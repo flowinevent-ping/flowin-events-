@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flowin — Parcours joueur</title>
+  <style>
+    body { margin:0; background:#0F0E1A; color:#fff; font-family:system-ui,sans-serif;
+           display:flex; align-items:center; justify-content:center; min-height:100vh;
+           flex-direction:column; text-align:center; padding:20px; box-sizing:border-box; }
+    .logo { font-size:32px; font-weight:900; color:#B06CE4; margin-bottom:8px; }
+    .sub  { font-size:14px; color:#9A8FBF; margin-bottom:32px; }
+    .spinner { width:36px; height:36px; border:3px solid rgba(176,108,228,.2);
+               border-top-color:#B06CE4; border-radius:50%;
+               animation:spin .8s linear infinite; margin:0 auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="logo">Flowin</div>
+  <div class="sub">Chargement du parcours…</div>
+  <div class="spinner"></div>
+  <script>
+    // Lire le paramètre ?ev= et rediriger vers le bon parcours
+    var params = new URLSearchParams(window.location.search);
+    var ev = params.get('ev') || '';
+
+    // Table de routage event → fichier parcours
+    var routes = {
+      'ev-paques': 'parcours_quiz_paques_vence.html',
+      'ev-nds':    'parcours_quiz_nds_2026.html'
+    };
+
+    var target = routes[ev];
+    if (target) {
+      // Conserver tous les params
+      window.location.replace(target + window.location.search);
+    } else if (ev) {
+      // Event inconnu — afficher message
+      document.querySelector('.sub').textContent = 'Parcours introuvable pour l\'événement : ' + ev;
+      document.querySelector('.spinner').style.display = 'none';
+    } else {
+      // Pas de param → parcours par défaut (Pâques pour l'instant)
+      window.location.replace('parcours_quiz_paques_vence.html');
+    }
+  </script>
+</body>
+</html>
