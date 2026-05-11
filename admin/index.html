@@ -6242,7 +6242,7 @@ function renderBiblioJeux(){
          + '<td class="col-actions"><div class="row-actions"><button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openModal(\'banque\',{banqueId:\''+b.id+'\'})">✏</button></div></td>'
          + '</tr>';
   });
-  if(list.length===0) html += '<tr><td colspan="5"><div class="empty-block mt-3"><div class="ico">🎮</div><div class="t">Aucune banque de questions</div><div class="s">Créez une première banque via « + Nouvelle banque »</div></div></td></tr>';
+  if(DATA.banques.length===0) html += '<tr><td colspan="5"><div class="empty-block mt-3"><div class="ico">🎮</div><div class="t">Aucune banque de questions</div><div class="s">Créez une première banque via « + Nouvelle banque »</div></div></td></tr>';
   html += '</tbody></table>';
   html += '<button class="btn btn-primary mt-3" onclick="newBanque()">+ Nouvelle banque</button>';
   html += '</div>';
