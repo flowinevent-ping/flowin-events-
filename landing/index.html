@@ -924,7 +924,7 @@ function writeJoueurBtoB(data){
   // Option C - localStorage partage (meme cle que dashboard)
   // A remplacer par : supabase.from('joueurs').insert(data) pour Session B (Supabase)
   try {
-    var raw=localStorage.getItem('flowin_v23_data');
+    var raw=localStorage.getItem('flowin_v28_data');
     var db;
     if(!raw){
       // Dashboard pas encore ouvert : créer structure minimale
@@ -956,8 +956,8 @@ function writeJoueurBtoB(data){
     if(db.events){for(var i=0;i<db.events.length;i++){if(db.events[i].id==='ev-flowin-demo'){db.events[i].participants=(db.events[i].participants||0)+1;db.events[i].joueursOptin=(db.events[i].joueursOptin||0)+1;break;}}}
     if(!db.lots)db.lots=[];
     db.lots.push({id:'lot-fl-'+Date.now(),eventId:'ev-flowin-demo',nom:data.lot||'',assigneA:joueur.id,dateAssign:ts,ticketCode:data.ticketCode||''});
-    localStorage.setItem('flowin_v23_data',JSON.stringify(db));
-    console.log('[writeJoueurBtoB] OK — '+joueur.id+' inscrit dans flowin_v23_data');
+    localStorage.setItem('flowin_v28_data',JSON.stringify(db));
+    console.log('[writeJoueurBtoB] OK — '+joueur.id+' inscrit dans flowin_v28_data');
   } catch(err){console.warn('[writeJoueurBtoB] ERREUR:',err);}
 }
 function spinSubmitForm(){
