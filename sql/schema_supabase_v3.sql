@@ -16,6 +16,16 @@
 -- 1. TABLE joueurs — colonnes B2B
 -- ============================================================
 
+-- Colonnes de base manquantes dans certaines installations v2
+ALTER TABLE joueurs
+  ADD COLUMN IF NOT EXISTS optin_date DATE;
+ALTER TABLE joueurs
+  ADD COLUMN IF NOT EXISTS source TEXT DEFAULT '';
+ALTER TABLE joueurs
+  ADD COLUMN IF NOT EXISTS adresse TEXT DEFAULT '';
+ALTER TABLE joueurs
+  ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+
 -- Enseigne / Structure professionnelle
 ALTER TABLE joueurs
   ADD COLUMN IF NOT EXISTS enseigne TEXT DEFAULT '';
@@ -118,7 +128,7 @@ USING (
   (
     client_type = 'btob'
     AND auth.uid() IN (
-      SELECT user_id FROM profiles WHERE role = 'sa'
+      SELECT id FROM profiles WHERE role = 'sa'
     )
   )
 );

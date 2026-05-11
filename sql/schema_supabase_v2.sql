@@ -111,9 +111,13 @@ CREATE TABLE public.joueurs (
   age_tranche TEXT,
   date_naissance TEXT,
   optin BOOLEAN DEFAULT FALSE,
+  optin_date DATE,
   gains INT DEFAULT 0,
   score_moy TEXT DEFAULT '0/4',
   events TEXT[] DEFAULT '{}',  -- IDs des events joués
+  source TEXT DEFAULT '',      -- canal d'acquisition
+  adresse TEXT DEFAULT '',
+  tags TEXT[] DEFAULT '{}',
   first_seen DATE,
   last_seen DATE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -262,3 +266,58 @@ CREATE TRIGGER trg_joueurs_updated BEFORE UPDATE ON public.joueurs
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_pros_updated BEFORE UPDATE ON public.pros
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- PARTENAIRES (lots dotation)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.partenaires (
+  id TEXT PRIMARY KEY,
+  nom TEXT NOT NULL,
+  secteur TEXT DEFAULT '',
+  contact TEXT DEFAULT '',
+  email TEXT DEFAULT '',
+  tel TEXT DEFAULT '',
+  ville TEXT DEFAULT '',
+  code_postal TEXT DEFAULT '',
+  adresse TEXT DEFAULT '',
+  notes TEXT DEFAULT '',
+  tags TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.partenaires ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "SA acces total partenaires" ON public.partenaires
+  FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+
+CREATE TRIGGER trg_partenaires_updated BEFORE UPDATE ON public.partenaires
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- PARTICIPATIONS (compteur realtime par event)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.participations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  event_id TEXT REFERENCES public.events(id) ON DELETE CASCADE NOT NULL,
+  joueur_id TEXT REFERENCES public.joueurs(id) ON DELETE SET NULL,
+  score INT DEFAULT 0,
+  completed BOOLEAN DEFAULT FALSE,
+  ts TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_participations_event ON public.participations(event_id);
+CREATE INDEX IF NOT EXISTS idx_participations_joueur ON public.participations(joueur_id);
+
+ALTER TABLE public.participations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "SA acces total participations" ON public.participations
+  FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "Pro voit ses participations" ON public.participations
+  FOR SELECT USING (
+    event_id IN (
+      SELECT id FROM public.events
+      WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid())
+    )
+  );
+-- Parcours joueur peut insérer (anon via service function)
+CREATE POLICY "Insert participation anon" ON public.participations
+  FOR INSERT WITH CHECK (true);
