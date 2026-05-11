@@ -913,28 +913,28 @@ body{background:#E8E4DC;min-height:100vh;display:flex;flex-direction:column;alig
         <div class="pq-form-wrap">
           <div class="pq-form-field">
             <label class="pq-form-label">Nom</label>
-            <input class="pq-form-input" placeholder="Dupont">
+            <input class="pq-form-input" id="pq-nom" placeholder="Dupont">
           </div>
           <div class="pq-form-field">
             <label class="pq-form-label">Prénom</label>
-            <input class="pq-form-input" placeholder="Camille" value="Camille">
+            <input class="pq-form-input" id="pq-prenom" placeholder="Camille">
           </div>
           <div class="pq-form-field">
             <label class="pq-form-label">Email</label>
-            <input class="pq-form-input" placeholder="camille@exemple.fr">
+            <input class="pq-form-input" id="pq-email" placeholder="camille@exemple.fr">
           </div>
           <div class="pq-form-field">
             <label class="pq-form-label">Téléphone</label>
-            <input class="pq-form-input" placeholder="06 12 34 56 78">
+            <input class="pq-form-input" id="pq-tel" placeholder="06 12 34 56 78">
           </div>
           <div class="pq-form-grid">
             <div class="pq-form-field">
               <label class="pq-form-label">Âge</label>
-              <input class="pq-form-input" placeholder="36-50 ans" value="26-35 ans">
+              <input class="pq-form-input" id="pq-age" placeholder="36-50 ans">
             </div>
             <div class="pq-form-field">
               <label class="pq-form-label">Code postal</label>
-              <input class="pq-form-input" placeholder="06140" value="06140">
+              <input class="pq-form-input" id="pq-cp" placeholder="06140">
             </div>
           </div>
           <div class="pq-form-field">
@@ -953,7 +953,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;flex-direction:column;alig
           </div>
         </div>
         <div class="bottom-cta">
-          <div class="btn" style="background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;font-family:'Fredoka One',cursive;font-size:15px" onclick="pqGo(6)">Valider ma participation →</div>
+          <div class="btn" style="background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;font-family:'Fredoka One',cursive;font-size:15px" onclick="pqSubmitForm()">Valider ma participation →</div>
         </div>
       </div>
 
@@ -1446,6 +1446,113 @@ function pqPickChipMulti(el){
 
 /* Config SuperAdmin (reflète le seed Pâques réel d'admin_preview.html) */
 /* Peut contenir 1 à N liens — le rendu s'adapte automatiquement       */
+/* ═══════════════════════════════════════════════════════════════════ */
+/* SUPABASE — Dual-write (config partagée avec le dashboard)           */
+/* ═══════════════════════════════════════════════════════════════════ */
+var PQ_SUPA_URL  = '';
+var PQ_SUPA_ANON = '';
+try {
+  PQ_SUPA_URL  = localStorage.getItem('flowin_supa_url')  || '';
+  PQ_SUPA_ANON = localStorage.getItem('flowin_supa_anon') || '';
+} catch(e) {}
+
+var PQ_EVENT_ID = 'ev-paques';
+var PQ_PRO_ID   = 'pro-vence';
+
+/* Upsert joueur dans Supabase (même structure que dashboard) */
+function pqSupaWrite(payload) {
+  if (!PQ_SUPA_URL || !PQ_SUPA_ANON) return;
+  fetch(PQ_SUPA_URL + '/rest/v1/joueurs', {
+    method: 'POST',
+    headers: {
+      'apikey': PQ_SUPA_ANON,
+      'Authorization': 'Bearer ' + PQ_SUPA_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify(payload)
+  }).catch(function(e) { console.warn('[pq] supabase write error', e); });
+}
+
+/* Incrémenter compteur participations */
+function pqSupaParticipation() {
+  if (!PQ_SUPA_URL || !PQ_SUPA_ANON) return;
+  fetch(PQ_SUPA_URL + '/rest/v1/participations', {
+    method: 'POST',
+    headers: {
+      'apikey': PQ_SUPA_ANON,
+      'Authorization': 'Bearer ' + PQ_SUPA_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify({
+      event_id: PQ_EVENT_ID,
+      ts: new Date().toISOString()
+    })
+  }).catch(function(e) { console.warn('[pq] participation write error', e); });
+}
+
+/* Soumission formulaire pq-5 → Supabase + pqGo(6) */
+function pqSubmitForm() {
+  var nomEl    = document.getElementById('pq-nom');
+  var prenomEl = document.getElementById('pq-prenom');
+  var emailEl  = document.getElementById('pq-email');
+  var telEl    = document.getElementById('pq-tel');
+  var ageEl    = document.getElementById('pq-age');
+  var cpEl     = document.getElementById('pq-cp');
+
+  var nom    = nomEl    ? nomEl.value.trim()    : '';
+  var prenom = prenomEl ? prenomEl.value.trim() : '';
+  var email  = emailEl  ? emailEl.value.trim()  : '';
+  var tel    = telEl    ? telEl.value.trim()    : '';
+  var age    = ageEl    ? ageEl.value.trim()    : '';
+  var cp     = cpEl     ? cpEl.value.trim()     : '';
+
+  /* Source sélectionnée */
+  var sourceChip = document.querySelector('#pq-5 .pq-form-source-chip.sel');
+  var source = sourceChip ? sourceChip.textContent.trim() : 'QR sur place';
+
+  /* Validation minimale */
+  if (!email && !nom) {
+    pqGo(6);
+    return;
+  }
+
+  /* Générer un id joueur cohérent */
+  var joueurId = 'j-pq-live-' + Date.now();
+
+  /* Payload Supabase (colonnes joueurs v2) */
+  var payload = {
+    id: joueurId,
+    email: email,
+    nom: nom,
+    prenom: prenom,
+    tel: tel,
+    ville: '',
+    code_postal: cp,
+    genre: '',
+    date_naissance: '',
+    optin: true,
+    optin_date: new Date().toISOString().slice(0,10),
+    gains: 0,
+    score_moy: '',
+    events: [PQ_EVENT_ID],
+    first_seen: new Date().toISOString().slice(0,10),
+    last_seen: new Date().toISOString().slice(0,10),
+    source: source,
+    tags: ['Vence'],
+    adresse: ''
+  };
+
+  pqSupaWrite(payload);
+  pqSupaParticipation();
+
+  /* Anti-doublon localStorage */
+  registerPlay(EVENT_SLUG, email || nom, 'FW-PQ-' + Math.floor(Math.random()*9000+1000));
+
+  pqGo(6);
+}
+
 var EVENT_SLUG = 'paques-vence-2026';
 var EVENT_CONFIG = {
   eventUrl: 'https://flowin-paques-vence-2026.netlify.app',
