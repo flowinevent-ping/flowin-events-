@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowin — Testez gratuitement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1B3A5C;
+  --teal:#00B4A0;
+  --orange:#E8500A;
+  --yellow:#F5A623;
+  --purple:#A855F7;
+  --green:#059669;
+  --bg:#F4F6F9;
+  --bd:#E2E8F0;
+  --mu:#64748B;
+  --w:#fff;
+  --f:'DM Sans',sans-serif;
+}
+html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--navy);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ══ TOPBAR ══ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(244,246,249,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--bd);
+}
+.logo{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-1px}
+.logo em{font-style:normal;color:var(--purple)}
+.topbar-cta{
+  background:var(--teal);color:#fff;border:none;
+  padding:10px 22px;border-radius:8px;
+  font-family:var(--f);font-size:13px;font-weight:800;
+  cursor:pointer;transition:.2s;
+}
+.topbar-cta:hover{background:#009175}
+
+/* ══ HERO ══ */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:100px 24px 60px;
+  background:var(--navy);
+  position:relative;overflow:hidden;
+}
+.hero-glow{
+  position:absolute;border-radius:50%;pointer-events:none;filter:blur(120px);opacity:.15;
+}
+.hg1{width:600px;height:600px;background:var(--teal);top:-200px;right:-150px}
+.hg2{width:400px;height:400px;background:var(--purple);bottom:-100px;left:-100px}
+
+.hero-logo{font-size:clamp(52px,9vw,96px);font-weight:800;color:#fff;letter-spacing:-3px;line-height:1;margin-bottom:40px}
+.hero-logo em{font-style:normal;color:var(--purple)}
+
+.hero-questions{display:flex;flex-direction:column;gap:0;max-width:580px;margin:0 auto 48px;text-align:left}
+.hq{
+  font-size:clamp(16px,2.2vw,22px);font-weight:700;color:#fff;
+  padding:16px 0;border-bottom:1px solid rgba(255,255,255,.1);
+  opacity:0;transform:translateY(12px);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.hq:last-child{border-bottom:none}
+.hq.show{opacity:1;transform:none}
+.hq-n{
+  display:inline-block;width:26px;height:26px;border-radius:50%;
+  background:rgba(0,180,160,.2);border:1px solid rgba(0,180,160,.4);
+  color:var(--teal);font-size:12px;font-weight:800;
+  text-align:center;line-height:26px;margin-right:12px;flex-shrink:0;
+}
+
+.hero-answer{
+  font-size:clamp(13px,1.5vw,16px);font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;color:var(--teal);
+  margin-bottom:36px;
+  opacity:0;transition:opacity .6s ease .1s;
+}
+.hero-answer.show{opacity:1}
+
+.hero-cta{
+  background:var(--teal);color:#fff;border:none;
+  padding:20px 52px;border-radius:12px;
+  font-family:var(--f);font-size:18px;font-weight:800;
+  cursor:pointer;transition:.2s;
+  box-shadow:0 12px 40px rgba(0,180,160,.4);
+  opacity:0;transform:translateY(8px);
+  transition:opacity .5s ease, transform .5s ease, background .2s, box-shadow .2s;
+}
+.hero-cta.show{opacity:1;transform:none}
+.hero-cta:hover{background:#009175;transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,180,160,.5)}
+
+/* ══ SECTION PROFILS ══ */
+.section{padding:80px 24px;max-width:900px;margin:0 auto}
+.section-label{
+  font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:14px;text-align:center;
+}
+.section-title{
+  font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-.5px;
+  color:var(--navy);text-align:center;margin-bottom:8px;line-height:1.1;
+}
+.section-sub{font-size:15px;color:var(--mu);text-align:center;margin-bottom:48px}
+
+/* Grille profils */
+.profiles{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-bottom:40px;
+}
+@media(max-width:600px){.profiles{grid-template-columns:repeat(2,1fr)}}
+
+.prof{
+  background:var(--w);border:2px solid var(--bd);border-radius:16px;
+  padding:24px 16px;text-align:center;cursor:pointer;
+  transition:.2s;position:relative;
+}
+.prof:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,180,160,.12)}
+.prof.on{border-color:var(--teal);background:#F0FDFB;box-shadow:0 8px 32px rgba(0,180,160,.18)}
+.prof-icon{font-size:36px;margin-bottom:10px;display:block}
+.prof-name{font-size:14px;font-weight:800;color:var(--navy)}
+.prof-check{
+  position:absolute;top:10px;right:10px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--teal);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:.2s;
+}
+.prof.on .prof-check{opacity:1}
+.prof-check svg{width:11px;height:11px}
+
+/* ══ CARD RÉSULTAT — redesign visuel ══ */
+.result-card{
+  border-radius:24px;overflow:hidden;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .45s ease, transform .45s ease;
+  pointer-events:none;
+}
+.result-card.show{opacity:1;transform:none;pointer-events:auto}
+
+/* Bloc AVANT — fond sombre, douleur grande */
+.rc-before{
+  background:var(--navy);
+  padding:36px 36px 32px;
+  position:relative;overflow:hidden;
+}
+.rc-before::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 80% 0%, rgba(232,80,10,.18) 0%, transparent 70%);
+}
+.rc-before-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:5px 14px;
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:20px;
+}
+.rc-before-text{
+  font-size:clamp(20px,3vw,28px);font-weight:700;
+  color:#fff;line-height:1.4;font-style:italic;
+  position:relative;z-index:1;
+}
+.rc-before-text::before{
+  content:'"';font-size:80px;color:rgba(255,255,255,.06);
+  position:absolute;top:-20px;left:-10px;font-style:normal;line-height:1;
+  z-index:0;pointer-events:none;
+}
+
+/* Flèche transition */
+.rc-arrow-row{
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);padding:0;height:48px;position:relative;
+}
+.rc-arrow-row::before,.rc-arrow-row::after{
+  content:'';position:absolute;left:0;right:0;height:24px;
+}
+.rc-arrow-row::before{top:0;background:var(--navy)}
+.rc-arrow-row::after{bottom:0;background:var(--w)}
+.rc-arrow-badge{
+  position:relative;z-index:1;
+  background:var(--teal);color:#fff;
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 4px 16px rgba(0,180,160,.4);
+}
+
+/* Bloc SOLUTION — pleine largeur, teal */
+.rc-how{
+  background:var(--teal);
+  padding:28px 36px;
+  display:flex;align-items:flex-start;gap:20px;
+}
+.rc-how-icon{
+  font-size:32px;flex-shrink:0;
+  background:rgba(255,255,255,.15);border-radius:12px;
+  width:52px;height:52px;display:flex;align-items:center;justify-content:center;
+}
+.rc-how-body{}
+.rc-how-label{
+  font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.6);margin-bottom:6px;
+}
+.rc-how-text{
+  font-size:clamp(16px,2vw,20px);font-weight:700;color:#fff;line-height:1.5;
+}
+
+/* Bloc RÉSULTAT — fond blanc, citation grande */
+.rc-result{
+  padding:28px 36px;background:var(--w);
+  display:flex;align-items:center;gap:20px;
+}
+.rc-result-bar{
+  width:4px;border-radius:4px;align-self:stretch;
+  background:var(--green);flex-shrink:0;
+}
+.rc-result-body{}
+.rc-result-label{
+  font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);margin-bottom:8px;
+}
+.rc-result-text{
+  font-size:clamp(18px,2.2vw,24px);font-weight:800;
+  color:var(--navy);line-height:1.45;font-style:italic;
+}
+
+.rc-col-tag{display:none} /* legacy — inutilisé */
+.rc-col-text{display:none}
+
+/* Métriques */
+.rc-metrics{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:2px solid var(--bg);background:var(--w);
+}
+@media(max-width:500px){.rc-metrics{grid-template-columns:repeat(2,1fr)}}
+.rc-met{
+  padding:18px 12px;text-align:center;
+  border-right:1px solid var(--bg);
+}
+.rc-met:last-child{border-right:none}
+.rc-mn{font-size:22px;font-weight:800;line-height:1;margin-bottom:4px}
+.rc-ml{font-size:11px;color:var(--mu);font-weight:500;line-height:1.4}
+
+/* ══ PREUVE ══ */
+.proof{
+  background:var(--navy);
+  padding:80px 24px;
+  text-align:center;
+}
+.proof-inner{max-width:800px;margin:0 auto}
+.proof-label{font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+.proof-title{font-size:clamp(28px,4.5vw,52px);font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.1;margin-bottom:16px}
+.proof-sub{font-size:16px;color:rgba(255,255,255,.5);margin-bottom:56px;font-weight:400}
+
+.proof-nums{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:2px;
+  background:rgba(255,255,255,.07);border-radius:16px;overflow:hidden;
+  margin-bottom:40px;
+}
+@media(max-width:500px){.proof-nums{grid-template-columns:1fr}}
+.pn{
+  padding:36px 24px;background:rgba(255,255,255,.04);text-align:center;
+}
+.pn-val{
+  font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1;
+  margin-bottom:8px;
+}
+.pn-lbl{font-size:13px;color:rgba(255,255,255,.45);font-weight:500;line-height:1.4}
+
+.proof-quote{
+  background:rgba(255,255,255,.06);border-left:3px solid var(--teal);
+  border-radius:0 12px 12px 0;
+  padding:20px 24px;text-align:left;
+  font-size:15px;color:rgba(255,255,255,.7);font-style:italic;line-height:1.65;
+}
+
+/* ══ CTA FINAL ══ */
+.cta-section{
+  padding:80px 24px;max-width:600px;margin:0 auto;text-align:center;
+}
+.cta-title{font-size:clamp(26px,4vw,40px);font-weight:800;color:var(--navy);letter-spacing:-.5px;line-height:1.15;margin-bottom:12px}
+.cta-sub{font-size:15px;color:var(--mu);margin-bottom:40px;line-height:1.6}
+
+.form-block{
+  background:var(--w);border-radius:20px;border:1px solid var(--bd);
+  padding:36px 32px;
+  box-shadow:0 8px 40px rgba(27,58,92,.08);
+}
+.form-row{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.f-input{
+  width:100%;padding:16px 18px;
+  border:1.5px solid var(--bd);border-radius:10px;
+  font-family:var(--f);font-size:15px;color:var(--navy);
+  background:var(--bg);
+  outline:none;transition:.2s;
+}
+.f-input:focus{border-color:var(--teal);background:#fff}
+.f-submit{
+  width:100%;padding:18px;
+  background:var(--teal);color:#fff;border:none;
+  border-radius:10px;font-family:var(--f);font-size:16px;font-weight:800;
+  cursor:pointer;transition:.2s;
+  box-shadow:0 8px 28px rgba(0,180,160,.3);
+}
+.f-submit:hover{background:#009175;transform:translateY(-1px)}
+.f-legal{font-size:12px;color:var(--mu);margin-top:10px;line-height:1.5}
+
+/* État bravo */
+.bravo{
+  display:none;text-align:center;padding:16px 0;
+}
+.bravo.show{display:block}
+.bravo-ring{
+  width:64px;height:64px;border-radius:50%;
+  background:#D1FAE5;border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+}
+.bravo-title{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.bravo-sub{font-size:14px;color:var(--mu);line-height:1.6}
+
+/* ══ FOOTER ══ */
+footer{
+  text-align:center;padding:24px;
+  font-size:12px;color:var(--mu);
+  border-top:1px solid var(--bd);
+}
+
+/* ══ ANIMATIONS ══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Flow<em>in</em></div>
+  <button class="topbar-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Tester gratuitement →</button>
+</div>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-glow hg1"></div>
+  <div class="hero-glow hg2"></div>
+
+  <div class="hero-logo">Flow<em>in</em></div>
+
+  <div class="hero-questions" id="hqs">
+    <div class="hq" id="hq0"><span class="hq-n">1</span>Avez-vous le contact de tous vos clients ?</div>
+    <div class="hq" id="hq1"><span class="hq-n">2</span>Un moyen de capter les prospects de passage ?</div>
+    <div class="hq" id="hq2"><span class="hq-n">3</span>Combien dépensez-vous pour trouver de nouveaux clients ?</div>
+    <div class="hq" id="hq3"><span class="hq-n">4</span>Travaillez-vous déjà avec vos acquis ?</div>
+  </div>
+
+  <div class="hero-answer" id="hero-ans">La solution tient en un clic.</div>
+
+  <button class="hero-cta" id="hero-cta" onclick="document.getElementById('profils').scrollIntoView({behavior:'smooth'})">
+    Je veux essayer →
+  </button>
+</section>
+
+<!-- ══ SECTION PROFILS ══ -->
+<section id="profils">
+  <div class="section">
+    <div class="section-label">Votre situation</div>
+    <div class="section-title">Vous êtes…</div>
+    <div class="section-sub">Cliquez sur votre profil — voyez exactement ce que Flowin change pour vous.</div>
+
+    <div class="profiles">
+      <div class="prof" onclick="selectProf(0,this)" id="p0">
+        <div class="prof-check"><svg viewBox="0 0 12 9" fill="none"><polyline points="1 4 4.5 7.5 11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="prof-icon">🛍️</span>
+        <div class="prof-name">Boutique / Commerce</div>
+      </div>
+      <div class="prof" onclick="selectProf(1,this)" id="p1">
+        <div class="prof-check"><svg viewBox="0 0 12 9" fill="none"><polyline points="1 4 4.5 7.5 11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="prof-icon">🍽️</span>
+        <div class="prof-name">Restaurant / Café</div>
+      </div>
+      <div class="prof" onclick="selectProf(2,this)" id="p2">
+        <div class="prof-check"><svg viewBox="0 0 12 9" fill="none"><polyline points="1 4 4.5 7.5 11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="prof-icon">⛺</span>
+        <div class="prof-name">Marché / Stand</div>
+      </div>
+      <div class="prof" onclick="selectProf(3,this)" id="p3">
+        <div class="prof-check"><svg viewBox="0 0 12 9" fill="none"><polyline points="1 4 4.5 7.5 11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="prof-icon">🏪</span>
+        <div class="prof-name">Réseau / Animation</div>
+      </div>
+      <div class="prof" onclick="selectProf(4,this)" id="p4">
+        <div class="prof-check"><svg viewBox="0 0 12 9" fill="none"><polyline points="1 4 4.5 7.5 11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="prof-icon">🏢</span>
+        <div class="prof-name">Entreprise / Asso</div>
+      </div>
+      <div class="prof" onclick="selectProf(5,this)" id="p5">
+        <div class="prof-check"><svg viewBox="0 0 12 9" fill="none"><polyline points="1 4 4.5 7.5 11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="prof-icon">🗺️</span>
+        <div class="prof-name">Tourisme / Collectivité</div>
+      </div>
+    </div>
+
+    <!-- Card résultat -->
+    <div class="result-card" id="result-card">
+      <!-- AVANT — fond sombre -->
+      <div class="rc-before" id="rc-before">
+        <div class="rc-before-tag">😔 Avant Flowin</div>
+        <div class="rc-before-text" id="rc-before-text"></div>
+      </div>
+      <!-- Flèche transition -->
+      <div class="rc-arrow-row">
+        <div class="rc-arrow-badge">⚡</div>
+      </div>
+      <!-- SOLUTION — pleine largeur teal -->
+      <div class="rc-how">
+        <div class="rc-how-icon" id="rc-how-icon">⚡</div>
+        <div class="rc-how-body">
+          <div class="rc-how-label">Avec Flowin</div>
+          <div class="rc-how-text" id="rc-how-text"></div>
+        </div>
+      </div>
+      <!-- RÉSULTAT — citation grande -->
+      <div class="rc-result">
+        <div class="rc-result-bar"></div>
+        <div class="rc-result-body">
+          <div class="rc-result-label">✅ Résultat</div>
+          <div class="rc-result-text" id="rc-result-text"></div>
+        </div>
+      </div>
+      <div class="rc-metrics" id="rc-metrics"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PREUVE ══ -->
+<section class="proof">
+  <div class="proof-inner">
+    <div class="proof-label">Pilote réel · Pâques 2026</div>
+    <div class="proof-title">186 personnes.<br>3 jours.<br>Elles voulaient garder le contact.</div>
+    <div class="proof-sub">Place publique. Un QR code. Zéro pub. Zéro commercial. Juste le jeu.</div>
+
+    <div class="proof-nums">
+      <div class="pn">
+        <div class="pn-val" style="color:var(--teal)" id="cnt1">0</div>
+        <div class="pn-lbl">ont joué<br>et laissé leur contact</div>
+      </div>
+      <div class="pn">
+        <div class="pn-val" style="color:var(--orange)" id="cnt2">0%</div>
+        <div class="pn-lbl">souhaitent être<br>recontactés</div>
+      </div>
+      <div class="pn">
+        <div class="pn-val" style="color:var(--yellow)" id="cnt3">0%</div>
+        <div class="pn-lbl">ont donné<br>leur avis spontanément</div>
+      </div>
+    </div>
+
+    <div class="proof-quote">
+      "Le lundi, ces 119 personnes n'existaient pas dans notre base. Le jeudi, on pouvait les recontacter. Avec leur accord. Directement."
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA FINAL ══ -->
+<section class="cta-section" id="cta">
+  <div class="cta-title">Votre premier event<br>est offert.</div>
+  <div class="cta-sub">Romain configure tout avec vous en 30 minutes.<br>Vous repartez avec un event opérationnel.<br>Sans engagement. Sans technique.</div>
+
+  <button class="play-btn" onclick="openPlay()">🎯 Vivre l'expérience joueur →</button>
+  <div style="font-size:12px;color:var(--mu);margin-bottom:28px">Découvrez exactement ce que vivent vos clients</div>
+
+  <div class="form-block" id="form-block">
+    <div id="form-content">
+      <div class="form-row">
+        <input class="f-input" type="text" placeholder="Votre prénom" id="f-nom">
+        <input class="f-input" type="email" placeholder="Votre email" id="f-email">
+        <input class="f-input" type="tel" placeholder="Votre téléphone" id="f-tel">
+      </div>
+      <button class="f-submit" onclick="submitForm()">Je veux mon premier event →</button>
+      <div class="f-legal">Romain vous rappelle sous 24h · Zéro engagement · Données protégées</div>
+    </div>
+    <div class="bravo" id="bravo">
+      <div class="bravo-ring">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="bravo-title">C'est parti !</div>
+      <div class="bravo-sub">Romain vous rappelle sous 24h.<br>Votre premier event sera prêt en 30 minutes chrono.</div>
+    </div>
+  </div>
+</section>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+.play-btn{display:inline-flex;align-items:center;gap:10px;background:#A855F7;color:#fff;border:none;padding:20px 48px;border-radius:12px;font-family:var(--f);font-size:18px;font-weight:800;cursor:pointer;transition:.2s;box-shadow:0 12px 40px rgba(168,85,247,.35);margin-bottom:16px;width:100%;justify-content:center}
+.play-btn:hover{background:#9333EA;transform:translateY(-2px)}
+.play-overlay{position:fixed;inset:0;z-index:999;background:#F5F0FF;display:none;flex-direction:column;overflow:hidden}
+.play-overlay.open{display:flex}
+.play-topbar{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;background:#1B3A5C;border-bottom:2px solid #A855F7;flex-shrink:0}
+.play-topbar-logo{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.play-topbar-logo em{font-style:normal;color:#A855F7}
+.play-topbar-ev{font-size:9px;color:rgba(255,255,255,.4);font-weight:600;margin-top:1px}
+.play-close{background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.play-body{flex:1;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;padding:20px 16px 40px;background:#F5F0FF}
+.play-phone{width:100%;max-width:390px;background:#FDF6EC;border-radius:32px;overflow:hidden;box-shadow:0 24px 64px rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.15);--a:#A855F7;--ad:#7C3AED;--al:#F5F0FF;--bg:#FDF6EC;--navy:#1B3A5C;--muted:#64748B;--green:#059669;--border:1.5px solid #E2E8F0}
+.play-phone .page{display:none;min-height:560px;position:relative}
+.play-phone .page.on{display:block}
+.play-phone .status-bar{display:flex;justify-content:space-between;padding:8px 22px 4px;font-size:12px;font-weight:900;color:#1B3A5C}
+.play-phone .header{padding:10px 20px 14px}.play-phone .header.withback{display:flex;align-items:center;gap:10px}
+.play-phone .back-btn{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid #E2E8F0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#1B3A5C;cursor:pointer;flex-shrink:0}
+.play-phone .header-title{font-family:'Fredoka One',cursive;font-size:18px;color:#1B3A5C;line-height:1.1}
+.play-phone .header-sub{font-size:11px;font-weight:800;color:#64748B;margin-top:2px}
+.play-phone .hero{padding:28px 20px 20px;color:#fff;position:relative;overflow:hidden}
+.play-phone .hero::after{content:'';position:absolute;right:-40px;top:-30px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,255,255,.15) 0%,transparent 70%)}
+.play-phone .hero-inner{position:relative;z-index:2}
+.play-phone .hero-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border-radius:100px;padding:5px 12px;font-size:10px;font-weight:900;margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}
+.play-phone .hero-chip .dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:fpulse 1.5s infinite}
+@keyframes fpulse{0%,100%{opacity:1}50%{opacity:.4}}
+.play-phone .hero-title{font-family:'Fredoka One',cursive;font-size:24px;line-height:1.1;margin-bottom:6px}
+.play-phone .hero-sub{font-size:12px;font-weight:800;opacity:.85}
+.play-phone .hero.spin{background:linear-gradient(135deg,#A855F7 0%,#7C3AED 100%)}
+.play-phone .progress-strip{display:flex;gap:6px;justify-content:center;padding:12px 20px 10px}
+.play-phone .progress-step{flex:1;height:4px;background:#F0EDE8;border-radius:100px;max-width:60px}
+.play-phone .progress-step.done{background:#059669}.play-phone .progress-step.on{background:#A855F7}
+.play-phone .spin-scene{padding:10px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.play-phone .spin-cta{width:100%;max-width:260px;padding:14px;background:linear-gradient(135deg,#A855F7,#7C3AED);color:#fff;border:none;border-radius:100px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(168,85,247,.35);text-align:center}
+.play-phone .win-card{margin:10px 20px 14px;background:#fff;border:1.5px solid #E2E8F0;border-radius:22px;padding:22px 20px;text-align:center;box-shadow:0 8px 24px rgba(168,85,247,.12)}
+.play-phone .win-emoji{font-size:56px;margin-bottom:8px;display:inline-block;animation:fbounce .6s cubic-bezier(.3,1.5,.5,1)}
+@keyframes fbounce{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.play-phone .win-title{font-family:'Fredoka One',cursive;font-size:22px;color:#1B3A5C;margin-bottom:4px}
+.play-phone .win-lot{font-size:12px;font-weight:800;color:#64748B;margin-bottom:14px}
+.play-phone .win-reward{background:#F5F0FF;border-radius:16px;padding:12px;display:flex;align-items:center;justify-content:center;gap:10px}
+.play-phone .win-reward-text{font-family:'Fredoka One',cursive;font-size:16px;color:#7C3AED}
+.play-phone .bottom-cta{position:sticky;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid #E2E8F0;padding:12px 20px;display:flex;gap:8px;z-index:40}
+.play-phone .btn{flex:1;border:none;border-radius:100px;padding:13px;font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;cursor:pointer;text-align:center}
+.play-phone .btn-primary{background:#A855F7;color:#fff}.play-phone .btn-ghost{background:#F8F6F2;color:#1B3A5C;border:1.5px solid #E2E8F0}
+.play-phone .landing-frame{padding:28px 20px 16px;text-align:center}
+.play-phone .landing-event-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 14px;font-size:10px;font-weight:900;color:#A855F7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.play-phone .landing-logo{width:80px;height:80px;border-radius:24px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 12px 28px rgba(168,85,247,.25)}
+.play-phone .landing-logo.spin{background:linear-gradient(135deg,#C4B8FA,#7C5CFC)}
+.play-phone .landing-title{font-family:'Fredoka One',cursive;font-size:22px;color:#1B3A5C;line-height:1.1;margin-bottom:8px}
+.play-phone .landing-sub{font-size:12px;font-weight:800;color:#64748B;margin-bottom:16px;line-height:1.5;padding:0 8px}
+.play-phone .landing-info-card{background:#fff;border:1.5px solid #E2E8F0;border-radius:14px;padding:10px;margin:0 0 7px;text-align:left;display:flex;align-items:center;gap:10px}
+.play-phone .landing-info-ico{width:34px;height:34px;border-radius:10px;background:#F5F0FF;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.play-phone .landing-info-text h4{font-size:11px;font-weight:900;color:#1B3A5C;margin-bottom:2px}
+.play-phone .landing-info-text p{font-size:10px;font-weight:800;color:#64748B}
+.play-phone .form-wrap{padding:4px 20px 16px}
+.play-phone .form-field{margin-bottom:10px}
+.play-phone .form-label{font-size:10px;font-weight:900;color:#1B3A5C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block}
+.play-phone .form-input{width:100%;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:11px 13px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:#1B3A5C;outline:none;box-sizing:border-box}
+.play-phone .form-input:focus{border-color:#A855F7}
+.play-phone .form-rgpd{display:flex;gap:10px;align-items:flex-start;padding:11px;background:#FAFAF8;border:1.5px solid #E2E8F0;border-radius:12px;margin-top:6px}
+.play-phone .form-rgpd-check{width:20px;height:20px;border-radius:6px;background:#A855F7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.play-phone .form-rgpd-text{font-size:10px;font-weight:700;color:#64748B;line-height:1.4}
+.play-phone .ticket{margin:0 20px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:20px;padding:16px;text-align:center;position:relative}
+.play-phone .ticket::before,.play-phone .ticket::after{content:'';position:absolute;width:18px;height:18px;background:#FDF6EC;border-radius:50%;top:50%;transform:translateY(-50%)}
+.play-phone .ticket::before{left:-9px}.play-phone .ticket::after{right:-9px}
+.play-phone .ticket-icon{font-size:32px;margin-bottom:5px}
+.play-phone .ticket-title{font-family:'Fredoka One',cursive;font-size:16px;color:#1B3A5C;margin-bottom:3px}
+.play-phone .ticket-code{font-family:'Fredoka One',cursive;font-size:18px;color:#A855F7;letter-spacing:.1em;padding:8px;background:#F5F0FF;border-radius:10px;margin-top:8px;display:block}
+.play-phone .ticket-hint{font-size:10px;font-weight:800;color:#64748B;margin-top:7px;line-height:1.4}
+</style>
+
+<div class="play-overlay" id="play-overlay">
+  <div class="play-topbar">
+    <div>
+      <div class="play-topbar-logo">Flow<em>in</em></div>
+      <div class="play-topbar-ev">ev-flowin-demo &middot; flowin.fr/play/ev-flowin-demo</div>
+    </div>
+    <button class="play-close" onclick="closePlay()">&#x2715;</button>
+  </div>
+  <div class="play-body">
+    <div class="play-phone">
+      <div id="vp-spin" style="overflow-y:auto;max-height:calc(100vh - 55px)">
+
+        <!-- SPIN 1 : Landing avec lots -->
+        <div class="page on" id="spin-1">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;&#9679; 5G</span></div>
+          <div class="landing-frame">
+            <div class="landing-event-chip">&#127919; Event pro &middot; en cours</div>
+            <div class="landing-logo spin">&#128640;</div>
+            <div class="landing-title">Flowin<br>D&#233;couverte Pro</div>
+            <div class="landing-sub">Tournez la roue et d&#233;couvrez ce que Flowin peut vous offrir.</div>
+            <div style="margin:0 0 6px;font-size:9px;font-weight:900;color:#64748B;text-transform:uppercase;letter-spacing:.1em">&#127942; Les lots &#224; gagner</div>
+            <div class="landing-info-card"><div class="landing-info-ico">&#127963;</div><div class="landing-info-text"><h4>Acc&#232;s Flowin complet</h4><p>Tableau de bord &#183; toutes fonctionnalit&#233;s</p></div></div>
+            <div class="landing-info-card"><div class="landing-info-ico">&#127873;</div><div class="landing-info-text"><h4>1 an d'abonnement offert</h4><p>Plateforme Flowin sans engagement</p></div></div>
+            <div class="landing-info-card"><div class="landing-info-ico">&#128101;</div><div class="landing-info-text"><h4>Flowin Team gratuit</h4><p>Multi-utilisateurs pour votre &#233;quipe</p></div></div>
+            <div class="landing-info-card"><div class="landing-info-ico">&#128640;</div><div class="landing-info-text"><h4>1er event configur&#233; &amp; d&#233;ploy&#233;</h4><p>Romain s'en charge en 30 minutes</p></div></div>
+            <div class="landing-info-card"><div class="landing-info-ico">&#129309;</div><div class="landing-info-text"><h4>Parrainer un ami</h4><p>Offrez l'exp&#233;rience &#224; un coll&#232;gue</p></div></div>
+          </div>
+          <div class="bottom-cta">
+            <div class="btn btn-primary" onclick="spinGo(2)" style="text-align:center">Je joue &#8594;</div>
+          </div>
+        </div>
+
+        <!-- SPIN 2 : Roue -->
+        <div class="page" id="spin-2">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;&#9679; 5G</span></div>
+          <div class="header withback">
+            <div class="back-btn" onclick="spinGo(1)">&#8592;</div>
+            <div><div class="header-title">La roue Flowin</div><div class="header-sub" id="spin-sub">1 essai &#183; appuyez pour lancer</div></div>
+          </div>
+          <div class="progress-strip">
+            <div class="progress-step done"></div><div class="progress-step on"></div>
+            <div class="progress-step"></div><div class="progress-step"></div>
+          </div>
+          <div class="spin-scene" style="gap:10px">
+            <div style="position:relative;width:300px;height:300px;margin:0 auto">
+              <svg viewBox="0 0 40 32" style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:34px;height:26px;z-index:5;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))">
+                <polygon points="20,28 2,2 38,2" fill="#A855F7" stroke="#7C3AED" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+              <canvas id="spin-canvas" width="300" height="300" style="border-radius:50%;box-shadow:0 14px 40px rgba(168,85,247,.28),0 0 0 6px #fff,0 0 0 9px rgba(168,85,247,.15)"></canvas>
+              <div id="spin-win-overlay" style="display:none;position:absolute;inset:0;background:rgba(26,16,51,.72);border-radius:50%;align-items:center;justify-content:center;flex-direction:column;z-index:10">
+                <div style="font-size:32px;margin-bottom:4px" id="spin-win-emoji">&#128640;</div>
+                <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#fff;text-align:center;line-height:1.2;padding:0 20px" id="spin-win-label">1er event offert !</div>
+              </div>
+            </div>
+            <div id="spin-result-band" style="display:none;background:linear-gradient(135deg,#A855F7,#7C3AED);border-radius:18px;padding:14px 18px;width:100%;text-align:center">
+              <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">&#127881; R&#233;sultat</div>
+              <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#fff;margin-bottom:2px" id="band-lot">1er event offert !</div>
+              <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.8)">Offert par Flowin</div>
+            </div>
+            <div id="spin-cta-wrap">
+              <button class="spin-cta" id="spin-btn" onclick="startSpinAnim()">&#127919; Tourner la roue</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPIN 3 : Ticket lot -->
+        <div class="page" id="spin-3">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;&#9679; 5G</span></div>
+          <div class="header">
+            <div class="header-title">&#127967; Votre ticket</div>
+            <div class="header-sub">Conservez ce code pour r&#233;clamer votre lot</div>
+          </div>
+          <div class="progress-strip">
+            <div class="progress-step done"></div><div class="progress-step done"></div>
+            <div class="progress-step on"></div><div class="progress-step"></div>
+          </div>
+          <div class="ticket" style="margin:12px 20px">
+            <div class="ticket-icon" id="ticket3-emoji">&#128640;</div>
+            <div class="ticket-title" id="ticket3-title">1er event offert</div>
+            <div style="font-size:10px;font-weight:800;color:#64748B;margin-bottom:8px">Flowin &#183; D&#233;couverte Pro</div>
+            <div class="ticket-code" id="ticket3-code">FW-PRO-0000</div>
+            <div class="ticket-hint">Pr&#233;sentez ce code &#224; Romain lors de votre appel de configuration</div>
+          </div>
+          <div style="margin:0 20px 20px;padding:14px;background:#F5F0FF;border-radius:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#7C3AED;margin-bottom:4px">Ce lot vous est r&#233;serv&#233;</div>
+            <div style="font-size:11px;font-weight:700;color:#64748B;line-height:1.5">Romain vous contacte sous 24h pour tout configurer ensemble. 30 minutes suffisent.</div>
+          </div>
+          <div class="bottom-cta">
+            <div class="btn btn-primary" onclick="spinGo(4)" style="text-align:center">Continuer &#8594;</div>
+          </div>
+        </div>
+
+        <!-- SPIN 4 : Bravo hero -->
+        <div class="page" id="spin-4">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;&#9679; 5G</span></div>
+          <div class="hero spin" style="padding:32px 20px 16px">
+            <div class="hero-inner">
+              <div class="hero-chip"><div class="dot"></div>R&#201;SULTAT</div>
+              <div class="hero-title" id="spin4-title">Bravo !</div>
+              <div class="hero-sub">Votre chance a parl&#233; &#127881;</div>
+            </div>
+          </div>
+          <div class="progress-strip">
+            <div class="progress-step done"></div><div class="progress-step done"></div>
+            <div class="progress-step done"></div><div class="progress-step on"></div>
+          </div>
+          <div class="win-card">
+            <div class="win-emoji" id="spin4-emoji">&#128640;</div>
+            <div class="win-title" id="spin4-lot">1er event offert !</div>
+            <div class="win-lot">Offert par Flowin</div>
+            <div class="win-reward">
+              <div style="font-size:22px">&#127963;</div>
+              <div class="win-reward-text">Configur&#233; avec vous en 30 min</div>
+            </div>
+          </div>
+          <div class="bottom-cta">
+            <div class="btn btn-primary" onclick="spinGo(5)" style="text-align:center">Continuer &#8594;</div>
+          </div>
+        </div>
+
+        <!-- SPIN 5 : Formulaire B2B -->
+        <div class="page" id="spin-5">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;&#9679; 5G</span></div>
+          <div class="header withback">
+            <div class="back-btn" onclick="spinGo(2)">&#8592;</div>
+            <div><div class="header-title">Vos coordonnées</div><div class="header-sub">Pour recevoir votre lot</div></div>
+          </div>
+          <div class="ticket" style="margin:0 20px 12px">
+            <div class="ticket-icon" id="ticket5-emoji">&#128640;</div>
+            <div class="ticket-title" id="ticket5-title">1er event offert</div>
+            <div style="font-size:10px;font-weight:800;color:#64748B">Flowin &#183; D&#233;couverte Pro</div>
+            <div class="ticket-code" id="ticket5-code">FW-PRO-0000</div>
+          </div>
+          <div class="form-wrap">
+            <div class="form-field">
+              <label class="form-label">Enseigne / Structure</label>
+              <input class="form-input" id="sp-enseigne" placeholder="Nom de votre commerce ou soci&#233;t&#233;">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="form-field"><label class="form-label">Pr&#233;nom</label><input class="form-input" id="sp-prenom" placeholder="Pr&#233;nom"></div>
+              <div class="form-field"><label class="form-label">Nom</label><input class="form-input" id="sp-nom" placeholder="Nom"></div>
+            </div>
+            <div class="form-field"><label class="form-label">Email</label><input class="form-input" id="sp-email" type="email" placeholder="votre@email.fr"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="form-field"><label class="form-label">T&#233;l&#233;phone</label><input class="form-input" id="sp-tel" type="tel" placeholder="06 12 34 56 78"></div>
+              <div class="form-field"><label class="form-label">Ville</label><input class="form-input" id="sp-ville" placeholder="Votre ville"></div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Vous &#234;tes plut&#244;t ?</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="sp-type-btns">
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickType(this,'Commercant')">&#128717; Commer&#231;ant</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickType(this,'Restaurateur')">&#127829; Restaurateur</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickType(this,'Exposant')">&#9978; Exposant</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickType(this,'Organisateur')">&#127914; Organisateur</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickType(this,'Entreprise')">&#127962; Entreprise</button>
+              </div>
+            </div>
+            <div class="form-field" style="margin-top:4px">
+              <label class="form-label">Comment nous avez-vous connu ?</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="sp-source-btns">
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickSource(this,'LinkedIn')">&#128188; LinkedIn</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickSource(this,'Bouche a oreille')">&#128483; Bouche &#224; oreille</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickSource(this,'Salon / Evenement')">&#127919; Salon / &#201;v&#233;nement</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickSource(this,'Demarchage direct')">&#128075; D&#233;marchage direct</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickSource(this,'Email')">📧 Email</button>
+                <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:6px 10px;font-size:11px;font-weight:800;color:#1B3A5C;cursor:pointer;font-family:'Nunito',sans-serif" onclick="spPickSource(this,'En me baladant')">🚶 En me baladant</button>
+              </div>
+            </div>
+            <div class="form-rgpd" style="margin-top:10px">
+              <div class="form-rgpd-check">&#10003;</div>
+              <div class="form-rgpd-text">J'accepte d'&#234;tre recontact&#233;(e) par Flowin. Donn&#233;es jamais c&#233;d&#233;es.</div>
+            </div>
+          </div>
+          <div class="bottom-cta">
+            <div class="btn btn-primary" onclick="spinSubmitForm()" style="text-align:center">Recevoir mon lot sur WhatsApp &#8594;</div>
+          </div>
+        </div>
+
+        <!-- SPIN 6 : Confirmation fidele parcours Noel -->
+        <!-- SPIN 6 : Confirmation festive -->
+        <div class="page" id="spin-6">
+          <div class="status-bar"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;&#9679; 5G</span></div>
+
+          <!-- Hero festif gradient violet-orange -->
+          <div style="padding:32px 20px 26px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#A855F7,#E8500A);color:#fff">
+            <div style="position:absolute;top:-40px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)"></div>
+            <div style="position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)"></div>
+            <div style="position:relative;z-index:2">
+              <div style="font-size:52px;margin-bottom:8px;display:inline-block">&#127881;</div>
+              <div style="font-family:'Fredoka One',cursive;font-size:26px;margin-bottom:4px" id="spin6-name">F&#233;licitations !</div>
+              <div style="font-size:12px;font-weight:800;opacity:.9">Participation enregistr&#233;e &#10003;</div>
+            </div>
+          </div>
+
+          <!-- Progress 3/3 done -->
+          <div class="progress-strip">
+            <div class="progress-step done"></div>
+            <div class="progress-step done"></div>
+            <div class="progress-step done"></div>
+          </div>
+
+          <!-- Ticket lot -->
+          <div style="margin:12px 20px">
+            <div style="background:#fff;border:1.5px solid #E2E8F0;border-radius:18px;padding:20px;text-align:center;position:relative;box-shadow:0 4px 16px rgba(168,85,247,.1)">
+              <div style="position:absolute;width:18px;height:18px;background:#FDF6EC;border-radius:50%;top:50%;transform:translateY(-50%);left:-9px"></div>
+              <div style="position:absolute;width:18px;height:18px;background:#FDF6EC;border-radius:50%;top:50%;transform:translateY(-50%);right:-9px"></div>
+              <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#A855F7;margin-bottom:8px">&#127942; Votre lot</div>
+              <div style="font-size:44px;margin-bottom:6px" id="spin6-emoji">&#128640;</div>
+              <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#1B3A5C;margin-bottom:4px" id="spin6-lot">1er event offert !</div>
+              <div style="font-size:10px;font-weight:800;color:#64748B;margin-bottom:12px">Offert par Flowin</div>
+              <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#A855F7;letter-spacing:.12em;padding:10px;background:#F5F0FF;border-radius:10px" id="spin6-code">FW-PRO-0000</div>
+              <div style="font-size:10px;font-weight:800;color:#64748B;margin-top:6px">Pr&#233;sentez ce code &#224; Romain</div>
+            </div>
+          </div>
+
+          <!-- WhatsApp + La suite -->
+          <div style="padding:0 20px 8px">
+            <a id="sp-wa-link" href="#" target="_blank" style="display:block;text-align:center;text-decoration:none;border-radius:100px;padding:14px;font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:#fff;background:#25D366;margin-bottom:10px">&#128241; Confirmer sur WhatsApp</a>
+            <div style="padding:12px 14px;background:#F0FDFB;border-left:3px solid #00B4A0;border-radius:0 12px 12px 0">
+              <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#00B4A0;margin-bottom:3px">La suite</div>
+              <div style="font-size:11px;font-weight:700;color:#1B3A5C;line-height:1.6">Romain vous rappelle sous <strong>24h</strong>.<br>Votre premier event configur&#233; en <strong>30&#160;minutes</strong>.</div>
+            </div>
+          </div>
+
+          <div class="bottom-cta">
+            <div class="btn btn-ghost" onclick="closePlay()" style="text-align:center">Fermer &#8594;</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SPIN_SEGS = [
+  {label:'Acces Flowin complet', emoji:'🏛️', color:'#A855F7'},
+  {label:'1 an offert',          emoji:'🎁', color:'#00B4A0'},
+  {label:'Flowin Team',          emoji:'👥', color:'#1B3A5C'},
+  {label:'1er event offert',     emoji:'🚀', color:'#E8500A'},
+  {label:'Ami parraine',     emoji:'🤝', color:'#F5A623'}
+];
+var spinAngle=0, spinning=false, winSeg=0, spProType='', spSource='', spinTicketCode='';
+
+function openPlay(){
+  document.getElementById('play-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  spinGo(1);
+  setTimeout(function(){ drawWheel(0,-1); },100);
+}
+function closePlay(){
+  document.getElementById('play-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function spinGo(n){
+  var vp=document.getElementById('vp-spin');
+  var pages=vp.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++) pages[i].classList.remove('on');
+  var t=document.getElementById('spin-'+n);
+  if(t) t.classList.add('on');
+  vp.scrollTop=0;
+}
+function drawWheel(angle,highlight){
+  var c=document.getElementById('spin-canvas');
+  if(!c)return;
+  var ctx=c.getContext('2d'),cx=150,cy=150,r=138,ri=32,n=SPIN_SEGS.length,sl=2*Math.PI/n;
+  ctx.clearRect(0,0,300,300);
+  for(var i=0;i<n;i++){
+    var s=angle+i*sl,e=s+sl,seg=SPIN_SEGS[i];
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);ctx.closePath();
+    ctx.fillStyle=(highlight===i)?lighten(seg.color):seg.color;ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();
+    var mid=s+sl/2,tr=r*0.66,tx=cx+tr*Math.cos(mid),ty=cy+tr*Math.sin(mid);
+    ctx.save();ctx.translate(tx,ty);
+    var deg=((mid*180/Math.PI)%360+360)%360;
+    ctx.rotate(deg>90&&deg<270?mid+Math.PI:mid);
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='15px sans-serif';ctx.fillStyle='#fff';
+    ctx.fillText(seg.emoji,0,-12);
+    ctx.font='bold 9px Nunito,Arial,sans-serif';
+    ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=3;
+    var words=seg.label.split(' ');
+    for(var w=0;w<words.length;w++) ctx.fillText(words[w],0,4+w*11-(words.length-1)*5.5);
+    ctx.shadowBlur=0;ctx.restore();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,ri,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.strokeStyle='#A855F7';ctx.lineWidth=4;ctx.stroke();
+  ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(spinning?'🎡':'🎯',cx,cy+1);
+}
+function lighten(h){
+  var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+  return 'rgb('+Math.min(255,r+60)+','+Math.min(255,g+60)+','+Math.min(255,b+60)+')';
+}
+(function(){function t(){var c=document.getElementById('spin-canvas');if(c)drawWheel(0,-1);else setTimeout(t,100);}t();})();
+function startSpinAnim(){
+  if(spinning)return;spinning=true;
+  var btn=document.getElementById('spin-btn'),sub=document.getElementById('spin-sub');
+  if(btn){btn.disabled=true;btn.textContent='La roue tourne...';}
+  if(sub){sub.textContent='Ne touchez plus a rien';}
+  winSeg=Math.floor(Math.random()*SPIN_SEGS.length);
+  var n=SPIN_SEGS.length,sl=2*Math.PI/n;
+  var ta=-Math.PI/2-(winSeg+0.5)*sl,fa=ta+5*2*Math.PI;
+  fa=fa%(2*Math.PI);
+  while(fa<spinAngle+4*2*Math.PI) fa+=2*Math.PI;
+  var sa=spinAngle,dur=4000,st=null;
+  function ease(t){return 1-Math.pow(1-t,4);}
+  function fr(ts){
+    if(!st)st=ts;var p=Math.min((ts-st)/dur,1);
+    spinAngle=sa+(fa-sa)*ease(p);drawWheel(spinAngle,-1);
+    if(p<1){requestAnimationFrame(fr);}else{spinAngle=fa;spinning=false;onSpinEnd();}
+  }
+  requestAnimationFrame(fr);
+}
+function onSpinEnd(){
+  drawWheel(spinAngle,winSeg);
+  var ov=document.getElementById('spin-win-overlay');if(ov)ov.style.display='flex';
+  var oe=document.getElementById('spin-win-emoji'),ol=document.getElementById('spin-win-label');
+  if(oe)oe.textContent=SPIN_SEGS[winSeg].emoji;
+  if(ol)ol.textContent=SPIN_SEGS[winSeg].label+' !';
+  var band=document.getElementById('spin-result-band'),bl=document.getElementById('band-lot');
+  if(band)band.style.display='block';
+  if(bl)bl.textContent=SPIN_SEGS[winSeg].emoji+' '+SPIN_SEGS[winSeg].label+' offert !';
+  var wrap=document.getElementById('spin-cta-wrap');
+  if(wrap)wrap.innerHTML='<button class="spin-cta" onclick="spinGo(5)">Réclamer mon lot →</button>';
+  spinTicketCode='FW-PRO-'+Math.floor(1000+Math.random()*9000);
+  var els=['spin4-emoji','spin4-lot','ticket3-emoji','ticket3-title','ticket3-code','ticket5-emoji','ticket5-title','ticket5-code','spin6-emoji','spin6-lot'];
+  var s4e=document.getElementById('spin4-emoji'),s4l=document.getElementById('spin4-lot');
+  var t3e=document.getElementById('ticket3-emoji'),t3t=document.getElementById('ticket3-title'),t3c=document.getElementById('ticket3-code');
+  var t5e=document.getElementById('ticket5-emoji'),t5t=document.getElementById('ticket5-title'),t5c=document.getElementById('ticket5-code');
+  var s6e=document.getElementById('spin6-emoji'),s6l=document.getElementById('spin6-lot');
+  if(s4e)s4e.textContent=SPIN_SEGS[winSeg].emoji;
+  if(s4l)s4l.textContent=SPIN_SEGS[winSeg].label+' offert !';
+  if(t3e)t3e.textContent=SPIN_SEGS[winSeg].emoji;
+  if(t3t)t3t.textContent=SPIN_SEGS[winSeg].label;
+  if(t3c)t3c.textContent=spinTicketCode;
+  if(t5e)t5e.textContent=SPIN_SEGS[winSeg].emoji;
+  if(t5t)t5t.textContent=SPIN_SEGS[winSeg].label;
+  if(t5c)t5c.textContent=spinTicketCode;
+  if(s6e)s6e.textContent=SPIN_SEGS[winSeg].emoji;
+  if(s6l)s6l.textContent=SPIN_SEGS[winSeg].label+' offert !';
+  var s6c=document.getElementById('spin6-code');
+  if(s6c) s6c.textContent=spinTicketCode;
+}
+function spPickType(btn,val){
+  spProType=val;
+  var btns=document.querySelectorAll('#sp-type-btns button');
+  for(var i=0;i<btns.length;i++){btns[i].style.background='#fff';btns[i].style.color='#1B3A5C';btns[i].style.borderColor='#E2E8F0';}
+  btn.style.background='#A855F7';btn.style.color='#fff';btn.style.borderColor='#A855F7';
+}
+function spPickSource(btn,val){
+  spSource=val;
+  var btns=document.querySelectorAll('#sp-source-btns button');
+  for(var i=0;i<btns.length;i++){btns[i].style.background='#fff';btns[i].style.color='#1B3A5C';btns[i].style.borderColor='#E2E8F0';}
+  btn.style.background='#A855F7';btn.style.color='#fff';btn.style.borderColor='#A855F7';
+}
+function writeJoueurBtoB(data){
+  // Option C - localStorage partage (meme cle que dashboard)
+  // A remplacer par : supabase.from('joueurs').insert(data) pour Session B (Supabase)
+  try {
+    var raw=localStorage.getItem('flowin_v23_data');
+    var db;
+    if(!raw){
+      // Dashboard pas encore ouvert : créer structure minimale
+      db={joueurs:[],events:[{id:'ev-flowin-demo',proId:'pro-flowin',nom:'Flowin — Découverte',
+        module:'spin',status:'live',clientType:'btob',participants:0,gagnants:0,joueursOptin:0}],
+        lots:[],partenaires:[],banques:[]};
+    } else {
+      db=JSON.parse(raw);
+    }
+    var ts=new Date().toISOString().slice(0,10);
+    // Préfixe j-fl- (pas j-btob-) pour ne pas être filtré par la migration
+    var joueur={
+      id:'j-fl-'+Date.now(),
+      prenom:data.prenom,nom:data.nom||'',
+      email:data.email,tel:data.tel||'',
+      ville:data.ville||'',codePostal:'',
+      enseigne:data.enseigne||'',
+      events:['ev-flowin-demo'],
+      gains:1,scoreMoy:'',
+      optin:true,optinDate:ts,
+      firstSeen:ts,lastSeen:ts,
+      source:'landing_v13',
+      tags:['btob',data.typePro||'',data.decouverte||''],
+      lot_gagne:data.lot||'',
+      ticket_code:data.ticketCode||''
+    };
+    if(!db.joueurs)db.joueurs=[];
+    db.joueurs.unshift(joueur);
+    if(db.events){for(var i=0;i<db.events.length;i++){if(db.events[i].id==='ev-flowin-demo'){db.events[i].participants=(db.events[i].participants||0)+1;db.events[i].joueursOptin=(db.events[i].joueursOptin||0)+1;break;}}}
+    if(!db.lots)db.lots=[];
+    db.lots.push({id:'lot-fl-'+Date.now(),eventId:'ev-flowin-demo',nom:data.lot||'',assigneA:joueur.id,dateAssign:ts,ticketCode:data.ticketCode||''});
+    localStorage.setItem('flowin_v23_data',JSON.stringify(db));
+    console.log('[writeJoueurBtoB] OK — '+joueur.id+' inscrit dans flowin_v23_data');
+  } catch(err){console.warn('[writeJoueurBtoB] ERREUR:',err);}
+}
+function spinSubmitForm(){
+  var enseigne=document.getElementById('sp-enseigne')?document.getElementById('sp-enseigne').value.trim():'';
+  var prenom=document.getElementById('sp-prenom').value.trim();
+  var nom=document.getElementById('sp-nom')?document.getElementById('sp-nom').value.trim():'';
+  var email=document.getElementById('sp-email').value.trim();
+  var tel=document.getElementById('sp-tel').value.trim();
+  var ville=document.getElementById('sp-ville')?document.getElementById('sp-ville').value.trim():'';
+  // G5-[17] Tous champs obligatoires
+  var _err = false;
+  function _req(id,val){ if(!val){ var el=document.getElementById(id); if(el){el.style.borderColor='#E8500A'; el.focus();} _err=true; } }
+  _req('sp-enseigne',enseigne);
+  _req('sp-prenom',prenom);
+  _req('sp-nom',nom);
+  _req('sp-email',email);
+  _req('sp-tel',tel);
+  _req('sp-ville',ville);
+  if(!spProType){ var btns=document.querySelectorAll('#sp-type-btns button'); if(btns[0]) btns[0].style.outline='2px solid #E8500A'; _err=true; }
+  if(!spSource){ var sbtns=document.querySelectorAll('#sp-source-btns button'); if(sbtns[0]) sbtns[0].style.outline='2px solid #E8500A'; _err=true; }
+  if(_err) return;
+  var lot=SPIN_SEGS[winSeg]?SPIN_SEGS[winSeg].label:'1er event offert';
+  var code=spinTicketCode||'FW-PRO-0000';
+  writeJoueurBtoB({prenom:prenom,nom:nom,email:email,tel:tel,ville:ville,enseigne:enseigne,typePro:spProType,decouverte:spSource,lot:lot,ticketCode:code});
+  var msg='Bonjour Romain ! J ai gagne : '+lot+' ('+code+')';
+  if(enseigne) msg+=' | Enseigne : '+enseigne;
+  msg+=' | '+prenom+(nom?' '+nom:'')+(spProType?', '+spProType:'');
+  msg+=' | Email : '+email;
+  if(tel) msg+=' | Tel : '+tel;
+  if(ville) msg+=' | Ville : '+ville;
+  if(spSource) msg+=' | Connu via : '+spSource;
+  document.getElementById('sp-wa-link').href='https://wa.me/33XXXXXXXXX?text='+encodeURIComponent(msg);
+  var nm=document.getElementById('spin6-name');
+  if(nm)nm.textContent=prenom+(enseigne?' - '+enseigne:'')+", c est gagne !";
+  spinGo(6);
+}
+</script>
+
+<footer>
+  Flow<em style="font-style:normal;color:var(--purple)">in</em> · OPConsult / BAITA EURL · Vence ·
+  <a href="#" style="color:var(--mu)">Politique de confidentialité</a>
+</footer>
+
+<script>
+// ══ DATA PROFILS (tableau source) ══
+var PROFILS = [
+  {
+    icon:'🛍️', name:'Boutique & Commerce',
+    before: '"Ils reviennent. Je les reconnais. Mais si je ferme 3 semaines, ils ne savent même pas où me retrouver."',
+    how:    'Un jeu en caisse. La roue tourne. Ils gagnent un lot. Leur email est dans votre base — sans qu\'ils y pensent.',
+    after:  '"J\'ai lancé mes soldes hier. 140 emails envoyés. En 1 clic. Zéro budget pub."',
+    metrics:[
+      {val:'+140',lbl:'contacts en 1 event',c:'var(--teal)'},
+      {val:'0 €',lbl:'de pub pour recontacter',c:'var(--orange)'},
+      {val:'Vos clients',lbl:'enfin identifiés',c:'var(--navy)'},
+      {val:'Gratuit',lbl:'1er event offert',c:'var(--yellow)'}
+    ]
+  },
+  {
+    icon:'🍽️', name:'Restaurant & Café',
+    before: '"J\'ai 8 tables vides ce soir. Mes habitués ne savent pas que je fais une soirée jazz jeudi. Je n\'ai aucun moyen de les prévenir."',
+    how:    'Un QR sur la table. Ils jouent entre l\'entrée et le plat. Vous récupérez leur contact — et leur préférence de soirée.',
+    after:  '"Jeudi, j\'ai envoyé un message à 200 clients. La salle était pleine à 20h."',
+    metrics:[
+      {val:'200',lbl:'clients contactables',c:'var(--orange)'},
+      {val:'1 SMS',lbl:'pour remplir votre salle',c:'var(--teal)'},
+      {val:'Créneaux',lbl:'creux identifiés',c:'var(--navy)'},
+      {val:'Gratuit',lbl:'1er event offert',c:'var(--yellow)'}
+    ]
+  },
+  {
+    icon:'⛺', name:'Marché / Exposant / Stand',
+    before: '"Samedi j\'ai fait 3 000€ de ventes. Dimanche, mes clients ne savent pas que je reviens dans 3 semaines. Tout est à recommencer."',
+    how:    'Une tombola sur votre stand. Ils s\'inscrivent pour tenter de gagner. Vous repartez avec 80 contacts qualifiés.',
+    after:  '"J\'envoie ma date du mois prochain à toute ma base. Je prends des commandes entre les marchés."',
+    metrics:[
+      {val:'80+',lbl:'contacts par journée',c:'var(--yellow)'},
+      {val:'Commandes',lbl:'entre les marchés',c:'var(--teal)'},
+      {val:'Jamais',lbl:'repartir de zéro',c:'var(--navy)'},
+      {val:'Gratuit',lbl:'1er event offert',c:'var(--orange)'}
+    ]
+  },
+  {
+    icon:'🏪', name:'Réseau / Animation',
+    before: '"J\'anime 12 événements par an pour mes commerçants. À la fin, je n\'ai aucun chiffre à leur montrer. Impossible de justifier mon action."',
+    how:    'Un outil unique, déployé sur tous vos événements. Chaque entité voit ses propres données. Vous avez le tableau global.',
+    after:  '"J\'arrive en AG avec des chiffres réels. Nombre de contacts captés, villes, âges. Mes membres renouvellent."',
+    metrics:[
+      {val:'1 outil',lbl:'pour tout le réseau',c:'var(--navy)'},
+      {val:'Chiffres',lbl:'concrets à présenter',c:'var(--teal)'},
+      {val:'Réseau',lbl:'fédéré par le jeu',c:'var(--orange)'},
+      {val:'Gratuit',lbl:'1er event offert',c:'var(--yellow)'}
+    ]
+  },
+  {
+    icon:'🏢', name:'Entreprise / Association',
+    before: '"On a tenu un stand 2 jours au salon. Des centaines de personnes s\'sont arrêtées. On a récupéré... 14 cartes de visite."',
+    how:    'Un quiz ou vote gamifié sur votre stand. Ils jouent, vous captez. Contacts, profils, intentions — en temps réel.',
+    after:  '"186 contacts qualifiés en 2 jours. Export CSV prêt pour notre CRM. Le directeur veut déployer sur tous nos salons."',
+    metrics:[
+      {val:'186',lbl:'contacts en 2 jours',c:'var(--purple)'},
+      {val:'CSV',lbl:'export direct CRM',c:'var(--teal)'},
+      {val:'Profils',lbl:'intentions captées',c:'var(--navy)'},
+      {val:'Gratuit',lbl:'1er event offert',c:'var(--yellow)'}
+    ]
+  },
+  {
+    icon:'🗺️', name:'Tourisme / Collectivité',
+    before: '"On a accueilli 4 000 visiteurs cet été. On ne sait pas d\'où ils viennent. On ne peut pas les informer de nos prochains événements."',
+    how:    'Un quiz sur votre patrimoine local, accessible par QR. Fun, rapide, engageant. Chaque scan = un profil visiteur.',
+    after:  '"Mon rapport de saison : 4 200 participants, 38 villes d\'origine, 71% prêts à revenir. Le dossier de subvention est bouclé."',
+    metrics:[
+      {val:'4200',lbl:'profils visiteurs',c:'var(--teal)'},
+      {val:'38',lbl:'villes d\'origine tracées',c:'var(--orange)'},
+      {val:'Rapport',lbl:'prêt pour subventions',c:'var(--navy)'},
+      {val:'Gratuit',lbl:'1er event offert',c:'var(--yellow)'}
+    ]
+  }
+];
+
+var tagColors = [
+  {cls:'tag-before', emoji:'😔', label:'Avant'},
+  {cls:'tag-how',    emoji:'⚡', label:'Avec Flowin'},
+  {cls:'tag-after',  emoji:'✅', label:'Résultat'}
+];
+
+function selectProf(idx, el) {
+  var profs = document.querySelectorAll('.prof');
+  for(var i=0;i<profs.length;i++) profs[i].classList.remove('on');
+  el.classList.add('on');
+
+  var d = PROFILS[idx];
+
+  document.getElementById('rc-before-text').innerHTML = d.before;
+  document.getElementById('rc-how-icon').textContent = d.icon;
+  document.getElementById('rc-how-text').textContent = d.how;
+  document.getElementById('rc-result-text').textContent = d.after.replace(/["""]/g,'');
+
+  var mHtml = '';
+  for(var k=0;k<d.metrics.length;k++){
+    var m = d.metrics[k];
+    mHtml += '<div class="rc-met">'
+      + '<div class="rc-mn" style="color:'+m.c+'">'+m.val+'</div>'
+      + '<div class="rc-ml">'+m.lbl+'</div>'
+      + '</div>';
+  }
+  document.getElementById('rc-metrics').innerHTML = mHtml;
+
+  var card = document.getElementById('result-card');
+  card.classList.remove('show');
+  void card.offsetWidth;
+  card.classList.add('show');
+
+  setTimeout(function(){
+    card.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 80);
+}
+
+// ══ HERO — questions en cascade ══
+function animHero(){
+  var delays = [0, 400, 800, 1200];
+  for(var i=0;i<4;i++){
+    (function(idx){
+      setTimeout(function(){
+        document.getElementById('hq'+idx).classList.add('show');
+      }, delays[idx]);
+    })(i);
+  }
+  setTimeout(function(){
+    document.getElementById('hero-ans').classList.add('show');
+  }, 1800);
+  setTimeout(function(){
+    document.getElementById('hero-cta').classList.add('show');
+  }, 2100);
+}
+
+// ══ PREUVE — compteurs animés ══
+var proofObserver = null;
+function animCounters(){
+  var targets = [{el:'cnt1',target:186,suffix:'',dur:1600},{el:'cnt2',target:76,suffix:'%',dur:1400},{el:'cnt3',target:98,suffix:'%',dur:1200}];
+  for(var i=0;i<targets.length;i++){
+    (function(t){
+      var start = Date.now();
+      var timer = setInterval(function(){
+        var elapsed = Date.now()-start;
+        var progress = Math.min(elapsed/t.dur,1);
+        var ease = 1-Math.pow(1-progress,3);
+        var val = Math.round(ease*t.target);
+        document.getElementById(t.el).textContent = val+t.suffix;
+        if(progress>=1) clearInterval(timer);
+      },16);
+    })(targets[i]);
+  }
+}
+
+function setupProofObserver(){
+  var proof = document.querySelector('.proof');
+  if(!proof) return;
+  var fired = false;
+  proofObserver = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !fired){
+      fired = true;
+      animCounters();
+    }
+  },{threshold:0.3});
+  proofObserver.observe(proof);
+}
+
+// ══ FORMULAIRE ══
+function submitForm(){
+  var nom = document.getElementById('f-nom').value.trim();
+  var email = document.getElementById('f-email').value.trim();
+  var tel = document.getElementById('f-tel').value.trim();
+  if(!nom || !email){ alert('Prénom et email requis.'); return; }
+
+  // TODO : brancher endpoint GAS/Supabase
+  document.getElementById('form-content').style.display='none';
+  document.getElementById('bravo').classList.add('show');
+}
+
+// ══ INIT ══
+window.addEventListener('load', function(){
+  animHero();
+  setupProofObserver();
+});
+</script>
+</body>
+</html>
