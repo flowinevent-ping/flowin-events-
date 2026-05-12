@@ -295,7 +295,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans
 /* CONFIG                                                       */
 /* ═══════════════════════════════════════════════════════════ */
 var PRO_ID = 'pro-vence';
-var PARCOURS_BASE = 'https://parcours-dmserijrj-flowinevent-6745s-projects.vercel.app';
+var PARCOURS_BASE = 'https://admin-4wrzrznuu-flowinevent-6745s-projects.vercel.app';
+var PARCOURS_PAGE = 'parcours.html';
 var LS_KEY = 'flowin_v28_data';
 var SUPA_URL = '';
 var SUPA_ANON = '';
@@ -440,8 +441,8 @@ function renderJoueurs() {
 /* RENDER PARCOURS — QR codes                                  */
 /* ═══════════════════════════════════════════════════════════ */
 function renderParcours() {
-  var urlPaques = PARCOURS_BASE + '/?ev=ev-paques';
-  var urlNds    = PARCOURS_BASE + '/?ev=ev-nds';
+  var urlPaques = PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=ev-paques';
+  var urlNds    = PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=ev-nds';
   document.getElementById('url-paques').textContent = urlPaques;
   document.getElementById('url-nds').textContent    = urlNds;
   document.getElementById('qr-paques').innerHTML = genQRSvg(urlPaques, {size:140, color:'#D4537E'});
@@ -449,7 +450,7 @@ function renderParcours() {
 }
 
 function openParcours(evId) {
-  window.open(PARCOURS_BASE + '/?ev=' + evId, '_blank');
+  window.open(PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=' + evId, '_blank');
 }
 
 /* ═══════════════════════════════════════════════════════════ */
@@ -479,7 +480,7 @@ function showEvModal(evId) {
            + '<div class="stat-row"><span class="stat-lbl">Opt-in</span><span class="stat-val">' + (ev.joueursOptin||0) + '</span></div>'
            + '<div class="stat-row"><span class="stat-lbl">Gagnants</span><span class="stat-val">' + (ev.gagnants||0) + '</span></div>'
            + '<div class="stat-row"><span class="stat-lbl">Joueurs CRM</span><span class="stat-val">' + jous.length + '</span></div>';
-  var qrUrl = PARCOURS_BASE + '/?ev=' + evId;
+  var qrUrl = PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=' + evId;
   body += '<div style="margin-top:14px;text-align:center">' + genQRSvg(qrUrl, {size:120, color: ev.couleur||'#7C2D92'}) + '</div>';
   body += '<div style="font-size:10px;color:var(--sm);text-align:center;margin-top:6px;word-break:break-all">' + qrUrl + '</div>';
   document.getElementById('modal-ev-body').innerHTML = body;
