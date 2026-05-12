@@ -1,5 +1,17 @@
 {
+  "headers": [
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    }
+  ],
   "rewrites": [
+    { "source": "/parcours.html", "destination": "/parcours.html" },
+    { "source": "/parcours_quiz_paques_vence.html", "destination": "/parcours_quiz_paques_vence.html" },
+    { "source": "/parcours_quiz_nds_2026.html", "destination": "/parcours_quiz_nds_2026.html" },
+    { "source": "/pro_mobile_v4.html", "destination": "/pro_mobile_v4.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
