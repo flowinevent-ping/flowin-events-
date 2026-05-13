@@ -1537,15 +1537,23 @@ async function supaUpsert(table, payload){
 
 // Upsert joueur → Supabase + GAS fallback
 async function supaWriteJoueur(j){
-  // G1-[3] enseigne dans le payload Supabase
-  // j.enseigne est transmis si défini
   if(!j || !j.id) return;
   var payload = {
     id:j.id, email:j.email, nom:j.nom, prenom:j.prenom||'', tel:j.tel||'',
     ville:j.ville||'', code_postal:j.codePostal||'', genre:j.genre||'',
     date_naissance:j.dateNaissance||'', optin:j.optin||false,
+    optin_date:j.optinDate||null,
     gains:j.gains||0, score_moy:j.scoreMoy||'', events:j.events||[],
-    first_seen:j.firstSeen||null, last_seen:j.lastSeen||null
+    first_seen:j.firstSeen||null, last_seen:j.lastSeen||null,
+    source:j.source||'',
+    adresse:j.adresse||'',
+    tags:Array.isArray(j.tags) ? j.tags : [],
+    age_tranche:j.ageTranche||'',
+    enseigne:j.enseigne||'',
+    lot_gagne:j.lotGagne||'',
+    ticket_code:j.ticketCode||'',
+    decouverte:j.decouverte||'',
+    client_type:j.clientType||'btoc'
   };
   var ok = await supaUpsert('joueurs', payload);
   if(!ok) gasBackup('joueur_upsert', payload);
@@ -1554,6 +1562,10 @@ async function supaWriteJoueur(j){
 // Upsert event → Supabase + GAS fallback
 async function supaWriteEvent(e){
   if(!e || !e.id) return;
+  // Génération auto qrUrl si manquant
+  if(e.cfg && !e.cfg.qrUrl){
+    e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/?ev=' + e.id;
+  }
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
@@ -1563,8 +1575,9 @@ async function supaWriteEvent(e){
     gagnants:e.gagnants||0, joueurs_optin:e.joueursOptin||0,
     score_min:e.scoreMin||0,
     cfg:e.cfg||{}, stats:e.stats||{},
-    pro_visib:(e.cfg&&e.cfg.proVisib)||{},
-    super_event_id:e.superEventId||null
+    pro_visib:e.proVisib||{},
+    super_event_id:e.superEventId||null,
+    client_type:e.clientType||'btoc'
   };
   var ok = await supaUpsert('events', payload);
   if(!ok) gasBackup('event_upsert', payload);
@@ -2867,7 +2880,7 @@ function enterEditMode(){
   if(t==='pro') entity = findPro(id);
   else if(t==='joueur') entity = findJoueur(id);
   else if(t==='event') entity = findEvent(id);
-  else if(t==='partner') entity = findPartner(id);
+  else if(t==='partenaire') entity = findPartner(id);
   else if(t==='superEvent') entity = findSuperEvent(id);
   if(!entity) return;
   state.drawer.edit = true;
@@ -2881,7 +2894,7 @@ function saveEdit(){
   if(t==='pro') arr = DATA.pros;
   else if(t==='joueur') arr = DATA.joueurs;
   else if(t==='event') arr = DATA.events;
-  else if(t==='partner') arr = DATA.partenaires;
+  else if(t==='partenaire') arr = DATA.partenaires;
   else if(t==='superEvent') arr = DATA.superEvents;
   if(!arr) return;
   const idx = arr.findIndex(x=>x.id===id);
@@ -3129,7 +3142,7 @@ function drawerPro(p){
     if(partenairesLies.length===0){
       html += '<div class="text-sm text-muted">Aucun partenaire associé aux events de ce pro.</div>';
     } else partenairesLies.forEach(pt => {
-      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'partner\',\''+pt.id+'\')"><div style="flex:1"><div class="fw-700">'+esc(pt.nom)+'</div><div class="text-xs text-muted">'+esc(pt.type||'')+'</div></div></div>';
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'partenaire\',\''+pt.id+'\')"><div style="flex:1"><div class="fw-700">'+esc(pt.nom)+'</div><div class="text-xs text-muted">'+esc(pt.type||'')+'</div></div></div>';
     });
   } else if(state.drawer.tab==='export'){
     html += '<div class="section-h">Exports disponibles</div>';
@@ -3915,7 +3928,7 @@ function drawerJoueur(j){
         html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:10px;margin-bottom:8px">'
              + '<div class="flex flex-between mb-2"><div class="fw-700">🏆 '+esc(l.nom)+'</div>'
              + (l.retire?'<span class="chip live">Retiré le '+fmt(l.dateRetrait)+'</span>':'<span class="chip warn">À retirer</span>')+'</div>'
-             + '<div class="text-xs text-muted">Gagné le '+fmt(l.dateAssign)+' · <a onclick="openDrawerFor(\'event\',\''+ev.id+'\')">'+esc(ev.nom)+'</a> · Partenaire : <a onclick="openDrawerFor(\'partner\',\''+pt.id+'\')">'+esc(pt.nom)+'</a></div>'
+             + '<div class="text-xs text-muted">Gagné le '+fmt(l.dateAssign)+' · <a onclick="openDrawerFor(\'event\',\''+ev.id+'\')">'+esc(ev.nom)+'</a> · Partenaire : <a onclick="openDrawerFor(\'partenaire\',\''+pt.id+'\')">'+esc(pt.nom)+'</a></div>'
              + '<div class="flex gap-2 mt-3">'
              + '<button class="btn btn-sm" onclick="openModal(\'qr\',{lotId:\''+l.id+'\'})">📱 QR retrait</button>'
              + (!l.retire?'<button class="btn btn-success btn-sm" onclick="markLotRetire(\''+l.id+'\')">✓ Marquer retiré</button>':'')
@@ -4035,7 +4048,7 @@ function renderBiblioGagnants(){
          + '<td onclick="openDrawerFor(\'event\',\''+e.id+'\')" style="cursor:pointer"><a>'+esc(e.nom)+'</a><div class="text-xs text-muted">'+fmt(e.dateD)+'</div></td>'
          + '<td><strong>'+esc(l.nom)+'</strong>'+(l.quantite>1?' <span class="text-muted">x'+l.quantite+'</span>':'')+'</td>'
          + '<td>'+(l.valeur||0)+' €</td>'
-         + '<td onclick="openDrawerFor(\'partner\',\''+p.id+'\')" style="cursor:pointer"><a>'+esc(p.nom)+'</a></td>'
+         + '<td onclick="openDrawerFor(\'partenaire\',\''+p.id+'\')" style="cursor:pointer"><a>'+esc(p.nom)+'</a></td>'
          + '<td class="text-sm text-muted">'+fmt(l.dateAssign)+'</td>'
          + '<td>'+(l.retire?'<span class="chip live">Retiré '+fmt(l.dateRetrait)+'</span>':'<span class="chip warn">À retirer</span>')+'</td>'
          + '<td class="col-actions"><div class="row-actions">'
@@ -4114,7 +4127,7 @@ function renderBiblioPartenaires(){
        + '<th class="col-actions"></th></tr></thead><tbody>';
   list.forEach(p => {
     const lots = DATA.lots.filter(l=>l.partenaireId===p.id);
-    html += '<tr onclick="openDrawerFor(\'partner\',\''+p.id+'\')">'
+    html += '<tr onclick="openDrawerFor(\'partenaire\',\''+p.id+'\')">'
          + '<td onclick="event.stopPropagation()"><input type="checkbox" class="check"/></td>'
          + '<td><div style="font-weight:700">'+esc(p.nom)+'</div><div class="text-xs text-muted">'+esc(p.adresse||'')+'</div></td>'
          + '<td>'+(p.type==='National'?'<span class="chip purple">National</span>':'<span class="chip past">Local</span>')+'</td>'
@@ -4122,7 +4135,7 @@ function renderBiblioPartenaires(){
          + '<td><strong>'+p.events.length+'</strong></td>'
          + '<td>'+lots.length+' <span class="text-xs text-muted">('+lots.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0)+' €)</span></td>'
          + '<td class="text-sm"><div>'+esc(p.contact||'-')+'</div><div class="text-xs text-muted">'+esc(p.email||'')+'</div></td>'
-         + '<td class="col-actions"><div class="row-actions"><button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openDrawerForEdit(\'partner\',\''+p.id+'\')">✏</button></div></td>'
+         + '<td class="col-actions"><div class="row-actions"><button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openDrawerForEdit(\'partenaire\',\''+p.id+'\')">✏</button></div></td>'
          + '</tr>';
   });
   if(list.length===0) html += '<tr><td colspan="8"><div class="empty-block mt-3"><div class="ico">🤝</div><div class="t">Aucun partenaire</div><div class="s">Ajoutez un premier partenaire via + Nouveau partenaire</div></div></td></tr>';
