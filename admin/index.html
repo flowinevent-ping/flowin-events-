@@ -1583,6 +1583,64 @@ async function supaWriteLot(l){
   if(!ok) gasBackup('lot_upsert', payload);
 }
 
+// Upsert pro → Supabase + GAS fallback
+async function supaWritePro(p){
+  if(!p || !p.id) return;
+  var payload = {
+    id: p.id, nom: p.nom, ville: p.ville||'', code_postal: p.codePostal||'',
+    adresse: p.adresse||'', siret: p.siret||'', secteur: p.secteur||'',
+    contact: p.contact||'', role_contact: p.role||'',
+    email: p.email||'', tel: p.tel||'',
+    entree_p: p.entreeP||null, notes: p.notes||'',
+    tags: Array.isArray(p.tags) ? p.tags : []
+  };
+  var ok = await supaUpsert('pros', payload);
+  if(!ok) gasBackup('pro_upsert', payload);
+}
+
+// Upsert partenaire → Supabase + GAS fallback
+async function supaWritePartenaire(p){
+  if(!p || !p.id) return;
+  var payload = {
+    id: p.id, nom: p.nom, type: p.type||'Local',
+    secteur: p.secteur||'', contact: p.contact||'',
+    role: p.role||'', email: p.email||'', tel: p.tel||'',
+    ville: p.ville||'', code_postal: p.codePostal||'',
+    adresse: p.adresse||'', siret: p.siret||'',
+    contrat: p.contrat||'', notes: p.notes||'',
+    events: Array.isArray(p.events) ? p.events : [],
+    tags: Array.isArray(p.tags) ? p.tags : []
+  };
+  var ok = await supaUpsert('partenaires', payload);
+  if(!ok) gasBackup('partenaire_upsert', payload);
+}
+
+// Upsert banque → Supabase + GAS fallback
+async function supaWriteBanque(b){
+  if(!b || !b.id) return;
+  var payload = {
+    id: b.id, nom: b.nom, description: b.description||'',
+    events: Array.isArray(b.events) ? b.events : [],
+    questions: Array.isArray(b.questions) ? b.questions : []
+  };
+  var ok = await supaUpsert('banques', payload);
+  if(!ok) gasBackup('banque_upsert', payload);
+}
+
+// Upsert super event → Supabase + GAS fallback
+async function supaWriteSuperEvent(se){
+  if(!se || !se.id) return;
+  var payload = {
+    id: se.id, nom: se.nom,
+    pros: Array.isArray(se.pros) ? se.pros : [],
+    events: Array.isArray(se.events) ? se.events : [],
+    date_d: se.dateD||null, date_f: se.dateF||null,
+    description: se.description||''
+  };
+  var ok = await supaUpsert('super_events', payload);
+  if(!ok) gasBackup('super_event_upsert', payload);
+}
+
 // GAS fallback (backup append-only)
 function gasBackup(action, payload){
   var GAS_URL = localStorage.getItem('flowin_gas_url')||'';
@@ -2772,8 +2830,10 @@ function filterPills(key,opts){
 
 function newPro(){
   const id = newId('pro');
-  DATA.pros.unshift({id,nom:'Nouveau pro',ville:'',codePostal:'',adresse:'',siret:'',secteur:'',contact:'',role:'',email:'',tel:'',entreeP:fmtDateInput(new Date().toISOString()),notes:'',tags:[]});
+  var nouveauPro = {id,nom:'Nouveau pro',ville:'',codePostal:'',adresse:'',siret:'',secteur:'',contact:'',role:'',email:'',tel:'',entreeP:fmtDateInput(new Date().toISOString()),notes:'',tags:[]};
+  DATA.pros.unshift(nouveauPro);
   saveData();
+  supaWritePro(nouveauPro);
   toast('Nouveau pro créé','success');
   openDrawerForEdit('pro',id);
 }
@@ -4072,8 +4132,11 @@ function renderBiblioPartenaires(){
 }
 function newPartenaire(){
   const id = newId('pt');
-  DATA.partenaires.unshift({id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''});
-  saveData(); openDrawerForEdit('partenaire',id);
+  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''};
+  DATA.partenaires.unshift(nouveauPt);
+  saveData();
+  supaWritePartenaire(nouveauPt);
+  openDrawerForEdit('partenaire',id);
 }
 
 // ----- PARTENAIRE drawer -----
@@ -8181,11 +8244,15 @@ function wizSave(){
       }
     }
     toast('Event "'+d.nom+'" créé','success');
+    supaWriteEvent(_newEv);
+    // Génération auto qrUrl
+    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/?ev=' + id;
   } else {
     const idx = DATA.events.findIndex(e=>e.id===state.wiz.editingId);
     if(idx>=0){
       _flowinMerge(DATA.events[idx], d);
       if(d.proVisib) DATA.events[idx].proVisib = d.proVisib;
+      supaWriteEvent(DATA.events[idx]);
     }
     toast('Event "'+d.nom+'" enregistré','success');
   }
