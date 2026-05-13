@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/parcours", "destination": "/parcours/index.html" },
+    { "source": "/admin",    "destination": "/admin/index.html" },
+    { "source": "/landing",  "destination": "/landing/index.html" },
+    { "source": "/",         "destination": "/admin/index.html" }
+  ]
+}
