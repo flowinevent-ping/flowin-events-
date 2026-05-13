@@ -273,11 +273,11 @@ body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans
 
 <!-- BOTTOMNAV -->
 <nav class="bottomnav">
-  <button class="nav-btn active" onclick="goTab('dashboard',this)"><div class="ico">🏠</div>Accueil</button>
-  <button class="nav-btn" onclick="goTab('events',this)"><div class="ico">📅</div>Events</button>
-  <button class="nav-btn" onclick="goTab('joueurs',this)"><div class="ico">👥</div>Joueurs</button>
-  <button class="nav-btn" onclick="goTab('parcours',this)"><div class="ico">📱</div>Parcours</button>
-  <button class="nav-btn" onclick="goTab('export',this)"><div class="ico">📤</div>Export</button>
+  <button id="nav-dashboard" class="nav-btn active" onclick="goTab('dashboard',this)"><div class="ico">🏠</div>Accueil</button>
+  <button id="nav-events" class="nav-btn" onclick="goTab('events',this)"><div class="ico">📅</div>Events</button>
+  <button id="nav-joueurs" class="nav-btn" onclick="goTab('joueurs',this)"><div class="ico">👥</div>Joueurs</button>
+  <button id="nav-parcours" class="nav-btn" onclick="goTab('parcours',this)"><div class="ico">📱</div>Parcours</button>
+  <button id="nav-export" class="nav-btn" onclick="goTab('export',this)"><div class="ico">📤</div>Export</button>
 </nav>
 
 <!-- MODAL EVENT STATS -->
@@ -334,7 +334,49 @@ function findEv(id) {
 /* NAVIGATION                                                   */
 /* ═══════════════════════════════════════════════════════════ */
 var currentTab = 'dashboard';
+
+// ═══════════════════════════════════════════════════════════
+// PRO VISIB : appliquer les flags du SA (masquer/afficher onglets)
+// ═══════════════════════════════════════════════════════════
+function applyProVisib() {
+  // Récupérer le proVisib de l'event courant (premier event du pro)
+  var evs = myEvents();
+  if (!evs.length) return;
+  // Prendre l'event LIVE ou le plus récent
+  var live = evs.filter(function(e){ return e.status==='live'; });
+  var ev = live.length ? live[0] : evs[0];
+  var pv = (ev && ev.proVisib) || {};
+  
+  // Mapping onglet → flag proVisib
+  var mapping = {
+    'dashboard'  : 'stats',         // Accueil = stats
+    'events'     : 'activite',      // Events = activité/tirage
+    'joueurs'    : 'participants',  // Joueurs = participants
+    'parcours'   : 'qr',            // Parcours = QR code
+    'export'     : 'export'         // Export
+  };
+  
+  Object.keys(mapping).forEach(function(tab){
+    var flag = mapping[tab];
+    var btn = document.getElementById('nav-' + tab);
+    if (!btn) return;
+    // Si flag === false dans proVisib → masquer
+    if (pv[flag] === false) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+    }
+  });
+  
+  // Afficher le message de bienvenue si défini
+  if (pv.msgBienvenue) {
+    var msgEl = document.getElementById('pro-welcome-msg');
+    if (msgEl) msgEl.textContent = pv.msgBienvenue;
+  }
+}
+
 function goTab(tab, btn) {
+  applyProVisib();  // Re-appliquer les flags à chaque changement d'onglet
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
   document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
   var v = document.getElementById('v-' + tab);
