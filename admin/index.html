@@ -1518,6 +1518,106 @@ function saveData(supaSync){
 // ============ DUAL-WRITE SUPABASE ============
 // Écrit un objet dans une table Supabase (upsert par id)
 // Retourne true si succès, false sinon
+// ============================================================
+// supaLoadAll : charger TOUTES les tables depuis Supabase
+// → DATA en mémoire = Supabase + override quelques calculs
+// ============================================================
+async function supaFetch(table, params){
+  if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return [];
+  try {
+    var url = FLOWIN_SUPA_URL + '/rest/v1/' + table + '?' + (params || 'select=*');
+    var r = await fetch(url, {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    if(!r.ok) { console.warn('[supaFetch] '+table+' status '+r.status); return []; }
+    return await r.json();
+  } catch(e) { console.warn('[supaFetch] '+table, e); return []; }
+}
+
+// Convertit une ligne Supabase (snake_case) en format DATA (camelCase)
+function supaRowToData(row, type){
+  if(!row) return null;
+  var o = Object.assign({}, row);
+  // Mappings communs
+  if(o.pro_id !== undefined) { o.proId = o.pro_id; delete o.pro_id; }
+  if(o.code_postal !== undefined) { o.codePostal = o.code_postal; delete o.code_postal; }
+  if(o.date_d !== undefined) { o.dateD = o.date_d; delete o.date_d; }
+  if(o.date_f !== undefined) { o.dateF = o.date_f; delete o.date_f; }
+  if(o.h_start !== undefined) { o.hStart = o.h_start; delete o.h_start; }
+  if(o.h_end !== undefined) { o.hEnd = o.h_end; delete o.h_end; }
+  if(o.joueurs_optin !== undefined) { o.joueursOptin = o.joueurs_optin; delete o.joueurs_optin; }
+  if(o.super_event_id !== undefined) { o.superEventId = o.super_event_id; delete o.super_event_id; }
+  if(o.client_type !== undefined) { o.clientType = o.client_type; delete o.client_type; }
+  if(o.pro_visib !== undefined) { o.proVisib = o.pro_visib; delete o.pro_visib; }
+  if(o.score_min !== undefined) { o.scoreMin = o.score_min; delete o.score_min; }
+  if(o.score_moy !== undefined) { o.scoreMoy = o.score_moy; delete o.score_moy; }
+  if(o.optin_date !== undefined) { o.optinDate = o.optin_date; delete o.optin_date; }
+  if(o.first_seen !== undefined) { o.firstSeen = o.first_seen; delete o.first_seen; }
+  if(o.last_seen !== undefined) { o.lastSeen = o.last_seen; delete o.last_seen; }
+  if(o.date_naissance !== undefined) { o.dateNaissance = o.date_naissance; delete o.date_naissance; }
+  if(o.age_tranche !== undefined) { o.ageTranche = o.age_tranche; delete o.age_tranche; }
+  if(o.lot_gagne !== undefined) { o.lotGagne = o.lot_gagne; delete o.lot_gagne; }
+  if(o.ticket_code !== undefined) { o.ticketCode = o.ticket_code; delete o.ticket_code; }
+  if(o.partenaire_id !== undefined) { o.partenaireId = o.partenaire_id; delete o.partenaire_id; }
+  if(o.event_id !== undefined) { o.eventId = o.event_id; delete o.event_id; }
+  if(o.assigne_a !== undefined) { o.assigneA = o.assigne_a; delete o.assigne_a; }
+  if(o.date_retrait !== undefined) { o.dateRetrait = o.date_retrait; delete o.date_retrait; }
+  if(o.role_contact !== undefined) { o.role = o.role_contact; delete o.role_contact; }
+  if(o.entree_p !== undefined) { o.entreeP = o.entree_p; delete o.entree_p; }
+  return o;
+}
+
+async function supaLoadAll(){
+  if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return null;
+  try {
+    console.log('[Flowin] Chargement Supabase…');
+    var results = await Promise.all([
+      supaFetch('pros'),
+      supaFetch('partenaires'),
+      supaFetch('events'),
+      supaFetch('super_events'),
+      supaFetch('joueurs'),
+      supaFetch('lots'),
+      supaFetch('banques')
+    ]);
+    var pros = results[0].map(function(r){ return supaRowToData(r,'pro'); });
+    var partenaires = results[1].map(function(r){ return supaRowToData(r,'partenaire'); });
+    var events = results[2].map(function(r){ return supaRowToData(r,'event'); });
+    var superEvents = results[3].map(function(r){ return supaRowToData(r,'superEvent'); });
+    var joueurs = results[4].map(function(r){ return supaRowToData(r,'joueur'); });
+    var lots = results[5].map(function(r){ return supaRowToData(r,'lot'); });
+    var banques = results[6].map(function(r){ return supaRowToData(r,'banque'); });
+    console.log('[Flowin] Supabase chargé : '+pros.length+' pros, '+events.length+' events, '+joueurs.length+' joueurs, '+lots.length+' lots');
+    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques };
+  } catch(e) {
+    console.error('[Flowin] supaLoadAll erreur', e);
+    return null;
+  }
+}
+
+// Recharger DATA depuis Supabase et rafraîchir l'UI
+async function refreshFromSupabase(){
+  var data = await supaLoadAll();
+  if(!data) {
+    toast('Supabase non disponible — données locales conservées', 'warning');
+    return;
+  }
+  // Remplacer chaque collection dans DATA
+  DATA.pros = data.pros;
+  DATA.partenaires = data.partenaires;
+  DATA.events = data.events;
+  DATA.superEvents = data.superEvents;
+  DATA.joueurs = data.joueurs;
+  DATA.lots = data.lots;
+  // Banques : merger avec SEED (les banques système ne sont pas en SQL)
+  if(data.banques && data.banques.length){
+    DATA.banques = data.banques;
+  }
+  saveData();
+  toast('✅ Synchronisé : '+data.events.length+' events · '+data.joueurs.length+' joueurs','success');
+  render();
+}
+
 async function supaUpsert(table, payload){
   if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return false;
   try {
@@ -9780,8 +9880,14 @@ function preprodCleanup() {
 }
 
 // ============ SUPABASE CONFIG ============
-let FLOWIN_SUPA_URL = localStorage.getItem('flowin_supa_url') || '';
-let FLOWIN_SUPA_ANON = localStorage.getItem('flowin_supa_anon') || '';
+// Credentials Supabase (publishable key - publique par design)
+const FLOWIN_SUPA_URL_DEFAULT = 'https://atddutvzklcgiqxlpvla.supabase.co';
+const FLOWIN_SUPA_ANON_DEFAULT = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+let FLOWIN_SUPA_URL = localStorage.getItem('flowin_supa_url') || FLOWIN_SUPA_URL_DEFAULT;
+let FLOWIN_SUPA_ANON = localStorage.getItem('flowin_supa_anon') || FLOWIN_SUPA_ANON_DEFAULT;
+// Persister automatiquement
+localStorage.setItem('flowin_supa_url', FLOWIN_SUPA_URL);
+localStorage.setItem('flowin_supa_anon', FLOWIN_SUPA_ANON);
 
 function saveSupaConfig(){
   const url = document.getElementById('supa-url');
@@ -9920,15 +10026,35 @@ function deleteLot(lotId){
   saveData(); renderDrawer(); toast('Lot supprimé','success');
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-  render();
+document.addEventListener('DOMContentLoaded', async function(){
+  render();  // Render initial avec localStorage (rapide)
   startRealtimePolling();
-  console.log('Flowin Dashboard v17 · Architecture LIBs · Données :',{
-    pros:DATA.pros.length,events:DATA.events.length,joueurs:DATA.joueurs.length,
-    partenaires:DATA.partenaires.length,jeux:DATA.jeux.length,banques:DATA.banques.length,
-    lots:DATA.lots.length,superEvents:DATA.superEvents.length
+  console.log('Flowin Dashboard v28 · Boot localStorage :',{
+    pros:DATA.pros.length,events:DATA.events.length,joueurs:DATA.joueurs.length
   });
-  console.log('Supabase:', FLOWIN_SUPA_URL||'non configuré');
+  
+  // Charger Supabase en parallèle et rafraîchir
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    console.log('[Flowin] Sync Supabase en cours...');
+    var data = await supaLoadAll();
+    if(data){
+      DATA.pros = data.pros;
+      DATA.partenaires = data.partenaires;
+      DATA.events = data.events;
+      DATA.superEvents = data.superEvents;
+      DATA.joueurs = data.joueurs;
+      DATA.lots = data.lots;
+      if(data.banques && data.banques.length) DATA.banques = data.banques;
+      saveData();
+      console.log('[Flowin] Supabase chargé :',{
+        pros:DATA.pros.length,events:DATA.events.length,joueurs:DATA.joueurs.length,
+        partenaires:DATA.partenaires.length,banques:DATA.banques.length,
+        lots:DATA.lots.length,superEvents:DATA.superEvents.length
+      });
+      render();
+      try { toast('✅ Synchronisé Supabase ('+DATA.events.length+' events)','success'); } catch(e){}
+    }
+  }
 });
 </script>
 </body>

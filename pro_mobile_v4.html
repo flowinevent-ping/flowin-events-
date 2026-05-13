@@ -329,22 +329,89 @@ var PRO_ID = (function(){
 var PARCOURS_BASE = 'https://admin-4wrzrznuu-flowinevent-6745s-projects.vercel.app';
 var PARCOURS_PAGE = 'parcours.html';
 var LS_KEY = 'flowin_v28_data';
-var SUPA_URL = '';
-var SUPA_ANON = '';
-
+// Credentials Supabase (publique par design — anon key)
+var SUPA_URL = 'https://atddutvzklcgiqxlpvla.supabase.co';
+var SUPA_ANON = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
 try {
-  SUPA_URL  = localStorage.getItem('flowin_supa_url')  || '';
-  SUPA_ANON = localStorage.getItem('flowin_supa_anon') || '';
+  SUPA_URL  = localStorage.getItem('flowin_supa_url')  || SUPA_URL;
+  SUPA_ANON = localStorage.getItem('flowin_supa_anon') || SUPA_ANON;
 } catch(e) {}
 
 /* ═══════════════════════════════════════════════════════════ */
-/* DATA — lue depuis localStorage (partagée avec dashboard SA) */
+/* DATA — chargée depuis Supabase (true simulation 100%)        */
 /* ═══════════════════════════════════════════════════════════ */
-var DATA = {events:[], joueurs:[], lots:[], pros:[]};
+var DATA = {events:[], joueurs:[], lots:[], pros:[], superEvents:[], partenaires:[], banques:[]};
+// Charger localStorage en fallback rapide (sera écrasé par Supabase)
 try {
   var raw = localStorage.getItem(LS_KEY);
-  if (raw) DATA = JSON.parse(raw);
+  if (raw) {
+    var loaded = JSON.parse(raw);
+    if(loaded.events) DATA.events = loaded.events;
+    if(loaded.joueurs) DATA.joueurs = loaded.joueurs;
+    if(loaded.lots) DATA.lots = loaded.lots;
+    if(loaded.pros) DATA.pros = loaded.pros;
+  }
 } catch(e) {}
+
+// Conversion snake_case → camelCase pour matcher le format dashboard
+function supaRowToData(row){
+  if(!row) return null;
+  var o = {};
+  for(var k in row){ if(row.hasOwnProperty(k)) o[k] = row[k]; }
+  if(o.pro_id !== undefined) { o.proId = o.pro_id; delete o.pro_id; }
+  if(o.code_postal !== undefined) { o.codePostal = o.code_postal; delete o.code_postal; }
+  if(o.date_d !== undefined) { o.dateD = o.date_d; delete o.date_d; }
+  if(o.date_f !== undefined) { o.dateF = o.date_f; delete o.date_f; }
+  if(o.h_start !== undefined) { o.hStart = o.h_start; delete o.h_start; }
+  if(o.h_end !== undefined) { o.hEnd = o.h_end; delete o.h_end; }
+  if(o.joueurs_optin !== undefined) { o.joueursOptin = o.joueurs_optin; delete o.joueurs_optin; }
+  if(o.super_event_id !== undefined) { o.superEventId = o.super_event_id; delete o.super_event_id; }
+  if(o.client_type !== undefined) { o.clientType = o.client_type; delete o.client_type; }
+  if(o.pro_visib !== undefined) { o.proVisib = o.pro_visib; delete o.pro_visib; }
+  if(o.score_min !== undefined) { o.scoreMin = o.score_min; delete o.score_min; }
+  if(o.score_moy !== undefined) { o.scoreMoy = o.score_moy; delete o.score_moy; }
+  if(o.optin_date !== undefined) { o.optinDate = o.optin_date; delete o.optin_date; }
+  if(o.first_seen !== undefined) { o.firstSeen = o.first_seen; delete o.first_seen; }
+  if(o.last_seen !== undefined) { o.lastSeen = o.last_seen; delete o.last_seen; }
+  if(o.lot_gagne !== undefined) { o.lotGagne = o.lot_gagne; delete o.lot_gagne; }
+  if(o.ticket_code !== undefined) { o.ticketCode = o.ticket_code; delete o.ticket_code; }
+  if(o.partenaire_id !== undefined) { o.partenaireId = o.partenaire_id; delete o.partenaire_id; }
+  if(o.event_id !== undefined) { o.eventId = o.event_id; delete o.event_id; }
+  if(o.assigne_a !== undefined) { o.assigneA = o.assigne_a; delete o.assigne_a; }
+  return o;
+}
+
+function supaFetchPro(table){
+  return fetch(SUPA_URL + '/rest/v1/' + table + '?select=*', {
+    headers: {'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON}
+  }).then(function(r){ return r.ok ? r.json() : []; })
+    .catch(function(){ return []; });
+}
+
+async function loadFromSupabase(){
+  if(!SUPA_URL || !SUPA_ANON) return;
+  try {
+    var results = await Promise.all([
+      supaFetchPro('pros'),
+      supaFetchPro('events'),
+      supaFetchPro('joueurs'),
+      supaFetchPro('lots'),
+      supaFetchPro('super_events'),
+      supaFetchPro('partenaires')
+    ]);
+    DATA.pros = results[0].map(supaRowToData);
+    DATA.events = results[1].map(supaRowToData);
+    DATA.joueurs = results[2].map(supaRowToData);
+    DATA.lots = results[3].map(supaRowToData);
+    DATA.superEvents = results[4].map(supaRowToData);
+    DATA.partenaires = results[5].map(supaRowToData);
+    console.log('[Pro Mobile] Supabase chargé:', DATA.events.length+' events, '+DATA.joueurs.length+' joueurs');
+    return true;
+  } catch(e){
+    console.warn('[Pro Mobile] Supabase erreur', e);
+    return false;
+  }
+}
 
 function myEvents() {
   return DATA.events.filter(function(e) { return e.proId === PRO_ID; });
@@ -610,6 +677,18 @@ function genQRSvg(url, opts) {
   if (DATA.pros) DATA.pros.forEach(function(p) { if (p.id === PRO_ID) pro = p; });
   if (pro) document.getElementById('pro-name').textContent = pro.nom;
   renderDashboard();
+  
+  // Charger Supabase en async et rafraîchir
+  loadFromSupabase().then(function(ok){
+    if(ok){
+      var pro2 = null;
+      DATA.pros.forEach(function(p){ if(p.id === PRO_ID) pro2 = p; });
+      if(pro2) document.getElementById('pro-name').textContent = pro2.nom;
+      renderDashboard();
+      applyProVisib();
+      console.log('[Pro Mobile] Données Supabase appliquées');
+    }
+  });
 })();
 </script>
 </body>
