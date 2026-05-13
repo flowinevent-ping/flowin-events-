@@ -32,8 +32,8 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Scénario 1 : 3 jeux Cannes (Quiz, Quiz Solo, Spin)
 INSERT INTO public.events (id, pro_id, nom, module, status, date_d, date_f, lieu, couleur, cfg, participants, joueurs_optin, gagnants, client_type, description) VALUES
-  ('ev-test-quiz','pro-test-cannes','TEST Festival Ete Cannes - Quiz','quiz','past','2026-08-01','2026-08-03','Croisette Cannes','#7C2D92','{"qrUrl":"https://flowin-events.vercel.app/parcours/?ev=ev-test-quiz","optinActif":true,"quizNbQuestions":5,"quizScoreMin":3,"quizBonus":true,"quizTimer":30}'::jsonb,3,3,1,'btoc','[FICTIF AUDIT - À SUPPRIMER]'),
-  ('ev-test-quizsolo','pro-test-cannes','TEST Festival Ete Cannes - Quiz Solo','quizsolo','past','2026-08-01','2026-08-03','Croisette Cannes','#F59E0B','{"qrUrl":"https://flowin-events.vercel.app/parcours/?ev=ev-test-quizsolo","optinActif":true,"quizNbQuestions":5,"quizScoreMin":3,"quizTimer":30}'::jsonb,3,3,1,'btoc','[FICTIF AUDIT - À SUPPRIMER]'),
+  ('ev-test-quiz','pro-test-cannes','TEST Festival Ete Cannes - Quiz','quiz','past','2026-08-01','2026-08-03','Croisette Cannes','#7C2D92','{"qrUrl":"https://flowin-events.vercel.app/parcours/?ev=ev-test-quiz","optinActif":true,"quizNbQuestions":5,"quizScoreMin":3,"quizBonus":true,"quizTimer":30,"quizRecapFin":true,"quizPartage":true,"quizUneFoisParJour":true,"quizShuffle":true,"quizBanques":["bq-test-cannes"],"bonusActif":true,"bonusList":[{"id":"frequence","label":"Vous etes venu(e)...","type":"single","options":[{"label":"En famille","val":"famille"},{"label":"Entre amis","val":"amis"},{"label":"En couple","val":"couple"},{"label":"Seul(e)","val":"seul"}]},{"id":"ambiance","label":"Je trouve lambiance...","type":"single","options":[{"label":"Genial","val":"genial"},{"label":"Top","val":"top"},{"label":"Moyen","val":"moyen"}]},{"id":"retour","label":"Souhaitez-vous revenir ?","type":"single","options":[{"label":"Oui","val":"oui"},{"label":"Peut-etre","val":"peutetre"},{"label":"Non","val":"non"}]}],"customQuestions":[{"id":"decouverte","label":"Comment nous avez-vous connu ?","type":"single","options":[{"label":"Instagram","val":"instagram"},{"label":"Facebook","val":"facebook"},{"label":"Site mairie","val":"mairie"},{"label":"Affiche","val":"affiche"},{"label":"Bouche a oreille","val":"bouche"}]}]}'::jsonb,3,3,1,'btoc','[FICTIF AUDIT - À SUPPRIMER]'),
+  ('ev-test-quizsolo','pro-test-cannes','TEST Festival Ete Cannes - Quiz Solo','quizsolo','past','2026-08-01','2026-08-03','Croisette Cannes','#F59E0B','{"qrUrl":"https://flowin-events.vercel.app/parcours/?ev=ev-test-quizsolo","optinActif":true,"quizNbQuestions":10,"quizTimer":20,"quizTimerVisible":true,"quizPartage":true,"quizUneFoisParJour":true,"classementPublic":true,"quizBanques":["bq-test-cannes"],"bonusActif":true,"bonusList":[{"id":"frequence","label":"Vous etes venu(e)...","type":"single","options":[{"label":"En famille","val":"famille"},{"label":"Entre amis","val":"amis"},{"label":"En couple","val":"couple"},{"label":"Seul(e)","val":"seul"}]},{"id":"ambiance","label":"Je trouve lambiance...","type":"single","options":[{"label":"Genial","val":"genial"},{"label":"Top","val":"top"},{"label":"Moyen","val":"moyen"}]}],"customQuestions":[{"id":"decouverte","label":"Comment nous avez-vous connu ?","type":"single","options":[{"label":"Instagram","val":"instagram"},{"label":"Facebook","val":"facebook"}]}]}'::jsonb,3,3,1,'btoc','[FICTIF AUDIT - À SUPPRIMER]'),
   ('ev-test-spin','pro-test-cannes','TEST Festival Ete Cannes - Spin','spin','past','2026-08-01','2026-08-03','Croisette Cannes','#EF9F27','{"qrUrl":"https://flowin-events.vercel.app/parcours/?ev=ev-test-spin","optinActif":true,"spinDuration":6,"spinSound":true}'::jsonb,3,3,1,'btoc','[FICTIF AUDIT - À SUPPRIMER]')
 ON CONFLICT (id) DO NOTHING;
 
@@ -92,6 +92,21 @@ INSERT INTO public.participations (event_id, joueur_id, score, completed) VALUES
   ('ev-test-spin','j-test-p2',0,TRUE),
   ('ev-test-spin','j-test-p3',0,TRUE);
 
+
+
+-- ─── BANQUE DE QUESTIONS TEST (Quiz Cannes) ───────────────
+INSERT INTO public.banques (id, nom, description, events, questions) VALUES (
+  'bq-test-cannes','TEST Banque Quiz Cannes','[FICTIF AUDIT - 5 questions test culture provençale]',
+  ARRAY['ev-test-quiz','ev-test-quizsolo'],
+  '[
+    {"id":"q-test-1","type":"qcm","texte":"Quel est le plat traditionnel de Nice ?","options":["Pissaladière","Cassoulet","Choucroute","Bouillabaisse"],"bonne":0,"points":1,"explication":"La pissaladière est une tarte niçoise aux oignons et anchois."},
+    {"id":"q-test-2","type":"qcm","texte":"Le Festival de Cannes a lieu chaque année en :","options":["Mars","Mai","Juillet","Septembre"],"bonne":1,"points":1,"explication":"Le Festival se déroule traditionnellement en mai."},
+    {"id":"q-test-3","type":"qcm","texte":"Quelle ville est surnommée la capitale du parfum ?","options":["Nice","Cannes","Grasse","Antibes"],"bonne":2,"points":1,"explication":"Grasse est mondialement connue pour son industrie du parfum."},
+    {"id":"q-test-4","type":"qcm","texte":"Quel artiste a vécu à Vence et y a peint une chapelle ?","options":["Picasso","Matisse","Renoir","Chagall"],"bonne":1,"points":1,"explication":"Henri Matisse a réalisé la Chapelle du Rosaire de Vence."},
+    {"id":"q-test-5","type":"qcm","texte":"La promenade des Anglais se trouve à :","options":["Cannes","Monaco","Nice","Antibes"],"bonne":2,"points":1,"explication":"La célèbre Promenade des Anglais longe la Baie des Anges à Nice."}
+  ]'::jsonb
+) ON CONFLICT (id) DO NOTHING;
+
 -- ─── VÉRIFICATION ─────────────────────────────────────────
 SELECT 'PROS test' as scope, count(*) FROM public.pros WHERE id LIKE 'pro-test-%'
 UNION ALL SELECT 'PARTENAIRES', count(*) FROM public.partenaires WHERE id LIKE 'part-test-%'
@@ -100,4 +115,5 @@ UNION ALL SELECT 'SUPER EVENTS', count(*) FROM public.super_events WHERE id LIKE
 UNION ALL SELECT 'JOUEURS', count(*) FROM public.joueurs WHERE id LIKE 'j-test-%'
 UNION ALL SELECT 'LOTS', count(*) FROM public.lots WHERE id LIKE 'lot-test-%'
 UNION ALL SELECT 'VOTES', count(*) FROM public.votes WHERE event_id LIKE 'ev-test-%'
-UNION ALL SELECT 'PARTICIPATIONS', count(*) FROM public.participations WHERE event_id LIKE 'ev-test-%';
+UNION ALL SELECT 'PARTICIPATIONS', count(*) FROM public.participations WHERE event_id LIKE 'ev-test-%'
+UNION ALL SELECT 'BANQUES', count(*) FROM public.banques WHERE id LIKE 'bq-test-%';

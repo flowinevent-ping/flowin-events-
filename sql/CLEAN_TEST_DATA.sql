@@ -15,6 +15,7 @@ DELETE FROM public.events WHERE id LIKE 'ev-test-%';
 DELETE FROM public.super_events WHERE id LIKE 'se-test-%';
 DELETE FROM public.partenaires WHERE id LIKE 'part-test-%';
 DELETE FROM public.pros WHERE id LIKE 'pro-test-%';
+DELETE FROM public.banques WHERE id LIKE 'bq-test-%';
 
 -- 2. Suppression par tag 'TEST' (sécurité 2, double filet)
 DELETE FROM public.joueurs WHERE 'TEST' = ANY(tags);
@@ -34,6 +35,7 @@ UNION ALL SELECT 'SUPER EVENTS restants', count(*) FROM public.super_events WHER
 UNION ALL SELECT 'JOUEURS restants', count(*) FROM public.joueurs WHERE id LIKE 'j-test-%' OR 'TEST' = ANY(tags)
 UNION ALL SELECT 'LOTS restants', count(*) FROM public.lots WHERE id LIKE 'lot-test-%'
 UNION ALL SELECT 'VOTES restants', count(*) FROM public.votes WHERE event_id LIKE 'ev-test-%'
-UNION ALL SELECT 'PARTICIPATIONS restantes', count(*) FROM public.participations WHERE event_id LIKE 'ev-test-%';
+UNION ALL SELECT 'PARTICIPATIONS restantes', count(*) FROM public.participations WHERE event_id LIKE 'ev-test-%'
+UNION ALL SELECT 'BANQUES restantes', count(*) FROM public.banques WHERE id LIKE 'bq-test-%';
 
 -- Tous les résultats doivent être à 0
