@@ -11,18 +11,21 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 1. PROFILES (Auth Supabase)
 -- ════════════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  auth_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   role TEXT NOT NULL CHECK (role IN ('sa','pro')),
   pro_id TEXT,
   email TEXT,
   nom TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- Migration pour bases existantes : ajouter auth_user_id et changer la PK
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS auth_user_id UUID;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "profile_own" ON public.profiles;
 DROP POLICY IF EXISTS "profile_sa" ON public.profiles;
-CREATE POLICY "profile_own" ON public.profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "profile_sa" ON public.profiles FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "profile_own" ON public.profiles FOR SELECT USING (auth.uid() = auth_user_id);
+CREATE POLICY "profile_sa" ON public.profiles FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 
 -- ════════════════════════════════════════════════════════════
 -- 2. PROS
@@ -44,8 +47,8 @@ ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
 ALTER TABLE public.pros ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "pros_sa" ON public.pros;
 DROP POLICY IF EXISTS "pros_pro" ON public.pros;
-CREATE POLICY "pros_sa" ON public.pros FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
-CREATE POLICY "pros_pro" ON public.pros FOR SELECT USING (id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "pros_sa" ON public.pros FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
+CREATE POLICY "pros_pro" ON public.pros FOR SELECT USING (id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()));
 
 -- ════════════════════════════════════════════════════════════
 -- 3. PARTENAIRES
@@ -73,9 +76,9 @@ ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS events TEXT[] DEFAULT '{
 ALTER TABLE public.partenaires ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "partenaires_sa" ON public.partenaires;
 DROP POLICY IF EXISTS "partenaires_pro" ON public.partenaires;
-CREATE POLICY "partenaires_sa" ON public.partenaires FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "partenaires_sa" ON public.partenaires FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "partenaires_pro" ON public.partenaires FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.events e WHERE e.id = ANY(partenaires.events) AND e.pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()))
+  EXISTS (SELECT 1 FROM public.events e WHERE e.id = ANY(partenaires.events) AND e.pro_id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()))
 );
 
 -- ════════════════════════════════════════════════════════════
@@ -109,8 +112,8 @@ ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "events_sa" ON public.events;
 DROP POLICY IF EXISTS "events_pro" ON public.events;
 DROP POLICY IF EXISTS "events_anon_read" ON public.events;
-CREATE POLICY "events_sa" ON public.events FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
-CREATE POLICY "events_pro" ON public.events FOR SELECT USING (pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "events_sa" ON public.events FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
+CREATE POLICY "events_pro" ON public.events FOR SELECT USING (pro_id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()));
 CREATE POLICY "events_anon_read" ON public.events FOR SELECT USING (true);
 
 -- ════════════════════════════════════════════════════════════
@@ -128,9 +131,9 @@ CREATE TABLE IF NOT EXISTS public.super_events (
 ALTER TABLE public.super_events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "se_sa" ON public.super_events;
 DROP POLICY IF EXISTS "se_pro" ON public.super_events;
-CREATE POLICY "se_sa" ON public.super_events FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "se_sa" ON public.super_events FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "se_pro" ON public.super_events FOR SELECT USING (
-  (SELECT pro_id FROM public.profiles WHERE id = auth.uid()) = ANY(pros)
+  (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()) = ANY(pros)
 );
 
 -- ════════════════════════════════════════════════════════════
@@ -177,9 +180,9 @@ ALTER TABLE public.joueurs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "joueurs_sa" ON public.joueurs;
 DROP POLICY IF EXISTS "joueurs_pro" ON public.joueurs;
 DROP POLICY IF EXISTS "joueurs_anon_insert" ON public.joueurs;
-CREATE POLICY "joueurs_sa" ON public.joueurs FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "joueurs_sa" ON public.joueurs FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "joueurs_pro" ON public.joueurs FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.events e WHERE e.id = ANY(joueurs.events) AND e.pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()))
+  EXISTS (SELECT 1 FROM public.events e WHERE e.id = ANY(joueurs.events) AND e.pro_id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()))
 );
 CREATE POLICY "joueurs_anon_insert" ON public.joueurs FOR INSERT WITH CHECK (true);
 
@@ -203,9 +206,9 @@ CREATE INDEX IF NOT EXISTS idx_lots_event ON public.lots(event_id);
 ALTER TABLE public.lots ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "lots_sa" ON public.lots;
 DROP POLICY IF EXISTS "lots_pro" ON public.lots;
-CREATE POLICY "lots_sa" ON public.lots FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "lots_sa" ON public.lots FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "lots_pro" ON public.lots FOR SELECT USING (
-  event_id IN (SELECT id FROM public.events WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()))
+  event_id IN (SELECT id FROM public.events WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()))
 );
 
 -- ════════════════════════════════════════════════════════════
@@ -223,7 +226,7 @@ CREATE TABLE IF NOT EXISTS public.banques (
 ALTER TABLE public.banques ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "banques_sa" ON public.banques;
 DROP POLICY IF EXISTS "banques_read" ON public.banques;
-CREATE POLICY "banques_sa" ON public.banques FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "banques_sa" ON public.banques FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "banques_read" ON public.banques FOR SELECT USING (true);
 
 -- ════════════════════════════════════════════════════════════
@@ -242,9 +245,9 @@ ALTER TABLE public.participations ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "participations_sa" ON public.participations;
 DROP POLICY IF EXISTS "participations_pro" ON public.participations;
 DROP POLICY IF EXISTS "participations_anon_insert" ON public.participations;
-CREATE POLICY "participations_sa" ON public.participations FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "participations_sa" ON public.participations FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "participations_pro" ON public.participations FOR SELECT USING (
-  event_id IN (SELECT id FROM public.events WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()))
+  event_id IN (SELECT id FROM public.events WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()))
 );
 CREATE POLICY "participations_anon_insert" ON public.participations FOR INSERT WITH CHECK (true);
 
@@ -266,9 +269,9 @@ ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "votes_sa" ON public.votes;
 DROP POLICY IF EXISTS "votes_pro" ON public.votes;
 DROP POLICY IF EXISTS "votes_anon_insert" ON public.votes;
-CREATE POLICY "votes_sa" ON public.votes FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'sa');
+CREATE POLICY "votes_sa" ON public.votes FOR ALL USING ((SELECT role FROM public.profiles WHERE auth_user_id = auth.uid()) = 'sa');
 CREATE POLICY "votes_pro" ON public.votes FOR SELECT USING (
-  event_id IN (SELECT id FROM public.events WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE id = auth.uid()))
+  event_id IN (SELECT id FROM public.events WHERE pro_id = (SELECT pro_id FROM public.profiles WHERE auth_user_id = auth.uid()))
 );
 CREATE POLICY "votes_anon_insert" ON public.votes FOR INSERT WITH CHECK (true);
 
@@ -507,84 +510,28 @@ UNION ALL SELECT 'VOTES', count(*) FROM public.votes WHERE event_id LIKE 'ev-tes
 UNION ALL SELECT 'PARTICIPATIONS', count(*) FROM public.participations WHERE event_id LIKE 'ev-test-%'
 UNION ALL SELECT 'BANQUES', count(*) FROM public.banques WHERE id LIKE 'bq-test-%'
 UNION ALL SELECT 'AUDIT events', count(*) FROM public.events WHERE cfg->>'audit_id' LIKE 'AUDIT-%';
+
 -- ============================================================
--- FLOWIN · COMPTES AUTH PRO TEST · 13/05/2026
--- 5 comptes pro pour tester pro_mobile_v4.html
--- 
--- Mot de passe commun : flowin-test-2026
--- À supprimer après audit (DELETE FROM auth.users WHERE email LIKE '%@test-flowin.fr')
+-- PROFILES PRO TEST (sans Auth Supabase — mode test simplifié)
 -- ============================================================
 
--- Activer pgcrypto pour hash mot de passe
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+INSERT INTO public.profiles (id, role, pro_id, email, nom) VALUES
+  ('11111111-1111-1111-1111-111111111001','pro','pro-test-cannes','animation@cannes-test.fr','Service Animation Cannes TEST'),
+  ('11111111-1111-1111-1111-111111111002','pro','pro-test-antibes','animation@antibes-test.fr','Service Animation Antibes TEST'),
+  ('11111111-1111-1111-1111-111111111003','pro','pro-test-grasse','animation@grasse-test.fr','Service Animation Grasse TEST'),
+  ('11111111-1111-1111-1111-111111111004','pro','pro-test-nice','animation@nice-test.fr','Service Animation Nice TEST'),
+  ('11111111-1111-1111-1111-111111111005','pro','pro-test-mougins','animation@mougins-test.fr','Service Animation Mougins TEST')
+ON CONFLICT (id) DO NOTHING;
 
--- Fonction helper pour créer un user Auth + profile en une fois
-CREATE OR REPLACE FUNCTION create_pro_test_user(
-  p_email TEXT,
-  p_password TEXT,
-  p_pro_id TEXT,
-  p_nom TEXT
-) RETURNS UUID AS $$
-DECLARE
-  v_user_id UUID := gen_random_uuid();
-BEGIN
-  -- INSERT dans auth.users avec hash bcrypt natif Supabase
-  INSERT INTO auth.users (
-    instance_id, id, aud, role, email, 
-    encrypted_password, email_confirmed_at, 
-    created_at, updated_at,
-    raw_app_meta_data, raw_user_meta_data,
-    confirmation_token, email_change, email_change_token_new, recovery_token
-  ) VALUES (
-    '00000000-0000-0000-0000-000000000000',
-    v_user_id,
-    'authenticated',
-    'authenticated',
-    p_email,
-    crypt(p_password, gen_salt('bf')),
-    NOW(),
-    NOW(),
-    NOW(),
-    '{"provider":"email","providers":["email"]}'::jsonb,
-    jsonb_build_object('nom', p_nom),
-    '','','',''
-  ) ON CONFLICT (id) DO NOTHING;
+SELECT 'PROFILES PRO test' AS scope, count(*) FROM public.profiles WHERE email LIKE '%@%-test.fr';
 
-  -- INSERT dans public.profiles
-  INSERT INTO public.profiles (id, role, pro_id, email, nom)
-  VALUES (v_user_id, 'pro', p_pro_id, p_email, p_nom)
-  ON CONFLICT (id) DO NOTHING;
-
-  RETURN v_user_id;
-END;
-$$ LANGUAGE plpgsql;
-
--- Créer les 5 comptes PRO test
-SELECT create_pro_test_user('animation@cannes-test.fr','flowin-test-2026','pro-test-cannes','Service Animation Cannes TEST');
-SELECT create_pro_test_user('animation@antibes-test.fr','flowin-test-2026','pro-test-antibes','Service Animation Antibes TEST');
-SELECT create_pro_test_user('animation@grasse-test.fr','flowin-test-2026','pro-test-grasse','Service Animation Grasse TEST');
-SELECT create_pro_test_user('animation@nice-test.fr','flowin-test-2026','pro-test-nice','Service Animation Nice TEST');
-SELECT create_pro_test_user('animation@mougins-test.fr','flowin-test-2026','pro-test-mougins','Service Animation Mougins TEST');
-
--- Compte SA test (Romain admin)
--- Décommenter si besoin :
--- SELECT create_pro_test_user('admin@flowin-test.fr','flowin-test-2026',NULL,'SA TEST');
--- Puis UPDATE public.profiles SET role='sa' WHERE email='admin@flowin-test.fr';
-
--- Cleanup fonction (sécurité)
-DROP FUNCTION IF EXISTS create_pro_test_user(TEXT,TEXT,TEXT,TEXT);
-
--- Vérification
-SELECT 
-  p.email,
-  p.role,
-  p.pro_id,
-  p.nom,
-  (SELECT nom FROM public.pros WHERE id = p.pro_id) AS pro_nom
-FROM public.profiles p
-WHERE p.email LIKE '%@%-test.fr'
-ORDER BY p.email;
-
--- Pour supprimer ces comptes test plus tard :
--- DELETE FROM public.profiles WHERE email LIKE '%@%-test.fr';
--- DELETE FROM auth.users WHERE email LIKE '%@%-test.fr';
+-- VERIFICATIONS FINALES
+SELECT 'TOTAL TABLES' as info, count(*) FROM pg_tables WHERE schemaname='public';
+SELECT 'PROS test' as scope, count(*) FROM public.pros WHERE id LIKE 'pro-test-%'
+UNION ALL SELECT 'PARTENAIRES', count(*) FROM public.partenaires WHERE id LIKE 'part-test-%'
+UNION ALL SELECT 'EVENTS', count(*) FROM public.events WHERE id LIKE 'ev-test-%'
+UNION ALL SELECT 'SUPER EVENTS', count(*) FROM public.super_events WHERE id LIKE 'se-test-%'
+UNION ALL SELECT 'JOUEURS', count(*) FROM public.joueurs WHERE id LIKE 'j-test-%'
+UNION ALL SELECT 'LOTS', count(*) FROM public.lots WHERE id LIKE 'lot-test-%'
+UNION ALL SELECT 'BANQUES', count(*) FROM public.banques WHERE id LIKE 'bq-test-%'
+UNION ALL SELECT 'PROFILES PRO test', count(*) FROM public.profiles WHERE email LIKE '%@%-test.fr';

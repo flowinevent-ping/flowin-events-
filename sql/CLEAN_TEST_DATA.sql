@@ -33,6 +33,7 @@ DELETE FROM public.partenaires WHERE notes LIKE '[FICTIF AUDIT%';
 
 -- 4. Suppression comptes Auth test
 DELETE FROM public.profiles WHERE email LIKE '%@%-test.fr';
+DELETE FROM public.profiles WHERE id LIKE '11111111-1111-1111-1111-1111111110%';
 DELETE FROM auth.users WHERE email LIKE '%@%-test.fr';
 
 -- 5. Vérification
