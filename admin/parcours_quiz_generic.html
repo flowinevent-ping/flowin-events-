@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Flowin Quiz</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0F0E1A;color:#fff;min-height:100vh;padding:20px}
+.container{max-width:480px;margin:0 auto}
+.header{text-align:center;margin-bottom:20px}
+.ev-name{font-size:22px;font-weight:800;color:#7C2D92;margin-bottom:4px}
+.card{background:#1F1B2E;border-radius:16px;padding:20px;margin-bottom:14px}
+.form-row{margin-bottom:14px}
+label{display:block;font-size:12px;color:#9A8FBF;margin-bottom:6px}
+input,select{width:100%;padding:12px;background:#2D2844;border:1px solid #3D3854;border-radius:10px;color:#fff;font-size:14px}
+.btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#7C2D92,#5B1F6B);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.q-num{font-size:11px;color:#B06CE4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.q-text{font-size:17px;font-weight:700;margin-bottom:16px;line-height:1.4}
+.option{background:#2D2844;border:2px solid #3D3854;padding:14px;border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .15s;font-size:14px}
+.option:hover{border-color:#7C2D92}
+.option.selected{border-color:#7C2D92;background:rgba(124,45,146,.25)}
+.option.correct{border-color:#10B981;background:rgba(16,185,129,.2)}
+.option.wrong{border-color:#EF4444;background:rgba(239,68,68,.2)}
+.timer{text-align:center;font-size:14px;color:#B06CE4;margin-bottom:14px}
+.score-final{text-align:center;font-size:48px;font-weight:900;color:#7C2D92;margin:20px 0}
+.chip{display:inline-block;padding:8px 14px;background:#2D2844;border:1px solid #3D3854;border-radius:20px;margin:4px;cursor:pointer;font-size:13px}
+.chip.selected{background:#7C2D92;border-color:#7C2D92}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="ev-name" id="ev-name">Quiz</div>
+    <div style="font-size:13px;color:#9A8FBF" id="ev-sub">Testez vos connaissances</div>
+  </div>
+
+  <div id="step-form" class="card">
+    <h3 style="margin-bottom:14px;font-size:16px">Vos coordonnées</h3>
+    <div class="form-row"><label>Email *</label><input type="email" id="email"></div>
+    <div class="form-row"><label>Prénom</label><input type="text" id="prenom"></div>
+    <div class="form-row"><label>Nom</label><input type="text" id="nom"></div>
+    <div class="form-row"><label>Ville</label><input type="text" id="ville"></div>
+    <button class="btn" onclick="startQuiz()">Commencer le quiz →</button>
+  </div>
+
+  <div id="step-quiz" style="display:none">
+    <div class="timer" id="timer">⏱ 30s</div>
+    <div class="card">
+      <div class="q-num" id="q-num">Question 1 / 5</div>
+      <div class="q-text" id="q-text"></div>
+      <div id="q-options"></div>
+    </div>
+  </div>
+
+  <div id="step-bonus" style="display:none">
+    <div class="card">
+      <div class="q-text" id="bonus-text"></div>
+      <div id="bonus-options"></div>
+      <button class="btn" onclick="nextBonus()">Suivant →</button>
+    </div>
+  </div>
+
+  <div id="step-end" style="display:none">
+    <div class="card">
+      <div style="text-align:center;font-size:14px;color:#9A8FBF">Votre score</div>
+      <div class="score-final" id="score-final">0 / 0</div>
+      <div style="text-align:center;font-size:13px;color:#9A8FBF" id="msg-final">Merci d'avoir joué !</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SUPABASE_URL='https://atddutvzklcgiqxlpvla.supabase.co';
+var SUPABASE_KEY='sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+var event=null;try{event=JSON.parse(sessionStorage.getItem('flowin_current_event'))||{};}catch(e){event={};}
+var cfg=event.cfg||{};
+
+document.getElementById('ev-name').textContent=event.nom||'Quiz';
+if(event.couleur){document.querySelectorAll('.btn').forEach(function(b){b.style.background='linear-gradient(135deg,'+event.couleur+',#5B1F6B)';});document.getElementById('ev-name').style.color=event.couleur;}
+
+var questions=[];
+var bonusList=cfg.bonusList||[];
+var customQuestions=cfg.customQuestions||[];
+var allExtras=bonusList.concat(customQuestions);
+var qIdx=0,bIdx=0,score=0,answers={};
+var formData={};
+var timer=null,timerLeft=cfg.quizTimer||30;
+
+// Charger les questions depuis la banque liée
+function loadQuestions(callback){
+  var banqueIds=cfg.quizBanques||[];
+  if(!banqueIds.length){
+    // Pas de banque liée → questions par défaut
+    questions=[{texte:'Question test sans banque',options:['Oui','Non'],bonne:0}];
+    callback();return;
+  }
+  fetch(SUPABASE_URL+'/rest/v1/banques?id=eq.'+encodeURIComponent(banqueIds[0])+'&select=questions',{
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data&&data.length&&data[0].questions){
+      questions=data[0].questions.slice(0,cfg.quizNbQuestions||5);
+    }else{
+      questions=[{texte:'Question test',options:['A','B'],bonne:0}];
+    }
+    callback();
+  }).catch(function(){
+    questions=[{texte:'Question test',options:['A','B'],bonne:0}];
+    callback();
+  });
+}
+
+function startQuiz(){
+  var email=document.getElementById('email').value.trim();
+  if(!email||email.indexOf('@')<0){alert('Email requis');return;}
+  formData={
+    email:email,
+    nom:document.getElementById('nom').value.trim(),
+    prenom:document.getElementById('prenom').value.trim(),
+    ville:document.getElementById('ville').value.trim()
+  };
+  document.getElementById('step-form').style.display='none';
+  loadQuestions(function(){
+    document.getElementById('step-quiz').style.display='block';
+    renderQ();
+  });
+}
+
+function renderQ(){
+  if(qIdx>=questions.length){
+    if(cfg.bonusActif&&allExtras.length){
+      document.getElementById('step-quiz').style.display='none';
+      renderBonus();
+    }else{
+      finishQuiz();
+    }
+    return;
+  }
+  var q=questions[qIdx];
+  document.getElementById('q-num').textContent='Question '+(qIdx+1)+' / '+questions.length;
+  document.getElementById('q-text').textContent=q.texte||'';
+  var html='';
+  (q.options||[]).forEach(function(opt,i){
+    html+='<div class="option" onclick="pickOption('+i+')">'+opt+'</div>';
+  });
+  document.getElementById('q-options').innerHTML=html;
+  timerLeft=cfg.quizTimer||30;
+  document.getElementById('timer').textContent='⏱ '+timerLeft+'s';
+  if(timer)clearInterval(timer);
+  timer=setInterval(function(){
+    timerLeft--;
+    document.getElementById('timer').textContent='⏱ '+timerLeft+'s';
+    if(timerLeft<=0){clearInterval(timer);pickOption(-1);}
+  },1000);
+}
+
+function pickOption(idx){
+  if(timer)clearInterval(timer);
+  var q=questions[qIdx];
+  var opts=document.querySelectorAll('.option');
+  if(idx===q.bonne)score++;
+  opts.forEach(function(o,i){
+    o.onclick=null;
+    if(i===q.bonne)o.classList.add('correct');
+    if(i===idx&&idx!==q.bonne)o.classList.add('wrong');
+  });
+  setTimeout(function(){qIdx++;renderQ();},1500);
+}
+
+function renderBonus(){
+  document.getElementById('step-bonus').style.display='block';
+  if(bIdx>=allExtras.length){finishQuiz();return;}
+  var b=allExtras[bIdx];
+  document.getElementById('bonus-text').textContent=b.label||'';
+  var html='';
+  (b.options||[]).forEach(function(opt){
+    html+='<div class="chip" onclick="pickChip(this,\''+(opt.val||opt.label)+'\')">'+(opt.label||opt.val)+'</div>';
+  });
+  document.getElementById('bonus-options').innerHTML=html;
+}
+
+function pickChip(el,val){
+  el.parentElement.querySelectorAll('.chip').forEach(function(c){c.classList.remove('selected');});
+  el.classList.add('selected');
+  answers[allExtras[bIdx].id]=val;
+}
+
+function nextBonus(){
+  bIdx++;
+  if(bIdx>=allExtras.length){
+    document.getElementById('step-bonus').style.display='none';
+    finishQuiz();
+  }else{renderBonus();}
+}
+
+function finishQuiz(){
+  document.getElementById('step-end').style.display='block';
+  document.getElementById('score-final').textContent=score+' / '+questions.length;
+  var scoreMin=cfg.quizScoreMin||0;
+  if(score>=scoreMin){
+    document.getElementById('msg-final').textContent='🎉 Bravo ! Vous êtes éligible au tirage au sort.';
+  }else{
+    document.getElementById('msg-final').textContent='Merci d\'avoir joué !';
+  }
+  saveJoueur();
+}
+
+function saveJoueur(){
+  var jid='j-qz-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  var payload={
+    id:jid,email:formData.email,nom:formData.nom,prenom:formData.prenom,ville:formData.ville,
+    events:[event.id],source:'QR Quiz '+event.nom,
+    optin:answers.optin==='oui'||true,
+    optin_date:new Date().toISOString().split('T')[0],
+    first_seen:new Date().toISOString().split('T')[0],last_seen:new Date().toISOString().split('T')[0],
+    gains:0,score_moy:score+'/'+questions.length,
+    decouverte:answers.decouverte||'',
+    client_type:'btoc'
+  };
+  fetch(SUPABASE_URL+'/rest/v1/joueurs',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(payload)
+  });
+  fetch(SUPABASE_URL+'/rest/v1/participations',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({event_id:event.id,joueur_id:jid,score:score,completed:true})
+  });
+}
+</script>
+</body>
+</html>

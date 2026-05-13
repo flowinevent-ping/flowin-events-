@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flowin Spin</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,sans-serif;background:#0F0E1A;color:#fff;min-height:100vh;padding:20px}
+    .container{max-width:480px;margin:0 auto}
+    .header{text-align:center;margin-bottom:24px}
+    .ev-name{font-size:22px;font-weight:800;color:#EF9F27;margin-bottom:4px}
+    .ev-sub{font-size:13px;color:#9A8FBF}
+    .card{background:#1F1B2E;border-radius:16px;padding:24px;margin-bottom:16px}
+    .wheel-container{position:relative;width:280px;height:280px;margin:32px auto}
+    .wheel{width:100%;height:100%;border-radius:50%;border:8px solid #EF9F27;
+           transition:transform 5s cubic-bezier(.2,.8,.2,1);background:conic-gradient(#EF4444 0deg 72deg,#10B981 72deg 144deg,#6B7280 144deg 216deg,#F59E0B 216deg 288deg,#8B5CF6 288deg 360deg)}
+    .needle{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:24px solid #fff;z-index:5}
+    .seg-label{position:absolute;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+    .btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#EF9F27,#F59E0B);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .form-row{margin-bottom:14px}
+    label{display:block;font-size:12px;color:#9A8FBF;margin-bottom:6px}
+    input{width:100%;padding:12px;background:#2D2844;border:1px solid #3D3854;border-radius:10px;color:#fff;font-size:14px}
+    .result{text-align:center;font-size:28px;font-weight:900;color:#EF9F27;margin:16px 0}
+    .error{background:#2D1B2E;padding:14px;border-radius:10px;color:#FF6B9D;font-size:13px;margin-bottom:16px}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#10B981;padding:12px 24px;border-radius:24px;font-weight:600;font-size:13px;opacity:0;transition:opacity .3s}
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="ev-name" id="ev-name">Spin</div>
+    <div class="ev-sub" id="ev-sub">Tournez la roue !</div>
+  </div>
+
+  <div id="step-form" class="card">
+    <h3 style="margin-bottom:14px;font-size:16px">Vos coordonnées</h3>
+    <div class="form-row"><label>Email *</label><input type="email" id="email" required></div>
+    <div class="form-row"><label>Prénom</label><input type="text" id="prenom"></div>
+    <div class="form-row"><label>Nom</label><input type="text" id="nom"></div>
+    <div class="form-row"><label>Ville</label><input type="text" id="ville"></div>
+    <button class="btn" onclick="startSpin()">Commencer →</button>
+  </div>
+
+  <div id="step-spin" style="display:none">
+    <div class="wheel-container">
+      <div class="needle"></div>
+      <div class="wheel" id="wheel"></div>
+    </div>
+    <button class="btn" id="spin-btn" onclick="doSpin()">🎰 Tournez !</button>
+  </div>
+
+  <div id="step-result" class="card" style="display:none">
+    <div class="result" id="result-text">🎉</div>
+    <p style="text-align:center;color:#9A8FBF;font-size:13px">Conservez ce résultat — l'organisateur pourra le vérifier.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPABASE_URL='https://atddutvzklcgiqxlpvla.supabase.co';
+var SUPABASE_KEY='sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+
+var event=null;
+try{ event=JSON.parse(sessionStorage.getItem('flowin_current_event'))||{}; }catch(e){ event={}; }
+var cfg=event.cfg||{};
+
+document.getElementById('ev-name').textContent=event.nom||'Spin';
+if(event.couleur){
+  document.querySelectorAll('.btn').forEach(function(b){b.style.background='linear-gradient(135deg,'+event.couleur+',#F59E0B)';});
+  document.getElementById('ev-name').style.color=event.couleur;
+}
+
+var segments=(cfg.spinSegments&&cfg.spinSegments.length)?cfg.spinSegments:[
+  {label:'Lot 1',color:'#EF4444',gain:'lot1'},
+  {label:'Lot 2',color:'#10B981',gain:'lot2'},
+  {label:'Lot 3',color:'#6B7280',gain:'lot3'}
+];
+
+// Construire les segments dynamiquement
+var wheel=document.getElementById('wheel');
+var anglePerSeg=360/segments.length;
+var gradient=segments.map(function(s,i){
+  return s.color+' '+(i*anglePerSeg)+'deg '+((i+1)*anglePerSeg)+'deg';
+}).join(',');
+wheel.style.background='conic-gradient('+gradient+')';
+
+var formData={};
+
+function startSpin(){
+  var email=document.getElementById('email').value.trim();
+  if(!email||email.indexOf('@')<0){alert('Email requis');return;}
+  formData={
+    email:email,
+    prenom:document.getElementById('prenom').value.trim(),
+    nom:document.getElementById('nom').value.trim(),
+    ville:document.getElementById('ville').value.trim()
+  };
+  document.getElementById('step-form').style.display='none';
+  document.getElementById('step-spin').style.display='block';
+}
+
+var spinning=false;
+function doSpin(){
+  if(spinning)return;
+  spinning=true;
+  document.getElementById('spin-btn').disabled=true;
+  var winIdx=Math.floor(Math.random()*segments.length);
+  var rotations=5+Math.random()*3;
+  var finalAngle=rotations*360+(360-winIdx*anglePerSeg-anglePerSeg/2);
+  wheel.style.transform='rotate('+finalAngle+'deg)';
+  
+  setTimeout(function(){
+    var winner=segments[winIdx];
+    document.getElementById('result-text').textContent='🎉 '+winner.label;
+    document.getElementById('step-result').style.display='block';
+    saveJoueur(winner);
+  },5500);
+}
+
+function saveJoueur(winner){
+  var jid='j-spin-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  var payload={
+    id:jid,
+    email:formData.email,
+    nom:formData.nom,
+    prenom:formData.prenom,
+    ville:formData.ville,
+    events:[event.id],
+    source:'QR Spin '+event.nom,
+    optin:true,
+    optin_date:new Date().toISOString().split('T')[0],
+    first_seen:new Date().toISOString().split('T')[0],
+    last_seen:new Date().toISOString().split('T')[0],
+    gains:winner.gain==='retry'?0:1,
+    lot_gagne:winner.label,
+    client_type:'btoc'
+  };
+  fetch(SUPABASE_URL+'/rest/v1/joueurs',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(payload)
+  });
+  fetch(SUPABASE_URL+'/rest/v1/participations',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({event_id:event.id,joueur_id:jid,score:0,completed:true})
+  });
+  showToast('Enregistré ✓');
+}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+</script>
+</body>
+</html>

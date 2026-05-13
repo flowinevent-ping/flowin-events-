@@ -14,36 +14,84 @@
                border-top-color:#B06CE4; border-radius:50%;
                animation:spin .8s linear infinite; margin:0 auto; }
     @keyframes spin { to { transform:rotate(360deg); } }
+    .err { background:#2D1B2E; padding:16px 20px; border-radius:12px; max-width:400px;
+           border:1px solid #5B2B5D; margin-top:20px; }
+    .err-title { font-size:14px; font-weight:700; color:#FF6B9D; margin-bottom:6px; }
+    .err-msg { font-size:12px; color:#9A8FBF; line-height:1.5; }
   </style>
 </head>
 <body>
   <div class="logo">Flowin</div>
-  <div class="sub">Chargement du parcours…</div>
-  <div class="spinner"></div>
+  <div class="sub" id="msg">Chargement du parcours…</div>
+  <div class="spinner" id="spin"></div>
+  <div id="errbox"></div>
+
   <script>
-    // Lire le paramètre ?ev= et rediriger vers le bon parcours
+    var SUPABASE_URL = 'https://atddutvzklcgiqxlpvla.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+
     var params = new URLSearchParams(window.location.search);
     var ev = params.get('ev') || '';
 
-    // Table de routage event → fichier parcours
-    var routes = {
+    function showError(title, msg) {
+      document.getElementById('spin').style.display = 'none';
+      document.getElementById('msg').style.display = 'none';
+      document.getElementById('errbox').innerHTML =
+        '<div class="err"><div class="err-title">' + title + '</div>' +
+        '<div class="err-msg">' + msg + '</div></div>';
+    }
+
+    // Mapping module → fichier parcours
+    var moduleRoutes = {
+      'quiz':       'parcours_quiz_generic.html',
+      'quizsolo':   'parcours_quiz_generic.html',
+      'spin':       'parcours_spin_generic.html',
+      'tombola':    'parcours_tombola_generic.html',
+      'vote':       'parcours_vote_generic.html',
+      'standup':    'parcours_vote_generic.html',
+      'quizmaster': 'parcours_quiz_generic.html'
+    };
+
+    // Cas spéciaux : events Pâques + NDS gardent leur parcours dédié
+    var legacyRoutes = {
       'ev-paques': 'parcours_quiz_paques_vence.html',
       'ev-nds':    'parcours_quiz_nds_2026.html'
     };
 
-    var target = routes[ev];
-    if (target) {
-      // Conserver tous les params
-      window.location.replace(target + window.location.search);
-    } else if (ev) {
-      // Event inconnu — afficher message
-      document.querySelector('.sub').textContent = 'Parcours introuvable pour l\'événement : ' + ev;
-      document.querySelector('.spinner').style.display = 'none';
+    if (!ev) {
+      showError('Lien invalide', 'Aucun événement spécifié dans l\'URL. Scannez un QR Code Flowin pour rejoindre un événement.');
+    } else if (legacyRoutes[ev]) {
+      // Parcours hardcodé : on redirige directement
+      window.location.replace(legacyRoutes[ev] + window.location.search);
     } else {
-      // Pas de param → parcours par défaut (Pâques pour l'instant)
-      window.location.replace('parcours_quiz_paques_vence.html');
+      // Lookup Supabase pour récupérer le module de l'event
+      fetch(SUPABASE_URL + '/rest/v1/events?id=eq.' + encodeURIComponent(ev) + '&select=id,nom,module,status,couleur,cfg', {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.length) {
+          showError('Événement introuvable', 'L\'événement <strong>' + ev + '</strong> n\'existe pas ou a été supprimé.');
+          return;
+        }
+        var event = data[0];
+        // Sauver l'event en sessionStorage pour le parcours générique
+        sessionStorage.setItem('flowin_current_event', JSON.stringify(event));
+        var target = moduleRoutes[event.module];
+        if (!target) {
+          showError('Module non supporté', 'Le module <strong>' + event.module + '</strong> n\'est pas encore disponible.');
+          return;
+        }
+        window.location.replace(target + window.location.search);
+      })
+      .catch(function(err) {
+        showError('Erreur de chargement', 'Impossible de joindre le serveur Flowin. Vérifiez votre connexion et réessayez.');
+        console.error('[Flowin] Erreur:', err);
+      });
     }
   </script>
 </body>
 </html>
-<!-- redeploy 1778628359 -->
