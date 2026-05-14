@@ -772,16 +772,47 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 @keyframes seqFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
-<body>
+<body class="puser-mode">
 
-
-<div class="shell" id="shell">
+<!-- Mode parcours user : on injecte un conteneur plein écran qui héberge la preview wizPreviewPages -->
+<div class="shell" id="shell" style="display:none">
   <aside class="sb" id="sidebar"></aside>
   <main class="content">
     <div class="topbar" id="topbar"></div>
     <div class="viewport" id="viewport"></div>
   </main>
 </div>
+
+<!-- Container parcours user -->
+<div id="puser-root" style="min-height:100vh;background:#0F0E1A;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0;color:#fff">
+  <div id="puser-loader" style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:60px 20px;text-align:center">
+    <div style="font-size:30px;font-weight:900;color:#B06CE4">Flowin</div>
+    <div style="font-size:13px;color:#9A8FBF">Chargement du parcours…</div>
+    <div style="width:36px;height:36px;border:3px solid rgba(176,108,228,.2);border-top-color:#B06CE4;border-radius:50%;animation:_pspin .8s linear infinite"></div>
+  </div>
+  <div id="puser-error" style="display:none;background:#2D1B2E;color:#fff;padding:20px;border-radius:14px;max-width:380px;margin:80px 20px;text-align:center">
+    <div style="font-size:32px;margin-bottom:10px">⚠️</div>
+    <div id="puser-error-title" style="font-size:16px;font-weight:700;margin-bottom:6px">Événement introuvable</div>
+    <div id="puser-error-msg" style="font-size:13px;color:#9A8FBF;line-height:1.5"></div>
+  </div>
+  <div id="puser-stage" style="display:none;width:100%;max-width:480px;margin:0 auto;padding:24px 14px">
+    <div id="puser-page-host" style="background:#fff;color:#1F1B2E;border-radius:24px;overflow:hidden;box-shadow:0 14px 50px rgba(0,0,0,.4);min-height:540px;display:flex;flex-direction:column"></div>
+    <div id="puser-nav" style="display:flex;gap:10px;margin-top:14px">
+      <button id="puser-prev" onclick="puserPrev()" style="flex:1;padding:13px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:10px;font-weight:700;cursor:pointer;font-size:14px">← Précédent</button>
+      <button id="puser-next" onclick="puserNext()" style="flex:2;padding:13px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 4px 14px rgba(124,45,146,.4)">Suivant →</button>
+    </div>
+    <div id="puser-progress" style="display:flex;gap:4px;margin-top:14px;justify-content:center"></div>
+  </div>
+</div>
+
+<style>
+@keyframes _pspin { to { transform: rotate(360deg); } }
+body.puser-mode { margin:0; padding:0; background:#0F0E1A; overflow-x:hidden; }
+body.puser-mode .drawer, body.puser-mode .modal-bd, body.puser-mode .drawer-bd, body.puser-mode .toast { display:none !important; }
+.puser-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); transition:all .2s; }
+.puser-dot.active { background:#B06CE4; width:18px; border-radius:3px; }
+#puser-page-host > div { width:100%; }
+</style>
 
 <div class="drawer-bd" id="drawerBd" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer"></aside>
@@ -10028,6 +10059,16 @@ function deleteLot(lotId){
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
+  // ═══ MODE PARCOURS USER : on intercepte le boot si ?ev= est présent ═══
+  var _ev = new URLSearchParams(window.location.search).get('ev');
+  if(_ev){
+    await puserBoot(_ev);
+    return;  // on n'exécute PAS le render() du dashboard SA
+  }
+  // ═══ MODE DASHBOARD SA (legacy) — désactivé pour ce fichier ═══
+  document.body.classList.remove('puser-mode');
+  document.getElementById('puser-root').style.display='none';
+  document.getElementById('shell').style.display='';
   render();  // Render initial avec localStorage (rapide)
   startRealtimePolling();
   console.log('Flowin Dashboard v28 · Boot localStorage :',{
@@ -10057,6 +10098,223 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
   }
 });
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// MODE PARCOURS USER — clone l'UX validée du dashboard SA (wizPreviewPages)
+// ═══════════════════════════════════════════════════════════════════
+var puserState = { event: null, pages: [], idx: 0, joueurId: null, formData: {}, voteScores: {}, quizScore: 0 };
+
+async function puserBoot(evId){
+  console.log('[Parcours User] Boot pour event:', evId);
+  
+  // 1. Fetch event depuis Supabase
+  var ev = null;
+  try {
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId)+'&select=*', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var rows = await r.json();
+    if(rows && rows.length) ev = rows[0];
+  } catch(e){ console.error(e); }
+  
+  if(!ev){
+    puserShowError('Événement introuvable', 'L\'événement <strong>'+evId+'</strong> n\'existe pas ou a été supprimé.');
+    return;
+  }
+  
+  // 2. Charger toute la base (lots, partenaires, banques pour les previews)
+  var supaData = await supaLoadAll();
+  if(supaData){
+    DATA.pros = supaData.pros;
+    DATA.partenaires = supaData.partenaires;
+    DATA.events = supaData.events;
+    DATA.superEvents = supaData.superEvents;
+    DATA.joueurs = supaData.joueurs;
+    DATA.lots = supaData.lots;
+    if(supaData.banques && supaData.banques.length) DATA.banques = supaData.banques;
+  }
+  
+  // 3. Mapper snake_case → camelCase pour cet event
+  var evMapped = supaRowToData(ev, 'event');
+  var evLots = DATA.lots.filter(function(l){ return l.eventId===evMapped.id; });
+  evMapped.lots = evLots;
+  evMapped.partenaires = (evMapped.partenaires || []);
+  
+  puserState.event = evMapped;
+  console.log('[Parcours User] Event chargé:', evMapped.nom, '· module:', evMapped.module);
+  
+  // 4. Injecter dans state.wiz.draft (les fonctions wizPreview lisent state.wiz.draft.cfg)
+  state.wiz.draft = {
+    module: evMapped.module,
+    nom: evMapped.nom,
+    couleur: evMapped.couleur || '#7C2D92',
+    cfg: evMapped.cfg || {},
+    lots: evLots,
+    partenaires: evMapped.partenaires,
+    id: evMapped.id
+  };
+  
+  // 5. Construire les pages via wizPreviewPages
+  try {
+    puserState.pages = wizPreviewPages(state.wiz.draft) || [];
+  } catch(e){
+    console.error('[Parcours User] wizPreviewPages erreur:', e);
+    puserState.pages = [];
+  }
+  
+  // Ajouter la page finale "Merci"
+  puserState.pages.push({
+    label: '✅ Merci',
+    html: puserThankYouHTML()
+  });
+  
+  if(!puserState.pages.length){
+    puserShowError('Parcours non disponible', 'Aucune page de parcours générée pour cet événement.');
+    return;
+  }
+  
+  // 6. Afficher la première page
+  puserState.idx = 0;
+  puserShow();
+}
+
+function puserShowError(title, msg){
+  document.getElementById('puser-loader').style.display='none';
+  var box = document.getElementById('puser-error');
+  document.getElementById('puser-error-title').textContent = title;
+  document.getElementById('puser-error-msg').innerHTML = msg;
+  box.style.display='';
+}
+
+function puserShow(){
+  document.getElementById('puser-loader').style.display='none';
+  document.getElementById('puser-error').style.display='none';
+  document.getElementById('puser-stage').style.display='';
+  
+  var page = puserState.pages[puserState.idx];
+  document.getElementById('puser-page-host').innerHTML = page.html;
+  
+  var prev = document.getElementById('puser-prev');
+  var next = document.getElementById('puser-next');
+  prev.style.visibility = puserState.idx === 0 ? 'hidden' : 'visible';
+  
+  var isLast = puserState.idx === puserState.pages.length - 1;
+  var isFormPage = (page.label||'').indexOf('Formulaire') >= 0;
+  
+  if(isLast){
+    next.style.display = 'none';
+  } else if(isFormPage){
+    next.textContent = 'Valider mes infos →';
+    next.style.display = '';
+  } else {
+    next.textContent = 'Suivant →';
+    next.style.display = '';
+  }
+  
+  var dots = '';
+  for(var i=0;i<puserState.pages.length;i++){
+    dots += '<div class="puser-dot '+(i===puserState.idx?'active':'')+'"></div>';
+  }
+  document.getElementById('puser-progress').innerHTML = dots;
+  
+  window.scrollTo(0,0);
+}
+
+function puserNext(){
+  var page = puserState.pages[puserState.idx];
+  if((page.label||'').indexOf('Formulaire') >= 0){
+    var inputs = document.querySelectorAll('#puser-page-host input, #puser-page-host textarea, #puser-page-host select');
+    var hasEmail = false;
+    inputs.forEach(function(inp){
+      var key = inp.name || inp.id || inp.placeholder;
+      if(key && inp.value) puserState.formData[key] = inp.value;
+      if((inp.type==='email' || /email/i.test(key||'')) && inp.value && inp.value.indexOf('@')>=0) hasEmail = true;
+    });
+    if(!hasEmail){
+      alert('Merci de saisir votre email pour continuer.');
+      return;
+    }
+  }
+  
+  if(puserState.idx < puserState.pages.length - 1){
+    puserState.idx++;
+    puserShow();
+    
+    if(puserState.pages[puserState.idx].label === '✅ Merci'){
+      puserSaveToSupabase();
+    }
+  }
+}
+
+function puserPrev(){
+  if(puserState.idx > 0){
+    puserState.idx--;
+    puserShow();
+  }
+}
+
+function puserThankYouHTML(){
+  return '<div style="padding:50px 30px;text-align:center">'+
+    '<div style="font-size:72px;margin-bottom:18px">🎉</div>'+
+    '<h2 style="font-size:24px;font-weight:900;color:#7C2D92;margin-bottom:10px">Merci !</h2>'+
+    '<p style="color:#6B7280;font-size:14px;line-height:1.6;margin-bottom:18px">Votre participation a bien été enregistrée. Les gagnants seront contactés par email après le tirage.</p>'+
+    '<div style="background:#F3E8FF;border-radius:12px;padding:14px;font-size:12px;color:#7C2D92;text-align:left;line-height:1.6">'+
+      '<div style="font-weight:700;margin-bottom:6px">📧 Restez connecté</div>'+
+      'Vous recevrez nos prochains événements et offres exclusives.'+
+    '</div>'+
+  '</div>';
+}
+
+async function puserSaveToSupabase(){
+  var ev = puserState.event;
+  var fd = puserState.formData || {};
+  var email = '';
+  for(var k in fd){
+    if(/email/i.test(k) && fd[k] && String(fd[k]).indexOf('@')>=0){ email = fd[k]; break; }
+  }
+  if(!email){ console.warn('[Parcours User] Pas d email — pas de save'); return; }
+  
+  var jid = 'j-u-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  var nom='',prenom='',tel='',ville='',cp='';
+  for(var k in fd){
+    var v=fd[k]; var kl=k.toLowerCase();
+    if(/(^|\b)nom\b/.test(kl) && !nom) nom=v;
+    if(/pr.nom|firstname/i.test(kl) && !prenom) prenom=v;
+    if(/t.l|phone|mobile/i.test(kl) && !tel) tel=v;
+    if(/ville|city/i.test(kl) && !ville) ville=v;
+    if(/postal|zip|cp/i.test(kl) && !cp) cp=v;
+  }
+  
+  var joueur = {
+    id: jid, email: email, nom: nom, prenom: prenom, tel: tel,
+    ville: ville, code_postal: cp,
+    events: [ev.id],
+    source: 'QR '+(ev.module||'')+' '+(ev.nom||''),
+    optin: true,
+    optin_date: new Date().toISOString().split('T')[0],
+    first_seen: new Date().toISOString().split('T')[0],
+    last_seen: new Date().toISOString().split('T')[0],
+    gains: 0, client_type: 'btoc'
+  };
+  
+  try {
+    await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs', {
+      method:'POST',
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(joueur)
+    });
+    await fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
+      method:'POST',
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({event_id:ev.id, joueur_id:jid, score:puserState.quizScore||0, completed:true})
+    });
+    console.log('[Parcours User] ✅ Sauvegardé:', email);
+  } catch(e){ console.error('[Parcours User] save error:', e); }
+}
+
+
 </script>
 </body>
 </html>
