@@ -6,8 +6,5 @@
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/((?!.*\\.html$|.*\\.css$|.*\\.js$|.*\\.json$|.*\\.png$|.*\\.svg$|.*\\.ico$|.*\\.jpg$).*)", "destination": "/index.html" }
   ]
 }
