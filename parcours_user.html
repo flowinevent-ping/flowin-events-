@@ -5133,7 +5133,7 @@ function drawerEvent(e){
       lotSemaineLabel:'À gagner cette semaine',
       lotSemaine:'',
       lotSemaineVal:'',
-      ctaText:_isBtobFront ? '🎡 Je tente ma chance' : '🎮 Participer gratuitement',
+      ctaText:_isBtobFront ? '🎡 Je tente ma chance' : '🎮 Participer',
       lotsActifs:[]
     };
     const front = e.cfg.front;
@@ -8689,7 +8689,7 @@ function renderWizardEvent(){
     html += '<div style="font-family:Georgia,serif;font-style:italic;font-size:24px;font-weight:700;line-height:1.1;color:'+(d.couleur||'#7C2D92')+';margin-bottom:8px">'+esc(d.nom||'Nom de l\'event')+'</div>';
     if(d.dateD) html += '<div style="font-size:12px;font-weight:700;color:#EF9F27">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
     html += '</div>';
-    html += '<div style="padding:14px 16px"><button style="width:100%;padding:11px;background:linear-gradient(135deg,'+(d.couleur||'#7C2D92')+',#EF9F27);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:800">🎮 Participer gratuitement</button></div>';
+    html += '<div style="padding:14px 16px"><button style="width:100%;padding:11px;background:linear-gradient(135deg,'+(d.couleur||'#7C2D92')+',#EF9F27);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:800">🎮 Participer</button></div>';
     html += '<div style="text-align:center;font-size:9px;color:#aaa;padding:0 16px 12px">Étape suivante : choisir le module de jeu</div>';
     html += '</div></div>';
   } else if(step==='B' && !d.module){
@@ -9095,7 +9095,7 @@ function wizPreviewFront(d, couleur, nom, lots, partenaires) {
   }
   // CTA
   html += '<div style="padding:10px 12px 14px">';
-  html += '<button style="width:100%;padding:11px;background:linear-gradient(135deg,'+couleur+',#EF9F27);color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:800;cursor:default;letter-spacing:.01em">🐣 Participer gratuitement</button>';
+  html += '<button style="width:100%;padding:11px;background:linear-gradient(135deg,'+couleur+',#EF9F27);color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:800;cursor:default;letter-spacing:.01em">🐣 Participer</button>';
   html += '<div style="text-align:center;font-size:8px;color:#bbb;margin-top:4px">Jeu gratuit · Sans achat obligatoire</div>';
   html += '</div>';
   return html;
@@ -10194,7 +10194,26 @@ function puserShow(){
   document.getElementById('puser-stage').style.display='';
   
   var page = puserState.pages[puserState.idx];
-  document.getElementById('puser-page-host').innerHTML = page.html;
+  var host = document.getElementById('puser-page-host');
+  host.innerHTML = page.html;
+  
+  // Rendre cliquables les boutons CTA du preview (Participer, Continuer, etc.)
+  setTimeout(function(){
+    var btns = host.querySelectorAll('button, .fp-cta-btn, [class*="cta"]');
+    btns.forEach(function(btn){
+      // Ne pas surcharger les boutons déjà programmés (vote stars, spin wheel)
+      var hasOnclick = btn.hasAttribute('onclick') && btn.getAttribute('onclick').length > 0;
+      var hasListener = btn.dataset.puserBound === '1';
+      if(hasOnclick || hasListener) return;
+      btn.dataset.puserBound = '1';
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        puserNext();
+      });
+    });
+  }, 50);
   
   var prev = document.getElementById('puser-prev');
   var next = document.getElementById('puser-next');
