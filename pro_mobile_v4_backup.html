@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Flowin · Pro</title>
+<style>
+:root{
+  --a:#7C2D92;--al:#F3E8FF;--ag:linear-gradient(135deg,#7C2D92,#A855F7);
+  --bg:#F8F5FF;--card:#fff;--border:#E9D5FF;
+  --txt:#1F1B2E;--muted:#6B7280;--sm:#94A3B8;
+  --paques:#D4537E;--nds:#3B5CC4;
+  --live:#EF4444;--upcoming:#3B82F6;--past:#7C2D92;
+  --r:14px;--shadow:0 2px 12px rgba(124,45,146,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding-bottom:80px}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--ag);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:20px;font-weight:900;letter-spacing:-0.5px}
+.topbar-pro{font-size:12px;opacity:.85;font-weight:600}
+.topbar-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
+
+/* ── BOTTOMNAV ── */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E9D5FF;display:flex;z-index:100;box-shadow:0 -4px 20px rgba(124,45,146,.08)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:9px;font-weight:600;gap:2px;transition:color .2s}
+.nav-btn .ico{font-size:20px;line-height:1}
+.nav-btn.active{color:var(--a)}
+.nav-btn.active .ico{filter:drop-shadow(0 0 4px rgba(124,45,146,.3))}
+
+/* ── VIEWS ── */
+.view{display:none;padding:14px 14px 0}
+.view.active{display:block}
+
+/* ── SECTION HEADER ── */
+.section-title{font-size:17px;font-weight:800;color:var(--txt);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title span{font-size:11px;font-weight:600;color:var(--muted);margin-left:auto}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid rgba(124,45,146,.06)}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:800;color:var(--txt)}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border-radius:12px;padding:14px 12px;box-shadow:var(--shadow);border:1px solid rgba(124,45,146,.07)}
+.kpi .lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.kpi .val{font-size:26px;font-weight:900;color:var(--txt);line-height:1}
+.kpi .delta{font-size:10px;color:var(--a);font-weight:600;margin-top:3px}
+
+/* ── EVENT CARDS ── */
+.ev-card{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);margin-bottom:10px;border-left:4px solid var(--a);display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:transform .15s}
+.ev-card:active{transform:scale(.98)}
+.ev-card.live{border-left-color:var(--live)}
+.ev-card.upcoming{border-left-color:var(--upcoming)}
+.ev-card.past{border-left-color:var(--past)}
+.ev-date{min-width:38px;text-align:center;background:var(--al);border-radius:8px;padding:6px 4px}
+.ev-date .d{font-size:20px;font-weight:900;color:var(--a);line-height:1}
+.ev-date .m{font-size:9px;font-weight:700;color:var(--a);text-transform:uppercase}
+.ev-info{flex:1;min-width:0}
+.ev-name{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-meta{font-size:11px;color:var(--muted)}
+.ev-chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700}
+.chip.live{background:#FEE2E2;color:#DC2626}
+.chip.upcoming{background:#DBEAFE;color:#1D4ED8}
+.chip.past{background:#F3E8FF;color:#7C2D92}
+.chip.optin{background:#D1FAE5;color:#065F46}
+
+/* ── JOUEURS TABLE ── */
+.j-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F3E8FF}
+.j-row:last-child{border-bottom:none}
+.j-avatar{width:36px;height:36px;border-radius:50%;background:var(--ag);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.j-info{flex:1;min-width:0}
+.j-name{font-size:13px;font-weight:700;color:var(--txt)}
+.j-email{font-size:10px;color:var(--sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.j-score{font-size:12px;font-weight:700;color:var(--a);text-align:right}
+
+/* ── PARCOURS PREVIEW ── */
+.parcours-card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid rgba(124,45,146,.06)}
+.phone-wrap{display:flex;justify-content:center;margin:14px 0}
+.phone-frame{width:200px;border-radius:28px;border:3px solid #1F1B2E;background:#fff;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.phone-bar{height:28px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;letter-spacing:1px}
+.phone-screen{padding:12px}
+.phone-q{font-size:11px;font-weight:800;color:#1F1B2E;margin-bottom:8px;line-height:1.4}
+.phone-opt{background:#F8F5FF;border:1.5px solid rgba(124,45,146,.15);border-radius:8px;padding:7px 10px;font-size:10px;font-weight:600;color:#374151;margin-bottom:5px}
+.phone-opt.sel{background:var(--al);border-color:var(--a);color:var(--a)}
+
+/* ── QR BOX ── */
+.qr-box{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0}
+.qr-url{font-size:10px;color:var(--sm);text-align:center;word-break:break-all;max-width:200px}
+.btn{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--border);background:#fff;color:var(--txt);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--ag);color:#fff;border-color:transparent}
+.btn-block{width:100%;justify-content:center}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+
+/* ── ALERT ── */
+.alert{border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start}
+.alert.info{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE}
+.alert.success{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
+
+/* ── SECTION TABS ── */
+.ev-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.ev-tabs::-webkit-scrollbar{display:none}
+.ev-tab{white-space:nowrap;border:1.5px solid var(--border);background:#fff;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;flex-shrink:0}
+.ev-tab.active{background:var(--a);color:#fff;border-color:var(--a)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:32px 20px;color:var(--muted)}
+.empty .ico{font-size:36px;margin-bottom:8px}
+.empty .t{font-size:14px;font-weight:700;margin-bottom:4px}
+.empty .s{font-size:12px}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:800;color:var(--txt);margin-bottom:14px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F3E8FF;font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-lbl{color:var(--muted);font-weight:600}
+.stat-val{font-weight:800;color:var(--txt)}
+</style>
+</head>
+<body>
+<!-- SÉLECTEUR PRO (mode test) -->
+<div id="pro-switcher" style="position:fixed;top:0;left:0;right:0;background:rgba(124,45,146,.95);color:#fff;padding:8px 12px;z-index:9999;font-size:11px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px)">
+  <span style="opacity:.7">PRO:</span>
+  <select id="pro-select" onchange="switchPro(this.value)" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;flex:1;max-width:280px">
+    <option value="pro-test-cannes">Cannes (TEST)</option>
+    <option value="pro-test-antibes">Antibes (TEST)</option>
+    <option value="pro-test-grasse">Grasse (TEST)</option>
+    <option value="pro-test-nice">Nice (TEST)</option>
+    <option value="pro-test-mougins">Mougins (TEST)</option>
+    <option value="pro-vence">Vence (PROD)</option>
+  </select>
+  <button onclick="document.getElementById('pro-switcher').style.display='none'" style="background:transparent;color:#fff;border:none;font-size:18px;cursor:pointer;padding:0 4px">×</button>
+</div>
+<style>body { padding-top:42px; }</style>
+<script>
+function switchPro(proId) {
+  localStorage.setItem('flowin_pro_id', proId);
+  window.location.href = window.location.pathname + '?pro=' + proId;
+}
+// Sync select value au load
+setTimeout(function(){
+  var sel = document.getElementById('pro-select');
+  if(sel) sel.value = (localStorage.getItem('flowin_pro_id') || 'pro-vence');
+}, 100);
+</script>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">Flow<span style="color:#E9D5FF">in</span></div>
+    <div class="topbar-pro" id="pro-name">Ville de Vence</div>
+  </div>
+  <div class="topbar-badge" id="live-badge" style="display:none">🔴 LIVE</div>
+</div>
+
+<!-- VIEWS -->
+
+<!-- ① TABLEAU DE BORD -->
+<div class="view active" id="v-dashboard">
+  <div style="padding-top:14px">
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi"><div class="lbl">Events</div><div class="val" id="kpi-events">—</div></div>
+      <div class="kpi"><div class="lbl">Participants</div><div class="val" id="kpi-part">—</div></div>
+      <div class="kpi"><div class="lbl">Joueurs CRM</div><div class="val" id="kpi-crm">—</div></div>
+      <div class="kpi"><div class="lbl">Opt-in</div><div class="val" id="kpi-optin">—</div><div class="delta" id="kpi-optin-pct"></div></div>
+    </div>
+    <div class="alert info">👁 Mode lecture seule. Pilotage géré par le Super Admin.</div>
+    <div id="db-events"></div>
+  </div>
+</div>
+
+<!-- ② EVENTS -->
+<div class="view" id="v-events">
+  <div style="padding-top:14px">
+    <div class="ev-tabs">
+      <div class="ev-tab active" onclick="filterEv('all',this)">Tous</div>
+      <div class="ev-tab" onclick="filterEv('live',this)">🔴 Live</div>
+      <div class="ev-tab" onclick="filterEv('upcoming',this)">📅 À venir</div>
+      <div class="ev-tab" onclick="filterEv('past',this)">📁 Passés</div>
+    </div>
+    <div id="ev-list"></div>
+  </div>
+</div>
+
+<!-- ③ JOUEURS -->
+<div class="view" id="v-joueurs">
+  <div style="padding-top:14px">
+    <div class="section-title">👥 Mes joueurs <span id="joueurs-count"></span></div>
+    <div class="card">
+      <div id="joueurs-list"></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="exportCSVPro()">⬇ Exporter CSV</button>
+  </div>
+</div>
+
+<!-- ④ PARCOURS JEUX -->
+<div class="view" id="v-parcours">
+  <div style="padding-top:14px">
+    <div class="section-title">📱 Parcours joueurs</div>
+
+    <!-- Pâques -->
+    <div class="parcours-card">
+      <div class="card-h">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#D4537E"></div>
+          <div class="card-title">Fêtes de Pâques 2026</div>
+        </div>
+        <span class="chip past">PASSÉ</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Quiz · 4–6 avril 2026 · Place du Grand Jardin</div>
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-bar" style="background:#D4537E">FLOWIN · PÂQUES</div>
+          <div class="phone-screen">
+            <div class="phone-q">Quel est l'animal symbole de Pâques le plus populaire en France ?</div>
+            <div class="phone-opt sel">🐰 Le lapin</div>
+            <div class="phone-opt">🐣 Le poussin</div>
+            <div class="phone-opt">🔔 La cloche</div>
+            <div class="phone-opt">🥚 L'œuf</div>
+          </div>
+        </div>
+      </div>
+      <div class="qr-box">
+        <div id="qr-paques"></div>
+        <div class="qr-url" id="url-paques"></div>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn" onclick="openParcours('ev-paques')">🔗 Ouvrir</button>
+          <button class="btn" onclick="showEvModal('ev-paques')">📊 Stats</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NDS -->
+    <div class="parcours-card">
+      <div class="card-h">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#3B5CC4"></div>
+          <div class="card-title">Nuits du Sud 2026</div>
+        </div>
+        <span class="chip upcoming">À VENIR</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Quiz · 15–24 juillet 2026 · Place du Grand Jardin</div>
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-bar" style="background:#3B5CC4">FLOWIN · NUITS DU SUD</div>
+          <div class="phone-screen">
+            <div class="phone-q">Quelle est l'année de création des Nuits du Sud ?</div>
+            <div class="phone-opt sel">🎵 1998</div>
+            <div class="phone-opt">🎸 2002</div>
+            <div class="phone-opt">🥁 1995</div>
+            <div class="phone-opt">🎺 2005</div>
+          </div>
+        </div>
+      </div>
+      <div class="qr-box">
+        <div id="qr-nds"></div>
+        <div class="qr-url" id="url-nds"></div>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn" onclick="openParcours('ev-nds')">🔗 Ouvrir</button>
+          <button class="btn" onclick="showEvModal('ev-nds')">📊 Stats</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ EXPORT -->
+<div class="view" id="v-export">
+  <div style="padding-top:14px">
+    <div class="section-title">📤 Export données</div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">Fêtes de Pâques 2026</div>
+      <div class="stat-row"><span class="stat-lbl">Participants</span><span class="stat-val" id="exp-paques-part">—</span></div>
+      <div class="stat-row"><span class="stat-lbl">Opt-in</span><span class="stat-val" id="exp-paques-optin">—</span></div>
+      <div class="stat-row"><span class="stat-lbl">Gagnants</span><span class="stat-val" id="exp-paques-gain">—</span></div>
+      <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="exportCSVPro('ev-paques')">⬇ Export CSV Pâques</button>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">Nuits du Sud 2026</div>
+      <div class="stat-row"><span class="stat-lbl">Statut</span><span class="stat-val">À venir · juil. 2026</span></div>
+      <div class="stat-row"><span class="stat-lbl">Lieu</span><span class="stat-val">Place du Grand Jardin</span></div>
+      <button class="btn btn-block" style="margin-top:12px" disabled>⬇ Export disponible après l'event</button>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px">Export global CRM</div>
+      <button class="btn btn-primary btn-block" onclick="exportCSVPro()">⬇ Tous les joueurs</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOMNAV -->
+<nav class="bottomnav">
+  <button id="nav-dashboard" class="nav-btn active" onclick="goTab('dashboard',this)"><div class="ico">🏠</div>Accueil</button>
+  <button id="nav-events" class="nav-btn" onclick="goTab('events',this)"><div class="ico">📅</div>Events</button>
+  <button id="nav-joueurs" class="nav-btn" onclick="goTab('joueurs',this)"><div class="ico">👥</div>Joueurs</button>
+  <button id="nav-parcours" class="nav-btn" onclick="goTab('parcours',this)"><div class="ico">📱</div>Parcours</button>
+  <button id="nav-export" class="nav-btn" onclick="goTab('export',this)"><div class="ico">📤</div>Export</button>
+</nav>
+
+<!-- MODAL EVENT STATS -->
+<div class="modal-overlay" id="ev-modal" onclick="closeModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-ev-title">Stats event</div>
+    <div id="modal-ev-body"></div>
+    <button class="btn btn-block" style="margin-top:16px" onclick="closeModal()">Fermer</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════ */
+/* CONFIG                                                       */
+/* ═══════════════════════════════════════════════════════════ */
+// PRO_ID dynamique : URL ?pro=xxx > localStorage > défaut
+var PRO_ID = (function(){
+  var p = new URLSearchParams(window.location.search).get('pro');
+  if(p) { localStorage.setItem('flowin_pro_id', p); return p; }
+  var stored = localStorage.getItem('flowin_pro_id');
+  return stored || 'pro-vence';
+})();
+var PARCOURS_BASE = 'https://admin-4wrzrznuu-flowinevent-6745s-projects.vercel.app';
+var PARCOURS_PAGE = 'parcours.html';
+var LS_KEY = 'flowin_v28_data';
+// Credentials Supabase (publique par design — anon key)
+var SUPA_URL = 'https://atddutvzklcgiqxlpvla.supabase.co';
+var SUPA_ANON = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+try {
+  SUPA_URL  = localStorage.getItem('flowin_supa_url')  || SUPA_URL;
+  SUPA_ANON = localStorage.getItem('flowin_supa_anon') || SUPA_ANON;
+} catch(e) {}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* DATA — chargée depuis Supabase (true simulation 100%)        */
+/* ═══════════════════════════════════════════════════════════ */
+var DATA = {events:[], joueurs:[], lots:[], pros:[], superEvents:[], partenaires:[], banques:[]};
+// Charger localStorage en fallback rapide (sera écrasé par Supabase)
+try {
+  var raw = localStorage.getItem(LS_KEY);
+  if (raw) {
+    var loaded = JSON.parse(raw);
+    if(loaded.events) DATA.events = loaded.events;
+    if(loaded.joueurs) DATA.joueurs = loaded.joueurs;
+    if(loaded.lots) DATA.lots = loaded.lots;
+    if(loaded.pros) DATA.pros = loaded.pros;
+  }
+} catch(e) {}
+
+// Conversion snake_case → camelCase pour matcher le format dashboard
+function supaRowToData(row){
+  if(!row) return null;
+  var o = {};
+  for(var k in row){ if(row.hasOwnProperty(k)) o[k] = row[k]; }
+  if(o.pro_id !== undefined) { o.proId = o.pro_id; delete o.pro_id; }
+  if(o.code_postal !== undefined) { o.codePostal = o.code_postal; delete o.code_postal; }
+  if(o.date_d !== undefined) { o.dateD = o.date_d; delete o.date_d; }
+  if(o.date_f !== undefined) { o.dateF = o.date_f; delete o.date_f; }
+  if(o.h_start !== undefined) { o.hStart = o.h_start; delete o.h_start; }
+  if(o.h_end !== undefined) { o.hEnd = o.h_end; delete o.h_end; }
+  if(o.joueurs_optin !== undefined) { o.joueursOptin = o.joueurs_optin; delete o.joueurs_optin; }
+  if(o.super_event_id !== undefined) { o.superEventId = o.super_event_id; delete o.super_event_id; }
+  if(o.client_type !== undefined) { o.clientType = o.client_type; delete o.client_type; }
+  if(o.pro_visib !== undefined) { o.proVisib = o.pro_visib; delete o.pro_visib; }
+  if(o.score_min !== undefined) { o.scoreMin = o.score_min; delete o.score_min; }
+  if(o.score_moy !== undefined) { o.scoreMoy = o.score_moy; delete o.score_moy; }
+  if(o.optin_date !== undefined) { o.optinDate = o.optin_date; delete o.optin_date; }
+  if(o.first_seen !== undefined) { o.firstSeen = o.first_seen; delete o.first_seen; }
+  if(o.last_seen !== undefined) { o.lastSeen = o.last_seen; delete o.last_seen; }
+  if(o.lot_gagne !== undefined) { o.lotGagne = o.lot_gagne; delete o.lot_gagne; }
+  if(o.ticket_code !== undefined) { o.ticketCode = o.ticket_code; delete o.ticket_code; }
+  if(o.partenaire_id !== undefined) { o.partenaireId = o.partenaire_id; delete o.partenaire_id; }
+  if(o.event_id !== undefined) { o.eventId = o.event_id; delete o.event_id; }
+  if(o.assigne_a !== undefined) { o.assigneA = o.assigne_a; delete o.assigne_a; }
+  return o;
+}
+
+function supaFetchPro(table){
+  return fetch(SUPA_URL + '/rest/v1/' + table + '?select=*', {
+    headers: {'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON}
+  }).then(function(r){ return r.ok ? r.json() : []; })
+    .catch(function(){ return []; });
+}
+
+async function loadFromSupabase(){
+  if(!SUPA_URL || !SUPA_ANON) return;
+  try {
+    var results = await Promise.all([
+      supaFetchPro('pros'),
+      supaFetchPro('events'),
+      supaFetchPro('joueurs'),
+      supaFetchPro('lots'),
+      supaFetchPro('super_events'),
+      supaFetchPro('partenaires')
+    ]);
+    DATA.pros = results[0].map(supaRowToData);
+    DATA.events = results[1].map(supaRowToData);
+    DATA.joueurs = results[2].map(supaRowToData);
+    DATA.lots = results[3].map(supaRowToData);
+    DATA.superEvents = results[4].map(supaRowToData);
+    DATA.partenaires = results[5].map(supaRowToData);
+    console.log('[Pro Mobile] Supabase chargé:', DATA.events.length+' events, '+DATA.joueurs.length+' joueurs');
+    return true;
+  } catch(e){
+    console.warn('[Pro Mobile] Supabase erreur', e);
+    return false;
+  }
+}
+
+function myEvents() {
+  return DATA.events.filter(function(e) { return e.proId === PRO_ID; });
+}
+function myJoueurs() {
+  var evIds = myEvents().map(function(e) { return e.id; });
+  return DATA.joueurs.filter(function(j) {
+    return j.events && j.events.some(function(eid) { return evIds.indexOf(eid) >= 0; });
+  });
+}
+function findEv(id) {
+  var found = null;
+  DATA.events.forEach(function(e) { if (e.id === id) found = e; });
+  return found;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* NAVIGATION                                                   */
+/* ═══════════════════════════════════════════════════════════ */
+var currentTab = 'dashboard';
+
+// ═══════════════════════════════════════════════════════════
+// PRO VISIB : appliquer les flags du SA (masquer/afficher onglets)
+// ═══════════════════════════════════════════════════════════
+function applyProVisib() {
+  // Récupérer le proVisib de l'event courant (premier event du pro)
+  var evs = myEvents();
+  if (!evs.length) return;
+  // Prendre l'event LIVE ou le plus récent
+  var live = evs.filter(function(e){ return e.status==='live'; });
+  var ev = live.length ? live[0] : evs[0];
+  var pv = (ev && ev.proVisib) || {};
+  
+  // Mapping onglet → flag proVisib
+  var mapping = {
+    'dashboard'  : 'stats',         // Accueil = stats
+    'events'     : 'activite',      // Events = activité/tirage
+    'joueurs'    : 'participants',  // Joueurs = participants
+    'parcours'   : 'qr',            // Parcours = QR code
+    'export'     : 'export'         // Export
+  };
+  
+  Object.keys(mapping).forEach(function(tab){
+    var flag = mapping[tab];
+    var btn = document.getElementById('nav-' + tab);
+    if (!btn) return;
+    // Si flag === false dans proVisib → masquer
+    if (pv[flag] === false) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+    }
+  });
+  
+  // Afficher le message de bienvenue si défini
+  if (pv.msgBienvenue) {
+    var msgEl = document.getElementById('pro-welcome-msg');
+    if (msgEl) msgEl.textContent = pv.msgBienvenue;
+  }
+}
+
+function goTab(tab, btn) {
+  applyProVisib();  // Re-appliquer les flags à chaque changement d'onglet
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  var v = document.getElementById('v-' + tab);
+  if (v) v.classList.add('active');
+  if (btn) btn.classList.add('active');
+  currentTab = tab;
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'events') renderEvents('all');
+  if (tab === 'joueurs') renderJoueurs();
+  if (tab === 'parcours') renderParcours();
+  if (tab === 'export') renderExport();
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RENDER DASHBOARD                                             */
+/* ═══════════════════════════════════════════════════════════ */
+function renderDashboard() {
+  var evs = myEvents();
+  var jous = myJoueurs();
+  var totalPart = evs.reduce(function(s,e) { return s + (e.participants||0); }, 0);
+  var totalOptin = evs.reduce(function(s,e) { return s + (e.joueursOptin||0); }, 0);
+  var live = evs.filter(function(e) { return e.status === 'live'; });
+
+  document.getElementById('kpi-events').textContent = evs.length;
+  document.getElementById('kpi-part').textContent = totalPart.toLocaleString('fr-FR');
+  document.getElementById('kpi-crm').textContent = jous.length;
+  document.getElementById('kpi-optin').textContent = totalOptin;
+  var pct = totalPart > 0 ? Math.round(totalOptin/totalPart*100) : 0;
+  document.getElementById('kpi-optin-pct').textContent = pct + '% du total';
+
+  document.getElementById('live-badge').style.display = live.length ? '' : 'none';
+
+  var html = '';
+  var upcoming = evs.filter(function(e) { return e.status === 'upcoming'; });
+  upcoming.sort(function(a,b) { return new Date(a.dateD) - new Date(b.dateD); });
+  var past = evs.filter(function(e) { return e.status === 'past'; });
+  past.sort(function(a,b) { return new Date(b.dateD) - new Date(a.dateD); });
+
+  var all = live.concat(upcoming).concat(past);
+  all.forEach(function(ev) { html += evCard(ev); });
+  if (!all.length) html = '<div class="empty"><div class="ico">📅</div><div class="t">Aucun event</div></div>';
+  document.getElementById('db-events').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RENDER EVENTS                                               */
+/* ═══════════════════════════════════════════════════════════ */
+function renderEvents(filter) {
+  var evs = myEvents();
+  if (filter !== 'all') evs = evs.filter(function(e) { return e.status === filter; });
+  evs.sort(function(a,b) { return new Date(b.dateD) - new Date(a.dateD); });
+  var html = '';
+  evs.forEach(function(ev) { html += evCard(ev); });
+  if (!evs.length) html = '<div class="empty"><div class="ico">📅</div><div class="t">Aucun event</div></div>';
+  document.getElementById('ev-list').innerHTML = html;
+}
+function filterEv(f, btn) {
+  document.querySelectorAll('.ev-tab').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderEvents(f);
+}
+
+function evCard(ev) {
+  var d = ev.dateD ? new Date(ev.dateD) : null;
+  var day = d ? d.getDate() : '--';
+  var months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  var mon = d ? months[d.getMonth()] : '--';
+  var chips = '<span class="chip ' + ev.status + '">' + (ev.status==='live'?'🔴 LIVE':ev.status==='upcoming'?'À VENIR':'PASSÉ') + '</span>';
+  if (ev.joueursOptin) chips += '<span class="chip optin">✓ ' + ev.joueursOptin + ' opt-in</span>';
+  return '<div class="ev-card ' + ev.status + '" onclick="showEvModal(\'' + ev.id + '\')">'
+       + '<div class="ev-date"><div class="d">' + day + '</div><div class="m">' + mon + '</div></div>'
+       + '<div class="ev-info">'
+       + '<div class="ev-name">' + esc(ev.nom) + '</div>'
+       + '<div class="ev-meta">' + esc(ev.lieu||'') + ' · ' + (ev.participants||0) + ' participants</div>'
+       + '<div class="ev-chips">' + chips + '</div>'
+       + '</div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RENDER JOUEURS                                              */
+/* ═══════════════════════════════════════════════════════════ */
+function renderJoueurs() {
+  var jous = myJoueurs();
+  document.getElementById('joueurs-count').textContent = jous.length + ' joueurs';
+  var html = '';
+  jous.slice(0, 50).forEach(function(j) {
+    var init = ((j.prenom||'?')[0] + (j.nom||'?')[0]).toUpperCase();
+    var score = j.scoreMoy || '-';
+    html += '<div class="j-row">'
+          + '<div class="j-avatar">' + init + '</div>'
+          + '<div class="j-info">'
+          + '<div class="j-name">' + esc(j.prenom||'') + ' ' + esc(j.nom||'') + '</div>'
+          + '<div class="j-email">' + esc(j.email||'') + '</div>'
+          + '</div>'
+          + '<div class="j-score">' + score + (j.optin ? '<br><span style="font-size:9px;color:#065F46">✓ optin</span>' : '') + '</div>'
+          + '</div>';
+  });
+  if (jous.length > 50) html += '<div style="text-align:center;padding:10px;font-size:11px;color:var(--muted)">… et ' + (jous.length-50) + ' autres</div>';
+  if (!jous.length) html = '<div class="empty"><div class="ico">👥</div><div class="t">Aucun joueur</div></div>';
+  document.getElementById('joueurs-list').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RENDER PARCOURS — QR codes                                  */
+/* ═══════════════════════════════════════════════════════════ */
+function renderParcours() {
+  var urlPaques = PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=ev-paques';
+  var urlNds    = PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=ev-nds';
+  document.getElementById('url-paques').textContent = urlPaques;
+  document.getElementById('url-nds').textContent    = urlNds;
+  document.getElementById('qr-paques').innerHTML = genQRSvg(urlPaques, {size:140, color:'#D4537E'});
+  document.getElementById('qr-nds').innerHTML    = genQRSvg(urlNds,    {size:140, color:'#3B5CC4'});
+}
+
+function openParcours(evId) {
+  window.open(PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=' + evId, '_blank');
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RENDER EXPORT                                               */
+/* ═══════════════════════════════════════════════════════════ */
+function renderExport() {
+  var evPaques = findEv('ev-paques');
+  if (evPaques) {
+    document.getElementById('exp-paques-part').textContent  = evPaques.participants || 0;
+    document.getElementById('exp-paques-optin').textContent = evPaques.joueursOptin || 0;
+    document.getElementById('exp-paques-gain').textContent  = evPaques.gagnants || 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* MODAL EVENT                                                  */
+/* ═══════════════════════════════════════════════════════════ */
+function showEvModal(evId) {
+  var ev = findEv(evId);
+  if (!ev) return;
+  document.getElementById('modal-ev-title').textContent = ev.nom;
+  var jous = DATA.joueurs.filter(function(j) { return j.events && j.events.indexOf(evId) >= 0; });
+  var body = '<div class="stat-row"><span class="stat-lbl">Statut</span><span class="stat-val">' + ev.status.toUpperCase() + '</span></div>'
+           + '<div class="stat-row"><span class="stat-lbl">Dates</span><span class="stat-val">' + (ev.dateD||'-') + (ev.dateF && ev.dateF!==ev.dateD ? ' → '+ev.dateF : '') + '</span></div>'
+           + '<div class="stat-row"><span class="stat-lbl">Lieu</span><span class="stat-val">' + esc(ev.lieu||'-') + '</span></div>'
+           + '<div class="stat-row"><span class="stat-lbl">Participants</span><span class="stat-val">' + (ev.participants||0) + '</span></div>'
+           + '<div class="stat-row"><span class="stat-lbl">Opt-in</span><span class="stat-val">' + (ev.joueursOptin||0) + '</span></div>'
+           + '<div class="stat-row"><span class="stat-lbl">Gagnants</span><span class="stat-val">' + (ev.gagnants||0) + '</span></div>'
+           + '<div class="stat-row"><span class="stat-lbl">Joueurs CRM</span><span class="stat-val">' + jous.length + '</span></div>';
+  var qrUrl = PARCOURS_BASE + '/' + PARCOURS_PAGE + '?ev=' + evId;
+  body += '<div style="margin-top:14px;text-align:center">' + genQRSvg(qrUrl, {size:120, color: ev.couleur||'#7C2D92'}) + '</div>';
+  body += '<div style="font-size:10px;color:var(--sm);text-align:center;margin-top:6px;word-break:break-all">' + qrUrl + '</div>';
+  document.getElementById('modal-ev-body').innerHTML = body;
+  document.getElementById('ev-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('ev-modal').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* EXPORT CSV                                                   */
+/* ═══════════════════════════════════════════════════════════ */
+function exportCSVPro(evId) {
+  var jous = myJoueurs();
+  if (evId) jous = jous.filter(function(j) { return j.events && j.events.indexOf(evId) >= 0; });
+  var rows = ['Nom,Prénom,Email,Téléphone,Ville,CP,Opt-in,Score,Gains,Source,First seen'];
+  jous.forEach(function(j) {
+    rows.push([j.nom,j.prenom,j.email,j.tel,j.ville,j.codePostal,j.optin?'Oui':'Non',j.scoreMoy,j.gains,j.source,j.firstSeen].map(function(v) { return '"'+(v||'')+'"'; }).join(','));
+  });
+  var blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'flowin-joueurs'+(evId?'-'+evId:'')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* UTILS                                                        */
+/* ═══════════════════════════════════════════════════════════ */
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* QR CODE (lib minifiée inline)                               */
+/* ═══════════════════════════════════════════════════════════ */
+function genQRSvg(url, opts) {
+  opts = opts || {};
+  var size = opts.size || 120;
+  var color = opts.color || '#000';
+  // Utilise l'API QR server externe
+  var encodedUrl = encodeURIComponent(url);
+  return '<img src="https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&data=' + encodedUrl + '&color=' + color.replace('#','') + '&bgcolor=ffffff&margin=4" width="' + size + '" height="' + size + '" style="border-radius:8px" alt="QR">';
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* INIT                                                         */
+/* ═══════════════════════════════════════════════════════════ */
+(function init() {
+  var pro = null;
+  if (DATA.pros) DATA.pros.forEach(function(p) { if (p.id === PRO_ID) pro = p; });
+  if (pro) document.getElementById('pro-name').textContent = pro.nom;
+  renderDashboard();
+  
+  // Charger Supabase en async et rafraîchir
+  loadFromSupabase().then(function(ok){
+    if(ok){
+      var pro2 = null;
+      DATA.pros.forEach(function(p){ if(p.id === PRO_ID) pro2 = p; });
+      if(pro2) document.getElementById('pro-name').textContent = pro2.nom;
+      renderDashboard();
+      applyProVisib();
+      console.log('[Pro Mobile] Données Supabase appliquées');
+    }
+  });
+})();
+</script>
+</body>
+</html>
