@@ -2676,6 +2676,9 @@ var FLOWIN_PRO_ID = null;
       console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module);
       /* Routage : si module connu, masquer les autres viewports */
       flowinShowModuleViewport(rows[0].module);
+      /* Hydrater les questions bonus depuis cfg si présentes */
+      try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques bonus', e); }
+      try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm bonus', e); }
     }
   } catch(e){ console.warn('[Flowin] fetch event', e); }
 })();
@@ -2707,6 +2710,81 @@ function flowinShowModuleViewport(moduleName){
   }
   console.log('[Flowin] viewport visible:', targetVp);
 }
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* Hydratation dynamique des questions bonus Pâques depuis Supabase     */
+/* Lit cfg.quizBonusList || cfg.bonusList et remplace le contenu pq-9   */
+/* ═══════════════════════════════════════════════════════════════════ */
+function flowinHydratePaquesBonus(){
+  if(!FLOWIN_EVENT || !FLOWIN_EVENT.cfg) return;
+  var cfg = FLOWIN_EVENT.cfg;
+  var bonusList = cfg.quizBonusList || cfg.bonusList || [];
+  if(!bonusList || !bonusList.length){
+    console.log('[Flowin] pas de questions bonus dans cfg → fallback hardcoded pq-9');
+    return;
+  }
+  
+  /* Remplace le contenu de .pq-bonus-body dans pq-9 */
+  var page = document.getElementById('pq-9');
+  if(!page) return;
+  var body = page.querySelector('.pq-bonus-body');
+  if(!body) return;
+  
+  var html = '<div class="pq-bonus-section">À propos de toi</div>';
+  for(var qi=0; qi<bonusList.length; qi++){
+    var q = bonusList[qi];
+    var isMulti = (q.type === 'multi');
+    var pickFn = isMulti ? 'pqPickChipMulti' : 'pqPickChip';
+    var hint = isMulti ? '<span class="pq-bonus-q-hint">(plusieurs choix)</span>' : '';
+    html += '<div class="pq-bonus-q-label">' + (qi+1) + '. ' + (q.label || '') + hint + '</div>';
+    html += '<div class="pq-bonus-chips">';
+    var opts = q.options || [];
+    for(var oi=0; oi<opts.length; oi++){
+      var sel = (oi === 0 ? ' sel' : '');
+      html += '<button class="pq-bonus-chip' + sel + '" onclick="' + pickFn + '(this)">' + (opts[oi].label || '') + '</button>';
+    }
+    html += '</div>';
+  }
+  html += '<button class="pq-bonus-submit" onclick="pqGo(10)">Valider et gagner mon point →</button>';
+  
+  body.innerHTML = html;
+  console.log('[Flowin] pq-9 hydraté avec ' + bonusList.length + ' questions bonus depuis cfg');
+}
+
+/* Idem pour QuizMaster qm-9 */
+function flowinHydrateQuizmasterBonus(){
+  if(!FLOWIN_EVENT || !FLOWIN_EVENT.cfg) return;
+  var cfg = FLOWIN_EVENT.cfg;
+  var bonusList = cfg.quizBonusList || cfg.bonusList || [];
+  if(!bonusList || !bonusList.length) return;
+  
+  var page = document.getElementById('qm-9');
+  if(!page) return;
+  var body = page.querySelector('.qm-bonus-body');
+  if(!body) return;
+  
+  var html = '<div class="qm-bonus-section">À propos de toi</div>';
+  for(var qi=0; qi<bonusList.length; qi++){
+    var q = bonusList[qi];
+    var isMulti = (q.type === 'multi');
+    var pickFn = isMulti ? 'qmPickChipMulti' : 'qmPickChip';
+    var hint = isMulti ? '<span class="qm-bonus-q-hint">(plusieurs choix)</span>' : '';
+    html += '<div class="qm-bonus-q-label">' + (qi+1) + '. ' + (q.label || '') + hint + '</div>';
+    html += '<div class="qm-bonus-chips">';
+    var opts = q.options || [];
+    for(var oi=0; oi<opts.length; oi++){
+      var sel = (oi === 0 ? ' sel' : '');
+      html += '<button class="qm-bonus-chip' + sel + '" onclick="' + pickFn + '(this)">' + (opts[oi].label || '') + '</button>';
+    }
+    html += '</div>';
+  }
+  html += '<button class="qm-bonus-submit" onclick="qmGo(10)">Valider et gagner mon point →</button>';
+  
+  body.innerHTML = html;
+  console.log('[Flowin] qm-9 hydraté avec ' + bonusList.length + ' questions bonus depuis cfg');
+}
+
+
 
 
 /* Écriture Supabase : joueur + participation */
