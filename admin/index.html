@@ -5980,6 +5980,9 @@ function newSuperEvent(){
   const today = fmtDateInput(new Date().toISOString());
   DATA.superEvents.unshift({id,nom:'Nouveau Super Event',pros:[],events:[],dateD:today,dateF:today,status:'upcoming',description:'',tirageGlobal:false,nbGagnantsFinal:0});
   saveData();
+  // 🔄 Sync Supabase
+  var _newSe = DATA.superEvents.find(function(s){return s.id===id;});
+  if(_newSe) supaWriteSuperEvent(_newSe);
   toast('Super Event créé · complétez les infos','success');
   openDrawerForEdit('superEvent',id);
 }
@@ -6810,7 +6813,9 @@ function saveLot(lotId, eventId){
     var newL = {id:newId('lot'),eventId:eventId,partenaireId:f.partenaireId,nom:f.nom,valeur:f.valeur,quantite:f.quantite||1,assigneA:'',retire:false,dateRetrait:'',dateAssign:''};
     DATA.lots.push(newL);
   }
-  saveData(); closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
+  saveData();
+  // 🔄 Sync Supabase
+  try { var _lot = DATA.lots.find(function(l){return l.id===lotId;}); if(_lot) supaWriteLot(_lot); } catch(e){} closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
 }
 
 function assignLotModal(lotId){
@@ -8229,6 +8234,16 @@ function lancerTirage(eventId){
   // 5. Mettre à jour le compteur gagnants de l'event
   ev.gagnants = (ev.gagnants||0) + nbTirer;
   saveData();
+  // 🔄 Sync Supabase : les lots assignés et joueurs gagnants
+  try {
+    var _evLots = DATA.lots.filter(function(l){return l.eventId===eventId && l.assigneA;});
+    _evLots.forEach(function(l){ supaWriteLot(l); });
+    var _winnerIds = _evLots.map(function(l){return l.assigneA;});
+    var _winners = DATA.joueurs.filter(function(j){return _winnerIds.indexOf(j.id)>=0;});
+    _winners.forEach(function(j){ supaWriteJoueur(j); });
+    var _ev = DATA.events.find(function(e){return e.id===eventId;});
+    if(_ev) supaWriteEvent(_ev);
+  } catch(e){ console.warn("[sync tirage]",e); }
 
   toast('🎉 Tirage terminé · '+nbTirer+' gagnant'+(nbTirer>1?'s':'')+' désignés','success');
   // Re-render pour afficher les billets
@@ -8318,6 +8333,9 @@ function wizCreateBanque(){
   if(!state.wiz.expandedBanques) state.wiz.expandedBanques = {};
   state.wiz.expandedBanques[id] = true;
   saveData();
+  // 🔄 Sync Supabase
+  var _newBq = DATA.banques.find(function(b){return b.id===id;});
+  if(_newBq) supaWriteBanque(_newBq);
   toast('Banque "'+nom+'" créée','success');
   renderWizard();
 }

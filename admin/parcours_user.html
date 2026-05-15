@@ -6011,6 +6011,9 @@ function newSuperEvent(){
   const today = fmtDateInput(new Date().toISOString());
   DATA.superEvents.unshift({id,nom:'Nouveau Super Event',pros:[],events:[],dateD:today,dateF:today,status:'upcoming',description:'',tirageGlobal:false,nbGagnantsFinal:0});
   saveData();
+  // 🔄 Sync Supabase
+  var _newSe = DATA.superEvents.find(function(s){return s.id===id;});
+  if(_newSe) supaWriteSuperEvent(_newSe);
   toast('Super Event créé · complétez les infos','success');
   openDrawerForEdit('superEvent',id);
 }
@@ -6841,7 +6844,8 @@ function saveLot(lotId, eventId){
     var newL = {id:newId('lot'),eventId:eventId,partenaireId:f.partenaireId,nom:f.nom,valeur:f.valeur,quantite:f.quantite||1,assigneA:'',retire:false,dateRetrait:'',dateAssign:''};
     DATA.lots.push(newL);
   }
-  saveData(); closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
+  saveData();
+  try { var _lot = DATA.lots.find(function(l){return l.id===lotId;}); if(_lot) supaWriteLot(_lot); } catch(e){} closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
 }
 
 function assignLotModal(lotId){
@@ -8260,6 +8264,15 @@ function lancerTirage(eventId){
   // 5. Mettre à jour le compteur gagnants de l'event
   ev.gagnants = (ev.gagnants||0) + nbTirer;
   saveData();
+  try {
+    var _evLots = DATA.lots.filter(function(l){return l.eventId===eventId && l.assigneA;});
+    _evLots.forEach(function(l){ supaWriteLot(l); });
+    var _winnerIds = _evLots.map(function(l){return l.assigneA;});
+    var _winners = DATA.joueurs.filter(function(j){return _winnerIds.indexOf(j.id)>=0;});
+    _winners.forEach(function(j){ supaWriteJoueur(j); });
+    var _ev = DATA.events.find(function(e){return e.id===eventId;});
+    if(_ev) supaWriteEvent(_ev);
+  } catch(e){ console.warn("[sync tirage]",e); }
 
   toast('🎉 Tirage terminé · '+nbTirer+' gagnant'+(nbTirer>1?'s':'')+' désignés','success');
   // Re-render pour afficher les billets
@@ -8349,6 +8362,9 @@ function wizCreateBanque(){
   if(!state.wiz.expandedBanques) state.wiz.expandedBanques = {};
   state.wiz.expandedBanques[id] = true;
   saveData();
+  // 🔄 Sync Supabase
+  var _newBq = DATA.banques.find(function(b){return b.id===id;});
+  if(_newBq) supaWriteBanque(_newBq);
   toast('Banque "'+nom+'" créée','success');
   renderWizard();
 }
@@ -10201,7 +10217,6 @@ function puserShow(){
   setTimeout(function(){
     var btns = host.querySelectorAll('button, .fp-cta-btn, [class*="cta"]');
     btns.forEach(function(btn){
-      // Ne pas surcharger les boutons déjà programmés (vote stars, spin wheel)
       var hasOnclick = btn.hasAttribute('onclick') && btn.getAttribute('onclick').length > 0;
       var hasListener = btn.dataset.puserBound === '1';
       if(hasOnclick || hasListener) return;
@@ -10213,6 +10228,53 @@ function puserShow(){
         puserNext();
       });
     });
+    
+    // 🆕 Rendre les étoiles VOTE cliquables (cible_id = section index)
+    if((page.label||'').indexOf('Vote') >= 0){
+      var pageIdx = puserState.idx;
+      var voteCibleId = 'section_'+pageIdx;
+      var starContainers = host.querySelectorAll('div');
+      starContainers.forEach(function(div){
+        var spans = div.querySelectorAll('span');
+        if(spans.length === 5){
+          // Vérif que ce sont bien des étoiles (★)
+          var allStars = true;
+          for(var i=0;i<spans.length;i++){
+            if((spans[i].textContent||'').indexOf('★') < 0) { allStars = false; break; }
+          }
+          if(!allStars) return;
+          spans.forEach(function(star, sidx){
+            star.style.cursor = 'pointer';
+            star.style.transition = 'transform .15s';
+            star.addEventListener('click', function(e){
+              e.preventDefault();
+              e.stopPropagation();
+              var note = sidx + 1;
+              puserState.voteScores[voteCibleId] = note;
+              // Mettre à jour visuel
+              spans.forEach(function(s, j){
+                s.style.color = j < note ? '#F59E0B' : '#E2E8F0';
+                s.style.transform = j < note ? 'scale(1.15)' : 'scale(1)';
+              });
+              console.log('[Vote] '+voteCibleId+' = '+note+' étoiles');
+            });
+          });
+        }
+      });
+      // Boutons Yes/No (mode vote yn)
+      var ynBtns = host.querySelectorAll('div[style*="border-radius:12px"]');
+      ynBtns.forEach(function(b){
+        var txt = b.textContent || '';
+        if(txt.indexOf('✅') >= 0 || txt.indexOf('❌') >= 0){
+          b.style.cursor = 'pointer';
+          b.addEventListener('click', function(e){
+            e.preventDefault(); e.stopPropagation();
+            puserState.voteScores[voteCibleId] = txt.indexOf('✅') >= 0 ? 1 : 0;
+            b.style.transform = 'scale(.95)';
+          });
+        }
+      });
+    }
   }, 50);
   
   var prev = document.getElementById('puser-prev');
@@ -10329,7 +10391,30 @@ async function puserSaveToSupabase(){
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify({event_id:ev.id, joueur_id:jid, score:puserState.quizScore||0, completed:true})
     });
-    console.log('[Parcours User] ✅ Sauvegardé:', email);
+    
+    // 🆕 Si module vote : écrire chaque vote dans table votes
+    if(ev.module === 'vote' || ev.module === 'standup'){
+      var voteRows = [];
+      Object.keys(puserState.voteScores).forEach(function(cibleId){
+        voteRows.push({
+          event_id: ev.id,
+          joueur_id: jid,
+          cible_id: cibleId,
+          cible_type: ev.module === 'standup' ? 'comedien' : 'section',
+          note: puserState.voteScores[cibleId]
+        });
+      });
+      if(voteRows.length){
+        await fetch(FLOWIN_SUPA_URL+'/rest/v1/votes', {
+          method:'POST',
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify(voteRows)
+        });
+        console.log('[Parcours User] ✅ '+voteRows.length+' vote(s) sauvegardé(s)');
+      }
+    }
+    
+    console.log('[Parcours User] ✅ Joueur+participation sauvegardés:', email);
   } catch(e){ console.error('[Parcours User] save error:', e); }
 }
 
