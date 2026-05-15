@@ -1,49 +1,100 @@
-# 📂 SQL FLOWIN — Schema final
+# Flowin · Schéma & Migration SQL
 
-## Ordre d'exécution
+État au 15/05/2026 — Validé sur PostgreSQL 16 local.
 
-### 1️⃣ `FINAL_CONSOLIDATED.sql`
-Schema complet (11 tables) avec RLS, indexes, vues, triggers.
-**Idempotent** — safe à re-exécuter.
+## Ordre d'exécution recommandé (Supabase SQL Editor)
 
-### 2️⃣ `SEED_AUDIT_FICTIF.sql` (optionnel — pour audit)
-Données fictives préfixées `*-test-*` :
-- 5 pros, 5 partenaires
-- 9 events (3 scénarios)
-- 2 super events
-- 9 joueurs, 9 lots, 3 votes, 9 participations
+```
+1. FINAL_CONSOLIDATED.sql       Schéma initial 11 tables + RLS
+2. SCHEMA_ALIGNMENT_v2.sql      Ajout colonnes manquantes (idempotent)
+3. SEED_PROD_v2.sql             Migration seed prod (186 joueurs Pâques, etc.)
+4. FIX_QR_URLS_v2.sql           Normalisation cfg.qrUrl (déjà fait en prod)
+```
 
-### 3️⃣ `CLEAN_TEST_DATA.sql`
-Supprime toutes les données `*-test-*`.
+Tous les fichiers sont **idempotents** : ils peuvent être exécutés plusieurs fois
+sans erreur (`ADD COLUMN IF NOT EXISTS`, `ON CONFLICT DO UPDATE`).
 
-## Structure (11 tables)
+---
+
+## Fichiers actifs
+
+| Fichier | Rôle | Lignes |
+|---|---|---|
+| `FINAL_CONSOLIDATED.sql` | Schéma initial 11 tables + RLS + vues | 350 |
+| `SCHEMA_ALIGNMENT_v2.sql` | Ajoute 28 colonnes manquantes (url, prenom, tel, stats, etc.) | 84 |
+| `SEED_PROD_v2.sql` | 2 pros + 3 events + 186 joueurs Pâques + 8 lots + 1 super_event | 322 |
+| `FIX_GENRE_COLUMN.sql` | Colonne genre (déjà incluse dans ALIGNMENT_v2) | 16 |
+| `FIX_PARTENAIRE_URL.sql` | Colonne partenaires.url (déjà incluse dans ALIGNMENT_v2) | 17 |
+| `FIX_QR_URLS_v2.sql` | UPDATE en masse de cfg.qrUrl | 25 |
+| `AUDIT_ALL_IN_ONE.sql` | Audit complet (vues, contrôles, stats) | 537 |
+| `CLEAN_TEST_DATA.sql` | Nettoyage données test (ev-test-*, j-test-*, etc.) | 52 |
+| `SEED_AUDIT_FICTIF.sql` | Seed fictif pour audit | 162 |
+| `SIMULATE_PARCOURS_USERS.sql` | Simule 4 joueurs scannent un QR | 69 |
+
+## Archives
+
+`sql/archive/` contient les anciens fichiers conservés pour traçabilité :
+- `FIX_QR_URLS.sql` (v1, remplacé par v2)
+- `FIX_RLS_500.sql` + `FIX_RLS_DISABLE.sql` (RLS mode test, à durcir avant prod)
+- `AUDIT_ALL_IN_ONE.sql.tmp` (fichier temporaire vide)
+
+---
+
+## Validation locale
+
+```bash
+# Démarrer PostgreSQL local
+apt-get install -y postgresql postgresql-client
+service postgresql start
+
+# Créer une DB de test propre
+su - postgres -c "psql -c 'CREATE DATABASE flowin_test;'"
+
+# Tester dans l'ordre
+su - postgres -c "psql flowin_test -f sql/FINAL_CONSOLIDATED.sql"
+su - postgres -c "psql flowin_test -f sql/SCHEMA_ALIGNMENT_v2.sql"
+su - postgres -c "psql flowin_test -f sql/SEED_PROD_v2.sql"
+
+# Vérifier
+su - postgres -c "psql flowin_test -c '
+  SELECT table_name, COUNT(*) FROM (
+    SELECT \"joueurs\" AS table_name FROM joueurs
+    UNION ALL SELECT \"events\" FROM events
+    UNION ALL SELECT \"pros\" FROM pros
+  ) t GROUP BY table_name;'"
+```
+
+Résultat attendu :
+- `pros: 2`
+- `events: 3`
+- `joueurs: 186`
+- `lots: 8`
+- `super_events: 1`
+
+---
+
+## Connexion Supabase
+
+```
+URL : https://atddutvzklcgiqxlpvla.supabase.co
+Anon key : sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF
+Région : eu-west-1
+```
+
+Exécution manuelle via le SQL Editor du dashboard Supabase.
+
+## Tables (10 tables data + 1 auth)
 
 | Table | Rôle |
-|-------|------|
-| `profiles` | Auth Supabase (SA/Pro) |
-| `pros` | Clients organisations |
-| `partenaires` | Fournisseurs de lots |
-| `events` | Animations |
-| `super_events` | Groupes d'events |
-| `joueurs` | CRM participants |
-| `lots` | Dotation |
-| `banques` | Questions quiz |
-| `participations` | Logs sessions |
-| `votes` | Votes module vote |
-| `gas_backup_log` | Audit append-only |
-
-## Vues
-
-- `v_prospects` : joueurs B2B
-- `v_stats_event` : KPIs par event
-- `v_top_joueurs` : top 100 par gains
-
-## Policies RLS
-
-- **SA** : tout accès
-- **Pro** : lecture scopée à `pro_id`
-- **Anon** : INSERT joueurs/participations/votes (parcours QR)
-
-## Anciens scripts
-
-Archivés dans `archive/` — historique pour référence.
+|---|---|
+| `profiles` | Auth Supabase (lié à auth.users) |
+| `pros` | Organisations clientes |
+| `partenaires` | Partenaires des events |
+| `events` | Événements (un par module : quiz, spin, vote, etc.) |
+| `super_events` | Groupements d'events |
+| `joueurs` | CRM des participants |
+| `lots` | Lots à gagner |
+| `banques` | Banques de questions quiz |
+| `participations` | Logs des participations (avec ticket_code, bonus_answers) |
+| `votes` | Logs des votes étoiles |
+| `gas_backup_log` | Logs backup Google Sheets |
