@@ -3259,7 +3259,7 @@ function drawerPro(p){
   if(state.drawer.edit){
     html += drawerFooter('<button class="btn" onclick="cancelEdit()">Annuler</button><button class="btn btn-primary" onclick="saveEdit()">✓ Enregistrer</button>');
   } else {
-    html += drawerFooter('<button class="btn btn-danger btn-sm" onclick="confirmDanger(\'Archiver ce pro ?\',\'Le pro sera archivé. Les events liés ne sont pas supprimés.\',()=>archivePro(\''+p.id+'\'),\'Archiver\')">🗑 Archiver</button><button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>');
+    html += drawerFooter('<button class="btn btn-danger btn-sm" onclick="confirmDanger(\'Archiver ce pro ?\',\'Le pro sera archivé. Les events liés ne sont pas supprimés.\',()=>archivePro(\''+p.id+'\'),\'Archiver\')">🗑 Archiver</button><button class="btn btn-sm" onclick="openProMobileModal(\''+p.id+'\')">📱 Aperçu mobile</button><button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>');
   }
   return html;
 }
@@ -3515,7 +3515,98 @@ function renderBiblioJoueurs(){
   `;
 
   let html = '<div class="page">';
-  html += '<style>'+xtraCss+'</style>';
+  html += `<style>${xtraCss}
+/* ═══════════════════════════════════════════════════════════════════ */
+/* MODAL PARCOURS PRO MOBILE                                           */
+/* ═══════════════════════════════════════════════════════════════════ */
+.pro-mobile-modal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.pmm-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+}
+.pmm-content {
+  position: relative;
+  background: var(--sa-bg, #fff);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  max-width: 95vw; max-height: 95vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  min-width: 480px;
+}
+.pmm-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--sa-border, #e5e7eb);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.pmm-title { font-size: 16px; font-weight: 800; color: var(--sa-text, #111); }
+.pmm-sub { font-size: 13px; color: var(--sa-muted, #6b7280); grid-column: 1; }
+.pmm-close {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  background: var(--sa-subtle, #f3f4f6); border: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.pmm-close:hover { background: var(--sa-border, #e5e7eb); }
+.pmm-body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  overflow: auto;
+}
+.pmm-phone {
+  width: 380px; height: 780px;
+  background: #000;
+  border-radius: 44px;
+  padding: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18), inset 0 0 0 2px #1f2937;
+  position: relative;
+  flex-shrink: 0;
+}
+.pmm-phone-notch {
+  position: absolute;
+  top: 12px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 24px;
+  background: #000; border-radius: 0 0 16px 16px;
+  z-index: 2;
+}
+.pmm-phone iframe {
+  width: 100%; height: 100%;
+  border-radius: 32px;
+  background: #fff;
+}
+.pmm-actions {
+  display: flex; flex-direction: column;
+  gap: 12px; align-items: flex-start;
+  align-self: start;
+  padding-top: 8px;
+}
+.pmm-url-display {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--sa-muted, #6b7280);
+  background: var(--sa-subtle, #f3f4f6);
+  padding: 8px 12px;
+  border-radius: 8px;
+  word-break: break-all;
+  max-width: 320px;
+}
+@media (max-width: 900px){
+  .pmm-body { grid-template-columns: 1fr; }
+  .pmm-phone { width: 320px; height: 680px; }
+}
+
+</style>`;
 
   // En-tête page
   html += '<div class="page-header">'
@@ -10078,7 +10169,101 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
   }
 });
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* MODAL PARCOURS PRO MOBILE                                           */
+/* ═══════════════════════════════════════════════════════════════════ */
+function openProMobileModal(proId){
+  if(!proId) { console.warn('[Flowin] openProMobileModal: proId vide'); return; }
+  var pro = (typeof findPro === 'function') ? findPro(proId) : null;
+  var proNom = pro ? pro.nom : proId;
+  var modal = document.getElementById('proMobileModal');
+  var iframe = document.getElementById('pmmIframe');
+  var sub = document.getElementById('pmmSub');
+  var urlDisp = document.getElementById('pmmUrlDisplay');
+  var openLink = document.getElementById('pmmOpenLink');
+  if(!modal || !iframe) return;
+  
+  /* Construction de l'URL : relative pour preview locale, absolue pour partage */
+  var localUrl = 'pro_mobile.html?pro=' + encodeURIComponent(proId);
+  var origin = window.location.origin && window.location.origin !== 'null'
+               ? window.location.origin
+               : 'https://flowin-events.vercel.app';
+  var fullUrl = origin + '/' + localUrl;
+  
+  sub.textContent = proNom + ' · ' + proId;
+  iframe.src = localUrl;
+  urlDisp.textContent = fullUrl;
+  openLink.href = fullUrl;
+  
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  /* Mémoriser pour la copie */
+  modal.dataset.url = fullUrl;
+}
+
+function closeProMobileModal(){
+  var modal = document.getElementById('proMobileModal');
+  var iframe = document.getElementById('pmmIframe');
+  if(!modal) return;
+  modal.style.display = 'none';
+  if(iframe) iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+function pmmCopyLink(){
+  var modal = document.getElementById('proMobileModal');
+  var url = (modal && modal.dataset.url) || '';
+  if(!url) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){
+      if(typeof toast === 'function') toast('Lien copié dans le presse-papier');
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    if(typeof toast === 'function') toast('Lien copié');
+  }
+}
+
+/* Échap pour fermer */
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    var modal = document.getElementById('proMobileModal');
+    if(modal && modal.style.display !== 'none') closeProMobileModal();
+  }
+});
+
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- MODAL PARCOURS PRO MOBILE (aperçu live de pro_mobile.html)          -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="proMobileModal" class="pro-mobile-modal" style="display:none">
+  <div class="pmm-backdrop" onclick="closeProMobileModal()"></div>
+  <div class="pmm-content">
+    <div class="pmm-header">
+      <div class="pmm-title">📱 Aperçu Parcours PRO Mobile</div>
+      <div class="pmm-sub" id="pmmSub">—</div>
+      <button class="pmm-close" onclick="closeProMobileModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="pmm-body">
+      <div class="pmm-phone">
+        <div class="pmm-phone-notch"></div>
+        <iframe id="pmmIframe" src="about:blank" frameborder="0"
+                allow="clipboard-write"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="pmm-actions">
+        <a id="pmmOpenLink" href="#" target="_blank" class="btn btn-primary">↗ Ouvrir dans un nouvel onglet</a>
+        <button class="btn" onclick="pmmCopyLink()">📋 Copier le lien</button>
+        <div class="pmm-url-display" id="pmmUrlDisplay">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 <!-- cache bust 1778541793 -->
