@@ -2646,6 +2646,70 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 </div>
 
 <script>
+
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* Helper de collecte des champs form depuis un viewport               */
+/* (utilisé par pq/qs/spin/vs/qmSubmitForm pour Supabase)              */
+/* ═══════════════════════════════════════════════════════════════════ */
+function _flowinCollectFormFields(viewportSelector){
+  var vp = document.querySelector(viewportSelector + ' .page.on') || document.querySelector(viewportSelector);
+  if(!vp) return {};
+  var inputs = vp.querySelectorAll('input');
+  var extra = {};
+  for(var i=0; i<inputs.length; i++){
+    var inp = inputs[i];
+    var val = (inp.value || '').trim();
+    var ph = (inp.placeholder || '').toLowerCase();
+    if(!val) continue;
+    /* Email en PREMIER pour éviter qu'il matche prenom (placeholder camille@...) */
+    if(val.indexOf('@')>=0){ extra.email = val; continue; }
+    if(/06|07|t.l|phone/i.test(ph) || /^\d[\s\d]+$/.test(val)){ extra.tel = val; continue; }
+    if(/ans|age/i.test(ph) || /ans/.test(val)){ extra.age_tranche = val; continue; }
+    if(/postal|cp|zip/i.test(ph) || /^\d{4,5}$/.test(val)){ extra.code_postal = val; continue; }
+    /* Prenom : placeholder STRICTEMENT prenom (sans @) */
+    if(/^(camille|l.a|marie|sophie|lucie)$/i.test(ph) || /pr.nom|firstname/i.test(ph)){ extra.prenom = val; continue; }
+    /* Nom : placeholder STRICTEMENT nom */
+    if(/^(dupont|martin|durand|bernard|petit)$/i.test(ph) || /lastname|^nom$/i.test(ph)){ extra.nom = val; continue; }
+    /* Fallback : texte alpha court non identifié */
+    if(val.length<30 && !val.match(/[@\d]/)){
+      if(!extra.prenom) extra.prenom = val;
+      else if(!extra.nom) extra.nom = val;
+    }
+  }
+  var genderSel = vp.querySelector('[data-gender].sel');
+  if(genderSel){ extra.genre = genderSel.getAttribute('data-gender') === 'F' ? 'Femme' : 'Homme'; }
+  var sourceSel = vp.querySelector('.pq-form-source-chip.sel:not([data-gender]), [data-source].sel');
+  if(sourceSel && sourceSel.textContent){ extra.source = sourceSel.textContent.trim(); }
+  return extra;
+}
+
+/* Helper : trouver l'input email d'un viewport (fallback si pas de type=email) */
+function _flowinFindEmail(viewportSelector, defaultEmail){
+  var vp = document.querySelector(viewportSelector);
+  if(!vp) return defaultEmail || '';
+  /* 1) Cherche un input type=email */
+  var em = vp.querySelector('[type="email"]');
+  if(em && em.value) return em.value.trim();
+  /* 2) Cherche un input dont le placeholder contient '@' */
+  var inputs = vp.querySelectorAll('input');
+  for(var i=0; i<inputs.length; i++){
+    var inp = inputs[i];
+    var ph = (inp.placeholder || '');
+    if(ph.indexOf('@') >= 0 && inp.value && inp.value.trim()){
+      return inp.value.trim();
+    }
+  }
+  /* 3) Cherche un input dont la value contient '@' */
+  for(var j=0; j<inputs.length; j++){
+    var v = (inputs[j].value || '').trim();
+    if(v.indexOf('@') >= 0) return v;
+  }
+  return defaultEmail || '';
+}
+
+
+
 /* Navigation téléphone Spin */
 function spinGo(n){
   var vp = document.getElementById('vp-spin');
@@ -3168,8 +3232,7 @@ function pqContactNo(el){
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
 function spinSubmitForm(){
-  var email = document.querySelector('#vp-spin [type="email"]');
-  var emailVal = email ? email.value : 'camille@exemple.fr';
+  var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
   if(checkDuplicate('sp', emailVal, spinGo, 8)) return;
   var _extra = _flowinCollectFormFields('#vp-spin');
   registerPlay('sp', emailVal, 'FW-SR-2814', _extra);
@@ -3178,8 +3241,7 @@ function spinSubmitForm(){
 
 /* Anti-doublon sur soumission form Quiz Solo (qs-2 → qs-3) */
 function qsSubmitForm(){
-  var email = document.querySelector('#vp-quizsolo [type="email"]');
-  var emailVal = email ? email.value : 'lea@exemple.fr';
+  var emailVal = _flowinFindEmail('#vp-quizsolo', 'lea@exemple.fr');
   if(checkDuplicate('qs', emailVal, qsGo, 8)) return;
   var _extra = _flowinCollectFormFields('#vp-quizsolo');
   registerPlay('qs', emailVal, 'QS-2026-LEA', _extra);
@@ -3188,8 +3250,7 @@ function qsSubmitForm(){
 
 /* Anti-doublon sur soumission form Quiz Pâques (pq-5 → pq-6) */
 function pqSubmitForm(){
-  var email = document.querySelector('#vp-paques [type="email"]');
-  var emailVal = email ? email.value : 'camille@exemple.fr';
+  var emailVal = _flowinFindEmail('#vp-paques', 'camille@exemple.fr');
   if(checkDuplicate('pq', emailVal, pqGo, 11)) return;
   var _extra = _flowinCollectFormFields('#vp-paques');
   registerPlay('pq', emailVal, 'PQ-2026-1427', _extra);
@@ -3213,8 +3274,7 @@ function qmGo(n){
 }
 
 function qmSubmitForm(){
-  var email = document.querySelector('#vp-quizmaster [type="email"]');
-  var emailVal = email ? email.value : 'camille@exemple.fr';
+  var emailVal = _flowinFindEmail('#vp-quizmaster', 'participant@exemple.fr');
   if(checkDuplicate('qm', emailVal, qmGo, 11)) return;
   var _extra = _flowinCollectFormFields('#vp-quizmaster');
   registerPlay('qm', emailVal, 'QM-2026-LIVE', _extra);
@@ -3260,8 +3320,7 @@ function qmRenderSocial(){
 
 /* Anti-doublon sur soumission form Vote Étoiles (vs-7 → vs-8) */
 function vsSubmitForm(){
-  var email = document.querySelector('#vp-votestars [type="email"]');
-  var emailVal = email ? email.value : 'lea@exemple.fr';
+  var emailVal = _flowinFindEmail('#vp-votestars', 'lea@exemple.fr');
   if(checkDuplicate('vs', emailVal, vsGo, 10)) return;
   var _extra = _flowinCollectFormFields('#vp-votestars');
   registerPlay('vs', emailVal, 'VS-2026-LEA', _extra);
