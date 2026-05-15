@@ -1663,10 +1663,10 @@ async function supaWriteJoueur(j){
 // Upsert event → Supabase + GAS fallback
 async function supaWriteEvent(e){
   if(!e || !e.id) return;
-  // Génération auto qrUrl si manquant
-  if(e.cfg && !e.cfg.qrUrl){
-    e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
-  }
+  // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
+  // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
+  if(!e.cfg) e.cfg = {};
+  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
