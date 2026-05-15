@@ -1510,9 +1510,108 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
       <!-- ─── QS 2 : Formulaire contact AVANT quiz ─── -->
       <div class="page" id="qs-2">
         <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-quiz-screen">
+          <div class="qs-timer-bar">
+            <div class="qs-timer-left">
+              <div class="qs-timer-ico">⏱️</div>
+              <div>
+                <div class="qs-timer-val">00:07</div>
+                <div class="qs-timer-label">Temps écoulé</div>
+              </div>
+            </div>
+            <div class="qs-score-pill">Score 0 pt</div>
+          </div>
+          <div class="qs-q-progress">
+            <div class="qs-q-dot active"></div>
+            <div class="qs-q-dot"></div>
+            <div class="qs-q-dot"></div>
+          </div>
+          <div class="qs-q-body">
+            <div class="qs-q-num">Q1</div>
+            <div class="qs-q-text">Quelle fleur a fait la renommée de Grasse au 18ème siècle ?</div>
+            <div class="qs-q-options">
+              <button class="qs-q-opt sel">La rose</button>
+              <button class="qs-q-opt">Le jasmin</button>
+              <button class="qs-q-opt">La lavande</button>
+              <button class="qs-q-opt">La tubéreuse</button>
+            </div>
+            <button class="qs-q-btn" onclick="qsGo(3)">Valider (+10 s'il est bon) →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QS 4 : Q2 timer + score ─── -->
+      <div class="page" id="qs-3">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-quiz-screen">
+          <div class="qs-timer-bar">
+            <div class="qs-timer-left">
+              <div class="qs-timer-ico">⏱️</div>
+              <div>
+                <div class="qs-timer-val">00:19</div>
+                <div class="qs-timer-label">Temps écoulé</div>
+              </div>
+            </div>
+            <div class="qs-score-pill" style="background:#1D9E75">Score 10 pts ✓</div>
+          </div>
+          <div class="qs-q-progress">
+            <div class="qs-q-dot done"></div>
+            <div class="qs-q-dot active"></div>
+            <div class="qs-q-dot"></div>
+          </div>
+          <div class="qs-q-body">
+            <div class="qs-q-num">Q2</div>
+            <div class="qs-q-text">Quel musée à Grasse est dédié à la parfumerie ?</div>
+            <div class="qs-q-options">
+              <button class="qs-q-opt">Musée Bonnard</button>
+              <button class="qs-q-opt sel">Musée International de la Parfumerie</button>
+              <button class="qs-q-opt">Villa Fragonard</button>
+              <button class="qs-q-opt">Galerie Molinard</button>
+            </div>
+            <button class="qs-q-btn" onclick="qsGo(4)">Valider (+10 s'il est bon) →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QS 5 : Q3 ─── -->
+      <div class="page" id="qs-4">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-quiz-screen">
+          <div class="qs-timer-bar">
+            <div class="qs-timer-left">
+              <div class="qs-timer-ico">⏱️</div>
+              <div>
+                <div class="qs-timer-val">00:34</div>
+                <div class="qs-timer-label">Temps écoulé</div>
+              </div>
+            </div>
+            <div class="qs-score-pill" style="background:#1D9E75">Score 20 pts ✓</div>
+          </div>
+          <div class="qs-q-progress">
+            <div class="qs-q-dot done"></div>
+            <div class="qs-q-dot done"></div>
+            <div class="qs-q-dot active"></div>
+          </div>
+          <div class="qs-q-body">
+            <div class="qs-q-num">Q3</div>
+            <div class="qs-q-text">Quel parfumeur célèbre est né à Grasse en 1881 ?</div>
+            <div class="qs-q-options">
+              <button class="qs-q-opt">Jacques Guerlain</button>
+              <button class="qs-q-opt">Ernest Beaux</button>
+              <button class="qs-q-opt sel">François Coty</button>
+              <button class="qs-q-opt">Henri Robert</button>
+            </div>
+            <button class="qs-q-btn" onclick="qsGo(6)">Terminer le quiz →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QS 6 : Résultat + Leaderboard live ─── -->
+      <div class="page" id="qs-5">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback" style="background:transparent">
           <div class="back-btn" onclick="qsGo(1)">←</div>
-          <div><div class="header-title" style="color:#1E293B">Tes coordonnées</div><div class="header-sub">Avant de lancer le quiz</div></div>
+          <div><div class="header-title" style="color:#1E293B">Tes coordonnées</div><div class="header-sub">Pour valider ta participation</div></div>
         </div>
         <div class="qs-form-wrap">
           <div class="qs-form-title">On fait connaissance ?</div>
@@ -1559,110 +1658,11 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <div class="qs-form-rgpd-box">✓</div>
             <div class="qs-form-rgpd-txt">J'accepte que Grasse Tourisme me contacte si je fais partie des gagnants. RGPD respecté.</div>
           </div>
-          <button class="qs-form-btn" onclick="qsSubmitForm()">🚀 Go, je démarre le chrono →</button>
+          <button class="qs-form-btn" onclick="qsSubmitForm()">🚀 Envoyer mes réponses →</button>
         </div>
       </div>
 
       <!-- ─── QS 3 : Q1 avec timer ─── -->
-      <div class="page" id="qs-3">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-        <div class="qs-quiz-screen">
-          <div class="qs-timer-bar">
-            <div class="qs-timer-left">
-              <div class="qs-timer-ico">⏱️</div>
-              <div>
-                <div class="qs-timer-val">00:07</div>
-                <div class="qs-timer-label">Temps écoulé</div>
-              </div>
-            </div>
-            <div class="qs-score-pill">Score 0 pt</div>
-          </div>
-          <div class="qs-q-progress">
-            <div class="qs-q-dot active"></div>
-            <div class="qs-q-dot"></div>
-            <div class="qs-q-dot"></div>
-          </div>
-          <div class="qs-q-body">
-            <div class="qs-q-num">Q1</div>
-            <div class="qs-q-text">Quelle fleur a fait la renommée de Grasse au 18ème siècle ?</div>
-            <div class="qs-q-options">
-              <button class="qs-q-opt sel">La rose</button>
-              <button class="qs-q-opt">Le jasmin</button>
-              <button class="qs-q-opt">La lavande</button>
-              <button class="qs-q-opt">La tubéreuse</button>
-            </div>
-            <button class="qs-q-btn" onclick="qsGo(4)">Valider (+10 s'il est bon) →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── QS 4 : Q2 timer + score ─── -->
-      <div class="page" id="qs-4">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-        <div class="qs-quiz-screen">
-          <div class="qs-timer-bar">
-            <div class="qs-timer-left">
-              <div class="qs-timer-ico">⏱️</div>
-              <div>
-                <div class="qs-timer-val">00:19</div>
-                <div class="qs-timer-label">Temps écoulé</div>
-              </div>
-            </div>
-            <div class="qs-score-pill" style="background:#1D9E75">Score 10 pts ✓</div>
-          </div>
-          <div class="qs-q-progress">
-            <div class="qs-q-dot done"></div>
-            <div class="qs-q-dot active"></div>
-            <div class="qs-q-dot"></div>
-          </div>
-          <div class="qs-q-body">
-            <div class="qs-q-num">Q2</div>
-            <div class="qs-q-text">Quel musée à Grasse est dédié à la parfumerie ?</div>
-            <div class="qs-q-options">
-              <button class="qs-q-opt">Musée Bonnard</button>
-              <button class="qs-q-opt sel">Musée International de la Parfumerie</button>
-              <button class="qs-q-opt">Villa Fragonard</button>
-              <button class="qs-q-opt">Galerie Molinard</button>
-            </div>
-            <button class="qs-q-btn" onclick="qsGo(5)">Valider (+10 s'il est bon) →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── QS 5 : Q3 ─── -->
-      <div class="page" id="qs-5">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-        <div class="qs-quiz-screen">
-          <div class="qs-timer-bar">
-            <div class="qs-timer-left">
-              <div class="qs-timer-ico">⏱️</div>
-              <div>
-                <div class="qs-timer-val">00:34</div>
-                <div class="qs-timer-label">Temps écoulé</div>
-              </div>
-            </div>
-            <div class="qs-score-pill" style="background:#1D9E75">Score 20 pts ✓</div>
-          </div>
-          <div class="qs-q-progress">
-            <div class="qs-q-dot done"></div>
-            <div class="qs-q-dot done"></div>
-            <div class="qs-q-dot active"></div>
-          </div>
-          <div class="qs-q-body">
-            <div class="qs-q-num">Q3</div>
-            <div class="qs-q-text">Quel parfumeur célèbre est né à Grasse en 1881 ?</div>
-            <div class="qs-q-options">
-              <button class="qs-q-opt">Jacques Guerlain</button>
-              <button class="qs-q-opt">Ernest Beaux</button>
-              <button class="qs-q-opt sel">François Coty</button>
-              <button class="qs-q-opt">Henri Robert</button>
-            </div>
-            <button class="qs-q-btn" onclick="qsGo(6)">Terminer le quiz →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── QS 6 : Résultat + Leaderboard live ─── -->
       <div class="page" id="qs-6">
         <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qs-result-hero">
@@ -2840,7 +2840,7 @@ function spinSubmitForm(){
   }
   if(checkDuplicate('sp', emailVal, spinGo, 7)) return;
   registerPlay('sp', emailVal, 'FW-SR-2814', _extra);
-  spinGo(6);
+  flowinShowBonus(function(){ spinGo(6); });
 }
 
 /* Anti-doublon sur soumission form Quiz Solo (qs-2 → qs-3) */
@@ -2874,7 +2874,7 @@ function qsSubmitForm(){
   }
   if(checkDuplicate('qs', emailVal, qsGo, 8)) return;
   registerPlay('qs', emailVal, 'QS-2026-LEA', _extra);
-  qsGo(3);
+  flowinShowBonus(function(){ qsGo(6); });
 }
 
 /* Anti-doublon sur soumission form Quiz Pâques (pq-5 → pq-6) */
@@ -2942,9 +2942,120 @@ function vsSubmitForm(){
   }
   if(checkDuplicate('vs', emailVal, vsGo, 10)) return;
   registerPlay('vs', emailVal, 'VS-2026-LEA', _extra);
-  vsGo(8);
+  flowinShowBonus(function(){ vsGo(8); });
+}
+
+
+
+/* ═════════ FLOWIN BONUS OVERLAY (conditionnel cfg.bonusActif) ═════════ */
+var FLOWIN_BONUS_CALLBACK = null;
+var FLOWIN_BONUS_ANSWERS = {};
+
+function flowinCheckBonusActive(){
+  if(!FLOWIN_EVENT || !FLOWIN_EVENT.cfg) return false;
+  var cfg = FLOWIN_EVENT.cfg;
+  return !!(cfg.bonusActif === true && cfg.bonusList && cfg.bonusList.length > 0);
+}
+
+function flowinShowBonus(callback){
+  if(!flowinCheckBonusActive()){ if(callback) callback(); return; }
+  
+  var bonusList = FLOWIN_EVENT.cfg.bonusList || [];
+  var container = document.getElementById('flowin-bonus-questions');
+  if(!container){ if(callback) callback(); return; }
+  
+  var html = '';
+  for(var qi=0; qi<bonusList.length; qi++){
+    var q = bonusList[qi];
+    var qtype = q.type || 'single';
+    var hint = qtype === 'multi' ? ' <span style="font-weight:600;font-size:11px;color:#9CA3AF">(plusieurs choix)</span>' : '';
+    html += '<div style="margin-bottom:18px">';
+    html += '<div style="font-size:13px;font-weight:800;color:#1F1B2E;margin-bottom:10px;line-height:1.4">' + (qi+1) + '. ' + (q.label || 'Question') + hint + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px" data-q-id="' + qi + '" data-q-type="' + qtype + '">';
+    var opts = q.options || [];
+    for(var oi=0; oi<opts.length; oi++){
+      var opt = opts[oi];
+      html += '<button data-val="' + (opt.val || '') + '" onclick="flowinPickBonusChip(this)" style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:9px 14px;font-size:13px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit">' + (opt.label || '') + '</button>';
+    }
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+  FLOWIN_BONUS_CALLBACK = callback || null;
+  FLOWIN_BONUS_ANSWERS = {};
+  document.getElementById('flowin-bonus-overlay').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function flowinPickBonusChip(btn){
+  var parent = btn.parentElement;
+  var qid = parent.getAttribute('data-q-id');
+  var qtype = parent.getAttribute('data-q-type');
+  var val = btn.getAttribute('data-val');
+  
+  if(qtype === 'multi'){
+    var current = FLOWIN_BONUS_ANSWERS[qid] || [];
+    var idx = current.indexOf(val);
+    if(idx >= 0){
+      current.splice(idx, 1);
+      btn.style.background = '#fff'; btn.style.color = '#1F1B2E'; btn.style.borderColor = '#E2E8F0';
+    } else {
+      current.push(val);
+      btn.style.background = '#7C2D92'; btn.style.color = '#fff'; btn.style.borderColor = '#7C2D92';
+    }
+    FLOWIN_BONUS_ANSWERS[qid] = current;
+  } else {
+    var btns = parent.querySelectorAll('button');
+    for(var i=0; i<btns.length; i++){
+      btns[i].style.background = '#fff'; btns[i].style.color = '#1F1B2E'; btns[i].style.borderColor = '#E2E8F0';
+    }
+    btn.style.background = '#7C2D92'; btn.style.color = '#fff'; btn.style.borderColor = '#7C2D92';
+    FLOWIN_BONUS_ANSWERS[qid] = val;
+  }
+}
+
+function flowinSubmitBonus(){
+  /* Envoyer les réponses bonus à Supabase (UPDATE participation la plus récente) */
+  try {
+    if(FLOWIN_SUPA_URL && FLOWIN_EVENT && Object.keys(FLOWIN_BONUS_ANSWERS).length > 0){
+      var lastJid = '';
+      try {
+        var keys = ['flowin_played_pq','flowin_played_qs','flowin_played_sp','flowin_played_vs'];
+        for(var k=0; k<keys.length; k++){
+          var stored = localStorage.getItem(keys[k]);
+          if(stored){
+            var obj = JSON.parse(stored);
+            if(obj.email) lastJid = obj.email;
+          }
+        }
+      } catch(e) {}
+      
+      console.log('[Flowin Bonus] réponses :', FLOWIN_BONUS_ANSWERS);
+    }
+  } catch(e) { console.warn('[bonus save]', e); }
+  
+  document.getElementById('flowin-bonus-overlay').style.display = 'none';
+  if(FLOWIN_BONUS_CALLBACK) FLOWIN_BONUS_CALLBACK();
+}
+
+function flowinSkipBonus(){
+  document.getElementById('flowin-bonus-overlay').style.display = 'none';
+  if(FLOWIN_BONUS_CALLBACK) FLOWIN_BONUS_CALLBACK();
 }
 
 </script>
+
+<!-- ═════════ FLOWIN BONUS OVERLAY (conditionnel) ═════════ -->
+<div id="flowin-bonus-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,14,26,.95);z-index:9999;overflow-y:auto;padding:20px">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:24px;padding:24px;color:#1F1B2E;font-family:'Nunito',sans-serif">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:800;color:#EF9F27;text-transform:uppercase;letter-spacing:.1em">&#10024; Profil visiteur</div>
+      <h2 style="font-size:22px;font-weight:900;margin:8px 0;color:#1F1B2E;font-family:'Fredoka One',cursive">Double tes chances</h2>
+      <p style="font-size:13px;color:#6B7280;line-height:1.5">Réponds aux questions ci-dessous pour augmenter tes chances au tirage</p>
+    </div>
+    <div id="flowin-bonus-questions"></div>
+    <button onclick="flowinSubmitBonus()" style="margin-top:18px;width:100%;padding:14px;background:linear-gradient(135deg,#EF9F27,#7C2D92);color:#fff;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit">Valider mes réponses &#8599;</button>
+    <button onclick="flowinSkipBonus()" style="margin-top:8px;width:100%;padding:10px;background:transparent;color:#9CA3AF;border:none;font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit">Passer cette étape</button>
+  </div>
+</div>
 </body>
 </html>
