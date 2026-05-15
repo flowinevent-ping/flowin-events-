@@ -915,6 +915,13 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <label class="form-label">Téléphone</label>
             <input class="form-input" placeholder="06 12 34 56 78">
           </div>
+          <div class="form-field">
+            <label class="form-label">Genre</label>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button style="flex:1;background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:9px 11px;font-size:13px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif" data-gender="H" onclick="sechPickSource(this)">👨 Homme</button>
+              <button style="flex:1;background:var(--a);color:#fff;border:1.5px solid var(--a);border-radius:100px;padding:9px 11px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif" data-gender="F" onclick="sechPickSource(this)">👩 Femme</button>
+            </div>
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="form-field">
               <label class="form-label">Âge</label>
@@ -1202,6 +1209,13 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="pq-form-field">
             <label class="pq-form-label">Téléphone</label>
             <input class="pq-form-input" placeholder="06 12 34 56 78">
+          </div>
+          <div class="pq-form-field">
+            <label class="pq-form-label">Genre</label>
+            <div class="pq-form-source-chips" data-group="genre-pq">
+              <button class="pq-form-source-chip" data-gender="H" onclick="pqPickSource(this)">👨 Homme</button>
+              <button class="pq-form-source-chip sel" data-gender="F" onclick="pqPickSource(this)">👩 Femme</button>
+            </div>
           </div>
           <div class="pq-form-grid">
             <div class="pq-form-field">
@@ -1514,6 +1528,32 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="qs-form-field">
             <label class="qs-form-label">Téléphone</label>
             <input class="qs-form-input" placeholder="06 XX XX XX XX">
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Genre</label>
+            <div style="display:flex;gap:8px">
+              <button style="flex:1;background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:10px;font-size:13px;font-weight:800;color:#1E293B;cursor:pointer;font-family:'Nunito',sans-serif" data-gender="H" onclick="qsPickChip(this)">👨 Homme</button>
+              <button style="flex:1;background:#1E293B;color:#fff;border:1.5px solid #1E293B;border-radius:100px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif" data-gender="F" onclick="qsPickChip(this)">👩 Femme</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="qs-form-field">
+              <label class="qs-form-label">Âge</label>
+              <input class="qs-form-input" placeholder="26-35 ans" value="26-35 ans">
+            </div>
+            <div class="qs-form-field">
+              <label class="qs-form-label">Code postal</label>
+              <input class="qs-form-input" placeholder="06130" value="06130">
+            </div>
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+              <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1E293B;cursor:pointer;font-family:'Nunito',sans-serif" onclick="qsPickChip(this)">📸 Instagram</button>
+              <button style="background:#1E293B;color:#fff;border:1.5px solid #1E293B;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif" onclick="qsPickChip(this)">🏛️ Site mairie</button>
+              <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1E293B;cursor:pointer;font-family:'Nunito',sans-serif" onclick="qsPickChip(this)">🗒️ Affiche / Flyer</button>
+              <button style="background:#fff;border:1.5px solid #E2E8F0;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1E293B;cursor:pointer;font-family:'Nunito',sans-serif" onclick="qsPickChip(this)">📣 Bouche à oreille</button>
+            </div>
           </div>
           <div class="qs-form-rgpd">
             <div class="qs-form-rgpd-box">✓</div>
@@ -1994,6 +2034,13 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Téléphone</label>
             <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="06 XX XX XX XX">
           </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Genre</label>
+            <div style="display:flex;gap:8px">
+              <button style="flex:1;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:9px 11px;font-size:13px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" data-gender="H" onclick="vsPickSource(this)">👨 Homme</button>
+              <button style="flex:1;background:#FCD34D;border:1.5px solid #FCD34D;border-radius:100px;padding:9px 11px;font-size:13px;font-weight:800;color:#1E1B4B;cursor:pointer;font-family:'Nunito',sans-serif" data-gender="F" onclick="vsPickSource(this)">👩 Femme</button>
+            </div>
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
             <div>
               <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Âge</label>
@@ -2198,10 +2245,12 @@ async function supaWriteFlowin(prefix, emailVal, ticketCode, extraFields){
     nom: (extraFields && extraFields.nom) || '',
     prenom: (extraFields && extraFields.prenom) || '',
     tel: (extraFields && extraFields.tel) || '',
+    genre: (extraFields && extraFields.genre) || '',
+    age_tranche: (extraFields && extraFields.age_tranche) || '',
     ville: (extraFields && extraFields.ville) || '',
     code_postal: (extraFields && extraFields.code_postal) || '',
     events: [FLOWIN_EV_ID],
-    source: 'QR '+(moduleMap[prefix] || prefix),
+    source: (extraFields && extraFields.source) ? extraFields.source : ('QR '+(moduleMap[prefix] || prefix)),
     optin: true,
     optin_date: today,
     first_seen: today,
@@ -2647,6 +2696,19 @@ function vsPickSource(el){
   el.style.color = '#1E1B4B';
 }
 
+/* QuizSolo : chips inline navy/blanc */
+function qsPickChip(el){
+  var parent = el.parentElement;
+  parent.querySelectorAll('button').forEach(function(c){
+    c.style.background = '#fff';
+    c.style.borderColor = '#E2E8F0';
+    c.style.color = '#1E293B';
+  });
+  el.style.background = '#1E293B';
+  el.style.borderColor = '#1E293B';
+  el.style.color = '#fff';
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════ */
 /* FONCTIONS PARTAGÉES — partage bottom-sheet, contact, anti-doublon  */
@@ -2717,11 +2779,11 @@ function checkDuplicate(prefix, emailVal, goFn, adPage){
   return false; // pas doublon
 }
 
-function registerPlay(prefix, emailVal, ticketCode){
+function registerPlay(prefix, emailVal, ticketCode, extraFields){
   try{
-    localStorage.setItem('flowin_played_'+prefix, JSON.stringify({email:emailVal, ticket:ticketCode, ts:Date.now()}));
+    localStorage.setItem('flowin_played_'+prefix, JSON.stringify({email:emailVal, ticket:ticketCode, extra:extraFields||null, ts:Date.now()}));
   }catch(e){}
-  try { supaWriteFlowin(prefix, emailVal, ticketCode); } catch(e){}
+  try { supaWriteFlowin(prefix, emailVal, ticketCode, extraFields); } catch(e){}
 }
 
 /* Init des fonctions pour chaque track */
@@ -2747,39 +2809,139 @@ function pqContactNo(el){
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
 function spinSubmitForm(){
-  var email = document.querySelector('#vp-spin #spin-5 .form-input') 
+  var email = document.querySelector('#vp-spin #spin-5 .form-input')
     ? document.querySelector('#vp-spin #spin-5 .form-input[placeholder*="email"], #vp-spin #spin-5 .form-input[placeholder*="confirmation"]')
     : null;
   var emailVal = email ? email.value : 'camille@exemple.fr';
+  if(!emailVal || emailVal.indexOf('@')<0) emailVal = 'camille@exemple.fr';
+  /* Lire tous les champs du formulaire sp */
+  var _vp = document.querySelector('#vp-spin');
+  var _inputs = _vp ? _vp.querySelectorAll('input') : [];
+  var _selChips = _vp ? _vp.querySelectorAll('button.sel, button[style*="background: rgb(30, 27, 75)"], button[style*="background: var(--a)"], button[style*="background: rgb(252, 211, 77)"], button[style*="background:#FCD34D"], button[style*="background:#1E293B"]') : [];
+  var _extra = { prenom:'', nom:'', tel:'', genre:'', age_tranche:'', ville:'', code_postal:'', source:'' };
+  for(var _i=0;_i<_inputs.length;_i++){
+    var _inp = _inputs[_i];
+    var _val = (_inp.value || '').trim();
+    var _ph = (_inp.placeholder || '').toLowerCase();
+    if(!_val) continue;
+    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
+    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+  }
+  /* Genre + Source depuis chips sélectionnés */
+  for(var _j=0;_j<_selChips.length;_j++){
+    var _btn = _selChips[_j];
+    var _gender = _btn.getAttribute('data-gender');
+    var _txt = (_btn.textContent || '').trim();
+    if(_gender) _extra.genre = (_gender === 'H' ? 'homme' : 'femme');
+    else if(_txt && !_extra.source) _extra.source = _txt.replace(/^[^\w]+/, '').trim();
+  }
   if(checkDuplicate('sp', emailVal, spinGo, 7)) return;
-  registerPlay('sp', emailVal, 'FW-SR-2814');
+  registerPlay('sp', emailVal, 'FW-SR-2814', _extra);
   spinGo(6);
 }
 
 /* Anti-doublon sur soumission form Quiz Solo (qs-2 → qs-3) */
 function qsSubmitForm(){
-  var email = document.querySelector('#vp-quizsolo .qs-form-input[placeholder*="exemple"]');
-  var emailVal = email ? email.value : 'lea@exemple.fr';
+  var emailEl = document.querySelector('#vp-quizsolo .qs-form-input[placeholder*="exemple"]');
+  var emailVal = emailEl ? emailEl.value : 'lea@exemple.fr';
+  if(!emailVal || emailVal.indexOf('@')<0) emailVal = 'lea@exemple.fr';
+  /* Lire tous les champs du formulaire qs */
+  var _vp = document.querySelector('#vp-quizsolo');
+  var _inputs = _vp ? _vp.querySelectorAll('input') : [];
+  var _selChips = _vp ? _vp.querySelectorAll('button.sel, button[style*="background: rgb(30, 27, 75)"], button[style*="background: var(--a)"], button[style*="background: rgb(252, 211, 77)"], button[style*="background:#FCD34D"], button[style*="background:#1E293B"]') : [];
+  var _extra = { prenom:'', nom:'', tel:'', genre:'', age_tranche:'', ville:'', code_postal:'', source:'' };
+  for(var _i=0;_i<_inputs.length;_i++){
+    var _inp = _inputs[_i];
+    var _val = (_inp.value || '').trim();
+    var _ph = (_inp.placeholder || '').toLowerCase();
+    if(!_val) continue;
+    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
+    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+  }
+  /* Genre + Source depuis chips sélectionnés */
+  for(var _j=0;_j<_selChips.length;_j++){
+    var _btn = _selChips[_j];
+    var _gender = _btn.getAttribute('data-gender');
+    var _txt = (_btn.textContent || '').trim();
+    if(_gender) _extra.genre = (_gender === 'H' ? 'homme' : 'femme');
+    else if(_txt && !_extra.source) _extra.source = _txt.replace(/^[^\w]+/, '').trim();
+  }
   if(checkDuplicate('qs', emailVal, qsGo, 8)) return;
-  registerPlay('qs', emailVal, 'QS-2026-LEA');
+  registerPlay('qs', emailVal, 'QS-2026-LEA', _extra);
   qsGo(3);
 }
 
 /* Anti-doublon sur soumission form Quiz Pâques (pq-5 → pq-6) */
 function pqSubmitForm(){
-  var email = document.querySelector('#vp-paques [type="email"]');
-  var emailVal = email ? email.value : 'camille@exemple.fr';
+  var emailEl = document.querySelector('#vp-paques [type="email"]') || document.querySelector('#pq-5 input[placeholder*="exemple"]');
+  var emailVal = emailEl ? emailEl.value : 'camille@exemple.fr';
+  if(!emailVal || emailVal.indexOf('@')<0) emailVal = 'camille@exemple.fr';
+  /* Lire tous les champs du formulaire pq */
+  var _vp = document.querySelector('#vp-paques');
+  var _inputs = _vp ? _vp.querySelectorAll('input') : [];
+  var _selChips = _vp ? _vp.querySelectorAll('button.sel, button[style*="background: rgb(30, 27, 75)"], button[style*="background: var(--a)"], button[style*="background: rgb(252, 211, 77)"], button[style*="background:#FCD34D"], button[style*="background:#1E293B"]') : [];
+  var _extra = { prenom:'', nom:'', tel:'', genre:'', age_tranche:'', ville:'', code_postal:'', source:'' };
+  for(var _i=0;_i<_inputs.length;_i++){
+    var _inp = _inputs[_i];
+    var _val = (_inp.value || '').trim();
+    var _ph = (_inp.placeholder || '').toLowerCase();
+    if(!_val) continue;
+    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
+    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+  }
+  /* Genre + Source depuis chips sélectionnés */
+  for(var _j=0;_j<_selChips.length;_j++){
+    var _btn = _selChips[_j];
+    var _gender = _btn.getAttribute('data-gender');
+    var _txt = (_btn.textContent || '').trim();
+    if(_gender) _extra.genre = (_gender === 'H' ? 'homme' : 'femme');
+    else if(_txt && !_extra.source) _extra.source = _txt.replace(/^[^\w]+/, '').trim();
+  }
   if(checkDuplicate('pq', emailVal, pqGo, 11)) return;
-  registerPlay('pq', emailVal, 'PQ-2026-1427');
+  registerPlay('pq', emailVal, 'PQ-2026-1427', _extra);
   pqGo(6);
 }
 
 /* Anti-doublon sur soumission form Vote Étoiles (vs-7 → vs-8) */
 function vsSubmitForm(){
-  var email = document.querySelector('#vp-votestars input[placeholder*="exemple"]');
-  var emailVal = email ? email.value : 'lea@exemple.fr';
+  var emailEl = document.querySelector('#vp-votestars input[placeholder*="exemple"]');
+  var emailVal = emailEl ? emailEl.value : 'lea@exemple.fr';
+  if(!emailVal || emailVal.indexOf('@')<0) emailVal = 'lea@exemple.fr';
+  /* Lire tous les champs du formulaire vs */
+  var _vp = document.querySelector('#vp-votestars');
+  var _inputs = _vp ? _vp.querySelectorAll('input') : [];
+  var _selChips = _vp ? _vp.querySelectorAll('button.sel, button[style*="background: rgb(30, 27, 75)"], button[style*="background: var(--a)"], button[style*="background: rgb(252, 211, 77)"], button[style*="background:#FCD34D"], button[style*="background:#1E293B"]') : [];
+  var _extra = { prenom:'', nom:'', tel:'', genre:'', age_tranche:'', ville:'', code_postal:'', source:'' };
+  for(var _i=0;_i<_inputs.length;_i++){
+    var _inp = _inputs[_i];
+    var _val = (_inp.value || '').trim();
+    var _ph = (_inp.placeholder || '').toLowerCase();
+    if(!_val) continue;
+    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
+    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+  }
+  /* Genre + Source depuis chips sélectionnés */
+  for(var _j=0;_j<_selChips.length;_j++){
+    var _btn = _selChips[_j];
+    var _gender = _btn.getAttribute('data-gender');
+    var _txt = (_btn.textContent || '').trim();
+    if(_gender) _extra.genre = (_gender === 'H' ? 'homme' : 'femme');
+    else if(_txt && !_extra.source) _extra.source = _txt.replace(/^[^\w]+/, '').trim();
+  }
   if(checkDuplicate('vs', emailVal, vsGo, 10)) return;
-  registerPlay('vs', emailVal, 'VS-2026-LEA');
+  registerPlay('vs', emailVal, 'VS-2026-LEA', _extra);
   vsGo(8);
 }
 
