@@ -1665,7 +1665,7 @@ async function supaWriteEvent(e){
   if(!e || !e.id) return;
   // Génération auto qrUrl si manquant
   if(e.cfg && !e.cfg.qrUrl){
-    e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/?ev=' + e.id;
+    e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
   }
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
@@ -8360,7 +8360,7 @@ function wizSave(){
     toast('Event "'+d.nom+'" créé','success');
     supaWriteEvent(_newEv);
     // Génération auto qrUrl
-    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/?ev=' + id;
+    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + id;
   } else {
     const idx = DATA.events.findIndex(e=>e.id===state.wiz.editingId);
     if(idx>=0){
