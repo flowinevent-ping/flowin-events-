@@ -2708,6 +2708,20 @@ function _flowinFindEmail(viewportSelector, defaultEmail){
   return defaultEmail || '';
 }
 
+/* ═══════════ Fonctions PickChip pour QuizSolo/Spin/Vote ═══════════ */
+function _flowinPickChipGeneric(el){
+  if(!el || !el.parentElement) return;
+  var siblings = el.parentElement.querySelectorAll('button');
+  for(var i=0; i<siblings.length; i++){
+    siblings[i].classList.remove('sel');
+  }
+  el.classList.add('sel');
+}
+function qsPickChip(el){ _flowinPickChipGeneric(el); }
+function spinPickChip(el){ _flowinPickChipGeneric(el); }
+function vsPickChip(el){ _flowinPickChipGeneric(el); }
+
+
 
 
 /* Navigation téléphone Spin */
@@ -3262,9 +3276,9 @@ function pqSubmitForm(){
 /* ═══════════════════════════════════════════════════════════════════ */
 
 function qmGo(n){
-  var vp = document.getElementById('vp-paques');
+  var vp = document.getElementById('vp-quizmaster');
   vp.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  var target = document.getElementById('pq-' + n);
+  var target = document.getElementById('qm-' + n);
   if(target) target.classList.add('on');
   vp.scrollTop = 0;
   /* Transition loading → confirm automatique */
