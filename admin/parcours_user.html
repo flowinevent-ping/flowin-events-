@@ -2556,8 +2556,8 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
         </div>
         <div class="qm-bc-score-card">
           <div class="qm-bc-score-label">Ton score final pour la tombola</div>
-          <div class="qm-bc-score-val" id="pq-score-val">3<span class="qm-bc-score-denom">/4</span></div>
-          <div class="qm-bc-score-plus" id="pq-score-plus">+1 POINT BONUS</div>
+          <div class="qm-bc-score-val" id="qm-score-val">3<span class="qm-bc-score-denom">/4</span></div>
+          <div class="qm-bc-score-plus" id="qm-score-plus">+1 POINT BONUS</div>
         </div>
         <div class="ticket">
           <div class="ticket-icon">🎟️</div>
@@ -2570,7 +2570,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="qm-bc-info-ico">📧</div>
           <div class="qm-bc-info-txt">Tu recevras un email si tu es tiré(e) au sort parmi les gagnants.</div>
         </div>
-<div class="contact-card" id="pq-contact">
+<div class="contact-card" id="qm-contact">
           <div class="contact-title">📬 On reste en contact ?</div>
           <div class="contact-sub">Prochains événements · offres partenaires</div>
           <div class="contact-btns">
@@ -2578,20 +2578,20 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <button class="contact-no" onclick="qmContactNo(this)">Non merci</button>
           </div>
         </div>
-        <div class="qm-social-wrap" id="pq-social-wrap">
+        <div class="qm-social-wrap" id="qm-social-wrap">
           <div class="qm-social-label">★ Retrouvez-nous ★</div>
-          <div class="qm-social-grid" id="pq-social-grid"></div>
+          <div class="qm-social-grid" id="qm-social-grid"></div>
         </div>
         <div class="bottom-cta" style="background:transparent;border-top:none;flex-direction:column;gap:8px">
-          <button class="qm-share-btn" id="pq-share-btn" onclick="qmOpenShare()">
+          <button class="qm-share-btn" id="qm-share-btn" onclick="qmOpenShare()">
             <span>📲 Partager</span>
             <span class="qm-share-badge">+1 POINT</span>
           </button>
           <button class="btn btn-ghost" style="width:100%" onclick="qmGo(8)">🤝 Voir nos partenaires</button>
         </div>
         <!-- Bottom-sheet partage -->
-        <div class="qm-share-backdrop" id="pq-share-backdrop" onclick="qmCloseShare()"></div>
-        <div class="qm-share-sheet" id="pq-share-sheet">
+        <div class="qm-share-backdrop" id="qm-share-backdrop" onclick="qmCloseShare()"></div>
+        <div class="qm-share-sheet" id="qm-share-sheet">
           <div class="qm-share-handle"></div>
           <div class="qm-share-title">Partage avec tes proches</div>
           <div class="qm-share-sub">+1 point bonus pour la tombola 🎟️</div>
@@ -2618,7 +2618,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           </div>
           
         </div>
-        <div class="qm-toast" id="pq-toast">✓ Partagé · +1 point validé</div>
+        <div class="qm-toast" id="qm-toast">✓ Partagé · +1 point validé</div>
       </div>
 
       <!-- ─── PÂQUES 11 : Anti-doublon ─── -->
@@ -2628,11 +2628,11 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="ad-icon">✋</div>
           <div class="ad-title">Tu as déjà joué !</div>
           <div class="ad-msg">Cette adresse email a déjà participé aux Quiz Master 2026.<br>Une seule participation par personne.</div>
-          <div class="ad-email" id="pq-ad-email">camille@exemple.fr</div>
+          <div class="ad-email" id="qm-ad-email">camille@exemple.fr</div>
           <div class="ticket" style="margin:0 20px">
             <div class="ticket-icon">🎟️</div>
             <div class="ticket-title">Ton ticket tombola</div>
-            <div class="ticket-code" id="pq-ad-code">QM-2026-LIVE</div>
+            <div class="ticket-code" id="qm-ad-code">QM-2026-LIVE</div>
             <div class="ticket-hint">Tirage Lundi de Quiz Master 11h · Salle de l'événement</div>
           </div>
           <button class="ad-btn" onclick="qmGo(1)">← Retour à l'accueil</button>
@@ -3238,8 +3238,8 @@ var PAQUES_CONFIG = {
 
 /* Rendu des liens sociaux dans pq-9 (appelé au chargement) */
 function qmRenderSocial(){
-  var grid = document.getElementById('pq-social-grid');
-  var wrap = document.getElementById('pq-social-wrap');
+  var grid = document.getElementById('qm-social-grid');
+  var wrap = document.getElementById('qm-social-wrap');
   if(!grid || !wrap) return;
   var active = (PAQUES_CONFIG.socialLinks || []).filter(function(l){ return l.active; });
   if(active.length === 0){
