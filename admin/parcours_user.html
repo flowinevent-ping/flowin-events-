@@ -903,9 +903,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="ticket-hint">Capture d'écran conseillée · valable uniquement aujourd'hui</div>
         </div>
         <div class="form-wrap">
-          <div class="form-field">
-            <label class="form-label">Prénom</label>
-            <input class="form-input" placeholder="Camille" value="Camille">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Prénom</label>
+              <input class="form-input" placeholder="Camille" value="Camille">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Nom</label>
+              <input class="form-input" placeholder="Dupont">
+            </div>
           </div>
           <div class="form-field">
             <label class="form-label">Email (confirmation)</label>
@@ -1198,9 +1204,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div><div class="header-title" style="color:#4B1528">Tes coordonnées</div><div class="header-sub">Pour la tombola du Lundi de Pâques</div></div>
         </div>
         <div class="pq-form-wrap">
-          <div class="pq-form-field">
-            <label class="pq-form-label">Prénom</label>
-            <input class="pq-form-input" placeholder="Camille" value="Camille">
+          <div class="pq-form-grid">
+            <div class="pq-form-field">
+              <label class="pq-form-label">Prénom</label>
+              <input class="pq-form-input" placeholder="Camille" value="Camille">
+            </div>
+            <div class="pq-form-field">
+              <label class="pq-form-label">Nom</label>
+              <input class="pq-form-input" placeholder="Dupont">
+            </div>
           </div>
           <div class="pq-form-field">
             <label class="pq-form-label">Email</label>
@@ -1616,9 +1628,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
         <div class="qs-form-wrap">
           <div class="qs-form-title">On fait connaissance ?</div>
           <div class="qs-form-sub">Indispensable pour te contacter si tu es dans le top 3</div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Prénom</label>
-            <input class="qs-form-input" placeholder="Léa" value="Léa">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="qs-form-field">
+              <label class="qs-form-label">Prénom</label>
+              <input class="qs-form-input" placeholder="Léa" value="Léa">
+            </div>
+            <div class="qs-form-field">
+              <label class="qs-form-label">Nom</label>
+              <input class="qs-form-input" placeholder="Martin">
+            </div>
           </div>
           <div class="qs-form-field">
             <label class="qs-form-label">Email</label>
@@ -2022,9 +2040,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
         </div>
 
         <div style="padding:0 20px 20px">
-          <div style="margin-bottom:12px">
-            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Prénom</label>
-            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Léa" value="Léa">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Prénom</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Léa" value="Léa">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Nom</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Martin">
+            </div>
           </div>
           <div style="margin-bottom:12px">
             <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Email</label>
@@ -2196,6 +2220,428 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
       </div>
 
     </div>
+
+    <!-- ═════════ TÉLÉPHONE #5 — QUIZMASTER (animateur live, grand quiz) ═════════ -->
+    <div class="viewport quizmaster-viewport" id="vp-quizmaster">
+
+      <!-- ─── PAQUES 1 : Landing ─── -->
+      <div class="page on" id="qm-1">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-landing">
+          <div class="qm-ville">Vence · Source d'inspiration</div>
+          <div class="qm-title">Fêtes<br>de Quiz Master</div>
+          <div class="qm-dates">4, 5 & 6 Avril 2026</div>
+          <div class="qm-emojis">🥚 🦋 🌸 🌼</div>
+        </div>
+        <div class="qm-bande"></div>
+        <div class="qm-lots-wrap">
+          <div class="qm-lots-label">Tombola de Quiz Master</div>
+          <div class="qm-lot-row">
+            <div class="qm-lot-ico">🥚</div>
+            <div class="qm-lot-body">
+              <div class="qm-lot-desc">Tombola Quiz Master — 1er au 3ème tirage</div>
+              <div class="qm-lot-val">Offert par la Organisateur</div>
+            </div>
+          </div>
+          <div class="qm-lot-row">
+            <div class="qm-lot-ico">🌸</div>
+            <div class="qm-lot-body">
+              <div class="qm-lot-desc">Cinéma Casino de Vence</div>
+              <div class="qm-lot-val">2 places offertes</div>
+            </div>
+          </div>
+          <div class="qm-tirage">🏛️ Tirage au sort Lundi de Quiz Master 11h</div>
+        </div>
+        <div class="qm-cta-wrap">
+          <button class="qm-cta" onclick="qmGo(2)">🐣 Participer gratuitement</button>
+          <div class="qm-cta-hint">Jeu gratuit · Sans achat obligatoire</div>
+        </div>
+        <div class="qm-footer">
+          <div class="qm-footer-txt">Conçu par <strong style="color:#bbb;font-weight:800">OPConsult</strong> · © 2026</div>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 2 : Question 1 neutre ─── -->
+      <div class="page" id="qm-2">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-quiz-screen">
+          <div class="qm-quiz-progress">
+            <div class="qm-quiz-progress-header">
+              <div class="qm-quiz-step-label">Question 1 / 3</div>
+              <div class="qm-quiz-step-dots">
+                <div class="qm-quiz-dot active"></div>
+                <div class="qm-quiz-dot"></div>
+                <div class="qm-quiz-dot"></div>
+              </div>
+            </div>
+          </div>
+          <div class="qm-quiz-body">
+            <div class="qm-quiz-num">Q1</div>
+            <div class="qm-quiz-question">Dans quel département se trouve Vence ?</div>
+            <div class="qm-quiz-options">
+              <button class="qm-quiz-opt">Var (83)</button>
+              <button class="qm-quiz-opt sel">Alpes-Maritimes (06)</button>
+              <button class="qm-quiz-opt">Bouches-du-Rhône (13)</button>
+              <button class="qm-quiz-opt">Gard (30)</button>
+            </div>
+            <button class="qm-quiz-btn" onclick="qmGo(3)">Valider ma réponse</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 3 : Question 2 validée (fix UX : mauvaise bleu + bonne réponse affichée) ─── -->
+      <div class="page" id="qm-3">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-quiz-screen">
+          <div class="qm-quiz-progress">
+            <div class="qm-quiz-progress-header">
+              <div class="qm-quiz-step-label">Question 2 / 3</div>
+              <div class="qm-quiz-step-dots">
+                <div class="qm-quiz-dot done"></div>
+                <div class="qm-quiz-dot active"></div>
+                <div class="qm-quiz-dot"></div>
+              </div>
+            </div>
+          </div>
+          <div class="qm-quiz-body">
+            <div class="qm-quiz-num">Q2</div>
+            <div class="qm-quiz-question">Quel artiste célèbre a décoré la Chapelle du Rosaire de Vence ?</div>
+            <div class="qm-quiz-options">
+              <button class="qm-quiz-opt wrong">Pablo Picasso</button>
+              <button class="qm-quiz-opt correct">Henri Matisse</button>
+              <button class="qm-quiz-opt neutral">Marc Chagall</button>
+              <button class="qm-quiz-opt neutral">Paul Cézanne</button>
+            </div>
+            <div class="qm-quiz-feedback ko">
+              <div class="qm-quiz-feedback-icon">❌</div>
+              <div>
+                <div class="qm-quiz-feedback-label">La bonne réponse était :</div>
+                <div class="qm-quiz-feedback-answer">Henri Matisse</div>
+              </div>
+            </div>
+            <button class="qm-quiz-btn" onclick="qmGo(4)">Question suivante →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 4 : Question 3 ─── -->
+      <div class="page" id="qm-4">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-quiz-screen">
+          <div class="qm-quiz-progress">
+            <div class="qm-quiz-progress-header">
+              <div class="qm-quiz-step-label">Question 3 / 3</div>
+              <div class="qm-quiz-step-dots">
+                <div class="qm-quiz-dot done"></div>
+                <div class="qm-quiz-dot done"></div>
+                <div class="qm-quiz-dot active"></div>
+              </div>
+            </div>
+          </div>
+          <div class="qm-quiz-body">
+            <div class="qm-quiz-num">Q3</div>
+            <div class="qm-quiz-question">Vence est classée ville...</div>
+            <div class="qm-quiz-options">
+              <button class="qm-quiz-opt">Thermale</button>
+              <button class="qm-quiz-opt sel">Réponse correcte</button>
+              <button class="qm-quiz-opt">Touristique d'excellence</button>
+              <button class="qm-quiz-opt">Fleurie</button>
+            </div>
+            <button class="qm-quiz-btn" onclick="qmGo(5)">Mes coordonnées →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 5 : Formulaire CRM avec "Connu comment ?" ─── -->
+      <div class="page" id="qm-5">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent">
+          <div class="back-btn" onclick="qmGo(4)">←</div>
+          <div><div class="header-title" style="color:#312E81">Tes coordonnées</div><div class="header-sub">Pour la tombola du Lundi de Quiz Master</div></div>
+        </div>
+        <div class="qm-form-wrap">
+          <div class="qm-form-grid">
+            <div class="qm-form-field">
+              <label class="qm-form-label">Prénom</label>
+              <input class="qm-form-input" placeholder="Camille" value="Camille">
+            </div>
+            <div class="qm-form-field">
+              <label class="qm-form-label">Nom</label>
+              <input class="qm-form-input" placeholder="Dupont">
+            </div>
+          </div>
+          <div class="qm-form-field">
+            <label class="qm-form-label">Email</label>
+            <input class="qm-form-input" placeholder="camille@exemple.fr">
+          </div>
+          <div class="qm-form-field">
+            <label class="qm-form-label">Téléphone</label>
+            <input class="qm-form-input" placeholder="06 12 34 56 78">
+          </div>
+          <div class="qm-form-field">
+            <label class="qm-form-label">Genre</label>
+            <div class="qm-form-source-chips" data-group="genre-pq">
+              <button class="qm-form-source-chip" data-gender="H" onclick="qmPickSource(this)">👨 Homme</button>
+              <button class="qm-form-source-chip sel" data-gender="F" onclick="qmPickSource(this)">👩 Femme</button>
+            </div>
+          </div>
+          <div class="qm-form-grid">
+            <div class="qm-form-field">
+              <label class="qm-form-label">Âge</label>
+              <input class="qm-form-input" placeholder="36-50 ans" value="26-35 ans">
+            </div>
+            <div class="qm-form-field">
+              <label class="qm-form-label">Code postal</label>
+              <input class="qm-form-input" placeholder="06140" value="06140">
+            </div>
+          </div>
+          <div class="qm-form-field">
+            <label class="qm-form-label">Comment nous as-tu connu ?</label>
+            <div class="qm-form-source-chips">
+              <button class="qm-form-source-chip" onclick="qmPickSource(this)">📸 Instagram</button>
+              <button class="qm-form-source-chip sel" onclick="qmPickSource(this)">🔵 Facebook</button>
+              <button class="qm-form-source-chip" onclick="qmPickSource(this)">🏛️ Site mairie</button>
+              <button class="qm-form-source-chip" onclick="qmPickSource(this)">🗒️ Affiche / Flyer</button>
+              <button class="qm-form-source-chip" onclick="qmPickSource(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="qm-form-rgpd">
+            <div class="qm-form-rgpd-box">✓</div>
+            <div class="qm-form-rgpd-txt">J'accepte que la Organisateur me recontacte pour les prochains événements. Données jamais cédées à des tiers.</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn" style="background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:15px" onclick="qmGo(6)">Valider ma participation →</div>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 6 : Loading ─── -->
+      <div class="page" id="qm-6">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-loading">
+          <div class="qm-spinner"></div>
+          <div class="qm-loading-txt">Enregistrement en cours…</div>
+          <div class="qm-loading-sub">On bascule sur ton résultat dans un instant</div>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 7 : Confirm score 2/3 + CTA Doublez ─── -->
+      <div class="page" id="qm-7">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-confirm-hero">
+          <div class="qm-confirm-inner">
+            <div class="qm-trophy">🎊</div>
+            <div class="qm-bravo">Bravo Camille !</div>
+            <div class="qm-herosub">Participation enregistrée</div>
+          </div>
+        </div>
+        <div class="qm-score-block">
+          <div class="qm-score-num">2<span class="qm-score-denom">/3</span></div>
+          <div class="qm-score-msg">Belle tentative !</div>
+        </div>
+        <div class="qm-correction-wrap">
+          <div class="qm-correction-header">📝 Tes réponses</div>
+          <div class="qm-correction-row">
+            <div class="qm-correction-icon">✅</div>
+            <div style="flex:1">
+              <div class="qm-correction-q">Q1 · Dans quel département se trouve Vence ?</div>
+              <div class="qm-correction-a">Alpes-Maritimes (06)</div>
+            </div>
+          </div>
+          <div class="qm-correction-row">
+            <div class="qm-correction-icon">❌</div>
+            <div style="flex:1">
+              <div class="qm-correction-q">Q2 · Quel artiste a décoré la Chapelle du Rosaire ?</div>
+              <div class="qm-correction-a">Pablo Picasso</div>
+              <div class="qm-correction-good">✓ Henri Matisse</div>
+            </div>
+          </div>
+          <div class="qm-correction-row">
+            <div class="qm-correction-icon">✅</div>
+            <div style="flex:1">
+              <div class="qm-correction-q">Q3 · Vence est classée ville...</div>
+              <div class="qm-correction-a">Réponse correcte</div>
+            </div>
+          </div>
+        </div>
+        <button class="qm-double-cta miss" onclick="qmGo(9)">🎟️ Tout n'est pas perdu — gagne +1 point !</button>
+        <div class="qm-double-hint">Réponds aux questions bonus pour tenter ta chance</div>
+        <div class="qm-double-skip">
+          <button onclick="qmGo(8)">Découvrir nos partenaires →</button>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 8 : Partenaires de l'événement ─── -->
+      <div class="page" id="qm-8">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-confirm-hero" style="padding:28px 20px 22px">
+          <div class="qm-confirm-inner">
+            <div class="qm-trophy">🤝</div>
+            <div class="qm-bravo">Merci à nos partenaires</div>
+            <div class="qm-herosub">Sans eux, rien ne serait possible</div>
+          </div>
+        </div>
+        <div style="padding:0 20px 16px">
+          <div class="partenaires">
+            <div class="partenaires-label">★ Partenaires Quiz Master 2026 ★</div>
+            <div class="partenaires-grid">
+              <div class="partenaire-tile" onclick="window.open('https://www.vence.fr','_blank')">
+                <div class="partenaire-emoji">🏛️</div>
+                <div class="partenaire-name">Organisateur</div>
+              </div>
+              <div class="partenaire-tile" onclick="window.open('#','_blank')">
+                <div class="partenaire-emoji">🥖</div>
+                <div class="partenaire-name">Boulangerie Saint-Lambert</div>
+              </div>
+              <div class="partenaire-tile" onclick="window.open('#','_blank')">
+                <div class="partenaire-emoji">🍷</div>
+                <div class="partenaire-name">Domaine de la Source</div>
+              </div>
+              <div class="partenaire-tile" onclick="window.open('#','_blank')">
+                <div class="partenaire-emoji">🌸</div>
+                <div class="partenaire-name">Fleurs de Vence</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn btn-ghost" onclick="qmGo(7)">← Retour</div>
+          <div class="btn btn-primary" onclick="qmGo(9)">Double mes chances →</div>
+        </div> (questions profil pour doubler points) ─── -->
+      <div class="page" id="qm-9">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-bonus-hero">
+          <div class="qm-bonus-label">Profil visiteur</div>
+          <div class="qm-bonus-title">Double tes chances<br>Réponds aux questions</div>
+        </div>
+        <div class="qm-bonus-body">
+          <div class="qm-bonus-section">À propos de toi</div>
+          <div class="qm-bonus-q-label">1. Tu es venu(e)...</div>
+          <div class="qm-bonus-chips">
+            <button class="qm-bonus-chip sel" onclick="qmPickChip(this)">👨‍👩‍👧 En famille</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">👫 Entre amis</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">💑 En couple</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">🚶 Seul(e)</button>
+          </div>
+          <div class="qm-bonus-q-label">2. Tes animations préférées ?<span class="qm-bonus-q-hint">(plusieurs choix)</span></div>
+          <div class="qm-bonus-chips">
+            <button class="qm-bonus-chip sel" onclick="qmPickChipMulti(this)">🛒 Marché / stands</button>
+            <button class="qm-bonus-chip sel" onclick="qmPickChipMulti(this)">🎪 Animations enfants</button>
+            <button class="qm-bonus-chip" onclick="qmPickChipMulti(this)">🎭 Défilé / Corso</button>
+            <button class="qm-bonus-chip" onclick="qmPickChipMulti(this)">🌿 Nature / animaux</button>
+          </div>
+          <div class="qm-bonus-q-label">3. Tu trouves l'ambiance...</div>
+          <div class="qm-bonus-chips">
+            <button class="qm-bonus-chip sel" onclick="qmPickChip(this)">🤩 Génial !</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">😊 Top</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">😐 Ça va</button>
+          </div>
+          <div class="qm-bonus-q-label">4. Tu souhaites revenir ?</div>
+          <div class="qm-bonus-chips">
+            <button class="qm-bonus-chip sel" onclick="qmPickChip(this)">✅ Oui</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">🤔 Peut-être</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">❌ Non</button>
+          </div>
+          <button class="qm-bonus-submit" onclick="qmGo(10)">Valider et gagner mon point →</button>
+        </div>
+      </div>
+
+      <!-- ─── PAQUES 10 : BonusConfirm avec billet + partage bottom-sheet ─── -->
+      <div class="page" id="qm-10">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qm-bc-hero">
+          <div class="qm-bc-emoji">🎉</div>
+          <div class="qm-bc-title">Bravo Camille !</div>
+          <div class="qm-bc-sub">Ton bonus est enregistré</div>
+        </div>
+        <div class="qm-bc-score-card">
+          <div class="qm-bc-score-label">Ton score final pour la tombola</div>
+          <div class="qm-bc-score-val" id="pq-score-val">3<span class="qm-bc-score-denom">/4</span></div>
+          <div class="qm-bc-score-plus" id="pq-score-plus">+1 POINT BONUS</div>
+        </div>
+        <div class="ticket">
+          <div class="ticket-icon">🎟️</div>
+          <div class="ticket-title">Ton ticket tombola</div>
+          <div style="font-size:11px;font-weight:800;color:var(--muted)">Quiz Master · Grand Quiz Live</div>
+          <div class="ticket-code">QM-2026-LIVE</div>
+          <div class="ticket-hint">Capture d'écran conseillée · tirage Lundi de Quiz Master 11h · Salle de l'événement</div>
+        </div>
+        <div class="qm-bc-info">
+          <div class="qm-bc-info-ico">📧</div>
+          <div class="qm-bc-info-txt">Tu recevras un email si tu es tiré(e) au sort parmi les gagnants.</div>
+        </div>
+<div class="contact-card" id="pq-contact">
+          <div class="contact-title">📬 On reste en contact ?</div>
+          <div class="contact-sub">Prochains événements · offres partenaires</div>
+          <div class="contact-btns">
+            <button class="contact-yes" onclick="qmContactYes(this)">✅ Oui carrément</button>
+            <button class="contact-no" onclick="qmContactNo(this)">Non merci</button>
+          </div>
+        </div>
+        <div class="qm-social-wrap" id="pq-social-wrap">
+          <div class="qm-social-label">★ Retrouvez-nous ★</div>
+          <div class="qm-social-grid" id="pq-social-grid"></div>
+        </div>
+        <div class="bottom-cta" style="background:transparent;border-top:none;flex-direction:column;gap:8px">
+          <button class="qm-share-btn" id="pq-share-btn" onclick="qmOpenShare()">
+            <span>📲 Partager</span>
+            <span class="qm-share-badge">+1 POINT</span>
+          </button>
+          <button class="btn btn-ghost" style="width:100%" onclick="qmGo(8)">🤝 Voir nos partenaires</button>
+        </div>
+        <!-- Bottom-sheet partage -->
+        <div class="qm-share-backdrop" id="pq-share-backdrop" onclick="qmCloseShare()"></div>
+        <div class="qm-share-sheet" id="pq-share-sheet">
+          <div class="qm-share-handle"></div>
+          <div class="qm-share-title">Partage avec tes proches</div>
+          <div class="qm-share-sub">+1 point bonus pour la tombola 🎟️</div>
+          <div class="qm-share-preview">
+            « Je viens de jouer au quiz Quiz Master · Grand Quiz Live 🐣 à toi de tenter ta chance ! <strong>flowin.romain-opconsult.com/paques-vence-2026</strong> »
+          </div>
+          <div class="qm-share-options">
+            <button class="qm-share-option" onclick="qmShareVia('whatsapp')">
+              <div class="qm-share-option-icon wa">💬</div>
+              <div class="qm-share-option-body">
+                <div class="qm-share-option-name">WhatsApp<span class="qm-share-badge-plus">+1 PT</span></div>
+                <div class="qm-share-option-hint">Envoyer à un contact ou groupe</div>
+              </div>
+              <div class="qm-share-option-arrow">→</div>
+            </button>
+            <button class="qm-share-option" onclick="qmShareVia('sms')">
+              <div class="qm-share-option-icon sms">✉️</div>
+              <div class="qm-share-option-body">
+                <div class="qm-share-option-name">SMS<span class="qm-share-badge-plus">+1 PT</span></div>
+                <div class="qm-share-option-hint">Message texte classique</div>
+              </div>
+              <div class="qm-share-option-arrow">→</div>
+            </button>
+          </div>
+          
+        </div>
+        <div class="qm-toast" id="pq-toast">✓ Partagé · +1 point validé</div>
+      </div>
+
+      <!-- ─── PÂQUES 11 : Anti-doublon ─── -->
+      <div class="page" id="qm-11">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="ad-screen" style="background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 100%)">
+          <div class="ad-icon">✋</div>
+          <div class="ad-title">Tu as déjà joué !</div>
+          <div class="ad-msg">Cette adresse email a déjà participé aux Quiz Master 2026.<br>Une seule participation par personne.</div>
+          <div class="ad-email" id="pq-ad-email">camille@exemple.fr</div>
+          <div class="ticket" style="margin:0 20px">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-title">Ton ticket tombola</div>
+            <div class="ticket-code" id="pq-ad-code">QM-2026-LIVE</div>
+            <div class="ticket-hint">Tirage Lundi de Quiz Master 11h · Salle de l'événement</div>
+          </div>
+          <button class="ad-btn" onclick="qmGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   </div>
 </div>
 
@@ -2228,9 +2674,40 @@ var FLOWIN_PRO_ID = null;
       FLOWIN_EVENT = rows[0];
       FLOWIN_PRO_ID = rows[0].pro_id || null;
       console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module);
+      /* Routage : si module connu, masquer les autres viewports */
+      flowinShowModuleViewport(rows[0].module);
     }
   } catch(e){ console.warn('[Flowin] fetch event', e); }
 })();
+
+/* Masque tous les viewports sauf celui correspondant au module de l'event */
+function flowinShowModuleViewport(moduleName){
+  var moduleMap = {
+    'quiz': 'vp-paques',
+    'quizsolo': 'vp-quizsolo',
+    'quizmaster': 'vp-quizmaster',
+    'spin': 'vp-spin',
+    'vote': 'vp-votestars'
+  };
+  var targetVp = moduleMap[moduleName];
+  if(!targetVp){ console.log('[Flowin] module inconnu, mode preview:', moduleName); return; }
+  
+  var allVps = ['vp-paques','vp-quizsolo','vp-quizmaster','vp-spin','vp-votestars'];
+  for(var i=0; i<allVps.length; i++){
+    var vp = document.getElementById(allVps[i]);
+    if(!vp) continue;
+    /* Masque le wrapper parent (.phone) si possible, sinon le viewport directement */
+    var phone = vp.closest ? vp.closest('.phone') : null;
+    var target = phone || vp;
+    if(allVps[i] === targetVp){
+      target.style.display = '';
+    } else {
+      target.style.display = 'none';
+    }
+  }
+  console.log('[Flowin] viewport visible:', targetVp);
+}
+
 
 /* Écriture Supabase : joueur + participation */
 async function supaWriteFlowin(prefix, emailVal, ticketCode, extraFields){
@@ -2711,6 +3188,219 @@ function qsPickChip(el){
 
 
 /* ═══════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* QUIZMASTER — Navigation + soumission + chips (cloné de Pâques)     */
+/* ═══════════════════════════════════════════════════════════════════ */
+/* Navigation téléphone Pâques */
+function qmGo(n){
+  var vp = document.getElementById('vp-paques');
+  vp.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  var target = document.getElementById('pq-' + n);
+  if(target) target.classList.add('on');
+  vp.scrollTop = 0;
+  /* Transition loading → confirm automatique */
+  if(n === 6){
+    setTimeout(function(){ qmGo(7); }, 1500);
+  }
+}
+
+/* Sélection chip bonus (single) */
+function qmPickChip(el){
+  var parent = el.parentElement;
+  parent.querySelectorAll('.pq-bonus-chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+/* Sélection chip bonus (multi) */
+function qmPickChipMulti(el){
+  el.classList.toggle('sel');
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* PAQUES 9 : config sociale dynamique + partage avec +1 point         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Config SuperAdmin (reflète le seed Pâques réel d'admin_preview.html) */
+/* Peut contenir 1 à N liens — le rendu s'adapte automatiquement       */
+var PAQUES_CONFIG = {
+  eventUrl: 'https://flowin.romain-opconsult.com/paques-vence-2026',
+  eventName: 'Fêtes de Pâques Vence 2026',
+  socialLinks: [
+    {icon:'📘', label:'Facebook',  url:'https://www.facebook.com/villede.vence', active:true},
+    {icon:'📸', label:'Instagram', url:'https://instagram.com/vence_tourisme',   active:true}
+    /* Exemples de liens supplémentaires possibles via SuperAdmin :
+       {icon:'🌐', label:'Site mairie', url:'https://www.vence.fr',          active:true},
+       {icon:'🎵', label:'TikTok',      url:'https://tiktok.com/@vence',     active:true} */
+  ]
+};
+
+/* Rendu des liens sociaux dans pq-9 (appelé au chargement) */
+function qmRenderSocial(){
+  var grid = document.getElementById('pq-social-grid');
+  var wrap = document.getElementById('pq-social-wrap');
+  if(!grid || !wrap) return;
+  var active = (PAQUES_CONFIG.socialLinks || []).filter(function(l){ return l.active; });
+  if(active.length === 0){
+    wrap.style.display = 'none';
+    return;
+  }
+  grid.innerHTML = active.map(function(l){
+    return '<a class="pq-social-link" href="' + l.url + '" target="_blank" rel="noopener">'
+      + '<div class="pq-social-icon">' + l.icon + '</div>'
+      + '<div class="pq-social-name">' + l.label + '</div>'
+      + '</a>';
+  }).join('');
+}
+
+/* Partage de l'event : bottom-sheet WhatsApp/SMS, +1 point UNIQUEMENT si canal choisi */
+var pqShared = false;
+
+function qmOpenShare(){
+  if(pqShared) return;
+  document.getElementById('pq-share-backdrop').classList.add('on');
+  document.getElementById('pq-share-sheet').classList.add('on');
+}
+
+function qmCloseShare(){
+  document.getElementById('pq-share-backdrop').classList.remove('on');
+  document.getElementById('pq-share-sheet').classList.remove('on');
+}
+
+function qmShareVia(channel){
+  var text = 'Je viens de jouer au quiz ' + PAQUES_CONFIG.eventName + ' 🐣 à toi de tenter ta chance ! ' + PAQUES_CONFIG.eventUrl;
+
+  /* Ouverture du canal choisi */
+  if(channel === 'whatsapp'){
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  } else if(channel === 'sms'){
+    window.location.href = 'sms:?&body=' + encodeURIComponent(text);
+  }
+
+  /* Fermer le bottom-sheet */
+  qmCloseShare();
+
+  /* Appliquer le +1 point (seulement si canal réellement choisi) */
+  if(!pqShared){
+    pqShared = true;
+    setTimeout(function(){
+      /* Animation score 3 → 4 */
+      var scoreEl = document.getElementById('pq-score-val');
+      var plusEl  = document.getElementById('pq-score-plus');
+      if(scoreEl){
+        scoreEl.innerHTML = '4<span class="pq-bc-score-denom">/4</span>';
+        scoreEl.classList.add('boost');
+      }
+      if(plusEl){
+        plusEl.textContent = '+2 POINTS BONUS';
+        plusEl.classList.add('boost');
+      }
+      /* Bouton passe en "done" */
+      var btn = document.getElementById('pq-share-btn');
+      if(btn){
+        btn.classList.add('done');
+        btn.innerHTML = '<span>✓ Partagé · score final 4/4</span>';
+      }
+      /* Toast confirmation */
+      var toast = document.getElementById('pq-toast');
+      if(toast){
+        toast.classList.add('on');
+        setTimeout(function(){ toast.classList.remove('on'); }, 2500);
+      }
+    }, 350);  /* délai pour laisser la sheet se fermer */
+  }
+}
+
+/* Init : rendre les liens sociaux au chargement */
+qmRenderSocial();
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* NAVIGATION TÉLÉPHONE #3 — QUIZ SOLO                                  */
+/* ═══════════════════════════════════════════════════════════════════ */
+function qsGo(n){
+  var vp = document.getElementById('vp-quizsolo');
+  vp.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  var target = document.getElementById('qs-' + n);
+  if(target) target.classList.add('on');
+  vp.scrollTop = 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* NAVIGATION TÉLÉPHONE #4 — VOTE ÉTOILES                               */
+/* ═══════════════════════════════════════════════════════════════════ */
+function vsGo(n){
+  var vp = document.getElementById('vp-votestars');
+  vp.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  var target = document.getElementById('vs-' + n);
+  if(target) target.classList.add('on');
+  vp.scrollTop = 0;
+}
+
+/* Notation étoiles : remplit toutes les étoiles jusqu'à la position cliquée */
+function vsRate(el, rating){
+  var stars = el.parentElement.querySelectorAll('.vs-star');
+  stars.forEach(function(s, i){
+    if(i < rating) s.classList.add('on');
+    else s.classList.remove('on');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* PICK SOURCE (chips "comment nous as-tu connu") — 3 variantes         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+
+
+/* QuizMaster : submit + pick source (clones de Pâques) */
+function qmSubmitForm(){
+  var emailEl = document.querySelector('#vp-quizmaster [type="email"]') || document.querySelector('#qm-5 input[placeholder*="exemple"]');
+  var emailVal = emailEl ? emailEl.value : 'participant@exemple.fr';
+  if(!emailVal || emailVal.indexOf('@')<0) emailVal = 'participant@exemple.fr';
+  /* Lire tous les champs du formulaire pq */
+  var _vp = document.querySelector('#vp-quizmaster');
+  var _inputs = _vp ? _vp.querySelectorAll('input') : [];
+  var _selChips = _vp ? _vp.querySelectorAll('button.sel, button[style*="background: rgb(30, 27, 75)"], button[style*="background: var(--a)"], button[style*="background: rgb(252, 211, 77)"], button[style*="background:#FCD34D"], button[style*="background:#1E293B"]') : [];
+  var _extra = { prenom:'', nom:'', tel:'', genre:'', age_tranche:'', ville:'', code_postal:'', source:'' };
+  for(var _i=0;_i<_inputs.length;_i++){
+    var _inp = _inputs[_i];
+    var _val = (_inp.value || '').trim();
+    var _ph = (_inp.placeholder || '').toLowerCase();
+    if(!_val) continue;
+    /* Détection par placeholder explicite (prioritaire) */
+    if(/^camille|^l.a|^marie|^sophie|^lucie|pr.nom|firstname/i.test(_ph)) { _extra.prenom = _val; }
+    else if(/^dupont|^martin|^durand|^bernard|^petit|^lastname|^nom$/i.test(_ph)) { _extra.nom = _val; }
+    else if(_val.indexOf('@')>=0) { /* email déjà capturé */ }
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) { _extra.tel = _val; }
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) { _extra.age_tranche = _val; }
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) { _extra.code_postal = _val; }
+    /* Fallback : 1er input alpha court non identifié = prenom, 2ème = nom */
+    else if(_val.length<30 && !_val.match(/[@\d]/)) {
+      if(!_extra.prenom) _extra.prenom = _val;
+      else if(!_extra.nom) _extra.nom = _val;
+    }
+  }
+  /* Genre + Source depuis chips sélectionnés */
+  for(var _j=0;_j<_selChips.length;_j++){
+    var _btn = _selChips[_j];
+    var _gender = _btn.getAttribute('data-gender');
+    var _txt = (_btn.textContent || '').trim();
+    if(_gender) _extra.genre = (_gender === 'H' ? 'homme' : 'femme');
+    else if(_txt && !_extra.source) _extra.source = _txt.replace(/^[^\w]+/, '').trim();
+  }
+  if(checkDuplicate('qm', emailVal, qmGo, 11)) return;
+  registerPlay('qm', emailVal, 'QM-2026-LIVE', _extra);
+  qmGo(6);
+}
+
+function qmPickSource(el){
+  var parent = el.parentElement;
+  parent.querySelectorAll('.qm-form-source-chip').forEach(function(c){
+    c.classList.remove('sel');
+  });
+  el.classList.add('sel');
+}
+
 /* FONCTIONS PARTAGÉES — partage bottom-sheet, contact, anti-doublon  */
 /* ═══════════════════════════════════════════════════════════════════ */
 
@@ -2790,6 +3480,7 @@ function registerPlay(prefix, emailVal, ticketCode, extraFields){
 makeShareFns('sp',  spinGo,  'Sécurité Routière Vence 2026', 'https://flowin.romain-opconsult.com/securite-vence-2026');
 makeShareFns('qs',  qsGo,    'Quiz Patrimoine Grasse 2026',  'https://flowin.romain-opconsult.com/grasse-2026');
 makeShareFns('vs',  vsGo,    'Jazz Antibes 2026',            'https://flowin.romain-opconsult.com/jazz-antibes-2026');
+makeShareFns('qm',  qmGo,    'Quiz Master Grand Live 2026',   'https://flowin.romain-opconsult.com/quizmaster-2026');
 
 /* pqContactYes / pqContactNo — Pâques a son propre système de partage donc on définit manuellement */
 function pqContactYes(el){
@@ -2824,11 +3515,18 @@ function spinSubmitForm(){
     var _val = (_inp.value || '').trim();
     var _ph = (_inp.placeholder || '').toLowerCase();
     if(!_val) continue;
-    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
-    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
-    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
-    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
-    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+    /* Détection par placeholder explicite (prioritaire) */
+    if(/^camille|^l.a|^marie|^sophie|^lucie|pr.nom|firstname/i.test(_ph)) { _extra.prenom = _val; }
+    else if(/^dupont|^martin|^durand|^bernard|^petit|^lastname|^nom$/i.test(_ph)) { _extra.nom = _val; }
+    else if(_val.indexOf('@')>=0) { /* email déjà capturé */ }
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) { _extra.tel = _val; }
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) { _extra.age_tranche = _val; }
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) { _extra.code_postal = _val; }
+    /* Fallback : 1er input alpha court non identifié = prenom, 2ème = nom */
+    else if(_val.length<30 && !_val.match(/[@\d]/)) {
+      if(!_extra.prenom) _extra.prenom = _val;
+      else if(!_extra.nom) _extra.nom = _val;
+    }
   }
   /* Genre + Source depuis chips sélectionnés */
   for(var _j=0;_j<_selChips.length;_j++){
@@ -2858,11 +3556,18 @@ function qsSubmitForm(){
     var _val = (_inp.value || '').trim();
     var _ph = (_inp.placeholder || '').toLowerCase();
     if(!_val) continue;
-    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
-    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
-    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
-    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
-    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+    /* Détection par placeholder explicite (prioritaire) */
+    if(/^camille|^l.a|^marie|^sophie|^lucie|pr.nom|firstname/i.test(_ph)) { _extra.prenom = _val; }
+    else if(/^dupont|^martin|^durand|^bernard|^petit|^lastname|^nom$/i.test(_ph)) { _extra.nom = _val; }
+    else if(_val.indexOf('@')>=0) { /* email déjà capturé */ }
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) { _extra.tel = _val; }
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) { _extra.age_tranche = _val; }
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) { _extra.code_postal = _val; }
+    /* Fallback : 1er input alpha court non identifié = prenom, 2ème = nom */
+    else if(_val.length<30 && !_val.match(/[@\d]/)) {
+      if(!_extra.prenom) _extra.prenom = _val;
+      else if(!_extra.nom) _extra.nom = _val;
+    }
   }
   /* Genre + Source depuis chips sélectionnés */
   for(var _j=0;_j<_selChips.length;_j++){
@@ -2892,11 +3597,18 @@ function pqSubmitForm(){
     var _val = (_inp.value || '').trim();
     var _ph = (_inp.placeholder || '').toLowerCase();
     if(!_val) continue;
-    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
-    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
-    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
-    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
-    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+    /* Détection par placeholder explicite (prioritaire) */
+    if(/^camille|^l.a|^marie|^sophie|^lucie|pr.nom|firstname/i.test(_ph)) { _extra.prenom = _val; }
+    else if(/^dupont|^martin|^durand|^bernard|^petit|^lastname|^nom$/i.test(_ph)) { _extra.nom = _val; }
+    else if(_val.indexOf('@')>=0) { /* email déjà capturé */ }
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) { _extra.tel = _val; }
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) { _extra.age_tranche = _val; }
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) { _extra.code_postal = _val; }
+    /* Fallback : 1er input alpha court non identifié = prenom, 2ème = nom */
+    else if(_val.length<30 && !_val.match(/[@\d]/)) {
+      if(!_extra.prenom) _extra.prenom = _val;
+      else if(!_extra.nom) _extra.nom = _val;
+    }
   }
   /* Genre + Source depuis chips sélectionnés */
   for(var _j=0;_j<_selChips.length;_j++){
@@ -2926,11 +3638,18 @@ function vsSubmitForm(){
     var _val = (_inp.value || '').trim();
     var _ph = (_inp.placeholder || '').toLowerCase();
     if(!_val) continue;
-    if(/pr.nom|firstname/i.test(_ph) || (_val.length<30 && !_val.match(/[@\d]/) && !_extra.prenom)) _extra.prenom = _val;
-    else if(_val.indexOf('@')>=0) {} /* email déjà capturé */
-    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) _extra.tel = _val;
-    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) _extra.age_tranche = _val;
-    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) _extra.code_postal = _val;
+    /* Détection par placeholder explicite (prioritaire) */
+    if(/^camille|^l.a|^marie|^sophie|^lucie|pr.nom|firstname/i.test(_ph)) { _extra.prenom = _val; }
+    else if(/^dupont|^martin|^durand|^bernard|^petit|^lastname|^nom$/i.test(_ph)) { _extra.nom = _val; }
+    else if(_val.indexOf('@')>=0) { /* email déjà capturé */ }
+    else if(/06|07|t.l|phone/i.test(_ph) || /^\d[\s\d]+$/.test(_val)) { _extra.tel = _val; }
+    else if(/ans|age/i.test(_ph) || /ans/.test(_val)) { _extra.age_tranche = _val; }
+    else if(/postal|cp|zip/i.test(_ph) || /^\d{4,5}$/.test(_val)) { _extra.code_postal = _val; }
+    /* Fallback : 1er input alpha court non identifié = prenom, 2ème = nom */
+    else if(_val.length<30 && !_val.match(/[@\d]/)) {
+      if(!_extra.prenom) _extra.prenom = _val;
+      else if(!_extra.nom) _extra.nom = _val;
+    }
   }
   /* Genre + Source depuis chips sélectionnés */
   for(var _j=0;_j<_selChips.length;_j++){

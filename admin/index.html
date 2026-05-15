@@ -1719,6 +1719,7 @@ async function supaWritePartenaire(p){
     id: p.id, nom: p.nom, type: p.type||'Local',
     secteur: p.secteur||'', contact: p.contact||'',
     role: p.role||'', email: p.email||'', tel: p.tel||'',
+    url: p.url || '',
     ville: p.ville||'', code_postal: p.codePostal||'',
     adresse: p.adresse||'', siret: p.siret||'',
     contrat: p.contrat||'', notes: p.notes||'',
@@ -4246,7 +4247,7 @@ function renderBiblioPartenaires(){
 }
 function newPartenaire(){
   const id = newId('pt');
-  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''};
+  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',url:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''};
   DATA.partenaires.unshift(nouveauPt);
   saveData();
   supaWritePartenaire(nouveauPt);
@@ -4284,6 +4285,7 @@ function drawerPartner(p){
       html += fieldInput('Rôle','role',f.role);
       html += fieldInput('Email','email',f.email,'email');
       html += fieldInput('Téléphone','tel',f.tel,'tel');
+      html += fieldInput('Site web (URL)','url',f.url||'','url');
       html += '<div class="section-h">Notes</div>';
       html += fieldInput('Notes internes','notes',f.notes,'textarea');
     } else {
@@ -4297,6 +4299,7 @@ function drawerPartner(p){
       html += fieldRow('Rôle',esc(p.role||'-'));
       html += fieldRow('Email',p.email?'<a href="mailto:'+escAttr(p.email)+'">'+esc(p.email)+'</a>':'-');
       html += fieldRow('Téléphone',p.tel?'<a href="tel:'+escAttr(p.tel)+'">'+esc(p.tel)+'</a>':'-');
+      html += fieldRow('Site web',p.url?'<a href="'+escAttr(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>':'-');
       html += '<div class="section-h">Notes</div>';
       html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.notes||'-')+'</div>';
     }
