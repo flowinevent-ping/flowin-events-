@@ -1,0 +1,450 @@
+-- ════════════════════════════════════════════════════════════════════════
+-- FLOWIN · MASTER SQL · 15/05/2026
+-- 
+-- ⚠️  À COPIER-COLLER EN UNE FOIS dans Supabase SQL Editor.
+-- 
+-- Contient dans l'ordre :
+--   1. SCHEMA_ALIGNMENT_v2.sql  (ajout 28 colonnes manquantes)
+--   2. SEED_PROD_v2.sql          (186 joueurs Pâques + events + lots)
+--   3. FIX_QR_URLS_v2.sql        (normalisation qrUrl)
+-- 
+-- IDEMPOTENT : exécutable plusieurs fois sans danger.
+-- Validé sur PostgreSQL 16 local avant publication.
+-- ════════════════════════════════════════════════════════════════════════
+
+
+-- ═══════════════ PARTIE 1/3 : SCHEMA_ALIGNMENT_v2 ═══════════════
+
+-- ============================================================
+-- FLOWIN · ALIGNEMENT SCHÉMA SUPABASE · 15/05/2026
+--
+-- Ajoute les colonnes manquantes pour aligner le schéma Supabase
+-- avec ce que le dashboard SA et le parcours user écrivent réellement.
+--
+-- Audit factuel des écarts :
+--   pros          : 6 colonnes manquantes
+--   partenaires   : 6 colonnes (dont url, genre déjà fait)
+--   events        : 8 colonnes (date_f, description, stats, pro_visib...)
+--   super_events  : 1 colonne (date_f)
+--   joueurs       : 5 colonnes (prenom, tel, code_postal, date_naissance, last_seen)
+--   participations: 1 colonne (ticket_code)
+--
+-- IDEMPOTENT : ADD COLUMN IF NOT EXISTS — exécutable plusieurs fois.
+-- À exécuter dans Supabase SQL Editor.
+-- ============================================================
+
+-- ════════════════════════════════════════════════════════════
+-- 1. PROS (organisations clientes)
+-- ════════════════════════════════════════════════════════════
+ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS code_postal TEXT;
+ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS adresse TEXT;
+ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS secteur TEXT;
+ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS role_contact TEXT;
+ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS tel TEXT;
+ALTER TABLE public.pros ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- ════════════════════════════════════════════════════════════
+-- 2. PARTENAIRES
+-- ════════════════════════════════════════════════════════════
+ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS code_postal TEXT;
+ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS siret TEXT;
+ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS role TEXT;
+ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS tel TEXT;
+ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS url TEXT DEFAULT '';
+ALTER TABLE public.partenaires ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- ════════════════════════════════════════════════════════════
+-- 3. EVENTS (le plus gros écart)
+-- ════════════════════════════════════════════════════════════
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS date_f DATE;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS h_end TIME;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS adresse TEXT;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS gagnants INT DEFAULT 0;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS joueurs_optin INT DEFAULT 0;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS stats JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS pro_visib JSONB DEFAULT '{}'::jsonb;
+
+-- ════════════════════════════════════════════════════════════
+-- 4. SUPER_EVENTS
+-- ════════════════════════════════════════════════════════════
+ALTER TABLE public.super_events ADD COLUMN IF NOT EXISTS date_f DATE;
+
+-- ════════════════════════════════════════════════════════════
+-- 5. JOUEURS (genre déjà ajouté via FIX_GENRE_COLUMN.sql)
+-- ════════════════════════════════════════════════════════════
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS prenom TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS tel TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS code_postal TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS date_naissance DATE;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS last_seen DATE;
+-- genre déjà ajouté précédemment, mais on le re-déclare pour idempotence
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS genre TEXT;
+
+-- ════════════════════════════════════════════════════════════
+-- 6. PARTICIPATIONS
+-- ════════════════════════════════════════════════════════════
+ALTER TABLE public.participations ADD COLUMN IF NOT EXISTS ticket_code TEXT;
+ALTER TABLE public.participations ADD COLUMN IF NOT EXISTS bonus_answers JSONB DEFAULT '{}'::jsonb;
+
+-- ════════════════════════════════════════════════════════════
+-- VÉRIFICATION : colonnes finales par table
+-- ════════════════════════════════════════════════════════════
+SELECT
+  table_name,
+  COUNT(*) AS col_count,
+  STRING_AGG(column_name, ', ' ORDER BY ordinal_position) AS columns
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name IN ('pros','partenaires','events','super_events','joueurs','lots','banques','participations','votes','profiles','gas_backup_log')
+GROUP BY table_name
+ORDER BY table_name;
+
+
+-- ═══════════════ PARTIE 2/3 : SEED_PROD_v2 ═══════════════
+
+-- ============================================================
+-- FLOWIN · SEED PRODUCTION v2 · 2026-05-15
+--
+-- Extrait du seed dashboard SA (admin/index.html SEED const).
+-- Contient les VRAIES données prod Pâques 2026 :
+--   · 2 pros · 3 events · 186 joueurs · 8 lots · 1 super_events
+--
+-- IDEMPOTENT : ON CONFLICT (id) DO UPDATE — exécutable plusieurs fois.
+-- À exécuter APRÈS SCHEMA_ALIGNMENT_v2.sql
+--
+-- v2 changelog : '' converti en NULL pour colonnes DATE/TIME
+-- ============================================================
+
+-- ════════ PROS ════════
+-- 2 pros
+INSERT INTO public.pros (id, nom, ville, code_postal, adresse, siret, secteur, contact, role_contact, email, tel, entree_p, notes, tags) VALUES
+  ('pro-vence', 'Ville de Vence', 'Vence', '06140', 'Hôtel de Ville, Place du Frêne', '21060157200019', 'Collectivité', 'Service Animation', NULL, 'animation@ville-vence.fr', '04 93 58 06 58', '2026-01-01', 'Client pilote Flowin · Fêtes de Pâques 2026 (186 participants)', ARRAY['pilote','collectivité']::text[]),
+  ('pro-flowin', 'Flowin', 'Nice', '06000', 'Nice, 06000', '', 'SaaS · Gamification', 'Romain Collin', NULL, 'contact@flowin.fr', '', '2026-05-07', 'Compte interne Flowin · Event démo commercial landing · Tunnel acquisition Pro', ARRAY['interne','demo','landing']::text[])
+ON CONFLICT (id) DO UPDATE SET
+  nom = EXCLUDED.nom,
+  ville = EXCLUDED.ville,
+  code_postal = EXCLUDED.code_postal,
+  adresse = EXCLUDED.adresse,
+  siret = EXCLUDED.siret,
+  secteur = EXCLUDED.secteur,
+  contact = EXCLUDED.contact,
+  role_contact = EXCLUDED.role_contact,
+  email = EXCLUDED.email,
+  tel = EXCLUDED.tel,
+  entree_p = EXCLUDED.entree_p,
+  notes = EXCLUDED.notes,
+  tags = EXCLUDED.tags
+;
+
+-- ════════ SUPER_EVENTS ════════
+-- 1 super_events
+INSERT INTO public.super_events (id, nom, pros, events, date_d, date_f, description) VALUES
+  ('se-nds-2026', 'Nuits du Sud 2026', ARRAY['pro-vence']::text[], ARRAY['ev-nds']::text[], '2026-07-15', '2026-07-24', 'Festival musique sur 10 jours · 1 event/concert · vote public + tirage final')
+ON CONFLICT (id) DO UPDATE SET
+  nom = EXCLUDED.nom,
+  pros = EXCLUDED.pros,
+  events = EXCLUDED.events,
+  date_d = EXCLUDED.date_d,
+  date_f = EXCLUDED.date_f,
+  description = EXCLUDED.description
+;
+
+-- ════════ EVENTS ════════
+-- 3 events
+INSERT INTO public.events (id, pro_id, nom, module, status, date_d, date_f, h_start, h_end, lieu, adresse, description, couleur, participants, gagnants, joueurs_optin, score_min, cfg, stats, pro_visib, super_event_id, client_type) VALUES
+  ('ev-paques', 'pro-vence', 'Fêtes de Pâques 2026', 'quiz', 'past', '2026-04-04', '2026-04-06', '10:00', '18:00', 'Place du Grand Jardin', 'Place du Grand Jardin, 06140 Vence', 'Quiz Pâques 3 jours · 8 lots à gagner', '#D4537E', 186, 8, 124, 14, '{"qrUrl":"https://flowin-opconsult.netlify.app/?ev=ev-paques","quizBanques":["bq-paques-vence"],"optinActif":true,"customQuestions":[{"id":"decouverte","label":"Comment avez-vous connu l''événement ?","type":"single","options":[{"label":"📸 Instagram","val":"instagram"},{"label":"🔵 Facebook","val":"facebook"},{"label":"🏛 Site de la mairie","val":"mairie"},{"label":"📋 Affiche / Flyer","val":"affiche"},{"label":"🗣 Bouche à oreille","val":"bouche"}]}],"quizCustomQuestions":[],"quizBonusList":[{"id":"frequence","label":"Vous êtes venu(e)...","type":"single","options":[{"val":"famille","label":"👨‍👩‍👧 En famille"},{"val":"amis","label":"👫 Entre amis"},{"val":"couple","label":"💑 En couple"},{"val":"seul","label":"🚶 Seul(e)"}]},{"id":"eventsPrefs","label":"Vos animations préférées ?","type":"multi","options":[{"val":"paques","label":"🛒 Marché / stands / food trucks"},{"val":"marche","label":"🎪 Animations enfants"},{"val":"artisanat","label":"🎭 Défilé / spectacles / Corso"},{"val":"noel","label":"🌿 Activités nature / animaux"}]},{"id":"musique","label":"Je trouve l''ambiance...","type":"single","options":[{"val":"monde","label":"🤩 Génial !"},{"val":"classique","label":"😊 Top, on se sent bien"},{"val":"jazz","label":"😐 Ça va, peut mieux faire"}]},{"id":"retour","label":"Souhaitez-vous revenir ?","type":"single","options":[{"val":"oui","label":"✅ Oui"},{"val":"peut-etre","label":"🤔 Peut-être"},{"val":"non","label":"❌ Non"}]},{"id":"optin","label":"On vous informe pour les prochains événements ?","type":"single","options":[{"val":"oui","label":"✅ Oui envoyez-moi un message"},{"val":"non","label":"❌ Non merci"}]}]}'::jsonb, '{"ageMoyen":44,"txConversion":67,"txOptin":73,"genre":{"hommes":38,"femmes":62},"ageRanges":[{"l":"< 18","v":11,"score":3.4},{"l":"18-25","v":15,"score":2.5},{"l":"26-35","v":25,"score":3.1},{"l":"36-50","v":79,"score":3.2},{"l":"51-65","v":36,"score":3.1},{"l":"65+","v":20,"score":3.2}],"parJour":[{"d":"01 avr","v":5},{"d":"02 avr","v":7},{"d":"03 avr","v":3},{"d":"04 avr","v":80},{"d":"05 avr","v":49},{"d":"06 avr","v":38},{"d":"11 avr","v":3},{"d":"17 avr","v":1}],"identVia":[{"l":"Google","v":0,"color":"#FBBF24","ico":"🟡"},{"l":"Facebook","v":0,"color":"#3B82F6","ico":"🔵"},{"l":"Apple","v":0,"color":"#1F1B2E","ico":"⚫"},{"l":"Email","v":0,"color":"#94A3B8","ico":"✉️"}],"scansHeure":[{"h":"20h","v":54},{"h":"21h","v":38},{"h":"22h","v":72},{"h":"23h","v":18}],"codesPostaux":[{"cp":"6140","v":104},{"cp":"6800","v":38},{"cp":"6200","v":32},{"cp":"6610","v":25},{"cp":"6130","v":24},{"cp":"6700","v":24}],"decouverte":[{"l":"Instagram","v":12,"ico":"📸","color":"#EC4899"},{"l":"Facebook","v":17,"ico":"🔵","color":"#3B82F6"},{"l":"Mairie","v":24,"ico":"🏛️","color":"#7C2D92"},{"l":"Affiche/Flyer","v":78,"ico":"🪧","color":"#EF9F27"}],"venuAvec":[{"l":"En famille","v":81,"ico":"👨‍👩‍👧"},{"l":"Entre amis","v":15,"ico":"👫"},{"l":"En couple","v":20,"ico":"💑"},{"l":"Seul(e)","v":17,"ico":"🚶"}],"eventsPrefs":[{"l":"Marché / stands / food trucks","v":77,"ico":"🛒"},{"l":"Animations enfants","v":38,"ico":"🎪"},{"l":"Défilé / spectacles / Corso","v":51,"ico":"🎭"},{"l":"Activités nature / animaux","v":32,"ico":"🌿"}],"retour":[{"l":"Oui","v":124,"ico":"✅","color":"#22C55E"},{"l":"Peut-être","v":6,"ico":"🤔","color":"#EF9F27"},{"l":"Non","v":1,"ico":"❌","color":"#EF4444"}],"ambiance":[{"l":"Génial !","v":80,"ico":"🤩"},{"l":"Top, on se sent bien","v":51,"ico":"😊"},{"l":"Ça va, peut mieux faire","v":3,"ico":"😐"}]}'::jsonb, '{}'::jsonb, NULL, NULL),
+  ('ev-nds', 'pro-vence', 'Nuits du Sud 2026', 'quiz', 'upcoming', '2026-07-15', '2026-07-24', '20:00', '23:59', 'Place du Grand Jardin', 'Place du Grand Jardin, 06140 Vence', 'Festival musiques du monde · 10 soirées · Quiz + Tirage NDS', '#3B5CC4', 0, 0, 0, 0, '{"qrUrl":"https://flowin-opconsult.netlify.app/?ev=ev-nds","quizBanques":[],"optinActif":true,"customQuestions":[{"id":"decouverte","label":"Comment avez-vous connu l''événement ?","type":"single","options":[{"label":"📸 Instagram","val":"instagram"},{"label":"🔵 Facebook","val":"facebook"},{"label":"🏛 Site de la mairie","val":"mairie"},{"label":"📋 Affiche / Flyer","val":"affiche"},{"label":"🗣 Bouche à oreille","val":"bouche"}]}],"quizBonusList":[{"id":"frequence","label":"Vous êtes venu(e)...","type":"single","options":[{"val":"famille","label":"👨‍👩‍👧 En famille"},{"val":"amis","label":"👫 Entre amis"},{"val":"couple","label":"💑 En couple"},{"val":"seul","label":"🚶 Seul(e)"}]},{"id":"ambiance","label":"Je trouve l''ambiance...","type":"single","options":[{"val":"genial","label":"🤩 Génial !"},{"val":"top","label":"😊 Top, on se sent bien"},{"val":"moyen","label":"😐 Ça va, peut mieux faire"}]},{"id":"retour","label":"Souhaitez-vous revenir ?","type":"single","options":[{"val":"oui","label":"✅ Oui"},{"val":"peut-etre","label":"🤔 Peut-être"},{"val":"non","label":"❌ Non"}]},{"id":"optin","label":"On vous informe pour les prochains événements ?","type":"single","options":[{"val":"oui","label":"✅ Oui envoyez-moi un message"},{"val":"non","label":"❌ Non merci"}]}],"proVisib":{"stats":true,"participants":true,"lots":true,"qr":true,"export":true,"activite":false,"msgBienvenue":"Bienvenue sur le dashboard Nuits du Sud 2026 !","langue":"fr"}}'::jsonb, '{}'::jsonb, '{"stats":true,"participants":true,"lots":true,"qr":true,"export":true,"activite":false,"msgBienvenue":"Bienvenue sur le dashboard Nuits du Sud 2026 !","langue":"fr"}'::jsonb, NULL, NULL),
+  ('ev-flowin-demo', 'pro-flowin', 'Flowin — Découverte', 'spin', 'live', '2026-05-07', '2030-05-03', '00:00', '23:59', 'Nice', 'Nice, 06000', 'Event démo commercial · Parcours joueur Flowin · Accès tunnel de vente landing', '#A855F7', 0, 0, 0, 0, '{"qrUrl":"","optinActif":true,"spinSegments":[{"id":"seg-1","label":"Accès Flowin complet","sublabel":"Tableau de bord inclus","emoji":"🎛️","color":"#A855F7","prob":20},{"id":"seg-2","label":"1 an offert","sublabel":"Abonnement Flowin gratuit","emoji":"🎁","color":"#00B4A0","prob":20},{"id":"seg-3","label":"Flowin Team","sublabel":"Multi-utilisateurs offert","emoji":"👥","color":"#1B3A5C","prob":20},{"id":"seg-4","label":"1er event offert","sublabel":"Config + déploiement inclus","emoji":"🚀","color":"#E8500A","prob":20},{"id":"seg-5","label":"Parrainer un ami","sublabel":"Et retenter votre chance","emoji":"🤝","color":"#F5A623","prob":20}],"proVisib":{"stats":true,"participants":true,"lots":true,"qr":true,"export":true,"activite":true,"msgBienvenue":"Bienvenue — Découvrez Flowin en jouant.","langue":"fr"}}'::jsonb, '{}'::jsonb, '{"stats":true,"participants":true,"lots":true,"qr":true,"export":true,"activite":true,"msgBienvenue":"Bienvenue — Découvrez Flowin en jouant.","langue":"fr"}'::jsonb, NULL, 'btob')
+ON CONFLICT (id) DO UPDATE SET
+  pro_id = EXCLUDED.pro_id,
+  nom = EXCLUDED.nom,
+  module = EXCLUDED.module,
+  status = EXCLUDED.status,
+  date_d = EXCLUDED.date_d,
+  date_f = EXCLUDED.date_f,
+  h_start = EXCLUDED.h_start,
+  h_end = EXCLUDED.h_end,
+  lieu = EXCLUDED.lieu,
+  adresse = EXCLUDED.adresse,
+  description = EXCLUDED.description,
+  couleur = EXCLUDED.couleur,
+  participants = EXCLUDED.participants,
+  gagnants = EXCLUDED.gagnants,
+  joueurs_optin = EXCLUDED.joueurs_optin,
+  score_min = EXCLUDED.score_min,
+  cfg = EXCLUDED.cfg,
+  stats = EXCLUDED.stats,
+  pro_visib = EXCLUDED.pro_visib,
+  super_event_id = EXCLUDED.super_event_id,
+  client_type = EXCLUDED.client_type
+;
+
+-- ════════ LOTS ════════
+-- 8 lots
+INSERT INTO public.lots (id, event_id, partenaire_id, nom, valeur, quantite, assigne_a, retire, date_retrait, note) VALUES
+  ('lot-paques-1', 'ev-paques', '', 'Place Festival Nuits du Sud 2026', 0, 1, 'j-pq-02', TRUE, '2026-04-07', 'Valable le 9, 11 ou 16 juillet 2026'),
+  ('lot-paques-2', 'ev-paques', '', 'Place Festival Nuits du Sud 2026', 0, 1, 'j-pq-06', TRUE, '2026-04-07', 'Valable le 9, 11 ou 16 juillet 2026'),
+  ('lot-paques-3', 'ev-paques', '', 'Place Festival Nuits du Sud 2026', 0, 1, 'j-pq-09', TRUE, '2026-04-07', 'Valable le 9, 11 ou 16 juillet 2026'),
+  ('lot-paques-4', 'ev-paques', '', '2 places enfants Cinéma Casino de Vence', 0, 2, 'j-pq-15', TRUE, '2026-04-07', 'Cinéma Casino de Vence'),
+  ('lot-paques-5', 'ev-paques', '', '2 places enfants Cinéma Casino de Vence', 0, 2, '', FALSE, NULL, 'Cinéma Casino de Vence'),
+  ('lot-paques-6', 'ev-paques', '', '2 places enfants Cinéma Casino de Vence', 0, 2, '', FALSE, NULL, 'Cinéma Casino de Vence'),
+  ('lot-paques-7', 'ev-paques', '', '2 places enfants Cinéma Casino de Vence', 0, 2, '', FALSE, NULL, 'Cinéma Casino de Vence'),
+  ('lot-paques-8', 'ev-paques', '', '2 places enfants Cinéma Casino de Vence', 0, 2, '', FALSE, NULL, 'Cinéma Casino de Vence')
+ON CONFLICT (id) DO UPDATE SET
+  event_id = EXCLUDED.event_id,
+  partenaire_id = EXCLUDED.partenaire_id,
+  nom = EXCLUDED.nom,
+  valeur = EXCLUDED.valeur,
+  quantite = EXCLUDED.quantite,
+  assigne_a = EXCLUDED.assigne_a,
+  retire = EXCLUDED.retire,
+  date_retrait = EXCLUDED.date_retrait,
+  note = EXCLUDED.note
+;
+
+-- ════════ JOUEURS (vrais participants Pâques 2026) ════════
+-- 186 joueurs
+INSERT INTO public.joueurs (id, email, nom, prenom, tel, ville, code_postal, adresse, date_naissance, events, gains, score_moy, optin, optin_date, last_seen, first_seen, source, tags, client_type) VALUES
+  ('j-pq-01', 'dakota.vegas06@gmail.com', 'Valérie Manes', 'Valérie', '', 'Saint-Laurent-du-Var', '06700', '', '1965-06-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-02', 'sabithaaceteee@gmail.com', 'Sabitha Iyyanar', 'Sabitha', '06 75 44 59 92 9', 'Vence', '06140', '', '1995-06-15', ARRAY['ev-paques']::text[], 1, '4/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-03', 'benoit.tva@gmail.com', 'Benoît Thierry', 'Benoît', '06 22 73 79 53', 'Saint-Nazaire', '44640', '', '1980-06-15', ARRAY['ev-paques']::text[], 0, '2/4', FALSE, NULL, '2026-04-06', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-04', 'fannyniell306@gmail.com', 'Fanny Niel', 'Fanny', '06 07 79 77 34', 'Le Bar-sur-Loup', '06620', '', '1980-06-15', ARRAY['ev-paques']::text[], 0, '4/4', FALSE, NULL, '2026-04-06', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-05', 'wagj06@gmail.com', 'Jacques Wagnieres', 'Jacques', '06 44 90 20 52', 'Vence', '06140', '', '1965-06-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-06', 'carolegym33@gmail.com', 'Carole Rioche', 'Carole', '06 75 48 51 81', 'Cagnes-sur-Mer', '06800', '', '1965-06-15', ARRAY['ev-paques']::text[], 1, '4/4', FALSE, NULL, '2026-04-06', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-07', 'john.tattoo@icloud.com', 'Jonathan Deregnaucourt', 'Jonathan', '06 15 24 41 72', 'Vence', '06140', '', '1980-06-15', ARRAY['ev-paques']::text[], 0, '2/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-08', 'cousincamille2@gmail.com', 'Camille Cousin', 'Camille', '06 10 75 58 90', 'Vence', '06140', '', '1995-06-15', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-09', 'stephanie.sola@hotmail.fr', 'Stéphanie Sola', 'Stéphanie', '06 12 43 10 94', 'Grasse', '06130', '', '1995-06-15', ARRAY['ev-paques']::text[], 1, '4/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-10', 'frederic.naepels@gmail.com', 'Frédéric Naepels', 'Frédéric', '06 58 22 50 23', 'Kembs', '68480', '', '1980-06-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-06', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-11', 'marie.laurent@wanadoo.fr', 'Marie Laurent', 'Marie', '06 99 08 83 34', 'Vence', '06140', '', '1980-06-15', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-06', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-12', 'delcampopablo24@gmail.com', 'Pablo Del campo', 'Pablo', '06 61 59 83 43', 'Vence', '06140', '', '2003-06-15', ARRAY['ev-paques']::text[], 0, '2/4', FALSE, NULL, '2026-04-06', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-13', 'juliappr11@gmail.com', 'Yuliia Popereka', 'Yuliia', '07 80 15 70 86', 'Vence', '06140', '', '2003-06-15', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-014', 'caroline.martinez@yahoo.fr', 'Caroline Martinez', 'Caroline', '', 'Vence', '06140', '', '1983-03-10', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-015', 'laurent.petit@icloud.com', 'Laurent Petit', 'Laurent', '06 91 72 23 11', 'Vence', '06140', '', '2004-05-23', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-016', 'sebastien.gautier@yahoo.fr', 'Sébastien Gautier', 'Sébastien', '', 'Saint-Laurent-du-Var', '06700', '', '1978-03-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-017', 'marc.moreau@gmail.com', 'Marc Moreau', 'Marc', '06 48 20 41 25', 'Nice', '06200', '', '1974-03-05', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-018', 'alice.francois@icloud.com', 'Alice François', 'Alice', '06 48 85 64 49', 'La Gaude', '06610', '', '2009-07-15', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-019', 'chantal.lambert@hotmail.fr', 'Chantal Lambert', 'Chantal', '', 'Vence', '06140', '', '1975-05-22', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-020', 'gerard.morel@gmail.com', 'Gérard Morel', 'Gérard', '06 70 47 14 39', 'Saint-Laurent-du-Var', '06700', '', '1985-07-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-021', 'laure.moreau@hotmail.fr', 'Laure Moreau', 'Laure', '06 85 94 35 64', 'Vence', '06140', '', '1981-05-26', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-022', 'patricia.blanc@wanadoo.fr', 'Patricia Blanc', 'Patricia', '', 'Grasse', '06130', '', '1975-02-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-01', '2026-04-01', '2026-04-01', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-023', 'anne.gautier@orange.fr', 'Anne Gautier', 'Anne', '', 'Vence', '06140', '', '1967-08-23', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-024', 'jade.royer@laposte.net', 'Jade Royer', 'Jade', '06 65 51 87 42', 'La Gaude', '06610', '', '1997-08-03', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-025', 'vincent.dubois@outlook.fr', 'Vincent Dubois', 'Vincent', '06 32 70 76 93', 'Saint-Laurent-du-Var', '06700', '', '1981-10-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-02', '2026-04-02', '2026-04-02', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-026', 'vincent.joly@laposte.net', 'Vincent Joly', 'Vincent', '', 'Saint-Laurent-du-Var', '06700', '', '1980-02-16', ARRAY['ev-paques']::text[], 0, '4/3', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-027', 'henri.morel@yahoo.fr', 'Henri Morel', 'Henri', '06 94 61 80 14', 'Saint-Laurent-du-Var', '06700', '', '1989-07-23', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-028', 'frederic.boyer@icloud.com', 'Frédéric Boyer', 'Frédéric', '06 69 62 16 34', 'Vence', '06140', '', '1999-01-22', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-029', 'laure.petit@hotmail.fr', 'Laure Petit', 'Laure', '', 'Vence', '06140', '', '1982-05-18', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-030', 'chantal.thomas@hotmail.fr', 'Chantal Thomas', 'Chantal', '', 'La Gaude', '06610', '', '1981-12-06', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-031', 'henri.roy@orange.fr', 'Henri Roy', 'Henri', '', 'Cagnes-sur-Mer', '06800', '', '1976-11-27', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-032', 'leo.aubert@hotmail.fr', 'Léo Aubert', 'Léo', '', 'Vence', '06140', '', '2010-08-18', ARRAY['ev-paques']::text[], 0, '4/3', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-033', 'elodie.roux@orange.fr', 'Élodie Roux', 'Élodie', '06 63 53 74 44', 'Nice', '06200', '', '1978-05-25', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-034', 'christophe.vasseur@wanadoo.fr', 'Christophe Vasseur', 'Christophe', '06 52 80 79 58', 'Vence', '06140', '', '1983-08-18', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-02', '2026-04-02', '2026-04-02', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-035', 'nathalie.legrand@free.fr', 'Nathalie Legrand', 'Nathalie', '06 15 50 70 58', 'Vence', '06140', '', '1960-04-28', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-036', 'julie.fournier@laposte.net', 'Julie Fournier', 'Julie', '06 85 52 22 66', 'Nice', '06200', '', '1942-01-05', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-037', 'laure.bernard@wanadoo.fr', 'Laure Bernard', 'Laure', '06 29 19 70 43', 'Cagnes-sur-Mer', '06800', '', '1977-07-28', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-038', 'martine.gauthier@icloud.com', 'Martine Gauthier', 'Martine', '06 72 79 14 89', 'La Gaude', '06610', '', '1988-07-11', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-039', 'caroline.martinez@orange.fr', 'Caroline Martinez', 'Caroline', '06 22 66 31 98', 'Vence', '06140', '', '1985-07-04', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-040', 'nicole.clement@gmail.com', 'Nicole Clément', 'Nicole', '', 'Vence', '06140', '', '1984-05-12', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-03', '2026-04-03', '2026-04-03', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-041', 'hugo.lefevre@wanadoo.fr', 'Hugo Lefèvre', 'Hugo', '06 58 89 97 40', 'Vence', '06140', '', '2008-03-03', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-042', 'nicolas.faure@laposte.net', 'Nicolas Faure', 'Nicolas', '', 'Vence', '06140', '', '1976-05-22', ARRAY['ev-paques']::text[], 0, '4/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-043', 'francoise.moreau@laposte.net', 'Françoise Moreau', 'Françoise', '', 'La Gaude', '06610', '', '1974-06-19', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-02', '2026-04-02', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-044', 'ines.perrin@hotmail.fr', 'Inès Perrin', 'Inès', '06 40 58 83 55', 'La Gaude', '06610', '', '1998-07-28', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-045', 'brigitte.gerard@outlook.fr', 'Brigitte Gérard', 'Brigitte', '06 16 87 73 46', 'Vence', '06140', '', '1978-01-19', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-046', 'celine.francois@hotmail.fr', 'Céline François', 'Céline', '06 94 97 27 90', 'Vence', '06140', '', '1989-10-09', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-047', 'julie.richard@outlook.fr', 'Julie Richard', 'Julie', '06 26 21 47 51', 'Grasse', '06130', '', '1967-08-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-048', 'arthur.chevalier@icloud.com', 'Arthur Chevalier', 'Arthur', '06 42 71 47 53', 'La Gaude', '06610', '', '1991-09-09', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-01', '2026-04-01', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-049', 'martine.vincent@hotmail.fr', 'Martine Vincent', 'Martine', '06 60 81 56 21', 'Cagnes-sur-Mer', '06800', '', '1984-11-24', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-11', '2026-04-11', '2026-04-11', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-050', 'arthur.david@laposte.net', 'Arthur David', 'Arthur', '06 43 84 58 91', 'Vence', '06140', '', '1993-06-22', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-051', 'thierry.aubert@gmail.com', 'Thierry Aubert', 'Thierry', '', 'Nice', '06200', '', '1978-10-18', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-052', 'michel.roy@outlook.fr', 'Michel Roy', 'Michel', '', 'Cagnes-sur-Mer', '06800', '', '1956-11-14', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-053', 'anne.renard@orange.fr', 'Anne Renard', 'Anne', '06 27 59 68 57', 'Vence', '06140', '', '1952-02-08', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-054', 'laure.lemaire@orange.fr', 'Laure Lemaire', 'Laure', '06 45 14 98 57', 'Vence', '06140', '', '1991-08-20', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-055', 'chloe.lefebvre@yahoo.fr', 'Chloé Lefebvre', 'Chloé', '', 'Saint-Laurent-du-Var', '06700', '', '2001-09-21', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-056', 'philippe.roche@orange.fr', 'Philippe Roche', 'Philippe', '06 86 12 16 52', 'Cagnes-sur-Mer', '06800', '', '1973-11-07', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-057', 'pauline.lambert@orange.fr', 'Pauline Lambert', 'Pauline', '06 39 52 28 86', 'La Gaude', '06610', '', '1987-09-07', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-058', 'alain.bertrand@icloud.com', 'Alain Bertrand', 'Alain', '', 'Nice', '06200', '', '1960-05-26', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-059', 'cedric.clement@gmail.com', 'Cédric Clément', 'Cédric', '', 'Vence', '06140', '', '2006-03-09', ARRAY['ev-paques']::text[], 0, '2/4', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-060', 'martine.aubert@laposte.net', 'Martine Aubert', 'Martine', '06 67 74 38 88', 'La Gaude', '06610', '', '1988-06-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-061', 'jade.perrin@laposte.net', 'Jade Perrin', 'Jade', '', 'La Gaude', '06610', '', '1991-11-01', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-062', 'chantal.michel@laposte.net', 'Chantal Michel', 'Chantal', '', 'Vence', '06140', '', '1959-12-15', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-063', 'alain.leroy@wanadoo.fr', 'Alain Leroy', 'Alain', '06 80 51 58 86', 'Grasse', '06130', '', '1964-05-20', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-064', 'nathan.joly@orange.fr', 'Nathan Joly', 'Nathan', '06 93 80 37 65', 'Vence', '06140', '', '2002-12-04', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-065', 'emilie.dumont@laposte.net', 'Émilie Dumont', 'Émilie', '06 50 64 50 95', 'La Gaude', '06610', '', '1989-07-14', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-03', '2026-04-03', '2026-04-03', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-066', 'sebastien.leroy@orange.fr', 'Sébastien Leroy', 'Sébastien', '06 57 26 81 17', 'Vence', '06140', '', '1989-02-03', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-067', 'chantal.denis@yahoo.fr', 'Chantal Denis', 'Chantal', '06 16 46 86 49', 'Saint-Laurent-du-Var', '06700', '', '1982-11-25', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-02', '2026-04-02', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-068', 'julien.bonnet@wanadoo.fr', 'Julien Bonnet', 'Julien', '', 'Cagnes-sur-Mer', '06800', '', '1985-11-16', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-069', 'catherine.henry@hotmail.fr', 'Catherine Henry', 'Catherine', '06 89 88 96 92', 'Nice', '06200', '', '1941-07-28', ARRAY['ev-paques']::text[], 0, '4/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-070', 'pascal.thomas@wanadoo.fr', 'Pascal Thomas', 'Pascal', '06 53 54 10 33', 'Vence', '06140', '', '1979-05-23', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-071', 'laure.thomas@orange.fr', 'Laure Thomas', 'Laure', '', 'Vence', '06140', '', '2003-12-17', ARRAY['ev-paques']::text[], 0, '2/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-072', 'veronique.robin@outlook.fr', 'Véronique Robin', 'Véronique', '06 82 86 20 16', 'Cagnes-sur-Mer', '06800', '', '1976-12-11', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-073', 'thomas.petit@orange.fr', 'Thomas Petit', 'Thomas', '06 72 87 66 63', 'Nice', '06200', '', '1987-05-15', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-074', 'celine.joly@orange.fr', 'Céline Joly', 'Céline', '06 72 77 95 49', 'Nice', '06200', '', '1988-05-22', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-075', 'sophie.martin@hotmail.fr', 'Sophie Martin', 'Sophie', '06 42 47 51 25', 'Vence', '06140', '', '1966-05-07', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-076', 'emilie.andre@wanadoo.fr', 'Émilie André', 'Émilie', '06 74 81 95 55', 'La Gaude', '06610', '', '1983-07-18', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-01', '2026-04-01', '2026-04-01', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-077', 'celine.joly@gmail.com', 'Céline Joly', 'Céline', '06 83 64 83 61', 'Vence', '06140', '', '2003-08-03', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-078', 'brigitte.girard@laposte.net', 'Brigitte Girard', 'Brigitte', '', 'Vence', '06140', '', '1972-12-12', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-079', 'jade.simon@free.fr', 'Jade Simon', 'Jade', '', 'Nice', '06200', '', '1993-05-24', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-080', 'henri.renaud@icloud.com', 'Henri Renaud', 'Henri', '', 'Grasse', '06130', '', '1986-04-25', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-081', 'christian.andre@wanadoo.fr', 'Christian André', 'Christian', '', 'Vence', '06140', '', '1955-11-03', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-082', 'stephanie.roger@yahoo.fr', 'Stéphanie Roger', 'Stéphanie', '', 'La Gaude', '06610', '', '1972-11-11', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-083', 'julie.perrin@outlook.fr', 'Julie Perrin', 'Julie', '', 'Cagnes-sur-Mer', '06800', '', '1963-10-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-084', 'lucas.robert@gmail.com', 'Lucas Robert', 'Lucas', '', 'Vence', '06140', '', '1993-06-27', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-085', 'elodie.sanchez@laposte.net', 'Élodie Sanchez', 'Élodie', '06 15 67 83 93', 'Saint-Laurent-du-Var', '06700', '', '1975-10-18', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-086', 'laure.durand@laposte.net', 'Laure Durand', 'Laure', '06 53 20 74 92', 'Cagnes-sur-Mer', '06800', '', '1990-02-26', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-087', 'david.gautier@laposte.net', 'David Gautier', 'David', '06 56 57 46 59', 'Vence', '06140', '', '1966-09-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-088', 'alice.petit@yahoo.fr', 'Alice Petit', 'Alice', '', 'Saint-Laurent-du-Var', '06700', '', '1995-02-11', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-089', 'louis.fournier@yahoo.fr', 'Louis Fournier', 'Louis', '06 54 49 93 99', 'Vence', '06140', '', '1993-02-19', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-090', 'christine.morin@icloud.com', 'Christine Morin', 'Christine', '06 26 95 99 97', 'Saint-Laurent-du-Var', '06700', '', '1950-07-21', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-091', 'elodie.chevalier@gmail.com', 'Élodie Chevalier', 'Élodie', '', 'Grasse', '06130', '', '1977-06-10', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-092', 'valerie.francois@wanadoo.fr', 'Valérie François', 'Valérie', '', 'Vence', '06140', '', '1977-03-03', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-093', 'emilie.renaud@gmail.com', 'Émilie Renaud', 'Émilie', '06 89 26 86 58', 'Grasse', '06130', '', '1943-11-11', ARRAY['ev-paques']::text[], 0, '4/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-094', 'thomas.girard@laposte.net', 'Thomas Girard', 'Thomas', '', 'Saint-Laurent-du-Var', '06700', '', '1978-01-14', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-095', 'laure.martinez@icloud.com', 'Laure Martinez', 'Laure', '06 70 34 57 96', 'Cagnes-sur-Mer', '06800', '', '1981-04-10', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-096', 'laure.roussel@free.fr', 'Laure Roussel', 'Laure', '06 30 35 87 27', 'Cagnes-sur-Mer', '06800', '', '1976-09-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-097', 'leo.robin@icloud.com', 'Léo Robin', 'Léo', '06 25 46 20 30', 'Nice', '06200', '', '2014-02-23', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-098', 'elodie.vincent@free.fr', 'Élodie Vincent', 'Élodie', '06 54 13 63 16', 'Grasse', '06130', '', '1976-02-08', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-099', 'michel.robin@hotmail.fr', 'Michel Robin', 'Michel', '06 93 52 28 27', 'Nice', '06200', '', '1966-01-11', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-100', 'laure.aubert@laposte.net', 'Laure Aubert', 'Laure', '06 12 42 37 29', 'La Gaude', '06610', '', '2009-10-01', ARRAY['ev-paques']::text[], 0, '4/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-101', 'caroline.renaud@free.fr', 'Caroline Renaud', 'Caroline', '', 'Cagnes-sur-Mer', '06800', '', '1966-02-25', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-102', 'cedric.lemaire@laposte.net', 'Cédric Lemaire', 'Cédric', '06 73 86 78 12', 'Vence', '06140', '', '2008-02-04', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-103', 'patricia.nicolas@free.fr', 'Patricia Nicolas', 'Patricia', '', 'Nice', '06200', '', '1981-01-20', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-02', '2026-04-02', '2026-04-02', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-104', 'martine.renaud@yahoo.fr', 'Martine Renaud', 'Martine', '06 74 80 12 59', 'Cagnes-sur-Mer', '06800', '', '1976-02-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-105', 'david.robin@outlook.fr', 'David Robin', 'David', '', 'Vence', '06140', '', '1978-12-01', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-106', 'frederic.michel@yahoo.fr', 'Frédéric Michel', 'Frédéric', '', 'Cagnes-sur-Mer', '06800', '', '1967-03-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-107', 'nicolas.berger@wanadoo.fr', 'Nicolas Berger', 'Nicolas', '06 68 14 47 35', 'Saint-Laurent-du-Var', '06700', '', '1986-03-03', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-108', 'sophie.mathieu@outlook.fr', 'Sophie Mathieu', 'Sophie', '06 79 70 42 14', 'Cagnes-sur-Mer', '06800', '', '1945-09-13', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-109', 'francois.gauthier@outlook.fr', 'François Gauthier', 'François', '', 'Vence', '06140', '', '1975-02-26', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-110', 'aurelie.dumont@wanadoo.fr', 'Aurélie Dumont', 'Aurélie', '06 76 44 20 64', 'Cagnes-sur-Mer', '06800', '', '1982-08-23', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-03', '2026-04-03', '2026-04-03', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-111', 'camille.royer@outlook.fr', 'Camille Royer', 'Camille', '', 'La Gaude', '06610', '', '2002-06-04', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-112', 'thomas.duval@wanadoo.fr', 'Thomas Duval', 'Thomas', '', 'Vence', '06140', '', '1979-12-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-113', 'chloe.joly@outlook.fr', 'Chloé Joly', 'Chloé', '06 19 95 91 61', 'Vence', '06140', '', '1990-11-26', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-114', 'camille.thomas@wanadoo.fr', 'Camille Thomas', 'Camille', '06 14 26 18 40', 'Vence', '06140', '', '2011-10-22', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-115', 'raphaël.robert@wanadoo.fr', 'Raphaël Robert', 'Raphaël', '06 57 66 19 83', 'Nice', '06200', '', '2014-11-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-11', '2026-04-11', '2026-04-11', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-116', 'sarah.mathieu@outlook.fr', 'Sarah Mathieu', 'Sarah', '', 'Cagnes-sur-Mer', '06800', '', '1999-04-04', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-117', 'martine.david@outlook.fr', 'Martine David', 'Martine', '06 88 46 98 72', 'Vence', '06140', '', '1968-05-23', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-118', 'michel.roger@wanadoo.fr', 'Michel Roger', 'Michel', '06 97 50 95 54', 'Grasse', '06130', '', '1945-12-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-119', 'manon.perrin@wanadoo.fr', 'Manon Perrin', 'Manon', '06 91 32 56 75', 'Vence', '06140', '', '2001-12-23', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-120', 'julien.roux@hotmail.fr', 'Julien Roux', 'Julien', '', 'Vence', '06140', '', '2010-08-01', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-121', 'arthur.bertrand@orange.fr', 'Arthur Bertrand', 'Arthur', '', 'Nice', '06200', '', '1991-02-10', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-122', 'laure.denis@orange.fr', 'Laure Denis', 'Laure', '06 67 69 97 76', 'La Gaude', '06610', '', '1962-03-11', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-123', 'cedric.lefevre@wanadoo.fr', 'Cédric Lefèvre', 'Cédric', '06 17 25 76 29', 'La Gaude', '06610', '', '1982-07-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-124', 'david.francois@yahoo.fr', 'David François', 'David', '06 42 35 91 80', 'Nice', '06200', '', '1971-09-10', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-125', 'cedric.laurent@icloud.com', 'Cédric Laurent', 'Cédric', '06 84 29 31 94', 'Vence', '06140', '', '1976-11-06', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-126', 'manon.dumont@gmail.com', 'Manon Dumont', 'Manon', '', 'Cagnes-sur-Mer', '06800', '', '1985-01-03', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-127', 'olivier.lemaire@gmail.com', 'Olivier Lemaire', 'Olivier', '06 92 48 71 41', 'Vence', '06140', '', '1987-08-21', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-02', '2026-04-02', '2026-04-02', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-128', 'michel.durand@wanadoo.fr', 'Michel Durand', 'Michel', '06 36 53 87 28', 'Grasse', '06130', '', '1947-08-14', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-129', 'lea.lopez@free.fr', 'Léa Lopez', 'Léa', '', 'Cagnes-sur-Mer', '06800', '', '1993-03-25', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-130', 'thierry.roy@orange.fr', 'Thierry Roy', 'Thierry', '', 'La Gaude', '06610', '', '1978-05-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-131', 'gerard.lemaire@hotmail.fr', 'Gérard Lemaire', 'Gérard', '', 'Cagnes-sur-Mer', '06800', '', '1972-03-27', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-132', 'nathalie.morel@laposte.net', 'Nathalie Morel', 'Nathalie', '06 49 73 12 21', 'Vence', '06140', '', '1966-09-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-133', 'charlotte.bonnet@yahoo.fr', 'Charlotte Bonnet', 'Charlotte', '', 'Nice', '06200', '', '1998-01-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-02', '2026-04-02', '2026-04-02', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-134', 'julie.aubert@outlook.fr', 'Julie Aubert', 'Julie', '06 65 27 43 56', 'Nice', '06200', '', '1960-09-01', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-01', '2026-04-01', '2026-04-01', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-135', 'antoine.petit@icloud.com', 'Antoine Petit', 'Antoine', '06 19 59 74 67', 'Cagnes-sur-Mer', '06800', '', '2004-04-12', ARRAY['ev-paques']::text[], 0, '2/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-136', 'manon.david@wanadoo.fr', 'Manon David', 'Manon', '', 'Cagnes-sur-Mer', '06800', '', '1985-02-13', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-137', 'robert.dupont@icloud.com', 'Robert Dupont', 'Robert', '', 'Nice', '06200', '', '1977-07-17', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-138', 'romain.aubert@icloud.com', 'Romain Aubert', 'Romain', '06 75 27 51 88', 'Vence', '06140', '', '2007-08-05', ARRAY['ev-paques']::text[], 0, '2/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-139', 'caroline.dumont@icloud.com', 'Caroline Dumont', 'Caroline', '06 82 48 70 12', 'Grasse', '06130', '', '1988-09-18', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-140', 'hugo.morin@gmail.com', 'Hugo Morin', 'Hugo', '', 'Vence', '06140', '', '2001-10-16', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-141', 'emilie.petit@laposte.net', 'Émilie Petit', 'Émilie', '06 89 58 28 97', 'Nice', '06200', '', '1971-03-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-142', 'frederic.mercier@gmail.com', 'Frédéric Mercier', 'Frédéric', '06 62 98 36 62', 'Vence', '06140', '', '1990-08-11', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-143', 'louise.durand@wanadoo.fr', 'Louise Durand', 'Louise', '06 94 71 77 58', 'Nice', '06200', '', '1997-09-07', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-144', 'patricia.picard@yahoo.fr', 'Patricia Picard', 'Patricia', '06 97 92 98 43', 'Vence', '06140', '', '1957-09-12', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-145', 'sylvie.perrin@hotmail.fr', 'Sylvie Perrin', 'Sylvie', '', 'Vence', '06140', '', '1956-05-25', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-146', 'camille.mathieu@laposte.net', 'Camille Mathieu', 'Camille', '06 45 46 25 83', 'Cagnes-sur-Mer', '06800', '', '1986-06-18', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-147', 'david.lopez@wanadoo.fr', 'David Lopez', 'David', '', 'Cagnes-sur-Mer', '06800', '', '1983-05-02', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-148', 'lucas.faure@laposte.net', 'Lucas Faure', 'Lucas', '06 44 81 99 44', 'Vence', '06140', '', '1990-04-07', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-149', 'sandrine.garnier@gmail.com', 'Sandrine Garnier', 'Sandrine', '', 'Nice', '06200', '', '1980-11-17', ARRAY['ev-paques']::text[], 0, '4/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-150', 'frederic.gauthier@laposte.net', 'Frédéric Gauthier', 'Frédéric', '06 10 80 30 62', 'Grasse', '06130', '', '1982-02-22', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-11', '2026-04-11', '2026-04-11', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-151', 'valerie.roussel@yahoo.fr', 'Valérie Roussel', 'Valérie', '', 'Grasse', '06130', '', '1978-05-21', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-152', 'laurent.andre@free.fr', 'Laurent André', 'Laurent', '06 60 73 33 47', 'Cagnes-sur-Mer', '06800', '', '2007-03-02', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-153', 'vincent.michel@yahoo.fr', 'Vincent Michel', 'Vincent', '06 79 77 73 27', 'Grasse', '06130', '', '1976-05-15', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-154', 'nathalie.garcia@yahoo.fr', 'Nathalie Garcia', 'Nathalie', '06 42 33 11 53', 'Vence', '06140', '', '1941-03-24', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-155', 'laure.mercier@wanadoo.fr', 'Laure Mercier', 'Laure', '06 61 64 75 51', 'Saint-Laurent-du-Var', '06700', '', '1941-10-28', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-156', 'catherine.lefevre@wanadoo.fr', 'Catherine Lefèvre', 'Catherine', '06 10 43 59 40', 'Cagnes-sur-Mer', '06800', '', '1962-08-11', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-157', 'julie.perrin@gmail.com', 'Julie Perrin', 'Julie', '', 'Grasse', '06130', '', '1983-05-21', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-158', 'philippe.roy@outlook.fr', 'Philippe Roy', 'Philippe', '06 49 98 25 91', 'Vence', '06140', '', '1967-03-13', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-17', '2026-04-17', '2026-04-17', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-159', 'daniel.francois@wanadoo.fr', 'Daniel François', 'Daniel', '06 87 57 63 99', 'Vence', '06140', '', '1963-08-05', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-160', 'lina.bonnet@hotmail.fr', 'Lina Bonnet', 'Lina', '06 20 77 67 77', 'Cagnes-sur-Mer', '06800', '', '1995-11-25', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-161', 'pascal.garcia@gmail.com', 'Pascal Garcia', 'Pascal', '', 'Nice', '06200', '', '1941-09-17', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-162', 'claude.schmitt@laposte.net', 'Claude Schmitt', 'Claude', '', 'Vence', '06140', '', '1942-02-22', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-163', 'jade.roger@gmail.com', 'Jade Roger', 'Jade', '06 68 82 17 81', 'Nice', '06200', '', '2008-08-05', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-164', 'manon.dubois@free.fr', 'Manon Dubois', 'Manon', '', 'Grasse', '06130', '', '2002-05-27', ARRAY['ev-paques']::text[], 0, '2/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-165', 'francois.leroy@icloud.com', 'François Leroy', 'François', '06 70 14 46 62', 'Vence', '06140', '', '1942-01-03', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-166', 'emilie.robin@free.fr', 'Émilie Robin', 'Émilie', '06 58 58 20 97', 'Saint-Laurent-du-Var', '06700', '', '1987-08-28', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-167', 'chantal.andre@icloud.com', 'Chantal André', 'Chantal', '', 'Grasse', '06130', '', '1988-07-17', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-168', 'julie.perrin@laposte.net', 'Julie Perrin', 'Julie', '06 78 58 39 41', 'Saint-Laurent-du-Var', '06700', '', '1995-11-24', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-169', 'pascal.mercier@orange.fr', 'Pascal Mercier', 'Pascal', '06 88 12 40 36', 'La Gaude', '06610', '', '1988-01-26', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-170', 'francois.roger@gmail.com', 'François Roger', 'François', '', 'Vence', '06140', '', '1978-04-24', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-171', 'olivier.durand@wanadoo.fr', 'Olivier Durand', 'Olivier', '', 'Vence', '06140', '', '1982-09-10', ARRAY['ev-paques']::text[], 0, '4/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-172', 'celine.clement@hotmail.fr', 'Céline Clément', 'Céline', '06 76 38 62 48', 'Vence', '06140', '', '1956-05-05', ARRAY['ev-paques']::text[], 0, '3/4', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-173', 'vincent.andre@free.fr', 'Vincent André', 'Vincent', '', 'Vence', '06140', '', '1982-09-16', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-174', 'elodie.mathieu@free.fr', 'Élodie Mathieu', 'Élodie', '', 'Vence', '06140', '', '1981-07-05', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-175', 'sandrine.perrin@wanadoo.fr', 'Sandrine Perrin', 'Sandrine', '06 63 81 77 27', 'Nice', '06200', '', '1985-08-02', ARRAY['ev-paques']::text[], 0, '4/3', FALSE, NULL, '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-176', 'christian.gauthier@orange.fr', 'Christian Gauthier', 'Christian', '', 'Saint-Laurent-du-Var', '06700', '', '1964-08-28', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-177', 'nathalie.petit@outlook.fr', 'Nathalie Petit', 'Nathalie', '06 15 19 34 85', 'Vence', '06140', '', '1970-07-22', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-178', 'christian.gauthier@outlook.fr', 'Christian Gauthier', 'Christian', '06 25 71 41 99', 'Saint-Laurent-du-Var', '06700', '', '1964-01-07', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-179', 'aurelie.legrand@icloud.com', 'Aurélie Legrand', 'Aurélie', '', 'Vence', '06140', '', '1988-06-25', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-180', 'chloe.morin@outlook.fr', 'Chloé Morin', 'Chloé', '06 69 22 70 50', 'Vence', '06140', '', '2006-06-17', ARRAY['ev-paques']::text[], 0, '2/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-181', 'henri.richard@hotmail.fr', 'Henri Richard', 'Henri', '', 'Vence', '06140', '', '1958-12-05', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-05', '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-182', 'emma.nicolas@wanadoo.fr', 'Emma Nicolas', 'Emma', '', 'Vence', '06140', '', '2012-04-11', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-05', '2026-04-05', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-183', 'veronique.dumont@outlook.fr', 'Véronique Dumont', 'Véronique', '06 72 68 31 55', 'Cagnes-sur-Mer', '06800', '', '1969-08-24', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-04', '2026-04-04', '2026-04-04', 'QR sur place', '{}'::text[], 'btoc'),
+  ('j-pq-184', 'thierry.vasseur@wanadoo.fr', 'Thierry Vasseur', 'Thierry', '06 77 14 19 95', 'Vence', '06140', '', '1963-09-21', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-06', '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-185', 'sandrine.leroy@wanadoo.fr', 'Sandrine Leroy', 'Sandrine', '06 57 17 89 91', 'Vence', '06140', '', '1987-01-07', ARRAY['ev-paques']::text[], 0, '3/3', FALSE, NULL, '2026-04-06', '2026-04-06', 'QR sur place', ARRAY['Vence']::text[], 'btoc'),
+  ('j-pq-186', 'celine.vasseur@gmail.com', 'Céline Vasseur', 'Céline', '06 11 12 77 45', 'Grasse', '06130', '', '1971-01-18', ARRAY['ev-paques']::text[], 0, '3/4', TRUE, '2026-04-01', '2026-04-01', '2026-04-01', 'QR sur place', '{}'::text[], 'btoc')
+ON CONFLICT (id) DO UPDATE SET
+  email = EXCLUDED.email,
+  nom = EXCLUDED.nom,
+  prenom = EXCLUDED.prenom,
+  tel = EXCLUDED.tel,
+  ville = EXCLUDED.ville,
+  code_postal = EXCLUDED.code_postal,
+  adresse = EXCLUDED.adresse,
+  date_naissance = EXCLUDED.date_naissance,
+  events = EXCLUDED.events,
+  gains = EXCLUDED.gains,
+  score_moy = EXCLUDED.score_moy,
+  optin = EXCLUDED.optin,
+  optin_date = EXCLUDED.optin_date,
+  last_seen = EXCLUDED.last_seen,
+  first_seen = EXCLUDED.first_seen,
+  source = EXCLUDED.source,
+  tags = EXCLUDED.tags,
+  client_type = EXCLUDED.client_type
+;
+
+-- ════════ VÉRIFICATION ════════
+SELECT 'pros' AS table_name, COUNT(*) AS rows FROM public.pros
+UNION ALL SELECT 'partenaires', COUNT(*) FROM public.partenaires
+UNION ALL SELECT 'events', COUNT(*) FROM public.events
+UNION ALL SELECT 'joueurs', COUNT(*) FROM public.joueurs
+UNION ALL SELECT 'lots', COUNT(*) FROM public.lots
+UNION ALL SELECT 'super_events', COUNT(*) FROM public.super_events;
+
+-- ═══════════════ PARTIE 3/3 : FIX_QR_URLS_v2 ═══════════════
+
+-- ============================================================
+-- FIX QR URLs · v2 · 15/05/2026
+-- 
+-- Reformatte TOUTES les qrUrl pour qu'elles soient cohérentes :
+--   https://flowin-events.vercel.app/parcours_user.html?ev={event_id}
+-- 
+-- À exécuter UNE FOIS après le déploiement du nouveau code.
+-- À l'avenir, supaWriteEvent() génère ça automatiquement à chaque save.
+-- ============================================================
+
+UPDATE public.events
+SET cfg = jsonb_set(
+  COALESCE(cfg, '{}'::jsonb),
+  '{qrUrl}',
+  to_jsonb('https://flowin-events.vercel.app/parcours_user.html?ev=' || id)
+);
+
+-- Vérification : tous les events test doivent avoir la bonne URL
+SELECT 
+  id, 
+  module,
+  cfg->>'qrUrl' AS qr_url
+FROM public.events
+WHERE id LIKE 'ev-test-%'
+ORDER BY id;

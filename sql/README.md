@@ -2,17 +2,32 @@
 
 État au 15/05/2026 — Validé sur PostgreSQL 16 local.
 
-## Ordre d'exécution recommandé (Supabase SQL Editor)
+---
+
+## 🚀 Exécution sur Supabase (procédure officielle)
+
+**1 seul fichier à exécuter** : `sql/RUN_ON_SUPABASE.sql` (contient les 3 SQL dans le bon ordre).
 
 ```
-1. FINAL_CONSOLIDATED.sql       Schéma initial 11 tables + RLS
-2. SCHEMA_ALIGNMENT_v2.sql      Ajout colonnes manquantes (idempotent)
-3. SEED_PROD_v2.sql             Migration seed prod (186 joueurs Pâques, etc.)
-4. FIX_QR_URLS_v2.sql           Normalisation cfg.qrUrl (déjà fait en prod)
+Étape 1. Ouvrir Supabase → SQL Editor → New query
+Étape 2. Copier-coller TOUT le contenu de sql/RUN_ON_SUPABASE.sql
+Étape 3. Cliquer "Run"
 ```
 
-Tous les fichiers sont **idempotents** : ils peuvent être exécutés plusieurs fois
-sans erreur (`ADD COLUMN IF NOT EXISTS`, `ON CONFLICT DO UPDATE`).
+⚠️ Ne PAS utiliser la commande `\i` — c'est psql CLI uniquement, pas SQL valide.
+
+Le fichier est **idempotent** : tu peux le réexécuter plusieurs fois sans danger
+(`ADD COLUMN IF NOT EXISTS` + `ON CONFLICT DO UPDATE`).
+
+Résultat attendu après exécution :
+```
+INSERT 0 2     pros
+INSERT 0 1     super_events  
+INSERT 0 3     events
+INSERT 0 8     lots
+INSERT 0 186   joueurs (vrais participants Pâques 2026)
+UPDATE 3       qrUrl normalisés
+```
 
 ---
 
@@ -20,81 +35,66 @@ sans erreur (`ADD COLUMN IF NOT EXISTS`, `ON CONFLICT DO UPDATE`).
 
 | Fichier | Rôle | Lignes |
 |---|---|---|
-| `FINAL_CONSOLIDATED.sql` | Schéma initial 11 tables + RLS + vues | 350 |
-| `SCHEMA_ALIGNMENT_v2.sql` | Ajoute 28 colonnes manquantes (url, prenom, tel, stats, etc.) | 84 |
-| `SEED_PROD_v2.sql` | 2 pros + 3 events + 186 joueurs Pâques + 8 lots + 1 super_event | 322 |
-| `FIX_GENRE_COLUMN.sql` | Colonne genre (déjà incluse dans ALIGNMENT_v2) | 16 |
-| `FIX_PARTENAIRE_URL.sql` | Colonne partenaires.url (déjà incluse dans ALIGNMENT_v2) | 17 |
-| `FIX_QR_URLS_v2.sql` | UPDATE en masse de cfg.qrUrl | 25 |
+| **`RUN_ON_SUPABASE.sql`** | **À exécuter dans le SQL Editor** (master concaténé) | 450 |
+| `FINAL_CONSOLIDATED.sql` | Schéma initial 11 tables + RLS + vues (déjà exécuté) | 350 |
+| `SCHEMA_ALIGNMENT_v2.sql` | Partie 1 : ajoute 28 colonnes manquantes | 84 |
+| `SEED_PROD_v2.sql` | Partie 2 : 186 joueurs Pâques + events + lots | 322 |
+| `FIX_QR_URLS_v2.sql` | Partie 3 : normalisation cfg.qrUrl | 25 |
+| `FIX_GENRE_COLUMN.sql` | (Inclus dans ALIGNMENT_v2) | 16 |
+| `FIX_PARTENAIRE_URL.sql` | (Inclus dans ALIGNMENT_v2) | 17 |
 | `AUDIT_ALL_IN_ONE.sql` | Audit complet (vues, contrôles, stats) | 537 |
 | `CLEAN_TEST_DATA.sql` | Nettoyage données test (ev-test-*, j-test-*, etc.) | 52 |
 | `SEED_AUDIT_FICTIF.sql` | Seed fictif pour audit | 162 |
-| `SIMULATE_PARCOURS_USERS.sql` | Simule 4 joueurs scannent un QR | 69 |
+| `SIMULATE_PARCOURS_USERS.sql` | Simule 4 joueurs qui scannent un QR | 69 |
 
 ## Archives
 
-`sql/archive/` contient les anciens fichiers conservés pour traçabilité :
-- `FIX_QR_URLS.sql` (v1, remplacé par v2)
-- `FIX_RLS_500.sql` + `FIX_RLS_DISABLE.sql` (RLS mode test, à durcir avant prod)
-- `AUDIT_ALL_IN_ONE.sql.tmp` (fichier temporaire vide)
+`sql/archive/` contient les anciens fichiers conservés pour traçabilité.
 
 ---
 
-## Validation locale
+## Validation locale (optionnel)
 
 ```bash
-# Démarrer PostgreSQL local
+# Installer PostgreSQL + créer DB test
 apt-get install -y postgresql postgresql-client
 service postgresql start
-
-# Créer une DB de test propre
 su - postgres -c "psql -c 'CREATE DATABASE flowin_test;'"
 
-# Tester dans l'ordre
+# Tester
 su - postgres -c "psql flowin_test -f sql/FINAL_CONSOLIDATED.sql"
-su - postgres -c "psql flowin_test -f sql/SCHEMA_ALIGNMENT_v2.sql"
-su - postgres -c "psql flowin_test -f sql/SEED_PROD_v2.sql"
+su - postgres -c "psql flowin_test -f sql/RUN_ON_SUPABASE.sql"
 
 # Vérifier
-su - postgres -c "psql flowin_test -c '
-  SELECT table_name, COUNT(*) FROM (
-    SELECT \"joueurs\" AS table_name FROM joueurs
-    UNION ALL SELECT \"events\" FROM events
-    UNION ALL SELECT \"pros\" FROM pros
-  ) t GROUP BY table_name;'"
+su - postgres -c "psql flowin_test -c \"
+  SELECT 'pros' AS t, COUNT(*) FROM pros 
+  UNION ALL SELECT 'events', COUNT(*) FROM events 
+  UNION ALL SELECT 'joueurs', COUNT(*) FROM joueurs;
+\""
 ```
-
-Résultat attendu :
-- `pros: 2`
-- `events: 3`
-- `joueurs: 186`
-- `lots: 8`
-- `super_events: 1`
 
 ---
 
 ## Connexion Supabase
 
 ```
-URL : https://atddutvzklcgiqxlpvla.supabase.co
+URL      : https://atddutvzklcgiqxlpvla.supabase.co
 Anon key : sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF
-Région : eu-west-1
+Région   : eu-west-1
 ```
 
-Exécution manuelle via le SQL Editor du dashboard Supabase.
-
-## Tables (10 tables data + 1 auth)
+## Tables (10 data + 1 auth)
 
 | Table | Rôle |
 |---|---|
 | `profiles` | Auth Supabase (lié à auth.users) |
 | `pros` | Organisations clientes |
-| `partenaires` | Partenaires des events |
+| `partenaires` | Partenaires des events (avec colonne `url` site web) |
 | `events` | Événements (un par module : quiz, spin, vote, etc.) |
 | `super_events` | Groupements d'events |
-| `joueurs` | CRM des participants |
+| `joueurs` | CRM des participants (avec `genre`, `prenom`, etc.) |
 | `lots` | Lots à gagner |
 | `banques` | Banques de questions quiz |
-| `participations` | Logs des participations (avec ticket_code, bonus_answers) |
+| `participations` | Logs des participations (avec `ticket_code`, `bonus_answers`) |
 | `votes` | Logs des votes étoiles |
 | `gas_backup_log` | Logs backup Google Sheets |
