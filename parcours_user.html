@@ -923,6 +923,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             </div>
           </div>
           <div class="form-field">
+            <label class="form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+              <button style="padding:8px 12px;background:var(--al);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px" data-source="instagram" onclick="spinPickChip(this)">📸 Instagram</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="facebook" onclick="spinPickChip(this)">🔵 Facebook</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="affiche" onclick="spinPickChip(this)">📋 Affiche</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="bouche" onclick="spinPickChip(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="form-field">
             <label class="form-label">Email (confirmation)</label>
             <input class="form-input" placeholder="camille@exemple.fr">
           </div>
@@ -1553,6 +1562,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             </div>
           </div>
           <div class="qs-form-field">
+            <label class="qs-form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+              <button style="padding:8px 12px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px" data-source="instagram" onclick="qsPickChip(this)">📸 Instagram</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="facebook" onclick="qsPickChip(this)">🔵 Facebook</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="affiche" onclick="qsPickChip(this)">📋 Affiche</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="bouche" onclick="qsPickChip(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="qs-form-field">
             <label class="qs-form-label">Email</label>
             <input class="qs-form-input" placeholder="lea@exemple.fr">
           </div>
@@ -2042,6 +2060,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <div style="display:flex;gap:6px;margin-top:6px">
               <button style="flex:1;padding:10px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:13px" data-gender="F" onclick="vsPickChip(this)">👩 Femme</button>
               <button style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:13px" data-gender="M" onclick="vsPickChip(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Comment nous as-tu connu ?</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+              <button style="padding:8px 12px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:12px" data-source="instagram" onclick="vsPickChip(this)">📸 Instagram</button>
+              <button style="padding:8px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:12px" data-source="facebook" onclick="vsPickChip(this)">🔵 Facebook</button>
+              <button style="padding:8px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:12px" data-source="affiche" onclick="vsPickChip(this)">📋 Affiche</button>
+              <button style="padding:8px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:12px" data-source="bouche" onclick="vsPickChip(this)">📣 Bouche à oreille</button>
             </div>
           </div>
           <div style="margin-bottom:12px">
@@ -2664,9 +2691,12 @@ function _flowinCollectFormFields(viewportSelector){
     if(!val) continue;
     /* Email en PREMIER pour éviter qu'il matche prenom (placeholder camille@...) */
     if(val.indexOf('@')>=0){ extra.email = val; continue; }
-    if(/06|07|t.l|phone/i.test(ph) || /^\d[\s\d]+$/.test(val)){ extra.tel = val; continue; }
+    /* Code postal AVANT tel (sinon placeholder '06140' matche /06/) */
+    if(/postal|cp|zip/i.test(ph) || /^0\d{4}$/.test(ph) || /^\d{5}$/.test(val)){ extra.code_postal = val; continue; }
+    /* Tel : placeholder avec espaces (06 12 34...) ou mot tel/phone */
+    if(/^0\d\s/.test(ph) || /^06\s|^07\s/i.test(ph) || /t.l|phone|num.ro/i.test(ph)){ extra.tel = val; continue; }
+    /* Âge */
     if(/ans|age/i.test(ph) || /ans/.test(val)){ extra.age_tranche = val; continue; }
-    if(/postal|cp|zip/i.test(ph) || /^\d{4,5}$/.test(val)){ extra.code_postal = val; continue; }
     /* Prenom : placeholder STRICTEMENT prenom (sans @) */
     if(/^(camille|l.a|marie|sophie|lucie)$/i.test(ph) || /pr.nom|firstname/i.test(ph)){ extra.prenom = val; continue; }
     /* Nom : placeholder STRICTEMENT nom */
@@ -2679,7 +2709,7 @@ function _flowinCollectFormFields(viewportSelector){
   }
   var genderSel = vp.querySelector('[data-gender].sel');
   if(genderSel){ extra.genre = genderSel.getAttribute('data-gender') === 'F' ? 'Femme' : 'Homme'; }
-  var sourceSel = vp.querySelector('.pq-form-source-chip.sel:not([data-gender]), [data-source].sel');
+  var sourceSel = vp.querySelector('[data-source].sel, [class*="form-source-chip"].sel:not([data-gender])');
   if(sourceSel && sourceSel.textContent){ extra.source = sourceSel.textContent.trim(); }
   return extra;
 }
