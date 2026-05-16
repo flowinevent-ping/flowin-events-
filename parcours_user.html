@@ -4315,10 +4315,20 @@ function flowinShowModuleViewport(moduleName){
     }
   }
 
-  /* Body plein écran */
+  /* Body plein écran + reset scroll */
   document.body.style.background = '#fff';
   document.body.style.padding = '0';
   document.body.style.margin = '0';
+  document.body.style.overflow = 'hidden';
+
+  /* Reset scroll sur tous les viewports + body */
+  try { window.scrollTo(0, 0); } catch(e){}
+  try { document.documentElement.scrollTop = 0; } catch(e){}
+  var activeVp = document.getElementById(targetVp);
+  if(activeVp) activeVp.scrollTop = 0;
+  /* Scroll reset sur la page active */
+  var activePage = activeVp ? activeVp.querySelector('.page.on') : null;
+  if(activePage) activePage.scrollTop = 0;
 
   console.log('[Flowin] mode production · viewport:', targetVp);
 }
