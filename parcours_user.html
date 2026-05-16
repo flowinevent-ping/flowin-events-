@@ -3976,8 +3976,22 @@ var FLOWIN_EV_ID = (function(){
     return p.get('ev') || '';
   } catch(e){ return ''; }
 })();
+/* Fallback module depuis URL (?module=spin|quiz|vote|tombola…) */
+var FLOWIN_MODULE_FALLBACK = (function(){
+  try {
+    var p = new URLSearchParams(window.location.search);
+    return p.get('module') || '';
+  } catch(e){ return ''; }
+})();
 var FLOWIN_EVENT = null;
 var FLOWIN_PRO_ID = null;
+
+/* Routage immédiat si ?module= présent (avant Supabase) */
+if(FLOWIN_MODULE_FALLBACK){
+  document.addEventListener('DOMContentLoaded', function(){
+    try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(e){}
+  });
+}
 
 /* Fetch event au boot */
 (async function flowinBootFetch(){
@@ -3994,10 +4008,19 @@ var FLOWIN_PRO_ID = null;
       try { flowinShowModuleViewport(rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
+    } else if(FLOWIN_MODULE_FALLBACK) {
+      /* Event pas encore dans Supabase : fallback module URL */
+      console.log('[Flowin] fallback module:', FLOWIN_MODULE_FALLBACK);
+      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(e){}
     } else {
       console.log('[Flowin] event introuvable (preview mode):', FLOWIN_EV_ID);
     }
-  } catch(e){ console.warn('[Flowin] fetch event:', e); }
+  } catch(e){
+    console.warn('[Flowin] fetch event:', e);
+    if(FLOWIN_MODULE_FALLBACK){
+      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(err){}
+    }
+  }
 })();
 
 /* Helper : merge sans Object.assign (iOS Safari compat) */

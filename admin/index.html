@@ -5736,7 +5736,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : toujours parcours_user.html?ev= (fichier validé) ──
-       var _joueurUrl = 'parcours_user.html?ev=' + encodeURIComponent(e.id);
+       var _joueurUrl = 'parcours_user.html?ev=' + encodeURIComponent(e.id) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
        var _qrUrl = (e.cfg && e.cfg.qrUrl) ? e.cfg.qrUrl : _joueurUrl;
        html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px">';
        html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
@@ -5941,7 +5941,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : iframe phone parcours_user.html validé ──
-  var _jeuIframeUrl = 'parcours_user.html?ev=' + encodeURIComponent(eid);
+  var _jeuIframeUrl = 'parcours_user.html?ev=' + encodeURIComponent(eid) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Aperçu parcours joueur</div>';
   html += '<div style="display:flex;flex-direction:column;align-items:center;gap:8px">';
