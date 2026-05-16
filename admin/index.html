@@ -6427,29 +6427,17 @@ function renderBiblioJeux(){
 
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
-  html += '<div class="section-h">📱 Aperçu joueur</div>';
-  html += '<div class="phone-frame" style="max-width:240px;margin:0 auto">';
-  html += '<div class="phone-screen">';
-  html += '<div class="phone-bar" style="background:'+accent+'">FLOWIN · '+(mDef?esc(mDef.nom):'')+'</div>';
-  // Créer un event factice pour la preview
-  var fakeEvent = {id:'preview',module:tab,nom:mDef?mDef.nom:'',couleur:accent,cfg:cfg};
-  html += renderPreviewModule(tab, jeuObj||fakeEvent);
-  html += '</div></div>';
-
-  // Info parcours sous la preview
-  html += '<div style="margin-top:12px;font-size:10px;color:var(--sa-muted);line-height:1.7;padding:8px 10px;background:var(--sa-subtle);border-radius:8px">';
-  if(tab==='quiz'||tab==='quizsolo'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. '+(cfg.quizNbQuestions||5)+' questions · timer '+(cfg.quizTimer||30)+'s<br>'+(cfg.quizBonus!==false?'4. Bonus (+1 ticket)<br>5. Score + tickets':'4. Score');
-  } else if(tab==='spin'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. Spin roulette · '+(cfg.spinDuration||6)+'s<br>4. Résultat '+(cfg.spinModeTirage==='B'?'→ ticket tirage':'immédiat');
-  } else if(tab==='vote'){
-    html += '1. Landing → 2. Vote '+(cfg.voteMode==='yn'?'Oui/Non':'étoiles 1→5')+'<br>3. '+(cfg.voteResultatsLive?'Résultats live':'Résultats cachés');
-  } else if(tab==='tombola'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. Confirmation → tirage au sort';
-  } else if(tab==='standup'){
-    html += '1. Vote étoiles 1→5 par artiste<br>2. Podium final';
-  }
-  html += '</div>';
+  html += '<div class="section-h">📱 Parcours joueur · toutes les pages</div>';
+  // Créer un event factice enrichi pour la preview complète
+  var fakeEvent = {
+    id:'preview', module:tab,
+    nom: mDef ? mDef.nom : tab,
+    couleur: accent, cfg: cfg,
+    dateD: '', dateF: '', lieu: '',
+    partenaires: [],
+    lots: []
+  };
+  html += renderWizPreviewSequence(fakeEvent, {idxKey:'jeuxPreviewIdx', rerender:'render()'});
   html += '</div>'; // fin colonne droite
 
   html += '</div>'; // fin grid 2 colonnes
