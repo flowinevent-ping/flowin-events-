@@ -1,3 +1,14 @@
+-- Colonnes manquantes dans lots (selon schéma prod)
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS event_id      TEXT;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS partenaire_id TEXT;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS nom           TEXT;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS valeur        NUMERIC DEFAULT 0;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS quantite      INT DEFAULT 1;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS assigne_a     TEXT;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS retire        BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS date_retrait  DATE;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS note          TEXT;
+
 -- ══════════════════════════════════════════════════════════════════
 -- FLOWIN · SEED LOTS PÂQUES 2026 — 8 lots
 -- assigne_a = code joueur j-pq-* (TEXT reference)
