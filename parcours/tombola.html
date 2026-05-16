@@ -1161,165 +1161,171 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Pâques : chips avec classe .qm-form-source-chip */
 
-/* ── Mode standalone : plein écran sans chrome ── */
-html,body{margin:0;padding:0;background:#fff;overflow:hidden;height:100%;width:100%}
-.viewport{width:100%;height:100dvh;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* Standalone : plein écran */
+html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
+.viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
 <div class="viewport tb-viewport" id="vp-tombola">
-<!-- ─── TB 1 : Landing tombola ─── -->
-<div class="page on" id="tb-1">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="tb-landing">
-<div class="tb-badge">🔴 Croix Rouge · collecte solidaire</div>
-<div class="tb-logo">🎗️</div>
-<div class="tb-title">Tombola<br/>Croix Rouge Française</div>
-<div class="tb-sub">Soutiens la Croix Rouge et tente de remporter l'un des lots offerts par nos partenaires locaux. 100 % des bénéfices reversés.</div>
-<div class="tb-lots">
-<div class="tb-lot-row">
-<div class="tb-lot-ico">🥇</div>
-<div class="tb-lot-info">
-<div class="tb-lot-name">1er prix — Séjour bien-être 2 nuits</div>
-<div class="tb-lot-hint">Hôtel partenaire · Alpes-Maritimes</div>
-</div>
-</div>
-<div class="tb-lot-row">
-<div class="tb-lot-ico">🥈</div>
-<div class="tb-lot-info">
-<div class="tb-lot-name">2e prix — Bon d'achat 100 €</div>
-<div class="tb-lot-hint">Commerce local partenaire</div>
-</div>
-</div>
-<div class="tb-lot-row">
-<div class="tb-lot-ico">🥉</div>
-<div class="tb-lot-info">
-<div class="tb-lot-name">3e prix — Panier gourmand local</div>
-<div class="tb-lot-hint">Produits du terroir 06</div>
-</div>
-</div>
-</div>
-<div class="tb-draw-date">🗓️ Tirage le <strong>30 juin 2026</strong> — résultats publiés sur croix-rouge.fr</div>
-</div>
-<div class="bottom-cta">
-<div class="btn tb-btn-primary" onclick="tbGo(2)">Je m'inscris à la tombola →</div>
-</div>
-</div>
-<!-- ─── TB 2 : Formulaire CRM ─── -->
-<div class="page" id="tb-2">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback">
-<div class="back-btn" onclick="tbGo(1)">←</div>
-<div><div class="header-title">Mes coordonnées</div><div class="header-sub">Pour la tombola Croix Rouge</div></div>
-</div>
-<div class="progress-strip">
-<div class="progress-step done"></div>
-<div class="progress-step on"></div>
-<div class="progress-step"></div>
-</div>
-<div class="form-wrap">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<div class="form-field">
-<label class="form-label">Prénom</label>
-<input class="form-input" placeholder="Camille" value="Camille"/>
-</div>
-<div class="form-field">
-<label class="form-label">Nom</label>
-<input class="form-input" placeholder="Dupont"/>
-</div>
-</div>
-<div class="form-field">
-<label class="form-label">Genre</label>
-<div style="display:flex;gap:8px;margin-top:6px">
-<button onclick="tbPickGender(this)" style="flex:1;padding:10px;background:rgba(245,158,11,.15);border:1.5px solid #F59E0B;border-radius:12px;font-weight:700;color:#92400E;cursor:pointer;font-family:inherit">👩 Femme</button>
-<button onclick="tbPickGender(this)" style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(245,158,11,.3);border-radius:12px;font-weight:700;color:#1A1033;cursor:pointer;font-family:inherit">👨 Homme</button>
-</div>
-</div>
-<div class="form-field">
-<label class="form-label">Email</label>
-<input class="form-input" placeholder="camille@exemple.fr"/>
-</div>
-<div class="form-field">
-<label class="form-label">Téléphone</label>
-<input class="form-input" placeholder="06 12 34 56 78"/>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<div class="form-field">
-<label class="form-label">Âge</label>
-<input class="form-input" placeholder="36-50 ans"/>
-</div>
-<div class="form-field">
-<label class="form-label">Code postal</label>
-<input class="form-input" placeholder="06140" value="06140"/>
-</div>
-</div>
-<div class="form-field">
-<label class="form-label">Comment nous as-tu connu ?</label>
-<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
-<button class="tb-source-chip sel" onclick="tbPickSource(this)">📸 Instagram</button>
-<button class="tb-source-chip" onclick="tbPickSource(this)">🔵 Facebook</button>
-<button class="tb-source-chip" onclick="tbPickSource(this)">📋 Affiche / Flyer</button>
-<button class="tb-source-chip" onclick="tbPickSource(this)">📣 Bouche à oreille</button>
-</div>
-</div>
-<div class="form-rgpd" style="margin-top:10px">
-<div class="form-rgpd-check">✓</div>
-<div class="form-rgpd-text">J'accepte de participer à la tombola et d'être recontacté(e) par les organisateurs. Données jamais cédées.</div>
-</div>
-</div>
-<div class="bottom-cta">
-<div class="btn tb-btn-primary" onclick="tbGo(3)">Valider mon inscription →</div>
-</div>
-</div>
-<!-- ─── TB 3 : Ticket tombola ─── -->
-<div class="page" id="tb-3">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="tb-confirm-hero">
-<div class="tb-confirm-chip"><div class="dot" style="background:#FCD34D"></div>INSCRIPTION CONFIRMÉE</div>
-<div class="tb-confirm-title">Tu es dans la course ! 🎉</div>
-<div class="tb-confirm-sub">Ton numéro de tombola a été enregistré</div>
-</div>
-<div class="progress-strip">
-<div class="progress-step done"></div>
-<div class="progress-step done"></div>
-<div class="progress-step on"></div>
-</div>
-<div class="ticket" style="border-top:4px solid #F59E0B">
-<div class="ticket-icon">🎟️</div>
-<div class="ticket-title">Ton ticket tombola</div>
-<div style="font-size:11px;font-weight:800;color:var(--muted)">Tombola Croix Rouge · Vence</div>
-<div class="ticket-code">FW-CR-0742</div>
-<div class="ticket-hint">Tirage le <strong>30 juin 2026</strong> · résultats sur flowin.events</div>
-</div>
-<div style="padding:0 20px 16px">
-<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:14px 16px;font-size:12px;font-weight:800;color:#92400E;line-height:1.6">
-            📬 Un email de confirmation t'a été envoyé.<br/>
-            🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.<br/>
+
+      <!-- ─── TB 1 : Landing tombola ─── -->
+      <div class="page on" id="tb-1">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="tb-landing">
+          <div class="tb-badge">🔴 Croix Rouge · collecte solidaire</div>
+          <div class="tb-logo">🎗️</div>
+          <div class="tb-title">Tombola<br>Croix Rouge Française</div>
+          <div class="tb-sub">Soutiens la Croix Rouge et tente de remporter l'un des lots offerts par nos partenaires locaux. 100 % des bénéfices reversés.</div>
+          <div class="tb-lots">
+            <div class="tb-lot-row">
+              <div class="tb-lot-ico">🥇</div>
+              <div class="tb-lot-info">
+                <div class="tb-lot-name">1er prix — Séjour bien-être 2 nuits</div>
+                <div class="tb-lot-hint">Hôtel partenaire · Alpes-Maritimes</div>
+              </div>
+            </div>
+            <div class="tb-lot-row">
+              <div class="tb-lot-ico">🥈</div>
+              <div class="tb-lot-info">
+                <div class="tb-lot-name">2e prix — Bon d'achat 100 €</div>
+                <div class="tb-lot-hint">Commerce local partenaire</div>
+              </div>
+            </div>
+            <div class="tb-lot-row">
+              <div class="tb-lot-ico">🥉</div>
+              <div class="tb-lot-info">
+                <div class="tb-lot-name">3e prix — Panier gourmand local</div>
+                <div class="tb-lot-hint">Produits du terroir 06</div>
+              </div>
+            </div>
+          </div>
+          <div class="tb-draw-date">🗓️ Tirage le <strong>30 juin 2026</strong> — résultats publiés sur croix-rouge.fr</div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn tb-btn-primary" onclick="tbGo(2)">Je m'inscris à la tombola →</div>
+        </div>
+      </div>
+
+      <!-- ─── TB 2 : Formulaire CRM ─── -->
+      <div class="page" id="tb-2">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback">
+          <div class="back-btn" onclick="tbGo(1)">←</div>
+          <div><div class="header-title">Mes coordonnées</div><div class="header-sub">Pour la tombola Croix Rouge</div></div>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-step done"></div>
+          <div class="progress-step on"></div>
+          <div class="progress-step"></div>
+        </div>
+        <div class="form-wrap">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Prénom</label>
+              <input class="form-input" placeholder="Camille" value="Camille">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Nom</label>
+              <input class="form-input" placeholder="Dupont">
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Genre</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button style="flex:1;padding:10px;background:rgba(245,158,11,.15);border:1.5px solid #F59E0B;border-radius:12px;font-weight:700;color:#92400E;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👩 Femme</button>
+              <button style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(245,158,11,.3);border-radius:12px;font-weight:700;color:#1A1033;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input class="form-input" placeholder="camille@exemple.fr">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Téléphone</label>
+            <input class="form-input" placeholder="06 12 34 56 78">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Âge</label>
+              <input class="form-input" placeholder="36-50 ans">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Code postal</label>
+              <input class="form-input" placeholder="06140" value="06140">
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button class="tb-source-chip sel" onclick="tbPickSource(this)">📸 Instagram</button>
+              <button class="tb-source-chip" onclick="tbPickSource(this)">🔵 Facebook</button>
+              <button class="tb-source-chip" onclick="tbPickSource(this)">📋 Affiche / Flyer</button>
+              <button class="tb-source-chip" onclick="tbPickSource(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="form-rgpd" style="margin-top:10px">
+            <div class="form-rgpd-check">✓</div>
+            <div class="form-rgpd-text">J'accepte de participer à la tombola et d'être recontacté(e) par les organisateurs. Données jamais cédées.</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn tb-btn-primary" onclick="tbGo(3)">Valider mon inscription →</div>
+        </div>
+      </div>
+
+      <!-- ─── TB 3 : Ticket tombola ─── -->
+      <div class="page" id="tb-3">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="tb-confirm-hero">
+          <div class="tb-confirm-chip"><div class="dot" style="background:#FCD34D"></div>INSCRIPTION CONFIRMÉE</div>
+          <div class="tb-confirm-title">Tu es dans la course ! 🎉</div>
+          <div class="tb-confirm-sub">Ton numéro de tombola a été enregistré</div>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-step done"></div>
+          <div class="progress-step done"></div>
+          <div class="progress-step on"></div>
+        </div>
+        <div class="ticket" style="border-top:4px solid #F59E0B">
+          <div class="ticket-icon">🎟️</div>
+          <div class="ticket-title">Ton ticket tombola</div>
+          <div style="font-size:11px;font-weight:800;color:var(--muted)">Tombola Croix Rouge · Vence</div>
+          <div class="ticket-code">FW-CR-0742</div>
+          <div class="ticket-hint">Tirage le <strong>30 juin 2026</strong> · résultats sur flowin.events</div>
+        </div>
+        <div style="padding:0 20px 16px">
+          <div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:14px 16px;font-size:12px;font-weight:800;color:#92400E;line-height:1.6">
+            📬 Un email de confirmation t'a été envoyé.<br>
+            🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.<br>
             📲 Capture ce ticket par précaution.
           </div>
-</div>
-<div class="bottom-cta" style="flex-direction:column;gap:8px">
-<div class="btn tb-btn-primary" onclick="tbGo(1)">← Retour à l'accueil</div>
-</div>
-</div>
-<!-- ─── TB 4 : Anti-doublon ─── -->
-<div class="page" id="tb-4">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="ad-screen" style="background:linear-gradient(160deg,#FFFBEB 0%,#FEF3C7 100%)">
-<div class="ad-icon">✋</div>
-<div class="ad-title">Tu es déjà inscrit·e !</div>
-<div class="ad-msg">Cette adresse email participe déjà à la tombola Croix Rouge Française.<br/>Une seule inscription par personne.</div>
-<div class="ad-email">camille@exemple.fr</div>
-<div class="ticket" style="margin:0 20px;border-top:4px solid #F59E0B">
-<div class="ticket-icon">🎟️</div>
-<div class="ticket-title">Ton ticket tombola</div>
-<div class="ticket-code">FW-CR-0742</div>
-<div class="ticket-hint">Tirage le 30 juin 2026 · bonne chance !</div>
-</div>
-<button class="ad-btn" onclick="tbGo(1)">← Retour à l'accueil</button>
-</div>
-</div>
-</div>
+        </div>
+        <div class="bottom-cta" style="flex-direction:column;gap:8px">
+          <div class="btn tb-btn-primary" onclick="tbGo(1)">← Retour à l'accueil</div>
+        </div>
+      </div>
+
+      <!-- ─── TB 4 : Anti-doublon ─── -->
+      <div class="page" id="tb-4">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="ad-screen" style="background:linear-gradient(160deg,#FFFBEB 0%,#FEF3C7 100%)">
+          <div class="ad-icon">✋</div>
+          <div class="ad-title">Tu es déjà inscrit·e !</div>
+          <div class="ad-msg">Cette adresse email participe déjà à la tombola Croix Rouge Française.<br>Une seule inscription par personne.</div>
+          <div class="ad-email">camille@exemple.fr</div>
+          <div class="ticket" style="margin:0 20px;border-top:4px solid #F59E0B">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-title">Ton ticket tombola</div>
+            <div class="ticket-code">FW-CR-0742</div>
+            <div class="ticket-hint">Tirage le 30 juin 2026 · bonne chance !</div>
+          </div>
+          <button class="ad-btn" onclick="tbGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 <script>
 
 
@@ -2478,21 +2484,16 @@ function flowinHydrateQuizmasterBonus(){
   console.log('[Flowin] qm-9 hydraté avec ' + bonusList.length + ' questions');
 }
 
-/* ── Boot standalone : pas de routing Supabase ── */
+/* Boot standalone */
 (function(){
-  /* Récupérer ?ev= si présent pour hydratation */
-  var evId = (new URLSearchParams(window.location.search)).get('ev') || '';
-  var mod  = 'tombola';
-  if(evId) {
-    var H = {'apikey': FLOWIN_SUPA_ANON, 'Authorization': 'Bearer ' + FLOWIN_SUPA_ANON};
-    fetch(FLOWIN_SUPA_URL + '/rest/v1/events?id=eq.' + encodeURIComponent(evId) + '&select=*', {headers:H})
-      .then(function(r){return r.json();})
-      .then(function(rows){
-        if(rows && rows.length) {
-          FLOWIN_EVENT = rows[0];
-          try { flowinHydrateModule(rows[0]); } catch(e){}
-        }
-      }).catch(function(){});
+  var evId=(new URLSearchParams(window.location.search)).get('ev')||'';
+  if(evId){
+    var H={'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId)+'&select=*',{headers:H})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(rows&&rows.length){FLOWIN_EVENT=rows[0];try{flowinHydrateModule(rows[0]);}catch(e){}}
+    }).catch(function(){});
   }
 })();
 </script>

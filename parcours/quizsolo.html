@@ -1161,312 +1161,322 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Pâques : chips avec classe .qm-form-source-chip */
 
-/* ── Mode standalone : plein écran sans chrome ── */
-html,body{margin:0;padding:0;background:#fff;overflow:hidden;height:100%;width:100%}
-.viewport{width:100%;height:100dvh;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* Standalone : plein écran */
+html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
+.viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
 <div class="viewport qs-viewport" id="vp-quizsolo">
-<!-- ─── QS 1 : Landing ─── -->
-<div class="page on" id="qs-1">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="qs-landing">
-<div class="qs-badge">🏛️ Grasse · Patrimoine 2026</div>
-<div class="qs-logo">⚡</div>
-<div class="qs-title">Quiz patrimoine<br/>Grasse 2026</div>
-<div class="qs-sub">3 questions · sois rapide, le temps départage les ex-aequo.</div>
-<div class="qs-rules">
-<div class="qs-rules-title">Règles du jeu</div>
-<div class="qs-rule-row"><div class="qs-rule-ico">❓</div>3 questions à choix multiples</div>
-<div class="qs-rule-row"><div class="qs-rule-ico">⏱️</div>Temps de réponse mesuré par question</div>
-<div class="qs-rule-row"><div class="qs-rule-ico">🏆</div>3 premiers gagnent · départage au temps</div>
-<div class="qs-rule-row"><div class="qs-rule-ico">🎁</div>Lots du Comité Départemental du Tourisme</div>
-</div>
-</div>
-<div class="bottom-cta">
-<button class="qs-cta" onclick="qsGo(2)">Commencer le défi →</button>
-</div>
-</div>
-<!-- ─── QS 2 : Formulaire contact AVANT quiz ─── -->
-<div class="page" id="qs-2">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent">
-<div class="back-btn" onclick="qsGo(1)">←</div>
-<div><div class="header-title" style="color:#1E293B">Tes coordonnées</div><div class="header-sub">Avant de lancer le quiz</div></div>
-</div>
-<div class="qs-form-wrap">
-<div class="qs-form-title">On fait connaissance ?</div>
-<div class="qs-form-sub">Indispensable pour te contacter si tu es dans le top 3</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<div class="qs-form-field">
-<label class="qs-form-label">Prénom</label>
-<input class="qs-form-input" placeholder="Léa" value="Léa"/>
-</div>
-<div class="qs-form-field">
-<label class="qs-form-label">Nom</label>
-<input class="qs-form-input" placeholder="Martin"/>
-</div>
-</div>
-<div class="qs-form-field">
-<label class="qs-form-label">Genre</label>
-<div style="display:flex;gap:8px;margin-top:6px">
-<button data-gender="F" onclick="qsPickChip(this)" style="flex:1;padding:10px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:12px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit">👩 Femme</button>
-<button data-gender="M" onclick="qsPickChip(this)" style="flex:1;padding:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit">👨 Homme</button>
-</div>
-</div>
-<div class="qs-form-field">
-<label class="qs-form-label">Email</label>
-<input class="qs-form-input" placeholder="lea@exemple.fr"/>
-</div>
-<div class="qs-form-field">
-<label class="qs-form-label">Téléphone</label>
-<input class="qs-form-input" placeholder="06 XX XX XX XX"/>
-</div>
-<div class="qs-form-field">
-<label class="qs-form-label">Comment nous as-tu connu ?</label>
-<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-<button data-source="instagram" onclick="qsPickChip(this)" style="padding:8px 12px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px">📸 Instagram</button>
-<button data-source="facebook" onclick="qsPickChip(this)" style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px">🔵 Facebook</button>
-<button data-source="affiche" onclick="qsPickChip(this)" style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px">📋 Affiche</button>
-<button data-source="bouche" onclick="qsPickChip(this)" style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px">📣 Bouche à oreille</button>
-</div>
-</div>
-<div class="qs-form-rgpd">
-<div class="qs-form-rgpd-box">✓</div>
-<div class="qs-form-rgpd-txt">J'accepte que Grasse Tourisme me contacte si je fais partie des gagnants. RGPD respecté.</div>
-</div>
-<button class="qs-form-btn" onclick="qsSubmitForm()">🚀 Go, je démarre le chrono →</button>
-</div>
-</div>
-<!-- ─── QS 3 : Q1 avec timer ─── -->
-<div class="page" id="qs-3">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="qs-quiz-screen">
-<div class="qs-timer-bar">
-<div class="qs-timer-left">
-<div class="qs-timer-ico">⏱️</div>
-<div>
-<div class="qs-timer-val">00:07</div>
-<div class="qs-timer-label">Temps écoulé</div>
-</div>
-</div>
-<div class="qs-score-pill">Score 0 pt</div>
-</div>
-<div class="qs-q-progress">
-<div class="qs-q-dot active"></div>
-<div class="qs-q-dot"></div>
-<div class="qs-q-dot"></div>
-</div>
-<div class="qs-q-body">
-<div class="qs-q-num">Q1</div>
-<div class="qs-q-text">Quelle fleur a fait la renommée de Grasse au 18ème siècle ?</div>
-<div class="qs-q-options">
-<button class="qs-q-opt sel">La rose</button>
-<button class="qs-q-opt">Le jasmin</button>
-<button class="qs-q-opt">La lavande</button>
-<button class="qs-q-opt">La tubéreuse</button>
-</div>
-<button class="qs-q-btn" onclick="qsGo(4)">Valider (+10 s'il est bon) →</button>
-</div>
-</div>
-</div>
-<!-- ─── QS 4 : Q2 timer + score ─── -->
-<div class="page" id="qs-4">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="qs-quiz-screen">
-<div class="qs-timer-bar">
-<div class="qs-timer-left">
-<div class="qs-timer-ico">⏱️</div>
-<div>
-<div class="qs-timer-val">00:19</div>
-<div class="qs-timer-label">Temps écoulé</div>
-</div>
-</div>
-<div class="qs-score-pill" style="background:#1D9E75">Score 10 pts ✓</div>
-</div>
-<div class="qs-q-progress">
-<div class="qs-q-dot done"></div>
-<div class="qs-q-dot active"></div>
-<div class="qs-q-dot"></div>
-</div>
-<div class="qs-q-body">
-<div class="qs-q-num">Q2</div>
-<div class="qs-q-text">Quel musée à Grasse est dédié à la parfumerie ?</div>
-<div class="qs-q-options">
-<button class="qs-q-opt">Musée Bonnard</button>
-<button class="qs-q-opt sel">Musée International de la Parfumerie</button>
-<button class="qs-q-opt">Villa Fragonard</button>
-<button class="qs-q-opt">Galerie Molinard</button>
-</div>
-<button class="qs-q-btn" onclick="qsGo(5)">Valider (+10 s'il est bon) →</button>
-</div>
-</div>
-</div>
-<!-- ─── QS 5 : Q3 ─── -->
-<div class="page" id="qs-5">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="qs-quiz-screen">
-<div class="qs-timer-bar">
-<div class="qs-timer-left">
-<div class="qs-timer-ico">⏱️</div>
-<div>
-<div class="qs-timer-val">00:34</div>
-<div class="qs-timer-label">Temps écoulé</div>
-</div>
-</div>
-<div class="qs-score-pill" style="background:#1D9E75">Score 20 pts ✓</div>
-</div>
-<div class="qs-q-progress">
-<div class="qs-q-dot done"></div>
-<div class="qs-q-dot done"></div>
-<div class="qs-q-dot active"></div>
-</div>
-<div class="qs-q-body">
-<div class="qs-q-num">Q3</div>
-<div class="qs-q-text">Quel parfumeur célèbre est né à Grasse en 1881 ?</div>
-<div class="qs-q-options">
-<button class="qs-q-opt">Jacques Guerlain</button>
-<button class="qs-q-opt">Ernest Beaux</button>
-<button class="qs-q-opt sel">François Coty</button>
-<button class="qs-q-opt">Henri Robert</button>
-</div>
-<button class="qs-q-btn" onclick="qsGo(6)">Terminer le quiz →</button>
-</div>
-</div>
-</div>
-<!-- ─── QS 6 : Résultat + Leaderboard live ─── -->
-<div class="page" id="qs-6">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="qs-result-hero">
-<div class="qs-result-inner">
-<div class="qs-result-trophy">🏆</div>
-<div class="qs-result-title">Bravo Léa !</div>
-<div class="qs-result-sub">Ton score est enregistré</div>
-</div>
-</div>
-<div class="qs-score-card">
-<div style="font-size:10px;font-weight:900;color:#64748B;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Ton score</div>
-<div class="qs-score-big">30<span class="qs-score-denom">pts</span></div>
-<div class="qs-score-time">⏱️ Temps : 47 secondes</div>
-</div>
-<div class="qs-info-live">
-<div class="qs-info-live-dot"></div>
-<div class="qs-info-live-txt"><strong>Classement live</strong> · mis à jour à chaque nouveau joueur</div>
-</div>
-<div class="qs-lb-wrap">
-<div class="qs-lb-header">🏅 Top 5 actuel</div>
-<div class="qs-lb-row">
-<div class="qs-lb-rank podium">1</div>
-<div class="qs-lb-name">Thomas D.<div class="qs-lb-name-sub">Nice</div></div>
-<div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 28 s</div></div>
-</div>
-<div class="qs-lb-row">
-<div class="qs-lb-rank podium-2">2</div>
-<div class="qs-lb-name">Sophie M.<div class="qs-lb-name-sub">Grasse</div></div>
-<div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 42 s</div></div>
-</div>
-<div class="qs-lb-row me">
-<div class="qs-lb-rank podium-3">3</div>
-<div class="qs-lb-name">Léa (toi) 🟠<div class="qs-lb-name-sub">Cannes</div></div>
-<div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 47 s</div></div>
-</div>
-<div class="qs-lb-row">
-<div class="qs-lb-rank">4</div>
-<div class="qs-lb-name">Marc R.<div class="qs-lb-name-sub">Antibes</div></div>
-<div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 52 s</div></div>
-</div>
-<div class="qs-lb-row">
-<div class="qs-lb-rank">5</div>
-<div class="qs-lb-name">Camille B.<div class="qs-lb-name-sub">Mouans-Sartoux</div></div>
-<div><div class="qs-lb-score">20 pts</div><div class="qs-lb-time">⏱ 38 s</div></div>
-</div>
-</div>
-<div class="pq-bc-info" style="background:rgba(30,64,175,.08);border-color:rgba(30,64,175,.25)">
-<div class="pq-bc-info-ico">🎁</div>
-<div class="pq-bc-info-txt" style="color:#1E293B">Les 3 premiers à la clôture du jeu gagneront les lots offerts par Grasse Tourisme.</div>
-</div>
-<!-- Contact + Partager proprement dans la page, APRÈS le leaderboard -->
-<div class="contact-card" id="qs-contact" style="margin:0 20px 12px">
-<div class="contact-title">📬 On reste en contact ?</div>
-<div class="contact-sub">Prochains événements · offres partenaires</div>
-<div class="contact-btns">
-<button class="contact-yes" onclick="qsContactYes(this)">✅ Oui carrément</button>
-<button class="contact-no" onclick="qsContactNo(this)">Non merci</button>
-</div>
-<div class="contact-done-msg"></div>
-</div>
-<button class="share-btn-gen" id="qs-share-btn" onclick="qsOpenShare()" style="background:linear-gradient(135deg,#1E40AF,#EA580C)">📲 Partager mon score</button>
-<div style="padding:0 20px 20px">
-<button class="btn btn-ghost" onclick="qsGo(7)" style="width:100%;margin-top:8px">🤝 Voir nos partenaires</button>
-</div>
-<div style="height:20px"></div>
-<!-- Bottom-sheet partage qs (DANS la page) -->
-<div class="qs-share-backdrop" id="qs-share-bd" onclick="qsCloseShare()"></div>
-<div class="qs-share-sheet" id="qs-share-sheet">
-<div class="sh-handle"></div>
-<div class="sh-title">Partage avec tes proches</div>
-<div class="sh-sub">Invite tes amis à jouer !</div>
-<div class="sh-preview">« Je viens de jouer à <strong>Quiz Patrimoine Grasse 2026</strong> — à toi de tenter ta chance ! »</div>
-<div class="sh-options">
-<button class="sh-option" onclick="qsShareVia('whatsapp')">
-<div class="sh-option-icon wa">💬</div>
-<div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
-<div class="sh-arrow">→</div>
-</button>
-<button class="sh-option" onclick="qsShareVia('sms')">
-<div class="sh-option-icon sms">✉️</div>
-<div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
-<div class="sh-arrow">→</div>
-</button>
-</div>
-</div>
-<div class="qs-toast sh-toast" id="qs-toast">✓ Lien copié !</div>
-</div>
-<!-- ─── QS 7 : Partenaires ─── -->
-<div class="page" id="qs-7">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="qs-result-hero" style="padding:28px 20px 20px">
-<div class="qs-result-inner">
-<div class="qs-result-trophy">🤝</div>
-<div class="qs-result-title">Nos partenaires</div>
-<div class="qs-result-sub">Merci à eux pour ce quiz !</div>
-</div>
-</div>
-<div style="padding:14px 20px 0">
-<div class="partenaires">
-<div class="partenaires-label">★ Partenaires Quiz Grasse Patrimoine 2026 ★</div>
-<div class="partenaires-grid">
-<div class="partenaire-tile"><div class="partenaire-emoji">🏛️</div><div class="partenaire-name">Grasse Tourisme</div></div>
-<div class="partenaire-tile"><div class="partenaire-emoji">🌹</div><div class="partenaire-name">Musée de la Parfumerie</div></div>
-<div class="partenaire-tile"><div class="partenaire-emoji">🧴</div><div class="partenaire-name">Molinard</div></div>
-<div class="partenaire-tile"><div class="partenaire-emoji">🎓</div><div class="partenaire-name">Ville de Grasse</div></div>
-</div>
-</div>
-</div>
-<div class="bottom-cta" style="background:transparent;border-top:none">
-<div class="btn btn-ghost" onclick="qsGo(6)">← Retour</div>
-<div class="btn btn-primary" onclick="qsGo(1)">Terminer →</div>
-</div>
-</div>
-<!-- ─── QS 8 : Anti-doublon ─── -->
-<div class="page" id="qs-8">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="ad-screen" style="background:linear-gradient(160deg,#EFF6FF 0%,#FFF7ED 100%)">
-<div class="ad-icon">✋</div>
-<div class="ad-title">Tu as déjà joué !</div>
-<div class="ad-msg">Cette adresse email a déjà participé au Quiz Grasse 2026.<br/>Une seule participation par personne.</div>
-<div class="ad-email" id="qs-ad-email">lea@exemple.fr</div>
-<div class="ticket" style="margin:0 20px">
-<div class="ticket-icon">🏆</div>
-<div class="ticket-title">Ton score enregistré</div>
-<div class="ticket-code" id="qs-ad-code">30 pts · 47s</div>
-<div class="ticket-hint">Classement clôturé à la fin de l'événement</div>
-</div>
-<button class="ad-btn" onclick="qsGo(1)">← Retour à l'accueil</button>
-</div>
-</div>
-</div>
+
+      <!-- ─── QS 1 : Landing ─── -->
+      <div class="page on" id="qs-1">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-landing">
+          <div class="qs-badge">🏛️ Grasse · Patrimoine 2026</div>
+          <div class="qs-logo">⚡</div>
+          <div class="qs-title">Quiz patrimoine<br>Grasse 2026</div>
+          <div class="qs-sub">3 questions · sois rapide, le temps départage les ex-aequo.</div>
+          <div class="qs-rules">
+            <div class="qs-rules-title">Règles du jeu</div>
+            <div class="qs-rule-row"><div class="qs-rule-ico">❓</div>3 questions à choix multiples</div>
+            <div class="qs-rule-row"><div class="qs-rule-ico">⏱️</div>Temps de réponse mesuré par question</div>
+            <div class="qs-rule-row"><div class="qs-rule-ico">🏆</div>3 premiers gagnent · départage au temps</div>
+            <div class="qs-rule-row"><div class="qs-rule-ico">🎁</div>Lots du Comité Départemental du Tourisme</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <button class="qs-cta" onclick="qsGo(2)">Commencer le défi →</button>
+        </div>
+      </div>
+
+      <!-- ─── QS 2 : Formulaire contact AVANT quiz ─── -->
+      <div class="page" id="qs-2">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent">
+          <div class="back-btn" onclick="qsGo(1)">←</div>
+          <div><div class="header-title" style="color:#1E293B">Tes coordonnées</div><div class="header-sub">Avant de lancer le quiz</div></div>
+        </div>
+        <div class="qs-form-wrap">
+          <div class="qs-form-title">On fait connaissance ?</div>
+          <div class="qs-form-sub">Indispensable pour te contacter si tu es dans le top 3</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="qs-form-field">
+              <label class="qs-form-label">Prénom</label>
+              <input class="qs-form-input" placeholder="Léa" value="Léa">
+            </div>
+            <div class="qs-form-field">
+              <label class="qs-form-label">Nom</label>
+              <input class="qs-form-input" placeholder="Martin">
+            </div>
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Genre</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button style="flex:1;padding:10px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:12px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit" data-gender="F" onclick="qsPickChip(this)">👩 Femme</button>
+              <button style="flex:1;padding:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit" data-gender="M" onclick="qsPickChip(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Email</label>
+            <input class="qs-form-input" placeholder="lea@exemple.fr">
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Téléphone</label>
+            <input class="qs-form-input" placeholder="06 XX XX XX XX">
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+              <button style="padding:8px 12px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px" data-source="instagram" onclick="qsPickChip(this)">📸 Instagram</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="facebook" onclick="qsPickChip(this)">🔵 Facebook</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="affiche" onclick="qsPickChip(this)">📋 Affiche</button>
+              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="bouche" onclick="qsPickChip(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="qs-form-rgpd">
+            <div class="qs-form-rgpd-box">✓</div>
+            <div class="qs-form-rgpd-txt">J'accepte que Grasse Tourisme me contacte si je fais partie des gagnants. RGPD respecté.</div>
+          </div>
+          <button class="qs-form-btn" onclick="qsSubmitForm()">🚀 Go, je démarre le chrono →</button>
+        </div>
+      </div>
+
+      <!-- ─── QS 3 : Q1 avec timer ─── -->
+      <div class="page" id="qs-3">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-quiz-screen">
+          <div class="qs-timer-bar">
+            <div class="qs-timer-left">
+              <div class="qs-timer-ico">⏱️</div>
+              <div>
+                <div class="qs-timer-val">00:07</div>
+                <div class="qs-timer-label">Temps écoulé</div>
+              </div>
+            </div>
+            <div class="qs-score-pill">Score 0 pt</div>
+          </div>
+          <div class="qs-q-progress">
+            <div class="qs-q-dot active"></div>
+            <div class="qs-q-dot"></div>
+            <div class="qs-q-dot"></div>
+          </div>
+          <div class="qs-q-body">
+            <div class="qs-q-num">Q1</div>
+            <div class="qs-q-text">Quelle fleur a fait la renommée de Grasse au 18ème siècle ?</div>
+            <div class="qs-q-options">
+              <button class="qs-q-opt sel">La rose</button>
+              <button class="qs-q-opt">Le jasmin</button>
+              <button class="qs-q-opt">La lavande</button>
+              <button class="qs-q-opt">La tubéreuse</button>
+            </div>
+            <button class="qs-q-btn" onclick="qsGo(4)">Valider (+10 s'il est bon) →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QS 4 : Q2 timer + score ─── -->
+      <div class="page" id="qs-4">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-quiz-screen">
+          <div class="qs-timer-bar">
+            <div class="qs-timer-left">
+              <div class="qs-timer-ico">⏱️</div>
+              <div>
+                <div class="qs-timer-val">00:19</div>
+                <div class="qs-timer-label">Temps écoulé</div>
+              </div>
+            </div>
+            <div class="qs-score-pill" style="background:#1D9E75">Score 10 pts ✓</div>
+          </div>
+          <div class="qs-q-progress">
+            <div class="qs-q-dot done"></div>
+            <div class="qs-q-dot active"></div>
+            <div class="qs-q-dot"></div>
+          </div>
+          <div class="qs-q-body">
+            <div class="qs-q-num">Q2</div>
+            <div class="qs-q-text">Quel musée à Grasse est dédié à la parfumerie ?</div>
+            <div class="qs-q-options">
+              <button class="qs-q-opt">Musée Bonnard</button>
+              <button class="qs-q-opt sel">Musée International de la Parfumerie</button>
+              <button class="qs-q-opt">Villa Fragonard</button>
+              <button class="qs-q-opt">Galerie Molinard</button>
+            </div>
+            <button class="qs-q-btn" onclick="qsGo(5)">Valider (+10 s'il est bon) →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QS 5 : Q3 ─── -->
+      <div class="page" id="qs-5">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-quiz-screen">
+          <div class="qs-timer-bar">
+            <div class="qs-timer-left">
+              <div class="qs-timer-ico">⏱️</div>
+              <div>
+                <div class="qs-timer-val">00:34</div>
+                <div class="qs-timer-label">Temps écoulé</div>
+              </div>
+            </div>
+            <div class="qs-score-pill" style="background:#1D9E75">Score 20 pts ✓</div>
+          </div>
+          <div class="qs-q-progress">
+            <div class="qs-q-dot done"></div>
+            <div class="qs-q-dot done"></div>
+            <div class="qs-q-dot active"></div>
+          </div>
+          <div class="qs-q-body">
+            <div class="qs-q-num">Q3</div>
+            <div class="qs-q-text">Quel parfumeur célèbre est né à Grasse en 1881 ?</div>
+            <div class="qs-q-options">
+              <button class="qs-q-opt">Jacques Guerlain</button>
+              <button class="qs-q-opt">Ernest Beaux</button>
+              <button class="qs-q-opt sel">François Coty</button>
+              <button class="qs-q-opt">Henri Robert</button>
+            </div>
+            <button class="qs-q-btn" onclick="qsGo(6)">Terminer le quiz →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QS 6 : Résultat + Leaderboard live ─── -->
+      <div class="page" id="qs-6">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-result-hero">
+          <div class="qs-result-inner">
+            <div class="qs-result-trophy">🏆</div>
+            <div class="qs-result-title">Bravo Léa !</div>
+            <div class="qs-result-sub">Ton score est enregistré</div>
+          </div>
+        </div>
+        <div class="qs-score-card">
+          <div style="font-size:10px;font-weight:900;color:#64748B;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Ton score</div>
+          <div class="qs-score-big">30<span class="qs-score-denom">pts</span></div>
+          <div class="qs-score-time">⏱️ Temps : 47 secondes</div>
+        </div>
+        <div class="qs-info-live">
+          <div class="qs-info-live-dot"></div>
+          <div class="qs-info-live-txt"><strong>Classement live</strong> · mis à jour à chaque nouveau joueur</div>
+        </div>
+        <div class="qs-lb-wrap">
+          <div class="qs-lb-header">🏅 Top 5 actuel</div>
+          <div class="qs-lb-row">
+            <div class="qs-lb-rank podium">1</div>
+            <div class="qs-lb-name">Thomas D.<div class="qs-lb-name-sub">Nice</div></div>
+            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 28 s</div></div>
+          </div>
+          <div class="qs-lb-row">
+            <div class="qs-lb-rank podium-2">2</div>
+            <div class="qs-lb-name">Sophie M.<div class="qs-lb-name-sub">Grasse</div></div>
+            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 42 s</div></div>
+          </div>
+          <div class="qs-lb-row me">
+            <div class="qs-lb-rank podium-3">3</div>
+            <div class="qs-lb-name">Léa (toi) 🟠<div class="qs-lb-name-sub">Cannes</div></div>
+            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 47 s</div></div>
+          </div>
+          <div class="qs-lb-row">
+            <div class="qs-lb-rank">4</div>
+            <div class="qs-lb-name">Marc R.<div class="qs-lb-name-sub">Antibes</div></div>
+            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 52 s</div></div>
+          </div>
+          <div class="qs-lb-row">
+            <div class="qs-lb-rank">5</div>
+            <div class="qs-lb-name">Camille B.<div class="qs-lb-name-sub">Mouans-Sartoux</div></div>
+            <div><div class="qs-lb-score">20 pts</div><div class="qs-lb-time">⏱ 38 s</div></div>
+          </div>
+        </div>
+        <div class="pq-bc-info" style="background:rgba(30,64,175,.08);border-color:rgba(30,64,175,.25)">
+          <div class="pq-bc-info-ico">🎁</div>
+          <div class="pq-bc-info-txt" style="color:#1E293B">Les 3 premiers à la clôture du jeu gagneront les lots offerts par Grasse Tourisme.</div>
+        </div>
+        <!-- Contact + Partager proprement dans la page, APRÈS le leaderboard -->
+        <div class="contact-card" id="qs-contact" style="margin:0 20px 12px">
+          <div class="contact-title">📬 On reste en contact ?</div>
+          <div class="contact-sub">Prochains événements · offres partenaires</div>
+          <div class="contact-btns">
+            <button class="contact-yes" onclick="qsContactYes(this)">✅ Oui carrément</button>
+            <button class="contact-no" onclick="qsContactNo(this)">Non merci</button>
+          </div>
+          <div class="contact-done-msg"></div>
+        </div>
+        <button class="share-btn-gen" id="qs-share-btn" style="background:linear-gradient(135deg,#1E40AF,#EA580C)" onclick="qsOpenShare()">📲 Partager mon score</button>
+        <div style="padding:0 20px 20px">
+          <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="qsGo(7)">🤝 Voir nos partenaires</button>
+        </div>
+        <div style="height:20px"></div>
+        <!-- Bottom-sheet partage qs (DANS la page) -->
+        <div class="qs-share-backdrop" id="qs-share-bd" onclick="qsCloseShare()"></div>
+        <div class="qs-share-sheet" id="qs-share-sheet">
+          <div class="sh-handle"></div>
+          <div class="sh-title">Partage avec tes proches</div>
+          <div class="sh-sub">Invite tes amis à jouer !</div>
+          <div class="sh-preview">« Je viens de jouer à <strong>Quiz Patrimoine Grasse 2026</strong> — à toi de tenter ta chance ! »</div>
+          <div class="sh-options">
+            <button class="sh-option" onclick="qsShareVia('whatsapp')">
+              <div class="sh-option-icon wa">💬</div>
+              <div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
+              <div class="sh-arrow">→</div>
+            </button>
+            <button class="sh-option" onclick="qsShareVia('sms')">
+              <div class="sh-option-icon sms">✉️</div>
+              <div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
+              <div class="sh-arrow">→</div>
+            </button>
+          </div>
+        </div>
+        <div class="qs-toast sh-toast" id="qs-toast">✓ Lien copié !</div>
+      </div>
+
+      <!-- ─── QS 7 : Partenaires ─── -->
+      <div class="page" id="qs-7">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="qs-result-hero" style="padding:28px 20px 20px">
+          <div class="qs-result-inner">
+            <div class="qs-result-trophy">🤝</div>
+            <div class="qs-result-title">Nos partenaires</div>
+            <div class="qs-result-sub">Merci à eux pour ce quiz !</div>
+          </div>
+        </div>
+        <div style="padding:14px 20px 0">
+          <div class="partenaires">
+            <div class="partenaires-label">★ Partenaires Quiz Grasse Patrimoine 2026 ★</div>
+            <div class="partenaires-grid">
+              <div class="partenaire-tile"><div class="partenaire-emoji">🏛️</div><div class="partenaire-name">Grasse Tourisme</div></div>
+              <div class="partenaire-tile"><div class="partenaire-emoji">🌹</div><div class="partenaire-name">Musée de la Parfumerie</div></div>
+              <div class="partenaire-tile"><div class="partenaire-emoji">🧴</div><div class="partenaire-name">Molinard</div></div>
+              <div class="partenaire-tile"><div class="partenaire-emoji">🎓</div><div class="partenaire-name">Ville de Grasse</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta" style="background:transparent;border-top:none">
+          <div class="btn btn-ghost" onclick="qsGo(6)">← Retour</div>
+          <div class="btn btn-primary" onclick="qsGo(1)">Terminer →</div>
+        </div>
+      </div>
+
+      <!-- ─── QS 8 : Anti-doublon ─── -->
+      <div class="page" id="qs-8">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="ad-screen" style="background:linear-gradient(160deg,#EFF6FF 0%,#FFF7ED 100%)">
+          <div class="ad-icon">✋</div>
+          <div class="ad-title">Tu as déjà joué !</div>
+          <div class="ad-msg">Cette adresse email a déjà participé au Quiz Grasse 2026.<br>Une seule participation par personne.</div>
+          <div class="ad-email" id="qs-ad-email">lea@exemple.fr</div>
+          <div class="ticket" style="margin:0 20px">
+            <div class="ticket-icon">🏆</div>
+            <div class="ticket-title">Ton score enregistré</div>
+            <div class="ticket-code" id="qs-ad-code">30 pts · 47s</div>
+            <div class="ticket-hint">Classement clôturé à la fin de l'événement</div>
+          </div>
+          <button class="ad-btn" onclick="qsGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 <script>
 
 
@@ -2625,21 +2635,16 @@ function flowinHydrateQuizmasterBonus(){
   console.log('[Flowin] qm-9 hydraté avec ' + bonusList.length + ' questions');
 }
 
-/* ── Boot standalone : pas de routing Supabase ── */
+/* Boot standalone */
 (function(){
-  /* Récupérer ?ev= si présent pour hydratation */
-  var evId = (new URLSearchParams(window.location.search)).get('ev') || '';
-  var mod  = 'quizsolo';
-  if(evId) {
-    var H = {'apikey': FLOWIN_SUPA_ANON, 'Authorization': 'Bearer ' + FLOWIN_SUPA_ANON};
-    fetch(FLOWIN_SUPA_URL + '/rest/v1/events?id=eq.' + encodeURIComponent(evId) + '&select=*', {headers:H})
-      .then(function(r){return r.json();})
-      .then(function(rows){
-        if(rows && rows.length) {
-          FLOWIN_EVENT = rows[0];
-          try { flowinHydrateModule(rows[0]); } catch(e){}
-        }
-      }).catch(function(){});
+  var evId=(new URLSearchParams(window.location.search)).get('ev')||'';
+  if(evId){
+    var H={'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId)+'&select=*',{headers:H})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(rows&&rows.length){FLOWIN_EVENT=rows[0];try{flowinHydrateModule(rows[0]);}catch(e){}}
+    }).catch(function(){});
   }
 })();
 </script>

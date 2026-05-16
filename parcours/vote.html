@@ -1161,383 +1161,404 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Pâques : chips avec classe .qm-form-source-chip */
 
-/* ── Mode standalone : plein écran sans chrome ── */
-html,body{margin:0;padding:0;background:#fff;overflow:hidden;height:100%;width:100%}
-.viewport{width:100%;height:100dvh;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* Standalone : plein écran */
+html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
+.viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
 <div class="viewport vs-viewport" id="vp-votestars">
-<!-- ─── VS 1 : Landing ─── -->
-<div class="page on" id="vs-1">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="vs-landing">
-<div class="vs-badge">⭐ Soirée Jazz Antibes · 12 juin 2026</div>
-<div class="vs-logo">🎷</div>
-<div class="vs-title">Ta note<br/>change la prog</div>
-<div class="vs-sub">Donne 1 à 5 étoiles à chaque artiste pour guider la programmation 2027.</div>
-<div class="vs-rules">
-<div class="vs-rule-row"><div class="vs-rule-ico">🎤</div>5 artistes à évaluer un par un</div>
-<div class="vs-rule-row"><div class="vs-rule-ico">⭐</div>Note de 1 à 5 étoiles</div>
-<div class="vs-rule-row"><div class="vs-rule-ico">📮</div>Tes infos à la fin pour rester informé</div>
-<div class="vs-rule-row"><div class="vs-rule-ico">📊</div>Résultats publiés après le festival</div>
-</div>
-<button class="vs-cta" onclick="vsGo(2)">Je note les artistes →</button>
-</div>
-</div>
-<!-- ─── VS 2 : Artiste 1/5 — Kamasi Washington ─── -->
-<div class="page" id="vs-2">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent;padding:10px 20px">
-<div class="back-btn" onclick="vsGo(1)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
-<div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 1/5</div><div class="header-sub" style="color:#C7D2FE">Kamasi Washington</div></div>
-</div>
-<div style="padding:0 20px 12px;display:flex;gap:5px">
-<div class="qs-q-dot active" style="background:#FCD34D"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-</div>
-<div style="padding:20px 20px 20px">
-<div class="vs-artist-card" style="padding:24px 20px;text-align:center">
-<div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎷</div>
-<div class="vs-artist-name" style="font-size:20px">Kamasi Washington</div>
-<div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Jazz contemporain · USA</div>
-<div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+
+      <!-- ─── VS 1 : Landing ─── -->
+      <div class="page on" id="vs-1">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="vs-landing">
+          <div class="vs-badge">⭐ Soirée Jazz Antibes · 12 juin 2026</div>
+          <div class="vs-logo">🎷</div>
+          <div class="vs-title">Ta note<br>change la prog</div>
+          <div class="vs-sub">Donne 1 à 5 étoiles à chaque artiste pour guider la programmation 2027.</div>
+
+          <div class="vs-rules">
+            <div class="vs-rule-row"><div class="vs-rule-ico">🎤</div>5 artistes à évaluer un par un</div>
+            <div class="vs-rule-row"><div class="vs-rule-ico">⭐</div>Note de 1 à 5 étoiles</div>
+            <div class="vs-rule-row"><div class="vs-rule-ico">📮</div>Tes infos à la fin pour rester informé</div>
+            <div class="vs-rule-row"><div class="vs-rule-ico">📊</div>Résultats publiés après le festival</div>
+          </div>
+
+          <button class="vs-cta" onclick="vsGo(2)">Je note les artistes →</button>
+        </div>
+      </div>
+
+      <!-- ─── VS 2 : Artiste 1/5 — Kamasi Washington ─── -->
+      <div class="page" id="vs-2">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(1)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 1/5</div><div class="header-sub" style="color:#C7D2FE">Kamasi Washington</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎷</div>
+            <div class="vs-artist-name" style="font-size:20px">Kamasi Washington</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Jazz contemporain · USA</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
               Saxophoniste ténor, producteur d'albums majeurs du jazz moderne ("The Epic", "Heaven and Earth").
             </div>
-<div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
-<div class="vs-stars" data-artist="kamasi" style="justify-content:center;gap:10px">
-<div class="vs-star" onclick="vsRate(this,1)">★</div>
-<div class="vs-star" onclick="vsRate(this,2)">★</div>
-<div class="vs-star" onclick="vsRate(this,3)">★</div>
-<div class="vs-star" onclick="vsRate(this,4)">★</div>
-<div class="vs-star" onclick="vsRate(this,5)">★</div>
-</div>
-</div>
-</div>
-<button class="vs-submit-btn" onclick="vsGo(3)">Artiste suivant →</button>
-</div>
-<!-- ─── VS 3 : Artiste 2/5 — Hiromi Uehara ─── -->
-<div class="page" id="vs-3">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent;padding:10px 20px">
-<div class="back-btn" onclick="vsGo(2)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
-<div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 2/5</div><div class="header-sub" style="color:#C7D2FE">Hiromi Uehara</div></div>
-</div>
-<div style="padding:0 20px 12px;display:flex;gap:5px">
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot active" style="background:#FCD34D"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-</div>
-<div style="padding:20px 20px 20px">
-<div class="vs-artist-card" style="padding:24px 20px;text-align:center">
-<div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎹</div>
-<div class="vs-artist-name" style="font-size:20px">Hiromi Uehara</div>
-<div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Jazz fusion · Japon</div>
-<div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="kamasi">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(3)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 3 : Artiste 2/5 — Hiromi Uehara ─── -->
+      <div class="page" id="vs-3">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(2)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 2/5</div><div class="header-sub" style="color:#C7D2FE">Hiromi Uehara</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎹</div>
+            <div class="vs-artist-name" style="font-size:20px">Hiromi Uehara</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Jazz fusion · Japon</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
               Pianiste virtuose, fusion entre jazz, rock progressif et musique classique. Grammy Award 2011.
             </div>
-<div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
-<div class="vs-stars" data-artist="hiromi" style="justify-content:center;gap:10px">
-<div class="vs-star" onclick="vsRate(this,1)">★</div>
-<div class="vs-star" onclick="vsRate(this,2)">★</div>
-<div class="vs-star" onclick="vsRate(this,3)">★</div>
-<div class="vs-star" onclick="vsRate(this,4)">★</div>
-<div class="vs-star" onclick="vsRate(this,5)">★</div>
-</div>
-</div>
-</div>
-<button class="vs-submit-btn" onclick="vsGo(4)">Artiste suivant →</button>
-</div>
-<!-- ─── VS 4 : Artiste 3/5 — Ibrahim Maalouf ─── -->
-<div class="page" id="vs-4">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent;padding:10px 20px">
-<div class="back-btn" onclick="vsGo(3)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
-<div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 3/5</div><div class="header-sub" style="color:#C7D2FE">Ibrahim Maalouf</div></div>
-</div>
-<div style="padding:0 20px 12px;display:flex;gap:5px">
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot active" style="background:#FCD34D"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-</div>
-<div style="padding:20px 20px 20px">
-<div class="vs-artist-card" style="padding:24px 20px;text-align:center">
-<div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎺</div>
-<div class="vs-artist-name" style="font-size:20px">Ibrahim Maalouf</div>
-<div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Trompette jazz · France</div>
-<div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="hiromi">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(4)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 4 : Artiste 3/5 — Ibrahim Maalouf ─── -->
+      <div class="page" id="vs-4">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(3)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 3/5</div><div class="header-sub" style="color:#C7D2FE">Ibrahim Maalouf</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎺</div>
+            <div class="vs-artist-name" style="font-size:20px">Ibrahim Maalouf</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Trompette jazz · France</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
               Trompettiste franco-libanais, fusion jazz oriental. Victoire du jazz, compositions pour le cinéma.
             </div>
-<div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
-<div class="vs-stars" data-artist="ibrahim" style="justify-content:center;gap:10px">
-<div class="vs-star" onclick="vsRate(this,1)">★</div>
-<div class="vs-star" onclick="vsRate(this,2)">★</div>
-<div class="vs-star" onclick="vsRate(this,3)">★</div>
-<div class="vs-star" onclick="vsRate(this,4)">★</div>
-<div class="vs-star" onclick="vsRate(this,5)">★</div>
-</div>
-</div>
-</div>
-<button class="vs-submit-btn" onclick="vsGo(5)">Artiste suivant →</button>
-</div>
-<!-- ─── VS 5 : Artiste 4/5 — Stacey Kent ─── -->
-<div class="page" id="vs-5">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent;padding:10px 20px">
-<div class="back-btn" onclick="vsGo(4)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
-<div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 4/5</div><div class="header-sub" style="color:#C7D2FE">Stacey Kent</div></div>
-</div>
-<div style="padding:0 20px 12px;display:flex;gap:5px">
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot active" style="background:#FCD34D"></div>
-<div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
-</div>
-<div style="padding:20px 20px 20px">
-<div class="vs-artist-card" style="padding:24px 20px;text-align:center">
-<div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎸</div>
-<div class="vs-artist-name" style="font-size:20px">Stacey Kent</div>
-<div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Vocal jazz · UK</div>
-<div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="ibrahim">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(5)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 5 : Artiste 4/5 — Stacey Kent ─── -->
+      <div class="page" id="vs-5">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(4)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 4/5</div><div class="header-sub" style="color:#C7D2FE">Stacey Kent</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎸</div>
+            <div class="vs-artist-name" style="font-size:20px">Stacey Kent</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Vocal jazz · UK</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
               Chanteuse américaine installée à Londres, voix douce et bossa nova raffinée. Disque de platine.
             </div>
-<div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
-<div class="vs-stars" data-artist="stacey" style="justify-content:center;gap:10px">
-<div class="vs-star" onclick="vsRate(this,1)">★</div>
-<div class="vs-star" onclick="vsRate(this,2)">★</div>
-<div class="vs-star" onclick="vsRate(this,3)">★</div>
-<div class="vs-star" onclick="vsRate(this,4)">★</div>
-<div class="vs-star" onclick="vsRate(this,5)">★</div>
-</div>
-</div>
-</div>
-<button class="vs-submit-btn" onclick="vsGo(6)">Artiste suivant →</button>
-</div>
-<!-- ─── VS 6 : Artiste 5/5 — Marcus Miller ─── -->
-<div class="page" id="vs-6">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent;padding:10px 20px">
-<div class="back-btn" onclick="vsGo(5)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
-<div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 5/5</div><div class="header-sub" style="color:#C7D2FE">Marcus Miller · dernier !</div></div>
-</div>
-<div style="padding:0 20px 12px;display:flex;gap:5px">
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot" style="background:#1D9E75"></div>
-<div class="qs-q-dot active" style="background:#FCD34D"></div>
-</div>
-<div style="padding:20px 20px 20px">
-<div class="vs-artist-card" style="padding:24px 20px;text-align:center">
-<div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🥁</div>
-<div class="vs-artist-name" style="font-size:20px">Marcus Miller</div>
-<div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Bass / funk jazz · USA</div>
-<div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="stacey">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(6)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 6 : Artiste 5/5 — Marcus Miller ─── -->
+      <div class="page" id="vs-6">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(5)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 5/5</div><div class="header-sub" style="color:#C7D2FE">Marcus Miller · dernier !</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🥁</div>
+            <div class="vs-artist-name" style="font-size:20px">Marcus Miller</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Bass / funk jazz · USA</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
               Bassiste légendaire, compositeur et producteur (Miles Davis). 2 Grammy Awards, funk jazz.
             </div>
-<div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
-<div class="vs-stars" data-artist="marcus" style="justify-content:center;gap:10px">
-<div class="vs-star" onclick="vsRate(this,1)">★</div>
-<div class="vs-star" onclick="vsRate(this,2)">★</div>
-<div class="vs-star" onclick="vsRate(this,3)">★</div>
-<div class="vs-star" onclick="vsRate(this,4)">★</div>
-<div class="vs-star" onclick="vsRate(this,5)">★</div>
-</div>
-</div>
-</div>
-<button class="vs-submit-btn" onclick="vsGo(7)">Mes coordonnées →</button>
-</div>
-<!-- ─── VS 7 : Formulaire CRM ─── -->
-<div class="page" id="vs-7">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback" style="background:transparent;padding:10px 20px">
-<div class="back-btn" onclick="vsGo(6)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
-<div><div class="header-title" style="color:#FCD34D;font-size:17px">Tes coordonnées</div><div class="header-sub" style="color:#C7D2FE">Pour rester informé(e) du prochain festival</div></div>
-</div>
-<div style="padding:14px 20px;background:rgba(252,211,77,.08);margin:0 20px 14px;border-radius:14px;border:1px solid rgba(252,211,77,.2)">
-<div style="font-size:11px;font-weight:800;color:#FDE68A;line-height:1.5">
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="marcus">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(7)">Mes coordonnées →</button>
+      </div>
+
+      <!-- ─── VS 7 : Formulaire CRM ─── -->
+      <div class="page" id="vs-7">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(6)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Tes coordonnées</div><div class="header-sub" style="color:#C7D2FE">Pour rester informé(e) du prochain festival</div></div>
+        </div>
+        <div style="padding:14px 20px;background:rgba(252,211,77,.08);margin:0 20px 14px;border-radius:14px;border:1px solid rgba(252,211,77,.2)">
+          <div style="font-size:11px;font-weight:800;color:#FDE68A;line-height:1.5">
             ✨ Tes 5 votes sont enregistrés — on a juste besoin de tes infos pour te tenir au courant.
           </div>
-</div>
-<div style="padding:0 20px 20px">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-<div>
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Prénom</label>
-<input placeholder="Léa" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" value="Léa"/>
-</div>
-<div>
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Nom</label>
-<input placeholder="Martin" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none"/>
-</div>
-</div>
-<div style="margin-bottom:12px">
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Genre</label>
-<div style="display:flex;gap:6px;margin-top:6px">
-<button data-gender="F" onclick="vsPickChip(this)" style="flex:1;padding:10px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:13px">👩 Femme</button>
-<button data-gender="M" onclick="vsPickChip(this)" style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:13px">👨 Homme</button>
-</div>
-</div>
-<div style="margin-bottom:12px">
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Email</label>
-<input placeholder="lea@exemple.fr" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none"/>
-</div>
-<div style="margin-bottom:12px">
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Téléphone</label>
-<input placeholder="06 XX XX XX XX" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none"/>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-<div>
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Âge</label>
-<input placeholder="26-35 ans" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" value="26-35 ans"/>
-</div>
-<div>
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Code postal</label>
-<input placeholder="06600" style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" value="06600"/>
-</div>
-</div>
-<div style="margin-bottom:12px">
-<label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Comment nous as-tu connu ?</label>
-<div style="display:flex;flex-wrap:wrap;gap:6px">
-<button onclick="vsPickSource(this)" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif">📸 Instagram</button>
-<button onclick="vsPickSource(this)" style="background:#FCD34D;border:1.5px solid #FCD34D;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1E1B4B;cursor:pointer;font-family:'Nunito',sans-serif">🔵 Facebook</button>
-<button onclick="vsPickSource(this)" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif">🏛️ Site festival</button>
-<button onclick="vsPickSource(this)" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif">🗒️ Affiche / Flyer</button>
-<button onclick="vsPickSource(this)" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif">📣 Bouche à oreille</button>
-</div>
-</div>
-<div style="display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.08);border:1px solid rgba(252,211,77,.25);border-radius:12px;align-items:flex-start;margin-bottom:10px">
-<div style="width:22px;height:22px;border-radius:6px;background:#FCD34D;color:#1E1B4B;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900">✓</div>
-<div style="font-size:11px;font-weight:700;color:#E0E7FF;line-height:1.4">Préviens-moi de la prochaine édition du festival Jazz Antibes et des autres événements partenaires.</div>
-</div>
-</div>
-<button class="vs-submit-btn" onclick="vsSubmitForm()">Envoyer mes votes et mes infos →</button>
-<div style="padding:0 20px 16px;text-align:center">
-<button onclick="vsGo(9)" style="background:none;border:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);cursor:pointer;text-decoration:underline">🤝 Voir nos partenaires</button>
-</div>
-</div>
-<!-- ─── VS 8 : Confirmation ─── -->
-<div class="page" id="vs-8">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="vs-thanks-hero">
-<div class="vs-thanks-emoji">🙏</div>
-<div class="vs-thanks-title">Merci Léa !</div>
-<div class="vs-thanks-sub">Tes 5 votes sont enregistrés<br/>et tes infos bien en sécurité</div>
-</div>
-<div class="vs-summary">
-<div class="vs-summary-title">⭐ Récap de tes votes ⭐</div>
-<div class="vs-summary-row">
-<div class="vs-summary-avatar">🎷</div>
-<div class="vs-summary-name">Kamasi Washington</div>
-<div class="vs-summary-stars">★★★★★</div>
-</div>
-<div class="vs-summary-row">
-<div class="vs-summary-avatar">🎹</div>
-<div class="vs-summary-name">Hiromi Uehara</div>
-<div class="vs-summary-stars">★★★★☆</div>
-</div>
-<div class="vs-summary-row">
-<div class="vs-summary-avatar">🎺</div>
-<div class="vs-summary-name">Ibrahim Maalouf</div>
-<div class="vs-summary-stars">★★★☆☆</div>
-</div>
-<div class="vs-summary-row">
-<div class="vs-summary-avatar">🎸</div>
-<div class="vs-summary-name">Stacey Kent</div>
-<div class="vs-summary-stars">★★☆☆☆</div>
-</div>
-<div class="vs-summary-row">
-<div class="vs-summary-avatar">🥁</div>
-<div class="vs-summary-name">Marcus Miller</div>
-<div class="vs-summary-stars">★★★☆☆</div>
-</div>
-</div>
-<div class="vs-footer-info">
-<div class="vs-footer-ico">📧</div>
-<div class="vs-footer-txt">On te prévient dès l'ouverture de la programmation 2027 et pour le prochain événement.</div>
-</div>
-<div class="contact-card" id="vs-contact">
-<div class="contact-title">📬 On reste en contact ?</div>
-<div class="contact-sub">Prochains événements · offres partenaires</div>
-<div class="contact-btns">
-<button class="contact-yes" onclick="vsContactYes(this)">✅ Oui carrément</button>
-<button class="contact-no" onclick="vsContactNo(this)">Non merci</button>
-</div>
-</div>
-<button class="share-btn-gen" id="vs-share-btn" onclick="vsOpenShare()" style="background:linear-gradient(135deg,#4C1D95,#7C3AED)">📲 Partager cet événement</button>
-<div style="padding:0 20px 20px">
-<button class="vs-cta" onclick="vsGo(9)" style="background:rgba(255,255,255,.12);color:#FCD34D;border:1px solid rgba(252,211,77,.3);box-shadow:none">Voir nos partenaires →</button>
-</div>
-<!-- Bottom-sheet partage vs -->
-<div class="vs-share-backdrop" id="vs-share-bd" onclick="vsCloseShare()"></div>
-<div class="vs-share-sheet" id="vs-share-sheet">
-<div class="sh-handle"></div>
-<div class="sh-title">Partage avec tes proches</div>
-<div class="sh-sub">Invite tes amis à jouer !</div>
-<div class="sh-preview">« Je viens de jouer à <strong>Soirée Jazz Antibes 2026</strong> — à toi de tenter ta chance ! »</div>
-<div class="sh-options">
-<button class="sh-option" onclick="vsShareVia('whatsapp')">
-<div class="sh-option-icon wa">💬</div>
-<div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
-<div class="sh-arrow">→</div>
-</button>
-<button class="sh-option" onclick="vsShareVia('sms')">
-<div class="sh-option-icon sms">✉️</div>
-<div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
-<div class="sh-arrow">→</div>
-</button>
-</div>
-</div>
-<div class="vs-toast sh-toast" id="vs-toast">✓ Lien copié !</div>
-</div>
-<!-- ─── VS 9 : Partenaires ─── -->
-<div class="page" id="vs-9">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="vs-thanks-hero" style="padding:28px 20px 20px">
-<div class="vs-thanks-emoji" style="font-size:44px">🤝</div>
-<div class="vs-thanks-title">Nos partenaires</div>
-<div class="vs-thanks-sub">Sans eux, pas de festival !</div>
-</div>
-<div style="padding:14px 20px 0">
-<div class="partenaires" style="background:rgba(255,255,255,.08);border-color:rgba(252,211,77,.2)">
-<div class="partenaires-label" style="color:#FCD34D">★ Partenaires Jazz Antibes 2026 ★</div>
-<div class="partenaires-grid">
-<div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎷</div><div class="partenaire-name">Jazz Antibes</div></div>
-<div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏖️</div><div class="partenaire-name">Ville d'Antibes</div></div>
-<div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎵</div><div class="partenaire-name">SACEM</div></div>
-<div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏨</div><div class="partenaire-name">Hôtels Azur</div></div>
-</div>
-</div>
-</div>
-<div class="bottom-cta" style="background:transparent;border-top:none">
-<div class="btn" onclick="vsGo(8)" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)">← Retour</div>
-<div class="btn" onclick="vsGo(1)" style="background:#FCD34D;color:#1E1B4B;font-weight:900">Terminer →</div>
-</div>
-</div>
-<!-- ─── VS 10 : Anti-doublon ─── -->
-<div class="page" id="vs-10">
-<div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="ad-screen" style="background:linear-gradient(160deg,#1E1B4B 0%,#312E81 100%)">
-<div class="ad-icon">✋</div>
-<div class="ad-title" style="color:#FCD34D">Tu as déjà voté !</div>
-<div class="ad-msg" style="color:rgba(255,255,255,.8)">Cette adresse email a déjà voté pour le Jazz Antibes 2026.<br/>Un seul vote par personne.</div>
-<div class="ad-email" id="vs-ad-email" style="background:rgba(252,211,77,.15);color:#FCD34D">lea@exemple.fr</div>
-<div style="background:rgba(255,255,255,.08);border:1px solid rgba(252,211,77,.2);border-radius:18px;padding:16px;margin:0 20px;text-align:center">
-<div style="font-size:32px;margin-bottom:6px">🎷</div>
-<div style="font-family:'Fredoka One',cursive;font-size:15px;color:#FCD34D">Tes 5 votes ont été enregistrés</div>
-<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">Résultats publiés après le festival</div>
-</div>
-<button class="ad-btn" onclick="vsGo(1)" style="background:rgba(255,255,255,.1);color:#FCD34D;border-color:rgba(252,211,77,.3)">← Retour à l'accueil</button>
-</div>
-</div>
-</div>
+        </div>
+
+        <div style="padding:0 20px 20px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Prénom</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Léa" value="Léa">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Nom</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Martin">
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Genre</label>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button style="flex:1;padding:10px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:13px" data-gender="F" onclick="vsPickChip(this)">👩 Femme</button>
+              <button style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:13px" data-gender="M" onclick="vsPickChip(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Email</label>
+            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="lea@exemple.fr">
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Téléphone</label>
+            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="06 XX XX XX XX">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Âge</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="26-35 ans" value="26-35 ans">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Code postal</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="06600" value="06600">
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Comment nous as-tu connu ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">📸 Instagram</button>
+              <button style="background:#FCD34D;border:1.5px solid #FCD34D;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1E1B4B;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">🔵 Facebook</button>
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">🏛️ Site festival</button>
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">🗒️ Affiche / Flyer</button>
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.08);border:1px solid rgba(252,211,77,.25);border-radius:12px;align-items:flex-start;margin-bottom:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:#FCD34D;color:#1E1B4B;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900">✓</div>
+            <div style="font-size:11px;font-weight:700;color:#E0E7FF;line-height:1.4">Préviens-moi de la prochaine édition du festival Jazz Antibes et des autres événements partenaires.</div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsSubmitForm()">Envoyer mes votes et mes infos →</button>
+        <div style="padding:0 20px 16px;text-align:center">
+          <button onclick="vsGo(9)" style="background:none;border:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);cursor:pointer;text-decoration:underline">🤝 Voir nos partenaires</button>
+        </div>
+      </div>
+
+      <!-- ─── VS 8 : Confirmation ─── -->
+      <div class="page" id="vs-8">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="vs-thanks-hero">
+          <div class="vs-thanks-emoji">🙏</div>
+          <div class="vs-thanks-title">Merci Léa !</div>
+          <div class="vs-thanks-sub">Tes 5 votes sont enregistrés<br>et tes infos bien en sécurité</div>
+        </div>
+
+        <div class="vs-summary">
+          <div class="vs-summary-title">⭐ Récap de tes votes ⭐</div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎷</div>
+            <div class="vs-summary-name">Kamasi Washington</div>
+            <div class="vs-summary-stars">★★★★★</div>
+          </div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎹</div>
+            <div class="vs-summary-name">Hiromi Uehara</div>
+            <div class="vs-summary-stars">★★★★☆</div>
+          </div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎺</div>
+            <div class="vs-summary-name">Ibrahim Maalouf</div>
+            <div class="vs-summary-stars">★★★☆☆</div>
+          </div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎸</div>
+            <div class="vs-summary-name">Stacey Kent</div>
+            <div class="vs-summary-stars">★★☆☆☆</div>
+          </div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🥁</div>
+            <div class="vs-summary-name">Marcus Miller</div>
+            <div class="vs-summary-stars">★★★☆☆</div>
+          </div>
+        </div>
+
+        <div class="vs-footer-info">
+          <div class="vs-footer-ico">📧</div>
+          <div class="vs-footer-txt">On te prévient dès l'ouverture de la programmation 2027 et pour le prochain événement.</div>
+        </div>
+
+        <div class="contact-card" id="vs-contact">
+          <div class="contact-title">📬 On reste en contact ?</div>
+          <div class="contact-sub">Prochains événements · offres partenaires</div>
+          <div class="contact-btns">
+            <button class="contact-yes" onclick="vsContactYes(this)">✅ Oui carrément</button>
+            <button class="contact-no" onclick="vsContactNo(this)">Non merci</button>
+          </div>
+        </div>
+        <button class="share-btn-gen" id="vs-share-btn" style="background:linear-gradient(135deg,#4C1D95,#7C3AED)" onclick="vsOpenShare()">📲 Partager cet événement</button>
+        <div style="padding:0 20px 20px">
+          <button class="vs-cta" onclick="vsGo(9)" style="background:rgba(255,255,255,.12);color:#FCD34D;border:1px solid rgba(252,211,77,.3);box-shadow:none">Voir nos partenaires →</button>
+        </div>
+        <!-- Bottom-sheet partage vs -->
+        <div class="vs-share-backdrop" id="vs-share-bd" onclick="vsCloseShare()"></div>
+        <div class="vs-share-sheet" id="vs-share-sheet">
+          <div class="sh-handle"></div>
+          <div class="sh-title">Partage avec tes proches</div>
+          <div class="sh-sub">Invite tes amis à jouer !</div>
+          <div class="sh-preview">« Je viens de jouer à <strong>Soirée Jazz Antibes 2026</strong> — à toi de tenter ta chance ! »</div>
+          <div class="sh-options">
+            <button class="sh-option" onclick="vsShareVia('whatsapp')">
+              <div class="sh-option-icon wa">💬</div>
+              <div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
+              <div class="sh-arrow">→</div>
+            </button>
+            <button class="sh-option" onclick="vsShareVia('sms')">
+              <div class="sh-option-icon sms">✉️</div>
+              <div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
+              <div class="sh-arrow">→</div>
+            </button>
+          </div>
+          
+        </div>
+        <div class="vs-toast sh-toast" id="vs-toast">✓ Lien copié !</div>
+      </div>
+
+      <!-- ─── VS 9 : Partenaires ─── -->
+      <div class="page" id="vs-9">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="vs-thanks-hero" style="padding:28px 20px 20px">
+          <div class="vs-thanks-emoji" style="font-size:44px">🤝</div>
+          <div class="vs-thanks-title">Nos partenaires</div>
+          <div class="vs-thanks-sub">Sans eux, pas de festival !</div>
+        </div>
+        <div style="padding:14px 20px 0">
+          <div class="partenaires" style="background:rgba(255,255,255,.08);border-color:rgba(252,211,77,.2)">
+            <div class="partenaires-label" style="color:#FCD34D">★ Partenaires Jazz Antibes 2026 ★</div>
+            <div class="partenaires-grid">
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎷</div><div class="partenaire-name">Jazz Antibes</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏖️</div><div class="partenaire-name">Ville d'Antibes</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎵</div><div class="partenaire-name">SACEM</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏨</div><div class="partenaire-name">Hôtels Azur</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta" style="background:transparent;border-top:none">
+          <div class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="vsGo(8)">← Retour</div>
+          <div class="btn" style="background:#FCD34D;color:#1E1B4B;font-weight:900" onclick="vsGo(1)">Terminer →</div>
+        </div>
+      </div>
+
+      <!-- ─── VS 10 : Anti-doublon ─── -->
+      <div class="page" id="vs-10">
+        <div class="status-bar" style="color:#fff"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="ad-screen" style="background:linear-gradient(160deg,#1E1B4B 0%,#312E81 100%)">
+          <div class="ad-icon">✋</div>
+          <div class="ad-title" style="color:#FCD34D">Tu as déjà voté !</div>
+          <div class="ad-msg" style="color:rgba(255,255,255,.8)">Cette adresse email a déjà voté pour le Jazz Antibes 2026.<br>Un seul vote par personne.</div>
+          <div class="ad-email" style="background:rgba(252,211,77,.15);color:#FCD34D" id="vs-ad-email">lea@exemple.fr</div>
+          <div style="background:rgba(255,255,255,.08);border:1px solid rgba(252,211,77,.2);border-radius:18px;padding:16px;margin:0 20px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">🎷</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#FCD34D">Tes 5 votes ont été enregistrés</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">Résultats publiés après le festival</div>
+          </div>
+          <button class="ad-btn" style="background:rgba(255,255,255,.1);color:#FCD34D;border-color:rgba(252,211,77,.3)" onclick="vsGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 <script>
 
 
@@ -2696,21 +2717,16 @@ function flowinHydrateQuizmasterBonus(){
   console.log('[Flowin] qm-9 hydraté avec ' + bonusList.length + ' questions');
 }
 
-/* ── Boot standalone : pas de routing Supabase ── */
+/* Boot standalone */
 (function(){
-  /* Récupérer ?ev= si présent pour hydratation */
-  var evId = (new URLSearchParams(window.location.search)).get('ev') || '';
-  var mod  = 'vote';
-  if(evId) {
-    var H = {'apikey': FLOWIN_SUPA_ANON, 'Authorization': 'Bearer ' + FLOWIN_SUPA_ANON};
-    fetch(FLOWIN_SUPA_URL + '/rest/v1/events?id=eq.' + encodeURIComponent(evId) + '&select=*', {headers:H})
-      .then(function(r){return r.json();})
-      .then(function(rows){
-        if(rows && rows.length) {
-          FLOWIN_EVENT = rows[0];
-          try { flowinHydrateModule(rows[0]); } catch(e){}
-        }
-      }).catch(function(){});
+  var evId=(new URLSearchParams(window.location.search)).get('ev')||'';
+  if(evId){
+    var H={'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId)+'&select=*',{headers:H})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(rows&&rows.length){FLOWIN_EVENT=rows[0];try{flowinHydrateModule(rows[0]);}catch(e){}}
+    }).catch(function(){});
   }
 })();
 </script>

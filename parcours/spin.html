@@ -1161,282 +1161,293 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Pâques : chips avec classe .qm-form-source-chip */
 
-/* ── Mode standalone : plein écran sans chrome ── */
-html,body{margin:0;padding:0;background:#fff;overflow:hidden;height:100%;width:100%}
-.viewport{width:100%;height:100dvh;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* Standalone : plein écran */
+html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
+.viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
 <div class="viewport" id="vp-spin">
-<!-- ─── SPIN 1 : Landing event ─── -->
-<div class="page on" id="spin-1">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="landing-frame">
-<div class="landing-event-chip">🚦 Événement local · en cours</div>
-<div class="landing-logo spin">🛡️</div>
-<div class="landing-title">Sécurité Routière<br/>Vence 2026</div>
-<div class="landing-sub">Tourne la roue, tente ta chance et reparts avec un équipement prévention offert par la ville.</div>
-<div class="landing-info-card">
-<div class="landing-info-ico">📍</div>
-<div class="landing-info-text">
-<h4>Place du Grand Jardin, Vence</h4>
-<p>Stand Mairie · toute la journée</p>
-</div>
-</div>
-<div class="landing-info-card">
-<div class="landing-info-ico">🎁</div>
-<div class="landing-info-text">
-<h4>4 lots à gagner</h4>
-<p>Casque · Gilet · Kit sécurité · Flyer</p>
-</div>
-</div>
-<div class="landing-info-card">
-<div class="landing-info-ico">⏱️</div>
-<div class="landing-info-text">
-<h4>20 secondes</h4>
-<p>C'est tout ce qu'il te faut</p>
-</div>
-</div>
-</div>
-<div class="bottom-cta">
-<div class="btn btn-primary" onclick="spinGo(2)">Je tourne la roue →</div>
-</div>
-</div>
-<!-- ─── SPIN 2 : Roue idle ─── -->
-<div class="page" id="spin-2">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback">
-<div class="back-btn" onclick="spinGo(1)">←</div>
-<div><div class="header-title">La roue Flowin</div><div class="header-sub" id="spin-sub">1 essai · appuie pour lancer</div></div>
-</div>
-<div class="progress-strip">
-<div class="progress-step done"></div>
-<div class="progress-step on"></div>
-<div class="progress-step"></div>
-<div class="progress-step"></div>
-</div>
-<div class="spin-scene" style="gap:10px">
-<!-- Roue canvas JS -->
-<div style="position:relative;width:300px;height:300px;margin:0 auto">
-<!-- Pointeur triangle violet -->
-<svg style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:34px;height:26px;z-index:5;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))" viewbox="0 0 40 32">
-<polygon fill="#7C5CFC" points="20,28 2,2 38,2" stroke="#5538D4" stroke-linejoin="round" stroke-width="1.5"></polygon>
-</svg>
-<!-- Canvas roue -->
-<canvas height="300" id="spin-canvas" style="border-radius:50%;box-shadow:0 14px 40px rgba(124,92,252,.28),0 0 0 6px #fff,0 0 0 9px rgba(124,92,252,.15)" width="300"></canvas>
-<!-- Overlay résultat (caché au départ) -->
-<div id="spin-win-overlay" style="display:none;position:absolute;inset:0;background:rgba(26,16,51,.72);border-radius:50%;align-items:center;justify-content:center;flex-direction:column;z-index:10">
-<div id="spin-win-emoji" style="font-size:32px;margin-bottom:4px">🦺</div>
-<div id="spin-win-label" style="font-family:'Fredoka One',cursive;font-size:15px;color:#fff;text-align:center;line-height:1.2;padding:0 20px">Gilet jaune !</div>
-</div>
-</div>
-<!-- Bandeau résultat (sous la roue) -->
-<div id="spin-result-band" style="display:none;background:linear-gradient(135deg,#7C5CFC,#5538D4);border-radius:18px;padding:14px 18px;width:100%;text-align:center;animation:fadeUp .5s ease">
-<div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">🎉 Résultat</div>
-<div id="band-lot" style="font-family:'Fredoka One',cursive;font-size:20px;color:#fff;margin-bottom:2px">🦺 Gilet jaune offert !</div>
-<div id="band-sub" style="font-size:11px;font-weight:800;color:rgba(255,255,255,.8)">Offert par la Ville de Vence</div>
-</div>
-<div id="spin-cta-wrap">
-<button class="spin-cta" id="spin-btn" onclick="startSpinAnim()">🎯 Tourner la roue</button>
-</div>
-</div>
-</div>
-<!-- ─── SPIN 3 : (redirect auto depuis spin-2) ─── -->
-<div class="page" id="spin-3" style="display:none"></div>
-<!-- ─── SPIN 4 : Résultat ─── -->
-<div class="page" id="spin-4">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="hero spin" style="padding:36px 20px 18px">
-<div class="hero-inner">
-<div class="hero-chip"><div class="dot"></div>RÉSULTAT</div>
-<div class="hero-title" id="spin4-title">Bravo !</div>
-<div class="hero-sub">Ta chance a parlé 🎉</div>
-</div>
-</div>
-<div class="progress-strip">
-<div class="progress-step done"></div>
-<div class="progress-step done"></div>
-<div class="progress-step done"></div>
-<div class="progress-step on"></div>
-</div>
-<div class="win-card">
-<div class="win-emoji" id="spin4-emoji">🦺</div>
-<div class="win-title" id="spin4-lot">Gilet jaune offert !</div>
-<div class="win-lot">Offert par la Ville de Vence</div>
-<div class="win-reward">
-<div class="win-reward-emoji">🎁</div>
-<div class="win-reward-text">À réclamer au stand</div>
-</div>
-</div>
-<div class="bottom-cta" style="flex-direction:column;gap:8px">
-<div class="btn btn-primary" onclick="spinGo(5)">Réclamer mon lot →</div>
-<div style="display:flex;gap:8px;width:100%">
-<div class="btn btn-ghost" onclick="spinGo(2)" style="flex:1">↺ Revoir la roue</div>
-<div class="btn btn-ghost" onclick="spinGo(6)" style="flex:1">🤝 Partenaires</div>
-</div>
-</div>
-</div>
-<!-- ─── SPIN 5 : Formulaire réclamation CRM COMPLET ─── -->
-<div class="page" id="spin-5">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback">
-<div class="back-btn" onclick="spinGo(4)">←</div>
-<div><div class="header-title">Récupère ton lot</div><div class="header-sub">Présente ce ticket au stand</div></div>
-</div>
-<div class="ticket">
-<div class="ticket-icon">🎟️</div>
-<div class="ticket-title">Gilet jaune offert</div>
-<div style="font-size:11px;font-weight:800;color:var(--muted)">Sécurité Routière Vence 2026</div>
-<div class="ticket-code">FW-SR-2814</div>
-<div class="ticket-hint">Capture d'écran conseillée · valable uniquement aujourd'hui</div>
-</div>
-<div class="form-wrap">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<div class="form-field">
-<label class="form-label">Prénom</label>
-<input class="form-input" placeholder="Camille" value="Camille"/>
-</div>
-<div class="form-field">
-<label class="form-label">Nom</label>
-<input class="form-input" placeholder="Dupont"/>
-</div>
-</div>
-<div class="form-field">
-<label class="form-label">Genre</label>
-<div style="display:flex;gap:8px;margin-top:6px">
-<button data-gender="F" onclick="spinPickChip(this)" style="flex:1;padding:10px;background:var(--al);border:1.5px solid var(--a);border-radius:12px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit">👩 Femme</button>
-<button data-gender="M" onclick="spinPickChip(this)" style="flex:1;padding:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit">👨 Homme</button>
-</div>
-</div>
-<div class="form-field">
-<label class="form-label">Email (confirmation)</label>
-<input class="form-input" placeholder="camille@exemple.fr"/>
-</div>
-<div class="form-field">
-<label class="form-label">Téléphone</label>
-<input class="form-input" placeholder="06 12 34 56 78"/>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<div class="form-field">
-<label class="form-label">Âge</label>
-<input class="form-input" placeholder="36-50 ans" value="36-50 ans"/>
-</div>
-<div class="form-field">
-<label class="form-label">Code postal</label>
-<input class="form-input" placeholder="06140" value="06140"/>
-</div>
-</div>
-<div class="form-field">
-<label class="form-label">Comment nous as-tu connu ?</label>
-<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
-<button onclick="sechPickSource(this)" style="background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif">📸 Instagram</button>
-<button onclick="sechPickSource(this)" style="background:var(--a);color:#fff;border:1.5px solid var(--a);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">🏛️ Stand Mairie</button>
-<button onclick="sechPickSource(this)" style="background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif">🗒️ Affiche / Flyer</button>
-<button onclick="sechPickSource(this)" style="background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif">📣 Bouche à oreille</button>
-</div>
-</div>
-<div class="form-rgpd" style="margin-top:10px">
-<div class="form-rgpd-check">✓</div>
-<div class="form-rgpd-text">J'accepte d'être recontacté(e) pour les prochains événements de la Ville de Vence. Données jamais cédées.</div>
-</div>
-</div>
-<div class="bottom-cta">
-<div class="btn btn-ghost" onclick="spinGo(6)">Voir nos partenaires</div>
-<div class="btn btn-primary" onclick="spinSubmitForm()">Envoyer le ticket par email →</div>
-</div>
-</div>
-<!-- ─── SPIN 6 : Partenaires ─── -->
-<div class="page" id="spin-6">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="header withback">
-<div class="back-btn" onclick="spinGo(5)">←</div>
-<div><div class="header-title">Nos partenaires</div><div class="header-sub">Merci à eux !</div></div>
-</div>
-<div class="hero spin" style="padding:28px 20px 22px">
-<div class="hero-inner">
-<div class="hero-chip"><div class="dot"></div>PARTENAIRES</div>
-<div class="hero-title">Merci à eux 🤝</div>
-<div class="hero-sub">Sans eux, cet événement n'existerait pas</div>
-</div>
-</div>
-<div style="padding:16px 20px 24px">
-<div class="partenaires">
-<div class="partenaires-label">★ Partenaires Sécurité Routière Vence 2026 ★</div>
-<div class="partenaires-grid">
-<div class="partenaire-tile" onclick="window.open('https://www.vence.fr','_blank')">
-<div class="partenaire-emoji">🏛️</div>
-<div class="partenaire-name">Mairie de Vence</div>
-</div>
-<div class="partenaire-tile" onclick="window.open('#','_blank')">
-<div class="partenaire-emoji">🚒</div>
-<div class="partenaire-name">Pompiers 06</div>
-</div>
-<div class="partenaire-tile" onclick="window.open('#','_blank')">
-<div class="partenaire-emoji">🚓</div>
-<div class="partenaire-name">Police Municipale</div>
-</div>
-<div class="partenaire-tile" onclick="window.open('#','_blank')">
-<div class="partenaire-emoji">🛡️</div>
-<div class="partenaire-name">Sécurité Routière</div>
-</div>
-</div>
-</div>
-</div>
-<div class="bottom-cta" style="background:transparent;border-top:none">
-<div class="btn btn-ghost" onclick="spinGo(5)">← Retour au ticket</div>
-<div class="btn btn-primary" onclick="spinGo(1)">Terminer →</div>
-</div>
-<!-- Bloc rester en contact -->
-<div class="contact-card" id="sp-contact">
-<div class="contact-title">📬 On reste en contact ?</div>
-<div class="contact-sub">Prochains événements · offres partenaires</div>
-<div class="contact-btns">
-<button class="contact-yes" onclick="spContactYes(this)">✅ Oui carrément</button>
-<button class="contact-no" onclick="spContactNo(this)">Non merci</button>
-</div>
-<div class="contact-done-msg"></div>
-</div>
-<button class="share-btn-gen" id="sp-share-btn" onclick="spOpenShare()">📲 Partager cet événement</button>
-<!-- Bottom-sheet partage Spin -->
-<div class="sp-share-backdrop" id="sp-share-bd" onclick="spCloseShare()"></div>
-<div class="sp-share-sheet" id="sp-share-sheet">
-<div class="sh-handle"></div>
-<div class="sh-title">Partage avec tes proches</div>
-<div class="sh-sub">Invite tes amis à participer !</div>
-<div class="sh-preview">« Je viens de jouer à <strong>Sécurité Routière Vence 2026</strong> — à toi de tenter ta chance ! »</div>
-<div class="sh-options">
-<button class="sh-option" onclick="spShareVia('whatsapp')">
-<div class="sh-option-icon wa">💬</div>
-<div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
-<div class="sh-arrow">→</div>
-</button>
-<button class="sh-option" onclick="spShareVia('sms')">
-<div class="sh-option-icon sms">✉️</div>
-<div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
-<div class="sh-arrow">→</div>
-</button>
-</div>
-</div>
-<div class="sp-toast sh-toast" id="sp-toast">✓ Lien copié !</div>
-</div>
-<!-- ─── SPIN 7 : Anti-doublon ─── -->
-<div class="page" id="spin-7">
-<div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
-<div class="ad-screen" style="background:linear-gradient(160deg,#EDE8FF 0%,#F0EDE8 100%)">
-<div class="ad-icon">✋</div>
-<div class="ad-title">Tu as déjà joué !</div>
-<div class="ad-msg">Cette adresse email a déjà participé à cet événement.<br/>Une seule participation par personne.</div>
-<div class="ad-email" id="spin-ad-email">camille@exemple.fr</div>
-<div class="ticket" style="margin:0 20px">
-<div class="ticket-icon">🎟️</div>
-<div class="ticket-title">Ton ticket</div>
-<div class="ticket-code" id="spin-ad-code">FW-SR-2814</div>
-<div class="ticket-hint">Présente ce ticket au stand pour récupérer ton lot</div>
-</div>
-<button class="ad-btn" onclick="spinGo(1)">← Retour à l'accueil</button>
-</div>
-</div>
-</div>
+
+      <!-- ─── SPIN 1 : Landing event ─── -->
+      <div class="page on" id="spin-1">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="landing-frame">
+          <div class="landing-event-chip">🚦 Événement local · en cours</div>
+          <div class="landing-logo spin">🛡️</div>
+          <div class="landing-title">Sécurité Routière<br>Vence 2026</div>
+          <div class="landing-sub">Tourne la roue, tente ta chance et reparts avec un équipement prévention offert par la ville.</div>
+          <div class="landing-info-card">
+            <div class="landing-info-ico">📍</div>
+            <div class="landing-info-text">
+              <h4>Place du Grand Jardin, Vence</h4>
+              <p>Stand Mairie · toute la journée</p>
+            </div>
+          </div>
+          <div class="landing-info-card">
+            <div class="landing-info-ico">🎁</div>
+            <div class="landing-info-text">
+              <h4>4 lots à gagner</h4>
+              <p>Casque · Gilet · Kit sécurité · Flyer</p>
+            </div>
+          </div>
+          <div class="landing-info-card">
+            <div class="landing-info-ico">⏱️</div>
+            <div class="landing-info-text">
+              <h4>20 secondes</h4>
+              <p>C'est tout ce qu'il te faut</p>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn btn-primary" onclick="spinGo(2)">Je tourne la roue →</div>
+        </div>
+      </div>
+
+      <!-- ─── SPIN 2 : Roue idle ─── -->
+      <div class="page" id="spin-2">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback">
+          <div class="back-btn" onclick="spinGo(1)">←</div>
+          <div><div class="header-title">La roue Flowin</div><div class="header-sub" id="spin-sub">1 essai · appuie pour lancer</div></div>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-step done"></div>
+          <div class="progress-step on"></div>
+          <div class="progress-step"></div>
+          <div class="progress-step"></div>
+        </div>
+        <div class="spin-scene" style="gap:10px">
+          <!-- Roue canvas JS -->
+          <div style="position:relative;width:300px;height:300px;margin:0 auto">
+            <!-- Pointeur triangle violet -->
+            <svg viewBox="0 0 40 32" style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:34px;height:26px;z-index:5;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))">
+              <polygon points="20,28 2,2 38,2" fill="#7C5CFC" stroke="#5538D4" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            <!-- Canvas roue -->
+            <canvas id="spin-canvas" width="300" height="300" style="border-radius:50%;box-shadow:0 14px 40px rgba(124,92,252,.28),0 0 0 6px #fff,0 0 0 9px rgba(124,92,252,.15)"></canvas>
+            <!-- Overlay résultat (caché au départ) -->
+            <div id="spin-win-overlay" style="display:none;position:absolute;inset:0;background:rgba(26,16,51,.72);border-radius:50%;align-items:center;justify-content:center;flex-direction:column;z-index:10">
+              <div style="font-size:32px;margin-bottom:4px" id="spin-win-emoji">🦺</div>
+              <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#fff;text-align:center;line-height:1.2;padding:0 20px" id="spin-win-label">Gilet jaune !</div>
+            </div>
+          </div>
+          <!-- Bandeau résultat (sous la roue) -->
+          <div id="spin-result-band" style="display:none;background:linear-gradient(135deg,#7C5CFC,#5538D4);border-radius:18px;padding:14px 18px;width:100%;text-align:center;animation:fadeUp .5s ease">
+            <div style="font-size:10px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">🎉 Résultat</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#fff;margin-bottom:2px" id="band-lot">🦺 Gilet jaune offert !</div>
+            <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.8)" id="band-sub">Offert par la Ville de Vence</div>
+          </div>
+          <div id="spin-cta-wrap">
+            <button class="spin-cta" id="spin-btn" onclick="startSpinAnim()">🎯 Tourner la roue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SPIN 3 : (redirect auto depuis spin-2) ─── -->
+      <div class="page" id="spin-3" style="display:none"></div>
+
+      <!-- ─── SPIN 4 : Résultat ─── -->
+      <div class="page" id="spin-4">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="hero spin" style="padding:36px 20px 18px">
+          <div class="hero-inner">
+            <div class="hero-chip"><div class="dot"></div>RÉSULTAT</div>
+            <div class="hero-title" id="spin4-title">Bravo !</div>
+            <div class="hero-sub">Ta chance a parlé 🎉</div>
+          </div>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-step done"></div>
+          <div class="progress-step done"></div>
+          <div class="progress-step done"></div>
+          <div class="progress-step on"></div>
+        </div>
+        <div class="win-card">
+          <div class="win-emoji" id="spin4-emoji">🦺</div>
+          <div class="win-title" id="spin4-lot">Gilet jaune offert !</div>
+          <div class="win-lot">Offert par la Ville de Vence</div>
+          <div class="win-reward">
+            <div class="win-reward-emoji">🎁</div>
+            <div class="win-reward-text">À réclamer au stand</div>
+          </div>
+        </div>
+        <div class="bottom-cta" style="flex-direction:column;gap:8px">
+          <div class="btn btn-primary" onclick="spinGo(5)">Réclamer mon lot →</div>
+          <div style="display:flex;gap:8px;width:100%">
+            <div class="btn btn-ghost" style="flex:1" onclick="spinGo(2)">↺ Revoir la roue</div>
+            <div class="btn btn-ghost" style="flex:1" onclick="spinGo(6)">🤝 Partenaires</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SPIN 5 : Formulaire réclamation CRM COMPLET ─── -->
+      <div class="page" id="spin-5">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback">
+          <div class="back-btn" onclick="spinGo(4)">←</div>
+          <div><div class="header-title">Récupère ton lot</div><div class="header-sub">Présente ce ticket au stand</div></div>
+        </div>
+        <div class="ticket">
+          <div class="ticket-icon">🎟️</div>
+          <div class="ticket-title">Gilet jaune offert</div>
+          <div style="font-size:11px;font-weight:800;color:var(--muted)">Sécurité Routière Vence 2026</div>
+          <div class="ticket-code">FW-SR-2814</div>
+          <div class="ticket-hint">Capture d'écran conseillée · valable uniquement aujourd'hui</div>
+        </div>
+        <div class="form-wrap">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Prénom</label>
+              <input class="form-input" placeholder="Camille" value="Camille">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Nom</label>
+              <input class="form-input" placeholder="Dupont">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Genre</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button style="flex:1;padding:10px;background:var(--al);border:1.5px solid var(--a);border-radius:12px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit" data-gender="F" onclick="spinPickChip(this)">👩 Femme</button>
+              <button style="flex:1;padding:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit" data-gender="M" onclick="spinPickChip(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email (confirmation)</label>
+            <input class="form-input" placeholder="camille@exemple.fr">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Téléphone</label>
+            <input class="form-input" placeholder="06 12 34 56 78">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Âge</label>
+              <input class="form-input" placeholder="36-50 ans" value="36-50 ans">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Code postal</label>
+              <input class="form-input" placeholder="06140" value="06140">
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+              <button style="background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif" onclick="sechPickSource(this)">📸 Instagram</button>
+              <button style="background:var(--a);color:#fff;border:1.5px solid var(--a);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif" onclick="sechPickSource(this)">🏛️ Stand Mairie</button>
+              <button style="background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif" onclick="sechPickSource(this)">🗒️ Affiche / Flyer</button>
+              <button style="background:#fff;border:1.5px solid var(--accent-border);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:var(--navy);cursor:pointer;font-family:'Nunito',sans-serif" onclick="sechPickSource(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="form-rgpd" style="margin-top:10px">
+            <div class="form-rgpd-check">✓</div>
+            <div class="form-rgpd-text">J'accepte d'être recontacté(e) pour les prochains événements de la Ville de Vence. Données jamais cédées.</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn btn-ghost" onclick="spinGo(6)">Voir nos partenaires</div>
+          <div class="btn btn-primary" onclick="spinSubmitForm()">Envoyer le ticket par email →</div>
+        </div>
+      </div>
+
+      <!-- ─── SPIN 6 : Partenaires ─── -->
+      <div class="page" id="spin-6">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback">
+          <div class="back-btn" onclick="spinGo(5)">←</div>
+          <div><div class="header-title">Nos partenaires</div><div class="header-sub">Merci à eux !</div></div>
+        </div>
+        <div class="hero spin" style="padding:28px 20px 22px">
+          <div class="hero-inner">
+            <div class="hero-chip"><div class="dot"></div>PARTENAIRES</div>
+            <div class="hero-title">Merci à eux 🤝</div>
+            <div class="hero-sub">Sans eux, cet événement n'existerait pas</div>
+          </div>
+        </div>
+        <div style="padding:16px 20px 24px">
+          <div class="partenaires">
+            <div class="partenaires-label">★ Partenaires Sécurité Routière Vence 2026 ★</div>
+            <div class="partenaires-grid">
+              <div class="partenaire-tile" onclick="window.open('https://www.vence.fr','_blank')">
+                <div class="partenaire-emoji">🏛️</div>
+                <div class="partenaire-name">Mairie de Vence</div>
+              </div>
+              <div class="partenaire-tile" onclick="window.open('#','_blank')">
+                <div class="partenaire-emoji">🚒</div>
+                <div class="partenaire-name">Pompiers 06</div>
+              </div>
+              <div class="partenaire-tile" onclick="window.open('#','_blank')">
+                <div class="partenaire-emoji">🚓</div>
+                <div class="partenaire-name">Police Municipale</div>
+              </div>
+              <div class="partenaire-tile" onclick="window.open('#','_blank')">
+                <div class="partenaire-emoji">🛡️</div>
+                <div class="partenaire-name">Sécurité Routière</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta" style="background:transparent;border-top:none">
+          <div class="btn btn-ghost" onclick="spinGo(5)">← Retour au ticket</div>
+          <div class="btn btn-primary" onclick="spinGo(1)">Terminer →</div>
+        </div>
+        <!-- Bloc rester en contact -->
+        <div class="contact-card" id="sp-contact">
+          <div class="contact-title">📬 On reste en contact ?</div>
+          <div class="contact-sub">Prochains événements · offres partenaires</div>
+          <div class="contact-btns">
+            <button class="contact-yes" onclick="spContactYes(this)">✅ Oui carrément</button>
+            <button class="contact-no" onclick="spContactNo(this)">Non merci</button>
+          </div>
+          <div class="contact-done-msg"></div>
+        </div>
+        <button class="share-btn-gen" id="sp-share-btn" onclick="spOpenShare()">📲 Partager cet événement</button>
+        <!-- Bottom-sheet partage Spin -->
+        <div class="sp-share-backdrop" id="sp-share-bd" onclick="spCloseShare()"></div>
+        <div class="sp-share-sheet" id="sp-share-sheet">
+          <div class="sh-handle"></div>
+          <div class="sh-title">Partage avec tes proches</div>
+          <div class="sh-sub">Invite tes amis à participer !</div>
+          <div class="sh-preview">« Je viens de jouer à <strong>Sécurité Routière Vence 2026</strong> — à toi de tenter ta chance ! »</div>
+          <div class="sh-options">
+            <button class="sh-option" onclick="spShareVia('whatsapp')">
+              <div class="sh-option-icon wa">💬</div>
+              <div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
+              <div class="sh-arrow">→</div>
+            </button>
+            <button class="sh-option" onclick="spShareVia('sms')">
+              <div class="sh-option-icon sms">✉️</div>
+              <div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
+              <div class="sh-arrow">→</div>
+            </button>
+          </div>
+          
+        </div>
+        <div class="sp-toast sh-toast" id="sp-toast">✓ Lien copié !</div>
+      </div>
+
+      <!-- ─── SPIN 7 : Anti-doublon ─── -->
+      <div class="page" id="spin-7">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="ad-screen" style="background:linear-gradient(160deg,#EDE8FF 0%,#F0EDE8 100%)">
+          <div class="ad-icon">✋</div>
+          <div class="ad-title">Tu as déjà joué !</div>
+          <div class="ad-msg">Cette adresse email a déjà participé à cet événement.<br>Une seule participation par personne.</div>
+          <div class="ad-email" id="spin-ad-email">camille@exemple.fr</div>
+          <div class="ticket" style="margin:0 20px">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-title">Ton ticket</div>
+            <div class="ticket-code" id="spin-ad-code">FW-SR-2814</div>
+            <div class="ticket-hint">Présente ce ticket au stand pour récupérer ton lot</div>
+          </div>
+          <button class="ad-btn" onclick="spinGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 <script>
 
 
@@ -2595,21 +2606,16 @@ function flowinHydrateQuizmasterBonus(){
   console.log('[Flowin] qm-9 hydraté avec ' + bonusList.length + ' questions');
 }
 
-/* ── Boot standalone : pas de routing Supabase ── */
+/* Boot standalone */
 (function(){
-  /* Récupérer ?ev= si présent pour hydratation */
-  var evId = (new URLSearchParams(window.location.search)).get('ev') || '';
-  var mod  = 'spin';
-  if(evId) {
-    var H = {'apikey': FLOWIN_SUPA_ANON, 'Authorization': 'Bearer ' + FLOWIN_SUPA_ANON};
-    fetch(FLOWIN_SUPA_URL + '/rest/v1/events?id=eq.' + encodeURIComponent(evId) + '&select=*', {headers:H})
-      .then(function(r){return r.json();})
-      .then(function(rows){
-        if(rows && rows.length) {
-          FLOWIN_EVENT = rows[0];
-          try { flowinHydrateModule(rows[0]); } catch(e){}
-        }
-      }).catch(function(){});
+  var evId=(new URLSearchParams(window.location.search)).get('ev')||'';
+  if(evId){
+    var H={'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId)+'&select=*',{headers:H})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(rows&&rows.length){FLOWIN_EVENT=rows[0];try{flowinHydrateModule(rows[0]);}catch(e){}}
+    }).catch(function(){});
   }
 })();
 </script>
