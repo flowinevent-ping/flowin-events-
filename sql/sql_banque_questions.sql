@@ -1,3 +1,11 @@
+-- Colonnes manquantes dans banques (selon schéma prod)
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS nom        TEXT;
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS pro_id     TEXT;
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS event_ids  TEXT[] DEFAULT '{}';
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS questions  JSONB  DEFAULT '[]'::jsonb;
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS tags       TEXT[] DEFAULT '{}';
+ALTER TABLE public.banques ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
 -- ══════════════════════════════════════════════════════════════════
 -- FLOWIN · SEED BANQUE QUESTIONS — bq-paques-vence (40 questions)
 -- Pâques Vence 2026 · Quiz culturel sur Vence et Pâques
