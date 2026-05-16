@@ -5737,70 +5737,62 @@ function drawerEvent(e){
      if(parcoursTab==='joueur') {
        // ── Vision joueur ──
        var _qrUrl = (e.cfg && e.cfg.qrUrl) ? e.cfg.qrUrl : '';
-       var _isBtob = e.clientType === 'btob';
-       // Iframe uniquement si même domaine (chemin relatif) — URL externe bloquée par X-Frame-Options
-       var _isSameDomain = _qrUrl && !_qrUrl.startsWith('http');
-       if(_isSameDomain) {
-         // Fichier local : iframe directe
-         html += '<div style="margin-bottom:10px">';
-         html += '<div style="font-size:11px;color:var(--sa-muted);margin-bottom:12px">'
-               + '🎯 Parcours local · <code style="background:var(--sa-subtle);padding:2px 6px;border-radius:4px;font-size:10px">'
-               + esc(_qrUrl) + '</code>'
-               + ' · <a href="' + escAttr(_qrUrl) + '" target="_blank" style="color:var(--sa-accent);font-size:11px">Ouvrir ↗</a>'
-               + '</div>';
-         html += '<iframe src="' + escAttr(_qrUrl) + '" '
-               + 'style="width:100%;height:680px;border:none;border-radius:16px;'
-               + 'box-shadow:0 8px 32px rgba(0,0,0,.12);background:#F5F0FF" '
-               + 'loading="lazy" title="Parcours joueur ' + escAttr(e.nom) + '"></iframe>';
+       var _isVercel = _qrUrl && (_qrUrl.indexOf('flowin-events.vercel.app') >= 0 || !_qrUrl.startsWith('http'));
+       if(_isVercel && _qrUrl) {
+         // Même domaine Vercel ou chemin relatif → iframe phone directe
+         html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px">';
+         // Barre URL + bouton ouvrir
+         html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
+         html += '<span style="font-size:14px">📱</span>';
+         html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div>';
+         html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
          html += '</div>';
-       } else if(_isBtob || _qrUrl) {
-         // URL externe ou B2B déployé : aperçu natif + bouton ouvrir
-         html += '<div style="margin-bottom:10px">';
-         // Bannière URL avec bouton ouvrir
-         if(_qrUrl){
-           html += '<div style="display:flex;align-items:center;gap:10px;background:var(--sa-subtle);border-radius:10px;padding:10px 14px;margin-bottom:14px">';
-           html += '<span style="font-size:18px">🔗</span>';
-           html += '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.04em">URL déployée</div>';
-           html += '<div style="font-size:11px;color:var(--sa-text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div></div>';
-           html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">Ouvrir ↗</a>';
-           html += '</div>';
-         } else {
-           html += '<div style="background:#FFF7ED;border:1.5px dashed #F5A623;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">';
-           html += '<span>🚧</span>';
-           html += '<div style="flex:1">';
-           html += '<div style="font-size:11px;font-weight:800;color:#92400E">Pas encore déployé</div>';
-           html += '<div style="font-size:10px;color:#92400E;margin-top:2px">Renseignez l\'URL une fois le domaine en ligne · Wizard → Infos → URL QR · Ex : <code>https://flowin.fr/play/'+esc(e.id)+'</code></div>';
-           html += '</div>';
-           html += '<button onclick="openDrawerFor(\'event\',\''+e.id+'\',\'infos\');state.drawer.edit=true;renderDrawer()" style="flex-shrink:0;background:#F5A623;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">✏️ Configurer</button>';
-           html += '</div>';
-         }
-         // Aperçu B2B fidèle au vrai parcours flowin_v13.html
-         html += renderBtobParcoursPreview(e);
+         // Phone iframe
+         html += '<div style="width:260px;height:560px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 36px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
+         html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:90px;height:20px;background:#111;border-radius:0 0 12px 12px;z-index:2"></div>';
+         html += '<iframe src="'+escAttr(_qrUrl)+'" frameborder="0" loading="lazy" '
+               + 'style="width:100%;height:100%;border-radius:28px;background:#fff" '
+               + 'title="Parcours joueur '+escAttr(e.nom)+'"></iframe>';
+         html += '</div>';
+         html += '</div>';
+       } else if(_qrUrl) {
+         // URL externe tierce : bannière + bouton
+         html += '<div style="display:flex;align-items:center;gap:10px;background:var(--sa-subtle);border-radius:10px;padding:10px 14px;margin-bottom:14px">';
+         html += '<span style="font-size:18px">🔗</span>';
+         html += '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.04em">URL déployée</div>';
+         html += '<div style="font-size:11px;color:var(--sa-text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div></div>';
+         html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">Ouvrir ↗</a>';
          html += '</div>';
        } else {
-         // Parcours générique via wizard preview
-         var _pd = {
-           id: e.id, module: e.module, cfg: e.cfg || {},
-           nom: e.nom, couleur: e.couleur || '#7C2D92',
-           dateD: e.dateD, dateF: e.dateF, lieu: e.lieu,
-           partenaires: e.partenaires || [],
-           lots: DATA.lots.filter(function(l){ return l.eventId===e.id; })
-         };
-         if(!_pd.cfg.bonusList || !_pd.cfg.bonusList.length) {
-           _pd.cfg.bonusList = _pd.cfg.quizBonusList || [];
-         }
-         html += '<div style="margin-bottom:10px">';
-         html += '<div style="font-size:11px;color:var(--sa-muted);margin-bottom:8px">Parcours complet tel que le joueur le verra · données en direct depuis l\'event.</div>';
-         var _seqHtml = renderWizPreviewSequence(_pd, {idxKey:'parcoursPreviewIdx', rerender:'renderDrawer()'});
-         html += _seqHtml;
+         // Pas d'URL configurée
+         html += '<div style="background:#FFF7ED;border:1.5px dashed #F5A623;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">';
+         html += '<span>🚧</span><div style="flex:1"><div style="font-size:11px;font-weight:800;color:#92400E">Pas encore déployé</div>';
+         html += '<div style="font-size:10px;color:#92400E;margin-top:2px">Wizard → Infos → URL QR</div></div>';
+         html += '<button onclick="openDrawerFor(\'event\',\''+e.id+'\',\'infos\');state.drawer.edit=true;renderDrawer()" style="flex-shrink:0;background:#F5A623;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">✏️ Configurer</button>';
          html += '</div>';
        }
 
      } else {
-       // ── Vision Pro : ce que voit le Pro connecté ──
+       // ── Vision Pro : iframe phone pro_mobile + onglets + stats ──
        var _pv = e.proVisib || {};
-       html += '<div style="background:var(--sa-subtle);border-radius:12px;padding:14px;margin-bottom:12px">';
-       html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">Onglets visibles pour le Pro</div>';
+       var _proMobileUrl = 'pro_mobile.html?ev=' + encodeURIComponent(e.id);
+       // Phone iframe pro_mobile
+       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px">';
+       html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
+       html += '<span style="font-size:14px">🏢</span>';
+       html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600">Dashboard Pro · '+esc(e.nom)+'</div>';
+       html += '<a href="'+escAttr(_proMobileUrl)+'" target="_blank" style="flex-shrink:0;background:#7C2D92;color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
+       html += '</div>';
+       html += '<div style="width:260px;height:560px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 36px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
+       html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:90px;height:20px;background:#111;border-radius:0 0 12px 12px;z-index:2"></div>';
+       html += '<iframe src="'+escAttr(_proMobileUrl)+'" frameborder="0" loading="lazy" '
+             + 'style="width:100%;height:100%;border-radius:28px;background:#fff" '
+             + 'title="Dashboard Pro '+escAttr(e.nom)+'"></iframe>';
+       html += '</div>';
+       html += '</div>';
+       // Onglets visibles
+       html += '<div style="background:var(--sa-subtle);border-radius:12px;padding:12px;margin-bottom:10px">';
+       html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Onglets visibles pour le Pro</div>';
        var proTabs = [
          {key:'stats', ico:'📊', lbl:'Stats'},
          {key:'activite', ico:'🎲', lbl:'Tirage'},
@@ -5809,38 +5801,21 @@ function drawerEvent(e){
          {key:'qr', ico:'📱', lbl:'QR'},
          {key:'export', ico:'📥', lbl:'Export'}
        ];
-       html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+       html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
        proTabs.forEach(function(t) {
          var visible = _pv[t.key] !== false;
-         html += '<div style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;'
+         html += '<div style="padding:4px 9px;border-radius:7px;font-size:11px;font-weight:700;'
                + 'background:'+(visible?(e.couleur||'#7C2D92')+'18':'#F1F5F9')+';'
                + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">';
          html += t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
        });
        html += '</div>';
-       // Message de bienvenue
        if(_pv.msgBienvenue) {
-         html += '<div style="font-size:11px;color:var(--sa-muted);margin-top:4px">💬 Message bienvenue : <em>'+esc(_pv.msgBienvenue)+'</em></div>';
+         html += '<div style="font-size:11px;color:var(--sa-muted)">💬 '+esc(_pv.msgBienvenue)+'</div>';
        }
        html += '</div>';
-       // Stats Pro (ce que voit le Pro dans son dashboard)
-       html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Aperçu stats Pro</div>';
-       var _proStats = [
-         {lbl:'Participants', val:e.participants||0, color:'var(--sa-accent)'},
-         {lbl:'Opt-in', val:e.joueursOptin||0, color:'#1D9E75'},
-         {lbl:'Gagnants', val:e.gagnants||0, color:'#EF9F27'},
-         {lbl:'Lots', val:lots.length, color:'#7C2D92'}
-       ];
-       html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
-       _proStats.forEach(function(s) {
-         html += '<div style="background:#fff;border:1px solid var(--sa-border);border-radius:10px;padding:10px;text-align:center">';
-         html += '<div style="font-size:20px;font-weight:800;color:'+s.color+'">'+s.val+'</div>';
-         html += '<div style="font-size:10px;color:var(--sa-muted);font-weight:600">'+s.lbl+'</div>';
-         html += '</div>';
-       });
-       html += '</div>';
        // Bouton simuler vue Pro
-       html += '<button class="btn btn-sm" style="width:100%" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
+       html += '<button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
      }
 
   } else if(state.drawer.tab==='export'){
