@@ -5940,15 +5940,21 @@ function renderOngletJeu(e){
   };
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
+  // ── Aperçu joueur : iframe phone parcours_user.html validé ──
+  var _jeuIframeUrl = 'parcours_user.html?ev=' + encodeURIComponent(eid);
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Aperçu parcours joueur</div>';
-  // Adapter renderWizPreviewSequence pour le drawer : post-traiter les callbacks
-  var _seqHtml = (e.clientType === 'btob')
-    ? renderBtobParcoursPreview(e)
-    : renderWizPreviewSequence(_previewD);
-  _seqHtml = _seqHtml.split('renderWizard()').join('(function(){saveData();renderDrawer();})()');
-  _seqHtml = _seqHtml.split("state.wiz.draft.cfg").join("findEvent('"+eid+"').cfg");
-  html += _seqHtml;
+  html += '<div style="display:flex;flex-direction:column;align-items:center;gap:8px">';
+  html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:7px 12px">';
+  html += '<span style="font-size:13px">📱</span>';
+  html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_jeuIframeUrl+'</div>';
+  html += '<a href="'+_jeuIframeUrl+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
+  html += '</div>';
+  html += '<div style="width:240px;height:520px;background:#111;border-radius:34px;padding:8px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
+  html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:80px;height:18px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+  html += '<iframe src="'+_jeuIframeUrl+'" frameborder="0" loading="lazy" style="width:100%;height:100%;border-radius:26px;background:#fff" title="Parcours joueur"></iframe>';
+  html += '</div>';
+  html += '</div>';
   html += '</div>';
 
   return html;
