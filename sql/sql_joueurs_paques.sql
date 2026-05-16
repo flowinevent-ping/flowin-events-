@@ -5,9 +5,28 @@
 -- Idempotent — ON CONFLICT (id) DO UPDATE
 -- ══════════════════════════════════════════════════════════════════
 
--- Ajouter colonne external_id si manquante
-ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS external_id TEXT;
-CREATE UNIQUE INDEX IF NOT EXISTS joueurs_external_id_idx ON public.joueurs(external_id) WHERE external_id IS NOT NULL;
+
+-- Colonnes manquantes dans joueurs (selon schéma prod)
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS external_id   TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS prenom        TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS tel           TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS ville         TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS code_postal   TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS date_naissance DATE;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS optin_date    DATE;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS last_seen     DATE;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS first_seen    DATE;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS source        TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS score_moy     NUMERIC DEFAULT 0;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS events        TEXT[] DEFAULT '{}';
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS gains         TEXT[] DEFAULT '{}';
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS tags          TEXT[] DEFAULT '{}';
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS client_type   TEXT;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS genre         TEXT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS joueurs_external_id_idx 
+  ON public.joueurs(external_id) WHERE external_id IS NOT NULL;
+
 
 -- 186 joueurs Pâques 2026
 INSERT INTO public.joueurs (id, external_id, email, nom, prenom, tel, ville, code_postal, date_naissance, events, score_moy, optin, optin_date, last_seen, first_seen, source, tags, client_type)
