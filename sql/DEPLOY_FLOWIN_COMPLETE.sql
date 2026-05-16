@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS public.partenaires (
 CREATE TABLE IF NOT EXISTS public.banques (
   id          TEXT PRIMARY KEY,
   nom         TEXT NOT NULL,
-  pro_id      TEXT REFERENCES public.pros(id),
+  pro_id      TEXT,
   event_ids   TEXT[] DEFAULT '{}',
   questions   JSONB  DEFAULT '[]'::jsonb,
   tags        TEXT[] DEFAULT '{}',
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS public.super_events (
 );
 
 CREATE TABLE IF NOT EXISTS public.joueurs (
-  id             TEXT PRIMARY KEY,
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email          TEXT,
   nom            TEXT,
   prenom         TEXT,
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS public.joueurs (
 
 CREATE TABLE IF NOT EXISTS public.lots (
   id            TEXT PRIMARY KEY,
-  event_id      TEXT REFERENCES public.events(id),
+  event_id      TEXT,
   partenaire_id TEXT,
   nom           TEXT NOT NULL,
   valeur        NUMERIC DEFAULT 0,
@@ -128,9 +128,9 @@ CREATE TABLE IF NOT EXISTS public.lots (
 );
 
 CREATE TABLE IF NOT EXISTS public.participations (
-  id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  joueur_id     TEXT REFERENCES public.joueurs(id),
-  event_id      TEXT REFERENCES public.events(id),
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  joueur_id     UUID,
+  event_id      TEXT,
   score         INT  DEFAULT 0,
   ticket_code   TEXT,
   bonus_answers JSONB DEFAULT '{}'::jsonb,
@@ -139,9 +139,9 @@ CREATE TABLE IF NOT EXISTS public.participations (
 );
 
 CREATE TABLE IF NOT EXISTS public.votes (
-  id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  joueur_id   TEXT REFERENCES public.joueurs(id),
-  event_id    TEXT REFERENCES public.events(id),
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  joueur_id   UUID,
+  event_id    TEXT,
   section_id  TEXT,
   note        INT,
   created_at  TIMESTAMPTZ DEFAULT NOW()
