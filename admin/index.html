@@ -5735,48 +5735,27 @@ function drawerEvent(e){
      html += '</div>';
 
      if(parcoursTab==='joueur') {
-       // ── Vision joueur ──
-       var _qrUrl = (e.cfg && e.cfg.qrUrl) ? e.cfg.qrUrl : '';
-       var _isVercel = _qrUrl && (_qrUrl.indexOf('flowin-events.vercel.app') >= 0 || !_qrUrl.startsWith('http'));
-       if(_isVercel && _qrUrl) {
-         // Même domaine Vercel ou chemin relatif → iframe phone directe
-         html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px">';
-         // Barre URL + bouton ouvrir
-         html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
-         html += '<span style="font-size:14px">📱</span>';
-         html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div>';
-         html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
-         html += '</div>';
-         // Phone iframe
-         html += '<div style="width:260px;height:560px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 36px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
-         html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:90px;height:20px;background:#111;border-radius:0 0 12px 12px;z-index:2"></div>';
-         html += '<iframe src="'+escAttr(_qrUrl)+'" frameborder="0" loading="lazy" '
-               + 'style="width:100%;height:100%;border-radius:28px;background:#fff" '
-               + 'title="Parcours joueur '+escAttr(e.nom)+'"></iframe>';
-         html += '</div>';
-         html += '</div>';
-       } else if(_qrUrl) {
-         // URL externe tierce : bannière + bouton
-         html += '<div style="display:flex;align-items:center;gap:10px;background:var(--sa-subtle);border-radius:10px;padding:10px 14px;margin-bottom:14px">';
-         html += '<span style="font-size:18px">🔗</span>';
-         html += '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.04em">URL déployée</div>';
-         html += '<div style="font-size:11px;color:var(--sa-text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div></div>';
-         html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">Ouvrir ↗</a>';
-         html += '</div>';
-       } else {
-         // Pas d'URL configurée
-         html += '<div style="background:#FFF7ED;border:1.5px dashed #F5A623;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">';
-         html += '<span>🚧</span><div style="flex:1"><div style="font-size:11px;font-weight:800;color:#92400E">Pas encore déployé</div>';
-         html += '<div style="font-size:10px;color:#92400E;margin-top:2px">Wizard → Infos → URL QR</div></div>';
-         html += '<button onclick="openDrawerFor(\'event\',\''+e.id+'\',\'infos\');state.drawer.edit=true;renderDrawer()" style="flex-shrink:0;background:#F5A623;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">✏️ Configurer</button>';
-         html += '</div>';
-       }
+       // ── Vision joueur : toujours parcours_user.html?ev= (fichier validé) ──
+       var _joueurUrl = 'parcours_user.html?ev=' + encodeURIComponent(e.id);
+       var _qrUrl = (e.cfg && e.cfg.qrUrl) ? e.cfg.qrUrl : _joueurUrl;
+       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px">';
+       html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
+       html += '<span style="font-size:14px">📱</span>';
+       html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_joueurUrl)+'</div>';
+       html += '<a href="'+escAttr(_joueurUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
+       html += '</div>';
+       html += '<div style="width:260px;height:560px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 36px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
+       html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:90px;height:20px;background:#111;border-radius:0 0 12px 12px;z-index:2"></div>';
+       html += '<iframe src="'+escAttr(_joueurUrl)+'" frameborder="0" loading="lazy" '
+             + 'style="width:100%;height:100%;border-radius:28px;background:#fff" '
+             + 'title="Parcours joueur '+escAttr(e.nom)+'"></iframe>';
+       html += '</div>';
+       html += '</div>';
 
      } else {
-       // ── Vision Pro : iframe phone pro_mobile + onglets + stats ──
+       // ── Vision Pro : toujours pro_mobile.html?ev= (fichier validé) ──
        var _pv = e.proVisib || {};
        var _proMobileUrl = 'pro_mobile.html?ev=' + encodeURIComponent(e.id);
-       // Phone iframe pro_mobile
        html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px">';
        html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
        html += '<span style="font-size:14px">🏢</span>';
@@ -5790,9 +5769,6 @@ function drawerEvent(e){
              + 'title="Dashboard Pro '+escAttr(e.nom)+'"></iframe>';
        html += '</div>';
        html += '</div>';
-       // Onglets visibles
-       html += '<div style="background:var(--sa-subtle);border-radius:12px;padding:12px;margin-bottom:10px">';
-       html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Onglets visibles pour le Pro</div>';
        var proTabs = [
          {key:'stats', ico:'📊', lbl:'Stats'},
          {key:'activite', ico:'🎲', lbl:'Tirage'},
@@ -5801,21 +5777,16 @@ function drawerEvent(e){
          {key:'qr', ico:'📱', lbl:'QR'},
          {key:'export', ico:'📥', lbl:'Export'}
        ];
-       html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+       html += '<div style="background:var(--sa-subtle);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:5px">';
        proTabs.forEach(function(t) {
          var visible = _pv[t.key] !== false;
-         html += '<div style="padding:4px 9px;border-radius:7px;font-size:11px;font-weight:700;'
+         html += '<div style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;'
                + 'background:'+(visible?(e.couleur||'#7C2D92')+'18':'#F1F5F9')+';'
-               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">';
-         html += t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
+               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">'
+               + t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
        });
        html += '</div>';
-       if(_pv.msgBienvenue) {
-         html += '<div style="font-size:11px;color:var(--sa-muted)">💬 '+esc(_pv.msgBienvenue)+'</div>';
-       }
-       html += '</div>';
-       // Bouton simuler vue Pro
-       html += '<button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
+       html += '<button class="btn btn-sm" style="width:100%" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
      }
 
   } else if(state.drawer.tab==='export'){
