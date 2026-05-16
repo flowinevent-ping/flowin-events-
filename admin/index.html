@@ -5759,20 +5759,20 @@ function drawerEvent(e){
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
        var _joueurUrl = 'parcours_user.html?ev=' + encodeURIComponent(e.id) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
-       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
-       // Bannière URL
-       html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
+       // Preview statique + bouton plein écran (pas d'iframe)
+       html += '<div style="display:flex;flex-direction:column;gap:12px">';
+       html += '<div style="display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
        html += '<span style="font-size:13px">📱</span>';
        html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_joueurUrl)+'</div>';
        html += '<a href="'+escAttr(_joueurUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">↗</a>';
        html += '</div>';
-       // Bouton ouvrir modal
        html += '<button class="btn btn-primary" style="width:100%;font-size:14px;padding:13px" onclick="openJoueurModal(\''+e.id+'\',\''+escAttr(e.nom)+'\',\''+( e.module||'')+'\')">📱 Voir le parcours joueur complet →</button>';
-       // Mini iframe preview
-       html += '<div style="width:220px;height:460px;background:#111;border-radius:32px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
-       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-       html += '<iframe src="'+escAttr(_joueurUrl)+'" frameborder="0" loading="lazy" style="width:100%;height:100%;border-radius:24px;background:#fff" title="Parcours joueur"></iframe>';
-       html += '</div>';
+       // Preview statique phone
+       html += '<div class="phone-frame" style="margin:0 auto">';
+       html += '<div class="phone-bar" style="background:'+(e.couleur||'#7C2D92')+'">FLOWIN · '+esc(moduleLabel(e.module||'')||e.module)+'</div>';
+       html += '<div class="phone-screen" style="padding:0">';
+       html += renderPreviewModule(e.module, e);
+       html += '</div></div>';
        html += '</div>';
 
      } else {
@@ -5789,10 +5789,6 @@ function drawerEvent(e){
        // Bouton ouvrir modal
        html += '<button class="btn btn-primary" style="width:100%;font-size:14px;padding:13px;background:#7C2D92" onclick="openEventProModal(\''+e.id+'\',\''+escAttr(e.nom)+'\')"">🏢 Voir le dashboard Pro complet →</button>';
        // Mini iframe preview
-       html += '<div style="width:220px;height:460px;background:#111;border-radius:32px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
-       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-       html += '<iframe src="'+escAttr(_proMobileUrl)+'" frameborder="0" loading="lazy" style="width:100%;height:100%;border-radius:24px;background:#fff" title="Dashboard Pro"></iframe>';
-       html += '</div>';
        html += '</div>';
        var proTabs = [
          {key:'stats', ico:'📊', lbl:'Stats'},
@@ -5965,19 +5961,21 @@ function renderOngletJeu(e){
   };
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
-  // ── Aperçu joueur : iframe phone parcours_user.html validé ──
-  var _jeuIframeUrl = 'parcours_user.html?ev=' + encodeURIComponent(eid) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
+  // ── Aperçu joueur : preview statique HTML (pas d'iframe) ──
+  var _jeuOpenUrl = 'parcours_user.html?ev=' + encodeURIComponent(eid) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
-  html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Aperçu parcours joueur</div>';
-  html += '<div style="display:flex;flex-direction:column;align-items:center;gap:8px">';
-  html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:7px 12px">';
-  html += '<span style="font-size:13px">📱</span>';
-  html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_jeuIframeUrl+'</div>';
-  html += '<a href="'+_jeuIframeUrl+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
-  html += '</div>';
-  html += '<div style="width:240px;height:520px;background:#111;border-radius:34px;padding:8px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
-  html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:80px;height:18px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-  html += '<iframe src="'+_jeuIframeUrl+'" frameborder="0" loading="lazy" style="width:100%;height:100%;border-radius:26px;background:#fff" title="Parcours joueur"></iframe>';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em">📱 Aperçu parcours joueur</div>';
+  html += '<div style="display:flex;gap:8px">';
+  html += '<a href="'+escAttr(_jeuOpenUrl)+'" target="_blank" style="background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
+  html += '<button class="btn btn-sm" onclick="openJoueurModal(\''+e.id+'\',\''+escAttr(e.nom)+'\',\''+( e.module||'')+'\')">Plein écran</button>';
+  html += '</div></div>';
+  // Phone frame avec preview statique
+  html += '<div class="phone-frame" style="margin:0 auto;display:flex;flex-direction:column">';
+  html += '<div class="phone-bar" style="background:'+(e.couleur||'#7C2D92')+';font-family:inherit">';
+  html += 'FLOWIN · '+esc(moduleLabel(e.module||'')||'Event')+'</div>';
+  html += '<div class="phone-screen" style="padding:0">';
+  html += renderPreviewModule(e.module, e);
   html += '</div>';
   html += '</div>';
   html += '</div>';
