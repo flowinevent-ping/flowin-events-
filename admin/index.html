@@ -906,8 +906,7 @@ const TODAY = new Date('2026-05-03');
 const SEED = {
   pros: [
     {id:'pro-vence',nom:'Ville de Vence',ville:'Vence',codePostal:'06140',adresse:'Hôtel de Ville, Place du Frêne',siret:'21060157200019',secteur:'Collectivité',contact:'Service Animation',role:'Animateur événementiel',email:'animation@ville-vence.fr',tel:'04 93 58 06 58',entreeP:'2026-01-01',notes:'Client pilote Flowin · Fêtes de Pâques 2026 (186 participants)',tags:['pilote','collectivité']},
-    {id:'pro-flowin',nom:'Flowin',ville:'Nice',codePostal:'06000',adresse:'Nice, 06000',siret:'',secteur:'SaaS · Gamification',contact:'Romain Collin',role:'Fondateur',email:'contact@flowin.fr',tel:'',entreeP:'2026-05-07',notes:'Compte interne Flowin · Event démo commercial landing · Tunnel acquisition Pro',tags:['interne','demo','landing']},
-    {id:'pro-cannes',nom:'TEST Mairie de Cannes',ville:'Cannes',codePostal:'06400',adresse:'Hôtel de Ville, 1 rue Félix Faure, 06400 Cannes',siret:'21060029200019',secteur:'Collectivité',contact:'Service Culturel',role:'Animateur événementiel',email:'culture@ville-cannes.fr',tel:'04 97 06 40 00',entreeP:'2026-05-16',notes:'Compte test · Vote Concerts Riviera 2026',tags:['test','collectivité','vote']}
+    {id:'pro-flowin',nom:'Flowin',ville:'Nice',codePostal:'06000',adresse:'Nice, 06000',siret:'',secteur:'SaaS · Gamification',contact:'Romain Collin',role:'Fondateur',email:'contact@flowin.fr',tel:'',entreeP:'2026-05-07',notes:'Compte interne Flowin · Event démo commercial landing · Tunnel acquisition Pro',tags:['interne','demo','landing']}
   ],
   events: [
     {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
@@ -1009,27 +1008,7 @@ const SEED = {
       },
       stats:{}
     },
-    {id:'ev-test-vote',proId:'pro-cannes',nom:'TEST Vote Concerts Riviera',module:'vote',status:'past',dateD:'2026-09-20',dateF:'2026-09-20',hStart:'18:00',hEnd:'23:00',lieu:'Palais des Festivals',adresse:'1 Bd de la Croisette, 06400 Cannes',participants:3,gagnants:0,partenaires:[],joueursOptin:3,couleur:'#1E1B4B',description:'Vote étoiles · Test module Vote · 5 artistes à évaluer',scoreMin:0,
-      cfg:{qrUrl:'https://flowin-events.vercel.app/parcours_user.html?ev=ev-test-vote',optinActif:true,
-        voteMode:'stars',voteImgLayout:'central',voteResultatsLive:false,
-        voteSections:[
-          {titre:'The Jazz Collective',imageUrl:'',emoji:'🎷'},
-          {titre:'Maya Simone',imageUrl:'',emoji:'🎤'},
-          {titre:'Riviera Big Band',imageUrl:'',emoji:'🎺'},
-          {titre:'Les Percussions du Monde',imageUrl:'',emoji:'🥁'},
-          {titre:'Electric Sunset',imageUrl:'',emoji:'🎸'}
-        ],
-        customQuestions:[{id:'decouverte',label:'Comment avez-vous connu l\'événement ?',type:'single',options:[
-          {label:'📸 Instagram',val:'instagram'},
-          {label:'🔵 Facebook',val:'facebook'},
-          {label:'🏛 Site de la mairie',val:'mairie'},
-          {label:'📋 Affiche / Flyer',val:'affiche'},
-          {label:'🗣 Bouche à oreille',val:'bouche'}
-        ]}],
-        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:'Bienvenue sur le dashboard Concerts Riviera 2026 !',langue:'fr'}
-      },
-      stats:{ageMoyen:34,txConversion:100,txOptin:100,genre:{hommes:33,femmes:67},parJour:[{d:'20 sep',v:3}]}
-    },
+
     {id:'ev-flowin-demo',proId:'pro-flowin',nom:'Flowin — Découverte',module:'spin',status:'live',
       clientType:'btob',
       dateD:'2026-05-07',dateF:'2030-05-03',hStart:'00:00',hEnd:'23:59',
