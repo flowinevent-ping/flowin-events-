@@ -1,6 +1,7 @@
 -- Colonnes manquantes dans lots (selon schéma prod)
 ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS event_id      TEXT;
 ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS partenaire_id TEXT;
+ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS titre         TEXT;
 ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS nom           TEXT;
 ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS valeur        NUMERIC DEFAULT 0;
 ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS quantite      INT DEFAULT 1;
@@ -15,7 +16,7 @@ ALTER TABLE public.lots ADD COLUMN IF NOT EXISTS note          TEXT;
 -- Idempotent — ON CONFLICT (id) DO UPDATE
 -- ══════════════════════════════════════════════════════════════════
 
-INSERT INTO public.lots (id, event_id, partenaire_id, nom, valeur, quantite, assigne_a, retire, date_retrait, note)
+INSERT INTO public.lots (id, event_id, partenaire_id, titre, valeur, quantite, assigne_a, retire, date_retrait, note)
 VALUES
   ('lot-paques-1', 'ev-paques', NULL, 'Place Festival Nuits du Sud 2026',     0, 1, 'j-pq-02', TRUE,  '2026-04-07', 'Valable le 9, 11 ou 16 juillet 2026'),
   ('lot-paques-2', 'ev-paques', NULL, 'Place Festival Nuits du Sud 2026',     0, 1, 'j-pq-06', TRUE,  '2026-04-07', 'Valable le 9, 11 ou 16 juillet 2026'),

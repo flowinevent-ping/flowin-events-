@@ -13,6 +13,7 @@ ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS tel           TEXT;
 ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS ville         TEXT;
 ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS code_postal   TEXT;
 ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS date_naissance DATE;
+ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS optin         BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS optin_date    DATE;
 ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS last_seen     DATE;
 ALTER TABLE public.joueurs ADD COLUMN IF NOT EXISTS first_seen    DATE;
