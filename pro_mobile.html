@@ -32,6 +32,16 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden}
+/* ── Responsive desktop : simuler viewport mobile centré ── */
+@media (min-width:480px){
+  html,body{background:#E8E4DF}
+  body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:0}
+  body > *:not(#toast):not(.modal-backdrop):not(#qrModal){
+    max-width:430px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15);
+    min-height:100vh;background:var(--bg);
+    position:relative;
+  }
+}
 
 /* ── TOPBAR ── */
 .topbar{

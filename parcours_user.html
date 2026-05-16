@@ -1166,7 +1166,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 <body>
 
 <div class="preview-header">
-  <h1>Flowin · Preview v5.2</h1>
+  <h1>Flowin · Preview v5.2</h1><!-- cb-20260516 -->
   <p>Parcours participant · 6 modules de jeu</p>
   <div class="tag-row">
     <span>🎡 Spin (5 écrans)</span>
@@ -3988,9 +3988,10 @@ var FLOWIN_PRO_ID = null;
 
 /* Routage immédiat si ?module= présent (avant Supabase) */
 if(FLOWIN_MODULE_FALLBACK){
-  document.addEventListener('DOMContentLoaded', function(){
-    try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(e){}
-  });
+  /* Script dans <body> : DOM déjà chargé → exécution immédiate via setTimeout */
+  setTimeout(function(){
+    try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(e){ console.warn('[Flowin] fallback immédiat:', e); }
+  }, 0);
 }
 
 /* Fetch event au boot */
