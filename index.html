@@ -8,6 +8,99 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Flowin · Dashboard v24</title>
 <style>
+
+/* ═══ Modal aperçu parcours pro mobile ═══ */
+/* ═══════════════════════════════════════════════════════════════════ */
+/* MODAL PARCOURS PRO MOBILE                                           */
+/* ═══════════════════════════════════════════════════════════════════ */
+.pro-mobile-modal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.pmm-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+}
+.pmm-content {
+  position: relative;
+  background: var(--sa-bg, #fff);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  max-width: 95vw; max-height: 95vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  min-width: 480px;
+}
+.pmm-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--sa-border, #e5e7eb);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.pmm-title { font-size: 16px; font-weight: 800; color: var(--sa-text, #111); }
+.pmm-sub { font-size: 13px; color: var(--sa-muted, #6b7280); grid-column: 1; }
+.pmm-close {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  background: var(--sa-subtle, #f3f4f6); border: none;
+  width: 36px; height: 36px; border-radius: 50%;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.pmm-close:hover { background: var(--sa-border, #e5e7eb); }
+.pmm-body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  overflow: auto;
+}
+.pmm-phone {
+  width: 380px; height: 780px;
+  background: #000;
+  border-radius: 44px;
+  padding: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18), inset 0 0 0 2px #1f2937;
+  position: relative;
+  flex-shrink: 0;
+}
+.pmm-phone-notch {
+  position: absolute;
+  top: 12px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 24px;
+  background: #000; border-radius: 0 0 16px 16px;
+  z-index: 2;
+}
+.pmm-phone iframe {
+  width: 100%; height: 100%;
+  border-radius: 32px;
+  background: #fff;
+}
+.pmm-actions {
+  display: flex; flex-direction: column;
+  gap: 12px; align-items: flex-start;
+  align-self: start;
+  padding-top: 8px;
+}
+.pmm-url-display {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--sa-muted, #6b7280);
+  background: var(--sa-subtle, #f3f4f6);
+  padding: 8px 12px;
+  border-radius: 8px;
+  word-break: break-all;
+  max-width: 320px;
+}
+@media (max-width: 900px){
+  .pmm-body { grid-template-columns: 1fr; }
+  .pmm-phone { width: 320px; height: 680px; }
+}
+
+
 :root{
   --sa-bg:#F1F5F9;--sa-card:#FFFFFF;--sa-border:#E2E8F0;--sa-text:#0F172A;--sa-muted:#64748B;
   --sa-subtle:#F8FAFC;--sa-sb-bg:#1E293B;--sa-sb-bg-2:#172033;--sa-sb-hover:rgba(255,255,255,.06);
@@ -915,6 +1008,7 @@ const SEED = {
       },
       stats:{}
     },
+
     {id:'ev-flowin-demo',proId:'pro-flowin',nom:'Flowin — Découverte',module:'spin',status:'live',
       clientType:'btob',
       dateD:'2026-05-07',dateF:'2030-05-03',hStart:'00:00',hEnd:'23:59',
@@ -1663,10 +1757,10 @@ async function supaWriteJoueur(j){
 // Upsert event → Supabase + GAS fallback
 async function supaWriteEvent(e){
   if(!e || !e.id) return;
-  // Génération auto qrUrl si manquant
-  if(e.cfg && !e.cfg.qrUrl){
-    e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
-  }
+  // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
+  // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
+  if(!e.cfg) e.cfg = {};
+  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
@@ -1719,6 +1813,7 @@ async function supaWritePartenaire(p){
     id: p.id, nom: p.nom, type: p.type||'Local',
     secteur: p.secteur||'', contact: p.contact||'',
     role: p.role||'', email: p.email||'', tel: p.tel||'',
+    url: p.url || '',
     ville: p.ville||'', code_postal: p.codePostal||'',
     adresse: p.adresse||'', siret: p.siret||'',
     contrat: p.contrat||'', notes: p.notes||'',
@@ -3258,7 +3353,7 @@ function drawerPro(p){
   if(state.drawer.edit){
     html += drawerFooter('<button class="btn" onclick="cancelEdit()">Annuler</button><button class="btn btn-primary" onclick="saveEdit()">✓ Enregistrer</button>');
   } else {
-    html += drawerFooter('<button class="btn btn-danger btn-sm" onclick="confirmDanger(\'Archiver ce pro ?\',\'Le pro sera archivé. Les events liés ne sont pas supprimés.\',()=>archivePro(\''+p.id+'\'),\'Archiver\')">🗑 Archiver</button><button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>');
+    html += drawerFooter('<button class="btn btn-danger btn-sm" onclick="confirmDanger(\'Archiver ce pro ?\',\'Le pro sera archivé. Les events liés ne sont pas supprimés.\',()=>archivePro(\''+p.id+'\'),\'Archiver\')">🗑 Archiver</button><button class="btn btn-sm" onclick="openProMobileModal(\''+p.id+'\')">📱 Aperçu mobile</button><button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>');
   }
   return html;
 }
@@ -3514,7 +3609,8 @@ function renderBiblioJoueurs(){
   `;
 
   let html = '<div class="page">';
-  html += '<style>'+xtraCss+'</style>';
+  html += `<style>${xtraCss}
+</style>`;
 
   // En-tête page
   html += '<div class="page-header">'
@@ -4246,7 +4342,7 @@ function renderBiblioPartenaires(){
 }
 function newPartenaire(){
   const id = newId('pt');
-  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''};
+  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',url:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''};
   DATA.partenaires.unshift(nouveauPt);
   saveData();
   supaWritePartenaire(nouveauPt);
@@ -4284,6 +4380,7 @@ function drawerPartner(p){
       html += fieldInput('Rôle','role',f.role);
       html += fieldInput('Email','email',f.email,'email');
       html += fieldInput('Téléphone','tel',f.tel,'tel');
+      html += fieldInput('Site web (URL)','url',f.url||'','url');
       html += '<div class="section-h">Notes</div>';
       html += fieldInput('Notes internes','notes',f.notes,'textarea');
     } else {
@@ -4297,6 +4394,7 @@ function drawerPartner(p){
       html += fieldRow('Rôle',esc(p.role||'-'));
       html += fieldRow('Email',p.email?'<a href="mailto:'+escAttr(p.email)+'">'+esc(p.email)+'</a>':'-');
       html += fieldRow('Téléphone',p.tel?'<a href="tel:'+escAttr(p.tel)+'">'+esc(p.tel)+'</a>':'-');
+      html += fieldRow('Site web',p.url?'<a href="'+escAttr(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>':'-');
       html += '<div class="section-h">Notes</div>';
       html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.notes||'-')+'</div>';
     }
@@ -5638,72 +5736,41 @@ function drawerEvent(e){
      html += '</div>';
 
      if(parcoursTab==='joueur') {
-       // ── Vision joueur ──
-       var _qrUrl = (e.cfg && e.cfg.qrUrl) ? e.cfg.qrUrl : '';
-       var _isBtob = e.clientType === 'btob';
-       // Iframe uniquement si même domaine (chemin relatif) — URL externe bloquée par X-Frame-Options
-       var _isSameDomain = _qrUrl && !_qrUrl.startsWith('http');
-       if(_isSameDomain) {
-         // Fichier local : iframe directe
-         html += '<div style="margin-bottom:10px">';
-         html += '<div style="font-size:11px;color:var(--sa-muted);margin-bottom:12px">'
-               + '🎯 Parcours local · <code style="background:var(--sa-subtle);padding:2px 6px;border-radius:4px;font-size:10px">'
-               + esc(_qrUrl) + '</code>'
-               + ' · <a href="' + escAttr(_qrUrl) + '" target="_blank" style="color:var(--sa-accent);font-size:11px">Ouvrir ↗</a>'
-               + '</div>';
-         html += '<iframe src="' + escAttr(_qrUrl) + '" '
-               + 'style="width:100%;height:680px;border:none;border-radius:16px;'
-               + 'box-shadow:0 8px 32px rgba(0,0,0,.12);background:#F5F0FF" '
-               + 'loading="lazy" title="Parcours joueur ' + escAttr(e.nom) + '"></iframe>';
-         html += '</div>';
-       } else if(_isBtob || _qrUrl) {
-         // URL externe ou B2B déployé : aperçu natif + bouton ouvrir
-         html += '<div style="margin-bottom:10px">';
-         // Bannière URL avec bouton ouvrir
-         if(_qrUrl){
-           html += '<div style="display:flex;align-items:center;gap:10px;background:var(--sa-subtle);border-radius:10px;padding:10px 14px;margin-bottom:14px">';
-           html += '<span style="font-size:18px">🔗</span>';
-           html += '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.04em">URL déployée</div>';
-           html += '<div style="font-size:11px;color:var(--sa-text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div></div>';
-           html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">Ouvrir ↗</a>';
-           html += '</div>';
-         } else {
-           html += '<div style="background:#FFF7ED;border:1.5px dashed #F5A623;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">';
-           html += '<span>🚧</span>';
-           html += '<div style="flex:1">';
-           html += '<div style="font-size:11px;font-weight:800;color:#92400E">Pas encore déployé</div>';
-           html += '<div style="font-size:10px;color:#92400E;margin-top:2px">Renseignez l\'URL une fois le domaine en ligne · Wizard → Infos → URL QR · Ex : <code>https://flowin.fr/play/'+esc(e.id)+'</code></div>';
-           html += '</div>';
-           html += '<button onclick="openDrawerFor(\'event\',\''+e.id+'\',\'infos\');state.drawer.edit=true;renderDrawer()" style="flex-shrink:0;background:#F5A623;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">✏️ Configurer</button>';
-           html += '</div>';
-         }
-         // Aperçu B2B fidèle au vrai parcours flowin_v13.html
-         html += renderBtobParcoursPreview(e);
-         html += '</div>';
-       } else {
-         // Parcours générique via wizard preview
-         var _pd = {
-           id: e.id, module: e.module, cfg: e.cfg || {},
-           nom: e.nom, couleur: e.couleur || '#7C2D92',
-           dateD: e.dateD, dateF: e.dateF, lieu: e.lieu,
-           partenaires: e.partenaires || [],
-           lots: DATA.lots.filter(function(l){ return l.eventId===e.id; })
-         };
-         if(!_pd.cfg.bonusList || !_pd.cfg.bonusList.length) {
-           _pd.cfg.bonusList = _pd.cfg.quizBonusList || [];
-         }
-         html += '<div style="margin-bottom:10px">';
-         html += '<div style="font-size:11px;color:var(--sa-muted);margin-bottom:8px">Parcours complet tel que le joueur le verra · données en direct depuis l\'event.</div>';
-         var _seqHtml = renderWizPreviewSequence(_pd, {idxKey:'parcoursPreviewIdx', rerender:'renderDrawer()'});
-         html += _seqHtml;
-         html += '</div>';
-       }
+       // ── Vision joueur : modal plein écran parcours_user.html validé ──
+       var _joueurUrl = (e.module ? '/module_' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(e.id) : '/parcours_user.html?ev=' + encodeURIComponent(e.id));
+       html += '<div style="display:flex;flex-direction:column;gap:10px">';
+       html += '<div style="display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
+       html += '<span style="font-size:12px">📱</span>';
+       html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_joueurUrl)+'</div>';
+       html += '<a href="'+escAttr(_joueurUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">↗</a>';
+       html += '</div>';
+       html += '<button class="btn btn-primary" style="width:100%;padding:11px" onclick="openJoueurModal(\''+e.id+'\',\''+escAttr(e.nom)+'\',\''+( e.module||'')+'\')">⛶ Plein écran</button>';
+       html += '<div style="display:flex;justify-content:center">';
+       html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2),inset 0 0 0 2px #333;position:relative">';
+       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+       html += '<iframe src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none" title="Parcours joueur"></iframe>';
+       html += '</div></div>';
+       html += '</div>';
 
      } else {
-       // ── Vision Pro : ce que voit le Pro connecté ──
+       // ── Vision Pro : modal plein écran pro_mobile.html validé ──
        var _pv = e.proVisib || {};
-       html += '<div style="background:var(--sa-subtle);border-radius:12px;padding:14px;margin-bottom:12px">';
-       html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">Onglets visibles pour le Pro</div>';
+       var _proMobileUrl = 'pro_mobile.html?ev=' + encodeURIComponent(e.id);
+       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
+       // Bannière URL
+       html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
+       html += '<span style="font-size:13px">🏢</span>';
+       html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_proMobileUrl)+'</div>';
+       html += '<a href="'+escAttr(_proMobileUrl)+'" target="_blank" style="flex-shrink:0;background:#7C2D92;color:#fff;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">↗</a>';
+       html += '</div>';
+       // Bouton ouvrir modal
+       html += '<button class="btn btn-primary" style="width:100%;padding:11px;background:#7C2D92" onclick="openEventProModal(\''+e.id+'\',\''+escAttr(e.nom)+'\')"">⛶ Plein écran Pro</button>';
+       html += '<div style="display:flex;justify-content:center">';
+       html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2),inset 0 0 0 2px #333;position:relative">';
+       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+       html += '<iframe src="'+escAttr(_proMobileUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none" title="Dashboard Pro"></iframe>';
+       html += '</div></div>';
+       html += '</div>';
        var proTabs = [
          {key:'stats', ico:'📊', lbl:'Stats'},
          {key:'activite', ico:'🎲', lbl:'Tirage'},
@@ -5712,37 +5779,15 @@ function drawerEvent(e){
          {key:'qr', ico:'📱', lbl:'QR'},
          {key:'export', ico:'📥', lbl:'Export'}
        ];
-       html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+       html += '<div style="background:var(--sa-subtle);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:5px">';
        proTabs.forEach(function(t) {
          var visible = _pv[t.key] !== false;
-         html += '<div style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;'
+         html += '<div style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;'
                + 'background:'+(visible?(e.couleur||'#7C2D92')+'18':'#F1F5F9')+';'
-               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">';
-         html += t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
+               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">'
+               + t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
        });
        html += '</div>';
-       // Message de bienvenue
-       if(_pv.msgBienvenue) {
-         html += '<div style="font-size:11px;color:var(--sa-muted);margin-top:4px">💬 Message bienvenue : <em>'+esc(_pv.msgBienvenue)+'</em></div>';
-       }
-       html += '</div>';
-       // Stats Pro (ce que voit le Pro dans son dashboard)
-       html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Aperçu stats Pro</div>';
-       var _proStats = [
-         {lbl:'Participants', val:e.participants||0, color:'var(--sa-accent)'},
-         {lbl:'Opt-in', val:e.joueursOptin||0, color:'#1D9E75'},
-         {lbl:'Gagnants', val:e.gagnants||0, color:'#EF9F27'},
-         {lbl:'Lots', val:lots.length, color:'#7C2D92'}
-       ];
-       html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
-       _proStats.forEach(function(s) {
-         html += '<div style="background:#fff;border:1px solid var(--sa-border);border-radius:10px;padding:10px;text-align:center">';
-         html += '<div style="font-size:20px;font-weight:800;color:'+s.color+'">'+s.val+'</div>';
-         html += '<div style="font-size:10px;color:var(--sa-muted);font-weight:600">'+s.lbl+'</div>';
-         html += '</div>';
-       });
-       html += '</div>';
-       // Bouton simuler vue Pro
        html += '<button class="btn btn-sm" style="width:100%" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
      }
 
@@ -5897,15 +5942,16 @@ function renderOngletJeu(e){
   };
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
+  // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
+  var _jeuOpenUrl = (e.module ? '/module_' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(eid) : '/parcours_user.html?ev=' + encodeURIComponent(eid));
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
-  html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Aperçu parcours joueur</div>';
-  // Adapter renderWizPreviewSequence pour le drawer : post-traiter les callbacks
-  var _seqHtml = (e.clientType === 'btob')
-    ? renderBtobParcoursPreview(e)
-    : renderWizPreviewSequence(_previewD);
-  _seqHtml = _seqHtml.split('renderWizard()').join('(function(){saveData();renderDrawer();})()');
-  _seqHtml = _seqHtml.split("state.wiz.draft.cfg").join("findEvent('"+eid+"').cfg");
-  html += _seqHtml;
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em">📱 Parcours joueur · toutes les pages</div>';
+  html += '<div style="display:flex;gap:6px">';
+  html += '<a href="'+escAttr(_jeuOpenUrl)+'" target="_blank" style="background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
+  html += '<button class="btn btn-sm" onclick="openJoueurModal(\''+e.id+'\',\''+escAttr(e.nom)+'\',\''+( e.module||'')+'\')">⛶ Plein écran</button>';
+  html += '</div></div>';
+  html += renderWizPreviewSequence(_previewD, {idxKey:'parcoursPreviewIdx', rerender:'renderDrawer()'});
   html += '</div>';
 
   return html;
@@ -5980,6 +6026,9 @@ function newSuperEvent(){
   const today = fmtDateInput(new Date().toISOString());
   DATA.superEvents.unshift({id,nom:'Nouveau Super Event',pros:[],events:[],dateD:today,dateF:today,status:'upcoming',description:'',tirageGlobal:false,nbGagnantsFinal:0});
   saveData();
+  // 🔄 Sync Supabase
+  var _newSe = DATA.superEvents.find(function(s){return s.id===id;});
+  if(_newSe) supaWriteSuperEvent(_newSe);
   toast('Super Event créé · complétez les infos','success');
   openDrawerForEdit('superEvent',id);
 }
@@ -6378,29 +6427,17 @@ function renderBiblioJeux(){
 
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
-  html += '<div class="section-h">📱 Aperçu joueur</div>';
-  html += '<div class="phone-frame" style="max-width:240px;margin:0 auto">';
-  html += '<div class="phone-screen">';
-  html += '<div class="phone-bar" style="background:'+accent+'">FLOWIN · '+(mDef?esc(mDef.nom):'')+'</div>';
-  // Créer un event factice pour la preview
-  var fakeEvent = {id:'preview',module:tab,nom:mDef?mDef.nom:'',couleur:accent,cfg:cfg};
-  html += renderPreviewModule(tab, jeuObj||fakeEvent);
-  html += '</div></div>';
-
-  // Info parcours sous la preview
-  html += '<div style="margin-top:12px;font-size:10px;color:var(--sa-muted);line-height:1.7;padding:8px 10px;background:var(--sa-subtle);border-radius:8px">';
-  if(tab==='quiz'||tab==='quizsolo'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. '+(cfg.quizNbQuestions||5)+' questions · timer '+(cfg.quizTimer||30)+'s<br>'+(cfg.quizBonus!==false?'4. Bonus (+1 ticket)<br>5. Score + tickets':'4. Score');
-  } else if(tab==='spin'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. Spin roulette · '+(cfg.spinDuration||6)+'s<br>4. Résultat '+(cfg.spinModeTirage==='B'?'→ ticket tirage':'immédiat');
-  } else if(tab==='vote'){
-    html += '1. Landing → 2. Vote '+(cfg.voteMode==='yn'?'Oui/Non':'étoiles 1→5')+'<br>3. '+(cfg.voteResultatsLive?'Résultats live':'Résultats cachés');
-  } else if(tab==='tombola'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. Confirmation → tirage au sort';
-  } else if(tab==='standup'){
-    html += '1. Vote étoiles 1→5 par artiste<br>2. Podium final';
-  }
+  // ── Parcours complet validé : iframe parcours_user.html ──
+  var _masterUrl = '/module_' + encodeURIComponent(tab) + '.html';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html += '<div class="section-h" style="margin:0">📱 Parcours joueur · complet</div>';
+  html += '<a href="'+escAttr(_masterUrl)+'" target="_blank" style="background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
   html += '</div>';
+  html += '<div style="display:flex;justify-content:center">';
+  html += '<div style="width:260px;height:540px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #333;position:relative">';
+  html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:80px;height:18px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+  html += '<iframe src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:28px;border:none" title="Parcours '+escAttr(tab)+'"></iframe>';
+  html += '</div></div>';
   html += '</div>'; // fin colonne droite
 
   html += '</div>'; // fin grid 2 colonnes
@@ -6810,7 +6847,9 @@ function saveLot(lotId, eventId){
     var newL = {id:newId('lot'),eventId:eventId,partenaireId:f.partenaireId,nom:f.nom,valeur:f.valeur,quantite:f.quantite||1,assigneA:'',retire:false,dateRetrait:'',dateAssign:''};
     DATA.lots.push(newL);
   }
-  saveData(); closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
+  saveData();
+  // 🔄 Sync Supabase
+  try { var _lot = DATA.lots.find(function(l){return l.id===lotId;}); if(_lot) supaWriteLot(_lot); } catch(e){} closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
 }
 
 function assignLotModal(lotId){
@@ -8229,6 +8268,16 @@ function lancerTirage(eventId){
   // 5. Mettre à jour le compteur gagnants de l'event
   ev.gagnants = (ev.gagnants||0) + nbTirer;
   saveData();
+  // 🔄 Sync Supabase : les lots assignés et joueurs gagnants
+  try {
+    var _evLots = DATA.lots.filter(function(l){return l.eventId===eventId && l.assigneA;});
+    _evLots.forEach(function(l){ supaWriteLot(l); });
+    var _winnerIds = _evLots.map(function(l){return l.assigneA;});
+    var _winners = DATA.joueurs.filter(function(j){return _winnerIds.indexOf(j.id)>=0;});
+    _winners.forEach(function(j){ supaWriteJoueur(j); });
+    var _ev = DATA.events.find(function(e){return e.id===eventId;});
+    if(_ev) supaWriteEvent(_ev);
+  } catch(e){ console.warn("[sync tirage]",e); }
 
   toast('🎉 Tirage terminé · '+nbTirer+' gagnant'+(nbTirer>1?'s':'')+' désignés','success');
   // Re-render pour afficher les billets
@@ -8318,6 +8367,9 @@ function wizCreateBanque(){
   if(!state.wiz.expandedBanques) state.wiz.expandedBanques = {};
   state.wiz.expandedBanques[id] = true;
   saveData();
+  // 🔄 Sync Supabase
+  var _newBq = DATA.banques.find(function(b){return b.id===id;});
+  if(_newBq) supaWriteBanque(_newBq);
   toast('Banque "'+nom+'" créée','success');
   renderWizard();
 }
@@ -9882,8 +9934,8 @@ function preprodCleanup() {
 
 // ============ SUPABASE CONFIG ============
 // Credentials Supabase (publishable key - publique par design)
-const FLOWIN_SUPA_URL_DEFAULT = 'https://atddutvzklcgiqxlpvla.supabase.co';
-const FLOWIN_SUPA_ANON_DEFAULT = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+const FLOWIN_SUPA_URL_DEFAULT = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+const FLOWIN_SUPA_ANON_DEFAULT = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
 let FLOWIN_SUPA_URL = localStorage.getItem('flowin_supa_url') || FLOWIN_SUPA_URL_DEFAULT;
 let FLOWIN_SUPA_ANON = localStorage.getItem('flowin_supa_anon') || FLOWIN_SUPA_ANON_DEFAULT;
 // Persister automatiquement
@@ -10057,7 +10109,172 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
   }
 });
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* MODAL PARCOURS PRO MOBILE                                           */
+/* ═══════════════════════════════════════════════════════════════════ */
+/* ── Modal Joueur : parcours_user.html?ev=&module= ── */
+function openJoueurModal(evId, evNom, module){
+  var modal = document.getElementById('joueurModal');
+  var iframe = document.getElementById('jmIframe');
+  var sub = document.getElementById('jmSub');
+  var openLink = document.getElementById('jmOpenLink');
+  var urlDisp = document.getElementById('jmUrlDisplay');
+  if(!modal||!iframe) return;
+  var url = 'parcours_user.html?ev='+encodeURIComponent(evId)+(module?'&module='+encodeURIComponent(module):'');
+  sub.textContent = evNom + (module?' · '+module:'');
+  iframe.src = url;
+  if(openLink) openLink.href = url;
+  if(urlDisp) urlDisp.textContent = url;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeJoueurModal(){
+  var modal = document.getElementById('joueurModal');
+  var iframe = document.getElementById('jmIframe');
+  if(!modal) return;
+  modal.style.display = 'none';
+  if(iframe) iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+/* ── Modal Pro Event : pro_mobile.html?ev= ── */
+function openEventProModal(evId, evNom){
+  var modal = document.getElementById('proMobileModal');
+  var iframe = document.getElementById('pmmIframe');
+  var sub = document.getElementById('pmmSub');
+  var urlDisp = document.getElementById('pmmUrlDisplay');
+  var openLink = document.getElementById('pmmOpenLink');
+  if(!modal||!iframe) return;
+  var url = 'pro_mobile.html?ev='+encodeURIComponent(evId);
+  if(sub) sub.textContent = evNom || evId;
+  iframe.src = url;
+  if(openLink) openLink.href = url;
+  if(urlDisp) urlDisp.textContent = url;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function openProMobileModal(proId){
+  if(!proId) { console.warn('[Flowin] openProMobileModal: proId vide'); return; }
+  var pro = (typeof findPro === 'function') ? findPro(proId) : null;
+  var proNom = pro ? pro.nom : proId;
+  var modal = document.getElementById('proMobileModal');
+  var iframe = document.getElementById('pmmIframe');
+  var sub = document.getElementById('pmmSub');
+  var urlDisp = document.getElementById('pmmUrlDisplay');
+  var openLink = document.getElementById('pmmOpenLink');
+  if(!modal || !iframe) return;
+  
+  /* Construction de l'URL : relative pour preview locale, absolue pour partage */
+  var localUrl = 'pro_mobile.html?pro=' + encodeURIComponent(proId);
+  var origin = window.location.origin && window.location.origin !== 'null'
+               ? window.location.origin
+               : 'https://flowin-events.vercel.app';
+  var fullUrl = origin + '/' + localUrl;
+  
+  sub.textContent = proNom + ' · ' + proId;
+  iframe.src = localUrl;
+  urlDisp.textContent = fullUrl;
+  openLink.href = fullUrl;
+  
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  /* Mémoriser pour la copie */
+  modal.dataset.url = fullUrl;
+}
+
+function closeProMobileModal(){
+  var modal = document.getElementById('proMobileModal');
+  var iframe = document.getElementById('pmmIframe');
+  if(!modal) return;
+  modal.style.display = 'none';
+  if(iframe) iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+function pmmCopyLink(){
+  var modal = document.getElementById('proMobileModal');
+  var url = (modal && modal.dataset.url) || '';
+  if(!url) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){
+      if(typeof toast === 'function') toast('Lien copié dans le presse-papier');
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    if(typeof toast === 'function') toast('Lien copié');
+  }
+}
+
+/* Échap pour fermer */
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    var modal = document.getElementById('proMobileModal');
+    if(modal && modal.style.display !== 'none') closeProMobileModal();
+    var jm = document.getElementById('joueurModal');
+    if(jm && jm.style.display !== 'none') closeJoueurModal();
+  }
+});
+
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- MODAL PARCOURS JOUEUR (parcours_user.html?ev=&module=)              -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="joueurModal" class="pro-mobile-modal" style="display:none">
+  <div class="pmm-backdrop" onclick="closeJoueurModal()"></div>
+  <div class="pmm-content">
+    <div class="pmm-header">
+      <div class="pmm-title">📱 Parcours Joueur</div>
+      <div class="pmm-sub" id="jmSub">—</div>
+      <button class="pmm-close" onclick="closeJoueurModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="pmm-body">
+      <div class="pmm-phone">
+        <div class="pmm-phone-notch"></div>
+        <iframe id="jmIframe" src="about:blank" frameborder="0"
+                allow="clipboard-write"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="pmm-actions">
+        <a id="jmOpenLink" href="#" target="_blank" class="btn btn-primary">↗ Ouvrir dans un nouvel onglet</a>
+        <div class="pmm-url-display" id="jmUrlDisplay">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARCOURS PRO MOBILE (aperçu live de pro_mobile.html)          -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="proMobileModal" class="pro-mobile-modal" style="display:none">
+  <div class="pmm-backdrop" onclick="closeProMobileModal()"></div>
+  <div class="pmm-content">
+    <div class="pmm-header">
+      <div class="pmm-title">📱 Aperçu Parcours PRO Mobile</div>
+      <div class="pmm-sub" id="pmmSub">—</div>
+      <button class="pmm-close" onclick="closeProMobileModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="pmm-body">
+      <div class="pmm-phone">
+        <div class="pmm-phone-notch"></div>
+        <iframe id="pmmIframe" src="about:blank" frameborder="0"
+                allow="clipboard-write"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="pmm-actions">
+        <a id="pmmOpenLink" href="#" target="_blank" class="btn btn-primary">↗ Ouvrir dans un nouvel onglet</a>
+        <button class="btn" onclick="pmmCopyLink()">📋 Copier le lien</button>
+        <div class="pmm-url-display" id="pmmUrlDisplay">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 <!-- cache bust 1778541793 -->
