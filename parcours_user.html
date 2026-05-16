@@ -940,19 +940,241 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .qm-form-source-chip {background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
 .qm-form-source-chip:hover {transform:translateY(-1px)}
 .qm-form-source-chip.sel {background:#D4537E;color:#fff;border-color:#D4537E;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* MODULE TOMBOLA — Nuits du Sud 2026                                  */
+/* Palette : amber/or sur fond festival sombre                         */
+/* ═══════════════════════════════════════════════════════════════════ */
+.tb-viewport{background:linear-gradient(160deg,#1A1033 0%,#2D1B69 50%,#1A1033 100%)}
+.tb-landing{padding:32px 22px 22px;text-align:center;color:#fff}
+.tb-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:100px;padding:5px 14px;font-size:10px;font-weight:900;color:#FCD34D;margin-bottom:16px;text-transform:uppercase;letter-spacing:.1em;border:1px solid rgba(252,211,77,.3)}
+.tb-logo{width:84px;height:84px;border-radius:26px;margin:0 auto 14px;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 12px 30px rgba(245,158,11,.4)}
+.tb-title{font-family:'Fredoka One',cursive;font-size:26px;line-height:1.1;margin-bottom:8px;color:#FCD34D}
+.tb-sub{font-size:12px;font-weight:800;opacity:.85;margin-bottom:18px;line-height:1.5;color:#E0E7FF}
+.tb-lots{background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(252,211,77,.2);border-radius:16px;padding:12px 14px;text-align:left;margin-bottom:14px}
+.tb-lot-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.tb-lot-row:last-child{border-bottom:none}
+.tb-lot-ico{width:32px;height:32px;border-radius:10px;background:rgba(252,211,77,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tb-lot-name{font-size:12px;font-weight:900;color:#FCD34D;margin-bottom:2px}
+.tb-lot-hint{font-size:11px;font-weight:700;color:rgba(255,255,255,.6)}
+.tb-draw-date{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);background:rgba(252,211,77,.1);border-radius:10px;padding:8px 12px;border:1px solid rgba(252,211,77,.2)}
+.tb-btn-primary{background:linear-gradient(135deg,#F59E0B,#D97706);color:#1A1033;font-family:'Fredoka One',cursive;font-size:15px;border:none;border-radius:100px;cursor:pointer;box-shadow:0 10px 28px rgba(245,158,11,.4)}
+.tb-confirm-hero{background:linear-gradient(135deg,#1A1033,#2D1B69);padding:30px 22px 20px;text-align:center;color:#fff}
+.tb-confirm-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(252,211,77,.15);border-radius:100px;padding:5px 14px;font-size:9px;font-weight:900;color:#FCD34D;margin-bottom:10px;text-transform:uppercase;letter-spacing:.1em;border:1px solid rgba(252,211,77,.3)}
+.tb-confirm-title{font-family:'Fredoka One',cursive;font-size:24px;color:#FCD34D;margin-bottom:4px}
+.tb-confirm-sub{font-size:12px;font-weight:800;color:rgba(255,255,255,.7)}
+.tb-source-chip{background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1A1033;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.tb-source-chip.sel{background:#F59E0B;color:#1A1033;border-color:#F59E0B;box-shadow:0 3px 10px rgba(245,158,11,.3)}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* QUIZMASTER CSS — clone de Pâques avec couleurs adaptées             */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TÉLÉPHONE #2 — Pâques Hybride (couleurs prod + typo Fredoka)        */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Palette Pâques réelle (from index.html prod) */
+.quizmaster-viewport{background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%)}
+/* Landing Pâques */
+.qm-landing{padding:28px 22px 20px;text-align:center}
+.qm-ville{font-size:9px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.18em;margin-bottom:14px}
+.qm-title{font-family:'Fredoka One',cursive;font-size:46px;color:#6366F1;line-height:.95;margin-bottom:12px;letter-spacing:-.01em}
+.qm-dates{font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:#A855F7;letter-spacing:.03em;margin-bottom:16px}
+.qm-emojis{font-size:24px;letter-spacing:10px;opacity:.55}
+.qm-bande{height:4px;background:linear-gradient(90deg,#6366F1,#A855F7,#1D9E75,#AFA9EC,#6366F1)}
+/* Section Lots */
+.qm-lots-wrap{padding:16px 18px 0}
+.qm-lots-label{font-size:9px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.qm-lots-label::before{content:'';width:8px;height:8px;border-radius:50%;background:#6366F1}
+.qm-lot-row{background:rgba(255,255,255,.9);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(212,83,126,.12);box-shadow:0 1px 4px rgba(212,83,126,.08)}
+.qm-lot-ico{width:34px;height:34px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.qm-lot-body{flex:1;min-width:0}
+.qm-lot-desc{font-size:14px;font-weight:800;color:#312E81}
+.qm-lot-val{font-size:11px;font-weight:700;color:#1D9E75;margin-top:1px}
+.qm-tirage{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#72243E;margin-bottom:14px;padding-top:10px;border-top:1px solid rgba(212,83,126,.12);margin-top:6px}
+/* CTA Pâques */
+.qm-cta-wrap{padding:0 18px 10px}
+.qm-cta{width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:16px;border:none;border-radius:16px;cursor:pointer;letter-spacing:.01em;box-shadow:0 8px 22px rgba(212,83,126,.3)}
+.qm-cta-hint{text-align:center;font-size:10px;color:#bbb;margin-top:7px;font-weight:700}
+/* Footer attribution */
+.qm-footer{text-align:center;padding:14px 0 22px;border-top:1px solid rgba(212,83,126,.1);margin-top:10px}
+.qm-footer-txt{font-size:9px;color:#ccc;letter-spacing:.06em;font-weight:700}
+/* Quiz Pâques */
+.qm-quiz-screen{min-height:100%;background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%);padding-top:12px}
+.qm-quiz-progress{padding:14px 20px}
+.qm-quiz-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qm-quiz-step-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.1em}
+.qm-quiz-step-dots{display:flex;gap:5px}
+.qm-quiz-dot{width:22px;height:4px;border-radius:100px;background:rgba(212,83,126,.2)}
+.qm-quiz-dot.active{background:#6366F1}
+.qm-quiz-dot.done{background:#1D9E75}
+.qm-quiz-body{padding:14px 20px 20px}
+.qm-quiz-num{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
+.qm-quiz-question{font-family:'Fredoka One',cursive;font-size:21px;color:#312E81;line-height:1.25;margin-bottom:20px}
+.qm-quiz-options{display:flex;flex-direction:column;gap:10px}
+.qm-quiz-opt{background:#fff;border:1.5px solid #BFDBFE;border-radius:13px;padding:14px 16px;font-size:14px;font-weight:800;color:#1a1a2e;cursor:pointer;text-align:left;width:100%;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);font-family:'Nunito',sans-serif}
+.qm-quiz-opt:hover{transform:translateY(-1px)}
+.qm-quiz-opt.sel{background:#fff;color:#3B5CC4;border-color:#3B5CC4;border-width:2px;box-shadow:0 0 0 3px rgba(59,92,196,.15)}
+.qm-quiz-opt.correct{background:#F0FDF4;color:#16A34A;border-color:#22C55E;cursor:default}
+.qm-quiz-opt.wrong{background:#EFF6FF;color:#3B82F6;border-color:#60A5FA;cursor:default}
+.qm-quiz-opt.neutral{background:#F9FAFB;color:#9CA3AF;border-color:#E5E7EB;cursor:default}
+.qm-quiz-feedback{margin-top:14px;border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px}
+.qm-quiz-feedback.ok{background:#F0FDF4;border:1.5px solid #86EFAC}
+.qm-quiz-feedback.ko{background:#FFF5F5;border:1.5px solid #FECACA}
+.qm-quiz-feedback-icon{font-size:22px;flex-shrink:0}
+.qm-quiz-feedback-label{font-size:13px;font-weight:800;color:#1a1a2e}
+.qm-quiz-feedback-answer{font-size:14px;font-weight:900;color:#16A34A;margin-top:2px}
+.qm-quiz-btn{margin-top:18px;width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,83,126,.3),0 0 0 3px #3B5CC4;letter-spacing:.02em}
+.qm-quiz-btn.disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+/* Form Pâques */
+.qm-form-wrap{padding:20px;background:rgba(255,255,255,.4)}
+.qm-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#312E81;margin-bottom:4px}
+.qm-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
+.qm-form-field{margin-bottom:12px}
+.qm-form-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qm-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
+.qm-form-input:focus{border-color:#6366F1}
+.qm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qm-form-rgpd{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.7);border-radius:12px;margin-top:6px;align-items:flex-start}
+.qm-form-rgpd-box{width:22px;height:22px;border-radius:6px;background:#6366F1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900}
+.qm-form-rgpd-txt{font-size:11px;font-weight:700;color:#72243E;line-height:1.4}
+/* Chips source (comment avez-vous connu l'événement) */
+.qm-form-source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qm-form-source-chip{background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.qm-form-source-chip:hover{transform:translateY(-1px)}
+.qm-form-source-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+/* Loading Pâques */
+.qm-loading{min-height:100%;background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;text-align:center}
+.qm-spinner{width:60px;height:60px;border:5px solid #EEF2FF;border-top-color:#6366F1;border-radius:50%;animation:pq-spin 1s linear infinite}
+.qm-loading-txt{font-family:'Fredoka One',cursive;font-size:17px;color:#312E81}
+.qm-loading-sub{font-size:12px;font-weight:800;color:#888}
+/* Confirm Pâques */
+.qm-confirm-hero{padding:32px 20px 26px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#6366F1 0%,#A855F7 100%);color:#fff}
+.qm-confirm-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
+.qm-confirm-hero::after{content:'';position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
+.qm-confirm-inner{position:relative;z-index:2}
+.qm-trophy{font-size:56px;margin-bottom:6px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1)}
+.qm-bravo{font-family:'Fredoka One',cursive;font-size:26px;margin-bottom:4px}
+.qm-herosub{font-size:12px;font-weight:800;opacity:.9}
+.qm-score-block{text-align:center;padding:18px 20px 6px}
+.qm-score-num{font-family:'Fredoka One',cursive;font-size:62px;color:#6366F1;line-height:1}
+.qm-score-denom{font-size:24px;color:#A855F7}
+.qm-score-msg{font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;color:#312E81;margin-top:4px}
+.qm-correction-wrap{margin:10px 20px 12px;background:#fff;border:1.5px solid #E5E7EB;border-radius:14px;overflow:hidden}
+.qm-correction-header{background:#312E81;padding:9px 14px;font-size:10px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.12em}
+.qm-correction-row{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid #F5F2EE;align-items:flex-start}
+.qm-correction-row:last-child{border-bottom:none}
+.qm-correction-icon{font-size:18px;flex-shrink:0}
+.qm-correction-q{font-size:11px;font-weight:800;color:#72243E;margin-bottom:2px;line-height:1.3}
+.qm-correction-a{font-size:12px;font-weight:800;color:#312E81}
+.qm-correction-good{font-size:11px;font-weight:900;color:#16A34A;margin-top:2px}
+.qm-double-cta{margin:0 20px 8px;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;width:calc(100% - 40px);text-align:center;box-shadow:0 8px 20px rgba(212,83,126,.3)}
+.qm-double-cta.miss{background:linear-gradient(135deg,#A855F7,#F59E0B)}
+.qm-double-hint{text-align:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-top:-2px;padding:0 20px}
+.qm-double-skip{text-align:center;padding:4px 20px 12px}
+.qm-double-skip button{background:none;border:none;font-size:11px;color:#bbb;cursor:pointer;text-decoration:underline;font-weight:700}
+/* Bonus Pâques */
+.qm-bonus-hero{padding:24px 20px;background:linear-gradient(135deg,#312E81,#6366F1);color:#fff;position:relative;overflow:hidden}
+.qm-bonus-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%)}
+.qm-bonus-label{font-size:10px;font-weight:900;opacity:.6;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.qm-bonus-title{font-family:'Fredoka One',cursive;font-size:22px;line-height:1.2;position:relative;z-index:2}
+.qm-bonus-body{padding:16px 20px 20px}
+.qm-bonus-section{font-size:11px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;margin-top:6px}
+.qm-bonus-q-label{font-size:13px;font-weight:900;color:#312E81;margin-bottom:10px;margin-top:14px}
+.qm-bonus-q-hint{font-weight:600;font-size:10px;color:#aaa;margin-left:4px}
+.qm-bonus-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.qm-bonus-chip{background:#fff;border:1.5px solid #E5E7EB;border-radius:100px;padding:8px 12px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif}
+.qm-bonus-chip:hover{transform:translateY(-1px)}
+.qm-bonus-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+.qm-bonus-submit{width:100%;margin-top:18px;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em}
+/* BonusConfirm Pâques */
+.qm-bc-hero{padding:36px 20px 28px;background:linear-gradient(135deg,#1D9E75,#16A34A);color:#fff;text-align:center;position:relative;overflow:hidden}
+.qm-bc-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
+.qm-bc-emoji{font-size:64px;margin-bottom:8px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1);position:relative;z-index:2}
+.qm-bc-title{font-family:'Fredoka One',cursive;font-size:24px;line-height:1.2;margin-bottom:4px;position:relative;z-index:2}
+.qm-bc-sub{font-size:12px;font-weight:800;opacity:.9;position:relative;z-index:2}
+.qm-bc-score-card{margin:16px 20px 12px;background:#fff;border:1.5px solid #86EFAC;border-radius:18px;padding:18px;text-align:center;box-shadow:0 4px 16px rgba(29,158,117,.15)}
+.qm-bc-score-label{font-size:10px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.qm-bc-score-val{font-family:'Fredoka One',cursive;font-size:40px;color:#1D9E75;line-height:1}
+.qm-bc-score-denom{font-size:18px;color:#16A34A;margin-left:2px}
+.qm-bc-score-plus{display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:900;margin-top:8px}
+.qm-ticket{margin:0 20px 14px;background:#fff;border:1.5px dashed #6366F1;border-radius:16px;padding:18px;text-align:center;position:relative}
+.qm-ticket-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.qm-ticket-code{font-family:'Fredoka One',cursive;font-size:26px;color:#312E81;letter-spacing:.08em;margin:8px 0}
+.qm-ticket-hint{font-size:11px;font-weight:700;color:#888;line-height:1.4}
+.qm-bc-info{margin:0 20px 14px;padding:14px 16px;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.25);border-radius:14px;display:flex;align-items:center;gap:12px}
+.qm-bc-info-ico{font-size:22px}
+.qm-bc-info-txt{font-size:12px;font-weight:800;color:#312E81;line-height:1.4}
+/* Social links Pâques (rendu dynamique 1 à N liens) */
+.qm-social-wrap{margin:0 20px 14px}
+.qm-social-label{font-size:10px;font-weight:900;color:#72243E;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
+.qm-social-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.qm-social-link{flex:1;min-width:0;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit}
+.qm-social-link:hover{transform:translateY(-2px);border-color:#6366F1;box-shadow:0 6px 16px rgba(212,83,126,.15)}
+.qm-social-icon{font-size:22px}
+.qm-social-name{font-size:10px;font-weight:900;color:#312E81}
+/* Bouton Partager Pâques avec badge +1 point */
+.qm-share-btn{width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:16px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
+.qm-share-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(212,83,126,.4)}
+.qm-share-btn.done{background:linear-gradient(135deg,#1D9E75,#16A34A);box-shadow:0 8px 20px rgba(29,158,117,.25);cursor:default}
+.qm-share-btn.done:hover{transform:none}
+.qm-share-badge{background:rgba(255,255,255,.25);border-radius:100px;padding:3px 10px;font-family:'Nunito',sans-serif;font-weight:900;font-size:11px;letter-spacing:.05em}
+/* Animation du score qui passe de 3 à 4 */
+.qm-bc-score-val.boost{animation:score-pop .7s cubic-bezier(.3,1.6,.5,1)}
+.qm-bc-score-plus.boost{animation:badge-pop .5s ease}
+/* ─── Bottom-sheet partage (WhatsApp + SMS) ─── */
+.qm-share-backdrop{position:absolute;inset:0;background:rgba(26,16,51,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:200}
+.qm-share-backdrop.on{opacity:1;pointer-events:auto}
+.qm-share-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 28px;box-shadow:0 -10px 30px rgba(26,16,51,.18);transform:translateY(100%);transition:transform .3s cubic-bezier(.3,1,.3,1);z-index:201}
+.qm-share-sheet.on{transform:translateY(0)}
+.qm-share-handle{width:40px;height:4px;border-radius:100px;background:#E5E7EB;margin:0 auto 14px}
+.qm-share-title{font-family:'Fredoka One',cursive;font-size:18px;color:#312E81;text-align:center;margin-bottom:4px}
+.qm-share-sub{font-size:11px;font-weight:800;color:#888;text-align:center;margin-bottom:16px}
+.qm-share-preview{background:#EEF2FF;border:1px solid rgba(212,83,126,.2);border-radius:14px;padding:10px 12px;font-size:11px;font-weight:700;color:#72243E;line-height:1.4;margin-bottom:14px;font-family:'Nunito',sans-serif;max-height:80px;overflow:hidden}
+.qm-share-preview strong{color:#6366F1;font-weight:900;word-break:break-all}
+.qm-share-options{display:flex;flex-direction:column;gap:10px}
+.qm-share-option{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:1.5px solid #F5F3FF;background:#fff;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;width:100%;text-align:left;color:inherit;text-decoration:none}
+.qm-share-option:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.qm-share-option-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:#fff}
+.qm-share-option-icon.wa{background:linear-gradient(135deg,#25D366,#128C7E)}
+.qm-share-option-icon.sms{background:linear-gradient(135deg,#34D399,#059669)}
+.qm-share-option-body{flex:1;min-width:0}
+.qm-share-option-name{font-size:14px;font-weight:900;color:#312E81;line-height:1.2}
+.qm-share-option-hint{font-size:11px;font-weight:700;color:#888;margin-top:2px}
+.qm-share-option-arrow{font-size:16px;color:#6366F1;font-weight:900;flex-shrink:0}
+.qm-share-badge-plus{display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:2px 8px;font-size:9px;font-weight:900;margin-left:6px;letter-spacing:.04em}
+.qm-share-cancel{width:100%;margin-top:14px;padding:12px;background:#F8F6F2;border:1.5px solid #F5F3FF;border-radius:100px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;color:#888;cursor:pointer}
+.qm-share-cancel:hover{background:#F5F3FF}
+/* Toast confirmation après partage */
+.qm-toast{position:absolute;left:50%;top:20%;transform:translateX(-50%) translateY(-20px);background:#1D9E75;color:#fff;padding:12px 18px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:13px;box-shadow:0 8px 24px rgba(29,158,117,.4);opacity:0;pointer-events:none;transition:all .3s ease;z-index:300;white-space:nowrap}
+.qm-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ─── Fin CSS : vote-stars complémentaire + chips source + footer ─── */
+
+/* Chips source Pâques (connu comment) */
+.qm-form-source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qm-form-source-chip{background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.qm-form-source-chip:hover{transform:translateY(-1px)}
+.qm-form-source-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+/* ═══════════════════════════════════════════════════════════════════ */
+/* PICK SOURCE (chips "comment nous as-tu connu") — 3 variantes         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Pâques : chips avec classe .qm-form-source-chip */
 </style>
 </head>
 <body>
 
 <div class="preview-header">
-  <h1>Flowin · Preview v5.1</h1>
-  <p>Parcours participant · 5 modules de jeu</p>
+  <h1>Flowin · Preview v5.2</h1>
+  <p>Parcours participant · 6 modules de jeu</p>
   <div class="tag-row">
     <span>🎡 Spin (5 écrans)</span>
     <span>🐣 Quiz Pâques (9 écrans)</span>
     <span>🎤 Quiz Master (11 écrans)</span>
     <span>⚡ Quiz Solo (6 écrans)</span>
     <span>⭐ Vote Étoiles (8 écrans)</span>
+    <span>🎟️ Tombola (4 écrans)</span>
   </div>
 </div>
 
@@ -1110,15 +1332,6 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <div style="display:flex;gap:8px;margin-top:6px">
               <button style="flex:1;padding:10px;background:var(--al);border:1.5px solid var(--a);border-radius:12px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit" data-gender="F" onclick="spinPickChip(this)">👩 Femme</button>
               <button style="flex:1;padding:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit" data-gender="M" onclick="spinPickChip(this)">👨 Homme</button>
-            </div>
-          </div>
-          <div class="form-field">
-            <label class="form-label">Comment nous as-tu connu ?</label>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-              <button style="padding:8px 12px;background:var(--al);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px" data-source="instagram" onclick="spinPickChip(this)">📸 Instagram</button>
-              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="facebook" onclick="spinPickChip(this)">🔵 Facebook</button>
-              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="affiche" onclick="spinPickChip(this)">📋 Affiche</button>
-              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="bouche" onclick="spinPickChip(this)">📣 Bouche à oreille</button>
             </div>
           </div>
           <div class="form-field">
@@ -1752,6 +1965,14 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             </div>
           </div>
           <div class="qs-form-field">
+            <label class="qs-form-label">Email</label>
+            <input class="qs-form-input" placeholder="lea@exemple.fr">
+          </div>
+          <div class="qs-form-field">
+            <label class="qs-form-label">Téléphone</label>
+            <input class="qs-form-input" placeholder="06 XX XX XX XX">
+          </div>
+          <div class="qs-form-field">
             <label class="qs-form-label">Comment nous as-tu connu ?</label>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
               <button style="padding:8px 12px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px" data-source="instagram" onclick="qsPickChip(this)">📸 Instagram</button>
@@ -1759,14 +1980,6 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
               <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="affiche" onclick="qsPickChip(this)">📋 Affiche</button>
               <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="bouche" onclick="qsPickChip(this)">📣 Bouche à oreille</button>
             </div>
-          </div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Email</label>
-            <input class="qs-form-input" placeholder="lea@exemple.fr">
-          </div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Téléphone</label>
-            <input class="qs-form-input" placeholder="06 XX XX XX XX">
           </div>
           <div class="qs-form-rgpd">
             <div class="qs-form-rgpd-box">✓</div>
@@ -2250,15 +2463,6 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
             <div style="display:flex;gap:6px;margin-top:6px">
               <button style="flex:1;padding:10px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:13px" data-gender="F" onclick="vsPickChip(this)">👩 Femme</button>
               <button style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:13px" data-gender="M" onclick="vsPickChip(this)">👨 Homme</button>
-            </div>
-          </div>
-          <div style="margin-bottom:12px">
-            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Comment nous as-tu connu ?</label>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-              <button style="padding:8px 12px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:12px" data-source="instagram" onclick="vsPickChip(this)">📸 Instagram</button>
-              <button style="padding:8px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:12px" data-source="facebook" onclick="vsPickChip(this)">🔵 Facebook</button>
-              <button style="padding:8px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:12px" data-source="affiche" onclick="vsPickChip(this)">📋 Affiche</button>
-              <button style="padding:8px 12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:12px" data-source="bouche" onclick="vsPickChip(this)">📣 Bouche à oreille</button>
             </div>
           </div>
           <div style="margin-bottom:12px">
@@ -2858,8 +3062,178 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 
 
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TÉLÉPHONE #6 — Parcours TOMBOLA (4 écrans)                          -->
+<!-- Use case : Nuits du Sud 2026, activeModule=tombola                  -->
+<!-- winCondition=tombola_direct · CRM inscription → ticket numéroté     -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="phone-label">🎟️ Module Tombola · /scan/tombola-croix-rouge-vence</div>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="viewport tb-viewport" id="vp-tombola">
+
+      <!-- ─── TB 1 : Landing tombola ─── -->
+      <div class="page on" id="tb-1">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="tb-landing">
+          <div class="tb-badge">🔴 Croix Rouge · collecte solidaire</div>
+          <div class="tb-logo">🎗️</div>
+          <div class="tb-title">Tombola<br>Croix Rouge Française</div>
+          <div class="tb-sub">Soutiens la Croix Rouge et tente de remporter l'un des lots offerts par nos partenaires locaux. 100 % des bénéfices reversés.</div>
+          <div class="tb-lots">
+            <div class="tb-lot-row">
+              <div class="tb-lot-ico">🥇</div>
+              <div class="tb-lot-info">
+                <div class="tb-lot-name">1er prix — Séjour bien-être 2 nuits</div>
+                <div class="tb-lot-hint">Hôtel partenaire · Alpes-Maritimes</div>
+              </div>
+            </div>
+            <div class="tb-lot-row">
+              <div class="tb-lot-ico">🥈</div>
+              <div class="tb-lot-info">
+                <div class="tb-lot-name">2e prix — Bon d'achat 100 €</div>
+                <div class="tb-lot-hint">Commerce local partenaire</div>
+              </div>
+            </div>
+            <div class="tb-lot-row">
+              <div class="tb-lot-ico">🥉</div>
+              <div class="tb-lot-info">
+                <div class="tb-lot-name">3e prix — Panier gourmand local</div>
+                <div class="tb-lot-hint">Produits du terroir 06</div>
+              </div>
+            </div>
+          </div>
+          <div class="tb-draw-date">🗓️ Tirage le <strong>30 juin 2026</strong> — résultats publiés sur croix-rouge.fr</div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn tb-btn-primary" onclick="tbGo(2)">Je m'inscris à la tombola →</div>
+        </div>
+      </div>
+
+      <!-- ─── TB 2 : Formulaire CRM ─── -->
+      <div class="page" id="tb-2">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="header withback">
+          <div class="back-btn" onclick="tbGo(1)">←</div>
+          <div><div class="header-title">Mes coordonnées</div><div class="header-sub">Pour la tombola Croix Rouge</div></div>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-step done"></div>
+          <div class="progress-step on"></div>
+          <div class="progress-step"></div>
+        </div>
+        <div class="form-wrap">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Prénom</label>
+              <input class="form-input" placeholder="Camille" value="Camille">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Nom</label>
+              <input class="form-input" placeholder="Dupont">
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Genre</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <button style="flex:1;padding:10px;background:rgba(245,158,11,.15);border:1.5px solid #F59E0B;border-radius:12px;font-weight:700;color:#92400E;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👩 Femme</button>
+              <button style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(245,158,11,.3);border-radius:12px;font-weight:700;color:#1A1033;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input class="form-input" placeholder="camille@exemple.fr">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Téléphone</label>
+            <input class="form-input" placeholder="06 12 34 56 78">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="form-field">
+              <label class="form-label">Âge</label>
+              <input class="form-input" placeholder="36-50 ans">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Code postal</label>
+              <input class="form-input" placeholder="06140" value="06140">
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Comment nous as-tu connu ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+              <button class="tb-source-chip sel" onclick="tbPickSource(this)">📸 Instagram</button>
+              <button class="tb-source-chip" onclick="tbPickSource(this)">🔵 Facebook</button>
+              <button class="tb-source-chip" onclick="tbPickSource(this)">📋 Affiche / Flyer</button>
+              <button class="tb-source-chip" onclick="tbPickSource(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+          <div class="form-rgpd" style="margin-top:10px">
+            <div class="form-rgpd-check">✓</div>
+            <div class="form-rgpd-text">J'accepte de participer à la tombola et d'être recontacté(e) par les organisateurs. Données jamais cédées.</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn tb-btn-primary" onclick="tbGo(3)">Valider mon inscription →</div>
+        </div>
+      </div>
+
+      <!-- ─── TB 3 : Ticket tombola ─── -->
+      <div class="page" id="tb-3">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="tb-confirm-hero">
+          <div class="tb-confirm-chip"><div class="dot" style="background:#FCD34D"></div>INSCRIPTION CONFIRMÉE</div>
+          <div class="tb-confirm-title">Tu es dans la course ! 🎉</div>
+          <div class="tb-confirm-sub">Ton numéro de tombola a été enregistré</div>
+        </div>
+        <div class="progress-strip">
+          <div class="progress-step done"></div>
+          <div class="progress-step done"></div>
+          <div class="progress-step on"></div>
+        </div>
+        <div class="ticket" style="border-top:4px solid #F59E0B">
+          <div class="ticket-icon">🎟️</div>
+          <div class="ticket-title">Ton ticket tombola</div>
+          <div style="font-size:11px;font-weight:800;color:var(--muted)">Tombola Croix Rouge · Vence</div>
+          <div class="ticket-code">FW-CR-0742</div>
+          <div class="ticket-hint">Tirage le <strong>30 juin 2026</strong> · résultats sur flowin.events</div>
+        </div>
+        <div style="padding:0 20px 16px">
+          <div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:14px 16px;font-size:12px;font-weight:800;color:#92400E;line-height:1.6">
+            📬 Un email de confirmation t'a été envoyé.<br>
+            🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.<br>
+            📲 Capture ce ticket par précaution.
+          </div>
+        </div>
+        <div class="bottom-cta" style="flex-direction:column;gap:8px">
+          <div class="btn tb-btn-primary" onclick="tbGo(1)">← Retour à l'accueil</div>
+        </div>
+      </div>
+
+      <!-- ─── TB 4 : Anti-doublon ─── -->
+      <div class="page" id="tb-4">
+        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
+        <div class="ad-screen" style="background:linear-gradient(160deg,#FFFBEB 0%,#FEF3C7 100%)">
+          <div class="ad-icon">✋</div>
+          <div class="ad-title">Tu es déjà inscrit·e !</div>
+          <div class="ad-msg">Cette adresse email participe déjà à la tombola Croix Rouge Française.<br>Une seule inscription par personne.</div>
+          <div class="ad-email">camille@exemple.fr</div>
+          <div class="ticket" style="margin:0 20px;border-top:4px solid #F59E0B">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-title">Ton ticket tombola</div>
+            <div class="ticket-code">FW-CR-0742</div>
+            <div class="ticket-hint">Tirage le 30 juin 2026 · bonne chance !</div>
+          </div>
+          <button class="ad-btn" onclick="tbGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="footer-note">
-  Preview navigable · Flowin by OPConsult · Pâques Vence 2026 (prod) + Sécurité Routière Vence 2026 (à venir)
+  Preview navigable · Flowin by OPConsult · Pâques Vence 2026 (prod) + Sécurité Routière Vence 2026 (à venir) + Tombola Croix Rouge (test)
 </div>
 
 <script>
@@ -3318,6 +3692,34 @@ function vsGo(n){
   vp.scrollTop = 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TOMBOLA — navigation + interactions                                  */
+/* ═══════════════════════════════════════════════════════════════════ */
+function tbGo(n){
+  var vp = document.getElementById('vp-tombola');
+  vp.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  var target = document.getElementById('tb-' + n);
+  if(target) target.classList.add('on');
+  vp.scrollTop = 0;
+}
+function tbPickGender(el){
+  var parent = el.parentElement;
+  parent.querySelectorAll('button').forEach(function(b){
+    b.style.background = 'rgba(255,255,255,.06)';
+    b.style.borderColor = 'rgba(245,158,11,.3)';
+    b.style.color = '#1A1033';
+  });
+  el.style.background = 'rgba(245,158,11,.15)';
+  el.style.borderColor = '#F59E0B';
+  el.style.color = '#92400E';
+}
+function tbPickSource(el){
+  var parent = el.parentElement;
+  parent.querySelectorAll('.tb-source-chip').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+}
+
+
 /* Notation étoiles : remplit toutes les étoiles jusqu'à la position cliquée */
 function vsRate(el, rating){
   var stars = el.parentElement.querySelectorAll('.vs-star');
@@ -3681,23 +4083,56 @@ function flowinShowModuleViewport(moduleName){
     'quizsolo': 'vp-quizsolo',
     'quizmaster': 'vp-quizmaster',
     'spin': 'vp-spin',
-    'vote': 'vp-votestars'
+    'vote': 'vp-votestars',
+    'tombola': 'vp-tombola'
   };
   var targetVp = moduleMap[moduleName];
   if(!targetVp){
     console.log('[Flowin] module inconnu, mode preview:', moduleName);
     return;
   }
-  
-  var allVps = ['vp-paques','vp-quizsolo','vp-quizmaster','vp-spin','vp-votestars'];
+
+  /* Masquer header preview + labels phone */
+  var ph = document.querySelector('.preview-header');
+  if(ph) ph.style.display = 'none';
+  var fn = document.querySelector('.footer-note');
+  if(fn) fn.style.display = 'none';
+  var labels = document.querySelectorAll('.phone-label');
+  for(var j=0; j<labels.length; j++) labels[j].style.display = 'none';
+
+  /* Masquer tous les phone-wraps sauf le module actif */
+  var allVps = ['vp-paques','vp-quizsolo','vp-quizmaster','vp-spin','vp-votestars','vp-tombola'];
   for(var i=0; i<allVps.length; i++){
     var vp = document.getElementById(allVps[i]);
     if(!vp) continue;
     var wrap = vp.closest ? vp.closest('.phone-wrap') : null;
     var target = wrap || vp;
-    target.style.display = (allVps[i] === targetVp) ? '' : 'none';
+    if(allVps[i] === targetVp){
+      /* Mode production : phone centré plein écran */
+      target.style.display = '';
+      target.style.paddingTop = '0';
+      target.style.paddingBottom = '0';
+      target.style.background = 'transparent';
+      var phone = target.querySelector('.phone');
+      if(phone){
+        phone.style.width = '100%';
+        phone.style.maxWidth = '430px';
+        phone.style.minHeight = '100dvh';
+        phone.style.borderRadius = '0';
+        phone.style.boxShadow = 'none';
+        phone.style.margin = '0 auto';
+      }
+    } else {
+      target.style.display = 'none';
+    }
   }
-  console.log('[Flowin] viewport visible:', targetVp);
+
+  /* Body plein écran */
+  document.body.style.background = '#fff';
+  document.body.style.padding = '0';
+  document.body.style.margin = '0';
+
+  console.log('[Flowin] mode production · viewport:', targetVp);
 }
 
 /* Hydratation bonus pq-9 depuis cfg.quizBonusList */
@@ -3762,207 +4197,3 @@ function flowinHydrateQuizmasterBonus(){
 </script>
 </body>
 </html>
-
-/* ═══════════════════════════════════════════════════════════════════ */
-/* QUIZMASTER CSS — clone de Pâques avec couleurs adaptées             */
-/* ═══════════════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════════════ */
-/* TÉLÉPHONE #2 — Pâques Hybride (couleurs prod + typo Fredoka)        */
-/* ═══════════════════════════════════════════════════════════════════ */
-
-/* Palette Pâques réelle (from index.html prod) */
-.quizmaster-viewport{background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%)}
-/* Landing Pâques */
-.qm-landing{padding:28px 22px 20px;text-align:center}
-.qm-ville{font-size:9px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.18em;margin-bottom:14px}
-.qm-title{font-family:'Fredoka One',cursive;font-size:46px;color:#6366F1;line-height:.95;margin-bottom:12px;letter-spacing:-.01em}
-.qm-dates{font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:#A855F7;letter-spacing:.03em;margin-bottom:16px}
-.qm-emojis{font-size:24px;letter-spacing:10px;opacity:.55}
-.qm-bande{height:4px;background:linear-gradient(90deg,#6366F1,#A855F7,#1D9E75,#AFA9EC,#6366F1)}
-/* Section Lots */
-.qm-lots-wrap{padding:16px 18px 0}
-.qm-lots-label{font-size:9px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
-.qm-lots-label::before{content:'';width:8px;height:8px;border-radius:50%;background:#6366F1}
-.qm-lot-row{background:rgba(255,255,255,.9);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(212,83,126,.12);box-shadow:0 1px 4px rgba(212,83,126,.08)}
-.qm-lot-ico{width:34px;height:34px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.qm-lot-body{flex:1;min-width:0}
-.qm-lot-desc{font-size:14px;font-weight:800;color:#312E81}
-.qm-lot-val{font-size:11px;font-weight:700;color:#1D9E75;margin-top:1px}
-.qm-tirage{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#72243E;margin-bottom:14px;padding-top:10px;border-top:1px solid rgba(212,83,126,.12);margin-top:6px}
-/* CTA Pâques */
-.qm-cta-wrap{padding:0 18px 10px}
-.qm-cta{width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:16px;border:none;border-radius:16px;cursor:pointer;letter-spacing:.01em;box-shadow:0 8px 22px rgba(212,83,126,.3)}
-.qm-cta-hint{text-align:center;font-size:10px;color:#bbb;margin-top:7px;font-weight:700}
-/* Footer attribution */
-.qm-footer{text-align:center;padding:14px 0 22px;border-top:1px solid rgba(212,83,126,.1);margin-top:10px}
-.qm-footer-txt{font-size:9px;color:#ccc;letter-spacing:.06em;font-weight:700}
-/* Quiz Pâques */
-.qm-quiz-screen{min-height:100%;background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%);padding-top:12px}
-.qm-quiz-progress{padding:14px 20px}
-.qm-quiz-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.qm-quiz-step-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.1em}
-.qm-quiz-step-dots{display:flex;gap:5px}
-.qm-quiz-dot{width:22px;height:4px;border-radius:100px;background:rgba(212,83,126,.2)}
-.qm-quiz-dot.active{background:#6366F1}
-.qm-quiz-dot.done{background:#1D9E75}
-.qm-quiz-body{padding:14px 20px 20px}
-.qm-quiz-num{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
-.qm-quiz-question{font-family:'Fredoka One',cursive;font-size:21px;color:#312E81;line-height:1.25;margin-bottom:20px}
-.qm-quiz-options{display:flex;flex-direction:column;gap:10px}
-.qm-quiz-opt{background:#fff;border:1.5px solid #BFDBFE;border-radius:13px;padding:14px 16px;font-size:14px;font-weight:800;color:#1a1a2e;cursor:pointer;text-align:left;width:100%;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);font-family:'Nunito',sans-serif}
-.qm-quiz-opt:hover{transform:translateY(-1px)}
-.qm-quiz-opt.sel{background:#fff;color:#3B5CC4;border-color:#3B5CC4;border-width:2px;box-shadow:0 0 0 3px rgba(59,92,196,.15)}
-.qm-quiz-opt.correct{background:#F0FDF4;color:#16A34A;border-color:#22C55E;cursor:default}
-.qm-quiz-opt.wrong{background:#EFF6FF;color:#3B82F6;border-color:#60A5FA;cursor:default}
-.qm-quiz-opt.neutral{background:#F9FAFB;color:#9CA3AF;border-color:#E5E7EB;cursor:default}
-.qm-quiz-feedback{margin-top:14px;border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px}
-.qm-quiz-feedback.ok{background:#F0FDF4;border:1.5px solid #86EFAC}
-.qm-quiz-feedback.ko{background:#FFF5F5;border:1.5px solid #FECACA}
-.qm-quiz-feedback-icon{font-size:22px;flex-shrink:0}
-.qm-quiz-feedback-label{font-size:13px;font-weight:800;color:#1a1a2e}
-.qm-quiz-feedback-answer{font-size:14px;font-weight:900;color:#16A34A;margin-top:2px}
-.qm-quiz-btn{margin-top:18px;width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,83,126,.3),0 0 0 3px #3B5CC4;letter-spacing:.02em}
-.qm-quiz-btn.disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
-/* Form Pâques */
-.qm-form-wrap{padding:20px;background:rgba(255,255,255,.4)}
-.qm-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#312E81;margin-bottom:4px}
-.qm-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
-.qm-form-field{margin-bottom:12px}
-.qm-form-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
-.qm-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
-.qm-form-input:focus{border-color:#6366F1}
-.qm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.qm-form-rgpd{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.7);border-radius:12px;margin-top:6px;align-items:flex-start}
-.qm-form-rgpd-box{width:22px;height:22px;border-radius:6px;background:#6366F1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900}
-.qm-form-rgpd-txt{font-size:11px;font-weight:700;color:#72243E;line-height:1.4}
-/* Chips source (comment avez-vous connu l'événement) */
-.qm-form-source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.qm-form-source-chip{background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
-.qm-form-source-chip:hover{transform:translateY(-1px)}
-.qm-form-source-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
-/* Loading Pâques */
-.qm-loading{min-height:100%;background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;text-align:center}
-.qm-spinner{width:60px;height:60px;border:5px solid #EEF2FF;border-top-color:#6366F1;border-radius:50%;animation:pq-spin 1s linear infinite}
-.qm-loading-txt{font-family:'Fredoka One',cursive;font-size:17px;color:#312E81}
-.qm-loading-sub{font-size:12px;font-weight:800;color:#888}
-/* Confirm Pâques */
-.qm-confirm-hero{padding:32px 20px 26px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#6366F1 0%,#A855F7 100%);color:#fff}
-.qm-confirm-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
-.qm-confirm-hero::after{content:'';position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
-.qm-confirm-inner{position:relative;z-index:2}
-.qm-trophy{font-size:56px;margin-bottom:6px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1)}
-.qm-bravo{font-family:'Fredoka One',cursive;font-size:26px;margin-bottom:4px}
-.qm-herosub{font-size:12px;font-weight:800;opacity:.9}
-.qm-score-block{text-align:center;padding:18px 20px 6px}
-.qm-score-num{font-family:'Fredoka One',cursive;font-size:62px;color:#6366F1;line-height:1}
-.qm-score-denom{font-size:24px;color:#A855F7}
-.qm-score-msg{font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;color:#312E81;margin-top:4px}
-.qm-correction-wrap{margin:10px 20px 12px;background:#fff;border:1.5px solid #E5E7EB;border-radius:14px;overflow:hidden}
-.qm-correction-header{background:#312E81;padding:9px 14px;font-size:10px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.12em}
-.qm-correction-row{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid #F5F2EE;align-items:flex-start}
-.qm-correction-row:last-child{border-bottom:none}
-.qm-correction-icon{font-size:18px;flex-shrink:0}
-.qm-correction-q{font-size:11px;font-weight:800;color:#72243E;margin-bottom:2px;line-height:1.3}
-.qm-correction-a{font-size:12px;font-weight:800;color:#312E81}
-.qm-correction-good{font-size:11px;font-weight:900;color:#16A34A;margin-top:2px}
-.qm-double-cta{margin:0 20px 8px;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;width:calc(100% - 40px);text-align:center;box-shadow:0 8px 20px rgba(212,83,126,.3)}
-.qm-double-cta.miss{background:linear-gradient(135deg,#A855F7,#F59E0B)}
-.qm-double-hint{text-align:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-top:-2px;padding:0 20px}
-.qm-double-skip{text-align:center;padding:4px 20px 12px}
-.qm-double-skip button{background:none;border:none;font-size:11px;color:#bbb;cursor:pointer;text-decoration:underline;font-weight:700}
-/* Bonus Pâques */
-.qm-bonus-hero{padding:24px 20px;background:linear-gradient(135deg,#312E81,#6366F1);color:#fff;position:relative;overflow:hidden}
-.qm-bonus-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%)}
-.qm-bonus-label{font-size:10px;font-weight:900;opacity:.6;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
-.qm-bonus-title{font-family:'Fredoka One',cursive;font-size:22px;line-height:1.2;position:relative;z-index:2}
-.qm-bonus-body{padding:16px 20px 20px}
-.qm-bonus-section{font-size:11px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;margin-top:6px}
-.qm-bonus-q-label{font-size:13px;font-weight:900;color:#312E81;margin-bottom:10px;margin-top:14px}
-.qm-bonus-q-hint{font-weight:600;font-size:10px;color:#aaa;margin-left:4px}
-.qm-bonus-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
-.qm-bonus-chip{background:#fff;border:1.5px solid #E5E7EB;border-radius:100px;padding:8px 12px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif}
-.qm-bonus-chip:hover{transform:translateY(-1px)}
-.qm-bonus-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
-.qm-bonus-submit{width:100%;margin-top:18px;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em}
-/* BonusConfirm Pâques */
-.qm-bc-hero{padding:36px 20px 28px;background:linear-gradient(135deg,#1D9E75,#16A34A);color:#fff;text-align:center;position:relative;overflow:hidden}
-.qm-bc-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
-.qm-bc-emoji{font-size:64px;margin-bottom:8px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1);position:relative;z-index:2}
-.qm-bc-title{font-family:'Fredoka One',cursive;font-size:24px;line-height:1.2;margin-bottom:4px;position:relative;z-index:2}
-.qm-bc-sub{font-size:12px;font-weight:800;opacity:.9;position:relative;z-index:2}
-.qm-bc-score-card{margin:16px 20px 12px;background:#fff;border:1.5px solid #86EFAC;border-radius:18px;padding:18px;text-align:center;box-shadow:0 4px 16px rgba(29,158,117,.15)}
-.qm-bc-score-label{font-size:10px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-.qm-bc-score-val{font-family:'Fredoka One',cursive;font-size:40px;color:#1D9E75;line-height:1}
-.qm-bc-score-denom{font-size:18px;color:#16A34A;margin-left:2px}
-.qm-bc-score-plus{display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:900;margin-top:8px}
-.qm-ticket{margin:0 20px 14px;background:#fff;border:1.5px dashed #6366F1;border-radius:16px;padding:18px;text-align:center;position:relative}
-.qm-ticket-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
-.qm-ticket-code{font-family:'Fredoka One',cursive;font-size:26px;color:#312E81;letter-spacing:.08em;margin:8px 0}
-.qm-ticket-hint{font-size:11px;font-weight:700;color:#888;line-height:1.4}
-.qm-bc-info{margin:0 20px 14px;padding:14px 16px;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.25);border-radius:14px;display:flex;align-items:center;gap:12px}
-.qm-bc-info-ico{font-size:22px}
-.qm-bc-info-txt{font-size:12px;font-weight:800;color:#312E81;line-height:1.4}
-/* Social links Pâques (rendu dynamique 1 à N liens) */
-.qm-social-wrap{margin:0 20px 14px}
-.qm-social-label{font-size:10px;font-weight:900;color:#72243E;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
-.qm-social-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.qm-social-link{flex:1;min-width:0;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit}
-.qm-social-link:hover{transform:translateY(-2px);border-color:#6366F1;box-shadow:0 6px 16px rgba(212,83,126,.15)}
-.qm-social-icon{font-size:22px}
-.qm-social-name{font-size:10px;font-weight:900;color:#312E81}
-/* Bouton Partager Pâques avec badge +1 point */
-.qm-share-btn{width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:16px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
-.qm-share-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(212,83,126,.4)}
-.qm-share-btn.done{background:linear-gradient(135deg,#1D9E75,#16A34A);box-shadow:0 8px 20px rgba(29,158,117,.25);cursor:default}
-.qm-share-btn.done:hover{transform:none}
-.qm-share-badge{background:rgba(255,255,255,.25);border-radius:100px;padding:3px 10px;font-family:'Nunito',sans-serif;font-weight:900;font-size:11px;letter-spacing:.05em}
-/* Animation du score qui passe de 3 à 4 */
-.qm-bc-score-val.boost{animation:score-pop .7s cubic-bezier(.3,1.6,.5,1)}
-.qm-bc-score-plus.boost{animation:badge-pop .5s ease}
-/* ─── Bottom-sheet partage (WhatsApp + SMS) ─── */
-.qm-share-backdrop{position:absolute;inset:0;background:rgba(26,16,51,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:200}
-.qm-share-backdrop.on{opacity:1;pointer-events:auto}
-.qm-share-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 28px;box-shadow:0 -10px 30px rgba(26,16,51,.18);transform:translateY(100%);transition:transform .3s cubic-bezier(.3,1,.3,1);z-index:201}
-.qm-share-sheet.on{transform:translateY(0)}
-.qm-share-handle{width:40px;height:4px;border-radius:100px;background:#E5E7EB;margin:0 auto 14px}
-.qm-share-title{font-family:'Fredoka One',cursive;font-size:18px;color:#312E81;text-align:center;margin-bottom:4px}
-.qm-share-sub{font-size:11px;font-weight:800;color:#888;text-align:center;margin-bottom:16px}
-.qm-share-preview{background:#EEF2FF;border:1px solid rgba(212,83,126,.2);border-radius:14px;padding:10px 12px;font-size:11px;font-weight:700;color:#72243E;line-height:1.4;margin-bottom:14px;font-family:'Nunito',sans-serif;max-height:80px;overflow:hidden}
-.qm-share-preview strong{color:#6366F1;font-weight:900;word-break:break-all}
-.qm-share-options{display:flex;flex-direction:column;gap:10px}
-.qm-share-option{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:1.5px solid #F5F3FF;background:#fff;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;width:100%;text-align:left;color:inherit;text-decoration:none}
-.qm-share-option:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
-.qm-share-option-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:#fff}
-.qm-share-option-icon.wa{background:linear-gradient(135deg,#25D366,#128C7E)}
-.qm-share-option-icon.sms{background:linear-gradient(135deg,#34D399,#059669)}
-.qm-share-option-body{flex:1;min-width:0}
-.qm-share-option-name{font-size:14px;font-weight:900;color:#312E81;line-height:1.2}
-.qm-share-option-hint{font-size:11px;font-weight:700;color:#888;margin-top:2px}
-.qm-share-option-arrow{font-size:16px;color:#6366F1;font-weight:900;flex-shrink:0}
-.qm-share-badge-plus{display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:2px 8px;font-size:9px;font-weight:900;margin-left:6px;letter-spacing:.04em}
-.qm-share-cancel{width:100%;margin-top:14px;padding:12px;background:#F8F6F2;border:1.5px solid #F5F3FF;border-radius:100px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;color:#888;cursor:pointer}
-.qm-share-cancel:hover{background:#F5F3FF}
-/* Toast confirmation après partage */
-.qm-toast{position:absolute;left:50%;top:20%;transform:translateX(-50%) translateY(-20px);background:#1D9E75;color:#fff;padding:12px 18px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:13px;box-shadow:0 8px 24px rgba(29,158,117,.4);opacity:0;pointer-events:none;transition:all .3s ease;z-index:300;white-space:nowrap}
-.qm-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-/* ─── Fin CSS : vote-stars complémentaire + chips source + footer ─── */
-
-/* Chips source Pâques (connu comment) */
-.qm-form-source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.qm-form-source-chip{background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
-.qm-form-source-chip:hover{transform:translateY(-1px)}
-.qm-form-source-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
-/* ═══════════════════════════════════════════════════════════════════ */
-/* PICK SOURCE (chips "comment nous as-tu connu") — 3 variantes         */
-/* ═══════════════════════════════════════════════════════════════════ */
-
-/* Pâques : chips avec classe .qm-form-source-chip */
-function pqPickSource(el){
-  var parent = el.parentElement;
-  parent.querySelectorAll('.qm-form-source-chip').forEach(function(c){
-    c.classList.remove('sel');
-  });
-  el.classList.add('sel');
-}
-
