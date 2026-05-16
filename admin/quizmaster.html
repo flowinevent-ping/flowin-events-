@@ -2760,6 +2760,32 @@ function flowinHydrateQuizmasterBonus(){
     }).catch(function(){});
   }
 })();
+
+/* ── Navigation via postMessage (flèches dashboard) ── */
+(function(){
+  var _currentPage = 1;
+  var _goFn = qmGo;
+  var _prefix = 'qm';
+  
+  function _countPages() {
+    var i = 1;
+    while(document.getElementById(_prefix + '-' + i)) i++;
+    return i - 1;
+  }
+  
+  window.addEventListener('message', function(e) {
+    if(!e.data || !e.data.flowinNav) return;
+    var total = _countPages();
+    if(e.data.flowinNav === 'next' && _currentPage < total) {
+      _currentPage++;
+      try { _goFn(_currentPage); } catch(err) {}
+    } else if(e.data.flowinNav === 'prev' && _currentPage > 1) {
+      _currentPage--;
+      try { _goFn(_currentPage); } catch(err) {}
+    }
+  });
+})();
+
 </script>
 </body>
 </html>
