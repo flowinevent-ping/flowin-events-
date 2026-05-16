@@ -5737,7 +5737,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
-       var _joueurUrl = (e.module ? '/module_' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(e.id) : '/parcours_user.html?ev=' + encodeURIComponent(e.id));
+       var _joueurUrl = '/parcours_user.html?ev=' + encodeURIComponent(e.id) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
        html += '<div style="display:flex;flex-direction:column;gap:10px">';
        html += '<div style="display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
        html += '<span style="font-size:12px">📱</span>';
@@ -5943,7 +5943,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = (e.module ? '/module_' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(eid) : '/parcours_user.html?ev=' + encodeURIComponent(eid));
+  var _jeuOpenUrl = '/parcours_user.html?ev=' + encodeURIComponent(eid) + (e.module ? '&module=' + encodeURIComponent(e.module) : '');
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em">📱 Parcours joueur · toutes les pages</div>';
@@ -6428,7 +6428,7 @@ function renderBiblioJeux(){
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
   // ── Parcours complet validé : iframe parcours_user.html ──
-  var _masterUrl = '/module_' + encodeURIComponent(tab) + '.html';
+  var _masterUrl = '/parcours_user.html?module=' + encodeURIComponent(tab);
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
   html += '<div class="section-h" style="margin:0">📱 Parcours joueur · complet</div>';
   html += '<a href="'+escAttr(_masterUrl)+'" target="_blank" style="background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';

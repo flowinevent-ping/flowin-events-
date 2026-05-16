@@ -1161,7 +1161,40 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 /* ═══════════════════════════════════════════════════════════════════ */
 
 /* Pâques : chips avec classe .qm-form-source-chip */
+
+/* ── Masquage immédiat du module via attribut data-module sur <html> ── */
+html[data-module] .preview-header,
+html[data-module] .footer-note,
+html[data-module] .phone-label { display:none !important; }
+
+html[data-module] .phone-wrap { display:none !important; }
+
+html[data-module="spin"]        .phone-wrap:has(#vp-spin)        { display:flex !important; }
+html[data-module="quiz"]        .phone-wrap:has(#vp-paques)      { display:flex !important; }
+html[data-module="quizsolo"]    .phone-wrap:has(#vp-quizsolo)    { display:flex !important; }
+html[data-module="vote"]        .phone-wrap:has(#vp-votestars)   { display:flex !important; }
+html[data-module="quizmaster"]  .phone-wrap:has(#vp-quizmaster)  { display:flex !important; }
+html[data-module="tombola"]     .phone-wrap:has(#vp-tombola)     { display:flex !important; }
+
+html[data-module] .phone-wrap:not([style*="none"]) .phone {
+  width:100% !important; max-width:430px !important;
+  min-height:100dvh !important; border-radius:0 !important;
+  box-shadow:none !important; margin:0 auto !important;
+}
+html[data-module] body {
+  background:#fff !important; padding:0 !important; margin:0 !important;
+  overflow:hidden !important;
+}
 </style>
+<script>
+/* Détection ?module= AVANT rendu — masquage immédiat via attribut HTML */
+(function(){
+  try {
+    var m = new URLSearchParams(window.location.search).get('module');
+    if(m) document.documentElement.setAttribute('data-module', m);
+  } catch(e){}
+})();
+</script>
 </head>
 <body>
 
