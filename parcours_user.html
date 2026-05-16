@@ -3702,6 +3702,169 @@ function tbGo(n){
   if(target) target.classList.add('on');
   vp.scrollTop = 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* HYDRATATION DYNAMIQUE — injecte les données Supabase dans l'UI     */
+/* Appelé après flowinShowModuleViewport + fetch event                  */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+function flowinFormatDate(dateStr) {
+  if(!dateStr) return '';
+  try {
+    var d = new Date(dateStr + 'T00:00:00');
+    var months = ['jan.','fév.','mars','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  } catch(e){ return dateStr; }
+}
+
+function flowinSetText(selector, text) {
+  var els = document.querySelectorAll(selector);
+  for(var i=0; i<els.length; i++) { els[i].textContent = text; }
+}
+
+function flowinHydrateModule(ev) {
+  if(!ev) return;
+  var module = ev.module || '';
+  var nom = ev.nom || '';
+  var lieu = ev.lieu || '';
+  var couleur = ev.couleur || '#7C2D92';
+  var cfg = ev.cfg || {};
+  var dateD = flowinFormatDate(ev.date_d);
+  var dateF = flowinFormatDate(ev.date_f);
+  var dates = (dateD && dateF && dateD !== dateF) ? dateD + ' – ' + dateF : (dateD || '');
+
+  /* ── SPIN ── */
+  if(module === 'spin') {
+    var vp = document.getElementById('vp-spin');
+    if(!vp) return;
+    flowinSetText('#vp-spin .landing-title', nom);
+    var chip = vp.querySelector('.landing-event-chip');
+    if(chip) chip.textContent = '📍 ' + lieu + (dates ? ' · ' + dates : '');
+    /* Segments roue */
+    if(cfg.spinSegments && cfg.spinSegments.length) {
+      flowinHydrateSpinWheel(vp, cfg.spinSegments, couleur);
+    }
+  }
+
+  /* ── QUIZ (pq / qm) ── */
+  if(module === 'quiz') {
+    /* Pâques (pq) */
+    var vp = document.getElementById('vp-paques');
+    if(vp) {
+      var villeEl = vp.querySelector('.pq-ville');
+      if(villeEl) villeEl.textContent = lieu + ' · Flowin';
+      var titleEl = vp.querySelector('.pq-title');
+      if(titleEl) titleEl.innerHTML = nom.replace(' ', '<br>');
+      var datesEl = vp.querySelector('.pq-dates');
+      if(datesEl) datesEl.textContent = dates;
+    }
+    /* QuizMaster (qm) */
+    var vqm = document.getElementById('vp-quizmaster');
+    if(vqm) {
+      var qmVille = vqm.querySelector('.qm-ville');
+      if(qmVille) qmVille.textContent = lieu + ' · Flowin';
+      var qmTitle = vqm.querySelector('.qm-title');
+      if(qmTitle) qmTitle.innerHTML = nom.replace(' ', '<br>');
+      var qmDates = vqm.querySelector('.qm-dates');
+      if(qmDates) qmDates.textContent = dates;
+    }
+    /* QuizSolo (qs) */
+    var vqs = document.getElementById('vp-quizsolo');
+    if(vqs) {
+      var qsBadge = vqs.querySelector('.qs-badge');
+      if(qsBadge) qsBadge.textContent = '🏛️ ' + lieu + ' · ' + (ev.date_d ? new Date(ev.date_d + 'T00:00:00').getFullYear() : '');
+      var qsTitle = vqs.querySelector('.qs-title');
+      if(qsTitle) qsTitle.innerHTML = nom.replace(' ', '<br>');
+    }
+  }
+
+  /* ── VOTE ── */
+  if(module === 'vote') {
+    var vp = document.getElementById('vp-votestars');
+    if(!vp) return;
+    /* Badge landing */
+    var badge = vp.querySelector('.vs-badge');
+    if(badge) badge.textContent = '⭐ ' + nom + (dateD ? ' · ' + dateD : '');
+    /* Couleur viewport */
+    vp.style.background = 'linear-gradient(160deg,' + couleur + ' 0%,#1a1a3e 100%)';
+    /* Sections / artistes */
+    var sections = cfg.voteSections || [];
+    if(sections.length) {
+      flowinHydrateVoteArtistes(vp, sections);
+    }
+  }
+
+  /* ── TOMBOLA ── */
+  if(module === 'tombola') {
+    var vp = document.getElementById('vp-tombola');
+    if(!vp) return;
+    var badge = vp.querySelector('.tb-badge');
+    if(badge) badge.textContent = '🎟️ ' + lieu + ' · en cours';
+    var title = vp.querySelector('.tb-title');
+    if(title) title.innerHTML = 'Tombola<br>' + nom;
+    if(cfg.drawDate) {
+      var drawEl = vp.querySelector('.tb-draw-date');
+      if(drawEl) drawEl.innerHTML = '🗓️ Tirage le <strong>' + cfg.drawDate + '</strong>';
+    }
+  }
+
+  console.log('[Flowin] hydratation terminée · module:', module, '· event:', nom);
+}
+
+function flowinHydrateVoteArtistes(vp, sections) {
+  /* Écrans vs-2 à vs-{N+1} : un artiste par écran */
+  var total = sections.length;
+  for(var i = 0; i < total; i++) {
+    var screenId = 'vs-' + (i + 2);
+    var screen = document.getElementById(screenId);
+    if(!screen) continue;
+    var sec = sections[i];
+    var artisteName = sec.titre || sec.nom || '';
+    var emoji = sec.emoji || '🎵';
+    /* Header sub */
+    var sub = screen.querySelector('.header-sub');
+    if(sub) sub.textContent = artisteName;
+    /* Artist name block */
+    var nameEl = screen.querySelector('.vs-artist-name');
+    if(nameEl) nameEl.textContent = artisteName;
+    /* Genre / emoji */
+    var genreEl = screen.querySelector('.vs-artist-genre');
+    if(genreEl) genreEl.textContent = emoji + ' ' + (sec.genre || 'Artiste');
+    /* Header title */
+    var htEl = screen.querySelector('.header-title');
+    if(htEl) htEl.textContent = 'Artiste ' + (i + 1) + '/' + total;
+    /* Emoji central */
+    var emojiEl = screen.querySelector('.vs-artist-emoji');
+    if(emojiEl) emojiEl.textContent = emoji;
+  }
+  /* Mettre à jour le compteur sur landing */
+  var ruleRow = vp.querySelector('.vs-rule-row');
+  if(ruleRow) {
+    var ico = ruleRow.querySelector('.vs-rule-ico');
+    var lbl = ruleRow.querySelector('.vs-rule-lbl');
+    if(ico) ico.textContent = '🎤';
+    if(lbl) lbl.textContent = total + ' artistes à évaluer un par un';
+  }
+}
+
+function flowinHydrateSpinWheel(vp, segments, couleur) {
+  /* Mettre à jour les labels des segments dans le SVG de la roue */
+  var labels = vp.querySelectorAll('.wheel-label');
+  for(var i = 0; i < labels.length && i < segments.length; i++) {
+    labels[i].textContent = segments[i].label || '';
+  }
+  /* Landing : mettre à jour la liste des lots potentiels */
+  var infoCards = vp.querySelectorAll('.landing-info-card');
+  if(infoCards.length > 0) {
+    var lots = segments.slice(0, 3).map(function(s){ return s.emoji + ' ' + s.label; }).join(' · ');
+    var firstCard = infoCards[0];
+    if(firstCard) {
+      var infoText = firstCard.querySelector('.landing-info-text');
+      if(infoText) infoText.innerHTML = lots;
+    }
+  }
+}
+
 function tbPickGender(el){
   var parent = el.parentElement;
   parent.querySelectorAll('button').forEach(function(b){
@@ -4007,6 +4170,7 @@ if(FLOWIN_MODULE_FALLBACK){
       FLOWIN_PRO_ID = rows[0].pro_id || null;
       console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module);
       try { flowinShowModuleViewport(rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
+      try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
