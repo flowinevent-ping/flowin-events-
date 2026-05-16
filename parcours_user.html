@@ -751,6 +751,195 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .sp-toast,.qs-toast,.vs-toast{position:absolute;left:50%;top:18%;transform:translateX(-50%) translateY(-16px);background:#1D9E75;color:#fff;padding:10px 18px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:13px;box-shadow:0 8px 24px rgba(29,158,117,.4);opacity:0;pointer-events:none;transition:all .3s ease;z-index:300;white-space:nowrap}
 .sp-toast.on,.qs-toast.on,.vs-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
+
+
+/* ═══ CSS dupliqué pour QuizMaster (clone Pâques) ═══ */
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TÉLÉPHONE #2 — Pâques Hybride (couleurs prod + typo Fredoka)        */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Palette Pâques réelle (from index.html prod) */
+.quizmaster-viewport {background:linear-gradient(160deg,#FBEAF0 0%,#E8F8F2 55%,#FAEEDA 100%)}
+/* Landing Pâques */
+.qm-landing {padding:28px 22px 20px;text-align:center}
+.qm-ville {font-size:9px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.18em;margin-bottom:14px}
+.qm-title {font-family:'Fredoka One',cursive;font-size:46px;color:#D4537E;line-height:.95;margin-bottom:12px;letter-spacing:-.01em}
+.qm-dates {font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:#EF9F27;letter-spacing:.03em;margin-bottom:16px}
+.qm-emojis {font-size:24px;letter-spacing:10px;opacity:.55}
+.qm-bande {height:4px;background:linear-gradient(90deg,#D4537E,#EF9F27,#1D9E75,#AFA9EC,#D4537E)}
+/* Section Lots */
+.qm-lots-wrap {padding:16px 18px 0}
+.qm-lots-label {font-size:9px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.qm-lots-label::before {content:'';width:8px;height:8px;border-radius:50%;background:#D4537E}
+.qm-lot-row {background:rgba(255,255,255,.9);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(212,83,126,.12);box-shadow:0 1px 4px rgba(212,83,126,.08)}
+.qm-lot-ico {width:34px;height:34px;border-radius:10px;background:#FBEAF0;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.qm-lot-body {flex:1;min-width:0}
+.qm-lot-desc {font-size:14px;font-weight:800;color:#4B1528}
+.qm-lot-val {font-size:11px;font-weight:700;color:#1D9E75;margin-top:1px}
+.qm-tirage {display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#72243E;margin-bottom:14px;padding-top:10px;border-top:1px solid rgba(212,83,126,.12);margin-top:6px}
+/* CTA Pâques */
+.qm-cta-wrap {padding:0 18px 10px}
+.qm-cta {width:100%;padding:16px;background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;font-family:'Fredoka One',cursive;font-size:16px;border:none;border-radius:16px;cursor:pointer;letter-spacing:.01em;box-shadow:0 8px 22px rgba(212,83,126,.3)}
+.qm-cta-hint {text-align:center;font-size:10px;color:#bbb;margin-top:7px;font-weight:700}
+/* Footer attribution */
+.qm-footer {text-align:center;padding:14px 0 22px;border-top:1px solid rgba(212,83,126,.1);margin-top:10px}
+.qm-footer-txt {font-size:9px;color:#ccc;letter-spacing:.06em;font-weight:700}
+/* Quiz Pâques */
+.qm-quiz-screen {min-height:100%;background:linear-gradient(160deg,#FBEAF0 0%,#E8F8F2 55%,#FAEEDA 100%);padding-top:12px}
+.qm-quiz-progress {padding:14px 20px}
+.qm-quiz-progress-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qm-quiz-step-label {font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.1em}
+.qm-quiz-step-dots {display:flex;gap:5px}
+.qm-quiz-dot {width:22px;height:4px;border-radius:100px;background:rgba(212,83,126,.2)}
+.qm-quiz-dot.active {background:#D4537E}
+.qm-quiz-dot.done {background:#1D9E75}
+.qm-quiz-body {padding:14px 20px 20px}
+.qm-quiz-num {font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
+.qm-quiz-question {font-family:'Fredoka One',cursive;font-size:21px;color:#4B1528;line-height:1.25;margin-bottom:20px}
+.qm-quiz-options {display:flex;flex-direction:column;gap:10px}
+.qm-quiz-opt {background:#fff;border:1.5px solid #BFDBFE;border-radius:13px;padding:14px 16px;font-size:14px;font-weight:800;color:#1a1a2e;cursor:pointer;text-align:left;width:100%;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);font-family:'Nunito',sans-serif}
+.qm-quiz-opt:hover {transform:translateY(-1px)}
+.qm-quiz-opt.sel {background:#fff;color:#3B5CC4;border-color:#3B5CC4;border-width:2px;box-shadow:0 0 0 3px rgba(59,92,196,.15)}
+.qm-quiz-opt.correct {background:#F0FDF4;color:#16A34A;border-color:#22C55E;cursor:default}
+.qm-quiz-opt.wrong {background:#EFF6FF;color:#3B82F6;border-color:#60A5FA;cursor:default}
+.qm-quiz-opt.neutral {background:#F9FAFB;color:#9CA3AF;border-color:#E5E7EB;cursor:default}
+.qm-quiz-feedback {margin-top:14px;border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px}
+.qm-quiz-feedback.ok {background:#F0FDF4;border:1.5px solid #86EFAC}
+.qm-quiz-feedback.ko {background:#FFF5F5;border:1.5px solid #FECACA}
+.qm-quiz-feedback-icon {font-size:22px;flex-shrink:0}
+.qm-quiz-feedback-label {font-size:13px;font-weight:800;color:#1a1a2e}
+.qm-quiz-feedback-answer {font-size:14px;font-weight:900;color:#16A34A;margin-top:2px}
+.qm-quiz-btn {margin-top:18px;width:100%;padding:16px;background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,83,126,.3),0 0 0 3px #3B5CC4;letter-spacing:.02em}
+.qm-quiz-btn.disabled {opacity:.4;cursor:not-allowed;box-shadow:none}
+/* Form Pâques */
+.qm-form-wrap {padding:20px;background:rgba(255,255,255,.4)}
+.qm-form-title {font-family:'Fredoka One',cursive;font-size:22px;color:#4B1528;margin-bottom:4px}
+.qm-form-sub {font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
+.qm-form-field {margin-bottom:12px}
+.qm-form-label {font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qm-form-input {width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
+.qm-form-input:focus {border-color:#D4537E}
+.qm-form-grid {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qm-form-rgpd {display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.7);border-radius:12px;margin-top:6px;align-items:flex-start}
+.qm-form-rgpd-box {width:22px;height:22px;border-radius:6px;background:#D4537E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900}
+.qm-form-rgpd-txt {font-size:11px;font-weight:700;color:#72243E;line-height:1.4}
+/* Chips source (comment avez-vous connu l'événement) */
+.qm-form-source-chips {display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qm-form-source-chip {background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.qm-form-source-chip:hover {transform:translateY(-1px)}
+.qm-form-source-chip.sel {background:#D4537E;color:#fff;border-color:#D4537E;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+/* Loading Pâques */
+.qm-loading {min-height:100%;background:linear-gradient(160deg,#FBEAF0 0%,#E8F8F2 55%,#FAEEDA 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;text-align:center}
+.qm-spinner {width:60px;height:60px;border:5px solid #FBEAF0;border-top-color:#D4537E;border-radius:50%;animation:pq-spin 1s linear infinite}
+.qm-loading-txt {font-family:'Fredoka One',cursive;font-size:17px;color:#4B1528}
+.qm-loading-sub {font-size:12px;font-weight:800;color:#888}
+/* Confirm Pâques */
+.qm-confirm-hero {padding:32px 20px 26px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#D4537E 0%,#EF9F27 100%);color:#fff}
+.qm-confirm-hero::before {content:'';position:absolute;top:-40px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
+.qm-confirm-hero::after {content:'';position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
+.qm-confirm-inner {position:relative;z-index:2}
+.qm-trophy {font-size:56px;margin-bottom:6px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1)}
+.qm-bravo {font-family:'Fredoka One',cursive;font-size:26px;margin-bottom:4px}
+.qm-herosub {font-size:12px;font-weight:800;opacity:.9}
+.qm-score-block {text-align:center;padding:18px 20px 6px}
+.qm-score-num {font-family:'Fredoka One',cursive;font-size:62px;color:#D4537E;line-height:1}
+.qm-score-denom {font-size:24px;color:#EF9F27}
+.qm-score-msg {font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;color:#4B1528;margin-top:4px}
+.qm-correction-wrap {margin:10px 20px 12px;background:#fff;border:1.5px solid #E5E7EB;border-radius:14px;overflow:hidden}
+.qm-correction-header {background:#4B1528;padding:9px 14px;font-size:10px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.12em}
+.qm-correction-row {display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid #F5F2EE;align-items:flex-start}
+.qm-correction-row:last-child {border-bottom:none}
+.qm-correction-icon {font-size:18px;flex-shrink:0}
+.qm-correction-q {font-size:11px;font-weight:800;color:#72243E;margin-bottom:2px;line-height:1.3}
+.qm-correction-a {font-size:12px;font-weight:800;color:#4B1528}
+.qm-correction-good {font-size:11px;font-weight:900;color:#16A34A;margin-top:2px}
+.qm-double-cta {margin:0 20px 8px;padding:16px;background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;width:calc(100% - 40px);text-align:center;box-shadow:0 8px 20px rgba(212,83,126,.3)}
+.qm-double-cta.miss {background:linear-gradient(135deg,#EF9F27,#F59E0B)}
+.qm-double-hint {text-align:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-top:-2px;padding:0 20px}
+.qm-double-skip {text-align:center;padding:4px 20px 12px}
+.qm-double-skip button {background:none;border:none;font-size:11px;color:#bbb;cursor:pointer;text-decoration:underline;font-weight:700}
+/* Bonus Pâques */
+.qm-bonus-hero {padding:24px 20px;background:linear-gradient(135deg,#4B1528,#D4537E);color:#fff;position:relative;overflow:hidden}
+.qm-bonus-hero::after {content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%)}
+.qm-bonus-label {font-size:10px;font-weight:900;opacity:.6;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.qm-bonus-title {font-family:'Fredoka One',cursive;font-size:22px;line-height:1.2;position:relative;z-index:2}
+.qm-bonus-body {padding:16px 20px 20px}
+.qm-bonus-section {font-size:11px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;margin-top:6px}
+.qm-bonus-q-label {font-size:13px;font-weight:900;color:#4B1528;margin-bottom:10px;margin-top:14px}
+.qm-bonus-q-hint {font-weight:600;font-size:10px;color:#aaa;margin-left:4px}
+.qm-bonus-chips {display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.qm-bonus-chip {background:#fff;border:1.5px solid #E5E7EB;border-radius:100px;padding:8px 12px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif}
+.qm-bonus-chip:hover {transform:translateY(-1px)}
+.qm-bonus-chip.sel {background:#D4537E;color:#fff;border-color:#D4537E;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+.qm-bonus-submit {width:100%;margin-top:18px;padding:16px;background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em}
+/* BonusConfirm Pâques */
+.qm-bc-hero {padding:36px 20px 28px;background:linear-gradient(135deg,#1D9E75,#16A34A);color:#fff;text-align:center;position:relative;overflow:hidden}
+.qm-bc-hero::before {content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
+.qm-bc-emoji {font-size:64px;margin-bottom:8px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1);position:relative;z-index:2}
+.qm-bc-title {font-family:'Fredoka One',cursive;font-size:24px;line-height:1.2;margin-bottom:4px;position:relative;z-index:2}
+.qm-bc-sub {font-size:12px;font-weight:800;opacity:.9;position:relative;z-index:2}
+.qm-bc-score-card {margin:16px 20px 12px;background:#fff;border:1.5px solid #86EFAC;border-radius:18px;padding:18px;text-align:center;box-shadow:0 4px 16px rgba(29,158,117,.15)}
+.qm-bc-score-label {font-size:10px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.qm-bc-score-val {font-family:'Fredoka One',cursive;font-size:40px;color:#1D9E75;line-height:1}
+.qm-bc-score-denom {font-size:18px;color:#16A34A;margin-left:2px}
+.qm-bc-score-plus {display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:900;margin-top:8px}
+.qm-ticket {margin:0 20px 14px;background:#fff;border:1.5px dashed #D4537E;border-radius:16px;padding:18px;text-align:center;position:relative}
+.qm-ticket-label {font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.qm-ticket-code {font-family:'Fredoka One',cursive;font-size:26px;color:#4B1528;letter-spacing:.08em;margin:8px 0}
+.qm-ticket-hint {font-size:11px;font-weight:700;color:#888;line-height:1.4}
+.qm-bc-info {margin:0 20px 14px;padding:14px 16px;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.25);border-radius:14px;display:flex;align-items:center;gap:12px}
+.qm-bc-info-ico {font-size:22px}
+.qm-bc-info-txt {font-size:12px;font-weight:800;color:#4B1528;line-height:1.4}
+/* Social links Pâques (rendu dynamique 1 à N liens) */
+.qm-social-wrap {margin:0 20px 14px}
+.qm-social-label {font-size:10px;font-weight:900;color:#72243E;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
+.qm-social-grid {display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.qm-social-link {flex:1;min-width:0;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit}
+.qm-social-link:hover {transform:translateY(-2px);border-color:#D4537E;box-shadow:0 6px 16px rgba(212,83,126,.15)}
+.qm-social-icon {font-size:22px}
+.qm-social-name {font-size:10px;font-weight:900;color:#4B1528}
+/* Bouton Partager Pâques avec badge +1 point */
+.qm-share-btn {width:100%;padding:16px;background:linear-gradient(135deg,#D4537E,#EF9F27);color:#fff;border:none;border-radius:16px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
+.qm-share-btn:hover {transform:translateY(-1px);box-shadow:0 12px 26px rgba(212,83,126,.4)}
+.qm-share-btn.done {background:linear-gradient(135deg,#1D9E75,#16A34A);box-shadow:0 8px 20px rgba(29,158,117,.25);cursor:default}
+.qm-share-btn.done:hover {transform:none}
+.qm-share-badge {background:rgba(255,255,255,.25);border-radius:100px;padding:3px 10px;font-family:'Nunito',sans-serif;font-weight:900;font-size:11px;letter-spacing:.05em}
+/* Animation du score qui passe de 3 à 4 */
+.qm-bc-score-val.boost {animation:score-pop .7s cubic-bezier(.3,1.6,.5,1)}
+.qm-bc-score-plus.boost {animation:badge-pop .5s ease}
+/* ─── Bottom-sheet partage (WhatsApp + SMS) ─── */
+.qm-share-backdrop {position:absolute;inset:0;background:rgba(26,16,51,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:200}
+.qm-share-backdrop.on {opacity:1;pointer-events:auto}
+.qm-share-sheet {position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 28px;box-shadow:0 -10px 30px rgba(26,16,51,.18);transform:translateY(100%);transition:transform .3s cubic-bezier(.3,1,.3,1);z-index:201}
+.qm-share-sheet.on {transform:translateY(0)}
+.qm-share-handle {width:40px;height:4px;border-radius:100px;background:#E5E7EB;margin:0 auto 14px}
+.qm-share-title {font-family:'Fredoka One',cursive;font-size:18px;color:#4B1528;text-align:center;margin-bottom:4px}
+.qm-share-sub {font-size:11px;font-weight:800;color:#888;text-align:center;margin-bottom:16px}
+.qm-share-preview {background:#FBEAF0;border:1px solid rgba(212,83,126,.2);border-radius:14px;padding:10px 12px;font-size:11px;font-weight:700;color:#72243E;line-height:1.4;margin-bottom:14px;font-family:'Nunito',sans-serif;max-height:80px;overflow:hidden}
+.qm-share-preview strong {color:#D4537E;font-weight:900;word-break:break-all}
+.qm-share-options {display:flex;flex-direction:column;gap:10px}
+.qm-share-option {display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:1.5px solid #F0EDE8;background:#fff;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;width:100%;text-align:left;color:inherit;text-decoration:none}
+.qm-share-option:hover {transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.qm-share-option-icon {width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:#fff}
+.qm-share-option-icon.wa {background:linear-gradient(135deg,#25D366,#128C7E)}
+.qm-share-option-icon.sms {background:linear-gradient(135deg,#34D399,#059669)}
+.qm-share-option-body {flex:1;min-width:0}
+.qm-share-option-name {font-size:14px;font-weight:900;color:#4B1528;line-height:1.2}
+.qm-share-option-hint {font-size:11px;font-weight:700;color:#888;margin-top:2px}
+.qm-share-option-arrow {font-size:16px;color:#D4537E;font-weight:900;flex-shrink:0}
+.qm-share-badge-plus {display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:2px 8px;font-size:9px;font-weight:900;margin-left:6px;letter-spacing:.04em}
+.qm-share-cancel {width:100%;margin-top:14px;padding:12px;background:#F8F6F2;border:1.5px solid #F0EDE8;border-radius:100px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;color:#888;cursor:pointer}
+.qm-share-cancel:hover {background:#F0EDE8}
+/* Toast confirmation après partage */
+.qm-toast {position:absolute;left:50%;top:20%;transform:translateX(-50%) translateY(-20px);background:#1D9E75;color:#fff;padding:12px 18px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:13px;box-shadow:0 8px 24px rgba(29,158,117,.4);opacity:0;pointer-events:none;transition:all .3s ease;z-index:300;white-space:nowrap}
+.qm-toast.on {opacity:1;transform:translateX(-50%) translateY(0)}
+/* ─── Fin CSS : vote-stars complémentaire + chips source + footer ─── */
+
+/* Chips source Pâques (connu comment) */
+.qm-form-source-chips {display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qm-form-source-chip {background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.qm-form-source-chip:hover {transform:translateY(-1px)}
+.qm-form-source-chip.sel {background:#D4537E;color:#fff;border-color:#D4537E;box-shadow:0 3px 10px rgba(212,83,126,.3)}
 </style>
 </head>
 <body>
@@ -2250,29 +2439,29 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="qm-ville">Vence · Source d'inspiration</div>
           <div class="qm-title">Quiz Master<br>Grand Live</div>
           <div class="qm-dates">Soirée Live 2026</div>
-          <div class="qm-emojis">🥚 🦋 🌸 🌼</div>
+          <div class="qm-emojis">🎤 🏆 🎯 📺</div>
         </div>
         <div class="qm-bande"></div>
         <div class="qm-lots-wrap">
-          <div class="qm-lots-label">Tombola de Pâques</div>
+          <div class="qm-lots-label">Classement Quiz Master</div>
           <div class="qm-lot-row">
-            <div class="qm-lot-ico">🥚</div>
+            <div class="qm-lot-ico">🎤</div>
             <div class="qm-lot-body">
-              <div class="qm-lot-desc">Tombola Pâques 2026 — 1er au 3ème tirage</div>
-              <div class="qm-lot-val">Offert par la Ville de Vence</div>
+              <div class="qm-lot-desc">Classement Quiz Master 2026 — 1er au 3ème prix</div>
+              <div class="qm-lot-val">Animation Quiz Master live</div>
             </div>
           </div>
           <div class="qm-lot-row">
-            <div class="qm-lot-ico">🌸</div>
+            <div class="qm-lot-ico">🎯</div>
             <div class="qm-lot-body">
-              <div class="qm-lot-desc">Cinéma Casino de Vence</div>
-              <div class="qm-lot-val">2 places offertes</div>
+              <div class="qm-lot-desc">Carte cadeau Casino Cinéma</div>
+              <div class="qm-lot-val">1 abonnement annuel offert</div>
             </div>
           </div>
           <div class="qm-tirage">🏛️ Tirage au sort Soirée Quiz Master 11h</div>
         </div>
         <div class="qm-cta-wrap">
-          <button class="qm-cta" onclick="qmGo(2)">🐣 Participer gratuitement</button>
+          <button class="qm-cta" onclick="qmGo(2)">🎤 Participer gratuitement</button>
           <div class="qm-cta-hint">Jeu gratuit · Sans achat obligatoire</div>
         </div>
         <div class="qm-footer">
@@ -2376,7 +2565,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
         <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback" style="background:transparent">
           <div class="back-btn" onclick="qmGo(4)">←</div>
-          <div><div class="header-title" style="color:#312E81">Tes coordonnées</div><div class="header-sub">Pour la tombola du Soirée Quiz Master</div></div>
+          <div><div class="header-title" style="color:#312E81">Tes coordonnées</div><div class="header-sub">Pour le classement du Quiz Master Live</div></div>
         </div>
         <div class="qm-form-wrap">
           <div class="qm-form-grid">
@@ -2503,7 +2692,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
         </div>
         <div style="padding:0 20px 16px">
           <div class="partenaires">
-            <div class="partenaires-label">★ Partenaires Fêtes de Pâques 2026 ★</div>
+            <div class="partenaires-label">★ Partenaires Quiz Master Grand Live 2026 ★</div>
             <div class="partenaires-grid">
               <div class="partenaire-tile" onclick="window.open('https://www.vence.fr','_blank')">
                 <div class="partenaire-emoji">🏛️</div>
@@ -2578,7 +2767,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="qm-bc-sub">Ton bonus est enregistré</div>
         </div>
         <div class="qm-bc-score-card">
-          <div class="qm-bc-score-label">Ton score final pour la tombola</div>
+          <div class="qm-bc-score-label">Ton score final au Quiz Master</div>
           <div class="qm-bc-score-val" id="qm-score-val">3<span class="qm-bc-score-denom">/4</span></div>
           <div class="qm-bc-score-plus" id="qm-score-plus">+1 POINT BONUS</div>
         </div>
@@ -2619,7 +2808,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
           <div class="qm-share-title">Partage avec tes proches</div>
           <div class="qm-share-sub">+1 point bonus pour la tombola 🎟️</div>
           <div class="qm-share-preview">
-            « Je viens de jouer au quiz Quiz Master Grand Live 2026 🐣 à toi de tenter ta chance ! <strong>flowin.romain-opconsult.com/paques-vence-2026</strong> »
+            « Je viens de jouer au Quiz Master Grand Live 2026 🎤 à toi de tenter ta chance ! <strong>flowin.romain-opconsult.com/quizmaster-2026</strong> »
           </div>
           <div class="qm-share-options">
             <button class="qm-share-option" onclick="qmShareVia('whatsapp')">
@@ -2650,7 +2839,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
         <div class="ad-screen" style="background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 100%)">
           <div class="ad-icon">✋</div>
           <div class="ad-title">Tu as déjà joué !</div>
-          <div class="ad-msg">Cette adresse email a déjà participé aux Fêtes de Pâques 2026.<br>Une seule participation par personne.</div>
+          <div class="ad-msg">Cette adresse email a déjà participé aux Quiz Master Grand Live 2026.<br>Une seule participation par personne.</div>
           <div class="ad-email" id="qm-ad-email">camille@exemple.fr</div>
           <div class="ticket" style="margin:0 20px">
             <div class="ticket-icon">🎟️</div>
@@ -3572,3 +3761,207 @@ function flowinHydrateQuizmasterBonus(){
 </script>
 </body>
 </html>
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* QUIZMASTER CSS — clone de Pâques avec couleurs adaptées             */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TÉLÉPHONE #2 — Pâques Hybride (couleurs prod + typo Fredoka)        */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Palette Pâques réelle (from index.html prod) */
+.quizmaster-viewport{background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%)}
+/* Landing Pâques */
+.qm-landing{padding:28px 22px 20px;text-align:center}
+.qm-ville{font-size:9px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.18em;margin-bottom:14px}
+.qm-title{font-family:'Fredoka One',cursive;font-size:46px;color:#6366F1;line-height:.95;margin-bottom:12px;letter-spacing:-.01em}
+.qm-dates{font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:#A855F7;letter-spacing:.03em;margin-bottom:16px}
+.qm-emojis{font-size:24px;letter-spacing:10px;opacity:.55}
+.qm-bande{height:4px;background:linear-gradient(90deg,#6366F1,#A855F7,#1D9E75,#AFA9EC,#6366F1)}
+/* Section Lots */
+.qm-lots-wrap{padding:16px 18px 0}
+.qm-lots-label{font-size:9px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.qm-lots-label::before{content:'';width:8px;height:8px;border-radius:50%;background:#6366F1}
+.qm-lot-row{background:rgba(255,255,255,.9);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(212,83,126,.12);box-shadow:0 1px 4px rgba(212,83,126,.08)}
+.qm-lot-ico{width:34px;height:34px;border-radius:10px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.qm-lot-body{flex:1;min-width:0}
+.qm-lot-desc{font-size:14px;font-weight:800;color:#312E81}
+.qm-lot-val{font-size:11px;font-weight:700;color:#1D9E75;margin-top:1px}
+.qm-tirage{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#72243E;margin-bottom:14px;padding-top:10px;border-top:1px solid rgba(212,83,126,.12);margin-top:6px}
+/* CTA Pâques */
+.qm-cta-wrap{padding:0 18px 10px}
+.qm-cta{width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:16px;border:none;border-radius:16px;cursor:pointer;letter-spacing:.01em;box-shadow:0 8px 22px rgba(212,83,126,.3)}
+.qm-cta-hint{text-align:center;font-size:10px;color:#bbb;margin-top:7px;font-weight:700}
+/* Footer attribution */
+.qm-footer{text-align:center;padding:14px 0 22px;border-top:1px solid rgba(212,83,126,.1);margin-top:10px}
+.qm-footer-txt{font-size:9px;color:#ccc;letter-spacing:.06em;font-weight:700}
+/* Quiz Pâques */
+.qm-quiz-screen{min-height:100%;background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%);padding-top:12px}
+.qm-quiz-progress{padding:14px 20px}
+.qm-quiz-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qm-quiz-step-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.1em}
+.qm-quiz-step-dots{display:flex;gap:5px}
+.qm-quiz-dot{width:22px;height:4px;border-radius:100px;background:rgba(212,83,126,.2)}
+.qm-quiz-dot.active{background:#6366F1}
+.qm-quiz-dot.done{background:#1D9E75}
+.qm-quiz-body{padding:14px 20px 20px}
+.qm-quiz-num{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
+.qm-quiz-question{font-family:'Fredoka One',cursive;font-size:21px;color:#312E81;line-height:1.25;margin-bottom:20px}
+.qm-quiz-options{display:flex;flex-direction:column;gap:10px}
+.qm-quiz-opt{background:#fff;border:1.5px solid #BFDBFE;border-radius:13px;padding:14px 16px;font-size:14px;font-weight:800;color:#1a1a2e;cursor:pointer;text-align:left;width:100%;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);font-family:'Nunito',sans-serif}
+.qm-quiz-opt:hover{transform:translateY(-1px)}
+.qm-quiz-opt.sel{background:#fff;color:#3B5CC4;border-color:#3B5CC4;border-width:2px;box-shadow:0 0 0 3px rgba(59,92,196,.15)}
+.qm-quiz-opt.correct{background:#F0FDF4;color:#16A34A;border-color:#22C55E;cursor:default}
+.qm-quiz-opt.wrong{background:#EFF6FF;color:#3B82F6;border-color:#60A5FA;cursor:default}
+.qm-quiz-opt.neutral{background:#F9FAFB;color:#9CA3AF;border-color:#E5E7EB;cursor:default}
+.qm-quiz-feedback{margin-top:14px;border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px}
+.qm-quiz-feedback.ok{background:#F0FDF4;border:1.5px solid #86EFAC}
+.qm-quiz-feedback.ko{background:#FFF5F5;border:1.5px solid #FECACA}
+.qm-quiz-feedback-icon{font-size:22px;flex-shrink:0}
+.qm-quiz-feedback-label{font-size:13px;font-weight:800;color:#1a1a2e}
+.qm-quiz-feedback-answer{font-size:14px;font-weight:900;color:#16A34A;margin-top:2px}
+.qm-quiz-btn{margin-top:18px;width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,83,126,.3),0 0 0 3px #3B5CC4;letter-spacing:.02em}
+.qm-quiz-btn.disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+/* Form Pâques */
+.qm-form-wrap{padding:20px;background:rgba(255,255,255,.4)}
+.qm-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#312E81;margin-bottom:4px}
+.qm-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
+.qm-form-field{margin-bottom:12px}
+.qm-form-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qm-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
+.qm-form-input:focus{border-color:#6366F1}
+.qm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qm-form-rgpd{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.7);border-radius:12px;margin-top:6px;align-items:flex-start}
+.qm-form-rgpd-box{width:22px;height:22px;border-radius:6px;background:#6366F1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900}
+.qm-form-rgpd-txt{font-size:11px;font-weight:700;color:#72243E;line-height:1.4}
+/* Chips source (comment avez-vous connu l'événement) */
+.qm-form-source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qm-form-source-chip{background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.qm-form-source-chip:hover{transform:translateY(-1px)}
+.qm-form-source-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+/* Loading Pâques */
+.qm-loading{min-height:100%;background:linear-gradient(160deg,#EEF2FF 0%,#E8F8F2 55%,#FAF5FF 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 20px;text-align:center}
+.qm-spinner{width:60px;height:60px;border:5px solid #EEF2FF;border-top-color:#6366F1;border-radius:50%;animation:pq-spin 1s linear infinite}
+.qm-loading-txt{font-family:'Fredoka One',cursive;font-size:17px;color:#312E81}
+.qm-loading-sub{font-size:12px;font-weight:800;color:#888}
+/* Confirm Pâques */
+.qm-confirm-hero{padding:32px 20px 26px;text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#6366F1 0%,#A855F7 100%);color:#fff}
+.qm-confirm-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
+.qm-confirm-hero::after{content:'';position:absolute;bottom:-30px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
+.qm-confirm-inner{position:relative;z-index:2}
+.qm-trophy{font-size:56px;margin-bottom:6px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1)}
+.qm-bravo{font-family:'Fredoka One',cursive;font-size:26px;margin-bottom:4px}
+.qm-herosub{font-size:12px;font-weight:800;opacity:.9}
+.qm-score-block{text-align:center;padding:18px 20px 6px}
+.qm-score-num{font-family:'Fredoka One',cursive;font-size:62px;color:#6366F1;line-height:1}
+.qm-score-denom{font-size:24px;color:#A855F7}
+.qm-score-msg{font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;color:#312E81;margin-top:4px}
+.qm-correction-wrap{margin:10px 20px 12px;background:#fff;border:1.5px solid #E5E7EB;border-radius:14px;overflow:hidden}
+.qm-correction-header{background:#312E81;padding:9px 14px;font-size:10px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.12em}
+.qm-correction-row{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid #F5F2EE;align-items:flex-start}
+.qm-correction-row:last-child{border-bottom:none}
+.qm-correction-icon{font-size:18px;flex-shrink:0}
+.qm-correction-q{font-size:11px;font-weight:800;color:#72243E;margin-bottom:2px;line-height:1.3}
+.qm-correction-a{font-size:12px;font-weight:800;color:#312E81}
+.qm-correction-good{font-size:11px;font-weight:900;color:#16A34A;margin-top:2px}
+.qm-double-cta{margin:0 20px 8px;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;width:calc(100% - 40px);text-align:center;box-shadow:0 8px 20px rgba(212,83,126,.3)}
+.qm-double-cta.miss{background:linear-gradient(135deg,#A855F7,#F59E0B)}
+.qm-double-hint{text-align:center;font-size:11px;font-weight:700;color:#9CA3AF;margin-top:-2px;padding:0 20px}
+.qm-double-skip{text-align:center;padding:4px 20px 12px}
+.qm-double-skip button{background:none;border:none;font-size:11px;color:#bbb;cursor:pointer;text-decoration:underline;font-weight:700}
+/* Bonus Pâques */
+.qm-bonus-hero{padding:24px 20px;background:linear-gradient(135deg,#312E81,#6366F1);color:#fff;position:relative;overflow:hidden}
+.qm-bonus-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%)}
+.qm-bonus-label{font-size:10px;font-weight:900;opacity:.6;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.qm-bonus-title{font-family:'Fredoka One',cursive;font-size:22px;line-height:1.2;position:relative;z-index:2}
+.qm-bonus-body{padding:16px 20px 20px}
+.qm-bonus-section{font-size:11px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;margin-top:6px}
+.qm-bonus-q-label{font-size:13px;font-weight:900;color:#312E81;margin-bottom:10px;margin-top:14px}
+.qm-bonus-q-hint{font-weight:600;font-size:10px;color:#aaa;margin-left:4px}
+.qm-bonus-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.qm-bonus-chip{background:#fff;border:1.5px solid #E5E7EB;border-radius:100px;padding:8px 12px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif}
+.qm-bonus-chip:hover{transform:translateY(-1px)}
+.qm-bonus-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+.qm-bonus-submit{width:100%;margin-top:18px;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em}
+/* BonusConfirm Pâques */
+.qm-bc-hero{padding:36px 20px 28px;background:linear-gradient(135deg,#1D9E75,#16A34A);color:#fff;text-align:center;position:relative;overflow:hidden}
+.qm-bc-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
+.qm-bc-emoji{font-size:64px;margin-bottom:8px;display:inline-block;animation:bounce .6s cubic-bezier(.3,1.5,.5,1);position:relative;z-index:2}
+.qm-bc-title{font-family:'Fredoka One',cursive;font-size:24px;line-height:1.2;margin-bottom:4px;position:relative;z-index:2}
+.qm-bc-sub{font-size:12px;font-weight:800;opacity:.9;position:relative;z-index:2}
+.qm-bc-score-card{margin:16px 20px 12px;background:#fff;border:1.5px solid #86EFAC;border-radius:18px;padding:18px;text-align:center;box-shadow:0 4px 16px rgba(29,158,117,.15)}
+.qm-bc-score-label{font-size:10px;font-weight:900;color:#1D9E75;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.qm-bc-score-val{font-family:'Fredoka One',cursive;font-size:40px;color:#1D9E75;line-height:1}
+.qm-bc-score-denom{font-size:18px;color:#16A34A;margin-left:2px}
+.qm-bc-score-plus{display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:900;margin-top:8px}
+.qm-ticket{margin:0 20px 14px;background:#fff;border:1.5px dashed #6366F1;border-radius:16px;padding:18px;text-align:center;position:relative}
+.qm-ticket-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.qm-ticket-code{font-family:'Fredoka One',cursive;font-size:26px;color:#312E81;letter-spacing:.08em;margin:8px 0}
+.qm-ticket-hint{font-size:11px;font-weight:700;color:#888;line-height:1.4}
+.qm-bc-info{margin:0 20px 14px;padding:14px 16px;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.25);border-radius:14px;display:flex;align-items:center;gap:12px}
+.qm-bc-info-ico{font-size:22px}
+.qm-bc-info-txt{font-size:12px;font-weight:800;color:#312E81;line-height:1.4}
+/* Social links Pâques (rendu dynamique 1 à N liens) */
+.qm-social-wrap{margin:0 20px 14px}
+.qm-social-label{font-size:10px;font-weight:900;color:#72243E;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
+.qm-social-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.qm-social-link{flex:1;min-width:0;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;text-decoration:none;color:inherit}
+.qm-social-link:hover{transform:translateY(-2px);border-color:#6366F1;box-shadow:0 6px 16px rgba(212,83,126,.15)}
+.qm-social-icon{font-size:22px}
+.qm-social-name{font-size:10px;font-weight:900;color:#312E81}
+/* Bouton Partager Pâques avec badge +1 point */
+.qm-share-btn{width:100%;padding:16px;background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;border:none;border-radius:16px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(212,83,126,.3);letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
+.qm-share-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(212,83,126,.4)}
+.qm-share-btn.done{background:linear-gradient(135deg,#1D9E75,#16A34A);box-shadow:0 8px 20px rgba(29,158,117,.25);cursor:default}
+.qm-share-btn.done:hover{transform:none}
+.qm-share-badge{background:rgba(255,255,255,.25);border-radius:100px;padding:3px 10px;font-family:'Nunito',sans-serif;font-weight:900;font-size:11px;letter-spacing:.05em}
+/* Animation du score qui passe de 3 à 4 */
+.qm-bc-score-val.boost{animation:score-pop .7s cubic-bezier(.3,1.6,.5,1)}
+.qm-bc-score-plus.boost{animation:badge-pop .5s ease}
+/* ─── Bottom-sheet partage (WhatsApp + SMS) ─── */
+.qm-share-backdrop{position:absolute;inset:0;background:rgba(26,16,51,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:200}
+.qm-share-backdrop.on{opacity:1;pointer-events:auto}
+.qm-share-sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 28px;box-shadow:0 -10px 30px rgba(26,16,51,.18);transform:translateY(100%);transition:transform .3s cubic-bezier(.3,1,.3,1);z-index:201}
+.qm-share-sheet.on{transform:translateY(0)}
+.qm-share-handle{width:40px;height:4px;border-radius:100px;background:#E5E7EB;margin:0 auto 14px}
+.qm-share-title{font-family:'Fredoka One',cursive;font-size:18px;color:#312E81;text-align:center;margin-bottom:4px}
+.qm-share-sub{font-size:11px;font-weight:800;color:#888;text-align:center;margin-bottom:16px}
+.qm-share-preview{background:#EEF2FF;border:1px solid rgba(212,83,126,.2);border-radius:14px;padding:10px 12px;font-size:11px;font-weight:700;color:#72243E;line-height:1.4;margin-bottom:14px;font-family:'Nunito',sans-serif;max-height:80px;overflow:hidden}
+.qm-share-preview strong{color:#6366F1;font-weight:900;word-break:break-all}
+.qm-share-options{display:flex;flex-direction:column;gap:10px}
+.qm-share-option{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:1.5px solid #F5F3FF;background:#fff;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;width:100%;text-align:left;color:inherit;text-decoration:none}
+.qm-share-option:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.qm-share-option-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:#fff}
+.qm-share-option-icon.wa{background:linear-gradient(135deg,#25D366,#128C7E)}
+.qm-share-option-icon.sms{background:linear-gradient(135deg,#34D399,#059669)}
+.qm-share-option-body{flex:1;min-width:0}
+.qm-share-option-name{font-size:14px;font-weight:900;color:#312E81;line-height:1.2}
+.qm-share-option-hint{font-size:11px;font-weight:700;color:#888;margin-top:2px}
+.qm-share-option-arrow{font-size:16px;color:#6366F1;font-weight:900;flex-shrink:0}
+.qm-share-badge-plus{display:inline-block;background:#1D9E75;color:#fff;border-radius:100px;padding:2px 8px;font-size:9px;font-weight:900;margin-left:6px;letter-spacing:.04em}
+.qm-share-cancel{width:100%;margin-top:14px;padding:12px;background:#F8F6F2;border:1.5px solid #F5F3FF;border-radius:100px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;color:#888;cursor:pointer}
+.qm-share-cancel:hover{background:#F5F3FF}
+/* Toast confirmation après partage */
+.qm-toast{position:absolute;left:50%;top:20%;transform:translateX(-50%) translateY(-20px);background:#1D9E75;color:#fff;padding:12px 18px;border-radius:100px;font-family:'Fredoka One',cursive;font-size:13px;box-shadow:0 8px 24px rgba(29,158,117,.4);opacity:0;pointer-events:none;transition:all .3s ease;z-index:300;white-space:nowrap}
+.qm-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ─── Fin CSS : vote-stars complémentaire + chips source + footer ─── */
+
+/* Chips source Pâques (connu comment) */
+.qm-form-source-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.qm-form-source-chip{background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#72243E;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
+.qm-form-source-chip:hover{transform:translateY(-1px)}
+.qm-form-source-chip.sel{background:#6366F1;color:#fff;border-color:#6366F1;box-shadow:0 3px 10px rgba(212,83,126,.3)}
+/* ═══════════════════════════════════════════════════════════════════ */
+/* PICK SOURCE (chips "comment nous as-tu connu") — 3 variantes         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Pâques : chips avec classe .qm-form-source-chip */
+function pqPickSource(el){
+  var parent = el.parentElement;
+  parent.querySelectorAll('.qm-form-source-chip').forEach(function(c){
+    c.classList.remove('sel');
+  });
+  el.classList.add('sel');
+}
+
