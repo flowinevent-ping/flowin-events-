@@ -6428,25 +6428,16 @@ function renderBiblioJeux(){
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
   // ── Parcours complet validé : iframe parcours_user.html ──
-  var _noModule = (tab === 'standup'); // Stand Up n'a pas de parcours_user
-  var _masterUrl = _noModule ? '' : ('/' + encodeURIComponent(tab) + '.html');
+  var _masterUrl = '/' + encodeURIComponent(tab) + '.html';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
   html += '<div class="section-h" style="margin:0">📱 Parcours joueur · complet</div>';
   html += '<a href="'+escAttr(_masterUrl)+'" target="_blank" style="background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
   html += '</div>';
-  if(_noModule) {
-    html += '<div style="display:flex;justify-content:center;align-items:center;height:300px;flex-direction:column;gap:12px;color:var(--sa-muted)">';
-    html += '<div style="font-size:48px">🌟</div>';
-    html += '<div style="font-weight:700;font-size:13px">Stand Up</div>';
-    html += '<div style="font-size:11px;text-align:center;max-width:200px">Ce module fonctionne en mode animateur live — pas de parcours QR individuel.</div>';
-    html += '</div>';
-  } else {
-    html += '<div style="display:flex;justify-content:center">';
-    html += '<div style="width:260px;height:540px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #333;position:relative">';
-    html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:80px;height:18px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-    html += '<iframe src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:28px;border:none" title="Parcours '+escAttr(tab)+'"></iframe>';
-    html += '</div></div>';
-  }
+  html += '<div style="display:flex;justify-content:center">';
+  html += '<div style="width:260px;height:540px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #333;position:relative">';
+  html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:80px;height:18px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+  html += '<iframe src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:28px;border:none" title="Parcours '+escAttr(tab)+'"></iframe>';
+  html += '</div></div>';
   html += '</div>'; // fin colonne droite
 
   html += '</div>'; // fin grid 2 colonnes
