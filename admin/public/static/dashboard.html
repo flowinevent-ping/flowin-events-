@@ -862,9 +862,6 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .wiz-seq-dot.active{background:var(--sa-accent);transform:scale(1.3)}
 .wiz-seq-label{font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;text-align:center;margin-bottom:6px}
 .wiz-seq-frame{animation:seqFade .18s ease}
-.phone-frame{position:relative;overflow:hidden}
-.phone-scaler-wrap{width:375px;transform-origin:top left;transform:scale(0.8107);pointer-events:none}
-.phone-screen{min-height:420px;max-height:600px;overflow:hidden}
 @keyframes seqFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── Phone mockup responsive ── */
@@ -891,8 +888,8 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .flowin-phone-frame {
   background: #111;
   border-radius: 36px;
-  padding: 0;
-  box-shadow: 0 12px 40px rgba(0,0,0,.28), inset 0 0 0 10px #1a1a1a, inset 0 0 0 2px #2d2d2d;
+  padding: 8px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.28), inset 0 0 0 2px #2d2d2d;
   position: relative;
   width: min(280px, 100%);
   aspect-ratio: 9 / 19.5;
@@ -910,14 +907,14 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
   width: 375px;
   height: 812px;
   transform-origin: top left;
-  transform: scale(0.747); /* 280/375 — frame full width */
+  transform: scale(0.704); /* 264/375 — frame inner 264px */
 }
 .flowin-phone-scaler iframe {
   width: 375px;
   height: 812px;
   border: none;
   display: block;
-  border-radius: 34px;
+  border-radius: 28px;
 }
 </style>
 </head>
@@ -977,7 +974,7 @@ const SEED = {
     
   ],
   events: [
-    {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',description:'Vence · Source d\'inspiration',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
+    {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
       cfg:{subtitle:'VENCE · SOURCE D\'INSPIRATION',datesLabel:'4, 5 & 6 Avril 2026',tirageDate:'Lundi de Pâques 11h',qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-paques',quizBanques:['bq-paques-vence'],optinActif:true,
       customQuestions:[
         {id:'decouverte',label:'Comment avez-vous connu l\'événement ?',type:'single',options:[
@@ -1293,14 +1290,14 @@ const SEED = {
     ]}
   ],
   lots: [
-    {id:'lot-pq-1',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-02',retire:true,dateRetrait:'2026-04-07',note:'Valable le 9, 11 ou 16 juillet 2026'},
-    {id:'lot-pq-2',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-06',retire:true,dateRetrait:'2026-04-07',note:'Valable le 9, 11 ou 16 juillet 2026'},
-    {id:'lot-pq-3',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-09',retire:true,dateRetrait:'2026-04-07',note:'Valable le 9, 11 ou 16 juillet 2026'},
-    {id:'lot-paques-4',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',desc:'2 places offertes',emoji:'🌸',valeur:0,quantite:2,assigneA:'j-pq-15',retire:true,dateRetrait:'2026-04-07',note:'Cinéma Casino de Vence'},
-    {id:'lot-paques-5',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',desc:'2 places offertes',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'Cinéma Casino de Vence'},
-    {id:'lot-paques-6',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',desc:'2 places offertes',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'Cinéma Casino de Vence'},
-    {id:'lot-paques-7',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',desc:'2 places offertes',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'Cinéma Casino de Vence'},
-    {id:'lot-paques-8',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',desc:'2 places offertes',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'Cinéma Casino de Vence'}
+    {id:'lot-pq-1',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-02',retire:true,dateRetrait:'2026-04-07',note:''},
+    {id:'lot-pq-2',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-06',retire:true,dateRetrait:'2026-04-07',note:''},
+    {id:'lot-pq-3',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-09',retire:true,dateRetrait:'2026-04-07',note:''},
+    {id:'lot-pq-4',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',emoji:'🌸',valeur:0,quantite:2,assigne:'j-pq-15',retire:true,dateRetrait:'2026-04-07',note:'2 places offertes'},
+    {id:'lot-pq-5',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'2 places offertes'},
+    {id:'lot-pq-6',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'2 places offertes'},
+    {id:'lot-pq-7',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'2 places offertes'},
+    {id:'lot-pq-8',eventId:'ev-paques',partenaireId:'',nom:'Cinéma Casino de Vence',emoji:'🌸',valeur:0,quantite:2,assigneA:'',retire:false,dateRetrait:'',note:'2 places offertes'}
   ],
     modules: {
     quiz:{label:'Quiz',cls:'quiz',emoji:'❓',desc:'Quiz à choix multiples'},
@@ -1514,7 +1511,7 @@ function migrateData(data){
   // Init DATA.landing si absent
   if(!data.landing){
     data.landing = {
-      deployUrl: 'https://flowin-events.vercel.app/landing/',
+      deployUrl: '',
       waNumber: '33XXXXXXXXX',
       accentColor: '#3B5CC4',
       moduleJeu: 'spin',
@@ -1830,7 +1827,6 @@ async function supaWriteBanque(b){
   if(!b || !b.id) return;
   var payload = {
     id: b.id, nom: b.nom, description: b.description||'',
-    pro_id: b.proId||null,
     event_ids: Array.isArray(b.events) ? b.events : [],
     questions: Array.isArray(b.questions) ? b.questions : [],
     tags: Array.isArray(b.tags) ? b.tags : []
@@ -5962,7 +5958,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid);
+  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid) + '&module=' + encodeURIComponent(e.module||'quiz');
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
@@ -7170,7 +7166,7 @@ function newLanding(){
     nom: 'Nouvelle landing',
     statut: 'brouillon',
     published: false,
-    deployUrl: '',
+    deployUrl: 'https://flowin-events.vercel.app/landing/',
     waNumber: '33XXXXXXXXX',
     accentColor: '#3B5CC4',
     moduleJeu: 'spin',
@@ -9091,12 +9087,12 @@ function renderWizPreviewSequence(d, ctx) {
 
   // Phone frame
   html += '<div class="wiz-seq-frame">';
-  html += '<div class="phone-frame"><div class="phone-screen"><div class="phone-scaler-wrap">';
+  html += '<div class="phone-frame"><div class="phone-screen">';
   html += '<div class="phone-bar" style="background:linear-gradient(135deg,'+(d.couleur||'#D4537E')+',#EF9F27,#1D9E75)">';
   html += 'FLOWIN · '+esc((d.nom||'Event').slice(0,18));
   html += '</div>';
   html += page.html;
-  html += '</div></div></div>';
+  html += '</div></div>';
   html += '</div>';
 
   html += '</div>';
@@ -9111,10 +9107,8 @@ function wizPreviewFront(d, couleur, nom, lots, partenaires) {
   // Bande couleur en haut comme le vrai parcours
   html += '<div style="height:3px;background:linear-gradient(90deg,'+couleur+',#EF9F27,#1D9E75,'+couleur+')"></div>';
   html += '<div style="padding:16px 14px 12px;background:linear-gradient(160deg,'+couleur+'18,'+couleur+'06);text-align:center;border-bottom:1px solid '+couleur+'22">';
-  var _frontSub = (d.cfg && d.cfg.subtitle)
-    ? d.cfg.subtitle
-    : (d.cfg && d.cfg.front && d.cfg.front.ville)
-    ? (d.cfg.front.ville + (d.cfg.front.sousTitre ? ' · ' + d.cfg.front.sousTitre : ''))
+  var _frontSub = (d.cfg && d.cfg.subtitle) ? d.cfg.subtitle
+    : (d.cfg && d.cfg.front && d.cfg.front.ville) ? (d.cfg.front.ville + (d.cfg.front.sousTitre ? ' · ' + d.cfg.front.sousTitre : ''))
     : ((d.lieu||'') + (d.clientType==='btob' ? ' · Découverte Pro' : ' · Source d\'inspiration'));
   html += '<div style="font-size:8px;font-weight:700;color:'+couleur+';text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px">'+esc(_frontSub)+'</div>';
   html += '<div style="font-family:Georgia,serif;font-style:italic;font-size:20px;font-weight:700;color:'+couleur+';line-height:1.1;margin-bottom:6px">'+esc(nom)+'</div>';
@@ -10155,7 +10149,7 @@ function openJoueurModal(evId, evNom, module){
   var openLink = document.getElementById('jmOpenLink');
   var urlDisp = document.getElementById('jmUrlDisplay');
   if(!modal||!iframe) return;
-  var url = '/parcours/'+encodeURIComponent(module||'quiz')+'.html?ev='+encodeURIComponent(evId)+'&module='+encodeURIComponent(module||'quiz');
+  var url = 'parcours_user.html?ev='+encodeURIComponent(evId)+(module?'&module='+encodeURIComponent(module):'');
   sub.textContent = evNom + (module?' · '+module:'');
   iframe.src = url;
   if(openLink) openLink.href = url;
