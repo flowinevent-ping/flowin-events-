@@ -6428,6 +6428,7 @@ function renderBiblioJeux(){
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
   // ── Parcours complet validé : iframe parcours_user.html ──
+  var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
   var _masterUrl = '/' + encodeURIComponent(tab) + '.html';
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
