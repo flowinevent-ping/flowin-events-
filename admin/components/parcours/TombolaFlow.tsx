@@ -6,6 +6,8 @@ interface TombolaEvent { id: string; nom: string; lieu: string; couleur: string;
 interface FormData { prenom: string; nom: string; email: string; tel: string; ville: string; ddn: string; optin: boolean }
 
 function extId(e: string) { return 'j-' + e.toLowerCase().trim().replace(/[^a-z0-9]/g,'-').substring(0,40) }
+function checkPlayed(evId: string) { try { return !!localStorage.getItem('flowin_played_'+evId) } catch { return false } }
+function markPlayed(evId: string, email: string, ticket: string) { try { localStorage.setItem('flowin_played_'+evId, JSON.stringify({email,ticket,ts:Date.now()})) } catch {} }
 function genTicket() { return 'TB-' + new Date().getFullYear() + '-' + Math.floor(1000+Math.random()*8999) }
 
 export default function TombolaFlow({ ev }: { ev: TombolaEvent }) {
@@ -30,7 +32,8 @@ export default function TombolaFlow({ ev }: { ev: TombolaEvent }) {
         headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
         body: JSON.stringify({ event_id:ev.id, ticket_code:ticket, completed:true })
       })
-    } catch(e) { console.warn('[tombola]', e) }
+      markPlayed(ev.id, form.email, ticket)
+  } catch(e) { console.warn('[tombola]', e) }
     setScreen('confirm')
   }
 
