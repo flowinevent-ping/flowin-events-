@@ -7634,52 +7634,41 @@ function modalLanding(data){
 
   // ── TAB APERÇU — navigation page par page
   else if(tab === 'apercu'){
-    // ── Aperçu réel : iframe vers /landing/index.html ──
-    var _ldIframeId = 'iframe-landing-apercu';
-    var _SECTIONS = ['s-hero','s-profils','s-proof','s-cta'];
-    var _LABELS   = ['Accueil','Profils','Preuves','CTA'];
+    var LAND_SECTIONS = ['s-hero','s-profils','s-proof','s-cta'];
+    var LAND_LABELS   = ['Accueil','Profils','Preuves','CTA'];
     if(typeof state.modal.landingPage === 'undefined') state.modal.landingPage = 0;
-    var _lp = state.modal.landingPage || 0;
-    if(_lp < 0) _lp = 0;
-    if(_lp >= _SECTIONS.length) _lp = _SECTIONS.length - 1;
+    var lp = state.modal.landingPage || 0;
+    if(lp < 0) lp = 0;
+    if(lp >= LAND_SECTIONS.length) lp = LAND_SECTIONS.length - 1;
 
-    /* Breadcrumb pages */
+    /* Breadcrumb */
     html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
-    for(var _li=0; _li<_SECTIONS.length; _li++){
-      var _isA = (_li===_lp);
+    for(var li=0; li<LAND_SECTIONS.length; li++){
+      var isA = (li === lp);
       html += '<div style="display:flex;align-items:center;gap:4px">';
-      html += '<button onclick="state.modal.landingPage='+_li+';renderModal()" '
-            + 'style="width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;font-size:9px;font-weight:800;'
-            + 'background:'+(_isA?'var(--sa-accent)':'var(--sa-subtle)')+';'
-            + 'color:'+(_isA?'#fff':'var(--sa-muted)')+'">'
-            + (_li+1)+'</button>';
-      if(_isA) html += '<span style="font-size:10px;font-weight:700;color:var(--sa-accent)">'+_LABELS[_li]+'</span>';
-      if(_li<_SECTIONS.length-1) html += '<span style="color:var(--sa-muted);font-size:9px">›</span>';
+      html += '<button style="width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;font-size:9px;font-weight:800;'
+            + 'background:'+(isA?'var(--sa-accent)':'var(--sa-subtle)')+';color:'+(isA?'#fff':'var(--sa-muted)')+'"'
+            + ' onclick="state.modal.landingPage='+li+';renderModal()">'+( li+1)+'</button>';
+      if(isA) html += '<span style="font-size:10px;font-weight:700;color:var(--sa-accent)">'+LAND_LABELS[li]+'</span>';
+      if(li < LAND_SECTIONS.length-1) html += '<span style="color:var(--sa-muted);font-size:9px">›</span>';
       html += '</div>';
     }
     html += '</div>';
 
-    /* Phone frame avec flèches */
+    /* Phone frame */
     html += '<div class="flowin-phone-wrap">';
     html += '<div class="flowin-phone-nav-row">';
-    html += '<button class="flowin-phone-nav" '
-          + 'onclick="state.modal.landingPage=Math.max(0,(state.modal.landingPage||0)-1);'
-          + 'renderModal();flowinNavLanding(\'iframe-landing-apercu\',state.modal.landingPage)">‹</button>';
-    html += '<span style="font-size:11px;color:var(--sa-muted)">'+((_lp)+1)+' / '+_SECTIONS.length+'</span>';
-    html += '<button class="flowin-phone-nav" '
-          + 'onclick="state.modal.landingPage=Math.min('+(_SECTIONS.length-1)+',(state.modal.landingPage||0)+1);'
-          + 'renderModal();flowinNavLanding(\'iframe-landing-apercu\',state.modal.landingPage)">›</button>';
+    html += '<button class="flowin-phone-nav" onclick="landingNav(-1)">‹</button>';
+    html += '<span style="font-size:11px;color:var(--sa-muted)">'+(lp+1)+' / '+LAND_SECTIONS.length+'</span>';
+    html += '<button class="flowin-phone-nav" onclick="landingNav(1)">›</button>';
     html += '</div>';
-    html += '<div class="flowin-phone-frame">';
-    html += '<div class="flowin-phone-notch"></div>';
+    html += '<div class="flowin-phone-frame"><div class="flowin-phone-notch"></div>';
     html += '<div class="flowin-phone-scaler">';
-    html += '<iframe id="'+_ldIframeId+'" src="/landing/index.html" frameborder="0" allow="clipboard-write"></iframe>';
+    html += '<iframe id="iframe-landing-apercu" src="/landing/index.html" frameborder="0" allow="clipboard-write"></iframe>';
     html += '</div></div></div>';
-
-    /* Note */
-    html += '<div style="font-size:10px;color:var(--sa-muted);text-align:center;margin-top:6px">Prévisualisation interne · page réelle</div>';
+    html += '<div style="font-size:10px;color:var(--sa-muted);text-align:center;margin-top:6px">Page '+( lp+1)+' / '+LAND_SECTIONS.length+' · Prévisualisation page réelle</div>';
     if(ld.deployUrl){
-      html += '<div style="text-align:center;margin-top:10px"><a href="' + esc(ld.deployUrl) + '" target="_blank" class="btn btn-sm">🔗 Voir en ligne</a></div>';
+      html += '<div style="text-align:center;margin-top:10px"><a href="'+esc(ld.deployUrl)+'" target="_blank" class="btn btn-sm">🔗 Voir en ligne</a></div>';
     }
   }
   // Footer save (hors aperçu)
@@ -10035,6 +10024,17 @@ function flowinNavLanding(iframeId, pageIdx) {
   var fr = document.getElementById(iframeId);
   if(!fr || !fr.contentWindow) return;
   fr.contentWindow.postMessage({landingGoto: pageIdx}, '*');
+}
+
+function landingNav(dir) {
+  if(typeof state.modal.landingPage === 'undefined') state.modal.landingPage = 0;
+  var np = (state.modal.landingPage || 0) + dir;
+  if(np < 0) np = 0;
+  if(np > 3) np = 3;
+  state.modal.landingPage = np;
+  renderModal();
+  var fr = document.getElementById('iframe-landing-apercu');
+  if(fr && fr.contentWindow) fr.contentWindow.postMessage({landingGoto: np}, '*');
 }
 
 function openJoueurModal(evId, evNom, module){
