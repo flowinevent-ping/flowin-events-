@@ -2382,7 +2382,7 @@ if(FLOWIN_MODULE_FALLBACK){
       FLOWIN_EVENT = rows[0];
       FLOWIN_PRO_ID = rows[0].pro_id || null;
       console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module);
-      try { flowinShowModuleViewport(rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
+      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
       try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
