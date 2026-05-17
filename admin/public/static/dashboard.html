@@ -5760,7 +5760,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
-       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(e.id);
+       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(e.id) + '&module=' + encodeURIComponent(e.module||'quiz');
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
        html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
@@ -6451,7 +6451,7 @@ function renderBiblioJeux(){
   // ── Parcours complet validé : iframe parcours_user.html ──
   var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
   var _demoEv = (DATA.events && DATA.events[0]) ? DATA.events[0].id : 'ev-paques';
-  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?ev=' + encodeURIComponent(_demoEv);
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?ev=' + encodeURIComponent(_demoEv) + '&module=' + encodeURIComponent(tab);
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
@@ -10155,7 +10155,7 @@ function openJoueurModal(evId, evNom, module){
   var openLink = document.getElementById('jmOpenLink');
   var urlDisp = document.getElementById('jmUrlDisplay');
   if(!modal||!iframe) return;
-  var url = '/parcours/'+encodeURIComponent(module||'quiz')+'.html?ev='+encodeURIComponent(evId);
+  var url = '/parcours/'+encodeURIComponent(module||'quiz')+'.html?ev='+encodeURIComponent(evId)+'&module='+encodeURIComponent(module||'quiz');
   sub.textContent = evNom + (module?' · '+module:'');
   iframe.src = url;
   if(openLink) openLink.href = url;
