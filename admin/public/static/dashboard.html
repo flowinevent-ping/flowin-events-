@@ -5760,7 +5760,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
-       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(e.id);
+       var _joueurUrl = '/parcours_user.html?ev=' + encodeURIComponent(e.id) + '&module=' + encodeURIComponent(e.module||'quiz');
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
        html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
@@ -5962,7 +5962,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid);
+  var _jeuOpenUrl = '/parcours_user.html?ev=' + encodeURIComponent(eid) + '&module=' + encodeURIComponent(e.module||'quiz');
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
@@ -10151,7 +10151,7 @@ function openJoueurModal(evId, evNom, module){
   var openLink = document.getElementById('jmOpenLink');
   var urlDisp = document.getElementById('jmUrlDisplay');
   if(!modal||!iframe) return;
-  var url = '/parcours/'+(module||'quiz')+'.html?ev='+encodeURIComponent(evId);
+  var url = '/parcours_user.html?ev='+encodeURIComponent(evId)+(module?'&module='+encodeURIComponent(module):'');
   sub.textContent = evNom + (module?' · '+module:'');
   iframe.src = url;
   if(openLink) openLink.href = url;

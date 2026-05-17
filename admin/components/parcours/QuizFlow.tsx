@@ -65,10 +65,10 @@ function Landing({ev,onStart}:{ev:EventData;onStart:()=>void}) {
     <div style={{minHeight:'100%',background:'linear-gradient(160deg,#FBEAF0 0%,#E8F8F2 55%,#FAEEDA 100%)'}}>
       <div style={{height:4,background:`linear-gradient(90deg,${c},#EF9F27,#1D9E75,${c})`}}/>
       <div style={{padding:'28px 22px 16px',textAlign:'center'}}>
-        <div style={{fontSize:9,fontWeight:900,color:'#1D9E75',textTransform:'uppercase',letterSpacing:'.18em',marginBottom:14}}>{ev.lieu} · Flowin</div>
+        <div style={{fontSize:9,fontWeight:900,color:'#1D9E75',textTransform:'uppercase',letterSpacing:'.18em',marginBottom:14}}>{ev.cfg?.subtitle||ev.description||ev.lieu} · {ev.cfg?.organisateur||'Flowin'}</div>
         <div style={{fontFamily:"'Fredoka One',cursive",fontSize:42,color:c,lineHeight:.95,marginBottom:12}}
           dangerouslySetInnerHTML={{__html:ev.nom.replace(' ','<br/>')}}/>
-        <div style={{fontFamily:"'Nunito',sans-serif",fontSize:16,fontWeight:900,color:'#EF9F27',marginBottom:16}}>{dates}</div>
+        <div style={{fontFamily:"'Nunito',sans-serif",fontSize:16,fontWeight:900,color:'#EF9F27',marginBottom:16}}>{ev.cfg?.datesLabel||dates}</div>
         <div style={{fontSize:24,letterSpacing:8,opacity:.55}}>🥚 🦋 🌸 🌻</div>
       </div>
       <div style={{height:3,background:`linear-gradient(90deg,${c},#EF9F27,#1D9E75,${c})`}}/>
