@@ -1873,6 +1873,26 @@ try {
     SEED.banques.forEach(function(sb){ if(!DATA.banques.find(function(b){ return b.id===sb.id; })) DATA.banques.push(JSON.parse(JSON.stringify(sb))); });
     localStorage.setItem(LS_KEY, JSON.stringify(DATA));
   }
+} catch(e_purge){ console.warn('[purge banques]', e_purge); }
+
+/* ══ GARANTIE ev-paques — toujours présent ══ */
+try {
+  if(!DATA.events || !DATA.events.length || !DATA.events.find(function(e){ return e.id==='ev-paques'; })) {
+    if(!DATA.events) DATA.events = [];
+    var _seedPaques = SEED.events.find(function(e){ return e.id==='ev-paques'; });
+    if(_seedPaques) {
+      DATA.events = DATA.events.filter(function(e){ return e.id!=='ev-paques'; });
+      DATA.events.unshift(JSON.parse(JSON.stringify(_seedPaques)));
+      localStorage.setItem(LS_KEY, JSON.stringify(DATA));
+      console.log('[Flowin] ev-paques réinjecté dans DATA.events');
+    }
+  }
+  if(!DATA.pros || !DATA.pros.length) {
+    var _seedPro = SEED.pros.find(function(p){ return p.id==='pro-vence'; });
+    if(_seedPro) { DATA.pros = [JSON.parse(JSON.stringify(_seedPro))]; localStorage.setItem(LS_KEY, JSON.stringify(DATA)); }
+  }
+} catch(e_guarantee){ console.warn('[guarantee]', e_guarantee); }
+try { /* dummy to avoid try-catch mismatch */
 } catch(_e){ console.warn('Purge banques:', _e); }
 // Normalisation défensive au boot — protège contre banques sans questions
 // Purge stricte — uniquement les 5 banques officielles, rien d'autre
