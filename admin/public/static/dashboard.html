@@ -1463,7 +1463,7 @@ function migrateData(data){
     });
   }
   // Réinjecter les lots Pâques v2 si absents
-  if(data.lots && !data.lots.find(l=>l.id==='lot-paques-1')){
+  if(data.lots && !data.lots.find(l=>l.id==='lot-pq-1')){
     // Supprimer les anciens lots Pâques (lot-1, lot-2, lot-4, lot-5)
     data.lots = data.lots.filter(l => !(l.eventId==='ev-paques' && (l.id==='lot-1'||l.id==='lot-2'||l.id==='lot-4'||l.id==='lot-5')));
     // Injecter les 8 nouveaux
@@ -5253,9 +5253,13 @@ function drawerEvent(e){
         html += '<div class="fp-section">';
         html += '<div class="fp-section-label" id="fp-pv-lotlabel">'+esc(front.lotLabel||'Lots à gagner')+'</div>';
         activeLots.slice(0,3).forEach((l,i)=>{
+          var _ico = l.emoji || ['🎁','🏆','✨'][i%3];
+          var _nom = l.nom || l.partenaire || 'Lot';
+          var _sub = (l.partenaire && l.nom) ? l.partenaire : '';
           html += '<div class="fp-lot-item">'
-               + '<div class="fp-lot-icon" style="background:'+(e.couleur||'#7C2D92')+'22">'+['🎁','🏆','✨'][i%3]+'</div>'
-               + '<div class="fp-lot-info"><div class="fp-lot-nom">'+esc(l.nom)+'</div>'
+               + '<div class="fp-lot-icon" style="background:'+(e.couleur||'#7C2D92')+'22">'+_ico+'</div>'
+               + '<div class="fp-lot-info"><div class="fp-lot-nom">'+esc(_nom)+'</div>'
+               + (_sub?'<div class="fp-lot-val">'+esc(_sub)+'</div>':'')
                + (l.valeur?'<div class="fp-lot-val">'+l.valeur+' €</div>':'')+'</div>'
                + '</div>';
         });
@@ -6204,283 +6208,361 @@ function drawerSuperEvent(se){
 
 // ============ JEUX (catalogue) ============
 function renderBiblioJeux(){
-  // ── Onglet actif (module sélectionné) ──
   if(!state.jeuxTab) state.jeuxTab = 'quiz';
   var tab = state.jeuxTab;
 
-  var modDefs = [
-    {id:'quiz',       ico:'🎯', nom:'Quiz',          color:'#D4537E', tag:'STANDARD'},
-    {id:'vote',       ico:'📊', nom:'Vote',           color:'#378ADD', tag:'STANDARD'},
-    {id:'spin',       ico:'🎡', nom:'Spin',           color:'#EF9F27', tag:'STANDARD'},
-    {id:'tombola',    ico:'🎟', nom:'Tombola',        color:'#1D9E75', tag:'STANDARD'},
-    {id:'quizsolo',   ico:'🏆', nom:'Quiz Solo',      color:'#F59E0B', tag:'COMPÉTITION'},
-    {id:'quizmaster', ico:'⚡', nom:'Quiz Master',    color:'#7C3AED', tag:'GAMIFICATION'},
-    {id:'standup',    ico:'🌟', nom:'Stand Up',       color:'#9333EA', tag:'ÉVÉNEMENTIEL'}
+  var MODS = [
+    {id:'quiz',       ico:'🎯', nom:'Quiz',          color:'#D4537E'},
+    {id:'vote',       ico:'📊', nom:'Vote',           color:'#378ADD'},
+    {id:'spin',       ico:'🎡', nom:'Spin',           color:'#EF9F27'},
+    {id:'tombola',    ico:'🎟', nom:'Tombola',        color:'#1D9E75'},
+    {id:'quizsolo',   ico:'🏆', nom:'Quiz Solo',      color:'#F59E0B'},
+    {id:'quizmaster', ico:'⚡', nom:'Quiz Master',    color:'#7C3AED'},
+    {id:'standup',    ico:'🌟', nom:'Stand Up',       color:'#9333EA'}
   ];
 
-  var html = '<div class="page">';
-  html += '<div class="page-header"><div><div class="page-title">🎮 Jeux</div><div class="page-subtitle">7 modules · paramètres globaux · prévisualisations</div></div>'
-       + '<div class="page-actions"><button class="btn" onclick="newBanque()">+ Nouvelle banque</button></div></div>';
-
-  // KPIs
-  var totalQ = DATA.banques.reduce(function(s,b){return s+((b.questions&&((b.questions&&b.questions.length)||0))||0);},0);
-  html += '<div class="kpi-grid">'
-       + kpi('Modules',7)
-       + kpi('Banques',DATA.banques.length)
-       + kpi('Questions',totalQ)
-       + kpi('Events actifs',DATA.events.filter(function(e){return e.status==='live'||e.status==='upcoming';}).length)
-       + '</div>';
-
-  // ── Onglets modules ──
-  html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:2px solid var(--sa-border);padding-bottom:0">';
-  modDefs.forEach(function(m){
-    var active = tab === m.id;
-    html += '<button onclick="state.jeuxTab=\''+m.id+'\';render()" style="padding:8px 14px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:'+(active?'800':'600')+';color:'+(active?m.color:'var(--sa-muted)')+';border-bottom:2px solid '+(active?m.color:'transparent')+';margin-bottom:-2px;font-family:inherit;display:flex;align-items:center;gap:5px">'
-           + m.ico+' '+m.nom+'</button>';
-  });
-  html += '</div>';
-
-  // ── Contenu du module sélectionné ──
-  var jeuObj = DATA.jeux.find(function(j){return j.type===tab || j.id==='jeu-'+tab;});
-  var cfg = jeuObj ? (jeuObj.configDefault||{}) : {};
+  // Données du module actif
+  var jeuObj = null;
+  for(var ji=0; ji<DATA.jeux.length; ji++){
+    var _j = DATA.jeux[ji];
+    if(_j.type === tab || _j.id === 'jeu-'+tab){ jeuObj = _j; break; }
+  }
+  var cfg  = jeuObj ? (jeuObj.configDefault || {}) : {};
   var jIdx = DATA.jeux.indexOf(jeuObj);
-  var mDef = modDefs.find(function(m){return m.id===tab;});
+  var mDef = null;
+  for(var mi=0; mi<MODS.length; mi++){ if(MODS[mi].id===tab){ mDef=MODS[mi]; break; } }
   var accent = mDef ? mDef.color : '#7C3AED';
 
-  html += '<div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start">';
+  // ── KPIs ──
+  var totalQ = 0;
+  for(var bi=0; bi<DATA.banques.length; bi++){
+    var _b = DATA.banques[bi];
+    totalQ += (_b.questions && _b.questions.length) ? _b.questions.length : 0;
+  }
+  var liveCount = 0;
+  for(var ei=0; ei<DATA.events.length; ei++){
+    var _e = DATA.events[ei];
+    if(_e.status==='live' || _e.status==='upcoming') liveCount++;
+  }
 
-  // ── Colonne gauche : paramètres ──
+  var html = '<div class="page">';
+  html += '<div class="page-header"><div><div class="page-title">🎮 Jeux</div>'
+        + '<div class="page-subtitle">7 modules · paramètres globaux · prévisualisations</div></div>'
+        + '<div class="page-actions"><button class="btn" onclick="newBanque()">+ Nouvelle banque</button></div></div>';
+
+  html += '<div class="kpi-grid">'
+        + kpi('Modules', MODS.length)
+        + kpi('Banques', DATA.banques.length)
+        + kpi('Questions', totalQ)
+        + kpi('Events actifs', liveCount)
+        + '</div>';
+
+  // ── Onglets modules ──
+  html += '<div style="display:flex;gap:0;flex-wrap:wrap;margin-bottom:16px;border-bottom:2px solid var(--sa-border)">';
+  for(var ti=0; ti<MODS.length; ti++){
+    var m = MODS[ti];
+    var isActive = (tab === m.id);
+    html += '<button onclick="state.jeuxTab=\''+m.id+'\';render()" '
+          + 'style="padding:9px 14px;border:none;background:none;cursor:pointer;'
+          + 'font-size:12px;font-weight:'+(isActive?'800':'600')+';'
+          + 'color:'+(isActive?m.color:'var(--sa-muted)')+';'
+          + 'border-bottom:2px solid '+(isActive?m.color:'transparent')+';'
+          + 'margin-bottom:-2px;font-family:inherit;white-space:nowrap">'
+          + m.ico + ' ' + m.nom
+          + '</button>';
+  }
+  html += '</div>';
+
+  // ── Grille 2 colonnes ──
+  html += '<div style="display:grid;grid-template-columns:1fr 284px;gap:20px;align-items:start">';
+
+  // ═══ COLONNE GAUCHE : paramètres ═══
   html += '<div>';
 
   // Bannière module
-  html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:'+accent+'12;border:1px solid '+accent+'30;border-radius:10px;margin-bottom:16px">'
-       + '<div style="width:42px;height:42px;border-radius:10px;background:'+accent+';display:flex;align-items:center;justify-content:center;font-size:22px">'+(mDef?mDef.ico:'🎮')+'</div>'
-       + '<div><div style="font-size:15px;font-weight:900;color:var(--sa-text)">'+(mDef?mDef.nom:'Module')+'</div>'
-       + '<div style="font-size:11px;color:var(--sa-muted)">Paramètres globaux · affecte les nouveaux events</div></div>'
-       + '</div>';
+  html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;'
+        + 'background:'+accent+'14;border:1px solid '+accent+'35;border-radius:10px;margin-bottom:16px">'
+        + '<div style="width:42px;height:42px;border-radius:10px;background:'+accent+';'
+        + 'display:flex;align-items:center;justify-content:center;font-size:22px">'+(mDef?mDef.ico:'🎮')+'</div>'
+        + '<div><div style="font-size:15px;font-weight:900;color:var(--sa-text)">'+(mDef?mDef.nom:'Module')+'</div>'
+        + '<div style="font-size:11px;color:var(--sa-muted)">Paramètres globaux · affecte les nouveaux events</div>'
+        + '</div></div>';
 
-  if(tab==='quiz'||tab==='quizsolo'){
-    // ── QUIZ / QUIZ SOLO ──
+  // ─── Paramètres par module ───
+  if(tab==='quiz' || tab==='quizsolo'){
     html += '<div class="section-h">Paramètres par défaut</div>';
     html += '<div class="form-grid">';
     html += '<div><label class="label">Nombre de questions / partie</label>'
-         + '<input type="number" class="input" value="'+(cfg.quizNbQuestions||5)+'" min="1" max="20" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizNbQuestions=parseInt(this.value)||5;saveData();}}).call(this)"/></div>';
+          + '<input type="number" class="input" value="'+(cfg.quizNbQuestions||5)+'" min="1" max="20"'
+          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizNbQuestions=parseInt(this.value)||5;saveData();}}).call(this)"/></div>';
     html += '<div><label class="label">Score minimum pour le tirage</label>'
-         + '<input type="number" class="input" value="'+(cfg.quizScoreMin||3)+'" min="0" max="20" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizScoreMin=parseInt(this.value)||3;saveData();}}).call(this)"/></div>';
+          + '<input type="number" class="input" value="'+(cfg.quizScoreMin||3)+'" min="0" max="20"'
+          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizScoreMin=parseInt(this.value)||3;saveData();}}).call(this)"/></div>';
     html += '<div><label class="label">Timer par question (sec)</label>'
-         + '<input type="number" class="input" value="'+(cfg.quizTimer||30)+'" min="5" max="120" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimer=parseInt(this.value)||30;saveData();}}).call(this)"/></div>';
+          + '<input type="number" class="input" value="'+(cfg.quizTimer||30)+'" min="5" max="120"'
+          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimer=parseInt(this.value)||30;saveData();}}).call(this)"/></div>';
     if(tab==='quizsolo'){
       html += '<div><label class="label">Timer visible par les joueurs</label>'
-           + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimerVisible=this.value===\'true\';saveData();}})()">'
-           + '<option value="true"'+(cfg.quizTimerVisible!==false?' selected':'')+'>Visible</option>'
-           + '<option value="false"'+(cfg.quizTimerVisible===false?' selected':'')+'>Caché</option>'
-           + '</select></div>';
+            + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimerVisible=(this.value===\'true\');saveData();}})()">'
+            + '<option value="true"'+(cfg.quizTimerVisible!==false?' selected':'')+'>Visible</option>'
+            + '<option value="false"'+(cfg.quizTimerVisible===false?' selected':'')+'>Caché</option>'
+            + '</select></div>';
     }
     html += '</div>';
 
-    html += '<div class="section-h" style="margin-top:14px">🎟 Règle des tickets (tirage au sort)</div>';
-    html += '<div style="display:flex;flex-direction:column;gap:8px">';
-    var ticketRules = [
-      {key:'quizBonus',    ico:'💡', lbl:'Questions bonus activées', desc:'Répondre au bonus = +1 ticket'},
-      {key:'quizPartage',  ico:'📲', lbl:'Partage réseaux sociaux',  desc:'WhatsApp / Messenger / Email = +1 ticket'},
-      {key:'quizRecapFin', ico:'📊', lbl:'Récapitulatif fin de partie', desc:'Affiche score + tickets accumulés'},
-      {key:'quizUneFoisParJour', ico:'🔒', lbl:'1 tentative par jour', desc:'Anti-doublon quotidien'}
+    var TICKET_RULES = [
+      {key:'quizBonus',         ico:'💡', lbl:'Questions bonus activées',   desc:'Répondre au bonus = +1 ticket'},
+      {key:'quizPartage',       ico:'📲', lbl:'Partage réseaux sociaux',    desc:'WhatsApp / Messenger / Email = +1 ticket'},
+      {key:'quizRecapFin',      ico:'📊', lbl:'Récapitulatif fin de partie',desc:'Affiche score + tickets accumulés'},
+      {key:'quizUneFoisParJour',ico:'🔒', lbl:'1 tentative par jour',       desc:'Anti-doublon quotidien'}
     ];
-    ticketRules.forEach(function(r){
-      var on = cfg[r.key]!==false;
+    html += '<div class="section-h" style="margin-top:14px">🎟 Règle des tickets</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:6px">';
+    for(var ri=0; ri<TICKET_RULES.length; ri++){
+      var r = TICKET_RULES[ri];
+      var on = (cfg[r.key] !== false);
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sa-subtle);border-radius:8px">'
-           + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">'+r.ico+'</span>'
-           + '<div><div style="font-size:12px;font-weight:700">'+r.lbl+'</div>'
-           + '<div style="font-size:10px;color:var(--sa-muted)">'+r.desc+'</div></div></div>'
-           + '<div class="toggle '+(on?'on':'')+'" onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.'+r.key+'=!jj.configDefault.'+r.key+';saveData();render();}})()" style="flex-shrink:0"></div>'
-           + '</div>';
-    });
+            + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">'+r.ico+'</span>'
+            + '<div><div style="font-size:12px;font-weight:700">'+r.lbl+'</div>'
+            + '<div style="font-size:10px;color:var(--sa-muted)">'+r.desc+'</div></div></div>'
+            + '<div class="toggle '+(on?'on':'')+'" style="flex-shrink:0"'
+            + ' onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.'+r.key+'=!jj.configDefault.'+r.key+';saveData();render();}})()"></div>'
+            + '</div>';
+    }
     html += '</div>';
-
-    // Info règle
     html += '<div style="margin-top:10px;padding:10px 12px;background:#F3E8FF;border-radius:8px;border-left:3px solid '+accent+';font-size:11px;color:#6D28D9">'
-         + '🎟 Règle : <strong>'+(cfg.quizScoreMin||3)+' bonnes = 1 ticket</strong>'
-         + (cfg.quizBonus!==false?' · bonus = 1 ticket':'')
-         + (cfg.quizPartage!==false?' · partage = 1 ticket':'')
-         + ' · max 3 tickets/jour → tirage au sort</div>';
-
-    // ── Banques gérées dans la section bas de page ──
+          + '🎟 <strong>'+(cfg.quizScoreMin||3)+' bonnes = 1 ticket</strong>'
+          + (cfg.quizBonus!==false?' · bonus = 1 ticket':'')
+          + (cfg.quizPartage!==false?' · partage = 1 ticket':'')
+          + ' · max 3 tickets/jour</div>';
 
   } else if(tab==='spin'){
-    // ── SPIN ──
     html += '<div class="section-h">Paramètres</div>';
     html += '<div class="form-grid">';
     html += '<div><label class="label">Durée animation (sec)</label>'
-         + '<input type="number" class="input" value="'+(cfg.spinDuration||6)+'" min="2" max="20" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinDuration=parseInt(this.value)||6;saveData();}}).call(this)"/></div>';
+          + '<input type="number" class="input" value="'+(cfg.spinDuration||6)+'" min="2" max="20"'
+          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinDuration=parseInt(this.value)||6;saveData();}}).call(this)"/></div>';
     html += '<div><label class="label">Mode</label>'
-         + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinModeTirage=this.value;saveData();render();}})()">'
-         + '<option value="A"'+(cfg.spinModeTirage!=='B'?' selected':'')+'>A · Gain instantané</option>'
-         + '<option value="B"'+(cfg.spinModeTirage==='B'?' selected':'')+'>B · Tirage final</option>'
-         + '</select></div>';
+          + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinModeTirage=this.value;saveData();render();}})()">'
+          + '<option value="A"'+(cfg.spinModeTirage!=='B'?' selected':'')+'>A · Gain instantané</option>'
+          + '<option value="B"'+(cfg.spinModeTirage==='B'?' selected':'')+'>B · Tirage final</option>'
+          + '</select></div>';
     html += '</div>';
     html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">'
-         + '<input type="checkbox" '+(cfg.spinSound!==false?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSound=this.checked;saveData();}}).call(this)"/> Son activé</label>';
+          + '<input type="checkbox" '+(cfg.spinSound!==false?'checked':'')+' '
+          + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSound=this.checked;saveData();}}).call(this)"/> Son activé</label>';
 
-    // Segments
-    var segs = cfg.spinSegments||[];
-    var totProba = segs.reduce(function(s,x){return s+(parseFloat(x.proba)||0);},0);
-    var probaOk = Math.abs(totProba-100)<0.5;
-    html += '<div class="section-h">Segments <span class="chip '+(probaOk?'live':'error')+'" style="font-size:9px">'+totProba.toFixed(0)+'%'+(probaOk?' ✓':' ≠ 100!')+'</span></div>';
+    var segs = cfg.spinSegments || [];
+    var totPct = 0;
+    for(var si=0; si<segs.length; si++) totPct += parseFloat(segs[si].proba)||0;
+    var pctOk = Math.abs(totPct-100)<0.5;
+    html += '<div class="section-h">Segments <span class="chip '+(pctOk?'live':'error')+'" style="font-size:9px">'
+          + totPct.toFixed(0)+'%'+(pctOk?' ✓':' ≠ 100!')+'</span></div>';
     html += '<div style="font-size:10px;color:var(--sa-muted);margin-bottom:6px">Couleur · Label · % · Stock · Perdant</div>';
-    segs.forEach(function(s,i){
+    for(var si=0; si<segs.length; si++){
+      var s = segs[si];
       html += '<div style="display:grid;grid-template-columns:28px 1fr 56px 56px auto auto;gap:5px;align-items:center;background:var(--sa-subtle);border-radius:7px;padding:6px 8px;margin-bottom:3px">'
-           + '<input type="color" value="'+escAttr(s.color||'#888')+'" style="width:26px;height:26px;border:none;border-radius:4px;cursor:pointer;padding:0" title="Couleur" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].color=this.value;saveData();render();}}).call(this)"/>'
-           + '<input type="text" class="input" style="font-size:11px;padding:4px 7px" placeholder="Label" value="'+escAttr(s.label||'')+'" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].label=this.value;saveData();}}).call(this)"/>'
-           + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.proba||0)+'" min="0" max="100" title="%" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].proba=parseFloat(this.value)||0;saveData();render();}}).call(this)"/>'
-           + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">%</div></div>'
-           + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.stock||0)+'" min="0" title="Stock" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].stock=parseInt(this.value)||0;saveData();}}).call(this)"/>'
-           + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">stock</div></div>'
-           + '<label style="display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap"><input type="checkbox" '+(s.perdant?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].perdant=this.checked;saveData();}}).call(this)"/> Perdant</label>'
-           + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px" title="Supprimer" onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments.splice('+i+',1);saveData();render();}})()">×</button>'
-           + '</div>';
-    });
-    html += '<button class="btn btn-sm" style="margin-top:6px" onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){if(!jj.configDefault.spinSegments)jj.configDefault.spinSegments=[];jj.configDefault.spinSegments.push({label:\'Nouveau\',color:\'#7C3AED\',proba:10,perdant:false,stock:10});saveData();render();}})()">+ Ajouter segment</button>';
+            + '<input type="color" value="'+escAttr(s.color||'#888')+'" style="width:26px;height:26px;border:none;border-radius:4px;cursor:pointer;padding:0"'
+            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].color=this.value;saveData();render();}}).call(this)"/>'
+            + '<input type="text" class="input" style="font-size:11px;padding:4px 7px" placeholder="Label" value="'+escAttr(s.label||'')+'"'
+            + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].label=this.value;saveData();}}).call(this)"/>'
+            + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.proba||0)+'" min="0" max="100" title="%"'
+            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].proba=parseFloat(this.value)||0;saveData();render();}}).call(this)"/>'
+            + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">%</div></div>'
+            + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.stock||0)+'" min="0" title="Stock"'
+            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].stock=parseInt(this.value)||0;saveData();}}).call(this)"/>'
+            + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">stock</div></div>'
+            + '<label style="display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap">'
+            + '<input type="checkbox" '+(s.perdant?'checked':'')+' '
+            + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].perdant=this.checked;saveData();}}).call(this)"/> Perdant</label>'
+            + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px" title="Supprimer"'
+            + ' onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments.splice('+si+',1);saveData();render();}})()">×</button>'
+            + '</div>';
+    }
+    html += '<button class="btn btn-sm" style="margin-top:6px"'
+          + ' onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){'
+          + 'if(!jj.configDefault.spinSegments)jj.configDefault.spinSegments=[];'
+          + 'jj.configDefault.spinSegments.push({label:\'Nouveau\',color:\'#7C3AED\',proba:10,perdant:false,stock:10});'
+          + 'saveData();render();}})()">+ Ajouter segment</button>';
 
   } else if(tab==='vote'){
-    // ── VOTE ──
     html += '<div class="section-h">Paramètres</div>';
     html += '<div class="form-grid">';
     html += '<div><label class="label">Mode de vote</label>'
-         + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteMode=this.value;saveData();render();}})()">'
-         + '<option value="stars"'+(cfg.voteMode!=='yn'?' selected':'')+'>⭐ Étoiles 1→5</option>'
-         + '<option value="yn"'+(cfg.voteMode==='yn'?' selected':'')+'>👍👎 Oui / Non</option>'
-         + '</select></div>';
+          + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteMode=this.value;saveData();render();}})()">'
+          + '<option value="stars"'+(cfg.voteMode!=='yn'?' selected':'')+'>⭐ Étoiles 1→5</option>'
+          + '<option value="yn"'+(cfg.voteMode==='yn'?' selected':'')+'>👍👎 Oui / Non</option>'
+          + '</select></div>';
     html += '<div><label class="label">Disposition image</label>'
-         + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteImgLayout=this.value;saveData();}})()"><option value="central"'+(cfg.voteImgLayout!=='fond'?' selected':'')+'>Centrale</option><option value="fond"'+(cfg.voteImgLayout==='fond'?' selected':'')+'>Plein fond</option></select></div>';
+          + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteImgLayout=this.value;saveData();}})()">'
+          + '<option value="central"'+(cfg.voteImgLayout!=='fond'?' selected':'')+'>Centrale</option>'
+          + '<option value="fond"'+(cfg.voteImgLayout==='fond'?' selected':'')+'>Plein fond</option>'
+          + '</select></div>';
     html += '</div>';
-    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;cursor:pointer">'
-         + '<input type="checkbox" '+(cfg.voteResultatsLive?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteResultatsLive=this.checked;saveData();}}).call(this)"/> Résultats live (visibles après chaque vote)</label>';
-    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;cursor:pointer">'
-         + '<input type="checkbox" '+(cfg.voteEmail?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteEmail=this.checked;saveData();}}).call(this)"/> Demander l\'email du participant</label>';
+    html += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
+    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
+          + '<input type="checkbox" '+(cfg.voteResultatsLive?'checked':'')+' '
+          + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteResultatsLive=this.checked;saveData();}}).call(this)"/> Résultats live (visibles après chaque vote)</label>';
+    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
+          + '<input type="checkbox" '+(cfg.voteEmail?'checked':'')+' '
+          + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteEmail=this.checked;saveData();}}).call(this)"/> Demander l\'email du participant</label>';
+    html += '</div>';
 
   } else if(tab==='tombola'){
-    // ── TOMBOLA ──
-    html += '<div class="section-h">Champs du formulaire</div>';
-    var champsDispos = [
-      {k:'prenom',l:'Prénom',req:true},{k:'nom',l:'Nom',req:true},{k:'email',l:'Email',req:true},{k:'genre',l:'Genre H/F',req:true},
-      {k:'telephone',l:'Téléphone'},{k:'ville',l:'Ville'},{k:'codePostal',l:'Code postal'},{k:'age_tranche',l:'Tranche d\'âge'},{k:'dateNaissance',l:'Date de naissance'}
+    var CHAMPS = [
+      {k:'prenom',      l:'Prénom',           req:true},
+      {k:'nom',         l:'Nom',              req:true},
+      {k:'email',       l:'Email',            req:true},
+      {k:'genre',       l:'Genre H/F',        req:true},
+      {k:'telephone',   l:'Téléphone',        req:false},
+      {k:'ville',       l:'Ville',            req:false},
+      {k:'codePostal',  l:'Code postal',      req:false},
+      {k:'age_tranche', l:'Tranche d\'âge',   req:false},
+      {k:'dateNaissance',l:'Date de naissance',req:false}
     ];
-    var champsCfg = cfg.tombolaChamps||['prenom','nom','email','genre','telephone','ville'];
-    champsDispos.forEach(function(c){
-      var on = c.req || champsCfg.indexOf(c.k)>=0;
+    var champsCfg = cfg.tombolaChamps || ['prenom','nom','email','genre','telephone','ville'];
+    html += '<div class="section-h">Champs du formulaire</div>';
+    for(var ci=0; ci<CHAMPS.length; ci++){
+      var c = CHAMPS[ci];
+      var on = c.req || (champsCfg.indexOf(c.k)>=0);
       html += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--sa-subtle);border-radius:7px;margin-bottom:3px">'
-           + '<input type="checkbox" '+(on?'checked':'')+(c.req?' disabled':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){var ch=jj.configDefault.tombolaChamps||[];if(this.checked){if(ch.indexOf(\''+c.k+'\')<0)ch.push(\''+c.k+'\');}else ch=ch.filter(function(x){return x!==\''+c.k+'\';});jj.configDefault.tombolaChamps=ch;saveData();}}).call(this)"/>'
-           + '<span style="font-size:12px;font-weight:600">'+c.l+'</span>'
-           + (c.req?'<span style="font-size:9px;color:#EF4444;margin-left:auto">Obligatoire</span>':'')
-           + '</div>';
-    });
+            + '<input type="checkbox" '+(on?'checked':'')+(c.req?' disabled':'')+' '
+            + 'onchange="(function(){'
+            + 'var jj=DATA.jeux['+jIdx+'];if(jj){'
+            + 'var ch=jj.configDefault.tombolaChamps||[];'
+            + 'if(this.checked){if(ch.indexOf(\''+c.k+'\')<0)ch.push(\''+c.k+'\');}else ch=ch.filter(function(x){return x!==\''+c.k+'\';});'
+            + 'jj.configDefault.tombolaChamps=ch;saveData();}}).call(this)"/>'
+            + '<span style="font-size:12px;font-weight:600">'+c.l+'</span>'
+            + (c.req?'<span style="font-size:9px;color:#EF4444;margin-left:auto">Obligatoire</span>':'')
+            + '</div>';
+    }
+    var CASES = [{k:'majeur',l:'Certifier avoir 18 ans'},{k:'reglement',l:'Accepter le règlement'},{k:'optin',l:'Opt-in newsletter'}];
+    var casesCfg = cfg.tombolaCasesLegales || ['majeur','reglement'];
     html += '<div class="section-h" style="margin-top:12px">Cases légales</div>';
-    var casesDispos = [{k:'majeur',l:'Certifier avoir 18 ans'},{k:'reglement',l:'Accepter le règlement'},{k:'optin',l:'Opt-in newsletter'}];
-    var casesCfg = cfg.tombolaCasesLegales||['majeur','reglement'];
-    casesDispos.forEach(function(c){
-      var on = casesCfg.indexOf(c.k)>=0;
+    for(var ki=0; ki<CASES.length; ki++){
+      var kk = CASES[ki];
+      var on = (casesCfg.indexOf(kk.k)>=0);
       html += '<label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;cursor:pointer">'
-           + '<input type="checkbox" '+(on?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){var cl=jj.configDefault.tombolaCasesLegales||[];if(this.checked){if(cl.indexOf(\''+c.k+'\')<0)cl.push(\''+c.k+'\');}else cl=cl.filter(function(x){return x!==\''+c.k+'\';});jj.configDefault.tombolaCasesLegales=cl;saveData();}}).call(this)"/> '+c.l+'</label>';
-    });
+            + '<input type="checkbox" '+(on?'checked':'')+' '
+            + 'onchange="(function(){'
+            + 'var jj=DATA.jeux['+jIdx+'];if(jj){'
+            + 'var cl=jj.configDefault.tombolaCasesLegales||[];'
+            + 'if(this.checked){if(cl.indexOf(\''+kk.k+'\')<0)cl.push(\''+kk.k+'\');}else cl=cl.filter(function(x){return x!==\''+kk.k+'\';});'
+            + 'jj.configDefault.tombolaCasesLegales=cl;saveData();}}).call(this)"/> '+kk.l+'</label>';
+    }
 
   } else if(tab==='standup'){
-    // ── STAND-UP ──
+    var comediens = cfg.standupComediens || [];
     html += '<div class="section-h">Comédiens / Artistes par défaut</div>';
-    var comediens = cfg.standupComediens||[];
-    if(comediens.length===0){
+    if(!comediens.length){
       html += '<div style="padding:10px;background:var(--sa-subtle);border-radius:8px;font-size:12px;color:var(--sa-muted)">Aucun artiste configuré</div>';
-    } else {
-      comediens.forEach(function(c,i){
-        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-             + '<input type="color" value="'+escAttr(c.couleur||'#888')+'" style="width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+i+'].couleur=this.value;saveData();render();}}).call(this)"/>'
-             + '<input type="text" class="input" value="'+escAttr(c.nom||'')+'" placeholder="Nom de l\'artiste" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+i+'].nom=this.value;saveData();}}).call(this)"/>'
-             + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px" onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens.splice('+i+',1);saveData();render();}})()">×</button>'
-             + '</div>';
-      });
     }
-    html += '<button class="btn btn-sm" style="margin-top:6px" onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){if(!jj.configDefault.standupComediens)jj.configDefault.standupComediens=[];jj.configDefault.standupComediens.push({nom:\'\',couleur:\'#7C3AED\'});saveData();render();}})()">+ Ajouter un artiste</button>';
+    for(var coi=0; coi<comediens.length; coi++){
+      var co = comediens[coi];
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+            + '<input type="color" value="'+escAttr(co.couleur||'#888')+'" style="width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0"'
+            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+coi+'].couleur=this.value;saveData();render();}}).call(this)"/>'
+            + '<input type="text" class="input" value="'+escAttr(co.nom||'')+'" placeholder="Nom de l\'artiste"'
+            + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+coi+'].nom=this.value;saveData();}}).call(this)"/>'
+            + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px"'
+            + ' onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens.splice('+coi+',1);saveData();render();}})()">×</button>'
+            + '</div>';
+    }
+    html += '<button class="btn btn-sm" style="margin-top:6px"'
+          + ' onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){'
+          + 'if(!jj.configDefault.standupComediens)jj.configDefault.standupComediens=[];'
+          + 'jj.configDefault.standupComediens.push({nom:\'\',couleur:\'#7C3AED\'});'
+          + 'saveData();render();}})()">+ Ajouter un artiste</button>';
 
   } else if(tab==='quizmaster'){
-    // ── QUIZ MASTER ──
-    html += '<div class="empty-block" style="padding:30px"><div class="ico">🎙</div>'
-         + '<div class="t">Quiz Master — Module animateur grand écran</div>'
-         + '<div class="d" style="max-width:300px">Intégration module Olivia en cours. Ce module permet l\'animation live sur scène avec banques thématiques, spin roulette, ligues et défis.</div>'
-         + '</div>';
+    html += '<div class="empty-block" style="padding:30px">'
+          + '<div class="ico">🎙</div>'
+          + '<div class="t">Quiz Master — Module animateur grand écran</div>'
+          + '<div class="d" style="max-width:300px">Animation live sur scène avec banques thématiques, spin roulette, ligues et défis. Intégration en cours.</div>'
+          + '</div>';
   }
 
-
-  // ── Sous-onglets Custom + Bonus (tous modules sauf vote) ──
-  if(tab !== 'vote') {
+  // ── Sous-onglets Questions custom + Bonus ──
+  if(tab !== 'vote'){
     if(!state.jeuxSubtab) state.jeuxSubtab = {};
     if(!state.jeuxSubtab[tab]) state.jeuxSubtab[tab] = 'config';
-    var jeuxSub = state.jeuxSubtab[tab];
-
-    // Tabs selector — insérés avant les params (préfixe)
-    // On les insère ici pour les montrer après les params config
+    var sub = state.jeuxSubtab[tab];
     html += '<div style="margin-top:16px;border-top:1px solid var(--sa-border);padding-top:14px">';
-    html += '<div class="flex gap-2 mb-3" style="flex-wrap:wrap">';
-    html += '<button class="filter-pill '+(jeuxSub==='custom'?'active':'')+'" onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']= \'custom\';render()">✏ Questions custom</button>';
-    html += '<button class="filter-pill '+(jeuxSub==='bonus'?'active':'')+'" onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']=\'bonus\';render()">✨ Bonus</button>';
+    html += '<div class="flex gap-2 mb-3">';
+    html += '<button class="filter-pill '+(sub==='custom'?'active':'')+'" '
+          + 'onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']=\'custom\';render()">✏ Questions custom</button>';
+    html += '<button class="filter-pill '+(sub==='bonus'?'active':'')+'" '
+          + 'onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']=\'bonus\';render()">✨ Bonus</button>';
     html += '</div>';
-
-    if(jeuxSub==='custom') {
+    if(sub==='custom'){
       if(!cfg.customQuestions) cfg.customQuestions = [];
-      html += renderCustomQuestionsEditor(cfg,
-        'DATA.jeux['+jIdx+'].configDefault',
-        'saveData();render()'
-      );
-    } else if(jeuxSub==='bonus') {
+      html += renderCustomQuestionsEditor(cfg, 'DATA.jeux['+jIdx+'].configDefault', 'saveData();render()');
+    } else if(sub==='bonus'){
       if(!cfg.bonusList) cfg.bonusList = [];
       html += renderBonusEditor(cfg,
         'DATA.jeux['+jIdx+'].configDefault',
         'DATA.jeux['+jIdx+'].configDefault.bonusActif=!DATA.jeux['+jIdx+'].configDefault.bonusActif;saveData();render()',
-        'saveData();render()'
-      );
+        'saveData();render()');
     }
     html += '</div>';
   }
 
   html += '</div>'; // fin colonne gauche
 
-  // ── Colonne droite : prévisualisation ──
+  // ═══ COLONNE DROITE : prévisualisation iframe ═══
+  var iframeId  = 'iframe-jeux-'+tab;
+  var iframeSrc = '/parcours/'+encodeURIComponent(tab)+'.html?module='+encodeURIComponent(tab);
   html += '<div>';
-  // ── Parcours complet validé : iframe parcours_user.html ──
-  var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
-  var _demoEv = (DATA.events && DATA.events[0]) ? DATA.events[0].id : 'ev-paques';
-  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?ev=' + encodeURIComponent(_demoEv) + '&module=' + encodeURIComponent(tab);
-  var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
-  html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
+  html += '<div class="flowin-phone-nav-row">';
+  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+iframeId+'\',\'prev\')">‹</button>';
+  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+iframeId+'\',\'next\')">›</button>';
+  html += '</div>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
-  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
-  html += '</div>';
-  html += '</div>';
+  html += '<div class="flowin-phone-scaler">';
+  html += '<iframe id="'+escAttr(iframeId)+'" src="'+escAttr(iframeSrc)+'" frameborder="0" allow="clipboard-write"></iframe>';
+  html += '</div></div></div>';
   html += '</div>'; // fin colonne droite
 
-  html += '</div>'; // fin grid 2 colonnes
+  html += '</div>'; // fin grille
 
-  // ── Section banques (bas de page) ──
+  // ── Section banques ──
   html += '<div class="section-h" style="margin-top:24px">📚 Banques de questions</div>';
   html += '<table class="tbl"><thead><tr><th>Nom</th><th>Description</th><th>Questions</th><th>Events liés</th><th class="col-actions"></th></tr></thead><tbody>';
-  DATA.banques.forEach(function(b){
-    var nbQ = (b.questions&&((b.questions&&b.questions.length)||0))||0;
-    var evLies = (b.events||[]).map(function(eid){var e=findEvent(eid);return e?'<span class="chip">'+esc(e.nom)+'</span>':''}).join(' ');
+  for(var bqi=0; bqi<DATA.banques.length; bqi++){
+    var b = DATA.banques[bqi];
+    var nbQ = (b.questions && b.questions.length) ? b.questions.length : 0;
+    var evLies = '';
+    var bEvs = b.events || [];
+    for(var beli=0; beli<bEvs.length; beli++){
+      var bev = findEvent(bEvs[beli]);
+      if(bev) evLies += '<span class="chip">'+esc(bev.nom)+'</span> ';
+    }
     html += '<tr onclick="openModal(\'banque\',{banqueId:\''+b.id+'\'})" style="cursor:pointer">'
-         + '<td><strong>'+esc(b.nom)+'</strong></td>'
-         + '<td class="text-sm text-muted">'+esc(b.description||'')+'</td>'
-         + '<td><strong>'+nbQ+'</strong></td>'
-         + '<td>'+(evLies||'<span class="text-muted text-xs">Aucun</span>')+'</td>'
-         + '<td class="col-actions"><div class="row-actions"><button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openModal(\'banque\',{banqueId:\''+b.id+'\'})">✏</button></div></td>'
-         + '</tr>';
-  });
-  if(DATA.banques.length===0) html += '<tr><td colspan="5"><div class="empty-block mt-3"><div class="ico">🎮</div><div class="t">Aucune banque de questions</div><div class="s">Créez une première banque via « + Nouvelle banque »</div></div></td></tr>';
+          + '<td><strong>'+esc(b.nom)+'</strong></td>'
+          + '<td class="text-sm text-muted">'+esc(b.description||'')+'</td>'
+          + '<td><strong>'+nbQ+'</strong></td>'
+          + '<td>'+(evLies||'<span class="text-muted text-xs">Aucun</span>')+'</td>'
+          + '<td class="col-actions"><div class="row-actions">'
+          + '<button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openModal(\'banque\',{banqueId:\''+b.id+'\'})">✏</button>'
+          + '</div></td>'
+          + '</tr>';
+  }
+  if(!DATA.banques.length){
+    html += '<tr><td colspan="5"><div class="empty-block mt-3">'
+          + '<div class="ico">🎮</div>'
+          + '<div class="t">Aucune banque de questions</div>'
+          + '<div class="s">Créez une première banque via « + Nouvelle banque »</div>'
+          + '</div></td></tr>';
+  }
   html += '</tbody></table>';
   html += '<button class="btn btn-primary mt-3" onclick="newBanque()">+ Nouvelle banque</button>';
-  html += '</div>';
+  html += '</div>'; // fin page
   return html;
 }
+
 function newBanque(){
   const id=newId('bq');
   DATA.banques.unshift({id,nom:'Nouvelle banque',description:'',events:[],questions:[]});
@@ -7552,244 +7634,15 @@ function modalLanding(data){
 
   // ── TAB APERÇU — navigation page par page
   else if(tab === 'apercu'){
-    var accent   = ld.accentColor || '#3B5CC4';
-    var hero2    = ld.hero   || {};
-    var proof2   = ld.proof  || {};
-    var qs3      = hero2.questions || [];
-    var profils2 = ld.profils || [];
-    var tunnel2  = (ld.tunnel||[]).filter(function(t){ return t.active; }).sort(function(a,b){ return a.ordre-b.ordre; });
-    var modInfo  = DATA.modules[ld.moduleJeu] || {emoji:'🎮',label:ld.moduleJeu||'spin'};
-
-    // Pages de la landing dans l'ordre de navigation
-    // Page index stocké dans state.modal.apercuPage
-    if(typeof state.modal.apercuPage === 'undefined') state.modal.apercuPage = 0;
-    var page = state.modal.apercuPage || 0;
-
-    // Construire les pages dynamiquement selon tunnel actif
-    var PAGES = [];
-    PAGES.push({id:'hero', lbl:'Accueil'});
-    tunnel2.forEach(function(t){ PAGES.push({id:t.id, lbl:t.lbl}); });
-    PAGES.push({id:'confirmation', lbl:'Confirmation'});
-
-    if(page >= PAGES.length) page = 0;
-    if(page < 0) page = PAGES.length - 1;
-    var curPage = PAGES[page];
-
-    // Phone frame wrapper
-    var phone = '<div style="max-width:340px;margin:0 auto;border:2px solid var(--sa-border);border-radius:24px;overflow:hidden;background:#0f0e1a;font-family:-apple-system,BlinkMacSystemFont,sans-serif;min-height:520px">';
-
-    // Topbar navigation pages
-    phone += '<div style="background:#1a1730;padding:10px 14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.1)">';
-    PAGES.forEach(function(p, i){
-      var isActive = i === page;
-      phone += '<div style="display:flex;align-items:center;gap:3px">';
-      phone += '<div style="width:20px;height:20px;border-radius:50%;background:' + (isActive ? esc(accent) : 'rgba(255,255,255,.15)') + ';color:' + (isActive ? '#fff' : 'rgba(255,255,255,.5)') + ';font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center">' + (i+1) + '</div>';
-      if(isActive) phone += '<span style="font-size:10px;color:rgba(255,255,255,.9);font-weight:700">' + esc(p.lbl) + '</span>';
-      phone += '</div>';
-      if(i < PAGES.length - 1) phone += '<div style="color:rgba(255,255,255,.2);font-size:9px">›</div>';
-    });
-    phone += '</div>';
-
-    // Contenu de la page courante
-    phone += '<div style="padding:24px 18px;min-height:420px">';
-
-    // ── PAGE HERO — avec sélection profil + ambiance dynamique
-    if(curPage.id === 'hero'){
-      var selProfId = state.modal.apercuProfil || '';
-      var selProf   = profils2.find(function(p){ return p.id === selProfId; }) || null;
-      var heroAccent = selProf ? (selProf.couleur || accent) : accent;
-      var heroAnswer = selProf ? selProf.apres : (hero2.answer || 'La solution tient en un clic.');
-      var heroCta    = selProf ? ('Je veux voir comment ça marche pour ' + selProf.lbl.split(' /')[0].trim() + ' →') : (hero2.cta || 'Je veux essayer  →');
-
-      // Header avec gradient adapté au profil sélectionné
-      var bgGrad = selProf
-        ? 'linear-gradient(160deg,' + esc(heroAccent) + '33,#0f0e1a 60%)'
-        : 'linear-gradient(160deg,#1a1730,#0f0e1a)';
-
-      phone = phone.replace('background:#0f0e1a;font-family', 'background:' + esc(bgGrad.replace(/,/g,'\u002c')) + ';transition:background .4s;font-family');
-
-      // Logo + profil actif
-      phone += '<div style="text-align:center;margin-bottom:16px">';
-      phone += '<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px">Flowin</div>';
-      if(selProf){
-        phone += '<div style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;background:' + esc(heroAccent) + '33;border:1px solid ' + esc(heroAccent) + '66;border-radius:20px;padding:4px 12px">'
-               + '<span style="font-size:16px">' + esc(selProf.ico) + '</span>'
-               + '<span style="font-size:11px;font-weight:700;color:#fff">' + esc(selProf.lbl) + '</span>'
-               + '<button onclick="state.modal.apercuProfil=\'\';renderModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer;padding:0 0 0 4px;line-height:1">×</button>'
-               + '</div>';
-      }
-      phone += '</div>';
-
-      // Questions hero
-      var anyQ = qs3.filter(function(q){ return q && q.trim(); });
-      if(anyQ.length){
-        anyQ.forEach(function(q,i){
-          phone += '<div style="font-size:12px;color:rgba(255,255,255,.78);padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:8px;align-items:flex-start">'
-               + '<span style="background:' + esc(heroAccent) + ';color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center">' + (i+1) + '</span>'
-               + esc(q) + '</div>';
-        });
-      } else {
-        phone += '<div style="border:1px dashed rgba(255,255,255,.2);border-radius:10px;padding:14px;text-align:center;color:rgba(255,255,255,.35);font-size:11px;margin-bottom:12px">Questions hero non configurées<br><span style="font-size:10px">→ Onglet Textes</span></div>';
-      }
-
-      // Réponse dynamique
-      phone += '<div style="margin-top:14px;font-size:14px;font-weight:800;color:#fff;text-align:center;line-height:1.3;min-height:40px">' + esc(heroAnswer) + '</div>';
-
-      // CTA dynamique
-      phone += '<button style="margin-top:14px;width:100%;background:' + esc(heroAccent) + ';color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:13px">' + esc(heroCta) + '</button>';
-
-      // Stats preuve
-      if(proof2.stat1){
-        phone += '<div style="margin-top:14px;display:flex;gap:20px;justify-content:center;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)">';
-        phone += '<div style="text-align:center"><div style="font-size:20px;font-weight:900;color:#fff">' + esc(proof2.stat1) + '</div><div style="font-size:9px;color:rgba(255,255,255,.45)">' + esc(proof2.stat1Lbl||'') + '</div></div>';
-        phone += '<div style="text-align:center"><div style="font-size:20px;font-weight:900;color:#fff">' + esc(proof2.stat2||'') + '</div><div style="font-size:9px;color:rgba(255,255,255,.45)">' + esc(proof2.stat2Lbl||'') + '</div></div>';
-        phone += '</div>';
-      }
-
-      // Sélecteur profils "Vous êtes…"
-      phone += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)">';
-      phone += '<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:8px;text-align:center">VOUS ÊTES…</div>';
-      phone += '<div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center">';
-      profils2.forEach(function(p){
-        var isSelected = selProfId === p.id;
-        var pColor = p.couleur || accent;
-        phone += '<button data-pid="' + esc(p.id) + '" onclick="state.modal.apercuProfil=this.dataset.pid;renderModal()" '
-               + 'style="background:' + (isSelected ? esc(pColor) : 'rgba(255,255,255,.08)') + ';'
-               + 'color:' + (isSelected ? '#fff' : 'rgba(255,255,255,.7)') + ';'
-               + 'border:1px solid ' + (isSelected ? esc(pColor) : 'rgba(255,255,255,.12)') + ';'
-               + 'border-radius:20px;padding:5px 10px;font-size:11px;font-weight:' + (isSelected ? '800' : '600') + ';cursor:pointer;'
-               + 'transform:' + (isSelected ? 'scale(1.05)' : 'scale(1)') + ';'
-               + 'box-shadow:' + (isSelected ? '0 2px 8px ' + esc(pColor) + '66' : 'none') + '">'
-               + esc(p.ico) + ' ' + esc(p.lbl.split(' /')[0].trim()) + '</button>';
-      });
-      phone += '</div>';
-
-      // Si profil sélectionné : micro-panel "Avant / Après"
-      if(selProf){
-        phone += '<div style="margin-top:10px;background:' + esc(selProf.couleur||accent) + '22;border:1px solid ' + esc(selProf.couleur||accent) + '55;border-radius:12px;padding:10px 12px">';
-        phone += '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Avant Flowin</div>';
-        phone += '<div style="font-size:11px;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:8px;font-style:italic">"' + esc(selProf.avant) + '"</div>';
-        phone += '<div style="font-size:10px;font-weight:700;color:' + esc(selProf.couleur||accent) + ';margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Avec Flowin</div>';
-        phone += '<div style="font-size:11px;color:#fff;line-height:1.5;font-weight:600">' + esc(selProf.apres) + '</div>';
-        phone += '</div>';
-      }
-
-      phone += '</div>'; // fin sélecteur profils
-    }
-
-    // ── PAGE PRÉSENTATION (tunnel step 1)
-    else if(curPage.id === 'presentation'){
-      phone += '<div style="text-align:center;margin-bottom:18px"><div style="font-size:28px">🎯</div><div style="font-size:16px;font-weight:900;color:#fff;margin-top:6px">Comment ça marche ?</div></div>';
-      phone += '<div style="display:flex;flex-direction:column;gap:10px">';
-      var steps = [
-        {n:'1',ico:'📱',t:'Un QR code',d:'Votre client scanne le QR code sur place — en quelques secondes.'},
-        {n:'2',ico:'🎮',t:'Un jeu',d:'Il joue à ' + esc(modInfo.label||'Spin') + ' — immersif, rapide, gratuit.'},
-        {n:'3',ico:'📝',t:'Ses coordonnées',d:'Il laisse son email et son accord pour être recontacté.'},
-        {n:'4',ico:'🏆',t:'Un lot à gagner',d:'Il entre dans le tirage — et vous avez son contact qualifié.'}
-      ];
-      steps.forEach(function(s){
-        phone += '<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 12px">'
-             + '<div style="font-size:20px;min-width:28px">' + s.ico + '</div>'
-             + '<div><div style="font-size:12px;font-weight:800;color:#fff;margin-bottom:2px">' + s.t + '</div>'
-             + '<div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.4">' + s.d + '</div></div>'
-             + '</div>';
-      });
-      phone += '</div>';
-    }
-
-    // ── PAGE EXEMPLE (tunnel step 2)
-    else if(curPage.id === 'exemple'){
-      phone += '<div style="text-align:center;margin-bottom:16px"><div style="font-size:28px">📍</div><div style="font-size:16px;font-weight:900;color:#fff;margin-top:6px">Un exemple concret</div></div>';
-      if(proof2.quote){
-        phone += '<div style="background:rgba(255,255,255,.06);border-left:3px solid ' + esc(accent) + ';border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:14px">';
-        phone += '<div style="font-size:11px;color:rgba(255,255,255,.65);font-style:italic;line-height:1.6">"' + esc(proof2.quote) + '"</div>';
-        phone += '</div>';
-      } else {
-        phone += '<div style="border:1px dashed rgba(255,255,255,.2);border-radius:10px;padding:14px;text-align:center;color:rgba(255,255,255,.35);font-size:11px;margin-bottom:14px">Citation client non configurée<br><span style="font-size:10px">→ Onglet Textes</span></div>';
-      }
-      phone += '<div style="display:flex;gap:12px;justify-content:center;margin-bottom:14px">';
-      if(proof2.stat1) phone += '<div style="text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 16px"><div style="font-size:22px;font-weight:900;color:#fff">' + esc(proof2.stat1) + '</div><div style="font-size:9px;color:rgba(255,255,255,.45)">' + esc(proof2.stat1Lbl||'') + '</div></div>';
-      if(proof2.stat2) phone += '<div style="text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 16px"><div style="font-size:22px;font-weight:900;color:#fff">' + esc(proof2.stat2) + '</div><div style="font-size:9px;color:rgba(255,255,255,.45)">' + esc(proof2.stat2Lbl||'') + '</div></div>';
-      phone += '</div>';
-      // Profils aperçu
-      if(profils2.length){
-        phone += '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.5px;margin-bottom:8px">VOUS ÊTES…</div>';
-        phone += '<div style="display:flex;flex-wrap:wrap;gap:5px">';
-        profils2.slice(0,4).forEach(function(p){
-          phone += '<div style="background:rgba(255,255,255,.08);border-radius:8px;padding:5px 10px;font-size:11px;color:rgba(255,255,255,.8)">' + esc(p.ico) + ' ' + esc(p.lbl) + '</div>';
-        });
-        phone += '</div>';
-      }
-    }
-
-    // ── PAGE JEU (tunnel step 3)
-    else if(curPage.id === 'jeu'){
-      phone += '<div style="text-align:center;margin-bottom:18px"><div style="font-size:36px">' + modInfo.emoji + '</div><div style="font-size:16px;font-weight:900;color:#fff;margin-top:6px">' + esc(modInfo.label) + '</div><div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px">Jouez et tentez de gagner</div></div>';
-      if(ld.moduleJeu === 'spin'){
-        // Roue stylisée simplifiée
-        phone += '<div style="width:160px;height:160px;border-radius:50%;background:conic-gradient(' + esc(accent) + ' 0deg 60deg,#2D3748 60deg 120deg,' + esc(accent) + '99 120deg 180deg,#2D3748 180deg 240deg,' + esc(accent) + 'cc 240deg 300deg,#2D3748 300deg 360deg);margin:0 auto 16px;border:4px solid rgba(255,255,255,.15);box-shadow:0 0 30px ' + esc(accent) + '44"></div>';
-        phone += '<button style="width:100%;background:' + esc(accent) + ';color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px">🎡 Lancer la roue</button>';
-      } else if(ld.moduleJeu === 'quiz'){
-        phone += '<div style="background:rgba(255,255,255,.06);border-radius:12px;padding:14px;margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:10px">Question 1 / 5</div>';
-        phone += '<div style="display:flex;flex-direction:column;gap:6px">';
-        ['Réponse A','Réponse B','Réponse C','Réponse D'].forEach(function(r){
-          phone += '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:9px 12px;font-size:12px;color:rgba(255,255,255,.8);cursor:pointer">' + r + '</div>';
-        });
-        phone += '</div></div>';
-      } else if(ld.moduleJeu === 'tombola'){
-        phone += '<div style="text-align:center;padding:20px 0"><div style="font-size:48px">🎁</div><div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:10px">Remplissez le formulaire<br>pour participer au tirage</div></div>';
-      }
-    }
-
-    // ── PAGE CAPTURE (formulaire CRM)
-    else if(curPage.id === 'capture'){
-      phone += '<div style="text-align:center;margin-bottom:18px"><div style="font-size:28px">📝</div><div style="font-size:15px;font-weight:900;color:#fff;margin-top:6px">Vos coordonnées</div><div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px">Pour recevoir votre résultat</div></div>';
-      phone += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">';
-      ['Prénom', 'Nom', 'Email', 'Téléphone (optionnel)'].forEach(function(f){
-        phone += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 14px;font-size:12px;color:rgba(255,255,255,.4)">' + f + '</div>';
-      });
-      phone += '</div>';
-      phone += '<div style="display:flex;gap:8px;align-items:flex-start;padding:10px;background:rgba(255,255,255,.04);border-radius:8px;margin-bottom:14px">'
-           + '<div style="width:16px;height:16px;border:1px solid ' + esc(accent) + ';border-radius:4px;min-width:16px;margin-top:1px"></div>'
-           + '<div style="font-size:10px;color:rgba(255,255,255,.5);line-height:1.5">J&rsquo;accepte d&rsquo;etre recontacte par email ou telephone. Donnees protegees, non revendues.</div>'
-           + '</div>';
-      phone += '<button style="width:100%;background:' + esc(accent) + ';color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px">Valider et participer 🎲</button>';
-    }
-
-    // ── PAGE CONFIRMATION
-    else if(curPage.id === 'confirmation'){
-      phone += '<div style="text-align:center;padding:20px 0">';
-      phone += '<div style="font-size:48px;margin-bottom:12px">🎉</div>';
-      phone += '<div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:8px">Vous êtes inscrit !</div>';
-      phone += '<div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:20px">Votre participation est enregistree.<br>Le tirage aura lieu à la fin de l&rsquo;événement.</div>';
-      if(ld.waNumber && ld.waNumber !== '33XXXXXXXXX'){
-        phone += '<a style="display:block;width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px;text-align:center;text-decoration:none;box-sizing:border-box" href="https://wa.me/' + esc(ld.waNumber) + '">💬 Nous contacter sur WhatsApp</a>';
-      } else {
-        phone += '<div style="border:1px dashed rgba(255,255,255,.2);border-radius:10px;padding:12px;text-align:center;color:rgba(255,255,255,.35);font-size:11px">Bouton WhatsApp non configuré<br><span style="font-size:10px">→ Onglet Config</span></div>';
-      }
-      phone += '<div style="margin-top:16px;font-size:11px;color:rgba(255,255,255,.3)">Propulsé par Flowin</div>';
-      phone += '</div>';
-    }
-
-    phone += '</div>'; // fin padding content
-    phone += '</div>'; // fin phone frame
-
-    // Navigation prev/next
-    var navHtml = '<div style="display:flex;align-items:center;justify-content:space-between;max-width:340px;margin:12px auto 0">';
-    navHtml += (page > 0
-      ? '<button class="btn btn-sm" onclick="state.modal.apercuPage=' + (page-1) + ';renderModal()">← ' + esc(PAGES[page-1].lbl) + '</button>'
-      : '<div></div>');
-    navHtml += '<div style="font-size:11px;color:var(--sa-muted)">' + (page+1) + ' / ' + PAGES.length + '</div>';
-    navHtml += (page < PAGES.length-1
-      ? '<button class="btn btn-sm btn-primary" onclick="state.modal.apercuPage=' + (page+1) + ';renderModal()">' + esc(PAGES[page+1].lbl) + ' →</button>'
-      : '<button class="btn btn-sm btn-primary" onclick="lpPublish(this.getAttribute(\'data-id\'));closeModal()" data-id="' + esc(ldId) + '">🟢 Publier</button>');
-    navHtml += '</div>';
-
-    html += '<div style="font-size:11px;color:var(--sa-muted);margin-bottom:12px;background:#FEF9C3;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px">⚠️ Prévisualisation interne — page ' + (page+1) + ' sur ' + PAGES.length + '</div>';
-    html += phone;
-    html += navHtml;
+    // ── Aperçu réel : iframe vers /landing/index.html ──
+    html += '<div style="font-size:11px;color:var(--sa-muted);margin-bottom:12px;background:#FEF9C3;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px">⚠️ Prévisualisation interne — page réelle</div>';
+    html += '<div style="display:flex;justify-content:center">';
+    html += '<div class="flowin-phone-frame" style="width:375px;max-width:100%;height:680px;background:#fff">';
+    html += '<iframe src="/landing/index.html" style="width:375px;height:812px;border:none;display:block;transform:scale(0.836);transform-origin:top left" frameborder="0"></iframe>';
+    html += '</div>';
+    html += '</div>';
     if(ld.deployUrl){
-      html += '<div style="text-align:center;margin-top:10px"><a href="' + esc(ld.deployUrl) + '" target="_blank" class="btn btn-sm">↗ Voir en ligne</a></div>';
+      html += '<div style="text-align:center;margin-top:10px"><a href="' + esc(ld.deployUrl) + '" target="_blank" class="btn btn-sm">🔗 Voir en ligne</a></div>';
     }
   }
   // Footer save (hors aperçu)

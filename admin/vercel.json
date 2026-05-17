@@ -28,5 +28,12 @@
       "source": "/landing/",
       "destination": "/landing/index.html"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/static/dashboard.html",
+      "destination": "/dashboard.html",
+      "permanent": true
+    }
   ]
 }
