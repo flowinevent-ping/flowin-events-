@@ -5786,7 +5786,7 @@ function drawerEvent(e){
        html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button>';
        html += '<div class="flowin-phone-frame">';
        html += '<div class="flowin-phone-notch"></div>';
-              html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+              html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
        html += '</div>';
        html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button>';
        html += '</div>';
@@ -5991,7 +5991,7 @@ function renderOngletJeu(e){
   html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')">‹</button>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
-  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
   html += '</div>';
   html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')">›</button>';
   html += '</div>';
@@ -6479,7 +6479,7 @@ function renderBiblioJeux(){
   html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
-  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
   html += '</div>';
   html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button>';
   html += '</div>';
@@ -10160,18 +10160,19 @@ document.addEventListener('DOMContentLoaded', async function(){
 /* ═══════════════════════════════════════════════════════════════════ */
 /* ── Modal Joueur : parcours_user.html?ev=&module= ── */
 
+function flowinScalePhone(frame) {
+  if(!frame) return;
+  var w = frame.offsetWidth, h = frame.offsetHeight;
+  if(!w || !h) { setTimeout(function(){ flowinScalePhone(frame); }, 80); return; }
+  var scaler = frame.querySelector('.flowin-phone-scaler');
+  if(!scaler) return;
+  var scale = Math.min((w-16)/375, (h-16)/812);
+  scaler.style.transform = 'scale('+scale+')';
+  scaler.style.width  = Math.round(375*scale)+'px';
+  scaler.style.height = Math.round(812*scale)+'px';
+}
 function flowinScalePhones() {
-  var frames = document.querySelectorAll('.flowin-phone-frame');
-  frames.forEach(function(frame) {
-    var scaler = frame.querySelector('.flowin-phone-scaler');
-    if(!scaler) return;
-    var innerW = frame.offsetWidth - 16; /* 8px padding × 2 */
-    var innerH = frame.offsetHeight - 16;
-    var scaleW = innerW / 375;
-    var scaleH = innerH / 812;
-    var scale = Math.max(scaleW, scaleH); /* max = rempli frame, léger overflow clippé */
-    scaler.style.transform = 'scale(' + scale + ')';
-  });
+  document.querySelectorAll('.flowin-phone-frame').forEach(flowinScalePhone);
 }
 function flowinNavIframe(iframeId, dir) {
   var fr = document.getElementById(iframeId);
