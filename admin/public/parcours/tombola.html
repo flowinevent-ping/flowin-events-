@@ -2497,6 +2497,7 @@ function flowinHydrateQuizmasterBonus(){
 })();
 </script>
 
+<script>
 /* ── Navigation depuis postMessage (dashboard preview arrows) ── */
 window.addEventListener('message', function(e) {
   if(!e.data || !e.data.flowinNav) return;
@@ -2518,6 +2519,7 @@ window.addEventListener('message', function(e) {
   pages[next].classList.add('on');
   if(vp.scrollTo) vp.scrollTo(0,0);
 });
+</script>
 
 </body>
 </html>
