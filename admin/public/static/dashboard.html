@@ -7664,11 +7664,11 @@ function modalLanding(data){
     html += '<div class="flowin-phone-nav-row">';
     html += '<button class="flowin-phone-nav" '
           + 'onclick="state.modal.landingPage=Math.max(0,(state.modal.landingPage||0)-1);'
-          + 'renderModal();flowinNavLanding(''+_ldIframeId+'',state.modal.landingPage)">‹</button>';
+          + 'renderModal();flowinNavLanding(\'iframe-landing-apercu\',state.modal.landingPage)">‹</button>';
     html += '<span style="font-size:11px;color:var(--sa-muted)">'+((_lp)+1)+' / '+_SECTIONS.length+'</span>';
     html += '<button class="flowin-phone-nav" '
           + 'onclick="state.modal.landingPage=Math.min('+(_SECTIONS.length-1)+',(state.modal.landingPage||0)+1);'
-          + 'renderModal();flowinNavLanding(''+_ldIframeId+'',state.modal.landingPage)">›</button>';
+          + 'renderModal();flowinNavLanding(\'iframe-landing-apercu\',state.modal.landingPage)">›</button>';
     html += '</div>';
     html += '<div class="flowin-phone-frame">';
     html += '<div class="flowin-phone-notch"></div>';
