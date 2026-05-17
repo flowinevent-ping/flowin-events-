@@ -956,6 +956,18 @@ function QR8bitByte(t){this.mode=QRMode.MODE_8BIT_BYTE,this.data=t,this.parsedDa
 
 // ============ DONNÉES MOCK (seed initial) ============
 const TODAY = new Date('2026-05-03');
+
+/* ══ RESET FORCÉ v29 — efface toutes les clés flowin_ sauf v29 ══ */
+(function(){
+  try {
+    var keys = Object.keys(localStorage);
+    keys.forEach(function(k){
+      if(k.indexOf('flowin_') === 0 && k !== 'flowin_v29_data') {
+        localStorage.removeItem(k);
+      }
+    });
+  } catch(e){}
+})();
 const SEED = {
   pros: [
     {id:'pro-vence',nom:'Ville de Vence',ville:'Vence',codePostal:'06140',adresse:'Hôtel de Ville, Place du Frêne',siret:'21060157200019',secteur:'Collectivité',contact:'Service Animation',role:'Animateur événementiel',email:'animation@ville-vence.fr',tel:'04 93 58 06 58',entreeP:'2026-01-01',notes:'Client pilote Flowin · Fêtes de Pâques 2026 (186 participants)',tags:['pilote','collectivité']},
