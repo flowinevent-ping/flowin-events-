@@ -2076,11 +2076,11 @@ function flowinHydrateModule(ev) {
     var vp = document.getElementById('vp-paques');
     if(vp) {
       var villeEl = vp.querySelector('.pq-ville');
-      if(villeEl) villeEl.textContent = lieu + ' · Flowin';
+      if(villeEl) villeEl.textContent = cfg.subtitle || (lieu + ' · Source d\'inspiration');
       var titleEl = vp.querySelector('.pq-title');
-      if(titleEl) titleEl.innerHTML = nom.replace(' ', '<br>');
+      if(titleEl) titleEl.innerHTML = cfg.nomCourt ? cfg.nomCourt.replace(' ', '<br>') : nom.replace(' ', '<br>');
       var datesEl = vp.querySelector('.pq-dates');
-      if(datesEl) datesEl.textContent = dates;
+      if(datesEl) datesEl.textContent = cfg.datesLabel || dates;
     }
     /* QuizMaster (qm) */
     var vqm = document.getElementById('vp-quizmaster');
