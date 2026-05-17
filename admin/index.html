@@ -1511,7 +1511,7 @@ function migrateData(data){
   // Init DATA.landing si absent
   if(!data.landing){
     data.landing = {
-      deployUrl: '',
+      deployUrl: 'https://flowin-events.vercel.app/landing/',
       waNumber: '33XXXXXXXXX',
       accentColor: '#3B5CC4',
       moduleJeu: 'spin',
@@ -1569,7 +1569,7 @@ function migrateData(data){
     if(!ld.nom) ld.nom = 'Landing sans nom';
     if(!ld.statut) ld.statut = 'brouillon';
     if(!ld.published) ld.published = false;
-    if(!ld.deployUrl) ld.deployUrl = '';
+    if(!ld.deployUrl) ld.deployUrl = 'https://flowin-events.vercel.app/landing/';
     if(!ld.waNumber) ld.waNumber = '33XXXXXXXXX';
     if(!ld.accentColor) ld.accentColor = '#3B5CC4';
     if(!ld.moduleJeu) ld.moduleJeu = 'spin';
