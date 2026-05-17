@@ -862,7 +862,63 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .wiz-seq-dot.active{background:var(--sa-accent);transform:scale(1.3)}
 .wiz-seq-label{font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;text-align:center;margin-bottom:6px}
 .wiz-seq-frame{animation:seqFade .18s ease}
+.phone-frame{position:relative;overflow:hidden}
+.phone-scaler-wrap{width:375px;transform-origin:top left;transform:scale(0.8107);pointer-events:none}
+.phone-screen{min-height:420px;max-height:600px;overflow:hidden}
 @keyframes seqFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Phone mockup responsive ── */
+.flowin-phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.flowin-phone-nav-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.flowin-phone-nav {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--sa-border); background: #fff;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.flowin-phone-nav:hover { background: var(--sa-subtle); }
+.flowin-phone-frame {
+  background: #111;
+  border-radius: 36px;
+  padding: 8px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.28), inset 0 0 0 2px #2d2d2d;
+  position: relative;
+  width: min(280px, 100%);
+  aspect-ratio: 9 / 19.5;
+  overflow: hidden;
+}
+.flowin-phone-notch {
+  position: absolute; top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 72px; height: 16px;
+  background: #111; border-radius: 0 0 10px 10px; z-index: 10;
+}
+.flowin-phone-scaler {
+  position: absolute;
+  top: 0; left: 0;
+  width: 375px;
+  height: 812px;
+  transform-origin: top left;
+  transform: scale(0.704); /* 264/375 — frame inner 264px */
+}
+.flowin-phone-scaler iframe {
+  width: 375px;
+  height: 812px;
+  border: none;
+  display: block;
+  border-radius: 28px;
+}
 </style>
 </head>
 <body>
@@ -903,14 +959,26 @@ function QR8bitByte(t){this.mode=QRMode.MODE_8BIT_BYTE,this.data=t,this.parsedDa
 
 // ============ DONNÉES MOCK (seed initial) ============
 const TODAY = new Date('2026-05-03');
+
+/* ══ RESET FORCÉ v30 ══ */
+(function(){
+  try {
+    var _cur = 'flowin_v30_data';
+    Object.keys(localStorage).forEach(function(k){
+      if(k.indexOf('flowin_')===0 && k!==_cur) localStorage.removeItem(k);
+    });
+    var _d30 = localStorage.getItem(_cur);
+    if(_d30){ try{ var _p=JSON.parse(_d30); if(!_p||!_p.events||!_p.events.length) localStorage.removeItem(_cur); }catch(e){ localStorage.removeItem(_cur); } }
+  }catch(e){}
+})();
 const SEED = {
   pros: [
     {id:'pro-vence',nom:'Ville de Vence',ville:'Vence',codePostal:'06140',adresse:'Hôtel de Ville, Place du Frêne',siret:'21060157200019',secteur:'Collectivité',contact:'Service Animation',role:'Animateur événementiel',email:'animation@ville-vence.fr',tel:'04 93 58 06 58',entreeP:'2026-01-01',notes:'Client pilote Flowin · Fêtes de Pâques 2026 (186 participants)',tags:['pilote','collectivité']},
-    {id:'pro-flowin',nom:'Flowin',ville:'Nice',codePostal:'06000',adresse:'Nice, 06000',siret:'',secteur:'SaaS · Gamification',contact:'Romain Collin',role:'Fondateur',email:'contact@flowin.fr',tel:'',entreeP:'2026-05-07',notes:'Compte interne Flowin · Event démo commercial landing · Tunnel acquisition Pro',tags:['interne','demo','landing']}
+    
   ],
   events: [
     {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
-      cfg:{qrUrl:'https://flowin-opconsult.netlify.app/?ev=ev-paques',quizBanques:['bq-paques-vence'],optinActif:true,
+      cfg:{qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-paques',quizBanques:['bq-paques-vence'],optinActif:true,
       customQuestions:[
         {id:'decouverte',label:'Comment avez-vous connu l\'événement ?',type:'single',options:[
           {label:'📸 Instagram',val:'instagram'},
@@ -963,73 +1031,8 @@ const SEED = {
         ambiance:[{l:'Génial !',v:80,ico:'🤩'},{l:'Top, on se sent bien',v:51,ico:'😊'},{l:'Ça va, peut mieux faire',v:3,ico:'😐'}]
       }
     },
-    {id:'ev-nds',proId:'pro-vence',nom:'Nuits du Sud 2026',module:'quiz',status:'upcoming',
-      dateD:'2026-07-15',dateF:'2026-07-24',hStart:'20:00',hEnd:'23:59',
-      lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',
-      participants:0,gagnants:0,partenaires:[],joueursOptin:0,
-      couleur:'#3B5CC4',description:'Festival musiques du monde · 10 soirées · Quiz + Tirage NDS',
-      scoreMin:0,banques:[],
-      cfg:{
-        qrUrl:'https://flowin-opconsult.netlify.app/?ev=ev-nds',
-        quizBanques:[],
-        optinActif:true,
-        customQuestions:[
-          {id:'decouverte',label:'Comment avez-vous connu l\'événement ?',type:'single',options:[
-            {label:'📸 Instagram',val:'instagram'},
-            {label:'🔵 Facebook',val:'facebook'},
-            {label:'🏛 Site de la mairie',val:'mairie'},
-            {label:'📋 Affiche / Flyer',val:'affiche'},
-            {label:'🗣 Bouche à oreille',val:'bouche'}
-          ]}
-        ],
-        quizBonusList:[
-          {id:'frequence',label:'Vous êtes venu(e)...',type:'single',options:[
-            {val:'famille',label:'👨‍👩‍👧 En famille'},
-            {val:'amis',label:'👫 Entre amis'},
-            {val:'couple',label:'💑 En couple'},
-            {val:'seul',label:'🚶 Seul(e)'}
-          ]},
-          {id:'ambiance',label:'Je trouve l\'ambiance...',type:'single',options:[
-            {val:'genial',label:'🤩 Génial !'},
-            {val:'top',label:'😊 Top, on se sent bien'},
-            {val:'moyen',label:'😐 Ça va, peut mieux faire'}
-          ]},
-          {id:'retour',label:'Souhaitez-vous revenir ?',type:'single',options:[
-            {val:'oui',label:'✅ Oui'},
-            {val:'peut-etre',label:'🤔 Peut-être'},
-            {val:'non',label:'❌ Non'}
-          ]},
-          {id:'optin',label:'On vous informe pour les prochains événements ?',type:'single',options:[
-            {val:'oui',label:'✅ Oui envoyez-moi un message'},
-            {val:'non',label:'❌ Non merci'}
-          ]}
-        ],
-        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:false,msgBienvenue:'Bienvenue sur le dashboard Nuits du Sud 2026 !',langue:'fr'}
-      },
-      stats:{}
-    },
-    {id:'ev-flowin-demo',proId:'pro-flowin',nom:'Flowin — Découverte',module:'spin',status:'live',
-      clientType:'btob',
-      dateD:'2026-05-07',dateF:'2030-05-03',hStart:'00:00',hEnd:'23:59',
-      lieu:'Nice',adresse:'Nice, 06000',
-      participants:0,gagnants:0,partenaires:[],joueursOptin:0,
-      couleur:'#A855F7',description:'Event démo commercial · Parcours joueur Flowin · Accès tunnel de vente landing',
-      scoreMin:0,banques:[],
-      cfg:{
-        qrUrl:'',
-        optinActif:true,
-        spinSegments:[
-          {id:'seg-1',label:'Accès Flowin complet',sublabel:'Tableau de bord inclus',emoji:'🎛️',color:'#A855F7',prob:20},
-          {id:'seg-2',label:'1 an offert',sublabel:'Abonnement Flowin gratuit',emoji:'🎁',color:'#00B4A0',prob:20},
-          {id:'seg-3',label:'Flowin Team',sublabel:'Multi-utilisateurs offert',emoji:'👥',color:'#1B3A5C',prob:20},
-          {id:'seg-4',label:'1er event offert',sublabel:'Config + déploiement inclus',emoji:'🚀',color:'#E8500A',prob:20},
-          {id:'seg-5',label:'Parrainer un ami',sublabel:'Et retenter votre chance',emoji:'🤝',color:'#F5A623',prob:20}
-        ],
-        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:'Bienvenue — Découvrez Flowin en jouant.',langue:'fr'}
-      },
-      stats:{}
-    },
-  ],
+    
+      ],
   joueurs: [
     {id:'j-pq-01',email:'dakota.vegas06@gmail.com',nom:'Valérie Manes',prenom:'Valérie',tel:'',ville:'Saint-Laurent-du-Var',codePostal:'06700',adresse:'',dateNaissance:'1965-06-15',events:['ev-paques'],gains:0,scoreMoy:'3/4',optin:true,optinDate:'2026-04-04',lastSeen:'2026-04-06',firstSeen:'2026-04-04',source:'QR sur place',tags:[]},
     {id:'j-pq-02',email:'sabithaaceteee@gmail.com',nom:'Sabitha Iyyanar',prenom:'Sabitha',tel:'06 75 44 59 92 9',ville:'Vence',codePostal:'06140',adresse:'',dateNaissance:'1995-06-15',events:['ev-paques'],gains:1,scoreMoy:'4/4',optin:true,optinDate:'2026-04-04',lastSeen:'2026-04-06',firstSeen:'2026-04-04',source:'QR sur place',tags:['Vence']},
@@ -1220,8 +1223,7 @@ const SEED = {
   ],
   partenaires: [],
   superEvents: [
-    {id:'se-nds-2026',nom:'Nuits du Sud 2026',pros:['pro-vence'],events:['ev-nds'],dateD:'2026-07-15',dateF:'2026-07-24',status:'upcoming',description:'Festival musique sur 10 jours · 1 event/concert · vote public + tirage final',tirageGlobal:true,nbGagnantsFinal:5},
-  ],
+      ],
   jeux: [
     {id:'jeu-quiz',nom:'Quiz Classique',type:'quiz',version:'2.4',deployments:['ev-paques'],description:'Quiz à choix multiples · 1 tentative/jour · réponse + résultat à la fin',configDefault:{quizNbQuestions:5,quizScoreMin:3,quizTimer:30,quizBonus:true,quizRecapFin:true,quizPartage:true,quizUneFoisParJour:true,quizShuffle:true,quizBanques:['bq-paques-vence'],bonusActif:true,bonusList:[{id:'frequence',label:'Vous êtes venu(e)...',type:'single',options:[{label:'👨\u200d👩\u200d👧 En famille',val:'famille'},{label:'👫 Entre amis',val:'amis'},{label:'💑 En couple',val:'couple'},{label:'🚶 Seul(e)',val:'seul'}]},{id:'ambiance',label:'Je trouve l\'ambiance...',type:'single',options:[{label:'🤩 Génial !',val:'genial'},{label:'😊 Top, on se sent bien',val:'top'},{label:'😐 Ça va, peut mieux faire',val:'moyen'}]},{id:'retour',label:'Souhaitez-vous revenir ?',type:'single',options:[{label:'✅ Oui',val:'oui'},{label:'🤔 Peut-être',val:'peutetre'},{label:'❌ Non',val:'non'}]},{id:'optin',label:'On vous informe pour les prochains événements ?',type:'single',options:[{label:'✅ Oui envoyez-moi un message',val:'oui'},{label:'❌ Non merci',val:'non'}]}],customQuestions:[{id:'decouverte',label:'Comment nous avez-vous connu ?',type:'single',options:[{label:'📸 Instagram',val:'instagram'},{label:'🔵 Facebook',val:'facebook'},{label:'🏛 Site de la mairie',val:'mairie'},{label:'📋 Affiche / Flyer',val:'affiche'},{label:'🗣 Bouche à oreille',val:'bouche'}]}],optinActif:true},statsAgg:{joueursTotal:186,scoreMoyen:15.8,tauxComplete:91}},
     {id:'jeu-quizsolo',nom:'Quiz Solo (compétition)',type:'quizsolo',version:'1.8',deployments:[],description:'Compétition individuelle · classement live · finale entre top 3 si égalité',configDefault:{quizNbQuestions:10,quizTimer:20,quizTimerVisible:true,quizPartage:true,quizUneFoisParJour:true,classementPublic:true,bonusActif:true,bonusList:[{id:'frequence',label:'Vous êtes venu(e)...',type:'single',options:[{label:'👨\u200d👩\u200d👧 En famille',val:'famille'},{label:'👫 Entre amis',val:'amis'},{label:'💑 En couple',val:'couple'},{label:'🚶 Seul(e)',val:'seul'}]},{id:'ambiance',label:'Je trouve l\'ambiance...',type:'single',options:[{label:'🤩 Génial !',val:'genial'},{label:'😊 Top, on se sent bien',val:'top'},{label:'😐 Ça va, peut mieux faire',val:'moyen'}]},{id:'retour',label:'Souhaitez-vous revenir ?',type:'single',options:[{label:'✅ Oui',val:'oui'},{label:'🤔 Peut-être',val:'peutetre'},{label:'❌ Non',val:'non'}]},{id:'optin',label:'On vous informe pour les prochains événements ?',type:'single',options:[{label:'✅ Oui envoyez-moi un message',val:'oui'},{label:'❌ Non merci',val:'non'}]}],customQuestions:[{id:'decouverte',label:'Comment nous avez-vous connu ?',type:'single',options:[{label:'📸 Instagram',val:'instagram'},{label:'🔵 Facebook',val:'facebook'},{label:'🏛 Site de la mairie',val:'mairie'},{label:'📋 Affiche / Flyer',val:'affiche'},{label:'🗣 Bouche à oreille',val:'bouche'}]}],optinActif:true},statsAgg:{joueursTotal:412,scoreMoyen:14.2,tauxComplete:78}},
@@ -1313,12 +1315,12 @@ const SEED = {
 
 
 // ============ STORAGE LOCAL ============
-const LS_KEY = 'flowin_v28_data'; // v28 — bump LS_KEY + landing pages multi + apercu profils
+const LS_KEY = 'flowin_v30_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
 function loadData(){
   try{
     // Migration : récupérer données d'une ancienne clé si la nouvelle est vide
   if(!localStorage.getItem(LS_KEY)){
-    var _oldKeys=['flowin_v22_data','flowin_v21_data','flowin_v20_data'];
+    var _oldKeys=['flowin_v22_data','flowin_v21_data','flowin_v21_data'];
     for(var _ki=0;_ki<_oldKeys.length;_ki++){
       var _old=localStorage.getItem(_oldKeys[_ki]);
       if(_old){
@@ -1512,7 +1514,7 @@ function migrateData(data){
   // Init DATA.landing si absent
   if(!data.landing){
     data.landing = {
-      deployUrl: '',
+      deployUrl: 'https://flowin-events.vercel.app/landing/',
       waNumber: '33XXXXXXXXX',
       accentColor: '#3B5CC4',
       moduleJeu: 'spin',
@@ -1570,7 +1572,7 @@ function migrateData(data){
     if(!ld.nom) ld.nom = 'Landing sans nom';
     if(!ld.statut) ld.statut = 'brouillon';
     if(!ld.published) ld.published = false;
-    if(!ld.deployUrl) ld.deployUrl = '';
+    if(!ld.deployUrl) ld.deployUrl = 'https://flowin-events.vercel.app/landing/';
     if(!ld.waNumber) ld.waNumber = '33XXXXXXXXX';
     if(!ld.accentColor) ld.accentColor = '#3B5CC4';
     if(!ld.moduleJeu) ld.moduleJeu = 'spin';
@@ -1759,7 +1761,7 @@ async function supaWriteEvent(e){
   // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
   // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
   if(!e.cfg) e.cfg = {};
-  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
+  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (e.module||'quiz') + '.html?ev=' + e.id;
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
@@ -1828,8 +1830,10 @@ async function supaWriteBanque(b){
   if(!b || !b.id) return;
   var payload = {
     id: b.id, nom: b.nom, description: b.description||'',
-    events: Array.isArray(b.events) ? b.events : [],
-    questions: Array.isArray(b.questions) ? b.questions : []
+    pro_id: b.proId||null,
+    event_ids: Array.isArray(b.events) ? b.events : [],
+    questions: Array.isArray(b.questions) ? b.questions : [],
+    tags: Array.isArray(b.tags) ? b.tags : []
   };
   var ok = await supaUpsert('banques', payload);
   if(!ok) gasBackup('banque_upsert', payload);
@@ -1874,6 +1878,26 @@ try {
     SEED.banques.forEach(function(sb){ if(!DATA.banques.find(function(b){ return b.id===sb.id; })) DATA.banques.push(JSON.parse(JSON.stringify(sb))); });
     localStorage.setItem(LS_KEY, JSON.stringify(DATA));
   }
+} catch(e_purge){ console.warn('[purge banques]', e_purge); }
+
+/* ══ GARANTIE ev-paques — toujours présent ══ */
+try {
+  if(!DATA.events || !DATA.events.length || !DATA.events.find(function(e){ return e.id==='ev-paques'; })) {
+    if(!DATA.events) DATA.events = [];
+    var _seedPaques = SEED.events.find(function(e){ return e.id==='ev-paques'; });
+    if(_seedPaques) {
+      DATA.events = DATA.events.filter(function(e){ return e.id!=='ev-paques'; });
+      DATA.events.unshift(JSON.parse(JSON.stringify(_seedPaques)));
+      localStorage.setItem(LS_KEY, JSON.stringify(DATA));
+      console.log('[Flowin] ev-paques réinjecté dans DATA.events');
+    }
+  }
+  if(!DATA.pros || !DATA.pros.length) {
+    var _seedPro = SEED.pros.find(function(p){ return p.id==='pro-vence'; });
+    if(_seedPro) { DATA.pros = [JSON.parse(JSON.stringify(_seedPro))]; localStorage.setItem(LS_KEY, JSON.stringify(DATA)); }
+  }
+} catch(e_guarantee){ console.warn('[guarantee]', e_guarantee); }
+try { /* dummy to avoid try-catch mismatch */
 } catch(_e){ console.warn('Purge banques:', _e); }
 // Normalisation défensive au boot — protège contre banques sans questions
 // Purge stricte — uniquement les 5 banques officielles, rien d'autre
@@ -2326,7 +2350,7 @@ function toast(msg,type){
 // ----- CONFIRM -----
 function resetCache(){
   if(!confirm('Vider le cache localStorage et recharger le SEED v23 ?')) return;
-  localStorage.removeItem('flowin_v20_data');
+  localStorage.removeItem('flowin_v21_data');
   localStorage.removeItem('flowin_v21_data');
   localStorage.removeItem('flowin_v22_data');
   localStorage.removeItem('flowin_v23_data');
@@ -2879,7 +2903,7 @@ function renderPilotageProMode(){
   // QR code du dernier event (le plus récent)
   const lastEv = myEvents.sort((a,b)=>new Date(b.dateD)-new Date(a.dateD))[0];
   if(lastEv){
-    var url = (lastEv.cfg&&lastEv.cfg.qrUrl) ? lastEv.cfg.qrUrl : 'https://flowin-opconsult.netlify.app/?ev='+lastEv.id;
+    var url = (lastEv.cfg&&lastEv.cfg.qrUrl) ? lastEv.cfg.qrUrl : 'https://flowin-events.vercel.app/parcours/quiz.html?ev='+lastEv.id;
     const qrSvg = genQRSvg(url, {size:120, color:lastEv.couleur||'#7C2D92'});
     html += '<div class="card"><div class="card-h"><div class="card-title">📱 QR Code</div></div>'
          + '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0">'
@@ -3246,7 +3270,7 @@ function drawerPro(p){
         const url = 'https://flowin.com/'+slug;
         const qrColor = (e.couleur||'#7C2D92').replace('#','');
         html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:10px;text-align:center;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\',\'qr\')">'
-             + '<div style="background:#fff;border-radius:6px;padding:6px;line-height:0;display:inline-block"><div style="width:108px;height:108px">'+genQRSvg((e.cfg&&e.cfg.qrUrl)?e.cfg.qrUrl:'https://flowin-opconsult.netlify.app/?ev='+e.id, {size:108, color:e.couleur||'#7C2D92'})+'</div></div>'
+             + '<div style="background:#fff;border-radius:6px;padding:6px;line-height:0;display:inline-block"><div style="width:108px;height:108px">'+genQRSvg((e.cfg&&e.cfg.qrUrl)?e.cfg.qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev='+e.id, {size:108, color:e.couleur||'#7C2D92'})+'</div></div>'
              + '<div class="fw-700 mt-2 text-sm">'+esc(e.nom.length>22?e.nom.slice(0,22)+'…':e.nom)+'</div>'
              + '<div class="text-xs text-muted mt-2">'+statusChip(e.status)+'</div>'
              + '</div>';
@@ -5156,7 +5180,7 @@ function drawerEvent(e){
     }
   } else if(state.drawer.tab==='qr'){
     const qrColor = (e.couleur||'#7C2D92').replace('#','');
-    var qrUrl = (e.cfg&&e.cfg.qrUrl) ? e.cfg.qrUrl : 'https://flowin-opconsult.netlify.app/?ev='+e.id;
+    var qrUrl = (e.cfg&&e.cfg.qrUrl) ? e.cfg.qrUrl : 'https://flowin-events.vercel.app/parcours/quiz.html?ev='+e.id;
     html += '<div class="alert info"><span class="ico">📱</span>QR code à afficher sur le lieu de l\'event. Couleur synchronisée avec celle de l\'event.</div>';
     html += '<div style="text-align:center;background:linear-gradient(135deg,'+(e.couleur||'#7C2D92')+'22,#fff);padding:30px;border-radius:14px;margin-bottom:14px">';
     html += '<div style="display:inline-block;background:#fff;padding:10px;border-radius:8px;margin-bottom:14px;line-height:0">'
@@ -5735,64 +5759,37 @@ function drawerEvent(e){
      html += '</div>';
 
      if(parcoursTab==='joueur') {
-       // ── Vision joueur ──
-       var _qrUrl = (e.cfg && e.cfg.qrUrl) ? e.cfg.qrUrl : '';
-       var _isVercel = _qrUrl && (_qrUrl.indexOf('flowin-events.vercel.app') >= 0 || !_qrUrl.startsWith('http'));
-       if(_isVercel && _qrUrl) {
-         // Même domaine Vercel ou chemin relatif → iframe phone directe
-         html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:8px">';
-         // Barre URL + bouton ouvrir
-         html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
-         html += '<span style="font-size:14px">📱</span>';
-         html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div>';
-         html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
-         html += '</div>';
-         // Phone iframe
-         html += '<div style="width:260px;height:560px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 36px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
-         html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:90px;height:20px;background:#111;border-radius:0 0 12px 12px;z-index:2"></div>';
-         html += '<iframe src="'+escAttr(_qrUrl)+'" frameborder="0" loading="lazy" '
-               + 'style="width:100%;height:100%;border-radius:28px;background:#fff" '
-               + 'title="Parcours joueur '+escAttr(e.nom)+'"></iframe>';
-         html += '</div>';
-         html += '</div>';
-       } else if(_qrUrl) {
-         // URL externe tierce : bannière + bouton
-         html += '<div style="display:flex;align-items:center;gap:10px;background:var(--sa-subtle);border-radius:10px;padding:10px 14px;margin-bottom:14px">';
-         html += '<span style="font-size:18px">🔗</span>';
-         html += '<div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.04em">URL déployée</div>';
-         html += '<div style="font-size:11px;color:var(--sa-text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_qrUrl)+'</div></div>';
-         html += '<a href="'+escAttr(_qrUrl)+'" target="_blank" style="flex-shrink:0;background:var(--sa-accent);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">Ouvrir ↗</a>';
-         html += '</div>';
-       } else {
-         // Pas d'URL configurée
-         html += '<div style="background:#FFF7ED;border:1.5px dashed #F5A623;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">';
-         html += '<span>🚧</span><div style="flex:1"><div style="font-size:11px;font-weight:800;color:#92400E">Pas encore déployé</div>';
-         html += '<div style="font-size:10px;color:#92400E;margin-top:2px">Wizard → Infos → URL QR</div></div>';
-         html += '<button onclick="openDrawerFor(\'event\',\''+e.id+'\',\'infos\');state.drawer.edit=true;renderDrawer()" style="flex-shrink:0;background:#F5A623;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">✏️ Configurer</button>';
-         html += '</div>';
-       }
+       // ── Vision joueur : modal plein écran parcours_user.html validé ──
+       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(e.id);
+       var _vjiId = 'iframe-parcours-'+e.id;
+       html += '<div class="flowin-phone-wrap">';
+       html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
+       html += '<div class="flowin-phone-frame">';
+       html += '<div class="flowin-phone-notch"></div>';
+       html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+       html += '</div>';
+       html += '</div>';
+       html += '</div>';
 
      } else {
-       // ── Vision Pro : iframe phone pro_mobile + onglets + stats ──
+       // ── Vision Pro : modal plein écran pro_mobile.html validé ──
        var _pv = e.proVisib || {};
        var _proMobileUrl = 'pro_mobile.html?ev=' + encodeURIComponent(e.id);
-       // Phone iframe pro_mobile
-       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px">';
+       html += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
+       // Bannière URL
        html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
-       html += '<span style="font-size:14px">🏢</span>';
-       html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600">Dashboard Pro · '+esc(e.nom)+'</div>';
-       html += '<a href="'+escAttr(_proMobileUrl)+'" target="_blank" style="flex-shrink:0;background:#7C2D92;color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">↗ Ouvrir</a>';
+       html += '<span style="font-size:13px">🏢</span>';
+       html += '<div style="flex:1;min-width:0;font-size:10px;color:var(--sa-muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_proMobileUrl)+'</div>';
+       html += '<a href="'+escAttr(_proMobileUrl)+'" target="_blank" style="flex-shrink:0;background:#7C2D92;color:#fff;padding:4px 9px;border-radius:6px;font-size:10px;font-weight:700;text-decoration:none">↗</a>';
        html += '</div>';
-       html += '<div style="width:260px;height:560px;background:#111;border-radius:36px;padding:9px;box-shadow:0 10px 36px rgba(0,0,0,.22),inset 0 0 0 2px #2d2d2d;position:relative;flex-shrink:0">';
-       html += '<div style="position:absolute;top:9px;left:50%;transform:translateX(-50%);width:90px;height:20px;background:#111;border-radius:0 0 12px 12px;z-index:2"></div>';
-       html += '<iframe src="'+escAttr(_proMobileUrl)+'" frameborder="0" loading="lazy" '
-             + 'style="width:100%;height:100%;border-radius:28px;background:#fff" '
-             + 'title="Dashboard Pro '+escAttr(e.nom)+'"></iframe>';
+       // Bouton ouvrir modal
+       html += '<button class="btn btn-primary" style="width:100%;padding:11px;background:#7C2D92" onclick="openEventProModal(\''+e.id+'\',\''+escAttr(e.nom)+'\')"">⛶ Plein écran Pro</button>';
+       html += '<div style="display:flex;justify-content:center">';
+       html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2),inset 0 0 0 2px #333;position:relative">';
+       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+       html += '<iframe src="'+escAttr(_proMobileUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none" title="Dashboard Pro"></iframe>';
+       html += '</div></div>';
        html += '</div>';
-       html += '</div>';
-       // Onglets visibles
-       html += '<div style="background:var(--sa-subtle);border-radius:12px;padding:12px;margin-bottom:10px">';
-       html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Onglets visibles pour le Pro</div>';
        var proTabs = [
          {key:'stats', ico:'📊', lbl:'Stats'},
          {key:'activite', ico:'🎲', lbl:'Tirage'},
@@ -5801,21 +5798,16 @@ function drawerEvent(e){
          {key:'qr', ico:'📱', lbl:'QR'},
          {key:'export', ico:'📥', lbl:'Export'}
        ];
-       html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+       html += '<div style="background:var(--sa-subtle);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:5px">';
        proTabs.forEach(function(t) {
          var visible = _pv[t.key] !== false;
-         html += '<div style="padding:4px 9px;border-radius:7px;font-size:11px;font-weight:700;'
+         html += '<div style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;'
                + 'background:'+(visible?(e.couleur||'#7C2D92')+'18':'#F1F5F9')+';'
-               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">';
-         html += t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
+               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">'
+               + t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
        });
        html += '</div>';
-       if(_pv.msgBienvenue) {
-         html += '<div style="font-size:11px;color:var(--sa-muted)">💬 '+esc(_pv.msgBienvenue)+'</div>';
-       }
-       html += '</div>';
-       // Bouton simuler vue Pro
-       html += '<button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
+       html += '<button class="btn btn-sm" style="width:100%" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
      }
 
   } else if(state.drawer.tab==='export'){
@@ -5969,15 +5961,18 @@ function renderOngletJeu(e){
   };
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
+  // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
+  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid);
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
-  html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Aperçu parcours joueur</div>';
-  // Adapter renderWizPreviewSequence pour le drawer : post-traiter les callbacks
-  var _seqHtml = (e.clientType === 'btob')
-    ? renderBtobParcoursPreview(e)
-    : renderWizPreviewSequence(_previewD);
-  _seqHtml = _seqHtml.split('renderWizard()').join('(function(){saveData();renderDrawer();})()');
-  _seqHtml = _seqHtml.split("state.wiz.draft.cfg").join("findEvent('"+eid+"').cfg");
-  html += _seqHtml;
+  var _iframeId = 'iframe-jeu-'+eid;
+  html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
+  html += '<div class="flowin-phone-wrap">';
+  html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')">›</button></div>';
+  html += '<div class="flowin-phone-frame">';
+  html += '<div class="flowin-phone-notch"></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+  html += '</div>';
+  html += '</div>';
   html += '</div>';
 
   return html;
@@ -6453,28 +6448,17 @@ function renderBiblioJeux(){
 
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
-  html += '<div class="section-h">📱 Aperçu joueur</div>';
-  html += '<div class="phone-frame" style="max-width:240px;margin:0 auto">';
-  html += '<div class="phone-screen">';
-  html += '<div class="phone-bar" style="background:'+accent+'">FLOWIN · '+(mDef?esc(mDef.nom):'')+'</div>';
-  // Créer un event factice pour la preview
-  var fakeEvent = {id:'preview',module:tab,nom:mDef?mDef.nom:'',couleur:accent,cfg:cfg};
-  html += renderPreviewModule(tab, jeuObj||fakeEvent);
-  html += '</div></div>';
-
-  // Info parcours sous la preview
-  html += '<div style="margin-top:12px;font-size:10px;color:var(--sa-muted);line-height:1.7;padding:8px 10px;background:var(--sa-subtle);border-radius:8px">';
-  if(tab==='quiz'||tab==='quizsolo'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. '+(cfg.quizNbQuestions||5)+' questions · timer '+(cfg.quizTimer||30)+'s<br>'+(cfg.quizBonus!==false?'4. Bonus (+1 ticket)<br>5. Score + tickets':'4. Score');
-  } else if(tab==='spin'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. Spin roulette · '+(cfg.spinDuration||6)+'s<br>4. Résultat '+(cfg.spinModeTirage==='B'?'→ ticket tirage':'immédiat');
-  } else if(tab==='vote'){
-    html += '1. Landing → 2. Vote '+(cfg.voteMode==='yn'?'Oui/Non':'étoiles 1→5')+'<br>3. '+(cfg.voteResultatsLive?'Résultats live':'Résultats cachés');
-  } else if(tab==='tombola'){
-    html += '1. Landing → 2. Formulaire CRM<br>3. Confirmation → tirage au sort';
-  } else if(tab==='standup'){
-    html += '1. Vote étoiles 1→5 par artiste<br>2. Podium final';
-  }
+  // ── Parcours complet validé : iframe parcours_user.html ──
+  var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
+  var _masterUrl = '/' + encodeURIComponent(tab) + '.html';
+  var _jmIframeId = 'iframe-master-'+tab;
+  html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
+  html += '<div class="flowin-phone-wrap">';
+  html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
+  html += '<div class="flowin-phone-frame">';
+  html += '<div class="flowin-phone-notch"></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+  html += '</div>';
   html += '</div>';
   html += '</div>'; // fin colonne droite
 
@@ -8450,7 +8434,7 @@ function wizSave(){
     toast('Event "'+d.nom+'" créé','success');
     supaWriteEvent(_newEv);
     // Génération auto qrUrl
-    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + id;
+    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (_newEv.module||'quiz') + '.html?ev=' + id;
   } else {
     const idx = DATA.events.findIndex(e=>e.id===state.wiz.editingId);
     if(idx>=0){
@@ -8516,7 +8500,7 @@ function renderWizardEvent(){
     html += '<div class="form-row mt-3"><label class="label">Lieu</label><input type="text" class="input" value="'+escAttr(d.lieu)+'" oninput="state.wiz.draft.lieu=this.value"/></div>';
     html += '<div class="form-row"><label class="label">Adresse complète</label><input type="text" class="input" value="'+escAttr(d.adresse)+'" oninput="state.wiz.draft.adresse=this.value"/></div>';
     html += '<div class="form-row"><label class="label">Description courte</label><textarea class="textarea" oninput="state.wiz.draft.description=this.value">'+esc(d.description)+'</textarea></div>';
-    html += '<div class="form-row mt-3"><label class="label">🔗 URL du parcours joueur <span style="font-size:10px;color:var(--sa-muted);font-weight:400">(sera l\'URL du QR code · ex: https://flowin-opconsult.netlify.app/?ev=ev-nds)</span></label><input type="url" class="input" value="'+escAttr(d.cfg&&d.cfg.qrUrl?d.cfg.qrUrl:''||'')+'" placeholder="https://...netlify.app/?ev=" oninput="if(!state.wiz.draft.cfg)state.wiz.draft.cfg={};state.wiz.draft.cfg.qrUrl=this.value"/></div>';
+    html += '<div class="form-row mt-3"><label class="label">🔗 URL du parcours joueur <span style="font-size:10px;color:var(--sa-muted);font-weight:400">(sera l\'URL du QR code · ex: https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-nds)</span></label><input type="url" class="input" value="'+escAttr(d.cfg&&d.cfg.qrUrl?d.cfg.qrUrl:''||'')+'" placeholder="https://flowin-events.vercel.app/parcours/quiz.html?ev=" oninput="if(!state.wiz.draft.cfg)state.wiz.draft.cfg={};state.wiz.draft.cfg.qrUrl=this.value"/></div>';
     html += '<div class="form-row"><label class="label">Couleur dominante</label><div class="color-swatches">'
          + ['#7C2D92','#10B981','#3B82F6','#F59E0B','#EF4444','#06B6D4','#EC4899','#8B5CF6'].map(c=>'<div class="color-swatch '+(d.couleur===c?'selected':'')+'" style="background:'+c+'" onclick="state.wiz.draft.couleur=\''+c+'\';renderWizard()"></div>').join('')
          + '</div></div>';
@@ -9106,12 +9090,12 @@ function renderWizPreviewSequence(d, ctx) {
 
   // Phone frame
   html += '<div class="wiz-seq-frame">';
-  html += '<div class="phone-frame"><div class="phone-screen">';
+  html += '<div class="phone-frame"><div class="phone-screen"><div class="phone-scaler-wrap">';
   html += '<div class="phone-bar" style="background:linear-gradient(135deg,'+(d.couleur||'#D4537E')+',#EF9F27,#1D9E75)">';
   html += 'FLOWIN · '+esc((d.nom||'Event').slice(0,18));
   html += '</div>';
   html += page.html;
-  html += '</div></div>';
+  html += '</div></div></div>';
   html += '</div>';
 
   html += '</div>';
@@ -9972,8 +9956,8 @@ function preprodCleanup() {
 
 // ============ SUPABASE CONFIG ============
 // Credentials Supabase (publishable key - publique par design)
-const FLOWIN_SUPA_URL_DEFAULT = 'https://atddutvzklcgiqxlpvla.supabase.co';
-const FLOWIN_SUPA_ANON_DEFAULT = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
+const FLOWIN_SUPA_URL_DEFAULT = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+const FLOWIN_SUPA_ANON_DEFAULT = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
 let FLOWIN_SUPA_URL = localStorage.getItem('flowin_supa_url') || FLOWIN_SUPA_URL_DEFAULT;
 let FLOWIN_SUPA_ANON = localStorage.getItem('flowin_supa_anon') || FLOWIN_SUPA_ANON_DEFAULT;
 // Persister automatiquement
@@ -10151,6 +10135,56 @@ document.addEventListener('DOMContentLoaded', async function(){
 /* ═══════════════════════════════════════════════════════════════════ */
 /* MODAL PARCOURS PRO MOBILE                                           */
 /* ═══════════════════════════════════════════════════════════════════ */
+/* ── Modal Joueur : parcours_user.html?ev=&module= ── */
+
+function flowinScalePhones(){} function flowinScalePhone(){}
+function flowinNavIframe(iframeId, dir) {
+  var fr = document.getElementById(iframeId);
+  if(!fr || !fr.contentWindow) return;
+  fr.contentWindow.postMessage({flowinNav: dir}, '*');
+}
+
+function openJoueurModal(evId, evNom, module){
+  var modal = document.getElementById('joueurModal');
+  var iframe = document.getElementById('jmIframe');
+  var sub = document.getElementById('jmSub');
+  var openLink = document.getElementById('jmOpenLink');
+  var urlDisp = document.getElementById('jmUrlDisplay');
+  if(!modal||!iframe) return;
+  var url = '/parcours/'+(module||'quiz')+'.html?ev='+encodeURIComponent(evId);
+  sub.textContent = evNom + (module?' · '+module:'');
+  iframe.src = url;
+  if(openLink) openLink.href = url;
+  if(urlDisp) urlDisp.textContent = url;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeJoueurModal(){
+  var modal = document.getElementById('joueurModal');
+  var iframe = document.getElementById('jmIframe');
+  if(!modal) return;
+  modal.style.display = 'none';
+  if(iframe) iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+/* ── Modal Pro Event : pro_mobile.html?ev= ── */
+function openEventProModal(evId, evNom){
+  var modal = document.getElementById('proMobileModal');
+  var iframe = document.getElementById('pmmIframe');
+  var sub = document.getElementById('pmmSub');
+  var urlDisp = document.getElementById('pmmUrlDisplay');
+  var openLink = document.getElementById('pmmOpenLink');
+  if(!modal||!iframe) return;
+  var url = 'pro_mobile.html?ev='+encodeURIComponent(evId);
+  if(sub) sub.textContent = evNom || evId;
+  iframe.src = url;
+  if(openLink) openLink.href = url;
+  if(urlDisp) urlDisp.textContent = url;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
 function openProMobileModal(proId){
   if(!proId) { console.warn('[Flowin] openProMobileModal: proId vide'); return; }
   var pro = (typeof findPro === 'function') ? findPro(proId) : null;
@@ -10210,12 +10244,41 @@ document.addEventListener('keydown', function(e){
   if(e.key === 'Escape'){
     var modal = document.getElementById('proMobileModal');
     if(modal && modal.style.display !== 'none') closeProMobileModal();
+    var jm = document.getElementById('joueurModal');
+    if(jm && jm.style.display !== 'none') closeJoueurModal();
   }
 });
 
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- MODAL PARCOURS JOUEUR (parcours_user.html?ev=&module=)              -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div id="joueurModal" class="pro-mobile-modal" style="display:none">
+  <div class="pmm-backdrop" onclick="closeJoueurModal()"></div>
+  <div class="pmm-content">
+    <div class="pmm-header">
+      <div class="pmm-title">📱 Parcours Joueur</div>
+      <div class="pmm-sub" id="jmSub">—</div>
+      <button class="pmm-close" onclick="closeJoueurModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="pmm-body">
+      <div class="pmm-phone">
+        <div class="pmm-phone-notch"></div>
+        <iframe id="jmIframe" src="about:blank" frameborder="0"
+                allow="clipboard-write"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="pmm-actions">
+        <a id="jmOpenLink" href="#" target="_blank" class="btn btn-primary">↗ Ouvrir dans un nouvel onglet</a>
+        <div class="pmm-url-display" id="jmUrlDisplay">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PARCOURS PRO MOBILE (aperçu live de pro_mobile.html)          -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <div id="proMobileModal" class="pro-mobile-modal" style="display:none">

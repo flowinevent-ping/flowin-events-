@@ -678,6 +678,59 @@ async function flowinProFetch(){
 /* Lancer au boot */
 flowinProFetch();
 
+/* Polling refresh toutes les 30s */
+setInterval(function(){ flowinProFetch(); }, 30000);
+
+/* Callback appelé quand les données Supabase sont prêtes */
+function flowinProDataReady(){
+  var d = FLOWIN_PRO_DATA;
+  var ev = d.events && d.events[0] ? d.events[0] : null;
+  var joueurs = d.joueurs || [];
+  var lots = d.lots || [];
+
+  /* KPIs */
+  var participants = ev ? (ev.participants || joueurs.length) : joueurs.length;
+  var optins = joueurs.filter(function(j){ return j.optin; }).length;
+  var txOptin = participants > 0 ? Math.round(optins / participants * 100) : 0;
+  var gagnants = ev ? (ev.gagnants || 0) : 0;
+  var txConv = participants > 0 ? Math.round(joueurs.length / participants * 100) : 0;
+
+  /* Mettre à jour le DOM */
+  var kpis = document.querySelectorAll('.kpi-val');
+  if(kpis[0]) kpis[0].textContent = participants;
+  if(kpis[1]) kpis[1].textContent = txConv + '%';
+  if(kpis[2]) kpis[2].textContent = txOptin + '%';
+  if(kpis[3]) kpis[3].textContent = gagnants;
+
+  /* Delta opt-in */
+  var deltas = document.querySelectorAll('.kpi-delta');
+  if(deltas[2]) deltas[2].textContent = optins + ' inscrits';
+  if(deltas[3]) deltas[3].textContent = lots.filter(function(l){ return l.retire; }).length + ' lots retirés';
+
+  /* Feed participants (derniers inscrits) */
+  var feed = document.getElementById('participantFeed');
+  if(feed && joueurs.length){
+    var recent = joueurs.slice().sort(function(a,b){
+      return (b.last_seen||'') > (a.last_seen||'') ? 1 : -1;
+    }).slice(0,8);
+    feed.innerHTML = recent.map(function(j){
+      var initials = ((j.prenom||j.pseudo||'?')[0]+(j.nom||'?')[0]).toUpperCase();
+      return '<div class="feed-item">'
+        + '<div class="feed-av" style="background:var(--navy)">' + initials + '</div>'
+        + '<div class="feed-info"><div class="feed-name">' + (j.prenom||'') + ' ' + (j.nom||'') + '</div>'
+        + '<div class="feed-sub">' + (j.ville||'') + (j.optin?' · ✅ opt-in':'') + '</div></div>'
+        + '<div class="feed-time">' + (j.last_seen||'') + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  /* Titre event */
+  if(ev && ev.nom){
+    var titleEl = document.querySelector('.dash-event-name');
+    if(titleEl) titleEl.textContent = ev.nom;
+  }
+}
+
 /* ── UTILS ── */
 function showToast(msg){
   var t=document.getElementById('toast');
