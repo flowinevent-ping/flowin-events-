@@ -1463,7 +1463,7 @@ function migrateData(data){
     });
   }
   // Réinjecter les lots Pâques v2 si absents
-  if(data.lots && !data.lots.find(l=>l.id==='lot-paques-1')){
+  if(data.lots && !data.lots.find(l=>l.id==='lot-pq-1')){
     // Supprimer les anciens lots Pâques (lot-1, lot-2, lot-4, lot-5)
     data.lots = data.lots.filter(l => !(l.eventId==='ev-paques' && (l.id==='lot-1'||l.id==='lot-2'||l.id==='lot-4'||l.id==='lot-5')));
     // Injecter les 8 nouveaux
@@ -5253,9 +5253,13 @@ function drawerEvent(e){
         html += '<div class="fp-section">';
         html += '<div class="fp-section-label" id="fp-pv-lotlabel">'+esc(front.lotLabel||'Lots à gagner')+'</div>';
         activeLots.slice(0,3).forEach((l,i)=>{
+          var _ico = l.emoji || ['🎁','🏆','✨'][i%3];
+          var _nom = l.nom || l.partenaire || 'Lot';
+          var _sub = (l.partenaire && l.nom) ? l.partenaire : '';
           html += '<div class="fp-lot-item">'
-               + '<div class="fp-lot-icon" style="background:'+(e.couleur||'#7C2D92')+'22">'+['🎁','🏆','✨'][i%3]+'</div>'
-               + '<div class="fp-lot-info"><div class="fp-lot-nom">'+esc(l.nom)+'</div>'
+               + '<div class="fp-lot-icon" style="background:'+(e.couleur||'#7C2D92')+'22">'+_ico+'</div>'
+               + '<div class="fp-lot-info"><div class="fp-lot-nom">'+esc(_nom)+'</div>'
+               + (_sub?'<div class="fp-lot-val">'+esc(_sub)+'</div>':'')
                + (l.valeur?'<div class="fp-lot-val">'+l.valeur+' €</div>':'')+'</div>'
                + '</div>';
         });
