@@ -1312,7 +1312,7 @@ const SEED = {
 
 
 // ============ STORAGE LOCAL ============
-const LS_KEY = 'flowin_v30_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
+const LS_KEY = 'flowin_v31_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
 function loadData(){
   try{
     // Migration : récupérer données d'une ancienne clé si la nouvelle est vide
@@ -1467,7 +1467,7 @@ function migrateData(data){
     // Supprimer les anciens lots Pâques (lot-1, lot-2, lot-4, lot-5)
     data.lots = data.lots.filter(l => !(l.eventId==='ev-paques' && (l.id==='lot-1'||l.id==='lot-2'||l.id==='lot-4'||l.id==='lot-5')));
     // Injecter les 8 nouveaux
-    SEED.lots.filter(l=>l.id.startsWith('lot-paques-')).forEach(seedL => {
+    SEED.lots.filter(l=>l.id.startsWith('lot-pq-') || l.id.startsWith('lot-paques-')).forEach(seedL => {
       data.lots.push(JSON.parse(JSON.stringify(seedL)));
     });
   }
