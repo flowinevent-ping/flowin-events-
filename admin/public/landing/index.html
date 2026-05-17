@@ -1190,30 +1190,45 @@ window.addEventListener('load', function(){
 (function(){
   var SECTIONS = ['s-hero','s-profils','s-proof','s-cta'];
   var curIdx = 0;
+  var isIframe = (window.parent !== window);
 
-  function goTo(idx){
+  function showSection(idx){
     if(idx < 0) idx = 0;
     if(idx >= SECTIONS.length) idx = SECTIONS.length - 1;
     curIdx = idx;
-    var el = document.getElementById(SECTIONS[curIdx]);
-    if(el) el.scrollIntoView({behavior:'instant',block:'start'});
+    if(!isIframe) return;
+    /* Afficher uniquement la section active, masquer les autres */
+    for(var i=0; i<SECTIONS.length; i++){
+      var el = document.getElementById(SECTIONS[i]);
+      if(!el) continue;
+      el.style.display = (i === curIdx) ? 'block' : 'none';
+    }
+    /* Scroll en haut de la section active */
+    var active = document.getElementById(SECTIONS[curIdx]);
+    if(active) active.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }
 
   window.addEventListener('message', function(e){
     if(!e.data) return;
-    if(e.data.landingNav === 'next') goTo(curIdx + 1);
-    if(e.data.landingNav === 'prev') goTo(curIdx - 1);
-    if(e.data.landingGoto !== undefined) goTo(e.data.landingGoto);
+    if(e.data.landingNav === 'next') showSection(curIdx + 1);
+    if(e.data.landingNav === 'prev') showSection(curIdx - 1);
+    if(typeof e.data.landingGoto !== 'undefined') showSection(e.data.landingGoto);
   });
 
-  /* Désactiver le scroll natif dans le contexte iframe dashboard */
-  if(window.parent !== window){
+  /* Init en contexte iframe */
+  if(isIframe){
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
-    /* Forcer la hauteur d'une section à 100dvh pour un rendu propre */
-    var style = document.createElement('style');
-    style.textContent = 'section{min-height:100vh;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start}';
-    document.head.appendChild(style);
+    /* Masquer toutes les sections sauf la première au chargement */
+    window.addEventListener('DOMContentLoaded', function(){
+      showSection(0);
+    });
+    /* Fallback si DOM déjà chargé */
+    if(document.readyState !== 'loading'){
+      setTimeout(function(){ showSection(0); }, 50);
+    }
   }
 })();
 </script>
