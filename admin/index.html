@@ -901,14 +901,20 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
   width: 72px; height: 16px;
   background: #111; border-radius: 0 0 10px 10px; z-index: 10;
 }
-/* Scaler : iframe rendu à 375px natif puis scale pour rentrer dans le frame */
-.flowin-phone-frame iframe {
-  width: 100%; height: 100%;
-  border-radius: 28px; border: none;
+.flowin-phone-scaler {
+  position: absolute;
+  top: 0; left: 0;
+  width: 375px;
+  height: 812px;
+  transform-origin: top left;
+  transform: scale(0.704); /* 264/375 — frame inner 264px */
+}
+.flowin-phone-scaler iframe {
+  width: 375px;
+  height: 812px;
+  border: none;
   display: block;
-  /* Zoom sur le contenu pour simuler 375px dans un frame de 264px */
-  zoom: 0.70;
-  transform: scale(1.0);
+  border-radius: 28px;
 }
 </style>
 </head>
@@ -5790,7 +5796,7 @@ function drawerEvent(e){
        html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
        html += '<div class="flowin-phone-frame">';
        html += '<div class="flowin-phone-notch"></div>';
-       html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
+       html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
        html += '</div>';
        html += '</div>';
        html += '</div>';
@@ -5994,7 +6000,7 @@ function renderOngletJeu(e){
   html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
-  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
   html += '</div>';
   html += '</div>';
   html += '</div>';
@@ -6481,7 +6487,7 @@ function renderBiblioJeux(){
   html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
-  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
   html += '</div>';
   html += '</div>';
   html += '</div>'; // fin colonne droite
@@ -10161,20 +10167,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 /* ═══════════════════════════════════════════════════════════════════ */
 /* ── Modal Joueur : parcours_user.html?ev=&module= ── */
 
-function flowinScalePhone(frame) {
-  if(!frame) return;
-  var w = frame.offsetWidth, h = frame.offsetHeight;
-  if(!w || !h) { setTimeout(function(){ flowinScalePhone(frame); }, 80); return; }
-  var scaler = frame.querySelector('.flowin-phone-scaler');
-  if(!scaler) return;
-  var scale = Math.min((w-16)/375, (h-16)/812);
-  scaler.style.transform = 'scale('+scale+')';
-  scaler.style.width  = Math.round(375*scale)+'px';
-  scaler.style.height = Math.round(812*scale)+'px';
-}
-function flowinScalePhones() {
-  document.querySelectorAll('.flowin-phone-frame').forEach(flowinScalePhone);
-}
+function flowinScalePhones(){} function flowinScalePhone(){}
 function flowinNavIframe(iframeId, dir) {
   var fr = document.getElementById(iframeId);
   if(!fr || !fr.contentWindow) return;
