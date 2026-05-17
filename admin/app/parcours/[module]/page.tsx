@@ -1,55 +1,44 @@
 import { supabase } from '@/lib/supabase'
 import QuizFlow from '@/components/parcours/QuizFlow'
+import SpinFlow from '@/components/parcours/SpinFlow'
+import VoteFlow from '@/components/parcours/VoteFlow'
+import TombolaFlow from '@/components/parcours/TombolaFlow'
 import { notFound } from 'next/navigation'
 
-interface Props { searchParams: { ev?: string } }
+const VALID = ['quiz','spin','vote','tombola','quizsolo','quizmaster']
 
-async function fetchEvent(evId: string) {
-  const { data: events } = await supabase
-    .from('events').select('*').eq('id', evId).limit(1)
-  if (!events || !events[0]) return null
+async function fetchEvent(evId: string, module: string) {
+  const { data: events } = await supabase.from('events').select('*').eq('id', evId).limit(1)
+  if (!events?.[0]) return null
   const ev = events[0]
+  const { data: lots } = await supabase.from('lots').select('*').eq('event_id', evId)
 
-  // Lots
-  const { data: lots } = await supabase
-    .from('lots').select('id,titre,emoji,valeur_euros,partenaire_id').eq('event_id', evId)
-
-  // Banque de questions
   let questions: any[] = []
-  if (ev.cfg?.quizBanques && ev.cfg.quizBanques.length > 0) {
-    const { data: banques } = await supabase
-      .from('banques').select('questions').in('id', ev.cfg.quizBanques)
-    if (banques) {
-      banques.forEach((b: any) => {
-        if (Array.isArray(b.questions)) questions = questions.concat(b.questions)
-      })
-    }
+  if (module === 'quiz' && ev.cfg?.quizBanques?.length) {
+    const { data: banques } = await supabase.from('banques').select('questions').in('id', ev.cfg.quizBanques)
+    banques?.forEach((b: any) => { if (Array.isArray(b.questions)) questions = questions.concat(b.questions) })
+    const nb = ev.cfg?.nbQuestions || 5
+    questions = questions.sort(() => Math.random() - .5).slice(0, nb)
   }
-
-  // Shuffle + limiter
-  const nbQ = ev.cfg?.nbQuestions || 5
-  questions = questions.sort(()=>Math.random()-.5).slice(0, nbQ)
-
-  return { ...ev, lots: lots||[], questions }
+  return { ...ev, lots: lots || [], questions }
 }
 
-export default async function ParcoursPage({ params, searchParams }: { params: { module: string }, searchParams: { ev?: string } }) {
+export default async function ParcoursPage({ params, searchParams }: {
+  params: { module: string }
+  searchParams: { ev?: string }
+}) {
   const evId = searchParams.ev
-  if (!evId) return notFound()
+  const module = params.module
+  if (!evId || !VALID.includes(module)) return notFound()
 
-  const ev = await fetchEvent(evId)
+  const ev = await fetchEvent(evId, module)
   if (!ev) return notFound()
 
-  const module = params.module
+  if (module === 'quiz')    return <QuizFlow ev={ev} />
+  if (module === 'spin')    return <SpinFlow ev={ev} />
+  if (module === 'vote')    return <VoteFlow ev={ev} />
+  if (module === 'tombola') return <TombolaFlow ev={ev} />
 
-  // Pour l'instant, le quiz est le seul module natif Next.js
-  // Les autres redirigent vers leur HTML statique
-  if (module === 'quiz') {
-    return <QuizFlow ev={ev} />
-  }
-
-  // Autres modules → HTML statique
-  return (
-    <meta httpEquiv="refresh" content={`0;url=/public/parcours/${module}.html?ev=${evId}`} />
-  )
+  // quizsolo, quizmaster → quiz flow avec variantes
+  return <QuizFlow ev={ev} />
 }
