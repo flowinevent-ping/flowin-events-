@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Flowin · Pro Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1B3A5C;
+  --teal:#00B4A0;
+  --teal-light:#E6F9F7;
+  --orange:#E8500A;
+  --orange-light:#FEF0E8;
+  --gold:#F5A623;
+  --gold-light:#FEF9EC;
+  --pro:#7C2D92;
+  --pro-light:#F3E8FF;
+  --green:#059669;
+  --green-light:#D1FAE5;
+  --red:#DC2626;
+  --blue:#2563EB;
+  --pink:#DB2777;
+  --bg:#F4F6F9;
+  --white:#fff;
+  --border:#E2E8F0;
+  --text:#1A2744;
+  --muted:#64748B;
+  --radius:16px;
+  --shadow:0 2px 12px rgba(27,58,92,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);
+  padding:0 16px;
+  display:flex;align-items:center;gap:10px;
+  height:54px;
+  border-bottom:3px solid var(--teal);
+}
+.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--teal);letter-spacing:.5px;flex-shrink:0}
+.topbar-info{flex:1;min-width:0}
+.ev-name{font-size:12px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+.live-badge{display:flex;align-items:center;gap:4px;background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);border-radius:20px;padding:4px 9px;flex-shrink:0}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.live-txt{font-size:9px;font-weight:900;color:var(--red);letter-spacing:.08em}
+
+/* ── BODY ── */
+.body{padding:14px 14px 0;max-width:430px;margin:0 auto}
+
+/* ── SECTIONS ── */
+.section{display:none;animation:fadeIn .22s ease-out}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── SEC LABEL ── */
+.sec-label{font-size:9px;font-weight:900;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
+.card-pad{padding:16px}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{border-radius:14px;padding:14px 12px;position:relative;overflow:hidden}
+.kpi.navy{background:var(--navy)}
+.kpi.teal{background:var(--teal-light);border:1px solid rgba(0,180,160,.2)}
+.kpi.orange{background:var(--orange-light);border:1px solid rgba(232,80,10,.2)}
+.kpi.gold{background:var(--gold-light);border:1px solid rgba(245,166,35,.2)}
+.kpi-ico{font-size:18px;margin-bottom:5px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1;letter-spacing:-1px}
+.kpi.navy .kpi-val{color:var(--teal)}
+.kpi.teal .kpi-val{color:#007A6E}
+.kpi.orange .kpi-val{color:var(--orange)}
+.kpi.gold .kpi-val{color:#B45309}
+.kpi-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+.kpi.navy .kpi-lbl{color:rgba(255,255,255,.55)}
+.kpi.teal .kpi-lbl{color:#007A6E}
+.kpi.orange .kpi-lbl{color:var(--orange)}
+.kpi.gold .kpi-lbl{color:#B45309}
+.kpi-delta{font-size:11px;font-weight:700;margin-top:5px}
+.kpi.navy .kpi-delta{color:rgba(255,255,255,.45)}
+.kpi-delta.up{color:var(--green)!important}
+
+/* ── CHART SVG ── */
+.chart-outer{padding:14px 14px 10px}
+.chart-title{font-size:12px;font-weight:800;color:var(--text);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.chart-peak{font-size:10px;font-weight:800;color:var(--orange);background:var(--orange-light);padding:3px 8px;border-radius:8px}
+.bar-lbl-row{display:flex;margin-top:4px}
+.bar-lbl-cell{flex:1;text-align:center;font-size:8px;font-weight:700;color:var(--muted)}
+.bar-lbl-cell.live-lbl{color:var(--red);font-weight:900}
+
+/* ── FEED ── */
+.feed-header{padding:12px 14px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.feed-title{font-size:12px;font-weight:800;color:var(--text)}
+.feed-count{font-size:10px;font-weight:800;color:var(--navy);background:#EEF2F8;padding:2px 8px;border-radius:8px}
+.feed-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .12s}
+.feed-item:hover{background:#F8FAFC}
+.feed-item:last-child{border-bottom:none}
+.feed-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0}
+.feed-name{font-size:12px;font-weight:800;color:var(--text)}
+.feed-meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.pill{display:inline-block;font-size:9px;font-weight:800;padding:2px 5px;border-radius:6px}
+.pill.ville{background:#F1F5F9;color:#475569}
+.pill.optin{background:var(--green-light);color:var(--green)}
+.pill.noptin{background:#F1F5F9;color:var(--muted)}
+.pill.lot{background:var(--gold-light);color:#B45309}
+.feed-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.ticket-b{font-size:10px;font-weight:900;color:#B45309;background:var(--gold-light);padding:2px 7px;border-radius:8px}
+.feed-time{font-size:9px;font-weight:700;color:var(--muted)}
+
+/* ── QR ── */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 14px;gap:12px}
+.qr-frame{background:#fff;border-radius:18px;padding:14px;box-shadow:0 0 0 2px var(--teal-light),0 6px 24px rgba(27,58,92,.12);cursor:pointer;transition:transform .18s}
+.qr-frame:active{transform:scale(.97)}
+.qr-hint{font-size:10px;font-weight:800;color:var(--teal);display:flex;align-items:center;gap:4px}
+.qr-url{font-size:10px;color:var(--muted);text-align:center;word-break:break-all;max-width:250px;line-height:1.4}
+.qr-url-edit{font-size:10px;font-weight:700;color:var(--teal);cursor:pointer;margin-top:-4px}
+
+.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 14px}
+.share-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;border-radius:12px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;transition:all .15s;text-decoration:none}
+.share-btn:active{transform:scale(.96)}
+.btn-wa{background:#25D366;color:#fff;box-shadow:0 4px 12px rgba(37,211,102,.25)}
+.btn-wa:hover{background:#128C7E}
+.btn-sms{background:var(--navy);color:#fff}
+.btn-sms:hover{opacity:.88}
+
+/* ── STATS BARS ── */
+.stat-block{padding:12px 14px}
+.stat-title{font-size:11px;font-weight:900;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.stat-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-ico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.stat-name{font-size:11px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.stat-track{flex:none;width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.stat-fill{height:5px;border-radius:3px}
+.stat-num{font-size:11px;font-weight:800;width:34px;text-align:right;flex-shrink:0;color:var(--text)}
+
+/* ── SE HERO ── */
+.se-hero{background:linear-gradient(135deg,var(--navy),#2D5A8C);border-radius:var(--radius);padding:18px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.se-hero::before{content:'🌟';position:absolute;right:-8px;top:-8px;font-size:72px;opacity:.1;transform:rotate(12deg)}
+.se-member{display:inline-flex;align-items:center;gap:5px;background:rgba(0,180,160,.2);border:1px solid rgba(0,180,160,.4);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;color:var(--teal);margin-bottom:10px}
+.se-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--teal);margin-bottom:3px}
+.se-sub{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:12px}
+.se-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.se-kpi{background:rgba(255,255,255,.1);border-radius:10px;padding:8px;text-align:center}
+.se-kpi-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff}
+.se-kpi-lbl{font-size:8px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
+
+/* ── PROS TILES ── */
+.pros-row{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:12px 14px}
+.pros-row::-webkit-scrollbar{display:none}
+.pro-tile{flex-shrink:0;width:96px;background:var(--bg);border-radius:12px;border:1px solid var(--border);padding:10px 8px;text-align:center}
+.pro-tile.me{border-color:var(--teal);background:var(--teal-light)}
+.pro-tile-logo{font-size:20px;margin-bottom:3px}
+.pro-tile-name{font-size:9px;font-weight:800;color:var(--text);line-height:1.2}
+.pro-tile-stat{font-size:8px;color:var(--muted);margin-top:2px}
+.pro-tile-bar{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.pro-tile-fill{height:3px;background:var(--teal);border-radius:2px}
+
+/* ── FORM ── */
+.form-wrap{padding:14px}
+.form-section-title{font-size:10px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--teal)}
+.form-group{margin-bottom:10px}
+.form-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;display:block}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:10px 12px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;
+  transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  outline:none;border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,180,160,.12);background:#fff;
+}
+.form-input[readonly]{color:var(--muted);background:var(--border);cursor:not-allowed}
+.form-textarea{min-height:68px;resize:none}
+.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748B' d='M5 7L0 2h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px;padding-right:30px}
+.form-select option{background:#fff}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-hint{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.readonly-note{display:flex;align-items:flex-start;gap:6px;background:var(--teal-light);border:1px solid rgba(0,180,160,.2);border-radius:9px;padding:9px 11px;margin-bottom:12px;font-size:10px;color:#007A6E;font-weight:700;line-height:1.4}
+
+/* ── BUTTONS ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;border-radius:12px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;transition:all .15s;width:100%}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--navy);color:#fff;box-shadow:0 4px 16px rgba(27,58,92,.22)}
+.btn-primary:hover{background:#142D4A}
+.btn-ghost{background:var(--bg);color:var(--navy);border:1.5px solid var(--border)}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(0,180,160,.25)}
+
+/* ── SUCCESS ── */
+.success-box{display:none;flex-direction:column;align-items:center;gap:10px;padding:28px 20px;text-align:center}
+.success-box.show{display:flex}
+.success-ico{font-size:50px}
+.success-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text)}
+.success-sub{font-size:12px;color:var(--muted);max-width:230px;line-height:1.5}
+.success-payload{font-size:9px;color:var(--muted);background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:8px;text-align:left;width:100%;font-family:monospace;line-height:1.6;word-break:break-all;margin-top:4px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(27,58,92,.5);backdrop-filter:blur(6px);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:24px 24px 0 0;padding:22px;width:100%;max-width:430px;display:flex;flex-direction:column;align-items:center;gap:12px;border-top:3px solid var(--teal)}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin-bottom:2px}
+.modal-close{align-self:flex-end;background:var(--bg);border:none;border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.modal-url{font-size:10px;color:var(--muted);text-align:center;word-break:break-all;line-height:1.5}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:800;border-left:3px solid var(--teal);opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── NAV BOTTOM ── */
+.nav-wrap{position:sticky;bottom:0;z-index:50;background:var(--white);border-top:1.5px solid var(--border);box-shadow:0 -4px 16px rgba(27,58,92,.08);padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-inner{display:flex;max-width:430px;margin:0 auto;position:relative}
+.nav-indicator{position:absolute;bottom:0;height:3px;background:var(--navy);border-radius:2px 2px 0 0;transition:left .25s cubic-bezier(.34,1.2,.64,1),width .25s cubic-bezier(.34,1.2,.64,1)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 7px;cursor:pointer;border:none;background:none;font-family:'Nunito',sans-serif;color:var(--muted);transition:color .18s;position:relative}
+.nav-tab.active{color:var(--navy)}
+.nav-tab-ico{font-size:20px;transition:transform .18s}
+.nav-tab.active .nav-tab-ico{transform:scale(1.15)}
+.nav-tab-lbl{font-size:9px;font-weight:800;letter-spacing:.05em;transition:font-weight .15s}
+.nav-tab.active .nav-tab-lbl{font-weight:900}
+.nav-badge{position:absolute;top:7px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:7px;font-weight:900;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff}
+
+.safe{height:16px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Flowin</div>
+  <div class="topbar-info">
+    <div class="ev-name" id="evName">Marché du printemps</div>
+    <div class="ev-sub">Ville de Vence · Place du Frêne · 1–4 mai 2026</div>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    <div class="live-txt">LIVE</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+<!-- ══════════ LIVE ══════════ -->
+<div class="section active" id="sec-live">
+
+  <div class="sec-label">En ce moment</div>
+  <div class="kpi-grid">
+    <div class="kpi navy">
+      <div class="kpi-ico">👥</div>
+      <div class="kpi-val">89</div>
+      <div class="kpi-lbl">Participants</div>
+      <div class="kpi-delta up">↑ +12 depuis 14h</div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-ico">✅</div>
+      <div class="kpi-val">97%</div>
+      <div class="kpi-lbl">Conversion</div>
+      <div class="kpi-delta up" style="color:var(--green)">Excellent</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-ico">📧</div>
+      <div class="kpi-val">73%</div>
+      <div class="kpi-lbl">RGPD opt-in</div>
+      <div class="kpi-delta" style="color:var(--orange)">67 inscrits</div>
+    </div>
+    <div class="kpi gold">
+      <div class="kpi-ico">🏆</div>
+      <div class="kpi-val">3</div>
+      <div class="kpi-lbl">Gagnants</div>
+      <div class="kpi-delta" style="color:#B45309">lots distribués</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Trafic · scans par heure</div>
+  <div class="card">
+    <div class="chart-outer">
+      <div class="chart-title">
+        Trafic aujourd'hui
+        <span class="chart-peak">⚡ Pic 22 scans à 16h</span>
+      </div>
+      <svg id="trafficSvg" width="100%" viewBox="0 0 340 90" style="overflow:visible;display:block;height:90px"></svg>
+      <div class="bar-lbl-row" id="trafficLbls"></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Flux participants</div>
+  <div class="card">
+    <div class="feed-header">
+      <div class="feed-title">Derniers participants</div>
+      <div class="feed-count">89 total</div>
+    </div>
+    <div id="feedList"></div>
+  </div>
+
+</div><!-- /live -->
+
+<!-- ══════════ QR ══════════ -->
+<div class="section" id="sec-qr">
+
+  <div class="sec-label">QR Code · event en cours</div>
+  <div class="card">
+    <div class="qr-wrap">
+      <div class="qr-frame" onclick="openModal()">
+        <svg viewBox="0 0 160 160" width="190" height="190" xmlns="http://www.w3.org/2000/svg">
+          <rect width="160" height="160" fill="white"/>
+          <rect x="5" y="5" width="50" height="50" rx="5" fill="#1B3A5C"/>
+          <rect x="11" y="11" width="38" height="38" rx="3" fill="white"/>
+          <rect x="16" y="16" width="28" height="28" rx="2" fill="#1B3A5C"/>
+          <rect x="105" y="5" width="50" height="50" rx="5" fill="#1B3A5C"/>
+          <rect x="111" y="11" width="38" height="38" rx="3" fill="white"/>
+          <rect x="116" y="16" width="28" height="28" rx="2" fill="#1B3A5C"/>
+          <rect x="5" y="105" width="50" height="50" rx="5" fill="#1B3A5C"/>
+          <rect x="11" y="111" width="38" height="38" rx="3" fill="white"/>
+          <rect x="16" y="116" width="28" height="28" rx="2" fill="#1B3A5C"/>
+          <rect x="62" y="5" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="71" y="5" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="80" y="5" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="95" y="5" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="62" y="14" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="77" y="14" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="92" y="14" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="68" y="23" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="83" y="23" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="98" y="23" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="32" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="74" y="32" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="89" y="32" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="62" y="41" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="80" y="41" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="95" y="41" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="5" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="14" y="62" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="32" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="62" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="74" y="62" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="89" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="107" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="122" y="62" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="140" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="149" y="62" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="5" y="71" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="23" y="71" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="49" y="71" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="68" y="71" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="83" y="71" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="98" y="71" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="116" y="71" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="131" y="71" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="149" y="71" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="5" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="17" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="35" y="80" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="53" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="71" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="86" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="110" y="80" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="128" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="143" y="80" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="98" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="74" y="98" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="89" y="98" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="107" y="98" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="128" y="98" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="143" y="98" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="107" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="80" y="107" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="95" y="107" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="116" y="107" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="116" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="71" y="116" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="86" y="116" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="104" y="116" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="119" y="116" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="125" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="83" y="125" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="98" y="125" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="116" y="125" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="140" y="125" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="134" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="77" y="134" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="95" y="134" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="113" y="134" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="128" y="134" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="62" y="143" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="74" y="143" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="92" y="143" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="113" y="143" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="134" y="143" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="149" y="143" width="5" height="5" rx="1" fill="#00B4A0"/>
+          <rect x="62" y="152" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="80" y="152" width="5" height="5" rx="1" fill="#1B3A5C"/>
+          <rect x="98" y="152" width="5" height="5" rx="1" fill="#1B3A5C"/>
+        </svg>
+      </div>
+      <div class="qr-hint">👆 Appuyer pour agrandir</div>
+      <div class="qr-url" id="qrUrlDisplay">flowin.romain-opconsult.com/ev-mai</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Inviter · partager</div>
+  <div class="card" style="padding:14px 0 0">
+    <div style="padding:0 14px 10px">
+      <div class="form-group">
+        <label class="form-label">Message de partage WhatsApp</label>
+        <textarea class="form-textarea" id="waMsg" style="min-height:52px">🎡 Venez jouer au Marché du printemps ! Scannez ici 👉 https://flowin.romain-opconsult.com/ev-mai</textarea>
+        <div class="form-hint">Ce message sera utilisé pour le bouton WhatsApp.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message SMS</label>
+        <textarea class="form-textarea" id="smsMsg" style="min-height:52px">Jouez au Marché du printemps ! 👉 https://flowin.romain-opconsult.com/ev-mai</textarea>
+      </div>
+      <button class="btn btn-teal" onclick="saveMsgs()" style="margin-bottom:14px">💾 Sauvegarder les messages</button>
+    </div>
+    <div class="share-grid">
+      <a class="share-btn btn-wa" id="waLink" href="#" onclick="openWA(event)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </a>
+      <a class="share-btn btn-sms" id="smsLink" href="#" onclick="openSMS(event)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        SMS
+      </a>
+    </div>
+  </div>
+
+</div><!-- /qr -->
+
+<!-- ══════════ STATS ══════════ -->
+<div class="section" id="sec-stats">
+
+  <div class="sec-label">Genre · âge moyen 44 ans</div>
+  <div class="card card-pad">
+    <div class="stat-row"><div class="stat-ico">👩</div><div class="stat-name">Femmes</div><div class="stat-track"><div class="stat-fill" style="width:62%;background:var(--pink)"></div></div><div class="stat-num" style="color:var(--pink)">62%</div></div>
+    <div class="stat-row"><div class="stat-ico">👨</div><div class="stat-name">Hommes</div><div class="stat-track"><div class="stat-fill" style="width:38%;background:var(--blue)"></div></div><div class="stat-num" style="color:var(--blue)">38%</div></div>
+  </div>
+
+  <div class="sec-label">Tranches d'âge</div>
+  <div class="card card-pad">
+    <svg id="ageSvg" viewBox="0 0 320 100" width="100%" style="overflow:visible;display:block"></svg>
+  </div>
+
+  <div class="sec-label">Participants par soir · Pâques 2026</div>
+  <div class="card">
+    <div class="chart-outer">
+      <svg id="soirSvg" viewBox="0 0 340 80" width="100%" style="overflow:visible;display:block;height:80px"></svg>
+      <div class="bar-lbl-row" id="soirLbls"></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Comment ils ont connu l'événement</div>
+  <div class="card card-pad">
+    <div class="stat-row"><div class="stat-ico">📌</div><div class="stat-name">Affiche / Flyer</div><div class="stat-track"><div class="stat-fill" style="width:100%;background:var(--navy)"></div></div><div class="stat-num">42%</div></div>
+    <div class="stat-row"><div class="stat-ico">🏛</div><div class="stat-name">Mairie</div><div class="stat-track"><div class="stat-fill" style="width:31%;background:var(--teal)"></div></div><div class="stat-num">13%</div></div>
+    <div class="stat-row"><div class="stat-ico">📘</div><div class="stat-name">Facebook</div><div class="stat-track"><div class="stat-fill" style="width:21%;background:var(--blue)"></div></div><div class="stat-num">9%</div></div>
+    <div class="stat-row"><div class="stat-ico">📸</div><div class="stat-name">Instagram</div><div class="stat-track"><div class="stat-fill" style="width:14%;background:var(--pink)"></div></div><div class="stat-num">6%</div></div>
+    <div class="stat-row"><div class="stat-ico">🤝</div><div class="stat-name">Bouche à oreille</div><div class="stat-track"><div class="stat-fill" style="width:71%;background:var(--orange)"></div></div><div class="stat-num">30%</div></div>
+  </div>
+
+  <div class="sec-label">Venu(e) avec…</div>
+  <div class="card card-pad">
+    <div class="stat-row"><div class="stat-ico">👨‍👩‍👧</div><div class="stat-name">En famille</div><div class="stat-track"><div class="stat-fill" style="width:100%;background:var(--navy)"></div></div><div class="stat-num">44%</div></div>
+    <div class="stat-row"><div class="stat-ico">🎭</div><div class="stat-name">Défilé / spectacle</div><div class="stat-track"><div class="stat-fill" style="width:61%;background:var(--teal)"></div></div><div class="stat-num">27%</div></div>
+    <div class="stat-row"><div class="stat-ico">💑</div><div class="stat-name">En couple</div><div class="stat-track"><div class="stat-fill" style="width:25%;background:var(--gold)"></div></div><div class="stat-num">11%</div></div>
+    <div class="stat-row"><div class="stat-ico">👫</div><div class="stat-name">Entre amis</div><div class="stat-track"><div class="stat-fill" style="width:18%;background:var(--orange)"></div></div><div class="stat-num">8%</div></div>
+    <div class="stat-row"><div class="stat-ico">🚶</div><div class="stat-name">Seul(e)</div><div class="stat-track"><div class="stat-fill" style="width:20%;background:var(--muted)"></div></div><div class="stat-num">9%</div></div>
+  </div>
+
+  <div class="sec-label">Top codes postaux</div>
+  <div class="card card-pad">
+    <div class="stat-row"><div class="stat-ico">📍</div><div class="stat-name">06140 · Vence</div><div class="stat-track"><div class="stat-fill" style="width:100%;background:var(--green)"></div></div><div class="stat-num" style="color:var(--green)">46</div></div>
+    <div class="stat-row"><div class="stat-ico">📍</div><div class="stat-name">06800 · Cagnes</div><div class="stat-track"><div class="stat-fill" style="width:65%;background:var(--green)"></div></div><div class="stat-num" style="color:var(--green)">30</div></div>
+    <div class="stat-row"><div class="stat-ico">📍</div><div class="stat-name">06200 · Nice</div><div class="stat-track"><div class="stat-fill" style="width:50%;background:var(--green)"></div></div><div class="stat-num" style="color:var(--green)">23</div></div>
+    <div class="stat-row"><div class="stat-ico">📍</div><div class="stat-name">06610 · La Gaude</div><div class="stat-track"><div class="stat-fill" style="width:28%;background:var(--green)"></div></div><div class="stat-num" style="color:var(--green)">13</div></div>
+    <div class="stat-row"><div class="stat-ico">📍</div><div class="stat-name">06700 · St-Laurent</div><div class="stat-track"><div class="stat-fill" style="width:17%;background:var(--green)"></div></div><div class="stat-num" style="color:var(--green)">8</div></div>
+  </div>
+
+</div><!-- /stats -->
+
+<!-- ══════════ SUPER EVENT ══════════ -->
+<div class="section" id="sec-se">
+
+  <div class="sec-label">Mes Super Events</div>
+
+  <div class="se-hero">
+    <div class="se-member">✅ Membre depuis mars 2026</div>
+    <div class="se-title">🎵 Nuits du Sud 2026</div>
+    <div class="se-sub">15 – 24 juillet · Vence · Place du Grand Jardin</div>
+    <div class="se-kpis">
+      <div class="se-kpi"><div class="se-kpi-val">3</div><div class="se-kpi-lbl">Pros</div></div>
+      <div class="se-kpi"><div class="se-kpi-val">4</div><div class="se-kpi-lbl">Events</div></div>
+      <div class="se-kpi"><div class="se-kpi-val">5</div><div class="se-kpi-lbl">Lots</div></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Pros participants</div>
+  <div class="card" style="overflow:visible">
+    <div class="pros-row">
+      <div class="pro-tile me"><div class="pro-tile-logo">🏛️</div><div class="pro-tile-name">Ville de Vence</div><div class="pro-tile-stat">1 event · vous</div><div class="pro-tile-bar"><div class="pro-tile-fill" style="width:100%"></div></div></div>
+      <div class="pro-tile"><div class="pro-tile-logo">🎭</div><div class="pro-tile-name">Office de Tourisme</div><div class="pro-tile-stat">2 events</div><div class="pro-tile-bar"><div class="pro-tile-fill" style="width:70%"></div></div></div>
+      <div class="pro-tile"><div class="pro-tile-logo">🏪</div><div class="pro-tile-name">Commerçants Centre</div><div class="pro-tile-stat">1 event</div><div class="pro-tile-bar"><div class="pro-tile-fill" style="width:40%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Rejoindre un autre Super Event</div>
+  <div class="card">
+    <div id="seFormWrap">
+      <div class="form-wrap">
+        <div class="form-section-title">📋 Votre demande d'adhésion</div>
+
+        <div class="readonly-note">🔒 Infos pré-remplies depuis votre fiche pro · non modifiables ici</div>
+
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Structure</label>
+            <input class="form-input" readonly value="Ville de Vence">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Contact</label>
+            <input class="form-input" readonly value="Marie Dubois">
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Email</label>
+            <input class="form-input" readonly value="mairie@vence.fr">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Téléphone</label>
+            <input class="form-input" readonly value="04 93 58 40 17">
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Ville</label>
+            <input class="form-input" readonly value="Vence">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Code postal</label>
+            <input class="form-input" readonly value="06140">
+          </div>
+        </div>
+        <div style="height:14px"></div>
+
+        <div class="form-group">
+          <label class="form-label">Super Event visé *</label>
+          <select class="form-select" id="seTarget">
+            <option value="">Choisir un Super Event…</option>
+            <option value="fete-vence-2026">Fête de Vence 2026</option>
+            <option value="noel-2026">Noël des Commerçants 2026</option>
+            <option value="estival-2026">Festival Estival 2026</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Décrivez votre event *</label>
+          <textarea class="form-textarea" id="seDesc" placeholder="Nature, public attendu, lieu, nb participants prévu…"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Module *</label>
+            <select class="form-select" id="seModule">
+              <option value="">Module…</option>
+              <option value="quiz">🧠 Quiz</option>
+              <option value="spin">🎡 Spin</option>
+              <option value="vote">🗳 Vote</option>
+              <option value="tombola">🎟 Tombola</option>
+              <option value="quizsolo">🏆 Quiz Solo</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Dates souhaitées *</label>
+            <input class="form-input" id="seDates" placeholder="ex: 12-14 sept 2026">
+          </div>
+        </div>
+        <div style="height:10px"></div>
+
+        <div class="form-group">
+          <label class="form-label">Message libre</label>
+          <textarea class="form-textarea" id="seMsg" placeholder="Questions, contraintes spécifiques, besoins particuliers…"></textarea>
+        </div>
+
+        <div style="background:var(--teal-light);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:#007A6E;font-weight:700;line-height:1.5;border:1px solid rgba(0,180,160,.2)">
+          ✨ Une fois acceptée par le Super Admin, vous êtes automatiquement intégré dans le Super Event et votre fiche pro est mise à jour.
+        </div>
+
+        <button class="btn btn-primary" onclick="sendSE()">📩 Envoyer la demande</button>
+      </div>
+    </div>
+
+    <div class="success-box" id="seSuccess">
+      <div class="success-ico">📩</div>
+      <div class="success-title">Demande envoyée !</div>
+      <div class="success-sub">Le Super Admin va traiter votre demande. Vous serez intégré automatiquement une fois accepté.</div>
+      <div class="success-payload" id="sePayload"></div>
+      <button class="btn btn-ghost" style="max-width:220px;margin-top:6px" onclick="resetSE()">Nouvelle demande</button>
+    </div>
+  </div>
+
+</div><!-- /se -->
+
+</div><!-- /body -->
+<div class="safe"></div>
+
+<!-- NAV BOTTOM -->
+<div class="nav-wrap">
+  <div class="nav-inner" id="navInner">
+    <div class="nav-indicator" id="navIndicator"></div>
+    <button class="nav-tab active" id="nt-live" onclick="goTab(this,'sec-live',0)">
+      <div class="nav-tab-ico">🔴</div>
+      <div class="nav-tab-lbl">Live</div>
+    </button>
+    <button class="nav-tab" id="nt-qr" onclick="goTab(this,'sec-qr',1)">
+      <div class="nav-tab-ico">📱</div>
+      <div class="nav-tab-lbl">QR</div>
+    </button>
+    <button class="nav-tab" id="nt-stats" onclick="goTab(this,'sec-stats',2)">
+      <div class="nav-tab-ico">📊</div>
+      <div class="nav-tab-lbl">Stats</div>
+    </button>
+    <button class="nav-tab" id="nt-se" onclick="goTab(this,'sec-se',3)">
+      <div class="nav-tab-ico">🌟</div>
+      <div class="nav-tab-lbl">Super Event</div>
+      <div class="nav-badge">1</div>
+    </button>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+<div class="modal-overlay" id="qrModal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <svg viewBox="0 0 160 160" width="240" height="240" xmlns="http://www.w3.org/2000/svg">
+      <rect width="160" height="160" fill="white"/>
+      <rect x="5" y="5" width="50" height="50" rx="5" fill="#1B3A5C"/><rect x="11" y="11" width="38" height="38" rx="3" fill="white"/><rect x="16" y="16" width="28" height="28" rx="2" fill="#1B3A5C"/>
+      <rect x="105" y="5" width="50" height="50" rx="5" fill="#1B3A5C"/><rect x="111" y="11" width="38" height="38" rx="3" fill="white"/><rect x="116" y="16" width="28" height="28" rx="2" fill="#1B3A5C"/>
+      <rect x="5" y="105" width="50" height="50" rx="5" fill="#1B3A5C"/><rect x="11" y="111" width="38" height="38" rx="3" fill="white"/><rect x="16" y="116" width="28" height="28" rx="2" fill="#1B3A5C"/>
+      <rect x="62" y="5" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="71" y="5" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="80" y="5" width="5" height="5" rx="1" fill="#1B3A5C"/>
+      <rect x="62" y="14" width="5" height="5" rx="1" fill="#00B4A0"/><rect x="77" y="14" width="5" height="5" rx="1" fill="#1B3A5C"/><rect x="92" y="14" width="5" height="5" rx="1" fill="#00B4A0"/>
+    </svg>
+    <div style="font-size:13px;font-weight:800;color:var(--text)">Marché du printemps</div>
+    <div class="modal-url" id="modalUrl">flowin.romain-opconsult.com/ev-mai</div>
+    <a class="share-btn btn-wa" style="width:100%;justify-content:center" onclick="openWA(event)" href="#">
+      Partager sur WhatsApp
+    </a>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════ FLOWIN PRO MOBILE — Supabase (lecture seule) ════════ */
+var FLOWIN_SUPA_URL  = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+var FLOWIN_SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+try {
+  var _su = localStorage.getItem('flowin_supa_url');  if(_su) FLOWIN_SUPA_URL = _su;
+  var _sa = localStorage.getItem('flowin_supa_anon'); if(_sa) FLOWIN_SUPA_ANON = _sa;
+} catch(e) {}
+
+var FLOWIN_PRO_ID = new URLSearchParams(window.location.search).get('pro')
+                    || localStorage.getItem('flowin_pro_id')
+                    || null;
+if(FLOWIN_PRO_ID){
+  try { localStorage.setItem('flowin_pro_id', FLOWIN_PRO_ID); } catch(e) {}
+}
+
+var FLOWIN_PRO_DATA = {pro:null, events:[], joueurs:[], lots:[]};
+
+async function flowinProFetch(){
+  if(!FLOWIN_PRO_ID || !FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return;
+  var H = {'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+  try {
+    var rPro = await fetch(FLOWIN_SUPA_URL+'/rest/v1/pros?id=eq.'+encodeURIComponent(FLOWIN_PRO_ID)+'&select=*', {headers:H});
+    var pros = await rPro.json();
+    if(pros && pros.length) FLOWIN_PRO_DATA.pro = pros[0];
+    
+    var rEv = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events?pro_id=eq.'+encodeURIComponent(FLOWIN_PRO_ID)+'&select=*&order=date_d.desc', {headers:H});
+    FLOWIN_PRO_DATA.events = await rEv.json() || [];
+    
+    var evIds = FLOWIN_PRO_DATA.events.map(function(e){return '"'+e.id+'"';}).join(',');
+    if(evIds){
+      var rJ = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=ov.{'+evIds+'}&select=*', {headers:H});
+      FLOWIN_PRO_DATA.joueurs = await rJ.json() || [];
+      
+      var rL = await fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=in.('+evIds+')&select=*', {headers:H});
+      FLOWIN_PRO_DATA.lots = await rL.json() || [];
+    }
+    
+    console.log('[Flowin Pro] charge:', {
+      pro: FLOWIN_PRO_DATA.pro ? FLOWIN_PRO_DATA.pro.nom : null,
+      events: FLOWIN_PRO_DATA.events.length,
+      joueurs: FLOWIN_PRO_DATA.joueurs.length,
+      lots: FLOWIN_PRO_DATA.lots.length
+    });
+    
+    /* Notifier l'UI qu'on a chargé (hook pour mise à jour vues plus tard) */
+    if(typeof flowinProDataReady === 'function') flowinProDataReady();
+  } catch(e){ console.warn('[Flowin Pro] fetch error:', e); }
+}
+
+/* Lancer au boot */
+flowinProFetch();
+
+/* Polling refresh toutes les 30s */
+setInterval(function(){ flowinProFetch(); }, 30000);
+
+/* Callback appelé quand les données Supabase sont prêtes */
+function flowinProDataReady(){
+  var d = FLOWIN_PRO_DATA;
+  var ev = d.events && d.events[0] ? d.events[0] : null;
+  var joueurs = d.joueurs || [];
+  var lots = d.lots || [];
+
+  /* KPIs */
+  var participants = ev ? (ev.participants || joueurs.length) : joueurs.length;
+  var optins = joueurs.filter(function(j){ return j.optin; }).length;
+  var txOptin = participants > 0 ? Math.round(optins / participants * 100) : 0;
+  var gagnants = ev ? (ev.gagnants || 0) : 0;
+  var txConv = participants > 0 ? Math.round(joueurs.length / participants * 100) : 0;
+
+  /* Mettre à jour le DOM */
+  var kpis = document.querySelectorAll('.kpi-val');
+  if(kpis[0]) kpis[0].textContent = participants;
+  if(kpis[1]) kpis[1].textContent = txConv + '%';
+  if(kpis[2]) kpis[2].textContent = txOptin + '%';
+  if(kpis[3]) kpis[3].textContent = gagnants;
+
+  /* Delta opt-in */
+  var deltas = document.querySelectorAll('.kpi-delta');
+  if(deltas[2]) deltas[2].textContent = optins + ' inscrits';
+  if(deltas[3]) deltas[3].textContent = lots.filter(function(l){ return l.retire; }).length + ' lots retirés';
+
+  /* Feed participants (derniers inscrits) */
+  var feed = document.getElementById('participantFeed');
+  if(feed && joueurs.length){
+    var recent = joueurs.slice().sort(function(a,b){
+      return (b.last_seen||'') > (a.last_seen||'') ? 1 : -1;
+    }).slice(0,8);
+    feed.innerHTML = recent.map(function(j){
+      var initials = ((j.prenom||j.pseudo||'?')[0]+(j.nom||'?')[0]).toUpperCase();
+      return '<div class="feed-item">'
+        + '<div class="feed-av" style="background:var(--navy)">' + initials + '</div>'
+        + '<div class="feed-info"><div class="feed-name">' + (j.prenom||'') + ' ' + (j.nom||'') + '</div>'
+        + '<div class="feed-sub">' + (j.ville||'') + (j.optin?' · ✅ opt-in':'') + '</div></div>'
+        + '<div class="feed-time">' + (j.last_seen||'') + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  /* Titre event */
+  if(ev && ev.nom){
+    var titleEl = document.querySelector('.dash-event-name');
+    if(titleEl) titleEl.textContent = ev.nom;
+  }
+}
+
+/* ── UTILS ── */
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2400);
+}
+
+function saveToLS(key,val){
+  try{localStorage.setItem('flowin_pro_'+key,JSON.stringify(val));}catch(e){}
+}
+function loadFromLS(key,def){
+  try{var v=localStorage.getItem('flowin_pro_'+key);return v?JSON.parse(v):def;}catch(e){return def;}
+}
+
+/* ── NAV ── */
+var currentTab=0;
+function goTab(btn,secId,idx){
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById(secId).classList.add('active');
+  currentTab=idx;
+  updateIndicator();
+  window.scrollTo(0,0);
+}
+function updateIndicator(){
+  var tabs=document.querySelectorAll('.nav-tab');
+  if(!tabs.length)return;
+  var tab=tabs[currentTab];
+  var ind=document.getElementById('navIndicator');
+  if(!tab||!ind)return;
+  var w=tab.offsetWidth;
+  var l=tab.offsetLeft;
+  ind.style.left=l+8+'px';
+  ind.style.width=w-16+'px';
+}
+window.addEventListener('resize',updateIndicator);
+setTimeout(updateIndicator,100);
+
+/* ── MODAL ── */
+function openModal(){document.getElementById('qrModal').classList.add('open');}
+function closeModal(){document.getElementById('qrModal').classList.remove('open');}
+
+/* ── WA / SMS ── */
+function openWA(e){
+  e.preventDefault();
+  var msg=document.getElementById('waMsg').value;
+  window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
+}
+function openSMS(e){
+  e.preventDefault();
+  var msg=document.getElementById('smsMsg').value;
+  window.location.href='sms:?body='+encodeURIComponent(msg);
+}
+
+/* ── SAVE MESSAGES ── */
+function saveMsgs(){
+  var wa=document.getElementById('waMsg').value;
+  var sms=document.getElementById('smsMsg').value;
+  saveToLS('wa_msg',wa);
+  saveToLS('sms_msg',sms);
+  /* Payload SQL prêt */
+  var payload={
+    table:'pro_config',
+    pro_id:'11111111-1111-1111-1111-111111111111',
+    key:'share_messages',
+    value:{wa_msg:wa,sms_msg:sms},
+    updated_at:new Date().toISOString()
+  };
+  console.log('SQL PAYLOAD →',JSON.stringify(payload,null,2));
+  showToast('✅ Messages sauvegardés');
+}
+
+/* ── TRAFIC SVG ── */
+(function(){
+  var data=[{h:'9h',n:4},{h:'10h',n:8},{h:'11h',n:11},{h:'12h',n:6},{h:'13h',n:3},{h:'14h',n:14},{h:'15h',n:18},{h:'16h',n:22},{h:'17h',n:3}];
+  var svg=document.getElementById('trafficSvg');
+  var lblRow=document.getElementById('trafficLbls');
+  var W=340,H=90,PAD=5;
+  var max=Math.max.apply(null,data.map(function(d){return d.n;}));
+  var barW=Math.floor((W-PAD*(data.length+1))/data.length);
+  var out='<defs><linearGradient id="gNav" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1B3A5C"/><stop offset="100%" stop-color="#1B3A5C" stop-opacity="0.5"/></linearGradient><linearGradient id="gPeak" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8500A"/><stop offset="100%" stop-color="#F5A623"/></linearGradient><linearGradient id="gLive" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#DC2626"/><stop offset="100%" stop-color="#DC2626" stop-opacity="0.6"/></linearGradient></defs>';
+  data.forEach(function(d,i){
+    var x=PAD+i*(barW+PAD);
+    var bH=Math.max(4,Math.round(d.n/max*(H-16)));
+    var y=H-bH-2;
+    var isLive=i===data.length-1;
+    var isPeak=d.n===max;
+    var grad=isLive?'url(#gLive)':isPeak?'url(#gPeak)':'url(#gNav)';
+    var r=Math.min(5,barW/2);
+    out+='<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+bH+'" rx="'+r+'" fill="'+grad+'"/>';
+    var col=isLive?'#DC2626':isPeak?'#E8500A':'#1B3A5C';
+    out+='<text x="'+(x+barW/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="9" font-weight="800" fill="'+col+'" font-family="Nunito">'+d.n+'</text>';
+    var l=document.createElement('div');
+    l.className='bar-lbl-cell'+(isLive?' live-lbl':'');
+    l.textContent=d.h+(isLive?' 🔴':'');
+    lblRow.appendChild(l);
+  });
+  svg.innerHTML=out;
+})();
+
+/* ── ÂGE SVG ── */
+(function(){
+  var data=[{lbl:'< 18',n:11,c:'#BFDBFE'},{lbl:'18–25',n:15,c:'#93C5FD'},{lbl:'26–35',n:25,c:'#60A5FA'},{lbl:'36–50',n:79,c:'#1B3A5C'},{lbl:'51–65',n:36,c:'#00B4A0'},{lbl:'65+',n:20,c:'#F5A623'}];
+  var svg=document.getElementById('ageSvg');
+  var W=320,H=100,PAD=6,LH=18;
+  var max=Math.max.apply(null,data.map(function(d){return d.n;}));
+  var barW=Math.floor((W-PAD*(data.length+1))/data.length);
+  var out='';
+  data.forEach(function(d,i){
+    var x=PAD+i*(barW+PAD);
+    var bH=Math.max(5,Math.round(d.n/max*(H-LH-12)));
+    var y=H-LH-bH;
+    var isPeak=d.n===max;
+    out+='<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+bH+'" rx="5" fill="'+d.c+'" opacity="'+(isPeak?1:0.8)+'"/>';
+    out+='<text x="'+(x+barW/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="10" font-weight="800" fill="'+d.c+'" font-family="Nunito">'+d.n+'</text>';
+    out+='<text x="'+(x+barW/2)+'" y="'+(H-3)+'" text-anchor="middle" font-size="8" font-weight="700" fill="#64748B" font-family="Nunito">'+d.lbl+'</text>';
+  });
+  svg.innerHTML=out;
+})();
+
+/* ── SOIR SVG ── */
+(function(){
+  var data=[{lbl:'01/04',n:5},{lbl:'02/04',n:7},{lbl:'03/04',n:3},{lbl:'04/04',n:80},{lbl:'05/04',n:49},{lbl:'06/04',n:38},{lbl:'11/04',n:3},{lbl:'17/04',n:1}];
+  var svg=document.getElementById('soirSvg');
+  var lblRow=document.getElementById('soirLbls');
+  var W=340,H=80,PAD=5;
+  var max=Math.max.apply(null,data.map(function(d){return d.n;}));
+  var barW=Math.floor((W-PAD*(data.length+1))/data.length);
+  var out='<defs><linearGradient id="gSoir" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00B4A0"/><stop offset="100%" stop-color="#00B4A0" stop-opacity="0.5"/></linearGradient><linearGradient id="gSoirPeak" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5A623"/><stop offset="100%" stop-color="#E8500A"/></linearGradient></defs>';
+  data.forEach(function(d,i){
+    var x=PAD+i*(barW+PAD);
+    var bH=Math.max(3,Math.round(d.n/max*(H-14)));
+    var y=H-bH-2;
+    var isPeak=d.n===max;
+    out+='<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+bH+'" rx="4" fill="'+(isPeak?'url(#gSoirPeak)':'url(#gSoir)')+'"/>';
+    var col=isPeak?'#E8500A':'#00B4A0';
+    out+='<text x="'+(x+barW/2)+'" y="'+(y-3)+'" text-anchor="middle" font-size="9" font-weight="800" fill="'+col+'" font-family="Nunito">'+d.n+'</text>';
+    var l=document.createElement('div');
+    l.className='bar-lbl-cell';
+    l.textContent=d.lbl;
+    lblRow.appendChild(l);
+  });
+  svg.innerHTML=out;
+})();
+
+/* ── FEED ── */
+(function(){
+  var data=[
+    {p:'Valérie',n:'L.',v:'Vence',d:'📱',lot:'🥖',t:1,h:'17h03',op:true,c:'#1B3A5C'},
+    {p:'Jean-Pierre',n:'R.',v:'Nice',d:'🤖',lot:null,t:1,h:'16h58',op:false,c:'#2563EB'},
+    {p:'Sabrina',n:'C.',v:'Antibes',d:'📱',lot:'🎬',t:1,h:'16h41',op:true,c:'#DB2777'},
+    {p:'Marc',n:'B.',v:'Cagnes',d:'📱',lot:null,t:1,h:'16h35',op:true,c:'#059669'},
+    {p:'Amira',n:'K.',v:'Vence',d:'📱',lot:'🌸',t:1,h:'16h22',op:true,c:'#E8500A'}
+  ];
+  var feed=document.getElementById('feedList');
+  data.forEach(function(p){
+    var init=p.p[0]+p.n[0];
+    feed.innerHTML+='<div class="feed-item">'
+      +'<div class="feed-av" style="background:'+p.c+'">'+init+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div class="feed-name">'+p.p+' '+p.n+'</div>'
+      +'<div class="feed-meta">'
+      +'<span class="pill ville">'+p.d+' '+p.v+'</span>'
+      +(p.op?'<span class="pill optin">opt-in</span>':'<span class="pill noptin">sans opt-in</span>')
+      +(p.lot?'<span class="pill lot">'+p.lot+' lot</span>':'')
+      +'</div></div>'
+      +'<div class="feed-right"><div class="ticket-b">🎟 '+p.t+'</div><div class="feed-time">'+p.h+'</div></div>'
+      +'</div>';
+  });
+})();
+
+/* ── LOAD SAVED MESSAGES ── */
+(function(){
+  var wa=loadFromLS('wa_msg',null);
+  var sms=loadFromLS('sms_msg',null);
+  if(wa) document.getElementById('waMsg').value=wa;
+  if(sms) document.getElementById('smsMsg').value=sms;
+})();
+
+/* ── SUPER EVENT FORM ── */
+function sendSE(){
+  var target=document.getElementById('seTarget').value;
+  var desc=document.getElementById('seDesc').value.trim();
+  var module=document.getElementById('seModule').value;
+  var dates=document.getElementById('seDates').value.trim();
+  var msg=document.getElementById('seMsg').value.trim();
+  if(!target||!desc||!module||!dates){showToast('⚠️ Remplissez tous les champs *');return;}
+
+  /* Payload SQL → super_event_requests */
+  var payload={
+    table:'super_event_requests',
+    super_event_id:target,
+    pro_id:'11111111-1111-1111-1111-111111111111',
+    nom_structure:'Ville de Vence',
+    contact:'Marie Dubois',
+    email:'mairie@vence.fr',
+    tel:'04 93 58 40 17',
+    ville:'Vence',
+    code_postal:'06140',
+    description_event:desc,
+    module_souhaite:module,
+    dates_souhaitees:dates,
+    message:msg,
+    status:'pending',
+    created_at:new Date().toISOString()
+  };
+
+  saveToLS('se_request_'+target,payload);
+  console.log('INSERT super_event_requests →',JSON.stringify(payload,null,2));
+
+  document.getElementById('sePayload').textContent='INSERT → super_event_requests\n'+JSON.stringify({super_event_id:target,module_souhaite:module,dates_souhaitees:dates,status:'pending'},null,2);
+  document.getElementById('seFormWrap').style.display='none';
+  document.getElementById('seSuccess').classList.add('show');
+  showToast('📩 Demande envoyée au Super Admin');
+}
+
+function resetSE(){
+  ['seTarget','seModule'].forEach(function(id){document.getElementById(id).value='';});
+  ['seDesc','seDates','seMsg'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('seSuccess').classList.remove('show');
+  document.getElementById('seFormWrap').style.display='';
+}
+</script>
+</body>
+</html>
