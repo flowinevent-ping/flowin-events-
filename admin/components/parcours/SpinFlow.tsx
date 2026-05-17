@@ -29,9 +29,10 @@ async function write(ev: SpinEvent, form: FormData, ticket: string) {
 }
 
 export default function SpinFlow({ ev }: { ev: SpinEvent }) {
-  const [screen, setScreen] = useState<'landing'|'form'|'spin'|'result'>('landing')
+  const [screen, setScreen] = useState<'played'|'landing'|'form'|'spin'|'result'>('landing')
   const [form, setForm] = useState<FormData>({prenom:'',nom:'',email:'',tel:'',optin:false})
   const [spinning, setSpinning] = useState(false)
+  const [playedTicket, setPlayedTicket] = useState('')
   const [angle, setAngle] = useState(0)
   const [result, setResult] = useState<Segment|null>(null)
   const [ticket] = useState(genTicket())
@@ -108,6 +109,17 @@ export default function SpinFlow({ ev }: { ev: SpinEvent }) {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
       <div style={{maxWidth:430,margin:'0 auto',minHeight:'100vh',background:`linear-gradient(160deg,${c}22,#fff)`}}>
+        {screen==='played' && (
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,textAlign:'center'}}>
+            <div style={{fontSize:64,marginBottom:12}}>🎟️</div>
+            <div style={{fontFamily:"'Fredoka One',cursive",fontSize:24,color:c}}>Tu as déjà participé !</div>
+            {playedTicket&&<div style={{background:'#fff',borderRadius:14,padding:16,border:`1.5px dashed ${c}`,marginTop:16}}>
+              <div style={{fontSize:10,fontWeight:900,color:c,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:4}}>🎟️ Ton code</div>
+              <div style={{fontFamily:"'Fredoka One',cursive",fontSize:24,color:'#1a1a2e'}}>{playedTicket}</div>
+            </div>}
+            <div style={{fontSize:13,fontWeight:700,color:'#666',marginTop:12,fontFamily:'sans-serif'}}>Bonne chance ! 🍀</div>
+          </div>
+        )}
         {screen==='landing' && (
           <div style={{padding:24,textAlign:'center'}}>
             <div style={{fontFamily:"'Fredoka One',cursive",fontSize:42,color:c,marginBottom:8}}>{ev.nom}</div>

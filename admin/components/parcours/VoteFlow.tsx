@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SUPA_URL, SUPA_ANON } from '@/lib/supabase'
 
 interface Section { id?: string; titre?: string; nom?: string; emoji?: string }
@@ -14,8 +14,15 @@ export default function VoteFlow({ ev }: { ev: VoteEvent }) {
   const [votes, setVotes] = useState<Record<string,number>>({})
   const [form, setForm] = useState<FormData>({prenom:'',email:'',optin:false})
   const c = ev.couleur || '#7C2D92'
-  const currentIdx = Object.keys(votes).length
+  const [currentIdx, setCurrentIdx] = useState(0)
+  const [played, setPlayed] = useState(false)
   const currentSec = sections[currentIdx]
+
+  useEffect(()=>{
+    if(typeof window!=='undefined'){
+      try{if(localStorage.getItem('flowin_played_'+ev.id))setPlayed(true)}catch{}
+    }
+  },[ev.id])
 
   async function submit() {
     if (!form.email) return
@@ -33,6 +40,7 @@ export default function VoteFlow({ ev }: { ev: VoteEvent }) {
           body: JSON.stringify({ event_id:ev.id, section_id:secId, note })
         }).catch(e=>console.warn('[vote]',e))
       })
+      try{localStorage.setItem('flowin_played_'+ev.id,JSON.stringify({ts:Date.now()}))}catch{}
     } catch(e) { console.warn('[vote submit]', e) }
     setScreen('done')
   }
@@ -41,7 +49,14 @@ export default function VoteFlow({ ev }: { ev: VoteEvent }) {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
       <div style={{maxWidth:430,margin:'0 auto',minHeight:'100vh',background:`linear-gradient(160deg,${c} 0%,#1a1a3e 100%)`,color:'#fff'}}>
-        {screen==='landing' && (
+        {played && screen!=='done' && (
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,textAlign:'center',background:`linear-gradient(160deg,${c},#1a1a3e)`}}>
+            <div style={{fontSize:64,marginBottom:12}}>⭐</div>
+            <div style={{fontFamily:"'Fredoka One',cursive",fontSize:24,color:'#FCD34D'}}>Tu as déjà voté !</div>
+            <div style={{fontSize:13,color:'rgba(255,255,255,.7)',marginTop:8,fontFamily:'sans-serif'}}>Merci pour ta participation 🎉</div>
+          </div>
+        )}
+        {!played && screen==='landing' && (
           <div style={{padding:32,textAlign:'center'}}>
             <div style={{fontSize:48,marginBottom:16}}>⭐</div>
             <div style={{fontFamily:"'Fredoka One',cursive",fontSize:36,marginBottom:8}}>{ev.nom}</div>
@@ -65,7 +80,10 @@ export default function VoteFlow({ ev }: { ev: VoteEvent }) {
                 <button key={n} onClick={()=>{
                   const id = currentSec.id||String(currentIdx)
                   setVotes(v=>({...v,[id]:n}))
-                  setTimeout(()=>{ if(currentIdx+1>=sections.length) setScreen('form'); }, 300)
+                  setTimeout(()=>{
+                    if(currentIdx+1>=sections.length) setScreen('form')
+                    else setCurrentIdx(i=>i+1)
+                  }, 400)
                 }}
                 style={{fontSize:40,background:'none',border:'none',cursor:'pointer',opacity:votes[currentSec.id||String(currentIdx)]>=n?1:.3,filter:votes[currentSec.id||String(currentIdx)]>=n?'none':'grayscale(1)',transition:'all .1s'}}>
                   ⭐
@@ -74,7 +92,7 @@ export default function VoteFlow({ ev }: { ev: VoteEvent }) {
             </div>
           </div>
         )}
-        {screen==='form' && (
+        {!played && screen==='form' && (
           <div style={{padding:24}}>
             <div style={{fontFamily:"'Fredoka One',cursive",fontSize:24,marginBottom:8}}>Tes infos</div>
             <div style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:20}}>Pour être tenu au courant des résultats</div>

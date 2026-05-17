@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SUPA_URL, SUPA_ANON } from '@/lib/supabase'
 
 interface TombolaEvent { id: string; nom: string; lieu: string; couleur: string; cfg: any; lots: any[] }
@@ -11,7 +11,7 @@ function markPlayed(evId: string, email: string, ticket: string) { try { localSt
 function genTicket() { return 'TB-' + new Date().getFullYear() + '-' + Math.floor(1000+Math.random()*8999) }
 
 export default function TombolaFlow({ ev }: { ev: TombolaEvent }) {
-  const [screen, setScreen] = useState<'landing'|'form'|'confirm'>('landing')
+  const [screen, setScreen] = useState<'played'|'landing'|'form'|'confirm'>('landing')
   const [form, setForm] = useState<FormData>({prenom:'',nom:'',email:'',tel:'',ville:'',ddn:'',optin:false})
   const [ticket] = useState(genTicket())
   const [err, setErr] = useState('')
@@ -41,6 +41,14 @@ export default function TombolaFlow({ ev }: { ev: TombolaEvent }) {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
       <div style={{maxWidth:430,margin:'0 auto',minHeight:'100vh',background:`linear-gradient(160deg,#FFF9F0,#FFF3E0)`}}>
+        {screen==='played' && (
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,textAlign:'center'}}>
+            <div style={{fontSize:64,marginBottom:12}}>🎟️</div>
+            <div style={{fontFamily:"'Fredoka One',cursive",fontSize:24,color:c}}>Tu as déjà participé !</div>
+            <div style={{fontSize:13,fontWeight:700,color:'#666',marginTop:8,fontFamily:'sans-serif'}}>Bonne chance pour le tirage 🍀</div>
+            <div style={{fontSize:13,fontWeight:700,color:'#666',marginTop:12,fontFamily:'sans-serif'}}>Bonne chance ! 🍀</div>
+          </div>
+        )}
         {screen==='landing' && (
           <div style={{padding:28,textAlign:'center'}}>
             <div style={{fontSize:64,marginBottom:8}}>🎟️</div>
