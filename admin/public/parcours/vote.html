@@ -2747,5 +2747,28 @@ function flowinHydrateQuizmasterBonus(){
   }
 })();
 </script>
+
+/* ── Navigation depuis postMessage (dashboard preview arrows) ── */
+window.addEventListener('message', function(e) {
+  if(!e.data || !e.data.flowinNav) return;
+  var dir = e.data.flowinNav;
+  /* Trouver la page courante active */
+  var vp = document.querySelector('.viewport');
+  if(!vp) vp = document.body;
+  var pages = vp.querySelectorAll('.page');
+  var cur = -1;
+  for(var i=0; i<pages.length; i++) {
+    if(pages[i].classList.contains('on')) { cur = i; break; }
+  }
+  if(cur < 0) return;
+  var next = dir === 'next' ? cur + 1 : cur - 1;
+  if(next < 0) next = 0;
+  if(next >= pages.length) next = pages.length - 1;
+  if(next === cur) return;
+  pages[cur].classList.remove('on');
+  pages[next].classList.add('on');
+  if(vp.scrollTo) vp.scrollTo(0,0);
+});
+
 </body>
 </html>
