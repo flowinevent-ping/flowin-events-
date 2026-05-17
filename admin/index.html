@@ -863,6 +863,44 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .wiz-seq-label{font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;text-align:center;margin-bottom:6px}
 .wiz-seq-frame{animation:seqFade .18s ease}
 @keyframes seqFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Phone mockup responsive ── */
+.flowin-phone-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.flowin-phone-nav {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--sa-border); background: #fff;
+  font-size: 20px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.flowin-phone-nav:hover { background: var(--sa-subtle); }
+.flowin-phone-frame {
+  background: #111;
+  border-radius: 36px;
+  padding: 8px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.28), inset 0 0 0 2px #2d2d2d;
+  position: relative;
+  width: min(260px, calc(100% - 100px));
+  aspect-ratio: 9 / 19.5;
+  flex-shrink: 0;
+}
+.flowin-phone-notch {
+  position: absolute; top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 72px; height: 16px;
+  background: #111; border-radius: 0 0 10px 10px; z-index: 2;
+}
+.flowin-phone-frame iframe {
+  width: 100%; height: 100%;
+  border-radius: 28px; border: none;
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -5739,13 +5777,13 @@ function drawerEvent(e){
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
        var _joueurUrl = (e.module ? '/' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(e.id) : '/parcours_user.html?ev=' + encodeURIComponent(e.id));
        var _vjiId = 'iframe-parcours-'+e.id;
-       html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px">';
-       html += '<button onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')\" style="width:38px;height:38px;border-radius:50%;border:none;background:var(--sa-subtle);font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center">‹</button>';
-       html += '<div style="width:220px;height:460px;background:#111;border-radius:32px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.2),inset 0 0 0 2px #333;position:relative">';
-       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:65px;height:14px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-       html += '<iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:24px;border:none"></iframe>';
+       html += '<div class="flowin-phone-wrap">';
+       html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button>';
+       html += '<div class="flowin-phone-frame">';
+       html += '<div class="flowin-phone-notch"></div>';
+       html += '<iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write"></iframe>';
        html += '</div>';
-       html += '<button onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')\" style="width:38px;height:38px;border-radius:50%;border:none;background:var(--sa-subtle);font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center">›</button>';
+       html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button>';
        html += '</div>';
        html += '</div>';
 
@@ -5944,13 +5982,13 @@ function renderOngletJeu(e){
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
-  html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px">';
-  html += '<button onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')\" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--sa-border);background:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>';
-  html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #333;position:relative">';
-  html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-  html += '<iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none"></iframe>';
+  html += '<div class="flowin-phone-wrap">';
+  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')">‹</button>';
+  html += '<div class="flowin-phone-frame">';
+  html += '<div class="flowin-phone-notch"></div>';
+  html += '<iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write"></iframe>';
   html += '</div>';
-  html += '<button onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')\" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--sa-border);background:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>';
+  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')">›</button>';
   html += '</div>';
   html += '</div>';
 
@@ -6432,18 +6470,14 @@ function renderBiblioJeux(){
   var _masterUrl = '/' + encodeURIComponent(tab) + '.html';
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
-  if(!_noModule) {
-    html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px">';
-    html += '<button onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--sa-border);background:#fff;font-size:20px;cursor:pointer;flex-shrink:0">‹</button>';
-    html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 0 0 2px #333;position:relative">';
-    html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-    html += '<iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none"></iframe>';
-    html += '</div>';
-    html += '<button onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--sa-border);background:#fff;font-size:20px;cursor:pointer;flex-shrink:0">›</button>';
-    html += '</div>';
-  } else {
-    html += '<div style="display:flex;justify-content:center;align-items:center;height:200px;color:var(--sa-muted);font-size:12px">Mode animateur live — pas de parcours QR</div>';
-  }
+  html += '<div class="flowin-phone-wrap">';
+  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button>';
+  html += '<div class="flowin-phone-frame">';
+  html += '<div class="flowin-phone-notch"></div>';
+  html += '<iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write"></iframe>';
+  html += '</div>';
+  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button>';
+  html += '</div>';
   html += '</div>'; // fin colonne droite
 
   html += '</div>'; // fin grid 2 colonnes
