@@ -959,7 +959,7 @@ const TODAY = new Date('2026-05-03');
 const SEED = {
   pros: [
     {id:'pro-vence',nom:'Ville de Vence',ville:'Vence',codePostal:'06140',adresse:'Hôtel de Ville, Place du Frêne',siret:'21060157200019',secteur:'Collectivité',contact:'Service Animation',role:'Animateur événementiel',email:'animation@ville-vence.fr',tel:'04 93 58 06 58',entreeP:'2026-01-01',notes:'Client pilote Flowin · Fêtes de Pâques 2026 (186 participants)',tags:['pilote','collectivité']},
-    {id:'pro-flowin',nom:'Flowin',ville:'Nice',codePostal:'06000',adresse:'Nice, 06000',siret:'',secteur:'SaaS · Gamification',contact:'Romain Collin',role:'Fondateur',email:'contact@flowin.fr',tel:'',entreeP:'2026-05-07',notes:'Compte interne Flowin · Event démo commercial landing · Tunnel acquisition Pro',tags:['interne','demo','landing']}
+    
   ],
   events: [
     {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
@@ -1016,74 +1016,8 @@ const SEED = {
         ambiance:[{l:'Génial !',v:80,ico:'🤩'},{l:'Top, on se sent bien',v:51,ico:'😊'},{l:'Ça va, peut mieux faire',v:3,ico:'😐'}]
       }
     },
-    {id:'ev-nds',proId:'pro-vence',nom:'Nuits du Sud 2026',module:'quiz',status:'upcoming',
-      dateD:'2026-07-15',dateF:'2026-07-24',hStart:'20:00',hEnd:'23:59',
-      lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',
-      participants:0,gagnants:0,partenaires:[],joueursOptin:0,
-      couleur:'#3B5CC4',description:'Festival musiques du monde · 10 soirées · Quiz + Tirage NDS',
-      scoreMin:0,banques:[],
-      cfg:{
-        qrUrl:'https://flowin-opconsult.netlify.app/?ev=ev-nds',
-        quizBanques:[],
-        optinActif:true,
-        customQuestions:[
-          {id:'decouverte',label:'Comment avez-vous connu l\'événement ?',type:'single',options:[
-            {label:'📸 Instagram',val:'instagram'},
-            {label:'🔵 Facebook',val:'facebook'},
-            {label:'🏛 Site de la mairie',val:'mairie'},
-            {label:'📋 Affiche / Flyer',val:'affiche'},
-            {label:'🗣 Bouche à oreille',val:'bouche'}
-          ]}
-        ],
-        quizBonusList:[
-          {id:'frequence',label:'Vous êtes venu(e)...',type:'single',options:[
-            {val:'famille',label:'👨‍👩‍👧 En famille'},
-            {val:'amis',label:'👫 Entre amis'},
-            {val:'couple',label:'💑 En couple'},
-            {val:'seul',label:'🚶 Seul(e)'}
-          ]},
-          {id:'ambiance',label:'Je trouve l\'ambiance...',type:'single',options:[
-            {val:'genial',label:'🤩 Génial !'},
-            {val:'top',label:'😊 Top, on se sent bien'},
-            {val:'moyen',label:'😐 Ça va, peut mieux faire'}
-          ]},
-          {id:'retour',label:'Souhaitez-vous revenir ?',type:'single',options:[
-            {val:'oui',label:'✅ Oui'},
-            {val:'peut-etre',label:'🤔 Peut-être'},
-            {val:'non',label:'❌ Non'}
-          ]},
-          {id:'optin',label:'On vous informe pour les prochains événements ?',type:'single',options:[
-            {val:'oui',label:'✅ Oui envoyez-moi un message'},
-            {val:'non',label:'❌ Non merci'}
-          ]}
-        ],
-        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:false,msgBienvenue:'Bienvenue sur le dashboard Nuits du Sud 2026 !',langue:'fr'}
-      },
-      stats:{}
-    },
-
-    {id:'ev-flowin-demo',proId:'pro-flowin',nom:'Flowin — Découverte',module:'spin',status:'live',
-      clientType:'btob',
-      dateD:'2026-05-07',dateF:'2030-05-03',hStart:'00:00',hEnd:'23:59',
-      lieu:'Nice',adresse:'Nice, 06000',
-      participants:0,gagnants:0,partenaires:[],joueursOptin:0,
-      couleur:'#A855F7',description:'Event démo commercial · Parcours joueur Flowin · Accès tunnel de vente landing',
-      scoreMin:0,banques:[],
-      cfg:{
-        qrUrl:'',
-        optinActif:true,
-        spinSegments:[
-          {id:'seg-1',label:'Accès Flowin complet',sublabel:'Tableau de bord inclus',emoji:'🎛️',color:'#A855F7',prob:20},
-          {id:'seg-2',label:'1 an offert',sublabel:'Abonnement Flowin gratuit',emoji:'🎁',color:'#00B4A0',prob:20},
-          {id:'seg-3',label:'Flowin Team',sublabel:'Multi-utilisateurs offert',emoji:'👥',color:'#1B3A5C',prob:20},
-          {id:'seg-4',label:'1er event offert',sublabel:'Config + déploiement inclus',emoji:'🚀',color:'#E8500A',prob:20},
-          {id:'seg-5',label:'Parrainer un ami',sublabel:'Et retenter votre chance',emoji:'🤝',color:'#F5A623',prob:20}
-        ],
-        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:'Bienvenue — Découvrez Flowin en jouant.',langue:'fr'}
-      },
-      stats:{}
-    },
-  ],
+    
+      ],
   joueurs: [
     {id:'j-pq-01',email:'dakota.vegas06@gmail.com',nom:'Valérie Manes',prenom:'Valérie',tel:'',ville:'Saint-Laurent-du-Var',codePostal:'06700',adresse:'',dateNaissance:'1965-06-15',events:['ev-paques'],gains:0,scoreMoy:'3/4',optin:true,optinDate:'2026-04-04',lastSeen:'2026-04-06',firstSeen:'2026-04-04',source:'QR sur place',tags:[]},
     {id:'j-pq-02',email:'sabithaaceteee@gmail.com',nom:'Sabitha Iyyanar',prenom:'Sabitha',tel:'06 75 44 59 92 9',ville:'Vence',codePostal:'06140',adresse:'',dateNaissance:'1995-06-15',events:['ev-paques'],gains:1,scoreMoy:'4/4',optin:true,optinDate:'2026-04-04',lastSeen:'2026-04-06',firstSeen:'2026-04-04',source:'QR sur place',tags:['Vence']},
@@ -1372,7 +1306,7 @@ function loadData(){
   try{
     // Migration : récupérer données d'une ancienne clé si la nouvelle est vide
   if(!localStorage.getItem(LS_KEY)){
-    var _oldKeys=['flowin_v22_data','flowin_v21_data','flowin_v20_data'];
+    var _oldKeys=['flowin_v22_data','flowin_v21_data','flowin_v21_data'];
     for(var _ki=0;_ki<_oldKeys.length;_ki++){
       var _old=localStorage.getItem(_oldKeys[_ki]);
       if(_old){
@@ -1813,7 +1747,7 @@ async function supaWriteEvent(e){
   // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
   // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
   if(!e.cfg) e.cfg = {};
-  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + e.id;
+  e.cfg.qrUrl = 'https://flowin-events.vercel.app/' + (e.module||'quiz') + '.html?ev=' + e.id;
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
@@ -2380,7 +2314,7 @@ function toast(msg,type){
 // ----- CONFIRM -----
 function resetCache(){
   if(!confirm('Vider le cache localStorage et recharger le SEED v23 ?')) return;
-  localStorage.removeItem('flowin_v20_data');
+  localStorage.removeItem('flowin_v21_data');
   localStorage.removeItem('flowin_v21_data');
   localStorage.removeItem('flowin_v22_data');
   localStorage.removeItem('flowin_v23_data');
@@ -8464,7 +8398,7 @@ function wizSave(){
     toast('Event "'+d.nom+'" créé','success');
     supaWriteEvent(_newEv);
     // Génération auto qrUrl
-    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours_user.html?ev=' + id;
+    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/' + (_newEv.module||'quiz') + '.html?ev=' + id;
   } else {
     const idx = DATA.events.findIndex(e=>e.id===state.wiz.editingId);
     if(idx>=0){
