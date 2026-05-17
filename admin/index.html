@@ -957,16 +957,16 @@ function QR8bitByte(t){this.mode=QRMode.MODE_8BIT_BYTE,this.data=t,this.parsedDa
 // ============ DONNÉES MOCK (seed initial) ============
 const TODAY = new Date('2026-05-03');
 
-/* ══ RESET FORCÉ v29 — efface toutes les clés flowin_ sauf v29 ══ */
+/* ══ RESET FORCÉ v30 ══ */
 (function(){
   try {
-    var keys = Object.keys(localStorage);
-    keys.forEach(function(k){
-      if(k.indexOf('flowin_') === 0 && k !== 'flowin_v29_data') {
-        localStorage.removeItem(k);
-      }
+    var _cur = 'flowin_v30_data';
+    Object.keys(localStorage).forEach(function(k){
+      if(k.indexOf('flowin_')===0 && k!==_cur) localStorage.removeItem(k);
     });
-  } catch(e){}
+    var _d30 = localStorage.getItem(_cur);
+    if(_d30){ try{ var _p=JSON.parse(_d30); if(!_p||!_p.events||!_p.events.length) localStorage.removeItem(_cur); }catch(e){ localStorage.removeItem(_cur); } }
+  }catch(e){}
 })();
 const SEED = {
   pros: [
@@ -1312,7 +1312,7 @@ const SEED = {
 
 
 // ============ STORAGE LOCAL ============
-const LS_KEY = 'flowin_v29_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
+const LS_KEY = 'flowin_v30_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
 function loadData(){
   try{
     // Migration : récupérer données d'une ancienne clé si la nouvelle est vide
