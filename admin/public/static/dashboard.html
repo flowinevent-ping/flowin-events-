@@ -7657,43 +7657,138 @@ function modalLanding(data){
     html += '</div>';
   }
 
-  // ── TAB APERÇU — navigation page par page
+  // ── TAB APERÇU — 4 pages inline (pas d'iframe) ──
   else if(tab === 'apercu'){
-    var LAND_SECTIONS = ['s-hero','s-profils','s-proof','s-cta'];
-    var LAND_LABELS   = ['Accueil','Profils','Preuves','CTA'];
+    // Pages : 0=hero 1=profils 2=preuves 3=cta
     if(typeof state.modal.landingPage === 'undefined') state.modal.landingPage = 0;
     var lp = state.modal.landingPage || 0;
     if(lp < 0) lp = 0;
-    if(lp >= LAND_SECTIONS.length) lp = LAND_SECTIONS.length - 1;
+    if(lp > 3) lp = 3;
 
-    /* Breadcrumb */
+    var accent = ld.accentColor || '#3B5CC4';
+    var hero2  = ld.hero  || {};
+    var proof2 = ld.proof || {};
+
+    // Profils depuis ld.profils ou defaults
+    var profils2 = ld.profils || [
+      {ico:'🛍️', lbl:'Boutique / Commerce', couleur:'#E85D04'},
+      {ico:'🍽️', lbl:'Restaurant / Café',   couleur:'#D62828'},
+      {ico:'⛺',  lbl:'Marché / Stand',       couleur:'#2D6A4F'},
+      {ico:'🏪',  lbl:'Réseau / Animation',   couleur:'#7B2FBE'},
+      {ico:'🏢',  lbl:'Entreprise / Asso',    couleur:'#1B4F72'},
+      {ico:'🗺️', lbl:'Tourisme / Collectivité',couleur:'#0B6E4F'}
+    ];
+
+    var PAGES = ['Accueil','Profils','Preuves','CTA'];
+
+    // ── Breadcrumb ──
     html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
-    for(var li=0; li<LAND_SECTIONS.length; li++){
-      var isA = (li === lp);
+    for(var pi=0; pi<PAGES.length; pi++){
+      var isA = (pi === lp);
       html += '<div style="display:flex;align-items:center;gap:4px">';
-      html += '<button style="width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;font-size:9px;font-weight:800;'
-            + 'background:'+(isA?'var(--sa-accent)':'var(--sa-subtle)')+';color:'+(isA?'#fff':'var(--sa-muted)')+'"'
-            + ' onclick="state.modal.landingPage='+li+';renderModal()">'+( li+1)+'</button>';
-      if(isA) html += '<span style="font-size:10px;font-weight:700;color:var(--sa-accent)">'+LAND_LABELS[li]+'</span>';
-      if(li < LAND_SECTIONS.length-1) html += '<span style="color:var(--sa-muted);font-size:9px">›</span>';
+      html += '<button onclick="state.modal.landingPage='+pi+';renderModal()" style="width:22px;height:22px;border-radius:50%;border:none;cursor:pointer;font-size:9px;font-weight:800;background:'+(isA?accent:'var(--sa-subtle)')+';color:'+(isA?'#fff':'var(--sa-muted)')+'\">'+(pi+1)+'</button>';
+      if(isA) html += '<span style="font-size:10px;font-weight:700;color:'+accent+'">'+PAGES[pi]+'</span>';
+      if(pi < 3) html += '<span style="color:var(--sa-muted);font-size:9px">›</span>';
       html += '</div>';
     }
     html += '</div>';
 
-    /* Phone frame */
-    html += '<div class="flowin-phone-wrap">';
-    html += '<div class="flowin-phone-nav-row">';
-    html += '<button class="flowin-phone-nav" onclick="landingNav(-1)">‹</button>';
-    html += '<span style="font-size:11px;color:var(--sa-muted)">'+(lp+1)+' / '+LAND_SECTIONS.length+'</span>';
-    html += '<button class="flowin-phone-nav" onclick="landingNav(1)">›</button>';
+    // ── Flèches + compteur ──
+    html += '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px">';
+    html += '<button class="flowin-phone-nav" onclick="state.modal.landingPage=Math.max(0,(state.modal.landingPage||0)-1);renderModal()">‹</button>';
+    html += '<span style="font-size:11px;color:var(--sa-muted)">'+(lp+1)+' / 4</span>';
+    html += '<button class="flowin-phone-nav" onclick="state.modal.landingPage=Math.min(3,(state.modal.landingPage||0)+1);renderModal()">›</button>';
     html += '</div>';
-    html += '<div class="flowin-phone-frame"><div class="flowin-phone-notch"></div>';
-    html += '<div class="flowin-phone-scaler">';
-    html += '<iframe id="iframe-landing-apercu" src="/landing/index.html" frameborder="0" allow="clipboard-write"></iframe>';
-    html += '</div></div></div>';
-    html += '<div style="font-size:10px;color:var(--sa-muted);text-align:center;margin-top:6px">Page '+( lp+1)+' / '+LAND_SECTIONS.length+' · Prévisualisation page réelle</div>';
+
+    // ── Phone frame inline ──
+    var NAVY='#1B3A5C'; var TEAL='#0ABDA0'; var BG='#F4F6F9';
+    html += '<div style="display:flex;justify-content:center">';
+    html += '<div style="width:320px;border:8px solid #1F1B2E;border-radius:40px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.2);background:'+BG+';font-family:-apple-system,BlinkMacSystemFont,sans-serif;position:relative">';
+
+    // Topbar (commun)
+    html += '<div style="background:'+NAVY+';padding:8px 14px;display:flex;align-items:center;justify-content:space-between">';
+    html += '<div style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-1px">Flow<span style="color:'+TEAL+'">in</span></div>';
+    html += '<button style="background:'+TEAL+';color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:default">Tester gratuitement →</button>';
+    html += '</div>';
+
+    // Contenu de la page active
+    html += '<div style="height:480px;overflow:hidden">';
+
+    if(lp === 0){
+      // ── PAGE 1 : HERO ──
+      var HQS = [
+        'Avez-vous le contact de tous vos clients\u00a0?',
+        'Un moyen de capter les prospects de passage\u00a0?',
+        'Combien dépensez-vous pour trouver de nouveaux clients\u00a0?',
+        'Travaillez-vous déjà avec vos acquis\u00a0?'
+      ];
+      var customQs = (hero2.questions && hero2.questions.length) ? hero2.questions : [];
+      html += '<div style="background:'+NAVY+';padding:20px 16px 16px;text-align:center">';
+      html += '<div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-1.5px;margin-bottom:16px">Flow<span style="color:'+TEAL+'">in</span></div>';
+      for(var qi=0; qi<HQS.length; qi++){
+        var q = (customQs[qi] && customQs[qi].trim()) ? customQs[qi] : HQS[qi];
+        html += '<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);text-align:left">';
+        html += '<div style="width:18px;height:18px;border-radius:50%;background:'+TEAL+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(qi+1)+'</div>';
+        html += '<div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.4">'+esc(q)+'</div></div>';
+      }
+      html += '</div>';
+      html += '<div style="background:#fff;padding:14px 16px;text-align:center">';
+      html += '<div style="font-size:14px;font-weight:800;color:'+NAVY+';margin-bottom:12px">'+esc(hero2.answer||'La solution tient en un clic.')+'</div>';
+      html += '<button style="width:100%;background:'+TEAL+';color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:default">'+esc(hero2.cta||'Je veux essayer')+'</button>';
+      html += '</div>';
+
+    } else if(lp === 1){
+      // ── PAGE 2 : PROFILS ──
+      html += '<div style="background:'+BG+';padding:16px">';
+      html += '<div style="font-size:10px;font-weight:700;color:'+TEAL+';text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Votre situation</div>';
+      html += '<div style="font-size:16px;font-weight:900;color:'+NAVY+';margin-bottom:12px">Vous êtes…</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">';
+      for(var pri=0; pri<profils2.length && pri<6; pri++){
+        var pr = profils2[pri];
+        var pcolor = pr.couleur || accent;
+        html += '<div style="background:#fff;border-radius:10px;padding:10px 8px;text-align:center;border:1px solid rgba(0,0,0,.07)">';
+        html += '<div style="font-size:22px;margin-bottom:4px">'+esc(pr.ico||'🏢')+'</div>';
+        html += '<div style="font-size:10px;font-weight:800;color:'+NAVY+';line-height:1.2">'+esc(pr.lbl||'')+'</div>';
+        html += '</div>';
+      }
+      html += '</div></div>';
+
+    } else if(lp === 2){
+      // ── PAGE 3 : PREUVES ──
+      var stat1 = proof2.stat1 || '186'; var stat1l = proof2.stat1Lbl || 'personnes';
+      var stat2 = proof2.stat2 || '3';   var stat2l = proof2.stat2Lbl || 'jours';
+      html += '<div style="background:'+NAVY+';padding:20px 16px;height:100%">';
+      html += '<div style="font-size:9px;font-weight:700;color:'+TEAL+';text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Pilote réel · Pâques 2026</div>';
+      html += '<div style="font-size:20px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:14px">'+stat1+' personnes.<br>'+stat2+' jours.<br>Elles voulaient garder le contact.</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">';
+      html += '<div style="background:rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center"><div style="font-size:20px;font-weight:900;color:'+TEAL+'">'+esc(stat1)+'</div><div style="font-size:9px;color:rgba(255,255,255,.6);line-height:1.3">ont joué et laissé leur contact</div></div>';
+      html += '<div style="background:rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center"><div style="font-size:20px;font-weight:900;color:#EF9F27">76%</div><div style="font-size:9px;color:rgba(255,255,255,.6);line-height:1.3">souhaitent être recontactés</div></div>';
+      html += '<div style="background:rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center"><div style="font-size:20px;font-weight:900;color:#F9CA24">98%</div><div style="font-size:9px;color:rgba(255,255,255,.6);line-height:1.3">ont donné leur avis</div></div>';
+      html += '</div>';
+      var quote = proof2.quote || '\"Le lundi, ces 119 personnes n\'existaient pas dans notre base. Le jeudi, on pouvait les recontacter. Avec leur accord.\"';
+      html += '<div style="border-left:3px solid '+TEAL+';padding-left:10px;font-size:11px;color:rgba(255,255,255,.75);font-style:italic;line-height:1.5">'+esc(quote)+'</div>';
+      html += '</div>';
+
+    } else {
+      // ── PAGE 4 : CTA ──
+      html += '<div style="background:'+BG+';padding:20px 16px;text-align:center">';
+      html += '<div style="font-size:22px;font-weight:900;color:'+NAVY+';margin-bottom:8px;line-height:1.2">Votre premier event<br>est offert.</div>';
+      html += '<div style="font-size:12px;color:#64748B;line-height:1.6;margin-bottom:16px">Romain configure tout avec vous en 30 minutes.<br>Sans engagement. Sans technique.</div>';
+      html += '<div style="background:#fff;border-radius:12px;padding:14px;border:1px solid rgba(0,0,0,.08)">';
+      html += '<input style="width:100%;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:7px;box-sizing:border-box;color:'+NAVY+'" placeholder="Votre prénom" type="text" readonly/>';
+      html += '<input style="width:100%;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:7px;box-sizing:border-box;color:'+NAVY+'" placeholder="Votre email" type="email" readonly/>';
+      html += '<input style="width:100%;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:10px;box-sizing:border-box;color:'+NAVY+'" placeholder="Votre téléphone" type="tel" readonly/>';
+      html += '<button style="width:100%;background:'+accent+';color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:default">Je veux mon premier event →</button>';
+      html += '<div style="font-size:9px;color:#94A3B8;margin-top:7px">Romain vous rappelle sous 24h · Zéro engagement</div>';
+      html += '</div></div>';
+    }
+
+    html += '</div>'; // fin height:480px
+    html += '</div>'; // fin phone frame
+    html += '</div>'; // fin flex center
+
     if(ld.deployUrl){
-      html += '<div style="text-align:center;margin-top:10px"><a href="'+esc(ld.deployUrl)+'" target="_blank" class="btn btn-sm">🔗 Voir en ligne</a></div>';
+      html += '<div style="text-align:center;margin-top:10px"><a href="'+esc(ld.deployUrl)+'" target="_blank" class="btn btn-sm">🔗 Voir la vraie landing</a></div>';
     }
   }
   // Footer save (hors aperçu)
