@@ -344,7 +344,7 @@ footer{
 </div>
 
 <!-- ══ HERO ══ -->
-<section class="hero">
+<section class="hero" id="s-hero">
   <div class="hero-glow hg1"></div>
   <div class="hero-glow hg2"></div>
 
@@ -365,7 +365,7 @@ footer{
 </section>
 
 <!-- ══ SECTION PROFILS ══ -->
-<section id="profils">
+<section id="s-profils">
   <div class="section">
     <div class="section-label">Votre situation</div>
     <div class="section-title">Vous êtes…</div>
@@ -437,7 +437,7 @@ footer{
 </section>
 
 <!-- ══ PREUVE ══ -->
-<section class="proof">
+<section class="proof" id="s-proof">
   <div class="proof-inner">
     <div class="proof-label">Pilote réel · Pâques 2026</div>
     <div class="proof-title">186 personnes.<br>3 jours.<br>Elles voulaient garder le contact.</div>
@@ -465,7 +465,7 @@ footer{
 </section>
 
 <!-- ══ CTA FINAL ══ -->
-<section class="cta-section" id="cta">
+<section class="cta-section" id="s-cta">
   <div class="cta-title">Votre premier event<br>est offert.</div>
   <div class="cta-sub">Romain configure tout avec vous en 30 minutes.<br>Vous repartez avec un event opérationnel.<br>Sans engagement. Sans technique.</div>
 
@@ -1183,6 +1183,39 @@ window.addEventListener('load', function(){
   animHero();
   setupProofObserver();
 });
+</script>
+
+<script>
+/* ── Navigation page-à-page depuis dashboard postMessage ── */
+(function(){
+  var SECTIONS = ['s-hero','s-profils','s-proof','s-cta'];
+  var curIdx = 0;
+
+  function goTo(idx){
+    if(idx < 0) idx = 0;
+    if(idx >= SECTIONS.length) idx = SECTIONS.length - 1;
+    curIdx = idx;
+    var el = document.getElementById(SECTIONS[curIdx]);
+    if(el) el.scrollIntoView({behavior:'instant',block:'start'});
+  }
+
+  window.addEventListener('message', function(e){
+    if(!e.data) return;
+    if(e.data.landingNav === 'next') goTo(curIdx + 1);
+    if(e.data.landingNav === 'prev') goTo(curIdx - 1);
+    if(e.data.landingGoto !== undefined) goTo(e.data.landingGoto);
+  });
+
+  /* Désactiver le scroll natif dans le contexte iframe dashboard */
+  if(window.parent !== window){
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    /* Forcer la hauteur d'une section à 100dvh pour un rendu propre */
+    var style = document.createElement('style');
+    style.textContent = 'section{min-height:100vh;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start}';
+    document.head.appendChild(style);
+  }
+})();
 </script>
 </body>
 </html>
