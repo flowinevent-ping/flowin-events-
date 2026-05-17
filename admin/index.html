@@ -867,15 +867,20 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 /* ── Phone mockup responsive ── */
 .flowin-phone-wrap {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 8px 0;
+  gap: 8px;
+  padding: 4px 0;
+}
+.flowin-phone-nav-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 .flowin-phone-nav {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   border: 2px solid var(--sa-border); background: #fff;
-  font-size: 20px; cursor: pointer; flex-shrink: 0;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: background .15s;
 }
@@ -886,9 +891,8 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
   padding: 8px;
   box-shadow: 0 12px 40px rgba(0,0,0,.28), inset 0 0 0 2px #2d2d2d;
   position: relative;
-  width: min(320px, calc(100% - 80px));
+  width: min(280px, 100%);
   aspect-ratio: 9 / 19.5;
-  flex-shrink: 0;
   overflow: hidden;
 }
 .flowin-phone-notch {
@@ -5783,12 +5787,11 @@ function drawerEvent(e){
        var _joueurUrl = (e.module ? '/' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(e.id) : '/parcours_user.html?ev=' + encodeURIComponent(e.id));
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
-       html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button>';
+       html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
        html += '<div class="flowin-phone-frame">';
        html += '<div class="flowin-phone-notch"></div>';
-              html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
+       html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_vjiId)+'" src="'+escAttr(_joueurUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
        html += '</div>';
-       html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button>';
        html += '</div>';
        html += '</div>';
 
@@ -5988,12 +5991,11 @@ function renderOngletJeu(e){
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
   html += '<div class="flowin-phone-wrap">';
-  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')">‹</button>';
+  html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
   html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_iframeId)+'" src="'+escAttr(_jeuOpenUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
   html += '</div>';
-  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_iframeId+'\',\'next\')">›</button>';
   html += '</div>';
   html += '</div>';
 
@@ -6476,12 +6478,11 @@ function renderBiblioJeux(){
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
-  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button>';
+  html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
   html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write" onload="flowinScalePhone(this.parentNode.parentNode)"></iframe></div>';
   html += '</div>';
-  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button>';
   html += '</div>';
   html += '</div>'; // fin colonne droite
 
