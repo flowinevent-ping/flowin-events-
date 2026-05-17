@@ -10169,9 +10169,8 @@ function flowinScalePhones() {
     var innerH = frame.offsetHeight - 16;
     var scaleW = innerW / 375;
     var scaleH = innerH / 812;
-    var scale = Math.min(scaleW, scaleH);
+    var scale = Math.max(scaleW, scaleH); /* max = rempli frame, léger overflow clippé */
     scaler.style.transform = 'scale(' + scale + ')';
-    scaler.style.height = (812 * scale) + 'px';
   });
 }
 function flowinNavIframe(iframeId, dir) {
