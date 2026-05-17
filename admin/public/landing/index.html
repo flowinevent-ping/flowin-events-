@@ -1167,42 +1167,13 @@ function setupProofObserver(){
 }
 
 // ══ FORMULAIRE ══
-var _SUPA_URL = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
-var _SUPA_KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
-
 function submitForm(){
   var nom = document.getElementById('f-nom').value.trim();
   var email = document.getElementById('f-email').value.trim();
   var tel = document.getElementById('f-tel').value.trim();
   if(!nom || !email){ alert('Prénom et email requis.'); return; }
 
-  /* Écrire prospect en Supabase (table joueurs, tag btob) */
-  var extId = 'j-btob-' + email.toLowerCase().replace(/[^a-z0-9]/g,'-').substring(0,35);
-  var payload = {
-    external_id: extId,
-    prenom: nom.split(' ')[0],
-    nom: nom.split(' ').slice(1).join(' ') || '',
-    email: email.toLowerCase().trim(),
-    tel: tel,
-    optin: true,
-    optin_date: new Date().toISOString().slice(0,10),
-    first_seen: new Date().toISOString().slice(0,10),
-    last_seen: new Date().toISOString().slice(0,10),
-    client_type: 'btob',
-    source: 'landing-b2b',
-    tags: ['btob']
-  };
-  fetch(_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
-    method: 'POST',
-    headers: {
-      'apikey': _SUPA_KEY,
-      'Authorization': 'Bearer '+_SUPA_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates,return=minimal'
-    },
-    body: JSON.stringify(payload)
-  }).catch(function(e){ console.warn('[landing] supa:', e); });
-
+  // TODO : brancher endpoint GAS/Supabase
   document.getElementById('form-content').style.display='none';
   document.getElementById('bravo').classList.add('show');
 }
