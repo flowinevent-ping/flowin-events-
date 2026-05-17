@@ -5962,7 +5962,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = '/parcours_user.html?ev=' + encodeURIComponent(eid) + '&module=' + encodeURIComponent(e.module||'quiz');
+  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid);
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
@@ -6451,7 +6451,7 @@ function renderBiblioJeux(){
   // ── Parcours complet validé : iframe parcours_user.html ──
   var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
   var _demoEv = (DATA.events && DATA.events[0]) ? DATA.events[0].id : 'ev-paques';
-  var _masterUrl = '/parcours_user.html?module=' + encodeURIComponent(tab) + '&ev=' + encodeURIComponent(_demoEv);
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?ev=' + encodeURIComponent(_demoEv);
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
