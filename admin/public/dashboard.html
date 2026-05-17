@@ -1454,7 +1454,23 @@ function migrateData(data){
     const removed = before - data.joueurs.length;
     if(removed > 0) console.log('[migrate] Purgé '+removed+' joueurs obsolètes (démo/anonymes)');
   }
-  // [IDEMPOTENT] Retirer ev-paques des joueurs qui ne devraient pas l'avoir (sécurité)
+  // [FIX] Corriger firstSeen/lastSeen vides ou epoch sur les joueurs Pâques
+  if(data.joueurs){
+    var EPOCH_THRESHOLD = new Date('2000-01-01').getTime();
+    data.joueurs.forEach(function(j){
+      if(!j.id || j.id.indexOf('j-pq-') < 0) return;
+      var seedJ = null;
+      for(var si=0; si<SEED.joueurs.length; si++){
+        if(SEED.joueurs[si].id === j.id){ seedJ = SEED.joueurs[si]; break; }
+      }
+      if(!seedJ) return;
+      var fsOk = j.firstSeen && (new Date(j.firstSeen)).getFullYear() >= 2000;
+      var lsOk = j.lastSeen  && (new Date(j.lastSeen)).getFullYear()  >= 2000;
+      if(!fsOk) j.firstSeen = seedJ.firstSeen || '';
+      if(!lsOk) j.lastSeen  = seedJ.lastSeen  || '';
+    });
+  }
+    // [IDEMPOTENT] Retirer ev-paques des joueurs qui ne devraient pas l'avoir (sécurité)
   if(data.joueurs){
     data.joueurs.forEach(j => {
       if(!j.id.startsWith('j-pq-') && j.events && j.events.includes('ev-paques')){
@@ -2274,7 +2290,16 @@ function genQRSvg(content, opts){
   }
 }
 const fmt = d => { try{ return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});}catch(e){return d;} };
-const fmtFull = d => { try{ return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});}catch(e){return d;} };
+const fmtFull = function(d){
+  if(!d && d !== 0) return '-';
+  try{
+    var dt = new Date(d);
+    if(isNaN(dt.getTime())) return '-';
+    /* Rejeter l'époque Unix (0 = 01 janv 1970) et les dates avant 2000 */
+    if(dt.getFullYear() < 2000) return '-';
+    return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  }catch(e){ return '-'; }
+};
 const fmtDateInput = d => d ? String(d).slice(0,10) : '';
 const dayMonth = d => { const dt=new Date(d); return {d:dt.getDate(),m:dt.toLocaleDateString('fr-FR',{month:'short'}).replace('.','')}; };
 const findPro = id => DATA.pros.find(p=>p.id===id);
@@ -4040,8 +4065,8 @@ function drawerJoueur(j){
       html += fieldRow('Adresse',esc(j.adresse||'-'));
       html += fieldRow('Source',esc(j.source||'-'));
       html += fieldRow('Newsletter',j.optin?'<span class="chip live">Opt-in '+(j.optinDate?'· '+fmt(j.optinDate):'')+'</span>':'<span class="chip past">Non opt-in</span>');
-      html += fieldRow('Première activité',fmtFull(j.firstSeen));
-      html += fieldRow('Dernière activité',fmtFull(j.lastSeen));
+      html += fieldRow('Première activité',j.firstSeen ? fmtFull(j.firstSeen) : '-');
+      html += fieldRow('Dernière activité',j.lastSeen ? fmtFull(j.lastSeen) : '-');
       if(!_isBtob){
         html += '<div class="section-h">Tags</div>';
         html += '<div class="flex gap-2 flex-wrap">'+(j.tags||[]).map(t=>'<span class="chip purple">'+esc(t)+'</span>').join('')+(j.tags&&j.tags.length?'':'<span class="text-muted text-sm">Aucun tag</span>')+'</div>';
