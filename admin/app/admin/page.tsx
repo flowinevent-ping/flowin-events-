@@ -1,5 +1,18 @@
-import { redirect } from 'next/navigation'
-// Le dashboard SA est servi en HTML statique via /static/dashboard.html
 export default function AdminPage() {
-  redirect('/static/dashboard.html')
+  return (
+    <html lang="fr" style={{margin:0,padding:0,height:'100%'}}>
+      <body style={{margin:0,padding:0,height:'100%'}}>
+        <iframe
+          src="/static/dashboard.html"
+          style={{
+            width:'100vw',
+            height:'100vh',
+            border:'none',
+            display:'block'
+          }}
+          title="Flowin Dashboard SA"
+        />
+      </body>
+    </html>
+  )
 }

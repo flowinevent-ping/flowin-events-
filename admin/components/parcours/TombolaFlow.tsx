@@ -54,7 +54,11 @@ export default function TombolaFlow({ ev }: { ev: TombolaEvent }) {
             <div style={{fontSize:64,marginBottom:8}}>🎟️</div>
             <div style={{fontFamily:"'Fredoka One',cursive",fontSize:36,color:c,marginBottom:8}}>{ev.nom}</div>
             <div style={{fontSize:14,color:'#888',marginBottom:16}}>{ev.lieu}</div>
-            {ev.lots?.slice(0,3).map((l:any,i:number)=>(
+            {(()=>{
+              const seen:Record<string,any>={};
+              (ev.lots||[]).forEach((l:any)=>{if(seen[l.titre])seen[l.titre].quantite=(seen[l.titre].quantite||1)+1;else seen[l.titre]={...l};});
+              return Object.values(seen).slice(0,3);
+            })().map((l:any,i:number)=>(
               <div key={i} style={{background:'#fff',borderRadius:12,padding:'12px 16px',marginBottom:8,border:'1px solid rgba(239,159,39,.2)',textAlign:'left',display:'flex',gap:10,alignItems:'center'}}>
                 <span style={{fontSize:22}}>{l.emoji||'🎁'}</span>
                 <div>

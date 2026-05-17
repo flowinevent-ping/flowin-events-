@@ -52,7 +52,15 @@ function Landing({ev,onStart}:{ev:EventData;onStart:()=>void}) {
   const c=ev.couleur||'#D4537E'
   const d1=fmtDate(ev.date_d), d2=fmtDate(ev.date_f)
   const dates=d1===d2||!d2?d1:d1+' — '+d2
-  const lots=(ev.lots||[]).filter((_,i)=>i<3)
+  // Dédupliquer les lots par titre, agréger les quantités
+  const lots=(()=>{
+    const seen:Record<string,any>={};
+    (ev.lots||[]).forEach((l:any)=>{
+      if(seen[l.titre]) seen[l.titre].quantite=(seen[l.titre].quantite||1)+1;
+      else seen[l.titre]={...l};
+    });
+    return Object.values(seen).slice(0,3);
+  })()
   return (
     <div style={{minHeight:'100%',background:'linear-gradient(160deg,#FBEAF0 0%,#E8F8F2 55%,#FAEEDA 100%)'}}>
       <div style={{height:4,background:`linear-gradient(90deg,${c},#EF9F27,#1D9E75,${c})`}}/>
@@ -74,6 +82,7 @@ function Landing({ev,onStart}:{ev:EventData;onStart:()=>void}) {
               <div style={{width:34,height:34,borderRadius:10,background:'#FBEAF0',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>{l.emoji||'🎁'}</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:800,color:'#4B1528'}}>{l.titre}</div>
+                <div style={{fontSize:11,fontWeight:700,color:'rgba(75,21,40,.5)'}}>{(l.quantite||1)} à gagner</div>
                 {l.partenaire&&<div style={{fontSize:11,fontWeight:700,color:'#1D9E75'}}>Offert par {l.partenaire}</div>}
               </div>
             </div>
