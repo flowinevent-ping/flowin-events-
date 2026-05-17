@@ -6447,7 +6447,7 @@ function renderBiblioJeux(){
   // ── Parcours complet validé : iframe parcours_user.html ──
   var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
   var _demoEv = (DATA.events && DATA.events[0]) ? DATA.events[0].id : 'ev-paques';
-  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?ev=' + encodeURIComponent(_demoEv) + '&module=' + encodeURIComponent(tab);
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab);
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
