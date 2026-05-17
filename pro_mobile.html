@@ -32,16 +32,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden}
-/* ── Responsive desktop : simuler viewport mobile centré ── */
-@media (min-width:480px){
-  html,body{background:#E8E4DF}
-  body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:0}
-  body > *:not(#toast):not(.modal-backdrop):not(#qrModal){
-    max-width:430px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15);
-    min-height:100vh;background:var(--bg);
-    position:relative;
-  }
-}
 
 /* ── TOPBAR ── */
 .topbar{
@@ -637,15 +627,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif
 
 <script>
 /* ════════ FLOWIN PRO MOBILE — Supabase (lecture seule) ════════ */
-var FLOWIN_SUPA_URL  = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
-var FLOWIN_SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+var FLOWIN_SUPA_URL  = 'https://atddutvzklcgiqxlpvla.supabase.co';
+var FLOWIN_SUPA_ANON = 'sb_publishable_LBkvaGc0M9ZzXZLxviJi9g_58lU8onF';
 try {
   var _su = localStorage.getItem('flowin_supa_url');  if(_su) FLOWIN_SUPA_URL = _su;
   var _sa = localStorage.getItem('flowin_supa_anon'); if(_sa) FLOWIN_SUPA_ANON = _sa;
 } catch(e) {}
 
-var FLOWIN_EV_ID  = new URLSearchParams(window.location.search).get('ev') || '';
-var FLOWIN_CURRENT_EV_ID = '';
 var FLOWIN_PRO_ID = new URLSearchParams(window.location.search).get('pro')
                     || localStorage.getItem('flowin_pro_id')
                     || null;
@@ -656,18 +644,6 @@ if(FLOWIN_PRO_ID){
 var FLOWIN_PRO_DATA = {pro:null, events:[], joueurs:[], lots:[]};
 
 async function flowinProFetch(){
-  /* Si ?ev= présent : résoudre le pro_id depuis l'event */
-  if(FLOWIN_EV_ID && !FLOWIN_PRO_ID) {
-    try {
-      var H0 = {'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
-      var rEv0 = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(FLOWIN_EV_ID)+'&select=pro_id', {headers:H0});
-      var ev0 = await rEv0.json();
-      if(ev0 && ev0.length && ev0[0].pro_id) {
-        FLOWIN_PRO_ID = ev0[0].pro_id;
-        try { localStorage.setItem('flowin_pro_id', FLOWIN_PRO_ID); } catch(e){}
-      }
-    } catch(e){ console.warn('[Pro] ev→pro_id:', e); }
-  }
   if(!FLOWIN_PRO_ID || !FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return;
   var H = {'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
   try {

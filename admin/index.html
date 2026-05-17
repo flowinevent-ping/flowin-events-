@@ -975,7 +975,7 @@ const SEED = {
   ],
   events: [
     {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
-      cfg:{qrUrl:'https://flowin-events.vercel.app/quiz.html?ev=ev-paques',quizBanques:['bq-paques-vence'],optinActif:true,
+      cfg:{qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-paques',quizBanques:['bq-paques-vence'],optinActif:true,
       customQuestions:[
         {id:'decouverte',label:'Comment avez-vous connu l\'événement ?',type:'single',options:[
           {label:'📸 Instagram',val:'instagram'},
@@ -1758,7 +1758,7 @@ async function supaWriteEvent(e){
   // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
   // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
   if(!e.cfg) e.cfg = {};
-  e.cfg.qrUrl = 'https://flowin-events.vercel.app/' + (e.module||'quiz') + '.html?ev=' + e.id;
+  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (e.module||'quiz') + '.html?ev=' + e.id;
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
@@ -1827,8 +1827,10 @@ async function supaWriteBanque(b){
   if(!b || !b.id) return;
   var payload = {
     id: b.id, nom: b.nom, description: b.description||'',
-    events: Array.isArray(b.events) ? b.events : [],
-    questions: Array.isArray(b.questions) ? b.questions : []
+    pro_id: b.proId||null,
+    event_ids: Array.isArray(b.events) ? b.events : [],
+    questions: Array.isArray(b.questions) ? b.questions : [],
+    tags: Array.isArray(b.tags) ? b.tags : []
   };
   var ok = await supaUpsert('banques', payload);
   if(!ok) gasBackup('banque_upsert', payload);
@@ -2898,7 +2900,7 @@ function renderPilotageProMode(){
   // QR code du dernier event (le plus récent)
   const lastEv = myEvents.sort((a,b)=>new Date(b.dateD)-new Date(a.dateD))[0];
   if(lastEv){
-    var url = (lastEv.cfg&&lastEv.cfg.qrUrl) ? lastEv.cfg.qrUrl : 'https://flowin-opconsult.netlify.app/?ev='+lastEv.id;
+    var url = (lastEv.cfg&&lastEv.cfg.qrUrl) ? lastEv.cfg.qrUrl : 'https://flowin-events.vercel.app/parcours/quiz.html?ev='+lastEv.id;
     const qrSvg = genQRSvg(url, {size:120, color:lastEv.couleur||'#7C2D92'});
     html += '<div class="card"><div class="card-h"><div class="card-title">📱 QR Code</div></div>'
          + '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0">'
@@ -3265,7 +3267,7 @@ function drawerPro(p){
         const url = 'https://flowin.com/'+slug;
         const qrColor = (e.couleur||'#7C2D92').replace('#','');
         html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:10px;text-align:center;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\',\'qr\')">'
-             + '<div style="background:#fff;border-radius:6px;padding:6px;line-height:0;display:inline-block"><div style="width:108px;height:108px">'+genQRSvg((e.cfg&&e.cfg.qrUrl)?e.cfg.qrUrl:'https://flowin-opconsult.netlify.app/?ev='+e.id, {size:108, color:e.couleur||'#7C2D92'})+'</div></div>'
+             + '<div style="background:#fff;border-radius:6px;padding:6px;line-height:0;display:inline-block"><div style="width:108px;height:108px">'+genQRSvg((e.cfg&&e.cfg.qrUrl)?e.cfg.qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev='+e.id, {size:108, color:e.couleur||'#7C2D92'})+'</div></div>'
              + '<div class="fw-700 mt-2 text-sm">'+esc(e.nom.length>22?e.nom.slice(0,22)+'…':e.nom)+'</div>'
              + '<div class="text-xs text-muted mt-2">'+statusChip(e.status)+'</div>'
              + '</div>';
@@ -5175,7 +5177,7 @@ function drawerEvent(e){
     }
   } else if(state.drawer.tab==='qr'){
     const qrColor = (e.couleur||'#7C2D92').replace('#','');
-    var qrUrl = (e.cfg&&e.cfg.qrUrl) ? e.cfg.qrUrl : 'https://flowin-opconsult.netlify.app/?ev='+e.id;
+    var qrUrl = (e.cfg&&e.cfg.qrUrl) ? e.cfg.qrUrl : 'https://flowin-events.vercel.app/parcours/quiz.html?ev='+e.id;
     html += '<div class="alert info"><span class="ico">📱</span>QR code à afficher sur le lieu de l\'event. Couleur synchronisée avec celle de l\'event.</div>';
     html += '<div style="text-align:center;background:linear-gradient(135deg,'+(e.couleur||'#7C2D92')+'22,#fff);padding:30px;border-radius:14px;margin-bottom:14px">';
     html += '<div style="display:inline-block;background:#fff;padding:10px;border-radius:8px;margin-bottom:14px;line-height:0">'
@@ -5755,7 +5757,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
-       var _joueurUrl = (e.module ? '/' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(e.id) : '/parcours_user.html?ev=' + encodeURIComponent(e.id));
+       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(e.id);
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
        html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
@@ -5957,7 +5959,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = (e.module ? '/' + encodeURIComponent(e.module) + '.html?ev=' + encodeURIComponent(eid) : '/parcours_user.html?ev=' + encodeURIComponent(eid));
+  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid);
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
@@ -8429,7 +8431,7 @@ function wizSave(){
     toast('Event "'+d.nom+'" créé','success');
     supaWriteEvent(_newEv);
     // Génération auto qrUrl
-    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/' + (_newEv.module||'quiz') + '.html?ev=' + id;
+    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (_newEv.module||'quiz') + '.html?ev=' + id;
   } else {
     const idx = DATA.events.findIndex(e=>e.id===state.wiz.editingId);
     if(idx>=0){
@@ -8495,7 +8497,7 @@ function renderWizardEvent(){
     html += '<div class="form-row mt-3"><label class="label">Lieu</label><input type="text" class="input" value="'+escAttr(d.lieu)+'" oninput="state.wiz.draft.lieu=this.value"/></div>';
     html += '<div class="form-row"><label class="label">Adresse complète</label><input type="text" class="input" value="'+escAttr(d.adresse)+'" oninput="state.wiz.draft.adresse=this.value"/></div>';
     html += '<div class="form-row"><label class="label">Description courte</label><textarea class="textarea" oninput="state.wiz.draft.description=this.value">'+esc(d.description)+'</textarea></div>';
-    html += '<div class="form-row mt-3"><label class="label">🔗 URL du parcours joueur <span style="font-size:10px;color:var(--sa-muted);font-weight:400">(sera l\'URL du QR code · ex: https://flowin-opconsult.netlify.app/?ev=ev-nds)</span></label><input type="url" class="input" value="'+escAttr(d.cfg&&d.cfg.qrUrl?d.cfg.qrUrl:''||'')+'" placeholder="https://...netlify.app/?ev=" oninput="if(!state.wiz.draft.cfg)state.wiz.draft.cfg={};state.wiz.draft.cfg.qrUrl=this.value"/></div>';
+    html += '<div class="form-row mt-3"><label class="label">🔗 URL du parcours joueur <span style="font-size:10px;color:var(--sa-muted);font-weight:400">(sera l\'URL du QR code · ex: https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-nds)</span></label><input type="url" class="input" value="'+escAttr(d.cfg&&d.cfg.qrUrl?d.cfg.qrUrl:''||'')+'" placeholder="https://flowin-events.vercel.app/parcours/quiz.html?ev=" oninput="if(!state.wiz.draft.cfg)state.wiz.draft.cfg={};state.wiz.draft.cfg.qrUrl=this.value"/></div>';
     html += '<div class="form-row"><label class="label">Couleur dominante</label><div class="color-swatches">'
          + ['#7C2D92','#10B981','#3B82F6','#F59E0B','#EF4444','#06B6D4','#EC4899','#8B5CF6'].map(c=>'<div class="color-swatch '+(d.couleur===c?'selected':'')+'" style="background:'+c+'" onclick="state.wiz.draft.couleur=\''+c+'\';renderWizard()"></div>').join('')
          + '</div></div>';
@@ -10146,7 +10148,7 @@ function openJoueurModal(evId, evNom, module){
   var openLink = document.getElementById('jmOpenLink');
   var urlDisp = document.getElementById('jmUrlDisplay');
   if(!modal||!iframe) return;
-  var url = 'parcours_user.html?ev='+encodeURIComponent(evId)+(module?'&module='+encodeURIComponent(module):'');
+  var url = '/parcours/'+(module||'quiz')+'.html?ev='+encodeURIComponent(evId);
   sub.textContent = evNom + (module?' · '+module:'');
   iframe.src = url;
   if(openLink) openLink.href = url;
