@@ -2557,10 +2557,10 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
   
   /* Génère id joueur déterministe à partir de l'email */
   var emailLower = String(email).toLowerCase().trim();
-  var jid = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
+  var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
   
   var joueurPayload = {
-    id: jid,
+    external_id: extId,
     email: emailLower,
     events: [FLOWIN_EVENT.id],
     optin: true,
@@ -2572,7 +2572,7 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(extraFields) _flowinMerge(joueurPayload, extraFields);
   
   /* UPSERT joueur */
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=id', {
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
     method:'POST',
     headers:{
       'apikey':FLOWIN_SUPA_ANON,
@@ -2586,7 +2586,6 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
   /* INSERT participation */
   var partPayload = {
     event_id: FLOWIN_EVENT.id,
-    joueur_id: jid,
     completed: true,
     ticket_code: ticket || ''
   };

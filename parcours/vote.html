@@ -2526,10 +2526,10 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
   
   /* Génère id joueur déterministe à partir de l'email */
   var emailLower = String(email).toLowerCase().trim();
-  var jid = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
+  var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
   
   var joueurPayload = {
-    id: jid,
+    external_id: extId,
     email: emailLower,
     events: [FLOWIN_EVENT.id],
     optin: true,
@@ -2541,7 +2541,7 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(extraFields) _flowinMerge(joueurPayload, extraFields);
   
   /* UPSERT joueur */
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=id', {
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
     method:'POST',
     headers:{
       'apikey':FLOWIN_SUPA_ANON,
@@ -2555,7 +2555,6 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
   /* INSERT participation */
   var partPayload = {
     event_id: FLOWIN_EVENT.id,
-    joueur_id: jid,
     completed: true,
     ticket_code: ticket || ''
   };
@@ -2570,7 +2569,25 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
     body: JSON.stringify(partPayload)
   }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
   
-  console.log('[Flowin] supaWriteFlowin OK:', prefix, jid, ticket);
+  console.log('[Flowin] supaWriteFlowin OK:', prefix, extId, ticket);
+  
+  /* Écriture votes dans la table votes */
+  try {
+    var sections = (FLOWIN_EVENT.cfg && FLOWIN_EVENT.cfg.voteSections) ? FLOWIN_EVENT.cfg.voteSections : [];
+    sections.forEach(function(sec, idx) {
+      var secId = sec.id || ('sec-'+idx);
+      var starsEl = document.querySelectorAll('[data-section-idx="'+idx+'"] .vs-star.on');
+      var note = starsEl.length;
+      if(note > 0) {
+        fetch(FLOWIN_SUPA_URL+'/rest/v1/votes', {
+          method:'POST',
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+                   'Content-Type':'application/json','Prefer':'return=minimal'},
+          body: JSON.stringify({event_id:FLOWIN_EVENT.id, section_id:secId, note:note})
+        }).catch(function(e){ console.warn('[votes]',e); });
+      }
+    });
+  } catch(e){ console.warn('[votes write]',e); }
 }
 
 /* Wrapper de compat : registerPlay() existant peut appeler ceci en plus */
