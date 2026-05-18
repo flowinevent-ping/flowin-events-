@@ -2167,6 +2167,9 @@ try {
           valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''});
     }
     localStorage.setItem(LS_KEY, JSON.stringify(DATA));
+    // Persister dans Supabase
+    try { supaWriteEvent(DATA.events.find(function(e){return e.id==='ev-crf-2026';})); } catch(_se){}
+    try { supaWritePro(DATA.pros.find(function(p){return p.id==='pro-crf-vence';})); } catch(_sp){}
   }
 } catch(e_crf){ console.warn('[garantie ev-crf-2026]', e_crf); }
 try { /* dummy to avoid try-catch mismatch */
@@ -10442,7 +10445,12 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(data){
       DATA.pros = data.pros;
       DATA.partenaires = data.partenaires;
-      DATA.events = data.events;
+      // Merger : garder les events locaux absents de Supabase (ex: ev-crf-2026 pas encore écrit)
+      var _supaEvIds = data.events.map(function(e){ return e.id; });
+      var _localOnly = DATA.events.filter(function(e){ return _supaEvIds.indexOf(e.id) < 0; });
+      DATA.events = data.events.concat(_localOnly);
+      // Écrire dans Supabase les events locaux manquants
+      for(var _sei=0; _sei<_localOnly.length; _sei++){ supaWriteEvent(_localOnly[_sei]); }
       DATA.superEvents = data.superEvents;
       DATA.joueurs = data.joueurs;
       DATA.lots = data.lots;
