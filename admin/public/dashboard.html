@@ -2894,6 +2894,16 @@ function frontLive(){
   st('fp-pv-semnom', f.lotSemaineNom);
   st('fp-pv-semlabel', f.lotSemaineLabel);
   st('fp-pv-sem', f.lotSemaine + (f.lotSemaineVal?' · '+f.lotSemaineVal:''));
+  var _lotsSync = DATA.lots.filter(function(l){ return l.eventId === drawer.id && !l.retire; });
+  var _fpSec = document.querySelector('#frontPreview .fp-section');
+  if(_fpSec && _lotsSync.length){
+    var _lh = '<div class="fp-section-label">'+esc(f.lotLabel||'Lots à gagner')+'</div>';
+    _lotsSync.slice(0,3).forEach(function(l,i){
+      _lh += '<div class="fp-lot-item"><div class="fp-lot-icon" style="background:'+(e.couleur||'#7C2D92')+'22">'+(l.emoji||['🎁','🏆','✨'][i%3])+'</div>'
+            + '<div class="fp-lot-info"><div class="fp-lot-nom">'+esc(l.nom||'Lot')+'</div>'+(l.valeur?'<div class="fp-lot-val">'+l.valeur+' €</div>':'')+'</div></div>';
+    });
+    _fpSec.innerHTML = _lh;
+  }
 }
 
 // ============ RENDER ROUTER ============
@@ -3761,6 +3771,14 @@ function exportFichePro(id){
   downloadJSON('fiche-pro-'+id+'.json', data);
   toast('Fiche pro exportée (JSON)','success');
 }
+function exportMailchimp(evId){
+  var joueurs = DATA.joueurs.filter(function(j){ return j.events && j.events.indexOf(evId)>=0 && j.optin; });
+  if(!joueurs.length){ toast('Aucun opt-in','warn'); return; }
+  exportCSV('optin', evId);
+  setTimeout(function(){ window.open('https://mailchimp.com/','_blank'); }, 400);
+  toast(joueurs.length+' contacts opt-in exportés','success');
+}
+
 function exportCSV(type, id){
   if(type==='joueurs'){
     const filter = id ? {eventId:id} : {};
@@ -5689,15 +5707,17 @@ function drawerEvent(e){
         html += '</div>';
       } else if(allLots.length){
         html += '<div style="margin-top:6px">';
-        allLots.slice(0,5).forEach(function(l){
-          var _dotCol = l.color || (e.couleur||'#7C2D92');
-          html += '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;background:var(--sa-subtle);border-radius:7px;margin-bottom:4px;font-size:11px">';
-          html += '<div style="width:10px;height:10px;border-radius:50%;background:'+_dotCol+';flex-shrink:0"></div>';
-          html += '<span style="font-weight:600">'+esc(l.nom||'Lot')+'</span>';
-          if(l.valeur) html += '<span style="color:var(--sa-muted);margin-left:auto">'+esc(String(l.valeur))+'</span>';
+        for(var _li=0; _li<allLots.length; _li++){
+          var _l2 = allLots[_li];
+          var _lid2 = _l2.id;
+          html += '<div style="display:grid;grid-template-columns:28px 1fr 70px 26px;gap:4px;align-items:center;padding:4px;margin-bottom:3px;background:var(--sa-subtle);border-radius:8px">';
+          html += '<input type="text" value="'+escAttr(_l2.emoji||'🎁')+'" maxlength="2" style="width:26px;text-align:center;font-size:15px;border:1px solid var(--sa-border);border-radius:6px;padding:2px;background:#fff" oninput="(function(){var lt=DATA.lots.find(function(x){return x.id===\''+_lid2+'\';});if(lt){lt.emoji=this.value;saveData();frontLive();}}).call(this)"/>';
+          html += '<input type="text" class="input" style="font-size:11px;padding:5px 8px" placeholder="Nom du lot" value="'+escAttr(_l2.nom||'')+'" oninput="(function(){var lt=DATA.lots.find(function(x){return x.id===\''+_lid2+'\';});if(lt){lt.nom=this.value;saveData();frontLive();}}).call(this)"/>';
+          html += '<input type="number" class="input" style="font-size:11px;padding:5px;text-align:center" placeholder="€" value="'+escAttr(String(_l2.valeur||''))+'"\ oninput="(function(){var lt=DATA.lots.find(function(x){return x.id===\''+_lid2+'\';});if(lt){lt.valeur=parseFloat(this.value)||0;saveData();}}).call(this)"/>';
+          html += '<button style="background:none;border:none;cursor:pointer;font-size:13px" title="Sync Supabase" onclick="(function(){var lt=DATA.lots.find(function(x){return x.id===\''+_lid2+'\';});if(lt){supaWriteLot(lt);toast(\'Sauvé en base\',\'success\');}})()" >💾</button>';
           html += '</div>';
-        });
-        if(allLots.length>5) html += '<div style="font-size:10px;color:var(--sa-muted)">+' + (allLots.length-5) + ' autres…</div>';
+        }
+        html += '<button class="btn btn-sm" style="margin-top:4px;font-size:11px" onclick="newLotForEvent(\''+e.id+'\')" >+ Lot</button>';
         html += '</div>';
       } else {
         html += '<div class="text-xs text-muted mb-2">💡 Ajoutez des lots dans l\'onglet Lots</div>';
@@ -6870,6 +6890,15 @@ function renderBiblioJeux(){
   html += '<button class="btn btn-primary mt-3" onclick="newBanque()">+ Nouvelle banque</button>';
   html += '</div>';
   return html;
+}
+
+function newLotForEvent(evId){
+  var nom = prompt('Nom du lot :','Nouveau lot');
+  if(!nom) return;
+  var nl = {id:newId('lot'),eventId:evId,partenaireId:'',nom:nom,valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:'',emoji:'🎁'};
+  DATA.lots.push(nl);
+  saveData(); supaWriteLot(nl); renderDrawer();
+  toast('Lot ajouté','success');
 }
 
 function newBanque(){
