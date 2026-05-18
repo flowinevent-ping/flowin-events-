@@ -6233,358 +6233,281 @@ function drawerSuperEvent(se){
 
 // ============ JEUX (catalogue) ============
 function renderBiblioJeux(){
+  // ── Onglet actif (module sélectionné) ──
   if(!state.jeuxTab) state.jeuxTab = 'quiz';
   var tab = state.jeuxTab;
 
-  var MODS = [
-    {id:'quiz',       ico:'🎯', nom:'Quiz',          color:'#D4537E'},
-    {id:'vote',       ico:'📊', nom:'Vote',           color:'#378ADD'},
-    {id:'spin',       ico:'🎡', nom:'Spin',           color:'#EF9F27'},
-    {id:'tombola',    ico:'🎟', nom:'Tombola',        color:'#1D9E75'},
-    {id:'quizsolo',   ico:'🏆', nom:'Quiz Solo',      color:'#F59E0B'},
-    {id:'quizmaster', ico:'⚡', nom:'Quiz Master',    color:'#7C3AED'},
-    {id:'standup',    ico:'🌟', nom:'Stand Up',       color:'#9333EA'}
+  var modDefs = [
+    {id:'quiz',       ico:'🎯', nom:'Quiz',          color:'#D4537E', tag:'STANDARD'},
+    {id:'vote',       ico:'📊', nom:'Vote',           color:'#378ADD', tag:'STANDARD'},
+    {id:'spin',       ico:'🎡', nom:'Spin',           color:'#EF9F27', tag:'STANDARD'},
+    {id:'tombola',    ico:'🎟', nom:'Tombola',        color:'#1D9E75', tag:'STANDARD'},
+    {id:'quizsolo',   ico:'🏆', nom:'Quiz Solo',      color:'#F59E0B', tag:'COMPÉTITION'},
+    {id:'quizmaster', ico:'⚡', nom:'Quiz Master',    color:'#7C3AED', tag:'GAMIFICATION'},
+    {id:'standup',    ico:'🌟', nom:'Stand Up',       color:'#9333EA', tag:'ÉVÉNEMENTIEL'}
   ];
 
-  // Données du module actif
-  var jeuObj = null;
-  for(var ji=0; ji<DATA.jeux.length; ji++){
-    var _j = DATA.jeux[ji];
-    if(_j.type === tab || _j.id === 'jeu-'+tab){ jeuObj = _j; break; }
-  }
-  var cfg  = jeuObj ? (jeuObj.configDefault || {}) : {};
-  var jIdx = DATA.jeux.indexOf(jeuObj);
-  var mDef = null;
-  for(var mi=0; mi<MODS.length; mi++){ if(MODS[mi].id===tab){ mDef=MODS[mi]; break; } }
-  var accent = mDef ? mDef.color : '#7C3AED';
-
-  // ── KPIs ──
-  var totalQ = 0;
-  for(var bi=0; bi<DATA.banques.length; bi++){
-    var _b = DATA.banques[bi];
-    totalQ += (_b.questions && _b.questions.length) ? _b.questions.length : 0;
-  }
-  var liveCount = 0;
-  for(var ei=0; ei<DATA.events.length; ei++){
-    var _e = DATA.events[ei];
-    if(_e.status==='live' || _e.status==='upcoming') liveCount++;
-  }
-
   var html = '<div class="page">';
-  html += '<div class="page-header"><div><div class="page-title">🎮 Jeux</div>'
-        + '<div class="page-subtitle">7 modules · paramètres globaux · prévisualisations</div></div>'
-        + '<div class="page-actions"><button class="btn" onclick="newBanque()">+ Nouvelle banque</button></div></div>';
+  html += '<div class="page-header"><div><div class="page-title">🎮 Jeux</div><div class="page-subtitle">7 modules · paramètres globaux · prévisualisations</div></div>'
+       + '<div class="page-actions"><button class="btn" onclick="newBanque()">+ Nouvelle banque</button></div></div>';
 
+  // KPIs
+  var totalQ = DATA.banques.reduce(function(s,b){return s+((b.questions&&((b.questions&&b.questions.length)||0))||0);},0);
   html += '<div class="kpi-grid">'
-        + kpi('Modules', MODS.length)
-        + kpi('Banques', DATA.banques.length)
-        + kpi('Questions', totalQ)
-        + kpi('Events actifs', liveCount)
-        + '</div>';
+       + kpi('Modules',7)
+       + kpi('Banques',DATA.banques.length)
+       + kpi('Questions',totalQ)
+       + kpi('Events actifs',DATA.events.filter(function(e){return e.status==='live'||e.status==='upcoming';}).length)
+       + '</div>';
 
   // ── Onglets modules ──
-  html += '<div style="display:flex;gap:0;flex-wrap:wrap;margin-bottom:16px;border-bottom:2px solid var(--sa-border)">';
-  for(var ti=0; ti<MODS.length; ti++){
-    var m = MODS[ti];
-    var isActive = (tab === m.id);
-    html += '<button onclick="state.jeuxTab=\''+m.id+'\';render()" '
-          + 'style="padding:9px 14px;border:none;background:none;cursor:pointer;'
-          + 'font-size:12px;font-weight:'+(isActive?'800':'600')+';'
-          + 'color:'+(isActive?m.color:'var(--sa-muted)')+';'
-          + 'border-bottom:2px solid '+(isActive?m.color:'transparent')+';'
-          + 'margin-bottom:-2px;font-family:inherit;white-space:nowrap">'
-          + m.ico + ' ' + m.nom
-          + '</button>';
-  }
+  html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:2px solid var(--sa-border);padding-bottom:0">';
+  modDefs.forEach(function(m){
+    var active = tab === m.id;
+    html += '<button onclick="state.jeuxTab=\''+m.id+'\';render()" style="padding:8px 14px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:'+(active?'800':'600')+';color:'+(active?m.color:'var(--sa-muted)')+';border-bottom:2px solid '+(active?m.color:'transparent')+';margin-bottom:-2px;font-family:inherit;display:flex;align-items:center;gap:5px">'
+           + m.ico+' '+m.nom+'</button>';
+  });
   html += '</div>';
 
-  // ── Grille 2 colonnes ──
-  html += '<div style="display:grid;grid-template-columns:1fr 284px;gap:20px;align-items:start">';
+  // ── Contenu du module sélectionné ──
+  var jeuObj = DATA.jeux.find(function(j){return j.type===tab || j.id==='jeu-'+tab;});
+  var cfg = jeuObj ? (jeuObj.configDefault||{}) : {};
+  var jIdx = DATA.jeux.indexOf(jeuObj);
+  var mDef = modDefs.find(function(m){return m.id===tab;});
+  var accent = mDef ? mDef.color : '#7C3AED';
 
-  // ═══ COLONNE GAUCHE : paramètres ═══
+  html += '<div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start">';
+
+  // ── Colonne gauche : paramètres ──
   html += '<div>';
 
   // Bannière module
-  html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;'
-        + 'background:'+accent+'14;border:1px solid '+accent+'35;border-radius:10px;margin-bottom:16px">'
-        + '<div style="width:42px;height:42px;border-radius:10px;background:'+accent+';'
-        + 'display:flex;align-items:center;justify-content:center;font-size:22px">'+(mDef?mDef.ico:'🎮')+'</div>'
-        + '<div><div style="font-size:15px;font-weight:900;color:var(--sa-text)">'+(mDef?mDef.nom:'Module')+'</div>'
-        + '<div style="font-size:11px;color:var(--sa-muted)">Paramètres globaux · affecte les nouveaux events</div>'
-        + '</div></div>';
+  html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:'+accent+'12;border:1px solid '+accent+'30;border-radius:10px;margin-bottom:16px">'
+       + '<div style="width:42px;height:42px;border-radius:10px;background:'+accent+';display:flex;align-items:center;justify-content:center;font-size:22px">'+(mDef?mDef.ico:'🎮')+'</div>'
+       + '<div><div style="font-size:15px;font-weight:900;color:var(--sa-text)">'+(mDef?mDef.nom:'Module')+'</div>'
+       + '<div style="font-size:11px;color:var(--sa-muted)">Paramètres globaux · affecte les nouveaux events</div></div>'
+       + '</div>';
 
-  // ─── Paramètres par module ───
-  if(tab==='quiz' || tab==='quizsolo'){
+  if(tab==='quiz'||tab==='quizsolo'){
+    // ── QUIZ / QUIZ SOLO ──
     html += '<div class="section-h">Paramètres par défaut</div>';
     html += '<div class="form-grid">';
     html += '<div><label class="label">Nombre de questions / partie</label>'
-          + '<input type="number" class="input" value="'+(cfg.quizNbQuestions||5)+'" min="1" max="20"'
-          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizNbQuestions=parseInt(this.value)||5;saveData();}}).call(this)"/></div>';
+         + '<input type="number" class="input" value="'+(cfg.quizNbQuestions||5)+'" min="1" max="20" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizNbQuestions=parseInt(this.value)||5;saveData();}}).call(this)"/></div>';
     html += '<div><label class="label">Score minimum pour le tirage</label>'
-          + '<input type="number" class="input" value="'+(cfg.quizScoreMin||3)+'" min="0" max="20"'
-          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizScoreMin=parseInt(this.value)||3;saveData();}}).call(this)"/></div>';
+         + '<input type="number" class="input" value="'+(cfg.quizScoreMin||3)+'" min="0" max="20" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizScoreMin=parseInt(this.value)||3;saveData();}}).call(this)"/></div>';
     html += '<div><label class="label">Timer par question (sec)</label>'
-          + '<input type="number" class="input" value="'+(cfg.quizTimer||30)+'" min="5" max="120"'
-          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimer=parseInt(this.value)||30;saveData();}}).call(this)"/></div>';
+         + '<input type="number" class="input" value="'+(cfg.quizTimer||30)+'" min="5" max="120" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimer=parseInt(this.value)||30;saveData();}}).call(this)"/></div>';
     if(tab==='quizsolo'){
       html += '<div><label class="label">Timer visible par les joueurs</label>'
-            + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimerVisible=(this.value===\'true\');saveData();}})()">'
-            + '<option value="true"'+(cfg.quizTimerVisible!==false?' selected':'')+'>Visible</option>'
-            + '<option value="false"'+(cfg.quizTimerVisible===false?' selected':'')+'>Caché</option>'
-            + '</select></div>';
+           + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.quizTimerVisible=this.value===\'true\';saveData();}})()">'
+           + '<option value="true"'+(cfg.quizTimerVisible!==false?' selected':'')+'>Visible</option>'
+           + '<option value="false"'+(cfg.quizTimerVisible===false?' selected':'')+'>Caché</option>'
+           + '</select></div>';
     }
     html += '</div>';
 
-    var TICKET_RULES = [
-      {key:'quizBonus',         ico:'💡', lbl:'Questions bonus activées',   desc:'Répondre au bonus = +1 ticket'},
-      {key:'quizPartage',       ico:'📲', lbl:'Partage réseaux sociaux',    desc:'WhatsApp / Messenger / Email = +1 ticket'},
-      {key:'quizRecapFin',      ico:'📊', lbl:'Récapitulatif fin de partie',desc:'Affiche score + tickets accumulés'},
-      {key:'quizUneFoisParJour',ico:'🔒', lbl:'1 tentative par jour',       desc:'Anti-doublon quotidien'}
+    html += '<div class="section-h" style="margin-top:14px">🎟 Règle des tickets (tirage au sort)</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:8px">';
+    var ticketRules = [
+      {key:'quizBonus',    ico:'💡', lbl:'Questions bonus activées', desc:'Répondre au bonus = +1 ticket'},
+      {key:'quizPartage',  ico:'📲', lbl:'Partage réseaux sociaux',  desc:'WhatsApp / Messenger / Email = +1 ticket'},
+      {key:'quizRecapFin', ico:'📊', lbl:'Récapitulatif fin de partie', desc:'Affiche score + tickets accumulés'},
+      {key:'quizUneFoisParJour', ico:'🔒', lbl:'1 tentative par jour', desc:'Anti-doublon quotidien'}
     ];
-    html += '<div class="section-h" style="margin-top:14px">🎟 Règle des tickets</div>';
-    html += '<div style="display:flex;flex-direction:column;gap:6px">';
-    for(var ri=0; ri<TICKET_RULES.length; ri++){
-      var r = TICKET_RULES[ri];
-      var on = (cfg[r.key] !== false);
+    ticketRules.forEach(function(r){
+      var on = cfg[r.key]!==false;
       html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sa-subtle);border-radius:8px">'
-            + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">'+r.ico+'</span>'
-            + '<div><div style="font-size:12px;font-weight:700">'+r.lbl+'</div>'
-            + '<div style="font-size:10px;color:var(--sa-muted)">'+r.desc+'</div></div></div>'
-            + '<div class="toggle '+(on?'on':'')+'" style="flex-shrink:0"'
-            + ' onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.'+r.key+'=!jj.configDefault.'+r.key+';saveData();render();}})()"></div>'
-            + '</div>';
-    }
+           + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">'+r.ico+'</span>'
+           + '<div><div style="font-size:12px;font-weight:700">'+r.lbl+'</div>'
+           + '<div style="font-size:10px;color:var(--sa-muted)">'+r.desc+'</div></div></div>'
+           + '<div class="toggle '+(on?'on':'')+'" onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.'+r.key+'=!jj.configDefault.'+r.key+';saveData();render();}})()" style="flex-shrink:0"></div>'
+           + '</div>';
+    });
     html += '</div>';
+
+    // Info règle
     html += '<div style="margin-top:10px;padding:10px 12px;background:#F3E8FF;border-radius:8px;border-left:3px solid '+accent+';font-size:11px;color:#6D28D9">'
-          + '🎟 <strong>'+(cfg.quizScoreMin||3)+' bonnes = 1 ticket</strong>'
-          + (cfg.quizBonus!==false?' · bonus = 1 ticket':'')
-          + (cfg.quizPartage!==false?' · partage = 1 ticket':'')
-          + ' · max 3 tickets/jour</div>';
+         + '🎟 Règle : <strong>'+(cfg.quizScoreMin||3)+' bonnes = 1 ticket</strong>'
+         + (cfg.quizBonus!==false?' · bonus = 1 ticket':'')
+         + (cfg.quizPartage!==false?' · partage = 1 ticket':'')
+         + ' · max 3 tickets/jour → tirage au sort</div>';
+
+    // ── Banques gérées dans la section bas de page ──
 
   } else if(tab==='spin'){
+    // ── SPIN ──
     html += '<div class="section-h">Paramètres</div>';
     html += '<div class="form-grid">';
     html += '<div><label class="label">Durée animation (sec)</label>'
-          + '<input type="number" class="input" value="'+(cfg.spinDuration||6)+'" min="2" max="20"'
-          + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinDuration=parseInt(this.value)||6;saveData();}}).call(this)"/></div>';
+         + '<input type="number" class="input" value="'+(cfg.spinDuration||6)+'" min="2" max="20" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinDuration=parseInt(this.value)||6;saveData();}}).call(this)"/></div>';
     html += '<div><label class="label">Mode</label>'
-          + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinModeTirage=this.value;saveData();render();}})()">'
-          + '<option value="A"'+(cfg.spinModeTirage!=='B'?' selected':'')+'>A · Gain instantané</option>'
-          + '<option value="B"'+(cfg.spinModeTirage==='B'?' selected':'')+'>B · Tirage final</option>'
-          + '</select></div>';
+         + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinModeTirage=this.value;saveData();render();}})()">'
+         + '<option value="A"'+(cfg.spinModeTirage!=='B'?' selected':'')+'>A · Gain instantané</option>'
+         + '<option value="B"'+(cfg.spinModeTirage==='B'?' selected':'')+'>B · Tirage final</option>'
+         + '</select></div>';
     html += '</div>';
     html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">'
-          + '<input type="checkbox" '+(cfg.spinSound!==false?'checked':'')+' '
-          + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSound=this.checked;saveData();}}).call(this)"/> Son activé</label>';
+         + '<input type="checkbox" '+(cfg.spinSound!==false?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSound=this.checked;saveData();}}).call(this)"/> Son activé</label>';
 
-    var segs = cfg.spinSegments || [];
-    var totPct = 0;
-    for(var si=0; si<segs.length; si++) totPct += parseFloat(segs[si].proba)||0;
-    var pctOk = Math.abs(totPct-100)<0.5;
-    html += '<div class="section-h">Segments <span class="chip '+(pctOk?'live':'error')+'" style="font-size:9px">'
-          + totPct.toFixed(0)+'%'+(pctOk?' ✓':' ≠ 100!')+'</span></div>';
+    // Segments
+    var segs = cfg.spinSegments||[];
+    var totProba = segs.reduce(function(s,x){return s+(parseFloat(x.proba)||0);},0);
+    var probaOk = Math.abs(totProba-100)<0.5;
+    html += '<div class="section-h">Segments <span class="chip '+(probaOk?'live':'error')+'" style="font-size:9px">'+totProba.toFixed(0)+'%'+(probaOk?' ✓':' ≠ 100!')+'</span></div>';
     html += '<div style="font-size:10px;color:var(--sa-muted);margin-bottom:6px">Couleur · Label · % · Stock · Perdant</div>';
-    for(var si=0; si<segs.length; si++){
-      var s = segs[si];
+    segs.forEach(function(s,i){
       html += '<div style="display:grid;grid-template-columns:28px 1fr 56px 56px auto auto;gap:5px;align-items:center;background:var(--sa-subtle);border-radius:7px;padding:6px 8px;margin-bottom:3px">'
-            + '<input type="color" value="'+escAttr(s.color||'#888')+'" style="width:26px;height:26px;border:none;border-radius:4px;cursor:pointer;padding:0"'
-            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].color=this.value;saveData();render();}}).call(this)"/>'
-            + '<input type="text" class="input" style="font-size:11px;padding:4px 7px" placeholder="Label" value="'+escAttr(s.label||'')+'"'
-            + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].label=this.value;saveData();}}).call(this)"/>'
-            + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.proba||0)+'" min="0" max="100" title="%"'
-            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].proba=parseFloat(this.value)||0;saveData();render();}}).call(this)"/>'
-            + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">%</div></div>'
-            + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.stock||0)+'" min="0" title="Stock"'
-            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].stock=parseInt(this.value)||0;saveData();}}).call(this)"/>'
-            + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">stock</div></div>'
-            + '<label style="display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap">'
-            + '<input type="checkbox" '+(s.perdant?'checked':'')+' '
-            + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+si+'].perdant=this.checked;saveData();}}).call(this)"/> Perdant</label>'
-            + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px" title="Supprimer"'
-            + ' onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments.splice('+si+',1);saveData();render();}})()">×</button>'
-            + '</div>';
-    }
-    html += '<button class="btn btn-sm" style="margin-top:6px"'
-          + ' onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){'
-          + 'if(!jj.configDefault.spinSegments)jj.configDefault.spinSegments=[];'
-          + 'jj.configDefault.spinSegments.push({label:\'Nouveau\',color:\'#7C3AED\',proba:10,perdant:false,stock:10});'
-          + 'saveData();render();}})()">+ Ajouter segment</button>';
+           + '<input type="color" value="'+escAttr(s.color||'#888')+'" style="width:26px;height:26px;border:none;border-radius:4px;cursor:pointer;padding:0" title="Couleur" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].color=this.value;saveData();render();}}).call(this)"/>'
+           + '<input type="text" class="input" style="font-size:11px;padding:4px 7px" placeholder="Label" value="'+escAttr(s.label||'')+'" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].label=this.value;saveData();}}).call(this)"/>'
+           + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.proba||0)+'" min="0" max="100" title="%" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].proba=parseFloat(this.value)||0;saveData();render();}}).call(this)"/>'
+           + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">%</div></div>'
+           + '<div><input type="number" class="input" style="font-size:11px;padding:4px;text-align:center" value="'+(s.stock||0)+'" min="0" title="Stock" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].stock=parseInt(this.value)||0;saveData();}}).call(this)"/>'
+           + '<div style="font-size:8px;color:var(--sa-muted);text-align:center">stock</div></div>'
+           + '<label style="display:flex;align-items:center;gap:3px;font-size:9px;cursor:pointer;white-space:nowrap"><input type="checkbox" '+(s.perdant?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments['+i+'].perdant=this.checked;saveData();}}).call(this)"/> Perdant</label>'
+           + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px" title="Supprimer" onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.spinSegments.splice('+i+',1);saveData();render();}})()">×</button>'
+           + '</div>';
+    });
+    html += '<button class="btn btn-sm" style="margin-top:6px" onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){if(!jj.configDefault.spinSegments)jj.configDefault.spinSegments=[];jj.configDefault.spinSegments.push({label:\'Nouveau\',color:\'#7C3AED\',proba:10,perdant:false,stock:10});saveData();render();}})()">+ Ajouter segment</button>';
 
   } else if(tab==='vote'){
+    // ── VOTE ──
     html += '<div class="section-h">Paramètres</div>';
     html += '<div class="form-grid">';
     html += '<div><label class="label">Mode de vote</label>'
-          + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteMode=this.value;saveData();render();}})()">'
-          + '<option value="stars"'+(cfg.voteMode!=='yn'?' selected':'')+'>⭐ Étoiles 1→5</option>'
-          + '<option value="yn"'+(cfg.voteMode==='yn'?' selected':'')+'>👍👎 Oui / Non</option>'
-          + '</select></div>';
+         + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteMode=this.value;saveData();render();}})()">'
+         + '<option value="stars"'+(cfg.voteMode!=='yn'?' selected':'')+'>⭐ Étoiles 1→5</option>'
+         + '<option value="yn"'+(cfg.voteMode==='yn'?' selected':'')+'>👍👎 Oui / Non</option>'
+         + '</select></div>';
     html += '<div><label class="label">Disposition image</label>'
-          + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteImgLayout=this.value;saveData();}})()">'
-          + '<option value="central"'+(cfg.voteImgLayout!=='fond'?' selected':'')+'>Centrale</option>'
-          + '<option value="fond"'+(cfg.voteImgLayout==='fond'?' selected':'')+'>Plein fond</option>'
-          + '</select></div>';
+         + '<select class="select" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteImgLayout=this.value;saveData();}})()"><option value="central"'+(cfg.voteImgLayout!=='fond'?' selected':'')+'>Centrale</option><option value="fond"'+(cfg.voteImgLayout==='fond'?' selected':'')+'>Plein fond</option></select></div>';
     html += '</div>';
-    html += '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
-    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
-          + '<input type="checkbox" '+(cfg.voteResultatsLive?'checked':'')+' '
-          + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteResultatsLive=this.checked;saveData();}}).call(this)"/> Résultats live (visibles après chaque vote)</label>';
-    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
-          + '<input type="checkbox" '+(cfg.voteEmail?'checked':'')+' '
-          + 'onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteEmail=this.checked;saveData();}}).call(this)"/> Demander l\'email du participant</label>';
-    html += '</div>';
+    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;cursor:pointer">'
+         + '<input type="checkbox" '+(cfg.voteResultatsLive?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteResultatsLive=this.checked;saveData();}}).call(this)"/> Résultats live (visibles après chaque vote)</label>';
+    html += '<label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:8px;cursor:pointer">'
+         + '<input type="checkbox" '+(cfg.voteEmail?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.voteEmail=this.checked;saveData();}}).call(this)"/> Demander l\'email du participant</label>';
 
   } else if(tab==='tombola'){
-    var CHAMPS = [
-      {k:'prenom',      l:'Prénom',           req:true},
-      {k:'nom',         l:'Nom',              req:true},
-      {k:'email',       l:'Email',            req:true},
-      {k:'genre',       l:'Genre H/F',        req:true},
-      {k:'telephone',   l:'Téléphone',        req:false},
-      {k:'ville',       l:'Ville',            req:false},
-      {k:'codePostal',  l:'Code postal',      req:false},
-      {k:'age_tranche', l:'Tranche d\'âge',   req:false},
-      {k:'dateNaissance',l:'Date de naissance',req:false}
-    ];
-    var champsCfg = cfg.tombolaChamps || ['prenom','nom','email','genre','telephone','ville'];
+    // ── TOMBOLA ──
     html += '<div class="section-h">Champs du formulaire</div>';
-    for(var ci=0; ci<CHAMPS.length; ci++){
-      var c = CHAMPS[ci];
-      var on = c.req || (champsCfg.indexOf(c.k)>=0);
+    var champsDispos = [
+      {k:'prenom',l:'Prénom',req:true},{k:'nom',l:'Nom',req:true},{k:'email',l:'Email',req:true},{k:'genre',l:'Genre H/F',req:true},
+      {k:'telephone',l:'Téléphone'},{k:'ville',l:'Ville'},{k:'codePostal',l:'Code postal'},{k:'age_tranche',l:'Tranche d\'âge'},{k:'dateNaissance',l:'Date de naissance'}
+    ];
+    var champsCfg = cfg.tombolaChamps||['prenom','nom','email','genre','telephone','ville'];
+    champsDispos.forEach(function(c){
+      var on = c.req || champsCfg.indexOf(c.k)>=0;
       html += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--sa-subtle);border-radius:7px;margin-bottom:3px">'
-            + '<input type="checkbox" '+(on?'checked':'')+(c.req?' disabled':'')+' '
-            + 'onchange="(function(){'
-            + 'var jj=DATA.jeux['+jIdx+'];if(jj){'
-            + 'var ch=jj.configDefault.tombolaChamps||[];'
-            + 'if(this.checked){if(ch.indexOf(\''+c.k+'\')<0)ch.push(\''+c.k+'\');}else ch=ch.filter(function(x){return x!==\''+c.k+'\';});'
-            + 'jj.configDefault.tombolaChamps=ch;saveData();}}).call(this)"/>'
-            + '<span style="font-size:12px;font-weight:600">'+c.l+'</span>'
-            + (c.req?'<span style="font-size:9px;color:#EF4444;margin-left:auto">Obligatoire</span>':'')
-            + '</div>';
-    }
-    var CASES = [{k:'majeur',l:'Certifier avoir 18 ans'},{k:'reglement',l:'Accepter le règlement'},{k:'optin',l:'Opt-in newsletter'}];
-    var casesCfg = cfg.tombolaCasesLegales || ['majeur','reglement'];
+           + '<input type="checkbox" '+(on?'checked':'')+(c.req?' disabled':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){var ch=jj.configDefault.tombolaChamps||[];if(this.checked){if(ch.indexOf(\''+c.k+'\')<0)ch.push(\''+c.k+'\');}else ch=ch.filter(function(x){return x!==\''+c.k+'\';});jj.configDefault.tombolaChamps=ch;saveData();}}).call(this)"/>'
+           + '<span style="font-size:12px;font-weight:600">'+c.l+'</span>'
+           + (c.req?'<span style="font-size:9px;color:#EF4444;margin-left:auto">Obligatoire</span>':'')
+           + '</div>';
+    });
     html += '<div class="section-h" style="margin-top:12px">Cases légales</div>';
-    for(var ki=0; ki<CASES.length; ki++){
-      var kk = CASES[ki];
-      var on = (casesCfg.indexOf(kk.k)>=0);
+    var casesDispos = [{k:'majeur',l:'Certifier avoir 18 ans'},{k:'reglement',l:'Accepter le règlement'},{k:'optin',l:'Opt-in newsletter'}];
+    var casesCfg = cfg.tombolaCasesLegales||['majeur','reglement'];
+    casesDispos.forEach(function(c){
+      var on = casesCfg.indexOf(c.k)>=0;
       html += '<label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;cursor:pointer">'
-            + '<input type="checkbox" '+(on?'checked':'')+' '
-            + 'onchange="(function(){'
-            + 'var jj=DATA.jeux['+jIdx+'];if(jj){'
-            + 'var cl=jj.configDefault.tombolaCasesLegales||[];'
-            + 'if(this.checked){if(cl.indexOf(\''+kk.k+'\')<0)cl.push(\''+kk.k+'\');}else cl=cl.filter(function(x){return x!==\''+kk.k+'\';});'
-            + 'jj.configDefault.tombolaCasesLegales=cl;saveData();}}).call(this)"/> '+kk.l+'</label>';
-    }
+           + '<input type="checkbox" '+(on?'checked':'')+' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){var cl=jj.configDefault.tombolaCasesLegales||[];if(this.checked){if(cl.indexOf(\''+c.k+'\')<0)cl.push(\''+c.k+'\');}else cl=cl.filter(function(x){return x!==\''+c.k+'\';});jj.configDefault.tombolaCasesLegales=cl;saveData();}}).call(this)"/> '+c.l+'</label>';
+    });
 
   } else if(tab==='standup'){
-    var comediens = cfg.standupComediens || [];
+    // ── STAND-UP ──
     html += '<div class="section-h">Comédiens / Artistes par défaut</div>';
-    if(!comediens.length){
+    var comediens = cfg.standupComediens||[];
+    if(comediens.length===0){
       html += '<div style="padding:10px;background:var(--sa-subtle);border-radius:8px;font-size:12px;color:var(--sa-muted)">Aucun artiste configuré</div>';
+    } else {
+      comediens.forEach(function(c,i){
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+             + '<input type="color" value="'+escAttr(c.couleur||'#888')+'" style="width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0" onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+i+'].couleur=this.value;saveData();render();}}).call(this)"/>'
+             + '<input type="text" class="input" value="'+escAttr(c.nom||'')+'" placeholder="Nom de l\'artiste" oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+i+'].nom=this.value;saveData();}}).call(this)"/>'
+             + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px" onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens.splice('+i+',1);saveData();render();}})()">×</button>'
+             + '</div>';
+      });
     }
-    for(var coi=0; coi<comediens.length; coi++){
-      var co = comediens[coi];
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-            + '<input type="color" value="'+escAttr(co.couleur||'#888')+'" style="width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0"'
-            + ' onchange="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+coi+'].couleur=this.value;saveData();render();}}).call(this)"/>'
-            + '<input type="text" class="input" value="'+escAttr(co.nom||'')+'" placeholder="Nom de l\'artiste"'
-            + ' oninput="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens['+coi+'].nom=this.value;saveData();}}).call(this)"/>'
-            + '<button style="background:none;border:none;cursor:pointer;color:var(--sa-muted);font-size:16px"'
-            + ' onclick="if(confirm(\'Supprimer ?\'))(function(){var jj=DATA.jeux['+jIdx+'];if(jj){jj.configDefault.standupComediens.splice('+coi+',1);saveData();render();}})()">×</button>'
-            + '</div>';
-    }
-    html += '<button class="btn btn-sm" style="margin-top:6px"'
-          + ' onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){'
-          + 'if(!jj.configDefault.standupComediens)jj.configDefault.standupComediens=[];'
-          + 'jj.configDefault.standupComediens.push({nom:\'\',couleur:\'#7C3AED\'});'
-          + 'saveData();render();}})()">+ Ajouter un artiste</button>';
+    html += '<button class="btn btn-sm" style="margin-top:6px" onclick="(function(){var jj=DATA.jeux['+jIdx+'];if(jj){if(!jj.configDefault.standupComediens)jj.configDefault.standupComediens=[];jj.configDefault.standupComediens.push({nom:\'\',couleur:\'#7C3AED\'});saveData();render();}})()">+ Ajouter un artiste</button>';
 
   } else if(tab==='quizmaster'){
-    html += '<div class="empty-block" style="padding:30px">'
-          + '<div class="ico">🎙</div>'
-          + '<div class="t">Quiz Master — Module animateur grand écran</div>'
-          + '<div class="d" style="max-width:300px">Animation live sur scène avec banques thématiques, spin roulette, ligues et défis. Intégration en cours.</div>'
-          + '</div>';
+    // ── QUIZ MASTER ──
+    html += '<div class="empty-block" style="padding:30px"><div class="ico">🎙</div>'
+         + '<div class="t">Quiz Master — Module animateur grand écran</div>'
+         + '<div class="d" style="max-width:300px">Intégration module Olivia en cours. Ce module permet l\'animation live sur scène avec banques thématiques, spin roulette, ligues et défis.</div>'
+         + '</div>';
   }
 
-  // ── Sous-onglets Questions custom + Bonus ──
-  if(tab !== 'vote'){
+
+  // ── Sous-onglets Custom + Bonus (tous modules sauf vote) ──
+  if(tab !== 'vote') {
     if(!state.jeuxSubtab) state.jeuxSubtab = {};
     if(!state.jeuxSubtab[tab]) state.jeuxSubtab[tab] = 'config';
-    var sub = state.jeuxSubtab[tab];
+    var jeuxSub = state.jeuxSubtab[tab];
+
+    // Tabs selector — insérés avant les params (préfixe)
+    // On les insère ici pour les montrer après les params config
     html += '<div style="margin-top:16px;border-top:1px solid var(--sa-border);padding-top:14px">';
-    html += '<div class="flex gap-2 mb-3">';
-    html += '<button class="filter-pill '+(sub==='custom'?'active':'')+'" '
-          + 'onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']=\'custom\';render()">✏ Questions custom</button>';
-    html += '<button class="filter-pill '+(sub==='bonus'?'active':'')+'" '
-          + 'onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']=\'bonus\';render()">✨ Bonus</button>';
+    html += '<div class="flex gap-2 mb-3" style="flex-wrap:wrap">';
+    html += '<button class="filter-pill '+(jeuxSub==='custom'?'active':'')+'" onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']= \'custom\';render()">✏ Questions custom</button>';
+    html += '<button class="filter-pill '+(jeuxSub==='bonus'?'active':'')+'" onclick="if(!state.jeuxSubtab)state.jeuxSubtab={};state.jeuxSubtab[\''+tab+'\']=\'bonus\';render()">✨ Bonus</button>';
     html += '</div>';
-    if(sub==='custom'){
+
+    if(jeuxSub==='custom') {
       if(!cfg.customQuestions) cfg.customQuestions = [];
-      html += renderCustomQuestionsEditor(cfg, 'DATA.jeux['+jIdx+'].configDefault', 'saveData();render()');
-    } else if(sub==='bonus'){
+      html += renderCustomQuestionsEditor(cfg,
+        'DATA.jeux['+jIdx+'].configDefault',
+        'saveData();render()'
+      );
+    } else if(jeuxSub==='bonus') {
       if(!cfg.bonusList) cfg.bonusList = [];
       html += renderBonusEditor(cfg,
         'DATA.jeux['+jIdx+'].configDefault',
         'DATA.jeux['+jIdx+'].configDefault.bonusActif=!DATA.jeux['+jIdx+'].configDefault.bonusActif;saveData();render()',
-        'saveData();render()');
+        'saveData();render()'
+      );
     }
     html += '</div>';
   }
 
   html += '</div>'; // fin colonne gauche
 
-  // ═══ COLONNE DROITE : prévisualisation iframe ═══
-  var iframeId  = 'iframe-jeux-'+tab;
-  var iframeSrc = '/parcours/'+encodeURIComponent(tab)+'.html?module='+encodeURIComponent(tab);
+  // ── Colonne droite : prévisualisation ──
   html += '<div>';
+  // ── Parcours complet validé : iframe parcours_user.html ──
+  var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
+  var _demoEv = (DATA.events && DATA.events[0]) ? DATA.events[0].id : 'ev-paques';
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab);
+  var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
-  html += '<div class="flowin-phone-nav-row">';
-  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+iframeId+'\',\'prev\')">‹</button>';
-  html += '<button class="flowin-phone-nav" onclick="flowinNavIframe(\''+iframeId+'\',\'next\')">›</button>';
-  html += '</div>';
+  html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
   html += '<div class="flowin-phone-notch"></div>';
-  html += '<div class="flowin-phone-scaler">';
-  html += '<iframe id="'+escAttr(iframeId)+'" src="'+escAttr(iframeSrc)+'" frameborder="0" allow="clipboard-write"></iframe>';
-  html += '</div></div></div>';
+  html += '<div class="flowin-phone-scaler"><iframe id="'+escAttr(_jmIframeId)+'" src="'+escAttr(_masterUrl)+'" frameborder="0" allow="clipboard-write"></iframe></div>';
+  html += '</div>';
+  html += '</div>';
   html += '</div>'; // fin colonne droite
 
-  html += '</div>'; // fin grille
+  html += '</div>'; // fin grid 2 colonnes
 
-  // ── Section banques ──
+  // ── Section banques (bas de page) ──
   html += '<div class="section-h" style="margin-top:24px">📚 Banques de questions</div>';
   html += '<table class="tbl"><thead><tr><th>Nom</th><th>Description</th><th>Questions</th><th>Events liés</th><th class="col-actions"></th></tr></thead><tbody>';
-  for(var bqi=0; bqi<DATA.banques.length; bqi++){
-    var b = DATA.banques[bqi];
-    var nbQ = (b.questions && b.questions.length) ? b.questions.length : 0;
-    var evLies = '';
-    var bEvs = b.events || [];
-    for(var beli=0; beli<bEvs.length; beli++){
-      var bev = findEvent(bEvs[beli]);
-      if(bev) evLies += '<span class="chip">'+esc(bev.nom)+'</span> ';
-    }
+  DATA.banques.forEach(function(b){
+    var nbQ = (b.questions&&((b.questions&&b.questions.length)||0))||0;
+    var evLies = (b.events||[]).map(function(eid){var e=findEvent(eid);return e?'<span class="chip">'+esc(e.nom)+'</span>':''}).join(' ');
     html += '<tr onclick="openModal(\'banque\',{banqueId:\''+b.id+'\'})" style="cursor:pointer">'
-          + '<td><strong>'+esc(b.nom)+'</strong></td>'
-          + '<td class="text-sm text-muted">'+esc(b.description||'')+'</td>'
-          + '<td><strong>'+nbQ+'</strong></td>'
-          + '<td>'+(evLies||'<span class="text-muted text-xs">Aucun</span>')+'</td>'
-          + '<td class="col-actions"><div class="row-actions">'
-          + '<button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openModal(\'banque\',{banqueId:\''+b.id+'\'})">✏</button>'
-          + '</div></td>'
-          + '</tr>';
-  }
-  if(!DATA.banques.length){
-    html += '<tr><td colspan="5"><div class="empty-block mt-3">'
-          + '<div class="ico">🎮</div>'
-          + '<div class="t">Aucune banque de questions</div>'
-          + '<div class="s">Créez une première banque via « + Nouvelle banque »</div>'
-          + '</div></td></tr>';
-  }
+         + '<td><strong>'+esc(b.nom)+'</strong></td>'
+         + '<td class="text-sm text-muted">'+esc(b.description||'')+'</td>'
+         + '<td><strong>'+nbQ+'</strong></td>'
+         + '<td>'+(evLies||'<span class="text-muted text-xs">Aucun</span>')+'</td>'
+         + '<td class="col-actions"><div class="row-actions"><button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openModal(\'banque\',{banqueId:\''+b.id+'\'})">✏</button></div></td>'
+         + '</tr>';
+  });
+  if(DATA.banques.length===0) html += '<tr><td colspan="5"><div class="empty-block mt-3"><div class="ico">🎮</div><div class="t">Aucune banque de questions</div><div class="s">Créez une première banque via « + Nouvelle banque »</div></div></td></tr>';
   html += '</tbody></table>';
   html += '<button class="btn btn-primary mt-3" onclick="newBanque()">+ Nouvelle banque</button>';
-  html += '</div>'; // fin page
+  html += '</div>';
   return html;
 }
 
