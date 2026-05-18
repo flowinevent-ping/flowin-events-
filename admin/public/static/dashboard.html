@@ -2071,7 +2071,7 @@ async function supaWritePartenaire(p){
 }
 
 // Upsert banque → Supabase + GAS fallback
-async function supaWriteBanque(b){
+async async function supaWriteBanque(b){
   if(!b || !b.id) return;
   var payload = {
     id: b.id, nom: b.nom, description: b.description||'',
@@ -8787,6 +8787,7 @@ function wizRemoveBanqueQuestion(banqueId, questionIdx){
   if(!confirm('Supprimer cette question de la banque "'+b.nom+'" ?')) return;
   if(b.questions) b.questions.splice(questionIdx, 1);
   saveData();
+  supaWriteBanque(b);
   toast('Question supprimée','success');
   renderWizard();
 }
@@ -8808,6 +8809,7 @@ function wizBanqueQSave(){
     toast('Question modifiée','success');
   }
   saveData();
+  supaWriteBanque(b);
   closeModal();
   render();
 }
