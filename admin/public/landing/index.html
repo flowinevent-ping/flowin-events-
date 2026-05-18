@@ -490,6 +490,22 @@ footer{
       <div class="bravo-sub">Romain vous rappelle sous 24h.<br>Votre premier event sera prêt en 30 minutes chrono.</div>
     </div>
   </div>
+
+  <!-- QR code d'accès direct au funnel -->
+  <div style="margin-top:32px;text-align:center;padding:20px;background:rgba(255,255,255,.08);border-radius:16px;border:1px solid rgba(255,255,255,.12)">
+    <div style="font-size:11px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">📱 Accès direct par QR code</div>
+    <img id="landing-qr" 
+      src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fflowin-events.vercel.app%2Flanding%2Findex.html%3Fsource%3Dqr&bgcolor=1B3A5C&color=ffffff&margin=8"
+      alt="QR code Flowin" 
+      style="border-radius:12px;display:block;margin:0 auto 12px;width:140px;height:140px">
+    <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Scannez pour accéder au formulaire</div>
+    <div style="font-size:10px;background:rgba(0,0,0,.2);border-radius:8px;padding:6px 12px;color:var(--mu);word-break:break-all;font-family:monospace">
+      flowin-events.vercel.app/landing/index.html
+    </div>
+    <button onclick="copyLandingUrl()" style="margin-top:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 16px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
+      📋 Copier le lien
+    </button>
+  </div>
 </section>
 
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
@@ -954,7 +970,7 @@ function writeJoueurBtoB(data){
       gains:1, scoreMoy:'',
       optin:true, optinDate:ts,
       firstSeen:ts, lastSeen:ts,
-      source:'landing_btob',
+      source:(new URLSearchParams(window.location.search)).get('source')==='qr' ? 'landing_btob_qr' : 'landing_btob',
       tags:['btob', data.typePro||'', data.decouverte||''],
       lot_gagne:data.lot||'',
       ticket_code:data.ticketCode||'',
@@ -971,7 +987,7 @@ function writeJoueurBtoB(data){
       gains:1, score_moy:'',
       events:['ev-flowin-demo'],
       first_seen:ts, last_seen:ts,
-      source:'landing_btob',
+      source:(new URLSearchParams(window.location.search)).get('source')==='qr' ? 'landing_btob_qr' : 'landing_btob',
       tags:joueur.tags,
       age_tranche:'', enseigne:joueur.enseigne,
       lot_gagne:joueur.lot_gagne,
@@ -1213,6 +1229,12 @@ function setupProofObserver(){
 }
 
 // ══ FORMULAIRE ══
+function copyLandingUrl(){
+  var url = 'https://flowin-events.vercel.app/landing/index.html';
+  if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ alert('Lien copié !'); }); }
+  else { var t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Lien copié !'); }
+}
+
 function submitForm(){
   var nom   = document.getElementById('f-nom').value.trim();
   var email = document.getElementById('f-email').value.trim();
@@ -1227,7 +1249,7 @@ function submitForm(){
     gains:0, scoreMoy:'',
     optin:true, optinDate:ts,
     firstSeen:ts, lastSeen:ts,
-    source:'landing_cta',
+    source:(new URLSearchParams(window.location.search)).get('source')==='qr' ? 'landing_qr' : 'landing_cta',
     tags:['btob','cta'],
     client_type:'btob'
   };
@@ -1241,7 +1263,7 @@ function submitForm(){
     gains:0, score_moy:'',
     events:joueur.events,
     first_seen:ts, last_seen:ts,
-    source:'landing_cta',
+    source:(new URLSearchParams(window.location.search)).get('source')==='qr' ? 'landing_qr' : 'landing_cta',
     tags:joueur.tags,
     age_tranche:'', enseigne:'',
     lot_gagne:'', ticket_code:'',
