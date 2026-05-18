@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flowin — Fix CRF</title>
+<meta charset="utf-8">
+<style>
+body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#F8FAFC}
+.box{text-align:center;padding:32px;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);max-width:400px}
+.ico{font-size:48px;margin-bottom:16px}
+h2{color:#1B3A5C;margin:0 0 8px}
+p{color:#64748B;font-size:14px;margin:0 0 20px}
+.btn{display:inline-block;background:#E8212B;color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none}
+#log{font-size:12px;color:#94A3B8;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="ico">🏥</div>
+  <h2>Injection Croix Rouge</h2>
+  <p>Injection de l'event Croix Rouge 23 mai 2026 dans le dashboard</p>
+  <button class="btn" onclick="fix()">Lancer →</button>
+  <div id="log"></div>
+</div>
+<script>
+function log(msg){ document.getElementById('log').textContent = msg; }
+
+function fix(){
+  log('Lecture localStorage...');
+  try {
+    var LS = 'flowin_v31_data';
+    var raw = localStorage.getItem(LS);
+    var d = raw ? JSON.parse(raw) : null;
+    if(!d){ log('Pas de données v31 — rechargement depuis SEED au prochain lancement'); redirect(); return; }
+    if(!d.events) d.events = [];
+    if(!d.pros)   d.pros   = [];
+    if(!d.lots)   d.lots   = [];
+    if(!d.banques) d.banques = [];
+
+    // Event CRF
+    var hasCRF = d.events.some(function(e){ return e.id === 'ev-crf-2026'; });
+    if(!hasCRF){
+      d.events.push({
+        id:'ev-crf-2026', proId:'pro-crf-vence',
+        nom:'Croix Rouge \u2014 Collecte Vence 2026',
+        module:'quiz', status:'upcoming',
+        dateD:'2026-05-23', dateF:'2026-05-23',
+        hStart:'09:00', hEnd:'18:00',
+        lieu:'Place du Grand Jardin',
+        adresse:'Place du Grand Jardin, 06140 Vence',
+        participants:0, gagnants:0, joueursOptin:0,
+        couleur:'#E8212B',
+        description:'Collecte solidaire Croix Rouge',
+        scoreMin:0, banques:['bq-croix-rouge'], partenaires:[],
+        superEventId:'', clientType:'btoc', tiragesFaits:{},
+        cfg:{
+          subtitle:'VENCE \u00b7 SOLIDARIT\u00c9 2026',
+          datesLabel:'Samedi 23 Mai 2026',
+          nomCourt:'Croix Rouge<br>Vence',
+          tirageDate:'Manuel',
+          qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-crf-2026',
+          quizBanques:['bq-croix-rouge'], optinActif:true,
+          quizNbQuestions:4, quizScoreMin:1, quizBonus:true,
+          quizTimer:false, quizTimerVisible:false,
+          quizPartage:false, quizRecapFin:true,
+          quizUneFoisParJour:true, tirageManuel:true,
+          logoEmoji:'🏥', accent:'#E8212B', accentSoft:'#FFF0F0'
+        },
+        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:''}
+      });
+      log('✅ ev-crf-2026 injecté');
+    } else {
+      log('ev-crf-2026 déjà présent');
+    }
+
+    // Pro CRF
+    if(!d.pros.some(function(p){ return p.id === 'pro-crf-vence'; })){
+      d.pros.push({id:'pro-crf-vence',
+        nom:'Croix Rouge Fran\u00e7aise \u2014 D\u00e9l\u00e9gation de Vence',
+        ville:'Vence', codePostal:'06140', adresse:'', tel:'', email:'',
+        secteur:'Association', contact:'', role:'', siret:'',
+        entreeP:'2026-05-18', notes:'', tags:['crf']
+      });
+    }
+
+    // Banque CRF
+    if(!d.banques.some(function(b){ return b.id === 'bq-croix-rouge'; })){
+      d.banques.push({
+        id:'bq-croix-rouge',
+        nom:'Quiz Croix Rouge \u2014 Vence 2026',
+        description:'Questions premiers secours',
+        events:['ev-crf-2026'],
+        questions:[
+          {id:'q-crf-1',type:'qcm',texte:'En quelle annee la Croix Rouge a-t-elle ete fondee ?',options:['1854','1863','1901','1920'],bonne:1,points:1,explication:'1863, par Henry Dunant.'},
+          {id:'q-crf-2',type:'qcm',texte:'Que font les compressions thoraciques ?',options:['Faire respirer','Faire circuler le sang','Verifier le pouls','Appeler les secours'],bonne:1,points:1,explication:'Elles font circuler le sang.'},
+          {id:'q-crf-3',type:'qcm',texte:'Quel numero pour une urgence medicale ?',options:['17','15','18','112'],bonne:1,points:1,explication:'Le 15 est le SAMU.'},
+          {id:'q-crf-4',type:'qcm',texte:'Position personne inconsciente qui respire ?',options:['Sur le dos','PLS','Assise','Debout'],bonne:1,points:1,explication:'La PLS evite etouffement.'}
+        ],
+        tags:['crf','secours']
+      });
+    }
+
+    // 6 Lots CRF
+    var crfLots = d.lots.filter(function(l){ return l.eventId === 'ev-crf-2026'; });
+    if(crfLots.length === 0){
+      for(var i=1; i<=6; i++){
+        d.lots.push({id:'lot-crf-'+i, eventId:'ev-crf-2026',
+          partenaireId:'', nom:'Lot '+i+' \u2014 \u00c0 compl\u00e9ter',
+          valeur:0, quantite:1, assigneA:'', retire:false,
+          dateRetrait:'', dateAssign:'', note:''});
+      }
+    }
+
+    localStorage.setItem(LS, JSON.stringify(d));
+    log('✅ Injection terminée — redirection...');
+    setTimeout(redirect, 800);
+  } catch(e) {
+    log('Erreur: '+e.message);
+  }
+}
+
+function redirect(){
+  window.location.href = '/dashboard.html?t=' + Date.now();
+}
+</script>
+</body>
+</html>
