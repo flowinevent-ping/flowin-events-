@@ -2354,6 +2354,15 @@ function pqContactNo(el){
 }
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
+
+function suSubmitForm(){
+  var emailVal = _flowinFindEmail('#vp-standup', 'contact@exemple.fr');
+  if(!emailVal){ suGo(4); return; }
+  var _extra = _flowinCollectFormFields('#vp-standup');
+  var _ticket = 'SU-2026-'+Math.floor(Math.random()*9000+1000);
+  registerPlay('su', emailVal, _ticket, _extra);
+  suGo(4);
+}
 function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
   if(checkDuplicate('sp', emailVal, spinGo, 8)) return;

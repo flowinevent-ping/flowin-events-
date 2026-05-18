@@ -1270,7 +1270,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           </div>
         </div>
         <div class="bottom-cta">
-          <div class="btn tb-btn-primary" onclick="tbGo(3)">Valider mon inscription →</div>
+          <div class="btn tb-btn-primary" onclick="tbSubmitForm()">Valider mon inscription →</div>
         </div>
       </div>
 
@@ -2121,6 +2121,16 @@ function pqContactNo(el){
 }
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
+
+function tbSubmitForm(){
+  var emailVal = _flowinFindEmail('#vp-tombola', 'contact@exemple.fr');
+  if(!emailVal){ tbGo(3); return; }
+  var _extra = _flowinCollectFormFields('#vp-tombola');
+  var _ticketEl = document.getElementById('tb-ticket-code');
+  var _ticket = (_ticketEl && _ticketEl.textContent) || 'TB-2026-'+Math.floor(Math.random()*9000+1000);
+  registerPlay('tb', emailVal, _ticket, _extra);
+  tbGo(3);
+}
 function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
   if(checkDuplicate('sp', emailVal, spinGo, 8)) return;
