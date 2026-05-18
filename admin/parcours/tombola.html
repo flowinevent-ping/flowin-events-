@@ -1164,6 +1164,66 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Standalone : plein écran */
 html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
 .viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ══════════════════════════════════════════
+   DARK THEME OVERRIDE — COMPLET
+   Fond sombre #0F0A1E sur TOUT
+══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  background: #0F0A1E !important;
+  color: #fff !important;
+}
+.phone { background: #0F0A1E !important; }
+.viewport, .tb-viewport {
+  background: linear-gradient(160deg,#6B0000 0%,#C41E3A 45%,#E8212B 100%) !important;
+}
+/* Pages non-landing : fond sombre pur */
+#tb-2, #tb-2 .page,
+#tb-3, #tb-3 .page,
+#tb-4, #tb-4 .page,
+#tb-5, #tb-5 .page,
+#tb-confirm {
+  background: #0F0A1E !important;
+}
+/* Tout element avec fond blanc/clair → sombre */
+[style*="background:#fff"],
+[style*="background: #fff"],
+[style*="background:#F"],
+[style*="background: #F"],
+[style*="background:white"] {
+  background: rgba(255,255,255,.07) !important;
+}
+/* Inputs */
+input, select, textarea {
+  background: rgba(255,255,255,.08) !important;
+  color: #fff !important;
+  border-color: rgba(255,255,255,.15) !important;
+}
+input::placeholder, select::placeholder, textarea::placeholder {
+  color: rgba(255,255,255,.4) !important;
+}
+/* Textes */
+.form-label, label { color: rgba(255,255,255,.6) !important; }
+.header-title { color: #fff !important; }
+.header-sub, .header-subtitle { color: rgba(255,255,255,.6) !important; }
+/* Header */
+.header, .withback { background: #0F0A1E !important; }
+/* RGPD + partenaires */
+.form-rgpd, .partenaires { background: rgba(255,255,255,.05) !important; }
+/* Checkbox */
+.form-rgpd-text, .form-rgpd label { color: rgba(255,255,255,.7) !important; }
+/* Bouton ghost */
+.btn-ghost { background: rgba(255,255,255,.1) !important; color: #fff !important; }
+/* Back btn */
+.back-btn { background: rgba(255,255,255,.12) !important; color: #fff !important; }
+/* Status bar */
+.status-bar { background: #0F0A1E !important; color: #fff !important; }
+/* Progress */
+.progress-step { background: rgba(255,255,255,.15) !important; }
+/* Confettis déco → visible sur fond sombre */
+.tb-landing svg { opacity: .4 !important; }
 </style>
 </head>
 <body>
