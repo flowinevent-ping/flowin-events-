@@ -2935,6 +2935,7 @@ function frontLive(){
   st('fp-pv-lotlabel', f.lotLabel);
   st('fp-pv-tirage', f.lotTirage);
   st('fp-pv-cta', f.ctaText);
+  st('fp-pv-desc', f.description||'');
   st('fp-pv-semnom', f.lotSemaineNom);
   st('fp-pv-semlabel', f.lotSemaineLabel);
   st('fp-pv-sem', f.lotSemaine + (f.lotSemaineVal?' · '+f.lotSemaineVal:''));
@@ -5758,6 +5759,7 @@ function drawerEvent(e){
       lotSemaine:'',
       lotSemaineVal:'',
       ctaText:_isBtobFront ? '🎡 Je tente ma chance' : '🎮 Participer gratuitement',
+      description:'',
       lotsActifs:[]
     };
     const front = e.cfg.front;
@@ -5795,15 +5797,16 @@ function drawerEvent(e){
     html += '<div class="front-preview-notch"></div>';
     html += '<div class="front-preview-inner">';
     // Barre statut
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;font-size:10px;font-weight:700;color:#1a1a2e"><span>9:41</span><span>●●●●● 5G</span></div>';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;font-size:10px;font-weight:700;color:rgba(255,255,255,.7);background:#0F172A"><span>9:41</span><span>●●●●● 5G</span></div>';
     // Hero
     var _accentSoft = (e.cfg && e.cfg.accentSoft) ? e.cfg.accentSoft : (e.couleur||'#7C2D92')+'22';
-    var _bgGrad = 'linear-gradient(160deg,'+_accentSoft+' 0%,#fff 60%,'+_accentSoft+' 100%)';
+    var _bgGrad = 'linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%)';
     if(front.visible.titre){
       html += '<div class="fp-hero" style="background:'+_bgGrad+'">';
-      html += '<div class="fp-sub" id="fp-pv-sub" style="color:'+(e.couleur||'#7C2D92')+'">'+esc(front.sousTitre||'')+'</div>';
-      html += '<div class="fp-title" id="fp-pv-titre" style="color:'+(e.couleur||'#7C2D92')+'">'+esc(front.titre||'')+'</div>';
-      if(front.visible.dates) html += '<div class="fp-dates" id="fp-pv-dates" style="color:'+(e.couleur||'#EF9F27')+'">'+esc(front.dates||'')+'</div>';
+      html += '<div class="fp-sub" id="fp-pv-sub" style="color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em">'+esc(front.sousTitre||'')+'</div>';
+      html += '<div class="fp-title" id="fp-pv-titre" style="color:#fff">'+esc(front.titre||'')+'</div>';
+      if(front.visible.dates) html += '<div class="fp-dates" id="fp-pv-dates" style="color:rgba(255,255,255,.7)">'+esc(front.dates||'')+'</div>';
+      if(front.description) html += '<div class="fp-desc" id="fp-pv-desc" style="font-size:11px;color:#64748B;padding:4px 16px 8px;text-align:center;line-height:1.5">'+esc(front.description)+'</div>';
       // Logo SVG ou emoji
       var _logoSvg = e.cfg && e.cfg.logoSvg;
       var _logoEmoji = e.cfg && e.cfg.logoEmoji;
@@ -5864,6 +5867,7 @@ function drawerEvent(e){
     if(front.visible.titre){
       html += '<div class="front-fld"><label>Titre</label><input class="input" value="'+escAttr(front.titre)+'" oninput="frontUpd(\''+e.id+'\',\'titre\',this.value);frontLive()"/></div>';
       html += '<div class="front-fld"><label>Sous-titre</label><input class="input" value="'+escAttr(front.sousTitre)+'" oninput="frontUpd(\''+e.id+'\',\'sousTitre\',this.value);frontLive()"/></div>';
+      html += '<div class="front-fld"><label>Description <span style="font-weight:400;color:#94A3B8">(texte sous le titre)</span></label><textarea class="input" rows="3" style="resize:vertical;font-size:12px" placeholder="Ex: Soutiens la Croix Rouge et tente de remporter l\'un des lots..." oninput="frontUpd(\''+e.id+'\',\'description\',this.value);frontLive()">'+escAttr(front.description||'')+'</textarea></div>';
       html += '<div class="front-fld"><label>Ville</label><input class="input" value="'+escAttr(front.ville)+'" oninput="frontUpd(\''+e.id+'\',\'ville\',this.value);frontLive()"/></div>';
       html += '<div class="front-fld"><label>Dates affichées</label><input class="input" value="'+escAttr(front.dates)+'" oninput="frontUpd(\''+e.id+'\',\'dates\',this.value);frontLive()"/></div>';
     }
