@@ -2103,15 +2103,59 @@ function flowinHydrateModule(ev) {
 
   /* ── QUIZ (pq / qm) ── */
   if(module === 'quiz') {
-    /* Pâques (pq) */
+    /* Pâques viewport (pq) — adaptatif toutes couleurs */
     var vp = document.getElementById('vp-paques');
     if(vp) {
+      /* Textes */
       var villeEl = vp.querySelector('.pq-ville');
-      if(villeEl) villeEl.textContent = cfg.subtitle || (lieu + ' · Source d\'inspiration');
+      if(villeEl){
+        villeEl.textContent = cfg.subtitle || (lieu + ' · Source d\'inspiration');
+        villeEl.style.color = cfg.accent || couleur || '#1D9E75';
+      }
       var titleEl = vp.querySelector('.pq-title');
-      if(titleEl) titleEl.innerHTML = cfg.nomCourt ? cfg.nomCourt.replace(' ', '<br>') : nom.replace(' ', '<br>');
+      if(titleEl){
+        titleEl.innerHTML = cfg.nomCourt || nom.replace(/\s/, '<br>');
+        titleEl.style.color = couleur || '#D4537E';
+      }
       var datesEl = vp.querySelector('.pq-dates');
       if(datesEl) datesEl.textContent = cfg.datesLabel || dates;
+
+      /* Fond viewport adaptatif */
+      vp.style.background = cfg.accentSoft
+        ? 'linear-gradient(160deg,'+cfg.accentSoft+' 0%,#fff 60%,'+cfg.accentSoft+' 100%)'
+        : '';
+
+      /* Logo/emoji */
+      var emojiEl = vp.querySelector('.pq-emojis');
+      if(emojiEl && cfg.logoEmoji){
+        emojiEl.style.fontSize = '52px';
+        emojiEl.style.letterSpacing = '0';
+        /* Logo SVG Croix Rouge si event CRF */
+        if(cfg.logoSvg){
+          emojiEl.innerHTML = cfg.logoSvg;
+        } else {
+          emojiEl.textContent = cfg.logoEmoji;
+        }
+      }
+
+      /* Bouton CTA couleur */
+      var ctaBtn = vp.querySelector('.pq-cta');
+      if(ctaBtn && couleur){
+        ctaBtn.style.background = 'linear-gradient(135deg,'+couleur+','+couleur+'cc)';
+        ctaBtn.style.boxShadow = '0 8px 24px '+couleur+'55';
+      }
+
+      /* Tirage info */
+      var tirageEl = vp.querySelector('.pq-tirage');
+      if(tirageEl && cfg.tirageDate){
+        tirageEl.textContent = '🏥 Tirage ' + cfg.tirageDate;
+      }
+
+      /* Label lots */
+      var lotsLabel = vp.querySelector('.pq-lots-label');
+      if(lotsLabel && nom){
+        lotsLabel.textContent = nom.split('—')[0].trim() || 'Tombola';
+      }
     }
     /* QuizMaster (qm) */
     var vqm = document.getElementById('vp-quizmaster');

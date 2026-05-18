@@ -970,10 +970,50 @@ const TODAY = new Date('2026-05-03');
 })();
 const SEED = {
   pros: [
+    {id:'pro-crf-vence', nom:'Croix Rouge Française — Délégation de Vence', ville:'Vence', codePostal:'06140',
+      adresse:'', tel:'', email:'', secteur:'Association / Collectivité',
+      contact:'', role:'Délégué local', siret:'',
+      entreeP:'2026-05-18', notes:'Collecte solidaire Vence 2026', tags:['association','crf']},
     {id:'pro-vence',nom:'Ville de Vence',ville:'Vence',codePostal:'06140',adresse:'Hôtel de Ville, Place du Frêne',siret:'21060157200019',secteur:'Collectivité',contact:'Service Animation',role:'Animateur événementiel',email:'animation@ville-vence.fr',tel:'04 93 58 06 58',entreeP:'2026-01-01',notes:'Client pilote Flowin · Fêtes de Pâques 2026 (186 participants)',tags:['pilote','collectivité']},
     
   ],
   events: [
+    {id:'ev-crf-2026', proId:'pro-crf-vence',
+      nom:'Croix Rouge — Collecte Vence 2026',
+      module:'quiz', status:'upcoming',
+      dateD:'2026-05-23', dateF:'2026-05-23',
+      hStart:'09:00', hEnd:'18:00',
+      lieu:'Place du Grand Jardin', adresse:'Place du Grand Jardin, 06140 Vence',
+      participants:0, gagnants:0, joueursOptin:0,
+      couleur:'#E8212B',
+      description:'Collecte solidaire Croix Rouge · Samedi 23 mai 2026',
+      scoreMin:0, banques:['bq-croix-rouge'], partenaires:[],
+      superEventId:'', clientType:'btoc',
+      tiragesFaits:{},
+      cfg:{
+        subtitle:'VENCE · SOLIDARITÉ 2026',
+        datesLabel:'Samedi 23 Mai 2026',
+        nomCourt:'Croix Rouge<br>Vence',
+        tirageDate:'Manuel — fin de journée',
+        qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-crf-2026',
+        quizBanques:['bq-croix-rouge'],
+        optinActif:true,
+        quizNbQuestions:4,
+        quizScoreMin:1,
+        quizBonus:true,
+        quizTimer:false,
+        quizTimerVisible:false,
+        quizPartage:false,
+        quizRecapFin:true,
+        quizUneFoisParJour:true,
+        tirageManuel:true,
+        logoEmoji:'🏥',
+        logoSvg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80"><circle cx="40" cy="40" r="40" fill="#E8212B"/><rect x="30" y="16" width="20" height="48" rx="4" fill="#fff"/><rect x="16" y="30" width="48" height="20" rx="4" fill="#fff"/></svg>',
+        accent:'#E8212B',
+        accentSoft:'#FFF0F0'
+      },
+      proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:''}
+    },
     {id:'ev-paques',proId:'pro-vence',nom:'Fêtes de Pâques 2026',module:'quiz',status:'past',dateD:'2026-04-04',dateF:'2026-04-06',hStart:'10:00',hEnd:'18:00',lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',participants:186,gagnants:8,partenaires:[],joueursOptin:124,couleur:'#D4537E',description:'Quiz Pâques 3 jours · 8 lots à gagner',scoreMin:14,banques:[],
       cfg:{subtitle:'VENCE · SOURCE D\'INSPIRATION',datesLabel:'4, 5 & 6 Avril 2026',tirageDate:'Lundi de Pâques 11h',qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-paques',quizBanques:['bq-paques-vence'],optinActif:true,
       customQuestions:[
@@ -1246,6 +1286,18 @@ const SEED = {
     ],bonusActif:true,bonusList:[{id:'venue',label:'Tu es venu(e)...',type:'single',options:[{label:'👨\u200d👩\u200d👧 En famille',val:'famille'},{label:'👫 Entre amis',val:'amis'},{label:'💑 En couple',val:'couple'},{label:'🚶 Seul(e)',val:'seul'}]},{id:'animations',label:'Tes animations préférées ?',type:'multi',options:[{label:'🛒 Marché / stands',val:'marche'},{label:'🎪 Animations enfants',val:'enfants'},{label:'🎭 Défilé / Corso',val:'defile'},{label:'🌿 Nature / animaux',val:'nature'}]},{id:'ambiance',label:'Tu trouves l\'ambiance...',type:'single',options:[{label:'🤩 Génial !',val:'genial'},{label:'😊 Top',val:'top'},{label:'😐 Ça va',val:'moyen'}]},{id:'retour',label:'Tu souhaites revenir ?',type:'single',options:[{label:'✅ Oui',val:'oui'},{label:'🤔 Peut-être',val:'peutetre'},{label:'❌ Non',val:'non'}]}],customQuestions:[{id:'decouverte',label:'Comment nous avez-vous connu ?',type:'single',options:[{label:'📸 Instagram',val:'instagram'},{label:'🔵 Facebook',val:'facebook'},{label:'🏛 Site de la mairie',val:'mairie'},{label:'📋 Affiche / Flyer',val:'affiche'},{label:'🗣 Bouche à oreille',val:'bouche'}]}],optinActif:true},statsAgg:{joueursTotal:89,scoreMoyen:0,tauxComplete:97}},
   ],
   banques: [
+    {id:'bq-croix-rouge',
+      nom:'Quiz Croix Rouge — Vence 2026',
+      description:'Questions à compléter · thème solidarité, premiers secours, Croix Rouge',
+      events:['ev-crf-2026'],
+      questions:[
+        {id:'q-crf-1',type:'qcm',texte:'En quelle année la Croix Rouge a-t-elle été fondée ?',options:['1854','1863','1901','1920'],bonne:1,points:1,explication:'La Croix Rouge internationale a été fondée en 1863 par Henry Dunant.'},
+        {id:'q-crf-2',type:'qcm',texte:'Que signifie le geste des compressions thoraciques ?',options:['Faire respirer','Masser le cœur','Vérifier le pouls','Appeler les secours'],bonne:1,points:1,explication:'Les compressions thoraciques permettent de faire circuler le sang quand le cœur s'arrête.'},
+        {id:'q-crf-3',type:'qcm',texte:'Quel numéro appeler en cas d'urgence médicale en France ?',options:['17','15','18','112'],bonne:1,points:1,explication:'Le 15 est le SAMU, dédié aux urgences médicales.'},
+        {id:'q-crf-4',type:'qcm',texte:'Quelle est la position à adopter pour une personne inconsciente qui respire ?',options:['Allongée sur le dos','Position latérale de sécurité','Assise','Debout soutenue'],bonne:1,points:1,explication:'La PLS évite l'étouffement chez une personne inconsciente.'}
+      ],
+      tags:['crf','solidarité','secours']
+    },
     {id:'bq-paques-vence',nom:'Pâques Vence 2026',description:'Banque officielle Pâques Vence · 40 questions culture, patrimoine, traditions provençales',events:['ev-paques'],questions:[
       {id:'q-pv01',type:'qcm',texte:'En quelle année la cathédrale de Vence a-t-elle été fondée ?',options:['Xe siècle','XIe siècle','XIIe siècle','XIVe siècle'],bonne:2,points:1,explication:'La cathédrale Notre-Dame-de-la-Nativité de Vence date du XIIe siècle.'},
       {id:'q-pv02',type:'qcm',texte:'Quel artiste célèbre a décoré la Chapelle du Rosaire à Vence ?',options:['Pablo Picasso','Henri Matisse','Marc Chagall','Paul Cézanne'],bonne:1,points:1,explication:'Henri Matisse a conçu et décoré la Chapelle du Rosaire à Vence entre 1948 et 1951.'},
@@ -1290,6 +1342,12 @@ const SEED = {
     ]}
   ],
   lots: [
+    {id:'lot-crf-1',eventId:'ev-crf-2026',partenaireId:'',nom:'Lot 1 — À compléter',valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''},
+    {id:'lot-crf-2',eventId:'ev-crf-2026',partenaireId:'',nom:'Lot 2 — À compléter',valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''},
+    {id:'lot-crf-3',eventId:'ev-crf-2026',partenaireId:'',nom:'Lot 3 — À compléter',valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''},
+    {id:'lot-crf-4',eventId:'ev-crf-2026',partenaireId:'',nom:'Lot 4 — À compléter',valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''},
+    {id:'lot-crf-5',eventId:'ev-crf-2026',partenaireId:'',nom:'Lot 5 — À compléter',valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''},
+    {id:'lot-crf-6',eventId:'ev-crf-2026',partenaireId:'',nom:'Lot 6 — À compléter',valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''},
     {id:'lot-pq-1',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-02',retire:true,dateRetrait:'2026-04-07',note:''},
     {id:'lot-pq-2',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-06',retire:true,dateRetrait:'2026-04-07',note:''},
     {id:'lot-pq-3',eventId:'ev-paques',partenaireId:'',nom:'Tombola Pâques 2026 — 1er au 3ème tirage',emoji:'🥚',partenaire:'Ville de Vence',valeur:0,quantite:1,assigneA:'j-pq-09',retire:true,dateRetrait:'2026-04-07',note:''},
@@ -1312,7 +1370,7 @@ const SEED = {
 
 
 // ============ STORAGE LOCAL ============
-const LS_KEY = 'flowin_v31_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
+const LS_KEY = 'flowin_v32_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
 function loadData(){
   try{
     // Migration : récupérer données d'une ancienne clé si la nouvelle est vide
