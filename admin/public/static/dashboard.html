@@ -4,7 +4,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta charset="UTF-8"><!-- flowin-v28-build-20260513b -->
+<meta charset="UTF-8">
+  <link rel="dns-prefetch" href="https://ywcqtupgoxfzkddqkztk.supabase.co">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><!-- flowin-v28-build-20260513b -->
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Flowin · Dashboard v24</title>
 <style>
@@ -1900,10 +1902,10 @@ async function supaLoadAll(){
     console.log('[Flowin] Chargement Supabase…');
     var results = await Promise.all([
       supaFetch('pros'),
-      supaFetch('partenaires'),
+      supaFetch('partenaires', 'select=id,nom,ville,secteur,contact,email,tel,siret,tags,entree_p'),
       supaFetch('events'),
-      supaFetch('super_events'),
-      supaFetch('joueurs'),
+      supaFetch('super_events', 'select=*&limit=50'),
+      supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=500'),
       supaFetch('lots'),
       supaFetch('banques'),
       supaFetch('landings')
@@ -10576,6 +10578,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   // Charger Supabase en parallèle et rafraîchir
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     console.log('[Flowin] Sync Supabase en cours...');
+    await new Promise(function(r){setTimeout(r,50)}); // Yield: laisser le browser peindre d'abord
     var data = await supaLoadAll();
     if(data){
       DATA.pros = data.pros;
