@@ -1225,7 +1225,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
             <div class="pq-quiz-question">Dans quel département se trouve Vence ?</div>
             <div class="pq-quiz-options">
               <button class="pq-quiz-opt">Var (83)</button>
-              <button class="pq-quiz-opt sel">Alpes-Maritimes (06)</button>
+              <button class="pq-quiz-opt">Alpes-Maritimes (06)</button>
               <button class="pq-quiz-opt">Bouches-du-Rhône (13)</button>
               <button class="pq-quiz-opt">Gard (30)</button>
             </div>
@@ -1252,10 +1252,10 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
             <div class="pq-quiz-num">Q2</div>
             <div class="pq-quiz-question">Quel artiste célèbre a décoré la Chapelle du Rosaire de Vence ?</div>
             <div class="pq-quiz-options">
-              <button class="pq-quiz-opt wrong">Pablo Picasso</button>
+              <button class="pq-quiz-opt">Pablo Picasso</button>
               <button class="pq-quiz-opt correct">Henri Matisse</button>
-              <button class="pq-quiz-opt neutral">Marc Chagall</button>
-              <button class="pq-quiz-opt neutral">Paul Cézanne</button>
+              <button class="pq-quiz-opt">Marc Chagall</button>
+              <button class="pq-quiz-opt">Paul Cézanne</button>
             </div>
             <div class="pq-quiz-feedback ko">
               <div class="pq-quiz-feedback-icon">❌</div>
@@ -1288,7 +1288,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
             <div class="pq-quiz-question">Vence est classée ville...</div>
             <div class="pq-quiz-options">
               <button class="pq-quiz-opt">Thermale</button>
-              <button class="pq-quiz-opt sel">D'art et d'histoire</button>
+              <button class="pq-quiz-opt">D'art et d'histoire</button>
               <button class="pq-quiz-opt">Touristique d'excellence</button>
               <button class="pq-quiz-opt">Fleurie</button>
             </div>
@@ -2774,6 +2774,39 @@ function flowinHydrateGenericQuiz(ev){
   /* Tirage */
   var tirageEl = vp.querySelector('.pq-tirage');
   if(tirageEl && cfg.tirageDate) tirageEl.textContent = '📅 Tirage ' + cfg.tirageDate;
+
+
+  /* Mettre à jour les compteurs Question X / N */
+  var _nbQ = (ev.cfg && ev.cfg.quizNbQuestions) ? parseInt(ev.cfg.quizNbQuestions) : 0;
+  if(_nbQ > 0){
+    var _labels = document.querySelectorAll('.pq-quiz-step-label');
+    for(var _qi=0; _qi < _labels.length; _qi++){
+      var _lbl = _labels[_qi];
+      /* Extraire le numéro de question courant depuis le texte existant */
+      var _match = _lbl.textContent.match(/(\d+)\s*\/\s*\d+/);
+      if(_match){
+        _lbl.textContent = 'Question ' + _match[1] + ' / ' + _nbQ;
+      }
+    }
+    /* Mettre à jour les barres de progression (points) */
+    var _vp2 = document.getElementById('vp-paques');
+    if(_vp2){
+      var _dots = _vp2.querySelectorAll('.pq-quiz-step-dots');
+      _dots.forEach(function(dotWrap){
+        /* Reconstruire les dots selon le nombre de questions */
+        var _cur = dotWrap.querySelectorAll('.pq-quiz-dot.active, .pq-quiz-dot.done').length;
+        var _activeDot = dotWrap.querySelector('.pq-quiz-dot.active');
+        var _activeIdx = _activeDot ? Array.from(dotWrap.children).indexOf(_activeDot) : 0;
+        var _newHtml = '';
+        for(var _di=0; _di<_nbQ; _di++){
+          var _cls = _di < _activeIdx ? 'done' : (_di === _activeIdx ? 'active' : '');
+          _newHtml += '<div class="pq-quiz-dot '+_cls+'"></div>';
+        }
+        dotWrap.innerHTML = _newHtml;
+      });
+    }
+    console.log('[Flowin] Compteur questions mis à jour: ' + _nbQ + ' questions');
+  }
 
   console.log('[Flowin] hydratation generique quiz OK:', ev.nom);
 
