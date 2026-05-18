@@ -1334,7 +1334,15 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="pq-form-grid">
             <div class="pq-form-field">
               <label class="pq-form-label">Âge</label>
-              <input class="pq-form-input" placeholder="Tranche d\'âge">
+              <select class="pq-form-input" style="cursor:pointer">
+                <option value="">Tranche d'âge</option>
+                <option value="-18">Moins de 18 ans</option>
+                <option value="18-25">18 – 25 ans</option>
+                <option value="26-35">26 – 35 ans</option>
+                <option value="36-50">36 – 50 ans</option>
+                <option value="51-65">51 – 65 ans</option>
+                <option value="65+">Plus de 65 ans</option>
+              </select>
             </div>
             <div class="pq-form-field">
               <label class="pq-form-label">Code postal</label>
@@ -1508,12 +1516,23 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="pq-bc-score-val" id="pq-score-val">3<span class="pq-bc-score-denom">/4</span></div>
           <div class="pq-bc-score-plus" id="pq-score-plus">+1 POINT BONUS</div>
         </div>
-        <div class="ticket">
-          <div class="ticket-icon">🎟️</div>
-          <div class="ticket-title">Ton ticket tombola</div>
-          <div style="font-size:11px;font-weight:800;color:var(--muted)">Fêtes de Pâques Vence 2026</div>
-          <div class="ticket-code">PQ-2026-1427</div>
-          <div class="ticket-hint">Capture d'écran conseillée · tirage Lundi de Pâques 11h · Place du Peyra</div>
+        <!-- Tickets dynamiques : 1 par ticket gagné (quiz + bonus + partage) -->
+        <div id="pq-tickets-wrap">
+          <div class="ticket" id="pq-ticket-1" style="border-color:#D4537E">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-title">Ticket 1 — Quiz</div>
+            <div id="pq-ticket-event-label" style="font-size:11px;font-weight:800;color:var(--muted)">Fêtes de Pâques Vence 2026</div>
+            <div class="ticket-code" id="pq-ticket-code-1">PQ-2026-1427</div>
+            <div class="ticket-hint" id="pq-ticket-hint">Capture d'écran conseillée · tirage Lundi de Pâques 11h · Place du Peyra</div>
+          </div>
+          <!-- Ticket bonus (affiché si bonus complété) -->
+          <div class="ticket" id="pq-ticket-2" style="display:none;border-color:#1D9E75;margin-top:8px">
+            <div class="ticket-icon">🌟</div>
+            <div class="ticket-title">Ticket 2 — Bonus</div>
+            <div style="font-size:11px;font-weight:800;color:#1D9E75">+1 ticket pour les questions bonus</div>
+            <div class="ticket-code" id="pq-ticket-code-2" style="color:#1D9E75">PQ-2026-1428</div>
+            <div class="ticket-hint">Même tirage · même lieu</div>
+          </div>
         </div>
         <div class="pq-bc-info">
           <div class="pq-bc-info-ico">📧</div>
@@ -1913,6 +1932,17 @@ function pqGo(n){
   /* Transition loading → confirm automatique */
   if(n === 6){
     setTimeout(function(){ pqGo(7); }, 1500);
+  }
+  /* Afficher le 2ème ticket quand bonus validé (page 10) */
+  if(n === 10){
+    var t2 = document.getElementById('pq-ticket-2');
+    var c2 = document.getElementById('pq-ticket-code-2');
+    var c1 = document.getElementById('pq-ticket-code-1');
+    if(t2) t2.style.display = '';
+    /* Générer le code du ticket bonus */
+    var _base = (c1 && c1.textContent) || 'PQ-2026-0000';
+    var _num = parseInt(_base.split('-').pop()) || 1427;
+    if(c2) c2.textContent = _base.replace(/\d+$/, String(_num + 1));
   }
 }
 
@@ -2659,6 +2689,57 @@ function flowinHydrateGenericQuiz(ev){
   if(tirageEl && cfg.tirageDate) tirageEl.textContent = '📅 Tirage ' + cfg.tirageDate;
 
   console.log('[Flowin] hydratation generique quiz OK:', ev.nom);
+
+  /* Ticket dynamique : préfixe, nom event, tirage */
+  var evtNom = ev.nom || 'Cet événement';
+  var couleurEv = ev.couleur || '#7C2D92';
+  /* Préfixe ticket : 2 premières lettres significatives */
+  var _prefix = evtNom.replace(/[^a-zA-Z]/g,'').substring(0,2).toUpperCase() || 'FL';
+  var _code = _prefix + '-2026-' + (Math.floor(Math.random()*9000)+1000);
+
+  var tickLbl = document.getElementById('pq-ticket-event-label');
+  if(tickLbl) tickLbl.textContent = evtNom;
+
+  var tickCode1 = document.getElementById('pq-ticket-code-1');
+  if(tickCode1){
+    tickCode1.textContent = _code;
+    tickCode1.style.color = couleurEv;
+  }
+  var tickCode2 = document.getElementById('pq-ticket-code-2');
+  if(tickCode2){
+    var _num = parseInt(_code.split('-').pop()) || 1427;
+    tickCode2.textContent = _prefix + '-2026-' + (_num + 1);
+    tickCode2.style.color = '#1D9E75';
+  }
+  var tickHint = document.getElementById('pq-ticket-hint');
+  if(tickHint){
+    var _tirage = (ev.cfg && ev.cfg.tirageDate) ? ev.cfg.tirageDate : 'fin de journée';
+    var _lieu = ev.lieu || '';
+    tickHint.textContent = 'Capture d\'ecran conseillée · Tirage ' + _tirage + (_lieu ? ' · ' + _lieu : '');
+  }
+  /* Couleur bordure ticket */
+  var tick1 = document.getElementById('pq-ticket-1');
+  if(tick1) tick1.style.borderColor = couleurEv;
+
+  /* Lots : récupérer depuis Supabase (déjà dans FLOWIN_EVENT.lots si chargé) */
+  var lotsWrap = vp ? vp.querySelector('.pq-lots-wrap') : null;
+  if(lotsWrap && ev.id){
+    /* Charger les lots depuis Supabase */
+    fetch(FLOWIN_SUPA_URL + '/rest/v1/lots?event_id=eq.' + encodeURIComponent(ev.id) + '&select=titre,valeur&retire=eq.false', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    }).then(function(r){ return r.json(); }).then(function(lots){
+      if(!lots || !lots.length) return;
+      var lotsHtml = '';
+      for(var li=0; li<lots.length; li++){
+        var lt = lots[li];
+        lotsHtml += '<div class="pq-lot-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">'
+          + '<div style="width:32px;height:32px;border-radius:8px;background:'+couleurEv+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🎁</div>'
+          + '<div style="flex:1"><div style="font-size:12px;font-weight:700;color:#1a1a2e">' + (lt.titre||'Lot') + '</div>'
+          + (lt.valeur ? '<div style="font-size:10px;color:#888">Valeur : ' + lt.valeur + ' €</div>' : '') + '</div></div>';
+      }
+      lotsWrap.innerHTML = '<div class="pq-lots-label" style="font-size:9px;font-weight:900;color:'+couleurEv+';text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px">🎁 LOTS À GAGNER</div>' + lotsHtml;
+    }).catch(function(e){ console.warn('[Flowin] lots fetch:', e); });
+  }
 }
 
 })();
