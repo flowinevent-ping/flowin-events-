@@ -1852,6 +1852,25 @@ async function supaWriteBanque(b){
 }
 
 // Upsert super event → Supabase + GAS fallback
+async function supaWriteLanding(ld){
+  if(!ld || !ld.id) return;
+  var payload = {
+    id:ld.id, nom:ld.nom||'', statut:ld.statut||'brouillon',
+    published:ld.published||false,
+    deploy_url:ld.deployUrl||'',
+    accent_color:ld.accentColor||'#3B5CC4',
+    module_jeu:ld.moduleJeu||'spin',
+    wa_number:ld.waNumber||'',
+    hero:ld.hero||{},
+    proof:ld.proof||{},
+    tunnel:ld.tunnel||[],
+    profils:ld.profils||[],
+    created_at:ld.createdAt||null
+  };
+  var ok = await supaUpsert('landings', payload);
+  if(!ok) gasBackup('landing_upsert', payload);
+}
+
 async function supaWriteSuperEvent(se){
   if(!se || !se.id) return;
   var payload = {
@@ -7235,6 +7254,7 @@ function lpPublish(ldId){
   ld.published = true;
   ld.statut = 'active';
   saveData(); render();
+  supaWriteLanding(ld);
   toast(esc(ld.nom) + ' — publiée', 'success');
 }
 
@@ -7243,6 +7263,7 @@ function lpUnpublish(ldId){
   if(!ld) return;
   ld.published = false;
   saveData(); render();
+  supaWriteLanding(ld);
   toast(esc(ld.nom) + ' — dépubliée', 'info');
 }
 
@@ -7258,6 +7279,13 @@ function lpDelete(ldId){
   confirmDanger('Supprimer cette landing ?','Cette action est irréversible.', function(){
     DATA.landings = (DATA.landings||[]).filter(function(l){ return l.id !== ldId; });
     saveData(); render();
+    /* Suppression Supabase */
+    if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+      fetch(FLOWIN_SUPA_URL+'/rest/v1/landings?id=eq.'+encodeURIComponent(ldId), {
+        method:'DELETE',
+        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      }).catch(function(e){ console.warn('[lpDelete Supabase]', e); });
+    }
     toast('Landing supprimée', 'info');
   }, 'Supprimer');
 }
@@ -7302,6 +7330,7 @@ function lpSave(ldId){
   var ld = (DATA.landings||[]).find(function(l){ return l.id === ldId; });
   if(!ld) return;
   saveData(); render(); closeModal();
+  supaWriteLanding(ld);
   toast('Landing sauvegardée', 'success');
 }
 

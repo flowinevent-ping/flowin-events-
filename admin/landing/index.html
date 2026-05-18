@@ -920,45 +920,91 @@ function spPickSource(btn,val){
   for(var i=0;i<btns.length;i++){btns[i].style.background='#fff';btns[i].style.color='#1B3A5C';btns[i].style.borderColor='#E2E8F0';}
   btn.style.background='#A855F7';btn.style.color='#fff';btn.style.borderColor='#A855F7';
 }
+/* ── Constantes Supabase (clé publique anon, safe côté client) ── */
+var _SUPA_URL  = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+var _SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+var _LS_KEY    = 'flowin_v31_data';
+
+function _supaUpsertLanding(table, payload){
+  fetch(_SUPA_URL+'/rest/v1/'+table, {
+    method:'POST',
+    headers:{
+      'apikey':_SUPA_ANON,
+      'Authorization':'Bearer '+_SUPA_ANON,
+      'Content-Type':'application/json',
+      'Prefer':'resolution=merge-duplicates'
+    },
+    body:JSON.stringify(payload)
+  }).then(function(r){
+    if(!r.ok) r.text().then(function(t){console.warn('[Supabase landing] '+table+' err:',t);});
+    else console.log('[Supabase landing] '+table+' OK — '+payload.id);
+  }).catch(function(e){console.warn('[Supabase landing] fetch err:',e);});
+}
+
 function writeJoueurBtoB(data){
-  // Option C - localStorage partage (meme cle que dashboard)
-  // A remplacer par : supabase.from('joueurs').insert(data) pour Session B (Supabase)
   try {
-    var raw=localStorage.getItem('flowin_v28_data');
-    var db;
-    if(!raw){
-      // Dashboard pas encore ouvert : créer structure minimale
-      db={joueurs:[],events:[{id:'ev-flowin-demo',proId:'pro-flowin',nom:'Flowin — Découverte',
-        module:'spin',status:'live',clientType:'btob',participants:0,gagnants:0,joueursOptin:0}],
-        lots:[],partenaires:[],banques:[]};
-    } else {
-      db=JSON.parse(raw);
-    }
-    var ts=new Date().toISOString().slice(0,10);
-    // Préfixe j-fl- (pas j-btob-) pour ne pas être filtré par la migration
-    var joueur={
+    var ts = new Date().toISOString().slice(0,10);
+    var joueur = {
       id:'j-fl-'+Date.now(),
-      prenom:data.prenom,nom:data.nom||'',
-      email:data.email,tel:data.tel||'',
-      ville:data.ville||'',codePostal:'',
+      prenom:data.prenom, nom:data.nom||'',
+      email:data.email, tel:data.tel||'',
+      ville:data.ville||'', codePostal:'',
       enseigne:data.enseigne||'',
       events:['ev-flowin-demo'],
-      gains:1,scoreMoy:'',
-      optin:true,optinDate:ts,
-      firstSeen:ts,lastSeen:ts,
-      source:'landing_v13',
-      tags:['btob',data.typePro||'',data.decouverte||''],
+      gains:1, scoreMoy:'',
+      optin:true, optinDate:ts,
+      firstSeen:ts, lastSeen:ts,
+      source:'landing_btob',
+      tags:['btob', data.typePro||'', data.decouverte||''],
       lot_gagne:data.lot||'',
-      ticket_code:data.ticketCode||''
+      ticket_code:data.ticketCode||'',
+      client_type:'btob'
     };
-    if(!db.joueurs)db.joueurs=[];
+
+    /* 1. Supabase (primaire) */
+    _supaUpsertLanding('joueurs', {
+      id:joueur.id, email:joueur.email,
+      nom:joueur.nom, prenom:joueur.prenom,
+      tel:joueur.tel, ville:joueur.ville, code_postal:'',
+      genre:'', date_naissance:'',
+      optin:true, optin_date:ts,
+      gains:1, score_moy:'',
+      events:['ev-flowin-demo'],
+      first_seen:ts, last_seen:ts,
+      source:'landing_btob',
+      tags:joueur.tags,
+      age_tranche:'', enseigne:joueur.enseigne,
+      lot_gagne:joueur.lot_gagne,
+      ticket_code:joueur.ticket_code,
+      client_type:'btob'
+    });
+
+    /* 2. localStorage (clé courante v31) */
+    var raw = localStorage.getItem(_LS_KEY);
+    var db;
+    try { db = raw ? JSON.parse(raw) : null; } catch(e){ db = null; }
+    if(!db || !db.joueurs){
+      db = {joueurs:[],events:[{id:'ev-flowin-demo',proId:'pro-flowin',
+        nom:'Flowin — Découverte',module:'spin',status:'live',
+        clientType:'btob',participants:0,gagnants:0,joueursOptin:0}],
+        lots:[],partenaires:[],banques:[]};
+    }
     db.joueurs.unshift(joueur);
-    if(db.events){for(var i=0;i<db.events.length;i++){if(db.events[i].id==='ev-flowin-demo'){db.events[i].participants=(db.events[i].participants||0)+1;db.events[i].joueursOptin=(db.events[i].joueursOptin||0)+1;break;}}}
-    if(!db.lots)db.lots=[];
-    db.lots.push({id:'lot-fl-'+Date.now(),eventId:'ev-flowin-demo',nom:data.lot||'',assigneA:joueur.id,dateAssign:ts,ticketCode:data.ticketCode||''});
-    localStorage.setItem('flowin_v28_data',JSON.stringify(db));
-    console.log('[writeJoueurBtoB] OK — '+joueur.id+' inscrit dans flowin_v28_data');
-  } catch(err){console.warn('[writeJoueurBtoB] ERREUR:',err);}
+    if(db.events){
+      for(var i=0;i<db.events.length;i++){
+        if(db.events[i].id==='ev-flowin-demo'){
+          db.events[i].participants=(db.events[i].participants||0)+1;
+          db.events[i].joueursOptin=(db.events[i].joueursOptin||0)+1;
+          break;
+        }
+      }
+    }
+    if(!db.lots) db.lots=[];
+    db.lots.push({id:'lot-fl-'+Date.now(),eventId:'ev-flowin-demo',
+      nom:data.lot||'',assigneA:joueur.id,dateAssign:ts,ticketCode:data.ticketCode||''});
+    localStorage.setItem(_LS_KEY, JSON.stringify(db));
+    console.log('[writeJoueurBtoB] OK — '+joueur.id+' → Supabase + LS '+_LS_KEY);
+  } catch(err){ console.warn('[writeJoueurBtoB] ERREUR:',err); }
 }
 function spinSubmitForm(){
   var enseigne=document.getElementById('sp-enseigne')?document.getElementById('sp-enseigne').value.trim():'';
@@ -1168,12 +1214,48 @@ function setupProofObserver(){
 
 // ══ FORMULAIRE ══
 function submitForm(){
-  var nom = document.getElementById('f-nom').value.trim();
+  var nom   = document.getElementById('f-nom').value.trim();
   var email = document.getElementById('f-email').value.trim();
-  var tel = document.getElementById('f-tel').value.trim();
+  var tel   = document.getElementById('f-tel').value.trim();
   if(!nom || !email){ alert('Prénom et email requis.'); return; }
-
-  // TODO : brancher endpoint GAS/Supabase
+  var ts = new Date().toISOString().slice(0,10);
+  var joueur = {
+    id:'j-cta-'+Date.now(),
+    prenom:nom, nom:'', email:email, tel:tel||'',
+    ville:'', codePostal:'', enseigne:'',
+    events:['ev-flowin-cta'],
+    gains:0, scoreMoy:'',
+    optin:true, optinDate:ts,
+    firstSeen:ts, lastSeen:ts,
+    source:'landing_cta',
+    tags:['btob','cta'],
+    client_type:'btob'
+  };
+  /* Supabase */
+  _supaUpsertLanding('joueurs', {
+    id:joueur.id, email:joueur.email,
+    nom:joueur.nom, prenom:joueur.prenom,
+    tel:joueur.tel, ville:'', code_postal:'',
+    genre:'', date_naissance:'',
+    optin:true, optin_date:ts,
+    gains:0, score_moy:'',
+    events:joueur.events,
+    first_seen:ts, last_seen:ts,
+    source:'landing_cta',
+    tags:joueur.tags,
+    age_tranche:'', enseigne:'',
+    lot_gagne:'', ticket_code:'',
+    client_type:'btob'
+  });
+  /* localStorage v31 */
+  try {
+    var raw = localStorage.getItem(_LS_KEY);
+    var db; try { db = raw ? JSON.parse(raw) : null; } catch(e){ db = null; }
+    if(!db || !db.joueurs) db = {joueurs:[], events:[], lots:[], partenaires:[], banques:[]};
+    db.joueurs.unshift(joueur);
+    localStorage.setItem(_LS_KEY, JSON.stringify(db));
+  } catch(e){ console.warn('[submitForm LS]',e); }
+  console.log('[submitForm CTA] OK — '+joueur.id);
   document.getElementById('form-content').style.display='none';
   document.getElementById('bravo').classList.add('show');
 }
