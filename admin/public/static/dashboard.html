@@ -2071,7 +2071,7 @@ async function supaWritePartenaire(p){
 }
 
 // Upsert banque → Supabase + GAS fallback
-async async function supaWriteBanque(b){
+async function supaWriteBanque(b){
   if(!b || !b.id) return;
   var payload = {
     id: b.id, nom: b.nom, description: b.description||'',
