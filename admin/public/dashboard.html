@@ -597,12 +597,15 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .wiz-banque-q-opt.correct{background:#D1FAE5;color:#065F46;font-weight:700}
 
 /* ============== ONGLET FRONT · ÉDITEUR LIVE ============== */
-.front-preview-wrap{margin-bottom:18px}
+.front-preview-wrap{margin-bottom:18px;display:flex;flex-direction:column;align-items:center}
 .front-preview-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sa-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .front-preview-label::before{content:'';width:6px;height:6px;border-radius:50%;background:#10B981;animation:pulse 2s infinite}
-.front-preview-mobile{max-width:340px;margin:0 auto;background:#fff;border:8px solid #1F1B2E;border-radius:30px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.front-preview-mobile{background:#1a1a1a;border-radius:40px;padding:0;box-shadow:0 16px 48px rgba(0,0,0,.35),inset 0 0 0 2px #444,inset 0 0 0 8px #111;position:relative;width:270px;aspect-ratio:9/19.5;overflow:hidden;isolation:isolate}
+.front-preview-inner{position:absolute;top:8px;left:8px;right:8px;bottom:8px;border-radius:30px;overflow-y:auto;overflow-x:hidden;background:#fff;-ms-overflow-style:none;scrollbar-width:none}
+.front-preview-inner::-webkit-scrollbar{display:none}
+.front-preview-notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:64px;height:17px;background:#111;border-radius:0 0 10px 10px;z-index:10}
 .fp-hero{padding:24px 18px 18px;text-align:center}
-.fp-sub{font-size:9px;font-weight:700;color:#7C2D92;text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px}
+.fp-sub{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px;opacity:.8}
 .fp-title{font-family:Georgia,serif;font-style:italic;font-size:32px;font-weight:700;line-height:1;margin-bottom:8px}
 .fp-dates{font-size:13px;font-weight:700;color:#EF9F27;letter-spacing:.02em}
 .fp-section{padding:12px 16px 0}
@@ -2903,7 +2906,7 @@ function frontLive(){
   if(!e || !e.cfg || !e.cfg.front) return;
   const f = e.cfg.front;
   st('fp-pv-titre', f.titre);
-  st('fp-pv-sub', (f.ville||'')+(f.sousTitre?' · '+f.sousTitre:''));
+  st('fp-pv-sub', f.sousTitre||'');
   st('fp-pv-dates', f.dates);
   st('fp-pv-lotlabel', f.lotLabel);
   st('fp-pv-tirage', f.lotTirage);
@@ -5645,14 +5648,25 @@ function drawerEvent(e){
 
     // ─── APERÇU LIVE MOBILE (en haut) ───
     html += '<div class="front-preview-wrap">';
-    html += '<div class="front-preview-label">📱 Aperçu mobile · live</div>';
+    html += '<div class="front-preview-label" style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu mobile · live</div>';
     html += '<div class="front-preview-mobile" id="frontPreview">';
+    html += '<div class="front-preview-notch"></div>';
+    html += '<div class="front-preview-inner">';
+    // Barre statut
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;font-size:10px;font-weight:700;color:#1a1a2e"><span>9:41</span><span>●●●●● 5G</span></div>';
     // Hero
+    var _accentSoft = (e.cfg && e.cfg.accentSoft) ? e.cfg.accentSoft : (e.couleur||'#7C2D92')+'22';
+    var _bgGrad = 'linear-gradient(160deg,'+_accentSoft+' 0%,#fff 60%,'+_accentSoft+' 100%)';
     if(front.visible.titre){
-      html += '<div class="fp-hero" style="background:linear-gradient(160deg,'+(e.couleur||'#7C2D92')+'22 0%,#FAEEDA 100%)">';
-      html += '<div class="fp-sub" id="fp-pv-sub">'+esc(front.ville||'')+' · '+esc(front.sousTitre||'')+'</div>';
+      html += '<div class="fp-hero" style="background:'+_bgGrad+'">';
+      html += '<div class="fp-sub" id="fp-pv-sub" style="color:'+(e.couleur||'#7C2D92')+'">'+esc(front.sousTitre||'')+'</div>';
       html += '<div class="fp-title" id="fp-pv-titre" style="color:'+(e.couleur||'#7C2D92')+'">'+esc(front.titre||'')+'</div>';
-      if(front.visible.dates) html += '<div class="fp-dates" id="fp-pv-dates">'+esc(front.dates||'')+'</div>';
+      if(front.visible.dates) html += '<div class="fp-dates" id="fp-pv-dates" style="color:'+(e.couleur||'#EF9F27')+'">'+esc(front.dates||'')+'</div>';
+      // Logo SVG ou emoji
+      var _logoSvg = e.cfg && e.cfg.logoSvg;
+      var _logoEmoji = e.cfg && e.cfg.logoEmoji;
+      if(_logoSvg) html += '<div style="margin:12px auto 4px;display:flex;justify-content:center">'+_logoSvg+'</div>';
+      else if(_logoEmoji) html += '<div style="font-size:42px;text-align:center;margin:10px 0">'+_logoEmoji+'</div>';
       html += '</div>';
     }
     // Lots
@@ -5692,6 +5706,7 @@ function drawerEvent(e){
     html += '<button class="fp-cta-btn" style="background:linear-gradient(135deg,'+(e.couleur||'#7C2D92')+',#EF9F27)" id="fp-pv-cta">'+esc(front.ctaText||'Participer')+'</button>';
     html += '<div class="fp-cta-note">Jeu gratuit · Sans achat obligatoire</div>';
     html += '</div>';
+    html += '</div>';  // front-preview-inner
     html += '</div></div>';
 
     // ─── ÉDITEUR ───
