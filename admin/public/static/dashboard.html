@@ -1699,7 +1699,7 @@ function migrateData(data){
   // [IDEMPOTENT] Normaliser toutes les banques — forcer questions:[] si absent
   if(data.banques){
     // Purge stricte — whitelist des 5 banques officielles uniquement
-    var _officialIds = ['bq-paques-vence']; // Banque officielle Pâques Vence
+    var _officialIds = ['bq-paques-vence','bq-croix-rouge']; // Banques officielles actives
     data.banques = data.banques.filter(function(b){ return b && b.id && _officialIds.indexOf(b.id) >= 0; });
     data.banques.forEach(function(b){ if(!b.questions) b.questions=[]; if(!b.events) b.events=[]; });
     // Réinjecter les banques manquantes depuis le SEED
