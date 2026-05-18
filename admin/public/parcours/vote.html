@@ -2478,6 +2478,21 @@ var FLOWIN_MODULE_FALLBACK = (function(){
 })();
 var FLOWIN_EVENT = null;
 var FLOWIN_PRO_ID = null;
+/* ── Nettoyage anti-doublon inter-events ── */
+(function(){
+  try {
+    var _evId = (new URLSearchParams(window.location.search)).get('ev') || '';
+    if(_evId && _evId !== 'ev-paques'){
+      /* Supprimer les clés des anciens events pour éviter collision */
+      localStorage.removeItem('flowin_played_pq');
+      localStorage.removeItem('flowin_played_qm');
+      localStorage.removeItem('flowin_played_qs');
+      localStorage.removeItem('flowin_played_sp');
+      localStorage.removeItem('flowin_played_vs');
+      localStorage.removeItem('flowin_played_tb');
+    }
+  } catch(e){}
+})();
 /* ── Paramètres URL cfg depuis section Jeux dashboard (bonus=0, partage=0) ── */
 var FLOWIN_CFG_PARAMS = (function(){
   try {
