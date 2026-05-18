@@ -942,6 +942,59 @@ function QR8bitByte(t){this.mode=QRMode.MODE_8BIT_BYTE,this.data=t,this.parsedDa
 </script>
 <script>
 "use strict";
+/* ══ PRE-BOOT : injection directe localStorage — CRF garanti même en cache ancien ══ */
+(function(){
+  try {
+    var _k = 'flowin_v31_data';
+    var _raw = localStorage.getItem(_k);
+    if(!_raw) return; // Sera chargé depuis SEED plus tard
+    var _d = JSON.parse(_raw);
+    if(!_d || !_d.events) return;
+    // Injecter ev-crf-2026 si absent
+    var _hasCRF = false;
+    for(var _i=0; _i<_d.events.length; _i++){
+      if(_d.events[_i].id === 'ev-crf-2026'){ _hasCRF = true; break; }
+    }
+    if(!_hasCRF){
+      _d.events.push({id:'ev-crf-2026',proId:'pro-crf-vence',
+        nom:'Croix Rouge — Collecte Vence 2026',module:'quiz',status:'upcoming',
+        dateD:'2026-05-23',dateF:'2026-05-23',hStart:'09:00',hEnd:'18:00',
+        lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',
+        participants:0,gagnants:0,joueursOptin:0,couleur:'#E8212B',
+        description:'Collecte solidaire Croix Rouge',scoreMin:0,
+        banques:['bq-croix-rouge'],partenaires:[],superEventId:'',
+        clientType:'btoc',tiragesFaits:{},
+        cfg:{subtitle:'VENCE · SOLIDARITÉ 2026',datesLabel:'Samedi 23 Mai 2026',
+          nomCourt:'Croix Rouge<br>Vence',tirageDate:'Manuel',
+          qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-crf-2026',
+          quizBanques:['bq-croix-rouge'],optinActif:true,quizNbQuestions:4,
+          quizScoreMin:1,quizBonus:true,quizTimer:false,quizTimerVisible:false,
+          quizPartage:false,quizRecapFin:true,quizUneFoisParJour:true,tirageManuel:true,
+          logoEmoji:'🏥',accent:'#E8212B',accentSoft:'#FFF0F0'},
+        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:''}
+      });
+      if(!_d.pros) _d.pros=[];
+      var _hasPro=false;
+      for(var _pi=0;_pi<_d.pros.length;_pi++){if(_d.pros[_pi].id==='pro-crf-vence'){_hasPro=true;break;}}
+      if(!_hasPro) _d.pros.push({id:'pro-crf-vence',
+        nom:'Croix Rouge Française — Délégation de Vence',
+        ville:'Vence',codePostal:'06140',adresse:'',tel:'',email:'',
+        secteur:'Association',contact:'',role:'',siret:'',
+        entreeP:'2026-05-18',notes:'',tags:['crf']});
+      if(!_d.lots) _d.lots=[];
+      var _crfLots=0;
+      for(var _li=0;_li<_d.lots.length;_li++){if(_d.lots[_li].eventId==='ev-crf-2026')_crfLots++;}
+      if(_crfLots===0){
+        for(var _gi=1;_gi<=6;_gi++)
+          _d.lots.push({id:'lot-crf-'+_gi,eventId:'ev-crf-2026',
+            partenaireId:'',nom:'Lot '+_gi+' — À compléter',
+            valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''});
+      }
+      localStorage.setItem(_k, JSON.stringify(_d));
+    }
+  } catch(_e){ /* silencieux */ }
+})();
+
 
 
 
