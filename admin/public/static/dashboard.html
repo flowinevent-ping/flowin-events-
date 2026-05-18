@@ -1916,6 +1916,14 @@ async function supaLoadAll(){
     var lots = results[5].map(function(r){ return supaRowToData(r,'lot'); });
     var banques = results[6].map(function(r){ return supaRowToData(r,'banque'); });
     var landings = results[7].map(function(r){ return supaRowToData(r,'landing'); });
+    /* Recalculer participants/optin/gagnants depuis les vrais joueurs */
+    events.forEach(function(ev){
+      var jEv = joueurs.filter(function(j){ return j.events && j.events.indexOf(ev.id) >= 0; });
+      ev.participants = jEv.length;
+      ev.joueursOptin = jEv.filter(function(j){ return j.optin; }).length;
+      var lotsEv = lots.filter(function(l){ return l.eventId === ev.id && l.assigneA; });
+      ev.gagnants = lotsEv.length;
+    });
     console.log('[Flowin] Supabase chargé : '+pros.length+' pros, '+events.length+' events, '+joueurs.length+' joueurs, '+lots.length+' lots, '+landings.length+' landings');
     return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques, landings:landings };
   } catch(e) {
@@ -5110,7 +5118,7 @@ function drawerEvent(e){
   if(!e) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Event introuvable</div>';
   const pro = findPro(e.proId);
   const partenaires = (e.partenaires||[]).map(findPartner).filter(Boolean);
-  const participants = DATA.joueurs.filter(j=>j.events.includes(e.id));
+  const participants = DATA.joueurs.filter(function(j){ return j.events && j.events.indexOf(e.id) >= 0; });
   const lots = DATA.lots.filter(l=>l.eventId===e.id);
 
   let html = drawerHeader('📅 '+esc(e.nom), statusChip(e.status)+' · '+moduleChip(e.module)+' · '+esc(pro?pro.nom:'-'));

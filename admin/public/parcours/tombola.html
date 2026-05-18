@@ -2419,7 +2419,7 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
       body: JSON.stringify(partPayload)
     }).then(function(r){
       if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation err:', r.status, t); });
-      else console.log('[Flowin] ✅ inscription:', emailLower, evId, ticket);
+      else console.log('[Flowin] ✅ inscription OK:', emailLower, evId, ticket);
     });
   }).catch(function(e){ console.warn('[Flowin] supaWriteFlowin:', e); });
 }
