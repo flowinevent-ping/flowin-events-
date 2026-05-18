@@ -2053,7 +2053,7 @@ async function supaWritePro(p){
 }
 
 // Upsert partenaire → Supabase + GAS fallback
-async async function supaWritePartenaire(p){
+async function supaWritePartenaire(p){
   if(!p || !p.id) return;
   var payload = {
     id: p.id, nom: p.nom, type: p.type||'Local',
