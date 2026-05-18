@@ -2475,20 +2475,20 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
       'apikey':FLOWIN_SUPA_ANON,
       'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
       'Content-Type':'application/json',
-      'Prefer':'resolution=merge-duplicates,return=minimal'
+      'Prefer':'resolution=merge-duplicates,return=representation'
     },
     body: JSON.stringify(joueurPayload)
+  }).then(function(r){
+    if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] joueur upsert error:', r.status, t); });
+    return r.json();
   }).catch(function(e){ console.warn('[Flowin] upsert joueur:', e); });
   
   /* INSERT participation — avec joueur_id + played_at pour stats par jour */
   var partPayload = {
     event_id:    FLOWIN_EVENT.id,
     joueur_id:   extId,
-    played_at:   nowIso,
-    played_date: dateIso,
     completed:   true,
-    ticket_code: ticket || '',
-    module:      FLOWIN_EVENT.module || ''
+    ticket_code: ticket || ''
   };
   fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
     method:'POST',
@@ -2496,9 +2496,11 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
       'apikey':FLOWIN_SUPA_ANON,
       'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
       'Content-Type':'application/json',
-      'Prefer':'return=minimal'
+      'Prefer':'return=representation'
     },
     body: JSON.stringify(partPayload)
+  }).then(function(r){
+    if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation error:', r.status, t); });
   }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
   
   console.log('[Flowin] supaWriteFlowin OK:', prefix, jid, ticket);
