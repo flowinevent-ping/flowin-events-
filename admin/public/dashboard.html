@@ -1673,6 +1673,16 @@ function supaRowToData(row, type){
   if(o.date_retrait !== undefined) { o.dateRetrait = o.date_retrait; delete o.date_retrait; }
   if(o.role_contact !== undefined) { o.role = o.role_contact; delete o.role_contact; }
   if(o.entree_p !== undefined) { o.entreeP = o.entree_p; delete o.entree_p; }
+  if(o.decouverte !== undefined) { /* déjà au bon nom */ }
+  if(o.enseigne !== undefined) { /* déjà au bon nom */ }
+  if(o.date_assign !== undefined) { o.dateAssign = o.date_assign; delete o.date_assign; }
+  if(o.tirage_global !== undefined) { o.tirageGlobal = o.tirage_global; delete o.tirage_global; }
+  if(o.nb_gagnants_final !== undefined) { o.nbGagnantsFinal = o.nb_gagnants_final; delete o.nb_gagnants_final; }
+  if(o.deploy_url !== undefined) { o.deployUrl = o.deploy_url; delete o.deploy_url; }
+  if(o.accent_color !== undefined) { o.accentColor = o.accent_color; delete o.accent_color; }
+  if(o.module_jeu !== undefined) { o.moduleJeu = o.module_jeu; delete o.module_jeu; }
+  if(o.wa_number !== undefined) { o.waNumber = o.wa_number; delete o.wa_number; }
+  if(o.created_at !== undefined) { o.createdAt = o.created_at; delete o.created_at; }
   return o;
 }
 
@@ -1687,7 +1697,8 @@ async function supaLoadAll(){
       supaFetch('super_events'),
       supaFetch('joueurs'),
       supaFetch('lots'),
-      supaFetch('banques')
+      supaFetch('banques'),
+      supaFetch('landings')
     ]);
     var pros = results[0].map(function(r){ return supaRowToData(r,'pro'); });
     var partenaires = results[1].map(function(r){ return supaRowToData(r,'partenaire'); });
@@ -1696,8 +1707,9 @@ async function supaLoadAll(){
     var joueurs = results[4].map(function(r){ return supaRowToData(r,'joueur'); });
     var lots = results[5].map(function(r){ return supaRowToData(r,'lot'); });
     var banques = results[6].map(function(r){ return supaRowToData(r,'banque'); });
-    console.log('[Flowin] Supabase chargé : '+pros.length+' pros, '+events.length+' events, '+joueurs.length+' joueurs, '+lots.length+' lots');
-    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques };
+    var landings = results[7].map(function(r){ return supaRowToData(r,'landing'); });
+    console.log('[Flowin] Supabase chargé : '+pros.length+' pros, '+events.length+' events, '+joueurs.length+' joueurs, '+lots.length+' lots, '+landings.length+' landings');
+    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques, landings:landings };
   } catch(e) {
     console.error('[Flowin] supaLoadAll erreur', e);
     return null;
@@ -1716,6 +1728,8 @@ async function refreshFromSupabase(){
   DATA.partenaires = data.partenaires;
   DATA.events = data.events;
   DATA.superEvents = data.superEvents;
+    if(data.landings && data.landings.length) DATA.landings = data.landings;
+
   DATA.joueurs = data.joueurs;
   DATA.lots = data.lots;
   // Banques : merger avec SEED (les banques système ne sont pas en SQL)
@@ -1799,7 +1813,7 @@ async function supaWriteLot(l){
     id:l.id, event_id:l.eventId, partenaire_id:l.partenaireId||null,
     nom:l.nom, valeur:l.valeur||0, quantite:l.quantite||1,
     assigne_a:l.assigneA||null, retire:l.retire||false,
-    date_retrait:l.dateRetrait||null, note:l.note||''
+    date_retrait:l.dateRetrait||null, date_assign:l.dateAssign||null, note:l.note||''
   };
   var ok = await supaUpsert('lots', payload);
   if(!ok) gasBackup('lot_upsert', payload);
@@ -1878,7 +1892,10 @@ async function supaWriteSuperEvent(se){
     pros: Array.isArray(se.pros) ? se.pros : [],
     events: Array.isArray(se.events) ? se.events : [],
     date_d: se.dateD||null, date_f: se.dateF||null,
-    description: se.description||''
+    description: se.description||'',
+    status: se.status||'upcoming',
+    tirage_global: se.tirageGlobal||false,
+    nb_gagnants_final: se.nbGagnantsFinal||0
   };
   var ok = await supaUpsert('super_events', payload);
   if(!ok) gasBackup('super_event_upsert', payload);
