@@ -2019,6 +2019,7 @@ const LIB_EVENTS = {
   setStatus: (id, newStatus) => {
     const ev = DATA.events.find(e=>e.id===id); if(!ev) return;
     ev.status = newStatus; saveData();
+    supaWriteEvent(ev); // Sync statut → désactive/réactive QR côté parcours
   },
   participantsList: (eventId) => DATA.joueurs.filter(j=>j.events.includes(eventId))
 };
@@ -3498,7 +3499,8 @@ function archiveEvent(id){
   var e = findEvent(id); if(!e) return;
   e.status = 'archived';
   saveData(); closeDrawer(); closeModal();
-  toast('Event archivé','success'); render();
+  supaWriteEvent(e); // Persiste le statut archived → QR bloqué côté parcours
+  toast('Event archivé · QR code désactivé','success'); render();
 }
 function confirmDelete(type, id){
   if(type==='event'){

@@ -2410,7 +2410,18 @@ if(FLOWIN_MODULE_FALLBACK){
     if(rows && rows.length){
       FLOWIN_EVENT = rows[0];
       FLOWIN_PRO_ID = rows[0].pro_id || null;
-      console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module);
+      console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module, '· statut:', rows[0].status);
+
+      /* ── Bloquer si event terminé ou archivé ── */
+      if(rows[0].status === 'past' || rows[0].status === 'archived'){
+        document.body.innerHTML = '<div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F8FAFC;font-family:-apple-system,sans-serif;padding:32px;text-align:center">'
+          + '<div style="font-size:48px;margin-bottom:16px">🔒</div>'
+          + '<div style="font-size:20px;font-weight:800;color:#1B3A5C;margin-bottom:8px">Cet event est terminé</div>'
+          + '<div style="font-size:14px;color:#64748B;max-width:280px;line-height:1.6">Le QR code de cet événement n'est plus actif.<br>Merci pour votre participation !</div>'
+          + '</div>';
+        return;
+      }
+
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
       try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
