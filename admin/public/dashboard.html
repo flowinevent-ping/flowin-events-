@@ -3816,6 +3816,101 @@ function deleteEvent(id){
   render();
 }
 
+function duplicateEvent(id){
+  var src = findEvent(id);
+  if(!src){ toast('Event introuvable','warn'); return; }
+
+  /* Générer un nouvel ID unique */
+  var newId = id + '-copy-' + Date.now().toString(36);
+  var newNom = src.nom + ' (copie)';
+
+  var confirmation = 'Dupliquer \"' + (src.nom||id) + '\" ?\n\n'
+    + 'Crée un nouvel event identique :\n'
+    + '• Même module, configuration, couleur, lots\n'
+    + '• Banque de questions liée conservée\n'
+    + '• 0 participant, 0 gagnant (repart à zéro)\n\n'
+    + 'Nouvel ID : ' + newId;
+
+  if(!confirm(confirmation)) return;
+
+  /* ── Copie profonde de l\'event ── */
+  var newEv = JSON.parse(JSON.stringify(src));
+  newEv.id          = newId;
+  newEv.nom         = newNom;
+  newEv.status      = 'draft';
+  newEv.participants = 0;
+  newEv.gagnants    = 0;
+  newEv.joueursOptin = 0;
+  delete newEv.createdAt;
+  delete newEv.updatedAt;
+
+  /* ── Copie des lots (sans gagnants) ── */
+  var srcLots = DATA.lots.filter(function(l){ return l.eventId === id; });
+  var newLots = srcLots.map(function(l){
+    var nl = JSON.parse(JSON.stringify(l));
+    nl.id        = 'lot-' + newId + '-' + nl.rang;
+    nl.eventId   = newId;
+    nl.assigneA  = null;
+    nl.dateAssign = null;
+    return nl;
+  });
+
+  /* ── Persister localement ── */
+  DATA.events.push(newEv);
+  DATA.lots = DATA.lots.concat(newLots);
+  saveData();
+
+  /* ── Persister en Supabase ── */
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    var H = {
+      'apikey': FLOWIN_SUPA_ANON,
+      'Authorization': 'Bearer ' + FLOWIN_SUPA_ANON,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    };
+    /* Event */
+    var evPayload = {
+      id:          newEv.id,
+      nom:         newEv.nom,
+      status:      newEv.status,
+      module:      newEv.module,
+      pro_id:      newEv.proId,
+      couleur:     newEv.couleur,
+      lieu:        newEv.lieu || '',
+      date_debut:  newEv.dateDebut || null,
+      date_fin:    newEv.dateFin   || null,
+      participants: 0,
+      gagnants:    0,
+      cfg:         newEv.cfg || {}
+    };
+    fetch(FLOWIN_SUPA_URL + '/rest/v1/events', {
+      method: 'POST', headers: H,
+      body: JSON.stringify(evPayload)
+    }).then(function(r){
+      if(!r.ok) r.text().then(function(t){ console.warn('[dup event]', r.status, t); });
+    });
+    /* Lots */
+    newLots.forEach(function(nl){
+      fetch(FLOWIN_SUPA_URL + '/rest/v1/lots', {
+        method: 'POST', headers: H,
+        body: JSON.stringify({
+          event_id: nl.eventId,
+          titre:    nl.titre  || nl.nom || '',
+          emoji:    nl.emoji  || '🎁',
+          valeur:   nl.valeur || 0,
+          rang:     nl.rang   || 1
+        })
+      }).catch(function(){});
+    });
+  }
+
+  toast('⧉ "' + newNom + '" créé — modifie les dates et le nom puis publie', 'success');
+  render();
+  /* Ouvrir le drawer du nouvel event */
+  setTimeout(function(){ openDrawer('event', newId); }, 300);
+}
+
+
 function archiveEvent(id){
   var e = findEvent(id); if(!e) return;
   e.status = 'archived';
@@ -6306,6 +6401,7 @@ function drawerEvent(e){
     }
     html += drawerFooter(
       '<button class="btn btn-sm" style="background:#EF4444;color:#fff;border:none" onclick="deleteEvent(\''+e.id+'\')">🗑 Supprimer</button>'
+      + '<button class="btn btn-sm" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0" onclick="duplicateEvent(\''+e.id+'\')">⧉ Dupliquer</button>'
       + '<button class="btn btn-sm" onclick="startWizardEdit(\''+e.id+'\')">✏ Wizard</button>',
       '<button class="btn btn-primary" onclick="enterEditMode()">✏ Édition rapide</button>'
     );
