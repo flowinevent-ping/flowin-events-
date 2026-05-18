@@ -68,7 +68,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Progress dots */
 .progress-strip{display:flex;gap:6px;justify-content:center;padding:14px 20px 12px}
 .progress-step{flex:1;height:4px;background:rgba(255,255,255,.15);border-radius:100px;max-width:60px}
-.progress-step.done{background:var(--green)}
+.progress-step.done{background:#7C2D92}/*var(--green)}
 .progress-step.on{background:var(--a)}
 .progress-step.on.green{background:#1D9E75}
 
@@ -944,10 +944,10 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 /* MODULE TOMBOLA — Nuits du Sud 2026                                  */
 /* Palette : amber/or sur fond festival sombre                         */
 /* ═══════════════════════════════════════════════════════════════════ */
-.tb-viewport{background:linear-gradient(160deg,#8B0000 0%,#E8212B 45%,#FF5252 100%) !important}
+.tb-viewport{background:linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%) !important}
 .tb-landing{padding:32px 22px 22px;text-align:center;color:#fff}
 .tb-badge{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:100px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-radius:100px;padding:5px 14px;font-size:10px;font-weight:900;color:#fff;margin-bottom:16px;text-transform:uppercase;letter-spacing:.1em;border:1px solid rgba(252,211,77,.3)}
-.tb-logo{width:84px;height:84px;border-radius:26px;margin:0 auto 14px;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 12px 30px rgba(245,158,11,.4)}
+.tb-logo{width:84px;height:84px;border-radius:26px;margin:0 auto 14px;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 12px 30px rgba(168,85,247,.4)}
 .tb-title{font-family:'Fredoka One',cursive;font-size:26px;line-height:1.1;margin-bottom:8px;color:#fff}
 .tb-sub{font-size:12px;font-weight:600;opacity:.85;margin-bottom:18px;line-height:1.5;color:#fff}
 .tb-lots{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(8px);border:1px solid rgba(252,211,77,.2);border-radius:16px;padding:12px 14px;text-align:left;margin-bottom:14px}
@@ -957,13 +957,13 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .tb-lot-name{color:#fff;font-size:12px;font-weight:900;color:#fff;margin-bottom:2px}
 .tb-lot-hint{color:rgba(255,255,255,.6);font-size:11px;font-weight:700;color:rgba(255,255,255,.6)}
 .tb-draw-date{color:rgba(255,255,255,.7);font-size:11px;font-weight:800;color:rgba(255,255,255,.7);background:rgba(252,211,77,.1);border-radius:10px;padding:8px 12px;border:1px solid rgba(252,211,77,.2)}
-.tb-btn-primary{background:rgba(255,255,255,.07);color:#E8212B;font-family:'Fredoka One',cursive;font-size:15px;border:none;border-radius:100px;cursor:pointer;box-shadow:0 10px 28px rgba(245,158,11,.4)}
-.tb-confirm-hero{background:linear-gradient(135deg,#8B0000,#E8212B);padding:30px 22px 20px;text-align:center;color:#fff}
+.tb-btn-primary{background:rgba(255,255,255,.07);color:#E8212B;font-family:'Fredoka One',cursive;font-size:15px;border:none;border-radius:100px;cursor:pointer;box-shadow:0 10px 28px rgba(168,85,247,.4)}
+.tb-confirm-hero{background:linear-gradient(135deg,#0F172A,#1E293B);padding:30px 22px 20px;text-align:center;color:#fff}
 .tb-confirm-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(252,211,77,.15);border-radius:100px;padding:5px 14px;font-size:9px;font-weight:900;color:#fff;margin-bottom:10px;text-transform:uppercase;letter-spacing:.1em;border:1px solid rgba(252,211,77,.3)}
 .tb-confirm-title{font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:4px}
 .tb-confirm-sub{font-size:12px;font-weight:800;color:rgba(255,255,255,.7)}
 .tb-source-chip{background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.2);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;transition:all .1s;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:4px}
-.tb-source-chip.sel{background:#F59E0B;color:#fff;border-color:#fff;box-shadow:0 3px 10px rgba(245,158,11,.3)}
+.tb-source-chip.sel{background:#F59E0B;color:#fff;border-color:#fff;box-shadow:0 3px 10px rgba(168,85,247,.3)}
 
 /* ═══════════════════════════════════════════════════════════════════ */
 /* QUIZMASTER CSS — clone de Pâques avec couleurs adaptées             */
@@ -1988,7 +1988,8 @@ function flowinHydrateModule(ev) {
     var ri=parseInt(tbColor.slice(1,3),16)||232, gi=parseInt(tbColor.slice(3,5),16)||33, bi=parseInt(tbColor.slice(5,7),16)||43;
     var tbDark='rgb('+(Math.round(ri*.55))+','+(Math.round(gi*.55))+','+(Math.round(bi*.55))+')';
     var vport=vp.querySelector('.tb-viewport');
-    if(vport) vport.style.background='linear-gradient(160deg,'+tbDark+' 0%,'+tbColor+' 45%,'+tbColor+'cc 100%)';
+    /* Fond Flowin dark — ne pas écraser avec couleur event */
+    if(vport) vport.style.background='';
     var logoEl=vp.querySelector('.tb-logo');
     if(logoEl&&!logoEl.querySelector('svg')){
       logoEl.innerHTML='<svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+tbColor+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+tbColor+'"/></svg>';
@@ -2063,10 +2064,10 @@ function tbPickGender(el){
   var parent = el.parentElement;
   parent.querySelectorAll('button').forEach(function(b){
     b.style.background = 'rgba(255,255,255,.06)';
-    b.style.borderColor = 'rgba(245,158,11,.3)';
+    b.style.borderColor = 'rgba(168,85,247,.3)';
     b.style.color = '#1A1033';
   });
-  el.style.background = 'rgba(245,158,11,.15)';
+  el.style.background = 'rgba(168,85,247,.15)';
   el.style.borderColor = '#F59E0B';
   el.style.color = '#92400E';
 }
