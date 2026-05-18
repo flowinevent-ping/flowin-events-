@@ -8618,9 +8618,7 @@ function ticketSendMail(joueurId, lotId, eventId, idx, num){
 // Lancer un tirage (mock pour l'instant — pour les events live)
 function lancerTirageJour(eventId, dateStr){
   const ev = LIB_EVENTS.find(eventId); if(!ev) return;
-  if(ev.status !== 'live' && ev.status !== 'past'){
-    toast('Le tirage nécessite un event en cours ou terminé','warn'); return;
-  }
+  /* Tirage disponible à tout moment — même pour un event upcoming ou archived */
   if(!confirm('Lancer le tirage du '+fmt(dateStr)+' ?')) return;
   if(!ev.tiragesFaits) ev.tiragesFaits = {};
   ev.tiragesFaits[dateStr] = true;
