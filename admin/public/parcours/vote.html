@@ -2472,6 +2472,28 @@ var FLOWIN_MODULE_FALLBACK = (function(){
 })();
 var FLOWIN_EVENT = null;
 var FLOWIN_PRO_ID = null;
+/* ── Paramètres URL cfg depuis section Jeux dashboard (bonus=0, partage=0) ── */
+var FLOWIN_CFG_PARAMS = (function(){
+  try {
+    var p = new URLSearchParams(window.location.search);
+    return { bonus: p.get('bonus'), partage: p.get('partage'), timer: p.get('timer') };
+  } catch(e){ return {}; }
+})();
+/* Appliquer immédiatement les paramètres d'affichage */
+if(FLOWIN_CFG_PARAMS.bonus === '0'){
+  document.addEventListener('DOMContentLoaded', function(){
+    var _h=function(sel){var els=document.querySelectorAll(sel);for(var i=0;i<els.length;i++)els[i].style.display='none';};
+    _h('#pq-9,#qm-9');
+    _h('.pq-double-cta,.pq-double-hint,.pq-double-skip');
+    _h('.pq-share-btn,.pq-share-badge,.pq-bc-share');
+  });
+}
+if(FLOWIN_CFG_PARAMS.partage === '0'){
+  document.addEventListener('DOMContentLoaded', function(){
+    var els=document.querySelectorAll('.pq-share-btn,#pq-share-btn,.pq-bc-share,.pq-share-badge');
+    for(var i=0;i<els.length;i++) els[i].style.display='none';
+  });
+}
 
 /* Routage immédiat si ?module= présent (avant Supabase) */
 if(FLOWIN_MODULE_FALLBACK){

@@ -6888,7 +6888,12 @@ function renderBiblioJeux(){
   // ── Parcours complet validé : iframe parcours_user.html ──
   var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
   var _demoEv = (DATA.events && DATA.events[0]) ? DATA.events[0].id : 'ev-paques';
-  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab);
+  // Passer l'état des toggles dans l'URL pour que le parcours se cache/montre correctement
+  var _cfgParams = '';
+  if(cfg.quizBonus === false)   _cfgParams += '&bonus=0';
+  if(cfg.quizPartage === false) _cfgParams += '&partage=0';
+  if(cfg.quizTimer)             _cfgParams += '&timer='+encodeURIComponent(cfg.quizTimer||0);
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab) + _cfgParams;
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
