@@ -1924,6 +1924,11 @@ function launchWheel(){ startSpinAnim(); }
 
 /* Navigation téléphone Pâques */
 function pqGo(n){
+  /* Sauter la page bonus si bonus=OFF (FLOWIN_CFG_PARAMS.bonus==='0') */
+  if(n === 9 && typeof FLOWIN_CFG_PARAMS !== 'undefined' && FLOWIN_CFG_PARAMS.bonus === '0'){
+    pqGo(8); /* → aller directement aux partenaires */
+    return;
+  }
   var vp = document.getElementById('vp-paques');
   vp.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   var target = document.getElementById('pq-' + n);
