@@ -1902,7 +1902,7 @@ async function supaLoadAll(){
     console.log('[Flowin] Chargement Supabase…');
     var results = await Promise.all([
       supaFetch('pros'),
-      supaFetch('partenaires', 'select=id,nom,ville,secteur,contact,email,tel,siret,tags,entree_p'),
+      supaFetch('partenaires', 'select=id,nom,ville,code_postal,secteur,contact,email,tel,siret,tags,entree_p'),
       supaFetch('events'),
       supaFetch('super_events', 'select=*&limit=50'),
       supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=500'),
@@ -2053,7 +2053,7 @@ async function supaWritePro(p){
 }
 
 // Upsert partenaire → Supabase + GAS fallback
-async function supaWritePartenaire(p){
+async async function supaWritePartenaire(p){
   if(!p || !p.id) return;
   var payload = {
     id: p.id, nom: p.nom, type: p.type||'Local',
@@ -2761,7 +2761,7 @@ function modalWizPartner(d){
     +   '<div><label class="label">Ville</label><input type="text" class="input" value="'+escAttr(d.ville||'')+'" oninput="state.modal.data.ville=this.value"/></div>'
     +   '<div><label class="label">Email contact</label><input type="email" class="input" value="'+escAttr(d.email||'')+'" oninput="state.modal.data.email=this.value"/></div>'
     + '</div>'
-    + '<div class="form-row mt-2"><label class="label">SIRET (optionnel)</label><input type="text" class="input" value="'+escAttr(d.siret||'')+'" oninput="state.modal.data.siret=this.value"/></div>'
+    + '<div class="form-grid mt-2">'    +   '<div><label class="label">Téléphone</label><input type="tel" class="input" value="'+escAttr(d.tel||'')+'" placeholder="06XXXXXXXX" oninput="state.modal.data.tel=this.value"/></div>'    +   '<div><label class="label">Code postal</label><input type="text" class="input" value="'+escAttr(d.code_postal||'')+'" placeholder="06140" maxlength="5" oninput="state.modal.data.code_postal=this.value"/></div>'    + '</div>'    + '<div class="form-row mt-2"><label class="label">SIRET (optionnel)</label><input type="text" class="input" value="'+escAttr(d.siret||'')+'" oninput="state.modal.data.siret=this.value"/></div>'
     + '<div class="alert info mt-3 text-sm"><span class="ico">ℹ️</span>Ce partenaire sera ajouté au CRM partenaires global et coché automatiquement sur cet event.</div>'
     + '</div>'
     + '<div class="modal-footer"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="wizPartnerSave()">+ Créer et ajouter</button></div>'
@@ -8930,7 +8930,14 @@ function wizPartnerSave(){
   const d = state.modal.data;
   if(!d.nom){ toast('Nom du partenaire requis','warn'); return; }
   const id = newId('pt');
-  DATA.partenaires.push({id,nom:d.nom,secteur:d.secteur||'',type:d.type||'Local',ville:d.ville||'',email:d.email||'',siret:d.siret||'',events:[],totalDistribue:0,actif:true,recurrent:d.type==='Récurrent'});
+  var _pt = {
+    id, nom:d.nom, secteur:d.secteur||'', type:d.type||'Local',
+    ville:d.ville||'', email:d.email||'', tel:d.tel||'',
+    code_postal:d.code_postal||'', siret:d.siret||'',
+    events:[], totalDistribue:0, actif:true, recurrent:d.type==='Récurrent'
+  };
+  DATA.partenaires.push(_pt);
+  supaWritePartenaire(_pt); /* ← Supabase + GAS backup */
   // Auto-coche dans le wizard
   if(!state.wiz.draft.partenaires) state.wiz.draft.partenaires = [];
   state.wiz.draft.partenaires.push(id);
