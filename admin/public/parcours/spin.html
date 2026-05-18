@@ -2441,11 +2441,15 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
     body: JSON.stringify(joueurPayload)
   }).catch(function(e){ console.warn('[Flowin] upsert joueur:', e); });
   
-  /* INSERT participation */
+  /* INSERT participation — avec joueur_id + played_at pour stats par jour */
   var partPayload = {
-    event_id: FLOWIN_EVENT.id,
-    completed: true,
-    ticket_code: ticket || ''
+    event_id:    FLOWIN_EVENT.id,
+    joueur_id:   extId,
+    played_at:   nowIso,
+    played_date: dateIso,
+    completed:   true,
+    ticket_code: ticket || '',
+    module:      FLOWIN_EVENT.module || ''
   };
   fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
     method:'POST',

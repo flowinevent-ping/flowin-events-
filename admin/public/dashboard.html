@@ -10100,16 +10100,27 @@ function startRealtimePolling(){
     // Si Supabase configuré : requête réelle
     if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
       liveEvents.forEach(ev=>{
+        // Comptage total participants
         fetch(FLOWIN_SUPA_URL+'/rest/v1/participations?event_id=eq.'+ev.id+'&select=count', {
           headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
                    'Prefer':'count=exact','Range':'0-0'}
-        }).then(r=>{
-          const count = parseInt(r.headers.get('content-range')?.split('/')[1]||'0');
+        }).then(function(r){
+          var count = parseInt((r.headers.get('content-range')||'0/0').split('/')[1]||'0');
           if(count && count !== ev.participants){
             ev.participants = count;
             if(state.view==='pilotage') render();
           }
-        }).catch(()=>{});
+        }).catch(function(){});
+        // Comptage participants du JOUR (pour stats par commerce par jour)
+        var todayStr = new Date().toISOString().slice(0,10);
+        fetch(FLOWIN_SUPA_URL+'/rest/v1/participations?event_id=eq.'+ev.id+'&played_date=eq.'+todayStr+'&select=count', {
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+                   'Prefer':'count=exact','Range':'0-0'}
+        }).then(function(r){
+          var countJour = parseInt((r.headers.get('content-range')||'0/0').split('/')[1]||'0');
+          if(!ev.stats) ev.stats = {};
+          ev.stats.participantsAujourdhui = countJour;
+        }).catch(function(){});
       });
     } else {
       // Simulation : incrément aléatoire pour démo
