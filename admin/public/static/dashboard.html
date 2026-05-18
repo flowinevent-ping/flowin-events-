@@ -2706,7 +2706,21 @@ function renderModal(){
   else if(k==='tirage') html = modalTirage(state.modal.data);
   else if(k==='superEvent') html = modalSuperEvent(state.modal.data);
   else if(k==='reglages-section') html = modalReglagesSection(state.modal.data);
-  else if(k==='landing-setup') html = modalLanding(state.modal.data);
+  else if(k==='qr-landing'){
+      var _qd=state.modal.data||{};
+      var _qu=(_qd.url&&_qd.url.length>5?_qd.url:'https://flowin-events.vercel.app/landing/index.html')+'?source=qr';
+      var _qi='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='+encodeURIComponent(_qu)+'&bgcolor=1B3A5C&color=ffffff&margin=12';
+      html='<div class="modal-header"><div class="modal-title">📱 QR — '+esc(_qd.nom||'Landing')+'</div><button class="modal-close" onclick="closeModal()">×</button></div>'
+          +'<div class="modal-body" style="text-align:center;padding:24px">'
+          +'<div style="background:linear-gradient(135deg,#1B3A5C,#0F2A45);border-radius:16px;padding:24px;display:inline-block">'
+          +'<img src="'+_qi+'" style="width:200px;height:200px;border-radius:8px;display:block;margin:0 auto 14px">'
+          +'<div style="font-size:10px;color:rgba(255,255,255,.5);word-break:break-all;font-family:monospace;background:rgba(0,0,0,.2);border-radius:6px;padding:5px 10px">'+esc(_qu)+'</div>'
+          +'</div>'
+          +'<div style="margin-top:16px;display:flex;gap:10px;justify-content:center">'
+          +'<button class="btn btn-primary" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+_qu.replace(/'/g,"\\'")+'\'  ).then(function(){toast(\'Lien copié\',\'success\');})">📋 Copier</button>'
+          +'<a href="'+esc(_qu)+'" target="_blank" class="btn">↗ Ouvrir</a>'
+          +'</div></div>';
+    } else if(k==='landing-setup') html = modalLanding(state.modal.data);
   else if(k==='comm') html = modalComm(state.modal.data);
   else if(k==='wizPartner') html = modalWizPartner(state.modal.data);
   else if(k==='wizBanqueQ') html = modalWizBanqueQ(state.modal.data);
@@ -7875,6 +7889,7 @@ function renderLandingKanbanCard(ld){
     +   '</div>'
     +   '<div class="kb-actions">'
     +     '<button class="btn btn-sm" onclick="event.stopPropagation();openModal(\'landing-setup\',{ldId:\'' + esc(ld.id) + '\',tab:\'config\'})">⚙️</button>'
+    +     '<button class="btn btn-sm" style="padding:5px 8px;font-size:14px" title="QR Code accès direct" onclick="event.stopPropagation();(function(){var _u=(ld.deployUrl&&ld.deployUrl.length>5?ld.deployUrl:\'https://flowin-events.vercel.app/landing/index.html\');\'?source=qr\';openModal(\'qr-landing\',{url:ld.deployUrl||\'\'  ,nom:ld.nom});})()" >📱</button>'
     +     (ld.published
           ? '<button class="btn btn-sm" style="background:#FEE2E2;color:#991B1B;border-color:#FECACA" onclick="event.stopPropagation();lpUnpublish(\'' + esc(ld.id) + '\')">🔴 Dépublier</button>'
           : '<button class="btn btn-sm btn-primary" onclick="event.stopPropagation();lpPublish(\'' + esc(ld.id) + '\')">🟢 Publier</button>')
