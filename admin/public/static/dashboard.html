@@ -9874,8 +9874,10 @@ function renderWizConfigForModule(d){
   const m = d.module;
   let html = '';
   if(m==='quiz' || m==='quizsolo'){
+    if(!d.cfg.quizBanques) d.cfg.quizBanques = [];
     if(!d.cfg.quizBonusList) d.cfg.quizBonusList = [];
     if(!d.cfg.quizCustomQuestions) d.cfg.quizCustomQuestions = [];
+    if(!d.cfg.customQuestions) d.cfg.customQuestions = [];
     const subtab = d.cfg.quizSubtab || 'banques';
     // Sous-onglets
     html += '<div class="flex gap-2 mb-3" style="flex-wrap:wrap">'
@@ -9935,7 +9937,10 @@ function renderWizConfigForModule(d){
       });
       html += '<button class="btn btn-sm mt-3" onclick="wizCreateBanque()" style="display:block;width:100%">+ Créer une nouvelle banque</button>';
     } else if(subtab==='questions'){
-      if(!d.cfg.customQuestions) d.cfg.customQuestions = d.cfg.quizCustomQuestions || [];
+      /* Fusionner quizCustomQuestions → customQuestions */
+      if(!d.cfg.customQuestions || !d.cfg.customQuestions.length){
+        d.cfg.customQuestions = d.cfg.quizCustomQuestions || [];
+      }
       html += renderCustomQuestionsEditor(d.cfg, 'state.wiz.draft.cfg', 'renderWizard()');
     } else if(subtab==='bonus'){
       // Sous-onglet Bonus — utilise renderBonusEditor (design unifié)
@@ -10219,7 +10224,11 @@ function renderBonusEditor(cfg, idxPfx, toggleFn, rerender) {
        + '<div onclick="'+toggleFn+'" style="width:42px;height:24px;background:'+(cfg.bonusActif?'#7C2D92':'#CBD5E1')+';border-radius:100px;cursor:pointer;position:relative;flex-shrink:0">'
        + '<div style="width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:'+(cfg.bonusActif?'21':'3')+'px;transition:left .2s"></div>'
        + '</div></div>';
-  if(cfg.bonusActif) {
+  /* Questions éditables même quand toggle=OFF */
+  if(cfg.bonusActif !== false || bonusList.length > 0 || true) {
+    if(!cfg.bonusActif){
+      html += '<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 12px;font-size:11px;color:#92400E;margin-bottom:12px">⚠️ Bonus désactivé — les questions ci-dessous ne seront pas affichées aux participants</div>';
+    }
     bonusList.forEach(function(b, bi) {
       if(b.texte && !b.label){ b.label=b.texte; b.id='bonus-'+bi; b.type='single'; b.options=b.options||[]; }
       if(!b.options) b.options=[];
