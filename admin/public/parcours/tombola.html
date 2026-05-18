@@ -1813,6 +1813,41 @@ function flowinSetText(selector, text) {
   for(var i=0; i<els.length; i++) { els[i].textContent = text; }
 }
 
+/* ── Hydratation textes Pâques → event réel ── */
+function flowinHydrateDynTexts(ev){
+  if(!ev) return;
+  var nom = ev.nom || 'Cet événement';
+  var cfg = ev.cfg || {};
+  var tirage = cfg.tirageDate || 'fin de journée';
+  var lieu = ev.lieu || '';
+  var url = cfg.qrUrl || window.location.href;
+  var hint = 'Capture conseillée · Tirage ' + tirage + (lieu ? ' · ' + lieu : '');
+
+  /* Anti-doublon page */
+  var adMsg = document.querySelector('#pq-11 .ad-msg');
+  if(adMsg) adMsg.innerHTML = 'Cette adresse email a déjà participé à <strong>' + nom + '</strong>.<br>Une seule participation par personne.';
+
+  /* Ticket hint */
+  var tHint = document.getElementById('pq-ticket-hint');
+  if(tHint) tHint.textContent = hint;
+
+  /* Partenaires label */
+  var pLabel = document.querySelector('.partenaires-label');
+  if(pLabel) pLabel.textContent = '★ Partenaires ' + nom + ' ★';
+
+  /* Header formulaire */
+  var formSub = document.querySelector('#pq-5 .header-sub');
+  if(formSub) formSub.textContent = 'Pour la tombola de ' + nom;
+
+  /* Partage texte */
+  var sharePreview = document.querySelector('.pq-share-preview');
+  if(sharePreview) sharePreview.innerHTML = '« Je viens de jouer à <strong>' + nom + '</strong> · à toi de tenter ta chance ! <strong>' + url + '</strong> »';
+
+  /* Toast partage */
+  var toast = document.getElementById('pq-toast');
+  if(toast) toast.textContent = '✓ Partagé · +1 point validé';
+}
+
 function flowinHydrateModule(ev) {
   if(!ev) return;
   var module = ev.module || '';
@@ -2325,7 +2360,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {

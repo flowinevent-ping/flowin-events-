@@ -2046,6 +2046,41 @@ function flowinSetText(selector, text) {
   for(var i=0; i<els.length; i++) { els[i].textContent = text; }
 }
 
+/* ── Hydratation textes Pâques → event réel ── */
+function flowinHydrateDynTexts(ev){
+  if(!ev) return;
+  var nom = ev.nom || 'Cet événement';
+  var cfg = ev.cfg || {};
+  var tirage = cfg.tirageDate || 'fin de journée';
+  var lieu = ev.lieu || '';
+  var url = cfg.qrUrl || window.location.href;
+  var hint = 'Capture conseillée · Tirage ' + tirage + (lieu ? ' · ' + lieu : '');
+
+  /* Anti-doublon page */
+  var adMsg = document.querySelector('#pq-11 .ad-msg');
+  if(adMsg) adMsg.innerHTML = 'Cette adresse email a déjà participé à <strong>' + nom + '</strong>.<br>Une seule participation par personne.';
+
+  /* Ticket hint */
+  var tHint = document.getElementById('pq-ticket-hint');
+  if(tHint) tHint.textContent = hint;
+
+  /* Partenaires label */
+  var pLabel = document.querySelector('.partenaires-label');
+  if(pLabel) pLabel.textContent = '★ Partenaires ' + nom + ' ★';
+
+  /* Header formulaire */
+  var formSub = document.querySelector('#pq-5 .header-sub');
+  if(formSub) formSub.textContent = 'Pour la tombola de ' + nom;
+
+  /* Partage texte */
+  var sharePreview = document.querySelector('.pq-share-preview');
+  if(sharePreview) sharePreview.innerHTML = '« Je viens de jouer à <strong>' + nom + '</strong> · à toi de tenter ta chance ! <strong>' + url + '</strong> »';
+
+  /* Toast partage */
+  var toast = document.getElementById('pq-toast');
+  if(toast) toast.textContent = '✓ Partagé · +1 point validé';
+}
+
 function flowinHydrateModule(ev) {
   if(!ev) return;
   var module = ev.module || '';
@@ -2557,7 +2592,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
@@ -2581,20 +2616,20 @@ function _flowinMerge(dst, src){
   return dst;
 }
 
-/* Écriture joueur + participation en parallèle */
+/* Écriture joueur + participation — async séquenciel */
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();
   var dateIso = nowIso.slice(0,10);
-  
-  /* Génère id joueur déterministe à partir de l'email */
   var emailLower = String(email).toLowerCase().trim();
   var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
-  
+  var evId = FLOWIN_EVENT.id;
+
+  /* Champs collectés depuis le form (cp, prenom, nom, tel, age) */
   var joueurPayload = {
     external_id: extId,
     email: emailLower,
-    events: [FLOWIN_EVENT.id],
+    events: [evId],
     optin: true,
     optin_date: dateIso,
     first_seen: dateIso,
@@ -2602,61 +2637,58 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
     client_type: 'btoc'
   };
   if(extraFields) _flowinMerge(joueurPayload, extraFields);
-  
-  /* UPSERT joueur */
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
+
+  /* 1. Upsert joueur — récupérer l'UUID Supabase */
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs', {
     method:'POST',
     headers:{
       'apikey':FLOWIN_SUPA_ANON,
       'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
       'Content-Type':'application/json',
-      'Prefer':'resolution=merge-duplicates,return=representation'
+      'Prefer':'resolution=merge-duplicates,return=representation',
+      'X-Upsert-On':'external_id'
     },
     body: JSON.stringify(joueurPayload)
   }).then(function(r){
-    if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] joueur upsert error:', r.status, t); });
+    if(!r.ok){ r.text().then(function(t){ console.warn('[Flowin] joueur err:', r.status, t); }); return null; }
     return r.json();
-  }).catch(function(e){ console.warn('[Flowin] upsert joueur:', e); });
-  
-  /* INSERT participation — avec joueur_id + played_at pour stats par jour */
-  var partPayload = {
-    event_id:    FLOWIN_EVENT.id,
-    joueur_id:   extId,
-    completed:   true,
-    ticket_code: ticket || ''
-  };
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
-    method:'POST',
-    headers:{
-      'apikey':FLOWIN_SUPA_ANON,
-      'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
-      'Content-Type':'application/json',
-      'Prefer':'return=representation'
-    },
-    body: JSON.stringify(partPayload)
-  }).then(function(r){
-    if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation error:', r.status, t); });
-  }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
-  
-  console.log('[Flowin] supaWriteFlowin OK:', prefix, extId, ticket);
-  
-  /* Écriture votes dans la table votes */
-  try {
-    var sections = (FLOWIN_EVENT.cfg && FLOWIN_EVENT.cfg.voteSections) ? FLOWIN_EVENT.cfg.voteSections : [];
-    sections.forEach(function(sec, idx) {
-      var secId = sec.id || ('sec-'+idx);
-      var starsEl = document.querySelectorAll('[data-section-idx="'+idx+'"] .vs-star.on');
-      var note = starsEl.length;
-      if(note > 0) {
-        fetch(FLOWIN_SUPA_URL+'/rest/v1/votes', {
-          method:'POST',
-          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
-                   'Content-Type':'application/json','Prefer':'return=minimal'},
-          body: JSON.stringify({event_id:FLOWIN_EVENT.id, section_id:secId, note:note})
-        }).catch(function(e){ console.warn('[votes]',e); });
-      }
+  }).then(function(rows){
+    /* Récupérer l'UUID retourné OU chercher par external_id */
+    var uuid = null;
+    if(rows && rows.length) uuid = rows[0].id;
+    
+    if(!uuid){
+      /* Fallback : chercher le joueur par external_id */
+      return fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?external_id=eq.'+encodeURIComponent(extId)+'&select=id', {
+        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      }).then(function(r){ return r.json(); }).then(function(rows){
+        return rows && rows.length ? rows[0].id : null;
+      });
+    }
+    return uuid;
+  }).then(function(uuid){
+    if(!uuid){ console.warn('[Flowin] UUID joueur introuvable'); return; }
+    /* 2. INSERT participation avec le vrai UUID */
+    var partPayload = {
+      event_id: evId,
+      joueur_id: uuid,
+      completed: true,
+      ticket_code: ticket || ''
+    };
+    return fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
+      method:'POST',
+      headers:{
+        'apikey':FLOWIN_SUPA_ANON,
+        'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
+      body: JSON.stringify(partPayload)
+    }).then(function(r){
+      if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation err:', r.status, t); });
+      else console.log('[Flowin] ✅ inscription OK:', emailLower, evId, ticket);
     });
-  } catch(e){ console.warn('[votes write]',e); }
+  }).catch(function(e){ console.warn('[Flowin] supaWriteFlowin:', e); });
 }
 
 /* Wrapper de compat : registerPlay() existant peut appeler ceci en plus */
