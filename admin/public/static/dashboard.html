@@ -8041,6 +8041,17 @@ function modalLanding(data){
   // ── TAB CONFIG
   else if(tab === 'config'){
     html += '<div style="display:flex;flex-direction:column;gap:12px">';
+    /* QR code EN HAUT — visible sans scroll */
+    var _ldUrl2 = (ld.deployUrl && ld.deployUrl.length > 5) ? ld.deployUrl : 'https://flowin-events.vercel.app/landing/index.html';
+    var _qrSrc2 = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(_ldUrl2+'?source=qr')+'&bgcolor=1B3A5C&color=ffffff&margin=10';
+    html += '<div style="background:linear-gradient(135deg,#1B3A5C,#0F2A45);border-radius:14px;padding:16px;text-align:center">'
+         + '<div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">📱 QR Code d\'accès direct</div>'
+         + '<img src="'+_qrSrc2+'" style="width:140px;height:140px;border-radius:8px;display:block;margin:0 auto 10px;background:#fff;padding:3px">'
+         + '<div style="font-size:9px;color:rgba(255,255,255,.4);margin-bottom:10px;word-break:break-all;font-family:monospace;background:rgba(0,0,0,.2);border-radius:5px;padding:4px 8px">'+esc(_ldUrl2)+'</div>'
+         + '<div style="display:flex;gap:6px;justify-content:center">'
+         + '<button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:10px" onclick="(function(){var u=\''+esc(_ldUrl2)+'?source=qr\';navigator.clipboard?navigator.clipboard.writeText(u).then(function(){toast(\'Lien copié\',\'success\');}):alert(u);})()" >📋 Copier</button>'
+         + '<a href="'+esc(_ldUrl2)+'" target="_blank" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:10px;padding:6px 12px;border-radius:6px;text-decoration:none;font-weight:700">↗ Ouvrir</a>'
+         + '</div></div>';
     html += '<div><label style="font-size:12px;font-weight:700;color:var(--sa-muted)">Statut</label>'
          + '<select class="inp" style="width:100%;margin-top:4px" onchange="lpSetStatut(\'' + esc(ldId) + '\',this.value)">'
          + '<option value="brouillon"' + (ld.statut==='brouillon'?' selected':'') + '>📝 Brouillon</option>'
@@ -8061,15 +8072,7 @@ function modalLanding(data){
          + '<input class="inp" style="flex:1" value="' + esc(ld.accentColor||'#3B5CC4') + '" oninput="lpSetField(\'' + esc(ldId) + '\',\'accentColor\',this.value)"/>'
          + '</div></div>';
 
-    /* QR Code d'accès direct */
-    var _ldUrl = ld.deployUrl || 'https://flowin-events.vercel.app/landing/index.html';
-    var _qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=110x110&data='+encodeURIComponent(_ldUrl+'?source=qr')+'&bgcolor=1B3A5C&color=ffffff&margin=6';
-    html += '<div style="padding:12px 0;border-top:1px solid var(--sa-border);text-align:center">'
-         + '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 QR Code d\'accès direct</div>'
-         + '<img src="'+_qrSrc+'" style="width:100px;height:100px;border-radius:8px;display:block;margin:0 auto 8px">'
-         + '<div style="font-size:10px;color:var(--sa-muted);margin-bottom:6px;word-break:break-all">'+esc(_ldUrl)+'</div>'
-         + '<button class="btn btn-sm" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+_ldUrl+'?source=qr\').then(function(){toast(\'Lien copié\',\'success\');})" style="font-size:10px">📋 Copier le lien</button>'
-         + '</div>';
+    /* QR déplacé en haut du tab config */
     html += '<div style="padding-top:6px;border-top:1px solid var(--sa-border)">'
          + '<button class="btn btn-danger btn-sm" onclick="lpDelete(\'' + esc(ldId) + '\')">🗑 Supprimer cette landing</button>'
          + '</div>';
