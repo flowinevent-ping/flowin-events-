@@ -6168,18 +6168,46 @@ function newSuperEvent(){
 
 // Toggle pro/event dans un super event
 function seToggle(kind,seId,itemId,checked){
-  const se = findSuperEvent(seId); if(!se) return;
+  var se = findSuperEvent(seId); if(!se) return;
   if(!se[kind]) se[kind] = [];
-  if(checked && !se[kind].includes(itemId)) se[kind].push(itemId);
-  if(!checked) {
-    se[kind] = se[kind].filter(x => x!==itemId);
-    // Si on retire un pro, on retire aussi ses events de la sélection
-    if(kind==='pros'){
-      const evIds = DATA.events.filter(e=>e.proId===itemId).map(e=>e.id);
-      se.events = (se.events||[]).filter(eid => !evIds.includes(eid));
+
+  if(checked){
+    if(se[kind].indexOf(itemId) < 0) se[kind].push(itemId);
+    // Lien bidirectionnel : event.superEventId = seId
+    if(kind === 'events'){
+      var ev = findEvent(itemId);
+      if(ev){
+        ev.superEventId = seId;
+        supaWriteEvent(ev); // Supabase event.super_event_id = seId
+      }
+    }
+  } else {
+    se[kind] = se[kind].filter(function(x){ return x !== itemId; });
+    // Si on retire un pro → retirer aussi ses events
+    if(kind === 'pros'){
+      var evIds = DATA.events.filter(function(e){ return e.proId === itemId; }).map(function(e){ return e.id; });
+      se.events = (se.events||[]).filter(function(eid){ return evIds.indexOf(eid) < 0; });
+      // Effacer superEventId sur les events retirés
+      for(var _i=0; _i<evIds.length; _i++){
+        var _ev = findEvent(evIds[_i]);
+        if(_ev && _ev.superEventId === seId){
+          _ev.superEventId = '';
+          supaWriteEvent(_ev);
+        }
+      }
+    }
+    // Si on retire un event directement
+    if(kind === 'events'){
+      var evOff = findEvent(itemId);
+      if(evOff && evOff.superEventId === seId){
+        evOff.superEventId = '';
+        supaWriteEvent(evOff);
+      }
     }
   }
+
   saveData();
+  supaWriteSuperEvent(se); // Persister se.events[] dans Supabase
   renderDrawer();
 }
 function seCreateAndAddPro(seId){
@@ -8439,12 +8467,14 @@ function wizSave(){
     }, d);
     _newEv.id = id; _newEv.status = 'upcoming'; _newEv.participants = 0; _newEv.gagnants = 0; _newEv.joueursOptin = 0;
     DATA.events.unshift(_newEv);
-    // Si on vient d'un super event, on rattache automatiquement
+    // Si on vient d'un super event, on rattache automatiquement (bidirectionnel)
     if(state.wiz.superEventId){
-      const se = findSuperEvent(state.wiz.superEventId);
-      if(se){
-        if(!se.events) se.events = [];
-        se.events.push(id);
+      var _se = findSuperEvent(state.wiz.superEventId);
+      if(_se){
+        if(!_se.events) _se.events = [];
+        if(_se.events.indexOf(id) < 0) _se.events.push(id);
+        _newEv.superEventId = state.wiz.superEventId; // event → SE
+        supaWriteSuperEvent(_se); // SE → Supabase (se.events[] à jour)
       }
     }
     toast('Event "'+d.nom+'" créé','success');
