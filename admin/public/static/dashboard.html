@@ -886,35 +886,38 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 }
 .flowin-phone-nav:hover { background: var(--sa-subtle); }
 .flowin-phone-frame {
-  background: #111;
-  border-radius: 36px;
-  padding: 8px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.28), inset 0 0 0 2px #2d2d2d;
+  background: #1a1a1a;
+  border-radius: 38px;
+  padding: 0;
+  box-shadow: 0 16px 48px rgba(0,0,0,.35), inset 0 0 0 2px #333, inset 0 0 0 7px #111;
   position: relative;
-  width: min(280px, 100%);
+  width: min(270px, 100%);
   aspect-ratio: 9 / 19.5;
   overflow: hidden;
+  isolation: isolate;
 }
 .flowin-phone-notch {
-  position: absolute; top: 8px; left: 50%;
+  position: absolute; top: 10px; left: 50%;
   transform: translateX(-50%);
-  width: 72px; height: 16px;
-  background: #111; border-radius: 0 0 10px 10px; z-index: 10;
+  width: 68px; height: 18px;
+  background: #111; border-radius: 0 0 12px 12px; z-index: 10;
 }
 .flowin-phone-scaler {
   position: absolute;
-  top: 0; left: 0;
-  width: 375px;
-  height: 812px;
-  transform-origin: top left;
-  transform: scale(0.704); /* 264/375 — frame inner 264px */
+  top: 7px; left: 7px;
+  right: 7px; bottom: 7px;
+  overflow: hidden;
+  border-radius: 31px;
 }
 .flowin-phone-scaler iframe {
   width: 375px;
   height: 812px;
   border: none;
   display: block;
-  border-radius: 28px;
+  border-radius: 0;
+  transform-origin: top left;
+  transform: scale(calc((270px - 14px) / 375px));
+  transform: scale(0.683);
 }
 </style>
 </head>
