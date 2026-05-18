@@ -2421,7 +2421,10 @@ function makeShareFns(prefix, goFn, eventName, eventUrl){
 
 /* Vérification anti-doublon localStorage */
 function checkDuplicate(prefix, emailVal, goFn, adPage){
-  var key = 'flowin_played_'+prefix;
+  /* Clé par event (pas par module) pour éviter collision inter-events */
+  var key = (typeof FLOWIN_EV_ID !== 'undefined' && FLOWIN_EV_ID)
+    ? 'flowin_played_'+FLOWIN_EV_ID
+    : 'flowin_played_'+prefix;
   try{
     var stored = localStorage.getItem(key);
     if(stored){
@@ -2437,7 +2440,10 @@ function checkDuplicate(prefix, emailVal, goFn, adPage){
 
 function registerPlay(prefix, emailVal, ticketCode){
   try{
-    localStorage.setItem('flowin_played_'+prefix, JSON.stringify({email:emailVal, ticket:ticketCode, ts:Date.now()}));
+    var _regKey = (typeof FLOWIN_EV_ID !== 'undefined' && FLOWIN_EV_ID)
+      ? 'flowin_played_'+FLOWIN_EV_ID
+      : 'flowin_played_'+prefix;
+    localStorage.setItem(_regKey, JSON.stringify({email:emailVal, ticket:ticketCode, ts:Date.now()}));
   }catch(e){}
 }
 
