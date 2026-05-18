@@ -1884,6 +1884,8 @@ function supaRowToData(row, type){
   if(o.module_jeu !== undefined) { o.moduleJeu = o.module_jeu; delete o.module_jeu; }
   if(o.wa_number !== undefined) { o.waNumber = o.wa_number; delete o.wa_number; }
   if(o.created_at !== undefined) { o.createdAt = o.created_at; delete o.created_at; }
+  /* Lots : Supabase stocke 'titre' mais JS utilise 'nom' */
+  if(o.titre !== undefined && o.nom === undefined) { o.nom = o.titre; }
   return o;
 }
 
@@ -5598,12 +5600,12 @@ function drawerEvent(e){
     var _isBtobFront = e.clientType === 'btob';
     if(!e.cfg.front) e.cfg.front = {
       visible:{titre:true, dates:true, lots:true, tirage:!_isBtobFront, lotSemaine:false},
-      titre:e.nom,
-      sousTitre:_isBtobFront ? 'Découverte Pro' : 'Source d\'inspiration',
-      dates:fmtFull(e.dateD)+(e.dateF&&e.dateF!==e.dateD?' → '+fmtFull(e.dateF):''),
+      titre:e.cfg.nomCourt ? e.cfg.nomCourt.replace(/<br>/g,' ') : e.nom,
+      sousTitre:_isBtobFront ? 'Découverte Pro' : (e.cfg.subtitle || 'Source d\'inspiration'),
+      dates:e.cfg.datesLabel || (fmtFull(e.dateD)+(e.dateF&&e.dateF!==e.dateD?' → '+fmtFull(e.dateF):'')),
       ville:e.lieu||(_isBtobFront?'Nice':'Vence'),
       lotLabel:_isBtobFront ? 'Ce que vous pouvez gagner' : 'Lots à gagner',
-      lotTirage:_isBtobFront ? 'Romain vous contacte sous 24h' : 'Tirage au sort à la fin de l\'event',
+      lotTirage:_isBtobFront ? 'Romain vous contacte sous 24h' : (e.cfg.tirageDate ? 'Tirage ' + e.cfg.tirageDate : 'Tirage au sort à la fin de l\'event'),
       lotSemaineNom:'Lot de la semaine',
       lotSemaineLabel:'À gagner cette semaine',
       lotSemaine:'',
@@ -5622,6 +5624,22 @@ function drawerEvent(e){
       : DATA.lots.filter(function(l){return l.eventId===e.id;});
 
     html += '<div class="alert info"><span class="ico">🎨</span>Aperçu live de la page d\'accueil que voient les participants quand ils scannent le QR. Modifiez à droite, voyez le résultat à gauche.</div>';
+    /* Sync lots depuis Supabase si noms vides */
+    (function(){
+      var _lotsLocaux = DATA.lots.filter(function(l){ return l.eventId===e.id; });
+      var _hasNoNames = _lotsLocaux.length > 0 && _lotsLocaux.every(function(l){ return !l.nom && !l.titre; });
+      if(_hasNoNames || _lotsLocaux.length===0){
+        supaFetch('lots', 'event_id=eq.'+encodeURIComponent(e.id)+'&select=*').then(function(rows){
+          rows.forEach(function(r){
+            var mapped = supaRowToData(r,'lot');
+            var local = DATA.lots.find(function(l){ return l.id===mapped.id; });
+            if(local){ for(var k in mapped){ if(mapped.hasOwnProperty(k)) local[k]=mapped[k]; } }
+            else DATA.lots.push(mapped);
+          });
+          saveData(); renderDrawer();
+        }).catch(function(){});
+      }
+    })();
 
     // ─── APERÇU LIVE MOBILE (en haut) ───
     html += '<div class="front-preview-wrap">';
@@ -5643,7 +5661,7 @@ function drawerEvent(e){
         html += '<div class="fp-section-label" id="fp-pv-lotlabel">'+esc(front.lotLabel||'Lots à gagner')+'</div>';
         activeLots.slice(0,3).forEach((l,i)=>{
           var _ico = l.emoji || ['🎁','🏆','✨'][i%3];
-          var _nom = l.nom || l.partenaire || 'Lot';
+          var _nom = l.nom || l.titre || l.partenaire || 'Lot';
           var _sub = (l.partenaire && l.nom) ? l.partenaire : '';
           html += '<div class="fp-lot-item">'
                + '<div class="fp-lot-icon" style="background:'+(e.couleur||'#7C2D92')+'22">'+_ico+'</div>'
