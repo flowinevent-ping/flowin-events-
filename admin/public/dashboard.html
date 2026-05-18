@@ -1675,6 +1675,19 @@ function migrateData(data){
       data.lots.push(JSON.parse(JSON.stringify(seedL)));
     });
   }
+  // [IDEMPOTENT] Initialiser data.jeux depuis SEED si absent (données v31 sans jeux)
+  if(!data.jeux || !data.jeux.length){
+    data.jeux = JSON.parse(JSON.stringify(SEED.jeux || []));
+    console.log('[migrate] data.jeux initialisé depuis SEED:', data.jeux.length, 'modules');
+  } else {
+    // Merger les jeux SEED manquants (nouveaux modules ajoutés après v31)
+    SEED.jeux.forEach(function(seedJ){
+      if(!data.jeux.find(function(j){ return j.id === seedJ.id; })){
+        data.jeux.push(JSON.parse(JSON.stringify(seedJ)));
+      }
+    });
+  }
+
   // [IDEMPOTENT] Forcer les segments array sur jeu-spin si encore en ancien format ou ancien contenu
   if(data.jeux){
     const jeuSpin = data.jeux.find(j => j.id === 'jeu-spin');
