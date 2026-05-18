@@ -2588,20 +2588,20 @@ function _flowinMerge(dst, src){
   return dst;
 }
 
-/* Écriture joueur + participation en parallèle */
+/* Écriture joueur + participation — async séquenciel */
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();
   var dateIso = nowIso.slice(0,10);
-  
-  /* Génère id joueur déterministe à partir de l'email */
   var emailLower = String(email).toLowerCase().trim();
   var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
-  
+  var evId = FLOWIN_EVENT.id;
+
+  /* Champs collectés depuis le form (cp, prenom, nom, tel, age) */
   var joueurPayload = {
     external_id: extId,
     email: emailLower,
-    events: [FLOWIN_EVENT.id],
+    events: [evId],
     optin: true,
     optin_date: dateIso,
     first_seen: dateIso,
@@ -2609,43 +2609,58 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
     client_type: 'btoc'
   };
   if(extraFields) _flowinMerge(joueurPayload, extraFields);
-  
-  /* UPSERT joueur */
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
+
+  /* 1. Upsert joueur — récupérer l'UUID Supabase */
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs', {
     method:'POST',
     headers:{
       'apikey':FLOWIN_SUPA_ANON,
       'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
       'Content-Type':'application/json',
-      'Prefer':'resolution=merge-duplicates,return=representation'
+      'Prefer':'resolution=merge-duplicates,return=representation',
+      'X-Upsert-On':'external_id'
     },
     body: JSON.stringify(joueurPayload)
   }).then(function(r){
-    if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] joueur upsert error:', r.status, t); });
+    if(!r.ok){ r.text().then(function(t){ console.warn('[Flowin] joueur err:', r.status, t); }); return null; }
     return r.json();
-  }).catch(function(e){ console.warn('[Flowin] upsert joueur:', e); });
-  
-  /* INSERT participation — avec joueur_id + played_at pour stats par jour */
-  var partPayload = {
-    event_id:    FLOWIN_EVENT.id,
-    joueur_id:   extId,
-    completed:   true,
-    ticket_code: ticket || ''
-  };
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
-    method:'POST',
-    headers:{
-      'apikey':FLOWIN_SUPA_ANON,
-      'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
-      'Content-Type':'application/json',
-      'Prefer':'return=representation'
-    },
-    body: JSON.stringify(partPayload)
-  }).then(function(r){
-    if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation error:', r.status, t); });
-  }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
-  
-  console.log('[Flowin] supaWriteFlowin OK:', prefix, jid, ticket);
+  }).then(function(rows){
+    /* Récupérer l'UUID retourné OU chercher par external_id */
+    var uuid = null;
+    if(rows && rows.length) uuid = rows[0].id;
+    
+    if(!uuid){
+      /* Fallback : chercher le joueur par external_id */
+      return fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?external_id=eq.'+encodeURIComponent(extId)+'&select=id', {
+        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      }).then(function(r){ return r.json(); }).then(function(rows){
+        return rows && rows.length ? rows[0].id : null;
+      });
+    }
+    return uuid;
+  }).then(function(uuid){
+    if(!uuid){ console.warn('[Flowin] UUID joueur introuvable'); return; }
+    /* 2. INSERT participation avec le vrai UUID */
+    var partPayload = {
+      event_id: evId,
+      joueur_id: uuid,
+      completed: true,
+      ticket_code: ticket || ''
+    };
+    return fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
+      method:'POST',
+      headers:{
+        'apikey':FLOWIN_SUPA_ANON,
+        'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
+      body: JSON.stringify(partPayload)
+    }).then(function(r){
+      if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation err:', r.status, t); });
+      else console.log('[Flowin] ✅ inscription:', emailLower, evId, ticket);
+    });
+  }).catch(function(e){ console.warn('[Flowin] supaWriteFlowin:', e); });
 }
 
 /* Wrapper de compat : registerPlay() existant peut appeler ceci en plus */
