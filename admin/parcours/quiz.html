@@ -2581,8 +2581,14 @@ if(FLOWIN_MODULE_FALLBACK){
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
       try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
-      try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
-      try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
+      /* flowinHydratePaquesBonus uniquement pour ev-paques (pas pour ev-crf-2026 etc.) */
+      if(rows[0].id === 'ev-paques'){
+        try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
+        try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
+      } else {
+        /* Pour les autres events quiz : appliquer couleur + design générique */
+        try { flowinHydrateGenericQuiz(rows[0]); } catch(e){ console.warn('[Flowin] hydrate generic', e); }
+      }
     } else if(FLOWIN_MODULE_FALLBACK) {
       /* Event pas encore dans Supabase : fallback module URL */
       console.log('[Flowin] fallback module:', FLOWIN_MODULE_FALLBACK);
@@ -2596,6 +2602,65 @@ if(FLOWIN_MODULE_FALLBACK){
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(err){}
     }
   }
+/* ── Hydratation générique pour events quiz non-Pâques (ex: ev-crf-2026) ── */
+function flowinHydrateGenericQuiz(ev){
+  if(!ev) return;
+  var vp = document.getElementById('vp-paques');
+  if(!vp) return;
+  var cfg = ev.cfg || {};
+  var couleur = ev.couleur || '#7C2D92';
+
+  /* Fond du viewport */
+  vp.style.background = cfg.accentSoft
+    ? 'linear-gradient(160deg,'+cfg.accentSoft+' 0%,#fff 60%,'+cfg.accentSoft+' 100%)'
+    : 'linear-gradient(160deg,#FFF0F0 0%,#fff 60%,#FFF0F0 100%)';
+
+  /* Logo SVG ou emoji */
+  var emojiEl = vp.querySelector('.pq-emojis');
+  if(emojiEl){
+    if(cfg.logoSvg){
+      emojiEl.innerHTML = cfg.logoSvg;
+      emojiEl.style.fontSize = '52px';
+    } else if(cfg.logoEmoji){
+      emojiEl.textContent = cfg.logoEmoji;
+      emojiEl.style.fontSize = '52px';
+    }
+  }
+
+  /* Couleur du titre */
+  var titleEl = vp.querySelector('.pq-title');
+  if(titleEl) titleEl.style.color = couleur;
+
+  /* Couleur du label ville */
+  var villeEl = vp.querySelector('.pq-ville');
+  if(villeEl) villeEl.style.color = couleur;
+
+  /* Bouton CTA */
+  var ctaEl = vp.querySelector('.pq-cta');
+  if(ctaEl){
+    ctaEl.style.background = 'linear-gradient(135deg,'+couleur+','+couleur+'cc)';
+    ctaEl.style.boxShadow = '0 8px 24px '+couleur+'55';
+    ctaEl.textContent = '❤️ Participer gratuitement';
+  }
+
+  /* Bandeau lots : vider les lots Pâques et mettre le label CRF */
+  var lotsLabel = vp.querySelector('.pq-lots-label');
+  if(lotsLabel) lotsLabel.textContent = ev.nom ? ev.nom.split('—')[0].trim() : 'Tombola';
+
+  var lotsWrap = vp.querySelector('.pq-lots-wrap');
+  if(lotsWrap){
+    /* Supprimer les lots Pâques hardcodés */
+    var rows = lotsWrap.querySelectorAll('.pq-lot-row');
+    for(var ri=0; ri<rows.length; ri++) rows[ri].style.display = 'none';
+  }
+
+  /* Tirage */
+  var tirageEl = vp.querySelector('.pq-tirage');
+  if(tirageEl && cfg.tirageDate) tirageEl.textContent = '📅 Tirage ' + cfg.tirageDate;
+
+  console.log('[Flowin] hydratation generique quiz OK:', ev.nom);
+}
+
 })();
 
 /* Helper : merge sans Object.assign (iOS Safari compat) */
