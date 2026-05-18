@@ -2662,14 +2662,15 @@ if(FLOWIN_MODULE_FALLBACK){
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
       try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
-      /* flowinHydratePaquesBonus uniquement pour ev-paques (pas pour ev-crf-2026 etc.) */
-      if(rows[0].id === 'ev-paques'){
-        try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
-        try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
-      } else {
-        /* Pour les autres events quiz : appliquer couleur + design générique */
+      /* Hydratation bonus : pour TOUS les events (lit cfg.quizBonusList) */
+      try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate bonus', e); }
+      try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm bonus', e); }
+      /* Design générique pour les events non-Pâques */
+      if(rows[0].id !== 'ev-paques'){
         try { flowinHydrateGenericQuiz(rows[0]); } catch(e){ console.warn('[Flowin] hydrate generic', e); }
       }
+      /* Questions custom dans le formulaire */
+      try { flowinHydrateCustomQuestions(rows[0]); } catch(e){ console.warn('[Flowin] hydrate custom q', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
       /* Event pas encore dans Supabase : fallback module URL */
       console.log('[Flowin] fallback module:', FLOWIN_MODULE_FALLBACK);
@@ -2686,6 +2687,63 @@ if(FLOWIN_MODULE_FALLBACK){
 /* ── Hydratation générique pour events quiz non-Pâques (ex: ev-crf-2026) ── */
 
 /* ── Hydratation textes Pâques → event réel ── */
+
+/* ── Hydratation questions custom dans le formulaire CRM ── */
+function flowinHydrateCustomQuestions(ev){
+  if(!ev || !ev.cfg) return;
+  var questions = ev.cfg.customQuestions || ev.cfg.quizCustomQuestions || [];
+  if(!questions.length) return;
+
+  var form = document.getElementById('pq-5');
+  if(!form) return;
+  var formWrap = form.querySelector('.pq-form-wrap');
+  if(!formWrap) return;
+
+  /* Injecter les questions custom avant le bloc RGPD */
+  var rgpdEl = form.querySelector('.pq-form-rgpd');
+  var insertTarget = rgpdEl || formWrap;
+
+  var html = '<div class="pq-form-field" id="pq-custom-questions">';
+  html += '<label class="pq-form-label" style="color:'+(ev.couleur||'#D4537E')+'">Questions complémentaires</label>';
+
+  questions.forEach(function(q, qi){
+    if(!q.actif && q.actif !== undefined) return; // question désactivée
+    var label = q.label || q.texte || q.question || '';
+    if(!label) return;
+
+    html += '<div style="margin-top:10px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#4B1528;margin-bottom:6px">'+(qi+1)+'. '+label+'</div>';
+
+    var opts = q.options || [];
+    var isMulti = q.type === 'multi';
+    if(opts.length > 0){
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      opts.forEach(function(opt, oi){
+        var oVal = typeof opt === 'string' ? opt : (opt.label || '');
+        var pickFn = isMulti ? 'this.classList.toggle(\'sel\')' : '(function(el){var p=el.parentElement;p.querySelectorAll(\'button\').forEach(function(b){b.classList.remove(\'sel\')});el.classList.add(\'sel\');})(this)';
+        html += '<button class="pq-form-source-chip" onclick="'+pickFn+';return false" data-custom-q="'+qi+'" data-custom-opt="'+oi+'">'+oVal+'</button>';
+      });
+      html += '</div>';
+    } else {
+      html += '<input class="pq-form-input" placeholder="Votre réponse..." data-custom-q="'+qi+'">';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+
+  /* Insérer avant RGPD ou à la fin du form */
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  var node = tmp.firstChild;
+  if(rgpdEl && rgpdEl.parentNode){
+    rgpdEl.parentNode.insertBefore(node, rgpdEl);
+  } else {
+    formWrap.appendChild(node);
+  }
+
+  /* Collecter les réponses custom dans _flowinCollectFormFields */
+  console.log('[Flowin] '+questions.length+' question(s) custom injectée(s) dans le form');
+}
 function flowinHydrateDynTexts(ev){
   if(!ev) return;
   var nom = ev.nom || 'Cet événement';
