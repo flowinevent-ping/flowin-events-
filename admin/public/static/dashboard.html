@@ -6407,6 +6407,8 @@ function renderOngletJeu(e){
   wizHtml = wizHtml.split("state.wiz.draft.cfg").join("findEvent('"+eid+"').cfg");
   // modSubtab persisté dans l'event cfg
   wizHtml = wizHtml.split("state.wiz.draft.cfg.modSubtab").join("findEvent('"+eid+"').cfg.modSubtab");
+  /* quizSubtab pour les modules quiz/quizsolo */
+  wizHtml = wizHtml.split("state.wiz.draft.cfg.quizSubtab").join("findEvent('"+eid+"').cfg.quizSubtab");
 
   html += wizHtml;
 
