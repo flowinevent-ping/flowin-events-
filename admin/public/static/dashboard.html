@@ -8351,14 +8351,41 @@ function wizSave(){
       }
     }
     toast('Event "'+d.nom+'" créé','success');
+    // Génération auto qrUrl AVANT écriture Supabase
+    if(!_newEv.cfg) _newEv.cfg = {};
+    _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (_newEv.module||'quiz') + '.html?ev=' + id;
     supaWriteEvent(_newEv);
-    // Génération auto qrUrl
-    if(_newEv.cfg) _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (_newEv.module||'quiz') + '.html?ev=' + id;
+    // ── Persister les lots du wizard dans DATA.lots avec le bon eventId ──
+    if(d.lots && d.lots.length){
+      for(var _li=0; _li<d.lots.length; _li++){
+        var _ldraft = d.lots[_li];
+        if(!_ldraft.nom) continue;
+        var _newLot = {
+          id: newId('lot'),
+          eventId: id,
+          partenaireId: _ldraft.partenaireId || '',
+          nom: _ldraft.nom || 'Lot',
+          valeur: _ldraft.valeur || 0,
+          quantite: _ldraft.quantite || 1,
+          assigneA: '', retire: false,
+          dateRetrait: '', dateAssign: '', note: ''
+        };
+        DATA.lots.push(_newLot);
+        supaWriteLot(_newLot);
+      }
+    }
+    // Nettoyer les champs draft parasites de l'event (lots/partenaires sont dans DATA, pas dans l'event)
+    delete _newEv.lots;
   } else {
     const idx = DATA.events.findIndex(e=>e.id===state.wiz.editingId);
     if(idx>=0){
       _flowinMerge(DATA.events[idx], d);
       if(d.proVisib) DATA.events[idx].proVisib = d.proVisib;
+      // Nettoyer les champs draft parasites
+      delete DATA.events[idx].lots;
+      // QR URL recalculé
+      if(!DATA.events[idx].cfg) DATA.events[idx].cfg = {};
+      DATA.events[idx].cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (DATA.events[idx].module||'quiz') + '.html?ev=' + DATA.events[idx].id;
       supaWriteEvent(DATA.events[idx]);
     }
     toast('Event "'+d.nom+'" enregistré','success');
