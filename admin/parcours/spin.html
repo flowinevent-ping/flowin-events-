@@ -10,14 +10,14 @@
 
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --a:#7C5CFC; --ad:#5538D4; --al:#EDE8FF; --bg:#F0EDE8;
+  --a:#7C5CFC; --ad:#5538D4; --al:#EDE8FF; --bg:#0F0A1E;
   --navy:#1A1033; --navy2:#2D1B69; --white:#fff;
   --green:#1D9E75; --orange:#FF8C00; --red:#EF4444; --amber:#F59E0B;
   --accent:#7C5CFC; --accent-soft:#EDE8FF;
-  --border:2.5px solid #F0EDE8; --r:22px; --r-sm:12px; --r-pill:100px;
-  --muted:#888; --text:#1A1033;
+  --border:2.5px solid rgba(255,255,255,.12); --r:22px; --r-sm:12px; --r-pill:100px;
+  --muted:#888; --text:#F0EDE8;
 }
-body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;font-family:'Nunito',sans-serif;gap:22px;flex-wrap:wrap}
+body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;font-family:'Nunito',sans-serif;gap:22px;flex-wrap:wrap}
 
 /* Titre global */
 .preview-header{width:100%;text-align:center;padding:8px 0 18px}
@@ -31,7 +31,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .phone-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.08em}
 .phone{width:375px;height:812px;background:#fff;border-radius:44px;border:10px solid #1a1a1a;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;position:relative}
 .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:26px;background:#1a1a1a;border-radius:0 0 18px 18px;z-index:100}
-.viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:var(--bg);position:relative}
+.viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:#0F0A1E;position:relative}
 .viewport::-webkit-scrollbar{display:none}
 
 /* Page wrapper */
@@ -67,7 +67,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Progress dots */
 .progress-strip{display:flex;gap:6px;justify-content:center;padding:14px 20px 12px}
-.progress-step{flex:1;height:4px;background:#F0EDE8;border-radius:100px;max-width:60px}
+.progress-step{flex:1;height:4px;background:rgba(255,255,255,.15);border-radius:100px;max-width:60px}
 .progress-step.done{background:var(--green)}
 .progress-step.on{background:var(--a)}
 .progress-step.on.green{background:#1D9E75}
@@ -1935,6 +1935,41 @@ function flowinSetText(selector, text) {
   for(var i=0; i<els.length; i++) { els[i].textContent = text; }
 }
 
+/* ── Hydratation textes Pâques → event réel ── */
+function flowinHydrateDynTexts(ev){
+  if(!ev) return;
+  var nom = ev.nom || 'Cet événement';
+  var cfg = ev.cfg || {};
+  var tirage = cfg.tirageDate || 'fin de journée';
+  var lieu = ev.lieu || '';
+  var url = cfg.qrUrl || window.location.href;
+  var hint = 'Capture conseillée · Tirage ' + tirage + (lieu ? ' · ' + lieu : '');
+
+  /* Anti-doublon page */
+  var adMsg = document.querySelector('#pq-11 .ad-msg');
+  if(adMsg) adMsg.innerHTML = 'Cette adresse email a déjà participé à <strong>' + nom + '</strong>.<br>Une seule participation par personne.';
+
+  /* Ticket hint */
+  var tHint = document.getElementById('pq-ticket-hint');
+  if(tHint) tHint.textContent = hint;
+
+  /* Partenaires label */
+  var pLabel = document.querySelector('.partenaires-label');
+  if(pLabel) pLabel.textContent = '★ Partenaires ' + nom + ' ★';
+
+  /* Header formulaire */
+  var formSub = document.querySelector('#pq-5 .header-sub');
+  if(formSub) formSub.textContent = 'Pour la tombola de ' + nom;
+
+  /* Partage texte */
+  var sharePreview = document.querySelector('.pq-share-preview');
+  if(sharePreview) sharePreview.innerHTML = '« Je viens de jouer à <strong>' + nom + '</strong> · à toi de tenter ta chance ! <strong>' + url + '</strong> »';
+
+  /* Toast partage */
+  var toast = document.getElementById('pq-toast');
+  if(toast) toast.textContent = '✓ Partagé · +1 point validé';
+}
+
 function flowinHydrateModule(ev) {
   if(!ev) return;
   var module = ev.module || '';
@@ -2437,7 +2472,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
