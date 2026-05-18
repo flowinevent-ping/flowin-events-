@@ -1370,7 +1370,7 @@ const SEED = {
 
 
 // ============ STORAGE LOCAL ============
-const LS_KEY = 'flowin_v32_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
+const LS_KEY = 'flowin_v31_data'; /* reset Pâques only */ // v28 — bump LS_KEY + landing pages multi + apercu profils
 function loadData(){
   try{
     // Migration : récupérer données d'une ancienne clé si la nouvelle est vide
@@ -1528,6 +1528,55 @@ function migrateData(data){
       if(!lsOk) j.lastSeen  = seedJ.lastSeen  || '';
     });
   }
+    // [IDEMPOTENT] Injecter ev-crf-2026 si absent (migration v31 → CRF mai 2026)
+  (function(){
+    var hasCRF = false;
+    for(var _i=0; _i<data.events.length; _i++){
+      if(data.events[_i].id === 'ev-crf-2026'){ hasCRF = true; break; }
+    }
+    if(!hasCRF){
+      // Injecter depuis le SEED
+      var seedEv = null;
+      for(var _j=0; _j<SEED.events.length; _j++){
+        if(SEED.events[_j].id === 'ev-crf-2026'){ seedEv = SEED.events[_j]; break; }
+      }
+      if(seedEv) data.events.push(JSON.parse(JSON.stringify(seedEv)));
+    }
+    var hasPro = false;
+    for(var _i=0; _i<data.pros.length; _i++){
+      if(data.pros[_i].id === 'pro-crf-vence'){ hasPro = true; break; }
+    }
+    if(!hasPro){
+      var seedPro = null;
+      for(var _j=0; _j<SEED.pros.length; _j++){
+        if(SEED.pros[_j].id === 'pro-crf-vence'){ seedPro = SEED.pros[_j]; break; }
+      }
+      if(seedPro) data.pros.push(JSON.parse(JSON.stringify(seedPro)));
+    }
+    var hasBq = false;
+    for(var _i=0; _i<data.banques.length; _i++){
+      if(data.banques[_i].id === 'bq-croix-rouge'){ hasBq = true; break; }
+    }
+    if(!hasBq){
+      var seedBq = null;
+      for(var _j=0; _j<SEED.banques.length; _j++){
+        if(SEED.banques[_j].id === 'bq-croix-rouge'){ seedBq = SEED.banques[_j]; break; }
+      }
+      if(seedBq) data.banques.push(JSON.parse(JSON.stringify(seedBq)));
+    }
+    var lotsCRF = 0;
+    for(var _i=0; _i<data.lots.length; _i++){
+      if(data.lots[_i].eventId === 'ev-crf-2026') lotsCRF++;
+    }
+    if(lotsCRF === 0){
+      for(var _j=0; _j<SEED.lots.length; _j++){
+        if(SEED.lots[_j].eventId === 'ev-crf-2026'){
+          data.lots.push(JSON.parse(JSON.stringify(SEED.lots[_j])));
+        }
+      }
+    }
+  })();
+
     // [IDEMPOTENT] Retirer ev-paques des joueurs qui ne devraient pas l'avoir (sécurité)
   if(data.joueurs){
     data.joueurs.forEach(j => {
