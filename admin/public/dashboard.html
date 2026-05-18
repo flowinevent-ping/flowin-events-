@@ -3386,23 +3386,91 @@ function drawerPro(p){
       }
     }
   } else if(state.drawer.tab==='liens'){
+    // ── Joueurs CRM ──
     html += '<div class="section-h">Joueurs CRM rattachés ('+joueursLies.length+')</div>';
     if(joueursLies.length===0){
       html += '<div class="text-sm text-muted">Aucun joueur rattaché aux events de ce pro.</div>';
-    } else if(joueursLies.length>5){
-      joueursLies.slice(0,5).forEach(j => {
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'joueur\',\''+j.id+'\')"><div style="flex:1"><div class="fw-700">'+esc(j.nom)+'</div><div class="text-xs text-muted">'+esc(j.email)+'</div></div></div>';
-      });
-      html += '<button class="btn btn-sm">Voir les '+joueursLies.length+' joueurs →</button>';
-    } else joueursLies.forEach(j => {
-      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'joueur\',\''+j.id+'\')"><div style="flex:1"><div class="fw-700">'+esc(j.nom)+'</div><div class="text-xs text-muted">'+esc(j.email)+'</div></div></div>';
+    } else {
+      var _jShow = joueursLies.length>5 ? joueursLies.slice(0,5) : joueursLies;
+      for(var _ji=0; _ji<_jShow.length; _ji++){
+        var _jj = _jShow[_ji];
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'joueur\',\''+_jj.id+'\')">'
+              + '<div style="flex:1"><div class="fw-700">'+esc(_jj.nom)+'</div><div class="text-xs text-muted">'+esc(_jj.email)+'</div></div></div>';
+      }
+      if(joueursLies.length>5){
+        html += '<button class="btn btn-sm" onclick="closeDrawer();state.view=\'joueurs\';render()">Voir les '+joueursLies.length+' joueurs →</button>';
+      }
+    }
+
+    // ── Gagnants tirés au sort ──
+    var _evIds = evs.map(function(e){ return e.id; });
+    var _lotsGagnes = DATA.lots.filter(function(l){
+      return l.assigneA && _evIds.indexOf(l.eventId) >= 0;
     });
-    html += '<div class="section-h">Partenaires ('+partenairesLies.length+')</div>';
+    html += '<div class="section-h" style="margin-top:14px">🏆 Gagnants tirés au sort ('+_lotsGagnes.length+')</div>';
+    if(_lotsGagnes.length===0){
+      html += '<div class="text-sm text-muted">Aucun tirage effectué pour ce pro.</div>';
+    } else {
+      // Trier par date de tirage décroissante
+      _lotsGagnes.sort(function(a,b){
+        return new Date(b.dateAssign||0).getTime() - new Date(a.dateAssign||0).getTime();
+      });
+      for(var _li=0; _li<_lotsGagnes.length; _li++){
+        var _lot = _lotsGagnes[_li];
+        var _gj = findJoueur(_lot.assigneA);
+        var _gev = findEvent(_lot.eventId);
+        var _dateAssign = _lot.dateAssign ? fmtFull(_lot.dateAssign) : '-';
+        html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:6px">'
+              + '<div style="font-size:18px;padding-top:1px">🏆</div>'
+              + '<div style="flex:1">'
+              + '<div style="font-size:12px;font-weight:700;color:var(--sa-text)">'+esc(_gj?_gj.prenom+' '+_gj.nom:'Joueur inconnu')+'</div>'
+              + '<div style="font-size:10px;color:var(--sa-muted)">'+esc(_lot.nom||'Lot')+'</div>'
+              + '<div style="font-size:10px;color:var(--sa-muted)">📅 '+_dateAssign+' · '+esc(_gev?_gev.nom:_lot.eventId)+'</div>'
+              + '</div>'
+              + '<div style="font-size:9px;padding:3px 7px;border-radius:10px;background:'+(_lot.retire?'#D1FAE5':'#FEF3C7')+';color:'+(_lot.retire?'#065F46':'#92400E')+'">'
+              + (_lot.retire?'✓ Retiré':'En attente')+'</div>'
+              + '</div>';
+      }
+    }
+
+    // ── Dates de tirage par event ──
+    html += '<div class="section-h" style="margin-top:14px">📅 Dates de tirage</div>';
+    var _hasAnyTirage = false;
+    for(var _ei=0; _ei<evs.length; _ei++){
+      var _ev = evs[_ei];
+      var _tirajesFaits = _ev.tiragesFaits ? Object.keys(_ev.tiragesFaits) : [];
+      var _evLots = DATA.lots.filter(function(l){ return l.eventId === _ev.id; });
+      var _evGag  = _evLots.filter(function(l){ return !!l.assigneA; });
+      if(!_evLots.length && !_tirajesFaits.length) continue;
+      _hasAnyTirage = true;
+      html += '<div style="padding:8px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px">'
+            + '<div style="font-size:12px;font-weight:700;margin-bottom:4px">'+esc(_ev.nom)+'</div>';
+      if(_tirajesFaits.length){
+        html += '<div style="font-size:10px;color:var(--sa-muted);margin-bottom:3px">Tirages effectués :</div>';
+        for(var _ti=0; _ti<_tirajesFaits.length; _ti++){
+          html += '<div style="font-size:10px;color:var(--sa-text);padding:2px 0">📅 '+fmtFull(_tirajesFaits[_ti])+'</div>';
+        }
+      }
+      html += '<div style="font-size:10px;color:var(--sa-muted);margin-top:4px">'
+            + _evLots.length+' lot'  +(_evLots.length>1?'s':'')+' au total · '
+            + _evGag.length+' gagnant'+(_evGag.length>1?'s':'')+' désigné'+(_evGag.length>1?'s':'')
+            + '</div>';
+      html += '</div>';
+    }
+    if(!_hasAnyTirage){
+      html += '<div class="text-sm text-muted">Aucun tirage planifié.</div>';
+    }
+
+    // ── Partenaires ──
+    html += '<div class="section-h" style="margin-top:14px">Partenaires ('+partenairesLies.length+')</div>';
     if(partenairesLies.length===0){
       html += '<div class="text-sm text-muted">Aucun partenaire associé aux events de ce pro.</div>';
-    } else partenairesLies.forEach(pt => {
-      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'partenaire\',\''+pt.id+'\')"><div style="flex:1"><div class="fw-700">'+esc(pt.nom)+'</div><div class="text-xs text-muted">'+esc(pt.type||'')+'</div></div></div>';
-    });
+    } else {
+      for(var _pi=0; _pi<partenairesLies.length; _pi++){
+        var _pt = partenairesLies[_pi];
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'partenaire\',\''+_pt.id+'\')"><div style="flex:1"><div class="fw-700">'+esc(_pt.nom)+'</div><div class="text-xs text-muted">'+esc(_pt.type||'')+'</div></div></div>';
+      }
+    }
   } else if(state.drawer.tab==='export'){
     html += '<div class="section-h">Exports disponibles</div>';
     html += '<button class="btn mb-2 btn-block" onclick="exportFichePro(\''+p.id+'\')">📄 Fiche pro complète (PDF)</button>';
