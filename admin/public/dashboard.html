@@ -1528,51 +1528,79 @@ function migrateData(data){
       if(!lsOk) j.lastSeen  = seedJ.lastSeen  || '';
     });
   }
-    // [IDEMPOTENT] Injecter ev-crf-2026 si absent (migration v31 → CRF mai 2026)
+    // [IDEMPOTENT v1.1] Injecter ev-crf-2026 si absent — données hardcodées (pas de ref SEED)
   (function(){
+    if(!data.events) data.events = [];
+    if(!data.pros) data.pros = [];
+    if(!data.banques) data.banques = [];
+    if(!data.lots) data.lots = [];
+
     var hasCRF = false;
     for(var _i=0; _i<data.events.length; _i++){
       if(data.events[_i].id === 'ev-crf-2026'){ hasCRF = true; break; }
     }
     if(!hasCRF){
-      // Injecter depuis le SEED
-      var seedEv = null;
-      for(var _j=0; _j<SEED.events.length; _j++){
-        if(SEED.events[_j].id === 'ev-crf-2026'){ seedEv = SEED.events[_j]; break; }
-      }
-      if(seedEv) data.events.push(JSON.parse(JSON.stringify(seedEv)));
+      data.events.push({id:'ev-crf-2026', proId:'pro-crf-vence',
+        nom:'Croix Rouge — Collecte Vence 2026',
+        module:'quiz', status:'upcoming',
+        dateD:'2026-05-23', dateF:'2026-05-23',
+        hStart:'09:00', hEnd:'18:00',
+        lieu:'Place du Grand Jardin', adresse:'Place du Grand Jardin, 06140 Vence',
+        participants:0, gagnants:0, joueursOptin:0,
+        couleur:'#E8212B', description:'Collecte solidaire Croix Rouge',
+        scoreMin:0, banques:['bq-croix-rouge'], partenaires:[],
+        superEventId:'', clientType:'btoc', tiragesFaits:{},
+        cfg:{subtitle:'VENCE · SOLIDARITÉ 2026', datesLabel:'Samedi 23 Mai 2026',
+          nomCourt:'Croix Rouge<br>Vence', tirageDate:'Manuel',
+          qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-crf-2026',
+          quizBanques:['bq-croix-rouge'], optinActif:true,
+          quizNbQuestions:4, quizScoreMin:1, quizBonus:true,
+          quizTimer:false, quizTimerVisible:false, quizPartage:false,
+          quizRecapFin:true, quizUneFoisParJour:true, tirageManuel:true,
+          logoEmoji:'🏥', accent:'#E8212B', accentSoft:'#FFF0F0'},
+        proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:''}
+      });
     }
+
     var hasPro = false;
     for(var _i=0; _i<data.pros.length; _i++){
       if(data.pros[_i].id === 'pro-crf-vence'){ hasPro = true; break; }
     }
     if(!hasPro){
-      var seedPro = null;
-      for(var _j=0; _j<SEED.pros.length; _j++){
-        if(SEED.pros[_j].id === 'pro-crf-vence'){ seedPro = SEED.pros[_j]; break; }
-      }
-      if(seedPro) data.pros.push(JSON.parse(JSON.stringify(seedPro)));
+      data.pros.push({id:'pro-crf-vence', nom:'Croix Rouge Française — Délégation de Vence',
+        ville:'Vence', codePostal:'06140', adresse:'', tel:'', email:'',
+        secteur:'Association / Collectivité', contact:'', role:'',
+        siret:'', entreeP:'2026-05-18', notes:'', tags:['association','crf']});
     }
+
     var hasBq = false;
     for(var _i=0; _i<data.banques.length; _i++){
       if(data.banques[_i].id === 'bq-croix-rouge'){ hasBq = true; break; }
     }
     if(!hasBq){
-      var seedBq = null;
-      for(var _j=0; _j<SEED.banques.length; _j++){
-        if(SEED.banques[_j].id === 'bq-croix-rouge'){ seedBq = SEED.banques[_j]; break; }
-      }
-      if(seedBq) data.banques.push(JSON.parse(JSON.stringify(seedBq)));
+      data.banques.push({id:'bq-croix-rouge',
+        nom:'Quiz Croix Rouge — Vence 2026',
+        description:'Questions premiers secours et Croix Rouge',
+        events:['ev-crf-2026'],
+        questions:[
+          {id:'q-crf-1',type:'qcm',texte:'En quelle annee la Croix Rouge a-t-elle ete fondee ?',options:['1854','1863','1901','1920'],bonne:1,points:1,explication:'Fondee en 1863 par Henry Dunant.'},
+          {id:'q-crf-2',type:'qcm',texte:'Que font les compressions thoraciques ?',options:['Faire respirer','Faire circuler le sang','Verifier le pouls','Appeler les secours'],bonne:1,points:1,explication:'Les compressions font circuler le sang.'},
+          {id:'q-crf-3',type:'qcm',texte:'Quel numero appeler pour une urgence medicale ?',options:['17','15','18','112'],bonne:1,points:1,explication:'Le 15 est le SAMU.'},
+          {id:'q-crf-4',type:'qcm',texte:'Position pour une personne inconsciente qui respire ?',options:['Sur le dos','PLS','Assise','Debout'],bonne:1,points:1,explication:'La PLS evite etouffement.'}
+        ], tags:['crf','secours']});
     }
+
     var lotsCRF = 0;
     for(var _i=0; _i<data.lots.length; _i++){
       if(data.lots[_i].eventId === 'ev-crf-2026') lotsCRF++;
     }
     if(lotsCRF === 0){
-      for(var _j=0; _j<SEED.lots.length; _j++){
-        if(SEED.lots[_j].eventId === 'ev-crf-2026'){
-          data.lots.push(JSON.parse(JSON.stringify(SEED.lots[_j])));
-        }
+      var LOTS_CRF = ['Lot 1','Lot 2','Lot 3','Lot 4','Lot 5','Lot 6'];
+      for(var _li=0; _li<LOTS_CRF.length; _li++){
+        data.lots.push({id:'lot-crf-'+(_li+1), eventId:'ev-crf-2026',
+          partenaireId:'', nom:LOTS_CRF[_li]+' — À compléter',
+          valeur:0, quantite:1, assigneA:'', retire:false,
+          dateRetrait:'', dateAssign:'', note:''});
       }
     }
   })();
@@ -2052,11 +2080,47 @@ try {
     if(_seedPro) { DATA.pros = [JSON.parse(JSON.stringify(_seedPro))]; localStorage.setItem(LS_KEY, JSON.stringify(DATA)); }
   }
 } catch(e_guarantee){ console.warn('[guarantee]', e_guarantee); }
+/* ══ GARANTIE ev-crf-2026 — toujours présent ══ */
+try {
+  if(DATA.events && !DATA.events.find(function(e){ return e.id==='ev-crf-2026'; })){
+    DATA.events.push({id:'ev-crf-2026',proId:'pro-crf-vence',
+      nom:'Croix Rouge — Collecte Vence 2026',module:'quiz',status:'upcoming',
+      dateD:'2026-05-23',dateF:'2026-05-23',hStart:'09:00',hEnd:'18:00',
+      lieu:'Place du Grand Jardin',adresse:'Place du Grand Jardin, 06140 Vence',
+      participants:0,gagnants:0,joueursOptin:0,couleur:'#E8212B',
+      description:'Collecte solidaire Croix Rouge',scoreMin:0,
+      banques:['bq-croix-rouge'],partenaires:[],superEventId:'',
+      clientType:'btoc',tiragesFaits:{},
+      cfg:{subtitle:'VENCE · SOLIDARITÉ 2026',datesLabel:'Samedi 23 Mai 2026',
+        nomCourt:'Croix Rouge<br>Vence',tirageDate:'Manuel',
+        qrUrl:'https://flowin-events.vercel.app/parcours/quiz.html?ev=ev-crf-2026',
+        quizBanques:['bq-croix-rouge'],optinActif:true,quizNbQuestions:4,
+        quizScoreMin:1,quizBonus:true,quizTimer:false,quizTimerVisible:false,
+        quizPartage:false,quizRecapFin:true,quizUneFoisParJour:true,tirageManuel:true,
+        logoEmoji:'🏥',accent:'#E8212B',accentSoft:'#FFF0F0'},
+      proVisib:{stats:true,participants:true,lots:true,qr:true,export:true,activite:true,msgBienvenue:''}
+    });
+    if(!DATA.pros.find(function(p){ return p.id==='pro-crf-vence'; }))
+      DATA.pros.push({id:'pro-crf-vence',nom:'Croix Rouge Française — Délégation de Vence',
+        ville:'Vence',codePostal:'06140',adresse:'',tel:'',email:'',
+        secteur:'Association',contact:'',role:'',siret:'',
+        entreeP:'2026-05-18',notes:'',tags:['crf']});
+    if(!DATA.lots) DATA.lots=[];
+    var _crfLots=DATA.lots.filter(function(l){return l.eventId==='ev-crf-2026';});
+    if(_crfLots.length===0){
+      for(var _gi=1;_gi<=6;_gi++)
+        DATA.lots.push({id:'lot-crf-'+_gi,eventId:'ev-crf-2026',
+          partenaireId:'',nom:'Lot '+_gi+' — À compléter',
+          valeur:0,quantite:1,assigneA:'',retire:false,dateRetrait:'',dateAssign:'',note:''});
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(DATA));
+  }
+} catch(e_crf){ console.warn('[garantie ev-crf-2026]', e_crf); }
 try { /* dummy to avoid try-catch mismatch */
 } catch(_e){ console.warn('Purge banques:', _e); }
 // Normalisation défensive au boot — protège contre banques sans questions
 // Purge stricte — uniquement les 5 banques officielles, rien d'autre
-var _officialBqIds = ['bq-paques-vence']; // Banque officielle Pâques Vence
+var _officialBqIds = ['bq-paques-vence','bq-croix-rouge']; // Banques officielles actives
 if(DATA.banques){
   DATA.banques = DATA.banques.filter(function(b){ return b && b.id && _officialBqIds.indexOf(b.id) >= 0; });
   DATA.banques.forEach(function(b){ if(!b.questions) b.questions=[]; if(!b.events) b.events=[]; });
