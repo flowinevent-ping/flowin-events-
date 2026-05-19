@@ -1891,6 +1891,24 @@ function tbOpenPartLink(el) {
   var link = el.getAttribute('data-url');
   if(link && link !== '#') window.open(link, '_blank');
 }
+function flowinHydrateTombolaLots(lots) {
+  if(!lots || !lots.length) return;
+  var grid = document.querySelector('#tb-1 .tb-lots');
+  if(!grid) return;
+  var ranks = ['🥇','🥈','🥉','🏅','🎁'];
+  var html = '';
+  for(var i=0; i<lots.length && i<5; i++) {
+    var l = lots[i];
+    var lnom = l.nom || l.titre || ('Prix ' + (i+1));
+    html += '<div class="tb-lot-row">';
+    html += '<div class="tb-lot-ico">' + (ranks[i]||'🎁') + '</div>';
+    html += '<div class="tb-lot-info">';
+    html += '<div class="tb-lot-name">' + lnom + '</div>';
+    if(l.valeur) html += '<div class="tb-lot-hint">' + l.valeur + ' €</div>';
+    html += '</div></div>';
+  }
+  grid.innerHTML = html;
+}
 function flowinHydrateTombolaPartenaires(ev) {
   var parts = FLOWIN_PARTENAIRES;
   if(!parts || !parts.length) return;
@@ -2441,6 +2459,7 @@ function vsSubmitForm(){
 var FLOWIN_SUPA_URL = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
 var FLOWIN_SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
 var FLOWIN_PARTENAIRES = [];
+var FLOWIN_LOTS = [];
 var FLOWIN_EV_ID = (function(){
   try {
     var p = new URLSearchParams(window.location.search);
@@ -2530,6 +2549,16 @@ if(FLOWIN_MODULE_FALLBACK){
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
       var _pIds = (rows[0].cfg && rows[0].cfg.partenaires && rows[0].cfg.partenaires.length) ? rows[0].cfg.partenaires : [];
+      /* Fetch lots de l'event */
+      try {
+        var _lR = await fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=eq.'+encodeURIComponent(FLOWIN_EV_ID)+'&select=id,nom,titre,valeur,emoji,description', {
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+        });
+        FLOWIN_LOTS = await _lR.json();
+        if(!Array.isArray(FLOWIN_LOTS)) FLOWIN_LOTS = [];
+        if(FLOWIN_LOTS.length) try { flowinHydrateTombolaLots(FLOWIN_LOTS); } catch(_le2){}
+      } catch(_le){ console.warn('[Flowin] fetch lots:', _le); }
+
       if(_pIds.length) {
         try {
           var _pF = _pIds.map(function(id){ return 'id.eq.'+encodeURIComponent(id); }).join(',');

@@ -9116,6 +9116,41 @@ function wizCreateBanque(){
   toast('Banque "'+nom+'" créée','success');
   renderWizard();
 }
+function wizAddLot(){
+  var d = state.wiz.draft;
+  var evId = d.id || ('ev-draft-'+Date.now());
+  openModal('editLot',{
+    id: newId('lot'), eventId: evId, nom:'', titre:'',
+    valeur:0, quantite:1, partenaireId:'',
+    emoji:'🎁', description:'', retire:false,
+    assigneA:'', note:'', _wizMode:true
+  });
+}
+function wizEditLot(lotId){
+  var l = DATA.lots.find(function(x){ return x.id===lotId; });
+  if(!l) return;
+  var copy = {};
+  for(var k in l){ if(l.hasOwnProperty(k)) copy[k]=l[k]; }
+  copy._wizMode = true;
+  openModal('editLot', copy);
+}
+function wizDeleteLot(lotId){
+  if(!confirm('Supprimer ce lot ?')) return;
+  DATA.lots = DATA.lots.filter(function(l){ return l.id!==lotId; });
+  supaDeleteLot(lotId);
+  saveData();
+  renderWizard();
+  toast('Lot supprimé','success');
+}
+async function supaDeleteLot(lotId){
+  if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return;
+  try {
+    await fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?id=eq.'+encodeURIComponent(lotId), {
+      method:'DELETE',
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}
+    });
+  } catch(e){ console.error('[Flowin] supaDeleteLot FAILED', lotId, e); }
+}
 function wizPartnerSave(){
   const d = state.modal.data;
   if(!d.nom){ toast('Nom du partenaire requis','warn'); return; }
@@ -9350,26 +9385,33 @@ function renderWizardEvent(){
          + '<span class="text-sm text-muted" style="align-self:center">'+selected.length+' / '+DATA.partenaires.length+' partenaire'+(DATA.partenaires.length>1?'s':'')+'</span>'
          + '</div>';
   } else if(step==='E'){
-    var evLots = d.lots || [];
-    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
-    html += '<div style="padding:16px 14px;text-align:center">';
-    html += '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div>';
+    var evLots = (d.id && DATA.lots) ? DATA.lots.filter(function(l){ return l.eventId===d.id; }) : (d.lots||[]);
+    html += '<div class="section-h">Étape 5 · Lots à gagner</div>';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+    html += '<span style="font-size:12px;color:var(--sa-muted)">'+evLots.length+' lot'+(evLots.length>1?'s':'')+' configuré'+(evLots.length>1?'s':'')+'</span>';
+    html += '<button class="btn btn-primary btn-sm" onclick="wizAddLot()">+ Lot</button>';
+    html += '</div>';
     if(evLots.length){
-      html += '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px;text-align:left">';
-      var _ri=['🥇','🥈','🥉','🏅'];
-      evLots.slice(0,4).forEach(function(l,i){
-        html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;'+(i>0?'border-top:1px solid rgba(255,255,255,.07)':'')+'">';
-        html += '<div style="width:28px;height:28px;border-radius:8px;background:rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;font-size:15px">'+_ri[i]+'</div>';
-        html += '<div style="font-size:11px;font-weight:800;color:#fff">'+esc(l.nom||'Lot')+'</div>';
+      evLots.forEach(function(l,i){
+        html += '<div class="card" style="margin-bottom:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">';
+        html += '<div style="font-size:20px">'+(['🥇','🥈','🥉','🏅'][i]||'🎁')+'</div>';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div style="font-weight:700;font-size:13px">'+esc(l.nom||l.titre||'Lot sans nom')+'</div>';
+        if(l.valeur) html += '<div style="font-size:11px;color:var(--sa-muted)">'+l.valeur+' €</div>';
         html += '</div>';
+        html += '<div style="display:flex;gap:6px">';
+        html += '<button class="btn btn-sm" onclick="wizEditLot(\''+l.id+'\')" title="Modifier">✏️</button>';
+        html += '<button class="btn btn-sm" style="color:#ef4444" onclick="wizDeleteLot(\''+l.id+'\')" title="Supprimer">🗑</button>';
+        html += '</div></div>';
       });
-      html += '</div>';
     } else {
-      html += '<div style="color:rgba(255,255,255,.3);font-size:11px;padding:16px 0">Aucun lot configuré</div>';
+      html += '<div class="empty-block" style="padding:24px">';
+      html += '<div class="ico">🎁</div><div class="t">Aucun lot configuré</div>';
+      html += '<div class="s">Cliquez &quot;+ Lot&quot; pour ajouter le premier lot</div>';
+      html += '<button class="btn btn-primary mt-2" onclick="wizAddLot()">+ Ajouter un lot</button>';
+      html += '</div>';
     }
-    html += '<button style="width:100%;margin-top:10px;padding:10px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:11px;font-weight:800">Je m\'inscris →</button>';
-    html += '</div></div></div>';
-  } else if(step==='F'){
+    } else if(step==='F'){
     html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
     html += '<div style="padding:14px 12px 18px;background:linear-gradient(135deg,'+(d.couleur||'#7C2D92')+',#A855F7);color:#fff;text-align:center;position:relative">';
     html += '<div style="font-size:9px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:5px">FÉLICITATIONS</div>';
@@ -9557,7 +9599,7 @@ function renderWizardEvent(){
     html += '</div></div>';
   } else if(step==='E'){
     // Étape E : aperçu section lots sur la landing
-    const evLots = d.lots || [];
+    const evLots = (d.id && DATA.lots) ? DATA.lots.filter(function(l){ return l.eventId===d.id; }) : (d.lots||[]);
     html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
     html += '<div style="padding:18px 14px 10px;text-align:center;background:linear-gradient(160deg,#0F172A,#1E293B)">';
     html += '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div>';
