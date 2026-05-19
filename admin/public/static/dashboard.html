@@ -5811,8 +5811,8 @@ function drawerEvent(e){
     var _badgeTxt = front.badge || (e.lieu ? e.lieu.toUpperCase() : '') + (front.sousTitre ? ' · '+front.sousTitre.toUpperCase() : '');
     if(_badgeTxt) html += '<div id="fp-pv-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:5px 14px;font-size:9px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px">'+(e.module==="tombola"?"❤️":"🎮")+" "+esc(_badgeTxt)+'</div>';
     // Logo
-    if(_logoSvg) html += '<div style="margin:0 auto 12px;display:flex;justify-content:center">'+_logoSvg+'</div>';
-    else html += '<div style="margin:0 auto 12px">'+_defaultLogo+'</div>';
+    var _showLogo = _logoSvg || _defaultLogo;
+    if(_showLogo) html += '<div style="margin:0 auto 12px;display:flex;justify-content:center;text-align:center">'+(_logoSvg||_defaultLogo)+'</div>';
     // Titre
     if(front.visible.titre) html += '<div class="fp-title" id="fp-pv-titre" style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;margin-bottom:8px">'+esc(front.titre||'')+'</div>';
     // Description
@@ -9298,15 +9298,25 @@ function renderWizardEvent(){
     // Étape A sans nom encore
     html += '<div class="empty-block"><div class="ico">✨</div><div class="t">Aperçu live</div><div class="d mt-2">Tapez le nom de l\'event pour voir l\'aperçu.</div></div>';
   } else if(step==='A'){
-    // Étape A : preview landing minimale (titre + dates + couleur)
-    html += '<div class="phone-frame"><div class="phone-screen">';
-    html += '<div style="padding:24px 16px 18px;text-align:center;background:linear-gradient(160deg,'+(d.couleur||'#7C2D92')+'22 0%,#FAEEDA 100%)">';
-    html += '<div style="font-size:9px;font-weight:700;color:'+(d.couleur||'#7C2D92')+';text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px">'+esc(d.lieu||'Lieu')+'</div>';
-    html += '<div style="font-family:Georgia,serif;font-style:italic;font-size:24px;font-weight:700;line-height:1.1;color:'+(d.couleur||'#7C2D92')+';margin-bottom:8px">'+esc(d.nom||'Nom de l\'event')+'</div>';
-    if(d.dateD) html += '<div style="font-size:12px;font-weight:700;color:#EF9F27">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
+    // Étape A : preview landing — dark Flowin identique au parcours
+    var _wCol = d.couleur || '#7C2D92';
+    var _wIsTombola = d.module === 'tombola';
+    var _wLogoSvg = _wIsTombola
+      ? '<svg viewBox="0 0 100 100" style="width:64px;height:64px;display:block;margin:0 auto 12px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+_wCol+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+_wCol+'"/></svg>'
+      : '<div style="font-size:36px;text-align:center;margin-bottom:10px">'+(d.module==='spin'?'🎡':d.module==='quiz'?'🧠':d.module==='vote'?'🗳️':'🎟️')+'</div>';
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%)">';
+    html += '<div style="padding:22px 16px 14px;text-align:center">';
+    // Badge pill
+    html += '<div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:4px 12px;font-size:8px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">📍 '+(d.lieu||'Vence').toUpperCase()+'</div>';
+    // Logo
+    html += _wLogoSvg;
+    // Titre
+    html += '<div style="font-size:20px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:8px">'+esc(d.nom||'Nom de l\'event')+'</div>';
+    // Dates
+    if(d.dateD) html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:14px">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
     html += '</div>';
-    html += '<div style="padding:14px 16px"><button style="width:100%;padding:11px;background:linear-gradient(135deg,'+(d.couleur||'#7C2D92')+',#EF9F27);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:800">🎮 Participer gratuitement</button></div>';
-    html += '<div style="text-align:center;font-size:9px;color:#aaa;padding:0 16px 12px">Étape suivante : choisir le module de jeu</div>';
+    html += '<div style="padding:0 14px 14px"><button style="width:100%;padding:13px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:13px;font-weight:800;cursor:pointer">🎮 Participer gratuitement</button></div>';
+    html += '<div style="text-align:center;font-size:9px;color:rgba(255,255,255,.35);padding:0 16px 10px">Étape suivante : choisir le module de jeu</div>';
     html += '</div></div>';
   } else if(step==='B' && !d.module){
     // Étape B sans module choisi
