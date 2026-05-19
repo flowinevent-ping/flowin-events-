@@ -161,12 +161,12 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Partenaires (footer confirmation) */
 .partenaires{padding:14px 20px 20px;background:rgba(255,255,255,.04);border-top:var(--border)}
-.partenaires-label{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
-.partenaires-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.partenaire-tile{background:rgba(255,255,255,.07);border:var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform .1s}
-.partenaire-tile:hover{transform:translateY(-1px)}
-.partenaire-emoji{font-size:22px;margin-bottom:4px}
-.partenaire-name{font-size:9px;font-weight:900;color:var(--navy);line-height:1.2}
+.partenaires-label{font-size:11px;font-weight:900;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:14px}
+.partenaires-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.partenaire-tile{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:20px 12px;text-align:center;cursor:pointer;transition:transform .15s,background .15s}
+.partenaire-tile:active{transform:scale(.97);background:rgba(255,255,255,.14)}
+.partenaire-emoji{font-size:40px;margin-bottom:10px;display:block}
+.partenaire-name{font-size:13px;font-weight:800;color:#fff;line-height:1.3;word-break:break-word}
 
 /* Ticket confirm */
 .ticket{margin:0 20px 14px;background:rgba(255,255,255,.07);border:var(--border);border-radius:22px;padding:20px;text-align:center;position:relative}
@@ -1924,7 +1924,18 @@ function flowinHydrateTombolaPartenaires(ev) {
   for(var i=0; i<parts.length; i++) {
     var p = parts[i];
     var link = p.site_web || p.url || '#';
-    var emoji = p.emoji || '🤝';
+    var emoji = p.emoji;
+    if(!emoji) {
+      var _n = (p.nom||'').toLowerCase();
+      if(_n.indexOf('patisserie')>=0||_n.indexOf('boulangerie')>=0||_n.indexOf('palanque')>=0) emoji='🍰';
+      else if(_n.indexOf('bijouterie')>=0||_n.indexOf('lorenzo')>=0||_n.indexOf('bijou')>=0) emoji='💎';
+      else if(_n.indexOf('ccdk')>=0||_n.indexOf('commerce')>=0) emoji='🏪';
+      else if(_n.indexOf('cin')>=0||_n.indexOf('majestic')>=0) emoji='🎬';
+      else if(_n.indexOf('sport')>=0||_n.indexOf('decathlon')>=0) emoji='🏃';
+      else if(_n.indexOf('pizza')>=0||_n.indexOf('restaurant')>=0) emoji='🍕';
+      else if(_n.indexOf('ski')>=0||_n.indexOf('isola')>=0) emoji='⛷️';
+      else emoji='🤝';
+    }
     var pnom = p.nom || 'Partenaire';
     html += '<div class="partenaire-tile" data-url="' + link + '" onclick="tbOpenPartLink(this)">';
     html += '<div class="partenaire-emoji">' + emoji + '</div>';
