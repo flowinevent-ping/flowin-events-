@@ -2009,6 +2009,40 @@ function flowinHydrateModule(ev) {
     if(cfg.tirageDate||cfg.drawDate){var drawEl=vp.querySelector('.tb-draw-date');if(drawEl)drawEl.innerHTML='📅 Tirage le <strong>'+(cfg.tirageDate||cfg.drawDate)+'</strong>';}
     var tbBtn=vp.querySelector('.tb-btn-primary');
     if(tbBtn){tbBtn.style.background='linear-gradient(135deg,#7C2D92,#A855F7)';tbBtn.style.color='#fff';tbBtn.style.fontWeight='800';}
+
+    /* Champs Front éditables depuis le dashboard */
+    var front = cfg.front || {};
+    /* CTA texte */
+    if(front.ctaText && tbBtn) tbBtn.textContent = front.ctaText;
+    /* Note sous CTA */
+    var ctaNoteEl = vp.querySelector('.tb-cta-note');
+    if(ctaNoteEl && front.ctaNote) ctaNoteEl.textContent = front.ctaNote;
+    /* Formulaire : titre + sous-titre */
+    var formTitle = vp.querySelector('.header-title');
+    if(formTitle && front.formTitre) formTitle.textContent = front.formTitre;
+    var formSub = vp.querySelector('.header-sub');
+    if(formSub && front.formSousTitre) formSub.textContent = front.formSousTitre;
+    /* Confirmation : titre */
+    var confirmT = vp.querySelector('.tb-confirm-titre');
+    if(confirmT && front.confirmTitre) confirmT.textContent = front.confirmTitre;
+    var confirmS = vp.querySelector('.tb-confirm-sous');
+    if(confirmS && front.confirmSousTitre) confirmS.textContent = front.confirmSousTitre;
+    /* Notes confirmation */
+    var emailN = vp.querySelector('.tb-note-email');
+    if(emailN && front.emailNote) emailN.textContent = front.emailNote;
+    var gagnantsN = vp.querySelector('.tb-note-gagnants');
+    if(gagnantsN && front.gagnantsNote) gagnantsN.textContent = front.gagnantsNote;
+    /* Tirage hint sur ticket */
+    var tirageH = vp.querySelector('.tb-ticket-tirage');
+    if(tirageH && front.tirageHint) tirageH.textContent = front.tirageHint;
+    /* Préfixe ticket */
+    if(front.ticketPrefix){
+      vp.querySelectorAll('.tb-ticket-code').forEach(function(el){
+        var old = el.textContent;
+        el.textContent = old.replace(/^[A-Z]+-/, front.ticketPrefix+'-');
+      });
+    }
+    console.log('[Flowin] front fields hydrated');
   }
 
   console.log('[Flowin] hydratation terminée · module:', module, '· event:', nom);

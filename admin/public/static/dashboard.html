@@ -5760,7 +5760,16 @@ function drawerEvent(e){
       lotSemaine:'',
       lotSemaineVal:'',
       ctaText:_isBtobFront ? '🎡 Je tente ma chance' : '🎮 Participer gratuitement',
+      ctaNote:'Jeu gratuit · Sans achat obligatoire',
       description:'',
+      formTitre:'Mes coordonnées',
+      formSousTitre:e.nom||'',
+      confirmTitre:'Tu es dans la course ! 🎉',
+      confirmSousTitre:'Ton numéro de tombola a été enregistré',
+      emailNote:'📬 Un email de confirmation t\'a été envoyé.',
+      gagnantsNote:'🏆 Les gagnants seront contactés après le tirage',
+      tirageHint:'Tirage le '+(e.cfg&&e.cfg.tirageDate?e.cfg.tirageDate:'fin de l\'event')+' · bonne chance !',
+      ticketPrefix:'FW',
       lotsActifs:[]
     };
     const front = e.cfg.front;
@@ -5952,8 +5961,31 @@ function drawerEvent(e){
     // Section CTA
     html += '<div class="front-section">';
     html += '<div class="front-section-h"><span class="front-section-name">🎯 Bouton d\'action</span></div>';
-    html += '<div class="front-fld"><label>Texte du bouton</label><input class="input" value="'+escAttr(front.ctaText)+'" oninput="frontUpd(\''+e.id+'\',\'ctaText\',this.value);frontLive()"/></div>';
+    html += '<div class="front-fld"><label>Texte du bouton CTA</label><input class="input" value="'+escAttr(front.ctaText)+'" oninput="frontUpd(\''+e.id+'\',\'ctaText\',this.value);frontLive()"/></div>';
+    html += '<div class="front-fld"><label>Note sous le bouton</label><input class="input" value="'+escAttr(front.ctaNote||'')+'" placeholder="Jeu gratuit · Sans achat obligatoire" oninput="frontUpd(\''+e.id+'\',\'ctaNote\',this.value);frontLive()"/></div>';
     html += '</div>';
+
+    // Section formulaire
+    html += '<div class="front-section">';
+    html += '<div class="front-section-h"><span class="front-section-name">📋 Formulaire</span></div>';
+    html += '<div class="form-grid">';
+    html += '<div class="front-fld"><label>Titre</label><input class="input" value="'+escAttr(front.formTitre||'Mes coordonnées')+'" oninput="frontUpd(\''+e.id+'\',\'formTitre\',this.value)"/></div>';
+    html += '<div class="front-fld"><label>Sous-titre</label><input class="input" value="'+escAttr(front.formSousTitre||'')+'" oninput="frontUpd(\''+e.id+'\',\'formSousTitre\',this.value)"/></div>';
+    html += '</div></div>';
+
+    // Section confirmation
+    html += '<div class="front-section">';
+    html += '<div class="front-section-h"><span class="front-section-name">✅ Page confirmation</span></div>';
+    html += '<div class="front-fld"><label>Titre</label><input class="input" value="'+escAttr(front.confirmTitre||'')+'" oninput="frontUpd(\''+e.id+'\',\'confirmTitre\',this.value)"/></div>';
+    html += '<div class="front-fld"><label>Sous-titre</label><input class="input" value="'+escAttr(front.confirmSousTitre||'')+'" oninput="frontUpd(\''+e.id+'\',\'confirmSousTitre\',this.value)"/></div>';
+    html += '<div class="form-grid">';
+    html += '<div class="front-fld"><label>Note email</label><input class="input" value="'+escAttr(front.emailNote||'')+'" oninput="frontUpd(\''+e.id+'\',\'emailNote\',this.value)"/></div>';
+    html += '<div class="front-fld"><label>Note gagnants</label><input class="input" value="'+escAttr(front.gagnantsNote||'')+'" oninput="frontUpd(\''+e.id+'\',\'gagnantsNote\',this.value)"/></div>';
+    html += '</div>';
+    html += '<div class="form-grid">';
+    html += '<div class="front-fld"><label>Texte tirage ticket</label><input class="input" value="'+escAttr(front.tirageHint||'')+'" oninput="frontUpd(\''+e.id+'\',\'tirageHint\',this.value)"/></div>';
+    html += '<div class="front-fld"><label>Préfixe ticket</label><input class="input" placeholder="FW" value="'+escAttr(front.ticketPrefix||'FW')+'" style="font-family:monospace" oninput="frontUpd(\''+e.id+'\',\'ticketPrefix\',this.value)"/></div>';
+    html += '</div></div>';
 
     html += '<div class="form-row mt-3"><button class="btn btn-primary btn-block" onclick="frontSave(\''+e.id+'\')">💾 Enregistrer et publier</button></div>';
     html += '<div class="text-xs text-muted text-center mt-2" id="frontSaved" style="opacity:0;transition:opacity .4s">✅ Enregistré · visible immédiatement sur le QR</div>';
