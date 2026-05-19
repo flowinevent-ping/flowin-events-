@@ -6396,12 +6396,7 @@ function drawerEvent(e){
          html += '<td style="padding:8px 6px;font-size:11px;color:var(--sa-muted)">'+esc(j.codePostal||'')+'</td>';
          var sm=String(j.scoreMoy||'0/4');var sn=parseFloat(sm)||0;
          html += '<td style="padding:8px 6px;text-align:center;font-size:11px;font-weight:700;color:'+(sn>=3?'#1D9E75':sn>=2?'#EF9F27':'#EF4444')+'">'+sm+'</td>';
-         html += '<td style="padding:8px 6px;text-align:center">';
-         if(lot2) html += '<span style="font-size:11px;font-weight:700;color:#fff;background:#1D9E75;border-radius:6px;padding:2px 6px">🏆</span>';
-         else if(j.optin) html += '<span style="font-size:11px;font-weight:700;color:#7C2D92;background:#F3E8FF;border-radius:6px;padding:2px 6px">✓</span>';
-         else html += '<span style="font-size:10px;color:var(--sa-muted)">—</span>';
-         html += '</td>';
-         /* Cellule ticket pour tombola/quizmaster */
+         /* Cellule ticket pour tombola/quizmaster — AVANT optin */
          if(e.module==='tombola'||e.module==='quizmaster'){
            var _part = DATA.participations && DATA.participations.find(function(p){ return p.joueur_id===j.id && p.event_id===e.id; });
            var _ticket = _part ? _part.ticket_code : (j.ticketCode || '—');
@@ -6410,6 +6405,12 @@ function drawerEvent(e){
            else html += '<span style="color:var(--sa-muted);font-size:10px">—</span>';
            html += '</td>';
          }
+         /* Cellule OPT-IN */
+         html += '<td style="padding:8px 6px;text-align:center">';
+         if(lot2) html += '<span style="font-size:11px;font-weight:700;color:#fff;background:#1D9E75;border-radius:6px;padding:2px 6px">🏆</span>';
+         else if(j.optin) html += '<span style="font-size:11px;font-weight:700;color:#7C2D92;background:#F3E8FF;border-radius:6px;padding:2px 6px">✓</span>';
+         else html += '<span style="font-size:10px;color:var(--sa-muted)">—</span>';
+         html += '</td>';
          html += '<td style="padding:8px 6px;font-size:10px;color:var(--sa-muted)">'+(j.firstSeen?fmt(j.firstSeen):'')+'</td>';
        }
        html += '</tr>';
