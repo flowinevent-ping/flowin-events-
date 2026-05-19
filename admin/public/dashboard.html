@@ -7662,8 +7662,15 @@ function saveLot(lotId, eventId){
     DATA.lots.push(newL);
   }
   saveData();
-  // 🔄 Sync Supabase
-  try { var _lot = DATA.lots.find(function(l){return l.id===lotId;}); if(_lot) supaWriteLot(_lot); } catch(e){} closeModal(); renderDrawer(); toast('Lot '+(lotId?'modifié':'ajouté'),'success');
+  // Sync Supabase — nouveaux lots et lots modifiés
+  try {
+    var _lotToSync = lotId ? DATA.lots.find(function(x){return x.id===lotId;}) : DATA.lots[DATA.lots.length-1];
+    if(_lotToSync) supaWriteLot(_lotToSync);
+  } catch(e){ console.error('[Flowin] saveLot sync', e); }
+  closeModal();
+  // Si appelé depuis le wizard → rafraîchir le wizard
+  if(state.view === 'wizard-event') { renderWizard(); } else { renderDrawer(); }
+  toast('Lot '+(lotId?'modifié':'ajouté'),'success');
 }
 
 function assignLotModal(lotId){
@@ -9118,21 +9125,11 @@ function wizCreateBanque(){
 }
 function wizAddLot(){
   var d = state.wiz.draft;
-  var evId = d.id || ('ev-draft-'+Date.now());
-  openModal('editLot',{
-    id: newId('lot'), eventId: evId, nom:'', titre:'',
-    valeur:0, quantite:1, partenaireId:'',
-    emoji:'🎁', description:'', retire:false,
-    assigneA:'', note:'', _wizMode:true
-  });
+  var evId = d.id || state.wiz.editingId || '';
+  openModal('addLot', {eventId: evId, _wizMode:true});
 }
 function wizEditLot(lotId){
-  var l = DATA.lots.find(function(x){ return x.id===lotId; });
-  if(!l) return;
-  var copy = {};
-  for(var k in l){ if(l.hasOwnProperty(k)) copy[k]=l[k]; }
-  copy._wizMode = true;
-  openModal('editLot', copy);
+  openModal('editLot', {lotId: lotId, _wizMode:true});
 }
 function wizDeleteLot(lotId){
   if(!confirm('Supprimer ce lot ?')) return;
