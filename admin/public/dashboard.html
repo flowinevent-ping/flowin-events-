@@ -2936,6 +2936,7 @@ function frontLive(){
   st('fp-pv-tirage', f.lotTirage);
   st('fp-pv-cta', f.ctaText);
   st('fp-pv-desc', f.description||'');
+  st('fp-pv-badge', f.badge||'');
   st('fp-pv-semnom', f.lotSemaineNom);
   st('fp-pv-semlabel', f.lotSemaineLabel);
   st('fp-pv-sem', f.lotSemaine + (f.lotSemaineVal?' · '+f.lotSemaineVal:''));
@@ -5803,6 +5804,7 @@ function drawerEvent(e){
     var _bgGrad = 'linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%)';
     if(front.visible.titre){
       html += '<div class="fp-hero" style="background:'+_bgGrad+'">';
+      if(front.badge) html += '<div id="fp-pv-badge" style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:100px;padding:4px 12px;font-size:9px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">'+esc(front.badge||front.sousTitre||'')+'</div>';
       html += '<div class="fp-sub" id="fp-pv-sub" style="color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.1em">'+esc(front.sousTitre||'')+'</div>';
       html += '<div class="fp-title" id="fp-pv-titre" style="color:#fff">'+esc(front.titre||'')+'</div>';
       if(front.visible.dates) html += '<div class="fp-dates" id="fp-pv-dates" style="color:rgba(255,255,255,.7)">'+esc(front.dates||'')+'</div>';
@@ -5832,6 +5834,7 @@ function drawerEvent(e){
                + '</div>';
         });
         html += '</div>';
+        html += '<div style="margin-top:8px"><button class="btn btn-sm" onclick="state.drawer.tab=\'tirage\';renderDrawer()">✏ Éditer les lots →</button></div>';
       }
     }
     // Lot semaine
@@ -5844,7 +5847,7 @@ function drawerEvent(e){
     }
     // Tirage
     if(front.visible.tirage){
-      html += '<div class="fp-tirage-line"><span class="fp-tirage-dot"></span><span id="fp-pv-tirage">'+esc(front.lotTirage||'')+'</span></div>';
+      html += '<div class="fp-tirage-line" style="justify-content:center;font-size:13px"><span class="fp-tirage-dot"></span><span id="fp-pv-tirage">'+esc(front.lotTirage||'')+'</span></div>';
     }
     // CTA
     html += '<div class="fp-cta-wrap">';
@@ -5869,6 +5872,7 @@ function drawerEvent(e){
       html += '<div class="front-fld"><label>Sous-titre</label><input class="input" value="'+escAttr(front.sousTitre)+'" oninput="frontUpd(\''+e.id+'\',\'sousTitre\',this.value);frontLive()"/></div>';
       html += '<div class="front-fld"><label>Description <span style="font-weight:400;color:#94A3B8">(texte sous le titre)</span></label><textarea class="input" rows="3" style="resize:vertical;font-size:12px" placeholder="Ex: Soutiens la Croix Rouge et tente de remporter l\'un des lots..." oninput="frontUpd(\''+e.id+'\',\'description\',this.value);frontLive()">'+escAttr(front.description||'')+'</textarea></div>';
       html += '<div class="front-fld"><label>Ville</label><input class="input" value="'+escAttr(front.ville)+'" oninput="frontUpd(\''+e.id+'\',\'ville\',this.value);frontLive()"/></div>';
+      html += '<div class="front-fld"><label>Badge / Accroche <span style="font-weight:400;color:#94A3B8">(puce en haut)</span></label><input class="input" value="'+escAttr(front.badge||e.lieu||'')+'" placeholder="Ex: VENCE · COLLECTE SOLIDAIRE" oninput="frontUpd(\''+e.id+'\',\'badge\',this.value);frontLive()"/></div>';
       html += '<div class="front-fld"><label>Dates affichées</label><input class="input" value="'+escAttr(front.dates)+'" oninput="frontUpd(\''+e.id+'\',\'dates\',this.value);frontLive()"/></div>';
     }
     html += '</div>';
