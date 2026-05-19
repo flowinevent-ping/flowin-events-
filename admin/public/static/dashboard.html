@@ -9963,8 +9963,7 @@ function renderWizPreviewSequence(d, ctx) {
 function wizPreviewFront(d, couleur, nom, lots, partenaires) {
   var front = (d.cfg && d.cfg.front) || {};
   /* Badge : front.badge prioritaire, fallback avec emoji selon module */
-  var _badgeEmoji = d.module==='tombola' ? '❤️' : '🎮';
-  var _badge = front.badge || (d.lieu ? (_badgeEmoji+' '+d.lieu.toUpperCase()) : '');
+  var _badge = front.badge || (d.lieu ? (d.module==='tombola' ? '❤️ ' : '🎮 ')+d.lieu.toUpperCase() : '');
   var _desc  = front.description || '';
   var _tirage = front.lotTirage || (d.cfg&&d.cfg.tirageDate ? '📋 Tirage le '+d.cfg.tirageDate : '');
   var _cta   = front.ctaText || (d.module==='tombola' ? '🎟️ Je m\'inscris à la tombola →' : '🎮 Participer gratuitement');
@@ -9985,7 +9984,7 @@ function wizPreviewFront(d, couleur, nom, lots, partenaires) {
   /* Description — identique .tb-sub */
   if(_desc) html += '<div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.6;margin-bottom:14px;font-weight:500;padding:0 4px">'+esc(_desc)+'</div>';
   /* Dates */
-  if(d.dateD) html += '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:12px">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
+  if(d.dateD && d.module!=='tombola') html += '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:12px">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
   /* Lots — identique .tb-lot-row */
   if(lots && lots.length) {
     html += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px 10px;margin-bottom:12px;text-align:left">';

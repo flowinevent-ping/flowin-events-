@@ -1970,6 +1970,21 @@ function flowinHydrateDynTexts(ev){
   var pLabel = document.querySelector('.partenaires-label');
   if(pLabel) pLabel.textContent = '★ Partenaires ' + nom + ' ★';
 
+  /* Tombola : hydrater tb-1 depuis cfg.front */
+  var _front = cfg.front || {};
+  var tbBadge = document.querySelector('#vp-tombola .tb-badge');
+  if(tbBadge && _front.badge) tbBadge.textContent = _front.badge;
+  var tbTitle = document.querySelector('#vp-tombola .tb-title');
+  if(tbTitle && nom) tbTitle.textContent = nom;
+  var tbSub = document.querySelector('#vp-tombola .tb-sub');
+  if(tbSub && _front.description) tbSub.textContent = _front.description;
+  var tbCta = document.querySelector('#vp-tombola .tb-btn-primary');
+  if(tbCta && _front.ctaText) tbCta.textContent = _front.ctaText;
+  var tbCtaNote = document.querySelector('#vp-tombola .tb-cta-note');
+  if(tbCtaNote && _front.ctaNote) tbCtaNote.textContent = _front.ctaNote;
+  var tbDrawDate = document.querySelector('#vp-tombola .tb-draw-date');
+  if(tbDrawDate && _front.lotTirage) tbDrawDate.textContent = _front.lotTirage;
+
   /* Header formulaire */
   var formSub = document.querySelector('#pq-5 .header-sub');
   if(formSub) formSub.textContent = 'Pour la tombola de ' + nom;
