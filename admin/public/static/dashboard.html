@@ -599,7 +599,7 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .wiz-banque-q-opt.correct{background:#D1FAE5;color:#065F46;font-weight:700}
 
 /* ============== ONGLET FRONT · ÉDITEUR LIVE ============== */
-.front-preview-wrap{margin-bottom:18px;display:flex;flex-direction:column;align-items:center}
+.front-preview-wrap{margin-bottom:0;display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start}
 .front-preview-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sa-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .front-preview-label::before{content:'';width:6px;height:6px;border-radius:50%;background:#10B981;animation:pulse 2s infinite}
 .front-preview-mobile{background:#1a1a1a;border-radius:40px;padding:0;box-shadow:0 16px 48px rgba(0,0,0,.35),inset 0 0 0 2px #444,inset 0 0 0 8px #111;position:relative;width:270px;aspect-ratio:9/19.5;overflow:hidden;isolation:isolate}
@@ -629,7 +629,7 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* Éditeur (en bas) */
-.front-editor{background:var(--sa-card);border:1px solid var(--sa-border);border-radius:12px;padding:14px;margin-top:6px}
+.front-editor{background:var(--sa-card);border:1px solid var(--sa-border);border-radius:12px;padding:14px;overflow-y:auto;max-height:calc(100vh - 160px)}
 .front-editor-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sa-text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--sa-border)}
 .front-section{padding:10px 0;border-bottom:1px solid var(--sa-border)}
 .front-section:last-child{border-bottom:none}
@@ -5759,7 +5759,7 @@ function drawerEvent(e){
       lotSemaineLabel:'À gagner cette semaine',
       lotSemaine:'',
       lotSemaineVal:'',
-      ctaText:_isBtobFront ? '🎡 Je tente ma chance' : '🎮 Participer gratuitement',
+      ctaText:_isBtobFront ? '🎡 Je tente ma chance' : (e.module==='tombola' ? '🎟️ Je m\'inscris à la tombola →' : '🎮 Participer gratuitement'),
       ctaNote:'Jeu gratuit · Sans achat obligatoire',
       description:'',
       formTitre:'Mes coordonnées',
@@ -5803,7 +5803,7 @@ function drawerEvent(e){
     // ─── APERÇU LIVE MOBILE (en haut) ───
     html += '<div class="front-preview-wrap">';
     html += '<div class="front-preview-label" style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu mobile · live</div>';
-    html += '<div class="front-preview-mobile" id="frontPreview">';
+    html += '<div class="front-preview-mobile" id="frontPreview" style="position:sticky;top:0">';
     html += '<div class="front-preview-notch" style="display:none"></div>';
     html += '<div class="front-preview-inner" style="background:linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%);color:#fff;display:flex;flex-direction:column;height:100%">';
 
