@@ -2788,6 +2788,8 @@ function wizFrontUpd(field, value){
   if(!d.cfg.front) d.cfg.front = {};
   d.cfg.front[field] = value;
   renderWizard();
+  /* RÈGLE : si event existant → persistance immédiate */
+  if(d.id) frontSave(d.id, true);
 }
 function wizFrontSave(){
   /* Sauvegarde cfg.front du draft dans l'event réel + Supabase */
@@ -2972,9 +2974,11 @@ function setMode(m){ state.mode=m; render(); }
 
 // ============== HELPERS ONGLET FRONT (éditeur live) ==============
 function frontUpd(eventId, field, value){
-  const e = findEvent(eventId);
+  var e = findEvent(eventId);
   if(!e || !e.cfg || !e.cfg.front) return;
   e.cfg.front[field] = value;
+  /* RÈGLE : persistance immédiate Supabase à chaque modification */
+  frontSave(eventId, true); /* true = silencieux (pas de toast) */
 }
 function frontToggleVis(eventId, key){
   const e = findEvent(eventId);
@@ -2983,13 +2987,24 @@ function frontToggleVis(eventId, key){
   saveData();
   renderDrawer();
 }
-function frontSave(eventId){
-  const e = findEvent(eventId);
+function frontSave(eventId, silent){
+  var e = findEvent(eventId);
   if(!e) return;
   saveData();
-  toast('Front publié · visible immédiatement','success');
-  const el = document.getElementById('frontSaved');
-  if(el){ el.style.opacity='1'; setTimeout(()=>{ if(el) el.style.opacity='0'; }, 2500); }
+  /* Persistance Supabase : UPDATE events SET cfg = ... */
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    var payload = JSON.stringify({ cfg: e.cfg });
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(eventId), {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      body: payload
+    }).catch(function(err){ console.warn('[frontSave] Supabase error:', err); });
+  }
+  if(!silent){
+    toast('Front publié · visible immédiatement','success');
+    var el = document.getElementById('frontSaved');
+    if(el){ el.style.opacity='1'; setTimeout(function(){ if(el) el.style.opacity='0'; }, 2500); }
+  }
 }
 // frontLive : re-render seulement les éléments d'aperçu sans détruire le DOM
 // Évite de perdre le focus des inputs en cours d'édition
