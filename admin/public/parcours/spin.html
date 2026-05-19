@@ -30,7 +30,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
 .phone-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.08em}
 .phone{width:375px;height:812px;background:#fff;border-radius:44px;border:10px solid #1a1a1a;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;position:relative}
-.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:26px;background:#1a1a1a;border-radius:0 0 18px 18px;z-index:100}
+.notch{display:none}
 .viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:#0F0A1E;position:relative}
 .viewport::-webkit-scrollbar{display:none}
 
@@ -39,7 +39,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .page.on{display:block}
 
 /* Status bar */
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 22px 4px;font-size:13px;font-weight:900;color:var(--navy)}
+.status-bar{display:none}
 
 /* Header */
 .header{padding:10px 20px 14px;background:var(--bg)}
@@ -152,7 +152,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Form */
 .form-wrap{padding:4px 20px 16px}
 .form-field{margin-bottom:12px}
-.form-label{font-size:10px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.form-label{font-size:12px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
 .form-input{width:100%;background:#fff;border:var(--border);border-radius:14px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--navy);outline:none}
 .form-input:focus{border-color:var(--a)}
 .form-rgpd{display:flex;gap:10px;align-items:flex-start;padding:12px;background:rgba(255,255,255,.05);border:var(--border);border-radius:14px;margin-top:6px}
@@ -252,7 +252,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .pq-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#4B1528;margin-bottom:4px}
 .pq-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
 .pq-form-field{margin-bottom:12px}
-.pq-form-label{font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.pq-form-label{font-size:12px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .pq-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
 .pq-form-input:focus{border-color:#D4537E}
 .pq-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -424,7 +424,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .qs-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#075985;margin-bottom:4px}
 .qs-form-sub{font-size:12px;font-weight:800;color:#0369A1;margin-bottom:16px}
 .qs-form-field{margin-bottom:12px}
-.qs-form-label{font-size:10px;font-weight:900;color:#0369A1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qs-form-label{font-size:12px;font-weight:900;color:#0369A1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qs-form-input{width:100%;background:#fff;border:1.5px solid rgba(14,165,233,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#075985;outline:none}
 .qs-form-input:focus{border-color:#0EA5E9}
 .qs-form-rgpd{display:flex;gap:10px;padding:12px;background:#F0F9FF;border-radius:12px;align-items:flex-start}
@@ -574,7 +574,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .qs-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#1E293B;margin-bottom:4px}
 .qs-form-sub{font-size:12px;font-weight:800;color:#64748B;margin-bottom:16px}
 .qs-form-field{margin-bottom:12px}
-.qs-form-label{font-size:10px;font-weight:900;color:#EA580C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qs-form-label{font-size:12px;font-weight:900;color:#EA580C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qs-form-input{width:100%;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1E293B;outline:none}
 .qs-form-input:focus{border-color:#EA580C}
 .qs-form-rgpd{display:flex;gap:10px;padding:12px;background:#fff;border-radius:12px;margin-top:6px;align-items:flex-start;border:1.5px solid #E2E8F0}
@@ -1031,7 +1031,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .qm-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#312E81;margin-bottom:4px}
 .qm-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
 .qm-form-field{margin-bottom:12px}
-.qm-form-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qm-form-label{font-size:12px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qm-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
 .qm-form-input:focus{border-color:#6366F1}
 .qm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1164,6 +1164,18 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Standalone : plein écran */
 html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
 .viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ── Responsive mobile ── */
+@media (max-width:430px){
+  body{font-size:16px}
+  .pq-form-label,.qm-form-label,.form-label{font-size:12px}
+  .pq-form-input,.qm-form-input,.form-input,.qs-form-input{font-size:16px;padding:13px 15px}
+  .pq-quiz-opt,.qm-quiz-opt{font-size:15px;padding:12px 14px}
+  .btn,.pq-btn,.qm-btn,.tb-btn-primary{font-size:16px;padding:15px 20px}
+  .header-title{font-size:18px}
+  .tb-title{font-size:28px}
+  h1,h2{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -1171,7 +1183,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── SPIN 1 : Landing event ─── -->
       <div class="page on" id="spin-1">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="landing-frame">
           <div class="landing-event-chip">🚦 Événement local · en cours</div>
           <div class="landing-logo spin">🛡️</div>
@@ -1206,7 +1217,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── SPIN 2 : Roue idle ─── -->
       <div class="page" id="spin-2">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback">
           <div class="back-btn" onclick="spinGo(1)">←</div>
           <div><div class="header-title">La roue Flowin</div><div class="header-sub" id="spin-sub">1 essai · appuie pour lancer</div></div>
@@ -1249,7 +1259,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── SPIN 4 : Résultat ─── -->
       <div class="page" id="spin-4">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="hero spin" style="padding:36px 20px 18px">
           <div class="hero-inner">
             <div class="hero-chip"><div class="dot"></div>RÉSULTAT</div>
@@ -1283,7 +1292,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── SPIN 5 : Formulaire réclamation CRM COMPLET ─── -->
       <div class="page" id="spin-5">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback">
           <div class="back-btn" onclick="spinGo(4)">←</div>
           <div><div class="header-title">Récupère ton lot</div><div class="header-sub">Présente ce ticket au stand</div></div>
@@ -1354,7 +1362,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── SPIN 6 : Partenaires ─── -->
       <div class="page" id="spin-6">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback">
           <div class="back-btn" onclick="spinGo(5)">←</div>
           <div><div class="header-title">Nos partenaires</div><div class="header-sub">Merci à eux !</div></div>
@@ -1430,7 +1437,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── SPIN 7 : Anti-doublon ─── -->
       <div class="page" id="spin-7">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="ad-screen" style="background:linear-gradient(160deg,#EDE8FF 0%,#F0EDE8 100%)">
           <div class="ad-icon">✋</div>
           <div class="ad-title">Tu as déjà joué !</div>

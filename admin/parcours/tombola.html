@@ -30,7 +30,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
 .phone-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em}
 .phone{width:375px;height:812px;background:rgba(255,255,255,.07);border-radius:44px;border:10px solid #1a1a1a;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;position:relative}
-.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:26px;background:#1a1a1a;border-radius:0 0 18px 18px;z-index:100}
+.notch{display:none}
 .viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:var(--bg);position:relative}
 .viewport::-webkit-scrollbar{display:none}
 
@@ -39,7 +39,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .page.on{display:block}
 
 /* Status bar */
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 22px 4px;font-size:13px;font-weight:900;color:var(--navy)}
+.status-bar{display:none}
 
 /* Header */
 .header{padding:10px 20px 14px;background:#0F0A1E}
@@ -152,7 +152,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Form */
 .form-wrap{padding:4px 20px 16px}
 .form-field{margin-bottom:12px}
-.form-label{font-size:10px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.form-label{font-size:12px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
 .form-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:14px;padding:12px 14px;color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--navy);outline:none}
 .form-input:focus{border-color:var(--a)}
 .form-rgpd{display:flex;gap:10px;align-items:flex-start;padding:12px;background:rgba(255,255,255,.05);border:var(--border);border-radius:14px;margin-top:6px}
@@ -252,7 +252,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .pq-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;margin-bottom:4px}
 .pq-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
 .pq-form-field{margin-bottom:12px}
-.pq-form-label{font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.pq-form-label{font-size:12px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .pq-form-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
 .pq-form-input:focus{border-color:#D4537E}
 .pq-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -424,7 +424,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .qs-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#075985;margin-bottom:4px}
 .qs-form-sub{font-size:12px;font-weight:800;color:#0369A1;margin-bottom:16px}
 .qs-form-field{margin-bottom:12px}
-.qs-form-label{font-size:10px;font-weight:900;color:#0369A1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qs-form-label{font-size:12px;font-weight:900;color:#0369A1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qs-form-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(14,165,233,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#075985;outline:none}
 .qs-form-input:focus{border-color:#0EA5E9}
 .qs-form-rgpd{display:flex;gap:10px;padding:12px;background:#F0F9FF;border-radius:12px;align-items:flex-start}
@@ -574,7 +574,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .qs-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#1E293B;margin-bottom:4px}
 .qs-form-sub{font-size:12px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:16px}
 .qs-form-field{margin-bottom:12px}
-.qs-form-label{font-size:10px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qs-form-label{font-size:12px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qs-form-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1E293B;outline:none}
 .qs-form-input:focus{border-color:#fff}
 .qs-form-rgpd{display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.07);border-radius:12px;margin-top:6px;align-items:flex-start;border:1.5px solid #E2E8F0}
@@ -1031,7 +1031,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .qm-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#312E81;margin-bottom:4px}
 .qm-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
 .qm-form-field{margin-bottom:12px}
-.qm-form-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qm-form-label{font-size:12px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qm-form-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
 .qm-form-input:focus{border-color:#6366F1}
 .qm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1224,6 +1224,18 @@ input::placeholder, select::placeholder, textarea::placeholder {
 .progress-step { background: rgba(255,255,255,.15) !important; }
 /* Confettis déco → visible sur fond sombre */
 .tb-landing svg { opacity: .4 !important; }
+
+/* ── Responsive mobile ── */
+@media (max-width:430px){
+  body{font-size:16px}
+  .pq-form-label,.qm-form-label,.form-label{font-size:12px}
+  .pq-form-input,.qm-form-input,.form-input,.qs-form-input{font-size:16px;padding:13px 15px}
+  .pq-quiz-opt,.qm-quiz-opt{font-size:15px;padding:12px 14px}
+  .btn,.pq-btn,.qm-btn,.tb-btn-primary{font-size:16px;padding:15px 20px}
+  .header-title{font-size:18px}
+  .tb-title{font-size:28px}
+  h1,h2{font-size:22px}
+}
 </style>
 </head>
 <body style="background:#0F0A1E">
@@ -1231,7 +1243,6 @@ input::placeholder, select::placeholder, textarea::placeholder {
 
       <!-- ─── TB 1 : Landing tombola ─── -->
       <div class="page on" id="tb-1">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="tb-landing" style="position:relative"><svg style="position:absolute;top:0;left:0;width:100%;pointer-events:none;opacity:.35" viewBox="0 0 375 100"><circle cx="25" cy="20" r="6" fill="#FFD700"/><circle cx="75" cy="45" r="4" fill="#fff"/><circle cx="130" cy="12" r="5" fill="#FFD700"/><circle cx="195" cy="32" r="4" fill="#fff"/><circle cx="255" cy="16" r="6" fill="#FFD700"/><circle cx="315" cy="38" r="4" fill="#fff"/><circle cx="355" cy="10" r="5" fill="#FFD700"/><rect x="50" y="55" width="6" height="6" rx="1" fill="#FFD700" transform="rotate(30 53 58)"/><rect x="160" y="48" width="5" height="5" rx="1" fill="#fff" transform="rotate(45 162 50)"/><rect x="285" y="52" width="6" height="6" rx="1" fill="#FFD700" transform="rotate(20 288 55)"/></svg>
           <div class="tb-badge">🔴 Croix Rouge · collecte solidaire</div>
           <div class="tb-logo"><svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="#E8212B"/><rect x="16" y="38" width="68" height="24" rx="5" fill="#E8212B"/></svg></div>
@@ -1269,7 +1280,6 @@ input::placeholder, select::placeholder, textarea::placeholder {
 
       <!-- ─── TB 2 : Formulaire CRM ─── -->
       <div class="page" id="tb-2">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback">
           <div class="back-btn" onclick="tbGo(1)">←</div>
           <div><div class="header-title">Mes coordonnées</div><div class="header-sub">Pour la tombola Croix Rouge</div></div>
@@ -1336,7 +1346,6 @@ input::placeholder, select::placeholder, textarea::placeholder {
 
       <!-- ─── TB 3 : Ticket tombola ─── -->
       <div class="page" id="tb-3">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="tb-confirm-hero">
           <div class="tb-confirm-chip"><div class="dot" style="background:#A855F7"></div>INSCRIPTION CONFIRMÉE</div>
           <div class="tb-confirm-title">Tu es dans la course ! 🎉</div>
@@ -1368,7 +1377,6 @@ input::placeholder, select::placeholder, textarea::placeholder {
 
       <!-- ─── TB 4 : Anti-doublon ─── -->
       <div class="page" id="tb-4">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="ad-screen" style="background:linear-gradient(160deg,rgba(124,45,146,.12) 0%,rgba(124,45,146,.12) 100%)">
           <div class="ad-icon">✋</div>
           <div class="ad-title">Tu es déjà inscrit·e !</div>
