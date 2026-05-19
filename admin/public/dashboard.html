@@ -9850,41 +9850,46 @@ function renderWizPreviewSequence(d, ctx) {
 
 function wizPreviewFront(d, couleur, nom, lots, partenaires) {
   var front = (d.cfg && d.cfg.front) || {};
-  var _badge = front.badge || (d.lieu ? '📍 '+d.lieu.toUpperCase() : '');
+  /* Badge : front.badge prioritaire, fallback avec emoji selon module */
+  var _badgeEmoji = d.module==='tombola' ? '❤️' : '🎮';
+  var _badge = front.badge || (d.lieu ? (_badgeEmoji+' '+d.lieu.toUpperCase()) : '');
   var _desc  = front.description || '';
-  var _tirage = front.lotTirage || '';
-  var _cta   = front.ctaText || (d.module==='tombola' ? 'Je m\'inscris à la tombola →' : '🎮 Participer gratuitement');
+  var _tirage = front.lotTirage || (d.cfg&&d.cfg.tirageDate ? '📋 Tirage le '+d.cfg.tirageDate : '');
+  var _cta   = front.ctaText || (d.module==='tombola' ? '🎟️ Je m\'inscris à la tombola →' : '🎮 Participer gratuitement');
+  var _ctaNote = front.ctaNote || 'Jeu gratuit · Sans achat obligatoire';
   var _isTombola = d.module === 'tombola';
+  /* Logo identique à tombola.html : 84px, drop-shadow */
   var _logoSvg = _isTombola
-    ? '<svg viewBox="0 0 100 100" style="width:52px;height:52px;display:block;margin:0 auto 10px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+couleur+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+couleur+'"/></svg>'
-    : '';
+    ? '<svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto 12px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+couleur+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+couleur+'"/></svg>'
+    : (d.module==='quiz'?'<div style="font-size:36px;margin:0 auto 10px;text-align:center">🧠</div>':d.module==='vote'?'<div style="font-size:36px;margin:0 auto 10px;text-align:center">🗳️</div>':d.module==='spin'?'<div style="font-size:36px;margin:0 auto 10px;text-align:center">🎡</div>':'');
   var html = '';
-  // Fond dark Flowin
-  html += '<div style="background:linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%);min-height:100%;padding:16px 14px;color:#fff;text-align:center">';
-  // Badge
-  if(_badge) html += '<div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:4px 12px;font-size:8px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">'+esc(_badge)+'</div>';
-  // Logo
+  html += '<div style="background:linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%);min-height:100%;padding:20px 16px 16px;color:#fff;text-align:center">';
+  /* Badge — identique .tb-badge */
+  if(_badge) html += '<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(168,85,247,.3);border-radius:100px;padding:5px 14px;font-size:9px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px">'+esc(_badge)+'</div>';
+  /* Logo */
   html += _logoSvg;
-  // Titre
-  html += '<div style="font-size:18px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:6px">'+esc(nom)+'</div>';
-  // Description
-  if(_desc) html += '<div style="font-size:11px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:8px">'+esc(_desc)+'</div>';
-  // Dates
-  if(d.dateD) html += '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:10px">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
-  // Lots
-  if(lots.length) {
-    html += '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px;margin-bottom:10px;text-align:left">';
+  /* Titre — Fredoka One 24px identique .tb-title */
+  html += '<div style="font-family:'Fredoka One',cursive;font-size:24px;font-weight:400;color:#fff;line-height:1.15;margin-bottom:8px">'+esc(nom)+'</div>';
+  /* Description — identique .tb-sub */
+  if(_desc) html += '<div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.6;margin-bottom:14px;font-weight:500;padding:0 4px">'+esc(_desc)+'</div>';
+  /* Dates */
+  if(d.dateD) html += '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:12px">'+fmtFull(d.dateD)+(d.dateF&&d.dateF!==d.dateD?' → '+fmtFull(d.dateF):'')+'</div>';
+  /* Lots — identique .tb-lot-row */
+  if(lots && lots.length) {
+    html += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px 10px;margin-bottom:12px;text-align:left">';
     var _ranks=['🥇','🥈','🥉','🏅'];
-    lots.slice(0,4).forEach(function(l,i){
-      html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;'+(i>0?'border-top:1px solid rgba(255,255,255,.07)':'')+'"><div style="width:28px;height:28px;border-radius:8px;background:rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;font-size:15px">'+_ranks[i]+'</div><div style="font-size:11px;font-weight:700;color:#fff">'+esc(l.nom||'Lot')+'</div></div>';
+    lots.slice(0,3).forEach(function(l,i){
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(i>0?'border-top:1px solid rgba(255,255,255,.07)':'')+'">';
+      html += '<div style="width:36px;height:36px;border-radius:12px;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+_ranks[i]+'</div>';
+      html += '<div style="text-align:left"><div style="font-size:12px;font-weight:800;color:#fff">'+esc(l.nom||'Lot')+'</div>'+(l.partenaire?'<div style="font-size:10px;color:rgba(255,255,255,.5)">'+esc(l.partenaire)+'</div>':'')+'</div></div>';
     });
     html += '</div>';
   }
-  // Tirage
-  if(_tirage) html += '<div style="background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8)">'+esc(_tirage)+'</div>';
-  // CTA
-  html += '<button style="width:100%;padding:11px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:12px;font-weight:800;cursor:default">'+esc(_cta)+'</button>';
-  html += '<div style="font-size:8px;color:rgba(255,255,255,.35);margin-top:5px">Jeu gratuit · Sans achat obligatoire</div>';
+  /* Tirage — identique .tb-draw-date */
+  if(_tirage) html += '<div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:rgba(255,255,255,.85)">'+esc(_tirage)+'</div>';
+  /* CTA — identique .tb-btn-primary */
+  html += '<button style="width:100%;padding:14px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:100px;font-size:13px;font-weight:800;cursor:default;box-shadow:0 8px 24px rgba(168,85,247,.35)">'+esc(_cta)+'</button>';
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:7px">'+esc(_ctaNote)+'</div>';
   html += '</div>';
   return html;
 }
