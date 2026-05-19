@@ -1826,10 +1826,10 @@ function saveData(supaSync){
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     if(DATA.events) DATA.events.forEach(function(ev){ supaWriteEvent(ev); });
     if(DATA.lots) DATA.lots.forEach(function(l){ supaWriteLot(l); });
+    if(DATA.pros) DATA.pros.forEach(function(p){ supaWritePro(p); });
+    if(DATA.partenaires) DATA.partenaires.forEach(function(p){ supaWritePartenaire(p); });
     if(supaSync){
       if(DATA.joueurs) DATA.joueurs.forEach(function(j){ supaWriteJoueur(j); });
-      if(DATA.pros) DATA.pros.forEach(function(p){ supaUpsert('pros', p); });
-      if(DATA.partenaires) DATA.partenaires.forEach(function(p){ supaUpsert('partenaires', p); });
     }
   }
 }
@@ -2037,7 +2037,7 @@ async function supaWriteLot(l){
     date_retrait:l.dateRetrait||null, date_assign:l.dateAssign||null, note:l.note||''
   };
   var ok = await supaUpsert('lots', payload);
-  if(!ok) gasBackup('lot_upsert', payload);
+  if(!ok) { console.error('[Flowin] supaWriteLot FAILED', payload && payload.id); }
 }
 
 // Upsert pro → Supabase + GAS fallback
@@ -2052,25 +2052,44 @@ async function supaWritePro(p){
     tags: Array.isArray(p.tags) ? p.tags : []
   };
   var ok = await supaUpsert('pros', payload);
-  if(!ok) gasBackup('pro_upsert', payload);
+  if(!ok) { console.error('[Flowin] supaWritePro FAILED', p.id); toast('Erreur sync Pro '+p.nom,'error'); }
 }
 
 // Upsert partenaire → Supabase + GAS fallback
 async function supaWritePartenaire(p){
   if(!p || !p.id) return;
   var payload = {
-    id: p.id, nom: p.nom, type: p.type||'Local',
-    secteur: p.secteur||'', contact: p.contact||'',
-    role: p.role||'', email: p.email||'', tel: p.tel||'',
+    id: p.id,
+    nom: p.nom || '',
+    type: p.type || 'Local',
+    emoji: p.emoji || '',
+    description: p.description || '',
+    contact_nom: p.contactNom || p.contact_nom || '',
+    contact_email: p.contactEmail || p.contact_email || '',
+    contact_tel: p.contactTel || p.contact_tel || '',
+    site_web: p.siteWeb || p.site_web || '',
+    actif: p.actif !== undefined ? p.actif : true,
+    visible: p.visible !== undefined ? p.visible : true,
+    en_avant: p.enAvant || p.en_avant || false,
+    couleur: p.couleur || '#7C5CFC',
+    image_url: p.imageUrl || p.image_url || '',
+    promo_text: p.promoText || p.promo_text || '',
+    adresse: p.adresse || '',
+    role: p.role || '',
+    email: p.email || '',
+    tel: p.tel || '',
     url: p.url || '',
-    ville: p.ville||'', code_postal: p.codePostal||'',
-    adresse: p.adresse||'', siret: p.siret||'',
-    contrat: p.contrat||'', notes: p.notes||'',
+    ville: p.ville || '',
+    code_postal: p.codePostal || p.code_postal || '',
+    siret: p.siret || '',
+    contrat: p.contrat || '',
+    notes: p.notes || '',
+    contact: p.contact || '',
     events: Array.isArray(p.events) ? p.events : [],
     tags: Array.isArray(p.tags) ? p.tags : []
   };
   var ok = await supaUpsert('partenaires', payload);
-  if(!ok) gasBackup('partenaire_upsert', payload);
+  if(!ok) { console.error('[Flowin] supaWritePartenaire FAILED', p.id); toast('Erreur sync partenaire '+p.nom, 'error'); }
 }
 
 // Upsert banque → Supabase + GAS fallback
@@ -2083,7 +2102,7 @@ async function supaWriteBanque(b){
     tags: Array.isArray(b.tags) ? b.tags : []
   };
   var ok = await supaUpsert('banques', payload);
-  if(!ok) gasBackup('banque_upsert', payload);
+  if(!ok) { console.error('[Flowin] supaWriteBanque FAILED', payload && payload.id); }
 }
 
 // Upsert super event → Supabase + GAS fallback
@@ -2119,11 +2138,14 @@ async function supaWriteSuperEvent(se){
     nb_gagnants_final: se.nbGagnantsFinal||0
   };
   var ok = await supaUpsert('super_events', payload);
-  if(!ok) gasBackup('super_event_upsert', payload);
+  if(!ok) { console.error('[Flowin] supaWriteSuperEvent FAILED', payload && payload.id); }
 }
 
 // GAS fallback (backup append-only)
 function gasBackup(action, payload){
+  /* GAS désactivé — erreurs loguées en console uniquement */
+  console.warn('[Flowin] supabase write failed:', action, payload && payload.id);
+  return;
   var GAS_URL = localStorage.getItem('flowin_gas_url')||'';
   if(!GAS_URL) return;
   // Anti-doublon : clé = action+id+timestamp minute
@@ -2384,8 +2406,8 @@ const LIB_PARTENAIRES = {
   },
   find: id => DATA.partenaires.find(p=>p.id===id),
   count: () => DATA.partenaires.length,
-  create: (fields) => { const p=_flowinNew({id:newId('pt'),nom:'',secteur:'',type:'Local',ville:'',email:'',siret:'',events:[],totalDistribue:0,actif:true,recurrent:false},fields); DATA.partenaires.push(p); saveData(); return p; },
-  update: (id, fields) => { const idx=DATA.partenaires.findIndex(p=>p.id===id); if(idx<0)return null; _flowinMerge(DATA.partenaires[idx],fields); saveData(); return DATA.partenaires[idx]; },
+  create: (fields) => { const p=_flowinNew({id:newId('pt'),nom:'',type:'Local',ville:'',email:'',events:[],actif:true},fields); DATA.partenaires.push(p); supaWritePartenaire(p); saveData(); return p; },
+  update: (id, fields) => { const idx=DATA.partenaires.findIndex(p=>p.id===id); if(idx<0)return null; _flowinMerge(DATA.partenaires[idx],fields); supaWritePartenaire(DATA.partenaires[idx]); saveData(); return DATA.partenaires[idx]; },
   delete: (id) => { DATA.partenaires=DATA.partenaires.filter(p=>p.id!==id); saveData(); }
 };
 
