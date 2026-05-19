@@ -7873,6 +7873,10 @@ function renderPreviewTombola(e){
   html+=_svg;
   html+='<div style="font-size:15px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:5px">'+esc(_nom)+'</div>';
   if(_desc) html+='<div style="font-size:9px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:8px;padding:0 4px">'+esc(_desc)+'</div>';
+  if(e&&e.date_d){
+    var _dD=fmtFull(e.date_d), _dF=e.date_f?fmtFull(e.date_f):'';
+    html+='<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:8px">'+esc(_dD+(_dF&&_dF!==_dD?' → '+_dF:''))+'</div>';
+  }
   if(_lots.length){
     html+='<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 8px;margin-bottom:7px;text-align:left">';
     var _r=['🥇','🥈','🥉'];
@@ -9050,14 +9054,27 @@ function resetData(){
 function wizCreatePartner(){
   openModal('wizPartner',{nom:'',secteur:'',type:'Local',ville:'',email:'',siret:''});
 }
+function wizAutoSavePartenaires(){
+  var d = state.wiz.draft;
+  if(!d || !d.id) return; /* wizard creation : pas encore d'id */
+  var ev = findEvent(d.id);
+  if(!ev) return;
+  if(!ev.cfg) ev.cfg = {};
+  ev.cfg.partenaires = (d.partenaires && d.partenaires.length) ? d.partenaires.slice() : [];
+  supaWriteEvent(ev);
+  saveData();
+  toast('Partenaires enregistrés ✓', 'success');
+}
 function wizPartnerAdd(id){
   if(!state.wiz.draft.partenaires) state.wiz.draft.partenaires = [];
-  if(!state.wiz.draft.partenaires.includes(id)) state.wiz.draft.partenaires.push(id);
+  if(state.wiz.draft.partenaires.indexOf(id) < 0) state.wiz.draft.partenaires.push(id);
+  wizAutoSavePartenaires();
   renderWizard();
 }
 function wizPartnerRemove(id){
   if(!state.wiz.draft.partenaires) return;
-  state.wiz.draft.partenaires = state.wiz.draft.partenaires.filter(x => x !== id);
+  state.wiz.draft.partenaires = state.wiz.draft.partenaires.filter(function(x){ return x !== id; });
+  wizAutoSavePartenaires();
   renderWizard();
 }
 
@@ -9282,7 +9299,6 @@ function renderWizardEvent(){
     var _isTombola = d.module === 'tombola';
     var _evLots = (d.id && DATA.lots) ? DATA.lots.filter(function(l){ return l.eventId===d.id; }) : [];
     html += '<div class="section-h">Étape 1 · Identité &amp; configuration front</div>';
-    html += '<div style="margin-bottom:14px"><button class="btn" style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(124,45,146,.1),rgba(168,85,247,.1));border:1px solid rgba(168,85,247,.3);color:#A855F7;font-weight:700;font-size:12px" onclick="openModal(\'wizFront\',{})">✏️ Personnaliser les textes &amp; emojis de la page joueur</button></div>';
     if(wiz_nbJours > 1){
       html += '<div class="alert info"><span class="ico">📆</span><strong>Event multi-jours · '+wiz_nbJours+' jours</strong> · Du '+fmt(wiz_d.dateD)+' au '+fmt(wiz_d.dateF)+'. Un tirage par jour activable à l\'étape Tirage.</div>';
     }
