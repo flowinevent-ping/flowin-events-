@@ -1275,6 +1275,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
         </div>
         <div class="bottom-cta">
           <div class="btn tb-btn-primary" onclick="tbGo(2)">Je m'inscris à la tombola →</div>
+          <div class="tb-cta-note" style="font-size:10px;text-align:center;color:rgba(255,255,255,.45);padding:4px 0 2px;width:100%">Jeu gratuit · Sans achat obligatoire</div>
         </div>
       </div>
 
@@ -1365,8 +1366,8 @@ input::placeholder, select::placeholder, textarea::placeholder {
         </div>
         <div style="padding:0 20px 16px">
           <div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:14px;padding:14px 16px;font-size:12px;font-weight:800;color:#C4B5FD;line-height:1.6">
-            📬 Un email de confirmation t'a été envoyé.<br>
-            🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.<br>
+            <span class="tb-note-email">📬 Un email de confirmation t'a été envoyé.</span><br>
+            <span class="tb-note-gagnants">🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.</span><br>
             📲 Capture ce ticket par précaution.
           </div>
         </div>
@@ -2003,10 +2004,14 @@ function flowinHydrateModule(ev) {
       logoEl.innerHTML='<svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+tbColor+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+tbColor+'"/></svg>';
     }
     var badge=vp.querySelector('.tb-badge');
-    if(badge) badge.textContent='❤️ '+lieu+' · '+((ev.cfg&&ev.cfg.datesLabel)?ev.cfg.datesLabel:'Collecte solidaire');
+    if(badge) badge.textContent=front.badge ? front.badge : ('❤️ '+lieu+' · '+((ev.cfg&&ev.cfg.datesLabel)?ev.cfg.datesLabel:'Collecte solidaire'));
     var title=vp.querySelector('.tb-title');
     if(title) title.innerHTML=nom;
-    if(cfg.tirageDate||cfg.drawDate){var drawEl=vp.querySelector('.tb-draw-date');if(drawEl)drawEl.innerHTML='📅 Tirage le <strong>'+(cfg.tirageDate||cfg.drawDate)+'</strong>';}
+    /* Description landing */
+    var tbSub=vp.querySelector('.tb-sub');
+    if(tbSub && front.description) tbSub.textContent=front.description;
+    var _tirageText=front.lotTirage||(cfg.tirageDate||cfg.drawDate?'📅 Tirage le <strong>'+(cfg.tirageDate||cfg.drawDate)+'</strong>':null);
+    if(_tirageText){var drawEl=vp.querySelector('.tb-draw-date');if(drawEl)drawEl.innerHTML=_tirageText;}
     var tbBtn=vp.querySelector('.tb-btn-primary');
     if(tbBtn){tbBtn.style.background='linear-gradient(135deg,#7C2D92,#A855F7)';tbBtn.style.color='#fff';tbBtn.style.fontWeight='800';}
 
@@ -2023,9 +2028,9 @@ function flowinHydrateModule(ev) {
     var formSub = vp.querySelector('.header-sub');
     if(formSub && front.formSousTitre) formSub.textContent = front.formSousTitre;
     /* Confirmation : titre */
-    var confirmT = vp.querySelector('.tb-confirm-titre');
+    var confirmT = vp.querySelector('.tb-confirm-title');
     if(confirmT && front.confirmTitre) confirmT.textContent = front.confirmTitre;
-    var confirmS = vp.querySelector('.tb-confirm-sous');
+    var confirmS = vp.querySelector('.tb-confirm-sub');
     if(confirmS && front.confirmSousTitre) confirmS.textContent = front.confirmSousTitre;
     /* Notes confirmation */
     var emailN = vp.querySelector('.tb-note-email');
@@ -2033,13 +2038,14 @@ function flowinHydrateModule(ev) {
     var gagnantsN = vp.querySelector('.tb-note-gagnants');
     if(gagnantsN && front.gagnantsNote) gagnantsN.textContent = front.gagnantsNote;
     /* Tirage hint sur ticket */
-    var tirageH = vp.querySelector('.tb-ticket-tirage');
-    if(tirageH && front.tirageHint) tirageH.textContent = front.tirageHint;
+    vp.querySelectorAll('.ticket-hint').forEach(function(tirageH){
+      if(front.tirageHint) tirageH.textContent=front.tirageHint;
+    });
     /* Préfixe ticket */
     if(front.ticketPrefix){
-      vp.querySelectorAll('.tb-ticket-code').forEach(function(el){
-        var old = el.textContent;
-        el.textContent = old.replace(/^[A-Z]+-/, front.ticketPrefix+'-');
+      vp.querySelectorAll('.ticket-code').forEach(function(el){
+        var txt = el.textContent;
+        el.textContent = txt.replace(/^[A-Z]+-/, front.ticketPrefix+'-');
       });
     }
     console.log('[Flowin] front fields hydrated');
