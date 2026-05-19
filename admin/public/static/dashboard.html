@@ -9278,7 +9278,10 @@ function renderWizardEvent(){
   html += '<div class="wiz-grid"><div class="wiz-form">';
 
   if(step==='A'){
-    html += '<div class="section-h">Étape 1 · Identité</div>';
+    var _front = (d.cfg && d.cfg.front) ? d.cfg.front : {};
+    var _isTombola = d.module === 'tombola';
+    var _evLots = (d.id && DATA.lots) ? DATA.lots.filter(function(l){ return l.eventId===d.id; }) : [];
+    html += '<div class="section-h">Étape 1 · Identité &amp; configuration front</div>';
     html += '<div style="margin-bottom:14px"><button class="btn" style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(124,45,146,.1),rgba(168,85,247,.1));border:1px solid rgba(168,85,247,.3);color:#A855F7;font-weight:700;font-size:12px" onclick="openModal(\'wizFront\',{})">✏️ Personnaliser les textes &amp; emojis de la page joueur</button></div>';
     if(wiz_nbJours > 1){
       html += '<div class="alert info"><span class="ico">📆</span><strong>Event multi-jours · '+wiz_nbJours+' jours</strong> · Du '+fmt(wiz_d.dateD)+' au '+fmt(wiz_d.dateF)+'. Un tirage par jour activable à l\'étape Tirage.</div>';
@@ -9303,7 +9306,38 @@ function renderWizardEvent(){
          + ['#7C2D92','#10B981','#3B82F6','#F59E0B','#EF4444','#06B6D4','#EC4899','#8B5CF6'].map(c=>'<div class="color-swatch '+(d.couleur===c?'selected':'')+'" style="background:'+c+'" onclick="state.wiz.draft.couleur=\''+c+'\';renderWizard()"></div>').join('')
          + '</div></div>';
     html += '<div class="form-row"><label class="label">Super Event (optionnel)</label><select class="select" onchange="state.wiz.draft.superEventId=this.value"><option value="">Aucun</option>'+DATA.superEvents.map(s=>'<option value="'+s.id+'" '+(d.superEventId===s.id?'selected':'')+'>'+esc(s.nom)+'</option>').join('')+'</select></div>';
-    html += '<div class="form-row mt-3" style="padding-top:12px;border-top:1px solid var(--sa-border)"><button class="btn" style="width:100%;gap:8px;background:linear-gradient(135deg,rgba(124,45,146,.12),rgba(168,85,247,.12));border:1px solid rgba(168,85,247,.3);color:var(--sa-accent);font-weight:700" onclick="openModal(\'wizFront\',{})"><span>✏️</span><span>Textes &amp; emojis — personnaliser la page joueur</span></button></div>';
+    html += '<div style="margin-top:16px;padding-top:14px;border-top:2px solid rgba(168,85,247,.2)">';
+    html += '<div class="section-h" style="margin-bottom:10px">✏️ Textes &amp; emojis — page joueur</div>';
+    html += '<div class="form-row"><label class="label">Badge / accroche</label>'
+          + '<input type="text" class="input" value="'+escAttr(_front.badge||'')+'" placeholder="❤️ VENCE · COLLECTE SOLIDAIRE" oninput="wizFrontUpd(\'badge\',this.value)"/></div>';
+    html += '<div class="form-row"><label class="label">Description (sous le titre)</label>'
+          + '<textarea class="textarea" rows="2" oninput="wizFrontUpd(\'description\',this.value)" placeholder="Décrivez l\'event...">'+esc(_front.description||'')+'</textarea></div>';
+    html += '<div class="form-row"><label class="label">Texte bouton CTA</label>'
+          + '<input type="text" class="input" value="'+escAttr(_front.ctaText||(_isTombola?'🎟 Je m\'inscris à la tombola →':'🎮 Participer gratuitement'))+'" oninput="wizFrontUpd(\'ctaText\',this.value)"/></div>';
+    html += '<div class="form-row"><label class="label">Note sous le bouton</label>'
+          + '<input type="text" class="input" value="'+escAttr(_front.ctaNote||'')+'" placeholder="Jeu gratuit · Sans achat obligatoire" oninput="wizFrontUpd(\'ctaNote\',this.value)"/></div>';
+    html += '<div class="form-row"><label class="label">Texte tirage (bloc violet)</label>'
+          + '<input type="text" class="input" value="'+escAttr(_front.lotTirage||'')+'" placeholder="📋 Tirage le JJ/MM — résultats sur ..." oninput="wizFrontUpd(\'lotTirage\',this.value)"/></div>';
+    html += '</div>';
+    html += '<div style="margin-top:14px;padding-top:14px;border-top:2px solid rgba(168,85,247,.2)">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    html += '<div class="section-h" style="margin-bottom:0">🎁 Lots (étape 5)</div>';
+    html += '<button class="btn btn-sm" onclick="wizGoStep(\'E\')">'+(_evLots.length?'Modifier':'+ Ajouter')+' →</button>';
+    html += '</div>';
+    if(_evLots.length){
+      var _ranks=['🥇','🥈','🥉','🏅'];
+      _evLots.slice(0,3).forEach(function(l,i){
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--sa-bg);border:1px solid var(--sa-border);border-radius:8px;margin-bottom:5px">';
+        html += '<span style="font-size:16px">'+(_ranks[i]||'🎁')+'</span>';
+        html += '<span style="font-size:12px;font-weight:700">'+esc(l.nom||l.titre||'Lot')+'</span>';
+        if(l.valeur) html += '<span style="font-size:11px;color:var(--sa-muted);margin-left:auto">'+l.valeur+' €</span>';
+        html += '</div>';
+      });
+      if(_evLots.length>3) html += '<div style="font-size:11px;color:var(--sa-muted);text-align:center">+'+(_evLots.length-3)+' autres lots</div>';
+    } else {
+      html += '<div style="padding:10px;text-align:center;color:var(--sa-muted);font-size:12px">Aucun lot — <a style="color:var(--sa-accent);cursor:pointer" onclick="wizGoStep(\'E\')">configurer les lots →</a></div>';
+    }
+    html += '</div>';
   } else if(step==='B'){
     html += '<div class="section-h">Étape 2 · Choix du module de jeu</div>';
     html += '<div class="module-cards">';
