@@ -9248,7 +9248,7 @@ function renderWizardEvent(){
     html += '<div class="section-h">Étape 3 · Configuration du module '+(d.module?moduleChip(d.module):'')+'</div>';
     if(!d.module) html += '<div class="alert warn"><span class="ico">⚠️</span>Choisissez d\'abord un module à l\'étape 2.</div>';
     else html += renderWizConfigForModule(d);
-  } else if(step==='D'){
+  } else if(step==='_D_LEGACY_DISABLED'){
     const sels = (d.partenaires||[]).map(function(pid){return DATA.partenaires.find(function(p){return p.id===pid;});}).filter(Boolean);
     html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
     html += '<div style="padding:16px 14px 10px;text-align:center"><div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div></div>';
