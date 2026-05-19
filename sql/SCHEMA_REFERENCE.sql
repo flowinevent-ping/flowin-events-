@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS partenaires (
   contrat      TEXT DEFAULT '',
   notes        TEXT DEFAULT '',
   contact      TEXT DEFAULT '',
+  instagram    TEXT DEFAULT '',
+  facebook     TEXT DEFAULT '',
   events       TEXT[] DEFAULT '{}',
   tags         TEXT[] DEFAULT '{}',
   created_at   TIMESTAMPTZ DEFAULT NOW()

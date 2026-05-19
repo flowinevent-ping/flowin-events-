@@ -2079,7 +2079,10 @@ async function supaWritePartenaire(p){
     role: p.role || '',
     email: p.email || '',
     tel: p.tel || '',
-    url: p.url || '',
+    url: p.url || p.site_web || '',
+    site_web: p.site_web || p.url || '',
+    instagram: p.instagram || '',
+    facebook: p.facebook || '',
     ville: p.ville || '',
     code_postal: p.codePostal || p.code_postal || '',
     siret: p.siret || '',
@@ -2869,6 +2872,11 @@ function modalWizPartner(d){
     +   '<div><label class="label">Email contact</label><input type="email" class="input" value="'+escAttr(d.email||'')+'" oninput="state.modal.data.email=this.value"/></div>'
     + '</div>'
     + '<div class="form-grid mt-2">'    +   '<div><label class="label">Téléphone</label><input type="tel" class="input" value="'+escAttr(d.tel||'')+'" placeholder="06XXXXXXXX" oninput="state.modal.data.tel=this.value"/></div>'    +   '<div><label class="label">Code postal</label><input type="text" class="input" value="'+escAttr(d.code_postal||'')+'" placeholder="06140" maxlength="5" oninput="state.modal.data.code_postal=this.value"/></div>'    + '</div>'    + '<div class="form-row mt-2"><label class="label">SIRET (optionnel)</label><input type="text" class="input" value="'+escAttr(d.siret||'')+'" oninput="state.modal.data.siret=this.value"/></div>'
+    + '<div class="form-row mt-2"><label class="label">Site internet</label><input type="url" class="input" value="'+escAttr(d.site_web||'')+'" placeholder="https://..." oninput="state.modal.data.site_web=this.value"/></div>'
+    + '<div class="form-grid mt-2">'
+    +   '<div><label class="label">Instagram</label><input type="text" class="input" value="'+escAttr(d.instagram||'')+'" placeholder="@compte" oninput="state.modal.data.instagram=this.value"/></div>'
+    +   '<div><label class="label">Facebook</label><input type="text" class="input" value="'+escAttr(d.facebook||'')+'" placeholder="Page ou URL" oninput="state.modal.data.facebook=this.value"/></div>'
+    + '</div>'
     + '<div class="alert info mt-3 text-sm"><span class="ico">ℹ️</span>Ce partenaire sera ajouté au CRM partenaires global et coché automatiquement sur cet event.</div>'
     + '</div>'
     + '<div class="modal-footer"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="wizPartnerSave()">+ Créer et ajouter</button></div>'
@@ -9116,7 +9124,9 @@ function wizPartnerSave(){
     id, nom:d.nom, secteur:d.secteur||'', type:d.type||'Local',
     ville:d.ville||'', email:d.email||'', tel:d.tel||'',
     code_postal:d.code_postal||'', siret:d.siret||'',
-    events:[], totalDistribue:0, actif:true, recurrent:d.type==='Récurrent'
+    site_web:d.site_web||'', url:d.site_web||'',
+    instagram:d.instagram||'', facebook:d.facebook||'',
+    events:[], actif:true, recurrent:d.type==='Récurrent'
   };
   DATA.partenaires.push(_pt);
   supaWritePartenaire(_pt); /* ← Supabase + GAS backup */
