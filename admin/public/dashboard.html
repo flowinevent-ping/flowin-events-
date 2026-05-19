@@ -1927,7 +1927,7 @@ async function supaLoadAll(){
       ev.gagnants = lotsEv.length;
     });
     console.log('[Flowin] Supabase chargé : '+pros.length+' pros, '+events.length+' events, '+joueurs.length+' joueurs, '+lots.length+' lots, '+landings.length+' landings');
-    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques, landings:landings };
+    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques, landings:landings, participations:participations||[] };
   } catch(e) {
     console.error('[Flowin] supaLoadAll erreur', e);
     return null;
@@ -6306,6 +6306,7 @@ function drawerEvent(e){
        html += pHdr('ville','VILLE','90px');
        html += pHdr('cp','CP','60px');
        html += pHdr('score','SCORE','70px');
+       if(e.module==='tombola'||e.module==='quizmaster') html += '<th style="padding:8px 6px;font-size:11px;font-weight:700;color:var(--sa-muted)">🎟 BILLET</th>';
        html += pHdr('optin','OPT-IN','70px');
        html += '<th style="padding:8px 6px;font-size:11px;font-weight:700;color:var(--sa-muted)">DATE</th>';
      }
@@ -6342,6 +6343,15 @@ function drawerEvent(e){
          else if(j.optin) html += '<span style="font-size:11px;font-weight:700;color:#7C2D92;background:#F3E8FF;border-radius:6px;padding:2px 6px">✓</span>';
          else html += '<span style="font-size:10px;color:var(--sa-muted)">—</span>';
          html += '</td>';
+         /* Cellule ticket pour tombola/quizmaster */
+         if(e.module==='tombola'||e.module==='quizmaster'){
+           var _part = DATA.participations && DATA.participations.find(function(p){ return p.joueur_id===j.id && p.event_id===e.id; });
+           var _ticket = _part ? _part.ticket_code : (j.ticketCode || '—');
+           html += '<td style="padding:8px 6px;text-align:center">';
+           if(_ticket && _ticket!=='—') html += '<code style="background:#F3E8FF;color:#7C2D92;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.03em">'+esc(_ticket)+'</code>';
+           else html += '<span style="color:var(--sa-muted);font-size:10px">—</span>';
+           html += '</td>';
+         }
          html += '<td style="padding:8px 6px;font-size:10px;color:var(--sa-muted)">'+(j.firstSeen?fmt(j.firstSeen):'')+'</td>';
        }
        html += '</tr>';
@@ -10759,6 +10769,7 @@ document.addEventListener('DOMContentLoaded', async function(){
       for(var _sei=0; _sei<_localOnly.length; _sei++){ supaWriteEvent(_localOnly[_sei]); }
       DATA.superEvents = data.superEvents;
       DATA.joueurs = data.joueurs;
+      DATA.participations = data.participations || [];
       DATA.lots = data.lots;
       if(data.banques && data.banques.length) DATA.banques = data.banques;
       saveData();
