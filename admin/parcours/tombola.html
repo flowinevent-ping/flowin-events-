@@ -958,6 +958,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .tb-lot-hint{color:rgba(255,255,255,.6);font-size:13px;font-weight:600}
 .tb-draw-date{color:rgba(255,255,255,.8);font-size:14px;font-weight:700;text-align:center;background:rgba(168,85,247,.1);border-radius:10px;padding:8px 12px;border:1px solid rgba(168,85,247,.2)}
 .tb-btn-primary{background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:15px;border:none;border-radius:100px;cursor:pointer;box-shadow:0 10px 28px rgba(168,85,247,.4)}
+.tb-btn-secondary{background:rgba(168,85,247,.15);color:#C4B5FD;font-family:'Fredoka One',cursive;font-size:15px;border:1.5px solid rgba(168,85,247,.4);border-radius:100px;cursor:pointer}
 .tb-confirm-hero{background:linear-gradient(135deg,#0F172A,#1E293B);padding:30px 22px 20px;text-align:center;color:#fff}
 .tb-confirm-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(168,85,247,.15);border-radius:100px;padding:5px 14px;font-size:9px;font-weight:900;color:#fff;margin-bottom:10px;text-transform:uppercase;letter-spacing:.1em;border:1px solid rgba(168,85,247,.3)}
 .tb-confirm-title{font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:4px}
@@ -1273,6 +1274,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
           </div>
           <div class="tb-draw-date" style="text-align:center;width:100%">🗓️ Tirage le <strong>30 juin 2026</strong> — résultats publiés sur croix-rouge.fr</div>
         </div>
+        <div class="tb-cta-note" style="font-size:10px;text-align:center;color:rgba(255,255,255,.45);padding:2px 0 6px;width:100%">Jeu gratuit · Sans achat obligatoire</div>
         <div class="bottom-cta">
           <div class="btn tb-btn-primary" onclick="tbGo(2)">Je m'inscris à la tombola →</div>
         </div>
@@ -1365,12 +1367,13 @@ input::placeholder, select::placeholder, textarea::placeholder {
         </div>
         <div style="padding:0 20px 16px">
           <div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:14px;padding:14px 16px;font-size:12px;font-weight:800;color:#C4B5FD;line-height:1.6">
-            📬 Un email de confirmation t'a été envoyé.<br>
-            🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.<br>
+            <span class="tb-note-email">📬 Un email de confirmation t'a été envoyé.</span><br>
+            <span class="tb-note-gagnants">🏆 Les gagnants seront contactés le <strong>1er juillet</strong>.</span><br>
             📲 Capture ce ticket par précaution.
           </div>
         </div>
         <div class="bottom-cta" style="flex-direction:column;gap:8px">
+          <div class="btn tb-btn-secondary" id="tb-cta-partenaires" style="display:none" onclick="tbGo(5)">🤝 Voir nos partenaires →</div>
           <div class="btn tb-btn-primary" onclick="tbGo(1)">← Retour à l'accueil</div>
         </div>
       </div>
@@ -1389,6 +1392,23 @@ input::placeholder, select::placeholder, textarea::placeholder {
             <div class="ticket-hint">Tirage le 30 juin 2026 · bonne chance !</div>
           </div>
           <button class="ad-btn" onclick="tbGo(1)">← Retour à l'accueil</button>
+        </div>
+      </div>
+
+    <!-- TB 5 : Partenaires -->
+      <div class="page" id="tb-5">
+        <div class="header withback">
+          <div class="back-btn" onclick="tbGo(3)">←</div>
+          <div><div class="header-title">Nos partenaires</div><div class="header-sub" id="tb-part-sub">Ils rendent cet event possible</div></div>
+        </div>
+        <div style="padding:16px 20px 20px">
+          <div class="partenaires-label" id="tb-part-label">★ Partenaires ★</div>
+          <div class="partenaires-grid" id="tb-part-grid">
+            <div style="grid-column:span 3;text-align:center;padding:32px 0;color:rgba(255,255,255,.4);font-size:13px">Chargement…</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="btn tb-btn-primary" onclick="tbGo(1)">← Retour à l’accueil</div>
         </div>
       </div>
 
@@ -1867,6 +1887,35 @@ function tbGo(n){
 /* Appelé après flowinShowModuleViewport + fetch event                  */
 /* ═══════════════════════════════════════════════════════════════════ */
 
+function tbOpenPartLink(el) {
+  var link = el.getAttribute('data-url');
+  if(link && link !== '#') window.open(link, '_blank');
+}
+function flowinHydrateTombolaPartenaires(ev) {
+  var parts = FLOWIN_PARTENAIRES;
+  if(!parts || !parts.length) return;
+  var nom = (ev && ev.nom) ? ev.nom : 'cet event';
+  var label = document.getElementById('tb-part-label');
+  if(label) label.textContent = '★ Partenaires · ' + nom + ' ★';
+  var sub = document.getElementById('tb-part-sub');
+  if(sub) sub.textContent = 'Ils rendent cet event possible (' + parts.length + ')';
+  var grid = document.getElementById('tb-part-grid');
+  if(!grid) return;
+  var html = '';
+  for(var i=0; i<parts.length; i++) {
+    var p = parts[i];
+    var link = p.site_web || p.url || '#';
+    var emoji = p.emoji || '🤝';
+    var pnom = p.nom || 'Partenaire';
+    html += '<div class="partenaire-tile" data-url="' + link + '" onclick="tbOpenPartLink(this)">';
+    html += '<div class="partenaire-emoji">' + emoji + '</div>';
+    html += '<div class="partenaire-name">' + (pnom.length > 18 ? pnom.slice(0,16) + '...' : pnom) + '</div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+  var cta = document.getElementById('tb-cta-partenaires');
+  if(cta) cta.style.display = '';
+}
 function flowinFormatDate(dateStr) {
   if(!dateStr) return '';
   try {
@@ -2003,10 +2052,14 @@ function flowinHydrateModule(ev) {
       logoEl.innerHTML='<svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+tbColor+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+tbColor+'"/></svg>';
     }
     var badge=vp.querySelector('.tb-badge');
-    if(badge) badge.textContent='❤️ '+lieu+' · '+((ev.cfg&&ev.cfg.datesLabel)?ev.cfg.datesLabel:'Collecte solidaire');
+    if(badge) badge.textContent=front.badge ? front.badge : ('❤️ '+lieu+' · '+((ev.cfg&&ev.cfg.datesLabel)?ev.cfg.datesLabel:'Collecte solidaire'));
     var title=vp.querySelector('.tb-title');
     if(title) title.innerHTML=nom;
-    if(cfg.tirageDate||cfg.drawDate){var drawEl=vp.querySelector('.tb-draw-date');if(drawEl)drawEl.innerHTML='📅 Tirage le <strong>'+(cfg.tirageDate||cfg.drawDate)+'</strong>';}
+    /* Description landing */
+    var tbSub=vp.querySelector('.tb-sub');
+    if(tbSub && front.description) tbSub.textContent=front.description;
+    var _tirageText=front.lotTirage||(cfg.tirageDate||cfg.drawDate?'📅 Tirage le <strong>'+(cfg.tirageDate||cfg.drawDate)+'</strong>':null);
+    if(_tirageText){var drawEl=vp.querySelector('.tb-draw-date');if(drawEl)drawEl.innerHTML=_tirageText;}
     var tbBtn=vp.querySelector('.tb-btn-primary');
     if(tbBtn){tbBtn.style.background='linear-gradient(135deg,#7C2D92,#A855F7)';tbBtn.style.color='#fff';tbBtn.style.fontWeight='800';}
 
@@ -2023,9 +2076,9 @@ function flowinHydrateModule(ev) {
     var formSub = vp.querySelector('.header-sub');
     if(formSub && front.formSousTitre) formSub.textContent = front.formSousTitre;
     /* Confirmation : titre */
-    var confirmT = vp.querySelector('.tb-confirm-titre');
+    var confirmT = vp.querySelector('.tb-confirm-title');
     if(confirmT && front.confirmTitre) confirmT.textContent = front.confirmTitre;
-    var confirmS = vp.querySelector('.tb-confirm-sous');
+    var confirmS = vp.querySelector('.tb-confirm-sub');
     if(confirmS && front.confirmSousTitre) confirmS.textContent = front.confirmSousTitre;
     /* Notes confirmation */
     var emailN = vp.querySelector('.tb-note-email');
@@ -2033,13 +2086,14 @@ function flowinHydrateModule(ev) {
     var gagnantsN = vp.querySelector('.tb-note-gagnants');
     if(gagnantsN && front.gagnantsNote) gagnantsN.textContent = front.gagnantsNote;
     /* Tirage hint sur ticket */
-    var tirageH = vp.querySelector('.tb-ticket-tirage');
-    if(tirageH && front.tirageHint) tirageH.textContent = front.tirageHint;
+    vp.querySelectorAll('.ticket-hint').forEach(function(tirageH){
+      if(front.tirageHint) tirageH.textContent=front.tirageHint;
+    });
     /* Préfixe ticket */
     if(front.ticketPrefix){
-      vp.querySelectorAll('.tb-ticket-code').forEach(function(el){
-        var old = el.textContent;
-        el.textContent = old.replace(/^[A-Z]+-/, front.ticketPrefix+'-');
+      vp.querySelectorAll('.ticket-code').forEach(function(el){
+        var txt = el.textContent;
+        el.textContent = txt.replace(/^[A-Z]+-/, front.ticketPrefix+'-');
       });
     }
     console.log('[Flowin] front fields hydrated');
@@ -2386,6 +2440,7 @@ function vsSubmitForm(){
 /* ═════════════════════════════════════════════════════════════════════ */
 var FLOWIN_SUPA_URL = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
 var FLOWIN_SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+var FLOWIN_PARTENAIRES = [];
 var FLOWIN_EV_ID = (function(){
   try {
     var p = new URLSearchParams(window.location.search);
@@ -2474,6 +2529,18 @@ if(FLOWIN_MODULE_FALLBACK){
       try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
+      var _pIds = (rows[0].cfg && rows[0].cfg.partenaires && rows[0].cfg.partenaires.length) ? rows[0].cfg.partenaires : [];
+      if(_pIds.length) {
+        try {
+          var _pF = _pIds.map(function(id){ return 'id.eq.'+encodeURIComponent(id); }).join(',');
+          var _prResp = await fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?or=('+_pF+')&select=id,nom,emoji,site_web,url,actif', {
+            headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+          });
+          FLOWIN_PARTENAIRES = await _prResp.json();
+          if(!Array.isArray(FLOWIN_PARTENAIRES)) FLOWIN_PARTENAIRES = [];
+          try { flowinHydrateTombolaPartenaires(rows[0]); } catch(_e2){ console.warn('[Flowin] hydrate partenaires:', _e2); }
+        } catch(_pe){ console.warn('[Flowin] fetch partenaires:', _pe); }
+      }
     } else if(FLOWIN_MODULE_FALLBACK) {
       /* Event pas encore dans Supabase : fallback module URL */
       console.log('[Flowin] fallback module:', FLOWIN_MODULE_FALLBACK);

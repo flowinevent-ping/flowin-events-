@@ -1905,7 +1905,7 @@ async function supaLoadAll(){
     console.log('[Flowin] Chargement Supabase…');
     var results = await Promise.all([
       supaFetch('pros'),
-      supaFetch('partenaires', 'select=id,nom,ville,code_postal,secteur,contact,email,tel,siret,tags,entree_p'),
+      supaFetch('partenaires', 'select=*'),
       supaFetch('events'),
       supaFetch('super_events', 'select=*&limit=50'),
       supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=500'),
@@ -9154,6 +9154,10 @@ function wizSave(){
         supaWriteLot(_newLot);
       }
     }
+    // Persister les IDs partenaires dans cfg.partenaires pour le parcours joueur
+    if(!_newEv.cfg) _newEv.cfg = {};
+    _newEv.cfg.partenaires = (d.partenaires && d.partenaires.length) ? d.partenaires.slice() : [];
+    supaWriteEvent(_newEv); // réécriture avec cfg.partenaires à jour
     // Nettoyer les champs draft parasites de l'event (lots/partenaires sont dans DATA, pas dans l'event)
     delete _newEv.lots;
   } else {
@@ -9166,6 +9170,8 @@ function wizSave(){
       // QR URL recalculé
       if(!DATA.events[idx].cfg) DATA.events[idx].cfg = {};
       DATA.events[idx].cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (DATA.events[idx].module||'quiz') + '.html?ev=' + DATA.events[idx].id;
+      // Persister les IDs partenaires dans cfg.partenaires pour le parcours joueur
+      DATA.events[idx].cfg.partenaires = (d.partenaires && d.partenaires.length) ? d.partenaires.slice() : [];
       supaWriteEvent(DATA.events[idx]);
     }
     toast('Event "'+d.nom+'" enregistré','success');
