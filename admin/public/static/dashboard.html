@@ -1927,7 +1927,7 @@ async function supaLoadAll(){
       ev.gagnants = lotsEv.length;
     });
     console.log('[Flowin] Supabase chargé : '+pros.length+' pros, '+events.length+' events, '+joueurs.length+' joueurs, '+lots.length+' lots, '+landings.length+' landings');
-    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques, landings:landings, participations:participations||[] };
+    return { pros:pros, partenaires:partenaires, events:events, superEvents:superEvents, joueurs:joueurs, lots:lots, banques:banques, landings:landings };
   } catch(e) {
     console.error('[Flowin] supaLoadAll erreur', e);
     return null;
@@ -10790,7 +10790,7 @@ document.addEventListener('DOMContentLoaded', async function(){
       for(var _sei=0; _sei<_localOnly.length; _sei++){ supaWriteEvent(_localOnly[_sei]); }
       DATA.superEvents = data.superEvents;
       DATA.joueurs = data.joueurs;
-      DATA.participations = data.participations || [];
+      DATA.participations = DATA.participations || [];
       DATA.lots = data.lots;
       if(data.banques && data.banques.length) DATA.banques = data.banques;
       saveData();
