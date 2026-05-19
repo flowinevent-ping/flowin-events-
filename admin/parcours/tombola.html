@@ -1249,6 +1249,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
           <div class="tb-logo"><svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="#E8212B"/><rect x="16" y="38" width="68" height="24" rx="5" fill="#E8212B"/></svg></div>
           <div class="tb-title">Tombola<br>Croix Rouge Française</div>
           <div class="tb-sub">Soutiens la Croix Rouge et tente de remporter l'un des lots offerts par nos partenaires locaux. 100 % des bénéfices reversés.</div>
+          <div class="tb-dates" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px;display:none"></div>
           <div class="tb-lots">
             <div class="tb-lot-row">
               <div class="tb-lot-ico">🥇</div>
@@ -1984,6 +1985,16 @@ function flowinHydrateDynTexts(ev){
   if(tbCtaNote && _front.ctaNote) tbCtaNote.textContent = _front.ctaNote;
   var tbDrawDate = document.querySelector('#vp-tombola .tb-draw-date');
   if(tbDrawDate && _front.lotTirage) tbDrawDate.textContent = _front.lotTirage;
+  /* Dates d'event */
+  var tbDates = document.querySelector('#vp-tombola .tb-dates');
+  if(tbDates) {
+    var _dD = ev.date_d ? flowinFormatDate(ev.date_d) : '';
+    var _dF = ev.date_f ? flowinFormatDate(ev.date_f) : '';
+    if(_dD) {
+      tbDates.textContent = _dD + (_dF && _dF !== _dD ? ' → ' + _dF : '');
+      tbDates.style.display = '';
+    }
+  }
 
   /* Header formulaire */
   var formSub = document.querySelector('#pq-5 .header-sub');
