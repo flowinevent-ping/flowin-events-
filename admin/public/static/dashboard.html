@@ -9249,6 +9249,23 @@ function renderWizardEvent(){
     if(!d.module) html += '<div class="alert warn"><span class="ico">⚠️</span>Choisissez d\'abord un module à l\'étape 2.</div>';
     else html += renderWizConfigForModule(d);
   } else if(step==='D'){
+    const sels = (d.partenaires||[]).map(function(pid){return DATA.partenaires.find(function(p){return p.id===pid;});}).filter(Boolean);
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="padding:16px 14px 10px;text-align:center"><div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div></div>';
+    if(sels.length){
+      html += '<div style="padding:0 12px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+      sels.slice(0,6).forEach(function(p){
+        var ini=p.nom.split(' ').map(function(n){return n[0];}).join('').slice(0,2).toUpperCase();
+        html += '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center">'
+             + '<div style="width:28px;height:28px;border-radius:50%;background:rgba(168,85,247,.25);color:#A855F7;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;margin-bottom:3px">'+ini+'</div>'
+             + '<div style="font-size:9px;color:rgba(255,255,255,.7)">'+esc(p.nom.slice(0,15))+'</div></div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="padding:24px 14px;text-align:center"><div style="color:rgba(255,255,255,.3);font-size:11px">Aucun partenaire sélectionné</div></div>';
+    }
+    html += '</div></div>';
+  } else if(step==='D'){
     html += '<div class="section-h">Étape 4 · Partenaires</div>';
     html += '<div class="alert info"><span class="ico">🤝</span>Sélectionnez les partenaires de cet event en les ajoutant à droite. Vous pouvez aussi en créer un nouveau.</div>';
     if(!d.partenaires) d.partenaires = [];
