@@ -1822,12 +1822,15 @@ function migrateData(data){
 }
 function saveData(supaSync){
   try{ localStorage.setItem(LS_KEY, JSON.stringify(DATA)); }catch(e){ console.warn('[saveData] localStorage write error', e); }
-  // Dual-write Supabase si activé et appelé avec supaSync=true
-  if(supaSync && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
-    // Sync events modifiés
+  /* RÈGLE GLOBALE : toujours persister dans Supabase — plus de perte de données */
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     if(DATA.events) DATA.events.forEach(function(ev){ supaWriteEvent(ev); });
-    // Sync lots modifiés
     if(DATA.lots) DATA.lots.forEach(function(l){ supaWriteLot(l); });
+    if(supaSync){
+      if(DATA.joueurs) DATA.joueurs.forEach(function(j){ supaWriteJoueur(j); });
+      if(DATA.pros) DATA.pros.forEach(function(p){ supaUpsert('pros', p); });
+      if(DATA.partenaires) DATA.partenaires.forEach(function(p){ supaUpsert('partenaires', p); });
+    }
   }
 }
 
