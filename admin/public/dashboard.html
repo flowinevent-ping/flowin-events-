@@ -8786,6 +8786,10 @@ function startWizardEdit(eventId,startStep){
   // Sécurité : init obligatoire des arrays/objets
   if(!Array.isArray(draft.lots)) draft.lots = [];
   if(!Array.isArray(draft.partenaires)) draft.partenaires = [];
+  /* Charger partenaires depuis cfg.partenaires si vide au root */
+  if(draft.partenaires.length === 0 && draft.cfg && Array.isArray(draft.cfg.partenaires) && draft.cfg.partenaires.length > 0) {
+    draft.partenaires = draft.cfg.partenaires.slice();
+  }
   if(!draft.cfg) draft.cfg = {};
   if(!Array.isArray(draft.cfg.quizBanques)) draft.cfg.quizBanques = [];
   if(!Array.isArray(draft.cfg.quizCustomQuestions)) draft.cfg.quizCustomQuestions = [];
