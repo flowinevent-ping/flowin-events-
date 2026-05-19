@@ -1292,31 +1292,33 @@ input::placeholder, select::placeholder, textarea::placeholder {
           <div class="progress-step on"></div>
           <div class="progress-step"></div>
         </div>
-        <div class="form-wrap">
+        <div class="form-wrap" id="tb-form-wrap">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="form-field">
-              <label class="form-label">Prénom</label>
-              <input class="form-input" placeholder="">
+              <label class="form-label">Prénom <span style="color:#F87171">*</span></label>
+              <input id="tb-prenom" class="form-input" placeholder="Camille" autocomplete="given-name">
             </div>
             <div class="form-field">
-              <label class="form-label">Nom</label>
-              <input class="form-input" placeholder="">
+              <label class="form-label">Nom <span style="color:#F87171">*</span></label>
+              <input id="tb-nom" class="form-input" placeholder="Dupont" autocomplete="family-name">
             </div>
           </div>
           <div class="form-field">
             <label class="form-label">Genre</label>
             <div style="display:flex;gap:8px;margin-top:6px">
-              <button style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👩 Femme</button>
-              <button style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👨 Homme</button>
+              <button id="tb-genre-f" style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👩 Femme</button>
+              <button id="tb-genre-m" style="flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit" onclick="tbPickGender(this)">👨 Homme</button>
             </div>
           </div>
           <div class="form-field">
-            <label class="form-label">Email</label>
-            <input class="form-input" placeholder="">
+            <label class="form-label">Email <span style="color:#F87171">*</span></label>
+            <input id="tb-email" class="form-input" type="email" placeholder="nom@exemple.fr" autocomplete="email">
+            <div id="tb-email-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div class="form-field">
-            <label class="form-label">Téléphone</label>
-            <input class="form-input" placeholder="">
+            <label class="form-label">Téléphone <span style="color:#F87171">*</span></label>
+            <input id="tb-tel" class="form-input" type="tel" placeholder="06 XX XX XX XX" autocomplete="tel">
+            <div id="tb-tel-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="form-field">
@@ -1374,8 +1376,8 @@ input::placeholder, select::placeholder, textarea::placeholder {
           </div>
         </div>
         <div class="bottom-cta" style="flex-direction:column;gap:8px">
-          <div class="btn tb-btn-secondary" id="tb-cta-partenaires" style="display:none" onclick="tbGo(5)">🤝 Voir nos partenaires →</div>
-          <div class="btn tb-btn-primary" onclick="tbGo(1)">← Retour à l'accueil</div>
+          <div class="btn tb-btn-primary" id="tb-cta-partenaires" onclick="tbGo(5)">🤝 Voir nos partenaires →</div>
+          <div class="btn tb-btn-secondary" onclick="tbGo(1)">← Retour à l'accueil</div>
         </div>
       </div>
 
@@ -2383,14 +2385,59 @@ function pqContactNo(el){
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
 
-function tbSubmitForm(){
-  var emailVal = _flowinFindEmail('#vp-tombola', 'contact@exemple.fr');
-  if(!emailVal){ tbGo(3); return; }
-  var _extra = _flowinCollectFormFields('#vp-tombola');
+function tbSetFieldState(id, isErr, msg) {
+  var el = document.getElementById(id);
+  if(el) el.style.border = isErr ? '2px solid #F87171' : '';
+  var errEl = document.getElementById(id+'-err');
+  if(errEl){ errEl.textContent = msg||''; errEl.style.display = isErr ? '' : 'none'; }
+}
+async function tbSubmitForm(){
+  var prenom = ((document.getElementById('tb-prenom')||{}).value||'').trim();
+  var nom    = ((document.getElementById('tb-nom')||{}).value||'').trim();
+  var email  = ((document.getElementById('tb-email')||{}).value||'').trim().toLowerCase();
+  var tel    = ((document.getElementById('tb-tel')||{}).value||'').trim().replace(/\s/g,'');
+  var ok = true;
+  /* Champs obligatoires */
+  if(!prenom){ tbSetFieldState('tb-prenom',true,'Prénom obligatoire'); ok=false; } else tbSetFieldState('tb-prenom',false);
+  if(!nom)   { tbSetFieldState('tb-nom',true,'Nom obligatoire'); ok=false; } else tbSetFieldState('tb-nom',false);
+  if(!email||email.indexOf('@')<0){ tbSetFieldState('tb-email',true,'Email invalide'); ok=false; } else tbSetFieldState('tb-email',false);
+  if(!tel||tel.length<8){ tbSetFieldState('tb-tel',true,'Téléphone obligatoire (min 8 chiffres)'); ok=false; } else tbSetFieldState('tb-tel',false);
+  if(!ok){ document.querySelector('#tb-2 .form-wrap').scrollTop=0; return; }
+  /* Anti-doublon localStorage */
+  if(checkDuplicate('tb', email, tbGo, 4)) return;
+  /* Loading */
+  var _btn = document.querySelector('#tb-2 .tb-btn-primary');
+  if(_btn){ _btn.textContent='Vérification…'; _btn.style.opacity='0.7'; _btn.style.pointerEvents='none'; }
+  try {
+    var _evId = FLOWIN_EV_ID || '';
+    /* Check doublon email */
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rEd = await _rE.json();
+    if(Array.isArray(_rEd) && _rEd.length > 0){
+      tbSetFieldState('tb-email',true,'Cet email est déjà inscrit');
+      if(_btn){ _btn.textContent='Valider mon inscription →'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
+      return;
+    }
+    /* Check doublon tel */
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rTd = await _rT.json();
+    if(Array.isArray(_rTd) && _rTd.length > 0){
+      tbSetFieldState('tb-tel',true,'Ce téléphone est déjà inscrit');
+      if(_btn){ _btn.textContent='Valider mon inscription →'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
+      return;
+    }
+  } catch(_de){ console.warn('[Flowin] doublon check:', _de); }
+  /* Ticket */
   var _ticketEl = document.getElementById('tb-ticket-code');
-  var _ticket = (_ticketEl && _ticketEl.textContent) || 'TB-2026-'+Math.floor(Math.random()*9000+1000);
-  registerPlay('tb', emailVal, _ticket, _extra);
+  var _ticket = (_ticketEl && _ticketEl.textContent) || 'FW-CR-'+Math.floor(Math.random()*9000+1000);
+  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  registerPlay('tb', email, _ticket, _extra);
   tbGo(3);
+  if(_btn){ _btn.textContent='Valider mon inscription →'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
 }
 function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
