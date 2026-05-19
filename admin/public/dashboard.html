@@ -2730,6 +2730,11 @@ function renderModal(){
 
 function modalWizFront(d){
   var front = (state.wiz && state.wiz.draft && state.wiz.draft.cfg && state.wiz.draft.cfg.front) || {};
+  /* Pré-remplir description si vide */
+  if(!front.description && state.wiz && state.wiz.draft && state.wiz.draft.module === 'tombola'){
+    front = Object.keys(front).length ? front : {};
+    if(!front.description) front.description = '';
+  }
   var isTombola = state.wiz && state.wiz.draft && state.wiz.draft.module === 'tombola';
   var html = '<div class="modal" style="max-width:560px">';
   html += '<div class="modal-h"><div><div class="title">✏️ Textes & emojis</div><div class="subtitle">Personnalisation de la page joueur · visible dans l\'aper\u00e7u live</div></div><button class="drawer-close" onclick="closeModal()">×</button></div>';
@@ -2772,7 +2777,7 @@ function modalWizFront(d){
   html += '</div>';
 
   html += '</div>';
-  html += '<div class="modal-footer"><button class="btn btn-primary" onclick="closeModal()">✓ Fermer</button></div>';
+  html += '<div class="modal-footer"><button class="btn" onclick="closeModal()">Fermer</button><button class="btn btn-primary" onclick="wizFrontSave()">✓ Enregistrer</button></div>';
   html += '</div>';
   return html;
 }
@@ -2783,6 +2788,22 @@ function wizFrontUpd(field, value){
   if(!d.cfg.front) d.cfg.front = {};
   d.cfg.front[field] = value;
   renderWizard();
+}
+function wizFrontSave(){
+  /* Sauvegarde cfg.front du draft dans l'event réel + Supabase */
+  var d = state.wiz.draft;
+  if(!d || !d.id) { closeModal(); return; }
+  var ev = findEvent(d.id);
+  if(ev){
+    if(!ev.cfg) ev.cfg = {};
+    if(!ev.cfg.front) ev.cfg.front = {};
+    var front = d.cfg && d.cfg.front ? d.cfg.front : {};
+    Object.keys(front).forEach(function(k){ ev.cfg.front[k] = front[k]; });
+    frontSave(d.id);
+    saveData();
+    toast('Textes sauvegardés ✓','success');
+  }
+  closeModal();
 }
 
 function modalWizBanqueQ(d){
@@ -5819,7 +5840,7 @@ function drawerEvent(e){
       lotSemaineVal:'',
       ctaText:_isBtobFront ? '🎡 Je tente ma chance' : (e.module==='tombola' ? '🎟️ Je m\'inscris à la tombola →' : '🎮 Participer gratuitement'),
       ctaNote:'Jeu gratuit · Sans achat obligatoire',
-      description:'',
+      description:(e.module==='tombola' ? 'Soutenez notre cause et tentez de remporter l\'un des lots offerts par nos partenaires. Jeu gratuit, sans achat obligatoire.' : ''),
       formTitre:'Mes coordonnées',
       formSousTitre:e.nom||'',
       confirmTitre:'Tu es dans la course ! 🎉',
