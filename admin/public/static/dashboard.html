@@ -9156,6 +9156,7 @@ function renderWizardEvent(){
 
   if(step==='A'){
     html += '<div class="section-h">Étape 1 · Identité</div>';
+    html += '<div style="margin-bottom:14px"><button class="btn" style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(124,45,146,.1),rgba(168,85,247,.1));border:1px solid rgba(168,85,247,.3);color:#A855F7;font-weight:700;font-size:12px" onclick="openModal(\'wizFront\',{})">✏️ Personnaliser les textes &amp; emojis de la page joueur</button></div>';
     if(wiz_nbJours > 1){
       html += '<div class="alert info"><span class="ico">📆</span><strong>Event multi-jours · '+wiz_nbJours+' jours</strong> · Du '+fmt(wiz_d.dateD)+' au '+fmt(wiz_d.dateF)+'. Un tirage par jour activable à l\'étape Tirage.</div>';
     }
@@ -9414,7 +9415,8 @@ function renderWizardEvent(){
 
   html += '</div>';
   // Preview adapté à chaque étape
-  html += '<div class="wiz-preview"><div class="wiz-preview-title">📱 Aperçu mobile (live)</div>';
+  var _wizFrontBtn = (step==='A') ? '<button class="btn btn-sm" style="font-size:11px;padding:4px 10px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.35);color:#A855F7;font-weight:700" onclick="openModal(\'wizFront\',{})">✏️ Textes</button>' : '';
+  html += '<div class="wiz-preview"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div class="wiz-preview-title" style="margin-bottom:0">📱 Aperçu mobile (live)</div>'+_wizFrontBtn+'</div>';
 
   if(!d.nom && step==='A'){
     // Étape A sans nom encore
