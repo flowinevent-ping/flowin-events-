@@ -10,14 +10,14 @@
 
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --a:#7C5CFC; --ad:#5538D4; --al:#EDE8FF; --bg:#F0EDE8;
+  --a:#7C5CFC; --ad:#5538D4; --al:#EDE8FF; --bg:#0F0A1E;
   --navy:#1A1033; --navy2:#2D1B69; --white:#fff;
   --green:#1D9E75; --orange:#FF8C00; --red:#EF4444; --amber:#F59E0B;
   --accent:#7C5CFC; --accent-soft:#EDE8FF;
-  --border:2.5px solid #F0EDE8; --r:22px; --r-sm:12px; --r-pill:100px;
-  --muted:#888; --text:#1A1033;
+  --border:2.5px solid rgba(255,255,255,.12); --r:22px; --r-sm:12px; --r-pill:100px;
+  --muted:#888; --text:#F0EDE8;
 }
-body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;font-family:'Nunito',sans-serif;gap:22px;flex-wrap:wrap}
+body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;font-family:'Nunito',sans-serif;gap:22px;flex-wrap:wrap}
 
 /* Titre global */
 .preview-header{width:100%;text-align:center;padding:8px 0 18px}
@@ -30,8 +30,8 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
 .phone-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.08em}
 .phone{width:375px;height:812px;background:#fff;border-radius:44px;border:10px solid #1a1a1a;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;position:relative}
-.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:26px;background:#1a1a1a;border-radius:0 0 18px 18px;z-index:100}
-.viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:var(--bg);position:relative}
+.notch{display:none}
+.viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:#0F0A1E;position:relative}
 .viewport::-webkit-scrollbar{display:none}
 
 /* Page wrapper */
@@ -39,13 +39,13 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .page.on{display:block}
 
 /* Status bar */
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 22px 4px;font-size:13px;font-weight:900;color:var(--navy)}
+.status-bar{display:none}
 
 /* Header */
 .header{padding:10px 20px 14px;background:var(--bg)}
 .header.withback{display:flex;align-items:center;gap:10px}
 .back-btn{width:38px;height:38px;border-radius:50%;background:#fff;border:var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--navy);cursor:pointer;flex-shrink:0}
-.back-btn:hover{background:#F8F6F2}
+.back-btn:hover{background:rgba(255,255,255,.2)}
 .header-title{font-family:'Fredoka One',cursive;font-size:20px;color:var(--navy);line-height:1.1}
 .header-sub{font-size:11px;font-weight:800;color:var(--muted);margin-top:2px}
 
@@ -67,7 +67,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Progress dots */
 .progress-strip{display:flex;gap:6px;justify-content:center;padding:14px 20px 12px}
-.progress-step{flex:1;height:4px;background:#F0EDE8;border-radius:100px;max-width:60px}
+.progress-step{flex:1;height:4px;background:rgba(255,255,255,.15);border-radius:100px;max-width:60px}
 .progress-step.done{background:var(--green)}
 .progress-step.on{background:var(--a)}
 .progress-step.on.green{background:#1D9E75}
@@ -122,7 +122,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .vote-result-pct{font-family:'Fredoka One',cursive;font-size:16px;color:var(--navy)}
 .vote-result-item.winner .vote-result-pct{color:#1D9E75}
 .vote-result-item.winner{border-color:#86EFAC;background:linear-gradient(135deg,#fff 0%,#F0FDF4 100%)}
-.vote-bar-track{height:10px;background:#F0EDE8;border-radius:100px;overflow:hidden}
+.vote-bar-track{height:10px;background:rgba(255,255,255,.15);border-radius:100px;overflow:hidden}
 .vote-bar-fill{height:100%;background:linear-gradient(90deg,#A78BFA,#7C5CFC);border-radius:100px;transition:width .8s cubic-bezier(.4,0,.2,1)}
 .vote-result-item.winner .vote-bar-fill{background:linear-gradient(90deg,#34D399,#10B981)}
 .vote-meta{padding:0 20px 12px;font-size:10px;font-weight:800;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.08em}
@@ -134,7 +134,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .btn-primary{background:var(--a);color:#fff}
 .btn-primary.green{background:#1D9E75}
 .btn-primary.disabled{opacity:.4;cursor:not-allowed}
-.btn-ghost{background:#F8F6F2;color:var(--navy);border:var(--border)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:var(--border)}
 
 /* Landing hero */
 .landing-frame{padding:36px 20px 20px;text-align:center}
@@ -152,15 +152,15 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Form */
 .form-wrap{padding:4px 20px 16px}
 .form-field{margin-bottom:12px}
-.form-label{font-size:10px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.form-label{font-size:12px;font-weight:900;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
 .form-input{width:100%;background:#fff;border:var(--border);border-radius:14px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--navy);outline:none}
 .form-input:focus{border-color:var(--a)}
-.form-rgpd{display:flex;gap:10px;align-items:flex-start;padding:12px;background:#FAFAF8;border:var(--border);border-radius:14px;margin-top:6px}
+.form-rgpd{display:flex;gap:10px;align-items:flex-start;padding:12px;background:rgba(255,255,255,.05);border:var(--border);border-radius:14px;margin-top:6px}
 .form-rgpd-check{width:22px;height:22px;border-radius:6px;background:var(--a);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .form-rgpd-text{font-size:11px;font-weight:700;color:var(--muted);line-height:1.4}
 
 /* Partenaires (footer confirmation) */
-.partenaires{padding:14px 20px 20px;background:#FAFAF8;border-top:var(--border)}
+.partenaires{padding:14px 20px 20px;background:rgba(255,255,255,.04);border-top:var(--border)}
 .partenaires-label{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
 .partenaires-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .partenaire-tile{background:#fff;border:var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform .1s}
@@ -252,7 +252,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .pq-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#4B1528;margin-bottom:4px}
 .pq-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
 .pq-form-field{margin-bottom:12px}
-.pq-form-label{font-size:10px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.pq-form-label{font-size:12px;font-weight:900;color:#D4537E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .pq-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
 .pq-form-input:focus{border-color:#D4537E}
 .pq-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -424,7 +424,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .qs-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#075985;margin-bottom:4px}
 .qs-form-sub{font-size:12px;font-weight:800;color:#0369A1;margin-bottom:16px}
 .qs-form-field{margin-bottom:12px}
-.qs-form-label{font-size:10px;font-weight:900;color:#0369A1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qs-form-label{font-size:12px;font-weight:900;color:#0369A1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qs-form-input{width:100%;background:#fff;border:1.5px solid rgba(14,165,233,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#075985;outline:none}
 .qs-form-input:focus{border-color:#0EA5E9}
 .qs-form-rgpd{display:flex;gap:10px;padding:12px;background:#F0F9FF;border-radius:12px;align-items:flex-start}
@@ -574,7 +574,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .qs-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#1E293B;margin-bottom:4px}
 .qs-form-sub{font-size:12px;font-weight:800;color:#64748B;margin-bottom:16px}
 .qs-form-field{margin-bottom:12px}
-.qs-form-label{font-size:10px;font-weight:900;color:#EA580C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qs-form-label{font-size:12px;font-weight:900;color:#EA580C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qs-form-input{width:100%;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1E293B;outline:none}
 .qs-form-input:focus{border-color:#EA580C}
 .qs-form-rgpd{display:flex;gap:10px;padding:12px;background:#fff;border-radius:12px;margin-top:6px;align-items:flex-start;border:1.5px solid #E2E8F0}
@@ -1031,7 +1031,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .qm-form-title{font-family:'Fredoka One',cursive;font-size:22px;color:#312E81;margin-bottom:4px}
 .qm-form-sub{font-size:12px;font-weight:800;color:#72243E;margin-bottom:16px}
 .qm-form-field{margin-bottom:12px}
-.qm-form-label{font-size:10px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.qm-form-label{font-size:12px;font-weight:900;color:#6366F1;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
 .qm-form-input{width:100%;background:#fff;border:1.5px solid rgba(212,83,126,.2);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e;outline:none}
 .qm-form-input:focus{border-color:#6366F1}
 .qm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1164,6 +1164,18 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 /* Standalone : plein écran */
 html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#fff}
 .viewport{width:100% !important;height:100dvh !important;border-radius:0 !important;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ── Responsive mobile ── */
+@media (max-width:430px){
+  body{font-size:16px}
+  .pq-form-label,.qm-form-label,.form-label{font-size:12px}
+  .pq-form-input,.qm-form-input,.form-input,.qs-form-input{font-size:16px;padding:13px 15px}
+  .pq-quiz-opt,.qm-quiz-opt{font-size:15px;padding:12px 14px}
+  .btn,.pq-btn,.qm-btn,.tb-btn-primary{font-size:16px;padding:15px 20px}
+  .header-title{font-size:18px}
+  .tb-title{font-size:28px}
+  h1,h2{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -1171,7 +1183,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 1 : Landing ─── -->
       <div class="page on" id="qm-1">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-landing">
           <div class="qm-ville">Vence · Source d'inspiration</div>
           <div class="qm-title">Quiz Master<br>Grand Live</div>
@@ -1208,7 +1219,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 2 : Question 1 neutre ─── -->
       <div class="page" id="qm-2">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-quiz-screen">
           <div class="qm-quiz-progress">
             <div class="qm-quiz-progress-header">
@@ -1225,7 +1235,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
             <div class="qm-quiz-question">Dans quel département se trouve Vence ?</div>
             <div class="qm-quiz-options">
               <button class="qm-quiz-opt">Var (83)</button>
-              <button class="qm-quiz-opt sel">Alpes-Maritimes (06)</button>
+              <button class="qm-quiz-opt">Alpes-Maritimes (06)</button>
               <button class="qm-quiz-opt">Bouches-du-Rhône (13)</button>
               <button class="qm-quiz-opt">Gard (30)</button>
             </div>
@@ -1236,7 +1246,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 3 : Question 2 validée (fix UX : mauvaise bleu + bonne réponse affichée) ─── -->
       <div class="page" id="qm-3">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-quiz-screen">
           <div class="qm-quiz-progress">
             <div class="qm-quiz-progress-header">
@@ -1252,10 +1261,10 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
             <div class="qm-quiz-num">Q2</div>
             <div class="qm-quiz-question">Quel artiste célèbre a décoré la Chapelle du Rosaire de Vence ?</div>
             <div class="qm-quiz-options">
-              <button class="qm-quiz-opt wrong">Pablo Picasso</button>
+              <button class="qm-quiz-opt">Pablo Picasso</button>
               <button class="qm-quiz-opt correct">Henri Matisse</button>
-              <button class="qm-quiz-opt neutral">Marc Chagall</button>
-              <button class="qm-quiz-opt neutral">Paul Cézanne</button>
+              <button class="qm-quiz-opt">Marc Chagall</button>
+              <button class="qm-quiz-opt">Paul Cézanne</button>
             </div>
             <div class="qm-quiz-feedback ko">
               <div class="qm-quiz-feedback-icon">❌</div>
@@ -1271,7 +1280,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 4 : Question 3 ─── -->
       <div class="page" id="qm-4">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-quiz-screen">
           <div class="qm-quiz-progress">
             <div class="qm-quiz-progress-header">
@@ -1288,7 +1296,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
             <div class="qm-quiz-question">Vence est classée ville...</div>
             <div class="qm-quiz-options">
               <button class="qm-quiz-opt">Thermale</button>
-              <button class="qm-quiz-opt sel">D'art et d'histoire</button>
+              <button class="qm-quiz-opt">D'art et d'histoire</button>
               <button class="qm-quiz-opt">Touristique d'excellence</button>
               <button class="qm-quiz-opt">Fleurie</button>
             </div>
@@ -1299,7 +1307,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 5 : Formulaire CRM avec "Connu comment ?" ─── -->
       <div class="page" id="qm-5">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="header withback" style="background:transparent">
           <div class="back-btn" onclick="qmGo(4)">←</div>
           <div><div class="header-title" style="color:#312E81">Tes coordonnées</div><div class="header-sub">Pour le classement du Quiz Master Live</div></div>
@@ -1308,44 +1315,44 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="qm-form-grid">
             <div class="qm-form-field">
               <label class="qm-form-label">Prénom</label>
-              <input class="qm-form-input" placeholder="Camille" value="Camille">
+              <input class="qm-form-input" placeholder="">
             </div>
             <div class="qm-form-field">
               <label class="qm-form-label">Nom</label>
-              <input class="qm-form-input" placeholder="Dupont">
+              <input class="qm-form-input" placeholder="">
             </div>
           </div>
 
           <div class="qm-form-field">
             <label class="qm-form-label">Genre</label>
             <div class="qm-form-source-row" style="margin-top:6px">
-              <button class="qm-form-source-chip sel" data-gender="F" onclick="qmPickSource(this)">👩 Femme</button>
+              <button class="qm-form-source-chip" data-gender="F" onclick="qmPickSource(this)">👩 Femme</button>
               <button class="qm-form-source-chip" data-gender="M" onclick="qmPickSource(this)">👨 Homme</button>
             </div>
           </div>
           <div class="qm-form-field">
             <label class="qm-form-label">Email</label>
-            <input class="qm-form-input" placeholder="camille@exemple.fr">
+            <input class="qm-form-input" placeholder="">
           </div>
           <div class="qm-form-field">
             <label class="qm-form-label">Téléphone</label>
-            <input class="qm-form-input" placeholder="06 12 34 56 78">
+            <input class="qm-form-input" placeholder="">
           </div>
           <div class="qm-form-grid">
             <div class="qm-form-field">
               <label class="qm-form-label">Âge</label>
-              <input class="qm-form-input" placeholder="36-50 ans" value="26-35 ans">
+              <select class="qm-form-input" style="cursor:pointer"><option value="">Tranche d'âge</option><option value="-18">Moins de 18 ans</option><option value="18-25">18 – 25 ans</option><option value="26-35">26 – 35 ans</option><option value="36-50">36 – 50 ans</option><option value="51-65">51 – 65 ans</option><option value="65+">66 ans et plus</option></select>
             </div>
             <div class="qm-form-field">
               <label class="qm-form-label">Code postal</label>
-              <input class="qm-form-input" placeholder="06140" value="06140">
+              <input class="qm-form-input" placeholder="">
             </div>
           </div>
           <div class="qm-form-field">
             <label class="qm-form-label">Comment nous as-tu connu ?</label>
             <div class="qm-form-source-chips">
               <button class="qm-form-source-chip" onclick="qmPickSource(this)">📸 Instagram</button>
-              <button class="qm-form-source-chip sel" onclick="qmPickSource(this)">🔵 Facebook</button>
+              <button class="qm-form-source-chip" onclick="qmPickSource(this)">🔵 Facebook</button>
               <button class="qm-form-source-chip" onclick="qmPickSource(this)">🏛️ Site mairie</button>
               <button class="qm-form-source-chip" onclick="qmPickSource(this)">🗒️ Affiche / Flyer</button>
               <button class="qm-form-source-chip" onclick="qmPickSource(this)">📣 Bouche à oreille</button>
@@ -1357,13 +1364,12 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           </div>
         </div>
         <div class="bottom-cta">
-          <div class="btn" style="background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:15px" onclick="qmGo(6)">Valider ma participation →</div>
+          <div class="btn" style="background:linear-gradient(135deg,#6366F1,#A855F7);color:#fff;font-family:'Fredoka One',cursive;font-size:15px" onclick="qmSubmitForm()">Valider ma participation →</div>
         </div>
       </div>
 
       <!-- ─── PAQUES 6 : Loading ─── -->
       <div class="page" id="qm-6">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-loading">
           <div class="qm-spinner"></div>
           <div class="qm-loading-txt">Enregistrement en cours…</div>
@@ -1373,7 +1379,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 7 : Confirm score 2/3 + CTA Doublez ─── -->
       <div class="page" id="qm-7">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-confirm-hero">
           <div class="qm-confirm-inner">
             <div class="qm-trophy">🎊</div>
@@ -1419,7 +1424,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 8 : Partenaires de l'événement ─── -->
       <div class="page" id="qm-8">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-confirm-hero" style="padding:28px 20px 22px">
           <div class="qm-confirm-inner">
             <div class="qm-trophy">🤝</div>
@@ -1458,7 +1462,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 9 : (questions profil pour doubler points) ─── -->
       <div class="page" id="qm-9">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-bonus-hero">
           <div class="qm-bonus-label">Profil visiteur</div>
           <div class="qm-bonus-title">Double tes chances<br>Réponds aux questions</div>
@@ -1467,27 +1470,27 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="qm-bonus-section">À propos de toi</div>
           <div class="qm-bonus-q-label">1. Tu es venu(e)...</div>
           <div class="qm-bonus-chips">
-            <button class="qm-bonus-chip sel" onclick="qmPickChip(this)">👨‍👩‍👧 En famille</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">👨‍👩‍👧 En famille</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">👫 Entre amis</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">💑 En couple</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">🚶 Seul(e)</button>
           </div>
           <div class="qm-bonus-q-label">2. Tes animations préférées ?<span class="qm-bonus-q-hint">(plusieurs choix)</span></div>
           <div class="qm-bonus-chips">
-            <button class="qm-bonus-chip sel" onclick="qmPickChipMulti(this)">🛒 Marché / stands</button>
-            <button class="qm-bonus-chip sel" onclick="qmPickChipMulti(this)">🎪 Animations enfants</button>
+            <button class="qm-bonus-chip" onclick="qmPickChipMulti(this)">🛒 Marché / stands</button>
+            <button class="qm-bonus-chip" onclick="qmPickChipMulti(this)">🎪 Animations enfants</button>
             <button class="qm-bonus-chip" onclick="qmPickChipMulti(this)">🎭 Défilé / Corso</button>
             <button class="qm-bonus-chip" onclick="qmPickChipMulti(this)">🌿 Nature / animaux</button>
           </div>
           <div class="qm-bonus-q-label">3. Tu trouves l'ambiance...</div>
           <div class="qm-bonus-chips">
-            <button class="qm-bonus-chip sel" onclick="qmPickChip(this)">🤩 Génial !</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">🤩 Génial !</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">😊 Top</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">😐 Ça va</button>
           </div>
           <div class="qm-bonus-q-label">4. Tu souhaites revenir ?</div>
           <div class="qm-bonus-chips">
-            <button class="qm-bonus-chip sel" onclick="qmPickChip(this)">✅ Oui</button>
+            <button class="qm-bonus-chip" onclick="qmPickChip(this)">✅ Oui</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">🤔 Peut-être</button>
             <button class="qm-bonus-chip" onclick="qmPickChip(this)">❌ Non</button>
           </div>
@@ -1497,7 +1500,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PAQUES 10 : BonusConfirm avec billet + partage bottom-sheet ─── -->
       <div class="page" id="qm-10">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="qm-bc-hero">
           <div class="qm-bc-emoji">🎉</div>
           <div class="qm-bc-title">Bravo Camille !</div>
@@ -1572,7 +1574,6 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 
       <!-- ─── PÂQUES 11 : Anti-doublon ─── -->
       <div class="page" id="qm-11">
-        <div class="status-bar"><span>9:41</span><span>●●●●● 5G</span></div>
         <div class="ad-screen" style="background:linear-gradient(160deg,#EEF2FF 0%,#F5F3FF 100%)">
           <div class="ad-icon">✋</div>
           <div class="ad-title">Tu as déjà joué !</div>
@@ -2077,6 +2078,41 @@ function flowinSetText(selector, text) {
   for(var i=0; i<els.length; i++) { els[i].textContent = text; }
 }
 
+/* ── Hydratation textes Pâques → event réel ── */
+function flowinHydrateDynTexts(ev){
+  if(!ev) return;
+  var nom = ev.nom || 'Cet événement';
+  var cfg = ev.cfg || {};
+  var tirage = cfg.tirageDate || 'fin de journée';
+  var lieu = ev.lieu || '';
+  var url = cfg.qrUrl || window.location.href;
+  var hint = 'Capture conseillée · Tirage ' + tirage + (lieu ? ' · ' + lieu : '');
+
+  /* Anti-doublon page */
+  var adMsg = document.querySelector('#pq-11 .ad-msg');
+  if(adMsg) adMsg.innerHTML = 'Cette adresse email a déjà participé à <strong>' + nom + '</strong>.<br>Une seule participation par personne.';
+
+  /* Ticket hint */
+  var tHint = document.getElementById('pq-ticket-hint');
+  if(tHint) tHint.textContent = hint;
+
+  /* Partenaires label */
+  var pLabel = document.querySelector('.partenaires-label');
+  if(pLabel) pLabel.textContent = '★ Partenaires ' + nom + ' ★';
+
+  /* Header formulaire */
+  var formSub = document.querySelector('#pq-5 .header-sub');
+  if(formSub) formSub.textContent = 'Pour la tombola de ' + nom;
+
+  /* Partage texte */
+  var sharePreview = document.querySelector('.pq-share-preview');
+  if(sharePreview) sharePreview.innerHTML = '« Je viens de jouer à <strong>' + nom + '</strong> · à toi de tenter ta chance ! <strong>' + url + '</strong> »';
+
+  /* Toast partage */
+  var toast = document.getElementById('pq-toast');
+  if(toast) toast.textContent = '✓ Partagé · +1 point validé';
+}
+
 function flowinHydrateModule(ev) {
   if(!ev) return;
   var module = ev.module || '';
@@ -2107,11 +2143,11 @@ function flowinHydrateModule(ev) {
     var vp = document.getElementById('vp-paques');
     if(vp) {
       var villeEl = vp.querySelector('.pq-ville');
-      if(villeEl) villeEl.textContent = lieu + ' · Flowin';
+      if(villeEl) villeEl.textContent = cfg.subtitle || (lieu + ' · Source d\'inspiration');
       var titleEl = vp.querySelector('.pq-title');
-      if(titleEl) titleEl.innerHTML = nom.replace(' ', '<br>');
+      if(titleEl) titleEl.innerHTML = cfg.nomCourt ? cfg.nomCourt.replace(' ', '<br>') : nom.replace(' ', '<br>');
       var datesEl = vp.querySelector('.pq-dates');
-      if(datesEl) datesEl.textContent = dates;
+      if(datesEl) datesEl.textContent = cfg.datesLabel || dates;
     }
     /* QuizMaster (qm) */
     var vqm = document.getElementById('vp-quizmaster');
@@ -2342,7 +2378,10 @@ function makeShareFns(prefix, goFn, eventName, eventUrl){
 
 /* Vérification anti-doublon localStorage */
 function checkDuplicate(prefix, emailVal, goFn, adPage){
-  var key = 'flowin_played_'+prefix;
+  /* Clé par event (pas par module) pour éviter collision inter-events */
+  var key = (typeof FLOWIN_EV_ID !== 'undefined' && FLOWIN_EV_ID)
+    ? 'flowin_played_'+FLOWIN_EV_ID
+    : 'flowin_played_'+prefix;
   try{
     var stored = localStorage.getItem(key);
     if(stored){
@@ -2358,7 +2397,10 @@ function checkDuplicate(prefix, emailVal, goFn, adPage){
 
 function registerPlay(prefix, emailVal, ticketCode){
   try{
-    localStorage.setItem('flowin_played_'+prefix, JSON.stringify({email:emailVal, ticket:ticketCode, ts:Date.now()}));
+    var _regKey = (typeof FLOWIN_EV_ID !== 'undefined' && FLOWIN_EV_ID)
+      ? 'flowin_played_'+FLOWIN_EV_ID
+      : 'flowin_played_'+prefix;
+    localStorage.setItem(_regKey, JSON.stringify({email:emailVal, ticket:ticketCode, ts:Date.now()}));
   }catch(e){}
 }
 
@@ -2503,6 +2545,43 @@ var FLOWIN_MODULE_FALLBACK = (function(){
 })();
 var FLOWIN_EVENT = null;
 var FLOWIN_PRO_ID = null;
+/* ── Nettoyage anti-doublon inter-events ── */
+(function(){
+  try {
+    var _evId = (new URLSearchParams(window.location.search)).get('ev') || '';
+    if(_evId && _evId !== 'ev-paques'){
+      /* Supprimer les clés des anciens events pour éviter collision */
+      localStorage.removeItem('flowin_played_pq');
+      localStorage.removeItem('flowin_played_qm');
+      localStorage.removeItem('flowin_played_qs');
+      localStorage.removeItem('flowin_played_sp');
+      localStorage.removeItem('flowin_played_vs');
+      localStorage.removeItem('flowin_played_tb');
+    }
+  } catch(e){}
+})();
+/* ── Paramètres URL cfg depuis section Jeux dashboard (bonus=0, partage=0) ── */
+var FLOWIN_CFG_PARAMS = (function(){
+  try {
+    var p = new URLSearchParams(window.location.search);
+    return { bonus: p.get('bonus'), partage: p.get('partage'), timer: p.get('timer') };
+  } catch(e){ return {}; }
+})();
+/* Appliquer immédiatement les paramètres d'affichage */
+if(FLOWIN_CFG_PARAMS.bonus === '0'){
+  document.addEventListener('DOMContentLoaded', function(){
+    var _h=function(sel){var els=document.querySelectorAll(sel);for(var i=0;i<els.length;i++)els[i].style.display='none';};
+    _h('#pq-9,#qm-9');
+    _h('.pq-double-cta,.pq-double-hint,.pq-double-skip');
+    _h('.pq-share-btn,.pq-share-badge,.pq-bc-share');
+  });
+}
+if(FLOWIN_CFG_PARAMS.partage === '0'){
+  document.addEventListener('DOMContentLoaded', function(){
+    var els=document.querySelectorAll('.pq-share-btn,#pq-share-btn,.pq-bc-share,.pq-share-badge');
+    for(var i=0;i<els.length;i++) els[i].style.display='none';
+  });
+}
 
 /* Routage immédiat si ?module= présent (avant Supabase) */
 if(FLOWIN_MODULE_FALLBACK){
@@ -2523,9 +2602,22 @@ if(FLOWIN_MODULE_FALLBACK){
     if(rows && rows.length){
       FLOWIN_EVENT = rows[0];
       FLOWIN_PRO_ID = rows[0].pro_id || null;
-      console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module);
-      try { flowinShowModuleViewport(rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module, '· statut:', rows[0].status);
+
+      /* ── Bloquer si event terminé ou archivé ── */
+      if(rows[0].status === 'past' || rows[0].status === 'archived'){
+        document.body.innerHTML = '<div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F8FAFC;font-family:-apple-system,sans-serif;padding:32px;text-align:center">'
+          + '<div style="font-size:48px;margin-bottom:16px">🔒</div>'
+          + '<div style="font-size:20px;font-weight:800;color:#1B3A5C;margin-bottom:8px">Cet event est terminé</div>'
+          + '<div style="font-size:14px;color:#64748B;max-width:280px;line-height:1.6">Le QR code de cet événement n\'est plus actif.<br>Merci pour votre participation !</div>'
+          + '</div>';
+        return;
+      }
+
+      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]);
+      /* Compteur dynamique quizmaster */
+      (function(ev){ var _nbQ=(ev.cfg&&ev.cfg.quizNbQuestions)?parseInt(ev.cfg.quizNbQuestions):0; if(_nbQ>0){ document.querySelectorAll('.qm-quiz-step-label').forEach(function(l){ var m=l.textContent.match(/(\d+)\s*\/\s*\d+/); if(m) l.textContent='Question '+m[1]+' / '+_nbQ; }); } })(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
@@ -2549,20 +2641,20 @@ function _flowinMerge(dst, src){
   return dst;
 }
 
-/* Écriture joueur + participation en parallèle */
+/* Écriture joueur + participation — async séquenciel */
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();
   var dateIso = nowIso.slice(0,10);
-  
-  /* Génère id joueur déterministe à partir de l'email */
   var emailLower = String(email).toLowerCase().trim();
   var extId = 'j-' + emailLower.replace(/[^a-z0-9]/g,'-').substring(0,40);
-  
+  var evId = FLOWIN_EVENT.id;
+
+  /* Champs collectés depuis le form (cp, prenom, nom, tel, age) */
   var joueurPayload = {
     external_id: extId,
     email: emailLower,
-    events: [FLOWIN_EVENT.id],
+    events: [evId],
     optin: true,
     optin_date: dateIso,
     first_seen: dateIso,
@@ -2570,37 +2662,58 @@ function supaWriteFlowin(prefix, email, ticket, extraFields){
     client_type: 'btoc'
   };
   if(extraFields) _flowinMerge(joueurPayload, extraFields);
-  
-  /* UPSERT joueur */
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?on_conflict=external_id', {
+
+  /* 1. Upsert joueur — récupérer l'UUID Supabase */
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs', {
     method:'POST',
     headers:{
       'apikey':FLOWIN_SUPA_ANON,
       'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
       'Content-Type':'application/json',
-      'Prefer':'resolution=merge-duplicates,return=minimal'
+      'Prefer':'resolution=merge-duplicates,return=representation',
+      'X-Upsert-On':'external_id'
     },
     body: JSON.stringify(joueurPayload)
-  }).catch(function(e){ console.warn('[Flowin] upsert joueur:', e); });
-  
-  /* INSERT participation */
-  var partPayload = {
-    event_id: FLOWIN_EVENT.id,
-    completed: true,
-    ticket_code: ticket || ''
-  };
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
-    method:'POST',
-    headers:{
-      'apikey':FLOWIN_SUPA_ANON,
-      'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
-      'Content-Type':'application/json',
-      'Prefer':'return=minimal'
-    },
-    body: JSON.stringify(partPayload)
-  }).catch(function(e){ console.warn('[Flowin] insert participation:', e); });
-  
-  console.log('[Flowin] supaWriteFlowin OK:', prefix, jid, ticket);
+  }).then(function(r){
+    if(!r.ok){ r.text().then(function(t){ console.warn('[Flowin] joueur err:', r.status, t); }); return null; }
+    return r.json();
+  }).then(function(rows){
+    /* Récupérer l'UUID retourné OU chercher par external_id */
+    var uuid = null;
+    if(rows && rows.length) uuid = rows[0].id;
+    
+    if(!uuid){
+      /* Fallback : chercher le joueur par external_id */
+      return fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?external_id=eq.'+encodeURIComponent(extId)+'&select=id', {
+        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      }).then(function(r){ return r.json(); }).then(function(rows){
+        return rows && rows.length ? rows[0].id : null;
+      });
+    }
+    return uuid;
+  }).then(function(uuid){
+    if(!uuid){ console.warn('[Flowin] UUID joueur introuvable'); return; }
+    /* 2. INSERT participation avec le vrai UUID */
+    var partPayload = {
+      event_id: evId,
+      joueur_id: uuid,
+      completed: true,
+      ticket_code: ticket || ''
+    };
+    return fetch(FLOWIN_SUPA_URL+'/rest/v1/participations', {
+      method:'POST',
+      headers:{
+        'apikey':FLOWIN_SUPA_ANON,
+        'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
+      body: JSON.stringify(partPayload)
+    }).then(function(r){
+      if(!r.ok) r.text().then(function(t){ console.warn('[Flowin] participation err:', r.status, t); });
+      else console.log('[Flowin] ✅ inscription OK:', emailLower, evId, ticket);
+    });
+  }).catch(function(e){ console.warn('[Flowin] supaWriteFlowin:', e); });
 }
 
 /* Wrapper de compat : registerPlay() existant peut appeler ceci en plus */
@@ -2626,7 +2739,8 @@ function flowinShowModuleViewport(moduleName){
     'quizmaster': 'vp-quizmaster',
     'spin': 'vp-spin',
     'vote': 'vp-votestars',
-    'tombola': 'vp-tombola'
+    'tombola': 'vp-tombola',
+    'standup': 'vp-votestars'
   };
   var targetVp = moduleMap[moduleName];
   if(!targetVp){
@@ -2760,5 +2874,30 @@ function flowinHydrateQuizmasterBonus(){
   }
 })();
 </script>
+
+<script>
+/* ── Navigation depuis postMessage (dashboard preview arrows) ── */
+window.addEventListener('message', function(e) {
+  if(!e.data || !e.data.flowinNav) return;
+  var dir = e.data.flowinNav;
+  /* Trouver la page courante active */
+  var vp = document.querySelector('.viewport');
+  if(!vp) vp = document.body;
+  var pages = vp.querySelectorAll('.page');
+  var cur = -1;
+  for(var i=0; i<pages.length; i++) {
+    if(pages[i].classList.contains('on')) { cur = i; break; }
+  }
+  if(cur < 0) return;
+  var next = dir === 'next' ? cur + 1 : cur - 1;
+  if(next < 0) next = 0;
+  if(next >= pages.length) next = pages.length - 1;
+  if(next === cur) return;
+  pages[cur].classList.remove('on');
+  pages[next].classList.add('on');
+  if(vp.scrollTo) vp.scrollTo(0,0);
+});
+</script>
+
 </body>
 </html>

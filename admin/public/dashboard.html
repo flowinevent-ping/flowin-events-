@@ -2724,7 +2724,65 @@ function renderModal(){
   else if(k==='comm') html = modalComm(state.modal.data);
   else if(k==='wizPartner') html = modalWizPartner(state.modal.data);
   else if(k==='wizBanqueQ') html = modalWizBanqueQ(state.modal.data);
+  else if(k==='wizFront') html = modalWizFront(state.modal.data);
   $('#modalBd').innerHTML = html;
+}
+
+function modalWizFront(d){
+  var front = (state.wiz && state.wiz.draft && state.wiz.draft.cfg && state.wiz.draft.cfg.front) || {};
+  var isTombola = state.wiz && state.wiz.draft && state.wiz.draft.module === 'tombola';
+  var html = '<div class="modal" style="max-width:560px">';
+  html += '<div class="modal-h"><div><div class="title">✏️ Textes & emojis</div><div class="subtitle">Personnalisation de la page joueur · visible dans l\'aper\u00e7u live</div></div><button class="drawer-close" onclick="closeModal()">×</button></div>';
+  html += '<div class="modal-body" style="display:flex;flex-direction:column;gap:12px;padding:20px">';
+
+  // Badge
+  html += '<div>';
+  html += '<label class="label" style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.05em">Badge / Accroche <span style="font-size:10px;font-weight:400;color:var(--sa-muted)">(ex: ❤️ VENCE · TOMBOLA)</span></label>';
+  html += '<input type="text" class="input" id="wfBadge" value="'+escAttr(front.badge||'')+'" placeholder="❤️ VENCE · EVENT" oninput="wizFrontUpd(\'badge\',this.value)"/>';
+  html += '</div>';
+
+  // Texte CTA
+  html += '<div>';
+  html += '<label class="label" style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.05em">Texte du bouton CTA</label>';
+  html += '<input type="text" class="input" id="wfCta" value="'+escAttr(front.ctaText||(isTombola?'🎟️ Je m\'inscris à la tombola →':'🎮 Participer gratuitement'))+'" oninput="wizFrontUpd(\'ctaText\',this.value)"/>';
+  html += '</div>';
+
+  // Note CTA
+  html += '<div>';
+  html += '<label class="label" style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.05em">Note sous le bouton</label>';
+  html += '<input type="text" class="input" id="wfCtaNote" value="'+escAttr(front.ctaNote||'')+'" placeholder="Jeu gratuit · Sans achat obligatoire" oninput="wizFrontUpd(\'ctaNote\',this.value)"/>';
+  html += '</div>';
+
+  // Description
+  html += '<div>';
+  html += '<label class="label" style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.05em">Description <span style="font-size:10px;font-weight:400">(paragraphe sous le titre)</span></label>';
+  html += '<textarea class="textarea" id="wfDesc" rows="3" placeholder="Soutiens la Croix Rouge et tente de remporter..." oninput="wizFrontUpd(\'description\',this.value)">'+esc(front.description||'')+'</textarea>';
+  html += '</div>';
+
+  // Tirage hint
+  html += '<div>';
+  html += '<label class="label" style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.05em">Texte tirage <span style="font-size:10px;font-weight:400">(bloc violet sous les lots)</span></label>';
+  html += '<input type="text" class="input" id="wfTirage" value="'+escAttr(front.lotTirage||'')+'" placeholder="📋 Tirage le JJ/MM/AAAA — résultats publiés sur ..." oninput="wizFrontUpd(\'lotTirage\',this.value)"/>';
+  html += '</div>';
+
+  // Titre lots
+  html += '<div>';
+  html += '<label class="label" style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.05em">Titre section lots</label>';
+  html += '<input type="text" class="input" id="wfLotLabel" value="'+escAttr(front.lotLabel||'')+'" placeholder="Lots à gagner" oninput="wizFrontUpd(\'lotLabel\',this.value)"/>';
+  html += '</div>';
+
+  html += '</div>';
+  html += '<div class="modal-footer"><button class="btn btn-primary" onclick="closeModal()">✓ Fermer</button></div>';
+  html += '</div>';
+  return html;
+}
+
+function wizFrontUpd(field, value){
+  var d = state.wiz.draft;
+  if(!d.cfg) d.cfg = {};
+  if(!d.cfg.front) d.cfg.front = {};
+  d.cfg.front[field] = value;
+  renderWizard();
 }
 
 function modalWizBanqueQ(d){
@@ -9121,6 +9179,7 @@ function renderWizardEvent(){
          + ['#7C2D92','#10B981','#3B82F6','#F59E0B','#EF4444','#06B6D4','#EC4899','#8B5CF6'].map(c=>'<div class="color-swatch '+(d.couleur===c?'selected':'')+'" style="background:'+c+'" onclick="state.wiz.draft.couleur=\''+c+'\';renderWizard()"></div>').join('')
          + '</div></div>';
     html += '<div class="form-row"><label class="label">Super Event (optionnel)</label><select class="select" onchange="state.wiz.draft.superEventId=this.value"><option value="">Aucun</option>'+DATA.superEvents.map(s=>'<option value="'+s.id+'" '+(d.superEventId===s.id?'selected':'')+'>'+esc(s.nom)+'</option>').join('')+'</select></div>';
+    html += '<div class="form-row mt-3" style="padding-top:12px;border-top:1px solid var(--sa-border)"><button class="btn" style="width:100%;gap:8px;background:linear-gradient(135deg,rgba(124,45,146,.12),rgba(168,85,247,.12));border:1px solid rgba(168,85,247,.3);color:var(--sa-accent);font-weight:700" onclick="openModal(\'wizFront\',{})"><span>✏️</span><span>Textes &amp; emojis — personnaliser la page joueur</span></button></div>';
   } else if(step==='B'){
     html += '<div class="section-h">Étape 2 · Choix du module de jeu</div>';
     html += '<div class="module-cards">';

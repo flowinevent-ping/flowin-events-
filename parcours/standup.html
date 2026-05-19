@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
-<title>Flowin · quizsolo</title>
+<title>Flowin · vote</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --a:#7C5CFC; --ad:#5538D4; --al:#EDE8FF; --bg:#F0EDE8;
+  --a:#7C5CFC; --ad:#5538D4; --al:#EDE8FF; --bg:#0F0A1E;
   --navy:#1A1033; --navy2:#2D1B69; --white:#fff;
   --green:#1D9E75; --orange:#FF8C00; --red:#EF4444; --amber:#F59E0B;
   --accent:#7C5CFC; --accent-soft:#EDE8FF;
-  --border:2.5px solid #F0EDE8; --r:22px; --r-sm:12px; --r-pill:100px;
-  --muted:#888; --text:#1A1033;
+  --border:2.5px solid rgba(255,255,255,.12); --r:22px; --r-sm:12px; --r-pill:100px;
+  --muted:#888; --text:#F0EDE8;
 }
-body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;font-family:'Nunito',sans-serif;gap:22px;flex-wrap:wrap}
+body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;font-family:'Nunito',sans-serif;gap:22px;flex-wrap:wrap}
 
 /* Titre global */
 .preview-header{width:100%;text-align:center;padding:8px 0 18px}
@@ -31,7 +31,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 .phone-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.08em}
 .phone{width:375px;height:812px;background:#fff;border-radius:44px;border:10px solid #1a1a1a;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;position:relative}
 .notch{display:none}
-.viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:var(--bg);position:relative}
+.viewport{height:100%;overflow-y:auto;overflow-x:hidden;background:#0F0A1E;position:relative}
 .viewport::-webkit-scrollbar{display:none}
 
 /* Page wrapper */
@@ -67,7 +67,7 @@ body{background:#E8E4DC;min-height:100vh;display:flex;align-items:flex-start;jus
 
 /* Progress dots */
 .progress-strip{display:flex;gap:6px;justify-content:center;padding:14px 20px 12px}
-.progress-step{flex:1;height:4px;background:#F0EDE8;border-radius:100px;max-width:60px}
+.progress-step{flex:1;height:4px;background:rgba(255,255,255,.15);border-radius:100px;max-width:60px}
 .progress-step.done{background:var(--green)}
 .progress-step.on{background:var(--a)}
 .progress-step.on.green{background:#1D9E75}
@@ -1179,303 +1179,383 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 </style>
 </head>
 <body>
-<div class="viewport qs-viewport" id="vp-quizsolo">
+<div class="viewport vs-viewport" id="vp-votestars">
 
-      <!-- ─── QS 1 : Landing ─── -->
-      <div class="page on" id="qs-1">
-        <div class="qs-landing">
-          <div class="qs-badge">🏛️ Grasse · Patrimoine 2026</div>
-          <div class="qs-logo">⚡</div>
-          <div class="qs-title">Quiz patrimoine<br>Grasse 2026</div>
-          <div class="qs-sub">3 questions · sois rapide, le temps départage les ex-aequo.</div>
-          <div class="qs-rules">
-            <div class="qs-rules-title">Règles du jeu</div>
-            <div class="qs-rule-row"><div class="qs-rule-ico">❓</div>3 questions à choix multiples</div>
-            <div class="qs-rule-row"><div class="qs-rule-ico">⏱️</div>Temps de réponse mesuré par question</div>
-            <div class="qs-rule-row"><div class="qs-rule-ico">🏆</div>3 premiers gagnent · départage au temps</div>
-            <div class="qs-rule-row"><div class="qs-rule-ico">🎁</div>Lots du Comité Départemental du Tourisme</div>
+      <!-- ─── VS 1 : Landing ─── -->
+      <div class="page on" id="vs-1">
+        <div class="vs-landing">
+          <div class="vs-badge">⭐ Soirée Jazz Antibes · 12 juin 2026</div>
+          <div class="vs-logo">🎷</div>
+          <div class="vs-title">Ta note<br>change la prog</div>
+          <div class="vs-sub">Donne 1 à 5 étoiles à chaque artiste pour guider la programmation 2027.</div>
+
+          <div class="vs-rules">
+            <div class="vs-rule-row"><div class="vs-rule-ico">🎤</div>5 artistes à évaluer un par un</div>
+            <div class="vs-rule-row"><div class="vs-rule-ico">⭐</div>Note de 1 à 5 étoiles</div>
+            <div class="vs-rule-row"><div class="vs-rule-ico">📮</div>Tes infos à la fin pour rester informé</div>
+            <div class="vs-rule-row"><div class="vs-rule-ico">📊</div>Résultats publiés après le festival</div>
           </div>
-        </div>
-        <div class="bottom-cta">
-          <button class="qs-cta" onclick="qsGo(2)">Commencer le défi →</button>
+
+          <button class="vs-cta" onclick="vsGo(2)">Je note les artistes →</button>
         </div>
       </div>
 
-      <!-- ─── QS 2 : Formulaire contact AVANT quiz ─── -->
-      <div class="page" id="qs-2">
-        <div class="header withback" style="background:transparent">
-          <div class="back-btn" onclick="qsGo(1)">←</div>
-          <div><div class="header-title" style="color:#1E293B">Tes coordonnées</div><div class="header-sub">Avant de lancer le quiz</div></div>
+      <!-- ─── VS 2 : Artiste 1/5 — Kamasi Washington ─── -->
+      <div class="page" id="vs-2">
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(1)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 1/5</div><div class="header-sub" style="color:#C7D2FE">Kamasi Washington</div></div>
         </div>
-        <div class="qs-form-wrap">
-          <div class="qs-form-title">On fait connaissance ?</div>
-          <div class="qs-form-sub">Indispensable pour te contacter si tu es dans le top 3</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="qs-form-field">
-              <label class="qs-form-label">Prénom</label>
-              <input class="qs-form-input" placeholder="Léa" value="Léa">
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎷</div>
+            <div class="vs-artist-name" style="font-size:20px">Kamasi Washington</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Jazz contemporain · USA</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+              Saxophoniste ténor, producteur d'albums majeurs du jazz moderne ("The Epic", "Heaven and Earth").
             </div>
-            <div class="qs-form-field">
-              <label class="qs-form-label">Nom</label>
-              <input class="qs-form-input" placeholder="Martin">
-            </div>
-          </div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Genre</label>
-            <div style="display:flex;gap:8px;margin-top:6px">
-              <button style="flex:1;padding:10px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:12px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit" data-gender="F" onclick="qsPickChip(this)">👩 Femme</button>
-              <button style="flex:1;padding:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit" data-gender="M" onclick="qsPickChip(this)">👨 Homme</button>
-            </div>
-          </div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Email</label>
-            <input class="qs-form-input" placeholder="lea@exemple.fr">
-          </div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Téléphone</label>
-            <input class="qs-form-input" placeholder="06 XX XX XX XX">
-          </div>
-          <div class="qs-form-field">
-            <label class="qs-form-label">Comment nous as-tu connu ?</label>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-              <button style="padding:8px 12px;background:rgba(124,92,252,.15);border:1.5px solid var(--a);border-radius:10px;font-weight:700;color:var(--ad);cursor:pointer;font-family:inherit;font-size:13px" data-source="instagram" onclick="qsPickChip(this)">📸 Instagram</button>
-              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="facebook" onclick="qsPickChip(this)">🔵 Facebook</button>
-              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="affiche" onclick="qsPickChip(this)">📋 Affiche</button>
-              <button style="padding:8px 12px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-weight:700;color:#1F1B2E;cursor:pointer;font-family:inherit;font-size:13px" data-source="bouche" onclick="qsPickChip(this)">📣 Bouche à oreille</button>
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="kamasi">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
             </div>
           </div>
-          <div class="qs-form-rgpd">
-            <div class="qs-form-rgpd-box">✓</div>
-            <div class="qs-form-rgpd-txt">J'accepte que Grasse Tourisme me contacte si je fais partie des gagnants. RGPD respecté.</div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(3)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 3 : Artiste 2/5 — Hiromi Uehara ─── -->
+      <div class="page" id="vs-3">
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(2)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 2/5</div><div class="header-sub" style="color:#C7D2FE">Hiromi Uehara</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎹</div>
+            <div class="vs-artist-name" style="font-size:20px">Hiromi Uehara</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Jazz fusion · Japon</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+              Pianiste virtuose, fusion entre jazz, rock progressif et musique classique. Grammy Award 2011.
+            </div>
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="hiromi">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
           </div>
-          <button class="qs-form-btn" onclick="qsSubmitForm()">🚀 Go, je démarre le chrono →</button>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(4)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 4 : Artiste 3/5 — Ibrahim Maalouf ─── -->
+      <div class="page" id="vs-4">
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(3)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 3/5</div><div class="header-sub" style="color:#C7D2FE">Ibrahim Maalouf</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎺</div>
+            <div class="vs-artist-name" style="font-size:20px">Ibrahim Maalouf</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Trompette jazz · France</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+              Trompettiste franco-libanais, fusion jazz oriental. Victoire du jazz, compositions pour le cinéma.
+            </div>
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="ibrahim">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(5)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 5 : Artiste 4/5 — Stacey Kent ─── -->
+      <div class="page" id="vs-5">
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(4)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 4/5</div><div class="header-sub" style="color:#C7D2FE">Stacey Kent</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+          <div class="qs-q-dot" style="background:rgba(252,211,77,.15)"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🎸</div>
+            <div class="vs-artist-name" style="font-size:20px">Stacey Kent</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Vocal jazz · UK</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+              Chanteuse américaine installée à Londres, voix douce et bossa nova raffinée. Disque de platine.
+            </div>
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="stacey">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(6)">Artiste suivant →</button>
+      </div>
+
+      <!-- ─── VS 6 : Artiste 5/5 — Marcus Miller ─── -->
+      <div class="page" id="vs-6">
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(5)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Artiste 5/5</div><div class="header-sub" style="color:#C7D2FE">Marcus Miller · dernier !</div></div>
+        </div>
+        <div style="padding:0 20px 12px;display:flex;gap:5px">
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot" style="background:#1D9E75"></div>
+          <div class="qs-q-dot active" style="background:#FCD34D"></div>
+        </div>
+        <div style="padding:20px 20px 20px">
+          <div class="vs-artist-card" style="padding:24px 20px;text-align:center">
+            <div class="vs-artist-avatar" style="width:100px;height:100px;border-radius:30px;margin:0 auto 14px;font-size:52px;box-shadow:0 12px 32px rgba(252,211,77,.3)">🥁</div>
+            <div class="vs-artist-name" style="font-size:20px">Marcus Miller</div>
+            <div class="vs-artist-genre" style="font-size:12px;margin-top:4px;margin-bottom:20px">Bass / funk jazz · USA</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(252,211,77,.15);border-radius:12px;padding:12px 14px;margin-bottom:20px;font-size:11px;font-weight:800;color:#C7D2FE;line-height:1.5">
+              Bassiste légendaire, compositeur et producteur (Miles Davis). 2 Grammy Awards, funk jazz.
+            </div>
+            <div style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">Ta note</div>
+            <div class="vs-stars" style="justify-content:center;gap:10px" data-artist="marcus">
+              <div class="vs-star" onclick="vsRate(this,1)">★</div>
+              <div class="vs-star" onclick="vsRate(this,2)">★</div>
+              <div class="vs-star" onclick="vsRate(this,3)">★</div>
+              <div class="vs-star" onclick="vsRate(this,4)">★</div>
+              <div class="vs-star" onclick="vsRate(this,5)">★</div>
+            </div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsGo(7)">Mes coordonnées →</button>
+      </div>
+
+      <!-- ─── VS 7 : Formulaire CRM ─── -->
+      <div class="page" id="vs-7">
+        <div class="header withback" style="background:transparent;padding:10px 20px">
+          <div class="back-btn" onclick="vsGo(6)" style="background:rgba(255,255,255,.15);border-color:rgba(252,211,77,.3);color:#fff">←</div>
+          <div><div class="header-title" style="color:#FCD34D;font-size:17px">Tes coordonnées</div><div class="header-sub" style="color:#C7D2FE">Pour rester informé(e) du prochain festival</div></div>
+        </div>
+        <div style="padding:14px 20px;background:rgba(252,211,77,.08);margin:0 20px 14px;border-radius:14px;border:1px solid rgba(252,211,77,.2)">
+          <div style="font-size:11px;font-weight:800;color:#FDE68A;line-height:1.5">
+            ✨ Tes 5 votes sont enregistrés — on a juste besoin de tes infos pour te tenir au courant.
+          </div>
+        </div>
+
+        <div style="padding:0 20px 20px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Prénom</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Léa" value="Léa">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Nom</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Martin">
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Genre</label>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <button style="flex:1;padding:10px;background:rgba(252,211,77,.2);border:1.5px solid #FCD34D;border-radius:10px;font-weight:700;color:#FCD34D;cursor:pointer;font-family:inherit;font-size:13px" data-gender="F" onclick="vsPickChip(this)">👩 Femme</button>
+              <button style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:10px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:13px" data-gender="M" onclick="vsPickChip(this)">👨 Homme</button>
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Email</label>
+            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="lea@exemple.fr">
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Téléphone</label>
+            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="06 XX XX XX XX">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Âge</label>
+              <select style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none;cursor:pointer" ><option value="" style="color:#1a1a2e">Tranche d'âge</option><option value="-18" style="color:#1a1a2e">Moins de 18 ans</option><option value="18-25" style="color:#1a1a2e">18 – 25 ans</option><option value="26-35" style="color:#1a1a2e">26 – 35 ans</option><option value="36-50" style="color:#1a1a2e">36 – 50 ans</option><option value="51-65" style="color:#1a1a2e">51 – 65 ans</option><option value="65+" style="color:#1a1a2e">66 ans et plus</option></select>
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Code postal</label>
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="06600" value="06600">
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Comment nous as-tu connu ?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">📸 Instagram</button>
+              <button style="background:#FCD34D;border:1.5px solid #FCD34D;border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#1E1B4B;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">🔵 Facebook</button>
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">🏛️ Site festival</button>
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">🗒️ Affiche / Flyer</button>
+              <button style="background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:100px;padding:7px 11px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif" onclick="vsPickSource(this)">📣 Bouche à oreille</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;padding:12px;background:rgba(255,255,255,.08);border:1px solid rgba(252,211,77,.25);border-radius:12px;align-items:flex-start;margin-bottom:10px">
+            <div style="width:22px;height:22px;border-radius:6px;background:#FCD34D;color:#1E1B4B;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:900">✓</div>
+            <div style="font-size:11px;font-weight:700;color:#E0E7FF;line-height:1.4">Préviens-moi de la prochaine édition du festival Jazz Antibes et des autres événements partenaires.</div>
+          </div>
+        </div>
+        <button class="vs-submit-btn" onclick="vsSubmitForm()">Envoyer mes votes et mes infos →</button>
+        <div style="padding:0 20px 16px;text-align:center">
+          <button onclick="vsGo(9)" style="background:none;border:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);cursor:pointer;text-decoration:underline">🤝 Voir nos partenaires</button>
         </div>
       </div>
 
-      <!-- ─── QS 3 : Q1 avec timer ─── -->
-      <div class="page" id="qs-3">
-        <div class="qs-quiz-screen">
-          <div class="qs-timer-bar">
-            <div class="qs-timer-left">
-              <div class="qs-timer-ico">⏱️</div>
-              <div>
-                <div class="qs-timer-val">00:07</div>
-                <div class="qs-timer-label">Temps écoulé</div>
-              </div>
-            </div>
-            <div class="qs-score-pill">Score 0 pt</div>
-          </div>
-          <div class="qs-q-progress">
-            <div class="qs-q-dot active"></div>
-            <div class="qs-q-dot"></div>
-            <div class="qs-q-dot"></div>
-          </div>
-          <div class="qs-q-body">
-            <div class="qs-q-num">Q1</div>
-            <div class="qs-q-text">Quelle fleur a fait la renommée de Grasse au 18ème siècle ?</div>
-            <div class="qs-q-options">
-              <button class="qs-q-opt sel">La rose</button>
-              <button class="qs-q-opt">Le jasmin</button>
-              <button class="qs-q-opt">La lavande</button>
-              <button class="qs-q-opt">La tubéreuse</button>
-            </div>
-            <button class="qs-q-btn" onclick="qsGo(4)">Valider (+10 s'il est bon) →</button>
-          </div>
+      <!-- ─── VS 8 : Confirmation ─── -->
+      <div class="page" id="vs-8">
+        <div class="vs-thanks-hero">
+          <div class="vs-thanks-emoji">🙏</div>
+          <div class="vs-thanks-title">Merci Léa !</div>
+          <div class="vs-thanks-sub">Tes 5 votes sont enregistrés<br>et tes infos bien en sécurité</div>
         </div>
-      </div>
 
-      <!-- ─── QS 4 : Q2 timer + score ─── -->
-      <div class="page" id="qs-4">
-        <div class="qs-quiz-screen">
-          <div class="qs-timer-bar">
-            <div class="qs-timer-left">
-              <div class="qs-timer-ico">⏱️</div>
-              <div>
-                <div class="qs-timer-val">00:19</div>
-                <div class="qs-timer-label">Temps écoulé</div>
-              </div>
-            </div>
-            <div class="qs-score-pill" style="background:#1D9E75">Score 10 pts ✓</div>
+        <div class="vs-summary">
+          <div class="vs-summary-title">⭐ Récap de tes votes ⭐</div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎷</div>
+            <div class="vs-summary-name">Kamasi Washington</div>
+            <div class="vs-summary-stars">★★★★★</div>
           </div>
-          <div class="qs-q-progress">
-            <div class="qs-q-dot done"></div>
-            <div class="qs-q-dot active"></div>
-            <div class="qs-q-dot"></div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎹</div>
+            <div class="vs-summary-name">Hiromi Uehara</div>
+            <div class="vs-summary-stars">★★★★☆</div>
           </div>
-          <div class="qs-q-body">
-            <div class="qs-q-num">Q2</div>
-            <div class="qs-q-text">Quel musée à Grasse est dédié à la parfumerie ?</div>
-            <div class="qs-q-options">
-              <button class="qs-q-opt">Musée Bonnard</button>
-              <button class="qs-q-opt sel">Musée International de la Parfumerie</button>
-              <button class="qs-q-opt">Villa Fragonard</button>
-              <button class="qs-q-opt">Galerie Molinard</button>
-            </div>
-            <button class="qs-q-btn" onclick="qsGo(5)">Valider (+10 s'il est bon) →</button>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎺</div>
+            <div class="vs-summary-name">Ibrahim Maalouf</div>
+            <div class="vs-summary-stars">★★★☆☆</div>
+          </div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🎸</div>
+            <div class="vs-summary-name">Stacey Kent</div>
+            <div class="vs-summary-stars">★★☆☆☆</div>
+          </div>
+          <div class="vs-summary-row">
+            <div class="vs-summary-avatar">🥁</div>
+            <div class="vs-summary-name">Marcus Miller</div>
+            <div class="vs-summary-stars">★★★☆☆</div>
           </div>
         </div>
-      </div>
 
-      <!-- ─── QS 5 : Q3 ─── -->
-      <div class="page" id="qs-5">
-        <div class="qs-quiz-screen">
-          <div class="qs-timer-bar">
-            <div class="qs-timer-left">
-              <div class="qs-timer-ico">⏱️</div>
-              <div>
-                <div class="qs-timer-val">00:34</div>
-                <div class="qs-timer-label">Temps écoulé</div>
-              </div>
-            </div>
-            <div class="qs-score-pill" style="background:#1D9E75">Score 20 pts ✓</div>
-          </div>
-          <div class="qs-q-progress">
-            <div class="qs-q-dot done"></div>
-            <div class="qs-q-dot done"></div>
-            <div class="qs-q-dot active"></div>
-          </div>
-          <div class="qs-q-body">
-            <div class="qs-q-num">Q3</div>
-            <div class="qs-q-text">Quel parfumeur célèbre est né à Grasse en 1881 ?</div>
-            <div class="qs-q-options">
-              <button class="qs-q-opt">Jacques Guerlain</button>
-              <button class="qs-q-opt">Ernest Beaux</button>
-              <button class="qs-q-opt sel">François Coty</button>
-              <button class="qs-q-opt">Henri Robert</button>
-            </div>
-            <button class="qs-q-btn" onclick="qsGo(6)">Terminer le quiz →</button>
-          </div>
+        <div class="vs-footer-info">
+          <div class="vs-footer-ico">📧</div>
+          <div class="vs-footer-txt">On te prévient dès l'ouverture de la programmation 2027 et pour le prochain événement.</div>
         </div>
-      </div>
 
-      <!-- ─── QS 6 : Résultat + Leaderboard live ─── -->
-      <div class="page" id="qs-6">
-        <div class="qs-result-hero">
-          <div class="qs-result-inner">
-            <div class="qs-result-trophy">🏆</div>
-            <div class="qs-result-title">Bravo Léa !</div>
-            <div class="qs-result-sub">Ton score est enregistré</div>
-          </div>
-        </div>
-        <div class="qs-score-card">
-          <div style="font-size:10px;font-weight:900;color:#64748B;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Ton score</div>
-          <div class="qs-score-big">30<span class="qs-score-denom">pts</span></div>
-          <div class="qs-score-time">⏱️ Temps : 47 secondes</div>
-        </div>
-        <div class="qs-info-live">
-          <div class="qs-info-live-dot"></div>
-          <div class="qs-info-live-txt"><strong>Classement live</strong> · mis à jour à chaque nouveau joueur</div>
-        </div>
-        <div class="qs-lb-wrap">
-          <div class="qs-lb-header">🏅 Top 5 actuel</div>
-          <div class="qs-lb-row">
-            <div class="qs-lb-rank podium">1</div>
-            <div class="qs-lb-name">Thomas D.<div class="qs-lb-name-sub">Nice</div></div>
-            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 28 s</div></div>
-          </div>
-          <div class="qs-lb-row">
-            <div class="qs-lb-rank podium-2">2</div>
-            <div class="qs-lb-name">Sophie M.<div class="qs-lb-name-sub">Grasse</div></div>
-            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 42 s</div></div>
-          </div>
-          <div class="qs-lb-row me">
-            <div class="qs-lb-rank podium-3">3</div>
-            <div class="qs-lb-name">Léa (toi) 🟠<div class="qs-lb-name-sub">Cannes</div></div>
-            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 47 s</div></div>
-          </div>
-          <div class="qs-lb-row">
-            <div class="qs-lb-rank">4</div>
-            <div class="qs-lb-name">Marc R.<div class="qs-lb-name-sub">Antibes</div></div>
-            <div><div class="qs-lb-score">30 pts</div><div class="qs-lb-time">⏱ 52 s</div></div>
-          </div>
-          <div class="qs-lb-row">
-            <div class="qs-lb-rank">5</div>
-            <div class="qs-lb-name">Camille B.<div class="qs-lb-name-sub">Mouans-Sartoux</div></div>
-            <div><div class="qs-lb-score">20 pts</div><div class="qs-lb-time">⏱ 38 s</div></div>
-          </div>
-        </div>
-        <div class="pq-bc-info" style="background:rgba(30,64,175,.08);border-color:rgba(30,64,175,.25)">
-          <div class="pq-bc-info-ico">🎁</div>
-          <div class="pq-bc-info-txt" style="color:#1E293B">Les 3 premiers à la clôture du jeu gagneront les lots offerts par Grasse Tourisme.</div>
-        </div>
-        <!-- Contact + Partager proprement dans la page, APRÈS le leaderboard -->
-        <div class="contact-card" id="qs-contact" style="margin:0 20px 12px">
+        <div class="contact-card" id="vs-contact">
           <div class="contact-title">📬 On reste en contact ?</div>
           <div class="contact-sub">Prochains événements · offres partenaires</div>
           <div class="contact-btns">
-            <button class="contact-yes" onclick="qsContactYes(this)">✅ Oui carrément</button>
-            <button class="contact-no" onclick="qsContactNo(this)">Non merci</button>
+            <button class="contact-yes" onclick="vsContactYes(this)">✅ Oui carrément</button>
+            <button class="contact-no" onclick="vsContactNo(this)">Non merci</button>
           </div>
-          <div class="contact-done-msg"></div>
         </div>
-        <button class="share-btn-gen" id="qs-share-btn" style="background:linear-gradient(135deg,#1E40AF,#EA580C)" onclick="qsOpenShare()">📲 Partager mon score</button>
+        <button class="share-btn-gen" id="vs-share-btn" style="background:linear-gradient(135deg,#4C1D95,#7C3AED)" onclick="vsOpenShare()">📲 Partager cet événement</button>
         <div style="padding:0 20px 20px">
-          <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="qsGo(7)">🤝 Voir nos partenaires</button>
+          <button class="vs-cta" onclick="vsGo(9)" style="background:rgba(255,255,255,.12);color:#FCD34D;border:1px solid rgba(252,211,77,.3);box-shadow:none">Voir nos partenaires →</button>
         </div>
-        <div style="height:20px"></div>
-        <!-- Bottom-sheet partage qs (DANS la page) -->
-        <div class="qs-share-backdrop" id="qs-share-bd" onclick="qsCloseShare()"></div>
-        <div class="qs-share-sheet" id="qs-share-sheet">
+        <!-- Bottom-sheet partage vs -->
+        <div class="vs-share-backdrop" id="vs-share-bd" onclick="vsCloseShare()"></div>
+        <div class="vs-share-sheet" id="vs-share-sheet">
           <div class="sh-handle"></div>
           <div class="sh-title">Partage avec tes proches</div>
           <div class="sh-sub">Invite tes amis à jouer !</div>
-          <div class="sh-preview">« Je viens de jouer à <strong>Quiz Patrimoine Grasse 2026</strong> — à toi de tenter ta chance ! »</div>
+          <div class="sh-preview">« Je viens de jouer à <strong>Soirée Jazz Antibes 2026</strong> — à toi de tenter ta chance ! »</div>
           <div class="sh-options">
-            <button class="sh-option" onclick="qsShareVia('whatsapp')">
+            <button class="sh-option" onclick="vsShareVia('whatsapp')">
               <div class="sh-option-icon wa">💬</div>
               <div class="sh-option-body"><div class="sh-option-name">WhatsApp</div><div class="sh-option-hint">Envoyer à un contact ou groupe</div></div>
               <div class="sh-arrow">→</div>
             </button>
-            <button class="sh-option" onclick="qsShareVia('sms')">
+            <button class="sh-option" onclick="vsShareVia('sms')">
               <div class="sh-option-icon sms">✉️</div>
               <div class="sh-option-body"><div class="sh-option-name">SMS</div><div class="sh-option-hint">Message texte classique</div></div>
               <div class="sh-arrow">→</div>
             </button>
           </div>
+          
         </div>
-        <div class="qs-toast sh-toast" id="qs-toast">✓ Lien copié !</div>
+        <div class="vs-toast sh-toast" id="vs-toast">✓ Lien copié !</div>
       </div>
 
-      <!-- ─── QS 7 : Partenaires ─── -->
-      <div class="page" id="qs-7">
-        <div class="qs-result-hero" style="padding:28px 20px 20px">
-          <div class="qs-result-inner">
-            <div class="qs-result-trophy">🤝</div>
-            <div class="qs-result-title">Nos partenaires</div>
-            <div class="qs-result-sub">Merci à eux pour ce quiz !</div>
-          </div>
+      <!-- ─── VS 9 : Partenaires ─── -->
+      <div class="page" id="vs-9">
+        <div class="vs-thanks-hero" style="padding:28px 20px 20px">
+          <div class="vs-thanks-emoji" style="font-size:44px">🤝</div>
+          <div class="vs-thanks-title">Nos partenaires</div>
+          <div class="vs-thanks-sub">Sans eux, pas de festival !</div>
         </div>
         <div style="padding:14px 20px 0">
-          <div class="partenaires">
-            <div class="partenaires-label">★ Partenaires Quiz Grasse Patrimoine 2026 ★</div>
+          <div class="partenaires" style="background:rgba(255,255,255,.08);border-color:rgba(252,211,77,.2)">
+            <div class="partenaires-label" style="color:#FCD34D">★ Partenaires Jazz Antibes 2026 ★</div>
             <div class="partenaires-grid">
-              <div class="partenaire-tile"><div class="partenaire-emoji">🏛️</div><div class="partenaire-name">Grasse Tourisme</div></div>
-              <div class="partenaire-tile"><div class="partenaire-emoji">🌹</div><div class="partenaire-name">Musée de la Parfumerie</div></div>
-              <div class="partenaire-tile"><div class="partenaire-emoji">🧴</div><div class="partenaire-name">Molinard</div></div>
-              <div class="partenaire-tile"><div class="partenaire-emoji">🎓</div><div class="partenaire-name">Ville de Grasse</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎷</div><div class="partenaire-name">Jazz Antibes</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏖️</div><div class="partenaire-name">Ville d'Antibes</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎵</div><div class="partenaire-name">SACEM</div></div>
+              <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏨</div><div class="partenaire-name">Hôtels Azur</div></div>
             </div>
           </div>
         </div>
         <div class="bottom-cta" style="background:transparent;border-top:none">
-          <div class="btn btn-ghost" onclick="qsGo(6)">← Retour</div>
-          <div class="btn btn-primary" onclick="qsGo(1)">Terminer →</div>
+          <div class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="vsGo(8)">← Retour</div>
+          <div class="btn" style="background:#FCD34D;color:#1E1B4B;font-weight:900" onclick="vsGo(1)">Terminer →</div>
         </div>
       </div>
 
-      <!-- ─── QS 8 : Anti-doublon ─── -->
-      <div class="page" id="qs-8">
-        <div class="ad-screen" style="background:linear-gradient(160deg,#EFF6FF 0%,#FFF7ED 100%)">
+      <!-- ─── VS 10 : Anti-doublon ─── -->
+      <div class="page" id="vs-10">
+        <div class="ad-screen" style="background:linear-gradient(160deg,#1E1B4B 0%,#312E81 100%)">
           <div class="ad-icon">✋</div>
-          <div class="ad-title">Tu as déjà joué !</div>
-          <div class="ad-msg">Cette adresse email a déjà participé au Quiz Grasse 2026.<br>Une seule participation par personne.</div>
-          <div class="ad-email" id="qs-ad-email">lea@exemple.fr</div>
-          <div class="ticket" style="margin:0 20px">
-            <div class="ticket-icon">🏆</div>
-            <div class="ticket-title">Ton score enregistré</div>
-            <div class="ticket-code" id="qs-ad-code">30 pts · 47s</div>
-            <div class="ticket-hint">Classement clôturé à la fin de l'événement</div>
+          <div class="ad-title" style="color:#FCD34D">Tu as déjà voté !</div>
+          <div class="ad-msg" style="color:rgba(255,255,255,.8)">Cette adresse email a déjà voté pour le Jazz Antibes 2026.<br>Un seul vote par personne.</div>
+          <div class="ad-email" style="background:rgba(252,211,77,.15);color:#FCD34D" id="vs-ad-email">lea@exemple.fr</div>
+          <div style="background:rgba(255,255,255,.08);border:1px solid rgba(252,211,77,.2);border-radius:18px;padding:16px;margin:0 20px;text-align:center">
+            <div style="font-size:32px;margin-bottom:6px">🎷</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#FCD34D">Tes 5 votes ont été enregistrés</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">Résultats publiés après le festival</div>
           </div>
-          <button class="ad-btn" onclick="qsGo(1)">← Retour à l'accueil</button>
+          <button class="ad-btn" style="background:rgba(255,255,255,.1);color:#FCD34D;border-color:rgba(252,211,77,.3)" onclick="vsGo(1)">← Retour à l'accueil</button>
         </div>
       </div>
 
@@ -2317,6 +2397,15 @@ function pqContactNo(el){
 }
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
+
+function suSubmitForm(){
+  var emailVal = _flowinFindEmail('#vp-standup', 'contact@exemple.fr');
+  if(!emailVal){ suGo(4); return; }
+  var _extra = _flowinCollectFormFields('#vp-standup');
+  var _ticket = 'SU-2026-'+Math.floor(Math.random()*9000+1000);
+  registerPlay('su', emailVal, _ticket, _extra);
+  suGo(4);
+}
 function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
   if(checkDuplicate('sp', emailVal, spinGo, 8)) return;
