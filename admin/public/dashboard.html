@@ -7564,8 +7564,8 @@ function modalComm(d){
 function renderPreviewModule(type,e){
   if(type==='spin') return renderPreviewSpin(e);
   if(type==='vote') return renderPreviewVote(e);
-  if(type==='quiz'||type==='quizsolo'||type==='quizmaster') return renderPreviewQuiz();
-  if(type==='tombola') return renderPreviewTombola();
+  if(type==='quiz'||type==='quizsolo'||type==='quizmaster') return renderPreviewQuiz(e);
+  if(type==='tombola') return renderPreviewTombola(e);
   if(type==='standup') return renderPreviewStandup();
   return '<div style="padding:30px;text-align:center;color:var(--sa-muted)">Aperçu non disponible</div>';
 }
@@ -7722,19 +7722,20 @@ function renderPreviewQuiz(){
     + '</div>';
 }
 
-function renderPreviewTombola(){
-  return '<div class="tomb-mock">'
-    + '<div class="vote-mock-title">🎁 Tombola Été</div>'
-    + '<div class="vote-mock-desc">Tentez de gagner 1 nuit Hôtel Cantemerle !</div>'
-    + '<div class="tomb-mock-field"><div class="lbl">Email *</div><div class="input-fake">votre@email.fr</div></div>'
-    + '<div class="tomb-mock-field"><div class="lbl">Nom *</div><div class="input-fake">Nom complet</div></div>'
-    + '<div class="tomb-mock-field"><div class="lbl">Téléphone</div><div class="input-fake">06 XX XX XX XX</div></div>'
-    + '<div class="tomb-mock-field"><div class="lbl">Ville</div><div class="input-fake">Vence</div></div>'
-    + '<div class="tomb-mock-cb"><input type="checkbox"/>Je certifie avoir + 18 ans</div>'
-    + '<div class="tomb-mock-cb"><input type="checkbox"/>J\'accepte le règlement de la tombola</div>'
-    + '<button class="tomb-mock-btn">PARTICIPER</button>'
-    + '</div>';
+function renderPreviewTombola(e){
+  var _col=(e&&e.couleur)||'#7C2D92',_nom=(e&&e.nom)||'Tombola';
+  var _svg='<svg viewBox="0 0 100 100" style="width:44px;height:44px;display:block;margin:0 auto 8px"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+_col+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+_col+'"/></svg>';
+  return '<div style="background:linear-gradient(160deg,#0F172A,#1E293B);padding:14px;color:#fff">'
+    +'<div style="text-align:center;margin-bottom:10px">'+_svg+'<div style="font-size:14px;font-weight:900;color:#fff">'+esc(_nom)+'</div></div>'
+    +'<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:8px;margin-bottom:8px">'
+    +'<div style="font-size:8px;color:rgba(255,255,255,.4);margin-bottom:4px">EMAIL *</div>'
+    +'<div style="background:rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,.3)">votre@email.fr</div>'
+    +'<div style="font-size:8px;color:rgba(255,255,255,.4);margin:5px 0 3px">NOM *</div>'
+    +'<div style="background:rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,.3)">Nom complet</div></div>'
+    +'<button style="width:100%;padding:9px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:10px;font-weight:800">Je m\'inscris à la tombola →</button>'
+    +'</div>';
 }
+
 
 function renderPreviewStandup(){
   return '<div class="vote-mock">'
@@ -9136,6 +9137,23 @@ function renderWizardEvent(){
     if(!d.module) html += '<div class="alert warn"><span class="ico">⚠️</span>Choisissez d\'abord un module à l\'étape 2.</div>';
     else html += renderWizConfigForModule(d);
   } else if(step==='D'){
+    const sels = (d.partenaires||[]).map(function(pid){return DATA.partenaires.find(function(p){return p.id===pid;});}).filter(Boolean);
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="padding:16px 14px 10px;text-align:center"><div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div></div>';
+    if(sels.length){
+      html += '<div style="padding:0 12px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+      sels.slice(0,6).forEach(function(p){
+        var ini=p.nom.split(' ').map(function(n){return n[0];}).join('').slice(0,2).toUpperCase();
+        html += '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center">'
+             + '<div style="width:28px;height:28px;border-radius:50%;background:rgba(168,85,247,.25);color:#A855F7;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;margin-bottom:3px">'+ini+'</div>'
+             + '<div style="font-size:9px;color:rgba(255,255,255,.7)">'+esc(p.nom.slice(0,15))+'</div></div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="padding:24px 14px;text-align:center"><div style="color:rgba(255,255,255,.3);font-size:11px">Aucun partenaire sélectionné</div></div>';
+    }
+    html += '</div></div>';
+  } else if(step==='D'){
     html += '<div class="section-h">Étape 4 · Partenaires</div>';
     html += '<div class="alert info"><span class="ico">🤝</span>Sélectionnez les partenaires de cet event en les ajoutant à droite. Vous pouvez aussi en créer un nouveau.</div>';
     if(!d.partenaires) d.partenaires = [];
@@ -9181,38 +9199,41 @@ function renderWizardEvent(){
          + '<span class="text-sm text-muted" style="align-self:center">'+selected.length+' / '+DATA.partenaires.length+' partenaire'+(DATA.partenaires.length>1?'s':'')+'</span>'
          + '</div>';
   } else if(step==='E'){
-    html += '<div class="section-h">Étape 5 · Lots à distribuer</div>';
-    html += '<div class="alert info"><span class="ico">🎁</span>Configurez les lots offerts. Nom, valeur, quantité, partenaire fournisseur.</div>';
-    if(d.lots.length===0) html += '<div class="empty-block"><div class="ico">🎁</div><div class="t">Aucun lot configuré</div><div class="d">Cliquez « + Ajouter un lot » pour commencer.</div></div>';
-    else d.lots.forEach((l,i)=>{
-      const partner = findPartner(l.partenaireId);
-      html += '<div class="card-edit-item">'
-           + '<div class="flex flex-between mb-2"><div class="text-xs text-muted">Lot '+(i+1)+'</div><div class="row-actions">'
-           + (i>0?'<button class="btn btn-icon btn-sm" onclick="wizMoveItem(\'lots\','+i+',-1)" title="Monter">⬆</button>':'')
-           + (i<d.lots.length-1?'<button class="btn btn-icon btn-sm" onclick="wizMoveItem(\'lots\','+i+',1)" title="Descendre">⬇</button>':'')
-           + '<button class="btn btn-icon btn-sm btn-danger" onclick="state.wiz.draft.lots.splice('+i+',1);renderWizard()" title="Supprimer">✕</button>'
-           + '</div></div>'
-           + '<div class="form-row"><label class="label">Nom du lot</label><input type="text" class="input" value="'+escAttr(l.nom||'')+'" placeholder="Ex: Bon Fragonard 50 €" oninput="state.wiz.draft.lots['+i+'].nom=this.value"/></div>'
-           + '<div class="form-grid mt-2">'
-           +   '<div><label class="label">Valeur (€)</label><input type="number" class="input" value="'+(l.valeur||0)+'" min="0" oninput="state.wiz.draft.lots['+i+'].valeur=parseInt(this.value)||0"/></div>'
-           +   '<div><label class="label">Quantité (stock)</label><input type="number" class="input" value="'+(l.quantite||1)+'" min="1" oninput="state.wiz.draft.lots['+i+'].quantite=parseInt(this.value)||1"/></div>'
-           + '</div>'
-           + '<div class="form-row mt-2"><label class="label">Partenaire fournisseur</label><select class="select" onchange="state.wiz.draft.lots['+i+'].partenaireId=this.value;renderWizard()">'
-           +   '<option value="">— Aucun —</option>'
-           +   DATA.partenaires.map(pt => '<option value="'+pt.id+'" '+(l.partenaireId===pt.id?'selected':'')+'>'+esc(pt.nom)+'</option>').join('')
-           + '</select></div>'
-           + (partner ? '<div class="text-xs text-muted mt-2">🤝 Fourni par <strong>'+esc(partner.nom)+'</strong> ('+esc(partner.type||'')+')</div>' : '')
-           + '</div>';
-    });
-    html += '<div class="flex gap-2 mt-3">'
-         + '<button class="btn btn-sm" onclick="state.wiz.draft.lots.push({nom:\'Nouveau lot\',valeur:20,quantite:1,partenaireId:\'\'});renderWizard()">+ Ajouter un lot</button>'
-         + '<button class="btn btn-sm btn-ghost" onclick="toast(\'Banque des lots · à venir\',\'info\')">📚 Banque des lots (à venir)</button>'
-         + '</div>';
-    if(d.lots.length>0){
-      const totalVal = d.lots.reduce((s,l)=>s+(l.valeur||0)*(l.quantite||1),0);
-      const totalQte = d.lots.reduce((s,l)=>s+(l.quantite||1),0);
-      html += '<div class="alert info mt-3"><span class="ico">📊</span><strong>'+d.lots.length+'</strong> lot'+(d.lots.length>1?'s':'')+' configuré'+(d.lots.length>1?'s':'')+' · <strong>'+totalQte+'</strong> à distribuer · valeur totale : <strong>'+totalVal+' €</strong></div>';
+    var evLots = d.lots || [];
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="padding:16px 14px;text-align:center">';
+    html += '<div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div>';
+    if(evLots.length){
+      html += '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px;text-align:left">';
+      var _ri=['🥇','🥈','🥉','🏅'];
+      evLots.slice(0,4).forEach(function(l,i){
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;'+(i>0?'border-top:1px solid rgba(255,255,255,.07)':'')+'">';
+        html += '<div style="width:28px;height:28px;border-radius:8px;background:rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;font-size:15px">'+_ri[i]+'</div>';
+        html += '<div style="font-size:11px;font-weight:800;color:#fff">'+esc(l.nom||'Lot')+'</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="color:rgba(255,255,255,.3);font-size:11px;padding:16px 0">Aucun lot configuré</div>';
     }
+    html += '<button style="width:100%;margin-top:10px;padding:10px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:11px;font-weight:800">Je m\'inscris →</button>';
+    html += '</div></div></div>';
+  } else if(step==='F'){
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="padding:14px 12px 18px;background:linear-gradient(135deg,'+(d.couleur||'#7C2D92')+',#A855F7);color:#fff;text-align:center;position:relative">';
+    html += '<div style="font-size:9px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:5px">FÉLICITATIONS</div>';
+    html += '<div style="font-size:18px;font-weight:800;line-height:1.1;margin-bottom:3px">[Nom du gagnant]</div>';
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.85)">'+esc(d.nom||'Event')+'</div>';
+    html += '<div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:24px">🥇</div>';
+    html += '</div>';
+    html += '<div style="background:rgba(255,255,255,.06);padding:12px;margin:8px;border-radius:10px">';
+    html += '<div style="background:rgba(168,85,247,.15);border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #A855F7">';
+    html += '<div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">🎁 LOT GAGNÉ</div>';
+    html += '<div style="font-size:13px;font-weight:800;color:'+(d.couleur||'#A855F7')+'">[Nom du lot]</div>';
+    html += '</div>';
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.35);text-align:center;font-style:italic">Tirage configuré · prêt pour les gagnants</div>';
+    html += '</div>';
+    html += '</div></div>';
   } else if(step==='F'){
     html += '<div class="section-h">Étape 6 · Modalités de tirage</div>';
     if(d.module==='spin'||d.module==='vote'||d.module==='standup'){
@@ -9368,8 +9389,8 @@ function renderWizardEvent(){
     html += renderWizPreviewSequence(d);
   } else if(d.module && (step==='B' || step==='G')){
     // Étape B/G : aperçu simple
-    html += '<div class="phone-frame"><div class="phone-screen"><div class="phone-bar" style="background:'+(d.couleur||'#7C2D92')+'">FLOWIN · '+esc(d.nom||'Event').slice(0,16)+'</div>';
-    html += renderPreviewModule(d.module,{module:d.module,nom:d.nom,couleur:d.couleur});
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += renderPreviewModule(d.module,{module:d.module,nom:d.nom||'Nouvel event',couleur:d.couleur||'#7C2D92'});
     html += '</div></div>';
   } else if(step==='D'){
     // Étape D : aperçu section partenaires
