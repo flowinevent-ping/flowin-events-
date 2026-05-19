@@ -2000,7 +2000,7 @@ async function supaWriteJoueur(j){
     client_type:j.clientType||'btoc'
   };
   var ok = await supaUpsert('joueurs', payload);
-  if(!ok) gasBackup('joueur_upsert', payload);
+  if(!ok) { console.error('[Flowin] supaWriteJoueur FAILED', payload && payload.id); }
 }
 
 // Upsert event → Supabase + GAS fallback
@@ -2032,7 +2032,8 @@ async function supaWriteLot(l){
   if(!l || !l.id) return;
   var payload = {
     id:l.id, event_id:l.eventId, partenaire_id:l.partenaireId||null,
-    nom:l.nom, valeur:l.valeur||0, quantite:l.quantite||1,
+    nom:l.nom||'', titre:l.nom||l.titre||'',
+    valeur:l.valeur||0, quantite:l.quantite||1,
     assigne_a:l.assigneA||null, retire:l.retire||false,
     date_retrait:l.dateRetrait||null, date_assign:l.dateAssign||null, note:l.note||''
   };
