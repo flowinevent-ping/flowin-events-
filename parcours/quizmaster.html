@@ -2648,7 +2648,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]);
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); flowinHydrateFront(rows[0]);
       /* Compteur dynamique quizmaster */
       (function(ev){ var _nbQ=(ev.cfg&&ev.cfg.quizNbQuestions)?parseInt(ev.cfg.quizNbQuestions):0; if(_nbQ>0){ document.querySelectorAll('.qm-quiz-step-label').forEach(function(l){ var m=l.textContent.match(/(\d+)\s*\/\s*\d+/); if(m) l.textContent='Question '+m[1]+' / '+_nbQ; }); } })(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }

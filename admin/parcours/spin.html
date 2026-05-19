@@ -1976,6 +1976,39 @@ function flowinHydrateDynTexts(ev){
   if(toast) toast.textContent = '✓ Partagé · +1 point validé';
 }
 
+
+/* ============================================================
+   REGLE FLOWIN — flowinHydrateFront
+   Applique cfg.front a tous les elements landing.
+   Appelee automatiquement apres flowinHydrateModule.
+   ============================================================ */
+function flowinHydrateFront(ev) {
+  var cfg = (ev && ev.cfg) || {};
+  var front = cfg.front || {};
+  var module = ev ? (ev.module || '') : '';
+  var SELECTORS = {
+    quiz:       { badge:['.pq-ville'], description:['.pq-cta-hint'], ctaText:['.pq-cta'], ctaNote:['.pq-cta-hint'] },
+    quizsolo:   { badge:['.qs-badge'], ctaText:['.qs-cta'], ctaNote:['.qs-cta-hint'] },
+    quizmaster: { badge:['.qm-ville'], ctaText:['.qm-cta'], ctaNote:['.qm-cta-hint'] },
+    spin:       { badge:['.landing-event-chip'], description:['.landing-sub'], ctaText:['.landing-btn','.spin-cta'] },
+    vote:       { badge:['.vs-badge'], ctaText:['.vs-cta'], ctaNote:['.vs-cta-hint'] },
+    standup:    { badge:['.vs-badge'], ctaText:['.vs-cta'], ctaNote:['.vs-cta-hint'] }
+  };
+  var map = SELECTORS[module] || {};
+  function applyText(sels, value) {
+    if(!value || !sels) return;
+    for(var i=0;i<sels.length;i++){
+      var els = document.querySelectorAll(sels[i]);
+      for(var j=0;j<els.length;j++) els[j].textContent = value;
+    }
+  }
+  if(front.badge)       applyText(map.badge,       front.badge);
+  if(front.description) applyText(map.description, front.description);
+  if(front.ctaText)     applyText(map.ctaText,      front.ctaText);
+  if(front.ctaNote)     applyText(map.ctaNote,      front.ctaNote);
+  console.log('[Flowin] flowinHydrateFront done · module:', module);
+}
+
 function flowinHydrateModule(ev) {
   if(!ev) return;
   var module = ev.module || '';
@@ -2478,7 +2511,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); flowinHydrateFront(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
