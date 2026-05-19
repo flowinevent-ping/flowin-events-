@@ -7803,19 +7803,31 @@ function renderPreviewQuiz(){
 }
 
 function renderPreviewTombola(e){
-  var _col=(e&&e.couleur)||'#7C2D92',_nom=(e&&e.nom)||'Tombola';
-  var _svg='<svg viewBox="0 0 100 100" style="width:44px;height:44px;display:block;margin:0 auto 8px"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+_col+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+_col+'"/></svg>';
-  return '<div style="background:linear-gradient(160deg,#0F172A,#1E293B);padding:14px;color:#fff">'
-    +'<div style="text-align:center;margin-bottom:10px">'+_svg+'<div style="font-size:14px;font-weight:900;color:#fff">'+esc(_nom)+'</div></div>'
-    +'<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:8px;margin-bottom:8px">'
-    +'<div style="font-size:8px;color:rgba(255,255,255,.4);margin-bottom:4px">EMAIL *</div>'
-    +'<div style="background:rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,.3)">votre@email.fr</div>'
-    +'<div style="font-size:8px;color:rgba(255,255,255,.4);margin:5px 0 3px">NOM *</div>'
-    +'<div style="background:rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,.3)">Nom complet</div></div>'
-    +'<button style="width:100%;padding:9px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:10px;font-weight:800">Je m\'inscris à la tombola →</button>'
-    +'</div>';
+  var _col=(e&&e.couleur)||'#E8212B';
+  var _nom=(e&&e.nom)||'Tombola';
+  var _front=(e&&e.cfg&&e.cfg.front)||{};
+  var _badge=_front.badge||(e&&e.lieu?'❤️ '+e.lieu.toUpperCase():'❤️ VENCE');
+  var _desc=_front.description||'';
+  var _tirage=_front.lotTirage||'';
+  var _cta=_front.ctaText||'🎟️ Je m\'inscris à la tombola →';
+  var _lots=(e&&e.id&&DATA.lots)?DATA.lots.filter(function(l){return l.eventId===e.id;}):(e&&e.lots||[]);
+  var _svg='<svg viewBox="0 0 100 100" style="width:56px;height:56px;display:block;margin:0 auto 10px"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+_col+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+_col+'"/></svg>';
+  var html='<div style="background:linear-gradient(160deg,#0F172A,#1E293B,#172033);padding:14px 12px;color:#fff;text-align:center">';
+  html+='<div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:3px 10px;font-size:8px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">'+esc(_badge)+'</div>';
+  html+=_svg;
+  html+='<div style="font-size:15px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:5px">'+esc(_nom)+'</div>';
+  if(_desc) html+='<div style="font-size:9px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:8px;padding:0 4px">'+esc(_desc)+'</div>';
+  if(_lots.length){
+    html+='<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 8px;margin-bottom:7px;text-align:left">';
+    var _r=['🥇','🥈','🥉'];
+    _lots.slice(0,3).forEach(function(l,i){html+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;'+(i>0?'border-top:1px solid rgba(255,255,255,.06)':'')+'"><span style="font-size:12px">'+_r[i]+'</span><span style="font-size:9px;font-weight:700;color:#fff">'+esc(l.nom||'Lot')+'</span></div>';});
+    html+='</div>';
+  }
+  if(_tirage) html+='<div style="background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);border-radius:7px;padding:5px 8px;margin-bottom:7px;font-size:8px;font-weight:700;color:rgba(255,255,255,.8)">'+esc(_tirage)+'</div>';
+  html+='<button style="width:100%;padding:8px;background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;border:none;border-radius:50px;font-size:9px;font-weight:800">'+esc(_cta)+'</button>';
+  html+='</div>';
+  return html;
 }
-
 
 function renderPreviewStandup(){
   return '<div class="vote-mock">'
@@ -9478,9 +9490,9 @@ function renderWizardEvent(){
   } else if(step==='D'){
     // Étape D : aperçu section partenaires
     const sels = (d.partenaires||[]).map(pid => DATA.partenaires.find(p=>p.id===pid)).filter(Boolean);
-    html += '<div class="phone-frame"><div class="phone-screen">';
-    html += '<div style="padding:24px 16px 14px;text-align:center;background:linear-gradient(160deg,'+(d.couleur||'#7C2D92')+'22,#FAEEDA)">';
-    html += '<div style="font-family:Georgia,serif;font-style:italic;font-size:20px;font-weight:700;color:'+(d.couleur||'#7C2D92')+'">'+esc(d.nom||'Event')+'</div>';
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="padding:18px 14px 10px;text-align:center;background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div>';
     html += '</div>';
     if(sels.length){
       html += '<div style="padding:14px 16px">';
@@ -9502,9 +9514,9 @@ function renderWizardEvent(){
   } else if(step==='E'){
     // Étape E : aperçu section lots sur la landing
     const evLots = d.lots || [];
-    html += '<div class="phone-frame"><div class="phone-screen">';
-    html += '<div style="padding:20px 16px 14px;text-align:center;background:linear-gradient(160deg,'+(d.couleur||'#7C2D92')+'22,#FAEEDA)">';
-    html += '<div style="font-family:Georgia,serif;font-style:italic;font-size:20px;font-weight:700;color:'+(d.couleur||'#7C2D92')+'">'+esc(d.nom||'Event')+'</div>';
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="padding:18px 14px 10px;text-align:center;background:linear-gradient(160deg,#0F172A,#1E293B)">';
+    html += '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:10px">'+esc(d.nom||'Event')+'</div>';
     html += '</div>';
     if(evLots.length){
       html += '<div style="padding:14px 16px">';
@@ -9526,7 +9538,7 @@ function renderWizardEvent(){
     html += '</div></div>';
   } else if(step==='F'){
     // Étape F : aperçu billet gagnant
-    html += '<div class="phone-frame"><div class="phone-screen" style="background:#FBEAF0">';
+    html += '<div class="phone-frame"><div class="phone-screen" style="background:linear-gradient(160deg,#0F172A,#1E293B)">';
     html += '<div style="padding:14px 12px 18px;background:linear-gradient(135deg,'+(d.couleur||'#7C2D92')+',#EF9F27);color:#fff;text-align:center;position:relative">';
     html += '<div style="font-size:9px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:5px">FÉLICITATIONS</div>';
     html += '<div style="font-size:18px;font-weight:800;line-height:1.1;margin-bottom:3px">[Nom du gagnant]</div>';
