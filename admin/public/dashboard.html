@@ -6448,8 +6448,8 @@ function drawerEvent(e){
            + '</div>';
     }
     html += drawerFooter(
-      '<button class="btn btn-sm" style="background:#EF4444;color:#fff;border:none" onclick="deleteEvent(\''+e.id+'\')">🗑 Supprimer</button>'
-      + '<button class="btn btn-sm" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0" onclick="duplicateEvent(\''+e.id+'\')">⧉ Dupliquer</button>'
+      '<button class="btn btn-sm" style="background:#EF4444;color:#fff;border:none;padding:6px 8px" title="Supprimer" onclick="deleteEvent(\''+e.id+'\')">🗑</button>'
+      + '<button class="btn btn-sm" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0;padding:6px 8px" title="Dupliquer" onclick="duplicateEvent(\''+e.id+'\')">⧉</button>'
       + '<button class="btn btn-sm" onclick="startWizardEdit(\''+e.id+'\')">✏ Wizard</button>',
       '<button class="btn btn-primary" onclick="enterEditMode()">✏ Édition rapide</button>'
     );
