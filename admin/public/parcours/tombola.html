@@ -2629,7 +2629,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); flowinHydrateFront(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
       var _pIds = (rows[0].cfg && rows[0].cfg.partenaires && rows[0].cfg.partenaires.length) ? rows[0].cfg.partenaires : [];
