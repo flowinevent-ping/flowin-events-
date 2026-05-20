@@ -1,262 +1,341 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import { generateTicket } from '@/lib/ticket'
-import { actionCheckDuplicate, actionWriteJoueur } from '@/lib/actions'
-import type { FlowinEvent, FlowinLot, FlowinPartenaire, SubmitFormData } from '@/lib/types'
-import FormCRM from '@/components/ui/FormCRM'
-import TicketScreen from '@/components/ui/TicketScreen'
-import PartenairesScreen from '@/components/ui/PartenairesScreen'
+import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
-type Screen = 'landing' | 'form' | 'ticket' | 'already' | 'partenaires'
+type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
+
+const SOURCES = ['📸 Instagram', '🔵 Facebook', '📋 Affiche / Flyer', '📣 Bouche à oreille', '🌐 Autre']
+const AGE_OPTIONS = [
+  { val: '', label: 'Tranche d\'âge' },
+  { val: '-18', label: 'Moins de 18 ans' },
+  { val: '18-25', label: '18–25 ans' },
+  { val: '26-35', label: '26–35 ans' },
+  { val: '36-50', label: '36–50 ans' },
+  { val: '51-65', label: '51–65 ans' },
+  { val: '65+', label: '66 ans et plus' },
+]
 
 interface Props {
-  event: FlowinEvent | null
+  ev: FlowinEvent | null
   lots: FlowinLot[]
   partenaires: FlowinPartenaire[]
   evId: string
 }
 
-const LS_KEY_PREFIX = 'flowin_played_'
-
-export default function TombolaClient({ event, lots, partenaires, evId }: Props) {
+export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const [screen, setScreen] = useState<Screen>('landing')
-  const [ticket, setTicket] = useState('')
-  const [alreadyEmail, setAlreadyEmail] = useState('')
-  const [alreadyTicket, setAlreadyTicket] = useState('')
+  const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', genre: '', age: '', cp: '', source: '' })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
-  const [formError, setFormError] = useState<string | null>(null)
+  const [ticket, setTicket] = useState('')
+  const [existingTicket, setExistingTicket] = useState('')
+  const [partIdx, setPartIdx] = useState(0)
 
-  const couleur = event?.couleur ?? '#E8212B'
+  const couleur = ev?.couleur ?? '#E8212B'
+  const nom = ev?.nom ?? 'Tombola'
+  const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
+  const front = (cfg.front ?? {}) as Record<string, string>
+  const badge = front.badge ?? ''
+  const description = front.description ?? ''
+  const tirageText = front.lotTirage ?? (cfg.tirageDate ? `\u{1F4C5} Tirage le ${cfg.tirageDate}` : '')
+  const ctaText = front.ctaText ?? "Je m'inscris \u00e0 la tombola \u2192"
 
-  /* Vérifier anti-doublon localStorage au boot */
+  const lsKey = `flowin_played_${evId}`
   useEffect(() => {
-    if (!evId) return
     try {
-      const stored = localStorage.getItem(LS_KEY_PREFIX + evId)
-      if (stored) {
-        const data = JSON.parse(stored)
-        setAlreadyEmail(data.email ?? '')
-        setAlreadyTicket(data.ticket ?? '')
-        setScreen('already')
-      }
-    } catch { /* pas de localStorage */ }
-  }, [evId])
+      const saved = localStorage.getItem(lsKey)
+      if (saved) { setExistingTicket(saved); setScreen('already') }
+    } catch {}
+  }, [lsKey])
 
-  /* Event non trouvé */
-  if (!event) {
-    return (
-      <div id="flowin-vp" style={{ '--bg': '#fff', '--a': '#D4537E' } as React.CSSProperties}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, padding: 40 }}>
-          <div style={{ fontSize: 48 }}>❌</div>
-          <div style={{ fontSize: 18, fontWeight: 800, textAlign: 'center' }}>Event introuvable</div>
-          <div style={{ fontSize: 14, color: '#888', textAlign: 'center' }}>
-            Vérifiez le lien ou contactez l&apos;organisateur.
-          </div>
-        </div>
-      </div>
-    )
+  function fmtDate(d?: string | null) {
+    if (!d) return ''
+    return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
   }
+  const d1 = fmtDate(ev?.date_d), d2 = fmtDate(ev?.date_f)
+  const dates = d1 ? (d2 && d2 !== d1 ? `${d1} \u2192 ${d2}` : d1) : ''
 
-  const cfg = event.cfg ?? {}
-  const drawDate = (cfg.drawDate as string) ?? ''
-  const nomCourt = (cfg.nomCourt as string) ?? event.nom
+  async function handleSubmit() {
+    const errs: Record<string, string> = {}
+    if (!form.prenom.trim()) errs.prenom = 'Obligatoire'
+    if (!form.nom.trim()) errs.nom = 'Obligatoire'
+    if (!form.email.includes('@')) errs.email = 'Email invalide'
+    if (form.tel.replace(/\s/g, '').length < 8) errs.tel = 'Invalide'
+    setErrors(errs)
+    if (Object.keys(errs).length) return
 
-  /* Soumission formulaire */
-  async function handleFormSubmit(form: SubmitFormData) {
     setSubmitting(true)
-    setFormError(null)
+    const emailLower = form.email.toLowerCase().trim()
 
-    /* Anti-doublon Supabase */
-    const dupResult = await actionCheckDuplicate(form.email, form.tel, event!.id)
-    if (dupResult === 'email_duplicate') {
-      setFormError('Cet email est déjà inscrit à cette tombola')
-      setSubmitting(false)
-      return
-    }
-    if (dupResult === 'tel_duplicate') {
-      setFormError('Ce téléphone est déjà inscrit à cette tombola')
-      setSubmitting(false)
-      return
+    const { data: dup } = await supabase
+      .from('joueurs').select('id,ticket_code')
+      .eq('email_lower', emailLower).contains('events', [evId]).limit(1)
+
+    if (dup?.length) {
+      const t = (dup[0] as { ticket_code?: string }).ticket_code ?? ''
+      try { localStorage.setItem(lsKey, t) } catch {}
+      setExistingTicket(t); setSubmitting(false); setScreen('already'); return
     }
 
-    /* Génération ticket */
-    const t = generateTicket('TB')
-    setTicket(t)
+    const tc = generateTicket('TB')
+    const today = new Date().toISOString().slice(0, 10)
+    const extId = `j-tb-${emailLower.replace(/[^a-z0-9]/g, '-').substring(0, 36)}`
 
-    /* Sauvegarde Supabase */
-    const result = await actionWriteJoueur(event!, form, t)
-    if (!result.success) {
-      setFormError('Erreur lors de l\'inscription. Veuillez réessayer.')
-      setSubmitting(false)
-      return
-    }
+    await supabase.from('joueurs').upsert({
+      external_id: extId, email: emailLower,
+      prenom: form.prenom.trim(), nom: form.nom.trim(), tel: form.tel.trim(),
+      code_postal: form.cp.trim() || null, genre: form.genre || null,
+      age_tranche: form.age || null,
+      decouverte: form.source.replace(/^[^ ]+ /, '') || null,
+      optin: true, optin_date: today, first_seen: today, last_seen: today,
+      events: [evId], ticket_code: tc, source: 'tombola',
+    }, { onConflict: 'external_id' })
 
-    /* Anti-doublon localStorage */
-    try {
-      localStorage.setItem(LS_KEY_PREFIX + evId, JSON.stringify({
-        email: form.email, ticket: t, ts: Date.now()
-      }))
-    } catch { /* pas de localStorage */ }
-
-    setSubmitting(false)
-    setScreen('ticket')
+    try { localStorage.setItem(lsKey, tc) } catch {}
+    setTicket(tc); setSubmitting(false); setScreen('ticket')
   }
+
+  const partSelected = partenaires[partIdx]
+  const c = couleur
 
   return (
-    <div
-      id="flowin-vp"
-      style={{ '--bg': '#111', '--a': couleur, '--text': '#fff', '--muted': 'rgba(255,255,255,.6)' } as React.CSSProperties}
-    >
+    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: '#0F172A', color: '#fff', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+      <style>{`
+        *{box-sizing:border-box;margin:0;padding:0}
+        .screen{padding:20px;min-height:100dvh;display:flex;flex-direction:column}
+        .btn-cta{width:100%;padding:16px;border:none;border-radius:50px;background:${c};color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+        .btn-ghost{background:none;border:1px solid rgba(255,255,255,.15);border-radius:12px;color:rgba(255,255,255,.55);font-size:13px;padding:10px;cursor:pointer;width:100%;font-family:inherit;margin-top:6px}
+        .input{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit}
+        .input:focus{border-color:${c}} .input.err{border-color:#F87171}
+        .label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:5px}
+        .err-msg{font-size:11px;color:#F87171;margin-top:3px;font-weight:700}
+        .source-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit}
+        .source-chip.sel{background:rgba(168,85,247,.15);border-color:#7C2D92;color:#C4B5FD}
+        .gender-btn{flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:14px}
+        .gender-btn.sel{background:rgba(168,85,247,.15);border-color:#7C2D92;color:#C4B5FD}
+        .lot-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+        .lot-row:last-child{border-bottom:none}
+        .part-tile{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center;cursor:pointer}
+        .link-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;margin-bottom:8px}
+        select.input option{background:#1E293B}
+      `}</style>
 
-      {/* ── SCREEN 1 : Landing ── */}
+      {/* LANDING */}
       {screen === 'landing' && (
-        <div className="fl-screen active" style={{ background: `linear-gradient(160deg, ${couleur}22 0%, #111 100%)` }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '40px 24px 24px' }}>
-            {/* Hero */}
-            <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <div style={{ fontSize: 64, marginBottom: 12 }}>🎟️</div>
-              <div style={{ fontFamily: 'Fredoka One, cursive', fontSize: 28, color: '#fff', lineHeight: 1.2, marginBottom: 8 }}>
-                {nomCourt}
+        <div className="screen" style={{ paddingTop: 32 }}>
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            {badge && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '5px 14px', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 14 }}>
+                ❤️ {badge}
               </div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,.6)', lineHeight: 1.5 }}>
-                {event.description || 'Inscrivez-vous et tentez de gagner !'}
-              </div>
-              {event.lieu && (
-                <div style={{ marginTop: 10, fontSize: 12, color: 'rgba(255,255,255,.5)' }}>
-                  📍 {event.lieu}
-                  {drawDate && ` · Tirage le ${drawDate}`}
-                </div>
-              )}
-            </div>
-
-            {/* Lots preview */}
-            {lots.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: couleur, marginBottom: 10, textAlign: 'center' }}>
-                  🎁 Lots à gagner
-                </div>
-                {lots.slice(0, 3).map(lot => (
-                  <div key={lot.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,.08)' }}>
-                    <span style={{ fontSize: 24 }}>{lot.emoji ?? '🎁'}</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{lot.titre || lot.nom}</div>
-                      {lot.valeur ? <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{lot.valeur} €</div> : null}
+            )}
+            <svg viewBox="0 0 100 100" width={84} height={84} style={{ display: 'block', margin: '0 auto 14px', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,.4))' }}>
+              <circle cx="50" cy="50" r="50" fill="#fff" />
+              <rect x="38" y="16" width="24" height="68" rx="5" fill={c} />
+              <rect x="16" y="38" width="68" height="24" rx="5" fill={c} />
+            </svg>
+            <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>{nom}</div>
+            {description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', lineHeight: 1.6, marginBottom: 10, padding: '0 8px' }}>{description}</div>}
+            {dates && <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 16 }}>{dates}</div>}
+          </div>
+          {lots.length > 0 && (
+            <div style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, marginBottom: 14 }}>
+              {lots.slice(0, 5).map((l, i) => {
+                const ranks = ['🥇', '🥈', '🥉', '🎁', '🎁']
+                return (
+                  <div key={l.id} className="lot-row">
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(168,85,247,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+                      {l.emoji || ranks[i] || '🎁'}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 800 }}>{l.titre || l.nom}</div>
+                      {l.description && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)' }}>{l.description}</div>}
                     </div>
                   </div>
-                ))}
-                {lots.length > 3 && (
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', textAlign: 'center', marginTop: 8 }}>
-                    + {lots.length - 3} autres lots
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* CTA */}
-            <div style={{ marginTop: 'auto' }}>
-              <button
-                className="fl-btn fl-btn-primary"
-                style={{ background: couleur, fontSize: 17 }}
-                onClick={() => setScreen('form')}
-              >
-                Participer à la tombola →
-              </button>
-              {partenaires.length > 0 && (
-                <button
-                  className="fl-btn fl-btn-ghost"
-                  style={{ marginTop: 10, color: 'rgba(255,255,255,.6)', borderColor: 'rgba(255,255,255,.2)' }}
-                  onClick={() => setScreen('partenaires')}
-                >
-                  🤝 Voir nos partenaires
-                </button>
-              )}
+                )
+              })}
             </div>
-          </div>
+          )}
+          {tirageText && (
+            <div style={{ background: 'rgba(168,85,247,.1)', border: '1px solid rgba(168,85,247,.25)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)', marginBottom: 16 }}>
+              {tirageText}
+            </div>
+          )}
+          <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
+          <div style={{ fontSize: 10, textAlign: 'center', color: 'rgba(255,255,255,.3)', margin: '6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Nos {partenaires.length} partenaires</button>
+          )}
         </div>
       )}
 
-      {/* ── SCREEN 2 : Formulaire ── */}
+      {/* FORMULAIRE */}
       {screen === 'form' && (
-        <div className="fl-screen active" style={{ background: '#f8f8fc' }}>
-          <div className="fl-header" style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,.08)' }}>
-            <button className="fl-back-btn" onClick={() => setScreen('landing')}>←</button>
+        <div className="screen">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <button className="btn-ghost" style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', flexShrink: 0 }} onClick={() => setScreen('landing')}>←</button>
             <div>
-              <div style={{ fontFamily: 'Fredoka One, cursive', fontSize: 17, color: '#1a1a2e' }}>Inscription</div>
-              <div style={{ fontSize: 11, color: '#888' }}>{nomCourt}</div>
+              <div style={{ fontWeight: 800, fontSize: 17 }}>Mes coordonnées</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.45)' }}>Pour {nom}</div>
             </div>
           </div>
-
-          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 0 0' }}>
-            <div style={{ padding: '0 20px 16px' }}>
-              <div style={{ fontSize: 14, color: '#555', lineHeight: 1.5 }}>
-                Remplissez le formulaire pour recevoir votre numéro de tombola 🎟️
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+            {[['prenom', 'Prénom *', 'Camille'], ['nom', 'Nom *', 'Dupont']].map(([k, lbl, ph]) => (
+              <div key={k}>
+                <label className="label">{lbl}</label>
+                <input className={`input${errors[k] ? ' err' : ''}`} placeholder={ph}
+                  value={form[k as keyof typeof form]}
+                  onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} />
+                {errors[k] && <div className="err-msg">{errors[k]}</div>}
               </div>
-            </div>
-
-            {formError && (
-              <div style={{ margin: '0 20px 12px', padding: '12px 16px', background: '#FCEBEB', border: '1px solid #F7C1C1', borderRadius: 10, fontSize: 13, fontWeight: 700, color: '#A32D2D' }}>
-                ⚠️ {formError}
-              </div>
-            )}
-
-            <FormCRM
-              onSubmit={handleFormSubmit}
-              submitting={submitting}
-              couleur={couleur}
-              ctaLabel="Valider mon inscription →"
-            />
+            ))}
           </div>
+          <div style={{ marginBottom: 12 }}>
+            <label className="label">Genre</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {['👩 Femme', '👨 Homme'].map(g => (
+                <button key={g} className={`gender-btn${form.genre === g ? ' sel' : ''}`} onClick={() => setForm(f => ({ ...f, genre: g }))}>{g}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label className="label">Email *</label>
+            <input className={`input${errors.email ? ' err' : ''}`} type="email" placeholder="nom@exemple.fr" autoCapitalize="none"
+              value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+            {errors.email && <div className="err-msg">{errors.email}</div>}
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label className="label">Téléphone *</label>
+            <input className={`input${errors.tel ? ' err' : ''}`} type="tel" placeholder="06 XX XX XX XX"
+              value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} />
+            {errors.tel && <div className="err-msg">{errors.tel}</div>}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+            <div>
+              <label className="label">Tranche d&apos;âge</label>
+              <select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>
+                {AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="label">Code postal</label>
+              <input className="input" placeholder="06140" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <label className="label">Comment nous avez-vous connu ?</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+              {SOURCES.map(s => (
+                <button key={s} className={`source-chip${form.source === s ? ' sel' : ''}`} onClick={() => setForm(f => ({ ...f, source: s }))}>{s}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '12px 0 0', fontSize: 11, color: 'rgba(255,255,255,.45)', lineHeight: 1.5 }}>
+            <div style={{ width: 20, height: 20, borderRadius: 5, background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12 }}>✓</div>
+            <div>J&apos;accepte de participer à cette tombola et d&apos;être recontacté(e) par les organisateurs. Données jamais cédées à des tiers.</div>
+          </div>
+          <button className="btn-cta" style={{ marginTop: 20 }} onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Vérification…' : 'Valider mon inscription →'}
+          </button>
         </div>
       )}
 
-      {/* ── SCREEN 3 : Ticket ── */}
-      {screen === 'ticket' && (
-        <TicketScreen
-          ticket={ticket}
-          event={event}
-          lots={lots}
-          couleur={couleur}
-          onPartenaires={() => setScreen('partenaires')}
-          onHome={() => setScreen('landing')}
-        />
-      )}
-
-      {/* ── SCREEN 4 : Déjà inscrit ── */}
-      {screen === 'already' && (
-        <div className="fl-screen active" style={{ background: '#111' }}>
-          <div className="fl-ad-screen">
-            <div className="fl-ad-icon">✋</div>
-            <div className="fl-ad-title" style={{ color: '#fff' }}>Déjà inscrit·e !</div>
-            <div className="fl-ad-msg">
-              L&apos;adresse <strong style={{ color: couleur }}>{alreadyEmail}</strong> est déjà inscrite à cette tombola.
-            </div>
-            {alreadyTicket && (
-              <div className="fl-ticket" style={{ borderTopColor: couleur, width: '100%' }}>
-                <div style={{ fontSize: 28 }}>🎟️</div>
-                <div style={{ fontSize: 11, fontWeight: 800, color: '#888' }}>Ton ticket tombola</div>
-                <div className="fl-ticket-code" style={{ color: couleur }}>{alreadyTicket}</div>
-                {drawDate && (
-                  <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>Tirage le {drawDate}</div>
-                )}
-              </div>
-            )}
-            <button className="fl-btn fl-btn-ghost" style={{ color: couleur, borderColor: couleur }} onClick={() => setScreen('landing')}>
-              ← Retour à l&apos;accueil
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── SCREEN 5 : Partenaires ── */}
+      {/* PARTENAIRES */}
       {screen === 'partenaires' && (
-        <PartenairesScreen
-          partenaires={partenaires}
-          event={event}
-          couleur={couleur}
-          dark
-          onBack={() => setScreen(ticket ? 'ticket' : 'landing')}
-        />
+        <div className="screen">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <button className="btn-ghost" style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', flexShrink: 0 }} onClick={() => setScreen('landing')}>←</button>
+            <div style={{ fontWeight: 800, fontSize: 17 }}>Nos partenaires</div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            {partenaires.map((p, i) => (
+              <div key={p.id} className="part-tile" onClick={() => { setPartIdx(i); setScreen('partSheet') }}>
+                {p.image_url
+                  ? <img src={p.image_url} alt={p.nom} style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 8, marginBottom: 6, display: 'block', margin: '0 auto 6px' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                  : <div style={{ fontSize: 32, marginBottom: 6 }}>{p.emoji ?? '🤝'}</div>
+                }
+                <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.3 }}>{p.nom}</div>
+              </div>
+            ))}
+          </div>
+          <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
+        </div>
+      )}
+
+      {/* BOTTOM SHEET PARTENAIRE */}
+      {screen === 'partSheet' && partSelected && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 10, display: 'flex', alignItems: 'flex-end' }} onClick={() => setScreen('partenaires')}>
+          <div style={{ background: '#1E293B', borderRadius: '20px 20px 0 0', padding: 20, width: '100%', maxWidth: 430, margin: '0 auto', maxHeight: '70dvh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,.06)', border: '2px solid rgba(255,255,255,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, margin: '0 auto 12px' }}>
+              {partSelected.image_url ? <img src={partSelected.image_url} alt={partSelected.nom} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} /> : partSelected.emoji ?? '🤝'}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 900, textAlign: 'center', marginBottom: 4 }}>{partSelected.nom}</div>
+            {partSelected.description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', textAlign: 'center', lineHeight: 1.5, marginBottom: 12 }}>{partSelected.description}</div>}
+            {partSelected.promo_text && (
+              <div style={{ background: 'rgba(168,85,247,.1)', border: '1px solid rgba(168,85,247,.25)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#C4B5FD', marginBottom: 12, textAlign: 'center' }}>
+                🎁 {partSelected.promo_text}
+              </div>
+            )}
+            {(partSelected.site_web || partSelected.url) && (
+              <a href={partSelected.site_web ?? partSelected.url!} target="_blank" rel="noopener" className="link-btn">🌐 <span>Site web</span></a>
+            )}
+            {partSelected.instagram && (
+              <a href={partSelected.instagram.startsWith('http') ? partSelected.instagram : `https://instagram.com/${partSelected.instagram.replace('@', '')}`} target="_blank" rel="noopener" className="link-btn">📸 <span>Instagram</span></a>
+            )}
+            {partSelected.facebook && (
+              <a href={partSelected.facebook.startsWith('http') ? partSelected.facebook : `https://facebook.com/${partSelected.facebook}`} target="_blank" rel="noopener" className="link-btn">🔵 <span>Facebook</span></a>
+            )}
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>← Retour</button>
+          </div>
+        </div>
+      )}
+
+      {/* TICKET */}
+      {screen === 'ticket' && (
+        <div className="screen" style={{ justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 100, padding: '4px 14px', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 16 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
+              INSCRIPTION CONFIRMÉE
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Tu es dans la course ! 🎉</div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Ton numéro de tombola a été enregistré</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,.06)', border: '1.5px solid rgba(255,255,255,.15)', borderRadius: 16, padding: 20, textAlign: 'center', marginBottom: 16, borderTop: `4px solid ${c}` }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🎟️</div>
+            <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Ton ticket tombola</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.4)' }}>{nom}</div>
+            <div style={{ fontSize: 28, fontWeight: 900, color: c, letterSpacing: '.1em', margin: '12px 0', fontFamily: 'monospace' }}>{ticket}</div>
+            {tirageText && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)' }}>{tirageText}</div>}
+          </div>
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
+          )}
+        </div>
+      )}
+
+      {/* DÉJÀ INSCRIT */}
+      {screen === 'already' && (
+        <div className="screen" style={{ justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+            <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 6 }}>Déjà inscrit !</div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Tu es déjà dans la course pour {nom}.</div>
+          </div>
+          {existingTicket && (
+            <div style={{ background: 'rgba(255,255,255,.06)', border: `1.5px solid rgba(255,255,255,.15)`, borderRadius: 16, padding: 20, textAlign: 'center', marginBottom: 16, borderTop: `4px solid ${c}` }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🎟️</div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: c, letterSpacing: '.1em', fontFamily: 'monospace' }}>{existingTicket}</div>
+              {tirageText && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)', marginTop: 8 }}>{tirageText}</div>}
+            </div>
+          )}
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
+          )}
+        </div>
       )}
     </div>
   )
