@@ -1307,11 +1307,11 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="form-field">
               <label class="form-label">Prénom</label>
-              <input class="form-input" placeholder="">
+              <input id="sp-prenom" class="form-input" placeholder="">
             </div>
             <div class="form-field">
               <label class="form-label">Nom</label>
-              <input class="form-input" placeholder="">
+              <input id="sp-nom" class="form-input" placeholder="">
             </div>
           </div>
 
@@ -1324,11 +1324,13 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           </div>
           <div class="form-field">
             <label class="form-label">Email (confirmation)</label>
-            <input class="form-input" placeholder="">
+            <input id="sp-email" class="form-input" type="email" placeholder="nom@exemple.fr" autocomplete="email">
+            <div id="sp-email-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div class="form-field">
             <label class="form-label">Téléphone</label>
-            <input class="form-input" placeholder="">
+            <input id="sp-tel" class="form-input" placeholder="">
+            <div id="sp-tel-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div class="form-field">
@@ -2323,12 +2325,53 @@ function pqContactNo(el){
 }
 
 /* Anti-doublon sur soumission form spin (avant spinGo(6)) */
-function spinSubmitForm(){
-  var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
-  if(checkDuplicate('sp', emailVal, spinGo, 8)) return;
-  var _extra = _flowinCollectFormFields('#vp-spin');
-  registerPlay('sp', emailVal, 'FW-SR-2814', _extra);
-  spinGo(6);
+function _flspFieldState(id, isErr, msg) {
+  var el = document.getElementById(id);
+  if(el) el.style.border = isErr ? "2px solid #F87171" : "";
+  var errEl = document.getElementById(id+"-err");
+  if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
+}
+async function spinSubmitForm(){
+  var prenom = ((document.getElementById("sp-prenom")||{}).value||"").trim();
+  var nom    = ((document.getElementById("sp-nom")||{}).value||"").trim();
+  var email  = ((document.getElementById("sp-email")||{}).value||"").trim().toLowerCase();
+  var tel    = ((document.getElementById("sp-tel")||{}).value||"").trim().replace(/\s/g,"");
+  var ok = true;
+  if(!prenom){ _flspFieldState("sp-prenom",true,"Prénom obligatoire"); ok=false; } else _flspFieldState("sp-prenom",false);
+  if(!nom)   { _flspFieldState("sp-nom",true,"Nom obligatoire"); ok=false; } else _flspFieldState("sp-nom",false);
+  if(!email||email.indexOf("@")<0){ _flspFieldState("sp-email",true,"Email invalide"); ok=false; } else _flspFieldState("sp-email",false);
+  if(!tel||tel.length<8){ _flspFieldState("sp-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flspFieldState("sp-tel",false);
+  if(!ok) return;
+  if(checkDuplicate("sp", email, spinGo, 8)) return;
+  var _btn = document.querySelector("#vp-spin .btn-submit, #vp-spin .pq-btn-submit, #vp-spin .spin-cta");
+  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  try {
+    var _evId = FLOWIN_EV_ID || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rEd = await _rE.json();
+    if(Array.isArray(_rEd) && _rEd.length > 0){
+      _flspFieldState("sp-email",true,"Cet email est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rTd = await _rT.json();
+    if(Array.isArray(_rTd) && _rTd.length > 0){
+      _flspFieldState("sp-tel",true,"Ce tél. est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+  } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
+  var _ticketEl = document.getElementById("sp-ticket-code");
+  var _ticket = (_ticketEl && _ticketEl.textContent) || "FW-"+Math.floor(Math.random()*9000+1000);
+  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  registerPlay("sp", email, _ticket, _extra);
+  spinGo(3);
+  if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
 
 /* Anti-doublon sur soumission form Quiz Solo (qs-2 → qs-3) */

@@ -1386,11 +1386,11 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
             <div>
               <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Prénom</label>
-              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Léa" value="Léa">
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" id="vs-prenom" placeholder="Léa">
             </div>
             <div>
               <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Nom</label>
-              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="Martin">
+              <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" id="vs-nom" placeholder="Martin">
             </div>
           </div>
           <div style="margin-bottom:12px">
@@ -1402,11 +1402,13 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           </div>
           <div style="margin-bottom:12px">
             <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Email</label>
-            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="lea@exemple.fr">
+            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" id="vs-email" placeholder="lea@exemple.fr">
+            <div id="vs-email-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div style="margin-bottom:12px">
             <label style="font-size:10px;font-weight:900;color:#FCD34D;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Téléphone</label>
-            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" placeholder="06 XX XX XX XX">
+            <input style="width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(252,211,77,.25);border-radius:12px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:#fff;outline:none" id="vs-tel" placeholder="06 XX XX XX XX">
+          <div id="vs-tel-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
             <div>
@@ -2518,12 +2520,53 @@ function qmRenderSocial(){
 
 
 /* Anti-doublon sur soumission form Vote Étoiles (vs-7 → vs-8) */
-function vsSubmitForm(){
-  var emailVal = _flowinFindEmail('#vp-votestars', 'lea@exemple.fr');
-  if(checkDuplicate('vs', emailVal, vsGo, 10)) return;
-  var _extra = _flowinCollectFormFields('#vp-votestars');
-  registerPlay('vs', emailVal, 'VS-2026-LEA', _extra);
-  vsGo(8);
+function _flvsFieldState(id, isErr, msg) {
+  var el = document.getElementById(id);
+  if(el) el.style.border = isErr ? "2px solid #F87171" : "";
+  var errEl = document.getElementById(id+"-err");
+  if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
+}
+async function vsSubmitForm(){
+  var prenom = ((document.getElementById("vs-prenom")||{}).value||"").trim();
+  var nom    = ((document.getElementById("vs-nom")||{}).value||"").trim();
+  var email  = ((document.getElementById("vs-email")||{}).value||"").trim().toLowerCase();
+  var tel    = ((document.getElementById("vs-tel")||{}).value||"").trim().replace(/\s/g,"");
+  var ok = true;
+  if(!prenom){ _flvsFieldState("vs-prenom",true,"Prénom obligatoire"); ok=false; } else _flvsFieldState("vs-prenom",false);
+  if(!nom)   { _flvsFieldState("vs-nom",true,"Nom obligatoire"); ok=false; } else _flvsFieldState("vs-nom",false);
+  if(!email||email.indexOf("@")<0){ _flvsFieldState("vs-email",true,"Email invalide"); ok=false; } else _flvsFieldState("vs-email",false);
+  if(!tel||tel.length<8){ _flvsFieldState("vs-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flvsFieldState("vs-tel",false);
+  if(!ok) return;
+  if(checkDuplicate("vs", email, vsGo, 8)) return;
+  var _btn = document.querySelector("#vp-vote .btn-submit, #vp-vote .pq-btn-submit, #vp-vote .spin-cta");
+  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  try {
+    var _evId = FLOWIN_EV_ID || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rEd = await _rE.json();
+    if(Array.isArray(_rEd) && _rEd.length > 0){
+      _flvsFieldState("vs-email",true,"Cet email est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rTd = await _rT.json();
+    if(Array.isArray(_rTd) && _rTd.length > 0){
+      _flvsFieldState("vs-tel",true,"Ce tél. est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+  } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
+  var _ticketEl = document.getElementById("vs-ticket-code");
+  var _ticket = (_ticketEl && _ticketEl.textContent) || "VS-"+Math.floor(Math.random()*9000+1000);
+  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  registerPlay("vs", email, _ticket, _extra);
+  vsGo(3);
+  if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
 
 

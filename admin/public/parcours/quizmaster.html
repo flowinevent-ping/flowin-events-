@@ -1315,11 +1315,11 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="qm-form-grid">
             <div class="qm-form-field">
               <label class="qm-form-label">Prénom</label>
-              <input class="qm-form-input" placeholder="">
+              <input id="qm-prenom" class="qm-form-input" placeholder="">
             </div>
             <div class="qm-form-field">
               <label class="qm-form-label">Nom</label>
-              <input class="qm-form-input" placeholder="">
+              <input id="qm-nom" class="qm-form-input" placeholder="">
             </div>
           </div>
 
@@ -1332,11 +1332,13 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           </div>
           <div class="qm-form-field">
             <label class="qm-form-label">Email</label>
-            <input class="qm-form-input" placeholder="">
+            <input id="qm-email" class="qm-form-input" placeholder="">
+            <div id="qm-email-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div class="qm-form-field">
             <label class="qm-form-label">Téléphone</label>
-            <input class="qm-form-input" placeholder="">
+            <input id="qm-tel" class="qm-form-input" placeholder="">
+            <div id="qm-tel-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div class="qm-form-grid">
             <div class="qm-form-field">
@@ -2502,12 +2504,53 @@ function qmGo(n){
   }
 }
 
-function qmSubmitForm(){
-  var emailVal = _flowinFindEmail('#vp-quizmaster', 'participant@exemple.fr');
-  if(checkDuplicate('qm', emailVal, qmGo, 11)) return;
-  var _extra = _flowinCollectFormFields('#vp-quizmaster');
-  registerPlay('qm', emailVal, 'QM-2026-LIVE', _extra);
+function _flqmFieldState(id, isErr, msg) {
+  var el = document.getElementById(id);
+  if(el) el.style.border = isErr ? "2px solid #F87171" : "";
+  var errEl = document.getElementById(id+"-err");
+  if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
+}
+async function qmSubmitForm(){
+  var prenom = ((document.getElementById("qm-prenom")||{}).value||"").trim();
+  var nom    = ((document.getElementById("qm-nom")||{}).value||"").trim();
+  var email  = ((document.getElementById("qm-email")||{}).value||"").trim().toLowerCase();
+  var tel    = ((document.getElementById("qm-tel")||{}).value||"").trim().replace(/\s/g,"");
+  var ok = true;
+  if(!prenom){ _flqmFieldState("qm-prenom",true,"Prénom obligatoire"); ok=false; } else _flqmFieldState("qm-prenom",false);
+  if(!nom)   { _flqmFieldState("qm-nom",true,"Nom obligatoire"); ok=false; } else _flqmFieldState("qm-nom",false);
+  if(!email||email.indexOf("@")<0){ _flqmFieldState("qm-email",true,"Email invalide"); ok=false; } else _flqmFieldState("qm-email",false);
+  if(!tel||tel.length<8){ _flqmFieldState("qm-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flqmFieldState("qm-tel",false);
+  if(!ok) return;
+  if(checkDuplicate("qm", email, qmGo, 11)) return;
+  var _btn = document.querySelector("#vp-quizmaster .btn-submit, #vp-quizmaster .pq-btn-submit, #vp-quizmaster .spin-cta");
+  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  try {
+    var _evId = FLOWIN_EV_ID || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rEd = await _rE.json();
+    if(Array.isArray(_rEd) && _rEd.length > 0){
+      _flqmFieldState("qm-email",true,"Cet email est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rTd = await _rT.json();
+    if(Array.isArray(_rTd) && _rTd.length > 0){
+      _flqmFieldState("qm-tel",true,"Ce tél. est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+  } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
+  var _ticketEl = document.getElementById("qm-ticket-code");
+  var _ticket = (_ticketEl && _ticketEl.textContent) || "QM-"+Math.floor(Math.random()*9000+1000);
+  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  registerPlay("qm", email, _ticket, _extra);
   qmGo(6);
+  if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
 
 function qmPickSource(el){

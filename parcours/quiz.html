@@ -1315,11 +1315,11 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="pq-form-grid">
             <div class="pq-form-field">
               <label class="pq-form-label">Prénom</label>
-              <input class="pq-form-input" placeholder="">
+              <input id="pq-prenom" class="pq-form-input" placeholder="">
             </div>
             <div class="pq-form-field">
               <label class="pq-form-label">Nom</label>
-              <input class="pq-form-input" placeholder="">
+              <input id="pq-nom" class="pq-form-input" placeholder="">
             </div>
           </div>
 
@@ -1332,11 +1332,13 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           </div>
           <div class="pq-form-field">
             <label class="pq-form-label">Email</label>
-            <input class="pq-form-input" placeholder="">
+            <input id="pq-email" class="pq-form-input" placeholder="">
+            <div id="pq-email-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div class="pq-form-field">
             <label class="pq-form-label">Téléphone</label>
-            <input class="pq-form-input" placeholder="">
+            <input id="pq-tel" class="pq-form-input" placeholder="">
+            <div id="pq-tel-err" style="display:none;color:#F87171;font-size:11px;margin-top:4px;font-weight:700"></div>
           </div>
           <div class="pq-form-grid">
             <div class="pq-form-field">
@@ -2522,15 +2524,53 @@ function qsSubmitForm(){
 }
 
 /* Anti-doublon sur soumission form Quiz Pâques (pq-5 → pq-6) */
-function pqSubmitForm(){
-  var emailVal = _flowinFindEmail('#vp-paques', 'camille@exemple.fr');
-  if(checkDuplicate('pq', emailVal, pqGo, 11)) return;
-  var _extra = _flowinCollectFormFields('#vp-paques');
-  /* Ticket code dynamique depuis DOM (mis à jour par flowinHydrateGenericQuiz) */
-  var _ticketEl = document.getElementById('pq-ticket-code-1');
-  var _ticket = (_ticketEl && _ticketEl.textContent) || 'FL-2026-'+Math.floor(Math.random()*9000+1000);
-  registerPlay('pq', emailVal, _ticket, _extra);
+function _flpqFieldState(id, isErr, msg) {
+  var el = document.getElementById(id);
+  if(el) el.style.border = isErr ? "2px solid #F87171" : "";
+  var errEl = document.getElementById(id+"-err");
+  if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
+}
+async function pqSubmitForm(){
+  var prenom = ((document.getElementById("pq-prenom")||{}).value||"").trim();
+  var nom    = ((document.getElementById("pq-nom")||{}).value||"").trim();
+  var email  = ((document.getElementById("pq-email")||{}).value||"").trim().toLowerCase();
+  var tel    = ((document.getElementById("pq-tel")||{}).value||"").trim().replace(/\s/g,"");
+  var ok = true;
+  if(!prenom){ _flpqFieldState("pq-prenom",true,"Prénom obligatoire"); ok=false; } else _flpqFieldState("pq-prenom",false);
+  if(!nom)   { _flpqFieldState("pq-nom",true,"Nom obligatoire"); ok=false; } else _flpqFieldState("pq-nom",false);
+  if(!email||email.indexOf("@")<0){ _flpqFieldState("pq-email",true,"Email invalide"); ok=false; } else _flpqFieldState("pq-email",false);
+  if(!tel||tel.length<8){ _flpqFieldState("pq-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flpqFieldState("pq-tel",false);
+  if(!ok) return;
+  if(checkDuplicate("pq", email, pqGo, 11)) return;
+  var _btn = document.querySelector("#vp-paques .btn-submit, #vp-paques .pq-btn-submit, #vp-paques .spin-cta");
+  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  try {
+    var _evId = FLOWIN_EV_ID || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rEd = await _rE.json();
+    if(Array.isArray(_rEd) && _rEd.length > 0){
+      _flpqFieldState("pq-email",true,"Cet email est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var _rTd = await _rT.json();
+    if(Array.isArray(_rTd) && _rTd.length > 0){
+      _flpqFieldState("pq-tel",true,"Ce tél. est déjà inscrit");
+      if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
+      return;
+    }
+  } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
+  var _ticketEl = document.getElementById("pq-ticket-code-1");
+  var _ticket = (_ticketEl && _ticketEl.textContent) || "FL-"+Math.floor(Math.random()*9000+1000);
+  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  registerPlay("pq", email, _ticket, _extra);
   pqGo(6);
+  if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════ */
