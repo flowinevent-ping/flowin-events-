@@ -1908,7 +1908,7 @@ async function supaLoadAll(){
       supaFetch('partenaires', 'select=*'),
       supaFetch('events'),
       supaFetch('super_events', 'select=*&limit=50'),
-      supaFetch('joueurs', 'select=id,ts,prenom,nom,email,genre,tel,ville,code_postal,adresse,date_naissance,optin,optin_date,gains,score_moy,events,first_seen,last_seen,source,age_tranche,enseigne,lot_gagne,ticket_code,decouverte,client_type,tags,external_id,updated_at&order=updated_at.desc&limit=500'),
+      supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=500'),
       supaFetch('lots'),
       supaFetch('banques'),
       supaFetch('landings')
@@ -1991,7 +1991,6 @@ async function supaWriteJoueur(j){
     first_seen:j.firstSeen||null, last_seen:j.lastSeen||null,
     source:j.source||'',
     adresse:j.adresse||'',
-    tags:Array.isArray(j.tags) ? j.tags : [],
     age_tranche:j.ageTranche||'',
     enseigne:j.enseigne||'',
     lot_gagne:j.lotGagne||'',

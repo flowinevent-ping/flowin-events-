@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS joueurs (
   client_type    TEXT DEFAULT 'btoc',
   first_seen     TIMESTAMPTZ DEFAULT NULL,
   last_seen      TIMESTAMPTZ DEFAULT NULL,
-  tags           TEXT[] DEFAULT '{}',
+  -- tags : colonne absente en prod (ne pas ajouter sans migration)
   created_at     TIMESTAMPTZ DEFAULT NOW(),
   updated_at     TIMESTAMPTZ DEFAULT NOW()
 );
