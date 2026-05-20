@@ -2190,6 +2190,22 @@ function flowinHydrateModule(ev) {
     }
   }
 
+  /* Fetch lots Supabase */
+  var lotsWrap_vs = document.querySelector('.pq-lots-wrap');
+  if(lotsWrap_vs && ev.id) {
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=eq.'+encodeURIComponent(ev.id)+'&select=titre,nom,valeur&retire=eq.false', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    }).then(function(r){ return r.json(); }).then(function(lots){
+      if(!lots||!lots.length) return;
+      var lHtml = '';
+      for(var li=0;li<lots.length;li++){
+        var lt=lots[li];
+        lHtml+='<div class="pq-lot-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">'          +'<div style="width:32px;height:32px;border-radius:8px;background:'+couleur+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🎁</div>'          +'<div style="flex:1"><div style="font-size:12px;font-weight:700;color:#1a1a2e">'+(lt.titre||lt.nom||'Lot')+'</div>'          +(lt.valeur?'<div style="font-size:10px;color:#888">'+lt.valeur+' €</div>':'')+'</div></div>';
+      }
+      lotsWrap_vs.innerHTML='<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;color:'+couleur+'">🎁 LOTS À GAGNER</div>'+lHtml;
+    }).catch(function(e){ console.warn('[Flowin] lots fetch vs:', e); });
+  }
+
   /* ── TOMBOLA ── */
   if(module === 'tombola') {
     var vp = document.getElementById('vp-tombola');
@@ -2542,165 +2558,71 @@ function _flvsFieldState(id, isErr, msg) {
   if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
 }
 async function vsSubmitForm(){
+  /* 1. Collecte */
   var prenom = ((document.getElementById("vs-prenom")||{}).value||"").trim();
   var nom    = ((document.getElementById("vs-nom")||{}).value||"").trim();
   var email  = ((document.getElementById("vs-email")||{}).value||"").trim().toLowerCase();
   var tel    = ((document.getElementById("vs-tel")||{}).value||"").trim().replace(/\s/g,"");
+  /* 2. Validation */
   var ok = true;
   if(!prenom){ _flvsFieldState("vs-prenom",true,"Prénom obligatoire"); ok=false; } else _flvsFieldState("vs-prenom",false);
-  if(!nom)   { _flvsFieldState("vs-nom",true,"Nom obligatoire"); ok=false; } else _flvsFieldState("vs-nom",false);
+  if(!nom)   { _flvsFieldState("vs-nom",true,"Nom obligatoire"); ok=false; }     else _flvsFieldState("vs-nom",false);
   if(!email||email.indexOf("@")<0){ _flvsFieldState("vs-email",true,"Email invalide"); ok=false; } else _flvsFieldState("vs-email",false);
   if(!tel||tel.length<8){ _flvsFieldState("vs-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flvsFieldState("vs-tel",false);
   if(!ok) return;
-  if(checkDuplicate("vs", email, vsGo, 8)) return;
-  var _btn = document.querySelector("#vp-vote .btn-submit, #vp-vote .pq-btn-submit, #vp-vote .spin-cta");
-  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  /* 3. Anti-doublon localStorage */
+  if(checkDuplicate("vs", email, vsGo, {'pq':11,'qm':11,'qs':8,'sp':8,'vs':8}["vs"]||8)) return;
+  /* 4. Loading */
+  var _btn = document.querySelector("#vp-votestars .btn-submit, #vp-votestars .pq-btn-submit, #vp-votestars .spin-cta, #vp-votestars .vs-submit-btn, #vp-votestars .qm-btn-submit");
+  if(_btn){ _btn.textContent="Vérification\u2026"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  /* 5. Anti-doublon Supabase */
   try {
-    var _evId = FLOWIN_EV_ID || "";
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    var _evId = FLOWIN_EV_ID || (FLOWIN_EVENT && FLOWIN_EVENT.id) || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+"/rest/v1/joueurs?email_lower=eq."+encodeURIComponent(email)+"&events=cs.[\""+_evId+"\"]&select=id", {
+      headers:{"apikey":FLOWIN_SUPA_ANON,"Authorization":"Bearer "+FLOWIN_SUPA_ANON}
     });
     var _rEd = await _rE.json();
-    if(Array.isArray(_rEd) && _rEd.length > 0){
-      _flvsFieldState("vs-email",true,"Cet email est déjà inscrit");
+    if(Array.isArray(_rEd)&&_rEd.length>0){
+      _flvsFieldState("vs-email",true,"Cet email est déjà inscrit à cet event");
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    var _rT = await fetch(FLOWIN_SUPA_URL+"/rest/v1/joueurs?tel=eq."+encodeURIComponent(tel)+"&events=cs.[\""+_evId+"\"]&select=id", {
+      headers:{"apikey":FLOWIN_SUPA_ANON,"Authorization":"Bearer "+FLOWIN_SUPA_ANON}
     });
     var _rTd = await _rT.json();
-    if(Array.isArray(_rTd) && _rTd.length > 0){
-      _flvsFieldState("vs-tel",true,"Ce tél. est déjà inscrit");
+    if(Array.isArray(_rTd)&&_rTd.length>0){
+      _flvsFieldState("vs-tel",true,"Ce tél. est déjà inscrit à cet event");
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
   } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
-  var _ticketEl = document.getElementById("vs-ticket-code");
-  var _ticket = (_ticketEl && _ticketEl.textContent) || "VS-"+Math.floor(Math.random()*9000+1000);
-  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  /* 6. Ticket unique : VS-AAAA-XXXX */
+  var _ticket = flowinGenerateTicket("VS");
+  FLOWIN_SESSION_EMAIL = email;
+  /* 7. Mise à jour DOM ticket */
+  var _vpEl = document.getElementById("vp-votestars");
+  if(_vpEl) _vpEl.querySelectorAll(".ticket-code").forEach(function(el){ el.textContent=_ticket; });
+  /* 8. Sauvegarde localStorage + Supabase (ticket_code dans joueurs) */
+  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket };
   registerPlay("vs", email, _ticket, _extra);
-  vsGo(3);
+  /* 9. Navigation */
+  vsGo(8);
   if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
-
-
-
-/* ═════════════════════════════════════════════════════════════════════ */
-/* FLOWIN SUPABASE BRANCHEMENT + supaWriteFlowin (joueur + participation) */
-/* ═════════════════════════════════════════════════════════════════════ */
-var FLOWIN_SUPA_URL = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
-var FLOWIN_SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
-var FLOWIN_EV_ID = (function(){
-  try {
-    var p = new URLSearchParams(window.location.search);
-    return p.get('ev') || '';
-  } catch(e){ return ''; }
-})();
-/* Fallback module depuis URL (?module=spin|quiz|vote|tombola…) */
-var FLOWIN_MODULE_FALLBACK = (function(){
-  try {
-    var p = new URLSearchParams(window.location.search);
-    return p.get('module') || '';
-  } catch(e){ return ''; }
-})();
-var FLOWIN_EVENT = null;
-var FLOWIN_PRO_ID = null;
-/* ── Nettoyage anti-doublon inter-events ── */
-(function(){
-  try {
-    var _evId = (new URLSearchParams(window.location.search)).get('ev') || '';
-    if(_evId && _evId !== 'ev-paques'){
-      /* Supprimer les clés des anciens events pour éviter collision */
-      localStorage.removeItem('flowin_played_pq');
-      localStorage.removeItem('flowin_played_qm');
-      localStorage.removeItem('flowin_played_qs');
-      localStorage.removeItem('flowin_played_sp');
-      localStorage.removeItem('flowin_played_vs');
-      localStorage.removeItem('flowin_played_tb');
-    }
-  } catch(e){}
-})();
-/* ── Paramètres URL cfg depuis section Jeux dashboard (bonus=0, partage=0) ── */
-var FLOWIN_CFG_PARAMS = (function(){
-  try {
-    var p = new URLSearchParams(window.location.search);
-    return { bonus: p.get('bonus'), partage: p.get('partage'), timer: p.get('timer') };
-  } catch(e){ return {}; }
-})();
-/* Appliquer immédiatement les paramètres d'affichage */
-if(FLOWIN_CFG_PARAMS.bonus === '0'){
-  document.addEventListener('DOMContentLoaded', function(){
-    var _h=function(sel){var els=document.querySelectorAll(sel);for(var i=0;i<els.length;i++)els[i].style.display='none';};
-    _h('#pq-9,#qm-9');
-    _h('.pq-double-cta,.pq-double-hint,.pq-double-skip');
-    _h('.pq-share-btn,.pq-share-badge,.pq-bc-share');
-  });
-}
-if(FLOWIN_CFG_PARAMS.partage === '0'){
-  document.addEventListener('DOMContentLoaded', function(){
-    var els=document.querySelectorAll('.pq-share-btn,#pq-share-btn,.pq-bc-share,.pq-share-badge');
-    for(var i=0;i<els.length;i++) els[i].style.display='none';
-  });
-}
-
-/* Routage immédiat si ?module= présent (avant Supabase) */
-if(FLOWIN_MODULE_FALLBACK){
-  /* Script dans <body> : DOM déjà chargé → exécution immédiate via setTimeout */
-  setTimeout(function(){
-    try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(e){ console.warn('[Flowin] fallback immédiat:', e); }
-  }, 0);
-}
-
-/* Fetch event au boot */
-(async function flowinBootFetch(){
-  if(!FLOWIN_EV_ID) return;
-  try {
-    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(FLOWIN_EV_ID)+'&select=*', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
-    });
-    var rows = await r.json();
-    if(rows && rows.length){
-      FLOWIN_EVENT = rows[0];
-      FLOWIN_PRO_ID = rows[0].pro_id || null;
-      console.log('[Flowin] event chargé:', rows[0].nom, '· module:', rows[0].module, '· statut:', rows[0].status);
-
-      /* ── Bloquer si event terminé ou archivé ── */
-      if(rows[0].status === 'past' || rows[0].status === 'archived'){
-        document.body.innerHTML = '<div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F8FAFC;font-family:-apple-system,sans-serif;padding:32px;text-align:center">'
-          + '<div style="font-size:48px;margin-bottom:16px">🔒</div>'
-          + '<div style="font-size:20px;font-weight:800;color:#1B3A5C;margin-bottom:8px">Cet event est terminé</div>'
-          + '<div style="font-size:14px;color:#64748B;max-width:280px;line-height:1.6">Le QR code de cet événement n\'est plus actif.<br>Merci pour votre participation !</div>'
-          + '</div>';
-        return;
-      }
-
-      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); flowinHydrateFront(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
-      try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
-      try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
-    } else if(FLOWIN_MODULE_FALLBACK) {
-      /* Event pas encore dans Supabase : fallback module URL */
-      console.log('[Flowin] fallback module:', FLOWIN_MODULE_FALLBACK);
-      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(e){}
-    } else {
-      console.log('[Flowin] event introuvable (preview mode):', FLOWIN_EV_ID);
-    }
-  } catch(e){
-    console.warn('[Flowin] fetch event:', e);
-    if(FLOWIN_MODULE_FALLBACK){
-      try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK); } catch(err){}
-    }
-  }
-})();
-
-/* Helper : merge sans Object.assign (iOS Safari compat) */
 function _flowinMerge(dst, src){
   for(var k in src){ if(Object.prototype.hasOwnProperty.call(src,k)) dst[k] = src[k]; }
   return dst;
 }
 
 /* Écriture joueur + participation — async séquenciel */
+/* -- Génération ticket unique : format MODULE-AAAA-XXXX -- */
+var FLOWIN_SESSION_EMAIL = '';
+function flowinGenerateTicket(prefix) {
+  var year = new Date().getFullYear();
+  var rand = Math.floor(Math.random()*9000)+1000;
+  return prefix.toUpperCase()+'-'+year+'-'+rand;
+}
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();
@@ -2928,7 +2850,7 @@ function flowinHydrateQuizmasterBonus(){
     fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId)+'&select=*',{headers:H})
     .then(function(r){return r.json();})
     .then(function(rows){
-      if(rows&&rows.length){FLOWIN_EVENT=rows[0];try{flowinHydrateModule(rows[0]);}catch(e){}}
+      if(rows&&rows.length){FLOWIN_EVENT=rows[0];try{flowinHydrateModule(rows[0]);flowinHydrateDynTexts(rows[0]);flowinHydrateFront(rows[0]);}catch(e){}}
     }).catch(function(){});
   }
 })();

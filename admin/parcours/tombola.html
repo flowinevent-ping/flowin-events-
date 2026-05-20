@@ -2511,7 +2511,7 @@ async function tbSubmitForm(){
   } catch(_de){ console.warn('[Flowin] doublon check:', _de); }
 
   /* 6. Ticket tombola : TB-AAAA-XXXX (généré ici, pas depuis le DOM) */
-  var _ticket = 'TB-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
+  var _ticket = flowinGenerateTicket('TB');
 
   /* 7. Afficher le ticket sur tb-3 et tb-4 avant navigation */
   var _vpTb = document.getElementById('vp-tombola');
@@ -2763,6 +2763,13 @@ function _flowinMerge(dst, src){
 }
 
 /* Écriture joueur + participation — async séquenciel */
+/* -- Génération ticket unique : format MODULE-AAAA-XXXX -- */
+var FLOWIN_SESSION_EMAIL = '';
+function flowinGenerateTicket(prefix) {
+  var year = new Date().getFullYear();
+  var rand = Math.floor(Math.random()*9000)+1000;
+  return prefix.toUpperCase()+'-'+year+'-'+rand;
+}
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();

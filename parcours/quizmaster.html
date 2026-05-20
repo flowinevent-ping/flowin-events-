@@ -2539,48 +2539,58 @@ function _flqmFieldState(id, isErr, msg) {
   if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
 }
 async function qmSubmitForm(){
+  /* 1. Collecte */
   var prenom = ((document.getElementById("qm-prenom")||{}).value||"").trim();
   var nom    = ((document.getElementById("qm-nom")||{}).value||"").trim();
   var email  = ((document.getElementById("qm-email")||{}).value||"").trim().toLowerCase();
   var tel    = ((document.getElementById("qm-tel")||{}).value||"").trim().replace(/\s/g,"");
+  /* 2. Validation */
   var ok = true;
   if(!prenom){ _flqmFieldState("qm-prenom",true,"Prénom obligatoire"); ok=false; } else _flqmFieldState("qm-prenom",false);
-  if(!nom)   { _flqmFieldState("qm-nom",true,"Nom obligatoire"); ok=false; } else _flqmFieldState("qm-nom",false);
+  if(!nom)   { _flqmFieldState("qm-nom",true,"Nom obligatoire"); ok=false; }     else _flqmFieldState("qm-nom",false);
   if(!email||email.indexOf("@")<0){ _flqmFieldState("qm-email",true,"Email invalide"); ok=false; } else _flqmFieldState("qm-email",false);
   if(!tel||tel.length<8){ _flqmFieldState("qm-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flqmFieldState("qm-tel",false);
   if(!ok) return;
-  if(checkDuplicate("qm", email, qmGo, 11)) return;
-  var _btn = document.querySelector("#vp-quizmaster .btn-submit, #vp-quizmaster .pq-btn-submit, #vp-quizmaster .spin-cta");
-  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  /* 3. Anti-doublon localStorage */
+  if(checkDuplicate("qm", email, qmGo, {'pq':11,'qm':11,'qs':8,'sp':8,'vs':8}["qm"]||8)) return;
+  /* 4. Loading */
+  var _btn = document.querySelector("#vp-quizmaster .btn-submit, #vp-quizmaster .pq-btn-submit, #vp-quizmaster .spin-cta, #vp-quizmaster .vs-submit-btn, #vp-quizmaster .qm-btn-submit");
+  if(_btn){ _btn.textContent="Vérification\u2026"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  /* 5. Anti-doublon Supabase */
   try {
-    var _evId = FLOWIN_EV_ID || "";
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    var _evId = FLOWIN_EV_ID || (FLOWIN_EVENT && FLOWIN_EVENT.id) || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+"/rest/v1/joueurs?email_lower=eq."+encodeURIComponent(email)+"&events=cs.[\""+_evId+"\"]&select=id", {
+      headers:{"apikey":FLOWIN_SUPA_ANON,"Authorization":"Bearer "+FLOWIN_SUPA_ANON}
     });
     var _rEd = await _rE.json();
-    if(Array.isArray(_rEd) && _rEd.length > 0){
-      _flqmFieldState("qm-email",true,"Cet email est déjà inscrit");
+    if(Array.isArray(_rEd)&&_rEd.length>0){
+      _flqmFieldState("qm-email",true,"Cet email est déjà inscrit à cet event");
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    var _rT = await fetch(FLOWIN_SUPA_URL+"/rest/v1/joueurs?tel=eq."+encodeURIComponent(tel)+"&events=cs.[\""+_evId+"\"]&select=id", {
+      headers:{"apikey":FLOWIN_SUPA_ANON,"Authorization":"Bearer "+FLOWIN_SUPA_ANON}
     });
     var _rTd = await _rT.json();
-    if(Array.isArray(_rTd) && _rTd.length > 0){
-      _flqmFieldState("qm-tel",true,"Ce tél. est déjà inscrit");
+    if(Array.isArray(_rTd)&&_rTd.length>0){
+      _flqmFieldState("qm-tel",true,"Ce tél. est déjà inscrit à cet event");
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
   } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
-  var _ticketEl = document.getElementById("qm-ticket-code");
-  var _ticket = (_ticketEl && _ticketEl.textContent) || "QM-"+Math.floor(Math.random()*9000+1000);
-  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  /* 6. Ticket unique : QM-AAAA-XXXX */
+  var _ticket = flowinGenerateTicket("QM");
+  FLOWIN_SESSION_EMAIL = email;
+  /* 7. Mise à jour DOM ticket */
+  var _vpEl = document.getElementById("vp-quizmaster");
+  if(_vpEl) _vpEl.querySelectorAll(".ticket-code").forEach(function(el){ el.textContent=_ticket; });
+  /* 8. Sauvegarde localStorage + Supabase (ticket_code dans joueurs) */
+  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket };
   registerPlay("qm", email, _ticket, _extra);
+  /* 9. Navigation */
   qmGo(6);
   if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
-
 function qmPickSource(el){
   var parent = el.parentElement;
   parent.querySelectorAll('.pq-form-source-chip').forEach(function(c){
@@ -2751,6 +2761,13 @@ function _flowinMerge(dst, src){
 }
 
 /* Écriture joueur + participation — async séquenciel */
+/* -- Génération ticket unique : format MODULE-AAAA-XXXX -- */
+var FLOWIN_SESSION_EMAIL = '';
+function flowinGenerateTicket(prefix) {
+  var year = new Date().getFullYear();
+  var rand = Math.floor(Math.random()*9000)+1000;
+  return prefix.toUpperCase()+'-'+year+'-'+rand;
+}
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();

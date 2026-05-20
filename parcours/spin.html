@@ -2035,6 +2035,22 @@ function flowinHydrateModule(ev) {
     }
   }
 
+  /* Fetch lots Supabase */
+  var lotsWrap_sp = document.querySelector('.pq-lots-wrap');
+  if(lotsWrap_sp && ev.id) {
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=eq.'+encodeURIComponent(ev.id)+'&select=titre,nom,valeur&retire=eq.false', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    }).then(function(r){ return r.json(); }).then(function(lots){
+      if(!lots||!lots.length) return;
+      var lHtml = '';
+      for(var li=0;li<lots.length;li++){
+        var lt=lots[li];
+        lHtml+='<div class="pq-lot-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">'          +'<div style="width:32px;height:32px;border-radius:8px;background:'+couleur+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🎁</div>'          +'<div style="flex:1"><div style="font-size:12px;font-weight:700;color:#1a1a2e">'+(lt.titre||lt.nom||'Lot')+'</div>'          +(lt.valeur?'<div style="font-size:10px;color:#888">'+lt.valeur+' €</div>':'')+'</div></div>';
+      }
+      lotsWrap_sp.innerHTML='<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;color:'+couleur+'">🎁 LOTS À GAGNER</div>'+lHtml;
+    }).catch(function(e){ console.warn('[Flowin] lots fetch sp:', e); });
+  }
+
   /* ── QUIZ (pq / qm) ── */
   if(module === 'quiz') {
     /* Pâques (pq) */
@@ -2332,49 +2348,58 @@ function _flspFieldState(id, isErr, msg) {
   if(errEl){ errEl.textContent = msg||""; errEl.style.display = isErr ? "" : "none"; }
 }
 async function spinSubmitForm(){
+  /* 1. Collecte */
   var prenom = ((document.getElementById("sp-prenom")||{}).value||"").trim();
   var nom    = ((document.getElementById("sp-nom")||{}).value||"").trim();
   var email  = ((document.getElementById("sp-email")||{}).value||"").trim().toLowerCase();
   var tel    = ((document.getElementById("sp-tel")||{}).value||"").trim().replace(/\s/g,"");
+  /* 2. Validation */
   var ok = true;
   if(!prenom){ _flspFieldState("sp-prenom",true,"Prénom obligatoire"); ok=false; } else _flspFieldState("sp-prenom",false);
-  if(!nom)   { _flspFieldState("sp-nom",true,"Nom obligatoire"); ok=false; } else _flspFieldState("sp-nom",false);
+  if(!nom)   { _flspFieldState("sp-nom",true,"Nom obligatoire"); ok=false; }     else _flspFieldState("sp-nom",false);
   if(!email||email.indexOf("@")<0){ _flspFieldState("sp-email",true,"Email invalide"); ok=false; } else _flspFieldState("sp-email",false);
   if(!tel||tel.length<8){ _flspFieldState("sp-tel",true,"Tél. obligatoire (min 8 chiffres)"); ok=false; } else _flspFieldState("sp-tel",false);
   if(!ok) return;
-  if(checkDuplicate("sp", email, spinGo, 8)) return;
-  var _btn = document.querySelector("#vp-spin .btn-submit, #vp-spin .pq-btn-submit, #vp-spin .spin-cta");
-  if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  /* 3. Anti-doublon localStorage */
+  if(checkDuplicate("sp", email, spinGo, {'pq':11,'qm':11,'qs':8,'sp':8,'vs':8}["sp"]||8)) return;
+  /* 4. Loading */
+  var _btn = document.querySelector("#vp-spin .btn-submit, #vp-spin .pq-btn-submit, #vp-spin .spin-cta, #vp-spin .vs-submit-btn, #vp-spin .qm-btn-submit");
+  if(_btn){ _btn.textContent="Vérification\u2026"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
+  /* 5. Anti-doublon Supabase */
   try {
-    var _evId = FLOWIN_EV_ID || "";
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    var _evId = FLOWIN_EV_ID || (FLOWIN_EVENT && FLOWIN_EVENT.id) || "";
+    var _rE = await fetch(FLOWIN_SUPA_URL+"/rest/v1/joueurs?email_lower=eq."+encodeURIComponent(email)+"&events=cs.[\""+_evId+"\"]&select=id", {
+      headers:{"apikey":FLOWIN_SUPA_ANON,"Authorization":"Bearer "+FLOWIN_SUPA_ANON}
     });
     var _rEd = await _rE.json();
-    if(Array.isArray(_rEd) && _rEd.length > 0){
-      _flspFieldState("sp-email",true,"Cet email est déjà inscrit");
+    if(Array.isArray(_rEd)&&_rEd.length>0){
+      _flspFieldState("sp-email",true,"Cet email est déjà inscrit à cet event");
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    var _rT = await fetch(FLOWIN_SUPA_URL+"/rest/v1/joueurs?tel=eq."+encodeURIComponent(tel)+"&events=cs.[\""+_evId+"\"]&select=id", {
+      headers:{"apikey":FLOWIN_SUPA_ANON,"Authorization":"Bearer "+FLOWIN_SUPA_ANON}
     });
     var _rTd = await _rT.json();
-    if(Array.isArray(_rTd) && _rTd.length > 0){
-      _flspFieldState("sp-tel",true,"Ce tél. est déjà inscrit");
+    if(Array.isArray(_rTd)&&_rTd.length>0){
+      _flspFieldState("sp-tel",true,"Ce tél. est déjà inscrit à cet event");
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
   } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
-  var _ticketEl = document.getElementById("sp-ticket-code");
-  var _ticket = (_ticketEl && _ticketEl.textContent) || "FW-"+Math.floor(Math.random()*9000+1000);
-  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  /* 6. Ticket unique : SP-AAAA-XXXX */
+  var _ticket = flowinGenerateTicket("SP");
+  FLOWIN_SESSION_EMAIL = email;
+  /* 7. Mise à jour DOM ticket */
+  var _vpEl = document.getElementById("vp-spin");
+  if(_vpEl) _vpEl.querySelectorAll(".ticket-code").forEach(function(el){ el.textContent=_ticket; });
+  /* 8. Sauvegarde localStorage + Supabase (ticket_code dans joueurs) */
+  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket };
   registerPlay("sp", email, _ticket, _extra);
+  /* 9. Navigation */
   spinGo(3);
   if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
 }
-
-/* Anti-doublon sur soumission form Quiz Solo (qs-2 → qs-3) */
 function qsSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-quizsolo', 'lea@exemple.fr');
   if(checkDuplicate('qs', emailVal, qsGo, 8)) return;
@@ -2594,6 +2619,13 @@ function _flowinMerge(dst, src){
 }
 
 /* Écriture joueur + participation — async séquenciel */
+/* -- Génération ticket unique : format MODULE-AAAA-XXXX -- */
+var FLOWIN_SESSION_EMAIL = '';
+function flowinGenerateTicket(prefix) {
+  var year = new Date().getFullYear();
+  var rand = Math.floor(Math.random()*9000)+1000;
+  return prefix.toUpperCase()+'-'+year+'-'+rand;
+}
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
   var nowIso = new Date().toISOString();
