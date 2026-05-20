@@ -2466,52 +2466,65 @@ function tbSetFieldState(id, isErr, msg) {
   if(errEl){ errEl.textContent = msg||''; errEl.style.display = isErr ? '' : 'none'; }
 }
 async function tbSubmitForm(){
+  /* 1. Collecte */
   var prenom = ((document.getElementById('tb-prenom')||{}).value||'').trim();
   var nom    = ((document.getElementById('tb-nom')||{}).value||'').trim();
   var email  = ((document.getElementById('tb-email')||{}).value||'').trim().toLowerCase();
   var tel    = ((document.getElementById('tb-tel')||{}).value||'').trim().replace(/\s/g,'');
+
+  /* 2. Validation champs obligatoires */
   var ok = true;
-  /* Champs obligatoires */
-  if(!prenom){ tbSetFieldState('tb-prenom',true,'Prénom obligatoire'); ok=false; } else tbSetFieldState('tb-prenom',false);
-  if(!nom)   { tbSetFieldState('tb-nom',true,'Nom obligatoire'); ok=false; } else tbSetFieldState('tb-nom',false);
+  if(!prenom){ tbSetFieldState('tb-prenom',true,'Prénom obligatoire'); ok=false; }  else tbSetFieldState('tb-prenom',false);
+  if(!nom)   { tbSetFieldState('tb-nom',true,'Nom obligatoire'); ok=false; }        else tbSetFieldState('tb-nom',false);
   if(!email||email.indexOf('@')<0){ tbSetFieldState('tb-email',true,'Email invalide'); ok=false; } else tbSetFieldState('tb-email',false);
   if(!tel||tel.length<8){ tbSetFieldState('tb-tel',true,'Téléphone obligatoire (min 8 chiffres)'); ok=false; } else tbSetFieldState('tb-tel',false);
   if(!ok){ document.querySelector('#tb-2 .form-wrap').scrollTop=0; return; }
-  /* Anti-doublon localStorage */
+
+  /* 3. Anti-doublon localStorage */
   if(checkDuplicate('tb', email, tbGo, 4)) return;
-  /* Loading */
+
+  /* 4. Loading */
   var _btn = document.querySelector('#tb-2 .tb-btn-primary');
-  if(_btn){ _btn.textContent='Vérification…'; _btn.style.opacity='0.7'; _btn.style.pointerEvents='none'; }
+  if(_btn){ _btn.textContent='Vérification\u2026'; _btn.style.opacity='0.7'; _btn.style.pointerEvents='none'; }
+
+  /* 5. Anti-doublon Supabase — email + tel scopés à cet event */
   try {
-    var _evId = FLOWIN_EV_ID || '';
-    /* Check doublon email */
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+    var _evId = FLOWIN_EV_ID || (FLOWIN_EVENT && FLOWIN_EVENT.id) || '';
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.[\"'+_evId+'\"]&select=id', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var _rEd = await _rE.json();
-    if(Array.isArray(_rEd) && _rEd.length > 0){
-      tbSetFieldState('tb-email',true,'Cet email est déjà inscrit');
-      if(_btn){ _btn.textContent='Valider mon inscription →'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
+    if(Array.isArray(_rEd)&&_rEd.length>0){
+      tbSetFieldState('tb-email',true,'Cet email est déjà inscrit à cette tombola');
+      if(_btn){ _btn.textContent='Valider mon inscription \u2192'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
       return;
     }
-    /* Check doublon tel */
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.[\"'+_evId+'\"]&select=id', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var _rTd = await _rT.json();
-    if(Array.isArray(_rTd) && _rTd.length > 0){
-      tbSetFieldState('tb-tel',true,'Ce téléphone est déjà inscrit');
-      if(_btn){ _btn.textContent='Valider mon inscription →'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
+    if(Array.isArray(_rTd)&&_rTd.length>0){
+      tbSetFieldState('tb-tel',true,'Ce téléphone est déjà inscrit à cette tombola');
+      if(_btn){ _btn.textContent='Valider mon inscription \u2192'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
       return;
     }
   } catch(_de){ console.warn('[Flowin] doublon check:', _de); }
-  /* Ticket */
-  var _ticketEl = document.getElementById('tb-ticket-code');
-  var _ticket = (_ticketEl && _ticketEl.textContent) || 'FW-CR-'+Math.floor(Math.random()*9000+1000);
-  var _extra = { prenom:prenom, nom:nom, tel:tel };
+
+  /* 6. Ticket tombola : TB-AAAA-XXXX (généré ici, pas depuis le DOM) */
+  var _ticket = 'TB-' + new Date().getFullYear() + '-' + (Math.floor(Math.random()*9000)+1000);
+
+  /* 7. Afficher le ticket sur tb-3 et tb-4 avant navigation */
+  var _vpTb = document.getElementById('vp-tombola');
+  if(_vpTb) _vpTb.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent = _ticket; });
+
+  /* 8. Sauvegarde localStorage + Supabase
+        ticket_code dans _extra -> _flowinMerge l'injecte dans joueurs.ticket_code */
+  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket };
   registerPlay('tb', email, _ticket, _extra);
+
+  /* 9. Confirmation + reset bouton */
   tbGo(3);
-  if(_btn){ _btn.textContent='Valider mon inscription →'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
+  if(_btn){ _btn.textContent='Valider mon inscription \u2192'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
 }
 function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
