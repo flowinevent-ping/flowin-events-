@@ -6555,7 +6555,7 @@ function drawerEvent(e){
      } else {
        // ── Vision Pro : modal plein écran pro_mobile.html validé ──
        var _pv = e.proVisib || {};
-       var _proMobileUrl = 'pro_mobile.html?ev=' + encodeURIComponent(e.id);
+       var _proMobileUrl = '/static/pro_mobile.html?ev=' + encodeURIComponent(e.id);
        html += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
        // Bannière URL
        html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
@@ -9601,7 +9601,7 @@ function renderWizardEvent(){
     html += '</div>';
 
     // ── Lien accès Pro ──
-    var _proUrl = 'https://flowin-events.vercel.app/pro_mobile.html?ev=' + encodeURIComponent(d.id||'');
+    var _proUrl = 'https://flowin-events.vercel.app/pro?ev=' + encodeURIComponent(d.id||'');
     html += '<div class="section-h" style="margin-top:18px">🔗 Accès Pro — lien & QR</div>';
     html += '<div style="background:var(--sa-subtle);border-radius:10px;padding:12px 14px;margin-bottom:12px">';
     html += '<div style="font-size:10px;color:var(--sa-muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">URL dashboard Pro (à partager avec le Pro client)</div>';
@@ -9741,46 +9741,17 @@ function renderWizardEvent(){
     html += '</div>';
     html += '</div></div>';
   } else if(step==='H'){
-    // Étape H : aperçu Vue Pro — simuler le dashboard Pro mobile
-    var pv = d.proVisib || {};
-    var pvTabs = [];
-    if(pv.stats!==false) pvTabs.push({ico:'📊',lbl:'Stats'});
-    if(pv.activite!==false) pvTabs.push({ico:'🎰',lbl:'Tirage'});
-    if(pv.participants!==false) pvTabs.push({ico:'👥',lbl:'Participants'});
-    if(pv.lots!==false) pvTabs.push({ico:'🎁',lbl:'Lots'});
-    if(pv.qr!==false) pvTabs.push({ico:'📱',lbl:'QR'});
-    if(pv.export!==false) pvTabs.push({ico:'📥',lbl:'Export'});
-    html += '<div class="phone-frame"><div class="phone-screen">';
-    html += '<div class="phone-bar" style="background:'+(d.couleur||'#7C2D92')+'">👤 Vue Pro · '+(d.nom||'Event').slice(0,14)+'</div>';
-    // Message de bienvenue
-    if(pv.msgBienvenue) {
-      html += '<div style="padding:8px 12px;background:'+(d.couleur||'#7C2D92')+'12;font-size:10px;color:'+(d.couleur||'#7C2D92')+';font-weight:600;border-bottom:1px solid '+(d.couleur||'#7C2D92')+'22">'+esc(pv.msgBienvenue)+'</div>';
+    // Étape H : aperçu LIVE pro_mobile.html — UX validée, pas d'invention
+    if(d.id){
+      var _proIframeUrl = '/static/pro_mobile.html?ev=' + encodeURIComponent(d.id);
+      html += '<div style="display:flex;justify-content:center">';
+      html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.25),inset 0 0 0 2px #333;position:relative">';
+      html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
+      html += '<iframe src="'+escAttr(_proIframeUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none" title="Dashboard Pro"></iframe>';
+      html += '</div></div>';
+    } else {
+      html += '<div class="empty-block"><div class="ico">🏢</div><div class="t">Aperçu Pro</div><div class="d mt-2">Disponible après création de l\'event.</div></div>';
     }
-    // KPIs
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 10px 6px">';
-    html += '<div style="background:#fff;border:1px solid #eee;border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:'+(d.couleur||'#7C2D92')+'">'+(d.participants||0)+'</div><div style="font-size:9px;color:#888">Participants</div></div>';
-    html += '<div style="background:#fff;border:1px solid #eee;border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#1D9E75">'+(d.joueursOptin||0)+'</div><div style="font-size:9px;color:#888">Opt-in</div></div>';
-    html += '</div>';
-    // Onglets visibles
-    html += '<div style="padding:4px 10px 6px">';
-    html += '<div style="font-size:9px;font-weight:700;color:#888;margin-bottom:5px">Onglets accessibles ('+pvTabs.length+'/6)</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
-    pvTabs.forEach(function(t) {
-      html += '<div style="background:'+(d.couleur||'#7C2D92')+'18;color:'+(d.couleur||'#7C2D92')+';border-radius:6px;padding:4px 8px;font-size:9px;font-weight:700">'+t.ico+' '+t.lbl+'</div>';
-    });
-    if(pvTabs.length===0) html += '<div style="font-size:10px;color:#aaa">Aucun onglet visible</div>';
-    html += '</div></div>';
-    // QR accès Pro
-    if(pv.qr!==false && d.id) {
-      var _pvProUrl = 'https://flowin-events.vercel.app/pro_mobile.html?ev=' + encodeURIComponent(d.id);
-      html += '<div style="text-align:center;padding:6px 12px 10px">';
-      html += '<div style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:8px;padding:6px">';
-      html += genQRSvg(_pvProUrl, {size:90,color:(d.couleur||'#7C2D92')});
-      html += '</div>';
-      html += '<div style="font-size:9px;color:#666;margin-top:5px;font-weight:700">📱 QR accès Pro dashboard</div>';
-      html += '</div>';
-    }
-    html += '</div></div>';
   } else {
     html += '<div class="empty-block"><div class="ico">👆</div><div class="t">Aperçu live</div><div class="d mt-2">Continuez la configuration pour voir le rendu.</div></div>';
   }
@@ -11152,7 +11123,7 @@ function openEventProModal(evId, evNom){
   var urlDisp = document.getElementById('pmmUrlDisplay');
   var openLink = document.getElementById('pmmOpenLink');
   if(!modal||!iframe) return;
-  var url = 'pro_mobile.html?ev='+encodeURIComponent(evId);
+  var url = '/static/pro_mobile.html?ev='+encodeURIComponent(evId);
   if(sub) sub.textContent = evNom || evId;
   iframe.src = url;
   if(openLink) openLink.href = url;
@@ -11173,7 +11144,7 @@ function openProMobileModal(proId){
   if(!modal || !iframe) return;
   
   /* Construction de l'URL : relative pour preview locale, absolue pour partage */
-  var localUrl = 'pro_mobile.html?pro=' + encodeURIComponent(proId);
+  var localUrl = '/static/pro_mobile.html?pro=' + encodeURIComponent(proId);
   var origin = window.location.origin && window.location.origin !== 'null'
                ? window.location.origin
                : 'https://flowin-events.vercel.app';
