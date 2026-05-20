@@ -1906,7 +1906,7 @@ function pqPickChipMulti(el){
 /* Config SuperAdmin (reflète le seed Pâques réel d'admin_preview.html) */
 /* Peut contenir 1 à N liens — le rendu s'adapte automatiquement       */
 var PAQUES_CONFIG = {
-  eventUrl: 'https://flowin.romain-opconsult.com/paques-vence-2026',
+  eventUrl: (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id)?('https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id):'https://flowin-events.vercel.app',
   eventName: 'Fêtes de Pâques Vence 2026',
   socialLinks: [
     {icon:'📘', label:'Facebook',  url:'https://www.facebook.com/villede.vence', active:true},
@@ -2081,6 +2081,39 @@ function flowinHydrateDynTexts(ev){
   /* Toast partage */
   var toast = document.getElementById('pq-toast');
   if(toast) toast.textContent = '✓ Partagé · +1 point validé';
+}
+
+
+/* ============================================================
+   REGLE FLOWIN — flowinHydrateFront
+   Applique cfg.front a tous les elements landing.
+   Appelee automatiquement apres flowinHydrateModule.
+   ============================================================ */
+function flowinHydrateFront(ev) {
+  var cfg = (ev && ev.cfg) || {};
+  var front = cfg.front || {};
+  var module = ev ? (ev.module || '') : '';
+  var SELECTORS = {
+    quiz:       { badge:['.pq-ville'], description:['.pq-cta-hint'], ctaText:['.pq-cta'], ctaNote:['.pq-cta-hint'] },
+    quizsolo:   { badge:['.qs-badge'], ctaText:['.qs-cta'], ctaNote:['.qs-cta-hint'] },
+    quizmaster: { badge:['.qm-ville'], ctaText:['.qm-cta'], ctaNote:['.qm-cta-hint'] },
+    spin:       { badge:['.landing-event-chip'], description:['.landing-sub'], ctaText:['.landing-btn','.spin-cta'] },
+    vote:       { badge:['.vs-badge'], ctaText:['.vs-cta'], ctaNote:['.vs-cta-hint'] },
+    standup:    { badge:['.vs-badge'], ctaText:['.vs-cta'], ctaNote:['.vs-cta-hint'] }
+  };
+  var map = SELECTORS[module] || {};
+  function applyText(sels, value) {
+    if(!value || !sels) return;
+    for(var i=0;i<sels.length;i++){
+      var els = document.querySelectorAll(sels[i]);
+      for(var j=0;j<els.length;j++) els[j].textContent = value;
+    }
+  }
+  if(front.badge)       applyText(map.badge,       front.badge);
+  if(front.description) applyText(map.description, front.description);
+  if(front.ctaText)     applyText(map.ctaText,      front.ctaText);
+  if(front.ctaNote)     applyText(map.ctaNote,      front.ctaNote);
+  console.log('[Flowin] flowinHydrateFront done · module:', module);
 }
 
 function flowinHydrateModule(ev) {
@@ -2375,10 +2408,10 @@ function registerPlay(prefix, emailVal, ticketCode){
 }
 
 /* Init des fonctions pour chaque track */
-makeShareFns('sp',  spinGo,  'Sécurité Routière Vence 2026', 'https://flowin.romain-opconsult.com/securite-vence-2026');
-makeShareFns('qs',  qsGo,    'Quiz Patrimoine Grasse 2026',  'https://flowin.romain-opconsult.com/grasse-2026');
-makeShareFns('vs',  vsGo,    'Jazz Antibes 2026',            'https://flowin.romain-opconsult.com/jazz-antibes-2026');
-makeShareFns('qm',  qmGo,    'Quiz Master Grand Live 2026', 'https://flowin.romain-opconsult.com/quizmaster-2026');
+makeShareFns('sp', spinGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('qs', qsGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('vs', vsGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('qm', qmGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
 
 /* pqContactYes / pqContactNo — Pâques a son propre système de partage donc on définit manuellement */
 function pqContactYes(el){
@@ -2594,7 +2627,7 @@ if(FLOWIN_MODULE_FALLBACK){
       }
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
-      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); flowinHydrateFront(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate paques', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm', e); }
     } else if(FLOWIN_MODULE_FALLBACK) {
