@@ -2586,7 +2586,7 @@ async function pqSubmitForm(){
   if(_btn){ _btn.textContent="Vérification…"; _btn.style.opacity="0.7"; _btn.style.pointerEvents="none"; }
   try {
     var _evId = FLOWIN_EV_ID || "";
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.["'+_evId+'"]&select=id', {
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.{"+_evId+"}&select=id', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var _rEd = await _rE.json();
@@ -2595,7 +2595,7 @@ async function pqSubmitForm(){
       if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
       return;
     }
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.["'+_evId+'"]&select=id', {
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.{"+_evId+"}&select=id', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var _rTd = await _rT.json();

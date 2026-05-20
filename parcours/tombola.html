@@ -2490,7 +2490,7 @@ async function tbSubmitForm(){
   /* 5. Anti-doublon Supabase — email + tel scopés à cet event */
   try {
     var _evId = FLOWIN_EV_ID || (FLOWIN_EVENT && FLOWIN_EVENT.id) || '';
-    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.[\"'+_evId+'\"]&select=id', {
+    var _rE = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?email_lower=eq.'+encodeURIComponent(email)+'&events=cs.{+_evId+}&select=id', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var _rEd = await _rE.json();
@@ -2499,7 +2499,7 @@ async function tbSubmitForm(){
       if(_btn){ _btn.textContent='Valider mon inscription \u2192'; _btn.style.opacity=''; _btn.style.pointerEvents=''; }
       return;
     }
-    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.[\"'+_evId+'\"]&select=id', {
+    var _rT = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?tel=eq.'+encodeURIComponent(tel)+'&events=cs.{+_evId+}&select=id', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var _rTd = await _rT.json();

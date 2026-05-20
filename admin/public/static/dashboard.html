@@ -3557,7 +3557,7 @@ async function loadEventJoueurs(evId){
   if(!evId || !FLOWIN_SUPA_URL) return;
   /* Toujours recharger — evJoueurs est une donnée de session */
   try {
-    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.["'+evId+'"]&select=*&order=updated_at.desc', {
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.{'+evId+'}&select=*&order=updated_at.desc', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var rows = await r.json();
