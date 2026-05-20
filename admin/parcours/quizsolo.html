@@ -2083,6 +2083,24 @@ function flowinHydrateModule(ev) {
       if(qmTitle) qmTitle.innerHTML = nom.replace(' ', '<br>');
       var qmDates = vqm.querySelector('.qm-dates');
       if(qmDates) qmDates.textContent = dates;
+      /* Fetch lots Supabase */
+      var lotsWrap = document.querySelector('.qm-lots-wrap');
+      if(lotsWrap && ev.id) {
+        fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=eq.'+encodeURIComponent(ev.id)+'&select=titre,nom,valeur&retire=eq.false', {
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+        }).then(function(r){ return r.json(); }).then(function(lots){
+          if(!lots || !lots.length) return;
+          var lotsHtml = '';
+          for(var li=0; li<lots.length; li++){
+            var lt = lots[li];
+            lotsHtml += '<div class="qm-lot-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">'
+              + '<div style="width:32px;height:32px;border-radius:8px;background:'+couleur+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🎁</div>'
+              + '<div style="flex:1"><div style="font-size:12px;font-weight:700;color:#1a1a2e">'+(lt.titre||lt.nom||'Lot')+'</div>'
+              + (lt.valeur ? '<div style="font-size:10px;color:#888">'+lt.valeur+' €</div>' : '')+'</div></div>';
+          }
+          lotsWrap.innerHTML = '<div class="qm-lots-label" style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px">🎁 LOTS À GAGNER</div>'+lotsHtml;
+        }).catch(function(e){ console.warn('[Flowin] lots fetch:', e); });
+      }
     }
     /* QuizSolo (qs) */
     var vqs = document.getElementById('vp-quizsolo');
@@ -2091,6 +2109,24 @@ function flowinHydrateModule(ev) {
       if(qsBadge) qsBadge.textContent = '🏛️ ' + lieu + ' · ' + (ev.date_d ? new Date(ev.date_d + 'T00:00:00').getFullYear() : '');
       var qsTitle = vqs.querySelector('.qs-title');
       if(qsTitle) qsTitle.innerHTML = nom.replace(' ', '<br>');
+      /* Fetch lots Supabase */
+      var lotsWrap = document.querySelector('.qm-lots-wrap');
+      if(lotsWrap && ev.id) {
+        fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=eq.'+encodeURIComponent(ev.id)+'&select=titre,nom,valeur&retire=eq.false', {
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+        }).then(function(r){ return r.json(); }).then(function(lots){
+          if(!lots || !lots.length) return;
+          var lotsHtml = '';
+          for(var li=0; li<lots.length; li++){
+            var lt = lots[li];
+            lotsHtml += '<div class="qm-lot-row" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)">'
+              + '<div style="width:32px;height:32px;border-radius:8px;background:'+couleur+'18;display:flex;align-items:center;justify-content:center;font-size:16px">🎁</div>'
+              + '<div style="flex:1"><div style="font-size:12px;font-weight:700;color:#1a1a2e">'+(lt.titre||lt.nom||'Lot')+'</div>'
+              + (lt.valeur ? '<div style="font-size:10px;color:#888">'+lt.valeur+' €</div>' : '')+'</div></div>';
+          }
+          lotsWrap.innerHTML = '<div class="qm-lots-label" style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px">🎁 LOTS À GAGNER</div>'+lotsHtml;
+        }).catch(function(e){ console.warn('[Flowin] lots fetch:', e); });
+      }
     }
   }
 
