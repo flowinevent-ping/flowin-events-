@@ -1262,10 +1262,10 @@ input::placeholder, select::placeholder, textarea::placeholder {
       <!-- ─── TB 1 : Landing tombola ─── -->
       <div class="page on" id="tb-1">
         <div class="tb-landing" style="position:relative"><svg style="position:absolute;top:0;left:0;width:100%;pointer-events:none;opacity:.35" viewBox="0 0 375 100"><circle cx="25" cy="20" r="6" fill="#FFD700"/><circle cx="75" cy="45" r="4" fill="#fff"/><circle cx="130" cy="12" r="5" fill="#FFD700"/><circle cx="195" cy="32" r="4" fill="#fff"/><circle cx="255" cy="16" r="6" fill="#FFD700"/><circle cx="315" cy="38" r="4" fill="#fff"/><circle cx="355" cy="10" r="5" fill="#FFD700"/><rect x="50" y="55" width="6" height="6" rx="1" fill="#FFD700" transform="rotate(30 53 58)"/><rect x="160" y="48" width="5" height="5" rx="1" fill="#fff" transform="rotate(45 162 50)"/><rect x="285" y="52" width="6" height="6" rx="1" fill="#FFD700" transform="rotate(20 288 55)"/></svg>
-          <div class="tb-badge">🔴 Croix Rouge · collecte solidaire</div>
+          <div class="tb-badge" id="tb-ev-badge">🔴 Tombola solidaire</div>
           <div class="tb-logo"><svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="#E8212B"/><rect x="16" y="38" width="68" height="24" rx="5" fill="#E8212B"/></svg></div>
-          <div class="tb-title">Tombola<br>Croix Rouge Française</div>
-          <div class="tb-sub">Soutiens la Croix Rouge et tente de remporter l'un des lots offerts par nos partenaires locaux. 100 % des bénéfices reversés.</div>
+          <div class="tb-title" id="tb-ev-title">Tombola</div>
+          <div class="tb-sub" id="tb-ev-sub">Participez et tentez de remporter l'un des lots offerts par nos partenaires.</div>
           <div class="tb-dates" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px;display:none"></div>
           <div class="tb-lots">
             <div class="tb-lot-row">
@@ -1302,7 +1302,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
       <div class="page" id="tb-2">
         <div class="header withback">
           <div class="back-btn" onclick="tbGo(1)">←</div>
-          <div><div class="header-title">Mes coordonnées</div><div class="header-sub">Pour la tombola Croix Rouge</div></div>
+          <div><div class="header-title">Mes coordonnées</div><div class="header-sub" id="tb-form-sub">Pour la tombola</div></div>
         </div>
         <div class="progress-strip">
           <div class="progress-step done"></div>
@@ -1381,7 +1381,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
         <div class="ticket" style="border-top:4px solid #7C2D92">
           <div class="ticket-icon">🎟️</div>
           <div class="ticket-title">Ton ticket tombola</div>
-          <div style="font-size:11px;font-weight:800;color:var(--muted)">Tombola Croix Rouge · Vence</div>
+          <div id="tb-ticket-ev-label" style="font-size:11px;font-weight:800;color:var(--muted)">Tombola</div>
           <div class="ticket-code">FW-CR-0742</div>
           <div class="ticket-hint">Tirage le <strong>30 juin 2026</strong> · résultats sur flowin.events</div>
         </div>
@@ -1403,7 +1403,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
         <div class="ad-screen" style="background:linear-gradient(160deg,rgba(124,45,146,.12) 0%,rgba(124,45,146,.12) 100%)">
           <div class="ad-icon">✋</div>
           <div class="ad-title">Tu es déjà inscrit·e !</div>
-          <div class="ad-msg">Cette adresse email participe déjà à la tombola Croix Rouge Française.<br>Une seule inscription par personne.</div>
+          <div class="ad-msg">Cette adresse email participe déjà à cet événement.<br>Une seule inscription par personne.</div>
           <div class="ad-email">camille@exemple.fr</div>
           <div class="ticket" style="margin:0 20px;border-top:4px solid #7C2D92">
             <div class="ticket-icon">🎟️</div>
@@ -1793,8 +1793,8 @@ function pqPickChipMulti(el){
 /* Config SuperAdmin (reflète le seed Pâques réel d'admin_preview.html) */
 /* Peut contenir 1 à N liens — le rendu s'adapte automatiquement       */
 var PAQUES_CONFIG = {
-  eventUrl: 'https://flowin.romain-opconsult.com/paques-vence-2026',
-  eventName: 'Fêtes de Pâques Vence 2026',
+  eventUrl: (FLOWIN_EVENT && FLOWIN_EVENT.module && FLOWIN_EVENT.id) ? ('https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id) : 'https://flowin-events.vercel.app',
+  eventName: (FLOWIN_EVENT && FLOWIN_EVENT.nom) ? FLOWIN_EVENT.nom : 'Flowin',
   socialLinks: [
     {icon:'📘', label:'Facebook',  url:'https://www.facebook.com/villede.vence', active:true},
     {icon:'📸', label:'Instagram', url:'https://instagram.com/vence_tourisme',   active:true}
@@ -2440,10 +2440,10 @@ function registerPlay(prefix, emailVal, ticketCode){
 }
 
 /* Init des fonctions pour chaque track */
-makeShareFns('sp',  spinGo,  'Sécurité Routière Vence 2026', 'https://flowin.romain-opconsult.com/securite-vence-2026');
-makeShareFns('qs',  qsGo,    'Quiz Patrimoine Grasse 2026',  'https://flowin.romain-opconsult.com/grasse-2026');
-makeShareFns('vs',  vsGo,    'Jazz Antibes 2026',            'https://flowin.romain-opconsult.com/jazz-antibes-2026');
-makeShareFns('qm',  qmGo,    'Quiz Master Grand Live 2026', 'https://flowin.romain-opconsult.com/quizmaster-2026');
+makeShareFns('sp', spinGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('qs', qsGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('vs', vsGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('qm', qmGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
 
 /* pqContactYes / pqContactNo — Pâques a son propre système de partage donc on définit manuellement */
 function pqContactYes(el){

@@ -1849,8 +1849,8 @@ function pqPickChipMulti(el){
 /* Config SuperAdmin (reflète le seed Pâques réel d'admin_preview.html) */
 /* Peut contenir 1 à N liens — le rendu s'adapte automatiquement       */
 var PAQUES_CONFIG = {
-  eventUrl: 'https://flowin.romain-opconsult.com/paques-vence-2026',
-  eventName: 'Fêtes de Pâques Vence 2026',
+  eventUrl: (FLOWIN_EVENT && FLOWIN_EVENT.module && FLOWIN_EVENT.id) ? ('https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id) : 'https://flowin-events.vercel.app',
+  eventName: (FLOWIN_EVENT && FLOWIN_EVENT.nom) ? FLOWIN_EVENT.nom : 'Flowin',
   socialLinks: [
     {icon:'📘', label:'Facebook',  url:'https://www.facebook.com/villede.vence', active:true},
     {icon:'📸', label:'Instagram', url:'https://instagram.com/vence_tourisme',   active:true}
@@ -2387,10 +2387,10 @@ function registerPlay(prefix, emailVal, ticketCode){
 }
 
 /* Init des fonctions pour chaque track */
-makeShareFns('sp',  spinGo,  'Sécurité Routière Vence 2026', 'https://flowin.romain-opconsult.com/securite-vence-2026');
-makeShareFns('qs',  qsGo,    'Quiz Patrimoine Grasse 2026',  'https://flowin.romain-opconsult.com/grasse-2026');
-makeShareFns('vs',  vsGo,    'Jazz Antibes 2026',            'https://flowin.romain-opconsult.com/jazz-antibes-2026');
-makeShareFns('qm',  qmGo,    'Quiz Master Grand Live 2026', 'https://flowin.romain-opconsult.com/quizmaster-2026');
+makeShareFns('sp', spinGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('qs', qsGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('vs', vsGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
+makeShareFns('qm', qmGo, (FLOWIN_EVENT&&FLOWIN_EVENT.nom?FLOWIN_EVENT.nom:'Flowin'), (FLOWIN_EVENT&&FLOWIN_EVENT.module&&FLOWIN_EVENT.id?'https://flowin-events.vercel.app/parcours/'+FLOWIN_EVENT.module+'?ev='+FLOWIN_EVENT.id:'https://flowin-events.vercel.app'));
 
 /* pqContactYes / pqContactNo — Pâques a son propre système de partage donc on définit manuellement */
 function pqContactYes(el){
