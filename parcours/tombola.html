@@ -1267,30 +1267,8 @@ input::placeholder, select::placeholder, textarea::placeholder {
           <div class="tb-title" id="tb-ev-title">Tombola</div>
           <div class="tb-sub" id="tb-ev-sub">Participez et tentez de remporter l'un des lots offerts par nos partenaires.</div>
           <div class="tb-dates" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:14px;display:none"></div>
-          <div class="tb-lots">
-            <div class="tb-lot-row">
-              <div class="tb-lot-ico">🥇</div>
-              <div class="tb-lot-info">
-                <div class="tb-lot-name">1er prix — Séjour bien-être 2 nuits</div>
-                <div class="tb-lot-hint">Hôtel partenaire · Alpes-Maritimes</div>
-              </div>
-            </div>
-            <div class="tb-lot-row">
-              <div class="tb-lot-ico">🥈</div>
-              <div class="tb-lot-info">
-                <div class="tb-lot-name">2e prix — Bon d'achat 100 €</div>
-                <div class="tb-lot-hint">Commerce local partenaire</div>
-              </div>
-            </div>
-            <div class="tb-lot-row">
-              <div class="tb-lot-ico">🥉</div>
-              <div class="tb-lot-info">
-                <div class="tb-lot-name">3e prix — Panier gourmand local</div>
-                <div class="tb-lot-hint">Produits du terroir 06</div>
-              </div>
-            </div>
-          </div>
-          <div class="tb-draw-date" style="text-align:center;width:100%">🗓️ Tirage le <strong>30 juin 2026</strong> — résultats publiés sur croix-rouge.fr</div>
+          <div class="tb-lots" id="tb-lots-container"></div>
+          <div class="tb-draw-date" id="tb-draw-date-txt" style="text-align:center;width:100%"></div>
         </div>
         <div class="tb-cta-note" style="font-size:10px;text-align:center;color:rgba(255,255,255,.45);padding:2px 0 6px;width:100%">Jeu gratuit · Sans achat obligatoire</div>
         <div class="bottom-cta">
@@ -1383,7 +1361,7 @@ input::placeholder, select::placeholder, textarea::placeholder {
           <div class="ticket-title">Ton ticket tombola</div>
           <div id="tb-ticket-ev-label" style="font-size:11px;font-weight:800;color:var(--muted)">Tombola</div>
           <div class="ticket-code">FW-CR-0742</div>
-          <div class="ticket-hint">Tirage le <strong>30 juin 2026</strong> · résultats sur flowin.events</div>
+          <div class="ticket-hint" id="tb-ticket-tirage-hint">Tirage au sort · bonne chance !</div>
         </div>
         <div style="padding:0 20px 16px">
           <div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.2);border-radius:14px;padding:14px 16px;font-size:12px;font-weight:800;color:#C4B5FD;line-height:1.6">
@@ -2062,6 +2040,28 @@ function flowinHydrateDynTexts(ev){
   var pLabel = document.querySelector('.partenaires-label');
   if(pLabel) pLabel.textContent = '★ Partenaires ' + nom + ' ★';
 
+  /* Tombola : remplir les lots depuis FLOWIN_LOTS (Supabase) */
+  var tbLotsContainer = document.getElementById('tb-lots-container');
+  if(tbLotsContainer) {
+    var ranks = ['🥇','🥈','🥉','🎁','🎁','🎁'];
+    var lotsHtml = '';
+    var _lotsAff = (FLOWIN_LOTS && FLOWIN_LOTS.length) ? FLOWIN_LOTS.slice(0, 5) : [];
+    if(_lotsAff.length) {
+      _lotsAff.forEach(function(l, i) {
+        var ico  = l.emoji || ranks[i] || '🎁';
+        var name = l.nom || l.titre || 'Lot';
+        var hint = l.description || '';
+        lotsHtml += '<div class="tb-lot-row">'
+          + '<div class="tb-lot-ico">'+ico+'</div>'
+          + '<div class="tb-lot-info">'
+          + '<div class="tb-lot-name">'+name+'</div>'
+          + (hint ? '<div class="tb-lot-hint">'+hint+'</div>' : '')
+          + '</div></div>';
+      });
+    }
+    tbLotsContainer.innerHTML = lotsHtml;
+  }
+
   /* Tombola : hydrater tb-1 depuis cfg.front */
   var _front = cfg.front || {};
   var tbBadge = document.querySelector('#vp-tombola .tb-badge');
@@ -2085,6 +2085,19 @@ function flowinHydrateDynTexts(ev){
       tbDates.textContent = _dD + (_dF && _dF !== _dD ? ' → ' + _dF : '');
       tbDates.style.display = '';
     }
+  }
+  /* Texte tirage depuis cfg.front ou cfg.tirageDate */
+  var _tbDrawTxt = document.getElementById('tb-draw-date-txt');
+  if(_tbDrawTxt) {
+    var _tirageStr = (_front && _front.lotTirage) ? _front.lotTirage
+      : (cfg.tirageDate ? '🗓️ Tirage le ' + cfg.tirageDate + ' — bonne chance !' : '');
+    _tbDrawTxt.textContent = _tirageStr;
+    _tbDrawTxt.style.display = _tirageStr ? '' : 'none';
+  }
+  /* Ticket tirage hint */
+  var _tbTktHint = document.getElementById('tb-ticket-tirage-hint');
+  if(_tbTktHint && cfg.tirageDate) {
+    _tbTktHint.innerHTML = 'Tirage le <strong>'+cfg.tirageDate+'</strong> · bonne chance !';
   }
 
   /* Header formulaire */
