@@ -6252,7 +6252,7 @@ function drawerEvent(e){
     })();
 
     // ─── APERÇU : iframe du parcours réel ───
-    var _ifrUrl = 'https://flowin-events.vercel.app/parcours/'+e.module+'.html?ev='+encodeURIComponent(e.id)+'&preview=1';
+    var _ifrUrl = '/parcours/'+e.module+'?ev='+encodeURIComponent(e.id);
     html += '<div class="front-preview-wrap">';
     html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu mobile · live (parcours réel)</div>';
     html += '<div style="position:relative;width:280px;margin:0 auto">';
@@ -11341,7 +11341,7 @@ function openJoueurModal(evId, evNom, module){
   var openLink = document.getElementById('jmOpenLink');
   var urlDisp = document.getElementById('jmUrlDisplay');
   if(!modal||!iframe) return;
-  var url = 'parcours_user.html?ev='+encodeURIComponent(evId)+(module?'&module='+encodeURIComponent(module):'');
+  var url = '/parcours/'+(module||'quiz')+'?ev='+encodeURIComponent(evId);
   sub.textContent = evNom + (module?' · '+module:'');
   iframe.src = url;
   if(openLink) openLink.href = url;
