@@ -6131,6 +6131,17 @@ function drawerEvent(e){
          + '<button class="btn" onclick="toast(\'Email partenaires envoyé\',\'success\')">📧 Envoyer par email</button>'
          + '</div>';
     html += '<div class="form-row mt-3"><button class="btn btn-block" onclick="toast(\'Sticker vinyle commandé\',\'success\')">📦 Commander vinyle imprimé (40 × 40 cm)</button></div>';
+
+    /* ── QR Accès Pro ── */
+    var proAccessUrl = 'https://flowin-events.vercel.app/pro?ev='+encodeURIComponent(e.id);
+    html += '<div class="section-h">🏢 QR accès Pro (à donner au client)</div>';
+    html += '<div style="text-align:center;background:linear-gradient(135deg,#1E293B22,#fff);padding:24px;border-radius:14px;margin-bottom:14px">';
+    html += '<div style="display:inline-block;background:#fff;padding:10px;border-radius:8px;margin-bottom:12px;line-height:0">'
+         + '<div style="width:160px;height:160px">'+genQRSvg(proAccessUrl, {size:160, color:'#1E293B'})+'</div>'
+         + '</div>';
+    html += '<div style="font-family:monospace;font-size:11px;color:var(--sa-muted);word-break:break-all;max-width:240px;margin:0 auto">'+esc(proAccessUrl)+'</div>';
+    html += '<button class="btn btn-sm" style="margin-top:10px" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+escAttr(proAccessUrl)+'\').then(function(){toast(\'Lien copié\',\'success\');})">📋 Copier le lien Pro</button>';
+    html += '</div>';
   } else if(state.drawer.tab==='front'){
     // ============== ONGLET FRONT (SA-only) ==============
     // Initialiser cfg.front si absent
