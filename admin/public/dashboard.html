@@ -1821,7 +1821,12 @@ function migrateData(data){
   return data;
 }
 function saveData(supaSync){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(DATA)); }catch(e){ console.warn('[saveData] localStorage write error', e); }
+  try{
+    /* evJoueurs = session uniquement, ne pas persister */
+    var _evj = DATA.evJoueurs; DATA.evJoueurs = undefined;
+    localStorage.setItem(LS_KEY, JSON.stringify(DATA));
+    DATA.evJoueurs = _evj || {};
+  }catch(e){ console.warn('[saveData] localStorage write error', e); }
   /* RÈGLE GLOBALE : toujours persister dans Supabase — plus de perte de données */
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     if(DATA.events) DATA.events.forEach(function(ev){ supaWriteEvent(ev); });
@@ -2165,7 +2170,7 @@ function gasBackup(action, payload){
 // _resetDataOld_removed — remplacée par version protégée (voir lancerTirage)
 const DATA = loadData();
 /* ── evJoueurs : données joueurs SCOPÉES par event (non persistées) ── */
-DATA.evJoueurs = DATA.evJoueurs || {};
+DATA.evJoueurs = {}; /* session uniquement — jamais persisté en localStorage */
 // ══ PURGE BANQUES ══
 try {
   var _ok = ['bq-paques-vence']; // Banque officielle Pâques Vence
@@ -3550,9 +3555,9 @@ function newPro(){
 /* ── Chargement joueurs scopé par event ── */
 async function loadEventJoueurs(evId){
   if(!evId || !FLOWIN_SUPA_URL) return;
-  if(DATA.evJoueurs[evId]) return; /* déjà chargé */
+  /* Toujours recharger — evJoueurs est une donnée de session */
   try {
-    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.["'+encodeURIComponent(evId)+'"]&select=*&order=updated_at.desc', {
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.["'+evId+'"]&select=*&order=updated_at.desc', {
       headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
     });
     var rows = await r.json();
