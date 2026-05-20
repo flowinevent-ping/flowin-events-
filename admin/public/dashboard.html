@@ -7517,7 +7517,7 @@ function renderBiblioJeux(){
   if(cfg.quizBonus === false)   _cfgParams += '&bonus=0';
   if(cfg.quizPartage === false) _cfgParams += '&partage=0';
   if(cfg.quizTimer)             _cfgParams += '&timer='+encodeURIComponent(cfg.quizTimer||0);
-  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '?module=' + encodeURIComponent(tab) + _cfgParams;
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab) + _cfgParams;
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
