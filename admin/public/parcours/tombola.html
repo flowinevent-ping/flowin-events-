@@ -2309,16 +2309,22 @@ function tbPickGender(el){
   parent.querySelectorAll('button').forEach(function(b){
     b.style.background = 'rgba(255,255,255,.06)';
     b.style.borderColor = 'rgba(168,85,247,.3)';
-    b.style.color = '#1A1033';
+    b.style.color = '#fff';
+    b.removeAttribute('data-selected');
   });
   el.style.background = 'rgba(168,85,247,.15)';
   el.style.borderColor = '#7C2D92';
   el.style.color = '#C4B5FD';
+  el.setAttribute('data-selected', '1');
 }
 function tbPickSource(el){
   var parent = el.parentElement;
-  parent.querySelectorAll('.tb-source-chip').forEach(function(c){ c.classList.remove('sel'); });
+  parent.querySelectorAll('.tb-source-chip').forEach(function(c){
+    c.classList.remove('sel');
+    c.removeAttribute('data-selected');
+  });
   el.classList.add('sel');
+  el.setAttribute('data-selected', '1');
 }
 
 
@@ -2536,7 +2542,16 @@ async function tbSubmitForm(){
 
   /* 8. Sauvegarde localStorage + Supabase
         ticket_code dans _extra -> _flowinMerge l'injecte dans joueurs.ticket_code */
-  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket };
+  /* Collecte genre, source, age */
+  var _genderBtn = document.querySelector('#tb-genre-f[data-selected], #tb-genre-m[data-selected]');
+  var _genre = _genderBtn ? (_genderBtn.id === 'tb-genre-f' ? 'Femme' : 'Homme') : '';
+  var _sourceChip = document.querySelector('.tb-source-chip[data-selected]');
+  var _source = _sourceChip ? _sourceChip.textContent.replace(/^[^ ]+ /,'') : '';
+  var _ageSelect = document.querySelector('#tb-2 select');
+  var _age = _ageSelect ? _ageSelect.value : '';
+  var _codePostal = (document.querySelector('#tb-2 .form-input[placeholder=""]')||{}).value || '';
+  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket,
+    genre:_genre, decouverte:_source, age_tranche:_age, code_postal:_codePostal };
   registerPlay('tb', email, _ticket, _extra);
 
   /* 9. Confirmation + reset bouton */

@@ -4234,11 +4234,37 @@ function exportPDFRapport(eventId){
     ${gagnants.map(l=>{const j=LIB_JOUEURS.find(l.assigneA)||{};return `<tr><td>${esc(j.nom||'-')}</td><td>${esc(j.email||'-')}</td><td>${esc(l.nom)}</td><td>${l.retire?'✓':'En attente'}</td></tr>`;}).join('')}
     </tbody></table>` : '';
 
-  const jouTable = `<h2>Liste participants (${participants.length})</h2>
-    <table><thead><tr><th>Nom</th><th>Email</th><th>Ville</th><th>CP</th><th>Opt-in</th><th>Score</th></tr></thead><tbody>
-    ${participants.slice(0,100).map(j=>`<tr><td>${esc(j.nom)}</td><td>${esc(j.email)}</td><td>${esc(j.ville||'')}</td><td>${j.codePostal||''}</td><td>${j.optin?'✓':''}</td><td>${esc(j.scoreMoy||'')}</td></tr>`).join('')}
-    ${participants.length>100?`<tr><td colspan="6" style="text-align:center;color:#94A3B8;font-style:italic">… et ${participants.length-100} autres (export CSV pour la liste complète)</td></tr>`:''}
-    </tbody></table>`;
+  /* Déterminer si event a des questions bonus quiz */
+  const hasScore = participants.some(j=>j.scoreMoy&&j.scoreMoy!=='0');
+  const hasGenre = participants.some(j=>j.genre);
+  const hasAge   = participants.some(j=>j.ageTranche);
+  const hasDec   = participants.some(j=>j.decouverte);
+  const hasCp    = participants.some(j=>j.codePostal);
+
+  const cols = ['Prénom','Nom','Email','Téléphone','Ville'];
+  if(hasCp)    cols.push('CP');
+  if(hasGenre) cols.push('Genre');
+  if(hasAge)   cols.push('Tranche d\'âge');
+  if(hasDec)   cols.push('Découverte');
+  cols.push('Opt-in','Ticket');
+  if(hasScore) cols.push('Score');
+
+  const jouTable = '<h2>Liste participants ('+participants.length+')</h2>'
+    + '<table><thead><tr>'+cols.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'
+    + participants.slice(0,200).map(function(j){
+        var cells = [
+          esc(j.prenom||''), esc(j.nom||''), esc(j.email||''), esc(j.tel||''), esc(j.ville||'')
+        ];
+        if(hasCp)    cells.push(j.codePostal||'');
+        if(hasGenre) cells.push(j.genre||'');
+        if(hasAge)   cells.push(j.ageTranche||'');
+        if(hasDec)   cells.push(j.decouverte||'');
+        cells.push(j.optin?'✓':'', esc(j.ticketCode||''));
+        if(hasScore) cells.push(esc(j.scoreMoy||''));
+        return '<tr>'+cells.map(function(v){ return '<td>'+v+'</td>'; }).join('')+'</tr>';
+      }).join('')
+    + (participants.length>200?'<tr><td colspan="'+cols.length+'" style="text-align:center;color:#94A3B8;font-style:italic">… et '+(participants.length-200)+' autres (export CSV pour la liste complète)</td></tr>':'')
+    + '</tbody></table>';
 
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Rapport Flowin${ev?' — '+ev.nom:''}</title><style>${css}</style></head><body>
     <h1>📊 Rapport Flowin${ev?' — '+ev.nom:''}</h1>
@@ -6200,69 +6226,22 @@ function drawerEvent(e){
       }
     })();
 
-    // ─── APERÇU LIVE MOBILE (en haut) ───
+    // ─── APERÇU : iframe du parcours réel ───
+    var _ifrUrl = 'https://flowin-events.vercel.app/parcours/'+e.module+'.html?ev='+encodeURIComponent(e.id)+'&preview=1';
     html += '<div class="front-preview-wrap">';
-    html += '<div class="front-preview-label" style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu mobile · live</div>';
-    html += '<div class="front-preview-mobile" id="frontPreview" style="position:sticky;top:0">';
-    html += '<div class="front-preview-notch" style="display:none"></div>';
-    html += '<div class="front-preview-inner" style="background:linear-gradient(160deg,#0F172A 0%,#1E293B 60%,#172033 100%);color:#fff;display:flex;flex-direction:column;height:100%">';
-
-    // ── HERO (fond sombre Flowin) ──
-    var _logoSvg = e.cfg && e.cfg.logoSvg;
-    var _logoEmoji = e.cfg && e.cfg.logoEmoji;
-    var _isTombola = e.module === 'tombola';
-    var _defaultLogo = _isTombola
-      ? '<svg viewBox="0 0 100 100" style="width:72px;height:72px;display:block;margin:0 auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+(e.couleur||'#E8212B')+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+(e.couleur||'#E8212B')+'"/></svg>'
-      : (e.cfg&&e.cfg.logoEmoji ? '<div style="font-size:40px;margin:0 auto 4px">'+e.cfg.logoEmoji+'</div>' : '');
-
-    html += '<div style="padding:24px 18px 12px;text-align:center">';
-    // Badge pill
-    var _badgeTxt = front.badge || (e.lieu ? e.lieu.toUpperCase() : '') + (front.sousTitre ? ' · '+front.sousTitre.toUpperCase() : '');
-    if(_badgeTxt) html += '<div id="fp-pv-badge" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:5px 14px;font-size:9px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px">'+(e.module==="tombola"?"❤️":"🎮")+" "+esc(_badgeTxt)+'</div>';
-    // Logo
-    var _showLogo = _logoSvg || _defaultLogo;
-    if(_showLogo) html += '<div style="margin:0 auto 12px;display:flex;justify-content:center;text-align:center">'+(_logoSvg||_defaultLogo)+'</div>';
-    // Titre
-    if(front.visible.titre) html += '<div class="fp-title" id="fp-pv-titre" style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;margin-bottom:8px">'+esc(front.titre||'')+'</div>';
-    // Description
-    if(front.description) html += '<div id="fp-pv-desc" style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:10px;padding:0 8px">'+esc(front.description)+'</div>';
-    // Dates
-    if(front.visible.dates) html += '<div id="fp-pv-dates" style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:12px">'+esc(front.dates||'')+'</div>';
+    html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu mobile · live (parcours réel)</div>';
+    html += '<div style="position:relative;width:280px;margin:0 auto">';
+    /* Cadre téléphone */
+    html += '<div style="border:3px solid #1e293b;border-radius:32px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);background:#000">';
+    html += '<div style="background:#1e293b;height:26px;display:flex;align-items:center;justify-content:center">';
+    html += '<div style="width:60px;height:8px;background:#000;border-radius:4px"></div>';
     html += '</div>';
-    // Lots
-    if(front.visible.lots){
-      const activeLots = allLots.filter(l => !front.lotsActifs.length || front.lotsActifs.includes(l.id));
-      if(activeLots.length){
-        html += '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;margin:0 12px 10px;padding:4px 12px">';
-        var _ranks=['🥇','🥈','🥉'];
-        activeLots.slice(0,3).forEach(function(l,i){
-          var _ico=l.emoji||_ranks[i]||'🎁';
-          var _nom=l.nom||l.titre||'Lot';
-          var _sub=l.partenaire||'';
-          html += '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(i<2?'border-bottom:1px solid rgba(255,255,255,.08)':'')+'">'               + '<div style="width:36px;height:36px;border-radius:11px;background:rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+_ico+'</div>'               + '<div><div style="font-size:13px;font-weight:800;color:#fff">'+esc(_nom)+'</div>'               + (_sub?'<div style="font-size:11px;color:rgba(255,255,255,.5)">'+esc(_sub)+'</div>':'')               + '</div></div>';
-        });
-        html += '</div>';
-      }
-    }
-    // Lot semaine
-    if(front.visible.lotSemaine && front.lotSemaine){
-      html += '<div class="fp-section fp-lot-semaine">';
-      html += '<div class="fp-lot-semaine-tag" id="fp-pv-semnom">'+esc(front.lotSemaineNom||'')+'</div>';
-      html += '<div class="fp-lot-semaine-titre" id="fp-pv-semlabel">'+esc(front.lotSemaineLabel||'')+'</div>';
-      html += '<div class="fp-lot-semaine-detail" id="fp-pv-sem">'+esc(front.lotSemaine)+(front.lotSemaineVal?' · <strong>'+esc(front.lotSemaineVal)+'</strong>':'')+'</div>';
-      html += '</div>';
-    }
-    // Tirage
-    if(front.visible.tirage){
-      html += '<div style="margin:0 12px 10px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);border-radius:10px;padding:10px 14px;text-align:center"><span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8)" id="fp-pv-tirage">'+esc(front.lotTirage||'')+'</span></div>';
-    }
-    // CTA
-    html += '<div class="fp-cta-wrap">';
-    html += '<button class="fp-cta-btn" style="background:linear-gradient(135deg,#7C2D92,#A855F7);color:#fff;width:calc(100%-32px);margin:0 16px;border:none;border-radius:50px;padding:16px;font-size:15px;font-weight:800;cursor:pointer" id="fp-pv-cta">'+esc(front.ctaText||'Participer')+'</button>';
-    html += '<div class="fp-cta-note">Jeu gratuit · Sans achat obligatoire</div>';
-    html += '</div>';
-    html += '</div>';  // front-preview-inner
+    html += '<iframe src="'+escAttr(_ifrUrl)+'" style="width:375px;height:580px;border:none;transform:scale(0.747);transform-origin:0 0;display:block;pointer-events:none" scrolling="no"></iframe>';
     html += '</div></div>';
+    html += '<div style="text-align:center;margin-top:8px">';
+    html += '<a href="'+escAttr(_ifrUrl)+'" target="_blank" class="btn btn-sm">🔗 Ouvrir en plein écran</a>';
+    html += '</div>';
+    html += '</div>';
 
     // ─── ÉDITEUR ───
     html += '<div class="front-editor">';
