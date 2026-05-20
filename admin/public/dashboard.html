@@ -2692,6 +2692,8 @@ function thSort(view,key,label,extraCls){
 
 // ----- TOAST -----
 let toastTimer = null;
+function parcoursUrl(m,ev){return ev?'/parcours/'+encodeURIComponent(m)+'?ev='+encodeURIComponent(ev):'/parcours/'+encodeURIComponent(m||'quiz')+'.html';}
+function proUrl(ev,pro){return ev?'/pro?ev='+encodeURIComponent(ev):pro?'/pro?pro='+encodeURIComponent(pro):'/pro';}
 function toast(msg,type){
   const el = $('#toast');
   el.className = 'toast show '+(type||'');
@@ -6260,7 +6262,7 @@ function drawerEvent(e){
     })();
 
     // ─── APERÇU : iframe du parcours réel ───
-    var _ifrUrl = '/parcours/'+e.module+'?ev='+encodeURIComponent(e.id);
+    var _ifrUrl = parcoursUrl(e.module, e.id);
     html += '<div class="front-preview-wrap">';
     html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu mobile · live (parcours réel)</div>';
     html += '<div style="position:relative;width:280px;margin:0 auto">';
@@ -6789,7 +6791,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
-       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '?ev=' + encodeURIComponent(e.id);
+       var _joueurUrl = parcoursUrl(e.module||'quiz', e.id);
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
        html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
@@ -6803,7 +6805,7 @@ function drawerEvent(e){
      } else {
        // ── Vision Pro : modal plein écran pro_mobile.html validé ──
        var _pv = e.proVisib || {};
-       var _proMobileUrl = '/pro?ev=' + encodeURIComponent(e.id);
+       var _proMobileUrl = proUrl(e.id, null);
        html += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
        // Bannière URL
        html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
@@ -6995,7 +6997,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '?ev=' + encodeURIComponent(eid);
+  var _jeuOpenUrl = parcoursUrl(e.module||'quiz', eid);
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
@@ -7522,10 +7524,10 @@ function renderBiblioJeux(){
   var _masterUrl;
   if(_evForModule) {
     /* Event trouvé → aperçu Next.js avec vraies données */
-    _masterUrl = '/parcours/' + encodeURIComponent(tab) + '?ev=' + encodeURIComponent(_evForModule.id);
+    _masterUrl = parcoursUrl(tab, _evForModule.id);
   } else {
     /* Aucun event → fallback HTML statique */
-    _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab);
+    _masterUrl = parcoursUrl(tab, null);
   }
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
@@ -11361,7 +11363,7 @@ function openJoueurModal(evId, evNom, module){
   var openLink = document.getElementById('jmOpenLink');
   var urlDisp = document.getElementById('jmUrlDisplay');
   if(!modal||!iframe) return;
-  var url = '/parcours/'+(module||'quiz')+'?ev='+encodeURIComponent(evId);
+  var url = parcoursUrl(module||'quiz', evId);
   sub.textContent = evNom + (module?' · '+module:'');
   iframe.src = url;
   if(openLink) openLink.href = url;
