@@ -193,7 +193,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
       )}
 
       {screen === 'partSheet' && partSel && (
-        <div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,.6)',zIndex:10,display:'flex',alignItems:'flex-end' }} onClick={()=>setScreen('partenaires')}>
+        <div style={{ position:'fixed',inset:0,background:'rgba(10,15,30,.75)',zIndex:10,display:'flex',alignItems:'flex-end',backdropFilter:'blur(4px)' }} onClick={()=>setScreen('partenaires')}>
           <div style={{ background:'#1E293B',borderRadius:'20px 20px 0 0',padding:20,width:'100%',maxWidth:430,margin:'0 auto',maxHeight:'70dvh',overflowY:'auto' }} onClick={e=>e.stopPropagation()}>
             <div style={{ width:72,height:72,borderRadius:'50%',background:'rgba(255,255,255,.06)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,margin:'0 auto 12px' }}>{partSel.emoji??'🤝'}</div>
             <div style={{ fontSize:20,fontWeight:900,textAlign:'center',marginBottom:4 }}>{partSel.nom}</div>

@@ -272,7 +272,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
               <div key={p.id} className="part-tile" onClick={() => { setPartIdx(i); setScreen('partSheet') }}>
                 {p.image_url
                   ? <img src={p.image_url} alt={p.nom} style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 8, marginBottom: 6, display: 'block', margin: '0 auto 6px' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  : <div style={{ fontSize: 32, marginBottom: 6 }}>{p.emoji ?? '🤝'}</div>
+                  : <div style={{ fontSize: 32, marginBottom: 6 }}>{p.emoji || '🤝'}</div>
                 }
                 <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.3 }}>{p.nom}</div>
               </div>
@@ -287,7 +287,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 10, display: 'flex', alignItems: 'flex-end' }} onClick={() => setScreen('partenaires')}>
           <div style={{ background: '#1E293B', borderRadius: '20px 20px 0 0', padding: 20, width: '100%', maxWidth: 430, margin: '0 auto', maxHeight: '70dvh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,.06)', border: '2px solid rgba(255,255,255,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, margin: '0 auto 12px' }}>
-              {partSelected.image_url ? <img src={partSelected.image_url} alt={partSelected.nom} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} /> : partSelected.emoji ?? '🤝'}
+              {partSelected.image_url ? <img src={partSelected.image_url} alt={partSelected.nom} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} /> : partSelected.emoji || '🤝'}
             </div>
             <div style={{ fontSize: 20, fontWeight: 900, textAlign: 'center', marginBottom: 4 }}>{partSelected.nom}</div>
             {partSelected.description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', textAlign: 'center', lineHeight: 1.5, marginBottom: 12 }}>{partSelected.description}</div>}
