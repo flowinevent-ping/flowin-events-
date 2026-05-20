@@ -43,10 +43,6 @@
   ],
   "rewrites": [
     {
-      "source": "/pro",
-      "destination": "/static/pro_mobile.html"
-    },
-    {
       "source": "/landing",
       "destination": "/landing/index.html"
     },

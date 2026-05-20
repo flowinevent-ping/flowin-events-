@@ -6790,7 +6790,7 @@ function drawerEvent(e){
      html += '</div>';
 
      if(parcoursTab==='joueur') {
-       // ── Vision joueur : modal plein écran parcours_user.html validé ──
+       // ── Vision joueur ──
        var _joueurUrl = parcoursUrl(e.module||'quiz', e.id);
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
@@ -7511,7 +7511,7 @@ function renderBiblioJeux(){
 
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
-  // ── Parcours complet validé : iframe parcours_user.html ──
+  // ── Parcours complet ──
   var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
   /* Chercher un event utilisant ce module pour un vrai aperçu */
   var _evForModule = null;
@@ -9037,9 +9037,9 @@ function modalReglagesSection(d){
       <div class="toggle-row"><div><div class="lbl">Sessions courtes (4 h)</div><div class="desc">Reconnexion auto au-delà</div></div><div class="toggle"></div></div>
       <div class="form-row mt-3"><label class="label">IP autorisées</label><input type="text" class="input" placeholder="Ex: 84.12.34.56"/></div>`},
     urls:{title:'🌐 URLs & domaines',body:`
-      <div class="form-row"><label class="label">Domaine principal</label><input type="text" class="input" value="flowin.romain-opconsult.com"/></div>
+      <div class="form-row"><label class="label">Domaine principal</label><input type="text" class="input" value="flowin-events.vercel.app"/></div>
       <div class="form-row"><label class="label">Pattern slug events</label><input type="text" class="input" value="/[event-slug]"/></div>
-      <div class="text-sm text-muted">Exemple : <code>https://flowin.romain-opconsult.com/nuits-du-sud-2026</code></div>`},
+      <div class="text-sm text-muted">Exemple : <code>https://flowin-events.vercel.app/parcours/quiz?ev=mon-event</code></div>`},
     templates:{title:'📧 Templates email',body:`
       <ul class="activity-list">
         ${activityItem('Confirmation','📧','Confirmation inscription event')}
@@ -10276,7 +10276,7 @@ function wizPreviewFront(d, couleur, nom, lots, partenaires) {
   var _cta   = front.ctaText || (d.module==='tombola' ? '🎟️ Je m\'inscris à la tombola →' : '🎮 Participer gratuitement');
   var _ctaNote = front.ctaNote || 'Jeu gratuit · Sans achat obligatoire';
   var _isTombola = d.module === 'tombola';
-  /* Logo identique à tombola.html : 84px, drop-shadow */
+  /* Logo événement */
   var _logoSvg = _isTombola
     ? '<svg viewBox="0 0 100 100" style="width:84px;height:84px;display:block;margin:0 auto 12px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4))"><circle cx="50" cy="50" r="50" fill="#fff"/><rect x="38" y="16" width="24" height="68" rx="5" fill="'+couleur+'"/><rect x="16" y="38" width="68" height="24" rx="5" fill="'+couleur+'"/></svg>'
     : (d.module==='quiz'?'<div style="font-size:36px;margin:0 auto 10px;text-align:center">🧠</div>':d.module==='vote'?'<div style="font-size:36px;margin:0 auto 10px;text-align:center">🗳️</div>':d.module==='spin'?'<div style="font-size:36px;margin:0 auto 10px;text-align:center">🎡</div>':'');
@@ -11330,7 +11330,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 /* ═══════════════════════════════════════════════════════════════════ */
 /* MODAL PARCOURS PRO MOBILE                                           */
 /* ═══════════════════════════════════════════════════════════════════ */
-/* ── Modal Joueur : parcours_user.html?ev=&module= ── */
+/* ── Modal Joueur ── */
 
 function flowinScalePhones(){} function flowinScalePhone(){}
 function flowinNavIframe(iframeId, dir) {
@@ -11380,7 +11380,7 @@ function closeJoueurModal(){
   document.body.style.overflow = '';
 }
 
-/* ── Modal Pro Event : pro_mobile.html?ev= ── */
+/* ── Modal Pro Event ── */
 function openEventProModal(evId, evNom){
   var modal = document.getElementById('proMobileModal');
   var iframe = document.getElementById('pmmIframe');
@@ -11466,7 +11466,7 @@ document.addEventListener('keydown', function(e){
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- MODAL PARCOURS JOUEUR (parcours_user.html?ev=&module=)              -->
+<!-- MODAL PARCOURS JOUEUR -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <div id="joueurModal" class="pro-mobile-modal" style="display:none">
   <div class="pmm-backdrop" onclick="closeJoueurModal()"></div>
@@ -11491,7 +11491,7 @@ document.addEventListener('keydown', function(e){
   </div>
 </div>
 
-<!-- MODAL PARCOURS PRO MOBILE (aperçu live de pro_mobile.html)          -->
+<!-- MODAL PARCOURS PRO MOBILE -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 <div id="proMobileModal" class="pro-mobile-modal" style="display:none">
   <div class="pmm-backdrop" onclick="closeProMobileModal()"></div>
