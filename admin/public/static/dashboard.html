@@ -4131,6 +4131,36 @@ function exportCSV(type, id){
     const rows = evs.map(e=>[esc2csv(e.nom),e.module,e.status,e.dateD,j.scoreMoy,j.gains].join(';'));
     downloadCSV('historique-'+j.id+'.csv', cols.join(';')+'\n'+rows.join('\n'));
     toast('Export historique téléchargé','success');
+  } else if(type==='optin'){
+    /* Export opt-in scopé à l'event */
+    const evOptin = id ? LIB_EVENTS.find(id) : null;
+    const joueursOptin = DATA.joueurs.filter(function(j){
+      return j.optin === true
+        && (!id || (j.events && j.events.indexOf(id) >= 0));
+    });
+    const colsO = ['Email','Prénom','Nom','Téléphone','Ville','Code postal','Opt-in date','Source'];
+    const rowsO = joueursOptin.map(function(j){
+      return [esc2csv(j.email),esc2csv(j.prenom),esc2csv(j.nom),j.tel||'',esc2csv(j.ville),j.codePostal||'',j.optinDate||'',esc2csv(j.source)].join(';');
+    });
+    const fnameO = id ? 'optin-'+id+'.csv' : 'optin-global.csv';
+    downloadCSV(fnameO, colsO.join(';')+'\n'+rowsO.join('\n'));
+    toast('Export opt-in téléchargé ('+joueursOptin.length+' contacts)','success');
+  } else if(type==='mailchimp'){
+    /* Export format Mailchimp scopé à l'event */
+    const joueursMailchimp = DATA.joueurs.filter(function(j){
+      return j.optin === true
+        && (!id || (j.events && j.events.indexOf(id) >= 0));
+    });
+    /* Format Mailchimp : Email Address, First Name, Last Name, Phone, Tags */
+    const evMc = id ? LIB_EVENTS.find(id) : null;
+    const tagMc = evMc ? evMc.nom.replace(/[,"]/g,'') : 'Flowin';
+    const colsMc = ['Email Address','First Name','Last Name','Phone','Tags'];
+    const rowsMc = joueursMailchimp.map(function(j){
+      return [esc2csv(j.email),esc2csv(j.prenom),esc2csv(j.nom),j.tel||'',esc2csv(tagMc)].join(',');
+    });
+    const fnameMc = id ? 'mailchimp-'+id+'.csv' : 'mailchimp-global.csv';
+    downloadCSV(fnameMc, colsMc.join(',')+'\n'+rowsMc.join('\n'));
+    toast('Export Mailchimp téléchargé ('+joueursMailchimp.length+' contacts)','success');
   } else {
     toast('Export CSV ('+type+') — type non reconnu','warn');
   }
@@ -6557,10 +6587,10 @@ function drawerEvent(e){
 
   } else if(state.drawer.tab==='export'){
     html += '<div class="section-h">Exports</div>';
-    html += '<button class="btn mb-2 btn-block" onclick="(function(){const eDrawer=findEvent(state.drawer.id);if(eDrawer)exportPDFRapport(eDrawer.id);})()">📄 Synthèse event (PDF)</button>';
-    html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'joueurs\',\''+e.id+'\'">📥 Liste participants (CSV)</button>';
-    html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'joueurs\',\''+e.id+'\'">📧 Liste opt-in newsletter (CSV)</button>';
-    html += '<button class="btn btn-block" onclick="toast(\'Export Mailchimp configuré\',\'success\')">🔗 Pousser vers Mailchimp</button>';
+    html += '<button class="btn mb-2 btn-block" onclick="exportPDFRapport(\''+e.id+'\')">📄 Synthèse event (PDF)</button>';
+    html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'joueurs\',\''+e.id+'\');">📥 Liste participants (CSV)</button>';
+    html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'optin\',\''+e.id+'\');">📧 Liste opt-in newsletter (CSV)</button>';
+    html += '<button class="btn btn-block" onclick="exportCSV(\'mailchimp\',\''+e.id+'\');">🔗 Export format Mailchimp (CSV)</button>';
   }
   html += '</div>';
   if(state.drawer.edit){
