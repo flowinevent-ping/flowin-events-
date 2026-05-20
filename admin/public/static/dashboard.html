@@ -5684,7 +5684,7 @@ function drawerEvent(e){
   if(!isPro || pv.participants!==false) tabs.push({id:'participants',label:'Participants',badge:participants.length||null});
   tabs.push({id:'jeu',label:'🎮 Jeu'});
   // Lots fusionné dans Front
-  if(state.mode==='sa') tabs.push({id:'parcours',label:'📱 Parcours'});
+  tabs.push({id:'parcours',label:'📱 Parcours'}); // visible SA + PRO
   if(!isPro || pv.export!==false) tabs.push({id:'export',label:'Export'});
   html += drawerTabs(tabs);
   html += '<div class="drawer-body">';
@@ -6756,7 +6756,7 @@ function drawerEvent(e){
 
      if(parcoursTab==='joueur') {
        // ── Vision joueur : modal plein écran parcours_user.html validé ──
-       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(e.id) + '&module=' + encodeURIComponent(e.module||'quiz');
+       var _joueurUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '?ev=' + encodeURIComponent(e.id);
        var _vjiId = 'iframe-parcours-'+e.id;
        html += '<div class="flowin-phone-wrap">';
        html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_vjiId+'\',\'next\')">›</button></div>';
@@ -6770,7 +6770,7 @@ function drawerEvent(e){
      } else {
        // ── Vision Pro : modal plein écran pro_mobile.html validé ──
        var _pv = e.proVisib || {};
-       var _proMobileUrl = '/static/pro_mobile.html?ev=' + encodeURIComponent(e.id);
+       var _proMobileUrl = '/pro?ev=' + encodeURIComponent(e.id);
        html += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">';
        // Bannière URL
        html += '<div style="width:100%;display:flex;align-items:center;gap:8px;background:var(--sa-subtle);border-radius:10px;padding:8px 12px">';
@@ -6961,7 +6961,7 @@ function renderOngletJeu(e){
   // Synchroniser previewIdx dans state.wiz
   if(!state.wiz) state.wiz = {};
   // ── Aperçu joueur : séquence complète navigable (renderWizPreviewSequence) ──
-  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '.html?ev=' + encodeURIComponent(eid) + '&module=' + encodeURIComponent(e.module||'quiz');
+  var _jeuOpenUrl = '/parcours/' + encodeURIComponent(e.module||'quiz') + '?ev=' + encodeURIComponent(eid);
   html += '<div style="margin-top:18px;border-top:1px solid var(--sa-border);padding-top:14px">';
   var _iframeId = 'iframe-jeu-'+eid;
   html += '<div style="font-size:11px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📱 Parcours joueur · toutes les pages</div>';
@@ -7483,7 +7483,7 @@ function renderBiblioJeux(){
   if(cfg.quizBonus === false)   _cfgParams += '&bonus=0';
   if(cfg.quizPartage === false) _cfgParams += '&partage=0';
   if(cfg.quizTimer)             _cfgParams += '&timer='+encodeURIComponent(cfg.quizTimer||0);
-  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '.html?module=' + encodeURIComponent(tab) + _cfgParams;
+  var _masterUrl = '/parcours/' + encodeURIComponent(tab) + '?module=' + encodeURIComponent(tab) + _cfgParams;
   var _jmIframeId = 'iframe-master-'+tab;
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
@@ -9960,7 +9960,7 @@ function renderWizardEvent(){
   } else if(step==='H'){
     // Étape H : aperçu LIVE pro_mobile.html — UX validée, pas d'invention
     if(d.id){
-      var _proIframeUrl = '/static/pro_mobile.html?ev=' + encodeURIComponent(d.id);
+      var _proIframeUrl = '/pro?ev=' + encodeURIComponent(d.id);
       html += '<div style="display:flex;justify-content:center">';
       html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.25),inset 0 0 0 2px #333;position:relative">';
       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
@@ -11340,7 +11340,7 @@ function openEventProModal(evId, evNom){
   var urlDisp = document.getElementById('pmmUrlDisplay');
   var openLink = document.getElementById('pmmOpenLink');
   if(!modal||!iframe) return;
-  var url = '/static/pro_mobile.html?ev='+encodeURIComponent(evId);
+  var url = '/pro?ev='+encodeURIComponent(evId);
   if(sub) sub.textContent = evNom || evId;
   iframe.src = url;
   if(openLink) openLink.href = url;
@@ -11361,7 +11361,7 @@ function openProMobileModal(proId){
   if(!modal || !iframe) return;
   
   /* Construction de l'URL : relative pour preview locale, absolue pour partage */
-  var localUrl = '/static/pro_mobile.html?pro=' + encodeURIComponent(proId);
+  var localUrl = '/pro?pro=' + encodeURIComponent(proId);
   var origin = window.location.origin && window.location.origin !== 'null'
                ? window.location.origin
                : 'https://flowin-events.vercel.app';
