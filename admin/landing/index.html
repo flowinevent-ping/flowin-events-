@@ -33,13 +33,6 @@ html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--navy
 }
 .logo{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-1px}
 .logo em{font-style:normal;color:var(--purple)}
-.topbar-cta{
-  background:var(--teal);color:#fff;border:none;
-  padding:10px 22px;border-radius:8px;
-  font-family:var(--f);font-size:13px;font-weight:800;
-  cursor:pointer;transition:.2s;
-}
-.topbar-cta:hover{background:#009175}
 
 /* ══ HERO ══ */
 .hero{
@@ -340,7 +333,6 @@ footer{
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">Flow<em>in</em></div>
-  <button class="topbar-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Tester gratuitement →</button>
 </div>
 
 <!-- ══ HERO ══ -->
@@ -1035,7 +1027,7 @@ function spinSubmitForm(){
   if(tel) msg+=' | Tel : '+tel;
   if(ville) msg+=' | Ville : '+ville;
   if(spSource) msg+=' | Connu via : '+spSource;
-  document.getElementById('sp-wa-link').href='https://wa.me/33XXXXXXXXX?text='+encodeURIComponent(msg);
+  document.getElementById('sp-wa-link').href='https://wa.me/?text='+encodeURIComponent(msg);
   var nm=document.getElementById('spin6-name');
   if(nm)nm.textContent=prenom+(enseigne?' - '+enseigne:'')+", c est gagne !";
   spinGo(6);
