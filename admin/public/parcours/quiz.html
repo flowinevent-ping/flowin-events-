@@ -1466,22 +1466,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
           <div class="partenaires">
             <div class="partenaires-label" id="pq-part-label">★ Partenaires Fêtes de Pâques 2026 ★</div>
             <div class="partenaires-grid" id="pq-part-grid">
-              <div class="partenaire-tile" onclick="window.open('https://www.vence.fr','_blank')">
-                <div class="partenaire-emoji">🏛️</div>
-                <div class="partenaire-name">Ville de Vence</div>
-              </div>
-              <div class="partenaire-tile" onclick="window.open('#','_blank')">
-                <div class="partenaire-emoji">🥖</div>
-                <div class="partenaire-name">Boulangerie Saint-Lambert</div>
-              </div>
-              <div class="partenaire-tile" onclick="window.open('#','_blank')">
-                <div class="partenaire-emoji">🍷</div>
-                <div class="partenaire-name">Domaine de la Source</div>
-              </div>
-              <div class="partenaire-tile" onclick="window.open('#','_blank')">
-                <div class="partenaire-emoji">🌸</div>
-                <div class="partenaire-name">Fleurs de Vence</div>
-              </div>
+              <!-- Partenaires chargés depuis Supabase via flowinHydratePartenaires -->
             </div>
           </div>
         </div>
@@ -3006,6 +2991,12 @@ function flowinHydrateGenericQuiz(ev){
     }
     console.log('[Flowin] Compteur questions mis à jour: ' + _nbQ + ' questions');
   }
+
+  /* ── Partenaires : vider la grille hardcodée Pâques, sera remplie par flowinHydratePartenaires ── */
+  var partGrid = document.getElementById('pq-part-grid');
+  if(partGrid) partGrid.innerHTML = '<div style="text-align:center;padding:24px;color:rgba(0,0,0,.3);font-size:13px">Chargement des partenaires…</div>';
+  var partLabel = document.getElementById('pq-part-label');
+  if(partLabel) partLabel.textContent = ev.nom ? ('\u2605 Partenaires \u00b7 ' + ev.nom + ' \u2605') : '\u2605 Partenaires \u2605';
 
   console.log('[Flowin] hydratation generique quiz OK:', ev.nom);
 
