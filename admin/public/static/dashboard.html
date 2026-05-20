@@ -2877,6 +2877,8 @@ function modalWizPartner(d){
     +   '<div><label class="label">Instagram</label><input type="text" class="input" value="'+escAttr(d.instagram||'')+'" placeholder="@compte" oninput="state.modal.data.instagram=this.value"/></div>'
     +   '<div><label class="label">Facebook</label><input type="text" class="input" value="'+escAttr(d.facebook||'')+'" placeholder="Page ou URL" oninput="state.modal.data.facebook=this.value"/></div>'
     + '</div>'
+    + '<div class="form-row mt-2"><label class="label">Logo (URL image) <span style="font-size:10px;color:var(--sa-muted);font-weight:400">— affiché à la place de l\'emoji dans le parcours</span></label>'
+    + '<input type="url" class="input" value="'+escAttr(d.image_url||d.imageUrl||'')+'" placeholder="https://... (jpg, png, svg)" oninput="state.modal.data.image_url=this.value"/></div>'
     + '<div class="alert info mt-3 text-sm"><span class="ico">ℹ️</span>Ce partenaire sera ajouté au CRM partenaires global et coché automatiquement sur cet event.</div>'
     + '</div>'
     + '<div class="modal-footer"><button class="btn" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="wizPartnerSave()">+ Créer et ajouter</button></div>'
@@ -9217,6 +9219,7 @@ function wizPartnerSave(){
     code_postal:d.code_postal||'', siret:d.siret||'',
     site_web:d.site_web||'', url:d.site_web||'',
     instagram:d.instagram||'', facebook:d.facebook||'',
+    image_url:d.image_url||d.imageUrl||'',
     events:[], actif:true, recurrent:d.type==='Récurrent'
   };
   DATA.partenaires.push(_pt);

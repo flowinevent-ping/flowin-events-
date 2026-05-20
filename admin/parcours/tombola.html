@@ -167,6 +167,23 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .partenaire-tile:active{transform:scale(.97);background:rgba(255,255,255,.14)}
 .partenaire-emoji{font-size:40px;margin-bottom:10px;display:block}
 .partenaire-name{font-size:13px;font-weight:800;color:#fff;line-height:1.3;word-break:break-word}
+.partenaire-logo{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.2)}
+.part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+.part-sheet-overlay.on{opacity:1;pointer-events:all}
+.part-sheet{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#1a1230 0%,#0f0c1e 100%);border-radius:24px 24px 0 0;padding:0 0 env(safe-area-inset-bottom);z-index:201;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.23,1)}
+.part-sheet.on{transform:translateY(0)}
+.part-sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin:10px auto 16px}
+.part-sheet-body{padding:0 24px 28px}
+.part-sheet-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;border:2px solid rgba(255,255,255,.15)}
+.part-sheet-avatar img{width:100%;height:100%;object-fit:cover}
+.part-sheet-nom{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;text-align:center;margin-bottom:6px}
+.part-sheet-desc{font-size:13px;color:rgba(255,255,255,.65);text-align:center;line-height:1.5;margin-bottom:12px}
+.part-sheet-promo{background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.35);border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;color:#C4B5FD;text-align:center;margin-bottom:14px}
+.part-sheet-links{display:flex;flex-direction:column;gap:8px}
+.part-sheet-link{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
+.part-sheet-link:active{background:rgba(255,255,255,.14)}
+.part-sheet-link-ico{font-size:20px;width:28px;text-align:center}
+.part-sheet-close{position:absolute;top:14px;right:18px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 /* Ticket confirm */
 .ticket{margin:0 20px 14px;background:rgba(255,255,255,.07);border:var(--border);border-radius:22px;padding:20px;text-align:center;position:relative}
@@ -1415,6 +1432,20 @@ input::placeholder, select::placeholder, textarea::placeholder {
         </div>
       </div>
 
+    <!-- Bottom sheet partenaire -->
+    <div class="part-sheet-overlay" id="tb-part-overlay" onclick="tbClosePartSheet()"></div>
+    <div class="part-sheet" id="tb-part-sheet" role="dialog" aria-modal="true">
+      <div class="part-sheet-handle"></div>
+      <button class="part-sheet-close" onclick="tbClosePartSheet()">&#x2715;</button>
+      <div class="part-sheet-body">
+        <div class="part-sheet-avatar" id="tb-ps-avatar"></div>
+        <div class="part-sheet-nom" id="tb-ps-nom"></div>
+        <div class="part-sheet-desc" id="tb-ps-desc" style="display:none"></div>
+        <div class="part-sheet-promo" id="tb-ps-promo" style="display:none"></div>
+        <div class="part-sheet-links" id="tb-ps-links"></div>
+      </div>
+    </div>
+
     </div>
   </div>
 <script>
@@ -1890,9 +1921,59 @@ function tbGo(n){
 /* Appelé après flowinShowModuleViewport + fetch event                  */
 /* ═══════════════════════════════════════════════════════════════════ */
 
-function tbOpenPartLink(el) {
-  var link = el.getAttribute('data-url');
-  if(link && link !== '#') window.open(link, '_blank');
+function tbShowPartSheet(idx) {
+  var p = FLOWIN_PARTENAIRES[idx];
+  if(!p) return;
+  var av = document.getElementById('tb-ps-avatar');
+  if(av) {
+    if(p.image_url) {
+      av.innerHTML = '<img src="'+p.image_url+'" alt="'+p.nom+'" style="width:100%;height:100%;object-fit:cover">';
+      av.style.background = 'transparent';
+    } else {
+      av.innerHTML = '<span style="font-size:36px">'+tbGetEmojiForPart(p.nom||'')+'</span>';
+      av.style.background = 'rgba(168,85,247,.15)';
+    }
+  }
+  var nom = document.getElementById('tb-ps-nom');
+  if(nom) nom.textContent = p.nom || '';
+  var desc = document.getElementById('tb-ps-desc');
+  if(desc){ desc.textContent = p.description||''; desc.style.display = p.description ? '' : 'none'; }
+  var promo = document.getElementById('tb-ps-promo');
+  if(promo){ promo.textContent = p.promo_text||''; promo.style.display = p.promo_text ? '' : 'none'; }
+  var links = document.getElementById('tb-ps-links');
+  if(links) {
+    var lhtml = '';
+    if(p.site_web||p.url) lhtml += '<a href="'+(p.site_web||p.url)+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">🌐</span><span>Site internet</span></a>';
+    if(p.instagram) {
+      var _ig = p.instagram.indexOf('http') === 0 ? p.instagram : 'https://instagram.com/'+p.instagram.replace('@','');
+      lhtml += '<a href="'+_ig+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">📸</span><span>Instagram</span></a>';
+    }
+    if(p.facebook) {
+      var _fb = p.facebook.indexOf('http') === 0 ? p.facebook : 'https://facebook.com/'+p.facebook;
+      lhtml += '<a href="'+_fb+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">🔵</span><span>Facebook</span></a>';
+    }
+    if(!lhtml) lhtml = '<div style="text-align:center;color:rgba(255,255,255,.4);font-size:13px;padding:12px 0">Aucun lien configuré pour ce partenaire</div>';
+    links.innerHTML = lhtml;
+  }
+  document.getElementById('tb-part-overlay').classList.add('on');
+  document.getElementById('tb-part-sheet').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function tbClosePartSheet() {
+  document.getElementById('tb-part-overlay').classList.remove('on');
+  document.getElementById('tb-part-sheet').classList.remove('on');
+  document.body.style.overflow = '';
+}
+function tbGetEmojiForPart(nom) {
+  var n = nom.toLowerCase();
+  if(n.indexOf('patisserie')>=0||n.indexOf('palanque')>=0||n.indexOf('boulangerie')>=0) return '🍰';
+  if(n.indexOf('bijouterie')>=0||n.indexOf('lorenzo')>=0||n.indexOf('bijou')>=0) return '💎';
+  if(n.indexOf('ccdk')>=0||n.indexOf('commerce')>=0) return '🏪';
+  if(n.indexOf('cin')>=0||n.indexOf('majestic')>=0) return '🎬';
+  if(n.indexOf('sport')>=0||n.indexOf('decathlon')>=0) return '🏃';
+  if(n.indexOf('pizza')>=0||n.indexOf('restaurant')>=0) return '🍕';
+  if(n.indexOf('ski')>=0||n.indexOf('isola')>=0) return '⛷';
+  return '🤝';
 }
 function flowinHydrateTombolaLots(lots) {
   if(!lots || !lots.length) return;
@@ -1925,23 +2006,16 @@ function flowinHydrateTombolaPartenaires(ev) {
   var html = '';
   for(var i=0; i<parts.length; i++) {
     var p = parts[i];
-    var link = p.site_web || p.url || '#';
-    var emoji = p.emoji;
-    if(!emoji) {
-      var _n = (p.nom||'').toLowerCase();
-      if(_n.indexOf('patisserie')>=0||_n.indexOf('boulangerie')>=0||_n.indexOf('palanque')>=0) emoji='🍰';
-      else if(_n.indexOf('bijouterie')>=0||_n.indexOf('lorenzo')>=0||_n.indexOf('bijou')>=0) emoji='💎';
-      else if(_n.indexOf('ccdk')>=0||_n.indexOf('commerce')>=0) emoji='🏪';
-      else if(_n.indexOf('cin')>=0||_n.indexOf('majestic')>=0) emoji='🎬';
-      else if(_n.indexOf('sport')>=0||_n.indexOf('decathlon')>=0) emoji='🏃';
-      else if(_n.indexOf('pizza')>=0||_n.indexOf('restaurant')>=0) emoji='🍕';
-      else if(_n.indexOf('ski')>=0||_n.indexOf('isola')>=0) emoji='⛷️';
-      else emoji='🤝';
-    }
+    var emoji = p.emoji || tbGetEmojiForPart(p.nom||'');
     var pnom = p.nom || 'Partenaire';
-    html += '<div class="partenaire-tile" data-url="' + link + '" onclick="tbOpenPartLink(this)">';
-    html += '<div class="partenaire-emoji">' + emoji + '</div>';
+    var hasLinks = p.site_web || p.url || p.instagram || p.facebook;
+    var avatarHtml = p.image_url
+      ? '<img src="'+p.image_url+'" alt="'+pnom+'" class="partenaire-logo" style="width:56px;height:56px;margin-bottom:8px">'
+      : '<div class="partenaire-emoji">'+emoji+'</div>';
+    html += '<div class="partenaire-tile" onclick="tbShowPartSheet('+i+')" role="button" aria-label="'+pnom+'">';
+    html += avatarHtml;
     html += '<div class="partenaire-name">' + (pnom.length > 18 ? pnom.slice(0,16) + '...' : pnom) + '</div>';
+    if(hasLinks) html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:4px">→ voir</div>';
     html += '</div>';
   }
   grid.innerHTML = html;
