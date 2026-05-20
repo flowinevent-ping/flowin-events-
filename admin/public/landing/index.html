@@ -487,12 +487,12 @@ footer{
   <div style="margin-top:32px;text-align:center;padding:20px;background:rgba(255,255,255,.08);border-radius:16px;border:1px solid rgba(255,255,255,.12)">
     <div style="font-size:11px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">📱 Accès direct par QR code</div>
     <img id="landing-qr" 
-      src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fflowin-events.vercel.app%2Flanding%2Findex.html%3Fsource%3Dqr&bgcolor=1B3A5C&color=ffffff&margin=8"
+      src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fflowin-events.vercel.app%2Flanding%3Fsource%3Dqr&bgcolor=1B3A5C&color=ffffff&margin=8"
       alt="QR code Flowin" 
       style="border-radius:12px;display:block;margin:0 auto 12px;width:140px;height:140px">
     <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Scannez pour accéder au formulaire</div>
     <div style="font-size:10px;background:rgba(0,0,0,.2);border-radius:8px;padding:6px 12px;color:var(--mu);word-break:break-all;font-family:monospace">
-      flowin-events.vercel.app/landing/index.html
+      flowin-events.vercel.app/landing
     </div>
     <button onclick="copyLandingUrl()" style="margin-top:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 16px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
       📋 Copier le lien
@@ -1222,7 +1222,7 @@ function setupProofObserver(){
 
 // ══ FORMULAIRE ══
 function copyLandingUrl(){
-  var url = 'https://flowin-events.vercel.app/landing/index.html';
+  var url = 'https://flowin-events.vercel.app/landing';
   if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ alert('Lien copié !'); }); }
   else { var t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Lien copié !'); }
 }
