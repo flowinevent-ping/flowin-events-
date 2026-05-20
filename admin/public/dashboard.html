@@ -3053,6 +3053,31 @@ function frontSave(eventId, silent){
 }
 // frontLive : re-render seulement les éléments d'aperçu sans détruire le DOM
 // Évite de perdre le focus des inputs en cours d'édition
+function toggleProVisib(evId, key){
+  var e = findEvent(evId);
+  if(!e){ return; }
+  if(!e.proVisib) e.proVisib = {stats:true,participants:true,lots:true,qr:true,export:true,activite:true};
+  e.proVisib[key] = (e.proVisib[key] !== false) ? false : true;
+  saveData();
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId), {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      body:JSON.stringify({pro_visib:e.proVisib})
+    }).catch(function(err){console.warn('[proVisib]',err);});
+  }
+  renderDrawer();
+}
+function simulateProView(evId){
+  var ev = findEvent(evId);
+  if(!ev){ toast('Event introuvable','warn'); return; }
+  if(!ev.proId){ toast('Pas de Pro configuré pour cet event','warn'); return; }
+  state.currentProId = ev.proId;
+  if(ev.proVisib) state.proVisib = ev.proVisib;
+  closeDrawer();
+  setMode('pro');
+  goView('events');
+}
 function frontLive(){
   function gt(id){ const el=document.getElementById(id); return el?el.value:null; }
   function st(id, v){ const el=document.getElementById(id); if(el && v!=null) el.textContent=v; }
@@ -6797,13 +6822,14 @@ function drawerEvent(e){
        html += '<div style="background:var(--sa-subtle);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:5px">';
        proTabs.forEach(function(t) {
          var visible = _pv[t.key] !== false;
-         html += '<div style="padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;'
-               + 'background:'+(visible?(e.couleur||'#7C2D92')+'18':'#F1F5F9')+';'
-               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#aaa')+'">'
-               + t.ico+' '+t.lbl+(visible?' ✓':' —')+'</div>';
+         html += '<button onclick="toggleProVisib(\''+e.id+'\',\''+t.key+'\')" '
+               + 'style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:none;'
+               + 'background:'+(visible?(e.couleur||'#7C2D92')+'22':'#F1F5F9')+';'
+               + 'color:'+(visible?(e.couleur||'#7C2D92'):'#94A3B8')+'">'
+               + t.ico+' '+t.lbl+(visible?' ✓':' ✕')+'</button>';
        });
        html += '</div>';
-       html += '<button class="btn btn-sm" style="width:100%" onclick="setMode(\'pro\');state.currentProId=\''+e.proId+'\';closeDrawer();goView(\'events\')">👁 Simuler la vue Pro →</button>';
+       html += '<button class="btn btn-sm" style="width:100%" onclick="simulateProView(\''+e.id+'\')" >👁 Simuler la vue Pro →</button>';
      }
 
   } else if(state.drawer.tab==='export'){
