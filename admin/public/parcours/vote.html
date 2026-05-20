@@ -2501,7 +2501,7 @@ function pqSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-paques', 'camille@exemple.fr');
   if(checkDuplicate('pq', emailVal, pqGo, 11)) return;
   var _extra = _flowinCollectFormFields('#vp-paques');
-  registerPlay('pq', emailVal, 'PQ-2026-1427', _extra);
+  var _tPq=flowinGenerateTicket('PQ'); var _exPq={prenom:_extra.prenom||'',nom:_extra.nom||'',tel:_extra.tel||'',ticket_code:_tPq}; registerPlay('pq', emailVal, _tPq, _exPq);
   pqGo(6);
 }
 
