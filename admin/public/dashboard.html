@@ -5132,31 +5132,59 @@ function drawerPartner(p){
     if(state.drawer.edit){
       const f = state.drawer.form;
       html += '<div class="alert info"><span class="ico">✏️</span>Mode édition</div>';
-      html += fieldInput('Nom','nom',f.nom);
-      html += fieldSelect('Type','type',f.type,[{v:'Local',l:'Local'},{v:'National',l:'National'}]);
+      html += fieldInput('Nom *','nom',f.nom);
+      html += fieldSelect('Type','type',f.type,[{v:'Local',l:'Local'},{v:'National',l:'National'},{v:'Récurrent',l:'Récurrent'}]);
       html += fieldInput('Secteur','secteur',f.secteur);
-      html += fieldInput('SIRET','siret',f.siret);
-      html += fieldInput('Adresse','adresse',f.adresse);
-      html += '<div class="section-h">Contact</div>';
+      html += fieldInput('Emoji (si pas de logo)','emoji',f.emoji||'');
+      html += '<div class="section-h">Présence dans les parcours joueurs</div>';
+      html += fieldInput('Description courte','description',f.description||'','textarea');
+      html += fieldInput('Texte promo (bandeau violet)','promo_text',f.promo_text||f.promoText||'');
+      html += fieldInput('Logo (URL image)','image_url',f.image_url||f.imageUrl||'','url');
+      html += '<div class="section-h">Liens</div>';
+      html += fieldInput('Site web','site_web',f.site_web||f.siteWeb||f.url||'','url');
+      html += fieldInput('Instagram (@compte ou URL)','instagram',f.instagram||'');
+      html += fieldInput('Facebook (page ou URL)','facebook',f.facebook||'');
+      html += '<div class="section-h">Contact interne</div>';
       html += fieldInput('Nom contact','contact',f.contact);
       html += fieldInput('Rôle','role',f.role);
       html += fieldInput('Email','email',f.email,'email');
       html += fieldInput('Téléphone','tel',f.tel,'tel');
-      html += fieldInput('Site web (URL)','url',f.url||'','url');
-      html += '<div class="section-h">Notes</div>';
-      html += fieldInput('Notes internes','notes',f.notes,'textarea');
+      html += '<div class="section-h">Coordonnées</div>';
+      html += fieldInput('SIRET','siret',f.siret);
+      html += fieldInput('Adresse','adresse',f.adresse);
+      html += '<div class="section-h">Notes internes</div>';
+      html += fieldInput('Notes','notes',f.notes,'textarea');
+      html += '<div class="section-h">Statut</div>';
+      html += '<div style="display:flex;gap:16px;align-items:center;margin-top:4px">'
+           + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
+           + '<input type="checkbox" '+(f.actif!==false?'checked ':'')+'onchange="setForm(\'actif\',this.checked)"> Actif</label>'
+           + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
+           + '<input type="checkbox" '+(f.visible!==false?'checked ':'')+'onchange="setForm(\'visible\',this.checked)"> Visible</label>'
+           + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">'
+           + '<input type="checkbox" '+(f.en_avant||f.enAvant?'checked ':'')+'onchange="setForm(\'en_avant\',this.checked)"> En avant</label>'
+           + '</div>';
     } else {
+      /* Vue lecture */
+      if(p.image_url||p.imageUrl) html += '<div style="margin-bottom:12px;text-align:center"><img src="'+escAttr(p.image_url||p.imageUrl)+'" alt="logo" style="height:56px;max-width:160px;object-fit:contain;border-radius:8px"></div>';
+      else if(p.emoji) html += '<div style="font-size:40px;text-align:center;margin-bottom:8px">'+esc(p.emoji)+'</div>';
       html += fieldRow('Nom','<strong>'+esc(p.nom)+'</strong>');
-      html += fieldRow('Type','<span class="chip '+(p.type==='National'?'purple':'past')+'">'+esc(p.type)+'</span>');
-      html += fieldRow('Secteur',esc(p.secteur));
-      html += fieldRow('SIRET',p.siret?'<code>'+esc(p.siret)+'</code>':'-');
-      html += fieldRow('Adresse',esc(p.adresse||'-'));
+      html += fieldRow('Type','<span class="chip '+(p.type==='National'?'purple':p.type==='Récurrent'?'live':'past')+'">'+esc(p.type||'-')+'</span>');
+      html += fieldRow('Secteur',esc(p.secteur||'-'));
+      html += fieldRow('Statut',(p.actif!==false?'<span class="chip live">Actif</span>':'<span class="chip">Inactif</span>')+(p.visible!==false?' · Visible':' · Masqué')+(p.en_avant||p.enAvant?' · ⭐ En avant':''));
+      if(p.description) { html += '<div class="section-h">Description</div>'; html += '<div style="background:var(--sa-subtle);padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.description)+'</div>'; }
+      if(p.promo_text||p.promoText) { html += '<div class="section-h">Promo</div>'; html += '<div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);padding:10px 12px;border-radius:8px;font-size:13px;color:#7C2D92">'+esc(p.promo_text||p.promoText)+'</div>'; }
+      html += '<div class="section-h">Liens</div>';
+      var siteUrl = p.site_web||p.siteWeb||p.url;
+      html += fieldRow('Site web',siteUrl?'<a href="'+escAttr(siteUrl)+'" target="_blank" rel="noopener">'+esc(siteUrl)+'</a>':'-');
+      html += fieldRow('Instagram',p.instagram?'<a href="'+(p.instagram.indexOf('http')===0?escAttr(p.instagram):'https://instagram.com/'+escAttr(p.instagram.replace('@','')))+'" target="_blank">'+esc(p.instagram)+'</a>':'-');
+      html += fieldRow('Facebook',p.facebook?'<a href="'+(p.facebook.indexOf('http')===0?escAttr(p.facebook):'https://facebook.com/'+escAttr(p.facebook))+'" target="_blank">'+esc(p.facebook)+'</a>':'-');
       html += '<div class="section-h">Contact</div>';
       html += fieldRow('Nom',esc(p.contact||'-'));
       html += fieldRow('Rôle',esc(p.role||'-'));
       html += fieldRow('Email',p.email?'<a href="mailto:'+escAttr(p.email)+'">'+esc(p.email)+'</a>':'-');
       html += fieldRow('Téléphone',p.tel?'<a href="tel:'+escAttr(p.tel)+'">'+esc(p.tel)+'</a>':'-');
-      html += fieldRow('Site web',p.url?'<a href="'+escAttr(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>':'-');
+      html += fieldRow('SIRET',p.siret?'<code>'+esc(p.siret)+'</code>':'-');
+      html += fieldRow('Adresse',esc(p.adresse||'-'));
       html += '<div class="section-h">Notes</div>';
       html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.notes||'-')+'</div>';
     }
