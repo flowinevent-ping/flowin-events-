@@ -2392,7 +2392,12 @@ function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
   if(checkDuplicate('sp', emailVal, spinGo, 8)) return;
   var _extra = _flowinCollectFormFields('#vp-spin');
-  registerPlay('sp', emailVal, 'FW-SR-2814', _extra);
+  var _ticketSp = flowinGenerateTicket('SP');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpSp = document.getElementById('vp-spin');
+  if(_vpSp) _vpSp.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketSp; });
+  var _extraSp = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketSp };
+  registerPlay('sp', emailVal, _ticketSp, _extraSp);
   spinGo(6);
 }
 
@@ -2475,7 +2480,12 @@ function qmSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-quizmaster', 'participant@exemple.fr');
   if(checkDuplicate('qm', emailVal, qmGo, 11)) return;
   var _extra = _flowinCollectFormFields('#vp-quizmaster');
-  registerPlay('qm', emailVal, 'QM-2026-LIVE', _extra);
+  var _ticketQm = flowinGenerateTicket('QM');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpQm = document.getElementById('vp-quizmaster');
+  if(_vpQm) _vpQm.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketQm; });
+  var _extraQm = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketQm };
+  registerPlay('qm', emailVal, _ticketQm, _extraQm);
   qmGo(6);
 }
 
@@ -2521,7 +2531,12 @@ function vsSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-votestars', 'lea@exemple.fr');
   if(checkDuplicate('vs', emailVal, vsGo, 10)) return;
   var _extra = _flowinCollectFormFields('#vp-votestars');
-  registerPlay('vs', emailVal, 'VS-2026-LEA', _extra);
+  var _ticketVs = flowinGenerateTicket('VS');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpVs = document.getElementById('vp-votestars');
+  if(_vpVs) _vpVs.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketVs; });
+  var _extraVs = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketVs };
+  registerPlay('vs', emailVal, _ticketVs, _extraVs);
   vsGo(8);
 }
 

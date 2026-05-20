@@ -1945,12 +1945,14 @@ function pqGo(n){
   if(n === 10){
     var t2 = document.getElementById('pq-ticket-2');
     var c2 = document.getElementById('pq-ticket-code-2');
-    var c1 = document.getElementById('pq-ticket-code-1');
     if(t2) t2.style.display = '';
-    /* Générer le code du ticket bonus */
-    var _base = (c1 && c1.textContent) || 'PQ-2026-0000';
-    var _num = parseInt(_base.split('-').pop()) || 1427;
-    if(c2) c2.textContent = _base.replace(/\d+$/, String(_num + 1));
+    /* Ticket bonus : numéro unique différent du ticket 1 */
+    var _ticket2 = flowinGenerateTicket('PQ');
+    if(c2) c2.textContent = _ticket2;
+    /* Sauvegarder en Supabase comme 2ème participation si email connu */
+    if(FLOWIN_SESSION_EMAIL && FLOWIN_EVENT) {
+      supaWriteFlowin('pq', FLOWIN_SESSION_EMAIL, _ticket2, {ticket_bonus:true, ticket_code:_ticket2});
+    }
   }
 }
 
@@ -2510,7 +2512,12 @@ function spinSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-spin', 'camille@exemple.fr');
   if(checkDuplicate('sp', emailVal, spinGo, 8)) return;
   var _extra = _flowinCollectFormFields('#vp-spin');
-  registerPlay('sp', emailVal, 'FW-SR-2814', _extra);
+  var _ticketSp = flowinGenerateTicket('SP');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpSp = document.getElementById('vp-spin');
+  if(_vpSp) _vpSp.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketSp; });
+  var _extraSp = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketSp };
+  registerPlay('sp', emailVal, _ticketSp, _extraSp);
   spinGo(6);
 }
 
@@ -2519,11 +2526,23 @@ function qsSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-quizsolo', 'lea@exemple.fr');
   if(checkDuplicate('qs', emailVal, qsGo, 8)) return;
   var _extra = _flowinCollectFormFields('#vp-quizsolo');
-  registerPlay('qs', emailVal, 'QS-2026-LEA', _extra);
+  var _ticketQs = flowinGenerateTicket('QS');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpQs = document.getElementById('vp-quizsolo');
+  if(_vpQs) _vpQs.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketQs; });
+  var _extraQs = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketQs };
+  registerPlay('qs', emailVal, _ticketQs, _extraQs);
   qsGo(3);
 }
 
 /* Anti-doublon sur soumission form Quiz Pâques (pq-5 → pq-6) */
+/* ── Ticket generation : format MODULE-AAAA-XXXX ── */
+var FLOWIN_SESSION_EMAIL = '';
+function flowinGenerateTicket(prefix) {
+  var year = new Date().getFullYear();
+  var rand = Math.floor(Math.random()*9000)+1000;
+  return prefix.toUpperCase()+'-'+year+'-'+rand;
+}
 function _flpqFieldState(id, isErr, msg) {
   var el = document.getElementById(id);
   if(el) el.style.border = isErr ? "2px solid #F87171" : "";
@@ -2565,9 +2584,11 @@ async function pqSubmitForm(){
       return;
     }
   } catch(_de){ console.warn("[Flowin] doublon check:", _de); }
-  var _ticketEl = document.getElementById("pq-ticket-code-1");
-  var _ticket = (_ticketEl && _ticketEl.textContent) || "FL-"+Math.floor(Math.random()*9000+1000);
-  var _extra = { prenom:prenom, nom:nom, tel:tel };
+  var _ticket = flowinGenerateTicket("PQ");
+  FLOWIN_SESSION_EMAIL = email;
+  var _vp = document.getElementById("vp-paques");
+  if(_vp) _vp.querySelectorAll(".ticket-code").forEach(function(el){ if(el.id!=="pq-ticket-code-2") el.textContent=_ticket; });
+  var _extra = { prenom:prenom, nom:nom, tel:tel, ticket_code:_ticket };
   registerPlay("pq", email, _ticket, _extra);
   pqGo(6);
   if(_btn){ _btn.textContent="Valider"; _btn.style.opacity=""; _btn.style.pointerEvents=""; }
@@ -2593,7 +2614,12 @@ function qmSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-quizmaster', 'participant@exemple.fr');
   if(checkDuplicate('qm', emailVal, qmGo, 11)) return;
   var _extra = _flowinCollectFormFields('#vp-quizmaster');
-  registerPlay('qm', emailVal, 'QM-2026-LIVE', _extra);
+  var _ticketQm = flowinGenerateTicket('QM');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpQm = document.getElementById('vp-quizmaster');
+  if(_vpQm) _vpQm.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketQm; });
+  var _extraQm = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketQm };
+  registerPlay('qm', emailVal, _ticketQm, _extraQm);
   qmGo(6);
 }
 
@@ -2639,7 +2665,12 @@ function vsSubmitForm(){
   var emailVal = _flowinFindEmail('#vp-votestars', 'lea@exemple.fr');
   if(checkDuplicate('vs', emailVal, vsGo, 10)) return;
   var _extra = _flowinCollectFormFields('#vp-votestars');
-  registerPlay('vs', emailVal, 'VS-2026-LEA', _extra);
+  var _ticketVs = flowinGenerateTicket('VS');
+  FLOWIN_SESSION_EMAIL = emailVal;
+  var _vpVs = document.getElementById('vp-votestars');
+  if(_vpVs) _vpVs.querySelectorAll('.ticket-code').forEach(function(el){ el.textContent=_ticketVs; });
+  var _extraVs = { prenom:_extra.prenom||'', nom:_extra.nom||'', tel:_extra.tel||'', ticket_code:_ticketVs };
+  registerPlay('vs', emailVal, _ticketVs, _extraVs);
   vsGo(8);
 }
 
