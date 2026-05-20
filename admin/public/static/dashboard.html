@@ -5116,179 +5116,233 @@ function newPartenaire(){
 // ----- PARTENAIRE drawer -----
 function drawerPartner(p){
   if(!p) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Partenaire introuvable</div>';
-  const lots = DATA.lots.filter(l=>l.partenaireId===p.id);
-  const events = p.events.map(findEvent).filter(Boolean);
-  const valeur = lots.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0);
+  const lots   = DATA.lots.filter(l=>l.partenaireId===p.id || l.partenaire_id===p.id);
+  const events = (p.events||[]).map(findEvent).filter(Boolean);
+  const valeur = lots.reduce(function(s,l){ return s+(l.valeur||0)*(l.quantite||1); },0);
 
-  let html = drawerHeader('🤝 '+esc(p.nom), '<span class="chip '+(p.type==='National'?'purple':'past')+'">'+esc(p.type)+'</span> · '+esc(p.secteur));
+  /* ── Header ── */
+  var typeClass = p.type==='National'?'purple':p.type==='Récurrent'?'live':'past';
+  var html = drawerHeader('🤝 '+esc(p.nom),
+    '<span class="chip '+typeClass+'">'+esc(p.type||'Local')+'</span>'
+    +(p.secteur?' · '+esc(p.secteur):''));
+
   html += drawerTabs([
-    {id:'infos',label:'Infos'},
-    {id:'stats',label:'Stats'},
-    {id:'lots',label:'Lots',badge:lots.length},
-    {id:'events',label:'Events',badge:events.length},
-    {id:'contrat',label:'Contrat'}
+    {id:'infos',   label:'Infos'},
+    {id:'stats',   label:'Stats'},
+    {id:'lots',    label:'Lots',   badge:lots.length||null},
+    {id:'events',  label:'Events', badge:events.length||null},
+    {id:'contrat', label:'Contrat'}
   ]);
   html += '<div class="drawer-body">';
 
+  /* ══════════════════════════════ TAB INFOS ══════════════════════════════ */
   if(state.drawer.tab==='infos'){
     if(state.drawer.edit){
-      const f = state.drawer.form;
+      /* ── MODE ÉDITION ── */
+      var f = state.drawer.form;
       var logoVal = f.image_url||f.imageUrl||'';
 
-      /* ── SECTION 1 : LOGO + IDENTITÉ ── */
-      html += '<div class="section-h" style="margin-top:0">🖼 Logo & Identité</div>';
+      html += '<div class="alert info"><span class="ico">✏️</span>Mode édition · '+esc(p.nom)+'</div>';
 
-      /* Bloc logo : preview auto-fit + input URL */
-      html += '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px">'
-           + '<div id="pt-logo-zone" style="width:88px;height:88px;flex-shrink:0;border-radius:12px;border:2px dashed var(--sa-border);background:var(--sa-subtle);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">'
-           + (logoVal
-              ? '<img id="pt-logo-img" src="'+escAttr(logoVal)+'" alt="logo" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\';document.getElementById(\'pt-logo-placeholder\').style.display=\'block\'">'
-                + '<div id="pt-logo-placeholder" style="display:none;font-size:22px;color:var(--sa-muted)">🖼</div>'
-              : '<div id="pt-logo-placeholder" style="font-size:22px;color:var(--sa-muted)">🖼</div>'
-                + '<img id="pt-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain">')
-           + '</div>'
-           + '<div style="flex:1">'
-           + '<div class="field-label" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px">Logo (URL — PNG, SVG, JPG, WebP)</div>'
-           + '<input type="url" class="input" placeholder="https://…" value="'+escAttr(logoVal)+'"'
-           + ' oninput="(function(v){ setForm(\'image_url\',v); var img=document.getElementById(\'pt-logo-img\'); var ph=document.getElementById(\'pt-logo-placeholder\'); if(v){ img.src=v; img.style.display=\'block\'; if(ph)ph.style.display=\'none\'; }else{ img.src=\'\'; img.style.display=\'none\'; if(ph)ph.style.display=\'block\'; } })(this.value)" style="margin-bottom:6px">'
-           + '<div class="field-label" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px">Emoji fallback (si pas de logo)</div>'
-           + '<input class="input" placeholder="🤝" value="'+escAttr(f.emoji||'')+'" oninput="setForm(\'emoji\',this.value)">'
-           + '</div></div>';
+      /* --- Section 1 : Logo & Identité --- */
+      html += '<div class="section-h">🖼 Logo & Identité</div>';
+      html += '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px">';
+      /* Zone preview logo */
+      html += '<div id="pt-logo-zone" style="width:88px;height:88px;flex-shrink:0;border-radius:12px;border:2px dashed var(--sa-border);background:var(--sa-subtle);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">';
+      if(logoVal){
+        html += '<img id="pt-logo-img" src="'+escAttr(logoVal)+'" alt="logo" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\';document.getElementById(\'pt-logo-emoji\').style.display=\'block\'">';
+        html += '<div id="pt-logo-emoji" style="display:none;font-size:28px;text-align:center">'+esc(f.emoji||p.emoji||'🤝')+'</div>';
+      } else {
+        html += '<img id="pt-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain">';
+        html += '<div id="pt-logo-emoji" style="font-size:28px;text-align:center">'+esc(f.emoji||p.emoji||'🖼')+'</div>';
+      }
+      html += '</div>';
+      /* Champs logo */
+      html += '<div style="flex:1">';
+      html += '<div class="field-row"><div class="field-label">Logo (URL image)</div><div class="field-value">';
+      html += '<input type="url" class="input" placeholder="https://logo.png" value="'+escAttr(logoVal)+'"';
+      html += ' oninput="(function(v){';
+      html += 'setForm(\'image_url\',v);';
+      html += 'var img=document.getElementById(\'pt-logo-img\');';
+      html += 'var em=document.getElementById(\'pt-logo-emoji\');';
+      html += 'if(v){img.src=v;img.style.display=\'block\';if(em)em.style.display=\'none\';}';
+      html += 'else{img.src=\'\';img.style.display=\'none\';if(em){em.textContent=document.querySelector(\'#pt-emoji-input\')?document.querySelector(\'#pt-emoji-input\').value:\'🖼\';em.style.display=\'block\';}}';
+      html += '})(this.value)">';
+      html += '</div></div>';
+      html += '<div class="field-row"><div class="field-label">Emoji (si pas de logo)</div><div class="field-value">';
+      html += '<input id="pt-emoji-input" class="input" placeholder="🤝" value="'+escAttr(f.emoji||p.emoji||'')+'" oninput="setForm(\'emoji\',this.value);var em=document.getElementById(\'pt-logo-emoji\');if(em&&!document.getElementById(\'pt-logo-img\').src)em.textContent=this.value||\'🖼\'">';
+      html += '</div></div>';
+      html += '</div></div>';
 
-      html += fieldInput('Nom *','nom',f.nom);
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
-           + '<div>'+fieldSelect('Type','type',f.type,[{v:'Local',l:'Local'},{v:'National',l:'National'},{v:'Récurrent',l:'Récurrent'}])+'</div>'
-           + '<div>'+fieldInput('Secteur','secteur',f.secteur||'')+'</div>'
-           + '</div>';
+      html += fieldInput('Nom *','nom',f.nom||'');
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
+      html += fieldSelect('Type','type',f.type||'Local',[{v:'Local',l:'Local'},{v:'National',l:'National'},{v:'Récurrent',l:'Récurrent'}]);
+      html += fieldInput('Secteur','secteur',f.secteur||'');
+      html += '</div>';
 
-      /* Statut inline */
-      html += '<div style="display:flex;gap:16px;align-items:center;padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:18px">'
-           + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;font-weight:700"><input type="checkbox" '+(f.actif!==false?'checked ':'')+'onchange="setForm(\'actif\',this.checked)"> Actif</label>'
-           + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;font-weight:700"><input type="checkbox" '+(f.visible!==false?'checked ':'')+'onchange="setForm(\'visible\',this.checked)"> Visible</label>'
-           + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;font-weight:700"><input type="checkbox" '+(f.en_avant||f.en_avant?'checked ':'')+'onchange="setForm(\'en_avant\',this.checked)"> ⭐ En avant</label>'
-           + '</div>';
+      /* Toggles statut */
+      html += '<div style="display:flex;gap:16px;padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin:0 0 14px">';
+      html += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">';
+      html += '<input type="checkbox" '+(f.actif!==false?'checked ':'')+'onchange="setForm(\'actif\',this.checked)"> Actif</label>';
+      html += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">';
+      html += '<input type="checkbox" '+(f.visible!==false?'checked ':'')+'onchange="setForm(\'visible\',this.checked)"> Visible</label>';
+      html += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">';
+      html += '<input type="checkbox" '+(f.en_avant||f.enAvant?'checked ':'')+'onchange="setForm(\'en_avant\',this.checked)"> ⭐ En avant</label>';
+      html += '</div>';
 
-      /* ── SECTION 2 : PRÉSENCE PARCOURS JOUEURS ── */
-      html += '<div class="section-h">📱 Présence dans le parcours joueurs'
-           + '<span style="margin-left:6px;font-size:9px;font-weight:700;background:rgba(124,45,146,.12);color:#7C2D92;padding:2px 6px;border-radius:10px;text-transform:none">bottom sheet joueur</span>'
-           + '</div>';
+      /* --- Section 2 : Présence parcours --- */
+      html += '<div class="section-h">📱 Présence dans le parcours joueurs <span style="font-size:9px;font-weight:700;background:rgba(124,45,146,.12);color:#7C2D92;padding:2px 6px;border-radius:10px;margin-left:4px;text-transform:none">bottom sheet</span></div>';
       html += fieldInput('Description','description',f.description||'','textarea');
       html += fieldInput('Texte promo → bandeau violet','promo_text',f.promo_text||f.promoText||'');
 
-      /* ── SECTION 3 : LIENS RÉSEAUX (→ bottom sheet) ── */
-      html += '<div class="section-h">🔗 Réseaux & contact'
-           + '<span style="margin-left:6px;font-size:9px;font-weight:700;background:rgba(29,155,117,.12);color:#0F6E56;padding:2px 6px;border-radius:10px;text-transform:none">liens cliquables parcours</span>'
-           + '</div>';
+      /* --- Section 3 : Réseaux (→ liens parcours) --- */
+      html += '<div class="section-h">🔗 Réseaux & contact <span style="font-size:9px;font-weight:700;background:rgba(29,155,117,.12);color:#0F6E56;padding:2px 6px;border-radius:10px;margin-left:4px;text-transform:none">liens cliquables parcours</span></div>';
       html += '<div style="background:rgba(29,155,117,.06);border:1px solid rgba(29,155,117,.15);border-radius:10px;padding:10px 12px;margin-bottom:14px">';
-      html += '<div style="font-size:10px;font-weight:700;color:#0F6E56;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">→ Affichés comme liens cliquables dans la fiche joueur</div>';
+      html += '<div style="font-size:10px;font-weight:700;color:#0F6E56;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">→ Affichés comme liens dans la fiche joueur</div>';
       html += fieldInput('🌐 Site web','site_web',f.site_web||f.siteWeb||f.url||'','url');
-      html += fieldInput('📸 Instagram (@compte ou URL complète)','instagram',f.instagram||'');
-      html += fieldInput('🔵 Facebook (page ou URL complète)','facebook',f.facebook||'');
+      html += fieldInput('📸 Instagram (@compte ou URL)','instagram',f.instagram||'');
+      html += fieldInput('🔵 Facebook (page ou URL)','facebook',f.facebook||'');
       html += '</div>';
-      html += fieldInput('📧 Email de contact','email',f.email,'email');
-      html += fieldInput('📞 Téléphone','tel',f.tel,'tel');
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
+      html += fieldInput('📧 Email','email',f.email||'','email');
+      html += fieldInput('📞 Téléphone','tel',f.tel||'','tel');
+      html += '</div>';
 
-      /* ── SECTION 4 : ADMINISTRATIF ── */
+      /* --- Section 4 : Administratif --- */
       html += '<div class="section-h">📋 Administratif</div>';
       html += fieldInput('Nom contact interne','contact',f.contact||'');
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0">'
-           + '<div>'+fieldInput('Rôle','role',f.role||'')+'</div>'
-           + '<div>'+fieldInput('Ville','ville',f.ville||'')+'</div>'
-           + '</div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
+      html += fieldInput('Rôle','role',f.role||'');
+      html += fieldInput('Ville','ville',f.ville||'');
+      html += '</div>';
       html += fieldInput('Adresse','adresse',f.adresse||'');
       html += fieldInput('SIRET','siret',f.siret||'');
       html += fieldInput('Notes internes','notes',f.notes||'','textarea');
+
     } else {
-      /* Vue lecture */
-      var _logoUrl = p.image_url||p.imageUrl||'';
-      html += '<div style="text-align:center;margin-bottom:14px">';
-      if(_logoUrl) {
-        html += '<img src="'+escAttr(_logoUrl)+'" alt="logo"'
-             + ' style="max-height:80px;max-width:180px;object-fit:contain;border-radius:10px;border:1px solid var(--sa-border,#E2E8F0);display:block;margin:0 auto"'
-             + ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">';
-        html += '<div style="display:none;font-size:40px;margin-top:4px">'+esc(p.emoji||'🤝')+'</div>';
-      } else if(p.emoji) {
-        html += '<div style="font-size:40px">'+esc(p.emoji)+'</div>';
+      /* ── MODE LECTURE ── */
+      var logoUrl = p.image_url||p.imageUrl||'';
+      var emoji   = p.emoji||'';
+
+      /* Logo / emoji en haut */
+      html += '<div style="text-align:center;padding:16px 0 12px">';
+      if(logoUrl){
+        html += '<img src="'+escAttr(logoUrl)+'" alt="logo" style="max-height:80px;max-width:180px;object-fit:contain;border-radius:10px;border:1px solid var(--sa-border);display:block;margin:0 auto"';
+        html += ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">';
+        html += '<div style="display:none;font-size:48px;margin-top:4px">'+esc(emoji||'🤝')+'</div>';
+      } else if(emoji){
+        html += '<div style="font-size:52px;line-height:1">'+esc(emoji)+'</div>';
       }
       html += '</div>';
+
+      /* Infos de base */
       html += fieldRow('Nom','<strong>'+esc(p.nom)+'</strong>');
-      html += fieldRow('Type','<span class="chip '+(p.type==='National'?'purple':p.type==='Récurrent'?'live':'past')+'">'+esc(p.type||'-')+'</span>');
+      html += fieldRow('Type','<span class="chip '+typeClass+'">'+esc(p.type||'Local')+'</span>');
       html += fieldRow('Secteur',esc(p.secteur||'-'));
-      html += fieldRow('Statut',(p.actif!==false?'<span class="chip live">Actif</span>':'<span class="chip">Inactif</span>')+(p.visible!==false?' · Visible':' · Masqué')+(p.en_avant||p.enAvant?' · ⭐ En avant':''));
-      if(p.description) { html += '<div class="section-h">Description</div>'; html += '<div style="background:var(--sa-subtle);padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.description)+'</div>'; }
-      if(p.promo_text||p.promoText) { html += '<div class="section-h">Promo</div>'; html += '<div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);padding:10px 12px;border-radius:8px;font-size:13px;color:#7C2D92">'+esc(p.promo_text||p.promoText)+'</div>'; }
+      html += fieldRow('Statut',
+        (p.actif!==false?'<span class="chip live">Actif</span>':'<span class="chip">Inactif</span>')
+        +(p.visible!==false?' · Visible':' · Masqué')
+        +(p.en_avant||p.enAvant?' · ⭐ En avant':'')
+      );
+
+      /* Description & Promo */
+      if(p.description){
+        html += '<div class="section-h">Description</div>';
+        html += '<div style="background:var(--sa-subtle);padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.description)+'</div>';
+      }
+      if(p.promo_text||p.promoText){
+        html += '<div class="section-h">Promo</div>';
+        html += '<div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);padding:10px 12px;border-radius:8px;font-size:13px;color:#7C2D92">'+esc(p.promo_text||p.promoText)+'</div>';
+      }
+
+      /* Liens */
       html += '<div class="section-h">Liens</div>';
       var siteUrl = p.site_web||p.siteWeb||p.url;
-      html += fieldRow('Site web',siteUrl?'<a href="'+escAttr(siteUrl)+'" target="_blank" rel="noopener">'+esc(siteUrl)+'</a>':'-');
-      html += fieldRow('Instagram',p.instagram?'<a href="'+(p.instagram.indexOf('http')===0?escAttr(p.instagram):'https://instagram.com/'+escAttr(p.instagram.replace('@','')))+'" target="_blank">'+esc(p.instagram)+'</a>':'-');
-      html += fieldRow('Facebook',p.facebook?'<a href="'+(p.facebook.indexOf('http')===0?escAttr(p.facebook):'https://facebook.com/'+escAttr(p.facebook))+'" target="_blank">'+esc(p.facebook)+'</a>':'-');
+      html += fieldRow('Site web', siteUrl
+        ? '<a href="'+escAttr(siteUrl)+'" target="_blank" rel="noopener">'+esc(siteUrl)+'</a>'
+        : '-');
+      html += fieldRow('Instagram', p.instagram
+        ? '<a href="'+(p.instagram.indexOf('http')===0?escAttr(p.instagram):'https://instagram.com/'+escAttr(p.instagram.replace('@','')))+'" target="_blank">'+esc(p.instagram)+'</a>'
+        : '-');
+      html += fieldRow('Facebook', p.facebook
+        ? '<a href="'+(p.facebook.indexOf('http')===0?escAttr(p.facebook):'https://facebook.com/'+escAttr(p.facebook))+'" target="_blank">'+esc(p.facebook)+'</a>'
+        : '-');
+
+      /* Contact */
       html += '<div class="section-h">Contact</div>';
-      html += fieldRow('Nom',esc(p.contact||'-'));
-      html += fieldRow('Rôle',esc(p.role||'-'));
-      html += fieldRow('Email',p.email?'<a href="mailto:'+escAttr(p.email)+'">'+esc(p.email)+'</a>':'-');
-      html += fieldRow('Téléphone',p.tel?'<a href="tel:'+escAttr(p.tel)+'">'+esc(p.tel)+'</a>':'-');
-      html += fieldRow('SIRET',p.siret?'<code>'+esc(p.siret)+'</code>':'-');
-      html += fieldRow('Adresse',esc(p.adresse||'-'));
-      html += '<div class="section-h">Notes</div>';
-      html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.notes||'-')+'</div>';
+      html += fieldRow('Nom',       esc(p.contact||'-'));
+      html += fieldRow('Rôle',      esc(p.role||'-'));
+      html += fieldRow('Email',     p.email ? '<a href="mailto:'+escAttr(p.email)+'">'+esc(p.email)+'</a>' : '-');
+      html += fieldRow('Téléphone', p.tel   ? '<a href="tel:'+escAttr(p.tel)+'">'+esc(p.tel)+'</a>' : '-');
+      html += fieldRow('Ville',     esc(p.ville||'-'));
+      html += fieldRow('SIRET',     p.siret ? '<code>'+esc(p.siret)+'</code>' : '-');
+      html += fieldRow('Adresse',   esc(p.adresse||'-'));
+
+      /* Notes */
+      if(p.notes){
+        html += '<div class="section-h">Notes</div>';
+        html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.notes)+'</div>';
+      }
     }
+
+  /* ══════════════════════════════ TAB STATS ══════════════════════════════ */
   } else if(state.drawer.tab==='stats'){
     html += '<div class="kpi-grid" style="grid-template-columns:1fr 1fr">'
-         + kpi('Lots fournis',lots.length)
-         + kpi('Valeur cumulée',valeur+' €')
-         + kpi('Lots retirés',lots.filter(l=>l.retire).length+' / '+lots.length)
-         + kpi('Events sponsorisés',events.length)
+         + kpi('Lots fournis', lots.length)
+         + kpi('Valeur cumulée', valeur+' €')
+         + kpi('Lots retirés', lots.filter(function(l){ return l.retire; }).length+' / '+lots.length)
+         + kpi('Events sponsorisés', events.length)
          + '</div>';
-    html += '<div class="section-h">Distribution par event</div>';
-    events.forEach(e => {
-      const lotsEv = lots.filter(l=>l.eventId===e.id);
-      const valEv = lotsEv.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0);
-      html += '<div style="padding:12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
-           + '<div class="flex flex-between"><div class="fw-700">'+esc(e.nom)+'</div><div class="text-sm">'+lotsEv.length+' lot'+(lotsEv.length>1?'s':'')+' · '+valEv+' €</div></div>'
-           + '<div class="text-xs text-muted mt-2">'+fmt(e.dateD)+' · '+statusChip(e.status)+'</div></div>';
-    });
+
+  /* ══════════════════════════════ TAB LOTS ══════════════════════════════ */
   } else if(state.drawer.tab==='lots'){
-    html += '<div class="section-h">'+lots.length+' lot'+(lots.length>1?'s':'')+' fourni'+(lots.length>1?'s':'')+'</div>';
-    if(lots.length===0) html += '<div class="empty-block"><div class="d">Aucun lot fourni pour le moment.</div></div>';
-    else lots.forEach(l => {
-      const e = findEvent(l.eventId), j = l.assigneA?findJoueur(l.assigneA):null;
+    html += '<div class="section-h">'+lots.length+' lot'+(lots.length>1?'s':'')+'</div>';
+    if(lots.length===0) html += '<div class="empty-block"><div class="d">Aucun lot fourni.</div></div>';
+    else lots.forEach(function(l){
+      var e = findEvent(l.eventId||l.event_id);
       html += '<div style="padding:12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px">'
-           + '<div class="flex flex-between mb-2"><div class="fw-700">'+esc(l.nom)+(l.quantite>1?' x'+l.quantite:'')+'</div><div>'+l.valeur+' €</div></div>'
-           + '<div class="text-xs text-muted">'+(e?'<a onclick="openDrawerFor(\'event\',\''+e.id+'\')">'+esc(e.nom)+'</a>':'-')+(j?' · gagné par <a onclick="openDrawerFor(\'joueur\',\''+j.id+'\')">'+esc(j.nom)+'</a>':' · non attribué')+(l.retire?' · <span class="chip live">Retiré</span>':(j?' · <span class="chip warn">À retirer</span>':''))+'</div></div>';
+           + '<div class="flex flex-between mb-2"><div class="fw-700">'+esc(l.nom||l.titre||'Lot')+(l.quantite>1?' x'+l.quantite:'')+'</div><div>'+(l.valeur||0)+' €</div></div>'
+           + '<div class="text-xs text-muted">'+(e?'<a onclick="openDrawerFor(\'event\',\''+e.id+'\')">'+esc(e.nom)+'</a>':'-')+(l.retire?' · <span class="chip live">Retiré</span>':'')+'</div>'
+           + '</div>';
     });
-    html += '<button class="btn btn-sm mt-3" onclick="toast(\'Workflow ajout lot à venir\',\'info\')">+ Ajouter un lot</button>';
+
+  /* ══════════════════════════════ TAB EVENTS ══════════════════════════════ */
   } else if(state.drawer.tab==='events'){
     html += '<div class="section-h">'+events.length+' event'+(events.length>1?'s':'')+' sponsorisé'+(events.length>1?'s':'')+'</div>';
-    events.forEach(e => {
+    if(events.length===0) html += '<div class="empty-block"><div class="d">Aucun event.</div></div>';
+    events.forEach(function(e){
       html += '<div style="padding:12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
            + '<div class="flex flex-between"><div class="fw-700">'+esc(e.nom)+'</div>'+statusChip(e.status)+'</div>'
-           + '<div class="text-xs text-muted mt-2">'+fmt(e.dateD)+' · '+moduleChip(e.module)+'</div></div>';
+           + '<div class="text-xs text-muted mt-2">'+fmt(e.dateD||e.date_d)+' · '+moduleChip(e.module)+'</div></div>';
     });
+
+  /* ══════════════════════════════ TAB CONTRAT ══════════════════════════════ */
   } else if(state.drawer.tab==='contrat'){
-    html += '<div class="section-h">Convention en cours</div>';
+    html += '<div class="section-h">Convention</div>';
     html += '<div class="card" style="margin:0">'+esc(p.contrat||'Aucun contrat formel · partenariat au passage')+'</div>';
-    html += '<div class="section-h">Pièces jointes</div>';
-    html += '<div class="empty-block"><div class="ico">📎</div><div class="t">Aucun document attaché</div><div class="d">Glisser-déposer un fichier (PDF, image)</div><button class="btn btn-sm mt-3" onclick="toast(\'Upload simulé\',\'info\')">+ Joindre un document</button></div>';
-    html += '<div class="section-h">Historique facturation</div>';
-    html += '<div class="card" style="margin:0">'
-         + activityItem('Q1 2026','💸','Aucune contrepartie financière (lots en nature)')
-         + activityItem('Q4 2025','💸','Aucune contrepartie financière (lots en nature)')
-         + '</div>';
   }
+
   html += '</div>';
+
+  /* ══════════════════════════════ FOOTER ══════════════════════════════ */
   if(state.drawer.edit){
     html += drawerFooter(
-      '<button class="btn btn-danger" onclick="deletePartenaire(\''+p.id+'\')" style="background:rgba(226,75,74,.1);color:#E24B4A;border:1.5px solid rgba(226,75,74,.3)">🗑 Supprimer</button>'
-      +'<div style="display:flex;gap:8px"><button class="btn" onclick="cancelEdit()">Annuler</button><button class="btn btn-primary" onclick="saveEdit()">✓ Enregistrer</button></div>'
+      '<button class="btn" style="background:rgba(226,75,74,.08);color:#E24B4A;border:1.5px solid rgba(226,75,74,.25)" onclick="deletePartenaire(\''+p.id+'\')">🗑 Supprimer</button>'
+      + '<div style="display:flex;gap:8px">'
+      + '<button class="btn" onclick="cancelEdit()">Annuler</button>'
+      + '<button class="btn btn-primary" onclick="saveEdit()">✓ Enregistrer</button>'
+      + '</div>'
     );
   } else {
     html += drawerFooter(
-      '<button class="btn" style="background:rgba(226,75,74,.08);color:#E24B4A;border:1.5px solid rgba(226,75,74,.2)" onclick="deletePartenaire(\''+p.id+'\')" >🗑 Supprimer</button>',
-      '<button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>'
+      '<button class="btn" style="background:rgba(226,75,74,.08);color:#E24B4A;border:1.5px solid rgba(226,75,74,.25)" onclick="deletePartenaire(\''+p.id+'\')">🗑 Supprimer</button>'
+      + '<button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>'
     );
   }
+
   return html;
 }
+
 function deletePartenaire(id){
   var p = DATA.partenaires.find(function(x){ return x.id===id; });
   if(!p) return;
