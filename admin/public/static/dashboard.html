@@ -5052,10 +5052,10 @@ function renderBiblioPartenaires(){
   const search = state.search.partenaires.toLowerCase();
   let list = DATA.partenaires.slice();
   if(search) list = list.filter(p=>p.nom.toLowerCase().includes(search)||p.secteur.toLowerCase().includes(search));
-  list = applySort(list,'partenaires',{nom:p=>p.nom.toLowerCase(),type:p=>p.type,secteur:p=>p.secteur,
+  list = applySort(list,'partenaires',{nom:p=>p.nom.toLowerCase(),type:p=>p.type||'',secteur:p=>p.secteur||'',
+    ville:p=>(p.ville||'').toLowerCase(),tel:p=>(p.tel||''),email:p=>(p.email||'').toLowerCase(),
     events:p=>p.events.length,
-    lots:p=>DATA.lots.filter(l=>l.partenaireId===p.id).length,
-    contact:p=>(p.contact||'').toLowerCase()});
+    lots:p=>DATA.lots.filter(l=>l.partenaireId===p.id).length});
   const totalLots = DATA.lots.length;
   const valeurFournie = DATA.lots.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0);
 
@@ -5078,23 +5078,25 @@ function renderBiblioPartenaires(){
   html += '<table class="tbl"><thead><tr>'
        + '<th style="width:32px"><input type="checkbox" class="check"/></th>'
        + thSort('partenaires','nom','Partenaire')
-       + thSort('partenaires','type','Type')
-       + thSort('partenaires','secteur','Secteur')
-       + thSort('partenaires','events','Events')
-       + thSort('partenaires','lots','Lots fournis')
-       + thSort('partenaires','contact','Contact')
+       + thSort('partenaires','type','Catégorie')
+       + thSort('partenaires','ville','Ville')
+       + thSort('partenaires','tel','Téléphone')
+       + thSort('partenaires','email','Email')
        + '<th class="col-actions"></th></tr></thead><tbody>';
   list.forEach(p => {
     const lots = DATA.lots.filter(l=>l.partenaireId===p.id);
+    var typeChip = p.type==='National'?'<span class="chip purple">National</span>':p.type==='Récurrent'?'<span class="chip live">Récurrent</span>':'<span class="chip past">Local</span>';
     html += '<tr onclick="openDrawerFor(\'partenaire\',\''+p.id+'\')">'
          + '<td onclick="event.stopPropagation()"><input type="checkbox" class="check"/></td>'
-         + '<td><div style="font-weight:700">'+esc(p.nom)+'</div><div class="text-xs text-muted">'+esc(p.adresse||'')+'</div></td>'
-         + '<td>'+(p.type==='National'?'<span class="chip purple">National</span>':'<span class="chip past">Local</span>')+'</td>'
-         + '<td class="text-sm text-muted">'+esc(p.secteur)+'</td>'
-         + '<td><strong>'+p.events.length+'</strong></td>'
-         + '<td>'+lots.length+' <span class="text-xs text-muted">('+lots.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0)+' €)</span></td>'
-         + '<td class="text-sm"><div>'+esc(p.contact||'-')+'</div><div class="text-xs text-muted">'+esc(p.email||'')+'</div></td>'
-         + '<td class="col-actions"><div class="row-actions"><button class="btn btn-icon btn-sm" onclick="event.stopPropagation();openDrawerForEdit(\'partenaire\',\''+p.id+'\')">✏</button></div></td>'
+         + '<td><div style="font-weight:700">'+esc(p.nom)+'</div><div class="text-xs text-muted">'+esc(p.secteur||'')+'</div></td>'
+         + '<td>'+typeChip+'</td>'
+         + '<td class="text-sm">'+esc(p.ville||'-')+'</td>'
+         + '<td class="text-sm">'+esc(p.tel||'-')+'</td>'
+         + '<td class="text-sm">'+esc(p.email||'-')+'</td>'
+         + '<td class="col-actions"><div class="row-actions">'
+         + '<button class="btn btn-icon btn-sm" title="Éditer" onclick="event.stopPropagation();openDrawerForEdit(\'partenaire\',\''+p.id+'\')">✏</button>'
+         + '<button class="btn btn-icon btn-sm" title="Supprimer" onclick="event.stopPropagation();deletePartenaire(\''+p.id+'\')">🗑</button>'
+         + '</div></td>'
          + '</tr>';
   });
   if(list.length===0) html += '<tr><td colspan="8"><div class="empty-block mt-3"><div class="ico">🤝</div><div class="t">Aucun partenaire</div><div class="s">Ajoutez un premier partenaire via + Nouveau partenaire</div></div></td></tr>';
@@ -5104,7 +5106,7 @@ function renderBiblioPartenaires(){
 }
 function newPartenaire(){
   const id = newId('pt');
-  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',url:'',adresse:'',siret:'',secteur:'',events:[],contrat:'',notes:''};
+  var nouveauPt = {id,nom:'Nouveau partenaire',type:'Local',contact:'',role:'',email:'',tel:'',url:'',adresse:'',ville:'',siret:'',secteur:'',events:[],actif:true,visible:true,contrat:'',notes:''};
   DATA.partenaires.unshift(nouveauPt);
   saveData();
   supaWritePartenaire(nouveauPt);
@@ -5233,11 +5235,34 @@ function drawerPartner(p){
   }
   html += '</div>';
   if(state.drawer.edit){
-    html += drawerFooter('<button class="btn" onclick="cancelEdit()">Annuler</button><button class="btn btn-primary" onclick="saveEdit()">✓ Enregistrer</button>');
+    html += drawerFooter(
+      '<button class="btn btn-danger" onclick="deletePartenaire(\''+p.id+'\')" style="background:rgba(226,75,74,.1);color:#E24B4A;border:1.5px solid rgba(226,75,74,.3)">🗑 Supprimer</button>'
+      +'<div style="display:flex;gap:8px"><button class="btn" onclick="cancelEdit()">Annuler</button><button class="btn btn-primary" onclick="saveEdit()">✓ Enregistrer</button></div>'
+    );
   } else {
-    html += drawerFooter('','<button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>');
+    html += drawerFooter(
+      '<button class="btn" style="background:rgba(226,75,74,.08);color:#E24B4A;border:1.5px solid rgba(226,75,74,.2)" onclick="deletePartenaire(\''+p.id+'\')" >🗑 Supprimer</button>',
+      '<button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>'
+    );
   }
   return html;
+}
+function deletePartenaire(id){
+  var p = DATA.partenaires.find(function(x){ return x.id===id; });
+  if(!p) return;
+  if(!confirm('Supprimer « '+p.nom+' » ? Cette action est irréversible.')) return;
+  /* Supprimer en Supabase */
+  if(FLOWIN_SUPA_URL) {
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?id=eq.'+encodeURIComponent(id), {
+      method:'DELETE',
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}
+    }).catch(function(e){ console.warn('[Flowin] delete partenaire:', e); });
+  }
+  DATA.partenaires = DATA.partenaires.filter(function(x){ return x.id!==id; });
+  saveData();
+  closeDrawer();
+  toast('Partenaire supprimé','success');
+  render();
 }
 // ============ BIBLIOTHÈQUE EVENTS ============
 function renderBiblioEvents(){
