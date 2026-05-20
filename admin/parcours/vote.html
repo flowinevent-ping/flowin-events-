@@ -163,10 +163,12 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .partenaires{padding:14px 20px 20px;background:rgba(255,255,255,.04);border-top:var(--border)}
 .partenaires-label{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:10px}
 .partenaires-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.partenaire-tile{background:#fff;border:var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform .1s}
-.partenaire-tile:hover{transform:translateY(-1px)}
-.partenaire-emoji{font-size:22px;margin-bottom:4px}
-.partenaire-name{font-size:9px;font-weight:900;color:var(--navy);line-height:1.2}
+.partenaires-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.partenaire-tile{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:16px;padding:18px 10px 14px;text-align:center;cursor:pointer;transition:transform .15s}
+.partenaire-tile:active{transform:scale(.97)}
+.partenaire-emoji{font-size:38px;margin-bottom:8px;display:block}
+.partenaire-name{font-size:12px;font-weight:800;color:#fff;line-height:1.3;word-break:break-word}
+.partenaire-voir{font-size:10px;color:rgba(252,211,77,.8);margin-top:3px}
 
 /* Ticket confirm */
 .ticket{margin:0 20px 14px;background:#fff;border:var(--border);border-radius:22px;padding:20px;text-align:center;position:relative}
@@ -1176,6 +1178,25 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
   .tb-title{font-size:28px}
   h1,h2{font-size:22px}
 }
+
+/* ── Partenaires : bottom sheet + tiles ── */
+.partenaire-logo{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,0,0,.1);margin-bottom:8px}
+.part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
+.part-sheet-overlay.on{opacity:1;pointer-events:all}
+.part-sheet{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#1a1230 0%,#0f0c1e 100%);border-radius:24px 24px 0 0;padding:0 0 env(safe-area-inset-bottom);z-index:201;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.23,1)}
+.part-sheet.on{transform:translateY(0)}
+.part-sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin:10px auto 16px}
+.part-sheet-body{padding:0 24px 28px}
+.part-sheet-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;border:2px solid rgba(255,255,255,.15)}
+.part-sheet-avatar img{width:100%;height:100%;object-fit:cover}
+.part-sheet-nom{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;text-align:center;margin-bottom:6px}
+.part-sheet-desc{font-size:13px;color:rgba(255,255,255,.65);text-align:center;line-height:1.5;margin-bottom:12px}
+.part-sheet-promo{background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.35);border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;color:#C4B5FD;text-align:center;margin-bottom:14px}
+.part-sheet-links{display:flex;flex-direction:column;gap:8px}
+.part-sheet-link{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
+.part-sheet-link:active{background:rgba(255,255,255,.14)}
+.part-sheet-link-ico{font-size:20px;width:28px;text-align:center}
+.part-sheet-close{position:absolute;top:14px;right:18px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -1531,7 +1552,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
         <div style="padding:14px 20px 0">
           <div class="partenaires" style="background:rgba(255,255,255,.08);border-color:rgba(252,211,77,.2)">
             <div class="partenaires-label" style="color:#FCD34D">★ Partenaires Jazz Antibes 2026 ★</div>
-            <div class="partenaires-grid">
+            <div class="partenaires-grid" id="vs-part-grid">
               <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎷</div><div class="partenaire-name">Jazz Antibes</div></div>
               <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🏖️</div><div class="partenaire-name">Ville d'Antibes</div></div>
               <div class="partenaire-tile" style="background:rgba(255,255,255,.15);color:#fff"><div class="partenaire-emoji">🎵</div><div class="partenaire-name">SACEM</div></div>
@@ -2622,6 +2643,77 @@ function flowinGenerateTicket(prefix) {
   var year = new Date().getFullYear();
   var rand = Math.floor(Math.random()*9000)+1000;
   return prefix.toUpperCase()+'-'+year+'-'+rand;
+}
+/* ── Bottom sheet partenaires (générique tous parcours) ── */
+var FLOWIN_PARTENAIRES = [];
+function flowinShowPartSheet(idx) {
+  var p = FLOWIN_PARTENAIRES[idx];
+  if(!p) return;
+  var av = document.getElementById('fl-ps-avatar');
+  if(av) {
+    if(p.image_url) {
+      av.innerHTML = '<img src="'+p.image_url+'" alt="'+p.nom+'">';
+      av.style.background = 'transparent';
+    } else {
+      av.innerHTML = '<span style="font-size:34px">'+flowinGetEmojiForPart(p.nom||'')+'</span>';
+      av.style.background = 'rgba(168,85,247,.15)';
+    }
+  }
+  var el = function(id){ return document.getElementById(id); };
+  if(el('fl-ps-nom'))  el('fl-ps-nom').textContent  = p.nom || '';
+  if(el('fl-ps-desc')){ el('fl-ps-desc').textContent = p.description||''; el('fl-ps-desc').style.display = p.description?'':'none'; }
+  if(el('fl-ps-promo')){ el('fl-ps-promo').textContent = p.promo_text||''; el('fl-ps-promo').style.display = p.promo_text?'':'none'; }
+  if(el('fl-ps-links')) {
+    var lhtml = '';
+    if(p.site_web||p.url) lhtml += '<a href="'+(p.site_web||p.url)+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">\u{1F310}</span><span>Site internet</span></a>';
+    if(p.instagram) { var ig=p.instagram.indexOf('http')===0?p.instagram:'https://instagram.com/'+p.instagram.replace('@',''); lhtml+='<a href="'+ig+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">\u{1F4F8}</span><span>Instagram</span></a>'; }
+    if(p.facebook)  { var fb=p.facebook.indexOf('http')===0?p.facebook:'https://facebook.com/'+p.facebook; lhtml+='<a href="'+fb+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">\u{1F535}</span><span>Facebook</span></a>'; }
+    if(!lhtml) lhtml='<div style="text-align:center;color:rgba(255,255,255,.4);font-size:13px;padding:12px 0">Aucun lien configur\u00e9 pour ce partenaire</div>';
+    el('fl-ps-links').innerHTML = lhtml;
+  }
+  document.getElementById('fl-part-overlay').classList.add('on');
+  document.getElementById('fl-part-sheet').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function flowinClosePartSheet() {
+  document.getElementById('fl-part-overlay').classList.remove('on');
+  document.getElementById('fl-part-sheet').classList.remove('on');
+  document.body.style.overflow='';
+}
+function flowinGetEmojiForPart(nom) {
+  var n=nom.toLowerCase();
+  if(n.indexOf('patisserie')>=0||n.indexOf('palanque')>=0||n.indexOf('boulangerie')>=0) return '\u{1F370}';
+  if(n.indexOf('bijouterie')>=0||n.indexOf('lorenzo')>=0||n.indexOf('bijou')>=0) return '\u{1F48E}';
+  if(n.indexOf('ccdk')>=0||n.indexOf('commerce')>=0) return '\u{1F3EA}';
+  if(n.indexOf('cin')>=0||n.indexOf('majestic')>=0) return '\u{1F3AC}';
+  if(n.indexOf('sport')>=0||n.indexOf('decathlon')>=0) return '\u{1F3C3}';
+  if(n.indexOf('pizza')>=0||n.indexOf('restaurant')>=0) return '\u{1F355}';
+  if(n.indexOf('mairie')>=0||n.indexOf('ville')>=0) return '\u{1F3DB}';
+  if(n.indexOf('jazz')>=0||n.indexOf('musique')>=0) return '\u{1F3B7}';
+  return '\u{1F91D}';
+}
+function flowinHydratePartenaires(gridId, labelId, ev) {
+  var parts = FLOWIN_PARTENAIRES;
+  if(!parts||!parts.length) return;
+  var grid = document.getElementById(gridId);
+  if(!grid) return;
+  var label = document.getElementById(labelId);
+  if(label) label.textContent = '\u2605 Partenaires \u00b7 '+(ev&&ev.nom?ev.nom:'cet event')+' \u2605';
+  var html = '';
+  for(var i=0;i<parts.length;i++) {
+    var p=parts[i], pnom=p.nom||'Partenaire';
+    var emoji = p.emoji||flowinGetEmojiForPart(pnom);
+    var avatarHtml = p.image_url
+      ? '<img src="'+p.image_url+'" alt="'+pnom+'" class="partenaire-logo">'
+      : '<div class="partenaire-emoji">'+emoji+'</div>';
+    var hasLinks = p.site_web||p.url||p.instagram||p.facebook;
+    html += '<div class="partenaire-tile" onclick="flowinShowPartSheet('+i+')" role="button" aria-label="'+pnom+'">';
+    html += avatarHtml;
+    html += '<div class="partenaire-name">'+(pnom.length>18?pnom.slice(0,16)+'\u2026':pnom)+'</div>';
+    if(hasLinks) html += '<div class="partenaire-voir">\u2192 voir</div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
 }
 function supaWriteFlowin(prefix, email, ticket, extraFields){
   if(!FLOWIN_EVENT || !email) return;
