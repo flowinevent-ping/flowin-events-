@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -43,6 +43,23 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
     setTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
   }
+
+
+  /* Navigation postMessage — flèches dashboard SA */
+  useEffect(() => {
+    const NAV_SCREENS: Screen[] = ['landing', 'vote', 'form', 'ticket', 'already']
+    function onMsg(e: MessageEvent) {
+      if (!e.data || !e.data.flowinNav) return
+      setScreen(cur => {
+        const i = NAV_SCREENS.indexOf(cur)
+        if (e.data.flowinNav === 'next' && i < NAV_SCREENS.length - 1) return NAV_SCREENS[i + 1]
+        if (e.data.flowinNav === 'prev' && i > 0) return NAV_SCREENS[i - 1]
+        return cur
+      })
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [])
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#0F172A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>

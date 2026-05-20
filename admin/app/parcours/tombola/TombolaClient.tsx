@@ -101,6 +101,23 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const partSelected = partenaires[partIdx]
   const c = couleur
 
+
+  /* Navigation postMessage — flèches dashboard SA */
+  useEffect(() => {
+    const NAV_SCREENS: Screen[] = ['landing', 'form', 'partenaires', 'ticket', 'already']
+    function onMsg(e: MessageEvent) {
+      if (!e.data || !e.data.flowinNav) return
+      setScreen(cur => {
+        const i = NAV_SCREENS.indexOf(cur)
+        if (e.data.flowinNav === 'next' && i < NAV_SCREENS.length - 1) return NAV_SCREENS[i + 1]
+        if (e.data.flowinNav === 'prev' && i > 0) return NAV_SCREENS[i - 1]
+        return cur
+      })
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [])
+
   return (
     <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: '#0F172A', color: '#fff', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
       <style>{`

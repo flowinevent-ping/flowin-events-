@@ -65,6 +65,23 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
 
   const q=questions[qIdx]
 
+
+  /* Navigation postMessage — flèches dashboard SA */
+  useEffect(() => {
+    const NAV_SCREENS: Screen[] = ['landing', 'quiz', 'result', 'form', 'ticket', 'already']
+    function onMsg(e: MessageEvent) {
+      if (!e.data || !e.data.flowinNav) return
+      setScreen(cur => {
+        const i = NAV_SCREENS.indexOf(cur)
+        if (e.data.flowinNav === 'next' && i < NAV_SCREENS.length - 1) return NAV_SCREENS[i + 1]
+        if (e.data.flowinNav === 'prev' && i > 0) return NAV_SCREENS[i - 1]
+        return cur
+      })
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [])
+
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#0F172A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
       <style>{parcoursCSS(c)+'.opt{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:14px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left}.opt.correct{background:rgba(34,197,94,.2);border-color:#22C55E}.opt.wrong{background:rgba(239,68,68,.2);border-color:#EF4444}.opt.reveal{background:rgba(34,197,94,.12);border-color:#22C55E88}'}</style>
