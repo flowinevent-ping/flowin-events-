@@ -5146,51 +5146,34 @@ function drawerPartner(p){
 
       /* --- Section 1 : Logo & Identité --- */
       html += '<div class="section-h">🖼 Logo & Identité</div>';
-      html += '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px">';
-      /* Zone preview logo */
-      html += '<div id="pt-logo-zone" style="width:88px;height:88px;flex-shrink:0;border-radius:12px;border:2px dashed var(--sa-border);background:var(--sa-subtle);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">';
+
+      /* Zone preview cliquable + input file caché */
+      html += '<div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px">';
+      html += '<label for="pt-file-input" style="width:100px;height:100px;flex-shrink:0;border-radius:14px;border:2px dashed var(--sa-border);background:var(--sa-subtle);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;cursor:pointer" title="Cliquer pour uploader un logo PNG/JPG/SVG">';
       if(logoVal){
-        html += '<img id="pt-logo-img" src="'+escAttr(logoVal)+'" alt="logo" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\';document.getElementById(\'pt-logo-emoji\').style.display=\'block\'">';
-        html += '<div id="pt-logo-emoji" style="display:none;font-size:28px;text-align:center">'+esc(f.emoji||p.emoji||'🤝')+'</div>';
+        html += '<img id="pt-logo-img" src="'+escAttr(logoVal)+'" style="width:100%;height:100%;object-fit:contain" onerror="_ptImgErr(this)">';
+        html += '<div id="pt-logo-ef" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:34px">'+esc(f.emoji||p.emoji||'🖼')+'</div>';
       } else {
-        html += '<img id="pt-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain">';
-        html += '<div id="pt-logo-emoji" style="font-size:28px;text-align:center">'+esc(f.emoji||p.emoji||'🖼')+'</div>';
+        html += '<img id="pt-logo-img" src="" style="display:none;width:100%;height:100%;object-fit:contain">';
+        html += '<div id="pt-logo-ef" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;font-size:34px">'+esc(f.emoji||p.emoji||'🖼')+'</div>';
       }
-      html += '</div>';
-      /* Champs logo */
+      html += '<div style="position:absolute;bottom:0;width:100%;text-align:center;font-size:9px;font-weight:800;background:rgba(0,0,0,.45);color:#fff;padding:3px 0;text-transform:uppercase;letter-spacing:.06em">📁 Upload</div>';
+      html += '</label>';
+      html += '<input type="file" id="pt-file-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none" onchange="ptUploadLogo(this)">';
+
+      /* Champs droite */
       html += '<div style="flex:1">';
-      html += '<div class="field-row"><div class="field-label">Logo (URL image)</div><div class="field-value">';
-      html += '<input type="url" class="input" placeholder="https://logo.png" value="'+escAttr(logoVal)+'"';
-      html += ' oninput="(function(v){';
-      html += 'setForm(\'image_url\',v);';
-      html += 'var img=document.getElementById(\'pt-logo-img\');';
-      html += 'var em=document.getElementById(\'pt-logo-emoji\');';
-      html += 'if(v){img.src=v;img.style.display=\'block\';if(em)em.style.display=\'none\';}';
-      html += 'else{img.src=\'\';img.style.display=\'none\';if(em){em.textContent=document.querySelector(\'#pt-emoji-input\')?document.querySelector(\'#pt-emoji-input\').value:\'🖼\';em.style.display=\'block\';}}';
-      html += '})(this.value)">';
+      var urlDisplay = (logoVal && logoVal.startsWith('data:')) ? '(image uploadée depuis fichier)' : (logoVal||'');
+      html += '<div class="field-row"><div class="field-label">Ou coller une URL</div><div class="field-value">';
+      html += '<input id="pt-logo-url" type="url" class="input" placeholder="https://exemple.fr/logo.png" value="'+escAttr(urlDisplay)+'" oninput="ptUpdateLogoFromUrl(this.value)">';
       html += '</div></div>';
-      html += '<div class="field-row"><div class="field-label">Emoji (si pas de logo)</div><div class="field-value">';
-      html += '<input id="pt-emoji-input" class="input" placeholder="🤝" value="'+escAttr(f.emoji||p.emoji||'')+'" oninput="setForm(\'emoji\',this.value);var em=document.getElementById(\'pt-logo-emoji\');if(em&&!document.getElementById(\'pt-logo-img\').src)em.textContent=this.value||\'🖼\'">';
+      html += '<div class="field-row"><div class="field-label">Emoji fallback (si pas de logo)</div><div class="field-value">';
+      html += '<input id="pt-emoji-input" class="input" placeholder="🤝" value="'+escAttr(f.emoji||p.emoji||'')+'" oninput="ptUpdateEmoji(this.value)">';
       html += '</div></div>';
+      html += '<div style="margin-top:4px;font-size:11px;color:var(--sa-muted)">PNG · JPG · SVG · WebP — auto-dimensionné dans la fiche joueur</div>';
       html += '</div></div>';
 
-      html += fieldInput('Nom *','nom',f.nom||'');
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">';
-      html += fieldSelect('Type','type',f.type||'Local',[{v:'Local',l:'Local'},{v:'National',l:'National'},{v:'Récurrent',l:'Récurrent'}]);
-      html += fieldInput('Secteur','secteur',f.secteur||'');
-      html += '</div>';
-
-      /* Toggles statut */
-      html += '<div style="display:flex;gap:16px;padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin:0 0 14px">';
-      html += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">';
-      html += '<input type="checkbox" '+(f.actif!==false?'checked ':'')+'onchange="setForm(\'actif\',this.checked)"> Actif</label>';
-      html += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">';
-      html += '<input type="checkbox" '+(f.visible!==false?'checked ':'')+'onchange="setForm(\'visible\',this.checked)"> Visible</label>';
-      html += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">';
-      html += '<input type="checkbox" '+(f.en_avant||f.enAvant?'checked ':'')+'onchange="setForm(\'en_avant\',this.checked)"> ⭐ En avant</label>';
-      html += '</div>';
-
-      /* --- Section 2 : Présence parcours --- */
+/* --- Section 2 : Présence parcours --- */
       html += '<div class="section-h">📱 Présence dans le parcours joueurs <span style="font-size:9px;font-weight:700;background:rgba(124,45,146,.12);color:#7C2D92;padding:2px 6px;border-radius:10px;margin-left:4px;text-transform:none">bottom sheet</span></div>';
       html += fieldInput('Description','description',f.description||'','textarea');
       html += fieldInput('Texte promo → bandeau violet','promo_text',f.promo_text||f.promoText||'');
@@ -5228,7 +5211,7 @@ function drawerPartner(p){
       html += '<div style="text-align:center;padding:16px 0 12px">';
       if(logoUrl){
         html += '<img src="'+escAttr(logoUrl)+'" alt="logo" style="max-height:80px;max-width:180px;object-fit:contain;border-radius:10px;border:1px solid var(--sa-border);display:block;margin:0 auto"';
-        html += ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">';
+        html += ' onerror="_ptImgErr(this)">';
         html += '<div style="display:none;font-size:48px;margin-top:4px">'+esc(emoji||'🤝')+'</div>';
       } else if(emoji){
         html += '<div style="font-size:52px;line-height:1">'+esc(emoji)+'</div>';
@@ -5341,6 +5324,59 @@ function drawerPartner(p){
   }
 
   return html;
+}
+
+/* ── Fonctions logo partenaire (upload + URL) ── */
+function _ptImgErr(img) {
+  img.style.display = 'none';
+  var nxt = img.nextElementSibling;
+  if(nxt) nxt.style.display = 'flex';
+  else {
+    var ef = document.getElementById('pt-logo-ef');
+    if(ef) ef.style.display = 'flex';
+  }
+}
+function _ptPreviewLogo(src, emojiVal) {
+  var img = document.getElementById('pt-logo-img');
+  var ef  = document.getElementById('pt-logo-ef');
+  if(!img) return;
+  if(src) {
+    img.src = src; img.style.display = 'block';
+    if(ef) ef.style.display = 'none';
+  } else {
+    img.src = ''; img.style.display = 'none';
+    if(ef) { ef.style.display = 'flex'; ef.textContent = emojiVal || '🖼'; }
+  }
+}
+function ptUploadLogo(input) {
+  var file = input && input.files && input.files[0];
+  if(!file) return;
+  /* Vérifier taille : max 500 KB */
+  if(file.size > 512000) { toast('Image trop grande (max 500 KB)', 'error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    setForm('image_url', dataUrl);
+    _ptPreviewLogo(dataUrl, null);
+    var urlField = document.getElementById('pt-logo-url');
+    if(urlField) urlField.value = '(image uploadée depuis fichier)';
+  };
+  reader.onerror = function() { toast('Erreur lecture fichier', 'error'); };
+  reader.readAsDataURL(file);
+}
+function ptUpdateLogoFromUrl(v) {
+  var emojiInput = document.getElementById('pt-emoji-input');
+  var emojiVal   = emojiInput ? emojiInput.value : '🖼';
+  setForm('image_url', v);
+  _ptPreviewLogo(v, emojiVal);
+}
+function ptUpdateEmoji(v) {
+  setForm('emoji', v);
+  var img = document.getElementById('pt-logo-img');
+  var ef  = document.getElementById('pt-logo-ef');
+  if(ef && (!img || !img.src || img.style.display === 'none')) {
+    ef.textContent = v || '🖼';
+  }
 }
 
 function deletePartenaire(id){
