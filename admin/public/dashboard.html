@@ -9562,6 +9562,18 @@ function renderWizardEvent(){
     html += '<div style="font-size:9px;color:rgba(255,255,255,.4);text-align:center;margin-top:8px">Les onglets activés ci-dessus apparaissent dans la navigation</div>';
     html += '</div>';
 
+    // ── Lien accès Pro ──
+    var _proUrl = 'https://flowin-events.vercel.app/pro_mobile.html?ev=' + encodeURIComponent(d.id||'');
+    html += '<div class="section-h" style="margin-top:18px">🔗 Accès Pro — lien & QR</div>';
+    html += '<div style="background:var(--sa-subtle);border-radius:10px;padding:12px 14px;margin-bottom:12px">';
+    html += '<div style="font-size:10px;color:var(--sa-muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">URL dashboard Pro (à partager avec le Pro client)</div>';
+    html += '<div style="display:flex;align-items:center;gap:8px">';
+    html += '<div style="flex:1;background:#fff;border:1px solid var(--sa-border);border-radius:8px;padding:8px 10px;font-size:10px;font-family:monospace;word-break:break-all;color:var(--sa-accent)">'+escAttr(_proUrl)+'</div>';
+    html += '<button class="btn btn-sm btn-primary" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+escAttr(_proUrl)+'\').then(function(){toast(\'URL copiée ✓\',\'success\')})">📋 Copier</button>';
+    html += '</div>';
+    html += '<div style="margin-top:10px;text-align:center">' + genQRSvg(_proUrl, {size:120,color:d.couleur||'#7C2D92'}) + '</div>';
+    html += '<div style="font-size:9px;color:var(--sa-muted);text-align:center;margin-top:4px">QR à imprimer ou envoyer au Pro client</div>';
+    html += '</div>';
     // ── Info importantes ──
     html += '<div style="margin-top:14px;padding:10px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:11px;color:#166534;line-height:1.6">'
          + '✅ <strong>Lecture seule garantie</strong> — le Pro ne peut jamais modifier les paramètres de l\'event, accéder au wizard, ou éditer le front.<br>'
@@ -9720,13 +9732,14 @@ function renderWizardEvent(){
     });
     if(pvTabs.length===0) html += '<div style="font-size:10px;color:#aaa">Aucun onglet visible</div>';
     html += '</div></div>';
-    // QR code placeholder
-    if(pv.qr!==false) {
+    // QR accès Pro
+    if(pv.qr!==false && d.id) {
+      var _pvProUrl = 'https://flowin-events.vercel.app/pro_mobile.html?ev=' + encodeURIComponent(d.id);
       html += '<div style="text-align:center;padding:6px 12px 10px">';
-      html += '<div style="display:inline-block;border:2px solid '+(d.couleur||'#7C2D92')+';border-radius:10px;padding:8px">';
-      html += genQRSvg('https://flowin.app/'+esc(d.id||'event'), {size:70,color:(d.couleur||'#7C2D92')});
+      html += '<div style="display:inline-block;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:8px;padding:6px">';
+      html += genQRSvg(_pvProUrl, {size:90,color:(d.couleur||'#7C2D92')});
       html += '</div>';
-      html += '<div style="font-size:9px;color:#888;margin-top:4px">QR de déploiement</div>';
+      html += '<div style="font-size:9px;color:#666;margin-top:5px;font-weight:700">📱 QR accès Pro dashboard</div>';
       html += '</div>';
     }
     html += '</div></div>';
