@@ -3068,6 +3068,14 @@ function toggleProVisib(evId, key){
   }
   renderDrawer();
 }
+function wizTogglePV(key){
+  if(!state.wiz || !state.wiz.draft) return;
+  if(!state.wiz.draft.proVisib) state.wiz.draft.proVisib = {stats:true,activite:true,participants:true,lots:true,qr:true,export:true,msgBienvenue:''};
+  /* Si la valeur est undefined, la défauts = true donc toggle → false */
+  var cur = state.wiz.draft.proVisib[key];
+  state.wiz.draft.proVisib[key] = (cur === undefined) ? false : !cur;
+  render();
+}
 function simulateProView(evId){
   var ev = findEvent(evId);
   if(!ev){ toast('Event introuvable','warn'); return; }
@@ -9789,7 +9797,13 @@ function renderWizardEvent(){
     html += '</div>';
     html += '<div class="alert success mt-3"><span class="ico">✓</span>Tout est OK · cliquez sur "Créer event" en haut à droite pour valider.</div>';
   } else if(step==='H'){
-    var pv = d.proVisib || {};
+    /* S'assurer que tous les flags sont définis avant le rendu */
+    if(!d.proVisib) d.proVisib = {};
+    var _pvDefs = {stats:true,activite:true,participants:true,lots:true,qr:true,export:true,msgBienvenue:''};
+    for(var _pvk in _pvDefs){
+      if(d.proVisib[_pvk] === undefined) d.proVisib[_pvk] = _pvDefs[_pvk];
+    }
+    var pv = d.proVisib;
     html += '<div class="section-h">Étape 8 · Vue Pro — Accès et visibilité</div>';
     html += '<div class="alert info" style="margin-bottom:14px"><span class="ico">👤</span>'
          + 'Configurez ce que le Pro peut voir dans son dashboard. Ces réglages s\'appliquent à cet event uniquement.</div>';
@@ -9818,10 +9832,7 @@ function renderWizardEvent(){
            + '<div><div style="font-size:12px;font-weight:700">'+t.lbl+'</div>'
            + '<div style="font-size:10px;color:var(--sa-muted)">'+t.desc+'</div></div>'
            + '</div>'
-           + '<div class="toggle '+(on?'on':'')+'" onclick="(function(){'
-           + 'if(!state.wiz.draft.proVisib)state.wiz.draft.proVisib={};'
-           + 'state.wiz.draft.proVisib.'+t.key+'=!state.wiz.draft.proVisib.'+t.key+';'
-           + 'render();})()"></div>'
+           + '<div class="toggle '+(on?'on':'')+'" onclick="wizTogglePV(\''+t.key+'\')"></div>'
            + '</div>';
     });
     html += '</div>';
