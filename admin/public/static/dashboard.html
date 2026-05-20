@@ -3395,7 +3395,7 @@ function renderPilotageProMode(){
   if(myJoueursAll.length > 0){
     html += '<div class="card" style="margin-top:16px"><div class="card-h"><div class="card-title">👥 Mes joueurs CRM</div>'
          + '<div style="display:flex;gap:8px">'
-         + '<button class="btn btn-sm" onclick="exportCSV(\'joueurs\')">⬇ Export CSV ('+myJoueursAll.length+')</button>'
+         + '<button class="btn btn-sm" onclick="exportCSV(\'joueurs-pro\',\''+proId+'\');">⬇ Export CSV ('+myJoueursAll.length+')</button>'
          + '</div></div>';
     html += '<div style="overflow-x:auto"><table class="table"><thead><tr>'
          + '<th>Joueur</th><th>Ville</th><th>Opt-in</th><th>Gains</th><th>Score</th><th>Dernière vue</th>'
@@ -4071,6 +4071,12 @@ function exportMailchimp(evId){
   toast(joueurs.length+' contacts opt-in exportés','success');
 }
 
+/* ═══════════════════════════════════════════════════════════════
+ * RÈGLE PERMANENTE — EXPORT SCOPÉ À L'EVENT
+ * Tout export depuis un contexte event DOIT passer id = event.id
+ * Jamais d'export global depuis une vue event.
+ * Export global = uniquement depuis les vues CRM/SA transverses.
+ * ═══════════════════════════════════════════════════════════════ */
 function exportCSV(type, id){
   if(type==='joueurs'){
     const filter = id ? {eventId:id} : {};
@@ -4864,7 +4870,7 @@ function drawerJoueur(j){
   } else if(state.drawer.tab==='export'){
     html += '<div class="alert warn"><span class="ico">⚠️</span>Conformité RGPD · ces actions sont irréversibles et tracées.</div>';
     html += '<div class="section-h">Exports</div>';
-    html += '<button class="btn mb-2 btn-block" onclick="exportPDFRapport(null)">📄 Fiche joueur complète (PDF)</button>';
+    html += '<button class="btn mb-2 btn-block" onclick="exportPDFRapport(j.events&&j.events[0]?j.events[0]:null)">📄 Fiche joueur complète (PDF)</button>';
     html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'historique-joueur\',\''+j.id+'\')">📥 Historique events (CSV)</button>';
     html += '<button class="btn btn-block" onclick="toast(\'Export RGPD préparé\',\'success\')">📦 Export RGPD complet (toutes données)</button>';
     html += '<div class="section-h">Actions RGPD</div>';
@@ -5894,7 +5900,7 @@ function drawerEvent(e){
          + '</div>';
     html += '<div class="section-h">Exports</div>';
     html += '<div class="form-grid">'
-         + '<button class="btn" onclick="exportPDFRapport(null)">🖨 PDF imprimable A4</button>'
+         + '<button class="btn" onclick="exportPDFRapport(state.drawer.id||null)">🖨 PDF imprimable A4</button>'
          + '<button class="btn" onclick="toast(\'PNG haute résolution exporté\',\'success\')">🖼 PNG haute résolution</button>'
          + '<button class="btn" onclick="toast(\'SVG vectoriel exporté\',\'success\')">📐 SVG vectoriel</button>'
          + '<button class="btn" onclick="toast(\'Email partenaires envoyé\',\'success\')">📧 Envoyer par email</button>'
@@ -8651,9 +8657,11 @@ function modalRapport(d){
     html += '</tbody></table>';
   }
   html += '</div></div>';
+  /* RÈGLE : export scopé à l'event courant (state.drawer.id) si disponible */
+  var _rapEvId = state.drawer && state.drawer.id ? state.drawer.id : null;
   html += '<div class="modal-footer"><button class="btn" onclick="closeModal()">Fermer</button>'
-       + '<div class="flex gap-2"><button class="btn" onclick="exportPDFRapport(null);closeModal()">📄 Export PDF</button>'
-       + '<button class="btn btn-primary" onclick="exportCSV(\'joueurs\');closeModal()">📥 Export CSV</button></div></div>';
+       + '<div class="flex gap-2"><button class="btn" onclick="exportPDFRapport(\''+(_rapEvId||'')+'\');closeModal()">📄 Export PDF</button>'
+       + '<button class="btn btn-primary" onclick="exportCSV(\'joueurs\',\''+(_rapEvId||'')+'\');closeModal()">📥 Export CSV</button></div></div>';
   html += '</div>';
   return html;
 }
