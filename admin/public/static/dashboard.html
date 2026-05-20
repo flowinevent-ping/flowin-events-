@@ -5148,11 +5148,11 @@ function drawerPartner(p){
                 + '<img id="pt-logo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:contain">')
            + '</div>'
            + '<div style="flex:1">'
-           + '<label style="display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:4px">Logo (URL — PNG, SVG, JPG, WebP)</label>'
-           + '<input class="f-input" type="url" placeholder="https://..." value="'+escAttr(logoVal)+'"'
+           + '<div class="field-label" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px">Logo (URL — PNG, SVG, JPG, WebP)</div>'
+           + '<input type="url" class="input" placeholder="https://…" value="'+escAttr(logoVal)+'"'
            + ' oninput="(function(v){ setForm(\'image_url\',v); var img=document.getElementById(\'pt-logo-img\'); var ph=document.getElementById(\'pt-logo-placeholder\'); if(v){ img.src=v; img.style.display=\'block\'; if(ph)ph.style.display=\'none\'; }else{ img.src=\'\'; img.style.display=\'none\'; if(ph)ph.style.display=\'block\'; } })(this.value)" style="margin-bottom:6px">'
-           + '<label style="display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:4px">Emoji fallback (si pas de logo)</label>'
-           + '<input class="f-input" placeholder="🤝" value="'+escAttr(f.emoji||'')+'" oninput="setForm(\'emoji\',this.value)">'
+           + '<div class="field-label" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px">Emoji fallback (si pas de logo)</div>'
+           + '<input class="input" placeholder="🤝" value="'+escAttr(f.emoji||'')+'" oninput="setForm(\'emoji\',this.value)">'
            + '</div></div>';
 
       html += fieldInput('Nom *','nom',f.nom);
@@ -5200,8 +5200,17 @@ function drawerPartner(p){
       html += fieldInput('Notes internes','notes',f.notes||'','textarea');
     } else {
       /* Vue lecture */
-      if(p.image_url||p.imageUrl) html += '<div style="margin-bottom:12px;text-align:center"><img src="'+escAttr(p.image_url||p.imageUrl)+'" alt="logo" style="height:56px;max-width:160px;object-fit:contain;border-radius:8px"></div>';
-      else if(p.emoji) html += '<div style="font-size:40px;text-align:center;margin-bottom:8px">'+esc(p.emoji)+'</div>';
+      var _logoUrl = p.image_url||p.imageUrl||'';
+      html += '<div style="text-align:center;margin-bottom:14px">';
+      if(_logoUrl) {
+        html += '<img src="'+escAttr(_logoUrl)+'" alt="logo"'
+             + ' style="max-height:80px;max-width:180px;object-fit:contain;border-radius:10px;border:1px solid var(--sa-border,#E2E8F0);display:block;margin:0 auto"'
+             + ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">';
+        html += '<div style="display:none;font-size:40px;margin-top:4px">'+esc(p.emoji||'🤝')+'</div>';
+      } else if(p.emoji) {
+        html += '<div style="font-size:40px">'+esc(p.emoji)+'</div>';
+      }
+      html += '</div>';
       html += fieldRow('Nom','<strong>'+esc(p.nom)+'</strong>');
       html += fieldRow('Type','<span class="chip '+(p.type==='National'?'purple':p.type==='Récurrent'?'live':'past')+'">'+esc(p.type||'-')+'</span>');
       html += fieldRow('Secteur',esc(p.secteur||'-'));
