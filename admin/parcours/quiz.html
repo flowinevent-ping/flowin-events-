@@ -1180,7 +1180,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 }
 
 /* ── Partenaires : bottom sheet + tiles ── */
-.partenaire-logo{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,0,0,.1);margin-bottom:8px}
+.partenaire-logo{width:56px;height:56px;border-radius:10px;object-fit:contain;border:1px solid rgba(0,0,0,.1);margin-bottom:8px;background:#fff;padding:4px}
 .part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s}
 .part-sheet-overlay.on{opacity:1;pointer-events:all}
 .part-sheet{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,#1a1230 0%,#0f0c1e 100%);border-radius:24px 24px 0 0;padding:0 0 env(safe-area-inset-bottom);z-index:201;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.23,1)}
@@ -1188,7 +1188,7 @@ html,body{margin:0;padding:0;overflow:hidden;height:100%;width:100%;background:#
 .part-sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin:10px auto 16px}
 .part-sheet-body{padding:0 24px 28px}
 .part-sheet-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;border:2px solid rgba(255,255,255,.15)}
-.part-sheet-avatar img{width:100%;height:100%;object-fit:cover}
+.part-sheet-avatar img{width:100%;height:100%;object-fit:contain;padding:6px}
 .part-sheet-nom{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;text-align:center;margin-bottom:6px}
 .part-sheet-desc{font-size:13px;color:rgba(255,255,255,.65);text-align:center;line-height:1.5;margin-bottom:12px}
 .part-sheet-promo{background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.35);border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;color:#C4B5FD;text-align:center;margin-bottom:14px}
@@ -2788,6 +2788,21 @@ if(FLOWIN_MODULE_FALLBACK){
 
       try { flowinShowModuleViewport(FLOWIN_MODULE_FALLBACK || rows[0].module); } catch(e){ console.warn('[Flowin] routage', e); }
       try { flowinHydrateModule(rows[0]); flowinHydrateDynTexts(rows[0]); flowinHydrateFront(rows[0]); } catch(e){ console.warn('[Flowin] hydrate', e); }
+      /* ── Fetch partenaires depuis Supabase (tous les champs bottom sheet) ── */
+      var _pIds2 = (rows[0].cfg && rows[0].cfg.partenaires && rows[0].cfg.partenaires.length)
+        ? rows[0].cfg.partenaires : [];
+      if(_pIds2.length) {
+        var _pF2 = _pIds2.map(function(id){ return 'id.eq.'+encodeURIComponent(id); }).join(',');
+        fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?or=('+_pF2+')&select=id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,actif', {
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+        }).then(function(r){ return r.json(); }).then(function(parts){
+          FLOWIN_PARTENAIRES = Array.isArray(parts) ? parts.filter(function(p){ return p.actif !== false; }) : [];
+          var gId = document.querySelector('.partenaires-grid');
+          var lId = document.querySelector('.partenaires-label');
+          if(gId) flowinHydratePartenaires(gId.id || 'pq-part-grid', lId ? (lId.id || 'pq-part-label') : 'pq-part-label', rows[0]);
+        }).catch(function(e){ console.warn('[Flowin] partenaires fetch:', e); });
+      }
+
       /* Hydratation bonus : pour TOUS les events (lit cfg.quizBonusList) */
       try { flowinHydratePaquesBonus(); } catch(e){ console.warn('[Flowin] hydrate bonus', e); }
       try { flowinHydrateQuizmasterBonus(); } catch(e){ console.warn('[Flowin] hydrate qm bonus', e); }
@@ -3115,7 +3130,7 @@ function flowinHydratePartenaires(gridId, labelId, ev) {
     var p=parts[i], pnom=p.nom||'Partenaire';
     var emoji = p.emoji||flowinGetEmojiForPart(pnom);
     var avatarHtml = p.image_url
-      ? '<img src="'+p.image_url+'" alt="'+pnom+'" class="partenaire-logo">'
+      ? '<img src="'+p.image_url+'" alt="'+pnom+'" class="partenaire-logo" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'+'<div style="display:none;font-size:38px;margin-bottom:8px">'+emoji+'</div>'
       : '<div class="partenaire-emoji">'+emoji+'</div>';
     var hasLinks = p.site_web||p.url||p.instagram||p.facebook;
     html += '<div class="partenaire-tile" onclick="flowinShowPartSheet('+i+')" role="button" aria-label="'+pnom+'">';

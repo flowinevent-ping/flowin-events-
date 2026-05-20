@@ -175,7 +175,7 @@ body{background:#0F0A1E;min-height:100vh;display:flex;align-items:flex-start;jus
 .part-sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin:10px auto 16px}
 .part-sheet-body{padding:0 24px 28px}
 .part-sheet-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;border:2px solid rgba(255,255,255,.15)}
-.part-sheet-avatar img{width:100%;height:100%;object-fit:cover}
+.part-sheet-avatar img{width:100%;height:100%;object-fit:contain;padding:6px}
 .part-sheet-nom{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;text-align:center;margin-bottom:6px}
 .part-sheet-desc{font-size:13px;color:rgba(255,255,255,.65);text-align:center;line-height:1.5;margin-bottom:12px}
 .part-sheet-promo{background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.35);border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;color:#C4B5FD;text-align:center;margin-bottom:14px}
@@ -2735,7 +2735,7 @@ if(FLOWIN_MODULE_FALLBACK){
       if(_pIds.length) {
         try {
           var _pF = _pIds.map(function(id){ return 'id.eq.'+encodeURIComponent(id); }).join(',');
-          var _prResp = await fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?or=('+_pF+')&select=id,nom,emoji,site_web,url,actif', {
+          var _prResp = await fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?or=('+_pF+')&select=id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,actif', {
             headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
           });
           FLOWIN_PARTENAIRES = await _prResp.json();
