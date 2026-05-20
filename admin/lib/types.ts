@@ -109,7 +109,19 @@ export interface FlowinPartenaire {
   en_avant: boolean
   couleur: string | null
   type: string | null
+  secteur: string | null
+  ville: string | null
+  code_postal: string | null
+  adresse: string | null
+  email: string | null
+  tel: string | null
+  contact: string | null
+  role: string | null
+  siret: string | null
+  contrat: string | null
+  notes: string | null
   events: string[]
+  tags: string[]
 }
 
 export interface FlowinParticipation {
@@ -135,3 +147,37 @@ export interface SubmitFormData {
 }
 
 export type TicketPrefix = 'TB' | 'PQ' | 'QM' | 'QS' | 'SP' | 'VS'
+
+export interface FlowinPro {
+  id: string
+  nom: string
+  ville: string
+  code_postal: string
+  adresse: string
+  siret: string
+  secteur: string
+  contact: string
+  role_contact: string
+  email: string
+  tel: string
+  entree_p: string | null
+  notes: string
+  tags: string[]
+}
+
+export interface FlowinSuperEvent {
+  id: string
+  nom: string
+  pros: string[]
+  events: string[]
+  description: string
+  created_at: string
+}
+
+export interface DashboardData {
+  joueurs: FlowinJoueur[]
+  events: FlowinEvent[]
+  partenaires: FlowinPartenaire[]
+  lots: FlowinLot[]
+  pros: FlowinPro[]
+}
