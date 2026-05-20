@@ -1,25 +1,11 @@
-import type { Metadata } from 'next'
-import { fetchEvent } from '@/lib/events'
-import { fetchLots } from '@/lib/lots'
-import { fetchPartenaires } from '@/lib/partenaires'
+import { fetchParcoursData } from '@/lib/parcours'
 import SpinClient from './SpinClient'
 
 interface Props { searchParams: { ev?: string } }
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const ev = await fetchEvent(searchParams.ev ?? '')
-  return {
-    title: ev ? `${ev.nom} — Spin` : 'Spin Flowin',
-    description: ev?.description ?? 'Tournez la roue et découvrez votre lot !',
-  }
-}
-
-export default async function SpinPage({ searchParams }: Props) {
+export default async function Page({ searchParams }: Props) {
   const evId = searchParams.ev ?? ''
-  const event = await fetchEvent(evId)
-  const lots  = event ? await fetchLots(evId) : []
-  const partenaires = event ? await fetchPartenaires(event.cfg?.partenaires ?? []) : []
-  return (
-    <SpinClient event={event} lots={lots} partenaires={partenaires} evId={evId} />
-  )
+  if (!evId) return <div style={{display:'flex',height:'100dvh',alignItems:'center',justifyContent:'center',fontFamily:'system-ui',color:'#888'}}>Aucun event.</div>
+  const data = await fetchParcoursData(evId)
+  return <SpinClient {...data} evId={evId} />
 }
