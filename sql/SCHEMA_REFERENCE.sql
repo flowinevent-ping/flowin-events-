@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS joueurs (
   id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   external_id    TEXT UNIQUE,
   email          TEXT NOT NULL DEFAULT '',
-  email_lower    TEXT GENERATED ALWAYS AS (lower(email)) STORED,
+  email_lower    TEXT GENERATED ALWAYS AS (lower(email)) STORED, -- NE PAS écrire, auto-calculé
   nom            TEXT DEFAULT '',
   prenom         TEXT DEFAULT '',
   tel            TEXT DEFAULT '',
@@ -260,6 +260,17 @@ ALTER TABLE landings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "flowin_anon_all_landings" ON landings;
 CREATE POLICY "flowin_anon_all_landings" ON landings FOR ALL TO public USING (true) WITH CHECK (true);
 
+-- ════════════════════════════════════════════════════════════════════
+-- ════════════════════════════════════════════════════════════════════
+-- RÈGLES DE CÂBLAGE — à respecter dans tous les supaWrite*
+-- ════════════════════════════════════════════════════════════════════
+-- joueurs.email_lower : GENERATED ALWAYS — ne jamais inclure dans payload
+-- joueurs.score_moy   : numeric — envoyer null si vide (pas '')
+-- joueurs.date_naissance : date — envoyer null si vide (pas '')
+-- partenaires.site_web : ne pas dupliquer dans le payload
+-- banques.event_ids   : lire depuis b.eventIds || b.events
+-- supaUpsert          : résolution par PK (id) — comportement correct
+-- supaFetch joueurs   : select explicite (exclut email_lower)
 -- ════════════════════════════════════════════════════════════════════
 -- FIN · SCHEMA_REFERENCE.sql
 -- Prochaine étape post-NDS : Supabase Auth + RLS SA/PRO

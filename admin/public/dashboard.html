@@ -1908,7 +1908,7 @@ async function supaLoadAll(){
       supaFetch('partenaires', 'select=*'),
       supaFetch('events'),
       supaFetch('super_events', 'select=*&limit=50'),
-      supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=500'),
+      supaFetch('joueurs', 'select=id,ts,prenom,nom,email,genre,tel,ville,code_postal,adresse,date_naissance,optin,optin_date,gains,score_moy,events,first_seen,last_seen,source,age_tranche,enseigne,lot_gagne,ticket_code,decouverte,client_type,tags,external_id,updated_at&order=updated_at.desc&limit=500'),
       supaFetch('lots'),
       supaFetch('banques'),
       supaFetch('landings')
@@ -1985,9 +1985,9 @@ async function supaWriteJoueur(j){
   var payload = {
     id:j.id, email:j.email, nom:j.nom, prenom:j.prenom||'', tel:j.tel||'',
     ville:j.ville||'', code_postal:j.codePostal||'', genre:j.genre||'',
-    date_naissance:j.dateNaissance||'', optin:j.optin||false,
+    date_naissance:j.dateNaissance||null, optin:j.optin||false,
     optin_date:j.optinDate||null,
-    gains:j.gains||0, score_moy:j.scoreMoy||'', events:j.events||[],
+    gains:j.gains||0, score_moy:j.scoreMoy||null, events:j.events||[],
     first_seen:j.firstSeen||null, last_seen:j.lastSeen||null,
     source:j.source||'',
     adresse:j.adresse||'',
@@ -2080,7 +2080,6 @@ async function supaWritePartenaire(p){
     email: p.email || '',
     tel: p.tel || '',
     url: p.url || p.site_web || '',
-    site_web: p.site_web || p.url || '',
     instagram: p.instagram || '',
     facebook: p.facebook || '',
     ville: p.ville || '',
@@ -2101,7 +2100,8 @@ async function supaWriteBanque(b){
   if(!b || !b.id) return;
   var payload = {
     id: b.id, nom: b.nom, description: b.description||'',
-    event_ids: Array.isArray(b.events) ? b.events : [],
+    pro_id: b.proId || null,
+    event_ids: Array.isArray(b.eventIds||b.events) ? (b.eventIds||b.events) : [],
     questions: Array.isArray(b.questions) ? b.questions : [],
     tags: Array.isArray(b.tags) ? b.tags : []
   };
