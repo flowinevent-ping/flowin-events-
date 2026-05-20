@@ -2686,8 +2686,8 @@ function flowinShowPartSheet(idx) {
     if(p.site_web||p.url) lhtml += '<a href="'+(p.site_web||p.url)+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">\u{1F310}</span><span>Site internet</span></a>';
     if(p.instagram) { var ig=p.instagram.indexOf('http')===0?p.instagram:'https://instagram.com/'+p.instagram.replace('@',''); lhtml+='<a href="'+ig+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">\u{1F4F8}</span><span>Instagram</span></a>'; }
     if(p.facebook)  { var fb=p.facebook.indexOf('http')===0?p.facebook:'https://facebook.com/'+p.facebook; lhtml+='<a href="'+fb+'" target="_blank" rel="noopener" class="part-sheet-link"><span class="part-sheet-link-ico">\u{1F535}</span><span>Facebook</span></a>'; }
-    if(!lhtml) lhtml='<div style="text-align:center;color:rgba(255,255,255,.4);font-size:13px;padding:12px 0">Aucun lien configur\u00e9 pour ce partenaire</div>';
     el('fl-ps-links').innerHTML = lhtml;
+    el('fl-ps-links').style.display = lhtml ? '' : 'none';
   }
   document.getElementById('fl-part-overlay').classList.add('on');
   document.getElementById('fl-part-sheet').classList.add('on');
@@ -2722,13 +2722,12 @@ function flowinHydratePartenaires(gridId, labelId, ev) {
     var p=parts[i], pnom=p.nom||'Partenaire';
     var emoji = p.emoji||flowinGetEmojiForPart(pnom);
     var avatarHtml = p.image_url
-      ? '<img src="'+p.image_url+'" alt="'+pnom+'" class="partenaire-logo" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'+'<div style="display:none;font-size:38px;margin-bottom:8px">'+emoji+'</div>'
+      ? '<img src="'+p.image_url+'" alt="'+pnom+'" class="partenaire-logo" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'+'<div class="partenaire-emoji" style="display:none">'+emoji+'</div>'
       : '<div class="partenaire-emoji">'+emoji+'</div>';
     var hasLinks = p.site_web||p.url||p.instagram||p.facebook;
     html += '<div class="partenaire-tile" onclick="flowinShowPartSheet('+i+')" role="button" aria-label="'+pnom+'">';
     html += avatarHtml;
     html += '<div class="partenaire-name">'+(pnom.length>18?pnom.slice(0,16)+'\u2026':pnom)+'</div>';
-    if(hasLinks) html += '<div class="partenaire-voir">\u2192 voir</div>';
     html += '</div>';
   }
   grid.innerHTML = html;
