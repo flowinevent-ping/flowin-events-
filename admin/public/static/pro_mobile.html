@@ -697,7 +697,7 @@ function flowinProDataReady(){
 
   /* ── QR dynamique ── */
   if(ev && ev.module && ev.id) {
-    var qrUrl = 'https://flowin-events.vercel.app/parcours/'+ev.module+'?ev='+encodeURIComponent(ev.id);
+    var qrUrl = 'https://flowin-events.vercel.app/parcours/'+ev.module+'.html?ev='+encodeURIComponent(ev.id);
     var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='+encodeURIComponent(qrUrl);
     /* Image QR mini */
     var qrImg = document.getElementById('qrImg');

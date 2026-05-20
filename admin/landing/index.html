@@ -918,7 +918,7 @@ var _SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
 var _LS_KEY    = 'flowin_v31_data';
 
 function _supaUpsertLanding(table, payload){
-  fetch(_SUPA_URL+'/rest/v1/'+table, {
+  fetch(_SUPA_URL+'/rest/v1/'+table+'?on_conflict=external_id', {
     method:'POST',
     headers:{
       'apikey':_SUPA_ANON,
@@ -955,17 +955,15 @@ function writeJoueurBtoB(data){
 
     /* 1. Supabase (primaire) */
     _supaUpsertLanding('joueurs', {
-      id:joueur.id, email:joueur.email,
+      external_id:'j-btob-'+joueur.email.replace(/[^a-z0-9]/g,'-').substring(0,36),
+      email:joueur.email,
       nom:joueur.nom, prenom:joueur.prenom,
       tel:joueur.tel, ville:joueur.ville, code_postal:'',
-      genre:'', date_naissance:'',
       optin:true, optin_date:ts,
-      gains:1, score_moy:'',
-      events:['ev-flowin-demo'],
       first_seen:ts, last_seen:ts,
       source:'landing_btob',
       tags:joueur.tags,
-      age_tranche:'', enseigne:joueur.enseigne,
+      enseigne:joueur.enseigne,
       lot_gagne:joueur.lot_gagne,
       ticket_code:joueur.ticket_code,
       client_type:'btob'
@@ -1225,18 +1223,15 @@ function submitForm(){
   };
   /* Supabase */
   _supaUpsertLanding('joueurs', {
-    id:joueur.id, email:joueur.email,
+    external_id:'j-cta-'+joueur.email.replace(/[^a-z0-9]/g,'-').substring(0,36),
+    email:joueur.email,
     nom:joueur.nom, prenom:joueur.prenom,
     tel:joueur.tel, ville:'', code_postal:'',
-    genre:'', date_naissance:'',
     optin:true, optin_date:ts,
-    gains:0, score_moy:'',
-    events:joueur.events,
     first_seen:ts, last_seen:ts,
-    source:'landing_cta',
+    source:(new URLSearchParams(window.location.search)).get('source')==='qr' ? 'landing_qr' : 'landing_cta',
     tags:joueur.tags,
-    age_tranche:'', enseigne:'',
-    lot_gagne:'', ticket_code:'',
+    enseigne:'',
     client_type:'btob'
   });
   /* localStorage v31 */
