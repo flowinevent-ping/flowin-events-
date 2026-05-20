@@ -2164,6 +2164,8 @@ function gasBackup(action, payload){
 }
 // _resetDataOld_removed — remplacée par version protégée (voir lancerTirage)
 const DATA = loadData();
+/* ── evJoueurs : données joueurs SCOPÉES par event (non persistées) ── */
+DATA.evJoueurs = DATA.evJoueurs || {};
 // ══ PURGE BANQUES ══
 try {
   var _ok = ['bq-paques-vence']; // Banque officielle Pâques Vence
@@ -2323,7 +2325,10 @@ const LIB_EVENTS = {
     ev.status = newStatus; saveData();
     supaWriteEvent(ev); // Sync statut → désactive/réactive QR côté parcours
   },
-  participantsList: (eventId) => DATA.joueurs.filter(j=>j.events.includes(eventId))
+  participantsList: (eventId) => {
+    if(eventId && DATA.evJoueurs[eventId]) return DATA.evJoueurs[eventId];
+    return DATA.joueurs.filter(function(j){ return j.events && j.events.indexOf(eventId) >= 0; });
+  }
 };
 
 const LIB_JOUEURS = {
@@ -3541,6 +3546,22 @@ function newPro(){
 }
 
 // ============ DRAWER (système commun) ============
+
+/* ── Chargement joueurs scopé par event ── */
+async function loadEventJoueurs(evId){
+  if(!evId || !FLOWIN_SUPA_URL) return;
+  if(DATA.evJoueurs[evId]) return; /* déjà chargé */
+  try {
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.["'+encodeURIComponent(evId)+'"]&select=*&order=updated_at.desc', {
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+    });
+    var rows = await r.json();
+    if(!Array.isArray(rows)) rows = [];
+    DATA.evJoueurs[evId] = rows.map(function(row){ return supaRowToData(row,'joueur'); });
+    renderDrawer();
+  } catch(e){ console.error('[Flowin] loadEventJoueurs', evId, e); DATA.evJoueurs[evId] = []; }
+}
+
 function openDrawerFor(type,id,tab){
   state.drawer = {open:true,type,id,tab:tab||'infos',edit:false,form:{}};
   // Synchroniser proVisib depuis l'event si mode Pro
@@ -3548,6 +3569,8 @@ function openDrawerFor(type,id,tab){
     var _ev = DATA.events.find(function(e){ return e.id===id; });
     if(_ev && _ev.proVisib) state.proVisib = _ev.proVisib;
   }
+  // Charger les joueurs scopés à cet event (indépendant du global)
+  if(type==='event' && id) loadEventJoueurs(id);
   $('#drawerBd').classList.add('open');
   $('#drawer').classList.add('open');
   $('#drawer').classList.toggle('wide', type==='event'||type==='joueur');
@@ -4080,11 +4103,19 @@ function exportMailchimp(evId){
  * ═══════════════════════════════════════════════════════════════ */
 function exportCSV(type, id){
   if(type==='joueurs'){
-    const filter = id ? {eventId:id} : {};
-    const csv = LIB_JOUEURS.exportCSV(filter);
-    const fname = id ? 'joueurs-event-'+id+'.csv' : 'joueurs-crm-flowin.csv';
-    downloadCSV(fname, csv);
-    toast('Export CSV joueurs téléchargé ('+LIB_JOUEURS.query(filter).length+' lignes)','success');
+    /* Utiliser les joueurs scopés à l'event si disponibles */
+    if(id && DATA.evJoueurs[id]) {
+      var _evJ = DATA.evJoueurs[id];
+      var csv = LIB_JOUEURS.exportCSV({ids: _evJ.map(function(j){return j.id;})});
+      downloadCSV('joueurs-event-'+id+'.csv', csv);
+      toast('Export CSV joueurs téléchargé ('+_evJ.length+' lignes)','success');
+    } else {
+      const filter = id ? {eventId:id} : {};
+      const csv = LIB_JOUEURS.exportCSV(filter);
+      const fname = id ? 'joueurs-event-'+id+'.csv' : 'joueurs-crm-flowin.csv';
+      downloadCSV(fname, csv);
+      toast('Export CSV joueurs téléchargé ('+LIB_JOUEURS.query(filter).length+' lignes)','success');
+    }
   } else if(type==='lots'){
     const list = LIB_LOTS.query(id?{eventId:id}:{});
     const cols = ['ID','Event','Partenaire','Nom lot','Valeur €','Qté','Assigné à','Retiré','Date retrait','Date assignation'];
@@ -4141,9 +4172,10 @@ function exportCSV(type, id){
   } else if(type==='optin'){
     /* Export opt-in scopé à l'event */
     const evOptin = id ? LIB_EVENTS.find(id) : null;
-    const joueursOptin = DATA.joueurs.filter(function(j){
-      return j.optin === true
-        && (!id || (j.events && j.events.indexOf(id) >= 0));
+    /* Utiliser les joueurs scopés si disponibles, sinon fallback global */
+    var _baseOptin = (id && DATA.evJoueurs[id]) ? DATA.evJoueurs[id] : DATA.joueurs;
+    const joueursOptin = _baseOptin.filter(function(j){
+      return j.optin === true;
     });
     const colsO = ['Email','Prénom','Nom','Téléphone','Ville','Code postal','Opt-in date','Source'];
     const rowsO = joueursOptin.map(function(j){
@@ -4154,10 +4186,8 @@ function exportCSV(type, id){
     toast('Export opt-in téléchargé ('+joueursOptin.length+' contacts)','success');
   } else if(type==='mailchimp'){
     /* Export format Mailchimp scopé à l'event */
-    const joueursMailchimp = DATA.joueurs.filter(function(j){
-      return j.optin === true
-        && (!id || (j.events && j.events.indexOf(id) >= 0));
-    });
+    var _baseMc = (id && DATA.evJoueurs[id]) ? DATA.evJoueurs[id] : DATA.joueurs;
+    const joueursMailchimp = _baseMc.filter(function(j){ return j.optin === true; });
     /* Format Mailchimp : Email Address, First Name, Last Name, Phone, Tags */
     const evMc = id ? LIB_EVENTS.find(id) : null;
     const tagMc = evMc ? evMc.nom.replace(/[,"]/g,'') : 'Flowin';
@@ -4176,7 +4206,10 @@ function exportCSV(type, id){
 function exportPDFRapport(eventId){
   const ev = eventId ? LIB_EVENTS.find(eventId) : null;
   const pro = ev ? LIB_PROS.find(ev.proId) : null;
-  const participants = eventId ? LIB_JOUEURS.query({eventId}) : DATA.joueurs;
+  /* Joueurs scopés à l'event si disponibles */
+  const participants = eventId
+    ? (DATA.evJoueurs[eventId] || LIB_JOUEURS.query({eventId}))
+    : DATA.joueurs;
   const lots = eventId ? LIB_LOTS.query({eventId}) : DATA.lots;
   const optin = participants.filter(j=>j.optin);
   const gagnants = lots.filter(l=>l.assigneA);
@@ -5419,7 +5452,8 @@ function drawerEvent(e){
   if(!e) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Event introuvable</div>';
   const pro = findPro(e.proId);
   const partenaires = (e.partenaires||[]).map(findPartner).filter(Boolean);
-  const participants = DATA.joueurs.filter(function(j){ return j.events && j.events.indexOf(e.id) >= 0; });
+  /* Joueurs scopés à cet event — chargés par loadEventJoueurs() */
+  const participants = DATA.evJoueurs[e.id] || [];
   const lots = DATA.lots.filter(l=>l.eventId===e.id);
 
   let html = drawerHeader('📅 '+esc(e.nom), statusChip(e.status)+' · '+moduleChip(e.module)+' · '+esc(pro?pro.nom:'-'));
@@ -9034,7 +9068,8 @@ function lancerTirage(eventId){
   const regle = cfg.tirageRegle || 'tous'; // 'tous' | 'quiz' | 'quizbonus'
 
   // 1. Construire la liste des éligibles
-  let eligibles = LIB_JOUEURS.query({eventId});
+  /* Joueurs scopés à l'event — source: evJoueurs (Supabase) ou fallback local */
+  let eligibles = DATA.evJoueurs[eventId] || LIB_JOUEURS.query({eventId});
   if(regle === 'quiz')      eligibles = eligibles.filter(j => j.scoreMoy && parseFloat(j.scoreMoy)>0);
   if(regle === 'quizbonus') eligibles = eligibles.filter(j => j.optin); // double chance opt-in
 
