@@ -3073,9 +3073,21 @@ function toggleProVisib(evId, key){
 function wizTogglePV(key){
   if(!state.wiz || !state.wiz.draft) return;
   if(!state.wiz.draft.proVisib) state.wiz.draft.proVisib = {stats:true,activite:true,participants:true,lots:true,qr:true,export:true,msgBienvenue:''};
-  /* Si la valeur est undefined, la défauts = true donc toggle → false */
   var cur = state.wiz.draft.proVisib[key];
   state.wiz.draft.proVisib[key] = (cur === undefined) ? false : !cur;
+  /* Sauvegarder immédiatement en Supabase */
+  var _evId = state.wiz.draft.id;
+  if(_evId && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(_evId), {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      body:JSON.stringify({pro_visib: state.wiz.draft.proVisib})
+    }).then(function(){
+      /* Recharger l'iframe pro preview après save */
+      var _proIframe = document.getElementById('pro-preview-iframe-wiz');
+      if(_proIframe) _proIframe.src = _proIframe.src;
+    }).catch(function(e){console.warn('[wizTogglePV]',e);});
+  }
   render();
 }
 function simulateProView(evId){
@@ -10012,7 +10024,7 @@ function renderWizardEvent(){
       html += '<div style="display:flex;justify-content:center">';
       html += '<div style="width:240px;height:500px;background:#111;border-radius:34px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.25),inset 0 0 0 2px #333;position:relative">';
       html += '<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:16px;background:#111;border-radius:0 0 10px 10px;z-index:2"></div>';
-      html += '<iframe src="'+escAttr(_proIframeUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none" title="Dashboard Pro"></iframe>';
+      html += '<iframe id="pro-preview-iframe-wiz" src="'+escAttr(_proIframeUrl)+'" frameborder="0" allow="clipboard-write" style="width:100%;height:100%;border-radius:26px;border:none" title="Dashboard Pro"></iframe>';
       html += '</div></div>';
     } else {
       html += '<div class="empty-block"><div class="ico">🏢</div><div class="t">Aperçu Pro</div><div class="d mt-2">Disponible après création de l\'event.</div></div>';

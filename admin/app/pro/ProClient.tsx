@@ -28,10 +28,7 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
 
   /* proVisib : ce que le pro peut voir */
   const pv = useMemo(() => {
-    const raw = (ev as unknown as Record<string,unknown>)?.proVisib
-                ?? (ev as unknown as Record<string,unknown>)?.pro_visib
-                ?? {}
-    return raw as Record<string, boolean>
+    return (ev?.pro_visib ?? {}) as Record<string, boolean>
   }, [ev])
 
   const visibleTabs = useMemo<Tab[]>(() => {
