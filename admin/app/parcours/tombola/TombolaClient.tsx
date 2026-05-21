@@ -95,7 +95,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     }, { onConflict: 'external_id' })
 
     try { localStorage.setItem(lsKey, tc) } catch {}
-    setTicket(tc); setSubmitting(false); setScreen('ticket')
+    setTicket(tc); setExistingTicket(tc); setSubmitting(false); setScreen('ticket')
   }
 
   const partSelected = partenaires[partIdx]

@@ -71,7 +71,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ' })
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}; setScreen('already'); return }
-    setTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}
+    setTicket(res.ticket); setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}
     setScreen('ticket')
   }
 
@@ -217,7 +217,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
           <div style={{ fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{nom}</div>
           <div className="card" style={{ borderTop:`4px solid ${c}`,marginBottom:16 }}>
             <div style={{ fontSize:32,marginBottom:8 }}>🎟️</div>
-            <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
+            <div className="ticket-code">{screen==='ticket'?(ticket||'—'  ):(existingTicket||'—')}</div>
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
           </div>
           {partenaires.length > 0 && <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>🤝 Nos partenaires</button>}
