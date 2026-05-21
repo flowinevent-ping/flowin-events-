@@ -2127,6 +2127,7 @@ async function supaWriteLanding(ld){
     proof:ld.proof||{},
     tunnel:ld.tunnel||[],
     profils:ld.profils||[],
+    cta_section:ld.ctaSection||{},
     created_at:ld.createdAt||null
   };
   var ok = await supaUpsert('landings', payload);
@@ -8372,6 +8373,16 @@ function lpDelete(ldId){
   }, 'Supprimer');
 }
 
+/* Debounce timer pour auto-save landing */
+var _lpSaveTimer = null;
+function lpAutosave(ldId){
+  if(_lpSaveTimer) clearTimeout(_lpSaveTimer);
+  _lpSaveTimer = setTimeout(function(){
+    var ld = (DATA.landings||[]).find(function(l){ return l.id === ldId; });
+    if(ld) supaWriteLanding(ld);
+  }, 800);
+}
+
 function lpSetField(ldId, path, val){
   var ld = (DATA.landings||[]).find(function(l){ return l.id === ldId; });
   if(!ld) return;
@@ -8383,6 +8394,7 @@ function lpSetField(ldId, path, val){
   }
   obj[parts[parts.length-1]] = val;
   saveData();
+  lpAutosave(ldId);
 }
 
 function lpSetQuestion(ldId, idx, val){
@@ -8390,6 +8402,7 @@ function lpSetQuestion(ldId, idx, val){
   if(!ld || !ld.hero) return;
   ld.hero.questions[idx] = val;
   saveData();
+  lpAutosave(ldId);
 }
 
 function lpToggleTunnel(ldId, stepId){
@@ -8398,6 +8411,7 @@ function lpToggleTunnel(ldId, stepId){
   var t = ld.tunnel.find(function(x){ return x.id === stepId; });
   if(t) t.active = !t.active;
   saveData(); renderModal();
+  supaWriteLanding(ld);
 }
 
 function lpSetProfil(ldId, profId, field, val){
@@ -8406,6 +8420,7 @@ function lpSetProfil(ldId, profId, field, val){
   var p = ld.profils.find(function(x){ return x.id === profId; });
   if(p) p[field] = val;
   saveData();
+  lpAutosave(ldId);
 }
 
 function lpSave(ldId){

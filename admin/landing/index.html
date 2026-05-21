@@ -917,6 +917,82 @@ var _SUPA_URL  = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
 var _SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
 var _LS_KEY    = 'flowin_v31_data';
 
+
+/* ══════════════════════════════════════════════════════════
+   FLOWIN LANDING — Hydratation depuis Supabase
+   Charge la config depuis landings WHERE id='ld-flowin-demo'
+   ══════════════════════════════════════════════════════════ */
+var _LANDING_ID = 'ld-flowin-demo';
+
+function flowinHydrateLanding(cfg){
+  try {
+    var hero  = cfg.hero  || {};
+    var proof = cfg.proof || {};
+    var cta   = cfg.cta_section || {};
+    var profils = cfg.profils || [];
+
+    /* ── Hero questions ── */
+    var qs = hero.questions || [];
+    for(var qi=0; qi<4; qi++){
+      var el = document.getElementById('hq'+qi);
+      if(el && qs[qi]){
+        /* Conserver le numéro, remplacer le texte */
+        var num = el.querySelector('.hq-n');
+        el.textContent = '';
+        if(num){ el.appendChild(num); }
+        el.appendChild(document.createTextNode(qs[qi]));
+      }
+    }
+
+    /* ── Réponse hero ── */
+    var ans = document.getElementById('hero-ans');
+    if(ans && hero.answer) ans.textContent = hero.answer;
+
+    /* ── CTA hero ── */
+    var heroCta = document.getElementById('hero-cta');
+    if(heroCta && hero.cta) heroCta.textContent = hero.cta;
+
+    /* ── Proof stats ── */
+    if(proof.stat1){ var c1=document.getElementById('cnt1'); if(c1) c1.textContent=proof.stat1; }
+    if(proof.stat2){ var c2=document.getElementById('cnt2'); if(c2) c2.textContent=proof.stat2+'%'; }
+    if(proof.stat3){ var c3=document.getElementById('cnt3'); if(c3) c3.textContent=proof.stat3+'%'; }
+    if(proof.quote){
+      var qEl=document.querySelector('.proof-quote'); if(qEl) qEl.textContent='"'+proof.quote+'"';
+    }
+    if(proof.quoteAuthor){
+      var qaEl=document.querySelector('.proof-author'); if(qaEl) qaEl.textContent='— '+proof.quoteAuthor;
+    }
+
+    /* ── Profils ── (stockés globalement pour selectProf) */
+    if(profils.length){ window._FLOWIN_PROFILS = profils; }
+
+    /* ── CTA section ── */
+    var ctaTitle = document.querySelector('.cta-title');
+    if(ctaTitle && cta.title) ctaTitle.textContent = cta.title;
+
+    /* ── Couleur d'accent ── */
+    if(cfg.accent_color){
+      document.documentElement.style.setProperty('--accent', cfg.accent_color);
+    }
+
+  } catch(e){ console.warn('[flowinHydrateLanding]', e); }
+}
+
+/* Charger la config depuis Supabase */
+(function(){
+  fetch(_SUPA_URL+'/rest/v1/landings?id=eq.'+_LANDING_ID+'&select=*', {
+    headers:{'apikey':_SUPA_ANON,'Authorization':'Bearer '+_SUPA_ANON}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){
+    if(rows && rows[0]){
+      window._FLOWIN_LANDING_CFG = rows[0];
+      flowinHydrateLanding(rows[0]);
+    }
+  })
+  .catch(function(e){ console.warn('[Flowin landing config]', e); });
+})();
+
 function _supaUpsertLanding(table, payload){
   fetch(_SUPA_URL+'/rest/v1/'+table+'?on_conflict=external_id', {
     method:'POST',
