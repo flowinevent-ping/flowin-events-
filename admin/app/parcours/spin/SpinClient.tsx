@@ -176,7 +176,12 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
         <div className="screen">
           <div className="header"><div className="back" onClick={()=>setScreen('landing')}>←</div><div className="title">Nos partenaires</div></div>
           <div className="grid2" style={{ marginBottom:16 }}>{partenaires.map((p,i)=><div key={p.id} className="part-tile" onClick={()=>{}}>{p.image_url?<img src={p.image_url} alt={p.nom} style={{width:52,height:52,objectFit:'contain',borderRadius:8,display:'block',margin:'0 auto 6px'}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />:<div style={{fontSize:32,marginBottom:6}}>{p.emoji??'🤝'}</div>}<div style={{fontSize:11,fontWeight:700}}>{p.nom}</div></div>)}</div>
-          <button className="btn" onClick={()=>setScreen('spin')}>Jouer →</button>
+          {existingTicket ? (
+            <button className="btn" style={{background:'rgba(34,197,94,.15)',border:'2px solid #22C55E',color:'#4ADE80'}}
+              onClick={()=>setScreen('already')}>✅ Déjà joué · revoir mon ticket</button>
+          ) : (
+            <button className="btn" onClick={()=>setScreen('spin')}>Jouer →</button>
+          )}
         </div>
       )}
 

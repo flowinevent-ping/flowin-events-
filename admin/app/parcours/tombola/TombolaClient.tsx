@@ -278,7 +278,12 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
               </div>
             ))}
           </div>
-          <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
+          {existingTicket ? (
+            <button className="btn-cta" style={{ background:'rgba(34,197,94,.15)',border:'2px solid #22C55E',color:'#4ADE80' }}
+              onClick={() => setScreen('already')}>✅ Déjà inscrit(e) · revoir mon ticket</button>
+          ) : (
+            <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
+          )}
         </div>
       )}
 
