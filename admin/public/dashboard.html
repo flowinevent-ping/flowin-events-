@@ -2013,7 +2013,7 @@ async function supaWriteEvent(e){
   // GÉNÉRATION AUTOMATIQUE DU QR URL — TOUJOURS recalculé pour garantir cohérence
   // (id event → URL parcours_user, indépendamment de ce qui était dans cfg avant)
   if(!e.cfg) e.cfg = {};
-  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (e.module||'quiz') + '.html?ev=' + e.id;
+  e.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (e.module||'quiz') + '?ev=' + e.id;
   var payload = {
     id:e.id, pro_id:e.proId, nom:e.nom, module:e.module,
     status:e.status, date_d:e.dateD||null, date_f:e.dateF||null,
@@ -3072,21 +3072,25 @@ function toggleProVisib(evId, key){
 }
 function wizTogglePV(key){
   if(!state.wiz || !state.wiz.draft) return;
-  if(!state.wiz.draft.proVisib) state.wiz.draft.proVisib = {stats:true,activite:true,participants:true,lots:true,qr:true,export:true,msgBienvenue:''};
+  /* Initialiser les flags manquants */
+  if(!state.wiz.draft.proVisib){
+    state.wiz.draft.proVisib = {stats:true,activite:true,participants:true,lots:true,qr:true,export:true,msgBienvenue:''};
+  }
   var cur = state.wiz.draft.proVisib[key];
   state.wiz.draft.proVisib[key] = (cur === undefined) ? false : !cur;
-  /* Sauvegarder immédiatement en Supabase */
-  var _evId = state.wiz.draft.id;
-  if(_evId && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
-    fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(_evId), {
-      method:'PATCH',
-      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
-      body:JSON.stringify({pro_visib: state.wiz.draft.proVisib})
-    }).then(function(){
-      /* Recharger l'iframe pro preview après save */
+
+  /* Utiliser editingId (en scope, même script) + toggleProVisib qui gère Supabase */
+  var _evId = state.wiz.editingId;
+  if(_evId){
+    /* Synchroniser DATA.events avec le draft wizard */
+    var _ev = findEvent(_evId);
+    if(_ev){ _ev.proVisib = state.wiz.draft.proVisib; }
+    /* Sauvegarder en Supabase via supaUpsert (en scope) */
+    supaUpsert('events', {id:_evId, pro_visib:state.wiz.draft.proVisib}).then(function(){
+      /* Recharger l'iframe preview pro */
       var _proIframe = document.getElementById('pro-preview-iframe-wiz');
-      if(_proIframe) _proIframe.src = _proIframe.src;
-    }).catch(function(e){console.warn('[wizTogglePV]',e);});
+      if(_proIframe){ var s=_proIframe.src; _proIframe.src=''; _proIframe.src=s; }
+    });
   }
   render();
 }
