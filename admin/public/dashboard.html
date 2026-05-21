@@ -8736,6 +8736,11 @@ function modalLanding(data){
     /* Iframe de la vraie landing — identique à ce que voit le prospect */
     var _lpUrl = (ld.deployUrl && ld.deployUrl.length > 5) ? ld.deployUrl : 'https://flowin-events.vercel.app/landing';
     html += '<div style="font-size:10px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📱 Aperçu live (landing réelle)</div>';
+    /* Boutons flèches comme pour les parcours */
+    html += '<div style="display:flex;justify-content:center;gap:8px;margin-bottom:8px">';
+    html += '<button class="nav-arrow" onclick="flowinNavIframe(\'iframe-landing-apercu\',\'prev\')">&#8249;</button>';
+    html += '<button class="nav-arrow" onclick="flowinNavIframe(\'iframe-landing-apercu\',\'next\')">&#8250;</button>';
+    html += '</div>';
     html += '<div style="position:relative;width:280px;margin:0 auto">';
     html += '<div style="border:3px solid #1e293b;border-radius:28px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);background:#000">';
     html += '<div style="background:#1e293b;height:22px;display:flex;align-items:center;justify-content:center">';
