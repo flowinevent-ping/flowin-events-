@@ -1899,6 +1899,7 @@ function supaRowToData(row, type){
   if(o.module_jeu !== undefined) { o.moduleJeu = o.module_jeu; delete o.module_jeu; }
   if(o.wa_number !== undefined) { o.waNumber = o.wa_number; delete o.wa_number; }
   if(o.created_at !== undefined) { o.createdAt = o.created_at; delete o.created_at; }
+  if(o.cta_section !== undefined) { o.ctaSection = o.cta_section; delete o.cta_section; }
   /* Lots : Supabase stocke 'titre' mais JS utilise 'nom' */
   if(o.titre !== undefined && o.nom === undefined) { o.nom = o.titre; }
   return o;
@@ -8572,6 +8573,16 @@ function renderLandingsTable(list){
 function modalLanding(data){
   var ldId = (data && data.ldId) || ((DATA.landings && DATA.landings[0]) ? DATA.landings[0].id : '');
   var tab  = (data && data.tab) || 'apercu';
+  /* Refresh silencieux depuis Supabase pour sync avec le preview live */
+  if(ldId){ supaFetch('landings','select=*&id=eq.'+encodeURIComponent(ldId)).then(function(rows){
+    if(rows&&rows[0]){
+      var fresh=supaRowToData(rows[0],'landing');
+      var i=(DATA.landings||[]).findIndex(function(l){return l.id===ldId;});
+      if(i>-1) DATA.landings[i]=Object.assign({},DATA.landings[i],fresh);
+      else{ if(!DATA.landings)DATA.landings=[]; DATA.landings.push(fresh); }
+      saveData(); renderModal();
+    }
+  }).catch(function(){}); }
   var profSelId = (data && data.profil) || '';
   var ld = (DATA.landings||[]).find(function(l){ return l.id === ldId; });
   if(!ld) return '<div class="modal"><div class="modal-h"><div class="title">Landing introuvable</div><button class="drawer-close" onclick="closeModal()">&#215;</button></div><div class="modal-body"><div class="empty-block"><div class="ico">🌐</div><div class="t">Landing introuvable</div></div></div></div>';

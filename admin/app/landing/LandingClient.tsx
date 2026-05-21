@@ -141,6 +141,24 @@ export default function LandingClient({
 
   const selProfil = profils.find(p => p.id === selectedProfil)
 
+  /* Navigation postMessage — flèches dashboard SA */
+  useEffect(() => {
+    const SECTIONS = ['', 's-profils', 's-proof', 's-cta']
+    let sIdx = 0
+    function onMsg(e: MessageEvent) {
+      if (!e.data?.flowinNav) return
+      if (e.data.flowinNav === 'next') sIdx = Math.min(sIdx + 1, SECTIONS.length - 1)
+      if (e.data.flowinNav === 'prev') sIdx = Math.max(sIdx - 1, 0)
+      const id = SECTIONS[sIdx]
+      if (!id) { window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [])
+
+
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
