@@ -8,33 +8,45 @@ interface Profil {
   id: string; ico: string; lbl: string; couleur: string
   before: string; how: string; after: string; metrics: Metric[]
 }
+interface Module {
+  id: string; ico: string; nom: string; tagline: string; couleur: string; features: string[]
+}
+interface PricingTier {
+  id: string; nom: string; prix: string; unite: string | null; badge: string | null
+  highlight: boolean; features: string[]; cta: string
+}
 interface LandingCfg {
   id: string; nom: string; accent_color: string
   hero: { questions: string[]; answer: string; cta: string }
   proof: { stat1: string; stat1Lbl: string; stat2: string; stat2Lbl: string; stat3: string; stat3Lbl: string; quote: string; quoteAuthor: string }
   profils: Profil[]
+  modules: Module[]
+  pricing: PricingTier[]
   cta_section: { title: string; subtitle: string; formPlaceholderNom: string; formPlaceholderEmail: string; formPlaceholderTel: string; ctaSubmit: string; successTitle: string; successText: string }
 }
 
 const COLORS: Record<string, string> = { teal:'#00B4A0', orange:'#F97316', navy:'#1B3A5C', purple:'#A855F7', yellow:'#F59E0B' }
+const DEMO_URL = 'https://flowin-events.vercel.app/parcours/spin?ev=ev-flowin-demo'
 
 export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCfg | null; source: string }) {
   const cfg = cfgProp!
   const hero    = cfg?.hero
   const proof   = cfg?.proof
   const profils = cfg?.profils ?? []
+  const modules = cfg?.modules ?? []
+  const pricing = cfg?.pricing ?? []
   const cta     = cfg?.cta_section
   const teal = '#00B4A0'; const purple = '#A855F7'; const navy = '#1B3A5C'
 
-  const [qIdx, setQIdx]         = useState(0)
-  const [qVisible, setQVisible] = useState(true)
-  const [selProf, setSelProf]   = useState<string | null>(null)
+  const [qIdx, setQIdx]           = useState(0)
+  const [qVisible, setQVisible]   = useState(true)
+  const [selProf, setSelProf]     = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'before'|'how'|'after'>('before')
-  const [form, setForm]         = useState({ nom:'', email:'', tel:'' })
+  const [form, setForm]           = useState({ nom:'', email:'', tel:'' })
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [counters, setCounters] = useState({ c1:0, c2:0, c3:0 })
-  const [counted, setCounted]   = useState(false)
+  const [counters, setCounters]   = useState({ c1:0, c2:0, c3:0 })
+  const [counted, setCounted]     = useState(false)
 
   useEffect(() => {
     if (!hero?.questions?.length) return
@@ -65,7 +77,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
   }, [counted, proof?.stat1, proof?.stat3])
 
   useEffect(() => {
-    const SECS = ['s-hero','s-profils','s-proof','s-cta']
+    const SECS = ['s-hero','s-demo','s-profils','s-proof','s-modules','s-pricing','s-cta']
     let idx = 0
     function onMsg(e: MessageEvent) {
       if (!e.data?.flowinNav) return
@@ -139,12 +151,52 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         .qr-box{display:flex;align-items:center;gap:12px;background:#F4F6F9;border:1px solid rgba(27,58,92,.1);border-radius:12px;padding:14px;margin-top:20px;text-align:left}
         .success-box{background:rgba(0,180,160,.08);border:1.5px solid rgba(0,180,160,.3);border-radius:14px;padding:28px}
         .footer{text-align:center;padding:24px;font-size:11px;color:rgba(27,58,92,.35);background:#F4F6F9}
+        /* DEMO */
+        .demo-section{background:linear-gradient(135deg,${navy} 0%,#0F2340 100%);padding:60px 24px;color:#fff}
+        .demo-inner{max-width:800px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+        @media(max-width:600px){.demo-inner{grid-template-columns:1fr;gap:24px;text-align:center}}
+        .phone-mock{width:180px;height:320px;border-radius:28px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;overflow:hidden}
+        .phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:18px;background:rgba(255,255,255,.1);border-radius:0 0 12px 12px}
+        .phone-screen{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px 16px}
+        .spin-preview{width:100px;height:100px;border-radius:50%;border:3px solid ${teal};display:flex;align-items:center;justify-content:center;font-size:36px;animation:spinAnim 8s linear infinite}
+        @keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .demo-cta-group{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+        .btn-try{background:${teal};color:#fff;border:none;border-radius:50px;padding:14px 28px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;text-align:center}
+        /* MODULES */
+        .modules-section{background:#fff;padding:60px 24px}
+        .modules-inner{max-width:900px;margin:0 auto}
+        .modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:32px}
+        .module-card{border:1.5px solid rgba(27,58,92,.1);border-radius:16px;padding:20px;transition:box-shadow .2s}
+        .module-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.08)}
+        .module-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px}
+        .module-features{list-style:none;margin-top:12px}
+        .module-features li{font-size:12px;color:rgba(27,58,92,.6);padding:3px 0;display:flex;align-items:center;gap:6px}
+        .module-features li::before{content:"✓";color:${teal};font-weight:900;font-size:11px;flex-shrink:0}
+        /* PRICING */
+        .pricing-section{background:#F4F6F9;padding:60px 24px}
+        .pricing-inner{max-width:900px;margin:0 auto}
+        .pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:32px}
+        .price-card{background:#fff;border:1.5px solid rgba(27,58,92,.1);border-radius:20px;padding:24px;position:relative;transition:box-shadow .2s}
+        .price-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.08)}
+        .price-card.highlight{border-color:${teal};box-shadow:0 8px 40px rgba(0,180,160,.18)}
+        .price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:${teal};color:#fff;font-size:10px;font-weight:800;padding:4px 14px;border-radius:100px;white-space:nowrap}
+        .price-amount{font-size:40px;font-weight:900;color:${navy};line-height:1}
+        .price-unit{font-size:13px;color:rgba(27,58,92,.45);font-weight:600}
+        .price-features{list-style:none;margin:16px 0 20px}
+        .price-features li{font-size:13px;color:rgba(27,58,92,.7);padding:5px 0;border-bottom:1px solid rgba(27,58,92,.05);display:flex;align-items:center;gap:8px}
+        .price-features li::before{content:"✓";color:${teal};font-weight:900;font-size:11px;flex-shrink:0}
+        .btn-price{width:100%;padding:13px;border:none;border-radius:50px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+        .btn-price.hl{background:${teal};color:#fff}
+        .btn-price.ghost{background:transparent;border:1.5px solid rgba(27,58,92,.2);color:${navy}}
+        .section-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:${teal};margin-bottom:10px}
+        .section-title{font-size:clamp(22px,4vw,30px);font-weight:900;color:${navy};margin-bottom:6px}
+        .section-sub{color:rgba(27,58,92,.5);font-size:15px}
       `}</style>
 
       <nav className="topbar">
         <div className="logo">Flow<em>in</em></div>
-        <button className="btn-demo" onClick={() => document.getElementById('s-cta')?.scrollIntoView({ behavior:'smooth' })}>
-          Demander une démo
+        <button className="btn-demo" onClick={() => document.getElementById('s-demo')?.scrollIntoView({ behavior:'smooth' })}>
+          Voir la démo →
         </button>
       </nav>
 
@@ -159,17 +211,55 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
           </div>
           <div style={{ fontSize:'clamp(14px,2.5vw,18px)', color:'rgba(27,58,92,.6)', margin:'16px 0 28px' }}>{hero?.answer}</div>
           <button className="btn-demo" style={{ fontSize:16, padding:'16px 36px' }}
-            onClick={() => document.getElementById('s-profils')?.scrollIntoView({ behavior:'smooth' })}>
+            onClick={() => document.getElementById('s-demo')?.scrollIntoView({ behavior:'smooth' })}>
             {hero?.cta}
           </button>
+        </div>
+      </section>
+
+      {/* DEMO SPIN */}
+      <section className="demo-section" id="s-demo">
+        <div className="demo-inner">
+          <div>
+            <div className="section-label" style={{ color:teal }}>DÉMO LIVE</div>
+            <div className="section-title" style={{ color:'#fff', marginBottom:10 }}>Testez l&apos;expérience joueur en 30 secondes</div>
+            <div style={{ color:'rgba(255,255,255,.6)', fontSize:14, lineHeight:1.7, marginBottom:20 }}>
+              Scannez le QR ou ouvrez le lien. Vivez exactement ce que vivra votre client — spin, formulaire CRM, ticket de tirage.
+            </div>
+            <div className="demo-cta-group">
+              <a href={DEMO_URL} target="_blank" rel="noopener" className="btn-try">
+                🎡 Jouer à la démo →
+              </a>
+              <div style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.12)', borderRadius:12, padding:14 }}>
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(DEMO_URL)}&bgcolor=0F2340&color=ffffff&margin=6`}
+                  alt="QR démo" style={{ width:60, height:60, borderRadius:8, flexShrink:0 }} />
+                <div>
+                  <div style={{ fontWeight:800, fontSize:13, color:'#fff' }}>📱 Tester sur mobile</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', marginTop:3 }}>Scannez pour vivre l&apos;expérience sur votre téléphone</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ display:'flex', justifyContent:'center' }}>
+            <div className="phone-mock">
+              <div className="phone-notch" />
+              <div className="phone-screen">
+                <div className="spin-preview">🎡</div>
+                <div style={{ fontSize:11, fontWeight:800, color:'rgba(255,255,255,.7)', textAlign:'center' }}>Roue de la Fortune</div>
+                <div style={{ fontSize:9, color:'rgba(255,255,255,.35)', textAlign:'center' }}>Mon 1er event offert</div>
+                <div style={{ background:teal, borderRadius:50, padding:'8px 16px', fontSize:11, fontWeight:800, color:'#fff', marginTop:8 }}>Faire tourner →</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* PROFILS */}
       <section id="s-profils" style={{ padding:'60px 24px' }}>
         <div style={{ maxWidth:860, margin:'0 auto' }}>
-          <div style={{ fontSize:26, fontWeight:900, textAlign:'center', color:navy, marginBottom:8 }}>Qui êtes-vous ?</div>
-          <div style={{ color:'rgba(27,58,92,.5)', textAlign:'center', marginBottom:32, fontSize:15 }}>
+          <div className="section-label" style={{ textAlign:'center' }}>POUR QUI ?</div>
+          <div className="section-title" style={{ textAlign:'center', marginBottom:8 }}>Qui êtes-vous ?</div>
+          <div className="section-sub" style={{ textAlign:'center', marginBottom:32 }}>
             Choisissez votre profil pour voir ce que Flowin peut faire pour vous.
           </div>
           <div className="profils-grid">
@@ -243,6 +333,66 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
               <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>— {proof.quoteAuthor}</div>
             </>
           )}
+        </div>
+      </section>
+
+      {/* MODULES */}
+      <section className="modules-section" id="s-modules">
+        <div className="modules-inner">
+          <div style={{ textAlign:'center' }}>
+            <div className="section-label">LES MODULES</div>
+            <div className="section-title">6 formats de jeu. 1 plateforme.</div>
+            <div className="section-sub" style={{ marginTop:6 }}>Chaque module collecte les données CRM et génère un ticket de tirage automatique.</div>
+          </div>
+          <div className="modules-grid">
+            {modules.map(m => (
+              <div key={m.id} className="module-card">
+                <div className="module-ico" style={{ background:`${m.couleur}18` }}>
+                  <span>{m.ico}</span>
+                </div>
+                <div style={{ fontWeight:900, fontSize:16, color:navy }}>{m.nom}</div>
+                <div style={{ fontSize:12, color:m.couleur, fontWeight:700, marginTop:2 }}>{m.tagline}</div>
+                <ul className="module-features">
+                  {m.features.map((f, i) => <li key={i}>{f}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section className="pricing-section" id="s-pricing">
+        <div className="pricing-inner">
+          <div style={{ textAlign:'center' }}>
+            <div className="section-label">TARIFS</div>
+            <div className="section-title">Simple. Transparent. Sans surprise.</div>
+            <div className="section-sub" style={{ marginTop:6 }}>Aucune CB requise pour la démo. Activation en 24h.</div>
+          </div>
+          <div className="pricing-grid">
+            {pricing.map(tier => (
+              <div key={tier.id} className={`price-card${tier.highlight?' highlight':''}`}>
+                {tier.badge && <div className="price-badge">{tier.badge}</div>}
+                <div style={{ fontWeight:800, fontSize:14, color:'rgba(27,58,92,.5)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>{tier.nom}</div>
+                <div style={{ display:'flex', alignItems:'baseline', gap:4, marginBottom:4 }}>
+                  <div className="price-amount">{tier.prix}</div>
+                  {tier.prix !== 'Devis' && <div style={{ fontSize:13, color:'rgba(27,58,92,.4)' }}>€</div>}
+                </div>
+                {tier.unite && <div className="price-unit">{tier.unite}</div>}
+                <ul className="price-features">
+                  {tier.features.map((f, i) => <li key={i}>{f}</li>)}
+                </ul>
+                <button
+                  className={`btn-price${tier.highlight?' hl':' ghost'}`}
+                  onClick={() => document.getElementById('s-cta')?.scrollIntoView({ behavior:'smooth' })}>
+                  {tier.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign:'center', marginTop:16, fontSize:12, color:'rgba(27,58,92,.4)' }}>
+            TVA non applicable · Art. 293B du CGI · Tous les tarifs sont HT
+          </div>
         </div>
       </section>
 
