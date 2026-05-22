@@ -84,7 +84,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     const today = new Date().toISOString().slice(0, 10)
     const extId = `j-tb-${emailLower.replace(/[^a-z0-9]/g, '-').substring(0, 36)}`
 
-    await supabase.from('joueurs').upsert({
+    const { data: joueurRows } = await supabase.from('joueurs').upsert({
       external_id: extId, email: emailLower,
       prenom: form.prenom.trim(), nom: form.nom.trim(), tel: form.tel.trim(),
       code_postal: form.cp.trim() || null, genre: form.genre || null,
@@ -92,7 +92,19 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       decouverte: form.source.replace(/^[^ ]+ /, '') || null,
       optin: true, optin_date: today, first_seen: today, last_seen: today,
       events: [evId], ticket_code: tc, source: 'tombola',
-    }, { onConflict: 'external_id' })
+    }, { onConflict: 'external_id' }).select('id')
+
+    if (joueurRows?.length) {
+      const joueurId = (joueurRows[0] as { id: string }).id
+      await supabase.from('participations').insert({
+        joueur_id: joueurId,
+        event_id: evId,
+        ticket_code: tc,
+        score: 0,
+        completed: true,
+        tickets: 1,
+      })
+    }
 
     try { localStorage.setItem(lsKey, tc) } catch {}
     setTicket(tc); setExistingTicket(tc); setSubmitting(false); setScreen('ticket')

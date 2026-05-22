@@ -107,7 +107,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
   const today = new Date().toISOString().slice(0, 10)
   const extId = `j-${payload.prefix.toLowerCase()}-${emailLower.replace(/[^a-z0-9]/g, '-').substring(0, 36)}`
 
-  await supabase.from('joueurs').upsert({
+  const { data: joueurRows } = await supabase.from('joueurs').upsert({
     external_id: extId,
     email: emailLower,
     prenom: payload.prenom?.trim() || null,
@@ -126,7 +126,21 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     events: payload.events,
     ticket_code: tc,
     source: payload.source,
-  }, { onConflict: 'external_id' })
+  }, { onConflict: 'external_id' }).select('id')
+
+  /* Participation */
+  if (joueurRows?.length) {
+    const joueurId = (joueurRows[0] as { id: string }).id
+    const scoreNum = payload.score_moy ? (parseInt(payload.score_moy.split('/')[0]) || 0) : 0
+    await supabase.from('participations').insert({
+      joueur_id: joueurId,
+      event_id: evId,
+      ticket_code: tc,
+      score: scoreNum,
+      completed: true,
+      tickets: 1,
+    })
+  }
 
   return { success: true, duplicate: false, ticket: tc }
 }
