@@ -113,13 +113,25 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
       {screen === 'landing' && (
         <div className="screen" style={{ paddingTop:32,textAlign:'center' }}>
-          <div style={{ fontSize:48,marginBottom:14 }}>🎡</div>
+          <div style={{ marginBottom:14 }}>
+            <i className="ti ti-rotate-clockwise" style={{ fontSize:48,color:c }} aria-hidden="true" />
+          </div>
           <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
           <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string)||'Tentez votre chance !'}</div>
-          {tirageText && <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14 }}>🗓️ {tirageText}</div>}
-          <button className="btn" onClick={()=>setScreen('spin')}>🎡 Faire tourner la roue →</button>
+          {tirageText && (
+            <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'center',gap:6 }}>
+              <i className="ti ti-calendar" style={{ fontSize:14 }} aria-hidden="true" />{tirageText}
+            </div>
+          )}
+          <button className="btn" onClick={()=>setScreen('spin')}>
+            <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />Faire tourner la roue →
+          </button>
           <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
-          {partenaires.length > 0 && <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>🤝 Nos partenaires</button>}
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>
+              <i className="ti ti-users" style={{ marginRight:6 }} aria-hidden="true" />Nos partenaires
+            </button>
+          )}
         </div>
       )}
 
@@ -138,18 +150,23 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
           {resultSeg.perdant ? (
             <>
-              <div style={{ fontSize:48,marginBottom:12 }}>😅</div>
-              <div style={{ fontSize:22,fontWeight:900,marginBottom:8 }}>Pas de chance !</div>
-              <div style={{ fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20 }}>Laisse tes coordonnées quand même pour participer au tirage !</div>
+              <div style={{ marginBottom:12 }}>
+                <i className="ti ti-mood-sad" style={{ fontSize:48,color:'rgba(255,255,255,.4)' }} aria-hidden="true" />
+              </div>
+              <div style={{ fontSize:22,fontWeight:900,marginBottom:8 }}>Pas cette fois !</div>
+              <div style={{ fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20 }}>Laisse tes coordonnées pour participer au tirage final.</div>
+              <button className="btn" onClick={()=>setScreen('form')}>Participer au tirage →</button>
             </>
           ) : (
             <>
-              <div style={{ fontSize:48,marginBottom:12 }}>🎉</div>
+              <div style={{ marginBottom:12 }}>
+                <i className="ti ti-star" style={{ fontSize:48,color:c }} aria-hidden="true" />
+              </div>
               <div style={{ fontSize:22,fontWeight:900,marginBottom:8 }}>Tu as gagné !</div>
               <div style={{ background:`${resultSeg.color}22`,border:`2px solid ${resultSeg.color}66`,borderRadius:14,padding:'16px 20px',fontSize:17,fontWeight:800,color:'#fff',marginBottom:20 }}>{resultSeg.label}</div>
+              <button className="btn" onClick={()=>setScreen('form')}>Réclamer mon gain →</button>
             </>
           )}
-          <button className="btn" onClick={()=>setScreen('form')}>Laisser mes coordonnées →</button>
         </div>
       )}
 
@@ -175,10 +192,12 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       {screen === 'partenaires' && (
         <div className="screen">
           <div className="header"><div className="back" onClick={()=>setScreen('landing')}>←</div><div className="title">Nos partenaires</div></div>
-          <div className="grid2" style={{ marginBottom:16 }}>{partenaires.map((p,i)=><div key={p.id} className="part-tile" onClick={()=>{}}>{p.image_url?<img src={p.image_url} alt={p.nom} style={{width:52,height:52,objectFit:'contain',borderRadius:8,display:'block',margin:'0 auto 6px'}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />:<div style={{fontSize:32,marginBottom:6}}>{p.emoji??'🤝'}</div>}<div style={{fontSize:11,fontWeight:700}}>{p.nom}</div></div>)}</div>
+          <div className="grid2" style={{ marginBottom:16 }}>{partenaires.map((p,i)=><div key={p.id} className="part-tile" onClick={()=>{}}>{p.image_url?<img src={p.image_url} alt={p.nom} style={{width:52,height:52,objectFit:'contain',borderRadius:8,display:'block',margin:'0 auto 6px'}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />:p.emoji?<div style={{fontSize:32,marginBottom:6}}>{p.emoji}</div>:<div style={{fontSize:28,marginBottom:6,color:c}}><i className="ti ti-users" aria-hidden="true"/></div>}<div style={{fontSize:11,fontWeight:700}}>{p.nom}</div></div>)}</div>
           {existingTicket ? (
             <button className="btn" style={{background:'rgba(34,197,94,.15)',border:'2px solid #22C55E',color:'#4ADE80'}}
-              onClick={()=>setScreen('already')}>✅ Déjà joué · revoir mon ticket</button>
+              onClick={()=>setScreen('already')}>
+              <i className="ti ti-check" style={{ marginRight:6 }} aria-hidden="true" />Déjà joué · revoir mon ticket
+            </button>
           ) : (
             <button className="btn" onClick={()=>setScreen('spin')}>Jouer →</button>
           )}
@@ -187,12 +206,20 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
       {(screen === 'ticket' || screen === 'already') && (
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <div style={{ fontSize:48,marginBottom:12 }}>{screen==='ticket'?'🎉':'✅'}</div>
+          <div style={{ marginBottom:12 }}>
+            <i className={`ti ${screen==='ticket'?'ti-check':'ti-check-circle'}`} style={{ fontSize:48,color:c }} aria-hidden="true" />
+          </div>
           <div style={{ fontSize:22,fontWeight:900,marginBottom:6 }}>{screen==='ticket'?'Inscription confirmée !':'Déjà joué !'}</div>
           <div className="card" style={{ borderTop:`4px solid ${c}`,marginBottom:16,marginTop:20 }}>
-            <div style={{ fontSize:32,marginBottom:8 }}>🎟️</div>
+            <div style={{ marginBottom:8 }}>
+              <i className="ti ti-ticket" style={{ fontSize:32,color:c }} aria-hidden="true" />
+            </div>
             <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
-            {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
+            {tirageText && (
+              <div style={{ fontSize:11,color:'rgba(255,255,255,.45)',display:'flex',alignItems:'center',justifyContent:'center',gap:5,marginTop:6 }}>
+                <i className="ti ti-calendar" style={{ fontSize:12 }} aria-hidden="true" />{tirageText}
+              </div>
+            )}
           </div>
         </div>
       )}
