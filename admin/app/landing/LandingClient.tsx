@@ -111,7 +111,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
   }, [counted, proof?.stat1, proof?.stat3])
 
   useEffect(() => {
-    const SECS = ['s-hero','s-besoins','s-demo','s-profils','s-proof','s-modules','s-accomp','s-pricing','s-cta']
+    const SECS = ['s-hero','s-probleme','s-besoins','s-demo','s-profils','s-proof','s-modules','s-gamme','s-accomp','s-pricing','s-cta']
     let idx = 0
     function onMsg(e: MessageEvent) {
       if (!e.data?.flowinNav) return
@@ -233,6 +233,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         .besoins-inner{max-width:960px;margin:0 auto}
         .besoins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(27,58,92,.1);border-radius:16px;overflow:hidden;margin-top:40px}
         @media(max-width:680px){.besoins-grid{grid-template-columns:1fr}}
+        @media(max-width:680px){.gamme-grid{grid-template-columns:1fr !important}}
         .besoin-card{background:#fff;padding:28px 24px;display:flex;flex-direction:column;gap:0}
         .besoin-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;flex-shrink:0}
         .besoin-verb{font-size:22px;font-weight:700;margin-bottom:4px}
@@ -343,6 +344,29 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
             onClick={() => document.getElementById('s-besoins')?.scrollIntoView({ behavior:'smooth' })}>
             {hero?.cta ?? 'Voir comment Flowin fonctionne →'}
           </button>
+        </div>
+      </section>
+
+      {/* LE PROBLÈME */}
+      <section id="s-probleme" style={{ padding:'70px 24px', background:'#0E1B30' }}>
+        <div style={{ maxWidth:760, margin:'0 auto', textAlign:'center' }}>
+          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>Le constat</div>
+          <div style={{ fontSize:'clamp(22px,4vw,32px)', fontWeight:800, color:'#fff', lineHeight:1.25, marginBottom:32 }}>Des visiteurs, des prospects, des clients passent. Et après&nbsp;?</div>
+          <div style={{ display:'grid', gap:10, textAlign:'left' }}>
+            {[
+              'Combien de personnes sont passées à votre stand, boutique, event ?',
+              'Pouvez-vous les recontacter ?',
+              'Combien de clients viennent chaque jour ? Quel est le pic de fréquentation ?',
+              'D\u2019où viennent-ils ?',
+              'Quel est votre taux de retour questionnaire ?',
+              'Quels chiffres transmettre à vos partenaires ?',
+            ].map((q, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:12, padding:'14px 16px' }}>
+                <i className="ti ti-help-circle" style={{ color:teal, fontSize:20, flexShrink:0 }} aria-hidden="true" />
+                <span style={{ fontSize:15, color:'#fff' }}>{q}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -597,6 +621,31 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* LA GAMME — Animer / Piloter / Mutualiser */}
+      <section id="s-gamme" style={{ padding:'70px 24px', background:'#0E1B30' }}>
+        <div style={{ maxWidth:960, margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:40 }}>
+            <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>La gamme</div>
+            <div style={{ fontSize:'clamp(22px,4vw,30px)', fontWeight:800, color:'#fff' }}>Ce que Flowin vous permet de faire</div>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }} className="gamme-grid">
+            {[
+              { ico:'ti-device-gamepad-2', t:'Animer', c:'#00B4A0', items:['6 modules de jeu','Customisation jeux / lots / quiz','Marque blanche'] },
+              { ico:'ti-chart-dots', t:'Piloter', c:'#3B5CC4', items:['Dashboard temps réel','Stats : genre, âge, opt-in, géographie','Base client réutilisable'] },
+              { ico:'ti-users-group', t:'Mutualiser', c:'#A855F7', items:['Super-events collectifs','Sponsoring / partenaires','Rejoindre un super-event'] },
+            ].map((g, i) => (
+              <div key={i} style={{ background:'linear-gradient(180deg,rgba(16,31,56,.9),rgba(10,20,36,.9))', border:'1px solid rgba(255,255,255,.1)', borderRadius:18, padding:'28px 22px', textAlign:'center' }}>
+                <i className={`ti ${g.ico}`} style={{ fontSize:40, color:g.c }} aria-hidden="true" />
+                <div style={{ fontSize:20, fontWeight:800, color:'#fff', margin:'12px 0' }}>{g.t}</div>
+                {g.items.map((it, j) => (
+                  <div key={j} style={{ fontSize:13, color:'rgba(255,255,255,.6)', padding:'7px 0', borderTop:'1px solid rgba(255,255,255,.07)' }}>{it}</div>
+                ))}
               </div>
             ))}
           </div>
