@@ -127,9 +127,11 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     ctx.fillStyle = ptg; ctx.fill(); ctx.strokeStyle = 'rgba(80,140,210,.5)'; ctx.lineWidth = 1; ctx.stroke()
   }, [segments, angle, c, screen])
 
-  /* Confettis sur écran de gain */
+  /* Confettis sur écran de gain + ticket */
   useEffect(() => {
-    if (screen !== 'result' || !resultSeg || resultSeg.perdant) return
+    const gainResult = screen === 'result' && resultSeg && !resultSeg.perdant
+    const gainTicket = screen === 'ticket'
+    if (!gainResult && !gainTicket) return
     const canvas = confettiRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -345,21 +347,32 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       )}
 
       {(screen === 'ticket' || screen === 'already') && (
-        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <div style={{ marginBottom:12 }}>
-            <i className={`ti ${screen==='ticket'?'ti-check':'ti-check-circle'}`} style={{ fontSize:48,color:c }} aria-hidden="true" />
+        <div className="screen" style={{ justifyContent:'center',alignItems:'center',textAlign:'center',position:'relative',minHeight:'100dvh',background:'radial-gradient(ellipse at 50% 40%, #0a1f2e 0%, #060d18 70%)' }}>
+          <canvas ref={confettiRef} width={430} height={700} style={{ position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5 }} />
+          {/* Rayons en fond */}
+          <div style={{ position:'absolute',inset:0,zIndex:0,overflow:'hidden',opacity:0.35 }}>
+            <div style={{ position:'absolute',top:'40%',left:'50%',width:'200%',height:'200%',transform:'translate(-50%,-50%)',background:'repeating-conic-gradient(from 0deg at 50% 50%, rgba(0,180,160,.18) 0deg 8deg, transparent 8deg 16deg)' }} />
           </div>
-          <div style={{ fontSize:22,fontWeight:900,marginBottom:6 }}>{screen==='ticket'?'Inscription confirmée !':'Déjà joué !'}</div>
-          <div className="card" style={{ borderTop:`4px solid ${c}`,marginBottom:16,marginTop:20 }}>
-            <div style={{ marginBottom:8 }}>
-              <i className="ti ti-ticket" style={{ fontSize:32,color:c }} aria-hidden="true" />
-            </div>
-            <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
-            {tirageText && (
-              <div style={{ fontSize:11,color:'rgba(255,255,255,.45)',display:'flex',alignItems:'center',justifyContent:'center',gap:5,marginTop:6 }}>
-                <i className="ti ti-calendar" style={{ fontSize:12 }} aria-hidden="true" />{tirageText}
+          {/* Carte teal */}
+          <div style={{ position:'relative',zIndex:10,width:'88%',maxWidth:360,borderRadius:18,overflow:'hidden',border:'2px solid #14B8A6',boxShadow:'0 0 40px rgba(20,184,166,.5),0 12px 48px rgba(0,0,0,.6)',background:'#071620' }}>
+            <div style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',padding:'12px 0',fontSize:14,fontWeight:900,letterSpacing:3,color:'#fff' }}>✦ FÉLICITATIONS ✦</div>
+            <div style={{ padding:'22px 20px 26px' }}>
+              <div style={{ fontSize:46,marginBottom:10 }}>🥳</div>
+              <div style={{ fontSize:11,fontWeight:800,letterSpacing:2,color:'#2DD4BF',marginBottom:4 }}>VOUS AVEZ GAGNÉ</div>
+              <div style={{ fontSize:26,fontWeight:900,color:'#fff',marginBottom:18,textTransform:'uppercase' }}>{form.prenom||'Vous'}</div>
+              <div style={{ border:'1px solid rgba(45,212,191,.4)',borderRadius:12,padding:'14px 16px',marginBottom:16,background:'rgba(20,184,166,.06)' }}>
+                <div style={{ fontSize:11,fontWeight:700,color:'#2DD4BF',marginBottom:4 }}>Votre lot</div>
+                <div style={{ fontSize:19,fontWeight:900,color:'#fff' }}>{resultSeg&&!resultSeg.perdant?resultSeg.label:'Lot offert'}</div>
               </div>
-            )}
+              <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
+              <button className="btn" style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'12px 0',width:'80%',fontWeight:900,letterSpacing:1,color:'#fff' }} onClick={()=>{ setScreen('landing'); setResultSeg(null); setAngle(0) }}>▶ PLAY AGAIN</button>
+              {tirageText && (
+                <div style={{ fontSize:11,color:'rgba(255,255,255,.45)',marginTop:12,display:'flex',alignItems:'center',justifyContent:'center',gap:5 }}>
+                  <i className="ti ti-calendar" style={{ fontSize:12 }} aria-hidden="true" />{tirageText}
+                </div>
+              )}
+              <div style={{ fontSize:10,color:'rgba(255,255,255,.3)',marginTop:14,letterSpacing:1 }}>Powered by Flowin</div>
+            </div>
           </div>
         </div>
       )}
