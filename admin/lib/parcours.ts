@@ -78,6 +78,10 @@ export interface JoueurPayload {
   genre?: string
   age_tranche?: string
   decouverte?: string
+  enseigne?: string
+  secteur?: string
+  client_type?: string
+  lot_gagne?: string
   score_moy?: string
   bonus_reponses?: Record<string, unknown>
   events: string[]
@@ -118,6 +122,10 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     genre: payload.genre || null,
     age_tranche: payload.age_tranche || null,
     decouverte: payload.decouverte || null,
+    enseigne: payload.enseigne || null,
+    secteur: payload.secteur || null,
+    client_type: payload.client_type || 'btoc',
+    lot_gagne: payload.lot_gagne || null,
     score_moy: payload.score_moy || null,
     optin: true,
     optin_date: today,

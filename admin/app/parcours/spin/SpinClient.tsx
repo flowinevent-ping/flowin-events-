@@ -15,17 +15,20 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const segments = (cfg.spinSegments ?? []) as Segment[]
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
   const lsKey = `flowin_played_${evId}`
+  const isBtob = (ev?.client_type === 'btob')
+  const SECTEURS = ['Commerçant','Restaurateur','Exposant','Organisateur','Entreprise','Association','Collectivité','Autre']
 
   const [screen, setScreen] = useState<Screen>('landing')
   const [spinning, setSpinning] = useState(false)
   const [resultSeg, setResultSeg] = useState<Segment | null>(null)
   const [angle, setAngle] = useState(0)
-  const [form, setForm] = useState({ prenom:'',nom:'',email:'',tel:'',genre:'',age:'',cp:'',source:'' })
+  const [form, setForm] = useState({ prenom:'',nom:'',email:'',tel:'',genre:'',age:'',cp:'',source:'',enseigne:'',secteur:'' })
   const [errors, setErrors] = useState<Record<string,string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [ticket, setTicket] = useState('')
   const [existingTicket, setExistingTicket] = useState('')
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const confettiRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
 
@@ -122,7 +125,38 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     ptg.addColorStop(0,'#6AABEE'); ptg.addColorStop(0.5,'#AACCF0'); ptg.addColorStop(1,'#6AABEE')
     ctx.beginPath(); ctx.moveTo(CX-11, py-12); ctx.lineTo(CX+11, py-12); ctx.lineTo(CX+6, py+1); ctx.lineTo(CX, py+12); ctx.lineTo(CX-6, py+1); ctx.closePath()
     ctx.fillStyle = ptg; ctx.fill(); ctx.strokeStyle = 'rgba(80,140,210,.5)'; ctx.lineWidth = 1; ctx.stroke()
-  }, [segments, angle, c])
+  }, [segments, angle, c, screen])
+
+  /* Confettis sur écran de gain */
+  useEffect(() => {
+    if (screen !== 'result' || !resultSeg || resultSeg.perdant) return
+    const canvas = confettiRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const W = canvas.width, H = canvas.height
+    const COLS = ['#00B4A0','#3B5CC4','#7C3AED','#F97316','#FFD700','#06B6D4','#fff','#9333EA']
+    type P = { x:number; y:number; vx:number; vy:number; r:number; col:string; rot:number; vr:number }
+    const parts: P[] = []
+    for (let i = 0; i < 140; i++) {
+      parts.push({ x: W/2, y: H*0.32, vx: (Math.random()-0.5)*11, vy: Math.random()*-13-3, r: Math.random()*5+3, col: COLS[Math.floor(Math.random()*COLS.length)], rot: Math.random()*Math.PI, vr: (Math.random()-0.5)*0.3 })
+    }
+    let raf = 0, frame = 0
+    const tick = () => {
+      ctx.clearRect(0, 0, W, H)
+      frame++
+      parts.forEach(p => {
+        p.vy += 0.32; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.rot += p.vr
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot)
+        ctx.fillStyle = p.col; ctx.fillRect(-p.r, -p.r, p.r*2, p.r*1.4)
+        ctx.restore()
+      })
+      if (frame < 180) raf = requestAnimationFrame(tick)
+      else ctx.clearRect(0, 0, W, H)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [screen, resultSeg])
 
   function spinWheel() {
     if (spinning || !segments.length) return
@@ -149,14 +183,25 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
   async function handleSubmit() {
     const errs: Record<string,string> = {}
+    if (isBtob && !form.enseigne.trim()) errs.enseigne = 'Obligatoire'
     if (!form.prenom.trim()) errs.prenom = 'Obligatoire'
     if (!form.nom.trim()) errs.nom = 'Obligatoire'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     if (form.tel.replace(/\s/g,'').length < 8) errs.tel = 'Invalide'
+    if (isBtob && !form.secteur) errs.secteur = 'Obligatoire'
     setErrors(errs); if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('SP')
-    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'spin',prefix:'SP' })
+    const res = await writeJoueur({
+      email:form.email, prenom:form.prenom, nom:form.nom, tel:form.tel, code_postal:form.cp,
+      genre:form.genre || undefined, age_tranche: isBtob ? undefined : (form.age || undefined),
+      decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,
+      enseigne: isBtob ? (form.enseigne || undefined) : undefined,
+      secteur: isBtob ? (form.secteur || undefined) : undefined,
+      client_type: isBtob ? 'btob' : undefined,
+      lot_gagne: (resultSeg && !resultSeg.perdant) ? resultSeg.label : undefined,
+      events:[evId], ticket_code:tc, source:'spin', prefix:'SP'
+    })
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
     setTicket(res.ticket); setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
@@ -226,7 +271,10 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       )}
 
       {screen === 'result' && resultSeg && (
-        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
+        <div className="screen" style={{ justifyContent:'center',textAlign:'center',position:'relative' }}>
+          {!resultSeg.perdant && (
+            <canvas ref={confettiRef} width={430} height={600} style={{ position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5 }} />
+          )}
           {resultSeg.perdant ? (
             <>
               <div style={{ marginBottom:12 }}>
@@ -251,7 +299,13 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
       {screen === 'form' && (
         <div className="screen">
-          <div className="header"><div><div className="title">Mes coordonnées</div><div className="sub">{nom}{resultSeg&&!resultSeg.perdant?` · Lot : ${resultSeg.label}`:''}</div></div></div>
+          <div className="header"><div><div className="title">{isBtob?'Vos coordonnées':'Mes coordonnées'}</div><div className="sub">{nom}{resultSeg&&!resultSeg.perdant?` · Lot : ${resultSeg.label}`:''}</div></div></div>
+          {isBtob && (
+            <div style={{ marginBottom:12 }}>
+              <label className="label">Enseigne / Structure *</label>
+              <input className={`input${errors.enseigne?' err':''}`} placeholder="Nom de votre commerce ou société" value={form.enseigne} onChange={e=>setForm(f=>({...f,enseigne:e.target.value}))} />{errors.enseigne&&<div className="err">{errors.enseigne}</div>}
+            </div>
+          )}
           <div className="grid2" style={{ marginBottom:12 }}>
             {[['prenom','Prénom *','Camille'],['nom','Nom *','Dupont']].map(([k,l,p])=>(
               <div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} placeholder={p} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>
@@ -259,10 +313,17 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           </div>
           <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" placeholder="nom@exemple.fr" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
           <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" placeholder="06 XX" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
-          <div className="grid2" style={{ marginBottom:12 }}>
-            <div><label className="label">Tranche d'âge</label><select className="input" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-            <div><label className="label">CP</label><input className="input" placeholder="06140" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
-          </div>
+          {isBtob ? (
+            <div className="grid2" style={{ marginBottom:12 }}>
+              <div><label className="label">Secteur d'activité *</label><select className={`input${errors.secteur?' err':''}`} value={form.secteur} onChange={e=>setForm(f=>({...f,secteur:e.target.value}))}><option value="">Choisir…</option>{SECTEURS.map(s=><option key={s} value={s}>{s}</option>)}</select>{errors.secteur&&<div className="err">{errors.secteur}</div>}</div>
+              <div><label className="label">Code postal</label><input className="input" placeholder="06140" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
+            </div>
+          ) : (
+            <div className="grid2" style={{ marginBottom:12 }}>
+              <div><label className="label">Tranche d'âge</label><select className="input" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
+              <div><label className="label">CP</label><input className="input" placeholder="06140" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
+            </div>
+          )}
           <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
         </div>
