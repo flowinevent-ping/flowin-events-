@@ -29,144 +29,27 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
   useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
 
-  // ── WHEEL DRAWING — Canova style ──────────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !segments.length) return
     const ctx = canvas.getContext('2d')!
-    const W = canvas.width, CX = W/2, CY = W/2
-    const sR = 118, RIM = 16, hR = 22
-    const N = segments.length, arc = (2 * Math.PI) / N
-
-    ctx.clearRect(0, 0, W, W)
-
-    // Blue background
-    const bg = ctx.createRadialGradient(CX, CY*0.65, 30, CX, CY, 180)
-    bg.addColorStop(0, '#1030A0')
-    bg.addColorStop(0.4, '#0A1E6A')
-    bg.addColorStop(1, '#030818')
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W)
-
-    const oR = sR + RIM
-
-    // Shadow
-    ctx.save(); ctx.translate(0, 4)
-    ctx.beginPath(); ctx.arc(CX, CY, oR+2, 0, Math.PI*2)
-    ctx.fillStyle = 'rgba(0,0,0,.42)'; ctx.fill(); ctx.restore()
-
-    // Blue drum rim (18 concentric passes)
-    for (let i = 0; i <= 18; i++) {
-      const t = i/18, r = sR + t*RIM
-      const brt = 0.5 + Math.pow(Math.sin(t*Math.PI*0.92+0.1), 1.2)*0.6
-      ctx.beginPath(); ctx.arc(CX, CY, r, 0, Math.PI*2)
-      ctx.strokeStyle = `rgb(${~~(10+brt*25)},${~~(48+brt*98)},${~~(172+brt*68)})`
-      ctx.lineWidth = RIM/18*1.5; ctx.stroke()
-    }
-    // Specular highlight top-left
-    ctx.save()
-    ctx.beginPath(); ctx.arc(CX, CY, sR+RIM*0.45, -Math.PI*0.82, -Math.PI*0.12)
-    ctx.strokeStyle = 'rgba(180,220,255,.2)'; ctx.lineWidth = 9; ctx.stroke()
-    ctx.restore()
-    ctx.beginPath(); ctx.arc(CX, CY, oR+2, 0, Math.PI*2)
-    ctx.strokeStyle = 'rgba(0,20,80,.75)'; ctx.lineWidth = 2; ctx.stroke()
-    ctx.beginPath(); ctx.arc(CX, CY, oR+1, 0, Math.PI*2)
-    ctx.strokeStyle = 'rgba(80,160,255,.45)'; ctx.lineWidth = 1.2; ctx.stroke()
-
-    // Amber LED dots
-    const dR = sR + RIM*0.55
-    for (let i = 0; i < 12; i++) {
-      const da = i/12*Math.PI*2
-      const dx = CX + Math.cos(da)*dR, dy = CY + Math.sin(da)*dR
-      ctx.beginPath(); ctx.arc(dx, dy, 3.5, 0, Math.PI*2)
-      ctx.fillStyle = 'rgba(0,12,45,.7)'; ctx.fill()
-      const dg = ctx.createRadialGradient(dx-0.8, dy-0.8, 0, dx, dy, 2.8)
-      dg.addColorStop(0, '#FFE566'); dg.addColorStop(0.5, '#FFAA00'); dg.addColorStop(1, '#CC7700')
-      ctx.beginPath(); ctx.arc(dx, dy, 2.8, 0, Math.PI*2); ctx.fillStyle = dg; ctx.fill()
-      ctx.beginPath(); ctx.arc(dx, dy, 1, 0, Math.PI*2)
-      ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.fill()
-    }
-
-    // Chrome separator ring
-    ctx.beginPath(); ctx.arc(CX, CY, sR+2, 0, Math.PI*2)
-    ctx.strokeStyle = 'rgba(0,0,0,.38)'; ctx.lineWidth = 2.5; ctx.stroke()
-    const cg = ctx.createLinearGradient(CX-sR, CY, CX+sR, CY)
-    cg.addColorStop(0, '#B8C0D0'); cg.addColorStop(0.3, '#E0E8F4')
-    cg.addColorStop(0.7, '#A0ACBC'); cg.addColorStop(1, '#B8C0D0')
-    ctx.beginPath(); ctx.arc(CX, CY, sR+1, 0, Math.PI*2)
-    ctx.strokeStyle = cg; ctx.lineWidth = 3; ctx.stroke()
-
-    // Segments
+    const w = canvas.width, cx = w/2, cy = w/2, r = cx - 8
+    const n = segments.length, arc = (2 * Math.PI) / n
+    ctx.clearRect(0, 0, w, w)
     segments.forEach((seg, i) => {
-      const s = i*arc + angle + 0.025, e = s + arc - 0.05
-      const mid = (s+e)/2
-      const mx = CX + Math.cos(mid)*sR*0.52, my = CY + Math.sin(mid)*sR*0.52
-      const col = seg.color || c
-      const sg = ctx.createRadialGradient(mx, my, 0, CX, CY, sR)
-      sg.addColorStop(0, col+'FF'); sg.addColorStop(0.6, col+'CC'); sg.addColorStop(1, col+'88')
-      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, sR, s, e); ctx.closePath()
-      ctx.fillStyle = sg; ctx.fill()
-      // 3D bevel highlight
-      ctx.save()
-      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, sR, s, e); ctx.closePath(); ctx.clip()
-      const bv = ctx.createLinearGradient(
-        CX+Math.cos(mid)*8, CY+Math.sin(mid)*8,
-        CX+Math.cos(mid)*sR, CY+Math.sin(mid)*sR
-      )
-      bv.addColorStop(0, 'rgba(255,255,255,.28)')
-      bv.addColorStop(0.4, 'rgba(255,255,255,.07)')
-      bv.addColorStop(1, 'rgba(0,0,0,.2)')
-      ctx.fillStyle = bv; ctx.fillRect(CX-sR, CY-sR, sR*2, sR*2)
-      ctx.restore()
-      // Divider
-      ctx.beginPath(); ctx.moveTo(CX, CY)
-      ctx.lineTo(CX+Math.cos(s)*sR, CY+Math.sin(s)*sR)
-      ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1.5; ctx.stroke()
-      // Label
-      ctx.save(); ctx.translate(CX, CY); ctx.rotate(mid)
-      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
-      ctx.font = 'bold 11px Inter,system-ui,sans-serif'
-      const txt = seg.label.length > 13 ? seg.label.slice(0,12)+'…' : seg.label
-      ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.lineWidth = 4; ctx.strokeText(txt, sR-8, 0)
-      ctx.fillStyle = '#fff'; ctx.fillText(txt, sR-8, 0)
-      ctx.restore()
+      const start = i * arc + angle, end = start + arc
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, end); ctx.closePath()
+      ctx.fillStyle = seg.color || '#7C2D92'; ctx.fill()
+      ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1; ctx.stroke()
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(start + arc/2)
+      ctx.textAlign = 'right'; ctx.fillStyle = '#fff'; ctx.font = 'bold 11px system-ui'
+      ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 3
+      const txt = seg.label.length > 14 ? seg.label.slice(0,12)+'…' : seg.label
+      ctx.fillText(txt, r - 10, 4); ctx.restore()
     })
-    ctx.beginPath(); ctx.arc(CX, CY, sR, 0, Math.PI*2)
-    ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.5; ctx.stroke()
-
-    // Hub — chrome rings + green ball + SPIN
-    for (let r = hR+10; r > hR+1; r -= 0.7) {
-      const t = (r-hR-1)/9, v = ~~(138+Math.sin(t*Math.PI)*105)
-      ctx.beginPath(); ctx.arc(CX, CY, r, 0, Math.PI*2)
-      ctx.strokeStyle = `rgb(${v},${v+8},${v+18})`; ctx.lineWidth = 0.8; ctx.stroke()
-    }
-    ctx.beginPath(); ctx.arc(CX, CY, hR+10, 0, Math.PI*2)
-    ctx.strokeStyle = 'rgba(80,100,140,.7)'; ctx.lineWidth = 2; ctx.stroke()
-    const hg = ctx.createRadialGradient(CX-hR*0.3, CY-hR*0.32, 2, CX, CY, hR)
-    hg.addColorStop(0, '#88DD44'); hg.addColorStop(0.4, '#44AA22'); hg.addColorStop(1, '#114408')
-    ctx.beginPath(); ctx.arc(CX, CY, hR, 0, Math.PI*2); ctx.fillStyle = hg; ctx.fill()
-    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, hR, 0, Math.PI*2); ctx.clip()
-    const hs = ctx.createRadialGradient(CX-hR*0.3, CY-hR*0.34, 0, CX, CY, hR)
-    hs.addColorStop(0, 'rgba(200,255,140,.45)'); hs.addColorStop(1, 'rgba(0,0,0,0)')
-    ctx.fillStyle = hs; ctx.fillRect(CX-hR, CY-hR, hR*2, hR*2); ctx.restore()
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Inter,system-ui,sans-serif'
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('SPIN', CX, CY)
-
-    // Pointer — blue chrome angular
-    const py = CY - sR - RIM*0.5
-    ctx.save(); ctx.translate(2, 3)
-    ctx.beginPath()
-    ctx.moveTo(CX-10, py-11); ctx.lineTo(CX+10, py-11)
-    ctx.lineTo(CX+6, py+1); ctx.lineTo(CX, py+11); ctx.lineTo(CX-6, py+1)
-    ctx.closePath(); ctx.fillStyle = 'rgba(0,0,0,.38)'; ctx.fill(); ctx.restore()
-    const ptg = ctx.createLinearGradient(CX-10, 0, CX+10, 0)
-    ptg.addColorStop(0, '#6AABEE'); ptg.addColorStop(0.5, '#AACCF0'); ptg.addColorStop(1, '#6AABEE')
-    ctx.beginPath()
-    ctx.moveTo(CX-10, py-11); ctx.lineTo(CX+10, py-11)
-    ctx.lineTo(CX+6, py+1); ctx.lineTo(CX, py+11); ctx.lineTo(CX-6, py+1)
-    ctx.closePath(); ctx.fillStyle = ptg; ctx.fill()
-    ctx.strokeStyle = 'rgba(80,140,210,.5)'; ctx.lineWidth = 1; ctx.stroke()
-    ctx.beginPath(); ctx.moveTo(CX, py-9); ctx.lineTo(CX, py+7)
-    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; ctx.stroke()
+    // Centre
+    ctx.beginPath(); ctx.arc(cx, cy, 18, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill()
+    ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI*2); ctx.fillStyle = c; ctx.fill()
   }, [segments, angle, c])
 
   function spinWheel() {
@@ -207,6 +90,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     setTicket(res.ticket); setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
   }
 
+
   /* Navigation postMessage — flèches dashboard SA */
   useEffect(() => {
     const NAV_SCREENS: Screen[] = ['landing', 'spin', 'result', 'form', 'ticket', 'already']
@@ -224,7 +108,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#060C1A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#0F172A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
       <style>{parcoursCSS(c)}</style>
 
       {screen === 'landing' && (
@@ -252,24 +136,13 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       )}
 
       {screen === 'spin' && (
-        <div className="screen" style={{ alignItems:'center',paddingTop:16,background:'#060C1A' }}>
-          <div style={{ fontSize:15,fontWeight:800,marginBottom:16,textAlign:'center',color:'rgba(255,255,255,.85)' }}>Appuie sur la roue !</div>
+        <div className="screen" style={{ alignItems:'center',paddingTop:24 }}>
+          <div style={{ fontSize:15,fontWeight:800,marginBottom:20,textAlign:'center' }}>Appuie sur la roue !</div>
           <div style={{ position:'relative',width:300,height:300,cursor:spinning?'default':'pointer' }} onClick={spinWheel}>
-            <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:8,display:'block' }} />
+            <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:'50%',boxShadow:'0 8px 40px rgba(0,0,0,.4)' }} />
+            <div style={{ position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:28,filter:'drop-shadow(0 2px 6px rgba(0,0,0,.6))' }}>▼</div>
           </div>
-          {/* GAME TIME badge */}
-          <div style={{ marginTop:14,position:'relative',width:200,height:64 }}>
-            {/* TIME block — behind */}
-            <div style={{ position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',width:168,height:36,background:'linear-gradient(180deg,#9A28CC 0%,#7818A8 45%,#520C80 100%)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 12px rgba(0,0,0,.5)',border:'1px solid rgba(180,80,255,.4)' }}>
-              <span style={{ fontSize:18,fontWeight:900,color:'rgba(235,210,255,.95)',letterSpacing:4 }}>TIME</span>
-            </div>
-            {/* GAME block — in front */}
-            <div style={{ position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',width:152,height:40,background:'linear-gradient(180deg,#5A88EE 0%,#3868D0 40%,#1A44A8 100%)',borderRadius:20,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 14px rgba(0,0,0,.5)',border:'1px solid rgba(140,180,255,.5)',zIndex:1 }}>
-              <div style={{ position:'absolute',top:3,left:6,right:6,height:'40%',background:'rgba(255,255,255,.22)',borderRadius:14 }} />
-              <span style={{ fontSize:22,fontWeight:900,color:'#fff',letterSpacing:3,textShadow:'0 1px 4px rgba(0,0,100,.4)',position:'relative',zIndex:1 }}>GAME</span>
-            </div>
-          </div>
-          <div style={{ marginTop:10,fontSize:12,color:'rgba(255,255,255,.35)' }}>{spinning?'En cours…':'Appuie pour tourner !'}</div>
+          <div style={{ marginTop:20,fontSize:13,color:'rgba(255,255,255,.45)' }}>{spinning?'En cours…':'Appuie pour tourner !'}</div>
         </div>
       )}
 
