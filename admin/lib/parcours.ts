@@ -202,6 +202,7 @@ export function parcoursCSS(couleur: string): string {
 
 /* ── Shared Form Component helper ── */
 export const SOURCES = ['📸 Instagram', '🔵 Facebook', '📋 Affiche / Flyer', '📣 Bouche à oreille', '🌐 Autre']
+export const SECTEURS = ['Commerce & Négoce', 'Point de vente indépendant', 'Restaurateur', 'Association / Événementiel', 'Municipalité / Office de tourisme', 'Centre commercial', 'Entreprise / RH', 'Organisateur de salon']
 export const AGE_OPTIONS = [
   { val: '', label: "Tranche d'âge" },
   { val: '-18', label: 'Moins de 18 ans' },
