@@ -616,13 +616,18 @@ footer{
           </div>
           <div class="spin-scene" style="gap:10px">
             <div style="position:relative;width:300px;height:300px;margin:0 auto">
-              <svg viewBox="0 0 40 32" style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:34px;height:26px;z-index:5;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))">
-                <polygon points="20,28 2,2 38,2" fill="#A855F7" stroke="#7C3AED" stroke-width="1.5" stroke-linejoin="round"/>
-              </svg>
-              <canvas id="spin-canvas" width="300" height="300" style="border-radius:50%;box-shadow:0 14px 40px rgba(168,85,247,.28),0 0 0 6px #fff,0 0 0 9px rgba(168,85,247,.15)"></canvas>
+              <canvas id="spin-canvas" width="300" height="300" style="border-radius:50%;box-shadow:0 14px 40px rgba(16,30,120,.4)"></canvas>
               <div id="spin-win-overlay" style="display:none;position:absolute;inset:0;background:rgba(26,16,51,.72);border-radius:50%;align-items:center;justify-content:center;flex-direction:column;z-index:10">
                 <div style="font-size:32px;margin-bottom:4px" id="spin-win-emoji">&#128640;</div>
                 <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#fff;text-align:center;line-height:1.2;padding:0 20px" id="spin-win-label">1er event offert !</div>
+              </div>
+            </div>
+            <div style="position:relative;width:180px;height:60px;margin:2px auto 0">
+              <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:138px;height:38px;background:linear-gradient(180deg,#5A88EE 0%,#3868D0 40%,#1A44A8 100%);border-radius:19px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.5);border:1px solid rgba(140,180,255,.5);z-index:1">
+                <span style="font-size:20px;font-weight:900;color:#fff;letter-spacing:3px;text-shadow:0 1px 4px rgba(0,0,100,.4)">GAME</span>
+              </div>
+              <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:152px;height:32px;background:linear-gradient(180deg,#9A28CC 0%,#7818A8 45%,#520C80 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45);border:1px solid rgba(180,80,255,.4)">
+                <span style="font-size:16px;font-weight:900;color:rgba(235,210,255,.95);letter-spacing:4px">TIME</span>
               </div>
             </div>
             <div id="spin-result-band" style="display:none;background:linear-gradient(135deg,#A855F7,#7C3AED);border-radius:18px;padding:14px 18px;width:100%;text-align:center">
@@ -807,12 +812,14 @@ footer{
 
 <script>
 var SPIN_SEGS = [
-  {label:'Acces Flowin complet', emoji:'🏛️', color:'#A855F7'},
-  {label:'1 an offert',          emoji:'🎁', color:'#00B4A0'},
-  {label:'Flowin Team',          emoji:'👥', color:'#1B3A5C'},
-  {label:'1er event offert',     emoji:'🚀', color:'#E8500A'},
-  {label:'Ami parraine',     emoji:'🤝', color:'#F5A623'}
+  {label:'1 event',        emoji:'🚀', color:'#00B4A0'},
+  {label:'1 design custom',emoji:'🎨', color:'#3B5CC4'},
+  {label:'Rejouez',        emoji:'🔄', color:'#8E24AA'},
+  {label:'1 quiz custom',  emoji:'❓', color:'#E8500A'},
+  {label:'2 events',       emoji:'🎁', color:'#00BCD4'},
+  {label:'Rejouez',        emoji:'🔄', color:'#C62828'}
 ];
+var SPIN_WIN_INDEX = 0; // démo : gain forcé sur "1 event"
 var spinAngle=0, spinning=false, winSeg=0, spProType='', spSource='', spinTicketCode='';
 
 function openPlay(){
@@ -836,31 +843,106 @@ function spinGo(n){
 function drawWheel(angle,highlight){
   var c=document.getElementById('spin-canvas');
   if(!c)return;
-  var ctx=c.getContext('2d'),cx=150,cy=150,r=138,ri=32,n=SPIN_SEGS.length,sl=2*Math.PI/n;
-  ctx.clearRect(0,0,300,300);
-  for(var i=0;i<n;i++){
-    var s=angle+i*sl,e=s+sl,seg=SPIN_SEGS[i];
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);ctx.closePath();
-    ctx.fillStyle=(highlight===i)?lighten(seg.color):seg.color;ctx.fill();
-    ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.stroke();
-    var mid=s+sl/2,tr=r*0.66,tx=cx+tr*Math.cos(mid),ty=cy+tr*Math.sin(mid);
-    ctx.save();ctx.translate(tx,ty);
-    var deg=((mid*180/Math.PI)%360+360)%360;
-    ctx.rotate(deg>90&&deg<270?mid+Math.PI:mid);
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='15px sans-serif';ctx.fillStyle='#fff';
-    ctx.fillText(seg.emoji,0,-12);
-    ctx.font='bold 9px Nunito,Arial,sans-serif';
-    ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=3;
-    var words=seg.label.split(' ');
-    for(var w=0;w<words.length;w++) ctx.fillText(words[w],0,4+w*11-(words.length-1)*5.5);
-    ctx.shadowBlur=0;ctx.restore();
+  var ctx=c.getContext('2d');
+  var W=c.width, CX=W/2, CY=W/2;
+  var sR=W*0.41, RIM=W*0.052, hR=W*0.082, oR=sR+RIM;
+  var n=SPIN_SEGS.length, ARC=2*Math.PI/n;
+  var DARK=['#007A6C','#29408C','#6A0080','#B71010','#0088A0','#8E1010'];
+  ctx.clearRect(0,0,W,W);
+
+  // Fond bleu radial
+  var bg=ctx.createRadialGradient(CX,CY*0.65,40,CX,CY,W*0.7);
+  bg.addColorStop(0,'#1030A0');bg.addColorStop(0.4,'#0A1E6A');bg.addColorStop(1,'#030818');
+  ctx.fillStyle=bg;ctx.beginPath();ctx.arc(CX,CY,oR+4,0,2*Math.PI);ctx.fill();
+
+  // Anneau bleu drum 3D
+  for(var k=0;k<=20;k++){
+    var t=k/20, rr=sR+t*RIM;
+    var brt=0.5+Math.pow(Math.sin(t*Math.PI*0.92+0.1),1.2)*0.6;
+    ctx.beginPath();ctx.arc(CX,CY,rr,0,2*Math.PI);
+    ctx.strokeStyle='rgb('+((10+brt*25)|0)+','+((48+brt*98)|0)+','+((172+brt*68)|0)+')';
+    ctx.lineWidth=RIM/20*1.5;ctx.stroke();
   }
-  ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,ri,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
-  ctx.strokeStyle='#A855F7';ctx.lineWidth=4;ctx.stroke();
-  ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(spinning?'🎡':'🎯',cx,cy+1);
+  // Reflet spéculaire
+  ctx.beginPath();ctx.arc(CX,CY,sR+RIM*0.45,-Math.PI*0.82,-Math.PI*0.12);
+  ctx.strokeStyle='rgba(180,220,255,.22)';ctx.lineWidth=8;ctx.stroke();
+  // Bordures
+  ctx.beginPath();ctx.arc(CX,CY,oR+2,0,2*Math.PI);ctx.strokeStyle='rgba(0,20,80,.75)';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(CX,CY,oR+1,0,2*Math.PI);ctx.strokeStyle='rgba(80,160,255,.45)';ctx.lineWidth=1.2;ctx.stroke();
+
+  // Dots LED amber
+  var dR=sR+RIM*0.55;
+  for(var d=0;d<12;d++){
+    var da=d/12*2*Math.PI, dx=CX+Math.cos(da)*dR, dy=CY+Math.sin(da)*dR;
+    ctx.beginPath();ctx.arc(dx,dy,3.6,0,2*Math.PI);ctx.fillStyle='rgba(0,12,45,.7)';ctx.fill();
+    var dg=ctx.createRadialGradient(dx-1,dy-1,0,dx,dy,3);
+    dg.addColorStop(0,'#FFE566');dg.addColorStop(0.5,'#FFAA00');dg.addColorStop(1,'#CC7700');
+    ctx.beginPath();ctx.arc(dx,dy,3,0,2*Math.PI);ctx.fillStyle=dg;ctx.fill();
+    ctx.beginPath();ctx.arc(dx,dy,1.1,0,2*Math.PI);ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
+  }
+
+  // Séparateur chrome
+  ctx.beginPath();ctx.arc(CX,CY,sR+2,0,2*Math.PI);ctx.strokeStyle='rgba(0,0,0,.38)';ctx.lineWidth=2.5;ctx.stroke();
+  var cg=ctx.createLinearGradient(CX-sR,CY,CX+sR,CY);
+  cg.addColorStop(0,'#B8C0D0');cg.addColorStop(0.3,'#E0E8F4');cg.addColorStop(0.7,'#A0ACBC');cg.addColorStop(1,'#B8C0D0');
+  ctx.beginPath();ctx.arc(CX,CY,sR+1,0,2*Math.PI);ctx.strokeStyle=cg;ctx.lineWidth=3;ctx.stroke();
+
+  // Segments
+  for(var i=0;i<n;i++){
+    var seg=SPIN_SEGS[i];
+    var s=angle+i*ARC+0.02, e=s+ARC-0.04, mid=(s+e)/2;
+    var mx=CX+Math.cos(mid)*sR*0.52, my=CY+Math.sin(mid)*sR*0.52;
+    var baseCol=(highlight===i)?lighten(seg.color):seg.color;
+    var sg=ctx.createRadialGradient(mx,my,0,CX,CY,sR);
+    sg.addColorStop(0,baseCol);sg.addColorStop(0.6,baseCol);sg.addColorStop(1,DARK[i%DARK.length]);
+    ctx.beginPath();ctx.moveTo(CX,CY);ctx.arc(CX,CY,sR,s,e);ctx.closePath();ctx.fillStyle=sg;ctx.fill();
+    // Bevel 3D
+    ctx.save();ctx.beginPath();ctx.moveTo(CX,CY);ctx.arc(CX,CY,sR,s,e);ctx.closePath();ctx.clip();
+    var bv=ctx.createLinearGradient(CX+Math.cos(mid)*8,CY+Math.sin(mid)*8,CX+Math.cos(mid)*sR,CY+Math.sin(mid)*sR);
+    bv.addColorStop(0,'rgba(255,255,255,.28)');bv.addColorStop(0.4,'rgba(255,255,255,.07)');bv.addColorStop(1,'rgba(0,0,0,.2)');
+    ctx.fillStyle=bv;ctx.fillRect(CX-sR,CY-sR,sR*2,sR*2);ctx.restore();
+    // Séparateur
+    ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX+Math.cos(s)*sR,CY+Math.sin(s)*sR);
+    ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1.5;ctx.stroke();
+    // Texte + emoji
+    ctx.save();ctx.translate(CX,CY);ctx.rotate(mid);
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.font='14px sans-serif';ctx.fillStyle='#fff';
+    ctx.fillText(seg.emoji,sR-9,-13);
+    ctx.font='bold 13px Nunito,Arial,sans-serif';
+    var txt=seg.label.length>14?seg.label.slice(0,13)+'…':seg.label;
+    ctx.strokeStyle='rgba(0,0,0,.95)';ctx.lineWidth=4;ctx.strokeText(txt,sR-9,3);
+    ctx.fillStyle='#fff';ctx.fillText(txt,sR-9,3);
+    ctx.restore();
+  }
+  ctx.beginPath();ctx.arc(CX,CY,sR,0,2*Math.PI);ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=1.5;ctx.stroke();
+
+  // Hub chrome + bille verte
+  for(var rh=hR+12;rh>hR+1;rh-=0.7){
+    var th=(rh-hR-1)/11, v=(138+Math.sin(th*Math.PI)*105)|0;
+    ctx.beginPath();ctx.arc(CX,CY,rh,0,2*Math.PI);
+    ctx.strokeStyle='rgb('+v+','+(v+8)+','+(v+18)+')';ctx.lineWidth=0.8;ctx.stroke();
+  }
+  ctx.beginPath();ctx.arc(CX,CY,hR+12,0,2*Math.PI);ctx.strokeStyle='rgba(80,100,140,.7)';ctx.lineWidth=2;ctx.stroke();
+  var hg=ctx.createRadialGradient(CX-hR*0.3,CY-hR*0.32,2,CX,CY,hR);
+  hg.addColorStop(0,'#88DD44');hg.addColorStop(0.4,'#44AA22');hg.addColorStop(1,'#114408');
+  ctx.beginPath();ctx.arc(CX,CY,hR,0,2*Math.PI);ctx.fillStyle=hg;ctx.fill();
+  ctx.save();ctx.beginPath();ctx.arc(CX,CY,hR,0,2*Math.PI);ctx.clip();
+  var hs=ctx.createRadialGradient(CX-hR*0.3,CY-hR*0.34,0,CX,CY,hR);
+  hs.addColorStop(0,'rgba(200,255,140,.45)');hs.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=hs;ctx.fillRect(CX-hR,CY-hR,hR*2,hR*2);ctx.restore();
+  ctx.fillStyle='#fff';ctx.font='bold 12px Nunito,Arial,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('SPIN',CX,CY);
+
+  // Pointer bleu interne (en haut)
+  var py=CY-sR-RIM*0.5;
+  ctx.save();ctx.translate(2,3);
+  ctx.beginPath();ctx.moveTo(CX-11,py-12);ctx.lineTo(CX+11,py-12);ctx.lineTo(CX+6,py+1);ctx.lineTo(CX,py+12);ctx.lineTo(CX-6,py+1);ctx.closePath();
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();ctx.restore();
+  var ptg=ctx.createLinearGradient(CX-11,0,CX+11,0);
+  ptg.addColorStop(0,'#6AABEE');ptg.addColorStop(0.5,'#AACCF0');ptg.addColorStop(1,'#6AABEE');
+  ctx.beginPath();ctx.moveTo(CX-11,py-12);ctx.lineTo(CX+11,py-12);ctx.lineTo(CX+6,py+1);ctx.lineTo(CX,py+12);ctx.lineTo(CX-6,py+1);ctx.closePath();
+  ctx.fillStyle=ptg;ctx.fill();ctx.strokeStyle='rgba(80,140,210,.5)';ctx.lineWidth=1;ctx.stroke();
 }
 function lighten(h){
   var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
@@ -872,7 +954,7 @@ function startSpinAnim(){
   var btn=document.getElementById('spin-btn'),sub=document.getElementById('spin-sub');
   if(btn){btn.disabled=true;btn.textContent='La roue tourne...';}
   if(sub){sub.textContent='Ne touchez plus a rien';}
-  winSeg=Math.floor(Math.random()*SPIN_SEGS.length);
+  winSeg=SPIN_WIN_INDEX;
   var n=SPIN_SEGS.length,sl=2*Math.PI/n;
   var ta=-Math.PI/2-(winSeg+0.5)*sl,fa=ta+5*2*Math.PI;
   fa=fa%(2*Math.PI);
