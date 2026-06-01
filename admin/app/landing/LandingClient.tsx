@@ -111,7 +111,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
   }, [counted, proof?.stat1, proof?.stat3])
 
   useEffect(() => {
-    const SECS = ['s-hero','s-probleme','s-besoins','s-demo','s-profils','s-proof','s-modules','s-gamme','s-accomp','s-pricing','s-cta']
+    const SECS = ['s-hero','s-probleme','s-besoins','s-demo','s-profils','s-proof','s-modules','s-stats','s-gamme','s-accomp','s-pricing','s-cta']
     let idx = 0
     function onMsg(e: MessageEvent) {
       if (!e.data?.flowinNav) return
@@ -431,8 +431,8 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
 
           {/* PHONE — vrai parcours en iframe */}
           <div style={{ display:'flex', justifyContent:'center' }}>
-            <div style={{ width:260, height:540, borderRadius:32, background:'#0F172A', border:'10px solid #1a1a2e', overflow:'hidden', position:'relative', boxShadow:'0 24px 70px rgba(0,0,0,.55)', flexShrink:0 }}>
-              <iframe src={DEMO_URL} title="Démo Flowin" style={{ width:'100%', height:'100%', border:'none', display:'block' }} />
+            <div style={{ width:300, height:620, borderRadius:36, background:'#0F172A', border:'12px solid #14141f', overflow:'hidden', position:'relative', boxShadow:'0 24px 70px rgba(0,0,0,.55)', flexShrink:0 }}>
+              <iframe src={DEMO_URL} title="Démo Flowin" style={{ width:'390px', height:'806px', border:'none', display:'block', transform:'scale(0.708)', transformOrigin:'top left' }} />
             </div>
           </div>
         </div>
@@ -538,6 +538,35 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
                     </li>
                   ))}
                 </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* VISUEL STATS — aperçu dashboard */}
+      <section id="s-stats" style={{ padding:'70px 24px', background:'#0E1B30' }}>
+        <div style={{ maxWidth:760, margin:'0 auto', textAlign:'center' }}>
+          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>Vos chiffres, en direct</div>
+          <div style={{ fontSize:'clamp(22px,4vw,30px)', fontWeight:800, color:'#fff', marginBottom:8 }}>Vous mesurez tout, en temps réel.</div>
+          <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', marginBottom:32 }}>Aperçu d&apos;un tableau de bord. Données géographiques réelles — Fêtes de Pâques, Vence.</div>
+          <div style={{ background:'linear-gradient(180deg,#0F1E36,#0A1424)', border:'1px solid rgba(255,255,255,.1)', borderRadius:18, padding:24, textAlign:'left' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
+              {[['186','Participants',teal],['115','Opt-in (62%)','#F59E0B'],['6','Communes','#A855F7']].map(([v,l,c],i)=>(
+                <div key={i} style={{ background:'rgba(255,255,255,.04)', borderRadius:12, padding:'14px', textAlign:'center' }}>
+                  <div style={{ fontSize:26, fontWeight:900, color:c as string }}>{v}</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,.55)' }}>{l}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', marginBottom:14 }}>D&apos;où viennent vos visiteurs</div>
+            {[['Vence (06140)',74,100],['La Gaude (06610)',24,33],['Cagnes (06800)',23,31],['St-Laurent (06700)',22,30],['Nice (06200)',22,30],['Grasse (06130)',18,24]].map(([lbl,n,w],i)=>(
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
+                <span style={{ width:130, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
+                <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
+                  <span style={{ display:'block', height:'100%', width:`${w}%`, background:`linear-gradient(90deg,${teal},#3B5CC4)`, borderRadius:100 }} />
+                </span>
+                <span style={{ width:28, textAlign:'right', fontWeight:800, color:'#fff' }}>{n}</span>
               </div>
             ))}
           </div>

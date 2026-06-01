@@ -305,25 +305,25 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           {isBtob && (
             <div style={{ marginBottom:12 }}>
               <label className="label">Enseigne / Structure *</label>
-              <input className={`input${errors.enseigne?' err':''}`} placeholder="Nom de votre commerce ou société" value={form.enseigne} onChange={e=>setForm(f=>({...f,enseigne:e.target.value}))} />{errors.enseigne&&<div className="err">{errors.enseigne}</div>}
+              <input className={`input${errors.enseigne?' err':''}`} placeholder="" value={form.enseigne} onChange={e=>setForm(f=>({...f,enseigne:e.target.value}))} />{errors.enseigne&&<div className="err">{errors.enseigne}</div>}
             </div>
           )}
           <div className="grid2" style={{ marginBottom:12 }}>
-            {[['prenom','Prénom *','Camille'],['nom','Nom *','Dupont']].map(([k,l,p])=>(
+            {[['prenom','Prénom *',''],['nom','Nom *','']].map(([k,l,p])=>(
               <div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} placeholder={p} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>
             ))}
           </div>
-          <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" placeholder="nom@exemple.fr" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
-          <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" placeholder="06 XX" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
+          <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" placeholder="" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
+          <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" placeholder="" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
           {isBtob ? (
             <div className="grid2" style={{ marginBottom:12 }}>
               <div><label className="label">Secteur d'activité *</label><select className={`input${errors.secteur?' err':''}`} value={form.secteur} onChange={e=>setForm(f=>({...f,secteur:e.target.value}))}><option value="">Choisir…</option>{SECTEURS.map(s=><option key={s} value={s}>{s}</option>)}</select>{errors.secteur&&<div className="err">{errors.secteur}</div>}</div>
-              <div><label className="label">Code postal</label><input className="input" placeholder="06140" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
+              <div><label className="label">Code postal</label><input className="input" placeholder="" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
             </div>
           ) : (
             <div className="grid2" style={{ marginBottom:12 }}>
               <div><label className="label">Tranche d'âge</label><select className="input" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-              <div><label className="label">CP</label><input className="input" placeholder="06140" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
+              <div><label className="label">CP</label><input className="input" placeholder="" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
             </div>
           )}
           <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
@@ -366,7 +366,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               </div>
               <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
               <a href="tel:0616354936" className="btn" style={{ display:'block',textDecoration:'none',background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'13px 0',width:'82%',margin:'0 auto',fontWeight:900,letterSpacing:1,color:'#fff' }}>📞 Contactez-nous</a>
-              <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'10px auto 0',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'rgba(255,255,255,.7)',cursor:'pointer' }} onClick={()=>{ setScreen('landing') }}>← Retour à l'accueil</button>
+              <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'10px auto 0',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'rgba(255,255,255,.7)',cursor:'pointer' }} onClick={()=>{ try{localStorage.removeItem(lsKey)}catch{}; setExistingTicket(''); setTicket(''); setResultSeg(null); setAngle(0); setScreen('landing') }}>← Retour à l'accueil</button>
               {tirageText && (
                 <div style={{ fontSize:11,color:'rgba(255,255,255,.45)',marginTop:12,display:'flex',alignItems:'center',justifyContent:'center',gap:5 }}>
                   <i className="ti ti-calendar" style={{ fontSize:12 }} aria-hidden="true" />{tirageText}
