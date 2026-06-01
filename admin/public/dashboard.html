@@ -7529,12 +7529,18 @@ function renderBiblioJeux(){
 
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
-  // ── Aperçu neutre du module ──
-  /* Vue "paramètres globaux" → aperçu NEUTRE du module (aucun event client).
-     ev=__demo__ : données génériques côté Next.js (couleur master, sans branding). */
-  var _masterUrl = parcoursUrl(tab, '__demo__');
+  // ── Aperçu démo thématique par module ──
+  /* Chaque module montre son contenu démo d'origine (quiz=Pâques, vote=Jazz, etc.)
+     via son .html (sans ?ev= → pas d'écrasement par Supabase).
+     Exception Spin : on affiche la spin Flowin (couleur Flowin) via ev-flowin-demo. */
+  var _masterUrl;
+  if(tab === 'spin') {
+    _masterUrl = parcoursUrl('spin', 'ev-flowin-demo');
+  } else {
+    _masterUrl = '/parcours/'+encodeURIComponent(tab)+'.html';
+  }
   var _jmIframeId = 'iframe-master-'+tab;
-  html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · aperçu neutre</div>';
+  html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
   html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
