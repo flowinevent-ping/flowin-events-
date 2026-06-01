@@ -235,6 +235,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         @media(max-width:680px){.besoins-grid{grid-template-columns:1fr}}
         @media(max-width:680px){.gamme-grid{grid-template-columns:1fr !important}}
         @media(max-width:680px){.dash-cols{grid-template-columns:1fr !important}}
+        @media(max-width:680px){.dash-kpis{grid-template-columns:repeat(2,1fr) !important}}
         .besoin-card{background:#fff;padding:28px 24px;display:flex;flex-direction:column;gap:0}
         .besoin-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;flex-shrink:0}
         .besoin-verb{font-size:22px;font-weight:700;margin-bottom:4px}
@@ -550,12 +551,12 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         <div style={{ maxWidth:820, margin:'0 auto', textAlign:'center' }}>
           <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>Vos chiffres, en direct</div>
           <div style={{ fontSize:'clamp(22px,4vw,30px)', fontWeight:800, color:'#fff', marginBottom:8 }}>Vous mesurez tout, en temps réel.</div>
-          <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', marginBottom:32 }}>Données réelles — Fêtes de Pâques, Vence (186 participants).</div>
+          <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', marginBottom:32 }}>Données réelles — Fêtes de Pâques, Vence (192 participants).</div>
           <div style={{ background:'linear-gradient(180deg,#0F1E36,#0A1424)', border:'1px solid rgba(255,255,255,.1)', borderRadius:18, padding:24, textAlign:'left' }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-              {[['186','Participants',teal],['115','Opt-in (62%)','#F59E0B'],['6','Communes','#A855F7']].map(([v,l,c],i)=>(
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:24 }} className="dash-kpis">
+              {[['192','Participants',teal],['43 ans','Âge moyen','#00B4A0'],['100%','Conversion','#3B5CC4'],['74%','Opt-in RGPD','#F59E0B']].map(([v,l,c],i)=>(
                 <div key={i} style={{ background:'rgba(255,255,255,.04)', borderRadius:12, padding:'14px', textAlign:'center' }}>
-                  <div style={{ fontSize:26, fontWeight:900, color:c as string }}>{v}</div>
+                  <div style={{ fontSize:22, fontWeight:900, color:c as string }}>{v}</div>
                   <div style={{ fontSize:11, color:'rgba(255,255,255,.55)' }}>{l}</div>
                 </div>
               ))}
@@ -563,13 +564,23 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
             <div className="dash-cols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:28 }}>
               <div>
                 <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', marginBottom:14 }}>Tranches d&apos;âge</div>
-                {[['36-50 ans',71,100],['51-65 ans',41,58],['26-35 ans',30,42],['65 ans et +',22,31],['18-25 ans',18,25],['Moins de 18',4,6]].map(([lbl,n,w],i)=>(
+                {[['36-50 ans',81,100],['51-65 ans',37,46],['26-35 ans',28,35],['65 ans et +',20,25],['18-25 ans',15,19],['Moins de 18',11,14]].map(([lbl,n,w],i)=>(
                   <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
                     <span style={{ width:92, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
                     <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
                       <span style={{ display:'block', height:'100%', width:`${w}%`, background:'linear-gradient(90deg,#A855F7,#3B5CC4)', borderRadius:100 }} />
                     </span>
                     <span style={{ width:24, textAlign:'right', fontWeight:800, color:'#fff' }}>{n}</span>
+                  </div>
+                ))}
+                <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', margin:'22px 0 14px' }}>Répartition par genre</div>
+                {[['Femmes',61,'#00B4A0'],['Hommes',39,'#3B5CC4']].map(([lbl,w,col],i)=>(
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
+                    <span style={{ width:92, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
+                    <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
+                      <span style={{ display:'block', height:'100%', width:`${w}%`, background:col as string, borderRadius:100 }} />
+                    </span>
+                    <span style={{ width:32, textAlign:'right', fontWeight:800, color:'#fff' }}>{w}%</span>
                   </div>
                 ))}
               </div>
@@ -584,8 +595,31 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
                     <span style={{ width:24, textAlign:'right', fontWeight:800, color:'#fff' }}>{n}</span>
                   </div>
                 ))}
+                <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', margin:'22px 0 14px' }}>Intention de revenir</div>
+                {[['Oui',66,'#22C55E'],['Peut-être',3,'#F59E0B'],['Non',1,'#EF4444']].map(([lbl,w,col],i)=>(
+                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
+                    <span style={{ width:78, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
+                    <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
+                      <span style={{ display:'block', height:'100%', width:`${w}%`, background:col as string, borderRadius:100 }} />
+                    </span>
+                    <span style={{ width:32, textAlign:'right', fontWeight:800, color:'#fff' }}>{w}%</span>
+                  </div>
+                ))}
               </div>
             </div>
+            <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', margin:'24px 0 14px' }}>Comment ils ont connu l&apos;événement</div>
+            <div className="dash-cols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'2px 28px' }}>
+              {[['Affiche / Flyer',42],['Mairie',13],['Facebook',9],['Instagram',7]].map(([lbl,w],i)=>(
+                <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
+                  <span style={{ width:100, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
+                  <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
+                    <span style={{ display:'block', height:'100%', width:`${(w as number)*2}%`, background:'linear-gradient(90deg,#3B5CC4,#00B4A0)', borderRadius:100 }} />
+                  </span>
+                  <span style={{ width:32, textAlign:'right', fontWeight:800, color:'#fff' }}>{w}%</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
           </div>
         </div>
       </section>
