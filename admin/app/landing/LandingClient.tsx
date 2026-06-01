@@ -96,11 +96,11 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
     const observer = new IntersectionObserver(entries => {
       if (!entries[0].isIntersecting) return
       setCounted(true)
-      const t1 = parseInt(proof?.stat1 ?? '186'), t3 = parseInt(proof?.stat3 ?? '94')
+      const t1 = parseInt(proof?.stat1 ?? '186'), t2 = parseInt(proof?.stat2 ?? '3'), t3 = parseInt(proof?.stat3 ?? '94')
       let n = 0
       const iv = setInterval(() => {
         n += 4
-        setCounters({ c1: Math.min(n*Math.round(t1/40), t1), c2: 3, c3: Math.min(Math.round(n*t3/40), t3) })
+        setCounters({ c1: Math.min(n*Math.round(t1/40), t1), c2: t2, c3: Math.min(Math.round(n*t3/40), t3) })
         if (n >= 40) clearInterval(iv)
       }, 30)
       observer.disconnect()
@@ -108,7 +108,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
     const el = document.getElementById('s-proof')
     if (el) observer.observe(el)
     return () => observer.disconnect()
-  }, [counted, proof?.stat1, proof?.stat3])
+  }, [counted, proof?.stat1, proof?.stat2, proof?.stat3])
 
   useEffect(() => {
     const SECS = ['s-hero','s-probleme','s-besoins','s-demo','s-profils','s-proof','s-modules','s-stats','s-gamme','s-accomp','s-pricing','s-cta']
@@ -549,10 +549,10 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         <div style={{ maxWidth:760, margin:'0 auto', textAlign:'center' }}>
           <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>Vos chiffres, en direct</div>
           <div style={{ fontSize:'clamp(22px,4vw,30px)', fontWeight:800, color:'#fff', marginBottom:8 }}>Vous mesurez tout, en temps réel.</div>
-          <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', marginBottom:32 }}>Aperçu d&apos;un tableau de bord. Données géographiques réelles — Fêtes de Pâques, Vence.</div>
+          <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', marginBottom:32 }}>Aperçu d&apos;un tableau de bord temps réel.</div>
           <div style={{ background:'linear-gradient(180deg,#0F1E36,#0A1424)', border:'1px solid rgba(255,255,255,.1)', borderRadius:18, padding:24, textAlign:'left' }}>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-              {[['186','Participants',teal],['115','Opt-in (62%)','#F59E0B'],['6','Communes','#A855F7']].map(([v,l,c],i)=>(
+              {[['980','Contacts',teal],['5','Dates','#F59E0B'],['100%','Opt-in','#A855F7']].map(([v,l,c],i)=>(
                 <div key={i} style={{ background:'rgba(255,255,255,.04)', borderRadius:12, padding:'14px', textAlign:'center' }}>
                   <div style={{ fontSize:26, fontWeight:900, color:c as string }}>{v}</div>
                   <div style={{ fontSize:11, color:'rgba(255,255,255,.55)' }}>{l}</div>
