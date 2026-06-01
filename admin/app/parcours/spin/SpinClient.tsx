@@ -227,7 +227,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#0F172A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+    <div className="app">
       <style>{parcoursCSS(c)}</style>
 
       {screen === 'landing' && (
@@ -347,7 +347,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       )}
 
       {(screen === 'ticket' || screen === 'already') && (
-        <div className="screen" style={{ justifyContent:'center',alignItems:'center',textAlign:'center',position:'relative',minHeight:'100dvh',background:'radial-gradient(ellipse at 50% 40%, #0a1f2e 0%, #060d18 70%)' }}>
+        <div className="screen" style={{ justifyContent:'center',alignItems:'center',textAlign:'center',position:'relative',background:'radial-gradient(ellipse at 50% 40%, #0a1f2e 0%, #060d18 70%)' }}>
           <canvas ref={confettiRef} width={430} height={700} style={{ position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5 }} />
           {/* Rayons en fond */}
           <div style={{ position:'absolute',inset:0,zIndex:0,overflow:'hidden',opacity:0.35 }}>
