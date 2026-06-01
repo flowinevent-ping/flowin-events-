@@ -34,8 +34,57 @@ export interface ParcoursPageData {
   banques: ParcoursBanque[]
 }
 
+/* ── Aperçu NEUTRE des modules (dashboard SA · paramètres globaux) ──
+   evId === '__demo__' → données génériques sans aucun branding client.
+   ev.nom omis volontairement : chaque module applique son propre libellé neutre par défaut. */
+function demoParcoursData(): ParcoursPageData {
+  const ev = {
+    id: '__demo__',
+    couleur: '#7C2D92',
+    client_type: 'btoc',
+    date_d: null,
+    date_f: null,
+    cfg: {
+      subtitle: 'Aperçu du module',
+      quizNbQuestions: 3,
+      quizTimer: 30,
+      spinSegments: [
+        { label: 'Lot 1', color: '#7C2D92' },
+        { label: 'Dommage', color: '#475569', perdant: true },
+        { label: 'Lot 2', color: '#A855F7' },
+        { label: 'Rejouez', color: '#475569', perdant: true },
+      ],
+      voteItems: [
+        { id: 'demo-a', nom: 'Proposition A', emoji: '🅰️' },
+        { id: 'demo-b', nom: 'Proposition B', emoji: '🅱️' },
+        { id: 'demo-c', nom: 'Proposition C', emoji: '🅾️' },
+      ],
+      voteMode: 'stars',
+    },
+  } as unknown as FlowinEvent
+
+  const lots = [
+    { id: 'demo-l1', event_id: '__demo__', partenaire_id: null, nom: 'Lot exemple', titre: 'Lot exemple', valeur: 0, quantite: 1, retire: false, emoji: '🎁', description: null },
+  ] as unknown as FlowinLot[]
+
+  const banques: ParcoursBanque[] = [
+    {
+      id: 'demo-bq',
+      nom: 'Démonstration',
+      questions: [
+        { id: 'demo-q1', type: 'qcm', texte: 'Question de démonstration 1 ?', options: ['Réponse A', 'Réponse B', 'Réponse C', 'Réponse D'], bonne: 0 },
+        { id: 'demo-q2', type: 'qcm', texte: 'Question de démonstration 2 ?', options: ['Choix 1', 'Choix 2', 'Choix 3'], bonne: 1 },
+        { id: 'demo-q3', type: 'qcm', texte: 'Question de démonstration 3 ?', options: ['Vrai', 'Faux'], bonne: 0 },
+      ],
+    },
+  ]
+
+  return { ev, lots, partenaires: [], banques }
+}
+
 /* ── Fetch partagé server-side ── */
 export async function fetchParcoursData(evId: string): Promise<ParcoursPageData> {
+  if (evId === '__demo__') return demoParcoursData()
   const [evRes, lotsRes] = await Promise.all([
     supabase.from('events').select('*').eq('id', evId).single(),
     supabase.from('lots').select('*').eq('event_id', evId),

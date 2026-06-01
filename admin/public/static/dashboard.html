@@ -7529,26 +7529,12 @@ function renderBiblioJeux(){
 
   // ── Colonne droite : prévisualisation ──
   html += '<div>';
-  // ── Parcours complet ──
-  var _noModule = (tab === 'standup' && false); /* tous les modules ont un fichier */
-  /* Chercher un event utilisant ce module pour un vrai aperçu */
-  var _evForModule = null;
-  if(DATA.events) {
-    for(var _ei=0; _ei<DATA.events.length; _ei++){
-      if(DATA.events[_ei].module === tab){ _evForModule = DATA.events[_ei]; break; }
-    }
-    if(!_evForModule) _evForModule = DATA.events[0] || null;
-  }
-  var _masterUrl;
-  if(_evForModule) {
-    /* Event trouvé → aperçu Next.js avec vraies données */
-    _masterUrl = parcoursUrl(tab, _evForModule.id);
-  } else {
-    /* Aucun event → fallback HTML statique */
-    _masterUrl = parcoursUrl(tab, null);
-  }
+  // ── Aperçu neutre du module ──
+  /* Vue "paramètres globaux" → aperçu NEUTRE du module (aucun event client).
+     ev=__demo__ : données génériques côté Next.js (couleur master, sans branding). */
+  var _masterUrl = parcoursUrl(tab, '__demo__');
   var _jmIframeId = 'iframe-master-'+tab;
-  html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
+  html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · aperçu neutre</div>';
   html += '<div class="flowin-phone-wrap">';
   html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
   html += '<div class="flowin-phone-frame">';
