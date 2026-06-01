@@ -723,6 +723,7 @@ footer{
               <div class="form-field"><label class="form-label">T&#233;l&#233;phone</label><input class="form-input" id="sp-tel" type="tel" placeholder="06 12 34 56 78"></div>
               <div class="form-field"><label class="form-label">Ville</label><input class="form-input" id="sp-ville" placeholder="Votre ville"></div>
             </div>
+            <div class="form-field"><label class="form-label">Code postal</label><input class="form-input" id="sp-cp" type="text" inputmode="numeric" maxlength="5" placeholder="06140"></div>
             <div class="form-field">
               <label class="form-label">Vous &#234;tes plut&#244;t ?</label>
               <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="sp-type-btns">
@@ -1114,7 +1115,7 @@ function writeJoueurBtoB(data){
       id:'j-fl-'+Date.now(),
       prenom:data.prenom, nom:data.nom||'',
       email:data.email, tel:data.tel||'',
-      ville:data.ville||'', codePostal:'',
+      ville:data.ville||'', codePostal:data.codePostal||'',
       enseigne:data.enseigne||'',
       events:['ev-flowin-demo'],
       gains:1, scoreMoy:'',
@@ -1132,12 +1133,14 @@ function writeJoueurBtoB(data){
       external_id:'j-btob-'+joueur.email.replace(/[^a-z0-9]/g,'-').substring(0,36),
       email:joueur.email,
       nom:joueur.nom, prenom:joueur.prenom,
-      tel:joueur.tel, ville:joueur.ville, code_postal:'',
+      tel:joueur.tel, ville:joueur.ville, code_postal:data.codePostal||'',
       optin:true, optin_date:ts,
       first_seen:ts, last_seen:ts,
       source:(new URLSearchParams(window.location.search)).get('source')==='qr' ? 'landing_btob_qr' : 'landing_btob',
       tags:joueur.tags,
       enseigne:joueur.enseigne,
+      secteur:data.typePro||'',
+      decouverte:data.decouverte||'',
       lot_gagne:joueur.lot_gagne,
       ticket_code:joueur.ticket_code,
       client_type:'btob'
@@ -1177,6 +1180,7 @@ function spinSubmitForm(){
   var email=document.getElementById('sp-email').value.trim();
   var tel=document.getElementById('sp-tel').value.trim();
   var ville=document.getElementById('sp-ville')?document.getElementById('sp-ville').value.trim():'';
+  var cp=document.getElementById('sp-cp')?document.getElementById('sp-cp').value.trim():'';
   // G5-[17] Tous champs obligatoires
   var _err = false;
   function _req(id,val){ if(!val){ var el=document.getElementById(id); if(el){el.style.borderColor='#E8500A'; el.focus();} _err=true; } }
@@ -1186,12 +1190,13 @@ function spinSubmitForm(){
   _req('sp-email',email);
   _req('sp-tel',tel);
   _req('sp-ville',ville);
+  _req('sp-cp',cp);
   if(!spProType){ var btns=document.querySelectorAll('#sp-type-btns button'); if(btns[0]) btns[0].style.outline='2px solid #E8500A'; _err=true; }
   if(!spSource){ var sbtns=document.querySelectorAll('#sp-source-btns button'); if(sbtns[0]) sbtns[0].style.outline='2px solid #E8500A'; _err=true; }
   if(_err) return;
   var lot=SPIN_SEGS[winSeg]?SPIN_SEGS[winSeg].label:'1er event offert';
   var code=spinTicketCode||'FW-PRO-0000';
-  writeJoueurBtoB({prenom:prenom,nom:nom,email:email,tel:tel,ville:ville,enseigne:enseigne,typePro:spProType,decouverte:spSource,lot:lot,ticketCode:code});
+  writeJoueurBtoB({prenom:prenom,nom:nom,email:email,tel:tel,ville:ville,codePostal:cp,enseigne:enseigne,typePro:spProType,decouverte:spSource,lot:lot,ticketCode:code});
   var msg='Bonjour Romain ! J ai gagne : '+lot+' ('+code+')';
   if(enseigne) msg+=' | Enseigne : '+enseigne;
   msg+=' | '+prenom+(nom?' '+nom:'')+(spProType?', '+spProType:'');
