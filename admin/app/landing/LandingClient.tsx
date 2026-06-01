@@ -340,10 +340,9 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
             <span className="baseline-sep">·</span>
             <span className="baseline-verb" style={{ color:'#1D9E75' }}>Fidélisez</span>
           </div>
-          <button className="btn-demo" style={{ display:'inline-flex', fontSize:16, padding:'16px 36px', margin:'0 auto' }}
-            onClick={() => document.getElementById('s-besoins')?.scrollIntoView({ behavior:'smooth' })}>
-            {hero?.cta ?? 'Voir comment Flowin fonctionne →'}
-          </button>
+          <a className="btn-demo" href={DEMO_URL} target="_blank" rel="noopener" style={{ display:'inline-flex', fontSize:16, padding:'16px 36px', margin:'0 auto', textDecoration:'none' }}>
+            {hero?.cta ?? 'Jouer et gagner mon premier event →'}
+          </a>
         </div>
       </section>
 
@@ -430,92 +429,10 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
             </div>
           </div>
 
-          {/* PHONE MOCKUP INTERACTIF */}
+          {/* PHONE — vrai parcours en iframe */}
           <div style={{ display:'flex', justifyContent:'center' }}>
-            <div style={{ width:200, height:400, borderRadius:28, background:'#0F172A', border:'2px solid rgba(255,255,255,.12)', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(0,0,0,.5)', flexShrink:0 }}>
-              <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:48, height:14, background:'rgba(0,0,0,.8)', borderRadius:'0 0 9px 9px', zIndex:10 }} />
-
-              {/* Screen landing */}
-              {phoneScreen === 'landing' && (
-                <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'22px 14px' }}>
-                  <div style={{ width:60, height:60, borderRadius:'50%', border:`2.5px solid ${teal}`, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:14, animation:'spinAnim 9s linear infinite' }}>
-                    <i className="ti ti-rotate-clockwise" style={{ fontSize:28, color:teal }} aria-hidden="true" />
-                  </div>
-                  <div style={{ fontSize:13, fontWeight:800, color:'#fff', marginBottom:6 }}>Découvrez Flowin</div>
-                  <div style={{ fontSize:10, color:'rgba(255,255,255,.45)', marginBottom:18, lineHeight:1.5 }}>Vivez l&apos;expérience de vos futurs clients</div>
-                  <button onClick={() => setPhoneScreen('spin')} style={{ background:teal, color:'#fff', border:'none', borderRadius:50, padding:'9px 0', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:5 }}>
-                    <i className="ti ti-rotate-clockwise" style={{ fontSize:11 }} aria-hidden="true" />Faire tourner la roue
-                  </button>
-                  <div style={{ fontSize:9, color:'rgba(255,255,255,.25)', marginTop:6 }}>Jeu gratuit · Sans achat obligatoire</div>
-                </div>
-              )}
-
-              {/* Screen spin */}
-              {phoneScreen === 'spin' && (
-                <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', padding:'18px 12px' }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,.5)', marginBottom:10, textAlign:'center' }}>Appuie sur la roue !</div>
-                  <div style={{ position:'relative', cursor:'pointer', flexShrink:0 }} onClick={doPhoneSpin}>
-                    <div style={{ position:'absolute', top:-5, left:'50%', transform:'translateX(-50%)', width:0, height:0, borderLeft:'6px solid transparent', borderRight:'6px solid transparent', borderTop:'16px solid #C9A227', zIndex:10, filter:'drop-shadow(0 1px 3px rgba(0,0,0,.5))' }} />
-                    <canvas ref={canvasRef} width={148} height={148} style={{ borderRadius:'50%', display:'block' }} />
-                  </div>
-                  <div style={{ fontSize:10, color:'rgba(255,255,255,.35)', marginTop:8, textAlign:'center' }}>
-                    {phoneSpinning ? 'En cours…' : 'Clique pour tourner'}
-                  </div>
-                </div>
-              )}
-
-              {/* Screen result */}
-              {phoneScreen === 'result' && (
-                <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:16 }}>
-                  <i className="ti ti-star" style={{ fontSize:36, color:'#F59E0B', marginBottom:8 }} aria-hidden="true" />
-                  <div style={{ fontSize:15, fontWeight:800, color:'#fff', marginBottom:10 }}>Tu as gagné !</div>
-                  <div style={{ background:'rgba(59,92,196,.25)', border:'2px solid rgba(59,92,196,.5)', borderRadius:10, padding:'10px 14px', fontSize:12, fontWeight:800, color:'#fff', marginBottom:16, width:'100%' }}>{phoneLot}</div>
-                  <button onClick={() => setPhoneScreen('form')} style={{ background:teal, color:'#fff', border:'none', borderRadius:50, padding:'9px 0', fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', width:'100%' }}>Réclamer mon gain →</button>
-                </div>
-              )}
-
-              {/* Screen form */}
-              {phoneScreen === 'form' && (
-                <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', padding:'20px 12px', paddingTop:22, overflowY:'auto' }}>
-                  <div style={{ fontSize:12, fontWeight:800, color:'#fff', marginBottom:2 }}>Mes coordonnées</div>
-                  <div style={{ fontSize:9, color:'rgba(255,255,255,.4)', marginBottom:12 }}>Lot : {phoneLot}</div>
-                  {[['Prénom *','Camille'],['Nom *','Dupont']].map(([lbl,ph]) => (
-                    <div key={lbl} style={{ marginBottom:6 }}>
-                      <div style={{ fontSize:8, fontWeight:700, textTransform:'uppercase' as const, color:'rgba(255,255,255,.35)', marginBottom:3 }}>{lbl}</div>
-                      <input style={{ width:'100%', padding:'6px 8px', border:'1px solid rgba(255,255,255,.15)', borderRadius:7, color:'#fff', fontSize:10, background:'rgba(255,255,255,.06)', fontFamily:'inherit', outline:'none' }} placeholder={ph} />
-                    </div>
-                  ))}
-                  {[['Email *','nom@exemple.fr'],['Tél *','06 XX XX XX XX']].map(([lbl,ph]) => (
-                    <div key={lbl} style={{ marginBottom:6 }}>
-                      <div style={{ fontSize:8, fontWeight:700, textTransform:'uppercase' as const, color:'rgba(255,255,255,.35)', marginBottom:3 }}>{lbl}</div>
-                      <input style={{ width:'100%', padding:'6px 8px', border:'1px solid rgba(255,255,255,.15)', borderRadius:7, color:'#fff', fontSize:10, background:'rgba(255,255,255,.06)', fontFamily:'inherit', outline:'none' }} placeholder={ph} />
-                    </div>
-                  ))}
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:10 }}>
-                    {[['Âge','26–35'],['CP','06140']].map(([lbl,ph]) => (
-                      <div key={lbl}>
-                        <div style={{ fontSize:8, fontWeight:700, textTransform:'uppercase' as const, color:'rgba(255,255,255,.35)', marginBottom:3 }}>{lbl}</div>
-                        <input style={{ width:'100%', padding:'6px 8px', border:'1px solid rgba(255,255,255,.15)', borderRadius:7, color:'#fff', fontSize:10, background:'rgba(255,255,255,.06)', fontFamily:'inherit', outline:'none' }} placeholder={ph} />
-                      </div>
-                    ))}
-                  </div>
-                  <button onClick={() => setPhoneScreen('ticket')} style={{ background:teal, color:'#fff', border:'none', borderRadius:50, padding:9, fontSize:11, fontWeight:700, cursor:'pointer', fontFamily:'inherit', width:'100%' }}>✓ Valider →</button>
-                </div>
-              )}
-
-              {/* Screen ticket */}
-              {phoneScreen === 'ticket' && (
-                <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:16 }}>
-                  <i className="ti ti-check" style={{ fontSize:36, color:teal, marginBottom:8 }} aria-hidden="true" />
-                  <div style={{ fontSize:14, fontWeight:800, color:'#fff', marginBottom:14 }}>Inscription confirmée !</div>
-                  <div style={{ background:'rgba(255,255,255,.06)', border:'1.5px solid rgba(255,255,255,.12)', borderRadius:12, padding:14, width:'100%', borderTop:`3px solid ${teal}` }}>
-                    <i className="ti ti-ticket" style={{ fontSize:22, color:teal, marginBottom:5, display:'block' }} aria-hidden="true" />
-                    <div style={{ fontSize:18, fontWeight:900, color:teal, letterSpacing:'.08em', fontFamily:'monospace' }}>SP-2026-4872</div>
-                    <div style={{ fontSize:9, color:'rgba(255,255,255,.3)', marginTop:3 }}>Votre ticket de participation</div>
-                  </div>
-                  <button onClick={() => { setPhoneScreen('landing'); angleRef.current=0; drawWheel(0) }} style={{ background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.1)', color:'rgba(255,255,255,.45)', borderRadius:50, padding:'7px 14px', fontSize:10, fontWeight:600, cursor:'pointer', fontFamily:'inherit', marginTop:12 }}>Recommencer</button>
-                </div>
-              )}
+            <div style={{ width:260, height:540, borderRadius:32, background:'#0F172A', border:'10px solid #1a1a2e', overflow:'hidden', position:'relative', boxShadow:'0 24px 70px rgba(0,0,0,.55)', flexShrink:0 }}>
+              <iframe src={DEMO_URL} title="Démo Flowin" style={{ width:'100%', height:'100%', border:'none', display:'block' }} />
             </div>
           </div>
         </div>
