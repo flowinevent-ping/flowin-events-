@@ -42,9 +42,9 @@ const BESOINS = [
     desc:'Avoir du trafic, c\'est bien. Transformer chaque passage en futur client — c\'est ce qui fait la différence. Flowin capte les contacts qualifiés directement sur le terrain.',
     features:['6 mécaniques d\'engagement','Formulaire CRM intégré (email, tél, âge, ville)','94% d\'opt-in moyen','Export CSV immédiat'],
     metric:'186 contacts en 3 jours · Ville de Vence' },
-  { id:'convertir', verb:'Convertissez', icon:'ti-bolt', couleur:'#3B5CC4',
-    tagline:'Le jeu est votre levier de conversion physique',
-    desc:'La mécanique de jeu est votre outil de conversion terrain. En 30 secondes, un inconnu s\'identifie et entre dans votre base. Vous ne laissez plus repartir personne sans contact.',
+  { id:'convertir', verb:'Dynamisez', icon:'ti-bolt', couleur:'#3B5CC4',
+    tagline:'Le jeu est votre levier d\'animation physique',
+    desc:'La mécanique de jeu est votre outil d\'animation terrain. En 30 secondes, un inconnu s\'identifie et entre dans votre base. Vous ne laissez plus repartir personne sans contact.',
     features:['Parcours joueur en 30 secondes','Anti-doublon & RGPD intégrés','Ticket de participation automatique','Dashboard temps réel'],
     metric:'Bien travailler sa base coûte 5 à 7× moins cher' },
   { id:'fideliser', verb:'Fidélisez', icon:'ti-repeat', couleur:'#1D9E75',
@@ -335,7 +335,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
           <div className="hero-baseline">
             <span className="baseline-verb" style={{ color:'#D85A30' }}>Captez</span>
             <span className="baseline-sep">·</span>
-            <span className="baseline-verb" style={{ color:'#3B5CC4' }}>Convertissez</span>
+            <span className="baseline-verb" style={{ color:'#3B5CC4' }}>Dynamisez</span>
             <span className="baseline-sep">·</span>
             <span className="baseline-verb" style={{ color:'#1D9E75' }}>Fidélisez</span>
           </div>
@@ -608,7 +608,7 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         <div className="accomp-inner">
           <div style={{ textAlign:'center' }}>
             <div className="section-eyebrow">L&apos;accompagnement</div>
-            <div className="section-title">Un chef de projet à chaque déploiement</div>
+            <div className="section-title">Un chef de projet dédié à votre compte</div>
             <div className="section-sub">Vous ne configurez pas seul. Flowin vous accompagne de la conception au live.</div>
           </div>
           <div className="accomp-card">
