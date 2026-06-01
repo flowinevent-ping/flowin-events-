@@ -365,8 +365,8 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
                 <div style={{ fontSize:19,fontWeight:900,color:'#fff' }}>{resultSeg&&!resultSeg.perdant?resultSeg.label:'Lot offert'}</div>
               </div>
               <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
-              <button className="btn" style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'12px 0',width:'80%',fontWeight:900,letterSpacing:1,color:'#fff' }} onClick={()=>{ setScreen('landing'); setResultSeg(null); setAngle(0) }}>▶ PLAY AGAIN</button>
-              <button className="btn-ghost" style={{ display:'block',width:'80%',margin:'10px auto 0',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'rgba(255,255,255,.7)',cursor:'pointer' }} onClick={()=>{ setScreen('landing'); setResultSeg(null); setAngle(0) }}>← Retour à l'accueil</button>
+              <a href="tel:0616354936" className="btn" style={{ display:'block',textDecoration:'none',background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'13px 0',width:'82%',margin:'0 auto',fontWeight:900,letterSpacing:1,color:'#fff' }}>📞 Contactez-nous</a>
+              <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'10px auto 0',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'rgba(255,255,255,.7)',cursor:'pointer' }} onClick={()=>{ setScreen('landing') }}>← Retour à l'accueil</button>
               {tirageText && (
                 <div style={{ fontSize:11,color:'rgba(255,255,255,.45)',marginTop:12,display:'flex',alignItems:'center',justifyContent:'center',gap:5 }}>
                   <i className="ti ti-calendar" style={{ fontSize:12 }} aria-hidden="true" />{tirageText}
