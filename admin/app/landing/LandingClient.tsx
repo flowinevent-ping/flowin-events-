@@ -226,34 +226,25 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
   const [tab, setTab]   = useState<'reponse'|'benefice'>('reponse')
   const [form, setForm] = useState({ prenom:'', email:'', tel:'', secteur:'' })
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted]   = useState(false)
-  const [err, setErr]               = useState('')
 
-  async function handleSubmit() {
-    setErr('')
-    if (!form.prenom.trim() || !form.email.includes('@')) {
-      setErr('Renseignez au moins votre prénom et un email valide.')
-      return
+  // Bouton identique au hero : on enregistre le contact si renseigné (best-effort) puis on lance le jeu
+  async function handlePlay() {
+    if (form.prenom.trim() && form.email.includes('@')) {
+      setSubmitting(true)
+      try {
+        const today = new Date().toISOString().slice(0,10)
+        const emailLower = form.email.toLowerCase().trim()
+        await supabase.from('joueurs').upsert({
+          external_id: `j-cta-${emailLower.replace(/[^a-z0-9]/g,'-').substring(0,36)}`,
+          email: emailLower, prenom: form.prenom.trim(), tel: form.tel.trim() || null,
+          tags: ['btob','cta', form.secteur].filter(Boolean),
+          optin: true, optin_date: today, first_seen: today, last_seen: today,
+          source: source === 'qr' ? 'landing_qr' : 'landing_cta',
+          client_type: 'btob', enseigne: form.secteur || null,
+        }, { onConflict: 'external_id' })
+      } catch { /* best-effort */ }
     }
-    setSubmitting(true)
-    try {
-      const today = new Date().toISOString().slice(0,10)
-      const emailLower = form.email.toLowerCase().trim()
-      const { error } = await supabase.from('joueurs').upsert({
-        external_id: `j-cta-${emailLower.replace(/[^a-z0-9]/g,'-').substring(0,36)}`,
-        email: emailLower, prenom: form.prenom.trim(), tel: form.tel.trim() || null,
-        tags: ['btob','cta', form.secteur].filter(Boolean),
-        optin: true, optin_date: today, first_seen: today, last_seen: today,
-        source: source === 'qr' ? 'landing_qr' : 'landing_cta',
-        client_type: 'btob', enseigne: form.secteur || null,
-      }, { onConflict: 'external_id' })
-      setSubmitting(false)
-      if (error) { setErr('Une erreur est survenue, réessayez dans un instant.'); return }
-      setSubmitted(true)
-    } catch {
-      setSubmitting(false)
-      setErr('Une erreur est survenue, réessayez dans un instant.')
-    }
+    window.location.href = '/parcours/spin?ev=ev-flowin-demo'
   }
 
   const p = PROFILS[sel]
@@ -459,39 +450,33 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       {/* CTA FINAL */}
       <section className="ctafinal" id="cta">
         <div className="wrap">
-          <h2>Gagnez votre premier event</h2>
+          <h2>Contactez-nous</h2>
           <div style={{ color:'rgba(255,255,255,.6)', fontSize:15 }}>Aucune CB requise · Rappel sous 24h · Sans engagement</div>
-          {submitted ? (
-            <div className="thanks">
-              <h3>Merci {form.prenom} !</h3>
-              <p>Votre demande est enregistrée. On vous rappelle sous 24h.</p>
-            </div>
-          ) : (
-            <>
-              <div className="ctaform">
-                <input placeholder="Votre prénom" value={form.prenom} onChange={e => setForm({ ...form, prenom:e.target.value })} />
-                <input type="email" placeholder="Email professionnel" value={form.email} onChange={e => setForm({ ...form, email:e.target.value })} />
-                <input type="tel" placeholder="Téléphone" value={form.tel} onChange={e => setForm({ ...form, tel:e.target.value })} />
-                <select value={form.secteur} onChange={e => setForm({ ...form, secteur:e.target.value })}>
-                  <option value="">Secteur d&apos;activité…</option>
-                  <option>Commerce &amp; Négoce</option>
-                  <option>Restaurateur</option>
-                  <option>Association / Événementiel</option>
-                  <option>Municipalité / Office de tourisme</option>
-                </select>
-                <button className="cta" style={{ justifyContent:'center', marginTop:6 }} onClick={handleSubmit} disabled={submitting}>
-                  {submitting ? 'Envoi…' : 'Gagner mon premier event →'}
-                </button>
-                {err && <div style={{ color:'#FCA5A5', fontSize:13, marginTop:2 }}>{err}</div>}
-              </div>
-              <div className="ctaor">— ou contactez-nous directement —</div>
-              <div className="ctacall">
-                <a className="callbtn" href="tel:+33616354936"><Ic n="phone" /> Appelez-nous</a>
-                <a className="wabtn" href="https://wa.me/33616354936" target="_blank" rel="noopener"><Ic n="brand-whatsapp" /> WhatsApp</a>
-              </div>
-              <div className="note">Données jamais cédées à des tiers · RGPD</div>
-            </>
-          )}
+          <div className="ctaform">
+            <input placeholder="Votre prénom" value={form.prenom} onChange={e => setForm({ ...form, prenom:e.target.value })} />
+            <input type="email" placeholder="Email professionnel" value={form.email} onChange={e => setForm({ ...form, email:e.target.value })} />
+            <input type="tel" placeholder="Téléphone" value={form.tel} onChange={e => setForm({ ...form, tel:e.target.value })} />
+            <select value={form.secteur} onChange={e => setForm({ ...form, secteur:e.target.value })}>
+              <option value="">Secteur d&apos;activité…</option>
+              <option>Commerce &amp; Négoce</option>
+              <option>Point de vente indépendant</option>
+              <option>Restaurateur</option>
+              <option>Association / Événementiel</option>
+              <option>Municipalité / Office de tourisme</option>
+              <option>Centre commercial</option>
+              <option>Entreprise / RH</option>
+              <option>Organisateur de salon</option>
+            </select>
+            <button className="cta" style={{ justifyContent:'center', marginTop:6 }} onClick={handlePlay} disabled={submitting}>
+              {submitting ? 'Un instant…' : 'Jouer et gagner mon premier event →'}
+            </button>
+          </div>
+          <div className="ctaor">— ou contactez-nous directement —</div>
+          <div className="ctacall">
+            <a className="callbtn" href="tel:+33616354936"><Ic n="phone" /> Appelez-nous</a>
+            <a className="wabtn" href="https://wa.me/33616354936" target="_blank" rel="noopener"><Ic n="brand-whatsapp" /> WhatsApp</a>
+          </div>
+          <div className="note">Données jamais cédées à des tiers · RGPD</div>
         </div>
       </section>
     </div>
