@@ -1,359 +1,275 @@
 'use client'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
-interface Metric { val: string; lbl: string; c: string }
-interface Profil {
-  id: string; ico: string; lbl: string; couleur: string
-  before: string; how: string; after: string; metrics: Metric[]
+/* ── Icônes SVG inline (sans CDN, robustes iOS/Android) ── */
+const TIP: Record<string, string> = {
+'help-circle':'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a2.9 2.9 0 0 1 5.6 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12" y2="17.01"/>',
+'target-arrow':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+'bolt':'<path d="M13 3 4 14h7l-1 7 9-11h-7z"/>',
+'heart-handshake':'<path d="M12 20 4.8 12.8a4 4 0 0 1 6-5.2 4 4 0 0 1 6 5.2z"/><path d="M12 8.5 10.6 10a1.4 1.4 0 0 0 2 2"/>',
+'device-gamepad-2':'<path d="M7 8h10a4 4 0 0 1 4 4 4 4 0 0 1-7 2.6l-.5-.6h-3l-.5.6A4 4 0 0 1 3 12a4 4 0 0 1 4-4z"/><line x1="7" y1="12" x2="9" y2="12"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="15" y1="11" x2="15.01" y2="11"/><line x1="17" y1="13" x2="17.01" y2="13"/>',
+'steering-wheel':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><line x1="12" y1="14.4" x2="12" y2="21"/><line x1="9.9" y1="11" x2="3.6" y2="9"/><line x1="14.1" y1="11" x2="20.4" y2="9"/>',
+'users-group':'<circle cx="9" cy="9" r="2.8"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="10" r="2.3"/><path d="M16.5 14.6a4.6 4.6 0 0 1 4 4.4"/>',
+'user-check':'<circle cx="9" cy="8" r="3.4"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="m16 11 2 2 4-4"/>',
+'phone':'<path d="M5 4h3l2 5-2.4 1.4a11 11 0 0 0 5 5L14 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+'brand-whatsapp':'<path d="M3 21l1.7-4.1A8 8 0 1 1 8 19.4z"/><path d="M9 9.4c0 3.8 2.9 5.8 5.3 5.8.8 0 1.4-.5 1.4-1.1 0-.3-1.6-1.2-1.9-1.2s-.6.6-1 .6-1.7-1-2.1-2.1c0-.3.7-.6.7-1s-1-1.9-1.2-1.9-1.2.3-1.2 1z"/>',
+'tools-kitchen-2':'<path d="M5 3v6a2 2 0 0 0 4 0V3"/><line x1="7" y1="9" x2="7" y2="21"/><path d="M16 3c-1.6 0-2.8 2-2.8 4.4S14.4 12 16 12s2.8-2.2 2.8-4.6S17.6 3 16 3z"/><line x1="16" y1="12" x2="16" y2="21"/>',
+'calendar-event':'<rect x="4" y="5" width="16" height="16" rx="2"/><line x1="4" y1="9.5" x2="20" y2="9.5"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="16" y1="3" x2="16" y2="6"/><rect x="8" y="13" width="3.5" height="3.5" rx=".5"/>',
+'building-store':'<path d="M4 9h16l-1.2-4.2a1 1 0 0 0-1-.8H6.2a1 1 0 0 0-1 .8z"/><path d="M5 9v1a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 4 0V9"/><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/><path d="M9 20v-4h4v4"/>',
+'building-community':'<path d="M3 21h18"/><path d="M5 21V7l6-3 6 3v14"/><line x1="9" y1="9" x2="9" y2="9.01"/><line x1="13" y1="9" x2="13" y2="9.01"/><line x1="9" y1="13" x2="9" y2="13.01"/><line x1="13" y1="13" x2="13" y2="13.01"/><path d="M9 21v-4h4v4"/>',
+'building-bank':'<line x1="3" y1="21" x2="21" y2="21"/><path d="M3 10 12 4l9 6"/><line x1="5" y1="10" x2="5" y2="21"/><line x1="9" y1="10" x2="9" y2="21"/><line x1="15" y1="10" x2="15" y2="21"/><line x1="19" y1="10" x2="19" y2="21"/>',
+'rotate-clockwise':'<path d="M19.9 13A8 8 0 1 1 18 7"/><path d="M18 3v4h-4"/>',
+'ticket':'<path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><line x1="13" y1="6" x2="13" y2="18" stroke-dasharray="2 2"/>',
+'thumb-up':'<path d="M7 11v8H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1z"/><path d="M7 11l4-7a2 2 0 0 1 2 2v3h4.5a2 2 0 0 1 2 2.3l-1 5a2 2 0 0 1-2 1.7H7"/>',
+'user':'<circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+'award':'<circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21 12 18.5 16.5 21 15 13.5"/>',
+'world':'<circle cx="12" cy="12" r="9"/><line x1="3.5" y1="9" x2="20.5" y2="9"/><line x1="3.5" y1="15" x2="20.5" y2="15"/><path d="M11.5 3a16 16 0 0 0 0 18M12.5 3a16 16 0 0 1 0 18"/>',
+'brand-instagram':'<rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.2"/><line x1="16.6" y1="7.4" x2="16.6" y2="7.41"/>',
+'brand-facebook':'<path d="M13 22v-8h2.6l.4-3H13V9.1c0-.9.3-1.5 1.7-1.5H16V5.1A22 22 0 0 0 13.6 5C11.4 5 10 6.3 10 8.8V11H7.5v3H10v8z"/>',
+'trending-up':'<path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/>',
 }
-interface Module { id: string; ico: string; nom: string; tagline: string; couleur: string; features: string[] }
-interface PricingTier {
-  id: string; nom: string; prix: string; unite: string | null; badge: string | null
-  highlight: boolean; features: string[]; cta: string
+function svg(n: string) {
+  return '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">' + (TIP[n] || '') + '</svg>'
 }
-interface LandingCfg {
-  id: string; nom: string; accent_color: string
-  hero: { questions: string[]; answer: string; cta: string }
-  proof: { stat1: string; stat1Lbl: string; stat2: string; stat2Lbl: string; stat3: string; stat3Lbl: string; quote: string; quoteAuthor: string }
-  profils: Profil[]
-  modules: Module[]
-  pricing: PricingTier[]
-  cta_section: { title: string; subtitle: string; formPlaceholderNom: string; formPlaceholderEmail: string; formPlaceholderTel: string; ctaSubmit: string; successTitle: string; successText: string }
+function Ic({ n }: { n: string }) {
+  return <span style={{ display:'inline-flex', alignItems:'center', justifyContent:'center' }} dangerouslySetInnerHTML={{ __html: svg(n) }} />
 }
 
-const COLORS: Record<string, string> = { teal:'#00B4A0', orange:'#F97316', navy:'#1B3A5C', purple:'#A855F7', yellow:'#F59E0B' }
-const DEMO_URL = 'https://flowin-events.vercel.app/parcours/spin?ev=ev-flowin-demo'
-
-const SPIN_SEGS = [
-  { color:'#3B5CC4', label:'Mon 1er event offert', perdant:false },
-  { color:'#00B4A0', label:'Accès démo complet',   perdant:false },
-  { color:'#A855F7', label:'1 mois gratuit',        perdant:false },
-  { color:'#4A5568', label:'Retentez !',             perdant:true  },
-  { color:'#1D3461', label:'Mon 1er event offert',  perdant:false },
-  { color:'#F59E0B', label:'Onboarding offert',     perdant:false },
+/* ── Données (reprises du prototype validé) ── */
+interface Profil { ico:string; lbl:string; col:string; scenario:string; reponse:string; benefice:string }
+const PROFILS: Profil[] = [
+ { ico:'tools-kitchen-2', lbl:'Restaurateur', col:'#D62828',
+   scenario:"Et si on créait une base client qui vous permettrait d'augmenter votre fréquentation ?",
+   reponse:"Captez les clients qui passent sans laisser de trace, puis réactivez cette base quand vous en avez besoin : heures creuses, soirée à thème, nouveau menu, promo…",
+   benefice:"Vous ne subissez plus les creux : vous les remplissez avec vos propres clients, sans racheter de la pub à chaque fois." },
+ { ico:'calendar-event', lbl:"Créateur d'events", col:'#7B2FBE',
+   scenario:"Et si vous pouviez recontacter directement ceux et celles qui sont venus ? Et si vous mesuriez votre trafic avec plus de précision — pour avoir de meilleurs partenaires ?",
+   reponse:"Chaque participant entre dans une base qui vous appartient. Vous la réactivez d'un event à l'autre et vous savez précisément qui est venu, d'où, et combien.",
+   benefice:"Vous ne repartez jamais de zéro et vous négociez vos partenariats avec des chiffres réels, pas des estimations." },
+ { ico:'building-store', lbl:'Commerce', col:'#E85D04',
+   scenario:"Faites de chaque fête une occasion d'acquérir du monde, boostez votre clientèle.",
+   reponse:"Le flux que vous voyez passer sans le capter — faute de temps ou d'outil — devient une base à vous, réactivable à chaque temps fort, seul ou avec les commerces de votre rue.",
+   benefice:"Une clientèle que vous possédez et relancez à volonté, au lieu de la voir repartir chez le voisin." },
+ { ico:'building-community', lbl:'Association', col:'#3B5CC4',
+   scenario:"Recensez vos actions, faites participer, sensibilisez, créez de l'engagement, gardez le contact, donnez de la visibilité à vos partenaires / mécènes.",
+   reponse:"Le jeu capte vos participants et vos données d'engagement. Vous les valorisez au service de votre cause et vous animez votre communauté dans la durée.",
+   benefice:"Un engagement mesurable, des rapports prêts pour vos mécènes, une communauté qui reste mobilisée entre deux actions." },
+ { ico:'building-bank', lbl:'Institution', col:'#0B6E4F',
+   scenario:"Donnez de l'attractivité, augmentez la visibilité et le trafic, mesurez l'impact et les retombées en temps réel.",
+   reponse:"Le flux de visiteurs, aujourd'hui invisible, devient une donnée exploitable : d'où ils viennent, qui ils sont, quand ils passent — au service de votre territoire.",
+   benefice:"Des retombées chiffrées en temps réel à présenter à vos élus et partenaires, sans étude coûteuse." },
 ]
-
-type PhoneScreen = 'landing'|'spin'|'result'|'form'|'ticket'
-
-const BESOINS = [
-  { id:'capter', verb:'Captez', icon:'ti-crosshair', couleur:'#D85A30',
-    tagline:'Construisez votre base là où vous êtes',
-    desc:'Avoir du trafic, c\'est bien. Transformer chaque passage en futur client — c\'est ce qui fait la différence. Flowin capte les contacts qualifiés directement sur le terrain.',
-    features:['6 mécaniques d\'engagement','Formulaire CRM intégré (email, tél, âge, ville)','94% d\'opt-in moyen','Export CSV immédiat'],
-    metric:'186 contacts en 3 jours · Ville de Vence' },
-  { id:'convertir', verb:'Dynamisez', icon:'ti-bolt', couleur:'#3B5CC4',
-    tagline:'Le jeu est votre levier d\'animation physique',
-    desc:'La mécanique de jeu est votre outil d\'animation terrain. En 30 secondes, un inconnu s\'identifie et entre dans votre base. Vous ne laissez plus repartir personne sans contact.',
-    features:['Parcours joueur en 30 secondes','Anti-doublon & RGPD intégrés','Ticket de participation automatique','Dashboard temps réel'],
-    metric:'Bien travailler sa base coûte 5 à 7× moins cher' },
-  { id:'fideliser', verb:'Fidélisez', icon:'ti-repeat', couleur:'#1D9E75',
-    tagline:'Faites revenir ceux que vous avez captés',
-    desc:'La tombola récurrente, le quiz de saison, le super event annuel — Flowin crée le prétexte de revenir. Votre base capturée devient un actif durable.',
-    features:['Events récurrents configurables','Super events multi-sites','Tirage au sort transparent','Analyse post-event'],
-    metric:'De l\'événement ponctuel à la relation durable' },
+interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
+const MODULES: Module[] = [
+ { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Premier contact CRM', f:['Segments personnalisables','Parcours mobile-first','Capture CRM en 30s'] },
+ { ico:'help-circle', nom:'Quiz événement', col:'#A855F7', tag:'Qualifiez en engageant', f:['Banques par thème','Score animé','Ticket de tirage auto'] },
+ { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'Tirage transparent', f:['Lots avec stocks','Tirage vérifiable','Export CSV gagnants'] },
+ { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La foule en temps réel', f:['Résultats instantanés','Multi-choix','Historique des votes'] },
+ { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:'Capture autonome', f:['Parcours libre','Score personnel','Ticket de participation'] },
+ { ico:'award', nom:'Quiz master', col:'#F97316', tag:'Engagement compétitif', f:['Classement temps réel','Questions simultanées','Ambiance tournoi'] },
 ]
+interface Tier { nom:string; prix:string; unite:string; badge:string|null; hl:boolean; f:string[] }
+const PRICING: Tier[] = [
+ { nom:'Votre campagne', prix:'189', unite:'/ event · HT', badge:null, hl:false, f:["Jusqu'à 1 000 participants","Tous les modules","Visuel co-brandé","Data stockée","Dashboard Pro temps réel","Export CSV","Chef de projet dédié"] },
+ { nom:'Abonnement', prix:'289', unite:'/ mois', badge:'Recommandé', hl:true, f:["Jusqu'à 3 000 participants / event","Events illimités","Dashboard multi-events","Super events + tirage global","Rapports analytiques","Chef de projet dédié"] },
+ { nom:'Sur mesure', prix:'Devis', unite:'', badge:null, hl:false, f:["Gros volumes","Stratégie & dev","Campagne sur fichier client","Customisation","Rapports analytiques","Super-events sponsorisés","Chef de projet dédié"] },
+]
+interface Step { verbe:string; ico:string; txt:string; col:string }
+interface Proc { desc:string; steps:Step[] }
+const PROCESS: Proc[] = [
+ { desc:"Vous partez de zéro ou presque : captez le flux qui passe et construisez une base de contacts qui vous appartient.", steps:[
+   { verbe:'Capter', ico:'target-arrow', txt:"Chaque visiteur — salon, marché, event — entre dans votre base en moins de 30 secondes !", col:'#E85D04' },
+   { verbe:'Dynamiser', ico:'bolt', txt:"Créons de l'intérêt : par la participation, nous créons l'engagement !", col:'#3B5CC4' },
+   { verbe:'Fidéliser', ico:'heart-handshake', txt:"Une base qui vous appartient, réexploitable à tout moment — des visiteurs et clients qui vous correspondent, avec leur consentement.", col:'#00B4A0' },
+ ] },
+ { desc:"Vous avez déjà des contacts, mais ils dorment : exploitez ce fichier et transformez-le en clients actifs à chaque temps fort.", steps:[
+   { verbe:'Exploiter', ico:'rotate-clockwise', txt:"Réactivez vos clients et prospects dormants.", col:'#7B2FBE' },
+   { verbe:'Dynamiser', ico:'bolt', txt:"Créez de l'engagement, gamifiez, créez de l'intérêt.", col:'#3B5CC4' },
+   { verbe:'Transformer', ico:'trending-up', txt:"À vous de jouer ! Augmentez vos ventes, votre fréquentation, vos visites…", col:'#00B4A0' },
+ ] },
+]
+const G_AGE = 'linear-gradient(90deg,#A855F7,#3B5CC4)'
+const G_GEO = 'linear-gradient(90deg,#00B4A0,#3B5CC4)'
+const G_CONNU = 'linear-gradient(90deg,#3B5CC4,#00B4A0)'
+const AGE: [string,number,number][] = [['36-50 ans',81,100],['51-65 ans',37,46],['26-35 ans',28,35],['65 ans et +',20,25],['18-25 ans',15,19],['Moins de 18',11,14]]
+const GENRE: [string,number,number,string][] = [['Femmes',61,61,'#00B4A0'],['Hommes',39,39,'#3B5CC4']]
+const GEO: [string,number,number][] = [['06140',74,100],['06610',24,33],['06800',23,31],['06700',22,30],['06000',22,30],['06130',18,24]]
+const RETOUR: [string,number,number,string][] = [['Oui',66,66,'#22C55E'],['Peut-être',3,3,'#F59E0B'],['Non',1,1,'#EF4444']]
+const CONNU: [string,number][] = [['Affiche / Flyer',42],['Mairie',13],['Site internet',17],['Instagram',15],['Facebook',13]]
+const REDIR: [string,string,number,string][] = [['Site internet','world',38,'#'],['Instagram','brand-instagram',31,'#'],['Facebook','brand-facebook',24,'#']]
 
-export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCfg | null; source: string }) {
-  const cfg = cfgProp!
-  const hero    = cfg?.hero
-  const proof   = cfg?.proof
-  const profils = cfg?.profils ?? []
-  const modules = cfg?.modules ?? []
-  const pricing = cfg?.pricing ?? []
-  const cta     = cfg?.cta_section
-  const teal = '#00B4A0'; const navy = '#1B3A5C'
+function Bar({ lbl, n, w, col }: { lbl:string; n:string|number; w:number; col:string }) {
+  return (
+    <div className="bar">
+      <span className="bl">{lbl}</span>
+      <span className="bt"><span className="bf" style={{ width:w+'%', background:col }} /></span>
+      <span className="bn">{n}</span>
+    </div>
+  )
+}
 
-  const [qIdx, setQIdx]           = useState(0)
-  const [qVisible, setQVisible]   = useState(true)
-  const [selProf, setSelProf]     = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'before'|'how'|'after'>('before')
-  const [form, setForm]           = useState({ nom:'', email:'', tel:'' })
-  const [submitted, setSubmitted] = useState(false)
+const CSS = `
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#F4F6F9;color:#1B3A5C;overflow-x:hidden;-webkit-text-size-adjust:100%}
+  .lp-root{-webkit-tap-highlight-color:transparent}
+  .wrap{max-width:1100px;margin:0 auto}
+  .sec{padding:70px 24px}
+  .sec-dark{background:#0E1B30;color:#fff}
+  .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#00B4A0;text-align:center;margin-bottom:12px}
+  .title{font-size:clamp(22px,4vw,32px);font-weight:800;text-align:center;line-height:1.25}
+  .sub{font-size:14px;color:rgba(120,130,150,.9);text-align:center;margin-top:8px}
+  .sec-dark .sub{color:rgba(255,255,255,.55)}
+  .pico{width:20px;height:20px;flex-shrink:0;color:#00B4A0}
+  .hero{background:linear-gradient(160deg,#13314f 0%,#0E2742 55%,#0A1C32 100%);color:#fff;text-align:center;padding:90px 24px 80px}
+  .logo{font-size:clamp(40px,8vw,64px);font-weight:900;letter-spacing:-.02em}
+  .logo em{color:#A855F7;font-style:normal}
+  .promise{font-size:clamp(24px,4vw,40px);font-weight:900;line-height:1.15;margin:18px auto 16px;max-width:760px}
+  .baseline{font-size:clamp(17px,2.5vw,22px);font-weight:900;margin-bottom:10px}
+  .baseline .c1{color:#F97316}.baseline .c2{color:#3B5CC4}.baseline .c3{color:#00B4A0}
+  .ans{color:rgba(255,255,255,.6);font-size:15px;margin-bottom:26px}
+  .hstats{display:flex;gap:26px;justify-content:center;margin:24px 0 26px;flex-wrap:wrap}
+  .hstat .v{font-size:clamp(26px,4vw,36px);font-weight:900;color:#00B4A0}
+  .hstat .l{font-size:12px;color:rgba(255,255,255,.55)}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:#00B4A0;color:#fff;border:none;border-radius:100px;padding:16px 36px;font-size:16px;font-weight:800;cursor:pointer;text-decoration:none}
+  .prob{display:grid;gap:10px;max-width:680px;margin:28px auto 0}
+  .prob .q{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;font-size:15px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  .bcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:26px 22px;text-align:center;box-shadow:0 8px 30px rgba(20,40,80,.05)}
+  .bcard .ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px}
+  .bcard h3{font-size:18px;margin-bottom:8px}.bcard p{font-size:13px;color:#5a6b80;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:30px 0}
+  .chip{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:18px 14px;width:150px;text-align:center;cursor:pointer;transition:.15s}
+  .chip.on{border-color:#00B4A0;box-shadow:0 0 0 3px rgba(0,180,160,.12)}
+  .chip .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:22px}
+  .chip .nm{font-size:13px;font-weight:800;line-height:1.2}
+  .pdetail{background:#fff;border-radius:18px;padding:28px;max-width:920px;margin:0 auto;box-shadow:0 12px 40px rgba(20,40,80,.06)}
+  .ptabs{display:flex;gap:8px;margin:14px 0 18px}
+  .ptab{border:1px solid rgba(0,0,0,.1);background:#fff;border-radius:100px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;color:#1B3A5C}
+  .ptab.on{background:#00B4A0;color:#fff;border-color:#00B4A0}
+  .ptext{font-size:16px;font-style:italic;color:#3a4d63;line-height:1.6;min-height:54px}
+  .axcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px}
+  .pcardp{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:20px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,.04);text-align:left}
+  .proc-sel{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:6px 0 26px}
+  .proc-btn{border:1.5px solid rgba(0,0,0,.12);background:#fff;border-radius:100px;padding:14px 26px;font-size:15px;font-weight:800;cursor:pointer;color:#1B3A5C;transition:all .15s}
+  .proc-btn.on{background:#1B3A5C;color:#fff;border-color:#1B3A5C}
+  .proc-view{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:20px;padding:34px 28px;box-shadow:0 4px 20px rgba(0,0,0,.04);max-width:880px;margin:0 auto}
+  .proc-desc{font-size:16px;color:#3a4d63;line-height:1.6;margin-bottom:24px;text-align:center}
+  .proc-steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:6px}
+  @media(max-width:720px){.proc-steps{grid-template-columns:1fr}}
+  .pstep{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+  .pstep .pico{width:50px;height:50px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:25px}
+  .pstep .pverb{font-size:18px;font-weight:800}
+  .pstep .ptxt{font-size:14px;color:#5B7085;line-height:1.55}
+  .proof{display:flex;gap:50px;justify-content:center;margin:10px 0 24px;flex-wrap:wrap}
+  .proof .v{font-size:clamp(40px,7vw,64px);font-weight:900}
+  .proof .l{font-size:13px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;text-align:center}
+  .quote{font-size:18px;font-style:italic;color:rgba(255,255,255,.9);text-align:center;max-width:700px;margin:0 auto}
+  .grid3m{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  .mcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:22px}
+  .mcard .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px}
+  .mcard h3{font-size:16px;margin-bottom:4px}.mcard .tag{font-size:12px;color:#00B4A0;font-weight:700;margin-bottom:10px}
+  .mcard li{font-size:12px;color:#5a6b80;padding:5px 0;border-top:1px solid rgba(0,0,0,.06);list-style:none;display:flex;gap:6px}
+  .mcard li::before{content:'✓';color:#00B4A0;font-weight:900}
+  .dash{background:linear-gradient(180deg,#0F1E36,#0A1424);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px;max-width:820px;margin:0 auto;text-align:left}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+  .kpi{background:rgba(255,255,255,.04);border-radius:12px;padding:14px;text-align:center}
+  .kpi .v{font-size:22px;font-weight:900}.kpi .l{font-size:11px;color:rgba(255,255,255,.55)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px}
+  .bar .bl{width:92px;color:rgba(255,255,255,.7);flex-shrink:0}
+  .bar .bt{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+  .bar .bf{display:block;height:100%;border-radius:100px}
+  .bar .bn{width:30px;text-align:right;font-weight:800}
+  .gam{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  .gcard{background:linear-gradient(180deg,rgba(16,31,56,.9),rgba(10,20,36,.9));border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:28px 22px;text-align:center}
+  .gcard .ic{font-size:40px;margin-bottom:12px;display:inline-flex}
+  .gcard h3{font-size:20px;font-weight:900;margin-bottom:12px}
+  .gcard .gi{font-size:13px;color:rgba(255,255,255,.6);padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}
+  .price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;max-width:920px;margin-left:auto;margin-right:auto}
+  .pcard{position:relative;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:18px;padding:28px 22px;text-align:center}
+  .pcard.hl{border:2px solid #00B4A0}
+  .pbadge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#00B4A0;color:#fff;font-size:11px;font-weight:800;padding:4px 14px;border-radius:100px;text-transform:uppercase}
+  .pcard .pn{font-size:13px;font-weight:800;text-transform:uppercase;color:#5a6b80}
+  .pcard .pp{font-size:32px;font-weight:900;margin:8px 0}.pcard .pu{font-size:13px;color:#5a6b80}
+  .pcard li{list-style:none;font-size:13px;color:#3a4d63;padding:6px 0;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:6px;text-align:left}
+  .pcard li::before{content:'✓';color:#00B4A0;font-weight:900}
+  .pm-line{text-align:center;margin-top:22px;font-size:14px;font-weight:700;color:#3a4d63;display:flex;align-items:center;justify-content:center;gap:8px}
+  .ctafinal{background:linear-gradient(160deg,#13314f,#0A1C32);color:#fff;text-align:center;padding:80px 24px}
+  .ctafinal h2{font-size:clamp(24px,4vw,34px);font-weight:900;margin-bottom:10px}
+  .ctaform{max-width:420px;margin:24px auto 0;display:grid;gap:10px}
+  .ctaform input,.ctaform select{padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-size:16px;font-family:inherit;width:100%}
+  .ctaform input::placeholder{color:rgba(255,255,255,.5)}
+  .ctaform select option{color:#1B3A5C}
+  .ctacall{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px auto 0;max-width:420px}
+  .ctacall a{flex:1;min-width:150px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:100px;padding:13px 22px;font-size:15px;font-weight:800;text-decoration:none}
+  .ctacall .callbtn{background:rgba(255,255,255,.10);color:#fff;border:1.5px solid rgba(255,255,255,.35)}
+  .ctacall .wabtn{background:#25D366;color:#0A1C32}
+  .ctaor{color:rgba(255,255,255,.5);font-size:13px;margin-top:14px}
+  .redirviz{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .redirviz .rv{flex:1;min-width:120px;max-width:210px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;text-decoration:none;transition:background .15s}
+  .redirviz .rv:hover{background:rgba(255,255,255,.12)}
+  .redirviz .rv-ic{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(0,180,160,.18);color:#00B4A0;font-size:20px}
+  .redirviz .rv-n{font-size:26px;font-weight:900;color:#00B4A0;line-height:1}
+  .redirviz .rv-l{font-size:13px;color:rgba(255,255,255,.7)}
+  .note{font-size:13px;color:rgba(255,255,255,.5);margin-top:14px}
+  .thanks{max-width:420px;margin:24px auto 0;background:rgba(0,180,160,.12);border:1px solid rgba(0,180,160,.4);border-radius:16px;padding:28px 22px}
+  .thanks h3{font-size:20px;font-weight:900;margin-bottom:6px}
+  .thanks p{font-size:14px;color:rgba(255,255,255,.75)}
+  @media(max-width:720px){.grid3,.grid3m,.gam,.price,.kpis,.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+`
+
+export default function LandingClient({ source = '' }: { cfg?: unknown; source?: string }) {
+  const [psel, setPsel] = useState(0)
+  const [sel, setSel]   = useState(0)
+  const [tab, setTab]   = useState<'reponse'|'benefice'>('reponse')
+  const [form, setForm] = useState({ prenom:'', email:'', tel:'', secteur:'' })
   const [submitting, setSubmitting] = useState(false)
-  const [counters, setCounters]   = useState({ c1:0, c2:0, c3:0 })
-  const [counted, setCounted]     = useState(false)
-
-  // Phone mockup
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
-  const frameRef   = useRef<number>(0)
-  const angleRef   = useRef<number>(0)
-  const [phoneScreen, setPhoneScreen] = useState<PhoneScreen>('landing')
-  const [phoneLot,    setPhoneLot]    = useState('')
-  const [phoneSpinning, setPhoneSpinning] = useState(false)
-
-  useEffect(() => {
-    if (!hero?.questions?.length) return
-    const iv = setInterval(() => {
-      setQVisible(false)
-      setTimeout(() => { setQIdx(i => (i+1) % hero.questions.length); setQVisible(true) }, 400)
-    }, 3400)
-    return () => clearInterval(iv)
-  }, [hero?.questions?.length])
-
-  useEffect(() => {
-    if (counted) return
-    const observer = new IntersectionObserver(entries => {
-      if (!entries[0].isIntersecting) return
-      setCounted(true)
-      const t1 = parseInt(proof?.stat1 ?? '186'), t2 = parseInt(proof?.stat2 ?? '3'), t3 = parseInt(proof?.stat3 ?? '94')
-      let n = 0
-      const iv = setInterval(() => {
-        n += 4
-        setCounters({ c1: Math.min(n*Math.round(t1/40), t1), c2: t2, c3: Math.min(Math.round(n*t3/40), t3) })
-        if (n >= 40) clearInterval(iv)
-      }, 30)
-      observer.disconnect()
-    }, { threshold: 0.3 })
-    const el = document.getElementById('s-proof')
-    if (el) observer.observe(el)
-    return () => observer.disconnect()
-  }, [counted, proof?.stat1, proof?.stat2, proof?.stat3])
-
-  useEffect(() => {
-    const SECS = ['s-hero','s-probleme','s-besoins','s-demo','s-profils','s-proof','s-modules','s-stats','s-gamme','s-accomp','s-pricing','s-cta']
-    let idx = 0
-    function onMsg(e: MessageEvent) {
-      if (!e.data?.flowinNav) return
-      if (e.data.flowinNav === 'next') idx = Math.min(idx+1, SECS.length-1)
-      if (e.data.flowinNav === 'prev') idx = Math.max(idx-1, 0)
-      document.getElementById(SECS[idx])?.scrollIntoView({ behavior: 'smooth' })
-    }
-    window.addEventListener('message', onMsg)
-    return () => window.removeEventListener('message', onMsg)
-  }, [])
-
-  const drawWheel = useCallback((angle: number) => {
-    const cv = canvasRef.current
-    if (!cv) return
-    const ctx = cv.getContext('2d')!
-    const S=148, cx=74, cy=74
-    ctx.clearRect(0,0,S,S)
-    const oR=72, fR=68, sR=56, hR=14
-    const n=SPIN_SEGS.length, arc=2*Math.PI/n
-    ctx.beginPath(); ctx.arc(cx,cy,oR,0,Math.PI*2); ctx.fillStyle='#0D0A04'; ctx.fill()
-    ctx.beginPath(); ctx.arc(cx,cy,oR,0,Math.PI*2); ctx.strokeStyle='#C9A227'; ctx.lineWidth=2; ctx.stroke()
-    for(let i=0;i<24;i++){
-      const da=i/24*Math.PI*2, x=cx+Math.cos(da)*(oR-5), y=cy+Math.sin(da)*(oR-5)
-      ctx.beginPath(); ctx.arc(x,y,i%3===0?2:1.2,0,Math.PI*2)
-      ctx.fillStyle=i%3===0?'#FFD700':'#5C3D0A'; ctx.fill()
-    }
-    ctx.beginPath(); ctx.arc(cx,cy,fR,0,Math.PI*2); ctx.strokeStyle='#6B4F1A'; ctx.lineWidth=1; ctx.stroke()
-    SPIN_SEGS.forEach((s,i)=>{
-      const st=i*arc+angle, en=st+arc
-      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,sR,st,en); ctx.closePath()
-      ctx.fillStyle=s.color; ctx.fill()
-      ctx.beginPath(); ctx.moveTo(cx,cy)
-      ctx.lineTo(cx+Math.cos(st)*sR, cy+Math.sin(st)*sR)
-      ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1; ctx.stroke()
-      ctx.save(); ctx.translate(cx,cy); ctx.rotate(st+arc/2)
-      ctx.textAlign='right'; ctx.fillStyle='rgba(255,255,255,.95)'
-      ctx.font='bold 7px -apple-system,sans-serif'
-      ctx.shadowColor='rgba(0,0,0,.7)'; ctx.shadowBlur=2
-      ctx.fillText(s.label.length>12?s.label.slice(0,11)+'\u2026':s.label, sR-8, 2.5)
-      ctx.restore()
-    })
-    ctx.beginPath(); ctx.arc(cx,cy,hR+2,0,Math.PI*2); ctx.fillStyle='#0D0A04'; ctx.fill()
-    ctx.beginPath(); ctx.arc(cx,cy,hR+2,0,Math.PI*2); ctx.strokeStyle='#C9A227'; ctx.lineWidth=1.5; ctx.stroke()
-    ctx.beginPath(); ctx.arc(cx,cy,hR,0,Math.PI*2); ctx.fillStyle='#3B5CC4'; ctx.fill()
-    ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='bold 5.5px -apple-system,sans-serif'
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.shadowBlur=0
-    ctx.fillText('FLOWIN', cx, cy)
-  }, [])
-
-  useEffect(() => {
-    if (phoneScreen === 'spin') drawWheel(angleRef.current)
-  }, [phoneScreen, drawWheel])
-
-  function doPhoneSpin() {
-    if (phoneSpinning) return
-    setPhoneSpinning(true)
-    const winners = SPIN_SEGS.filter(s => !s.perdant)
-    const target  = winners[Math.floor(Math.random()*winners.length)]
-    const tIdx    = SPIN_SEGS.indexOf(target)
-    const arc     = 2*Math.PI/SPIN_SEGS.length
-    const tAngle  = -(tIdx*arc+arc/2-Math.PI/2)+Math.PI*10
-    const s0      = angleRef.current
-    const dur     = 3800
-    let t0 = 0
-    function anim(ts: number) {
-      if (!t0) t0 = ts
-      const p = Math.min((ts-t0)/dur, 1)
-      const e = 1-Math.pow(1-p, 4)
-      angleRef.current = s0+(tAngle-s0)*e
-      drawWheel(angleRef.current)
-      if (p < 1) { frameRef.current = requestAnimationFrame(anim) }
-      else {
-        setPhoneSpinning(false)
-        setPhoneLot(target.label)
-        setTimeout(() => setPhoneScreen('result'), 300)
-      }
-    }
-    frameRef.current = requestAnimationFrame(anim)
-  }
+  const [submitted, setSubmitted]   = useState(false)
 
   async function handleSubmit() {
-    if (!form.nom.trim() || !form.email.includes('@')) return
+    if (!form.prenom.trim() || !form.email.includes('@')) return
     setSubmitting(true)
     const today = new Date().toISOString().slice(0,10)
     const emailLower = form.email.toLowerCase().trim()
-    const profil = profils.find(p => p.id === selProf)
     await supabase.from('joueurs').upsert({
       external_id: `j-cta-${emailLower.replace(/[^a-z0-9]/g,'-').substring(0,36)}`,
-      email: emailLower, prenom: form.nom.trim(), tel: form.tel.trim()||null,
-      tags: ['btob','cta', profil?.lbl ?? ''].filter(Boolean),
-      optin:true, optin_date:today, first_seen:today, last_seen:today,
-      source: source==='qr' ? 'landing_qr' : 'landing_cta',
-      client_type:'btob', enseigne: profil?.lbl ?? null,
-    }, { onConflict:'external_id' })
+      email: emailLower, prenom: form.prenom.trim(), tel: form.tel.trim() || null,
+      tags: ['btob','cta', form.secteur].filter(Boolean),
+      optin: true, optin_date: today, first_seen: today, last_seen: today,
+      source: source === 'qr' ? 'landing_qr' : 'landing_cta',
+      client_type: 'btob', enseigne: form.secteur || null,
+    }, { onConflict: 'external_id' })
     setSubmitting(false); setSubmitted(true)
   }
 
-  const sp = profils.find(p => p.id === selProf)
-  const TAB_LABELS = [
-    { id:'before' as const, lbl:'Avant' },
-    { id:'how'    as const, lbl:'Avec Flowin' },
-    { id:'after'  as const, lbl:'Résultat' },
-  ]
+  const p = PROFILS[sel]
+  const proc = PROCESS[psel]
 
   return (
-    <div style={{ fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif', background:'#F4F6F9', color:navy, minHeight:'100dvh', overflowX:'hidden' }}>
-      <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(244,246,249,.96);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(27,58,92,.1)}
-        .logo{font-size:20px;font-weight:700;color:${navy}}.logo em{font-style:normal;color:${teal}}
-        .btn-demo{background:${teal};color:#fff;border:none;border-radius:50px;padding:10px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}
-        .hero{position:relative;overflow:hidden;padding:90px 24px 70px;text-align:center;background:#fff;border-bottom:1px solid rgba(27,58,92,.08)}
-        .hero-q{font-size:clamp(18px,3.5vw,28px);font-weight:700;color:${navy};line-height:1.3;transition:opacity .4s,transform .4s;text-align:center;min-height:72px;display:flex;align-items:center;justify-content:center}
-        .hero-baseline{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin:24px 0 32px}
-        .baseline-verb{font-size:clamp(14px,2vw,18px);font-weight:700;letter-spacing:.04em}
-        .baseline-sep{color:rgba(27,58,92,.25);font-size:22px;font-weight:300}
-        /* BESOINS */
-        .besoins{background:#fff;padding:70px 24px;border-bottom:1px solid rgba(27,58,92,.08)}
-        .besoins-inner{max-width:960px;margin:0 auto}
-        .besoins-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(27,58,92,.1);border-radius:16px;overflow:hidden;margin-top:40px}
-        @media(max-width:680px){.besoins-grid{grid-template-columns:1fr}}
-        @media(max-width:680px){.gamme-grid{grid-template-columns:1fr !important}}
-        @media(max-width:680px){.dash-cols{grid-template-columns:1fr !important}}
-        @media(max-width:680px){.dash-kpis{grid-template-columns:repeat(2,1fr) !important}}
-        .besoin-card{background:#fff;padding:28px 24px;display:flex;flex-direction:column;gap:0}
-        .besoin-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;flex-shrink:0}
-        .besoin-verb{font-size:22px;font-weight:700;margin-bottom:4px}
-        .besoin-tag{font-size:12px;font-weight:600;margin-bottom:14px}
-        .besoin-desc{font-size:13px;line-height:1.65;color:rgba(27,58,92,.65);margin-bottom:16px}
-        .besoin-feats{list-style:none;margin-bottom:16px}
-        .besoin-feats li{font-size:12px;color:rgba(27,58,92,.65);padding:4px 0;border-bottom:1px solid rgba(27,58,92,.05);display:flex;align-items:center;gap:8px}
-        .besoin-feats li:last-child{border-bottom:none}
-        .besoin-metric{font-size:11px;font-weight:600;padding:8px 12px;border-radius:8px;display:flex;align-items:center;gap:6px;margin-top:auto}
-        /* DEMO */
-        .demo-section{background:#1B3A5C;padding:70px 24px}
-        .demo-inner{max-width:820px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-        @media(max-width:640px){.demo-inner{grid-template-columns:1fr;gap:28px;text-align:center}}
-        .phone-mock{width:180px;height:320px;border-radius:28px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px}
-        .phone-notch{width:60px;height:16px;background:rgba(255,255,255,.1);border-radius:0 0 10px 10px;position:absolute;top:0;left:50%;transform:translateX(-50%)}
-        .spin-circle{width:100px;height:100px;border-radius:50%;border:2.5px solid ${teal};display:flex;align-items:center;justify-content:center;font-size:32px;animation:spinAnim 9s linear infinite}
-        @keyframes spinAnim{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        .demo-cta-a{display:block;background:${teal};color:#fff;text-decoration:none;border-radius:50px;padding:14px 28px;font-size:15px;font-weight:700;text-align:center;font-family:inherit;cursor:pointer;border:none;margin-bottom:10px}
-        /* PROFILS */
-        .profils-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
-        .prof{background:#fff;border:1.5px solid rgba(27,58,92,.1);border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .18s}
-        .prof.sel{border-color:${teal};box-shadow:0 4px 20px rgba(0,180,160,.15)}
-        .prof:hover{box-shadow:0 3px 12px rgba(0,0,0,.07)}
-        .prof-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 8px}
-        .result-card{background:#fff;border-radius:16px;box-shadow:0 6px 28px rgba(0,0,0,.07);padding:24px;margin-top:20px}
-        .tab-row{display:flex;gap:6px;margin-bottom:14px}
-        .tab-btn{padding:6px 14px;border-radius:20px;border:1.5px solid rgba(27,58,92,.15);background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:${navy};font-family:inherit;display:flex;align-items:center;gap:5px}
-        .tab-btn.on{background:${teal};border-color:${teal};color:#fff}
-        .tab-content{font-size:14px;color:rgba(27,58,92,.75);line-height:1.7;font-style:italic}
-        /* PROOF */
-        .proof{background:${navy};padding:70px 24px;color:#fff}
-        .proof-inner{max-width:700px;margin:0 auto;text-align:center}
-        .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px}
-        .pn-val{font-size:56px;font-weight:700;line-height:1}
-        .pn-lbl{font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-        /* MODULES */
-        .modules-section{background:#fff;padding:70px 24px}
-        .modules-inner{max-width:920px;margin:0 auto}
-        .modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:32px}
-        .module-card{border:1px solid rgba(27,58,92,.1);border-radius:16px;padding:20px;transition:box-shadow .18s}
-        .module-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.07)}
-        .module-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px;flex-shrink:0}
-        .module-feats{list-style:none;margin-top:10px}
-        .module-feats li{font-size:12px;color:rgba(27,58,92,.6);padding:3px 0;display:flex;align-items:center;gap:7px}
-        /* ACCOMP */
-        .accomp{background:#F4F6F9;padding:70px 24px}
-        .accomp-inner{max-width:860px;margin:0 auto}
-        .accomp-card{background:#fff;border-top:3px solid ${teal};border-radius:0 0 16px 16px;padding:32px;margin-top:32px}
-        .accomp-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-        @media(max-width:560px){.accomp-grid{grid-template-columns:1fr}}
-        .accomp-item{display:flex;align-items:flex-start;gap:12px}
-        .accomp-ico{width:36px;height:36px;border-radius:10px;background:rgba(0,180,160,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:${teal}}
-        /* PRICING */
-        .pricing-section{background:#fff;padding:70px 24px;border-top:1px solid rgba(27,58,92,.08)}
-        .pricing-inner{max-width:920px;margin:0 auto}
-        .pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:32px}
-        .price-card{border:1px solid rgba(27,58,92,.1);border-radius:20px;padding:24px;position:relative;background:#fff}
-        .price-card.hl{border-color:${teal};box-shadow:0 6px 32px rgba(0,180,160,.14)}
-        .price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:${teal};color:#fff;font-size:10px;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap;letter-spacing:.04em}
-        .price-amount{font-size:42px;font-weight:700;color:${navy};line-height:1}
-        .price-feats{list-style:none;margin:14px 0 18px}
-        .price-feats li{font-size:13px;color:rgba(27,58,92,.7);padding:5px 0;border-bottom:1px solid rgba(27,58,92,.05);display:flex;align-items:center;gap:8px}
-        .price-feats li:last-child{border-bottom:none}
-        .btn-price{width:100%;padding:13px;border:none;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
-        .btn-price.hl{background:${teal};color:#fff}
-        .btn-price.ghost{background:transparent;border:1.5px solid rgba(27,58,92,.2);color:${navy}}
-        /* CTA */
-        .cta-section{background:#F4F6F9;padding:70px 24px;border-top:1px solid rgba(27,58,92,.08)}
-        .cta-inner{max-width:460px;margin:0 auto;text-align:center}
-        .inp{width:100%;padding:14px 16px;background:#fff;border:1.5px solid rgba(27,58,92,.15);border-radius:12px;color:${navy};font-size:15px;font-family:inherit;outline:none;margin-bottom:10px}
-        .inp:focus{border-color:${teal}}
-        .btn-submit{width:100%;padding:16px;background:${teal};color:#fff;border:none;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
-        .success-box{background:rgba(0,180,160,.07);border:1.5px solid rgba(0,180,160,.25);border-radius:14px;padding:28px}
-        .footer{text-align:center;padding:24px;font-size:11px;color:rgba(27,58,92,.35);background:#F4F6F9}
-        .section-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${teal};margin-bottom:10px}
-        .section-title{font-size:clamp(22px,4vw,30px);font-weight:700;color:${navy};margin-bottom:8px}
-        .section-sub{color:rgba(27,58,92,.5);font-size:15px;line-height:1.6}
-      `}</style>
-
-      {/* NAV */}
-      <nav className="topbar">
-        <div className="logo">Flow<em>in</em></div>
-        <button className="btn-demo" onClick={() => document.getElementById('s-besoins')?.scrollIntoView({ behavior:'smooth' })}>
-          <i className="ti ti-arrow-right" style={{fontSize:15}} aria-hidden="true" />
-          Voir la solution
-        </button>
-      </nav>
+    <div className="lp-root">
+      <style>{CSS}</style>
 
       {/* HERO */}
-      <section className="hero" id="s-hero">
-        <div style={{ position:'relative', zIndex:1, maxWidth:720, margin:'0 auto' }}>
-          <div style={{ marginBottom:28, minHeight:80 }}>
-            <div className="hero-q" style={{ opacity:qVisible?1:0, transform:qVisible?'translateY(0)':'translateY(8px)' }}>
-              {hero?.questions?.[qIdx] ?? ''}
-            </div>
-          </div>
-          <div style={{ fontSize:'clamp(14px,2.2vw,17px)', color:'rgba(27,58,92,.6)', marginBottom:28, lineHeight:1.6 }}>
-            {hero?.answer}
-          </div>
-          <div className="hero-baseline">
-            <span className="baseline-verb" style={{ color:'#D85A30' }}>Captez</span>
-            <span className="baseline-sep">·</span>
-            <span className="baseline-verb" style={{ color:'#3B5CC4' }}>Dynamisez</span>
-            <span className="baseline-sep">·</span>
-            <span className="baseline-verb" style={{ color:'#1D9E75' }}>Fidélisez</span>
-          </div>
-          <a className="btn-demo" href={DEMO_URL} target="_blank" rel="noopener" style={{ display:'inline-flex', fontSize:16, padding:'16px 36px', margin:'0 auto', textDecoration:'none' }}>
-            {hero?.cta ?? 'Jouer et gagner mon premier event →'}
-          </a>
+      <section className="hero">
+        <div className="logo">Flow<em>in</em></div>
+        <h1 className="promise">Transformez votre passage en prospect, vos prospects en clients.</h1>
+        <div className="baseline"><span className="c1">Captez</span> · <span className="c2">Dynamisez</span> · <span className="c3">Fidélisez</span></div>
+        <div className="hstats">
+          <div className="hstat"><div className="v">980</div><div className="l">contacts captés</div></div>
+          <div className="hstat"><div className="v">5 dates</div><div className="l">une saison</div></div>
+          <div className="hstat"><div className="v">100%</div><div className="l">d&apos;opt-in</div></div>
         </div>
+        <a className="cta" href="#cta">Jouer et gagner mon premier event →</a>
       </section>
 
-      {/* LE PROBLÈME */}
-      <section id="s-probleme" style={{ padding:'70px 24px', background:'#0E1B30' }}>
-        <div style={{ maxWidth:760, margin:'0 auto', textAlign:'center' }}>
-          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>Le constat</div>
-          <div style={{ fontSize:'clamp(22px,4vw,32px)', fontWeight:800, color:'#fff', lineHeight:1.25, marginBottom:32 }}>Des visiteurs, des prospects, des clients passent. Et après&nbsp;?</div>
-          <div style={{ display:'grid', gap:10, textAlign:'left' }}>
+      {/* PROBLEME */}
+      <section className="sec sec-dark" id="probleme">
+        <div className="wrap" style={{ maxWidth:760, textAlign:'center' }}>
+          <div className="eyebrow">Le constat</div>
+          <div className="title" style={{ color:'#fff' }}>Des visiteurs, des prospects, des clients passent. Et après{'\u00A0'}?</div>
+          <div className="prob">
             {[
               'Combien de personnes sont passées à votre stand, boutique, event ?',
               'Pouvez-vous les recontacter ?',
@@ -362,261 +278,134 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
               'Quel est votre taux de retour questionnaire ?',
               'Quels chiffres transmettre à vos partenaires ?',
             ].map((q, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:12, padding:'14px 16px' }}>
-                <i className="ti ti-help-circle" style={{ color:teal, fontSize:20, flexShrink:0 }} aria-hidden="true" />
-                <span style={{ fontSize:15, color:'#fff' }}>{q}</span>
-              </div>
+              <div className="q" key={i}><Ic n="help-circle" /> {q}</div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* VOS BESOINS */}
-      <section className="besoins" id="s-besoins">
-        <div className="besoins-inner">
-          <div style={{ textAlign:'center' }}>
-            <div className="section-eyebrow">Vos besoins</div>
-            <div className="section-title">Tout ce dont vous avez besoin, là où vous êtes</div>
-            <div className="section-sub">Trois résultats. Une seule plateforme. Un chef de projet dédié.</div>
+      {/* BESOINS */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="eyebrow">Vos besoins</div>
+          <div className="title">Tout ce dont vous avez besoin, à portée de main.</div>
+          <div className="sub">Vous souhaitez…</div>
+          <div className="proc-sel">
+            <button className={'proc-btn' + (psel===0?' on':'')} onClick={() => setPsel(0)}>Créer votre base</button>
+            <button className={'proc-btn' + (psel===1?' on':'')} onClick={() => setPsel(1)}>Exploiter votre base existante</button>
           </div>
-          <div className="besoins-grid">
-            {BESOINS.map(b => (
-              <div key={b.id} className="besoin-card">
-                <div className="besoin-icon" style={{ background:`${b.couleur}14`, color:b.couleur }}>
-                  <i className={`ti ${b.icon}`} aria-hidden="true" />
+          <div className="proc-view">
+            <p className="proc-desc">{proc.desc}</p>
+            <div className="proc-steps">
+              {proc.steps.map((s, i) => (
+                <div className="pstep" key={i}>
+                  <span className="pico" style={{ background:s.col+'18', color:s.col }}><Ic n={s.ico} /></span>
+                  <span className="pverb" style={{ color:s.col }}>{s.verbe}</span>
+                  <span className="ptxt">{s.txt}</span>
                 </div>
-                <div className="besoin-verb" style={{ color:b.couleur }}>{b.verb}</div>
-                <div className="besoin-tag" style={{ color:b.couleur }}>{b.tagline}</div>
-                <p className="besoin-desc">{b.desc}</p>
-                <ul className="besoin-feats">
-                  {b.features.map((f,i) => (
-                    <li key={i}>
-                      <i className="ti ti-check" style={{ color:teal, fontSize:13, flexShrink:0 }} aria-hidden="true" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <div className="besoin-metric" style={{ background:`${b.couleur}0d`, color:b.couleur }}>
-                  <i className="ti ti-trending-up" style={{ fontSize:14 }} aria-hidden="true" />
-                  {b.metric}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* DEMO */}
-      <section className="demo-section" id="s-demo">
-        <div className="demo-inner">
-          <div>
-            <div className="section-eyebrow" style={{ color:teal }}>Démo live</div>
-            <div className="section-title" style={{ color:'#fff', marginBottom:12 }}>
-              Testez l&apos;expérience joueur
-            </div>
-            <div style={{ color:'rgba(255,255,255,.6)', fontSize:14, lineHeight:1.7, marginBottom:24 }}>
-              Vivez exactement ce que vivra votre client — spin, formulaire CRM, ticket de tirage. Le parcours complet.
-            </div>
-            <a href={DEMO_URL} target="_blank" rel="noopener" className="demo-cta-a">
-              <i className="ti ti-external-link" style={{ marginRight:6 }} aria-hidden="true" />
-              Ouvrir en live
-            </a>
-            <div style={{ display:'flex', alignItems:'center', gap:12, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.12)', borderRadius:12, padding:12 }}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(DEMO_URL)}&bgcolor=1B3A5C&color=ffffff&margin=6`}
-                alt="QR démo" style={{ width:56, height:56, borderRadius:8, flexShrink:0 }} />
-              <div>
-                <div style={{ fontWeight:700, fontSize:13, color:'#fff' }}>Accès mobile</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,.4)', marginTop:2 }}>Scannez pour tester sur votre téléphone</div>
-              </div>
-            </div>
-          </div>
-
-          {/* PHONE — vrai parcours en iframe */}
-          <div style={{ display:'flex', justifyContent:'center' }}>
-            <div style={{ width:300, height:620, borderRadius:36, background:'#0F172A', border:'12px solid #14141f', overflow:'hidden', position:'relative', boxShadow:'0 24px 70px rgba(0,0,0,.55)', flexShrink:0 }}>
-              <iframe src={DEMO_URL} title="Démo Flowin" style={{ width:'390px', height:'806px', border:'none', display:'block', transform:'scale(0.708)', transformOrigin:'top left' }} />
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* PROFILS */}
-      <section id="s-profils" style={{ padding:'70px 24px', background:'#F4F6F9' }}>
-        <div style={{ maxWidth:880, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:32 }}>
-            <div className="section-eyebrow">Votre métier</div>
-            <div className="section-title">Flowin s&apos;adapte à votre activité</div>
-            <div className="section-sub">Choisissez votre profil pour voir ce que Flowin peut faire pour vous.</div>
-          </div>
-          <div className="profils-grid">
-            {profils.map(p => (
-              <div key={p.id} className={`prof${selProf===p.id?' sel':''}`}
-                onClick={() => { setSelProf(p.id===selProf?null:p.id); setActiveTab('before') }}>
-                <div className="prof-ico" style={{ background:`${p.couleur}14`, color:p.couleur }}>
-                  <i className={`ti ${p.ico}`} aria-hidden="true" />
-                </div>
-                <div style={{ fontSize:11, fontWeight:700, color:navy, lineHeight:1.3 }}>{p.lbl}</div>
+      <section className="sec">
+        <div className="wrap">
+          <div className="title">Flowin s&apos;adapte à votre activité</div>
+          <div className="sub">Choisissez votre profil pour voir ce que Flowin peut faire pour vous.</div>
+          <div className="chips">
+            {PROFILS.map((pf, i) => (
+              <div className={'chip' + (i===sel?' on':'')} key={i} onClick={() => setSel(i)}>
+                <div className="ic" style={{ background:pf.col+'18', color:pf.col }}><Ic n={pf.ico} /></div>
+                <div className="nm">{pf.lbl}</div>
               </div>
             ))}
           </div>
-          {sp && (
-            <div className="result-card">
-              <div style={{ fontWeight:700, fontSize:17, color:navy, marginBottom:14, display:'flex', alignItems:'center', gap:10 }}>
-                <div style={{ width:32, height:32, borderRadius:9, background:`${sp.couleur}14`, color:sp.couleur, display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>
-                  <i className={`ti ${sp.ico}`} aria-hidden="true" />
-                </div>
-                {sp.lbl}
-              </div>
-              <div className="tab-row">
-                {TAB_LABELS.map(t => (
-                  <button key={t.id} className={`tab-btn${activeTab===t.id?' on':''}`}
-                    onClick={() => setActiveTab(t.id)}>
-                    {t.lbl}
-                  </button>
-                ))}
-              </div>
-              <div className="tab-content">
-                {activeTab==='before' && sp.before}
-                {activeTab==='how'    && sp.how}
-                {activeTab==='after'  && sp.after}
-              </div>
+          <div className="pdetail">
+            <h3 style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <span style={{ width:34, height:34, borderRadius:9, display:'inline-flex', alignItems:'center', justifyContent:'center', background:p.col+'18', color:p.col }}><Ic n={p.ico} /></span> {p.lbl}
+            </h3>
+            <div style={{ marginTop:10, fontSize:15, fontWeight:600, color:'#1B3A5C' }}>{p.scenario}</div>
+            <div className="ptabs" style={{ marginTop:16 }}>
+              <button className={'ptab' + (tab==='reponse'?' on':'')} onClick={() => setTab('reponse')}>La réponse Flowin</button>
+              <button className={'ptab' + (tab==='benefice'?' on':'')} onClick={() => setTab('benefice')}>Le bénéfice</button>
             </div>
-          )}
+            <div className="ptext">{tab==='reponse' ? p.reponse : p.benefice}</div>
+          </div>
         </div>
       </section>
 
-      {/* PROOF */}
-      <section className="proof" id="s-proof">
-        <div className="proof-inner">
-          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:14 }}>
-            Ils l&apos;ont fait. Vraiment.
+      {/* PREUVE */}
+      <section className="sec sec-dark">
+        <div className="wrap">
+          <div className="eyebrow">Ils l&apos;ont fait. Vraiment.</div>
+          <div className="proof">
+            <div><div className="v" style={{ color:'#00B4A0' }}>980</div><div className="l">contacts</div></div>
+            <div><div className="v" style={{ color:'#F59E0B' }}>5</div><div className="l">dates</div></div>
+            <div><div className="v" style={{ color:'#A855F7' }}>100%</div><div className="l">opt-in</div></div>
           </div>
-          <div className="proof-grid">
-            <div>
-              <div className="pn-val" style={{ color:teal }}>{counters.c1}</div>
-              <div className="pn-lbl">{proof?.stat1Lbl}</div>
-            </div>
-            <div>
-              <div className="pn-val" style={{ color:'#F59E0B' }}>{counters.c2}</div>
-              <div className="pn-lbl">{proof?.stat2Lbl}</div>
-            </div>
-            <div>
-              <div className="pn-val" style={{ color:'#A855F7' }}>{counters.c3}%</div>
-              <div className="pn-lbl">{proof?.stat3Lbl}</div>
-            </div>
-          </div>
-          {proof?.quote && (
-            <>
-              <div style={{ fontSize:16, fontStyle:'italic', color:'rgba(255,255,255,.85)', lineHeight:1.7, marginBottom:10 }}>
-                &ldquo;{proof.quote}&rdquo;
-              </div>
-              <div style={{ fontSize:12, color:'rgba(255,255,255,.4)' }}>— {proof.quoteAuthor}</div>
-            </>
-          )}
+          <div className="quote">« En 5 dates, nous avons capté 980 personnes qui ont accepté d&apos;être recontactées. »</div>
         </div>
       </section>
 
       {/* MODULES */}
-      <section className="modules-section" id="s-modules">
-        <div className="modules-inner">
-          <div style={{ textAlign:'center' }}>
-            <div className="section-eyebrow">Les mécaniques</div>
-            <div className="section-title">6 formats de capture. 1 plateforme.</div>
-            <div className="section-sub">Chaque mécanique collecte les données CRM et génère un ticket de tirage automatique.</div>
-          </div>
-          <div className="modules-grid">
-            {modules.map(m => (
-              <div key={m.id} className="module-card">
-                <div className="module-ico" style={{ background:`${m.couleur}14`, color:m.couleur }}>
-                  <i className={`ti ${m.ico}`} aria-hidden="true" />
-                </div>
-                <div style={{ fontWeight:700, fontSize:15, color:navy }}>{m.nom}</div>
-                <div style={{ fontSize:12, color:m.couleur, fontWeight:600, marginTop:2 }}>{m.tagline}</div>
-                <ul className="module-feats">
-                  {m.features.map((f,i) => (
-                    <li key={i}>
-                      <i className="ti ti-check" style={{ color:teal, fontSize:12, flexShrink:0 }} aria-hidden="true" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+      <section className="sec">
+        <div className="wrap">
+          <div className="eyebrow">6 mécaniques</div>
+          <div className="title">Un module pour chaque moment</div>
+          <div className="grid3m">
+            {MODULES.map((m, i) => (
+              <div className="mcard" key={i}>
+                <div className="ic" style={{ background:m.col+'18', color:m.col }}><Ic n={m.ico} /></div>
+                <h3>{m.nom}</h3>
+                <div className="tag">{m.tag}</div>
+                <ul>{m.f.map((x, j) => <li key={j}>{x}</li>)}</ul>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* VISUEL STATS — dashboard Pâques (données réelles) */}
-      <section id="s-stats" style={{ padding:'70px 24px', background:'#0E1B30' }}>
-        <div style={{ maxWidth:820, margin:'0 auto', textAlign:'center' }}>
-          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>Vos chiffres, en direct</div>
-          <div style={{ fontSize:'clamp(22px,4vw,30px)', fontWeight:800, color:'#fff', marginBottom:8 }}>Vous mesurez tout, en temps réel.</div>
-          <div style={{ fontSize:14, color:'rgba(255,255,255,.55)', marginBottom:32 }}>Données réelles — Fêtes de Pâques, Vence (192 participants).</div>
-          <div style={{ background:'linear-gradient(180deg,#0F1E36,#0A1424)', border:'1px solid rgba(255,255,255,.1)', borderRadius:18, padding:24, textAlign:'left' }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:24 }} className="dash-kpis">
-              {[['192','Participants',teal],['43 ans','Âge moyen','#00B4A0'],['100%','Conversion','#3B5CC4'],['74%','Opt-in RGPD','#F59E0B']].map(([v,l,c],i)=>(
-                <div key={i} style={{ background:'rgba(255,255,255,.04)', borderRadius:12, padding:'14px', textAlign:'center' }}>
-                  <div style={{ fontSize:22, fontWeight:900, color:c as string }}>{v}</div>
-                  <div style={{ fontSize:11, color:'rgba(255,255,255,.55)' }}>{l}</div>
-                </div>
-              ))}
+      {/* STATS DASHBOARD */}
+      <section className="sec sec-dark">
+        <div className="wrap" style={{ maxWidth:820, textAlign:'center' }}>
+          <div className="eyebrow">Vos chiffres, en direct</div>
+          <div className="title" style={{ color:'#fff' }}>Vous mesurez tout, en temps réel.</div>
+          <div className="sub">Données réelles d&apos;un événement physique (192 participants).</div>
+          <div className="dash" style={{ marginTop:28 }}>
+            <div className="kpis">
+              <div className="kpi"><div className="v" style={{ color:'#00B4A0' }}>192</div><div className="l">Participants</div></div>
+              <div className="kpi"><div className="v" style={{ color:'#00B4A0' }}>43 ans</div><div className="l">Âge moyen</div></div>
+              <div className="kpi"><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">Conversion</div></div>
+              <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">Opt-in RGPD</div></div>
             </div>
-            <div className="dash-cols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:28 }}>
+            <div className="cols">
               <div>
-                <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', marginBottom:14 }}>Tranches d&apos;âge</div>
-                {[['36-50 ans',81,100],['51-65 ans',37,46],['26-35 ans',28,35],['65 ans et +',20,25],['18-25 ans',15,19],['Moins de 18',11,14]].map(([lbl,n,w],i)=>(
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
-                    <span style={{ width:92, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
-                    <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
-                      <span style={{ display:'block', height:'100%', width:`${w}%`, background:'linear-gradient(90deg,#A855F7,#3B5CC4)', borderRadius:100 }} />
-                    </span>
-                    <span style={{ width:24, textAlign:'right', fontWeight:800, color:'#fff' }}>{n}</span>
-                  </div>
-                ))}
-                <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', margin:'22px 0 14px' }}>Répartition par genre</div>
-                {[['Femmes',61,'#00B4A0'],['Hommes',39,'#3B5CC4']].map(([lbl,w,col],i)=>(
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
-                    <span style={{ width:92, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
-                    <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
-                      <span style={{ display:'block', height:'100%', width:`${w}%`, background:col as string, borderRadius:100 }} />
-                    </span>
-                    <span style={{ width:32, textAlign:'right', fontWeight:800, color:'#fff' }}>{w}%</span>
-                  </div>
-                ))}
+                <div className="barh">Tranches d&apos;âge</div>
+                <div>{AGE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_AGE} />)}</div>
+                <div className="barh" style={{ marginTop:22 }}>Répartition par genre</div>
+                <div>{GENRE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
               </div>
               <div>
-                <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', marginBottom:14 }}>D&apos;où viennent vos visiteurs</div>
-                {[['Vence',74,100],['La Gaude',24,33],['Cagnes',23,31],['St-Laurent',22,30],['Nice',22,30],['Grasse',18,24]].map(([lbl,n,w],i)=>(
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
-                    <span style={{ width:78, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
-                    <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
-                      <span style={{ display:'block', height:'100%', width:`${w}%`, background:`linear-gradient(90deg,${teal},#3B5CC4)`, borderRadius:100 }} />
-                    </span>
-                    <span style={{ width:24, textAlign:'right', fontWeight:800, color:'#fff' }}>{n}</span>
-                  </div>
-                ))}
-                <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', margin:'22px 0 14px' }}>Intention de revenir</div>
-                {[['Oui',66,'#22C55E'],['Peut-être',3,'#F59E0B'],['Non',1,'#EF4444']].map(([lbl,w,col],i)=>(
-                  <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
-                    <span style={{ width:78, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
-                    <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
-                      <span style={{ display:'block', height:'100%', width:`${w}%`, background:col as string, borderRadius:100 }} />
-                    </span>
-                    <span style={{ width:32, textAlign:'right', fontWeight:800, color:'#fff' }}>{w}%</span>
-                  </div>
-                ))}
+                <div className="barh">D&apos;où viennent vos visiteurs</div>
+                <div>{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div>
+                <div className="barh" style={{ marginTop:22 }}>Intention de revenir</div>
+                <div>{RETOUR.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
               </div>
             </div>
-            <div style={{ fontSize:13, fontWeight:800, color:'rgba(255,255,255,.7)', margin:'24px 0 14px' }}>Comment ils ont connu l&apos;événement</div>
-            <div className="dash-cols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'2px 28px' }}>
-              {[['Affiche / Flyer',42],['Mairie',13],['Facebook',9],['Instagram',7]].map(([lbl,w],i)=>(
-                <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:9, fontSize:12 }}>
-                  <span style={{ width:100, color:'rgba(255,255,255,.7)', flexShrink:0 }}>{lbl}</span>
-                  <span style={{ flex:1, height:8, background:'rgba(255,255,255,.06)', borderRadius:100, overflow:'hidden' }}>
-                    <span style={{ display:'block', height:'100%', width:`${(w as number)*2}%`, background:'linear-gradient(90deg,#3B5CC4,#00B4A0)', borderRadius:100 }} />
-                  </span>
-                  <span style={{ width:32, textAlign:'right', fontWeight:800, color:'#fff' }}>{w}%</span>
-                </div>
+            <div className="barh" style={{ marginTop:24 }}>Comment ils ont connu l&apos;événement</div>
+            <div className="cols" style={{ gap:'2px 28px' }}>
+              {CONNU.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[1]*2} col={G_CONNU} />)}
+            </div>
+            <div className="barh" style={{ marginTop:24 }}>Redirections vers vos liens après le jeu</div>
+            <div className="redirviz">
+              {REDIR.map((r, i) => (
+                <a className="rv" href={r[3]} target="_blank" rel="noopener" key={i}>
+                  <span className="rv-ic"><Ic n={r[1]} /></span>
+                  <span className="rv-n">{r[2]}%</span>
+                  <span className="rv-l">{r[0]}</span>
+                </a>
               ))}
             </div>
             <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
@@ -624,133 +413,77 @@ export default function LandingClient({ cfg: cfgProp, source }: { cfg: LandingCf
         </div>
       </section>
 
-      {/* LA GAMME — Animer / Piloter / Mutualiser */}
-      <section id="s-gamme" style={{ padding:'70px 24px', background:'#0E1B30' }}>
-        <div style={{ maxWidth:960, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:40 }}>
-            <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.12em', color:teal, marginBottom:12 }}>La gamme</div>
-            <div style={{ fontSize:'clamp(22px,4vw,30px)', fontWeight:800, color:'#fff' }}>Ce que Flowin vous permet de faire</div>
+      {/* GAMME */}
+      <section className="sec sec-dark">
+        <div className="wrap">
+          <div className="eyebrow">La gamme</div>
+          <div className="title" style={{ color:'#fff' }}>Ce que Flowin vous permet de faire</div>
+          <div className="gam">
+            <div className="gcard"><div className="ic" style={{ color:'#00B4A0' }}><Ic n="device-gamepad-2" /></div><h3>Animer</h3><div className="gi">6 modules de jeu</div><div className="gi">Customisation jeux / lots / quiz</div><div className="gi">Marque blanche</div></div>
+            <div className="gcard"><div className="ic" style={{ color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Dashboard temps réel</div><div className="gi">Stats : genre, âge, opt-in, géo</div><div className="gi">Base client réutilisable</div></div>
+            <div className="gcard"><div className="ic" style={{ color:'#A855F7' }}><Ic n="users-group" /></div><h3>Mutualiser</h3><div className="gi">Super-events collectifs</div><div className="gi">Sponsoring / partenaires</div><div className="gi">Rejoindre un super-event</div></div>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }} className="gamme-grid">
-            {[
-              { ico:'ti-device-gamepad-2', t:'Animer', c:'#00B4A0', items:['6 modules de jeu','Customisation jeux / lots / quiz','Marque blanche'] },
-              { ico:'ti-chart-dots', t:'Piloter', c:'#3B5CC4', items:['Dashboard temps réel','Stats : genre, âge, opt-in, géographie','Base client réutilisable'] },
-              { ico:'ti-users-group', t:'Mutualiser', c:'#A855F7', items:['Super-events collectifs','Sponsoring / partenaires','Rejoindre un super-event'] },
-            ].map((g, i) => (
-              <div key={i} style={{ background:'linear-gradient(180deg,rgba(16,31,56,.9),rgba(10,20,36,.9))', border:'1px solid rgba(255,255,255,.1)', borderRadius:18, padding:'28px 22px', textAlign:'center' }}>
-                <i className={`ti ${g.ico}`} style={{ fontSize:40, color:g.c }} aria-hidden="true" />
-                <div style={{ fontSize:20, fontWeight:800, color:'#fff', margin:'12px 0' }}>{g.t}</div>
-                {g.items.map((it, j) => (
-                  <div key={j} style={{ fontSize:13, color:'rgba(255,255,255,.6)', padding:'7px 0', borderTop:'1px solid rgba(255,255,255,.07)' }}>{it}</div>
-                ))}
+        </div>
+      </section>
+
+      {/* TARIFS */}
+      <section className="sec">
+        <div className="wrap">
+          <div className="eyebrow">Tarifs</div>
+          <div className="title">Boostez, mesurez, gardez le contact.</div>
+          <div className="sub">Flowin : vous créez l&apos;événement, on crée l&apos;engagement.</div>
+          <div className="price">
+            {PRICING.map((pr, i) => (
+              <div className={'pcard' + (pr.hl?' hl':'')} key={i}>
+                {pr.badge && <div className="pbadge">{pr.badge}</div>}
+                <div className="pn">{pr.nom}</div>
+                <div className="pp">{pr.prix==='Devis' ? 'Sur devis' : pr.prix+' €'}</div>
+                <div className="pu">{pr.unite}</div>
+                <ul style={{ marginTop:14 }}>{pr.f.map((x, j) => <li key={j}>{x}</li>)}</ul>
               </div>
             ))}
           </div>
+          <div className="pm-line"><span style={{ color:'#3B5CC4', display:'inline-flex' }}><Ic n="user-check" /></span> Un chef de projet dédié à votre compte.</div>
         </div>
       </section>
 
-      {/* ACCOMPAGNEMENT */}
-      <section className="accomp" id="s-accomp">
-        <div className="accomp-inner">
-          <div style={{ textAlign:'center' }}>
-            <div className="section-eyebrow">L&apos;accompagnement</div>
-            <div className="section-title">Un chef de projet dédié à votre compte</div>
-            <div className="section-sub">Vous ne configurez pas seul. Flowin vous accompagne de la conception au live.</div>
-          </div>
-          <div className="accomp-card">
-            <div className="accomp-grid">
-              {[
-                { icon:'ti-palette', title:'Création graphique', desc:'Visuels aux couleurs de votre marque, white label complet' },
-                { icon:'ti-database', title:'Intégration données internes', desc:'CRM existant, caisse, billetterie, base adhérents' },
-                { icon:'ti-settings', title:'Paramétrage complet', desc:'Lots, questions, parcours, tirage — clés en main' },
-                { icon:'ti-school', title:'Formation & suivi', desc:'Prise en main dashboard + analyse résultats post-event' },
-              ].map((item, i) => (
-                <div key={i} className="accomp-item">
-                  <div className="accomp-ico">
-                    <i className={`ti ${item.icon}`} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <div style={{ fontSize:13, fontWeight:700, color:navy, marginBottom:3 }}>{item.title}</div>
-                    <div style={{ fontSize:12, color:'rgba(27,58,92,.55)', lineHeight:1.5 }}>{item.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PRICING */}
-      <section className="pricing-section" id="s-pricing">
-        <div className="pricing-inner">
-          <div style={{ textAlign:'center' }}>
-            <div className="section-eyebrow">Tarifs</div>
-            <div className="section-title">Simple. Transparent. Sans surprise.</div>
-            <div className="section-sub">Démo gratuite · Activation en 24h · Sans engagement</div>
-          </div>
-          <div className="pricing-grid">
-            {pricing.map(tier => (
-              <div key={tier.id} className={`price-card${tier.highlight?' hl':''}`}>
-                {tier.badge && <div className="price-badge">{tier.badge}</div>}
-                <div style={{ fontWeight:700, fontSize:11, color:'rgba(27,58,92,.45)', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:8 }}>{tier.nom}</div>
-                <div style={{ display:'flex', alignItems:'baseline', gap:3, marginBottom:3 }}>
-                  <div className="price-amount">{tier.prix}</div>
-                  {tier.prix !== 'Devis' && <div style={{ fontSize:14, color:'rgba(27,58,92,.4)' }}>€</div>}
-                </div>
-                {tier.unite && <div style={{ fontSize:12, color:'rgba(27,58,92,.4)', fontWeight:600, marginBottom:4 }}>{tier.unite}</div>}
-                <ul className="price-feats">
-                  {tier.features.map((f,i) => (
-                    <li key={i}>
-                      <i className="ti ti-check" style={{ color:teal, fontSize:12, flexShrink:0 }} aria-hidden="true" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <button className={`btn-price${tier.highlight?' hl':' ghost'}`}
-                  onClick={() => document.getElementById('s-cta')?.scrollIntoView({ behavior:'smooth' })}>
-                  {tier.cta}
-                </button>
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign:'center', marginTop:14, fontSize:11, color:'rgba(27,58,92,.35)' }}>
-            TVA non applicable · Art. 293B du CGI
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="cta-section" id="s-cta">
-        <div className="cta-inner">
+      {/* CTA FINAL */}
+      <section className="ctafinal" id="cta">
+        <div className="wrap">
+          <h2>Gagnez votre premier event</h2>
+          <div style={{ color:'rgba(255,255,255,.6)', fontSize:15 }}>Aucune CB requise · Rappel sous 24h · Sans engagement</div>
           {submitted ? (
-            <div className="success-box">
-              <div style={{ fontSize:20, fontWeight:700, color:navy, marginBottom:8 }}>{cta?.successTitle}</div>
-              <div style={{ fontSize:14, color:'rgba(27,58,92,.6)', lineHeight:1.6 }}>{cta?.successText}</div>
+            <div className="thanks">
+              <h3>Merci {form.prenom} !</h3>
+              <p>Votre demande est enregistrée. On vous rappelle sous 24h.</p>
             </div>
           ) : (
             <>
-              <div style={{ fontSize:28, fontWeight:700, color:navy, marginBottom:6 }}>{cta?.title}</div>
-              <div style={{ color:'rgba(27,58,92,.5)', marginBottom:28, fontSize:14 }}>{cta?.subtitle}</div>
-              <input className="inp" placeholder={cta?.formPlaceholderNom} value={form.nom}
-                onChange={e => setForm(f=>({...f,nom:e.target.value}))} />
-              <input className="inp" type="email" placeholder={cta?.formPlaceholderEmail}
-                autoCapitalize="none" value={form.email}
-                onChange={e => setForm(f=>({...f,email:e.target.value}))} />
-              <input className="inp" type="tel" placeholder={cta?.formPlaceholderTel} value={form.tel}
-                onChange={e => setForm(f=>({...f,tel:e.target.value}))} />
-              <button className="btn-submit" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? 'Envoi…' : cta?.ctaSubmit}
-              </button>
-              <div style={{ fontSize:11, color:'rgba(27,58,92,.35)', marginTop:8 }}>Données jamais cédées à des tiers · RGPD</div>
+              <div className="ctaform">
+                <input placeholder="Votre prénom" value={form.prenom} onChange={e => setForm({ ...form, prenom:e.target.value })} />
+                <input type="email" placeholder="Email professionnel" value={form.email} onChange={e => setForm({ ...form, email:e.target.value })} />
+                <input type="tel" placeholder="Téléphone" value={form.tel} onChange={e => setForm({ ...form, tel:e.target.value })} />
+                <select value={form.secteur} onChange={e => setForm({ ...form, secteur:e.target.value })}>
+                  <option value="">Secteur d&apos;activité…</option>
+                  <option>Commerce &amp; Négoce</option>
+                  <option>Restaurateur</option>
+                  <option>Association / Événementiel</option>
+                  <option>Municipalité / Office de tourisme</option>
+                </select>
+                <button className="cta" style={{ justifyContent:'center', marginTop:6 }} onClick={handleSubmit} disabled={submitting}>
+                  {submitting ? 'Envoi…' : 'Gagner mon premier event →'}
+                </button>
+              </div>
+              <div className="ctaor">— ou contactez-nous directement —</div>
+              <div className="ctacall">
+                <a className="callbtn" href="tel:+33616354936"><Ic n="phone" /> Appelez-nous</a>
+                <a className="wabtn" href="https://wa.me/33616354936" target="_blank" rel="noopener"><Ic n="brand-whatsapp" /> WhatsApp</a>
+              </div>
+              <div className="note">Données jamais cédées à des tiers · RGPD</div>
             </>
           )}
         </div>
       </section>
-
-      <footer className="footer">
-        Flowin · OPConsult / BAITA EURL · Vence 06140 ·{' '}
-        <a href="mailto:romain@opconsult.fr" style={{ color:'inherit' }}>romain@opconsult.fr</a>
-      </footer>
     </div>
   )
 }
