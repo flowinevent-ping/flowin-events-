@@ -227,21 +227,33 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
   const [form, setForm] = useState({ prenom:'', email:'', tel:'', secteur:'' })
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted]   = useState(false)
+  const [err, setErr]               = useState('')
 
   async function handleSubmit() {
-    if (!form.prenom.trim() || !form.email.includes('@')) return
+    setErr('')
+    if (!form.prenom.trim() || !form.email.includes('@')) {
+      setErr('Renseignez au moins votre prénom et un email valide.')
+      return
+    }
     setSubmitting(true)
-    const today = new Date().toISOString().slice(0,10)
-    const emailLower = form.email.toLowerCase().trim()
-    await supabase.from('joueurs').upsert({
-      external_id: `j-cta-${emailLower.replace(/[^a-z0-9]/g,'-').substring(0,36)}`,
-      email: emailLower, prenom: form.prenom.trim(), tel: form.tel.trim() || null,
-      tags: ['btob','cta', form.secteur].filter(Boolean),
-      optin: true, optin_date: today, first_seen: today, last_seen: today,
-      source: source === 'qr' ? 'landing_qr' : 'landing_cta',
-      client_type: 'btob', enseigne: form.secteur || null,
-    }, { onConflict: 'external_id' })
-    setSubmitting(false); setSubmitted(true)
+    try {
+      const today = new Date().toISOString().slice(0,10)
+      const emailLower = form.email.toLowerCase().trim()
+      const { error } = await supabase.from('joueurs').upsert({
+        external_id: `j-cta-${emailLower.replace(/[^a-z0-9]/g,'-').substring(0,36)}`,
+        email: emailLower, prenom: form.prenom.trim(), tel: form.tel.trim() || null,
+        tags: ['btob','cta', form.secteur].filter(Boolean),
+        optin: true, optin_date: today, first_seen: today, last_seen: today,
+        source: source === 'qr' ? 'landing_qr' : 'landing_cta',
+        client_type: 'btob', enseigne: form.secteur || null,
+      }, { onConflict: 'external_id' })
+      setSubmitting(false)
+      if (error) { setErr('Une erreur est survenue, réessayez dans un instant.'); return }
+      setSubmitted(true)
+    } catch {
+      setSubmitting(false)
+      setErr('Une erreur est survenue, réessayez dans un instant.')
+    }
   }
 
   const p = PROFILS[sel]
@@ -261,13 +273,12 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="hstat"><div className="v">5 dates</div><div className="l">une saison</div></div>
           <div className="hstat"><div className="v">100%</div><div className="l">d&apos;opt-in</div></div>
         </div>
-        <a className="cta" href="#cta">Jouer et gagner mon premier event →</a>
+        <a className="cta" href="/parcours/spin?ev=ev-flowin-demo">Jouer et gagner mon premier event →</a>
       </section>
 
       {/* PROBLEME */}
       <section className="sec sec-dark" id="probleme">
         <div className="wrap" style={{ maxWidth:760, textAlign:'center' }}>
-          <div className="eyebrow">Le constat</div>
           <div className="title" style={{ color:'#fff' }}>Des visiteurs, des prospects, des clients passent. Et après{'\u00A0'}?</div>
           <div className="prob">
             {[
@@ -287,7 +298,6 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       {/* BESOINS */}
       <section className="sec">
         <div className="wrap">
-          <div className="eyebrow">Vos besoins</div>
           <div className="title">Tout ce dont vous avez besoin, à portée de main.</div>
           <div className="sub">Vous souhaitez…</div>
           <div className="proc-sel">
@@ -313,7 +323,6 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       <section className="sec">
         <div className="wrap">
           <div className="title">Flowin s&apos;adapte à votre activité</div>
-          <div className="sub">Choisissez votre profil pour voir ce que Flowin peut faire pour vous.</div>
           <div className="chips">
             {PROFILS.map((pf, i) => (
               <div className={'chip' + (i===sel?' on':'')} key={i} onClick={() => setSel(i)}>
@@ -473,6 +482,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 <button className="cta" style={{ justifyContent:'center', marginTop:6 }} onClick={handleSubmit} disabled={submitting}>
                   {submitting ? 'Envoi…' : 'Gagner mon premier event →'}
                 </button>
+                {err && <div style={{ color:'#FCA5A5', fontSize:13, marginTop:2 }}>{err}</div>}
               </div>
               <div className="ctaor">— ou contactez-nous directement —</div>
               <div className="ctacall">
