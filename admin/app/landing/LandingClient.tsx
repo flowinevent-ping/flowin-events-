@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackVisite } from '@/lib/track'
 
 /* ── Icônes SVG inline (sans CDN, robustes iOS/Android) ── */
 const TIP: Record<string, string> = {
@@ -271,6 +272,8 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
   const [tab, setTab]   = useState<'reponse'|'benefice'>('reponse')
   const [form, setForm] = useState({ prenom:'', email:'', tel:'', secteur:'' })
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => { trackVisite('landing') }, [])
 
   // Bouton identique au hero : on enregistre le contact si renseigné (best-effort) puis on lance le jeu
   async function handlePlay() {

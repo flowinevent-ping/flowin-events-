@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS } from '@/lib/parcours'
+import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 
@@ -31,6 +32,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const confettiRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
+  useEffect(() => { trackVisite('spin', evId) }, [evId])
 
   useEffect(() => {
     const canvas = canvasRef.current
