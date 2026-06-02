@@ -28,6 +28,7 @@ const TIP: Record<string, string> = {
 'brand-instagram':'<rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.2"/><line x1="16.6" y1="7.4" x2="16.6" y2="7.41"/>',
 'brand-facebook':'<path d="M13 22v-8h2.6l.4-3H13V9.1c0-.9.3-1.5 1.7-1.5H16V5.1A22 22 0 0 0 13.6 5C11.4 5 10 6.3 10 8.8V11H7.5v3H10v8z"/>',
 'trending-up':'<path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/>',
+'mail':'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
 }
 function svg(n: string) {
   return '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">' + (TIP[n] || '') + '</svg>'
@@ -495,10 +496,22 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="ctacall">
             <a className="callbtn" href="tel:+33616354936"><Ic n="phone" /> Appelez-nous</a>
             <a className="wabtn" href="https://wa.me/33616354936" target="_blank" rel="noopener"><Ic n="brand-whatsapp" /> WhatsApp</a>
+            <a className="callbtn" href="mailto:info@opconsul.co"><Ic n="mail" /> Email</a>
           </div>
           <div className="note">Données jamais cédées à des tiers · RGPD</div>
         </div>
       </section>
+
+      {/* FOOTER */}
+      <footer style={{ background:'#0A1424', color:'rgba(255,255,255,.5)', textAlign:'center', padding:'30px 24px', fontSize:13, lineHeight:1.7 }}>
+        <div style={{ fontSize:20, fontWeight:900, color:'rgba(255,255,255,.9)', letterSpacing:'-.02em', marginBottom:6 }}>Flow<em style={{ color:'#A855F7', fontStyle:'normal' }}>in</em></div>
+        <div>Flowin is powered by OPConsult · Vence, France</div>
+        <div style={{ marginTop:8 }}>
+          <a href="mailto:info@opconsul.co" style={{ color:'#00B4A0', textDecoration:'none' }}>info@opconsul.co</a>
+          {' · '}
+          <a href="tel:+33616354936" style={{ color:'#00B4A0', textDecoration:'none' }}>06 16 35 49 36</a>
+        </div>
+      </footer>
     </div>
   )
 }
