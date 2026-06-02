@@ -249,20 +249,20 @@ const CSS = `
     .price::-webkit-scrollbar{display:none}
     .pcard{flex:0 0 80%;scroll-snap-align:center}
   }
-  /* Lisibilite : eyebrows homogenes + pictos & textes un cran plus grands */
-  .eyebrow{font-size:13px;letter-spacing:.14em}
-  .sub{font-size:15px}
-  .bcard .ic{width:56px;height:56px;font-size:28px}
-  .bcard h3{font-size:19px}.bcard p{font-size:14px}
-  .chip .ic{width:50px;height:50px;font-size:26px}.chip .nm{font-size:14px}
-  .pstep .pico{width:56px;height:56px;font-size:28px}.pstep .pverb{font-size:19px}.pstep .ptxt{font-size:15px}
-  .ptext{font-size:17px}
-  .mcard .ic{width:52px;height:52px;font-size:26px}.mcard h3{font-size:17px}.mcard .tag{font-size:13px}.mcard li{font-size:13px}
-  .gcard .ic{font-size:46px}.gcard h3{font-size:21px}.gcard .gi{font-size:14px}
-  .pcard .pn{font-size:14px}.pcard li{font-size:14px}
-  .kpi .v{font-size:24px}.kpi .l{font-size:12px}
-  .barh{font-size:14px}.bar{font-size:13px}.bar .bl{width:104px}
-  .pm-line{font-size:15px}
+  /* Lisibilite : eyebrows + pictos & textes agrandis (palier 2) */
+  .eyebrow{font-size:15px;letter-spacing:.12em}
+  .sub{font-size:16px}
+  .bcard .ic{width:60px;height:60px;font-size:32px}
+  .bcard h3{font-size:20px}.bcard p{font-size:15px}
+  .chip .ic{width:56px;height:56px;font-size:30px}.chip .nm{font-size:15px}
+  .pstep .pico{width:62px;height:62px;font-size:32px}.pstep .pverb{font-size:21px}.pstep .ptxt{font-size:16px}
+  .ptext{font-size:18px}
+  .mcard .ic{width:58px;height:58px;font-size:30px}.mcard h3{font-size:19px}.mcard .tag{font-size:14px}.mcard li{font-size:14px}
+  .gcard .ic{font-size:52px}.gcard h3{font-size:23px}.gcard .gi{font-size:15px}
+  .pcard .pn{font-size:15px}.pcard li{font-size:15px}.pcard .pp{font-size:36px}
+  .kpi .v{font-size:27px}.kpi .l{font-size:13px}
+  .barh{font-size:15px}.bar{font-size:14px}.bar .bl{width:110px}
+  .pm-line{font-size:16px}
 `
 
 export default function LandingClient({ source = '' }: { cfg?: unknown; source?: string }) {
