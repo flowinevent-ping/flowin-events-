@@ -181,7 +181,7 @@ const CSS = `
   .kpi{background:rgba(255,255,255,.04);border-radius:12px;padding:14px;text-align:center}
   .kpi .v{font-size:22px;font-weight:900}.kpi .l{font-size:11px;color:rgba(255,255,255,.55)}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-  .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px}
+  .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px;align-items:start}
   .statpanel .barh{margin-top:0}
   .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
   .bar{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px}
@@ -237,9 +237,11 @@ const CSS = `
     .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
     .proc-steps::-webkit-scrollbar{display:none}
     .pstep{flex:0 0 80%;scroll-snap-align:center}
-    .statpanels{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
+    .statpanels{display:flex;align-items:flex-start;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .statpanels::-webkit-scrollbar{display:none}
     .statpanel{flex:0 0 85%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 14px}
+    .statpanel .redirviz{gap:8px}
+    .statpanel .redirviz .rv{min-width:0;padding:12px 6px}
     .gam{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .gam::-webkit-scrollbar{display:none}
     .gcard{flex:0 0 78%;scroll-snap-align:center}
@@ -496,7 +498,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="ctacall">
             <a className="callbtn" href="tel:+33616354936"><Ic n="phone" /> Appelez-nous</a>
             <a className="wabtn" href="https://wa.me/33616354936" target="_blank" rel="noopener"><Ic n="brand-whatsapp" /> WhatsApp</a>
-            <a className="callbtn" href="mailto:info@opconsul.co"><Ic n="mail" /> Email</a>
+            <a className="callbtn" href="mailto:info@opconsult.co"><Ic n="mail" /> Email</a>
           </div>
           <div className="note">Données jamais cédées à des tiers · RGPD</div>
         </div>
@@ -507,7 +509,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
         <div style={{ fontSize:20, fontWeight:900, color:'rgba(255,255,255,.9)', letterSpacing:'-.02em', marginBottom:6 }}>Flow<em style={{ color:'#A855F7', fontStyle:'normal' }}>in</em></div>
         <div>Flowin is powered by OPConsult · Vence, France</div>
         <div style={{ marginTop:8 }}>
-          <a href="mailto:info@opconsul.co" style={{ color:'#00B4A0', textDecoration:'none' }}>info@opconsul.co</a>
+          <a href="mailto:info@opconsult.co" style={{ color:'#00B4A0', textDecoration:'none' }}>info@opconsult.co</a>
           {' · '}
           <a href="tel:+33616354936" style={{ color:'#00B4A0', textDecoration:'none' }}>06 16 35 49 36</a>
         </div>
