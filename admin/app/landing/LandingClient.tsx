@@ -79,14 +79,14 @@ interface Step { verbe:string; ico:string; txt:string; col:string }
 interface Proc { desc:string; steps:Step[] }
 const PROCESS: Proc[] = [
  { desc:"Vous partez de zéro ou presque : captez le flux qui passe et construisez une base de contacts qui vous appartient.", steps:[
-   { verbe:'Capter', ico:'target-arrow', txt:"Chaque visiteur — salon, marché, event — entre dans votre base en moins de 30 secondes !", col:'#E85D04' },
-   { verbe:'Dynamiser', ico:'bolt', txt:"Créons de l'intérêt : par la participation, nous créons l'engagement !", col:'#3B5CC4' },
-   { verbe:'Fidéliser', ico:'heart-handshake', txt:"Une base qui vous appartient, réexploitable à tout moment — des visiteurs et clients qui vous correspondent, avec leur consentement.", col:'#00B4A0' },
+   { verbe:'Captez', ico:'target-arrow', txt:"Chaque visiteur — salon, marché, event — entre dans votre base en moins de 30 secondes !", col:'#E85D04' },
+   { verbe:'Dynamisez', ico:'bolt', txt:"Créons de l'intérêt : par la participation, nous créons l'engagement !", col:'#3B5CC4' },
+   { verbe:'Fidélisez', ico:'heart-handshake', txt:"Une base qui vous appartient, réexploitable à tout moment — des visiteurs et clients qui vous correspondent, avec leur consentement.", col:'#00B4A0' },
  ] },
- { desc:"Vous avez déjà des contacts, mais ils dorment : exploitez ce fichier et transformez-le en clients actifs à chaque temps fort.", steps:[
-   { verbe:'Exploiter', ico:'rotate-clockwise', txt:"Réactivez vos clients et prospects dormants.", col:'#7B2FBE' },
-   { verbe:'Dynamiser', ico:'bolt', txt:"Créez de l'engagement, gamifiez, créez de l'intérêt.", col:'#3B5CC4' },
-   { verbe:'Transformer', ico:'trending-up', txt:"À vous de jouer ! Augmentez vos ventes, votre fréquentation, vos visites…", col:'#00B4A0' },
+ { desc:"Vous avez déjà des contacts ? Flowin vous aide à valoriser et exploiter votre capital.", steps:[
+   { verbe:'Exploitez', ico:'rotate-clockwise', txt:"Réactivez vos clients et prospects dormants.", col:'#7B2FBE' },
+   { verbe:'Dynamisez', ico:'bolt', txt:"Créez de l'engagement, gamifiez, créez de l'intérêt.", col:'#3B5CC4' },
+   { verbe:'Transformez', ico:'trending-up', txt:"À vous de jouer ! Augmentez vos ventes, votre fréquentation, vos visites…", col:'#00B4A0' },
  ] },
 ]
 const G_AGE = 'linear-gradient(90deg,#A855F7,#3B5CC4)'
