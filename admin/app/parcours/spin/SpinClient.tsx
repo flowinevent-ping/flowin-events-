@@ -260,11 +260,11 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           <div style={{ position:'relative',width:300,height:300,cursor:spinning?'default':'pointer' }} onClick={spinWheel}>
             <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:'50%',boxShadow:'0 14px 40px rgba(16,30,120,.4)' }} />
           </div>
-          <div style={{ position:'relative',width:180,height:60,margin:'4px auto 0' }}>
-            <div style={{ position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',width:138,height:38,background:'linear-gradient(180deg,#5A88EE 0%,#3868D0 40%,#1A44A8 100%)',borderRadius:19,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px rgba(0,0,0,.5)',border:'1px solid rgba(140,180,255,.5)',zIndex:1 }}>
+          <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:6,margin:'8px auto 0' }}>
+            <div style={{ width:138,height:38,background:'linear-gradient(180deg,#5A88EE 0%,#3868D0 40%,#1A44A8 100%)',borderRadius:19,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px rgba(0,0,0,.5)',border:'1px solid rgba(140,180,255,.5)' }}>
               <span style={{ fontSize:20,fontWeight:900,color:'#fff',letterSpacing:3,textShadow:'0 1px 4px rgba(0,0,100,.4)' }}>GAME</span>
             </div>
-            <div style={{ position:'absolute',bottom:0,left:'50%',transform:'translateX(-50%)',width:152,height:32,background:'linear-gradient(180deg,#9A28CC 0%,#7818A8 45%,#520C80 100%)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 14px rgba(0,0,0,.45)',border:'1px solid rgba(180,80,255,.4)' }}>
+            <div style={{ width:152,height:32,background:'linear-gradient(180deg,#9A28CC 0%,#7818A8 45%,#520C80 100%)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 14px rgba(0,0,0,.45)',border:'1px solid rgba(180,80,255,.4)' }}>
               <span style={{ fontSize:16,fontWeight:900,color:'rgba(235,210,255,.95)',letterSpacing:4 }}>TIME</span>
             </div>
           </div>
