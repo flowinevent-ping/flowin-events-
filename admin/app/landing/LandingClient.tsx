@@ -218,6 +218,19 @@ const CSS = `
   .thanks h3{font-size:20px;font-weight:900;margin-bottom:6px}
   .thanks p{font-size:14px;color:rgba(255,255,255,.75)}
   @media(max-width:720px){.grid3,.grid3m,.gam,.price,.kpis,.cols{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+  /* Carrousels horizontaux en mobile : profils, mecaniques, etapes besoins */
+  @media(max-width:720px){
+    .chips{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 4px 8px;margin:24px 0}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex:0 0 auto;scroll-snap-align:center}
+    .grid3m{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
+    .grid3m::-webkit-scrollbar{display:none}
+    .mcard{flex:0 0 80%;scroll-snap-align:center}
+    .proc-view{padding:24px 16px}
+    .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
+    .proc-steps::-webkit-scrollbar{display:none}
+    .pstep{flex:0 0 80%;scroll-snap-align:center}
+  }
 `
 
 export default function LandingClient({ source = '' }: { cfg?: unknown; source?: string }) {
