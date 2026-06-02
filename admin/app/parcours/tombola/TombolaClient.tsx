@@ -212,10 +212,11 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
-            {[['prenom', 'Prénom *', 'Camille'], ['nom', 'Nom *', 'Dupont']].map(([k, lbl]) => (
+            {[['prenom', 'Prénom *', 'given-name'], ['nom', 'Nom *', 'family-name']].map(([k, lbl, ac]) => (
               <div key={k}>
                 <label className="label">{lbl}</label>
                 <input className={`input${errors[k] ? ' err' : ''}`}
+                  autoComplete={ac}
                   value={form[k as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} />
                 {errors[k] && <div className="err-msg">{errors[k]}</div>}
@@ -232,13 +233,13 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           </div>
           <div style={{ marginBottom: 12 }}>
             <label className="label">Email *</label>
-            <input className={`input${errors.email ? ' err' : ''}`} type="email" autoCapitalize="none"
+            <input className={`input${errors.email ? ' err' : ''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none"
               value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
             {errors.email && <div className="err-msg">{errors.email}</div>}
           </div>
           <div style={{ marginBottom: 12 }}>
             <label className="label">Téléphone *</label>
-            <input className={`input${errors.tel ? ' err' : ''}`} type="tel"
+            <input className={`input${errors.tel ? ' err' : ''}`} type="tel" inputMode="tel" autoComplete="tel"
               value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} />
             {errors.tel && <div className="err-msg">{errors.tel}</div>}
           </div>
@@ -251,7 +252,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             </div>
             <div>
               <label className="label">Code postal</label>
-              <input className="input" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />
+              <input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />
             </div>
           </div>
           <div style={{ marginBottom: 12 }}>
