@@ -307,25 +307,25 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           {isBtob && (
             <div style={{ marginBottom:12 }}>
               <label className="label">Enseigne / Structure *</label>
-              <input className={`input${errors.enseigne?' err':''}`} value={form.enseigne} onChange={e=>setForm(f=>({...f,enseigne:e.target.value}))} />{errors.enseigne&&<div className="err">{errors.enseigne}</div>}
+              <input className={`input${errors.enseigne?' err':''}`} autoComplete="organization" value={form.enseigne} onChange={e=>setForm(f=>({...f,enseigne:e.target.value}))} />{errors.enseigne&&<div className="err">{errors.enseigne}</div>}
             </div>
           )}
           <div className="grid2" style={{ marginBottom:12 }}>
-            {[['prenom','Prénom *','Camille'],['nom','Nom *','Dupont']].map(([k,l])=>(
-              <div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>
+            {[['prenom','Prénom *','given-name'],['nom','Nom *','family-name']].map(([k,l,ac])=>(
+              <div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} autoComplete={ac} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>
             ))}
           </div>
-          <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
-          <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
+          <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
+          <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
           {isBtob ? (
             <div className="grid2" style={{ marginBottom:12 }}>
               <div><label className="label">Secteur d'activité *</label><select className={`input${errors.secteur?' err':''}`} value={form.secteur} onChange={e=>setForm(f=>({...f,secteur:e.target.value}))}><option value="">Choisir…</option>{SECTEURS.map(s=><option key={s} value={s}>{s}</option>)}</select>{errors.secteur&&<div className="err">{errors.secteur}</div>}</div>
-              <div><label className="label">Code postal</label><input className="input" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
+              <div><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
             </div>
           ) : (
             <div className="grid2" style={{ marginBottom:12 }}>
               <div><label className="label">Tranche d'âge</label><select className="input" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-              <div><label className="label">CP</label><input className="input" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
+              <div><label className="label">CP</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
             </div>
           )}
           <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
