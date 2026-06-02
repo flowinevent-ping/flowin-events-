@@ -98,6 +98,10 @@ const GEO: [string,number,number][] = [['06140',74,100],['06610',24,33],['06800'
 const RETOUR: [string,number,number,string][] = [['Oui',66,66,'#22C55E'],['Peut-être',3,3,'#F59E0B'],['Non',1,1,'#EF4444']]
 const CONNU: [string,number][] = [['Affiche / Flyer',42],['Mairie',13],['Site internet',17],['Instagram',15],['Facebook',13]]
 const REDIR: [string,string,number,string][] = [['Site internet','world',38,'#'],['Instagram','brand-instagram',31,'#'],['Facebook','brand-facebook',24,'#']]
+const G_JOURS = 'linear-gradient(90deg,#00B4A0,#22C55E)'
+const G_HEURES = 'linear-gradient(90deg,#F59E0B,#F97316)'
+const JOURS: [string,number,number][] = [['Samedi',71,100],['Dimanche',54,76],['Mercredi',33,46],['Vendredi',21,30],['Jeudi',13,18]]
+const HEURES: [string,number,number][] = [['16h–18h',58,100],['14h–16h',49,84],['10h–12h',38,66],['18h–20h',30,52],['12h–14h',17,29]]
 
 function Bar({ lbl, n, w, col }: { lbl:string; n:string|number; w:number; col:string }) {
   return (
@@ -176,6 +180,8 @@ const CSS = `
   .kpi{background:rgba(255,255,255,.04);border-radius:12px;padding:14px;text-align:center}
   .kpi .v{font-size:22px;font-weight:900}.kpi .l{font-size:11px;color:rgba(255,255,255,.55)}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px}
+  .statpanel .barh{margin-top:0}
   .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
   .bar{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px}
   .bar .bl{width:92px;color:rgba(255,255,255,.7);flex-shrink:0}
@@ -230,6 +236,15 @@ const CSS = `
     .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
     .proc-steps::-webkit-scrollbar{display:none}
     .pstep{flex:0 0 80%;scroll-snap-align:center}
+    .statpanels{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
+    .statpanels::-webkit-scrollbar{display:none}
+    .statpanel{flex:0 0 85%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 14px}
+    .gam{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
+    .gam::-webkit-scrollbar{display:none}
+    .gcard{flex:0 0 78%;scroll-snap-align:center}
+    .price{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0}
+    .price::-webkit-scrollbar{display:none}
+    .pcard{flex:0 0 80%;scroll-snap-align:center}
   }
 `
 
@@ -393,33 +408,26 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <div className="kpi"><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">Conversion</div></div>
               <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">Opt-in RGPD</div></div>
             </div>
-            <div className="cols">
-              <div>
-                <div className="barh">Tranches d&apos;âge</div>
-                <div>{AGE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_AGE} />)}</div>
-                <div className="barh" style={{ marginTop:22 }}>Répartition par genre</div>
-                <div>{GENRE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
+            <div className="statpanels">
+              <div className="statpanel"><div className="barh">Tranches d&apos;âge</div>{AGE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_AGE} />)}</div>
+              <div className="statpanel"><div className="barh">Répartition par genre</div>{GENRE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
+              <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div>{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div>
+              <div className="statpanel"><div className="barh">Intention de revenir</div>{RETOUR.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
+              <div className="statpanel"><div className="barh">Jours de fréquentation</div>{JOURS.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_JOURS} />)}</div>
+              <div className="statpanel"><div className="barh">Pics horaires</div>{HEURES.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_HEURES} />)}</div>
+              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div>{CONNU.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[1]*2} col={G_CONNU} />)}</div>
+              <div className="statpanel">
+                <div className="barh">Redirections vers vos liens après le jeu</div>
+                <div className="redirviz">
+                  {REDIR.map((r, i) => (
+                    <a className="rv" href={r[3]} target="_blank" rel="noopener" key={i}>
+                      <span className="rv-ic"><Ic n={r[1]} /></span>
+                      <span className="rv-n">{r[2]}%</span>
+                      <span className="rv-l">{r[0]}</span>
+                    </a>
+                  ))}
+                </div>
               </div>
-              <div>
-                <div className="barh">D&apos;où viennent vos visiteurs</div>
-                <div>{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div>
-                <div className="barh" style={{ marginTop:22 }}>Intention de revenir</div>
-                <div>{RETOUR.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
-              </div>
-            </div>
-            <div className="barh" style={{ marginTop:24 }}>Comment ils ont connu l&apos;événement</div>
-            <div className="cols" style={{ gap:'2px 28px' }}>
-              {CONNU.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[1]*2} col={G_CONNU} />)}
-            </div>
-            <div className="barh" style={{ marginTop:24 }}>Redirections vers vos liens après le jeu</div>
-            <div className="redirviz">
-              {REDIR.map((r, i) => (
-                <a className="rv" href={r[3]} target="_blank" rel="noopener" key={i}>
-                  <span className="rv-ic"><Ic n={r[1]} /></span>
-                  <span className="rv-n">{r[2]}%</span>
-                  <span className="rv-l">{r[0]}</span>
-                </a>
-              ))}
             </div>
             <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
           </div>
@@ -429,7 +437,6 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       {/* GAMME */}
       <section className="sec sec-dark">
         <div className="wrap">
-          <div className="eyebrow">La gamme</div>
           <div className="title" style={{ color:'#fff' }}>Ce que Flowin vous permet de faire</div>
           <div className="gam">
             <div className="gcard"><div className="ic" style={{ color:'#00B4A0' }}><Ic n="device-gamepad-2" /></div><h3>Animer</h3><div className="gi">6 modules de jeu</div><div className="gi">Customisation jeux / lots / quiz</div><div className="gi">Marque blanche</div></div>
