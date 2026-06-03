@@ -302,7 +302,8 @@ const CSS = `
   .kpi .v{font-size:22px;font-weight:900}.kpi .l{font-size:11px;color:rgba(255,255,255,.55)}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
   .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px;align-items:stretch}
-  .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px}
+  .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column}
+  .spbody{flex:1;display:flex;flex-direction:column;justify-content:center}
   .statpanel .barh{margin-top:0}
   .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
   .bar{display:flex;align-items:center;gap:10px;margin-bottom:13px;font-size:14px}
@@ -363,9 +364,9 @@ const CSS = `
     .cdot.on{width:24px;border-radius:100px;background:#00B4A0}
     .sec-dark .cdot{background:rgba(255,255,255,.22)}
     .sec-dark .cdot.on{background:#00B4A0}
-    .statpanels{display:flex;flex-direction:column;gap:14px}
+    .statpanels{display:flex;align-items:stretch;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
     .statpanels::-webkit-scrollbar{display:none}
-    .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
+    .statpanel{flex:0 0 92%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
     .statpanel .redirviz{gap:8px}
     .statpanel .redirviz .rv{min-width:0;padding:12px 6px}
     .gam{display:flex;flex-direction:column;gap:14px}
@@ -570,16 +571,16 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">Opt-in RGPD</div></div>
             </div>
             <div className="statpanels" id="stats">
-              <div className="statpanel"><div className="barh">Tranches d&apos;âge</div><Pyramid data={AGE} grad={G_AGE} /></div>
-              <div className="statpanel"><div className="barh">Répartition par genre</div><Donut data={GENRE.map((r) => [r[0], r[1], r[3]] as [string,number,string])} /></div>
-              <div className="statpanel"><div className="barh">Jours de fréquentation</div>{JOURS.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_JOURS} />)}</div>
-              <div className="statpanel"><div className="barh">Pics horaires</div><Wave data={HEURES} color="#F59E0B" /></div>
-              <div className="statpanel"><div className="barh">Intention de revenir</div><Gauge pct={RETOUR[0][1]} label="comptent revenir" color={RETOUR[0][3]} /></div>
-              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div><Donut data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#0B6E4F','#F59E0B','#E8212B'][i]] as [string,number,string])} /></div>
-              <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div>{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div>
+              <div className="statpanel"><div className="barh">Tranches d&apos;âge</div><div className="spbody"><Pyramid data={AGE} grad={G_AGE} /></div></div>
+              <div className="statpanel"><div className="barh">Répartition par genre</div><div className="spbody"><Donut data={GENRE.map((r) => [r[0], r[1], r[3]] as [string,number,string])} /></div></div>
+              <div className="statpanel"><div className="barh">Jours de fréquentation</div><div className="spbody">{JOURS.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_JOURS} />)}</div></div>
+              <div className="statpanel"><div className="barh">Pics horaires</div><div className="spbody"><Wave data={HEURES} color="#F59E0B" /></div></div>
+              <div className="statpanel"><div className="barh">Intention de revenir</div><div className="spbody"><Gauge pct={RETOUR[0][1]} label="comptent revenir" color={RETOUR[0][3]} /></div></div>
+              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div><div className="spbody"><Donut data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#0B6E4F','#F59E0B','#E8212B'][i]] as [string,number,string])} /></div></div>
+              <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div><div className="spbody">{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div></div>
               <div className="statpanel">
                 <div className="barh">Redirections vers vos liens après le jeu</div>
-                <div className="redirviz">
+                <div className="spbody"><div className="redirviz">
                   {REDIR.map((r, i) => (
                     <a className="rv" href={r[3]} target="_blank" rel="noopener" key={i}>
                       <span className="rv-ic"><Ic n={r[1]} /></span>
@@ -587,9 +588,10 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                       <span className="rv-l">{r[0]}</span>
                     </a>
                   ))}
-                </div>
+                </div></div>
               </div>
             </div>
+            <Dots id="stats" count={8} />
             <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
           </div>
         </div>
