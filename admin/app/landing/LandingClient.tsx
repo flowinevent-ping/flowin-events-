@@ -182,16 +182,29 @@ function Gauge({ pct, label, color }:{ pct:number; label:string; color:string })
   )
 }
 
-function scrollCar(id:string, dir:number) {
-  if (typeof document === 'undefined') return
-  const el = document.getElementById(id)
-  if (el) el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.85), behavior:'smooth' })
+function carStep(el:HTMLElement):number {
+  const child = el.children[0] as HTMLElement | undefined
+  return child ? child.getBoundingClientRect().width + 14 : el.clientWidth
 }
-function CNav({ id }:{ id:string }) {
+function Dots({ id, count }:{ id:string; count:number }) {
+  const [active, setActive] = useState(0)
+  useEffect(() => {
+    const el = document.getElementById(id)
+    if (!el) return
+    const onScroll = () => setActive(Math.round(el.scrollLeft / carStep(el)))
+    el.addEventListener('scroll', onScroll, { passive:true })
+    onScroll()
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [id])
+  const go = (i:number) => {
+    const el = document.getElementById(id)
+    if (el) el.scrollTo({ left: i * carStep(el), behavior:'smooth' })
+  }
   return (
-    <div className="cnav">
-      <button type="button" aria-label="Précédent" onClick={() => scrollCar(id, -1)}>‹</button>
-      <button type="button" aria-label="Suivant" onClick={() => scrollCar(id, 1)}>›</button>
+    <div className="cdots">
+      {Array.from({ length: count }).map((_, i) => (
+        <button key={i} type="button" aria-label={'Voir ' + (i + 1)} className={'cdot' + (i === active ? ' on' : '')} onClick={() => go(i)} />
+      ))}
     </div>
   )
 }
@@ -269,7 +282,7 @@ const CSS = `
   .proc-steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:6px}
   @media(max-width:720px){.proc-steps{grid-template-columns:1fr}}
   .pstep{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;background:#F6F8FB;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:24px 18px}
-  .cnav{display:none}
+  .cdots{display:none}
   .pstep .pico{width:50px;height:50px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:25px}
   .pstep .pverb{font-size:18px;font-weight:800}
   .pstep .ptxt{font-size:14px;color:#5B7085;line-height:1.55}
@@ -345,8 +358,11 @@ const CSS = `
     .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
     .proc-steps::-webkit-scrollbar{display:none}
     .pstep{flex:0 0 90%;scroll-snap-align:center}
-    .cnav{display:flex;justify-content:center;gap:16px;margin-top:18px}
-    .cnav button{width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(0,0,0,.14);background:#fff;color:#1B3A5C;font-size:24px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.08);padding-bottom:3px}
+    .cdots{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px}
+    .cdot{width:9px;height:9px;border-radius:50%;border:none;padding:0;background:rgba(0,0,0,.16);cursor:pointer;transition:width .2s,background .2s}
+    .cdot.on{width:24px;border-radius:100px;background:#00B4A0}
+    .sec-dark .cdot{background:rgba(255,255,255,.22)}
+    .sec-dark .cdot.on{background:#00B4A0}
     .statpanels{display:flex;align-items:flex-start;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .statpanels::-webkit-scrollbar{display:none}
     .statpanel{flex:0 0 92%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
@@ -477,7 +493,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 </div>
               ))}
             </div>
-            <CNav id="besoins" />
+            <Dots id="besoins" count={proc.steps.length} />
           </div>
         </div>
       </section>
@@ -536,7 +552,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               </div>
             ))}
           </div>
-          <CNav id="mecaniques" />
+          <Dots id="mecaniques" count={MODULES.length} />
         </div>
       </section>
 
@@ -574,7 +590,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 </div>
               </div>
             </div>
-            <CNav id="stats" />
+            <Dots id="stats" count={8} />
             <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
           </div>
         </div>
