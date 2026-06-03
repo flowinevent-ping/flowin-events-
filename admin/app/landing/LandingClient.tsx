@@ -39,28 +39,23 @@ function Ic({ n }: { n: string }) {
 }
 
 /* ── Données (reprises du prototype validé) ── */
-interface Profil { ico:string; lbl:string; col:string; scenario:string; reponse:string; benefice:string }
+interface Profil { ico:string; lbl:string; col:string; scenario:string; reponse:string }
 const PROFILS: Profil[] = [
  { ico:'tools-kitchen-2', lbl:'Restaurateur', col:'#D62828',
-   scenario:"Et si on créait une base client qui vous permettrait d'augmenter votre fréquentation ?",
-   reponse:"Captez les clients qui passent sans laisser de trace, puis réactivez cette base quand vous en avez besoin : heures creuses, soirée à thème, nouveau menu, promo…",
-   benefice:"Vous ne subissez plus les creux : vous les remplissez avec vos propres clients, sans racheter de la pub à chaque fois." },
- { ico:'calendar-event', lbl:"Créateur d'events", col:'#0B6E4F',
-   scenario:"Et si vous pouviez recontacter directement ceux et celles qui sont venus ? Et si vous mesuriez votre trafic avec plus de précision — pour avoir de meilleurs partenaires ?",
-   reponse:"Chaque participant entre dans une base qui vous appartient. Vous la réactivez d'un event à l'autre et vous savez précisément qui est venu, d'où, et combien.",
-   benefice:"Vous ne repartez jamais de zéro et vous négociez vos partenariats avec des chiffres réels, pas des estimations." },
+   scenario:"Vos clients passent, mangent, repartent — et pour les faire revenir, il ne vous reste que la communication sur les réseaux. Vous restez en démarche passive.",
+   reponse:"On vous aide à capter vos clients et à constituer votre base. Vous l'animez quand vous voulez : heures creuses, soirée à thème, nouveauté, réouverture, offre spéciale. Flowin personnalise et vous accompagne — une base à vous pour remplir vos creux et faire revenir, sans dépendre de la pub." },
+ { ico:'calendar-event', lbl:"Créateur d'events", col:'#00B4A0',
+   scenario:"Vos participants viennent, vivent l'event, repartent — et d'une édition à l'autre vous repartez de zéro, sans savoir qui est venu ni d'où.",
+   reponse:"On capte vos participants, on constitue votre base à vous, on vous aide à la réactiver à l'event suivant. On vous accompagne dans votre stratégie marketing : une audience qui grandit à chaque édition et des chiffres réels pour négocier vos partenaires." },
  { ico:'building-store', lbl:'Commerce', col:'#E85D04',
-   scenario:"Faites de chaque fête une occasion d'acquérir du monde, boostez votre clientèle.",
-   reponse:"Le flux que vous voyez passer sans le capter — faute de temps ou d'outil — devient une base à vous, réactivable à chaque temps fort, seul ou avec les commerces de votre rue.",
-   benefice:"Une clientèle que vous possédez et relancez à volonté, au lieu de la voir repartir chez le voisin." },
+   scenario:"Le flux passe et repart sans laisser de trace. Vos actions commerciales restent passives, sans ciblage ni retour sur la fréquentation.",
+   reponse:"On vous aide à capter ce flux et à le personnaliser : ciblage, retour de fréquentation, actions commerciales actives. On vous accompagne, seul ou avec les commerces de votre rue — une clientèle que vous ciblez et relancez à volonté, une fréquentation que vous pilotez." },
  { ico:'building-community', lbl:'Association', col:'#3B5CC4',
-   scenario:"Recensez vos actions, faites participer, sensibilisez, créez de l'engagement, gardez le contact, donnez de la visibilité à vos partenaires / mécènes.",
-   reponse:"Le jeu capte vos participants et vos données d'engagement. Vous les valorisez au service de votre cause et vous animez votre communauté dans la durée.",
-   benefice:"Un engagement mesurable, des rapports prêts pour vos mécènes, une communauté qui reste mobilisée entre deux actions." },
+   scenario:"Vous mobilisez du monde, mais entre deux temps forts le lien se perd et vos partenaires, adhérents manquent de preuves de votre impact terrain.",
+   reponse:"On crée de l'engagement et de l'immersion, on capte vos participants et leur retour d'expérience. On vous accompagne pour animer votre communauté dans la durée — une communauté mobilisée entre deux actions, et un retour d'expérience qui prouve votre impact." },
  { ico:'building-bank', lbl:'Institution', col:'#0B6E4F',
-   scenario:"Donnez de l'attractivité, augmentez la visibilité et le trafic, mesurez l'impact et les retombées en temps réel.",
-   reponse:"Le flux de visiteurs, aujourd'hui invisible, devient une donnée exploitable : d'où ils viennent, qui ils sont, quand ils passent — au service de votre territoire.",
-   benefice:"Des retombées chiffrées en temps réel à présenter à vos élus et partenaires, sans étude coûteuse." },
+   scenario:"Vous organisez des événements locaux, mais le flux reste difficile à mesurer et vous avez peu de retours précis.",
+   reponse:"On rend le flux mesurable (qui, d'où, quand) et on transforme l'enquête de satisfaction en participation engagée — un retour augmenté, proche de votre public. Des outils simples à intégrer : Flowin personnalise et vous accompagne. Visibilité, retombées chiffrées et enquêtes suivies — de quoi convaincre élus et partenaires." },
 ]
 interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
@@ -270,10 +265,10 @@ const CSS = `
   .chip .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:22px}
   .chip .nm{font-size:13px;font-weight:800;line-height:1.2}
   .pdetail{background:#fff;border-radius:18px;padding:28px;max-width:920px;margin:0 auto;box-shadow:0 12px 40px rgba(20,40,80,.06)}
-  .ptabs{display:flex;gap:8px;margin:14px 0 18px}
-  .ptab{border:1px solid rgba(0,0,0,.1);background:#fff;border-radius:100px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;color:#1B3A5C}
-  .ptab.on{background:#00B4A0;color:#fff;border-color:#00B4A0}
-  .ptext{font-size:16px;font-style:italic;color:#3a4d63;line-height:1.6;min-height:54px}
+  .pscenario{margin-top:12px;font-size:16px;font-weight:600;color:#1B3A5C;line-height:1.55}
+  .psolution{margin-top:18px;background:rgba(0,180,160,.07);border-left:3px solid #00B4A0;border-radius:0 14px 14px 0;padding:16px 20px}
+  .pkick{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#00B4A0;margin-bottom:8px}
+  .ptext{font-size:16px;color:#3a4d63;line-height:1.6}
   .axcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px}
   .pcardp{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:20px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,.04);text-align:left}
   .proc-sel{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:6px 0 26px}
@@ -418,7 +413,6 @@ const CSS = `
 export default function LandingClient({ source = '' }: { cfg?: unknown; source?: string }) {
   const [psel, setPsel] = useState(0)
   const [sel, setSel]   = useState(0)
-  const [tab, setTab]   = useState<'reponse'|'benefice'>('reponse')
   const [form, setForm] = useState({ prenom:'', email:'', tel:'', secteur:'' })
   const [submitting, setSubmitting] = useState(false)
 
@@ -519,12 +513,11 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
             <h3 style={{ display:'flex', alignItems:'center', gap:10 }}>
               <span style={{ width:34, height:34, borderRadius:9, display:'inline-flex', alignItems:'center', justifyContent:'center', background:p.col+'18', color:p.col }}><Ic n={p.ico} /></span> {p.lbl}
             </h3>
-            <div style={{ marginTop:10, fontSize:15, fontWeight:600, color:'#1B3A5C' }}>{p.scenario}</div>
-            <div className="ptabs" style={{ marginTop:16 }}>
-              <button className={'ptab' + (tab==='reponse'?' on':'')} onClick={() => setTab('reponse')}>La réponse Flowin</button>
-              <button className={'ptab' + (tab==='benefice'?' on':'')} onClick={() => setTab('benefice')}>Le bénéfice</button>
+            <div className="pscenario">{p.scenario}</div>
+            <div className="psolution">
+              <div className="pkick">Avec Flowin</div>
+              <div className="ptext">{p.reponse}</div>
             </div>
-            <div className="ptext">{tab==='reponse' ? p.reponse : p.benefice}</div>
           </div>
         </div>
       </section>
@@ -546,7 +539,8 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       <section className="sec">
         <div className="wrap">
           <div className="eyebrow">6 mécaniques</div>
-          <div className="title">Un module pour chaque moment</div>
+          <div className="title">Ce qui compte, ce n&apos;est pas le jeu.</div>
+          <div className="sub">Roue, quiz, tombola… les codes sont connus. La vraie valeur, c&apos;est la méthode Flowin et l&apos;accompagnement qui va avec : c&apos;est ce qui crée l&apos;engagement — jusqu&apos;à 75 % de contacts captés.</div>
           <div className="grid3m" id="mecaniques">
             {MODULES.map((m, i) => (
               <div className="mcard" key={i}>
