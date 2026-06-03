@@ -81,14 +81,14 @@ interface Step { verbe:string; ico:string; txt:string; col:string }
 interface Proc { desc:string; steps:Step[] }
 const PROCESS: Proc[] = [
  { desc:"Vous partez de zéro ou presque : captez le flux qui passe et construisez une base de contacts qui vous appartient.", steps:[
-   { verbe:'Captez', ico:'target-arrow', txt:"Chaque visiteur — salon, marché, event — entre dans votre base en moins de 30 secondes !", col:'#E85D04' },
-   { verbe:'Dynamisez', ico:'bolt', txt:"Créons de l'intérêt : par la participation, nous créons l'engagement !", col:'#3B5CC4' },
-   { verbe:'Fidélisez', ico:'heart-handshake', txt:"Une base qui vous appartient, réexploitable à tout moment — des visiteurs et clients qui vous correspondent, avec leur consentement.", col:'#00B4A0' },
+   { verbe:'Captez', ico:'target-arrow', txt:"Chaque visiteur entre dans votre base de contacts en moins de 30 secondes, simplement en jouant.", col:'#E85D04' },
+   { verbe:'Dynamisez', ico:'bolt', txt:"Le jeu attire, fait participer et crée de l'engagement autour de votre marque.", col:'#3B5CC4' },
+   { verbe:'Fidélisez', ico:'heart-handshake', txt:"Une base de contacts qui vous appartient, réutilisable à tout moment et avec leur consentement.", col:'#00B4A0' },
  ] },
  { desc:"Vous avez déjà des contacts ? Flowin vous aide à valoriser et exploiter votre capital.", steps:[
-   { verbe:'Exploitez', ico:'rotate-clockwise', txt:"Réactivez vos clients et prospects dormants.", col:'#7B2FBE' },
-   { verbe:'Dynamisez', ico:'bolt', txt:"Créez de l'engagement, gamifiez, créez de l'intérêt.", col:'#3B5CC4' },
-   { verbe:'Transformez', ico:'trending-up', txt:"À vous de jouer ! Augmentez vos ventes, votre fréquentation, vos visites…", col:'#00B4A0' },
+   { verbe:'Exploitez', ico:'rotate-clockwise', txt:"Réveillez vos clients et prospects endormis avec une nouvelle animation.", col:'#E85D04' },
+   { verbe:'Dynamisez', ico:'bolt', txt:"Un jeu, un tirage, un défi : vous recréez de l'intérêt et du trafic.", col:'#3B5CC4' },
+   { verbe:'Transformez', ico:'trending-up', txt:"Plus de trafic, plus de ventes, plus de visites : votre base travaille pour vous.", col:'#00B4A0' },
  ] },
 ]
 const G_AGE = 'linear-gradient(90deg,#3B5CC4,#00B4A0)'
