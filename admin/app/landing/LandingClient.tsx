@@ -45,7 +45,7 @@ const PROFILS: Profil[] = [
    scenario:"Et si on créait une base client qui vous permettrait d'augmenter votre fréquentation ?",
    reponse:"Captez les clients qui passent sans laisser de trace, puis réactivez cette base quand vous en avez besoin : heures creuses, soirée à thème, nouveau menu, promo…",
    benefice:"Vous ne subissez plus les creux : vous les remplissez avec vos propres clients, sans racheter de la pub à chaque fois." },
- { ico:'calendar-event', lbl:"Créateur d'events", col:'#7B2FBE',
+ { ico:'calendar-event', lbl:"Créateur d'events", col:'#0B6E4F',
    scenario:"Et si vous pouviez recontacter directement ceux et celles qui sont venus ? Et si vous mesuriez votre trafic avec plus de précision — pour avoir de meilleurs partenaires ?",
    reponse:"Chaque participant entre dans une base qui vous appartient. Vous la réactivez d'un event à l'autre et vous savez précisément qui est venu, d'où, et combien.",
    benefice:"Vous ne repartez jamais de zéro et vous négociez vos partenariats avec des chiffres réels, pas des estimations." },
