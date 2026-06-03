@@ -256,8 +256,10 @@ const CSS = `
   .hstat .v{font-size:clamp(26px,4vw,36px);font-weight:900;color:#00B4A0}
   .hstat .l{font-size:12px;color:rgba(255,255,255,.55)}
   .cta{display:inline-flex;align-items:center;gap:8px;background:#00B4A0;color:#fff;border:none;border-radius:100px;padding:16px 36px;font-size:16px;font-weight:800;cursor:pointer;text-decoration:none}
-  .prob{display:grid;gap:10px;max-width:680px;margin:28px auto 0}
-  .prob .q{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;font-size:15px;text-align:left}
+  .prob{display:flex;flex-direction:column;max-width:660px;margin:28px auto 0;text-align:left}
+  .prob .q{display:flex;align-items:flex-start;gap:14px;padding:17px 2px;font-size:17px;line-height:1.4;color:rgba(255,255,255,.92);border-bottom:1px solid rgba(255,255,255,.1)}
+  .prob .q:last-child{border-bottom:none}
+  .prob .q::before{content:'';width:8px;height:8px;border-radius:50%;background:#00B4A0;margin-top:7px;flex-shrink:0}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
   .bcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:26px 22px;text-align:center;box-shadow:0 8px 30px rgba(20,40,80,.05)}
   .bcard .ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px}
@@ -470,7 +472,8 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
             {[
               'Combien de personnes sont passées à votre stand, boutique, event ?',
               'Pouvez-vous les recontacter ?',
-              'Combien de clients viennent chaque jour ? Quel est le pic de fréquentation ?',
+              'Combien de clients viennent chaque jour ?',
+              'Quel est le pic de fréquentation ?',
               'D\u2019où viennent-ils ?',
               'Quel est votre taux de retour questionnaire ?',
               'Quels chiffres transmettre à vos partenaires ?',
