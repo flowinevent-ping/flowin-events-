@@ -73,8 +73,8 @@ const MODULES: Module[] = [
 ]
 interface Tier { nom:string; prix:string; unite:string; badge:string|null; hl:boolean; f:string[] }
 const PRICING: Tier[] = [
- { nom:'Votre campagne', prix:'189', unite:'/ event · HT', badge:null, hl:false, f:["Jusqu'à 1 000 participants","Tous les modules","Visuel co-brandé","Data stockée","Dashboard Pro temps réel","Export CSV","Chef de projet dédié"] },
- { nom:'Abonnement', prix:'289', unite:'/ mois', badge:'Recommandé', hl:true, f:["Jusqu'à 3 000 participants / event","Events illimités","Dashboard multi-events","Super events + tirage global","Rapports analytiques","Chef de projet dédié"] },
+ { nom:'Votre campagne', prix:'189', unite:'/ event · HT', badge:null, hl:false, f:["Jusqu'à 1 000 participants","Tous les modules","Visuel co-brandé","Data stockée","Tableau de bord Pro temps réel","Export CSV","Chef de projet dédié"] },
+ { nom:'Abonnement', prix:'289', unite:'/ mois', badge:'Recommandé', hl:true, f:["Jusqu'à 3 000 participants / event","Events illimités","Tableau de bord multi-events","Super events + tirage global","Rapports analytiques","Chef de projet dédié"] },
  { nom:'Sur mesure', prix:'Devis', unite:'', badge:null, hl:false, f:["Gros volumes","Stratégie & dev","Campagne sur fichier client","Customisation","Rapports analytiques","Super-events sponsorisés","Chef de projet dédié"] },
 ]
 interface Step { verbe:string; ico:string; txt:string; col:string }
@@ -93,7 +93,6 @@ const PROCESS: Proc[] = [
 ]
 const G_AGE = 'linear-gradient(90deg,#A855F7,#3B5CC4)'
 const G_GEO = 'linear-gradient(90deg,#00B4A0,#3B5CC4)'
-const G_CONNU = 'linear-gradient(90deg,#3B5CC4,#00B4A0)'
 const AGE: [string,number,number][] = [['36-50 ans',81,100],['51-65 ans',37,46],['26-35 ans',28,35],['65 ans et +',20,25],['18-25 ans',15,19],['Moins de 18',11,14]]
 const GENRE: [string,number,number,string][] = [['Femmes',61,61,'#00B4A0'],['Hommes',39,39,'#3B5CC4']]
 const GEO: [string,number,number][] = [['06140',74,100],['06610',24,33],['06800',23,31],['06700',22,30],['06000',22,30],['06130',18,24]]
@@ -101,7 +100,6 @@ const RETOUR: [string,number,number,string][] = [['Oui',66,66,'#22C55E'],['Peut-
 const CONNU: [string,number][] = [['Affiche / Flyer',42],['Mairie',13],['Site internet',17],['Instagram',15],['Facebook',13]]
 const REDIR: [string,string,number,string][] = [['Site internet','world',38,'#'],['Instagram','brand-instagram',31,'#'],['Facebook','brand-facebook',24,'#']]
 const G_JOURS = 'linear-gradient(90deg,#00B4A0,#22C55E)'
-const G_HEURES = 'linear-gradient(90deg,#F59E0B,#F97316)'
 const JOURS: [string,number,number][] = [['Samedi',71,100],['Dimanche',54,76],['Mercredi',33,46],['Vendredi',21,30],['Jeudi',13,18]]
 const HEURES: [string,number,number][] = [['16h–18h',58,100],['14h–16h',49,84],['10h–12h',38,66],['18h–20h',30,52],['12h–14h',17,29]]
 
@@ -112,6 +110,114 @@ function Bar({ lbl, n, w, col }: { lbl:string; n:string|number; w:number; col:st
       <span className="bt"><span className="bf" style={{ width:w+'%', background:col }} /></span>
       <span className="bn">{n}</span>
     </div>
+  )
+}
+
+function Pyramid({ data, grad }:{ data:[string,number,number][]; grad:string }) {
+  const max = Math.max(...data.map(d => d[1]))
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:9 }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12 }}>
+          <span style={{ width:78, textAlign:'right', color:'rgba(255,255,255,.7)', flexShrink:0 }}>{d[0]}</span>
+          <span style={{ flex:1, display:'flex', justifyContent:'center' }}>
+            <span style={{ width:((d[1]/max)*100)+'%', height:14, background:grad, borderRadius:100, display:'block' }} />
+          </span>
+          <span style={{ width:26, textAlign:'right', fontWeight:800, color:'#fff', flexShrink:0 }}>{d[1]}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function Donut({ data }:{ data:[string,number,string][] }) {
+  const C = 263.9
+  const total = data.reduce((s, d) => s + d[1], 0) || 1
+  let acc = 0
+  const segs = data.map((d) => {
+    const start = (acc / total) * C
+    const len = (d[1] / total) * C
+    acc += d[1]
+    return { len, start, col:d[2] }
+  })
+  const lead = Math.round((data[0][1] / total) * 100)
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14 }}>
+      <svg width="128" height="128" viewBox="0 0 120 120">
+        <g transform="rotate(-90 60 60)">
+          <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
+          {segs.map((s, i) => (
+            <circle key={i} cx="60" cy="60" r="42" fill="none" stroke={s.col} strokeWidth="16"
+              strokeDasharray={s.len + ' ' + (C - s.len)} strokeDashoffset={-s.start} />
+          ))}
+        </g>
+        <text x="60" y="57" textAnchor="middle" fill="#fff" fontSize="22" fontWeight="900">{lead}%</text>
+        <text x="60" y="73" textAnchor="middle" fill="rgba(255,255,255,.5)" fontSize="10">{data[0][0]}</text>
+      </svg>
+      <div style={{ display:'flex', flexDirection:'column', gap:7, width:'100%' }}>
+        {data.map((d, i) => (
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'rgba(255,255,255,.7)' }}>
+            <span style={{ width:10, height:10, borderRadius:3, background:d[2], flexShrink:0 }} />
+            <span style={{ flex:1 }}>{d[0]}</span>
+            <span style={{ fontWeight:800, color:'#fff' }}>{d[1]}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Gauge({ pct, label, color }:{ pct:number; label:string; color:string }) {
+  const C = Math.PI * 50
+  const len = (pct / 100) * C
+  return (
+    <div style={{ display:'flex', justifyContent:'center', paddingTop:6 }}>
+      <svg width="186" height="108" viewBox="0 0 120 70">
+        <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="14" strokeLinecap="round" />
+        <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke={color} strokeWidth="14" strokeLinecap="round" strokeDasharray={len + ' ' + C} />
+        <text x="60" y="50" textAnchor="middle" fill="#fff" fontSize="26" fontWeight="900">{pct}%</text>
+        <text x="60" y="64" textAnchor="middle" fill="rgba(255,255,255,.5)" fontSize="9">{label}</text>
+      </svg>
+    </div>
+  )
+}
+
+function Cols({ data, grad }:{ data:[string,number,number][]; grad:string }) {
+  const max = Math.max(...data.map(d => d[1]))
+  return (
+    <div style={{ display:'flex', alignItems:'flex-end', gap:8, paddingTop:6 }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
+          <span style={{ fontSize:12, fontWeight:800, color:'#fff' }}>{d[1]}</span>
+          <span style={{ width:'100%', maxWidth:30, height:Math.round((d[1]/max)*92)+'px', background:grad, borderRadius:'6px 6px 0 0', display:'block' }} />
+          <span style={{ fontSize:10, color:'rgba(255,255,255,.6)', whiteSpace:'nowrap' }}>{d[0]}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function Wave({ data, color }:{ data:[string,number,number][]; color:string }) {
+  const W = 280, H = 90, pad = 18
+  const innerW = W - pad * 2
+  const max = Math.max(...data.map(d => d[1]))
+  const n = data.length
+  const pts = data.map((d, i) => [pad + (n === 1 ? innerW/2 : (i/(n-1))*innerW), H - 6 - (d[1]/max)*(H-26)] as [number,number])
+  const curve = (arr:[number,number][]) => arr.slice(1).map((p, i) => {
+    const x0 = arr[i][0], y0 = arr[i][1], x1 = p[0], y1 = p[1], mx = (x0+x1)/2
+    return ' C' + mx + ' ' + y0 + ' ' + mx + ' ' + y1 + ' ' + x1 + ' ' + y1
+  }).join('')
+  const line = 'M' + pts[0][0] + ' ' + pts[0][1] + curve(pts)
+  const area = line + ' L' + pts[n-1][0] + ' ' + H + ' L' + pts[0][0] + ' ' + H + ' Z'
+  return (
+    <svg width="100%" viewBox={'0 0 ' + W + ' ' + (H + 22)} preserveAspectRatio="none" style={{ display:'block' }}>
+      <defs><linearGradient id="wvgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={color} stopOpacity="0.45" /><stop offset="1" stopColor={color} stopOpacity="0" /></linearGradient></defs>
+      <path d={area} fill="url(#wvgrad)" />
+      <path d={line} fill="none" stroke={color} strokeWidth="2.5" />
+      {pts.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r="3" fill={color} />)}
+      {data.map((d, i) => <text key={'v'+i} x={pts[i][0]} y={pts[i][1]-7} textAnchor="middle" fill="#fff" fontSize="9" fontWeight="800">{d[1]}</text>)}
+      {data.map((d, i) => <text key={'l'+i} x={pts[i][0]} y={H+16} textAnchor="middle" fill="rgba(255,255,255,.6)" fontSize="9">{d[0]}</text>)}
+    </svg>
   )
 }
 
@@ -139,7 +245,7 @@ const CSS = `
   .hstat .l{font-size:12px;color:rgba(255,255,255,.55)}
   .cta{display:inline-flex;align-items:center;gap:8px;background:#00B4A0;color:#fff;border:none;border-radius:100px;padding:16px 36px;font-size:16px;font-weight:800;cursor:pointer;text-decoration:none}
   .prob{display:grid;gap:10px;max-width:680px;margin:28px auto 0}
-  .prob .q{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;font-size:15px}
+  .prob .q{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px;font-size:15px;text-align:left}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
   .bcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:26px 22px;text-align:center;box-shadow:0 8px 30px rgba(20,40,80,.05)}
   .bcard .ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px}
@@ -163,7 +269,8 @@ const CSS = `
   .proc-desc{font-size:16px;color:#3a4d63;line-height:1.6;margin-bottom:24px;text-align:center}
   .proc-steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:6px}
   @media(max-width:720px){.proc-steps{grid-template-columns:1fr}}
-  .pstep{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+  .pstep{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;background:#F6F8FB;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:24px 18px}
+  .swipe-hint{display:none}
   .pstep .pico{width:50px;height:50px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:25px}
   .pstep .pverb{font-size:18px;font-weight:800}
   .pstep .ptxt{font-size:14px;color:#5B7085;line-height:1.55}
@@ -182,7 +289,8 @@ const CSS = `
   .kpi{background:rgba(255,255,255,.04);border-radius:12px;padding:14px;text-align:center}
   .kpi .v{font-size:22px;font-weight:900}.kpi .l{font-size:11px;color:rgba(255,255,255,.55)}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-  .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px;align-items:start}
+  .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px;align-items:stretch}
+  .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px}
   .statpanel .barh{margin-top:0}
   .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
   .bar{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px}
@@ -237,7 +345,8 @@ const CSS = `
     .proc-view{padding:24px 16px}
     .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
     .proc-steps::-webkit-scrollbar{display:none}
-    .pstep{flex:0 0 80%;scroll-snap-align:center}
+    .pstep{flex:0 0 85%;scroll-snap-align:center}
+    .swipe-hint{display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:800;letter-spacing:.06em;color:#9aa7b8}
     .statpanels{display:flex;align-items:flex-start;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .statpanels::-webkit-scrollbar{display:none}
     .statpanel{flex:0 0 85%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 14px}
@@ -328,7 +437,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               'Quel est votre taux de retour questionnaire ?',
               'Quels chiffres transmettre à vos partenaires ?',
             ].map((q, i) => (
-              <div className="q" key={i}><Ic n="help-circle" /> {q}</div>
+              <div className="q" key={i}>{q}</div>
             ))}
           </div>
         </div>
@@ -354,6 +463,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 </div>
               ))}
             </div>
+            <div className="swipe-hint">‹&nbsp;&nbsp;Faites glisser&nbsp;&nbsp;›</div>
           </div>
         </div>
       </section>
@@ -429,13 +539,13 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">Opt-in RGPD</div></div>
             </div>
             <div className="statpanels">
-              <div className="statpanel"><div className="barh">Tranches d&apos;âge</div>{AGE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_AGE} />)}</div>
-              <div className="statpanel"><div className="barh">Répartition par genre</div>{GENRE.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
+              <div className="statpanel"><div className="barh">Tranches d&apos;âge</div><Pyramid data={AGE} grad={G_AGE} /></div>
+              <div className="statpanel"><div className="barh">Répartition par genre</div><Donut data={GENRE.map((r) => [r[0], r[1], r[3]] as [string,number,string])} /></div>
+              <div className="statpanel"><div className="barh">Jours de fréquentation</div><Cols data={JOURS} grad={G_JOURS} /></div>
+              <div className="statpanel"><div className="barh">Pics horaires</div><Wave data={HEURES} color="#F59E0B" /></div>
+              <div className="statpanel"><div className="barh">Intention de revenir</div><Gauge pct={RETOUR[0][1]} label="comptent revenir" color={RETOUR[0][3]} /></div>
+              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div><Donut data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#A855F7','#F59E0B','#E8212B'][i]] as [string,number,string])} /></div>
               <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div>{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div>
-              <div className="statpanel"><div className="barh">Intention de revenir</div>{RETOUR.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[2]} col={r[3]} />)}</div>
-              <div className="statpanel"><div className="barh">Jours de fréquentation</div>{JOURS.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_JOURS} />)}</div>
-              <div className="statpanel"><div className="barh">Pics horaires</div>{HEURES.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_HEURES} />)}</div>
-              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div>{CONNU.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]+'%'} w={r[1]*2} col={G_CONNU} />)}</div>
               <div className="statpanel">
                 <div className="barh">Redirections vers vos liens après le jeu</div>
                 <div className="redirviz">
@@ -460,7 +570,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="title" style={{ color:'#fff' }}>Ce que Flowin vous permet de faire</div>
           <div className="gam">
             <div className="gcard"><div className="ic" style={{ color:'#00B4A0' }}><Ic n="device-gamepad-2" /></div><h3>Animer</h3><div className="gi">6 modules de jeu</div><div className="gi">Customisation jeux / lots / quiz</div><div className="gi">Marque blanche</div></div>
-            <div className="gcard"><div className="ic" style={{ color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Dashboard temps réel</div><div className="gi">Stats : genre, âge, opt-in, géo</div><div className="gi">Base client réutilisable</div></div>
+            <div className="gcard"><div className="ic" style={{ color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Tableau de bord temps réel</div><div className="gi">Stats : genre, âge, opt-in, géo</div><div className="gi">Base client réutilisable</div></div>
             <div className="gcard"><div className="ic" style={{ color:'#A855F7' }}><Ic n="users-group" /></div><h3>Mutualiser</h3><div className="gi">Super-events collectifs</div><div className="gi">Sponsoring / partenaires</div><div className="gi">Rejoindre un super-event</div></div>
           </div>
         </div>
