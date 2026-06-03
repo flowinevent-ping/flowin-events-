@@ -142,8 +142,8 @@ function Donut({ data }:{ data:[string,number,string][] }) {
   })
   const lead = Math.round((data[0][1] / total) * 100)
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, padding:'4px 0' }}>
-      <svg width="150" height="150" viewBox="0 0 120 120">
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:13, padding:'2px 0' }}>
+      <svg width="132" height="132" viewBox="0 0 120 120">
         <g transform="rotate(-90 60 60)">
           <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
           {segs.map((s, i) => (
@@ -154,7 +154,7 @@ function Donut({ data }:{ data:[string,number,string][] }) {
         <text x="60" y="57" textAnchor="middle" fill="#fff" fontSize="23" fontWeight="900">{lead}%</text>
         <text x="60" y="73" textAnchor="middle" fill="rgba(255,255,255,.5)" fontSize="10">{data[0][0]}</text>
       </svg>
-      <div style={{ display:'flex', flexDirection:'column', gap:9, width:'100%' }}>
+      <div style={{ display:'flex', flexDirection:'column', gap:7, width:'100%' }}>
         {data.map((d, i) => (
           <div key={i} style={{ display:'flex', alignItems:'center', gap:10, fontSize:14, color:'rgba(255,255,255,.72)' }}>
             <span style={{ width:12, height:12, borderRadius:4, background:d[2], flexShrink:0 }} />
@@ -405,6 +405,12 @@ const CSS = `
   .kpi .v{font-size:30px}.kpi .l{font-size:14px}
   .barh{font-size:19px;margin-bottom:18px}.bar{font-size:14px}.bar .bl{width:110px}
   .pm-line{font-size:16px}
+  @media(max-width:360px){
+    .sec{padding:34px 16px}
+    .bar .bl{width:84px}
+    .barh{font-size:17px}
+    .pstep .pverb{font-size:23px}
+  }
 `
 
 export default function LandingClient({ source = '' }: { cfg?: unknown; source?: string }) {
