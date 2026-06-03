@@ -241,15 +241,15 @@ const CSS = `
   .sec{padding:70px 24px}
   .sec-dark{background:#0E1B30;color:#fff}
   .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#00B4A0;text-align:center;margin-bottom:12px}
-  .title{font-size:clamp(25px,5.8vw,34px);font-weight:800;text-align:center;line-height:1.22;overflow-wrap:break-word}
+  .title{font-size:clamp(28px,6.6vw,38px);font-weight:800;text-align:center;line-height:1.2;overflow-wrap:break-word}
   .sub{font-size:14px;color:rgba(120,130,150,.9);text-align:center;margin-top:8px}
   .sec-dark .sub{color:rgba(255,255,255,.55)}
   .pico{width:20px;height:20px;flex-shrink:0;color:#00B4A0}
   .hero{background:linear-gradient(160deg,#13314f 0%,#0E2742 55%,#0A1C32 100%);color:#fff;text-align:center;padding:90px 24px 80px}
-  .logo{font-size:clamp(40px,8vw,64px);font-weight:900;letter-spacing:-.02em}
+  .logo{font-size:clamp(56px,13vw,78px);font-weight:900;letter-spacing:-.02em}
   .logo em{color:#A855F7;font-style:normal}
-  .promise{font-size:clamp(24px,4vw,40px);font-weight:900;line-height:1.15;margin:18px auto 16px;max-width:760px}
-  .baseline{font-size:clamp(17px,2.5vw,22px);font-weight:900;margin-bottom:10px}
+  .promise{font-size:clamp(31px,7.2vw,46px);font-weight:900;line-height:1.13;margin:18px auto 16px;max-width:760px}
+  .baseline{font-size:clamp(21px,4.8vw,28px);font-weight:900;margin-bottom:10px}
   .baseline .c1{color:#F97316}.baseline .c2{color:#3B5CC4}.baseline .c3{color:#00B4A0}
   .ans{color:rgba(255,255,255,.6);font-size:15px;margin-bottom:26px}
   .hstats{display:flex;gap:26px;justify-content:center;margin:24px 0 26px;flex-wrap:wrap}
@@ -291,8 +291,8 @@ const CSS = `
   .proof .l{font-size:13px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;text-align:center}
   .quote{font-size:18px;font-style:italic;color:rgba(255,255,255,.9);text-align:center;max-width:700px;margin:0 auto}
   .grid3m{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
-  .mcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:26px 22px;box-shadow:0 8px 30px rgba(20,40,80,.06)}
-  .mcard .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px}
+  .mcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:26px 22px;box-shadow:0 8px 30px rgba(20,40,80,.06);text-align:center}
+  .mcard .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px}
   .mcard h3{font-size:16px;margin-bottom:4px}.mcard .tag{font-size:12px;color:#00B4A0;font-weight:700;margin-bottom:10px}
   .mcard li{font-size:12px;color:#5a6b80;padding:5px 0;border-top:1px solid rgba(0,0,0,.06);list-style:none;display:flex;gap:6px}
   .mcard li::before{content:'✓';color:#00B4A0;font-weight:900}
@@ -363,14 +363,14 @@ const CSS = `
     .cdot.on{width:24px;border-radius:100px;background:#00B4A0}
     .sec-dark .cdot{background:rgba(255,255,255,.22)}
     .sec-dark .cdot.on{background:#00B4A0}
-    .statpanels{display:flex;align-items:flex-start;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
+    .statpanels{display:flex;flex-direction:column;gap:14px}
     .statpanels::-webkit-scrollbar{display:none}
-    .statpanel{flex:0 0 92%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
+    .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
     .statpanel .redirviz{gap:8px}
     .statpanel .redirviz .rv{min-width:0;padding:12px 6px}
-    .gam{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
+    .gam{display:flex;flex-direction:column;gap:14px}
     .gam::-webkit-scrollbar{display:none}
-    .gcard{flex:0 0 78%;scroll-snap-align:center}
+    .gcard{width:auto}
     .price{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0}
     .price::-webkit-scrollbar{display:none}
     .pcard{flex:0 0 80%;scroll-snap-align:center}
@@ -590,7 +590,6 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 </div>
               </div>
             </div>
-            <Dots id="stats" count={8} />
             <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
           </div>
         </div>
