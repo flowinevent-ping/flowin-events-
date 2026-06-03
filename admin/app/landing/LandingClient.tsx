@@ -59,12 +59,12 @@ const PROFILS: Profil[] = [
 ]
 interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
- { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Premier contact CRM', f:['Segments personnalisables','Parcours mobile-first','Capture CRM en 30s'] },
- { ico:'help-circle', nom:'Quiz événement', col:'#0B6E4F', tag:'Qualifiez en engageant', f:['Banques par thème','Score animé','Ticket de tirage auto'] },
- { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'Tirage transparent', f:['Lots avec stocks','Tirage vérifiable','Export CSV gagnants'] },
- { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La foule en temps réel', f:['Résultats instantanés','Multi-choix','Historique des votes'] },
- { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:'Capture autonome', f:['Parcours libre','Score personnel','Ticket de participation'] },
- { ico:'award', nom:'Quiz master', col:'#F97316', tag:'Engagement compétitif', f:['Classement temps réel','Questions simultanées','Ambiance tournoi'] },
+ { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Le premier lien', f:["L'envie en une seconde","Le passage devient contact","Une base à vous, vite"] },
+ { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:'Immersif & personnalisable', f:["Des questions à votre image","Le sondage avant / pendant / après","Engage, qualifie et récompense"] },
+ { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:"Crée l'attente", f:["Entretient l'engagement","Donne une raison de revenir","Chacun entre dans votre base"] },
+ { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La voix du public', f:["Un avis terrain immédiat","Un événement vivant","Asso, event, institution"] },
+ { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:"L'engagement en autonomie", f:["Tourne sans animateur","Capte en continu","Boutique, stand, vitrine"] },
+ { ico:'award', nom:'Quiz master', col:'#F97316', tag:"L'émotion collective", f:["Un moment fédérateur","L'effet de groupe","Marque les esprits"] },
 ]
 interface Tier { nom:string; prix:string; unite:string; badge:string|null; hl:boolean; f:string[] }
 const PRICING: Tier[] = [
