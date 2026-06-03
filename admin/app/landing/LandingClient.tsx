@@ -358,15 +358,19 @@ const CSS = `
     .price{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0}
     .price::-webkit-scrollbar{display:none}
     .pcard{flex:0 0 80%;scroll-snap-align:center}
-    .sec{padding:48px 20px}
-    .hero{padding:58px 20px 50px}
-    .prob{margin-top:22px}
-    .proc-sel{margin:4px 0 20px}
-    .proc-view{padding:24px 16px;margin-top:4px}
-    .dash{padding:20px 16px;margin-top:22px}
-    .kpis{margin-bottom:18px;gap:12px}
-    .promise{margin:14px auto 14px}
-    .hstats{margin:20px 0 22px}
+    .sec{padding:38px 20px}
+    .hero{padding:48px 20px 40px}
+    .prob{margin-top:18px}
+    .grid3,.grid3m,.gam,.price{margin-top:18px}
+    .chips{margin:18px 0}
+    .proc-sel{margin:2px 0 16px}
+    .proc-view{padding:22px 15px;margin-top:2px}
+    .proc-desc{margin-bottom:16px}
+    .dash{padding:18px 14px;margin-top:18px}
+    .kpis{margin-bottom:14px;gap:10px}
+    .promise{margin:12px auto 12px}
+    .hstats{margin:18px 0 20px}
+    .ans{margin-bottom:18px}
   }
   /* Lisibilite : tailles & espacements homogenes */
   .eyebrow{font-size:15px;letter-spacing:.12em;margin-bottom:14px}
