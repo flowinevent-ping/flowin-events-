@@ -61,7 +61,7 @@ interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
  { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Le premier lien', f:["L'envie en une seconde","Le passage devient contact","Une base à vous, vite"] },
  { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:'Immersif & personnalisable', f:["Des questions à votre image","Le sondage avant / pendant / après","Engage, qualifie et récompense"] },
- { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:"Crée l'attente", f:["Entretient l'engagement","Donne une raison de revenir","Chacun entre dans votre base"] },
+ { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'100% personnalisable', f:["Vos lots, vos couleurs","Tirage automatique","Publication des gagnants"] },
  { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La voix du public', f:["Un avis terrain immédiat","Un événement vivant","Asso, event, institution"] },
  { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:"L'engagement en autonomie", f:["Tourne sans animateur","Capte en continu","Boutique, stand, vitrine"] },
  { ico:'award', nom:'Quiz master', col:'#F97316', tag:"L'émotion collective", f:["Un moment fédérateur","L'effet de groupe","Marque les esprits"] },
@@ -83,7 +83,7 @@ const PROCESS: Proc[] = [
  { desc:"Vous avez déjà des contacts ? Flowin vous aide à valoriser et exploiter votre capital.", steps:[
    { verbe:'Exploitez', ico:'rotate-clockwise', txt:"Réveillez vos clients et prospects endormis avec une nouvelle animation.", col:'#E85D04' },
    { verbe:'Dynamisez', ico:'bolt', txt:"Un jeu, un tirage, un défi : vous recréez de l'intérêt et du trafic.", col:'#3B5CC4' },
-   { verbe:'Transformez', ico:'trending-up', txt:"Plus de trafic, plus de ventes, plus de visites : votre base travaille pour vous.", col:'#00B4A0' },
+   { verbe:'Transformez', ico:'trending-up', txt:"Plus de trafic = plus de ventes. Vous n'êtes plus passif, votre base travaille pour vous.", col:'#00B4A0' },
  ] },
 ]
 const G_AGE = 'linear-gradient(90deg,#3B5CC4,#00B4A0)'
