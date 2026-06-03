@@ -462,7 +462,6 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       <section className="sec sec-dark" id="probleme">
         <div className="wrap" style={{ maxWidth:760, textAlign:'center' }}>
           <div className="title" style={{ color:'#fff' }}>Des visiteurs, des prospects, des clients passent. Et après{'\u00A0'}?</div>
-          <div className="sub">Avec Flowin, vous avez la réponse à chacune de ces questions{'\u00A0'}:</div>
           <div className="prob">
             {[
               'Combien de personnes sont passées à votre stand, boutique, event ?',
