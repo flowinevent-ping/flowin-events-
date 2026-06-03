@@ -462,7 +462,9 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       {/* PROBLEME */}
       <section className="sec sec-dark" id="probleme">
         <div className="wrap" style={{ maxWidth:760, textAlign:'center' }}>
+          <div className="eyebrow">Le constat</div>
           <div className="title" style={{ color:'#fff' }}>Des visiteurs, des prospects, des clients passent. Et après{'\u00A0'}?</div>
+          <div className="sub">Aujourd&apos;hui, ces questions restent sans réponse{'\u00A0'}:</div>
           <div className="prob">
             {[
               'Combien de personnes sont passées à votre stand, boutique, event ?',
