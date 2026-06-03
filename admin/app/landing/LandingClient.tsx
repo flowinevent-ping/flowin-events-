@@ -228,7 +228,7 @@ const CSS = `
   .sec{padding:70px 24px}
   .sec-dark{background:#0E1B30;color:#fff}
   .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#00B4A0;text-align:center;margin-bottom:12px}
-  .title{font-size:clamp(20px,4.4vw,32px);font-weight:800;text-align:center;line-height:1.25;overflow-wrap:break-word}
+  .title{font-size:clamp(25px,5.8vw,34px);font-weight:800;text-align:center;line-height:1.22;overflow-wrap:break-word}
   .sub{font-size:14px;color:rgba(120,130,150,.9);text-align:center;margin-top:8px}
   .sec-dark .sub{color:rgba(255,255,255,.55)}
   .pico{width:20px;height:20px;flex-shrink:0;color:#00B4A0}
@@ -278,7 +278,7 @@ const CSS = `
   .proof .l{font-size:13px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;text-align:center}
   .quote{font-size:18px;font-style:italic;color:rgba(255,255,255,.9);text-align:center;max-width:700px;margin:0 auto}
   .grid3m{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
-  .mcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:22px}
+  .mcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:26px 22px;box-shadow:0 8px 30px rgba(20,40,80,.06)}
   .mcard .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px}
   .mcard h3{font-size:16px;margin-bottom:4px}.mcard .tag{font-size:12px;color:#00B4A0;font-weight:700;margin-bottom:10px}
   .mcard li{font-size:12px;color:#5a6b80;padding:5px 0;border-top:1px solid rgba(0,0,0,.06);list-style:none;display:flex;gap:6px}
@@ -358,20 +358,30 @@ const CSS = `
     .price{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0}
     .price::-webkit-scrollbar{display:none}
     .pcard{flex:0 0 80%;scroll-snap-align:center}
+    .sec{padding:48px 20px}
+    .hero{padding:58px 20px 50px}
+    .prob{margin-top:22px}
+    .proc-sel{margin:4px 0 20px}
+    .proc-view{padding:24px 16px;margin-top:4px}
+    .dash{padding:20px 16px;margin-top:22px}
+    .kpis{margin-bottom:18px;gap:12px}
+    .promise{margin:14px auto 14px}
+    .hstats{margin:20px 0 22px}
   }
-  /* Lisibilite : eyebrows + pictos & textes agrandis (palier 2) */
-  .eyebrow{font-size:15px;letter-spacing:.12em}
-  .sub{font-size:16px}
+  /* Lisibilite : tailles & espacements homogenes */
+  .eyebrow{font-size:15px;letter-spacing:.12em;margin-bottom:14px}
+  .sub{font-size:17px;margin-top:10px}
   .bcard .ic{width:60px;height:60px;font-size:32px}
-  .bcard h3{font-size:20px}.bcard p{font-size:15px}
+  .bcard h3{font-size:21px}.bcard p{font-size:15px}
   .chip .ic{width:56px;height:56px;font-size:30px}.chip .nm{font-size:15px}
-  .pstep .pico{width:62px;height:62px;font-size:32px}.pstep .pverb{font-size:21px}.pstep .ptxt{font-size:16px}
+  .pstep .pico{width:66px;height:66px;font-size:34px}.pstep .pverb{font-size:26px}.pstep .ptxt{font-size:17px;line-height:1.55}
   .ptext{font-size:18px}
-  .mcard .ic{width:58px;height:58px;font-size:30px}.mcard h3{font-size:19px}.mcard .tag{font-size:14px}.mcard li{font-size:14px}
-  .gcard .ic{font-size:52px}.gcard h3{font-size:23px}.gcard .gi{font-size:15px}
-  .pcard .pn{font-size:15px}.pcard li{font-size:15px}.pcard .pp{font-size:36px}
-  .kpi .v{font-size:27px}.kpi .l{font-size:13px}
-  .barh{font-size:15px}.bar{font-size:14px}.bar .bl{width:110px}
+  .proc-desc{font-size:17px}
+  .mcard .ic{width:62px;height:62px;font-size:32px}.mcard h3{font-size:22px}.mcard .tag{font-size:15px}.mcard li{font-size:15px}
+  .gcard .ic{font-size:54px}.gcard h3{font-size:24px}.gcard .gi{font-size:16px}
+  .pcard .pn{font-size:16px}.pcard li{font-size:16px}.pcard .pp{font-size:40px}.pcard .pu{font-size:15px}
+  .kpi .v{font-size:30px}.kpi .l{font-size:14px}
+  .barh{font-size:17px;margin-bottom:16px}.bar{font-size:14px}.bar .bl{width:110px}
   .pm-line{font-size:16px}
 `
 
