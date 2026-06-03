@@ -354,11 +354,11 @@ const CSS = `
     .chip{flex:0 0 auto;scroll-snap-align:center}
     .grid3m{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .grid3m::-webkit-scrollbar{display:none}
-    .mcard{flex:0 0 90%;scroll-snap-align:center}
+    .mcard{flex:0 0 100%;scroll-snap-align:center}
     .proc-view{padding:24px 16px}
     .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
     .proc-steps::-webkit-scrollbar{display:none}
-    .pstep{flex:0 0 90%;scroll-snap-align:center}
+    .pstep{flex:0 0 100%;scroll-snap-align:center}
     .cdots{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:18px}
     .cdot{width:9px;height:9px;border-radius:50%;border:none;padding:0;background:rgba(0,0,0,.16);cursor:pointer;transition:width .2s,background .2s}
     .cdot.on{width:24px;border-radius:100px;background:#00B4A0}
@@ -366,7 +366,7 @@ const CSS = `
     .sec-dark .cdot.on{background:#00B4A0}
     .statpanels{display:flex;align-items:stretch;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
     .statpanels::-webkit-scrollbar{display:none}
-    .statpanel{flex:0 0 92%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
+    .statpanel{flex:0 0 100%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
     .statpanel .redirviz{gap:8px}
     .statpanel .redirviz .rv{min-width:0;padding:12px 6px}
     .gam{display:flex;flex-direction:column;gap:14px}
@@ -374,7 +374,7 @@ const CSS = `
     .gcard{width:auto}
     .price{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0}
     .price::-webkit-scrollbar{display:none}
-    .pcard{flex:0 0 80%;scroll-snap-align:center}
+    .pcard{flex:0 0 100%;scroll-snap-align:center}
     .sec{padding:38px 20px}
     .hero{padding:48px 20px 40px}
     .prob{margin-top:18px}
@@ -615,7 +615,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="eyebrow">Tarifs</div>
           <div className="title">Boostez, mesurez, gardez le contact.</div>
           <div className="sub">Flowin : vous créez l&apos;événement, on crée l&apos;engagement.</div>
-          <div className="price">
+          <div className="price" id="tarifs">
             {PRICING.map((pr, i) => (
               <div className={'pcard' + (pr.hl?' hl':'')} key={i}>
                 {pr.badge && <div className="pbadge">{pr.badge}</div>}
@@ -626,6 +626,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               </div>
             ))}
           </div>
+          <Dots id="tarifs" count={PRICING.length} />
           <div className="pm-line"><span style={{ color:'#3B5CC4', display:'inline-flex' }}><Ic n="user-check" /></span> Un chef de projet dédié à votre compte.</div>
         </div>
       </section>
