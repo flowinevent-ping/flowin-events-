@@ -59,10 +59,10 @@ const PROFILS: Profil[] = [
 ]
 interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
- { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Le premier lien', f:["L'envie en une seconde","Le passage devient contact","Une base à vous, vite"] },
- { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:'Immersif & personnalisable', f:["Des questions à votre image","Le sondage avant / pendant / après","Engage, qualifie et récompense"] },
+ { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Le premier lien', f:["L'envie en une seconde","Le passage devient contact","Votre base en quelques secondes"] },
+ { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:'Immersif & personnalisable', f:["Des questions à votre image","Une animation avant / pendant / après vos events","Engage, qualifie et récompense"] },
  { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'100% personnalisable', f:["Vos lots, vos couleurs","Tirage automatique","Publication des gagnants"] },
- { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La voix du public', f:["Un avis terrain immédiat","Un événement vivant","Asso, event, institution"] },
+ { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La voix du public', f:["Donnez la parole à votre public","Récoltez, sondez en direct","Asso, event, institution"] },
  { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:"L'engagement en autonomie", f:["Tourne sans animateur","Capte en continu","Boutique, stand, vitrine"] },
  { ico:'award', nom:'Quiz master', col:'#F97316', tag:"L'émotion collective", f:["Un moment fédérateur","L'effet de groupe","Marque les esprits"] },
 ]
@@ -529,7 +529,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="proof">
             <div><div className="v" style={{ color:'#00B4A0' }}>980</div><div className="l">contacts</div></div>
             <div><div className="v" style={{ color:'#F59E0B' }}>5</div><div className="l">dates</div></div>
-            <div><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">opt-in</div></div>
+            <div><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">souhaitent rester en contact</div></div>
           </div>
           <div className="quote">« En 5 dates, nous avons capté 980 personnes qui ont accepté d&apos;être recontactées. »</div>
         </div>
@@ -566,7 +566,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <div className="kpi"><div className="v" style={{ color:'#00B4A0' }}>192</div><div className="l">Participants</div></div>
               <div className="kpi"><div className="v" style={{ color:'#00B4A0' }}>43 ans</div><div className="l">Âge moyen</div></div>
               <div className="kpi"><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">Conversion</div></div>
-              <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">Opt-in RGPD</div></div>
+              <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">souhaitent rester en contact</div></div>
             </div>
             <div className="statpanels" id="stats">
               <div className="statpanel"><div className="barh">Tranches d&apos;âge</div><div className="spbody"><Pyramid data={AGE} grad={G_AGE} /></div></div>
@@ -601,7 +601,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="title" style={{ color:'#fff' }}>Ce que Flowin vous permet de faire</div>
           <div className="gam" id="services">
             <div className="gcard"><div className="ic" style={{ background:'#00B4A018', color:'#00B4A0' }}><Ic n="device-gamepad-2" /></div><h3>Animer</h3><div className="gi">6 modules de jeu</div><div className="gi">Customisation jeux / lots / quiz</div><div className="gi">Marque blanche</div></div>
-            <div className="gcard"><div className="ic" style={{ background:'#3B5CC418', color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Tableau de bord temps réel</div><div className="gi">Stats : genre, âge, opt-in, géo</div><div className="gi">Base client réutilisable</div></div>
+            <div className="gcard"><div className="ic" style={{ background:'#3B5CC418', color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Tableau de bord temps réel</div><div className="gi">Stats : genre, âge, consentement, géo</div><div className="gi">Base client réutilisable</div></div>
             <div className="gcard"><div className="ic" style={{ background:'#F59E0B18', color:'#F59E0B' }}><Ic n="users-group" /></div><h3>Mutualiser</h3><div className="gi">Super-events collectifs</div><div className="gi">Sponsoring / partenaires</div><div className="gi">Rejoindre un super-event</div></div>
           </div>
           <Dots id="services" count={3} />
