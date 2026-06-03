@@ -143,7 +143,7 @@ function Donut({ data }:{ data:[string,number,string][] }) {
   const lead = Math.round((data[0][1] / total) * 100)
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, padding:'4px 0' }}>
-      <svg width="168" height="168" viewBox="0 0 120 120">
+      <svg width="150" height="150" viewBox="0 0 120 120">
         <g transform="rotate(-90 60 60)">
           <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
           {segs.map((s, i) => (
@@ -303,10 +303,10 @@ const CSS = `
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
   .statpanels{display:grid;grid-template-columns:1fr 1fr;gap:24px 30px;margin-top:6px;align-items:stretch}
   .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px;display:flex;flex-direction:column}
-  .spbody{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .spbody{flex:1;display:flex;flex-direction:column;justify-content:flex-start}
   .statpanel .barh{margin-top:0}
-  .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
-  .bar{display:flex;align-items:center;gap:10px;margin-bottom:13px;font-size:14px}
+  .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.85);margin-bottom:16px;text-align:center}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:17px;font-size:14px}
   .bar .bl{width:92px;color:rgba(255,255,255,.72);flex-shrink:0}
   .bar .bt{flex:1;height:13px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
   .bar .bf{display:block;height:100%;border-radius:100px}
@@ -403,7 +403,7 @@ const CSS = `
   .gcard .ic{font-size:32px}.gcard h3{font-size:24px}.gcard .gi{font-size:17px}
   .pcard .pn{font-size:16px}.pcard li{font-size:16px}.pcard .pp{font-size:40px}.pcard .pu{font-size:15px}
   .kpi .v{font-size:30px}.kpi .l{font-size:14px}
-  .barh{font-size:17px;margin-bottom:16px}.bar{font-size:14px}.bar .bl{width:110px}
+  .barh{font-size:19px;margin-bottom:18px}.bar{font-size:14px}.bar .bl{width:110px}
   .pm-line{font-size:16px}
 `
 
