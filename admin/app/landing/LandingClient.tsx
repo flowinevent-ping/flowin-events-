@@ -91,7 +91,7 @@ const PROCESS: Proc[] = [
    { verbe:'Transformez', ico:'trending-up', txt:"À vous de jouer ! Augmentez vos ventes, votre fréquentation, vos visites…", col:'#00B4A0' },
  ] },
 ]
-const G_AGE = 'linear-gradient(90deg,#A855F7,#3B5CC4)'
+const G_AGE = 'linear-gradient(90deg,#3B5CC4,#00B4A0)'
 const G_GEO = 'linear-gradient(90deg,#00B4A0,#3B5CC4)'
 const AGE: [string,number,number][] = [['36-50 ans',81,100],['51-65 ans',37,46],['26-35 ans',28,35],['65 ans et +',20,25],['18-25 ans',15,19],['Moins de 18',11,14]]
 const GENRE: [string,number,number,string][] = [['Femmes',61,61,'#00B4A0'],['Hommes',39,39,'#3B5CC4']]
@@ -116,14 +116,14 @@ function Bar({ lbl, n, w, col }: { lbl:string; n:string|number; w:number; col:st
 function Pyramid({ data, grad }:{ data:[string,number,number][]; grad:string }) {
   const max = Math.max(...data.map(d => d[1]))
   return (
-    <div style={{ display:'flex', flexDirection:'column', gap:9 }}>
+    <div style={{ display:'flex', flexDirection:'column', gap:13, padding:'4px 0' }}>
       {data.map((d, i) => (
-        <div key={i} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12 }}>
-          <span style={{ width:78, textAlign:'right', color:'rgba(255,255,255,.7)', flexShrink:0 }}>{d[0]}</span>
+        <div key={i} style={{ display:'flex', alignItems:'center', gap:10, fontSize:14 }}>
+          <span style={{ width:84, textAlign:'right', color:'rgba(255,255,255,.72)', flexShrink:0 }}>{d[0]}</span>
           <span style={{ flex:1, display:'flex', justifyContent:'center' }}>
-            <span style={{ width:((d[1]/max)*100)+'%', height:14, background:grad, borderRadius:100, display:'block' }} />
+            <span style={{ width:((d[1]/max)*100)+'%', height:20, background:grad, borderRadius:100, display:'block' }} />
           </span>
-          <span style={{ width:26, textAlign:'right', fontWeight:800, color:'#fff', flexShrink:0 }}>{d[1]}</span>
+          <span style={{ width:30, textAlign:'right', fontWeight:800, color:'#fff', flexShrink:0, fontSize:16 }}>{d[1]}</span>
         </div>
       ))}
     </div>
@@ -142,8 +142,8 @@ function Donut({ data }:{ data:[string,number,string][] }) {
   })
   const lead = Math.round((data[0][1] / total) * 100)
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14 }}>
-      <svg width="128" height="128" viewBox="0 0 120 120">
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, padding:'4px 0' }}>
+      <svg width="168" height="168" viewBox="0 0 120 120">
         <g transform="rotate(-90 60 60)">
           <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="16" />
           {segs.map((s, i) => (
@@ -151,13 +151,13 @@ function Donut({ data }:{ data:[string,number,string][] }) {
               strokeDasharray={s.len + ' ' + (C - s.len)} strokeDashoffset={-s.start} />
           ))}
         </g>
-        <text x="60" y="57" textAnchor="middle" fill="#fff" fontSize="22" fontWeight="900">{lead}%</text>
+        <text x="60" y="57" textAnchor="middle" fill="#fff" fontSize="23" fontWeight="900">{lead}%</text>
         <text x="60" y="73" textAnchor="middle" fill="rgba(255,255,255,.5)" fontSize="10">{data[0][0]}</text>
       </svg>
-      <div style={{ display:'flex', flexDirection:'column', gap:7, width:'100%' }}>
+      <div style={{ display:'flex', flexDirection:'column', gap:9, width:'100%' }}>
         {data.map((d, i) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'rgba(255,255,255,.7)' }}>
-            <span style={{ width:10, height:10, borderRadius:3, background:d[2], flexShrink:0 }} />
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:10, fontSize:14, color:'rgba(255,255,255,.72)' }}>
+            <span style={{ width:12, height:12, borderRadius:4, background:d[2], flexShrink:0 }} />
             <span style={{ flex:1 }}>{d[0]}</span>
             <span style={{ fontWeight:800, color:'#fff' }}>{d[1]}%</span>
           </div>
@@ -182,17 +182,16 @@ function Gauge({ pct, label, color }:{ pct:number; label:string; color:string })
   )
 }
 
-function Cols({ data, grad }:{ data:[string,number,number][]; grad:string }) {
-  const max = Math.max(...data.map(d => d[1]))
+function scrollCar(id:string, dir:number) {
+  if (typeof document === 'undefined') return
+  const el = document.getElementById(id)
+  if (el) el.scrollBy({ left: dir * Math.round(el.clientWidth * 0.85), behavior:'smooth' })
+}
+function CNav({ id }:{ id:string }) {
   return (
-    <div style={{ display:'flex', alignItems:'flex-end', gap:8, paddingTop:6 }}>
-      {data.map((d, i) => (
-        <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
-          <span style={{ fontSize:12, fontWeight:800, color:'#fff' }}>{d[1]}</span>
-          <span style={{ width:'100%', maxWidth:30, height:Math.round((d[1]/max)*92)+'px', background:grad, borderRadius:'6px 6px 0 0', display:'block' }} />
-          <span style={{ fontSize:10, color:'rgba(255,255,255,.6)', whiteSpace:'nowrap' }}>{d[0]}</span>
-        </div>
-      ))}
+    <div className="cnav">
+      <button type="button" aria-label="Précédent" onClick={() => scrollCar(id, -1)}>‹</button>
+      <button type="button" aria-label="Suivant" onClick={() => scrollCar(id, 1)}>›</button>
     </div>
   )
 }
@@ -229,7 +228,7 @@ const CSS = `
   .sec{padding:70px 24px}
   .sec-dark{background:#0E1B30;color:#fff}
   .eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#00B4A0;text-align:center;margin-bottom:12px}
-  .title{font-size:clamp(22px,4vw,32px);font-weight:800;text-align:center;line-height:1.25}
+  .title{font-size:clamp(20px,4.4vw,32px);font-weight:800;text-align:center;line-height:1.25;overflow-wrap:break-word}
   .sub{font-size:14px;color:rgba(120,130,150,.9);text-align:center;margin-top:8px}
   .sec-dark .sub{color:rgba(255,255,255,.55)}
   .pico{width:20px;height:20px;flex-shrink:0;color:#00B4A0}
@@ -270,7 +269,7 @@ const CSS = `
   .proc-steps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:6px}
   @media(max-width:720px){.proc-steps{grid-template-columns:1fr}}
   .pstep{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;background:#F6F8FB;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:24px 18px}
-  .swipe-hint{display:none}
+  .cnav{display:none}
   .pstep .pico{width:50px;height:50px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:25px}
   .pstep .pverb{font-size:18px;font-weight:800}
   .pstep .ptxt{font-size:14px;color:#5B7085;line-height:1.55}
@@ -293,9 +292,9 @@ const CSS = `
   .statpanel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 16px}
   .statpanel .barh{margin-top:0}
   .barh{font-size:13px;font-weight:800;color:rgba(255,255,255,.7);margin-bottom:14px}
-  .bar{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px}
-  .bar .bl{width:92px;color:rgba(255,255,255,.7);flex-shrink:0}
-  .bar .bt{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:13px;font-size:14px}
+  .bar .bl{width:92px;color:rgba(255,255,255,.72);flex-shrink:0}
+  .bar .bt{flex:1;height:13px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
   .bar .bf{display:block;height:100%;border-radius:100px}
   .bar .bn{width:30px;text-align:right;font-weight:800}
   .gam{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
@@ -341,15 +340,16 @@ const CSS = `
     .chip{flex:0 0 auto;scroll-snap-align:center}
     .grid3m{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .grid3m::-webkit-scrollbar{display:none}
-    .mcard{flex:0 0 80%;scroll-snap-align:center}
+    .mcard{flex:0 0 90%;scroll-snap-align:center}
     .proc-view{padding:24px 16px}
     .proc-steps{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:8px}
     .proc-steps::-webkit-scrollbar{display:none}
-    .pstep{flex:0 0 85%;scroll-snap-align:center}
-    .swipe-hint{display:block;text-align:center;margin-top:14px;font-size:13px;font-weight:800;letter-spacing:.06em;color:#9aa7b8}
+    .pstep{flex:0 0 90%;scroll-snap-align:center}
+    .cnav{display:flex;justify-content:center;gap:16px;margin-top:18px}
+    .cnav button{width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(0,0,0,.14);background:#fff;color:#1B3A5C;font-size:24px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.08);padding-bottom:3px}
     .statpanels{display:flex;align-items:flex-start;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
     .statpanels::-webkit-scrollbar{display:none}
-    .statpanel{flex:0 0 85%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 14px}
+    .statpanel{flex:0 0 92%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
     .statpanel .redirviz{gap:8px}
     .statpanel .redirviz .rv{min-width:0;padding:12px 6px}
     .gam{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:10px}
@@ -454,7 +454,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           </div>
           <div className="proc-view">
             <p className="proc-desc">{proc.desc}</p>
-            <div className="proc-steps">
+            <div className="proc-steps" id="besoins">
               {proc.steps.map((s, i) => (
                 <div className="pstep" key={i}>
                   <span className="pico" style={{ background:s.col+'18', color:s.col }}><Ic n={s.ico} /></span>
@@ -463,7 +463,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 </div>
               ))}
             </div>
-            <div className="swipe-hint">‹&nbsp;&nbsp;Faites glisser&nbsp;&nbsp;›</div>
+            <CNav id="besoins" />
           </div>
         </div>
       </section>
@@ -512,7 +512,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
         <div className="wrap">
           <div className="eyebrow">6 mécaniques</div>
           <div className="title">Un module pour chaque moment</div>
-          <div className="grid3m">
+          <div className="grid3m" id="mecaniques">
             {MODULES.map((m, i) => (
               <div className="mcard" key={i}>
                 <div className="ic" style={{ background:m.col+'18', color:m.col }}><Ic n={m.ico} /></div>
@@ -522,6 +522,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               </div>
             ))}
           </div>
+          <CNav id="mecaniques" />
         </div>
       </section>
 
@@ -538,13 +539,13 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <div className="kpi"><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">Conversion</div></div>
               <div className="kpi"><div className="v" style={{ color:'#F59E0B' }}>74%</div><div className="l">Opt-in RGPD</div></div>
             </div>
-            <div className="statpanels">
+            <div className="statpanels" id="stats">
               <div className="statpanel"><div className="barh">Tranches d&apos;âge</div><Pyramid data={AGE} grad={G_AGE} /></div>
               <div className="statpanel"><div className="barh">Répartition par genre</div><Donut data={GENRE.map((r) => [r[0], r[1], r[3]] as [string,number,string])} /></div>
-              <div className="statpanel"><div className="barh">Jours de fréquentation</div><Cols data={JOURS} grad={G_JOURS} /></div>
+              <div className="statpanel"><div className="barh">Jours de fréquentation</div>{JOURS.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_JOURS} />)}</div>
               <div className="statpanel"><div className="barh">Pics horaires</div><Wave data={HEURES} color="#F59E0B" /></div>
               <div className="statpanel"><div className="barh">Intention de revenir</div><Gauge pct={RETOUR[0][1]} label="comptent revenir" color={RETOUR[0][3]} /></div>
-              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div><Donut data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#A855F7','#F59E0B','#E8212B'][i]] as [string,number,string])} /></div>
+              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div><Donut data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#0B6E4F','#F59E0B','#E8212B'][i]] as [string,number,string])} /></div>
               <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div>{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div>
               <div className="statpanel">
                 <div className="barh">Redirections vers vos liens après le jeu</div>
@@ -559,6 +560,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
                 </div>
               </div>
             </div>
+            <CNav id="stats" />
             <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', marginTop:18, textAlign:'center', fontStyle:'italic' }}>Et aussi : « venu avec », événements préférés, créneaux horaires, score par tranche d&apos;âge… tout est mesuré.</div>
           </div>
         </div>
