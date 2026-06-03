@@ -65,7 +65,7 @@ const PROFILS: Profil[] = [
 interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
  { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Premier contact CRM', f:['Segments personnalisables','Parcours mobile-first','Capture CRM en 30s'] },
- { ico:'help-circle', nom:'Quiz événement', col:'#A855F7', tag:'Qualifiez en engageant', f:['Banques par thème','Score animé','Ticket de tirage auto'] },
+ { ico:'help-circle', nom:'Quiz événement', col:'#0B6E4F', tag:'Qualifiez en engageant', f:['Banques par thème','Score animé','Ticket de tirage auto'] },
  { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'Tirage transparent', f:['Lots avec stocks','Tirage vérifiable','Export CSV gagnants'] },
  { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La foule en temps réel', f:['Résultats instantanés','Multi-choix','Historique des votes'] },
  { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:'Capture autonome', f:['Parcours libre','Score personnel','Ticket de participation'] },
@@ -247,7 +247,7 @@ const CSS = `
   .pico{width:20px;height:20px;flex-shrink:0;color:#00B4A0}
   .hero{background:linear-gradient(160deg,#13314f 0%,#0E2742 55%,#0A1C32 100%);color:#fff;text-align:center;padding:90px 24px 80px}
   .logo{font-size:clamp(56px,13vw,78px);font-weight:900;letter-spacing:-.02em}
-  .logo em{color:#A855F7;font-style:normal}
+  .logo em{color:#3B5CC4;font-style:normal}
   .promise{font-size:clamp(31px,7.2vw,46px);font-weight:900;line-height:1.13;margin:18px auto 16px;max-width:760px}
   .baseline{font-size:clamp(21px,4.8vw,28px);font-weight:900;margin-bottom:10px}
   .baseline .c1{color:#F97316}.baseline .c2{color:#3B5CC4}.baseline .c3{color:#00B4A0}
@@ -537,7 +537,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
           <div className="proof">
             <div><div className="v" style={{ color:'#00B4A0' }}>980</div><div className="l">contacts</div></div>
             <div><div className="v" style={{ color:'#F59E0B' }}>5</div><div className="l">dates</div></div>
-            <div><div className="v" style={{ color:'#A855F7' }}>100%</div><div className="l">opt-in</div></div>
+            <div><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">opt-in</div></div>
           </div>
           <div className="quote">« En 5 dates, nous avons capté 980 personnes qui ont accepté d&apos;être recontactées. »</div>
         </div>
@@ -673,7 +673,7 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
 
       {/* FOOTER */}
       <footer style={{ background:'#0A1424', color:'rgba(255,255,255,.5)', textAlign:'center', padding:'30px 24px', fontSize:13, lineHeight:1.7 }}>
-        <div style={{ fontSize:20, fontWeight:900, color:'rgba(255,255,255,.9)', letterSpacing:'-.02em', marginBottom:6 }}>Flow<em style={{ color:'#A855F7', fontStyle:'normal' }}>in</em></div>
+        <div style={{ fontSize:20, fontWeight:900, color:'rgba(255,255,255,.9)', letterSpacing:'-.02em', marginBottom:6 }}>Flow<em style={{ color:'#3B5CC4', fontStyle:'normal' }}>in</em></div>
         <div>Flowin is powered by OPConsult · Vence, France</div>
         <div style={{ marginTop:8 }}>
           <a href="mailto:info@opconsult.co" style={{ color:'#00B4A0', textDecoration:'none' }}>info@opconsult.co</a>
