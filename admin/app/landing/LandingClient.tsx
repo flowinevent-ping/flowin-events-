@@ -59,12 +59,12 @@ const PROFILS: Profil[] = [
 ]
 interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
- { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:'Le premier lien', f:["L'envie en une seconde","Le passage devient contact","Votre base en quelques secondes"] },
- { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:'Immersif & personnalisable', f:["Des questions à votre image","Une animation avant / pendant / après vos events","Engage, qualifie et récompense"] },
- { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'100% personnalisable', f:["Vos lots, vos couleurs","Tirage automatique","Publication des gagnants"] },
- { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'La voix du public', f:["Donnez la parole à votre public","Récoltez, sondez en direct","Asso, event, institution"] },
- { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:"L'engagement en autonomie", f:["Tourne sans animateur","Capte en continu","Boutique, stand, vitrine"] },
- { ico:'award', nom:'Quiz master', col:'#F97316', tag:"L'émotion collective", f:["Un moment fédérateur","L'effet de groupe","Marque les esprits"] },
+ { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:"L'accroche qui capte", f:["Crée l'envie en une seconde","Transforme le passage en contact","Votre base en quelques secondes"] },
+ { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:"L'immersion personnalisée", f:["Une expérience à votre image","Avant, pendant, après l'event","Vous engagez et gardez le contact"] },
+ { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:"L'attente qui fait revenir", f:["Vos lots, vos couleurs","Tirage automatique","Publication des gagnants"] },
+ { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:"Le public qui s'exprime", f:["Donnez la parole en direct","Récoltez avis et ressenti","Un moment vivant et immersif"] },
+ { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:'Le contact en continu', f:["Capte sans animateur","Joue à tout moment","Alimente votre base en continu"] },
+ { ico:'award', nom:'Quiz master', col:'#F97316', tag:"L'émotion collective", f:["Fédère toute la salle","Crée un moment fort","Garde le contact de tous"] },
 ]
 interface Tier { nom:string; prix:string; unite:string; badge:string|null; hl:boolean; f:string[] }
 const PRICING: Tier[] = [
