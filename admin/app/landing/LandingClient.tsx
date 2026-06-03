@@ -317,7 +317,7 @@ const CSS = `
   .gcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:28px 22px;text-align:center;box-shadow:0 10px 34px rgba(0,0,0,.22)}
   .gcard .ic{width:62px;height:62px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px}
   .gcard h3{font-size:22px;font-weight:900;margin-bottom:14px;color:#1B3A5C}
-  .gcard .gi{font-size:15px;color:#5a6b80;padding:11px 0;border-top:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;gap:8px}
+  .gcard .gi{font-size:15px;color:#5a6b80;padding:11px 0;border-top:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:8px;text-align:left}
   .gcard .gi::before{content:'✓';color:#00B4A0;font-weight:900;flex-shrink:0}
   .price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;max-width:920px;margin-left:auto;margin-right:auto}
   .pcard{position:relative;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:18px;padding:28px 22px;text-align:center}
