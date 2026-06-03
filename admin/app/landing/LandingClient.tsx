@@ -456,7 +456,6 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
         <div className="logo">Flow<em>in</em></div>
         <h1 className="promise">Transformez votre passage en prospect, vos prospects en clients.</h1>
         <div className="baseline"><span className="c1">Captez</span> · <span className="c2">Dynamisez</span> · <span className="c3">Fidélisez</span></div>
-        <a className="cta" style={{ marginTop:18 }} href="/parcours/spin?ev=ev-flowin-demo">Jouer et gagner mon premier event →</a>
       </section>
 
       {/* PROBLEME */}
