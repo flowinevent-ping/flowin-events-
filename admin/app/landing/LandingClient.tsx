@@ -312,10 +312,11 @@ const CSS = `
   .bar .bf{display:block;height:100%;border-radius:100px}
   .bar .bn{width:30px;text-align:right;font-weight:800}
   .gam{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
-  .gcard{background:linear-gradient(180deg,rgba(16,31,56,.9),rgba(10,20,36,.9));border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:28px 22px;text-align:center}
-  .gcard .ic{font-size:40px;margin-bottom:12px;display:inline-flex}
-  .gcard h3{font-size:20px;font-weight:900;margin-bottom:12px}
-  .gcard .gi{font-size:13px;color:rgba(255,255,255,.6);padding:7px 0;border-top:1px solid rgba(255,255,255,.07)}
+  .gcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:28px 22px;text-align:center;box-shadow:0 10px 34px rgba(0,0,0,.22)}
+  .gcard .ic{width:62px;height:62px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px}
+  .gcard h3{font-size:22px;font-weight:900;margin-bottom:14px;color:#1B3A5C}
+  .gcard .gi{font-size:15px;color:#5a6b80;padding:11px 0;border-top:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;gap:8px}
+  .gcard .gi::before{content:'✓';color:#00B4A0;font-weight:900;flex-shrink:0}
   .price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;max-width:920px;margin-left:auto;margin-right:auto}
   .pcard{position:relative;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:18px;padding:28px 22px;text-align:center}
   .pcard.hl{border:2px solid #00B4A0}
@@ -369,9 +370,9 @@ const CSS = `
     .statpanel{flex:0 0 100%;scroll-snap-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 18px}
     .statpanel .redirviz{gap:8px}
     .statpanel .redirviz .rv{min-width:0;padding:12px 6px}
-    .gam{display:flex;flex-direction:column;gap:14px}
+    .gam{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
     .gam::-webkit-scrollbar{display:none}
-    .gcard{width:auto}
+    .gcard{flex:0 0 100%;scroll-snap-align:center}
     .price{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0}
     .price::-webkit-scrollbar{display:none}
     .pcard{flex:0 0 100%;scroll-snap-align:center}
@@ -399,7 +400,7 @@ const CSS = `
   .ptext{font-size:18px}
   .proc-desc{font-size:17px}
   .mcard .ic{width:62px;height:62px;font-size:32px}.mcard h3{font-size:22px}.mcard .tag{font-size:15px}.mcard li{font-size:15px}
-  .gcard .ic{font-size:54px}.gcard h3{font-size:24px}.gcard .gi{font-size:16px}
+  .gcard .ic{font-size:32px}.gcard h3{font-size:24px}.gcard .gi{font-size:17px}
   .pcard .pn{font-size:16px}.pcard li{font-size:16px}.pcard .pp{font-size:40px}.pcard .pu{font-size:15px}
   .kpi .v{font-size:30px}.kpi .l{font-size:14px}
   .barh{font-size:17px;margin-bottom:16px}.bar{font-size:14px}.bar .bl{width:110px}
@@ -601,11 +602,12 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       <section className="sec sec-dark">
         <div className="wrap">
           <div className="title" style={{ color:'#fff' }}>Ce que Flowin vous permet de faire</div>
-          <div className="gam">
-            <div className="gcard"><div className="ic" style={{ color:'#00B4A0' }}><Ic n="device-gamepad-2" /></div><h3>Animer</h3><div className="gi">6 modules de jeu</div><div className="gi">Customisation jeux / lots / quiz</div><div className="gi">Marque blanche</div></div>
-            <div className="gcard"><div className="ic" style={{ color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Tableau de bord temps réel</div><div className="gi">Stats : genre, âge, opt-in, géo</div><div className="gi">Base client réutilisable</div></div>
-            <div className="gcard"><div className="ic" style={{ color:'#A855F7' }}><Ic n="users-group" /></div><h3>Mutualiser</h3><div className="gi">Super-events collectifs</div><div className="gi">Sponsoring / partenaires</div><div className="gi">Rejoindre un super-event</div></div>
+          <div className="gam" id="services">
+            <div className="gcard"><div className="ic" style={{ background:'#00B4A018', color:'#00B4A0' }}><Ic n="device-gamepad-2" /></div><h3>Animer</h3><div className="gi">6 modules de jeu</div><div className="gi">Customisation jeux / lots / quiz</div><div className="gi">Marque blanche</div></div>
+            <div className="gcard"><div className="ic" style={{ background:'#3B5CC418', color:'#3B5CC4' }}><Ic n="steering-wheel" /></div><h3>Piloter</h3><div className="gi">Tableau de bord temps réel</div><div className="gi">Stats : genre, âge, opt-in, géo</div><div className="gi">Base client réutilisable</div></div>
+            <div className="gcard"><div className="ic" style={{ background:'#F59E0B18', color:'#F59E0B' }}><Ic n="users-group" /></div><h3>Mutualiser</h3><div className="gi">Super-events collectifs</div><div className="gi">Sponsoring / partenaires</div><div className="gi">Rejoindre un super-event</div></div>
           </div>
+          <Dots id="services" count={3} />
         </div>
       </section>
 
