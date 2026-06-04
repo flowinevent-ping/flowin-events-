@@ -99,7 +99,7 @@ function rememberJoueur(id: string | undefined | null, email: string, prenom?: s
 }
 
 /* Bloc 2 — attribue ticket (1/jour/lieu) + gain immédiat si l'event appartient à un Super Event */
-async function attribuerSuperEvent(joueurId: string, evId: string, ticket: string, today: string): Promise<void> {
+async function attribuerSuperEvent(joueurId: string, evId: string, today: string): Promise<void> {
   const { data: ev } = await supabase
     .from('events')
     .select('super_event_id,gain_immediat,gain_ticket')
@@ -118,15 +118,13 @@ async function attribuerSuperEvent(joueurId: string, evId: string, ticket: strin
 
   if (row.gain_immediat) {
     const code = 'G-' + Math.random().toString(36).slice(2, 8).toUpperCase()
-    await supabase.from('gains').insert({
-      user_id: joueurId,
+    await supabase.from('se_gains').insert({
       super_event_id: seId,
+      joueur_id: joueurId,
       event_id: evId,
       type: 'immediat',
-      lot_nom: row.gain_immediat,
-      lot_titre: row.gain_immediat,
+      libelle: row.gain_immediat,
       code,
-      condition: ticket,
       utilise: false,
     })
   }
@@ -192,7 +190,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       tickets: 1,
     })
     /* Bloc 2 — Super Event : ticket + gain immédiat + identité */
-    await attribuerSuperEvent(joueurId, evId, tc, today)
+    await attribuerSuperEvent(joueurId, evId, today)
     rememberJoueur(joueurId, emailLower, payload.prenom)
   }
 

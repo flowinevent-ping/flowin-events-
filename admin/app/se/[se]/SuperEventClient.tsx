@@ -8,7 +8,7 @@ type Lot = { id: string; rang: number | null; valeur: number | null; libelle?: s
 type Sponsor = { id: string; nom: string; image_url?: string | null }
 type FocusEvent = { id: string; nom: string; module?: string | null; gain_immediat?: string | null }
 type Autre = { id: string; nom: string; date_d?: string | null; date_f?: string | null; nb: number }
-type GainRow = { id: string; lot_nom?: string | null; lot_titre?: string | null; code?: string | null; utilise?: boolean | null; event_id?: string | null; type?: string | null }
+type GainRow = { id: string; libelle?: string | null; code?: string | null; utilise?: boolean | null; event_id?: string | null; type?: string | null }
 type Joueur = { id: string; prenom?: string }
 
 interface Props {
@@ -90,7 +90,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
         ids.length
           ? supabase.from('participations').select('event_id').eq('joueur_id', jid).in('event_id', ids).eq('completed', true)
           : Promise.resolve({ data: [] as { event_id: string | null }[] }),
-        supabase.from('gains').select('id,lot_nom,lot_titre,code,utilise,event_id,type').eq('user_id', jid).eq('super_event_id', se.id),
+        supabase.from('se_gains').select('id,libelle,code,utilise,event_id,type').eq('joueur_id', jid).eq('super_event_id', se.id),
       ])
       const tkRows = (tk.data ?? []) as { event_id: string | null }[]
       const paRows = (pa.data ?? []) as { event_id: string | null }[]
@@ -193,7 +193,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                     <div key={g.id} className="fe-card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', borderRadius: 16, background: g.utilise ? '#F3F4F6' : 'linear-gradient(135deg,#EAFBF3,#D6F5E6)', border: `1px solid ${g.utilise ? '#e5e7eb' : '#bfedd6'}` }}>
                       <span style={{ fontSize: 24, flexShrink: 0 }}>🎁</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: g.utilise ? '#6b7280' : '#0B6E50', textDecoration: g.utilise ? 'line-through' : 'none' }}>{g.lot_nom || g.lot_titre || 'Lot'}</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: g.utilise ? '#6b7280' : '#0B6E50', textDecoration: g.utilise ? 'line-through' : 'none' }}>{g.libelle || 'Lot'}</div>
                         {g.code && <div style={{ fontSize: 12, color: '#6b7385', fontFamily: 'monospace', marginTop: 2 }}>Code : {g.code}</div>}
                       </div>
                       <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, padding: '4px 9px', borderRadius: 100, background: g.utilise ? '#e5e7eb' : '#0B6E50', color: g.utilise ? '#6b7280' : '#fff' }}>
