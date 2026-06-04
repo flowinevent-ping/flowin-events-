@@ -10,6 +10,8 @@ export type Lieu = {
   module?: string | null
   couleur?: string | null
   joue?: boolean
+  gain_immediat?: string | null
+  gain_ticket?: boolean | null
 }
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
   mode?: 'vitrine' | 'jeu'
   height?: number | string
   showPosition?: boolean
+  onSelect?: (id: string) => void
 }
 
 declare global {
@@ -47,9 +50,11 @@ function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) => (({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } as Record<string, string>)[c]))
 }
 
-export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, showPosition = false }: Props) {
+export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, showPosition = false, onSelect }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
+  const onSelectRef = useRef(onSelect)
+  useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
 
   useEffect(() => {
     let cancelled = false
@@ -85,9 +90,13 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
           iconAnchor: [14, 14],
         })
         const m = L.marker([p.lat, p.lng], { icon }).addTo(map)
-        const dir = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
-        const itin = `<br><a href="${dir}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;color:#3B5CC4;font-weight:600;text-decoration:none;">Itin&eacute;raire &rarr;</a>`
-        m.bindPopup(`<strong>${esc(p.nom)}</strong>${itin}`)
+        if (onSelectRef.current) {
+          m.on('click', () => { if (onSelectRef.current) onSelectRef.current(p.id) })
+        } else {
+          const dir = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
+          const itin = `<br><a href="${dir}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;color:#3B5CC4;font-weight:600;text-decoration:none;">Itin&eacute;raire &rarr;</a>`
+          m.bindPopup(`<strong>${esc(p.nom)}</strong>${itin}`)
+        }
       })
 
       if (pts.length > 1) {

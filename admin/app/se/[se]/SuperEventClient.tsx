@@ -21,6 +21,14 @@ const LOT_THEME = [
   { fg: '#5F5E5A', bg: '#F1EFE8' },
   { fg: '#712B13', bg: '#FAECE7' },
 ]
+const MODULE_LABEL: Record<string, string> = {
+  spin: 'Roue de la chance',
+  quiz: 'Quiz',
+  quizsolo: 'Quiz solo',
+  quizmaster: 'Quiz Master',
+  tombola: 'Tombola',
+  vote: 'Vote',
+}
 
 function dirUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
@@ -28,13 +36,20 @@ function dirUrl(lat: number, lng: number): string {
 
 export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: Props) {
   const [open, setOpen] = useState<boolean>(!!focus)
+  const [selected, setSelected] = useState<Lieu | null>(null)
   const lotsSorted = [...lots].sort((a, b) => (a.rang ?? 9) - (b.rang ?? 9))
+
+  function selectById(id: string) {
+    const l = lieux.find((x) => x.id === id)
+    if (l) setSelected(l)
+  }
 
   return (
     <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', fontFamily: 'system-ui, sans-serif', color: '#1a2030', background: '#e8eaed' }}>
+      <style>{`@keyframes feSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes feFade{from{opacity:0}to{opacity:1}}`}</style>
 
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <SuperEventMap lieux={lieux} mode="vitrine" height="100%" showPosition={true} />
+        <SuperEventMap lieux={lieux} mode="vitrine" height="100%" showPosition={true} onSelect={selectById} />
       </div>
 
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000, padding: '12px 14px', pointerEvents: 'none' }}>
@@ -88,23 +103,31 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: P
 
             {!focus && (
               <div style={{ background: '#EEF1FB', color: '#2c3a63', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.5, marginBottom: 14 }}>
-                Rends-toi dans un commerce et <strong>scanne son QR</strong> sur place pour jouer. Chaque commerce joué = <strong>+1 ticket/jour</strong>.
+                Touche un commerce pour voir ce qu&apos;il propose. Pour jouer, rends-toi sur place et <strong>scanne son QR</strong>. Chaque commerce joué = <strong>+1 ticket/jour</strong>.
               </div>
             )}
 
-            {lieux.map((l) => (
-              <div key={l.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 0', borderBottom: '0.5px solid #eee' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 30, height: 30, borderRadius: '50%', border: '0.5px solid #d9dbe0', color: '#5b6172', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0 }}>🏪</span>
-                  <div style={{ fontSize: 14, fontWeight: 500 }}>{l.nom}</div>
+            {lieux.map((l) => {
+              const hint = l.gain_immediat ? `🎁 ${l.gain_immediat}` : '🎟️ Ticket pour le tirage'
+              return (
+                <div
+                  key={l.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelected(l)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '11px 0', borderBottom: '0.5px solid #eee', cursor: 'pointer' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                    <span style={{ width: 32, height: 32, borderRadius: '50%', border: '0.5px solid #d9dbe0', color: '#5b6172', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🏪</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.nom}</div>
+                      <div style={{ fontSize: 11.5, color: '#7a8190', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hint}</div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 20, color: '#c4c8d0', flexShrink: 0 }}>›</span>
                 </div>
-                {typeof l.lat === 'number' && typeof l.lng === 'number' && (
-                  <a href={dirUrl(l.lat, l.lng)} target="_blank" rel="noopener" style={{ fontSize: 13, color: HERO, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                    Itinéraire →
-                  </a>
-                )}
-              </div>
-            ))}
+              )
+            })}
 
             {sponsors.length > 0 && (
               <div style={{ marginTop: 16 }}>
@@ -122,6 +145,88 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: P
           </div>
         )}
       </div>
+
+      {/* ===== FICHE COMMERCE (cliquable depuis liste ou pin) ===== */}
+      {selected && (
+        <>
+          <div
+            onClick={() => setSelected(null)}
+            style={{ position: 'absolute', inset: 0, zIndex: 1500, background: 'rgba(15,20,35,.45)', animation: 'feFade .2s ease' }}
+          />
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 1600, background: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, boxShadow: '0 -6px 30px rgba(0,0,0,.22)', maxHeight: '80dvh', overflowY: 'auto', animation: 'feSheetUp .28s cubic-bezier(.4,0,.2,1)' }}>
+            <div style={{ padding: '12px 20px 24px' }}>
+              <div style={{ width: 40, height: 4, background: '#d9dbe0', borderRadius: 2, margin: '0 auto 16px' }} />
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.2 }}>{selected.nom}</div>
+                  {selected.module && (
+                    <div style={{ fontSize: 13, color: '#7a8190', marginTop: 3 }}>
+                      Jeu proposé : {MODULE_LABEL[selected.module] || selected.module}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
+                  style={{ flexShrink: 0, width: 32, height: 32, borderRadius: '50%', border: 'none', background: '#f0f1f4', color: '#5b6172', fontSize: 16, cursor: 'pointer' }}
+                  aria-label="Fermer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', color: '#9aa0ad', margin: '18px 0 8px' }}>
+                Ce que tu peux gagner ici
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {selected.gain_immediat && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#E9F7F0', color: '#0F6E56', borderRadius: 10, padding: '11px 14px' }}>
+                    <span style={{ fontSize: 18 }}>🎁</span>
+                    <div>
+                      <div style={{ fontSize: 11, opacity: 0.8 }}>Gain immédiat</div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{selected.gain_immediat}</div>
+                    </div>
+                  </div>
+                )}
+                {selected.gain_ticket !== false && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#EEF1FB', color: '#2c3a63', borderRadius: 10, padding: '11px 14px' }}>
+                    <span style={{ fontSize: 18 }}>🎟️</span>
+                    <div>
+                      <div style={{ fontSize: 11, opacity: 0.8 }}>Tirage au sort final</div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>+1 ticket (1 fois par jour)</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {focus && focus.id === selected.id ? (
+                <a
+                  href={selected.module ? `/parcours/${selected.module}?ev=${selected.id}` : '#'}
+                  style={{ display: 'block', textAlign: 'center', marginTop: 18, background: '#0F6E56', color: '#fff', fontWeight: 600, fontSize: 15, padding: '14px', borderRadius: 12, textDecoration: 'none' }}
+                >
+                  Jouer maintenant
+                </a>
+              ) : (
+                <>
+                  <div style={{ background: '#FAF6EE', color: '#7a5a1e', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.5, margin: '18px 0 14px' }}>
+                    📍 Pour jouer, rends-toi dans le commerce et <strong>scanne le QR sur place</strong>.
+                  </div>
+                  {typeof selected.lat === 'number' && typeof selected.lng === 'number' && (
+                    <a
+                      href={dirUrl(selected.lat, selected.lng)}
+                      target="_blank"
+                      rel="noopener"
+                      style={{ display: 'block', textAlign: 'center', background: HERO, color: '#fff', fontWeight: 600, fontSize: 15, padding: '14px', borderRadius: 12, textDecoration: 'none' }}
+                    >
+                      Itinéraire →
+                    </a>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   )
