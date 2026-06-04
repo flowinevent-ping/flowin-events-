@@ -15,7 +15,7 @@ export type Lieu = {
 interface Props {
   lieux: Lieu[]
   mode?: 'vitrine' | 'jeu'
-  height?: number
+  height?: number | string
   showPosition?: boolean
 }
 
@@ -85,10 +85,9 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
           iconAnchor: [14, 14],
         })
         const m = L.marker([p.lat, p.lng], { icon }).addTo(map)
-        const playLink = p.module
-          ? `<br><a href="/parcours/${esc(p.module)}?ev=${esc(p.id)}" style="display:inline-block;margin-top:6px;color:#3B5CC4;font-weight:600;text-decoration:none;">Jouer &rarr;</a>`
-          : ''
-        m.bindPopup(`<strong>${esc(p.nom)}</strong>${playLink}`)
+        const dir = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
+        const itin = `<br><a href="${dir}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;color:#3B5CC4;font-weight:600;text-decoration:none;">Itin&eacute;raire &rarr;</a>`
+        m.bindPopup(`<strong>${esc(p.nom)}</strong>${itin}`)
       })
 
       if (pts.length > 1) {
@@ -111,6 +110,8 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
           { enableHighAccuracy: true, timeout: 8000 }
         )
       }
+
+      setTimeout(() => { if (!cancelled && mapRef.current) mapRef.current.invalidateSize() }, 200)
     })
 
     return () => {
