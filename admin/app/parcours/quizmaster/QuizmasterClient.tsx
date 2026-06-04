@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
 
@@ -96,7 +97,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
 
       {screen==='form'&&!getJoueurLocal()&&(<div className="screen"><div className="header"><div><div className="title">Crée ton compte</div><div className="sub">Score final : {score}/{questions.length}</div></div></div><div className="grid2" style={{marginBottom:12}}>{[['prenom','Prénom *','given-name'],['nom','Nom *','family-name']].map(([k,l,ac])=>(<div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} autoComplete={ac} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>))}</div><div style={{marginBottom:12}}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div><div style={{marginBottom:12}}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div><div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div><button className="btn" style={{marginTop:16}} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button></div>)}
 
-      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div></div>)}
+      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} /></div>)}
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
@@ -238,6 +239,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
           </div>
           {partenaires.length > 0 && <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>🤝 Nos partenaires</button>}
+          <ParcoursOutro superEventId={ev?.super_event_id} />
         </div>
       )}
     </div>

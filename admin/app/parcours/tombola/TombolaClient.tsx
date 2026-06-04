@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { generateTicket } from '@/lib/ticket'
 import { getJoueurLocal, claimJoueur, attribuerSuperEvent, rememberJoueur } from '@/lib/parcours'
+import ParcoursOutro from '../_components/ParcoursOutro'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
 type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
@@ -371,6 +372,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
           )}
+          <ParcoursOutro superEventId={ev?.super_event_id} />
         </div>
       )}
 
@@ -392,6 +394,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
           )}
+          <ParcoursOutro superEventId={ev?.super_event_id} />
         </div>
       )}
     </div>

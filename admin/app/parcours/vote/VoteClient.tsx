@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 
@@ -139,6 +140,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
             <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
           </div>
+          <ParcoursOutro superEventId={ev?.super_event_id} />
         </div>
       )}
     </div>
