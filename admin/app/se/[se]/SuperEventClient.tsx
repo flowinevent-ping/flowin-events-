@@ -32,16 +32,13 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: P
     <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', fontFamily: 'system-ui, sans-serif', color: '#1a2030', background: '#e8eaed' }}>
 
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-        <SuperEventMap lieux={lieux} mode="jeu" height="100%" showPosition={true} />
+        <SuperEventMap lieux={lieux} mode="vitrine" height="100%" showPosition={true} />
       </div>
 
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, pointerEvents: 'none' }}>
-        <div style={{ background: 'rgba(255,255,255,.96)', boxShadow: '0 2px 10px rgba(0,0,0,.12)', borderRadius: 12, padding: '8px 12px', maxWidth: '68%', pointerEvents: 'auto' }}>
+        <div style={{ background: 'rgba(255,255,255,.96)', boxShadow: '0 2px 10px rgba(0,0,0,.12)', borderRadius: 12, padding: '8px 12px', maxWidth: '78%', pointerEvents: 'auto' }}>
           <div style={{ fontSize: 11, color: HERO, fontWeight: 600 }}>Flowin · Super Event</div>
           <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.2 }}>{se.nom}</div>
-        </div>
-        <div style={{ background: HERO, color: '#fff', borderRadius: 12, padding: '8px 12px', fontSize: 13, fontWeight: 600, boxShadow: '0 2px 10px rgba(0,0,0,.12)', pointerEvents: 'auto', whiteSpace: 'nowrap' }}>
-          🎟️ 0 ticket
         </div>
       </div>
 
@@ -87,11 +84,8 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: P
         {lieux.map((l) => (
           <div key={l.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 0', borderBottom: '0.5px solid #eee' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ width: 30, height: 30, borderRadius: '50%', border: '2px solid #BA7517', color: '#BA7517', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0 }}>🏪</span>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 500 }}>{l.nom}</div>
-                <div style={{ fontSize: 11, color: '#854F0B' }}>À faire</div>
-              </div>
+              <span style={{ width: 30, height: 30, borderRadius: '50%', border: '0.5px solid #d9dbe0', color: '#5b6172', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0 }}>🏪</span>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{l.nom}</div>
             </div>
             {typeof l.lat === 'number' && typeof l.lng === 'number' && (
               <a href={dirUrl(l.lat, l.lng)} target="_blank" rel="noopener" style={{ fontSize: 13, color: HERO, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
