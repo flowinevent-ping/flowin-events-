@@ -262,15 +262,10 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           <div style={{ position:'relative',width:300,height:300,cursor:spinning?'default':'pointer' }} onClick={spinWheel}>
             <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:'50%',boxShadow:'0 14px 40px rgba(16,30,120,.4)' }} />
           </div>
-          <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:6,margin:'8px auto 0' }}>
-            <div style={{ width:138,height:38,background:'linear-gradient(180deg,#5A88EE 0%,#3868D0 40%,#1A44A8 100%)',borderRadius:19,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px rgba(0,0,0,.5)',border:'1px solid rgba(140,180,255,.5)' }}>
-              <span style={{ fontSize:20,fontWeight:900,color:'#fff',letterSpacing:3,textShadow:'0 1px 4px rgba(0,0,100,.4)' }}>GAME</span>
-            </div>
-            <div style={{ width:152,height:32,background:'linear-gradient(180deg,#9A28CC 0%,#7818A8 45%,#520C80 100%)',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 14px rgba(0,0,0,.45)',border:'1px solid rgba(180,80,255,.4)' }}>
-              <span style={{ fontSize:16,fontWeight:900,color:'rgba(235,210,255,.95)',letterSpacing:4 }}>TIME</span>
-            </div>
-          </div>
-          <div style={{ marginTop:14,fontSize:13,color:'rgba(255,255,255,.45)' }}>{spinning?'En cours…':'Appuie pour tourner !'}</div>
+          <button className="btn" onClick={spinWheel} disabled={spinning} style={{ maxWidth:240,marginTop:18 }}>
+            <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />{spinning?'La roue tourne…':'Faire tourner la roue'}
+          </button>
+          <div style={{ marginTop:10,fontSize:12,color:'rgba(255,255,255,.4)' }}>{spinning?'':'ou appuie directement sur la roue'}</div>
         </div>
       )}
 
