@@ -6,12 +6,14 @@ type SE = { id: string; nom: string; description?: string | null; date_d?: strin
 type Lot = { id: string; rang: number | null; valeur: number | null; libelle?: string | null }
 type Sponsor = { id: string; nom: string; image_url?: string | null }
 type FocusEvent = { id: string; nom: string; module?: string | null; gain_immediat?: string | null }
+type Autre = { id: string; nom: string; date_d?: string | null; date_f?: string | null; nb: number }
 
 interface Props {
   se: SE
   lots: Lot[]
   lieux: Lieu[]
   sponsors: Sponsor[]
+  autres?: Autre[]
   focus?: FocusEvent | null
 }
 
@@ -40,7 +42,20 @@ function dirUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
 }
 
-export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: Props) {
+const MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
+function jour(d?: string | null): string {
+  if (!d) return ''
+  const p = d.split('-')
+  if (p.length < 3) return ''
+  return `${parseInt(p[2], 10)} ${MOIS[parseInt(p[1], 10) - 1] || ''}`
+}
+function periode(a?: string | null, b?: string | null): string {
+  const ja = jour(a), jb = jour(b)
+  if (ja && jb) return `${ja} – ${jb}`
+  return ja || jb || ''
+}
+
+export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [], focus }: Props) {
   const [open, setOpen] = useState<boolean>(!!focus)
   const [selected, setSelected] = useState<Lieu | null>(null)
   const lotsSorted = [...lots].sort((a, b) => (a.rang ?? 9) - (b.rang ?? 9))
@@ -171,6 +186,31 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, focus }: P
                 )
               })}
             </div>
+
+            {autres.length > 0 && (
+              <div style={{ marginTop: 22 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}>🌍 Autres opérations en cours</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {autres.map((a) => (
+                    <a
+                      key={a.id}
+                      href={`/se/${a.id}`}
+                      className="fe-card"
+                      style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '14px 15px', borderRadius: 18, background: 'linear-gradient(135deg,#F4F6FB,#EAF0FF)', border: '1px solid #e2e8f6', textDecoration: 'none', color: 'inherit' }}
+                    >
+                      <span style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#2746A6,#3B7DE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23, flexShrink: 0 }}>📍</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 15.5, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.nom}</div>
+                        <div style={{ fontSize: 12.5, color: '#6b7385', marginTop: 2 }}>
+                          {a.nb} commerce{a.nb > 1 ? 's' : ''}{periode(a.date_d, a.date_f) ? ` · ${periode(a.date_d, a.date_f)}` : ''}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 22, color: '#9fb0d8', flexShrink: 0 }}>›</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {sponsors.length > 0 && (
               <div style={{ marginTop: 20 }}>
