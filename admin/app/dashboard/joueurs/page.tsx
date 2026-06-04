@@ -9,7 +9,7 @@ export default function Page() {
   const { joueurs, openDrawer, openDrawerEdit } = useDashboard()
   const [search, setSearch] = useState('')
 
-  const base = joueurs.filter((j: FlowinJoueur) => (j as any).gains > 0)
+  const base = joueurs
 
   const list = useMemo(() => {
     if (!search.trim()) return base
