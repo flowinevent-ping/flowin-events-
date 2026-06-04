@@ -91,7 +91,7 @@ export interface JoueurPayload {
 }
 
 /* Bloc 2 — mémorise l'identité joueur côté client pour la reconnaissance Super Event */
-function rememberJoueur(id: string | undefined | null, email: string, prenom?: string): void {
+export function rememberJoueur(id: string | undefined | null, email: string, prenom?: string): void {
   if (!id || typeof window === 'undefined') return
   try {
     localStorage.setItem('flowin_joueur', JSON.stringify({ id, email, prenom: (prenom || '').trim() }))
@@ -99,7 +99,7 @@ function rememberJoueur(id: string | undefined | null, email: string, prenom?: s
 }
 
 /* Bloc 2 — attribue ticket (1/jour/lieu) + gain immédiat si l'event appartient à un Super Event */
-async function attribuerSuperEvent(joueurId: string, evId: string, today: string): Promise<void> {
+export async function attribuerSuperEvent(joueurId: string, evId: string, today: string): Promise<void> {
   const { data: ev } = await supabase
     .from('events')
     .select('super_event_id,gain_immediat,gain_ticket')
@@ -194,6 +194,44 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     rememberJoueur(joueurId, emailLower, payload.prenom)
   }
 
+  return { success: true, duplicate: false, ticket: tc }
+}
+
+/* ── Bloc 2 — Compte joueur déjà créé (reconnaissance) ── */
+export function getJoueurLocal(): { id: string; email: string; prenom?: string } | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const s = localStorage.getItem('flowin_joueur')
+    if (s) {
+      const o = JSON.parse(s) as { id?: string; email?: string; prenom?: string }
+      if (o.id && o.email) return { id: o.id, email: o.email, prenom: o.prenom }
+    }
+  } catch { /* ignore */ }
+  return null
+}
+
+/* ── Bloc 2 — Réclamer (joueur déjà inscrit) : participation + ticket/gain SANS re-formulaire ── */
+export async function claimJoueur(
+  joueur: { id: string; email: string; prenom?: string },
+  evId: string,
+  prefix: TicketPrefix
+): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
+  const emailLower = joueur.email.toLowerCase().trim()
+  const { data: dup } = await supabase
+    .from('joueurs').select('id,ticket_code').eq('email_lower', emailLower).contains('events', [evId]).limit(1)
+  if (dup?.length) {
+    const d0 = dup[0] as { id?: string; ticket_code?: string }
+    rememberJoueur(d0.id, emailLower, joueur.prenom)
+    return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
+  }
+  const tc = generateTicket(prefix)
+  const today = new Date().toISOString().slice(0, 10)
+  const { data: jrow } = await supabase.from('joueurs').select('events').eq('id', joueur.id).single()
+  const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
+  await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)
+  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: 0, completed: true, tickets: 1 })
+  await attribuerSuperEvent(joueur.id, evId, today)
+  rememberJoueur(joueur.id, emailLower, joueur.prenom)
   return { success: true, duplicate: false, ticket: tc }
 }
 

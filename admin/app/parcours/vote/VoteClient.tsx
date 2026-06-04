@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 
@@ -28,6 +28,23 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   const lsCheck = () => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already'); return true } } catch {}; return false }
   
   useState(() => { setTimeout(lsCheck, 0) })
+
+  /* Bloc 2 — compte deja cree : saute le formulaire, attribue directement */
+  const [reco, setReco] = useState(false)
+  useEffect(() => {
+    if (screen !== 'form' || reco) return
+    const local = getJoueurLocal()
+    if (!local) return
+    setReco(true)
+    ;(async () => {
+      if (local.prenom) setForm(f => ({ ...f, prenom: local.prenom as string }))
+      const res = await claimJoueur(local, evId, 'VS')
+      try { localStorage.setItem(lsKey, res.ticket) } catch {}
+      setExistingTicket(res.ticket)
+      if (res.duplicate) { setScreen('already'); return }
+      setTicket(res.ticket); setScreen('ticket')
+    })()
+  }, [screen, reco, evId, lsKey])
 
   async function handleSubmit() {
     const errs: Record<string,string> = {}
@@ -98,9 +115,9 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
         </div>
       )}
 
-      {screen === 'form' && (
+      {screen === 'form' && !getJoueurLocal() && (
         <div className="screen">
-          <div className="header"><div><div className="title">Mes coordonnées</div><div className="sub">{nom}</div></div></div>
+          <div className="header"><div><div className="title">Crée ton compte</div><div className="sub">{nom}</div></div></div>
           <div className="grid2" style={{ marginBottom:12 }}>
             {[['prenom','Prénom *','given-name'],['nom','Nom *','family-name']].map(([k,l,ac])=>(
               <div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} autoComplete={ac} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>

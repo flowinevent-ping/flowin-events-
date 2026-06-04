@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -33,6 +33,23 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
   useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
   useEffect(() => { trackVisite('spin', evId) }, [evId])
+
+  /* Bloc 2 — compte déjà créé : on saute le formulaire et on attribue directement */
+  const [reco, setReco] = useState(false)
+  useEffect(() => {
+    if (screen !== 'form' || reco) return
+    const local = getJoueurLocal()
+    if (!local) return
+    setReco(true)
+    ;(async () => {
+      if (local.prenom) setForm(f => ({ ...f, prenom: local.prenom as string }))
+      const res = await claimJoueur(local, evId, 'SP')
+      try { localStorage.setItem(lsKey, res.ticket) } catch {}
+      setExistingTicket(res.ticket)
+      if (res.duplicate) { setScreen('already'); return }
+      setTicket(res.ticket); setScreen('ticket')
+    })()
+  }, [screen, reco, evId, lsKey])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -296,9 +313,9 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
         </div>
       )}
 
-      {screen === 'form' && (
+      {screen === 'form' && !getJoueurLocal() && (
         <div className="screen">
-          <div className="header"><div><div className="title">{isBtob?'Vos coordonnées':'Mes coordonnées'}</div><div className="sub">{nom}{resultSeg&&!resultSeg.perdant?` · Lot : ${resultSeg.label}`:''}</div></div></div>
+          <div className="header"><div><div className="title">{isBtob?'Vos coordonnées':'Crée ton compte'}</div><div className="sub">{isBtob ? nom : 'Pour réclamer ton lot'}{resultSeg&&!resultSeg.perdant?` · ${resultSeg.label}`:''}</div></div></div>
           {isBtob && (
             <div style={{ marginBottom:12 }}>
               <label className="label">Enseigne / Structure *</label>

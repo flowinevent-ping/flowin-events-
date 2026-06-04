@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { generateTicket } from '@/lib/ticket'
+import { getJoueurLocal, claimJoueur, attribuerSuperEvent, rememberJoueur } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
 type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
@@ -58,6 +59,23 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const d1 = fmtDate(ev?.date_d), d2 = fmtDate(ev?.date_f)
   const dates = d1 ? (d2 && d2 !== d1 ? `${d1} \u2192 ${d2}` : d1) : ''
 
+  /* Bloc 2 — compte deja cree : saute le formulaire, attribue directement */
+  const [reco, setReco] = useState(false)
+  useEffect(() => {
+    if (screen !== 'form' || reco) return
+    const local = getJoueurLocal()
+    if (!local) return
+    setReco(true)
+    ;(async () => {
+      if (local.prenom) setForm(f => ({ ...f, prenom: local.prenom as string }))
+      const res = await claimJoueur(local, evId, 'TB')
+      try { localStorage.setItem(lsKey, res.ticket) } catch {}
+      setExistingTicket(res.ticket)
+      if (res.duplicate) { setScreen('already'); return }
+      setTicket(res.ticket); setScreen('ticket')
+    })()
+  }, [screen, reco, evId, lsKey])
+
   async function handleSubmit() {
     const errs: Record<string, string> = {}
     if (!form.prenom.trim()) errs.prenom = 'Obligatoire'
@@ -75,7 +93,9 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       .eq('email_lower', emailLower).contains('events', [evId]).limit(1)
 
     if (dup?.length) {
-      const t = (dup[0] as { ticket_code?: string }).ticket_code ?? ''
+      const d0 = dup[0] as { id?: string; ticket_code?: string }
+      rememberJoueur(d0.id, emailLower, form.prenom)
+      const t = d0.ticket_code ?? ''
       try { localStorage.setItem(lsKey, t) } catch {}
       setExistingTicket(t); setSubmitting(false); setScreen('already'); return
     }
@@ -104,6 +124,8 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
         completed: true,
         tickets: 1,
       })
+      await attribuerSuperEvent(joueurId, evId, today)
+      rememberJoueur(joueurId, emailLower, form.prenom)
     }
 
     try { localStorage.setItem(lsKey, tc) } catch {}
@@ -202,12 +224,12 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       )}
 
       {/* FORMULAIRE */}
-      {screen === 'form' && (
+      {screen === 'form' && !getJoueurLocal() && (
         <div className="screen">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <button className="btn-ghost" style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', flexShrink: 0 }} onClick={() => setScreen('landing')}>←</button>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 17 }}>Mes coordonnées</div>
+              <div style={{ fontWeight: 800, fontSize: 17 }}>Crée ton compte</div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,.45)' }}>Pour {nom}</div>
             </div>
           </div>
