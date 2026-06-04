@@ -267,21 +267,13 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 )}
               </div>
 
-              {focus && focus.id === selected.id ? (
-                <a href={selected.module ? `/parcours/${selected.module}?ev=${selected.id}` : '#'} style={{ display: 'block', textAlign: 'center', marginTop: 22, background: fu.grad, color: '#fff', fontWeight: 800, fontSize: 18, padding: '17px', borderRadius: 16, textDecoration: 'none', boxShadow: '0 5px 18px rgba(20,26,38,.2)' }}>
-                  🎮 C&apos;est parti, on joue !
+              <div style={{ background: '#FAF6EE', color: '#7a5a1e', borderRadius: 16, padding: '13px 15px', fontSize: 13.5, lineHeight: 1.5, margin: '20px 0 15px' }}>
+                📍 Pour jouer, c&apos;est sur place : rends-toi au commerce et <strong>scanne son QR</strong>.
+              </div>
+              {typeof selected.lat === 'number' && typeof selected.lng === 'number' && (
+                <a href={dirUrl(selected.lat, selected.lng)} target="_blank" rel="noopener" style={{ display: 'block', textAlign: 'center', background: HERO, color: '#fff', fontWeight: 800, fontSize: 16.5, padding: '16px', borderRadius: 16, textDecoration: 'none' }}>
+                  Emmène-moi →
                 </a>
-              ) : (
-                <>
-                  <div style={{ background: '#FAF6EE', color: '#7a5a1e', borderRadius: 16, padding: '13px 15px', fontSize: 13.5, lineHeight: 1.5, margin: '20px 0 15px' }}>
-                    📍 File sur place, scanne le QR du commerce et c&apos;est parti !
-                  </div>
-                  {typeof selected.lat === 'number' && typeof selected.lng === 'number' && (
-                    <a href={dirUrl(selected.lat, selected.lng)} target="_blank" rel="noopener" style={{ display: 'block', textAlign: 'center', background: HERO, color: '#fff', fontWeight: 800, fontSize: 16.5, padding: '16px', borderRadius: 16, textDecoration: 'none' }}>
-                      Emmène-moi →
-                    </a>
-                  )}
-                </>
               )}
             </div>
           </div>
