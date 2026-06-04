@@ -125,3 +125,35 @@ export async function fetchDashboardStats() {
     totalGagnants: (joueursRes.data ?? []).filter((j: { gains: number }) => j.gains > 0).length,
   }
 }
+
+/* ── Super Event : tickets & gains ── */
+export interface SeTicketRow { event_id: string | null; super_event_id: string | null }
+export interface SeGainRow { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; super_event_id: string | null }
+
+export async function fetchJoueurTicketsGains(joueurId: string): Promise<{ tickets: SeTicketRow[]; gains: SeGainRow[] }> {
+  const [tk, ga] = await Promise.all([
+    supabase.from('se_tickets').select('event_id,super_event_id').eq('joueur_id', joueurId),
+    supabase.from('se_gains').select('id,libelle,code,utilise,event_id,super_event_id').eq('joueur_id', joueurId),
+  ])
+  return { tickets: (tk.data ?? []) as SeTicketRow[], gains: (ga.data ?? []) as SeGainRow[] }
+}
+
+/* ── Super Event : stats agrégées d'un commerce (espace pro) ── */
+export async function fetchEventSuperEventStats(eventId: string): Promise<{ tickets: number; gains: number; gainsUtilises: number }> {
+  const [tk, ga] = await Promise.all([
+    supabase.from('se_tickets').select('id', { count: 'exact', head: true }).eq('event_id', eventId),
+    supabase.from('se_gains').select('utilise').eq('event_id', eventId),
+  ])
+  const gainsRows = (ga.data ?? []) as { utilise: boolean | null }[]
+  return {
+    tickets: tk.count ?? 0,
+    gains: gainsRows.length,
+    gainsUtilises: gainsRows.filter((g) => g.utilise).length,
+  }
+}
+
+/* ── Super Event : marquer un gain comme utilisé ── */
+export async function marquerGainUtilise(gainId: string, utilise: boolean): Promise<boolean> {
+  const { error } = await supabase.from('se_gains').update({ utilise, utilise_ts: utilise ? new Date().toISOString() : null }).eq('id', gainId)
+  return !error
+}

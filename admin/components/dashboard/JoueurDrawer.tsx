@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { updateJoueur, deleteJoueur } from '@/lib/dashboard'
+import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, type SeTicketRow, type SeGainRow } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip } from './DashboardUI'
 import type { FlowinJoueur } from '@/lib/types'
 
@@ -16,8 +16,17 @@ export default function JoueurDrawer() {
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinJoueur>>({})
   const [saving, setSaving] = useState(false)
+  const [seTickets, setSeTickets] = useState<SeTicketRow[]>([])
+  const [seGains, setSeGains] = useState<SeGainRow[]>([])
 
   const j = useMemo(() => joueurs.find(x => x.id === drawer.id), [joueurs, drawer.id])
+
+  useEffect(() => {
+    if (!drawer.id) return
+    let on = true
+    fetchJoueurTicketsGains(drawer.id).then(r => { if (on) { setSeTickets(r.tickets); setSeGains(r.gains) } })
+    return () => { on = false }
+  }, [drawer.id])
 
   if (!j) return (
     <div className="sa-drawer-empty">
@@ -28,6 +37,9 @@ export default function JoueurDrawer() {
 
   const joueurEvents = (j.events ?? []).map(eid => events.find(e => e.id === eid)).filter(Boolean)
   const joueurLots   = lots.filter(l => (l as unknown as { assigne_a: string }).assigne_a === j.id)
+  const ticketsByEvent = Array.from(
+    seTickets.reduce((m, t) => { if (t.event_id) m.set(t.event_id, (m.get(t.event_id) || 0) + 1); return m }, new Map<string, number>())
+  )
 
   function enterEdit() {
     setForm({ ...j })
@@ -59,6 +71,7 @@ export default function JoueurDrawer() {
     { id: 'infos', label: 'Infos' },
     { id: 'events', label: 'Events', badge: joueurEvents.length },
     { id: 'lots', label: 'Lots', badge: joueurLots.length },
+    { id: 'se', label: 'Tickets', badge: seTickets.length },
   ]
 
   const initials = ((j.prenom?.[0] ?? '') + (j.nom?.[0] ?? '')).toUpperCase() || '?'
@@ -139,6 +152,38 @@ export default function JoueurDrawer() {
               <div key={l.id} className="sa-list-item">
                 <span style={{ fontSize: 20 }}>{l.emoji ?? '🎁'}</span>
                 <div>{l.titre || l.nom} — {l.valeur} €</div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {drawer.tab === 'se' && (
+          <>
+            <SectionHeader>{seTickets.length} ticket{seTickets.length > 1 ? 's' : ''} Super Event</SectionHeader>
+            {ticketsByEvent.length === 0 && <div className="sa-empty-inline">Aucun ticket Super Event</div>}
+            {ticketsByEvent.map(([eid, n]) => {
+              const ev = events.find(e => e.id === eid)
+              return (
+                <div key={eid} className="sa-list-item">
+                  <span style={{ fontSize: 18 }}>🎟️</span>
+                  <div style={{ flex: 1 }}>{ev?.nom ?? eid}</div>
+                  <strong>{n}</strong>
+                </div>
+              )
+            })}
+
+            <SectionHeader>{seGains.length} gain{seGains.length > 1 ? 's' : ''} immédiat{seGains.length > 1 ? 's' : ''}</SectionHeader>
+            {seGains.length === 0 && <div className="sa-empty-inline">Aucun gain immédiat</div>}
+            {seGains.map(g => (
+              <div key={g.id} className="sa-list-item">
+                <span style={{ fontSize: 18 }}>🎁</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{g.libelle ?? 'Lot'}</div>
+                  {g.code && <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.code}</div>}
+                </div>
+                {g.utilise
+                  ? <span className="sa-chip">Utilisé</span>
+                  : <span className="sa-chip live">À récupérer</span>}
               </div>
             ))}
           </>

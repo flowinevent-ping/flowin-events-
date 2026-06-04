@@ -52,6 +52,11 @@ export default function PartenaireDrawer() {
     closeDrawer()
   }
 
+  async function setPaiement(statut: string) {
+    const ok = await upsertPartenaire({ id: p.id, statut_paiement: statut })
+    if (ok) setPartenaires(partenaires.map(x => x.id === p.id ? { ...x, statut_paiement: statut } as FlowinPartenaire : x))
+  }
+
   const typeChip = p.type === 'National' ? 'purple' : p.type === 'Récurrent' ? 'live' : 'past'
 
   const tabs = [
@@ -180,15 +185,35 @@ export default function PartenaireDrawer() {
             </div>
             <div className="sa-field"><label className="sa-label">Adresse</label><input className="sa-input" value={form.adresse ?? ''} onChange={ff('adresse')} /></div>
             <div className="sa-field"><label className="sa-label">Notes</label><textarea className="sa-input" rows={2} value={form.notes ?? ''} onChange={ff('notes')} /></div>
+            <SectionHeader>💶 Sponsoring Super Event</SectionHeader>
+            <div className="sa-field">
+              <label className="sa-label">Montant du sponsoring (€)</label>
+              <input className="sa-input" type="number" min="0" value={form.montant_sponsoring ?? ''} onChange={e => setForm(prev => ({ ...prev, montant_sponsoring: e.target.value === '' ? null : Number(e.target.value) }))} />
+            </div>
           </>
         )}
 
         {drawer.tab === 'stats' && (
-          <div className="sa-kpi-grid-2">
-            <div className="sa-kpi"><div className="sa-kpi-val">{pLots.length}</div><div className="sa-kpi-lbl">Lots fournis</div></div>
-            <div className="sa-kpi"><div className="sa-kpi-val">{pLots.reduce((s, l) => s + (l.valeur ?? 0) * (l.quantite ?? 1), 0)} €</div><div className="sa-kpi-lbl">Valeur</div></div>
-            <div className="sa-kpi"><div className="sa-kpi-val">{pEvents.length}</div><div className="sa-kpi-lbl">Events</div></div>
-          </div>
+          <>
+            <div className="sa-kpi-grid-2">
+              <div className="sa-kpi"><div className="sa-kpi-val">{pLots.length}</div><div className="sa-kpi-lbl">Lots fournis</div></div>
+              <div className="sa-kpi"><div className="sa-kpi-val">{pLots.reduce((s, l) => s + (l.valeur ?? 0) * (l.quantite ?? 1), 0)} €</div><div className="sa-kpi-lbl">Valeur</div></div>
+              <div className="sa-kpi"><div className="sa-kpi-val">{pEvents.length}</div><div className="sa-kpi-lbl">Events</div></div>
+            </div>
+
+            <SectionHeader>💶 Sponsoring Super Event</SectionHeader>
+            <FieldRow label="Montant" value={p.montant_sponsoring != null ? <strong>{p.montant_sponsoring} €</strong> : '—'} />
+            <FieldRow label="Virement" value={
+              p.statut_paiement === 'valide'
+                ? <span className="sa-chip live">✅ Reçu</span>
+                : <span className="sa-chip">⏳ En attente</span>
+            } />
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              {p.statut_paiement === 'valide'
+                ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Marquer en attente</button>
+                : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le virement</button>}
+            </div>
+          </>
         )}
 
         {drawer.tab === 'lots' && (

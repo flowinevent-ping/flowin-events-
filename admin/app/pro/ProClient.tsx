@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { fetchProDashboard, getQrUrl, type ProDashboardData } from '@/lib/pro'
+import { fetchEventSuperEventStats } from '@/lib/dashboard'
 import type { FlowinEvent, FlowinJoueur, FlowinLot } from '@/lib/types'
 
 type Tab = 'stats' | 'tirage' | 'participants' | 'lots' | 'qr' | 'export'
@@ -20,6 +21,7 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   const [refreshing, setRefreshing] = useState(false)
   const [tirageDone, setTirageDone] = useState(false)
   const [gagnant, setGagnant] = useState<FlowinJoueur | null>(null)
+  const [seStats, setSeStats] = useState<{ tickets: number; gains: number; gainsUtilises: number } | null>(null)
 
   const ev = useMemo(
     () => data.events.find(e => e.id === selectedEvId) ?? data.events[0] ?? null,
@@ -73,6 +75,13 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
     setData(fresh)
     setRefreshing(false)
   }
+
+  useEffect(() => {
+    if (!ev?.id || !ev?.super_event_id) { setSeStats(null); return }
+    let on = true
+    fetchEventSuperEventStats(ev.id).then(s => { if (on) setSeStats(s) })
+    return () => { on = false }
+  }, [ev?.id, ev?.super_event_id])
 
   useEffect(() => {
     if (ev?.status !== 'live') return
@@ -208,6 +217,28 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
                 <div className="kpi-sub">{evLots.length} lot{evLots.length!==1?'s':''}</div>
               </div>
             </div>
+
+            {seStats && (
+              <div className="card" style={{ marginTop:10 }}>
+                <div style={{ fontSize:11,fontWeight:800,color:'#64748B',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:10 }}>
+                  🎟️ Super Event — ton commerce
+                </div>
+                <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10 }}>
+                  <div className="kpi" style={{ background:'#EEF3FE',color:'#2746A6' }}>
+                    <div className="kpi-val">{seStats.tickets}</div>
+                    <div className="kpi-lbl">Tickets distribués</div>
+                  </div>
+                  <div className="kpi" style={{ background:'#E9F7F0',color:'#0B6E50' }}>
+                    <div className="kpi-val">{seStats.gains}</div>
+                    <div className="kpi-lbl">Gains remis</div>
+                  </div>
+                  <div className="kpi" style={{ background:'#F3F4F6',color:'#475569' }}>
+                    <div className="kpi-val">{seStats.gainsUtilises}</div>
+                    <div className="kpi-lbl">Gains utilisés</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {evJoueurs.length > 0 && (
               <div className="card">

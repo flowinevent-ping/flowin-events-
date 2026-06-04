@@ -122,6 +122,9 @@ export interface FlowinPartenaire {
   notes: string | null
   events: string[]
   tags: string[]
+  super_event_id: string | null
+  montant_sponsoring: number | null
+  statut_paiement: string | null
 }
 
 export interface FlowinParticipation {
