@@ -90,6 +90,48 @@ export interface JoueurPayload {
   prefix: string
 }
 
+/* Bloc 2 — mémorise l'identité joueur côté client pour la reconnaissance Super Event */
+function rememberJoueur(id: string | undefined | null, email: string, prenom?: string): void {
+  if (!id || typeof window === 'undefined') return
+  try {
+    localStorage.setItem('flowin_joueur', JSON.stringify({ id, email, prenom: (prenom || '').trim() }))
+  } catch { /* ignore */ }
+}
+
+/* Bloc 2 — attribue ticket (1/jour/lieu) + gain immédiat si l'event appartient à un Super Event */
+async function attribuerSuperEvent(joueurId: string, evId: string, ticket: string, today: string): Promise<void> {
+  const { data: ev } = await supabase
+    .from('events')
+    .select('super_event_id,gain_immediat,gain_ticket')
+    .eq('id', evId)
+    .single()
+  const row = ev as { super_event_id?: string | null; gain_immediat?: string | null; gain_ticket?: boolean | null } | null
+  if (!row || !row.super_event_id) return
+  const seId = row.super_event_id
+
+  if (row.gain_ticket !== false) {
+    await supabase.from('se_tickets').upsert(
+      { super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today },
+      { onConflict: 'joueur_id,event_id,jour', ignoreDuplicates: true }
+    )
+  }
+
+  if (row.gain_immediat) {
+    const code = 'G-' + Math.random().toString(36).slice(2, 8).toUpperCase()
+    await supabase.from('gains').insert({
+      user_id: joueurId,
+      super_event_id: seId,
+      event_id: evId,
+      type: 'immediat',
+      lot_nom: row.gain_immediat,
+      lot_titre: row.gain_immediat,
+      code,
+      condition: ticket,
+      utilise: false,
+    })
+  }
+}
+
 export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
@@ -103,8 +145,9 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     .limit(1)
 
   if (dup?.length) {
-    const t = (dup[0] as { ticket_code?: string }).ticket_code ?? ''
-    return { success: false, duplicate: true, ticket: t }
+    const d0 = dup[0] as { id?: string; ticket_code?: string }
+    rememberJoueur(d0.id, emailLower, payload.prenom)
+    return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
   }
 
   const tc = payload.ticket_code || generateTicket(payload.prefix as TicketPrefix)
@@ -148,6 +191,9 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       completed: true,
       tickets: 1,
     })
+    /* Bloc 2 — Super Event : ticket + gain immédiat + identité */
+    await attribuerSuperEvent(joueurId, evId, tc, today)
+    rememberJoueur(joueurId, emailLower, payload.prenom)
   }
 
   return { success: true, duplicate: false, ticket: tc }
