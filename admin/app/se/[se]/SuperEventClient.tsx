@@ -191,8 +191,11 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
         {open && (
           <div style={{ padding: '4px 20px 28px' }}>
 
-            {identified && joueur?.prenom && (
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Salut {joueur.prenom} 👋</div>
+            {identified && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{joueur?.prenom ? `Salut ${joueur.prenom} 👋` : 'Salut 👋'}</div>
+                <a href="/moi" style={{ fontSize: 13, fontWeight: 800, color: '#2746A6', background: '#EFF3FE', padding: '7px 13px', borderRadius: 100, textDecoration: 'none' }}>👤 Mon compte</a>
+              </div>
             )}
 
             {focus && (

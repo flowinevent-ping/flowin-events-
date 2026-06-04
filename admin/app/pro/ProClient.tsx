@@ -2,10 +2,10 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { fetchProDashboard, getQrUrl, type ProDashboardData } from '@/lib/pro'
-import { fetchEventSuperEventStats } from '@/lib/dashboard'
+import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, type ProGainRow } from '@/lib/dashboard'
 import type { FlowinEvent, FlowinJoueur, FlowinLot } from '@/lib/types'
 
-type Tab = 'stats' | 'tirage' | 'participants' | 'lots' | 'qr' | 'export'
+type Tab = 'stats' | 'gains' | 'tirage' | 'participants' | 'lots' | 'qr' | 'export'
 
 interface Props {
   initialData: ProDashboardData
@@ -22,6 +22,9 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   const [tirageDone, setTirageDone] = useState(false)
   const [gagnant, setGagnant] = useState<FlowinJoueur | null>(null)
   const [seStats, setSeStats] = useState<{ tickets: number; gains: number; gainsUtilises: number } | null>(null)
+  const [proGains, setProGains] = useState<ProGainRow[]>([])
+  const [codeInput, setCodeInput] = useState('')
+  const [gainMsg, setGainMsg] = useState('')
 
   const ev = useMemo(
     () => data.events.find(e => e.id === selectedEvId) ?? data.events[0] ?? null,
@@ -35,13 +38,14 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
 
   const visibleTabs = useMemo<Tab[]>(() => {
     const t: Tab[] = ['stats']
+    if (ev?.super_event_id)        t.push('gains')
     if (pv.activite !== false)    t.push('tirage')
     if (pv.participants !== false) t.push('participants')
     if (pv.lots !== false)        t.push('lots')
     if (pv.qr !== false)          t.push('qr')
     if (pv.export !== false)      t.push('export')
     return t
-  }, [pv])
+  }, [pv, ev?.super_event_id])
 
   const [tab, setTab] = useState<Tab>('stats')
 
@@ -77,11 +81,36 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   }
 
   useEffect(() => {
-    if (!ev?.id || !ev?.super_event_id) { setSeStats(null); return }
+    if (!ev?.id || !ev?.super_event_id) { setSeStats(null); setProGains([]); return }
     let on = true
     fetchEventSuperEventStats(ev.id).then(s => { if (on) setSeStats(s) })
+    fetchProGains([ev.id]).then(g => { if (on) setProGains(g) })
     return () => { on = false }
   }, [ev?.id, ev?.super_event_id])
+
+  async function reloadGains() {
+    if (!ev?.id) return
+    const [g, s] = await Promise.all([fetchProGains([ev.id]), fetchEventSuperEventStats(ev.id)])
+    setProGains(g); setSeStats(s)
+  }
+  async function validerGain(id: string) {
+    const ok = await marquerGainUtilise(id, true)
+    if (ok) { setGainMsg('✅ Gain marqué comme utilisé.'); await reloadGains() }
+    else setGainMsg('Erreur, réessayez.')
+  }
+  async function annulerGain(id: string) {
+    const ok = await marquerGainUtilise(id, false)
+    if (ok) await reloadGains()
+  }
+  async function validerParCode() {
+    const c = codeInput.trim().toUpperCase()
+    if (!c) return
+    const g = proGains.find(x => (x.code || '').toUpperCase() === c)
+    if (!g) { setGainMsg('❌ Code introuvable pour ce commerce.'); return }
+    if (g.utilise) { setGainMsg('⚠️ Ce gain a déjà été utilisé.'); return }
+    await validerGain(g.id)
+    setCodeInput('')
+  }
 
   useEffect(() => {
     if (ev?.status !== 'live') return
@@ -123,6 +152,7 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
 
   const NAV_ITEMS: { id: Tab; icon: string; label: string }[] = [
     { id:'stats',        icon:'📊', label:'Stats' },
+    { id:'gains',        icon:'🎁', label:'Gains' },
     { id:'tirage',       icon:'🎲', label:'Tirage' },
     { id:'participants', icon:'👥', label:'Joueurs' },
     { id:'lots',         icon:'🎁', label:'Lots' },
@@ -258,6 +288,47 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
                 {evJoueurs.length>5 && <div style={{ textAlign:'center',fontSize:12,color:'#94A3B8',marginTop:8 }}>+{evJoueurs.length-5} autres</div>}
               </div>
             )}
+          </>
+        )}
+
+        {/* GAINS — validation utilisation */}
+        {tab === 'gains' && (
+          <>
+            <div className="card">
+              <div style={{ fontSize:11,fontWeight:800,color:'#64748B',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:12 }}>
+                Valider un gain présenté
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <input
+                  value={codeInput}
+                  onChange={e => { setCodeInput(e.target.value); setGainMsg('') }}
+                  placeholder="Code du gain (ex : G-AB12CD)"
+                  style={{ flex:1, padding:'12px 14px', borderRadius:12, border:'1px solid #d9dde6', fontSize:15, fontFamily:'monospace', textTransform:'uppercase', outline:'none' }}
+                />
+                <button onClick={validerParCode} style={{ background:'#0B6E50', color:'#fff', fontWeight:800, fontSize:14.5, padding:'0 18px', borderRadius:12, border:'none', cursor:'pointer' }}>Valider</button>
+              </div>
+              {gainMsg && <div style={{ marginTop:10, fontSize:13.5, fontWeight:600, color: gainMsg.startsWith('✅') ? '#0B6E50' : '#B45309' }}>{gainMsg}</div>}
+              <div style={{ fontSize:12, color:'#94A3B8', marginTop:10, lineHeight:1.5 }}>Le client présente le code depuis son compte ; saisissez-le ici ou validez-le dans la liste ci-dessous.</div>
+            </div>
+
+            <div className="card">
+              <div style={{ fontSize:11,fontWeight:800,color:'#64748B',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:12 }}>
+                Gains émis ({proGains.filter(g=>!g.utilise).length} à utiliser · {proGains.filter(g=>g.utilise).length} utilisés)
+              </div>
+              {proGains.length === 0 && <div style={{ fontSize:13.5, color:'#94A3B8' }}>Aucun gain émis pour l&apos;instant.</div>}
+              {proGains.map(g => (
+                <div key={g.id} className="j-row" style={{ alignItems:'center' }}>
+                  <span style={{ fontSize:20, flexShrink:0 }}>{g.utilise ? '✅' : '🎁'}</span>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontWeight:700, fontSize:13.5, textDecoration: g.utilise ? 'line-through' : 'none', color: g.utilise ? '#94A3B8' : '#1E293B' }}>{g.libelle || 'Lot'}</div>
+                    <div style={{ fontSize:11, color:'#64748B' }}>{g.joueur} · <code style={{ fontFamily:'monospace' }}>{g.code}</code></div>
+                  </div>
+                  {g.utilise
+                    ? <button onClick={() => annulerGain(g.id)} style={{ flexShrink:0, background:'transparent', border:'1px solid #e2e8f0', color:'#64748B', fontWeight:700, fontSize:12, padding:'7px 11px', borderRadius:10, cursor:'pointer' }}>Annuler</button>
+                    : <button onClick={() => validerGain(g.id)} style={{ flexShrink:0, background:'#0B6E50', color:'#fff', fontWeight:800, fontSize:12.5, padding:'8px 13px', borderRadius:10, border:'none', cursor:'pointer' }}>Marquer utilisé</button>}
+                </div>
+              ))}
+            </div>
           </>
         )}
 

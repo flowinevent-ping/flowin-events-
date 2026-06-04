@@ -157,3 +157,20 @@ export async function marquerGainUtilise(gainId: string, utilise: boolean): Prom
   const { error } = await supabase.from('se_gains').update({ utilise, utilise_ts: utilise ? new Date().toISOString() : null }).eq('id', gainId)
   return !error
 }
+
+/* ── Super Event : gains émis par les commerces d'un pro (validation utilisation) ── */
+export interface ProGainRow { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; joueur: string }
+export async function fetchProGains(eventIds: string[]): Promise<ProGainRow[]> {
+  if (!eventIds.length) return []
+  const { data } = await supabase
+    .from('se_gains').select('id,libelle,code,utilise,event_id,joueur_id,created_at')
+    .in('event_id', eventIds).order('created_at', { ascending: false })
+  const rows = (data ?? []) as { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; joueur_id: string | null }[]
+  const jids = Array.from(new Set(rows.map(r => r.joueur_id).filter(Boolean))) as string[]
+  const names: Record<string, string> = {}
+  if (jids.length) {
+    const { data: js } = await supabase.from('joueurs').select('id,prenom,nom').in('id', jids)
+    ;(js ?? []).forEach((j: { id: string; prenom?: string | null; nom?: string | null }) => { names[j.id] = `${j.prenom ?? ''} ${j.nom ?? ''}`.trim() || '—' })
+  }
+  return rows.map(r => ({ id: r.id, libelle: r.libelle, code: r.code, utilise: r.utilise, event_id: r.event_id, joueur: r.joueur_id ? (names[r.joueur_id] || '—') : '—' }))
+}
