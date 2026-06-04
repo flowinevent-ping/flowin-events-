@@ -18,7 +18,7 @@ export default async function Page({ params }: Props) {
   const [seRes, lotsRes, lieuxRes, sponsorsRes, focusRes] = await Promise.all([
     supabase.from('super_events').select('id,nom,description,date_d,date_f').eq('id', seId).single(),
     supabase.from('se_lots').select('id,rang,valeur,libelle').eq('super_event_id', seId).order('rang'),
-    supabase.from('events').select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires').eq('super_event_id', seId),
+    supabase.from('events').select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires').eq('super_event_id', seId).neq('status','pending'),
     supabase.from('partenaires').select('id,nom,image_url').eq('super_event_id', seId).eq('statut_paiement', 'valide'),
     supabase.from('events').select('id,nom,module,gain_immediat').eq('id', evId).single(),
   ])
