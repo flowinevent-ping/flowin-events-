@@ -58,6 +58,16 @@ function periode(a?: string | null, b?: string | null): string {
   return ja || jb || ''
 }
 
+function distMeters(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6371000, toR = (d: number) => (d * Math.PI) / 180
+  const dLat = toR(bLat - aLat), dLng = toR(bLng - aLng)
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(toR(aLat)) * Math.cos(toR(bLat)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(s))
+}
+function fmtDist(m: number): string {
+  return m < 1000 ? `à ${Math.round(m / 10) * 10} m` : `à ${(m / 1000).toFixed(1).replace('.', ',')} km`
+}
+
 export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [], focus }: Props) {
   const [open, setOpen] = useState<boolean>(!!focus)
   const [selected, setSelected] = useState<Lieu | null>(null)
@@ -65,6 +75,16 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
   const [played, setPlayed] = useState<Set<string>>(new Set())
   const [ticketCount, setTicketCount] = useState(0)
   const [gains, setGains] = useState<GainRow[]>([])
+  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (p) => setUserPos({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => {},
+      { timeout: 8000 }
+    )
+  }, [])
 
   const lotsSorted = [...lots].sort((a, b) => (a.rang ?? 9) - (b.rang ?? 9))
   const idsKey = lieux.map((l) => l.id).join(',')
@@ -112,6 +132,9 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
   const mapLieux = identified ? lieux.map((l) => ({ ...l, joue: played.has(l.id) })) : lieux
   const playedCount = lieux.filter((l) => played.has(l.id)).length
   const fu = selected ? modUI(selected.module) : null
+  const dist = (selected && userPos && typeof selected.lat === 'number' && typeof selected.lng === 'number')
+    ? fmtDist(distMeters(userPos.lat, userPos.lng, selected.lat, selected.lng))
+    : null
 
   return (
     <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', fontFamily: 'system-ui, sans-serif', color: '#141a26', background: '#f1ede6' }}>
@@ -320,20 +343,35 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
           <div onClick={() => setSelected(null)} style={{ position: 'absolute', inset: 0, zIndex: 1500, background: 'rgba(15,20,35,.5)', animation: 'feFade .2s ease' }} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 1600, background: '#fff', borderTopLeftRadius: 26, borderTopRightRadius: 26, boxShadow: '0 -6px 30px rgba(0,0,0,.25)', maxHeight: '86dvh', overflowY: 'auto', animation: 'feSheetUp .3s cubic-bezier(.4,0,.2,1)' }}>
 
-            <div style={{ background: fu.grad, color: '#fff', padding: '24px 22px 26px', borderTopLeftRadius: 26, borderTopRightRadius: 26, position: 'relative' }}>
-              <div style={{ width: 48, height: 6, background: 'rgba(255,255,255,.55)', borderRadius: 3, margin: '0 auto 18px' }} />
-              <button onClick={() => setSelected(null)} style={{ position: 'absolute', top: 16, right: 18, width: 36, height: 36, borderRadius: '50%', border: 'none', background: 'rgba(255,255,255,.22)', color: '#fff', fontSize: 18, cursor: 'pointer' }} aria-label="Fermer">✕</button>
-              <div style={{ fontSize: 54, lineHeight: 1, marginBottom: 10 }}>{fu.emoji}</div>
-              <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.15 }}>{selected.nom}</div>
-              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 13, fontWeight: 800, background: 'rgba(255,255,255,.24)', padding: '5px 13px', borderRadius: 100 }}>{fu.label}</span>
-                {identified && played.has(selected.id) && (
-                  <span style={{ fontSize: 13, fontWeight: 800, background: '#16A34A', padding: '5px 13px', borderRadius: 100 }}>✓ Déjà joué</span>
-                )}
+            {/* Hero : photo si dispo, sinon dégradé du jeu */}
+            <div style={{ position: 'relative', borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden', color: '#fff', background: fu.grad }}>
+              {selected.photo_url && (
+                <>
+                  <img src={selected.photo_url} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,15,30,.25) 0%, rgba(10,15,30,.78) 100%)' }} />
+                </>
+              )}
+              <div style={{ position: 'relative', padding: '20px 22px 22px', minHeight: selected.photo_url ? 188 : undefined, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', width: 48, height: 6, background: 'rgba(255,255,255,.7)', borderRadius: 3 }} />
+                <button onClick={() => setSelected(null)} style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,.35)', color: '#fff', fontSize: 18, cursor: 'pointer', backdropFilter: 'blur(4px)' }} aria-label="Fermer">✕</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                  <span style={{ width: 44, height: 44, borderRadius: 13, background: selected.photo_url ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, backdropFilter: 'blur(4px)' }}>{fu.emoji}</span>
+                  <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                    {selected.categorie && <span style={{ fontSize: 12, fontWeight: 800, background: 'rgba(255,255,255,.22)', padding: '4px 11px', borderRadius: 100, backdropFilter: 'blur(4px)' }}>{selected.categorie}</span>}
+                    {identified && played.has(selected.id) && <span style={{ fontSize: 12, fontWeight: 800, background: '#16A34A', padding: '4px 11px', borderRadius: 100 }}>✓ Déjà joué</span>}
+                  </div>
+                </div>
+                <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.15, textShadow: selected.photo_url ? '0 1px 8px rgba(0,0,0,.4)' : 'none' }}>{selected.nom}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, fontSize: 13, opacity: 0.95 }}>
+                  <span style={{ fontWeight: 700 }}>🎮 {fu.label}</span>
+                  {dist && <span>· 📍 {dist}</span>}
+                </div>
               </div>
             </div>
 
-            <div style={{ padding: '20px 22px 26px' }}>
+            <div style={{ padding: '18px 22px 26px' }}>
+
+              {/* Gains */}
               <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#9aa0ad', marginBottom: 11 }}>Ici, tu repars avec 👇</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {selected.gain_immediat && (
@@ -356,13 +394,61 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 )}
               </div>
 
-              <div style={{ background: '#FAF6EE', color: '#7a5a1e', borderRadius: 16, padding: '13px 15px', fontSize: 13.5, lineHeight: 1.5, margin: '20px 0 15px' }}>
+              {/* Infos pratiques */}
+              {(selected.adresse || selected.horaires || selected.tel || selected.site_web) && (
+                <div style={{ marginTop: 18, border: '1px solid #eef0f3', borderRadius: 16, overflow: 'hidden' }}>
+                  {selected.adresse && (
+                    <div style={{ display: 'flex', gap: 12, padding: '13px 15px', borderBottom: '1px solid #f1f2f5' }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>📍</span>
+                      <div style={{ fontSize: 14, color: '#2b3242' }}>{selected.adresse}{dist ? ` · ${dist}` : ''}</div>
+                    </div>
+                  )}
+                  {selected.horaires && (
+                    <div style={{ display: 'flex', gap: 12, padding: '13px 15px', borderBottom: '1px solid #f1f2f5' }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>🕒</span>
+                      <div style={{ fontSize: 14, color: '#2b3242' }}>{selected.horaires}</div>
+                    </div>
+                  )}
+                  {selected.tel && (
+                    <a href={`tel:${selected.tel.replace(/\s/g, '')}`} style={{ display: 'flex', gap: 12, padding: '13px 15px', borderBottom: selected.site_web ? '1px solid #f1f2f5' : 'none', textDecoration: 'none' }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>📞</span>
+                      <div style={{ fontSize: 14, color: HERO, fontWeight: 600 }}>{selected.tel}</div>
+                    </a>
+                  )}
+                  {selected.site_web && (
+                    <a href={selected.site_web} target="_blank" rel="noopener" style={{ display: 'flex', gap: 12, padding: '13px 15px', textDecoration: 'none' }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>🌐</span>
+                      <div style={{ fontSize: 14, color: HERO, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selected.site_web.replace(/^https?:\/\//, '')}</div>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Description */}
+              {selected.description && (
+                <div style={{ marginTop: 16, fontSize: 14, lineHeight: 1.6, color: '#4a5160' }}>{selected.description}</div>
+              )}
+
+              {/* Rappel jeu sur place */}
+              <div style={{ background: '#FAF6EE', color: '#7a5a1e', borderRadius: 16, padding: '13px 15px', fontSize: 13.5, lineHeight: 1.5, margin: '18px 0 14px' }}>
                 📍 Pour jouer, c&apos;est sur place : rends-toi au commerce et <strong>scanne son QR</strong>.
               </div>
+
+              {/* Actions */}
               {typeof selected.lat === 'number' && typeof selected.lng === 'number' && (
                 <a href={dirUrl(selected.lat, selected.lng)} target="_blank" rel="noopener" style={{ display: 'block', textAlign: 'center', background: HERO, color: '#fff', fontWeight: 800, fontSize: 16.5, padding: '16px', borderRadius: 16, textDecoration: 'none' }}>
-                  Emmène-moi →
+                  Y aller · Itinéraire →
                 </a>
+              )}
+              {(selected.tel || selected.site_web) && (
+                <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                  {selected.tel && (
+                    <a href={`tel:${selected.tel.replace(/\s/g, '')}`} style={{ flex: 1, textAlign: 'center', background: '#fff', color: '#2b3242', fontWeight: 700, fontSize: 14.5, padding: '13px', borderRadius: 14, textDecoration: 'none', border: '1px solid #e3e5ea' }}>📞 Appeler</a>
+                  )}
+                  {selected.site_web && (
+                    <a href={selected.site_web} target="_blank" rel="noopener" style={{ flex: 1, textAlign: 'center', background: '#fff', color: '#2b3242', fontWeight: 700, fontSize: 14.5, padding: '13px', borderRadius: 14, textDecoration: 'none', border: '1px solid #e3e5ea' }}>🌐 Site</a>
+                  )}
+                </div>
               )}
             </div>
           </div>

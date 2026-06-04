@@ -12,6 +12,13 @@ export type Lieu = {
   joue?: boolean
   gain_immediat?: string | null
   gain_ticket?: boolean | null
+  adresse?: string | null
+  description?: string | null
+  categorie?: string | null
+  tel?: string | null
+  site_web?: string | null
+  photo_url?: string | null
+  horaires?: string | null
 }
 
 interface Props {
