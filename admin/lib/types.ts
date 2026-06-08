@@ -125,6 +125,10 @@ export interface FlowinPartenaire {
   super_event_id: string | null
   montant_sponsoring: number | null
   statut_paiement: string | null
+  offre: string | null
+  paiement_mode: string | null
+  facture_emise: boolean
+  event_id: string | null
 }
 
 export interface FlowinParticipation {

@@ -57,6 +57,16 @@ export default function PartenaireDrawer() {
     if (ok) setPartenaires(partenaires.map(x => x.id === p.id ? { ...x, statut_paiement: statut } as FlowinPartenaire : x))
   }
 
+  async function setFacture(v: boolean) {
+    const ok = await upsertPartenaire({ id: p.id, facture_emise: v })
+    if (ok) setPartenaires(partenaires.map(x => x.id === p.id ? { ...x, facture_emise: v } as FlowinPartenaire : x))
+  }
+
+  const PAIEMENT_MODES: Record<string, string> = {
+    lydia_wero: 'Lydia / Wero', paypal: 'PayPal', sepa: 'Virement SEPA', virement: 'Virement bancaire', especes: 'Espèces',
+  }
+  const modeLabel = (m?: string | null) => (m ? (PAIEMENT_MODES[m] || m) : '—')
+
   const typeChip = p.type === 'National' ? 'purple' : p.type === 'Récurrent' ? 'live' : 'past'
 
   const tabs = [
@@ -185,10 +195,42 @@ export default function PartenaireDrawer() {
             </div>
             <div className="sa-field"><label className="sa-label">Adresse</label><input className="sa-input" value={form.adresse ?? ''} onChange={ff('adresse')} /></div>
             <div className="sa-field"><label className="sa-label">Notes</label><textarea className="sa-input" rows={2} value={form.notes ?? ''} onChange={ff('notes')} /></div>
-            <SectionHeader>💶 Sponsoring Super Event</SectionHeader>
+            <SectionHeader>💶 Sponsoring &amp; facturation</SectionHeader>
             <div className="sa-field">
-              <label className="sa-label">Montant du sponsoring (€)</label>
-              <input className="sa-input" type="number" min="0" value={form.montant_sponsoring ?? ''} onChange={e => setForm(prev => ({ ...prev, montant_sponsoring: e.target.value === '' ? null : Number(e.target.value) }))} />
+              <label className="sa-label">Formule / offre choisie</label>
+              <input className="sa-input" placeholder="ex. visibilite_lots, sponsoring loterie…" value={form.offre ?? ''} onChange={ff('offre')} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div className="sa-field">
+                <label className="sa-label">Montant (€)</label>
+                <input className="sa-input" type="number" min="0" value={form.montant_sponsoring ?? ''} onChange={e => setForm(prev => ({ ...prev, montant_sponsoring: e.target.value === '' ? null : Number(e.target.value) }))} />
+              </div>
+              <div className="sa-field">
+                <label className="sa-label">Mode de paiement</label>
+                <select className="sa-input" value={form.paiement_mode ?? ''} onChange={ff('paiement_mode')}>
+                  <option value="">—</option>
+                  <option value="lydia_wero">Lydia / Wero</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="sepa">Virement SEPA</option>
+                  <option value="virement">Virement bancaire</option>
+                  <option value="especes">Espèces</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div className="sa-field">
+                <label className="sa-label">Statut paiement</label>
+                <select className="sa-input" value={form.statut_paiement ?? 'en_attente'} onChange={ff('statut_paiement')}>
+                  <option value="en_attente">En attente</option>
+                  <option value="valide">Validé</option>
+                </select>
+              </div>
+              <div className="sa-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: '10px 0' }}>
+                  <input type="checkbox" checked={form.facture_emise === true} onChange={e => setForm(prev => ({ ...prev, facture_emise: e.target.checked }))} />
+                  🧾 Facture émise
+                </label>
+              </div>
             </div>
           </>
         )}
@@ -201,17 +243,27 @@ export default function PartenaireDrawer() {
               <div className="sa-kpi"><div className="sa-kpi-val">{pEvents.length}</div><div className="sa-kpi-lbl">Events</div></div>
             </div>
 
-            <SectionHeader>💶 Sponsoring Super Event</SectionHeader>
+            <SectionHeader>💶 Sponsoring &amp; facturation</SectionHeader>
+            <FieldRow label="Formule choisie" value={p.offre ? <strong>{p.offre}</strong> : '—'} />
             <FieldRow label="Montant" value={p.montant_sponsoring != null ? <strong>{p.montant_sponsoring} €</strong> : '—'} />
-            <FieldRow label="Virement" value={
+            <FieldRow label="Mode de paiement" value={modeLabel(p.paiement_mode)} />
+            <FieldRow label="Paiement" value={
               p.statut_paiement === 'valide'
                 ? <span className="sa-chip live">✅ Reçu</span>
                 : <span className="sa-chip">⏳ En attente</span>
             } />
-            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <FieldRow label="Facture" value={
+              p.facture_emise
+                ? <span className="sa-chip live">🧾 Émise</span>
+                : <span className="sa-chip">— Non émise</span>
+            } />
+            <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
               {p.statut_paiement === 'valide'
-                ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Marquer en attente</button>
-                : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le virement</button>}
+                ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Paiement en attente</button>
+                : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le paiement</button>}
+              {p.facture_emise
+                ? <button className="sa-btn" onClick={() => setFacture(false)}>↩ Facture non émise</button>
+                : <button className="sa-btn" onClick={() => setFacture(true)}>🧾 Marquer facture émise</button>}
             </div>
           </>
         )}
