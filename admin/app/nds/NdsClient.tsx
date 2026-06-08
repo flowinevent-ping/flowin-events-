@@ -1,0 +1,258 @@
+'use client'
+
+import { useState } from 'react'
+
+type Cfg = {
+  accent_color?: string
+  wa_number?: string
+  hero?: any
+  proof?: any
+  pricing?: any
+  cta_section?: any
+  modules?: any
+}
+
+export default function NdsClient({ cfg }: { cfg: Cfg }) {
+  const [tab, setTab] = useState<'accueil' | 'festival' | 'visibilite' | 'offre'>('accueil')
+
+  // Couleurs : pilotées par cfg.accent_color (défaut violet NDS), magenta en secondaire
+  const accent = cfg?.accent_color || '#8B5CF6'
+
+  // Contenu : cfg en priorité, sinon données officielles figées (plaquette / nuitsdusud.com)
+  const heroTitle = cfg?.hero?.title || 'Le festival\njoue pour vous'
+  const heroSub =
+    cfg?.hero?.sub ||
+    'Cette ann\u00e9e, les Nuits du Sud se jouent aussi sur mobile. 24 000 festivaliers jouent, gagnent \u2014 et d\u00e9couvrent votre commerce.'
+
+  // Prix : jamais invent\u00e9. Si absent de la config -> "Sur demande".
+  const prix: string | number | undefined =
+    cfg?.pricing?.prix ?? cfg?.pricing?.price ?? cfg?.pricing?.montant
+  const prixLabel = prix ? `${prix} \u20ac` : 'Sur demande'
+
+  const wa = cfg?.wa_number || ''
+  const waHref = wa ? `https://wa.me/${wa.replace(/[^0-9]/g, '')}` : '#offre'
+
+  const nights = [
+    { d: '09', j: 'Jeu', a: 'Luiza \u00b7 Mariam chante Amadou & Mariam', t: '\u2605 Micro Ondes \u2014 Talents' },
+    { d: '10', j: 'Ven', a: "Maya Kamaty \u00b7 Kassav'", t: '' },
+    { d: '11', j: 'Sam', a: 'Bakermat \u00b7 Breakbot & Irfane', t: '\u2605 Geiste \u2014 Talents' },
+    { d: '16', j: 'Jeu', a: 'Soom T (DJ set) \u00b7 Danakil', t: '' },
+    { d: '17', j: 'Ven', a: 'Kolinga \u00b7 V\u00e9ronique Sanson', t: '' },
+    { d: '18', j: 'Sam', a: "Magic System \u00b7 Ben l'Oncle Soul", t: '\u2605 Killian Alaari \u2014 Talents' },
+  ]
+
+  const Tab = ({ id, label }: { id: typeof tab; label: string }) => (
+    <button className={'tab' + (tab === id ? ' on' : '')} onClick={() => { setTab(id); if (typeof window !== 'undefined') window.scrollTo(0, 0) }}>
+      {label}
+    </button>
+  )
+
+  return (
+    <div className="nds-app">
+      <style>{css(accent)}</style>
+
+      <div className="topbar">
+        <div className="brandrow">
+          <div className="nds-lock"><span className="moon" /><span className="nm">NUITS DU SUD</span></div>
+          <div className="powered">Espace partenaires<br />propuls\u00e9 par <b>Flowin</b></div>
+        </div>
+        <div className="tabs">
+          <Tab id="accueil" label="Accueil" />
+          <Tab id="festival" label="Le festival" />
+          <Tab id="visibilite" label="Votre visibilit\u00e9" />
+          <Tab id="offre" label="Devenir partenaire" />
+        </div>
+      </div>
+
+      {/* ACCUEIL */}
+      {tab === 'accueil' && (
+        <div className="panel">
+          <div className="hero">
+            <div className="bg" /><div className="veil" />
+            <span className="badge">29e \u00c9DITION \u00b7 9 \u2192 18 JUILLET 2026</span>
+            <h1>{heroTitle.split('\n').map((l, i) => <span key={i}>{l}<br /></span>)}</h1>
+            <div className="dt">Place du Grand Jardin \u00b7 Vence</div>
+            <p className="sub">{heroSub}</p>
+          </div>
+          <div className="wrap">
+            <div className="statband">
+              <div className="s"><b>24 000</b><span>festivaliers</span></div>
+              <div className="s"><b>6</b><span>soir\u00e9es</span></div>
+              <div className="s"><b>80%</b><span>locaux</span></div>
+              <div className="s"><b>60%</b><span>femmes</span></div>
+            </div>
+            <div className="mini3">
+              <div className="m3"><div className="icw">{icQR}</div><div><h3>Votre QR perso</h3><p>Faites jouer vos clients, captez les festivaliers.</p></div></div>
+              <div className="m3"><div className="icw">{icChart}</div><div><h3>Vos statistiques</h3><p>Scans, participations, clics sur vos liens \u2014 mesur\u00e9s.</p></div></div>
+              <div className="m3"><div className="icw">{icStar}</div><div><h3>Partenaire officiel</h3><p>Associ\u00e9 au plus grand festival de l\u2019arri\u00e8re-pays ni\u00e7ois.</p></div></div>
+            </div>
+            <button className="btn" style={{ margin: '26px 0 8px' }} onClick={() => { setTab('offre'); window.scrollTo(0, 0) }}>Devenir partenaire</button>
+          </div>
+        </div>
+      )}
+
+      {/* FESTIVAL */}
+      {tab === 'festival' && (
+        <div className="panel"><div className="sec wrap">
+          <div className="kick mag">Le festival</div>
+          <h2 className="hsec">Six soir\u00e9es, <em>Place du Grand Jardin</em></h2>
+          <p className="edito">\u00ab Voyager, rassembler, r\u00e9v\u00e9ler, partager, offrir, surprendre. \u00bb</p>
+          <div className="nights">
+            {nights.map((n, i) => (
+              <div className="night" key={i}>
+                <div className="date"><div className="dd">{n.d}</div><div className="jj">{n.j}</div></div>
+                <div className="bar" />
+                <div><div className="aa">{n.a}</div>{n.t && <div className="tt">{n.t}</div>}</div>
+              </div>
+            ))}
+          </div>
+          <p className="foot">Direction artistique Rock en Seine \u00d7 Radio Nova</p>
+          <div className="reach">
+            <div className="rs"><b>24 000</b>festivaliers \u00b7 6 jours</div>
+            <div className="rs"><b>80%</b>locaux (06 \u00b7 Var)</div>
+            <div className="rs"><b>22 000</b>abonn\u00e9s newsletter</div>
+            <div className="rs"><b>90 000</b>visites du site</div>
+          </div>
+        </div></div>
+      )}
+
+      {/* VISIBILITE */}
+      {tab === 'visibilite' && (
+        <div className="panel"><div className="sec wrap">
+          <div className="kick gold">Votre place dans le jeu</div>
+          <h2 className="hsec">L\u00e0 o\u00f9 <em className="g">24 000 personnes</em> vous voient</h2>
+          <p className="lead">Le jeu officiel est le support. Vous, vous gagnez de la visibilit\u00e9 de proximit\u00e9 \u2014 et vous la mesurez.</p>
+          <div className="vcards">
+            <div className="vc"><div className="icw">{icQR}</div><h3>Votre QR personnalis\u00e9</h3><p>\u00c0 votre caisse. Vos clients jouent, de nouveaux festivaliers vous d\u00e9couvrent. Chaque scan vous est attribu\u00e9.</p></div>
+            <div className="vc"><div className="icw">{icList}</div><h3>Pr\u00e9sence officielle</h3><p>Logo dans l\u2019annuaire des partenaires, fiche d\u00e9di\u00e9e (accroche + liens), position sur la carte du festival.</p></div>
+            <div className="vc"><div className="icw">{icLink}</div><h3>Liens tra\u00e7\u00e9s</h3><p>Site, Instagram : chaque clic compt\u00e9 en temps r\u00e9el. Une pr\u00e9sence qui se mesure, l\u00e0 o\u00f9 un flyer ne dira jamais rien.</p></div>
+            <div className="vc"><div className="icw">{icCal}</div><h3>Avant \u00b7 pendant \u00b7 apr\u00e8s</h3><p>Vous \u00eates visible d\u00e8s l\u2019annonce, pendant les six soir\u00e9es, et apr\u00e8s la derni\u00e8re note.</p></div>
+          </div>
+          <div className="note">Le scan sur place reste la cl\u00e9 : c\u2019est lui qui prouve le passage et l\u2019attribue \u00e0 votre commerce.</div>
+        </div></div>
+      )}
+
+      {/* OFFRE */}
+      {tab === 'offre' && (
+        <div className="panel" id="offre"><div className="sec wrap">
+          <div className="kick">Devenir partenaire</div>
+          <h2 className="hsec">Une offre, <em>tout inclus</em></h2>
+          <p className="lead">Devenez partenaire officiel visible des Nuits du Sud 2026.</p>
+          <div className="offer">
+            <div className="oh"><div className="onm">Partenaire visible NDS 2026</div><div className="opr">{prixLabel}</div></div>
+            <ul>
+              <li>Votre <b>QR Code personnalis\u00e9</b> \u2014 faites jouer vos clients, captez-en de nouveaux</li>
+              <li><b>Pr\u00e9sence officielle</b> dans l\u2019appli du festival (annuaire + fiche + liens)</li>
+              <li><b>Vos statistiques</b> \u2014 scans, participations, clics, en temps r\u00e9el</li>
+              <li><b>Position sur la carte</b> du festival</li>
+              <li><b>Mise en avant</b> aupr\u00e8s des festivaliers \u2014 avant \u00b7 pendant \u00b7 apr\u00e8s</li>
+            </ul>
+            <a className="btn" href={waHref} target={wa ? '_blank' : undefined} rel="noopener">
+              {prix ? 'R\u00e9server ma place' : 'Demander une pr\u00e9sentation'}
+            </a>
+            <p className="reassure">Facture d\u00e8s validation \u00b7 sans engagement de dur\u00e9e</p>
+          </div>
+          <p className="sponsor-line">Vous souhaitez sponsoriser un lot ou b\u00e9n\u00e9ficier d\u2019une mise en avant premium ? <a href={waHref} target={wa ? '_blank' : undefined} rel="noopener">Contactez-nous.</a></p>
+        </div></div>
+      )}
+
+      <div className="flowinfoot">
+        <div className="muted2">Le jeu officiel des Nuits du Sud est propuls\u00e9 par</div>
+        <div className="fl">Flowin</div>
+        <div className="tript"><span>Captez</span><span>Dynamisez</span><span>Fid\u00e9lisez</span></div>
+        <a className="fllink" href="/landing">D\u00e9couvrir Flowin \u2192</a>
+      </div>
+    </div>
+  )
+}
+
+const icQR = <svg className="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><path d="M14 14h3v3M21 14v7h-7" /></svg>
+const icChart = <svg className="ic" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg>
+const icStar = <svg className="ic" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.8-4.5 4.2 1.2 6L12 17l-5.4 2.6 1.2-6L3.3 9.4l6.1-.8z" /></svg>
+const icList = <svg className="ic" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
+const icLink = <svg className="ic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" /></svg>
+const icCal = <svg className="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+
+function css(accent: string) {
+  return `
+  .nds-app{--accent:${accent};--magenta:#EC4899;--cyan:#22D3EE;--gold:#F8B84E;--ink:#0a0713;--text:#f6f2ff;--muted:rgba(246,242,255,.62);--faint:rgba(246,242,255,.36);--line:rgba(246,242,255,.13);--card:rgba(255,255,255,.05);--flowin:#7E9BF2;
+    max-width:480px;margin:0 auto;min-height:100vh;background:linear-gradient(180deg,var(--ink),#070510);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;position:relative;overflow:hidden}
+  .nds-app *{box-sizing:border-box}
+  .nds-app h1,.nds-app h2,.nds-app h3{font-family:'Fredoka','DM Sans',sans-serif;font-weight:600;line-height:1.1;margin:0}
+  .nds-app .wrap{padding:0 20px}.nds-app .sec{padding:32px 0}
+  .nds-app .ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .nds-app .muted2{color:var(--muted);font-size:12px}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(10,7,19,.86);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .brandrow{display:flex;align-items:center;justify-content:space-between;padding:13px 20px 11px}
+  .nds-lock{display:flex;align-items:center;gap:8px}
+  .nds-lock .moon{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 64% 34%,#fff,var(--gold));box-shadow:0 0 9px var(--gold)}
+  .nds-lock .nm{font-family:'Fredoka';font-weight:600;font-size:15px;letter-spacing:.16em}
+  .powered{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:right;line-height:1.3}
+  .powered b{color:var(--flowin)}
+  .tabs{display:flex;gap:4px;padding:0 14px 10px;overflow-x:auto}
+  .tab{flex-shrink:0;font-family:'Fredoka','DM Sans';font-weight:500;font-size:13px;color:var(--muted);padding:8px 13px;border-radius:100px;cursor:pointer;white-space:nowrap;border:1px solid transparent;background:none}
+  .tab.on{color:#fff;background:linear-gradient(100deg,var(--accent),var(--magenta));box-shadow:0 6px 18px -8px var(--magenta)}
+  .kick{font-family:'Fredoka';font-weight:600;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:11px;display:flex;align-items:center;gap:9px}
+  .kick.mag{color:var(--magenta)}.kick.gold{color:var(--gold)}.kick:before{content:'';width:22px;height:2px;background:currentColor}
+  .hsec{font-size:25px;margin-bottom:8px}.hsec em{font-style:normal;color:var(--accent)}.hsec em.g{color:var(--gold)}
+  .lead{font-size:14.5px;color:var(--muted);margin-bottom:20px}
+  .btn{display:flex;align-items:center;justify-content:center;width:100%;cursor:pointer;border:none;font-family:'Fredoka';font-weight:600;font-size:16px;border-radius:14px;padding:15px;text-decoration:none;color:#fff;background:linear-gradient(100deg,var(--accent),var(--magenta));box-shadow:0 14px 30px -12px var(--magenta)}
+  .hero{position:relative;padding:46px 20px 40px;overflow:hidden}
+  .hero .bg{position:absolute;inset:0;z-index:0;background:url('/nds/hero.jpg') center/cover;opacity:.9}
+  .hero .veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,7,19,.4),rgba(139,92,246,.32) 40%,rgba(236,72,153,.42) 78%,#070510)}
+  .hero>*{position:relative;z-index:2}
+  .hero .badge{display:inline-block;font-family:'Fredoka';font-weight:600;font-size:11px;letter-spacing:.14em;padding:6px 13px;border-radius:100px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);margin-bottom:16px}
+  .hero h1{font-size:33px;text-shadow:0 4px 24px rgba(0,0,0,.5)}
+  .hero .dt{font-family:'Fredoka';font-weight:500;font-size:14px;margin-top:8px;opacity:.92}
+  .hero .sub{font-size:14.5px;color:rgba(246,242,255,.85);margin-top:14px;max-width:330px;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+  .statband{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:22px 0 0;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .statband .s{background:var(--ink);padding:14px 6px;text-align:center}
+  .statband b{font-family:'Fredoka';font-size:21px;display:block;line-height:1;color:var(--accent)}
+  .statband .s:nth-child(2) b{color:var(--magenta)}.statband .s:nth-child(3) b{color:var(--cyan)}.statband .s:nth-child(4) b{color:var(--gold)}
+  .statband span{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700;margin-top:4px;display:block}
+  .mini3{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+  .m3{display:flex;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .m3 .icw{width:40px;height:40px;flex-shrink:0;border-radius:11px;display:grid;place-items:center;color:var(--accent);background:rgba(139,92,246,.14)}
+  .m3:nth-child(2) .icw{color:var(--magenta);background:rgba(236,72,153,.14)}
+  .m3:nth-child(3) .icw{color:var(--gold);background:rgba(248,184,78,.14)}
+  .m3 h3{font-size:15px}.m3 p{font-size:12.5px;color:var(--muted)}
+  .edito{font-size:13px;color:var(--faint);font-style:italic;margin:-2px 0 20px}
+  .nights{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .night{background:var(--ink);padding:15px 16px;display:flex;align-items:center;gap:14px}
+  .night .date{flex-shrink:0;width:46px;text-align:center}
+  .night .dd{font-family:'Fredoka';font-weight:600;font-size:21px;line-height:1}
+  .night .jj{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-top:3px;font-weight:700}
+  .night:nth-child(even) .jj{color:var(--magenta)}
+  .night .bar{width:3px;align-self:stretch;border-radius:3px;background:var(--accent)}
+  .night:nth-child(even) .bar{background:var(--magenta)}
+  .night .aa{font-family:'Fredoka';font-weight:600;font-size:15px;line-height:1.15}
+  .night .tt{font-size:10.5px;color:var(--gold);font-weight:700;margin-top:2px}
+  .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:13px}
+  .reach{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:18px}
+  .rs{background:var(--card);border:1px solid var(--line);border-radius:100px;padding:8px 14px;font-size:12px;color:var(--muted)}
+  .rs b{font-family:'Fredoka';color:var(--text);margin-right:4px}
+  .vcards{display:flex;flex-direction:column;gap:11px}
+  .vc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .vc .icw{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--accent);background:rgba(139,92,246,.13);margin-bottom:11px}
+  .vc:nth-child(2) .icw{color:var(--cyan);background:rgba(34,211,238,.12)}
+  .vc:nth-child(3) .icw{color:var(--magenta);background:rgba(236,72,153,.12)}
+  .vc:nth-child(4) .icw{color:var(--gold);background:rgba(248,184,78,.12)}
+  .vc h3{font-size:16px;margin-bottom:5px}.vc p{font-size:13px;color:var(--muted)}
+  .note{margin-top:18px;font-size:12.5px;color:var(--gold);background:rgba(248,184,78,.1);border:1px solid rgba(248,184,78,.26);border-radius:12px;padding:12px 14px;line-height:1.45}
+  .offer{border:1.5px solid var(--accent);border-radius:20px;padding:22px;background:rgba(139,92,246,.08);box-shadow:0 16px 40px -22px var(--accent)}
+  .oh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .onm{font-family:'Fredoka';font-weight:600;font-size:18px}
+  .opr{font-family:'Fredoka';font-weight:600;font-size:26px;white-space:nowrap;color:var(--accent)}
+  .offer ul{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:10px}
+  .offer li{font-size:13px;display:flex;gap:9px;align-items:flex-start;line-height:1.35;color:var(--text)}
+  .offer li:before{content:'';width:17px;height:17px;flex-shrink:0;margin-top:1px;border-radius:50%;background:var(--accent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/11px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/11px no-repeat}
+  .reassure{font-size:12px;color:var(--muted);text-align:center;margin-top:13px}
+  .sponsor-line{font-size:12.5px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
+  .sponsor-line a{color:var(--accent);font-weight:700;text-decoration:none}
+  .flowinfoot{border-top:1px solid var(--line);padding:26px 20px 40px;text-align:center;background:rgba(126,155,242,.05)}
+  .flowinfoot .fl{font-family:'Fredoka';font-weight:600;font-size:20px;background:linear-gradient(100deg,#7E9BF2,#A9BEF8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tript{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:12px 0 14px}
+  .tript span{font-family:'Fredoka';font-weight:500;font-size:12.5px;padding:7px 14px;border-radius:100px;border:1px solid var(--line)}
+  .fllink{color:var(--flowin);text-decoration:none;font-weight:700;font-size:13px}
+  `
+}
