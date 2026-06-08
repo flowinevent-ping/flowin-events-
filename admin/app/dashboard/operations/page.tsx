@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 
 export const revalidate = 30 // ISR
 
-export const metadata = { title: 'Flowin \u2014 Op\u00e9rations Super Events' }
+export const metadata = { title: 'Flowin — Opérations Super Events' }
 
 type Row = {
   id: string; nom: string; status: string; date_d: string | null; date_f: string | null
@@ -14,7 +14,7 @@ type Row = {
 }
 
 const n = (v: number | null | undefined) => (v == null ? 0 : v)
-const eur = (v: number | null | undefined) => `${n(v).toLocaleString('fr-FR')} \u20ac`
+const eur = (v: number | null | undefined) => `${n(v).toLocaleString('fr-FR')} €`
 
 export default async function OperationsPage() {
   const { data, error } = await supabase
@@ -29,10 +29,10 @@ export default async function OperationsPage() {
       <div style={S.wrap}>
         <div style={S.head}>
           <div>
-            <div style={S.kick}>FLOWIN \u00b7 SUPER ADMIN</div>
-            <h1 style={S.h1}>Op\u00e9rations \u2014 Super Events</h1>
+            <div style={S.kick}>FLOWIN · SUPER ADMIN</div>
+            <h1 style={S.h1}>Opérations — Super Events</h1>
           </div>
-          <a href="/dashboard.html" style={S.back}>\u2190 Dashboard</a>
+          <a href="/dashboard.html" style={S.back}>← Dashboard</a>
         </div>
 
         {error && <div style={S.err}>Erreur de lecture : {error.message}</div>}
@@ -45,27 +45,27 @@ export default async function OperationsPage() {
               <div style={S.cardHead}>
                 <div>
                   <div style={S.seNom}>{r.nom}{nds && <span style={S.tag}>NDS</span>}</div>
-                  <div style={S.seId}>{r.id} \u00b7 {r.date_d || '?'} \u2192 {r.date_f || '?'} \u00b7 geofence {n(r.geofence_m)} m</div>
+                  <div style={S.seId}>{r.id} · {r.date_d || '?'} → {r.date_f || '?'} · geofence {n(r.geofence_m)} m</div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                   <span style={{ ...S.status, ...(r.status === 'live' ? S.stLive : r.status === 'upcoming' ? S.stUp : S.stOff) }}>{r.status}</span>
-                  <a href={`/dashboard/operations/${r.id}`} style={{ color: '#7E9BF2', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>D\u00e9tails \u2192</a>
+                  <a href={`/dashboard/operations/${r.id}`} style={{ color: '#7E9BF2', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>Détails →</a>
                 </div>
               </div>
 
               <div style={S.kpis}>
-                <Kpi label="Commerces" value={n(r.commerces_total)} sub={`${n(r.commerces_actifs)} actifs \u00b7 ${n(r.commerces_pending)} en attente`} c="#8B5CF6" />
-                <Kpi label="Pay\u00e9s" value={n(r.commerces_payes)} sub="commerces" c="#37D399" />
+                <Kpi label="Commerces" value={n(r.commerces_total)} sub={`${n(r.commerces_actifs)} actifs · ${n(r.commerces_pending)} en attente`} c="#8B5CF6" />
+                <Kpi label="Payés" value={n(r.commerces_payes)} sub="commerces" c="#37D399" />
                 <Kpi label="Joueurs" value={n(r.joueurs)} sub={`${n(r.tickets)} tickets`} c="#22D3EE" />
-                <Kpi label="Gains" value={n(r.gains)} sub={`${n(r.gains_utilises)} utilis\u00e9s`} c="#F8B84E" />
-                <Kpi label="Sponsors" value={n(r.sponsors)} sub={`${n(r.sponsors_valides)} valid\u00e9s`} c="#EC4899" />
+                <Kpi label="Gains" value={n(r.gains)} sub={`${n(r.gains_utilises)} utilisés`} c="#F8B84E" />
+                <Kpi label="Sponsors" value={n(r.sponsors)} sub={`${n(r.sponsors_valides)} validés`} c="#EC4899" />
                 <Kpi label="CA pros" value={eur(r.ca_pros)} sub={`sponsoring ${eur(r.sponsoring_encaisse)}`} c="#A6E15A" isText />
               </div>
             </div>
           )
         })}
 
-        <p style={S.note}>Donn\u00e9es agr\u00e9g\u00e9es (vue v_se_dashboard), rafra\u00eechies toutes les 30 s. Chiffres uniquement \u2014 aucune donn\u00e9e nominative.</p>
+        <p style={S.note}>Données agrégées (vue v_se_dashboard), rafraîchies toutes les 30 s. Chiffres uniquement — aucune donnée nominative.</p>
       </div>
     </div>
   )

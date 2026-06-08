@@ -22,23 +22,23 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
   const heroTitle = cfg?.hero?.title || 'Le festival\njoue pour vous'
   const heroSub =
     cfg?.hero?.sub ||
-    'Cette ann\u00e9e, les Nuits du Sud se jouent aussi sur mobile. 24 000 festivaliers jouent, gagnent \u2014 et d\u00e9couvrent votre commerce.'
+    'Cette année, les Nuits du Sud se jouent aussi sur mobile. 24 000 festivaliers jouent, gagnent — et découvrent votre commerce.'
 
-  // Prix : jamais invent\u00e9. Si absent de la config -> "Sur demande".
+  // Prix : jamais inventé. Si absent de la config -> "Sur demande".
   const prix: string | number | undefined =
     cfg?.pricing?.prix ?? cfg?.pricing?.price ?? cfg?.pricing?.montant
-  const prixLabel = prix ? `${prix} \u20ac` : 'Sur demande'
+  const prixLabel = prix ? `${prix} €` : 'Sur demande'
 
   const wa = cfg?.wa_number || ''
   const waHref = wa ? `https://wa.me/${wa.replace(/[^0-9]/g, '')}` : '#offre'
 
   const nights = [
-    { d: '09', j: 'Jeu', a: 'Luiza \u00b7 Mariam chante Amadou & Mariam', t: '\u2605 Micro Ondes \u2014 Talents' },
-    { d: '10', j: 'Ven', a: "Maya Kamaty \u00b7 Kassav'", t: '' },
-    { d: '11', j: 'Sam', a: 'Bakermat \u00b7 Breakbot & Irfane', t: '\u2605 Geiste \u2014 Talents' },
-    { d: '16', j: 'Jeu', a: 'Soom T (DJ set) \u00b7 Danakil', t: '' },
-    { d: '17', j: 'Ven', a: 'Kolinga \u00b7 V\u00e9ronique Sanson', t: '' },
-    { d: '18', j: 'Sam', a: "Magic System \u00b7 Ben l'Oncle Soul", t: '\u2605 Killian Alaari \u2014 Talents' },
+    { d: '09', j: 'Jeu', a: 'Luiza · Mariam chante Amadou & Mariam', t: '★ Micro Ondes — Talents' },
+    { d: '10', j: 'Ven', a: "Maya Kamaty · Kassav'", t: '' },
+    { d: '11', j: 'Sam', a: 'Bakermat · Breakbot & Irfane', t: '★ Geiste — Talents' },
+    { d: '16', j: 'Jeu', a: 'Soom T (DJ set) · Danakil', t: '' },
+    { d: '17', j: 'Ven', a: 'Kolinga · Véronique Sanson', t: '' },
+    { d: '18', j: 'Sam', a: "Magic System · Ben l'Oncle Soul", t: '★ Killian Alaari — Talents' },
   ]
 
   const Tab = ({ id, label }: { id: typeof tab; label: string }) => (
@@ -54,12 +54,12 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
       <div className="topbar">
         <div className="brandrow">
           <div className="nds-lock"><span className="moon" /><span className="nm">NUITS DU SUD</span></div>
-          <div className="powered">Espace partenaires<br />propuls\u00e9 par <b>Flowin</b></div>
+          <div className="powered">Espace partenaires<br />propulsé par <b>Flowin</b></div>
         </div>
         <div className="tabs">
           <Tab id="accueil" label="Accueil" />
           <Tab id="festival" label="Le festival" />
-          <Tab id="visibilite" label="Votre visibilit\u00e9" />
+          <Tab id="visibilite" label="Votre visibilité" />
           <Tab id="offre" label="Devenir partenaire" />
         </div>
       </div>
@@ -69,22 +69,22 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
         <div className="panel">
           <div className="hero">
             <div className="bg" /><div className="veil" />
-            <span className="badge">29e \u00c9DITION \u00b7 9 \u2192 18 JUILLET 2026</span>
+            <span className="badge">29e ÉDITION · 9 → 18 JUILLET 2026</span>
             <h1>{heroTitle.split('\n').map((l, i) => <span key={i}>{l}<br /></span>)}</h1>
-            <div className="dt">Place du Grand Jardin \u00b7 Vence</div>
+            <div className="dt">Place du Grand Jardin · Vence</div>
             <p className="sub">{heroSub}</p>
           </div>
           <div className="wrap">
             <div className="statband">
               <div className="s"><b>24 000</b><span>festivaliers</span></div>
-              <div className="s"><b>6</b><span>soir\u00e9es</span></div>
+              <div className="s"><b>6</b><span>soirées</span></div>
               <div className="s"><b>80%</b><span>locaux</span></div>
               <div className="s"><b>60%</b><span>femmes</span></div>
             </div>
             <div className="mini3">
               <div className="m3"><div className="icw">{icQR}</div><div><h3>Votre QR perso</h3><p>Faites jouer vos clients, captez les festivaliers.</p></div></div>
-              <div className="m3"><div className="icw">{icChart}</div><div><h3>Vos statistiques</h3><p>Scans, participations, clics sur vos liens \u2014 mesur\u00e9s.</p></div></div>
-              <div className="m3"><div className="icw">{icStar}</div><div><h3>Partenaire officiel</h3><p>Associ\u00e9 au plus grand festival de l\u2019arri\u00e8re-pays ni\u00e7ois.</p></div></div>
+              <div className="m3"><div className="icw">{icChart}</div><div><h3>Vos statistiques</h3><p>Scans, participations, clics sur vos liens — mesurés.</p></div></div>
+              <div className="m3"><div className="icw">{icStar}</div><div><h3>Partenaire officiel</h3><p>Associé au plus grand festival de l’arrière-pays niçois.</p></div></div>
             </div>
             <button className="btn" style={{ margin: '26px 0 8px' }} onClick={() => { setTab('offre'); window.scrollTo(0, 0) }}>Devenir partenaire</button>
           </div>
@@ -95,8 +95,8 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
       {tab === 'festival' && (
         <div className="panel"><div className="sec wrap">
           <div className="kick mag">Le festival</div>
-          <h2 className="hsec">Six soir\u00e9es, <em>Place du Grand Jardin</em></h2>
-          <p className="edito">\u00ab Voyager, rassembler, r\u00e9v\u00e9ler, partager, offrir, surprendre. \u00bb</p>
+          <h2 className="hsec">Six soirées, <em>Place du Grand Jardin</em></h2>
+          <p className="edito">« Voyager, rassembler, révéler, partager, offrir, surprendre. »</p>
           <div className="nights">
             {nights.map((n, i) => (
               <div className="night" key={i}>
@@ -106,11 +106,11 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
               </div>
             ))}
           </div>
-          <p className="foot">Direction artistique Rock en Seine \u00d7 Radio Nova</p>
+          <p className="foot">Direction artistique Rock en Seine × Radio Nova</p>
           <div className="reach">
-            <div className="rs"><b>24 000</b>festivaliers \u00b7 6 jours</div>
-            <div className="rs"><b>80%</b>locaux (06 \u00b7 Var)</div>
-            <div className="rs"><b>22 000</b>abonn\u00e9s newsletter</div>
+            <div className="rs"><b>24 000</b>festivaliers · 6 jours</div>
+            <div className="rs"><b>80%</b>locaux (06 · Var)</div>
+            <div className="rs"><b>22 000</b>abonnés newsletter</div>
             <div className="rs"><b>90 000</b>visites du site</div>
           </div>
         </div></div>
@@ -120,15 +120,15 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
       {tab === 'visibilite' && (
         <div className="panel"><div className="sec wrap">
           <div className="kick gold">Votre place dans le jeu</div>
-          <h2 className="hsec">L\u00e0 o\u00f9 <em className="g">24 000 personnes</em> vous voient</h2>
-          <p className="lead">Le jeu officiel est le support. Vous, vous gagnez de la visibilit\u00e9 de proximit\u00e9 \u2014 et vous la mesurez.</p>
+          <h2 className="hsec">Là où <em className="g">24 000 personnes</em> vous voient</h2>
+          <p className="lead">Le jeu officiel est le support. Vous, vous gagnez de la visibilité de proximité — et vous la mesurez.</p>
           <div className="vcards">
-            <div className="vc"><div className="icw">{icQR}</div><h3>Votre QR personnalis\u00e9</h3><p>\u00c0 votre caisse. Vos clients jouent, de nouveaux festivaliers vous d\u00e9couvrent. Chaque scan vous est attribu\u00e9.</p></div>
-            <div className="vc"><div className="icw">{icList}</div><h3>Pr\u00e9sence officielle</h3><p>Logo dans l\u2019annuaire des partenaires, fiche d\u00e9di\u00e9e (accroche + liens), position sur la carte du festival.</p></div>
-            <div className="vc"><div className="icw">{icLink}</div><h3>Liens tra\u00e7\u00e9s</h3><p>Site, Instagram : chaque clic compt\u00e9 en temps r\u00e9el. Une pr\u00e9sence qui se mesure, l\u00e0 o\u00f9 un flyer ne dira jamais rien.</p></div>
-            <div className="vc"><div className="icw">{icCal}</div><h3>Avant \u00b7 pendant \u00b7 apr\u00e8s</h3><p>Vous \u00eates visible d\u00e8s l\u2019annonce, pendant les six soir\u00e9es, et apr\u00e8s la derni\u00e8re note.</p></div>
+            <div className="vc"><div className="icw">{icQR}</div><h3>Votre QR personnalisé</h3><p>À votre caisse. Vos clients jouent, de nouveaux festivaliers vous découvrent. Chaque scan vous est attribué.</p></div>
+            <div className="vc"><div className="icw">{icList}</div><h3>Présence officielle</h3><p>Logo dans l’annuaire des partenaires, fiche dédiée (accroche + liens), position sur la carte du festival.</p></div>
+            <div className="vc"><div className="icw">{icLink}</div><h3>Liens traçés</h3><p>Site, Instagram : chaque clic compté en temps réel. Une présence qui se mesure, là où un flyer ne dira jamais rien.</p></div>
+            <div className="vc"><div className="icw">{icCal}</div><h3>Avant · pendant · après</h3><p>Vous êtes visible dès l’annonce, pendant les six soirées, et après la dernière note.</p></div>
           </div>
-          <div className="note">Le scan sur place reste la cl\u00e9 : c\u2019est lui qui prouve le passage et l\u2019attribue \u00e0 votre commerce.</div>
+          <div className="note">Le scan sur place reste la clé : c’est lui qui prouve le passage et l’attribue à votre commerce.</div>
         </div></div>
       )}
 
@@ -141,26 +141,26 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
           <div className="offer">
             <div className="oh"><div className="onm">Partenaire visible NDS 2026</div><div className="opr">{prixLabel}</div></div>
             <ul>
-              <li>Votre <b>QR Code personnalis\u00e9</b> \u2014 faites jouer vos clients, captez-en de nouveaux</li>
-              <li><b>Pr\u00e9sence officielle</b> dans l\u2019appli du festival (annuaire + fiche + liens)</li>
-              <li><b>Vos statistiques</b> \u2014 scans, participations, clics, en temps r\u00e9el</li>
+              <li>Votre <b>QR Code personnalisé</b> — faites jouer vos clients, captez-en de nouveaux</li>
+              <li><b>Présence officielle</b> dans l’appli du festival (annuaire + fiche + liens)</li>
+              <li><b>Vos statistiques</b> — scans, participations, clics, en temps réel</li>
               <li><b>Position sur la carte</b> du festival</li>
-              <li><b>Mise en avant</b> aupr\u00e8s des festivaliers \u2014 avant \u00b7 pendant \u00b7 apr\u00e8s</li>
+              <li><b>Mise en avant</b> auprès des festivaliers — avant · pendant · après</li>
             </ul>
             <a className="btn" href={waHref} target={wa ? '_blank' : undefined} rel="noopener">
-              {prix ? 'R\u00e9server ma place' : 'Demander une pr\u00e9sentation'}
+              {prix ? 'Réserver ma place' : 'Demander une présentation'}
             </a>
-            <p className="reassure">Facture d\u00e8s validation \u00b7 sans engagement de dur\u00e9e</p>
+            <p className="reassure">Facture dès validation · sans engagement de durée</p>
           </div>
-          <p className="sponsor-line">Vous souhaitez sponsoriser un lot ou b\u00e9n\u00e9ficier d\u2019une mise en avant premium ? <a href={waHref} target={wa ? '_blank' : undefined} rel="noopener">Contactez-nous.</a></p>
+          <p className="sponsor-line">Vous souhaitez sponsoriser un lot ou bénéficier d’une mise en avant premium ? <a href={waHref} target={wa ? '_blank' : undefined} rel="noopener">Contactez-nous.</a></p>
         </div></div>
       )}
 
       <div className="flowinfoot">
-        <div className="muted2">Le jeu officiel des Nuits du Sud est propuls\u00e9 par</div>
+        <div className="muted2">Le jeu officiel des Nuits du Sud est propulsé par</div>
         <div className="fl">Flowin</div>
-        <div className="tript"><span>Captez</span><span>Dynamisez</span><span>Fid\u00e9lisez</span></div>
-        <a className="fllink" href="/landing">D\u00e9couvrir Flowin \u2192</a>
+        <div className="tript"><span>Captez</span><span>Dynamisez</span><span>Fidélisez</span></div>
+        <a className="fllink" href="/landing">Découvrir Flowin →</a>
       </div>
     </div>
   )
