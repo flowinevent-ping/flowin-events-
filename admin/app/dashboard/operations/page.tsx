@@ -47,7 +47,10 @@ export default async function OperationsPage() {
                   <div style={S.seNom}>{r.nom}{nds && <span style={S.tag}>NDS</span>}</div>
                   <div style={S.seId}>{r.id} \u00b7 {r.date_d || '?'} \u2192 {r.date_f || '?'} \u00b7 geofence {n(r.geofence_m)} m</div>
                 </div>
-                <span style={{ ...S.status, ...(r.status === 'live' ? S.stLive : r.status === 'upcoming' ? S.stUp : S.stOff) }}>{r.status}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                  <span style={{ ...S.status, ...(r.status === 'live' ? S.stLive : r.status === 'upcoming' ? S.stUp : S.stOff) }}>{r.status}</span>
+                  <a href={`/dashboard/operations/${r.id}`} style={{ color: '#7E9BF2', fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>D\u00e9tails \u2192</a>
+                </div>
               </div>
 
               <div style={S.kpis}>

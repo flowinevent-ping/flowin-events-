@@ -130,6 +130,8 @@ export async function attribuerSuperEvent(joueurId: string, evId: string, today:
   }
 }
 
+import { captureParrainage } from './parrainage'
+
 export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
@@ -192,6 +194,8 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     /* Bloc 2 — Super Event : ticket + gain immédiat + identité */
     await attribuerSuperEvent(joueurId, evId, today)
     rememberJoueur(joueurId, emailLower, payload.prenom)
+    /* Parrainage : si l'inscription vient d'un lien ?ref=, on l'enregistre (validé + attribué au commerce) */
+    await captureParrainage(extId)
   }
 
   return { success: true, duplicate: false, ticket: tc }
