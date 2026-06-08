@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import SuperEventMap, { Lieu } from '../_components/SuperEventMap'
 
-type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null }
+type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; social?: { insta?: string; fb?: string; site?: string } | null }
 type Lot = { id: string; rang: number | null; valeur: number | null; libelle?: string | null }
 type Sponsor = { id: string; nom: string; image_url?: string | null }
 type FocusEvent = { id: string; nom: string; module?: string | null; gain_immediat?: string | null }
@@ -251,6 +251,17 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                       </div>
                     )
                   })}
+                </div>
+              </div>
+            )}
+
+            {(se.social?.insta || se.social?.fb) && (
+              <div style={{ background: '#fff', border: '1px solid #e6e9f2', borderRadius: 16, padding: '15px 16px', marginBottom: 18, textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#2c3a63', marginBottom: 6 }}>🎟️ Résultats du grand tirage</div>
+                <div style={{ fontSize: 12.5, color: '#6b7280', marginBottom: 12, lineHeight: 1.45 }}>Les gagnants sont annoncés sur les réseaux des Nuits du Sud. Suis-les pour ne rien manquer.</div>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                  {se.social?.insta && <a href={se.social.insta} target="_blank" rel="noopener" style={{ flex: 1, maxWidth: 160, padding: '11px', borderRadius: 12, background: '#3B5CC4', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>Instagram</a>}
+                  {se.social?.fb && <a href={se.social.fb} target="_blank" rel="noopener" style={{ flex: 1, maxWidth: 160, padding: '11px', borderRadius: 12, background: '#3b5998', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>Facebook</a>}
                 </div>
               </div>
             )}
