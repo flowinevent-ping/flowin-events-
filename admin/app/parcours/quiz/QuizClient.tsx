@@ -68,7 +68,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     setReco(true)
     ;(async () => {
       if (local.prenom) setForm(f => ({ ...f, prenom: local.prenom as string }))
-      const res = await claimJoueur(local, evId, 'PQ')
+      const res = await claimJoueur(local, evId, 'PQ', bonusAnswers)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
       if (res.duplicate) { setScreen('already'); return }
@@ -86,7 +86,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('PQ')
-    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ' })
+    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers })
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}; setScreen('already'); return }
     setTicket(res.ticket); setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}

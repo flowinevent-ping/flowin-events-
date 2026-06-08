@@ -190,6 +190,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       score: scoreNum,
       completed: true,
       tickets: 1,
+      bonus_answers: payload.bonus_reponses ?? null,
     })
     /* Bloc 2 — Super Event : ticket + gain immédiat + identité */
     await attribuerSuperEvent(joueurId, evId, today)
@@ -218,7 +219,8 @@ export function getJoueurLocal(): { id: string; email: string; prenom?: string }
 export async function claimJoueur(
   joueur: { id: string; email: string; prenom?: string },
   evId: string,
-  prefix: TicketPrefix
+  prefix: TicketPrefix,
+  bonus?: Record<string, unknown>
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const { data: dup } = await supabase
@@ -233,7 +235,7 @@ export async function claimJoueur(
   const { data: jrow } = await supabase.from('joueurs').select('events').eq('id', joueur.id).single()
   const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
   await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)
-  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: 0, completed: true, tickets: 1 })
+  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: 0, completed: true, tickets: 1, bonus_answers: bonus ?? null })
   await attribuerSuperEvent(joueur.id, evId, today)
   rememberJoueur(joueur.id, emailLower, joueur.prenom)
   return { success: true, duplicate: false, ticket: tc }
