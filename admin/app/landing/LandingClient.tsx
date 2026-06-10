@@ -14,8 +14,9 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   a{color:inherit}
   .ic{display:block}
   section{padding:40px 22px 48px;scroll-margin-top:64px}
-  .page{display:none;animation:fade .25s ease}
-  .page.show{display:block}
+  .page{animation:fade .25s ease}
+  .app.paged .page{display:none}
+  .app.paged .page.show{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
   .menu{position:sticky;top:0;z-index:50;background:rgba(14,27,48,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
@@ -491,6 +492,7 @@ export default function LandingClient({ cfg, source = '' }: { cfg?: any; source?
       if (at && at.scrollIntoView) at.scrollIntoView({ inline: 'center', block: 'nearest' })
     }
     Array.from(document.querySelectorAll('[data-to]')).forEach((el) => el.addEventListener('click', () => showPage(el.getAttribute('data-to') || 'top')))
+    const app = document.querySelector('.app'); if (app) app.classList.add('paged')
     showPage('top')
 
     function buildDots(car: any) {
