@@ -173,10 +173,14 @@ export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; s
   if (!e || !e.super_event_id || e.lat == null || e.lng == null) {
     return { onSite: true, scan: {} }
   }
+  const { data: se } = await supabase.from('super_events').select('geofence_m,geo_controle').eq('id', e.super_event_id).single()
+  const seRow = se as { geofence_m?: number | null; geo_controle?: boolean | null } | null
+  // Contrôle GPS désactivé par défaut : on ne demande pas la position, ticket normal.
+  if (!seRow || seRow.geo_controle !== true) {
+    return { onSite: true, scan: {} }
+  }
   let geofence = 150
-  const { data: se } = await supabase.from('super_events').select('geofence_m').eq('id', e.super_event_id).single()
-  const g = (se as { geofence_m?: number | null } | null)?.geofence_m
-  if (typeof g === 'number' && g > 0) geofence = g
+  if (typeof seRow.geofence_m === 'number' && seRow.geofence_m > 0) geofence = seRow.geofence_m
 
   const pos = await getScanPosition()
   if (!pos) {

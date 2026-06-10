@@ -1893,6 +1893,7 @@ function supaRowToData(row, type){
   if(o.enseigne !== undefined) { /* déjà au bon nom */ }
   if(o.date_assign !== undefined) { o.dateAssign = o.date_assign; delete o.date_assign; }
   if(o.tirage_global !== undefined) { o.tirageGlobal = o.tirage_global; delete o.tirage_global; }
+  if(o.geo_controle !== undefined) { o.geoControle = o.geo_controle; delete o.geo_controle; }
   if(o.nb_gagnants_final !== undefined) { o.nbGagnantsFinal = o.nb_gagnants_final; delete o.nb_gagnants_final; }
   if(o.deploy_url !== undefined) { o.deployUrl = o.deploy_url; delete o.deploy_url; }
   if(o.accent_color !== undefined) { o.accentColor = o.accent_color; delete o.accent_color; }
@@ -2145,7 +2146,8 @@ async function supaWriteSuperEvent(se){
     description: se.description||'',
     status: se.status||'upcoming',
     tirage_global: se.tirageGlobal||false,
-    nb_gagnants_final: se.nbGagnantsFinal||0
+    nb_gagnants_final: se.nbGagnantsFinal||0,
+    geo_controle: se.geoControle||false
   };
   var ok = await supaUpsert('super_events', payload);
   if(!ok) { console.error('[Flowin] supaWriteSuperEvent FAILED', payload && payload.id); }
@@ -7098,7 +7100,7 @@ function renderBiblioSuperEvents(){
 function newSuperEvent(){
   const id = newId('se');
   const today = fmtDateInput(new Date().toISOString());
-  DATA.superEvents.unshift({id,nom:'Nouveau Super Event',pros:[],events:[],dateD:today,dateF:today,status:'upcoming',description:'',tirageGlobal:false,nbGagnantsFinal:0});
+  DATA.superEvents.unshift({id,nom:'Nouveau Super Event',pros:[],events:[],dateD:today,dateF:today,status:'upcoming',description:'',tirageGlobal:false,nbGagnantsFinal:0,geoControle:false});
   saveData();
   // 🔄 Sync Supabase
   var _newSe = DATA.superEvents.find(function(s){return s.id===id;});
@@ -7211,6 +7213,8 @@ function drawerSuperEvent(se){
       html += fieldSelect('Statut','status',f.status,[{v:'upcoming',l:'À venir'},{v:'live',l:'En cours'},{v:'past',l:'Passé'}]);
       html += '<div class="field-row"><div class="field-label">Tirage final global</div><div class="field-value"><div class="toggle '+(f.tirageGlobal?'on':'')+'" onclick="setForm(\'tirageGlobal\',!state.drawer.form.tirageGlobal);renderDrawer()"></div></div></div>';
       if(f.tirageGlobal) html += fieldInput('Nombre de gagnants finaux','nbGagnantsFinal',f.nbGagnantsFinal,'number');
+      html += '<div class="field-row"><div class="field-label">Contrôle GPS (anti-scan à distance)</div><div class="field-value"><div class="toggle '+(f.geoControle?'on':'')+'" onclick="setForm(\'geoControle\',!state.drawer.form.geoControle);renderDrawer()"></div></div></div>';
+      if(f.geoControle) html += '<div class="alert info" style="margin-top:6px"><span class="ico">📍</span>Le joueur doit être sur place (géofence '+(f.geofenceM||150)+' m) pour gagner un ticket. Sinon : autorisé sans ticket.</div>';
     } else {
       html += fieldRow('Nom','<strong>'+esc(se.nom)+'</strong>');
       html += fieldRow('Description',esc(se.description||'-'));
@@ -7219,6 +7223,7 @@ function drawerSuperEvent(se){
       html += fieldRow('Pros liés',prosLies.length?prosLies.map(p=>'<a onclick="openDrawerFor(\'pro\',\''+p.id+'\')">'+esc(p.nom)+'</a>').join(' · '):'<span class="text-muted">Aucun · ajoutez des pros dans l\'onglet "Pros"</span>');
       html += fieldRow('Events liés',evs.length+' / '+eventsCandidats.length+' events disponibles');
       html += fieldRow('Tirage final',se.tirageGlobal?'Oui · '+se.nbGagnantsFinal+' gagnants':'Non · gains par event');
+      html += fieldRow('Contrôle GPS',se.geoControle?('Activé · géofence '+(se.geofenceM||150)+' m'):'Désactivé');
     }
   } else if(state.drawer.tab==='pros'){
     html += '<div class="alert info"><span class="ico">🏢</span>Sélectionnez les pros qui participent à ce Super Event. Vous pourrez ensuite choisir les events de chacun.</div>';
