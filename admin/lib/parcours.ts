@@ -99,7 +99,7 @@ export function rememberJoueur(id: string | undefined | null, email: string, pre
 }
 
 /* Bloc 2 — attribue ticket (1/jour/lieu) + gain immédiat si l'event appartient à un Super Event */
-export async function attribuerSuperEvent(joueurId: string, evId: string, today: string): Promise<void> {
+export async function attribuerSuperEvent(joueurId: string, evId: string, today: string, onSite: boolean = true): Promise<void> {
   const { data: ev } = await supabase
     .from('events')
     .select('super_event_id,gain_immediat,gain_ticket')
@@ -109,14 +109,14 @@ export async function attribuerSuperEvent(joueurId: string, evId: string, today:
   if (!row || !row.super_event_id) return
   const seId = row.super_event_id
 
-  if (row.gain_ticket !== false) {
+  if (onSite && row.gain_ticket !== false) {
     await supabase.from('se_tickets').upsert(
       { super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today },
       { onConflict: 'joueur_id,event_id,jour', ignoreDuplicates: true }
     )
   }
 
-  if (row.gain_immediat) {
+  if (onSite && row.gain_immediat) {
     const code = 'G-' + Math.random().toString(36).slice(2, 8).toUpperCase()
     await supabase.from('se_gains').insert({
       super_event_id: seId,
@@ -131,6 +131,66 @@ export async function attribuerSuperEvent(joueurId: string, evId: string, today:
 }
 
 import { captureParrainage } from './parrainage'
+
+/* ── Anti-scan à distance : géolocalisation du scan ── */
+function getScanPosition(timeoutMs = 8000): Promise<GeolocationPosition | null> {
+  if (typeof navigator === 'undefined' || !navigator.geolocation) return Promise.resolve(null)
+  return new Promise((resolve) => {
+    let done = false
+    const finish = (v: GeolocationPosition | null) => { if (!done) { done = true; resolve(v) } }
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => finish(pos),
+        () => finish(null),
+        { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 30000 }
+      )
+    } catch { finish(null) }
+    setTimeout(() => finish(null), timeoutMs + 500)
+  })
+}
+
+function distanceMeters(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6371000
+  const toRad = (d: number) => (d * Math.PI) / 180
+  const dLat = toRad(bLat - aLat)
+  const dLng = toRad(bLng - aLng)
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2
+  return Math.round(2 * R * Math.asin(Math.sqrt(s)))
+}
+
+/**
+ * Capture la position au scan et la compare au point de scan (event lat/lng) selon geofence_m.
+ * Règles : sur place → ticket ; hors zone → autorisé sans ticket ; refus/indispo → non vérifié, sans ticket.
+ * Si l'event n'a pas de coordonnées ou n'est pas dans un Super Event, le géofence ne s'applique pas (ticket normal).
+ */
+export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; scan: Record<string, unknown> }> {
+  const { data: ev } = await supabase
+    .from('events')
+    .select('lat,lng,super_event_id')
+    .eq('id', evId)
+    .single()
+  const e = ev as { lat?: number | null; lng?: number | null; super_event_id?: string | null } | null
+  if (!e || !e.super_event_id || e.lat == null || e.lng == null) {
+    return { onSite: true, scan: {} }
+  }
+  let geofence = 150
+  const { data: se } = await supabase.from('super_events').select('geofence_m').eq('id', e.super_event_id).single()
+  const g = (se as { geofence_m?: number | null } | null)?.geofence_m
+  if (typeof g === 'number' && g > 0) geofence = g
+
+  const pos = await getScanPosition()
+  if (!pos) {
+    return { onSite: false, scan: { scan_statut: 'non_verifie' } }
+  }
+  const lat = pos.coords.latitude
+  const lng = pos.coords.longitude
+  const dist = distanceMeters(lat, lng, e.lat, e.lng)
+  const onSite = dist <= geofence
+  return {
+    onSite,
+    scan: { scan_lat: lat, scan_lng: lng, scan_distance_m: dist, scan_statut: onSite ? 'sur_place' : 'hors_zone' },
+  }
+}
 
 export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
   const emailLower = payload.email.toLowerCase().trim()
@@ -183,17 +243,19 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
   if (joueurRows?.length) {
     const joueurId = (joueurRows[0] as { id: string }).id
     const scoreNum = payload.score_moy ? (parseInt(payload.score_moy.split('/')[0]) || 0) : 0
+    const geo = await captureScanGeo(evId)
     await supabase.from('participations').insert({
       joueur_id: joueurId,
       event_id: evId,
       ticket_code: tc,
       score: scoreNum,
       completed: true,
-      tickets: 1,
+      tickets: geo.onSite ? 1 : 0,
       bonus_answers: payload.bonus_reponses ?? null,
+      ...geo.scan,
     })
-    /* Bloc 2 — Super Event : ticket + gain immédiat + identité */
-    await attribuerSuperEvent(joueurId, evId, today)
+    /* Bloc 2 — Super Event : ticket + gain immédiat (uniquement si scan sur place) */
+    await attribuerSuperEvent(joueurId, evId, today, geo.onSite)
     rememberJoueur(joueurId, emailLower, payload.prenom)
     /* Parrainage : si l'inscription vient d'un lien ?ref=, on l'enregistre (validé + attribué au commerce) */
     await captureParrainage(extId)
@@ -235,8 +297,9 @@ export async function claimJoueur(
   const { data: jrow } = await supabase.from('joueurs').select('events').eq('id', joueur.id).single()
   const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
   await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)
-  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: 0, completed: true, tickets: 1, bonus_answers: bonus ?? null })
-  await attribuerSuperEvent(joueur.id, evId, today)
+  const geo = await captureScanGeo(evId)
+  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: 0, completed: true, tickets: geo.onSite ? 1 : 0, bonus_answers: bonus ?? null, ...geo.scan })
+  await attribuerSuperEvent(joueur.id, evId, today, geo.onSite)
   rememberJoueur(joueur.id, emailLower, joueur.prenom)
   return { success: true, duplicate: false, ticket: tc }
 }

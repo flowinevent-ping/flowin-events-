@@ -7325,9 +7325,10 @@ function drawerSuperEvent(se){
             var ba = (pa.bonus_answers && typeof pa.bonus_answers==='object') ? pa.bonus_answers : {};
             var ef = (pa.extra_fields && typeof pa.extra_fields==='object') ? pa.extra_fields : {};
             var bk = Object.keys(ba); var fk = Object.keys(ef);
+            var sb = pa.scan_statut==='sur_place'?'<span class="chip live" style="font-size:9px">📍 sur place</span> ':(pa.scan_statut==='hors_zone'?'<span class="chip" style="font-size:9px;background:#F59E0B;color:#fff">🛰️ à distance</span> ':(pa.scan_statut==='non_verifie'?'<span class="chip" style="font-size:9px">📍 non vérifié</span> ':''));
             html += '<div style="padding:8px 10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:5px">'
                  + '<div class="flex flex-between"><div class="fw-700 text-sm">'+esc(((j.prenom||'')+' '+(j.nom||'')).trim()||j.email||'joueur')+'</div>'
-                 + '<div>'+(j.optin?'<span class="chip live" style="font-size:9px">RGPD ✓</span>':'<span class="chip" style="font-size:9px">no opt-in</span>')+'</div></div>'
+                 + '<div>'+sb+(j.optin?'<span class="chip live" style="font-size:9px">RGPD ✓</span>':'<span class="chip" style="font-size:9px">no opt-in</span>')+'</div></div>'
                  + '<div class="text-xs text-muted">'+esc((j.code_postal||j.codePostal||j.ville||''))+' · score '+(pa.score||0)+' · '+(pa.tickets||0)+'🎫'+(pa.ticket_code?(' · '+esc(pa.ticket_code)):'')+'</div>'
                  + (bk.length?('<div class="text-xs" style="margin-top:3px">🧩 bonus — '+bk.map(function(k){ return esc(k)+': '+esc(String(ba[k])); }).join(' · ')+'</div>'):'')
                  + (fk.length?('<div class="text-xs" style="margin-top:3px">📝 form — '+fk.map(function(k){ return esc(k)+': '+esc(String(ef[k])); }).join(' · ')+'</div>'):'')
