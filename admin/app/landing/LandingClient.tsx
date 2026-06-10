@@ -43,7 +43,7 @@ interface Profil { ico:string; lbl:string; col:string; scenario:string; reponse:
 const PROFILS: Profil[] = [
  { ico:'tools-kitchen-2', lbl:'Restaurateur', col:'#D62828',
    scenario:"Vos clients passent, mangent, repartent — et pour les faire revenir, il ne vous reste que la communication sur les réseaux. Vous restez en démarche passive.",
-   reponse:"On vous aide à capter vos clients et à constituer votre base. Vous l'animez quand vous voulez : heures creuses, soirée à thème, nouveauté, réouverture, offre spéciale. Flowin personnalise et vous accompagne — une base à vous pour remplir vos creux et faire revenir, sans dépendre de la pub." },
+   reponse:"On vous aide à capter vos clients et à constituer votre base. Vous l'animez quand vous voulez : soirée à thème, nouveauté, réouverture, offre spéciale. Flowin personnalise et vous accompagne — une base à vous pour communiquer en direct et faire revenir, sans dépendre de la pub." },
  { ico:'calendar-event', lbl:"Créateur d'events", col:'#00B4A0',
    scenario:"Vos participants viennent, vivent l'event, repartent — et d'une édition à l'autre vous repartez de zéro, sans savoir qui est venu ni d'où.",
    reponse:"On capte vos participants, on constitue votre base à vous, on vous aide à la réactiver à l'event suivant. On vous accompagne dans votre stratégie marketing : une audience qui grandit à chaque édition et des chiffres réels pour négocier vos partenaires." },
@@ -59,18 +59,18 @@ const PROFILS: Profil[] = [
 ]
 interface Module { ico:string; nom:string; col:string; tag:string; f:string[] }
 const MODULES: Module[] = [
- { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:"L'accroche qui capte", f:["Crée l'envie en une seconde","Transforme le passage en contact","Votre base en quelques secondes"] },
- { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:"L'immersion personnalisée", f:["Une expérience à votre image","Avant, pendant, après l'event","Vous engagez et gardez le contact"] },
- { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:"L'attente qui fait revenir", f:["Vos lots, vos couleurs","Tirage automatique","Publication des gagnants"] },
- { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:"Le public qui s'exprime", f:["Donnez la parole en direct","Récoltez avis et ressenti","Un moment vivant et immersif"] },
- { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:'Le contact en continu', f:["Capte sans animateur","Joue à tout moment","Alimente votre base en continu"] },
- { ico:'award', nom:'Quiz master', col:'#F97316', tag:"L'émotion collective", f:["Fédère toute la salle","Crée un moment fort","Garde le contact de tous"] },
+ { ico:'help-circle', nom:'Quiz + bonus', col:'#0B6E4F', tag:'Engagez et sondez', f:["Un jeu à votre image qui capte l'attention","Vous sondez vos visiteurs en même temps"] },
+ { ico:'ticket', nom:'Tombola', col:'#E8212B', tag:'Simple et efficace', f:["Vos lots, vos couleurs, en quelques clics","Tirage et gagnants gérés tout seuls"] },
+ { ico:'thumb-up', nom:'Vote live', col:'#F59E0B', tag:'Immersif et participatif', f:["Votre public s'exprime en direct","Vous récupérez son avis sur le moment"] },
+ { ico:'user', nom:'Quiz solo', col:'#00B4A0', tag:'Intéressez votre public', f:["Chacun joue à son rythme, sans animateur","Vous suivez les résultats en temps réel"] },
+ { ico:'award', nom:'Quiz master', col:'#F97316', tag:'Fédérez votre communauté', f:["Toute la salle joue ensemble, en direct","Un grand moment qui anime votre communauté"] },
+ { ico:'rotate-clockwise', nom:'Roue de la fortune', col:'#3B5CC4', tag:"L'accroche qui attire", f:["Donne envie de s'arrêter en une seconde","Transforme le passage en participation"] },
 ]
 interface Tier { nom:string; prix:string; unite:string; badge:string|null; hl:boolean; f:string[] }
 const PRICING: Tier[] = [
- { nom:'Votre campagne', prix:'189', unite:'/ event · HT', badge:null, hl:false, f:["Jusqu'à 1 000 participants","Tous les modules","Visuel co-brandé","Data stockée","Tableau de bord Pro temps réel","Export CSV","Chef de projet dédié"] },
- { nom:'Abonnement', prix:'289', unite:'/ mois', badge:'Recommandé', hl:true, f:["Jusqu'à 3 000 participants / event","Events illimités","Tableau de bord multi-events","Super events + tirage global","Rapports analytiques","Chef de projet dédié"] },
- { nom:'Sur mesure', prix:'Devis', unite:'', badge:null, hl:false, f:["Gros volumes","Stratégie & dev","Campagne sur fichier client","Customisation","Rapports analytiques","Super-events sponsorisés","Chef de projet dédié"] },
+ { nom:"À l'event", prix:'189', unite:'/ event · HT', badge:null, hl:false, f:["Jusqu'à 1 000 participants","Tous les jeux","Visuel à vos couleurs","Données stockées","Tableau de bord temps réel","Export CSV","Chef de projet dédié"] },
+ { nom:'Abonnement', prix:'289', unite:'/ mois · HT', badge:'Le plus choisi', hl:true, f:["Events illimités · jusqu'à 3 000 participants","Super Event inclus + tirage global","Tableau de bord multi-events","Rapports analytiques","Chef de projet dédié"] },
+ { nom:'Sur mesure', prix:'Devis', unite:'', badge:null, hl:false, f:["Volumes importants, multi-sites","Super Event sponsorisé · co-branding","Campagne sur votre fichier client","Stratégie & développement","Chef de projet dédié"] },
 ]
 interface Step { verbe:string; ico:string; txt:string; col:string }
 interface Proc { desc:string; steps:Step[] }
@@ -448,23 +448,20 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       {/* HERO */}
       <section className="hero">
         <div className="logo">Flow<em>in</em></div>
-        <h1 className="promise">Transformez votre passage en prospect, vos prospects en clients.</h1>
-        <div className="baseline"><span className="c1">Captez</span> · <span className="c2">Dynamisez</span> · <span className="c3">Fidélisez</span></div>
+        <h1 className="promise">L&apos;animation qui fait revenir vos clients.</h1>
+        <div className="baseline"><span className="c1">Fidélisez</span> · <span className="c2">Animez</span> · <span className="c3">Boostez</span></div>
       </section>
 
       {/* PROBLEME */}
       <section className="sec sec-dark" id="probleme">
         <div className="wrap" style={{ maxWidth:760, textAlign:'center' }}>
-          <div className="title" style={{ color:'#fff' }}>Des visiteurs, des prospects, des clients passent. Et après{'\u00A0'}?</div>
+          <div className="title" style={{ color:'#fff' }}>Faites de vos lieux et de vos events un moyen de capter et fidéliser.</div>
           <div className="prob">
             {[
-              'Combien de personnes sont passées à votre stand, boutique, event ?',
-              'Pouvez-vous les recontacter ?',
-              'Combien de clients viennent chaque jour ?',
-              'Quel est le pic de fréquentation ?',
-              'D\u2019où viennent-ils ?',
-              'Quel est votre taux de retour questionnaire ?',
-              'Quels chiffres transmettre à vos partenaires ?',
+              'Sachez enfin qui est venu, combien, et d\u2019où.',
+              'Gardez le lien et donnez envie de revenir.',
+              'Relancez votre public sans repayer de la pub.',
+              'Présentez de vrais chiffres à vos partenaires et à votre direction.',
             ].map((q, i) => (
               <div className="q" key={i}>{q}</div>
             ))}
@@ -527,20 +524,20 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
         <div className="wrap">
           <div className="eyebrow">Ils l&apos;ont fait. Vraiment.</div>
           <div className="proof">
-            <div><div className="v" style={{ color:'#00B4A0' }}>980</div><div className="l">contacts</div></div>
-            <div><div className="v" style={{ color:'#F59E0B' }}>5</div><div className="l">dates</div></div>
-            <div><div className="v" style={{ color:'#3B5CC4' }}>100%</div><div className="l">souhaitent rester en contact</div></div>
+            <div><div className="v" style={{ color:'#00B4A0' }}>192</div><div className="l">participants</div></div>
+            <div><div className="v" style={{ color:'#F59E0B' }}>100%</div><div className="l">conversion</div></div>
+            <div><div className="v" style={{ color:'#3B5CC4' }}>74%</div><div className="l">souhaitent rester en contact</div></div>
           </div>
-          <div className="quote">« En 5 dates, nous avons capté 980 personnes qui ont accepté d&apos;être recontactées. »</div>
+          <div className="quote">« Sur une seule animation : 192 participants, et 74 % veulent qu&apos;on les recontacte. »</div>
         </div>
       </section>
 
       {/* MODULES */}
       <section className="sec">
         <div className="wrap">
-          <div className="eyebrow">6 mécaniques</div>
-          <div className="title">Ce qui compte, ce n&apos;est pas le jeu.</div>
-          <div className="sub">Roue, quiz, tombola… les codes sont connus. La vraie valeur, c&apos;est la méthode Flowin et l&apos;accompagnement qui va avec : c&apos;est ce qui crée l&apos;engagement — jusqu&apos;à 75 % de contacts captés.</div>
+          <div className="eyebrow">Les animations</div>
+          <div className="title">6 façons d&apos;animer. Vous choisissez.</div>
+          <div className="sub">On choisit ensemble celle qui colle le mieux à votre lieu et à votre public. Le jeu crée l&apos;activité, Flowin organise la saisie et traduit tout en données claires.</div>
           <div className="grid3m" id="mecaniques">
             {MODULES.map((m, i) => (
               <div className="mcard" key={i}>
@@ -612,8 +609,8 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       <section className="sec">
         <div className="wrap">
           <div className="eyebrow">Tarifs</div>
-          <div className="title">Boostez, mesurez, gardez le contact.</div>
-          <div className="sub">Flowin : vous créez l&apos;événement, on crée l&apos;engagement.</div>
+          <div className="title">Des tarifs clairs, pensés pour le terrain.</div>
+          <div className="sub">Pas d&apos;abonnement piège ni de coûts cachés. Vous choisissez selon vos besoins, on s&apos;occupe du reste.</div>
           <div className="price" id="tarifs">
             {PRICING.map((pr, i) => (
               <div className={'pcard' + (pr.hl?' hl':'')} key={i}>
@@ -633,8 +630,8 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
       {/* CTA FINAL */}
       <section className="ctafinal" id="cta">
         <div className="wrap">
-          <h2>Contactez-nous</h2>
-          <div style={{ color:'rgba(255,255,255,.6)', fontSize:15 }}>Aucune CB requise · Rappel sous 24h · Sans engagement</div>
+          <h2>Et si on animait votre lieu ?</h2>
+          <div style={{ color:'rgba(255,255,255,.6)', fontSize:15 }}>On en parle en quelques minutes, sans matériel ni installation. Rappel sous 24 h, sans engagement.</div>
           <div className="ctaform">
             <input placeholder="Votre prénom" value={form.prenom} onChange={e => setForm({ ...form, prenom:e.target.value })} />
             <input type="email" placeholder="Email professionnel" value={form.email} onChange={e => setForm({ ...form, email:e.target.value })} />
@@ -651,10 +648,10 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <option>Organisateur de salon</option>
             </select>
             <button className="cta" style={{ justifyContent:'center', marginTop:6 }} onClick={handlePlay} disabled={submitting}>
-              {submitting ? 'Un instant…' : 'Jouer et gagner mon premier event →'}
+              {submitting ? 'Un instant…' : 'Réserver ma démo →'}
             </button>
           </div>
-          <div className="ctaor">— ou contactez-nous directement —</div>
+          <div className="ctaor">— ou joignez-nous directement —</div>
           <div className="ctacall">
             <a className="callbtn" href="tel:+33616354936"><Ic n="phone" /> Appelez-nous</a>
             <a className="wabtn" href="https://wa.me/33616354936" target="_blank" rel="noopener"><Ic n="brand-whatsapp" /> WhatsApp</a>
