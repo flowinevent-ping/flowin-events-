@@ -487,6 +487,8 @@ export default function LandingClient({ cfg, source = '' }: { cfg?: any; source?
       Array.from(document.querySelectorAll('section.page')).forEach((p) => p.classList.remove('show'))
       ids.forEach((id) => { const s = document.getElementById(id); if (s) s.classList.add('show') })
       setActive(key); window.scrollTo(0, 0)
+      const at = menuLinks.find((a) => a.getAttribute('data-to') === key) as HTMLElement | undefined
+      if (at && at.scrollIntoView) at.scrollIntoView({ inline: 'center', block: 'nearest' })
     }
     Array.from(document.querySelectorAll('[data-to]')).forEach((el) => el.addEventListener('click', () => showPage(el.getAttribute('data-to') || 'top')))
     showPage('top')
@@ -532,7 +534,8 @@ export default function LandingClient({ cfg, source = '' }: { cfg?: any; source?
             email, prenom, tel: tel || null,
             tags: ['btob','cta', secteur].filter(Boolean),
             optin: true, optin_date: today, first_seen: today, last_seen: today,
-            source: source === 'qr' ? 'landing_qr' : 'landing_cta', client_type: 'btob', enseigne: secteur || null,
+            source: source === 'qr' ? 'landing_qr' : 'landing_cta', client_type: 'btob', enseigne: secteur || null, secteur: secteur || null,
+            ts: new Date().toISOString(),
           }, { onConflict: 'external_id' })
         } catch { /* best-effort */ }
         ;(document.getElementById('cForm') as HTMLElement).hidden = true
