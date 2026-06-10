@@ -7301,15 +7301,43 @@ function drawerSuperEvent(se){
       });
     }
   } else if(state.drawer.tab==='passages'){
-    html += '<div class="alert info"><span class="ico">📍</span>Passages = participations par pro. Le « flashé à distance » n\'est pas encore captable (position du scan à ajouter).</div>';
-    if(!prosLies.length){ html += '<div class="alert warn"><span class="ico">⚠️</span>Aucun pro lié.</div>'; }
-    else {
+    if(!state.sePass) state.sePass={};
+    var cache = state.sePass[se.id];
+    if(cache===undefined){
+      loadSEPassages(se);
+      html += '<div class="alert info"><span class="ico">⏳</span>Chargement des passages…</div>';
+    } else if(!prosLies.length){
+      html += '<div class="alert warn"><span class="ico">⚠️</span>Aucun pro lié.</div>';
+    } else {
+      var parts = cache;
       prosLies.forEach(function(p){
-        var proEv=DATA.events.filter(function(e){ return e.proId===p.id && seEventIds.indexOf(e.id)>=0; }).map(function(e){ return e.id; });
-        var cnt=seParts.filter(function(j){ return (j.events||[]).some(function(eid){ return proEv.indexOf(eid)>=0; }); }).length;
-        html += '<div class="flex flex-between" style="padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px"><div class="fw-700">'+esc(p.nom)+'</div><div class="text-sm">'+cnt+' passage'+(cnt>1?'s':'')+'</div></div>';
+        var pts = DATA.events.filter(function(e){ return e.proId===p.id && seEventIds.indexOf(e.id)>=0; });
+        var ptIds = pts.map(function(e){ return e.id; });
+        var proParts = parts.filter(function(pa){ return ptIds.indexOf(pa.event_id)>=0; });
+        var proTickets = proParts.reduce(function(a,pa){ return a+(pa.tickets||0); },0);
+        html += '<div class="section-h">🏢 '+esc(p.nom)+' · '+proParts.length+' passage'+(proParts.length>1?'s':'')+' · '+proTickets+' 🎫</div>';
+        pts.forEach(function(e){
+          var evParts = proParts.filter(function(pa){ return pa.event_id===e.id; });
+          html += '<div class="text-xs text-muted" style="margin:8px 0 3px">📍 '+esc(e.nom)+' · '+esc(e.module||'')+' · QR '+esc(e.qrToken||e.qr_token||'—')+' · '+evParts.length+' passage'+(evParts.length>1?'s':'')+'</div>';
+          if(!evParts.length){ html += '<div class="text-xs" style="color:#aaa;padding:0 0 6px">— aucun passage</div>'; }
+          evParts.forEach(function(pa){
+            var j = DATA.joueurs.find(function(x){ return x.id===pa.joueur_id; }) || {};
+            var ba = (pa.bonus_answers && typeof pa.bonus_answers==='object') ? pa.bonus_answers : {};
+            var ef = (pa.extra_fields && typeof pa.extra_fields==='object') ? pa.extra_fields : {};
+            var bk = Object.keys(ba); var fk = Object.keys(ef);
+            html += '<div style="padding:8px 10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:5px">'
+                 + '<div class="flex flex-between"><div class="fw-700 text-sm">'+esc(((j.prenom||'')+' '+(j.nom||'')).trim()||j.email||'joueur')+'</div>'
+                 + '<div>'+(j.optin?'<span class="chip live" style="font-size:9px">RGPD ✓</span>':'<span class="chip" style="font-size:9px">no opt-in</span>')+'</div></div>'
+                 + '<div class="text-xs text-muted">'+esc((j.code_postal||j.codePostal||j.ville||''))+' · score '+(pa.score||0)+' · '+(pa.tickets||0)+'🎫'+(pa.ticket_code?(' · '+esc(pa.ticket_code)):'')+'</div>'
+                 + (bk.length?('<div class="text-xs" style="margin-top:3px">🧩 bonus — '+bk.map(function(k){ return esc(k)+': '+esc(String(ba[k])); }).join(' · ')+'</div>'):'')
+                 + (fk.length?('<div class="text-xs" style="margin-top:3px">📝 form — '+fk.map(function(k){ return esc(k)+': '+esc(String(ef[k])); }).join(' · ')+'</div>'):'')
+                 + '</div>';
+          });
+        });
       });
+      html += '<div class="text-xs text-muted" style="margin-top:8px">ℹ️ « Flashé à distance » non disponible (position du scan à capter).</div>';
     }
+
   }
   html += '</div>';
   if(state.drawer.edit){
@@ -7318,6 +7346,21 @@ function drawerSuperEvent(se){
     html += drawerFooter('','<button class="btn btn-primary" onclick="enterEditMode()">✏ Éditer</button>');
   }
   return html;
+}
+
+// ---- Super Event : chargement des passages détaillés à la demande ----
+function loadSEPassages(se){
+  if(!se) return;
+  if(!state.sePass) state.sePass={};
+  var ids = (se.events||[]);
+  if(!ids.length){ state.sePass[se.id]=[]; if(typeof render==='function') render(); return; }
+  if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.sePass[se.id]=[]; if(typeof render==='function') render(); return; }
+  state.sePass[se.id]=[]; // marqueur 'en cours' pour ne pas refetch en boucle
+  var url = FLOWIN_SUPA_URL+'/rest/v1/participations?event_id=in.('+ids.join(',')+')&select=*&order=created_at.desc';
+  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON} })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){ state.sePass[se.id]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
+    .catch(function(){ state.sePass[se.id]=[]; if(typeof render==='function') render(); });
 }
 
 // ============ JEUX (catalogue) ============
