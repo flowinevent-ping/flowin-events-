@@ -228,6 +228,40 @@ function Wave({ data, color }:{ data:[string,number,number][]; color:string }) {
   )
 }
 
+function Channels({ data }:{ data:[string,number,string,string][] }) {
+  const rows = [...data].sort((a, b) => b[1] - a[1])
+  const max = Math.max(...rows.map((d) => d[1]))
+  return (
+    <div>
+      {rows.map((d, i) => (
+        <div className="chrow" key={i}>
+          <span className="chic" style={{ background:d[2]+'22', color:d[2], fontSize:17 }}><Ic n={d[3]} /></span>
+          <span className="chlb">{d[0]}</span>
+          <span className="chbt"><span className="chbf" style={{ width:(d[1]/max*100)+'%', background:d[2] }} /></span>
+          <span className="chvn">{d[1]}%</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+function Lolli({ data, color }:{ data:[string,number,number][]; color:string }) {
+  const max = Math.max(...data.map((d) => d[1]))
+  return (
+    <div>
+      {data.map((d, i) => {
+        const w = d[1] / max * 100
+        return (
+          <div className="llrow" key={i}>
+            <span className="lllb">{d[0]}</span>
+            <span className="lltrack"><span className="llline" style={{ width:w+'%', background:color }} /><span className="lldot" style={{ left:w+'%', background:color }} /></span>
+            <span className="llvn">{d[1]}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 const CSS = `
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#F4F6F9;color:#1B3A5C;overflow-x:hidden;-webkit-text-size-adjust:100%}
@@ -308,6 +342,18 @@ const CSS = `
   .bar .bt{flex:1;height:13px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
   .bar .bf{display:block;height:100%;border-radius:100px}
   .bar .bn{width:30px;text-align:right;font-weight:800}
+  .chrow{display:flex;align-items:center;gap:11px;margin-bottom:15px}
+  .chic{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .chlb{width:104px;font-size:14px;color:rgba(255,255,255,.74);flex-shrink:0;line-height:1.2}
+  .chbt{flex:1;height:9px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+  .chbf{display:block;height:100%;border-radius:100px}
+  .chvn{width:40px;text-align:right;font-weight:800;font-size:14px}
+  .llrow{display:flex;align-items:center;gap:12px;margin-bottom:19px;font-size:14px}
+  .lllb{width:62px;color:rgba(255,255,255,.74);flex-shrink:0}
+  .lltrack{position:relative;flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px}
+  .llline{position:absolute;left:0;top:0;height:3px;border-radius:2px}
+  .lldot{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 4px rgba(59,92,196,.16)}
+  .llvn{width:30px;text-align:right;font-weight:800;flex-shrink:0}
   .gam{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
   .gcard{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:28px 22px;text-align:center;box-shadow:0 10px 34px rgba(0,0,0,.22)}
   .gcard .ic{width:62px;height:62px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px}
@@ -571,8 +617,8 @@ export default function LandingClient({ source = '' }: { cfg?: unknown; source?:
               <div className="statpanel"><div className="barh">Jours de fréquentation</div><div className="spbody">{JOURS.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_JOURS} />)}</div></div>
               <div className="statpanel"><div className="barh">Pics horaires</div><div className="spbody"><Wave data={HEURES} color="#F59E0B" /></div></div>
               <div className="statpanel"><div className="barh">Intention de revenir</div><div className="spbody"><Gauge pct={RETOUR[0][1]} label="comptent revenir" color={RETOUR[0][3]} /></div></div>
-              <div className="statpanel"><div className="barh">Comment ils ont connu l&apos;événement</div><div className="spbody"><Donut data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#0B6E4F','#F59E0B','#E8212B'][i]] as [string,number,string])} /></div></div>
-              <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div><div className="spbody">{GEO.map((r, i) => <Bar key={i} lbl={r[0]} n={r[1]} w={r[2]} col={G_GEO} />)}</div></div>
+              <div className="statpanel"><div className="barh">Comment ils vous ont connu</div><div className="spbody"><Channels data={CONNU.map((r, i) => [r[0], r[1], ['#3B5CC4','#00B4A0','#0B6E4F','#E1306C','#1877F2'][i], ['ticket','building-bank','world','brand-instagram','brand-facebook'][i]] as [string,number,string,string])} /></div></div>
+              <div className="statpanel"><div className="barh">D&apos;où viennent vos visiteurs</div><div className="spbody"><Lolli data={GEO} color={G_GEO} /></div></div>
               <div className="statpanel">
                 <div className="barh">Redirections vers vos liens après le jeu</div>
                 <div className="spbody"><div className="redirviz">
