@@ -7182,12 +7182,18 @@ function drawerSuperEvent(se){
   const prosLies = (se.pros||[]).map(findPro).filter(Boolean);
   // Events possibles : tous les events des pros liés
   const eventsCandidats = DATA.events.filter(e=>se.pros.includes(e.proId));
+  var seEventIds = se.events||[];
+  var seParts = DATA.joueurs.filter(function(j){ return (j.events||[]).some(function(eid){ return seEventIds.indexOf(eid)>=0; }); });
+  var seGagn = seParts.filter(function(j){ return j.lotGagne; });
 
   let html = drawerHeader('🌟 '+esc(se.nom),statusChip(se.status)+(prosLies.length?' · '+prosLies.length+' pro'+(prosLies.length>1?'s':''):''));
   html += drawerTabs([
     {id:'infos',label:'Infos'},
     {id:'pros',label:'Pros',badge:prosLies.length||null},
     {id:'events',label:'Events',badge:evs.length||null},
+    {id:'participants',label:'Participants',badge:seParts.length||null},
+    {id:'gagnants',label:'Gagnants',badge:seGagn.length||null},
+    {id:'passages',label:'Passages'},
     {id:'stats',label:'Stats'},
     {id:'tirage',label:'Tirage final'}
   ]);
@@ -7276,6 +7282,33 @@ function drawerSuperEvent(se){
       html += '<div class="form-row"><label class="label">Pool des participants</label><div class="card" style="margin:0">'+totalOptin+' participants opt-in cumulés sur '+evs.length+' events</div></div>';
       html += '<div class="form-row"><label class="label">Nombre de gagnants finaux</label><input type="number" class="input" value="'+(se.nbGagnantsFinal||3)+'"/></div>';
       html += '<button class="btn btn-primary btn-block" '+(isLocked?'disabled':'')+' onclick="toast(\'Tirage final effectué\',\'success\')">🎲 Lancer le tirage final '+(isLocked?'(verrouillé)':'')+'</button>';
+    }
+  } else if(state.drawer.tab==='participants'){
+    if(!seParts.length){ html += '<div class="alert info"><span class="ico">👥</span>Aucun participant pour le moment.</div>'; }
+    else {
+      html += '<div class="section-h">'+seParts.length+' participant'+(seParts.length>1?'s':'')+'</div>';
+      seParts.forEach(function(j){
+        var loc=[j.ville,(j.code_postal||j.codePostal||'')].filter(Boolean).join(' · ');
+        html += '<div class="flex flex-between" style="padding:9px 0;border-bottom:1px solid #eee"><div><div class="fw-700">'+esc(((j.prenom||'')+' '+(j.nom||'')).trim()||'(sans nom)')+'</div><div class="text-xs text-muted">'+esc(loc||j.email||'')+'</div></div><div class="text-sm">'+(j.optin?'<span class="chip live" style="font-size:9px">opt-in</span>':'')+(j.tickets?(' · '+j.tickets+'🎫'):'')+'</div></div>';
+      });
+    }
+  } else if(state.drawer.tab==='gagnants'){
+    if(!seGagn.length){ html += '<div class="alert info"><span class="ico">🏆</span>Aucun gagnant enregistré.</div>'; }
+    else {
+      html += '<div class="section-h">'+seGagn.length+' gagnant'+(seGagn.length>1?'s':'')+'</div>';
+      seGagn.forEach(function(j){
+        html += '<div class="flex flex-between" style="padding:9px 0;border-bottom:1px solid #eee"><div><div class="fw-700">'+esc(((j.prenom||'')+' '+(j.nom||'')).trim()||'(sans nom)')+'</div><div class="text-xs text-muted">'+esc(j.lotGagne||'')+(j.ticketCode?(' · '+esc(j.ticketCode)):'')+'</div></div><div class="text-sm">🎁</div></div>';
+      });
+    }
+  } else if(state.drawer.tab==='passages'){
+    html += '<div class="alert info"><span class="ico">📍</span>Passages = participations par pro. Le « flashé à distance » n\'est pas encore captable (position du scan à ajouter).</div>';
+    if(!prosLies.length){ html += '<div class="alert warn"><span class="ico">⚠️</span>Aucun pro lié.</div>'; }
+    else {
+      prosLies.forEach(function(p){
+        var proEv=DATA.events.filter(function(e){ return e.proId===p.id && seEventIds.indexOf(e.id)>=0; }).map(function(e){ return e.id; });
+        var cnt=seParts.filter(function(j){ return (j.events||[]).some(function(eid){ return proEv.indexOf(eid)>=0; }); }).length;
+        html += '<div class="flex flex-between" style="padding:10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px"><div class="fw-700">'+esc(p.nom)+'</div><div class="text-sm">'+cnt+' passage'+(cnt>1?'s':'')+'</div></div>';
+      });
     }
   }
   html += '</div>';
