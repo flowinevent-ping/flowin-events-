@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 type Cfg = {
   accent_color?: string
@@ -14,6 +15,43 @@ type Cfg = {
 
 export default function NdsClient({ cfg }: { cfg: Cfg }) {
   const [tab, setTab] = useState<'accueil' | 'festival' | 'visibilite' | 'offre'>('accueil')
+
+  // Formulaire partenaire → CRM partenaires (statut prospect)
+  const [pf, setPf] = useState({ nom: '', categorie: '', adresse: '', contact: '', email: '', tel: '', message: '' })
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  async function submitPartenaire() {
+    if (!pf.nom.trim() || !pf.email.includes('@') || !pf.tel.trim()) return
+    setSending(true)
+    try {
+      const emailLower = pf.email.toLowerCase().trim()
+      const now = new Date().toISOString()
+      await supabase.from('partenaires').upsert({
+        id: `prosp-nds-${emailLower.replace(/[^a-z0-9]/g, '-').slice(0, 36)}`,
+        nom: pf.nom.trim(),
+        type: pf.categorie.trim() || null,
+        adresse: pf.adresse.trim() || null,
+        ville: 'Vence',
+        contact_nom: pf.contact.trim() || null,
+        contact: pf.contact.trim() || null,
+        contact_email: emailLower,
+        email: emailLower,
+        contact_tel: pf.tel.trim() || null,
+        tel: pf.tel.trim() || null,
+        notes: pf.message.trim() || null,
+        super_event_id: 'se-nds-2026',
+        tags: ['prospect', 'nds-landing'],
+        statut_paiement: 'prospect',
+        actif: false,
+        visible: false,
+        en_avant: false,
+        ts: now,
+        created_at: now,
+      }, { onConflict: 'id' })
+      setSent(true)
+    } catch { /* best-effort */ }
+    setSending(false)
+  }
 
   // Couleurs : pilotées par cfg.accent_color (défaut violet NDS), magenta en secondaire
   const accent = cfg?.accent_color || '#8B5CF6'
@@ -152,6 +190,26 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
             </a>
             <p className="reassure">Facture dès validation · sans engagement de durée</p>
           </div>
+
+          {sent ? (
+            <div className="psent">✅ Merci ! Votre demande est enregistrée — l’équipe Flowin · Nuits du Sud vous recontacte rapidement.</div>
+          ) : (
+            <div className="pform">
+              <div><label>Nom de l’établissement *</label><input value={pf.nom} onChange={e => setPf({ ...pf, nom: e.target.value })} placeholder="Ex. Cave du Jardin" /></div>
+              <div className="row2">
+                <div><label>Catégorie</label><input value={pf.categorie} onChange={e => setPf({ ...pf, categorie: e.target.value })} placeholder="Caviste, resto…" /></div>
+                <div><label>Adresse</label><input value={pf.adresse} onChange={e => setPf({ ...pf, adresse: e.target.value })} placeholder="Rue, Vence" /></div>
+              </div>
+              <div><label>Votre nom *</label><input value={pf.contact} onChange={e => setPf({ ...pf, contact: e.target.value })} placeholder="Prénom et nom" /></div>
+              <div className="row2">
+                <div><label>Email *</label><input type="email" inputMode="email" value={pf.email} onChange={e => setPf({ ...pf, email: e.target.value })} placeholder="vous@exemple.fr" /></div>
+                <div><label>Téléphone *</label><input type="tel" inputMode="tel" value={pf.tel} onChange={e => setPf({ ...pf, tel: e.target.value })} placeholder="06 00 00 00 00" /></div>
+              </div>
+              <div><label>Message (facultatif)</label><textarea value={pf.message} onChange={e => setPf({ ...pf, message: e.target.value })} placeholder="Votre intérêt…" /></div>
+              <button className="btn" disabled={sending} onClick={submitPartenaire}>{sending ? 'Envoi…' : 'Envoyer ma demande'}</button>
+            </div>
+          )}
+
           <p className="sponsor-line">Vous souhaitez sponsoriser un lot ou bénéficier d’une mise en avant premium ? <a href={waHref} target={wa ? '_blank' : undefined} rel="noopener">Contactez-nous.</a></p>
         </div></div>
       )}
@@ -249,6 +307,16 @@ function css(accent: string) {
   .reassure{font-size:12px;color:var(--muted);text-align:center;margin-top:13px}
   .sponsor-line{font-size:12.5px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
   .sponsor-line a{color:var(--accent);font-weight:700;text-decoration:none}
+  .pform{margin-top:18px;display:flex;flex-direction:column;gap:11px}
+  .pform label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .pform input,.pform textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+  .pform input::placeholder,.pform textarea::placeholder{color:var(--faint)}
+  .pform input:focus,.pform textarea:focus{border-color:var(--accent)}
+  .pform textarea{min-height:74px;resize:vertical}
+  .pform .row2{display:flex;gap:10px}
+  .pform .row2>div{flex:1;min-width:0}
+  .pform .btn{margin-top:4px}
+  .psent{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--card);text-align:center;font-weight:700;line-height:1.5}
   .flowinfoot{border-top:1px solid var(--line);padding:26px 20px 40px;text-align:center;background:rgba(126,155,242,.05)}
   .flowinfoot .fl{font-family:'Fredoka';font-weight:600;font-size:20px;background:linear-gradient(100deg,#7E9BF2,#A9BEF8);-webkit-background-clip:text;background-clip:text;color:transparent}
   .tript{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:12px 0 14px}
