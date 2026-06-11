@@ -170,30 +170,37 @@
   footer a{color:var(--teal);text-decoration:none}
 
 body{display:flex;justify-content:center;background:#0c1420}
-.dash{width:100%;max-width:480px;background:#0c1420;padding-bottom:30px}
+.dash{width:100%;max-width:480px;background:#0c1420;padding-bottom:30px;overflow:hidden}
 .ndtop{background:linear-gradient(135deg,#6e2785,#4d1a61);padding:18px 18px 20px;color:#fff;font-family:'Manrope',system-ui,sans-serif}
 .ndk{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.65}
 .ndh{font-size:25px;font-weight:800;margin-top:3px}
 .ndb{display:inline-block;margin-top:9px;font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:20px}
 .ndlive{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;background:rgba(74,222,128,.16);color:#7bf0a8;padding:4px 10px;border-radius:20px;margin-left:6px}
 .nddot{width:7px;height:7px;border-radius:50%;background:#4ADE80}
-.ndnote{margin:18px 16px 0;background:rgba(59,92,196,.12);border:1px solid rgba(59,92,196,.3);border-radius:14px;padding:13px 14px;font-size:12.5px;color:#c3cdf2;line-height:1.5;font-family:'Manrope',system-ui,sans-serif}
-/* empiler : neutraliser le carousel, panels pleine largeur */
-.stack{padding:8px 16px 0}
-.stack .kpis{margin:8px 0 14px!important}
-.stack .panel{width:auto!important;max-width:none!important;min-width:0!important;flex:none!important;display:block!important;margin:0 0 14px!important;scroll-snap-align:none!important}
+.kpiwrap{padding:14px 16px 4px}
+.kpiwrap .kpis{margin:0!important}
+.chint{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px;font-family:'Manrope',sans-serif}
+.chint .ct{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7e8aa3}
+.chint .cg{font-size:11px;color:#7e8aa3;font-weight:600}
+/* CARROUSEL */
+.carousel-pro{display:flex;gap:13px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 16px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.carousel-pro::-webkit-scrollbar{display:none}
+.carousel-pro .panel{flex:0 0 86%!important;width:86%!important;max-width:none!important;min-width:0!important;scroll-snap-align:center;margin:0!important;display:block!important}
+.cdots{display:flex;gap:7px;justify-content:center;padding:10px 0 2px}
+.cd{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2)}
+.cd.on{background:#3B5CC4;width:20px;border-radius:4px}
+.ndnote{margin:16px 16px 0;background:rgba(59,92,196,.12);border:1px solid rgba(59,92,196,.3);border-radius:14px;padding:13px 14px;font-size:12.5px;color:#c3cdf2;line-height:1.5;font-family:'Manrope',sans-serif}
 </style></head>
-<body><div class="dash"><div class="ndtop">
-  <div class="ndk">Nuits du Sud 2026 · Espace Pro</div>
-  <div class="ndh">Le Bar</div>
-  <span class="ndb">Station · lecture seule</span>
-  <span class="ndlive"><span class="nddot"></span>En direct</span>
-</div><div class="stack"><div class="kpis">
+<body><div class="dash"><div class="ndtop"><div class="ndk">Nuits du Sud 2026 · Espace Pro</div><div class="ndh">Le Bar</div><span class="ndb">Station · lecture seule</span><span class="ndlive"><span class="nddot"></span>En direct</span></div>
+<div class="chint"><span class="ct">Les chiffres en direct</span></div>
+<div class="kpiwrap"><div class="kpis">
       <div class="kpi"><div class="v" style="color:var(--teal)">192</div><div class="l">Participants</div></div>
       <div class="kpi"><div class="v" style="color:var(--teal)">43 ans</div><div class="l">Âge moyen</div></div>
       <div class="kpi"><div class="v" style="color:var(--blue)">100%</div><div class="l">Conversion</div></div>
       <div class="kpi"><div class="v" style="color:var(--amber)">74%</div><div class="l">souhaitent rester en contact</div></div>
-    </div><div class="panel">
+    </div></div>
+<div class="chint"><span class="ct">Statistiques détaillées</span><span class="cg">glisse pour explorer →</span></div>
+<div class="carousel-pro"><div class="panel">
       <h4>Tranches d'âge</h4>
       <div class="vbars">
         <div class="vcol"><span class="vn">81</span><span class="vbar" style="height:100%;background:linear-gradient(180deg,#F9A23C,#E8730C)"></span><span class="vl">36–50</span></div>
@@ -262,4 +269,12 @@ body{display:flex;justify-content:center;background:#0c1420}
       <div class="bar"><span class="bl">06700</span><span class="bt"><span class="bf" style="width:30%;background:linear-gradient(90deg,var(--blue),var(--teal))"></span></span><span class="bn">22</span></div>
       <div class="bar"><span class="bl">06000</span><span class="bt"><span class="bf" style="width:30%;background:linear-gradient(90deg,var(--blue),var(--teal))"></span></span><span class="bn">22</span></div>
       <div class="bar"><span class="bl">06130</span><span class="bt"><span class="bf" style="width:24%;background:linear-gradient(90deg,var(--blue),var(--teal))"></span></span><span class="bn">18</span></div>
-    </div></div><div class="ndnote"><b>Tirage au sort :</b> géré par l'organisateur principal (Ville de Vence). Ton espace station est en lecture seule — tu suis l'affluence et les contacts en temps réel.</div></div></body></html>
+    </div></div>
+<div class="cdots"><span class="cd on"></span><span class="cd"></span><span class="cd"></span><span class="cd"></span><span class="cd"></span><span class="cd"></span><span class="cd"></span></div>
+<div class="ndnote"><b>Tirage au sort :</b> géré par l'organisateur principal (Ville de Vence). Ton espace station est en lecture seule — tu suis l'affluence et les contacts en temps réel.</div></div><script>
+var car=document.querySelector('.carousel-pro'),dts=document.querySelectorAll('.cd');
+if(car){car.addEventListener('scroll',function(){
+  var w=car.scrollLeft,pw=car.scrollWidth/dts.length,idx=Math.round(w/pw);
+  for(var i=0;i<dts.length;i++){if(i===idx)dts[i].className='cd on';else dts[i].className='cd';}
+});}
+</script></body></html>
