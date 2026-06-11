@@ -201,8 +201,7 @@ const BODY = `<div class="app">
   <!-- 1. HERO -->
   <section class="hero page show" id="top">
     <div class="logo">Flow<em>in</em></div>
-    <h1>L'animation qui <span class="hl">fait revenir vos clients</span>.</h1>
-    <p class="hsub">Animez votre lieu, créez du lien, faites revenir vos clients.</p>
+    <h1>Animez votre lieu, créez du lien, <span class="hl">faites revenir vos clients</span>.</h1>
     <div class="baseline"><span class="c1">Fidélisez</span> · <span class="c2">Animez</span> · <span class="c3">Boostez</span></div>
     <a class="btn" style="margin-top:20px" data-to="comment">Voir comment ça marche →</a>
   </section>
