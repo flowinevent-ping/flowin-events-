@@ -52,3 +52,8 @@ Alléger / fluidifier le texte des 2 landings live (réduire le verbiage, phrase
 - `admin/app/landing` (mockup `docs/mockups/flowin-events-landing.html`) — landing contact
 - `admin/app/nds` (mockup `docs/mockups/flowin-nds-partenaire-v25.html`) — landing partenaire NDS
 Règles : pas de jargon, pas de ClickFunnels, garder le sens. Travailler sur le code live (pas reconstruire), section par section, valider au screenshot avant push.
+
+## ⬜ Chantier UX desktop landing (11/06)
+La landing `/landing` est en format mobile figé (`.app{max-width:480px}`) + navigation par onglets → effet "colonne 2000" sur desktop.
+FAIT : hero passé en desktop (`@media min-width:820px` dans le CSS de `LandingClient.tsx`, hero pleine largeur + typo agrandie).
+RESTE : adapter les sections onglets (Pourquoi/Comment/Résultats/Tarifs) en version desktop large, section par section, validation screenshot. Même approche pour `/nds` si besoin.
