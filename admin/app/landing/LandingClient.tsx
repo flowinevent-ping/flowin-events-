@@ -199,7 +199,7 @@ const BODY = `<div class="app">
   <section class="dark page" id="probleme">
     <div class="eyebrow">Pourquoi Flowin</div>
     <h2 class="t">Le monde passe. <span style="color:var(--teal)">Vous ne gardez rien.</span></h2>
-    <p class="sub">Boutique, marché, expo, festival : les gens viennent, profitent… et repartent sans laisser de trace.</p>
+    <p class="sub">Les gens viennent, profitent… et repartent sans laisser de trace.</p>
     <div class="plist">
       <div class="pl"><span class="x"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>Vous ne savez pas qui est venu, ni combien.</div>
       <div class="pl"><span class="x"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>Aucun moyen de recontacter vos visiteurs.</div>
@@ -220,7 +220,7 @@ const BODY = `<div class="app">
     <div class="uses carousel">
       <div class="use"><div class="uh"><span class="ui" style="background:var(--orange)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>1 · Vous installez Flowin</div><p>Une animation à vos couleurs sur votre lieu ou votre event.</p></div>
       <div class="use"><div class="uh"><span class="ui" style="background:var(--blue)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>2 · Vous récupérez une base</div><p>Vos visiteurs jouent, leurs infos entrent dans votre fichier.</p></div>
-      <div class="use"><div class="uh"><span class="ui" style="background:var(--teal)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span>3 · Vous passez à l'action</div><p>Insta et Facebook diffusent. Flowin, vous contactez votre base en direct : event, promo, annonce.</p></div>
+      <div class="use"><div class="uh"><span class="ui" style="background:var(--teal)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span>3 · Vous passez à l'action</div><p>Insta et Facebook diffusent. Flowin, vous contactez votre base en direct.</p></div>
     </div>
         <p class="sub" style="font-weight:800;color:var(--ink);text-align:center;margin-top:20px">Passez de la communication passive à l'action active.</p>
   </section>
@@ -252,7 +252,7 @@ const BODY = `<div class="app">
   <section class="dark page" id="resultats">
     <div class="eyebrow">Vos résultats</div>
     <h2 class="t">Vous voyez tout, en direct.</h2>
-    <p class="sub">Affluence, profils, provenance, retombées : de vrais indicateurs en temps réel pendant l'animation, prêts à analyser.</p>
+    <p class="sub">Affluence, profils, provenance : vos indicateurs en temps réel, prêts à analyser.</p>
     <div class="kpis">
       <div class="kpi"><div class="v" style="color:var(--teal)">192</div><div class="l">Participants</div></div>
       <div class="kpi"><div class="v" style="color:var(--teal)">43 ans</div><div class="l">Âge moyen</div></div>
@@ -363,10 +363,10 @@ const BODY = `<div class="app">
     <div class="eyebrow">Pour qui</div>
     <h2 class="t">Quel que soit votre lieu, votre public.</h2>
     <div class="uses carousel">
-      <div class="use"><div class="uh"><span class="ui" style="background:var(--orange)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M7 2v8M5 2v6a2 2 0 0 0 4 0V2M7 10v12M16 2c-2 0-3 2-3 5s1 4 3 4v11"/></svg></span>Restaurant &amp; bar</div><p>Constituez une base de clients réguliers et communiquez vos offres directement, sans repasser par la pub.</p></div>
-      <div class="use"><div class="uh"><span class="ui" style="background:var(--blue)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M6 8h12l-1 12H7zM9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Commerce &amp; boutique</div><p>Transformez le passage en clientèle que vous pouvez relancer, seul ou avec les commerces de votre rue.</p></div>
+      <div class="use"><div class="uh"><span class="ui" style="background:var(--orange)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M7 2v8M5 2v6a2 2 0 0 0 4 0V2M7 10v12M16 2c-2 0-3 2-3 5s1 4 3 4v11"/></svg></span>Restaurant &amp; bar</div><p>Constituez une base de clients réguliers et communiquez vos offres en direct.</p></div>
+      <div class="use"><div class="uh"><span class="ui" style="background:var(--blue)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M6 8h12l-1 12H7zM9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Commerce &amp; boutique</div><p>Transformez le passage en clientèle que vous pouvez relancer.</p></div>
       <div class="use"><div class="uh"><span class="ui" style="background:var(--violet)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M3 21h18M5 21V7l6-3 6 3v14"/><path d="M9 21v-4h4v4"/></svg></span>Association</div><p>Animez vos temps forts, gardez le lien avec vos membres et mesurez votre impact pour vos partenaires.</p></div>
-      <div class="use"><div class="uh"><span class="ui" style="background:#0B6E4F"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M3 21h18M3 10 12 4l9 6M5 10v11M19 10v11M10 21v-5h4v5"/></svg></span>Collectivité &amp; tourisme</div><p>Mesurez l'affluence et les profils de vos animations, et fédérez les acteurs locaux autour d'un même outil.</p></div>
+      <div class="use"><div class="uh"><span class="ui" style="background:#0B6E4F"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M3 21h18M3 10 12 4l9 6M5 10v11M19 10v11M10 21v-5h4v5"/></svg></span>Collectivité &amp; tourisme</div><p>Mesurez vos animations et fédérez les acteurs locaux autour d'un même outil.</p></div>
       <div class="use"><div class="uh"><span class="ui" style="background:var(--teal)"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9.5h16M8 3v3M16 3v3"/></svg></span>Événementiel &amp; salon</div><p>Mesurez la fréquentation réelle et repartez avec une base qualifiée à chaque édition.</p></div>
     </div>
   </section>
