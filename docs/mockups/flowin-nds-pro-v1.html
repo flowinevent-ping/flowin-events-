@@ -5,7 +5,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--violet:#6e2785;--violet2:#4d1a61;--blue:#3B5CC4;--orange:#F5A100;--magenta:#E0218A;--ink:#150c1c;--card:#1f1428;--line:rgba(255,255,255,.08);--muted:#9d8fab}
+:root{--violet:#6e2785;--violet2:#4d1a61;--blue:#3B5CC4;--orange:#F5A100;--magenta:#E0218A;--card:#1f1428;--line:rgba(255,255,255,.08);--muted:#9d8fab}
 body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;justify-content:center}
 .app{width:100%;max-width:460px;min-height:100vh;background:linear-gradient(180deg,#150c1c,#0d0812);color:#fff;padding-bottom:30px}
 .top{background:linear-gradient(135deg,var(--violet),var(--violet2));padding:18px 18px 20px;position:sticky;top:0;z-index:10}
@@ -19,25 +19,26 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px}
 .kpi .n{font-size:30px;font-weight:800;line-height:1;letter-spacing:-1px}
-.kpi .n.b{color:var(--blue)}.kpi .n.o{color:var(--orange)}.kpi .n.m{color:var(--magenta)}.kpi .n.g{color:#4ADE80}
+.kpi .n.b{color:var(--blue)}.kpi .n.o{color:var(--orange)}.kpi .n.g{color:#4ADE80}
 .kpi .t{font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:600}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
-.bars{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:6px}
-.bar{flex:1;background:linear-gradient(180deg,var(--magenta),var(--violet));border-radius:5px 5px 0 0;position:relative;min-height:4px}
-.bar.hi{background:linear-gradient(180deg,var(--orange),var(--magenta))}
-.bx{display:flex;gap:6px;margin-top:7px}
-.bx span{flex:1;text-align:center;font-size:9.5px;color:var(--muted)}
-.seg{display:flex;height:13px;border-radius:7px;overflow:hidden;margin:12px 0 12px}
+.vbars{display:flex;align-items:flex-end;gap:7px;height:140px}
+.vb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.vbar{width:100%;background:linear-gradient(180deg,var(--magenta),var(--violet));border-radius:5px 5px 0 0;min-height:5px}
+.vv{font-size:11px;font-weight:800;margin-bottom:4px}
+.vl{font-size:9.5px;color:var(--muted);margin-top:6px;text-align:center}
+.seg{display:flex;height:13px;border-radius:7px;overflow:hidden;margin-bottom:12px}
 .seg i{display:block;height:100%}
 .leg{display:flex;flex-wrap:wrap;gap:10px 16px}
 .leg div{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#e9e2ef;font-weight:600}
 .leg b{width:10px;height:10px;border-radius:3px;display:inline-block}
 .hrow{display:flex;align-items:center;gap:11px;margin:11px 0}
-.hrow span{width:118px;font-size:12.5px;color:#e9e2ef;font-weight:600;flex-shrink:0}
+.hrow span{width:124px;font-size:12px;color:#e9e2ef;font-weight:600;flex-shrink:0}
 .hrow .track{flex:1;height:10px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden}
 .hrow .track i{display:block;height:100%;border-radius:6px}
-.hrow b{font-size:13px;font-weight:800;width:34px;text-align:right}
-.list{margin-top:4px}
+.hrow b{font-size:13px;font-weight:800;width:36px;text-align:right}
+.big{display:flex;align-items:center;gap:13px}
+.big .n{font-size:34px;font-weight:800;color:var(--orange)}
 .row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
 .row:last-child{border:none}
 .av{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--violet),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
@@ -61,45 +62,35 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;
       <div class="kpi"><div class="n o">43 ans</div><div class="t">Âge moyen</div></div>
     </div>
 
-    <div class="lbl">Affluence par heure</div>
+    <div class="lbl">Tranches d'âge</div>
+    <div class="card"><div class="vbars"><div class="vb"><span class="vv">81</span><div class="vbar" style="height:100%"></div><span class="vl">36–50</span></div><div class="vb"><span class="vv">37</span><div class="vbar" style="height:46%"></div><span class="vl">51–65</span></div><div class="vb"><span class="vv">28</span><div class="vbar" style="height:35%"></div><span class="vl">26–35</span></div><div class="vb"><span class="vv">20</span><div class="vbar" style="height:25%"></div><span class="vl">65 +</span></div><div class="vb"><span class="vv">15</span><div class="vbar" style="height:19%"></div><span class="vl">18–25</span></div><div class="vb"><span class="vv">11</span><div class="vbar" style="height:14%"></div><span class="vl">&lt;18</span></div></div></div>
+
+    <div class="lbl">Répartition par genre</div>
     <div class="card">
-      <div class="bars">
-        <div class="bar" style="height:18%"></div><div class="bar" style="height:26%"></div>
-        <div class="bar" style="height:40%"></div><div class="bar" style="height:58%"></div>
-        <div class="bar hi" style="height:82%"></div><div class="bar hi" style="height:100%"></div>
-        <div class="bar hi" style="height:88%"></div><div class="bar" style="height:54%"></div>
-      </div>
-      <div class="bx"><span>18h</span><span>19h</span><span>20h</span><span>21h</span><span>22h</span><span>23h</span><span>00h</span><span>01h</span></div>
+      <div class="seg"><i style="width:61%;background:var(--magenta)"></i><i style="width:39%;background:var(--blue)"></i></div>
+      <div class="leg"><div><b style="background:var(--magenta)"></b>Femmes · 61%</div><div><b style="background:var(--blue)"></b>Hommes · 39%</div></div>
     </div>
 
-    <div class="lbl">Profil des visiteurs</div>
-    <div class="card">
-      <div class="seg">
-        <i style="width:61%;background:var(--magenta)"></i><i style="width:39%;background:var(--blue)"></i>
-      </div>
-      <div class="leg">
-        <div><b style="background:var(--magenta)"></b>Femmes · 61%</div>
-        <div><b style="background:var(--blue)"></b>Hommes · 39%</div>
-      </div>
-      <div style="margin-top:15px;display:flex;align-items:center;gap:11px">
-        <div class="n o" style="font-size:26px;font-weight:800">66%</div>
-        <div style="font-size:13px;color:#e9e2ef;font-weight:600;line-height:1.35">comptent revenir<br><span style="color:var(--muted);font-weight:500">une autre soirée du festival</span></div>
-      </div>
-    </div>
+    <div class="lbl">Jours de fréquentation</div>
+    <div class="card"><div class="vbars"><div class="vb"><span class="vv">71</span><div class="vbar" style="height:100%"></div><span class="vl">Sam</span></div><div class="vb"><span class="vv">54</span><div class="vbar" style="height:76%"></div><span class="vl">Dim</span></div><div class="vb"><span class="vv">33</span><div class="vbar" style="height:46%"></div><span class="vl">Mer</span></div><div class="vb"><span class="vv">21</span><div class="vbar" style="height:30%"></div><span class="vl">Ven</span></div><div class="vb"><span class="vv">13</span><div class="vbar" style="height:18%"></div><span class="vl">Jeu</span></div></div></div>
+
+    <div class="lbl">Pics horaires</div>
+    <div class="card"><div class="vbars"><div class="vb"><span class="vv">38</span><div class="vbar" style="height:66%"></div><span class="vl">10-12h</span></div><div class="vb"><span class="vv">17</span><div class="vbar" style="height:29%"></div><span class="vl">12-14h</span></div><div class="vb"><span class="vv">49</span><div class="vbar" style="height:84%"></div><span class="vl">14-16h</span></div><div class="vb"><span class="vv">58</span><div class="vbar" style="height:100%"></div><span class="vl">16-18h</span></div><div class="vb"><span class="vv">30</span><div class="vbar" style="height:52%"></div><span class="vl">18-20h</span></div></div></div>
+
+    <div class="lbl">Intention de revenir</div>
+    <div class="card"><div class="big"><div class="n">66%</div><div style="font-size:13px;color:#e9e2ef;font-weight:600;line-height:1.35">comptent revenir<br><span style="color:var(--muted);font-weight:500">une autre soirée du festival</span></div></div></div>
 
     <div class="lbl">Comment ils ont connu l'animation</div>
-    <div class="card">
-      <div class="hrow"><span>Affiche / sur place</span><div class="track"><i style="width:42%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>42%</b></div>
-      <div class="hrow"><span>Site internet</span><div class="track"><i style="width:38%;background:linear-gradient(90deg,var(--blue),var(--violet))"></i></div><b>38%</b></div>
-      <div class="hrow"><span>Instagram</span><div class="track"><i style="width:31%;background:linear-gradient(90deg,var(--magenta),var(--orange))"></i></div><b>31%</b></div>
-    </div>
+    <div class="card"><div class="hrow"><span>Affiche / Flyer</span><div class="track"><i style="width:100%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>42%</b></div><div class="hrow"><span>Site internet</span><div class="track"><i style="width:40%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>17%</b></div><div class="hrow"><span>Instagram</span><div class="track"><i style="width:36%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>15%</b></div><div class="hrow"><span>Mairie</span><div class="track"><i style="width:31%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>13%</b></div><div class="hrow"><span>Facebook</span><div class="track"><i style="width:31%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>13%</b></div></div>
+
+    <div class="lbl">D'où viennent les visiteurs</div>
+    <div class="card"><div class="hrow"><span>06140 Vence</span><div class="track"><i style="width:100%;background:linear-gradient(90deg,var(--blue),var(--violet))"></i></div><b style="width:auto">74</b></div><div class="hrow"><span>06610 La Gaude</span><div class="track"><i style="width:32%;background:linear-gradient(90deg,var(--blue),var(--violet))"></i></div><b style="width:auto">24</b></div><div class="hrow"><span>06800 Cagnes</span><div class="track"><i style="width:31%;background:linear-gradient(90deg,var(--blue),var(--violet))"></i></div><b style="width:auto">23</b></div><div class="hrow"><span>06700 St-Laurent</span><div class="track"><i style="width:30%;background:linear-gradient(90deg,var(--blue),var(--violet))"></i></div><b style="width:auto">22</b></div></div>
 
     <div class="lbl">Dernières participations</div>
-    <div class="card list">
+    <div class="card" style="margin-top:4px">
       <div class="row"><div class="av">CM</div><div><div class="nm">Camille M.</div><div class="mt">22:41 · Vence</div></div><div class="tag">+1 ticket</div></div>
       <div class="row"><div class="av">YL</div><div><div class="nm">Yanis L.</div><div class="mt">22:37 · Les alentours</div></div><div class="tag">+1 ticket</div></div>
       <div class="row"><div class="av">SF</div><div><div class="nm">Sophie F.</div><div class="mt">22:33 · Vence</div></div><div class="tag">+1 ticket</div></div>
-      <div class="row"><div class="av">TR</div><div><div class="nm">Théo R.</div><div class="mt">22:29 · Plus loin</div></div><div class="tag">+1 ticket</div></div>
     </div>
 
     <div class="note"><b>Tirage au sort :</b> géré par l'organisateur principal (Ville de Vence). Ton espace station est en lecture seule — tu suis l'affluence et les contacts en temps réel.</div>
