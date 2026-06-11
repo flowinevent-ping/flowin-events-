@@ -181,6 +181,15 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .hero a,.hero button,.hero .btn,.hero .cta{max-width:520px;margin-left:auto;margin-right:auto}
   nav,.nav,.topbar,.foot,.footer{max-width:1080px!important;margin-left:auto!important;margin-right:auto!important}
 }
+
+/* ===== TRIPTYQUE + lisibilité mobile (boom) ===== */
+.baseline{font-size:23px!important;font-weight:800!important;letter-spacing:.2px;margin-top:18px!important;line-height:1.35;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
+.hero h1{font-size:34px!important;line-height:1.08!important}
+.hero{padding:54px 22px 48px!important}
+@media(min-width:820px){
+  .baseline{font-size:32px!important;margin-top:24px!important;gap:16px}
+  .hero h1{font-size:60px!important}
+}
 `
 
 const BODY = `<div class="app">
