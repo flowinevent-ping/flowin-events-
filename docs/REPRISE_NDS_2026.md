@@ -46,3 +46,9 @@ URLs QR (dépend du module `nds2026`) → générer les 4 images QR → push →
 - Mockups/livrables → toujours archivés dans le repo (permanence, le filesystem reset entre sessions).
 - iOS Safari : `var`, `.indexOf` pas `.includes`, pas de spread/`Object.assign`.
 - Validation avant push : tsc 0 erreur, `next build`, screenshot.
+
+## ⬜ Chantier copy (demandé le 11/06)
+Alléger / fluidifier le texte des 2 landings live (réduire le verbiage, phrases courtes, ton Flowin) :
+- `admin/app/landing` (mockup `docs/mockups/flowin-events-landing.html`) — landing contact
+- `admin/app/nds` (mockup `docs/mockups/flowin-nds-partenaire-v25.html`) — landing partenaire NDS
+Règles : pas de jargon, pas de ClickFunnels, garder le sens. Travailler sur le code live (pas reconstruire), section par section, valider au screenshot avant push.
