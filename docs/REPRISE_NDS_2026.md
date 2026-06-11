@@ -57,3 +57,8 @@ Règles : pas de jargon, pas de ClickFunnels, garder le sens. Travailler sur le 
 La landing `/landing` est en format mobile figé (`.app{max-width:480px}`) + navigation par onglets → effet "colonne 2000" sur desktop.
 FAIT : hero passé en desktop (`@media min-width:820px` dans le CSS de `LandingClient.tsx`, hero pleine largeur + typo agrandie).
 RESTE : adapter les sections onglets (Pourquoi/Comment/Résultats/Tarifs) en version desktop large, section par section, validation screenshot. Même approche pour `/nds` si besoin.
+
+## ⚠️ /nds — design corrigé, form à recâbler (11/06)
+Le bon design partenaire = `flowin-nds-partenaire-v25.html` ("Rejoignez l'opération partenaires").
+FAIT : rewrite `beforeFiles` dans `admin/next.config.js` → `/nds` sert `public/nds-partenaire.html` (l'ancien `NdsClient` "Prenez part au festival" est court-circuité, conservé dans le repo).
+⚠️ RESTE : le formulaire "Devenir partenaire" de cette page statique n'est PAS câblé au CRM Supabase (le câblage était dans l'ancien NdsClient). À refaire : porter le design v25 en React DANS la route /nds + rebrancher l'upsert CRM (table `pros`/landing, source nds-landing, rattache se-nds-2026) qui existait dans l'ancien NdsClient.
