@@ -169,7 +169,19 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   footer{background:var(--dk);color:rgba(255,255,255,.5);text-align:center;padding:28px 22px;font-size:12px;line-height:1.7}
   footer .lg{font-size:19px;font-weight:900;color:rgba(255,255,255,.9);letter-spacing:-.02em;margin-bottom:6px}
   footer .lg em{color:var(--blue);font-style:normal}
-  footer a{color:var(--teal);text-decoration:none}`
+  footer a{color:var(--teal);text-decoration:none}
+
+/* ===== DESKTOP (>=820px) : sortir du format mobile figé ===== */
+@media(min-width:820px){
+  .app{max-width:1080px!important}
+  .hero{padding:90px 40px 74px!important}
+  .hero h1{font-size:64px!important;line-height:1.05!important}
+  .hero h2{font-size:40px!important;line-height:1.12!important;max-width:780px;margin-left:auto;margin-right:auto}
+  .hero p{font-size:19px!important;max-width:640px;margin-left:auto;margin-right:auto}
+  .hero a,.hero button,.hero .btn,.hero .cta{max-width:520px;margin-left:auto;margin-right:auto}
+  nav,.nav,.topbar,.foot,.footer{max-width:1080px!important;margin-left:auto!important;margin-right:auto!important}
+}
+`
 
 const BODY = `<div class="app">
 
@@ -199,7 +211,7 @@ const BODY = `<div class="app">
   <section class="dark page" id="probleme">
     <div class="eyebrow">Pourquoi Flowin</div>
     <h2 class="t">Le monde passe. <span style="color:var(--teal)">Vous ne gardez rien.</span></h2>
-    <p class="sub">Les gens viennent, profitent… et repartent sans laisser de trace.</p>
+    <p class="sub">Du flux qui passe, sans laisser de trace.</p>
     <div class="plist">
       <div class="pl"><span class="x"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>Vous ne savez pas qui est venu, ni combien.</div>
       <div class="pl"><span class="x"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>Aucun moyen de recontacter vos visiteurs.</div>
