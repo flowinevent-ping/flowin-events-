@@ -62,3 +62,8 @@ RESTE : adapter les sections onglets (Pourquoi/Comment/Résultats/Tarifs) en ver
 Le bon design partenaire = `flowin-nds-partenaire-v25.html` ("Rejoignez l'opération partenaires").
 FAIT : rewrite `beforeFiles` dans `admin/next.config.js` → `/nds` sert `public/nds-partenaire.html` (l'ancien `NdsClient` "Prenez part au festival" est court-circuité, conservé dans le repo).
 ⚠️ RESTE : le formulaire "Devenir partenaire" de cette page statique n'est PAS câblé au CRM Supabase (le câblage était dans l'ancien NdsClient). À refaire : porter le design v25 en React DANS la route /nds + rebrancher l'upsert CRM (table `pros`/landing, source nds-landing, rattache se-nds-2026) qui existait dans l'ancien NdsClient.
+
+## ⬜ UX landings — direction validée (11/06)
+Direction : moins de texte, police plus grande, du rythme, pro/percutant ("boom"). PAS de look "blog 2000".
+FAIT sur /landing : hero desktop élargi, titre = "Animez votre lieu, créez du lien, faites revenir vos clients", triptyque Fidélisez/Animez/Boostez agrandi + rythmé, typo mobile augmentée.
+RESTE : appliquer la même direction à /nds-partenaire.html (public/, 116KB, design v25 validé) — augmenter police, réduire texte, rythmer, SANS casser le design validé (examiner section par section). Puis finir les sections internes de /landing (onglets Pourquoi/Comment/Résultats/Tarifs) en version desktop large.
