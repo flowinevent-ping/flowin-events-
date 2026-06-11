@@ -1,0 +1,95 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>NDS — Dashboard Pro</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--violet:#6e2785;--violet2:#4d1a61;--blue:#3B5CC4;--orange:#F5A100;--magenta:#E0218A;--ink:#150c1c;--card:#1f1428;--line:rgba(255,255,255,.08);--muted:#9d8fab}
+body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;justify-content:center}
+.app{width:100%;max-width:460px;min-height:100vh;background:linear-gradient(180deg,#150c1c,#0d0812);color:#fff;padding-bottom:30px}
+.top{background:linear-gradient(135deg,var(--violet),var(--violet2));padding:18px 18px 20px;position:sticky;top:0;z-index:10}
+.top .kick{font-size:11px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.6);text-transform:uppercase}
+.top h1{font-size:25px;font-weight:800;margin-top:3px;letter-spacing:-.5px}
+.top .badge{display:inline-block;margin-top:9px;font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:20px}
+.top .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;background:rgba(74,222,128,.16);color:#7bf0a8;padding:4px 10px;border-radius:20px;margin-left:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#4ADE80}
+.wrap{padding:16px 16px 0}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:20px 2px 11px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px}
+.kpi .n{font-size:30px;font-weight:800;line-height:1;letter-spacing:-1px}
+.kpi .n.b{color:var(--blue)}.kpi .n.o{color:var(--orange)}.kpi .n.m{color:var(--magenta)}.kpi .n.g{color:#4ADE80}
+.kpi .t{font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:6px}
+.bar{flex:1;background:linear-gradient(180deg,var(--magenta),var(--violet));border-radius:5px 5px 0 0;position:relative;min-height:4px}
+.bar.hi{background:linear-gradient(180deg,var(--orange),var(--magenta))}
+.bx{display:flex;gap:6px;margin-top:7px}
+.bx span{flex:1;text-align:center;font-size:9.5px;color:var(--muted)}
+.seg{display:flex;height:13px;border-radius:7px;overflow:hidden;margin:12px 0 12px}
+.seg i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:10px 16px}
+.leg div{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#e9e2ef;font-weight:600}
+.leg b{width:10px;height:10px;border-radius:3px;display:inline-block}
+.list{margin-top:4px}
+.row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
+.row:last-child{border:none}
+.av{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--violet),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.row .nm{font-size:14px;font-weight:700}.row .mt{font-size:11.5px;color:var(--muted)}
+.row .tag{margin-left:auto;font-size:11px;font-weight:700;color:var(--orange)}
+.note{margin-top:18px;background:rgba(59,92,196,.12);border:1px solid rgba(59,92,196,.3);border-radius:14px;padding:13px 14px;font-size:12.5px;color:#c3cdf2;line-height:1.5}
+</style></head><body>
+<div class="app">
+  <div class="top">
+    <div class="kick">Nuits du Sud 2026 · Espace Pro</div>
+    <h1>Le Bar</h1>
+    <span class="badge">Station · lecture seule</span>
+    <span class="live"><span class="dot"></span>En direct</span>
+  </div>
+  <div class="wrap">
+    <div class="lbl">Les chiffres en direct</div>
+    <div class="kpis">
+      <div class="kpi"><div class="n">247</div><div class="t">Participations</div></div>
+      <div class="kpi"><div class="n b">247</div><div class="t">Tickets générés</div></div>
+      <div class="kpi"><div class="n g">74%</div><div class="t">Veulent rester en contact</div></div>
+      <div class="kpi"><div class="n o">43 ans</div><div class="t">Âge moyen</div></div>
+    </div>
+
+    <div class="lbl">Affluence par heure</div>
+    <div class="card">
+      <div class="bars">
+        <div class="bar" style="height:18%"></div><div class="bar" style="height:26%"></div>
+        <div class="bar" style="height:40%"></div><div class="bar" style="height:58%"></div>
+        <div class="bar hi" style="height:82%"></div><div class="bar hi" style="height:100%"></div>
+        <div class="bar hi" style="height:88%"></div><div class="bar" style="height:54%"></div>
+      </div>
+      <div class="bx"><span>18h</span><span>19h</span><span>20h</span><span>21h</span><span>22h</span><span>23h</span><span>00h</span><span>01h</span></div>
+    </div>
+
+    <div class="lbl">Venus ce soir…</div>
+    <div class="card">
+      <div class="seg">
+        <i style="width:21%;background:var(--magenta)"></i><i style="width:34%;background:var(--violet)"></i>
+        <i style="width:33%;background:var(--blue)"></i><i style="width:12%;background:var(--orange)"></i>
+      </div>
+      <div class="leg">
+        <div><b style="background:var(--magenta)"></b>En solo · 21%</div>
+        <div><b style="background:var(--violet)"></b>En couple · 34%</div>
+        <div><b style="background:var(--blue)"></b>Entre amis · 33%</div>
+        <div><b style="background:var(--orange)"></b>En famille · 12%</div>
+      </div>
+    </div>
+
+    <div class="lbl">Dernières participations</div>
+    <div class="card list">
+      <div class="row"><div class="av">CM</div><div><div class="nm">Camille M.</div><div class="mt">22:41 · Vence</div></div><div class="tag">+1 ticket</div></div>
+      <div class="row"><div class="av">YL</div><div><div class="nm">Yanis L.</div><div class="mt">22:37 · Les alentours</div></div><div class="tag">+1 ticket</div></div>
+      <div class="row"><div class="av">SF</div><div><div class="nm">Sophie F.</div><div class="mt">22:33 · Vence</div></div><div class="tag">+1 ticket</div></div>
+      <div class="row"><div class="av">TR</div><div><div class="nm">Théo R.</div><div class="mt">22:29 · Plus loin</div></div><div class="tag">+1 ticket</div></div>
+    </div>
+
+    <div class="note"><b>Tirage au sort :</b> géré par l'organisateur principal (Ville de Vence). Ton espace station est en lecture seule — tu suis l'affluence et les contacts en temps réel.</div>
+  </div>
+</div>
+</body></html>
