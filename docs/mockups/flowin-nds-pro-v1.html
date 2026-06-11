@@ -32,6 +32,11 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;
 .leg{display:flex;flex-wrap:wrap;gap:10px 16px}
 .leg div{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#e9e2ef;font-weight:600}
 .leg b{width:10px;height:10px;border-radius:3px;display:inline-block}
+.hrow{display:flex;align-items:center;gap:11px;margin:11px 0}
+.hrow span{width:118px;font-size:12.5px;color:#e9e2ef;font-weight:600;flex-shrink:0}
+.hrow .track{flex:1;height:10px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden}
+.hrow .track i{display:block;height:100%;border-radius:6px}
+.hrow b{font-size:13px;font-weight:800;width:34px;text-align:right}
 .list{margin-top:4px}
 .row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line)}
 .row:last-child{border:none}
@@ -50,8 +55,8 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;
   <div class="wrap">
     <div class="lbl">Les chiffres en direct</div>
     <div class="kpis">
-      <div class="kpi"><div class="n">247</div><div class="t">Participations</div></div>
-      <div class="kpi"><div class="n b">247</div><div class="t">Tickets générés</div></div>
+      <div class="kpi"><div class="n">192</div><div class="t">Participants</div></div>
+      <div class="kpi"><div class="n b">100%</div><div class="t">Taux de conversion</div></div>
       <div class="kpi"><div class="n g">74%</div><div class="t">Veulent rester en contact</div></div>
       <div class="kpi"><div class="n o">43 ans</div><div class="t">Âge moyen</div></div>
     </div>
@@ -67,18 +72,26 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0d0812;display:flex;
       <div class="bx"><span>18h</span><span>19h</span><span>20h</span><span>21h</span><span>22h</span><span>23h</span><span>00h</span><span>01h</span></div>
     </div>
 
-    <div class="lbl">Venus ce soir…</div>
+    <div class="lbl">Profil des visiteurs</div>
     <div class="card">
       <div class="seg">
-        <i style="width:21%;background:var(--magenta)"></i><i style="width:34%;background:var(--violet)"></i>
-        <i style="width:33%;background:var(--blue)"></i><i style="width:12%;background:var(--orange)"></i>
+        <i style="width:61%;background:var(--magenta)"></i><i style="width:39%;background:var(--blue)"></i>
       </div>
       <div class="leg">
-        <div><b style="background:var(--magenta)"></b>En solo · 21%</div>
-        <div><b style="background:var(--violet)"></b>En couple · 34%</div>
-        <div><b style="background:var(--blue)"></b>Entre amis · 33%</div>
-        <div><b style="background:var(--orange)"></b>En famille · 12%</div>
+        <div><b style="background:var(--magenta)"></b>Femmes · 61%</div>
+        <div><b style="background:var(--blue)"></b>Hommes · 39%</div>
       </div>
+      <div style="margin-top:15px;display:flex;align-items:center;gap:11px">
+        <div class="n o" style="font-size:26px;font-weight:800">66%</div>
+        <div style="font-size:13px;color:#e9e2ef;font-weight:600;line-height:1.35">comptent revenir<br><span style="color:var(--muted);font-weight:500">une autre soirée du festival</span></div>
+      </div>
+    </div>
+
+    <div class="lbl">Comment ils ont connu l'animation</div>
+    <div class="card">
+      <div class="hrow"><span>Affiche / sur place</span><div class="track"><i style="width:42%;background:linear-gradient(90deg,var(--violet),var(--magenta))"></i></div><b>42%</b></div>
+      <div class="hrow"><span>Site internet</span><div class="track"><i style="width:38%;background:linear-gradient(90deg,var(--blue),var(--violet))"></i></div><b>38%</b></div>
+      <div class="hrow"><span>Instagram</span><div class="track"><i style="width:31%;background:linear-gradient(90deg,var(--magenta),var(--orange))"></i></div><b>31%</b></div>
     </div>
 
     <div class="lbl">Dernières participations</div>
