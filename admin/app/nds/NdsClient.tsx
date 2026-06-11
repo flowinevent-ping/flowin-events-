@@ -159,14 +159,14 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
         <div className="panel"><div className="sec wrap">
           <div className="kick gold">Votre place dans le jeu</div>
           <h2 className="hsec">Là où <em className="g">24 000 personnes</em> vous voient</h2>
-          <p className="lead">Le jeu officiel est le support. Vous, vous gagnez de la visibilité de proximité — et vous la mesurez.</p>
+          <p className="lead">Le jeu officiel est le support. Vous gagnez en visibilité de proximité — et vous la mesurez.</p>
           <div className="vcards">
             <div className="vc"><div className="icw">{icQR}</div><h3>Votre QR personnalisé</h3><p>À votre caisse. Vos clients jouent, de nouveaux festivaliers vous découvrent. Chaque scan vous est attribué.</p></div>
             <div className="vc"><div className="icw">{icList}</div><h3>Présence officielle</h3><p>Logo dans l’annuaire des partenaires, fiche dédiée (accroche + liens), position sur la carte du festival.</p></div>
             <div className="vc"><div className="icw">{icLink}</div><h3>Liens traçés</h3><p>Site, Instagram : chaque clic compté en temps réel. Une présence qui se mesure, là où un flyer ne dira jamais rien.</p></div>
             <div className="vc"><div className="icw">{icCal}</div><h3>Avant · pendant · après</h3><p>Vous êtes visible dès l’annonce, pendant les six soirées, et après la dernière note.</p></div>
           </div>
-          <div className="note">Le scan sur place reste la clé : c’est lui qui prouve le passage et l’attribue à votre commerce.</div>
+          <div className="note">Le scan sur place reste la clé : il prouve le passage et l’attribue à votre commerce.</div>
         </div></div>
       )}
 
