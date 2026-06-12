@@ -67,3 +67,13 @@ FAIT : rewrite `beforeFiles` dans `admin/next.config.js` → `/nds` sert `public
 Direction : moins de texte, police plus grande, du rythme, pro/percutant ("boom"). PAS de look "blog 2000".
 FAIT sur /landing : hero desktop élargi, titre = "Animez votre lieu, créez du lien, faites revenir vos clients", triptyque Fidélisez/Animez/Boostez agrandi + rythmé, typo mobile augmentée.
 RESTE : appliquer la même direction à /nds-partenaire.html (public/, 116KB, design v25 validé) — augmenter police, réduire texte, rythmer, SANS casser le design validé (examiner section par section). Puis finir les sections internes de /landing (onglets Pourquoi/Comment/Résultats/Tarifs) en version desktop large.
+
+## Décision 12/06 : déploiement PROPRE (pas de bouche-trou)
+Romain veut le portage propre React/Next.js (stabilité/fiabilité), pas l'option B temporaire. Sécurité/protection = phase ultérieure.
+⚠️ EN ATTENDANT, le form partenaire /nds (maquette statique) NE CAPTURE RIEN — risque pendant la prospection. À traiter en PRIORITÉ dans le portage.
+Plan propre (ordre) :
+1. /nds en React (design v25) + form rebranché upsert `partenaires` (statut prospect, tag nds-landing) — réutiliser le câblage de l'ancien NdsClient (conservé dans git/repo). PRIORITÉ (prospection).
+2. Master `admin/app/parcours/nds2026` (parcours v24 en React) → débloque les QR.
+3. Dashboard pro NDS dans ProClient (rendu conditionnel, sans casser pro-vence), câblé par station.
+4. Générer les 4 QR, tester.
+Page hub de démos créée : /demos.html (public/).
