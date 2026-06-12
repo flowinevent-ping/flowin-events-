@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>Romain Collin — OPConsult · Flowin</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--blue:#3B5CC4;--teal:#00B4A0;--ink:#0c1222;--line:rgba(255,255,255,.1)}
+  body{font-family:'Manrope',system-ui,sans-serif;background:#0c1222;color:#fff;min-height:100dvh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased}
+  .wrap{width:100%;max-width:440px;padding:0 18px 40px}
+  .hero{text-align:center;padding:42px 14px 26px;background:linear-gradient(165deg,#16223f,#0c1222);border-radius:0 0 26px 26px;margin:0 -18px 22px;position:relative;overflow:hidden}
+  .hero:before{content:'';position:absolute;top:-60px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(59,92,196,.4),transparent 70%)}
+  .brand{font-size:15px;font-weight:800;letter-spacing:.04em;color:rgba(255,255,255,.65);position:relative}
+  .brand b{color:#fff}.brand .in{color:var(--blue)}
+  .av{width:92px;height:92px;border-radius:26px;margin:18px auto 14px;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#fff;box-shadow:0 12px 34px rgba(59,92,196,.4);position:relative}
+  .name{font-size:25px;font-weight:900;letter-spacing:-.02em;position:relative}
+  .role{font-size:14px;color:rgba(255,255,255,.6);margin-top:4px;font-weight:600;position:relative}
+  .quick{display:flex;gap:9px;margin-top:18px;position:relative}
+  .quick a{flex:1;text-decoration:none;background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:13px;padding:11px 6px;color:#fff;font-size:12.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:5px}
+  .quick a svg{width:19px;height:19px}
+  .add{display:block;width:100%;margin-top:14px;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;border:none;border-radius:14px;padding:16px;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;position:relative;box-shadow:0 10px 26px rgba(0,180,160,.3)}
+  .formcard{background:#131c33;border:1px solid var(--line);border-radius:20px;padding:22px 18px;margin-top:6px}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);text-align:center}
+  .ftitle{font-size:19px;font-weight:900;text-align:center;margin:7px 0 4px;letter-spacing:-.01em}
+  .fsub{font-size:13px;color:rgba(255,255,255,.55);text-align:center;margin-bottom:18px;line-height:1.5}
+  .row{display:flex;gap:10px}
+  .field{margin-bottom:12px;flex:1}
+  label{display:block;font-size:12px;font-weight:700;color:rgba(255,255,255,.6);margin-bottom:6px}
+  input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;color:#fff;font-size:15px;font-family:inherit;outline:none}
+  input:focus{border-color:var(--blue)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+  .chip{background:rgba(255,255,255,.05);border:1.5px solid var(--line);border-radius:100px;padding:9px 15px;font-size:13px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;user-select:none}
+  .chip.sel{background:rgba(59,92,196,.22);border-color:var(--blue);color:#fff}
+  .send{width:100%;margin-top:8px;background:#fff;color:var(--ink);border:none;border-radius:14px;padding:16px;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer}
+  .send:disabled{opacity:.6}
+  .ok{display:none;text-align:center;padding:28px 14px}
+  .ok .check{width:64px;height:64px;border-radius:50%;background:rgba(0,180,160,.18);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .ok h3{font-size:21px;font-weight:900;margin-bottom:6px}
+  .ok p{font-size:14px;color:rgba(255,255,255,.6);line-height:1.5}
+  .err{color:#ff8585;font-size:12.5px;margin-top:6px;display:none}
+  .foot{text-align:center;font-size:11px;color:rgba(255,255,255,.35);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="brand"><b>Flow</b><span class="in">in</span> · OPConsult</div>
+    <div class="av">RC</div>
+    <div class="name">Romain Collin</div>
+    <div class="role">Fondateur · OPConsult — Flowin</div>
+    <div class="quick">
+      <a href="tel:+33616354936"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</a>
+      <a href="mailto:info@opconsult.co"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</a>
+      <a href="https://flowin-events.vercel.app/landing" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>Flowin</a>
+    </div>
+    <button class="add" id="addBtn">＋ Ajouter à mes contacts</button>
+  </div>
+
+  <div class="formcard" id="card">
+    <div class="eyebrow">Restons en contact</div>
+    <div class="ftitle">Laissez-moi vos coordonnées</div>
+    <div class="fsub">Je vous recontacte rapidement après la soirée.</div>
+    <div class="row">
+      <div class="field"><label>Prénom</label><input id="prenom" autocomplete="given-name" /></div>
+      <div class="field"><label>Nom</label><input id="nom" autocomplete="family-name" /></div>
+    </div>
+    <div class="field"><label>Email</label><input id="email" type="email" inputmode="email" autocapitalize="none" autocomplete="email" /></div>
+    <div class="field"><label>Téléphone</label><input id="tel" type="tel" inputmode="tel" autocomplete="tel" /></div>
+    <div class="field"><label>Entreprise</label><input id="entreprise" autocomplete="organization" /></div>
+    <div class="field"><label>Vous êtes plutôt…</label>
+      <div class="chips" id="chips">
+        <span class="chip" data-v="sponsor">Sponsor</span>
+        <span class="chip" data-v="commerce">Commerce</span>
+        <span class="chip" data-v="partenaire">Partenaire</span>
+        <span class="chip" data-v="autre">Autre</span>
+      </div>
+    </div>
+    <div class="err" id="err">Merci de renseigner au moins un email ou un téléphone.</div>
+    <button class="send" id="sendBtn">Envoyer mes coordonnées →</button>
+  </div>
+
+  <div class="ok" id="ok">
+    <div class="check"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#00B4A0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h3>Merci !</h3>
+    <p>Vos coordonnées sont bien enregistrées.<br>À très vite.</p>
+  </div>
+
+  <div class="foot">OPConsult · Vence · propulsé par Flowin</div>
+</div>
+
+<script>
+(function(){
+  var BASE='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var params=new URLSearchParams(location.search);
+  var SOURCE=params.get('src')||'Soirée networking — QR carte de visite';
+
+  // vCard
+  document.getElementById('addBtn').onclick=function(){
+    var v=['BEGIN:VCARD','VERSION:3.0','N:Collin;Romain;;;','FN:Romain Collin','ORG:OPConsult — Flowin','TITLE:Fondateur','TEL;TYPE=CELL:+33616354936','EMAIL;TYPE=INTERNET:info@opconsult.co','URL:https://flowin-events.vercel.app/landing','END:VCARD'].join('\n');
+    var blob=new Blob([v],{type:'text/vcard;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='Romain-Collin.vcf';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url)},2000);
+  };
+
+  // chips type
+  var type='';
+  var chips=document.querySelectorAll('#chips .chip');
+  for(var i=0;i<chips.length;i++){
+    chips[i].onclick=function(){
+      for(var j=0;j<chips.length;j++)chips[j].classList.remove('sel');
+      this.classList.add('sel');type=this.getAttribute('data-v');
+    };
+  }
+
+  function val(id){return (document.getElementById(id).value||'').trim();}
+  function uuidish(){return 'ct-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);}
+
+  document.getElementById('sendBtn').onclick=function(){
+    var prenom=val('prenom'),nom=val('nom'),email=val('email').toLowerCase(),tel=val('tel'),entreprise=val('entreprise');
+    var err=document.getElementById('err');
+    if(!email && !tel){err.style.display='block';return;}
+    err.style.display='none';
+    var btn=this;btn.disabled=true;btn.textContent='Envoi…';
+    var now=new Date().toISOString();
+    var fullnom=(prenom+' '+nom).trim();
+    var payload={
+      id:uuidish(), prenom:prenom||null, nom:(entreprise||fullnom||'Contact'),
+      contact_nom:fullnom||null, contact:fullnom||null,
+      email:email||null, contact_email:email||null,
+      tel:tel||null, contact_tel:tel||null,
+      entreprise:entreprise||null,
+      type:type||'autre', role:type||'autre',
+      source:SOURCE, created_at:now, ts:now,
+      tags:['contact','networking',type||'autre'],
+      statut_paiement:'contact', visible:true, actif:true
+    };
+    fetch(BASE+'partenaires',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)})
+      .then(function(r){
+        document.getElementById('card').style.display='none';
+        document.getElementById('ok').style.display='block';
+        window.scrollTo({top:0,behavior:'smooth'});
+      })
+      .catch(function(){
+        btn.disabled=false;btn.textContent='Envoyer mes coordonnées →';
+        err.textContent='Erreur réseau, réessayez.';err.style.display='block';
+      });
+  };
+})();
+</script>
+</body>
+</html>
