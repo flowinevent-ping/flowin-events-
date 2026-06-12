@@ -5,6 +5,7 @@ const nextConfig = {
     return {
       beforeFiles: [
         { source: '/nds', destination: '/nds-partenaire.html' },
+        { source: '/parcours/nds2026', destination: '/nds-parcours.html' },
       ],
     }
   },

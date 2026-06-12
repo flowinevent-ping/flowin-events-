@@ -626,5 +626,42 @@
   buildMap();
 })();
 </script>
+
+<script>
+(function(){
+  var BASE='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var evId=(new URLSearchParams(location.search)).get('ev')||'ev-nds-bar';
+  function H(){return {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};}
+  function uuid(){try{return crypto.randomUUID();}catch(e){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16);});}}
+  function tk(){var s='ND-',a='0123456789ABCDEFGHJKLMNPQRSTUVWXYZ',i;for(i=0;i<5;i++)s+=a.charAt(Math.floor(Math.random()*a.length));return s;}
+  var done=false;
+  function inscrire(){
+    if(done)return;
+    var sc=document.getElementById('inscription');if(!sc)return;
+    var ins=sc.querySelectorAll('.input'),v=[],i;
+    for(i=0;i<ins.length;i++)v.push((ins[i].value||'').trim());
+    var email=(v[2]||'').toLowerCase();
+    if(!email||email.indexOf('@')<0)return;
+    done=true;
+    var id=uuid(),ticket=tk(),now=new Date().toISOString();
+    fetch(BASE+'joueurs',{method:'POST',headers:H(),body:JSON.stringify({
+      id:id,prenom:v[0]||null,nom:v[1]||null,email:email,tel:v[3]||null,
+      age_tranche:v[4]||null,code_postal:v[5]||null,events:[evId],
+      ticket_code:ticket,source:'nds2026',ts:now,last_seen:now.slice(0,10)
+    })}).then(function(){
+      fetch(BASE+'participations',{method:'POST',headers:H(),body:JSON.stringify({
+        joueur_id:id,event_id:evId,ticket_code:ticket,score:0,completed:true,tickets:1
+      })});
+    });
+    try{localStorage.setItem('nds_played_'+evId,ticket);}catch(e){}
+    var t=document.querySelector('.ticket-code');if(t)t.textContent=ticket;
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-go]'):null;if(!b)return;
+    if(b.getAttribute('data-go')==='quiz'){var insc=document.getElementById('inscription');if(insc&&insc.contains(b))inscrire();}
+  },true);
+})();
+</script>
 </body>
 </html>
