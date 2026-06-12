@@ -77,3 +77,14 @@ Plan propre (ordre) :
 3. Dashboard pro NDS dans ProClient (rendu conditionnel, sans casser pro-vence), câblé par station.
 4. Générer les 4 QR, tester.
 Page hub de démos créée : /demos.html (public/).
+
+## ✅ 12/06 — PARCOURS USER RÉEL CODÉ + DASHBOARD PRO PAR STATION
+- Master `admin/app/parcours/nds2026/` créé (page.tsx + NDS2026Client.tsx), repart du QuizClient éprouvé.
+  - Inscription RÉELLE : writeJoueur -> table joueurs + participations (source=nds2026, prefix ND).
+  - Détection RETOUR : getJoueurLocal/claimJoueur -> skip réinscription, va au ticket.
+  - Branding NDS : logo blanc /nds/logo_nds_blanc_hd.png + couleur violette.
+  - Type TicketPrefix élargi avec 'ND' (lib/types.ts). Build vert (route /parcours/nds2026 générée).
+- 4 events NDS (module nds2026) configurés en base : 4 questions quiz + subtitle + timer + tirageDate.
+- URLs parcours réel (= cible des QR) : /parcours/nds2026?ev=ev-nds-{bar|caisses|ecrans|tablette}
+- Dashboard pro réel par station (données réelles via ProClient existant) : /pro?pro=pro-nds-{bar|caisses|ecrans|tablette}
+RESTE (optionnel) : appliquer le design carrousel v1 (mockup nds-pro.html) au ProClient pour NDS ; attribuerSuperEvent (ticket du jour se_tickets) dans le master ; générer les images QR pointant vers les URLs ci-dessus.
