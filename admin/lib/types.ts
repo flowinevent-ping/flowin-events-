@@ -153,7 +153,7 @@ export interface SubmitFormData {
   optin?: boolean
 }
 
-export type TicketPrefix = 'TB' | 'PQ' | 'QM' | 'QS' | 'SP' | 'VS'
+export type TicketPrefix = 'TB' | 'PQ' | 'QM' | 'QS' | 'SP' | 'VS' | 'ND'
 
 export interface FlowinPro {
   id: string
