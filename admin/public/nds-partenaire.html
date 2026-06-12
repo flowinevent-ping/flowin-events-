@@ -34,6 +34,28 @@
     padding:8px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;border:1px solid transparent;background:none}
   .tab.on{color:#fff;background:linear-gradient(100deg,var(--accent),#5B79E0);box-shadow:0 6px 18px -8px var(--accent)}
 
+  .pburger{display:flex;flex-direction:column;gap:4px;width:40px;height:40px;align-items:center;justify-content:center;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid var(--line);cursor:pointer;flex-shrink:0}
+  .pburger span{display:block;width:18px;height:2px;border-radius:2px;background:#fff}
+  .pdim{position:fixed;inset:0;background:rgba(4,7,15,.66);backdrop-filter:blur(2px);z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
+  .pdim.on{opacity:1;pointer-events:auto}
+  .pdrawer{position:fixed;top:0;right:0;height:100%;width:80%;max-width:330px;background:linear-gradient(180deg,#0c1226,#05070f);z-index:100;transform:translateX(100%);transition:transform .28s ease;box-shadow:-12px 0 40px rgba(0,0,0,.5);display:flex;flex-direction:column;padding:22px 20px}
+  .pdrawer.on{transform:translateX(0)}
+  .pdrawer .pdx{align-self:flex-end;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.07);border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1}
+  .pdrawer .pdt{font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--flowin);margin:6px 2px 18px}
+  .pdrawer a{display:block;font-size:17px;font-weight:600;color:rgba(243,245,252,.84);text-decoration:none;padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;text-align:left;font-family:inherit}
+  .pdrawer a.cta{margin-top:18px;background:linear-gradient(100deg,var(--accent),#5B79E0);color:#fff;text-align:center;border-radius:12px;border:none;padding:15px;font-weight:700}
+
+  html{scroll-behavior:smooth}
+  .content{padding:0}
+  .content .panel{display:block;animation:none}
+  .content .panel{scroll-margin-top:78px}
+  /* tunnels (wizard onboard, sponsor, contact) = overlay plein écran */
+  .tunnel{position:fixed;inset:0;z-index:80;background:var(--ink);overflow-y:auto;padding:0;display:none}
+  .tunnel.on{display:block}
+  .tunnel .tunbar{position:sticky;top:0;z-index:5;background:rgba(8,11,22,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:13px 18px}
+  .tunnel .tunback{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+  .tunnel .tuntitle{font-weight:700;font-size:15px}
+
   .panel{animation:fade .3s ease}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -242,17 +264,24 @@
         <span class="wm"><b>Nuits du Sud</b><s>Partenaires · 2026</s></span>
       </div>
       <div class="powered">Opération partenaires<br>par <b>Flowin</b></div>
-    </div>
-    <div class="tabs">
-      <button class="tab on" data-t="accueil">Accueil</button>
-      <button class="tab" data-t="marche">Comment ça fonctionne</button>
-      <button class="tab" data-t="festival">Le festival</button>
-      <button class="tab" data-t="offre">Devenir partenaire</button>
+      <button class="pburger" id="pBurger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 
+  <div class="pdim" id="pDim"></div>
+  <aside class="pdrawer" id="pDrawer">
+    <button class="pdx" id="pDrawerClose" aria-label="Fermer">×</button>
+    <div class="pdt">Nuits du Sud · Partenaires</div>
+    <a data-to="accueil">Accueil</a>
+    <a data-to="marche">Comment ça fonctionne</a>
+    <a data-to="festival">Le festival</a>
+    <a data-to="offre">Devenir partenaire</a>
+    <a class="cta" data-go="onboard">Réserver ma participation</a>
+  </aside>
+
+  <div class="content">
   <!-- ACCUEIL -->
-  <div class="panel" data-p="accueil">
+  <div class="panel" id="accueil" data-p="accueil">
     <div class="hero">
       <div class="bg"></div><div class="veil"></div>
       <div class="herologo"><span class="mk"><svg viewBox="0 0 24 24" width="21" height="21"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#fff"/></svg></span><span class="wm">Nuits du Sud</span></div>
@@ -276,7 +305,7 @@
   </div>
 
   <!-- COMMENT ÇA FONCTIONNE -->
-  <div class="panel" data-p="marche" hidden>
+  <div class="panel" id="marche" data-p="marche">
     <div class="sec wrap">
       <div class="kick">Comment ça fonctionne</div>
       <h2 class="hsec">Une participation <em>simple</em></h2>
@@ -352,7 +381,7 @@
   </div>
 
   <!-- LE FESTIVAL -->
-  <div class="panel" data-p="festival" hidden>
+  <div class="panel" id="festival" data-p="festival">
     <div class="sec wrap">
       <div class="kick">Le festival</div>
       <h2 class="hsec">Pourquoi les <em>Nuits du Sud</em> ?</h2>
@@ -381,7 +410,7 @@
   </div>
 
   <!-- DEVENIR PARTENAIRE -->
-  <div class="panel" data-p="offre" hidden>
+  <div class="panel" id="offre" data-p="offre">
     <div class="sec wrap">
       <div class="kick">Pourquoi cette opération ?</div>
       <h2 class="hsec">Pourquoi cette opération <em>existe</em></h2>
@@ -418,7 +447,8 @@
   </div>
 
   <!-- FUNNEL -->
-  <div class="panel" data-p="onboard" hidden>
+  </div><!-- /.content -->
+  <div class="tunnel" id="onboard" data-p="onboard"><div class="tunbar"><button class="tunback" data-back>←</button><div class="tuntitle">Réserver ma participation</div></div>
     <div class="sec wrap">
       <button class="backlink" data-back="offre">← Retour</button>
       <div class="wsteps"><div class="wstep on"></div><div class="wstep"></div><div class="wstep"></div><div class="wstep"></div></div>
@@ -467,7 +497,7 @@
   </div>
 
   <!-- SPONSOR -->
-  <div class="panel" data-p="sponsor" hidden>
+  <div class="tunnel" id="sponsor" data-p="sponsor"><div class="tunbar"><button class="tunback" data-back>←</button><div class="tuntitle">Devenir sponsor</div></div>
     <div class="sec wrap">
       <button class="backlink" data-back="offre">← Retour</button>
       <div class="kick gold">Sponsoriser un lot</div>
@@ -500,7 +530,7 @@
   </div>
 
   <!-- CONTACT -->
-  <div class="panel" data-p="contact" hidden>
+  <div class="tunnel" id="contact" data-p="contact"><div class="tunbar"><button class="tunback" data-back>←</button><div class="tuntitle">Nous contacter</div></div>
     <div class="sec wrap">
       <button class="backlink" data-back="offre">← Retour</button>
       <div class="kick">Nous contacter</div>
@@ -531,19 +561,43 @@
   </div>
 </div>
 <script>
-  var tabs=document.querySelectorAll('.tab');
-  var panels=document.querySelectorAll('.panel');
-  function show(t){
-    for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('on',tabs[i].getAttribute('data-t')===t)}
-    for(var j=0;j<panels.length;j++){panels[j].hidden=(panels[j].getAttribute('data-p')!==t)}
-    if(t==='onboard'){wizGo(1)}
-    window.scrollTo(0,0);
+  // burger drawer
+  var pDrawer=document.getElementById('pDrawer'), pDim=document.getElementById('pDim');
+  function pClose(){pDrawer.classList.remove('on');pDim.classList.remove('on');}
+  function pOpen(){pDrawer.classList.add('on');pDim.classList.add('on');}
+  document.getElementById('pBurger').addEventListener('click',pOpen);
+  document.getElementById('pDrawerClose').addEventListener('click',pClose);
+  pDim.addEventListener('click',pClose);
+
+  var CONTENT=['accueil','marche','festival','offre'];
+  function openTunnel(id){
+    var el=document.getElementById(id); if(!el)return;
+    el.classList.add('on');
+    if(id==='onboard'){wizGo(1);} el.scrollTop=0;
   }
-  for(var k=0;k<tabs.length;k++){tabs[k].addEventListener('click',function(){show(this.getAttribute('data-t'))})}
+  function closeTunnels(){
+    var t=document.querySelectorAll('.tunnel.on');
+    for(var i=0;i<t.length;i++)t[i].classList.remove('on');
+  }
+  function show(t){
+    pClose();
+    if(CONTENT.indexOf(t)>=0){
+      closeTunnels();
+      var el=document.getElementById(t);
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    } else {
+      openTunnel(t);
+    }
+  }
+  // ancres de contenu (data-to dans le drawer)
+  var tos=document.querySelectorAll('[data-to]');
+  for(var a=0;a<tos.length;a++){tos[a].addEventListener('click',function(){show(this.getAttribute('data-to'))})}
+  // CTA vers tunnels (data-go)
   var gos=document.querySelectorAll('[data-go]');
   for(var g=0;g<gos.length;g++){gos[g].addEventListener('click',function(){show(this.getAttribute('data-go'))})}
+  // retour depuis un tunnel
   var backs=document.querySelectorAll('[data-back]');
-  for(var bb=0;bb<backs.length;bb++){backs[bb].addEventListener('click',function(){show(this.getAttribute('data-back')||'accueil')})}
+  for(var bb=0;bb<backs.length;bb++){backs[bb].addEventListener('click',function(){closeTunnels();window.scrollTo(0,0);})}
   function wizGo(n){
     for(var i=1;i<=4;i++){var el=document.getElementById('w'+i);if(el)el.hidden=(i!==n);}
     var st=document.querySelectorAll('.wstep');for(var s=0;s<st.length;s++){st[s].classList.toggle('on',s<n)}
