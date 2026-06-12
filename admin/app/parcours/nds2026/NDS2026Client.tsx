@@ -96,10 +96,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   return (
     <div className="ndsbody">
-      <style dangerouslySetInnerHTML={{ __html: NDS_CSS + `
-        .ndsbody{background:#0c0a12;font-family:'Manrope',system-ui,sans-serif;color:#fff;display:block;min-height:100dvh;padding:0}
-        .ndsbody .phone{position:relative;width:100%;max-width:480px;margin:0 auto;border-radius:0;min-height:100dvh;background:transparent}
-        .ndsbody .scr{position:static !important;inset:auto !important;display:block !important;min-height:100dvh}
+      <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
+        .ndsbody{min-height:100vh;min-height:100dvh;display:block;background:#160820;font-family:'Manrope',system-ui,sans-serif;color:#fff;padding:0}
+        .ndsbody .phone{width:100%;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#160820;position:relative;display:flex;flex-direction:column}
+        .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0}
+        .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
