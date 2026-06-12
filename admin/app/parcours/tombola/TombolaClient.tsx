@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { generateTicket } from '@/lib/ticket'
-import { getJoueurLocal, claimJoueur, attribuerSuperEvent, rememberJoueur } from '@/lib/parcours'
+import { getJoueurLocal, claimJoueur, writeJoueur } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
@@ -87,50 +86,29 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     if (Object.keys(errs).length) return
 
     setSubmitting(true)
-    const emailLower = form.email.toLowerCase().trim()
-
-    const { data: dup } = await supabase
-      .from('joueurs').select('id,ticket_code')
-      .eq('email_lower', emailLower).contains('events', [evId]).limit(1)
-
-    if (dup?.length) {
-      const d0 = dup[0] as { id?: string; ticket_code?: string }
-      rememberJoueur(d0.id, emailLower, form.prenom)
-      const t = d0.ticket_code ?? ''
-      try { localStorage.setItem(lsKey, t) } catch {}
-      setExistingTicket(t); setSubmitting(false); setScreen('already'); return
-    }
-
     const tc = generateTicket('TB')
-    const today = new Date().toISOString().slice(0, 10)
-    const extId = `j-tb-${emailLower.replace(/[^a-z0-9]/g, '-').substring(0, 36)}`
+    const res = await writeJoueur({
+      email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
+      code_postal: form.cp, genre: form.genre, age_tranche: form.age,
+      decouverte: form.source.replace(/^[^ ]+ /, '') || undefined,
+      events: [evId], ticket_code: tc, source: 'tombola', prefix: 'TB',
+    })
+    setSubmitting(false)
 
-    const { data: joueurRows } = await supabase.from('joueurs').upsert({
-      external_id: extId, email: emailLower,
-      prenom: form.prenom.trim(), nom: form.nom.trim(), tel: form.tel.trim(),
-      code_postal: form.cp.trim() || null, genre: form.genre || null,
-      age_tranche: form.age || null,
-      decouverte: form.source.replace(/^[^ ]+ /, '') || null,
-      optin: true, optin_date: today, first_seen: today, last_seen: today,
-      events: [evId], ticket_code: tc, source: 'tombola',
-    }, { onConflict: 'external_id' }).select('id')
-
-    if (joueurRows?.length) {
-      const joueurId = (joueurRows[0] as { id: string }).id
-      await supabase.from('participations').insert({
-        joueur_id: joueurId,
-        event_id: evId,
-        ticket_code: tc,
-        score: 0,
-        completed: true,
-        tickets: 1,
-      })
-      await attribuerSuperEvent(joueurId, evId, today)
-      rememberJoueur(joueurId, emailLower, form.prenom)
+    // Doublon : déjà inscrit en base -> écran "déjà joué"
+    if (res.duplicate) {
+      const t = res.ticket || ''
+      try { localStorage.setItem(lsKey, t) } catch {}
+      setExistingTicket(t); setScreen('already'); return
     }
-
-    try { localStorage.setItem(lsKey, tc) } catch {}
-    setTicket(tc); setExistingTicket(tc); setSubmitting(false); setScreen('ticket')
+    // Échec écriture distante : on n'enregistre pas en local (retry possible)
+    if (!res.success) {
+      if (res.error) console.error('[tombola] enregistrement Supabase échoué:', res.error)
+      setErrors({ email: 'Enregistrement impossible, réessaie.' }); return
+    }
+    const finalTicket = res.ticket || tc
+    try { localStorage.setItem(lsKey, finalTicket) } catch {}
+    setTicket(finalTicket); setExistingTicket(finalTicket); setScreen('ticket')
   }
 
   const partSelected = partenaires[partIdx]

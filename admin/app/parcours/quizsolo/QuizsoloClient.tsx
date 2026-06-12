@@ -78,6 +78,7 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
     const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizsolo',prefix:'QS'})
     setSubmitting(false)
     if(res.duplicate){setExistingTicket(res.ticket);try{localStorage.setItem(lsKey,res.ticket)}catch{};setScreen('already');return}
+    if(!res.success){if(res.error)console.error('[quizsolo] Supabase échoué:',res.error);return}
     setTicket(res.ticket);setExistingTicket(res.ticket);try{localStorage.setItem(lsKey,res.ticket)}catch{};setScreen('ticket')
   }
 

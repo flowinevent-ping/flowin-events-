@@ -56,9 +56,14 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     setErrors(errs); if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('VS')
-    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS' })
+    // Les votes sont la donnée clé de ce parcours -> stockés dans bonus_answers
+    // (participations.bonus_answers) pour exploitation dans le rapport.
+    const voteData: Record<string, unknown> = { vote_mode: mode }
+    items.forEach(it => { voteData[`vote_${it.id}`] = votes[it.id] ?? null })
+    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS',bonus_reponses:voteData })
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
+    if (!res.success) { if (res.error) console.error('[vote] enregistrement Supabase échoué:', res.error); setErrors({ email: 'Enregistrement impossible, réessaie.' }); return }
     setTicket(res.ticket); setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
   }
 

@@ -226,6 +226,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     })
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
+    if(!res.success){if(res.error)console.error('[spin] Supabase échoué:',res.error);return}
     setTicket(res.ticket); setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
   }
 
