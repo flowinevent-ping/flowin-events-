@@ -175,16 +175,21 @@ export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; s
   }
   const { data: se } = await supabase.from('super_events').select('geofence_m,geo_controle').eq('id', e.super_event_id).single()
   const seRow = se as { geofence_m?: number | null; geo_controle?: boolean | null } | null
-  // Contrôle GPS désactivé par défaut : on ne demande pas la position, ticket normal.
+
+  // Contrôle GPS désactivé : on ne demande pas la position au joueur, MAIS on enregistre
+  // toujours le LIEU de la station (lat/lng fixes de l'event) — indispensable au rapport
+  // (répartition géographique des participations par station).
   if (!seRow || seRow.geo_controle !== true) {
-    return { onSite: true, scan: {} }
+    return { onSite: true, scan: { scan_lat: e.lat, scan_lng: e.lng, scan_statut: 'station' } }
   }
+
   let geofence = 150
   if (typeof seRow.geofence_m === 'number' && seRow.geofence_m > 0) geofence = seRow.geofence_m
 
   const pos = await getScanPosition()
   if (!pos) {
-    return { onSite: false, scan: { scan_statut: 'non_verifie' } }
+    // Pas de position fournie : on garde le lieu de la station, statut non vérifié.
+    return { onSite: false, scan: { scan_lat: e.lat, scan_lng: e.lng, scan_statut: 'non_verifie' } }
   }
   const lat = pos.coords.latitude
   const lng = pos.coords.longitude
@@ -196,7 +201,7 @@ export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; s
   }
 }
 
-export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
+export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
 
@@ -218,7 +223,20 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
   const today = new Date().toISOString().slice(0, 10)
   const extId = `j-${payload.prefix.toLowerCase()}-${emailLower.replace(/[^a-z0-9]/g, '-').substring(0, 36)}`
 
-  const { data: joueurRows } = await supabase.from('joueurs').upsert({
+  /* score_moy = colonne NUMERIC. Le payload arrive en "bon/total" (ex "3/4").
+     On convertit en pourcentage entier (0-100). Sans conversion, l'upsert échoue
+     (invalid input syntax for type numeric) et RIEN n'est enregistré en base. */
+  let scoreNum = 0
+  let scorePct: number | null = null
+  if (payload.score_moy) {
+    const parts = String(payload.score_moy).split('/')
+    const bon = parseInt(parts[0]) || 0
+    const tot = parseInt(parts[1]) || 0
+    scoreNum = bon
+    scorePct = tot > 0 ? Math.round((bon / tot) * 100) : bon
+  }
+
+  const { data: joueurRows, error: joueurErr } = await supabase.from('joueurs').upsert({
     external_id: extId,
     email: emailLower,
     prenom: payload.prenom?.trim() || null,
@@ -233,7 +251,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     secteur: payload.secteur || null,
     client_type: payload.client_type || 'btoc',
     lot_gagne: payload.lot_gagne || null,
-    score_moy: payload.score_moy || null,
+    score_moy: scorePct,
     optin: true,
     optin_date: today,
     first_seen: today,
@@ -243,12 +261,16 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     source: payload.source,
   }, { onConflict: 'external_id' }).select('id')
 
+  if (joueurErr) {
+    console.error('[writeJoueur] upsert joueur échoué:', joueurErr.message)
+    return { success: false, duplicate: false, ticket: tc, error: joueurErr.message }
+  }
+
   /* Participation */
   if (joueurRows?.length) {
     const joueurId = (joueurRows[0] as { id: string }).id
-    const scoreNum = payload.score_moy ? (parseInt(payload.score_moy.split('/')[0]) || 0) : 0
     const geo = await captureScanGeo(evId)
-    await supabase.from('participations').insert({
+    const { error: partErr } = await supabase.from('participations').insert({
       joueur_id: joueurId,
       event_id: evId,
       ticket_code: tc,
@@ -258,6 +280,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       bonus_answers: payload.bonus_reponses ?? null,
       ...geo.scan,
     })
+    if (partErr) console.error('[writeJoueur] insert participation échoué:', partErr.message)
     /* Bloc 2 — Super Event : ticket + gain immédiat (uniquement si scan sur place) */
     await attribuerSuperEvent(joueurId, evId, today, geo.onSite)
     rememberJoueur(joueurId, emailLower, payload.prenom)
@@ -287,7 +310,7 @@ export async function claimJoueur(
   evId: string,
   prefix: TicketPrefix,
   bonus?: Record<string, unknown>
-): Promise<{ success: boolean; duplicate: boolean; ticket: string }> {
+): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const { data: dup } = await supabase
     .from('joueurs').select('id,ticket_code').eq('email_lower', emailLower).contains('events', [evId]).limit(1)

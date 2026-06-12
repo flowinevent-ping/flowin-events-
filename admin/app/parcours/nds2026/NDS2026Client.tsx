@@ -91,8 +91,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     })
     setSaving(false)
     const finalTicket = res.ticket || tc
-    setTicket(finalTicket); setSaved(true)
-    try { localStorage.setItem(lsKey, finalTicket) } catch {}
+    setTicket(finalTicket)
+    // On ne marque "joué" (local + écran tickets) QUE si l'écriture Supabase a réussi
+    // (ou doublon = déjà en base). En cas d'échec réseau/base, on autorise un nouvel essai.
+    if (res.success || res.duplicate) {
+      setSaved(true)
+      try { localStorage.setItem(lsKey, finalTicket) } catch {}
+    } else if (res.error) {
+      console.error('[nds2026] enregistrement Supabase échoué:', res.error)
+    }
     return finalTicket
   }
 
