@@ -72,7 +72,7 @@ RESTE : appliquer la même direction à /nds-partenaire.html (public/, 116KB, de
 Romain veut le portage propre React/Next.js (stabilité/fiabilité), pas l'option B temporaire. Sécurité/protection = phase ultérieure.
 ⚠️ EN ATTENDANT, le form partenaire /nds (maquette statique) NE CAPTURE RIEN — risque pendant la prospection. À traiter en PRIORITÉ dans le portage.
 Plan propre (ordre) :
-1. /nds en React (design v25) + form rebranché upsert `partenaires` (statut prospect, tag nds-landing) — réutiliser le câblage de l'ancien NdsClient (conservé dans git/repo). PRIORITÉ (prospection).
+1. ✅ CAPTURE PROSPECTS RÉTABLIE (12/06) : form du design v25 (/nds, static) câblé à Supabase via JS REST -> table partenaires (prospect/nds-landing, se-nds-2026), testé OK. Reste à terme : porter ce /nds en composant React pur (le câblage actuel est fonctionnel et stable mais sur la page statique).
 2. Master `admin/app/parcours/nds2026` (parcours v24 en React) → débloque les QR.
 3. Dashboard pro NDS dans ProClient (rendu conditionnel, sans casser pro-vence), câblé par station.
 4. Générer les 4 QR, tester.
