@@ -222,7 +222,11 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .tbl thead th.sortable:hover .sort-ic{opacity:.85}
 .tbl .sort-ic.active{opacity:1;color:var(--sa-accent);font-size:13px}
 .shell.pro .tbl .sort-ic.active{color:var(--pro-accent)}
-@media(max-width:640px){.sidebar{display:none;position:fixed;top:0;left:0;height:100vh;z-index:1000;box-shadow:4px 0 24px rgba(0,0,0,.18)}.sidebar.sb-open{display:flex}.topbar-burger{display:flex!important}.page{padding:10px}.drawer{width:100%!important;left:0;right:0}}
+@media(max-width:640px){.sidebar{display:none;position:fixed;top:0;left:0;height:100vh;z-index:1000;box-shadow:4px 0 24px rgba(0,0,0,.18)}.sidebar.sb-open{display:flex}.topbar-burger{display:flex!important}.page{padding:10px}.drawer{width:100%!important;left:0;right:0}
+.sb{position:fixed;top:0;left:0;height:100vh;z-index:1000;transform:translateX(-100%);transition:transform .26s ease;box-shadow:4px 0 28px rgba(0,0,0,.28)}
+.sb.sb-open{transform:translateX(0)}
+.sb-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:999;opacity:0;pointer-events:none;transition:opacity .22s}
+.sb-backdrop.on{opacity:1;pointer-events:auto}}
 .topbar-burger{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);cursor:pointer;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .tbl tbody td{padding:12px 14px;border-bottom:1px solid var(--sa-border);font-size:13px;vertical-align:middle}
 .tbl tbody tr{cursor:pointer;transition:background .12s}
@@ -2987,8 +2991,15 @@ function renderSidebar(){
 
 // ============ TOPBAR ============
 function toggleSidebar(){
-  const sb=document.querySelector('.sidebar');
-  if(sb){ sb.classList.toggle('sb-open'); }
+  var sb=document.querySelector('.sb');
+  if(!sb) return;
+  var opening=!sb.classList.contains('sb-open');
+  sb.classList.toggle('sb-open');
+  var bd=document.querySelector('.sb-backdrop');
+  if(opening){
+    if(!bd){ bd=document.createElement('div'); bd.className='sb-backdrop'; bd.addEventListener('click',toggleSidebar); document.body.appendChild(bd); }
+    setTimeout(function(){ bd.classList.add('on'); },10);
+  } else if(bd){ bd.classList.remove('on'); }
 }
 function renderTopbar(){
   const crumbs = breadcrumbForView();
@@ -3020,7 +3031,7 @@ function breadcrumbForView(){
   return crumbs;
 }
 
-function goView(v){ state.view=v; closeDrawer(); render(); }
+function goView(v){ state.view=v; closeDrawer(); var sb=document.querySelector('.sb.sb-open'); if(sb){ toggleSidebar(); } render(); }
 function setMode(m){ state.mode=m; render(); }
 
 // ============== HELPERS ONGLET FRONT (éditeur live) ==============
