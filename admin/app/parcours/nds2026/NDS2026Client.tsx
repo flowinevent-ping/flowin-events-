@@ -97,8 +97,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   return (
     <div className="ndsbody">
       <style dangerouslySetInnerHTML={{ __html: NDS_CSS + `
-        .ndsbody{background:#0c0a12;font-family:'Manrope',system-ui,sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100dvh;padding:0}
-        .ndsbody .phone{max-width:480px;border-radius:0;min-height:100dvh;flex:none}
+        .ndsbody{background:#0c0a12;font-family:'Manrope',system-ui,sans-serif;color:#fff;display:block;min-height:100dvh;padding:0}
+        .ndsbody .phone{position:relative;width:100%;max-width:480px;margin:0 auto;border-radius:0;min-height:100dvh;background:transparent}
+        .ndsbody .scr{position:static !important;inset:auto !important;display:block !important;min-height:100dvh}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
