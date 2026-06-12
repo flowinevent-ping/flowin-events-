@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { writeJoueur, shuffle, getJoueurLocal } from '@/lib/parcours'
+import { writeJoueur, shuffle, getJoueurLocal, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
@@ -138,7 +138,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoCapitalize="none" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />{errors.email && <div className="err">{errors.email}</div>}</div>
               <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
               <div className="grid2" style={{ marginBottom: 12 }}>
-                <div><label className="label">Tranche d&apos;âge</label><input className="input" placeholder="—" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} /></div>
+                <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
                 <div><label className="label">Code postal</label><input className="input" inputMode="numeric" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
               </div>
               <div><label className="label">Tu as connu le festival par…</label>

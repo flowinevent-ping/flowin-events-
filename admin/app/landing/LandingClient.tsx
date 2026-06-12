@@ -15,7 +15,7 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .ic{display:block}
   section{padding:40px 22px 48px;scroll-margin-top:64px}
   .page{animation:fade .25s ease}
-  .app.paged .page{display:none}
+  .app.paged .page{display:block}
   .app.paged .page.show{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
