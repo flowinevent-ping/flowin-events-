@@ -551,5 +551,44 @@
   function wizNext(formId,n){var f=document.getElementById(formId);var ins=f.querySelectorAll('input');var ok=true;for(var i=0;i<ins.length;i++){if(ins[i].type!=='file'&&!ins[i].value.trim()){ins[i].style.borderColor='#EF6B6B';ok=false}else{ins[i].style.borderColor=''}}if(!ok)return;wizGo(n);}
   function sendForm(formId,thanksId){var f=document.getElementById(formId);var ins=f.querySelectorAll('input,textarea');var ok=true;for(var i=0;i<ins.length;i++){if(ins[i].type!=='file'&&!ins[i].value.trim()){ins[i].style.borderColor='#EF6B6B';ok=false}else{ins[i].style.borderColor=''}}if(!ok)return;f.hidden=true;document.getElementById(thanksId).hidden=false;window.scrollTo(0,0);}
 </script>
+
+<script>
+(function(){
+  var URL_='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/partenaires';
+  var KEY_='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  function readForm(){
+    var ins=document.querySelectorAll('.finput'), v={nom:'',adresse:'',contact:'',email:'',tel:''}, i, inp, ph, ty;
+    for(i=0;i<ins.length;i++){
+      inp=ins[i]; if(inp.offsetParent===null) continue;
+      ph=(inp.getAttribute('placeholder')||'').toLowerCase(); ty=inp.type;
+      if(ty==='email') v.email=inp.value;
+      else if(ty==='tel') v.tel=inp.value;
+      else if(ph.indexOf('rue')>=0||ph.indexOf('adresse')>=0) v.adresse=inp.value;
+      else if(ph.indexOf('enseigne')>=0||ph.indexOf('cave')>=0||ph.indexOf('nom de')>=0) v.nom=inp.value;
+      else if(ph.indexOf('prénom')>=0||ph.indexOf('prenom')>=0) v.contact=inp.value;
+    }
+    return v;
+  }
+  function send(){
+    var v=readForm();
+    if(!v.email||v.email.indexOf('@')<0||!v.tel) return;
+    var em=v.email.toLowerCase().replace(/\s/g,''), now=new Date().toISOString();
+    var body={
+      id:'prosp-nds-'+em.replace(/[^a-z0-9]/g,'-').slice(0,36),
+      nom:v.nom||null, adresse:v.adresse||null, ville:'Vence',
+      contact_nom:v.contact||null, contact:v.contact||null,
+      contact_email:em, email:em, contact_tel:v.tel||null, tel:v.tel||null,
+      super_event_id:'se-nds-2026', tags:['prospect','nds-landing'],
+      statut_paiement:'prospect', actif:false, visible:false, en_avant:false,
+      ts:now, created_at:now
+    };
+    fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)});
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
+    if((b.textContent||'').toLowerCase().indexOf('envoyer')>=0) send();
+  },true);
+})();
+</script>
 </body>
 </html>
