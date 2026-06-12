@@ -76,7 +76,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     setErrors(errs)
     if (Object.keys(errs).length) return
-    setScreen('quiz')
+    // Pas de questions configurées -> on saute le quiz pour éviter un écran vide
+    setScreen(questions.length > 0 ? 'quiz' : 'resultats')
   }
 
   async function persist(): Promise<string> {
@@ -103,14 +104,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     return finalTicket
   }
 
-  async function finaliser() { await persist(); setScreen('tickets') }
+  async function finaliser() { await persist(); setScreen('final') }
 
   async function finishBonus() {
     await persist(); setBonusDone(true); setScreen('final')
   }
 
   const q = questions[qIdx]
-  const navOn = screen === 'tickets' || screen === 'carte' || screen === 'partenaires'
+  const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires'
 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
@@ -118,14 +119,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   return (
     <div className="ndsbody">
       <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
-        .ndsbody{min-height:100vh;min-height:100dvh;display:block;background:#160820;font-family:'Manrope',system-ui,sans-serif;color:#fff;padding:0}
+        .ndsbody{width:100%;min-height:100vh;min-height:100dvh;display:block;background:#160820;font-family:'Manrope',system-ui,sans-serif;color:#fff;padding:0}
         .ndsbody .phone{width:100%;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#160820;position:relative;display:flex;flex-direction:column;overflow:hidden}
-        .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0}
+        .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
-        .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh}
+        .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
         .ndsbody .padnav{padding-bottom:96px}
         .ndsbody .nav{position:sticky;bottom:0}
-        .ndsbody .map-fake{flex:1;min-height:340px;background:linear-gradient(160deg,#241233,#3a1450);position:relative}
+        .ndsbody .map-fake{flex:1;width:100%;min-height:340px;background:linear-gradient(160deg,#241233,#3a1450);position:relative}
         .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:96px;display:flex;flex-direction:column;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -257,9 +258,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="res-head">
               <div className="res-ico"><svg className="ic"><use href="#i-checkc" /></svg></div>
               <div className="res-bravo disp">C&apos;est validé !</div>
-              <div className="res-sub">+1 point bonus ajouté à ta participation</div>
+              <div className="res-sub">Participation enregistrée pour le tirage</div>
             </div>
-            <div className="res-body">
+            <div className="res-body padnav">
               <div className="res-eyebrow">Joue les autres stations ce soir</div>
               <div className="nextcard">
                 {STATIONS.filter(s => s.id !== evId).map(s => (
@@ -348,7 +349,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         )}
 
         {navOn && (
-          <nav className="nav" id="nav">
+          <nav className="nav on" id="nav">
             <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
             <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Mes tickets</button>
             <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
