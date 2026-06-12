@@ -346,7 +346,7 @@ export function parcoursCSS(couleur: string): string {
   return `
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;background:#0F172A}
-    .app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:#0F172A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .app{max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:#0F172A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     .screen{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column}
     .btn{width:100%;padding:14px;border:none;border-radius:50px;background:${couleur};color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .1s}
     .btn:active{transform:scale(.98)} .btn:disabled{opacity:.6}
