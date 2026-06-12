@@ -13,21 +13,27 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .app{max-width:480px;margin:0 auto;background:var(--paper);overflow-x:hidden}
   a{color:inherit}
   .ic{display:block}
-  section{padding:40px 22px 48px;scroll-margin-top:64px}
-  .page{animation:fade .25s ease}
-  .app.paged .page{display:block}
-  .app.paged .page.show{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  html{scroll-behavior:smooth}
+  section{padding:40px 22px 48px;scroll-margin-top:62px}
 
   .menu{position:sticky;top:0;z-index:50;background:rgba(14,27,48,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
   .menu .row{display:flex;align-items:center;gap:10px;padding:11px 16px}
   .menu .lg{font-size:18px;font-weight:900;letter-spacing:-.02em;color:#fff;flex-shrink:0;cursor:pointer}
   .menu .lg em{color:var(--blue);font-style:normal}
-  .menu .links{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
-  .menu .links::-webkit-scrollbar{display:none}
-  .menu .links a{flex:0 0 auto;font-size:12px;font-weight:700;color:rgba(255,255,255,.62);text-decoration:none;padding:6px 9px;border-radius:8px;white-space:nowrap;cursor:pointer}
-  .menu .links a.cta{background:var(--teal);color:#fff}
-  .menu .links a.active:not(.cta){color:#fff;background:rgba(255,255,255,.12)}
+  .menu .spacer{margin-left:auto}
+  .menu .hcta{font-size:12.5px;font-weight:800;color:#fff;background:var(--teal);border-radius:9px;padding:8px 13px;text-decoration:none;cursor:pointer;white-space:nowrap}
+  .burger{display:flex;flex-direction:column;gap:4px;width:38px;height:38px;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);cursor:pointer;flex-shrink:0}
+  .burger span{display:block;width:18px;height:2px;border-radius:2px;background:#fff}
+
+  .drawer-dim{position:fixed;inset:0;background:rgba(8,16,30,.6);backdrop-filter:blur(2px);z-index:90;opacity:0;pointer-events:none;transition:opacity .25s}
+  .drawer-dim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:80%;max-width:320px;background:linear-gradient(180deg,#10203a,#0b1726);z-index:100;transform:translateX(100%);transition:transform .28s ease;box-shadow:-12px 0 40px rgba(0,0,0,.4);display:flex;flex-direction:column;padding:22px 20px}
+  .drawer.on{transform:translateX(0)}
+  .drawer .dx{align-self:flex-end;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.08);border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1}
+  .drawer .dlg{font-size:22px;font-weight:900;color:#fff;margin:4px 2px 22px}
+  .drawer .dlg em{color:var(--blue);font-style:normal}
+  .drawer a{display:block;font-size:17px;font-weight:700;color:rgba(255,255,255,.82);text-decoration:none;padding:14px 4px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer}
+  .drawer a.cta{margin-top:18px;background:var(--teal);color:#fff;text-align:center;border-radius:12px;border:none;padding:15px}
 
   .dark{background:linear-gradient(170deg,var(--d2),var(--d3));color:#fff}
   .darker{background:var(--dk);color:#fff}
@@ -197,25 +203,32 @@ const BODY = `<div class="app">
   <div class="menu">
     <div class="row">
       <div class="lg" data-to="top">Flow<em>in</em></div>
-      <div class="links">
-        <a data-to="probleme">Pourquoi</a>
-        <a data-to="comment">Comment</a>
-        <a data-to="resultats">Résultats</a>
-        <a data-to="tarifs">Tarifs</a>
-        <a data-to="contact" class="cta">Contact</a>
-      </div>
+      <div class="spacer"></div>
+      <a class="hcta" data-to="contact">Contact</a>
+      <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 
+  <div class="drawer-dim" id="drawerDim"></div>
+  <aside class="drawer" id="drawer">
+    <button class="dx" id="drawerClose" aria-label="Fermer">×</button>
+    <div class="dlg">Flow<em>in</em></div>
+    <a data-to="probleme">Pourquoi Flowin</a>
+    <a data-to="solution">Comment ça marche</a>
+    <a data-to="resultats">Résultats</a>
+    <a data-to="tarifs">Tarifs</a>
+    <a class="cta" data-to="contact">Demander une démo</a>
+  </aside>
+
   <!-- 1. HERO -->
-  <section class="hero page show" id="top">
+  <section class="hero" id="top">
     <h1>Animez votre lieu, créez du lien, <span class="hl">faites revenir vos clients</span>.</h1>
     <div class="baseline"><span class="c1">Fidélisez</span> · <span class="c2">Animez</span> · <span class="c3">Boostez</span></div>
     <a class="btn" style="margin-top:20px" data-to="comment">Voir comment ça marche →</a>
   </section>
 
   <!-- 2. CONSTAT -->
-  <section class="dark page" id="probleme">
+  <section class="dark" id="probleme">
     <div class="eyebrow">Pourquoi Flowin</div>
     <h2 class="t">Le monde passe. <span style="color:var(--teal)">Vous ne gardez rien.</span></h2>
     <p class="sub">Du flux qui passe, sans laisser de trace.</p>
@@ -232,7 +245,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 3. SYSTÈME / MÉTHODE -->
-  <section class="page" id="solution">
+  <section id="solution">
     <div class="eyebrow">Comment ça marche</div>
     <h2 class="t">Simple, et <span style="color:var(--teal)">direct.</span></h2>
     <p class="sub">Vos réseaux diffusent. Flowin vous aide à fidéliser.</p>
@@ -245,7 +258,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 4. BÉNÉFICES -->
-  <section class="dark page" id="benefices">
+  <section class="dark" id="benefices">
     <div class="eyebrow">Ce que ça vous apporte</div>
     <h2 class="t">Bien plus qu'un jeu.</h2>
     <div class="ben">
@@ -257,7 +270,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 5. SUPER EVENT -->
-  <section class="darker page" id="superevent">
+  <section class="darker" id="superevent">
     <div class="se-badge">L'innovation Flowin</div>
     <h2 class="t">Le Super Event : seul c'est bien, à plusieurs c'est fort.</h2>
     <p class="sub" style="color:rgba(255,255,255,.65)">Plusieurs acteurs, une même animation. Plus d'affluence pour tous — chacun garde son public.</p>
@@ -268,7 +281,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 6. RÉSULTATS -->
-  <section class="dark page" id="resultats">
+  <section class="dark" id="resultats">
     <div class="eyebrow">Vos résultats</div>
     <h2 class="t">Vous voyez tout, en direct.</h2>
     <p class="sub">Affluence, profils, provenance : vos indicateurs en temps réel, prêts à analyser.</p>
@@ -378,7 +391,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 7. POUR QUI -->
-  <section class="page" id="cas">
+  <section id="cas">
     <div class="eyebrow">Pour qui</div>
     <h2 class="t">Quel que soit votre lieu, votre public.</h2>
     <div class="uses carousel">
@@ -391,7 +404,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 8. MÉCANIQUES -->
-  <section class="dark page" id="jeux">
+  <section class="dark" id="jeux">
     <div class="eyebrow">Les animations</div>
     <h2 class="t">6 façons d'animer.</h2>
     <p class="sub">On choisit ensemble celle qui colle à votre public. Personnalisez, sondez.</p>
@@ -407,7 +420,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 9. TARIFS -->
-  <section class="page" id="tarifs">
+  <section id="tarifs">
     <div class="eyebrow">Tarifs</div>
     <h2 class="t">Des tarifs clairs, pensés pour le terrain.</h2>
     <p class="sub">Pas de coûts cachés. Vous choisissez, on s'occupe du reste.</p>
@@ -454,7 +467,7 @@ const BODY = `<div class="app">
   </section>
 
   <!-- 10. CTA FINAL -->
-  <section class="ctaf page" id="contact">
+  <section class="ctaf" id="contact">
     <h2 class="t" style="color:#fff">Et si on animait votre lieu ?</h2>
     <p class="sub" style="color:rgba(255,255,255,.6)">Quelques minutes, sans matériel. On regarde ce qui marche chez vous.</p>
     <div class="form" id="cForm">
@@ -498,21 +511,23 @@ export default function LandingClient({ cfg, source = '' }: { cfg?: any; source?
   useEffect(() => {
     trackVisite('landing')
 
-    const GROUPS: Record<string, string[]> = { top:['top'], probleme:['probleme'], comment:['solution','superevent','jeux'], resultats:['benefices','resultats'], tarifs:['cas','tarifs','contact'], contact:['contact'] }
-    const menuLinks = Array.from(document.querySelectorAll('.menu .links a'))
-    function setActive(id: string) { menuLinks.forEach((a) => { const t = a.getAttribute('data-to'); if (t === id) a.classList.add('active'); else a.classList.remove('active') }) }
-    function showPage(key: string) {
-      if (!GROUPS[key]) key = 'top'
-      const ids = GROUPS[key]
-      Array.from(document.querySelectorAll('section.page')).forEach((p) => p.classList.remove('show'))
-      ids.forEach((id) => { const s = document.getElementById(id); if (s) s.classList.add('show') })
-      setActive(key); window.scrollTo(0, 0)
-      const at = menuLinks.find((a) => a.getAttribute('data-to') === key) as HTMLElement | undefined
-      if (at && at.scrollIntoView) at.scrollIntoView({ inline: 'center', block: 'nearest' })
+    const drawer = document.getElementById('drawer')
+    const dim = document.getElementById('drawerDim')
+    function closeDrawer() { drawer?.classList.remove('on'); dim?.classList.remove('on') }
+    function openDrawer() { drawer?.classList.add('on'); dim?.classList.add('on') }
+    document.getElementById('burgerBtn')?.addEventListener('click', openDrawer)
+    document.getElementById('drawerClose')?.addEventListener('click', closeDrawer)
+    dim?.addEventListener('click', closeDrawer)
+
+    function goTo(id: string) {
+      closeDrawer()
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      else window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-    Array.from(document.querySelectorAll('[data-to]')).forEach((el) => el.addEventListener('click', () => showPage(el.getAttribute('data-to') || 'top')))
-    const app = document.querySelector('.app'); if (app) app.classList.add('paged')
-    showPage('top')
+    Array.from(document.querySelectorAll('[data-to]')).forEach((el) =>
+      el.addEventListener('click', () => goTo(el.getAttribute('data-to') || 'top'))
+    )
 
     function buildDots(car: any) {
       const slides = car.children, n = slides.length
