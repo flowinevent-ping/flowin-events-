@@ -88,3 +88,18 @@ Page hub de démos créée : /demos.html (public/).
 - URLs parcours réel (= cible des QR) : /parcours/nds2026?ev=ev-nds-{bar|caisses|ecrans|tablette}
 - Dashboard pro réel par station (données réelles via ProClient existant) : /pro?pro=pro-nds-{bar|caisses|ecrans|tablette}
 RESTE (optionnel) : appliquer le design carrousel v1 (mockup nds-pro.html) au ProClient pour NDS ; attribuerSuperEvent (ticket du jour se_tickets) dans le master ; générer les images QR pointant vers les URLs ci-dessus.
+
+## ✅ 12/06 — PARCOURS USER : design v24 EXACT + écriture réelle
+- /parcours/nds2026 sert maintenant la MAQUETTE v24 (design exact : hero violet+ruban, logo blanc gauche, carte verre, écrans soignés) via rewrite beforeFiles dans next.config.js.
+- Écriture Supabase câblée sur la validation de l'inscription : POST joueurs (UUID, prenom/nom/email/tel/age_tranche/code_postal, events, ticket_code ND-xxxxx, source nds2026, ts, last_seen) + POST participations (joueur_id, event_id, ticket_code, score, completed, tickets). Testé OK via MCP.
+- Le master React app/parcours/nds2026 (NDS2026Client) reste dans le repo mais est court-circuité par le rewrite (design générique, conservé au cas où).
+- Schéma joueurs : id=UUID, email_lower=généré (ne pas insérer), pas de created_at (ts/last_seen). participations: created_at (pas ts).
+
+## ⬜ RESTE (ordre demandé par Romain)
+1. TIMER sur les questions du quiz de la maquette nds-parcours.html (absent aujourd'hui) — à coder dans le JS du mockup.
+2. PUIS corrections landing /landing (LandingClient.tsx) :
+   - hero trop écrasé : mieux répartir, trop d'espace en bas
+   - sous les graphes (section Résultats) : trop d'espace, agrandir les images/graphes
+   - personas (section "Pour qui" / cartes secteurs) trop petits
+   - encarts de prix (section Tarifs) : ajouter une bordure autour
+   - global : texte un peu trop petit / mal proportionné
