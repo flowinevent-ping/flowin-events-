@@ -81,14 +81,14 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
 
   .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
   .kpi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:15px;text-align:center}
-  .kpi .v{font-size:24px;font-weight:900}.kpi .l{font-size:11px;color:rgba(255,255,255,.55);margin-top:5px}
+  .kpi .v{font-size:28px;font-weight:900}.kpi .l{font-size:12px;color:rgba(255,255,255,.6);margin-top:6px}
   .panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-top:12px}
   .panel h4{font-size:13px;font-weight:800;color:rgba(255,255,255,.85);margin-bottom:14px;text-align:center}
-  .bar{display:flex;align-items:center;gap:10px;margin-bottom:11px;font-size:13px}
-  .bar .bl{width:88px;color:rgba(255,255,255,.7);flex-shrink:0}
-  .bar .bt{flex:1;height:11px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-size:15px}
+  .bar .bl{width:96px;color:rgba(255,255,255,.72);flex-shrink:0}
+  .bar .bt{flex:1;height:16px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
   .bar .bf{display:block;height:100%;border-radius:100px}
-  .bar .bn{width:30px;text-align:right;font-weight:800;color:#fff}
+  .bar .bn{width:34px;text-align:right;font-weight:800;color:#fff;font-size:14px}
   .donutwrap{display:flex;flex-direction:column;align-items:center;gap:12px}
   .leg{display:flex;flex-direction:column;gap:7px;width:100%}
   .leg .lr{display:flex;align-items:center;gap:9px;font-size:13px;color:rgba(255,255,255,.7)}
@@ -105,11 +105,11 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .rcard .rv{font-size:22px;font-weight:900;color:var(--teal);line-height:1}
   .rcard .rl{font-size:11px;color:rgba(255,255,255,.55);margin-top:5px}
 
-  .uses{display:flex;flex-direction:column;gap:10px;margin-top:18px}
-  .use{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 16px}
-  .use .uh{display:flex;align-items:center;gap:11px;font-size:15.5px;font-weight:800}
-  .use .ui{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;color:#fff}
-  .use p{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .uses{display:flex;flex-direction:column;gap:13px;margin-top:18px}
+  .use{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 18px}
+  .use .uh{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:800}
+  .use .ui{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+  .use p{font-size:14px;color:var(--muted);margin-top:9px;line-height:1.55}
 
   .games{display:flex;flex-direction:column;gap:12px;margin-top:18px}
   .game{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
@@ -121,17 +121,17 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .game li:before{content:'✓';position:absolute;left:0;color:var(--teal);font-weight:900}
 
   .prices{display:flex;flex-direction:column;gap:15px;margin-top:20px}
-  .price{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;position:relative;box-shadow:0 10px 30px rgba(20,40,80,.05)}
+  .price{background:#fff;border:2px solid #cfdaea;border-radius:20px;padding:24px;position:relative;box-shadow:0 10px 30px rgba(20,40,80,.06)}
   .price.hl{border:2px solid var(--teal);box-shadow:0 18px 44px rgba(0,180,160,.18)}
   .price.hl:before{content:'';position:absolute;inset:0;border-radius:20px;padding:2px;background:linear-gradient(135deg,var(--teal),#6A93FF);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.0}
   .pbadge{position:absolute;top:-12px;left:22px;background:linear-gradient(135deg,var(--teal),#12937f);color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:6px 14px;border-radius:100px;box-shadow:0 6px 16px rgba(0,180,160,.35)}
   .price .pn{font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--ink)}
   .price.hl .pn{color:var(--teal)}
-  .price .ptag{font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.45;min-height:34px}
+  .price .ptag{font-size:13px;color:var(--muted);margin:6px 0 0;line-height:1.5;min-height:34px}
   .price .pp{font-size:32px;font-weight:900;margin:10px 0 4px;color:var(--ink);letter-spacing:-.02em}
   .price .pu{font-size:12.5px;color:var(--muted);font-weight:700}
   .price ul{margin-top:14px}
-  .price li{list-style:none;font-size:13px;color:#3a4d63;padding:7px 0;border-top:1px solid var(--line);display:flex;gap:8px;line-height:1.4}
+  .price li{list-style:none;font-size:14px;color:#3a4d63;padding:8px 0;border-top:1px solid var(--line);display:flex;gap:8px;line-height:1.45}
   .price li:before{content:'✓';color:var(--teal);font-weight:900;flex-shrink:0}
   .price li.gold{color:#8a5e12;font-weight:800}
   .price li.gold:before{content:'★';color:#E0A52E}
@@ -184,8 +184,8 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
 
 /* ===== TRIPTYQUE + lisibilité mobile (boom) ===== */
 .baseline{font-size:23px!important;font-weight:800!important;letter-spacing:.2px;margin-top:18px!important;line-height:1.35;display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
-.hero h1{font-size:34px!important;line-height:1.08!important}
-.hero{padding:54px 22px 48px!important}
+.hero h1{font-size:38px!important;line-height:1.1!important}
+.hero{padding:44px 22px 30px!important}
 @media(min-width:820px){
   .baseline{font-size:32px!important;margin-top:24px!important;gap:16px}
   .hero h1{font-size:60px!important}
