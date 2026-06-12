@@ -290,7 +290,7 @@ if(car){car.addEventListener('scroll',function(){
       if(d&&d[0]&&d[0].nom){var t=document.querySelector('.ndtitle,.dtitle,.protitle,h1');if(t)t.textContent=d[0].nom;}
     }).catch(function(){});
   // participants reels (participations de l'event)
-  fetch(BASE+'participations?event_id=eq.'+encodeURIComponent(ev)+'&select=id',{headers:H})
+  fetch(BASE+'joueurs?events=cs.{'+encodeURIComponent(ev)+'}&select=id',{headers:H})
     .then(function(r){return r.json();}).then(function(d){
       var n=Array.isArray(d)?d.length:0;
       var el=document.getElementById('kParticipants');if(el)el.textContent=n;
