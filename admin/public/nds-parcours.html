@@ -322,7 +322,7 @@
     <div class="div"></div>
     <div class="tir"><span class="dot"></span> Tirage au sort chaque soir du festival</div>
   </div>
-  <a class="btn">Je joue maintenant</a>
+  <a class="btn" data-go="inscription">Je joue maintenant</a>
   <div class="foot">En participant, tu acceptes notre politique de confidentialit&eacute;.</div></div>
 </section>
 
@@ -635,33 +635,85 @@
   function H(){return {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};}
   function uuid(){try{return crypto.randomUUID();}catch(e){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16);});}}
   function tk(){var s='ND-',a='0123456789ABCDEFGHJKLMNPQRSTUVWXYZ',i;for(i=0;i<5;i++)s+=a.charAt(Math.floor(Math.random()*a.length));return s;}
-  var done=false;
+  var S={qs:[],i:0,score:0,sel:-1,ans:false,timer:null,t:20,tmax:20,jid:null,ticket:null,saved:false};
+  fetch(BASE+'events?id=eq.'+encodeURIComponent(evId)+'&select=cfg',{headers:H()})
+    .then(function(r){return r.json();})
+    .then(function(d){var cfg=(d&&d[0]&&d[0].cfg)||{};S.qs=cfg.customQuestions||[];S.tmax=cfg.quizTimer||20;})
+    .catch(function(){});
   function inscrire(){
-    if(done)return;
-    var sc=document.getElementById('inscription');if(!sc)return;
+    if(S.jid)return true;
+    var sc=document.getElementById('inscription');if(!sc)return false;
     var ins=sc.querySelectorAll('.input'),v=[],i;
     for(i=0;i<ins.length;i++)v.push((ins[i].value||'').trim());
     var email=(v[2]||'').toLowerCase();
-    if(!email||email.indexOf('@')<0)return;
-    done=true;
-    var id=uuid(),ticket=tk(),now=new Date().toISOString();
+    if(!email||email.indexOf('@')<0){alert('Merci de renseigner ton email pour participer.');return false;}
+    S.jid=uuid();S.ticket=tk();
+    var now=new Date().toISOString();
     fetch(BASE+'joueurs',{method:'POST',headers:H(),body:JSON.stringify({
-      id:id,prenom:v[0]||null,nom:v[1]||null,email:email,tel:v[3]||null,
+      id:S.jid,prenom:v[0]||null,nom:v[1]||null,email:email,tel:v[3]||null,
       age_tranche:v[4]||null,code_postal:v[5]||null,events:[evId],
-      ticket_code:ticket,source:'nds2026',ts:now,last_seen:now.slice(0,10)
-    })}).then(function(){
-      fetch(BASE+'participations',{method:'POST',headers:H(),body:JSON.stringify({
-        joueur_id:id,event_id:evId,ticket_code:ticket,score:0,completed:true,tickets:1
-      })});
-    });
-    try{localStorage.setItem('nds_played_'+evId,ticket);}catch(e){}
-    var t=document.querySelector('.ticket-code');if(t)t.textContent=ticket;
+      ticket_code:S.ticket,source:'nds2026',ts:now,last_seen:now.slice(0,10)})}).catch(function(){});
+    try{localStorage.setItem('nds_played_'+evId,S.ticket);}catch(e){}
+    return true;
   }
+  function renderQ(){
+    var q=S.qs[S.i];if(!q)return;
+    S.sel=-1;S.ans=false;
+    var quiz=document.getElementById('quiz');
+    var dsub=quiz.querySelector('.dsub');if(dsub)dsub.textContent='Quiz · '+(S.i+1)+' / '+S.qs.length;
+    var prog=quiz.querySelector('.progress');
+    if(prog){var hh='',k;for(k=0;k<S.qs.length;k++)hh+='<div class="pstep'+(k<=S.i?' on':'')+'"></div>';prog.innerHTML=hh;}
+    var qtxt=quiz.querySelector('.qtxt');if(qtxt)qtxt.textContent=q.texte;
+    var card=quiz.querySelector('.qcard');
+    var olds=card.querySelectorAll('.opt'),m;for(m=olds.length-1;m>=0;m--)card.removeChild(olds[m]);
+    q.options.forEach(function(opt,idx){
+      var b=document.createElement('button');b.className='opt';b.textContent=opt;b.setAttribute('data-i',idx);
+      b.onclick=function(){if(S.ans)return;S.sel=idx;var all=card.querySelectorAll('.opt'),z;for(z=0;z<all.length;z++)all[z].classList.remove('sel');b.classList.add('sel');};
+      card.appendChild(b);
+    });
+    var pv=quiz.querySelector('.preview');if(pv)pv.style.display='none';
+    var btn=quiz.querySelector('.btn');if(btn)btn.textContent='Valider';
+    startTimer();
+  }
+  function startTimer(){
+    stopTimer();S.t=S.tmax;
+    var quiz=document.getElementById('quiz');
+    var tEl=quiz.querySelector('.qtimer');
+    if(!tEl){var dh=quiz.querySelector('.dhead');if(dh){tEl=document.createElement('div');tEl.className='qtimer';tEl.style.cssText='margin-left:auto;font-weight:800;font-size:15px;background:rgba(255,255,255,.18);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#fff';dh.appendChild(tEl);}}
+    if(tEl)tEl.textContent=S.t;
+    S.timer=setInterval(function(){S.t--;if(tEl){tEl.textContent=S.t;tEl.style.background=S.t<=5?'rgba(239,68,68,.35)':'rgba(255,255,255,.18)';}if(S.t<=0){stopTimer();reveal();}},1000);
+  }
+  function stopTimer(){if(S.timer){clearInterval(S.timer);S.timer=null;}}
+  function reveal(){
+    if(S.ans)return;S.ans=true;stopTimer();
+    var q=S.qs[S.i];var card=document.getElementById('quiz').querySelector('.qcard');
+    var all=card.querySelectorAll('.opt'),z;
+    for(z=0;z<all.length;z++){var bi=parseInt(all[z].getAttribute('data-i'),10);
+      if(bi===q.bonne)all[z].classList.add('correct');else if(bi===S.sel)all[z].classList.add('wrong');}
+    if(S.sel===q.bonne)S.score++;
+    var btn=document.getElementById('quiz').querySelector('.btn');
+    if(btn)btn.textContent=(S.i+1<S.qs.length)?'Question suivante':'Voir mon résultat';
+  }
+  function next(){if(S.i+1<S.qs.length){S.i++;renderQ();}else finish();}
+  function finish(){
+    stopTimer();
+    if(!S.saved&&S.jid){S.saved=true;
+      fetch(BASE+'participations',{method:'POST',headers:H(),body:JSON.stringify({
+        joueur_id:S.jid,event_id:evId,ticket_code:S.ticket,score:S.score,completed:true,tickets:1})}).catch(function(){});}
+    var rs=document.getElementById('resultats');
+    if(rs){var sc=rs.querySelector('.score');if(sc)sc.textContent=S.score+' / '+S.qs.length;}
+    go('resultats');
+  }
+  function startQuizFirst(){S.i=0;S.score=0;S.saved=false;if(!S.qs.length){finish();return;}renderQ();}
   document.addEventListener('click',function(e){
-    var b=e.target&&e.target.closest?e.target.closest('[data-go]'):null;if(!b)return;
-    if(b.getAttribute('data-go')==='quiz'){var insc=document.getElementById('inscription');if(insc&&insc.contains(b))inscrire();}
+    if(!e.target||!e.target.closest)return;
+    var goInsc=e.target.closest('#inscription [data-go="quiz"]');
+    if(goInsc){e.preventDefault();e.stopImmediatePropagation();if(inscrire()){startQuizFirst();go('quiz');}return;}
+    var quizBtn=e.target.closest('#quiz .btn');
+    if(quizBtn){e.preventDefault();e.stopImmediatePropagation();if(!S.ans)reveal();else next();return;}
   },true);
 })();
+
 </script>
 </body>
 </html>
