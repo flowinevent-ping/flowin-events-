@@ -193,7 +193,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   }
 
   const q = questions[qIdx]
-  const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires'
+  const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires' || (screen === 'onboard' && saved)
 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
@@ -235,7 +235,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
       <div className="phone">
         {screen === 'onboard' && (
-          <section className="scr on">
+          <section className={`scr on${saved ? ' padnav' : ''}`}>
             <div className="hero">
               <div className="htop"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ verticalAlign: -1, marginRight: 5 }}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" /></svg>VENCE</div>
               <div className="hname">Nuits du<br />Sud</div>
@@ -251,12 +251,24 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="div" />
                 <div className="tir"><span className="dot" /> Tirage au sort chaque soir du festival</div>
               </div>
-              <a className="btn" onClick={() => {
-                if (saved) { setScreen('tickets'); return }
-                if (recurrent) { setScreen(questions.length > 0 ? 'quiz' : 'resultats'); return }
-                setScreen('inscription')
-              }}>{saved ? 'Voir mes tickets' : (recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant')}</a>
-              <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
+              {saved ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(22,163,74,.16)', border: '1px solid rgba(22,163,74,.4)', borderRadius: 14, padding: '13px 15px', marginBottom: 12, fontSize: 14, fontWeight: 600 }}>
+                    <svg className="ic" style={{ width: 20, height: 20, color: '#4ade80', flexShrink: 0 }}><use href="#i-checkc" /></svg>
+                    <span>Tu as déjà joué cette station. Va sur une autre station pour cumuler un ticket de plus !</span>
+                  </div>
+                  <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Jouer une autre station</a>
+                  <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: 'rgba(255,255,255,.85)', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
+                </>
+              ) : (
+                <>
+                  <a className="btn" onClick={() => {
+                    if (recurrent) { setScreen(questions.length > 0 ? 'quiz' : 'resultats'); return }
+                    setScreen('inscription')
+                  }}>{recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant'}</a>
+                  <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
+                </>
+              )}
             </div>
           </section>
         )}
