@@ -61,7 +61,7 @@
 
   .kick{font-family:'Bricolage Grotesque';font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
     color:var(--lilac);margin-bottom:12px;display:flex;align-items:center;gap:9px}
-  .kick.gold{color:var(--gold)}.kick:before{content:'';width:22px;height:2px;background:currentColor}
+  .kick.gold{color:var(--gold)}.kick:before{content:'';width:28px;height:3px;border-radius:2px;background:currentColor}
   .hsec{font-size:26px;margin-bottom:9px}.hsec em{font-style:normal;color:var(--accent)}.hsec em.g{color:var(--gold)}
   .lead{font-size:15.5px;color:var(--muted);margin-bottom:22px;line-height:1.55}
   .btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;cursor:pointer;border:none;
@@ -88,7 +88,7 @@
   .recap-h{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;margin-bottom:14px}
   .mini{display:flex;flex-direction:column;gap:10px}
   .m3{display:flex;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-  .m3 .icw{width:42px;height:42px;flex-shrink:0;border-radius:12px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.16)}
+  .m3 .icw{width:48px;height:48px;flex-shrink:0;border-radius:13px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.16)}
   .m3 h3{font-size:14.5px;font-weight:600}.m3 p{font-size:12.5px;color:var(--muted);margin-top:2px}
 
   .nights{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
@@ -107,12 +107,12 @@
 
   .vcards{display:flex;flex-direction:column;gap:11px}
   .vc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-  .vc .icw{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.15);margin-bottom:13px}
+  .vc .icw{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.15);margin-bottom:13px}
   .vc h3{font-size:18px;font-weight:700;margin-bottom:6px}.vc p{font-size:14.5px;color:var(--muted);line-height:1.5}
 
   .tirage{margin-top:26px;border:1px solid rgba(245,181,68,.28);background:rgba(245,181,68,.06);border-radius:18px;padding:20px}
   .tirage .th{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  .tirage .th .icw{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--gold);background:rgba(245,181,68,.14)}
+  .tirage .th .icw{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--gold);background:rgba(245,181,68,.14)}
   .tirage .th h3{font-size:16px;font-weight:700}
   .steps{display:flex;flex-direction:column;gap:0}
   .step{display:flex;gap:13px;padding:11px 0;border-top:1px solid var(--line)}
@@ -245,7 +245,7 @@
   .flow2{margin-top:18px;display:flex;flex-direction:column;gap:11px}
   .fcard{position:relative;display:flex;align-items:center;gap:14px;background:linear-gradient(100deg,rgba(59,92,196,.12),rgba(124,92,196,.04));border:1px solid var(--line);border-radius:16px;padding:14px 16px;overflow:hidden}
   .fcard .fnum{position:absolute;right:14px;top:4px;font-family:'Bricolage Grotesque';font-weight:800;font-size:34px;color:rgba(255,255,255,.07);line-height:1}
-  .fcard .fico{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#5B79E0);display:grid;place-items:center;flex-shrink:0;box-shadow:0 8px 18px -8px var(--accent)}
+  .fcard .fico{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),#5B79E0);display:grid;place-items:center;flex-shrink:0;box-shadow:0 8px 18px -8px var(--accent)}
   .fcard .fico .ic{stroke:#fff;stroke-width:1.9;fill:none}
   .fcard h4{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;color:var(--text);line-height:1.15}
   .fcard p{font-size:14px;color:var(--muted);margin-top:3px}
@@ -310,11 +310,11 @@
       <div class="kick">Comment ça fonctionne</div>
       <h2 class="hsec">Une participation <em>simple</em></h2>
       <div class="flow2">
-        <div class="fcard"><div class="fnum">1</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.2"/><path d="M19 8v6M22 11h-6"/></svg></div><div class="ftxt"><h4>Vous rejoignez l’opération</h4><p>En quelques minutes</p></div></div>
-        <div class="fcard"><div class="fnum">2</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 21v.01M17 21h.01M21 17v.01"/></svg></div><div class="ftxt"><h4>Vous recevez votre QR personnalisé</h4><p>À votre nom</p></div></div>
-        <div class="fcard"><div class="fnum">3</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8 15.7 6.2M8.3 13.2 15.7 17.8"/></svg></div><div class="ftxt"><h4>Vous le partagez à vos clients</h4><p>Vitrine, comptoir, réseaux</p></div></div>
-        <div class="fcard"><div class="fnum">4</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"/><path d="M2 8h20v4H2zM12 21V8M12 8S10.5 3 8 3 5.5 8 8 8h4M12 8s1.5-5 4-5 2.5 5 0 5h-4"/></svg></div><div class="ftxt"><h4>Vos clients jouent au tirage</h4><p>Et tentent de gagner</p></div></div>
-        <div class="fcard"><div class="fnum">5</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12.5" y="7" width="3" height="10" rx="1"/><rect x="18" y="13" width="3" height="4" rx="1"/></svg></div><div class="ftxt"><h4>Vous suivez vos résultats</h4><p>En temps réel</p></div></div>
+        <div class="fcard"><div class="fnum">1</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="3.2"/><path d="M19 8v6M22 11h-6"/></svg></div><div class="ftxt"><h4>Vous rejoignez l’opération</h4><p>En quelques minutes</p></div></div>
+        <div class="fcard"><div class="fnum">2</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 21v.01M17 21h.01M21 17v.01"/></svg></div><div class="ftxt"><h4>Vous recevez votre QR personnalisé</h4><p>À votre nom</p></div></div>
+        <div class="fcard"><div class="fnum">3</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8 15.7 6.2M8.3 13.2 15.7 17.8"/></svg></div><div class="ftxt"><h4>Vous le partagez à vos clients</h4><p>Vitrine, comptoir, réseaux</p></div></div>
+        <div class="fcard"><div class="fnum">4</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"/><path d="M2 8h20v4H2zM12 21V8M12 8S10.5 3 8 3 5.5 8 8 8h4M12 8s1.5-5 4-5 2.5 5 0 5h-4"/></svg></div><div class="ftxt"><h4>Vos clients jouent au tirage</h4><p>Et tentent de gagner</p></div></div>
+        <div class="fcard"><div class="fnum">5</div><div class="fico"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12.5" y="7" width="3" height="10" rx="1"/><rect x="18" y="13" width="3" height="4" rx="1"/></svg></div><div class="ftxt"><h4>Vous suivez vos résultats</h4><p>En temps réel</p></div></div>
       </div>
 
       <div class="kick gold" style="margin-top:34px">Votre visibilité</div>
@@ -363,7 +363,7 @@
             <div class="phonebody">
               <div class="ach"><span class="dot"></span>Le Grand Tirage</div>
               <div class="tirbig">
-                <div class="tirico"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><path d="M6 9a6 6 0 0 0 12 0M6 9a6 6 0 0 1 12 0M9 21h6M12 15v6"/></svg></div>
+                <div class="tirico"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M6 9a6 6 0 0 0 12 0M6 9a6 6 0 0 1 12 0M9 21h6M12 15v6"/></svg></div>
                 <div class="tirtxt"><b>Tirage tous les soirs</b><span>pendant toute la durée du festival</span></div>
               </div>
               <div class="tirlots">
@@ -466,7 +466,7 @@
       <div id="w2" hidden>
         <h2 class="hsec" style="font-size:23px;margin-bottom:8px">Votre logo</h2>
         <p class="lead">Il apparaîtra sur votre espace partenaire. Vous pourrez le transmettre plus tard si nécessaire.</p>
-        <label class="dropzone"><div class="di"><svg class="ic" viewBox="0 0 24 24" width="22" height="22"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>Glissez votre logo ici, ou cliquez pour parcourir<br><span style="font-size:11px;color:var(--faint)">PNG · JPG · SVG</span><input type="file" accept="image/*" style="display:none"></label>
+        <label class="dropzone"><div class="di"><svg class="ic" viewBox="0 0 24 24" width="24" height="24"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>Glissez votre logo ici, ou cliquez pour parcourir<br><span style="font-size:11px;color:var(--faint)">PNG · JPG · SVG</span><input type="file" accept="image/*" style="display:none"></label>
         <button class="btn" style="margin-top:16px" onclick="wizGo(3)">Continuer →</button>
         <button class="contactlink" onclick="wizGo(3)">Envoyer mon logo plus tard</button>
       </div>
