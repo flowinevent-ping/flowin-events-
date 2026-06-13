@@ -15,7 +15,7 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   a{color:inherit}
   .ic{display:block}
   html{scroll-behavior:smooth}
-  section{padding:62px 24px 66px;scroll-margin-top:62px}
+  section{padding:62px 24px 66px;scroll-margin-top:76px}
 
   
   .menu .row{display:flex;align-items:center;gap:10px;padding:11px 16px}
