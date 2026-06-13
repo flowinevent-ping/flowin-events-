@@ -60,8 +60,8 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .proof .l{font-size:10.5px;color:rgba(255,255,255,.6);margin-top:6px;line-height:1.3}
   .pilote{font-size:11px;color:rgba(255,255,255,.4);margin-top:10px}
 
-  .plist{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
-  .pl{display:flex;flex-direction:column;gap:13px;padding:19px 17px;font-size:15px;line-height:1.4;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:17px}
+  .plist{display:grid;grid-template-columns:1fr;gap:10px;margin-top:24px}
+  .pl{display:flex;flex-direction:row;align-items:center;gap:14px;padding:16px 16px;font-size:14.5px;line-height:1.38;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px}
 
   .pl .x{width:46px;height:46px;border-radius:13px;background:rgba(232,115,12,.18);color:#F59E0B;display:grid;place-items:center;flex-shrink:0}
 
