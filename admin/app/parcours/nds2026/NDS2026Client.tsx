@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { writeJoueur, shuffle, AGE_OPTIONS } from '@/lib/parcours'
+import { writeJoueur, claimJoueur, getJoueurLocal, shuffle, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
@@ -45,11 +45,25 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [sheetPart, setSheetPart] = useState<number | null>(null)
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<unknown>(null)
+  const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
+  const [ticketCount, setTicketCount] = useState(1)
 
   const lsKey = `flowin_played_${evId}`
 
   useEffect(() => {
     try { const s = localStorage.getItem(lsKey); if (s) { setTicket(s); setSaved(true) } } catch {}
+    // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
+    const prof = getJoueurLocal()
+    if (prof) {
+      setRecurrent(prof)
+      if (prof.prenom) setForm(f => ({ ...f, prenom: prof.prenom as string }))
+    }
+    // Cumul de tickets : nombre de stations NDS déjà jouées (1 ticket / station / jour)
+    try {
+      let n = 0
+      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++ })
+      setTicketCount(Math.max(1, n))
+    } catch {}
   }, [lsKey])
 
   useEffect(() => {
@@ -144,12 +158,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (saved) return ticket
     setSaving(true)
     const tc = generateTicket('ND')
-    const res = await writeJoueur({
-      email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
-      code_postal: form.cp, age_tranche: form.age, decouverte: form.source || undefined,
-      score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
-      source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers,
-    })
+    const res = recurrent
+      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers)
+      : await writeJoueur({
+          email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
+          code_postal: form.cp, age_tranche: form.age, decouverte: form.source || undefined,
+          score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
+          source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers,
+        })
     setSaving(false)
     const finalTicket = res.ticket || tc
     setTicket(finalTicket)
@@ -157,7 +173,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     // (ou doublon = déjà en base). En cas d'échec réseau/base, on autorise un nouvel essai.
     if (res.success || res.duplicate) {
       setSaved(true)
-      try { localStorage.setItem(lsKey, finalTicket) } catch {}
+      try {
+        localStorage.setItem(lsKey, finalTicket)
+        // recalcul du cumul de tickets après enregistrement
+        let n = 0
+        STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++ })
+        setTicketCount(Math.max(1, n))
+      } catch {}
     } else if (res.error) {
       console.error('[nds2026] enregistrement Supabase échoué:', res.error)
     }
@@ -202,6 +224,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .pt-sheet2{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:1000;background:#fff;color:#1a1020;border-radius:22px 22px 0 0;padding:22px 20px 30px;box-shadow:0 -8px 40px rgba(0,0,0,.3)}
         .ndsbody .pt-dim2{position:fixed;inset:0;background:rgba(10,4,16,.55);z-index:999}
         .ndsbody .sh-row{display:flex;align-items:center;gap:9px;margin-top:10px;text-decoration:none;color:var(--purple);font-weight:700;font-size:14px}
+        .ndsbody .opt.correct{border-color:#16a34a !important;background:rgba(22,163,74,.18) !important;color:#fff}
+        .ndsbody .opt.wrong{border-color:#ef4444 !important;background:rgba(239,68,68,.18) !important;color:#fff}
+        .ndsbody .opt.correct::after{content:'✓';float:right;font-weight:800;color:#4ade80}
+        .ndsbody .opt.wrong::after{content:'✕';float:right;font-weight:800;color:#f87171}
+        .ndsbody .qexpl{margin-top:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.9)}
+        .ndsbody .qexpl b{color:#4ade80}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
@@ -223,7 +251,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="div" />
                 <div className="tir"><span className="dot" /> Tirage au sort chaque soir du festival</div>
               </div>
-              <a className="btn" onClick={() => setScreen(saved ? 'tickets' : 'inscription')}>{saved ? 'Voir mes tickets' : 'Je joue maintenant'}</a>
+              <a className="btn" onClick={() => {
+                if (saved) { setScreen('tickets'); return }
+                if (recurrent) { setScreen(questions.length > 0 ? 'quiz' : 'resultats'); return }
+                setScreen('inscription')
+              }}>{saved ? 'Voir mes tickets' : (recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant')}</a>
               <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
             </div>
           </section>
@@ -270,8 +302,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   let cls = 'opt'
                   if (answered) { if (i === q.bonne) cls = 'opt correct'; else if (i === selected) cls = 'opt wrong' }
                   else if (i === selected) cls = 'opt sel'
-                  return <button key={i} className={cls} onClick={() => handleAnswer(i)}>{opt}</button>
+                  return <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={answered}>{opt}</button>
                 })}
+                {answered && (
+                  <div className="qexpl">
+                    {selected === q.bonne ? <b>Bonne réponse ✓</b> : <span>Bonne réponse : <b>{q.options[q.bonne]}</b></span>}
+                    {q.explication && <div style={{ marginTop: 6 }}>{q.explication}</div>}
+                  </div>
+                )}
               </div>
             </div>
           </section>
@@ -332,7 +370,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 ))}
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de 12h30.</div>
-              <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Voir les points sur la carte</a>
+              <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="reslink" onClick={() => setScreen('tickets')}>Mes tickets</a>
             </div>
           </section>
@@ -342,12 +380,20 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="pad padnav">
               <div className="tk-hero">
-                <div className="tk-big">1</div>
-                <div className="tk-lbl">ticket gagné ce soir</div>
+                <div className="tk-big">{ticketCount}</div>
+                <div className="tk-lbl">{ticketCount > 1 ? 'tickets cumulés ce soir' : 'ticket gagné ce soir'}</div>
                 <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> Tirage demain à 12h30 · 3 places à gagner</div>
               </div>
               <div className="infocard b-magenta" style={{ marginTop: 14 }}><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code : <b>{ticket || '—'}</b></div></div>
-              <div className="tk-tip" style={{ marginTop: 12 }}><svg className="ic"><use href="#i-layers" /></svg><div>Joue les autres stations chaque soir — plus tu cumules de tickets, plus tu as de chances au tirage.</div></div>
+              {ticketCount < STATIONS.length && (
+                <>
+                  <div className="tk-tip" style={{ marginTop: 12 }}><svg className="ic"><use href="#i-layers" /></svg><div>Réponds aux quiz des autres stations : <b>chaque station = 1 ticket de plus</b> et plus de chances au tirage.</div></div>
+                  <a className="double" style={{ marginTop: 14 }} onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Cumuler aux autres stations</a>
+                </>
+              )}
+              {ticketCount >= STATIONS.length && (
+                <div className="tk-tip" style={{ marginTop: 12, background: '#e9f9ef', borderColor: '#bbf7d0', color: '#16a34a' }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>Toutes les stations jouées !</b> Tu as le maximum de tickets pour le tirage de ce soir.</div></div>
+              )}
             </div>
           </section>
         )}
@@ -358,12 +404,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="qc">
                 <span className="em"><svg className="ic"><use href="#i-map" /></svg></span>
                 <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Touche une station pour y aller</div></div>
-                <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> 1</span>
+                <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> {ticketCount}</span>
               </div>
             </div>
             <div className="map-fake">
               <div className="map-real" ref={mapRef} />
               <div className="map-list">
+                <label className="stn" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', justifyContent: 'center', gap: 10, fontWeight: 800 }}>
+                  <svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>
+                  Scanner le QR d&apos;une station
+                  <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={() => setScreen('carte')} />
+                </label>
                 {STATIONS.map(s => {
                   const cur = s.id === evId
                   return (
