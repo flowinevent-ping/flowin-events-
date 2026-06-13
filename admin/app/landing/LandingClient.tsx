@@ -14,7 +14,7 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   a{color:inherit}
   .ic{display:block}
   html{scroll-behavior:smooth}
-  section{padding:40px 22px 48px;scroll-margin-top:62px}
+  section{padding:62px 24px 66px;scroll-margin-top:62px}
 
   .menu{position:sticky;top:0;z-index:50;background:rgba(14,27,48,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
   .menu .row{display:flex;align-items:center;gap:10px;padding:11px 16px}
@@ -37,11 +37,11 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
 
   .dark{background:linear-gradient(170deg,var(--d2),var(--d3));color:#fff}
   .darker{background:var(--dk);color:#fff}
-  .eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--teal);margin-bottom:11px;display:flex;align-items:center;gap:8px}
+  .eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--teal);margin-bottom:16px;display:flex;align-items:center;gap:8px}
   .eyebrow:before{content:'';width:20px;height:2px;background:var(--teal);border-radius:2px}
   h2.t{font-size:25px;font-weight:900;line-height:1.16;letter-spacing:-.01em}
   .dark h2.t,.darker h2.t{color:#fff}
-  .sub{font-size:14.5px;color:var(--muted);margin-top:10px;line-height:1.55}
+  .sub{font-size:14.5px;color:var(--muted);margin-top:14px;line-height:1.6}
   .dark .sub,.darker .sub{color:rgba(255,255,255,.6)}
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--teal);color:#fff;border:none;border-radius:100px;padding:16px;font-size:15.5px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit}
 
@@ -59,8 +59,8 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .proof .l{font-size:10.5px;color:rgba(255,255,255,.6);margin-top:6px;line-height:1.3}
   .pilote{font-size:11px;color:rgba(255,255,255,.4);margin-top:10px}
 
-  .plist{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-  .pl{display:flex;flex-direction:column;gap:10px;padding:15px 14px;font-size:13.5px;line-height:1.32;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:15px}
+  .plist{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+  .pl{display:flex;flex-direction:column;gap:12px;padding:20px 17px;font-size:13.5px;line-height:1.4;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:17px}
 
   .pl .x{width:28px;height:28px;border-radius:9px;background:rgba(232,115,12,.16);color:#F59E0B;display:grid;place-items:center;flex-shrink:0}
 
