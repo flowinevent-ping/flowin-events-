@@ -15,7 +15,7 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   a{color:inherit}
   .ic{display:block}
   html{scroll-behavior:smooth}
-  section{padding:62px 24px 66px;scroll-margin-top:76px}
+  section{padding:46px 24px 50px;scroll-margin-top:76px}
 
   
   .menu .row{display:flex;align-items:center;gap:10px;padding:11px 16px}
@@ -40,9 +40,9 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .darker{background:var(--dk);color:#fff}
   .eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--teal);margin-bottom:16px;display:flex;align-items:center;gap:8px}
   .eyebrow:before{content:'';width:20px;height:2px;background:var(--teal);border-radius:2px}
-  h2.t{font-size:25px;font-weight:900;line-height:1.16;letter-spacing:-.01em}
+  h2.t{font-size:27px;font-weight:900;line-height:1.15;letter-spacing:-.01em}
   .dark h2.t,.darker h2.t{color:#fff}
-  .sub{font-size:14.5px;color:var(--muted);margin-top:14px;line-height:1.6}
+  .sub{font-size:16px;color:var(--muted);margin-top:12px;line-height:1.55}
   .dark .sub,.darker .sub{color:rgba(255,255,255,.6)}
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--teal);color:#fff;border:none;border-radius:100px;padding:16px;font-size:15.5px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit}
 
@@ -70,13 +70,13 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .fstep:not(:last-child):before{content:'';position:absolute;left:21px;top:44px;bottom:0;width:2px;background:linear-gradient(var(--blue),rgba(59,92,196,.2))}
   .fstep .fn{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;z-index:1}
   .fstep h4{font-size:16px;font-weight:800}
-  .fstep p{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.42}
+  .fstep p{font-size:14.5px;color:var(--muted);margin-top:3px;line-height:1.45}
 
   .ben{display:flex;flex-direction:column;gap:12px;margin-top:18px}
   .bc{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
-  .bc .bi{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:#fff;flex-shrink:0}
-  .bc h4{font-size:16px;font-weight:800;color:#fff}
-  .bc p{font-size:13px;color:rgba(255,255,255,.62);margin-top:3px;line-height:1.46}
+  .bc .bi{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;color:#fff;flex-shrink:0}
+  .bc h4{font-size:18px;font-weight:800;color:#fff}
+  .bc p{font-size:14.5px;color:rgba(255,255,255,.7);margin-top:4px;line-height:1.5}
 
   .se-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--orange),var(--amber));padding:6px 14px;border-radius:100px;margin-bottom:14px}
   .se-line{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px 16px;margin-top:11px}
@@ -115,14 +115,14 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .uses{display:flex;flex-direction:column;gap:13px;margin-top:18px}
   .use{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 18px}
   .use .uh{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:800}
-  .use .ui{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+  .use .ui{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;color:#fff}
   .use p{font-size:14px;color:var(--muted);margin-top:9px;line-height:1.55}
 
   .games{display:flex;flex-direction:column;gap:12px;margin-top:18px}
   .game{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
   .game .gt{display:flex;align-items:center;gap:12px;margin-bottom:11px}
-  .game .gi{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;flex-shrink:0}
-  .game h4{font-size:16px;font-weight:800;color:#fff}
+  .game .gi{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:#fff;flex-shrink:0}
+  .game h4{font-size:18px;font-weight:800;color:#fff}
   .game .tag{font-size:12.5px;color:var(--teal);font-weight:800;margin-top:2px;letter-spacing:.01em}
   .game li{list-style:none;font-size:12.5px;color:rgba(255,255,255,.62);padding-left:18px;position:relative;line-height:1.5}
   .game li:before{content:'✓';position:absolute;left:0;color:var(--teal);font-weight:900}
@@ -263,10 +263,10 @@ const BODY = `<div class="app">
     <div class="eyebrow">Ce que ça vous apporte</div>
     <h2 class="t">Bien plus qu'un jeu.</h2>
     <div class="ben">
-      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--blue),#2C49A6)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></div><div><h4>Vous constituez une base client</h4><p>Chaque participant rejoint votre base.</p></div></div>
-      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--teal),#138571)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19.9 13A8 8 0 1 1 18 7"/><path d="M18 3v4h-4"/></svg></div><div><h4>Vous communiquez en direct</h4><p>Une offre, une actu : vous joignez vos clients directement.</p></div></div>
-      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--orange),#C24A03)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></div><div><h4>Vous animez votre lieu</h4><p>Vous relancez votre public et faites revenir du monde.</p></div></div>
-      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--amber),#C77A06)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 5-6"/></svg></div><div><h4>Vous mesurez ce qui compte</h4><p>Affluence, profils, retombées : tout est mesuré.</p></div></div>
+      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--blue),#2C49A6)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></div><div><h4>Vous constituez une base client</h4><p>Chaque participant rejoint votre base.</p></div></div>
+      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--teal),#138571)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19.9 13A8 8 0 1 1 18 7"/><path d="M18 3v4h-4"/></svg></div><div><h4>Vous communiquez en direct</h4><p>Une offre, une actu : vous joignez vos clients directement.</p></div></div>
+      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--orange),#C24A03)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></div><div><h4>Vous animez votre lieu</h4><p>Vous relancez votre public et faites revenir du monde.</p></div></div>
+      <div class="bc"><div class="bi" style="background:linear-gradient(135deg,var(--amber),#C77A06)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 5-6"/></svg></div><div><h4>Vous mesurez ce qui compte</h4><p>Affluence, profils, retombées : tout est mesuré.</p></div></div>
     </div>
   </section>
 
@@ -410,12 +410,12 @@ const BODY = `<div class="app">
     <h2 class="t">6 façons d'animer.</h2>
     <p class="sub">On choisit ensemble celle qui colle à votre public. Personnalisez, sondez.</p>
     <div class="games carousel">
-      <div class="game"><div class="gt"><div class="gi" style="background:#0B6E4F"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.4 9a2.6 2.6 0 1 1 3.7 2.4c-.9.4-1.1.9-1.1 1.8"/><path d="M12 16.5h.01"/></svg></div><div><h4>Quiz + bonus</h4><div class="tag">Engagez et sondez</div></div></div><ul><li>Un jeu à votre image qui capte l'attention</li><li>Vous sondez vos visiteurs en même temps</li></ul></div>
-      <div class="game"><div class="gt"><div class="gi" style="background:var(--orange)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M13 6v12" stroke-dasharray="2 2"/></svg></div><div><h4>Tombola</h4><div class="tag">Simple et efficace</div></div></div><ul><li>Vos lots, vos couleurs, en quelques clics</li><li>Tirage et gagnants gérés en un instant, prêts à diffuser</li></ul></div>
-      <div class="game"><div class="gt"><div class="gi" style="background:var(--amber)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M7 11v8H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1z"/><path d="M7 11l4-7a2 2 0 0 1 2 2v3h4.5a2 2 0 0 1 2 2.3l-1 5a2 2 0 0 1-2 1.7H7"/></svg></div><div><h4>Vote live</h4><div class="tag">Immersif et participatif</div></div></div><ul><li>Votre public s'exprime en direct</li><li>Vous récupérez les votes en 1 clic</li></ul></div>
-      <div class="game"><div class="gt"><div class="gi" style="background:var(--teal)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div><div><h4>Quiz solo</h4><div class="tag">Intéressez votre public</div></div></div><ul><li>Chacun joue à son rythme, sans animateur</li><li>Vous suivez les résultats en temps réel</li></ul></div>
-      <div class="game"><div class="gt"><div class="gi" style="background:#F97316"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21 12 18.5 16.5 21 15 13.5"/></svg></div><div><h4>Quiz master</h4><div class="tag">Fédérez votre communauté</div></div></div><ul><li>Tout le monde joue ensemble, en direct</li><li>Scores et gagnants gérés automatiquement — un moment fort qui rassemble</li></ul></div>
-      <div class="game"><div class="gt"><div class="gi" style="background:var(--blue)"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg></div><div><h4>Roue de la fortune</h4><div class="tag">L'accroche qui attire</div></div></div><ul><li>Donne envie de s'arrêter en une seconde</li><li>Transforme le passage en participation</li></ul></div>
+      <div class="game"><div class="gt"><div class="gi" style="background:#0B6E4F"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.4 9a2.6 2.6 0 1 1 3.7 2.4c-.9.4-1.1.9-1.1 1.8"/><path d="M12 16.5h.01"/></svg></div><div><h4>Quiz + bonus</h4><div class="tag">Engagez et sondez</div></div></div><ul><li>Un jeu à votre image qui capte l'attention</li><li>Vous sondez vos visiteurs en même temps</li></ul></div>
+      <div class="game"><div class="gt"><div class="gi" style="background:var(--orange)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M13 6v12" stroke-dasharray="2 2"/></svg></div><div><h4>Tombola</h4><div class="tag">Simple et efficace</div></div></div><ul><li>Vos lots, vos couleurs, en quelques clics</li><li>Tirage et gagnants gérés en un instant, prêts à diffuser</li></ul></div>
+      <div class="game"><div class="gt"><div class="gi" style="background:var(--amber)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><path d="M7 11v8H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1z"/><path d="M7 11l4-7a2 2 0 0 1 2 2v3h4.5a2 2 0 0 1 2 2.3l-1 5a2 2 0 0 1-2 1.7H7"/></svg></div><div><h4>Vote live</h4><div class="tag">Immersif et participatif</div></div></div><ul><li>Votre public s'exprime en direct</li><li>Vous récupérez les votes en 1 clic</li></ul></div>
+      <div class="game"><div class="gt"><div class="gi" style="background:var(--teal)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div><div><h4>Quiz solo</h4><div class="tag">Intéressez votre public</div></div></div><ul><li>Chacun joue à son rythme, sans animateur</li><li>Vous suivez les résultats en temps réel</li></ul></div>
+      <div class="game"><div class="gt"><div class="gi" style="background:#F97316"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21 12 18.5 16.5 21 15 13.5"/></svg></div><div><h4>Quiz master</h4><div class="tag">Fédérez votre communauté</div></div></div><ul><li>Tout le monde joue ensemble, en direct</li><li>Scores et gagnants gérés automatiquement — un moment fort qui rassemble</li></ul></div>
+      <div class="game"><div class="gt"><div class="gi" style="background:var(--blue)"><svg class="ic" width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg></div><div><h4>Roue de la fortune</h4><div class="tag">L'accroche qui attire</div></div></div><ul><li>Donne envie de s'arrêter en une seconde</li><li>Transforme le passage en participation</li></ul></div>
     </div>
     <a class="btn" data-to="resultats" style="margin-top:18px">Voir les résultats →</a>
   </section>
