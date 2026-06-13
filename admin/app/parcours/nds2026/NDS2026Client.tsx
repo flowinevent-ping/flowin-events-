@@ -158,6 +158,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (saved) return ticket
     setSaving(true)
     const tc = generateTicket('ND')
+    // Marquage "joué" en local IMMEDIATEMENT (avant tout appel réseau) : c'est ce qui
+    // empêche de rejouer la même station, même si Supabase est lent ou injoignable.
+    setTicket(tc)
+    setSaved(true)
+    try {
+      localStorage.setItem(lsKey, tc)
+      let n = 0
+      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++ })
+      setTicketCount(Math.max(1, n))
+    } catch {}
+
     const res = recurrent
       ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers)
       : await writeJoueur({
@@ -167,21 +178,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers,
         })
     setSaving(false)
+    // Si Supabase a renvoyé un ticket (ex. doublon avec code existant), on l'aligne
     const finalTicket = res.ticket || tc
-    setTicket(finalTicket)
-    // On ne marque "joué" (local + écran tickets) QUE si l'écriture Supabase a réussi
-    // (ou doublon = déjà en base). En cas d'échec réseau/base, on autorise un nouvel essai.
-    if (res.success || res.duplicate) {
-      setSaved(true)
-      try {
-        localStorage.setItem(lsKey, finalTicket)
-        // recalcul du cumul de tickets après enregistrement
-        let n = 0
-        STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++ })
-        setTicketCount(Math.max(1, n))
-      } catch {}
-    } else if (res.error) {
-      console.error('[nds2026] enregistrement Supabase échoué:', res.error)
+    if (finalTicket !== tc) {
+      setTicket(finalTicket)
+      try { localStorage.setItem(lsKey, finalTicket) } catch {}
+    }
+    if (!res.success && !res.duplicate && res.error) {
+      console.error('[nds2026] enregistrement Supabase échoué (jeu marqué joué en local):', res.error)
     }
     return finalTicket
   }
