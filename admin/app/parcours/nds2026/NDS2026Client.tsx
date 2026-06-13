@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { writeJoueur, shuffle, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
@@ -13,9 +13,9 @@ const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
 
 /* Les 3 stations fixes du festival (carte). joue=true => station courante scannée */
 const STATIONS = [
-  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket' },
-  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass' },
-  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor' },
+  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.72325, lng: 7.11120 },
+  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.72372, lng: 7.11205 },
+  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.72405, lng: 7.11158 },
 ]
 
 export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: Props) {
@@ -43,6 +43,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [bonusIdx, setBonusIdx] = useState(0)
   const [bonusDone, setBonusDone] = useState(false)
   const [sheetPart, setSheetPart] = useState<number | null>(null)
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const mapObjRef = useRef<unknown>(null)
 
   const lsKey = `flowin_played_${evId}`
 
@@ -57,6 +59,64 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     return () => clearInterval(iv)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, qIdx])
+
+  // Carte Leaflet : chargée à la demande quand on arrive sur l'écran carte
+  useEffect(() => {
+    if (screen !== 'carte') return
+    let cancelled = false
+
+    function ensureLeaflet(): Promise<unknown> {
+      const w = window as unknown as { L?: unknown }
+      if (w.L) return Promise.resolve(w.L)
+      return new Promise((resolve, reject) => {
+        // CSS
+        if (!document.getElementById('leaflet-css')) {
+          const link = document.createElement('link')
+          link.id = 'leaflet-css'
+          link.rel = 'stylesheet'
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+          document.head.appendChild(link)
+        }
+        // JS
+        const existing = document.getElementById('leaflet-js') as HTMLScriptElement | null
+        if (existing) { existing.addEventListener('load', () => resolve((window as unknown as { L: unknown }).L)); return }
+        const s = document.createElement('script')
+        s.id = 'leaflet-js'
+        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+        s.onload = () => resolve((window as unknown as { L: unknown }).L)
+        s.onerror = reject
+        document.head.appendChild(s)
+      })
+    }
+
+    ensureLeaflet().then((L) => {
+      if (cancelled || !mapRef.current) return
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const LL = L as any
+      // Si une map existe déjà sur ce node, on la détruit (re-entrée écran)
+      if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
+
+      const center: [number, number] = [43.72367, 7.11161]
+      const map = LL.map(mapRef.current, { zoomControl: false, attributionControl: false }).setView(center, 17)
+      mapObjRef.current = map
+      LL.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
+
+      STATIONS.forEach(st => {
+        const cur = st.id === evId
+        const html = `<div style="width:34px;height:34px;border-radius:50%;background:${cur ? '#16a34a' : 'linear-gradient(135deg,#7C2D92,#E0218A)'};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px">${cur ? '★' : ''}</div>`
+        const icon = LL.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] })
+        LL.marker([st.lat, st.lng], { icon })
+          .addTo(map)
+          .bindPopup(`<b>${st.nom}</b><br>${st.ou}${cur ? '<br><b style="color:#16a34a">Tu es ici</b>' : ''}`)
+      })
+      setTimeout(() => { try { map.invalidateSize() } catch {} }, 120)
+    }).catch(() => { /* CDN bloqué : la liste de stations reste affichée en fallback */ })
+
+    return () => {
+      cancelled = true
+      if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
+    }
+  }, [screen, evId])
 
   const handleAnswer = useCallback((idx: number) => {
     if (answered) return
@@ -127,9 +187,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .padnav{padding-bottom:96px}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .map-fake{flex:1;width:100%;min-height:340px;background:linear-gradient(160deg,#241233,#3a1450);position:relative}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:96px;display:flex;flex-direction:column;gap:10px}
-        .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22)}
+        .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:96px;z-index:600;display:flex;flex-direction:column;gap:10px}
+        .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
+        .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
+        .ndsbody .stn .go{margin-left:auto;flex-shrink:0;color:var(--magenta)}
+        .ndsbody .stn .go .ic{width:18px;height:18px}
         .ndsbody .stn .em{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
         .ndsbody .stn .em .ic{width:22px;height:22px}
         .ndsbody .stn .nm{font-weight:800;font-size:15px}
@@ -293,20 +357,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="map-top">
               <div className="qc">
                 <span className="em"><svg className="ic"><use href="#i-map" /></svg></span>
-                <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Flashe le QR sur place</div></div>
+                <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Touche une station pour y aller</div></div>
                 <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> 1</span>
               </div>
             </div>
             <div className="map-fake">
+              <div className="map-real" ref={mapRef} />
               <div className="map-list">
                 {STATIONS.map(s => {
                   const cur = s.id === evId
                   return (
-                    <div className={`stn${cur ? ' cur' : ''}`} key={s.id}>
+                    <button
+                      className={`stn${cur ? ' cur' : ''}`}
+                      key={s.id}
+                      onClick={() => { if (!cur) window.location.href = `/parcours/nds2026?ev=${s.id}`; else setScreen('onboard') }}
+                    >
                       <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
                       <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
-                      <span className="tg" style={cur ? { background: '#e9f9ef', color: '#16a34a' } : { background: '#f3edf7', color: '#7a708a' }}>{cur ? 'Tu es ici' : 'À flasher'}</span>
-                    </div>
+                      {cur
+                        ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>Tu es ici</span>
+                        : <span className="go"><svg className="ic" style={{ transform: 'scaleX(-1)' }}><use href="#i-arrowl" /></svg></span>}
+                    </button>
                   )
                 })}
               </div>
