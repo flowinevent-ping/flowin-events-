@@ -257,11 +257,32 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               {saved ? (
                 <>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(22,163,74,.16)', border: '1px solid rgba(22,163,74,.4)', borderRadius: 14, padding: '13px 15px', marginBottom: 12, fontSize: 14, fontWeight: 600 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(22,163,74,.16)', border: '1px solid rgba(22,163,74,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
                     <svg className="ic" style={{ width: 20, height: 20, color: '#4ade80', flexShrink: 0 }}><use href="#i-checkc" /></svg>
-                    <span>Tu as déjà joué cette station. Va sur une autre station pour cumuler un ticket de plus !</span>
+                    <span>Station validée ! Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir.</span>
                   </div>
-                  <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Jouer une autre station</a>
+                  {ticketCount < STATIONS.length ? (
+                    <>
+                      <div style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '14px 15px', marginBottom: 14 }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-layers" /></svg>
+                          Chaque station = 1 ticket de plus
+                        </div>
+                        {STATIONS.filter(s => { try { return !localStorage.getItem(`flowin_played_${s.id}`) } catch { return s.id !== evId } }).map(s => (
+                          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'rgba(255,255,255,.8)', padding: '5px 0' }}>
+                            <span style={{ width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 14, height: 14, color: '#fff' }}><use href={`#${s.icon}`} /></svg></span>
+                            <span><b>{s.nom}</b> — à jouer</span>
+                          </div>
+                        ))}
+                      </div>
+                      <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
+                    </>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(224,33,138,.14)', border: '1px solid rgba(224,33,138,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
+                      <svg className="ic" style={{ width: 20, height: 20, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-ticket" /></svg>
+                      <span>Toutes les stations jouées ! Tu as le <b>maximum de tickets</b> pour ce soir. Bonne chance au tirage 🎉</span>
+                    </div>
+                  )}
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: 'rgba(255,255,255,.85)', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
                 </>
               ) : (
