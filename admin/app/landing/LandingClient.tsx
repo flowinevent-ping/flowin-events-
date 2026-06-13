@@ -10,13 +10,14 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
     --paper:#F4F6F9;--muted:#5a6b80;--line:rgba(0,0,0,.07);
   }
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#000;color:var(--ink);-webkit-text-size-adjust:100%}
-  .app{max-width:480px;margin:0 auto;background:var(--paper);overflow-x:hidden}
+  .app{max-width:480px;margin:0 auto;background:var(--paper);padding-top:60px}
+  .menu{position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:50;background:rgba(14,27,48,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
   a{color:inherit}
   .ic{display:block}
   html{scroll-behavior:smooth}
   section{padding:62px 24px 66px;scroll-margin-top:62px}
 
-  .menu{position:sticky;top:0;z-index:50;background:rgba(14,27,48,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+  
   .menu .row{display:flex;align-items:center;gap:10px;padding:11px 16px}
   .menu .lg{font-size:18px;font-weight:900;letter-spacing:-.02em;color:#fff;flex-shrink:0;cursor:pointer}
   .menu .lg em{color:var(--blue);font-style:normal}
