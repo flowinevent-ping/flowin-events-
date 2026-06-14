@@ -226,7 +226,7 @@ const BODY = `<div class="app">
   <section class="hero" id="top">
     <h1>Animez votre lieu, créez du lien, <span class="hl">faites revenir vos clients</span>.</h1>
     <div class="baseline"><span class="c1">Fidélisez</span> · <span class="c2">Animez</span> · <span class="c3">Boostez</span></div>
-    <a class="btn" style="margin-top:20px" data-to="comment">Voir comment ça marche →</a>
+    <a class="btn" style="margin-top:20px" data-to="solution">Voir comment ça marche →</a>
   </section>
 
   <!-- 2. CONSTAT -->
@@ -243,7 +243,7 @@ const BODY = `<div class="app">
       <div class="pl"><span class="x"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>Aucun outil pour lire vos flux : caisse, réseaux… tout est éparpillé.</div>
     </div>
     <p class="sub" style="font-weight:800;color:#fff;margin-top:20px;text-align:center">Faites de chaque lieu, manifestation ou event une occasion de capter et fidéliser.</p>
-    <a class="btn" data-to="comment" style="margin-top:16px">Voir la solution →</a>
+    <a class="btn" data-to="solution" style="margin-top:16px">Voir la solution →</a>
   </section>
 
   <!-- 3. SYSTÈME / MÉTHODE -->
@@ -528,7 +528,7 @@ export default function LandingClient({ cfg, source = '' }: { cfg?: any; source?
       else window.scrollTo({ top: 0, behavior: 'smooth' })
     }
     Array.from(document.querySelectorAll('[data-to]')).forEach((el) =>
-      el.addEventListener('click', () => goTo(el.getAttribute('data-to') || 'top'))
+      el.addEventListener('click', () => { closeDrawer(); goTo(el.getAttribute('data-to') || 'top') })
     )
 
     function buildDots(car: any) {
