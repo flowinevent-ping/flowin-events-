@@ -2765,7 +2765,7 @@ function renderModal(){
   else if(k==='qr') html = modalQR(state.modal.data);
   else if(k==='rapport') html = modalRapport(state.modal.data);
   else if(k==='tirage') html = modalTirage(state.modal.data);
-  else if(k==='superEvent') html = modalSuperEvent(state.modal.data);
+  else if(k==='superEvent') html = ''; /* SuperEvent geré par drawerSuperEvent (drawer), pas de modale — branche neutralisée pour éviter ReferenceError */
   else if(k==='reglages-section') html = modalReglagesSection(state.modal.data);
   else if(k==='qr-landing'){
       var _qd=state.modal.data||{};
@@ -4347,7 +4347,7 @@ function duplicateEvent(id){
   toast('⧉ "' + newNom + '" créé — modifie les dates et le nom puis publie', 'success');
   render();
   /* Ouvrir le drawer du nouvel event */
-  setTimeout(function(){ openDrawer('event', newId); }, 300);
+  setTimeout(function(){ openDrawerFor('event', newId); }, 300);
 }
 
 
@@ -9774,7 +9774,7 @@ function wizSave(){
     toast('Event "'+d.nom+'" créé','success');
     // Génération auto qrUrl AVANT écriture Supabase
     if(!_newEv.cfg) _newEv.cfg = {};
-    _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (_newEv.module||'quiz') + '.html?ev=' + id;
+    _newEv.cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (_newEv.module||'quiz') + '?ev=' + id;
     supaWriteEvent(_newEv);
     // ── Persister les lots du wizard dans DATA.lots avec le bon eventId ──
     if(d.lots && d.lots.length){
@@ -9810,7 +9810,7 @@ function wizSave(){
       delete DATA.events[idx].lots;
       // QR URL recalculé
       if(!DATA.events[idx].cfg) DATA.events[idx].cfg = {};
-      DATA.events[idx].cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (DATA.events[idx].module||'quiz') + '.html?ev=' + DATA.events[idx].id;
+      DATA.events[idx].cfg.qrUrl = 'https://flowin-events.vercel.app/parcours/' + (DATA.events[idx].module||'quiz') + '?ev=' + DATA.events[idx].id;
       // Persister les IDs partenaires dans cfg.partenaires pour le parcours joueur
       DATA.events[idx].cfg.partenaires = (d.partenaires && d.partenaires.length) ? d.partenaires.slice() : [];
       supaWriteEvent(DATA.events[idx]);
