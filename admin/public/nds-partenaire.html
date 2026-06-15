@@ -720,13 +720,22 @@
     fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)})
       .catch(function(){SENT_=false;});
   }
+  function activate(){
+    var v=readForm();
+    if(!v.email||v.email.indexOf('@')<0) return;
+    var em=v.email.toLowerCase().replace(/\s/g,'');
+    var id='prosp-nds-'+em.replace(/[^a-z0-9]/g,'-').slice(0,36);
+    var patch={ statut_paiement:'paye', actif:true, visible:true };
+    fetch(URL_+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(patch)});
+  }
   if(document.readyState!=='loading') bindLogo(); else document.addEventListener('DOMContentLoaded',bindLogo);
   document.addEventListener('click',function(e){
     var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
-    var t=(b.textContent||'').toLowerCase();
-    if(t.indexOf('envoyer')>=0||t.indexOf('payer')>=0||(b.getAttribute('onclick')||'').indexOf('wizGo(4)')>=0) send();
+    var t=(b.textContent||'').toLowerCase(), oc=(b.getAttribute('onclick')||'');
+    if(t.indexOf('envoyer')>=0||t.indexOf('payer')>=0||oc.indexOf('wizGo(4)')>=0){ send(); if(t.indexOf('payer')>=0||oc.indexOf('wizGo(4)')>=0) setTimeout(activate,400); }
   },true);
   window.flowinSubmitPartner=send;
+  window.flowinActivatePartner=activate;
 })();
 </script>
 </body>
