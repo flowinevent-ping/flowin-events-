@@ -13,8 +13,8 @@ const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
 
 /* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
    Incrémenter la version à chaque modification du texte. */
-const OPTIN_VERSION = 'nds-2026-v1'
-const OPTIN_TEXT = "J'accepte que les Nuits du Sud, leurs commerçants partenaires et Flowin (qui opère l'animation) me recontactent par email ou SMS : infos du festival, offres et nouveautés des partenaires. Données jamais revendues. Désinscription à tout moment."
+const OPTIN_VERSION = 'nds-2026-v2'
+const OPTIN_TEXT = "J'accepte de garder le contact avec les Nuits du Sud et partenaires."
 
 /* Les 3 stations fixes du festival (carte). joue=true => station courante scannée */
 const STATIONS = [
@@ -258,7 +258,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className={`scr on${saved ? ' padnav' : ''}`}>
             <div className="hero">
               <div className="htop"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ verticalAlign: -1, marginRight: 5 }}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" /></svg>VENCE</div>
-              <div className="hname">Nuits du<br />Sud</div>
+              <img className="hlogo" src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" />
               <div className="hdate">9 → 18 Juillet 2026</div>
             </div>
             <div className="stage">
@@ -303,24 +303,25 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </>
               ) : (
                 <>
+                  <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#fff' }}>Bienvenue au Super Event</div>
+                  </div>
                   <div style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '15px 16px', marginBottom: 14 }}>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-spark" /></svg>
-                      Comment ça marche
-                    </div>
                     {[
-                      { n: '1', t: 'Réponds au quiz', s: 'Quelques questions sur le festival' },
-                      { n: '2', t: 'Gagne ton ticket', s: '1 ticket pour le tirage de ce soir' },
-                      { n: '3', t: 'Flashe les 3 stations', s: 'Chaque station = 1 ticket de plus' },
-                    ].map(step => (
-                      <div key={step.n} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '6px 0' }}>
-                        <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 800, color: '#fff' }}>{step.n}</span>
-                        <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,.9)' }}><b style={{ color: '#fff' }}>{step.t}</b> — {step.s}</span>
+                      { ic: 'i-help', t: 'Réponds au Quizz', s: 'Remporte 1 ticket' },
+                      { ic: 'i-layers', t: '3 lieux, 3 quizz', s: '3 fois plus de chance de gagner !' },
+                      { ic: 'i-scan', t: 'Flashe le QR code', s: 'Remporte le lot' },
+                      { ic: 'i-clock', t: 'Tirage chaque soir', s: '3 places à gagner' },
+                    ].map((step, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '7px 0' }}>
+                        <span style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href={`#${step.ic}`} /></svg></span>
+                        <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,.9)', lineHeight: 1.3 }}><b style={{ color: '#fff' }}>{step.t}</b><br /><span style={{ fontSize: 12.5, opacity: .8 }}>{step.s}</span></span>
                       </div>
                     ))}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.1)', fontSize: 12.5, color: 'rgba(255,255,255,.7)' }}>
-                      <svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-clock" /></svg>
-                      Tirage au sort chaque soir · 3 places à gagner
+                    <div style={{ display: 'flex', gap: 7, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.1)' }}>
+                      {STATIONS.map(s => (
+                        <span key={s.id} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.85)', background: 'rgba(255,255,255,.06)', borderRadius: 8, padding: '7px 4px' }}>{s.nom}</span>
+                      ))}
                     </div>
                   </div>
                   <a className="btn" onClick={() => {
