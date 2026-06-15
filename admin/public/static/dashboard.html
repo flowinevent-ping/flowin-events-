@@ -2952,6 +2952,7 @@ function renderSidebar(){
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
+      {id:'prospection',ico:'📞',lbl:'Prospection',n:(state.prospection?state.prospection.length:0)},
       {id:'landing-page',ico:'🌐',lbl:'Landing Page',n:(DATA.landings||[]).length},
     ]},
     {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length} ]},
@@ -3171,6 +3172,156 @@ function frontLive(){
 }
 
 // ============ RENDER ROUTER ============
+// ============ PROSPECTION CRM ============
+var PROSP_ETATS=[
+  {v:'a_contacter',l:'À contacter',c:'#5B6B8C'},
+  {v:'a_relancer',l:'À relancer',c:'#3B5CC4'},
+  {v:'rappel_planifie',l:'Rappel planifié',c:'#8A6FC4'},
+  {v:'interesse',l:'Intéressé',c:'#2FBF71'},
+  {v:'rdv_pris',l:'RDV pris',c:'#00B4A0'},
+  {v:'client',l:'Client ✓',c:'#1a9d5a'},
+  {v:'pas_interesse',l:'Pas intéressé',c:'#E8536B'},
+  {v:'injoignable',l:'Injoignable',c:'#7a839a'}
+];
+var PROSP_TYPES=['Supermarché','Bricolage','Restaurant','Vêtement','Hôtel','BTP','Coiffure / Beauté','Boulangerie','Caviste / Épicerie fine','Fleuriste','Pharmacie','Opticien','Garage / Auto','Immobilier','Autre'];
+var PROSP_VILLES=['Vence','Tourrettes-sur-Loup','Cagnes-sur-Mer','Carros','La Colle-sur-Loup','Gattières','Saint-Laurent-du-Var','Saint-Paul-de-Vence','Le Broc','Nice'];
+
+function prospEtatObj(v){for(var i=0;i<PROSP_ETATS.length;i++){if(PROSP_ETATS[i].v===v)return PROSP_ETATS[i];}return PROSP_ETATS[0];}
+function prospEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+async function loadProspection(){
+  var rows = await supaFetch('prospection','select=*&order=ville.asc,enseigne.asc');
+  state.prospection = rows || [];
+  render();
+}
+
+function renderProspection(){
+  if(!state.prospection){ loadProspection(); return '<div class="page"><div class="page-header"><div class="page-title">&#128222; Prospection</div></div><div class="empty-block">Chargement…</div></div>'; }
+  var list = state.prospection.slice();
+  var fq=(state.prospFilters&&state.prospFilters.q)||'';
+  var fv=(state.prospFilters&&state.prospFilters.ville)||'';
+  var ft=(state.prospFilters&&state.prospFilters.type)||'';
+  var fe=(state.prospFilters&&state.prospFilters.etat)||'';
+  var filtered=[];
+  for(var i=0;i<list.length;i++){
+    var r=list[i];
+    if(fv&&r.ville!==fv)continue;
+    if(ft&&r.type_commerce!==ft)continue;
+    if(fe&&r.etat!==fe)continue;
+    if(fq){var hay=((r.enseigne||'')+' '+(r.ville||'')+' '+(r.contact_nom||'')+' '+(r.note||'')).toLowerCase();if(hay.indexOf(fq.toLowerCase())<0)continue;}
+    filtered.push(r);
+  }
+  // KPIs
+  var total=list.length,todo=0,contacted=0,interest=0,rdv=0;
+  for(var k=0;k<list.length;k++){var e=list[k].etat;if(e==='a_contacter'||e==='a_relancer')todo++;if(e!=='a_contacter')contacted++;if(e==='interesse'||e==='rdv_pris'||e==='client')interest++;if(e==='rdv_pris'||e==='client')rdv++;}
+
+  var html='<div class="page">';
+  html+='<div class="page-header"><div class="page-title">&#128222; Prospection commer&ccedil;ants</div><div class="page-sub">Suivi des appels &middot; '+total+' commerce'+(total>1?'s':'')+'</div></div>';
+
+  // KPIs
+  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">';
+  html+=prospKpi(total,'Total')+prospKpi(todo,'À traiter')+prospKpi(contacted,'Contactés')+prospKpi(interest,'Intéressés')+prospKpi(rdv,'RDV / clients');
+  html+='</div>';
+
+  // Barre outils
+  html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center">';
+  html+='<input id="prospQ" placeholder="Rechercher…" value="'+prospEsc(fq)+'" oninput="prospSetFilter(\'q\',this.value)" style="flex:1;min-width:150px;padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit">';
+  html+=prospSelect('ville',PROSP_VILLES,'Toutes villes',fv);
+  html+=prospSelect('type',PROSP_TYPES,'Tous types',ft);
+  html+=prospSelectEtat(fe);
+  html+='<button class="btn" onclick="prospToggleImport()" style="background:#F5B544;color:#1a1205;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">＋ Ajouter</button>';
+  html+='</div>';
+
+  // Zone import (cachée par défaut)
+  html+='<div id="prospImport" style="display:none;background:rgba(245,181,68,.06);border:1px dashed rgba(245,181,68,.4);border-radius:12px;padding:14px;margin-bottom:14px">';
+  html+='<div style="font-weight:700;margin-bottom:6px">Coller une liste (Google Maps / manuel)</div>';
+  html+='<div style="font-size:12.5px;color:var(--muted,#9aa6bd);margin-bottom:8px">1 commerce par bloc. Nom sur la 1re ligne, téléphone et adresse détectés. Séparez chaque commerce par une ligne vide.</div>';
+  html+='<textarea id="prospPaste" rows="5" placeholder="Carrefour Market Vence&#10;04 93 58 00 00&#10;12 av des Poilus, Vence&#10;&#10;Boulangerie du Cours&#10;06 12 34 56 78&#10;5 place du Grand Jardin" style="width:100%;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(0,0,0,.2);color:inherit;padding:10px;font-family:inherit;font-size:13px"></textarea>';
+  html+='<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">';
+  html+=prospSelectRaw('prospPasteVille',PROSP_VILLES,'— Ville —');
+  html+=prospSelectRaw('prospPasteType',PROSP_TYPES,'— Type —');
+  html+='<button class="btn" onclick="prospDoPaste()" style="background:#3B5CC4;color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">Analyser & importer</button>';
+  html+='</div></div>';
+
+  // Tableau
+  html+='<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
+  html+='<thead><tr>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Enseigne</th>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Ville</th>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Type</th>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Tél</th>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">État</th>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Contact</th>'+
+    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Note</th>'+
+    '</tr></thead><tbody>';
+  for(var j=0;j<filtered.length;j++){
+    var p=filtered[j];var eo=prospEtatObj(p.etat);
+    var tel=p.tel?'<a href="tel:'+prospEsc(p.tel)+'" style="display:inline-flex;align-items:center;gap:4px;background:#00B4A0;color:#04201c;border-radius:7px;padding:6px 10px;font-weight:700;text-decoration:none;white-space:nowrap;font-size:13px">📞 '+prospEsc(p.tel)+'</a>':'<span style="color:var(--muted,#9aa6bd);font-size:12px">— sans n°</span>';
+    var sel='<select onchange="prospUpdate('+p.id+',\'etat\',this.value);this.style.background=prospEtatColor(this.value)" style="background:'+eo.c+';color:#fff;border:none;border-radius:16px;padding:6px 10px;font-weight:700;font-size:12px;cursor:pointer">';
+    for(var m=0;m<PROSP_ETATS.length;m++){sel+='<option value="'+PROSP_ETATS[m].v+'"'+(PROSP_ETATS[m].v===p.etat?' selected':'')+'>'+PROSP_ETATS[m].l+'</option>';}
+    sel+='</select>';
+    html+='<tr style="border-top:1px solid var(--line,#2a3550)">'+
+      '<td style="padding:10px"><div style="font-weight:700">'+prospEsc(p.enseigne)+'</div><div style="font-size:11.5px;color:var(--muted,#9aa6bd)">'+prospEsc(p.adresse||'')+'</div></td>'+
+      '<td style="padding:10px;font-size:13px">'+prospEsc(p.ville)+'</td>'+
+      '<td style="padding:10px"><span style="font-size:11.5px;background:rgba(255,255,255,.06);border-radius:5px;padding:2px 7px">'+prospEsc(p.type_commerce)+'</span></td>'+
+      '<td style="padding:10px">'+tel+'</td>'+
+      '<td style="padding:10px">'+sel+'</td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.contact_nom)+'" placeholder="Nom" onblur="prospUpdate('+p.id+',\'contact_nom\',this.value)" style="width:110px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:13px" onfocus="this.style.borderColor=\'var(--line,#2a3550)\';this.style.background=\'rgba(0,0,0,.2)\'"></td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.note)+'" placeholder="Note…" onblur="prospUpdate('+p.id+',\'note\',this.value)" style="width:100%;min-width:140px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:13px" onfocus="this.style.borderColor=\'var(--line,#2a3550)\';this.style.background=\'rgba(0,0,0,.2)\'"></td>'+
+      '</tr>';
+  }
+  html+='</tbody></table></div>';
+  if(!filtered.length)html+='<div class="empty-block" style="padding:40px;text-align:center;color:var(--muted,#9aa6bd)">Aucun commerce. Clique « ＋ Ajouter » pour coller une liste.</div>';
+  html+='</div>';
+  return html;
+}
+function prospKpi(v,l){return '<div style="background:rgba(255,255,255,.04);border:1px solid var(--line,#2a3550);border-radius:12px;padding:12px 14px"><div style="font-size:22px;font-weight:800">'+v+'</div><div style="font-size:11px;color:var(--muted,#9aa6bd);text-transform:uppercase;margin-top:3px">'+l+'</div></div>';}
+function prospSelect(key,arr,allLbl,cur){var h='<select onchange="prospSetFilter(\''+key+'\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+allLbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'"'+(arr[i]===cur?' selected':'')+'>'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
+function prospSelectEtat(cur){var h='<select onchange="prospSetFilter(\'etat\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">Tous états</option>';for(var i=0;i<PROSP_ETATS.length;i++){h+='<option value="'+PROSP_ETATS[i].v+'"'+(PROSP_ETATS[i].v===cur?' selected':'')+'>'+PROSP_ETATS[i].l+'</option>';}return h+'</select>';}
+function prospSelectRaw(id,arr,lbl){var h='<select id="'+id+'" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+lbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'">'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
+function prospEtatColor(v){return prospEtatObj(v).c;}
+function prospSetFilter(key,val){if(!state.prospFilters)state.prospFilters={};state.prospFilters[key]=val;render();
+  // refocus recherche
+  if(key==='q'){setTimeout(function(){var el=document.getElementById('prospQ');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);}
+}
+function prospToggleImport(){var el=document.getElementById('prospImport');if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function prospUpdate(id,field,val){
+  var body={};body[field]=val;body.updated_at=new Date().toISOString();
+  if(field==='etat')body.pas_interesse=(val==='pas_interesse');
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)})
+    .then(function(r){if(r.ok){for(var i=0;i<state.prospection.length;i++){if(state.prospection[i].id===id){state.prospection[i][field]=val;}}toast('Enregistré');}else{toast('Erreur');}})
+    .catch(function(){toast('Erreur réseau');});
+}
+function prospLooksTel(line){var d=line.replace(/[^0-9]/g,'');return d.length>=9&&d.length<=14&&/[0-9][\s.\-0-9]{8,}/.test(line);}
+function prospLooksAddr(line){return /\d{1,4}\s/.test(line)||/\b(rue|avenue|av\.|bd|boulevard|place|chemin|route|impasse|allée|quai|cours)\b/i.test(line)||/\b\d{5}\b/.test(line);}
+function prospParse(text){
+  var blocks=text.replace(/\r/g,'').split(/\n\s*\n/);var out=[];
+  for(var b=0;b<blocks.length;b++){
+    var raw=blocks[b].split('\n');var lines=[];
+    for(var x=0;x<raw.length;x++){if(raw[x].trim())lines.push(raw[x].trim());}
+    if(!lines.length)continue;
+    var rec={enseigne:lines[0],tel:null,adresse:null};
+    for(var i=1;i<lines.length;i++){var ln=lines[i];
+      if(!rec.tel&&prospLooksTel(ln)){rec.tel=ln.replace(/[^0-9+]/g,'');continue;}
+      if(!rec.adresse&&prospLooksAddr(ln)){rec.adresse=ln;continue;}
+      if(!rec.adresse){rec.adresse=ln;}}
+    out.push(rec);
+  }
+  return out;
+}
+function prospDoPaste(){
+  var ville=document.getElementById('prospPasteVille').value;
+  var type=document.getElementById('prospPasteType').value;
+  if(!ville||!type){toast('Choisis ville + type');return;}
+  var recs=prospParse(document.getElementById('prospPaste').value);
+  if(!recs.length){toast('Aucun commerce détecté');return;}
+  var payload=[];
+  for(var i=0;i<recs.length;i++){payload.push({ville:ville,type_commerce:type,enseigne:recs[i].enseigne,adresse:recs[i].adresse,tel:recs[i].tel,etat:'a_contacter'});}
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection',{method:'POST',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)})
+    .then(function(r){if(r.ok){toast(payload.length+' commerces ajoutés');loadProspection();}else{toast('Erreur import');}})
+    .catch(function(){toast('Erreur réseau');});
+}
+
 function render(){
   renderSidebar();
   renderTopbar();
@@ -3193,6 +3344,7 @@ function render(){
   else if(v==='rapports') html = renderRapports();
   else if(v==='parametres') html = renderParametres();
   else if(v==='btob-prospects') html = renderBtobProspects();
+  else if(v==='prospection') html = renderProspection();
   else if(v==='landing-page') html = renderLandingPage();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
