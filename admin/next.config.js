@@ -7,6 +7,7 @@ const nextConfig = {
         { source: '/nds', destination: '/nds-partenaire.html' },
         { source: '/carte', destination: '/carte.html' },
         { source: '/pro-nds', destination: '/pro-nds-live.html' },
+        { source: '/prospection', destination: '/prospection.html' },
       ],
     }
   },

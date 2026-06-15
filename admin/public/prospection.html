@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prospection · Flowin</title>
+<style>
+  :root{
+    --bg:#0B1220; --panel:#121C2E; --card:#16223A; --line:rgba(255,255,255,.10);
+    --text:#EAF0FB; --muted:rgba(234,240,251,.62); --accent:#3B5CC4; --teal:#00B4A0;
+    --gold:#F5B544; --red:#E8536B; --green:#2FBF71;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+  .wrap{max-width:1280px;margin:0 auto;padding:18px 16px 80px}
+  h1{font-size:22px;font-weight:800;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13.5px;margin-bottom:18px}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px}
+  .kpi .v{font-size:24px;font-weight:800;line-height:1}
+  .kpi .l{font-size:11.5px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.05em}
+  @media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+
+  /* Barre outils */
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+  .bar input,.bar select{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 12px;font-size:14px;font-family:inherit}
+  .bar input[type=search]{flex:1;min-width:160px}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+  .btn.ghost{background:var(--card);border:1px solid var(--line)}
+  .btn.gold{background:var(--gold);color:#1a1205}
+
+  /* Import zone */
+  .import{display:none;background:var(--panel);border:1px dashed rgba(245,181,68,.5);border-radius:14px;padding:16px;margin-bottom:16px}
+  .import.on{display:block}
+  .import h3{margin:0 0 8px;font-size:15px}
+  .import p{color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0}
+  .import code{background:var(--card);padding:2px 7px;border-radius:6px;font-size:12.5px;color:var(--gold)}
+  .maprow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+  .maprow label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+  .maprow select{width:100%}
+  .preview{max-height:160px;overflow:auto;font-size:12px;background:var(--bg);border-radius:8px;padding:8px;margin-top:8px;white-space:pre;color:var(--muted)}
+
+  /* Tableau */
+  .tablewrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;padding:11px 12px;background:var(--card);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);position:sticky;top:0;cursor:pointer;white-space:nowrap}
+  td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  .ens{font-weight:700}
+  .meta{color:var(--muted);font-size:12px}
+  .telbtn{display:inline-flex;align-items:center;gap:5px;background:var(--teal);color:#04201c;border-radius:8px;padding:6px 11px;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap}
+  .telbtn.empty{background:var(--card);color:var(--muted);border:1px solid var(--line)}
+  .etat-sel{border:none;border-radius:20px;padding:6px 10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;color:#fff}
+  .note-in{width:100%;background:transparent;border:1px solid transparent;color:var(--text);border-radius:7px;padding:5px 7px;font-size:13px;font-family:inherit}
+  .note-in:focus{border-color:var(--line);background:var(--bg);outline:none}
+  .tag{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11.5px;color:var(--muted)}
+  .empty-state{padding:50px 20px;text-align:center;color:var(--muted)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#04210f;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99}
+  .toast.on{opacity:1}
+  @media(max-width:720px){
+    .hide-m{display:none}
+    .wrap{padding:14px 10px 80px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Prospection commerçants</h1>
+  <div class="sub">Suivi des appels · Nuits du Sud 2026 & Flowin</div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="Rechercher enseigne, ville, contact…">
+    <select id="fVille"><option value="">Toutes villes</option></select>
+    <select id="fType"><option value="">Tous types</option></select>
+    <select id="fEtat"><option value="">Tous états</option></select>
+    <button class="btn gold" id="impBtn">＋ Importer CSV</button>
+  </div>
+
+  <div class="import" id="importBox">
+    <h3>Importer un CSV (Google Maps · Instant Data Scraper)</h3>
+    <p>1. Sur Google Maps cherche <code>restaurant Vence</code>, scroll toute la liste. 2. Lance Instant Data Scraper → <b>Download CSV</b>. 3. Charge-le ici et associe les colonnes.</p>
+    <input type="file" id="csvFile" accept=".csv">
+    <select id="impVille" style="margin-left:8px"></select>
+    <select id="impType" style="margin-left:8px"></select>
+    <div id="mapZone" style="display:none">
+      <div class="maprow" id="mapRows"></div>
+      <div class="preview" id="csvPreview"></div>
+      <button class="btn" id="doImport" style="margin-top:10px">Importer ces lignes</button>
+      <span id="impCount" class="meta" style="margin-left:10px"></span>
+    </div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="enseigne">Enseigne</th>
+          <th data-sort="ville" class="hide-m">Ville</th>
+          <th data-sort="type_commerce" class="hide-m">Type</th>
+          <th>Tél</th>
+          <th data-sort="etat">État</th>
+          <th class="hide-m">Contact</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none">Aucune ligne. Importe un CSV pour commencer.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var BASE='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+
+  var ETATS=[
+    {v:'a_contacter',l:'À contacter',c:'#5B6B8C'},
+    {v:'a_relancer',l:'À relancer',c:'#3B5CC4'},
+    {v:'rappel_planifie',l:'Rappel planifié',c:'#8A6FC4'},
+    {v:'interesse',l:'Intéressé',c:'#2FBF71'},
+    {v:'rdv_pris',l:'RDV pris',c:'#00B4A0'},
+    {v:'client',l:'Client ✓',c:'#1a9d5a'},
+    {v:'pas_interesse',l:'Pas intéressé',c:'#E8536B'},
+    {v:'injoignable',l:'Injoignable',c:'#7a839a'}
+  ];
+  var TYPES=['Supermarché','Bricolage','Restaurant','Vêtement','Hôtel','BTP','Coiffure / Beauté','Boulangerie','Caviste / Épicerie fine','Fleuriste','Pharmacie','Opticien','Garage / Auto','Immobilier','Autre'];
+  var VILLES=['Vence','Tourrettes-sur-Loup','Cagnes-sur-Mer','Carros','La Colle-sur-Loup','Gattières','Saint-Laurent-du-Var','Saint-Paul-de-Vence','Le Broc','Nice'];
+
+  var DATA=[], sortKey='etat', sortDir=1;
+
+  function etatObj(v){for(var i=0;i<ETATS.length;i++){if(ETATS[i].v===v)return ETATS[i];}return ETATS[0];}
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.className='toast on';setTimeout(function(){t.className='toast';},1600);}
+
+  // ---- LOAD ----
+  function load(){
+    fetch(BASE+'prospection?select=*&order=ville.asc,enseigne.asc',{headers:H})
+      .then(function(r){return r.json();})
+      .then(function(d){DATA=d||[];render();})
+      .catch(function(e){console.error(e);toast('Erreur de chargement');});
+  }
+
+  // ---- FILTERS ----
+  function fillSelect(id,arr,all){
+    var s=document.getElementById(id);var html=all?'<option value="">'+all+'</option>':'';
+    for(var i=0;i<arr.length;i++){html+='<option value="'+esc(arr[i])+'">'+esc(arr[i])+'</option>';}
+    s.innerHTML=html;
+  }
+  fillSelect('fVille',VILLES,'Toutes villes');
+  fillSelect('fType',TYPES,'Tous types');
+  fillSelect('impVille',VILLES,'— Ville —');
+  fillSelect('impType',TYPES,'— Type —');
+  (function(){var s=document.getElementById('fEtat');var h='<option value="">Tous états</option>';for(var i=0;i<ETATS.length;i++){h+='<option value="'+ETATS[i].v+'">'+ETATS[i].l+'</option>';}s.innerHTML=h;})();
+
+  function filtered(){
+    var q=(document.getElementById('q').value||'').toLowerCase();
+    var fv=document.getElementById('fVille').value;
+    var ft=document.getElementById('fType').value;
+    var fe=document.getElementById('fEtat').value;
+    var out=[];
+    for(var i=0;i<DATA.length;i++){
+      var r=DATA[i];
+      if(fv&&r.ville!==fv)continue;
+      if(ft&&r.type_commerce!==ft)continue;
+      if(fe&&r.etat!==fe)continue;
+      if(q){
+        var hay=((r.enseigne||'')+' '+(r.ville||'')+' '+(r.contact_nom||'')+' '+(r.note||'')).toLowerCase();
+        if(hay.indexOf(q)<0)continue;
+      }
+      out.push(r);
+    }
+    out.sort(function(a,b){
+      var x=(a[sortKey]||'')+'',y=(b[sortKey]||'')+'';
+      return x<y?-sortDir:x>y?sortDir:0;
+    });
+    return out;
+  }
+
+  // ---- KPIs ----
+  function renderKpis(){
+    var total=DATA.length,contacted=0,interest=0,rdv=0,todo=0;
+    for(var i=0;i<DATA.length;i++){
+      var e=DATA[i].etat;
+      if(e!=='a_contacter')contacted++;
+      if(e==='interesse'||e==='rdv_pris'||e==='client')interest++;
+      if(e==='rdv_pris'||e==='client')rdv++;
+      if(e==='a_contacter'||e==='a_relancer')todo++;
+    }
+    var k=document.getElementById('kpis');
+    k.innerHTML=
+      kpi(total,'Total')+kpi(todo,'À traiter')+kpi(contacted,'Contactés')+kpi(interest,'Intéressés')+kpi(rdv,'RDV / clients');
+  }
+  function kpi(v,l){return '<div class="kpi"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>';}
+
+  // ---- RENDER ----
+  function render(){
+    renderKpis();
+    var list=filtered();
+    var tb=document.getElementById('rows');
+    document.getElementById('emptyState').style.display=DATA.length?'none':'block';
+    var html='';
+    for(var i=0;i<list.length;i++){
+      var r=list[i];var eo=etatObj(r.etat);
+      var tel=r.tel?'<a class="telbtn" href="tel:'+esc(r.tel)+'">📞 '+esc(r.tel)+'</a>':'<span class="telbtn empty">— sans n°</span>';
+      var sel='<select class="etat-sel" style="background:'+eo.c+'" data-id="'+r.id+'">';
+      for(var j=0;j<ETATS.length;j++){sel+='<option value="'+ETATS[j].v+'"'+(ETATS[j].v===r.etat?' selected':'')+'>'+ETATS[j].l+'</option>';}
+      sel+='</select>';
+      html+='<tr>'+
+        '<td><div class="ens">'+esc(r.enseigne)+'</div><div class="meta">'+esc(r.adresse||'')+'</div></td>'+
+        '<td class="hide-m">'+esc(r.ville)+'</td>'+
+        '<td class="hide-m"><span class="tag">'+esc(r.type_commerce)+'</span></td>'+
+        '<td>'+tel+'</td>'+
+        '<td>'+sel+'</td>'+
+        '<td class="hide-m"><input class="note-in" data-id="'+r.id+'" data-f="contact_nom" value="'+esc(r.contact_nom)+'" placeholder="Nom contact"></td>'+
+        '<td><input class="note-in" data-id="'+r.id+'" data-f="note" value="'+esc(r.note)+'" placeholder="Note…"></td>'+
+        '</tr>';
+    }
+    tb.innerHTML=html;
+    bindRowEvents();
+  }
+
+  function bindRowEvents(){
+    var sels=document.querySelectorAll('.etat-sel');
+    for(var i=0;i<sels.length;i++){
+      sels[i].onchange=function(){
+        var id=this.getAttribute('data-id');var val=this.value;
+        this.style.background=etatObj(val).c;
+        patch(id,{etat:val,pas_interesse:val==='pas_interesse'});
+      };
+    }
+    var ins=document.querySelectorAll('.note-in');
+    for(var k=0;k<ins.length;k++){
+      ins[k].onblur=function(){
+        var id=this.getAttribute('data-id');var f=this.getAttribute('data-f');var o={};o[f]=this.value;
+        patch(id,o);
+      };
+    }
+  }
+
+  function patch(id,obj){
+    obj.updated_at=new Date().toISOString();
+    fetch(BASE+'prospection?id=eq.'+id,{method:'PATCH',headers:Object.assign({},H,{'Prefer':'return=minimal'}),body:JSON.stringify(obj)})
+      .then(function(r){if(r.ok){toast('Enregistré');for(var i=0;i<DATA.length;i++){if(DATA[i].id==id){for(var key in obj){DATA[i][key]=obj[key];}}}renderKpis();}else{toast('Erreur');}})
+      .catch(function(){toast('Erreur réseau');});
+  }
+
+  // ---- FILTRES bind ----
+  document.getElementById('q').oninput=render;
+  document.getElementById('fVille').onchange=render;
+  document.getElementById('fType').onchange=render;
+  document.getElementById('fEtat').onchange=render;
+  var ths=document.querySelectorAll('th[data-sort]');
+  for(var i=0;i<ths.length;i++){
+    ths[i].onclick=function(){var k=this.getAttribute('data-sort');if(sortKey===k){sortDir=-sortDir;}else{sortKey=k;sortDir=1;}render();};
+  }
+
+  // ---- IMPORT CSV ----
+  document.getElementById('impBtn').onclick=function(){document.getElementById('importBox').classList.toggle('on');};
+  var parsedRows=[], parsedHeaders=[];
+
+  document.getElementById('csvFile').onchange=function(e){
+    var f=e.target.files[0];if(!f)return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      var res=parseCSV(rd.result);
+      parsedHeaders=res.headers;parsedRows=res.rows;
+      buildMapping();
+    };
+    rd.readAsText(f);
+  };
+
+  function parseCSV(text){
+    var lines=[];var cur='';var row=[];var inQ=false;
+    for(var i=0;i<text.length;i++){
+      var ch=text[i];
+      if(ch==='"'){if(inQ&&text[i+1]==='"'){cur+='"';i++;}else{inQ=!inQ;}}
+      else if(ch===','&&!inQ){row.push(cur);cur='';}
+      else if((ch==='\n'||ch==='\r')&&!inQ){if(cur!==''||row.length){row.push(cur);lines.push(row);row=[];cur='';}if(ch==='\r'&&text[i+1]==='\n')i++;}
+      else{cur+=ch;}
+    }
+    if(cur!==''||row.length){row.push(cur);lines.push(row);}
+    var headers=lines.shift()||[];
+    var rows=[];
+    for(var j=0;j<lines.length;j++){if(lines[j].length>1)rows.push(lines[j]);}
+    return {headers:headers,rows:rows};
+  }
+
+  function guessCol(headers,keys){
+    for(var i=0;i<headers.length;i++){
+      var h=(headers[i]||'').toLowerCase();
+      for(var k=0;k<keys.length;k++){if(h.indexOf(keys[k])>=0)return i;}
+    }
+    return -1;
+  }
+
+  function buildMapping(){
+    document.getElementById('mapZone').style.display='block';
+    var fields=[['enseigne','Enseigne / Nom',['name','title','nom','enseigne']],['adresse','Adresse',['address','adresse','street']],['tel','Téléphone',['phone','tel','téléphone','number']],['email','Email',['email','mail']]];
+    var html='';
+    for(var i=0;i<fields.length;i++){
+      var g=guessCol(parsedHeaders,fields[i][2]);
+      html+='<div><label>'+fields[i][1]+'</label><select data-target="'+fields[i][0]+'"><option value="-1">— ignorer —</option>';
+      for(var c=0;c<parsedHeaders.length;c++){html+='<option value="'+c+'"'+(c===g?' selected':'')+'>'+esc(parsedHeaders[c]||('col '+c))+'</option>';}
+      html+='</select></div>';
+    }
+    document.getElementById('mapRows').innerHTML=html;
+    var prev=parsedRows.slice(0,3).map(function(r){return r.join(' | ');}).join('\n');
+    document.getElementById('csvPreview').textContent='Aperçu ('+parsedRows.length+' lignes):\n'+prev;
+    document.getElementById('impCount').textContent=parsedRows.length+' lignes prêtes';
+  }
+
+  document.getElementById('doImport').onclick=function(){
+    var ville=document.getElementById('impVille').value;
+    var type=document.getElementById('impType').value;
+    if(!ville||!type){toast('Choisis ville + type');return;}
+    var maps={};var sels=document.querySelectorAll('#mapRows select');
+    for(var i=0;i<sels.length;i++){maps[sels[i].getAttribute('data-target')]=parseInt(sels[i].value,10);}
+    if(maps.enseigne<0){toast('Mappe au moins l\'enseigne');return;}
+    var payload=[];
+    for(var j=0;j<parsedRows.length;j++){
+      var r=parsedRows[j];
+      var ens=(r[maps.enseigne]||'').trim();
+      if(!ens)continue;
+      payload.push({
+        ville:ville,type_commerce:type,enseigne:ens,
+        adresse:maps.adresse>=0?(r[maps.adresse]||'').trim():null,
+        tel:maps.tel>=0?cleanTel(r[maps.tel]):null,
+        email:maps.email>=0?(r[maps.email]||'').trim():null,
+        etat:'a_contacter'
+      });
+    }
+    if(!payload.length){toast('Rien à importer');return;}
+    fetch(BASE+'prospection',{method:'POST',headers:Object.assign({},H,{'Prefer':'return=minimal'}),body:JSON.stringify(payload)})
+      .then(function(r){if(r.ok){toast(payload.length+' commerces importés');document.getElementById('importBox').classList.remove('on');document.getElementById('csvFile').value='';document.getElementById('mapZone').style.display='none';load();}else{r.text().then(function(t){console.error(t);});toast('Erreur import');}})
+      .catch(function(){toast('Erreur réseau');});
+  };
+
+  function cleanTel(s){if(!s)return null;var t=s.replace(/[^0-9+]/g,'');return t||null;}
+
+  load();
+})();
+</script>
+</body>
+</html>
