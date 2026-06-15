@@ -3188,6 +3188,7 @@ var PROSP_VILLES=['Vence','Tourrettes-sur-Loup','Cagnes-sur-Mer','Carros','La Co
 
 function prospEtatObj(v){for(var i=0;i<PROSP_ETATS.length;i++){if(PROSP_ETATS[i].v===v)return PROSP_ETATS[i];}return PROSP_ETATS[0];}
 function prospEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function prospEtatColor(v){return prospEtatObj(v).c;}
 
 async function loadProspection(){
   var rows = await supaFetch('prospection','select=*&order=ville.asc,enseigne.asc');
@@ -3197,6 +3198,7 @@ async function loadProspection(){
 
 function renderProspection(){
   if(!state.prospection){ loadProspection(); return '<div class="page"><div class="page-header"><div class="page-title">&#128222; Prospection</div></div><div class="empty-block">Chargement…</div></div>'; }
+  if(!state.prospSort) state.prospSort={key:'enseigne',dir:1};
   var list = state.prospection.slice();
   var fq=(state.prospFilters&&state.prospFilters.q)||'';
   var fv=(state.prospFilters&&state.prospFilters.ville)||'';
@@ -3208,9 +3210,12 @@ function renderProspection(){
     if(fv&&r.ville!==fv)continue;
     if(ft&&r.type_commerce!==ft)continue;
     if(fe&&r.etat!==fe)continue;
-    if(fq){var hay=((r.enseigne||'')+' '+(r.ville||'')+' '+(r.contact_nom||'')+' '+(r.note||'')).toLowerCase();if(hay.indexOf(fq.toLowerCase())<0)continue;}
+    if(fq){var hay=((r.enseigne||'')+' '+(r.ville||'')+' '+(r.contact_nom||'')+' '+(r.note||'')+' '+(r.tel||'')).toLowerCase();if(hay.indexOf(fq.toLowerCase())<0)continue;}
     filtered.push(r);
   }
+  // tri
+  var sk=state.prospSort.key, sd=state.prospSort.dir;
+  filtered.sort(function(a,b){var x=(a[sk]==null?'':a[sk])+'',y=(b[sk]==null?'':b[sk])+'';return x.toLowerCase()<y.toLowerCase()?-sd:x.toLowerCase()>y.toLowerCase()?sd:0;});
   // KPIs
   var total=list.length,todo=0,contacted=0,interest=0,rdv=0;
   for(var k=0;k<list.length;k++){var e=list[k].etat;if(e==='a_contacter'||e==='a_relancer')todo++;if(e!=='a_contacter')contacted++;if(e==='interesse'||e==='rdv_pris'||e==='client')interest++;if(e==='rdv_pris'||e==='client')rdv++;}
@@ -3230,9 +3235,23 @@ function renderProspection(){
   html+=prospSelect('type',PROSP_TYPES,'Tous types',ft);
   html+=prospSelectEtat(fe);
   html+='<button class="btn" onclick="prospToggleImport()" style="background:#F5B544;color:#1a1205;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">＋ Ajouter</button>';
+  html+='<button class="btn" onclick="prospToggleScrap()" style="background:#3B5CC4;color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">⚡ Scraping Maps</button>';
   html+='</div>';
 
-  // Zone import (cachée par défaut)
+  // Zone scraping (cachée)
+  html+='<div id="prospScrap" style="display:none;background:rgba(59,92,196,.07);border:1px solid rgba(59,92,196,.4);border-radius:12px;padding:16px;margin-bottom:14px">';
+  html+='<div style="font-weight:800;margin-bottom:8px">⚡ Récupérer les commerces depuis Google Maps (sans extension)</div>';
+  html+='<ol style="font-size:13.5px;line-height:1.7;margin:0 0 10px 18px;padding:0">';
+  html+='<li>Ouvre <b>Google Maps</b>, cherche par ex. <code style="background:rgba(0,0,0,.25);padding:1px 6px;border-radius:5px">restaurant Vence</code>, scrolle toute la liste à gauche.</li>';
+  html+='<li>Appuie sur <b>F12</b> (ou clic droit → Inspecter) puis onglet <b>Console</b>.</li>';
+  html+='<li>Clique <b>« Copier le script »</b> ci-dessous, colle-le dans la Console, Entrée. Tout est copié automatiquement.</li>';
+  html+='<li>Reviens ici, clique <b>« ＋ Ajouter »</b>, colle (Ctrl+V), choisis ville + type, importe.</li>';
+  html+='</ol>';
+  html+='<button class="btn" onclick="prospCopyScript(this)" style="background:#00B4A0;color:#04201c;border:none;border-radius:9px;padding:10px 16px;font-weight:800;cursor:pointer">📋 Copier le script Google Maps</button>';
+  html+='<textarea id="prospScriptSrc" readonly style="position:absolute;left:-9999px;width:1px;height:1px">(function(){var out=[];document.querySelectorAll(\'[role="feed"] &gt; div\').forEach(function(el){var name=el.querySelector(\'.fontHeadlineSmall\');if(!name)return;var txt=el.innerText.split(\'\\n\').map(function(s){return s.trim();}).filter(Boolean);var nom=name.innerText.trim();var tel=\'\';txt.forEach(function(l){var d=l.replace(/[^0-9]/g,\'\');if(!tel&amp;&amp;d.length&gt;=9&amp;&amp;d.length&lt;=12&amp;&amp;/0\\d[\\s.]?\\d{2}/.test(l))tel=l;});var adr=\'\';txt.forEach(function(l){if(!adr&amp;&amp;/\\d+\\s|rue|avenue|av\\.|bd|boulevard|place|chemin|route|impasse/i.test(l)&amp;&amp;l!==nom)adr=l;});out.push(nom+(tel?\'\\n\'+tel:\'\')+(adr?\'\\n\'+adr:\'\'));});var res=out.join(\'\\n\\n\');console.log(res);copy(res);alert(out.length+\' commerces copies !\');})();</textarea>';
+  html+='</div>';
+
+  // Zone import (cachée)
   html+='<div id="prospImport" style="display:none;background:rgba(245,181,68,.06);border:1px dashed rgba(245,181,68,.4);border-radius:12px;padding:14px;margin-bottom:14px">';
   html+='<div style="font-weight:700;margin-bottom:6px">Coller une liste (Google Maps / manuel)</div>';
   html+='<div style="font-size:12.5px;color:var(--muted,#9aa6bd);margin-bottom:8px">1 commerce par bloc. Nom sur la 1re ligne, téléphone et adresse détectés. Séparez chaque commerce par une ligne vide.</div>';
@@ -3246,28 +3265,34 @@ function renderProspection(){
   // Tableau
   html+='<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
   html+='<thead><tr>'+
-    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Enseigne</th>'+
-    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Ville</th>'+
-    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Type</th>'+
-    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Tél</th>'+
-    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">État</th>'+
-    '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Contact</th>'+
+    prospTh('enseigne','Enseigne')+
+    prospTh('ville','Ville')+
+    prospTh('type_commerce','Type')+
+    prospTh('tel','Tél')+
+    prospTh('email','Email')+
+    prospTh('etat','État')+
+    prospTh('contact_nom','Contact')+
     '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd)">Note</th>'+
+    '<th style="width:30px"></th>'+
     '</tr></thead><tbody>';
   for(var j=0;j<filtered.length;j++){
     var p=filtered[j];var eo=prospEtatObj(p.etat);
-    var tel=p.tel?'<a href="tel:'+prospEsc(p.tel)+'" style="display:inline-flex;align-items:center;gap:4px;background:#00B4A0;color:#04201c;border-radius:7px;padding:6px 10px;font-weight:700;text-decoration:none;white-space:nowrap;font-size:13px">📞 '+prospEsc(p.tel)+'</a>':'<span style="color:var(--muted,#9aa6bd);font-size:12px">— sans n°</span>';
+    var tel=p.tel
+      ? '<a href="tel:'+prospEsc(p.tel)+'" style="display:inline-flex;align-items:center;gap:4px;background:#00B4A0;color:#04201c;border-radius:7px;padding:5px 9px;font-weight:700;text-decoration:none;white-space:nowrap;font-size:12.5px">📞 '+prospEsc(p.tel)+'</a>'
+      : '<input value="" placeholder="+ n°" onblur="if(this.value)prospUpdate('+p.id+',\'tel\',this.value)" style="width:90px;background:rgba(0,0,0,.15);border:1px solid var(--line,#2a3550);color:inherit;border-radius:6px;padding:5px;font-size:12.5px">';
     var sel='<select onchange="prospUpdate('+p.id+',\'etat\',this.value);this.style.background=prospEtatColor(this.value)" style="background:'+eo.c+';color:#fff;border:none;border-radius:16px;padding:6px 10px;font-weight:700;font-size:12px;cursor:pointer">';
     for(var m=0;m<PROSP_ETATS.length;m++){sel+='<option value="'+PROSP_ETATS[m].v+'"'+(PROSP_ETATS[m].v===p.etat?' selected':'')+'>'+PROSP_ETATS[m].l+'</option>';}
     sel+='</select>';
     html+='<tr style="border-top:1px solid var(--line,#2a3550)">'+
-      '<td style="padding:10px"><div style="font-weight:700">'+prospEsc(p.enseigne)+'</div><div style="font-size:11.5px;color:var(--muted,#9aa6bd)">'+prospEsc(p.adresse||'')+'</div></td>'+
-      '<td style="padding:10px;font-size:13px">'+prospEsc(p.ville)+'</td>'+
-      '<td style="padding:10px"><span style="font-size:11.5px;background:rgba(255,255,255,.06);border-radius:5px;padding:2px 7px">'+prospEsc(p.type_commerce)+'</span></td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.enseigne)+'" onblur="prospUpdate('+p.id+',\'enseigne\',this.value)" style="font-weight:700;width:150px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:4px" onfocus="prospFoc(this)" onmouseover="this.style.borderColor=\'rgba(255,255,255,.1)\'" onmouseout="if(document.activeElement!==this)this.style.borderColor=\'transparent\'"><div style="font-size:11.5px;color:var(--muted,#9aa6bd)"><input value="'+prospEsc(p.adresse)+'" placeholder="adresse" onblur="prospUpdate('+p.id+',\'adresse\',this.value)" style="width:150px;background:transparent;border:none;color:var(--muted,#9aa6bd);font-size:11.5px;padding:2px 4px"></div></td>'+
+      '<td style="padding:10px">'+prospVilleSel(p)+'</td>'+
+      '<td style="padding:10px">'+prospTypeSel(p)+'</td>'+
       '<td style="padding:10px">'+tel+'</td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.email)+'" placeholder="email" onblur="prospUpdate('+p.id+',\'email\',this.value)" style="width:130px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:12.5px" onfocus="prospFoc(this)"></td>'+
       '<td style="padding:10px">'+sel+'</td>'+
-      '<td style="padding:10px"><input value="'+prospEsc(p.contact_nom)+'" placeholder="Nom" onblur="prospUpdate('+p.id+',\'contact_nom\',this.value)" style="width:110px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:13px" onfocus="this.style.borderColor=\'var(--line,#2a3550)\';this.style.background=\'rgba(0,0,0,.2)\'"></td>'+
-      '<td style="padding:10px"><input value="'+prospEsc(p.note)+'" placeholder="Note…" onblur="prospUpdate('+p.id+',\'note\',this.value)" style="width:100%;min-width:140px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:13px" onfocus="this.style.borderColor=\'var(--line,#2a3550)\';this.style.background=\'rgba(0,0,0,.2)\'"></td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.contact_nom)+'" placeholder="Nom" onblur="prospUpdate('+p.id+',\'contact_nom\',this.value)" style="width:100px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:13px" onfocus="prospFoc(this)"></td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.note)+'" placeholder="Note…" onblur="prospUpdate('+p.id+',\'note\',this.value)" style="width:100%;min-width:120px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:13px" onfocus="prospFoc(this)"></td>'+
+      '<td style="padding:10px;text-align:center"><span onclick="prospDelete('+p.id+')" title="Supprimer" style="cursor:pointer;color:var(--muted,#9aa6bd);font-size:15px">✕</span></td>'+
       '</tr>';
   }
   html+='</tbody></table></div>';
@@ -3276,20 +3301,34 @@ function renderProspection(){
   return html;
 }
 function prospKpi(v,l){return '<div style="background:rgba(255,255,255,.04);border:1px solid var(--line,#2a3550);border-radius:12px;padding:12px 14px"><div style="font-size:22px;font-weight:800">'+v+'</div><div style="font-size:11px;color:var(--muted,#9aa6bd);text-transform:uppercase;margin-top:3px">'+l+'</div></div>';}
+function prospTh(key,label){var s=state.prospSort||{};var arr=s.key===key?(s.dir===1?' ▲':' ▼'):' ⇅';return '<th onclick="prospSort(\''+key+'\')" style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd);cursor:pointer;user-select:none;white-space:nowrap">'+label+'<span style="opacity:.6;font-size:10px">'+arr+'</span></th>';}
+function prospSort(key){if(!state.prospSort)state.prospSort={key:key,dir:1};else if(state.prospSort.key===key)state.prospSort.dir=-state.prospSort.dir;else{state.prospSort.key=key;state.prospSort.dir=1;}render();}
 function prospSelect(key,arr,allLbl,cur){var h='<select onchange="prospSetFilter(\''+key+'\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+allLbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'"'+(arr[i]===cur?' selected':'')+'>'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
 function prospSelectEtat(cur){var h='<select onchange="prospSetFilter(\'etat\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">Tous états</option>';for(var i=0;i<PROSP_ETATS.length;i++){h+='<option value="'+PROSP_ETATS[i].v+'"'+(PROSP_ETATS[i].v===cur?' selected':'')+'>'+PROSP_ETATS[i].l+'</option>';}return h+'</select>';}
 function prospSelectRaw(id,arr,lbl){var h='<select id="'+id+'" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+lbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'">'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
-function prospEtatColor(v){return prospEtatObj(v).c;}
-function prospSetFilter(key,val){if(!state.prospFilters)state.prospFilters={};state.prospFilters[key]=val;render();
-  // refocus recherche
-  if(key==='q'){setTimeout(function(){var el=document.getElementById('prospQ');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);}
-}
+function prospVilleSel(p){var h='<select onchange="prospUpdate('+p.id+',\'ville\',this.value)" style="background:transparent;border:1px solid transparent;color:inherit;font-size:13px;padding:4px;border-radius:6px;cursor:pointer" onmouseover="this.style.borderColor=\'rgba(255,255,255,.1)\'" onmouseout="this.style.borderColor=\'transparent\'">';for(var i=0;i<PROSP_VILLES.length;i++){h+='<option'+(PROSP_VILLES[i]===p.ville?' selected':'')+'>'+prospEsc(PROSP_VILLES[i])+'</option>';}return h+'</select>';}
+function prospTypeSel(p){var h='<select onchange="prospUpdate('+p.id+',\'type_commerce\',this.value)" style="background:rgba(255,255,255,.06);border:none;color:inherit;font-size:11.5px;padding:3px 7px;border-radius:5px;cursor:pointer">';for(var i=0;i<PROSP_TYPES.length;i++){h+='<option'+(PROSP_TYPES[i]===p.type_commerce?' selected':'')+'>'+prospEsc(PROSP_TYPES[i])+'</option>';}return h+'</select>';}
+function prospFoc(el){el.style.borderColor='var(--line,#2a3550)';el.style.background='rgba(0,0,0,.2)';el.onblur2=el.onblur;}
+function prospSetFilter(key,val){if(!state.prospFilters)state.prospFilters={};state.prospFilters[key]=val;render();if(key==='q'){setTimeout(function(){var el=document.getElementById('prospQ');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);}}
 function prospToggleImport(){var el=document.getElementById('prospImport');if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function prospToggleScrap(){var el=document.getElementById('prospScrap');if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function prospCopyScript(btn){
+  var el=document.getElementById('prospScriptSrc');
+  var script=el?el.value:'';
+  if(navigator.clipboard){navigator.clipboard.writeText(script).then(function(){toast('Script copié — colle-le dans la Console (F12) de Google Maps');});}
+  else{el.style.display='block';el.select();document.execCommand('copy');el.style.display='none';toast('Script copié');}
+}
 function prospUpdate(id,field,val){
   var body={};body[field]=val;body.updated_at=new Date().toISOString();
   if(field==='etat')body.pas_interesse=(val==='pas_interesse');
   fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)})
-    .then(function(r){if(r.ok){for(var i=0;i<state.prospection.length;i++){if(state.prospection[i].id===id){state.prospection[i][field]=val;}}toast('Enregistré');}else{toast('Erreur');}})
+    .then(function(r){if(r.ok){for(var i=0;i<state.prospection.length;i++){if(state.prospection[i].id===id){state.prospection[i][field]=val;if(field==='etat')state.prospection[i].pas_interesse=body.pas_interesse;}}toast('Enregistré');if(field==='etat'||field==='ville'||field==='type_commerce'||field==='tel')render();}else{toast('Erreur');}})
+    .catch(function(){toast('Erreur réseau');});
+}
+function prospDelete(id){
+  if(!confirm('Supprimer ce commerce de la liste ?'))return;
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'DELETE',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}})
+    .then(function(r){if(r.ok){state.prospection=state.prospection.filter(function(p){return p.id!==id;});toast('Supprimé');render();}else{toast('Erreur');}})
     .catch(function(){toast('Erreur réseau');});
 }
 function prospLooksTel(line){var d=line.replace(/[^0-9]/g,'');return d.length>=9&&d.length<=14&&/[0-9][\s.\-0-9]{8,}/.test(line);}
