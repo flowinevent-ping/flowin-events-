@@ -10,7 +10,7 @@
 <style>
   :root{--accent:#3B5CC4;--gold:#F5B544;--lilac:#8FA6F0;--ink:#080B16;--ink2:#05070F;
     --card:rgba(255,255,255,.045);--line:rgba(255,255,255,.10);--text:#F3F5FC;
-    --muted:rgba(243,245,252,.78);--faint:rgba(243,245,252,.34);--flowin:#8FA6F0}
+    --muted:rgba(243,245,252,.78);--faint:rgba(243,245,252,.55);--flowin:#8FA6F0}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#0a0a0f;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     display:flex;justify-content:center;padding:18px 0}
@@ -18,7 +18,7 @@
     color:var(--text);position:relative;overflow:hidden;border-radius:22px}
   .nds-app h1,.nds-app h2,.nds-app h3{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;
     font-weight:700;line-height:1.06;letter-spacing:-.015em}
-  .wrap{padding:0 22px}.sec{padding:34px 0;scroll-margin-top:96px}
+  .wrap{padding:0 22px}.sec{padding:26px 0;scroll-margin-top:90px}
   .ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .muted2{color:var(--muted);font-size:12px}
 
@@ -162,7 +162,10 @@
   .herologo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
   .herologo .mk{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);display:grid;place-items:center}
   .herologo .wm{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.4)}
-  .promo30{margin:26px 0 4px;background:rgba(59,92,196,.1);border:1px solid rgba(59,92,196,.3);border-radius:14px;padding:15px 16px;font-size:14px;line-height:1.55;color:var(--text)}
+  .promo30{display:flex;align-items:center;gap:11px;margin:22px 0 4px;background:linear-gradient(110deg,rgba(245,181,68,.14),rgba(245,181,68,.05));border:1px solid rgba(245,181,68,.42);border-radius:14px;padding:15px 16px;font-size:14.5px;line-height:1.5;color:var(--text);box-shadow:0 10px 30px -18px rgba(245,181,68,.5)}
+  .promo30::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(245,181,68,.25);flex-shrink:0;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .promo30 b{color:var(--gold);font-weight:800}
   .promo30 b{color:var(--accent);font-weight:700}
   .appwrap{margin-top:28px}
   .appbar{display:inline-block;font-size:11px;font-weight:700;color:var(--gold);background:rgba(245,181,68,.1);border:1px solid rgba(245,181,68,.3);border-radius:100px;padding:7px 13px;margin-bottom:14px}
