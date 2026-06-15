@@ -187,7 +187,7 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .hero h2{font-size:40px!important;line-height:1.12!important;max-width:780px;margin-left:auto;margin-right:auto}
   .hero p{font-size:19px!important;max-width:640px;margin-left:auto;margin-right:auto}
   .hero a,.hero button,.hero .btn,.hero .cta{max-width:520px;margin-left:auto;margin-right:auto}
-  nav,.nav,.topbar,.foot,.footer{max-width:1080px!important;margin-left:auto!important;margin-right:auto!important}
+  nav,.nav,.topbar,.foot,.footer,.menu{max-width:1080px!important;margin-left:auto!important;margin-right:auto!important}
   .ben{display:grid!important;grid-template-columns:1fr 1fr;gap:14px}
   .plist{grid-template-columns:1fr 1fr!important;gap:12px}
   .uses,.carousel{max-width:760px;margin-left:auto;margin-right:auto}
