@@ -170,6 +170,13 @@
   .oben p b{color:var(--text);font-weight:700}
   @media(min-width:860px){.oben{flex:0 0 30%}}
   .reassure{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+  .proofgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .proof{background:linear-gradient(160deg,rgba(59,92,196,.16),rgba(124,92,196,.05));border:1px solid rgba(59,92,196,.28);border-radius:16px;padding:18px 14px;text-align:center}
+  .proof .pv{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1;color:var(--accent)}
+  .proof .pv.g{color:var(--gold)}
+  .proof .pv.gr{color:#2FD89E}
+  .proof .pl{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.3}
+  .proofnote{font-size:13px;color:var(--text);font-weight:600;line-height:1.5;margin:16px 2px 0;text-align:center}
   .orgpd{font-size:11px;color:var(--faint);line-height:1.5;margin:4px 2px 16px;text-align:left}
   .sponsor-line{font-size:12.5px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.5}
   .sponsor-line a{color:var(--accent);font-weight:700;text-decoration:none}
@@ -456,6 +463,17 @@
         <div class="bstat"><div class="bv">22 000</div><div class="bl">abonnés newsletter</div></div>
       </div>
       <p class="lead" style="margin-top:16px">Un événement reconnu, des dizaines de milliers de visiteurs chaque année, une forte visibilité régionale.</p>
+
+      <div class="kick gold" style="margin-top:30px">Résultats prouvés</div>
+      <h2 class="hsec">Ce que ça a déjà <em class="g">rapporté</em></h2>
+      <p class="lead">Chiffres réels d’un pilote réalisé à Vence.</p>
+      <div class="proofgrid">
+        <div class="proof"><div class="pv">186</div><div class="pl">participants captés</div></div>
+        <div class="proof"><div class="pv g">74%</div><div class="pl">veulent rester en contact</div></div>
+        <div class="proof"><div class="pv">100%</div><div class="pl">de conversion au jeu</div></div>
+        <div class="proof"><div class="pv gr">66%</div><div class="pl">comptent revenir</div></div>
+      </div>
+      <p class="proofnote">Du flux qui passe sans laisser de trace, à une base de contacts qui vous revient.</p>
     </div>
   </div>
 
