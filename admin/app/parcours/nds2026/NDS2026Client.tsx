@@ -39,7 +39,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [answered, setAnswered] = useState(false)
   const [score, setScore] = useState(0)
   const [timer, setTimer] = useState(timerSec)
-  const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', age: '', cp: '', source: '', optin: false })
+  const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', age: '', cp: '', source: '', sexe: '', optin: false })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [ticket, setTicket] = useState('')
   const [saving, setSaving] = useState(false)
@@ -64,7 +64,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       setForm(f => ({ ...f,
         prenom: prof.prenom || f.prenom, nom: prof.nom || f.nom,
         email: prof.email || f.email, tel: prof.tel || f.tel,
-        cp: prof.cp || f.cp, age: prof.age || f.age }))
+        cp: prof.cp || f.cp, age: prof.age || f.age, sexe: prof.genre || f.sexe }))
     }
     // Cumul de tickets : nombre de stations NDS déjà jouées (1 ticket / station / jour)
     try {
@@ -182,7 +182,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers)
       : await writeJoueur({
           email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
-          code_postal: form.cp, age_tranche: form.age, decouverte: form.source || undefined,
+          code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined,
           score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
           source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers,
           optin: form.optin, optin_version: OPTIN_VERSION,
@@ -348,9 +348,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoCapitalize="none" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />{errors.email && <div className="err">{errors.email}</div>}</div>
               <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
               <div className="grid2" style={{ marginBottom: 12 }}>
+                <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option><option value="A">Autre</option></select></div>
                 <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-                <div><label className="label">Code postal</label><input className="input" inputMode="numeric" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
               </div>
+              <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
               <div><label className="label">Tu as connu le festival par…</label>
                 <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}>{s}</span>)}</div>
               </div>

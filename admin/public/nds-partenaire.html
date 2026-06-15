@@ -527,12 +527,12 @@
       <div class="wlabel" id="wlabel">Étape 1 / 4</div>
       <div id="w1">
         <h2 class="hsec" style="font-size:23px;margin-bottom:14px">Vos informations</h2>
-        <div class="field"><label class="flabel">Nom de l’établissement *</label><input class="finput" type="text" placeholder="Ex. Cave du Jardin"></div>
-        <div class="field"><label class="flabel">Catégorie *</label><select class="finput"><option>Restaurant · Bar</option><option>Caviste</option><option>Boutique · Mode</option><option>Bijouterie</option><option>Beauté · Bien-être</option><option>Hôtel</option><option>Institution</option><option>Autre</option></select></div>
-        <div class="field"><label class="flabel">Adresse *</label><input class="finput" type="text" placeholder="Rue, Vence"></div>
-        <div class="field"><label class="flabel">Votre nom *</label><input class="finput" type="text" placeholder="Prénom et nom"></div>
-        <div class="field"><label class="flabel">Email *</label><input class="finput" type="email" inputmode="email" placeholder="vous@exemple.fr"></div>
-        <div class="field"><label class="flabel">Téléphone *</label><input class="finput" type="tel" inputmode="tel" placeholder="06 00 00 00 00"></div>
+        <div class="field"><label class="flabel">Nom de l’établissement *</label><input class="finput" data-f="nom" type="text" placeholder="Ex. Cave du Jardin"></div>
+        <div class="field"><label class="flabel">Catégorie *</label><select class="finput" data-f="type"><option>Restaurant · Bar</option><option>Caviste</option><option>Boutique · Mode</option><option>Bijouterie</option><option>Beauté · Bien-être</option><option>Hôtel</option><option>Institution</option><option>Autre</option></select></div>
+        <div class="field"><label class="flabel">Adresse *</label><input class="finput" data-f="adresse" type="text" placeholder="Rue, Vence"></div>
+        <div class="field"><label class="flabel">Votre nom *</label><input class="finput" data-f="contact" type="text" placeholder="Prénom et nom"></div>
+        <div class="field"><label class="flabel">Email *</label><input class="finput" data-f="email" type="email" inputmode="email" placeholder="vous@exemple.fr"></div>
+        <div class="field"><label class="flabel">Téléphone *</label><input class="finput" data-f="tel" type="tel" inputmode="tel" placeholder="06 00 00 00 00"></div>
         <button class="btn" onclick="wizNext('w1',2)">Continuer →</button>
       </div>
       <div id="w2" hidden>
@@ -684,38 +684,48 @@
 (function(){
   var URL_='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/partenaires';
   var KEY_='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var LOGO_=null;
+  var SENT_=false;
+  function bindLogo(){
+    var inp=document.querySelector('#w2 input[type=file]'); if(!inp) return;
+    inp.addEventListener('change',function(){
+      var file=inp.files&&inp.files[0]; if(!file) return;
+      var rd=new FileReader();
+      rd.onload=function(){ LOGO_=rd.result; var dz=inp.closest('.dropzone'); if(dz){dz.style.borderColor='#2FD89E';dz.querySelector('.di').innerHTML='✓';} };
+      rd.readAsDataURL(file);
+    });
+  }
   function readForm(){
-    var ins=document.querySelectorAll('.finput'), v={nom:'',adresse:'',contact:'',email:'',tel:''}, i, inp, ph, ty;
-    for(i=0;i<ins.length;i++){
-      inp=ins[i]; if(inp.offsetParent===null) continue;
-      ph=(inp.getAttribute('placeholder')||'').toLowerCase(); ty=inp.type;
-      if(ty==='email') v.email=inp.value;
-      else if(ty==='tel') v.tel=inp.value;
-      else if(ph.indexOf('rue')>=0||ph.indexOf('adresse')>=0) v.adresse=inp.value;
-      else if(ph.indexOf('enseigne')>=0||ph.indexOf('cave')>=0||ph.indexOf('nom de')>=0) v.nom=inp.value;
-      else if(ph.indexOf('prénom')>=0||ph.indexOf('prenom')>=0) v.contact=inp.value;
-    }
+    var v={nom:'',type:'',adresse:'',contact:'',email:'',tel:''}, els=document.querySelectorAll('#w1 [data-f]'), i, el, k;
+    for(i=0;i<els.length;i++){ el=els[i]; k=el.getAttribute('data-f'); v[k]=el.value; }
     return v;
   }
   function send(){
+    if(SENT_) return;
     var v=readForm();
     if(!v.email||v.email.indexOf('@')<0||!v.tel) return;
     var em=v.email.toLowerCase().replace(/\s/g,''), now=new Date().toISOString();
     var body={
       id:'prosp-nds-'+em.replace(/[^a-z0-9]/g,'-').slice(0,36),
-      nom:v.nom||null, adresse:v.adresse||null, ville:'Vence',
+      nom:v.nom||null, type:v.type||null, adresse:v.adresse||null, ville:'Vence',
       contact_nom:v.contact||null, contact:v.contact||null,
       contact_email:em, email:em, contact_tel:v.tel||null, tel:v.tel||null,
+      image_url:LOGO_||null,
       super_event_id:'se-nds-2026', tags:['prospect','nds-landing'],
       statut_paiement:'prospect', actif:false, visible:false, en_avant:false,
       ts:now, created_at:now
     };
-    fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)});
+    SENT_=true;
+    fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)})
+      .catch(function(){SENT_=false;});
   }
+  if(document.readyState!=='loading') bindLogo(); else document.addEventListener('DOMContentLoaded',bindLogo);
   document.addEventListener('click',function(e){
     var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
-    if((b.textContent||'').toLowerCase().indexOf('envoyer')>=0) send();
+    var t=(b.textContent||'').toLowerCase();
+    if(t.indexOf('envoyer')>=0||t.indexOf('payer')>=0||(b.getAttribute('onclick')||'').indexOf('wizGo(4)')>=0) send();
   },true);
+  window.flowinSubmitPartner=send;
 })();
 </script>
 </body>
