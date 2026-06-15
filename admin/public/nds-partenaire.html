@@ -15,7 +15,7 @@
   body{background:#0a0a0f;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     display:flex;justify-content:center;min-height:100vh}
   @media(min-width:520px){body{padding:18px 0;align-items:center}}
-  .nds-app{--hdr:60px;width:100%;max-width:480px;height:100vh;height:100dvh;background:linear-gradient(180deg,var(--ink),var(--ink2));
+  .nds-app{--hdr:76px;width:100%;max-width:480px;height:100vh;height:100dvh;background:linear-gradient(180deg,var(--ink),var(--ink2));
     color:var(--text);position:relative;overflow:hidden;border-radius:22px}
   .nds-app h1,.nds-app h2,.nds-app h3{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;
     font-weight:700;line-height:1.06;letter-spacing:-.015em}
@@ -24,7 +24,6 @@
     .nds-app{max-width:1100px !important}
     .topbar{max-width:1100px}
     .hero{padding:64px 20px 44px}
-    .flow2{display:grid !important;grid-template-columns:1fr 1fr;gap:14px}
     .sec{padding:44px 0}
     .hsec{font-size:32px}
     .carousel{display:grid !important;grid-template-columns:1fr 1fr;overflow-x:visible !important;gap:18px}
@@ -37,23 +36,20 @@
     .hero{padding:64px 20px 44px}
     .hero h1{font-size:46px;max-width:760px}
     .hero .sub{font-size:18px;max-width:560px}
-    .vcards{display:grid !important;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:stretch}
     .vc{padding:24px}
     .bigstats{gap:16px}
     .promo30{max-width:640px}
   }
-  @media(min-width:560px) and (max-width:859px){
-    .vcards{display:grid !important;grid-template-columns:1fr 1fr;gap:14px}
-  }.sec{padding:26px 0;scroll-margin-top:90px}
+.sec{padding:26px 0;scroll-margin-top:90px}
   .ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .muted2{color:var(--muted);font-size:12px}
 
   .topbar{position:absolute;top:0;left:0;right:0;z-index:50;background:rgba(8,11,22,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-  .brandrow{display:flex;align-items:center;gap:12px;padding:0 18px;height:60px}
+  .brandrow{display:flex;align-items:center;gap:14px;padding:0 18px;height:76px}
   .nds-lock{display:flex;align-items:center;gap:8px}
   .nds-lock .moon{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 64% 34%,#fff,var(--gold));box-shadow:0 0 9px var(--gold)}
   .nds-lock .nm{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;letter-spacing:.14em}
-  .powered{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);text-align:right;line-height:1.3;margin-left:auto}
+  .powered{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);text-align:right;line-height:1.35;margin-left:auto}
   .powered b{color:var(--flowin);font-weight:700}
 
   .pburger{display:flex;flex-direction:column;gap:4px;width:40px;height:40px;align-items:center;justify-content:center;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid var(--line);cursor:pointer;flex-shrink:0}
@@ -133,11 +129,14 @@
   .rs{background:var(--card);border:1px solid var(--line);border-radius:100px;padding:8px 14px;font-size:12px;color:var(--muted)}
   .rs b{font-family:'Bricolage Grotesque';font-weight:700;color:var(--text);margin-right:4px}
 
-  .vcards{display:flex;flex-direction:column;gap:11px}
-  .vc{position:relative;background:linear-gradient(120deg,rgba(59,92,196,.10),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:20px;overflow:hidden}
+  .vcards{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 2px 10px;margin:0 -2px}
+  .vcards::-webkit-scrollbar{display:none}
+  .vc{scroll-snap-align:start;flex:0 0 80%;position:relative;background:linear-gradient(120deg,rgba(59,92,196,.10),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px 22px;overflow:hidden}
   .vc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),#7C5CC4)}
-  .vc .icw{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.15);margin-bottom:13px}
-  .vc h3{font-size:18px;font-weight:700;margin-bottom:6px}.vc p{font-size:15.5px;color:rgba(243,245,252,.8);line-height:1.5}
+  .vc .icw{width:68px;height:68px;border-radius:18px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.15);margin-bottom:16px}
+  .vc .icw .ic{width:32px;height:32px}
+  .vc h3{font-size:19px;font-weight:700;margin-bottom:8px}.vc p{font-size:15.5px;color:rgba(243,245,252,.8);line-height:1.5}
+  @media(min-width:860px){.vc{flex:0 0 31%}}
 
   .tirage{margin-top:26px;border:1px solid rgba(245,181,68,.28);background:rgba(245,181,68,.06);border-radius:18px;padding:20px}
   .tirage .th{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -160,9 +159,16 @@
   .offer ul{list-style:none;display:flex;flex-direction:column;gap:13px;margin-bottom:18px}
   .offer li{font-size:13.5px;position:relative;padding-left:30px;line-height:1.5;color:var(--muted)}
   .offer li b{font-weight:700;color:var(--text)}
-  .offer li:before{content:'';position:absolute;left:0;top:2px;width:19px;height:19px;border-radius:50%;background:var(--accent);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/12px no-repeat;
+  .offer li:before{content:'';position:absolute;left:0;top:2px;width:19px;height:19px;border-radius:50%;background:var(--accent);    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/12px no-repeat;
     mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/12px no-repeat}
+  .obenefits{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 2px 12px;margin:0 -2px 6px}
+  .obenefits::-webkit-scrollbar{display:none}
+  .oben{scroll-snap-align:start;flex:0 0 64%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:12px;min-height:140px}
+  .oben .obi{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.16);flex-shrink:0}
+  .oben .obi .ic{width:28px;height:28px}
+  .oben p{font-size:14.5px;line-height:1.4;color:var(--muted)}
+  .oben p b{color:var(--text);font-weight:700}
+  @media(min-width:860px){.oben{flex:0 0 30%}}
   .reassure{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
   .sponsor-line{font-size:12.5px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.5}
   .sponsor-line a{color:var(--accent);font-weight:700;text-decoration:none}
@@ -182,11 +188,12 @@
   .tript span{font-weight:600;font-size:12.5px;padding:7px 14px;border-radius:100px;border:1px solid var(--line);color:var(--muted)}
   .fllink{color:var(--flowin);text-decoration:none;font-weight:700;font-size:13px}
 
-  .nds-logo{display:flex;align-items:center;gap:9px}
-  .nds-logo .mk{width:30px;height:30px;border-radius:9px;background:linear-gradient(150deg,var(--accent),#5B79E0);display:grid;place-items:center;box-shadow:0 4px 12px -5px var(--accent)}
+  .nds-logo{display:flex;align-items:center;gap:11px}
+  .nds-logo .mk{width:40px;height:40px;border-radius:11px;background:linear-gradient(150deg,var(--accent),#5B79E0);display:grid;place-items:center;box-shadow:0 4px 12px -5px var(--accent)}
+  .nds-logo .mk svg{width:22px;height:22px}
   .nds-logo .wm{display:flex;flex-direction:column;line-height:1}
-  .nds-logo .wm b{font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;letter-spacing:.01em;color:var(--text)}
-  .nds-logo .wm s{font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--lilac);text-decoration:none;font-weight:700;margin-top:3px}
+  .nds-logo .wm b{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;letter-spacing:.01em;color:var(--text)}
+  .nds-logo .wm s{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--lilac);text-decoration:none;font-weight:700;margin-top:4px}
   .herologo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
   .herologo .mk{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);display:grid;place-items:center}
   .herologo .wm{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;letter-spacing:.01em;text-shadow:0 2px 10px rgba(0,0,0,.4)}
@@ -274,13 +281,15 @@
   .phonetop:before{content:'';width:52px;height:6px;border-radius:6px;background:rgba(255,255,255,.16)}
   .phonebody{padding:16px}
 
-  .flow2{margin-top:18px;display:flex;flex-direction:column;gap:11px}
-  .fcard{position:relative;display:flex;align-items:center;gap:14px;background:linear-gradient(100deg,rgba(59,92,196,.12),rgba(124,92,196,.04));border:1px solid var(--line);border-radius:16px;padding:14px 16px;overflow:hidden}
-  .fcard .fnum{position:absolute;right:14px;top:4px;font-family:'Bricolage Grotesque';font-weight:800;font-size:34px;color:rgba(255,255,255,.07);line-height:1}
-  .fcard .fico{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),#5B79E0);display:grid;place-items:center;flex-shrink:0;box-shadow:0 8px 18px -8px var(--accent)}
-  .fcard .fico .ic{stroke:#fff;stroke-width:1.9;fill:none}
-  .fcard h4{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;color:var(--text);line-height:1.15}
-  .fcard p{font-size:14.5px;color:var(--muted);margin-top:3px}
+  .flow2{margin-top:18px;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 2px 10px;margin-left:-2px;margin-right:-2px}
+  .flow2::-webkit-scrollbar{display:none}
+  .fcard{scroll-snap-align:start;flex:0 0 70%;position:relative;display:flex;flex-direction:column;gap:14px;background:linear-gradient(135deg,rgba(59,92,196,.14),rgba(124,92,196,.05));border:1px solid var(--line);border-radius:18px;padding:20px 18px;overflow:hidden;min-height:172px}
+  .fcard .fnum{position:absolute;right:16px;top:8px;font-family:'Bricolage Grotesque';font-weight:800;font-size:40px;color:rgba(255,255,255,.08);line-height:1}
+  .fcard .fico{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),#5B79E0);display:grid;place-items:center;flex-shrink:0;box-shadow:0 8px 18px -8px var(--accent)}
+  .fcard .fico .ic{stroke:#fff;stroke-width:1.9;fill:none;width:30px;height:30px}
+  .fcard h4{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;color:var(--text);line-height:1.18}
+  .fcard p{font-size:14.5px;color:var(--muted);margin-top:4px}
+  @media(min-width:860px){.fcard{flex:0 0 30%}}
   .bigstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
   .bstat{background:linear-gradient(160deg,rgba(59,92,196,.16),rgba(124,92,196,.05));border:1px solid rgba(59,92,196,.28);border-radius:18px;padding:18px 10px;text-align:center;box-shadow:0 14px 34px -22px var(--accent)}
   .bstat .bv{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;line-height:1;background:linear-gradient(120deg,#fff,#A9BEF2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -454,14 +463,14 @@
           <div class="onm">Une seule offre,<br>tout compris</div>
           <div class="opr"><span class="v">450 €</span><span class="u">HT</span></div>
         </div>
-        <ul>
-          <li><b>Présence officielle</b> dans l’opération partenaire</li>
-          <li><b>Mise en avant</b> de votre établissement</li>
-          <li><b>Animation</b> de votre clientèle</li>
-          <li><b>Participation</b> au Grand Tirage</li>
-          <li><b>Visibilité</b> sur les supports de l’opération</li>
-          <li><b>Accès aux statistiques</b> de participation</li>
-        </ul>
+        <div class="obenefits">
+          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><p><b>Présence officielle</b> dans l’opération partenaire</p></div>
+          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 17l-6.3 4.4L8 14 2 9.4h7.6z"/></svg></div><p><b>Mise en avant</b> de votre établissement</p></div>
+          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div><p><b>Animation</b> de votre clientèle</p></div>
+          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0M6 9a6 6 0 0 1 12 0M9 21h6M12 15v6"/></svg></div><p><b>Participation</b> au Grand Tirage</p></div>
+          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div><p><b>Visibilité</b> sur les supports de l’opération</p></div>
+          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12.5" y="7" width="3" height="10" rx="1"/><rect x="18" y="13" width="3" height="4" rx="1"/></svg></div><p><b>Accès aux statistiques</b> de participation</p></div>
+        </div>
         <button class="btn" data-go="onboard">Réserver ma participation</button>
         <p class="reassure">Une seule formule · sans engagement de durée</p>
       </div>
