@@ -44,7 +44,10 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
     if (!local) return
     setReco(true)
     ;(async () => {
-      if (local.prenom) setForm(f => ({ ...f, prenom: local.prenom as string }))
+      setForm(f => ({ ...f,
+        prenom: local.prenom || f.prenom, nom: local.nom || f.nom,
+        email: local.email || f.email, tel: local.tel || f.tel,
+        cp: local.cp || f.cp, age: local.age || f.age, genre: local.genre || f.genre }))
       const res = await claimJoueur(local, evId, 'QM')
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)

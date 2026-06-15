@@ -61,7 +61,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     const prof = getJoueurLocal()
     if (prof) {
       setRecurrent(prof)
-      if (prof.prenom) setForm(f => ({ ...f, prenom: prof.prenom as string }))
+      setForm(f => ({ ...f,
+        prenom: prof.prenom || f.prenom, nom: prof.nom || f.nom,
+        email: prof.email || f.email, tel: prof.tel || f.tel,
+        cp: prof.cp || f.cp, age: prof.age || f.age }))
     }
     // Cumul de tickets : nombre de stations NDS déjà jouées (1 ticket / station / jour)
     try {

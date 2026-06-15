@@ -591,8 +591,8 @@
       <h2 class="hsec">Une <em>question</em> ?</h2>
       <p class="lead">Laissez-nous un mot, on vous répond vite.</p>
       <div id="contactForm">
-        <div class="field"><label class="flabel">Votre nom *</label><input class="finput" type="text" placeholder="Prénom et nom"></div>
-        <div class="field"><label class="flabel">Email *</label><input class="finput" type="email" inputmode="email" placeholder="vous@exemple.fr"></div>
+        <div class="field"><label class="flabel">Votre nom *</label><input class="finput" type="text" name="name" autocomplete="name" placeholder="Prénom et nom"></div>
+        <div class="field"><label class="flabel">Email *</label><input class="finput" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" placeholder="vous@exemple.fr"></div>
         <div class="field"><label class="flabel">Votre message *</label><textarea class="ftext" placeholder="Votre question…"></textarea></div>
         <button class="btn" onclick="sendForm('contactForm','contactThanks')">Envoyer</button>
       </div>

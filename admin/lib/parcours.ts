@@ -93,10 +93,20 @@ export interface JoueurPayload {
 }
 
 /* Bloc 2 — mémorise l'identité joueur côté client pour la reconnaissance Super Event */
-export function rememberJoueur(id: string | undefined | null, email: string, prenom?: string): void {
-  if (!id || typeof window === 'undefined') return
+type JoueurProfile = { id?: string; email?: string; prenom?: string; nom?: string; tel?: string; cp?: string; age?: string; genre?: string }
+export function rememberJoueur(id: string | undefined | null, email: string, prenom?: string, extra?: Partial<JoueurProfile>): void {
+  if (typeof window === 'undefined') return
   try {
-    localStorage.setItem('flowin_joueur', JSON.stringify({ id, email, prenom: (prenom || '').trim() }))
+    let prev: Partial<JoueurProfile> = {}
+    try { const s = localStorage.getItem('flowin_joueur'); if (s) prev = JSON.parse(s) } catch { /* ignore */ }
+    const merged: Partial<JoueurProfile> = {
+      ...prev,
+      ...(id ? { id } : {}),
+      email: (email || prev.email || '').toLowerCase().trim(),
+      prenom: (prenom ?? prev.prenom ?? '').trim(),
+      ...(extra || {}),
+    }
+    localStorage.setItem('flowin_joueur', JSON.stringify(merged))
   } catch { /* ignore */ }
 }
 
@@ -217,7 +227,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
 
   if (dup?.length) {
     const d0 = dup[0] as { id?: string; ticket_code?: string }
-    rememberJoueur(d0.id, emailLower, payload.prenom)
+    rememberJoueur(d0.id, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
     return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
   }
 
@@ -286,7 +296,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     if (partErr) console.error('[writeJoueur] insert participation échoué:', partErr.message)
     /* Bloc 2 — Super Event : ticket + gain immédiat (uniquement si scan sur place) */
     await attribuerSuperEvent(joueurId, evId, today, geo.onSite)
-    rememberJoueur(joueurId, emailLower, payload.prenom)
+    rememberJoueur(joueurId, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
     /* Parrainage : si l'inscription vient d'un lien ?ref=, on l'enregistre (validé + attribué au commerce) */
     await captureParrainage(extId)
   }
@@ -295,13 +305,13 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
 }
 
 /* ── Bloc 2 — Compte joueur déjà créé (reconnaissance) ── */
-export function getJoueurLocal(): { id: string; email: string; prenom?: string } | null {
+export function getJoueurLocal(): { id: string; email: string; prenom?: string; nom?: string; tel?: string; cp?: string; age?: string; genre?: string } | null {
   if (typeof window === 'undefined') return null
   try {
     const s = localStorage.getItem('flowin_joueur')
     if (s) {
-      const o = JSON.parse(s) as { id?: string; email?: string; prenom?: string }
-      if (o.id && o.email) return { id: o.id, email: o.email, prenom: o.prenom }
+      const o = JSON.parse(s) as { id?: string; email?: string; prenom?: string; nom?: string; tel?: string; cp?: string; age?: string; genre?: string }
+      if (o.id && o.email) return { id: o.id, email: o.email, prenom: o.prenom, nom: o.nom, tel: o.tel, cp: o.cp, age: o.age, genre: o.genre }
     }
   } catch { /* ignore */ }
   return null
