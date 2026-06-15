@@ -79,6 +79,7 @@
 </head>
 <body>
 <div class="wrap">
+  <a href="/demos.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:13px;margin-bottom:12px">← Retour au hub</a>
   <h1>Prospection commerçants</h1>
   <div class="sub">Suivi des appels · Nuits du Sud 2026 & Flowin</div>
 
@@ -103,6 +104,17 @@
       <div class="preview" id="csvPreview"></div>
       <button class="btn" id="doImport" style="margin-top:10px">Importer ces lignes</button>
       <span id="impCount" class="meta" style="margin-left:10px"></span>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+    <h3>Ou : coller manuellement (texte brut)</h3>
+    <p>Colle ici une liste copiée (Google Maps, Pages Jaunes, ou tapée à la main). Un commerce par bloc. Format reconnu : <code>Nom</code> sur une ligne, <code>téléphone</code> et <code>adresse</code> détectés automatiquement. Sépare chaque commerce par une ligne vide.</p>
+    <textarea id="pasteBox" rows="6" style="width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font-family:inherit;font-size:13.5px" placeholder="Carrefour Market Vence&#10;04 93 58 00 00&#10;12 av des Poilus, 06140 Vence&#10;&#10;Boulangerie du Cours&#10;06 12 34 56 78&#10;5 place du Grand Jardin, Vence"></textarea>
+    <div style="margin-top:8px">
+      <select id="pasteVille"></select>
+      <select id="pasteType" style="margin-left:8px"></select>
+      <button class="btn" id="doPaste" style="margin-left:8px">Analyser & importer</button>
+      <span id="pasteCount" class="meta" style="margin-left:10px"></span>
     </div>
   </div>
 
@@ -356,6 +368,61 @@
   };
 
   function cleanTel(s){if(!s)return null;var t=s.replace(/[^0-9+]/g,'');return t||null;}
+
+  // ---- SCRAPING MANUEL (coller-parser) ----
+  fillSelect('pasteVille',VILLES,'— Ville —');
+  fillSelect('pasteType',TYPES,'— Type —');
+
+  function looksLikeTel(line){
+    var digits=line.replace(/[^0-9]/g,'');
+    return digits.length>=9 && digits.length<=14 && /[0-9][\s.\-0-9]{8,}/.test(line);
+  }
+  function looksLikeAddress(line){
+    return /\d{1,4}\s/.test(line) || /\b(rue|avenue|av\.|bd|boulevard|place|chemin|route|impasse|allée|quai|cours)\b/i.test(line) || /\b\d{5}\b/.test(line);
+  }
+
+  function parsePaste(text){
+    var blocks=text.replace(/\r/g,'').split(/\n\s*\n/);
+    var out=[];
+    for(var b=0;b<blocks.length;b++){
+      var raw=blocks[b].split('\n');
+      var lines=[];
+      for(var x=0;x<raw.length;x++){if(raw[x].trim())lines.push(raw[x].trim());}
+      if(!lines.length)continue;
+      var rec={enseigne:'',tel:null,adresse:null};
+      // 1re ligne = toujours l'enseigne (le nom vient en premier sur Maps/listes)
+      rec.enseigne=lines[0];
+      // lignes suivantes: tél ou adresse
+      for(var i=1;i<lines.length;i++){
+        var ln=lines[i];
+        if(!rec.tel && looksLikeTel(ln)){rec.tel=cleanTel(ln);continue;}
+        if(!rec.adresse && looksLikeAddress(ln)){rec.adresse=ln;continue;}
+        if(!rec.adresse){rec.adresse=ln;}
+      }
+      out.push(rec);
+    }
+    return out;
+  }
+
+  document.getElementById('pasteBox').oninput=function(){
+    var recs=parsePaste(this.value);
+    document.getElementById('pasteCount').textContent=recs.length?recs.length+' commerce(s) détecté(s)':'';
+  };
+
+  document.getElementById('doPaste').onclick=function(){
+    var ville=document.getElementById('pasteVille').value;
+    var type=document.getElementById('pasteType').value;
+    if(!ville||!type){toast('Choisis ville + type');return;}
+    var recs=parsePaste(document.getElementById('pasteBox').value);
+    if(!recs.length){toast('Aucun commerce détecté');return;}
+    var payload=[];
+    for(var i=0;i<recs.length;i++){
+      payload.push({ville:ville,type_commerce:type,enseigne:recs[i].enseigne,adresse:recs[i].adresse,tel:recs[i].tel,etat:'a_contacter'});
+    }
+    fetch(BASE+'prospection',{method:'POST',headers:HMIN,body:JSON.stringify(payload)})
+      .then(function(r){if(r.ok){toast(payload.length+' commerces ajoutés');document.getElementById('pasteBox').value='';document.getElementById('pasteCount').textContent='';document.getElementById('importBox').classList.remove('on');load();}else{toast('Erreur ajout');}})
+      .catch(function(){toast('Erreur réseau');});
+  };
 
   load();
 })();
