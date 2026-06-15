@@ -5153,14 +5153,34 @@ function modalQR(d){
     + '</div>';
 }
 // ============ BIBLIOTHÈQUE PARTENAIRES ============
+function ptOrigineLabel(src){
+  var s = (src||'').toLowerCase();
+  if(s==='carte' || s==='carte_vcard' || s==='vcard') return {t:'vCard / Carte', c:'teal'};
+  if(s.indexOf('landing_qr')>=0) return {t:'Landing QR', c:'purple'};
+  if(s.indexOf('landing')>=0) return {t:'Landing', c:'live'};
+  if(s.indexOf('nds')>=0) return {t:'Partenaire NDS', c:'purple'};
+  if(s) return {t:src, c:'past'};
+  return {t:'Saisie manuelle', c:'past'};
+}
+function ptDateLabel(p){
+  var d = p.createdAt || p.ts || '';
+  if(!d) return '-';
+  try { var dt=new Date(d); if(isNaN(dt.getTime())) return '-';
+    return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'})+' '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  } catch(e){ return '-'; }
+}
 function renderBiblioPartenaires(){
   const search = state.search.partenaires.toLowerCase();
   let list = DATA.partenaires.slice();
   if(search) list = list.filter(p=>p.nom.toLowerCase().includes(search)||p.secteur.toLowerCase().includes(search));
   list = applySort(list,'partenaires',{nom:p=>p.nom.toLowerCase(),type:p=>p.type||'',secteur:p=>p.secteur||'',
     ville:p=>(p.ville||'').toLowerCase(),tel:p=>(p.tel||''),email:p=>(p.email||'').toLowerCase(),
+    origine:p=>(p.source||'').toLowerCase(),
+    date:p=>(p.createdAt||p.ts||''),
     events:p=>p.events.length,
     lots:p=>DATA.lots.filter(l=>l.partenaireId===p.id).length});
+  /* Tri par défaut : contact le plus récent en premier (origine/date prioritaires) */
+  if(!state.sort.partenaires.key){ list.sort(function(a,b){ return (b.createdAt||b.ts||'').localeCompare(a.createdAt||a.ts||''); }); }
   const totalLots = DATA.lots.length;
   const valeurFournie = DATA.lots.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0);
 
@@ -5182,6 +5202,8 @@ function renderBiblioPartenaires(){
        + '</div>';
   html += '<table class="tbl"><thead><tr>'
        + '<th style="width:32px"><input type="checkbox" class="check"/></th>'
+       + thSort('partenaires','origine','Origine')
+       + thSort('partenaires','date','Date')
        + thSort('partenaires','nom','Partenaire')
        + thSort('partenaires','type','Catégorie')
        + thSort('partenaires','ville','Ville')
@@ -5191,8 +5213,11 @@ function renderBiblioPartenaires(){
   list.forEach(p => {
     const lots = DATA.lots.filter(l=>l.partenaireId===p.id);
     var typeChip = p.type==='National'?'<span class="chip purple">National</span>':p.type==='Récurrent'?'<span class="chip live">Récurrent</span>':'<span class="chip past">Local</span>';
+    var orig = ptOrigineLabel(p.source);
     html += '<tr onclick="openDrawerFor(\'partenaire\',\''+p.id+'\')">'
          + '<td onclick="event.stopPropagation()"><input type="checkbox" class="check"/></td>'
+         + '<td><span class="chip '+orig.c+'">'+esc(orig.t)+'</span></td>'
+         + '<td class="text-sm text-muted" style="white-space:nowrap">'+esc(ptDateLabel(p))+'</td>'
          + '<td><div style="font-weight:700">'+esc(p.nom)+'</div><div class="text-xs text-muted">'+esc(p.secteur||'')+'</div></td>'
          + '<td>'+typeChip+'</td>'
          + '<td class="text-sm">'+esc(p.ville||'-')+'</td>'
@@ -5204,7 +5229,7 @@ function renderBiblioPartenaires(){
          + '</div></td>'
          + '</tr>';
   });
-  if(list.length===0) html += '<tr><td colspan="8"><div class="empty-block mt-3"><div class="ico">🤝</div><div class="t">Aucun partenaire</div><div class="s">Ajoutez un premier partenaire via + Nouveau partenaire</div></div></td></tr>';
+  if(list.length===0) html += '<tr><td colspan="10"><div class="empty-block mt-3"><div class="ico">🤝</div><div class="t">Aucun partenaire</div><div class="s">Ajoutez un premier partenaire via + Nouveau partenaire</div></div></td></tr>';
   html += '</tbody></table>';
   html += '</div>';
   return html;
