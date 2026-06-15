@@ -13,11 +13,13 @@
     --muted:rgba(243,245,252,.78);--faint:rgba(243,245,252,.55);--flowin:#8FA6F0}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#0a0a0f;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
-    display:flex;justify-content:center;padding:18px 0}
-  .nds-app{width:100%;max-width:480px;min-height:100vh;background:linear-gradient(180deg,var(--ink),var(--ink2));
+    display:flex;justify-content:center;min-height:100vh}
+  @media(min-width:520px){body{padding:18px 0;align-items:center}}
+  .nds-app{--hdr:60px;width:100%;max-width:480px;height:100vh;height:100dvh;background:linear-gradient(180deg,var(--ink),var(--ink2));
     color:var(--text);position:relative;overflow:hidden;border-radius:22px}
   .nds-app h1,.nds-app h2,.nds-app h3{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;
     font-weight:700;line-height:1.06;letter-spacing:-.015em}
+  @media(min-width:520px){.nds-app{height:auto;min-height:88vh;max-height:92vh}}
   @media(min-width:860px){
     .nds-app{max-width:1100px !important}
     .topbar{max-width:1100px}
@@ -46,17 +48,13 @@
   .ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .muted2{color:var(--muted);font-size:12px}
 
-  .topbar{position:fixed;top:16px;left:16px;right:16px;z-index:50;background:rgba(8,11,22,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.nds-app{padding-top:96px}
-  .brandrow{display:flex;align-items:center;justify-content:space-between;padding:13px 20px 11px}
+  .topbar{position:absolute;top:0;left:0;right:0;z-index:50;background:rgba(8,11,22,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brandrow{display:flex;align-items:center;gap:12px;padding:0 18px;height:60px}
   .nds-lock{display:flex;align-items:center;gap:8px}
   .nds-lock .moon{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 64% 34%,#fff,var(--gold));box-shadow:0 0 9px var(--gold)}
   .nds-lock .nm{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;letter-spacing:.14em}
-  .powered{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);text-align:right;line-height:1.35}
+  .powered{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);text-align:right;line-height:1.3;margin-left:auto}
   .powered b{color:var(--flowin);font-weight:700}
-  .tabs{display:flex;gap:4px;padding:0 14px 10px;overflow-x:auto}
-  .tab{flex-shrink:0;font-family:'Plus Jakarta Sans';font-weight:600;font-size:13px;color:var(--muted);
-    padding:8px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;border:1px solid transparent;background:none}
-  .tab.on{color:#fff;background:linear-gradient(100deg,var(--accent),#5B79E0);box-shadow:0 6px 18px -8px var(--accent)}
 
   .pburger{display:flex;flex-direction:column;gap:4px;width:40px;height:40px;align-items:center;justify-content:center;border-radius:11px;background:rgba(255,255,255,.06);border:1px solid var(--line);cursor:pointer;flex-shrink:0}
   .pburger span{display:block;width:18px;height:2px;border-radius:2px;background:#fff}
@@ -69,10 +67,14 @@
   .pdrawer a{display:block;font-size:17px;font-weight:600;color:rgba(243,245,252,.84);text-decoration:none;padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;text-align:left;font-family:inherit}
   .pdrawer a.cta{margin-top:18px;background:linear-gradient(100deg,var(--accent),#5B79E0);color:#fff;text-align:center;border-radius:12px;border:none;padding:15px;font-weight:700}
 
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:auto}
+  /* === VRAIE NAVIGATION MULTI-VUES : 1 écran = 1 panel === */
   .content{padding:0}
-  .content .panel{display:block;animation:none}
-  .content .panel{scroll-margin-top:104px}
+  .content .panel{display:none}
+  .content .panel.active{display:block;padding-bottom:36px}
+  .nds-app .content{
+    position:absolute;top:var(--hdr);left:0;right:0;bottom:0;
+    overflow-y:auto;-webkit-overflow-scrolling:touch}
   /* tunnels (wizard onboard, sponsor, contact) = overlay plein écran */
   .tunnel{position:fixed;inset:0;z-index:80;background:var(--ink);overflow-y:auto;padding:0;display:none}
   .tunnel.on{display:block}
@@ -115,14 +117,16 @@
   .m3 .icw{width:48px;height:48px;flex-shrink:0;border-radius:13px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.16)}
   .m3 h3{font-size:14.5px;font-weight:600}.m3 p{font-size:12.5px;color:var(--muted);margin-top:2px}
 
-  .nights{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-  .night{background:var(--ink);padding:15px 16px;display:flex;align-items:center;gap:14px}
-  .night .date{flex-shrink:0;width:46px;text-align:center}
-  .night .dd{font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;line-height:1}
-  .night .jj{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--lilac);margin-top:3px;font-weight:700}
-  .night .bar{width:3px;align-self:stretch;border-radius:3px;background:var(--accent)}
-  .night .aa{font-family:'Bricolage Grotesque';font-weight:600;font-size:15px;line-height:1.15}
-  .night .tt{font-size:10.5px;color:var(--gold);font-weight:700;margin-top:2px}
+  .nights{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 2px 10px;margin:0 -2px}
+  .nights::-webkit-scrollbar{display:none}
+  .night{scroll-snap-align:start;flex:0 0 78%;background:linear-gradient(165deg,rgba(59,92,196,.14),var(--card));border:1px solid var(--line);border-radius:18px;padding:18px 18px 20px;display:flex;flex-direction:column;gap:14px;min-height:148px}
+  .night .date{display:flex;align-items:baseline;gap:8px}
+  .night .dd{font-family:'Bricolage Grotesque';font-weight:700;font-size:34px;line-height:1}
+  .night .jj{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--lilac);font-weight:700}
+  .night .bar{display:none}
+  .night .aa{font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;line-height:1.2}
+  .night .tt{font-size:12px;color:var(--gold);font-weight:700;margin-top:6px}
+  @media(min-width:860px){.night{flex:0 0 31%}}
   .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:14px}
   .edito{font-size:13px;color:var(--faint);font-style:italic;margin:-3px 0 20px}
   .reach{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:20px}
@@ -198,13 +202,13 @@
   .appcard{flex:0 0 80%;scroll-snap-align:center;background:linear-gradient(180deg,rgba(124,92,196,.10),rgba(59,92,196,.05));border:1px solid var(--line);border-radius:18px;padding:16px}
   .appcard .ach{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque';font-weight:700;font-size:14px;margin-bottom:14px}
   .appcard .ach .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
-  .ptiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .ptile{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:13px;padding:13px 10px;text-align:center}
-  .ptile .av{width:42px;height:42px;border-radius:11px;margin:0 auto 7px;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;color:#fff}
-  .ptile .pn{font-size:11.5px;font-weight:600;line-height:1.25;color:var(--text)}
+  .ptiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ptile{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:15px;padding:18px 12px;text-align:center}
+  .ptile .av{width:56px;height:56px;border-radius:14px;margin:0 auto 10px;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:#fff}
+  .ptile .pn{font-size:13px;font-weight:600;line-height:1.3;color:var(--text)}
   .ptile.reserved{border:1.5px dashed var(--gold);background:rgba(245,181,68,.06);display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .ptile.reserved .plus{width:38px;height:38px;border-radius:10px;border:1.5px dashed var(--gold);color:var(--gold);display:grid;place-items:center;font-size:22px;margin-bottom:7px}
-  .ptile.reserved .pn{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:10px}
+  .ptile.reserved .plus{width:48px;height:48px;border-radius:13px;border:1.5px dashed var(--gold);color:var(--gold);display:grid;place-items:center;font-size:26px;margin-bottom:9px}
+  .ptile.reserved .pn{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
   .appcap{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.45}
   .appcap b{color:var(--text)}
   .flogo{border:1.5px dashed var(--gold);border-radius:12px;padding:22px 16px;text-align:center;color:var(--gold);font-family:'Bricolage Grotesque';font-weight:700;font-size:14px;letter-spacing:.06em;margin:6px 0 14px;position:relative}
@@ -312,7 +316,6 @@
   <div class="panel" id="accueil" data-p="accueil">
     <div class="hero">
       <div class="bg"></div><div class="veil"></div>
-      <div class="herologo"><span class="mk"><svg viewBox="0 0 24 24" width="21" height="21"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#fff"/></svg></span><span class="wm">Nuits du Sud</span></div>
       <span class="badge">29e ÉDITION · 9 → 18 JUILLET 2026 · VENCE</span>
       <h1>Rejoignez l’opération partenaires des Nuits du Sud</h1>
       <p class="sub">Associez votre établissement à un événement majeur de la Côte d’Azur. Visibilité locale, public de saison, dynamique collective.</p>
@@ -611,12 +614,18 @@
     pClose();
     if(CONTENT.indexOf(t)>=0){
       closeTunnels();
+      var panels=document.querySelectorAll('.content .panel');
+      for(var i=0;i<panels.length;i++){panels[i].classList.remove('active');}
       var el=document.getElementById(t);
-      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+      if(el){el.classList.add('active');}
+      var c=document.querySelector('.content');
+      if(c){c.scrollTop=0;}
     } else {
       openTunnel(t);
     }
   }
+  // vue initiale
+  show('accueil');
   // ancres de contenu (data-to dans le drawer)
   var tos=document.querySelectorAll('[data-to]');
   for(var a=0;a<tos.length;a++){tos[a].addEventListener('click',function(){show(this.getAttribute('data-to'))})}
