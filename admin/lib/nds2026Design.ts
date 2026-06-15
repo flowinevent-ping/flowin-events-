@@ -85,7 +85,10 @@ export const NDS_CSS = `
   .chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:rgba(255,255,255,.62)}
   .chip.sel{background:rgba(224,33,138,.18);border-color:var(--magenta);color:#ffd5ec}
   .rgpd{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
-  .rgpd .rc{width:20px;height:20px;border-radius:5px;background:var(--magenta);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+  .rgpd-check{cursor:pointer;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.03);transition:border-color .2s,background .2s}
+  .rgpd-check.on{border-color:var(--magenta);background:rgba(232,33,107,.06)}
+  .rgpd .rc{width:22px;height:22px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;transition:background .2s,border-color .2s}
+  .rgpd-check.on .rc{background:var(--magenta);border-color:var(--magenta)}
   .rgpd .rc .ic{width:13px;height:13px;stroke-width:3}
   .btn{display:block;width:100%;text-align:center;border:none;border-radius:50px;padding:16px;font-family:'Manrope';font-weight:700;font-size:18px;color:#fff;cursor:pointer;text-decoration:none;margin-top:18px;background:linear-gradient(90deg,var(--magenta2),var(--magenta));box-shadow:0 10px 24px rgba(224,33,138,.35)}
   .btn-ghost{display:block;text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:50px;color:rgba(255,255,255,.82);font-size:14px;font-weight:700;padding:14px;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:10px}

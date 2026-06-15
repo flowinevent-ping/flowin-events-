@@ -11,6 +11,11 @@ interface Props extends ParcoursPageData { evId: string }
 
 const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
 
+/* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
+   Incrémenter la version à chaque modification du texte. */
+const OPTIN_VERSION = 'nds-2026-v1'
+const OPTIN_TEXT = "J'accepte que les Nuits du Sud, leurs commerçants partenaires et Flowin (qui opère l'animation) me recontactent par email ou SMS : infos du festival, offres et nouveautés des partenaires. Données jamais revendues. Désinscription à tout moment."
+
 /* Les 3 stations fixes du festival (carte). joue=true => station courante scannée */
 const STATIONS = [
   { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.72325, lng: 7.11120 },
@@ -34,7 +39,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [answered, setAnswered] = useState(false)
   const [score, setScore] = useState(0)
   const [timer, setTimer] = useState(timerSec)
-  const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', age: '', cp: '', source: '' })
+  const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', age: '', cp: '', source: '', optin: false })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [ticket, setTicket] = useState('')
   const [saving, setSaving] = useState(false)
@@ -148,6 +153,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (!form.prenom.trim()) errs.prenom = 'Requis'
     if (!form.nom.trim()) errs.nom = 'Requis'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
+    if (!form.optin) errs.optin = 'Merci de cocher cette case pour continuer'
     setErrors(errs)
     if (Object.keys(errs).length) return
     // Pas de questions configurées -> on saute le quiz pour éviter un écran vide
@@ -176,6 +182,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           code_postal: form.cp, age_tranche: form.age, decouverte: form.source || undefined,
           score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
           source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers,
+          optin: form.optin, optin_version: OPTIN_VERSION,
         })
     setSaving(false)
     // Si Supabase a renvoyé un ticket (ex. doublon avec code existant), on l'aligne
@@ -318,7 +325,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div><label className="label">Tu as connu le festival par…</label>
                 <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}>{s}</span>)}</div>
               </div>
-              <div className="rgpd"><span className="rc"><svg className="ic"><use href="#i-check" /></svg></span><div>J&apos;accepte d&apos;être recontacté(e) par le festival. Données jamais cédées.</div></div>
+              <div className={`rgpd rgpd-check${form.optin ? ' on' : ''}`} onClick={() => setForm(f => ({ ...f, optin: !f.optin }))} role="checkbox" aria-checked={form.optin} tabIndex={0}>
+                <span className="rc">{form.optin && <svg className="ic"><use href="#i-check" /></svg>}</span>
+                <div>{OPTIN_TEXT}</div>
+              </div>
+              {errors.optin && <div className="err">{errors.optin}</div>}
               <a className="btn" onClick={submitInscription}>C&apos;est parti</a>
             </div>
           </section>

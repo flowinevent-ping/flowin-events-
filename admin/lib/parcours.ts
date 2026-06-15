@@ -84,6 +84,8 @@ export interface JoueurPayload {
   lot_gagne?: string
   score_moy?: string
   bonus_reponses?: Record<string, unknown>
+  optin?: boolean
+  optin_version?: string
   events: string[]
   ticket_code: string
   source: string
@@ -252,8 +254,9 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     client_type: payload.client_type || 'btoc',
     lot_gagne: payload.lot_gagne || null,
     score_moy: scorePct,
-    optin: true,
+    optin: payload.optin !== false,
     optin_date: today,
+    optin_version: payload.optin_version || null,
     first_seen: today,
     last_seen: today,
     events: payload.events,
