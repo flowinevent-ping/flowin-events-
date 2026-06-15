@@ -60,8 +60,20 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#04210f;padding:11px 20px;border-radius:10px;font-weight:700;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99}
   .toast.on{opacity:1}
   @media(max-width:720px){
-    .hide-m{display:none}
     .wrap{padding:14px 10px 80px}
+    /* Tableau -> cartes empilées sur mobile */
+    table,thead,tbody,th,td,tr{display:block}
+    thead{display:none}
+    tbody tr{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;padding:13px 14px}
+    tbody tr:hover td{background:transparent}
+    td{border:none;padding:6px 0}
+    td:first-child{padding-top:0}
+    /* libellés devant chaque champ */
+    td[data-lbl]::before{content:attr(data-lbl);display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
+    .telbtn{width:100%;justify-content:center;padding:11px;font-size:15px}
+    .etat-sel{width:100%;padding:11px;font-size:14px}
+    .note-in{border:1px solid var(--line);background:var(--bg);padding:9px;font-size:14px}
+    .kpis{grid-template-columns:repeat(2,1fr)}
   }
 </style>
 </head>
@@ -99,11 +111,11 @@
       <thead>
         <tr>
           <th data-sort="enseigne">Enseigne</th>
-          <th data-sort="ville" class="hide-m">Ville</th>
-          <th data-sort="type_commerce" class="hide-m">Type</th>
+          <th data-sort="ville">Ville</th>
+          <th data-sort="type_commerce">Type</th>
           <th>Tél</th>
           <th data-sort="etat">État</th>
-          <th class="hide-m">Contact</th>
+          <th>Contact</th>
           <th>Note</th>
         </tr>
       </thead>
@@ -119,6 +131,7 @@
   var BASE='https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
   var H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+  var HMIN={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
 
   var ETATS=[
     {v:'a_contacter',l:'À contacter',c:'#5B6B8C'},
@@ -214,12 +227,12 @@
       sel+='</select>';
       html+='<tr>'+
         '<td><div class="ens">'+esc(r.enseigne)+'</div><div class="meta">'+esc(r.adresse||'')+'</div></td>'+
-        '<td class="hide-m">'+esc(r.ville)+'</td>'+
-        '<td class="hide-m"><span class="tag">'+esc(r.type_commerce)+'</span></td>'+
-        '<td>'+tel+'</td>'+
-        '<td>'+sel+'</td>'+
-        '<td class="hide-m"><input class="note-in" data-id="'+r.id+'" data-f="contact_nom" value="'+esc(r.contact_nom)+'" placeholder="Nom contact"></td>'+
-        '<td><input class="note-in" data-id="'+r.id+'" data-f="note" value="'+esc(r.note)+'" placeholder="Note…"></td>'+
+        '<td data-lbl="Ville">'+esc(r.ville)+'</td>'+
+        '<td data-lbl="Type"><span class="tag">'+esc(r.type_commerce)+'</span></td>'+
+        '<td data-lbl="Téléphone">'+tel+'</td>'+
+        '<td data-lbl="État">'+sel+'</td>'+
+        '<td data-lbl="Contact"><input class="note-in" data-id="'+r.id+'" data-f="contact_nom" value="'+esc(r.contact_nom)+'" placeholder="Nom contact"></td>'+
+        '<td data-lbl="Note"><input class="note-in" data-id="'+r.id+'" data-f="note" value="'+esc(r.note)+'" placeholder="Note…"></td>'+
         '</tr>';
     }
     tb.innerHTML=html;
@@ -246,7 +259,7 @@
 
   function patch(id,obj){
     obj.updated_at=new Date().toISOString();
-    fetch(BASE+'prospection?id=eq.'+id,{method:'PATCH',headers:Object.assign({},H,{'Prefer':'return=minimal'}),body:JSON.stringify(obj)})
+    fetch(BASE+'prospection?id=eq.'+id,{method:'PATCH',headers:HMIN,body:JSON.stringify(obj)})
       .then(function(r){if(r.ok){toast('Enregistré');for(var i=0;i<DATA.length;i++){if(DATA[i].id==id){for(var key in obj){DATA[i][key]=obj[key];}}}renderKpis();}else{toast('Erreur');}})
       .catch(function(){toast('Erreur réseau');});
   }
@@ -337,7 +350,7 @@
       });
     }
     if(!payload.length){toast('Rien à importer');return;}
-    fetch(BASE+'prospection',{method:'POST',headers:Object.assign({},H,{'Prefer':'return=minimal'}),body:JSON.stringify(payload)})
+    fetch(BASE+'prospection',{method:'POST',headers:HMIN,body:JSON.stringify(payload)})
       .then(function(r){if(r.ok){toast(payload.length+' commerces importés');document.getElementById('importBox').classList.remove('on');document.getElementById('csvFile').value='';document.getElementById('mapZone').style.display='none';load();}else{r.text().then(function(t){console.error(t);});toast('Erreur import');}})
       .catch(function(){toast('Erreur réseau');});
   };
