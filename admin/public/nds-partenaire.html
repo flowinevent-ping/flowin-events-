@@ -10,7 +10,7 @@
 <style>
   :root{--accent:#3B5CC4;--gold:#F5B544;--lilac:#8FA6F0;--ink:#080B16;--ink2:#05070F;
     --card:rgba(255,255,255,.045);--line:rgba(255,255,255,.10);--text:#F3F5FC;
-    --muted:rgba(243,245,252,.62);--faint:rgba(243,245,252,.34);--flowin:#8FA6F0}
+    --muted:rgba(243,245,252,.78);--faint:rgba(243,245,252,.34);--flowin:#8FA6F0}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#0a0a0f;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     display:flex;justify-content:center;padding:18px 0}
@@ -18,7 +18,7 @@
     color:var(--text);position:relative;overflow:hidden;border-radius:22px}
   .nds-app h1,.nds-app h2,.nds-app h3{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;
     font-weight:700;line-height:1.06;letter-spacing:-.015em}
-  .wrap{padding:0 22px}.sec{padding:52px 0;scroll-margin-top:104px}
+  .wrap{padding:0 22px}.sec{padding:34px 0;scroll-margin-top:96px}
   .ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .muted2{color:var(--muted);font-size:12px}
 
@@ -106,9 +106,10 @@
   .rs b{font-family:'Bricolage Grotesque';font-weight:700;color:var(--text);margin-right:4px}
 
   .vcards{display:flex;flex-direction:column;gap:11px}
-  .vc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .vc{position:relative;background:linear-gradient(120deg,rgba(59,92,196,.10),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:20px;overflow:hidden}
+  .vc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),#7C5CC4)}
   .vc .icw{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.15);margin-bottom:13px}
-  .vc h3{font-size:18px;font-weight:700;margin-bottom:6px}.vc p{font-size:14.5px;color:var(--muted);line-height:1.5}
+  .vc h3{font-size:18px;font-weight:700;margin-bottom:6px}.vc p{font-size:15.5px;color:rgba(243,245,252,.8);line-height:1.5}
 
   .tirage{margin-top:26px;border:1px solid rgba(245,181,68,.28);background:rgba(245,181,68,.06);border-radius:18px;padding:20px}
   .tirage .th{display:flex;align-items:center;gap:10px;margin-bottom:14px}
