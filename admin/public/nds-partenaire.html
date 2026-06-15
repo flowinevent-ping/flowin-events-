@@ -660,8 +660,9 @@
       openTunnel(t);
     }
   }
-  // vue initiale
-  show('accueil');
+  // vue initiale (ou tunnel direct via ?go=onboard pour QR de souscription en présentation)
+  var _qs=(function(){try{return new URLSearchParams(window.location.search).get('go')||''}catch(e){return ''}})();
+  if(_qs){ show(_qs); } else { show('accueil'); }
   // ancres de contenu (data-to dans le drawer)
   var tos=document.querySelectorAll('[data-to]');
   for(var a=0;a<tos.length;a++){tos[a].addEventListener('click',function(){show(this.getAttribute('data-to'))})}
