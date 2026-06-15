@@ -3308,8 +3308,7 @@ function renderProspection(){
   return html;
 }
 function prospKpi(v,l){return '<div style="background:rgba(255,255,255,.04);border:1px solid var(--line,#2a3550);border-radius:12px;padding:12px 14px"><div style="font-size:22px;font-weight:800">'+v+'</div><div style="font-size:11px;color:var(--muted,#9aa6bd);text-transform:uppercase;margin-top:3px">'+l+'</div></div>';}
-function prospTh(key,label){return '<th style="text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:var(--muted,#9aa6bd);white-space:nowrap">'+label+'</th>';}
-function prospSort(key){}
+
 function prospSelect(key,arr,allLbl,cur){var h='<select onchange="prospSetFilter(\''+key+'\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+allLbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'"'+(arr[i]===cur?' selected':'')+'>'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
 function prospSelectEtat(cur){var h='<select onchange="prospSetFilter(\'etat\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">Tous états</option>';for(var i=0;i<PROSP_ETATS.length;i++){h+='<option value="'+PROSP_ETATS[i].v+'"'+(PROSP_ETATS[i].v===cur?' selected':'')+'>'+PROSP_ETATS[i].l+'</option>';}return h+'</select>';}
 function prospSelectRaw(id,arr,lbl){var h='<select id="'+id+'" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+lbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'">'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
