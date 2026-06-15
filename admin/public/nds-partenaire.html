@@ -133,8 +133,8 @@
   .vcards::-webkit-scrollbar{display:none}
   .vc{scroll-snap-align:start;flex:0 0 80%;position:relative;background:linear-gradient(120deg,rgba(59,92,196,.10),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:24px 22px;overflow:hidden}
   .vc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),#7C5CC4)}
-  .vc .icw{width:68px;height:68px;border-radius:18px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.15);margin-bottom:16px}
-  .vc .icw .ic{width:32px;height:32px}
+  .vc .icw{width:68px;height:68px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#5B79E0);box-shadow:0 8px 18px -8px var(--accent);margin-bottom:16px}
+  .vc .icw .ic{width:32px;height:32px;stroke:#fff}
   .vc h3{font-size:19px;font-weight:700;margin-bottom:8px}.vc p{font-size:15.5px;color:rgba(243,245,252,.8);line-height:1.5}
   @media(min-width:860px){.vc{flex:0 0 31%}}
 
@@ -151,11 +151,11 @@
   .note{margin-top:20px;font-size:12.5px;color:var(--lilac);background:rgba(59,92,196,.1);border:1px solid rgba(59,92,196,.26);border-radius:12px;padding:13px 15px;line-height:1.5}
 
   .offer{border:1.5px solid var(--accent);border-radius:20px;padding:24px;background:rgba(59,92,196,.08);box-shadow:0 16px 40px -22px var(--accent)}
-  .oh{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
-  .onm{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;max-width:195px;line-height:1.18}
-  .opr{text-align:right;white-space:nowrap}
-  .opr .v{font-family:'Bricolage Grotesque';font-weight:700;font-size:30px;color:var(--accent);display:block;line-height:1}
-  .opr .u{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+  .oh{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .onm{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;max-width:100%;line-height:1.18}
+  .opr{text-align:left;white-space:nowrap;display:flex;align-items:baseline;gap:7px}
+  .opr .v{font-family:'Bricolage Grotesque';font-weight:700;font-size:34px;color:var(--accent);line-height:1}
+  .opr .u{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
   .offer ul{list-style:none;display:flex;flex-direction:column;gap:13px;margin-bottom:18px}
   .offer li{font-size:13.5px;position:relative;padding-left:30px;line-height:1.5;color:var(--muted)}
   .offer li b{font-weight:700;color:var(--text)}
@@ -164,8 +164,8 @@
   .obenefits{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 2px 12px;margin:0 -2px 6px}
   .obenefits::-webkit-scrollbar{display:none}
   .oben{scroll-snap-align:start;flex:0 0 72%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:12px;min-height:150px}
-  .oben .obi{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;color:var(--accent);background:rgba(59,92,196,.16);flex-shrink:0}
-  .oben .obi .ic{width:28px;height:28px}
+  .oben .obi{width:54px;height:54px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#5B79E0);box-shadow:0 8px 18px -8px var(--accent);flex-shrink:0}
+  .oben .obi .ic{width:28px;height:28px;stroke:#fff}
   .oben p{font-size:14.5px;line-height:1.4;color:var(--muted)}
   .oben p b{color:var(--text);font-weight:700}
   @media(min-width:860px){.oben{flex:0 0 30%}}
@@ -352,9 +352,9 @@
       <div class="recap" style="margin-top:26px">
         <div class="recap-h">Pourquoi rejoindre l’opération ?</div>
         <div class="vcards">
-          <div class="vc"><div class="icw"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Attirez de nouveaux clients</h3><p>Les festivaliers vous découvrent pendant toute la durée du festival.</p></div>
-          <div class="vc"><div class="icw"><svg class="ic" viewBox="0 0 24 24"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 8a4 4 0 0 1 0 8"/></svg></div><h3>Valorisez votre commerce</h3><p>Gagnez en visibilité auprès d’un public local et de saison, sur les supports de l’opération.</p></div>
           <div class="vc"><div class="icw"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.9 15.7 7.1M8.3 13.1 15.7 16.9"/></svg></div><h3>Rejoignez un réseau local actif</h3><p>Commerces, entreprises et institutions fédérés autour du même événement.</p></div>
+          <div class="vc"><div class="icw"><svg class="ic" viewBox="0 0 24 24"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 8a4 4 0 0 1 0 8"/></svg></div><h3>Valorisez votre commerce</h3><p>Gagnez en visibilité auprès d’un public local et de saison, sur les supports de l’opération.</p></div>
+          <div class="vc"><div class="icw"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Développez votre clientèle</h3><p>Les festivaliers vous découvrent pendant toute la durée du festival.</p></div>
         </div>
       </div>
       <button class="btn" style="margin:16px 0 6px" data-go="offre">Rejoindre l’opération partenaire</button>
