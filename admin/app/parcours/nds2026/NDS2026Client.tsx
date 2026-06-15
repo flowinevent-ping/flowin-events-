@@ -6,7 +6,7 @@ import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 
-type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires'
+type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil'
 interface Props extends ParcoursPageData { evId: string }
 
 const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
@@ -151,7 +151,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     }, 1100)
   }, [answered, qIdx, questions])
 
-  function submitInscription() {
+  async function submitInscription() {
     const errs: Record<string, string> = {}
     if (!form.prenom.trim()) errs.prenom = 'Requis'
     if (!form.nom.trim()) errs.nom = 'Requis'
@@ -159,8 +159,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (!form.optin) errs.optin = 'Merci de cocher cette case pour continuer'
     setErrors(errs)
     if (Object.keys(errs).length) return
-    // Pas de questions configurées -> on saute le quiz pour éviter un écran vide
-    setScreen(questions.length > 0 ? 'quiz' : 'resultats')
+    await persist()
+    setScreen('final')
   }
 
   async function persist(): Promise<string> {
@@ -200,14 +200,20 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     return finalTicket
   }
 
-  async function finaliser() { await persist(); setScreen('final') }
+  async function finaliser() {
+    // Profil déjà connu (récurrent) -> on enregistre directement, sinon on demande le profil
+    if (recurrent) { await persist(); setScreen('final') }
+    else setScreen('inscription')
+  }
 
   async function finishBonus() {
-    await persist(); setBonusDone(true); setScreen('final')
+    setBonusDone(true)
+    if (recurrent) { await persist(); setScreen('final') }
+    else setScreen('inscription')
   }
 
   const q = questions[qIdx]
-  const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires' || (screen === 'onboard' && saved)
+  const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires' || screen === 'profil' || (screen === 'onboard' && saved)
 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
@@ -297,9 +303,28 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </>
               ) : (
                 <>
+                  <div style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '15px 16px', marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-spark" /></svg>
+                      Comment ça marche
+                    </div>
+                    {[
+                      { n: '1', t: 'Réponds au quiz', s: 'Quelques questions sur le festival' },
+                      { n: '2', t: 'Gagne ton ticket', s: '1 ticket pour le tirage de ce soir' },
+                      { n: '3', t: 'Flashe les 3 stations', s: 'Chaque station = 1 ticket de plus' },
+                    ].map(step => (
+                      <div key={step.n} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '6px 0' }}>
+                        <span style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 13, fontWeight: 800, color: '#fff' }}>{step.n}</span>
+                        <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,.9)' }}><b style={{ color: '#fff' }}>{step.t}</b> — {step.s}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.1)', fontSize: 12.5, color: 'rgba(255,255,255,.7)' }}>
+                      <svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-clock" /></svg>
+                      Tirage au sort chaque soir · 3 places à gagner
+                    </div>
+                  </div>
                   <a className="btn" onClick={() => {
-                    if (recurrent) { setScreen(questions.length > 0 ? 'quiz' : 'resultats'); return }
-                    setScreen('inscription')
+                    setScreen(questions.length > 0 ? 'quiz' : 'resultats')
                   }}>{recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant'}</a>
                   <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
                 </>
@@ -312,8 +337,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr purple on">
             <div className="pad">
               <div className="dhead">
-                <div className="back" onClick={() => setScreen('onboard')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
-                <div><div className="dtitle">On y va !</div><div className="dsub">Juste une fois, pour recevoir tes gains</div></div>
+                <div className="back" onClick={() => setScreen('resultats')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
+                <div><div className="dtitle">Dernière étape !</div><div className="dsub">Tes infos pour valider ton ticket et recevoir tes gains</div></div>
               </div>
               <div className="grid2" style={{ marginBottom: 12 }}>
                 <div><label className="label">Prénom</label><input className="input" value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} />{errors.prenom && <div className="err">{errors.prenom}</div>}</div>
@@ -333,7 +358,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div>{OPTIN_TEXT}</div>
               </div>
               {errors.optin && <div className="err">{errors.optin}</div>}
-              <a className="btn" onClick={submitInscription}>C&apos;est parti</a>
+              <a className="btn" onClick={submitInscription}>{saving ? 'Enregistrement…' : 'Valider mon ticket →'}</a>
             </div>
           </section>
         )}
@@ -342,7 +367,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr purple on">
             <div className="pad">
               <div className="dhead">
-                <div className="back" onClick={() => setScreen('inscription')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
+                <div className="back" onClick={() => setScreen('onboard')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
                 <div style={{ flex: 1 }}><div className="dtitle">{nom}</div><div className="dsub">Quiz · {qIdx + 1} / {questions.length}</div></div>
                 <div style={{ marginLeft: 'auto', fontWeight: 800, fontSize: 15, color: '#fff', background: timer <= 5 ? 'rgba(239,68,68,.35)' : 'rgba(255,255,255,.18)', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{timer}</div>
               </div>
@@ -381,7 +406,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {bonusQs.length > 0 && !bonusDone && <a className="double" onClick={() => { setBonusIdx(0); setScreen('bonus') }}><svg className="ic"><use href="#i-spark" /></svg> Double tes chances</a>}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>3 places pour ton prochain concert</b></div></div>
               <div className="infocard b-green"><svg className="ic"><use href="#i-checkc" /></svg><div>Participation enregistrée&#8239;!</div></div>
-              <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : 'Voir mon ticket →'}</a>
+              <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? 'Voir mon ticket →' : 'Valider et recevoir mon ticket →')}</a>
             </div>
           </section>
         )}
@@ -422,7 +447,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de 12h30.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
-              <a className="reslink" onClick={() => setScreen('tickets')}>Mes tickets</a>
+              <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
             </div>
           </section>
         )}
@@ -521,10 +546,40 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           </section>
         )}
 
+        {screen === 'profil' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="pad padnav">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 18 }}>
+                <span style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 28, height: 28, color: '#fff' }}><use href="#i-user" /></svg></span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226' }}>{form.prenom || recurrent?.prenom || 'Mon profil'}</div>
+                  <div style={{ fontSize: 13, color: '#7a708a' }}>{form.email || recurrent?.email || 'Participant Nuits du Sud'}</div>
+                </div>
+              </div>
+
+              <div className="infocard b-magenta"><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code ticket : <b>{ticket || '—'}</b></div></div>
+              <div className="infocard b-green" style={{ marginTop: 10 }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir</div></div>
+
+              <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>
+                  <svg className="ic" style={{ width: 17, height: 17, color: 'var(--magenta)' }}><use href="#i-spark" /></svg>
+                  Tu restes informé
+                </div>
+                <div style={{ fontSize: 13, color: '#52455e', lineHeight: 1.5 }}>Tu recevras les infos du festival, les offres et nouveautés des commerçants partenaires. Désinscription à tout moment.</div>
+              </div>
+
+              <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
+              <a className="double" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg> Les partenaires &amp; leurs offres</a>
+              <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
+            </div>
+          </section>
+        )}
+
         {navOn && (
           <nav className="nav on" id="nav">
+            <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
             <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
-            <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Mes tickets</button>
+            <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
             <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
           </nav>
         )}
