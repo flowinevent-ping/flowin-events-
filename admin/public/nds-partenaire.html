@@ -18,7 +18,25 @@
     color:var(--text);position:relative;overflow:hidden;border-radius:22px}
   .nds-app h1,.nds-app h2,.nds-app h3{font-family:'Bricolage Grotesque','Plus Jakarta Sans',sans-serif;
     font-weight:700;line-height:1.06;letter-spacing:-.015em}
-  .wrap{padding:0 22px}.sec{padding:26px 0;scroll-margin-top:90px}
+  @media(min-width:860px){
+    .nds-app{max-width:1100px !important}
+    .topbar{max-width:1100px}
+  }
+  .wrap{padding:0 22px;max-width:1040px;margin-left:auto;margin-right:auto}
+
+  /* === RESPONSIVE DESKTOP : vrai site multi-colonnes === */
+  @media(min-width:860px){
+    .hero{padding:64px 20px 44px}
+    .hero h1{font-size:46px;max-width:760px}
+    .hero .sub{font-size:18px;max-width:560px}
+    .vcards{display:grid !important;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:stretch}
+    .vc{padding:24px}
+    .bigstats{gap:16px}
+    .promo30{max-width:640px}
+  }
+  @media(min-width:560px) and (max-width:859px){
+    .vcards{display:grid !important;grid-template-columns:1fr 1fr;gap:14px}
+  }.sec{padding:26px 0;scroll-margin-top:90px}
   .ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
   .muted2{color:var(--muted);font-size:12px}
 
