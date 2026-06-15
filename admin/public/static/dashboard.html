@@ -3199,6 +3199,9 @@ async function loadProspection(){
 function renderProspection(){
   if(!state.prospection){ loadProspection(); return '<div class="page"><div class="page-header"><div class="page-title">&#128222; Prospection</div></div><div class="empty-block">Chargement…</div></div>'; }
   if(!state.prospSort) state.prospSort={key:'enseigne',dir:1};
+  // cache listes ville/type (1 fois par render au lieu de 2x par ligne)
+  _prospVilleCache=prospUniqVals('ville',PROSP_VILLES).sort();
+  _prospTypeCache=prospUniqVals('type_commerce',PROSP_TYPES).sort();
   var list = state.prospection.slice();
   var fq=(state.prospFilters&&state.prospFilters.q)||'';
   var fv=(state.prospFilters&&state.prospFilters.ville)||'';
@@ -3231,8 +3234,8 @@ function renderProspection(){
   // Barre outils
   html+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center">';
   html+='<input id="prospQ" placeholder="Rechercher…" value="'+prospEsc(fq)+'" oninput="prospSetFilter(\'q\',this.value)" style="flex:1;min-width:150px;padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit">';
-  html+=prospSelect('ville',prospUniqVals('ville',PROSP_VILLES).sort(),'Toutes villes',fv);
-  html+=prospSelect('type',prospUniqVals('type_commerce',PROSP_TYPES).sort(),'Tous types',ft);
+  html+=prospSelect('ville',_prospVilleCache||prospUniqVals('ville',PROSP_VILLES),'Toutes villes',fv);
+  html+=prospSelect('type',_prospTypeCache||prospUniqVals('type_commerce',PROSP_TYPES),'Tous types',ft);
   html+=prospSelectEtat(fe);
   html+='<button class="btn" onclick="prospToggleImport()" style="background:#F5B544;color:#1a1205;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">＋ Ajouter</button>';
   html+='<button class="btn" onclick="prospToggleScrap()" style="background:#3B5CC4;color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">⚡ Scraping Maps</button>';
@@ -3266,8 +3269,9 @@ function renderProspection(){
   html+='<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
   html+='<thead><tr>'+
     prospTh('enseigne','Enseigne')+
-    prospTh('ville','Ville')+
     prospTh('type_commerce','Type')+
+    prospTh('ville','Ville')+
+    prospTh('cp','CP')+
     prospTh('tel','Tél')+
     prospTh('email','Email')+
     prospTh('etat','État')+
@@ -3285,8 +3289,9 @@ function renderProspection(){
     sel+='</select>';
     html+='<tr style="border-top:1px solid var(--line,#2a3550)">'+
       '<td style="padding:10px"><input value="'+prospEsc(p.enseigne)+'" onblur="prospUpdate('+p.id+',\'enseigne\',this.value)" style="font-weight:700;width:150px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:4px" onfocus="prospFoc(this)" onmouseover="this.style.borderColor=\'rgba(255,255,255,.1)\'" onmouseout="if(document.activeElement!==this)this.style.borderColor=\'transparent\'"><div style="font-size:11.5px;color:var(--muted,#9aa6bd)"><input value="'+prospEsc(p.adresse)+'" placeholder="adresse" onblur="prospUpdate('+p.id+',\'adresse\',this.value)" style="width:150px;background:transparent;border:none;color:var(--muted,#9aa6bd);font-size:11.5px;padding:2px 4px"></div></td>'+
-      '<td style="padding:10px">'+prospVilleSel(p)+'</td>'+
       '<td style="padding:10px">'+prospTypeSel(p)+'</td>'+
+      '<td style="padding:10px">'+prospVilleSel(p)+'</td>'+
+      '<td style="padding:10px"><input value="'+prospEsc(p.cp)+'" placeholder="CP" onblur="prospUpdate('+p.id+',\'cp\',this.value)" style="width:58px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:12.5px" onfocus="prospFoc(this)"></td>'+
       '<td style="padding:10px">'+tel+'</td>'+
       '<td style="padding:10px"><input value="'+prospEsc(p.email)+'" placeholder="email" onblur="prospUpdate('+p.id+',\'email\',this.value)" style="width:130px;background:transparent;border:1px solid transparent;color:inherit;border-radius:6px;padding:5px;font-size:12.5px" onfocus="prospFoc(this)"></td>'+
       '<td style="padding:10px">'+sel+'</td>'+
@@ -3306,10 +3311,11 @@ function prospSort(key){if(!state.prospSort)state.prospSort={key:key,dir:1};else
 function prospSelect(key,arr,allLbl,cur){var h='<select onchange="prospSetFilter(\''+key+'\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+allLbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'"'+(arr[i]===cur?' selected':'')+'>'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
 function prospSelectEtat(cur){var h='<select onchange="prospSetFilter(\'etat\',this.value)" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">Tous états</option>';for(var i=0;i<PROSP_ETATS.length;i++){h+='<option value="'+PROSP_ETATS[i].v+'"'+(PROSP_ETATS[i].v===cur?' selected':'')+'>'+PROSP_ETATS[i].l+'</option>';}return h+'</select>';}
 function prospSelectRaw(id,arr,lbl){var h='<select id="'+id+'" style="padding:9px 12px;border-radius:9px;border:1px solid var(--line,#2a3550);background:rgba(255,255,255,.04);color:inherit"><option value="">'+lbl+'</option>';for(var i=0;i<arr.length;i++){h+='<option value="'+prospEsc(arr[i])+'">'+prospEsc(arr[i])+'</option>';}return h+'</select>';}
+var _prospVilleCache=null,_prospTypeCache=null;
 function prospUniqVals(field,base){var seen={},out=[];var i;for(i=0;i<base.length;i++){var b=base[i];if(b&&!seen[b]){seen[b]=1;out.push(b);}}var arr=(state.prospection||[]);for(i=0;i<arr.length;i++){var v=arr[i][field];if(v!=null){v=(''+v).trim();if(v&&!seen[v]){seen[v]=1;out.push(v);}}}return out;}
 function prospOptionsHtml(values,cur){var h='';var found=false;var i;cur=(cur==null?'':(''+cur).trim());for(i=0;i<values.length;i++){var v=values[i];var s=(v===cur);if(s)found=true;h+='<option'+(s?' selected':'')+'>'+prospEsc(v)+'</option>';}if(!found&&cur){h='<option selected>'+prospEsc(cur)+'</option>'+h;}return h;}
-function prospVilleSel(p){var vals=prospUniqVals('ville',PROSP_VILLES);var h='<select onchange="prospUpdate('+p.id+',\'ville\',this.value)" style="background:transparent;border:1px solid transparent;color:inherit;font-size:13px;padding:4px;border-radius:6px;cursor:pointer" onmouseover="this.style.borderColor=\'rgba(255,255,255,.1)\'" onmouseout="this.style.borderColor=\'transparent\'">';return h+prospOptionsHtml(vals,p.ville)+'</select>';}
-function prospTypeSel(p){var vals=prospUniqVals('type_commerce',PROSP_TYPES);var h='<select onchange="prospUpdate('+p.id+',\'type_commerce\',this.value)" style="background:rgba(255,255,255,.06);border:none;color:inherit;font-size:11.5px;padding:3px 7px;border-radius:5px;cursor:pointer">';return h+prospOptionsHtml(vals,p.type_commerce)+'</select>';}
+function prospVilleSel(p){var vals=_prospVilleCache||prospUniqVals('ville',PROSP_VILLES);var h='<select onchange="prospUpdate('+p.id+',\'ville\',this.value)" style="background:transparent;border:1px solid transparent;color:inherit;font-size:13px;padding:4px;border-radius:6px;cursor:pointer" onmouseover="this.style.borderColor=\'rgba(255,255,255,.1)\'" onmouseout="this.style.borderColor=\'transparent\'">';return h+prospOptionsHtml(vals,p.ville)+'</select>';}
+function prospTypeSel(p){var vals=_prospTypeCache||prospUniqVals('type_commerce',PROSP_TYPES);var h='<select onchange="prospUpdate('+p.id+',\'type_commerce\',this.value)" style="background:rgba(255,255,255,.06);border:none;color:inherit;font-size:11.5px;padding:3px 7px;border-radius:5px;cursor:pointer">';return h+prospOptionsHtml(vals,p.type_commerce)+'</select>';}
 function prospFoc(el){el.style.borderColor='var(--line,#2a3550)';el.style.background='rgba(0,0,0,.2)';el.onblur2=el.onblur;}
 function prospSetFilter(key,val){if(!state.prospFilters)state.prospFilters={};state.prospFilters[key]=val;render();if(key==='q'){setTimeout(function(){var el=document.getElementById('prospQ');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);}}
 function prospToggleImport(){var el=document.getElementById('prospImport');if(el)el.style.display=el.style.display==='none'?'block':'none';}
