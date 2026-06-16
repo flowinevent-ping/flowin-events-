@@ -259,6 +259,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         const icon = LL.divIcon({ html, className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz] })
         LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => setFiche(c))
       })
+      // Position du joueur (géoloc) — affichée sur les deux vues
+      if (typeof navigator !== 'undefined' && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          if (cancelled || mapObjRef.current !== map) return
+          const uhtml = '<div style="width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.25)"></div>'
+          const uicon = LL.divIcon({ html: uhtml, className: '', iconSize: [18, 18], iconAnchor: [9, 9] })
+          LL.marker([pos.coords.latitude, pos.coords.longitude], { icon: uicon, zIndexOffset: 1000 }).addTo(map).bindPopup('Tu es ici')
+        }, () => {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 })
+      }
       setTimeout(() => { try { map.invalidateSize() } catch {} }, 120)
     }).catch(() => { /* CDN bloqué : la liste de stations reste affichée en fallback */ })
 
@@ -440,10 +449,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
         .ndsbody .logotrack{display:flex;gap:14px;width:max-content;padding:16px 12px;align-items:center;animation:logoscroll 52s linear infinite}
         .ndsbody .logoband:active .logotrack{animation-play-state:paused}
-        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:11px 20px;color:#7C2D92;font-weight:700;font-size:14.5px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:64px}
-        .ndsbody .logoslot img{max-height:46px;max-width:140px;object-fit:contain;display:block}
-        .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:132px;justify-content:center;font-size:13.5px;font-weight:800;letter-spacing:.01em}
-        .ndsbody .logoband-inline{margin:18px 0 4px}
+        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:12px 22px;color:#7C2D92;font-weight:700;font-size:15px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:78px}
+        .ndsbody .logoslot img{max-height:58px;max-width:172px;object-fit:contain;display:block}
+        .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:152px;justify-content:center;font-size:14px;font-weight:800;letter-spacing:.01em}
+        .ndsbody .logoband-inline{margin:6px 0 2px}
         .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:5px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
         .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:12px 8px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;background:transparent;color:#7C2D92}
         .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
@@ -687,15 +696,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="map-fake">
               <div className="map-real" ref={mapRef} />
               <div className="map-list">
-                {mapView === 'partenaires' && (
-                  commerces.length > 0 ? commerces.map(c => (
-                    <button className="stn" key={c.id} onClick={() => setFiche(c)}>
-                      <span className="em">{c.image_url ? <img src={c.image_url} alt="" style={{ width: 42, height: 42, borderRadius: 12, objectFit: 'cover' }} /> : <svg className="ic"><use href="#i-store" /></svg>}</span>
-                      <div style={{ minWidth: 0 }}><div className="nm">{c.nom}</div><div className="ou">{[c.adresse, c.ville].filter(Boolean).join(', ') || 'Voir la fiche'}</div></div>
-                      {c.tickets_par_scan ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>+{c.tickets_par_scan} 🎟</span> : <span className="tg" style={{ background: '#f3eef8', color: '#7C2D92' }}>Voir</span>}
-                    </button>
-                  )) : <div style={{ background: '#fff', borderRadius: 14, padding: 18, textAlign: 'center', color: '#7a708a', fontSize: 13.5, fontWeight: 600 }}>Nos partenaires arrivent très bientôt.</div>
-                )}
                 <div className="map-switch">
                   <button onClick={() => setMapView('stations')} className={mapView === 'stations' ? 'on' : ''}>Pendant le festival</button>
                   <button onClick={() => setMapView('partenaires')} className={mapView === 'partenaires' ? 'on' : ''}>Chez les partenaires</button>
@@ -730,16 +730,20 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-sheet2">
                   <button onClick={() => setFiche(null)} aria-label="Fermer" style={{ position: 'absolute', top: 14, right: 16, background: '#f1edf5', border: 'none', color: '#1a1020', borderRadius: 999, width: 32, height: 32, fontSize: 18, cursor: 'pointer' }}>×</button>
                   {fiche.image_url ? <img src={fiche.image_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} /> : null}
-                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 2 }}>{fiche.nom}</div>
-                  {fiche.adresse || fiche.ville ? <div style={{ fontSize: 13.5, color: '#52455e', marginBottom: 12 }}>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</div> : null}
-                  <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}>Le jeu continue chez nos partenaires&nbsp;! Rends-toi sur place{fiche.tickets_par_scan ? ' et flashe leur QR pour gagner des tickets en plus' : ' pour profiter de leur offre'}.</div>
+                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>{fiche.nom}</div>
+                  {fiche.adresse || fiche.ville ? (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
+                      <svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0, marginTop: 2 }}><use href="#i-map" /></svg>
+                      <span><b style={{ color: '#1a1226' }}>Le lieu — </b>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</span>
+                    </div>
+                  ) : null}
+                  <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}><b>Le jeu — </b>{fiche.tickets_par_scan ? `Rends-toi sur place et flashe le QR du commerce pour gagner +${fiche.tickets_par_scan} ticket${fiche.tickets_par_scan > 1 ? 's' : ''} pour le tirage.` : "Rends-toi sur place et profite de l'offre partenaire."}</div>
                   {fiche.latitude && fiche.longitude ? (
                     <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }}>
                       <svg className="ic" style={{ width: 16, height: 16, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
                     </a>
                   ) : null}
                   {fiche.promo_text ? <div style={{ background: '#fff4e6', color: '#c2410c', borderRadius: 12, padding: '10px 13px', fontWeight: 700, fontSize: 13.5, marginBottom: 12 }}>{fiche.promo_text}</div> : null}
-                  {fiche.tickets_par_scan ? <div style={{ fontSize: 13.5, color: '#16a34a', fontWeight: 700, marginBottom: 12 }}>+{fiche.tickets_par_scan} ticket{fiche.tickets_par_scan > 1 ? 's' : ''} en venant ici</div> : null}
                   {fiche.site_web || fiche.instagram || fiche.facebook ? (
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       {fiche.site_web ? <a className="reslink" href={fiche.site_web} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Site web</a> : null}
