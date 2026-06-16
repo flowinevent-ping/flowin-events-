@@ -67,11 +67,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [sheetPart, setSheetPart] = useState<number | null>(null)
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<unknown>(null)
+  const [placeMode, setPlaceMode] = useState(false)
+  const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
+  const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
+
+  useEffect(() => {
+    try { if (new URLSearchParams(window.location.search).get('place') === '1') setPlaceMode(true) } catch {}
+  }, [])
   const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
-  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string; ou?: string } | null>(null)
+  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
   const [bandPartners, setBandPartners] = useState<{ id: string; nom: string; image_url: string | null; emoji: string | null }[]>([])
@@ -237,7 +244,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       LL.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
       // Stations : vert = validé (joué) · jaune clignotant = à jouer · ★ = station courante
-      if (mapView === 'stations') STATIONS.forEach(st => {
+      if (mapView === 'stations' || placeMode) STATIONS.forEach(st => {
         const cur = st.id === evId
         let done = false
         try { done = !!localStorage.getItem(`flowin_played_${st.id}`) } catch {}
@@ -246,9 +253,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         const mark = cur ? '★' : (done ? '✓' : '')
         const html = `<div class="${cls}" style="width:34px;height:34px;border-radius:50%;background:${bg};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px">${mark}</div>`
         const icon = LL.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] })
-        LL.marker([st.lat, st.lng], { icon })
-          .addTo(map)
-          .on('click', () => { if (cur) setScreen('onboard'); else setScanTarget({ nom: st.nom, lat: st.lat, lng: st.lng, msg: st.msg, ou: st.ou }) })
+        const g0 = geoRef.current[st.id]
+        const mk = LL.marker([g0 ? g0.lat : st.lat, g0 ? g0.lng : st.lng], { icon, draggable: placeMode }).addTo(map)
+        if (placeMode) {
+          mk.on('dragend', (e: { target: { getLatLng: () => { lat: number; lng: number } } }) => {
+            const ll = e.target.getLatLng()
+            geoRef.current = { ...geoRef.current, [st.id]: { lat: ll.lat, lng: ll.lng } }
+            setGeo({ ...geoRef.current })
+          })
+        } else {
+          mk.on('click', () => { if (cur) setScreen('onboard'); else setScanTarget({ nom: st.nom, lat: st.lat, lng: st.lng, msg: st.msg, ou: st.ou, done }) })
+        }
       })
 
       // Commerces partenaires actifs (vue v_nds_commerces_carte) : clic -> fiche
@@ -275,7 +290,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       cancelled = true
       if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
     }
-  }, [screen, evId, commerces, mapView])
+  }, [screen, evId, commerces, mapView, placeMode])
 
   const handleAnswer = useCallback((idx: number) => {
     if (answered) return
@@ -702,10 +717,33 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </div>
               </div>
             </div>
+            {placeMode && (
+              <div style={{ position: 'absolute', left: 12, right: 12, bottom: 150, zIndex: 1200, background: '#1a1226', color: '#fff', borderRadius: 14, padding: '12px 14px', boxShadow: '0 10px 30px rgba(0,0,0,.4)' }}>
+                <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 6 }}>Mode placement — glisse les 4 points sur la carte</div>
+                {STATIONS.map(st => { const g = geo[st.id]; return <div key={st.id} style={{ fontSize: 11.5, opacity: .85, fontVariantNumeric: 'tabular-nums' }}>{st.nom} : {(g ? g.lat : st.lat).toFixed(5)}, {(g ? g.lng : st.lng).toFixed(5)}</div> })}
+                <button onClick={() => { const out = STATIONS.map(st => { const g = geo[st.id]; return { id: st.id, lat: g ? +g.lat.toFixed(6) : st.lat, lng: g ? +g.lng.toFixed(6) : st.lng } }); try { navigator.clipboard.writeText(JSON.stringify(out)) } catch {} }} style={{ marginTop: 9, width: '100%', background: '#E0218A', border: 'none', color: '#fff', borderRadius: 10, padding: '10px 14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>Copier les positions</button>
+              </div>
+            )}
             {scanTarget && (
               <>
                 <div className="pt-dim2" onClick={() => setScanTarget(null)} />
                 <div className="pt-sheet2">
+                  {scanTarget.done ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 8 }}>
+                        <span style={{ width: 30, height: 30, borderRadius: '50%', background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href="#i-checkc" /></svg></span>
+                        <div style={{ fontWeight: 800, fontSize: 18 }}>« {scanTarget.nom} » déjà jouée</div>
+                      </div>
+                      <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 14, background: '#e9f9ef', border: '1px solid #bbf7d0', borderRadius: 12, padding: '12px 14px' }}>Tu as déjà joué cette station aujourd&apos;hui. File vers une <b>autre station</b> pour gagner un ticket de plus au tirage&nbsp;!</div>
+                      {scanTarget.lat && scanTarget.lng ? (
+                        <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 0 }}>
+                          <svg className="ic" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: -3 }}><use href="#i-map" /></svg>Y retourner (Maps)
+                        </a>
+                      ) : null}
+                      <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Fermer</a>
+                    </>
+                  ) : (
+                  <>
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: scanTarget.ou ? 2 : 6 }}>Direction « {scanTarget.nom} »</div>
                   {scanTarget.ou ? (
                     <div style={{ fontSize: 13.5, color: '#7a708a', fontWeight: 600, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-map" /></svg>{scanTarget.ou}</div>
@@ -721,6 +759,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     </a>
                   ) : null}
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Plus tard</a>
+                  </>
+                  )}
                 </div>
               </>
             )}
