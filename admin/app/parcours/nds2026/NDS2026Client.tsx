@@ -402,9 +402,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
         .ndsbody .foot{color:#9a8fa6 !important}
         /* B — bandeau hero a hauteur fixe avec image NDS d'origine (onboard uniquement). L'image vit dans .hero (pas dans .stage scrollable) ; le voile garantit la lisibilite du label+logo et le fondu vers le theme clair. La prize-card chevauche le bas via margin:-56px d'origine. */
-        .ndsbody .scr.on .hero{position:relative;background:#190a25 url(/nds/bg-stage.webp) center 32%/cover no-repeat;padding:18px 16px 68px;display:flex;flex-direction:column;align-items:center;text-align:center}
+        .ndsbody .scr.on .hero{position:relative;background:#190a25 url(/nds/bg-stage.webp) center 32%/cover no-repeat;padding:22px 20px 70px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
         .ndsbody .scr.on .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,6,24,.34) 0%,rgba(15,6,24,.04) 38%,rgba(15,6,24,.52) 100%);pointer-events:none}
-        .ndsbody .scr.on .htop,.ndsbody .scr.on .hlogo{position:relative;z-index:1}
+        .ndsbody .scr.on .hlogo{position:relative;z-index:1}
         /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
         .ndsbody .logotrack{display:flex;gap:10px;width:max-content;padding:12px 10px;align-items:center;animation:logoscroll 26s linear infinite}
@@ -420,7 +420,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {screen === 'onboard' && (
           <section className={`scr on${saved ? ' padnav' : ''}`}>
             <div className="hero">
-              <div className="htop"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ verticalAlign: -1, marginRight: 5 }}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" /></svg>VENCE</div>
               <img className="hlogo" src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" />
             </div>
             <div className="stage">
