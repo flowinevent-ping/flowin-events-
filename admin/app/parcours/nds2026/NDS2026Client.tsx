@@ -365,7 +365,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
         .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        .ndsbody .padnav{padding-bottom:150px}
+        .ndsbody .padnav{padding-bottom:172px}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .footdock{position:sticky;bottom:0;z-index:1000;display:flex;flex-direction:column;width:100%}
         .ndsbody .footdock .nav{position:static}
@@ -374,7 +374,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:150px;z-index:600;display:flex;flex-direction:column;gap:10px}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:172px;z-index:600;display:flex;flex-direction:column;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
         .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -424,10 +424,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr.on .hero .prize{position:relative;z-index:1;margin:0 !important}
         /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-        .ndsbody .logotrack{display:flex;gap:10px;width:max-content;padding:12px 10px;align-items:center;animation:logoscroll 26s linear infinite}
+        .ndsbody .logotrack{display:flex;gap:14px;width:max-content;padding:16px 12px;align-items:center;animation:logoscroll 52s linear infinite}
         .ndsbody .logoband:active .logotrack{animation-play-state:paused}
-        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:11px;padding:8px 16px;color:#7C2D92;font-weight:700;font-size:12px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:7px;height:44px}
-        .ndsbody .logoslot img{max-height:28px;max-width:92px;object-fit:contain;display:block}
+        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:11px 20px;color:#7C2D92;font-weight:700;font-size:14.5px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:64px}
+        .ndsbody .logoslot img{max-height:46px;max-width:140px;object-fit:contain;display:block}
         @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
         @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
       ` }} />
@@ -683,26 +683,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       <svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>
                       Flasher le QR d&apos;une station
                     </button>
-                    {STATIONS.map(s => {
-                      const cur = s.id === evId
-                      let done = false
-                      try { done = !!localStorage.getItem(`flowin_played_${s.id}`) } catch {}
-                      return (
-                        <button
-                          className={`stn${cur ? ' cur' : ''}`}
-                          key={s.id}
-                          onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom, lat: s.lat, lng: s.lng, msg: s.msg, ou: s.ou }) }}
-                        >
-                          <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
-                          <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
-                          {cur
-                            ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>Tu es ici</span>
-                            : done
-                              ? <span className="tg" style={{ background: '#eef0ff', color: '#5b21b6' }}>Ticket gagné ✓</span>
-                              : <span className="tg" style={{ background: '#fff4e6', color: '#c2410c' }}>Flasher sur place</span>}
-                        </button>
-                      )
-                    })}
                   </>
                 ) : (
                   commerces.length > 0 ? commerces.map(c => (
@@ -853,7 +833,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     <span className="logoslot" key={`bd-${p.id}-${i}`}>
                       {p.image_url
                         ? <img src={p.image_url} alt={p.nom} />
-                        : <>{p.emoji ? <span style={{ fontSize: 16 }}>{p.emoji}</span> : null}<span>{p.nom}</span></>}
+                        : <>{p.emoji ? <span style={{ fontSize: 24 }}>{p.emoji}</span> : null}<span>{p.nom}</span></>}
                     </span>
                   ))}
                 </div>
