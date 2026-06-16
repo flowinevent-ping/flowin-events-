@@ -316,6 +316,29 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .opt.wrong::after{content:'✕';float:right;font-weight:800;color:#f87171}
         .ndsbody .qexpl{margin-top:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.9)}
         .ndsbody .qexpl b{color:#4ade80}
+        /* A — fond blanc partout (couleurs uniquement, dimensions inchangees) */
+        .ndsbody .phone{background:#fff !important}
+        .ndsbody .scr.purple{background:#fff !important}
+        .ndsbody .stage{background:#fff !important}
+        .ndsbody .prize{background:#fff !important;border:1px solid #ece7f2 !important;box-shadow:0 8px 26px rgba(30,16,46,.10) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+        .ndsbody .prize .lbl{color:#9a8fa6 !important}
+        .ndsbody .prize .nm{color:#1a1226 !important}
+        .ndsbody .prize .div{background:#ece7f2 !important}
+        .ndsbody .prize .tir{color:#52455e !important}
+        .ndsbody .qcard{background:#fff !important;border:1px solid #ece7f2 !important}
+        .ndsbody .qtxt{color:#1a1226 !important}
+        .ndsbody .opt{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
+        .ndsbody .opt.correct{color:#14532d !important}
+        .ndsbody .opt.wrong{color:#7f1d1d !important}
+        .ndsbody .dtitle{color:#1a1226 !important}
+        .ndsbody .dsub{color:#7a708a !important}
+        .ndsbody .dhead .back{background:#f3eef8 !important;color:#7C2D92 !important}
+        .ndsbody .progress .pstep{background:#ece7f2 !important}
+        .ndsbody .label{color:#7a708a !important}
+        .ndsbody .input{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
+        .ndsbody .input::placeholder{color:#b8aec6 !important}
+        .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
+        .ndsbody .foot{color:#9a8fa6 !important}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
@@ -325,7 +348,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="hero">
               <div className="htop"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ verticalAlign: -1, marginRight: 5 }}><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" /></svg>VENCE</div>
               <img className="hlogo" src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" />
-              <div className="hdate">9 → 18 Juillet 2026</div>
             </div>
             <div className="stage">
               <div className="prize">
@@ -370,9 +392,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               ) : (
                 <>
                   <div style={{ textAlign: 'center', marginBottom: 14 }}>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: '#fff' }}>Bienvenue au Super Event</div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Bienvenue au Super Event</div>
                   </div>
-                  <div style={{ background: 'rgba(12,6,22,.62)', border: '1px solid rgba(255,255,255,.18)', borderRadius: 16, padding: '15px 16px', marginBottom: 14, backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', boxShadow: '0 8px 22px rgba(0,0,0,.28)' }}>
+                  <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '15px 16px', marginBottom: 14, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
                     {[
                       { ic: 'i-help', t: 'Réponds au Quizz', s: 'Remporte 1 ticket' },
                       { ic: 'i-layers', t: '3 lieux, 3 quizz', s: '3 fois plus de chance de gagner !' },
@@ -380,12 +402,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     ].map((step, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '7px 0' }}>
                         <span style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href={`#${step.ic}`} /></svg></span>
-                        <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,.9)', lineHeight: 1.3 }}><b style={{ color: '#fff' }}>{step.t}</b><br /><span style={{ fontSize: 12.5, opacity: .8 }}>{step.s}</span></span>
+                        <span style={{ fontSize: 13.5, color: '#52455e', lineHeight: 1.3 }}><b style={{ color: '#1a1226' }}>{step.t}</b><br /><span style={{ fontSize: 12.5, opacity: .85 }}>{step.s}</span></span>
                       </div>
                     ))}
-                    <div style={{ display: 'flex', gap: 7, marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.1)' }}>
+                    <div style={{ display: 'flex', gap: 7, marginTop: 10, paddingTop: 10, borderTop: '1px solid #ece7f2' }}>
                       {STATIONS.map(s => (
-                        <span key={s.id} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.85)', background: 'rgba(255,255,255,.06)', borderRadius: 8, padding: '7px 4px' }}>{s.nom}</span>
+                        <span key={s.id} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#52455e', background: '#f3eef8', borderRadius: 8, padding: '7px 4px' }}>{s.nom}</span>
                       ))}
                     </div>
                   </div>
@@ -436,7 +458,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="dhead">
                 <div className="back" onClick={() => setScreen('onboard')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
                 <div style={{ flex: 1 }}><div className="dtitle">{nom}</div><div className="dsub">Quiz · {qIdx + 1} / {questions.length}</div></div>
-                <div style={{ marginLeft: 'auto', fontWeight: 800, fontSize: 15, color: '#fff', background: timer <= 5 ? 'rgba(239,68,68,.35)' : 'rgba(255,255,255,.18)', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{timer}</div>
+                <div style={{ marginLeft: 'auto', fontWeight: 800, fontSize: 15, color: timer <= 5 ? '#dc2626' : '#7C2D92', background: timer <= 5 ? '#fde7e7' : '#f3eef8', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{timer}</div>
               </div>
               <div className="progress">{questions.map((_, k) => <div key={k} className={`pstep${k <= qIdx ? ' on' : ''}`} />)}</div>
               <div className="qcard">
