@@ -46,6 +46,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const lotNom = (cfg.lotNom as string) || '3 places offertes'
   const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
   const lotResume = (cfg.lotResume as string) || '3 places pour ton prochain concert'
+  const tirageHeure = (cfg.tirageHeure as string) || '12h30'
+  // D — bandeau défilant : on répète la liste pour remplir, puis on double pour la boucle (-50%)
+  const ptList = (partenaires ?? []).filter(p => p.actif !== false)
+  const ptBase = ptList.length ? (ptList.length < 4 ? Array(Math.ceil(4 / ptList.length)).fill(0).flatMap(() => ptList) : ptList) : []
+  const ptTrack = [...ptBase, ...ptBase]
 
   const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
   const [screen, setScreen] = useState<Screen>('onboard')
@@ -70,7 +75,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [ticketCount, setTicketCount] = useState(1)
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
-  const [scanTarget, setScanTarget] = useState<{ nom: string } | null>(null)
+  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number } | null>(null)
+  const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
   const [fiche, setFiche] = useState<Commerce | null>(null)
   const scanVideoRef = useRef<HTMLVideoElement | null>(null)
@@ -397,6 +403,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .foot{color:#9a8fa6 !important}
         /* B — fond image NDS d'origine sur l'ecran d'accueil uniquement (onboard, incl. recurrent saved). Cadrage/padding repris des reglages valides. */
         .ndsbody .scr.on .stage{background:url(/nds/bg-stage.webp) center 12%/cover no-repeat !important;padding:120px 0 1px !important}
+        /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
+        .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+        .ndsbody .logotrack{display:flex;gap:10px;width:max-content;padding:12px 10px;align-items:center;animation:logoscroll 26s linear infinite}
+        .ndsbody .logoband:active .logotrack{animation-play-state:paused}
+        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:11px;padding:8px 16px;color:#7C2D92;font-weight:700;font-size:12px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:7px;height:44px}
+        .ndsbody .logoslot img{max-height:28px;max-width:92px;object-fit:contain;display:block}
+        @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
@@ -597,14 +611,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div className="nextline" key={s.id}><span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div></div>
                 ))}
               </div>
-              <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de 12h30.</div>
+              <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de {tirageHeure}.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
               {partenaires.length > 0 && (
-                <div className="bandeau" onClick={() => setScreen('partenaires')} style={{ cursor: 'pointer', marginTop: 16 }}>
-                  <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)' }}><use href="#i-store" /></svg>
-                  <span style={{ fontSize: 13.5, fontWeight: 700, color: '#7C2D92' }}>Merci à nos partenaires — voir leurs offres</span>
-                </div>
+                <>
+                  <div className="logoband" onClick={() => setScreen('partenaires')} style={{ cursor: 'pointer' }} aria-label="Nos partenaires">
+                    <div className="logotrack">
+                      {ptTrack.map((p, i) => (
+                        <span className="logoslot" key={`${p.id}-${i}`}>
+                          {p.image_url
+                            ? <img src={p.image_url} alt={p.nom} />
+                            : <>{p.emoji ? <span style={{ fontSize: 16 }}>{p.emoji}</span> : null}<span>{p.nom}</span></>}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bandeau" onClick={() => setScreen('carte')} style={{ cursor: 'pointer', marginTop: 8 }}>
+                    <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)' }}><use href="#i-store" /></svg>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: '#7C2D92' }}>Le jeu continue chez nos partenaires →</span>
+                  </div>
+                </>
               )}
             </div>
           </section>
@@ -616,7 +643,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="tk-hero">
                 <div className="tk-big">{ticketCount}</div>
                 <div className="tk-lbl">{ticketCount > 1 ? 'tickets cumulés ce soir' : 'ticket gagné ce soir'}</div>
-                <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> Tirage demain à 12h30 · 3 places à gagner</div>
+                <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> Tirage demain à {tirageHeure} · {lotResume}</div>
               </div>
               <div className="infocard b-magenta" style={{ marginTop: 14 }}><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code : <b>{ticket || '—'}</b></div></div>
               {ticketCount < STATIONS.length && (
@@ -637,37 +664,53 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="map-top">
               <div className="qc">
                 <span className="em"><svg className="ic"><use href="#i-map" /></svg></span>
-                <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Flashe le QR de chaque station pour cumuler tes tickets</div></div>
+                <div style={{ minWidth: 0 }}><div className="t">{mapView === 'stations' ? 'Les points de jeu' : 'Nos partenaires'}</div><div className="s">{mapView === 'stations' ? 'Flashe le QR de chaque station pour cumuler tes tickets' : 'Le jeu continue : retrouve nos partenaires en ville'}</div></div>
                 <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> {ticketCount}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 10, background: 'rgba(255,255,255,.7)', borderRadius: 12, padding: 4 }}>
+                <button onClick={() => setMapView('stations')} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px 8px', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', background: mapView === 'stations' ? 'linear-gradient(135deg,#7C2D92,#E0218A)' : 'transparent', color: mapView === 'stations' ? '#fff' : '#7C2D92' }}>Pendant le festival</button>
+                <button onClick={() => setMapView('partenaires')} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px 8px', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', background: mapView === 'partenaires' ? 'linear-gradient(135deg,#7C2D92,#E0218A)' : 'transparent', color: mapView === 'partenaires' ? '#fff' : '#7C2D92' }}>Chez les partenaires</button>
               </div>
             </div>
             <div className="map-fake">
               <div className="map-real" ref={mapRef} />
               <div className="map-list">
-                <button className="stn" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', justifyContent: 'center', gap: 10, fontWeight: 800 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>
-                  <svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>
-                  Flasher le QR d&apos;une station
-                </button>
-                {STATIONS.map(s => {
-                  const cur = s.id === evId
-                  let done = false
-                  try { done = !!localStorage.getItem(`flowin_played_${s.id}`) } catch {}
-                  return (
-                    <button
-                      className={`stn${cur ? ' cur' : ''}`}
-                      key={s.id}
-                      onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom }) }}
-                    >
-                      <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
-                      <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
-                      {cur
-                        ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>Tu es ici</span>
-                        : done
-                          ? <span className="tg" style={{ background: '#eef0ff', color: '#5b21b6' }}>Ticket gagné ✓</span>
-                          : <span className="tg" style={{ background: '#fff4e6', color: '#c2410c' }}>Flasher sur place</span>}
+                {mapView === 'stations' ? (
+                  <>
+                    <button className="stn" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', justifyContent: 'center', gap: 10, fontWeight: 800 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>
+                      <svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>
+                      Flasher le QR d&apos;une station
                     </button>
-                  )
-                })}
+                    {STATIONS.map(s => {
+                      const cur = s.id === evId
+                      let done = false
+                      try { done = !!localStorage.getItem(`flowin_played_${s.id}`) } catch {}
+                      return (
+                        <button
+                          className={`stn${cur ? ' cur' : ''}`}
+                          key={s.id}
+                          onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom, lat: s.lat, lng: s.lng }) }}
+                        >
+                          <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
+                          <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
+                          {cur
+                            ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>Tu es ici</span>
+                            : done
+                              ? <span className="tg" style={{ background: '#eef0ff', color: '#5b21b6' }}>Ticket gagné ✓</span>
+                              : <span className="tg" style={{ background: '#fff4e6', color: '#c2410c' }}>Flasher sur place</span>}
+                        </button>
+                      )
+                    })}
+                  </>
+                ) : (
+                  commerces.length > 0 ? commerces.map(c => (
+                    <button className="stn" key={c.id} onClick={() => setFiche(c)}>
+                      <span className="em">{c.image_url ? <img src={c.image_url} alt="" style={{ width: 42, height: 42, borderRadius: 12, objectFit: 'cover' }} /> : <svg className="ic"><use href="#i-store" /></svg>}</span>
+                      <div style={{ minWidth: 0 }}><div className="nm">{c.nom}</div><div className="ou">{[c.adresse, c.ville].filter(Boolean).join(', ') || 'Voir la fiche'}</div></div>
+                      {c.tickets_par_scan ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>+{c.tickets_par_scan} 🎟</span> : <span className="tg" style={{ background: '#f3eef8', color: '#7C2D92' }}>Voir</span>}
+                    </button>
+                  )) : <div style={{ background: '#fff', borderRadius: 14, padding: 18, textAlign: 'center', color: '#7a708a', fontSize: 13.5, fontWeight: 600 }}>Nos partenaires arrivent très bientôt.</div>
+                )}
               </div>
             </div>
             {scanTarget && (
@@ -677,6 +720,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 6 }}>Direction « {scanTarget.nom} »</div>
                   <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, marginBottom: 14 }}>Pour gagner <b>1 ticket de plus</b>, rends-toi à cette station et <b>flashe son QR code</b> sur place. Tu cumules un ticket à chaque station, toute la soirée.</div>
                   <button className="btn" style={{ marginTop: 0 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>Flasher le QR maintenant</button>
+                  {scanTarget.lat && scanTarget.lng ? (
+                    <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 10 }}>
+                      <svg className="ic" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
+                    </a>
+                  ) : null}
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Plus tard</a>
                 </div>
               </>
@@ -689,6 +737,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   {fiche.image_url ? <img src={fiche.image_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} /> : null}
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 2 }}>{fiche.nom}</div>
                   {fiche.adresse || fiche.ville ? <div style={{ fontSize: 13.5, color: '#52455e', marginBottom: 12 }}>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</div> : null}
+                  {fiche.latitude && fiche.longitude ? (
+                    <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }}>
+                      <svg className="ic" style={{ width: 16, height: 16, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
+                    </a>
+                  ) : null}
                   {fiche.promo_text ? <div style={{ background: '#fff4e6', color: '#c2410c', borderRadius: 12, padding: '10px 13px', fontWeight: 700, fontSize: 13.5, marginBottom: 12 }}>{fiche.promo_text}</div> : null}
                   {fiche.tickets_par_scan ? <div style={{ fontSize: 13.5, color: '#16a34a', fontWeight: 700, marginBottom: 12 }}>+{fiche.tickets_par_scan} ticket{fiche.tickets_par_scan > 1 ? 's' : ''} en venant ici</div> : null}
                   {fiche.site_web || fiche.instagram || fiche.facebook ? (
