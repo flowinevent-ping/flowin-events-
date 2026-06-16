@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Éditeur de banques — Flowin</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --navy:#1B3A5C; --teal:#00B4A0; --magenta:#E0218A; --purple:#7C2D92;
+    --ink:#1a1226; --muted:#6b6478; --line:#e7e0ee; --bg:#f5f3f8; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .top{position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+  .top h1{font-size:17px;font-weight:800;margin:0;letter-spacing:-.01em}
+  .top .sp{flex:1}
+  .tabs{display:flex;gap:6px;background:rgba(255,255,255,.12);border-radius:12px;padding:4px}
+  .tab{border:none;background:transparent;color:rgba(255,255,255,.8);font-family:inherit;font-weight:700;font-size:12.5px;padding:8px 13px;border-radius:9px;cursor:pointer}
+  .tab.on{background:#fff;color:var(--navy)}
+  .wrap{max-width:860px;margin:0 auto;padding:18px 16px 120px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  select.bk,.sel{font-family:inherit;font-weight:700;font-size:14px;padding:11px 13px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer;min-width:220px}
+  .hint{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+  .qc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 16px 14px;margin-bottom:14px;box-shadow:0 4px 16px rgba(27,58,92,.05)}
+  .qc .qh{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .qc .qn{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
+  .qc .del{margin-left:auto;border:1px solid #f3c9dc;background:#fff;color:#c2185b;font-family:inherit;font-weight:700;font-size:11.5px;padding:6px 10px;border-radius:8px;cursor:pointer}
+  label.l{display:block;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:8px 2px 5px}
+  textarea,input.t{width:100%;font-family:inherit;font-size:14px;font-weight:600;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;background:#faf8fc;color:var(--ink);outline:none;resize:vertical}
+  textarea:focus,input.t:focus,select:focus{border-color:var(--magenta)}
+  .opt{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .opt .rb{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#fff}
+  .opt .rb.on{border-color:var(--teal);background:var(--teal)}
+  .opt .rb.on::after{content:"";width:10px;height:10px;border-radius:50%;background:#fff}
+  .opt input{flex:1;min-width:0}
+  .opt .good{font-size:10.5px;font-weight:800;color:#0a8f7f;text-transform:uppercase;letter-spacing:.04em}
+  .add{display:block;width:100%;border:1.5px dashed #cdb8d8;background:#fbf7fd;color:var(--purple);font-family:inherit;font-weight:800;font-size:13.5px;padding:13px;border-radius:14px;cursor:pointer;margin-top:4px}
+  .savebar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center}
+  .savebar .meta{font-size:12.5px;color:var(--muted);flex:1}
+  .btn{border:none;border-radius:12px;font-family:inherit;font-weight:800;font-size:14px;padding:13px 20px;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--teal),#0a8f7f);box-shadow:0 6px 18px rgba(0,180,160,.3)}
+  .btn.alt{background:linear-gradient(135deg,var(--purple),var(--magenta));box-shadow:0 6px 18px rgba(224,33,138,.28)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:70;background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:12px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .toast.err{background:#b3174b}
+  .empty{text-align:center;color:var(--muted);font-weight:600;padding:40px 0}
+  .bdg{font-size:11px;font-weight:800;color:var(--navy);background:#e7eef6;border-radius:7px;padding:4px 9px}
+  .twocol{display:flex;gap:8px}
+  .twocol input{flex:1}
+  .small{font-size:11px;color:var(--muted);margin:2px 2px 8px}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>🎯 Éditeur de banques</h1>
+    <div class="tabs">
+      <button class="tab on" id="tabJeu" onclick="switchTab('jeu')">Questions jeu</button>
+      <button class="tab" id="tabBonus" onclick="switchTab('bonus')">Bonus / sondages</button>
+      <button class="tab" id="tabCustom" onclick="switchTab('custom')">Custom</button>
+    </div>
+    <div class="sp"></div>
+    <span class="bdg" id="cntBadge">—</span>
+  </div>
+
+  <div class="wrap">
+    <div class="row">
+      <select class="bk" id="picker" onchange="onPick()"></select>
+      <button class="btn alt" id="applyAll" style="display:none" onclick="applyBonusToAll()">Appliquer à toutes les stations NDS</button>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div id="list"></div>
+    <button class="add" id="addBtn" onclick="addItem()">+ Ajouter une question</button>
+  </div>
+
+  <div class="savebar">
+    <div class="meta" id="saveMeta">Chargement…</div>
+    <button class="btn" id="saveBtn" onclick="saveCurrent()" disabled>💾 Enregistrer</button>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  var SUPA_URL = localStorage.getItem('flowin_supa_url') || 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var SUPA_ANON = localStorage.getItem('flowin_supa_anon') || 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  function H(extra){
+    var h = { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + SUPA_ANON };
+    if(extra){ for(var k in extra){ if(extra.hasOwnProperty(k)) h[k] = extra[k]; } }
+    return h;
+  }
+  function api(path){ return SUPA_URL + '/rest/v1/' + path; }
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s); }
+
+  var STATE = {
+    tab: 'jeu',
+    banques: [],   // [{id,nom,event_ids,questions}]
+    events: [],    // [{id,nom,cfg,super_event_id,module}]
+    curId: null,   // id banque (jeu) ou id event (bonus/custom)
+    items: []      // tableau en cours d'édition (clone)
+  };
+
+  function toast(msg, isErr){
+    var t = $('toast'); t.textContent = msg;
+    t.className = 'toast show' + (isErr ? ' err' : '');
+    setTimeout(function(){ t.className = 'toast' + (isErr ? ' err' : ''); }, 2200);
+  }
+
+  /* ---------- Chargement initial ---------- */
+  function load(){
+    var pB = fetch(api('banques?select=id,nom,event_ids,questions&order=id'), { headers: H() }).then(function(r){ return r.json(); });
+    var pE = fetch(api('events?select=id,nom,cfg,super_event_id,module&status=neq.archived&order=id'), { headers: H() }).then(function(r){ return r.json(); });
+    Promise.all([pB, pE]).then(function(res){
+      STATE.banques = res[0] || [];
+      STATE.events = res[1] || [];
+      $('saveMeta').textContent = STATE.banques.length + ' banque(s) · ' + STATE.events.length + ' event(s)';
+      switchTab('jeu');
+    }).catch(function(e){
+      $('saveMeta').textContent = 'Erreur de chargement';
+      toast('Erreur de chargement : ' + e.message, true);
+    });
+  }
+
+  /* ---------- Onglets ---------- */
+  window.switchTab = function(tab){
+    STATE.tab = tab;
+    $('tabJeu').className = 'tab' + (tab==='jeu'?' on':'');
+    $('tabBonus').className = 'tab' + (tab==='bonus'?' on':'');
+    $('tabCustom').className = 'tab' + (tab==='custom'?' on':'');
+    $('applyAll').style.display = (tab==='bonus') ? '' : 'none';
+    $('addBtn').textContent = (tab==='bonus') ? '+ Ajouter une question de sondage' : '+ Ajouter une question';
+    buildPicker();
+  };
+
+  function buildPicker(){
+    var sel = $('picker'); sel.innerHTML = '';
+    var opts = [];
+    if(STATE.tab === 'jeu'){
+      $('hint').innerHTML = 'Édite les questions de quiz d\'une banque. La <b>bonne réponse</b> se règle avec le rond vert. Sauvegarde par banque.';
+      for(var i=0;i<STATE.banques.length;i++){
+        var b = STATE.banques[i];
+        var nbq = (b.questions||[]).length;
+        opts.push({ v: b.id, l: (b.nom||b.id) + ' (' + nbq + ')' });
+      }
+    } else {
+      $('hint').innerHTML = (STATE.tab==='bonus')
+        ? 'Questions de <b>sondage / RSE</b> posées après le quiz (pas de bonne réponse). Sélectionne une station ; tu peux ensuite <b>appliquer à toutes les stations NDS</b>.'
+        : 'Questions <b>custom</b> ajoutées à une station en plus de sa banque (mêmes règles que le quiz, avec bonne réponse).';
+      for(var j=0;j<STATE.events.length;j++){
+        var e = STATE.events[j];
+        var key = (STATE.tab==='bonus') ? 'quizBonusList' : 'customQuestions';
+        var n = (e.cfg && e.cfg[key]) ? e.cfg[key].length : 0;
+        opts.push({ v: e.id, l: (e.nom||e.id) + ' (' + n + ')' });
+      }
+    }
+    var html = '';
+    for(var k=0;k<opts.length;k++){ html += '<option value="'+esc(opts[k].v)+'">'+esc(opts[k].l)+'</option>'; }
+    sel.innerHTML = html || '<option value="">— aucun —</option>';
+    if(opts.length){ STATE.curId = opts[0].v; sel.value = opts[0].v; loadItems(); }
+    else { STATE.curId = null; STATE.items = []; render(); }
+  }
+
+  window.onPick = function(){ STATE.curId = $('picker').value; loadItems(); };
+
+  /* ---------- Charger les items de la sélection courante ---------- */
+  function loadItems(){
+    if(STATE.tab === 'jeu'){
+      var b = findBanque(STATE.curId);
+      STATE.items = b ? clone(b.questions || []) : [];
+    } else {
+      var e = findEvent(STATE.curId);
+      var key = (STATE.tab==='bonus') ? 'quizBonusList' : 'customQuestions';
+      STATE.items = (e && e.cfg && e.cfg[key]) ? clone(e.cfg[key]) : [];
+    }
+    render();
+  }
+
+  function findBanque(id){ for(var i=0;i<STATE.banques.length;i++){ if(STATE.banques[i].id===id) return STATE.banques[i]; } return null; }
+  function findEvent(id){ for(var i=0;i<STATE.events.length;i++){ if(STATE.events[i].id===id) return STATE.events[i]; } return null; }
+  function clone(o){ return JSON.parse(JSON.stringify(o||[])); }
+
+  /* ---------- Rendu de la liste éditable ---------- */
+  function render(){
+    var list = $('list');
+    $('cntBadge').textContent = STATE.items.length + ' question(s)';
+    $('saveBtn').disabled = !STATE.curId;
+    if(!STATE.curId){ list.innerHTML = '<div class="empty">Aucun élément. Sélectionne une banque ou une station.</div>'; return; }
+    var html = '';
+    for(var i=0;i<STATE.items.length;i++){
+      html += (STATE.tab==='bonus') ? bonusCard(i) : quizCard(i);
+    }
+    list.innerHTML = html || '<div class="empty">Aucune question. Clique « Ajouter ».</div>';
+  }
+
+  function quizCard(i){
+    var q = STATE.items[i];
+    var opts = q.options || ['','','',''];
+    var h = '<div class="qc">'
+      + '<div class="qh"><span class="qn">'+(i+1)+'</span><span style="font-size:12px;color:var(--muted);font-weight:700">'+esc(q.id||'nouvelle')+'</span>'
+      + '<button class="del" onclick="delItem('+i+')">Supprimer</button></div>'
+      + '<label class="l">Question</label>'
+      + '<textarea rows="2" oninput="setField('+i+',\'texte\',this.value)">'+esc(q.texte)+'</textarea>'
+      + '<label class="l">Réponses (coche la bonne)</label>';
+    for(var o=0;o<4;o++){
+      var on = (q.bonne===o);
+      h += '<div class="opt">'
+        + '<div class="rb'+(on?' on':'')+'" onclick="setBonne('+i+','+o+')" title="Bonne réponse"></div>'
+        + '<input class="t" value="'+escAttr(opts[o]||'')+'" oninput="setOpt('+i+','+o+',this.value)" placeholder="Option '+(o+1)+'" />'
+        + (on?'<span class="good">bonne</span>':'')
+        + '</div>';
+    }
+    h += '<label class="l">Explication (optionnel)</label>'
+      + '<textarea rows="2" oninput="setField('+i+',\'explication\',this.value)">'+esc(q.explication)+'</textarea>'
+      + '</div>';
+    return h;
+  }
+
+  function bonusCard(i){
+    var q = STATE.items[i];
+    var type = q.type || 'single';
+    var opts = q.options || [];
+    var h = '<div class="qc">'
+      + '<div class="qh"><span class="qn">'+(i+1)+'</span>'
+      + '<select class="sel" style="min-width:auto;font-size:12.5px;padding:7px 9px" onchange="setField('+i+',\'type\',this.value)">'
+      + '<option value="single"'+(type==='single'?' selected':'')+'>Choix unique</option>'
+      + '<option value="multi"'+(type==='multi'?' selected':'')+'>Choix multiple</option>'
+      + '</select>'
+      + '<button class="del" onclick="delItem('+i+')">Supprimer</button></div>'
+      + '<label class="l">Intitulé</label>'
+      + '<textarea rows="2" oninput="setField('+i+',\'label\',this.value)">'+esc(q.label)+'</textarea>'
+      + '<label class="l">Options de réponse</label>';
+    for(var o=0;o<opts.length;o++){
+      h += '<div class="opt"><div class="twocol" style="flex:1">'
+        + '<input class="t" style="max-width:110px" value="'+escAttr(opts[o].val||'')+'" oninput="setBonusOpt('+i+','+o+',\'val\',this.value)" placeholder="clé" />'
+        + '<input class="t" value="'+escAttr(opts[o].label||'')+'" oninput="setBonusOpt('+i+','+o+',\'label\',this.value)" placeholder="Libellé affiché" />'
+        + '</div><button class="del" style="margin-left:8px" onclick="delBonusOpt('+i+','+o+')">×</button></div>';
+    }
+    h += '<button class="add" style="padding:9px;font-size:12.5px;margin-top:2px" onclick="addBonusOpt('+i+')">+ Option</button>'
+      + '</div>';
+    return h;
+  }
+
+  function escAttr(s){ return String(s==null?'':s).replace(/"/g,'&quot;'); }
+
+  /* ---------- Mutations ---------- */
+  window.setField = function(i,k,v){ STATE.items[i][k] = v; if(k==='type') render(); };
+  window.setOpt = function(i,o,v){ if(!STATE.items[i].options) STATE.items[i].options=['','','','']; STATE.items[i].options[o] = v; };
+  window.setBonne = function(i,o){ STATE.items[i].bonne = o; render(); };
+  window.setBonusOpt = function(i,o,k,v){ STATE.items[i].options[o][k] = v; };
+  window.addBonusOpt = function(i){ if(!STATE.items[i].options) STATE.items[i].options=[]; STATE.items[i].options.push({ val:'', label:'' }); render(); };
+  window.delBonusOpt = function(i,o){ STATE.items[i].options.splice(o,1); render(); };
+  window.delItem = function(i){ STATE.items.splice(i,1); render(); };
+
+  window.addItem = function(){
+    if(!STATE.curId){ toast('Sélectionne d\'abord une banque ou une station', true); return; }
+    if(STATE.tab==='bonus'){
+      STATE.items.push({ id:'b_'+Date.now().toString(36), type:'single', label:'', options:[{val:'',label:''},{val:'',label:''}] });
+    } else {
+      var prefix = (STATE.tab==='jeu') ? 'q-' : 'c-';
+      STATE.items.push({ id: prefix + Date.now().toString(36), type:'qcm', texte:'', options:['','','',''], bonne:0, points:1, explication:'' });
+    }
+    render();
+    window.scrollTo(0, document.body.scrollHeight);
+  };
+
+  /* ---------- Validation avant sauvegarde ---------- */
+  function validate(){
+    var errs = [];
+    for(var i=0;i<STATE.items.length;i++){
+      var q = STATE.items[i];
+      if(STATE.tab==='bonus'){
+        if(!q.label || !q.label.trim()) errs.push('Q'+(i+1)+' : intitulé vide');
+        if(!q.options || q.options.length<2) errs.push('Q'+(i+1)+' : au moins 2 options');
+      } else {
+        if(!q.texte || !q.texte.trim()) errs.push('Q'+(i+1)+' : question vide');
+        var filled = (q.options||[]).filter(function(o){ return o && o.trim(); });
+        if(filled.length<2) errs.push('Q'+(i+1)+' : au moins 2 réponses');
+        if(typeof q.bonne !== 'number' || q.bonne<0 || q.bonne>3 || !(q.options&&q.options[q.bonne]&&q.options[q.bonne].trim())) errs.push('Q'+(i+1)+' : bonne réponse non définie');
+      }
+    }
+    return errs;
+  }
+
+  /* ---------- Sauvegarde ---------- */
+  window.saveCurrent = function(){
+    if(!STATE.curId) return;
+    var errs = validate();
+    if(errs.length){ toast(errs[0], true); return; }
+    $('saveBtn').disabled = true; $('saveBtn').textContent = '⏳ Enregistrement…';
+    if(STATE.tab==='jeu'){
+      saveBanque(STATE.curId, STATE.items);
+    } else {
+      var key = (STATE.tab==='bonus') ? 'quizBonusList' : 'customQuestions';
+      saveEventCfg([STATE.curId], key, STATE.items);
+    }
+  };
+
+  function saveBanque(id, questions){
+    fetch(api('banques?id=eq.' + encodeURIComponent(id)), {
+      method:'PATCH',
+      headers: H({ 'Content-Type':'application/json', 'Prefer':'return=minimal' }),
+      body: JSON.stringify({ questions: questions })
+    }).then(function(r){
+      if(r.ok){ var b=findBanque(id); if(b) b.questions = clone(questions); doneSave(questions.length + ' questions enregistrées'); }
+      else { r.text().then(function(t){ failSave(t); }); }
+    }).catch(function(e){ failSave(e.message); });
+  }
+
+  function saveEventCfg(ids, key, items){
+    var chain = Promise.resolve();
+    var ok = 0;
+    ids.forEach(function(id){
+      chain = chain.then(function(){
+        var e = findEvent(id); if(!e) return;
+        var cfg = e.cfg ? JSON.parse(JSON.stringify(e.cfg)) : {};
+        cfg[key] = clone(items);
+        return fetch(api('events?id=eq.' + encodeURIComponent(id)), {
+          method:'PATCH',
+          headers: H({ 'Content-Type':'application/json', 'Prefer':'return=minimal' }),
+          body: JSON.stringify({ cfg: cfg })
+        }).then(function(r){ if(r.ok){ ok++; e.cfg = cfg; } });
+      });
+    });
+    chain.then(function(){
+      if(ok===ids.length) doneSave(items.length + (key==='quizBonusList'?' questions bonus':' questions custom') + ' enregistrées sur ' + ok + ' station(s)');
+      else failSave('Partiel : ' + ok + '/' + ids.length);
+    }).catch(function(e){ failSave(e.message); });
+  }
+
+  window.applyBonusToAll = function(){
+    var errs = validate();
+    if(errs.length){ toast(errs[0], true); return; }
+    var nds = STATE.events.filter(function(e){ return e.super_event_id === 'se-nds-2026'; }).map(function(e){ return e.id; });
+    if(!nds.length){ toast('Aucune station NDS trouvée', true); return; }
+    if(!confirm('Appliquer ce bonus aux ' + nds.length + ' stations NDS ?')) return;
+    $('saveBtn').disabled = true; $('saveBtn').textContent = '⏳…';
+    saveEventCfg(nds, 'quizBonusList', STATE.items);
+  };
+
+  function doneSave(msg){ $('saveBtn').disabled=false; $('saveBtn').textContent='💾 Enregistrer'; toast('✅ ' + msg); buildPickerLabelsOnly(); }
+  function failSave(msg){ $('saveBtn').disabled=false; $('saveBtn').textContent='💾 Enregistrer'; toast('Échec : ' + (msg||'erreur'), true); }
+
+  function buildPickerLabelsOnly(){
+    // rafraîchit juste les compteurs dans le sélecteur sans recharger l'édition
+    var sel = $('picker'); var cur = sel.value;
+    var html = '';
+    if(STATE.tab==='jeu'){
+      for(var i=0;i<STATE.banques.length;i++){ var b=STATE.banques[i]; html += '<option value="'+esc(b.id)+'">'+esc((b.nom||b.id)+' ('+((b.questions||[]).length)+')')+'</option>'; }
+    } else {
+      var key = (STATE.tab==='bonus')?'quizBonusList':'customQuestions';
+      for(var j=0;j<STATE.events.length;j++){ var e=STATE.events[j]; var n=(e.cfg&&e.cfg[key])?e.cfg[key].length:0; html += '<option value="'+esc(e.id)+'">'+esc((e.nom||e.id)+' ('+n+')')+'</option>'; }
+    }
+    sel.innerHTML = html; sel.value = cur;
+    $('cntBadge').textContent = STATE.items.length + ' question(s)';
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

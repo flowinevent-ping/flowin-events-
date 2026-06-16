@@ -2955,7 +2955,7 @@ function renderSidebar(){
       {id:'prospection',ico:'📞',lbl:'Prospection',n:(state.prospection?state.prospection.length:0)},
       {id:'landing-page',ico:'🌐',lbl:'Landing Page',n:(DATA.landings||[]).length},
     ]},
-    {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length} ]},
+    {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length}, {id:'banques',ico:'🎯',lbl:'Banques de questions',ext:'/banques.html'} ]},
     {group:'REPORTING', list:[ {id:'rapports',ico:'📊',lbl:'Rapports'} ]},
     {group:'SYSTÈME', list:[ {id:'parametres',ico:'⚙️',lbl:'Paramètres'} ]}
   ];
@@ -2981,7 +2981,8 @@ function renderSidebar(){
     g.list.forEach(it => {
       const active = state.view===it.id ? 'active' : '';
       const badge = it.live ? '<span class="badge">'+it.live+'</span>' : (it.n!=null ? '<span class="text-xs" style="color:var(--sa-sb-text-dim);font-weight:700">'+it.n+'</span>':'');
-      html += '<button class="sb-item '+active+'" onclick="goView(\''+it.id+'\')"><span class="ico">'+it.ico+'</span><span class="lbl">'+it.lbl+'</span>'+badge+'</button>';
+      var _click = it.ext ? 'window.open(\''+it.ext+'\',\'_blank\')' : 'goView(\''+it.id+'\')';
+      html += '<button class="sb-item '+active+'" onclick="'+_click+'"><span class="ico">'+it.ico+'</span><span class="lbl">'+it.lbl+'</span>'+badge+'</button>';
     });
   });
   html += '</div>';
