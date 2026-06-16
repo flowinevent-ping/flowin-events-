@@ -84,6 +84,7 @@ export interface JoueurPayload {
   lot_gagne?: string
   score_moy?: string
   bonus_reponses?: Record<string, unknown>
+  quiz_reponses?: unknown
   optin?: boolean
   optin_version?: string
   events: string[]
@@ -294,6 +295,21 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       ...geo.scan,
     })
     if (partErr) console.error('[writeJoueur] insert participation échoué:', partErr.message)
+    /* Stockage complet des réponses (profil + découverte + quiz + bonus) dans se_reponses */
+    await writeSeReponses({
+      joueurId, evId, jour: today,
+      source: payload.source,
+      decouverte: payload.decouverte,
+      form: {
+        prenom: payload.prenom ?? null, nom: payload.nom ?? null, email: emailLower,
+        tel: payload.tel ?? null, code_postal: payload.code_postal ?? null,
+        age_tranche: payload.age_tranche ?? null, genre: payload.genre ?? null,
+        optin: payload.optin !== false,
+      },
+      quiz_reponses: payload.quiz_reponses,
+      bonus_reponses: payload.bonus_reponses,
+      scoreMoy: payload.score_moy,
+    })
     /* Bloc 2 — Super Event : ticket + gain immédiat (uniquement si scan sur place) */
     await attribuerSuperEvent(joueurId, evId, today, geo.onSite)
     rememberJoueur(joueurId, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
@@ -302,6 +318,38 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
   }
 
   return { success: true, duplicate: false, ticket: tc }
+}
+
+/* ── Stockage exhaustif des réponses (profil + découverte + quiz + bonus) ── */
+async function writeSeReponses(opts: {
+  joueurId: string; evId: string; jour: string;
+  source?: string; decouverte?: string;
+  form?: Record<string, unknown>;
+  quiz_reponses?: unknown; bonus_reponses?: unknown;
+  scoreMoy?: string;
+}): Promise<void> {
+  try {
+    let scoreNum: number | null = null
+    if (opts.scoreMoy) { const p = String(opts.scoreMoy).split('/'); scoreNum = parseInt(p[0]) || 0 }
+    let seId: string | null = null
+    try {
+      const { data: ev } = await supabase.from('events').select('super_event_id').eq('id', opts.evId).single()
+      seId = (ev as { super_event_id?: string | null } | null)?.super_event_id ?? null
+    } catch { /* ignore */ }
+    const { error } = await supabase.from('se_reponses').insert({
+      joueur_id: opts.joueurId,
+      event_id: opts.evId,
+      super_event_id: seId,
+      jour: opts.jour,
+      source: opts.source ?? null,
+      decouverte: opts.decouverte ?? null,
+      form: opts.form ?? null,
+      quiz_reponses: opts.quiz_reponses ?? null,
+      bonus_reponses: opts.bonus_reponses ?? null,
+      score: scoreNum,
+    })
+    if (error) console.error('[se_reponses] insert échoué:', error.message)
+  } catch (e) { console.error('[se_reponses] exception:', e) }
 }
 
 /* ── Bloc 2 — Compte joueur déjà créé (reconnaissance) ── */
@@ -322,7 +370,8 @@ export async function claimJoueur(
   joueur: { id: string; email: string; prenom?: string },
   evId: string,
   prefix: TicketPrefix,
-  bonus?: Record<string, unknown>
+  bonus?: Record<string, unknown>,
+  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string }
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const { data: dup } = await supabase
@@ -338,7 +387,17 @@ export async function claimJoueur(
   const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
   await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)
   const geo = await captureScanGeo(evId)
-  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: 0, completed: true, tickets: geo.onSite ? 1 : 0, bonus_answers: bonus ?? null, ...geo.scan })
+  const sc = extra?.score ? (parseInt(String(extra.score).split('/')[0]) || 0) : 0
+  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: geo.onSite ? 1 : 0, bonus_answers: bonus ?? null, ...geo.scan })
+  await writeSeReponses({
+    joueurId: joueur.id, evId, jour: today,
+    source: extra?.source ?? 'nds2026',
+    decouverte: extra?.decouverte,
+    form: { email: emailLower, prenom: joueur.prenom ?? null },
+    quiz_reponses: extra?.quiz_reponses,
+    bonus_reponses: bonus,
+    scoreMoy: extra?.score,
+  })
   await attribuerSuperEvent(joueur.id, evId, today, geo.onSite)
   rememberJoueur(joueur.id, emailLower, joueur.prenom)
   return { success: true, duplicate: false, ticket: tc }

@@ -43,6 +43,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const nbQ = (cfg.quizNbQuestions as number) ?? 4
   const timerSec = (cfg.quizTimer as number) || 20
   const bonusQs = (cfg.quizBonusList ?? []) as BonusQuestion[]
+  const lotNom = (cfg.lotNom as string) || '3 places offertes'
+  const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
+  const lotResume = (cfg.lotResume as string) || '3 places pour ton prochain concert'
 
   const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
   const [screen, setScreen] = useState<Screen>('onboard')
@@ -57,6 +60,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [bonusAnswers, setBonusAnswers] = useState<Record<string, string | string[]>>({})
+  const [quizAnswers, setQuizAnswers] = useState<{ qid: string; texte: string; choix: number; reponse: string; bonne: number; correct: boolean }[]>([])
   const [bonusIdx, setBonusIdx] = useState(0)
   const [bonusDone, setBonusDone] = useState(false)
   const [sheetPart, setSheetPart] = useState<number | null>(null)
@@ -248,7 +252,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (answered) return
     setSelected(idx); setAnswered(true)
     const cur = questions[qIdx]
-    if (cur && idx === cur.bonne) setScore(s => s + 1)
+    if (cur) {
+      if (idx === cur.bonne) setScore(s => s + 1)
+      setQuizAnswers(a => [...a, { qid: cur.id, texte: cur.texte, choix: idx, reponse: cur.options[idx] ?? '', bonne: cur.bonne, correct: idx === cur.bonne }])
+    }
   }, [answered, qIdx, questions])
 
   const goNext = useCallback(() => {
@@ -284,12 +291,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     } catch {}
 
     const res = recurrent
-      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers)
+      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined })
       : await writeJoueur({
           email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
           code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined,
           score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
-          source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers,
+          source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
           optin: form.optin, optin_version: OPTIN_VERSION,
         })
     setSaving(false)
@@ -388,6 +395,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .input::placeholder{color:#b8aec6 !important}
         .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
         .ndsbody .foot{color:#9a8fa6 !important}
+        /* B — fond image NDS d'origine sur l'ecran d'accueil uniquement (onboard, incl. recurrent saved). Cadrage/padding repris des reglages valides. */
+        .ndsbody .scr.on .stage{background:url(/nds/bg-stage.webp) center 12%/cover no-repeat !important;padding:120px 0 1px !important}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
@@ -403,7 +412,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="lbl">À gagner chaque soir</div>
                 <div className="prow">
                   <span className="sq" style={{ background: 'linear-gradient(135deg,#E0218A,#8E2E9E)' }}><svg className="ic"><use href="#i-ticket" /></svg></span>
-                  <div><div className="nm">3 places offertes</div><div className="vl">Pour ton prochain concert</div></div>
+                  <div><div className="nm">{lotNom}</div><div className="vl">{lotDesc}</div></div>
                 </div>
                 <div className="div" />
                 <div className="tir"><span className="dot" /> Tirage au sort chaque soir du festival</div>
@@ -441,7 +450,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               ) : (
                 <>
                   <div style={{ textAlign: 'center', marginBottom: 14 }}>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Bienvenue au Super Event</div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#fff', textShadow: '0 2px 14px rgba(10,4,16,.55)' }}>Bienvenue au Super Event</div>
                   </div>
                   <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '15px 16px', marginBottom: 14, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
                     {[
@@ -547,7 +556,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="score-line">Bien joué&#8239;!</div>
               </div>
               {bonusQs.length > 0 && !bonusDone && <a className="double" onClick={() => { setBonusIdx(0); setScreen('bonus') }}><svg className="ic"><use href="#i-spark" /></svg> Double tes chances</a>}
-              <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>3 places pour ton prochain concert</b></div></div>
+              <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
               <div className="infocard b-green"><svg className="ic"><use href="#i-checkc" /></svg><div>Participation enregistrée&#8239;!</div></div>
               <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? 'Voir mon ticket →' : 'Valider et recevoir mon ticket →')}</a>
             </div>
