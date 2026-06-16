@@ -6,6 +6,19 @@
 
 ---
 
+## ⚠️ MÉTHODE OBLIGATOIRE — appliquer à CHAQUE tour
+
+> Ces règles existent parce que le schéma « tu oublies / rien n'a changé » est venu de leur absence. Elles ne sont pas optionnelles.
+
+1. **La liste est un contrat.** Relire la checklist du §5 **avant chaque réponse** et re-cocher chaque item ouvert. Aucun item ne sort du radar parce qu'il n'est pas dans le dernier message de Romain.
+2. **« Fait » ≠ build OK.** Un item parcours / Next.js reste **« À VÉRIFIER (device) »** tant que Romain ne l'a pas confirmé à l'écran contre sa référence. Interdiction de déclarer « fait » sur la seule base tsc / build / push.
+3. **Ce qui n'est pas vérifiable en local se DIT.** Le parcours (Leaflet + fetch Supabase) ne se rend pas en headless → l'annoncer « à valider sur device », ne jamais le maquiller en « OK ».
+4. **Ambiguïté = bloqueur explicite**, pas une devinette. Tout point flou (réf. design, consigne carte…) → « bloqué : il me faut X de toi ». On ne devine pas, on ne laisse pas filer.
+5. **Travail en BLOC** (HTML+CSS+JS+SQL alignés), validé avant push — pas de patch ponctuel, pas de faire/défaire/refaire.
+6. **Preuve obligatoire** pour tout « fait » : commit-hash + grep/view/DB. Pas de preuve = pas fait.
+
+---
+
 ## 0. État réel du déploiement (important)
 
 - Le code que l'on édite **est bien celui déployé** : `HEAD local = origin/main = 41c8ca1`, et les textes des captures (« Station validée », « Les points de jeu », « À gagner chaque soir »…) sont tous dans `NDS2026Client.tsx`. Vercel auto-déploie depuis `main` (~2-3 min). Donc « aucune modif enregistrée » = les écrans pointés ne correspondaient pas aux écrans modifiés, **pas** un problème de déploiement.
@@ -102,7 +115,42 @@ Clés stats : `ts` (timestamptz = **heure**), `source` (**origine**), `decouvert
 
 ---
 
-## 5. LES MANQUES (à terminer pour la version définitive)
+## 5. TRAVAIL RESTANT — checklist exhaustive (relire à chaque tour)
+
+> Légende : ✅ fait (à valider device) · ☐ à faire · 🔍 à vérifier · 🔒 bloqué (input Romain).
+
+| # | Item | État | Réf / où |
+|---|---|---|---|
+| 1 | Carte : markers commerces + fiche | ✅ | `7ee8258` |
+| 2 | 1ʳᵉ page (onboard neuf) : fond couleur, filtre retiré | ✅ | `acb9e3c` |
+| 3 | Fiche partenaire au-dessus de la nav + scroll | ✅ | `41c8ca1` |
+| 4 | Question « connu le festival » en roll | ✅ | `41c8ca1` |
+| 5 | Bandeau « Merci partenaires » (statique) écran final | ✅ | `41c8ca1` |
+| 6 | `se_tickets` écrit par station | ✅ (vérifié DB) | `parcours.ts` l.125 |
+| 7 | Prospection Vence (pagination) | ✅ | `9d5f2b7` |
+| 8 | **Présentation carte** selon consigne (cards/map, lisibilité) | 🔒+☐ | A1 — consigne à fournir |
+| 9 | **Bandeau défilant logos** DANS le parcours | ☐ | A2 — réutiliser `.logoband` |
+| 10 | **Fond couleur du front récurrent** (onboard `saved` blanc) | 🔒+☐ | A3 — réf design à fournir |
+| 11 | **Texte lot « 3 places »** hardcodé → pilotable + wording | ☐ | A4 — `NDS2026Client.tsx` l.402-406, 550 |
+| 12 | **UX « continuer chez nos partenaires → map »** | ☐ | A5 |
+| 13 | **Réponses détaillées** non stockées → créer table/colonnes | ☐ | E |
+| 14 | `source` rempli systématiquement (8/220 aujourd'hui) | ☐ | E |
+| 15 | **Banques par station** (4 stations sans banque) | ☐ | C |
+| 16 | Quiz sert-il bien les questions sur **chaque** station ? | 🔍 | C |
+| 17 | Profil user persistant + **cumul tickets conservé** entre sessions | 🔍 | D |
+| 18 | **Audit dashboards** : enregistrement data par station | ☐ | B |
+| 19 | **Parcours pro stats live** (`pro-nds-live.html`) branché aux vraies données | 🔍+☐ | B |
+| 20 | **Insertion jeu définitif par station** : quel module + son contenu réel | ☐ | §5bis |
+| 21 | **Paiement réel + facture** (tunnel partenaire) — réel ou maquette ? | 🔍 | §5bis |
+| 22 | Prospection **croisement** type × ville × CP (filtres croisés) | 🔍 | dashboard |
+| 23 | **Éditeur event générique** (stations/quiz/bonus/logo/bandeau/CRUD commerces) | ☐ après CDC | F |
+| 24 | **25 questions/station** + line-up + Vence + genre | 🔒 | G1 — contenu |
+| 25 | **Géocoder** les 4 derniers partenaires | 🔒 | G2 — API externe |
+| 26 | **Nouveau PIN SA** (encore `1234`) | 🔒 | G3 — valeur à fournir |
+
+Détail ci-dessous.
+
+## 5. LES MANQUES (détail)
 
 ### Parcours joueur — UI / UX
 - **A1. Présentation carte** : revoir selon consignes (cards station empilées **par-dessus** la map → lisibilité, hiérarchie, markers). État actuel = liste de cards sur fond map. *Consigne précise à re-confirmer avec Romain.*
@@ -119,6 +167,11 @@ Clés stats : `ts` (timestamptz = **heure**), `source` (**origine**), `decouvert
 
 ### Dashboard SA — éditeur (NON commencé)
 - **F. Éditeur d'événement générique** : 0 ligne aujourd'hui. **Ne pas coder avant validation du CDC séparé** (`CDC-editeur-event-flowin.md`). Inclut aussi : éditeur logo partenaire, éditeur bandeau, CRUD commerces.
+- **Prospection croisement** : vérifier le filtrage croisé type × ville × code postal (les filtres existent en dropdown ; à valider après le fix Vence).
+
+### 5bis. Insertion du jeu définitif / commercial
+- **Jeu définitif par station** : décider et câbler quel **module** tourne sur chaque station (`ev-nds-bar/caisses/ecrans/tablette` sont en `module=nds2026`) et son **contenu réel** (questions + bonus). Aujourd'hui le quiz/bonus n'est rattaché qu'à `ev-nds-2026` (voir C) → à brancher station par station avant ouverture.
+- **Paiement réel + facture** (tunnel partenaire `nds-partenaire.html`) : le funnel écrit le prospect en base (`tags` `pack-…`) mais **le paiement est probablement une maquette** (bouton « Payer X € HT » → étape merci). Pour la version commerciale : brancher un paiement réel (carte/SEPA) + génération de facture. **À confirmer : réel ou maquette ?**
 
 ### Bloqueurs (input requis)
 - **G1. 25 questions/station + bonus** : contenu (line-up Kassav'/Magic System/Danakil/V. Sanson/Ben l'Oncle Soul/Amadou & Mariam/Maya Kamaty/Kolinga/Bakermat/Breakbot & Irfane/Soom T/Luiza + Talents NDS, + Vence, + genre) — **domaine Romain**.
