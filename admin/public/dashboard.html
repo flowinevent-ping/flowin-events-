@@ -3191,8 +3191,13 @@ function prospEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 function prospEtatColor(v){return prospEtatObj(v).c;}
 
 async function loadProspection(){
-  var rows = await supaFetch('prospection','select=*&order=ville.asc,enseigne.asc&limit=5000');
-  state.prospection = rows || [];
+  // PostgREST plafonne chaque reponse a 1000 lignes (limit ne leve pas ce plafond) -> pagination par offset
+  var all = [], off = 0, PAGE = 1000, page;
+  do {
+    page = await supaFetch('prospection','select=*&order=ville.asc,enseigne.asc&offset='+off+'&limit='+PAGE);
+    if(page && page.length){ all = all.concat(page); off += PAGE; }
+  } while(page && page.length >= PAGE);
+  state.prospection = all;
   render();
 }
 
