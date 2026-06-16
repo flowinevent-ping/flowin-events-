@@ -3407,7 +3407,7 @@ function render(){
   // live-control supprimé — remplacé par drawer stats
   else html = '<div class="page"><div class="empty-block">Vue inconnue</div></div>';
   $('#viewport').innerHTML = html;
-  if(state.drawer.open) renderDrawer();
+  if(state.drawer.open && !state._pollingRender) renderDrawer();
   if(state.modal.open) renderModal();
 }
 
@@ -11502,9 +11502,9 @@ function startRealtimePolling(){
                    'Prefer':'count=exact','Range':'0-0'}
         }).then(function(r){
           var count = parseInt((r.headers.get('content-range')||'0/0').split('/')[1]||'0');
-          if(count && count !== ev.participants){
+            if(count && count !== ev.participants){
             ev.participants = count;
-            if(state.view==='pilotage') render();
+            if(state.view==='pilotage'){ state._pollingRender=true; render(); state._pollingRender=false; }
           }
         }).catch(function(){});
         // Comptage participants du JOUR (pour stats par commerce par jour)
