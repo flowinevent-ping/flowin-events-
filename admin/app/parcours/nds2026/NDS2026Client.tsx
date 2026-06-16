@@ -72,7 +72,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
 
   useEffect(() => {
-    try { if (new URLSearchParams(window.location.search).get('place') === '1') setPlaceMode(true) } catch {}
+    try { if (new URLSearchParams(window.location.search).get('place') === '1') { setPlaceMode(true); setScreen('carte') } } catch {}
   }, [])
   const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
