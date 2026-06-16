@@ -33,11 +33,14 @@ Repo : `flowinevent-ping/flowin-events-` · prod `flowin-events.vercel.app` · d
 - [ ] À VÉRIFIER SUR LE DÉPLOIEMENT (carte = tuiles + fetch live, pas screenshotable en local) : points s'affichent, clic ouvre la fiche, couleurs correctes
 
 ### 2. Parcours 1ʳᵉ page — `NDS2026Client.tsx` / `admin/lib/nds2026Design.ts`
-- [ ] Bandeau de couleur manquant
-- [ ] Image superposée
-- [ ] Encart lot
-- [ ] Trame grise qui masque le texte + le CTA (à corriger)
-- [ ] **Couleurs** (reprendre les indications couleur)
+- [x] **Bandeau de couleur en fond** : `.stage` = dégradé violet→sombre qui descend du hero — commit `acb9e3c`, tsc+build OK
+- [x] **Trame grise / filtre retiré** : suppression de l'image base64 + du `.stage::before` sombre qui masquait texte+CTA — `acb9e3c`
+- [x] Image superposée : retirée (remplacée par le fond couleur) — `acb9e3c`
+- [~] Encart lot : déjà présent (`.prize` « À gagner chaque soir »), rendu lisible (carte blanche sur fond couleur)
+- [ ] **Couleurs** : à confirmer sur déploiement — si d'autres écrans ont des couleurs à reprendre, à préciser
+
+### 2bis. Landing accueil (sponsor) — `admin/public/nds-partenaire.html`
+- [x] Hero allégé (moins de texte, sub orientée bénéfices, cartes raccourcies, CTA vers les fiches) — commit `289d941`
 
 ### 3. Fiche partenaire
 - [ ] La remonter (ne pas déborder la nav)
