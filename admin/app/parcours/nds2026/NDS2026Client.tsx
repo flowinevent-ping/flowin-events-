@@ -401,8 +401,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .input::placeholder{color:#b8aec6 !important}
         .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
         .ndsbody .foot{color:#9a8fa6 !important}
-        /* B — fond image NDS d'origine sur l'ecran d'accueil uniquement (onboard, incl. recurrent saved). Cadrage/padding repris des reglages valides. */
-        .ndsbody .scr.on .stage{background:url(/nds/bg-stage.webp) center 12%/cover no-repeat !important;padding:120px 0 1px !important}
+        /* B — bandeau hero a hauteur fixe avec image NDS d'origine (onboard uniquement). L'image vit dans .hero (pas dans .stage scrollable) ; le voile garantit la lisibilite du label+logo et le fondu vers le theme clair. La prize-card chevauche le bas via margin:-56px d'origine. */
+        .ndsbody .scr.on .hero{position:relative;background:#190a25 url(/nds/bg-stage.webp) center 32%/cover no-repeat;padding:18px 16px 68px;display:flex;flex-direction:column;align-items:center;text-align:center}
+        .ndsbody .scr.on .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,6,24,.34) 0%,rgba(15,6,24,.04) 38%,rgba(15,6,24,.52) 100%);pointer-events:none}
+        .ndsbody .scr.on .htop,.ndsbody .scr.on .hlogo{position:relative;z-index:1}
         /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
         .ndsbody .logotrack{display:flex;gap:10px;width:max-content;padding:12px 10px;align-items:center;animation:logoscroll 26s linear infinite}
@@ -464,7 +466,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               ) : (
                 <>
                   <div style={{ textAlign: 'center', marginBottom: 14 }}>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: '#fff', textShadow: '0 2px 14px rgba(10,4,16,.55)' }}>Bienvenue au Super Event</div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Bienvenue au Super Event</div>
                   </div>
                   <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '15px 16px', marginBottom: 14, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
                     {[
