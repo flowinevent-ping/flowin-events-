@@ -189,6 +189,32 @@
   .upsell .ud{font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:16px}
   .ubtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;cursor:pointer;border:none;font-family:'Plus Jakarta Sans';font-weight:700;font-size:15.5px;border-radius:13px;padding:15px;text-decoration:none;color:#1a1205;background:var(--gold);box-shadow:0 12px 28px -14px var(--gold)}
   .ufine{font-size:11.5px;color:var(--gold);text-align:center;margin-top:12px;font-weight:600;letter-spacing:.02em}
+  /* --- Bandeau logos defilant + packs partenaire --- */
+  .logoband{margin:18px 0 4px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .logotrack{display:flex;gap:10px;width:max-content;padding:12px 10px;animation:logoscroll 24s linear infinite}
+  .logoband:hover .logotrack{animation-play-state:paused}
+  .logoslot{flex:0 0 auto;border:1.5px dashed var(--gold);border-radius:11px;padding:11px 20px;color:var(--gold);font-family:'Bricolage Grotesque';font-weight:700;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;background:rgba(245,181,68,.06)}
+  @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media(prefers-reduced-motion:reduce){.logotrack{animation:none}}
+  .packs{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+  .pack{position:relative;border:1.5px solid var(--line);border-radius:20px;padding:22px;background:var(--card)}
+  .pack.pop{border-color:var(--gold);background:rgba(245,181,68,.06);box-shadow:0 18px 44px -22px var(--gold)}
+  .pack .pbadge{position:absolute;top:-11px;left:22px;background:var(--gold);color:#1a1205;font-family:'Bricolage Grotesque';font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:100px}
+  .pack .ph{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .pack .pnm{font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;line-height:1.12}
+  .pack .pnm small{display:block;font-family:'Plus Jakarta Sans';font-weight:600;font-size:11.5px;color:var(--faint);letter-spacing:.01em;margin-top:4px}
+  .pack .ppr{text-align:right;white-space:nowrap;display:flex;align-items:baseline;gap:5px;flex-shrink:0}
+  .pack .ppr .v{font-family:'Bricolage Grotesque';font-weight:700;font-size:27px;color:var(--accent);line-height:1}
+  .pack.pop .ppr .v{color:var(--gold)}
+  .pack .ppr .u{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+  .pack ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:18px}
+  .pack li{font-size:13.5px;position:relative;padding-left:28px;line-height:1.45;color:var(--muted)}
+  .pack li b{font-weight:700;color:var(--text)}
+  .pack li:before{content:'';position:absolute;left:0;top:1px;width:19px;height:19px;border-radius:50%;background:var(--accent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/12px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/12px no-repeat}
+  .pack.pop li:before{background:var(--gold)}
+  .pack .pbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;cursor:pointer;border:none;font-family:'Plus Jakarta Sans';font-weight:700;font-size:15px;border-radius:13px;padding:14px;color:#fff;background:var(--accent);box-shadow:0 12px 28px -14px var(--accent)}
+  .pack.pop .pbtn{color:#1a1205;background:var(--gold);box-shadow:0 12px 28px -14px var(--gold)}
+  @media(min-width:860px){.packs{flex-direction:row;align-items:stretch}.pack{flex:1;display:flex;flex-direction:column}.pack ul{flex:1}}
 
   .flowinfoot{border-top:1px solid var(--line);padding:28px 20px 38px;text-align:center;background:rgba(143,166,240,.045)}
   .flowinfoot .fl{font-family:'Bricolage Grotesque';font-weight:700;font-size:21px;color:var(--flowin)}
@@ -486,21 +512,63 @@
       <div class="kick gold" style="margin-top:30px">L’offre</div>
       <h2 class="hsec">Offre partenaire <em>2026</em></h2>
       <p class="lead">Nombre de participations limité pour cette édition.</p>
-      <div class="offer" style="margin-top:16px">
-        <div class="oh">
-          <div class="onm">Une seule offre,<br>tout compris</div>
-          <div class="opr"><span class="v">450 €</span><span class="u">HT</span></div>
+      <div class="logoband" aria-hidden="true">
+        <div class="logotrack">
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
+          <span class="logoslot">Votre logo ici</span>
         </div>
-        <div class="obenefits">
-          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><p><b>Visibilité officielle</b> dans l’opération et sur ses supports</p></div>
-          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0M6 9a6 6 0 0 1 12 0M9 21h6M12 15v6"/></svg></div><p><b>Animation de votre clientèle</b> qui joue et tente de gagner au Grand Tirage</p></div>
-          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12.5" y="7" width="3" height="10" rx="1"/><rect x="18" y="13" width="3" height="4" rx="1"/></svg></div><p><b>Statistiques de fréquentation</b> de votre station, agrégées et anonymes</p></div>
-          <div class="oben"><div class="obi"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M19 8v6M22 11h-6"/></svg></div><p><b>Vos contacts qualifiés</b> — les participants ayant consenti à être recontactés</p></div>
-        </div>
-        <p class="orgpd">Les contacts ne sont transmis que pour les participants ayant donné leur accord, et réattribués à votre établissement. Données jamais revendues, dans le respect du RGPD.</p>
-        <button class="btn" data-go="onboard">Réserver ma participation</button>
-        <p class="reassure">Une seule formule · sans engagement de durée</p>
       </div>
+      <div class="packs">
+        <div class="pack">
+          <div class="ph">
+            <div class="pnm">Visibilité<small>L’essentiel pour participer</small></div>
+            <div class="ppr"><span class="v">590 €</span><span class="u">HT</span></div>
+          </div>
+          <ul>
+            <li><b>Votre station QR officielle</b> dans l’opération et sur ses supports</li>
+            <li><b>Vos contacts qualifiés</b> — les participants ayant consenti à être recontactés</li>
+            <li><b>Statistiques de fréquentation</b> de votre station, agrégées et anonymes</li>
+          </ul>
+          <button class="pbtn" data-pack="visib" data-go="onboard" onclick="pickPack('visib')">Choisir Visibilité</button>
+        </div>
+        <div class="pack pop">
+          <span class="pbadge">Le plus choisi</span>
+          <div class="ph">
+            <div class="pnm">Animation<small>Faites jouer votre clientèle</small></div>
+            <div class="ppr"><span class="v">1 490 €</span><span class="u">HT</span></div>
+          </div>
+          <ul>
+            <li>Tout le pack <b>Visibilité</b></li>
+            <li><b>Animation de votre clientèle</b> qui joue et tente de gagner au Grand Tirage</li>
+            <li><b>Mise en avant</b> sur la carte du parcours et le bandeau partenaires</li>
+            <li><b>Reporting détaillé</b> — fréquentation horaire et courbes de trafic</li>
+          </ul>
+          <button class="pbtn" data-pack="anim" data-go="onboard" onclick="pickPack('anim')">Choisir Animation</button>
+        </div>
+        <div class="pack">
+          <div class="ph">
+            <div class="pnm">Sponsor<small>Visibilité maximale</small></div>
+            <div class="ppr"><span class="v">3 000 €</span><span class="u">HT</span></div>
+          </div>
+          <ul>
+            <li>Tout le pack <b>Animation</b></li>
+            <li><b>Sponsor d’un lot exclusif</b> du festival, sur le thème RSE</li>
+            <li><b>Présence sur l’ensemble des supports</b> de l’opération</li>
+            <li><b>Exclusivité de catégorie</b> + accompagnement dédié</li>
+          </ul>
+          <button class="pbtn" data-pack="spons" data-go="onboard" onclick="pickPack('spons')">Choisir Sponsor</button>
+        </div>
+      </div>
+      <p class="orgpd">Les contacts ne sont transmis que pour les participants ayant donné leur accord, et réattribués à votre établissement. Données jamais revendues, dans le respect du RGPD.</p>
+      <p class="reassure">Sans engagement de durée · nombre de participations limité</p>
       <div class="upsell">
         <span class="ub">Aller plus loin</span>
         <h3>Devenez sponsor d’un des <em>6 lots</em> exclusifs</h3>
@@ -545,11 +613,11 @@
       <div id="w3" hidden>
         <h2 class="hsec" style="font-size:23px;margin-bottom:14px">Paiement</h2>
         <div class="paysum">
-          <div class="payrow"><span>Participation partenaire NDS 2026</span><span>450,00 €</span></div>
-          <div class="payrow" style="color:var(--muted)"><span>TVA 20 %</span><span>90,00 €</span></div>
-          <div class="payrow tot"><span>Total</span><b>540,00 € TTC</b></div>
+          <div class="payrow"><span id="pay-label">Pack Visibilité NDS 2026</span><span id="pay-ht">590,00 €</span></div>
+          <div class="payrow" style="color:var(--muted)"><span>TVA 20 %</span><span id="pay-tva">118,00 €</span></div>
+          <div class="payrow tot"><span>Total</span><b id="pay-tot">708,00 € TTC</b></div>
         </div>
-        <button class="btn" onclick="wizGo(4)">Payer 450 € HT</button>
+        <button class="btn" id="payBtn" onclick="wizGo(4)">Payer 590 € HT</button>
         <p class="paysec">Paiement sécurisé · carte ou prélèvement SEPA · facture immédiate</p>
       </div>
       <div id="w4" hidden>
@@ -678,6 +746,20 @@
     var lb=document.getElementById('wlabel');if(lb)lb.textContent='Étape '+n+' / 4';window.scrollTo(0,0);
   }
   function wizNext(formId,n){var f=document.getElementById(formId);var ins=f.querySelectorAll('input');var ok=true;for(var i=0;i<ins.length;i++){if(ins[i].type!=='file'&&!ins[i].value.trim()){ins[i].style.borderColor='#EF6B6B';ok=false}else{ins[i].style.borderColor=''}}if(!ok)return;wizGo(n);}
+  window.PACKS={visib:{key:'visibilite',label:'Pack Visibilité',ht:590},anim:{key:'animation',label:'Pack Animation',ht:1490},spons:{key:'sponsor',label:'Pack Sponsor',ht:3000}};
+  window.SELECTED_PACK=window.PACKS.visib;
+  function eurInt(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');}
+  function eur(n){return eurInt(n)+',00 \u20ac';}
+  function refreshPay(){
+    var p=window.SELECTED_PACK||window.PACKS.visib,ht=p.ht,tva=Math.round(ht*0.2),ttc=ht+tva,e;
+    e=document.getElementById('pay-label');if(e)e.textContent=p.label+' NDS 2026';
+    e=document.getElementById('pay-ht');if(e)e.textContent=eur(ht);
+    e=document.getElementById('pay-tva');if(e)e.textContent=eur(tva);
+    e=document.getElementById('pay-tot');if(e)e.textContent=eur(ttc)+' TTC';
+    e=document.getElementById('payBtn');if(e)e.textContent='Payer '+eurInt(ht)+' \u20ac HT';
+  }
+  function pickPack(k){window.SELECTED_PACK=window.PACKS[k]||window.PACKS.visib;refreshPay();}
+  window.pickPack=pickPack;window.refreshPay=refreshPay;refreshPay();
   function sendForm(formId,thanksId){var f=document.getElementById(formId);var ins=f.querySelectorAll('input,textarea');var ok=true;for(var i=0;i<ins.length;i++){if(ins[i].type!=='file'&&!ins[i].value.trim()){ins[i].style.borderColor='#EF6B6B';ok=false}else{ins[i].style.borderColor=''}}if(!ok)return;f.hidden=true;document.getElementById(thanksId).hidden=false;window.scrollTo(0,0);}
 </script>
 
@@ -712,7 +794,7 @@
       contact_nom:v.contact||null, contact:v.contact||null,
       contact_email:em, email:em, contact_tel:v.tel||null, tel:v.tel||null,
       image_url:LOGO_||null,
-      super_event_id:'se-nds-2026', tags:['prospect','nds-landing'],
+      super_event_id:'se-nds-2026', tags:['prospect','nds-landing','pack-'+((window.SELECTED_PACK&&window.SELECTED_PACK.key)||'visibilite')],
       statut_paiement:'prospect', actif:false, visible:false, en_avant:false,
       ts:now, created_at:now
     };
