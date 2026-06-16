@@ -52,6 +52,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const mapObjRef = useRef<unknown>(null)
   const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
+  const [scanOpen, setScanOpen] = useState(false)
+  const [scanErr, setScanErr] = useState(false)
+  const [scanTarget, setScanTarget] = useState<{ nom: string } | null>(null)
+  const scanVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const lsKey = `flowin_played_${evId}`
 
@@ -80,7 +84,66 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     const iv = setInterval(() => setTimer(t => { if (t <= 1) { clearInterval(iv); handleAnswer(-1); return 0 } return t - 1 }), 1000)
     return () => clearInterval(iv)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, qIdx])
+  }, [screen, qIdx, answered])
+
+  // Scanner QR in-app (caméra + jsQR) — flasher le QR d'une station sans sortir du jeu
+  useEffect(() => {
+    if (!scanOpen) return
+    setScanErr(false)
+    let stream: MediaStream | null = null
+    let raf = 0
+    let stopped = false
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    type JsQRFn = (d: Uint8ClampedArray, w: number, h: number) => { data: string } | null
+
+    function loadJsQR(): Promise<JsQRFn> {
+      const w = window as unknown as { jsQR?: JsQRFn }
+      if (w.jsQR) return Promise.resolve(w.jsQR)
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script')
+        s.src = 'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'
+        s.onload = () => resolve((window as unknown as { jsQR: JsQRFn }).jsQR)
+        s.onerror = reject
+        document.head.appendChild(s)
+      })
+    }
+
+    async function start() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        const video = scanVideoRef.current
+        if (!video) return
+        video.srcObject = stream
+        await video.play()
+        const jsQR = await loadJsQR()
+        const tick = () => {
+          if (stopped) return
+          if (video.readyState >= 2 && ctx && video.videoWidth) {
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const code = jsQR(img.data, img.width, img.height)
+            if (code && code.data) {
+              const m = code.data.match(/ev=(ev-nds-[a-z0-9-]+)/i)
+              if (m) { stopped = true; window.location.href = `/parcours/nds2026?ev=${m[1]}`; return }
+            }
+          }
+          raf = requestAnimationFrame(tick)
+        }
+        raf = requestAnimationFrame(tick)
+      } catch {
+        setScanErr(true)
+      }
+    }
+    start()
+    return () => {
+      stopped = true
+      cancelAnimationFrame(raf)
+      if (stream) stream.getTracks().forEach(t => t.stop())
+    }
+  }, [scanOpen])
 
   // Carte Leaflet : chargée à la demande quand on arrive sur l'écran carte
   useEffect(() => {
@@ -145,11 +208,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     setSelected(idx); setAnswered(true)
     const cur = questions[qIdx]
     if (cur && idx === cur.bonne) setScore(s => s + 1)
-    setTimeout(() => {
-      if (qIdx + 1 < questions.length) { setQIdx(i => i + 1); setSelected(null); setAnswered(false) }
-      else setScreen('resultats')
-    }, 1100)
   }, [answered, qIdx, questions])
+
+  const goNext = useCallback(() => {
+    if (qIdx + 1 < questions.length) { setQIdx(i => i + 1); setSelected(null); setAnswered(false) }
+    else setScreen('resultats')
+  }, [qIdx, questions])
 
   async function submitInscription() {
     const errs: Record<string, string> = {}
@@ -308,12 +372,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div style={{ textAlign: 'center', marginBottom: 14 }}>
                     <div style={{ fontSize: 17, fontWeight: 800, color: '#fff' }}>Bienvenue au Super Event</div>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '15px 16px', marginBottom: 14 }}>
+                  <div style={{ background: 'rgba(12,6,22,.62)', border: '1px solid rgba(255,255,255,.18)', borderRadius: 16, padding: '15px 16px', marginBottom: 14, backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', boxShadow: '0 8px 22px rgba(0,0,0,.28)' }}>
                     {[
                       { ic: 'i-help', t: 'Réponds au Quizz', s: 'Remporte 1 ticket' },
                       { ic: 'i-layers', t: '3 lieux, 3 quizz', s: '3 fois plus de chance de gagner !' },
                       { ic: 'i-scan', t: 'Flashe le QR code', s: 'Remporte le lot' },
-                      { ic: 'i-clock', t: 'Tirage chaque soir', s: '3 places à gagner' },
                     ].map((step, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '7px 0' }}>
                         <span style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href={`#${step.ic}`} /></svg></span>
@@ -389,6 +452,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     {selected === q.bonne ? <b>Bonne réponse ✓</b> : <span>Bonne réponse : <b>{q.options[q.bonne]}</b></span>}
                     {q.explication && <div style={{ marginTop: 6 }}>{q.explication}</div>}
                   </div>
+                )}
+                {answered && (
+                  <button onClick={goNext} style={{ marginTop: 14, width: '100%', border: 'none', borderRadius: 14, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, color: '#fff', cursor: 'pointer', background: 'linear-gradient(90deg,var(--magenta2),var(--magenta))', boxShadow: '0 8px 20px rgba(224,33,138,.32)' }}>
+                    {qIdx + 1 < questions.length ? 'Question suivante →' : 'Voir mon résultat →'}
+                  </button>
                 )}
               </div>
             </div>
@@ -483,36 +551,65 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="map-top">
               <div className="qc">
                 <span className="em"><svg className="ic"><use href="#i-map" /></svg></span>
-                <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Touche une station pour y aller</div></div>
+                <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Flashe le QR de chaque station pour cumuler tes tickets</div></div>
                 <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> {ticketCount}</span>
               </div>
             </div>
             <div className="map-fake">
               <div className="map-real" ref={mapRef} />
               <div className="map-list">
-                <label className="stn" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', justifyContent: 'center', gap: 10, fontWeight: 800 }}>
+                <button className="stn" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', justifyContent: 'center', gap: 10, fontWeight: 800 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>
                   <svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>
-                  Scanner le QR d&apos;une station
-                  <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={() => setScreen('carte')} />
-                </label>
+                  Flasher le QR d&apos;une station
+                </button>
                 {STATIONS.map(s => {
                   const cur = s.id === evId
+                  let done = false
+                  try { done = !!localStorage.getItem(`flowin_played_${s.id}`) } catch {}
                   return (
                     <button
                       className={`stn${cur ? ' cur' : ''}`}
                       key={s.id}
-                      onClick={() => { if (!cur) window.location.href = `/parcours/nds2026?ev=${s.id}`; else setScreen('onboard') }}
+                      onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom }) }}
                     >
                       <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
                       <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
                       {cur
                         ? <span className="tg" style={{ background: '#e9f9ef', color: '#16a34a' }}>Tu es ici</span>
-                        : <span className="go"><svg className="ic" style={{ transform: 'scaleX(-1)' }}><use href="#i-arrowl" /></svg></span>}
+                        : done
+                          ? <span className="tg" style={{ background: '#eef0ff', color: '#5b21b6' }}>Ticket gagné ✓</span>
+                          : <span className="tg" style={{ background: '#fff4e6', color: '#c2410c' }}>Flasher sur place</span>}
                     </button>
                   )
                 })}
               </div>
             </div>
+            {scanTarget && (
+              <>
+                <div className="pt-dim2" onClick={() => setScanTarget(null)} />
+                <div className="pt-sheet2">
+                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 6 }}>Direction « {scanTarget.nom} »</div>
+                  <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, marginBottom: 14 }}>Pour gagner <b>1 ticket de plus</b>, rends-toi à cette station et <b>flashe son QR code</b> sur place. Tu cumules un ticket à chaque station, toute la soirée.</div>
+                  <button className="btn" style={{ marginTop: 0 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>Flasher le QR maintenant</button>
+                  <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Plus tard</a>
+                </div>
+              </>
+            )}
+            {scanOpen && (
+              <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: '#000' }}>
+                <video ref={scanVideoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(180deg,rgba(0,0,0,.6),transparent)' }}>
+                  <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>Vise le QR de la station</span>
+                  <button onClick={() => setScanOpen(false)} style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff', borderRadius: 999, width: 38, height: 38, fontSize: 20, cursor: 'pointer' }}>×</button>
+                </div>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 220, height: 220, border: '3px solid rgba(255,255,255,.9)', borderRadius: 24, boxShadow: '0 0 0 4000px rgba(0,0,0,.35)' }} />
+                {scanErr && (
+                  <div style={{ position: 'absolute', bottom: 40, left: 20, right: 20, background: '#fff', borderRadius: 16, padding: '16px', textAlign: 'center', fontSize: 14, color: '#1a1226' }}>
+                    Caméra indisponible ici. Ouvre l&apos;<b>appareil photo</b> de ton téléphone et vise le QR de la station : il ouvre le jeu automatiquement.
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 
