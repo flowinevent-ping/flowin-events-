@@ -21,6 +21,7 @@ const STATIONS = [
   { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.72325, lng: 7.11120 },
   { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.72372, lng: 7.11205 },
   { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.72405, lng: 7.11158 },
+  { id: 'ev-nds-tablette', nom: 'La Tablette', ou: "Avec l'équipe Nuits du Sud, sur le site", icon: 'i-layers', lat: 43.72358, lng: 7.11178 },
 ]
 
 export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: Props) {
@@ -73,7 +74,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     // Cumul de tickets : nombre de stations NDS déjà jouées (1 ticket / station / jour)
     try {
       let n = 0
-      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++ })
+      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++; if (localStorage.getItem(`flowin_bonus_${st.id}`)) n++ })
       setTicketCount(Math.max(1, n))
     } catch {}
   }, [lsKey])
@@ -238,7 +239,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     try {
       localStorage.setItem(lsKey, tc)
       let n = 0
-      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++ })
+      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++; if (localStorage.getItem(`flowin_bonus_${st.id}`)) n++ })
       setTicketCount(Math.max(1, n))
     } catch {}
 
@@ -272,6 +273,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   async function finishBonus() {
     setBonusDone(true)
+    try { localStorage.setItem(`flowin_bonus_${evId}`, '1') } catch {}
+    try {
+      let n = 0
+      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++; if (localStorage.getItem(`flowin_bonus_${st.id}`)) n++ })
+      setTicketCount(Math.max(1, n))
+    } catch {}
     if (recurrent) { await persist(); setScreen('final') }
     else setScreen('inscription')
   }
@@ -286,7 +293,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     <div className="ndsbody">
       <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
         html,body{height:auto !important;min-height:100dvh !important;max-height:none !important;overflow-x:hidden !important;overflow-y:auto !important;display:block !important;padding:0 !important;background:#160820}
-        .ndsbody{width:100%;min-height:100vh;min-height:100dvh;display:block;background:#160820;font-family:'Manrope',system-ui,sans-serif;color:#fff;padding:0}
+        .ndsbody{width:100%;min-height:100vh;min-height:100dvh;display:block;background:#fff;font-family:'Manrope',system-ui,sans-serif;color:#1a1226;padding:0}
         .ndsbody .phone{overflow:visible !important}
         .ndsbody .phone{width:100%;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#160820;position:relative;display:flex;flex-direction:column;overflow:hidden}
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
@@ -365,15 +372,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     <svg className="ic" style={{ width: 20, height: 20, color: '#4ade80', flexShrink: 0 }}><use href="#i-checkc" /></svg>
                     <span>Station validée ! Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir.</span>
                   </div>
-                  {ticketCount < STATIONS.length ? (
+                  {STATIONS.filter(s => { try { return !!localStorage.getItem(`flowin_played_${s.id}`) } catch { return false } }).length < STATIONS.length ? (
                     <>
-                      <div style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '14px 15px', marginBottom: 14 }}>
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 14, padding: '14px 15px', marginBottom: 14 }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1226', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
                           <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-layers" /></svg>
                           Chaque station = 1 ticket de plus
                         </div>
                         {STATIONS.filter(s => { try { return !localStorage.getItem(`flowin_played_${s.id}`) } catch { return s.id !== evId } }).map(s => (
-                          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'rgba(255,255,255,.8)', padding: '5px 0' }}>
+                          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: '#52455e', padding: '5px 0' }}>
                             <span style={{ width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 14, height: 14, color: '#fff' }}><use href={`#${s.icon}`} /></svg></span>
                             <span><b>{s.nom}</b> — à jouer</span>
                           </div>
@@ -387,7 +394,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       <span>Toutes les stations jouées ! Tu as le <b>maximum de tickets</b> pour ce soir. Bonne chance au tirage 🎉</span>
                     </div>
                   )}
-                  <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: 'rgba(255,255,255,.85)', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
+                  <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7C2D92', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
                 </>
               ) : (
                 <>
@@ -397,7 +404,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '15px 16px', marginBottom: 14, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
                     {[
                       { ic: 'i-help', t: 'Réponds au Quizz', s: 'Remporte 1 ticket' },
-                      { ic: 'i-layers', t: '3 lieux, 3 quizz', s: '3 fois plus de chance de gagner !' },
+                      { ic: 'i-layers', t: '4 lieux, 4 quizz', s: '4 fois plus de chance de gagner !' },
                       { ic: 'i-scan', t: 'Flashe le QR code', s: 'Remporte le lot' },
                     ].map((step, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '7px 0' }}>
