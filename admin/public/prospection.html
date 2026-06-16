@@ -166,10 +166,21 @@
 
   // ---- LOAD ----
   function load(){
-    fetch(BASE+'prospection?select=*&order=ville.asc,enseigne.asc',{headers:H})
-      .then(function(r){return r.json();})
-      .then(function(d){DATA=d||[];render();})
-      .catch(function(e){console.error(e);toast('Erreur de chargement');});
+    // PostgREST plafonne chaque reponse a 1000 lignes -> pagination par pages successives
+    DATA=[];
+    var PAGE=1000;
+    function page(off){
+      fetch(BASE+'prospection?select=*&order=ville.asc,enseigne.asc&offset='+off+'&limit='+PAGE,{headers:H})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          if(!d||!d.length){render();return;}
+          for(var i=0;i<d.length;i++){DATA.push(d[i]);}
+          render();
+          if(d.length>=PAGE){page(off+PAGE);}
+        })
+        .catch(function(e){console.error(e);toast('Erreur de chargement');});
+    }
+    page(0);
   }
 
   // ---- FILTERS ----
