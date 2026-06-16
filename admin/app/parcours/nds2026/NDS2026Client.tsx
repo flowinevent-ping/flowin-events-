@@ -356,8 +356,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .stn .nm{font-weight:800;font-size:15px}
         .ndsbody .stn .ou{font-size:12px;color:#6b6076;margin-top:1px}
         .ndsbody .stn .tg{margin-left:auto;font-size:11px;font-weight:800;padding:4px 9px;border-radius:100px;flex-shrink:0}
-        .ndsbody .pt-sheet2{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:1000;background:#fff;color:#1a1020;border-radius:22px 22px 0 0;padding:22px 20px 30px;box-shadow:0 -8px 40px rgba(0,0,0,.3)}
-        .ndsbody .pt-dim2{position:fixed;inset:0;background:rgba(10,4,16,.55);z-index:999}
+        .ndsbody .pt-sheet2{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:1300;max-height:82vh;overflow-y:auto;background:#fff;color:#1a1020;border-radius:22px 22px 0 0;padding:22px 20px calc(30px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.3)}
+        .ndsbody .pt-dim2{position:fixed;inset:0;background:rgba(10,4,16,.55);z-index:1250}
         .ndsbody .sh-row{display:flex;align-items:center;gap:9px;margin-top:10px;text-decoration:none;color:var(--purple);font-weight:700;font-size:14px}
         .ndsbody .opt.correct{border-color:#16a34a !important;background:rgba(22,163,74,.18) !important;color:#fff}
         .ndsbody .opt.wrong{border-color:#ef4444 !important;background:rgba(239,68,68,.18) !important;color:#fff}
@@ -591,6 +591,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de 12h30.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
+              {partenaires.length > 0 && (
+                <div className="bandeau" onClick={() => setScreen('partenaires')} style={{ cursor: 'pointer', marginTop: 16 }}>
+                  <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)' }}><use href="#i-store" /></svg>
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: '#7C2D92' }}>Merci à nos partenaires — voir leurs offres</span>
+                </div>
+              )}
             </div>
           </section>
         )}

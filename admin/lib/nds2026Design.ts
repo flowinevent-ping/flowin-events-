@@ -81,8 +81,9 @@ export const NDS_CSS = `
   .input{width:100%;padding:13px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:13px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit}
   .input::placeholder{color:rgba(255,255,255,.32)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-  .chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:rgba(255,255,255,.62)}
+  .chips{display:flex;flex-wrap:nowrap;gap:8px;margin-top:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding-bottom:4px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:rgba(255,255,255,.62)}
   .chip.sel{background:rgba(224,33,138,.18);border-color:var(--magenta);color:#ffd5ec}
   .rgpd{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
   .rgpd-check{cursor:pointer;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.03);transition:border-color .2s,background .2s}
