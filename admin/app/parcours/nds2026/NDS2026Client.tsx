@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { writeJoueur, claimJoueur, getJoueurLocal, shuffle, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
+import { supabase } from '@/lib/supabase'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 
 type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil'
@@ -23,6 +24,16 @@ const STATIONS = [
   { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.72405, lng: 7.11158 },
   { id: 'ev-nds-tablette', nom: 'La Tablette', ou: "Avec l'équipe Nuits du Sud, sur le site", icon: 'i-layers', lat: 43.72358, lng: 7.11178 },
 ]
+
+/* Commerce partenaire affiché sur la carte (vue v_nds_commerces_carte : déjà filtrée actif/visible) */
+type Commerce = {
+  id: string; nom: string; pack: string | null
+  latitude: number; longitude: number
+  image_url: string | null; en_avant: boolean | null
+  ville: string | null; adresse: string | null
+  site_web: string | null; instagram: string | null; facebook: string | null
+  promo_text: string | null; tickets_par_scan: number | null; ordre_carte: number | null
+}
 
 export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: Props) {
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
@@ -56,6 +67,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
   const [scanTarget, setScanTarget] = useState<{ nom: string } | null>(null)
+  const [commerces, setCommerces] = useState<Commerce[]>([])
+  const [fiche, setFiche] = useState<Commerce | null>(null)
   const scanVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const lsKey = `flowin_played_${evId}`
@@ -146,6 +159,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     }
   }, [scanOpen])
 
+  // Commerces partenaires (vue v_nds_commerces_carte) : chargés à l'entrée sur l'écran carte
+  useEffect(() => {
+    if (screen !== 'carte' || commerces.length) return
+    let cancelled = false
+    supabase.from('v_nds_commerces_carte').select('*').then(({ data }) => {
+      if (cancelled) return
+      const rows = (data ?? []) as Commerce[]
+      setCommerces(rows.filter(c => c.latitude != null && c.longitude != null))
+    })
+    return () => { cancelled = true }
+  }, [screen, commerces.length])
+
   // Carte Leaflet : chargée à la demande quand on arrive sur l'écran carte
   useEffect(() => {
     if (screen !== 'carte') return
@@ -187,13 +212,28 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       mapObjRef.current = map
       LL.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
+      // Stations : vert = validé (joué) · jaune clignotant = à jouer · ★ = station courante
       STATIONS.forEach(st => {
         const cur = st.id === evId
-        const html = `<div style="width:34px;height:34px;border-radius:50%;background:${cur ? '#16a34a' : 'linear-gradient(135deg,#7C2D92,#E0218A)'};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px">${cur ? '★' : ''}</div>`
+        let done = false
+        try { done = !!localStorage.getItem(`flowin_played_${st.id}`) } catch {}
+        const bg = done ? '#16a34a' : '#F5B544'
+        const cls = done ? '' : 'nds-mk-pulse'
+        const mark = cur ? '★' : (done ? '✓' : '')
+        const html = `<div class="${cls}" style="width:34px;height:34px;border-radius:50%;background:${bg};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px">${mark}</div>`
         const icon = LL.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] })
         LL.marker([st.lat, st.lng], { icon })
           .addTo(map)
-          .bindPopup(`<b>${st.nom}</b><br>${st.ou}${cur ? '<br><b style="color:#16a34a">Tu es ici</b>' : ''}`)
+          .bindPopup(`<b>${st.nom}</b><br>${st.ou}${cur ? '<br><b style="color:#16a34a">Tu es ici</b>' : (done ? '<br><b style="color:#16a34a">Validé ✓</b>' : '<br><b style="color:#b45309">À jouer — flashe le QR</b>')}`)
+      })
+
+      // Commerces partenaires actifs (vue v_nds_commerces_carte) : clic -> fiche
+      commerces.forEach(c => {
+        const big = !!c.en_avant
+        const sz = big ? 30 : 24
+        const html = `<div style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:linear-gradient(135deg,#F5B544,#E0218A);border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
+        const icon = LL.divIcon({ html, className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz] })
+        LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => setFiche(c))
       })
       setTimeout(() => { try { map.invalidateSize() } catch {} }, 120)
     }).catch(() => { /* CDN bloqué : la liste de stations reste affichée en fallback */ })
@@ -202,7 +242,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       cancelled = true
       if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
     }
-  }, [screen, evId])
+  }, [screen, evId, commerces])
 
   const handleAnswer = useCallback((idx: number) => {
     if (answered) return
@@ -302,6 +342,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .padnav{padding-bottom:96px}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .map-fake{flex:1;width:100%;min-height:340px;background:linear-gradient(160deg,#241233,#3a1450);position:relative}
+        @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
+        .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
         .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:96px;z-index:600;display:flex;flex-direction:column;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
@@ -621,6 +663,26 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, marginBottom: 14 }}>Pour gagner <b>1 ticket de plus</b>, rends-toi à cette station et <b>flashe son QR code</b> sur place. Tu cumules un ticket à chaque station, toute la soirée.</div>
                   <button className="btn" style={{ marginTop: 0 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>Flasher le QR maintenant</button>
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Plus tard</a>
+                </div>
+              </>
+            )}
+            {fiche && (
+              <>
+                <div className="pt-dim2" onClick={() => setFiche(null)} />
+                <div className="pt-sheet2">
+                  <button onClick={() => setFiche(null)} aria-label="Fermer" style={{ position: 'absolute', top: 14, right: 16, background: '#f1edf5', border: 'none', color: '#1a1020', borderRadius: 999, width: 32, height: 32, fontSize: 18, cursor: 'pointer' }}>×</button>
+                  {fiche.image_url ? <img src={fiche.image_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} /> : null}
+                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 2 }}>{fiche.nom}</div>
+                  {fiche.adresse || fiche.ville ? <div style={{ fontSize: 13.5, color: '#52455e', marginBottom: 12 }}>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</div> : null}
+                  {fiche.promo_text ? <div style={{ background: '#fff4e6', color: '#c2410c', borderRadius: 12, padding: '10px 13px', fontWeight: 700, fontSize: 13.5, marginBottom: 12 }}>{fiche.promo_text}</div> : null}
+                  {fiche.tickets_par_scan ? <div style={{ fontSize: 13.5, color: '#16a34a', fontWeight: 700, marginBottom: 12 }}>+{fiche.tickets_par_scan} ticket{fiche.tickets_par_scan > 1 ? 's' : ''} en venant ici</div> : null}
+                  {fiche.site_web || fiche.instagram || fiche.facebook ? (
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {fiche.site_web ? <a className="reslink" href={fiche.site_web} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Site web</a> : null}
+                      {fiche.instagram ? <a className="reslink" href={fiche.instagram} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Instagram</a> : null}
+                      {fiche.facebook ? <a className="reslink" href={fiche.facebook} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Facebook</a> : null}
+                    </div>
+                  ) : null}
                 </div>
               </>
             )}
