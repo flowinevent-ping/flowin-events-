@@ -19,10 +19,10 @@ const OPTIN_TEXT = "J'accepte de garder le contact avec les Nuits du Sud et part
 
 /* Les 3 stations fixes du festival (carte). joue=true => station courante scannée */
 const STATIONS = [
-  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.72325, lng: 7.11120 },
-  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.72372, lng: 7.11205 },
-  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.72405, lng: 7.11158 },
-  { id: 'ev-nds-tablette', nom: 'La Tablette', ou: "Avec l'équipe Nuits du Sud, sur le site", icon: 'i-layers', lat: 43.72358, lng: 7.11178 },
+  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.72325, lng: 7.11120, msg: "Passe aux caisses, à l'entrée du festival, et flashe le QR code sur place." },
+  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.72372, lng: 7.11205, msg: 'Rends-toi au bar et flashe le QR.' },
+  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.72405, lng: 7.11158, msg: "Flashe au changement de scène, sur l'écran géant." },
+  { id: 'ev-nds-tablette', nom: 'La Brigade Verte', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.72358, lng: 7.11178, msg: 'Trouve la Brigade Verte : elle se balade dans le festival.' },
 ]
 
 /* Commerce partenaire affiché sur la carte (vue v_nds_commerces_carte : déjà filtrée actif/visible) */
@@ -75,7 +75,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [ticketCount, setTicketCount] = useState(1)
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
-  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number } | null>(null)
+  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
   const [fiche, setFiche] = useState<Commerce | null>(null)
@@ -691,7 +691,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         <button
                           className={`stn${cur ? ' cur' : ''}`}
                           key={s.id}
-                          onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom, lat: s.lat, lng: s.lng }) }}
+                          onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom, lat: s.lat, lng: s.lng, msg: s.msg }) }}
                         >
                           <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
                           <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
@@ -720,6 +720,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-dim2" onClick={() => setScanTarget(null)} />
                 <div className="pt-sheet2">
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 6 }}>Direction « {scanTarget.nom} »</div>
+                  {scanTarget.msg ? (
+                    <div style={{ fontSize: 14.5, color: '#1a1226', fontWeight: 700, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '12px 14px' }}>{scanTarget.msg}</div>
+                  ) : null}
                   <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, marginBottom: 14 }}>Pour gagner <b>1 ticket de plus</b>, rends-toi à cette station et <b>flashe son QR code</b> sur place. Tu cumules un ticket à chaque station, toute la soirée.</div>
                   <button className="btn" style={{ marginTop: 0 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>Flasher le QR maintenant</button>
                   {scanTarget.lat && scanTarget.lng ? (
