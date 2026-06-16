@@ -402,9 +402,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
         .ndsbody .foot{color:#9a8fa6 !important}
         /* B — bandeau hero a hauteur fixe avec image NDS d'origine (onboard uniquement). L'image vit dans .hero (pas dans .stage scrollable) ; le voile garantit la lisibilite du label+logo et le fondu vers le theme clair. La prize-card chevauche le bas via margin:-56px d'origine. */
-        .ndsbody .scr.on .hero{position:relative;background:#190a25 url(/nds/bg-stage.webp) center 32%/cover no-repeat;padding:22px 20px 70px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
-        .ndsbody .scr.on .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,6,24,.34) 0%,rgba(15,6,24,.04) 38%,rgba(15,6,24,.52) 100%);pointer-events:none}
-        .ndsbody .scr.on .hlogo{position:relative;z-index:1}
+        .ndsbody .scr.on .hero{position:relative;background:#190a25 url(/nds/bg-stage.webp) center 30%/cover no-repeat;padding:20px 16px 18px;display:flex;flex-direction:column;align-items:stretch}
+        .ndsbody .scr.on .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,6,24,.42) 0%,rgba(15,6,24,.10) 32%,rgba(15,6,24,.28) 100%);pointer-events:none}
+        .ndsbody .scr.on .hlogo{position:relative;z-index:1;align-self:flex-start;height:110px;width:auto;max-width:86%;margin-bottom:14px}
+        .ndsbody .scr.on .hero .prize{position:relative;z-index:1;margin:0 !important}
         /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
         .ndsbody .logotrack{display:flex;gap:10px;width:max-content;padding:12px 10px;align-items:center;animation:logoscroll 26s linear infinite}
@@ -421,8 +422,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className={`scr on${saved ? ' padnav' : ''}`}>
             <div className="hero">
               <img className="hlogo" src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" />
-            </div>
-            <div className="stage">
               <div className="prize">
                 <div className="lbl">À gagner chaque soir</div>
                 <div className="prow">
@@ -432,6 +431,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="div" />
                 <div className="tir"><span className="dot" /> Tirage au sort chaque soir du festival</div>
               </div>
+            </div>
+            <div className="stage">
               {saved ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(22,163,74,.16)', border: '1px solid rgba(22,163,74,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
@@ -464,10 +465,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </>
               ) : (
                 <>
-                  <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                  <div style={{ textAlign: 'center', marginBottom: 8, marginTop: 2 }}>
                     <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Bienvenue au Super Event</div>
                   </div>
-                  <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '15px 16px', marginBottom: 14, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
+                  <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '13px 16px', marginBottom: 12, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
                     {[
                       { ic: 'i-help', t: 'Réponds au Quizz', s: 'Remporte 1 ticket' },
                       { ic: 'i-layers', t: '4 lieux, 4 quizz', s: '4 fois plus de chance de gagner !' },
@@ -478,11 +479,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         <span style={{ fontSize: 13.5, color: '#52455e', lineHeight: 1.3 }}><b style={{ color: '#1a1226' }}>{step.t}</b><br /><span style={{ fontSize: 12.5, opacity: .85 }}>{step.s}</span></span>
                       </div>
                     ))}
-                    <div style={{ display: 'flex', gap: 7, marginTop: 10, paddingTop: 10, borderTop: '1px solid #ece7f2' }}>
-                      {STATIONS.map(s => (
-                        <span key={s.id} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#52455e', background: '#f3eef8', borderRadius: 8, padding: '7px 4px' }}>{s.nom}</span>
-                      ))}
-                    </div>
                   </div>
                   <a className="btn" onClick={() => {
                     setScreen(questions.length > 0 ? 'quiz' : 'resultats')
