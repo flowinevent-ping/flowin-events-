@@ -27,10 +27,10 @@ Repo : `flowinevent-ping/flowin-events-` · prod `flowin-events.vercel.app` · d
 ## ❌ À FAIRE (parcours joueur + dashboard) — dans l'ordre
 
 ### 1. Carte du parcours (app joueur) — `admin/app/parcours/nds2026/NDS2026Client.tsx`
-- [ ] Afficher **uniquement les points actifs** (lire `v_nds_commerces_carte`, respecter actif/visible)
-- [ ] Points **cliquables** → ouverture **fiche station / partenaire** individuelle
-- [ ] Pastille **verte = validé** / **jaune clignotant = à jouer**
-- [ ] Afficher les commerces sur la carte
+- [x] Afficher les **commerces partenaires actifs** (fetch `v_nds_commerces_carte`, déjà filtrée actif/visible) — commit `7ee8258`, tsc 0 err + next build OK
+- [x] Points commerces **cliquables** → **fiche** bottom-sheet (nom, adresse, promo, tickets/scan, liens) — `7ee8258`
+- [x] Pastilles stations : **vert = validé** / **jaune clignotant = à jouer** (+ ★ station courante) — `7ee8258`
+- [ ] À VÉRIFIER SUR LE DÉPLOIEMENT (carte = tuiles + fetch live, pas screenshotable en local) : points s'affichent, clic ouvre la fiche, couleurs correctes
 
 ### 2. Parcours 1ʳᵉ page — `NDS2026Client.tsx` / `admin/lib/nds2026Design.ts`
 - [ ] Bandeau de couleur manquant
