@@ -47,7 +47,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
   const lotResume = (cfg.lotResume as string) || '3 places pour ton prochain concert'
   const tirageHeure = (cfg.tirageHeure as string) || '12h30'
-  const ptList = (partenaires ?? []).filter(p => p.actif !== false)
 
   const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
   const [screen, setScreen] = useState<Screen>('onboard')
@@ -77,10 +76,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [commerces, setCommerces] = useState<Commerce[]>([])
   const [bandPartners, setBandPartners] = useState<{ id: string; nom: string; image_url: string | null; emoji: string | null }[]>([])
   const [fiche, setFiche] = useState<Commerce | null>(null)
-  // Bandeau dock : tous les partenaires actifs (fallback event). Répété pour remplir, doublé pour la boucle (-50%).
-  const bandSrc = bandPartners.length ? bandPartners : ptList.map(p => ({ id: p.id, nom: p.nom, image_url: p.image_url ?? null, emoji: (p as { emoji?: string | null }).emoji ?? null }))
-  const bandFill = bandSrc.length ? (bandSrc.length < 4 ? Array(Math.ceil(4 / bandSrc.length)).fill(0).flatMap(() => bandSrc) : bandSrc) : []
-  const bandTrack = [...bandFill, ...bandFill]
+  // Bandeau partenaires : placeholders « Votre logo ici » tant que les partenaires ne sont pas validés (avec logo) dans le dashboard.
+  const bandReal = bandPartners.filter(p => p.image_url)
+  const bandUnit: { id: string; nom: string; image_url: string | null }[] = bandReal.length
+    ? bandReal.map(p => ({ id: p.id, nom: p.nom, image_url: p.image_url }))
+    : Array.from({ length: 6 }).map((_, i) => ({ id: `ph-${i}`, nom: 'Votre logo ici', image_url: null }))
+  const bandTrack = [...bandUnit, ...bandUnit]
   const scanVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const lsKey = `flowin_played_${evId}`
@@ -236,7 +237,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       LL.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
       // Stations : vert = validé (joué) · jaune clignotant = à jouer · ★ = station courante
-      STATIONS.forEach(st => {
+      if (mapView === 'stations') STATIONS.forEach(st => {
         const cur = st.id === evId
         let done = false
         try { done = !!localStorage.getItem(`flowin_played_${st.id}`) } catch {}
@@ -251,7 +252,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       })
 
       // Commerces partenaires actifs (vue v_nds_commerces_carte) : clic -> fiche
-      commerces.forEach(c => {
+      if (mapView === 'partenaires') commerces.forEach(c => {
         const big = !!c.en_avant
         const sz = big ? 30 : 24
         const html = `<div style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:linear-gradient(135deg,#F5B544,#E0218A);border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
@@ -265,7 +266,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       cancelled = true
       if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
     }
-  }, [screen, evId, commerces])
+  }, [screen, evId, commerces, mapView])
 
   const handleAnswer = useCallback((idx: number) => {
     if (answered) return
@@ -355,6 +356,19 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
 
+  // Bandeau partenaires (inline, collé au contenu) — réutilisé en bas de plusieurs écrans
+  const partnerBand = (
+    <div className="logoband logoband-inline" onClick={() => nb('partenaires')} style={{ cursor: 'pointer' }} aria-label="Espace partenaires">
+      <div className="logotrack">
+        {bandTrack.map((p, i) => (
+          <span className={`logoslot${p.image_url ? '' : ' logoslot-ph'}`} key={`bd-${p.id}-${i}`}>
+            {p.image_url ? <img src={p.image_url} alt={p.nom} /> : 'Votre logo ici'}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div className="ndsbody">
       <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
@@ -365,7 +379,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
         .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        .ndsbody .padnav{padding-bottom:172px}
+        .ndsbody .padnav{padding-bottom:92px}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .footdock{position:sticky;bottom:0;z-index:1000;display:flex;flex-direction:column;width:100%}
         .ndsbody .footdock .nav{position:static}
@@ -374,7 +388,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:172px;z-index:600;display:flex;flex-direction:column;gap:10px}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:92px;z-index:600;display:flex;flex-direction:column;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
         .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -428,6 +442,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .logoband:active .logotrack{animation-play-state:paused}
         .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:11px 20px;color:#7C2D92;font-weight:700;font-size:14.5px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:64px}
         .ndsbody .logoslot img{max-height:46px;max-width:140px;object-fit:contain;display:block}
+        .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:132px;justify-content:center;font-size:13.5px;font-weight:800;letter-spacing:.01em}
+        .ndsbody .logoband-inline{margin:18px 0 4px}
+        .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:5px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
+        .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:12px 8px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;background:transparent;color:#7C2D92}
+        .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
         @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
         @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
       ` }} />
@@ -478,6 +497,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     </div>
                   )}
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7C2D92', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
+                  {partnerBand}
                 </>
               ) : (
                 <>
@@ -627,14 +647,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de {tirageHeure}.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
-              {partenaires.length > 0 && (
-                <>
-                  <div className="bandeau" onClick={() => setScreen('carte')} style={{ cursor: 'pointer', marginTop: 8 }}>
-                    <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)' }}><use href="#i-store" /></svg>
-                    <span style={{ fontSize: 13.5, fontWeight: 700, color: '#7C2D92' }}>Le jeu continue chez nos partenaires →</span>
-                  </div>
-                </>
-              )}
+              {partnerBand}
             </div>
           </section>
         )}
@@ -657,6 +670,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {ticketCount >= STATIONS.length && (
                 <div className="tk-tip" style={{ marginTop: 12, background: '#e9f9ef', borderColor: '#bbf7d0', color: '#16a34a' }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>Toutes les stations jouées !</b> Tu as le maximum de tickets pour le tirage de ce soir.</div></div>
               )}
+              {partnerBand}
             </div>
           </section>
         )}
@@ -669,22 +683,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div style={{ minWidth: 0 }}><div className="t">{mapView === 'stations' ? 'Les points de jeu' : 'Nos partenaires'}</div><div className="s">{mapView === 'stations' ? 'Flashe le QR de chaque station pour cumuler tes tickets' : 'Le jeu continue : retrouve nos partenaires en ville'}</div></div>
                 <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> {ticketCount}</span>
               </div>
-              <div style={{ display: 'flex', gap: 6, marginTop: 10, background: 'rgba(255,255,255,.7)', borderRadius: 12, padding: 4 }}>
-                <button onClick={() => setMapView('stations')} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px 8px', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', background: mapView === 'stations' ? 'linear-gradient(135deg,#7C2D92,#E0218A)' : 'transparent', color: mapView === 'stations' ? '#fff' : '#7C2D92' }}>Pendant le festival</button>
-                <button onClick={() => setMapView('partenaires')} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px 8px', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', background: mapView === 'partenaires' ? 'linear-gradient(135deg,#7C2D92,#E0218A)' : 'transparent', color: mapView === 'partenaires' ? '#fff' : '#7C2D92' }}>Chez les partenaires</button>
-              </div>
             </div>
             <div className="map-fake">
               <div className="map-real" ref={mapRef} />
               <div className="map-list">
-                {mapView === 'stations' ? (
-                  <>
-                    <button className="stn" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', justifyContent: 'center', gap: 10, fontWeight: 800 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>
-                      <svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>
-                      Flasher le QR d&apos;une station
-                    </button>
-                  </>
-                ) : (
+                {mapView === 'partenaires' && (
                   commerces.length > 0 ? commerces.map(c => (
                     <button className="stn" key={c.id} onClick={() => setFiche(c)}>
                       <span className="em">{c.image_url ? <img src={c.image_url} alt="" style={{ width: 42, height: 42, borderRadius: 12, objectFit: 'cover' }} /> : <svg className="ic"><use href="#i-store" /></svg>}</span>
@@ -693,6 +696,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     </button>
                   )) : <div style={{ background: '#fff', borderRadius: 14, padding: 18, textAlign: 'center', color: '#7a708a', fontSize: 13.5, fontWeight: 600 }}>Nos partenaires arrivent très bientôt.</div>
                 )}
+                <div className="map-switch">
+                  <button onClick={() => setMapView('stations')} className={mapView === 'stations' ? 'on' : ''}>Pendant le festival</button>
+                  <button onClick={() => setMapView('partenaires')} className={mapView === 'partenaires' ? 'on' : ''}>Chez les partenaires</button>
+                </div>
               </div>
             </div>
             {scanTarget && (
@@ -820,32 +827,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
               <a className="double" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg> Les partenaires &amp; leurs offres</a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
+              {partnerBand}
             </div>
           </section>
         )}
 
         {navOn && (
-          <div className="footdock">
-            {bandTrack.length > 0 && (
-              <div className="logoband logoband-dock" onClick={() => nb('partenaires')} style={{ cursor: 'pointer' }} aria-label="Nos partenaires">
-                <div className="logotrack">
-                  {bandTrack.map((p, i) => (
-                    <span className="logoslot" key={`bd-${p.id}-${i}`}>
-                      {p.image_url
-                        ? <img src={p.image_url} alt={p.nom} />
-                        : <>{p.emoji ? <span style={{ fontSize: 24 }}>{p.emoji}</span> : null}<span>{p.nom}</span></>}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            <nav className="nav on" id="nav">
-              <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
-              <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
-              <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
-              <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
-            </nav>
-          </div>
+          <nav className="nav on" id="nav">
+            <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
+            <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
+            <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
+            <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
+          </nav>
         )}
       </div>
     </div>
