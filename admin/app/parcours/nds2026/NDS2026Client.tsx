@@ -72,7 +72,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [ticketCount, setTicketCount] = useState(1)
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
-  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string } | null>(null)
+  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string; ou?: string } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
   const [bandPartners, setBandPartners] = useState<{ id: string; nom: string; image_url: string | null; emoji: string | null }[]>([])
@@ -247,7 +247,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         const icon = LL.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] })
         LL.marker([st.lat, st.lng], { icon })
           .addTo(map)
-          .bindPopup(`<b>${st.nom}</b><br>${st.ou}${cur ? '<br><b style="color:#16a34a">Tu es ici</b>' : (done ? '<br><b style="color:#16a34a">Validé ✓</b>' : '<br><b style="color:#b45309">À jouer — flashe le QR</b>')}`)
+          .on('click', () => { if (cur) setScreen('onboard'); else setScanTarget({ nom: st.nom, lat: st.lat, lng: st.lng, msg: st.msg, ou: st.ou }) })
       })
 
       // Commerces partenaires actifs (vue v_nds_commerces_carte) : clic -> fiche
@@ -691,7 +691,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         <button
                           className={`stn${cur ? ' cur' : ''}`}
                           key={s.id}
-                          onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom, lat: s.lat, lng: s.lng, msg: s.msg }) }}
+                          onClick={() => { if (cur) setScreen('onboard'); else setScanTarget({ nom: s.nom, lat: s.lat, lng: s.lng, msg: s.msg, ou: s.ou }) }}
                         >
                           <span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span>
                           <div style={{ minWidth: 0 }}><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div>
@@ -719,7 +719,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <>
                 <div className="pt-dim2" onClick={() => setScanTarget(null)} />
                 <div className="pt-sheet2">
-                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 6 }}>Direction « {scanTarget.nom} »</div>
+                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: scanTarget.ou ? 2 : 6 }}>Direction « {scanTarget.nom} »</div>
+                  {scanTarget.ou ? (
+                    <div style={{ fontSize: 13.5, color: '#7a708a', fontWeight: 600, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-map" /></svg>{scanTarget.ou}</div>
+                  ) : null}
                   {scanTarget.msg ? (
                     <div style={{ fontSize: 14.5, color: '#1a1226', fontWeight: 700, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '12px 14px' }}>{scanTarget.msg}</div>
                   ) : null}
@@ -742,6 +745,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   {fiche.image_url ? <img src={fiche.image_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} /> : null}
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 2 }}>{fiche.nom}</div>
                   {fiche.adresse || fiche.ville ? <div style={{ fontSize: 13.5, color: '#52455e', marginBottom: 12 }}>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</div> : null}
+                  <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}>Le jeu continue chez nos partenaires&nbsp;! Rends-toi sur place{fiche.tickets_par_scan ? ' et flashe leur QR pour gagner des tickets en plus' : ' pour profiter de leur offre'}.</div>
                   {fiche.latitude && fiche.longitude ? (
                     <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }}>
                       <svg className="ic" style={{ width: 16, height: 16, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
