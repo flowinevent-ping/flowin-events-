@@ -3731,7 +3731,7 @@ function renderUpcomingCard(ev,kind){
        + '<div class="meta">'+moduleChip(ev.module)+' · '+esc(addr)+'</div>'
        + '<div style="display:flex;gap:5px;margin-top:6px">'
        + '<button class="btn btn-sm" style="font-size:10px" onclick="event.stopPropagation();openDrawerFor(\'event\',\''+ev.id+'\',\'qr\')">📱 QR</button>'
-       + (kind==='past'?'<button class="btn btn-sm" style="font-size:10px;background:#F3E8FF;color:#7C2D92;border-color:#E9D5FF" onclick="event.stopPropagation();openDrawerFor(\'event\',\''+ev.id+'\',\'tirage\')">🎲 Tirage</button>':'')
+       + '<button class="btn btn-sm" style="font-size:10px;background:#F3E8FF;color:#7C2D92;border-color:#E9D5FF" onclick="event.stopPropagation();openDrawerFor(\'event\',\''+ev.id+'\',\'tirage\')">🎲 Tirage</button>'
        + '</div>'
        + '</div>'
        + '</div>';
