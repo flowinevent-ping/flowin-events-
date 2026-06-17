@@ -11,6 +11,7 @@ type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'fina
 interface Props extends ParcoursPageData { evId: string }
 
 const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
+const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '📋', 'Bouche à oreille': '🗣️', 'Autre': '✨' }
 
 /* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
    Incrémenter la version à chaque modification du texte. */
@@ -41,7 +42,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const allQs = banques.flatMap(b => b.questions ?? [])
   const customQs = (cfg.customQuestions ?? []) as QuizQuestion[]
   const nbQ = (cfg.quizNbQuestions as number) ?? 4
-  const timerSec = (cfg.quizTimer as number) || 20
   const bonusQs = (cfg.quizBonusList ?? []) as BonusQuestion[]
   const lotNom = (cfg.lotNom as string) || '3 places offertes'
   const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
@@ -54,7 +54,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [selected, setSelected] = useState<number | null>(null)
   const [answered, setAnswered] = useState(false)
   const [score, setScore] = useState(0)
-  const [timer, setTimer] = useState(timerSec)
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', age: '', cp: '', source: '', sexe: '', optin: false })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [ticket, setTicket] = useState('')
@@ -112,13 +111,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     } catch {}
   }, [lsKey])
 
-  useEffect(() => {
-    if (screen !== 'quiz' || answered) return
-    setTimer(timerSec)
-    const iv = setInterval(() => setTimer(t => { if (t <= 1) { clearInterval(iv); handleAnswer(-1); return 0 } return t - 1 }), 1000)
-    return () => clearInterval(iv)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, qIdx, answered])
+
 
   // Scanner QR in-app (caméra + jsQR) — flasher le QR d'une station sans sortir du jeu
   useEffect(() => {
@@ -251,8 +244,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         const bg = done ? '#16a34a' : '#F5B544'
         const cls = done ? '' : 'nds-mk-pulse'
         const mark = cur ? '★' : (done ? '✓' : '')
-        const html = `<div class="${cls}" style="width:34px;height:34px;border-radius:50%;background:${bg};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px">${mark}</div>`
-        const icon = LL.divIcon({ html, className: '', iconSize: [34, 34], iconAnchor: [17, 17] })
+        const html = `<div class="${cls}" style="width:24px;height:24px;border-radius:50%;background:${bg};border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px">${mark}</div>`
+        const icon = LL.divIcon({ html, className: '', iconSize: [24, 24], iconAnchor: [12, 12] })
         const g0 = geoRef.current[st.id]
         const mk = LL.marker([g0 ? g0.lat : st.lat, g0 ? g0.lng : st.lng], { icon, draggable: placeMode }).addTo(map)
         if (placeMode) {
@@ -376,6 +369,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   const q = questions[qIdx]
   const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires' || screen === 'profil' || (screen === 'onboard' && saved)
+  const bandOn = screen !== 'inscription' && screen !== 'bonus'
 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
@@ -415,7 +409,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:196px;z-index:600;display:flex;flex-direction:column;align-items:center;gap:10px}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:14px;z-index:600;display:flex;flex-direction:column;align-items:stretch;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
         .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -448,6 +442,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .qtxt{color:#1a1226 !important}
         .ndsbody .opt{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
         .ndsbody .opt.sel{border-color:var(--magenta) !important;background:rgba(224,33,138,.10) !important;color:#7C2D92 !important}
+        .ndsbody .optb.sel{border-color:#3B5CC4 !important;background:rgba(59,92,196,.12) !important;color:#3B5CC4 !important}
+        .ndsbody .rgpd, .ndsbody .rgpd-check{color:#52455e !important}
+        .ndsbody .rgpd-check div{color:#52455e !important;font-weight:600}
+        .ndsbody .label-strong{color:#3a2f49 !important;font-weight:800 !important}
+        .ndsbody .chip-em{font-size:15px}
         .ndsbody .opt.correct{color:#14532d !important}
         .ndsbody .opt.wrong{color:#7f1d1d !important}
         .ndsbody .dtitle{color:#1a1226 !important}
@@ -569,12 +568,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoCapitalize="none" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />{errors.email && <div className="err">{errors.email}</div>}</div>
               <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
               <div className="grid2" style={{ marginBottom: 12 }}>
-                <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option><option value="A">Autre</option></select></div>
+                <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
                 <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
               </div>
               <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
-              <div><label className="label">Tu as connu le festival par…</label>
-                <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}>{s}</span>)}</div>
+              <div><label className="label label-strong">Tu as connu le festival par…</label>
+                <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}><span className="chip-em">{SRC_EMOJI[s]}</span> {s}</span>)}</div>
               </div>
               <div className={`rgpd rgpd-check${form.optin ? ' on' : ''}`} onClick={() => setForm(f => ({ ...f, optin: !f.optin }))} role="checkbox" aria-checked={form.optin} tabIndex={0}>
                 <span className="rc">{form.optin && <svg className="ic"><use href="#i-check" /></svg>}</span>
@@ -592,7 +591,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="dhead">
                 <div className="back" onClick={() => setScreen('onboard')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
                 <div style={{ flex: 1 }}><div className="dtitle">{nom}</div><div className="dsub">Quiz · {qIdx + 1} / {questions.length}</div></div>
-                <div style={{ marginLeft: 'auto', fontWeight: 800, fontSize: 15, color: timer <= 5 ? '#dc2626' : '#7C2D92', background: timer <= 5 ? '#fde7e7' : '#f3eef8', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{timer}</div>
+                
               </div>
               <div className="progress">{questions.map((_, k) => <div key={k} className={`pstep${k <= qIdx ? ' on' : ''}`} />)}</div>
               <div className="qcard">
@@ -649,7 +648,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   const bq = bonusQs[bonusIdx]
                   const ans = bonusAnswers[bq.id]
                   const isSel = Array.isArray(ans) ? ans.includes(opt.val) : ans === opt.val
-                  return <button key={opt.val} className={`opt${isSel ? ' sel' : ''}`} onClick={() => setBonusAnswers(a => bq.type === 'multi'
+                  return <button key={opt.val} className={`opt optb${isSel ? ' sel' : ''}`} onClick={() => setBonusAnswers(a => bq.type === 'multi'
                     ? { ...a, [bq.id]: ((a[bq.id] as string[] | undefined) ?? []).includes(opt.val) ? (a[bq.id] as string[]).filter(v => v !== opt.val) : [...((a[bq.id] as string[] | undefined) ?? []), opt.val] }
                     : { ...a, [bq.id]: opt.val })}>{opt.label}</button>
                 })}
@@ -878,15 +877,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           </section>
         )}
 
-        {navOn && (
+        {bandOn && (
           <div className="botdock">
             {partnerBand}
+            {navOn && (
             <nav className="nav on" id="nav">
               <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
               <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
               <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
               <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
             </nav>
+            )}
           </div>
         )}
       </div>
