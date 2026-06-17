@@ -118,6 +118,10 @@ const CSS = `*{margin:0;padding:0;box-sizing:border-box}
   .use .uh{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:800}
   .use .ui{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;flex-shrink:0;color:#fff}
   .use p{font-size:14px;color:var(--muted);margin-top:9px;line-height:1.55}
+  .offer-grid{display:grid;gap:14px;grid-template-columns:1fr;margin-top:4px}
+  .offer-grid .use{display:flex;flex-direction:column}
+  .offer-grid .use .uh{font-size:17px;line-height:1.2}
+  @media(min-width:680px){.offer-grid{grid-template-columns:1fr 1fr}}
 
   .games{display:flex;flex-direction:column;gap:12px;margin-top:18px}
   .game{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
@@ -469,10 +473,20 @@ const BODY = `<div class="app">
       </div>
 
     </div>
-    <div class="prices-contact" style="max-width:660px;margin:6px auto 0;text-align:center">
-      <p style="font-size:21px;font-weight:900;color:var(--ink);line-height:1.2;letter-spacing:-.01em;margin:0">Le Super Event : tout le monde y gagne.</p>
-      <p class="sub" style="margin:10px 0 24px">Ensemble, on dynamise le commerce local.</p>
-      <a class="btn" data-to="contact" style="display:inline-flex">Contactez-nous →</a>
+    <div class="prices-contact" style="max-width:760px;margin:6px auto 0">
+      <div class="offer-grid">
+        <div class="use">
+          <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--orange),var(--amber))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 7a3 3 0 0 1 0 6"/><path d="M20 20a6 6 0 0 0-4-5.6"/></svg></span>J'anime ma clientèle &amp; mes prospects</div>
+          <p>Captez de nouveaux contacts, relancez votre public et faites-le revenir — sur votre lieu comme pendant vos events.</p>
+        </div>
+        <div class="use">
+          <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--blue),var(--violet))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M12 2.5l2.6 6.3 6.8.5-5.2 4.4 1.6 6.6L12 17.2 6.2 20.8l1.6-6.6L2.6 9.8l6.8-.5z"/></svg></span>J'intègre un Super Event</div>
+          <p>Rejoignez une animation collective à l'échelle du territoire. Ensemble, on dynamise le commerce local.</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:24px">
+        <a class="btn" data-to="contact" style="display:inline-flex;width:auto;padding:16px 34px">Contactez-nous →</a>
+      </div>
     </div>
     <div class="pmline"><span style="color:var(--blue);display:inline-flex"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="m16 11 2 2 4-4"/></svg></span> Un chef de projet dédié à votre compte.</div>
   </section>
