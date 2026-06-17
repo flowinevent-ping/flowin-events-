@@ -415,7 +415,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:200px;z-index:600;display:flex;flex-direction:column;gap:10px}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:196px;z-index:600;display:flex;flex-direction:column;align-items:center;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
         .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -447,6 +447,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .qcard{background:#fff !important;border:1px solid #ece7f2 !important}
         .ndsbody .qtxt{color:#1a1226 !important}
         .ndsbody .opt{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
+        .ndsbody .opt.sel{border-color:var(--magenta) !important;background:rgba(224,33,138,.10) !important;color:#7C2D92 !important}
         .ndsbody .opt.correct{color:#14532d !important}
         .ndsbody .opt.wrong{color:#7f1d1d !important}
         .ndsbody .dtitle{color:#1a1226 !important}
@@ -456,6 +457,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .label{color:#7a708a !important}
         .ndsbody .input{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
         .ndsbody .input::placeholder{color:#b8aec6 !important}
+        .ndsbody .chip{background:#faf7fd !important;border-color:#e7def0 !important;color:#52455e !important}
+        .ndsbody .chip.sel{background:rgba(224,33,138,.10) !important;border-color:var(--magenta) !important;color:#7C2D92 !important}
         .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
         .ndsbody .foot{color:#9a8fa6 !important}
         /* B — bandeau hero a hauteur fixe avec image NDS d'origine (onboard uniquement). L'image vit dans .hero (pas dans .stage scrollable) ; le voile garantit la lisibilite du label+logo et le fondu vers le theme clair. La prize-card chevauche le bas via margin:-56px d'origine. */
@@ -471,8 +474,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .logoslot img{max-height:82px;max-width:215px;object-fit:contain;display:block}
         .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:196px;justify-content:center;font-size:16px;font-weight:800;letter-spacing:.01em}
         .ndsbody .logoband-inline{margin:0}
-        .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:5px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
-        .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:12px 8px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;background:transparent;color:#7C2D92}
+        .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:4px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
+        .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:7px 10px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;background:transparent;color:#7C2D92}
         .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
         @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
         @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
