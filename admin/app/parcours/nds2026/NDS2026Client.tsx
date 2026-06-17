@@ -639,7 +639,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {screen === 'bonus' && bonusQs[bonusIdx] && (
           <section className="scr purple on">
             <div className="pad">
-              <div className="dhead"><div className="back" onClick={() => setScreen('resultats')}><svg className="ic"><use href="#i-arrowl" /></svg></div><div style={{ flex: 1 }}><div className="dtitle">Bonus</div><div className="dsub">{bonusIdx + 1} / {bonusQs.length} · double tes chances</div></div><div className="reslink" style={{ padding: 0, margin: 0 }} onClick={finishBonus}>Passer</div></div>
+              <div className="dhead"><div className="back" onClick={() => setScreen('resultats')}><svg className="ic"><use href="#i-arrowl" /></svg></div><div style={{ flex: 1 }}><div className="dtitle">Bonus</div><div className="dsub">{bonusIdx + 1} / {bonusQs.length} · double tes chances</div></div></div>
               <div className="qcard">
                 <div className="qtxt">{bonusQs[bonusIdx].label}</div>
                 {bonusQs[bonusIdx].options.map(opt => {
