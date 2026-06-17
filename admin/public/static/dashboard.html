@@ -3193,14 +3193,17 @@ function prospEtatColor(v){return prospEtatObj(v).c;}
 
 async function loadProspection(){
   // PostgREST plafonne chaque reponse a 1000 lignes (limit ne leve pas ce plafond) -> pagination par offset
-  var all = [], off = 0, PAGE = 1000, page;
+  // tri id.asc (cle primaire indexee, deterministe) pour eviter toute fragilite d'ordre; le rendu retrie cote client
+  var all = [], off = 0, PAGE = 1000, page, guard = 0;
   do {
-    page = await supaFetch('prospection','select=*&order=ville.asc,enseigne.asc&offset='+off+'&limit='+PAGE);
+    page = await supaFetch('prospection','select=*&order=id.asc&offset='+off+'&limit='+PAGE);
     if(page && page.length){ all = all.concat(page); off += PAGE; }
-  } while(page && page.length >= PAGE);
+    guard++;
+  } while(page && page.length >= PAGE && guard < 50);
   state.prospection = all;
   render();
 }
+function prospReload(){ state.prospection=null; state.prospPage=1; toast('Rechargement…'); render(); }
 
 function renderProspection(){
   if(!state.prospection){ loadProspection(); return '<div class="page"><div class="page-header"><div class="page-title">&#128222; Prospection</div></div><div class="empty-block">Chargement…</div></div>'; }
@@ -3245,6 +3248,7 @@ function renderProspection(){
   html+=prospSelectEtat(fe);
   html+='<button class="btn" onclick="prospToggleImport()" style="background:#F5B544;color:#1a1205;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">＋ Ajouter</button>';
   html+='<button class="btn" onclick="prospToggleScrap()" style="background:#3B5CC4;color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">⚡ Scraping Maps</button>';
+  html+='<button class="btn" onclick="prospReload()" style="background:rgba(255,255,255,.06);color:inherit;border:1px solid var(--line,#2a3550);border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">↻ Recharger</button>';
   html+='</div>';
 
   // Zone scraping (cachée)
