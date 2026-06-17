@@ -403,7 +403,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
         .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        .ndsbody .padnav{padding-bottom:166px}
+        .ndsbody .padnav{padding-bottom:192px}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .botdock{position:sticky;bottom:0;z-index:40;background:#fff;box-shadow:0 -6px 18px rgba(20,8,30,.07)}
         .ndsbody .botdock .nav{position:static;box-shadow:none}
@@ -415,7 +415,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:174px;z-index:600;display:flex;flex-direction:column;gap:10px}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:200px;z-index:600;display:flex;flex-direction:column;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
         .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -467,9 +467,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
         .ndsbody .logotrack{display:flex;gap:14px;width:max-content;padding:9px 12px;align-items:center;animation:logoscroll 52s linear infinite}
         .ndsbody .logoband:active .logotrack{animation-play-state:paused}
-        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:14px 24px;color:#7C2D92;font-weight:700;font-size:15.5px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:88px}
-        .ndsbody .logoslot img{max-height:68px;max-width:195px;object-fit:contain;display:block}
-        .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:172px;justify-content:center;font-size:15px;font-weight:800;letter-spacing:.01em}
+        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:16px 26px;color:#7C2D92;font-weight:700;font-size:16.5px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:104px}
+        .ndsbody .logoslot img{max-height:82px;max-width:215px;object-fit:contain;display:block}
+        .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:196px;justify-content:center;font-size:16px;font-weight:800;letter-spacing:.01em}
         .ndsbody .logoband-inline{margin:0}
         .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:5px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
         .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:12px 8px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;background:transparent;color:#7C2D92}
@@ -481,7 +481,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
       <div className="phone">
         {screen === 'onboard' && (
-          <section className={`scr on${saved ? ' padnav' : ''}`}>
+          <section className="scr on">
             <div className="hero">
               <img className="hlogo" src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" />
               <div className="prize">
@@ -718,7 +718,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
             </div>
             {placeMode && (
-              <div style={{ position: 'absolute', left: 12, right: 12, bottom: 178, zIndex: 1200, background: '#1a1226', color: '#fff', borderRadius: 14, padding: '12px 14px', boxShadow: '0 10px 30px rgba(0,0,0,.4)' }}>
+              <div style={{ position: 'absolute', left: 12, right: 12, bottom: 204, zIndex: 1200, background: '#1a1226', color: '#fff', borderRadius: 14, padding: '12px 14px', boxShadow: '0 10px 30px rgba(0,0,0,.4)' }}>
                 <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 6 }}>Mode placement — glisse les 4 points sur la carte</div>
                 {STATIONS.map(st => { const g = geo[st.id]; return <div key={st.id} style={{ fontSize: 11.5, opacity: .85, fontVariantNumeric: 'tabular-nums' }}>{st.nom} : {(g ? g.lat : st.lat).toFixed(5)}, {(g ? g.lng : st.lng).toFixed(5)}</div> })}
                 <button onClick={() => { const out = STATIONS.map(st => { const g = geo[st.id]; return { id: st.id, lat: g ? +g.lat.toFixed(6) : st.lat, lng: g ? +g.lng.toFixed(6) : st.lng } }); try { navigator.clipboard.writeText(JSON.stringify(out)) } catch {} }} style={{ marginTop: 9, width: '100%', background: '#E0218A', border: 'none', color: '#fff', borderRadius: 10, padding: '10px 14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>Copier les positions</button>
