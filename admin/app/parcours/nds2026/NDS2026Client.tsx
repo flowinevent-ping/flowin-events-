@@ -16,7 +16,7 @@ const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '�
 /* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
    Incrémenter la version à chaque modification du texte. */
 const OPTIN_VERSION = 'nds-2026-v2'
-const OPTIN_TEXT = "J'accepte de garder le contact avec les Nuits du Sud et partenaires."
+const OPTIN_TEXT = "Je veux rester en contact avec les Nuits du Sud et leurs partenaires."
 
 /* Les 3 stations fixes du festival (carte). joue=true => station courante scannée */
 const STATIONS = [
