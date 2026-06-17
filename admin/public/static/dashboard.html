@@ -3177,6 +3177,7 @@ function frontLive(){
 var PROSP_ETATS=[
   {v:'a_contacter',l:'À contacter',c:'#5B6B8C'},
   {v:'a_relancer',l:'À relancer',c:'#3B5CC4'},
+  {v:'a_rappeler',l:'À rappeler',c:'#E8943A'},
   {v:'rappel_planifie',l:'Rappel planifié',c:'#8A6FC4'},
   {v:'interesse',l:'Intéressé',c:'#2FBF71'},
   {v:'rdv_pris',l:'RDV pris',c:'#00B4A0'},
@@ -3230,7 +3231,7 @@ function renderProspection(){
   filtered.sort(function(a,b){var x=(a[sk]==null?'':a[sk])+'',y=(b[sk]==null?'':b[sk])+'';return x.toLowerCase()<y.toLowerCase()?-sd:x.toLowerCase()>y.toLowerCase()?sd:0;});
   // KPIs
   var total=list.length,todo=0,contacted=0,interest=0,rdv=0;
-  for(var k=0;k<list.length;k++){var e=list[k].etat;if(e==='a_contacter'||e==='a_relancer')todo++;if(e!=='a_contacter')contacted++;if(e==='interesse'||e==='rdv_pris'||e==='client')interest++;if(e==='rdv_pris'||e==='client')rdv++;}
+  for(var k=0;k<list.length;k++){var e=list[k].etat;if(e==='a_contacter'||e==='a_relancer'||e==='a_rappeler')todo++;if(e!=='a_contacter')contacted++;if(e==='interesse'||e==='rdv_pris'||e==='client')interest++;if(e==='rdv_pris'||e==='client')rdv++;}
 
   var html='<div class="page">';
   html+='<div class="page-header"><div class="page-title">&#128222; Prospection commer&ccedil;ants</div><div class="page-sub">Suivi des appels &middot; '+total+' commerce'+(total>1?'s':'')+'</div></div>';
