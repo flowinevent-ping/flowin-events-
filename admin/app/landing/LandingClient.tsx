@@ -470,7 +470,8 @@ const BODY = `<div class="app">
 
     </div>
     <div class="prices-contact" style="max-width:660px;margin:6px auto 0;text-align:center">
-      <p class="sub" style="margin-bottom:24px">Chaque lieu a son public, son rythme et ses objectifs. On bâtit avec vous l'offre qui colle à votre terrain — sans coûts cachés, sans engagement.</p>
+      <p style="font-size:21px;font-weight:900;color:var(--ink);line-height:1.2;letter-spacing:-.01em;margin:0">Le Super Event : tout le monde y gagne.</p>
+      <p class="sub" style="margin:10px 0 24px">Ensemble, on dynamise le commerce local.</p>
       <a class="btn" data-to="contact" style="display:inline-flex">Contactez-nous →</a>
     </div>
     <div class="pmline"><span style="color:var(--blue);display:inline-flex"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="m16 11 2 2 4-4"/></svg></span> Un chef de projet dédié à votre compte.</div>
