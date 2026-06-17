@@ -1,0 +1,522 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<title>Flowin — Éditeur d'événement (mockup)</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --ink:#1B3A5C;--blue:#3B5CC4;--blue2:#6A93FF;--teal:#00B4A0;--orange:#E85D04;--amber:#F59E0B;--violet:#7C2D92;
+    --d1:#13314f;--d2:#0E1B30;--d3:#0A1C32;--dk:#0A1424;
+    --paper:#F4F6F9;--card:#fff;--muted:#5a6b80;--line:rgba(0,0,0,.08);
+    --herit:#5a6b80;--herit-bg:rgba(90,107,128,.12);
+    --surch:#E85D04;--surch-bg:rgba(232,93,4,.12);
+  }
+  html,body{height:100%}
+  body{font-family:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#000;color:var(--ink);-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;background:var(--paper);min-height:100vh;overflow-x:hidden;position:relative;padding-bottom:30px}
+  .page{display:none;animation:fade .22s ease}
+  .page.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* top bar */
+  .top{position:sticky;top:0;z-index:60;background:rgba(14,27,48,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:env(safe-area-inset-top) 0 0}
+  .top .row{display:flex;align-items:center;gap:10px;padding:12px 16px}
+  .lg{font-size:17px;font-weight:800;letter-spacing:-.02em;color:#fff;flex-shrink:0;cursor:pointer}
+  .lg em{color:var(--blue2);font-style:normal}
+  .back{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;display:grid;place-items:center;flex-shrink:0}
+  .crumb{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.6);margin-left:auto;text-align:right;line-height:1.3}
+  .crumb b{color:#fff}
+
+  /* generic */
+  section{padding:20px 16px 8px}
+  .eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);margin:18px 0 11px;display:flex;align-items:center;gap:8px}
+  .eyebrow:before{content:'';width:18px;height:2px;background:var(--blue);border-radius:2px}
+  .lead h1{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.15;color:var(--ink)}
+  .lead p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+  /* badges */
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.02em;padding:4px 9px;border-radius:100px;white-space:nowrap}
+  .b-herit{color:var(--herit);background:var(--herit-bg)}
+  .b-surch{color:var(--surch);background:var(--surch-bg)}
+  .b-status{color:var(--blue);background:rgba(59,92,196,.12)}
+  .b-live{color:var(--teal);background:rgba(0,180,160,.14)}
+  .b-archive{color:#8a96a6;background:rgba(138,150,166,.14)}
+  .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+  /* cards */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:11px;box-shadow:0 1px 2px rgba(16,30,54,.04)}
+  .se-card{background:linear-gradient(160deg,var(--d1),var(--d2));border:none;color:#fff;position:relative;overflow:hidden}
+  .se-card:before{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0,rgba(59,92,196,.4),transparent 60%);pointer-events:none}
+  .se-card .se-top{display:flex;align-items:center;gap:11px;position:relative}
+  .se-emoji{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:24px;flex-shrink:0}
+  .se-card h3{font-size:18px;font-weight:800;letter-spacing:-.01em}
+  .se-card .meta{font-size:12px;color:rgba(255,255,255,.62);margin-top:3px}
+  .se-card .se-tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--orange),var(--amber));padding:4px 11px;border-radius:100px;margin-bottom:12px}
+  .se-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;position:relative}
+  .se-stats .s{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px 6px;text-align:center}
+  .se-stats .v{font-size:18px;font-weight:800;color:#fff;line-height:1}
+  .se-stats .l{font-size:9.5px;color:rgba(255,255,255,.55);margin-top:5px;line-height:1.2}
+
+  .ev-row{display:flex;align-items:center;gap:12px}
+  .ev-color{width:8px;align-self:stretch;border-radius:100px;flex-shrink:0;min-height:42px}
+  .ev-main{flex:1;min-width:0}
+  .ev-main h4{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+  .ev-sub{font-size:11.5px;color:var(--muted);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .ev-mod{font-size:10.5px;font-weight:800;color:var(--violet);background:rgba(124,45,146,.1);padding:3px 8px;border-radius:7px;text-transform:uppercase;letter-spacing:.04em}
+
+  .row-actions{display:flex;gap:8px;margin-top:13px}
+  .act{flex:1;border:none;border-radius:11px;padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+  .act-primary{background:var(--blue);color:#fff}
+  .act-ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+  .act-tmpl{background:linear-gradient(135deg,var(--orange),var(--amber));color:#fff}
+  .act svg{width:15px;height:15px}
+
+  /* template view */
+  .tmpl-hero{background:linear-gradient(160deg,var(--blue),#2E47A0);border-radius:18px;padding:18px;color:#fff;margin-bottom:6px;position:relative;overflow:hidden}
+  .tmpl-hero:before{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}
+  .tmpl-hero h2{font-size:19px;font-weight:800;letter-spacing:-.01em;position:relative}
+  .tmpl-hero p{font-size:12.5px;color:rgba(255,255,255,.78);margin-top:5px;position:relative}
+  .tmpl-props{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;position:relative}
+  .prop{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);padding:6px 10px;border-radius:9px}
+  .prop .sw{width:13px;height:13px;border-radius:4px;border:1px solid rgba(255,255,255,.4)}
+  .tmpl-note{font-size:11.5px;color:var(--muted);line-height:1.5;background:var(--herit-bg);border-left:3px solid var(--herit);padding:10px 12px;border-radius:0 10px 10px 0;margin:14px 0 6px}
+
+  .station{display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .12s}
+  .station:active{transform:scale(.985)}
+  .station .ev-color{min-height:38px}
+  .station .chev{color:#c2ccd8;font-size:20px;flex-shrink:0}
+
+  /* editor view */
+  .ed-wrap{display:grid;grid-template-columns:1fr;gap:14px}
+  .screens{display:flex;gap:7px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .screens::-webkit-scrollbar{display:none}
+  .scn{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 13px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .scn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .scn .mini{width:6px;height:6px;border-radius:50%}
+  .scn.active .mini{background:#fff}
+
+  .field{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:9px}
+  .field .fh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .field .flabel{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .field .fbadge{margin-left:auto}
+  .finput{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;color:var(--ink);font-weight:600}
+  .finput:focus{outline:none;border-color:var(--blue);background:#fff}
+  .ftext{min-height:62px;resize:vertical;line-height:1.45}
+  .fhint{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.4}
+  .fhint.surch{color:var(--surch);font-weight:700}
+  .reset{font-size:10.5px;font-weight:800;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline}
+
+  .opt-list{display:flex;flex-direction:column;gap:7px}
+  .opt{display:flex;align-items:center;gap:9px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;font-weight:600;color:var(--ink)}
+  .opt .ohandle{color:#c2ccd8;font-size:14px}
+  .opt .oval{font-size:10px;font-weight:800;color:var(--muted);background:#fff;border:1px solid var(--line);padding:2px 7px;border-radius:6px;margin-left:auto}
+
+  /* phone preview */
+  .preview-wrap{position:sticky;top:120px;z-index:5}
+  .phone{margin:0 auto;width:236px;border-radius:34px;background:#0b1322;padding:11px 9px;box-shadow:0 18px 50px rgba(11,18,40,.5),inset 0 0 0 2px rgba(255,255,255,.06)}
+  .phone .notch{width:78px;height:5px;border-radius:100px;background:#222b3d;margin:0 auto 8px}
+  .screen{border-radius:24px;overflow:hidden;background:#0d1830;height:430px;position:relative}
+  .pv-bg{position:absolute;inset:0}
+  .pv-content{position:absolute;inset:0;display:flex;flex-direction:column;padding:20px 16px;color:#fff;overflow:hidden}
+  .pv-logo{font-size:30px;text-align:center;margin-top:8px}
+  .pv-title{font-size:17px;font-weight:800;text-align:center;margin-top:10px;line-height:1.2;letter-spacing:-.01em}
+  .pv-sub{font-size:10.5px;text-align:center;color:rgba(255,255,255,.78);margin-top:7px;line-height:1.4}
+  .pv-dates{font-size:10px;font-weight:800;text-align:center;color:#fff;background:rgba(255,255,255,.16);align-self:center;padding:5px 13px;border-radius:100px;margin-top:13px}
+  .pv-q{font-size:13px;font-weight:800;line-height:1.3;margin-top:6px}
+  .pv-opts{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+  .pv-opt{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:11px;padding:9px 11px;font-size:11.5px;font-weight:700}
+  .pv-lot{margin-top:auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:12px}
+  .pv-lot .lt{font-size:12px;font-weight:800}
+  .pv-lot .ld{font-size:10px;color:rgba(255,255,255,.78);margin-top:4px;line-height:1.35}
+  .pv-cta{margin-top:13px;background:#fff;color:#0d1830;border-radius:100px;padding:11px;text-align:center;font-size:12.5px;font-weight:800}
+  .pv-optin{display:flex;gap:9px;align-items:flex-start;margin-top:auto;background:rgba(255,255,255,.1);border-radius:12px;padding:11px}
+  .pv-optin .chk{width:17px;height:17px;border-radius:5px;border:2px solid #fff;flex-shrink:0;margin-top:1px;display:grid;place-items:center;font-size:11px}
+  .pv-optin p{font-size:10.5px;line-height:1.4}
+  .pv-foot{text-align:center;font-size:8.5px;color:rgba(255,255,255,.5);margin-top:12px}
+  .pv-foot em{font-style:normal;font-weight:800}
+  .pv-cap{text-align:center;font-size:10.5px;color:var(--muted);margin-top:10px;font-weight:700}
+  .pv-cap b{color:var(--blue)}
+
+  .legend{display:flex;gap:14px;justify-content:center;margin:6px 0 2px;flex-wrap:wrap}
+  .legend span{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:3px;display:block}
+
+  .foot{text-align:center;font-size:10.5px;color:#9aa6b4;padding:22px 16px 8px;line-height:1.5}
+  .foot em{font-style:normal;font-weight:800;color:var(--blue)}
+</style></head>
+<body>
+<div class="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="top">
+    <div class="row">
+      <button class="back" id="backBtn" onclick="goBack()" style="display:none">‹</button>
+      <div class="lg" onclick="nav('lib')">flow<em>in</em></div>
+      <div class="crumb" id="crumb">Éditeur d'événement</div>
+    </div>
+  </div>
+
+  <!-- ===== VUE 1 — BIBLIOTHÈQUE ===== -->
+  <div class="page show" id="page-lib">
+    <section>
+      <div class="lead">
+        <h1>Bibliothèque</h1>
+        <p>Vos Super Events et événements. Mettez en forme un parcours ou créez un template réutilisable pour toutes les stations.</p>
+      </div>
+
+      <div class="eyebrow">Super Events</div>
+      <div class="card se-card">
+        <span class="se-tag">Super Event</span>
+        <div class="se-top">
+          <div class="se-emoji">🌙</div>
+          <div>
+            <h3>Nuits du Sud 2026</h3>
+            <div class="meta">29ᵉ édition · Vence · 9 → 18 juil. 2026</div>
+          </div>
+        </div>
+        <div class="se-stats">
+          <div class="s"><div class="v">4</div><div class="l">Stations</div></div>
+          <div class="s"><div class="v">6</div><div class="l">Joueurs</div></div>
+          <div class="s"><div class="v">5</div><div class="l">Opt-ins</div></div>
+        </div>
+        <div class="row-actions">
+          <button class="act act-tmpl" onclick="nav('tmpl')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Template
+          </button>
+        </div>
+      </div>
+
+      <div class="eyebrow">Événements</div>
+      <div id="evList"></div>
+    </section>
+
+    <div class="foot">Mockup éditeur · charte <em>Flowin</em> · données NDS 2026 réelles</div>
+  </div>
+
+  <!-- ===== VUE 2 — TEMPLATE SUPER-EVENT ===== -->
+  <div class="page" id="page-tmpl">
+    <section>
+      <div class="tmpl-hero">
+        <h2>🌙 Template · Nuits du Sud 2026</h2>
+        <p>Propriétés partagées par toutes les stations du Super Event.</p>
+        <div class="tmpl-props">
+          <span class="prop"><span class="sw" style="background:#3B5CC4"></span>Accent #3B5CC4</span>
+          <span class="prop">Thème <b style="margin-left:3px">nds</b></span>
+          <span class="prop">Police Manrope</span>
+          <span class="prop">Co-brand Flowin</span>
+        </div>
+      </div>
+
+      <div class="tmpl-note">
+        Les écrans communs (accueil, opt-in, lots, clause) sont <b>hérités</b> du template. Une station peut <b>surcharger</b> ses propres écrans (sa banque de questions, son nom) sans casser les autres.
+      </div>
+
+      <div class="eyebrow">Stations rattachées</div>
+      <div id="stationList"></div>
+    </section>
+  </div>
+
+  <!-- ===== VUE 3 — ÉDITEUR D'ÉCRAN ===== -->
+  <div class="page" id="page-ed">
+    <section>
+      <div class="lead">
+        <h1 id="edTitle">Les Caisses</h1>
+        <p id="edSub">Édition page à page. Chaque champ est <b>hérité</b> du template ou <b>surchargé</b> pour cette station.</p>
+      </div>
+
+      <div class="screens" id="screens"></div>
+
+      <div class="legend">
+        <span><i style="background:var(--herit)"></i>Hérité du template</span>
+        <span><i style="background:var(--surch)"></i>Surchargé (station)</span>
+      </div>
+
+      <div class="preview-wrap">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="pv-bg" id="pvBg"></div>
+            <div class="pv-content" id="pvContent"></div>
+          </div>
+        </div>
+        <div class="pv-cap" id="pvCap"></div>
+      </div>
+
+      <div class="eyebrow">Champs de l'écran</div>
+      <div id="fields"></div>
+    </section>
+  </div>
+
+</div>
+
+<script>
+/* ============ Données NDS réelles (depuis Supabase ev-nds-*) ============ */
+var SE_ACCENT = "#3B5CC4";
+
+var EVENTS = [
+  { id:"ev-nds-caisses", nom:"NDS · Les Caisses",  short:"Les Caisses",  module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:0, optin:0, banque:"bq-nds-caisses · 25 questions" },
+  { id:"ev-nds-bar",     nom:"NDS · Le Bar",       short:"Le Bar",       module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:3, optin:2, banque:"bq-nds-bar · 25 questions" },
+  { id:"ev-nds-ecrans",  nom:"NDS · L'Écran",      short:"L'Écran",      module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:3, optin:3, banque:"bq-nds-ecrans · 25 questions" },
+  { id:"ev-nds-tablette",nom:"NDS · Brigade Verte",short:"Brigade Verte",module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:0, optin:0, banque:"bq-nds-tablette · 25 questions" },
+  { id:"ev-nds-2026",    nom:"Nuits du Sud 2026",  short:"Quiz festival",module:"quiz",    couleur:"#3B5CC4", status:"upcoming", part:0, optin:0, banque:"bq-nds-artistes · 14 questions + bonus RSE" }
+];
+
+/* cfg réel ev-nds-2026 */
+var CFG = {
+  titre:"Nuits du Sud 2026",
+  subtitle:"29e édition · Place du Grand Jardin, Vence",
+  logoEmoji:"🌙",
+  datesLabel:"9 → 18 juillet 2026",
+  accent:"#3B5CC4",
+  lotNom:"Vos prochaines places",
+  lotResume:"Des places de concert à gagner chaque soir",
+  lotDesc:"Tirage chaque soir du festival",
+  lotsPartenaires:["Bons d'achat dans les commerces partenaires","Un vélo électrique","2 pass Nuits du Sud 2027"],
+  optin:"Je veux rester en contact avec les Nuits du Sud et leurs partenaires",
+  bonusRSE:{ label:"Comment es-tu venu·e aux Nuits du Sud ce soir ?",
+             opts:[["pied","À pied"],["velo","Vélo ou trottinette"],["tc","Bus / navette"],["covoit","Covoiturage"],["voiture","Voiture (seul·e)"]] }
+};
+
+/* banque par station (1ère question d'exemple, réelle thématique) */
+var STATION_Q = {
+  "ev-nds-caisses":"Quel quartier de Vence accueille la scène principale des Nuits du Sud ?",
+  "ev-nds-bar":"Le festival des Nuits du Sud se déroule chaque année au mois de…",
+  "ev-nds-ecrans":"Combien d'éditions des Nuits du Sud sont célébrées en 2026 ?",
+  "ev-nds-tablette":"Quel est le bon réflexe « zéro déchet » sur le site du festival ?",
+  "ev-nds-2026":"Sur quelle place de Vence se tient la scène des Nuits du Sud ?"
+};
+
+/* ============ Vue 1 — Bibliothèque ============ */
+function statusBadge(s){
+  if(s==="live")     return '<span class="badge b-live"><span class="dot" style="background:var(--teal)"></span>En cours</span>';
+  if(s==="archived") return '<span class="badge b-archive">Archivé</span>';
+  return '<span class="badge b-status">À venir</span>';
+}
+function renderEvents(){
+  var h="";
+  for(var i=0;i<EVENTS.length;i++){
+    var e=EVENTS[i];
+    h+='<div class="card">'
+      +'<div class="ev-row">'
+      +'<div class="ev-color" style="background:'+e.couleur+'"></div>'
+      +'<div class="ev-main">'
+      +'<h4>'+e.nom+'</h4>'
+      +'<div class="ev-sub"><span class="ev-mod">'+e.module+'</span>'+statusBadge(e.status)
+      +'<span>· '+e.part+' joueurs · '+e.optin+' opt-ins</span></div>'
+      +'<div class="ev-sub" style="margin-top:6px">📚 '+e.banque+'</div>'
+      +'</div></div>'
+      +'<div class="row-actions">'
+      +'<button class="act act-primary" onclick="openEditor(\''+e.id+'\')">'
+      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'
+      +'Mise en forme</button>'
+      +'</div></div>';
+  }
+  document.getElementById("evList").innerHTML=h;
+}
+
+/* ============ Vue 2 — Template super-event ============ */
+/* surchargé = banque propre ; le reste hérité */
+function renderStations(){
+  var h="";
+  for(var i=0;i<EVENTS.length;i++){
+    var e=EVENTS[i];
+    var over = e.module==="nds2026"; // stations nds2026 surchargent leur banque
+    var badge = over
+      ? '<span class="badge b-surch">● surchargé</span>'
+      : '<span class="badge b-herit">○ hérité</span>';
+    h+='<div class="card station" onclick="openEditor(\''+e.id+'\')">'
+      +'<div class="ev-color" style="background:'+e.couleur+'"></div>'
+      +'<div class="ev-main">'
+      +'<h4>'+e.short+'</h4>'
+      +'<div class="ev-sub">'+badge+'<span>'+e.banque+'</span></div>'
+      +'</div>'
+      +'<div class="chev">›</div>'
+      +'</div>';
+  }
+  document.getElementById("stationList").innerHTML=h;
+}
+
+/* ============ Vue 3 — Éditeur d'écran ============ */
+var CUR_EV=null;
+var CUR_SCREEN="accueil";
+var SCREENS=[
+  {id:"accueil",  label:"Accueil",   herit:true},
+  {id:"quiz",     label:"Quiz",      herit:false},
+  {id:"bonus",    label:"Bonus RSE", herit:true},
+  {id:"lots",     label:"Lots",      herit:true},
+  {id:"optin",    label:"Opt-in",    herit:true}
+];
+
+function openEditor(evId){
+  CUR_EV=null;
+  for(var i=0;i<EVENTS.length;i++){ if(EVENTS[i].id===evId) CUR_EV=EVENTS[i]; }
+  CUR_SCREEN="accueil";
+  document.getElementById("edTitle").textContent=CUR_EV.short;
+  nav("ed");
+  renderScreens();
+  renderEditor();
+}
+
+function renderScreens(){
+  var h="";
+  for(var i=0;i<SCREENS.length;i++){
+    var s=SCREENS[i];
+    var color = s.herit ? "var(--herit)" : "var(--surch)";
+    h+='<button class="scn'+(s.id===CUR_SCREEN?' active':'')+'" onclick="selScreen(\''+s.id+'\')">'
+      +'<span class="mini" style="background:'+color+'"></span>'+s.label+'</button>';
+  }
+  document.getElementById("screens").innerHTML=h;
+}
+function selScreen(id){ CUR_SCREEN=id; renderScreens(); renderEditor(); }
+
+function badgeFor(herit){
+  return herit ? '<span class="badge b-herit fbadge">○ hérité</span>'
+               : '<span class="badge b-surch fbadge">● surchargé</span>';
+}
+function field(label,herit,inputHtml,hint,hintSurch){
+  return '<div class="field"><div class="fh"><span class="flabel">'+label+'</span>'+badgeFor(herit)+'</div>'
+    +inputHtml
+    +(hint?'<div class="fhint'+(hintSurch?' surch':'')+'">'+hint+'</div>':'')
+    +'</div>';
+}
+
+function renderEditor(){
+  var f="", isStation = CUR_EV.module==="nds2026";
+  if(CUR_SCREEN==="accueil"){
+    f+=field("Titre du parcours", true,
+        '<input class="finput" value="'+CFG.titre+'" readonly>',
+        "Hérité du template Super Event");
+    f+=field("Sous-titre", true,
+        '<input class="finput" value="'+CFG.subtitle+'" readonly>',
+        "Hérité du template");
+    f+=field("Dates affichées", true,
+        '<input class="finput" value="'+CFG.datesLabel+'" readonly>',
+        "Hérité du template");
+    f+=field("Logo / emoji", true,
+        '<input class="finput" value="'+CFG.logoEmoji+'" readonly>', "");
+  } else if(CUR_SCREEN==="quiz"){
+    f+=field("Banque de questions", !isStation,
+        '<input class="finput" value="'+CUR_EV.banque+'" readonly>',
+        isStation?"Surchargé : cette station a sa propre banque de 25 questions":"Hérité du template",
+        isStation);
+    f+=field("Première question (exemple)", !isStation,
+        '<textarea class="ftext finput" readonly>'+STATION_Q[CUR_EV.id]+'</textarea>',
+        isStation?"Issu de la banque propre à la station":"Banque commune au festival", isStation);
+    f+=field("Timer par question", true,
+        '<input class="finput" value="20 secondes" readonly>',
+        "Hérité du template");
+  } else if(CUR_SCREEN==="bonus"){
+    f+=field("Question bonus RSE", true,
+        '<input class="finput" value="'+CFG.bonusRSE.label+'" readonly>',
+        "Hérité du template (commun à toutes les stations)");
+    var opts="";
+    for(var i=0;i<CFG.bonusRSE.opts.length;i++){
+      opts+='<div class="opt"><span class="ohandle">⠿</span>'+CFG.bonusRSE.opts[i][1]
+           +'<span class="oval">'+CFG.bonusRSE.opts[i][0]+'</span></div>';
+    }
+    f+='<div class="field"><div class="fh"><span class="flabel">Options de réponse</span>'+badgeFor(true)+'</div>'
+      +'<div class="opt-list">'+opts+'</div>'
+      +'<div class="fhint">5 questions RSE & mobilité héritées du template</div></div>';
+  } else if(CUR_SCREEN==="lots"){
+    f+=field("Lot principal", true,
+        '<input class="finput" value="'+CFG.lotNom+'" readonly>', "Hérité du template");
+    f+=field("Résumé du lot", true,
+        '<input class="finput" value="'+CFG.lotResume+'" readonly>', "Hérité du template");
+    var lp="";
+    for(var j=0;j<CFG.lotsPartenaires.length;j++){
+      lp+='<div class="opt">'+CFG.lotsPartenaires[j]+'</div>';
+    }
+    f+='<div class="field"><div class="fh"><span class="flabel">Lots partenaires</span>'+badgeFor(true)+'</div>'
+      +'<div class="opt-list">'+lp+'</div>'
+      +'<div class="fhint">Hérité du template · clause d\'équivalence active</div></div>';
+  } else if(CUR_SCREEN==="optin"){
+    f+=field("Texte d'opt-in", true,
+        '<textarea class="ftext finput" readonly>'+CFG.optin+'</textarea>',
+        "Hérité du template");
+    f+=field("Champs collectés", true,
+        '<input class="finput" value="Prénom · E-mail · Sexe (Homme / Femme)" readonly>',
+        "Hérité du template");
+  }
+  document.getElementById("fields").innerHTML=f;
+  renderPreview();
+}
+
+/* ============ Aperçu téléphone ============ */
+function renderPreview(){
+  var bg=document.getElementById("pvBg");
+  bg.style.background="linear-gradient(165deg,"+CFG.accent+" 0%,#23357a 60%,#141d3f 100%)";
+  var c="", cap="";
+  if(CUR_SCREEN==="accueil"){
+    c='<div class="pv-logo">'+CFG.logoEmoji+'</div>'
+     +'<div class="pv-title">'+CFG.titre+'</div>'
+     +'<div class="pv-sub">'+CFG.subtitle+'</div>'
+     +'<div class="pv-dates">'+CFG.datesLabel+'</div>'
+     +'<div class="pv-cta" style="margin-top:auto">Commencer le jeu →</div>'
+     +'<div class="pv-foot">propulsé par <em>Flowin</em></div>';
+    cap="Écran <b>Accueil</b> · hérité du template";
+  } else if(CUR_SCREEN==="quiz"){
+    c='<div class="pv-sub" style="margin-top:0;text-align:left;font-weight:800;color:#fff">'+CUR_EV.short+'</div>'
+     +'<div class="pv-q">'+STATION_Q[CUR_EV.id]+'</div>'
+     +'<div class="pv-opts">'
+     +'<div class="pv-opt">Réponse A</div>'
+     +'<div class="pv-opt">Réponse B</div>'
+     +'<div class="pv-opt">Réponse C</div></div>'
+     +'<div class="pv-foot" style="margin-top:auto">'+CUR_EV.banque+'</div>';
+    cap = CUR_EV.module==="nds2026"
+      ? "Écran <b>Quiz</b> · <b style='color:var(--surch)'>surchargé</b> par la station"
+      : "Écran <b>Quiz</b> · banque commune festival";
+  } else if(CUR_SCREEN==="bonus"){
+    var o="";
+    for(var i=0;i<CFG.bonusRSE.opts.length;i++){ o+='<div class="pv-opt">'+CFG.bonusRSE.opts[i][1]+'</div>'; }
+    c='<div class="pv-sub" style="margin-top:0;font-weight:800;color:#fff">Question bonus 🌱</div>'
+     +'<div class="pv-q" style="margin-top:14px">'+CFG.bonusRSE.label+'</div>'
+     +'<div class="pv-opts">'+o+'</div>';
+    cap="Écran <b>Bonus RSE</b> · hérité du template";
+  } else if(CUR_SCREEN==="lots"){
+    var l="";
+    for(var k=0;k<CFG.lotsPartenaires.length;k++){ l+='<div class="pv-opt">🎁 '+CFG.lotsPartenaires[k]+'</div>'; }
+    c='<div class="pv-logo" style="font-size:24px">🎁</div>'
+     +'<div class="pv-title" style="font-size:15px">'+CFG.lotNom+'</div>'
+     +'<div class="pv-sub">'+CFG.lotResume+'</div>'
+     +'<div class="pv-opts" style="margin-top:14px">'+l+'</div>'
+     +'<div class="pv-foot" style="margin-top:auto">Clause d\'équivalence active</div>';
+    cap="Écran <b>Lots</b> · hérité du template";
+  } else if(CUR_SCREEN==="optin"){
+    c='<div class="pv-title" style="font-size:15px;margin-top:14px">Une dernière chose…</div>'
+     +'<div class="pv-optin" style="margin-top:18px">'
+     +'<div class="chk">✓</div><p>'+CFG.optin+'</p></div>'
+     +'<div class="pv-cta">Valider ma participation</div>'
+     +'<div class="pv-foot" style="margin-top:auto">propulsé par <em>Flowin</em></div>';
+    cap="Écran <b>Opt-in</b> · hérité du template";
+  }
+  document.getElementById("pvContent").innerHTML=c;
+  document.getElementById("pvCap").innerHTML="Aperçu live — "+cap;
+}
+
+/* ============ Navigation ============ */
+var STACK=["lib"];
+var CRUMBS={ lib:"Bibliothèque", tmpl:"🌙 <b>Nuits du Sud 2026</b> · Template", ed:"Éditeur d'écran" };
+function nav(p){
+  if(STACK[STACK.length-1]!==p) STACK.push(p);
+  show(p);
+}
+function goBack(){
+  if(STACK.length>1){ STACK.pop(); show(STACK[STACK.length-1]); }
+}
+function show(p){
+  var ids=["lib","tmpl","ed"];
+  for(var i=0;i<ids.length;i++){
+    document.getElementById("page-"+ids[i]).classList.toggle("show", ids[i]===p);
+  }
+  document.getElementById("backBtn").style.display = (p==="lib") ? "none" : "grid";
+  var cr=CRUMBS[p];
+  if(p==="ed" && CUR_EV) cr="🌙 NDS · <b>"+CUR_EV.short+"</b>";
+  document.getElementById("crumb").innerHTML=cr;
+  window.scrollTo(0,0);
+}
+
+renderEvents();
+renderStations();
+</script>
+</body></html>
