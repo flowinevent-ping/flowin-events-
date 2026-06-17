@@ -59,7 +59,7 @@ SUPER-EVENT  ── template de mise en forme (cfg.template) ──────�
 
 - Le template vit dans le super-event (`cfg.template`). Les events lisent : **template hérité** puis
   **surcharge locale** (`cfg` de l'event prime champ par champ).
-- Modifier le template super-event m=> se répercute sur tous les events enfants **qui n'ont pas surchargé** ce champ.
+- Modifier le template super-event se répercute sur tous les events enfants **qui n'ont pas surchargé** ce champ.
 - Un event peut **détacher** un champ (surcharge) sans casser les autres.
 - Règles/options de jeu (questions, lots, mécanique) **restent propres à chaque event** — le template ne touche que la **mise en forme**.
 
