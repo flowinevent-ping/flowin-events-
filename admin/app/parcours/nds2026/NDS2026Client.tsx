@@ -403,8 +403,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
         .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        .ndsbody .padnav{padding-bottom:92px}
+        .ndsbody .padnav{padding-bottom:150px}
         .ndsbody .nav{position:sticky;bottom:0}
+        .ndsbody .botdock{position:sticky;bottom:0;z-index:40;background:#fff;box-shadow:0 -6px 18px rgba(20,8,30,.07)}
+        .ndsbody .botdock .nav{position:static;box-shadow:none}
+        .ndsbody .botdock .logoband{border-left:none;border-right:none;border-radius:0}
         .ndsbody .footdock{position:sticky;bottom:0;z-index:1000;display:flex;flex-direction:column;width:100%}
         .ndsbody .footdock .nav{position:static}
         .ndsbody .logoband-dock{margin:0;border-radius:0;border-left:0;border-right:0;border-bottom:0;border-top:1px solid #ece7f2;background:rgba(255,255,255,.97)}
@@ -412,7 +415,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:92px;z-index:600;display:flex;flex-direction:column;gap:10px}
+        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:158px;z-index:600;display:flex;flex-direction:column;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
         .ndsbody .stn:active{transform:scale(.98)}
         .ndsbody .stn.cur{outline:2px solid var(--magenta)}
@@ -462,12 +465,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr.on .hero .prize{position:relative;z-index:1;margin:0 !important}
         /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
         .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-        .ndsbody .logotrack{display:flex;gap:14px;width:max-content;padding:16px 12px;align-items:center;animation:logoscroll 52s linear infinite}
+        .ndsbody .logotrack{display:flex;gap:14px;width:max-content;padding:9px 12px;align-items:center;animation:logoscroll 52s linear infinite}
         .ndsbody .logoband:active .logotrack{animation-play-state:paused}
         .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:12px 22px;color:#7C2D92;font-weight:700;font-size:15px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:78px}
         .ndsbody .logoslot img{max-height:58px;max-width:172px;object-fit:contain;display:block}
         .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:152px;justify-content:center;font-size:14px;font-weight:800;letter-spacing:.01em}
-        .ndsbody .logoband-inline{margin:6px 0 2px}
+        .ndsbody .logoband-inline{margin:0}
         .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:5px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
         .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:12px 8px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;background:transparent;color:#7C2D92}
         .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
@@ -521,7 +524,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     </div>
                   )}
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7C2D92', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
-                  {partnerBand}
                 </>
               ) : (
                 <>
@@ -671,7 +673,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de {tirageHeure}.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
-              {partnerBand}
             </div>
           </section>
         )}
@@ -694,7 +695,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {ticketCount >= STATIONS.length && (
                 <div className="tk-tip" style={{ marginTop: 12, background: '#e9f9ef', borderColor: '#bbf7d0', color: '#16a34a' }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>Toutes les stations jouées !</b> Tu as le maximum de tickets pour le tirage de ce soir.</div></div>
               )}
-              {partnerBand}
             </div>
           </section>
         )}
@@ -871,18 +871,20 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
               <a className="double" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg> Les partenaires &amp; leurs offres</a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
-              {partnerBand}
             </div>
           </section>
         )}
 
         {navOn && (
-          <nav className="nav on" id="nav">
-            <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
-            <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
-            <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
-            <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
-          </nav>
+          <div className="botdock">
+            {partnerBand}
+            <nav className="nav on" id="nav">
+              <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
+              <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
+              <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
+              <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
+            </nav>
+          </div>
         )}
       </div>
     </div>
