@@ -50,11 +50,16 @@ Une session a soit (A) bash + git + GitHub, soit (B) seulement Supabase MCP, soi
 - Stations : `BAR`, `CAISSES`, `ECRAN`, `TABLETTE`
 - Contacts ville : Cécile (événementiel), Anne-Lou & Camille (RSE/lots)
 
-### OPConsult / BAITA EURL
+### BAITA (OPConsult / Flowin)
+- Raison sociale : **BAITA** — SARL au capital de 5 000 € (greffe : SARL, pas EURL)
 - 40 rue des Arcs, 06140 Vence · Tél : 04 93 59 91 37 / 06 16 35 49 36
 - Email Flowin : `flowinevent@gmail.com` · Email OPConsult : `info@opconsult.co`
-- SIRET : [A FOURNIR PAR ROMAIN — bloquant facture/bon de commande]
+- SIREN : `512 026 907` · SIRET (siège) : `512 026 907 00018`
+- TVA intracommunautaire : `FR82 512 026 907`
+- RCS : `512 026 907 R.C.S. Grasse` (inscrit le 25/05/2009)
+- Capital social : 5 000 €
 - IBAN : `FR76 1460 7003 3470 2211 6462 345` · BIC : `CCBPFRPPMAR`
+- ⚠️ Régime TVA à confirmer : template proforma en TVA 20 % (prix packs affichés HT). Si franchise en base → remplacer ligne TVA par « TVA non applicable, art. 293 B du CGI » et TTC = HT.
 
 ---
 
@@ -93,8 +98,9 @@ a) Email auto souscription partenaire -> flowinevent@gmail.com
    - Trigger après form pack sur nds-partenaire.html · Edge Function Supabase à créer
    - Techno à valider : Resend ? SMTP Google ? · Contenu : coordonnées, pack, pièces jointes, lien BC + proforma
 
-b) Bon de commande + facture proforma 2026
-   - BLOQUANT : SIRET BAITA à fournir · Exemple : exemple-facture-bon-commande-NDS.html
+b) Bon de commande + facture proforma 2026 — ✅ template créé : `admin/public/nds-bon-commande-template.html`
+   - SIRET BAITA reçu (512 026 907 00018), mentions légales câblées · 16 variables {{}} · TVA 20% (à confirmer régime)
+   - Reste : générer le doc rempli depuis le dashboard (ou à la main) + brancher PROFORMA_URL dans la notif email
 
 c) CRM Retours dashboard SA (commit 77d7607) — non validé visuellement
    - Table crm_retours, vue dans renderCrmRetours() de dashboard.html
