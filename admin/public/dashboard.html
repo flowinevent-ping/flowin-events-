@@ -2999,8 +2999,8 @@ function renderSidebar(){
        +(isPro?'<select style="width:100%;margin-top:6px;padding:4px 6px;font-size:10px;font-weight:700;border-radius:6px;border:1px solid var(--sa-sb-border);background:var(--sa-sb-hover);color:var(--sa-sb-text);font-family:inherit" onchange="state.currentProId=this.value;render()">'+proSelOpts+'</select>':'')
        +'</div>';
   html += '<div class="sb-user"><div class="sb-avatar">'+(isPro?(curPro?curPro.nom[0].toUpperCase():'P'):'R')+'</div>'
-       +'<div class="sb-userinfo"><div class="sb-username">'+(isPro?(curPro?esc(curPro.nom):'Pro'):'Romain')+'</div><div class="sb-userrole">'+(isPro?'Pro \u00b7 Lecture seule':'Super Admin')+'</div></div></div>';
-       +(!isPro?'<div style="padding:8px 12px 14px"><button onclick="resetCache()" style="width:100%;padding:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em">&#128260; Vider le cache SEED</button></div>':'')
+       +'<div class="sb-userinfo"><div class="sb-username">'+(isPro?(curPro?esc(curPro.nom):'Pro'):'Romain')+'</div><div class="sb-userrole">'+(isPro?'Pro \u00b7 Lecture seule':'Super Admin')+'</div></div></div>'
+       +(!isPro?'<div style="padding:8px 12px 14px"><button onclick="resetCache()" style="width:100%;padding:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em">&#128260; Vider le cache SEED</button></div>':'');
   $('#sidebar').innerHTML = html;
   $('#shell').className = 'shell '+(isPro?'pro':'');
 }
