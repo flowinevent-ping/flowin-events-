@@ -59,7 +59,7 @@ Une session a soit (A) bash + git + GitHub, soit (B) seulement Supabase MCP, soi
 - RCS : `512 026 907 R.C.S. Grasse` (inscrit le 25/05/2009)
 - Capital social : 5 000 €
 - IBAN : `FR76 1460 7003 3470 2211 6462 345` · BIC : `CCBPFRPPMAR`
-- ⚠️ Régime TVA à confirmer : template proforma en TVA 20 % (prix packs affichés HT). Si franchise en base → remplacer ligne TVA par « TVA non applicable, art. 293 B du CGI » et TTC = HT.
+- ℹ️ Bon de commande/proforma affiché en HT seul (choix Romain). TVA/TTC uniquement sur la facture définitive — régime TVA à confirmer pour la facture (réel 20 % vs franchise base art. 293 B).
 
 ---
 
@@ -99,7 +99,7 @@ a) Email auto souscription partenaire -> flowinevent@gmail.com
    - Techno à valider : Resend ? SMTP Google ? · Contenu : coordonnées, pack, pièces jointes, lien BC + proforma
 
 b) Bon de commande + facture proforma 2026 — ✅ template créé : `admin/public/nds-bon-commande-template.html`
-   - SIRET BAITA reçu (512 026 907 00018), mentions légales câblées · 16 variables {{}} · TVA 20% (à confirmer régime)
+   - SIRET BAITA reçu (512 026 907 00018), mentions légales câblées · 14 variables {{}} · BC en HT seul (pros voient HT ; TVA/TTC réservés à la facture définitive)
    - Reste : générer le doc rempli depuis le dashboard (ou à la main) + brancher PROFORMA_URL dans la notif email
 
 c) CRM Retours dashboard SA (commit 77d7607) — non validé visuellement
