@@ -706,12 +706,12 @@
       <div class="wlabel" id="wlabel">Étape 1 / 4</div>
       <div id="w1">
         <h2 class="hsec" style="font-size:23px;margin-bottom:14px">Vos informations</h2>
-        <div class="field"><label class="flabel">Nom de l’établissement *</label><input class="finput" data-f="nom" type="text" placeholder="Ex. Cave du Jardin"></div>
+        <div class="field"><label class="flabel">Nom de l’établissement *</label><input class="finput" data-f="nom" type="text"></div>
         <div class="field"><label class="flabel">Catégorie *</label><select class="finput" data-f="type"><option>Restaurant · Bar</option><option>Caviste</option><option>Boutique · Mode</option><option>Bijouterie</option><option>Beauté · Bien-être</option><option>Hôtel</option><option>Institution</option><option>Autre</option></select></div>
-        <div class="field"><label class="flabel">Adresse *</label><input class="finput" data-f="adresse" type="text" placeholder="Rue, Vence"></div>
-        <div class="field"><label class="flabel">Votre nom *</label><input class="finput" data-f="contact" type="text" placeholder="Prénom et nom"></div>
-        <div class="field"><label class="flabel">Email *</label><input class="finput" data-f="email" type="email" inputmode="email" placeholder="vous@exemple.fr"></div>
-        <div class="field"><label class="flabel">Téléphone *</label><input class="finput" data-f="tel" type="tel" inputmode="tel" placeholder="06 00 00 00 00"></div>
+        <div class="field"><label class="flabel">Adresse *</label><input class="finput" data-f="adresse" type="text"></div>
+        <div class="field"><label class="flabel">Votre nom *</label><input class="finput" data-f="contact" type="text"></div>
+        <div class="field"><label class="flabel">Email *</label><input class="finput" data-f="email" type="email" inputmode="email"></div>
+        <div class="field"><label class="flabel">Téléphone *</label><input class="finput" data-f="tel" type="tel" inputmode="tel"></div>
         <button class="btn" onclick="wizNext('w1',2)">Continuer →</button>
       </div>
       <div id="w2" hidden>
@@ -722,20 +722,20 @@
         <button class="contactlink" onclick="wizGo(3)">Envoyer mon logo plus tard</button>
       </div>
       <div id="w3" hidden>
-        <h2 class="hsec" style="font-size:23px;margin-bottom:14px">Paiement</h2>
+        <h2 class="hsec" style="font-size:23px;margin-bottom:14px">R&eacute;servation</h2>
         <div class="paysum">
           <div class="payrow"><span id="pay-label">Pack Visibilité NDS 2026</span><span id="pay-ht">590,00 €</span></div>
           <div class="payrow" style="color:var(--muted)"><span>TVA 20 %</span><span id="pay-tva">118,00 €</span></div>
           <div class="payrow tot"><span>Total</span><b id="pay-tot">708,00 € TTC</b></div>
         </div>
-        <button class="btn" id="payBtn" onclick="wizGo(4)">Payer 590 € HT</button>
-        <p class="paysec">Paiement sécurisé · carte ou prélèvement SEPA · facture immédiate</p>
+        <button class="btn" id="payBtn" onclick="wizGo(4)">R&eacute;server &mdash; 590 &euro; HT</button>
+        <p class="paysec">R&eacute;servation par virement &mdash; le RIB vous est envoy&eacute; par email. Votre participation est valid&eacute;e &agrave; r&eacute;ception du r&egrave;glement, facture &eacute;mise sous 72&nbsp;h.</p>
       </div>
       <div id="w4" hidden>
         <div class="thanks">
           <div class="tk"><svg class="ic" viewBox="0 0 24 24" width="26" height="26" style="stroke:currentColor;fill:none;stroke-width:2"><path d="M20 6 9 17l-5-5"/></svg></div>
-          <h3>Bienvenue dans l’opération !</h3>
-          <p>Votre participation aux Nuits du Sud 2026 est enregistrée. Vous recevez par email votre espace partenaire et votre facture.</p>
+          <h3>Demande enregistr&eacute;e !</h3>
+          <p>Votre demande de participation aux Nuits du Sud 2026 est enregistr&eacute;e. Vous recevez par email le RIB pour le r&egrave;glement par virement&nbsp;; votre participation est valid&eacute;e &agrave; r&eacute;ception du r&egrave;glement, facture &eacute;mise sous 72&nbsp;h.</p>
         </div>
       </div>
     </div>
@@ -828,7 +828,7 @@
     e=document.getElementById('pay-ht');if(e)e.textContent=eur(ht);
     e=document.getElementById('pay-tva');if(e)e.textContent=eur(tva);
     e=document.getElementById('pay-tot');if(e)e.textContent=eur(ttc)+' TTC';
-    e=document.getElementById('payBtn');if(e)e.textContent='Payer '+eurInt(ht)+' \u20ac HT';
+    e=document.getElementById('payBtn');if(e)e.textContent='R\u00e9server \u2014 '+eurInt(ht)+' \u20ac HT';
   }
   function pickPack(k){window.SELECTED_PACK=window.PACKS[k]||window.PACKS.visib;refreshPay();}
   window.pickPack=pickPack;window.refreshPay=refreshPay;refreshPay();
@@ -860,14 +860,18 @@
     var v=readForm();
     if(!v.email||v.email.indexOf('@')<0||!v.tel) return;
     var em=v.email.toLowerCase().replace(/\s/g,''), now=new Date().toISOString();
+    var pk=window.SELECTED_PACK||window.PACKS.visib;
+    var contactFull=(v.contact||'').trim();
+    var firstName=contactFull?contactFull.split(' ')[0]:null;
     var body={
       id:'prosp-nds-'+em.replace(/[^a-z0-9]/g,'-').slice(0,36),
-      nom:v.nom||null, type:v.type||null, adresse:v.adresse||null, ville:'Vence',
-      contact_nom:v.contact||null, contact:v.contact||null,
+      nom:v.nom||null, entreprise:v.nom||null, type:v.type||null, adresse:v.adresse||null, ville:'Vence',
+      contact_nom:contactFull||null, contact:contactFull||null, prenom:firstName,
       contact_email:em, email:em, contact_tel:v.tel||null, tel:v.tel||null,
       image_url:LOGO_||null,
-      super_event_id:'se-nds-2026', tags:['prospect','nds-landing','pack-'+((window.SELECTED_PACK&&window.SELECTED_PACK.key)||'visibilite')],
-      statut_paiement:'prospect', actif:false, visible:false, en_avant:false,
+      pack:pk.key, offre:pk.label, montant_sponsoring:pk.ht, paiement_mode:'virement',
+      super_event_id:'se-nds-2026', tags:['nds-landing','en-attente-reglement','pack-'+pk.key],
+      statut_paiement:'en_attente_reglement', actif:false, visible:false, en_avant:false,
       ts:now, created_at:now
     };
     SENT_=true;
@@ -885,8 +889,8 @@
   if(document.readyState!=='loading') bindLogo(); else document.addEventListener('DOMContentLoaded',bindLogo);
   document.addEventListener('click',function(e){
     var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
-    var t=(b.textContent||'').toLowerCase(), oc=(b.getAttribute('onclick')||'');
-    if(t.indexOf('envoyer')>=0||t.indexOf('payer')>=0||oc.indexOf('wizGo(4)')>=0){ send(); if(t.indexOf('payer')>=0||oc.indexOf('wizGo(4)')>=0) setTimeout(activate,400); }
+    var oc=(b.getAttribute('onclick')||'');
+    if(oc.indexOf('wizGo(4)')>=0){ send(); }
   },true);
   window.flowinSubmitPartner=send;
   window.flowinActivatePartner=activate;
