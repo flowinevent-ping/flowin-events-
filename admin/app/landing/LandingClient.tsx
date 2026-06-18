@@ -428,69 +428,6 @@ const BODY = `<div class="app">
     <a class="btn" data-to="resultats" style="margin-top:18px">Voir les résultats →</a>
   </section>
 
-  <!-- 9. TARIFS -->
-  <section id="tarifs">
-    <div class="eyebrow">Tarifs</div>
-    <h2 class="t">Des tarifs clairs, pensés pour le terrain.</h2>
-    <p class="sub">Pas de coûts cachés. Vous choisissez, on s'occupe du reste.</p>
-    <!-- Prix masqués (NON supprimés) : pour réafficher, retirer style="display:none" sur la ligne ci-dessous -->
-    <div class="prices carousel" style="display:none" data-hidden-prices="1">
-
-      <div class="price">
-        <div class="pn">À l'event</div>
-        <div class="ptag">Pour un temps fort ponctuel ou un premier test.</div>
-        <div class="pp">189 €<span class="pu"> / event · HT</span></div>
-        <ul>
-          <li>Jusqu'à 1 000 participants</li>
-          <li>Tous les jeux · visuel à vos couleurs</li>
-          <li>Tableau de bord temps réel · export</li>
-        </ul>
-      </div>
-
-      <div class="price hl">
-        <span class="pbadge">Le plus choisi</span>
-        <div class="pn">Abonnement</div>
-        <div class="ptag">Pour animer toute l'année et capitaliser votre base client.</div>
-        <div class="pp">289 €<span class="pu"> / mois · HT</span></div>
-        <div class="pgold"><span class="gi"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l2.6 6.3 6.8.5-5.2 4.4 1.6 6.6L12 17.2 6.2 20.8l1.6-6.6L2.6 9.8l6.8-.5z"/></svg></span><span class="gt2"><b>Super Event inclus</b>Plusieurs commerces réunis, une animation commune, un tirage global — chacun garde sa base.</span></div>
-        <ul>
-          <li>Events illimités · jusqu'à 3 000 participants</li>
-          <li>Tableau de bord multi-events</li>
-          <li>Rapports analytiques</li>
-        </ul>
-      </div>
-
-      <div class="price">
-        <div class="pn">Sur mesure</div>
-        <div class="ptag">Pour les multi-sites, gros volumes et besoins spécifiques.</div>
-        <div class="pp">Sur devis</div>
-        <ul>
-          <li>Volumes importants · multi-sites</li>
-          <li class="gold">Super Event sponsorisé · co-branding</li>
-          <li>Campagne sur votre fichier client</li>
-          <li>Stratégie &amp; développement</li>
-        </ul>
-      </div>
-
-    </div>
-    <div class="prices-contact" style="max-width:760px;margin:6px auto 0">
-      <div class="offer-grid">
-        <div class="use">
-          <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--orange),var(--amber))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 7a3 3 0 0 1 0 6"/><path d="M20 20a6 6 0 0 0-4-5.6"/></svg></span>J'anime ma clientèle &amp; mes prospects</div>
-          <p>Captez de nouveaux contacts, relancez votre public et faites-le revenir — sur votre lieu comme pendant vos events.</p>
-        </div>
-        <div class="use">
-          <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--blue),var(--violet))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M12 2.5l2.6 6.3 6.8.5-5.2 4.4 1.6 6.6L12 17.2 6.2 20.8l1.6-6.6L2.6 9.8l6.8-.5z"/></svg></span>J'intègre un Super Event</div>
-          <p>Rejoignez une animation collective à l'échelle du territoire. Ensemble, on dynamise le commerce local.</p>
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:24px">
-        <a class="btn" data-to="contact" style="display:inline-flex;width:auto;padding:16px 34px">Contactez-nous →</a>
-      </div>
-    </div>
-    <div class="pmline"><span style="color:var(--blue);display:inline-flex"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="m16 11 2 2 4-4"/></svg></span> Un chef de projet dédié à votre compte.</div>
-  </section>
-
   <!-- 10. CTA FINAL -->
   <section class="ctaf" id="contact">
     <h2 class="t" style="color:#fff">Et si on animait votre lieu ?</h2>
