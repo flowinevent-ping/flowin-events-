@@ -1,154 +1,131 @@
 # HANDOFF — Flowin / Nuits du Sud 2026
 
-> Source de vérité inter-sessions. Mis à jour le 18/06/2026. HEAD = `c015686`.
-> CDC éditeur = `CDC-editeur-event-flowin.md` — **EN SUSPENS, ne pas rouvrir sans instruction explicite de Romain.**
+> Source de vérité du reste-à-faire. Mis à jour le **18/06/2026 (soir)**.
+> HEAD origin/main attendu : **d0cbfac**
 
 ---
 
-## ⚠️ MÉTHODE OBLIGATOIRE — appliquer à CHAQUE tour
+## ⚡ BOOTSTRAP INTER-SESSIONS (à faire en premier)
 
-1. **Bootstrap avant tout** : clone + `git log` (HEAD attendu = `c015686` ou plus récent) + push dry-run + Supabase `select 1`. Si l'un manque → STOP.
-2. **Token GitHub** : `<TOKEN_GITHUB>` (scope repo, expire ~sept. 2026). Le mettre dans le remote : `git remote set-url origin https://<TOKEN_GITHUB>@github.com/flowinevent-ping/flowin-events-.git`. **Ne jamais committer ce token en clair** (push-protection le bloque).
-3. **Preuve obligatoire** pour tout « fait » : commit-hash + grep/view/DB.
-4. **Travail en BLOC** (HTML+CSS+JS+SQL alignés), validé avant push.
-5. **iOS-safe** : `var`, `.indexOf()`, `function` — jamais spread, `.includes()`, template literals dans innerHTML.
-6. **Miroir dashboard** : avant tout push touchant `dashboard.html` → copier vers `admin/public/static/dashboard.html` → vérifier MD5 identiques.
-7. **Checklist complète** exécutée sans interruption — Romain ne reprend la main qu'une fois TOUT coché ✅.
+Une session a soit (A) bash + git + GitHub, soit (B) seulement Supabase MCP, soit (C) les deux.
+**Vérifier ce qu'on a AVANT de travailler :**
 
----
+1. **Git / GitHub** (si bash dispo) :
+   - `cd /home/claude/flowin` ou cloner : `git clone https://<TOKEN>@github.com/flowinevent-ping/flowin-events-.git .`
+   - `git fetch origin && git reset --hard origin/main`
+   - `git log --oneline -3` doit montrer d0cbfac ou plus récent
+   - Le token GitHub n'est PAS dans ce fichier (push protection). Il est dans `HANDOFF-AVEC-TOKEN.md` que Romain garde sur son Mac et réuploade en zip.
+   - Romain uploade le zip -> lire le token -> `git remote set-url origin https://<TOKEN>@github.com/flowinevent-ping/flowin-events-.git`
 
-## 1. Accès & autorisations
+2. **Supabase MCP** (si dispo) : `execute_sql` trivial `SELECT 1` sur project_id `ywcqtupgoxfzkddqkztk`.
 
-| Ressource | Valeur |
-|---|---|
-| **Repo GitHub** | `flowinevent-ping/flowin-events-` (public) |
-| **Remote (push)** | `https://<TOKEN_GITHUB>@github.com/flowinevent-ping/flowin-events-.git` |
-| **Token PAT** | `<TOKEN_GITHUB>` — scope `repo`, expire ~sept. 2026 → régénérer à l'échéance sur `github.com/settings/tokens` |
-| **Auteur commits** | `romain@flowin.events` / `Romain Collin` |
-| **Vercel** | auto-deploy depuis `main` → prod `https://flowin-events.vercel.app` |
-| **Supabase project_id** | `ywcqtupgoxfzkddqkztk` (eu-west-1) |
-| **Supabase anon key** | `sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1` (publique par design) |
-| **Supabase MCP** | `apply_migration` (DDL), `execute_sql` (DML/SELECT) |
-| **Working dir** | `/home/claude/flowin` (re-cloner si besoin) · Next.js root : `admin/` |
-| **PIN dashboard SA** | `1234` — **à changer** |
+3. Si un accès manque et qu'il est nécessaire -> le signaler UNE fois, rediriger, ne pas continuer en mode dégradé.
+
+4. **Filesystem se réinitialise entre sessions** : seul le code pushé persiste. Réinstaller Acorn si besoin : `npm install acorn --prefix /home/claude/.acorn`
 
 ---
 
-## 2. Stack & architecture
+## ACCÈS & RÉFÉRENCES
 
-- **Parcours joueur** : Next.js 14 App Router sous `admin/`, déployé Vercel.
-- **Dashboard SA** : monolithe vanilla JS `admin/public/dashboard.html` (miroir `admin/public/static/dashboard.html`, MD5 identiques obligatoires).
-- **Hub démos** : `admin/public/demos.html` → `flowin-events.vercel.app/demos.html`
-- **Base** : Supabase (Postgres + PostgREST + RLS anon).
-- **Présentation partenaire** (mockup) : `docs/mockups/flowin-partenaire-presentation.html` (source) + `admin/public/nds-partenaire-presentation.html` (servi par Vercel).
-- **Landing partenaire prod** : `admin/public/nds-partenaire.html` → `flowin-events.vercel.app/nds-partenaire.html`
+### GitHub
+- Repo : `flowinevent-ping/flowin-events-` (public)
+- Token PAT fine-grained (Contents R/W, expire 16 sep 2026) : voir `HANDOFF-AVEC-TOKEN.md` (hors repo)
+- Remote push : `https://<TOKEN>@github.com/flowinevent-ping/flowin-events-.git`
+- Commit author : `Romain Collin <romain@flowin.events>`
 
----
+### Supabase
+- Project ID : `ywcqtupgoxfzkddqkztk` · Région : `eu-west-1`
+- Anon key publique (OK en clair par design) : `sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1`
+- DDL/DML uniquement via MCP (`execute_sql`, `apply_migration`). bash ne joint pas `*.supabase.co`.
+- `execute_sql` ne retourne que le résultat de la DERNIERE requête si plusieurs -> envoyer une par une.
+- PostgREST hard cap 1000 lignes -> boucle offset pour tout fetch volumétrique.
 
-## 3. Ce qui a été fait (session 18/06/2026)
+### Vercel
+- URL prod : `https://flowin-events.vercel.app` · Auto-deploy depuis `main`, root `/admin`.
+- Jamais de déploiement manuel : push sur main = redeploy auto (1-2 min).
+- Pages : `/nds-partenaire.html`, `/nds-partenaire-presentation.html`, `/demos.html`, `/dashboard.html`, `/bon-achat-template.html`
 
-### Présentation partenaire NDS — `e9e15bf`
-Fichier : `docs/mockups/flowin-partenaire-presentation.html` + copie `admin/public/nds-partenaire-presentation.html`
+### NDS 2026
+- Super Event ID : `se-nds-2026` · Client : Ville de Vence · Festival : 9-18 juillet 2026
+- Stations : `BAR`, `CAISSES`, `ECRAN`, `TABLETTE`
+- Contacts ville : Cécile (événementiel), Anne-Lou & Camille (RSE/lots)
 
-| Item | Preuve |
-|---|---|
-| ✅ Barre de nav bas (Profil/Carte/Tickets/Partenaires, actif magenta) sur 5 écrans | navbar=5, nv on=5 |
-| ✅ Bandeau « Votre logo ici » déplacé EN BAS au-dessus de la nav | inapp-band=5, amarq haut retiré |
-| ✅ Nouvel écran PROFIL : 4 tickets + 3 places concert/soir + bons d'achat 1 gagnant/commerce | prof=1, slide 5 |
-| ✅ Bandeau in-app ralenti 40s + slots agrandis + dots 4→5 | animation 40s, dots=5 |
-| ✅ En ligne | `https://flowin-events.vercel.app/nds-partenaire-presentation.html` HTTP 200 |
-
-### Hub demos — `c015686`
-Fichier : `admin/public/demos.html`
-
-| Item | Preuve |
-|---|---|
-| ✅ Carte « Présentation partenaire NDS » ajoutée | cartes 11→12 |
-| ✅ Bouton Partager sur chaque carte (WhatsApp/Mail/Copier) | 1 bouton/carte, 12=12 |
-| ✅ URL absolue dynamique (origin+href, pas d'URL en dur) | buildUrl() |
-| ✅ iOS-safe (spread/includes/backtick = 0), ferme au clic extérieur | audit OK |
-| ✅ En ligne | `https://flowin-events.vercel.app/demos.html` HTTP 200 |
+### OPConsult / BAITA EURL
+- 40 rue des Arcs, 06140 Vence · Tél : 04 93 59 91 37 / 06 16 35 49 36
+- Email Flowin : `flowinevent@gmail.com` · Email OPConsult : `info@opconsult.co`
+- SIRET : [A FOURNIR PAR ROMAIN — bloquant facture/bon de commande]
+- IBAN : `FR76 1460 7003 3470 2211 6462 345` · BIC : `CCBPFRPPMAR`
 
 ---
 
-## 4. RESTE À FAIRE — checklist exhaustive
+## FAIT (sessions du 18/06/2026)
 
-> Légende : ✅ fait · ☐ à faire · 🔍 à vérifier · 🔒 bloqué (input Romain) · ⏸ en suspens
+### Migrations Supabase — appliquées en prod (NE PAS REJOUER)
+Trace SQL : `docs/sql/nds-bons-achat.sql`. Vérifié prod : 8/8 colonnes, vue OK, fonction OK.
+- `se_gains` : colonnes partenaire_id, montant, station, gagnant_nom/email/tel, qr_token, valide_jusqu_au + index
+- Vue `v_bons_achat_nds` · Fonction `next_ticket_code_nds(station)` -> NDS-BAR-2026-00001 etc.
 
-| # | Item | État |
-|---|---|---|
-| 1 | **Landing partenaire prod** `nds-partenaire.html` : reporter vrais chiffres (60% femmes, 20% touristes, 6 dates) | ☐ |
-| 2 | Carte parcours : markers commerces + fiche | ✅ |
-| 3 | 1ère page onboard : fond couleur | ✅ |
-| 4 | Fiche partenaire au-dessus de la nav + scroll | ✅ |
-| 5 | `se_tickets` écrit par station | ✅ |
-| 6 | Bandeau défilant logos DANS le parcours (réutiliser `.logoband`) | ☐ |
-| 7 | Texte lot « 3 places » → pilotable via `cfg` | ☐ |
-| 8 | UX « continuer chez nos partenaires → map » | ☐ |
-| 9 | Réponses détaillées stockées (table `se_reponses` ou colonnes jsonb) | ☐ |
-| 10 | `source`/`decouverte` rempli systématiquement (8/220 aujourd'hui) | ☐ |
-| 11 | Banques par station (4 stations sans banque câblée) | ☐ |
-| 12 | Profil user persistant + cumul tickets conservé entre sessions | 🔍 |
-| 13 | Parcours pro stats live (`pro-nds-live.html`) | ☐ |
-| 14 | 25 questions/station + bonus RSE validées | 🔒 |
-| 15 | Géocoder 4 derniers partenaires | 🔒 |
-| 16 | Nouveau PIN SA (encore `1234`) | 🔒 |
-| 17 | Paiement réel + facture tunnel partenaire | 🔍 |
-| 18 | **Éditeur event générique** (CDC séparé) | ⏸ EN SUSPENS |
-| 19 | Validation bout-en-bout parcours sur device iOS Safari | 🔍 |
-| 20 | Test QR ultime pré-event (deadline juillet 2026) | ☐ |
+### Landing partenaire (`admin/public/nds-partenaire.html`)
+- Typo agrandie (corps 12-17px), chiffres clés 32px, chiffres hero en gold gras
+- Topbar : demi-lune retirée, logo NDS 40px, Flow(blanc)in(teal #00B4A0)
+- Encart « L'essentiel » déplacé vers #marche
+- Carousel parcours : dots pagination iOS-safe + CTA « Voir les offres » (commit d0cbfac)
+
+### Présentation partenaire (`admin/public/nds-partenaire-presentation.html` + mockup)
+- Logo NDS 44px + Flow(blanc)in(teal), 5 slides, nav bas, dots
+
+### Template bon d'achat (`admin/public/bon-achat-template.html`)
+- 12 variables {{}}, cobrand NDSxFlowin, montant, gagnant, conditions, talon QR
+
+### Hub demos (`admin/public/demos.html`)
+- Carte présentation NDS + boutons Partager iOS-safe
+
+### Emails prospection (livrés en chat)
+- Version froide + suite à échange, 2 liens, clôture 9 juillet, signature Romain
 
 ---
 
-## 5. URLs en production
+## RESTE À FAIRE
 
-| Page | URL |
-|---|---|
-| Hub démos | `https://flowin-events.vercel.app/demos.html` |
-| Présentation partenaire | `https://flowin-events.vercel.app/nds-partenaire-presentation.html` |
-| Landing partenaire | `https://flowin-events.vercel.app/nds-partenaire.html` |
-| Dashboard SA | `https://flowin-events.vercel.app/dashboard.html` |
-| Parcours NDS | `https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-caisses` (+ bar/ecrans/tablette) |
+**Priorité acquisition (50 commerces en ~10 jours, clôture 9 juillet)**
 
----
+a) Email auto souscription partenaire -> flowinevent@gmail.com
+   - Trigger après form pack sur nds-partenaire.html · Edge Function Supabase à créer
+   - Techno à valider : Resend ? SMTP Google ? · Contenu : coordonnées, pack, pièces jointes, lien BC + proforma
 
-## 6. Commandes utiles
+b) Bon de commande + facture proforma 2026
+   - BLOQUANT : SIRET BAITA à fournir · Exemple : exemple-facture-bon-commande-NDS.html
 
-```bash
-# Clone + config token
-git clone https://<TOKEN_GITHUB>@github.com/flowinevent-ping/flowin-events-.git /home/claude/flowin
-cd /home/claude/flowin
+c) CRM Retours dashboard SA (commit 77d7607) — non validé visuellement
+   - Table crm_retours, vue dans renderCrmRetours() de dashboard.html
 
-# Vérif accès push
-git push --dry-run origin main
+d) Logo sidebar dashboard SA — à vérifier
 
-# Commit + push standard
-git -c user.email=romain@flowin.events -c user.name="Romain Collin" add -A && \
-git -c user.email=romain@flowin.events -c user.name="Romain Collin" commit -m "..." && \
-git push origin main
+**Parcours joueur NDS (Next.js)**
+- Validation bout-en-bout device iOS Safari
+- Bug image de fond NDS (.stage cover -> zones blanches + texte illisible)
+- Câblage carte -> fiches stations avec instructions par station
 
-# Miroir dashboard (avant tout push dashboard.html)
-cp admin/public/dashboard.html admin/public/static/dashboard.html
-md5sum admin/public/dashboard.html admin/public/static/dashboard.html
-
-# Validation JS vanilla
-node /home/claude/.acorn/node_modules/acorn/bin/acorn --ecma2020 --silent fichier.js
-
-# Validation Next.js
-cd admin && npx tsc --noEmit && npx next build
-
-# Supabase diagnostic NDS
-# SELECT cfg?'tirage', jsonb_array_length(cfg->'quizBonusList'), cfg->'quizBanques' FROM events WHERE super_event_id='se-nds-2026'
-```
+**Structurel** : migration Next.js post-NDS 2026
 
 ---
 
-## 7. Contexte NDS
+## RÈGLES PERMANENTES
 
-- **Super Event** : `se-nds-2026` | Client : `pro-nds-2026` (Ville de Vence)
-- **Contacts ville** : Cécile (événementiel), Anne-Lou et Camille (RSE et lots)
-- **Stations** : `ev-nds-caisses`, `ev-nds-bar`, `ev-nds-ecrans`, `ev-nds-tablette`
-- **Festival** : 9→18 juillet 2026, 6 dates, Vence, 24 000 festivaliers, 60% femmes, 80% locaux 06+Var
-- **Prix principal** : 3 places de concert tirées chaque soir à 22h30 | 1 bon d'achat par commerce partenaire
-- **Banques** : `bq-nds-bar` / `bq-nds-caisses` / `bq-nds-ecrans` / `bq-nds-tablette` + 6 questions bonus RSE communes
+- Preuve avant « fait » : jamais terminé sans commit-hash + grep/DB.
+- Miroir dashboard.html : avant push -> cp vers static/ -> md5sum identiques.
+- Vanilla JS : Acorn ecmaVersion:2020 0 erreur. iOS-safe : var / .indexOf() / function — JAMAIS spread, Object.assign, .includes(), template literals dans innerHTML.
+- Next.js : tsc --noEmit + next build (« Compiled successfully ») avant push.
+- Modules maîtres (NDS2026Client.tsx, SpinClient.tsx, QuizClient.tsx) : JAMAIS modifiés. Config via cfg Supabase.
+- Token GitHub : JAMAIS en clair dans un commit.
+- Formulaires : Homme / Femme (+ vide) uniquement — jamais « Autre ».
+- Divergence git : git fetch origin && git reset --hard origin/main.
+- Tester sur device ce qui ne rend pas en headless.
 
+---
+
+## DIAGNOSTIC RAPIDE NDS (1 appel Supabase)
+`SELECT cfg ? 'tirage', jsonb_array_length(cfg->'quizBonusList'), cfg->'quizBanques' FROM events WHERE id='ev-nds-2026';`
+
+---
+FIN HANDOFF
