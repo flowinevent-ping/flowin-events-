@@ -1,522 +1,522 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
-<title>Flowin — Éditeur d'événement (mockup)</title>
+<title>Flowin — Éditeur front & partenaires (mockup v2)</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{
     --ink:#1B3A5C;--blue:#3B5CC4;--blue2:#6A93FF;--teal:#00B4A0;--orange:#E85D04;--amber:#F59E0B;--violet:#7C2D92;
-    --d1:#13314f;--d2:#0E1B30;--d3:#0A1C32;--dk:#0A1424;
+    --d2:#0E1B30;--d3:#0A1C32;
     --paper:#F4F6F9;--card:#fff;--muted:#5a6b80;--line:rgba(0,0,0,.08);
-    --herit:#5a6b80;--herit-bg:rgba(90,107,128,.12);
-    --surch:#E85D04;--surch-bg:rgba(232,93,4,.12);
+    --hide:#9aa6b4;--ok:#13a36b;
   }
   html,body{height:100%}
   body{font-family:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#000;color:var(--ink);-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
-  .app{max-width:480px;margin:0 auto;background:var(--paper);min-height:100vh;overflow-x:hidden;position:relative;padding-bottom:30px}
-  .page{display:none;animation:fade .22s ease}
-  .page.show{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .app{max-width:480px;margin:0 auto;background:var(--paper);min-height:100vh;overflow-x:hidden;position:relative;padding-bottom:78px}
 
-  /* top bar */
+  /* top */
   .top{position:sticky;top:0;z-index:60;background:rgba(14,27,48,.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08);padding:env(safe-area-inset-top) 0 0}
   .top .row{display:flex;align-items:center;gap:10px;padding:12px 16px}
-  .lg{font-size:17px;font-weight:800;letter-spacing:-.02em;color:#fff;flex-shrink:0;cursor:pointer}
+  .lg{font-size:17px;font-weight:800;letter-spacing:-.02em;color:#fff}
   .lg em{color:var(--blue2);font-style:normal}
-  .back{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;display:grid;place-items:center;flex-shrink:0}
-  .crumb{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.6);margin-left:auto;text-align:right;line-height:1.3}
-  .crumb b{color:#fff}
+  .top .ctx{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);margin-left:auto}
+  .save-all{background:var(--teal);color:#fff;border:none;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit}
 
-  /* generic */
-  section{padding:20px 16px 8px}
-  .eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);margin:18px 0 11px;display:flex;align-items:center;gap:8px}
-  .eyebrow:before{content:'';width:18px;height:2px;background:var(--blue);border-radius:2px}
-  .lead h1{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.15;color:var(--ink)}
-  .lead p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  /* tabs */
+  .tabs{position:sticky;top:49px;z-index:55;display:flex;gap:4px;overflow-x:auto;background:var(--paper);padding:10px 12px;border-bottom:1px solid var(--line);scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:100px;padding:8px 13px;font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 
-  /* badges */
-  .badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.02em;padding:4px 9px;border-radius:100px;white-space:nowrap}
-  .b-herit{color:var(--herit);background:var(--herit-bg)}
-  .b-surch{color:var(--surch);background:var(--surch-bg)}
-  .b-status{color:var(--blue);background:rgba(59,92,196,.12)}
-  .b-live{color:var(--teal);background:rgba(0,180,160,.14)}
-  .b-archive{color:#8a96a6;background:rgba(138,150,166,.14)}
-  .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .page{display:none;padding:16px}
+  .page.show{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
-  /* cards */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:11px;box-shadow:0 1px 2px rgba(16,30,54,.04)}
-  .se-card{background:linear-gradient(160deg,var(--d1),var(--d2));border:none;color:#fff;position:relative;overflow:hidden}
-  .se-card:before{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0,rgba(59,92,196,.4),transparent 60%);pointer-events:none}
-  .se-card .se-top{display:flex;align-items:center;gap:11px;position:relative}
-  .se-emoji{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:24px;flex-shrink:0}
-  .se-card h3{font-size:18px;font-weight:800;letter-spacing:-.01em}
-  .se-card .meta{font-size:12px;color:rgba(255,255,255,.62);margin-top:3px}
-  .se-card .se-tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--orange),var(--amber));padding:4px 11px;border-radius:100px;margin-bottom:12px}
-  .se-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;position:relative}
-  .se-stats .s{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px 6px;text-align:center}
-  .se-stats .v{font-size:18px;font-weight:800;color:#fff;line-height:1}
-  .se-stats .l{font-size:9.5px;color:rgba(255,255,255,.55);margin-top:5px;line-height:1.2}
+  .lead h1{font-size:21px;font-weight:800;letter-spacing:-.02em}
+  .lead p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5}
 
-  .ev-row{display:flex;align-items:center;gap:12px}
-  .ev-color{width:8px;align-self:stretch;border-radius:100px;flex-shrink:0;min-height:42px}
-  .ev-main{flex:1;min-width:0}
-  .ev-main h4{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
-  .ev-sub{font-size:11.5px;color:var(--muted);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .ev-mod{font-size:10.5px;font-weight:800;color:var(--violet);background:rgba(124,45,146,.1);padding:3px 8px;border-radius:7px;text-transform:uppercase;letter-spacing:.04em}
+  /* toolbar CRUD */
+  .toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0 12px}
+  .tbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;color:var(--ink)}
+  .tbtn.add{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .tbtn.save{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .tbtn svg{width:14px;height:14px}
 
-  .row-actions{display:flex;gap:8px;margin-top:13px}
-  .act{flex:1;border:none;border-radius:11px;padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
-  .act-primary{background:var(--blue);color:#fff}
-  .act-ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
-  .act-tmpl{background:linear-gradient(135deg,var(--orange),var(--amber));color:#fff}
-  .act svg{width:15px;height:15px}
+  /* generic item rows */
+  .item{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px 13px;margin-bottom:9px;transition:opacity .2s}
+  .item.hidden{opacity:.45}
+  .item .ir{display:flex;align-items:center;gap:11px}
+  .item .grip{color:#c2ccd8;font-size:16px;cursor:grab;touch-action:none}
+  .ava{width:40px;height:40px;border-radius:11px;background:var(--paper);display:grid;place-items:center;font-size:20px;flex-shrink:0;border:1px solid var(--line)}
+  .imeta{flex:1;min-width:0}
+  .imeta h4{font-size:14.5px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px}
+  .imeta .sub{font-size:11.5px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pack{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:6px}
+  .pack.commerce{color:var(--teal);background:rgba(0,180,160,.12)}
+  .pack.premium{color:var(--violet);background:rgba(124,45,146,.12)}
+  .pack.sponsor{color:var(--orange);background:rgba(232,93,4,.12)}
+  .tag-hidden{font-size:9.5px;font-weight:800;color:var(--hide);background:rgba(154,166,180,.16);padding:2px 7px;border-radius:6px}
 
-  /* template view */
-  .tmpl-hero{background:linear-gradient(160deg,var(--blue),#2E47A0);border-radius:18px;padding:18px;color:#fff;margin-bottom:6px;position:relative;overflow:hidden}
-  .tmpl-hero:before{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}
-  .tmpl-hero h2{font-size:19px;font-weight:800;letter-spacing:-.01em;position:relative}
-  .tmpl-hero p{font-size:12.5px;color:rgba(255,255,255,.78);margin-top:5px;position:relative}
-  .tmpl-props{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;position:relative}
-  .prop{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);padding:6px 10px;border-radius:9px}
-  .prop .sw{width:13px;height:13px;border-radius:4px;border:1px solid rgba(255,255,255,.4)}
-  .tmpl-note{font-size:11.5px;color:var(--muted);line-height:1.5;background:var(--herit-bg);border-left:3px solid var(--herit);padding:10px 12px;border-radius:0 10px 10px 0;margin:14px 0 6px}
+  .iacts{display:flex;gap:6px;margin-top:11px;border-top:1px solid var(--line);padding-top:10px}
+  .ia{flex:1;border:none;background:var(--paper);border-radius:9px;padding:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:5px}
+  .ia.edit{color:var(--blue)}.ia.hide{color:var(--hide)}.ia.del{color:#c0392b}
+  .ia svg{width:13px;height:13px}
 
-  .station{display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .12s}
-  .station:active{transform:scale(.985)}
-  .station .ev-color{min-height:38px}
-  .station .chev{color:#c2ccd8;font-size:20px;flex-shrink:0}
+  /* inline edit */
+  .edit-box{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;display:none}
+  .edit-box.open{display:block}
+  .fld{margin-bottom:8px}
+  .fld label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:5px}
+  .fld input,.fld textarea,.fld select{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:9px 10px;font-size:13.5px;font-family:inherit;color:var(--ink);font-weight:600}
+  .fld input:focus,.fld textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+  .fld input[disabled]{color:var(--hide);background:#eef1f5}
+  .lock{font-size:9.5px;font-weight:800;color:var(--orange);margin-left:6px}
+  .save-row{display:flex;gap:7px;margin-top:6px}
+  .srow-b{flex:1;border:none;border-radius:9px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit}
+  .srow-b.ok{background:var(--teal);color:#fff}.srow-b.cancel{background:var(--paper);color:var(--muted)}
 
-  /* editor view */
-  .ed-wrap{display:grid;grid-template-columns:1fr;gap:14px}
-  .screens{display:flex;gap:7px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .screens::-webkit-scrollbar{display:none}
-  .scn{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 13px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
-  .scn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .scn .mini{width:6px;height:6px;border-radius:50%}
-  .scn.active .mini{background:#fff}
+  /* preview cards */
+  .prev-head{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+  .prev-head:before{content:'';width:16px;height:2px;background:var(--blue);border-radius:2px}
 
-  .field{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:9px}
-  .field .fh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .field .flabel{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-  .field .fbadge{margin-left:auto}
-  .finput{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;color:var(--ink);font-weight:600}
-  .finput:focus{outline:none;border-color:var(--blue);background:#fff}
-  .ftext{min-height:62px;resize:vertical;line-height:1.45}
-  .fhint{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.4}
-  .fhint.surch{color:var(--surch);font-weight:700}
-  .reset{font-size:10.5px;font-weight:800;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline}
+  /* marquee preview */
+  .marquee{overflow:hidden;background:linear-gradient(160deg,var(--d2),var(--d3));border-radius:14px;padding:14px 0;position:relative}
+  .marquee .track{display:flex;gap:14px;width:max-content;animation:scroll 16s linear infinite}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .mlogo{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 13px;color:#fff;font-size:12px;font-weight:700;white-space:nowrap}
+  .mlogo .me{font-size:18px}
 
-  .opt-list{display:flex;flex-direction:column;gap:7px}
-  .opt{display:flex;align-items:center;gap:9px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;font-weight:600;color:var(--ink)}
-  .opt .ohandle{color:#c2ccd8;font-size:14px}
-  .opt .oval{font-size:10px;font-weight:800;color:var(--muted);background:#fff;border:1px solid var(--line);padding:2px 7px;border-radius:6px;margin-left:auto}
+  /* landing preview (phone) */
+  .phone{margin:0 auto;width:230px;border-radius:32px;background:#0b1322;padding:10px 8px;box-shadow:0 16px 44px rgba(11,18,40,.45)}
+  .phone .notch{width:72px;height:5px;border-radius:100px;background:#222b3d;margin:0 auto 7px}
+  .screen{border-radius:22px;overflow:hidden;background:#0d1830;min-height:380px;color:#fff;padding:18px 15px;display:flex;flex-direction:column}
+  .screen .plogo{font-size:20px;font-weight:800;text-align:center}
+  .screen .plogo em{color:var(--blue2);font-style:normal}
+  .screen .phero{font-size:16px;font-weight:800;text-align:center;margin-top:16px;line-height:1.25}
+  .screen .psub{font-size:11px;color:rgba(255,255,255,.72);text-align:center;margin-top:9px;line-height:1.45}
+  .screen .pcta{background:var(--teal);border-radius:100px;text-align:center;padding:10px;font-size:12px;font-weight:800;margin-top:16px}
+  .screen .psection{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px;margin-top:10px;font-size:11.5px;font-weight:700}
+  .screen .psection.muted{opacity:.4}
 
-  /* phone preview */
-  .preview-wrap{position:sticky;top:120px;z-index:5}
-  .phone{margin:0 auto;width:236px;border-radius:34px;background:#0b1322;padding:11px 9px;box-shadow:0 18px 50px rgba(11,18,40,.5),inset 0 0 0 2px rgba(255,255,255,.06)}
-  .phone .notch{width:78px;height:5px;border-radius:100px;background:#222b3d;margin:0 auto 8px}
-  .screen{border-radius:24px;overflow:hidden;background:#0d1830;height:430px;position:relative}
-  .pv-bg{position:absolute;inset:0}
-  .pv-content{position:absolute;inset:0;display:flex;flex-direction:column;padding:20px 16px;color:#fff;overflow:hidden}
-  .pv-logo{font-size:30px;text-align:center;margin-top:8px}
-  .pv-title{font-size:17px;font-weight:800;text-align:center;margin-top:10px;line-height:1.2;letter-spacing:-.01em}
-  .pv-sub{font-size:10.5px;text-align:center;color:rgba(255,255,255,.78);margin-top:7px;line-height:1.4}
-  .pv-dates{font-size:10px;font-weight:800;text-align:center;color:#fff;background:rgba(255,255,255,.16);align-self:center;padding:5px 13px;border-radius:100px;margin-top:13px}
-  .pv-q{font-size:13px;font-weight:800;line-height:1.3;margin-top:6px}
-  .pv-opts{display:flex;flex-direction:column;gap:7px;margin-top:12px}
-  .pv-opt{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:11px;padding:9px 11px;font-size:11.5px;font-weight:700}
-  .pv-lot{margin-top:auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:12px}
-  .pv-lot .lt{font-size:12px;font-weight:800}
-  .pv-lot .ld{font-size:10px;color:rgba(255,255,255,.78);margin-top:4px;line-height:1.35}
-  .pv-cta{margin-top:13px;background:#fff;color:#0d1830;border-radius:100px;padding:11px;text-align:center;font-size:12.5px;font-weight:800}
-  .pv-optin{display:flex;gap:9px;align-items:flex-start;margin-top:auto;background:rgba(255,255,255,.1);border-radius:12px;padding:11px}
-  .pv-optin .chk{width:17px;height:17px;border-radius:5px;border:2px solid #fff;flex-shrink:0;margin-top:1px;display:grid;place-items:center;font-size:11px}
-  .pv-optin p{font-size:10.5px;line-height:1.4}
-  .pv-foot{text-align:center;font-size:8.5px;color:rgba(255,255,255,.5);margin-top:12px}
-  .pv-foot em{font-style:normal;font-weight:800}
-  .pv-cap{text-align:center;font-size:10.5px;color:var(--muted);margin-top:10px;font-weight:700}
-  .pv-cap b{color:var(--blue)}
+  /* packs */
+  .packgrid{display:flex;flex-direction:column;gap:9px}
+  .packc{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px}
+  .packc.hidden{opacity:.45}
+  .packc .ph{display:flex;align-items:center;gap:9px}
+  .packc h4{font-size:15px;font-weight:800}
+  .packc .price{margin-left:auto;font-size:16px;font-weight:800;color:var(--blue)}
+  .packc .pl{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.4}
 
-  .legend{display:flex;gap:14px;justify-content:center;margin:6px 0 2px;flex-wrap:wrap}
-  .legend span{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--muted)}
-  .legend i{width:10px;height:10px;border-radius:3px;display:block}
+  /* MAP drag&drop */
+  .maphint{font-size:12px;color:var(--muted);line-height:1.5;background:rgba(59,92,196,.07);border-left:3px solid var(--blue);padding:10px 12px;border-radius:0 10px 10px 0;margin-bottom:12px}
+  .maphint b{color:var(--ink)}
+  .mapbox{position:relative;width:100%;height:300px;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    background:
+      linear-gradient(rgba(59,92,196,.04),rgba(59,92,196,.04)),
+      repeating-linear-gradient(0deg,transparent 0 27px,rgba(27,58,92,.06) 27px 28px),
+      repeating-linear-gradient(90deg,transparent 0 27px,rgba(27,58,92,.06) 27px 28px),
+      linear-gradient(160deg,#eef3f0,#e3ebe6);
+    touch-action:none}
+  .road{position:absolute;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.04)}
+  .label-zone{position:absolute;top:9px;left:11px;font-size:10.5px;font-weight:800;color:#7d8a99;background:rgba(255,255,255,.8);padding:3px 9px;border-radius:7px}
+  .pin{position:absolute;transform:translate(-50%,-100%);cursor:grab;touch-action:none;z-index:2;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+  .pin.drag{z-index:9;cursor:grabbing}
+  .pin .head{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--blue);display:grid;place-items:center;border:2px solid #fff}
+  .pin .head span{transform:rotate(45deg);font-size:14px}
+  .pin.unplaced .head{background:var(--orange)}
+  .pin .cap{margin-top:3px;font-size:9px;font-weight:800;color:var(--ink);background:rgba(255,255,255,.9);padding:1px 5px;border-radius:5px;white-space:nowrap;max-width:84px;overflow:hidden;text-overflow:ellipsis}
 
-  .foot{text-align:center;font-size:10.5px;color:#9aa6b4;padding:22px 16px 8px;line-height:1.5}
-  .foot em{font-style:normal;font-weight:800;color:var(--blue)}
+  .tray{margin-top:12px;background:#fff;border:1px dashed var(--orange);border-radius:13px;padding:12px}
+  .tray h4{font-size:12px;font-weight:800;color:var(--orange);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .tray .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:11.5px;font-weight:700;cursor:grab;touch-action:none}
+  .chip .ce{font-size:15px}
+  .tray .empty{font-size:11.5px;color:var(--ok);font-weight:700}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:100px;font-size:12.5px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:88%}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* bottom bar (save) */
+  .bottombar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:9px;z-index:80}
+  .bottombar .bb{flex:1;border:none;border-radius:11px;padding:13px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit}
+  .bb.preview{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+  .bb.publish{background:var(--teal);color:#fff}
 </style></head>
 <body>
 <div class="app">
 
-  <!-- ===== TOP BAR ===== -->
-  <div class="top">
-    <div class="row">
-      <button class="back" id="backBtn" onclick="goBack()" style="display:none">‹</button>
-      <div class="lg" onclick="nav('lib')">flow<em>in</em></div>
-      <div class="crumb" id="crumb">Éditeur d'événement</div>
+  <div class="top"><div class="row">
+    <div class="lg">flow<em>in</em></div>
+    <div class="ctx">Éditeur front · partenaires</div>
+  </div></div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-v="front" onclick="setTab('front')">🖥️ Front</div>
+    <div class="tab" data-v="bandeau" onclick="setTab('bandeau')">🎞️ Bandeau</div>
+    <div class="tab" data-v="fiches" onclick="setTab('fiches')">🏪 Fiches</div>
+    <div class="tab" data-v="partenaire" onclick="setTab('partenaire')">🤝 Page partenaire</div>
+    <div class="tab" data-v="carte" onclick="setTab('carte')">🗺️ Carte</div>
+  </div>
+
+  <!-- ===== FRONT ===== -->
+  <div class="page show" id="p-front">
+    <div class="lead"><h1>Front de la landing</h1>
+      <p>Texte, image de fond, logo et sections. Ajoutez, masquez, éditez — sans toucher au code.</p></div>
+    <div class="toolbar">
+      <button class="tbtn add" onclick="addSection()">＋ Ajouter une section</button>
+      <button class="tbtn save" onclick="toast('Front enregistré ✓')">💾 Enregistrer</button>
     </div>
+    <div id="sectionList"></div>
+    <div class="prev-head">Aperçu live</div>
+    <div class="phone"><div class="notch"></div><div class="screen" id="frontPrev"></div></div>
   </div>
 
-  <!-- ===== VUE 1 — BIBLIOTHÈQUE ===== -->
-  <div class="page show" id="page-lib">
-    <section>
-      <div class="lead">
-        <h1>Bibliothèque</h1>
-        <p>Vos Super Events et événements. Mettez en forme un parcours ou créez un template réutilisable pour toutes les stations.</p>
-      </div>
-
-      <div class="eyebrow">Super Events</div>
-      <div class="card se-card">
-        <span class="se-tag">Super Event</span>
-        <div class="se-top">
-          <div class="se-emoji">🌙</div>
-          <div>
-            <h3>Nuits du Sud 2026</h3>
-            <div class="meta">29ᵉ édition · Vence · 9 → 18 juil. 2026</div>
-          </div>
-        </div>
-        <div class="se-stats">
-          <div class="s"><div class="v">4</div><div class="l">Stations</div></div>
-          <div class="s"><div class="v">6</div><div class="l">Joueurs</div></div>
-          <div class="s"><div class="v">5</div><div class="l">Opt-ins</div></div>
-        </div>
-        <div class="row-actions">
-          <button class="act act-tmpl" onclick="nav('tmpl')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            Template
-          </button>
-        </div>
-      </div>
-
-      <div class="eyebrow">Événements</div>
-      <div id="evList"></div>
-    </section>
-
-    <div class="foot">Mockup éditeur · charte <em>Flowin</em> · données NDS 2026 réelles</div>
+  <!-- ===== BANDEAU ===== -->
+  <div class="page" id="p-bandeau">
+    <div class="lead"><h1>Bandeau défilant</h1>
+      <p>Logos partenaires qui défilent. Glissez la poignée ⠿ pour réordonner, masquez ou retirez un logo.</p></div>
+    <div class="toolbar">
+      <button class="tbtn add" onclick="toast('Sélecteur de logo (mockup)')">＋ Insérer un logo</button>
+      <button class="tbtn save" onclick="toast('Bandeau enregistré ✓')">💾 Enregistrer</button>
+    </div>
+    <div class="prev-head">Aperçu du bandeau</div>
+    <div class="marquee"><div class="track" id="marqueeTrack"></div></div>
+    <div class="prev-head">Logos (glisser pour réordonner)</div>
+    <div id="logoList"></div>
   </div>
 
-  <!-- ===== VUE 2 — TEMPLATE SUPER-EVENT ===== -->
-  <div class="page" id="page-tmpl">
-    <section>
-      <div class="tmpl-hero">
-        <h2>🌙 Template · Nuits du Sud 2026</h2>
-        <p>Propriétés partagées par toutes les stations du Super Event.</p>
-        <div class="tmpl-props">
-          <span class="prop"><span class="sw" style="background:#3B5CC4"></span>Accent #3B5CC4</span>
-          <span class="prop">Thème <b style="margin-left:3px">nds</b></span>
-          <span class="prop">Police Manrope</span>
-          <span class="prop">Co-brand Flowin</span>
-        </div>
-      </div>
-
-      <div class="tmpl-note">
-        Les écrans communs (accueil, opt-in, lots, clause) sont <b>hérités</b> du template. Une station peut <b>surcharger</b> ses propres écrans (sa banque de questions, son nom) sans casser les autres.
-      </div>
-
-      <div class="eyebrow">Stations rattachées</div>
-      <div id="stationList"></div>
-    </section>
+  <!-- ===== FICHES ===== -->
+  <div class="page" id="p-fiches">
+    <div class="lead"><h1>Fiches partenaires</h1>
+      <p>Les commerces partenaires NDS. Éditez nom, logo, pack et description. Masquez ou supprimez une fiche.</p></div>
+    <div class="toolbar">
+      <button class="tbtn add" onclick="addPartner()">＋ Ajouter un partenaire</button>
+      <button class="tbtn save" onclick="toast('Fiches enregistrées ✓')">💾 Enregistrer</button>
+    </div>
+    <div id="partnerList"></div>
   </div>
 
-  <!-- ===== VUE 3 — ÉDITEUR D'ÉCRAN ===== -->
-  <div class="page" id="page-ed">
-    <section>
-      <div class="lead">
-        <h1 id="edTitle">Les Caisses</h1>
-        <p id="edSub">Édition page à page. Chaque champ est <b>hérité</b> du template ou <b>surchargé</b> pour cette station.</p>
-      </div>
+  <!-- ===== PAGE PARTENAIRE ===== -->
+  <div class="page" id="p-partenaire">
+    <div class="lead"><h1>Page partenaire</h1>
+      <p>Accroche, packs et call-to-action. Le <b>prix</b> est verrouillé (réservé au commercial).</p></div>
+    <div class="toolbar">
+      <button class="tbtn save" onclick="toast('Page partenaire enregistrée ✓')">💾 Enregistrer</button>
+    </div>
+    <div class="fld"><label>Accroche</label>
+      <input id="ptHero" value="Devenez partenaire des Nuits du Sud 2026"></div>
+    <div class="fld"><label>Sous-titre</label>
+      <textarea id="ptSub" rows="2">Offrez de la visibilité à votre commerce auprès de milliers de festivaliers.</textarea></div>
+    <div class="prev-head">Packs (masquables · prix verrouillé)</div>
+    <div class="packgrid" id="packList"></div>
+  </div>
 
-      <div class="screens" id="screens"></div>
-
-      <div class="legend">
-        <span><i style="background:var(--herit)"></i>Hérité du template</span>
-        <span><i style="background:var(--surch)"></i>Surchargé (station)</span>
-      </div>
-
-      <div class="preview-wrap">
-        <div class="phone">
-          <div class="notch"></div>
-          <div class="screen">
-            <div class="pv-bg" id="pvBg"></div>
-            <div class="pv-content" id="pvContent"></div>
-          </div>
-        </div>
-        <div class="pv-cap" id="pvCap"></div>
-      </div>
-
-      <div class="eyebrow">Champs de l'écran</div>
-      <div id="fields"></div>
-    </section>
+  <!-- ===== CARTE ===== -->
+  <div class="page" id="p-carte">
+    <div class="lead"><h1>Carte partenaires</h1>
+      <p>Placez et corrigez les points en <b>glisser-déposer</b>.</p></div>
+    <div class="maphint">Glissez un pin pour <b>corriger</b> sa position. Tirez une vignette du bac <b>« à placer »</b> sur la carte pour la positionner. <span id="placedCount"></span></div>
+    <div class="mapbox" id="mapbox">
+      <div class="label-zone">Centre de Vence</div>
+      <div class="road" style="left:0;right:0;top:46%;height:7px"></div>
+      <div class="road" style="top:0;bottom:0;left:38%;width:7px"></div>
+      <div class="road" style="top:0;bottom:0;left:70%;width:5px"></div>
+      <div class="road" style="left:0;right:0;top:74%;height:5px"></div>
+    </div>
+    <div class="tray" id="tray">
+      <h4>📍 À placer <span id="trayCount"></span></h4>
+      <div class="chips" id="trayChips"></div>
+    </div>
+    <div class="toolbar" style="margin-top:14px">
+      <button class="tbtn save" onclick="toast('Positions enregistrées ✓')">💾 Enregistrer les positions</button>
+    </div>
   </div>
 
 </div>
 
+<div class="bottombar">
+  <button class="bb preview" onclick="toast('Aperçu plein écran (mockup)')">👁 Aperçu</button>
+  <button class="bb publish" onclick="toast('Modifications publiées ✓')">🚀 Publier</button>
+</div>
+<div class="toast" id="toast"></div>
+
 <script>
-/* ============ Données NDS réelles (depuis Supabase ev-nds-*) ============ */
-var SE_ACCENT = "#3B5CC4";
-
-var EVENTS = [
-  { id:"ev-nds-caisses", nom:"NDS · Les Caisses",  short:"Les Caisses",  module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:0, optin:0, banque:"bq-nds-caisses · 25 questions" },
-  { id:"ev-nds-bar",     nom:"NDS · Le Bar",       short:"Le Bar",       module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:3, optin:2, banque:"bq-nds-bar · 25 questions" },
-  { id:"ev-nds-ecrans",  nom:"NDS · L'Écran",      short:"L'Écran",      module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:3, optin:3, banque:"bq-nds-ecrans · 25 questions" },
-  { id:"ev-nds-tablette",nom:"NDS · Brigade Verte",short:"Brigade Verte",module:"nds2026", couleur:"#7C2D92", status:"upcoming", part:0, optin:0, banque:"bq-nds-tablette · 25 questions" },
-  { id:"ev-nds-2026",    nom:"Nuits du Sud 2026",  short:"Quiz festival",module:"quiz",    couleur:"#3B5CC4", status:"upcoming", part:0, optin:0, banque:"bq-nds-artistes · 14 questions + bonus RSE" }
+/* ===== data ===== */
+var SECTIONS=[
+  {id:"s1",titre:"Hero",txt:"Animez votre clientèle. Faites gagner. Tout le monde y gagne.",hidden:false},
+  {id:"s2",titre:"Image de fond",txt:"festival-vence.jpg",hidden:false,img:true},
+  {id:"s3",titre:"Comment ça marche",txt:"3 étapes : scannez, jouez, gagnez.",hidden:false},
+  {id:"s4",titre:"Témoignages",txt:"Ce qu'en disent les commerces partenaires.",hidden:true}
 ];
+var PARTNERS=[
+  {id:"p1",nom:"Maison Palanque",emoji:"🥐",pack:"premium",desc:"Pâtisserie artisanale vençoise depuis 1927.",hidden:false,lat:43.724,lng:7.113},
+  {id:"p2",nom:"Pizza Napoli",emoji:"🍕",pack:"commerce",desc:"Restaurant italien à Vence.",hidden:false,lat:43.7235,lng:7.1126},
+  {id:"p3",nom:"Bijouterie Lorenzo",emoji:"💎",pack:"commerce",desc:"Joaillerie & horlogerie de charme.",hidden:false,lat:43.7236,lng:7.1121},
+  {id:"p4",nom:"CCDK Boutique",emoji:"👗",pack:"commerce",desc:"Prêt-à-porter & accessoires.",hidden:false,lat:43.7233,lng:7.1118},
+  {id:"p5",nom:"Cinéma Casino Vence",emoji:"🎬",pack:"commerce",desc:"Cinéma de Vence — 3 salles.",hidden:false,lat:43.7218,lng:7.1109},
+  {id:"p6",nom:"Fleurs de Vence",emoji:"🌸",pack:"commerce",desc:"Fleuriste — Vence.",hidden:false,lat:43.7229,lng:7.1129},
+  {id:"p7",nom:"SportCity Vence",emoji:"🏋️",pack:"commerce",desc:"Salle de sport · Fitness.",hidden:false,lat:43.7195,lng:7.1155},
+  {id:"p8",nom:"Ville de Vence",emoji:"🏛️",pack:"sponsor",desc:"Partenaire principal de la collecte.",hidden:false,lat:43.72315,lng:7.11355},
+  {id:"p9",nom:"Decathlon Cagnes",emoji:"🏃",pack:"commerce",desc:"Magasin de sport.",hidden:false,lat:43.722,lng:7.116},
+  {id:"p10",nom:"Boulangerie Saint-Lambert",emoji:"🥖",pack:"commerce",desc:"Boulangerie artisanale.",hidden:false,lat:null,lng:null},
+  {id:"p11",nom:"Domaine de la Source",emoji:"🍷",pack:"premium",desc:"Domaine viticole de Vence.",hidden:false,lat:null,lng:null},
+  {id:"p12",nom:"Forfait Ski Isola 2000",emoji:"⛷️",pack:"commerce",desc:"Station de ski.",hidden:false,lat:null,lng:null},
+  {id:"p13",nom:"Cinéma Le Majestic",emoji:"🎬",pack:"commerce",desc:"Séances · Avant-premières.",hidden:true,lat:null,lng:null}
+];
+var PACKS=[
+  {id:"k1",nom:"Pack Commerce",emoji:"🛍️",prix:"590 € HT",pl:"Logo bandeau + fiche + 1 lot",hidden:false,cls:"commerce"},
+  {id:"k2",nom:"Pack Premium",emoji:"⭐",prix:"1 490 € HT",pl:"Tout Commerce + carte + mise en avant",hidden:false,cls:"premium"},
+  {id:"k3",nom:"Sponsor officiel",emoji:"👑",prix:"3 590 € HT",pl:"Premium + logo écrans + naming",hidden:false,cls:"sponsor"}
+];
+var MARQUEE=["p1","p2","p3","p4","p6","p8"];
 
-/* cfg réel ev-nds-2026 */
-var CFG = {
-  titre:"Nuits du Sud 2026",
-  subtitle:"29e édition · Place du Grand Jardin, Vence",
-  logoEmoji:"🌙",
-  datesLabel:"9 → 18 juillet 2026",
-  accent:"#3B5CC4",
-  lotNom:"Vos prochaines places",
-  lotResume:"Des places de concert à gagner chaque soir",
-  lotDesc:"Tirage chaque soir du festival",
-  lotsPartenaires:["Bons d'achat dans les commerces partenaires","Un vélo électrique","2 pass Nuits du Sud 2027"],
-  optin:"Je veux rester en contact avec les Nuits du Sud et leurs partenaires",
-  bonusRSE:{ label:"Comment es-tu venu·e aux Nuits du Sud ce soir ?",
-             opts:[["pied","À pied"],["velo","Vélo ou trottinette"],["tc","Bus / navette"],["covoit","Covoiturage"],["voiture","Voiture (seul·e)"]] }
-};
-
-/* banque par station (1ère question d'exemple, réelle thématique) */
-var STATION_Q = {
-  "ev-nds-caisses":"Quel quartier de Vence accueille la scène principale des Nuits du Sud ?",
-  "ev-nds-bar":"Le festival des Nuits du Sud se déroule chaque année au mois de…",
-  "ev-nds-ecrans":"Combien d'éditions des Nuits du Sud sont célébrées en 2026 ?",
-  "ev-nds-tablette":"Quel est le bon réflexe « zéro déchet » sur le site du festival ?",
-  "ev-nds-2026":"Sur quelle place de Vence se tient la scène des Nuits du Sud ?"
-};
-
-/* ============ Vue 1 — Bibliothèque ============ */
-function statusBadge(s){
-  if(s==="live")     return '<span class="badge b-live"><span class="dot" style="background:var(--teal)"></span>En cours</span>';
-  if(s==="archived") return '<span class="badge b-archive">Archivé</span>';
-  return '<span class="badge b-status">À venir</span>';
+/* ===== helpers ===== */
+function $(id){return document.getElementById(id);}
+function toast(m){var t=$("toast");t.textContent=m;t.className="toast show";setTimeout(function(){t.className="toast";},1600);}
+function byId(arr,id){for(var i=0;i<arr.length;i++){if(arr[i].id===id)return arr[i];}return null;}
+function ico(name){
+  var p={
+    edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    hide:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    del:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>'
+  };
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p[name]+'</svg>';
 }
-function renderEvents(){
-  var h="";
-  for(var i=0;i<EVENTS.length;i++){
-    var e=EVENTS[i];
-    h+='<div class="card">'
-      +'<div class="ev-row">'
-      +'<div class="ev-color" style="background:'+e.couleur+'"></div>'
-      +'<div class="ev-main">'
-      +'<h4>'+e.nom+'</h4>'
-      +'<div class="ev-sub"><span class="ev-mod">'+e.module+'</span>'+statusBadge(e.status)
-      +'<span>· '+e.part+' joueurs · '+e.optin+' opt-ins</span></div>'
-      +'<div class="ev-sub" style="margin-top:6px">📚 '+e.banque+'</div>'
-      +'</div></div>'
-      +'<div class="row-actions">'
-      +'<button class="act act-primary" onclick="openEditor(\''+e.id+'\')">'
-      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'
-      +'Mise en forme</button>'
+
+/* ===== tabs ===== */
+function setTab(v){
+  var ts=document.querySelectorAll(".tab"),i;
+  for(i=0;i<ts.length;i++){ts[i].className="tab"+(ts[i].getAttribute("data-v")===v?" active":"");}
+  var ps=["front","bandeau","fiches","partenaire","carte"];
+  for(i=0;i<ps.length;i++){$("p-"+ps[i]).className="page"+(ps[i]===v?" show":"");}
+  window.scrollTo(0,0);
+  if(v==="carte")renderMap();
+}
+
+/* ===== FRONT ===== */
+function renderSections(){
+  var h="",i;
+  for(i=0;i<SECTIONS.length;i++){
+    var s=SECTIONS[i];
+    h+='<div class="item'+(s.hidden?" hidden":"")+'">'
+      +'<div class="ir"><span class="grip">⠿</span>'
+      +'<div class="ava">'+(s.img?"🖼️":"¶")+'</div>'
+      +'<div class="imeta"><h4>'+s.titre+(s.hidden?' <span class="tag-hidden">masqué</span>':'')+'</h4>'
+      +'<div class="sub">'+s.txt+'</div></div></div>'
+      +'<div class="iacts">'
+      +'<button class="ia edit" onclick="editSection(\''+s.id+'\')">'+ico("edit")+'Éditer</button>'
+      +'<button class="ia hide" onclick="toggleSection(\''+s.id+'\')">'+ico("hide")+(s.hidden?"Afficher":"Masquer")+'</button>'
+      +'<button class="ia del" onclick="delSection(\''+s.id+'\')">'+ico("del")+'Supprimer</button>'
+      +'</div>'
+      +'<div class="edit-box" id="eb-'+s.id+'">'
+      +'<div class="fld"><label>Titre</label><input id="et-'+s.id+'" value="'+s.titre.replace(/"/g,"&quot;")+'"></div>'
+      +'<div class="fld"><label>'+(s.img?"Image de fond":"Texte")+'</label><textarea id="ex-'+s.id+'" rows="2">'+s.txt+'</textarea></div>'
+      +'<div class="save-row"><button class="srow-b ok" onclick="saveSection(\''+s.id+'\')">Enregistrer</button>'
+      +'<button class="srow-b cancel" onclick="editSection(\''+s.id+'\')">Annuler</button></div>'
       +'</div></div>';
   }
-  document.getElementById("evList").innerHTML=h;
+  $("sectionList").innerHTML=h;
+  renderFrontPrev();
+}
+function editSection(id){var b=$("eb-"+id);b.className="edit-box"+(b.className.indexOf("open")<0?" open":"");}
+function saveSection(id){var s=byId(SECTIONS,id);s.titre=$("et-"+id).value;s.txt=$("ex-"+id).value;renderSections();toast("Section enregistrée ✓");}
+function toggleSection(id){var s=byId(SECTIONS,id);s.hidden=!s.hidden;renderSections();}
+function delSection(id){for(var i=0;i<SECTIONS.length;i++){if(SECTIONS[i].id===id){SECTIONS.splice(i,1);break;}}renderSections();toast("Section supprimée");}
+function addSection(){SECTIONS.push({id:"s"+Date.now(),titre:"Nouvelle section",txt:"À compléter…",hidden:false});renderSections();toast("Section ajoutée ✓");}
+function renderFrontPrev(){
+  var h='<div class="plogo">flow<em>in</em></div>',i;
+  for(i=0;i<SECTIONS.length;i++){
+    var s=SECTIONS[i];
+    if(s.id==="s1")h+='<div class="phero">'+s.txt+'</div>';
+    else if(s.id==="s2")h+='';
+    else h+='<div class="psection'+(s.hidden?" muted":"")+'">'+s.titre+'</div>';
+  }
+  h+='<div class="pcta">Commencer →</div>';
+  $("frontPrev").innerHTML=h;
 }
 
-/* ============ Vue 2 — Template super-event ============ */
-/* surchargé = banque propre ; le reste hérité */
-function renderStations(){
-  var h="";
-  for(var i=0;i<EVENTS.length;i++){
-    var e=EVENTS[i];
-    var over = e.module==="nds2026"; // stations nds2026 surchargent leur banque
-    var badge = over
-      ? '<span class="badge b-surch">● surchargé</span>'
-      : '<span class="badge b-herit">○ hérité</span>';
-    h+='<div class="card station" onclick="openEditor(\''+e.id+'\')">'
-      +'<div class="ev-color" style="background:'+e.couleur+'"></div>'
-      +'<div class="ev-main">'
-      +'<h4>'+e.short+'</h4>'
-      +'<div class="ev-sub">'+badge+'<span>'+e.banque+'</span></div>'
+/* ===== BANDEAU ===== */
+function renderMarquee(){
+  var items="",i,seq=MARQUEE.concat(MARQUEE);
+  for(i=0;i<seq.length;i++){
+    var p=byId(PARTNERS,seq[i]);
+    if(p&&!p.hidden)items+='<div class="mlogo"><span class="me">'+p.emoji+'</span>'+p.nom+'</div>';
+  }
+  $("marqueeTrack").innerHTML=items;
+}
+function renderLogoList(){
+  var h="",i;
+  for(i=0;i<MARQUEE.length;i++){
+    var p=byId(PARTNERS,MARQUEE[i]);if(!p)continue;
+    h+='<div class="item'+(p.hidden?" hidden":"")+'">'
+      +'<div class="ir"><span class="grip">⠿</span>'
+      +'<div class="ava">'+p.emoji+'</div>'
+      +'<div class="imeta"><h4>'+p.nom+(p.hidden?' <span class="tag-hidden">masqué</span>':'')+'</h4></div></div>'
+      +'<div class="iacts">'
+      +'<button class="ia hide" onclick="toggleLogo(\''+p.id+'\')">'+ico("hide")+(p.hidden?"Afficher":"Masquer")+'</button>'
+      +'<button class="ia del" onclick="delLogo(\''+p.id+'\')">'+ico("del")+'Retirer</button>'
+      +'</div></div>';
+  }
+  $("logoList").innerHTML=h;
+}
+function toggleLogo(id){var p=byId(PARTNERS,id);p.hidden=!p.hidden;renderLogoList();renderMarquee();}
+function delLogo(id){for(var i=0;i<MARQUEE.length;i++){if(MARQUEE[i]===id){MARQUEE.splice(i,1);break;}}renderLogoList();renderMarquee();toast("Logo retiré du bandeau");}
+
+/* ===== FICHES ===== */
+function renderPartners(){
+  var h="",i;
+  for(i=0;i<PARTNERS.length;i++){
+    var p=PARTNERS[i];
+    h+='<div class="item'+(p.hidden?" hidden":"")+'">'
+      +'<div class="ir"><div class="ava">'+p.emoji+'</div>'
+      +'<div class="imeta"><h4>'+p.nom+' <span class="pack '+p.pack+'">'+p.pack+'</span>'+(p.hidden?' <span class="tag-hidden">masqué</span>':'')+'</h4>'
+      +'<div class="sub">'+p.desc+'</div></div></div>'
+      +'<div class="iacts">'
+      +'<button class="ia edit" onclick="editPartner(\''+p.id+'\')">'+ico("edit")+'Éditer</button>'
+      +'<button class="ia hide" onclick="togglePartner(\''+p.id+'\')">'+ico("hide")+(p.hidden?"Afficher":"Masquer")+'</button>'
+      +'<button class="ia del" onclick="delPartner(\''+p.id+'\')">'+ico("del")+'Supprimer</button>'
       +'</div>'
-      +'<div class="chev">›</div>'
-      +'</div>';
+      +'<div class="edit-box" id="pe-'+p.id+'">'
+      +'<div class="fld"><label>Nom</label><input id="pn-'+p.id+'" value="'+p.nom.replace(/"/g,"&quot;")+'"></div>'
+      +'<div class="fld"><label>Emoji / logo</label><input id="pm-'+p.id+'" value="'+p.emoji+'"></div>'
+      +'<div class="fld"><label>Pack</label><select id="pk-'+p.id+'">'
+        +'<option value="commerce"'+(p.pack==="commerce"?" selected":"")+'>Commerce</option>'
+        +'<option value="premium"'+(p.pack==="premium"?" selected":"")+'>Premium</option>'
+        +'<option value="sponsor"'+(p.pack==="sponsor"?" selected":"")+'>Sponsor</option></select></div>'
+      +'<div class="fld"><label>Description</label><textarea id="pd-'+p.id+'" rows="2">'+p.desc+'</textarea></div>'
+      +'<div class="save-row"><button class="srow-b ok" onclick="savePartner(\''+p.id+'\')">Enregistrer</button>'
+      +'<button class="srow-b cancel" onclick="editPartner(\''+p.id+'\')">Annuler</button></div>'
+      +'</div></div>';
   }
-  document.getElementById("stationList").innerHTML=h;
+  $("partnerList").innerHTML=h;
 }
+function editPartner(id){var b=$("pe-"+id);b.className="edit-box"+(b.className.indexOf("open")<0?" open":"");}
+function savePartner(id){var p=byId(PARTNERS,id);p.nom=$("pn-"+id).value;p.emoji=$("pm-"+id).value;p.pack=$("pk-"+id).value;p.desc=$("pd-"+id).value;renderPartners();renderMarquee();toast("Fiche enregistrée ✓");}
+function togglePartner(id){var p=byId(PARTNERS,id);p.hidden=!p.hidden;renderPartners();renderMarquee();}
+function delPartner(id){for(var i=0;i<PARTNERS.length;i++){if(PARTNERS[i].id===id){PARTNERS.splice(i,1);break;}}renderPartners();toast("Fiche supprimée");}
+function addPartner(){PARTNERS.push({id:"p"+Date.now(),nom:"Nouveau partenaire",emoji:"🏪",pack:"commerce",desc:"À compléter…",hidden:false,lat:null,lng:null});renderPartners();toast("Partenaire ajouté ✓");}
 
-/* ============ Vue 3 — Éditeur d'écran ============ */
-var CUR_EV=null;
-var CUR_SCREEN="accueil";
-var SCREENS=[
-  {id:"accueil",  label:"Accueil",   herit:true},
-  {id:"quiz",     label:"Quiz",      herit:false},
-  {id:"bonus",    label:"Bonus RSE", herit:true},
-  {id:"lots",     label:"Lots",      herit:true},
-  {id:"optin",    label:"Opt-in",    herit:true}
-];
-
-function openEditor(evId){
-  CUR_EV=null;
-  for(var i=0;i<EVENTS.length;i++){ if(EVENTS[i].id===evId) CUR_EV=EVENTS[i]; }
-  CUR_SCREEN="accueil";
-  document.getElementById("edTitle").textContent=CUR_EV.short;
-  nav("ed");
-  renderScreens();
-  renderEditor();
-}
-
-function renderScreens(){
-  var h="";
-  for(var i=0;i<SCREENS.length;i++){
-    var s=SCREENS[i];
-    var color = s.herit ? "var(--herit)" : "var(--surch)";
-    h+='<button class="scn'+(s.id===CUR_SCREEN?' active':'')+'" onclick="selScreen(\''+s.id+'\')">'
-      +'<span class="mini" style="background:'+color+'"></span>'+s.label+'</button>';
+/* ===== PACKS ===== */
+function renderPacks(){
+  var h="",i;
+  for(i=0;i<PACKS.length;i++){
+    var k=PACKS[i];
+    h+='<div class="packc'+(k.hidden?" hidden":"")+'">'
+      +'<div class="ph"><div class="ava">'+k.emoji+'</div><h4>'+k.nom+'</h4>'
+      +'<div class="price">'+k.prix+'</div></div>'
+      +'<div class="pl">'+k.pl+'</div>'
+      +'<div class="iacts">'
+      +'<button class="ia edit" onclick="editPack(\''+k.id+'\')">'+ico("edit")+'Éditer texte</button>'
+      +'<button class="ia hide" onclick="togglePack(\''+k.id+'\')">'+ico("hide")+(k.hidden?"Afficher":"Masquer")+'</button>'
+      +'</div>'
+      +'<div class="edit-box" id="ke-'+k.id+'">'
+      +'<div class="fld"><label>Nom du pack</label><input id="kn-'+k.id+'" value="'+k.nom.replace(/"/g,"&quot;")+'"></div>'
+      +'<div class="fld"><label>Prix <span class="lock">🔒 verrouillé</span></label><input value="'+k.prix+'" disabled></div>'
+      +'<div class="fld"><label>Descriptif</label><textarea id="kl-'+k.id+'" rows="2">'+k.pl+'</textarea></div>'
+      +'<div class="save-row"><button class="srow-b ok" onclick="savePack(\''+k.id+'\')">Enregistrer</button>'
+      +'<button class="srow-b cancel" onclick="editPack(\''+k.id+'\')">Annuler</button></div>'
+      +'</div></div>';
   }
-  document.getElementById("screens").innerHTML=h;
+  $("packList").innerHTML=h;
 }
-function selScreen(id){ CUR_SCREEN=id; renderScreens(); renderEditor(); }
+function editPack(id){var b=$("ke-"+id);b.className="edit-box"+(b.className.indexOf("open")<0?" open":"");}
+function savePack(id){var k=byId(PACKS,id);k.nom=$("kn-"+id).value;k.pl=$("kl-"+id).value;renderPacks();toast("Pack enregistré ✓ (prix inchangé)");}
+function togglePack(id){var k=byId(PACKS,id);k.hidden=!k.hidden;renderPacks();}
 
-function badgeFor(herit){
-  return herit ? '<span class="badge b-herit fbadge">○ hérité</span>'
-               : '<span class="badge b-surch fbadge">● surchargé</span>';
+/* ===== CARTE drag&drop ===== */
+var LAT0=43.726,LAT1=43.717,LNG0=7.108,LNG1=7.117; /* box Vence */
+function ll2xy(lat,lng){
+  var x=(lng-LNG0)/(LNG1-LNG0); var y=(LAT0-lat)/(LAT0-LAT1);
+  x=Math.max(.04,Math.min(.96,x)); y=Math.max(.06,Math.min(.92,y));
+  return {x:x,y:y};
 }
-function field(label,herit,inputHtml,hint,hintSurch){
-  return '<div class="field"><div class="fh"><span class="flabel">'+label+'</span>'+badgeFor(herit)+'</div>'
-    +inputHtml
-    +(hint?'<div class="fhint'+(hintSurch?' surch':'')+'">'+hint+'</div>':'')
-    +'</div>';
+function xy2ll(x,y){
+  var lng=LNG0+x*(LNG1-LNG0); var lat=LAT0-y*(LAT0-LAT1);
+  return {lat:lat,lng:lng};
 }
-
-function renderEditor(){
-  var f="", isStation = CUR_EV.module==="nds2026";
-  if(CUR_SCREEN==="accueil"){
-    f+=field("Titre du parcours", true,
-        '<input class="finput" value="'+CFG.titre+'" readonly>',
-        "Hérité du template Super Event");
-    f+=field("Sous-titre", true,
-        '<input class="finput" value="'+CFG.subtitle+'" readonly>',
-        "Hérité du template");
-    f+=field("Dates affichées", true,
-        '<input class="finput" value="'+CFG.datesLabel+'" readonly>',
-        "Hérité du template");
-    f+=field("Logo / emoji", true,
-        '<input class="finput" value="'+CFG.logoEmoji+'" readonly>', "");
-  } else if(CUR_SCREEN==="quiz"){
-    f+=field("Banque de questions", !isStation,
-        '<input class="finput" value="'+CUR_EV.banque+'" readonly>',
-        isStation?"Surchargé : cette station a sa propre banque de 25 questions":"Hérité du template",
-        isStation);
-    f+=field("Première question (exemple)", !isStation,
-        '<textarea class="ftext finput" readonly>'+STATION_Q[CUR_EV.id]+'</textarea>',
-        isStation?"Issu de la banque propre à la station":"Banque commune au festival", isStation);
-    f+=field("Timer par question", true,
-        '<input class="finput" value="20 secondes" readonly>',
-        "Hérité du template");
-  } else if(CUR_SCREEN==="bonus"){
-    f+=field("Question bonus RSE", true,
-        '<input class="finput" value="'+CFG.bonusRSE.label+'" readonly>',
-        "Hérité du template (commun à toutes les stations)");
-    var opts="";
-    for(var i=0;i<CFG.bonusRSE.opts.length;i++){
-      opts+='<div class="opt"><span class="ohandle">⠿</span>'+CFG.bonusRSE.opts[i][1]
-           +'<span class="oval">'+CFG.bonusRSE.opts[i][0]+'</span></div>';
+function renderMap(){
+  var box=$("mapbox");
+  /* purge old pins */
+  var old=box.querySelectorAll(".pin");for(var z=0;z<old.length;z++){old[z].parentNode.removeChild(old[z]);}
+  var placed=0,toplace=0,i;
+  for(i=0;i<PARTNERS.length;i++){
+    var p=PARTNERS[i];if(p.hidden)continue;
+    if(p.lat!=null&&p.lng!=null){
+      placed++;
+      var xy=ll2xy(p.lat,p.lng);
+      addPin(box,p,xy.x,xy.y,false);
+    } else { toplace++; }
+  }
+  renderTray();
+  $("placedCount").textContent="("+placed+" placés)";
+  $("trayCount").textContent="("+toplace+")";
+}
+function addPin(box,p,x,y,unplaced){
+  var pin=document.createElement("div");
+  pin.className="pin"+(unplaced?" unplaced":"");
+  pin.style.left=(x*100)+"%";pin.style.top=(y*100)+"%";
+  pin.setAttribute("data-id",p.id);
+  pin.innerHTML='<div class="head"><span>'+p.emoji+'</span></div><div class="cap">'+p.nom+'</div>';
+  box.appendChild(pin);
+  makeDrag(pin,box,p);
+}
+function makeDrag(pin,box,p){
+  pin.addEventListener("pointerdown",function(e){
+    e.preventDefault();pin.setPointerCapture(e.pointerId);pin.className=pin.className+" drag";
+    function mv(ev){
+      var r=box.getBoundingClientRect();
+      var x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+      x=Math.max(.04,Math.min(.96,x));y=Math.max(.06,Math.min(.92,y));
+      pin.style.left=(x*100)+"%";pin.style.top=(y*100)+"%";
+      pin._x=x;pin._y=y;
     }
-    f+='<div class="field"><div class="fh"><span class="flabel">Options de réponse</span>'+badgeFor(true)+'</div>'
-      +'<div class="opt-list">'+opts+'</div>'
-      +'<div class="fhint">5 questions RSE & mobilité héritées du template</div></div>';
-  } else if(CUR_SCREEN==="lots"){
-    f+=field("Lot principal", true,
-        '<input class="finput" value="'+CFG.lotNom+'" readonly>', "Hérité du template");
-    f+=field("Résumé du lot", true,
-        '<input class="finput" value="'+CFG.lotResume+'" readonly>', "Hérité du template");
-    var lp="";
-    for(var j=0;j<CFG.lotsPartenaires.length;j++){
-      lp+='<div class="opt">'+CFG.lotsPartenaires[j]+'</div>';
+    function up(){
+      pin.removeEventListener("pointermove",mv);pin.removeEventListener("pointerup",up);
+      pin.className=pin.className.replace(" drag","");
+      if(pin._x!=null){var ll=xy2ll(pin._x,pin._y);p.lat=ll.lat;p.lng=ll.lng;toast(p.nom+" repositionné ✓");}
     }
-    f+='<div class="field"><div class="fh"><span class="flabel">Lots partenaires</span>'+badgeFor(true)+'</div>'
-      +'<div class="opt-list">'+lp+'</div>'
-      +'<div class="fhint">Hérité du template · clause d\'équivalence active</div></div>';
-  } else if(CUR_SCREEN==="optin"){
-    f+=field("Texte d'opt-in", true,
-        '<textarea class="ftext finput" readonly>'+CFG.optin+'</textarea>',
-        "Hérité du template");
-    f+=field("Champs collectés", true,
-        '<input class="finput" value="Prénom · E-mail · Sexe (Homme / Femme)" readonly>',
-        "Hérité du template");
+    pin.addEventListener("pointermove",mv);pin.addEventListener("pointerup",up);
+  });
+}
+function renderTray(){
+  var h="",i,n=0;
+  for(i=0;i<PARTNERS.length;i++){
+    var p=PARTNERS[i];if(p.hidden)continue;
+    if(p.lat==null||p.lng==null){
+      n++;
+      h+='<div class="chip" data-id="'+p.id+'"><span class="ce">'+p.emoji+'</span>'+p.nom+'</div>';
+    }
   }
-  document.getElementById("fields").innerHTML=f;
-  renderPreview();
+  if(n===0)h='<div class="empty">✓ Tous les partenaires sont placés sur la carte.</div>';
+  $("trayChips").innerHTML=h;
+  /* bind drag-from-tray */
+  var chips=$("trayChips").querySelectorAll(".chip");
+  for(i=0;i<chips.length;i++){bindTrayChip(chips[i]);}
+}
+function bindTrayChip(chip){
+  chip.addEventListener("pointerdown",function(e){
+    e.preventDefault();
+    var id=chip.getAttribute("data-id"),p=byId(PARTNERS,id),box=$("mapbox");
+    var ghost=chip.cloneNode(true);ghost.style.position="fixed";ghost.style.zIndex="999";ghost.style.opacity=".85";ghost.style.pointerEvents="none";
+    document.body.appendChild(ghost);
+    function mv(ev){ghost.style.left=(ev.clientX-30)+"px";ghost.style.top=(ev.clientY-16)+"px";}
+    mv(e);
+    function up(ev){
+      document.removeEventListener("pointermove",mv);document.removeEventListener("pointerup",up);
+      if(ghost.parentNode)ghost.parentNode.removeChild(ghost);
+      var r=box.getBoundingClientRect();
+      if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom){
+        var x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+        var ll=xy2ll(x,y);p.lat=ll.lat;p.lng=ll.lng;
+        toast(p.nom+" placé ✓");renderMap();
+      }
+    }
+    document.addEventListener("pointermove",mv);document.addEventListener("pointerup",up);
+  });
 }
 
-/* ============ Aperçu téléphone ============ */
-function renderPreview(){
-  var bg=document.getElementById("pvBg");
-  bg.style.background="linear-gradient(165deg,"+CFG.accent+" 0%,#23357a 60%,#141d3f 100%)";
-  var c="", cap="";
-  if(CUR_SCREEN==="accueil"){
-    c='<div class="pv-logo">'+CFG.logoEmoji+'</div>'
-     +'<div class="pv-title">'+CFG.titre+'</div>'
-     +'<div class="pv-sub">'+CFG.subtitle+'</div>'
-     +'<div class="pv-dates">'+CFG.datesLabel+'</div>'
-     +'<div class="pv-cta" style="margin-top:auto">Commencer le jeu →</div>'
-     +'<div class="pv-foot">propulsé par <em>Flowin</em></div>';
-    cap="Écran <b>Accueil</b> · hérité du template";
-  } else if(CUR_SCREEN==="quiz"){
-    c='<div class="pv-sub" style="margin-top:0;text-align:left;font-weight:800;color:#fff">'+CUR_EV.short+'</div>'
-     +'<div class="pv-q">'+STATION_Q[CUR_EV.id]+'</div>'
-     +'<div class="pv-opts">'
-     +'<div class="pv-opt">Réponse A</div>'
-     +'<div class="pv-opt">Réponse B</div>'
-     +'<div class="pv-opt">Réponse C</div></div>'
-     +'<div class="pv-foot" style="margin-top:auto">'+CUR_EV.banque+'</div>';
-    cap = CUR_EV.module==="nds2026"
-      ? "Écran <b>Quiz</b> · <b style='color:var(--surch)'>surchargé</b> par la station"
-      : "Écran <b>Quiz</b> · banque commune festival";
-  } else if(CUR_SCREEN==="bonus"){
-    var o="";
-    for(var i=0;i<CFG.bonusRSE.opts.length;i++){ o+='<div class="pv-opt">'+CFG.bonusRSE.opts[i][1]+'</div>'; }
-    c='<div class="pv-sub" style="margin-top:0;font-weight:800;color:#fff">Question bonus 🌱</div>'
-     +'<div class="pv-q" style="margin-top:14px">'+CFG.bonusRSE.label+'</div>'
-     +'<div class="pv-opts">'+o+'</div>';
-    cap="Écran <b>Bonus RSE</b> · hérité du template";
-  } else if(CUR_SCREEN==="lots"){
-    var l="";
-    for(var k=0;k<CFG.lotsPartenaires.length;k++){ l+='<div class="pv-opt">🎁 '+CFG.lotsPartenaires[k]+'</div>'; }
-    c='<div class="pv-logo" style="font-size:24px">🎁</div>'
-     +'<div class="pv-title" style="font-size:15px">'+CFG.lotNom+'</div>'
-     +'<div class="pv-sub">'+CFG.lotResume+'</div>'
-     +'<div class="pv-opts" style="margin-top:14px">'+l+'</div>'
-     +'<div class="pv-foot" style="margin-top:auto">Clause d\'équivalence active</div>';
-    cap="Écran <b>Lots</b> · hérité du template";
-  } else if(CUR_SCREEN==="optin"){
-    c='<div class="pv-title" style="font-size:15px;margin-top:14px">Une dernière chose…</div>'
-     +'<div class="pv-optin" style="margin-top:18px">'
-     +'<div class="chk">✓</div><p>'+CFG.optin+'</p></div>'
-     +'<div class="pv-cta">Valider ma participation</div>'
-     +'<div class="pv-foot" style="margin-top:auto">propulsé par <em>Flowin</em></div>';
-    cap="Écran <b>Opt-in</b> · hérité du template";
-  }
-  document.getElementById("pvContent").innerHTML=c;
-  document.getElementById("pvCap").innerHTML="Aperçu live — "+cap;
-}
-
-/* ============ Navigation ============ */
-var STACK=["lib"];
-var CRUMBS={ lib:"Bibliothèque", tmpl:"🌙 <b>Nuits du Sud 2026</b> · Template", ed:"Éditeur d'écran" };
-function nav(p){
-  if(STACK[STACK.length-1]!==p) STACK.push(p);
-  show(p);
-}
-function goBack(){
-  if(STACK.length>1){ STACK.pop(); show(STACK[STACK.length-1]); }
-}
-function show(p){
-  var ids=["lib","tmpl","ed"];
-  for(var i=0;i<ids.length;i++){
-    document.getElementById("page-"+ids[i]).classList.toggle("show", ids[i]===p);
-  }
-  document.getElementById("backBtn").style.display = (p==="lib") ? "none" : "grid";
-  var cr=CRUMBS[p];
-  if(p==="ed" && CUR_EV) cr="🌙 NDS · <b>"+CUR_EV.short+"</b>";
-  document.getElementById("crumb").innerHTML=cr;
-  window.scrollTo(0,0);
-}
-
-renderEvents();
-renderStations();
+/* init */
+renderSections();renderMarquee();renderLogoList();renderPartners();renderPacks();
 </script>
 </body></html>
