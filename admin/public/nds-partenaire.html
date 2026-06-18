@@ -8,11 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--accent:#3B5CC4;--gold:#F5B544;--lilac:#8FA6F0;--ink:#080B16;--ink2:#05070F;
+  :root{--accent:#3B5CC4;--gold:#F5B544;--lilac:#8FA6F0;--ink:#0C1733;--ink2:#070E22;
     --card:rgba(255,255,255,.045);--line:rgba(255,255,255,.10);--text:#F3F5FC;
     --muted:rgba(243,245,252,.78);--faint:rgba(243,245,252,.55);--flowin:#8FA6F0}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#0a0a0f;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  body{background:#0a1226;font-family:'Plus Jakarta Sans',system-ui,sans-serif;
     display:flex;justify-content:center;min-height:100vh}
   @media(min-width:520px){body{padding:18px 0;align-items:center}}
   .nds-app{--hdr:76px;width:100%;max-width:480px;height:100vh;height:100dvh;background:linear-gradient(180deg,var(--ink),var(--ink2));
@@ -355,6 +355,33 @@
   .bstat{background:linear-gradient(160deg,rgba(59,92,196,.16),rgba(124,92,196,.05));border:1px solid rgba(59,92,196,.28);border-radius:18px;padding:18px 10px;text-align:center;box-shadow:0 14px 34px -22px var(--accent)}
   .bstat .bv{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;line-height:1;background:linear-gradient(120deg,#fff,#A9BEF2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .bstat .bl{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.25}
+  /* logo NDS hero */
+  .hero .ndslogo{position:relative;z-index:2;display:block;width:min(184px,50%);margin:4px auto 14px;filter:drop-shadow(0 6px 22px rgba(0,0,0,.55))}
+  /* bloc carte mise en avant commercant */
+  .feat{margin:30px 0 4px}
+  .featcard{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);
+    background:radial-gradient(130% 90% at 25% 18%,rgba(59,92,196,.30),transparent 60%),linear-gradient(180deg,#10193a,#0b1228);padding:18px}
+  .feat .kick.gold{margin-bottom:6px}
+  .feat .featmap{position:relative;border-radius:15px;overflow:hidden;border:1px solid var(--line);
+    background:radial-gradient(120% 90% at 30% 40%,rgba(59,92,196,.22),transparent 62%),#0a1226;height:220px;margin:6px 0 0}
+  .feat .featmap svg{position:absolute;inset:0;width:100%;height:100%}
+  .feat .featmap .street{stroke:rgba(143,166,240,.16);stroke-width:7;fill:none}
+  .feat .featmap .street.b{stroke-width:11}
+  .feat .featmap .park{fill:rgba(59,92,196,.10)}
+  .feat .featmap .fpin{position:absolute;left:26%;top:52%;transform:translate(-50%,-100%);z-index:2}
+  .feat .featmap .fpin .pd{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--gold);border:2px solid #fff;box-shadow:0 6px 16px -6px rgba(245,181,68,.7)}
+  .feat .featmap .fpin .pd:after{content:'';position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;background:#1a1205;transform:translate(-50%,-50%)}
+  .feat .featmap .ffiche{position:absolute;right:11px;top:12px;width:56%;background:rgba(8,12,24,.94);border:1px solid var(--line);border-radius:13px;padding:11px;z-index:3;box-shadow:0 16px 32px -16px #000}
+  .feat .featmap .fflogo{border:1.5px dashed var(--gold);border-radius:9px;padding:14px 8px;text-align:center;color:var(--gold);font-family:'Bricolage Grotesque';font-weight:700;font-size:10.5px;letter-spacing:.06em}
+  .feat .featmap .ffname{font-weight:800;font-size:13px;color:#fff;margin-top:8px}
+  .feat .featmap .ffba{display:inline-block;margin-top:7px;font-size:10px;font-weight:700;color:#1a1205;background:var(--gold);border-radius:100px;padding:3px 10px}
+  .feat .featlede{font-size:14px;color:var(--text);line-height:1.5;margin:14px 0 2px}
+  .feat .featlede b{color:#fff}
+  .vlist{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+  .vrow{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.42;color:var(--text)}
+  .vrow .vk{width:24px;height:24px;border-radius:8px;background:rgba(245,181,68,.16);color:var(--gold);display:grid;place-items:center;flex-shrink:0;font-weight:800;font-size:13px}
+  .vrow b{color:#fff;font-weight:800}
+  .feat .logoband{margin:18px 0 0}
 </style>
 </head>
 <body>
@@ -363,7 +390,7 @@
     <div class="brandrow">
       <div class="nds-logo">
         <span class="mk"><svg viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#fff"/></svg></span>
-        <span class="wm"><b>Nuits du Sud</b><s>Partenaires · 2026</s></span>
+        <span class="wm"><b><img src="nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" style="height:15px;display:block"></b><s>Partenaires · 2026</s></span>
       </div>
       <button class="hcontact" data-go="contact">Contact</button>
       <button class="pburger" id="pBurger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -386,6 +413,7 @@
   <div class="panel" id="accueil" data-p="accueil">
     <div class="hero">
       <div class="bg"></div><div class="veil"></div>
+      <img class="ndslogo" src="nds/logo_nds_blanc_hd.png" alt="Nuits du Sud 2026">
       <span class="badge">29e ÉDITION · 9 → 18 JUILLET 2026 · VENCE</span>
       <h1>Rejoignez l’opération partenaires des Nuits du Sud</h1>
       <p class="sub">24 000 festivaliers, 80% de locaux. De la visibilité, des contacts qualifiés, un lot à offrir.</p>
@@ -402,6 +430,49 @@
         </div>
       </div>
       <button class="btn" style="margin:16px 0 6px" data-go="offre">Voir les offres partenaires</button>
+
+      <div class="feat">
+        <div class="featcard">
+          <div class="kick gold">L'essentiel</div>
+          <h2 class="hsec" style="margin-bottom:4px">Votre commerce sur la carte du jeu, <em class="g">tout le festival</em></h2>
+          <div class="featmap">
+            <svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+              <rect class="park" x="118" y="120" width="170" height="92" rx="14"/>
+              <path class="street b" d="M-10 66 H310"/>
+              <path class="street b" d="M-10 156 H310"/>
+              <path class="street" d="M-10 110 H310"/>
+              <path class="street" d="M70 -10 V230"/>
+              <path class="street" d="M150 -10 V230"/>
+              <path class="street" d="M232 -10 V230"/>
+            </svg>
+            <div class="fpin"><span class="pd"></span></div>
+            <div class="ffiche">
+              <div class="fflogo">VOTRE LOGO ICI</div>
+              <div class="ffname">Votre commerce</div>
+              <span class="ffba">Bon d'achat à gagner</span>
+            </div>
+          </div>
+          <p class="featlede"><b>Repéré par un point sur la carte du jeu</b> pendant les 10 soirs : les festivaliers ouvrent votre fiche et viennent jouer chez vous.</p>
+          <div class="vlist">
+            <div class="vrow"><span class="vk">✓</span><span><b>Vos clients participent aussi</b> — ils lancent le jeu depuis votre boutique.</span></div>
+            <div class="vrow"><span class="vk">✓</span><span><b>Tirage à la fin du festival</b> — un vrai moment de communication, gagnants annoncés sur les réseaux.</span></div>
+            <div class="vrow"><span class="vk">✓</span><span><b>Autant de lots que de commerces participants</b> — chaque partenaire a son gagnant.</span></div>
+            <div class="vrow"><span class="vk">✓</span><span><b>Un bon d'achat à gagner dans VOTRE boutique</b> — le gagnant revient chez vous.</span></div>
+            <div class="vrow"><span class="vk">✓</span><span><b>Dynamisez le commerce local</b> et faites vivre votre quartier pendant l'événement.</span></div>
+            <div class="vrow"><span class="vk">✓</span><span><b>Lancez le jeu en boutique et sur vos réseaux</b> — QR à votre nom, comptoir, vitrine, Insta.</span></div>
+          </div>
+          <div class="logoband" aria-hidden="true">
+            <div class="logotrack">
+              <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+              <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+              <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+              <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+              <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+            </div>
+          </div>
+          <button class="btn" style="margin-top:16px" data-go="offre">Réserver mon emplacement</button>
+        </div>
+      </div>
     </div>
   </div>
 
