@@ -1,37 +1,40 @@
-# notify-souscription — mise en service
+# notify-souscription — EN PRODUCTION (testé OK)
 
 Notifie `flowinevent@gmail.com` à chaque nouvelle souscription partenaire NDS 2026
-(insertion dans la table `partenaires` depuis `nds-partenaire.html`).
+(insertion dans `partenaires` depuis `nds-partenaire.html`, tag `nds-landing`).
 
-La capture du lead fonctionne déjà (le formulaire écrit dans `partenaires` avec
-`statut_paiement=en_attente_reglement`, `actif=false`). Cette fonction ajoute **uniquement**
-la notification email — rien d'autre n'est modifié.
+## Statut (18/06/2026)
+- ✅ Edge Function déployée (`notify-souscription`, verify_jwt=true)
+- ✅ Secret `RESEND_API_KEY` configuré dans Supabase (compte Resend sur flowinevent@gmail.com)
+- ✅ Trigger SQL `trg_notify_souscription_partenaire` sur INSERT `partenaires` (cf docs/sql/nds-notify-souscription.sql)
+- ✅ Test bout-en-bout : insert tag nds-landing → net.http_post → fn → Resend `200 {ok:true}`
 
-## 3 étapes (≈ 5 min)
+La capture du lead écrit dans `partenaires` (statut `en_attente_reglement`, actif=false).
+Une fois le virement reçu, activer le partenaire (statut payé / actif / visible).
 
-1. **Clé Resend**
-   - Créer un compte sur resend.com, générer une API key.
-   - (Pour envoyer depuis une adresse @flowin… il faut vérifier le domaine dans Resend.
-     Sinon l'expéditeur par défaut `onboarding@resend.dev` fonctionne pour recevoir sur Gmail.)
+## Chaîne technique
+landing (form pack) → INSERT partenaires (tags nds-landing)
+  → trigger `trg_notify_souscription_partenaire` (net.http_post, auth anon JWT)
+  → Edge Function `notify-souscription`
+  → Resend → email récap vers flowinevent@gmail.com
 
-2. **Déployer + secret**
-   ```
-   supabase functions deploy notify-souscription --project-ref ywcqtupgoxfzkddqkztk
-   supabase secrets set RESEND_API_KEY=re_xxx --project-ref ywcqtupgoxfzkddqkztk
-   ```
-   Secrets optionnels : `NOTIFY_FROM`, `NOTIFY_TO`, `DASHBOARD_URL`, `PROFORMA_URL`.
+## Secrets (Dashboard > Edge Functions > Secrets)
+- `RESEND_API_KEY`  (obligatoire) ✅ configuré
+- `NOTIFY_TO`       (optionnel) défaut flowinevent@gmail.com
+- `NOTIFY_FROM`     (optionnel) défaut onboarding@resend.dev — passer à une adresse @domaine vérifié pour un rendu pro
+- `DASHBOARD_URL`   (optionnel)
+- `PROFORMA_URL`    (optionnel) lien bon de commande / proforma — active le 2e bouton du mail (dépend du SIRET, item b)
 
-3. **Brancher le déclencheur** — Dashboard Supabase > Database > Webhooks > Create
-   - Table : `partenaires` · Event : `INSERT`
-   - Type : Supabase Edge Functions > `notify-souscription`
+## Limites Resend (compte gratuit)
+- Sans domaine vérifié : envoi uniquement vers l'adresse du compte (flowinevent@gmail.com) — OK ici.
+- 100 emails/jour, 3000/mois.
+- Pour envoyer depuis une adresse @flowin… : vérifier le domaine dans Resend > Domains, puis régler NOTIFY_FROM.
 
-## Sécurité
-- Sans `RESEND_API_KEY`, la fonction renvoie `200 {skipped:true}` : déployable sans risque.
-- Aucun secret n'est committé. La clé vit uniquement dans les secrets Supabase.
-
-## Test
-```
-curl -X POST https://ywcqtupgoxfzkddqkztk.supabase.co/functions/v1/notify-souscription \
-  -H "Content-Type: application/json" \
-  -d '{"record":{"nom":"Café Test","offre":"Pack Visibilité","montant_sponsoring":590,"contact_nom":"Jean","contact_email":"jean@test.fr","contact_tel":"0600000000","adresse":"1 rue X","ville":"Vence"}}'
+## Re-test manuel
+Insérer (puis supprimer) une ligne taggée nds-landing :
+```sql
+insert into partenaires (id,nom,contact_email,tags,super_event_id,offre,montant_sponsoring,statut_paiement,actif,visible)
+values ('test-x','Test','t@test.fr',ARRAY['nds-landing']::text[],'se-nds-2026','Pack Visibilité',590,'en_attente_reglement',false,false);
+-- vérifier : select status_code,left(content,200) from net._http_response order by id desc limit 1;
+delete from partenaires where id='test-x';
 ```
