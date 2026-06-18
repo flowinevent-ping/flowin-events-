@@ -1,43 +1,80 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
-<title>Flowin × Nuits du Sud — Ce que vit le partenaire (présentation)</title>
+<title>Flowin × Nuits du Sud — Présentation partenaire</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{
-    --purple:#7C2D92;--magenta:#E0218A;--magenta2:#8E2E9E;--orange:#F5A100;--gold:#F5B544;
-    --ink:#1c1024;--muted:#8a7e93;--line:#efe9f2;
+    --purple:#7C2D92;--magenta:#E0218A;--magenta2:#8E2E9E;--orange:#F5A100;--gold:#E8930A;
+    --ink:#23142c;--muted:#7a6e84;--line:#ece6f0;
     --blue:#3B5CC4;--teal:#00B4A0;
-    --paper:#0c0a12;--card:#160820;
+    --paper:#F5F3F9;
   }
-  body{font-family:'Manrope',system-ui,sans-serif;background:linear-gradient(180deg,#1b1136 0%,#140d28 45%,#0f0a1c 100%);background-attachment:fixed;color:#fff;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:480px;margin:0 auto;padding:26px 18px 60px}
-  .head{text-align:center;margin-bottom:8px}
-  .kick{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:8px}
-  .kick:before,.kick:after{content:'';width:18px;height:2px;background:var(--gold);border-radius:2px}
-  .head h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.18;margin-top:12px}
-  .head h1 em{font-style:normal;color:var(--gold)}
-  .head p{font-size:13.5px;color:rgba(255,255,255,.62);margin-top:10px;line-height:1.5}
+  body{font-family:'Manrope',system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:480px;margin:0 auto;padding:22px 0 56px;overflow:hidden}
+  .pad{padding:0 18px}
 
-  .step{margin-top:34px}
-  .step .lbl{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  .step .num{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--magenta));display:grid;place-items:center;font-weight:800;font-size:14px;flex-shrink:0}
-  .step .lt{font-size:16px;font-weight:800}
-  .cap{font-size:13.5px;color:rgba(255,255,255,.66);line-height:1.5;margin-top:14px;text-align:center;padding:0 6px}
-  .cap b{color:#fff;font-weight:800}
+  /* co-branding (clair) */
+  .cobrand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px}
+  .cobrand .fw{font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+  .cobrand .fw em{font-style:normal;color:var(--magenta)}
+  .cobrand .x{color:#b9adc4;font-size:15px}
+  .cobrand .ndschip{background:linear-gradient(135deg,var(--purple),var(--magenta));border-radius:10px;padding:6px 11px;display:flex;align-items:center}
+  .cobrand .ndschip img{height:18px;display:block}
+  .cobrand .role{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#fff;background:var(--gold);border-radius:100px;padding:5px 11px}
+
+  .head{text-align:center}
+  .kick{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--magenta);display:inline-flex;align-items:center;gap:8px}
+  .kick:before,.kick:after{content:'';width:18px;height:2px;background:var(--magenta);border-radius:2px}
+  .head h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.18;margin-top:12px;color:var(--ink)}
+  .head h1 em{font-style:normal;color:var(--magenta)}
+  .head p{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+  /* chiffres (clair) */
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:22px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 12px;text-align:center;box-shadow:0 2px 8px rgba(124,45,146,.05)}
+  .stat .v{font-size:26px;font-weight:800;color:var(--magenta);line-height:1}
+  .stat .l{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.3}
+  .stat.todo{border-style:dashed;border-color:#d8cde0}
+  .stat.todo .v{color:#b9adc4;font-size:18px}
+
+  /* pills valeurs */
+  .vstrip{display:flex;gap:9px;margin-top:14px}
+  .vpill{flex:1;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;border-radius:14px;padding:13px 12px;font-size:13px;font-weight:800;line-height:1.2}
+  .vpill .e{font-size:18px;flex-shrink:0}
+
+  /* bandeau defilant */
+  .bandlbl{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 9px;text-align:center}
+  .logoband{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);box-shadow:0 2px 8px rgba(124,45,146,.05)}
+  .logotrack{display:flex;gap:10px;width:max-content;padding:13px 10px;animation:logoscroll 22s linear infinite}
+  .logoband:hover .logotrack{animation-play-state:paused}
+  .logoslot{flex:0 0 auto;border:1.5px dashed var(--gold);border-radius:11px;padding:11px 18px;color:var(--gold);font-weight:800;font-size:11px;letter-spacing:.04em;white-space:nowrap;background:#fffaf0}
+  @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media(prefers-reduced-motion:reduce){.logotrack{animation:none}}
+
+  /* CARROUSEL */
+  .carwrap{margin-top:26px}
+  .carttl{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta);text-align:center;margin-bottom:14px}
+  .carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:0}
+  .carousel::-webkit-scrollbar{display:none}
+  .slide{flex:0 0 100%;scroll-snap-align:center;padding:0 18px}
+  .slide .lbl{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:13px}
+  .slide .num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0}
+  .slide .lt{font-size:15.5px;font-weight:800;color:var(--ink)}
+  .cap{font-size:13px;color:var(--muted);line-height:1.5;margin-top:14px;text-align:center;padding:0 4px}
+  .cap b{color:var(--ink);font-weight:800}
+  .dots{display:flex;justify-content:center;gap:8px;margin-top:18px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#d8cde0;transition:.2s}
+  .dot.on{background:var(--magenta);width:22px;border-radius:100px}
+  .swipe{text-align:center;font-size:11px;color:var(--muted);margin-top:10px}
 
   /* phone */
-  .phone{margin:0 auto;width:252px;border-radius:34px;background:#0b0712;padding:11px 9px;box-shadow:0 22px 56px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,255,255,.05)}
-  .notch{width:80px;height:5px;border-radius:100px;background:#241830;margin:0 auto 8px}
-  .screen{position:relative;border-radius:26px;overflow:hidden;height:474px;background:#160820}
+  .phone{margin:0 auto;width:248px;border-radius:34px;background:#1a1226;padding:11px 9px;box-shadow:0 22px 50px rgba(60,30,80,.28),inset 0 0 0 2px rgba(255,255,255,.05)}
+  .notch{width:80px;height:5px;border-radius:100px;background:#3a2b4a;margin:0 auto 8px}
+  .screen{position:relative;border-radius:26px;overflow:hidden;height:470px;background:#160820}
 
-  /* ===== écran CARTE ===== */
-  .mapbg{position:absolute;inset:0;
-    background:
-      repeating-linear-gradient(0deg,transparent 0 30px,rgba(255,255,255,.05) 30px 31px),
-      repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.05) 30px 31px),
-      radial-gradient(120% 80% at 60% 30%,rgba(124,45,146,.32),transparent 60%),
-      linear-gradient(160deg,#241036,#120a1e)}
+  /* écran CARTE */
+  .mapbg{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(255,255,255,.05) 30px 31px),repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.05) 30px 31px),radial-gradient(120% 80% at 60% 30%,rgba(124,45,146,.32),transparent 60%),linear-gradient(160deg,#241036,#120a1e)}
   .road{position:absolute;background:rgba(255,255,255,.07)}
   .park{position:absolute;border-radius:14px;background:rgba(124,45,146,.18);border:1px solid rgba(255,255,255,.06)}
   .qc{position:absolute;top:12px;left:11px;right:11px;display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--ink);box-shadow:0 6px 22px rgba(20,26,38,.3);border-radius:15px;padding:10px 13px;z-index:5}
@@ -49,15 +86,15 @@
   .pin .pd{width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#fff;border:2px solid var(--magenta);display:grid;place-items:center}
   .pin .pd span{transform:rotate(45deg);font-size:12px}
   .pin .cap2{margin-top:3px;font-size:8.5px;font-weight:800;color:#fff;background:rgba(18,10,30,.85);padding:1px 5px;border-radius:5px;white-space:nowrap}
-  .pin.you .pd{width:32px;height:32px;background:var(--gold);border-color:#fff}
+  .pin.you .pd{width:32px;height:32px;background:var(--orange);border-color:#fff}
   .pin.you .pd span{font-size:15px}
-  .pin.you:before{content:'';position:absolute;top:6px;left:50%;width:46px;height:46px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(245,181,68,.5),transparent);animation:pulse 2s infinite}
+  .pin.you:before{content:'';position:absolute;top:6px;left:50%;width:46px;height:46px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(245,161,0,.5),transparent);animation:pulse 2s infinite}
   @keyframes pulse{0%{transform:translate(-50%,-50%) scale(.6);opacity:.8}70%{transform:translate(-50%,-50%) scale(1.7);opacity:0}100%{opacity:0}}
-  .youtag{position:absolute;z-index:6;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1205;font-size:10px;font-weight:800;padding:5px 12px;border-radius:100px;box-shadow:0 8px 18px -6px rgba(245,181,68,.7);white-space:nowrap}
-  .youtag:after{content:'';position:absolute;top:-5px;left:50%;margin-left:-5px;width:10px;height:10px;background:var(--gold);transform:rotate(45deg)}
+  .youtag{position:absolute;z-index:6;left:50%;transform:translateX(-50%);background:var(--orange);color:#3a2400;font-size:10px;font-weight:800;padding:5px 12px;border-radius:100px;box-shadow:0 8px 18px -6px rgba(245,161,0,.7);white-space:nowrap}
+  .youtag:after{content:'';position:absolute;top:-5px;left:50%;margin-left:-5px;width:10px;height:10px;background:var(--orange);transform:rotate(45deg)}
   .locate{position:absolute;right:12px;bottom:14px;width:42px;height:42px;border-radius:13px;background:#fff;color:var(--purple);display:grid;place-items:center;font-size:18px;box-shadow:0 6px 18px rgba(0,0,0,.3);z-index:5}
 
-  /* ===== écran FICHE ===== */
+  /* écran FICHE */
   .fiche{position:absolute;inset:0;background:#fff;color:var(--ink);padding:26px 22px 22px;display:flex;flex-direction:column}
   .fiche .grab{width:42px;height:5px;border-radius:100px;background:#e7dcee;margin:0 auto 18px}
   .fbigl{width:74px;height:74px;border-radius:20px;border:2px dashed var(--gold);display:grid;place-items:center;margin:0 auto 12px;color:var(--gold);font-weight:800;font-size:10px;text-align:center;line-height:1.2}
@@ -68,150 +105,157 @@
   .flink{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border-radius:13px;color:#fff;font-weight:800;font-size:12px}
   .fcount{margin-top:auto;font-size:11px;color:#a99fb3;text-align:center;padding-top:14px}
 
-  /* ===== écran PRO mesure ===== */
+  /* écran PRO */
   .pro{position:absolute;inset:0;background:linear-gradient(170deg,#0E1B30,#0A1424);padding:18px 16px;overflow:hidden;display:flex;flex-direction:column}
   .pro .ph{font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
-  .pro .ph .dot{width:8px;height:8px;border-radius:50%;background:var(--teal)}
-  .pro .big{background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:16px;padding:16px;text-align:center;margin-top:13px}
+  .pro .ph .gd{width:8px;height:8px;border-radius:50%;background:var(--teal)}
+  .pro .big{background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:16px;padding:16px;text-align:center;margin-top:13px;color:#fff}
   .pro .big .v{font-size:38px;font-weight:800;line-height:1}
   .pro .big .l{font-size:11px;color:rgba(255,255,255,.85);margin-top:5px;font-weight:700}
   .pro .sub{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);margin:15px 0 9px}
-  .bar{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:12px}
-  .bar .bl{width:46px;color:rgba(255,255,255,.7);flex-shrink:0;font-weight:700}
-  .bar .bt{flex:1;height:9px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
-  .bar .bf{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,var(--blue),var(--teal))}
-  .bar .bn{width:24px;text-align:right;font-weight:800;color:#fff;flex-shrink:0}
+  .pbar{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:12px}
+  .pbar .bl{width:46px;color:rgba(255,255,255,.7);flex-shrink:0;font-weight:700}
+  .pbar .bt{flex:1;height:9px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+  .pbar .bf{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,var(--blue),var(--teal))}
+  .pbar .bn{width:24px;text-align:right;font-weight:800;color:#fff;flex-shrink:0}
   .pro .clics{margin-top:auto;display:flex;gap:8px}
   .cchip{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:9px 6px;text-align:center}
   .cchip .cv{font-size:17px;font-weight:800;color:var(--teal)}
   .cchip .cl{font-size:9px;color:rgba(255,255,255,.55);margin-top:3px}
   .exnote{font-size:9.5px;color:rgba(255,255,255,.4);text-align:center;margin-top:9px}
 
-  .foot{text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin-top:40px;line-height:1.5}
-  .foot b{color:var(--gold)}
-  /* co-branding */
-  .cobrand{display:flex;align-items:center;justify-content:center;gap:13px;margin-bottom:18px}
-  .cobrand .fw{font-size:20px;font-weight:800;letter-spacing:-.02em;color:#fff}
-  .cobrand .fw em{font-style:normal;color:#6A93FF}
-  .cobrand .x{color:rgba(255,255,255,.35);font-size:15px}
-  .cobrand img{height:24px;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
-  .cobrand .role{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(245,181,68,.4);border-radius:100px;padding:4px 10px;margin-left:2px}
-  /* bande chiffres */
-  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:22px}
-  .stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:15px;padding:15px 12px;text-align:center}
-  .stat .v{font-size:26px;font-weight:800;color:var(--gold);line-height:1}
-  .stat .l{font-size:11px;color:rgba(255,255,255,.62);margin-top:6px;line-height:1.3}
-  .stat.todo .v{color:rgba(255,255,255,.4);font-size:18px}
-  .stat.todo{border-style:dashed}
-  /* bandeau valeurs */
-  .vstrip{display:flex;gap:9px;margin-top:14px}
-  .vpill{flex:1;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(124,45,146,.5),rgba(224,33,138,.4));border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:13px 12px;font-size:13px;font-weight:800;line-height:1.2}
-  .vpill .e{font-size:18px;flex-shrink:0}
+  .foot{text-align:center;font-size:11px;color:var(--muted);margin-top:34px;line-height:1.5;padding:0 18px}
+  .foot b{color:var(--magenta)}
 </style></head>
 <body>
 <div class="wrap">
-  <div class="cobrand">
-    <span class="fw">flow<em>in</em></span>
-    <span class="x">×</span>
-    <img src="../../admin/public/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud">
-    <span class="role">Partenaire</span>
-  </div>
-  <div class="head">
-    <span class="kick">Côté partenaire</span>
-    <h1>Ce que vivent les festivaliers <em>chez vous</em></h1>
-    <p>Trois écrans réels de l'application Nuits du Sud. Pas une promesse — ce que vos clients voient et ce que vous mesurez.</p>
-  </div>
 
-  <div class="stats">
-    <div class="stat"><div class="v">24 000</div><div class="l">festivaliers sur l'édition</div></div>
-    <div class="stat"><div class="v">80%</div><div class="l">de public local</div></div>
-    <div class="stat"><div class="v">29ᵉ</div><div class="l">édition · 10 soirs (9→18 juil.)</div></div>
-    <div class="stat todo"><div class="v">__ %</div><div class="l">de femmes · collecté à l'inscription (à confirmer)</div></div>
-  </div>
+  <div class="pad">
+    <div class="cobrand">
+      <span class="fw">flow<em>in</em></span>
+      <span class="x">×</span>
+      <span class="ndschip"><img src="../../admin/public/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud"></span>
+      <span class="role">Partenaire</span>
+    </div>
+    <div class="head">
+      <span class="kick">Côté partenaire</span>
+      <h1>Ce que vivent les festivaliers <em>chez vous</em></h1>
+      <p>Trois écrans réels de l'application Nuits du Sud. Ce que vos clients voient, et ce que vous mesurez.</p>
+    </div>
 
-  <div class="vstrip">
-    <div class="vpill"><span class="e">🛍️</span>Dynamisez le commerce local</div>
-    <div class="vpill"><span class="e">✨</span>Animez votre lieu</div>
-  </div>
+    <div class="stats">
+      <div class="stat"><div class="v">24 000</div><div class="l">festivaliers sur l'édition</div></div>
+      <div class="stat"><div class="v">80%</div><div class="l">de public local</div></div>
+      <div class="stat"><div class="v">29ᵉ</div><div class="l">édition · 10 soirs (9→18 juil.)</div></div>
+      <div class="stat todo"><div class="v">__ %</div><div class="l">de femmes · collecté à l'inscription (à confirmer)</div></div>
+    </div>
 
-  <!-- 1. CARTE -->
-  <div class="step">
-    <div class="lbl"><div class="num">1</div><div class="lt">Vous apparaissez sur la carte du jeu</div></div>
-    <div class="phone"><div class="notch"></div>
-      <div class="screen">
-        <div class="mapbg">
-          <div class="road" style="left:0;right:0;top:46%;height:8px"></div>
-          <div class="road" style="top:0;bottom:0;left:40%;width:8px"></div>
-          <div class="road" style="top:0;bottom:0;left:74%;width:6px"></div>
-          <div class="road" style="left:0;right:0;top:74%;height:6px"></div>
-          <div class="park" style="left:42%;right:6%;top:48%;bottom:8%"></div>
-        </div>
-        <div class="qc">
-          <span class="em">🗺️</span>
-          <div><div class="t">Les points de jeu</div><div class="s">Flashe le QR sur place</div></div>
-          <span class="tk">🎟 1</span>
-        </div>
-        <!-- stations réelles -->
-        <div class="pin" style="left:30%;top:40%"><span class="pd"><span>🎟️</span></span><span class="cap2">Les Caisses</span></div>
-        <div class="pin" style="left:52%;top:34%"><span class="pd"><span>🍹</span></span><span class="cap2">Le Bar</span></div>
-        <div class="pin" style="left:64%;top:54%"><span class="pd"><span>🖥️</span></span><span class="cap2">L'Écran</span></div>
-        <!-- VOUS -->
-        <div class="pin you" style="left:42%;top:64%"><span class="pd"><span>🏪</span></span><span class="cap2">Votre commerce · exemple</span></div>
-        <div class="youtag" style="top:80%">VOUS APPARAISSEZ ICI</div>
-        <div class="locate">📍</div>
+    <div class="vstrip">
+      <div class="vpill"><span class="e">🛍️</span>Dynamisez le commerce local</div>
+      <div class="vpill"><span class="e">✨</span>Animez votre lieu</div>
+    </div>
+
+    <div class="bandlbl">Et bientôt, votre logo parmi eux</div>
+    <div class="logoband" aria-hidden="true">
+      <div class="logotrack">
+        <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+        <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+        <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+        <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
+        <span class="logoslot">Votre logo ici</span><span class="logoslot">Votre logo ici</span>
       </div>
     </div>
-    <div class="cap">Votre commerce est <b>repéré par un point</b>, à côté des 3 stations officielles (Les Caisses, Le Bar, L'Écran), <b>pendant les 10 soirs</b> du festival.</div>
   </div>
 
-  <!-- 2. FICHE -->
-  <div class="step">
-    <div class="lbl"><div class="num">2</div><div class="lt">Le joueur ouvre votre fiche</div></div>
-    <div class="phone"><div class="notch"></div>
-      <div class="screen">
-        <div class="fiche">
-          <div class="grab"></div>
-          <div class="fbigl">VOTRE<br>LOGO ICI</div>
-          <div class="fbign">Votre commerce</div>
-          <div class="fprev">Aperçu — fiche affichée dans l'appli, le joueur ne la quitte pas</div>
-          <div class="fpromo">🎁 Bon d'achat à gagner chez vous</div>
-          <div class="flinks">
-            <span class="flink" style="background:#E0218A">📸 Insta</span>
-            <span class="flink" style="background:#1877F2">f Facebook</span>
-            <span class="flink" style="background:#1f2937">🌐 Site</span>
+  <div class="carwrap">
+    <div class="carttl">Faites défiler →</div>
+    <div class="carousel" id="carousel">
+
+      <div class="slide">
+        <div class="lbl"><div class="num">1</div><div class="lt">Vous apparaissez sur la carte du jeu</div></div>
+        <div class="phone"><div class="notch"></div>
+          <div class="screen">
+            <div class="mapbg">
+              <div class="road" style="left:0;right:0;top:46%;height:8px"></div>
+              <div class="road" style="top:0;bottom:0;left:40%;width:8px"></div>
+              <div class="road" style="top:0;bottom:0;left:74%;width:6px"></div>
+              <div class="road" style="left:0;right:0;top:74%;height:6px"></div>
+              <div class="park" style="left:42%;right:6%;top:48%;bottom:8%"></div>
+            </div>
+            <div class="qc"><span class="em">🗺️</span><div><div class="t">Les points de jeu</div><div class="s">Flashe le QR sur place</div></div><span class="tk">🎟 1</span></div>
+            <div class="pin" style="left:30%;top:40%"><span class="pd"><span>🎟️</span></span><span class="cap2">Les Caisses</span></div>
+            <div class="pin" style="left:52%;top:34%"><span class="pd"><span>🍹</span></span><span class="cap2">Le Bar</span></div>
+            <div class="pin" style="left:64%;top:54%"><span class="pd"><span>🖥️</span></span><span class="cap2">L'Écran</span></div>
+            <div class="pin you" style="left:42%;top:64%"><span class="pd"><span>🏪</span></span><span class="cap2">Votre commerce · exemple</span></div>
+            <div class="youtag" style="top:80%">VOUS APPARAISSEZ ICI</div>
+            <div class="locate">📍</div>
           </div>
-          <div class="fcount">Chaque clic vers vos réseaux est compté.</div>
         </div>
+        <div class="cap">Votre commerce <b>repéré par un point</b>, à côté des 3 stations officielles, <b>pendant les 10 soirs</b>.</div>
       </div>
-    </div>
-    <div class="cap"><b>Votre vitrine digitale</b> dans le jeu : logo, accroche, bon d'achat et accès direct à vos réseaux — <b>sans quitter l'appli</b>.</div>
-  </div>
 
-  <!-- 3. PRO MESURE -->
-  <div class="step">
-    <div class="lbl"><div class="num">3</div><div class="lt">On mesure le passage des joueurs chez vous</div></div>
-    <div class="phone"><div class="notch"></div>
-      <div class="screen">
-        <div class="pro">
-          <div class="ph"><span class="dot"></span> Votre espace · passage des joueurs</div>
-          <div class="big"><div class="v">183</div><div class="l">passages de joueurs mesurés chez vous</div></div>
-          <div class="sub">D'OÙ VIENNENT VOS VISITEURS</div>
-          <div class="bar"><span class="bl">06140</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bn">74</span></div>
-          <div class="bar"><span class="bl">06610</span><span class="bt"><span class="bf" style="width:32%"></span></span><span class="bn">24</span></div>
-          <div class="bar"><span class="bl">06800</span><span class="bt"><span class="bf" style="width:31%"></span></span><span class="bn">23</span></div>
-          <div class="bar"><span class="bl">06000</span><span class="bt"><span class="bf" style="width:30%"></span></span><span class="bn">22</span></div>
-          <div class="clics">
-            <div class="cchip"><div class="cv">96</div><div class="cl">fiches ouvertes</div></div>
-            <div class="cchip"><div class="cv">41</div><div class="cl">clics Insta</div></div>
-            <div class="cchip"><div class="cv">28</div><div class="cl">clics Site</div></div>
+      <div class="slide">
+        <div class="lbl"><div class="num">2</div><div class="lt">Le joueur ouvre votre fiche</div></div>
+        <div class="phone"><div class="notch"></div>
+          <div class="screen">
+            <div class="fiche">
+              <div class="grab"></div>
+              <div class="fbigl">VOTRE<br>LOGO ICI</div>
+              <div class="fbign">Votre commerce</div>
+              <div class="fprev">Aperçu — fiche affichée dans l'appli, le joueur ne la quitte pas</div>
+              <div class="fpromo">🎁 Bon d'achat à gagner chez vous</div>
+              <div class="flinks">
+                <span class="flink" style="background:#E0218A">📸 Insta</span>
+                <span class="flink" style="background:#1877F2">f Facebook</span>
+                <span class="flink" style="background:#1f2937">🌐 Site</span>
+              </div>
+              <div class="fcount">Chaque clic vers vos réseaux est compté.</div>
+            </div>
           </div>
-          <div class="exnote">Exemple de données · suivi en temps réel</div>
         </div>
+        <div class="cap"><b>Votre vitrine digitale</b> : logo, bon d'achat et accès direct à vos réseaux — <b>sans quitter l'appli</b>.</div>
       </div>
+
+      <div class="slide">
+        <div class="lbl"><div class="num">3</div><div class="lt">On mesure le passage des joueurs chez vous</div></div>
+        <div class="phone"><div class="notch"></div>
+          <div class="screen">
+            <div class="pro">
+              <div class="ph"><span class="gd"></span> Votre espace · passage des joueurs</div>
+              <div class="big"><div class="v">183</div><div class="l">passages de joueurs mesurés chez vous</div></div>
+              <div class="sub">D'OÙ VIENNENT VOS VISITEURS</div>
+              <div class="pbar"><span class="bl">06140</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bn">74</span></div>
+              <div class="pbar"><span class="bl">06610</span><span class="bt"><span class="bf" style="width:32%"></span></span><span class="bn">24</span></div>
+              <div class="pbar"><span class="bl">06800</span><span class="bt"><span class="bf" style="width:31%"></span></span><span class="bn">23</span></div>
+              <div class="pbar"><span class="bl">06000</span><span class="bt"><span class="bf" style="width:30%"></span></span><span class="bn">22</span></div>
+              <div class="clics">
+                <div class="cchip"><div class="cv">96</div><div class="cl">fiches ouvertes</div></div>
+                <div class="cchip"><div class="cv">41</div><div class="cl">clics Insta</div></div>
+                <div class="cchip"><div class="cv">28</div><div class="cl">clics Site</div></div>
+              </div>
+              <div class="exnote">Exemple de données · suivi en temps réel</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Vous suivez <b>l'affluence et les contacts générés chez vous</b> en temps réel.</div>
+      </div>
+
     </div>
-    <div class="cap">Vous suivez <b>l'affluence et les contacts générés chez vous</b> en temps réel : passages, fiches ouvertes, clics vers vos réseaux.</div>
+    <div class="dots" id="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span></div>
+    <div class="swipe">← glissez pour voir les 3 écrans →</div>
   </div>
 
-  <div class="foot">Présentation fidèle à l'application <b>Nuits du Sud</b> · les stations et écrans sont réels · « Votre commerce » = votre emplacement réservé</div>
+  <div class="foot">Présentation fidèle à l'application <b>Nuits du Sud</b> · stations et écrans réels · « Votre commerce » = votre emplacement réservé (exemple)</div>
 </div>
+
+<script>
+(function(){
+  var car=document.getElementById('carousel'),dots=document.getElementById('dots').querySelectorAll('.dot');
+  if(!car)return;
+  car.addEventListener('scroll',function(){
+    var idx=Math.round(car.scrollLeft/car.clientWidth);
+    for(var i=0;i<dots.length;i++){ dots[i].className = (i===idx)?'dot on':'dot'; }
+  });
+})();
+</script>
 </body></html>
