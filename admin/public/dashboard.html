@@ -2953,6 +2953,7 @@ function renderSidebar(){
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
       {id:'prospection',ico:'📞',lbl:'Prospection',n:(state.prospection?state.prospection.length:0)},
+      {id:'crm-retours',ico:'🔄',lbl:'CRM Retours',n:(state.crmRetours?state.crmRetours.length:0)},
       {id:'landing-page',ico:'🌐',lbl:'Landing Page',n:(DATA.landings||[]).length},
     ]},
     {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length}, {id:'banques',ico:'🎯',lbl:'Banques de questions',ext:'/banques.html'} ]},
@@ -3206,6 +3207,100 @@ async function loadProspection(){
 }
 function prospReload(){ state.prospection=null; state.prospPage=1; toast('Rechargement…'); render(); }
 
+// === CRM RETOURS ===
+var CRM_ETATS=[{v:'nouveau',l:'Nouveau'},{v:'en_discussion',l:'En discussion'},{v:'devis_envoye',l:'Devis envoyé'},{v:'a_valider',l:'À valider'},{v:'paiement',l:'Paiement'},{v:'gagne',l:'Gagné'},{v:'perdu',l:'Perdu'}];
+var CRM_ORIGINES=['prospection','NDS','landing','referral','autre'];
+var CRM_PRODUITS=['NDS 2026','Flowin Event','Super Event'];
+async function loadCrmRetours(){
+  var all=await supaFetch('crm_retours','select=*&order=id.desc');
+  state.crmRetours=all||[];
+  render();
+}
+function crmReload(){state.crmRetours=null;toast('Rechargement…');render();}
+async function crmUpdate(id,field,val){
+  var body={};body[field]=val;
+  await supaFetch('crm_retours','id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)});
+  if(state.crmRetours){for(var i=0;i<state.crmRetours.length;i++){if(state.crmRetours[i].id===id){state.crmRetours[i][field]=val;}}}
+  toast('Enregistré');render();
+}
+async function crmAdd(){
+  var ens=prompt('Enseigne / Contact :');if(!ens)return;
+  var r=await supaFetch('crm_retours','',{method:'POST',headers:{'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({enseigne:ens,etat:'nouveau'})});
+  if(r&&r.length){if(!state.crmRetours)state.crmRetours=[];state.crmRetours.unshift(r[0]);render();toast('Ajouté');}
+}
+async function crmDel(id){
+  if(!confirm('Supprimer cette entrée ?'))return;
+  await supaFetch('crm_retours','id=eq.'+id,{method:'DELETE'});
+  state.crmRetours=state.crmRetours.filter(function(r){return r.id!==id;});render();toast('Supprimé');
+}
+function crmEsc(v){return v==null?'':(''+v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function crmSelect(id,field,opts,cur,allLbl){
+  var h='<select onchange="crmUpdate('+id+',\''+field+'\',this.value)" style="padding:5px 8px;border-radius:7px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;font-size:12px"><option value="">'+allLbl+'</option>';
+  for(var i=0;i<opts.length;i++){var v=typeof opts[i]==='object'?opts[i].v:opts[i];var l=typeof opts[i]==='object'?opts[i].l:opts[i];h+='<option value="'+crmEsc(v)+'"'+(v===cur?' selected':'')+'>'+crmEsc(l)+'</option>';}
+  return h+'</select>';
+}
+function renderCrmRetours(){
+  if(!state.crmRetours){loadCrmRetours();return '<div class="page"><div class="page-header"><div class="page-title">&#128260; CRM Retours</div></div><div class="empty-block">Chargement…</div></div>';}
+  // Filtres
+  if(!state.crmFilters)state.crmFilters={};
+  var f=state.crmFilters;
+  var list=state.crmRetours.slice();
+  if(f.q){var q=f.q.toLowerCase();list=list.filter(function(r){return(r.enseigne||'').toLowerCase().indexOf(q)>-1||(r.contact_nom||'').toLowerCase().indexOf(q)>-1||(r.ville||'').toLowerCase().indexOf(q)>-1;});}
+  if(f.etat)list=list.filter(function(r){return r.etat===f.etat;});
+  if(f.origine)list=list.filter(function(r){return r.origine===f.origine;});
+  if(f.produit)list=list.filter(function(r){return r.produit===f.produit;});
+  var ETAT_COLOR={'nouveau':'#6366f1','en_discussion':'#0ea5e9','devis_envoye':'#f59e0b','a_valider':'#f97316','paiement':'#8b5cf6','gagne':'#10b981','perdu':'#ef4444'};
+  var h='<div class="page">';
+  h+='<div class="page-header"><div class="page-title">&#128260; CRM Retours</div><div class="page-actions"><button class="btn-sm btn-primary" onclick="crmAdd()">+ Ajouter</button><button class="btn-sm" onclick="crmReload()">&#8635; Recharger</button></div></div>';
+  // KPIs
+  var kpiTotal=state.crmRetours.length;
+  var kpiGagnes=state.crmRetours.filter(function(r){return r.etat==='gagne';}).length;
+  var kpiPaiement=state.crmRetours.filter(function(r){return r.paiement_recu;}).length;
+  var kpiMontant=state.crmRetours.reduce(function(s,r){return s+(r.montant||0);},0);
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">';
+  h+=prospKpi(kpiTotal,'Total');h+=prospKpi(kpiGagnes,'Gagnés');h+=prospKpi(kpiPaiement,'Paiements reçus');h+=prospKpi(kpiMontant.toLocaleString('fr-FR')+'€','CA');
+  h+='</div>';
+  // Filtres
+  h+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">';
+  h+='<input id="crmQ" value="'+crmEsc(f.q||'')+'" placeholder="Rechercher…" oninput="state.crmFilters.q=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;flex:1;min-width:160px">';
+  h+='<select onchange="state.crmFilters.etat=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit"><option value="">Tous états</option>';
+  CRM_ETATS.forEach(function(e){h+='<option value="'+e.v+'"'+(e.v===f.etat?' selected':'')+'>'+e.l+'</option>';});h+='</select>';
+  h+='<select onchange="state.crmFilters.origine=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit"><option value="">Toutes origines</option>';
+  CRM_ORIGINES.forEach(function(o){h+='<option value="'+crmEsc(o)+'"'+(o===f.origine?' selected':'')+'>'+crmEsc(o)+'</option>';});h+='</select>';
+  h+='<select onchange="state.crmFilters.produit=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit"><option value="">Tous produits</option>';
+  CRM_PRODUITS.forEach(function(p){h+='<option value="'+crmEsc(p)+'"'+(p===f.produit?' selected':'')+'>'+crmEsc(p)+'</option>';});h+='</select>';
+  h+='</div>';
+  // Tableau
+  h+='<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
+  h+='<thead><tr style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--sa-muted);border-bottom:1px solid var(--sa-border)">';
+  var cols=['ENSEIGNE','CONTACT','VILLE','ORIGINE','PRODUIT / OFFRE','ÉTAT','PAIEMENT','LOGO','NOTE',''];
+  cols.forEach(function(c){h+='<th style="padding:10px;white-space:nowrap">'+c+'</th>';});
+  h+='</tr></thead><tbody>';
+  if(!list.length){h+='<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--sa-muted)">Aucune entrée</td></tr>';}
+  list.forEach(function(r){
+    var ec=ETAT_COLOR[r.etat]||'#888';
+    h+='<tr style="border-bottom:1px solid var(--sa-border);font-size:13px">';
+    h+='<td style="padding:10px"><b style="display:block">'+crmEsc(r.enseigne)+'</b><span style="font-size:11px;color:var(--sa-muted)">'+crmEsc(r.contact_email||'')+'</span></td>';
+    h+='<td style="padding:10px"><span style="display:block">'+crmEsc(r.contact_nom||'—')+'</span>';
+    if(r.contact_tel)h+='<a href="tel:'+crmEsc(r.contact_tel)+'" style="display:inline-flex;align-items:center;gap:4px;background:#00B4A0;color:#04201c;border-radius:7px;padding:4px 8px;font-weight:700;text-decoration:none;white-space:nowrap;font-size:12px">&#128222; '+crmEsc(r.contact_tel)+'</a>';
+    h+='</td>';
+    h+='<td style="padding:10px;white-space:nowrap">'+crmEsc(r.ville||'—')+' <span style="font-size:11px;color:var(--sa-muted)">'+crmEsc(r.cp||'')+'</span></td>';
+    h+='<td style="padding:10px">'+crmSelect(r.id,'origine',CRM_ORIGINES,r.origine,'—')+'</td>';
+    h+='<td style="padding:10px">'+crmSelect(r.id,'produit',CRM_PRODUITS,r.produit,'—')+'<br><input value="'+crmEsc(r.offre||'')+'" placeholder="Offre…" onblur="crmUpdate('+r.id+',\'offre\',this.value)" style="margin-top:4px;padding:4px 6px;border-radius:6px;border:1px solid var(--sa-border);background:transparent;color:inherit;font-size:12px;width:120px"></td>';
+    h+='<td style="padding:10px"><select onchange="crmUpdate('+r.id+',\'etat\',this.value)" style="padding:5px 8px;border-radius:7px;border:2px solid '+ec+';background:'+ec+'22;color:inherit;font-size:12px;font-weight:700">';
+    CRM_ETATS.forEach(function(e){h+='<option value="'+e.v+'"'+(e.v===r.etat?' selected':'')+'>'+e.l+'</option>';});
+    h+='</select></td>';
+    h+='<td style="padding:10px;text-align:center"><input type="checkbox"'+(r.paiement_recu?' checked':'')+' onchange="crmUpdate('+r.id+',\'paiement_recu\',this.checked)"></td>';
+    h+='<td style="padding:10px;text-align:center"><input type="checkbox"'+(r.logo_envoye?' checked':'')+' onchange="crmUpdate('+r.id+',\'logo_envoye\',this.checked)"></td>';
+    h+='<td style="padding:10px"><textarea rows="2" style="width:160px;padding:4px 6px;border-radius:6px;border:1px solid var(--sa-border);background:transparent;color:inherit;font-size:12px;resize:vertical" onblur="crmUpdate('+r.id+',\'note\',this.value)">'+crmEsc(r.note||'')+'</textarea></td>';
+    h+='<td style="padding:10px"><button onclick="crmDel('+r.id+')" style="background:#ef444422;border:1px solid #ef4444;color:#ef4444;border-radius:7px;padding:4px 8px;cursor:pointer;font-size:12px">&#128465;</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div></div>';
+  return h;
+}
+
+
 function renderProspection(){
   if(!state.prospection){ loadProspection(); return '<div class="page"><div class="page-header"><div class="page-title">&#128222; Prospection</div></div><div class="empty-block">Chargement…</div></div>'; }
   if(!state.prospSort) state.prospSort={key:'enseigne',dir:1};
@@ -3408,6 +3503,7 @@ function render(){
   else if(v==='parametres') html = renderParametres();
   else if(v==='btob-prospects') html = renderBtobProspects();
   else if(v==='prospection') html = renderProspection();
+  else if(v==='crm-retours') html = renderCrmRetours();
   else if(v==='landing-page') html = renderLandingPage();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats

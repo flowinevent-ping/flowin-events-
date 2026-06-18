@@ -225,7 +225,7 @@ const BODY = `<div class="app">
     <a data-to="probleme">Pourquoi Flowin</a>
     <a data-to="solution">Comment ça marche</a>
     <a data-to="resultats">Résultats</a>
-    <a data-to="tarifs">Tarifs</a>
+    <a data-to="contact">Contacter Flowin</a>
     <a class="cta" data-to="contact">Demander une démo</a>
   </aside>
 
@@ -396,7 +396,7 @@ const BODY = `<div class="app">
 
     </div>
     <p class="sub" style="font-size:12px">Exemple réel d'un tableau de bord — événement réalisé à Vence (06140).</p>
-    <a class="btn" data-to="tarifs" style="margin-top:6px">Voir les tarifs →</a>
+    <a class="btn" data-to="contact" style="margin-top:6px">Contacter Flowin →</a>
   </section>
 
   <!-- 7. POUR QUI -->
@@ -426,6 +426,20 @@ const BODY = `<div class="app">
       <div class="game"><div class="gt"><div class="gi" style="background:var(--blue)"><svg class="ic" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/></svg></div><div><h4>Roue de la fortune</h4><div class="tag">L'accroche qui attire</div></div></div><ul><li>Donne envie de s'arrêter en une seconde</li><li>Transforme le passage en participation</li></ul></div>
     </div>
     <a class="btn" data-to="resultats" style="margin-top:18px">Voir les résultats →</a>
+  </section>
+
+  <!-- 9b. VIGNETTES USAGE -->
+  <section id="usages" style="padding-top:0">
+    <div class="offer-grid">
+      <a class="use" href="/contact" style="text-decoration:none;cursor:pointer" data-to="contact">
+        <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--orange),var(--amber))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 7a3 3 0 0 1 0 6"/><path d="M20 20a6 6 0 0 0-4-5.6"/></svg></span>J'anime mon établissement</div>
+        <p>Une animation à vos couleurs sur votre lieu ou votre event. Flowin s'installe en quelques minutes.</p>
+      </a>
+      <a class="use" href="/nds" style="text-decoration:none;cursor:pointer">
+        <div class="uh"><span class="ui" style="background:linear-gradient(135deg,var(--blue),var(--violet))"><svg class="ic" width="26" height="26" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M12 2.5l2.6 6.3 6.8.5-5.2 4.4 1.6 6.6L12 17.2 6.2 20.8l1.6-6.6L2.6 9.8l6.8-.5z"/></svg></span>Intégrer un Super Event</div>
+        <p>Rejoignez une animation collective à l'échelle du territoire — les Nuits du Sud 2026 à Vence.</p>
+      </a>
+    </div>
   </section>
 
   <!-- 10. CTA FINAL -->
