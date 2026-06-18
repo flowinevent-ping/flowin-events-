@@ -169,6 +169,29 @@
   /* toast global */
   .fltoast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:100px;font-size:12.5px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:88%;text-align:center}
   .fltoast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* landing editor */
+  .badge.b-edit{color:var(--teal);background:rgba(0,180,160,.12)}
+  .lchips{display:flex;gap:8px;flex-wrap:wrap}
+  .lchip{width:46px;height:34px;border-radius:9px;border:2px solid transparent;cursor:pointer;padding:0}
+  .lchip.active{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
+  .ltoggle{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:9px;padding:9px 14px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit}
+  .ltoggle.on{background:rgba(0,180,160,.12);color:var(--teal);border-color:var(--teal)}
+  .lrow{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 8px;margin-bottom:7px}
+  .lrow.off{opacity:.5}
+  .lemoji{width:42px;text-align:center;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:7px 4px;font-size:16px;font-family:inherit}
+  .lrow .cinput{flex:1;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;font-weight:600;color:var(--ink)}
+  .lmini{border:none;background:var(--paper);border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;flex-shrink:0;color:var(--muted)}
+  .lmini.del{color:#c0392b}
+  .lsec{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px;margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .lsec.off{opacity:.5}
+  .lsec .cinput{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;color:var(--ink)}
+  .lsec .cinput[style*="font-weight"]{flex:1}
+  /* marquee dans le telephone */
+  .marq{overflow:hidden;margin-top:12px;border-radius:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:10px 0}
+  .marq .mtrack{display:flex;gap:10px;width:max-content;animation:lscroll 14s linear infinite}
+  @keyframes lscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .marq .mlogo{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:6px 11px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+  .marq .mlogo .me{font-size:15px}
 
 
   .legend{display:flex;gap:14px;justify-content:center;margin:6px 0 2px;flex-wrap:wrap}
@@ -223,6 +246,23 @@
 
       <div class="eyebrow">Événements</div>
       <div id="evList"></div>
+
+      <div class="eyebrow">Front &amp; Partenaire</div>
+      <div class="card">
+        <div class="ev-row">
+          <div class="ev-color" style="background:var(--teal)"></div>
+          <div class="ev-main">
+            <h4>Front Flowin &amp; Page partenaire</h4>
+            <div class="ev-sub"><span class="ev-mod" style="color:var(--teal);background:rgba(0,180,160,.1)">landing</span>
+            <span>logo · image de fond · artwork · bandeau</span></div>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button class="act act-primary" onclick="openLanding()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Mettre en forme</button>
+        </div>
+      </div>
     </section>
 
     <div class="foot">Mockup éditeur · charte <em>Flowin</em> · données NDS 2026 réelles</div>
@@ -390,6 +430,7 @@ var MAP_POINTS=[
 var MAP_SEQ=0;
 
 function openEditor(evId){
+  MODE="station";
   CUR_EV=null;
   for(var i=0;i<EVENTS.length;i++){ if(EVENTS[i].id===evId) CUR_EV=EVENTS[i]; }
   CUR_SCREEN="accueil";
@@ -399,11 +440,56 @@ function openEditor(evId){
   renderEditor();
 }
 
+/* ===== Mode LANDING (front + bandeau + page partenaire) ===== */
+var MODE="station";
+var LSCREENS=[
+  {id:"front",   label:"Front",          herit:false},
+  {id:"bandeau", label:"Bandeau",        herit:false},
+  {id:"partner", label:"Page partenaire",herit:false}
+];
+var LBG=[
+  {id:"bg1",label:"Bleu nuit",css:"linear-gradient(165deg,#3B5CC4,#141d3f)"},
+  {id:"bg2",label:"Festival",css:"linear-gradient(165deg,#7C2D92,#23357a 70%,#141d3f)"},
+  {id:"bg3",label:"Chaud",css:"linear-gradient(165deg,#E85D04,#7C2D92 80%)"},
+  {id:"bg4",label:"Sobre",css:"linear-gradient(165deg,#13314f,#0A1424)"}
+];
+var LANDING={
+  logo:"🌙",
+  titre:"Nuits du Sud 2026",
+  sous:"29e édition · Vence",
+  accent:"#3B5CC4",
+  bg:"bg1",
+  artwork:true,
+  /* bandeau : uniquement le partenaire reellement enregistre */
+  logos:[ {id:"l-vdv",nom:"Ville de Vence",emoji:"🏛️"} ],
+  /* page partenaire : SANS prix */
+  pAccroche:"Devenez partenaire des Nuits du Sud 2026",
+  pSous:"Offrez de la visibilité à votre commerce auprès des festivaliers.",
+  pSections:[
+    {id:"ps1",titre:"Pourquoi nous rejoindre",txt:"Votre logo dans le jeu et sur la carte du festival.",hidden:false},
+    {id:"ps2",titre:"Comment ça marche",txt:"On vous contacte, on intègre votre fiche, vous suivez les retombées.",hidden:false}
+  ],
+  pCta:"Être recontacté"
+};
+var LSEQ=0;
+
+function openLanding(){
+  MODE="landing";
+  CUR_EV=null;
+  CUR_SCREEN="front";
+  document.getElementById("edTitle").textContent="Front & Partenaire";
+  document.getElementById("edSub").innerHTML="Éditez le <b>front</b> (logo, image de fond, artwork), le <b>bandeau</b> et la <b>page partenaire</b>. Modifications visuelles directes.";
+  nav("ed");
+  renderScreens();
+  renderEditor();
+}
+
 function renderScreens(){
+  var list = (MODE==="landing") ? LSCREENS : SCREENS;
   var h="";
-  for(var i=0;i<SCREENS.length;i++){
-    var s=SCREENS[i];
-    var color = s.herit ? "var(--herit)" : "var(--surch)";
+  for(var i=0;i<list.length;i++){
+    var s=list[i];
+    var color = (MODE==="landing") ? "var(--teal)" : (s.herit ? "var(--herit)" : "var(--surch)");
     h+='<button class="scn'+(s.id===CUR_SCREEN?' active':'')+'" onclick="selScreen(\''+s.id+'\')">'
       +'<span class="mini" style="background:'+color+'"></span>'+s.label+'</button>';
   }
@@ -423,6 +509,7 @@ function field(label,herit,inputHtml,hint,hintSurch){
 }
 
 function renderEditor(){
+  if(MODE==="landing"){ renderLandingEditor(); return; }
   var f="", isStation = CUR_EV.module==="nds2026";
   if(CUR_SCREEN==="accueil"){
     f+=field("Titre du parcours", true,
@@ -500,6 +587,7 @@ function renderEditor(){
 
 /* ============ Aperçu téléphone ============ */
 function renderPreview(){
+  if(MODE==="landing"){ renderLandingPreview(); return; }
   var bg=document.getElementById("pvBg");
   bg.style.background="linear-gradient(165deg,"+CFG.accent+" 0%,#23357a 60%,#141d3f 100%)";
   var c="", cap="";
@@ -578,7 +666,8 @@ function show(p){
   }
   document.getElementById("backBtn").style.display = (p==="lib") ? "none" : "grid";
   var cr=CRUMBS[p];
-  if(p==="ed" && CUR_EV) cr="🌙 NDS · <b>"+CUR_EV.short+"</b>";
+  if(p==="ed" && MODE==="landing") cr="🎨 <b>Front & Partenaire</b>";
+  else if(p==="ed" && CUR_EV) cr="🌙 NDS · <b>"+CUR_EV.short+"</b>";
   document.getElementById("crumb").innerHTML=cr;
   window.scrollTo(0,0);
 }
@@ -638,6 +727,119 @@ function renameMapPoint(id,v){for(var i=0;i<MAP_POINTS.length;i++){if(MAP_POINTS
 function delMapPoint(id){for(var i=0;i<MAP_POINTS.length;i++){if(MAP_POINTS[i].id===id){MAP_POINTS.splice(i,1);break;}}renderCmap();renderPreview();toast("Point retiré");}
 function addMapPoint(){MAP_SEQ++;MAP_POINTS.push({id:"np"+MAP_SEQ,nom:"Nouveau point",emoji:"📍",lat:43.7215,lng:7.1126,real:false});renderCmap();renderPreview();toast("Point ajouté — place-le à la main");}
 function saveMap(){toast("Positions enregistrées ✓");}
+
+/* ============ Editeur LANDING ============ */
+function lfield(label,inner,hint){
+  return '<div class="field"><div class="fh"><span class="flabel">'+label+'</span>'
+    +'<span class="badge b-edit fbadge">✎ éditable</span></div>'+inner
+    +(hint?'<div class="fhint">'+hint+'</div>':'')+'</div>';
+}
+function bgCss(id){ for(var i=0;i<LBG.length;i++){ if(LBG[i].id===id) return LBG[i].css; } return LBG[0].css; }
+
+function renderLandingEditor(){
+  var f="",i;
+  if(CUR_SCREEN==="front"){
+    f+=lfield("Logo (emoji ou symbole)",
+        '<input class="finput" value="'+LANDING.logo+'" oninput="LANDING.logo=this.value;renderLandingPreview()">',
+        "Tape un emoji, ou colle plus tard une vraie image (PNG/SVG).");
+    var chips="";
+    for(i=0;i<LBG.length;i++){
+      chips+='<button class="lchip'+(LBG[i].id===LANDING.bg?' active':'')+'" style="background:'+LBG[i].css+'" onclick="LANDING.bg=\''+LBG[i].id+'\';renderLandingEditor()" title="'+LBG[i].label+'"></button>';
+    }
+    f+='<div class="field"><div class="fh"><span class="flabel">Image / fond</span><span class="badge b-edit fbadge">✎ éditable</span></div>'
+      +'<div class="lchips">'+chips+'</div>'
+      +'<div class="fhint">Choisis un fond. (Upload d\'image réelle au branchement.)</div></div>';
+    f+='<div class="field"><div class="fh"><span class="flabel">Artwork décoratif</span><span class="badge b-edit fbadge">✎ éditable</span></div>'
+      +'<button class="ltoggle'+(LANDING.artwork?' on':'')+'" onclick="LANDING.artwork=!LANDING.artwork;renderLandingEditor()">'
+      +(LANDING.artwork?'Activé':'Désactivé')+'</button>'
+      +'<div class="fhint">Voile lumineux par-dessus le fond.</div></div>';
+    f+=lfield("Titre",
+        '<input class="finput" value="'+LANDING.titre.replace(/"/g,"&quot;")+'" oninput="LANDING.titre=this.value;renderLandingPreview()">',"");
+    f+=lfield("Sous-titre",
+        '<input class="finput" value="'+LANDING.sous.replace(/"/g,"&quot;")+'" oninput="LANDING.sous=this.value;renderLandingPreview()">',"");
+  } else if(CUR_SCREEN==="bandeau"){
+    f+='<div class="field"><div class="fh"><span class="flabel">Logos du bandeau</span><span class="badge b-edit fbadge">✎ éditable</span></div>'
+      +'<div class="fhint" style="margin-bottom:10px">Glisse l\'ordre avec ↑ ↓, renomme, masque ou retire. Un seul partenaire est enregistré à ce jour (<b>Ville de Vence</b>) — ajoute les autres à la main.</div>';
+    for(i=0;i<LANDING.logos.length;i++){
+      var lo=LANDING.logos[i];
+      f+='<div class="lrow'+(lo.hidden?' off':'')+'">'
+        +'<input class="lemoji" value="'+lo.emoji+'" oninput="LANDING.logos['+i+'].emoji=this.value;renderLandingPreview()">'
+        +'<input class="cinput" value="'+lo.nom.replace(/"/g,"&quot;")+'" oninput="LANDING.logos['+i+'].nom=this.value;renderLandingPreview()">'
+        +'<button class="lmini" onclick="moveLogo('+i+',-1)">↑</button>'
+        +'<button class="lmini" onclick="moveLogo('+i+',1)">↓</button>'
+        +'<button class="lmini" onclick="hideLogo('+i+')">'+(lo.hidden?'◌':'👁')+'</button>'
+        +'<button class="lmini del" onclick="delLogo('+i+')">✕</button>'
+        +'</div>';
+    }
+    f+='<button class="cbtn add" style="margin-top:6px" onclick="addLogo()">＋ Ajouter un logo</button></div>';
+  } else if(CUR_SCREEN==="partner"){
+    f+=lfield("Accroche",
+        '<input class="finput" value="'+LANDING.pAccroche.replace(/"/g,"&quot;")+'" oninput="LANDING.pAccroche=this.value;renderLandingPreview()">',"");
+    f+=lfield("Sous-titre",
+        '<textarea class="ftext finput" oninput="LANDING.pSous=this.value;renderLandingPreview()">'+LANDING.pSous+'</textarea>',"");
+    f+='<div class="field"><div class="fh"><span class="flabel">Sections</span><span class="badge b-edit fbadge">✎ éditable</span></div>';
+    for(i=0;i<LANDING.pSections.length;i++){
+      var ps=LANDING.pSections[i];
+      f+='<div class="lsec'+(ps.hidden?' off':'')+'">'
+        +'<input class="cinput" style="font-weight:800" value="'+ps.titre.replace(/"/g,"&quot;")+'" oninput="LANDING.pSections['+i+'].titre=this.value;renderLandingPreview()">'
+        +'<button class="lmini" onclick="hideSec('+i+')">'+(ps.hidden?'◌':'👁')+'</button>'
+        +'<button class="lmini del" onclick="delSec('+i+')">✕</button>'
+        +'<textarea class="cinput" style="width:100%;margin-top:7px" oninput="LANDING.pSections['+i+'].txt=this.value;renderLandingPreview()">'+ps.txt+'</textarea>'
+        +'</div>';
+    }
+    f+='<button class="cbtn add" style="margin-top:6px" onclick="addSec()">＋ Ajouter une section</button></div>';
+    f+=lfield("Bouton (CTA)",
+        '<input class="finput" value="'+LANDING.pCta.replace(/"/g,"&quot;")+'" oninput="LANDING.pCta=this.value;renderLandingPreview()">',
+        "Aucun prix affiché ici — réservé au commercial.");
+  }
+  f+='<button class="cbtn save" style="margin-top:6px" onclick="toast(\'Modifications enregistrées ✓\')">💾 Enregistrer</button>';
+  document.getElementById("fields").innerHTML=f;
+  renderLandingPreview();
+}
+
+/* CRUD bandeau */
+function moveLogo(i,d){var j=i+d;if(j<0||j>=LANDING.logos.length)return;var t=LANDING.logos[i];LANDING.logos[i]=LANDING.logos[j];LANDING.logos[j]=t;renderLandingEditor();}
+function hideLogo(i){LANDING.logos[i].hidden=!LANDING.logos[i].hidden;renderLandingEditor();}
+function delLogo(i){LANDING.logos.splice(i,1);renderLandingEditor();toast("Logo retiré");}
+function addLogo(){LSEQ++;LANDING.logos.push({id:"nl"+LSEQ,nom:"Nouveau logo",emoji:"🏪",hidden:false});renderLandingEditor();toast("Logo ajouté ✓");}
+/* CRUD sections page partenaire */
+function hideSec(i){LANDING.pSections[i].hidden=!LANDING.pSections[i].hidden;renderLandingEditor();}
+function delSec(i){LANDING.pSections.splice(i,1);renderLandingEditor();toast("Section retirée");}
+function addSec(){LSEQ++;LANDING.pSections.push({id:"ns"+LSEQ,titre:"Nouvelle section",txt:"À compléter…",hidden:false});renderLandingEditor();toast("Section ajoutée ✓");}
+
+function renderLandingPreview(){
+  var bg=document.getElementById("pvBg");
+  bg.style.background=bgCss(LANDING.bg);
+  var aw = LANDING.artwork ? '<div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0,rgba(255,255,255,.18),transparent 60%);pointer-events:none"></div>' : '';
+  var c="",cap="",i;
+  if(CUR_SCREEN==="front"){
+    c=aw+'<div class="pv-logo">'+LANDING.logo+'</div>'
+     +'<div class="pv-title">'+LANDING.titre+'</div>'
+     +'<div class="pv-sub">'+LANDING.sous+'</div>'
+     +'<div class="pv-cta" style="margin-top:auto">Commencer →</div>'
+     +'<div class="pv-foot">propulsé par <em>Flowin</em></div>';
+    cap="Écran <b>Front</b> · logo / fond / artwork";
+  } else if(CUR_SCREEN==="bandeau"){
+    var seq="",any=false;
+    for(i=0;i<LANDING.logos.length;i++){ if(!LANDING.logos[i].hidden){any=true;seq+='<div class="mlogo"><span class="me">'+LANDING.logos[i].emoji+'</span>'+LANDING.logos[i].nom+'</div>';} }
+    seq=seq+seq;
+    c=aw+'<div class="pv-sub" style="margin-top:0;font-weight:800;color:#fff">Nos partenaires</div>'
+     +(any?'<div class="marq"><div class="mtrack">'+seq+'</div></div>':'<div class="pv-foot" style="margin-top:30px">Aucun logo visible — ajoute-en un.</div>')
+     +'<div class="pv-foot" style="margin-top:auto">Bandeau défilant · <em>Flowin</em></div>';
+    cap="Écran <b>Bandeau</b> · logos défilants";
+  } else if(CUR_SCREEN==="partner"){
+    var secs="";
+    for(i=0;i<LANDING.pSections.length;i++){ var s=LANDING.pSections[i]; secs+='<div class="psection'+(s.hidden?" muted":"")+'"><b>'+s.titre+'</b></div>'; }
+    c=aw+'<div class="pv-title" style="font-size:15px;margin-top:8px">'+LANDING.pAccroche+'</div>'
+     +'<div class="pv-sub">'+LANDING.pSous+'</div>'
+     +'<div class="pv-opts" style="margin-top:14px">'+secs+'</div>'
+     +'<div class="pv-cta" style="margin-top:auto">'+LANDING.pCta+'</div>'
+     +'<div class="pv-foot">aucun prix affiché ici</div>';
+    cap="Écran <b>Page partenaire</b> · sans prix";
+  }
+  document.getElementById("pvContent").innerHTML=c;
+  document.getElementById("pvCap").innerHTML="Aperçu live — "+cap;
+}
 
 /* toast */
 function toast(m){
