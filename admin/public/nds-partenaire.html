@@ -46,6 +46,11 @@
 
   .topbar{position:absolute;top:0;left:0;right:0;z-index:50;background:rgba(8,11,22,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   .brandrow{display:flex;align-items:center;gap:14px;padding:0 18px;height:76px}
+  .brand-sep{width:1px;height:24px;background:var(--line);flex-shrink:0}
+  .flowin-link{display:flex;align-items:center;gap:7px;text-decoration:none;flex-shrink:0;opacity:.85}
+  .flowin-link:hover{opacity:1}
+  .flowin-link .fl-wm{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:#00B4A0;letter-spacing:.01em;line-height:1}
+  .flowin-link .fl-sub{font-size:9px;color:var(--lilac);letter-spacing:.14em;text-transform:uppercase;font-weight:700;display:block;margin-top:3px}
   .nds-lock{display:flex;align-items:center;gap:8px}
   .nds-lock .moon{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 64% 34%,#fff,var(--gold));box-shadow:0 0 9px var(--gold)}
   .nds-lock .nm{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;letter-spacing:.14em}
@@ -318,7 +323,11 @@
   .payrow{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;padding:6px 0}
   .payrow.tot{border-top:1px solid var(--line);margin-top:6px;padding-top:12px;font-weight:700}
   .payrow.tot b{font-family:'Bricolage Grotesque';font-size:20px;color:var(--accent)}
-  .paysec{font-size:11.5px;color:var(--faint);text-align:center;margin-top:8px}
+  .ribbox{border:1px solid rgba(0,180,160,.35);border-radius:14px;padding:15px 16px;background:rgba(0,180,160,.06);margin-bottom:14px}
+  .ribrow{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0}
+  .ribrow .rl{color:var(--muted);font-weight:600;letter-spacing:.02em}
+  .ribrow .rv{font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;letter-spacing:.03em;word-break:break-all;text-align:right}
+  .richtit{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--lilac);font-weight:700;margin-bottom:8px}
   .thanks{text-align:center;padding:14px 0 4px}
   .thanks .tk{width:58px;height:58px;border-radius:50%;background:rgba(59,92,196,.16);color:var(--accent);display:grid;place-items:center;margin:0 auto 14px}
   .thanks h3{font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-bottom:8px}
@@ -392,6 +401,8 @@
         <span class="mk"><svg viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#fff"/></svg></span>
         <span class="wm"><b><img src="nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" style="height:20px;display:block"></b><s>Partenaires · 2026</s></span>
       </div>
+      <div class="brand-sep"></div>
+      <a class="flowin-link" href="/demos.html"><span class="fl-wm">Flowin<span class="fl-sub">Gamification</span></span></a>
       <button class="hcontact" data-go="contact">Contact</button>
       <button class="pburger" id="pBurger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
@@ -727,6 +738,13 @@
           <div class="payrow"><span id="pay-label">Pack Visibilité NDS 2026</span><span id="pay-ht">590,00 €</span></div>
           <div class="payrow" style="color:var(--muted)"><span>TVA 20 %</span><span id="pay-tva">118,00 €</span></div>
           <div class="payrow tot"><span>Total</span><b id="pay-tot">708,00 € TTC</b></div>
+        </div>
+        <div class="ribbox">
+          <div class="richtit">Coordonn&eacute;es bancaires pour le virement</div>
+          <div class="ribrow"><span class="rl">B&eacute;n&eacute;ficiaire</span><span class="rv">SARLU BAITA</span></div>
+          <div class="ribrow"><span class="rl">IBAN</span><span class="rv">FR76 1460 7003 3470 2211 6462 345</span></div>
+          <div class="ribrow"><span class="rl">BIC</span><span class="rv">CCBPFRPPMAR</span></div>
+          <div class="ribrow"><span class="rl">Banque</span><span class="rv">Banque Populaire M&eacute;diterran&eacute;e</span></div>
         </div>
         <button class="btn" id="payBtn" onclick="wizGo(4)">R&eacute;server &mdash; 590 &euro; HT</button>
         <p class="paysec">R&eacute;servation par virement &mdash; le RIB vous est envoy&eacute; par email. Votre participation est valid&eacute;e &agrave; r&eacute;ception du r&egrave;glement, facture &eacute;mise sous 72&nbsp;h.</p>
