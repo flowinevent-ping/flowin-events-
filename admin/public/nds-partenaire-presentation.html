@@ -186,6 +186,41 @@
   .prof .pfg .gi .ic{width:17px;height:17px}
   .prof .pfg .gt{font-size:12px;font-weight:800;line-height:1.25}
   .prof .pfg .gt span{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:2px}
+
+  /* ===== RESPONSIVE DESKTOP (>=768px) ===== */
+  @media (min-width:768px){
+    .wrap{max-width:960px;padding:32px 0 80px}
+    .pad{padding:0 36px}
+    /* Cobrand plus aéré */
+    .cobrand{padding:22px 32px}
+    .ndschip img{height:96px}
+    .flowin-cobrand .fb-dot{width:54px;height:54px;font-size:24px}
+    .flowin-cobrand .fb-txt{font-size:28px}
+    /* Titre section plus grand */
+    .hsec{font-size:32px;line-height:1.15}
+    .kick{font-size:14px}
+    /* Stats / chiffres : 4 colonnes au lieu de 2 */
+    .stats{grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px}
+    .stat{padding:22px 18px}
+    .stat b{font-size:34px}
+    /* Atouts en grille 3 colonnes */
+    .agrid{grid-template-columns:repeat(3,1fr);gap:16px}
+    .acard{padding:18px 16px}
+    /* Profile dispatch sur 2 col si possible */
+    .prof{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    /* Phone mockup centré dans les slides */
+    .slide{padding:24px}
+    /* Lede et paragraphes lisibles */
+    .lede{font-size:17px;line-height:1.55;max-width:720px}
+    /* Footer espace */
+    .footer{margin-top:48px}
+  }
+  @media (min-width:1100px){
+    .wrap{max-width:1100px}
+    .pad{padding:0 48px}
+    .hsec{font-size:38px}
+    .stat b{font-size:40px}
+  }
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
