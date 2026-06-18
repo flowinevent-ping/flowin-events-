@@ -37,6 +37,15 @@
   .stat.todo{border-style:dashed;border-color:#d8cde0}
   .stat.todo .v{color:#b9adc4;font-size:18px}
 
+  /* chiffres cle EN LIGNE type vignette */
+  .figstrip{display:flex;gap:10px;margin-top:22px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .figstrip::-webkit-scrollbar{display:none}
+  .fig{flex:0 0 auto;min-width:122px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px rgba(124,45,146,.05)}
+  .fig .fi{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:grid;place-items:center;color:#fff;margin-bottom:9px}
+  .fig .fi .ic{width:16px;height:16px}
+  .fig .fv{font-size:23px;font-weight:800;color:var(--magenta);line-height:1}
+  .fig .fl{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.3}
+
   .vstrip{display:flex;gap:9px;margin-top:14px}
   .vpill{flex:1;display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;border-radius:14px;padding:13px 12px;font-size:13px;font-weight:800;line-height:1.2}
   .vpill .ic{width:20px;height:20px;flex-shrink:0}
@@ -112,7 +121,11 @@
   .flink .ic{width:14px;height:14px}
   .fcount{margin-top:auto;font-size:11px;color:#a99fb3;text-align:center;padding-top:14px}
 
-  .annu{position:absolute;inset:0;background:#fff;color:var(--ink);padding:22px 18px;overflow:hidden}
+  .annu{position:absolute;inset:0;background:#fff;color:var(--ink);padding:18px 0 22px;overflow:hidden}
+  .amarq{overflow:hidden;background:linear-gradient(135deg,#241036,#3a1550);padding:10px 0;margin-bottom:14px;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .amtrack{display:flex;gap:9px;width:max-content;animation:logoscroll 15s linear infinite}
+  .amslot{flex:0 0 auto;border:1.5px dashed var(--gold);border-radius:9px;padding:8px 13px;color:var(--gold);font-weight:800;font-size:10px;white-space:nowrap;background:rgba(232,147,10,.12)}
+  .annu .apad{padding:0 18px}
   .annu .ah{font-size:18px;font-weight:800}
   .annu .asub{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.4}
   .annu .abanner{display:flex;align-items:center;gap:9px;background:#f6eefb;border:1px solid #ecdcf5;border-radius:12px;padding:10px;margin:13px 0;font-size:10.5px;color:var(--purple);font-weight:700;line-height:1.35}
@@ -161,6 +174,9 @@
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></symbol>
   <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.7 5L19 9.7 13.7 11.4 12 17l-1.7-5.6L5 9.7 10.3 8 12 3Z"/></symbol>
   <symbol id="i-touch" viewBox="0 0 24 24"><path d="M8 11V6a2 2 0 0 1 4 0v5"/><path d="M12 11V4a2 2 0 0 1 4 0v7"/><path d="M16 11V7a2 2 0 0 1 4 0v8a6 6 0 0 1-6 6h-2a6 6 0 0 1-5.2-3l-2.3-4a2 2 0 0 1 3.4-2L8 13"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-female" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></symbol>
 </svg>
 
 <div class="wrap">
@@ -180,11 +196,11 @@
       <p>Le jeu RSE des Nuits du Sud, vu côté commerce. Ce que vos clients voient, et ce que vous mesurez.</p>
     </div>
 
-    <div class="stats">
-      <div class="stat"><div class="v">24 000</div><div class="l">festivaliers sur l'édition</div></div>
-      <div class="stat"><div class="v">80%</div><div class="l">de public local</div></div>
-      <div class="stat"><div class="v">29ᵉ</div><div class="l">édition · 10 soirs (9→18 juil.)</div></div>
-      <div class="stat todo"><div class="v">__ %</div><div class="l">de femmes · collecté à l'inscription (à confirmer)</div></div>
+    <div class="figstrip">
+      <div class="fig"><div class="fi"><svg class="ic"><use href="#i-users"/></svg></div><div class="fv">24 000</div><div class="fl">festivaliers · en 6 jours</div></div>
+      <div class="fig"><div class="fi"><svg class="ic"><use href="#i-female"/></svg></div><div class="fv">60%</div><div class="fl">de femmes</div></div>
+      <div class="fig"><div class="fi"><svg class="ic"><use href="#i-pin"/></svg></div><div class="fv">80%</div><div class="fl">locaux · 06 &amp; Var</div></div>
+      <div class="fig"><div class="fi"><svg class="ic"><use href="#i-cal"/></svg></div><div class="fv">6</div><div class="fl">dates · 9→18 juil.</div></div>
     </div>
 
     <div class="vstrip">
@@ -259,25 +275,34 @@
       </div>
 
       <div class="slide">
-        <div class="lbl"><div class="num">3</div><div class="lt">Aussi listé dans l'annuaire</div></div>
+        <div class="lbl"><div class="num">3</div><div class="lt">Le bandeau &amp; l'annuaire partenaires</div></div>
         <div class="phone"><div class="notch"></div>
           <div class="screen">
             <div class="annu">
-              <div class="ah">Ils font vivre le festival</div>
-              <div class="asub">Les partenaires des Nuits du Sud. Touchez un logo pour les offres et les réseaux.</div>
-              <div class="abanner"><svg class="ic"><use href="#i-store"/></svg> Espace partenaires — votre fiche s'ouvre au clic, comme sur la carte.</div>
-              <div class="agrid">
-                <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
-                <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
-                <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
-                <div class="acard you"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Votre logo</div></div>
-                <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
-                <div class="acard you"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Votre logo</div></div>
+              <div class="amarq"><div class="amtrack">
+                <span class="amslot">Votre logo ici</span><span class="amslot">Votre logo ici</span>
+                <span class="amslot">Votre logo ici</span><span class="amslot">Votre logo ici</span>
+                <span class="amslot">Votre logo ici</span><span class="amslot">Votre logo ici</span>
+                <span class="amslot">Votre logo ici</span><span class="amslot">Votre logo ici</span>
+                <span class="amslot">Votre logo ici</span><span class="amslot">Votre logo ici</span>
+              </div></div>
+              <div class="apad">
+                <div class="ah">Ils font vivre le festival</div>
+                <div class="asub">Les partenaires des Nuits du Sud. Touchez un logo pour les offres et les réseaux.</div>
+                <div class="abanner"><svg class="ic"><use href="#i-store"/></svg> Espace partenaires — votre fiche s'ouvre au clic, comme sur la carte.</div>
+                <div class="agrid">
+                  <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
+                  <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
+                  <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
+                  <div class="acard you"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Votre logo</div></div>
+                  <div class="acard"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Partenaire</div></div>
+                  <div class="acard you"><div class="al"><svg class="ic"><use href="#i-store"/></svg></div><div class="an">Votre logo</div></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="cap"><b>L'annuaire dans le jeu</b> : votre logo parmi les partenaires, accessible d'un toucher.</div>
+        <div class="cap"><b>Le bandeau défilant « Votre logo ici »</b> en haut de l'écran, et votre logo dans l'annuaire — accessible d'un toucher.</div>
       </div>
 
       <div class="slide">
