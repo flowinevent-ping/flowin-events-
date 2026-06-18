@@ -874,6 +874,10 @@
     SENT_=true;
     fetch(URL_,{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)})
       .catch(function(){SENT_=false;});
+    // CRM Retours : capture du lead dans le pipeline commercial (origine + offre choisie)
+    var noteCrm=v.type?('Categorie: '+v.type+(v.adresse?(' - '+v.adresse):'')):(v.adresse||null);
+    var crmBody={enseigne:v.nom||null, contact_nom:contactFull||null, contact_tel:v.tel||null, contact_email:em, ville:'Vence', origine:'landing', produit:'NDS 2026', offre:pk.label, etat:'nouveau', montant:pk.ht, note:noteCrm};
+    fetch('https://ywcqtupgoxfzkddqkztk.supabase.co/rest/v1/crm_retours',{method:'POST',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(crmBody)}).catch(function(){});
   }
   function activate(){
     var v=readForm();
