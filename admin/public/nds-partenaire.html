@@ -251,6 +251,9 @@
   .appbar{display:inline-block;font-size:16px;font-weight:700;color:var(--gold);background:rgba(245,181,68,.1);border:1px solid rgba(245,181,68,.3);border-radius:100px;padding:7px 13px;margin-bottom:14px}
   .carousel{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
   .carousel::-webkit-scrollbar{height:0}
+  .cdots{display:flex;justify-content:center;gap:8px;margin-top:14px}
+  .cdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);transition:background .25s,width .25s}
+  .cdot.on{width:22px;border-radius:5px;background:var(--gold)}
   .appcard{flex:0 0 80%;scroll-snap-align:center;background:linear-gradient(180deg,rgba(124,92,196,.10),rgba(59,92,196,.05));border:1px solid var(--line);border-radius:18px;padding:16px}
   .appcard .ach{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;margin-bottom:14px}
   .appcard .ach .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
@@ -478,7 +481,7 @@
       <h2 class="hsec">Comment votre commerce est <em class="g">mis en avant</em></h2>
       <div class="appwrap">
         <div class="appbar">Les zones en pointillé = vos emplacements réservés</div>
-        <div class="carousel">
+        <div class="carousel" id="pcarousel">
           <div class="appcard">
             <div class="phonetop"></div>
             <div class="phonebody">
@@ -560,7 +563,9 @@
             </div>
           </div>
         </div>
+        <div class="cdots" id="pcdots"><span class="cdot on"></span><span class="cdot"></span><span class="cdot"></span><span class="cdot"></span></div>
       </div>
+      <button class="btn" style="margin-top:22px" data-go="offre">Voir les offres partenaires</button>
     </div>
   </div>
 
@@ -879,6 +884,26 @@
     fetch(URL_+'?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(patch)});
   }
   if(document.readyState!=='loading') bindLogo(); else document.addEventListener('DOMContentLoaded',bindLogo);
+  function initPCarousel(){
+    var car=document.getElementById('pcarousel'); if(!car) return;
+    var dts=document.getElementById('pcdots'); if(!dts) return;
+    var dotsEls=dts.querySelectorAll('.cdot');
+    var cards=car.querySelectorAll('.appcard');
+    function sync(){
+      if(!cards.length) return;
+      var cw=cards[0].offsetWidth+14;
+      var idx=Math.round(car.scrollLeft/cw);
+      if(idx<0)idx=0; if(idx>dotsEls.length-1)idx=dotsEls.length-1;
+      for(var i=0;i<dotsEls.length;i++){ dotsEls[i].className=(i===idx)?'cdot on':'cdot'; }
+    }
+    car.addEventListener('scroll',sync,{passive:true});
+    for(var d=0;d<dotsEls.length;d++){
+      (function(j){ dotsEls[j].addEventListener('click',function(){
+        if(!cards[j])return; car.scrollTo({left:(cards[0].offsetWidth+14)*j,behavior:'smooth'});
+      }); })(d);
+    }
+  }
+  if(document.readyState!=='loading') initPCarousel(); else document.addEventListener('DOMContentLoaded',initPCarousel);
   document.addEventListener('click',function(e){
     var b=e.target.closest?e.target.closest('button'):null; if(!b) return;
     var oc=(b.getAttribute('onclick')||'');
