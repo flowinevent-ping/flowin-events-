@@ -9,71 +9,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --accent:#3B5CC4;--gold:#F5B544;--teal:#00B4A0;
-    --ink:#0C1733;--ink2:#070E22;
-    --card:rgba(255,255,255,.05);--line:rgba(255,255,255,.10);
-    --text:#F3F5FC;--muted:rgba(243,245,252,.74);--faint:rgba(243,245,252,.5);
+    --accent:#3B5CC4;--gold:#E0982A;--teal:#00897B;
+    --paper:#F7F8FC;--white:#ffffff;
+    --line:#e7e9f2;--line2:#eef0f7;
+    --ink:#16203A;--text:#2A3350;--muted:#5A6280;--faint:#8A90A8;
+    --rose:#D03A6B;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:linear-gradient(180deg,var(--ink),var(--ink2));font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+  body{background:var(--paper);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
   .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
-
-  /* HEADER */
   .top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-  .top .nm{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;letter-spacing:.01em}
+  .top .nm{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;letter-spacing:.01em;color:var(--ink)}
   .top .nm .teal{color:var(--teal)}
   .kick{font-family:'Bricolage Grotesque';font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:22px 0 6px}
-  h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1.1;margin-bottom:6px}
+  h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1.1;margin-bottom:6px;color:var(--ink)}
   .lede{color:var(--muted);font-size:14.5px;margin-bottom:8px}
   .meta{color:var(--faint);font-size:12.5px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:8px}
-
-  /* SECTIONS */
+  .forts{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:18px;box-shadow:0 4px 18px -10px rgba(22,32,58,.18)}
+  .forts-h{font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+  .forts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fort{display:flex;gap:10px;align-items:flex-start}
+  .fort .fi{width:32px;height:32px;border-radius:9px;background:rgba(0,137,123,.10);color:var(--teal);display:grid;place-items:center;flex-shrink:0;font-weight:800;font-size:15px}
+  .fort .ft{font-size:13.5px;color:var(--text);line-height:1.4}
+  .fort .ft b{display:block;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;color:var(--ink);margin-bottom:1px}
   .sec{margin-top:26px}
   .sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
-  .sec-n{font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;color:var(--accent);background:rgba(59,92,196,.16);border:1px solid rgba(59,92,196,.3);border-radius:8px;min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-  .sec-t{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px}
+  .sec-n{font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;color:var(--accent);background:rgba(59,92,196,.10);border:1px solid rgba(59,92,196,.22);border-radius:8px;min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sec-t{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--ink)}
   .sec-t small{display:block;font-family:'Plus Jakarta Sans';font-weight:500;font-size:12.5px;color:var(--faint);letter-spacing:0;text-transform:none;margin-top:2px}
-
-  /* SCRIPT QUOTE */
-  .say{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:14px;padding:16px 18px;font-size:15.5px;color:var(--text)}
+  .say{background:var(--white);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:14px;padding:16px 18px;font-size:15.5px;color:var(--text);box-shadow:0 3px 14px -10px rgba(22,32,58,.16)}
   .say + .say{margin-top:10px}
   .say b{color:var(--gold)}
-
-  /* OBJECTIONS */
-  .obj{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:12px}
-  .obj-q{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:#FF9E9E;margin-bottom:8px;display:flex;gap:8px;align-items:flex-start}
-  .obj-q::before{content:'✗';color:#FF7A7A;font-size:14px;line-height:1.4}
+  .obj{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:12px;box-shadow:0 3px 14px -10px rgba(22,32,58,.14)}
+  .obj-q{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:var(--rose);margin-bottom:8px;display:flex;gap:8px;align-items:flex-start}
+  .obj-q::before{content:'✗';font-size:14px;line-height:1.4}
   .obj-a{font-size:14.5px;color:var(--muted)}
   .obj-a::before{content:'→ ';color:var(--teal);font-weight:700}
-
-  /* PRICE CHIP */
-  .price{display:inline-flex;align-items:baseline;gap:8px;background:rgba(245,181,68,.12);border:1px solid rgba(245,181,68,.35);border-radius:12px;padding:10px 16px;margin-top:6px}
+  .price{display:inline-flex;align-items:baseline;gap:8px;background:rgba(224,152,42,.10);border:1px solid rgba(224,152,42,.32);border-radius:12px;padding:10px 16px;margin-top:6px}
   .price b{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;color:var(--gold)}
   .price span{font-size:13px;color:var(--muted)}
-
-  /* SUIVI LIST */
   .flow{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px}
-  .flow li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--muted)}
-  .flow li b{color:var(--text);font-weight:700}
-  .flow li code{background:rgba(0,180,160,.14);color:var(--teal);padding:1px 6px;border-radius:5px;font-size:12.5px}
-
-  /* URL CTA */
-  .urlbox{margin-top:14px;background:var(--card);border:1px dashed rgba(0,180,160,.5);border-radius:14px;padding:16px 18px;text-align:center}
+  .flow li{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--muted)}
+  .flow li b{color:var(--ink);font-weight:700}
+  .flow li code{background:rgba(0,137,123,.10);color:var(--teal);padding:1px 6px;border-radius:5px;font-size:12.5px}
+  .urlbox{margin-top:14px;background:var(--white);border:1px dashed rgba(0,137,123,.45);border-radius:14px;padding:16px 18px;text-align:center}
   .urlbox .ul{font-size:12px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
   .urlbox a{display:block;color:var(--teal);font-weight:700;font-size:15px;text-decoration:none;word-break:break-all;margin:4px 0}
-
   .foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;text-align:center}
-
-  @media(max-width:520px){
-    h1{font-size:25px}
-    .say{font-size:14.5px}
-    .sec-t{font-size:17px}
-  }
-  @media print{
-    body{background:#fff;color:#111}
-    .say,.obj,.flow li,.urlbox{background:#f6f6f9;border-color:#ddd}
-    .sec-t,h1{color:#111}.obj-a,.lede,.flow li{color:#333}
-  }
+  @media(max-width:520px){h1{font-size:25px}.say{font-size:14.5px}.sec-t{font-size:17px}.forts-grid{grid-template-columns:1fr}}
+  @media print{body{background:#fff}.say,.obj,.flow li,.urlbox,.forts{box-shadow:none}}
 </style>
 </head>
 <body>
@@ -82,13 +66,25 @@
   <div class="top">
     <span class="nm">Flow<span class="teal">in</span></span>
     <span style="color:var(--faint)">×</span>
-    <span style="font-weight:700">Nuits du Sud</span>
+    <span style="font-weight:700;color:var(--ink)">Nuits du Sud</span>
   </div>
 
   <div class="kick">Prospection partenaires</div>
   <h1>Argumentaire téléphonique</h1>
   <p class="lede">Opération Nuits du Sud · Flowin × Ville de Vence · 9 → 18 juillet 2026</p>
   <p class="meta">Script d'appel à froid + réponses aux objections. À adapter selon l'interlocuteur.</p>
+
+  <div class="forts">
+    <div class="forts-h">Points forts à marteler</div>
+    <div class="forts-grid">
+      <div class="fort"><span class="fi">①</span><span class="ft"><b>24 000 festivaliers</b>80 % de locaux, sur 6 soirées</span></div>
+      <div class="fort"><span class="fi">②</span><span class="ft"><b>Partenaire officiel</b>logo sur la carte du jeu + annuaire</span></div>
+      <div class="fort"><span class="fi">③</span><span class="ft"><b>Un gagnant chez vous</b>un bon d'achat qui revient se dépenser</span></div>
+      <div class="fort"><span class="fi">④</span><span class="ft"><b>Zéro gestion</b>un QR à poser, on configure tout</span></div>
+      <div class="fort"><span class="fi">⑤</span><span class="ft"><b>Démarche RSE</b>associée à la Ville de Vence</span></div>
+      <div class="fort"><span class="fi">⑥</span><span class="ft"><b>590 € HT</b>soit moins de 100 € la soirée</span></div>
+    </div>
+  </div>
 
   <div class="sec">
     <div class="sec-h"><span class="sec-n">1</span><div class="sec-t">Accroche</div></div>
