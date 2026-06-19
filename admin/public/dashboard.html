@@ -170,7 +170,12 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .topbar .icon-btn:hover{background:var(--sa-subtle);color:var(--sa-text)}
 .topbar .icon-btn .dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:2px solid var(--sa-card)}
 
-.viewport{flex:1;overflow-y:auto;overflow-x:auto;background:var(--sa-bg)}
+.viewport{flex:1;overflow-y:auto;overflow-x:auto;background:var(--sa-bg);scrollbar-width:thin;scrollbar-color:var(--sa-accent-light) var(--sa-card)}
+.viewport::-webkit-scrollbar{height:14px;width:11px}
+.viewport::-webkit-scrollbar-track{background:var(--sa-card);border-radius:8px}
+.viewport::-webkit-scrollbar-thumb{background:var(--sa-border);border-radius:8px;border:3px solid var(--sa-card)}
+.viewport::-webkit-scrollbar-thumb:hover{background:var(--sa-accent-light)}
+.viewport::-webkit-scrollbar-corner{background:var(--sa-card)}
 .viewport::-webkit-scrollbar{width:8px}
 .viewport::-webkit-scrollbar-thumb{background:var(--sa-border);border-radius:4px}
 

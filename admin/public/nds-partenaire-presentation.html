@@ -60,6 +60,14 @@
   @media(prefers-reduced-motion:reduce){.logotrack{animation:none}}
 
   .carwrap{margin-top:26px}
+  .carstage{position:relative}
+  .carnav{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;font-size:24px;font-weight:700;line-height:1;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(124,45,146,.35);transition:opacity .15s,transform .15s;-webkit-tap-highlight-color:transparent}
+  .carnav:hover{transform:translateY(-50%) scale(1.06)}
+  .carnav.prev{left:6px}
+  .carnav.next{right:6px}
+  .carnav[disabled]{opacity:.25;cursor:default;pointer-events:none}
+  @media(max-width:520px){.carnav{width:36px;height:36px;font-size:20px}.carnav.prev{left:2px}.carnav.next{right:2px}}
+  .dot{cursor:pointer}
   .carttl{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta);text-align:center;margin-bottom:14px}
   .carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .carousel::-webkit-scrollbar{display:none}
@@ -287,6 +295,7 @@
 
   <div class="carwrap">
     <div class="carttl">Le parcours du joueur, étape par étape</div>
+    <div class="carstage">
     <div class="carousel" id="carousel">
 
       <div class="slide">
@@ -446,8 +455,11 @@
       </div>
 
     </div>
+      <button class="carnav prev" id="carPrev" type="button" aria-label="Écran précédent">&#8249;</button>
+      <button class="carnav next" id="carNext" type="button" aria-label="Écran suivant">&#8250;</button>
+    </div>
     <div class="dots" id="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-    <div class="swipe">← glissez pour voir les 5 étapes →</div>
+    <div class="swipe">← glissez ou utilisez les flèches pour voir les 5 étapes →</div>
   </div>
 
   <div class="foot">Présentation fidèle à l'application <b>Nuits du Sud</b> · jeu RSE · stations et écrans réels · « Votre commerce / logo » = votre emplacement réservé (exemple)</div>
@@ -455,12 +467,24 @@
 
 <script>
 (function(){
-  var car=document.getElementById('carousel'),dots=document.getElementById('dots').querySelectorAll('.dot');
+  var car=document.getElementById('carousel');
   if(!car)return;
-  car.addEventListener('scroll',function(){
-    var idx=Math.round(car.scrollLeft/car.clientWidth);
+  var dots=document.getElementById('dots').querySelectorAll('.dot');
+  var prev=document.getElementById('carPrev'),next=document.getElementById('carNext');
+  function count(){ return car.querySelectorAll('.slide').length; }
+  function curIdx(){ return Math.round(car.scrollLeft/car.clientWidth); }
+  function goTo(idx){ var n=count(); if(idx<0)idx=0; if(idx>n-1)idx=n-1; car.scrollTo({left:idx*car.clientWidth,behavior:'smooth'}); }
+  function refresh(){
+    var idx=curIdx(),n=count();
     for(var i=0;i<dots.length;i++){ dots[i].className=(i===idx)?'dot on':'dot'; }
-  });
+    if(prev)prev.disabled=(idx<=0);
+    if(next)next.disabled=(idx>=n-1);
+  }
+  car.addEventListener('scroll',refresh);
+  if(prev)prev.addEventListener('click',function(){ goTo(curIdx()-1); });
+  if(next)next.addEventListener('click',function(){ goTo(curIdx()+1); });
+  for(var d=0;d<dots.length;d++){ (function(k){ dots[k].addEventListener('click',function(){ goTo(k); }); })(d); }
+  refresh();
 })();
 </script>
 </body></html>
