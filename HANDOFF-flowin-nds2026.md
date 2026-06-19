@@ -90,27 +90,33 @@ Trace SQL : `docs/sql/nds-bons-achat.sql`. Vérifié prod : 8/8 colonnes, vue OK
 
 ---
 
-## RESTE À FAIRE
+## RESTE À FAIRE — mis à jour 19/06/2026 (après-midi)
 
-**Priorité acquisition (50 commerces en ~10 jours, clôture 9 juillet)**
+### ✅ Fait & poussé (sessions du 19/06)
+- Bon de commande/proforma NDS remplissable + signable (`dbfc15f`) · Edge Function `notify-bon-commande` -> mail flowinevent@gmail.com via Resend (OK ; voir spam ci-dessous)
+- 10 events sous-stations (caisse/bar/tablette 1-3) + parents conservés · tous super_event_id=se-nds-2026
+- Ticket 1/jour/station + cumul à vie (NDS2026Client) — Bloc 1
+- CRM 3 origines + vue v_crm_landing_pages + onglet « CRM Landing pages » — Blocs 2/3
+- 3 visuels + 9 QR stations + PDF print — Bloc 4 (`scripts/nds-visuels/generate.py`)
+- Landing NDS : typo + dots carousel + CTA (`d0cbfac`)
+- **Dashboard SA — onglet « Front NDS »** (`fd3fc15`/`675c3ec`) : logo glisser-déposer (normalisé 256px) ou URL, champs fiche (adresse/ville/CP/site/insta/fb/promo/desc), toggles Actif / Visible(carte) / Bandeau(formule) / NDS(fiche), aperçu bandeau live
+- **Colonne `partenaires.bandeau`** (opt-in formule) · bandeau du parcours `NDS2026Client.tsx` filtré sur bandeau=true
+- **Dashboard SA — onglet « Carte NDS »** (`3cabcb4`) : Leaflet, points stations (vert) + commerces (or) déplaçables à la main, sauvegarde auto, panneau « À placer »
+- **Fiche partenaire = option 1** : tous les partenaires du super-event de la station (`admin/lib/parcours.ts`) · toggle « NDS (fiche) » dans l'éditeur pour rattacher
+- Prospection +34 commerces réels (Tourrettes-sur-Loup / Saint-Jeannet / La Gaude / Gattières) · total ~1438
 
-a) Email auto souscription partenaire -> flowinevent@gmail.com
-   - Trigger après form pack sur nds-partenaire.html · Edge Function Supabase à créer
-   - Techno à valider : Resend ? SMTP Google ? · Contenu : coordonnées, pack, pièces jointes, lien BC + proforma
+### À faire côté Romain (décisions / accès — pas du code)
+- **Resend** : vérifier le domaine `flowin.events` -> mails hors spam + copie client
+- **Placer les 10 sous-stations** sur la Carte NDS (coords NULL) : onglet Carte NDS -> panneau « À placer »
+- **Rattacher les commerces** voulus à la fiche (toggle « NDS (fiche) ») et au bandeau (toggle « Bandeau (formule) »)
 
-b) Bon de commande + facture proforma 2026 — ✅ FAIT : `admin/public/bon-commande-nds.html` (version Romain, offres à cocher, HT+TVA+TTC, SIRET/TVA/RCS BAITA remplis). Branché au mail souscription via PROFORMA_URL (Edge Function v3).
-   - SIRET BAITA reçu (512 026 907 00018), mentions légales câblées · 14 variables {{}} · BC en HT seul (pros voient HT ; TVA/TTC réservés à la facture définitive)
-   - Reste : générer le doc rempli depuis le dashboard (ou à la main) + brancher PROFORMA_URL dans la notif email
+### À construire plus tard (sur GO explicite)
+- Éditeur quiz/bonus/station nds2026 dans le dashboard (`renderNdsStationEditor`/`renderNdsQuizQuestions`/`renderNdsBonus`) — jamais écrit ; « ça fonctionne pour le moment »
+- Validation iOS bout-en-bout · bug image de fond NDS (.stage cover) si encore présent
 
-c) CRM Retours dashboard SA (commit 77d7607) — non validé visuellement
-   - Table crm_retours, vue dans renderCrmRetours() de dashboard.html
-
-d) Logo sidebar dashboard SA — à vérifier
-
-**Parcours joueur NDS (Next.js)**
-- Validation bout-en-bout device iOS Safari
-- Bug image de fond NDS (.stage cover -> zones blanches + texte illisible)
-- Câblage carte -> fiches stations avec instructions par station
+### Confirmé / sans action
+- Écrans = **1 seul QR** (`ev-nds-ecrans`)
+- Wording : « **3 lots à gagner chaque soir · le jeu continue chez les partenaires** »
 
 **Structurel** : migration Next.js post-NDS 2026
 

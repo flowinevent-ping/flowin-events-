@@ -45,15 +45,25 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
 
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
 
-  /* Partenaires */
-  const partIds = (cfg.partenaires ?? []) as string[]
+  /* Partenaires — option 1 : tous les partenaires du super-event de la station (sur toutes les stations).
+     Repli sur cfg.partenaires (liste curée) si l'event n'a pas de super-event. */
+  const seId = ((ev as unknown) as { super_event_id?: string } | null)?.super_event_id
   let partenaires: FlowinPartenaire[] = []
-  if (partIds.length) {
+  if (seId) {
     const { data } = await supabase
       .from('partenaires')
       .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,actif')
-      .in('id', partIds)
+      .eq('super_event_id', seId)
     partenaires = ((data ?? []) as FlowinPartenaire[]).filter(p => p.actif !== false)
+  } else {
+    const partIds = (cfg.partenaires ?? []) as string[]
+    if (partIds.length) {
+      const { data } = await supabase
+        .from('partenaires')
+        .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,actif')
+        .in('id', partIds)
+      partenaires = ((data ?? []) as FlowinPartenaire[]).filter(p => p.actif !== false)
+    }
   }
 
   /* Banques de questions */

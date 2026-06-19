@@ -3401,6 +3401,7 @@ function ndsFrontPatch(id, body){
    .catch(function(e){ console.warn('[ndsFront] patch', e); toast('Erreur réseau','error'); });
 }
 function ndsFrontToggle(id, field, val){ var b={}; b[field]=val; ndsFrontPatch(id, b); }
+function ndsFrontNds(id, on){ ndsFrontPatch(id, {super_event_id: on?NDS_FRONT_SE:null}); }
 function ndsFrontField(id, field, val){ var b={}; b[field]=(val===undefined||val===null)?'':(''+val); ndsFrontPatch(id, b); }
 function ndsFrontRename(id){
   var cur=''; if(state.ndsFront){ for(var i=0;i<state.ndsFront.length;i++){ if(state.ndsFront[i].id===id) cur=state.ndsFront[i].nom||''; } }
@@ -3576,6 +3577,7 @@ function renderNdsFront(){
     h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"'+(p.actif!==false?' checked':'')+' onchange="ndsFrontToggle(\''+p.id+'\',\'actif\',this.checked)"> Actif</label>';
     h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"'+(p.visible!==false?' checked':'')+' onchange="ndsFrontToggle(\''+p.id+'\',\'visible\',this.checked)"> Visible (carte)</label>';
     h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-weight:700"><input type="checkbox"'+(p.bandeau?' checked':'')+' onchange="ndsFrontToggle(\''+p.id+'\',\'bandeau\',this.checked)"> &#11088; Bandeau (formule)</label>';
+    h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"'+(p.super_event_id===NDS_FRONT_SE?' checked':'')+' onchange="ndsFrontNds(\''+p.id+'\',this.checked)"> NDS (fiche)</label>';
     h+='</div>';
     /* fiche & infos pro (repliable) */
     h+='<details><summary style="cursor:pointer;font-size:12px;color:var(--sa-muted);font-weight:700">&#9998; Fiche &amp; infos pro</summary>';
