@@ -119,6 +119,33 @@
     .offer{padding:12px 14px}
     .offer.pop{box-shadow:none;border-color:var(--accent)}
   }
+
+  /* --- Interactif : remplissable / signable --- */
+  .fld{font-family:inherit;font-size:12.5px;color:var(--ink);border:none;border-bottom:1.5px solid var(--line);background:transparent;padding:3px 2px;width:100%;outline:none}
+  .fld:focus{border-bottom-color:var(--accent)}
+  .fld::placeholder{color:var(--faint);font-style:italic}
+  .fldrow{margin-bottom:6px}
+  .offer{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .offer.sel{border:1.5px solid var(--accent);box-shadow:0 4px 16px -8px rgba(59,92,196,.45)}
+  .offer.sel .chk{background:var(--accent);position:relative}
+  .offer.sel .chk::after{content:'';position:absolute;left:7px;top:3px;width:7px;height:12px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
+  .sigpad{width:100%;max-width:360px;height:130px;border:1px dashed #c7cee0;border-radius:12px;background:#fff;touch-action:none;display:block;cursor:crosshair}
+  .sigtools{display:flex;gap:16px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .sigtools button{font-family:inherit;font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline}
+  .signrow{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+  .signrow .col{flex:1;min-width:150px}
+  .signrow label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
+  .actions{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .btn-primary{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--accent),#2d49a8);border:none;border-radius:12px;padding:13px 22px;cursor:pointer;box-shadow:0 6px 18px -8px rgba(59,92,196,.6)}
+  .btn-primary[disabled]{opacity:.5;cursor:default}
+  .btn-ghost{font-family:inherit;font-size:13px;font-weight:700;color:var(--accent);background:#fff;border:1.5px solid var(--accent);border-radius:12px;padding:11px 18px;cursor:pointer;text-decoration:none;display:inline-block}
+  .statusmsg{font-size:13px;font-weight:600}
+  .statusmsg.err{color:var(--rose)} .statusmsg.ok{color:var(--teal)}
+  .viewonly{display:none}
+  body.viewmode .editonly{display:none!important}
+  body.viewmode .viewonly{display:block}
+  .sigimg{max-width:260px;max-height:120px;display:block;margin-top:6px}
+  @media print{ .actions,.sigtools{display:none!important} .fld{border-bottom:none} }
 </style>
 </head>
 <body>
@@ -141,8 +168,8 @@
         <h1 class="doc-type">Bon de commande</h1>
       </div>
       <div class="doc-meta">
-        N&deg; <b>NDS-2026-____</b><br>
-        Date : <b>__ / __ / 2026</b><br>
+        N&deg; <b id="docNum">NDS-2026-____</b><br>
+        Date : <b id="docDate">__ / __ / 2026</b><br>
         Cl&ocirc;ture des partenariats : <b>9 juillet 2026</b>
       </div>
     </div>
@@ -160,21 +187,20 @@
       </div>
       <div class="party client">
         <div class="ttl">Partenaire</div>
-        <div class="nm ph">Raison sociale&hellip;</div>
-        <div class="ln ph">
-          Adresse&hellip;<br>
-          Code postal &middot; Ville&hellip;<br>
-          Contact &middot; t&eacute;l&eacute;phone&hellip;<br>
-          Email&hellip;<br>
-          SIRET&hellip;
-        </div>
+        <div class="fldrow"><input class="fld" id="f_raison" placeholder="Raison sociale *" autocomplete="organization"></div>
+        <div class="fldrow"><input class="fld" id="f_adresse" placeholder="Adresse" autocomplete="street-address"></div>
+        <div class="fldrow" style="display:flex;gap:10px"><input class="fld" id="f_cp" placeholder="Code postal" style="max-width:90px" inputmode="numeric"><input class="fld" id="f_ville" placeholder="Ville"></div>
+        <div class="fldrow"><input class="fld" id="f_contact" placeholder="Contact (nom) *" autocomplete="name"></div>
+        <div class="fldrow"><input class="fld" id="f_tel" placeholder="Téléphone *" inputmode="tel" autocomplete="tel"></div>
+        <div class="fldrow"><input class="fld" id="f_email" placeholder="Email *" inputmode="email" autocomplete="email"></div>
+        <div class="fldrow"><input class="fld" id="f_siret" placeholder="SIRET" inputmode="numeric"></div>
       </div>
     </div>
 
     <div class="offers-h">Choisissez votre offre (cochez une case)</div>
     <div class="offers">
 
-      <div class="offer">
+      <div class="offer" data-offre="visibilite" data-label="Visibilité" data-ht="590" role="button" tabindex="0">
         <div class="chk"></div>
         <div class="offer-main">
           <div class="offer-top">
@@ -192,7 +218,7 @@
         </div>
       </div>
 
-      <div class="offer pop">
+      <div class="offer pop" data-offre="animation" data-label="Animation" data-ht="1490" role="button" tabindex="0">
         <div class="chk"></div>
         <div class="offer-main">
           <div class="offer-top">
@@ -212,7 +238,7 @@
         </div>
       </div>
 
-      <div class="offer">
+      <div class="offer" data-offre="sponsor" data-label="Sponsor officiel" data-ht="3590" role="button" tabindex="0">
         <div class="chk"></div>
         <div class="offer-main">
           <div class="offer-top">
@@ -235,9 +261,9 @@
     </div>
 
     <div class="totals">
-      <div class="trow"><span>Total HT</span><span class="v">__________ &euro;</span></div>
-      <div class="trow"><span>TVA 20 %</span><span class="v">__________ &euro;</span></div>
-      <div class="trow ttc"><span>Net &agrave; payer TTC</span><span class="v">__________ &euro;</span></div>
+      <div class="trow"><span>Total HT</span><span class="v" id="tHT">&mdash;</span></div>
+      <div class="trow"><span>TVA 20 %</span><span class="v" id="tTVA">&mdash;</span></div>
+      <div class="trow ttc"><span>Net &agrave; payer TTC</span><span class="v" id="tTTC">&mdash;</span></div>
     </div>
     <div class="total-note">Tarifs catalogue exprim&eacute;s en HT &middot; TVA au taux de 20 %</div>
 
@@ -247,7 +273,7 @@
         <div>Mode : <b>Virement bancaire</b></div>
         <div>BIC : <b>CCBPFRPPMAR</b></div>
         <div style="grid-column:1 / -1">IBAN : <b class="iban">FR76 1460 7003 3470 2211 6462 345</b></div>
-        <div style="grid-column:1 / -1">R&eacute;f&eacute;rence &agrave; rappeler : <b>NDS-2026-____</b></div>
+        <div style="grid-column:1 / -1">R&eacute;f&eacute;rence &agrave; rappeler : <b id="payRef">NDS-2026-____</b></div>
       </div>
     </div>
 
@@ -256,7 +282,24 @@
     </div>
 
     <div class="sign-lbl"><b>Bon pour accord</b> (nom, date et signature) :</div>
-    <div class="sign-box"></div>
+    <div class="editonly">
+      <canvas id="sigpad" class="sigpad"></canvas>
+      <div class="sigtools"><span style="font-size:11px;color:var(--faint)">Signez ci-dessus (doigt ou souris)</span><button type="button" id="sigClear">Effacer</button></div>
+    </div>
+    <img id="sigImg" class="sigimg viewonly" alt="Signature">
+    <div class="signrow">
+      <div class="col"><label>Nom du signataire</label><input class="fld" id="f_signataire" placeholder="Nom et fonction"></div>
+      <div class="col"><label>Date</label><input class="fld" id="f_date" readonly></div>
+    </div>
+
+    <div class="actions editonly">
+      <button type="button" id="submitBtn" class="btn-primary">Valider, signer et recevoir ma copie</button>
+      <span id="status" class="statusmsg"></span>
+    </div>
+    <div class="actions viewonly">
+      <a href="#" id="dlBtn" class="btn-primary" onclick="window.print();return false;">Télécharger ma copie (PDF)</a>
+      <span style="font-size:12px;color:var(--teal)">✓ Bon de commande signé et enregistré</span>
+    </div>
 
   </div>
 
@@ -265,5 +308,98 @@
   </div>
 
 </div>
+<script>
+(function(){
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  function $(id){return document.getElementById(id);}
+  function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
+  function qs(name){ var m=new RegExp('[?&]'+name+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
+
+  // --- Selection d'offre ---
+  var offers=document.querySelectorAll('.offer'), sel=null;
+  function pickOffer(el){
+    sel=el;
+    for(var i=0;i<offers.length;i++){ offers[i].className=offers[i].className.replace(/ sel/g,''); }
+    el.className+=' sel';
+    var ht=parseFloat(el.getAttribute('data-ht'));
+    var tva=Math.round(ht*0.20), ttc=ht+tva;
+    $('tHT').innerHTML=eur(ht); $('tTVA').innerHTML=eur(tva); $('tTTC').innerHTML=eur(ttc);
+  }
+  for(var i=0;i<offers.length;i++){ (function(el){
+    el.addEventListener('click',function(){ pickOffer(el); });
+    el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pickOffer(el); } });
+  })(offers[i]); }
+
+  // --- Date du jour ---
+  var today=new Date();
+  var dstr=('0'+today.getDate()).slice(-2)+' / '+('0'+(today.getMonth()+1)).slice(-2)+' / '+today.getFullYear();
+  if($('f_date')) $('f_date').value=dstr;
+
+  // --- Pad de signature ---
+  var cv=$('sigpad'), ctx=cv?cv.getContext('2d'):null, drawing=false, hasInk=false;
+  function fit(){ if(!cv)return; var r=cv.getBoundingClientRect(); cv.width=r.width; cv.height=r.height; if(ctx){ctx.lineWidth=2.2;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#16203A';} }
+  function pos(e){ var r=cv.getBoundingClientRect(); var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; var y=(e.touches?e.touches[0].clientY:e.clientY)-r.top; return {x:x,y:y}; }
+  function start(e){ if(!ctx)return; drawing=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault(); }
+  function move(e){ if(!drawing||!ctx)return; var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); hasInk=true; e.preventDefault(); }
+  function end(){ drawing=false; }
+  if(cv){
+    fit(); window.addEventListener('resize',function(){ /* ne pas vider en view */ if(!document.body.className.match(/viewmode/)) { var d=hasInk?cv.toDataURL():null; fit(); } });
+    cv.addEventListener('mousedown',start); cv.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+    cv.addEventListener('touchstart',start,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',end);
+    if($('sigClear')) $('sigClear').addEventListener('click',function(){ ctx.clearRect(0,0,cv.width,cv.height); hasInk=false; });
+  }
+
+  // --- Soumission ---
+  function setStatus(msg,cls){ var s=$('status'); if(s){ s.innerHTML=msg; s.className='statusmsg '+(cls||''); } }
+  if($('submitBtn')){
+    $('submitBtn').addEventListener('click',function(){
+      var raison=$('f_raison').value.trim(), contact=$('f_contact').value.trim();
+      var tel=$('f_tel').value.trim(), email=$('f_email').value.trim();
+      if(!sel){ setStatus('Choisissez une offre (cliquez sur une carte).','err'); return; }
+      if(!raison){ setStatus('Indiquez la raison sociale.','err'); return; }
+      if(!contact||!tel){ setStatus('Indiquez le contact et le t\u00e9l\u00e9phone.','err'); return; }
+      if(!email||email.indexOf('@')<0){ setStatus('Email invalide.','err'); return; }
+      if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
+      var ht=parseFloat(sel.getAttribute('data-ht')), tva=Math.round(ht*0.20), ttc=ht+tva;
+      var id='bc-nds-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+      var rec={ id:id, super_event_id:'se-nds-2026',
+        raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
+        contact:contact, tel:tel, email:email.toLowerCase(), siret:$('f_siret').value.trim()||null,
+        offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
+        montant_ht:ht, montant_tva:tva, montant_ttc:ttc,
+        signataire:$('f_signataire').value.trim()||contact, date_signature:dstr, signature:cv.toDataURL('image/png') };
+      $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
+      fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
+        .then(function(r){ if(!r.ok) throw new Error('http '+r.status); location.href='?id='+id; })
+        .catch(function(){ $('submitBtn').disabled=false; setStatus('\u00c9chec de l\'enregistrement. R\u00e9essayez.','err'); });
+    });
+  }
+
+  // --- Mode lecture (?id=) : charge le doc rempli + signe ---
+  var viewId=qs('id');
+  if(viewId){
+    fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        if(!rows||!rows.length){ setStatus('Bon de commande introuvable.','err'); return; }
+        var d=rows[0];
+        document.body.className+=' viewmode';
+        function setv(id,v){ var el=$(id); if(el) el.value=v||''; }
+        setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
+        setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
+        setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
+        var inputs=document.querySelectorAll('.fld'); for(var k=0;k<inputs.length;k++){ inputs[k].setAttribute('readonly','readonly'); }
+        for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){ pickOffer(offers[j]); } }
+        if(d.montant_ht!=null){ $('tHT').innerHTML=eur(d.montant_ht); $('tTVA').innerHTML=eur(d.montant_tva); $('tTTC').innerHTML=eur(d.montant_ttc); }
+        if($('sigImg')&&d.signature) $('sigImg').src=d.signature;
+        if($('docNum')) $('docNum').innerHTML=d.id;
+        if($('payRef')) $('payRef').innerHTML=d.id;
+        if($('docDate')) $('docDate').innerHTML=d.date_signature||dstr;
+      })
+      .catch(function(){ setStatus('Erreur de chargement.','err'); });
+  }
+})();
+</script>
 </body>
 </html>
