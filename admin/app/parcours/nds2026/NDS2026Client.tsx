@@ -235,12 +235,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     return () => { cancelled = true }
   }, [screen, commerces.length])
 
-  // Bandeau partenaires défilant (dock au-dessus du nav, sur tous les écrans) : tous les partenaires actifs
+  // Bandeau partenaires défilant (dock au-dessus du nav, sur tous les écrans) : uniquement les partenaires ayant choisi la formule bandeau (bandeau=true) et actifs
   useEffect(() => {
     let cancelled = false
-    supabase.from('partenaires').select('id,nom,image_url,emoji,actif').then(({ data }) => {
+    supabase.from('partenaires').select('id,nom,image_url,emoji,actif,bandeau').then(({ data }) => {
       if (cancelled) return
-      const rows = ((data ?? []) as { id: string; nom: string; image_url: string | null; emoji: string | null; actif: boolean | null }[]).filter(p => p.actif !== false)
+      const rows = ((data ?? []) as { id: string; nom: string; image_url: string | null; emoji: string | null; actif: boolean | null; bandeau: boolean | null }[]).filter(p => p.actif !== false && p.bandeau === true)
       setBandPartners(rows.map(p => ({ id: p.id, nom: p.nom, image_url: p.image_url, emoji: p.emoji })))
     })
     return () => { cancelled = true }
