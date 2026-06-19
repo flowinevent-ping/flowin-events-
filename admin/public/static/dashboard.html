@@ -3670,9 +3670,8 @@ function ndsMapBuild(elm){
   window._ndsMapObj=map;
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
   var pts=[];
-  var st=state.ndsCarte.stations, pa=state.ndsCarte.partners;
+  var st=state.ndsCarte.stations;
   for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lat,s.lng]); }
-  for(var k=0;k<pa.length;k++){ var p=pa[k]; if(p.latitude==null||p.longitude==null||p.actif===false) continue; ndsMapAddPartner(map,p); pts.push([p.latitude,p.longitude]); }
   if(pts.length>1){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:17}); }catch(e){} }
   else if(pts.length===1){ map.setView(pts[0],16); }
   setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 220);
@@ -3701,19 +3700,16 @@ function renderNdsCarte(){
   var paPlaced=0, paMiss=[];
   for(var k=0;k<pa.length;k++){ if(pa[k].actif===false) continue; if(pa[k].latitude!=null&&pa[k].longitude!=null) paPlaced++; else paMiss.push(pa[k]); }
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — placer &amp; glisser les points</div><div class="page-subtitle">Glisse un point pour le déplacer (sauvegarde auto). Stations en vert, commerces en or.</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
-  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(paPlaced,'Commerces placés')+prospKpi(stMiss.length+paMiss.length,'À placer')+'</div>';
+  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — placer &amp; glisser les points</div><div class="page-subtitle">Glisse une station pour la déplacer (sauvegarde auto). Stations NDS uniquement pour le moment.</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
+  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(stMiss.length,'Stations à placer')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start">';
   h+='<div id="nds-leaflet" style="height:540px;border-radius:14px;overflow:hidden;border:1px solid var(--sa-border);position:relative;z-index:0"></div>';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:14px;max-height:540px;overflow:auto">';
   h+='<div style="font-weight:800;margin-bottom:8px">À placer</div>';
   h+='<div style="font-size:11px;color:var(--sa-muted);margin-bottom:10px">Centre la carte sur le bon endroit, clique « Placer », puis glisse le point pour ajuster.</div>';
-  if(stMiss.length===0 && paMiss.length===0){ h+='<div style="font-size:12px;color:var(--sa-muted)">Tout est placé &#10003;</div>'; }
+  if(stMiss.length===0){ h+='<div style="font-size:12px;color:var(--sa-muted)">Toutes les stations sont placées &#10003;</div>'; }
   if(stMiss.length){ h+='<div style="font-size:10px;font-weight:800;color:#0a9b85;text-transform:uppercase;margin:6px 0">Stations</div>';
     for(var a=0;a<stMiss.length;a++){ var s=stMiss[a]; h+='<div id="ndsplace-station-'+s.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="flex:1;font-size:12px">'+esc(s.nom||s.id)+'</span><button class="btn-sm" onclick="ndsCartePlace(\'station\',\''+s.id+'\')">Placer</button></div>'; }
-  }
-  if(paMiss.length){ h+='<div style="font-size:10px;font-weight:800;color:#b9851f;text-transform:uppercase;margin:10px 0 6px">Commerces actifs</div>';
-    for(var b=0;b<paMiss.length;b++){ var p=paMiss[b]; h+='<div id="ndsplace-partner-'+p.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="flex:1;font-size:12px">'+esc(p.nom||p.id)+'</span><button class="btn-sm" onclick="ndsCartePlace(\'partner\',\''+p.id+'\')">Placer</button></div>'; }
   }
   h+='</div></div></div>';
   return h;
