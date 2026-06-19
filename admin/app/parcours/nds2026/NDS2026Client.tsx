@@ -26,6 +26,60 @@ const STATIONS = [
   { id: 'ev-nds-tablette', nom: 'La Brigade Verte', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.72358, lng: 7.11178, msg: 'Trouve la Brigade Verte : elle se balade dans le festival.' },
 ]
 
+/* ── Tickets NDS ───────────────────────────────────────────────────────────────
+   Règle : 1 ticket / station / JOUR. Le droit au ticket d'une station se remet à
+   zéro chaque jour (on peut rejouer au même endroit le lendemain), MAIS le cumul
+   des tickets gagnés est conservé à vie (ledger monotone, jamais remis à zéro). */
+function ndsYmd(): string {
+  const d = new Date()
+  const p = (n: number) => (n < 10 ? '0' + n : '' + n)
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+}
+/* Une station scannée (ev-nds-caisse-1, ev-nds-bar-2, …) -> sa famille carte. */
+function ndsFamily(id: string): string {
+  if (id.indexOf('ev-nds-caisse') === 0) return 'ev-nds-caisses'
+  if (id.indexOf('ev-nds-bar') === 0) return 'ev-nds-bar'
+  if (id.indexOf('ev-nds-ecran') === 0) return 'ev-nds-ecrans'
+  if (id.indexOf('ev-nds-tablette') === 0) return 'ev-nds-tablette'
+  return id
+}
+const NDS_LEDGER = 'flowin_nds_ledger'
+function ndsLedgerGet(): string[] {
+  try { const r = localStorage.getItem(NDS_LEDGER); return r ? (JSON.parse(r) as string[]) : [] } catch { return [] }
+}
+function ndsLedgerAdd(key: string): number {
+  try {
+    const l = ndsLedgerGet()
+    if (l.indexOf(key) === -1) { l.push(key); localStorage.setItem(NDS_LEDGER, JSON.stringify(l)) }
+    return l.length
+  } catch { return 1 }
+}
+/* Cumul des tickets gagnés depuis toujours (≥ 1 pour l'affichage). */
+function ndsCumul(): number { return Math.max(1, ndsLedgerGet().length) }
+/* Cette famille de station a-t-elle déjà été jouée AUJOURD'HUI ? */
+function ndsPlayedToday(famId: string): boolean {
+  try { return ndsLedgerGet().indexOf(famId + '@' + ndsYmd()) !== -1 } catch { return false }
+}
+/* Migration unique des anciennes clés permanentes (flowin_played_* / flowin_bonus_*
+   sans suffixe de date) vers le ledger, pour ne pas faire régresser le cumul d'un
+   appareil de test déjà utilisé. */
+function ndsMigrateLegacy(): void {
+  try {
+    if (localStorage.getItem('flowin_nds_migrated')) return
+    const dateSuffix = /_\d{4}-\d{2}-\d{2}$/
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (!k) continue
+      if (k.indexOf('flowin_played_') === 0 && !dateSuffix.test(k)) {
+        ndsLedgerAdd(ndsFamily(k.slice('flowin_played_'.length)) + '@legacy')
+      } else if (k.indexOf('flowin_bonus_') === 0) {
+        ndsLedgerAdd('b:' + ndsFamily(k.slice('flowin_bonus_'.length)) + '@legacy')
+      }
+    }
+    localStorage.setItem('flowin_nds_migrated', '1')
+  } catch {}
+}
+
 /* Commerce partenaire affiché sur la carte (vue v_nds_commerces_carte : déjà filtrée actif/visible) */
 type Commerce = {
   id: string; nom: string; pack: string | null
@@ -90,9 +144,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const bandTrack = [...bandUnit, ...bandUnit]
   const scanVideoRef = useRef<HTMLVideoElement | null>(null)
 
-  const lsKey = `flowin_played_${evId}`
+  const lsKey = `flowin_played_${ndsFamily(evId)}_${ndsYmd()}`
 
   useEffect(() => {
+    ndsMigrateLegacy()
     try { const s = localStorage.getItem(lsKey); if (s) { setTicket(s); setSaved(true) } } catch {}
     // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
     const prof = getJoueurLocal()
@@ -103,12 +158,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         email: prof.email || f.email, tel: prof.tel || f.tel,
         cp: prof.cp || f.cp, age: prof.age || f.age, sexe: prof.genre || f.sexe }))
     }
-    // Cumul de tickets : nombre de stations NDS déjà jouées (1 ticket / station / jour)
-    try {
-      let n = 0
-      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++; if (localStorage.getItem(`flowin_bonus_${st.id}`)) n++ })
-      setTicketCount(Math.max(1, n))
-    } catch {}
+    // Cumul des tickets gagnés à vie (jamais remis à zéro)
+    try { setTicketCount(ndsCumul()) } catch {}
   }, [lsKey])
 
 
@@ -238,9 +289,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
       // Stations : vert = validé (joué) · jaune clignotant = à jouer · ★ = station courante
       if (mapView === 'stations' || placeMode) STATIONS.forEach(st => {
-        const cur = st.id === evId
+        const cur = st.id === ndsFamily(evId)
         let done = false
-        try { done = !!localStorage.getItem(`flowin_played_${st.id}`) } catch {}
+        try { done = ndsPlayedToday(st.id) } catch {}
         const bg = done ? '#16a34a' : '#F5B544'
         const cls = done ? '' : 'nds-mk-pulse'
         const mark = cur ? '★' : (done ? '✓' : '')
@@ -322,9 +373,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     setSaved(true)
     try {
       localStorage.setItem(lsKey, tc)
-      let n = 0
-      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++; if (localStorage.getItem(`flowin_bonus_${st.id}`)) n++ })
-      setTicketCount(Math.max(1, n))
+      ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd())
+      setTicketCount(ndsCumul())
     } catch {}
 
     const res = recurrent
@@ -357,11 +407,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   async function finishBonus() {
     setBonusDone(true)
-    try { localStorage.setItem(`flowin_bonus_${evId}`, '1') } catch {}
     try {
-      let n = 0
-      STATIONS.forEach(st => { if (localStorage.getItem(`flowin_played_${st.id}`)) n++; if (localStorage.getItem(`flowin_bonus_${st.id}`)) n++ })
-      setTicketCount(Math.max(1, n))
+      ndsLedgerAdd('b:' + ndsFamily(evId) + '@' + ndsYmd())
+      setTicketCount(ndsCumul())
     } catch {}
     if (recurrent) { await persist(); setScreen('final') }
     else setScreen('inscription')
@@ -503,14 +551,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     <svg className="ic" style={{ width: 20, height: 20, color: '#4ade80', flexShrink: 0 }}><use href="#i-checkc" /></svg>
                     <span>Station validée ! Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir.</span>
                   </div>
-                  {STATIONS.filter(s => { try { return !!localStorage.getItem(`flowin_played_${s.id}`) } catch { return false } }).length < STATIONS.length ? (
+                  {STATIONS.filter(s => ndsPlayedToday(s.id)).length < STATIONS.length ? (
                     <>
                       <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 14, padding: '14px 15px', marginBottom: 14 }}>
                         <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1226', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
                           <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-layers" /></svg>
                           Chaque station = 1 ticket de plus
                         </div>
-                        {STATIONS.filter(s => { try { return !localStorage.getItem(`flowin_played_${s.id}`) } catch { return s.id !== evId } }).map(s => (
+                        {STATIONS.filter(s => !ndsPlayedToday(s.id)).map(s => (
                           <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: '#52455e', padding: '5px 0' }}>
                             <span style={{ width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 14, height: 14, color: '#fff' }}><use href={`#${s.icon}`} /></svg></span>
                             <span><b>{s.nom}</b> — à jouer</span>

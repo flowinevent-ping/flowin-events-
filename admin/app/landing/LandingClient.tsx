@@ -540,15 +540,15 @@ export default function LandingClient({ cfg, source = '' }: { cfg?: any; source?
         if (!ok) return
         const prenom = ins[0].value.trim(), email = ins[1].value.toLowerCase().trim(), tel = ins[2].value.trim(), secteur = ins[3].value
         try {
-          const today = new Date().toISOString().slice(0, 10)
-          await supabase.from('joueurs').upsert({
-            external_id: 'j-cta-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36),
-            email, prenom, tel: tel || null,
-            tags: ['btob','cta', secteur].filter(Boolean),
-            optin: true, optin_date: today, first_seen: today, last_seen: today,
-            source: source === 'qr' ? 'landing_qr' : 'landing_cta', client_type: 'btob', enseigne: secteur || null, secteur: secteur || null,
-            ts: new Date().toISOString(),
-          }, { onConflict: 'external_id' })
+          // Un prospect pro n'est pas un participant : on l'écrit dans le CRM (crm_retours),
+          // pas dans joueurs. Upsert idempotent par email (anti-doublon origine='landing-flowin').
+          await supabase.rpc('crm_landing_flowin_upsert', {
+            p_enseigne: prenom,
+            p_contact_nom: prenom,
+            p_contact_email: email,
+            p_contact_tel: tel || null,
+            p_produit: secteur || null,
+          })
         } catch { /* best-effort */ }
         ;(document.getElementById('cForm') as HTMLElement).hidden = true
         const th = document.getElementById('cThanks'); if (th) th.hidden = false
