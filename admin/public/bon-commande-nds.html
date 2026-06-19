@@ -105,7 +105,18 @@
     .totals{width:100%}
     .legal{padding:14px 18px}
   }
-  @media print{body{background:#fff;padding:0}.doc{box-shadow:none;border:none;border-radius:0}.offer.pop{box-shadow:none}}
+  @page{size:A4;margin:14mm}
+  @media print{
+    html,body{background:#fff;padding:0;margin:0;font-size:11.5px}
+    .doc{box-shadow:none;border:none;border-radius:0;max-width:100%;width:100%}
+    .cobrand{padding:10px 0 12px}
+    .body{padding:16px 0 8px}
+    .legal{padding:12px 0;margin:0;border-radius:0}
+    .head,.party,.offer,.totals,.pay,.conditions,.sign-box{page-break-inside:avoid;break-inside:avoid}
+    .offers{gap:9px}
+    .offer{padding:12px 14px}
+    .offer.pop{box-shadow:none;border-color:var(--accent)}
+  }
 </style>
 </head>
 <body>
