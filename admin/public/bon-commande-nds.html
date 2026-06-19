@@ -68,11 +68,15 @@
   .offer-ul li b{color:var(--ink);font-weight:700}
 
   /* Total */
-  .total-note{text-align:right;font-size:11.5px;color:var(--faint);margin-top:14px}
-  .total-box{margin:14px 0 0 auto;width:320px;max-width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--hl);border:1.5px dashed var(--gold);border-radius:14px}
-  .total-box .tl{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:var(--ink)}
-  .total-box .tv{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
-  .total-box .tv .u{font-family:'Plus Jakarta Sans';font-size:12px;font-weight:700;color:var(--faint);margin-left:3px}
+  .offer-prw{text-align:right}
+  .offer-ttc{font-size:11px;font-weight:600;color:var(--faint);margin-top:1px;font-variant-numeric:tabular-nums}
+  .total-note{text-align:right;font-size:11.5px;color:var(--faint);margin-top:12px}
+  .totals{margin:16px 0 0 auto;width:340px;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .trow{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;font-size:13.5px;color:var(--muted);border-bottom:1px solid var(--line)}
+  .trow .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+  .trow.ttc{border-bottom:none;background:var(--hl);border-top:1.5px dashed var(--gold)}
+  .trow.ttc span:first-child{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:var(--ink)}
+  .trow.ttc .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ink)}
 
   /* Reglement */
   .pay{margin-top:24px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
@@ -98,7 +102,7 @@
     .doc-type{font-size:24px}
     .head{flex-direction:column}
     .doc-meta{text-align:left}
-    .total-box{width:100%}
+    .totals{width:100%}
     .legal{padding:14px 18px}
   }
   @media print{body{background:#fff;padding:0}.doc{box-shadow:none;border:none;border-radius:0}.offer.pop{box-shadow:none}}
@@ -134,6 +138,7 @@
         <div class="ln">
           40 rue des Arcs, 06140 Vence<br>
           SIRET [SIRET &agrave; compl&eacute;ter]<br>
+          TVA intracommunautaire [N&deg; TVA &agrave; compl&eacute;ter]<br>
           04 93 59 91 37 &middot; info@opconsult.co
         </div>
       </div>
@@ -161,7 +166,7 @@
               <div class="offer-nm">Visibilit&eacute;</div>
               <div class="offer-sub">Votre pr&eacute;sence dans l&rsquo;op&eacute;ration</div>
             </div>
-            <div class="offer-pr">590 &euro;<span class="u">HT</span></div>
+            <div class="offer-prw"><div class="offer-pr">590 &euro;<span class="u">HT</span></div><div class="offer-ttc">soit 708 &euro; TTC</div></div>
           </div>
           <div class="offer-lot">Lot mis en jeu : <b>90 &euro; en bon d&rsquo;achat</b> dans votre boutique.</div>
           <ul class="offer-ul">
@@ -179,7 +184,7 @@
               <div class="offer-nm">Animation<span class="badge">Le plus choisi</span></div>
               <div class="offer-sub">Faites revenir vos clients</div>
             </div>
-            <div class="offer-pr">1&nbsp;490 &euro;<span class="u">HT</span></div>
+            <div class="offer-prw"><div class="offer-pr">1&nbsp;490 &euro;<span class="u">HT</span></div><div class="offer-ttc">soit 1&nbsp;788 &euro; TTC</div></div>
           </div>
           <div class="offer-lot">Lot mis en jeu : <b>159 &euro; en bon d&rsquo;achat</b> dans votre boutique.</div>
           <ul class="offer-ul">
@@ -199,7 +204,7 @@
               <div class="offer-nm">Sponsor officiel</div>
               <div class="offer-sub">Visibilit&eacute; maximale</div>
             </div>
-            <div class="offer-pr">3&nbsp;590 &euro;<span class="u">HT</span></div>
+            <div class="offer-prw"><div class="offer-pr">3&nbsp;590 &euro;<span class="u">HT</span></div><div class="offer-ttc">soit 4&nbsp;308 &euro; TTC</div></div>
           </div>
           <div class="offer-lot">Lot mis en jeu : <b>259 &euro; en bon d&rsquo;achat</b> dans votre boutique.</div>
           <ul class="offer-ul">
@@ -213,11 +218,12 @@
 
     </div>
 
-    <div class="total-box">
-      <span class="tl">Total command&eacute; HT</span>
-      <span class="tv">__________ &euro;<span class="u">HT</span></span>
+    <div class="totals">
+      <div class="trow"><span>Total HT</span><span class="v">__________ &euro;</span></div>
+      <div class="trow"><span>TVA 20 %</span><span class="v">__________ &euro;</span></div>
+      <div class="trow ttc"><span>Net &agrave; payer TTC</span><span class="v">__________ &euro;</span></div>
     </div>
-    <div class="total-note">Montants exprim&eacute;s en HT &middot; TVA appliqu&eacute;e sur la facture d&eacute;finitive</div>
+    <div class="total-note">Tarifs catalogue exprim&eacute;s en HT &middot; TVA au taux de 20 %</div>
 
     <div class="pay">
       <div class="ttl">R&egrave;glement</div>
@@ -239,7 +245,7 @@
   </div>
 
   <div class="legal">
-    <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET [SIRET &agrave; compl&eacute;ter] &middot; IBAN FR76 1460 7003 3470 2211 6462 345 &middot; BIC CCBPFRPPMAR &middot; Document non contractuel tant que non sign&eacute; &laquo;&nbsp;Bon pour accord&nbsp;&raquo;.
+    <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET [SIRET &agrave; compl&eacute;ter] &middot; TVA intracommunautaire [N&deg; TVA &agrave; compl&eacute;ter] &middot; IBAN FR76 1460 7003 3470 2211 6462 345 &middot; BIC CCBPFRPPMAR &middot; Document non contractuel tant que non sign&eacute; &laquo;&nbsp;Bon pour accord&nbsp;&raquo;.
   </div>
 
 </div>
