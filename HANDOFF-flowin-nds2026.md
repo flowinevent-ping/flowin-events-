@@ -98,7 +98,7 @@ a) Email auto souscription partenaire -> flowinevent@gmail.com
    - Trigger après form pack sur nds-partenaire.html · Edge Function Supabase à créer
    - Techno à valider : Resend ? SMTP Google ? · Contenu : coordonnées, pack, pièces jointes, lien BC + proforma
 
-b) Bon de commande + facture proforma 2026 — ✅ template créé : `admin/public/nds-bon-commande-template.html`
+b) Bon de commande + facture proforma 2026 — ✅ FAIT : `admin/public/bon-commande-nds.html` (version Romain, offres à cocher, HT+TVA+TTC, SIRET/TVA/RCS BAITA remplis). Branché au mail souscription via PROFORMA_URL (Edge Function v3).
    - SIRET BAITA reçu (512 026 907 00018), mentions légales câblées · 14 variables {{}} · BC en HT seul (pros voient HT ; TVA/TTC réservés à la facture définitive)
    - Reste : générer le doc rempli depuis le dashboard (ou à la main) + brancher PROFORMA_URL dans la notif email
 

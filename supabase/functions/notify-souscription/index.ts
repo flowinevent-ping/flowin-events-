@@ -25,7 +25,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
 const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "NDS x Flowin <onboarding@resend.dev>";
 const DASHBOARD_URL = Deno.env.get("DASHBOARD_URL") || "https://flowin-events.vercel.app/dashboard.html";
-const PROFORMA_URL = Deno.env.get("PROFORMA_URL") || "";
+const PROFORMA_URL = Deno.env.get("PROFORMA_URL") || "https://flowin-events.vercel.app/bon-commande-nds.html";
 
 function esc(v: unknown): string {
   if (v === null || v === undefined) return "—";
