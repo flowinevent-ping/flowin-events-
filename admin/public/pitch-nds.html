@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Argumentaire téléphonique — Partenaires NDS 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#3B5CC4;--gold:#F5B544;--teal:#00B4A0;
+    --ink:#0C1733;--ink2:#070E22;
+    --card:rgba(255,255,255,.05);--line:rgba(255,255,255,.10);
+    --text:#F3F5FC;--muted:rgba(243,245,252,.74);--faint:rgba(243,245,252,.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:linear-gradient(180deg,var(--ink),var(--ink2));font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
+
+  /* HEADER */
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .top .nm{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;letter-spacing:.01em}
+  .top .nm .teal{color:var(--teal)}
+  .kick{font-family:'Bricolage Grotesque';font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:22px 0 6px}
+  h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1.1;margin-bottom:6px}
+  .lede{color:var(--muted);font-size:14.5px;margin-bottom:8px}
+  .meta{color:var(--faint);font-size:12.5px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:8px}
+
+  /* SECTIONS */
+  .sec{margin-top:26px}
+  .sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+  .sec-n{font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;color:var(--accent);background:rgba(59,92,196,.16);border:1px solid rgba(59,92,196,.3);border-radius:8px;min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sec-t{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px}
+  .sec-t small{display:block;font-family:'Plus Jakarta Sans';font-weight:500;font-size:12.5px;color:var(--faint);letter-spacing:0;text-transform:none;margin-top:2px}
+
+  /* SCRIPT QUOTE */
+  .say{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:14px;padding:16px 18px;font-size:15.5px;color:var(--text)}
+  .say + .say{margin-top:10px}
+  .say b{color:var(--gold)}
+
+  /* OBJECTIONS */
+  .obj{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:12px}
+  .obj-q{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:#FF9E9E;margin-bottom:8px;display:flex;gap:8px;align-items:flex-start}
+  .obj-q::before{content:'✗';color:#FF7A7A;font-size:14px;line-height:1.4}
+  .obj-a{font-size:14.5px;color:var(--muted)}
+  .obj-a::before{content:'→ ';color:var(--teal);font-weight:700}
+
+  /* PRICE CHIP */
+  .price{display:inline-flex;align-items:baseline;gap:8px;background:rgba(245,181,68,.12);border:1px solid rgba(245,181,68,.35);border-radius:12px;padding:10px 16px;margin-top:6px}
+  .price b{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;color:var(--gold)}
+  .price span{font-size:13px;color:var(--muted)}
+
+  /* SUIVI LIST */
+  .flow{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px}
+  .flow li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--muted)}
+  .flow li b{color:var(--text);font-weight:700}
+  .flow li code{background:rgba(0,180,160,.14);color:var(--teal);padding:1px 6px;border-radius:5px;font-size:12.5px}
+
+  /* URL CTA */
+  .urlbox{margin-top:14px;background:var(--card);border:1px dashed rgba(0,180,160,.5);border-radius:14px;padding:16px 18px;text-align:center}
+  .urlbox .ul{font-size:12px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+  .urlbox a{display:block;color:var(--teal);font-weight:700;font-size:15px;text-decoration:none;word-break:break-all;margin:4px 0}
+
+  .foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;text-align:center}
+
+  @media(max-width:520px){
+    h1{font-size:25px}
+    .say{font-size:14.5px}
+    .sec-t{font-size:17px}
+  }
+  @media print{
+    body{background:#fff;color:#111}
+    .say,.obj,.flow li,.urlbox{background:#f6f6f9;border-color:#ddd}
+    .sec-t,h1{color:#111}.obj-a,.lede,.flow li{color:#333}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="nm">Flow<span class="teal">in</span></span>
+    <span style="color:var(--faint)">×</span>
+    <span style="font-weight:700">Nuits du Sud</span>
+  </div>
+
+  <div class="kick">Prospection partenaires</div>
+  <h1>Argumentaire téléphonique</h1>
+  <p class="lede">Opération Nuits du Sud · Flowin × Ville de Vence · 9 → 18 juillet 2026</p>
+  <p class="meta">Script d'appel à froid + réponses aux objections. À adapter selon l'interlocuteur.</p>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">1</span><div class="sec-t">Accroche</div></div>
+    <div class="say">« Bonjour, Romain Collin de <b>Flowin</b>. Je vous appelle au sujet du festival des <b>Nuits du Sud</b> — ça vous parle ? On y organise un grand jeu-concours pendant toute la durée du festival, <b>24 000 participants</b> attendus sur 6 soirées. »</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">2</span><div class="sec-t">Le concept<small>30 secondes</small></div></div>
+    <div class="say">« Dans une démarche <b>RSE</b>, on associe les commerces locaux via un jeu et une carte interactive. Le principe : les festivaliers répondent à des quiz et cumulent des tickets pour un tirage au sort chaque soir. Votre commerce apparaît sur cette carte — les gens voient votre enseigne, cliquent, et peuvent venir jouer chez vous aussi. »</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">3</span><div class="sec-t">Le rôle du commerce</div></div>
+    <div class="say">« Votre boutique devient un <b>point de jeu officiel</b> de l'opération Nuits du Sud. Vos propres clients peuvent participer depuis chez vous. Et à la fin du festival, il y a un grand tirage — chaque commerce partenaire a son propre gagnant : quelqu'un remporte un bon d'achat dans <b>VOTRE</b> boutique, et revient le dépenser. »</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">4</span><div class="sec-t">Concrètement, c'est quoi ?</div></div>
+    <div class="say">« Très léger pour vous : un <b>QR code</b> à poser en caisse ou vitrine, un lien pour vos réseaux. Vous êtes référencé comme partenaire officiel du festival, sur la carte du jeu et dans l'annuaire. C'est tout — on gère le reste. »</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">5</span><div class="sec-t">Le prix</div></div>
+    <div class="price"><b>590 € HT</b><span>visibilité complète sur le festival</span></div>
+    <div class="say" style="margin-top:12px">« L'entrée dans l'opération, c'est <b>590 € HT</b> pour la visibilité complète. Il y a des packs supérieurs si vous voulez plus d'animation ou de présence, mais la base c'est ça. »</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">6</span><div class="sec-t">Objections courantes</div></div>
+
+    <div class="obj">
+      <div class="obj-q">« C'est cher. »</div>
+      <div class="obj-a">590 € HT sur 6 soirées, avec 24 000 visiteurs dont 80 % de locaux — ça fait moins de 100 € la soirée pour être visible sur la carte de tout le festival. Et vous avez un gagnant qui revient chez vous avec un bon d'achat : c'est de la fidélisation concrète.</div>
+    </div>
+
+    <div class="obj">
+      <div class="obj-q">« On n'a pas le temps de gérer ça. »</div>
+      <div class="obj-a">Vous n'avez rien à gérer. On configure tout. Vous recevez votre QR, vous le posez, c'est fini. Le suivi est dans un dashboard — si vous voulez y jeter un œil, sinon on s'en occupe.</div>
+    </div>
+
+    <div class="obj">
+      <div class="obj-q">« On n'est pas sur place pendant le festival. »</div>
+      <div class="obj-a">Pas de problème, le QR fonctionne même sans vous. Les clients scannent, jouent, et votre fiche reste visible toute la durée de l'opération.</div>
+    </div>
+
+    <div class="obj">
+      <div class="obj-q">« Je dois en parler à mon associé / rappeler. »</div>
+      <div class="obj-a">Bien sûr. Je vous envoie la présentation par SMS/mail maintenant — vous avez tout pour décider. Le lien de souscription est dedans, c'est en 3 minutes. Les places sont limitées, on ferme les inscriptions le 9 juillet.</div>
+    </div>
+
+    <div class="obj">
+      <div class="obj-q">« On fait déjà de la pub autrement. »</div>
+      <div class="obj-a">C'est complémentaire — ici vous êtes associé à l'événement lui-même, pas juste à côté. Votre logo dans le jeu que les festivaliers utilisent pendant 6 soirées, c'est différent d'une affiche ou d'un post.</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">7</span><div class="sec-t">Closing</div></div>
+    <div class="say">« Je vous envoie le lien de présentation maintenant. Si ça vous convient, la réservation est en ligne — c'est un virement, facture sous 72h. On valide votre emplacement dès réception. »</div>
+    <div class="urlbox">
+      <div class="ul">Liens à envoyer</div>
+      <a href="https://flowin-events.vercel.app/nds-partenaire-presentation.html">flowin-events.vercel.app/nds-partenaire-presentation.html</a>
+      <a href="https://flowin-events.vercel.app/nds-partenaire.html">flowin-events.vercel.app/nds-partenaire.html</a>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="sec-n">8</span><div class="sec-t">Suivi CRM</div></div>
+    <ul class="flow">
+      <li><b>Pas intéressé</b> → noter dans le CRM, pas de relance</li>
+      <li><b>Rappel demandé</b> → planifier dans le CRM (colonne <code>date_rappel</code>)</li>
+      <li><b>Lien envoyé</b> → passer l'état à <code>lien_envoye</code></li>
+      <li><b>Souscription reçue</b> → statut <code>en_attente_reglement</code> automatiquement</li>
+    </ul>
+  </div>
+
+  <div class="foot">Flowin / BAITA EURL · Clôture des inscriptions le 9 juillet 2026</div>
+
+</div>
+</body>
+</html>
