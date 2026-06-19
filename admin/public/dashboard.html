@@ -2955,6 +2955,9 @@ function renderSidebar(){
       {id:'events',ico:'📅',lbl:'Events',n:DATA.events.length,live:liveCount},
       {id:'super-events',ico:'🌟',lbl:'Super Events',n:DATA.superEvents.length}
     ]},
+    {group:'NDS 2026', list:[
+      {id:'nds-front',ico:'🎨',lbl:'Front NDS',n:(state.ndsFront?state.ndsFront.length:0)}
+    ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
       {id:'prospection',ico:'📞',lbl:'Prospection',n:(state.prospection?state.prospection.length:0)},
@@ -3365,6 +3368,200 @@ function renderCrmLanding(){
 }
 
 
+/* ============ ÉDITEUR FRONT NDS — logos partenaires + bandeau + carte ============ */
+var NDS_FRONT_SE = 'se-nds-2026';
+function ndsFrontRest(){ return FLOWIN_SUPA_URL + '/rest/v1/partenaires'; }
+function ndsFrontHeaders(extra){
+  var h = {'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+  if(extra){ for(var k in extra){ if(extra.hasOwnProperty(k)) h[k]=extra[k]; } }
+  return h;
+}
+async function loadNdsFront(){
+  var sel = 'select=id,nom,emoji,image_url,actif,visible,en_avant,ville,adresse,latitude,longitude,super_event_id,promo_text,site_web,instagram,facebook,pack,type&order=ts.desc.nullslast&limit=1000';
+  var all = await supaFetch('partenaires', sel);
+  state.ndsFront = all || [];
+  render();
+}
+function ndsFrontReload(){ state.ndsFront=null; toast('Rechargement…'); render(); }
+function ndsFrontApply(id, body){
+  if(!state.ndsFront) return;
+  for(var i=0;i<state.ndsFront.length;i++){
+    if(state.ndsFront[i].id===id){ for(var k in body){ if(body.hasOwnProperty(k)) state.ndsFront[i][k]=body[k]; } }
+  }
+}
+function ndsFrontPatch(id, body){
+  ndsFrontApply(id, body);
+  render();
+  fetch(ndsFrontRest()+'?id=eq.'+encodeURIComponent(id), {
+    method:'PATCH',
+    headers:ndsFrontHeaders({'Content-Type':'application/json','Prefer':'return=minimal'}),
+    body:JSON.stringify(body)
+  }).then(function(r){ if(!r.ok){ toast('Erreur sauvegarde ('+r.status+')','error'); } else { toast('Enregistré'); } })
+   .catch(function(e){ console.warn('[ndsFront] patch', e); toast('Erreur réseau','error'); });
+}
+function ndsFrontToggle(id, field, val){ var b={}; b[field]=val; ndsFrontPatch(id, b); }
+function ndsFrontRename(id){
+  var cur=''; if(state.ndsFront){ for(var i=0;i<state.ndsFront.length;i++){ if(state.ndsFront[i].id===id) cur=state.ndsFront[i].nom||''; } }
+  var v=prompt('Nom du partenaire :', cur); if(v===null) return; v=(''+v).trim(); if(!v) return;
+  ndsFrontPatch(id, {nom:v});
+}
+function ndsFrontAdd(){
+  var nom = prompt('Nom du commerce / partenaire NDS :');
+  if(nom===null) return; nom=(''+nom).trim(); if(!nom) return;
+  var id = 'pt-nds-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9000+1000);
+  var row = { id:id, nom:nom, emoji:'🎁', image_url:'', actif:true, visible:true, en_avant:false, ville:'', adresse:'', super_event_id:NDS_FRONT_SE, promo_text:'', site_web:'', instagram:'', facebook:'', pack:'commerce', type:'Local' };
+  fetch(ndsFrontRest(), {
+    method:'POST',
+    headers:ndsFrontHeaders({'Content-Type':'application/json','Prefer':'return=representation'}),
+    body:JSON.stringify(row)
+  }).then(function(r){ return r.ok ? r.json() : null; })
+   .then(function(data){
+     if(data && data.length){ if(!state.ndsFront) state.ndsFront=[]; state.ndsFront.unshift(data[0]); toast('Ajouté'); render(); }
+     else { toast('Échec ajout','error'); }
+   }).catch(function(e){ console.warn('[ndsFront] add', e); toast('Erreur réseau','error'); });
+}
+function ndsFrontDel(id){
+  if(!confirm('Supprimer ce partenaire ? Action irréversible.')) return;
+  fetch(ndsFrontRest()+'?id=eq.'+encodeURIComponent(id), { method:'DELETE', headers:ndsFrontHeaders({'Prefer':'return=minimal'}) })
+   .then(function(){ state.ndsFront=state.ndsFront.filter(function(r){return r.id!==id;}); toast('Supprimé'); render(); })
+   .catch(function(e){ console.warn('[ndsFront] del', e); toast('Erreur réseau','error'); });
+}
+function ndsFrontTriggerFile(id){
+  var inp = document.getElementById('ndsfront-file');
+  if(!inp) return;
+  inp.setAttribute('data-target', id); inp.value=''; inp.click();
+}
+function ndsFrontFileChange(inp){
+  var id = inp.getAttribute('data-target');
+  var file = inp && inp.files && inp.files[0];
+  if(!id || !file) return;
+  if(file.size > 3000000){ toast('Fichier trop lourd (max 3 Mo)','error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var raw = e.target.result;
+    if(file.type === 'image/svg+xml'){ ndsFrontPatch(id, {image_url: raw}); return; }
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var max=256; var w=img.width||max, hh=img.height||max;
+        var sc=Math.min(1, max/Math.max(w,hh));
+        var cw=Math.max(1,Math.round(w*sc)), ch=Math.max(1,Math.round(hh*sc));
+        var cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
+        var ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cw,ch);
+        var out=cv.toDataURL('image/png');
+        ndsFrontPatch(id, {image_url: out});
+      } catch(err){ ndsFrontPatch(id, {image_url: raw}); }
+    };
+    img.onerror = function(){ ndsFrontPatch(id, {image_url: raw}); };
+    img.src = raw;
+  };
+  reader.onerror = function(){ toast('Erreur lecture fichier','error'); };
+  reader.readAsDataURL(file);
+}
+function ndsFrontLogoUrl(id){
+  var u = prompt('URL du logo (https://…) :'); if(u===null) return;
+  ndsFrontPatch(id, {image_url: (''+u).trim()});
+}
+function ndsFrontClearLogo(id){ ndsFrontPatch(id, {image_url: ''}); }
+function ndsFrontCoords(id){
+  var cur=''; if(state.ndsFront){ for(var i=0;i<state.ndsFront.length;i++){ if(state.ndsFront[i].id===id && state.ndsFront[i].latitude!=null){ cur=state.ndsFront[i].latitude+', '+state.ndsFront[i].longitude; } } }
+  var v=prompt('Coordonnées « latitude, longitude » (copiées depuis Google Maps) :', cur); if(v===null) return;
+  v=(''+v).replace(/\s/g,'');
+  if(v===''){ ndsFrontPatch(id, {latitude:null, longitude:null}); return; }
+  var parts=v.split(',');
+  if(parts.length!==2){ toast('Format attendu : lat,lng','error'); return; }
+  var la=parseFloat(parts[0]), lo=parseFloat(parts[1]);
+  if(isNaN(la)||isNaN(lo)){ toast('Coordonnées invalides','error'); return; }
+  ndsFrontPatch(id, {latitude:la, longitude:lo});
+}
+function ndsFrontSetFilter(f){ state.ndsFrontFilter=f; render(); }
+function ndsFrontHasLogo(p){ return p.image_url && (''+p.image_url).length>4; }
+function renderNdsFront(){
+  if(!state.ndsFront){ loadNdsFront(); return '<div class="page"><div class="page-header"><div class="page-title">&#127912; Front NDS</div></div><div class="empty-block">Chargement…</div></div>'; }
+  if(!state.ndsFrontFilter) state.ndsFrontFilter='nds';
+  if(state.ndsFrontSearch===undefined) state.ndsFrontSearch='';
+  var ff=state.ndsFrontFilter;
+  var q=(state.ndsFrontSearch||'').toLowerCase();
+  var bandReal=state.ndsFront.filter(function(p){ return p.actif!==false && ndsFrontHasLogo(p); });
+  var list=state.ndsFront.filter(function(p){
+    if(ff==='nds' && p.super_event_id!==NDS_FRONT_SE) return false;
+    if(ff==='actifs' && p.actif===false) return false;
+    if(ff==='logo' && !ndsFrontHasLogo(p)) return false;
+    if(ff==='carte' && !(p.latitude!=null && p.longitude!=null && p.actif!==false && p.visible!==false)) return false;
+    if(q){ var hay=((p.nom||'')+' '+(p.ville||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
+  });
+  var kTotal=state.ndsFront.length;
+  var kActifs=state.ndsFront.filter(function(p){return p.actif!==false;}).length;
+  var kLogo=state.ndsFront.filter(function(p){return ndsFrontHasLogo(p);}).length;
+  var kCarte=state.ndsFront.filter(function(p){return p.latitude!=null && p.longitude!=null && p.actif!==false && p.visible!==false;}).length;
+
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">&#127912; Front NDS — Logos &amp; Bandeau</div><div class="page-subtitle">Pose les logos partenaires, gère le bandeau défilant et la carte du parcours NDS</div></div><div class="page-actions"><button class="btn btn-primary" onclick="ndsFrontAdd()">+ Partenaire NDS</button><button class="btn" onclick="ndsFrontReload()">&#8635; Recharger</button></div></div>';
+  h+='<input type="file" id="ndsfront-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none" onchange="ndsFrontFileChange(this)">';
+  h+='<div class="kpi-grid">'+prospKpi(kTotal,'Partenaires')+prospKpi(kActifs,'Actifs')+prospKpi(kLogo,'Avec logo')+prospKpi(kCarte,'Sur la carte')+'</div>';
+
+  /* Aperçu bandeau défilant */
+  h+='<div class="section-h" style="margin-top:6px">Aperçu du bandeau défilant (parcours joueur)</div>';
+  h+='<style>@keyframes ndsmarq{from{transform:translateX(0)}to{transform:translateX(-50%)}}'
+    +'.ndsband-wrap{overflow:hidden;border-radius:14px;background:#0c1430;border:1px solid var(--sa-border);padding:14px 0}'
+    +'.ndsband-track{display:inline-flex;gap:14px;white-space:nowrap;animation:ndsmarq 28s linear infinite;will-change:transform;padding-left:14px}'
+    +'.ndsband-slot{display:inline-flex;align-items:center;justify-content:center;height:54px;min-width:120px;padding:0 16px;border-radius:12px;background:rgba(255,255,255,.08);border:1px dashed rgba(91,121,224,.6);color:#9fb0d8;font-size:12px;font-weight:700}'
+    +'.ndsband-slot img{max-height:42px;max-width:120px;object-fit:contain}</style>';
+  var units=bandReal.length?bandReal:[null,null,null,null,null,null];
+  h+='<div class="ndsband-wrap"><div class="ndsband-track">';
+  for(var dup=0; dup<2; dup++){
+    for(var u=0; u<units.length; u++){
+      var pu=units[u];
+      if(pu && ndsFrontHasLogo(pu)){ h+='<div class="ndsband-slot"><img src="'+escAttr(pu.image_url)+'" alt="'+escAttr(pu.nom||'')+'"></div>'; }
+      else { h+='<div class="ndsband-slot">Votre logo ici</div>'; }
+    }
+  }
+  h+='</div></div>';
+  h+='<div style="font-size:12px;color:var(--sa-muted);margin:6px 0 16px">Un logo apparaît dès que le partenaire est <b>Actif</b> et possède un <b>logo</b>. Sur la carte : il faut <b>Actif</b> + <b>Visible</b> + des <b>coordonnées</b>.</div>';
+
+  /* Filtres */
+  var chips=[['nds','NDS'],['tous','Tous'],['actifs','Actifs'],['logo','Avec logo'],['carte','Sur la carte']];
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">';
+  for(var ci=0; ci<chips.length; ci++){ h+='<button class="btn-sm'+(ff===chips[ci][0]?' btn-primary':'')+'" onclick="ndsFrontSetFilter(\''+chips[ci][0]+'\')">'+chips[ci][1]+'</button>'; }
+  h+='<input value="'+escAttr(state.ndsFrontSearch||'')+'" placeholder="Rechercher…" oninput="state.ndsFrontSearch=this.value;render()" style="padding:8px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;flex:1;min-width:140px">';
+  h+='</div>';
+
+  /* Grille de cartes */
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">';
+  if(list.length===0){ h+='<div class="empty-block" style="grid-column:1/-1">Aucun partenaire dans ce filtre</div>'; }
+  for(var li=0; li<list.length; li++){
+    var p=list[li];
+    var hasLogo=ndsFrontHasLogo(p);
+    var onCarte=(p.latitude!=null && p.longitude!=null);
+    h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px">';
+    h+='<div style="display:flex;gap:12px;align-items:center">';
+    h+='<div style="width:64px;height:64px;flex-shrink:0;border-radius:12px;border:'+(hasLogo?'1px solid var(--sa-border)':'2px dashed var(--sa-border)')+';background:var(--sa-subtle);display:flex;align-items:center;justify-content:center;overflow:hidden">';
+    if(hasLogo){ h+='<img src="'+escAttr(p.image_url)+'" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'">'; }
+    else { h+='<span style="font-size:9px;font-weight:800;color:var(--sa-muted);text-align:center;line-height:1.2;text-transform:uppercase">Votre<br>logo</span>'; }
+    h+='</div>';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div style="font-weight:800;cursor:pointer;overflow:hidden;text-overflow:ellipsis" onclick="ndsFrontRename(\''+p.id+'\')" title="Renommer">'+esc(p.nom||'—')+'</div>';
+    h+='<div style="font-size:12px;color:var(--sa-muted)">'+esc(p.ville||'—')+(p.super_event_id===NDS_FRONT_SE?' · <span style="color:#00B4A0;font-weight:700">NDS</span>':'')+'</div>';
+    h+='</div></div>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    h+='<button class="btn-sm" onclick="ndsFrontTriggerFile(\''+p.id+'\')">&#128247; Logo</button>';
+    h+='<button class="btn-sm" onclick="ndsFrontLogoUrl(\''+p.id+'\')">&#128279; URL</button>';
+    if(hasLogo){ h+='<button class="btn-sm" onclick="ndsFrontClearLogo(\''+p.id+'\')" title="Retirer le logo">&#10006;</button>'; }
+    h+='<button class="btn-sm" onclick="ndsFrontCoords(\''+p.id+'\')">&#128205; '+(onCarte?'Carte &#10003;':'Carte')+'</button>';
+    h+='<button class="btn-sm" onclick="ndsFrontDel(\''+p.id+'\')" style="margin-left:auto;color:#ef4444;border-color:#ef4444">&#128465;</button>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px">';
+    h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"'+(p.actif!==false?' checked':'')+' onchange="ndsFrontToggle(\''+p.id+'\',\'actif\',this.checked)"> Actif</label>';
+    h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"'+(p.visible!==false?' checked':'')+' onchange="ndsFrontToggle(\''+p.id+'\',\'visible\',this.checked)"> Visible</label>';
+    h+='<label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox"'+(p.en_avant?' checked':'')+' onchange="ndsFrontToggle(\''+p.id+'\',\'en_avant\',this.checked)"> &#11088; En avant</label>';
+    h+='</div>';
+    h+='</div>';
+  }
+  h+='</div></div>';
+  return h;
+}
+
 function renderProspection(){
   if(!state.prospection){ loadProspection(); return '<div class="page"><div class="page-header"><div class="page-title">&#128222; Prospection</div></div><div class="empty-block">Chargement…</div></div>'; }
   if(!state.prospSort) state.prospSort={key:'enseigne',dir:1};
@@ -3569,6 +3766,7 @@ function render(){
   else if(v==='prospection') html = renderProspection();
   else if(v==='crm-retours') html = renderCrmRetours();
   else if(v==='crm-landing') html = renderCrmLanding();
+  else if(v==='nds-front') html = renderNdsFront();
   else if(v==='landing-page') html = renderLandingPage();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
