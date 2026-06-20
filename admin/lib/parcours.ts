@@ -346,7 +346,7 @@ async function writeSeReponses(opts: {
       const { data: ev } = await supabase.from('events').select('super_event_id').eq('id', opts.evId).single()
       seId = (ev as { super_event_id?: string | null } | null)?.super_event_id ?? null
     } catch { /* ignore */ }
-    const { error } = await supabase.from('se_reponses').insert({
+    const payload = {
       joueur_id: opts.joueurId,
       event_id: opts.evId,
       super_event_id: seId,
@@ -357,8 +357,15 @@ async function writeSeReponses(opts: {
       quiz_reponses: opts.quiz_reponses ?? null,
       bonus_reponses: opts.bonus_reponses ?? null,
       score: scoreNum,
-    })
-    if (error) console.error('[se_reponses] insert échoué:', error.message)
+    }
+    // Insert avec 1 ré-essai : évite la perte silencieuse du détail form+quiz sur micro-coupure réseau
+    let { error } = await supabase.from('se_reponses').insert(payload)
+    if (error) {
+      console.error('[se_reponses] insert échoué (tentative 1):', error.message)
+      await new Promise(r => setTimeout(r, 800))
+      ;({ error } = await supabase.from('se_reponses').insert(payload))
+      if (error) console.error('[se_reponses] insert échoué (tentative 2):', error.message)
+    }
   } catch (e) { console.error('[se_reponses] exception:', e) }
 }
 

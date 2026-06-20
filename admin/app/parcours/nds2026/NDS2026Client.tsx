@@ -5,6 +5,7 @@ import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, shuffle,
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
+import { trackVisite } from '@/lib/track'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 
 type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil'
@@ -130,6 +131,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   useEffect(() => {
     try { if (new URLSearchParams(window.location.search).get('place') === '1') { setPlaceMode(true); setScreen('carte') } } catch {}
   }, [])
+  // Log du scan/ouverture parcours NDS — alimente l'entonnoir (scans -> jeux -> coordonnées)
+  useEffect(() => { trackVisite('nds2026', evId) }, [evId])
   const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
   const [scanOpen, setScanOpen] = useState(false)
