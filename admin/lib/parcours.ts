@@ -101,8 +101,9 @@ export interface JoueurPayload {
   ticket_code: string
   source: string
   prefix: string
-  /** Droit au ticket (NDS : quiz 4/4 OU bonus fait). Défaut true pour les autres parcours. */
-  ticket_eligible?: boolean
+  /** Tickets NDS : 1 ticket quiz (4/4) + 1 ticket bonus -> jusqu'à 2/station/jour. Défaut quiz=true (autres parcours), bonus=false. */
+  quiz_ticket?: boolean
+  bonus_ticket?: boolean
 }
 
 /* Bloc 2 — mémorise l'identité joueur côté client pour la reconnaissance Super Event */
@@ -123,8 +124,12 @@ export function rememberJoueur(id: string | undefined | null, email: string, pre
   } catch { /* ignore */ }
 }
 
-/* Bloc 2 — attribue ticket (1/jour/lieu) + gain immédiat si l'event appartient à un Super Event */
-export async function attribuerSuperEvent(joueurId: string, evId: string, today: string, onSite: boolean = true): Promise<void> {
+/* Bloc 2 — attribue les tickets (1 quiz + 1 bonus, max 2/station/jour) + gain immédiat */
+export async function attribuerSuperEvent(
+  joueurId: string, evId: string, today: string,
+  onSite: boolean = true,
+  tickets?: { quiz?: boolean; bonus?: boolean }
+): Promise<void> {
   const { data: ev } = await supabase
     .from('events')
     .select('super_event_id,gain_immediat,gain_ticket')
@@ -135,10 +140,14 @@ export async function attribuerSuperEvent(joueurId: string, evId: string, today:
   const seId = row.super_event_id
 
   if (onSite && row.gain_ticket !== false) {
-    await supabase.from('se_tickets').upsert(
-      { super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today },
-      { onConflict: 'joueur_id,event_id,jour', ignoreDuplicates: true }
-    )
+    const quizTk = tickets?.quiz !== false      // défaut true (autres parcours = 1 ticket au scan)
+    const bonusTk = tickets?.bonus === true
+    const rows: { super_event_id: string; joueur_id: string; event_id: string; jour: string; type: string }[] = []
+    if (quizTk) rows.push({ super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today, type: 'quiz' })
+    if (bonusTk) rows.push({ super_event_id: seId, joueur_id: joueurId, event_id: evId, jour: today, type: 'bonus' })
+    if (rows.length) {
+      await supabase.from('se_tickets').upsert(rows, { onConflict: 'joueur_id,event_id,jour,type', ignoreDuplicates: true })
+    }
   }
 
   if (onSite && row.gain_immediat) {
@@ -296,14 +305,16 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
   if (joueurRows?.length) {
     const joueurId = (joueurRows[0] as { id: string }).id
     const geo = await captureScanGeo(evId)
-    const ticketOk = geo.onSite && payload.ticket_eligible !== false
+    const quizTk = geo.onSite && payload.quiz_ticket !== false
+    const bonusTk = geo.onSite && payload.bonus_ticket === true
+    const nbTickets = (quizTk ? 1 : 0) + (bonusTk ? 1 : 0)
     const { error: partErr } = await supabase.from('participations').insert({
       joueur_id: joueurId,
       event_id: evId,
       ticket_code: tc,
       score: scoreNum,
       completed: true,
-      tickets: ticketOk ? 1 : 0,
+      tickets: nbTickets,
       bonus_answers: payload.bonus_reponses ?? null,
       ...geo.scan,
     })
@@ -323,8 +334,8 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       bonus_reponses: payload.bonus_reponses,
       scoreMoy: payload.score_moy,
     })
-    /* Bloc 2 — Super Event : ticket (si éligible : quiz 4/4 ou bonus) + gain immédiat, scan sur place */
-    await attribuerSuperEvent(joueurId, evId, today, ticketOk)
+    /* Bloc 2 — Super Event : tickets (quiz si 4/4, bonus si fait) + gain immédiat, scan sur place */
+    await attribuerSuperEvent(joueurId, evId, today, geo.onSite, { quiz: quizTk, bonus: bonusTk })
     rememberJoueur(joueurId, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
     /* Parrainage : si l'inscription vient d'un lien ?ref=, on l'enregistre (validé + attribué au commerce) */
     await captureParrainage(extId)
@@ -416,7 +427,7 @@ export async function claimJoueur(
   evId: string,
   prefix: TicketPrefix,
   bonus?: Record<string, unknown>,
-  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; ticketEligible?: boolean }
+  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; quizTicket?: boolean; bonusTicket?: boolean }
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const { data: dup } = await supabase
@@ -432,9 +443,11 @@ export async function claimJoueur(
   const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
   await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)
   const geo = await captureScanGeo(evId)
-  const ticketOk = geo.onSite && extra?.ticketEligible !== false
+  const quizTk = geo.onSite && extra?.quizTicket !== false
+  const bonusTk = geo.onSite && extra?.bonusTicket === true
+  const nbTickets = (quizTk ? 1 : 0) + (bonusTk ? 1 : 0)
   const sc = extra?.score ? (parseInt(String(extra.score).split('/')[0]) || 0) : 0
-  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: ticketOk ? 1 : 0, bonus_answers: bonus ?? null, ...geo.scan })
+  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, ...geo.scan })
   await writeSeReponses({
     joueurId: joueur.id, evId, jour: today,
     source: extra?.source ?? 'nds2026',
@@ -444,7 +457,7 @@ export async function claimJoueur(
     bonus_reponses: bonus,
     scoreMoy: extra?.score,
   })
-  await attribuerSuperEvent(joueur.id, evId, today, ticketOk)
+  await attribuerSuperEvent(joueur.id, evId, today, geo.onSite, { quiz: quizTk, bonus: bonusTk })
   rememberJoueur(joueur.id, emailLower, joueur.prenom)
   return { success: true, duplicate: false, ticket: tc }
 }

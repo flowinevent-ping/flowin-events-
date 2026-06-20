@@ -61,7 +61,7 @@ function ndsLedgerAdd(key: string): number {
 function ndsCumul(): number { return Math.max(1, ndsLedgerGet().length) }
 /* Cette famille de station a-t-elle déjà été jouée AUJOURD'HUI ? */
 function ndsPlayedToday(famId: string): boolean {
-  try { return ndsLedgerGet().indexOf(famId + '@' + ndsYmd()) !== -1 } catch { return false }
+  try { return localStorage.getItem('flowin_played_' + famId + '_' + ndsYmd()) != null } catch { return false }
 }
 /* Migration unique des anciennes clés permanentes (flowin_played_* / flowin_bonus_*
    sans suffixe de date) vers le ledger, pour ne pas faire régresser le cumul d'un
@@ -406,44 +406,47 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     setScreen('final')
   }
 
-  // Droit au ticket NDS : pas de quiz configuré -> éligible ; sinon quiz parfait (4/4) requis. Le bonus rattrape sinon.
+  // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
   const quizPerfect = questions.length === 0 || score >= questions.length
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
-  async function remoteWrite(tc: string, eligible: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+  async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
     return recurrent
-      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, ticketEligible: eligible })
+      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, quizTicket: quizTk, bonusTicket: bonusTk })
       : await writeJoueur({
           email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
           code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined,
           score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
           source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
-          optin: form.optin, optin_version: OPTIN_VERSION, ticket_eligible: eligible,
+          optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk,
         })
   }
 
-  async function persist(eligibleArg?: boolean): Promise<string> {
+  async function persist(bonusOverride?: boolean): Promise<string> {
     if (saved) return ticket
     setSaving(true)
-    // Éligible si quiz parfait OU bonus fait (eligibleArg force l'état frais quand le bonus vient d'être validé)
-    const eligible = eligibleArg ?? (quizPerfect || bonusDone)
+    // 2 tickets possibles : quiz (4/4) + bonus. bonusOverride force l'état frais quand le bonus vient d'être validé.
+    const quizTk = quizPerfect
+    const bonusTk = bonusOverride ?? bonusDone
     const tc = generateTicket('ND')
-    // Marquage "joué" en local IMMEDIATEMENT (anti-rejeu), MAIS l'échec d'écriture
-    // distante reste visible (Tâche 5) : on ne prétend pas "gagné" sans ligne en base.
     setTicket(tc)
     setSaved(true)
     try {
-      localStorage.setItem(lsKey, eligible ? tc : 'played')
-      if (eligible) { ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd()); setTicketCount(ndsCumul()) }
+      // Marqueur "joué aujourd'hui" (anti-rejeu), distinct du compteur de tickets
+      localStorage.setItem(lsKey, (quizTk || bonusTk) ? tc : 'played')
+      // Cumul tickets sur tout le festival : 1 entrée par ticket gagné (quiz / bonus), par station, par jour
+      if (quizTk) ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd())
+      if (bonusTk) ndsLedgerAdd('b:' + ndsFamily(evId) + '@' + ndsYmd())
+      setTicketCount(ndsCumul())
     } catch {}
 
-    let res = await remoteWrite(tc, eligible)
-    if (!res.success && !res.duplicate) { res = await remoteWrite(tc, eligible) } // 1 réessai auto
+    let res = await remoteWrite(tc, quizTk, bonusTk)
+    if (!res.success && !res.duplicate) { res = await remoteWrite(tc, quizTk, bonusTk) } // 1 réessai auto
     setSaving(false)
     const finalTicket = res.ticket || tc
     if (finalTicket !== tc) {
       setTicket(finalTicket)
-      try { if (eligible) localStorage.setItem(lsKey, finalTicket) } catch {}
+      try { if (quizTk || bonusTk) localStorage.setItem(lsKey, finalTicket) } catch {}
     }
     const ok = res.success || res.duplicate
     setSaveError(!ok)
@@ -456,7 +459,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (saving) return
     setSaving(true)
     const tc = ticket || generateTicket('ND')
-    const res = await remoteWrite(tc, quizPerfect || bonusDone)
+    const res = await remoteWrite(tc, quizPerfect, bonusDone)
     setSaving(false)
     const ok = res.success || res.duplicate
     setSaveError(!ok)
@@ -753,15 +756,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="score-card">
                 <div className="score disp">{score}/{questions.length}</div>
                 <div className="score-line">
-                  {quizPerfect ? 'Sans faute — 1 ticket gagné\u202f🎟️'
-                    : bonusDone ? 'Ticket gagné grâce au bonus\u202f🎟️'
-                    : `Il fallait ${questions.length}/${questions.length} pour le ticket`}
+                  {quizPerfect ? 'Sans faute — 1 ticket\u202f🎟️'
+                    : `${score}/${questions.length} — pas de ticket sur le quiz`}
+                  {bonusDone && ' · +1 ticket bonus\u202f🎟️'}
                 </div>
               </div>
               {bonusQs.length > 0 && !bonusDone && (
                 <a className="double" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
                   <svg className="ic"><use href="#i-spark" /></svg>
-                  {quizPerfect ? ' Double tes points — question bonus' : ' Rattrape ton ticket — question bonus'}
+                  {' +1 ticket — question bonus'}
                 </a>
               )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
@@ -827,13 +830,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> Tirage demain à {tirageHeure} · {lotResume}</div>
               </div>
               <div className="infocard b-magenta" style={{ marginTop: 14 }}><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code : <b>{ticket || '—'}</b></div></div>
-              {ticketCount < STATIONS.length && (
+              {ticketCount < STATIONS.length * 2 && (
                 <>
                   <div className="tk-tip" style={{ marginTop: 12 }}><svg className="ic"><use href="#i-layers" /></svg><div>Réponds aux quiz des autres stations : <b>chaque station = 1 ticket de plus</b> et plus de chances au tirage.</div></div>
                   <a className="double" style={{ marginTop: 14 }} onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Cumuler aux autres stations</a>
                 </>
               )}
-              {ticketCount >= STATIONS.length && (
+              {ticketCount >= STATIONS.length * 2 && (
                 <div className="tk-tip" style={{ marginTop: 12, background: '#e9f9ef', borderColor: '#bbf7d0', color: '#16a34a' }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>Toutes les stations jouées !</b> Tu as le maximum de tickets pour le tirage de ce soir.</div></div>
               )}
             </div>
