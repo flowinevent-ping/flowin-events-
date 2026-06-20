@@ -2957,7 +2957,8 @@ function renderSidebar(){
     ]},
     {group:'NDS 2026', list:[
       {id:'nds-front',ico:'🎨',lbl:'Front NDS',n:(state.ndsFront?state.ndsFront.length:0)},
-      {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'}
+      {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
+      {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -3512,7 +3513,7 @@ function renderNdsFront(){
   var h='<div class="page">';
   h+='<div class="page-header"><div><div class="page-title">&#127912; Front NDS — Logos, Fiche &amp; Bandeau</div><div class="page-subtitle">Glisse un logo, remplis la fiche (adresse, insta, site). Logo → fiche + carte. Bandeau seulement si le partenaire a pris la formule.</div></div><div class="page-actions"><button class="btn btn-primary" onclick="ndsFrontAdd()">+ Partenaire NDS</button><button class="btn" onclick="ndsFrontReload()">&#8635; Recharger</button></div></div>';
   h+='<input type="file" id="ndsfront-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none" onchange="ndsFrontFileChange(this)">';
-  h+='<div class="kpi-grid">'+prospKpi(kTotal,'Partenaires')+prospKpi(kLogo,'Avec logo')+prospKpi(kCarte,'Sur la carte')+prospKpi(kBand,'Dans le bandeau')+'</div>';
+  h+='<div class="kpi-grid">'+prospKpi(kTotal,'Partenaires')+prospKpi(kLogo,'Avec logo')+prospKpi(kCarte,'Avec coordonnées')+prospKpi(kBand,'Dans le bandeau')+'</div>';
 
   /* Aperçu bandeau défilant */
   h+='<div class="section-h" style="margin-top:6px">Aperçu du bandeau défilant (parcours joueur) — formule uniquement</div>';
@@ -3535,7 +3536,7 @@ function renderNdsFront(){
   h+='<div style="font-size:12px;color:var(--sa-muted);margin:6px 0 16px">Carte : <b>Actif</b> + <b>Visible</b> + <b>coordonnées</b>. &nbsp;|&nbsp; Bandeau : <b>Actif</b> + <b>logo</b> + <b>Bandeau (formule)</b>.</div>';
 
   /* Filtres */
-  var chips=[['nds','NDS'],['tous','Tous'],['actifs','Actifs'],['logo','Avec logo'],['bandeau','Bandeau'],['carte','Sur la carte']];
+  var chips=[['nds','NDS'],['tous','Tous'],['actifs','Actifs'],['logo','Avec logo'],['bandeau','Bandeau'],['carte','Avec coordonnées']];
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">';
   for(var ci=0; ci<chips.length; ci++){ h+='<button class="btn-sm'+(ff===chips[ci][0]?' btn-primary':'')+'" onclick="ndsFrontSetFilter(\''+chips[ci][0]+'\')">'+chips[ci][1]+'</button>'; }
   h+='<input value="'+escAttr(state.ndsFrontSearch||'')+'" placeholder="Rechercher…" oninput="state.ndsFrontSearch=this.value;render()" style="padding:8px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;flex:1;min-width:140px">';
@@ -3672,6 +3673,8 @@ function ndsMapBuild(elm){
   var pts=[];
   var st=state.ndsCarte.stations;
   for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lat,s.lng]); }
+  var pa=state.ndsCarte.partners||[];
+  for(var p=0;p<pa.length;p++){ var pp=pa[p]; if(pp.actif===false) continue; if(pp.latitude==null||pp.longitude==null) continue; ndsMapAddPartner(map,pp); pts.push([pp.latitude,pp.longitude]); }
   if(pts.length>1){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:17}); }catch(e){} }
   else if(pts.length===1){ map.setView(pts[0],16); }
   setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 220);
@@ -3700,18 +3703,67 @@ function renderNdsCarte(){
   var paPlaced=0, paMiss=[];
   for(var k=0;k<pa.length;k++){ if(pa[k].actif===false) continue; if(pa[k].latitude!=null&&pa[k].longitude!=null) paPlaced++; else paMiss.push(pa[k]); }
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — placer &amp; glisser les points</div><div class="page-subtitle">Glisse une station pour la déplacer (sauvegarde auto). Stations NDS uniquement pour le moment.</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
-  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(stMiss.length,'Stations à placer')+'</div>';
+  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — placer &amp; glisser les points</div><div class="page-subtitle">Stations (vert) et commerces partenaires (or). Glisse un point pour le déplacer, sauvegarde auto.</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
+  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(paPlaced+'/'+pa.length,'Commerces placés')+prospKpi(stMiss.length+paMiss.length,'À placer')+'</div>';
+  h+='<div style="display:flex;gap:16px;font-size:12px;color:var(--sa-muted);margin:4px 0 10px"><span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#2FD89E;vertical-align:middle;margin-right:5px"></span>Stations</span><span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#F5B544;vertical-align:middle;margin-right:5px"></span>Commerces partenaires</span></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start">';
   h+='<div id="nds-leaflet" style="height:540px;border-radius:14px;overflow:hidden;border:1px solid var(--sa-border);position:relative;z-index:0"></div>';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:14px;max-height:540px;overflow:auto">';
   h+='<div style="font-weight:800;margin-bottom:8px">À placer</div>';
   h+='<div style="font-size:11px;color:var(--sa-muted);margin-bottom:10px">Centre la carte sur le bon endroit, clique « Placer », puis glisse le point pour ajuster.</div>';
-  if(stMiss.length===0){ h+='<div style="font-size:12px;color:var(--sa-muted)">Toutes les stations sont placées &#10003;</div>'; }
+  if(stMiss.length===0 && paMiss.length===0){ h+='<div style="font-size:12px;color:var(--sa-muted)">Tous les points sont placés &#10003;</div>'; }
   if(stMiss.length){ h+='<div style="font-size:10px;font-weight:800;color:#0a9b85;text-transform:uppercase;margin:6px 0">Stations</div>';
     for(var a=0;a<stMiss.length;a++){ var s=stMiss[a]; h+='<div id="ndsplace-station-'+s.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="flex:1;font-size:12px">'+esc(s.nom||s.id)+'</span><button class="btn-sm" onclick="ndsCartePlace(\'station\',\''+s.id+'\')">Placer</button></div>'; }
   }
+  if(paMiss.length){ h+='<div style="font-size:10px;font-weight:800;color:#c98a16;text-transform:uppercase;margin:10px 0 6px">Commerces</div>';
+    for(var b=0;b<paMiss.length;b++){ var pm=paMiss[b]; h+='<div id="ndsplace-partner-'+pm.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="flex:1;font-size:12px">'+esc(pm.nom||pm.id)+'</span><button class="btn-sm" onclick="ndsCartePlace(\'partner\',\''+pm.id+'\')">Placer</button></div>'; }
+  }
   h+='</div></div></div>';
+  return h;
+}
+
+var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
+function ndsStationLabel(evid){
+  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3'};
+  return m[evid]||evid;
+}
+function ndsStationsJoined(events){
+  if(!events||!events.length) return '—';
+  var out=[]; for(var i=0;i<events.length;i++){ if(NDS_EVENT_IDS.indexOf(events[i])>-1) out.push(ndsStationLabel(events[i])); }
+  return out.length?out.join(', '):'—';
+}
+async function loadNdsParticipants(){
+  var rows = await supaFetch('joueurs', 'select=id,prenom,nom,email,tel,ticket_code,events,ts,first_seen&order=ts.desc.nullslast&limit=1000');
+  var out=[];
+  if(rows){ for(var i=0;i<rows.length;i++){ var r=rows[i]; var ev=r.events||[]; var hit=false; for(var j=0;j<ev.length;j++){ if(NDS_EVENT_IDS.indexOf(ev[j])>-1){ hit=true; break; } } if(hit) out.push(r); } }
+  state.ndsParticipants = out;
+  render();
+}
+function ndsParticipantsReload(){ state.ndsParticipants=null; toast('Rechargement…'); render(); }
+function renderNdsParticipants(){
+  if(!state.ndsParticipants){ loadNdsParticipants(); return '<div class="page"><div class="page-header"><div class="page-title">&#128101; Participants NDS 2026</div></div><div class="empty-block">Chargement…</div></div>'; }
+  var list=state.ndsParticipants;
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">&#128101; Participants NDS 2026</div><div class="page-subtitle">Joueurs agrégés de toutes les stations du Super Event NDS 2026</div></div><div class="page-actions"><button class="btn" onclick="ndsParticipantsReload()">&#8635; Recharger</button></div></div>';
+  h+='<div class="kpi-grid">'+prospKpi(list.length,'Participants')+'</div>';
+  if(!list.length){ h+='<div class="empty-block">Aucun participant pour le moment.</div></div>'; return h; }
+  h+='<div style="overflow-x:auto;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px">';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
+  h+='<thead><tr style="text-align:left;border-bottom:1px solid var(--sa-border)"><th style="padding:10px 12px">Prénom</th><th style="padding:10px 12px">Nom</th><th style="padding:10px 12px">Email</th><th style="padding:10px 12px">Tél</th><th style="padding:10px 12px">Ticket</th><th style="padding:10px 12px">Stations jouées</th><th style="padding:10px 12px">Date</th></tr></thead><tbody>';
+  for(var i=0;i<list.length;i++){
+    var p=list[i];
+    var dt=p.ts||p.first_seen||''; if(dt) dt=(''+dt).slice(0,10);
+    h+='<tr style="border-bottom:1px solid var(--sa-border)">';
+    h+='<td style="padding:9px 12px">'+esc(p.prenom||'—')+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(p.nom||'—')+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(p.email||'—')+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(p.tel||'—')+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(p.ticket_code||'—')+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(ndsStationsJoined(p.events))+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(dt||'—')+'</td>';
+    h+='</tr>';
+  }
+  h+='</tbody></table></div></div>';
   return h;
 }
 
@@ -3921,6 +3973,7 @@ function render(){
   else if(v==='crm-landing') html = renderCrmLanding();
   else if(v==='nds-front') html = renderNdsFront();
   else if(v==='nds-carte') html = renderNdsCarte();
+  else if(v==='nds-participants') html = renderNdsParticipants();
   else if(v==='landing-page') html = renderLandingPage();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
