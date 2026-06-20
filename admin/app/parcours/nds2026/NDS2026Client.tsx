@@ -19,12 +19,14 @@ const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '�
 const OPTIN_VERSION = 'nds-2026-v2'
 const OPTIN_TEXT = "Je veux rester en contact avec les Nuits du Sud et leurs partenaires."
 
-/* Les 3 stations fixes du festival (carte). joue=true => station courante scannée */
+/* Les 4 destinations de la carte joueur (familles de stations). Coords = vraies positions
+   de la base (events ev-nds-*), alignées sur la carte du dashboard. Rafraîchies en live
+   à l'entrée sur l'écran carte (voir useEffect plus bas). */
 const STATIONS = [
-  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.72325, lng: 7.11120, msg: "Passe aux caisses, à l'entrée du festival, et flashe le QR code sur place." },
-  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.72372, lng: 7.11205, msg: 'Rends-toi au bar et flashe le QR.' },
-  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.72405, lng: 7.11158, msg: "Flashe au changement de scène, sur l'écran géant." },
-  { id: 'ev-nds-tablette', nom: 'La Brigade Verte', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.72358, lng: 7.11178, msg: 'Trouve la Brigade Verte : elle se balade dans le festival.' },
+  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.722275, lng: 7.111421, msg: "Passe aux caisses, à l'entrée du festival, et flashe le QR code sur place." },
+  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.722391, lng: 7.111539, msg: 'Rends-toi au bar et flashe le QR.' },
+  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.722155, lng: 7.111708, msg: "Flashe au changement de scène, sur l'écran géant." },
+  { id: 'ev-nds-tablette', nom: 'La Brigade Verte', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.722661, lng: 7.111563, msg: 'Trouve la Brigade Verte : elle se balade dans le festival.' },
 ]
 
 /* ── Tickets NDS ───────────────────────────────────────────────────────────────
@@ -240,6 +242,23 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     })
     return () => { cancelled = true }
   }, [screen, commerces.length])
+
+  // Positions des 4 stations carte : resync depuis la base (events) -> alignées sur le dashboard
+  useEffect(() => {
+    if (screen !== 'carte' || placeMode) return
+    let cancelled = false
+    const fams = STATIONS.map(s => s.id)
+    supabase.from('events').select('id,lat,lng').in('id', fams).then(({ data }) => {
+      if (cancelled || !data) return
+      const next = { ...geoRef.current }
+      ;(data as { id: string; lat: number | null; lng: number | null }[]).forEach(r => {
+        if (r.lat != null && r.lng != null) next[r.id] = { lat: r.lat, lng: r.lng }
+      })
+      geoRef.current = next
+      setGeo({ ...next })
+    })
+    return () => { cancelled = true }
+  }, [screen, placeMode])
 
   // Bandeau partenaires défilant (dock au-dessus du nav, sur tous les écrans) : uniquement les partenaires ayant choisi la formule bandeau (bandeau=true) et actifs
   useEffect(() => {
