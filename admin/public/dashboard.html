@@ -3382,6 +3382,13 @@ async function loadNdsFront(){
   var sel = 'select=id,nom,emoji,image_url,actif,visible,en_avant,bandeau,ville,adresse,code_postal,latitude,longitude,super_event_id,promo_text,description,site_web,instagram,facebook,pack,type&order=ts.desc.nullslast&limit=1000';
   var all = await supaFetch('partenaires', sel);
   state.ndsFront = all || [];
+  // Comptage des clics par partenaire (sourcé : 1 ligne partenaire_clics = 1 clic d'un joueur sur un lien)
+  try {
+    var clics = await supaFetch('partenaire_clics', 'select=partenaire_id');
+    var counts = {};
+    if(clics){ for(var c=0;c<clics.length;c++){ var pid=clics[c].partenaire_id; if(pid){ counts[pid]=(counts[pid]||0)+1; } } }
+    state.ndsFrontClics = counts;
+  } catch(e){ state.ndsFrontClics = {}; }
   render();
 }
 function ndsFrontReload(){ state.ndsFront=null; toast('Rechargement…'); render(); }
@@ -3563,6 +3570,8 @@ function renderNdsFront(){
     h+='<div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">';
     h+='<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;background:'+(onMap?'rgba(16,185,129,.15);color:#10b981':'rgba(120,120,120,.12);color:var(--sa-muted)')+'">'+(onMap?'CARTE ✓':'carte —')+'</span>';
     h+='<span style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;background:'+(inBand?'rgba(0,180,160,.15);color:#00B4A0':'rgba(120,120,120,.12);color:var(--sa-muted)')+'">'+(inBand?'BANDEAU ✓':'bandeau —')+'</span>';
+    var _nClic=(state.ndsFrontClics&&state.ndsFrontClics[p.id])||0;
+    h+='<span title="Clics des joueurs sur les liens (site/insta/fb)" style="font-size:9px;font-weight:800;padding:2px 6px;border-radius:8px;background:'+(_nClic>0?'rgba(91,121,224,.15);color:#5B79E0':'rgba(120,120,120,.12);color:var(--sa-muted)')+'">&#128072; '+_nClic+' clic'+(_nClic>1?'s':'')+'</span>';
     h+='</div>';
     h+='</div></div>';
     /* actions logo */
@@ -4480,6 +4489,8 @@ function openDrawerFor(type,id,tab){
   }
   // Charger les joueurs scopés à cet event (indépendant du global)
   if(type==='event' && id) loadEventJoueurs(id);
+  // Charger les clics partenaires du joueur (profil participant — sourcé)
+  if(type==='joueur' && id) loadJoueurClics(id);
   $('#drawerBd').classList.add('open');
   $('#drawer').classList.add('open');
   $('#drawer').classList.toggle('wide', type==='event'||type==='joueur');
@@ -5656,6 +5667,30 @@ function xlsCloseDrops(){ document.querySelectorAll('.col-drop').forEach(d=>d.st
 document.addEventListener('click', function(e){ if(!e.target.closest('.xls-filter-btn')&&!e.target.closest('.col-drop')) xlsCloseDrops(); });
 
 // ----- JOUEUR drawer -----
+async function loadJoueurClics(id){
+  try {
+    var rows = await supaFetch('partenaire_clics', 'joueur_id=eq.'+encodeURIComponent(id)+'&select=partenaire_id,lien_key,event_id,ts&order=ts.desc&limit=200');
+    state.joueurClics = state.joueurClics || {};
+    state.joueurClics[id] = rows || [];
+  } catch(e){ state.joueurClics = state.joueurClics || {}; state.joueurClics[id] = []; }
+  if(state.drawer.open && state.drawer.type==='joueur' && state.drawer.id===id) renderDrawer();
+}
+function joueurClicsHtml(j){
+  var rows = (state.joueurClics && state.joueurClics[j.id]) || null;
+  if(rows===null) return '<div class="section-h">Clics partenaires</div><div class="text-sm text-muted">Chargement…</div>';
+  if(!rows.length) return '<div class="section-h">Clics partenaires</div><div class="text-sm text-muted">Aucun clic sur un lien partenaire.</div>';
+  var pname = function(pid){ var p=(DATA.partenaires||[]).find(function(x){return x.id===pid;}); if(!p && state.ndsFront){ p=state.ndsFront.find(function(x){return x.id===pid;}); } return p? (p.nom||pid) : pid; };
+  var h='<div class="section-h">Clics partenaires ('+rows.length+')</div>';
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i]; var jour = r.ts? (''+r.ts).slice(0,10) : '';
+    h+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px">';
+    h+='<span style="font-size:13px">&#128072;</span>';
+    h+='<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700">'+esc(pname(r.partenaire_id))+'</div>';
+    h+='<div style="font-size:10.5px;color:var(--sa-muted)">'+esc(r.lien_key||'lien')+(r.event_id?(' · '+esc(ndsStationLabel(r.event_id))):'')+(jour?(' · '+jour):'')+'</div></div>';
+    h+='</div>';
+  }
+  return h;
+}
 function drawerJoueur(j){
   if(!j) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Joueur introuvable</div>';
   const events = j.events.map(findEvent).filter(Boolean);
@@ -5719,6 +5754,7 @@ function drawerJoueur(j){
         html += '<div class="section-h">Tags</div>';
         html += '<div class="flex gap-2 flex-wrap">'+(j.tags||[]).map(t=>'<span class="chip purple">'+esc(t)+'</span>').join('')+(j.tags&&j.tags.length?'':'<span class="text-muted text-sm">Aucun tag</span>')+'</div>';
       }
+      html += joueurClicsHtml(j);
     }
   } else if(state.drawer.tab==='historique'){
     html += '<div class="alert info"><span class="ico">📅</span><strong>'+esc(j.prenom||j.nom)+'</strong> a participé à <strong>'+events.length+'</strong> event'+(events.length>1?'s':'')+'. Chaque ligne ci-dessous = une session distincte sur un event.</div>';
