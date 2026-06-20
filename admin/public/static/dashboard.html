@@ -5908,6 +5908,35 @@ function deleteJoueur(id){
 }
 
 // ============ BIBLIOTHÈQUE GAGNANTS ============
+async function loadSeGains(){
+  try {
+    var rows = await supaFetch('se_gains','select=id,super_event_id,event_id,joueur_id,type,libelle,code,utilise,gagnant_nom,gagnant_email,gagnant_tel,created_at&order=created_at.desc.nullslast&limit=1000');
+    state.seGains = rows || [];
+  } catch(e){ state.seGains = []; }
+  render();
+}
+function seGainsSectionHtml(){
+  if(!state.seGains){ loadSeGains(); return '<div class="section-h">Gains Super Event — immédiats &amp; tirages</div><div class="text-sm text-muted">Chargement…</div>'; }
+  var sg = state.seGains;
+  var h = '<div class="section-h">&#127942; Gains Super Event — immédiats &amp; tirages ('+sg.length+') <button class="btn-sm" style="margin-left:8px" onclick="state.seGains=null;render()">&#8635;</button></div>';
+  if(!sg.length){ return h + '<div class="text-sm text-muted">Aucun gain immédiat ni tirage enregistré pour le moment.</div>'; }
+  h += '<table class="tbl"><thead><tr><th>Gagnant</th><th>Type</th><th>Lot / Libellé</th><th>Code</th><th>Station</th><th>Le</th><th>Statut</th></tr></thead><tbody>';
+  for(var i=0;i<sg.length;i++){
+    var g=sg[i];
+    var who = g.gagnant_nom || '';
+    if(!who && g.joueur_id){ var jj=findJoueur(g.joueur_id); who = jj ? jj.nom : ''; }
+    var typeLbl = g.type==='tirage' ? '🎲 Tirage' : (g.type==='immediat' ? '⚡ Immédiat' : esc(g.type||'—'));
+    h += '<tr><td>'+esc(who||'—')+(g.gagnant_email?'<div style="font-size:10px;color:var(--sa-muted)">'+esc(g.gagnant_email)+'</div>':'')+'</td>'
+       + '<td>'+typeLbl+'</td>'
+       + '<td>'+esc(g.libelle||'—')+'</td>'
+       + '<td><code style="font-size:11px">'+esc(g.code||'—')+'</code></td>'
+       + '<td>'+esc(g.event_id?ndsStationLabel(g.event_id):'—')+'</td>'
+       + '<td>'+(g.created_at?(''+g.created_at).slice(0,10):'—')+'</td>'
+       + '<td>'+(g.utilise?'<span class="chip past">Utilisé</span>':'<span class="chip live">Valide</span>')+'</td></tr>';
+  }
+  h += '</tbody></table>';
+  return h;
+}
 function renderBiblioGagnants(){
   const filter = state.filter.gagnants;
   const search = state.search.gagnants.toLowerCase();
@@ -5946,6 +5975,8 @@ function renderBiblioGagnants(){
        + kpi('À retirer',totalAretirer,{delta:totalAretirer?'Action requise':'',trend:totalAretirer?'down':'flat'})
        + kpi('Valeur totale',valeurTotale.toLocaleString('fr-FR')+' €')
        + '</div>';
+  html += seGainsSectionHtml();
+
   html += '<div class="filter-bar">'
        + '<div class="filter-search"><input placeholder="Rechercher (joueur, event, partenaire, lot)…" oninput="state.search.gagnants=this.value;render()" value="'+esc(state.search.gagnants)+'"/></div>'
        + filterPills('gagnants',[
@@ -5953,6 +5984,7 @@ function renderBiblioGagnants(){
          ])
        + '</div>';
 
+  html += '<div class="section-h" style="margin-top:18px">&#127873; Lots attribués manuellement</div>';
   html += '<table class="tbl"><thead><tr>'
        + '<th style="width:32px"><input type="checkbox" class="check"/></th>'
        + thSort('gagnants','joueur','Joueur')
