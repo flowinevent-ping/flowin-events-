@@ -5204,6 +5204,36 @@ function exportPDFRapport(eventId){
 }
 
 // ============ BIBLIOTHÈQUE JOUEURS — TABLE EXCEL ============
+function mapSupaJoueur(r){
+  return {
+    id:r.id, email:r.email||'', nom:r.nom||'', prenom:r.prenom||'', tel:r.tel||'',
+    ville:r.ville||'', codePostal:r.code_postal||'', genre:r.genre||'',
+    dateNaissance:r.date_naissance||null, optin:!!r.optin, optinDate:r.optin_date||null,
+    gains:r.gains||0, scoreMoy:r.score_moy||null, events:Array.isArray(r.events)?r.events:[],
+    firstSeen:r.first_seen||null, lastSeen:r.last_seen||r.ts||null, source:r.source||'',
+    adresse:r.adresse||'', ageTranche:r.age_tranche||'', enseigne:r.enseigne||'',
+    lotGagne:r.lot_gagne||'', ticketCode:r.ticket_code||'', decouverte:r.decouverte||'',
+    clientType:r.client_type||'btoc', tags:Array.isArray(r.tags)?r.tags:[], ts:r.ts||r.last_seen||null
+  };
+}
+async function pullLiveJoueurs(){
+  toast('Synchronisation des joueurs…');
+  var all=[]; var off=0; var page=1000;
+  for(var i=0;i<12;i++){
+    var rows=await supaFetch('joueurs','select=*&order=ts.desc.nullslast&limit='+page+'&offset='+off);
+    if(!rows||!rows.length) break;
+    all=all.concat(rows);
+    if(rows.length<page) break;
+    off+=page;
+  }
+  if(!all.length){ toast('Aucun joueur récupéré (réseau ?)','error'); return; }
+  var mapped=all.map(mapSupaJoueur);
+  DATA.joueurs.splice(0, DATA.joueurs.length);
+  for(var k=0;k<mapped.length;k++){ DATA.joueurs.push(mapped[k]); }
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(DATA)); }catch(e){}
+  toast('Joueurs synchronisés depuis le live : '+mapped.length, 'success');
+  render();
+}
 function renderBiblioJoueurs(){
   const filter  = state.filter.joueurs;
   const search  = (state.search.joueurs||'').toLowerCase();
@@ -5319,6 +5349,7 @@ function renderBiblioJoueurs(){
   html += '<div class="page-header">'
        + '<div><div class="page-title">👥 Joueurs CRM</div><div class="page-subtitle">'+list.length.toLocaleString('fr-FR')+' joueurs affichés · '+total+' total · 1 email = 1 fiche</div></div>'
        + '<div class="page-actions">'
+       + '<button class="btn btn-primary" onclick="pullLiveJoueurs()" title="Tirer les joueurs réels depuis Supabase (inclut ceux créés au parcours)">&#8635; Live</button>'
        + '<button class="btn" onclick="exportCSV(\'joueurs\')">📥 CSV ('+list.length+')</button>'
        + '<button class="btn" onclick="toast(\'Newsletter envoyée à '+nbOptin+' destinataires\',\'success\')">📧 Newsletter ('+nbOptin+')</button>'
        + '</div></div>';
