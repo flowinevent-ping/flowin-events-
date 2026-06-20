@@ -1,0 +1,103 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Visuels NDS 2026 — Flowin</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',system-ui,sans-serif;background:#0c0712;color:#fff;min-height:100vh;display:flex;justify-content:center;padding:0 16px 60px}
+.wrap{width:100%;max-width:640px}
+.hd{text-align:center;padding:42px 10px 18px}
+.hd .sun{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE08A,#F5A100);margin:0 auto 14px;box-shadow:0 0 30px rgba(245,161,0,.5)}
+.hd .kick{font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#8a7d97}
+.hd h1{font-size:27px;font-weight:800;margin-top:8px;letter-spacing:-.5px}
+.hd h1 b{color:#3B5CC4}
+.hd p{margin-top:10px;color:#b3a8bf;font-size:14px;line-height:1.5}
+.back{display:inline-flex;align-items:center;gap:7px;margin:6px auto 0;color:#9d8fab;text-decoration:none;font-weight:700;font-size:13px}
+.back svg{width:16px;height:16px}
+.grid{display:flex;flex-direction:column;gap:18px;margin-top:24px}
+.vcard{background:#171022;border:1px solid #271a35;border-radius:18px;overflow:hidden}
+.vthumb{background:#0c0712;display:flex;align-items:center;justify-content:center;padding:18px;min-height:160px}
+.vthumb img{max-width:100%;max-height:300px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.vthumb .pdf{display:flex;flex-direction:column;align-items:center;gap:10px;color:#C97A14}
+.vthumb .pdf svg{width:56px;height:56px}
+.vbody{padding:16px 18px}
+.vtt{font-size:16.5px;font-weight:800}
+.vdd{font-size:13px;color:#9d8fab;margin-top:4px}
+.vmeta{display:inline-block;margin-top:10px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#8FA6F0;background:rgba(59,92,196,.14);border:1px solid rgba(59,92,196,.4);border-radius:50px;padding:4px 10px}
+.vacts{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{flex:1;min-width:130px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:800;font-size:13.5px;padding:12px 14px;border-radius:12px;border:none;cursor:pointer;font-family:inherit}
+.btn svg{width:17px;height:17px}
+.btn-dl{background:linear-gradient(135deg,#3B5CC4,#2FD8B6);color:#fff}
+.btn-share{background:#221733;color:#e9def6;border:1px solid #38284d}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#22C55E;color:#06210f;font-weight:800;font-size:13px;padding:11px 18px;border-radius:50px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+</style></head>
+<body><div class="wrap">
+  <div class="hd">
+    <div class="sun"></div>
+    <div class="kick">Flowin × Nuits du Sud 2026</div>
+    <h1>Visuels <b>partenaires</b></h1>
+    <p>Les visuels prêts à diffuser et à imprimer. Téléchargez, ou partagez le lien par mail / WhatsApp.</p>
+    <a class="back" href="/demos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Retour à l'accès direct</a>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+  var BASE='/nds/visuels/';
+  var ITEMS=[
+    {file:'carre_1080x1080.png', tt:'Carré · réseaux sociaux', dd:'Post Instagram / Facebook, format carré.', meta:'1080 × 1080 px', img:true},
+    {file:'story_1080x1920.png', tt:'Story · vertical', dd:'Story Instagram / statut WhatsApp, format 9:16.', meta:'1080 × 1920 px', img:true},
+    {file:'forex_700x700.png', tt:'Forex 70 × 70 · aperçu', dd:'Aperçu du support physique posé sur place (caisses, bar).', meta:'700 × 700 px', img:true},
+    {file:'forex_700x700_print.pdf', tt:'Forex 70 × 70 · prêt à imprimer', dd:'Fichier PDF haute définition pour l\'impression du panneau.', meta:'PDF · impression', img:false}
+  ];
+  var ICON_DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>';
+  var ICON_SHARE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+  var ICON_PDF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+
+  function abs(rel){ try{ return new URL(rel, window.location.href).href; }catch(e){ return rel; } }
+  var toast=document.getElementById('toast'); var tT=null;
+  function showToast(m){ toast.textContent=m; toast.className='toast show'; if(tT) clearTimeout(tT); tT=setTimeout(function(){ toast.className='toast'; },1900); }
+  function copy(url){
+    function done(){ showToast('Lien copié'); }
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,function(){ fb(url,done); }); }
+    else { fb(url,done); }
+  }
+  function fb(url,done){
+    var ta=document.createElement('textarea'); ta.value=url; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ showToast('Copie impossible'); }
+    document.body.removeChild(ta);
+  }
+  function share(item){
+    var url=abs(BASE+item.file);
+    var txt='Visuel NDS 2026 — '+item.tt+' : '+url;
+    if(navigator.share){ navigator.share({title:item.tt, text:'Visuel NDS 2026 — '+item.tt, url:url}).catch(function(){}); return; }
+    copy(url);
+  }
+
+  var grid=document.getElementById('grid');
+  for(var i=0;i<ITEMS.length;i++){
+    (function(item){
+      var url=BASE+item.file;
+      var card=document.createElement('div'); card.className='vcard';
+      var thumb='';
+      if(item.img){ thumb='<div class="vthumb"><img src="'+url+'" alt="'+item.tt+'" loading="lazy"/></div>'; }
+      else { thumb='<div class="vthumb"><div class="pdf">'+ICON_PDF+'<span style="font-weight:800;font-size:13px">PDF impression</span></div></div>'; }
+      card.innerHTML=thumb+
+        '<div class="vbody"><div class="vtt">'+item.tt+'</div><div class="vdd">'+item.dd+'</div>'+
+        '<span class="vmeta">'+item.meta+'</span>'+
+        '<div class="vacts">'+
+          '<a class="btn btn-dl" href="'+url+'" download>'+ICON_DL+'Télécharger</a>'+
+          '<button class="btn btn-share" type="button">'+ICON_SHARE+'Partager</button>'+
+        '</div></div>';
+      grid.appendChild(card);
+      var sb=card.querySelector('.btn-share');
+      sb.addEventListener('click',function(){ share(item); });
+    })(ITEMS[i]);
+  }
+})();
+</script>
+</body></html>
