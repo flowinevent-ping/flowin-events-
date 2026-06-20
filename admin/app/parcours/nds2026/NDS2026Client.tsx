@@ -156,7 +156,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   useEffect(() => {
     ndsMigrateLegacy()
-    try { const s = localStorage.getItem(lsKey); if (s) { setTicket(s); setSaved(true) } } catch {}
+    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); if (s !== 'played') setTicket(s) } } catch {}
     // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
     const prof = getJoueurLocal()
     if (prof) {
