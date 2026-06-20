@@ -1,7 +1,20 @@
 # HANDOFF — Flowin / Nuits du Sud 2026
 
-> Source de vérité du reste-à-faire. Mis à jour le **18/06/2026 (soir)**.
-> HEAD origin/main attendu : **d0cbfac**
+> Source de vérité du reste-à-faire. Mis à jour le **20/06/2026**.
+> HEAD origin/main attendu : **8c4fb7a**
+
+---
+
+## ✅ SESSION 20/06/2026 — 6 tâches du handoff faites & poussées
+
+- **Onglet « Participants NDS 2026 »** (dashboard SA, groupe NDS) : agrégé sur les 13 events du super-event, colonnes prénom/nom/email/tel/ticket/stations jouées/date, KPI total. Source de vérité confirmée = 5 participants. — `07f3da6`
+- **Carte NDS (dashboard)** : affiche stations (vert) + commerces (or) avec légende ; filtre Front NDS « Sur la carte » → « Avec coordonnées ». — `07f3da6`
+- **Présentation partenaire** : schéma SVG « Place du Grand Jardin » (supports physiques 70×70 Caisses/Bar + digitaux Écran/Brigade Verte), positions calées sur les coordonnées réelles. Appliqué à `admin/public/nds-partenaire-presentation.html` + `docs/mockups/flowin-partenaire-presentation.html`. — `f6ac8f9`
+- **Parcours NDS — reconnaissance par email** : `lookupJoueurByEmail` (lib/parcours.ts, lecture seule) ; à l'accueil/inscription, lookup compte → message de bienvenue + pré-remplissage + route `claimJoueur` (garde-fou ticket par compte, pas par appareil). — `8731453`
+- **Parcours NDS — écritures visibles** : `persist()` n'affiche plus « validé » sans confirmation ; échec réseau visible + 1 réessai auto + bouton « Réessayer ». — `8731453`
+- **HUB** : cartes Pitch + Visuels ajoutées (partage mail/WhatsApp auto sur toutes les cartes) + nouvelle page galerie `nds-visuels.html` (carré/story/forex 70×70 PNG+PDF, télécharger & partager par visuel). — `8c4fb7a`
+
+Validations : Acorn ES2020 = 0 err (dashboard, hub, galerie) · miroir `dashboard.html` ↔ `static/dashboard.html` MD5 identiques · `tsc --noEmit` = 0 err · `next build` ✓ (26/26 pages).
 
 ---
 
