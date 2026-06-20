@@ -3616,7 +3616,16 @@ async function loadNdsCarte(){
   var ev = await supaFetch('events', 'select=id,nom,lat,lng,module&module=eq.nds2026&order=id.asc');
   var stations = [];
   if(ev){ for(var i=0;i<ev.length;i++){ if(NDS_CARTE_STATIONS.indexOf(ev[i].id)>-1) stations.push(ev[i]); } }
-  state.ndsCarte = { stations: stations };
+  var pa = await supaFetch('partenaires', 'select=id,nom,latitude,longitude,actif,visible,super_event_id&order=nom.asc');
+  var partners = [];
+  if(pa){ for(var k=0;k<pa.length;k++){ partners.push(pa[k]); } }
+  state.ndsCarte = { stations: stations, partners: partners };
+  render();
+}
+function ndsCarteSetView(v){
+  state.ndsCarteView = v;
+  if(window._ndsMapObj){ try{ window._ndsMapObj.remove(); }catch(e){} window._ndsMapObj=null; }
+  var el=document.getElementById('nds-leaflet'); if(el) el.setAttribute('data-built','0');
   render();
 }
 function ndsCarteReload(){ state.ndsCarte=null; if(window._ndsMapObj){ try{ window._ndsMapObj.remove(); }catch(e){} window._ndsMapObj=null; } toast('Rechargement…'); render(); }
@@ -3662,6 +3671,7 @@ function ndsMapAddPartner(map, p){
   var m=L.marker([p.latitude,p.longitude],{draggable:true,icon:ndsCarteIcon('#F5B544')}).addTo(map);
   m.bindTooltip(p.nom||p.id);
   m.on('dragend', function(){ var ll=m.getLatLng(); ndsCartePartnerPatch(p.id, +ll.lat.toFixed(6), +ll.lng.toFixed(6)); });
+  m.on('click', function(){ if(typeof goView==='function') goView('nds-front'); });
   return m;
 }
 function ndsMapBuild(elm){
@@ -3671,8 +3681,14 @@ function ndsMapBuild(elm){
   window._ndsMapObj=map;
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(map);
   var pts=[];
-  var st=state.ndsCarte.stations;
-  for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lat,s.lng]); }
+  var view = state.ndsCarteView || 'stations';
+  if(view==='partenaires'){
+    var pa=state.ndsCarte.partners||[];
+    for(var k=0;k<pa.length;k++){ var p=pa[k]; if(p.latitude==null||p.longitude==null) continue; ndsMapAddPartner(map,p); pts.push([p.latitude,p.longitude]); }
+  } else {
+    var st=state.ndsCarte.stations;
+    for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lat,s.lng]); }
+  }
   if(pts.length>1){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:17}); }catch(e){} }
   else if(pts.length===1){ map.setView(pts[0],16); }
   setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 220);
@@ -3695,24 +3711,48 @@ function ndsCartePlace(kind, id){
 }
 function renderNdsCarte(){
   if(!state.ndsCarte){ loadNdsCarte(); return '<div class="page"><div class="page-header"><div class="page-title">&#128506; Carte NDS</div></div><div class="empty-block">Chargement de la carte…</div></div>'; }
-  var st=state.ndsCarte.stations;
+  var view = state.ndsCarteView || 'stations';
+  var st=state.ndsCarte.stations||[];
+  var pa=state.ndsCarte.partners||[];
   var stPlaced=0, stMiss=0;
   for(var i=0;i<st.length;i++){ if(st[i].lat!=null&&st[i].lng!=null) stPlaced++; else stMiss++; }
+  var paPlaced=0, paMiss=0;
+  for(var j=0;j<pa.length;j++){ if(pa[j].latitude!=null&&pa[j].longitude!=null) paPlaced++; else paMiss++; }
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — stations</div><div class="page-subtitle">Les '+st.length+' stations physiques réelles. Clique une station pour ouvrir sa fiche, ou glisse son point sur la carte (sauvegarde auto).</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
-  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(stMiss,'À placer')+'</div>';
+  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS</div><div class="page-subtitle">Deux couches séparées : les stations du festival et les commerces partenaires. Clique un point pour ouvrir sa fiche, ou glisse-le pour le placer (sauvegarde auto).</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
+  // Switch Stations / Partenaires
+  h+='<div style="display:inline-flex;gap:4px;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:10px;padding:4px;margin-bottom:12px">';
+  h+='<button class="btn-sm" style="border-radius:7px;'+(view==='stations'?'background:var(--sa-accent,#5B79E0);color:#fff':'background:transparent')+'" onclick="ndsCarteSetView(\'stations\')">&#128205; Stations ('+st.length+')</button>';
+  h+='<button class="btn-sm" style="border-radius:7px;'+(view==='partenaires'?'background:#F5B544;color:#1a1226':'background:transparent')+'" onclick="ndsCarteSetView(\'partenaires\')">&#127978; Partenaires ('+pa.length+')</button>';
+  h+='</div>';
+  if(view==='partenaires'){ h+='<div class="kpi-grid">'+prospKpi(paPlaced+'/'+pa.length,'Commerces placés')+prospKpi(paMiss,'À placer')+'</div>'; }
+  else { h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(stMiss,'À placer')+'</div>'; }
   h+='<div style="display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start">';
   h+='<div id="nds-leaflet" style="height:540px;border-radius:14px;overflow:hidden;border:1px solid var(--sa-border);position:relative;z-index:0"></div>';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:14px;max-height:540px;overflow:auto">';
-  h+='<div style="font-weight:800;margin-bottom:8px">Stations</div>';
-  for(var a=0;a<st.length;a++){
-    var s=st[a]; var placed=(s.lat!=null&&s.lng!=null);
-    h+='<div id="ndsplace-station-'+s.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--sa-border)">';
-    h+='<span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(placed?'#2FD89E':'#cbd5e1')+'"></span>';
-    h+='<span style="flex:1;font-size:12.5px;font-weight:600">'+esc(s.nom||s.id)+'</span>';
-    h+='<button class="btn-sm" onclick="openDrawerFor(\'event\',\''+s.id+'\')">Fiche</button>';
-    if(!placed){ h+='<button class="btn-sm" onclick="ndsCartePlace(\'station\',\''+s.id+'\')">Placer</button>'; }
-    h+='</div>';
+  if(view==='partenaires'){
+    h+='<div style="font-weight:800;margin-bottom:8px">Partenaires</div>';
+    if(!pa.length){ h+='<div style="font-size:12.5px;color:var(--sa-muted)">Aucun partenaire. Ajoute-les dans Front NDS.</div>'; }
+    for(var b=0;b<pa.length;b++){
+      var p=pa[b]; var pplaced=(p.latitude!=null&&p.longitude!=null);
+      h+='<div id="ndsplace-partner-'+p.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--sa-border)">';
+      h+='<span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(pplaced?'#F5B544':'#cbd5e1')+'"></span>';
+      h+='<span style="flex:1;font-size:12.5px;font-weight:600">'+esc(p.nom||p.id)+'</span>';
+      h+='<button class="btn-sm" onclick="goView(\'nds-front\')">Fiche</button>';
+      if(!pplaced){ h+='<button class="btn-sm" onclick="ndsCartePlace(\'partner\',\''+p.id+'\')">Placer</button>'; }
+      h+='</div>';
+    }
+  } else {
+    h+='<div style="font-weight:800;margin-bottom:8px">Stations</div>';
+    for(var a=0;a<st.length;a++){
+      var s=st[a]; var placed=(s.lat!=null&&s.lng!=null);
+      h+='<div id="ndsplace-station-'+s.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--sa-border)">';
+      h+='<span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(placed?'#2FD89E':'#cbd5e1')+'"></span>';
+      h+='<span style="flex:1;font-size:12.5px;font-weight:600">'+esc(s.nom||s.id)+'</span>';
+      h+='<button class="btn-sm" onclick="openDrawerFor(\'event\',\''+s.id+'\')">Fiche</button>';
+      if(!placed){ h+='<button class="btn-sm" onclick="ndsCartePlace(\'station\',\''+s.id+'\')">Placer</button>'; }
+      h+='</div>';
+    }
   }
   h+='</div></div></div>';
   return h;
