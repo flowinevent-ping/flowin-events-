@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { writeJoueur, claimJoueur, getJoueurLocal, shuffle, AGE_OPTIONS } from '@/lib/parcours'
+import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, shuffle, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
@@ -113,6 +113,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [ticket, setTicket] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(false)
+  const [emailKnown, setEmailKnown] = useState<{ prenom?: string; alreadyPlayed: boolean } | null>(null)
+  const [lookingUp, setLookingUp] = useState(false)
   const [bonusAnswers, setBonusAnswers] = useState<Record<string, string | string[]>>({})
   const [quizAnswers, setQuizAnswers] = useState<{ qid: string; texte: string; choix: number; reponse: string; bonne: number; correct: boolean }[]>([])
   const [bonusIdx, setBonusIdx] = useState(0)
@@ -351,6 +354,24 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     else setScreen('resultats')
   }, [qIdx, questions])
 
+  // Reconnaissance par email (Tâche 4) : pré-remplissage + route claimJoueur (ticket par compte, pas par appareil)
+  async function onEmailBlur(): Promise<void> {
+    const em = form.email.trim()
+    if (em.indexOf('@') === -1 || recurrent || lookingUp) return
+    setLookingUp(true)
+    try {
+      const j = await lookupJoueurByEmail(em, evId)
+      if (j) {
+        setRecurrent({ id: j.id, email: j.email, prenom: j.prenom })
+        setForm(f => ({ ...f,
+          prenom: j.prenom || f.prenom, nom: j.nom || f.nom, tel: j.tel || f.tel,
+          cp: j.cp || f.cp, age: j.age || f.age, sexe: j.genre || f.sexe }))
+        setEmailKnown({ prenom: j.prenom, alreadyPlayed: j.alreadyPlayed })
+      } else { setEmailKnown(null) }
+    } catch { /* silencieux */ }
+    setLookingUp(false)
+  }
+
   async function submitInscription() {
     const errs: Record<string, string> = {}
     if (!form.prenom.trim()) errs.prenom = 'Requis'
@@ -363,21 +384,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     setScreen('final')
   }
 
-  async function persist(): Promise<string> {
-    if (saved) return ticket
-    setSaving(true)
-    const tc = generateTicket('ND')
-    // Marquage "joué" en local IMMEDIATEMENT (avant tout appel réseau) : c'est ce qui
-    // empêche de rejouer la même station, même si Supabase est lent ou injoignable.
-    setTicket(tc)
-    setSaved(true)
-    try {
-      localStorage.setItem(lsKey, tc)
-      ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd())
-      setTicketCount(ndsCumul())
-    } catch {}
-
-    const res = recurrent
+  // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
+  async function remoteWrite(tc: string): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+    return recurrent
       ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined })
       : await writeJoueur({
           email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
@@ -386,17 +395,49 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
           optin: form.optin, optin_version: OPTIN_VERSION,
         })
+  }
+
+  async function persist(): Promise<string> {
+    if (saved) return ticket
+    setSaving(true)
+    const tc = generateTicket('ND')
+    // Marquage "joué" en local IMMEDIATEMENT (anti-rejeu), MAIS l'échec d'écriture
+    // distante reste visible (Tâche 5) : on ne prétend pas "gagné" sans ligne en base.
+    setTicket(tc)
+    setSaved(true)
+    try {
+      localStorage.setItem(lsKey, tc)
+      ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd())
+      setTicketCount(ndsCumul())
+    } catch {}
+
+    let res = await remoteWrite(tc)
+    if (!res.success && !res.duplicate) { res = await remoteWrite(tc) } // 1 réessai auto
     setSaving(false)
-    // Si Supabase a renvoyé un ticket (ex. doublon avec code existant), on l'aligne
     const finalTicket = res.ticket || tc
     if (finalTicket !== tc) {
       setTicket(finalTicket)
       try { localStorage.setItem(lsKey, finalTicket) } catch {}
     }
-    if (!res.success && !res.duplicate && res.error) {
-      console.error('[nds2026] enregistrement Supabase échoué (jeu marqué joué en local):', res.error)
-    }
+    const ok = res.success || res.duplicate
+    setSaveError(!ok)
+    if (!ok) console.error('[nds2026] enregistrement Supabase échoué (réessai possible):', res.error)
     return finalTicket
+  }
+
+  // Réessai manuel depuis la bannière d'erreur — Tâche 5
+  async function retrySave(): Promise<void> {
+    if (saving) return
+    setSaving(true)
+    const tc = ticket || generateTicket('ND')
+    const res = await remoteWrite(tc)
+    setSaving(false)
+    const ok = res.success || res.duplicate
+    setSaveError(!ok)
+    if (ok) {
+      const ft = res.ticket || tc
+      if (ft !== tc) { setTicket(ft); try { localStorage.setItem(lsKey, ft) } catch {} }
+    }
   }
 
   async function finaliser() {
@@ -613,7 +654,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div><label className="label">Prénom</label><input className="input" value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} />{errors.prenom && <div className="err">{errors.prenom}</div>}</div>
                 <div><label className="label">Nom</label><input className="input" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} />{errors.nom && <div className="err">{errors.nom}</div>}</div>
               </div>
-              <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoCapitalize="none" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />{errors.email && <div className="err">{errors.email}</div>}</div>
+              <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoCapitalize="none" value={form.email} onChange={e => { const v = e.target.value; setForm(f => ({ ...f, email: v })); if (emailKnown) setEmailKnown(null) }} onBlur={onEmailBlur} />{errors.email && <div className="err">{errors.email}</div>}
+                {emailKnown && (
+                  <div style={{ background: '#EEF2FF', border: '1px solid #3B5CC4', borderRadius: 12, padding: '10px 12px', marginTop: 8, color: '#23357a', fontSize: 13.5 }}>
+                    {emailKnown.alreadyPlayed
+                      ? <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''} 👋 Tu as déjà joué cette station — tu gardes ton ticket.</>
+                      : <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''} 👋 On a pré-rempli tes infos, vérifie et valide.</>}
+                  </div>
+                )}
+              </div>
               <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
               <div className="grid2" style={{ marginBottom: 12 }}>
                 <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
@@ -711,9 +760,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="res-head">
               <div className="res-ico"><svg className="ic"><use href="#i-checkc" /></svg></div>
               <div className="res-bravo disp">C&apos;est validé !</div>
-              <div className="res-sub">Participation enregistrée pour le tirage</div>
+              <div className="res-sub">{saveError ? 'Ticket émis — sauvegarde en ligne à confirmer' : 'Participation enregistrée pour le tirage'}</div>
             </div>
             <div className="res-body padnav">
+              {saveError && (
+                <div style={{ background: '#FFF4E5', border: '1px solid #F5B544', borderRadius: 12, padding: '12px 14px', margin: '0 0 14px', color: '#7a4d00', fontSize: 14, textAlign: 'left' }}>
+                  <b>Enregistrement non confirmé.</b> Ton ticket <b>{ticket || '—'}</b> n&apos;a pas pu être sauvegardé en ligne (réseau).
+                  <a onClick={retrySave} style={{ display: 'inline-block', marginTop: 8, fontWeight: 700, color: '#3B5CC4', cursor: 'pointer' }}>{saving ? 'Nouvelle tentative…' : 'Réessayer maintenant ↻'}</a>
+                </div>
+              )}
               <div className="res-eyebrow">Joue les autres stations ce soir</div>
               <div className="nextcard">
                 {STATIONS.filter(s => s.id !== evId).map(s => (

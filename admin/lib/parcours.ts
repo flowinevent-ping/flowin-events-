@@ -375,6 +375,31 @@ export function getJoueurLocal(): { id: string; email: string; prenom?: string; 
   return null
 }
 
+/* ── Bloc 2 — Reconnaissance par EMAIL (compte, pas appareil) ──
+   Lecture seule. À l'accueil/inscription, on retrouve le compte par email_lower
+   pour pré-remplir et router vers claimJoueur (garde-fou ticket par compte).
+   alreadyPlayed = a déjà une participation pour CET event (dédup downstream). */
+export async function lookupJoueurByEmail(
+  email: string,
+  evId: string
+): Promise<{ id: string; email: string; prenom?: string; nom?: string; tel?: string; cp?: string; age?: string; genre?: string; alreadyPlayed: boolean; ticket?: string } | null> {
+  const emailLower = (email || '').toLowerCase().trim()
+  if (emailLower.indexOf('@') === -1) return null
+  const { data, error } = await supabase
+    .from('joueurs')
+    .select('id,email,prenom,nom,tel,code_postal,age_tranche,genre,events,ticket_code')
+    .eq('email_lower', emailLower)
+    .limit(1)
+  if (error || !data?.length) return null
+  const j = data[0] as { id: string; email?: string; prenom?: string; nom?: string; tel?: string; code_postal?: string; age_tranche?: string; genre?: string; events?: string[]; ticket_code?: string }
+  const alreadyPlayed = Array.isArray(j.events) && j.events.indexOf(evId) > -1
+  return {
+    id: j.id, email: j.email || emailLower, prenom: j.prenom, nom: j.nom, tel: j.tel,
+    cp: j.code_postal, age: j.age_tranche, genre: j.genre,
+    alreadyPlayed, ticket: j.ticket_code,
+  }
+}
+
 /* ── Bloc 2 — Réclamer (joueur déjà inscrit) : participation + ticket/gain SANS re-formulaire ── */
 export async function claimJoueur(
   joueur: { id: string; email: string; prenom?: string },
