@@ -7896,6 +7896,17 @@ function renderModuleConfigInline(e){
   return html;
 }
 // ============ SUPER EVENTS ============
+function seParticipantsCount(se){
+  if(!se || !se.events || !se.events.length || !DATA.joueurs) return 0;
+  var n=0;
+  for(var k=0;k<DATA.joueurs.length;k++){
+    var j=DATA.joueurs[k]; if(!j || !j.events || !j.events.length) continue;
+    var hit=false;
+    for(var a=0;a<j.events.length;a++){ if(se.events.indexOf(j.events[a])>-1){ hit=true; break; } }
+    if(hit) n++;
+  }
+  return n;
+}
 function renderBiblioSuperEvents(){
   let html = '<div class="page">';
   html += '<div class="page-header">'
@@ -7908,7 +7919,7 @@ function renderBiblioSuperEvents(){
     DATA.superEvents.forEach(se => {
       const evs = (se.events||[]).map(findEvent).filter(Boolean);
       const pros = (se.pros||[]).map(findPro).filter(Boolean);
-      const totalPart = evs.reduce((s,e)=>s+(e.participants||0),0);
+      const totalPart = seParticipantsCount(se);
       const liveCount = evs.filter(e=>e.status==='live').length;
       html += '<div class="list-card" onclick="openDrawerFor(\'superEvent\',\''+se.id+'\')">'
            + '<div class="flex flex-between mb-2"><div style="font-size:16px;font-weight:800">🌟 '+esc(se.nom)+'</div>'+statusChip(se.status)+'</div>'
@@ -8087,7 +8098,7 @@ function drawerSuperEvent(se){
       html += '<button class="btn btn-block" onclick="seCreateAndAddEvent(\''+se.id+'\')">+ Créer un nouvel event et l\'ajouter</button>';
     }
   } else if(state.drawer.tab==='stats'){
-    const totalPart = evs.reduce((s,e)=>s+(e.participants||0),0);
+    const totalPart = seParticipantsCount(se);
     const totalOptin = evs.reduce((s,e)=>s+(e.joueursOptin||0),0);
     const totalGag = evs.reduce((s,e)=>s+(e.gagnants||0),0);
     html += '<div class="kpi-grid" style="grid-template-columns:1fr 1fr">'
