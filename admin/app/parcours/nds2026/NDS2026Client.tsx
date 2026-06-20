@@ -406,40 +406,44 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     setScreen('final')
   }
 
+  // Droit au ticket NDS : pas de quiz configuré -> éligible ; sinon quiz parfait (4/4) requis. Le bonus rattrape sinon.
+  const quizPerfect = questions.length === 0 || score >= questions.length
+
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
-  async function remoteWrite(tc: string): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+  async function remoteWrite(tc: string, eligible: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
     return recurrent
-      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined })
+      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, ticketEligible: eligible })
       : await writeJoueur({
           email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
           code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined,
           score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
           source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
-          optin: form.optin, optin_version: OPTIN_VERSION,
+          optin: form.optin, optin_version: OPTIN_VERSION, ticket_eligible: eligible,
         })
   }
 
-  async function persist(): Promise<string> {
+  async function persist(eligibleArg?: boolean): Promise<string> {
     if (saved) return ticket
     setSaving(true)
+    // Éligible si quiz parfait OU bonus fait (eligibleArg force l'état frais quand le bonus vient d'être validé)
+    const eligible = eligibleArg ?? (quizPerfect || bonusDone)
     const tc = generateTicket('ND')
     // Marquage "joué" en local IMMEDIATEMENT (anti-rejeu), MAIS l'échec d'écriture
     // distante reste visible (Tâche 5) : on ne prétend pas "gagné" sans ligne en base.
     setTicket(tc)
     setSaved(true)
     try {
-      localStorage.setItem(lsKey, tc)
-      ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd())
-      setTicketCount(ndsCumul())
+      localStorage.setItem(lsKey, eligible ? tc : 'played')
+      if (eligible) { ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd()); setTicketCount(ndsCumul()) }
     } catch {}
 
-    let res = await remoteWrite(tc)
-    if (!res.success && !res.duplicate) { res = await remoteWrite(tc) } // 1 réessai auto
+    let res = await remoteWrite(tc, eligible)
+    if (!res.success && !res.duplicate) { res = await remoteWrite(tc, eligible) } // 1 réessai auto
     setSaving(false)
     const finalTicket = res.ticket || tc
     if (finalTicket !== tc) {
       setTicket(finalTicket)
-      try { localStorage.setItem(lsKey, finalTicket) } catch {}
+      try { if (eligible) localStorage.setItem(lsKey, finalTicket) } catch {}
     }
     const ok = res.success || res.duplicate
     setSaveError(!ok)
@@ -452,7 +456,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (saving) return
     setSaving(true)
     const tc = ticket || generateTicket('ND')
-    const res = await remoteWrite(tc)
+    const res = await remoteWrite(tc, quizPerfect || bonusDone)
     setSaving(false)
     const ok = res.success || res.duplicate
     setSaveError(!ok)
@@ -470,11 +474,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   async function finishBonus() {
     setBonusDone(true)
-    try {
-      ndsLedgerAdd('b:' + ndsFamily(evId) + '@' + ndsYmd())
-      setTicketCount(ndsCumul())
-    } catch {}
-    if (recurrent) { await persist(); setScreen('final') }
+    // Le bonus rapporte le ticket si le quiz ne l'a pas déjà donné (1 ticket/station/jour) -> persist(true)
+    if (recurrent) { await persist(true); setScreen('final') }
     else setScreen('inscription')
   }
 
@@ -745,18 +746,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="res-head">
               <div className="res-ico"><svg className="ic"><use href="#i-trophy" /></svg></div>
-              <div className="res-bravo disp">Bravo !</div>
-              <div className="res-sub">Participation enregistrée pour le tirage</div>
+              <div className="res-bravo disp">{quizPerfect || bonusDone ? 'Bravo !' : 'Presque !'}</div>
+              <div className="res-sub">{quizPerfect || bonusDone ? 'Ton ticket est validé pour le tirage' : 'Pas encore de ticket pour cette station'}</div>
             </div>
             <div className="res-body">
               <div className="score-card">
                 <div className="score disp">{score}/{questions.length}</div>
-                <div className="score-line">Bien joué&#8239;!</div>
+                <div className="score-line">
+                  {quizPerfect ? 'Sans faute — 1 ticket gagné\u202f🎟️'
+                    : bonusDone ? 'Ticket gagné grâce au bonus\u202f🎟️'
+                    : `Il fallait ${questions.length}/${questions.length} pour le ticket`}
+                </div>
               </div>
-              {bonusQs.length > 0 && !bonusDone && <a className="double" onClick={() => { setBonusIdx(0); setScreen('bonus') }}><svg className="ic"><use href="#i-spark" /></svg> Double tes chances</a>}
+              {bonusQs.length > 0 && !bonusDone && (
+                <a className="double" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
+                  <svg className="ic"><use href="#i-spark" /></svg>
+                  {quizPerfect ? ' Double tes points — question bonus' : ' Rattrape ton ticket — question bonus'}
+                </a>
+              )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
               <div className="infocard b-green"><svg className="ic"><use href="#i-checkc" /></svg><div>Participation enregistrée&#8239;!</div></div>
-              <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? 'Voir mon ticket →' : 'Valider et recevoir mon ticket →')}</a>
+              <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? (quizPerfect || bonusDone ? 'Voir mon ticket →' : 'Continuer →') : (quizPerfect || bonusDone ? 'Valider et recevoir mon ticket →' : 'Continuer sans ticket →'))}</a>
             </div>
           </section>
         )}
@@ -785,8 +795,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="res-head">
               <div className="res-ico"><svg className="ic"><use href="#i-checkc" /></svg></div>
-              <div className="res-bravo disp">C&apos;est validé !</div>
-              <div className="res-sub">{saveError ? 'Ticket émis — sauvegarde en ligne à confirmer' : 'Participation enregistrée pour le tirage'}</div>
+              <div className="res-bravo disp">{quizPerfect || bonusDone ? "C'est validé !" : 'Participation enregistrée'}</div>
+              <div className="res-sub">{saveError ? 'Ticket émis — sauvegarde en ligne à confirmer' : (quizPerfect || bonusDone ? 'Participation enregistrée pour le tirage' : 'Pas de ticket à cette station — réussis un sans-faute ou la question bonus')}</div>
             </div>
             <div className="res-body padnav">
               {saveError && (
