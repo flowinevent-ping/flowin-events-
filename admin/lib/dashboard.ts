@@ -197,3 +197,13 @@ export async function enregistrerTirage(params: {
   if (error) console.error('[enregistrerTirage] insert échoué:', error.message)
   return { ok: !error, code }
 }
+
+/* ── Clics partenaires rattachés à un pro (via partenaires.event_id ∈ events du pro) ── */
+export async function fetchProClics(eventIds: string[]): Promise<number> {
+  if (!eventIds.length) return 0
+  const { data: parts } = await supabase.from('partenaires').select('id').in('event_id', eventIds)
+  const ids = ((parts ?? []) as { id: string }[]).map(p => p.id)
+  if (!ids.length) return 0
+  const { count } = await supabase.from('partenaire_clics').select('id', { count: 'exact', head: true }).in('partenaire_id', ids)
+  return count ?? 0
+}

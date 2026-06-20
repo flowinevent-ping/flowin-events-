@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { fetchProDashboard, getQrUrl, type ProDashboardData } from '@/lib/pro'
-import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, enregistrerTirage, type ProGainRow } from '@/lib/dashboard'
+import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, enregistrerTirage, fetchProClics, type ProGainRow } from '@/lib/dashboard'
 import type { FlowinEvent, FlowinJoueur, FlowinLot } from '@/lib/types'
 
 type Tab = 'stats' | 'gains' | 'tirage' | 'participants' | 'lots' | 'qr' | 'export'
@@ -80,6 +80,8 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
     setRefreshing(false)
   }
 
+  const [proClics, setProClics] = useState<number>(0)
+
   useEffect(() => {
     if (!ev?.id || !ev?.super_event_id) { setSeStats(null); setProGains([]); return }
     let on = true
@@ -87,6 +89,13 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
     fetchProGains([ev.id]).then(g => { if (on) setProGains(g) })
     return () => { on = false }
   }, [ev?.id, ev?.super_event_id])
+
+  useEffect(() => {
+    let on = true
+    const ids = data.events.map(e => e.id)
+    fetchProClics(ids).then(n => { if (on) setProClics(n) })
+    return () => { on = false }
+  }, [data.events])
 
   async function reloadGains() {
     if (!ev?.id) return
@@ -253,6 +262,11 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
                 <div className="kpi-val">{stats.gagnants}</div>
                 <div className="kpi-lbl">Gagnants</div>
                 <div className="kpi-sub">{evLots.length} lot{evLots.length!==1?'s':''}</div>
+              </div>
+              <div className="kpi" style={{ background:'#EEF2FF',color:'#3B4F9E' }}>
+                <span style={{ fontSize:13 }}>👆</span>
+                <div className="kpi-val">{proClics}</div>
+                <div className="kpi-lbl">Clics sur vos liens</div>
               </div>
             </div>
 
