@@ -396,8 +396,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   async function submitInscription() {
     const errs: Record<string, string> = {}
-    if (!form.prenom.trim()) errs.prenom = 'Requis'
-    if (!form.nom.trim()) errs.nom = 'Requis'
+    // Compte reconnu (recurrent) : profil déjà connu -> pas besoin de re-remplir prénom/nom
+    if (!recurrent && !form.prenom.trim()) errs.prenom = 'Requis'
+    if (!recurrent && !form.nom.trim()) errs.nom = 'Requis'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     if (!form.optin) errs.optin = 'Merci de cocher cette case pour continuer'
     setErrors(errs)
