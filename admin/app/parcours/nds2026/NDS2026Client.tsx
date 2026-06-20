@@ -537,6 +537,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .optb.sel{border-color:#3B5CC4 !important;background:rgba(59,92,196,.12) !important;color:#3B5CC4 !important}
         .ndsbody .rgpd, .ndsbody .rgpd-check{color:#52455e !important}
         .ndsbody .rgpd-check div{color:#52455e !important;font-weight:600}
+        .ndsbody .rgpd-check{border:1.5px solid #d9cfe6 !important;background:#faf7fd !important}
+        .ndsbody .rgpd-check.on{border-color:var(--magenta) !important;background:rgba(232,33,107,.07) !important}
+        .ndsbody .rgpd .rc{border:2px solid #b9a9cc !important;background:#fff !important}
+        .ndsbody .rgpd-check.on .rc{background:var(--magenta) !important;border-color:var(--magenta) !important;color:#fff !important}
         .ndsbody .label-strong{color:#3a2f49 !important;font-weight:800 !important}
         .ndsbody .chip-em{font-size:15px}
         .ndsbody .opt.correct{color:#14532d !important}
@@ -654,10 +658,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div><div className="dtitle">Dernière étape !</div><div className="dsub">Tes infos pour valider ton ticket et recevoir tes gains</div></div>
               </div>
               <div className="grid2" style={{ marginBottom: 12 }}>
-                <div><label className="label">Prénom</label><input className="input" value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} />{errors.prenom && <div className="err">{errors.prenom}</div>}</div>
-                <div><label className="label">Nom</label><input className="input" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} />{errors.nom && <div className="err">{errors.nom}</div>}</div>
+                <div><label className="label">Prénom</label><input className="input" autoComplete="given-name" value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} />{errors.prenom && <div className="err">{errors.prenom}</div>}</div>
+                <div><label className="label">Nom</label><input className="input" autoComplete="family-name" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} />{errors.nom && <div className="err">{errors.nom}</div>}</div>
               </div>
-              <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoCapitalize="none" value={form.email} onChange={e => { const v = e.target.value; setForm(f => ({ ...f, email: v })); if (emailKnown) setEmailKnown(null) }} onBlur={onEmailBlur} />{errors.email && <div className="err">{errors.email}</div>}
+              <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e => { const v = e.target.value; setForm(f => ({ ...f, email: v })); if (emailKnown) setEmailKnown(null) }} onBlur={onEmailBlur} />{errors.email && <div className="err">{errors.email}</div>}
                 {emailKnown && (
                   <div style={{ background: '#EEF2FF', border: '1px solid #3B5CC4', borderRadius: 12, padding: '10px 12px', marginTop: 8, color: '#23357a', fontSize: 13.5 }}>
                     {emailKnown.alreadyPlayed
@@ -666,12 +670,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   </div>
                 )}
               </div>
-              <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
+              <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
               <div className="grid2" style={{ marginBottom: 12 }}>
                 <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
                 <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
               </div>
-              <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
+              <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
               <div><label className="label label-strong">Tu as connu le festival par…</label>
                 <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}><span className="chip-em">{SRC_EMOJI[s]}</span> {s}</span>)}</div>
               </div>
