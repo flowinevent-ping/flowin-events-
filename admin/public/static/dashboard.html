@@ -3611,13 +3611,12 @@ function ndsCarteEnsureLeaflet(cb){
   js.onerror=function(){ toast('Carte indisponible (Leaflet)','error'); };
   document.head.appendChild(js);
 }
+var NDS_CARTE_STATIONS = ['ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
 async function loadNdsCarte(){
   var ev = await supaFetch('events', 'select=id,nom,lat,lng,module&module=eq.nds2026&order=id.asc');
   var stations = [];
-  if(ev){ for(var i=0;i<ev.length;i++){ if((''+ev[i].id).indexOf('ev-nds')===0) stations.push(ev[i]); } }
-  var partners = state.ndsFront;
-  if(!partners){ partners = await supaFetch('partenaires', 'select=id,nom,actif,latitude,longitude,super_event_id&order=ts.desc.nullslast&limit=1000'); }
-  state.ndsCarte = { stations: stations, partners: partners||[] };
+  if(ev){ for(var i=0;i<ev.length;i++){ if(NDS_CARTE_STATIONS.indexOf(ev[i].id)>-1) stations.push(ev[i]); } }
+  state.ndsCarte = { stations: stations };
   render();
 }
 function ndsCarteReload(){ state.ndsCarte=null; if(window._ndsMapObj){ try{ window._ndsMapObj.remove(); }catch(e){} window._ndsMapObj=null; } toast('Rechargement…'); render(); }
@@ -3655,6 +3654,7 @@ function ndsMapAddStation(map, s){
   var m=L.marker([s.lat,s.lng],{draggable:true,icon:ndsCarteIcon('#2FD89E')}).addTo(map);
   m.bindTooltip(s.nom||s.id);
   m.on('dragend', function(){ var ll=m.getLatLng(); ndsCarteStationPatch(s.id, +ll.lat.toFixed(6), +ll.lng.toFixed(6)); });
+  m.on('click', function(){ if(typeof openDrawerFor==='function') openDrawerFor('event', s.id); });
   return m;
 }
 function ndsMapAddPartner(map, p){
@@ -3673,8 +3673,6 @@ function ndsMapBuild(elm){
   var pts=[];
   var st=state.ndsCarte.stations;
   for(var i=0;i<st.length;i++){ var s=st[i]; if(s.lat==null||s.lng==null) continue; ndsMapAddStation(map,s); pts.push([s.lat,s.lng]); }
-  var pa=state.ndsCarte.partners||[];
-  for(var p=0;p<pa.length;p++){ var pp=pa[p]; if(pp.actif===false) continue; if(pp.latitude==null||pp.longitude==null) continue; ndsMapAddPartner(map,pp); pts.push([pp.latitude,pp.longitude]); }
   if(pts.length>1){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:17}); }catch(e){} }
   else if(pts.length===1){ map.setView(pts[0],16); }
   setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 220);
@@ -3697,26 +3695,24 @@ function ndsCartePlace(kind, id){
 }
 function renderNdsCarte(){
   if(!state.ndsCarte){ loadNdsCarte(); return '<div class="page"><div class="page-header"><div class="page-title">&#128506; Carte NDS</div></div><div class="empty-block">Chargement de la carte…</div></div>'; }
-  var st=state.ndsCarte.stations, pa=state.ndsCarte.partners;
-  var stPlaced=0, stMiss=[];
-  for(var i=0;i<st.length;i++){ if(st[i].lat!=null&&st[i].lng!=null) stPlaced++; else stMiss.push(st[i]); }
-  var paPlaced=0, paMiss=[];
-  for(var k=0;k<pa.length;k++){ if(pa[k].actif===false) continue; if(pa[k].latitude!=null&&pa[k].longitude!=null) paPlaced++; else paMiss.push(pa[k]); }
+  var st=state.ndsCarte.stations;
+  var stPlaced=0, stMiss=0;
+  for(var i=0;i<st.length;i++){ if(st[i].lat!=null&&st[i].lng!=null) stPlaced++; else stMiss++; }
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — placer &amp; glisser les points</div><div class="page-subtitle">Stations (vert) et commerces partenaires (or). Glisse un point pour le déplacer, sauvegarde auto.</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
-  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(paPlaced+'/'+pa.length,'Commerces placés')+prospKpi(stMiss.length+paMiss.length,'À placer')+'</div>';
-  h+='<div style="display:flex;gap:16px;font-size:12px;color:var(--sa-muted);margin:4px 0 10px"><span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#2FD89E;vertical-align:middle;margin-right:5px"></span>Stations</span><span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#F5B544;vertical-align:middle;margin-right:5px"></span>Commerces partenaires</span></div>';
+  h+='<div class="page-header"><div><div class="page-title">&#128506; Carte NDS — stations</div><div class="page-subtitle">Les '+st.length+' stations physiques réelles. Clique une station pour ouvrir sa fiche, ou glisse son point sur la carte (sauvegarde auto).</div></div><div class="page-actions"><button class="btn" onclick="ndsCarteReload()">&#8635; Recharger</button></div></div>';
+  h+='<div class="kpi-grid">'+prospKpi(stPlaced+'/'+st.length,'Stations placées')+prospKpi(stMiss,'À placer')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 300px;gap:14px;align-items:start">';
   h+='<div id="nds-leaflet" style="height:540px;border-radius:14px;overflow:hidden;border:1px solid var(--sa-border);position:relative;z-index:0"></div>';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:14px;max-height:540px;overflow:auto">';
-  h+='<div style="font-weight:800;margin-bottom:8px">À placer</div>';
-  h+='<div style="font-size:11px;color:var(--sa-muted);margin-bottom:10px">Centre la carte sur le bon endroit, clique « Placer », puis glisse le point pour ajuster.</div>';
-  if(stMiss.length===0 && paMiss.length===0){ h+='<div style="font-size:12px;color:var(--sa-muted)">Tous les points sont placés &#10003;</div>'; }
-  if(stMiss.length){ h+='<div style="font-size:10px;font-weight:800;color:#0a9b85;text-transform:uppercase;margin:6px 0">Stations</div>';
-    for(var a=0;a<stMiss.length;a++){ var s=stMiss[a]; h+='<div id="ndsplace-station-'+s.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="flex:1;font-size:12px">'+esc(s.nom||s.id)+'</span><button class="btn-sm" onclick="ndsCartePlace(\'station\',\''+s.id+'\')">Placer</button></div>'; }
-  }
-  if(paMiss.length){ h+='<div style="font-size:10px;font-weight:800;color:#c98a16;text-transform:uppercase;margin:10px 0 6px">Commerces</div>';
-    for(var b=0;b<paMiss.length;b++){ var pm=paMiss[b]; h+='<div id="ndsplace-partner-'+pm.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="flex:1;font-size:12px">'+esc(pm.nom||pm.id)+'</span><button class="btn-sm" onclick="ndsCartePlace(\'partner\',\''+pm.id+'\')">Placer</button></div>'; }
+  h+='<div style="font-weight:800;margin-bottom:8px">Stations</div>';
+  for(var a=0;a<st.length;a++){
+    var s=st[a]; var placed=(s.lat!=null&&s.lng!=null);
+    h+='<div id="ndsplace-station-'+s.id+'" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--sa-border)">';
+    h+='<span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(placed?'#2FD89E':'#cbd5e1')+'"></span>';
+    h+='<span style="flex:1;font-size:12.5px;font-weight:600">'+esc(s.nom||s.id)+'</span>';
+    h+='<button class="btn-sm" onclick="openDrawerFor(\'event\',\''+s.id+'\')">Fiche</button>';
+    if(!placed){ h+='<button class="btn-sm" onclick="ndsCartePlace(\'station\',\''+s.id+'\')">Placer</button>'; }
+    h+='</div>';
   }
   h+='</div></div></div>';
   return h;
@@ -3733,11 +3729,17 @@ function ndsStationsJoined(events){
   return out.length?out.join(', '):'—';
 }
 async function loadNdsParticipants(){
-  var rows = await supaFetch('joueurs', 'select=id,prenom,nom,email,tel,ticket_code,events,ts,first_seen&order=ts.desc.nullslast&limit=1000');
+  var rows = await supaFetch('joueurs', 'select=id,prenom,nom,email,tel,ticket_code,events,ts,first_seen,source,decouverte&order=ts.desc.nullslast&limit=1000');
   var out=[];
   if(rows){ for(var i=0;i<rows.length;i++){ var r=rows[i]; var ev=r.events||[]; var hit=false; for(var j=0;j<ev.length;j++){ if(NDS_EVENT_IDS.indexOf(ev[j])>-1){ hit=true; break; } } if(hit) out.push(r); } }
   state.ndsParticipants = out;
   render();
+}
+function ndsOrigine(p){
+  var s=(''+(p.source||'')).toLowerCase();
+  var m={'nds2026':'Flash QR · NDS','paques':'Flash QR · Pâques','landing-flowin':'Landing Flowin','landing-nds':'Landing NDS','manuel':'Ajout manuel','import':'Import'};
+  var lbl = m[s] || (s||'—');
+  return p.decouverte ? (lbl+' · '+p.decouverte) : lbl;
 }
 function ndsParticipantsReload(){ state.ndsParticipants=null; toast('Rechargement…'); render(); }
 function renderNdsParticipants(){
@@ -3749,7 +3751,7 @@ function renderNdsParticipants(){
   if(!list.length){ h+='<div class="empty-block">Aucun participant pour le moment.</div></div>'; return h; }
   h+='<div style="overflow-x:auto;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px">';
   h+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
-  h+='<thead><tr style="text-align:left;border-bottom:1px solid var(--sa-border)"><th style="padding:10px 12px">Prénom</th><th style="padding:10px 12px">Nom</th><th style="padding:10px 12px">Email</th><th style="padding:10px 12px">Tél</th><th style="padding:10px 12px">Ticket</th><th style="padding:10px 12px">Stations jouées</th><th style="padding:10px 12px">Date</th></tr></thead><tbody>';
+  h+='<thead><tr style="text-align:left;border-bottom:1px solid var(--sa-border)"><th style="padding:10px 12px">Prénom</th><th style="padding:10px 12px">Nom</th><th style="padding:10px 12px">Email</th><th style="padding:10px 12px">Tél</th><th style="padding:10px 12px">Ticket</th><th style="padding:10px 12px">Stations jouées</th><th style="padding:10px 12px">Origine</th><th style="padding:10px 12px">Date</th></tr></thead><tbody>';
   for(var i=0;i<list.length;i++){
     var p=list[i];
     var dt=p.ts||p.first_seen||''; if(dt) dt=(''+dt).slice(0,10);
@@ -3760,6 +3762,7 @@ function renderNdsParticipants(){
     h+='<td style="padding:9px 12px">'+esc(p.tel||'—')+'</td>';
     h+='<td style="padding:9px 12px">'+esc(p.ticket_code||'—')+'</td>';
     h+='<td style="padding:9px 12px">'+esc(ndsStationsJoined(p.events))+'</td>';
+    h+='<td style="padding:9px 12px">'+esc(ndsOrigine(p))+'</td>';
     h+='<td style="padding:9px 12px">'+esc(dt||'—')+'</td>';
     h+='</tr>';
   }
