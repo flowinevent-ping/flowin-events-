@@ -487,6 +487,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const bandOn = screen !== 'inscription' && screen !== 'bonus'
 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
+
+  // Tracking clic partenaire : qui (joueur) · quel partenaire · quel lien · quelle station · quand
+  function logClicPartenaire(partenaireId: string, lienKey: string, url: string | null) {
+    if (!url) return
+    try {
+      const jid = recurrent?.id || getJoueurLocal()?.id || null
+      void supabase.from('partenaire_clics').insert({
+        partenaire_id: partenaireId, event_id: evId, lien_key: lienKey, url, joueur_id: jid,
+      })
+    } catch { /* best-effort, ne bloque jamais l'ouverture du lien */ }
+  }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
 
   // Bandeau partenaires (inline, collé au contenu) — réutilisé en bas de plusieurs écrans
@@ -930,9 +941,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   {fiche.promo_text ? <div style={{ background: '#fff4e6', color: '#c2410c', borderRadius: 12, padding: '10px 13px', fontWeight: 700, fontSize: 13.5, marginBottom: 12 }}>{fiche.promo_text}</div> : null}
                   {fiche.site_web || fiche.instagram || fiche.facebook ? (
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      {fiche.site_web ? <a className="reslink" href={fiche.site_web} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Site web</a> : null}
-                      {fiche.instagram ? <a className="reslink" href={fiche.instagram} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Instagram</a> : null}
-                      {fiche.facebook ? <a className="reslink" href={fiche.facebook} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Facebook</a> : null}
+                      {fiche.site_web ? <a className="reslink" href={fiche.site_web} onClick={() => logClicPartenaire(fiche.id, 'site_web', fiche.site_web)} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Site web</a> : null}
+                      {fiche.instagram ? <a className="reslink" href={fiche.instagram} onClick={() => logClicPartenaire(fiche.id, 'instagram', fiche.instagram)} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Instagram</a> : null}
+                      {fiche.facebook ? <a className="reslink" href={fiche.facebook} onClick={() => logClicPartenaire(fiche.id, 'facebook', fiche.facebook)} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Facebook</a> : null}
                     </div>
                   ) : null}
                 </div>
