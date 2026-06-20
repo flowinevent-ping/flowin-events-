@@ -174,3 +174,26 @@ export async function fetchProGains(eventIds: string[]): Promise<ProGainRow[]> {
   }
   return rows.map(r => ({ id: r.id, libelle: r.libelle, code: r.code, utilise: r.utilise, event_id: r.event_id, joueur: r.joueur_id ? (names[r.joueur_id] || '—') : '—' }))
 }
+
+/* ── Tirage au sort : persiste le gagnant tiré (sinon perdu au rechargement) ── */
+export async function enregistrerTirage(params: {
+  superEventId: string | null
+  eventId: string | null
+  joueur: { id: string; prenom?: string | null; nom?: string | null; email?: string | null; tel?: string | null }
+}): Promise<{ ok: boolean; code: string }> {
+  const code = 'T-' + Math.random().toString(36).slice(2, 8).toUpperCase()
+  const { error } = await supabase.from('se_gains').insert({
+    super_event_id: params.superEventId,
+    event_id: params.eventId,
+    joueur_id: params.joueur.id,
+    type: 'tirage',
+    libelle: 'Tirage au sort',
+    code,
+    utilise: false,
+    gagnant_nom: `${params.joueur.prenom ?? ''} ${params.joueur.nom ?? ''}`.trim() || null,
+    gagnant_email: params.joueur.email ?? null,
+    gagnant_tel: params.joueur.tel ?? null,
+  })
+  if (error) console.error('[enregistrerTirage] insert échoué:', error.message)
+  return { ok: !error, code }
+}

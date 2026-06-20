@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { fetchProDashboard, getQrUrl, type ProDashboardData } from '@/lib/pro'
-import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, type ProGainRow } from '@/lib/dashboard'
+import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, enregistrerTirage, type ProGainRow } from '@/lib/dashboard'
 import type { FlowinEvent, FlowinJoueur, FlowinLot } from '@/lib/types'
 
 type Tab = 'stats' | 'gains' | 'tirage' | 'participants' | 'lots' | 'qr' | 'export'
@@ -118,11 +118,19 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
     return () => clearInterval(t)
   }, [ev?.status, proId])
 
-  function lancerTirage() {
+  async function lancerTirage() {
     const elig = evJoueurs.filter(j => j.ticket_code)
     if (!elig.length) return
-    setGagnant(elig[Math.floor(Math.random() * elig.length)])
+    const g = elig[Math.floor(Math.random() * elig.length)]
+    setGagnant(g)
     setTirageDone(true)
+    try {
+      await enregistrerTirage({
+        superEventId: (ev as unknown as { super_event_id?: string | null })?.super_event_id ?? null,
+        eventId: ev?.id ?? null,
+        joueur: { id: g.id, prenom: g.prenom, nom: g.nom, email: g.email, tel: g.tel },
+      })
+    } catch { /* persistance best-effort, le tirage reste affiché */ }
   }
 
   function exportCSV() {
