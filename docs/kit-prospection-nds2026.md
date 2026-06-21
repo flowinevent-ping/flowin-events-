@@ -18,69 +18,87 @@ Paiement en ligne **OFF**. Facture émise **à la validation du bon de commande*
 
 ---
 
-## 2. CONCEPT (à dire juste)
+## 2. CONCEPT (canonique, validé)
 
-Pendant toute la durée du festival, **votre enseigne fait jouer sa clientèle.**
-Un **QR code physique** en boutique + un **lien digital** : chaque client peut participer au jeu — un **quiz** où il **découvre ou reconnaît votre enseigne**. Le jeu continue **avec vous et vos clients**. Votre boutique devient **le lieu où l'on remporte des points pour le grand tirage au sort.**
+Cet été, **24 000 festivaliers** jouent à un **quiz RSE** pendant les Nuits du Sud et **découvrent les commerces partenaires sur une carte interactive**.
+Dans votre commerce, **le jeu continue** : un **QR à votre nom** + un **lien à diffuser**. Vos clients jouent au quiz (découvrent / reconnaissent votre enseigne) et **cumulent des tickets**. Plus on joue dans les commerces, plus on gagne — **bon d'achat à gagner chez vous** + **grand tirage au sort** à la clôture. **1 commerce partenaire = 1 lot.**
 
----
-
-## 3. EMAIL DE PROSPECTION
-
-**Objet :** Faites jouer votre clientèle pendant les Nuits du Sud (9–18 juillet)
-
-Bonjour [Prénom / Enseigne],
-
-Du 9 au 18 juillet, les Nuits du Sud animent Vence. Avec **Flowin**, le jeu officiel du parcours partenaires, **votre enseigne fait jouer sa propre clientèle** pendant toute la durée du festival.
-
-Le principe : un **QR code physique** dans votre boutique + un **lien digital**. Chaque client participe à un **quiz** où il découvre ou reconnaît votre enseigne, et **remporte des points pour le grand tirage au sort**. Votre commerce devient un lieu de jeu — le jeu continue avec vous et vos clients.
-
-Trois formules selon votre objectif :
-- **Visibilité — 590 € HT** : votre commerce listé dans le jeu + vos liens/réseaux mis en avant.
-- **Animation — 1 490 € HT** *(le plus choisi)* : votre enseigne fait jouer sa clientèle (QR + lien), mise en avant sur la carte du parcours, + reporting de passage.
-- **Sponsor — 3 590 € HT** : présence sur tous les supports + bandeau de l'app + lot RSE du festival.
-
-Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €) pour le tirage.
-
-Je vous montre le dispositif en 10 minutes. Quelles disponibilités cette semaine ?
-
-Bien à vous,
-Romain Collin — Flowin
-romain@flowin.events · [téléphone]
+Coordonnées : **info@opconsult.co · 06 16 35 49 36** — Romain Collin.
+Liens : Présentation https://flowin-events.vercel.app/nds-partenaire-presentation.html · Offres https://flowin-events.vercel.app/nds-partenaire.html
 
 ---
 
-## 4. SCRIPT PHONING
+## 3. EMAIL FROID (validé — ne pas réinventer)
+
+**Objet :** Les Nuits du Sud s'invitent dans votre commerce
+
+Bonjour,
+
+Cet été, pendant les Nuits du Sud, 24 000 festivaliers jouent à un quiz RSE lors de leurs visites en ville — et découvrent les commerces partenaires sur une carte interactive.
+
+Dans votre commerce partenaire des Nuits du Sud, le jeu continue : un QR à votre nom, une animation sur mesure, et un bon d'achat à gagner chez vous à la fin du festival.
+
+Présentation :
+→ https://flowin-events.vercel.app/nds-partenaire-presentation.html
+
+Offres partenaires :
+→ https://flowin-events.vercel.app/nds-partenaire.html
+
+Romain Collin
+06 16 35 49 36 — info@opconsult.co
+
+---
+
+## 4. EMAIL APRÈS APPEL (validé)
+
+**Objet :** Suite à notre échange — Nuits du Sud 2026
+
+Bonjour,
+
+Comme promis, voici le détail de l'opération.
+
+Cet été, pendant les Nuits du Sud, 24 000 festivaliers jouent à un quiz RSE lors de leurs visites en ville — et découvrent les commerces partenaires sur une carte interactive. L'objectif RSE : mettre en avant les commerces locaux et partenaires. Le jeu continue pendant toute la durée du festival.
+
+- Un quizz personnalisable, accessible par QR code
+- Un lien à diffuser sur vos réseaux
+- Un bon d'achat à gagner chez vous à la fin du festival
+
+Plus les participants jouent dans les commerces, plus ils gagnent de tickets — tirage au sort à la clôture. Un commerce partenaire = 1 lot.
+
+Présentation :
+→ https://flowin-events.vercel.app/nds-partenaire-presentation.html
+
+Offres partenaires :
+→ https://flowin-events.vercel.app/nds-partenaire.html
+
+Clôture des inscriptions le 9 juillet. Disponible si vous avez des questions.
+
+Romain Collin
+06 16 35 49 36 — info@opconsult.co
+
+---
+
+## 4 bis. SCRIPT PHONING (aligné concept validé)
 
 **Accroche (10 s)**
-« Bonjour, Romain de Flowin — on opère le jeu officiel du parcours partenaires des Nuits du Sud. Je vous appelle parce qu'on a un dispositif pour **faire jouer votre clientèle** pendant tout le festival, du 9 au 18 juillet. Vous avez deux minutes ? »
+« Bonjour, Romain Collin de Flowin — on est partenaire des Nuits du Sud. Cet été, 24 000 festivaliers jouent à un quiz RSE et découvrent les commerces partenaires sur une carte. Je vous appelle parce que dans votre commerce, le jeu peut continuer. Vous avez deux minutes ? »
 
 **Le concept**
-« C'est simple : on vous donne un **QR code physique** à mettre en boutique et un **lien digital**. Chaque client participe à un **quiz** où il découvre ou reconnaît votre enseigne, et il **gagne des points pour le grand tirage au sort**. Votre boutique devient un lieu de jeu — le jeu continue avec vous et vos clients. »
+« On vous donne un QR à votre nom + un lien à diffuser. Vos clients jouent au quiz, découvrent votre enseigne et cumulent des tickets. Plus on joue dans les commerces, plus on gagne — avec un bon d'achat à gagner chez vous et un grand tirage au sort à la clôture. Un commerce = un lot. »
 
-**Les 3 formules (laisser choisir)**
-- « La plus prise, c'est **Animation à 1 490 € HT** : votre enseigne fait jouer sa clientèle, vous êtes sur la carte du parcours, et vous avez un reporting de passage. »
-- « Si vous voulez juste être visible : **Visibilité, 590 € HT**. »
-- « Si vous voulez tout, marque + bandeau de l'app + lot RSE : **Sponsor, 3 590 € HT**. »
-- « Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €) pour le tirage. »
+**Les 3 formules**
+- « La plus prise : **Animation, 1 490 € HT** — animation de votre clientèle, mise en avant sur la carte du parcours, reporting de passage. »
+- « Juste être visible : **Visibilité, 590 € HT**. »
+- « Tout : marque + bandeau de l'app + lot RSE : **Sponsor, 3 590 € HT**. »
+- « Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €). »
 
 **Objections**
-- *« C'est cher »* → « Ici vous payez pour **animer vos propres clients** et capter des contacts qui ont opté pour vos infos, pas pour une affiche. »
-- *« Je n'ai pas le temps »* → « Rien à gérer : on fournit le QR et le jeu, vous affichez, c'est tout. »
-- *« Je réfléchis »* → « Je vous envoie le bon de commande, vous signez quand vous voulez, la facture ne part qu'à la validation. Je vous mets quelle formule en pré-rempli ? »
+- *« C'est cher »* → « Vous payez pour animer vos clients et capter des contacts opt-in, pas pour une affiche. »
+- *« Pas le temps »* → « Rien à gérer : on fournit le QR et le jeu, vous affichez. »
+- *« Je réfléchis »* → « Je vous envoie le bon de commande, vous signez quand vous voulez, la facture ne part qu'à la validation. »
 
 **Closing**
 « Je vous envoie le bon de commande pour **[formule]** aujourd'hui. Vous me confirmez l'enseigne exacte et l'adresse mail ? »
-
----
-
-## 4 bis. MESSAGE EMAIL DE RELANCE (court)
-
-**Objet :** On garde votre place sur le parcours NDS ?
-
-Bonjour [Prénom],
-Suite à notre échange : je vous joins le bon de commande **[formule]** pour faire jouer votre clientèle pendant les Nuits du Sud (QR en boutique + lien, points pour le grand tirage). Rien à payer en ligne — la facture part seulement à la validation. Il reste quelques emplacements sur la carte du parcours. Je le garde au chaud jusqu'à [date] ?
-Romain — Flowin
 
 ---
 
@@ -104,24 +122,11 @@ Texte intégral conservé en base (11 articles) :
 
 ---
 
-## 7. PARTENAIRES OFFICIELS NDS 2026 (sourcés site nuitsdusud.com)
+## 7. PARTENAIRES OFFICIELS NDS 2026 (sourcing — NON inséré en base)
 
-Inscrits en base `prospection` (note = « partenaire officiel NDS 2026 … »), contacts à compléter (non inventés) :
+Le site nuitsdusud.com affiche ses partenaires en **logos** (images). Noms lisibles depuis les fichiers : « Le Goût du Vin », « Malongo », « Le Mensuel », « La Vague » + ICI Azur / Radio Nova / Rock en Seine cités côté presse/prog. **Non insérés en base** : leur statut exact, leur catégorie et leurs coordonnées ne sont **pas vérifiés** — à confirmer avant toute saisie (règle : jamais inventer). 7 autres logos sont sans nom lisible.
 
-| Enseigne | Type | Priorité |
-|---|---|---|
-| Le Goût du Vin (Vence) | Caviste / Vin | haute *(déjà présent)* |
-| Malongo | Café / Torréfacteur | haute |
-| Le Mensuel | Presse / Média | moyenne |
-| La Vague | Presse / Média | moyenne |
-| ICI Azur | Média / Radio | moyenne |
-| Radio Nova | Média / Radio | basse |
-| Rock en Seine | Production / Prog | basse |
-
-Contact central festival (public) : `nuitsdusud@ville-vence.fr` · 04 93 58 40 17 · organisé par la Ville de Vence.
-7 logos partenaires supplémentaires sur le site sont des images sans nom lisible → non inventés, à identifier visuellement.
-
----
+Contact central festival (public, vérifié) : `nuitsdusud@ville-vence.fr` · 04 93 58 40 17 · organisé par la Ville de Vence.
 
 ## 8. ÉTAT PROSPECTION (base `prospection`, 21/06)
 
