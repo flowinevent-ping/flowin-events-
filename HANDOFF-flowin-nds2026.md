@@ -105,6 +105,28 @@ Trace SQL : `docs/sql/nds-bons-achat.sql`. Vérifié prod : 8/8 colonnes, vue OK
 
 ## RESTE À FAIRE — mis à jour 19/06/2026 (après-midi)
 
+### 🔎 VÉRIF 21/06/2026 — Maillon « ticket chez le commerçant » (Animation)
+Vérifié de bout en bout (code + base). **Verdict : code OK, le seul manque est de la DONNÉE.**
+- ÉCRITURE — `admin/lib/parcours.ts:attribuerSuperEvent()` insère `se_tickets(event_id=station, joueur_id, jour, type)`,
+  1/jour/personne garanti par `onConflict 'joueur_id,event_id,jour,type'`. ✅
+- LECTURE pro — `dashboard.ts:fetchEventSuperEventStats(ev.id)` compte `se_tickets WHERE event_id=ev.id` ;
+  le commerçant qui possède une STATION (pros+events) voit ses tickets cumuler. ✅ (tient la promesse Animation)
+- CLICS — `dashboard.ts:fetchProClics()` agrège via `partenaires.event_id ∈ events du pro`. ✅
+- DONNÉE ❌ : `partenaires.event_id = NULL` pour **les 10 lignes** (et ce sont des entrées seed/test :
+  Carrefour Vence, CCDK, Cinéma Le Majestic, « Rom », Ville de Vence…). Conséquence : leurs clics ne remontent
+  à aucun pro et elles n'ont pas de station porteuse de tickets. **Aucun bug code, rien à patcher (gel pré-festival respecté).**
+
+➡️ ACTION ROMAIN (info commerciale, non inventable) : pour chaque VRAI partenaire Animation, relier sa ligne
+   `partenaires` à SA station `events`. Une fois le mapping connu, 1 requête par partenaire :
+```sql
+update partenaires
+set event_id = '<events.id de SA station>',
+    super_event_id = 'se-nds-2026'
+where id = '<partenaires.id>';
+```
+   (Vérifier l'id station côté events : `select id, nom from events where super_event_id='se-nds-2026' order by nom;`)
+
+
 ### ✅ Fait & poussé (sessions du 19/06)
 - Bon de commande/proforma NDS remplissable + signable (`dbfc15f`) · Edge Function `notify-bon-commande` -> mail flowinevent@gmail.com via Resend (OK ; voir spam ci-dessous)
 - 10 events sous-stations (caisse/bar/tablette 1-3) + parents conservés · tous super_event_id=se-nds-2026
