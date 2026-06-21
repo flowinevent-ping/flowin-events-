@@ -3971,7 +3971,18 @@ function prospDelete(id){
 function prospLooksTel(line){var d=line.replace(/[^0-9]/g,'');return d.length>=9&&d.length<=14&&/[0-9][\s.\-0-9]{8,}/.test(line);}
 function prospLooksAddr(line){return /\d{1,4}\s/.test(line)||/\b(rue|avenue|av\.|bd|boulevard|place|chemin|route|impasse|allée|quai|cours)\b/i.test(line)||/\b\d{5}\b/.test(line);}
 function prospParse(text){
-  var blocks=text.replace(/\r/g,'').split(/\n\s*\n/);var out=[];
+  text=text.replace(/\r/g,'');
+  if(/ \| /.test(text)&&!/\n\s*\n/.test(text)){
+    var pls=text.split('\n');var pout=[];
+    for(var pi=0;pi<pls.length;pi++){var pl=pls[pi].trim();if(!pl)continue;
+      var pp=pl.split(' | ');var prec={enseigne:(pp[0]||'').trim(),tel:null,adresse:null};
+      for(var pj=1;pj<pp.length;pj++){var sg=pp[pj].trim();if(!sg)continue;
+        if(!prec.tel&&prospLooksTel(sg)){prec.tel=sg.replace(/[^0-9+]/g,'');continue;}
+        if(!prec.adresse){prec.adresse=sg;}}
+      if(prec.enseigne)pout.push(prec);}
+    return pout;
+  }
+  var blocks=text.split(/\n\s*\n/);var out=[];
   for(var b=0;b<blocks.length;b++){
     var raw=blocks[b].split('\n');var lines=[];
     for(var x=0;x<raw.length;x++){if(raw[x].trim())lines.push(raw[x].trim());}
