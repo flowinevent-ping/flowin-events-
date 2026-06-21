@@ -49,6 +49,31 @@ Romain Collin
 
 ---
 
+## 3 bis. EMAIL PROSPECTION — préféré Romain (structure aimée + règle)
+
+**Objet :** Faites venir les festivaliers des Nuits du Sud dans votre commerce (9–18 juillet)
+
+Bonjour,
+
+Du 9 au 18 juillet, les Nuits du Sud rassemblent 24 000 festivaliers à Vence. Avec Flowin, le jeu officiel du parcours partenaires, ils jouent à un quiz RSE et découvrent les commerces partenaires sur une carte interactive.
+
+Dans votre commerce, le jeu continue : un QR à votre nom + un lien à diffuser. Vos clients jouent au quiz, (re)découvrent votre enseigne et cumulent des tickets. Plus on joue dans les commerces, plus on gagne — un bon d'achat à gagner chez vous et un grand tirage au sort à la clôture. Un commerce partenaire = un lot.
+
+Trois formules selon votre objectif :
+- Visibilité — 590 € HT : votre commerce dans le jeu + vos liens/réseaux mis en avant (lot 90 €).
+- Animation — 1 490 € HT (le plus choisi) : animation de votre clientèle + mise en avant sur la carte du parcours + reporting de passage (lot 159 €).
+- Sponsor — 3 590 € HT : tous supports + bandeau de l'app + lot RSE du festival (lot 259 €).
+
+Présentation : → https://flowin-events.vercel.app/nds-partenaire-presentation.html
+Offres partenaires : → https://flowin-events.vercel.app/nds-partenaire.html
+
+Clôture des inscriptions le 9 juillet. Je vous montre le dispositif en 10 minutes — vos disponibilités cette semaine ?
+
+Romain Collin
+06 16 35 49 36 — info@opconsult.co
+
+---
+
 ## 4. EMAIL APRÈS APPEL (validé)
 
 **Objet :** Suite à notre échange — Nuits du Sud 2026
