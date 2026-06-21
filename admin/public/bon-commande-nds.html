@@ -292,6 +292,10 @@
       <div class="col"><label>Date</label><input class="fld" id="f_date" readonly></div>
     </div>
 
+    <div class="cgvrow editonly" style="margin-top:18px;display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--muted)">
+      <input type="checkbox" id="cgvChk" style="margin-top:3px;width:17px;height:17px;flex:none;accent-color:#7C2D92">
+      <label for="cgvChk" style="cursor:pointer">J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-nds.html" target="_blank" rel="noopener" style="color:#7C2D92;font-weight:700">conditions g&eacute;n&eacute;rales de vente</a>.</label>
+    </div>
     <div class="actions editonly">
       <button type="button" id="submitBtn" class="btn-primary">Valider, signer et recevoir ma copie</button>
       <span id="status" class="statusmsg"></span>
@@ -312,6 +316,7 @@
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var CGV_VERSION='v1-draft'; // a mettre a jour quand les CGV passent en version validee par le juriste
   function $(id){return document.getElementById(id);}
   function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
   function qs(name){ var m=new RegExp('[?&]'+name+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
@@ -361,6 +366,7 @@
       if(!contact||!tel){ setStatus('Indiquez le contact et le t\u00e9l\u00e9phone.','err'); return; }
       if(!email||email.indexOf('@')<0){ setStatus('Email invalide.','err'); return; }
       if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
+      if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
       var ht=parseFloat(sel.getAttribute('data-ht')), tva=Math.round(ht*0.20), ttc=ht+tva;
       var id='bc-nds-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
       var rec={ id:id, super_event_id:'se-nds-2026',
@@ -368,7 +374,8 @@
         contact:contact, tel:tel, email:email.toLowerCase(), siret:$('f_siret').value.trim()||null,
         offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
         montant_ht:ht, montant_tva:tva, montant_ttc:ttc,
-        signataire:$('f_signataire').value.trim()||contact, date_signature:dstr, signature:cv.toDataURL('image/png') };
+        signataire:$('f_signataire').value.trim()||contact, date_signature:dstr, signature:cv.toDataURL('image/png'),
+        cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
       $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
       fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
         .then(function(r){ if(!r.ok) throw new Error('http '+r.status); location.href='?id='+id; })

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CGV — Partenariat Nuits du Sud 2026 · Flowin</title>
+<style>
+  :root{ --ink:#16203A; --muted:#5b6577; --faint:#9aa3b2; --line:#e6e9ef; --bg:#f6f7fa; --card:#fff; --accent:#7C2D92; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+  .wrap{max-width:780px;margin:0 auto;padding:28px 20px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 26px 30px;box-shadow:0 8px 30px rgba(20,26,38,.06)}
+  h1{font-size:20px;margin:0 0 4px}
+  .meta{font-size:12px;color:var(--faint);margin-bottom:18px}
+  .content{white-space:pre-wrap;font-size:14px;color:#27314a}
+  .status{font-size:13px;color:var(--muted);padding:20px 0}
+  .err{color:#b42318}
+  .back{display:inline-block;margin-bottom:16px;font-size:13px;color:var(--accent);text-decoration:none;font-weight:700}
+  .legal{font-size:11px;color:var(--faint);line-height:1.6;margin-top:22px;padding-top:14px;border-top:1px dashed var(--line)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="javascript:history.length>1?history.back():location.href='/'">&larr; Retour</a>
+    <div class="card">
+      <h1 id="ttl">Conditions Générales de Vente</h1>
+      <div class="meta" id="meta"></div>
+      <div class="status" id="status">Chargement des conditions…</div>
+      <div class="content" id="content" style="display:none"></div>
+      <div class="legal">
+        <b>Flowin</b> est un produit de <b>BAITA EURL</b> (OPConsult) · 40 rue des Arcs, 06140 Vence · SIRET 512&nbsp;026&nbsp;907&nbsp;00018 · RCS Grasse 512&nbsp;026&nbsp;907 · TVA FR82&nbsp;512&nbsp;026&nbsp;907 · Contact : info@opconsult.co
+      </div>
+    </div>
+  </div>
+<script>
+(function(){
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  function $(id){return document.getElementById(id);}
+  fetch(SUPA+'/rest/v1/documents_legaux?id=eq.cgv-nds-2026&select=titre,contenu,version,updated_at',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+    .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+    .then(function(rows){
+      if(!rows||!rows.length){ $('status').innerHTML='Conditions indisponibles pour le moment.'; $('status').className='status err'; return; }
+      var d=rows[0];
+      if(d.titre) $('ttl').textContent=d.titre;
+      var bits=[];
+      if(d.version) bits.push('Version '+d.version);
+      if(d.updated_at) bits.push('mise à jour le '+String(d.updated_at).slice(0,10));
+      $('meta').textContent=bits.join(' · ');
+      $('content').textContent=d.contenu||'';
+      $('content').style.display='block';
+      $('status').style.display='none';
+    })
+    .catch(function(){ $('status').innerHTML='Erreur de chargement des conditions. Réessayez plus tard.'; $('status').className='status err'; });
+})();
+</script>
+</body>
+</html>
