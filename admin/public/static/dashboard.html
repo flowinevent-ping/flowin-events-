@@ -2969,7 +2969,7 @@ function renderSidebar(){
     ]},
     {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length}, {id:'banques',ico:'🎯',lbl:'Banques de questions',ext:'/banques.html'} ]},
     {group:'REPORTING', list:[ {id:'rapports',ico:'📊',lbl:'Rapports'} ]},
-    {group:'SYSTÈME', list:[ {id:'parametres',ico:'⚙️',lbl:'Paramètres'} ]}
+    {group:'SYSTÈME', list:[ {id:'cgv',ico:'📜',lbl:'CGV / Légal'}, {id:'parametres',ico:'⚙️',lbl:'Paramètres'} ]}
   ];
   // En mode Pro : pas de "Pros" (lui-même), pas de "Super Events" (SA), Jeux et CRM réduits
   const itemsPro = [
@@ -3045,7 +3045,7 @@ function renderTopbar(){
 function breadcrumbForView(){
   const labels = {
     pilotage:'Accueil', pros:'Pros', joueurs:'Joueurs', gagnants:'Gagnants', partenaires:'Partenaires',
-    events:'Events','super-events':'Super Events',jeux:'Jeux',rapports:'Rapports',parametres:'Paramètres',
+    events:'Events','super-events':'Super Events',jeux:'Jeux',rapports:'Rapports',parametres:'Paramètres',cgv:'CGV / Légal',
     'wizard-event':state.wiz.mode==='edit'?'Édition event':'Nouvel event','live-control':'Stats live'
   };
   const crumbs = [{label:'Flowin',action:'goView(\'pilotage\')'}];
@@ -4010,6 +4010,40 @@ function prospDoPaste(){
     .catch(function(){toast('Erreur réseau');});
 }
 
+// ============ CGV / DOCUMENTS LEGAUX ============
+function loadCgv(){
+  state.cgvLoaded='loading';
+  supaFetch('documents_legaux','id=eq.cgv-nds-2026&select=*').then(function(rows){
+    state.cgvDoc=(rows&&rows[0])||null; state.cgvLoaded=true; render();
+  });
+}
+function renderCgv(){
+  if(state.cgvLoaded!==true){ if(state.cgvLoaded!=='loading') loadCgv(); return '<div class="page"><div class="page-header"><div class="page-title">📜 CGV / Légal</div></div><div class="empty-block">Chargement…</div></div>'; }
+  var d=state.cgvDoc;
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">📜 CGV / Légal</div><div class="page-subtitle">Conditions générales de vente — Partenariat NDS 2026</div></div><div class="page-actions"><a class="btn" href="/cgv-nds.html" target="_blank">Voir la page publique ↗</a></div></div>';
+  if(!d){ h+='<div class="empty-block">Aucun document CGV en base (id cgv-nds-2026).</div></div>'; return h; }
+  h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px;padding:18px;max-width:900px">';
+  h+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">';
+  h+='<label style="font-size:12px;font-weight:700;color:#6b7280">Version<br><input id="cgvVersion" style="margin-top:4px;padding:7px 9px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-card);color:inherit;font-family:inherit" value="'+esc(d.version||'')+'"></label>';
+  h+='<label style="font-size:12px;font-weight:700;color:#6b7280">Statut<br><select id="cgvStatut" style="margin-top:4px;padding:7px 9px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-card);color:inherit;font-family:inherit"><option value="draft"'+(d.statut==='draft'?' selected':'')+'>draft (brouillon)</option><option value="valide"'+(d.statut==='valide'?' selected':'')+'>validé</option></select></label>';
+  h+='</div>';
+  h+='<textarea id="cgvContenu" style="width:100%;min-height:460px;padding:12px;border:1px solid var(--sa-border);border-radius:10px;background:var(--sa-card);color:inherit;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.5">'+esc(d.contenu||'')+'</textarea>';
+  h+='<div style="display:flex;align-items:center;gap:12px;margin-top:12px"><button class="btn" style="background:#7C2D92;color:#fff;border:none" onclick="cgvSave()">Enregistrer les CGV</button><span id="cgvSaveMsg" style="font-size:12px;color:#6b7280"></span></div>';
+  h+='<div style="font-size:11px;color:#9aa3b2;margin-top:10px">⚠️ Brouillon à faire valider par un juriste. La page publique /cgv-nds.html et le bon de commande affichent ce texte en direct.</div>';
+  h+='</div></div>';
+  return h;
+}
+function cgvSave(){
+  var contenu=document.getElementById('cgvContenu').value;
+  var version=document.getElementById('cgvVersion').value.trim();
+  var statut=document.getElementById('cgvStatut').value;
+  var msg=document.getElementById('cgvSaveMsg'); if(msg) msg.textContent='Enregistrement…';
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/documents_legaux?id=eq.cgv-nds-2026',{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({contenu:contenu,version:version,statut:statut,updated_at:new Date().toISOString()})})
+    .then(function(r){ if(!r.ok) throw new Error('http '+r.status); if(state.cgvDoc){state.cgvDoc.contenu=contenu;state.cgvDoc.version=version;state.cgvDoc.statut=statut;} if(msg) msg.textContent='✓ Enregistré'; toast('CGV enregistrées','success'); })
+    .catch(function(){ if(msg) msg.textContent='Échec, réessayez'; toast('Erreur enregistrement CGV','error'); });
+}
+
 function render(){
   renderSidebar();
   renderTopbar();
@@ -4031,6 +4065,7 @@ function render(){
   }
   else if(v==='rapports') html = renderRapports();
   else if(v==='parametres') html = renderParametres();
+  else if(v==='cgv') html = renderCgv();
   else if(v==='btob-prospects') html = renderBtobProspects();
   else if(v==='prospection') html = renderProspection();
   else if(v==='crm-retours') html = renderCrmRetours();
