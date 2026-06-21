@@ -18,24 +18,31 @@ Paiement en ligne **OFF**. Facture émise **à la validation du bon de commande*
 
 ---
 
-## 2. EMAIL DE PROSPECTION
+## 2. CONCEPT (à dire juste)
 
-**Objet :** Faites venir les festivaliers des Nuits du Sud dans votre commerce (9–18 juillet)
+Pendant toute la durée du festival, **votre enseigne fait jouer sa clientèle.**
+Un **QR code physique** en boutique + un **lien digital** : chaque client peut participer au jeu — un **quiz** où il **découvre ou reconnaît votre enseigne**. Le jeu continue **avec vous et vos clients**. Votre boutique devient **le lieu où l'on remporte des points pour le grand tirage au sort.**
+
+---
+
+## 3. EMAIL DE PROSPECTION
+
+**Objet :** Faites jouer votre clientèle pendant les Nuits du Sud (9–18 juillet)
 
 Bonjour [Prénom / Enseigne],
 
-Du 9 au 18 juillet, les Nuits du Sud rassemblent des milliers de festivaliers Place du Grand Jardin. Avec **Flowin**, le jeu officiel du parcours partenaires, ces visiteurs passent **chez les commerçants de Vence** pour gagner des lots.
+Du 9 au 18 juillet, les Nuits du Sud animent Vence. Avec **Flowin**, le jeu officiel du parcours partenaires, **votre enseigne fait jouer sa propre clientèle** pendant toute la durée du festival.
 
-Le principe est simple : un QR, un mini-jeu, et le festivalier cumule des tickets **dans votre boutique**. Vous gagnez en passage, en visibilité et en contacts qualifiés — sans rien gérer techniquement.
+Le principe : un **QR code physique** dans votre boutique + un **lien digital**. Chaque client participe à un **quiz** où il découvre ou reconnaît votre enseigne, et **remporte des points pour le grand tirage au sort**. Votre commerce devient un lieu de jeu — le jeu continue avec vous et vos clients.
 
 Trois formules selon votre objectif :
 - **Visibilité — 590 € HT** : votre commerce listé dans le jeu + vos liens/réseaux mis en avant.
-- **Animation — 1 490 € HT** *(le plus choisi)* : les joueurs viennent cumuler des tickets chez vous, vous êtes sur la carte du parcours, et vous recevez un reporting de passage.
+- **Animation — 1 490 € HT** *(le plus choisi)* : votre enseigne fait jouer sa clientèle (QR + lien), mise en avant sur la carte du parcours, + reporting de passage.
 - **Sponsor — 3 590 € HT** : présence sur tous les supports + bandeau de l'app + lot RSE du festival.
 
-Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €) que les festivaliers viennent retirer chez vous.
+Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €) pour le tirage.
 
-Je peux vous montrer le dispositif en 10 minutes. Quelles disponibilités cette semaine ?
+Je vous montre le dispositif en 10 minutes. Quelles disponibilités cette semaine ?
 
 Bien à vous,
 Romain Collin — Flowin
@@ -43,36 +50,36 @@ romain@flowin.events · [téléphone]
 
 ---
 
-## 3. SCRIPT PHONING
+## 4. SCRIPT PHONING
 
 **Accroche (10 s)**
-« Bonjour, Romain de Flowin — on opère le jeu officiel du parcours partenaires des Nuits du Sud cette année. Je vous appelle parce que le festival amène des milliers de visiteurs à Vence du 9 au 18 juillet, et on a un dispositif pour les faire passer chez vous. Vous avez deux minutes ? »
+« Bonjour, Romain de Flowin — on opère le jeu officiel du parcours partenaires des Nuits du Sud. Je vous appelle parce qu'on a un dispositif pour **faire jouer votre clientèle** pendant tout le festival, du 9 au 18 juillet. Vous avez deux minutes ? »
 
-**Le problème qu'on règle**
-« Pendant le festival, le monde est sur la place, pas forcément dans les commerces. Nous, on déplace ce flux : les festivaliers jouent via un QR et cumulent des tickets directement dans votre boutique. »
+**Le concept**
+« C'est simple : on vous donne un **QR code physique** à mettre en boutique et un **lien digital**. Chaque client participe à un **quiz** où il découvre ou reconnaît votre enseigne, et il **gagne des points pour le grand tirage au sort**. Votre boutique devient un lieu de jeu — le jeu continue avec vous et vos clients. »
 
 **Les 3 formules (laisser choisir)**
-- « La plus prise, c'est **Animation à 1 490 € HT** : les joueurs viennent chez vous, vous êtes sur la carte du parcours, et vous recevez un reporting de passage. »
+- « La plus prise, c'est **Animation à 1 490 € HT** : votre enseigne fait jouer sa clientèle, vous êtes sur la carte du parcours, et vous avez un reporting de passage. »
 - « Si vous voulez juste être visible : **Visibilité, 590 € HT**. »
 - « Si vous voulez tout, marque + bandeau de l'app + lot RSE : **Sponsor, 3 590 € HT**. »
-- « Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €) que les gagnants viennent retirer chez vous. »
+- « Chaque formule met un bon d'achat en jeu (90 / 159 / 259 €) pour le tirage. »
 
 **Objections**
-- *« C'est cher »* → « C'est le prix d'une demi-page de pub locale, mais ici vous payez pour du **passage réel mesuré**, pas une affiche. Et vous récupérez les contacts qui ont opté pour vos infos. »
-- *« Je n'ai pas le temps »* → « Justement, vous n'avez rien à gérer : on fournit le QR et le jeu, vous affichez, c'est tout. »
-- *« Je réfléchis »* → « Je vous envoie le bon de commande, vous le signez quand vous voulez, la facture ne part qu'à la validation. Je vous mets quelle formule en pré-rempli ? »
+- *« C'est cher »* → « Ici vous payez pour **animer vos propres clients** et capter des contacts qui ont opté pour vos infos, pas pour une affiche. »
+- *« Je n'ai pas le temps »* → « Rien à gérer : on fournit le QR et le jeu, vous affichez, c'est tout. »
+- *« Je réfléchis »* → « Je vous envoie le bon de commande, vous signez quand vous voulez, la facture ne part qu'à la validation. Je vous mets quelle formule en pré-rempli ? »
 
 **Closing**
-« Je vous envoie le bon de commande pour **[formule]** par mail aujourd'hui. Vous me confirmez l'enseigne exacte et l'adresse mail ? »
+« Je vous envoie le bon de commande pour **[formule]** aujourd'hui. Vous me confirmez l'enseigne exacte et l'adresse mail ? »
 
 ---
 
-## 4. MESSAGE EMAIL DE RELANCE (court)
+## 4 bis. MESSAGE EMAIL DE RELANCE (court)
 
 **Objet :** On garde votre place sur le parcours NDS ?
 
 Bonjour [Prénom],
-Suite à notre échange : je vous joins le bon de commande **[formule]** pour le parcours partenaires des Nuits du Sud. Rien à payer en ligne — la facture part seulement à la validation. Il reste quelques emplacements sur la carte du parcours, je préfère vous prévenir. Je le garde au chaud jusqu'à [date] ?
+Suite à notre échange : je vous joins le bon de commande **[formule]** pour faire jouer votre clientèle pendant les Nuits du Sud (QR en boutique + lien, points pour le grand tirage). Rien à payer en ligne — la facture part seulement à la validation. Il reste quelques emplacements sur la carte du parcours. Je le garde au chaud jusqu'à [date] ?
 Romain — Flowin
 
 ---
