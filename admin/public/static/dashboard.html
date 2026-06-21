@@ -3864,6 +3864,7 @@ function renderProspection(){
   html+='<button class="btn" onclick="prospToggleScrap()" style="background:#3B5CC4;color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">⚡ Scraping Maps</button>';
   html+='<button class="btn" onclick="prospReload()" style="background:rgba(255,255,255,.06);color:inherit;border:1px solid var(--line,#2a3550);border-radius:9px;padding:9px 15px;font-weight:700;cursor:pointer">↻ Recharger</button>';
   html+='</div>';
+  html+='<div style="font-size:13px;color:var(--muted,#9aa6bd);margin:-2px 0 12px 2px"><b style="color:var(--teal,#00B4A0)">'+filtered.length+'</b> r&eacute;sultat'+(filtered.length>1?'s':'')+(filtered.length!==total?' sur '+total:'')+' pour la s&eacute;lection</div>';
 
   // Zone scraping (cachée)
   html+='<div id="prospScrap" style="display:none;background:rgba(59,92,196,.07);border:1px solid rgba(59,92,196,.4);border-radius:12px;padding:16px;margin-bottom:14px">';
