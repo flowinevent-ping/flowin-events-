@@ -1,7 +1,48 @@
 # HANDOFF — Flowin / Nuits du Sud 2026
 
-> Document de reprise. Dernière mise à jour : 22/06/2026 (session reprise). HEAD au moment du handoff : `4d67750` (toujours revérifier via `git log` — ne pas supposer).
+> Document de reprise. Dernière mise à jour : **23/06/2026** (session présentation/visuels/bon de commande). HEAD au moment du handoff : `b8dfcc6` (toujours revérifier via `git log` — ne pas supposer).
 > Objectif : reprendre le projet dans une nouvelle session SANS dégradation ni perte des tâches accomplies.
+
+## 0. SESSION 23/06/2026 — ÉTAT LE PLUS RÉCENT (à lire EN PREMIER)
+
+> Prod toujours gelée (festival 9–18 juil). Tout passe par : édition fichier → Acorn/MD5 (dashboard) ou screenshot Chromium (pages) → commit auteur Romain → push `main` → Vercel auto-deploy. DB via Supabase MCP uniquement.
+
+### 0.1 Ce qui a été fait cette session (tout poussé sur `main`)
+- **Bon de commande** (`admin/public/bon-commande-nds.html`) : émetteur affiché **OPConsult** (BAITA en mention légale). Champ **Date éditable** (défaut = aujourd'hui) qui se reporte en direct dans l'en-tête « N° / Date » (fini le `__/__/2026`) ; la date saisie sert de `date_signature`. Champ « envoyer le bon signé à cette adresse ». Sur un bon signé (`?id=`) : boutons « Copier le lien » + « Envoyer par email au client » (mailto), pour transmettre **sans Resend**.
+- **Version A4 papier** : `admin/public/bon-commande-nds-a4.html` (impression, à remplir main).
+- **Présentation partenaire** (`admin/public/nds-partenaire-presentation.html`) — page commerciale clé qui répond à « **on achète quoi ?** » :
+  - Section **« Concrètement, vous achetez quoi ? »** montrant les **VRAIS visuels** reçus : forex 70×70 (boutique) + carré/story (réseaux), images servies depuis `/nds/visuels/`.
+  - Lot **Pass Nuits du Sud 2027** ajouté (en plus de places + bons d'achat).
+  - **Carte slide-1 refaite** en plan clair OSM (cohérente avec la mini-carte placemap) : 3 stations **Les Caisses / Le Bar / L'Écran** en marqueurs ronds **mis en valeur**, commerce ambre en héros, joueur bleu.
+  - **Écrans jeux = 2 stations** (1·2). Total « 12 stations » retiré (devenait faux). **⚠️ RESTE : vrai décompte par poste** (Caisses/Bars/Brigade) à confirmer par Romain pour réafficher un total exact.
+- **Visuels** (`admin/public/nds/visuels/`, sources éditables dans `visuels-src/`) : forex/carré/story regénérés avec « Flashe. Joue. Gagne. », lots (places + Pass 2027 + bons d'achat dans ce commerce), QR réel.
+  - **Forex** = version finale **AVEC 6 logos partenaires** (bloc « Nos partenaires », 2×3 « Votre logo ici ») — c'est l'état voulu par Romain (cf. journal §0.3).
+  - **Anti-cache images** : les PNG sont versionnés `?v=YYYYMMDDx`. **Version courante = `?v=20260623c`** (dans `nds-visuels.html` + `nds-partenaire-presentation.html`). **À CHAQUE remplacement d'un PNG, INCRÉMENTER la lettre** sinon Romain revoit l'ancien (cause n°1 des « rien n'a changé »). Règle Vercel `Cache-Control:no-cache` sur `/nds/visuels/(.*)` déjà en place.
+- **Dashboard** : les 2 landings NDS injectées affichent une icône **🎡** (avant : « ? ») ; la carte landing lit `ld.emoji` en priorité.
+
+### 0.2 Visuels & pages — chemins exacts (aucun lien cassé)
+- Présentation : `flowin-events.vercel.app/nds-partenaire-presentation.html`
+- Offres / devenir partenaire : `/nds-partenaire.html` (rewrite `/nds`→jeu festivalier ; `/nds-partenaire`→offres)
+- Bon de commande digital : `/bon-commande-nds.html` · A4 : `/bon-commande-nds-a4.html`
+- Hub visuels : `/nds-visuels.html` · fichiers : `/nds/visuels/{carre_1080x1080,story_1080x1920,forex_700x700}.png` + `forex_700x700_print.pdf`
+- CGV : `/cgv-nds.html`
+
+### 0.3 JOURNAL DES CONFUSIONS (à garder — ne pas re-déclencher la boucle)
+Trois points ont tourné en rond et fait perdre du temps. État figé ici pour ne pas recommencer :
+
+1. **« Insérer la landing dans le dashboard ».** Les 2 landings NDS **SONT** déjà injectées dans le dashboard (Landing Pages → colonne **Actives** : « Présentation partenaire » + « Jeu festivalier ») — visible sur les captures de Romain. Injection idempotente dans `migrateData()` de `dashboard.html` (objets `lp-nds-presentation` / `lp-nds-entry`). Donc **l'insertion est faite**. Le « ? » d'icône (corrigé → 🎡) faisait croire à un bug. **Ambiguïté NON tranchée** : si Romain veut **ÉDITER le contenu** de la présentation DEPUIS le dashboard, ce n'est PAS possible en l'état — ces pages sont **codées à la main**, l'éditeur de landing ne sait modifier que les landings construites dans l'éditeur. → **NE PAS re-deviner. Demander à Romain le comportement exact attendu** (carte présente ? éditer le HTML depuis le dash ? autre ?) AVANT de toucher.
+2. **Logos sur le forex.** Aller-retour : « enlève les logos » puis « il faut les logos ». **État final voulu = AVEC 6 logos partenaires** (bloc « Nos partenaires »). C'est la version en ligne. Ne pas re-supprimer sans instruction explicite.
+3. **Carte de présentation.** Itérée plusieurs fois. État voulu = **plan clair cohérent avec stations mises en valeur** (fait). Si nouvelle demande « plus proche du réel » : demander une **capture de la carte réelle de l'app** à reproduire, ne pas redeviner.
+
+### 0.4 BLOQUEUR EMAIL (Resend) — action Romain
+Bon signé → trigger `trg_notify_bon_commande` → edge function `notify-bon-commande` (Resend). **Resend n'a AUCUN domaine vérifié** → l'expéditeur test `onboarding@resend.dev` ne peut livrer QU'À `flowinevent@gmail.com` (propriétaire du compte). Tout envoi vers un client/autre adresse = **403 bloqué**. **Action Romain** : vérifier un domaine (`flowin.events` ou `opconsult.co`) sur resend.com/domains (~10 min DNS), PUIS Claude met à jour `NOTIFY_FROM` dans l'edge function → envoi auto possible. **En attendant** : utiliser les boutons « Copier le lien » / « Envoyer au client » sur le bon signé (transmission manuelle).
+
+### 0.5 COMPTES — rapatriement sur un compte maître (action Romain, À FROID APRÈS LE FESTIVAL)
+Aujourd'hui le projet est éclaté sur **3 comptes/emails différents** → fragile :
+- **GitHub** : org `flowinevent-ping` (repo `flowin-events-`).
+- **Supabase** : projet `ywcqtupgoxfzkddqkztk` sous le compte **Google `romain.collin@gmail.com`**, org affichée « romain.collin@gmail.com's Org », **nom trompeur du projet = « flowin revision olivia »** (c'est BIEN le projet NDS : prospection + events ev-nds + migrations sécu). Pièges connus : le compte `flowinevent` ne contient qu'un projet Supabase **VIDE** (`atddutvzklcgiqxlpvla`) ; `3opconsult` → projet Nexto (`wmiawwaxwlvascyflpba`).
+- **Vercel** : auto-deploy `main`, prod `flowin-events.vercel.app`.
+→ **À faire par Romain, à froid après le 9 juillet** : choisir UN email maître et y rapatrier GitHub + Supabase + Vercel. **NE PAS migrer pendant le festival** (risque de casser le jeu pour 24 000 joueurs). Free-tier Supabase = **pause auto après 7 j d'inactivité** → vérifier l'activité / passer Pro avant le festival.
 
 ## 1. Projet
 - Flowin = SaaS de gamification événementielle (marque OPConsult / société BAITA EURL, Vence 06140), opérateur unique : Romain Collin.
@@ -69,7 +110,8 @@
 - Test de charge (connexions massives) : non fait.
 - Skills / sous-agents Claude Code : après le 9 juillet.
 
-## 5bis. Chantiers UI commande/partenaire (session 22/06 — état constaté dans le code, à exécuter)
+## 5bis. Chantiers UI commande/partenaire (session 22/06 — EN GRANDE PARTIE FAITS le 23/06, voir §0)
+> ⚠️ Plusieurs de ces points (bon de commande digital + A4, carte présentation, visuels) ont été RÉALISÉS le 23/06. **§0 fait foi.** Garder ci-dessous pour historique.
 > Constats faits par lecture directe du code au HEAD `4d67750`. Prod gelée (festival) → chaque modif = BLOC validé (Acorn + miroir MD5 + screenshot Chromium) avant push.
 
 1. **Fiche partenaire détail (logo / infos / docs) — accès.** Dans `dashboard.html`, `drawerPartner()` (≈ l.6218) ouvre via `openDrawerFor('partenaire',id)` avec onglets **Infos · Stats · Lots · Events · Contrat** — **pas d'onglet Documents**. Le mode édition gère logo (upload + URL + emoji fallback). À cadrer avec Romain : surface visée (drawer SA, page Pro commerçant `nds-pro.html`/`pro-nds-live.html`, ou page partenaire publique) + symptôme exact d'« inaccessible » (drawer ne s'ouvre pas ? vue lecture seule vide ? section docs absente ?). NB : `pro-nds-live.html` ne contient pas de loader de fiche docs (les `document.` repérés = DOM, pas des documents partenaire).
