@@ -369,7 +369,7 @@
       if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
       var ht=parseFloat(sel.getAttribute('data-ht')), tva=Math.round(ht*0.20), ttc=ht+tva;
       var id='bc-nds-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
-      var rec={ id:id, super_event_id:'se-nds-2026',
+      var rec={ id:id, super_event_id:'se-nds-2026', statut:'signe',
         raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
         contact:contact, tel:tel, email:email.toLowerCase(), siret:$('f_siret').value.trim()||null,
         offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
