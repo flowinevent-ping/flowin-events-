@@ -296,6 +296,11 @@
       <input type="checkbox" id="cgvChk" style="margin-top:3px;width:17px;height:17px;flex:none;accent-color:#7C2D92">
       <label for="cgvChk" style="cursor:pointer">J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-nds.html" target="_blank" rel="noopener" style="color:#7C2D92;font-weight:700">conditions g&eacute;n&eacute;rales de vente</a>.</label>
     </div>
+    <div class="sendrow editonly" style="margin-top:16px">
+      <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px">Envoyer le bon de commande signé à cette adresse :</label>
+      <input class="fld" id="f_email_envoi" type="email" autocomplete="email" placeholder="adresse e-mail du destinataire (par défaut : email du partenaire)">
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">Le destinataire reçoit sa copie à cette adresse. Une copie part aussi automatiquement à flowinevent@gmail.com.</div>
+    </div>
     <div class="actions editonly">
       <button type="button" id="submitBtn" class="btn-primary">Valider, signer et recevoir ma copie</button>
       <span id="status" class="statusmsg"></span>
@@ -357,21 +362,28 @@
 
   // --- Soumission ---
   function setStatus(msg,cls){ var s=$('status'); if(s){ s.innerHTML=msg; s.className='statusmsg '+(cls||''); } }
+  if($('f_email')&&$('f_email_envoi')){
+    var _envoiEdited=false;
+    $('f_email_envoi').addEventListener('input',function(){ _envoiEdited=true; });
+    $('f_email').addEventListener('input',function(){ if(!_envoiEdited) $('f_email_envoi').value=$('f_email').value; });
+  }
   if($('submitBtn')){
     $('submitBtn').addEventListener('click',function(){
       var raison=$('f_raison').value.trim(), contact=$('f_contact').value.trim();
       var tel=$('f_tel').value.trim(), email=$('f_email').value.trim();
+      var emailEnvoi=($('f_email_envoi')&&$('f_email_envoi').value.trim())||email;
       if(!sel){ setStatus('Choisissez une offre (cliquez sur une carte).','err'); return; }
       if(!raison){ setStatus('Indiquez la raison sociale.','err'); return; }
       if(!contact||!tel){ setStatus('Indiquez le contact et le t\u00e9l\u00e9phone.','err'); return; }
       if(!email||email.indexOf('@')<0){ setStatus('Email invalide.','err'); return; }
+      if(!emailEnvoi||emailEnvoi.indexOf('@')<0){ setStatus("Adresse d'envoi invalide.","err"); return; }
       if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
       if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
       var ht=parseFloat(sel.getAttribute('data-ht')), tva=Math.round(ht*0.20), ttc=ht+tva;
       var id='bc-nds-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
       var rec={ id:id, super_event_id:'se-nds-2026', statut:'signe',
         raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
-        contact:contact, tel:tel, email:email.toLowerCase(), siret:$('f_siret').value.trim()||null,
+        contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
         offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
         montant_ht:ht, montant_tva:tva, montant_ttc:ttc,
         signataire:$('f_signataire').value.trim()||contact, date_signature:dstr, signature:cv.toDataURL('image/png'),

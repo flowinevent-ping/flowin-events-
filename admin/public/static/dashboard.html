@@ -2969,7 +2969,8 @@ function renderSidebar(){
     {group:'NDS 2026', list:[
       {id:'nds-front',ico:'🎨',lbl:'Front NDS',n:(state.ndsFront?state.ndsFront.length:0)},
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
-      {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)}
+      {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -3506,6 +3507,25 @@ function ndsFrontFiche(p, field, label, ph, ta){
   var st='padding:7px 9px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;font-size:12px;width:100%';
   if(ta){ return '<label style="font-size:10px;color:var(--sa-muted);font-weight:700;display:block">'+label+'<textarea rows="2" placeholder="'+escAttr(ph||'')+'" onblur="ndsFrontField(\''+p.id+'\',\''+field+'\',this.value)" style="'+st+';resize:vertical;margin-top:3px">'+esc(v)+'</textarea></label>'; }
   return '<label style="font-size:10px;color:var(--sa-muted);font-weight:700;display:block">'+label+'<input value="'+escAttr(v)+'" placeholder="'+escAttr(ph||'')+'" onblur="ndsFrontField(\''+p.id+'\',\''+field+'\',this.value)" style="'+st+';margin-top:3px"></label>';
+}
+function renderNdsBonCommande(){
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">&#129534; Bon de commande NDS 2026</div><div class="page-subtitle">Remplis le bon, fais signer le partenaire, envoie-lui sa copie. Une copie part automatiquement à flowinevent@gmail.com.</div></div></div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:8px">';
+  h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">'
+    +'<div style="font-size:34px">&#129534;</div>'
+    +'<div style="font-size:18px;font-weight:800">Bon de commande digital</div>'
+    +'<div style="font-size:13px;color:var(--sa-muted);flex:1;line-height:1.5">Rempli et signé à l\'écran (doigt ou souris). À la validation : envoi au partenaire (adresse saisie en bas du document) + copie à flowinevent@gmail.com.</div>'
+    +'<button class="btn btn-primary" onclick="window.open(\'/bon-commande-nds.html\',\'_blank\')">Ouvrir le bon de commande &#8599;</button>'
+    +'</div>';
+  h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">'
+    +'<div style="font-size:34px">&#128424;</div>'
+    +'<div style="font-size:18px;font-weight:800">Bon de commande A4 (papier)</div>'
+    +'<div style="font-size:13px;color:var(--sa-muted);flex:1;line-height:1.5">Version vierge à imprimer et remplir à la main, pour le porte-à-porte. 1 page A4.</div>'
+    +'<button class="btn" onclick="window.open(\'/bon-commande-nds-a4.html\',\'_blank\')">Ouvrir la version A4 &#8599;</button>'
+    +'</div>';
+  h+='</div></div>';
+  return h;
 }
 function renderNdsFront(){
   if(!state.ndsFront){ loadNdsFront(); return '<div class="page"><div class="page-header"><div class="page-title">&#127912; Front NDS</div></div><div class="empty-block">Chargement…</div></div>'; }
@@ -4084,6 +4104,7 @@ function render(){
   else if(v==='nds-front') html = renderNdsFront();
   else if(v==='nds-carte') html = renderNdsCarte();
   else if(v==='nds-participants') html = renderNdsParticipants();
+  else if(v==='nds-bon-commande') html = renderNdsBonCommande();
   else if(v==='landing-page') html = renderLandingPage();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
