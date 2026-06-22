@@ -66,19 +66,50 @@ Deno.serve(async (req: Request): Promise<Response> => {
     rows.map((x) => x[0] + " : " + x[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")).join("\n") +
     "\n\nLien : " + link;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: NOTIFY_FROM, to: [NOTIFY_TO],
-      reply_to: (r.email ?? undefined) as string | undefined,
-      subject: "✍️ Bon de commande signe — " + (r.raison_sociale ?? "Partenaire") + " (" + (r.offre_label ?? r.offre ?? "") + ")",
-      html, text,
-    }),
-  });
-  const body = await res.text();
-  if (!res.ok) {
-    return new Response(JSON.stringify({ error: "resend failed", status: res.status, body }), { status: 502, headers: { "Content-Type": "application/json" } });
+  const clientNom = String(r.raison_sociale ?? r.contact ?? "Partenaire");
+  const clientEmail = String(r.email ?? "").trim();
+  const emailValide = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clientEmail);
+
+  async function envoyer(to: string, subject: string, htmlBody: string, textBody: string) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: NOTIFY_FROM, to: [to],
+        reply_to: emailValide ? clientEmail : undefined,
+        subject, html: htmlBody, text: textBody,
+      }),
+    });
+    return { to, ok: res.ok, status: res.status, body: await res.text() };
   }
-  return new Response(JSON.stringify({ ok: true, resend: body }), { status: 200, headers: { "Content-Type": "application/json" } });
+
+  const results: Array<Record<string, unknown>> = [];
+
+  // 1) Copie interne -> flowinevent@gmail.com (intitule "Bon de commande - <nom client>")
+  results.push(await envoyer(
+    NOTIFY_TO,
+    "Bon de commande — " + clientNom + " (" + (r.offre_label ?? r.offre ?? "") + ")",
+    html, text,
+  ));
+
+  // 2) Envoi au client (adresse saisie dans le bon de commande), s'il y a un email valide
+  if (emailValide) {
+    const htmlClient =
+      '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto">' +
+      '<div style="background:#16203A;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">Votre bon de commande — Nuits du Sud 2026</div>' +
+      '<table style="width:100%;border-collapse:collapse;background:#f7f8fc;border:1px solid #e7e9f2;border-top:none">' + trs + "</table>" +
+      '<div style="padding:18px 4px"><a href="' + link + '" style="display:inline-block;background:#3B5CC4;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;font-size:14px">Consulter votre bon de commande</a></div>' +
+      '<div style="color:#8A90A8;font-size:12px;padding:6px 4px 18px">Merci pour votre confiance. Le partenariat est confirmé à réception du règlement (virement). BAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36.</div>' +
+      "</div>";
+    const textClient = "Votre bon de commande — Nuits du Sud 2026\n\n" +
+      text + "\n\nBAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36";
+    results.push(await envoyer(clientEmail, "Votre bon de commande — Nuits du Sud 2026 (" + clientNom + ")", htmlClient, textClient));
+  } else {
+    results.push({ to: "client", skipped: true, reason: "email client absent ou invalide" });
+  }
+
+  const anyFail = results.some((x) => x.ok === false);
+  return new Response(JSON.stringify({ ok: !anyFail, results }), {
+    status: anyFail ? 502 : 200, headers: { "Content-Type": "application/json" },
+  });
 });
