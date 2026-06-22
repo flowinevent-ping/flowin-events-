@@ -86,9 +86,9 @@
   .notch{width:80px;height:5px;border-radius:100px;background:#3a2b4a;margin:0 auto 8px}
   .screen{position:relative;border-radius:26px;overflow:hidden;height:470px;background:#160820}
 
-  .mapbg{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(255,255,255,.05) 30px 31px),repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.05) 30px 31px),radial-gradient(120% 80% at 60% 30%,rgba(124,45,146,.32),transparent 60%),linear-gradient(160deg,#241036,#120a1e)}
-  .road{position:absolute;background:rgba(255,255,255,.07)}
-  .park{position:absolute;border-radius:14px;background:rgba(124,45,146,.18);border:1px solid rgba(255,255,255,.06)}
+  .mapbg{position:absolute;inset:0;background:#E9E5DC}
+  .road{position:absolute;background:#fff;box-shadow:0 0 0 1.5px #D8D1C5;border-radius:2px}
+  .park{position:absolute;border-radius:12px;background:#B6DCAC;border:1px solid #9fca93}
   .qc{position:absolute;top:12px;left:11px;right:11px;display:flex;align-items:center;gap:10px;background:#fff;color:var(--ink);box-shadow:0 6px 22px rgba(20,26,38,.3);border-radius:15px;padding:10px 13px;z-index:5}
   .qc .em{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:grid;place-items:center;flex-shrink:0;color:#fff}
   .qc .em .ic{width:17px;height:17px}
@@ -96,12 +96,13 @@
   .qc .s{font-size:11px;color:#7a708a;margin-top:1px}
   .qc .tk{margin-left:auto;display:flex;align-items:center;gap:4px;background:#fbe9f4;color:var(--magenta);font-weight:800;border-radius:9px;padding:5px 8px;font-size:12px;flex-shrink:0}
   .qc .tk .ic{width:13px;height:13px}
-  .pin{position:absolute;transform:translate(-50%,-100%);z-index:4;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}
-  .pin .pd{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#fff;border:2px solid var(--magenta);display:grid;place-items:center;color:var(--magenta)}
-  .pin .pd .ic{transform:rotate(45deg);width:14px;height:14px}
-  .pin .cap2{margin-top:3px;font-size:8.5px;font-weight:800;color:#fff;background:rgba(18,10,30,.85);padding:1px 5px;border-radius:5px;white-space:nowrap}
-  .pin.you .pd{width:34px;height:34px;background:var(--orange);border-color:#fff;color:#fff}
-  .pin.you .pd .ic{width:16px;height:16px}
+  .pin{position:absolute;transform:translate(-50%,-100%);z-index:4;display:flex;flex-direction:column;align-items:center}
+  .pin .pd{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--magenta));border:2.5px solid #fff;display:grid;place-items:center;color:#fff;box-shadow:0 5px 12px rgba(20,10,30,.35)}
+  .pin .pd .ic{width:18px;height:18px}
+  .pin .cap2{margin-top:5px;font-size:9px;font-weight:800;color:#3a2150;background:#fff;padding:2px 7px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.16)}
+  .pin.you .pd{width:44px;height:44px;background:linear-gradient(135deg,#FFB02E,#F5872A);border-color:#fff;color:#fff;box-shadow:0 6px 16px rgba(245,135,42,.45)}
+  .pin.you .pd .ic{width:21px;height:21px}
+  .pin.you .cap2{color:#7a4f00}
   .pin.you:before{content:'';position:absolute;top:7px;left:50%;width:50px;height:50px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(245,161,0,.5),transparent);animation:pulse 1.8s infinite}
   @keyframes pulse{0%{transform:translate(-50%,-50%) scale(.5);opacity:.85}70%{transform:translate(-50%,-50%) scale(1.8);opacity:0}100%{opacity:0}}
   .userdot{position:absolute;z-index:3;transform:translate(-50%,-50%)}
@@ -547,7 +548,7 @@
           </div>
           <div style="background:rgba(59,92,196,.1);border:1px solid rgba(59,92,196,.4);border-radius:13px;padding:12px 13px">
             <div style="font-weight:800;font-size:13.5px;color:#9fb4ff;margin-bottom:7px">Ecrans jeux</div>
-            <div style="font-size:14px;color:#F3F5FC;font-weight:700;letter-spacing:1px">1 &middot; 2 &middot; 3</div>
+            <div style="font-size:14px;color:#F3F5FC;font-weight:700;letter-spacing:1px">1 &middot; 2</div>
             <div style="font-size:11px;color:rgba(159,180,255,.9);margin-top:6px">Logo digital &middot; ecran</div>
           </div>
         </div>
@@ -562,15 +563,15 @@
 
       <div style="background:linear-gradient(180deg,#0a1024,#070b18);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:13px">
         <div style="font-weight:800;font-size:13px;color:#F5B544;text-transform:uppercase;letter-spacing:.07em">Dans votre boutique</div>
-        <img src="/nds/visuels/forex_700x700.png?v=20260623" alt="Support physique 70x70 cm pour la boutique" loading="lazy" style="width:100%;border-radius:13px;border:1px solid rgba(255,255,255,.08);display:block">
+        <img src="/nds/visuels/forex_700x700.png?v=20260623b" alt="Support physique 70x70 cm pour la boutique" loading="lazy" style="width:100%;border-radius:13px;border:1px solid rgba(255,255,255,.08);display:block">
         <div style="font-size:13px;color:rgba(243,245,252,.72);line-height:1.5">Le <b style="color:#F3F5FC">support physique 70×70 cm</b> posé en caisse ou au bar : votre logo + un QR à votre nom. Vos clients le flashent et jouent sur place.</div>
       </div>
 
       <div style="background:linear-gradient(180deg,#0a1024,#070b18);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:13px">
         <div style="font-weight:800;font-size:13px;color:#E0218A;text-transform:uppercase;letter-spacing:.07em">Sur vos réseaux</div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <img src="/nds/visuels/carre_1080x1080.png?v=20260623" alt="Visuel carré pour les réseaux" loading="lazy" style="width:60%;border-radius:13px;border:1px solid rgba(255,255,255,.08);display:block">
-          <img src="/nds/visuels/story_1080x1920.png?v=20260623" alt="Visuel story vertical" loading="lazy" style="width:36%;border-radius:13px;border:1px solid rgba(255,255,255,.08);display:block">
+          <img src="/nds/visuels/carre_1080x1080.png?v=20260623b" alt="Visuel carré pour les réseaux" loading="lazy" style="width:60%;border-radius:13px;border:1px solid rgba(255,255,255,.08);display:block">
+          <img src="/nds/visuels/story_1080x1920.png?v=20260623b" alt="Visuel story vertical" loading="lazy" style="width:36%;border-radius:13px;border:1px solid rgba(255,255,255,.08);display:block">
         </div>
         <div style="font-size:13px;color:rgba(243,245,252,.72);line-height:1.5">Vos <b style="color:#F3F5FC">visuels prêts à poster</b> (Instagram, Facebook, story) avec le QR — pour faire venir votre clientèle.</div>
       </div>
