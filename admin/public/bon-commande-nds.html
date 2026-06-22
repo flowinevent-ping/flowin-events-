@@ -289,7 +289,7 @@
     <img id="sigImg" class="sigimg viewonly" alt="Signature">
     <div class="signrow">
       <div class="col"><label>Nom du signataire</label><input class="fld" id="f_signataire" placeholder="Nom et fonction"></div>
-      <div class="col"><label>Date</label><input class="fld" id="f_date" readonly></div>
+      <div class="col"><label>Date</label><input class="fld" id="f_date" placeholder="JJ / MM / AAAA"></div>
     </div>
 
     <div class="cgvrow editonly" style="margin-top:18px;display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--muted)">
@@ -347,6 +347,8 @@
   var today=new Date();
   var dstr=('0'+today.getDate()).slice(-2)+' / '+('0'+(today.getMonth()+1)).slice(-2)+' / '+today.getFullYear();
   if($('f_date')) $('f_date').value=dstr;
+  if($('docDate')) $('docDate').innerHTML=dstr;
+  if($('f_date')) $('f_date').addEventListener('input',function(){ if($('docDate')) $('docDate').innerHTML=$('f_date').value||'__ / __ / 2026'; });
 
   // --- Pad de signature ---
   var cv=$('sigpad'), ctx=cv?cv.getContext('2d'):null, drawing=false, hasInk=false;
@@ -388,7 +390,7 @@
         contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
         offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
         montant_ht:ht, montant_tva:tva, montant_ttc:ttc,
-        signataire:$('f_signataire').value.trim()||contact, date_signature:dstr, signature:cv.toDataURL('image/png'),
+        signataire:$('f_signataire').value.trim()||contact, date_signature:($('f_date').value.trim()||dstr), signature:cv.toDataURL('image/png'),
         cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
       $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
       fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
