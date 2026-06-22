@@ -1809,6 +1809,17 @@ function migrateData(data){
       delete data.landing;
     }
   }
+  // Migration NDS : ajoute les 2 landings NDS (pages statiques deja en ligne) si absentes — idempotent
+  if(!Array.isArray(data.landings)) data.landings = [];
+  var _ndsLandings = [
+    {id:'lp-nds-presentation', nom:'Landing NDS — Présentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html'},
+    {id:'lp-nds-entry', nom:'Landing NDS — Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'}
+  ];
+  _ndsLandings.forEach(function(_n){
+    if(!data.landings.some(function(l){ return l && l.id===_n.id; })){
+      data.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', createdAt:'2026-06-22'});
+    }
+  });
   // Normaliser chaque landing
   data.landings.forEach(function(ld){
     if(!ld.id) ld.id = 'lp-' + Date.now();
