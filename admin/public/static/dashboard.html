@@ -1817,7 +1817,7 @@ function migrateData(data){
   ];
   _ndsLandings.forEach(function(_n){
     if(!data.landings.some(function(l){ return l && l.id===_n.id; })){
-      data.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', createdAt:'2026-06-22'});
+      data.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'🎡', createdAt:'2026-06-22'});
     }
   });
   // Normaliser chaque landing
@@ -9638,7 +9638,7 @@ function renderLandingKanbanCard(ld){
 
   var html = '<div class="kb-card" onclick="openModal(\'landing-setup\',{ldId:\'' + esc(ld.id) + '\',tab:\'apercu\'})">'
     + '<div class="kb-card-head" style="background:' + esc(ld.accentColor||'#3B5CC4') + '22;border-color:' + esc(ld.accentColor||'#3B5CC4') + '">'
-    +   '<div style="font-size:18px">' + modInfo.emoji + '</div>'
+    +   '<div style="font-size:18px">' + (ld.emoji||modInfo.emoji||'🎡') + '</div>'
     +   '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">' + pubBadge + '</div>'
     + '</div>'
     + '<div class="kb-card-body">'
