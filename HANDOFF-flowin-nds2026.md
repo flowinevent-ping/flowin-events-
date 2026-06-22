@@ -42,7 +42,26 @@ Aujourd'hui le projet est éclaté sur **3 comptes/emails différents** → frag
 - **GitHub** : org `flowinevent-ping` (repo `flowin-events-`).
 - **Supabase** : projet `ywcqtupgoxfzkddqkztk` sous le compte **Google `romain.collin@gmail.com`**, org affichée « romain.collin@gmail.com's Org », **nom trompeur du projet = « flowin revision olivia »** (c'est BIEN le projet NDS : prospection + events ev-nds + migrations sécu). Pièges connus : le compte `flowinevent` ne contient qu'un projet Supabase **VIDE** (`atddutvzklcgiqxlpvla`) ; `3opconsult` → projet Nexto (`wmiawwaxwlvascyflpba`).
 - **Vercel** : auto-deploy `main`, prod `flowin-events.vercel.app`.
-→ **À faire par Romain, à froid après le 9 juillet** : choisir UN email maître et y rapatrier GitHub + Supabase + Vercel. **NE PAS migrer pendant le festival** (risque de casser le jeu pour 24 000 joueurs). Free-tier Supabase = **pause auto après 7 j d'inactivité** → vérifier l'activité / passer Pro avant le festival.
+→ **À faire par Romain, à froid après le 9 juillet** : choisir UN email maître et y rapatrier GitHub + Supabase + Vercel. **Procédure détaillée prête : `docs/rapatriement-compte-maitre.md`** (rapatriement prévu ~24/06 au soir selon arbitrage du risque). **NE PAS migrer pendant le festival** (risque de casser le jeu pour 24 000 joueurs). Free-tier Supabase = **pause auto après 7 j d'inactivité** → vérifier l'activité / passer Pro avant le festival.
+
+### 0.6 CONTINUITÉ AUTO-PUSH d'une conversation à l'autre (vérifié 23/06)
+Romain veut pouvoir, dans **toute nouvelle conversation**, demander une modif et qu'elle soit **commitée + pushée automatiquement** sans qu'il intervienne. Conditions réunies :
+- Le **token GitHub** (fine-grained, Contents R/W, exp ~17/09/2026) est conservé dans la **mémoire du projet Claude** (PAS dans le repo : public + push protection). Donc une nouvelle conversation **du même projet** l'a déjà.
+- Auth push vérifiée le 23/06 (`git ls-remote` authentifié OK, API GitHub 200, HEAD `b21bb52`).
+
+**BOOTSTRAP À LANCER EN PREMIER dans chaque nouvelle conversation** (conteneur neuf à chaque fois → re-cloner) :
+```
+TOKEN=<token en mémoire projet>
+git clone https://x-access-token:$TOKEN@github.com/flowinevent-ping/flowin-events-.git
+cd flowin-events- && git log --oneline -3        # noter le HEAD réel
+# … modifs …
+git -c user.email=romain@flowin.events -c user.name="Romain Collin" commit -m "..."
+git push origin main                              # remote déjà authentifié via l'URL de clone
+```
+Puis Vérif DB : Supabase MCP `execute_sql` → `select 1` sur `ywcqtupgoxfzkddqkztk`.
+- Push rejeté (non-fast-forward) : `git fetch origin && git reset --hard origin/main`, réappliquer, repush.
+- Clone/push **401** = token périmé → demander le courant à Romain UNE fois, MAJ mémoire + ce bloc.
+→ Tant que le token est en mémoire projet, **l'auto-push continue tout seul** entre conversations. Si un jour le rapatriement (§0.5) change le repo/owner, mettre à jour ce bloc + la mémoire.
 
 ## 1. Projet
 - Flowin = SaaS de gamification événementielle (marque OPConsult / société BAITA EURL, Vence 06140), opérateur unique : Romain Collin.
