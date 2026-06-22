@@ -82,15 +82,16 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0c0712;color:#fff;mi
   for(var i=0;i<ITEMS.length;i++){
     (function(item){
       var url=BASE+item.file;
+      var urlv=url+'?v=20260623';
       var card=document.createElement('div'); card.className='vcard';
       var thumb='';
-      if(item.img){ thumb='<div class="vthumb"><img src="'+url+'" alt="'+item.tt+'" loading="lazy"/></div>'; }
+      if(item.img){ thumb='<div class="vthumb"><img src="'+urlv+'" alt="'+item.tt+'" loading="lazy"/></div>'; }
       else { thumb='<div class="vthumb"><div class="pdf">'+ICON_PDF+'<span style="font-weight:800;font-size:13px">PDF impression</span></div></div>'; }
       card.innerHTML=thumb+
         '<div class="vbody"><div class="vtt">'+item.tt+'</div><div class="vdd">'+item.dd+'</div>'+
         '<span class="vmeta">'+item.meta+'</span>'+
         '<div class="vacts">'+
-          '<a class="btn btn-dl" href="'+url+'" download>'+ICON_DL+'Télécharger</a>'+
+          '<a class="btn btn-dl" href="'+urlv+'" download="'+item.file+'">'+ICON_DL+'Télécharger</a>'+
           '<button class="btn btn-share" type="button">'+ICON_SHARE+'Partager</button>'+
         '</div></div>';
       grid.appendChild(card);
