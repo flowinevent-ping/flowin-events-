@@ -156,7 +156,7 @@
     <span class="x-sep">&times;</span>
     <div class="flowin-block">
       <div class="flowin-mini"><div class="fb-dot">F</div><span class="fb-txt">Flow<span>in</span></span></div>
-      <div class="flowin-cap">un produit BAITA EURL &middot; OPConsult</div>
+      <div class="flowin-cap">un produit OPConsult &middot; BAITA EURL</div>
     </div>
   </div>
 
@@ -177,10 +177,10 @@
     <div class="parties">
       <div class="party emetteur">
         <div class="ttl">&Eacute;metteur</div>
-        <div class="nm">BAITA EURL</div>
+        <div class="nm">OPConsult</div>
         <div class="ln">
           40 rue des Arcs, 06140 Vence<br>
-          SIRET 512&nbsp;026&nbsp;907&nbsp;00018<br>
+          BAITA EURL &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907<br>
           TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907<br>
           04 93 59 91 37 &middot; info@opconsult.co
         </div>
@@ -305,8 +305,10 @@
       <button type="button" id="submitBtn" class="btn-primary">Valider, signer et recevoir ma copie</button>
       <span id="status" class="statusmsg"></span>
     </div>
-    <div class="actions viewonly">
+    <div class="actions viewonly" style="flex-wrap:wrap;gap:10px">
       <a href="#" id="dlBtn" class="btn-primary" onclick="window.print();return false;">Télécharger ma copie (PDF)</a>
+      <button type="button" id="copyLinkBtn" class="btn-primary" style="background:#3B5CC4">&#128203; Copier le lien à envoyer au client</button>
+      <a href="#" id="mailClientBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer par email au client</a>
       <span style="font-size:12px;color:var(--teal)">✓ Bon de commande signé et enregistré</span>
     </div>
 
@@ -415,6 +417,20 @@
         if($('docNum')) $('docNum').innerHTML=d.id;
         if($('payRef')) $('payRef').innerHTML=d.id;
         if($('docDate')) $('docDate').innerHTML=d.date_signature||dstr;
+        var _link=location.href;
+        var _mb=$('mailClientBtn');
+        if(_mb){
+          var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nOPConsult · BAITA EURL · info@opconsult.co · 06 16 35 49 36';
+          _mb.href='mailto:'+encodeURIComponent(d.email||'')+'?subject='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
+        }
+        var _cb=$('copyLinkBtn');
+        if(_cb){
+          _cb.addEventListener('click',function(){
+            var done=function(){ var t=_cb.innerHTML; _cb.innerHTML='✓ Lien copié — colle-le au client'; setTimeout(function(){ _cb.innerHTML=t; },2200); };
+            if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(_link).then(done,done); }
+            else { var ta=document.createElement('textarea'); ta.value=_link; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); done(); }
+          });
+        }
       })
       .catch(function(){ setStatus('Erreur de chargement.','err'); });
   }
