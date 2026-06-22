@@ -1,6 +1,6 @@
 # HANDOFF — Flowin / Nuits du Sud 2026
 
-> Document de reprise. Dernière mise à jour : 22/06/2026. HEAD au moment du handoff : voir `git log`.
+> Document de reprise. Dernière mise à jour : 22/06/2026 (session reprise). HEAD au moment du handoff : `4d67750` (toujours revérifier via `git log` — ne pas supposer).
 > Objectif : reprendre le projet dans une nouvelle session SANS dégradation ni perte des tâches accomplies.
 
 ## 1. Projet
@@ -32,8 +32,9 @@
 - Résultat scan : **0 ERROR** (était 4).
 - Migrations appliquées : `harden_security_safe_step1`, `harden_revoke_secdef_functions`, `bons_commande_add_cgv_tracking`.
 
-### CGV (complet)
-- Brouillon en base : `documents_legaux` id=`cgv-nds-2026`, statut `draft`, version `v1-draft` (À VALIDER PAR JURISTE).
+### CGV (complet — validé)
+- En base : `documents_legaux` id=`cgv-nds-2026`, **statut `valide`, version `v1`** (longueur ~5872 car.). Le brouillon a été remplacé par le texte validé.
+- **Greffe RCS confirmé (22/06)** : la mention « RCS de **Grasse**, SIREN 512 026 907 (SIRET 512 026 907 00018), TVA FR82512026907 » est **correcte**. BAITA SARL (nom commercial OP CONSULT), 40 rue des Arcs 06140 Vence, gérant Romain Collin, capital 5000 € ; Vence relève de l'arrondissement/Tribunal de commerce de Grasse (annonce de constitution parue dans *Le Cannois*, ressort de Grasse). Vérifié via societe.com / annuaire officiel.
 - Colonnes ajoutées à `bons_commande` : `cgv_version`, `cgv_acceptee_at`.
 - Page publique : `admin/public/cgv-nds.html` (charge les CGV depuis la base).
 - Bon de commande `admin/public/bon-commande-nds.html` : case « j'accepte les CGV » + lien, **bloquante** avant signature ; enregistre version + date.
@@ -53,7 +54,7 @@
 
 ## 5. RESTE À FAIRE
 ### Dépend de Romain
-- **CGV** : faire valider par un juriste → Dashboard CGV/Légal : coller le texte validé, statut `validé`, version à jour.
+- **CGV** : ✅ validée en base (statut `valide`, v1) — greffe RCS Grasse confirmé le 22/06. Plus d'action requise sauf modif de fond ultérieure.
 - **Prospection** : Scraping Maps ville par ville → coller les sorties pour compléter tél/email.
 - **Repo GitHub → privé** (Settings GitHub) : retire l'exposition publique du code + clé anon. PRIORITAIRE.
 - **Supabase Auth** : activer « Leaked Password Protection » (2 clics console).
@@ -68,7 +69,16 @@
 - Test de charge (connexions massives) : non fait.
 - Skills / sous-agents Claude Code : après le 9 juillet.
 
-## 6. Conventions & règles
+## 5bis. Chantiers UI commande/partenaire (session 22/06 — état constaté dans le code, à exécuter)
+> Constats faits par lecture directe du code au HEAD `4d67750`. Prod gelée (festival) → chaque modif = BLOC validé (Acorn + miroir MD5 + screenshot Chromium) avant push.
+
+1. **Fiche partenaire détail (logo / infos / docs) — accès.** Dans `dashboard.html`, `drawerPartner()` (≈ l.6218) ouvre via `openDrawerFor('partenaire',id)` avec onglets **Infos · Stats · Lots · Events · Contrat** — **pas d'onglet Documents**. Le mode édition gère logo (upload + URL + emoji fallback). À cadrer avec Romain : surface visée (drawer SA, page Pro commerçant `nds-pro.html`/`pro-nds-live.html`, ou page partenaire publique) + symptôme exact d'« inaccessible » (drawer ne s'ouvre pas ? vue lecture seule vide ? section docs absente ?). NB : `pro-nds-live.html` ne contient pas de loader de fiche docs (les `document.` repérés = DOM, pas des documents partenaire).
+2. **Carte de présentation à la charte.** Mini-carte refaite au dernier commit (`4d67750`, plan de ville + place du Grand Jardin) dans la présentation partenaire. Tokens charte dispo en `:root` (--ink #1B3A5C, --blue #3B5CC4, --teal #00B4A0, --orange #E85D04, --amber, --violet ; thème sombre --d1/--d2/--d3/--dk). À cadrer : quelle charte cible (sombre nds2026 vs présentation claire) et quel écart visuel précis.
+3. **Bandeau logo bord-à-bord.** À cadrer : quelle page + quel bandeau (hero présentation ? bandeau partenaires ? fiche ?).
+4. **Bon de commande pré-rempli digital.** `admin/public/bon-commande-nds.html` (26 KB) existe ; à la soumission, statut='signe' → `fn_bon_commande_chain` (crée fiche partenaire/pro + facture + lead CRM). À cadrer : source du pré-remplissage (params URL depuis la landing/CRM ? fiche prospection ? lien nominatif par commerce ?).
+5. **Bon de commande papier A4 (PDF).** À produire. À cadrer : génération client (print CSS A4 sur `bon-commande-nds.html`) ou PDF serveur ; coordonnées officielles à figer = info@opconsult.co / 06 16 35 49 36, BAITA SARL / OP CONSULT, RCS Grasse 512 026 907.
+
+
 - Fichiers NO-TOUCH : `nds2026Design.ts`, `SpinClient.tsx`, `QuizClient.tsx` (modules maîtres ; config via `cfg` en base).
 - Dashboard : validation **Acorn ES2020 = 0 erreur** + miroir `static/dashboard.html` **MD5-identique** avant tout push.
 - Next.js : `tsc --noEmit` + `next build` (lire le log).
