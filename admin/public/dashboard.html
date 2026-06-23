@@ -1813,7 +1813,8 @@ function migrateData(data){
   if(!Array.isArray(data.landings)) data.landings = [];
   var _ndsLandings = [
     {id:'lp-nds-presentation', nom:'Landing NDS — Présentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html'},
-    {id:'lp-nds-entry', nom:'Landing NDS — Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'}
+    {id:'lp-nds-entry', nom:'Landing NDS — Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'},
+    {id:'lp-nds-super-event', nom:'Présentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'}
   ];
   _ndsLandings.forEach(function(_n){
     if(!data.landings.some(function(l){ return l && l.id===_n.id; })){
