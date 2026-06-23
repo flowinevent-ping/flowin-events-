@@ -19,14 +19,19 @@ const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '�
 const OPTIN_VERSION = 'nds-2026-v2'
 const OPTIN_TEXT = "Je veux rester en contact avec les Nuits du Sud et leurs partenaires."
 
-/* Les 4 destinations de la carte joueur (familles de stations). Coords = vraies positions
-   de la base (events ev-nds-*), alignées sur la carte du dashboard. Rafraîchies en live
-   à l'entrée sur l'écran carte (voir useEffect plus bas). */
+/* Les 9 stations numérotées du festival (= référentiel unique, identique au dashboard).
+   Coords = vraies positions de la base (events ev-nds-* numérotés). Rafraîchies en live
+   à l'entrée sur l'écran carte (voir useEffect plus bas). 1 ticket / station / jour. */
 const STATIONS = [
-  { id: 'ev-nds-caisses', nom: 'Les Caisses', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.722275, lng: 7.111421, msg: "Passe aux caisses, à l'entrée du festival, et flashe le QR code sur place." },
-  { id: 'ev-nds-bar',     nom: 'Le Bar',      ou: 'Au bar des Nuits du Sud',          icon: 'i-glass', lat: 43.722391, lng: 7.111539, msg: 'Rends-toi au bar et flashe le QR.' },
-  { id: 'ev-nds-ecrans',  nom: "L'Écran",     ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.722155, lng: 7.111708, msg: "Flashe au changement de scène, sur l'écran géant." },
-  { id: 'ev-nds-tablette', nom: 'La Brigade Verte', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.722661, lng: 7.111563, msg: 'Trouve la Brigade Verte : elle se balade dans le festival.' },
+  { id: 'ev-nds-caisse-1', nom: 'Caisse 1', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.722715, lng: 7.111389, msg: "Passe à la Caisse 1, à l'entrée, et flashe le QR sur place." },
+  { id: 'ev-nds-caisse-2', nom: 'Caisse 2', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.722566, lng: 7.112381, msg: 'Passe à la Caisse 2 et flashe le QR sur place.' },
+  { id: 'ev-nds-caisse-3', nom: 'Caisse 3', ou: "À l'entrée, près de la billetterie", icon: 'i-ticket', lat: 43.722172, lng: 7.110657, msg: 'Passe à la Caisse 3 et flashe le QR sur place.' },
+  { id: 'ev-nds-bar-1', nom: 'Bar 1', ou: 'Au bar des Nuits du Sud', icon: 'i-glass', lat: 43.722488, lng: 7.111641, msg: 'Rends-toi au Bar 1 et flashe le QR.' },
+  { id: 'ev-nds-bar-2', nom: 'Bar 2', ou: 'Au bar des Nuits du Sud', icon: 'i-glass', lat: 43.722465, lng: 7.111445, msg: 'Rends-toi au Bar 2 et flashe le QR.' },
+  { id: 'ev-nds-ecrans', nom: "L'Écran", ou: "Sur l'écran géant, entre deux concerts", icon: 'i-monitor', lat: 43.722155, lng: 7.111708, msg: "Flashe au changement de scène, sur l'écran géant." },
+  { id: 'ev-nds-tablette-1', nom: 'Brigade Verte 1', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.722436, lng: 7.111748, msg: 'Trouve la Brigade Verte 1 et flashe son QR.' },
+  { id: 'ev-nds-tablette-2', nom: 'Brigade Verte 2', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.722564, lng: 7.111931, msg: 'Trouve la Brigade Verte 2 et flashe son QR.' },
+  { id: 'ev-nds-tablette-3', nom: 'Brigade Verte 3', ou: 'Elle se balade dans le festival', icon: 'i-layers', lat: 43.722523, lng: 7.112175, msg: 'Trouve la Brigade Verte 3 et flashe son QR.' },
 ]
 
 /* ── Tickets NDS ───────────────────────────────────────────────────────────────
@@ -38,12 +43,13 @@ function ndsYmd(): string {
   const p = (n: number) => (n < 10 ? '0' + n : '' + n)
   return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
 }
-/* Une station scannée (ev-nds-caisse-1, ev-nds-bar-2, …) -> sa famille carte. */
+/* Référentiel consolidé : chaque QR numéroté EST sa propre station (1 ticket/station/jour).
+   On ne regroupe plus en familles. Compat : un ancien id groupé renvoie vers la 1re
+   station numérotée correspondante (au cas où un vieux QR/lien serait encore scanné). */
 function ndsFamily(id: string): string {
-  if (id.indexOf('ev-nds-caisse') === 0) return 'ev-nds-caisses'
-  if (id.indexOf('ev-nds-bar') === 0) return 'ev-nds-bar'
-  if (id.indexOf('ev-nds-ecran') === 0) return 'ev-nds-ecrans'
-  if (id.indexOf('ev-nds-tablette') === 0) return 'ev-nds-tablette'
+  if (id === 'ev-nds-caisses') return 'ev-nds-caisse-1'
+  if (id === 'ev-nds-bar') return 'ev-nds-bar-1'
+  if (id === 'ev-nds-tablette') return 'ev-nds-tablette-1'
   return id
 }
 const NDS_LEDGER = 'flowin_nds_ledger'
@@ -136,6 +142,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Log du scan/ouverture parcours NDS — alimente l'entonnoir (scans -> jeux -> coordonnées)
   useEffect(() => { trackVisite('nds2026', evId) }, [evId])
   const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
+  // Popup reconnaissance « Déjà inscrit ? » — s'affiche au milieu du quiz après le flash
+  const [recoOpen, setRecoOpen] = useState(false)
+  const [recoAsked, setRecoAsked] = useState(false)
+  const [recoMode, setRecoMode] = useState<'ask' | 'email'>('ask')
+  const [recoEmail, setRecoEmail] = useState('')
+  const [recoBusy, setRecoBusy] = useState(false)
+  const [recoMsg, setRecoMsg] = useState<string | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
@@ -169,6 +182,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     // Cumul des tickets gagnés à vie (jamais remis à zéro)
     try { setTicketCount(ndsCumul()) } catch {}
   }, [lsKey])
+
+  // Popup « Déjà inscrit ? » : à l'arrivée sur le quiz, si le joueur n'est pas déjà
+  // reconnu (localStorage/email) et qu'on ne l'a pas encore demandé cette session.
+  useEffect(() => {
+    if (screen === 'quiz' && !recurrent && !recoAsked && !saved) {
+      setRecoMode('ask'); setRecoMsg(null); setRecoOpen(true)
+    }
+  }, [screen, recurrent, recoAsked, saved])
 
 
 
@@ -393,6 +414,29 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     } catch { /* silencieux */ }
     setLookingUp(false)
   }
+
+  // Popup reconnaissance : valider l'email -> retrouve le compte (reconnu = formulaire de fin sauté)
+  async function recoSubmitEmail(): Promise<void> {
+    const em = recoEmail.trim()
+    if (em.indexOf('@') === -1 || recoBusy) { setRecoMsg('Entre un email valide.'); return }
+    setRecoBusy(true); setRecoMsg(null)
+    try {
+      const j = await lookupJoueurByEmail(em, evId)
+      if (j) {
+        setRecurrent({ id: j.id, email: j.email, prenom: j.prenom })
+        setForm(f => ({ ...f,
+          prenom: j.prenom || f.prenom, nom: j.nom || f.nom, email: j.email || em, tel: j.tel || f.tel,
+          cp: j.cp || f.cp, age: j.age || f.age, sexe: j.genre || f.sexe, optin: true }))
+        setEmailKnown({ prenom: j.prenom, alreadyPlayed: j.alreadyPlayed })
+        setRecoOpen(false); setRecoAsked(true)
+      } else {
+        setRecoMsg("On ne te trouve pas avec cet email. Tu pourras t'inscrire à la fin du quiz.")
+      }
+    } catch { setRecoMsg('Connexion impossible, réessaie.') }
+    setRecoBusy(false)
+  }
+
+  function recoDismiss(): void { setRecoOpen(false); setRecoAsked(true); setRecoMode('ask'); setRecoEmail(''); setRecoMsg(null) }
 
   async function submitInscription() {
     const errs: Record<string, string> = {}
@@ -726,6 +770,31 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
         {screen === 'quiz' && q && (
           <section className="scr purple on">
+            {recoOpen && (
+              <div onClick={recoDismiss} style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18, background: 'rgba(20,8,30,.55)', backdropFilter: 'blur(2px)' }}>
+                <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 320, background: '#fff', borderRadius: 20, padding: '22px 20px', boxShadow: '0 24px 60px rgba(20,8,40,.5)', textAlign: 'center' }}>
+                  {recoMode === 'ask' ? (
+                    <>
+                      <div style={{ width: 54, height: 54, margin: '0 auto 12px', borderRadius: 16, background: 'linear-gradient(135deg,#7C2D92,#E0218A)', display: 'grid', placeItems: 'center' }}>
+                        <svg viewBox="0 0 24 24" style={{ width: 26, height: 26, fill: 'none', stroke: '#fff', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      </div>
+                      <div style={{ fontWeight: 800, fontSize: 19, color: '#23142c' }}>Déjà inscrit&nbsp;?</div>
+                      <div style={{ fontSize: 13, color: '#7a708a', margin: '8px 0 18px', lineHeight: 1.45 }}>Si tu as déjà joué une station, entre ton email&nbsp;: on garde tes infos et tes tickets.</div>
+                      <button onClick={() => { setRecoMode('email'); setRecoMsg(null) }} style={{ width: '100%', border: 'none', borderRadius: 13, padding: 14, fontFamily: 'inherit', fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: 'linear-gradient(90deg,#7C2D92,#E0218A)', boxShadow: '0 8px 20px rgba(224,33,138,.32)' }}>Oui, j&apos;ai déjà joué</button>
+                      <button onClick={recoDismiss} style={{ width: '100%', marginTop: 10, border: '1px solid #ece6f0', borderRadius: 13, padding: 13, fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#7a708a', cursor: 'pointer', background: '#fff' }}>Non, c&apos;est ma première fois</button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontWeight: 800, fontSize: 18, color: '#23142c', marginBottom: 12 }}>Ton email</div>
+                      <input type="email" inputMode="email" autoCapitalize="none" autoComplete="email" value={recoEmail} onChange={e => { setRecoEmail(e.target.value); if (recoMsg) setRecoMsg(null) }} placeholder="prenom@email.com" onKeyDown={e => { if (e.key === 'Enter') recoSubmitEmail() }} style={{ width: '100%', border: '1px solid #ece6f0', borderRadius: 12, padding: '13px 14px', fontSize: 15, fontFamily: 'inherit', outline: 'none', color: '#23142c' }} />
+                      {recoMsg && <div style={{ fontSize: 12.5, color: '#b4456e', marginTop: 8, lineHeight: 1.4 }}>{recoMsg}</div>}
+                      <button onClick={recoSubmitEmail} disabled={recoBusy} style={{ width: '100%', marginTop: 14, border: 'none', borderRadius: 13, padding: 14, fontFamily: 'inherit', fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: 'linear-gradient(90deg,#7C2D92,#E0218A)', boxShadow: '0 8px 20px rgba(224,33,138,.32)', opacity: recoBusy ? 0.7 : 1 }}>{recoBusy ? 'Recherche…' : 'Valider'}</button>
+                      <button onClick={recoDismiss} style={{ width: '100%', marginTop: 10, border: 'none', background: 'none', color: '#a99fb3', fontFamily: 'inherit', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Passer, je m&apos;inscris à la fin</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="pad">
               <div className="dhead">
                 <div className="back" onClick={() => setScreen('onboard')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
