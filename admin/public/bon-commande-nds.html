@@ -39,6 +39,10 @@
   .doc-type{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1.05;color:var(--ink)}
   .doc-meta{text-align:right;font-size:13px;color:var(--muted);line-height:1.7}
   .doc-meta b{color:var(--ink)}
+  .docnum-edit{font:inherit;font-weight:700;color:var(--ink);background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;text-align:right;width:158px;padding:0 2px 1px}
+  .docnum-edit:focus{border-bottom-color:#E0218A;background:#faf6fc}
+  body.viewmode .docnum-edit{border-bottom:none;background:transparent;width:auto;min-width:140px}
+  @media(max-width:640px){.docnum-edit{text-align:left}}
 
   /* Emetteur / client */
   .parties{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
@@ -168,7 +172,7 @@
         <h1 class="doc-type">Bon de commande</h1>
       </div>
       <div class="doc-meta">
-        N&deg; <b id="docNum">NDS-2026-____</b><br>
+        N&deg; <input id="docNum" type="text" spellcheck="false" autocomplete="off" class="docnum-edit" value="" title="Num\u00e9ro modifiable" /><br>
         Date : <b id="docDate">__ / __ / 2026</b><br>
         Cl&ocirc;ture des partenariats : <b>9 juillet 2026</b>
       </div>
@@ -346,6 +350,14 @@
   // --- Date du jour ---
   var today=new Date();
   var dstr=('0'+today.getDate()).slice(-2)+' / '+('0'+(today.getMonth()+1)).slice(-2)+' / '+today.getFullYear();
+  // --- Numero de bon de commande : format FL-JJMM.AAAA, editable a la main ---
+  var defNum='FL-'+('0'+today.getDate()).slice(-2)+('0'+(today.getMonth()+1)).slice(-2)+'.'+today.getFullYear();
+  if($('docNum')){
+    $('docNum').value=defNum;
+    $('docNum').addEventListener('input',function(){ if($('payRef')) $('payRef').textContent=(this.value.trim()||defNum); });
+  }
+  if($('payRef')) $('payRef').textContent=defNum;
+  if($('docDate')) $('docDate').textContent=dstr;
   if($('f_date')) $('f_date').value=dstr;
   if($('docDate')) $('docDate').innerHTML=dstr;
   if($('f_date')) $('f_date').addEventListener('input',function(){ if($('docDate')) $('docDate').innerHTML=$('f_date').value||'__ / __ / 2026'; });
@@ -384,7 +396,7 @@
       if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
       if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
       var ht=parseFloat(sel.getAttribute('data-ht')), tva=Math.round(ht*0.20), ttc=ht+tva;
-      var id='bc-nds-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+      var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
       var rec={ id:id, super_event_id:'se-nds-2026', statut:'signe',
         raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
         contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
@@ -394,8 +406,8 @@
         cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
       $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
       fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
-        .then(function(r){ if(!r.ok) throw new Error('http '+r.status); location.href='?id='+id; })
-        .catch(function(){ $('submitBtn').disabled=false; setStatus('\u00c9chec de l\'enregistrement. R\u00e9essayez.','err'); });
+        .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); location.href='?id='+id; })
+        .catch(function(e){ $('submitBtn').disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\'enregistrement. R\u00e9essayez.','err'); });
     });
   }
 
@@ -416,7 +428,7 @@
         for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){ pickOffer(offers[j]); } }
         if(d.montant_ht!=null){ $('tHT').innerHTML=eur(d.montant_ht); $('tTVA').innerHTML=eur(d.montant_tva); $('tTTC').innerHTML=eur(d.montant_ttc); }
         if($('sigImg')&&d.signature) $('sigImg').src=d.signature;
-        if($('docNum')) $('docNum').innerHTML=d.id;
+        if($('docNum')){ $('docNum').value=d.id; $('docNum').readOnly=true; }
         if($('payRef')) $('payRef').innerHTML=d.id;
         if($('docDate')) $('docDate').innerHTML=d.date_signature||dstr;
         var _link=location.href;
