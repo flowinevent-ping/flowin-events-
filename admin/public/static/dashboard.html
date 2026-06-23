@@ -2511,7 +2511,8 @@ function downloadJSON(filename, data){
 // ============ STATE UI ============
 const state = {
   mode:'sa',
-  view:'pilotage',
+  // Deep-link : /dashboard.html#landing ouvre directement la page Landing Pages
+  view:(function(){try{var h=(location.hash||'').replace('#','');if(h==='landing'||h==='landing-page')return 'landing-page';}catch(e){}return 'pilotage';})(),
   currentProId:'pro-vence',
   proVisib:{stats:true, participants:true, lots:true, qr:true, export:true, activite:true},
   joueurPage:0,

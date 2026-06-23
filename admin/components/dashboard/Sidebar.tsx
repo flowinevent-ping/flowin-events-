@@ -10,6 +10,7 @@ interface NavItem {
   count?: number
   href: string
   live?: number
+  external?: boolean
 }
 
 interface NavGroup {
@@ -46,7 +47,7 @@ export default function Sidebar() {
       group: 'ACQUISITION B2B',
       items: [
         { id: 'btob', icon: '🎯', label: 'Prospects B2B', count: 0, href: '/dashboard/btob' },
-        { id: 'landing', icon: '🌐', label: 'Landing Page', count: 1, href: '/dashboard/landing' },
+        { id: 'landing', icon: '🌐', label: 'Landing Page', count: 1, href: '/dashboard.html#landing', external: true },
       ],
     },
     {
@@ -85,7 +86,7 @@ export default function Sidebar() {
               <button
                 key={item.id}
                 className={`sa-sb-item${isActive(item.href) ? ' active' : ''}`}
-                onClick={() => router.push(item.href)}
+                onClick={() => { if (item.external) { window.location.href = item.href } else { router.push(item.href) } }}
               >
                 <span className="sa-sb-icon">{item.icon}</span>
                 <span className="sa-sb-label">{item.label}</span>
