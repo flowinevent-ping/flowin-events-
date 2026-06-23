@@ -1991,6 +1991,19 @@ async function refreshFromSupabase(){
   DATA.events = data.events;
   DATA.superEvents = data.superEvents;
     if(data.landings && data.landings.length) DATA.landings = data.landings;
+  // FIX bug recurrent : les landings NDS sont des pages STATIQUES (pas en table Supabase).
+  // Le fetch Supabase ci-dessus ecrase DATA.landings -> elles disparaissaient de la liste.
+  // On les re-injecte ici apres le fetch (idempotent) pour qu'elles restent visibles.
+  if(!Array.isArray(DATA.landings)) DATA.landings = [];
+  [
+    {id:'lp-nds-presentation', nom:'Landing NDS \u2014 Pr\u00e9sentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html'},
+    {id:'lp-nds-entry', nom:'Landing NDS \u2014 Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'},
+    {id:'lp-nds-super-event', nom:'Pr\u00e9sentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'}
+  ].forEach(function(_n){
+    if(!DATA.landings.some(function(l){ return l && l.id===_n.id; })){
+      DATA.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'});
+    }
+  });
 
   DATA.joueurs = data.joueurs;
   DATA.lots = data.lots;
