@@ -1814,7 +1814,8 @@ function migrateData(data){
   var _ndsLandings = [
     {id:'lp-nds-presentation', nom:'Landing NDS — Présentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html'},
     {id:'lp-nds-entry', nom:'Landing NDS — Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'},
-    {id:'lp-nds-super-event', nom:'Présentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'}
+    {id:'lp-nds-super-event', nom:'Présentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'},
+    {id:'lp-nds-parcours-client', nom:'Présentation parcours client', deployUrl:'https://flowin-events.vercel.app/nds-parcours-client.html'}
   ];
   _ndsLandings.forEach(function(_n){
     if(!data.landings.some(function(l){ return l && l.id===_n.id; })){
@@ -1998,7 +1999,8 @@ async function refreshFromSupabase(){
   [
     {id:'lp-nds-presentation', nom:'Landing NDS \u2014 Pr\u00e9sentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html'},
     {id:'lp-nds-entry', nom:'Landing NDS \u2014 Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'},
-    {id:'lp-nds-super-event', nom:'Pr\u00e9sentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'}
+    {id:'lp-nds-super-event', nom:'Pr\u00e9sentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'},
+    {id:'lp-nds-parcours-client', nom:'Pr\u00e9sentation parcours client', deployUrl:'https://flowin-events.vercel.app/nds-parcours-client.html'}
   ].forEach(function(_n){
     if(!DATA.landings.some(function(l){ return l && l.id===_n.id; })){
       DATA.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'});
