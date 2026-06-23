@@ -5871,9 +5871,11 @@ function drawerJoueur(j){
       html += fieldRow('Email','<a href="mailto:'+escAttr(j.email)+'">'+esc(j.email)+'</a>');
       html += fieldRow('Téléphone',j.tel?'<a href="tel:'+escAttr(j.tel)+'">'+esc(j.tel)+'</a>':'-');
       html += fieldRow('Date naissance',j.dateNaissance?fmtFull(j.dateNaissance):'-');
+      html += fieldRow('Tranche d\'âge',j.ageTranche?'<strong>'+esc(j.ageTranche)+' ans</strong>':'-');
       html += fieldRow('Ville',esc((j.ville||'-')+(j.codePostal?' · '+j.codePostal:'')));
       html += fieldRow('Adresse',esc(j.adresse||'-'));
       html += fieldRow('Source',esc(j.source||'-'));
+      html += fieldRow('Connu le festival via',j.decouverte?'<strong>'+esc(j.decouverte)+'</strong>':'-');
       html += fieldRow('Newsletter',j.optin?'<span class="chip live">Opt-in '+(j.optinDate?'· '+fmt(j.optinDate):'')+'</span>':'<span class="chip past">Non opt-in</span>');
       html += fieldRow('Première activité',j.firstSeen ? fmtFull(j.firstSeen) : '-');
       html += fieldRow('Dernière activité',j.lastSeen ? fmtFull(j.lastSeen) : '-');
