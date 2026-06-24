@@ -48,10 +48,16 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0c0712;color:#fff;mi
 (function(){
   var BASE='/nds/visuels/';
   var ITEMS=[
+    {file:'nds-partenaire-video-16x9.mp4', tt:'Vidéo présentation · 36 s', dd:'Pour les écrans du festival et vos réseaux. Voix off possible par-dessus.', meta:'MP4 · 1920×1080', video:true, thumbFile:'poster-partenaire.png'},
+    {file:'ecran_16x9.png', tt:'Affiche écran 16:9', dd:'Visuel plein écran pour TV / écrans du festival.', meta:'1920×1080 px', img:true},
     {file:'carre_1080x1080.png', tt:'Carré · réseaux sociaux', dd:'Post Instagram / Facebook, format carré.', meta:'1080 × 1080 px', img:true},
     {file:'story_1080x1920.png', tt:'Story · vertical', dd:'Story Instagram / statut WhatsApp, format 9:16.', meta:'1080 × 1920 px', img:true},
     {file:'forex_700x700.png', tt:'Forex 70 × 70 · aperçu', dd:'Aperçu du support physique posé sur place (caisses, bar).', meta:'700 × 700 px', img:true},
     {file:'forex_700x700_print.pdf', tt:'Forex 70 × 70 · prêt à imprimer', dd:'Fichier PDF haute définition pour l\'impression du panneau.', meta:'PDF · impression', img:false}
+  ,
+    {file:'bon_achat_90.png', tt:'Bon d\'achat 90 €', dd:'À faire gagner en boutique — offre Visibilité.', meta:'1200×630 px', img:true},
+    {file:'bon_achat_159.png', tt:'Bon d\'achat 159 €', dd:'À faire gagner en boutique — offre Animation.', meta:'1200×630 px', img:true},
+    {file:'bon_achat_259.png', tt:'Bon d\'achat 259 €', dd:'À faire gagner en boutique — offre Sponsor.', meta:'1200×630 px', img:true}
   ];
   var ICON_DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>';
   var ICON_SHARE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
@@ -82,10 +88,10 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0c0712;color:#fff;mi
   for(var i=0;i<ITEMS.length;i++){
     (function(item){
       var url=BASE+item.file;
-      var urlv=url+'?v=20260624c';
+      var urlv=url+'?v=20260624d';
       var card=document.createElement('div'); card.className='vcard';
       var thumb='';
-      if(item.img){ thumb='<div class="vthumb"><img src="'+urlv+'" alt="'+item.tt+'" loading="lazy"/></div>'; }
+      var tsrc=BASE+(item.thumbFile||item.file)+'?v=20260624d'; if(item.img||item.video){ thumb='<div class="vthumb" style="position:relative"><img src="'+tsrc+'" alt="'+item.tt+'" loading="lazy"/>'+(item.video?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:54px;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.6)">▶</div>':'')+'</div>'; }
       else { thumb='<div class="vthumb"><div class="pdf">'+ICON_PDF+'<span style="font-weight:800;font-size:13px">PDF impression</span></div></div>'; }
       card.innerHTML=thumb+
         '<div class="vbody"><div class="vtt">'+item.tt+'</div><div class="vdd">'+item.dd+'</div>'+
