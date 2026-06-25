@@ -48,7 +48,7 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0c0712;color:#fff;mi
 (function(){
   var BASE='/nds/visuels/';
   var ITEMS=[
-    {file:'nds-partenaire-video-16x9.mp4', tt:'Vidéo présentation · 36 s', dd:'Pour les écrans du festival et vos réseaux. Voix off possible par-dessus.', meta:'MP4 · 1920×1080', video:true, thumbFile:'poster-partenaire.png'},
+    {file:'nds-partenaire-video-16x9.mp4', tt:'Vidéo écran · 34 s', dd:'Le jeu sur les écrans du festival : concours, lots, QR à scanner. Voix off possible.', meta:'MP4 · 1920×1080', video:true, thumbFile:'poster-partenaire.png'},
     {file:'ecran_16x9.png', tt:'Affiche écran 16:9', dd:'Visuel plein écran pour TV / écrans du festival.', meta:'1920×1080 px', img:true},
     {file:'carre_1080x1080.png', tt:'Carré · réseaux sociaux', dd:'Post Instagram / Facebook, format carré.', meta:'1080 × 1080 px', img:true},
     {file:'story_1080x1920.png', tt:'Story · vertical', dd:'Story Instagram / statut WhatsApp, format 9:16.', meta:'1080 × 1920 px', img:true},
@@ -88,10 +88,10 @@ body{font-family:'Manrope',system-ui,sans-serif;background:#0c0712;color:#fff;mi
   for(var i=0;i<ITEMS.length;i++){
     (function(item){
       var url=BASE+item.file;
-      var urlv=url+'?v=20260624d';
+      var urlv=url+'?v=20260625a';
       var card=document.createElement('div'); card.className='vcard';
       var thumb='';
-      var tsrc=BASE+(item.thumbFile||item.file)+'?v=20260624d'; if(item.img||item.video){ thumb='<div class="vthumb" style="position:relative"><img src="'+tsrc+'" alt="'+item.tt+'" loading="lazy"/>'+(item.video?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:54px;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.6)">▶</div>':'')+'</div>'; }
+      var tsrc=BASE+(item.thumbFile||item.file)+'?v=20260625a'; if(item.img||item.video){ thumb='<div class="vthumb" style="position:relative"><img src="'+tsrc+'" alt="'+item.tt+'" loading="lazy"/>'+(item.video?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:54px;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.6)">▶</div>':'')+'</div>'; }
       else { thumb='<div class="vthumb"><div class="pdf">'+ICON_PDF+'<span style="font-weight:800;font-size:13px">PDF impression</span></div></div>'; }
       card.innerHTML=thumb+
         '<div class="vbody"><div class="vtt">'+item.tt+'</div><div class="vdd">'+item.dd+'</div>'+
