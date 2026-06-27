@@ -121,14 +121,15 @@ def gain_card(base, cx, cy, w, h, grad, icon, label, title, prog, dark=False):
     base.alpha_composite(cr, (int(cx - nw / 2) - xo, int(cy - nh / 2)))
 
 # ---- badge QR persistant : QR + 'Flash'(ambre)/'le QR'(blanc) a droite, AGRANDI ----
-def qr_badge(base, t, qsz=380):
+def qr_badge(base, t, qr_img=None, qsz=380):
+    qr_img = qr_img if qr_img is not None else QR
     ap = eo(ramp(t, 1.0, 1.6))
     if ap <= 0: return
     pad = 26
     cw = qsz + pad * 2
     card = Image.new("RGBA", (cw, cw), (0, 0, 0, 0)); cd = ImageDraw.Draw(card)
     cd.rounded_rectangle([0, 0, cw - 1, cw - 1], radius=44, fill=(255, 255, 255, 252))
-    card.paste(QR.resize((qsz, qsz), Image.NEAREST), (pad, pad))
+    card.paste(qr_img.resize((qsz, qsz), Image.NEAREST), (pad, pad))
     # texte a droite : 'Flash' ambre / 'le QR' blanc
     fF = L.font(72, 800); fL = L.font(64, 800)
     tw = max(L.measure("Flash", fF)[0], L.measure("le QR", fL)[0]) + 30
@@ -192,15 +193,36 @@ def name_card(base, l1, l2, cx, cy, w, h, prog):
 PARTNERS = ["bergerie", "pegase", "utile", "carrosserie-gp"]
 DUR = 40.0; NF = int(DUR * FPS)
 
-def frame(t):
+def finale_qr(base, lt, qr_img=None):
+    qr_img = qr_img if qr_img is not None else QR
+    ap = eo(ramp(lt, 0.25, 0.8)); qsz = 820
+    if ap <= 0.02: return
+    q = qr_img.resize((qsz, qsz), Image.NEAREST)
+    cwq = qsz + 72
+    card = Image.new("RGBA", (cwq, cwq), (0, 0, 0, 0))
+    ImageDraw.Draw(card).rounded_rectangle([0, 0, cwq - 1, cwq - 1], radius=48, fill=(255, 255, 255, 255))
+    card.paste(q, (36, 36))
+    s = 0.82 + 0.18 * ap; nw = int(cwq * s)
+    cr = card.resize((nw, nw), Image.LANCZOS)
+    al = cr.split()[3].point(lambda px: int(px * ap)); cr.putalpha(al)
+    base.alpha_composite(cr, (int(W / 2 - nw / 2), int(H * 0.30)))
+
+def qr_overlay(img, t, qr_img=None):
+    # ajoute le QR (badge persistant OU finale) — separe de scene() pour compositing par QR
+    if t < 29.5:
+        if t >= 1.6: qr_badge(img, t, qr_img)
+    else:
+        finale_qr(img, t - 29.5, qr_img)
+    return img
+
+def scene(t):
+    # TOUT sauf le QR (badge + carte finale), pour rendu base reutilisable
     img = make_bg(t)
-    show_badge = True
     if t < 3.0:                                    # INTRO
         L.put_logo(img, W / 2, H * 0.30, 0.56 * eo(ramp(t, 0.1, 0.7)), alpha=eo(ramp(t, 0.1, 0.6)))
         if t > 0.7: pop(img, tl("LE GRAND JEU", 96, WHITE), W / 2, H * 0.50, ramp(t, 0.7, 1.2))
         if t > 1.1: pop(img, tl("DU FESTIVAL", 96, AMBER), W / 2, H * 0.585, ramp(t, 1.1, 1.6))
         if t > 1.8: pop(img, tl("9 → 18 juillet · Vence", 46, WHITE), W / 2, H * 0.66, ramp(t, 1.8, 2.3))
-        show_badge = t > 1.6
     elif t < 7.6:                                  # FLASH. JOUE. GAGNE.
         lt = t - 3.0
         for (w, c, d0), y in zip([("FLASH.", AMBER, 0.0), ("JOUE.", WHITE, 0.7), ("GAGNE.", MAGENTA, 1.4)], [H * 0.32, H * 0.47, H * 0.62]):
@@ -237,27 +259,24 @@ def frame(t):
             logo_tile(img, slug, gx + dx * (tw / 2 + 22), gy + dy * (th / 2 + 22), tw, th, ramp(lt, 0.5 + i * 0.24, 0.95 + i * 0.24))
         # 5e partenaire : Electromenager Giordano (pas de logo fourni -> carte nom)
         name_card(img, "Électroménager", "Giordano", gx, H * 0.665, int(tw * 1.18), 150, ramp(lt, 1.5, 1.95))
-    else:                                          # FINALE — QR plein cadre propre (comme ref)
-        lt = t - 29.5; show_badge = False
+    else:                                          # FINALE — titre + texte (QR ajoute par finale_qr)
+        lt = t - 29.5
         pop(img, tl("FLASH LE QR", 116, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))
-        ap = eo(ramp(lt, 0.25, 0.8)); qsz = 820
-        if ap > 0.02:
-            q = QR.resize((qsz, qsz), Image.NEAREST)
-            cwq = qsz + 72
-            card = Image.new("RGBA", (cwq, cwq), (0, 0, 0, 0))
-            ImageDraw.Draw(card).rounded_rectangle([0, 0, cwq - 1, cwq - 1], radius=48, fill=(255, 255, 255, 255))
-            card.paste(q, (36, 36))
-            s = 0.82 + 0.18 * ap; nw = int(cwq * s)
-            cr = card.resize((nw, nw), Image.LANCZOS)
-            al = cr.split()[3].point(lambda px: int(px * ap)); cr.putalpha(al)
-            img.alpha_composite(cr, (int(W / 2 - nw / 2), int(H * 0.30)))
         if lt > 0.9: pop(img, tl("ce soir & dans les commerces !", 50, WHITE), W / 2, H * 0.78, ramp(lt, 0.9, 1.35))
-    if show_badge:
-        qr_badge(img, t)
+    return img
+
+def frame(t, qr_img=None):
+    img = scene(t)
+    qr_overlay(img, t, qr_img)
     return img.convert("RGB")
 
 if __name__ == "__main__":
     a = int(sys.argv[1]); b = int(sys.argv[2])
+    mode = sys.argv[3] if len(sys.argv) > 3 else "full"
+    outdir = sys.argv[4] if len(sys.argv) > 4 else OUT
+    os.makedirs(outdir, exist_ok=True)
     for i in range(a, min(b, NF)):
-        frame(i / FPS).save(f"{OUT}/f{i:04d}.jpg", quality=90)
-    print("CHUNK_OK", a, min(b, NF))
+        t = i / FPS
+        im = scene(t) if mode == "base" else frame(t)
+        im.convert("RGB").save(f"{outdir}/f{i:04d}.jpg", quality=90)
+    print("CHUNK_OK", mode, a, min(b, NF))
