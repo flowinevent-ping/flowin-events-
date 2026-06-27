@@ -89,7 +89,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('PQ')
-    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers })
+    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: true, optin_version: 'nds-2026-v3' })
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}; setScreen('already'); return }
     if (!res.success) { if (res.error) console.error('[quiz] Supabase échoué:', res.error); setErrors(e => ({ ...e, email: 'Enregistrement impossible, réessaie.' })); return }
@@ -201,7 +201,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
             <div><label className="label">CP</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e => setForm(f=>({...f,cp:e.target.value}))} /></div>
           </div>
           <div style={{ marginBottom:12 }}><label className="label">Comment découvert ?</label><div style={{ display:'flex',flexWrap:'wrap',gap:6,marginTop:6 }}>{SOURCES.map(s=><button key={s} className={`source-chip${form.source===s?' sel':''}`} onClick={()=>setForm(f=>({...f,source:s}))}>{s}</button>)}</div></div>
-          <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
+          <div className="rgpd"><div className="rgpd-check">✓</div><div>Je souhaite rester en contact avec les Nuits du Sud et Flowin. Mes données ne sont ni échangées ni vendues.</div></div>
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
         </div>
       )}
