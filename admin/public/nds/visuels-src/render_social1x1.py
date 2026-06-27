@@ -92,12 +92,12 @@ def frame(t):
     elif t < 29.5:
         lt = t - 23.0; show = False
         pop(img, tl("ET DANS LES COMMERCES", 50, AMBER), W / 2, H * 0.11, ramp(lt, 0.0, 0.45))
-        tw, th = 286, 158; gx = W * 0.5
-        logo_tile(img, "bergerie", gx - (tw/2 + 16), H * 0.31, tw, th, ramp(lt, 0.5, 0.95))
-        logo_tile(img, "pegase",   gx + (tw/2 + 16), H * 0.31, tw, th, ramp(lt, 0.74, 1.19))
-        logo_tile(img, "utile",    gx - (tw/2 + 16), H * 0.49, tw, th, ramp(lt, 0.98, 1.43))
-        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 16), H * 0.49, tw, th, ramp(lt, 1.22, 1.67))
-        logo_tile(img, "giordano", gx, H * 0.65, int(tw * 1.5), int(th * 0.82), ramp(lt, 1.5, 1.95))
+        tw, th = 340, 188; gx = W * 0.5
+        logo_tile(img, "bergerie", gx - (tw/2 + 14), H * 0.305, tw, th, ramp(lt, 0.5, 0.95))
+        logo_tile(img, "pegase",   gx + (tw/2 + 14), H * 0.305, tw, th, ramp(lt, 0.74, 1.19))
+        logo_tile(img, "utile",    gx - (tw/2 + 14), H * 0.49, tw, th, ramp(lt, 0.98, 1.43))
+        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 14), H * 0.49, tw, th, ramp(lt, 1.22, 1.67))
+        logo_tile(img, "giordano", gx, H * 0.66, int(tw * 1.55), int(th * 0.82), ramp(lt, 1.5, 1.95))
     else:
         lt = t - 29.5; show = False
         pop(img, tl("FLASH LE QR", 100, AMBER), W / 2, H * 0.16, ramp(lt, 0.0, 0.45))

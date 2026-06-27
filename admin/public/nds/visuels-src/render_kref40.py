@@ -181,7 +181,7 @@ def qr_badge(base, t, qr_img=None, qsz=380):
     d.text((tcx, by + cw * 0.62), "le QR", font=fL, fill=whc, anchor="lm")
 
 def logo_tile(base, slug, cx, cy, w, h, prog):
-    card = L.logo_card(LOGOS[slug], w, h)
+    card = L.logo_card(LOGOS[slug], w, h, pad_ratio=0.085)
     s = 0.7 + 0.3 * eo(prog); nw, nh = int(w * s), int(h * s)
     lr = card.resize((nw, nh), Image.LANCZOS); a = int(255 * eo(min(1, prog * 1.5)))
     if a < 255:
@@ -306,13 +306,13 @@ def scene(t):
         lt = t - 23.0
         pop(img, tl("ET DANS LES COMMERCES", 60, AMBER), W / 2, H * 0.14, ramp(lt, 0.0, 0.45))
         pop(img, tl("nos partenaires locaux", 44, WHITE), W / 2, H * 0.205, ramp(lt, 0.2, 0.65))
-        tw, th = 392, 214; gx = W * 0.5
+        tw, th = 462, 256; gx = W * 0.5
         # 2 + 2 + 1 (Giordano large en bas)
-        logo_tile(img, "bergerie", gx - (tw/2 + 22), H * 0.345, tw, th, ramp(lt, 0.5, 0.95))
-        logo_tile(img, "pegase",   gx + (tw/2 + 22), H * 0.345, tw, th, ramp(lt, 0.74, 1.19))
-        logo_tile(img, "utile",    gx - (tw/2 + 22), H * 0.515, tw, th, ramp(lt, 0.98, 1.43))
-        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 22), H * 0.515, tw, th, ramp(lt, 1.22, 1.67))
-        logo_tile(img, "giordano", gx, H * 0.675, int(tw * 1.5), int(th * 0.82), ramp(lt, 1.5, 1.95))
+        logo_tile(img, "bergerie", gx - (tw/2 + 20), H * 0.330, tw, th, ramp(lt, 0.5, 0.95))
+        logo_tile(img, "pegase",   gx + (tw/2 + 20), H * 0.330, tw, th, ramp(lt, 0.74, 1.19))
+        logo_tile(img, "utile",    gx - (tw/2 + 20), H * 0.500, tw, th, ramp(lt, 0.98, 1.43))
+        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 20), H * 0.500, tw, th, ramp(lt, 1.22, 1.67))
+        logo_tile(img, "giordano", gx, H * 0.655, int(tw * 1.6), int(th * 0.82), ramp(lt, 1.5, 1.95))
     else:                                          # FINALE — titre + texte (QR ajoute par finale_qr)
         lt = t - 29.5
         pop(img, tl("FLASH LE QR", 116, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))
