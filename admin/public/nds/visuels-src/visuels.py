@@ -44,6 +44,27 @@ def chip(img,cx,cy,txt,fnt,fill=ORANGE,fg=WHITE,padx=44,pady=18):
 CONTACT="flowinevent@gmail.com · 06 16 35 49 36"
 SIGN="Animez · Fidélisez · Boostez"
 
+LOGOS=["/home/claude/vid/logos/bergerie.png","/home/claude/vid/logos/pegase.png","/home/claude/vid/logos/utile.png","/home/claude/vid/logos/carrosserie-gp.png"]
+def _logo_card(path,cw,ch,pad_r=0.16):
+    lg=Image.open(path).convert("RGBA")
+    bb=lg.split()[3].getbbox()
+    if bb: lg=lg.crop(bb)
+    pad=int(min(cw,ch)*pad_r);iw,ih=cw-2*pad,ch-2*pad
+    r=min(iw/lg.width,ih/lg.height);nw,nh=max(1,int(lg.width*r)),max(1,int(lg.height*r))
+    lg=lg.resize((nw,nh),Image.LANCZOS)
+    card=Image.new("RGBA",(cw,ch),(0,0,0,0));mask=Image.new("L",(cw,ch),0)
+    ImageDraw.Draw(mask).rounded_rectangle([0,0,cw-1,ch-1],radius=int(min(cw,ch)*0.18),fill=255)
+    card=Image.composite(Image.new("RGBA",(cw,ch),(255,255,255,255)),card,mask)
+    card.alpha_composite(lg,(int((cw-nw)/2),int((ch-nh)/2)))
+    return card
+def logo_strip(img,cx,cy,cw,ch,gap,label_fnt=None,label="ILS PARTICIPENT DÉJÀ"):
+    d=ImageDraw.Draw(img)
+    if label: ctext(d,cx,cy-ch*0.62,label,label_fnt or font(28,800),TEAL)
+    n=len(LOGOS);total=n*cw+(n-1)*gap;x0=cx-total/2
+    for i,pp in enumerate(LOGOS):
+        img.alpha_composite(_logo_card(pp,cw,ch),(int(x0+i*(cw+gap)),int(cy-ch/2)))
+
+
 # ============ ACQ INSTA 1080x1080 ============
 def acq_insta():
     W,H=1080,1080;img=bg(W,H);d=ImageDraw.Draw(img)
@@ -54,25 +75,26 @@ def acq_insta():
     ctext(d,W/2,H*0.475,"festivaliers · 6 soirs · à Vence",font(40,600),WHITE)
     for i,w in enumerate(["ANIMEZ","FIDÉLISEZ","BOOSTEZ"]):
         chip(img,W/2,H*0.575+i*0.0,w,font(0+0,0)) if False else None
-    chip(img,W*0.27,H*0.60,"ANIMEZ",font(40,800));chip(img,W*0.52,H*0.60,"FIDÉLISEZ",font(40,800));chip(img,W*0.77,H*0.60,"BOOSTEZ",font(40,800))
-    ctext(d,W/2,H*0.70,"Vos clients jouent, cumulent des points",font(40,600),WHITE)
-    ctext(d,W/2,H*0.745,"et gagnent un bon d'achat chez vous.",font(40,600),WHITE)
-    chip(img,W/2,H*0.84,"DEVENEZ PARTENAIRE",font(46,800),fill=ORANGE)
-    ctext(d,W/2,H*0.915,CONTACT,font(34,700),WHITE)
-    ctext(d,W/2,H*0.955,SIGN,font(30,700),TEAL)
+    chip(img,W*0.27,H*0.545,"ANIMEZ",font(38,800));chip(img,W*0.52,H*0.545,"FIDÉLISEZ",font(38,800));chip(img,W*0.77,H*0.545,"BOOSTEZ",font(38,800))
+    ctext(d,W/2,H*0.635,"Vos clients jouent, cumulent des points",font(37,600),WHITE)
+    ctext(d,W/2,H*0.675,"et gagnent un bon d'achat chez vous.",font(37,600),WHITE)
+    logo_strip(img,W/2,H*0.785,168,104,20,label_fnt=font(26,800))
+    chip(img,W/2,H*0.885,"DEVENEZ PARTENAIRE",font(44,800),fill=ORANGE)
+    ctext(d,W/2,H*0.95,CONTACT,font(33,700),WHITE)
     return img.convert("RGB")
 
 # ============ ACQ FB 1200x630 ============
 def acq_fb():
     W,H=1200,630;img=bg(W,H);d=ImageDraw.Draw(img)
-    put_logo(img,W*0.74,H*0.30,0.5)
-    ctext(d,W*0.06,H*0.30,"VOTRE COMMERCE",font(58,800),WHITE,anchor="lm")
-    ctext(d,W*0.06,H*0.40,"DANS LE GRAND JEU",font(58,800),ORANGE,anchor="lm")
-    ctext(d,W*0.06,H*0.575,"24 000",font(96,800),TEAL,anchor="lm")
-    ctext(d,W*0.06,H*0.685,"festivaliers · Nuits du Sud 2026",font(34,600),WHITE,anchor="lm")
-    chip(img,W*0.74,H*0.62,"DEVENEZ PARTENAIRE",font(38,800),fill=ORANGE)
-    ctext(d,W*0.74,H*0.80,CONTACT,font(28,700),WHITE)
-    ctext(d,W*0.74,H*0.875,SIGN,font(26,700),TEAL)
+    put_logo(img,W*0.74,H*0.26,0.46)
+    ctext(d,W*0.06,H*0.27,"VOTRE COMMERCE",font(56,800),WHITE,anchor="lm")
+    ctext(d,W*0.06,H*0.37,"DANS LE GRAND JEU",font(56,800),ORANGE,anchor="lm")
+    ctext(d,W*0.06,H*0.55,"24 000",font(90,800),TEAL,anchor="lm")
+    ctext(d,W*0.06,H*0.655,"festivaliers · Nuits du Sud 2026",font(32,600),WHITE,anchor="lm")
+    logo_strip(img,W*0.28,H*0.85,140,80,16,label_fnt=font(22,800))
+    chip(img,W*0.74,H*0.58,"DEVENEZ PARTENAIRE",font(36,800),fill=ORANGE)
+    ctext(d,W*0.74,H*0.74,CONTACT,font(27,700),WHITE)
+    ctext(d,W*0.74,H*0.81,SIGN,font(25,700),TEAL)
     return img.convert("RGB")
 
 # ============ ACQ PRESENTATION 1920x1080 ============
@@ -94,9 +116,9 @@ def acq_pres():
         words=desc.split();line1=" ".join(words[:4]);line2=" ".join(words[4:])
         ctext(d,cx,H*0.625,line1,font(36,600),WHITE)
         if line2:ctext(d,cx,H*0.665,line2,font(36,600),WHITE)
-    chip(img,W/2,H*0.81,"DEVENEZ PARTENAIRE",font(48,800),fill=ORANGE)
-    ctext(d,W/2,H*0.89,CONTACT,font(36,700),WHITE)
-    ctext(d,W/2,H*0.935,SIGN,font(32,700),TEAL)
+    logo_strip(img,W/2,H*0.80,196,104,28,label_fnt=font(26,800))
+    chip(img,W/2,H*0.895,"DEVENEZ PARTENAIRE",font(44,800),fill=ORANGE)
+    ctext(d,W/2,H*0.95,CONTACT,font(32,700),WHITE)
     return img.convert("RGB")
 
 # ============ A4 COMMERCE 1654x2339 (client en boutique) ============
