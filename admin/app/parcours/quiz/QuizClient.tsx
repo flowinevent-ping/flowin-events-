@@ -209,7 +209,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
       {screen === 'partenaires' && (
         <div className="screen">
           <div className="header"><div className="back" onClick={()=>setScreen('landing')}>←</div><div className="title">Nos partenaires</div></div>
-          <div className="grid2" style={{ marginBottom:16 }}>{partenaires.map((p,i)=><div key={p.id} className="part-tile" onClick={()=>{setPartIdx(i);setScreen('partSheet')}}>{p.image_url?<img src={p.image_url} alt={p.nom} style={{width:52,height:52,objectFit:'contain',borderRadius:8,marginBottom:6,display:'block',margin:'0 auto 6px'}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />:<div style={{fontSize:32,marginBottom:6}}>{p.emoji??'🤝'}</div>}<div style={{fontSize:11,fontWeight:700,lineHeight:1.3}}>{p.nom}</div></div>)}</div>
+          <div className="grid2" style={{ marginBottom:16 }}>{partenaires.map((p,i)=><div key={p.id} className="part-tile" onClick={()=>{setPartIdx(i);setScreen('partSheet')}}>{p.image_url?<img src={p.image_url} alt={p.nom} style={{width:60,height:60,objectFit:'contain',background:'#fff',padding:6,boxSizing:'border-box',borderRadius:10,marginBottom:6,display:'block',margin:'0 auto 6px'}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />:<div style={{fontSize:32,marginBottom:6}}>{p.emoji??'🤝'}</div>}<div style={{fontSize:11,fontWeight:700,lineHeight:1.3}}>{p.nom}</div></div>)}</div>
           {existingTicket ? (
             <button className="btn" style={{background:'rgba(34,197,94,.15)',border:'2px solid #22C55E',color:'#4ADE80'}}
               onClick={()=>setScreen('already')}>✅ Déjà inscrit(e) · revoir mon ticket</button>

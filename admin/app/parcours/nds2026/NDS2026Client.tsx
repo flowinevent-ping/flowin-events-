@@ -1004,7 +1004,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-dim2" onClick={() => setFiche(null)} />
                 <div className="pt-sheet2">
                   <button onClick={() => setFiche(null)} aria-label="Fermer" style={{ position: 'absolute', top: 14, right: 16, background: '#f1edf5', border: 'none', color: '#1a1020', borderRadius: 999, width: 32, height: 32, fontSize: 18, cursor: 'pointer' }}>×</button>
-                  <PartnerLogo src={fiche.image_url} alt="" fallback={null} imgStyle={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} />
+                  <PartnerLogo src={fiche.image_url} alt="" fallback={null} imgStyle={{ width: 64, height: 64, borderRadius: 14, objectFit: 'contain', background: '#fff', padding: 6, boxSizing: 'border-box', marginBottom: 10 }} />
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>{fiche.nom}</div>
                   {fiche.adresse || fiche.ville ? (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
