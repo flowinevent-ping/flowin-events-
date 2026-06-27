@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import type { ReactNode, CSSProperties } from 'react'
 import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, shuffle, AGE_OPTIONS } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
@@ -18,6 +19,15 @@ const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '�
    Incrémenter la version à chaque modification du texte. */
 const OPTIN_VERSION = 'nds-2026-v2'
 const OPTIN_TEXT = "Je veux rester en contact avec les Nuits du Sud et leurs partenaires."
+
+/* Logo partenaire robuste : si image_url est vide OU si le fichier est introuvable (404,
+   logo pas encore fourni par le partenaire), on retombe proprement sur le fallback au lieu
+   d'afficher une image cassée. Dès que le vrai PNG est déposé au chemin attendu, il s'affiche. */
+function PartnerLogo({ src, alt, fallback, imgStyle, className }: { src: string | null; alt: string; fallback: ReactNode; imgStyle?: CSSProperties; className?: string }) {
+  const [broken, setBroken] = useState(false)
+  if (!src || broken) return <>{fallback}</>
+  return <img src={src} alt={alt} className={className} style={imgStyle} onError={() => setBroken(true)} />
+}
 
 /* Les 9 stations numérotées du festival (= référentiel unique, identique au dashboard).
    Coords = vraies positions de la base (events ev-nds-* numérotés). Rafraîchies en live
@@ -551,7 +561,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       <div className="logotrack">
         {bandTrack.map((p, i) => (
           <span className={`logoslot${p.image_url ? '' : ' logoslot-ph'}`} key={`bd-${p.id}-${i}`}>
-            {p.image_url ? <img src={p.image_url} alt={p.nom} /> : 'Votre logo ici'}
+            <PartnerLogo src={p.image_url} alt={p.nom} fallback={'Votre logo ici'} />
           </span>
         ))}
       </div>
@@ -994,7 +1004,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-dim2" onClick={() => setFiche(null)} />
                 <div className="pt-sheet2">
                   <button onClick={() => setFiche(null)} aria-label="Fermer" style={{ position: 'absolute', top: 14, right: 16, background: '#f1edf5', border: 'none', color: '#1a1020', borderRadius: 999, width: 32, height: 32, fontSize: 18, cursor: 'pointer' }}>×</button>
-                  {fiche.image_url ? <img src={fiche.image_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} /> : null}
+                  <PartnerLogo src={fiche.image_url} alt="" fallback={null} imgStyle={{ width: 64, height: 64, borderRadius: 14, objectFit: 'cover', marginBottom: 10 }} />
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>{fiche.nom}</div>
                   {fiche.adresse || fiche.ville ? (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
@@ -1046,7 +1056,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="pt-grid">
                 {partenaires.map((p, i) => (
                   <div className="pt-card" key={p.id} onClick={() => setSheetPart(i)}>
-                    <div className="pt-logo">{p.image_url ? <img src={p.image_url} alt={p.nom} style={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover' }} /> : <svg className="ic"><use href="#i-store" /></svg>}</div>
+                    <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover' }} /></div>
                     <div className="pt-nm">{p.nom}</div>
                   </div>
                 ))}
@@ -1057,7 +1067,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-dim2" onClick={() => setSheetPart(null)} />
                 <div className="pt-sheet2">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 6 }}>
-                    <div className="pt-logo" style={{ margin: 0 }}>{partenaires[sheetPart].image_url ? <img src={partenaires[sheetPart].image_url!} alt="" style={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover' }} /> : <svg className="ic"><use href="#i-store" /></svg>}</div>
+                    <div className="pt-logo" style={{ margin: 0 }}><PartnerLogo src={partenaires[sheetPart].image_url} alt="" fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover' }} /></div>
                     <div><div style={{ fontWeight: 800, fontSize: 19 }}>{partenaires[sheetPart].nom}</div>{partenaires[sheetPart].promo_text && <div style={{ fontSize: 13, color: '#7a708a' }}>{partenaires[sheetPart].promo_text}</div>}</div>
                   </div>
                   {partenaires[sheetPart].description && <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, margin: '8px 0' }}>{partenaires[sheetPart].description}</div>}
