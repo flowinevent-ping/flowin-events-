@@ -79,10 +79,10 @@ def frame(t):
         lt = t - 13.5
         pop(img, tl("FLASH AUX", 80, WHITE), W / 2, H * 0.16, ramp(lt, 0.0, 0.45))
         pop(img, tl("STATIONS", 80, AMBER), W / 2, H * 0.25, ramp(lt, 0.15, 0.6))
-        pw, ph = int(W * 0.40), 116
-        cells = [("Bar", -1, 0), ("Entrée", 1, 0), ("Brigade verte", -1, 1), ("Écran", 1, 1)]
-        for i, (s, dx, row) in enumerate(cells):
-            station_pill(img, s, W / 2 + dx * (pw / 2 + 16), H * (0.40 + row * 0.16), pw, ph, ramp(lt, 0.7 + i * 0.22, 1.1 + i * 0.22))
+        pw, ph = int(W * 0.43), 122
+        cells = [("Bar", "glass", -1, 0), ("Entrée", "ticket", 1, 0), ("Brigade verte", "leaf", -1, 1), ("Écran", "monitor", 1, 1)]
+        for i, (s, ic, dx, row) in enumerate(cells):
+            station_pill(img, s, W / 2 + dx * (pw / 2 + 14), H * (0.40 + row * 0.165), pw, ph, ramp(lt, 0.7 + i * 0.22, 1.1 + i * 0.22), icon=ic)
     elif t < 23.0:
         lt = t - 18.5
         pop(img, tl("CUMULE", 108, AMBER), W / 2, H * 0.28, ramp(lt, 0.0, 0.5))
@@ -91,13 +91,13 @@ def frame(t):
         pop(img, tl("LES LOTS !", 108, MAGENTA), W / 2, H * 0.66, ramp(lt, 0.9, 1.4))
     elif t < 29.5:
         lt = t - 23.0; show = False
-        pop(img, tl("ET DANS LES COMMERCES", 50, AMBER), W / 2, H * 0.12, ramp(lt, 0.0, 0.45))
-        tw, th = 300, 176; gx, gy = W * 0.5, H * 0.40
-        pos = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-        for i, slug in enumerate(PARTNERS):
-            dx, dy = pos[i]
-            logo_tile(img, slug, gx + dx * (tw / 2 + 18), gy + dy * (th / 2 + 16), tw, th, ramp(lt, 0.5 + i * 0.24, 0.95 + i * 0.24))
-        name_card(img, "Électroménager", "Giordano", gx, H * 0.66, int(tw * 1.2), 124, ramp(lt, 1.5, 1.95))
+        pop(img, tl("ET DANS LES COMMERCES", 50, AMBER), W / 2, H * 0.11, ramp(lt, 0.0, 0.45))
+        tw, th = 286, 158; gx = W * 0.5
+        logo_tile(img, "bergerie", gx - (tw/2 + 16), H * 0.31, tw, th, ramp(lt, 0.5, 0.95))
+        logo_tile(img, "pegase",   gx + (tw/2 + 16), H * 0.31, tw, th, ramp(lt, 0.74, 1.19))
+        logo_tile(img, "utile",    gx - (tw/2 + 16), H * 0.49, tw, th, ramp(lt, 0.98, 1.43))
+        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 16), H * 0.49, tw, th, ramp(lt, 1.22, 1.67))
+        logo_tile(img, "giordano", gx, H * 0.65, int(tw * 1.5), int(th * 0.82), ramp(lt, 1.5, 1.95))
     else:
         lt = t - 29.5; show = False
         pop(img, tl("FLASH LE QR", 100, AMBER), W / 2, H * 0.16, ramp(lt, 0.0, 0.45))

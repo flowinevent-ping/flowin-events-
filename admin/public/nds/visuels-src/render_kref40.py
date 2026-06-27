@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/fk40"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/ecrans_hd.png").convert("RGB")
-LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp"]}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano"]}
 
 BG = (9, 16, 32)
 AMBER = (244, 181, 68)
@@ -68,13 +68,33 @@ def pop(base, layer, cx, cy, prog, sf=0.55):
 
 def _icon(cd, kind, x, y, s, col=WHITE):
     w = col + (255,)
+    lw = max(3, int(s * 0.07))
     if kind == "music":
         r = int(s * 0.16)
         cd.ellipse([x + s*0.20 - r, y + s*0.66 - r, x + s*0.20 + r, y + s*0.66 + r], fill=w)
         cd.ellipse([x + s*0.66 - r, y + s*0.56 - r, x + s*0.66 + r, y + s*0.56 + r], fill=w)
-        cd.line([(x + s*0.20 + r, y + s*0.66), (x + s*0.20 + r, y + s*0.26)], fill=w, width=max(3, int(s*0.07)))
-        cd.line([(x + s*0.66 + r, y + s*0.56), (x + s*0.66 + r, y + s*0.16)], fill=w, width=max(3, int(s*0.07)))
-        cd.line([(x + s*0.20 + r, y + s*0.26), (x + s*0.66 + r, y + s*0.16)], fill=w, width=max(3, int(s*0.07)))
+        cd.line([(x + s*0.20 + r, y + s*0.66), (x + s*0.20 + r, y + s*0.26)], fill=w, width=lw)
+        cd.line([(x + s*0.66 + r, y + s*0.56), (x + s*0.66 + r, y + s*0.16)], fill=w, width=lw)
+        cd.line([(x + s*0.20 + r, y + s*0.26), (x + s*0.66 + r, y + s*0.16)], fill=w, width=lw)
+    elif kind == "glass":  # verre (bar)
+        cd.polygon([(x+s*0.24,y+s*0.18),(x+s*0.76,y+s*0.18),(x+s*0.56,y+s*0.54),(x+s*0.44,y+s*0.54)], fill=w)
+        cd.line([(x+s*0.50,y+s*0.54),(x+s*0.50,y+s*0.82)], fill=w, width=lw)
+        cd.line([(x+s*0.34,y+s*0.82),(x+s*0.66,y+s*0.82)], fill=w, width=lw)
+    elif kind == "ticket":  # billet (entree)
+        cd.rounded_rectangle([x+s*0.14,y+s*0.30,x+s*0.86,y+s*0.70], radius=int(s*0.08), fill=w)
+        cx = x+s*0.50
+        for k in range(5):
+            yy = y+s*0.34 + k*s*0.08
+            cd.line([(cx, yy),(cx, yy+s*0.04)], fill=(0,0,0,90), width=max(2,int(s*0.03)))
+    elif kind == "leaf":  # feuille (brigade verte)
+        cd.pieslice([x+s*0.18,y+s*0.18,x+s*0.92,y+s*0.92], 180, 270, fill=w)
+        cd.pieslice([x+s*0.10,y+s*0.10,x+s*0.84,y+s*0.84], 0, 90, fill=w)
+        cd.line([(x+s*0.24,y+s*0.78),(x+s*0.74,y+s*0.28)], fill=(0,0,0,70), width=max(2,int(s*0.04)))
+    elif kind == "monitor":  # ecran
+        cd.rounded_rectangle([x+s*0.14,y+s*0.18,x+s*0.86,y+s*0.64], radius=int(s*0.06), fill=w)
+        cd.rectangle([x+s*0.14,y+s*0.18,x+s*0.86,y+s*0.26], fill=(0,0,0,60))
+        cd.line([(x+s*0.50,y+s*0.64),(x+s*0.50,y+s*0.78)], fill=w, width=lw)
+        cd.line([(x+s*0.34,y+s*0.80),(x+s*0.66,y+s*0.80)], fill=w, width=lw)
     else:  # gift
         cd.rounded_rectangle([x + s*0.16, y + s*0.40, x + s*0.84, y + s*0.84], radius=int(s*0.06), fill=w)
         cd.rectangle([x + s*0.10, y + s*0.32, x + s*0.90, y + s*0.46], fill=w)
@@ -82,32 +102,48 @@ def _icon(cd, kind, x, y, s, col=WHITE):
         cd.line([(x + s*0.50, y + s*0.40), (x + s*0.30, y + s*0.20)], fill=w, width=max(2, int(s*0.05)))
         cd.line([(x + s*0.50, y + s*0.40), (x + s*0.70, y + s*0.20)], fill=w, width=max(2, int(s*0.05)))
 
-# ---- carte gain (degrade + icone + label + titre) facon reference ----
+# ---- carte gain ENRICHIE (lueur + degrade + gloss + icone) ----
 DARKTXT = (24, 16, 44)
 def gain_card(base, cx, cy, w, h, grad, icon, label, title, prog, dark=False):
     a = eo(min(1, prog * 1.6))
     txt_col = DARKTXT if dark else WHITE
     lbl_col = DARKTXT + (210,) if dark else (255, 255, 255, 230)
-    chip_fill = (255, 255, 255, 235) if dark else (255, 255, 255, 55)
+    chip_fill = (255, 255, 255, 240) if dark else (255, 255, 255, 60)
     icon_col = DARKTXT if dark else WHITE
-    card = Image.new("RGBA", (w, h), (0, 0, 0, 0)); cd = ImageDraw.Draw(card)
-    # degrade horizontal
-    grad_img = Image.new("RGBA", (w, h), (0, 0, 0, 0)); gpx = grad_img.load()
     c0, c1 = grad
-    for x in range(w):
-        f = x / (w - 1)
-        col = (int(c0[0] + (c1[0] - c0[0]) * f), int(c0[1] + (c1[1] - c0[1]) * f), int(c0[2] + (c1[2] - c0[2]) * f), 255)
-        for y in range(h): gpx[x, y] = col
-    mask = Image.new("L", (w, h), 0); ImageDraw.Draw(mask).rounded_rectangle([0, 0, w - 1, h - 1], radius=int(h * 0.20), fill=255)
+    s = 0.85 + 0.15 * eo(prog); nw, nh = int(w * s), int(h * s)
+    xo = int((1 - eo(prog)) * 60)
+    ox, oy = int(cx - nw / 2) - xo, int(cy - nh / 2)
+    # --- LUEUR coloree derriere la carte (profondeur) ---
+    gcol = ((c0[0] + c1[0]) // 2, (c0[1] + c1[1]) // 2, (c0[2] + c1[2]) // 2)
+    gpad = 70
+    glow = Image.new("RGBA", (nw + gpad * 2, nh + gpad * 2), (0, 0, 0, 0))
+    ImageDraw.Draw(glow).rounded_rectangle([gpad, gpad, nw + gpad, nh + gpad], radius=int(nh * 0.24), fill=gcol + (int(140 * a),))
+    glow = glow.filter(ImageFilter.GaussianBlur(46))
+    base.alpha_composite(glow, (ox - gpad, oy - gpad))
+    # --- carte ---
+    card = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    xs = np.linspace(0, 1, w)[None, :, None]
+    a0 = np.array(c0, np.float32); a1 = np.array(c1, np.float32)
+    g = (a0[None, None, :] + (a1 - a0)[None, None, :] * xs)
+    g = np.repeat(g, h, axis=0).clip(0, 255).astype(np.uint8)
+    grad_img = Image.fromarray(g, "RGB").convert("RGBA")
+    mask = Image.new("L", (w, h), 0); ImageDraw.Draw(mask).rounded_rectangle([0, 0, w - 1, h - 1], radius=int(h * 0.22), fill=255)
     card = Image.composite(grad_img, card, mask); cd = ImageDraw.Draw(card)
-    # chip icone (carre arrondi clair)
-    isz = int(h * 0.40); ix, iy = int(h * 0.22), int((h - isz) / 2)
+    # gloss : reflet clair sur le haut
+    gloss = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    ImageDraw.Draw(gloss).rounded_rectangle([int(w * 0.015), int(h * 0.06), int(w * 0.985), int(h * 0.46)], radius=int(h * 0.18), fill=(255, 255, 255, 42))
+    gloss = gloss.filter(ImageFilter.GaussianBlur(7))
+    card = Image.alpha_composite(card, Image.composite(gloss, Image.new("RGBA", (w, h), (0, 0, 0, 0)), mask)); cd = ImageDraw.Draw(card)
+    # chip icone (plus grande + anneau)
+    isz = int(h * 0.46); ix, iy = int(h * 0.20), int((h - isz) / 2)
+    cd.rounded_rectangle([ix - 4, iy - 4, ix + isz + 4, iy + isz + 4], radius=int(isz * 0.34), fill=(255, 255, 255, 28))
     cd.rounded_rectangle([ix, iy, ix + isz, iy + isz], radius=int(isz * 0.30), fill=chip_fill)
     _icon(cd, icon, ix + isz * 0.16, iy + isz * 0.12, isz * 0.72, col=icon_col)
     tx = ix + isz + int(h * 0.24)
     lines = title.split("\n")
     lbl_f = L.font(int(h * 0.135), 800)
-    ttl_f = L.font(int(h * 0.215) if len(lines) > 1 else int(h * 0.235), 800)
+    ttl_f = L.font(int(h * 0.215) if len(lines) > 1 else int(h * 0.245), 800)
     if len(lines) > 1:
         cd.text((tx, h * 0.24), label, font=lbl_f, fill=lbl_col, anchor="lm")
         cd.text((tx, h * 0.50), lines[0], font=ttl_f, fill=txt_col, anchor="lm")
@@ -115,10 +151,9 @@ def gain_card(base, cx, cy, w, h, grad, icon, label, title, prog, dark=False):
     else:
         cd.text((tx, h * 0.32), label, font=lbl_f, fill=lbl_col, anchor="lm")
         cd.text((tx, h * 0.60), lines[0], font=ttl_f, fill=txt_col, anchor="lm")
-    s = 0.85 + 0.15 * eo(prog); nw, nh = int(w * s), int(h * s)
     cr = card.resize((nw, nh), Image.LANCZOS); al = cr.split()[3].point(lambda p: int(p * a)); cr.putalpha(al)
-    xo = int((1 - eo(prog)) * 60)
-    base.alpha_composite(cr, (int(cx - nw / 2) - xo, int(cy - nh / 2)))
+    base.alpha_composite(cr, (ox, oy))
+
 
 # ---- badge QR persistant : QR + 'Flash'(ambre)/'le QR'(blanc) a droite, AGRANDI ----
 def qr_badge(base, t, qr_img=None, qsz=380):
@@ -162,22 +197,41 @@ def chip(base, txt, cx, cy, prog, fill=AMBER):
     lr = layer.resize((nw, nh), Image.LANCZOS); al = lr.split()[3].point(lambda p: int(p * a / 255)); lr.putalpha(al)
     pill.alpha_composite(lr, (40, 17)); base.alpha_composite(pill, (int(cx - (nw + 80) / 2), int(cy - (nh + 34) / 2)))
 
-def station_pill(base, txt, cx, cy, w, h, prog):
+def station_pill(base, txt, cx, cy, w, h, prog, icon=None):
     a = int(255 * eo(min(1, prog * 1.6)))
     if a <= 0: return
-    pill = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    gpx = Image.new("RGBA", (w, h), (0, 0, 0, 0)); px = gpx.load()
-    c0, c1 = (230, 24, 127), (140, 50, 205)
-    for x in range(w):
-        f = x / (w - 1)
-        cc = (int(c0[0] + (c1[0]-c0[0])*f), int(c0[1] + (c1[1]-c0[1])*f), int(c0[2] + (c1[2]-c0[2])*f), 255)
-        for y in range(h): px[x, y] = cc
-    m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, w-1, h-1], radius=int(h*0.34), fill=255)
-    pill = Image.composite(gpx, pill, m)
-    ImageDraw.Draw(pill).text((w/2, h/2), txt, font=L.font(int(h*0.42), 800), fill=WHITE, anchor="mm")
     s = 0.8 + 0.2 * eo(prog); nw, nh = int(w*s), int(h*s)
+    ox, oy = int(cx-nw/2), int(cy-nh/2)
+    # lueur magenta derriere
+    gpad = 44
+    glow = Image.new("RGBA", (nw+gpad*2, nh+gpad*2), (0,0,0,0))
+    ImageDraw.Draw(glow).rounded_rectangle([gpad, gpad, nw+gpad, nh+gpad], radius=int(nh*0.40), fill=(210, 30, 130, int(120*a/255)))
+    glow = glow.filter(ImageFilter.GaussianBlur(30))
+    base.alpha_composite(glow, (ox-gpad, oy-gpad))
+    # pill degrade
+    pill = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    c0, c1 = (235, 26, 132), (138, 52, 208)
+    xs = np.linspace(0, 1, w)[None, :, None]
+    a0 = np.array(c0, np.float32); a1 = np.array(c1, np.float32)
+    g = np.repeat((a0[None, None, :] + (a1 - a0)[None, None, :] * xs), h, axis=0).clip(0, 255).astype(np.uint8)
+    gpx = Image.fromarray(g, "RGB").convert("RGBA")
+    m = Image.new("L", (w, h), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, w-1, h-1], radius=int(h*0.40), fill=255)
+    pill = Image.composite(gpx, pill, m); pd = ImageDraw.Draw(pill)
+    # gloss haut
+    gloss = Image.new("RGBA", (w, h), (0,0,0,0))
+    ImageDraw.Draw(gloss).rounded_rectangle([int(w*0.04), int(h*0.10), int(w*0.96), int(h*0.48)], radius=int(h*0.30), fill=(255,255,255,46))
+    gloss = gloss.filter(ImageFilter.GaussianBlur(5))
+    pill = Image.alpha_composite(pill, Image.composite(gloss, Image.new("RGBA",(w,h),(0,0,0,0)), m)); pd = ImageDraw.Draw(pill)
+    # icone ronde a gauche + texte decale
+    if icon:
+        isz = int(h*0.52); icx = int(h*0.30)
+        pd.ellipse([icx-isz//2, h//2-isz//2, icx+isz//2, h//2+isz//2], fill=(255,255,255,60))
+        _icon(pd, icon, icx-isz*0.36, h//2-isz*0.36, isz*0.72, col=WHITE)
+        pd.text((int(h*0.62), h/2), txt, font=L.font(int(h*0.36), 800), fill=WHITE, anchor="lm")
+    else:
+        pd.text((w/2, h/2), txt, font=L.font(int(h*0.40), 800), fill=WHITE, anchor="mm")
     pr = pill.resize((nw, nh), Image.LANCZOS); al = pr.split()[3].point(lambda p: int(p*a/255)); pr.putalpha(al)
-    base.alpha_composite(pr, (int(cx-nw/2), int(cy-nh/2)))
+    base.alpha_composite(pr, (ox, oy))
 
 def name_card(base, l1, l2, cx, cy, w, h, prog):
     a = int(255 * eo(min(1, prog * 1.5)))
@@ -234,31 +288,31 @@ def scene(t):
         gain_card(img, W / 2, H * 0.34, int(W * 0.86), 200, ((230, 24, 127), (130, 60, 205)), "music", "DES PLACES DE", "Concert", ramp(lt, 0.4, 0.95))
         gain_card(img, W / 2, H * 0.52, int(W * 0.86), 256, ((246, 196, 74), (232, 150, 40)), "gift", "DES BONS D'ACHAT", "chez nos partenaires\nlocaux", ramp(lt, 0.9, 1.45), dark=True)
         if lt > 2.2: pop(img, tl("+ grand tirage final", 50, WHITE), W / 2, H * 0.69, ramp(lt, 2.2, 2.7))
-    elif t < 18.5:                                 # FLASH AUX STATIONS (libelle ref)
+    elif t < 18.5:                                 # FLASH AUX STATIONS (icones + lueur)
         lt = t - 13.5
         pop(img, tl("FLASH AUX", 96, WHITE), W / 2, H * 0.22, ramp(lt, 0.0, 0.45))
         pop(img, tl("STATIONS", 96, AMBER), W / 2, H * 0.295, ramp(lt, 0.15, 0.6))
-        pw, ph = int(W * 0.40), 132; gx = W * 0.5
-        cells = [("Bar", -1, 0), ("Entrée", 1, 0), ("Brigade verte", -1, 1), ("Écran", 1, 1)]
-        for i, (s, dx, row) in enumerate(cells):
-            station_pill(img, s, gx + dx * (pw / 2 + 18), H * (0.43 + row * 0.13), pw, ph, ramp(lt, 0.7 + i * 0.22, 1.1 + i * 0.22))
+        pw, ph = int(W * 0.45), 150; gx = W * 0.5
+        cells = [("Bar", "glass", -1, 0), ("Entrée", "ticket", 1, 0), ("Brigade verte", "leaf", -1, 1), ("Écran", "monitor", 1, 1)]
+        for i, (s, ic, dx, row) in enumerate(cells):
+            station_pill(img, s, gx + dx * (pw / 2 + 16), H * (0.43 + row * 0.135), pw, ph, ramp(lt, 0.7 + i * 0.22, 1.1 + i * 0.22), icon=ic)
     elif t < 23.0:                                 # CUMULE / REMPORTE (comme ref r010)
         lt = t - 18.5
         pop(img, tl("CUMULE", 132, AMBER), W / 2, H * 0.32, ramp(lt, 0.0, 0.5))
         pop(img, tl("TES POINTS", 132, WHITE), W / 2, H * 0.42, ramp(lt, 0.25, 0.75))
         pop(img, tl("REMPORTE", 132, MAGENTA), W / 2, H * 0.55, ramp(lt, 0.7, 1.2))
         pop(img, tl("LES LOTS !", 132, MAGENTA), W / 2, H * 0.65, ramp(lt, 0.9, 1.4))
-    elif t < 29.5:                                 # PARTENAIRES AVEC LOGOS + GIORDANO (5e)
+    elif t < 29.5:                                 # PARTENAIRES — 5 logos (Giordano inclus)
         lt = t - 23.0
         pop(img, tl("ET DANS LES COMMERCES", 60, AMBER), W / 2, H * 0.14, ramp(lt, 0.0, 0.45))
         pop(img, tl("nos partenaires locaux", 44, WHITE), W / 2, H * 0.205, ramp(lt, 0.2, 0.65))
-        tw, th = 392, 226; gx, gy = W * 0.5, H * 0.40
-        pos = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-        for i, slug in enumerate(PARTNERS):
-            dx, dy = pos[i]
-            logo_tile(img, slug, gx + dx * (tw / 2 + 22), gy + dy * (th / 2 + 22), tw, th, ramp(lt, 0.5 + i * 0.24, 0.95 + i * 0.24))
-        # 5e partenaire : Electromenager Giordano (pas de logo fourni -> carte nom)
-        name_card(img, "Électroménager", "Giordano", gx, H * 0.665, int(tw * 1.18), 150, ramp(lt, 1.5, 1.95))
+        tw, th = 392, 214; gx = W * 0.5
+        # 2 + 2 + 1 (Giordano large en bas)
+        logo_tile(img, "bergerie", gx - (tw/2 + 22), H * 0.345, tw, th, ramp(lt, 0.5, 0.95))
+        logo_tile(img, "pegase",   gx + (tw/2 + 22), H * 0.345, tw, th, ramp(lt, 0.74, 1.19))
+        logo_tile(img, "utile",    gx - (tw/2 + 22), H * 0.515, tw, th, ramp(lt, 0.98, 1.43))
+        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 22), H * 0.515, tw, th, ramp(lt, 1.22, 1.67))
+        logo_tile(img, "giordano", gx, H * 0.675, int(tw * 1.5), int(th * 0.82), ramp(lt, 1.5, 1.95))
     else:                                          # FINALE — titre + texte (QR ajoute par finale_qr)
         lt = t - 29.5
         pop(img, tl("FLASH LE QR", 116, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))
