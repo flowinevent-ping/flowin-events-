@@ -57,6 +57,7 @@ def chip(img, cx, cy, txt, fnt, fill=ORANGE, fg=WHITE, padx=44, pady=20):
 
 def put_logo(img, cx, cy, scale, alpha=1.0):
     lw = int(LOGO.width * scale); lh = int(LOGO.height * scale)
+    if lw < 1 or lh < 1: return
     lr = LOGO.resize((lw, lh), Image.LANCZOS)
     if alpha < 1.0:
         a = lr.split()[3].point(lambda p: int(p * alpha)); lr.putalpha(a)
@@ -70,3 +71,26 @@ def put_qr(img, qr_img, cx, cy, size, border=28, bg=(255, 255, 255)):
 
 CONTACT = "flowinevent@gmail.com · 06 16 35 49 36"
 SIGN = "Animez · Fidélisez · Boostez"
+
+_logocache = {}
+def logo_card(path, card_w, card_h, pad_ratio=0.16, radius_ratio=0.14):
+    """Logo PNG (transparence ou fond) ajuste/centre sur cartouche blanc arrondi. Cache par (path,w,h)."""
+    key = (path, card_w, card_h)
+    if key in _logocache: return _logocache[key].copy()
+    logo = Image.open(path).convert("RGBA")
+    # trim transparent borders si presents
+    bbox = logo.split()[3].getbbox()
+    if bbox: logo = logo.crop(bbox)
+    pad = int(min(card_w, card_h) * pad_ratio)
+    inner_w, inner_h = card_w - 2 * pad, card_h - 2 * pad
+    ratio = min(inner_w / logo.width, inner_h / logo.height)
+    nw, nh = max(1, int(logo.width * ratio)), max(1, int(logo.height * ratio))
+    logo = logo.resize((nw, nh), Image.LANCZOS)
+    card = Image.new("RGBA", (card_w, card_h), (0, 0, 0, 0))
+    mask = Image.new("L", (card_w, card_h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, card_w - 1, card_h - 1], radius=int(min(card_w, card_h) * radius_ratio), fill=255)
+    white = Image.new("RGBA", (card_w, card_h), (255, 255, 255, 255))
+    card = Image.composite(white, card, mask)
+    card.alpha_composite(logo, (int((card_w - nw) / 2), int((card_h - nh) / 2)))
+    _logocache[key] = card.copy()
+    return card
