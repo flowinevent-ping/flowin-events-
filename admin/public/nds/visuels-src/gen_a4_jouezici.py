@@ -12,6 +12,7 @@ LOGODIR = "/home/claude/repo/admin/public/nds/partenaires"
 
 BG=(9,16,32); AMBER=(244,181,68); ORANGE=(255,122,26); WHITE=(255,255,255)
 TEAL=(32,224,196); MAGENTA=(230,24,127); PURPLE=(124,58,200); INK=(22,16,40); MUTE=(190,198,226)
+_PLATE=False; _TEXTLOG=[]
 
 def _radial(arr,cx,cy,rad,col,strength):
     yy,xx=np.ogrid[0:H,0:W]; d=np.sqrt((xx-cx)**2+(yy-cy)**2)/rad
@@ -226,6 +227,36 @@ def grand_tirage_pill(img, cx, cy):
     pd.text((w/2,h/2),txt,font=fnt,fill=INK+(255,),anchor="mm")
     img.alpha_composite(pill,(int(cx-w/2),int(cy-h/2)))
 
+def tracked(d,cx,y,txt,size,col,w,tr):
+    fnt=L.font(size,w); ws=[L.measure(c,fnt)[0] for c in txt]
+    tot=sum(ws)+tr*(len(txt)-1); x=cx-tot/2
+    _TEXTLOG.append((txt,cx,y,size,col,w))
+    if _PLATE: return
+    for i,c in enumerate(txt):
+        d.text((x,y),c,font=fnt,fill=col,anchor="lm"); x+=ws[i]+tr
+
+def hrule(d,cx,y,wd,col,th=5):
+    d.rounded_rectangle([cx-wd/2,y-th/2,cx+wd/2,y+th/2],radius=th/2,fill=col+(255,))
+
+def wrapw(d,cx,y,txt,size,col,maxw,lh,w):
+    fnt=L.font(size,w); words=txt.split(); lines=[]; cur=""
+    for word in words:
+        t=(cur+" "+word).strip()
+        if L.measure(t,fnt)[0]>maxw and cur: lines.append(cur); cur=word
+        else: cur=t
+    if cur: lines.append(cur)
+    yy=y
+    for ln in lines:
+        _TEXTLOG.append((ln,cx,yy,size,col,w))
+        if not _PLATE: d.text((cx,yy),ln,font=fnt,fill=col,anchor="mm")
+        yy+=lh
+    return yy-lh
+
+def fitsz(txt,maxsize,maxw,w):
+    sz=maxsize
+    while sz>40 and L.measure(txt,L.font(sz,w))[0]>maxw: sz-=2
+    return sz
+
 def fit_ct(d,cx,y,txt,maxsize,col,maxw,w=800):
     sz=maxsize
     while sz>48 and L.measure(txt,L.font(sz,w))[0]>maxw: sz-=4
@@ -246,32 +277,42 @@ def a4(slug, commerce, lot_title, fname):
     global _TEXTLOG
     _TEXTLOG=[]
     img=make_bg(); d=ImageDraw.Draw(img,"RGBA")
-    L.put_logo(img, W/2, H*0.072, 0.96)
-    MAXW=int(W*0.90)
-    # eyebrow
-    ct(d, W/2, H*0.150, "GRAND JEU NUITS DU SUD", 76, TEAL, 800)
-    # HERO (gros, facon forex)
-    fit_ct(d, W/2, H*0.216, "GAGNE TES PLACES DE CONCERT", 132, AMBER, MAXW, 800)
-    fit_ct(d, W/2, H*0.276, "& BONS D'ACHAT", 132, WHITE, MAXW, 800)
-    # accroche : plus tu joues, plus tu augmentes tes chances
-    fit_ct(d, W/2, H*0.346, "Plus tu joues, plus tu augmentes", 66, WHITE, MAXW, 700)
-    fit_ct(d, W/2, H*0.392, "tes chances de remporter les lots", 66, AMBER, MAXW, 800)
-    # commerce focal (gros)
-    fit_ct(d, W/2, H*0.476, "Jouez ici, chez " + commerce, 84, WHITE, MAXW, 800)
-    logo_badge(img, slug, W*0.5, H*0.546, 220)
+    L.put_logo(img, W/2, H*0.066, 0.92)
+    MAXW=int(W*0.86)
+    SOFT=(206,214,234)
+    # ── KICKER (caps trackees, teal) ──
+    tracked(d, W/2, H*0.126, "GRAND JEU · NUITS DU SUD", 56, TEAL, 700, 16)
+    hrule(d, W/2, H*0.150, 110, AMBER, 6)
+    # ── TITRE DISPLAY (interligne serre, contraste couleur) ──
+    hsz=fitsz("GAGNE TES PLACES DE CONCERT", 126, MAXW, 800)
+    y1=H*0.212
+    _TEXTLOG.append(("GAGNE TES PLACES DE CONCERT",W/2,y1,hsz,AMBER,800))
+    if not _PLATE: d.text((W/2,y1),"GAGNE TES PLACES DE CONCERT",font=L.font(hsz,800),fill=AMBER,anchor="mm")
+    y2=y1+hsz*1.04
+    _TEXTLOG.append(("& BONS D'ACHAT",W/2,y2,hsz,WHITE,800))
+    if not _PLATE: d.text((W/2,y2),"& BONS D'ACHAT",font=L.font(hsz,800),fill=WHITE,anchor="mm")
+    # ── SOUS-TITRE (graisse legere = contraste) ──
+    suby=y2+hsz*0.92
+    wrapw(d, W/2, suby, "Plus tu joues, plus tu augmentes tes chances de remporter les lots.", 58, SOFT, int(W*0.80), 74, 500)
+    # ════════ BLOC ACTION (tiers bas) ════════
+    # kicker commerce
+    tracked(d, W/2, H*0.448, "JOUEZ ICI, CHEZ", 46, SOFT, 700, 12)
+    # nom commerce = titre (auto-fit)
+    csz=fitsz(commerce, 92, MAXW, 800)
+    _TEXTLOG.append((commerce,W/2,H*0.500,csz,AMBER,800))
+    if not _PLATE: d.text((W/2,H*0.500),commerce,font=L.font(csz,800),fill=AMBER,anchor="mm")
+    # logo commerce
+    logo_badge(img, slug, W*0.5, H*0.568, 188)
+    # lot (pill raffinee)
     if lot_title:
-        L.chip(img, W/2, H*0.604, "Votre lot : " + lot_title, L.font(58,800), fill=TEAL, fg=INK, padx=56, pady=26)
-        qy=0.762
-    else:
-        qy=0.742
-    # GROS QR focal (halo facon forex)
-    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*qy, 740)
-    bf=L.font(90,800)
-    fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2
-    d.text((x0,H*0.900),"Flash ",font=bf,fill=AMBER,anchor="lm")
-    d.text((x0+L.measure("Flash ",bf)[0],H*0.900),"le QR",font=bf,fill=WHITE,anchor="lm")
-    ct(d, W/2, H*0.946, "Grand tirage à la clôture du festival", 50, (214,220,238), 700)
-    ct(d, W/2, H*0.972, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
+        L.chip(img, W/2, H*0.626, "Votre lot : " + lot_title, L.font(52,700), fill=(36,30,62), fg=WHITE, padx=52, pady=24)
+    # ── QR (carte propre) + caption trackee ──
+    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.776, 650)
+    tracked(d, W/2, H*0.892, "FLASH · JOUE · GAGNE", 44, AMBER, 700, 10)
+    # ── PIED (filet + lignes trackees discretes) ──
+    hrule(d, W/2, H*0.930, int(W*0.62), (60,66,92), 3)
+    ct(d, W/2, H*0.950, "Grand tirage à la clôture du festival", 42, SOFT, 600)
+    tracked(d, W/2, H*0.972, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 30, MUTE, 600, 6)
     pref="plate_" if _PLATE else ""
     p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
