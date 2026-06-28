@@ -161,6 +161,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [recoBusy, setRecoBusy] = useState(false)
   const [recoMsg, setRecoMsg] = useState<string | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
+  const [fly, setFly] = useState(0)
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
   const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
@@ -464,6 +465,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
   const quizPerfect = questions.length === 0 || score >= questions.length
+  useEffect(() => { if (screen === 'final' && (quizPerfect || bonusDone)) setFly(f => f + 1) }, [screen, quizPerfect, bonusDone])
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
   async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
@@ -582,6 +584,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   return (
     <div className="ndsbody">
+      {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;🎟️</div>}
       <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
         html,body{height:auto !important;min-height:100dvh !important;max-height:none !important;overflow-x:hidden !important;overflow-y:auto !important;display:block !important;padding:0 !important;background:#160820}
         .ndsbody{width:100%;min-height:100vh;min-height:100dvh;display:block;background:#fff;font-family:'Manrope',system-ui,sans-serif;color:#1a1226;padding:0}

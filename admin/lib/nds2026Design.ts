@@ -152,6 +152,8 @@ export const NDS_CSS = `
   .parrainbtn{display:flex;align-items:center;justify-content:center;gap:9px;text-align:center;text-decoration:none;cursor:pointer;margin:14px 0;border-radius:50px;padding:16px;font-family:'Manrope';font-weight:800;font-size:16px;color:#fff;background:linear-gradient(90deg,#0d9488,#10b981);animation:pulseGreen 1.7s ease-in-out infinite}
   .parrainbtn .ic{width:20px;height:20px}
   @keyframes pulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.55),0 10px 22px rgba(5,150,105,.38)}50%{box-shadow:0 0 0 11px rgba(16,185,129,0),0 12px 26px rgba(5,150,105,.48)}}
+  .ticketfly{position:fixed;left:50%;bottom:42%;transform:translateX(-50%);z-index:4000;pointer-events:none;font-family:'Manrope';font-weight:800;font-size:34px;color:#10b981;text-shadow:0 4px 14px rgba(16,185,129,.45);animation:flyUp 1.25s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes flyUp{0%{opacity:0;transform:translateX(-50%) translateY(20px) scale(.5)}18%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.15)}100%{opacity:0;transform:translateX(-50%) translateY(-190px) scale(1)}}
   .res-eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9a8fa6;margin:6px 0 9px}
   .nextcard{background:#faf7fc;border:1px solid #f0e6f5;border-radius:14px;padding:4px 13px;margin-bottom:8px}
   .nextline{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #f0e6f5}
