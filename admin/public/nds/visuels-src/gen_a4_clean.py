@@ -103,10 +103,10 @@ def flash_banner(img,cx,cy,txt="FLASH ET JOUE"):
 # ---------- lockup STATION JEUX + logo ----------
 def station_lockup(img, slug, cx, cy):
     d=ImageDraw.Draw(img,"RGBA")
-    t1="STATION"; t2="JEUX"; f=L.font(96,800)
-    w1=L.measure(t1,f)[0]; w2=L.measure(t2,f)[0]; gap_tt=34
+    t1="STATION"; t2="JEUX"; f=L.font(100,800)
+    w1=L.measure(t1,f)[0]; w2=L.measure(t2,f)[0]; gap_tt=36
     txt_w=w1+gap_tt+w2
-    box=210; gap=64
+    box=330; gap=72
     total=txt_w+gap+box
     x=cx-total/2
     # texte (STATION blanc + JEUX teal)
@@ -218,15 +218,98 @@ def qr_block(img, qr_path, cx, cy, qsz):
 
 def grand_tirage_pill(img, cx, cy):
     txt="★  GRAND TIRAGE À LA CLÔTURE DU FESTIVAL"
-    fnt=L.font(46,800); tw=L.measure(txt,fnt)[0]; padx=60; w=tw+padx*2; h=104
-    glow=Image.new("RGBA",(w+80,h+80),(0,0,0,0))
-    ImageDraw.Draw(glow).rounded_rectangle([40,40,40+w,40+h],radius=h//2,fill=AMBER+(110,))
-    glow=glow.filter(ImageFilter.GaussianBlur(28)); img.alpha_composite(glow,(int(cx-(w+80)/2),int(cy-(h+80)/2)))
+    fnt=L.font(60,800); tw=L.measure(txt,fnt)[0]; padx=80; w=tw+padx*2; h=146
+    glow=Image.new("RGBA",(w+120,h+120),(0,0,0,0))
+    ImageDraw.Draw(glow).rounded_rectangle([60,60,60+w,60+h],radius=h//2,fill=AMBER+(140,))
+    glow=glow.filter(ImageFilter.GaussianBlur(40)); img.alpha_composite(glow,(int(cx-(w+120)/2),int(cy-(h+120)/2)))
     pill=Image.new("RGBA",(w,h),(0,0,0,0)); pd=ImageDraw.Draw(pill)
     pd.rounded_rectangle([0,0,w-1,h-1],radius=h//2,fill=AMBER+(255,))
+    pd.rounded_rectangle([7,7,w-8,h-8],radius=(h-14)//2,outline=(255,255,255,150),width=4)
     pd.text((w/2,h/2),txt,font=fnt,fill=INK+(255,),anchor="mm")
     img.alpha_composite(pill,(int(cx-w/2),int(cy-h/2)))
-    _TEXTLOG.append((txt,cx,cy,46,INK,800))
+    _TEXTLOG.append((txt,cx,cy,60,INK,800))
+
+
+# ---------- gros visuels GAINS "wow" (forme = le gain, pas de vignette plate) ----------
+def _grad_round(w,h,c0,c1,rad,notch=False):
+    arr=np.zeros((h,w,4),np.uint8)
+    for yy in range(h):
+        f=yy/max(1,h-1)
+        arr[yy,:,0]=int(c0[0]+(c1[0]-c0[0])*f); arr[yy,:,1]=int(c0[1]+(c1[1]-c0[1])*f)
+        arr[yy,:,2]=int(c0[2]+(c1[2]-c0[2])*f); arr[yy,:,3]=255
+    g=Image.fromarray(arr,"RGBA")
+    mask=Image.new("L",(w,h),0); md=ImageDraw.Draw(mask)
+    md.rounded_rectangle([0,0,w-1,h-1],radius=rad,fill=255)
+    if notch:
+        nr=int(h*0.16); nx=int(w*0.62)
+        md.ellipse([nx-nr,-nr,nx+nr,nr],fill=0); md.ellipse([nx-nr,h-nr,nx+nr,h+nr],fill=0)
+    card=Image.composite(g,Image.new("RGBA",(w,h),(0,0,0,0)),mask)
+    gl=Image.new("L",(w,h),0); ImageDraw.Draw(gl).rounded_rectangle([0,0,w-1,int(h*0.46)],radius=rad,fill=58)
+    gl=gl.filter(ImageFilter.GaussianBlur(max(8,int(h*0.05)))); wl=Image.new("RGBA",(w,h),(255,255,255,255)); wl.putalpha(gl); card.alpha_composite(wl)
+    cd=ImageDraw.Draw(card); cd.rounded_rectangle([0,0,w-1,h-1],radius=rad,outline=(255,255,255,150),width=4)
+    return card
+
+def _note(cd,x,y,s,col):
+    r=int(s*0.16); lw=max(4,int(s*0.075))
+    h1=(int(x-s*0.30),int(y+s*0.20)); h2=(int(x+s*0.14),int(y+s*0.06))
+    t1=(h1[0]+r,int(y-s*0.34)); t2=(h2[0]+r,int(y-s*0.48))
+    cd.line([(h1[0]+r,h1[1]),t1],fill=col,width=lw); cd.line([(h2[0]+r,h2[1]),t2],fill=col,width=lw)
+    cd.line([t1,t2],fill=col,width=lw)
+    cd.ellipse([h1[0]-r,h1[1]-r,h1[0]+r,h1[1]+r],fill=col); cd.ellipse([h2[0]-r,h2[1]-r,h2[0]+r,h2[1]+r],fill=col)
+
+def _dash_rect(cd,x0,y0,x1,y1,col,th):
+    step=max(12,int((x1-x0)*0.07)); seg=int(step*0.55)
+    xx=x0
+    while xx<x1:
+        cd.line([(xx,y0),(min(xx+seg,x1),y0)],fill=col,width=th); cd.line([(xx,y1),(min(xx+seg,x1),y1)],fill=col,width=th); xx+=step
+    yy=y0
+    while yy<y1:
+        cd.line([(x0,yy),(x0,min(yy+seg,y1))],fill=col,width=th); cd.line([(x1,yy),(x1,min(yy+seg,y1))],fill=col,width=th); yy+=step
+
+def hero_concert(img,cx,cy,w):
+    h=int(w*0.62); glow_blob(img,cx,cy,int(w*0.66),(32,224,196),85)
+    card=_grad_round(w,h,(70,240,214),(10,150,150),int(h*0.18),notch=True)
+    cd=ImageDraw.Draw(card)
+    nx=int(w*0.62)
+    for yy in range(int(h*0.16),int(h*0.86),int(h*0.12)):
+        cd.line([(nx,yy),(nx,yy+int(h*0.055))],fill=(255,255,255,160),width=max(3,int(h*0.022)))
+    _note(cd,int(w*0.30),int(h*0.52),int(h*0.80),(255,255,255,255))
+    card=card.rotate(-6,expand=True,resample=Image.BICUBIC)
+    img.alpha_composite(card,(int(cx-card.width/2),int(cy-card.height/2)))
+
+def hero_voucher(img,cx,cy,w):
+    h=int(w*0.62); glow_blob(img,cx,cy,int(w*0.66),(244,181,68),85)
+    card=_grad_round(w,h,(255,202,96),(236,128,24),int(h*0.18),notch=False)
+    cd=ImageDraw.Draw(card)
+    ins=int(h*0.13); _dash_rect(cd,ins,ins,w-ins,h-ins,(255,255,255,210),max(4,int(h*0.028)))
+    cd.text((int(w*0.5),int(h*0.56)),"€",font=L.font(int(h*0.64),800),fill=(255,255,255,255),anchor="mm")
+    bx,by=int(w*0.5),int(h*0.12); rr=int(h*0.11); bw2=max(5,int(h*0.05))
+    cd.ellipse([bx-rr*2,by-rr,bx,by+rr],outline=(255,255,255,255),width=bw2)
+    cd.ellipse([bx,by-rr,bx+rr*2,by+rr],outline=(255,255,255,255),width=bw2)
+    cd.polygon([(bx,by-int(rr*0.4)),(bx-int(rr*0.7),by+int(rr*1.1)),(bx+int(rr*0.7),by+int(rr*1.1))],fill=(255,255,255,255))
+    card=card.rotate(5,expand=True,resample=Image.BICUBIC)
+    img.alpha_composite(card,(int(cx-card.width/2),int(cy-card.height/2)))
+
+def cta_stations(img,cx,cy):
+    line1="PLUS TU JOUES, PLUS TU GAGNES"; line2="Découvre les autres stations du festival"
+    w=int(W*0.86); h=210
+    glow=Image.new("RGBA",(w+180,h+180),(0,0,0,0))
+    ImageDraw.Draw(glow).rounded_rectangle([90,90,90+w,90+h],radius=40,fill=(244,181,68,48))
+    glow=glow.filter(ImageFilter.GaussianBlur(54)); img.alpha_composite(glow,(int(cx-(w+180)/2),int(cy-(h+180)/2)))
+    box=Image.new("RGBA",(w,h),(0,0,0,0)); bd=ImageDraw.Draw(box)
+    bd.rounded_rectangle([0,0,w-1,h-1],radius=36,fill=(255,255,255,22),outline=AMBER+(220,),width=4)
+    img.alpha_composite(box,(int(cx-w/2),int(cy-h/2)))
+    d=ImageDraw.Draw(img,"RGBA")
+    f1sz=fitsz(line1,66,int(w*0.90),800)
+    _TEXTLOG.append((line1,cx,cy-h*0.20,f1sz,AMBER,800))
+    if not _PLATE: d.text((cx,cy-h*0.20),line1,font=L.font(f1sz,800),fill=AMBER+(255,),anchor="mm")
+    _TEXTLOG.append((line2,cx,cy+h*0.20,46,WHITE,600))
+    if not _PLATE: d.text((cx,cy+h*0.20),line2,font=L.font(46,600),fill=WHITE+(255,),anchor="mm")
+
+def footer_contact(img,cx,y):
+    d=ImageDraw.Draw(img,"RGBA")
+    d.rounded_rectangle([W*0.10,y-3,W*0.90,y+3],radius=3,fill=(120,110,80,140))
+    tracked(d,cx,y+58,L.CONTACT,40,(220,224,240),700,10)
 
 # ============================ A4 ============================
 def a4(slug, commerce, lot_title, fname):
@@ -250,31 +333,30 @@ def a4(slug, commerce, lot_title, fname):
     # 3) FLASH ET JOUE (Anton, banniere amber)
     flash_banner(img, W/2, H*0.222, "FLASH ET JOUE")
 
-    # 4) STATION JEUX + logo partenaire
+    # 4) STATION JEUX + logo partenaire (logo agrandi, SANS nom commerce = redondant)
     station_lockup(img, slug, W/2, H*0.300)
-    # nom commerce (clarte)
-    fit_ct(d, W/2, H*0.340, commerce, 60, WHITE, int(W*0.80), 800)
 
-    # 5) GAINS agrandis (2 grandes tuiles)
-    gy0=H*0.372; gy1=H*0.560
-    gap=W*0.040; gw=(W*0.83-gap)/2; gx=W*0.085
-    # tuile concert
-    gain_tile(img, gx, gy0, gx+gw, gy1, ((48,232,206),(16,140,140)),
-              concert_icon, "PLACES DE CONCERT", "Têtes d'affiche du festival", TEAL)
-    # tuile bons d'achat
+    # 5) GAINS "wow" (le gain = la forme, pas de vignette plate)
+    hw=int(W*0.335); cxL=W*0.295; cxR=W*0.705; gcy=H*0.452
+    hero_concert(img, cxL, gcy, hw)
+    hero_voucher(img, cxR, gcy, hw)
+    lblY=H*0.545
+    ct(d, cxL, lblY,        "PLACES DE CONCERT", 58, WHITE, 800)
+    ct(d, cxL, lblY+H*0.026,"Têtes d'affiche du festival", 38, MUTE, 600)
     sub = lot_title if lot_title else "Chez nos commerces partenaires"
-    gain_tile(img, gx+gw+gap, gy0, gx+gw*2+gap, gy1, ((255,196,84),(238,132,28)),
-              icon_voucher_wrap, "BONS D'ACHAT", sub, AMBER)
+    ct(d, cxR, lblY,        "BONS D'ACHAT", 58, WHITE, 800)
+    fit_ct(d, cxR, lblY+H*0.026, sub, 38, MUTE, int(W*0.40), 600, minsz=26)
 
-    # 6) QR sous les gains
-    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.728, 560)
-    tracked(d, W/2, H*0.840, "FLASH · JOUE · GAGNE", 50, AMBER, 800, 12)
+    # 6) QR (sous les gains) — plus de "FLASH JOUE GAGNE" (redondant)
+    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.700, 520)
 
-    # 7) cumul / grand tirage / mentions
-    ct(d, W/2, H*0.872, "Plus tu joues, plus tu cumules de points et de chances.", 42, MUTE, 500)
-    grand_tirage_pill(img, W/2, H*0.910)
-    tracked(d, W/2, H*0.944, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 28, (158,166,190), 600, 5)
-    ct(d, W/2, H*0.966, L.CONTACT, 30, (150,158,182), 600)
+    # 7) CTA mise en EVIDENCE : cumul + autres stations
+    cta_stations(img, W/2, H*0.842)
+
+    # 8) GRAND TIRAGE (agrandi) + contact en bas sur toute la ligne
+    grand_tirage_pill(img, W/2, H*0.918)
+    tracked(d, W/2, H*0.952, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
+    footer_contact(img, W/2, H*0.966)
 
     pref="plate_" if _PLATE else ""
     p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
