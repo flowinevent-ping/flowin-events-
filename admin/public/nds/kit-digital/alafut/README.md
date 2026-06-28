@@ -1,14 +1,20 @@
 # Kit digital — À la Fût (Nuits du Sud 2026)
 
-## Affiche A4 (boutique)
-- nds_a4_alafut.png (2480×3508, 300 dpi)
+**Contact comms : flowinevent@gmail.com · 06 16 35 49 36**
 
-## Vidéo
-- video-alafut-9x16.mp4 (9×16, à diffuser sur écran/réseaux)
+## Affiche A4 (à imprimer, en boutique)
+- `nds_a4_alafut.png` (2480×3508, 300 dpi) — QR **boutique** intégré.
+- Master éditable Canva : `https://flowin-events.vercel.app/nds/kit-digital/svg/nds_a4_alafut.svg`
 
-## Vidéos NDS communes (liens)
-- Insta : https://flowin-events.vercel.app/nds/kit-digital/nds/nds-insta-9x16.mp4
-- FB : https://flowin-events.vercel.app/nds/kit-digital/nds/nds-fb-16x9.mp4
-- Écrans : https://flowin-events.vercel.app/nds/kit-digital/nds/nds-ecrans-9x16.mp4
+## Vidéo 9×16 (réseaux / écran)
+- `video-alafut-9x16.mp4` — QR **réseaux** intégré (lien tracké). Éditable dans CapCut (MP4).
 
-QR de la station : encodé dans l'A4 et la vidéo.
+## Cartes QR (à distinguer les 2 usages)
+- 🟧 `carte-qr-station-alafut.png` — **EN BOUTIQUE** (sur place). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-alafut
+- 🟥 `carte-qr-reseaux-alafut.png` — **EN LIGNE** (à poster). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-alafut&source=reseaux-alafut
+- QR seuls : `qr-station-alafut.png`, `qr-reseaux-alafut.png`
+
+## Textes Insta / Facebook prêts à copier
+- https://flowin-events.vercel.app/nds/visuels/textes-reseaux-nds2026.md (section « À la Fût »)
+
+> Règle : **boutique = QR station** (A4, forex) · **réseaux = QR réseaux** (posts, vidéo). Le QR réseaux trace le canal et le commerce.

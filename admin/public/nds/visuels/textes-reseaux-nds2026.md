@@ -39,7 +39,7 @@ Jeu gratuit · sans obligation d'achat.
 > Chaque commerce poste avec **sa** vidéo (`nds-pro-<commerce>-9x16.mp4`) et **son** lien/QR ci-dessous. À afficher aussi en boutique avec l'A4 `nds_a4_<commerce>.png`.
 
 ### Domaine de la Bergerie
-**Lien :** https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-bergerie
+**Lien :** https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-bergerie&source=reseaux-bergerie
 
 **Instagram :**
 🎶 Le **Domaine de la Bergerie** joue les **Nuits du Sud 2026** ! (9 → 18 juillet)
@@ -50,12 +50,12 @@ On vous attend ! 👇 (lien en bio · ou flashez le QR en boutique)
 
 **Facebook :**
 🎶 Le Domaine de la Bergerie participe aux Nuits du Sud 2026 (9 → 18 juillet) !
-Jouez avec nous 👉 https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-bergerie
+Jouez avec nous 👉 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-bergerie&source=reseaux-bergerie
 Quiz, points à cumuler, **bon d'achat chez nous** et **places de concert** à gagner 🎟️🛍️ + grand tirage à la clôture 🏆
 #NuitsduSud #Vence
 
 ### Auto-Moto-École Pégase
-**Lien :** https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-pegase
+**Lien :** https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-pegase&source=reseaux-pegase
 
 **Instagram :**
 🎶 **Pégase** joue les **Nuits du Sud 2026** ! (9 → 18 juillet)
@@ -66,12 +66,12 @@ Plus vous jouez, plus vous cumulez de points pour le **grand tirage final** 🏆
 
 **Facebook :**
 🎶 L'Auto-Moto-École Pégase participe aux Nuits du Sud 2026 (9 → 18 juillet) !
-Jouez ici 👉 https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-pegase
+Jouez ici 👉 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-pegase&source=reseaux-pegase
 Quiz, points, **bon d'achat chez nous** + **places de concert** à gagner 🎟️ et grand tirage final 🏆
 #NuitsduSud #Vence
 
 ### Utile Vence
-**Lien :** https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-utile
+**Lien :** https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-utile&source=reseaux-utile
 
 **Instagram :**
 🎶 **Utile Vence** joue les **Nuits du Sud 2026** ! (9 → 18 juillet)
@@ -82,12 +82,12 @@ Chaque passage rapporte des points pour le **grand tirage final** 🏆
 
 **Facebook :**
 🎶 Utile Vence participe aux Nuits du Sud 2026 (9 → 18 juillet) !
-Jouez ici 👉 https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-utile
+Jouez ici 👉 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-utile&source=reseaux-utile
 Quiz, points à cumuler, **bon d'achat chez nous** + **places de concert** à gagner 🎟️🛍️ et grand tirage final 🏆
 #NuitsduSud #Vence
 
 ### Carrosserie GP
-**Lien :** https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-carrosserie-gp
+**Lien :** https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-carrosserie-gp&source=reseaux-carrosserie-gp
 
 **Instagram :**
 🎶 La **Carrosserie GP** joue les **Nuits du Sud 2026** ! (9 → 18 juillet)
@@ -98,12 +98,12 @@ Cumulez des points pour le **grand tirage final** 🏆
 
 **Facebook :**
 🎶 La Carrosserie GP participe aux Nuits du Sud 2026 (9 → 18 juillet) !
-Jouez ici 👉 https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-carrosserie-gp
+Jouez ici 👉 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-carrosserie-gp&source=reseaux-carrosserie-gp
 Quiz, points, **bon d'achat chez nous** + **places de concert** à gagner 🎟️ et grand tirage final 🏆
 #NuitsduSud #Vence
 
 ### Électroménager J. Giordano
-**Lien :** https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-giordano
+**Lien :** https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-giordano&source=reseaux-giordano
 
 **Instagram :**
 🎶 **Électroménager Giordano** joue les **Nuits du Sud 2026** ! (9 → 18 juillet)
@@ -114,6 +114,6 @@ Plus vous jouez, plus vous cumulez de points pour le **grand tirage final** 🏆
 
 **Facebook :**
 🎶 Électroménager Giordano participe aux Nuits du Sud 2026 (9 → 18 juillet) !
-Jouez ici 👉 https://flowin-events.vercel.app/parcours/quiz?ev=ev-nds-giordano
+Jouez ici 👉 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-giordano&source=reseaux-giordano
 Quiz, points, **bon d'achat chez nous** + **places de concert** à gagner 🎟️ et grand tirage final 🏆
 #NuitsduSud #Vence
