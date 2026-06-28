@@ -763,6 +763,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       </div>
                     ))}
                   </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16))', border: '1px solid #ece7f2', borderRadius: 14, padding: '11px 14px', marginBottom: 14, fontWeight: 800, fontSize: 14.5, color: '#1a1226', textAlign: 'center' }}>
+                    <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-layers" /></svg>
+                    <span>+ Vous jouez, + vos chances augmentent</span>
+                  </div>
                   <a className="btn" onClick={() => {
                     setScreen(questions.length > 0 ? 'quiz' : 'resultats')
                   }}>{recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant'}</a>
