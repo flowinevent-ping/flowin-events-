@@ -2987,7 +2987,7 @@ function renderSidebar(){
       {id:'nds-front',ico:'🎨',lbl:'Front NDS',n:(state.ndsFront?state.ndsFront.length:0)},
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
-      {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'}
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -3040,7 +3040,7 @@ function renderSidebar(){
        +'</div>';
   html += '<div class="sb-user"><div class="sb-avatar">'+(isPro?(curPro?curPro.nom[0].toUpperCase():'P'):'R')+'</div>'
        +'<div class="sb-userinfo"><div class="sb-username">'+(isPro?(curPro?esc(curPro.nom):'Pro'):'Romain')+'</div><div class="sb-userrole">'+(isPro?'Pro \u00b7 Lecture seule':'Super Admin')+'</div></div></div>'
-       +(!isPro?'<div style="padding:8px 12px 14px"><button onclick="resetCache()" style="width:100%;padding:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em">&#128260; Vider le cache SEED</button></div>':'');
+       +(!isPro?'<div style="padding:8px 12px 14px"><button onclick="goView(\'maintenance\')" style="width:100%;padding:7px;margin-bottom:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:8px;color:rgba(255,255,255,.55);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em">⚙️ Maintenance</button><button onclick="resetCache()" style="width:100%;padding:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.5);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em">&#128260; Vider le cache SEED</button></div>':'');
   $('#sidebar').innerHTML = html;
   $('#shell').className = 'shell '+(isPro?'pro':'');
 }
@@ -3074,7 +3074,7 @@ function renderTopbar(){
 function breadcrumbForView(){
   const labels = {
     pilotage:'Accueil', pros:'Pros', joueurs:'Joueurs', gagnants:'Gagnants', partenaires:'Partenaires',
-    events:'Events','super-events':'Super Events',jeux:'Jeux',rapports:'Rapports',parametres:'Paramètres',cgv:'CGV / Légal',
+    events:'Events','super-events':'Super Events',jeux:'Jeux',rapports:'Rapports',parametres:'Paramètres',cgv:'CGV / Légal','nds-media':'Vidéo & média','maintenance':'Maintenance',
     'wizard-event':state.wiz.mode==='edit'?'Édition event':'Nouvel event','live-control':'Stats live'
   };
   const crumbs = [{label:'Flowin',action:'goView(\'pilotage\')'}];
@@ -4092,6 +4092,63 @@ function cgvSave(){
     .catch(function(){ if(msg) msg.textContent='Échec, réessayez'; toast('Erreur enregistrement CGV','error'); });
 }
 
+function renderNdsMedia(){
+  var cb='https://flowin-events.vercel.app';
+  var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1;});
+  if(!nds.length){ nds=(DATA.partenaires||[]).slice(0,6); }
+  var sub=state.mediaTab||'nds2026';
+  function lnk(u,label,col){ return '<a href="'+u+'" target="_blank" rel="noopener" style="color:'+(col||'#22D3C6')+';font-weight:700;text-decoration:none">'+label+'</a>'; }
+  function card(title,inner){ return '<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">'+title+'</div>'+inner+'</div>'; }
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">🎬 Vidéo & média</div><div class="page-subtitle">Tous les éléments de communication — accès immédiat, zéro fouille.</div></div></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:18px"><button class="btn '+(sub==='nds2026'?'btn-primary':'')+'" onclick="state.mediaTab=\'nds2026\';render()">NDS 2026</button></div>';
+  var a4='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">';
+  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); a4+='<div style="text-align:center"><img src="'+cb+'/nds/visuels/nds_a4_'+s+'.png" style="width:100%;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin:6px 0 4px;font-weight:700">'+esc(p.nom)+'</div>'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png','⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'</div>'; });
+  a4+='</div>'; h+=card('📄 Affiches A4 ('+nds.length+')',a4);
+  var fx='<div class="text-xs" style="line-height:2">';
+  ['caisse-1','caisse-2','caisse-3'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png','⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
+  fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
+  var vd='<div class="text-xs" style="line-height:2">';
+  vd+=lnk(cb+'/nds/kit-digital/nds/nds-insta-9x16.mp4','▶ Insta (9×16)')+'<br>';
+  vd+=lnk(cb+'/nds/kit-digital/nds/nds-fb-16x9.mp4','▶ Facebook (16×9)')+'<br>';
+  vd+=lnk(cb+'/nds/kit-digital/nds/nds-ecrans-9x16.mp4','▶ Écrans festival (9×16)')+'<br>';
+  vd+=lnk(cb+'/nds/kit-digital/nds/nds-partenaire-16x9.mp4','▶ Prospection partenaire (16×9)')+'<br>';
+  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); vd+=lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4','▶ Vidéo '+esc(p.nom)+' (9×16)')+'<br>'; });
+  vd+='</div>'; h+=card('🎬 Vidéos',vd);
+  var kt='<div class="text-xs" style="line-height:2">';
+  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); kt+=lnk(cb+'/nds/kit-digital/'+s+'/','📁 Kit '+esc(p.nom))+' · '+lnk(cb+'/nds/visuels/tickets/nds_tickets_'+s+'.pdf','🎟️ Tickets','#E8A33C')+'<br>'; });
+  kt+='</div>'; h+=card('📦 Kits digitaux + tickets',kt);
+  var lp='<div class="text-xs" style="line-height:2">';
+  var lands=[['/landing','Landing Flowin'],['/nds','Landing NDS'],['/pro','Pro'],['/nds-pro.html','NDS Pro (présentation)'],['/nds-super-event-pro.html','Super-event Pro (stats/gagnants)'],['/nds-partenaire-presentation.html','Partenaire (présentation)'],['/flowin-partenaire-presentation.html','Flowin partenaire'],['/pitch-nds.html','Pitch NDS'],['/pro-nds-live.html','Pro NDS live'],['/prospection.html','Prospection'],['/demos.html','Démos'],['/carte.html','Carte']];
+  lands.forEach(function(a){ lp+=lnk(cb+a[0],'🌐 '+a[1])+'<br>'; });
+  lp+='</div>'; h+=card('🌐 Landing pages',lp);
+  var sm='<div class="text-xs" style="line-height:2">';
+  sm+=lnk(cb+'/nds/SOURCES-MAITRES.md','🗂 Manifeste sources maîtres')+'<br>';
+  sm+=lnk(cb+'/nds/kit-digital/svg/','✏️ Dossier SVG éditables (Canva)','#E8A33C')+'<br>';
+  sm+='</div>'; h+=card('🗂 Sources maîtres (Canva / CapCut)',sm);
+  h+='</div>'; return h;
+}
+function renderMaintenance(){
+  var repo='https://github.com/flowinevent-ping/flowin-events-';
+  var sb='https://supabase.com/dashboard/project/ywcqtupgoxfzkddqkztk';
+  var base='https://flowin-events.vercel.app';
+  function lnk(u,l){ return '<a href="'+u+'" target="_blank" rel="noopener" style="color:#22D3C6;font-weight:700;text-decoration:none">'+l+'</a>'; }
+  function row(k,v){ return '<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--sa-border)"><span class="text-xs text-muted">'+k+'</span><span class="text-xs" style="font-weight:700;text-align:right">'+v+'</span></div>'; }
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">⚙️ Maintenance</div><div class="page-subtitle">Accès rapides debug & infra — usage interne.</div></div></div>';
+  h+='<div class="alert info"><span class="ico">🛠</span>Liens directs pour diagnostiquer un bug et accéder à l’infra. Aucun secret affiché.</div>';
+  h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">🧱 Infrastructure</div>';
+  h+=row('Repo GitHub',lnk(repo,'flowinevent-ping/flowin-events-'));
+  h+=row('Supabase (projet)',lnk(sb,'ywcqtupgoxfzkddqkztk'));
+  h+=row('Base assets',lnk(base,'flowin-events.vercel.app'));
+  h+='</div>';
+  h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">🎮 Parcours de test (stations NDS)</div><div class="text-xs" style="line-height:2">';
+  ['bergerie','pegase','utile','carrosserie-gp','giordano','alafut'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
+  h+=lnk(base+'/parcours/nds2026?ev=ev-nds-digitale','▶ Parcours festival (digitale)')+'<br></div></div>';
+  h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px"><div class="section-h" style="margin-top:0">📋 Notes</div><div class="text-xs text-muted" style="line-height:1.7">Advisors sécurité Supabase : 0 ERROR au dernier scan · durcissement RLS avancé prévu post-festival.<br>Supabase FREE → passer Pro avant le 9/07 (risque pause auto 7 j d’inactivité).<br>Resend : domaine flowin.events à vérifier pour débloquer les emails gagnants.</div></div>';
+  h+='</div>'; return h;
+}
+
 function render(){
   renderSidebar();
   renderTopbar();
@@ -4123,6 +4180,8 @@ function render(){
   else if(v==='nds-participants') html = renderNdsParticipants();
   else if(v==='nds-bon-commande') html = renderNdsBonCommande();
   else if(v==='landing-page') html = renderLandingPage();
+else if(v==='nds-media') html = renderNdsMedia();
+else if(v==='maintenance') html = renderMaintenance();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
   else html = '<div class="page"><div class="empty-block">Vue inconnue</div></div>';
@@ -6308,7 +6367,14 @@ function drawerPartner(p){
     html += '<div class="mb-3"><a href="'+ticku+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">⬇ Planche tickets PDF</a> <span class="text-xs text-muted">(n° de série, champs gagnant à remplir)</span></div>';
     html += '<div class="section-h">📦 Kit digital complet</div>';
     html += '<div class="mb-3"><a href="'+kitu+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">📁 /nds/kit-digital/'+esc(cslug)+'/</a> <span class="text-xs text-muted">(affiche + vidéo + README)</span></div>';
-    html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
+    html += '<div class="section-h">📜 Docs & légal</div>';
+html += '<div class="mb-3 text-xs" style="line-height:1.9">';
+html += '<a href="'+cb+'/cgv-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">📜 CGV NDS 2026</a><br>';
+html += '<a href="'+cb+'/bon-commande-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">🧾 Bon de commande</a>';
+html += '</div>';
+html += '<div class="section-h">✏️ Source éditable (Canva)</div>';
+html += '<div class="mb-3"><a href="'+cb+'/nds/kit-digital/svg/nds_a4_'+cslug+'.svg" target="_blank" style="color:#E8A33C;font-size:12px;font-weight:700">✏️ A4 SVG (texte modifiable Canva)</a></div>';
+html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
     html += '<div class="text-xs" style="line-height:1.9">';
     html += '<a href="'+cb+'/nds/kit-digital/nds/nds-insta-9x16.mp4" target="_blank" style="color:#22D3C6;font-weight:700">▶ Vidéo Insta (9×16)</a><br>';
     html += '<a href="'+cb+'/nds/kit-digital/nds/nds-fb-16x9.mp4" target="_blank" style="color:#22D3C6;font-weight:700">▶ Vidéo Facebook (16×9)</a><br>';
