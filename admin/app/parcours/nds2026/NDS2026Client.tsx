@@ -162,6 +162,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [recoMsg, setRecoMsg] = useState<string | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
   const [fly, setFly] = useState(0)
+  const refreshServerTickets = useCallback(async (jid?: string | null) => {
+    const id = jid || recurrent?.id || getJoueurLocal()?.id
+    if (!id) return
+    try {
+      const { count } = await supabase.from('se_tickets').select('id', { count: 'exact', head: true }).eq('joueur_id', id).eq('super_event_id', 'se-nds-2026')
+      if (typeof count === 'number' && count > 0) setTicketCount(count)
+    } catch { /* hors-ligne : garde le cumul local */ }
+  }, [recurrent])
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
   const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
@@ -466,6 +474,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
   const quizPerfect = questions.length === 0 || score >= questions.length
   useEffect(() => { if (screen === 'final' && (quizPerfect || bonusDone)) setFly(f => f + 1) }, [screen, quizPerfect, bonusDone])
+  useEffect(() => { if (screen === 'tickets' || screen === 'final' || (screen === 'onboard' && saved)) refreshServerTickets() }, [screen, saved, refreshServerTickets])
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
   async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
@@ -693,7 +702,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div><div className="nm">{lotNom}</div><div className="vl">{lotDesc}</div></div>
                 </div>
                 <div className="div" />
-                <div className="tir"><span className="dot" /> Tirage au sort chaque soir du festival</div>
+                <div className="tir"><span className="dot" /> Grand tirage à la fin du festival · cadeau Partenaire</div>
               </div>
             </div>
             <div className="stage">
@@ -730,13 +739,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               ) : (
                 <>
                   <div style={{ textAlign: 'center', marginBottom: 8, marginTop: 2 }}>
-                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Bienvenue au Super Event</div>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Comment jouer&#8239;?</div>
                   </div>
                   <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '13px 16px', marginBottom: 12, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
                     {[
-                      { ic: 'i-help', t: 'Réponds au Quizz', s: 'Remporte 1 ticket' },
-                      { ic: 'i-layers', t: '4 lieux, 4 quizz', s: '4 fois plus de chance de gagner !' },
-                      { ic: 'i-scan', t: 'Flashe le QR code', s: 'Remporte le lot' },
+                      { ic: 'i-map', t: 'Rends-toi à une station jeux', s: 'Sur la carte — festival et partenaires' },
+                      { ic: 'i-scan', t: 'Flash le QR code', s: 'À la station' },
+                      { ic: 'i-help', t: 'Réponds au quizz', s: 'Et gagne des tickets' },
                     ].map((step, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '7px 0' }}>
                         <span style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href={`#${step.ic}`} /></svg></span>
