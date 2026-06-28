@@ -4094,30 +4094,41 @@ function cgvSave(){
 
 function renderNdsMedia(){
   var cb='https://flowin-events.vercel.app';
+  var VER='?v=20260628v15';
   var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1;});
   if(!nds.length){ nds=(DATA.partenaires||[]).slice(0,6); }
   var sub=state.mediaTab||'nds2026';
   function lnk(u,label,col){ return '<a href="'+u+'" target="_blank" rel="noopener" style="color:'+(col||'#22D3C6')+';font-weight:700;text-decoration:none">'+label+'</a>'; }
   function card(title,inner){ return '<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">'+title+'</div>'+inner+'</div>'; }
+  function vid(u,label,portrait){ var w=portrait?'190px':'320px'; return '<div style="display:inline-block;vertical-align:top;margin:0 12px 14px 0;width:'+w+'"><video src="'+u+'" controls preload="metadata" playsinline style="width:100%;border-radius:10px;border:1px solid var(--sa-border);background:#000;display:block"></video><div class="text-xs" style="margin:5px 0 3px;font-weight:700">'+label+'</div>'+lnk(u,'⬇ Télécharger')+'</div>'; }
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">🎬 Vidéo & média</div><div class="page-subtitle">Tous les éléments de communication — accès immédiat, zéro fouille.</div></div></div>';
+  h+='<div class="page-header"><div><div class="page-title">🎬 Vidéo & média</div><div class="page-subtitle">Tous les éléments de communication — prévisualisables, accès immédiat.</div></div></div>';
   h+='<div style="display:flex;gap:8px;margin-bottom:18px"><button class="btn '+(sub==='nds2026'?'btn-primary':'')+'" onclick="state.mediaTab=\'nds2026\';render()">NDS 2026</button></div>';
   var a4='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">';
-  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); a4+='<div style="text-align:center"><img src="'+cb+'/nds/visuels/nds_a4_'+s+'.png" style="width:100%;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin:6px 0 4px;font-weight:700">'+esc(p.nom)+'</div>'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png','⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'</div>'; });
-  a4+='</div>'; h+=card('📄 Affiches A4 ('+nds.length+')',a4);
+  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); a4+='<div style="text-align:center"><img src="'+cb+'/nds/visuels/nds_a4_'+s+'.png'+VER+'" style="width:100%;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin:6px 0 4px;font-weight:700">'+esc(p.nom)+'</div>'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'</div>'; });
+  a4+='</div>'; h+=card('📄 Affiches A4 ('+nds.length+') — version à jour',a4);
+  var vd='<div>';
+  vd+=vid(cb+'/nds/visuels/nds-spot-nds2026-16x9.mp4'+VER,'Spot NDS 2026 (16×9)',false);
+  vd+=vid(cb+'/nds/kit-digital/nds/nds-insta-9x16.mp4'+VER,'Insta (9×16)',true);
+  vd+=vid(cb+'/nds/kit-digital/nds/nds-fb-16x9.mp4'+VER,'Facebook (16×9)',false);
+  vd+=vid(cb+'/nds/kit-digital/nds/nds-ecrans-9x16.mp4'+VER,'Écrans festival (9×16)',true);
+  vd+=vid(cb+'/nds/kit-digital/nds/nds-partenaire-16x9.mp4'+VER,'Prospection partenaire (16×9)',false);
+  vd+='</div>'; h+=card('🎬 Vidéos NDS (prévisualisation)',vd);
   var fx='<div class="text-xs" style="line-height:2">';
-  ['caisse-1','caisse-2','caisse-3'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png','⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
+  ['caisse-1','caisse-2','caisse-3','bar-1','bar-2'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
   fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
-  var vd='<div class="text-xs" style="line-height:2">';
-  vd+=lnk(cb+'/nds/kit-digital/nds/nds-insta-9x16.mp4','▶ Insta (9×16)')+'<br>';
-  vd+=lnk(cb+'/nds/kit-digital/nds/nds-fb-16x9.mp4','▶ Facebook (16×9)')+'<br>';
-  vd+=lnk(cb+'/nds/kit-digital/nds/nds-ecrans-9x16.mp4','▶ Écrans festival (9×16)')+'<br>';
-  vd+=lnk(cb+'/nds/kit-digital/nds/nds-partenaire-16x9.mp4','▶ Prospection partenaire (16×9)')+'<br>';
-  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); vd+=lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4','▶ Vidéo '+esc(p.nom)+' (9×16)')+'<br>'; });
-  vd+='</div>'; h+=card('🎬 Vidéos',vd);
-  var kt='<div class="text-xs" style="line-height:2">';
-  nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); kt+=lnk(cb+'/nds/kit-digital/'+s+'/','📁 Kit '+esc(p.nom))+' · '+lnk(cb+'/nds/visuels/tickets/nds_tickets_'+s+'.pdf','🎟️ Tickets','#E8A33C')+'<br>'; });
-  kt+='</div>'; h+=card('📦 Kits digitaux + tickets',kt);
+  var kt='';
+  nds.forEach(function(p){ var s=(p.id||'').replace('pt-','');
+    kt+='<div style="border:1px solid var(--sa-border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">';
+    kt+='<img src="'+cb+'/nds/kit-digital/'+s+'/nds_a4_'+s+'.png'+VER+'" style="width:110px;border-radius:6px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'">';
+    kt+='<video src="'+cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER+'" controls preload="metadata" playsinline style="width:150px;border-radius:6px;border:1px solid var(--sa-border);background:#000;display:block"></video>';
+    kt+='<div style="flex:1;min-width:170px"><div style="font-weight:700;margin-bottom:6px">'+esc(p.nom)+'</div><div class="text-xs" style="line-height:2">'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER,'⬇ Vidéo')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/README.md','📄 Lisez-moi / textes')+'</div></div>';
+    kt+='</div>';
+  });
+  h+=card('📦 Kits digitaux par partenaire (A4 + vidéo + textes)',kt);
+  var tk='<div class="text-xs" style="line-height:2">';
+  ['concert','bergerie','carrosserie-gp','giordano','utile','pegase-formation125','pegase-remise'].forEach(function(t){ tk+=lnk(cb+'/nds/visuels/tickets/nds_tickets_'+t+'.pdf','🎟️ Tickets '+t+' (PDF)','#E8A33C')+'<br>'; });
+  tk+='</div>'; h+=card('🎟️ Tickets tombola',tk);
   var lp='<div class="text-xs" style="line-height:2">';
   var lands=[['/landing','Landing Flowin'],['/nds','Landing NDS'],['/pro','Pro'],['/nds-pro.html','NDS Pro (présentation)'],['/nds-super-event-pro.html','Super-event Pro (stats/gagnants)'],['/nds-partenaire-presentation.html','Partenaire (présentation)'],['/flowin-partenaire-presentation.html','Flowin partenaire'],['/pitch-nds.html','Pitch NDS'],['/pro-nds-live.html','Pro NDS live'],['/prospection.html','Prospection'],['/demos.html','Démos'],['/carte.html','Carte']];
   lands.forEach(function(a){ lp+=lnk(cb+a[0],'🌐 '+a[1])+'<br>'; });
