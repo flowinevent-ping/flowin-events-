@@ -893,7 +893,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {bonusQs.length > 0 && !bonusDone && (
                 <a className="bonusbtn" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
                   <svg className="ic"><use href="#i-spark" /></svg>
-                  {' +1 ticket — question bonus'}
+                  {' Réponds à la question bonus · +1 ticket'}
                 </a>
               )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
