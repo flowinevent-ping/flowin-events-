@@ -291,23 +291,16 @@ def hero_voucher(img,cx,cy,w):
     img.alpha_composite(card,(int(cx-card.width/2),int(cy-card.height/2)))
 
 def cta_stations(img,cx,cy):
-    line1="+ VOUS JOUEZ"; line2="+ VOUS AUGMENTEZ VOS CHANCES DE GAGNER"; line3="Découvrez les autres stations du festival"
-    w=int(W*0.88); h=256
-    glow=Image.new("RGBA",(w+180,h+180),(0,0,0,0))
-    ImageDraw.Draw(glow).rounded_rectangle([90,90,90+w,90+h],radius=42,fill=(244,181,68,52))
-    glow=glow.filter(ImageFilter.GaussianBlur(56)); img.alpha_composite(glow,(int(cx-(w+180)/2),int(cy-(h+180)/2)))
-    box=Image.new("RGBA",(w,h),(0,0,0,0)); bd=ImageDraw.Draw(box)
-    bd.rounded_rectangle([0,0,w-1,h-1],radius=38,fill=(255,255,255,24),outline=AMBER+(230,),width=5)
-    img.alpha_composite(box,(int(cx-w/2),int(cy-h/2)))
+    # CTA SANS encadre ni fond — typo display Anton (change de typo), 1 seule ligne forte + sous-ligne
+    line1="+ VOUS AUGMENTEZ VOS CHANCES DE GAGNER"; line2="Découvrez les autres stations du festival"
     d=ImageDraw.Draw(img,"RGBA")
-    s1=fitsz(line1,86,int(w*0.86),800)
-    _TEXTLOG.append((line1,cx,cy-h*0.295,s1,AMBER,800))
-    if not _PLATE: d.text((cx,cy-h*0.295),line1,font=L.font(s1,800),fill=AMBER+(255,),anchor="mm")
-    s2=fitsz(line2,58,int(w*0.92),800)
-    _TEXTLOG.append((line2,cx,cy-h*0.02,s2,WHITE,800))
-    if not _PLATE: d.text((cx,cy-h*0.02),line2,font=L.font(s2,800),fill=WHITE+(255,),anchor="mm")
-    _TEXTLOG.append((line3,cx,cy+h*0.30,42,TEAL,600))
-    if not _PLATE: d.text((cx,cy+h*0.30),line3,font=L.font(42,600),fill=TEAL+(255,),anchor="mm")
+    s=176
+    while s>72 and ameasure(line1,anton(s))[0] > int(W*0.92): s-=4
+    fnt=anton(s); tw,th=ameasure(line1,fnt)
+    _TEXTLOG.append((line1,cx,cy,int(s*0.85),AMBER,800))
+    if not _PLATE: d.text((cx,cy-th*0.04),line1,font=fnt,fill=AMBER+(255,),anchor="mm")
+    _TEXTLOG.append((line2,cx,cy+th*0.62+34,44,TEAL,600))
+    if not _PLATE: d.text((cx,cy+th*0.62+34),line2,font=L.font(44,600),fill=TEAL+(255,),anchor="mm")
 
 def footer_contact(img,cx,y):
     d=ImageDraw.Draw(img,"RGBA")
@@ -347,15 +340,15 @@ def a4(slug, commerce, lot_title, fname):
     ct(d, cxR, lblY, "BONS D'ACHAT", 58, WHITE, 800)
 
     # 6) QR (sous les gains)
-    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.712, 470)
+    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.700, 460)
 
-    # 7) CTA mis en EVIDENCE : + vous jouez + de chances
-    cta_stations(img, W/2, H*0.838)
+    # 7) CTA (sans encadre/fond, typo Anton) — degage du QR
+    cta_stations(img, W/2, H*0.835)
 
     # 8) GRAND TIRAGE (agrandi) + contact en bas pleine ligne
-    grand_tirage_pill(img, W/2, H*0.918)
-    tracked(d, W/2, H*0.952, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
-    footer_contact(img, W/2, H*0.966)
+    grand_tirage_pill(img, W/2, H*0.908)
+    tracked(d, W/2, H*0.944, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
+    footer_contact(img, W/2, H*0.958)
 
     pref="plate_" if _PLATE else ""
     p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
