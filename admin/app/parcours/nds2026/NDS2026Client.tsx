@@ -164,6 +164,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [recoMsg, setRecoMsg] = useState<string | null>(null)
   const [ticketCount, setTicketCount] = useState(1)
   const [fly, setFly] = useState(0)
+  const [celebrate, setCelebrate] = useState(0)
   const refreshServerTickets = useCallback(async (jid?: string | null) => {
     const id = jid || recurrent?.id || getJoueurLocal()?.id
     if (!id) return
@@ -382,7 +383,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       if (mapView === 'partenaires') commerces.forEach(c => {
         const big = !!c.en_avant
         const sz = big ? 30 : 24
-        const html = `<div style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:linear-gradient(135deg,#F5B544,#E0218A);border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
+        let cdone = false
+        try { cdone = ndsPlayedToday(ndsFamily('ev-nds-' + c.id.replace(/^pt-/, ''))) } catch {}
+        const cbg = cdone ? '#F5B544' : '#16a34a'
+        const ccls = cdone ? '' : 'nds-mk-pulse'
+        const html = `<div class="${ccls}" style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${cbg};border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
         const icon = LL.divIcon({ html, className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz] })
         LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => setFiche(c))
       })
@@ -475,7 +480,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
   const quizPerfect = questions.length === 0 || score >= questions.length
-  useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) setFly(f => f + 1) }, [screen, quizPerfect, bonusDone])
+  useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) { setFly(f => f + 1); setCelebrate(c => c + 1) } }, [screen, quizPerfect, bonusDone])
   useEffect(() => { if (screen === 'tickets' || screen === 'final' || (screen === 'onboard' && saved)) refreshServerTickets() }, [screen, saved, refreshServerTickets])
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
@@ -573,6 +578,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     const extId = 'j-nd-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
     const link = buildInviteLink(`/parcours/nds2026?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
     const txt = `Je joue au Grand Jeu des Nuits du Sud \u{1F3B6} Rejoins-moi, joue et tente de gagner des places de concert ! ${link}`
+    setCelebrate(c => c + 1)
     try {
       if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: 'Le Grand Jeu des Nuits du Sud', text: txt }) }
       else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
@@ -596,8 +602,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   return (
     <div className="ndsbody">
       {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;🎟️</div>}
-      {screen === 'resultats' && quizPerfect && (
-        <div className="confetti-wrap" aria-hidden="true">
+      {celebrate > 0 && (
+        <div className="confetti-wrap" key={celebrate} aria-hidden="true">
           {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
         </div>
       )}
@@ -1060,6 +1066,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       <span><b style={{ color: '#1a1226' }}>Le lieu — </b>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</span>
                     </div>
                   ) : null}
+                  {(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const tel = pp?.tel; return tel ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
+                      <span style={{ width: 15, textAlign: 'center', flexShrink: 0 }}>📞</span>
+                      <span><b style={{ color: '#1a1226' }}>Tél — </b><a href={`tel:${tel}`} style={{ color: '#7C2D92', fontWeight: 700 }}>{tel}</a></span>
+                    </div>
+                  ) : null })()}
                   <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}><b>Le jeu — </b>{fiche.tickets_par_scan ? `Rends-toi sur place et flashe le QR du commerce pour gagner +${fiche.tickets_par_scan} ticket${fiche.tickets_par_scan > 1 ? 's' : ''} pour le tirage.` : "Rends-toi sur place et profite de l'offre partenaire."}</div>
 {(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const ls = pp && Array.isArray(pp.lots) ? pp.lots : []; return ls.length ? (
   <div className="pt-lots" style={{ marginBottom: 12 }}>
@@ -1187,7 +1199,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
         {bandOn && (
           <div className="botdock">
-            {partnerBand}
+            {screen !== 'tickets' && partnerBand}
             {navOn && (
             <nav className="nav on" id="nav">
               <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
