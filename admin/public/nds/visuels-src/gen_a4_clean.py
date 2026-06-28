@@ -244,8 +244,6 @@ def _grad_round(w,h,c0,c1,rad,notch=False):
         nr=int(h*0.16); nx=int(w*0.62)
         md.ellipse([nx-nr,-nr,nx+nr,nr],fill=0); md.ellipse([nx-nr,h-nr,nx+nr,h+nr],fill=0)
     card=Image.composite(g,Image.new("RGBA",(w,h),(0,0,0,0)),mask)
-    gl=Image.new("L",(w,h),0); ImageDraw.Draw(gl).rounded_rectangle([0,0,w-1,int(h*0.46)],radius=rad,fill=58)
-    gl=gl.filter(ImageFilter.GaussianBlur(max(8,int(h*0.05)))); wl=Image.new("RGBA",(w,h),(255,255,255,255)); wl.putalpha(gl); card.alpha_composite(wl)
     cd=ImageDraw.Draw(card); cd.rounded_rectangle([0,0,w-1,h-1],radius=rad,outline=(255,255,255,150),width=4)
     return card
 
@@ -292,13 +290,13 @@ def hero_voucher(img,cx,cy,w):
 
 def cta_stations(img,cx,cy):
     # CTA SANS encadre ni fond — typo display Anton (change de typo), 1 seule ligne forte + sous-ligne
-    line1="+ VOUS AUGMENTEZ VOS CHANCES DE GAGNER"; line2="Découvrez les autres stations du festival"
+    line1="+ VOUS JOUEZ + VOS CHANCES AUGMENTENT"; line2="Découvrez les autres stations du festival"
     d=ImageDraw.Draw(img,"RGBA")
     s=176
     while s>72 and ameasure(line1,anton(s))[0] > int(W*0.92): s-=4
     fnt=anton(s); tw,th=ameasure(line1,fnt)
-    _TEXTLOG.append((line1,cx,cy,int(s*0.85),AMBER,800))
-    if not _PLATE: d.text((cx,cy-th*0.04),line1,font=fnt,fill=AMBER+(255,),anchor="mm")
+    _TEXTLOG.append((line1,cx,cy,int(s*0.85),WHITE,800))
+    if not _PLATE: d.text((cx,cy-th*0.04),line1,font=fnt,fill=WHITE+(255,),anchor="mm")
     _TEXTLOG.append((line2,cx,cy+th*0.62+34,44,TEAL,600))
     if not _PLATE: d.text((cx,cy+th*0.62+34),line2,font=L.font(44,600),fill=TEAL+(255,),anchor="mm")
 
