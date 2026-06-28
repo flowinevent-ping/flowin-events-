@@ -60,7 +60,9 @@ def _confetti(img):
             d.line([(x-s,y),(x+s,y)],fill=c+(a,),width=3)
             d.line([(x,y-s),(x,y+s)],fill=c+(a,),width=3)
 
-def ct(d,cx,y,txt,size,col,w=800): d.text((cx,y),txt,font=L.font(size,w),fill=col,anchor="mm")
+def ct(d,cx,y,txt,size,col,w=800):
+    _TEXTLOG.append((txt,cx,y,size,col,w))
+    if not _PLATE: d.text((cx,y),txt,font=L.font(size,w),fill=col,anchor="mm")
 def measure(txt,fnt): return L.measure(txt,fnt)
 
 def wrap(d,cx,y,txt,size,col,maxw,lh,w=600):
@@ -227,7 +229,8 @@ def grand_tirage_pill(img, cx, cy):
 def fit_ct(d,cx,y,txt,maxsize,col,maxw,w=800):
     sz=maxsize
     while sz>48 and L.measure(txt,L.font(sz,w))[0]>maxw: sz-=4
-    d.text((cx,y),txt,font=L.font(sz,w),fill=col,anchor="mm")
+    _TEXTLOG.append((txt,cx,y,sz,col,w))
+    if not _PLATE: d.text((cx,y),txt,font=L.font(sz,w),fill=col,anchor="mm")
 
 def qr_sobre(img, qr_path, cx, cy, qsz):
     halo=Image.new("RGBA",(qsz*2,qsz*2),(0,0,0,0))
@@ -240,6 +243,8 @@ def qr_sobre(img, qr_path, cx, cy, qsz):
     card.paste(qr,(pad,pad)); img.alpha_composite(card,(int(cx-cw/2),int(cy-cw/2)))
 
 def a4(slug, commerce, lot_title, fname):
+    global _TEXTLOG
+    _TEXTLOG=[]
     img=make_bg(); d=ImageDraw.Draw(img,"RGBA")
     L.put_logo(img, W/2, H*0.072, 0.96)
     MAXW=int(W*0.90)
@@ -267,7 +272,8 @@ def a4(slug, commerce, lot_title, fname):
     d.text((x0+L.measure("Flash ",bf)[0],H*0.900),"le QR",font=bf,fill=WHITE,anchor="lm")
     ct(d, W/2, H*0.946, "Grand tirage à la clôture du festival", 50, (214,220,238), 700)
     ct(d, W/2, H*0.972, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
-    p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
+    pref="plate_" if _PLATE else ""
+    p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
 PARTNERS = [
     ("bergerie",       "Domaine de la Bergerie",  "1 nuit offerte au camping",      "nds_a4_bergerie"),

@@ -10,6 +10,7 @@ W = H = 3500  # ~127 DPI a 70cm
 OUT = "/home/claude/vid/forex"; os.makedirs(OUT, exist_ok=True)
 
 BG=(9,16,32); AMBER=(244,181,68); TEAL=(32,224,196); WHITE=(255,255,255); INK=(22,16,40); MUTE=(196,204,230)
+_PLATE=False; _TEXTLOG=[]
 
 def _radial(arr,cx,cy,rad,col,strength):
     yy,xx=np.ogrid[0:H,0:W]
@@ -41,7 +42,9 @@ def make_bg():
     return _BG[0].copy()
 
 def k(x): return int(x/1080*W)
-def ct(img,cx,cy,txt,size,col,w=800): L.ctext(img,cx,cy,txt,L.font(size,w),col)
+def ct(img,cx,cy,txt,size,col,w=800):
+    _TEXTLOG.append((txt,cx,cy,size,col,w))
+    if not _PLATE: L.ctext(img,cx,cy,txt,L.font(size,w),col)
 
 def qr_card(img, qr_path, cx, cy, qsz):
     qr=Image.open(qr_path).convert("RGB").resize((qsz,qsz),Image.NEAREST)
@@ -101,6 +104,8 @@ def sponsor_strip(img, cy):
             img.alpha_composite(ph_img,(int(ccx-pw/2),int(ccy-ph/2)))
 
 def forex(station_id, station_label, fname):
+    global _TEXTLOG
+    _TEXTLOG=[]
     img=make_bg(); d=ImageDraw.Draw(img)
     # logo (contient deja dates+Vence) avec degagement
     L.put_logo(img, W/2, H*0.092, 0.28*W/1080)
@@ -117,7 +122,8 @@ def forex(station_id, station_label, fname):
     qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.516, k(338))
     # bandeau sponsors (6 emplacements)
     sponsor_strip(img, H*0.792)
-    p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
+    pref="plate_" if _PLATE else ""
+    p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
 
 JOBS = [
     ("ev-nds-caisse-1", "Caisse 1", "forex_70x70_caisse-1"),
