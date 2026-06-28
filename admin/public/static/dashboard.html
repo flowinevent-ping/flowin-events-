@@ -4107,13 +4107,27 @@ function renderNdsMedia(){
   var a4='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">';
   nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); a4+='<div style="text-align:center"><img src="'+cb+'/nds/visuels/nds_a4_'+s+'.png'+VER+'" style="width:100%;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin:6px 0 4px;font-weight:700">'+esc(p.nom)+'</div>'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'</div>'; });
   a4+='</div>'; h+=card('📄 Affiches A4 ('+nds.length+') — version à jour',a4);
-  var vd='<div>';
-  vd+=vid(cb+'/nds/visuels/nds-spot-nds2026-16x9.mp4'+VER,'Spot NDS 2026 (16×9)',false);
-  vd+=vid(cb+'/nds/kit-digital/nds/nds-insta-9x16.mp4'+VER,'Insta (9×16)',true);
-  vd+=vid(cb+'/nds/kit-digital/nds/nds-fb-16x9.mp4'+VER,'Facebook (16×9)',false);
-  vd+=vid(cb+'/nds/kit-digital/nds/nds-ecrans-9x16.mp4'+VER,'Écrans festival (9×16)',true);
-  vd+=vid(cb+'/nds/kit-digital/nds/nds-partenaire-16x9.mp4'+VER,'Prospection partenaire (16×9)',false);
-  vd+='</div>'; h+=card('🎬 Vidéos NDS (prévisualisation)',vd);
+  function vrow(items){ var s='<div>'; items.forEach(function(it){ s+=vid(cb+it[0]+VER,it[1],it[2]); }); return s+'</div>'; }
+  h+=card('🎬 Promo & écrans festival',vrow([
+    ['/nds/visuels/nds-ecrans-kinetic40-9x16.mp4','Écran festival kinétique 40s (9×16)',true],
+    ['/nds/visuels/nds-spot-nds2026-16x9.mp4','Spot NDS 2026 (16×9)',false]
+  ]));
+  h+=card('🤝 Présentation partenaires',vrow([
+    ['/nds/visuels/nds-partenaire-video-16x9.mp4','Présentation partenaire (16×9)',false],
+    ['/nds/visuels/nds-presentation-kinetic40-16x9.mp4','Présentation kinétique 40s (16×9)',false],
+    ['/nds/visuels/nds-pro-out-70s-16x9.mp4','Présentation pro 70s (16×9)',false],
+    ['/nds/visuels/nds-pro-out-76s-16x9.mp4','Présentation pro 76s (16×9)',false]
+  ]));
+  h+=card('📱 Réseaux NDS — lancement (Insta / FB)',vrow([
+    ['/nds/visuels/nds-social-festival-digital-9x16.mp4','Réseaux festival (9×16)',true],
+    ['/nds/visuels/nds-social-festival-digital-16x9.mp4','Réseaux festival (16×9)',false],
+    ['/nds/visuels/nds-social-kinetic40-1x1.mp4','Réseaux kinétique (1×1)',false],
+    ['/nds/kit-digital/nds/nds-insta-9x16.mp4','Insta kit (9×16)',true],
+    ['/nds/kit-digital/nds/nds-fb-16x9.mp4','Facebook kit (16×9)',false]
+  ]));
+  h+=card('🎮 Présentation du jeu',vrow([
+    ['/nds/visuels/nds-jeu-video-16x9.mp4','Présentation du jeu (16×9)',false]
+  ]));
   var fx='<div class="text-xs" style="line-height:2">';
   ['caisse-1','caisse-2','caisse-3','bar-1','bar-2'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
   fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
