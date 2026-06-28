@@ -106,7 +106,7 @@ def station_lockup(img, slug, cx, cy):
     t1="STATION"; t2="JEUX"; f=L.font(100,800)
     w1=L.measure(t1,f)[0]; w2=L.measure(t2,f)[0]; gap_tt=36
     txt_w=w1+gap_tt+w2
-    box=330; gap=72
+    box=360; gap=72
     total=txt_w+gap+box
     x=cx-total/2
     # texte (STATION blanc + JEUX teal)
@@ -119,7 +119,7 @@ def station_lockup(img, slug, cx, cy):
     lx=x+txt_w+gap
     p=f"{LOGODIR}/{slug}.png"
     if os.path.exists(p):
-        card=L.logo_card(p, box, box, pad_ratio=0.12, radius_ratio=0.20)
+        card=L.logo_card(p, box, box, pad_ratio=0.05, radius_ratio=0.18)
         img.alpha_composite(card,(int(lx),int(cy-box/2)))
 
 # ---------- gros visuels gains ----------
@@ -291,20 +291,23 @@ def hero_voucher(img,cx,cy,w):
     img.alpha_composite(card,(int(cx-card.width/2),int(cy-card.height/2)))
 
 def cta_stations(img,cx,cy):
-    line1="PLUS TU JOUES, PLUS TU GAGNES"; line2="Découvre les autres stations du festival"
-    w=int(W*0.86); h=210
+    line1="+ VOUS JOUEZ"; line2="+ VOUS AUGMENTEZ VOS CHANCES DE GAGNER"; line3="Découvrez les autres stations du festival"
+    w=int(W*0.88); h=256
     glow=Image.new("RGBA",(w+180,h+180),(0,0,0,0))
-    ImageDraw.Draw(glow).rounded_rectangle([90,90,90+w,90+h],radius=40,fill=(244,181,68,48))
-    glow=glow.filter(ImageFilter.GaussianBlur(54)); img.alpha_composite(glow,(int(cx-(w+180)/2),int(cy-(h+180)/2)))
+    ImageDraw.Draw(glow).rounded_rectangle([90,90,90+w,90+h],radius=42,fill=(244,181,68,52))
+    glow=glow.filter(ImageFilter.GaussianBlur(56)); img.alpha_composite(glow,(int(cx-(w+180)/2),int(cy-(h+180)/2)))
     box=Image.new("RGBA",(w,h),(0,0,0,0)); bd=ImageDraw.Draw(box)
-    bd.rounded_rectangle([0,0,w-1,h-1],radius=36,fill=(255,255,255,22),outline=AMBER+(220,),width=4)
+    bd.rounded_rectangle([0,0,w-1,h-1],radius=38,fill=(255,255,255,24),outline=AMBER+(230,),width=5)
     img.alpha_composite(box,(int(cx-w/2),int(cy-h/2)))
     d=ImageDraw.Draw(img,"RGBA")
-    f1sz=fitsz(line1,66,int(w*0.90),800)
-    _TEXTLOG.append((line1,cx,cy-h*0.20,f1sz,AMBER,800))
-    if not _PLATE: d.text((cx,cy-h*0.20),line1,font=L.font(f1sz,800),fill=AMBER+(255,),anchor="mm")
-    _TEXTLOG.append((line2,cx,cy+h*0.20,46,WHITE,600))
-    if not _PLATE: d.text((cx,cy+h*0.20),line2,font=L.font(46,600),fill=WHITE+(255,),anchor="mm")
+    s1=fitsz(line1,86,int(w*0.86),800)
+    _TEXTLOG.append((line1,cx,cy-h*0.295,s1,AMBER,800))
+    if not _PLATE: d.text((cx,cy-h*0.295),line1,font=L.font(s1,800),fill=AMBER+(255,),anchor="mm")
+    s2=fitsz(line2,58,int(w*0.92),800)
+    _TEXTLOG.append((line2,cx,cy-h*0.02,s2,WHITE,800))
+    if not _PLATE: d.text((cx,cy-h*0.02),line2,font=L.font(s2,800),fill=WHITE+(255,),anchor="mm")
+    _TEXTLOG.append((line3,cx,cy+h*0.30,42,TEAL,600))
+    if not _PLATE: d.text((cx,cy+h*0.30),line3,font=L.font(42,600),fill=TEAL+(255,),anchor="mm")
 
 def footer_contact(img,cx,y):
     d=ImageDraw.Draw(img,"RGBA")
@@ -317,43 +320,39 @@ def a4(slug, commerce, lot_title, fname):
     _TEXTLOG=[]
     img=make_bg()
     if not _PLATE:
-        glow_blob(img, W*0.50, H*0.135, W*0.46, (212,40,150), 60)
-        glow_blob(img, W*0.30, H*0.115, W*0.30, (120,46,196), 52)
+        glow_blob(img, W*0.50, H*0.150, W*0.46, (212,40,150), 60)
+        glow_blob(img, W*0.30, H*0.130, W*0.30, (120,46,196), 52)
     d=ImageDraw.Draw(img,"RGBA")
     MAXW=int(W*0.90)
 
-    # 1) LOGO NDS
-    L.put_logo(img, W/2, H*0.047, 0.76)
+    # 1) TITRE HAUT "LE GRAND JEU DES" (charte, impactant) — a la place du logo
+    tracked(d, W/2, H*0.064, "LE GRAND JEU DES", 92, TEAL, 800, 18)
 
-    # 2) TITRE "LE GRAND JEU DES NUITS DU SUD"
-    tracked(d, W/2, H*0.104, "LE GRAND JEU DES", 64, TEAL, 700, 14)
-    fit_ct(d, W/2, H*0.142, "NUITS DU SUD", 158, AMBER, MAXW, 800)
-    hrule(d, W/2, H*0.176, 150, MAGENTA, 7)
+    # 2) LOGO NUITS DU SUD en HERO (agrandi) — remplace le texte "NUITS DU SUD"
+    L.put_logo(img, W/2, H*0.162, 1.02)
+    hrule(d, W/2, H*0.244, 160, MAGENTA, 7)
 
     # 3) FLASH ET JOUE (Anton, banniere amber)
-    flash_banner(img, W/2, H*0.222, "FLASH ET JOUE")
+    flash_banner(img, W/2, H*0.292, "FLASH ET JOUE")
 
-    # 4) STATION JEUX + logo partenaire (logo agrandi, SANS nom commerce = redondant)
-    station_lockup(img, slug, W/2, H*0.300)
+    # 4) STATION JEUX + logo partenaire (logo agrandi, SANS nom commerce)
+    station_lockup(img, slug, W/2, H*0.372)
 
-    # 5) GAINS "wow" (le gain = la forme, pas de vignette plate)
-    hw=int(W*0.335); cxL=W*0.295; cxR=W*0.705; gcy=H*0.452
+    # 5) GAINS "wow" (billets reduits, SANS sous-texte)
+    hw=int(W*0.295); cxL=W*0.300; cxR=W*0.700; gcy=H*0.500
     hero_concert(img, cxL, gcy, hw)
     hero_voucher(img, cxR, gcy, hw)
-    lblY=H*0.545
-    ct(d, cxL, lblY,        "PLACES DE CONCERT", 58, WHITE, 800)
-    ct(d, cxL, lblY+H*0.026,"Têtes d'affiche du festival", 38, MUTE, 600)
-    sub = lot_title if lot_title else "Chez nos commerces partenaires"
-    ct(d, cxR, lblY,        "BONS D'ACHAT", 58, WHITE, 800)
-    fit_ct(d, cxR, lblY+H*0.026, sub, 38, MUTE, int(W*0.40), 600, minsz=26)
+    lblY=H*0.582
+    ct(d, cxL, lblY, "PLACES DE CONCERT", 58, WHITE, 800)
+    ct(d, cxR, lblY, "BONS D'ACHAT", 58, WHITE, 800)
 
-    # 6) QR (sous les gains) — plus de "FLASH JOUE GAGNE" (redondant)
-    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.700, 520)
+    # 6) QR (sous les gains)
+    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.712, 470)
 
-    # 7) CTA mise en EVIDENCE : cumul + autres stations
-    cta_stations(img, W/2, H*0.842)
+    # 7) CTA mis en EVIDENCE : + vous jouez + de chances
+    cta_stations(img, W/2, H*0.838)
 
-    # 8) GRAND TIRAGE (agrandi) + contact en bas sur toute la ligne
+    # 8) GRAND TIRAGE (agrandi) + contact en bas pleine ligne
     grand_tirage_pill(img, W/2, H*0.918)
     tracked(d, W/2, H*0.952, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
     footer_contact(img, W/2, H*0.966)
