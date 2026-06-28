@@ -154,6 +154,9 @@ export const NDS_CSS = `
   @keyframes pulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.55),0 10px 22px rgba(5,150,105,.38)}50%{box-shadow:0 0 0 11px rgba(16,185,129,0),0 12px 26px rgba(5,150,105,.48)}}
   .ticketfly{position:fixed;left:50%;top:46%;transform:translateX(-50%);z-index:4000;pointer-events:none;font-family:'Manrope';font-weight:800;font-size:30px;color:#fff;background:linear-gradient(90deg,#0d9488,#10b981);padding:12px 22px;border-radius:50px;box-shadow:0 12px 30px rgba(16,185,129,.5);animation:flyUp 1.5s cubic-bezier(.2,.7,.3,1) forwards}
   @keyframes flyUp{0%{opacity:0;transform:translateX(-50%) translateY(30px) scale(.5)}16%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.18)}30%{transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-230px) scale(1)}}
+  .confetti-wrap{position:fixed;inset:0;z-index:3500;pointer-events:none;overflow:hidden}
+  .confetti-pc{position:absolute;top:-16px;width:10px;height:15px;border-radius:2px;opacity:.95;animation:confettiFall 1.9s linear forwards}
+  @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(560deg);opacity:.85}}
   .res-eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9a8fa6;margin:6px 0 9px}
   .nextcard{background:#faf7fc;border:1px solid #f0e6f5;border-radius:14px;padding:4px 13px;margin-bottom:8px}
   .nextline{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #f0e6f5}

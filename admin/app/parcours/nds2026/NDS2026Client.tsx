@@ -110,6 +110,8 @@ type Commerce = {
   promo_text: string | null; tickets_par_scan: number | null; ordre_carte: number | null
 }
 
+const CONFETTI_PIECES = Array.from({ length: 20 }).map((_, i) => ({ l: (i * 5.3 + (i % 4) * 2) % 100, d: (i % 7) * 0.09, c: ['#E0218A', '#22D3C6', '#F5B544', '#7C2D92', '#10b981'][i % 5] }))
+
 export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: Props) {
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
   const nom = ev?.nom ?? 'Nuits du Sud'
@@ -594,6 +596,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   return (
     <div className="ndsbody">
       {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;🎟️</div>}
+      {screen === 'resultats' && quizPerfect && (
+        <div className="confetti-wrap" aria-hidden="true">
+          {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
+        </div>
+      )}
       <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
         html,body{height:auto !important;min-height:100dvh !important;max-height:none !important;overflow-x:hidden !important;overflow-y:auto !important;display:block !important;padding:0 !important;background:#160820}
         .ndsbody{width:100%;min-height:100vh;min-height:100dvh;display:block;background:#fff;font-family:'Manrope',system-ui,sans-serif;color:#1a1226;padding:0}
