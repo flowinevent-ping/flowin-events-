@@ -320,33 +320,33 @@ def a4(slug, commerce, lot_title, fname):
     tracked(d, W/2, H*0.064, "LE GRAND JEU DES", 92, TEAL, 800, 18)
 
     # 2) LOGO NUITS DU SUD en HERO (agrandi) — remplace le texte "NUITS DU SUD"
-    L.put_logo(img, W/2, H*0.162, 1.02)
-    hrule(d, W/2, H*0.244, 160, MAGENTA, 7)
+    L.put_logo(img, W/2, H*0.150, 1.0)
+    hrule(d, W/2, H*0.226, 160, MAGENTA, 7)
 
     # 3) FLASH ET JOUE (Anton, banniere amber)
-    flash_banner(img, W/2, H*0.292, "FLASH ET JOUE")
+    flash_banner(img, W/2, H*0.270, "FLASH ET JOUE")
 
     # 4) STATION JEUX + logo partenaire (logo agrandi, SANS nom commerce)
-    station_lockup(img, slug, W/2, H*0.372)
+    station_lockup(img, slug, W/2, H*0.360)
 
     # 5) GAINS "wow" (billets reduits, SANS sous-texte)
-    hw=int(W*0.295); cxL=W*0.300; cxR=W*0.700; gcy=H*0.500
+    hw=int(W*0.255); cxL=W*0.300; cxR=W*0.700; gcy=H*0.470
     hero_concert(img, cxL, gcy, hw)
     hero_voucher(img, cxR, gcy, hw)
-    lblY=H*0.582
+    lblY=H*0.548
     ct(d, cxL, lblY, "PLACES DE CONCERT", 58, WHITE, 800)
     ct(d, cxR, lblY, "BONS D'ACHAT", 58, WHITE, 800)
 
     # 6) QR (sous les gains)
-    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.700, 460)
+    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.668, 440)
 
     # 7) CTA (sans encadre/fond, typo Anton) — degage du QR
-    cta_stations(img, W/2, H*0.835)
+    cta_stations(img, W/2, H*0.800)
 
     # 8) GRAND TIRAGE (agrandi) + contact en bas pleine ligne
-    grand_tirage_pill(img, W/2, H*0.908)
-    tracked(d, W/2, H*0.944, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
-    footer_contact(img, W/2, H*0.958)
+    grand_tirage_pill(img, W/2, H*0.878)
+    tracked(d, W/2, H*0.916, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
+    footer_contact(img, W/2, H*0.945)
 
     pref="plate_" if _PLATE else ""
     p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
