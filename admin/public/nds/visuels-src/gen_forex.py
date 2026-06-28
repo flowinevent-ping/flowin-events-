@@ -68,24 +68,20 @@ def wrap_ct(img,cx,cy,txt,size,col,maxw,lh,w=600):
 
 def forex(station_id, station_label, fname):
     img=make_bg(); d=ImageDraw.Draw(img)
-    # logo (contient deja "9->18 Juillet 2026 . Vence") avec degagement
+    # logo (contient deja dates+Vence) avec degagement
     L.put_logo(img, W/2, H*0.098, 0.29*W/1080)
+    # CAISSE N -> chip en HAUT A DROITE
+    cfnt=L.font(k(48),800); ctw=L.measure(station_label.upper(),cfnt)[0]; cpadx=k(50)
+    chipw=ctw+cpadx*2
+    L.chip(img, W-k(70)-chipw/2, H*0.050+k(38), station_label.upper(), cfnt, fill=L.ORANGE, fg=WHITE, padx=cpadx, pady=k(22))
     # titre du panneau
-    ct(img, W/2, H*0.208, "STATION JEUX", k(50), TEAL, 800)
+    ct(img, W/2, H*0.214, "STATION JEUX", k(50), TEAL, 800)
     # hero action
-    ct(img, W/2, H*0.276, "FLASH · JOUE · GAGNE", k(82), AMBER, 800)
-    # chip station (caisse N)
-    L.chip(img, W/2, H*0.356, station_label.upper(), L.font(k(54),800), fill=L.ORANGE, fg=WHITE, padx=k(60), pady=k(24))
-    # QR central (la star)
-    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.580, k(380))
-    bf=L.font(k(58),800)
-    fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2; ylab=H*0.800
-    d.text((x0,ylab),"Flash ",font=bf,fill=AMBER,anchor="lm")
-    d.text((x0+L.measure("Flash ",bf)[0],ylab),"le QR",font=bf,fill=WHITE,anchor="lm")
+    ct(img, W/2, H*0.284, "FLASH · JOUE · GAGNE", k(82), AMBER, 800)
+    # QR central (la star) — plus de place sans 'Flash le QR' ni contact
+    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.560, k(410))
     # 1 seule ligne benefice
-    wrap_ct(img, W/2, H*0.876, "Gagne des places de concert + le grand tirage des bons d'achat", k(40), WHITE, int(W*0.80), k(56), 600)
-    # contact discret
-    ct(img, W/2, H*0.962, L.CONTACT, k(30), (180,188,216), 600)
+    wrap_ct(img, W/2, H*0.836, "Gagne des places de concert + le grand tirage des bons d'achat", k(42), WHITE, int(W*0.82), k(58), 700)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
 
 JOBS = [

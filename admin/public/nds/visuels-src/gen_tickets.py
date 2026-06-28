@@ -86,8 +86,14 @@ def ticket(lot_title, partner, valeur_txt, serial):
     lw=L.measure("Tiré le :",fnt)[0]; d.line([(fx+lw+24, fy+182),(int(TW*0.46), fy+182)], fill=(60,66,90,255), width=3)
     d.text((int(TW*0.52), fy+160), "Émargement :", font=fnt, fill=lcol, anchor="lm")
     lw2=L.measure("Émargement :",fnt)[0]; d.line([(int(TW*0.52)+lw2+24, fy+182),(TW-80, fy+182)], fill=(60,66,90,255), width=3)
-    # mention bas
-    d.text((TW/2, TH-26), "Nuits du Sud · 9 → 18 juillet 2026 · Vence · à présenter chez le commerce", font=L.font(26,600), fill=MUTE+(255,), anchor="mm")
+    # mention bas — co-brand Nuits du Sud x Flowin (deux tons, centre)
+    fA=L.font(30,800)
+    seg=[("Nuits du Sud",(90,96,120)),("  ×  ",(150,156,176)),("Flowin",L.ORANGE)]
+    totw=sum(L.measure(txt,fA)[0] for txt,_ in seg)
+    x=TW/2-totw/2; yA=TH-58
+    for txt,col in seg:
+        d.text((x,yA),txt,font=fA,fill=col+(255,),anchor="lm"); x+=L.measure(txt,fA)[0]
+    d.text((TW/2, TH-24), "9 → 18 juillet 2026 · Vence · à présenter chez le commerce", font=L.font(24,600), fill=MUTE+(255,), anchor="mm")
     # contour fin
     ImageDraw.Draw(base).rounded_rectangle([1,1,TW-2,TH-2],radius=30,outline=(40,46,70,120),width=2)
     return base
