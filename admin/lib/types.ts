@@ -93,6 +93,17 @@ export interface FlowinLot {
   description: string | null
 }
 
+export interface PartenaireLot {
+  id?: string
+  nom?: string
+  titre?: string
+  valeur?: number
+  gagnants?: number
+  quantite?: number
+  description?: string
+  valeur_euros?: number
+}
+
 export interface FlowinPartenaire {
   id: string
   nom: string
@@ -104,6 +115,7 @@ export interface FlowinPartenaire {
   instagram: string | null
   facebook: string | null
   image_url: string | null
+  lots: PartenaireLot[] | null
   actif: boolean
   visible: boolean
   en_avant: boolean

@@ -197,10 +197,17 @@ export const NDS_CSS = `
   .pt-banner{display:flex;gap:9px;align-items:flex-start;background:#FBF1E6;border:1px solid #f3e2cb;color:#8a5a1e;border-radius:13px;padding:11px 13px;font-size:12.5px;font-weight:600;margin-bottom:16px}
   .pt-banner .ic{width:16px;height:16px;flex-shrink:0;margin-top:1px}
   .pt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .pt-card{background:#fff;border:1.5px dashed #e2d5ea;border-radius:18px;padding:20px 14px;text-align:center;cursor:pointer;color:var(--ink)}
-  .pt-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#f3e9f7,#fbe9f4);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--magenta)}
-  .pt-logo .ic{width:26px;height:26px}
+  .pt-card{background:transparent;border:none;border-radius:0;padding:10px 6px;text-align:center;cursor:pointer;color:var(--ink)}
+  .pt-logo{width:96px;height:96px;background:transparent;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--magenta);overflow:hidden}
+  .pt-logo .ic{width:34px;height:34px}
   .pt-nm{font-size:13.5px;font-weight:800;color:#7a708a}
+  .pt-lots{margin:12px 0 4px}
+  .pt-lots-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:#7C2D92;margin-bottom:9px}
+  .pt-lots-h .ic{width:16px;height:16px}
+  .pt-lot{background:#faf7fd;border:1px solid #ece2f3;border-radius:13px;padding:10px 13px;margin-bottom:8px}
+  .pt-lot-t{font-weight:800;font-size:14.5px;color:#1a1226}
+  .pt-lot-q{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:800;color:#0e7c6e;background:rgba(32,224,196,.16);border-radius:100px;padding:2px 9px}
+  .pt-lot-d{font-size:12.5px;color:#6b6076;margin-top:5px;line-height:1.45}
 
   .pt-dim{position:absolute;inset:0;z-index:1500;background:rgba(28,16,36,.5);display:none}
   .pt-dim.on{display:block}

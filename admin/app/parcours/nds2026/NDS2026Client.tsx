@@ -1050,13 +1050,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {screen === 'partenaires' && (
           <section className="scr" style={{ background: '#fff' }}>
             <div className="pad padnav">
-              <div className="pt-hero">Ils font vivre le festival</div>
-              <div className="pt-sub">Les partenaires des Nuits du Sud. Touche un logo pour leurs offres et leurs réseaux.</div>
+              <div className="pt-hero">Nos partenaires jeux</div>
+              <div className="pt-sub">Les partenaires jeux des Nuits du Sud. Touche un logo pour leurs lots et leurs réseaux.</div>
               {partenaires.length === 0 && <div className="pt-banner"><svg className="ic"><use href="#i-store" /></svg><div>Espace partenaires — la liste réelle s&apos;affichera ici (logos, promo, réseaux).</div></div>}
               <div className="pt-grid">
                 {partenaires.map((p, i) => (
                   <div className="pt-card" key={p.id} onClick={() => setSheetPart(i)}>
-                    <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover' }} /></div>
+                    <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
                     <div className="pt-nm">{p.nom}</div>
                   </div>
                 ))}
@@ -1067,10 +1067,25 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-dim2" onClick={() => setSheetPart(null)} />
                 <div className="pt-sheet2">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 6 }}>
-                    <div className="pt-logo" style={{ margin: 0 }}><PartnerLogo src={partenaires[sheetPart].image_url} alt="" fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: 56, height: 56, borderRadius: 16, objectFit: 'cover' }} /></div>
+                    <div className="pt-logo" style={{ margin: 0 }}><PartnerLogo src={partenaires[sheetPart].image_url} alt="" fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
                     <div><div style={{ fontWeight: 800, fontSize: 19 }}>{partenaires[sheetPart].nom}</div>{partenaires[sheetPart].promo_text && <div style={{ fontSize: 13, color: '#7a708a' }}>{partenaires[sheetPart].promo_text}</div>}</div>
                   </div>
                   {partenaires[sheetPart].description && <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, margin: '8px 0' }}>{partenaires[sheetPart].description}</div>}
+                  {Array.isArray(partenaires[sheetPart].lots) && partenaires[sheetPart].lots!.length > 0 && (
+                    <div className="pt-lots">
+                      <div className="pt-lots-h"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-gift" /></svg> Lots à gagner</div>
+                      {partenaires[sheetPart].lots!.map((lot, li) => {
+                        const n = lot.gagnants ?? lot.quantite ?? 0
+                        return (
+                          <div className="pt-lot" key={lot.id || li}>
+                            <div className="pt-lot-t">{lot.titre || lot.nom}</div>
+                            {n > 0 ? <div className="pt-lot-q">{n} gagnant{n > 1 ? 's' : ''}</div> : null}
+                            {lot.description ? <div className="pt-lot-d">{lot.description}</div> : null}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                   {(partenaires[sheetPart].site_web || partenaires[sheetPart].url) && <a className="sh-row" href={partenaires[sheetPart].site_web || partenaires[sheetPart].url || '#'} target="_blank" rel="noopener noreferrer"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-store" /></svg> Site web</a>}
                   {partenaires[sheetPart].instagram && <a className="sh-row" href={partenaires[sheetPart].instagram!} target="_blank" rel="noopener noreferrer"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-insta" /></svg> Instagram</a>}
                   {partenaires[sheetPart].facebook && <a className="sh-row" href={partenaires[sheetPart].facebook!} target="_blank" rel="noopener noreferrer"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-fb" /></svg> Facebook</a>}

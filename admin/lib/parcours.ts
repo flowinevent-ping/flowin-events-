@@ -52,7 +52,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   if (seId) {
     const { data } = await supabase
       .from('partenaires')
-      .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,actif')
+      .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif')
       .eq('super_event_id', seId)
     partenaires = ((data ?? []) as FlowinPartenaire[]).filter(p => p.actif !== false)
   } else {
@@ -60,7 +60,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
     if (partIds.length) {
       const { data } = await supabase
         .from('partenaires')
-        .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,actif')
+        .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif')
         .in('id', partIds)
       partenaires = ((data ?? []) as FlowinPartenaire[]).filter(p => p.actif !== false)
     }
