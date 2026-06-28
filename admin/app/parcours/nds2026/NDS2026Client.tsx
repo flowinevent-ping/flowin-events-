@@ -353,12 +353,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       mapObjRef.current = map
       LL.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
-      // Stations : vert = validé (joué) · jaune clignotant = à jouer · ★ = station courante
+      // Stations : jaune = validé (joué) · vert clignotant = à jouer · ★ = station courante
       if (mapView === 'stations' || placeMode) STATIONS.forEach(st => {
         const cur = st.id === ndsFamily(evId)
         let done = false
         try { done = ndsPlayedToday(st.id) } catch {}
-        const bg = done ? '#16a34a' : '#F5B544'
+        const bg = done ? '#F5B544' : '#16a34a'
         const cls = done ? '' : 'nds-mk-pulse'
         const mark = cur ? '★' : (done ? '✓' : '')
         const html = `<div class="${cls}" style="width:24px;height:24px;border-radius:50%;background:${bg};border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px">${mark}</div>`
@@ -473,7 +473,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
   const quizPerfect = questions.length === 0 || score >= questions.length
-  useEffect(() => { if (screen === 'final' && (quizPerfect || bonusDone)) setFly(f => f + 1) }, [screen, quizPerfect, bonusDone])
+  useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) setFly(f => f + 1) }, [screen, quizPerfect, bonusDone])
   useEffect(() => { if (screen === 'tickets' || screen === 'final' || (screen === 'onboard' && saved)) refreshServerTickets() }, [screen, saved, refreshServerTickets])
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
@@ -611,8 +611,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .footdock .nav{position:static}
         .ndsbody .logoband-dock{margin:0;border-radius:0;border-left:0;border-right:0;border-bottom:0;border-top:1px solid #ece7f2;background:rgba(255,255,255,.97)}
         .ndsbody .map-fake{flex:1;width:100%;min-height:340px;background:linear-gradient(160deg,#241233,#3a1450);position:relative}
-        @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(245,181,68,.65)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(245,181,68,0)}}
+        @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(22,163,74,.7)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(22,163,74,0)}}
         .nds-mk-pulse{animation:ndsMk 1.2s infinite}
+        .ndsbody .stdot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+        .ndsbody .stdot-done{background:#F5B544}
+        .ndsbody .stdot-todo{background:#16a34a;animation:ndsMk 1.2s infinite}
         .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
         .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:14px;z-index:600;display:flex;flex-direction:column;align-items:stretch;gap:10px}
         .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
@@ -719,12 +722,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                           <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-layers" /></svg>
                           Chaque station = 1 ticket de plus
                         </div>
-                        {STATIONS.filter(s => !ndsPlayedToday(s.id)).map(s => (
+                        {STATIONS.map(s => { const dn = ndsPlayedToday(s.id); return (
                           <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: '#52455e', padding: '5px 0' }}>
-                            <span style={{ width: 26, height: 26, borderRadius: 8, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 14, height: 14, color: '#fff' }}><use href={`#${s.icon}`} /></svg></span>
-                            <span><b>{s.nom}</b> — à jouer</span>
+                            <span className={dn ? 'stdot stdot-done' : 'stdot stdot-todo'} />
+                            <span><b>{s.nom}</b> — {dn ? 'validée ✓' : 'à jouer'}</span>
                           </div>
-                        ))}
+                        )})}
                       </div>
                       <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
                     </>
@@ -890,9 +893,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div style={{ fontSize: 13.5, color: '#52455e' }}>• Va dans les autres stations &nbsp;• Réponds aux questions bonus &nbsp;• Parraine tes amis</div>
                 </div>
               )}
-              {(form.email || recurrent?.email) && (
-                <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
-              )}
               <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? (quizPerfect || bonusDone ? 'Voir mon ticket →' : 'Continuer →') : (quizPerfect || bonusDone ? 'Valider et recevoir mon ticket →' : 'Continuer sans ticket →'))}</a>
             </div>
           </section>
@@ -934,9 +934,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               )}
               <div className="res-eyebrow">Joue les autres stations ce soir</div>
               <div className="nextcard">
-                {STATIONS.filter(s => s.id !== evId).map(s => (
-                  <div className="nextline" key={s.id}><span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div></div>
-                ))}
+                {STATIONS.filter(s => s.id !== evId).map(s => { const dn = ndsPlayedToday(s.id); return (
+                  <div className="nextline" key={s.id}><span className={`em${dn ? '' : ' nds-mk-pulse'}`} style={{ background: dn ? '#F5B544' : '#16a34a' }}><svg className="ic"><use href={`#${dn ? 'i-checkc' : s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{dn ? 'validée ✓' : s.ou}</div></div></div>
+                )})}
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
