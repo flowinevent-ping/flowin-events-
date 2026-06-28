@@ -1,48 +1,105 @@
 # -*- coding: utf-8 -*-
-import sys; sys.path.insert(0, "/home/claude/vid")
+# Forex 70x70 "STATION JEUX" — REFONTE charte CINEMATIQUE (faisceaux), declinaisons par station, QR de la station.
+# Wording Romain: FLASH · JOUE · GAGNE tes places · participe au grand tirage des bons d'achat chez nos partenaires.
+import sys, os, math; sys.path.insert(0, "/home/claude/vid")
+import numpy as np
 import nds_lib as L
-from PIL import Image, ImageDraw
-import os
+from PIL import Image, ImageDraw, ImageFilter
 
 W = H = 3500  # ~127 DPI a 70cm
 OUT = "/home/claude/vid/forex"; os.makedirs(OUT, exist_ok=True)
 
-def k(x): return int(x / 1080 * W)  # echelle depuis grille 1080
+BG=(9,16,32); AMBER=(244,181,68); TEAL=(32,224,196); WHITE=(255,255,255); INK=(22,16,40); MUTE=(196,204,230)
+
+def _radial(arr,cx,cy,rad,col,strength):
+    yy,xx=np.ogrid[0:H,0:W]
+    dd=np.sqrt((xx-cx)**2+(yy-cy)**2)/rad
+    g=np.clip(1-dd,0,1)**2*strength
+    arr+=np.stack([g*col[0],g*col[1],g*col[2]],-1)
+
+def _beam(arr,pts,col,strength,blur):
+    m=Image.new("L",(W,H),0); ImageDraw.Draw(m).polygon(pts,fill=255)
+    m=m.filter(ImageFilter.GaussianBlur(blur))
+    a=np.asarray(m,np.float32)/255.0*strength
+    arr+=np.stack([a*col[0],a*col[1],a*col[2]],-1)
+
+_BG=[None]
+def make_bg():
+    if _BG[0] is not None: return _BG[0].copy()
+    base=np.zeros((H,W,3),np.float32)
+    for i in range(3): base[:,:,i]=BG[i]
+    acc=np.zeros((H,W,3),np.float32)
+    _beam(acc,[(W*0.28,-180),(W*0.00,H*0.40),(W*0.24,H*0.40)],(170,50,104),1.05,200)
+    _beam(acc,[(W*0.54,-180),(W*0.26,H*0.38),(W*0.60,H*0.38)],(122,44,124),0.98,200)
+    _beam(acc,[(W*0.84,-180),(W*0.60,H*0.40),(W*1.06,H*0.32)],(184,46,118),1.10,196)
+    _radial(acc,W*0.62,H*0.08,W*0.44,(152,42,98),0.55)
+    _radial(acc,W*0.50,H*0.46,W*0.66,(46,62,122),0.42)
+    _radial(acc,W*0.16,H*0.66,W*0.58,(22,96,92),0.34)
+    _radial(acc,W*0.84,H*0.70,W*0.58,(80,52,28),0.22)
+    out=np.clip(base+acc,0,255).astype(np.uint8)
+    _BG[0]=Image.fromarray(out,"RGB").convert("RGBA")
+    return _BG[0].copy()
+
+def k(x): return int(x/1080*W)
+def ct(img,cx,cy,txt,size,col,w=800): L.ctext(img,cx,cy,txt,L.font(size,w),col)
+
+def qr_card(img, qr_path, cx, cy, qsz):
+    qr=Image.open(qr_path).convert("RGB").resize((qsz,qsz),Image.NEAREST)
+    pad=int(qsz*0.07); cw=qsz+pad*2
+    halo=Image.new("RGBA",(cw+200,cw+200),(0,0,0,0))
+    ImageDraw.Draw(halo).rounded_rectangle([100,100,100+cw,100+cw],radius=int(cw*0.09),fill=AMBER+(120,))
+    halo=halo.filter(ImageFilter.GaussianBlur(70))
+    img.alpha_composite(halo,(int(cx-(cw+200)/2),int(cy-(cw+200)/2)))
+    card=Image.new("RGBA",(cw,cw),(0,0,0,0))
+    ImageDraw.Draw(card).rounded_rectangle([0,0,cw-1,cw-1],radius=int(cw*0.06),fill=(255,255,255,255))
+    card.paste(qr,(pad,pad))
+    img.alpha_composite(card,(int(cx-cw/2),int(cy-cw/2)))
+
+def wrap_ct(img,cx,cy,txt,size,col,maxw,lh,w=600):
+    d=ImageDraw.Draw(img); fnt=L.font(size,w); words=txt.split(); lines=[]; cur=""
+    for word in words:
+        t=(cur+" "+word).strip()
+        if L.measure(t,fnt)[0]>maxw and cur: lines.append(cur); cur=word
+        else: cur=t
+    if cur: lines.append(cur)
+    yy=cy-(len(lines)-1)*lh/2
+    for ln in lines:
+        d.text((cx,yy),ln,font=fnt,fill=col,anchor="mm"); yy+=lh
 
 def forex(station_id, station_label, fname):
-    img = L.bg(W, H, glow_cy=0.30, glow_strength=1.05)
-    d = ImageDraw.Draw(img)
-    # logo haut
-    L.put_logo(img, W/2, H*0.062, 0.36 * W/1080)
-    # headline kinetique
-    L.ctext(img, W/2, H*0.150, "FLASH · JOUE · GAGNE", L.font(k(80), 800), L.WHITE)
-    # a gagner
-    L.ctext(img, W/2, H*0.210, "DES PLACES DE CONCERT", L.font(k(50), 800), L.TEAL)
-    L.ctext(img, W/2, H*0.248, "& des bons d'achat chez vos commerces", L.font(k(36), 600), (220, 224, 240))
-    # chip station (au-dessus du QR)
-    L.chip(img, W/2, H*0.308, station_label.upper(), L.font(k(48), 800), fill=L.ORANGE, padx=k(52), pady=k(20))
+    img=make_bg(); d=ImageDraw.Draw(img)
+    L.put_logo(img, W/2, H*0.058, 0.30*W/1080)
+    # eyebrow STATION JEUX
+    ct(img, W/2, H*0.126, "STATION JEUX", k(52), TEAL, 800)
+    # hero
+    ct(img, W/2, H*0.182, "FLASH · JOUE · GAGNE", k(76), AMBER, 800)
+    ct(img, W/2, H*0.230, "TES PLACES DE CONCERT", k(54), WHITE, 800)
+    # chip station (caisse N)
+    L.chip(img, W/2, H*0.292, station_label.upper(), L.font(k(50),800), fill=L.ORANGE, fg=WHITE, padx=k(56), pady=k(22))
     # QR central
-    qr = Image.open(f"/home/claude/vid/qr/{station_id}.png").convert("RGB")
-    L.put_qr(img, qr, W/2, H*0.555, k(400), border=k(30))
-    # instruction
-    L.ctext(img, W/2, H*0.820, "Scanne · joue le quiz · cumule tes points", L.font(k(44), 700), L.WHITE)
-    L.ctext(img, W/2, H*0.862, "Gagne un bon d'achat + le grand tirage", L.font(k(38), 600), (220, 224, 240))
+    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.508, k(360))
+    bf=L.font(k(54),800)
+    fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2; ylab=H*0.728
+    d.text((x0,ylab),"Flash ",font=bf,fill=AMBER,anchor="lm")
+    d.text((x0+L.measure("Flash ",bf)[0],ylab),"le QR",font=bf,fill=WHITE,anchor="lm")
+    ct(img, W/2, H*0.772, "Scanne · joue le quiz · cumule tes points", k(40), WHITE, 700)
+    # grand tirage bons d'achat partenaires
+    wrap_ct(img, W/2, H*0.838, "Participe au grand tirage des bons d'achat chez nos commerces partenaires", k(40), MUTE, int(W*0.82), k(54), 600)
     # signature + contact
-    L.ctext(img, W/2, H*0.922, L.SIGN, L.font(k(44), 800), L.TEAL)
-    L.ctext(img, W/2, H*0.960, L.CONTACT, L.font(k(32), 600), (190, 196, 224))
-    out_png = f"{OUT}/{fname}.png"
-    img.convert("RGB").save(out_png, quality=95)
-    return out_png
+    ct(img, W/2, H*0.912, L.SIGN, k(44), TEAL, 800)
+    ct(img, W/2, H*0.948, "Nuits du Sud · 9 → 18 juillet 2026 · Vence", k(32), WHITE, 700)
+    ct(img, W/2, H*0.976, L.CONTACT, k(30), (190,196,224), 600)
+    p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
 
 JOBS = [
-    ("ev-nds-ecrans",   "Festival",  "forex_70x70_festival"),
-    ("ev-nds-caisse-1", "Caisse 1",  "forex_70x70_caisse-1"),
-    ("ev-nds-caisse-2", "Caisse 2",  "forex_70x70_caisse-2"),
-    ("ev-nds-caisse-3", "Caisse 3",  "forex_70x70_caisse-3"),
-    ("ev-nds-bar-1",    "Bar 1",     "forex_70x70_bar-1"),
-    ("ev-nds-bar-2",    "Bar 2",     "forex_70x70_bar-2"),
+    ("ev-nds-caisse-1", "Caisse 1", "forex_70x70_caisse-1"),
+    ("ev-nds-caisse-2", "Caisse 2", "forex_70x70_caisse-2"),
+    ("ev-nds-caisse-3", "Caisse 3", "forex_70x70_caisse-3"),
+    ("ev-nds-bar-1",    "Bar 1",    "forex_70x70_bar-1"),
+    ("ev-nds-bar-2",    "Bar 2",    "forex_70x70_bar-2"),
+    ("ev-nds-ecrans",   "Festival", "forex_70x70_festival"),
 ]
-for sid, lbl, fn in JOBS:
-    p = forex(sid, lbl, fn)
-    print("OK", p)
-print("DONE", len(JOBS))
+if __name__=="__main__":
+    for sid,lbl,fn in JOBS:
+        print("OK", forex(sid,lbl,fn))
+    print("DONE", len(JOBS))
