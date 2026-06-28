@@ -4094,7 +4094,7 @@ function cgvSave(){
 
 function renderNdsMedia(){
   var cb='https://flowin-events.vercel.app';
-  var VER='?v=20260628v15';
+  var VER='?v=20260628v16';
   var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1;});
   if(!nds.length){ nds=(DATA.partenaires||[]).slice(0,6); }
   var sub=state.mediaTab||'nds2026';

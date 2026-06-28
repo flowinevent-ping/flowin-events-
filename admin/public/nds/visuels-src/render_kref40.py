@@ -269,6 +269,19 @@ def qr_overlay(img, t, qr_img=None):
         finale_qr(img, t - 29.5, qr_img)
     return img
 
+import gen_a4_clean as A4  # tickets A4 (hero_concert / hero_voucher)
+def a4_ticket(base, kind, cx, cy, w, prog):
+    # ticket A4 (concert teal / bon d'achat amber) avec fondu + glissement
+    a = eo(min(1, prog * 1.6))
+    if a <= 0: return
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    if kind == "concert": A4.hero_concert(layer, cx, cy, w)
+    else: A4.hero_voucher(layer, cx, cy, w)
+    if a < 1.0:
+        al = layer.split()[3].point(lambda px: int(px * a)); layer.putalpha(al)
+    yo = int((1 - eo(prog)) * 44)
+    base.alpha_composite(layer, (0, yo))
+
 def scene(t):
     # TOUT sauf le QR (badge + carte finale), pour rendu base reutilisable
     img = make_bg(t)
@@ -282,12 +295,14 @@ def scene(t):
         for (w, c, d0), y in zip([("FLASH.", AMBER, 0.0), ("JOUE.", WHITE, 0.7), ("GAGNE.", MAGENTA, 1.4)], [H * 0.32, H * 0.47, H * 0.62]):
             p = ramp(lt, d0, d0 + 0.55)
             if p > 0: pop(img, tl(w, 168, c), W / 2, y, p, 0.5)
-    elif t < 13.5:                                 # GAINS — cartes degradees (comme la ref)
+    elif t < 13.5:                                 # GAINS — tickets A4 (concert teal + bon d'achat amber)
         lt = t - 7.6
-        pop(img, tl("À GAGNER", 66, AMBER), W / 2, H * 0.16, ramp(lt, 0.0, 0.45))
-        gain_card(img, W / 2, H * 0.34, int(W * 0.86), 200, ((230, 24, 127), (130, 60, 205)), "music", "DES PLACES DE", "Concert", ramp(lt, 0.4, 0.95))
-        gain_card(img, W / 2, H * 0.52, int(W * 0.86), 256, ((246, 196, 74), (232, 150, 40)), "gift", "DES BONS D'ACHAT", "chez nos partenaires\nlocaux", ramp(lt, 0.9, 1.45), dark=True)
-        if lt > 2.2: pop(img, tl("+ grand tirage final", 50, WHITE), W / 2, H * 0.69, ramp(lt, 2.2, 2.7))
+        pop(img, tl("À GAGNER", 66, AMBER), W / 2, H * 0.095, ramp(lt, 0.0, 0.45))
+        a4_ticket(img, "concert", W / 2, H * 0.300, int(W * 0.62), ramp(lt, 0.4, 0.95))
+        a4_ticket(img, "voucher", W / 2, H * 0.475, int(W * 0.62), ramp(lt, 0.9, 1.45))
+        if lt > 2.2:
+            pop(img, tl("Un tirage chaque soir · places de concert", 42, AMBER), W / 2, H * 0.645, ramp(lt, 2.2, 2.7))
+            pop(img, tl("+ grand tirage à la fin du festival", 42, WHITE), W / 2, H * 0.683, ramp(lt, 2.4, 2.9))
     elif t < 18.5:                                 # FLASH AUX STATIONS (icones + lueur)
         lt = t - 13.5
         pop(img, tl("FLASH AUX", 96, WHITE), W / 2, H * 0.22, ramp(lt, 0.0, 0.45))
@@ -304,8 +319,8 @@ def scene(t):
         pop(img, tl("LES LOTS !", 132, MAGENTA), W / 2, H * 0.65, ramp(lt, 0.9, 1.4))
     elif t < 29.5:                                 # PARTENAIRES — 5 logos (Giordano inclus)
         lt = t - 23.0
-        pop(img, tl("ET DANS LES COMMERCES", 60, AMBER), W / 2, H * 0.12, ramp(lt, 0.0, 0.45))
-        pop(img, tl("nos partenaires locaux", 44, WHITE), W / 2, H * 0.185, ramp(lt, 0.2, 0.65))
+        pop(img, tl("JOUE CHEZ NOS PARTENAIRES", 56, AMBER), W / 2, H * 0.115, ramp(lt, 0.0, 0.45))
+        pop(img, tl("pendant toute la durée du festival !", 40, WHITE), W / 2, H * 0.175, ramp(lt, 0.2, 0.65))
         tw, th = 462, 248; gx = W * 0.5
         # 2 + 2 + 2 (6 logos avec Alafut)
         logo_tile(img, "bergerie", gx - (tw/2 + 20), H * 0.300, tw, th, ramp(lt, 0.5, 0.95))
