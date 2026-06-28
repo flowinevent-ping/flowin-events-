@@ -69,30 +69,36 @@ def wrap_ct(img,cx,cy,txt,size,col,maxw,lh,w=600):
 def sponsor_strip(img, cy):
     import os as _os
     d=ImageDraw.Draw(img,"RGBA")
-    ct(img, W/2, cy-k(70), "NOS PARTENAIRES", k(34), TEAL, 800)
-    slots=[("pegase",), ("giordano",), (None,), (None,), (None,), (None,)]
-    margin=k(64); gap=k(26); n=6
-    avail=W-2*margin
-    cw=int((avail-(n-1)*gap)//n); ch=int(cw*0.66)
-    y=int(cy)
-    for i,(slug,) in enumerate(slots):
-        x=margin+i*(cw+gap)
+    ct(img, W/2, cy-k(72), "NOS PARTENAIRES", k(38), TEAL, 800)
+    slots=["pegase","giordano","alafut",None,None,None]
+    margin=k(54); n=6
+    bx0=margin; bx1=W-margin; bh=k(196); by0=int(cy)
+    # bandeau BLANC
+    band=Image.new("RGBA",(bx1-bx0,bh),(0,0,0,0))
+    ImageDraw.Draw(band).rounded_rectangle([0,0,bx1-bx0-1,bh-1],radius=k(26),fill=(255,255,255,255))
+    img.alpha_composite(band,(bx0,by0))
+    cellw=(bx1-bx0)/n
+    boxh=int(bh*0.64); boxw=int(cellw*0.80)
+    for i,slug in enumerate(slots):
+        ccx=bx0+cellw*(i+0.5); ccy=by0+bh/2
         p=f"/home/claude/repo/admin/public/nds/partenaires/{slug}.png" if slug else None
         if p and _os.path.exists(p):
-            card=L.logo_card(p, cw, ch, pad_ratio=0.16, radius_ratio=0.14)
-            img.alpha_composite(card,(x,y))
+            logo=Image.open(p).convert("RGBA"); bb=logo.split()[3].getbbox()
+            if bb: logo=logo.crop(bb)
+            r=min(boxw/logo.width, boxh/logo.height); nw,nh=max(1,int(logo.width*r)),max(1,int(logo.height*r))
+            logo=logo.resize((nw,nh),Image.LANCZOS)
+            img.alpha_composite(logo,(int(ccx-nw/2),int(ccy-nh/2)))
         else:
-            # placeholder pointille
-            ph=Image.new("RGBA",(cw,ch),(0,0,0,0))
-            pd=ImageDraw.Draw(ph)
-            for seg in range(0,cw,28):
-                pd.line([(seg,0),(seg+14,0)],fill=(255,255,255,90),width=3)
-                pd.line([(seg,ch-1),(seg+14,ch-1)],fill=(255,255,255,90),width=3)
-            for seg in range(0,ch,28):
-                pd.line([(0,seg),(0,seg+14)],fill=(255,255,255,90),width=3)
-                pd.line([(cw-1,seg),(cw-1,seg+14)],fill=(255,255,255,90),width=3)
-            pd.text((cw/2,ch/2),"+",font=L.font(int(ch*0.4),700),fill=(255,255,255,70),anchor="mm")
-            img.alpha_composite(ph,(x,y))
+            pw,ph=boxw,boxh
+            ph_img=Image.new("RGBA",(pw,ph),(0,0,0,0)); pd=ImageDraw.Draw(ph_img)
+            for seg in range(0,pw,30):
+                pd.line([(seg,0),(seg+16,0)],fill=(176,182,198,255),width=4)
+                pd.line([(seg,ph-1),(seg+16,ph-1)],fill=(176,182,198,255),width=4)
+            for seg in range(0,ph,30):
+                pd.line([(0,seg),(0,seg+16)],fill=(176,182,198,255),width=4)
+                pd.line([(pw-1,seg),(pw-1,seg+16)],fill=(176,182,198,255),width=4)
+            pd.text((pw/2,ph/2),"+",font=L.font(int(ph*0.42),700),fill=(176,182,198,255),anchor="mm")
+            img.alpha_composite(ph_img,(int(ccx-pw/2),int(ccy-ph/2)))
 
 def forex(station_id, station_label, fname):
     img=make_bg(); d=ImageDraw.Draw(img)
@@ -105,12 +111,12 @@ def forex(station_id, station_label, fname):
     # eyebrow
     ct(img, W/2, H*0.200, "STATION JEUX", k(48), TEAL, 800)
     # TITRE (essai) : Gagne tes places de concert & bons d'achat
-    ct(img, W/2, H*0.262, "GAGNE TES PLACES DE CONCERT", k(58), AMBER, 800)
-    ct(img, W/2, H*0.312, "& BONS D'ACHAT", k(58), WHITE, 800)
+    ct(img, W/2, H*0.256, "GAGNE TES PLACES DE CONCERT", k(58), AMBER, 800)
+    ct(img, W/2, H*0.304, "& BONS D'ACHAT", k(58), WHITE, 800)
     # QR central
-    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.560, k(360))
+    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.516, k(338))
     # bandeau sponsors (6 emplacements)
-    sponsor_strip(img, H*0.880)
+    sponsor_strip(img, H*0.792)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
 
 JOBS = [
