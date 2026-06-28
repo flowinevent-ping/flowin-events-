@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/fk40"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/ecrans_hd.png").convert("RGB")
-LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano"]}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut"]}
 
 BG = (9, 16, 32)
 AMBER = (244, 181, 68)
@@ -304,15 +304,16 @@ def scene(t):
         pop(img, tl("LES LOTS !", 132, MAGENTA), W / 2, H * 0.65, ramp(lt, 0.9, 1.4))
     elif t < 29.5:                                 # PARTENAIRES — 5 logos (Giordano inclus)
         lt = t - 23.0
-        pop(img, tl("ET DANS LES COMMERCES", 60, AMBER), W / 2, H * 0.14, ramp(lt, 0.0, 0.45))
-        pop(img, tl("nos partenaires locaux", 44, WHITE), W / 2, H * 0.205, ramp(lt, 0.2, 0.65))
-        tw, th = 462, 256; gx = W * 0.5
-        # 2 + 2 + 1 (Giordano large en bas)
-        logo_tile(img, "bergerie", gx - (tw/2 + 20), H * 0.330, tw, th, ramp(lt, 0.5, 0.95))
-        logo_tile(img, "pegase",   gx + (tw/2 + 20), H * 0.330, tw, th, ramp(lt, 0.74, 1.19))
-        logo_tile(img, "utile",    gx - (tw/2 + 20), H * 0.500, tw, th, ramp(lt, 0.98, 1.43))
-        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 20), H * 0.500, tw, th, ramp(lt, 1.22, 1.67))
-        logo_tile(img, "giordano", gx, H * 0.655, int(tw * 1.6), int(th * 0.82), ramp(lt, 1.5, 1.95))
+        pop(img, tl("ET DANS LES COMMERCES", 60, AMBER), W / 2, H * 0.12, ramp(lt, 0.0, 0.45))
+        pop(img, tl("nos partenaires locaux", 44, WHITE), W / 2, H * 0.185, ramp(lt, 0.2, 0.65))
+        tw, th = 462, 248; gx = W * 0.5
+        # 2 + 2 + 2 (6 logos avec Alafut)
+        logo_tile(img, "bergerie", gx - (tw/2 + 20), H * 0.300, tw, th, ramp(lt, 0.5, 0.95))
+        logo_tile(img, "pegase",   gx + (tw/2 + 20), H * 0.300, tw, th, ramp(lt, 0.70, 1.15))
+        logo_tile(img, "utile",    gx - (tw/2 + 20), H * 0.470, tw, th, ramp(lt, 0.90, 1.35))
+        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 20), H * 0.470, tw, th, ramp(lt, 1.10, 1.55))
+        logo_tile(img, "giordano", gx - (tw/2 + 20), H * 0.640, tw, th, ramp(lt, 1.30, 1.75))
+        logo_tile(img, "alafut",   gx + (tw/2 + 20), H * 0.640, tw, th, ramp(lt, 1.50, 1.95))
     else:                                          # FINALE — titre + texte (QR ajoute par finale_qr)
         lt = t - 29.5
         pop(img, tl("FLASH LE QR", 116, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))
