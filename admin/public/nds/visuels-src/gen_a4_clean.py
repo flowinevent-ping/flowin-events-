@@ -106,7 +106,7 @@ def station_lockup(img, slug, cx, cy):
     t1="STATION"; t2="JEUX"; f=L.font(100,800)
     w1=L.measure(t1,f)[0]; w2=L.measure(t2,f)[0]; gap_tt=36
     txt_w=w1+gap_tt+w2
-    box=360; gap=72
+    box=420; gap=72
     total=txt_w+gap+box
     x=cx-total/2
     # texte (STATION blanc + JEUX teal)
@@ -320,33 +320,33 @@ def a4(slug, commerce, lot_title, fname):
     tracked(d, W/2, H*0.064, "LE GRAND JEU DES", 92, TEAL, 800, 18)
 
     # 2) LOGO NUITS DU SUD en HERO (agrandi) — remplace le texte "NUITS DU SUD"
-    L.put_logo(img, W/2, H*0.150, 1.0)
-    hrule(d, W/2, H*0.226, 160, MAGENTA, 7)
+    L.put_logo(img, W/2, H*0.146, 1.0)
+    hrule(d, W/2, H*0.214, 160, MAGENTA, 7)
 
     # 3) FLASH ET JOUE (Anton, banniere amber)
-    flash_banner(img, W/2, H*0.270, "FLASH ET JOUE")
+    flash_banner(img, W/2, H*0.256, "FLASH & JOUE")
 
     # 4) STATION JEUX + logo partenaire (logo agrandi, SANS nom commerce)
-    station_lockup(img, slug, W/2, H*0.360)
+    station_lockup(img, slug, W/2, H*0.356)
 
     # 5) GAINS "wow" (billets reduits, SANS sous-texte)
-    hw=int(W*0.255); cxL=W*0.300; cxR=W*0.700; gcy=H*0.470
+    hw=int(W*0.225); cxL=W*0.300; cxR=W*0.700; gcy=H*0.468
     hero_concert(img, cxL, gcy, hw)
     hero_voucher(img, cxR, gcy, hw)
-    lblY=H*0.548
+    lblY=H*0.540
     ct(d, cxL, lblY, "PLACES DE CONCERT", 58, WHITE, 800)
     ct(d, cxR, lblY, "BONS D'ACHAT", 58, WHITE, 800)
 
     # 6) QR (sous les gains)
-    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.668, 460)
+    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.662, 500)
 
     # 7) CTA (sans encadre/fond, typo Anton) — degage du QR
-    cta_stations(img, W/2, H*0.800)
+    cta_stations(img, W/2, H*0.808)
 
     # 8) GRAND TIRAGE (agrandi) + contact en bas pleine ligne
-    grand_tirage_pill(img, W/2, H*0.878)
-    tracked(d, W/2, H*0.916, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
-    footer_contact(img, W/2, H*0.945)
+    grand_tirage_pill(img, W/2, H*0.880)
+    tracked(d, W/2, H*0.918, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
+    footer_contact(img, W/2, H*0.946)
 
     pref="plate_" if _PLATE else ""
     p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
