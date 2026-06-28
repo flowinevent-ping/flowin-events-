@@ -273,46 +273,93 @@ def qr_sobre(img, qr_path, cx, cy, qsz):
     ImageDraw.Draw(card).rounded_rectangle([0,0,cw-1,cw-1],radius=int(cw*0.06),fill=(255,255,255,255))
     card.paste(qr,(pad,pad)); img.alpha_composite(card,(int(cx-cw/2),int(cy-cw/2)))
 
+def glow_blob(img,cx,cy,r,col,a):
+    g=Image.new("RGBA",(int(r*2),int(r*2)),(0,0,0,0))
+    ImageDraw.Draw(g).ellipse([0,0,r*2,r*2],fill=col+(a,))
+    g=g.filter(ImageFilter.GaussianBlur(int(r*0.35))); img.alpha_composite(g,(int(cx-r),int(cy-r)))
+
+def panel(img,x0,y0,x1,y1,radius):
+    w=int(x1-x0); h=int(y1-y0)
+    glow=Image.new("RGBA",(w+200,h+200),(0,0,0,0))
+    ImageDraw.Draw(glow).rounded_rectangle([100,100,100+w,100+h],radius=radius,fill=(244,181,68,46))
+    glow=glow.filter(ImageFilter.GaussianBlur(55)); img.alpha_composite(glow,(int(x0-100),int(y0-100)))
+    arr=np.zeros((h,w,4),np.uint8)
+    for yy in range(h):
+        f=yy/max(1,h-1); a=int(30-14*f)
+        arr[yy,:,0]=255; arr[yy,:,1]=255; arr[yy,:,2]=255; arr[yy,:,3]=max(0,a)
+    mask=Image.new("L",(w,h),0); ImageDraw.Draw(mask).rounded_rectangle([0,0,w-1,h-1],radius=radius,fill=255)
+    card=Image.composite(Image.fromarray(arr,"RGBA"),Image.new("RGBA",(w,h),(0,0,0,0)),mask)
+    img.alpha_composite(card,(int(x0),int(y0)))
+    d=ImageDraw.Draw(img,"RGBA")
+    d.rounded_rectangle([x0,y0,x1,y1],radius=radius,outline=(244,181,68,170),width=3)
+    # liseré interne teal subtil
+    d.rounded_rectangle([x0+8,y0+8,x1-8,y1-8],radius=radius-6,outline=(32,224,196,40),width=2)
+
+def pill_icon(img,cx,cy,label,grad,icon_fn,dark):
+    f=L.font(50,800); tw=L.measure(label,f)[0]
+    iw=70; padx=44; gap=22; w=iw+gap+tw+padx*2; h=104
+    SS=3; bw,bh=w*SS,h*SS
+    g=Image.new("RGBA",(bw,bh),(0,0,0,0)); arr=np.zeros((bh,bw,4),np.uint8)
+    c0,c1=grad
+    for yy in range(bh):
+        f2=yy/max(1,bh-1)
+        arr[yy,:,0]=int(c0[0]+(c1[0]-c0[0])*f2); arr[yy,:,1]=int(c0[1]+(c1[1]-c0[1])*f2)
+        arr[yy,:,2]=int(c0[2]+(c1[2]-c0[2])*f2); arr[yy,:,3]=255
+    gi=Image.fromarray(arr,"RGBA")
+    mask=Image.new("L",(bw,bh),0); ImageDraw.Draw(mask).rounded_rectangle([0,0,bw-1,bh-1],radius=bh//2,fill=255)
+    pill=Image.composite(gi,Image.new("RGBA",(bw,bh),(0,0,0,0)),mask).resize((w,h),Image.LANCZOS)
+    pd=ImageDraw.Draw(pill)
+    txtcol=INK if dark else WHITE
+    icon_fn(pd, padx, (h-iw)//2, iw, txtcol)
+    pd.text((padx+iw+gap, h/2), label, font=f, fill=txtcol+(255,), anchor="lm")
+    img.alpha_composite(pill,(int(cx-w/2),int(cy-h/2)))
+
 def a4(slug, commerce, lot_title, fname):
     global _TEXTLOG
     _TEXTLOG=[]
     img=make_bg(); d=ImageDraw.Draw(img,"RGBA")
-    L.put_logo(img, W/2, H*0.066, 0.92)
-    MAXW=int(W*0.86)
-    SOFT=(206,214,234)
-    # ── KICKER (caps trackees, teal) ──
-    tracked(d, W/2, H*0.126, "GRAND JEU · NUITS DU SUD", 56, TEAL, 700, 16)
-    hrule(d, W/2, H*0.150, 110, AMBER, 6)
-    # ── TITRE DISPLAY (interligne serre, contraste couleur) ──
-    hsz=fitsz("GAGNE TES PLACES DE CONCERT", 126, MAXW, 800)
-    y1=H*0.212
+    SOFT=(210,218,238)
+    # glow d'impact derriere le titre
+    if not _PLATE:
+        glow_blob(img, W*0.5, H*0.235, W*0.46, (212,40,150), 70)
+        glow_blob(img, W*0.30, H*0.20, W*0.30, (120,46,196), 60)
+    L.put_logo(img, W/2, H*0.060, 0.90)
+    MAXW=int(W*0.88)
+    # KICKER
+    tracked(d, W/2, H*0.112, "GRAND JEU · NUITS DU SUD", 54, TEAL, 700, 16)
+    hrule(d, W/2, H*0.134, 110, AMBER, 6)
+    # TITRE DISPLAY
+    hsz=fitsz("GAGNE TES PLACES DE CONCERT", 128, MAXW, 800)
+    y1=H*0.190
     _TEXTLOG.append(("GAGNE TES PLACES DE CONCERT",W/2,y1,hsz,AMBER,800))
     if not _PLATE: d.text((W/2,y1),"GAGNE TES PLACES DE CONCERT",font=L.font(hsz,800),fill=AMBER,anchor="mm")
     y2=y1+hsz*1.04
     _TEXTLOG.append(("& BONS D'ACHAT",W/2,y2,hsz,WHITE,800))
     if not _PLATE: d.text((W/2,y2),"& BONS D'ACHAT",font=L.font(hsz,800),fill=WHITE,anchor="mm")
-    # ── SOUS-TITRE (graisse legere = contraste) ──
+    # SOUS-TITRE (graisse legere)
     suby=y2+hsz*0.92
-    wrapw(d, W/2, suby, "Plus tu joues, plus tu augmentes tes chances de remporter les lots.", 58, SOFT, int(W*0.80), 74, 500)
-    # ════════ BLOC ACTION (tiers bas) ════════
-    # kicker commerce
-    tracked(d, W/2, H*0.448, "JOUEZ ICI, CHEZ", 46, SOFT, 700, 12)
-    # nom commerce = titre (auto-fit)
-    csz=fitsz(commerce, 92, MAXW, 800)
-    _TEXTLOG.append((commerce,W/2,H*0.500,csz,AMBER,800))
-    if not _PLATE: d.text((W/2,H*0.500),commerce,font=L.font(csz,800),fill=AMBER,anchor="mm")
-    # logo commerce
-    logo_badge(img, slug, W*0.5, H*0.568, 188)
-    # lot (pill raffinee)
+    wrapw(d, W/2, suby, "Plus tu joues, plus tu augmentes tes chances de remporter les lots.", 56, SOFT, int(W*0.82), 70, 500)
+    # PASTILLES GAINS (couleur, anti-vide)
+    if not _PLATE:
+        pill_icon(img, W*0.305, H*0.378, "Places de concert", ((48,232,206),(20,150,150)), icon_music, dark=True)
+        pill_icon(img, W*0.700, H*0.378, "Bons d'achat", ((255,196,84),(240,140,30)), icon_gift, dark=True)
+    # ════════ CARTE D'ACTION (remplit le bas) ════════
+    cx0,cy0,cx1,cy1 = W*0.085, H*0.452, W*0.915, H*0.952
+    panel(img, cx0, cy0, cx1, cy1, 56)
+    tracked(d, W/2, H*0.492, "JOUEZ ICI, CHEZ", 44, SOFT, 700, 12)
+    csz=fitsz(commerce, 90, int(W*0.78), 800)
+    _TEXTLOG.append((commerce,W/2,H*0.540,csz,AMBER,800))
+    if not _PLATE: d.text((W/2,H*0.540),commerce,font=L.font(csz,800),fill=AMBER,anchor="mm")
+    logo_badge(img, slug, W*0.5, H*0.602, 178)
     if lot_title:
-        L.chip(img, W/2, H*0.626, "Votre lot : " + lot_title, L.font(52,700), fill=(36,30,62), fg=WHITE, padx=52, pady=24)
-    # ── QR (carte propre) + caption trackee ──
-    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.776, 650)
-    tracked(d, W/2, H*0.892, "FLASH · JOUE · GAGNE", 44, AMBER, 700, 10)
-    # ── PIED (filet + lignes trackees discretes) ──
-    hrule(d, W/2, H*0.930, int(W*0.62), (60,66,92), 3)
-    ct(d, W/2, H*0.950, "Grand tirage à la clôture du festival", 42, SOFT, 600)
-    tracked(d, W/2, H*0.972, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 30, MUTE, 600, 6)
+        L.chip(img, W/2, H*0.658, "Votre lot : " + lot_title, L.font(50,700), fill=TEAL, fg=INK, padx=50, pady=22)
+    else:
+        L.chip(img, W/2, H*0.658, "Joue & tente ta chance", L.font(50,700), fill=TEAL, fg=INK, padx=50, pady=22)
+    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.788, 560)
+    tracked(d, W/2, H*0.888, "FLASH · JOUE · GAGNE", 42, AMBER, 700, 10)
+    hrule(d, W/2, H*0.912, int(W*0.50), (244,181,68,90) if False else (120,110,80), 3)
+    ct(d, W/2, H*0.930, "Grand tirage à la clôture du festival", 38, SOFT, 600)
+    tracked(d, W/2, H*0.946, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", 27, (150,158,182), 600, 5)
     pref="plate_" if _PLATE else ""
     p=f"{OUT}/{pref}{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
