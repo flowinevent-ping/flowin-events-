@@ -338,7 +338,7 @@ def a4(slug, commerce, lot_title, fname):
     ct(d, cxR, lblY, "BONS D'ACHAT", 58, WHITE, 800)
 
     # 6) QR (sous les gains)
-    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.668, 440)
+    qr_block(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.668, 460)
 
     # 7) CTA (sans encadre/fond, typo Anton) — degage du QR
     cta_stations(img, W/2, H*0.800)
