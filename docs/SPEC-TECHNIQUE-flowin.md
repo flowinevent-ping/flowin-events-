@@ -110,7 +110,7 @@ Modalités : **un tirage chaque soir** (places de concert, manuel, compte NDS vi
 Décision Romain (28/06) :
 - **QR sur site** = station récurrente classique (`qrUrl` persistant) → jouer/gagner sur place, incite à venir en boutique.
 - **Lien digital** (envoyé par mail/WhatsApp) = **jeton à usage unique, NON-station** : 1 inscription/participation max, consommé après usage, trace `source + date + heure`. Ne permet **pas** de jouer/gagner sans passer par le lieu de jeu.
-- Schéma cible (à implémenter — cf. §8 mission kit digital) : la colonne **`partenaires.liens (jsonb)`** existe déjà ; table/clé `liens` prévue : `(id, partenaire_id, type[unique|regulier], token, source, used_at, usage_count, max_usage=1 pour unique, actif)`. À la conso d'un lien unique : journaliser puis invalider.
+- **Fondation DB construite (28/06)** : table `public.liens` `(id uuid, partenaire_id, type[unique|regulier], token unique, source, event_id, used_at, usage_count, max_usage, actif)` + primitives server-side `generer_lien(...)` et `consommer_lien(p_token, p_source)` (SECURITY DEFINER, `search_path` verrouillé, REVOKE anon/authenticated). `consommer_lien` applique la mécanique A (unique = 1 seule conso, journalise `used_at` + source, désactive après usage ; regulier = illimité). Migration versionnée : `docs/sql/kit-digital-liens.sql`. Colonne `partenaires.liens (jsonb)` conservée (dénormalisation front). **Reste à cadrer avec Romain (ne pas inventer)** : cadence de minting des liens `unique` (1 token/envoi vs lot), wiring front (où/quand appeler `consommer_lien`), hook « création pro » → génération auto du kit, modèle de grant pour exposer la conso côté front.
 
 ---
 
@@ -159,10 +159,11 @@ Deux sessions écrivant sur `main` → push rejetés. Résolution : `git fetch o
 
 ## 8. Missions ouvertes (suivi)
 
-1. **Kit digital partenaire auto-généré** (mécanique tranchée = A, cf. §4) : table/clé `liens` (jeton unique + QR régulier) ; assemblage A4 + vidéo perso + Insta/FB + email + textes/hashtags ; hook « création pro participant » ; exposition dashboard (hub Vidéo & média). Garde-fous : contact `flowinevent@gmail.com`, ne pas inventer.
+1. **Kit digital partenaire auto-généré** (mécanique tranchée = A, cf. §4) : **fondation DB faite** (table `liens` + `generer_lien`/`consommer_lien`, `docs/sql/kit-digital-liens.sql`). Reste : cadence minting `unique`, wiring front (`consommer_lien`), hook « création pro » → génération auto, assemblage assets (A4 + vidéo perso + Insta/FB + email + textes/hashtags), exposition dashboard (hub Vidéo & média). Garde-fous : contact `flowinevent@gmail.com`, ne pas inventer.
 2. **Owner Romain** : repo privé ; PITR + backup avant 9/07 ; CGV juriste (`documents_legaux` `cgv-nds-2026`, passer `draft`→`validé`, aligner `CGV_VERSION` `v1-draft`→`v1`) ; Resend domaine `flowin.events` (emails gagnants) ; 4 logos partenaires manquants ; coords Alafut.
 3. **Post-festival** : durcissement RLS avancé, rapatriement compte maître, migration Next.js, Skills/sous-agents.
 
 ---
 
 *Fin SPEC-TECHNIQUE-flowin v1. Mettre à jour ce fichier ET sa page Notion miroir à chaque évolution structurelle (modèle de données, sécurité, conventions, procédures).*
+*Page Notion miroir : https://app.notion.com/p/38d6dcca9add8198aed3f248a9a5fc32 (sous le hub « NDS 2026 — Comm »).*
