@@ -224,6 +224,11 @@ def grand_tirage_pill(img, cx, cy):
     pd.text((w/2,h/2),txt,font=fnt,fill=INK+(255,),anchor="mm")
     img.alpha_composite(pill,(int(cx-w/2),int(cy-h/2)))
 
+def fit_ct(d,cx,y,txt,maxsize,col,maxw,w=800):
+    sz=maxsize
+    while sz>48 and L.measure(txt,L.font(sz,w))[0]>maxw: sz-=4
+    d.text((cx,y),txt,font=L.font(sz,w),fill=col,anchor="mm")
+
 def qr_sobre(img, qr_path, cx, cy, qsz):
     halo=Image.new("RGBA",(qsz*2,qsz*2),(0,0,0,0))
     ImageDraw.Draw(halo).ellipse([qsz*0.25,qsz*0.25,qsz*1.75,qsz*1.75],fill=AMBER+(95,))
@@ -236,33 +241,28 @@ def qr_sobre(img, qr_path, cx, cy, qsz):
 
 def a4(slug, commerce, lot_title, fname):
     img=make_bg(); d=ImageDraw.Draw(img,"RGBA")
-    L.put_logo(img, W/2, H*0.080, 0.95)
-    # parcours 3 etapes (sobre)
-    ys=H*0.250
-    xs=[W*0.215, W*0.5, W*0.785]
-    connector(img, xs[0]+150, xs[1]-150, ys)
-    connector(img, xs[1]+150, xs[2]-150, ys)
-    step(img, xs[0], ys, 1, icon_qr,   "FLASH", "le QR",   MAGENTA)
-    step(img, xs[1], ys, 2, icon_quiz, "JOUE",  "le quiz", TEAL)
-    step(img, xs[2], ys, 3, icon_gift, "GAGNE", "des lots", AMBER)
-    # gains : 2 chips sobres
-    c1="Places de concert"; c2="Bons d'achat"
-    f=L.font(52,800)
-    w1=L.measure(c1,f)[0]+112; w2=L.measure(c2,f)[0]+112; gap=44
-    tot=w1+w2+gap
-    L.chip(img, W/2-tot/2+w1/2, H*0.392, c1, f, fill=TEAL, fg=INK, padx=56, pady=24)
-    L.chip(img, W/2+tot/2-w2/2, H*0.392, c2, f, fill=L.ORANGE, fg=WHITE, padx=56, pady=24)
-    # incentive cle
-    ct(d, W/2, H*0.452, "+ tu joues, plus tu augmentes tes chances", 58, AMBER, 800)
-    # commerce focal
-    ct(d, W/2, H*0.534, "Jouez ici, chez " + commerce, 64, WHITE, 800)
-    logo_badge(img, slug, W*0.5, H*0.594, 210)
-    L.chip(img, W/2, H*0.648, "Votre lot : " + lot_title, L.font(52,800), fill=(36,30,64), fg=WHITE, padx=50, pady=22)
-    # QR sobre (facon forex)
-    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.792, 660)
-    # footer sobre
-    ct(d, W/2, H*0.928, "Grand tirage à la clôture du festival", 50, WHITE, 700)
-    ct(d, W/2, H*0.962, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
+    L.put_logo(img, W/2, H*0.072, 0.96)
+    MAXW=int(W*0.90)
+    # eyebrow
+    ct(d, W/2, H*0.150, "GRAND JEU DES NUITS DU SUD", 72, TEAL, 800)
+    # HERO (gros, facon forex)
+    fit_ct(d, W/2, H*0.214, "GAGNE TES PLACES DE CONCERT", 132, AMBER, MAXW, 800)
+    fit_ct(d, W/2, H*0.274, "& BONS D'ACHAT", 132, WHITE, MAXW, 800)
+    # incentive engageant
+    fit_ct(d, W/2, H*0.340, "+ tu joues, plus tu augmentes tes chances", 74, WHITE, MAXW, 700)
+    # commerce focal (gros)
+    fit_ct(d, W/2, H*0.428, "Jouez ici, chez " + commerce, 86, WHITE, MAXW, 800)
+    logo_badge(img, slug, W*0.5, H*0.500, 230)
+    L.chip(img, W/2, H*0.560, "Votre lot : " + lot_title, L.font(60,800), fill=TEAL, fg=INK, padx=58, pady=28)
+    # GROS QR focal (halo facon forex)
+    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.745, 760)
+    # CTA + tirage
+    bf=L.font(92,800)
+    fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2
+    d.text((x0,H*0.892),"Flash ",font=bf,fill=AMBER,anchor="lm")
+    d.text((x0+L.measure("Flash ",bf)[0],H*0.892),"le QR",font=bf,fill=WHITE,anchor="lm")
+    ct(d, W/2, H*0.940, "Grand tirage à la clôture du festival", 50, (214,220,238), 700)
+    ct(d, W/2, H*0.968, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
 PARTNERS = [
