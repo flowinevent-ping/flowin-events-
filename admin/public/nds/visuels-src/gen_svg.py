@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Export SVG editable : plaque PNG (sans copie) + <text> editables (Canva).
 import sys, os, base64; sys.path.insert(0,"/home/claude/vid")
-import gen_a4_jouezici as A
+import gen_a4_clean as A
 import gen_forex as F
 
 OUTDIR="/home/claude/repo/admin/public/nds/kit-digital/svg"
