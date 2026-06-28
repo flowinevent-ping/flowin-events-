@@ -7,6 +7,7 @@ import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
 import { trackVisite } from '@/lib/track'
+import { buildInviteLink } from '@/lib/parrainage'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 
 type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil'
@@ -553,6 +554,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       })
     } catch { /* best-effort, ne bloque jamais l'ouverture du lien */ }
   }
+  const shareParrainage = async () => {
+    const email = (form.email || recurrent?.email || '').trim().toLowerCase()
+    if (email.indexOf('@') === -1) return
+    const extId = 'j-nd-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
+    const link = buildInviteLink(`/parcours/nds2026?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
+    const txt = `Je joue au Grand Jeu des Nuits du Sud \u{1F3B6} Rejoins-moi, joue et tente de gagner des places de concert ! ${link}`
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: 'Le Grand Jeu des Nuits du Sud', text: txt }) }
+      else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
+    } catch { /* annule */ }
+  }
   function nb(target: Screen) { setSheetPart(null); setScreen(target) }
 
   // Bandeau partenaires (inline, collé au contenu) — réutilisé en bas de plusieurs écrans
@@ -840,8 +852,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="res-head">
               <div className="res-ico"><svg className="ic"><use href="#i-trophy" /></svg></div>
-              <div className="res-bravo disp">{quizPerfect || bonusDone ? 'Bravo !' : 'Presque !'}</div>
-              <div className="res-sub">{quizPerfect || bonusDone ? 'Ton ticket est validé pour le tirage' : 'Pas encore de ticket pour cette station'}</div>
+              <div className="res-bravo disp">{quizPerfect ? 'Wow, super\u202f! \u{1F389}' : (bonusDone ? 'Bravo\u202f!' : 'Presque\u202f!')}</div>
+              <div className="res-sub">{quizPerfect ? 'Continue comme ça et cumule tes tickets\u202f!' : (bonusDone ? 'Ton ticket est validé pour le tirage' : 'Pas encore de ticket pour cette station')}</div>
             </div>
             <div className="res-body">
               <div className="score-card">
@@ -853,13 +865,22 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </div>
               </div>
               {bonusQs.length > 0 && !bonusDone && (
-                <a className="double" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
+                <a className="bonusbtn" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
                   <svg className="ic"><use href="#i-spark" /></svg>
                   {' +1 ticket — question bonus'}
                 </a>
               )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
               <div className="infocard b-green"><svg className="ic"><use href="#i-checkc" /></svg><div>Participation enregistrée&#8239;!</div></div>
+              {quizPerfect && (
+                <div className="infocard b-magenta" style={{ flexDirection: 'column', gap: 4 }}>
+                  <div><b>Continue comme ça&#8239;!</b> Chaque action = +1 ticket :</div>
+                  <div style={{ fontSize: 13.5, color: '#52455e' }}>• Va dans les autres stations &nbsp;• Réponds aux questions bonus &nbsp;• Parraine tes amis</div>
+                </div>
+              )}
+              {(form.email || recurrent?.email) && (
+                <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
+              )}
               <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? (quizPerfect || bonusDone ? 'Voir mon ticket →' : 'Continuer →') : (quizPerfect || bonusDone ? 'Valider et recevoir mon ticket →' : 'Continuer sans ticket →'))}</a>
             </div>
           </section>
@@ -905,7 +926,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div className="nextline" key={s.id}><span className="em"><svg className="ic"><use href={`#${s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{s.ou}</div></div></div>
                 ))}
               </div>
-              <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus pour le tirage de {tirageHeure}.</div>
+              <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
             </div>
@@ -918,7 +939,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <div className="tk-hero">
                 <div className="tk-big">{ticketCount}</div>
                 <div className="tk-lbl">{ticketCount > 1 ? 'tickets cumulés ce soir' : 'ticket gagné ce soir'}</div>
-                <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> Tirage demain à {tirageHeure} · {lotResume}</div>
+                <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> Tirage chaque soir des Nuits du Sud · 1 grand tirage à la clôture du festival</div>
               </div>
               <div className="infocard b-magenta" style={{ marginTop: 14 }}><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code : <b>{ticket || '—'}</b></div></div>
               {ticketCount < STATIONS.length * 2 && (
@@ -930,6 +951,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {ticketCount >= STATIONS.length * 2 && (
                 <div className="tk-tip" style={{ marginTop: 12, background: '#e9f9ef', borderColor: '#bbf7d0', color: '#16a34a' }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>Toutes les stations jouées !</b> Tu as le maximum de tickets pour le tirage de ce soir.</div></div>
               )}
+              {(form.email || recurrent?.email) && (
+                <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
+              )}
+              {partnerBand}
             </div>
           </section>
         )}
@@ -1004,7 +1029,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div className="pt-dim2" onClick={() => setFiche(null)} />
                 <div className="pt-sheet2">
                   <button onClick={() => setFiche(null)} aria-label="Fermer" style={{ position: 'absolute', top: 14, right: 16, background: '#f1edf5', border: 'none', color: '#1a1020', borderRadius: 999, width: 32, height: 32, fontSize: 18, cursor: 'pointer' }}>×</button>
-                  <PartnerLogo src={fiche.image_url} alt="" fallback={null} imgStyle={{ width: 64, height: 64, borderRadius: 14, objectFit: 'contain', background: '#fff', padding: 6, boxSizing: 'border-box', marginBottom: 10 }} />
+                  <PartnerLogo src={fiche.image_url} alt="" fallback={null} imgStyle={{ width: 92, height: 92, borderRadius: 18, objectFit: 'contain', background: '#fff', padding: 8, boxSizing: 'border-box', marginBottom: 12 }} />
                   <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>{fiche.nom}</div>
                   {fiche.adresse || fiche.ville ? (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
@@ -1013,6 +1038,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     </div>
                   ) : null}
                   <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}><b>Le jeu — </b>{fiche.tickets_par_scan ? `Rends-toi sur place et flashe le QR du commerce pour gagner +${fiche.tickets_par_scan} ticket${fiche.tickets_par_scan > 1 ? 's' : ''} pour le tirage.` : "Rends-toi sur place et profite de l'offre partenaire."}</div>
+{(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const ls = pp && Array.isArray(pp.lots) ? pp.lots : []; return ls.length ? (
+  <div className="pt-lots" style={{ marginBottom: 12 }}>
+    <div className="pt-lots-h"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-gift" /></svg> Lots à gagner</div>
+    {ls.map((lot, li) => { const n = lot.gagnants ?? lot.quantite ?? 0; return (
+      <div className="pt-lot" key={lot.id || li}>
+        <div className="pt-lot-t">{lot.titre || lot.nom}</div>
+        {n > 0 ? <div className="pt-lot-q">{n} gagnant{n > 1 ? 's' : ''}</div> : null}
+        {lot.description ? <div className="pt-lot-d">{lot.description}</div> : null}
+      </div>
+    )})}
+  </div>
+) : null })()}
                   {fiche.latitude && fiche.longitude ? (
                     <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }}>
                       <svg className="ic" style={{ width: 16, height: 16, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
