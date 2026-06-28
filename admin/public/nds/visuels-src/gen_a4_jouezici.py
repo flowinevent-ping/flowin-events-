@@ -244,25 +244,29 @@ def a4(slug, commerce, lot_title, fname):
     L.put_logo(img, W/2, H*0.072, 0.96)
     MAXW=int(W*0.90)
     # eyebrow
-    ct(d, W/2, H*0.150, "GRAND JEU DES NUITS DU SUD", 72, TEAL, 800)
+    ct(d, W/2, H*0.150, "GRAND JEU NUITS DU SUD", 76, TEAL, 800)
     # HERO (gros, facon forex)
-    fit_ct(d, W/2, H*0.214, "GAGNE TES PLACES DE CONCERT", 132, AMBER, MAXW, 800)
-    fit_ct(d, W/2, H*0.274, "& BONS D'ACHAT", 132, WHITE, MAXW, 800)
-    # incentive engageant
-    fit_ct(d, W/2, H*0.340, "+ tu joues, plus tu augmentes tes chances", 74, WHITE, MAXW, 700)
+    fit_ct(d, W/2, H*0.216, "GAGNE TES PLACES DE CONCERT", 132, AMBER, MAXW, 800)
+    fit_ct(d, W/2, H*0.276, "& BONS D'ACHAT", 132, WHITE, MAXW, 800)
+    # accroche : plus tu joues, plus tu augmentes tes chances
+    fit_ct(d, W/2, H*0.346, "Plus tu joues, plus tu augmentes", 66, WHITE, MAXW, 700)
+    fit_ct(d, W/2, H*0.392, "tes chances de remporter les lots", 66, AMBER, MAXW, 800)
     # commerce focal (gros)
-    fit_ct(d, W/2, H*0.428, "Jouez ici, chez " + commerce, 86, WHITE, MAXW, 800)
-    logo_badge(img, slug, W*0.5, H*0.500, 230)
-    L.chip(img, W/2, H*0.560, "Votre lot : " + lot_title, L.font(60,800), fill=TEAL, fg=INK, padx=58, pady=28)
+    fit_ct(d, W/2, H*0.476, "Jouez ici, chez " + commerce, 84, WHITE, MAXW, 800)
+    logo_badge(img, slug, W*0.5, H*0.546, 220)
+    if lot_title:
+        L.chip(img, W/2, H*0.604, "Votre lot : " + lot_title, L.font(58,800), fill=TEAL, fg=INK, padx=56, pady=26)
+        qy=0.762
+    else:
+        qy=0.742
     # GROS QR focal (halo facon forex)
-    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.745, 760)
-    # CTA + tirage
-    bf=L.font(92,800)
+    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*qy, 740)
+    bf=L.font(90,800)
     fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2
-    d.text((x0,H*0.892),"Flash ",font=bf,fill=AMBER,anchor="lm")
-    d.text((x0+L.measure("Flash ",bf)[0],H*0.892),"le QR",font=bf,fill=WHITE,anchor="lm")
-    ct(d, W/2, H*0.940, "Grand tirage à la clôture du festival", 50, (214,220,238), 700)
-    ct(d, W/2, H*0.968, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
+    d.text((x0,H*0.900),"Flash ",font=bf,fill=AMBER,anchor="lm")
+    d.text((x0+L.measure("Flash ",bf)[0],H*0.900),"le QR",font=bf,fill=WHITE,anchor="lm")
+    ct(d, W/2, H*0.946, "Grand tirage à la clôture du festival", 50, (214,220,238), 700)
+    ct(d, W/2, H*0.972, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
 PARTNERS = [
@@ -271,6 +275,7 @@ PARTNERS = [
     ("utile",          "Utile Vence",             "Bon d'achat",                    "nds_a4_utile"),
     ("carrosserie-gp", "Carrosserie GP",          "Bon d'achat révision",           "nds_a4_carrosserie-gp"),
     ("giordano",       "Électroménager Giordano", "Bon d'achat",                    "nds_a4_giordano"),
+    ("alafut",         "À la Fût",                "",                               "nds_a4_alafut"),
 ]
 if __name__=="__main__":
     for slug,com,lot,fn in PARTNERS:
