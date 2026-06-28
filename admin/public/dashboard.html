@@ -4136,10 +4136,14 @@ function renderNdsMedia(){
     kt+='<div style="border:1px solid var(--sa-border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">';
     kt+='<img src="'+cb+'/nds/kit-digital/'+s+'/nds_a4_'+s+'.png'+VER+'" style="width:110px;border-radius:6px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'">';
     kt+='<video src="'+cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER+'" controls preload="metadata" playsinline style="width:150px;border-radius:6px;border:1px solid var(--sa-border);background:#000;display:block"></video>';
-    kt+='<div style="flex:1;min-width:170px"><div style="font-weight:700;margin-bottom:6px">'+esc(p.nom)+'</div><div class="text-xs" style="line-height:2">'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER,'⬇ Vidéo')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/README.md','📄 Lisez-moi / textes')+'</div></div>';
+    kt+='<div style="display:flex;gap:8px">'
+      +'<div style="text-align:center"><img src="'+cb+'/nds/kit-digital/'+s+'/qr-station-'+s+'.png'+VER+'" style="width:84px;border-radius:6px;border:1px solid var(--sa-border);background:#fff" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin-top:3px;font-weight:700">QR station<br><span class="text-muted">sur site</span></div></div>'
+      +'<div style="text-align:center"><img src="'+cb+'/nds/kit-digital/'+s+'/qr-reseaux-'+s+'.png'+VER+'" style="width:84px;border-radius:6px;border:1px solid var(--sa-border);background:#fff" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin-top:3px;font-weight:700">QR réseaux<br><span class="text-muted">diffusion</span></div></div>'
+    +'</div>';
+    kt+='<div style="flex:1;min-width:170px"><div style="font-weight:700;margin-bottom:6px">'+esc(p.nom)+'</div><div class="text-xs" style="line-height:2">'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER,'⬇ Vidéo')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/README.md','📄 Lisez-moi / textes')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/qr-station-'+s+'.png'+VER,'⬇ QR station','#E8A33C')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/qr-reseaux-'+s+'.png'+VER,'⬇ QR réseaux','#E8A33C')+'</div></div>';
     kt+='</div>';
   });
-  h+=card('📦 Kits digitaux par partenaire (A4 + vidéo + textes)',kt);
+  h+=card('📦 Kits digitaux par partenaire (A4 + vidéo + QR station/réseaux + textes)',kt);
   var tk='<div class="text-xs" style="line-height:2">';
   ['concert','bergerie','carrosserie-gp','giordano','utile','pegase-formation125','pegase-remise'].forEach(function(t){ tk+=lnk(cb+'/nds/visuels/tickets/nds_tickets_'+t+'.pdf','🎟️ Tickets '+t+' (PDF)','#E8A33C')+'<br>'; });
   tk+='</div>'; h+=card('🎟️ Tickets tombola',tk);
