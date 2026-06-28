@@ -66,22 +66,51 @@ def wrap_ct(img,cx,cy,txt,size,col,maxw,lh,w=600):
     for ln in lines:
         d.text((cx,yy),ln,font=fnt,fill=col,anchor="mm"); yy+=lh
 
+def sponsor_strip(img, cy):
+    import os as _os
+    d=ImageDraw.Draw(img,"RGBA")
+    ct(img, W/2, cy-k(70), "NOS PARTENAIRES", k(34), TEAL, 800)
+    slots=[("pegase",), ("giordano",), (None,), (None,), (None,), (None,)]
+    margin=k(64); gap=k(26); n=6
+    avail=W-2*margin
+    cw=int((avail-(n-1)*gap)//n); ch=int(cw*0.66)
+    y=int(cy)
+    for i,(slug,) in enumerate(slots):
+        x=margin+i*(cw+gap)
+        p=f"/home/claude/repo/admin/public/nds/partenaires/{slug}.png" if slug else None
+        if p and _os.path.exists(p):
+            card=L.logo_card(p, cw, ch, pad_ratio=0.16, radius_ratio=0.14)
+            img.alpha_composite(card,(x,y))
+        else:
+            # placeholder pointille
+            ph=Image.new("RGBA",(cw,ch),(0,0,0,0))
+            pd=ImageDraw.Draw(ph)
+            for seg in range(0,cw,28):
+                pd.line([(seg,0),(seg+14,0)],fill=(255,255,255,90),width=3)
+                pd.line([(seg,ch-1),(seg+14,ch-1)],fill=(255,255,255,90),width=3)
+            for seg in range(0,ch,28):
+                pd.line([(0,seg),(0,seg+14)],fill=(255,255,255,90),width=3)
+                pd.line([(cw-1,seg),(cw-1,seg+14)],fill=(255,255,255,90),width=3)
+            pd.text((cw/2,ch/2),"+",font=L.font(int(ch*0.4),700),fill=(255,255,255,70),anchor="mm")
+            img.alpha_composite(ph,(x,y))
+
 def forex(station_id, station_label, fname):
     img=make_bg(); d=ImageDraw.Draw(img)
     # logo (contient deja dates+Vence) avec degagement
-    L.put_logo(img, W/2, H*0.098, 0.29*W/1080)
-    # CAISSE N -> chip en HAUT A DROITE
-    cfnt=L.font(k(48),800); ctw=L.measure(station_label.upper(),cfnt)[0]; cpadx=k(50)
+    L.put_logo(img, W/2, H*0.092, 0.28*W/1080)
+    # CAISSE N -> chip REDUIT, en haut a droite (sans chevauchement)
+    cfnt=L.font(k(34),800); ctw=L.measure(station_label.upper(),cfnt)[0]; cpadx=k(34)
     chipw=ctw+cpadx*2
-    L.chip(img, W-k(70)-chipw/2, H*0.050+k(38), station_label.upper(), cfnt, fill=L.ORANGE, fg=WHITE, padx=cpadx, pady=k(22))
-    # titre du panneau
-    ct(img, W/2, H*0.214, "STATION JEUX", k(50), TEAL, 800)
-    # hero action
-    ct(img, W/2, H*0.284, "FLASH · JOUE · GAGNE", k(82), AMBER, 800)
-    # QR central (la star) — plus de place sans 'Flash le QR' ni contact
-    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.560, k(410))
-    # 1 seule ligne benefice
-    wrap_ct(img, W/2, H*0.836, "Gagne des places de concert + le grand tirage des bons d'achat", k(42), WHITE, int(W*0.82), k(58), 700)
+    L.chip(img, W-k(60)-chipw/2, H*0.045+k(30), station_label.upper(), cfnt, fill=L.ORANGE, fg=WHITE, padx=cpadx, pady=k(16))
+    # eyebrow
+    ct(img, W/2, H*0.200, "STATION JEUX", k(48), TEAL, 800)
+    # TITRE (essai) : Gagne tes places de concert & bons d'achat
+    ct(img, W/2, H*0.262, "GAGNE TES PLACES DE CONCERT", k(58), AMBER, 800)
+    ct(img, W/2, H*0.312, "& BONS D'ACHAT", k(58), WHITE, 800)
+    # QR central
+    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.560, k(360))
+    # bandeau sponsors (6 emplacements)
+    sponsor_strip(img, H*0.880)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
 
 JOBS = [

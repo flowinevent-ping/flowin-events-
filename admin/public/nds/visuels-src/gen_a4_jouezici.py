@@ -35,7 +35,6 @@ def make_bg():
     _radial(acc,W*0.16,H*0.62,W*0.56,(22,96,92),0.32)
     _radial(acc,W*0.84,H*0.66,W*0.56,(80,52,28),0.22)
     img=Image.fromarray(np.clip(base+acc,0,255).astype(np.uint8),"RGB").convert("RGBA")
-    _confetti(img)
     _BG[0]=img
     return _BG[0].copy()
 
@@ -109,7 +108,7 @@ def step(img, cx, cy, num, icon_fn, big, small, ring):
     R=128
     # halo
     halo=Image.new("RGBA",(R*4,R*4),(0,0,0,0))
-    ImageDraw.Draw(halo).ellipse([R,R,R*3,R*3],fill=ring+(90,))
+    ImageDraw.Draw(halo).ellipse([R,R,R*3,R*3],fill=ring+(55,))
     halo=halo.filter(ImageFilter.GaussianBlur(40)); img.alpha_composite(halo,(int(cx-R*2),int(cy-R*2)))
     # disque verre
     disc=Image.new("RGBA",(R*2,R*2),(0,0,0,0))
@@ -225,34 +224,45 @@ def grand_tirage_pill(img, cx, cy):
     pd.text((w/2,h/2),txt,font=fnt,fill=INK+(255,),anchor="mm")
     img.alpha_composite(pill,(int(cx-w/2),int(cy-h/2)))
 
+def qr_sobre(img, qr_path, cx, cy, qsz):
+    halo=Image.new("RGBA",(qsz*2,qsz*2),(0,0,0,0))
+    ImageDraw.Draw(halo).ellipse([qsz*0.25,qsz*0.25,qsz*1.75,qsz*1.75],fill=AMBER+(95,))
+    halo=halo.filter(ImageFilter.GaussianBlur(58)); img.alpha_composite(halo,(int(cx-qsz),int(cy-qsz)))
+    qr=Image.open(qr_path).convert("RGB").resize((qsz,qsz),Image.NEAREST)
+    pad=int(qsz*0.07); cw=qsz+pad*2
+    card=Image.new("RGBA",(cw,cw),(0,0,0,0))
+    ImageDraw.Draw(card).rounded_rectangle([0,0,cw-1,cw-1],radius=int(cw*0.06),fill=(255,255,255,255))
+    card.paste(qr,(pad,pad)); img.alpha_composite(card,(int(cx-cw/2),int(cy-cw/2)))
+
 def a4(slug, commerce, lot_title, fname):
     img=make_bg(); d=ImageDraw.Draw(img,"RGBA")
-    L.put_logo(img, W/2, H*0.072, 0.98)
-    # titre energetique
-    ct(d, W/2, H*0.150, "JOUEZ & GAGNEZ", 188, AMBER, 800)
-    ct(d, W/2, H*0.190, "pendant les Nuits du Sud", 56, WHITE, 600)
-    # parcours 3 etapes
-    ys=H*0.300
+    L.put_logo(img, W/2, H*0.080, 0.95)
+    # parcours 3 etapes (sobre)
+    ys=H*0.250
     xs=[W*0.215, W*0.5, W*0.785]
     connector(img, xs[0]+150, xs[1]-150, ys)
     connector(img, xs[1]+150, xs[2]-150, ys)
     step(img, xs[0], ys, 1, icon_qr,   "FLASH", "le QR",   MAGENTA)
     step(img, xs[1], ys, 2, icon_quiz, "JOUE",  "le quiz", TEAL)
     step(img, xs[2], ys, 3, icon_gift, "GAGNE", "des lots", AMBER)
-    # gains en tickets (tilt)
-    t1=prize_ticket(4, 900, 300, ((232,40,150),(120,46,196)), icon_music, "Places de concert")
-    t2=prize_ticket(-4, 900, 300, ((255,180,64),(240,120,20)), icon_gift, "Bons d'achat", dark=True)
-    img.alpha_composite(t1,(int(W*0.045), int(H*0.430)))
-    img.alpha_composite(t2,(int(W*0.515), int(H*0.452)))
+    # gains : 2 chips sobres
+    c1="Places de concert"; c2="Bons d'achat"
+    f=L.font(52,800)
+    w1=L.measure(c1,f)[0]+112; w2=L.measure(c2,f)[0]+112; gap=44
+    tot=w1+w2+gap
+    L.chip(img, W/2-tot/2+w1/2, H*0.392, c1, f, fill=TEAL, fg=INK, padx=56, pady=24)
+    L.chip(img, W/2+tot/2-w2/2, H*0.392, c2, f, fill=L.ORANGE, fg=WHITE, padx=56, pady=24)
+    # incentive cle
+    ct(d, W/2, H*0.452, "+ tu joues, plus tu augmentes tes chances", 58, AMBER, 800)
     # commerce focal
-    ct(d, W/2, H*0.576, "Jouez ici, chez " + commerce, 68, WHITE, 800)
-    logo_badge(img, slug, W*0.5, H*0.630, 220)
-    L.chip(img, W/2, H*0.684, "Votre lot : " + lot_title, L.font(54,800), fill=TEAL, fg=INK, padx=52, pady=24)
-    # QR focal
-    qr_focal(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.824, 600)
-    # badge grand tirage
-    grand_tirage_pill(img, W/2, H*0.940)
-    ct(d, W/2, H*0.974, "Jeu gratuit · sans obligation d'achat", 34, MUTE, 600)
+    ct(d, W/2, H*0.534, "Jouez ici, chez " + commerce, 64, WHITE, 800)
+    logo_badge(img, slug, W*0.5, H*0.594, 210)
+    L.chip(img, W/2, H*0.648, "Votre lot : " + lot_title, L.font(52,800), fill=(36,30,64), fg=WHITE, padx=50, pady=22)
+    # QR sobre (facon forex)
+    qr_sobre(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.792, 660)
+    # footer sobre
+    ct(d, W/2, H*0.928, "Grand tirage à la clôture du festival", 50, WHITE, 700)
+    ct(d, W/2, H*0.962, "Jeu gratuit · sans obligation d'achat", 36, MUTE, 600)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
 PARTNERS = [
