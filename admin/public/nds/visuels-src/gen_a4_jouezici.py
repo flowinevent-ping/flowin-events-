@@ -156,31 +156,30 @@ def step_chip(img, cx, cy, n, txt, maxw):
 
 def a4(slug, commerce, gift_concert, lot_title, fname):
     img = make_bg(); d = ImageDraw.Draw(img)
-    L.put_logo(img, W/2, H*0.066, 1.02)
-    ct(d, W/2, H*0.118, "GRAND JEU DES NUITS DU SUD", 70, TEAL, 700)
-    ct(d, W/2, H*0.175, "FLASH", 300, AMBER, 800)
-    ct(d, W/2, H*0.238, "JOUE · GAGNE", 168, WHITE, 800)
+    # logo (contient deja dates+Vence) avec degagement -> pas d'eyebrow superpose
+    L.put_logo(img, W/2, H*0.082, 1.02)
+    # hero
+    ct(d, W/2, H*0.168, "FLASH", 300, AMBER, 800)
+    ct(d, W/2, H*0.228, "JOUE · GAGNE", 168, WHITE, 800)
     # 2 cartes gains
     cw, ch = 940, 360; gap=80
-    gain_card(img, W/2 - (cw+gap)/2, H*0.340, cw, ch, ((232,40,150),(120,46,196)), "music", "À GAGNER", "Places de concert")
-    gain_card(img, W/2 + (cw+gap)/2, H*0.340, cw, ch, ((255,176,60),(240,120,20)), "gift", "À GAGNER", "Bons d'achat", dark=True)
+    gain_card(img, W/2 - (cw+gap)/2, H*0.328, cw, ch, ((232,40,150),(120,46,196)), "music", "À GAGNER", "Places de concert")
+    gain_card(img, W/2 + (cw+gap)/2, H*0.328, cw, ch, ((255,176,60),(240,120,20)), "gift", "À GAGNER", "Bons d'achat", dark=True)
     # jouez ici + logo commerce
-    ct(d, W/2, H*0.458, "Jouez ici, chez", 70, WHITE, 700)
-    ct(d, W/2, H*0.498, commerce, 86, AMBER, 800)
-    logo_badge(img, slug, W/2, H*0.574, 360)
+    ct(d, W/2, H*0.444, "Jouez ici, chez", 66, WHITE, 700)
+    ct(d, W/2, H*0.484, commerce, 84, AMBER, 800)
+    logo_badge(img, slug, W/2, H*0.560, 340)
     # lot du commerce (chip)
-    L.chip(img, W/2, H*0.648, "Votre lot : " + lot_title, L.font(58,800), fill=TEAL, fg=INK, padx=56, pady=26)
+    L.chip(img, W/2, H*0.636, "Votre lot : " + lot_title, L.font(58,800), fill=TEAL, fg=INK, padx=56, pady=26)
     # QR
-    qr_card(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.770, 700)
+    qr_card(img, f"/home/claude/vid/qr/{slug}_hd.png", W/2, H*0.776, 700)
     bf=L.font(82,800)
     fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2
-    d.text((x0,H*0.912),"Flash ",font=bf,fill=AMBER,anchor="lm")
-    d.text((x0+L.measure("Flash ",bf)[0],H*0.912),"le QR",font=bf,fill=WHITE,anchor="lm")
-    # cumule + tirage
-    wrap(d, W/2, H*0.948, "Cumule tes points chez les commerces partenaires et aux concerts · grand tirage à la clôture", 48, MUTE, int(W*0.86), 62, 600)
-    # bas dates + legal
-    ct(d, W/2, H*0.975, "Nuits du Sud · 9 → 18 juillet 2026 · Vence", 46, WHITE, 700)
-    ct(d, W/2, H*0.991, "Jeu gratuit · sans obligation d'achat", 36, (170,178,206), 600)
+    d.text((x0,H*0.918),"Flash ",font=bf,fill=AMBER,anchor="lm")
+    d.text((x0+L.measure("Flash ",bf)[0],H*0.918),"le QR",font=bf,fill=WHITE,anchor="lm")
+    # footer minimal (2 lignes)
+    ct(d, W/2, H*0.958, "Cumule tes points · grand tirage à la clôture", 46, (210,216,236), 600)
+    ct(d, W/2, H*0.982, "Jeu gratuit · sans obligation d'achat", 36, (160,168,196), 600)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
 PARTNERS = [

@@ -68,27 +68,24 @@ def wrap_ct(img,cx,cy,txt,size,col,maxw,lh,w=600):
 
 def forex(station_id, station_label, fname):
     img=make_bg(); d=ImageDraw.Draw(img)
-    L.put_logo(img, W/2, H*0.058, 0.30*W/1080)
-    # eyebrow STATION JEUX
-    ct(img, W/2, H*0.126, "STATION JEUX", k(52), TEAL, 800)
-    # hero
-    ct(img, W/2, H*0.182, "FLASH · JOUE · GAGNE", k(76), AMBER, 800)
-    ct(img, W/2, H*0.230, "TES PLACES DE CONCERT", k(54), WHITE, 800)
+    # logo (contient deja "9->18 Juillet 2026 . Vence") avec degagement
+    L.put_logo(img, W/2, H*0.098, 0.29*W/1080)
+    # titre du panneau
+    ct(img, W/2, H*0.208, "STATION JEUX", k(50), TEAL, 800)
+    # hero action
+    ct(img, W/2, H*0.276, "FLASH · JOUE · GAGNE", k(82), AMBER, 800)
     # chip station (caisse N)
-    L.chip(img, W/2, H*0.292, station_label.upper(), L.font(k(50),800), fill=L.ORANGE, fg=WHITE, padx=k(56), pady=k(22))
-    # QR central
-    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.508, k(360))
-    bf=L.font(k(54),800)
-    fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2; ylab=H*0.728
+    L.chip(img, W/2, H*0.356, station_label.upper(), L.font(k(54),800), fill=L.ORANGE, fg=WHITE, padx=k(60), pady=k(24))
+    # QR central (la star)
+    qr_card(img, f"/home/claude/vid/qr/{station_id}.png", W/2, H*0.580, k(380))
+    bf=L.font(k(58),800)
+    fw=L.measure("Flash ",bf)[0]+L.measure("le QR",bf)[0]; x0=W/2-fw/2; ylab=H*0.800
     d.text((x0,ylab),"Flash ",font=bf,fill=AMBER,anchor="lm")
     d.text((x0+L.measure("Flash ",bf)[0],ylab),"le QR",font=bf,fill=WHITE,anchor="lm")
-    ct(img, W/2, H*0.772, "Scanne · joue le quiz · cumule tes points", k(40), WHITE, 700)
-    # grand tirage bons d'achat partenaires
-    wrap_ct(img, W/2, H*0.838, "Participe au grand tirage des bons d'achat chez nos commerces partenaires", k(40), MUTE, int(W*0.82), k(54), 600)
-    # signature + contact
-    ct(img, W/2, H*0.912, L.SIGN, k(44), TEAL, 800)
-    ct(img, W/2, H*0.948, "Nuits du Sud · 9 → 18 juillet 2026 · Vence", k(32), WHITE, 700)
-    ct(img, W/2, H*0.976, L.CONTACT, k(30), (190,196,224), 600)
+    # 1 seule ligne benefice
+    wrap_ct(img, W/2, H*0.876, "Gagne des places de concert + le grand tirage des bons d'achat", k(40), WHITE, int(W*0.80), k(56), 600)
+    # contact discret
+    ct(img, W/2, H*0.962, L.CONTACT, k(30), (180,188,216), 600)
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(127,127)); return p
 
 JOBS = [
