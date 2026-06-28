@@ -6283,9 +6283,42 @@ function drawerPartner(p){
     {id:'stats',   label:'Stats'},
     {id:'lots',    label:'Lots',   badge:lots.length||null},
     {id:'events',  label:'Events', badge:events.length||null},
+    {id:'comm',    label:'Élément comm'},
     {id:'contrat', label:'Contrat'}
   ]);
   html += '<div class="drawer-body">';
+
+  /* ══════════════════════════════ TAB ÉLÉMENT COMM ══════════════════════════════ */
+  if(state.drawer.tab==='comm'){
+    var cb = 'https://flowin-events.vercel.app';
+    var cslug = (p.id||'').replace('pt-','');
+    var a4u = cb+'/nds/visuels/nds_a4_'+cslug+'.png';
+    var vidu = cb+'/nds/kit-digital/'+cslug+'/video-'+cslug+'-9x16.mp4';
+    var kitu = cb+'/nds/kit-digital/'+cslug+'/';
+    var ticku = cb+'/nds/visuels/tickets/nds_tickets_'+cslug+'.pdf';
+    html += '<div class="alert info"><span class="ico">🎨</span>Éléments de communication de '+esc(p.nom)+' — prêts à imprimer / diffuser.</div>';
+    html += '<div class="section-h">📄 Affiche A4 (boutique)</div>';
+    html += '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">';
+    html += '<img src="'+a4u+'" style="width:120px;border-radius:8px;border:1px solid #2a2f45" onerror="this.style.display=\'none\'">';
+    html += '<div style="flex:1"><div class="text-xs text-muted mb-2">Affiche à la charte NDS, QR de la station du commerce.</div>';
+    html += '<a href="'+a4u+'" target="_blank" class="btn-sm" style="display:inline-block;background:#3B5CC4;color:#fff;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">⬇ Télécharger l\'A4</a></div></div>';
+    html += '<div class="section-h">🎬 Vidéo du commerce (9×16)</div>';
+    html += '<div class="mb-3"><a href="'+vidu+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">▶ video-'+esc(cslug)+'-9x16.mp4</a></div>';
+    html += '<div class="section-h">🎟️ Tickets tombola (à imprimer)</div>';
+    html += '<div class="mb-3"><a href="'+ticku+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">⬇ Planche tickets PDF</a> <span class="text-xs text-muted">(n° de série, champs gagnant à remplir)</span></div>';
+    html += '<div class="section-h">📦 Kit digital complet</div>';
+    html += '<div class="mb-3"><a href="'+kitu+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">📁 /nds/kit-digital/'+esc(cslug)+'/</a> <span class="text-xs text-muted">(affiche + vidéo + README)</span></div>';
+    html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
+    html += '<div class="text-xs" style="line-height:1.9">';
+    html += '<a href="'+cb+'/nds/kit-digital/nds/nds-insta-9x16.mp4" target="_blank" style="color:#22D3C6;font-weight:700">▶ Vidéo Insta (9×16)</a><br>';
+    html += '<a href="'+cb+'/nds/kit-digital/nds/nds-fb-16x9.mp4" target="_blank" style="color:#22D3C6;font-weight:700">▶ Vidéo Facebook (16×9)</a><br>';
+    html += '<a href="'+cb+'/nds/kit-digital/nds/nds-ecrans-9x16.mp4" target="_blank" style="color:#22D3C6;font-weight:700">▶ Vidéo écrans festival (9×16)</a><br>';
+    html += '<a href="'+cb+'/nds/kit-digital/nds/nds-partenaire-16x9.mp4" target="_blank" style="color:#22D3C6;font-weight:700">▶ Vidéo partenaire (16×9)</a><br>';
+    html += '<a href="'+cb+'/nds/visuels/forex/forex_70x70_caisse-1.png" target="_blank" style="color:#E8A33C;font-weight:700">⬇ Forex Station Jeux (70×70)</a>';
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }
 
   /* ══════════════════════════════ TAB INFOS ══════════════════════════════ */
   if(state.drawer.tab==='infos'){
