@@ -225,7 +225,8 @@ def grand_tirage_pill(img, cx, cy):
     pill=Image.new("RGBA",(w,h),(0,0,0,0)); pd=ImageDraw.Draw(pill)
     pd.rounded_rectangle([0,0,w-1,h-1],radius=h//2,fill=AMBER+(255,))
     pd.rounded_rectangle([7,7,w-8,h-8],radius=(h-14)//2,outline=(255,255,255,150),width=4)
-    pd.text((w/2,h/2),txt,font=fnt,fill=INK+(255,),anchor="mm")
+    if not _PLATE:
+        pd.text((w/2,h/2),txt,font=fnt,fill=INK+(255,),anchor="mm")
     img.alpha_composite(pill,(int(cx-w/2),int(cy-h/2)))
     _TEXTLOG.append((txt,cx,cy,60,INK,800))
 
