@@ -14,6 +14,7 @@ AMBER = (244, 181, 68)
 WHITE = (255, 255, 255)
 MAGENTA = (230, 24, 127)
 PURPLE = (124, 58, 200)
+TEAL = (32, 224, 196)
 
 def clamp(x, a=0., b=1.): return max(a, min(b, x))
 def eo(x): x = clamp(x); return 1 - (1 - x) ** 3
@@ -299,9 +300,9 @@ def scene(t):
         pop(img, tl("À GAGNER", 66, AMBER), W / 2, H * 0.095, ramp(lt, 0.0, 0.45))
         a4_ticket(img, "concert", W / 2, H * 0.300, int(W * 0.62), ramp(lt, 0.4, 0.95))
         a4_ticket(img, "voucher", W / 2, H * 0.475, int(W * 0.62), ramp(lt, 0.9, 1.45))
-        if lt > 2.2:
-            pop(img, tl("Chaque soir · places de concert", 42, AMBER), W / 2, H * 0.645, ramp(lt, 2.2, 2.7))
-            pop(img, tl("Grand tirage final · bons d'achat", 42, WHITE), W / 2, H * 0.683, ramp(lt, 2.4, 2.9))
+        if lt > 1.3:
+            pop(img, tl("Des places de concert", 44, TEAL), W / 2, H * 0.640, ramp(lt, 1.3, 1.8))
+            pop(img, tl("Des bons d'achat", 44, AMBER), W / 2, H * 0.690, ramp(lt, 1.5, 2.0))
     elif t < 18.5:                                 # FLASH AUX STATIONS (icones + lueur)
         lt = t - 13.5
         pop(img, tl("FLASH AUX", 96, WHITE), W / 2, H * 0.22, ramp(lt, 0.0, 0.45))
