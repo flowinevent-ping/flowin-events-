@@ -3,6 +3,14 @@
 > Document de reprise. Dernière mise à jour : **23/06/2026** (session présentation/visuels/bon de commande). HEAD au moment du handoff : `b8dfcc6` (toujours revérifier via `git log` — ne pas supposer).
 > Objectif : reprendre le projet dans une nouvelle session SANS dégradation ni perte des tâches accomplies.
 
+> ⚠️ **SOURCE À JOUR = table Supabase `handoff_notes` clé `handoff-nds-2026-comm`** (maj 29/06). Ce .md racine n'est pas resynchronisé intégralement.
+>
+> **Session 29/06 (suite)** — HEAD `158248e`. Supports éditables PPTX livrés car les SVG ne sont pas éditables dans Canva :
+> - **A4 éditables** (6 commerces) `e31705f` : `kit-digital/<slug>/nds_a4_<slug>-editable.pptx` (décor image + 10 zones de texte ; 'GRAND TIRAGE' exclu car brûlé dans le plate). Repro : `visuels-src/extract_a4_pptx.py` + `gen_pptx_a4.js`.
+> - **Tickets tombola éditables** (7 lots) `158248e` : `visuels/tickets/nds_ticket_<lot>-editable.pptx` (lot/partenaire-valeur/n° série éditables). Repro : `visuels-src/gen_ticket_plate.py` + `gen_pptx_tickets.js`.
+> - Pièges PPTX : `writeFile` async → `Promise.all` avant rezip (sinon fichiers tronqués 512Ko) ; recompresser via `pptx/scripts/rezip.py` ; installer Manrope en police système pour un QA fidèle.
+> - Mail Lucie (Giordano) corrigé + liens. 3 points à trancher par Romain : 6×42=252 (pas 256), pack 2000€ HT ou TTC, articulation fiche/carte 500HT vs pack 2000.
+
 ## 0. SESSION 23/06/2026 — ÉTAT LE PLUS RÉCENT (à lire EN PREMIER)
 
 > Prod toujours gelée (festival 9–18 juil). Tout passe par : édition fichier → Acorn/MD5 (dashboard) ou screenshot Chromium (pages) → commit auteur Romain → push `main` → Vercel auto-deploy. DB via Supabase MCP uniquement.
