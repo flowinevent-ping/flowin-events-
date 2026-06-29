@@ -387,6 +387,7 @@ PARTNERS = [
     ("carrosserie-gp", "Carrosserie GP",          "2 bons d'achat révision",          "nds_a4_carrosserie-gp"),
     ("giordano",       "Électroménager Giordano", "2 bons d'achat à gagner",          "nds_a4_giordano"),
     ("alafut",         "À la Fût",                "",                                  "nds_a4_alafut"),
+    ("charvolin",      "Assurance Charvolin",     "",                                  "nds_a4_charvolin"),
 ]
 if __name__=="__main__":
     for slug,com,lot,fn in PARTNERS:
