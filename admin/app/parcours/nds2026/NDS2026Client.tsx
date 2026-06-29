@@ -122,6 +122,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const lotNom = (cfg.lotNom as string) || '3 places offertes'
   const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
   const lotResume = (cfg.lotResume as string) || '3 places pour ton prochain concert'
+  const lot2Nom = (cfg.lot2Nom as string) || "Bons d'achat partenaires"
+  const lot2Desc = (cfg.lot2Desc as string) || 'Au grand tirage de fin de festival'
   const tirageHeure = (cfg.tirageHeure as string) || '12h30'
 
   const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
@@ -718,7 +720,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div><div className="nm">{lotNom}</div><div className="vl">{lotDesc}</div></div>
                 </div>
                 <div className="div" />
-                <div className="tir"><span className="dot" /> Grand tirage à la fin du festival · cadeau Partenaire</div>
+                <div className="prow">
+                  <span className="sq" style={{ background: 'linear-gradient(135deg,#E0218A,#8E2E9E)' }}><svg className="ic"><use href="#i-voucher" /></svg></span>
+                  <div><div className="nm">{lot2Nom}</div><div className="vl">{lot2Desc}</div></div>
+                </div>
               </div>
             </div>
             <div className="stage">
