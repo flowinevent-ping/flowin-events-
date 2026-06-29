@@ -9,9 +9,6 @@
 ## Vidéo 9×16 (réseaux / écran)
 - `video-carrosserie-gp-9x16.mp4` — QR **réseaux** intégré (lien tracké). Éditable dans CapCut (MP4).
 
-## Cartes QR (à distinguer les 2 usages)
-- 🟧 `carte-qr-station-carrosserie-gp.png` — **EN BOUTIQUE** (sur place). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-carrosserie-gp
-- 🟥 `carte-qr-reseaux-carrosserie-gp.png` — **EN LIGNE** (à poster). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-carrosserie-gp&source=reseaux-carrosserie-gp
 - QR seuls : `qr-station-carrosserie-gp.png`, `qr-reseaux-carrosserie-gp.png`
 
 ## Textes Insta / Facebook prêts à copier

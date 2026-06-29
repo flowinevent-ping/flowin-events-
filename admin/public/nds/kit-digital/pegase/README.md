@@ -9,9 +9,6 @@
 ## Vidéo 9×16 (réseaux / écran)
 - `video-pegase-9x16.mp4` — QR **réseaux** intégré (lien tracké). Éditable dans CapCut (MP4).
 
-## Cartes QR (à distinguer les 2 usages)
-- 🟧 `carte-qr-station-pegase.png` — **EN BOUTIQUE** (sur place). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-pegase
-- 🟥 `carte-qr-reseaux-pegase.png` — **EN LIGNE** (à poster). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-pegase&source=reseaux-pegase
 - QR seuls : `qr-station-pegase.png`, `qr-reseaux-pegase.png`
 
 ## Textes Insta / Facebook prêts à copier

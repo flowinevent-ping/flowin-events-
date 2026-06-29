@@ -9,9 +9,6 @@
 ## Vidéo 9×16 (réseaux / écran)
 - `video-alafut-9x16.mp4` — QR **réseaux** intégré (lien tracké). Éditable dans CapCut (MP4).
 
-## Cartes QR (à distinguer les 2 usages)
-- 🟧 `carte-qr-station-alafut.png` — **EN BOUTIQUE** (sur place). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-alafut
-- 🟥 `carte-qr-reseaux-alafut.png` — **EN LIGNE** (à poster). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-alafut&source=reseaux-alafut
 - QR seuls : `qr-station-alafut.png`, `qr-reseaux-alafut.png`
 
 ## Textes Insta / Facebook prêts à copier

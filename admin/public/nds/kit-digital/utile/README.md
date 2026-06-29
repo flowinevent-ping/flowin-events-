@@ -9,9 +9,6 @@
 ## Vidéo 9×16 (réseaux / écran)
 - `video-utile-9x16.mp4` — QR **réseaux** intégré (lien tracké). Éditable dans CapCut (MP4).
 
-## Cartes QR (à distinguer les 2 usages)
-- 🟧 `carte-qr-station-utile.png` — **EN BOUTIQUE** (sur place). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-utile
-- 🟥 `carte-qr-reseaux-utile.png` — **EN LIGNE** (à poster). Lien : https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-utile&source=reseaux-utile
 - QR seuls : `qr-station-utile.png`, `qr-reseaux-utile.png`
 
 ## Textes Insta / Facebook prêts à copier
