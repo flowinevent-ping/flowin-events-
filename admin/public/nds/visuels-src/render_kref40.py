@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/fk40"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/ecrans_hd.png").convert("RGB")
-LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut"]}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut", "charvolin"]}
 
 BG = (9, 16, 32)
 AMBER = (244, 181, 68)
@@ -286,15 +286,16 @@ def a4_ticket(base, kind, cx, cy, w, prog):
 def scene(t):
     # TOUT sauf le QR (badge + carte finale), pour rendu base reutilisable
     img = make_bg(t)
-    if t < 3.0:                                    # INTRO
-        L.put_logo(img, W / 2, H * 0.30, 0.56 * eo(ramp(t, 0.1, 0.7)), alpha=eo(ramp(t, 0.1, 0.6)))
-        if t > 0.7: pop(img, tl("LE GRAND JEU", 96, WHITE), W / 2, H * 0.50, ramp(t, 0.7, 1.2))
-        if t > 1.1: pop(img, tl("DU FESTIVAL", 96, AMBER), W / 2, H * 0.585, ramp(t, 1.1, 1.6))
-    elif t < 7.6:                                  # FLASH. JOUE. GAGNE.
+    if t < 3.0:                                    # INTRO — "CE SOIR / GRAND JEU" + logo NDS (façon réf 13s)
+        if t > 0.3: pop(img, tl("CE SOIR", 54, TEAL), W / 2, H * 0.295, ramp(t, 0.3, 0.8))
+        if t > 0.6: pop(img, tl("GRAND", 152, AMBER), W / 2, H * 0.40, ramp(t, 0.6, 1.1))
+        if t > 0.9: pop(img, tl("JEU", 152, MAGENTA), W / 2, H * 0.515, ramp(t, 0.9, 1.4))
+        L.put_logo(img, W / 2, H * 0.66, 0.40 * eo(ramp(t, 1.3, 2.0)), alpha=eo(ramp(t, 1.3, 1.9)))
+    elif t < 7.6:                                  # FLASH. / JOUE. / GAGNE. — un mot plein écran à la fois (façon réf 13s)
         lt = t - 3.0
-        for (w, c, d0), y in zip([("FLASH.", AMBER, 0.0), ("JOUE.", WHITE, 0.7), ("GAGNE.", MAGENTA, 1.4)], [H * 0.32, H * 0.47, H * 0.62]):
-            p = ramp(lt, d0, d0 + 0.55)
-            if p > 0: pop(img, tl(w, 168, c), W / 2, y, p, 0.5)
+        for (w, c, a, b) in [("FLASH.", AMBER, 0.0, 1.5), ("JOUE.", MAGENTA, 1.5, 3.0), ("GAGNE.", TEAL, 3.0, 4.6)]:
+            if a <= lt < b:
+                pop(img, tl(w, 224, c), W / 2, H * 0.46, ramp(lt, a, a + 0.5), 0.5)
     elif t < 13.5:                                 # GAINS — tickets A4 (concert teal + bon d'achat amber)
         lt = t - 7.6
         pop(img, tl("À GAGNER", 66, AMBER), W / 2, H * 0.095, ramp(lt, 0.0, 0.45))
@@ -317,18 +318,23 @@ def scene(t):
         pop(img, tl("TES POINTS", 132, WHITE), W / 2, H * 0.42, ramp(lt, 0.25, 0.75))
         pop(img, tl("REMPORTE", 132, MAGENTA), W / 2, H * 0.55, ramp(lt, 0.7, 1.2))
         pop(img, tl("LES LOTS !", 132, MAGENTA), W / 2, H * 0.65, ramp(lt, 0.9, 1.4))
-    elif t < 29.5:                                 # PARTENAIRES — 5 logos (Giordano inclus)
+    elif t < 29.5:                                 # PARTENAIRES — 7 logos (Charvolin inclus), layout 2-3-2 au-dessus du QR badge
         lt = t - 23.0
         pop(img, tl("JOUE CHEZ NOS PARTENAIRES", 56, AMBER), W / 2, H * 0.115, ramp(lt, 0.0, 0.45))
         pop(img, tl("pendant toute la durée du festival !", 40, WHITE), W / 2, H * 0.175, ramp(lt, 0.2, 0.65))
-        tw, th = 462, 248; gx = W * 0.5
-        # 2 + 2 + 2 (6 logos avec Alafut)
-        logo_tile(img, "bergerie", gx - (tw/2 + 20), H * 0.300, tw, th, ramp(lt, 0.5, 0.95))
-        logo_tile(img, "pegase",   gx + (tw/2 + 20), H * 0.300, tw, th, ramp(lt, 0.70, 1.15))
-        logo_tile(img, "utile",    gx - (tw/2 + 20), H * 0.470, tw, th, ramp(lt, 0.90, 1.35))
-        logo_tile(img, "carrosserie-gp", gx + (tw/2 + 20), H * 0.470, tw, th, ramp(lt, 1.10, 1.55))
-        logo_tile(img, "giordano", gx - (tw/2 + 20), H * 0.640, tw, th, ramp(lt, 1.30, 1.75))
-        logo_tile(img, "alafut",   gx + (tw/2 + 20), H * 0.640, tw, th, ramp(lt, 1.50, 1.95))
+        tw, th = 330, 177; gx = W * 0.5
+        dx2 = tw/2 + 20            # demi-écart rangée à 2 colonnes
+        dx3 = tw + 24             # écart rangée à 3 colonnes
+        # rangée 1 (2 logos)
+        logo_tile(img, "bergerie", gx - dx2, H * 0.300, tw, th, ramp(lt, 0.50, 0.95))
+        logo_tile(img, "pegase",   gx + dx2, H * 0.300, tw, th, ramp(lt, 0.66, 1.11))
+        # rangée 2 (3 logos) — Charvolin au centre
+        logo_tile(img, "utile",          gx - dx3, H * 0.450, tw, th, ramp(lt, 0.82, 1.27))
+        logo_tile(img, "charvolin",      gx,       H * 0.450, tw, th, ramp(lt, 0.98, 1.43))
+        logo_tile(img, "carrosserie-gp", gx + dx3, H * 0.450, tw, th, ramp(lt, 1.14, 1.59))
+        # rangée 3 (2 logos) — reste au-dessus du QR badge (top badge ≈ y0.712)
+        logo_tile(img, "giordano", gx - dx2, H * 0.600, tw, th, ramp(lt, 1.30, 1.75))
+        logo_tile(img, "alafut",   gx + dx2, H * 0.600, tw, th, ramp(lt, 1.46, 1.91))
     else:                                          # FINALE — titre + texte (QR ajoute par finale_qr)
         lt = t - 29.5
         pop(img, tl("FLASH LE QR", 116, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))
