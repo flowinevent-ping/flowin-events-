@@ -289,7 +289,6 @@ def scene(t):
         L.put_logo(img, W / 2, H * 0.30, 0.56 * eo(ramp(t, 0.1, 0.7)), alpha=eo(ramp(t, 0.1, 0.6)))
         if t > 0.7: pop(img, tl("LE GRAND JEU", 96, WHITE), W / 2, H * 0.50, ramp(t, 0.7, 1.2))
         if t > 1.1: pop(img, tl("DU FESTIVAL", 96, AMBER), W / 2, H * 0.585, ramp(t, 1.1, 1.6))
-        if t > 1.8: pop(img, tl("9 → 18 juillet · Vence", 46, WHITE), W / 2, H * 0.66, ramp(t, 1.8, 2.3))
     elif t < 7.6:                                  # FLASH. JOUE. GAGNE.
         lt = t - 3.0
         for (w, c, d0), y in zip([("FLASH.", AMBER, 0.0), ("JOUE.", WHITE, 0.7), ("GAGNE.", MAGENTA, 1.4)], [H * 0.32, H * 0.47, H * 0.62]):
@@ -301,8 +300,8 @@ def scene(t):
         a4_ticket(img, "concert", W / 2, H * 0.300, int(W * 0.62), ramp(lt, 0.4, 0.95))
         a4_ticket(img, "voucher", W / 2, H * 0.475, int(W * 0.62), ramp(lt, 0.9, 1.45))
         if lt > 2.2:
-            pop(img, tl("Un tirage chaque soir · places de concert", 42, AMBER), W / 2, H * 0.645, ramp(lt, 2.2, 2.7))
-            pop(img, tl("+ grand tirage à la fin du festival", 42, WHITE), W / 2, H * 0.683, ramp(lt, 2.4, 2.9))
+            pop(img, tl("Chaque soir · places de concert", 42, AMBER), W / 2, H * 0.645, ramp(lt, 2.2, 2.7))
+            pop(img, tl("Grand tirage final · bons d'achat", 42, WHITE), W / 2, H * 0.683, ramp(lt, 2.4, 2.9))
     elif t < 18.5:                                 # FLASH AUX STATIONS (icones + lueur)
         lt = t - 13.5
         pop(img, tl("FLASH AUX", 96, WHITE), W / 2, H * 0.22, ramp(lt, 0.0, 0.45))
