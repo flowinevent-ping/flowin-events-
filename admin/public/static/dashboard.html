@@ -4109,7 +4109,9 @@ function renderNdsMedia(){
   a4+='</div>'; h+=card('📄 Affiches A4 ('+nds.length+') — version à jour',a4);
   function vrow(items){ var s='<div>'; items.forEach(function(it){ s+=vid(cb+it[0]+VER,it[1],it[2]); }); return s+'</div>'; }
   h+=card('🎬 Promo & écrans festival',vrow([
-    ['/nds/visuels/nds-ecrans-kinetic40-9x16.mp4','Écran festival kinétique 40s (9×16)',true],
+    ['/nds/kit-digital/nds/nds-ecrans-9x16.mp4','Écrans festival (9×16)',true],
+    ['/nds/visuels/nds-ecrans-kinetic-9x16.mp4','Écran kinétique 13s (9×16)',true],
+    ['/nds/visuels/nds-ecrans-kinetic40-9x16.mp4','Écran kinétique 40s (9×16)',true],
     ['/nds/visuels/nds-spot-nds2026-16x9.mp4','Spot NDS 2026 (16×9)',false]
   ]));
   h+=card('🤝 Présentation partenaires',vrow([
@@ -4137,13 +4139,13 @@ function renderNdsMedia(){
     kt+='<img src="'+cb+'/nds/kit-digital/'+s+'/nds_a4_'+s+'.png'+VER+'" style="width:110px;border-radius:6px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'">';
     kt+='<video src="'+cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER+'" controls preload="metadata" playsinline style="width:150px;border-radius:6px;border:1px solid var(--sa-border);background:#000;display:block"></video>';
     kt+='<div style="display:flex;gap:8px">'
-      +'<img src="'+cb+'/nds/kit-digital/'+s+'/carte-qr-station-'+s+'.png'+VER+'" title="Carte QR station (en boutique)" style="width:118px;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'">'
-      +'<img src="'+cb+'/nds/kit-digital/'+s+'/carte-qr-reseaux-'+s+'.png'+VER+'" title="Carte QR reseaux (en ligne)" style="width:118px;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'">'
+      +'<div style="text-align:center"><img src="'+cb+'/nds/kit-digital/'+s+'/qr-station-'+s+'.png'+VER+'" title="QR station" style="width:80px;border-radius:6px;border:1px solid var(--sa-border)"><div class="text-xs" style="margin-top:4px;color:var(--sa-muted)">QR station</div></div>'
+      +'<div style="text-align:center"><img src="'+cb+'/nds/kit-digital/'+s+'/qr-reseaux-'+s+'.png'+VER+'" title="QR réseaux" style="width:80px;border-radius:6px;border:1px solid var(--sa-border)"><div class="text-xs" style="margin-top:4px;color:var(--sa-muted)">QR réseaux</div></div>'
     +'</div>';
-    kt+='<div style="flex:1;min-width:170px"><div style="font-weight:700;margin-bottom:6px">'+esc(p.nom)+'</div><div class="text-xs" style="line-height:2">'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER,'⬇ Vidéo')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/README.md','📄 Lisez-moi / textes')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/carte-qr-station-'+s+'.png'+VER,'⬇ Carte station','#E8A33C')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/carte-qr-reseaux-'+s+'.png'+VER,'⬇ Carte réseaux','#E8A33C')+'<br><span class="text-muted">QR seul :</span> '+lnk(cb+'/nds/kit-digital/'+s+'/qr-station-'+s+'.png'+VER,'station')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/qr-reseaux-'+s+'.png'+VER,'réseaux')+'</div></div>';
+    kt+='<div style="flex:1;min-width:170px"><div style="font-weight:700;margin-bottom:6px">'+esc(p.nom)+'</div><div class="text-xs" style="line-height:2">'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/video-'+s+'-9x16.mp4'+VER,'⬇ Vidéo')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'<br>'+lnk(cb+'/nds/kit-digital/'+s+'/README.md','📄 Lisez-moi / textes')+'<br><span class="text-muted">QR seul :</span> '+lnk(cb+'/nds/kit-digital/'+s+'/qr-station-'+s+'.png'+VER,'⬇ station')+' · '+lnk(cb+'/nds/kit-digital/'+s+'/qr-reseaux-'+s+'.png'+VER,'⬇ réseaux')+'</div></div>';
     kt+='</div>';
   });
-  h+=card('📦 Kits digitaux par partenaire (A4 + vidéo + cartes QR boutique/réseaux + textes)',kt);
+  h+=card('📦 Kits digitaux par partenaire (A4 + vidéo + QR codes + textes)',kt);
   var tk='<div class="text-xs" style="line-height:2">';
   ['concert','bergerie','carrosserie-gp','giordano','utile','pegase-formation125','pegase-remise'].forEach(function(t){ tk+=lnk(cb+'/nds/visuels/tickets/nds_tickets_'+t+'.pdf','🎟️ Tickets '+t+' (PDF)','#E8A33C')+'<br>'; });
   tk+='</div>'; h+=card('🎟️ Tickets tombola',tk);
