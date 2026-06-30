@@ -1,3 +1,15 @@
+## 🎬 SESSION 30/06 (suite 4) — RENDU FINAL livré parcours-jeu-flowin-nds v2
+
+Le montage v2 (script `render_parcours_flowin.py` stocké dans handoff Supabase `script-render-parcours-flowin-v2`) a été **rendu et livré**. Aucune modification du montage (déjà validé), uniquement rendu + intégration.
+
+- ✅ Script récupéré depuis Supabase → écrit dans `admin/public/nds/visuels-src/render_parcours_flowin.py` (committé, syntaxe OK).
+- ✅ Rendu 888 frames (0→888, 3 chunks ≤300) en PIL, 1080×1920 24fps ; assemblage ffmpeg libx264 crf19 ; audio **bergerie** muxé `-shortest`.
+- ✅ `parcours-jeu-flowin-nds.mp4` : **1080×1920, 37s, H264+AAC, 4.31 Mo** (remplace v1 2.24 Mo).
+- ✅ QR vérifié pyzbar sur 6 timestamps (toutes scènes) → `https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-digitale`.
+- ✅ Copié dans `kit-digital/nds/parcours-jeu-flowin-nds.mp4` (md5 identique au master) ; commit `218ab06` poussé sur main → Vercel auto-deploy.
+- 6 scènes conformes : Flash.Joue.Gagne (Flash sans e) + ×Flowin / Comment ça marche (1-2-3) / À gagner / Où jouer (carte) / EN GAGNANT LE JEU CONTINUE + 7 logos (bergerie, pegase, utile, charvolin, carrosserie-gp, giordano, alafut) + signature Flowin / GRAND TIRAGE FINAL. QR fixe + ligne de scan teal sur toutes les scènes, fond animé.
+- ⚠️ Invariants respectés : aucune touche à SpinClient/QuizClient/NDS2026Client ; render_kref40 NON utilisé ; pas de régénération d'une autre vidéo.
+
 ## 🎬 SESSION 30/06 (suite 3) — refonte verticale du spot → parcours-jeu-flowin-nds
 
 Romain voulait modifier SON spot (`nds-spot-nds2026-16x9`, 37s, muet), pas une autre vidéo. Mes 2 tentatives précédentes (render_kref40) étaient un AUTRE montage → rejetées. Le script source du spot n'existe plus (montage antérieur à la refonte charte). Le passage en vertical imposait une recomposition.
