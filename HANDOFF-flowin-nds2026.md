@@ -1,3 +1,16 @@
+## 🎬 SESSION 30/06 (suite 2) — spot + partenaire en 9×16 (refonte)
+
+Constat : les mp4 `nds-spot-nds2026-16x9` et `nds-partenaire-16x9` étaient des **rendus périmés** (ancien QR `nds-parcours.html`, « Flashe » avec E, noms texte erronés type « Work'n Fun / Util », scène « pas de téléphone » = fausse info). Les scripts étaient déjà corrigés ; seuls les rendus manquaient.
+
+- 🆕 `kit-digital/nds/nds-spot-9x16.mp4` (1080×1920, 40s, musique bergerie) : intro **FLASH** (sans E), 7 **logos** partenaires, finale **« Et un grand tirage final à la clôture »** + signature **« Flowin — partenaire jeux des Nuits du Sud »**. Source `render_spot40.py` (dérive `render_kref40`, finale custom — le maître n'est PAS touché).
+- 🆕 `kit-digital/nds/nds-partenaire-9x16.mp4` (1080×1920, 40s, musique bergerie) : charte verticale, page partenaire (7 logos), **sans** « pas de téléphone ». Base `render_kref40`.
+- QR `ev-nds-digitale` (cohérent insta/fb), pyzbar vérifié sur les 2. Musique = audio de `bergerie-video-complete-TEST.mp4` (libre de droit).
+- `index.html` : spot 9×16 + partenaire 9×16 ajoutés ; lien `nds-partenaire-16x9` (périmé) retiré.
+- ⚠️ Fichier `nds-partenaire-16x9.mp4` toujours sur disque (non listé) — à supprimer si Romain confirme.
+- HEAD repo : `c1d9e46`.
+
+---
+
 ## 🎬 SESSION 30/06 (suite) — vidéo charvolin + kits 7/7
 
 - 🆕 `kit-digital/charvolin/video-charvolin-9x16.mp4` (1080×1920, 24fps, 40s, muette comme les 6 autres). QR réseaux `ev-nds-charvolin&source=reseaux-charvolin` (pyzbar OK badge+finale). Pipeline = `render_kref40` base 960f + `composite_qr` (QR charvolin). README + zip charvolin régénérés.
