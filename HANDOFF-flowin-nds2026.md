@@ -1,3 +1,18 @@
+## 🧭 SESSION 30/06 (réorganisation navigation) — à lire EN PREMIER
+
+**Objectif tenu** : rendre le projet lisible par un humain qui arrive « à froid ». Avant : ~10 docs HANDOFF/RECAP/REPRISE en vrac à la racine, README vide (9 o). Après : **un point d'entrée unique**.
+
+- 🆕 **`README.md`** = porte d'entrée. Tableau « je cherche… → je vais là ». Ne duplique pas, il pointe.
+- 🆕 **`docs/ARCHITECTURE-flowin.md`** = comment Flowin marche (schéma, parcours joueur de bout en bout, glossaire) — lisible sans le code.
+- 🆕 **`docs/INDEX-LIVRABLES-nds2026.md`** = carte **sources → maîtres → téléchargeables** : pour chaque visuel, où est le fichier final, sa source, comment le régénérer.
+- 🧹 **Nettoyage** : 11 docs périmés déplacés dans **`docs/archive/`** (avec table « remplacé par »). Racine = `README` + `HANDOFF` + `CLAUDE` uniquement. `CDC-editeur` et `NDS2026-questions-a-valider` rangés dans `docs/`.
+- 🔗 Liens internes **tous vérifiés** (0 mort). `CLAUDE.md`, `SPEC-TECHNIQUE`, `SOURCES-MAITRES.md` (public) repointés vers la nouvelle carte.
+- ✅ Découverte au passage : les **4 logos ex-404** (bergerie, carrosserie-gp, pegase, utile) **sont présents** dans `admin/public/nds/partenaires/` → à confirmer côté affichage du mur de logos.
+
+> Aucune modification de code applicatif, de mécanique de jeu, de base ou de module maître. Pur travail de doc + rangement `.md` (0 risque deploy).
+
+---
+
 ## 🔁 RÉCAP REPRISE — sessions 28→30/06/2026 (à lire EN PREMIER)
 
 > HEAD repo au moment du handoff : **`2c186df`** (toujours revérifier via `git log`). Source canonique = table Supabase `handoff_notes` clé `handoff-nds-2026-comm` (synchronisée avec ce bloc).

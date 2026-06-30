@@ -1,6 +1,10 @@
 # CLAUDE.md — Flowin / Nuits du Sud 2026
 
 Instructions de travail pour toute session Claude Code (cloud ou terminal) sur ce dépôt.
+
+> 🧭 **Carte du projet (point d'entrée humain)** : `README.md` → renvoie vers l'architecture, l'index des livrables, le handoff.
+> 🏗️ Comprendre le produit : `docs/ARCHITECTURE-flowin.md` · Détail technique : `docs/SPEC-TECHNIQUE-flowin.md` · Livrables : `docs/INDEX-LIVRABLES-nds2026.md`.
+
 Source de vérité du reste-à-faire : `HANDOFF-flowin-nds2026.md`.
 
 ## Projet

@@ -1,5 +1,7 @@
 # SPEC TECHNIQUE — Flowin Events
 
+> 🧭 **Navigation** : point d'entrée = `README.md` · vue produit limpide = `docs/ARCHITECTURE-flowin.md` · livrables = `docs/INDEX-LIVRABLES-nds2026.md`. Ce document-ci = la **référence technique détaillée**.
+>
 > Document de référence pour travailler avec des **agents IA de production et de maintenance**.
 > Version : **v1** · MAJ : 2026-06-28 · Source de vérité opérationnelle : table Supabase `handoff_notes` clé `handoff-nds-2026-comm`.
 > Déploiement de référence : **Nuits du Sud 2026** (festival Vence, 9–18 juillet, ~24 000 festivaliers).
