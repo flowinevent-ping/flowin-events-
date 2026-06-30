@@ -1,3 +1,72 @@
+## 🔁 RÉCAP REPRISE — sessions 28→30/06/2026 (à lire EN PREMIER)
+
+> HEAD repo au moment du handoff : **`2c186df`** (toujours revérifier via `git log`). Source canonique = table Supabase `handoff_notes` clé `handoff-nds-2026-comm` (synchronisée avec ce bloc).
+
+### A. BOOTSTRAP (ouverture obligatoire, dans l'ordre)
+1. `git clone https://github.com/flowinevent-ping/flowin-events-.git` puis `git pull --ff-only origin main` → HEAD attendu **`2c186df`**. Branche `main`, app à la racine `/admin`, Vercel auto-deploy sur push.
+2. Identité commit : `git -c user.email=romain@flowin.events -c user.name="Romain Collin"`.
+3. Push auth : `https://x-access-token:<PAT>@github.com/flowinevent-ping/flowin-events-.git` — **PAT en mémoire projet, jamais en clair dans Notion/public**.
+4. Supabase via MCP uniquement, ref `ywcqtupgoxfzkddqkztk`, bootstrap `select 1`.
+5. Notion hub Comm : page id `38c6dcca-9add-81dd-9af2-c93139e06393`.
+6. Si `git push` OU Supabase échoue → **STOP**, signaler, pas de mode dégradé.
+
+### B. CE QUI A ÉTÉ FAIT (28→30/06)
+
+**B1. Brigade Verte — module sondage-only** (commit `c0bea33`)
+- Module `/parcours/nds2026`. Events `ev-nds-tablette` / `-1` / `-2` / `-3`, tous `super_event_id = se-nds-2026`, `gain_ticket = true`, `geo_controle = false`.
+- Mécanique : `quizBanques: []` + `quizNbQuestions: 0` + `sondageAnonyme: true` ⇒ quiz sauté, `quizTk=false`, `bonusTk=true` ⇒ **1 ticket** par sondage. Cumul festival via `ndsLedgerAdd`.
+- Géoloc : `captureScanGeo` ⇒ `onSite=true` si `geo_controle=false` OU pas de lat/lng ⇒ **ticket toujours accordé sur site, sans coordonnées**.
+- Stockage anonyme **VÉRIFIÉ** : `writeSondageBrigade(evId, bonusAnswers)` → table `sondage_brigade` (`event_id` + `reponses` jsonb, **0 PII, 0 coordonnée**). Déclenché dans `finishBonus` dès la fin du sondage, que la personne s'inscrive ensuite ou non. Anti-double via `sondageAnonSaved`.
+- Anti-rejeu : `localStorage` 1 participation/jour/station.
+- Stations culture (quiz présent) inchangées. Seuls changements globaux : optin désormais **facultatif** + texte optin RGPD reformulé.
+- **Non touché** : `SpinClient.tsx` / `QuizClient.tsx` (masters), banque dormante `bq-nds-rse-mobilite`.
+
+**B2. Bug routage QR (critique) — RÉSOLU** (commits `be95f22` + `c319b8f`)
+- Symptôme : QR station tombait sur l'écran générique « Jouer gratuitement » (QuizClient) au lieu de l'écran NDS brandé « À GAGNER / Comment jouer » (NDS2026Client).
+- Cause : anciens QR pointaient `/parcours/quiz?ev=…` au lieu de `/parcours/nds2026?ev=…`.
+- Fix code `be95f22` : garde-fou serveur dans `admin/app/parcours/quiz/page.tsx` → si l'event a un module canonique (`nds2026`…), redirige vers `/parcours/<module>` en conservant `source`. Rattrape tout ancien QR imprimé/vidéo/forex. N'altère pas QuizClient. `tsc 0` + `next build` OK.
+- Fix sources `c319b8f` : 6 QR commerce `visuels-src/qr/ev-nds-{alafut,bergerie,carrosserie-gp,giordano,pegase,utile}.png` régénérés en `nds2026`, scan vérifié.
+- Inventaire impression : A4 + kit-digital déjà `nds2026` → ce qui s'imprime/se distribue est bon.
+
+**B3. Vidéo Bergerie test + anti-perte** (commits `5f06ed9`, `91984c8`, `7b1e5f3`, `2c186df`)
+- Clip partenaires v2 (7 logos + Allianz Charvolin, QR remonté/agrandi) : `admin/public/nds/kit-digital/nds/clips/5-partenaires-bergerie-allianz.mp4` + source `render_partners_v2.py`.
+- Logo Allianz Charvolin committé (`partenaires/allianz-charvolin.png`).
+- Recette montage complète : `admin/public/nds/visuels-src/build_bergerie_video_test.py` (delogo « CE SOIR » + badge QR agrandi/remonté + splice scène partenaires xfade + grain). Recopie l'audio source. Vérifiée : sortie 40,54 s, QR `nds2026` scanné.
+- **Musique confirmée libre de droit par Romain (30/06)** → exception « ne pas committer la musique » LEVÉE. Source + rendu committés :
+  - source CapCut : `admin/public/nds/visuels-src/sources-video/bergerie-capcut-source-40s.mp4`
+  - rendu final test : `admin/public/nds/visuels-src/sources-video/bergerie-video-complete-TEST.mp4`
+  - script branché par défaut sur la source committée → reproductible **sans ré-upload**.
+
+### C. TRAVAIL À SUIVRE (prochaine conversation)
+1. **CGV** : faire valider par juriste → coller texte validé via Dashboard CGV/Légal + passer statut `validé`. Page `/cgv-nds.html`.
+2. **Règles du jeu** : valider/figer le wording public (4/4 = 1 ticket, +1 si bonus ; brigade = 1 ticket sondage ; 1 participation/jour/station ; cumul festival). **Mécanique gelée — ne pas changer la logique**, seulement publier/clarifier le texte joueur.
+3. **Kits digitaux par partenaire** (6 commerces) : compléter/valider A4, cartes QR, vidéo, READMEs. Index `https://flowin-events.vercel.app/nds/kit-digital/index.html`.
+4. **Stations Brigade Verte « sondage seulement »** : tester un QR brigade réel (intro → sondage → 1 ticket). Options : 6ᵉ question, ajouter PMR, peaufiner `intro`.
+5. **Stockage connexions + réponses même sans coordonnées** (pour traiter les résultats) :
+   - ✅ VÉRIFIÉ : réponses sondage stockées sans coordonnée ni PII (`sondage_brigade`) dès la fin du sondage.
+   - ⚠️ **GAP À TRAITER** : une connexion (scan QR) abandonnée *avant* la fin du sondage n'est PAS tracée ; réponses partielles non capturées. À implémenter si besoin : log scan/connexion indépendant + capture partielle (ex. table `connexions` ou insert au `mount` avec `session_id`).
+   - Colonne `converti` (sondage→inscription) : présente, non alimentée → implémenter si besoin (`session_id` + policy UPDATE).
+   - Lecture stats = `service_role` via MCP (anon ne peut PAS lire `sondage_brigade`).
+6. **Passe stabilité des règles + sauvegarde** :
+   - Vérifier mécanique inchangée (4/4=1, brigade=1) ; fonctions `add_points` / `attribuer_lot_auto` / `valider_parrainage` toujours `REVOKE`'d.
+   - Sauvegarde : `config_backups` snapshot à jour ; **backup manuel juste avant le 9/07** ; activer **PITR** ; rendre **repo privé** (actions owner Romain).
+   - Vérifier **domaine Resend** (bloqueur email : n'envoie qu'à flowinevent@gmail.com).
+
+### D. RÈGLE PERMANENTE — logos partenaires (À CONSERVER)
+- Insérer **systématiquement** les logos partenaires dans TOUS les supports visuels : **vidéo, forex, A4, présentation**. Raison : les partenaires se confirment dans les jours qui viennent → mettre à jour le mur de logos à **chaque nouveau partenaire signé**.
+- Forex = version finale **AVEC** logos (bloc « Nos partenaires », grille « Votre logo ici »). Vidéo = mur 7 logos incl. Allianz Charvolin (régénérable via `render_partners_v2.py`).
+- **Bloqueur Romain** : fournir PNG/SVG pour `admin/public/nds/partenaires/{bergerie,carrosserie-gp,pegase,utile}.png` (4 liens 404).
+- Anti-cache images : incrémenter `?v=YYYYMMDDx` à chaque remplacement de PNG.
+- Batch « 1 vidéo par partenaire » (commande permanente) : 1 vidéo/partenaire, QR `/parcours/nds2026?ev=ev-nds-<slug>&source=reseaux-<slug>` sur toutes les scènes, nommage `<Nom> video.mp4`, mur logos à jour.
+
+### E. ANTI-CONFLIT / ANTI-PERTE (impératif)
+- `git pull --ff-only` avant tout travail ; jamais `reset --hard` sans avoir committé.
+- Committer **source + rendu ensemble**, même session (`/home/claude` éphémère).
+- Ne pas toucher `QuizClient.tsx` / `SpinClient.tsx` (config via Supabase `cfg` uniquement).
+- Next.js : `tsc --noEmit` + `next build`, puis `git checkout -- admin/tsconfig.tsbuildinfo` avant push.
+
+---
+
 # HANDOFF — Flowin / Nuits du Sud 2026
 
 > Document de reprise. Dernière mise à jour : **23/06/2026** (session présentation/visuels/bon de commande). HEAD au moment du handoff : `b8dfcc6` (toujours revérifier via `git log` — ne pas supposer).
