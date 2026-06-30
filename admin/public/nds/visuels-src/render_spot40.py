@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/fk40"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/ecrans_hd.png").convert("RGB")
-LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut", "charvolin"]}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in L.PARTNERS}   # source unique: nds_lib.PARTNERS
 
 BG = (9, 16, 32)
 AMBER = (244, 181, 68)
@@ -318,23 +318,13 @@ def scene(t):
         pop(img, tl("TES POINTS", 132, WHITE), W / 2, H * 0.42, ramp(lt, 0.25, 0.75))
         pop(img, tl("REMPORTE", 132, MAGENTA), W / 2, H * 0.55, ramp(lt, 0.7, 1.2))
         pop(img, tl("LES LOTS !", 132, MAGENTA), W / 2, H * 0.65, ramp(lt, 0.9, 1.4))
-    elif t < 29.5:                                 # PARTENAIRES — 7 logos (Charvolin inclus), layout 2-3-2 au-dessus du QR badge
+    elif t < 29.5:                                 # PARTENAIRES — grille auto pilotee par nds_lib.PARTNERS (au-dessus du QR badge)
         lt = t - 23.0
         pop(img, tl("JOUE CHEZ NOS PARTENAIRES", 56, AMBER), W / 2, H * 0.115, ramp(lt, 0.0, 0.45))
         pop(img, tl("pendant toute la durée du festival !", 40, WHITE), W / 2, H * 0.175, ramp(lt, 0.2, 0.65))
-        tw, th = 330, 177; gx = W * 0.5
-        dx2 = tw/2 + 20            # demi-écart rangée à 2 colonnes
-        dx3 = tw + 24             # écart rangée à 3 colonnes
-        # rangée 1 (2 logos)
-        logo_tile(img, "bergerie", gx - dx2, H * 0.300, tw, th, ramp(lt, 0.50, 0.95))
-        logo_tile(img, "pegase",   gx + dx2, H * 0.300, tw, th, ramp(lt, 0.66, 1.11))
-        # rangée 2 (3 logos) — Charvolin au centre
-        logo_tile(img, "utile",          gx - dx3, H * 0.450, tw, th, ramp(lt, 0.82, 1.27))
-        logo_tile(img, "charvolin",      gx,       H * 0.450, tw, th, ramp(lt, 0.98, 1.43))
-        logo_tile(img, "carrosserie-gp", gx + dx3, H * 0.450, tw, th, ramp(lt, 1.14, 1.59))
-        # rangée 3 (2 logos) — reste au-dessus du QR badge (top badge ≈ y0.712)
-        logo_tile(img, "giordano", gx - dx2, H * 0.600, tw, th, ramp(lt, 1.30, 1.75))
-        logo_tile(img, "alafut",   gx + dx2, H * 0.600, tw, th, ramp(lt, 1.46, 1.91))
+        # zone logos centree (reste au-dessus du QR badge, top badge ≈ y0.712)
+        for i, (slug, lx, ly, ltw, lth) in enumerate(L.logo_grid(L.PARTNERS, W * 0.5, H * 0.45, W * 0.88, H * 0.40)):
+            logo_tile(img, slug, lx, ly, ltw, lth, ramp(lt, 0.50 + i * 0.10, 0.95 + i * 0.10))
     else:                                          # FINALE — grand tirage final + signature Flowin
         lt = t - 29.5
         pop(img, tl("Et un grand tirage final", 60, AMBER), W / 2, H * 0.110, ramp(lt, 0.0, 0.45))

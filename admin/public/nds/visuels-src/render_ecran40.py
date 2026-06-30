@@ -6,12 +6,7 @@ from PIL import Image, ImageDraw
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/fe40"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/ecrans_hd.png").convert("RGB")
-LOGOS = {
-    "bergerie": "/home/claude/vid/logos/bergerie.png",
-    "pegase": "/home/claude/vid/logos/pegase.png",
-    "utile": "/home/claude/vid/logos/utile.png",
-    "carrosserie-gp": "/home/claude/vid/logos/carrosserie-gp.png",
-}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in L.PARTNERS}   # source unique: nds_lib.PARTNERS
 
 def clamp(x, a=0., b=1.): return max(a, min(b, x))
 def eo(x): x = clamp(x); return 1 - (1 - x) ** 3
@@ -119,11 +114,9 @@ def frame(t):
         pop(img, tl("ET DANS LES COMMERCES", L.font(64, 800), L.TEAL), W / 2, H * 0.115, ramp(lt, 0.0, 0.45), 0.6)
         pop(img, tl("nos partenaires locaux", L.font(44, 600), L.WHITE), W / 2, H * 0.175, ramp(lt, 0.2, 0.65), 0.7)
         tw, th = 392, 230; gx, gy = W * 0.5, H * 0.46
-        pos = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-        for i, slug in enumerate(PARTNERS):
-            dx, dy = pos[i]
-            cx = gx + dx * (tw / 2 + 22); cy = gy + dy * (th / 2 + 22)
-            logo_tile(img, slug, cx, cy, tw, th, ramp(lt, 0.5 + i * 0.30, 0.95 + i * 0.30))
+        # grille auto pilotee par nds_lib.PARTNERS
+        for i, (slug, cx, cy, ltw, lth) in enumerate(L.logo_grid(L.PARTNERS, gx, H * 0.52, W * 0.90, H * 0.52)):
+            logo_tile(img, slug, cx, cy, ltw, lth, ramp(lt, 0.5 + i * 0.14, 0.95 + i * 0.14))
     else:                                         # FINALE QR plein cadre
         lt = t - 28.0
         pop(img, tl("FLASH LE QR", L.font(120, 800), L.ORANGE), W / 2, H * 0.12, ramp(lt, 0.0, 0.45), 0.5)
