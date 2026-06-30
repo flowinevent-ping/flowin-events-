@@ -3,7 +3,7 @@
 # DEPS: /home/claude/spotwork/logo_nds.png (=admin/public/nds/logo_nds_blanc_hd.png), /home/claude/vid/logos/<slug>.png (7),
 #       /home/claude/vid/fonts/Manrope.ttf, qrcode/numpy/PIL. RENDU: python3 render_parcours_flowin.py 0 888 full frames
 #       puis ffmpeg -framerate 24 -i frames/f%04d.jpg -crf 19 -pix_fmt yuv420p ; mux audio bergerie ; pyzbar ; commit kit-digital/nds/.
-import sys, os, math
+import sys, os, math, random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import qrcode
@@ -50,6 +50,38 @@ _qr=qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M,box_size=18,
 _qr.add_data("https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-digitale"); _qr.make(fit=True)
 QR=_qr.make_image(fill_color="black",back_color="white").convert("RGB")
 
+# --- FX dynamiques (style kinetic) : faisceaux animes, flash de coupe "BOOM", scintillements ---
+def _make_beam(color):
+    b=Image.new("RGBA",(300,H+700),(0,0,0,0))
+    ImageDraw.Draw(b).rectangle([110,0,190,H+700],fill=color+(85,))
+    return b.filter(ImageFilter.GaussianBlur(70)).rotate(18,expand=True,resample=Image.BICUBIC)
+BEAM_T=_make_beam(TEAL); BEAM_M=_make_beam(MAGENTA); BEAM_A=_make_beam(AMBER)
+def beams(img,t):
+    # 3 faisceaux lumineux qui derivent en continu -> fond vivant
+    for beam,sp,ph in [(BEAM_T,0.045,0.0),(BEAM_M,0.060,0.55),(BEAM_A,0.035,0.30)]:
+        x=int((((t*sp+ph)%1.45)-0.22)*W)
+        img.alpha_composite(beam,(x,-350))
+CUTS=(6.0,12.0,18.0,24.0,31.0)
+def cut_flash(img,t):
+    a=0.0
+    for b in CUTS:
+        d=abs(t-b)
+        if d<0.30: a=max(a,1-d/0.30)
+    if a>0.01:
+        img.alpha_composite(Image.new("RGBA",(W,H),(255,255,255,int(165*a*a))))
+_SPK=[(random.Random(13+i).random(),random.Random(71+i).random(),random.Random(149+i).random()) for i in range(48)]
+def sparkles(img,t,y0,y1,n=16,seed=0):
+    l=Image.new("RGBA",(W,H),(0,0,0,0)); d=ImageDraw.Draw(l)
+    for i in range(n):
+        rx,ry,rp=_SPK[(i*3+seed)%len(_SPK)]
+        x=int(90+rx*(W-180)); y=int(y0+ry*(y1-y0))
+        tw=0.5+0.5*math.sin(t*3.2+rp*6.28+i*1.7)
+        r=2+int(4*tw); al=int(50+170*tw); col=AMBER if i%2 else TEAL
+        d.line([(x-r*3,y),(x+r*3,y)],fill=col+(int(al*0.7),),width=2)
+        d.line([(x,y-r*3),(x,y+r*3)],fill=col+(int(al*0.7),),width=2)
+        d.ellipse([x-r,y-r,x+r,y+r],fill=col+(al,))
+    img.alpha_composite(l)
+
 def put_alpha(img,layer,a):
     if a>=1.0: img.alpha_composite(layer); return
     al=layer.split()[3].point(lambda p:int(p*a)); layer.putalpha(al); img.alpha_composite(layer)
@@ -67,6 +99,8 @@ def title_pop(img,cx,cy,txt,size,col,prog,w=800):
     tile=Image.new("RGBA",(tw_,th_),(0,0,0,0)); ImageDraw.Draw(tile).text((tw_/2,th_/2),txt,font=f,fill=col,anchor="mm")
     sc=0.6+0.4*eob(prog) if prog<1 else 1.0; nw,nh=max(1,int(tw_*sc)),max(1,int(th_*sc))
     tile=tile.resize((nw,nh),Image.LANCZOS); al=tile.split()[3].point(lambda p:int(p*ease(min(1,prog*1.6)))); tile.putalpha(al)
+    glow=tile.filter(ImageFilter.GaussianBlur(16))
+    img.alpha_composite(glow,(int(cx-nw/2),int(cy-nh/2)))
     img.alpha_composite(tile,(int(cx-nw/2),int(cy-nh/2)))
 
 def logo_header(img):
@@ -81,12 +115,12 @@ def qr_badge(img,t,a=1.0):
     qx,qy=QCX+30,QCY+30
     card.paste(QR.resize((QSZ,QSZ),Image.NEAREST),(qx,qy))
     put_alpha(img,card,ease(a))
-    if a>0.5:
-        ph=(t%1.8)/1.8; sy=int(qy+ph*QSZ)
-        scan=Image.new("RGBA",(W,H),(0,0,0,0)); sd=ImageDraw.Draw(scan)
-        for off,al in [(-6,40),(-3,90),(0,200),(3,90),(6,40)]:
-            sd.line([(qx,sy+off),(qx+QSZ,sy+off)],fill=TEAL+(al,),width=2)
-        scan=scan.filter(ImageFilter.GaussianBlur(1.5)); img.alpha_composite(scan)
+    if a>0.4:
+        pulse=0.5+0.5*math.sin(t*2.4)
+        ring=Image.new("RGBA",(W,H),(0,0,0,0)); rd=ImageDraw.Draw(ring)
+        rd.rounded_rectangle([QCX-8,QCY-8,QCX+QCW+8,QCY+QCW+8],radius=44,
+            outline=TEAL+(int((110+95*pulse)*ease(a)),),width=4+int(3*pulse))
+        ring=ring.filter(ImageFilter.GaussianBlur(5)); img.alpha_composite(ring)
     text(img,W/2,QCY-38,"FLASH & JOUE",34,AMBER,a,800,"mm")
     text(img,W/2,QCY+QCW+36,"Le grand jeu des Nuits du Sud",30,WHITE,a,700,"mm")
 
@@ -146,7 +180,7 @@ def flowin_sig(img,cx,cy,size,a):
     text(img,cx,cy+int(size*0.62),"partenaire jeux des Nuits du Sud",32,SOFT,a,700,"mm")
 
 def scene(t):
-    img=bg(t); logo_header(img)
+    img=bg(t); beams(img,t); logo_header(img)
     if t<6.0:
         l=t; a0=ramp(l,0.0,0.4)
         if a0>0:
@@ -174,6 +208,7 @@ def scene(t):
         qr_badge(img,t)
     elif t<18.0:
         l=t-12.0; title_pop(img,W/2,250,"A GAGNER",54,AMBER,ramp(l,0,0.5))
+        if l>0.3: sparkles(img,t,170,305,n=14,seed=5)
         info_card(img,W/2,430,920,150,"Des places de concert","a gagner chaque soir du festival",TEAL,ramp(l,0.4,0.9))
         info_card(img,W/2,610,920,150,"Des bons d'achat","dans les commerces participants",AMBER,ramp(l,0.7,1.2))
         text(img,W/2,790,"Cumule tes tickets et remporte les lots !",40,MAGENTA,ramp(l,1.4,1.9),800,"mm",18)
@@ -202,9 +237,11 @@ def scene(t):
         l=t-31.0
         text(img,W/2,300,"Et un",46,WHITE,ramp(l,0,0.4),700,"mm",20)
         title_pop(img,W/2,400,"GRAND TIRAGE FINAL",62,AMBER,ramp(l,0.15,0.7))
+        if l>0.4: sparkles(img,t,320,475,n=22,seed=11)
         text(img,W/2,492,"a la cloture du festival",48,WHITE,ramp(l,0.4,0.9),700,"mm",18)
         flowin_sig(img,W/2,690,72,ramp(l,0.9,1.4))
         qr_badge(img,t)
+    cut_flash(img,t)
     return img.convert("RGB")
 
 if __name__=="__main__":
