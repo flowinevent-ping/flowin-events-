@@ -521,3 +521,15 @@ export const AGE_OPTIONS = [
   { val: '51-65', label: '51–65 ans' },
   { val: '65+', label: '66 ans et plus' },
 ]
+
+/* ── Sondage Brigade Verte : enregistrement anonyme (stats RSE, zéro PII) ──
+   Écrit les réponses du sondage dès la fin du bloc bonus, que la personne
+   s'inscrive ensuite ou non. Aucune donnée personnelle. Gated côté UI par
+   cfg.sondageAnonyme. Échec silencieux : ne bloque jamais le parcours. */
+export async function writeSondageBrigade(evId: string, reponses: Record<string, unknown>): Promise<void> {
+  try {
+    await supabase.from('sondage_brigade').insert({ event_id: evId, reponses: reponses ?? {} })
+  } catch (e) {
+    console.error('[sondage_brigade] insert anonyme échoué:', e)
+  }
+}

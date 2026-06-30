@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
-import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, shuffle, AGE_OPTIONS } from '@/lib/parcours'
+import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, shuffle, AGE_OPTIONS, writeSondageBrigade } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
@@ -19,7 +19,7 @@ const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '�
 /* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
    Incrémenter la version à chaque modification du texte. */
 const OPTIN_VERSION = 'nds-2026-v3'
-const OPTIN_TEXT = "Je souhaite rester en contact avec les Nuits du Sud et Flowin. Mes données ne sont ni échangées ni vendues."
+const OPTIN_TEXT = "Je souhaite rester en contact avec les infos des Nuits du Sud et de Flowin. Mes coordonnées ne sont ni vendues ni cédées."
 
 /* Logo partenaire robuste : si image_url est vide OU si le fichier est introuvable (404,
    logo pas encore fourni par le partenaire), on retombe proprement sur le fallback au lieu
@@ -144,6 +144,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [quizAnswers, setQuizAnswers] = useState<{ qid: string; texte: string; choix: number; reponse: string; bonne: number; correct: boolean }[]>([])
   const [bonusIdx, setBonusIdx] = useState(0)
   const [bonusDone, setBonusDone] = useState(false)
+  const sondageAnonSaved = useRef(false)
   const [sheetPart, setSheetPart] = useState<number | null>(null)
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<unknown>(null)
@@ -473,7 +474,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (!recurrent && !form.prenom.trim()) errs.prenom = 'Requis'
     if (!recurrent && !form.nom.trim()) errs.nom = 'Requis'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
-    if (!form.optin) errs.optin = 'Merci de cocher cette case pour continuer'
+    // Optin marketing facultatif (RGPD) : la participation reste possible sans cocher.
     setErrors(errs)
     if (Object.keys(errs).length) return
     await persist()
@@ -502,7 +503,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (saved) return ticket
     setSaving(true)
     // 2 tickets possibles : quiz (4/4) + bonus. bonusOverride force l'état frais quand le bonus vient d'être validé.
-    const quizTk = quizPerfect
+    // Sans quiz (banque vide = brigade sondage), aucun ticket quiz : seul le sondage/bonus rapporte le point.
+    const quizTk = questions.length > 0 && quizPerfect
     const bonusTk = bonusOverride ?? bonusDone
     const tc = generateTicket('ND')
     setTicket(tc)
@@ -535,7 +537,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (saving) return
     setSaving(true)
     const tc = ticket || generateTicket('ND')
-    const res = await remoteWrite(tc, quizPerfect, bonusDone)
+    const res = await remoteWrite(tc, questions.length > 0 && quizPerfect, bonusDone)
     setSaving(false)
     const ok = res.success || res.duplicate
     setSaveError(!ok)
@@ -553,6 +555,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   async function finishBonus() {
     setBonusDone(true)
+    // Stats RSE anonymes (zéro PII) : on enregistre les réponses dès la fin du sondage,
+    // que la personne s'inscrive ensuite ou non. Gated par cfg.sondageAnonyme (brigade only).
+    if (cfg.sondageAnonyme && !sondageAnonSaved.current) {
+      sondageAnonSaved.current = true
+      await writeSondageBrigade(evId, bonusAnswers)
+    }
     // Le bonus rapporte le ticket si le quiz ne l'a pas déjà donné (1 ticket/station/jour) -> persist(true)
     if (recurrent) { await persist(true); setScreen('final') }
     else setScreen('inscription')
@@ -759,6 +767,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </>
               ) : (
                 <>
+                  {cfg.intro ? (
+                    <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '16px 18px', marginBottom: 14, fontSize: 14.5, lineHeight: 1.55, color: '#1a1226', fontWeight: 600, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>{cfg.intro as string}</div>
+                  ) : (<>
                   <div style={{ textAlign: 'center', marginBottom: 8, marginTop: 2 }}>
                     <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Comment jouer&#8239;?</div>
                   </div>
@@ -778,8 +789,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-layers" /></svg>
                     <span>+ Vous jouez, + vos chances augmentent</span>
                   </div>
+                  </>)}
                   <a className="btn" onClick={() => {
-                    setScreen(questions.length > 0 ? 'quiz' : 'resultats')
+                    setScreen(questions.length > 0 ? 'quiz' : (bonusQs.length > 0 ? 'bonus' : 'resultats'))
                   }}>{recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant'}</a>
                   <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
                 </>
