@@ -8,8 +8,7 @@ from PIL import Image, ImageDraw, ImageFilter
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/partners_frames"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/bergerie_reseaux_hd.png").convert("RGB")
-LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in
-         ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut", "allianz-charvolin"]}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in L.PARTNERS}   # source unique nds_lib.PARTNERS
 
 BG = (9, 16, 32); AMBER = (244, 181, 68); WHITE = (255, 255, 255)
 MAGENTA = (230, 24, 127); TEAL = (32, 224, 196)
@@ -97,19 +96,15 @@ def frame(t):
     # titre + sous-titre
     pop(img, tl("JOUE CHEZ NOS PARTENAIRES", 56, AMBER), W / 2, H * 0.100, ramp(t, 0.0, 0.45))
     pop(img, tl("pendant toute la durée du festival !", 40, WHITE), W / 2, H * 0.158, ramp(t, 0.2, 0.65))
-    # 7 logos 2-3-2 (Allianz Charvolin au centre rangée 2)
-    tw, th = 320, 172; gx = W * 0.5
-    dx2 = tw / 2 + 18; dx3 = tw + 22
-    r1, r2, r3 = H * 0.275, H * 0.410, H * 0.545
-    logo_tile(img, "bergerie",        gx - dx2, r1, tw, th, ramp(t, 0.50, 0.95))
-    logo_tile(img, "pegase",          gx + dx2, r1, tw, th, ramp(t, 0.62, 1.07))
-    logo_tile(img, "utile",           gx - dx3, r2, tw, th, ramp(t, 0.76, 1.21))
-    logo_tile(img, "allianz-charvolin", gx,     r2, tw, th, ramp(t, 0.90, 1.35))
-    logo_tile(img, "carrosserie-gp",  gx + dx3, r2, tw, th, ramp(t, 1.04, 1.49))
-    logo_tile(img, "giordano",        gx - dx2, r3, tw, th, ramp(t, 1.18, 1.63))
-    logo_tile(img, "alafut",          gx + dx2, r3, tw, th, ramp(t, 1.32, 1.77))
-    # QR remonté + agrandi (centré sous les logos)
-    big_qr(img, W / 2, H * 0.760, ramp(t, 1.45, 2.3), qsz=500)
+    # Mur de logos — SOURCE UNIQUE nds_lib.PARTNERS (grille auto, ajout/retrait = 0 coordonnée)
+    # Ajouter/retirer un logo : éditer PARTNERS dans nds_lib.py (1 ligne) -> la grille reflue seule.
+    grid = L.logo_grid(L.PARTNERS, W * 0.5, H * 0.410, W * 0.92, H * 0.34)
+    for i, (slug, cx, cy, gw, gh) in enumerate(grid):
+        a0 = 0.50 + i * 0.12                       # apparition échelonnée
+        logo_tile(img, slug, cx, cy, int(gw), int(gh), ramp(t, a0, a0 + 0.45))
+    # QR baked optionnel — NOQR=1 -> clip MASTER sans QR (le QR pro est apposé par stamp_pro.py)
+    if os.environ.get("NOQR") != "1":
+        big_qr(img, W / 2, H * 0.760, ramp(t, 1.45, 2.3), qsz=500)
     return img.convert("RGB")
 
 if __name__ == "__main__":

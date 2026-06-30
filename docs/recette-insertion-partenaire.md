@@ -51,3 +51,42 @@ l'animation. Ajouter un logo à `PARTNERS` reflue automatiquement la grille — 
 | `render_social1x1.py`    | 1080×1080 | (carré, aucun fichier kit) | — obsolète |
 
 **✅ Recette complète** : `render_pres16x9` (nds-fb-16x9), `render_spot40` (nds-spot-9x16 + nds-insta-9x16) et `render_ecran40` (nds-ecrans-9x16) lisent toutes la source unique via `L.logo_grid(L.PARTNERS)`. Toutes les vidéos festival qui montrent le mur de logos sont pilotées par la liste unique — ajout d'un partenaire = re-render (frames + ffmpeg), 0 coordonnée à toucher.
+
+---
+
+## ⚡ Recette anti-« recommencer » — MASTER sans-QR + STAMP par pro
+
+**Problème résolu :** chaque changement de logo OU de QR pro relançait un re-render
+frame-by-frame de toute la vidéo (~1 h 45). Désormais deux opérations rapides et séparées.
+
+### 1. Changer / ajouter / retirer un LOGO  (→ ~1-2 min, pas 1 h 45)
+Le mur de logos est sur la source unique `nds_lib.PARTNERS` (comme forex/A4/autres vidéos).
+- Éditer `PARTNERS` dans `nds_lib.py` (1 ligne) + déposer `partenaires/<slug>.png`.
+- Re-rendre **uniquement** le clip mur-de-logos (156 frames, `render_partners_v2.py`,
+  désormais via `L.logo_grid(L.PARTNERS)` — 0 coordonnée à toucher, DEKRA inclus).
+- `NOQR=1 python3 render_partners_v2.py 0 156` → clip MASTER **sans QR**.
+
+### 2. Attribuer une vidéo à UN pro avec SON QR  (→ ~30 s par pro, scan vérifié)
+Le QR n'est plus « cuit » dans les frames : il est apposé en **1 passe ffmpeg** sur un master sans-QR.
+```bash
+# 1 pro :
+python3 stamp_pro.py <master_sans_qr.mp4> <slug> out/<slug>.mp4 --mode reseaux --window 1:6
+# tous les pros (boucle, ~4 min pour 8) :
+for s in bergerie pegase utile carrosserie-gp giordano alafut charvolin dekra; do
+  python3 stamp_pro.py master.mp4 $s out/$s.mp4 --mode reseaux ; done
+# QR festival générique :
+python3 stamp_pro.py master.mp4 digitale out/digitale.mp4 --mode digitale
+```
+`stamp_pro.py` : QR (modes `reseaux`/`ev`/`digitale`) → badge validé « Flash le QR » →
+overlay ffmpeg (`--at X:Y`, `--window A:B`) → **audio du master conservé** (`-c:a copy`) →
+**vérif pyzbar** (sortie KO si le QR scanné ≠ URL attendue).
+
+### Principe
+- **Lourd = rendu UNE fois** (fond + mur de logos) → master immuable, sans QR, committé.
+- **Léger = par pro** (QR) → passe ffmpeg de quelques secondes, jamais de boucle PIL.
+- Logos pilotés par `PARTNERS` ; QR piloté par `--mode/--slug`. Plus aucun re-render complet
+  pour un changement de logo ou de QR.
+
+> Vidéo « complete » bergerie (avec musique CapCut) : `build_bergerie_video_test.py <src> <out> <slug>`
+> suit déjà ce principe (1 passe ffmpeg, audio intact). Il ne reste qu'à régénérer le clip
+> mur-de-logos en 8 logos (DEKRA) puis stamper le QR pro voulu.
