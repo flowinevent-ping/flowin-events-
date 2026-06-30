@@ -7,6 +7,7 @@ Station de jeu « Nuits du Sud 2026 ».
 - `nds_a4_charvolin-editable.pptx` — A4 éditable (Canva / PowerPoint / Google Slides), tous les éléments séparés
 - `nds_a4_charvolin.pdf` — A4 imprimable
 - `nds_a4_charvolin.svg` — A4 vectoriel (imprimeur / Illustrator)
+- `video-charvolin-9x16.mp4` — vidéo verticale 9×16 (réseaux / écran), QR réseaux intégré
 - `qr-station-charvolin.png` — QR à afficher en agence
 - `qr-reseaux-charvolin.png` — QR pour les réseaux (source tracée)
 
