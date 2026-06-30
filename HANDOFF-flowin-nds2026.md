@@ -1,3 +1,14 @@
+## 🟢 SESSION 30/06 (suite 6) — DEKRA Vence ajouté comme 8e partenaire
+
+Romain : intégrer DEKRA Vence (contrôle technique) comme partenaire, sur tous les supports + kit digital. Auth distributeur confirmée par Romain.
+- **Logo** : extrait de la capture fournie (vert RGB 16,129,71), fond blanc, « Vence » dessous (Manrope) → `admin/public/nds/partenaires/dekra.png` + `/home/claude/vid/logos/dekra.png`.
+- **Supabase** : `pt-dekra` (couleur #109247, adresse 1956 Rte de Cagnes 06140 Vence, 3 lots) + `ev-nds-dekra` (module nds2026, qr_token 98863bc1b3, super-event se-nds-2026, cfg copiée du festival + lots DEKRA). categorie « Controle technique ».
+- **Lots** : 2 CT auto offerts, 2 CT moto offerts, 15 bons de 10€ (valeurs auto 80€ / moto 50€ = estimations à valider).
+- **Kit digital** : `admin/public/nds/kit-digital/dekra/` → qr-station-dekra.png + qr-reseaux-dekra.png (pyzbar OK) + README. {TÉL à compléter}.
+- **Vidéo spot** : DEKRA ajouté comme 8e logo dans la scène partenaires (réagencement 3+3+2 : bergerie/pegase/utile · charvolin/carrosserie-gp/giordano · alafut/dekra). Re-rendu 888 frames, audio bergerie, QR ev-nds-digitale OK. `kit-digital/nds/parcours-jeu-flowin-nds.mp4` (7,99 Mo).
+- Script render MAJ (8 logos) committé + Supabase `script-render-parcours-flowin-v2`. Commit `46da57d` poussé main → Vercel.
+- **EN ATTENTE / RESTE À FAIRE** : (1) téléphone DEKRA manquant → bloque fiche/README final ; (2) forex_70x70 à régénérer avec 8 logos ; (3) affiche A4 nds_a4_dekra (PPTX/PDF/PNG/SVG) ; (4) vidéo partenaire dédiée DEKRA 9×16 ; (5) entrée DEKRA dans kit-digital/index.html ; (6) valeurs lots auto/moto à confirmer.
+
 ## ✨ SESSION 30/06 (suite 5) — FX dynamiques sur parcours-jeu-flowin-nds v2
 
 Romain : retirer la ligne teal qui balaie le QR + dynamiser le spot façon vidéo kinetic. Effets ajoutés (montage/structure/contenu inchangés) :
