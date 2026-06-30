@@ -1,3 +1,10 @@
+## 🟢 SESSION 30/06 (suite 7) — DEKRA : supports complétés (forex + A4 + index)
+
+- **Forex 70×70** : `dekra` ajouté aux slots de `gen_forex.py` (bandeau 8 logos). 3 forex caisses régénérés (PNG+SVG) → `kit-digital/nds/forex_70x70_caisse-1/2/3`. QR station vérifié.
+- **Affiche A4** : `nds_a4_dekra` généré via `gen_a4_clean.py` (logo DEKRA Vence en station-lockup, gains festival, QR station ev-nds-dekra vérifié). PNG + PDF + SVG → `kit-digital/dekra/` + `kit-digital/svg/`. Police Anton téléchargée dans `/home/claude/vid/fonts/`.
+- **Index kit** : bloc DEKRA ajouté dans `kit-digital/index.html` (A4 PNG/PDF/SVG, QR station/réseaux, lien tracké, lots, adresse, tél « à compléter »).
+- Commit `748927a` poussé main → Vercel.
+- **RESTE** : (1) **téléphone DEKRA** toujours manquant (placeholder partout) ; (2) A4 **éditable PPTX** + **zip kit** + **vidéo partenaire dédiée 9×16** DEKRA non générés (deps Node/CapCut) ; (3) valeurs lots auto 80€/moto 50€ à confirmer.
 ## 🟢 SESSION 30/06 (suite 6) — DEKRA Vence ajouté comme 8e partenaire
 
 Romain : intégrer DEKRA Vence (contrôle technique) comme partenaire, sur tous les supports + kit digital. Auth distributeur confirmée par Romain.
