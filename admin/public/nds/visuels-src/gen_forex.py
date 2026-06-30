@@ -73,7 +73,7 @@ def sponsor_strip(img, cy):
     import os as _os
     d=ImageDraw.Draw(img,"RGBA")
     ct(img, W/2, cy-k(72), "NOS PARTENAIRES", k(38), TEAL, 800)
-    slots=["pegase","giordano","alafut","carrosserie-gp","bergerie","utile","charvolin","dekra"]
+    slots=list(L.PARTNERS)   # source unique de verite: nds_lib.PARTNERS
     margin=k(54); n=len(slots)
     bx0=margin; bx1=W-margin; bh=k(196); by0=int(cy)
     # bandeau BLANC

@@ -29,7 +29,8 @@ card.paste(qr,(40,40)); card.save(f"{EL}/qr-ecrans.png"); print("qr-ecrans.png",
 
 # --- LOGOS partenaires (copie depuis le repo) ---
 import shutil
-for slug in ["bergerie","pegase","utile","carrosserie-gp","giordano","alafut","charvolin","dekra"]:
+import nds_lib as L
+for slug in L.PARTNERS:   # source unique de verite: nds_lib.PARTNERS
     shutil.copy(f"/home/claude/repo/admin/public/nds/partenaires/{slug}.png", f"{EL}/logo-{slug}.png")
 shutil.copy("/home/claude/repo/admin/public/nds/logo_nds_blanc_hd.png", f"{EL}/logo-nuits-du-sud.png")
 print("logos copies")

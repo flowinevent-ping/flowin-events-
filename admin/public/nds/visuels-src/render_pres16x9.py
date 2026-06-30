@@ -103,13 +103,9 @@ def frame(t):
         lt = t - 23.0
         pop(img, tl("ET DANS LES COMMERCES", 56, AMBER), CX, H * 0.12, ramp(lt, 0.0, 0.45))
         pop(img, tl("nos partenaires locaux", 42, WHITE), CX, H * 0.205, ramp(lt, 0.2, 0.65))
-        tw, th = 300, 142; dx = tw/2 + 16
-        cells8 = [("bergerie", -1, 0.34), ("pegase", 1, 0.34),
-                  ("utile", -1, 0.50), ("carrosserie-gp", 1, 0.50),
-                  ("giordano", -1, 0.66), ("alafut", 1, 0.66),
-                  ("charvolin", -1, 0.82), ("dekra", 1, 0.82)]
-        for i, (slug, sx, yy) in enumerate(cells8):
-            logo_tile(img, slug, CX + sx * dx, H * yy, tw, th, ramp(lt, 0.5 + i * 0.11, 0.95 + i * 0.11))
+        # grille auto-pilotee par la source unique nds_lib.PARTNERS (ajout partenaire = 0 edit ici)
+        for i, (slug, lx, ly, tw, th) in enumerate(L.logo_grid(L.PARTNERS, CX, H * 0.58, W * 0.42, H * 0.62, cols=2)):
+            logo_tile(img, slug, lx, ly, tw, th, ramp(lt, 0.5 + i * 0.11, 0.95 + i * 0.11))
     else:
         lt = t - 29.5; show = False
         pop(img, tl("FLASH LE QR", 120, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))

@@ -94,3 +94,51 @@ def logo_card(path, card_w, card_h, pad_ratio=0.16, radius_ratio=0.14):
     card.alpha_composite(logo, (int((card_w - nw) / 2), int((card_h - nh) / 2)))
     _logocache[key] = card.copy()
     return card
+
+
+# ============================================================================
+# SOURCE UNIQUE DE VERITE — liste des commerces partenaires NDS 2026
+# Pour AJOUTER un partenaire : 1) ajouter son logo dans admin/public/nds/partenaires/<slug>.png
+#                             2) ajouter "<slug>" a la fin de PARTNERS ci-dessous
+#                             3) lancer  bash rebuild_partenaires.sh   (regenere TOUT)
+# Tous les generateurs (forex, A4, videos, montage) lisent CETTE liste — plus de drift.
+# ============================================================================
+PARTNERS = [
+    "bergerie", "pegase", "utile", "carrosserie-gp",
+    "giordano", "alafut", "charvolin", "dekra",
+]
+PARTENAIRES_DIR = "/home/claude/repo/admin/public/nds/partenaires"
+
+def partner_logo(slug):
+    """Chemin du logo PNG d'un partenaire."""
+    return f"{PARTENAIRES_DIR}/{slug}.png"
+
+def logo_grid(slugs, cx, cy, area_w, area_h, cols=None, gap_ratio=0.10):
+    """Auto-layout d'une grille de logos centree sur (cx,cy) dans une zone area_w x area_h.
+    Retourne une liste de tuples (slug, tile_cx, tile_cy, tile_w, tile_h).
+    Le nombre de colonnes est calcule pour rester proche d'un ratio tuile ~1.85:1.
+    L'APPELANT gere l'animation (ramp) en iterant sur le resultat — la lib ne fait que placer."""
+    import math
+    n = len(slugs)
+    if n == 0: return []
+    if cols is None:
+        # nb de colonnes equilibre, proche du ratio largeur/hauteur de la zone
+        cols = max(1, min(n, round(math.sqrt(n * area_w / area_h))))
+    rows = (n + cols - 1) // cols
+    cell_w = area_w / cols
+    cell_h = area_h / rows
+    tw = int(cell_w * (1 - gap_ratio))
+    th = int(min(cell_h * (1 - gap_ratio), tw / 1.85))
+    out = []
+    for i, slug in enumerate(slugs):
+        r = i // cols
+        c = i % cols
+        # nb de tuiles sur CETTE ligne (derniere ligne possiblement incomplete -> centree)
+        on_row = min(cols, n - r * cols)
+        row_w = on_row * cell_w
+        x0 = cx - row_w / 2 + cell_w / 2
+        tx = x0 + c * cell_w
+        y0 = cy - rows * cell_h / 2 + cell_h / 2
+        ty = y0 + r * cell_h
+        out.append((slug, tx, ty, tw, th))
+    return out
