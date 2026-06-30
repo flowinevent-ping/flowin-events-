@@ -1,3 +1,14 @@
+## 🟢 SESSION 30/06 (suite 9) — RECETTE D'INSERTION (source unique partenaires)
+
+**Fini le drift de la liste partenaires (dupliquée dans ~15 fichiers).**
+- **Source unique** : `nds_lib.PARTNERS` (8 slugs, ordre canonique). + helper `L.logo_grid(slugs, cx, cy, w, h, cols)` (grille auto, renvoie positions, l'appelant anime).
+- **Branchés sur L.PARTNERS** : `gen_forex` (slots), `render_kref40` (LOGOS), `build_montage_kit` (loop), `render_pres16x9` (scène commerces via logo_grid → 0 coordonnée à toucher).
+- **Commande de rebuild** : `bash admin/public/nds/visuels-src/rebuild_partenaires.sh` → régénère forex PNG/SVG/PPTX + montage. Smoke-test OK (8 logos).
+- **Doc** : `docs/recette-insertion-partenaire.md` (procédure 3 étapes + mapping vidéo↔script qui manquait).
+- **Sorties régénérées** ordre canonique : forex PNG/SVG (3 caisses) + PPTX (6) + nds-fb-16x9 (auto-grille) + montage zip. Commit `8fc12d0`.
+- **Reste pour finir la recette** : convertir `render_spot40.py` et `render_ecran40.py` (scène commerces tuiles codées en dur) au helper `L.logo_grid(L.PARTNERS)` — ensuite nds-spot-9x16 et nds-ecrans-9x16 seront aussi pilotés par la source unique. (nds-insta-9x16 : source à confirmer ; render_social1x1 carré = aucun fichier kit.)
+
+**Procédure ajout partenaire = 3 étapes** : 1) logo `partenaires/<slug>.png` 2) `"<slug>"` dans `nds_lib.PARTNERS` 3) `bash rebuild_partenaires.sh` (+ étapes métier : Supabase pt-/ev-, A4, kit, index, Notion).
 ## 🟢 SESSION 30/06 (suite 8) — DEKRA : forex PPTX + 2 dernières vidéos
 
 - **Forex PPTX éditables** (caisses+bars+festival, 6 fichiers) régénérés à **8 logos** (chaîne plate→manifest→pptxgenjs). Commit `f6be282`.
