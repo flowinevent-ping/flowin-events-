@@ -44,13 +44,10 @@ l'animation. Ajouter un logo à `PARTNERS` reflue automatiquement la grille — 
 | Fichier kit (`kit-digital/nds/`) | Dimensions | Script source | Bandeau logos |
 |---|---|---|---|
 | `nds-fb-16x9.mp4`        | 1920×1080 | `render_pres16x9.py`  | ✅ auto (logo_grid) |
-| `nds-spot-9x16.mp4`      | 1080×1920 | `render_spot40.py`    | ⚠️ tuiles codées en dur |
-| `nds-ecrans-9x16.mp4`    | 1080×1920 | `render_ecran40.py`   | ⚠️ tuiles codées en dur |
-| `nds-partenaire-16x9.mp4`| 1920×1080 | (dérivé pres16x9, 34s)| — |
-| `nds-insta-9x16.mp4`     | 1080×1920 | source à confirmer    | — |
-| `render_social1x1.py`    | 1080×1080 | (carré, aucun fichier kit) | — |
+| `nds-spot-9x16.mp4`      | 1080×1920 | `render_spot40.py` (+ audio) | ✅ auto (logo_grid) |
+| `nds-insta-9x16.mp4`     | 1080×1920 | `render_spot40.py` (SANS audio — variante Insta silencieuse) | ✅ auto (logo_grid) |
+| `nds-ecrans-9x16.mp4`    | 1080×1920 | `render_ecran40.py`   | ✅ auto (logo_grid) |
+| `nds-partenaire-16x9.mp4`| 1920×1080 | présentation (upload, 34s) | — pas de mur de logos |
+| `render_social1x1.py`    | 1080×1080 | (carré, aucun fichier kit) | — obsolète |
 
-**À FAIRE pour finir la recette** : convertir les scènes commerces de `render_spot40.py` et
-`render_ecran40.py` au helper `L.logo_grid(L.PARTNERS, …)` (comme pres16x9) pour qu'elles soient
-elles aussi pilotées par la source unique. Tant que ce n'est pas fait, ces 2 vidéos gardent des
-tuiles codées en dur et doivent être éditées à la main lors d'un ajout.
+**✅ Recette complète** : `render_pres16x9` (nds-fb-16x9), `render_spot40` (nds-spot-9x16 + nds-insta-9x16) et `render_ecran40` (nds-ecrans-9x16) lisent toutes la source unique via `L.logo_grid(L.PARTNERS)`. Toutes les vidéos festival qui montrent le mur de logos sont pilotées par la liste unique — ajout d'un partenaire = re-render (frames + ffmpeg), 0 coordonnée à toucher.
