@@ -1,3 +1,15 @@
+## ✨ SESSION 30/06 (suite 5) — FX dynamiques sur parcours-jeu-flowin-nds v2
+
+Romain : retirer la ligne teal qui balaie le QR + dynamiser le spot façon vidéo kinetic. Effets ajoutés (montage/structure/contenu inchangés) :
+- **QR** : ligne de scan qui circule SUPPRIMÉE → remplacée par un **halo teal qui respire** autour du badge (sin pulse).
+- **Faisceaux animés** (teal/magenta/amber) qui dérivent en continu dans le fond → fond vivant (`beams()`, layers blurés précalculés).
+- **Flash de coupe « BOOM »** à chaque transition de scène (t=6/12/18/24/31, fenêtre 0,3 s) → cuts punchy (`cut_flash()`).
+- **Glow** doux derrière tous les gros titres (`title_pop` + GaussianBlur).
+- **Scintillements** (étoiles teal/amber qui twinklent) sur « À GAGNER » et « GRAND TIRAGE FINAL » (`sparkles()`).
+- Vidéo re-rendue (888 frames, chunks ≤220), audio bergerie, **7,98 Mo** (bitrate ↑ vs 4,31 Mo précédent à cause des FX). QR pyzbar OK sur 6 scènes.
+- Script FX = source de vérité : `render_parcours_flowin.py` (13183 o) committé + mis à jour dans Supabase `handoff_notes` clé `script-render-parcours-flowin-v2` (octet_length identique).
+- Commit `b86a38e` poussé main → Vercel auto-deploy. Invariants respectés (SpinClient/QuizClient/NDS2026Client intacts, render_kref40 non utilisé).
+
 ## 🎬 SESSION 30/06 (suite 4) — RENDU FINAL livré parcours-jeu-flowin-nds v2
 
 Le montage v2 (script `render_parcours_flowin.py` stocké dans handoff Supabase `script-render-parcours-flowin-v2`) a été **rendu et livré**. Aucune modification du montage (déjà validé), uniquement rendu + intégration.
