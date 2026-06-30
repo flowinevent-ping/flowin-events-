@@ -1,3 +1,10 @@
+## 🟢 SESSION 30/06 (suite 8) — DEKRA : forex PPTX + 2 dernières vidéos
+
+- **Forex PPTX éditables** (caisses+bars+festival, 6 fichiers) régénérés à **8 logos** (chaîne plate→manifest→pptxgenjs). Commit `f6be282`.
+- **nds-fb-16x9** (render_pres16x9) : scène commerces re-grillée 5→**8 logos** (2×4, DEKRA inclus), re-rendu 960 frames, copié dans kit. `dekra` ajouté au registre LOGOS de render_kref40 (lib partagée).
+- **Kit montage écran** (montage-ecran-nds2026.zip) : `logo-dekra.png` ajouté aux elements. Commit `4cb7582`.
+- ⚠️ **Mapping vidéos↔scripts non documenté** (source de la fragilité) : render_social1x1 est carré 1080×1080 (ne correspond à aucun fichier kit) ; nds-insta-9x16 (9×16) source incertaine. Restent encore en 7 logos : nds-spot-9x16 (spot40), nds-ecrans-9x16 (ecran40), nds-insta-9x16, nds-partenaire-16x9 (34s).
+- 🔧 **À restructurer (recette d'insertion)** : centraliser la liste partenaires dans UN seul module partagé (ex. nds_lib.PARTNERS) + un build_kit unique mappant script→fichier, pour qu'ajouter un partenaire = 1 ligne + 1 commande.
 ## 🟢 SESSION 30/06 (suite 7) — DEKRA : supports complétés (forex + A4 + index)
 
 - **Forex 70×70** : `dekra` ajouté aux slots de `gen_forex.py` (bandeau 8 logos). 3 forex caisses régénérés (PNG+SVG) → `kit-digital/nds/forex_70x70_caisse-1/2/3`. QR station vérifié.
