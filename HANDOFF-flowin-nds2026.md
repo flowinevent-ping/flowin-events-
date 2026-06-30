@@ -1,3 +1,9 @@
+## 🟢 SESSION 30/06 (suite 11) — nds-insta-9x16 tranché (8 logos)
+
+- **nds-insta-9x16 = render_spot40 SANS audio** (variante Insta silencieuse — confirmé via frame : titre « JOUE CHEZ NOS PARTENAIRES » + badge « Flash le QR » identiques au spot). Régénéré à 8 logos depuis les frames spot40 (déjà rendues à 8). QR ev-nds-digitale vérifié. Commit `4dd45d8`.
+- **TOUTES les vidéos festival à mur de logos = 8 logos** : parcours ✅, nds-fb-16x9 ✅, nds-spot-9x16 ✅, nds-ecrans-9x16 ✅, nds-insta-9x16 ✅.
+- Doc `docs/recette-insertion-partenaire.md` : mapping vidéo↔script complété (render_social1x1 = carré obsolète ; nds-partenaire-16x9 = présentation upload 34s sans mur de logos → hors recette).
+- **Recette d'insertion 100% bouclée** côté supports auto : forex PNG/SVG/PPTX + montage + 5 vidéos (pres16x9/spot40/ecran40) pilotés par nds_lib.PARTNERS via logo_grid.
 ## 🟢 SESSION 30/06 (suite 10) — DEKRA dans les vidéos festival + Notion
 
 - **render_spot40 (nds-spot-9x16)** + **render_ecran40 (nds-ecrans-9x16)** : scènes commerces converties au helper `L.logo_grid(L.PARTNERS)` (DRY) → **8 logos** (DEKRA inclus). Re-rendus 960 frames chacun. spot = avec audio (bergerie-capcut-source-40s), ecran = sans audio. QR ev-nds-digitale vérifié (pyzbar). Commit `4cd09b6`.
