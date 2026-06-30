@@ -1,3 +1,15 @@
+## 🎬 SESSION 30/06 (suite 3) — refonte verticale du spot → parcours-jeu-flowin-nds
+
+Romain voulait modifier SON spot (`nds-spot-nds2026-16x9`, 37s, muet), pas une autre vidéo. Mes 2 tentatives précédentes (render_kref40) étaient un AUTRE montage → rejetées. Le script source du spot n'existe plus (montage antérieur à la refonte charte). Le passage en vertical imposait une recomposition.
+
+- 🆕 `kit-digital/nds/parcours-jeu-flowin-nds.mp4` (1080×1920, 37s, musique bergerie) : recompose **fidèlement les 6 scènes du spot** en vertical — intro « Flash. Joue. Gagne. » / Comment ça marche (1-2-3) / À gagner / Où jouer (carte) / Nos partenaires / Grand tirage + Flowin.
+- Corrections demandées appliquées : **Flash sans e** (intro + « FLASH & JOUE »), **7 vrais logos** (remplacent Work'n Fun/Util/Alafut erronés), **fusion** partenaires + grand tirage + signature « Flowin — partenaire jeux des Nuits du Sud », **musique bergerie**, QR `ev-nds-digitale` (pyzbar OK).
+- Source `render_parcours_flowin.py` committée (PIL, 6 scènes, deps: logo_nds.png + /home/claude/vid/logos + Manrope). index.html mis à jour.
+- ⚠️ Méthode : valider le contenu AVEC Romain (storyboard) AVANT de rendre — ne pas régénérer une autre vidéo.
+- HEAD repo : `92b87bf`.
+
+---
+
 ## 🎬 SESSION 30/06 (suite 2) — spot + partenaire en 9×16 (refonte)
 
 Constat : les mp4 `nds-spot-nds2026-16x9` et `nds-partenaire-16x9` étaient des **rendus périmés** (ancien QR `nds-parcours.html`, « Flashe » avec E, noms texte erronés type « Work'n Fun / Util », scène « pas de téléphone » = fausse info). Les scripts étaient déjà corrigés ; seuls les rendus manquaient.
