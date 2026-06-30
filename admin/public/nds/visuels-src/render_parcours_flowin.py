@@ -226,9 +226,9 @@ def scene(t):
         title_pop(img,W/2,300,"LE JEU CONTINUE",52,WHITE,ramp(l,0.15,0.65))
         text(img,W/2,372,"chez nos partenaires",44,AMBER,ramp(l,0.35,0.8),800,"mm",18)
         tw_,th_=260,120; gx=W/2; dx2=tw_/2+16; dx3=tw_+18
-        cells=[("bergerie",gx-dx2,470),("pegase",gx+dx2,470),
-               ("utile",gx-dx3,604),("charvolin",gx,604),("carrosserie-gp",gx+dx3,604),
-               ("giordano",gx-dx2,738),("alafut",gx+dx2,738)]
+        cells=[("bergerie",gx-dx3,470),("pegase",gx,470),("utile",gx+dx3,470),
+               ("charvolin",gx-dx3,604),("carrosserie-gp",gx,604),("giordano",gx+dx3,604),
+               ("alafut",gx-dx2,738),("dekra",gx+dx2,738)]
         for i,(slug,cx,cy) in enumerate(cells):
             logo_card(img,cx,cy,tw_,th_,slug,ramp(l,0.5+i*0.08,1.0+i*0.08))
         flowin_sig(img,W/2,872,64,ramp(l,1.5,2.0))
