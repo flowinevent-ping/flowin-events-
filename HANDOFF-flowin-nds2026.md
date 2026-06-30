@@ -1,3 +1,13 @@
+## 🎬 SESSION 30/06 (suite) — vidéo charvolin + kits 7/7
+
+- 🆕 `kit-digital/charvolin/video-charvolin-9x16.mp4` (1080×1920, 24fps, 40s, muette comme les 6 autres). QR réseaux `ev-nds-charvolin&source=reseaux-charvolin` (pyzbar OK badge+finale). Pipeline = `render_kref40` base 960f + `composite_qr` (QR charvolin). README + zip charvolin régénérés.
+- ✅ **Les 7 kits partenaires ont désormais leur vidéo 9×16** (bergerie, pegase, utile, carrosserie-gp, giordano, alafut, charvolin). Le point « 1 vidéo par partenaire » est clos.
+- 🧹 `kit-digital/index.html` : section charvolin était **en DOUBLON** (2e occurrence avec liens QR cassés `qr-station.png`/`qr-reseaux.png`) → unifiée + bloc vidéo ajouté. Audit index : 0 doublon d'id, 0 lien QR cassé, 7/7 vidéos présentes.
+- ℹ️ Forex festival vérifié : bandeau « NOS PARTENAIRES » à jour avec les **7 logos** (charvolin inclus). Demande « forex par commerce » soulevée puis **annulée par Romain** (30/06) — non traitée.
+- HEAD repo : `9ca3ae8`.
+
+---
+
 ## 🧭 SESSION 30/06 (réorganisation navigation) — à lire EN PREMIER
 
 **Objectif tenu** : rendre le projet lisible par un humain qui arrive « à froid ». Avant : ~10 docs HANDOFF/RECAP/REPRISE en vrac à la racine, README vide (9 o). Après : **un point d'entrée unique**.
