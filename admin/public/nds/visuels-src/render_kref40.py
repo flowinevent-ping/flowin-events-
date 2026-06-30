@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 W, H, FPS = 1080, 1920, 24
 OUT = "/home/claude/vid/fk40"; os.makedirs(OUT, exist_ok=True)
 QR = Image.open("/home/claude/vid/qr/ecrans_hd.png").convert("RGB")
-LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut", "charvolin"]}
+LOGOS = {k: f"/home/claude/vid/logos/{k}.png" for k in ["bergerie", "pegase", "utile", "carrosserie-gp", "giordano", "alafut", "charvolin", "dekra"]}
 
 BG = (9, 16, 32)
 AMBER = (244, 181, 68)
