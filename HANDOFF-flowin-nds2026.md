@@ -1,3 +1,10 @@
+## 🟢 SESSION 30/06 (suite 10) — DEKRA dans les vidéos festival + Notion
+
+- **render_spot40 (nds-spot-9x16)** + **render_ecran40 (nds-ecrans-9x16)** : scènes commerces converties au helper `L.logo_grid(L.PARTNERS)` (DRY) → **8 logos** (DEKRA inclus). Re-rendus 960 frames chacun. spot = avec audio (bergerie-capcut-source-40s), ecran = sans audio. QR ev-nds-digitale vérifié (pyzbar). Commit `4cd09b6`.
+- **Récap vidéos à 8 logos** : parcours-jeu-flowin-nds ✅, nds-fb-16x9 ✅, nds-spot-9x16 ✅, nds-ecrans-9x16 ✅. → Toutes les vidéos festival qui montrent le mur de logos sont à jour.
+- **Recette d'insertion COMPLÈTE** : tous les supports (forex PNG/SVG/PPTX, montage, + vidéos pres16x9/spot40/ecran40) lisent désormais `nds_lib.PARTNERS` via `logo_grid`. Ajout partenaire = 1 ligne + rebuild (+ re-render vidéos).
+- **Notion** : (1) page redondante « BRIEF parcours v2 » vidée + renommée « 🗑️ obsolète à supprimer » (38f6dcca…8143) — suppression dure = geste manuel Romain (API ne supprime pas) ; (2) hub : bloc vidéos DEKRA 8 logos avec liens ; (3) page Kit complet : ligne vidéos mise à jour (8 logos + spot ajouté).
+- **Reste** (mineur, vidéos sans mur de logos visible ou source incertaine) : nds-insta-9x16 (source script à confirmer), nds-partenaire-16x9 (34s, présentation) / nds-partenaire-9x16.
 ## 🟢 SESSION 30/06 (suite 9) — RECETTE D'INSERTION (source unique partenaires)
 
 **Fini le drift de la liste partenaires (dupliquée dans ~15 fichiers).**
