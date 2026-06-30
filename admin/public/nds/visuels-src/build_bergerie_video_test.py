@@ -50,7 +50,8 @@ REPO      = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))  # racin
 CLIP_PART = os.path.join(REPO, "admin/public/nds/kit-digital/nds/clips/5-partenaires-bergerie-allianz.mp4")
 WORK      = os.environ.get("WORK", "/tmp/bergerie_build")
 os.makedirs(WORK, exist_ok=True)
-SRC_VIDEO = sys.argv[1] if len(sys.argv) > 1 else None
+SRC_DEFAULT = os.path.join(HERE, "sources-video", "bergerie-capcut-source-40s.mp4")  # source committée
+SRC_VIDEO = sys.argv[1] if len(sys.argv) > 1 else (SRC_DEFAULT if os.path.exists(SRC_DEFAULT) else None)
 OUT       = sys.argv[2] if len(sys.argv) > 2 else os.path.join(WORK, f"{SLUG}-video-complete-TEST.mp4")
 
 # ---------- Police Manrope 800 ----------
