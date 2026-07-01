@@ -3815,9 +3815,9 @@ function renderNdsCarte(){
   return h;
 }
 
-var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
+var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-alafut','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-dekra','ev-nds-giordano','ev-nds-pegase','ev-nds-utile'];
 function ndsStationLabel(evid){
-  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3'};
+  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-alafut':'À la Fût','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-dekra':'DEKRA Vence','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':'Auto-Moto-École Pégase','ev-nds-utile':'Utile Vence'};
   return m[evid]||evid;
 }
 function ndsStationsJoined(events){
@@ -3826,11 +3826,21 @@ function ndsStationsJoined(events){
   return out.length?out.join(', '):'—';
 }
 async function loadNdsParticipants(){
-  var rows = await supaFetch('joueurs', 'select=id,prenom,nom,email,tel,ticket_code,events,ts,first_seen,source,decouverte&order=ts.desc.nullslast&limit=1000');
-  var out=[];
-  if(rows){ for(var i=0;i<rows.length;i++){ var r=rows[i]; var ev=r.events||[]; var hit=false; for(var j=0;j<ev.length;j++){ if(NDS_EVENT_IDS.indexOf(ev[j])>-1){ hit=true; break; } } if(hit) out.push(r); } }
-  state.ndsParticipants = out;
+  var rows = await supaFetch('v_nds_participants', 'select=*&order=ts.desc.nullslast&limit=1000');
+  state.ndsParticipants = Array.isArray(rows)?rows:[];
   render();
+}
+async function ndsDeleteJoueur(id){
+  var p=(state.ndsParticipants||[]).filter(function(x){return x.id===id;})[0];
+  var label = p ? (((p.prenom||'')+' '+(p.nom||'')).trim()||p.email||id) : id;
+  if(!confirm('Supprimer d\u00e9finitivement '+label+' ?\n\nEfface le joueur, ses parties, r\u00e9ponses, gains et parrainages. Irr\u00e9versible.')) return;
+  if(!confirm('Derni\u00e8re confirmation : suppression TOTALE de '+label+' ?')) return;
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/admin_delete_joueur', { method:'POST', headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'}, body: JSON.stringify({p_id:id}) });
+    var jr = await r.json();
+    if(r.ok && jr && jr.ok){ if(typeof toast==='function') toast('Contact supprim\u00e9'); if(typeof closeDrawer==='function') closeDrawer(); state.ndsParticipants=null; loadNdsParticipants(); }
+    else { if(typeof toast==='function') toast('\u00c9chec suppression'+(jr&&jr.reason?' : '+jr.reason:'')); }
+  }catch(e){ if(typeof toast==='function') toast('Erreur suppression'); }
 }
 function ndsOrigine(p){
   var s=(''+(p.source||'')).toLowerCase();
@@ -3841,29 +3851,35 @@ function ndsOrigine(p){
 function ndsParticipantsReload(){ state.ndsParticipants=null; toast('Rechargement…'); render(); }
 function renderNdsParticipants(){
   if(!state.ndsParticipants){ loadNdsParticipants(); return '<div class="page"><div class="page-header"><div class="page-title">&#128101; Participants NDS 2026</div></div><div class="empty-block">Chargement…</div></div>'; }
-  var list=state.ndsParticipants;
+  var all=state.ndsParticipants;
+  var q=(state.search && state.search.ndsPart ? state.search.ndsPart : '').toLowerCase().trim();
+  var list = q ? all.filter(function(p){ return (((p.prenom||'')+' '+(p.nom||'')+' '+(p.email||'')+' '+(p.tel||'')+' '+(p.code_postal||'')+' '+(p.ticket_code||'')).toLowerCase().indexOf(q)>-1); }) : all;
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">&#128101; Participants NDS 2026</div><div class="page-subtitle">Joueurs agrégés de toutes les stations du Super Event NDS 2026</div></div><div class="page-actions"><button class="btn" onclick="ndsParticipantsReload()">&#8635; Recharger</button></div></div>';
-  h+='<div class="kpi-grid">'+prospKpi(list.length,'Participants')+'</div>';
-  if(!list.length){ h+='<div class="empty-block">Aucun participant pour le moment.</div></div>'; return h; }
+  h+='<div class="page-header"><div><div class="page-title">&#128101; Participants NDS 2026</div><div class="page-subtitle">Toutes les stations — festival + commerces partenaires</div></div><div class="page-actions"><button class="btn" onclick="ndsParticipantsReload()">&#8635; Recharger</button></div></div>';
+  h+='<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">'+prospKpi(all.length,'Participants')+prospKpi(all.reduce(function(s,p){return s+(p.nb_tickets||0);},0),'Tickets cumulés')+prospKpi(all.reduce(function(s,p){return s+(p.nb_filleuls||0);},0),'Parrainages')+'</div>';
+  h+='<div class="filter-search" style="margin:12px 0"><input placeholder="Rechercher (nom, email, tél, CP, ticket)…" oninput="if(!state.search)state.search={};state.search.ndsPart=this.value;render()" value="'+esc(q)+'"/></div>';
+  if(!list.length){ h+='<div class="empty-block">Aucun participant'+(q?(' pour « '+esc(q)+' »'):'')+'.</div></div>'; return h; }
   h+='<div style="overflow-x:auto;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px">';
   h+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
-  h+='<thead><tr style="text-align:left;border-bottom:1px solid var(--sa-border)"><th style="padding:10px 12px">Prénom</th><th style="padding:10px 12px">Nom</th><th style="padding:10px 12px">Email</th><th style="padding:10px 12px">Tél</th><th style="padding:10px 12px">Ticket</th><th style="padding:10px 12px">Stations jouées</th><th style="padding:10px 12px">Origine</th><th style="padding:10px 12px">Date</th></tr></thead><tbody>';
+  h+='<thead><tr style="text-align:left;border-bottom:1px solid var(--sa-border)"><th style="padding:10px 12px">Joueur</th><th style="padding:10px 12px">Tél</th><th style="padding:10px 12px">Stations jouées</th><th style="padding:10px 12px;text-align:center">&#127915;</th><th style="padding:10px 12px;text-align:center">&#128101;</th><th style="padding:10px 12px">Origine</th><th style="padding:10px 12px">Date</th><th style="padding:10px 12px"></th></tr></thead><tbody>';
   for(var i=0;i<list.length;i++){
     var p=list[i];
     var dt=p.ts||p.first_seen||''; if(dt) dt=(''+dt).slice(0,10);
-    h+='<tr style="border-bottom:1px solid var(--sa-border)">';
-    h+='<td style="padding:9px 12px">'+esc(p.prenom||'—')+'</td>';
-    h+='<td style="padding:9px 12px">'+esc(p.nom||'—')+'</td>';
-    h+='<td style="padding:9px 12px">'+esc(p.email||'—')+'</td>';
+    var nm=((p.prenom||'')+' '+(p.nom||'')).trim()||'—';
+    h+='<tr style="border-bottom:1px solid var(--sa-border);cursor:pointer" onclick="openDrawerFor(\'joueur\',\''+p.id+'\')">';
+    h+='<td style="padding:9px 12px"><div class="fw-700">'+esc(nm)+'</div><div class="text-xs text-muted">'+esc(p.email||'—')+'</div></td>';
     h+='<td style="padding:9px 12px">'+esc(p.tel||'—')+'</td>';
-    h+='<td style="padding:9px 12px">'+esc(p.ticket_code||'—')+'</td>';
     h+='<td style="padding:9px 12px">'+esc(ndsStationsJoined(p.events))+'</td>';
+    h+='<td style="padding:9px 12px;text-align:center;font-weight:700">'+(p.nb_tickets||0)+'</td>';
+    h+='<td style="padding:9px 12px;text-align:center">'+(p.nb_filleuls||0)+'</td>';
     h+='<td style="padding:9px 12px">'+esc(ndsOrigine(p))+'</td>';
     h+='<td style="padding:9px 12px">'+esc(dt||'—')+'</td>';
+    h+='<td style="padding:9px 12px;text-align:right"><button class="btn-sm" style="color:#dc2626;border-color:#fecaca" title="Supprimer définitivement" onclick="event.stopPropagation();ndsDeleteJoueur(\''+p.id+'\')">&#128465;</button></td>';
     h+='</tr>';
   }
-  h+='</tbody></table></div></div>';
+  h+='</tbody></table></div>';
+  h+='<div class="text-xs text-muted" style="margin-top:8px">'+list.length+(q?(' / '+all.length):'')+' participant'+(list.length>1?'s':'')+' · clique une ligne pour ouvrir la fiche &amp; l\'historique</div>';
+  h+='</div>';
   return h;
 }
 
@@ -4181,6 +4197,8 @@ function renderMaintenance(){
 }
 
 function render(){
+  var _fsActive=false,_fsS=0,_fsE=0;
+  try{ var _ae=document.activeElement; if(_ae && _ae.matches && _ae.matches('#viewport .filter-search input, #viewport input.filter-search')){ _fsActive=true; _fsS=_ae.selectionStart; _fsE=_ae.selectionEnd; } }catch(e){}
   renderSidebar();
   renderTopbar();
   const v = state.view;
@@ -4217,6 +4235,7 @@ else if(v==='maintenance') html = renderMaintenance();
   // live-control supprimé — remplacé par drawer stats
   else html = '<div class="page"><div class="empty-block">Vue inconnue</div></div>';
   $('#viewport').innerHTML = html;
+  if(_fsActive){ try{ var _ni=document.querySelector('#viewport .filter-search input, #viewport input.filter-search'); if(_ni){ _ni.focus(); _ni.setSelectionRange(_fsS,_fsE); } }catch(e){} }
   if(state.drawer.open && !state._pollingRender) renderDrawer();
   if(state.modal.open) renderModal();
   if(typeof ndsMapEnsure==='function' && document.getElementById('nds-leaflet')) ndsMapEnsure();
