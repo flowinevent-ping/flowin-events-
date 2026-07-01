@@ -1,4 +1,45 @@
-## 🟢 SESSION 30/06 (suite 11) — nds-insta-9x16 tranché (8 logos)
+## 🟢 SESSION 01/07 — Nook, corrections dashboard, anti-triche, vidéos, hub demos.html
+
+**Nouveau partenaire NOOK CAFÉ** (rue Louis Funel, Vence — FB/Insta fournis) : `ev-nds-nook` + `pt-nook` créés (module nds2026, cfg jeu copiée d'Utile), logo intégré + `nds_lib.PARTNERS` (9 partenaires), QR station + réseaux (one-shot) identifiés dans `kit-digital/nook/`. Lots volontairement EN SUSPENS (Romain). Adresse exacte + GPS + tél restent à fournir.
+
+**Logo Utile Vence** : fichier officiel fourni par Romain (`utile_vence.svg`) intégré partout — dashboard/front, montage, A4 (PNG+PDF), ticket PDF, montage-écran zip, ET mur de logos vidéo (via `rebuild-video-ecran8.sh`).
+
+**RECETTE DURABLE inscrite** : `admin/public/nds/RECETTE-LOGOS-PARTENAIRES.md` + `visuels-src/ecran-8-partenaires/rebuild-video-ecran8.sh` (1 commande = mur logos + composition finale + vérif QR/durée). Master plat CapCut désormais **versionné** dans `visuels-src/sources-video/bergerie-video-complete-TEST.mp4` — plus jamais à re-uploader.
+
+**Fix chevauchement QR video-ecran-8** : le master CapCut exposait brièvement (27.51-27.7s) son propre QR erroné (`ev-nds-bergerie`) avant la carte de recouvrement. Fenêtres avancées à 27.3s. Vérifié exhaustif (80 échantillons). Bonus : Nook intégré au mur (9 logos).
+
+**Collecte de données (objectif : visuel précis par station)** :
+- `participations.source_qr` ajouté (digital `reseaux-<slug>` vs physique) — canal enfin capté.
+- `participations.started_at` ajouté (heure de connexion, calcule le temps de jeu).
+- Règle confirmée : **digital = one-shot 1ère connexion** (écran de refus « rends-toi sur le lieu » si compte déjà connu) ; **physique = 1×/jour/station** (pas 1×/vie).
+- 2 index anti-triche posés : `uniq_participation_digital_oneshot`, `uniq_participation_physique_jour`. Erreurs d'écriture désormais surfacées (`writeJoueur` + `claimJoueur`) → plus de risque de ticket fantôme.
+
+**Dashboard, corrections réelles (pas de mock)** :
+- Fiche joueur Historique : vraies participations (date/heure/score/tickets/réponses), fini le mock appareil iPhone/Samsung inventé.
+- Fiche joueur Stats : canal réel (digital/physique) + plages horaires réelles, fini le mock device.
+- Bloc Parrainage & filleuls ajouté (table `parrainage`, jointure `external_id`).
+- Page Participants NDS : inclut les 8 commerces partenaires (vue `v_nds_participants`), recherche (bug focus corrigé GLOBALEMENT dans `render()`), clic ligne → fiche, colonnes tickets/parrainages, bouton suppression totale (`admin_delete_joueur` RPC, cascade, double confirmation).
+- Fiche event onglet QR : 3e bloc QR RÉSEAUX (digital, distinct de station et Accès Pro) ajouté, anti-confusion.
+- 7 comptes de test nettoyés (baitaenergie, will@*, Francis seed) — 0 résidu vérifié.
+
+**Vidéos** :
+- `nds-lancement-jeux-9x16.mp4` : repris à l'identique du fichier fourni par Romain (AUCUN contenu changé — vérifié pixel par pixel, écart 1.9/255 hors QR), juste vertical + logo NDS haut + signature Flowin + QR corrigé (`ev-nds-2026`).
+- Les deux vidéos (lancement + écran-8) ajoutées dans le **hub `demos.html`** (https://flowin-events.vercel.app/demos.html), section « Vidéos écrans NDS ».
+
+**Notion** : rubrique permanente « 💡 Idées & options techniques — Parking » créée (id `3906dcca-9add-81e4-81e6-dd443f0d27eb`) pour stocker les options étudiées non-actives (1ère entrée : QR physique GP en fiche, dépend de `geo_controle`).
+
+**RESTE / reste-à-faire prioritaire** :
+- Nook : adresse exacte + GPS + tél + lots (Romain doit fournir).
+- Tâche 1 (CGV + conditions bons par partenaire, même cadre) : en attente du wording de Romain.
+- Tâche 2 (bonus quiz 4Q ≠ brigade RSE, différent par station) : contenu RSE/accès/satisfaction à fournir par Romain.
+- Tâche 3 (UX maraudeur mode sondage tablette) : faisable dans l'archi actuelle, à cadrer.
+- Message dédié refus digital strict (aujourd'hui backstop DB générique) : finition mineure possible.
+- Sécurité `admin_delete_joueur` + dashboard SA sans login : durcissement post-festival prévu (déjà documenté).
+
+**Dernier commit : `bb069ca`. Repo propre, rien en attente (vérifié local == origin/main).**
+
+---
+
 
 - **nds-insta-9x16 = render_spot40 SANS audio** (variante Insta silencieuse — confirmé via frame : titre « JOUE CHEZ NOS PARTENAIRES » + badge « Flash le QR » identiques au spot). Régénéré à 8 logos depuis les frames spot40 (déjà rendues à 8). QR ev-nds-digitale vérifié. Commit `4dd45d8`.
 - **TOUTES les vidéos festival à mur de logos = 8 logos** : parcours ✅, nds-fb-16x9 ✅, nds-spot-9x16 ✅, nds-ecrans-9x16 ✅, nds-insta-9x16 ✅.
