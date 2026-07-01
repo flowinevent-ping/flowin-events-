@@ -3376,10 +3376,10 @@ async function loadCrmLanding(){
   // Landing Brigade Verte (sondage terrain) : pas dans crm_retours (pipeline B2B), on la merge
   // depuis joueurs+participations pour qu'elle apparaisse comme une source de plus, ici.
   try{
-    var bvJoueurs = await supaFetch('joueurs','select=id,prenom,nom,tel,email,genre,age_tranche,code_postal,created_at&source=eq.brigade-manuel&order=created_at.desc&limit=500');
+    var bvJoueurs = await supaFetch('joueurs','select=id,prenom,nom,tel,email,genre,age_tranche,code_postal,first_seen,updated_at&source=eq.brigade-manuel&order=updated_at.desc&limit=500');
     if(bvJoueurs && bvJoueurs.length){
       var bvIds = bvJoueurs.map(function(j){return j.id;});
-      var bvPart = await supaFetch('participations','select=joueur_id,bonus_answers,tickets,created_at&joueur_id=in.('+bvIds.join(',')+')');
+      var bvPart = await supaFetch('participations','select=joueur_id,bonus_answers,tickets,played_date&joueur_id=in.('+bvIds.join(',')+')');
       var partByJoueur = {};
       (bvPart||[]).forEach(function(p){ partByJoueur[p.joueur_id] = p; });
       var bvRows = bvJoueurs.map(function(j){
@@ -3390,7 +3390,7 @@ async function loadCrmLanding(){
           bvPrenom: j.prenom, bvNom: j.nom,
           contact_nom: [j.prenom,j.nom].filter(Boolean).join(' '),
           contact_email: j.email, contact_tel: j.tel,
-          etat: 'nouveau', created_at: j.created_at,
+          etat: 'nouveau', created_at: j.updated_at || j.first_seen,
           bvGenre: j.genre, bvAge: j.age_tranche, bvCp: j.code_postal,
           bvReponses: p.bonus_answers || null, bvTickets: p.tickets || 1
         };
