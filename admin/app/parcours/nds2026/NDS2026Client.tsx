@@ -184,7 +184,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   }, [recurrent])
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
-  const [scanTarget, setScanTarget] = useState<{ nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
+  const [scanTarget, setScanTarget] = useState<{ id?: string; nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
   const [bandPartners, setBandPartners] = useState<{ id: string; nom: string; image_url: string | null; emoji: string | null }[]>([])
@@ -384,7 +384,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             setGeo({ ...geoRef.current })
           })
         } else {
-          mk.on('click', () => { if (cur) setScreen('onboard'); else setScanTarget({ nom: st.nom, lat: st.lat, lng: st.lng, msg: st.msg, ou: st.ou, done }) })
+          mk.on('click', () => { if (cur) setScreen('onboard'); else setScanTarget({ id: st.id, nom: st.nom, lat: st.lat, lng: st.lng, msg: st.msg, ou: st.ou, done }) })
         }
       })
 
@@ -1063,7 +1063,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       </div>
                       <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 14, background: '#e9f9ef', border: '1px solid #bbf7d0', borderRadius: 12, padding: '12px 14px' }}>Tu as déjà joué cette station aujourd&apos;hui. File vers une <b>autre station</b> pour gagner un ticket de plus au tirage&nbsp;!</div>
                       {scanTarget.lat && scanTarget.lng ? (
-                        <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 0 }}>
+                        <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 0 }} onClick={() => logClicPartenaire(scanTarget.id || 'inconnu', 'maps', `https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`)}>
                           <svg className="ic" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: -3 }}><use href="#i-map" /></svg>Y retourner (Maps)
                         </a>
                       ) : null}
@@ -1081,7 +1081,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, marginBottom: 14 }}>Pour gagner <b>1 ticket de plus</b>, rends-toi à cette station et <b>flashe son QR code</b> sur place. Tu cumules un ticket à chaque station, toute la soirée.</div>
                   <button className="btn" style={{ marginTop: 0 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>Flasher le QR maintenant</button>
                   {scanTarget.lat && scanTarget.lng ? (
-                    <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 10 }}>
+                    <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 10 }} onClick={() => logClicPartenaire(scanTarget.id || 'inconnu', 'maps', `https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`)}>
                       <svg className="ic" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
                     </a>
                   ) : null}
@@ -1124,7 +1124,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   </div>
 ) : null })()}
                   {fiche.latitude && fiche.longitude ? (
-                    <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }}>
+                    <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }} onClick={() => logClicPartenaire(fiche.id, 'maps', `https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`)}>
                       <svg className="ic" style={{ width: 16, height: 16, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
                     </a>
                   ) : null}
@@ -1196,9 +1196,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       })}
                     </div>
                   )}
-                  {(partenaires[sheetPart].site_web || partenaires[sheetPart].url) && <a className="sh-row" href={partenaires[sheetPart].site_web || partenaires[sheetPart].url || '#'} target="_blank" rel="noopener noreferrer"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-store" /></svg> Site web</a>}
-                  {partenaires[sheetPart].instagram && <a className="sh-row" href={partenaires[sheetPart].instagram!} target="_blank" rel="noopener noreferrer"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-insta" /></svg> Instagram</a>}
-                  {partenaires[sheetPart].facebook && <a className="sh-row" href={partenaires[sheetPart].facebook!} target="_blank" rel="noopener noreferrer"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-fb" /></svg> Facebook</a>}
+                  {(partenaires[sheetPart].site_web || partenaires[sheetPart].url) && <a className="sh-row" href={partenaires[sheetPart].site_web || partenaires[sheetPart].url || '#'} target="_blank" rel="noopener noreferrer" onClick={() => logClicPartenaire(partenaires[sheetPart].id, 'site_web', partenaires[sheetPart].site_web || partenaires[sheetPart].url || null)}><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-store" /></svg> Site web</a>}
+                  {partenaires[sheetPart].instagram && <a className="sh-row" href={partenaires[sheetPart].instagram!} target="_blank" rel="noopener noreferrer" onClick={() => logClicPartenaire(partenaires[sheetPart].id, 'instagram', partenaires[sheetPart].instagram || null)}><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-insta" /></svg> Instagram</a>}
+                  {partenaires[sheetPart].facebook && <a className="sh-row" href={partenaires[sheetPart].facebook!} target="_blank" rel="noopener noreferrer" onClick={() => logClicPartenaire(partenaires[sheetPart].id, 'facebook', partenaires[sheetPart].facebook || null)}><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-fb" /></svg> Facebook</a>}
                   <a className="btn" style={{ marginTop: 16 }} onClick={() => setSheetPart(null)}>Fermer</a>
                 </div>
               </>

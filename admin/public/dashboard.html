@@ -3016,6 +3016,7 @@ function renderSidebar(){
       {id:'nds-front',ico:'🎨',lbl:'Front NDS',n:(state.ndsFront?state.ndsFront.length:0)},
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
+      {id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
       {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
@@ -4012,6 +4013,112 @@ function ndsStationsJoined(events){
   var out=[]; for(var i=0;i<events.length;i++){ if(NDS_EVENT_IDS.indexOf(events[i])>-1) out.push(ndsStationLabel(events[i])); }
   return out.length?out.join(', '):'—';
 }
+// ── Track QR : origine des scans (station vs réseaux) + clics sortants (FB/Insta/Site/Maps) ──
+async function loadTrackQr(){
+  state.trackQrClics = []; state.trackQrScans = []; // placeholders immédiats anti-double-fetch
+  try{
+    var clics = await supaFetch('partenaire_clics','select=id,partenaire_id,event_id,lien_key,url,ts,joueur_id&order=ts.desc&limit=2000');
+    var parts = await supaFetch('participations','select=event_id,source_qr,created_at&order=created_at.desc&limit=3000');
+    state.trackQrClics = clics||[];
+    state.trackQrScans = parts||[];
+    render();
+  }catch(e){ console.error('[Flowin] loadTrackQr erreur', e); }
+}
+function trackQrPartLabel(pid){
+  var p = (DATA.partenaires||[]).find(function(x){return x.id===pid;});
+  return p ? p.nom : (pid||'—');
+}
+function trackQrEvLabel(evId){
+  var e = (DATA.events||[]).find(function(x){return x.id===evId;});
+  return e ? e.nom : (evId||'—');
+}
+function renderTrackQr(){
+  if(!state.trackQrClics){ loadTrackQr(); return '<div class="page"><div class="page-header"><div class="page-title">&#128279; Track QR &amp; clics</div></div><div class="empty-block">Chargement…</div></div>'; }
+  if(!state.trackQrFilter) state.trackQrFilter = {type:'', q:''};
+  var f = state.trackQrFilter;
+
+  // Unifie scans QR (participations) + clics liens (partenaire_clics) dans une seule timeline
+  var rows = [];
+  state.trackQrScans.forEach(function(p){
+    var isReseaux = p.source_qr && p.source_qr.indexOf('reseaux-')===0;
+    var isManuel = p.source_qr === 'brigade-manuel';
+    rows.push({
+      type: isManuel ? 'brigade_manuel' : (isReseaux ? 'qr_reseaux' : 'qr_station'),
+      partenaire: trackQrEvLabel(p.event_id), detail: p.source_qr||'—', ts: p.created_at
+    });
+  });
+  state.trackQrClics.forEach(function(c){
+    rows.push({ type:'clic_'+(c.lien_key||'autre'), partenaire: trackQrPartLabel(c.partenaire_id), detail: c.url||'—', ts: c.ts });
+  });
+  rows.sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
+
+  var TYPE_META = {
+    qr_station:    {lbl:'📍 QR station',      color:'#7C2D92'},
+    qr_reseaux:    {lbl:'📱 QR réseaux',       color:'#3B5CC4'},
+    brigade_manuel:{lbl:'🌿 Brigade (manuel)', color:'#22C55E'},
+    clic_facebook: {lbl:'📘 Clic Facebook',    color:'#1877F2'},
+    clic_instagram:{lbl:'📷 Clic Instagram',   color:'#E1306C'},
+    clic_site_web: {lbl:'🌐 Clic Site web',    color:'#00B4A0'},
+    clic_maps:     {lbl:'📍 Clic Maps',        color:'#EA4335'},
+    clic_autre:    {lbl:'🔗 Autre clic',       color:'#888'}
+  };
+
+  var list = rows;
+  if(f.type) list = list.filter(function(r){ return r.type===f.type; });
+  if(f.q){ var q=f.q.toLowerCase(); list = list.filter(function(r){ return (r.partenaire||'').toLowerCase().indexOf(q)>-1; }); }
+
+  var kQrStation = rows.filter(function(r){return r.type==='qr_station';}).length;
+  var kQrReseaux = rows.filter(function(r){return r.type==='qr_reseaux';}).length;
+  var kClics = rows.filter(function(r){return r.type.indexOf('clic_')===0;}).length;
+  var kBrigade = rows.filter(function(r){return r.type==='brigade_manuel';}).length;
+
+  var h = '<div class="page">';
+  h += '<div class="page-header"><div><div class="page-title">&#128279; Track QR &amp; clics</div><div class="page-subtitle">Origine des scans et clics sortants (Facebook / Instagram / Site / Maps)</div></div><div class="page-actions"><button class="btn-sm" onclick="state.trackQrClics=null;render()">&#8635; Recharger</button></div></div>';
+  h += '<div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">'
+     + prospKpi(rows.length,'Événements trackés')
+     + prospKpi(kQrStation,'📍 Scans QR station')
+     + prospKpi(kQrReseaux,'📱 Scans QR réseaux')
+     + prospKpi(kBrigade,'🌿 Brigade manuel')
+     + prospKpi(kClics,'🔗 Clics sortants (FB/Insta/Site/Maps)')
+     + '</div>';
+
+  // Répartition des clics par type de lien (pour répondre precisement à "nombre de clic par redirection")
+  var byLink = {};
+  state.trackQrClics.forEach(function(c){ var k=c.lien_key||'autre'; byLink[k]=(byLink[k]||0)+1; });
+  if(Object.keys(byLink).length){
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+    Object.keys(byLink).forEach(function(k){
+      var meta = TYPE_META['clic_'+k] || TYPE_META.clic_autre;
+      h += '<span style="background:'+meta.color+'1a;color:'+meta.color+';border:1px solid '+meta.color+'55;border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:700">'+meta.lbl+' — '+byLink[k]+'</span>';
+    });
+    h += '</div>';
+  }
+
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">';
+  h += '<input value="'+crmEsc(f.q||'')+'" placeholder="Rechercher un partenaire…" oninput="state.trackQrFilter.q=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;flex:1;min-width:180px">';
+  h += '<select onchange="state.trackQrFilter.type=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit">';
+  h += '<option value=""'+(f.type===''?' selected':'')+'>Toutes les origines</option>';
+  Object.keys(TYPE_META).forEach(function(k){ h+='<option value="'+k+'"'+(f.type===k?' selected':'')+'>'+TYPE_META[k].lbl+'</option>'; });
+  h += '</select></div>';
+
+  h += '<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
+  h += '<thead><tr style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--sa-muted);border-bottom:1px solid var(--sa-border)"><th style="padding:10px">ORIGINE</th><th style="padding:10px">PARTENAIRE / STATION</th><th style="padding:10px">DÉTAIL</th><th style="padding:10px">DATE</th></tr></thead><tbody>';
+  if(!list.length){ h += '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--sa-muted)">Aucun événement pour ce filtre</td></tr>'; }
+  list.slice(0,500).forEach(function(r){
+    var meta = TYPE_META[r.type] || TYPE_META.clic_autre;
+    h += '<tr style="border-bottom:1px solid var(--sa-border);font-size:13px">';
+    h += '<td style="padding:10px;white-space:nowrap"><span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:'+meta.color+'22;color:'+meta.color+';border:1px solid '+meta.color+'">'+meta.lbl+'</span></td>';
+    h += '<td style="padding:10px"><b>'+crmEsc(r.partenaire||'—')+'</b></td>';
+    h += '<td style="padding:10px;font-size:11.5px;color:var(--sa-muted);max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+crmEsc(r.detail||'—')+'</td>';
+    h += '<td style="padding:10px;white-space:nowrap;color:var(--sa-muted);font-size:12px">'+crmLandingDate(r.ts)+'</td>';
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>';
+  if(list.length>500) h += '<div class="text-xs text-muted" style="margin-top:8px">Affichage limité aux 500 plus récents ('+list.length+' au total pour ce filtre).</div>';
+  h += '</div>';
+  return h;
+}
+
 async function loadNdsParticipants(){
   var rows = await supaFetch('v_nds_participants', 'select=*&order=ts.desc.nullslast&limit=1000');
   state.ndsParticipants = Array.isArray(rows)?rows:[];
@@ -4427,6 +4534,7 @@ function render(){
   else if(v==='nds-front') html = renderNdsFront();
   else if(v==='nds-carte') html = renderNdsCarte();
   else if(v==='nds-participants') html = renderNdsParticipants();
+  else if(v==='nds-track-qr') html = renderTrackQr();
   else if(v==='nds-bon-commande') html = renderNdsBonCommande();
   else if(v==='landing-page') html = renderLandingPage();
 else if(v==='nds-media') html = renderNdsMedia();
