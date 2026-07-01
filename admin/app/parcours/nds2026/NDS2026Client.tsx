@@ -488,13 +488,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
   async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+    const qrSource = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
     return recurrent
-      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, quizTicket: quizTk, bonusTicket: bonusTk })
+      ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, source_qr: qrSource, quizTicket: quizTk, bonusTicket: bonusTk })
       : await writeJoueur({
           email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
           code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined,
           score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
-          source: 'nds2026', prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
+          source: 'nds2026', source_qr: qrSource ?? null, prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
           optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk,
         })
   }

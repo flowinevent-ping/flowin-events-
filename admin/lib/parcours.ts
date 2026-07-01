@@ -100,6 +100,7 @@ export interface JoueurPayload {
   events: string[]
   ticket_code: string
   source: string
+  source_qr?: string | null
   prefix: string
   /** Tickets NDS : 1 ticket quiz (4/4) + 1 ticket bonus -> jusqu'à 2/station/jour. Défaut quiz=true (autres parcours), bonus=false. */
   quiz_ticket?: boolean
@@ -316,6 +317,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       completed: true,
       tickets: nbTickets,
       bonus_answers: payload.bonus_reponses ?? null,
+      source_qr: payload.source_qr ?? null,
       ...geo.scan,
     })
     if (partErr) console.error('[writeJoueur] insert participation échoué:', partErr.message)
@@ -427,7 +429,7 @@ export async function claimJoueur(
   evId: string,
   prefix: TicketPrefix,
   bonus?: Record<string, unknown>,
-  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; quizTicket?: boolean; bonusTicket?: boolean }
+  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; quizTicket?: boolean; bonusTicket?: boolean }
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const { data: dup } = await supabase
@@ -447,7 +449,7 @@ export async function claimJoueur(
   const bonusTk = geo.onSite && extra?.bonusTicket === true
   const nbTickets = (quizTk ? 1 : 0) + (bonusTk ? 1 : 0)
   const sc = extra?.score ? (parseInt(String(extra.score).split('/')[0]) || 0) : 0
-  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, ...geo.scan })
+  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: extra?.source_qr ?? null, ...geo.scan })
   await writeSeReponses({
     joueurId: joueur.id, evId, jour: today,
     source: extra?.source ?? 'nds2026',
