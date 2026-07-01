@@ -2704,6 +2704,7 @@ function genQRSvg(content, opts){
   }
 }
 const fmt = d => { try{ return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});}catch(e){return d;} };
+const fmtDateTime = d => { try{ var dt=new Date(d); var p=n=>n<10?'0'+n:''+n; return p(dt.getDate())+'/'+p(dt.getMonth()+1)+' '+p(dt.getHours())+'h'+p(dt.getMinutes()); }catch(e){return d||'—';} };
 const fmtFull = function(d){
   if(!d && d !== 0) return '-';
   try{
@@ -3366,6 +3367,24 @@ function renderCrmRetours(){
   });
   h+='</tbody></table></div></div>';
   return h;
+}
+
+// Résumé tickets + dernière partie par joueur, pour la colonne "Tickets" / "Date de jeu" du tableau Joueurs CRM.
+// Un seul fetch group pour tous les joueurs (pas de N+1), mis en cache dans state.joueursTickets.
+async function loadJoueursTicketsSummary(){
+  state.joueursTickets = {}; // placeholder immédiat pour ne pas relancer le fetch à chaque render
+  try{
+    var rows = await supaFetch('participations','select=joueur_id,tickets,created_at&order=created_at.desc&limit=5000');
+    var out = {};
+    (rows||[]).forEach(function(p){
+      if(!p.joueur_id) return;
+      if(!out[p.joueur_id]) out[p.joueur_id] = {tickets:0, lastPlay:null};
+      out[p.joueur_id].tickets += (p.tickets||0);
+      if(!out[p.joueur_id].lastPlay || p.created_at > out[p.joueur_id].lastPlay) out[p.joueur_id].lastPlay = p.created_at;
+    });
+    state.joueursTickets = out;
+    render();
+  }catch(e){ console.error('[Flowin] loadJoueursTicketsSummary erreur', e); }
 }
 
 // ── CRM Landing pages : boîte de réception des soumissions des landing (lecture seule,
@@ -4386,7 +4405,7 @@ function render(){
   let html = '';
   if(v==='pilotage') html = renderPilotage();
   else if(v==='pros') html = renderBiblioPros();
-  else if(v==='joueurs') html = renderBiblioJoueurs();
+  else if(v==='joueurs') { if(!state.joueursTickets) loadJoueursTicketsSummary(); html = renderBiblioJoueurs(); }
   else if(v==='gagnants') html = renderBiblioGagnants();
   else if(v==='partenaires') html = renderBiblioPartenaires();
   else if(v==='events') html = renderBiblioEvents();
@@ -5658,7 +5677,9 @@ function renderBiblioJoueurs(){
     score:   j=>parseFloat(String(j.scoreMoy).split('/')[0])||0,
     optin:   j=>j.optin?1:0,
     lastSeen:j=>new Date(j.lastSeen).getTime(),
-    firstSeen:j=>new Date(j.firstSeen||j.lastSeen).getTime()
+    firstSeen:j=>new Date(j.firstSeen||j.lastSeen).getTime(),
+    tickets: j=>{ var tk=(state.joueursTickets||{})[j.id]; return tk?tk.tickets:0; },
+    datejeu: j=>{ var tk=(state.joueursTickets||{})[j.id]; return tk&&tk.lastPlay?new Date(tk.lastPlay).getTime():0; }
   });
 
   // ---- Filtre B2B/B2C — AVANT pagination ----
@@ -5866,6 +5887,8 @@ function renderBiblioJoueurs(){
     html += xlsHdr('events','Event(s)','180px',evDropHtml);
     html += xlsHdr('score','Score','90px');
     html += xlsHdr('optin','Newsletter','100px',optinDropHtml);
+    html += xlsHdr('tickets','🎟 Tickets','80px');
+    html += xlsHdr('datejeu','Date de jeu','110px');
     html += xlsHdr('gains','Gains','70px');
     html += xlsHdr('firstSeen','1ère vue','90px');
     html += xlsHdr('lastSeen','Dernière vue','90px');
@@ -5933,6 +5956,8 @@ function renderBiblioJoueurs(){
            + '<td>'+evCell+'</td>'
            + '<td><div class="xls-score-bar"><div class="xls-score-dots">'+scoreDots+'</div><span style="font-size:11px;color:var(--sa-muted);margin-left:4px">'+esc(j.scoreMoy||'—')+'</span></div></td>'
            + '<td>'+(j.optin?'<span class="xls-badge green">✓ Oui</span>':'<span class="xls-badge gray">Non</span>')+'</td>'
+           + (function(){ var tk=(state.joueursTickets||{})[j.id]; return '<td style="text-align:center">'+(tk&&tk.tickets?('<span style="font-weight:800;color:#7C2D92">🎟 '+tk.tickets+'</span>'):'<span style="color:var(--sa-muted);font-size:11px">—</span>')+'</td>'
+             + '<td style="font-size:11px;color:var(--sa-muted)">'+(tk&&tk.lastPlay?fmtDateTime(tk.lastPlay):'<span style="color:var(--sa-muted)">—</span>')+'</td>'; })()
            + '<td>'+(j.gains?'<span class="xls-badge purple">🏆 '+j.gains+'</span>':'<span style="color:var(--sa-muted);font-size:11px">0</span>')+'</td>'
            + '<td style="font-size:11px;color:var(--sa-muted)">'+fmt(j.firstSeen||j.lastSeen)+'</td>'
            + '<td style="font-size:11px;color:var(--sa-muted)">'+fmt(j.lastSeen)+'</td>'
