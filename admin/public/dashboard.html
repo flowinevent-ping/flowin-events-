@@ -3401,6 +3401,12 @@ async function loadCrmLanding(){
   render();
 }
 function crmLandingReload(){state.crmLanding=null;toast('Rechargement…');render();}
+function crmLandingSortBy(col){
+  if(!state.crmLandingSort)state.crmLandingSort={col:'created_at',dir:'desc'};
+  if(state.crmLandingSort.col===col){ state.crmLandingSort.dir = state.crmLandingSort.dir==='asc'?'desc':'asc'; }
+  else { state.crmLandingSort = {col:col, dir:'asc'}; }
+  render();
+}
 function crmLandingDate(s){
   if(!s)return '—';
   try{var d=new Date(s);var p=function(n){return n<10?'0'+n:''+n;};return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+'h'+p(d.getMinutes());}catch(e){return '—';}
@@ -3412,6 +3418,29 @@ function renderCrmLanding(){
   var list=state.crmLanding.slice();
   if(f.q){var q=f.q.toLowerCase();list=list.filter(function(r){return (r.enseigne||'').toLowerCase().indexOf(q)>-1||(r.contact_nom||'').toLowerCase().indexOf(q)>-1||(r.contact_email||'').toLowerCase().indexOf(q)>-1;});}
   if(f.source)list=list.filter(function(r){return r.source_label===f.source;});
+  if(!state.crmLandingSort)state.crmLandingSort={col:'created_at',dir:'desc'};
+  var srt=state.crmLandingSort;
+  var SORT_GETTERS={
+    source: function(r){return r.source_label||'';},
+    nom: function(r){return (r.bvNom||r.contact_nom||'').toLowerCase();},
+    prenom: function(r){return (r.bvPrenom||'').toLowerCase();},
+    cp: function(r){return r.bvCp||'';},
+    tel: function(r){return r.contact_tel||'';},
+    sexe: function(r){return r.bvGenre||'';},
+    age: function(r){return r.bvAge||'';},
+    etat: function(r){return r.etat||'';},
+    enseigne: function(r){return (r.enseigne||'').toLowerCase();},
+    tickets: function(r){return r.bvTickets||0;},
+    created_at: function(r){return r.created_at||'';}
+  };
+  var getter = SORT_GETTERS[srt.col] || SORT_GETTERS.created_at;
+  list.sort(function(a,b){
+    var va=getter(a), vb=getter(b);
+    var cmp = va<vb?-1:(va>vb?1:0);
+    return srt.dir==='asc' ? cmp : -cmp;
+  });
+  function sortArrow(col){ return srt.col===col ? (srt.dir==='asc'?' &#9650;':' &#9660;') : ''; }
+  function sortTh(col,label){ return '<th onclick="crmLandingSortBy(\''+col+'\')" style="padding:10px;white-space:nowrap;cursor:pointer;user-select:none">'+label+sortArrow(col)+'</th>'; }
   var ETAT_COLOR={'nouveau':'#6366f1','en_discussion':'#0ea5e9','devis_envoye':'#f59e0b','a_valider':'#f97316','paiement':'#8b5cf6','gagne':'#10b981','perdu':'#ef4444'};
   var SRC_COLOR={'Landing Flowin':'#00B4A0','Landing Partenaire NDS':'#F5B544','Landing Brigade Verte':'#22C55E'};
   var h='<div class="page">';
@@ -3447,7 +3476,7 @@ function renderCrmLanding(){
     // Vue detaillee dediee : toutes les infos du formulaire en colonnes (pas de clic necessaire)
     h+='<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
     h+='<thead><tr style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--sa-muted);border-bottom:1px solid var(--sa-border)">';
-    ['SOURCE','NOM','PRÉNOM','CODE POSTAL','TÉLÉPHONE','SEXE','TRANCHE D\u2019ÂGE','RÉPONSES','TICKETS','DATE'].forEach(function(c){h+='<th style="padding:10px;white-space:nowrap">'+c+'</th>';});
+    h+=sortTh('source','SOURCE')+sortTh('nom','NOM')+sortTh('prenom','PRÉNOM')+sortTh('cp','CODE POSTAL')+sortTh('tel','TÉLÉPHONE')+sortTh('sexe','SEXE')+sortTh('age','TRANCHE D\u2019ÂGE')+'<th style="padding:10px;white-space:nowrap">RÉPONSES</th>'+sortTh('tickets','TICKETS')+sortTh('created_at','DATE');
     h+='</tr></thead><tbody>';
     if(!list.length){h+='<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--sa-muted)">Aucune entrée</td></tr>';}
     list.forEach(function(r){
@@ -3471,8 +3500,7 @@ function renderCrmLanding(){
 
   h+='<div style="overflow-x:auto"><table class="data-table" style="width:100%;border-collapse:collapse">';
   h+='<thead><tr style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--sa-muted);border-bottom:1px solid var(--sa-border)">';
-  var cols=['SOURCE','ENSEIGNE / NOM','CONTACT','ÉTAT','TICKETS','DATE'];
-  cols.forEach(function(c){h+='<th style="padding:10px;white-space:nowrap">'+c+'</th>';});
+  h+=sortTh('source','SOURCE')+sortTh('enseigne','ENSEIGNE / NOM')+'<th style="padding:10px;white-space:nowrap">CONTACT</th>'+sortTh('etat','ÉTAT')+sortTh('tickets','TICKETS')+sortTh('created_at','DATE');
   h+='</tr></thead><tbody>';
   if(!list.length){h+='<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--sa-muted)">Aucune entrée</td></tr>';}
   list.forEach(function(r){
@@ -3509,17 +3537,32 @@ function crmToggleBvDetail(id){ state.crmBvOpen = (state.crmBvOpen===id) ? null 
 function crmExportBrigadeTirage(){
   var rows = (state.crmLanding||[]).filter(function(r){ return r.source_label==='Landing Brigade Verte'; });
   if(!rows.length){ toast('Aucune entrée Brigade Verte à exporter','warning'); return; }
-  var lines = ['Prénom Nom;Téléphone;Email;Tickets;Date;Heure'];
+  var qCols=[
+    ['bv_venue','Venu comment'],['bv_acces','Accès festival'],['bv_infos','Infos accès trouvées'],
+    ['bv_solutions','Solutions envisagées'],['bv_engagement','Prêt à changer']
+  ];
+  var header=['Nom','Prénom','Téléphone','Email','Sexe','Tranche d\u2019âge','Code postal']
+    .concat(qCols.map(function(c){return c[1];}))
+    .concat(['Tickets','Date','Heure']);
+  var lines=[header.join(';')];
   rows.forEach(function(r){
     var d=null; try{ d=new Date(r.created_at); }catch(e){}
     var p=function(n){return n<10?'0'+n:''+n;};
     var dateStr = d ? (p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()) : '';
     var heureStr = d ? (p(d.getHours())+'h'+p(d.getMinutes())) : '';
-    lines.push([r.enseigne||'', r.contact_tel||'', r.contact_email||'', r.bvTickets||1, dateStr, heureStr].join(';'));
+    var rep = r.bvReponses || {};
+    var row=[
+      r.bvNom||'', r.bvPrenom||'', r.contact_tel||'', r.contact_email||'',
+      r.bvGenre==='H'?'Homme':(r.bvGenre==='F'?'Femme':''), r.bvAge||'', r.bvCp||''
+    ].concat(qCols.map(function(c){
+      var v=rep[c[0]]; if(v==null) return '';
+      return Array.isArray(v) ? v.join(', ') : v;
+    })).concat([r.bvTickets||1, dateStr, heureStr]);
+    lines.push(row.map(function(v){ v=String(v); return v.indexOf(';')>-1?('"'+v.replace(/"/g,'""')+'"'):v; }).join(';'));
   });
-  var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  var blob = new Blob(['\ufeff'+lines.join('\n')], {type:'text/csv;charset=utf-8'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-  a.download = 'tirage-brigade-verte-'+(new Date().toISOString().slice(0,10))+'.csv';
+  a.download = 'brigade-verte-reponses-'+(new Date().toISOString().slice(0,10))+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
