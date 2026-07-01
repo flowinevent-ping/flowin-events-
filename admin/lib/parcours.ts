@@ -320,7 +320,10 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       source_qr: payload.source_qr ?? null,
       ...geo.scan,
     })
-    if (partErr) console.error('[writeJoueur] insert participation échoué:', partErr.message)
+    if (partErr) {
+      if ((partErr as { code?: string }).code === '23505') return { success: false, duplicate: true, ticket: tc }
+      console.error('[writeJoueur] insert participation échoué:', partErr.message)
+    }
     /* Stockage complet des réponses (profil + découverte + quiz + bonus) dans se_reponses */
     await writeSeReponses({
       joueurId, evId, jour: today,
@@ -449,7 +452,11 @@ export async function claimJoueur(
   const bonusTk = geo.onSite && extra?.bonusTicket === true
   const nbTickets = (quizTk ? 1 : 0) + (bonusTk ? 1 : 0)
   const sc = extra?.score ? (parseInt(String(extra.score).split('/')[0]) || 0) : 0
-  await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: extra?.source_qr ?? null, ...geo.scan })
+  const { error: partErr2 } = await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: extra?.source_qr ?? null, ...geo.scan })
+  if (partErr2) {
+    if ((partErr2 as { code?: string }).code === '23505') { rememberJoueur(joueur.id, emailLower, joueur.prenom); return { success: false, duplicate: true, ticket: tc } }
+    return { success: false, duplicate: false, ticket: tc, error: partErr2.message }
+  }
   await writeSeReponses({
     joueurId: joueur.id, evId, jour: today,
     source: extra?.source ?? 'nds2026',
