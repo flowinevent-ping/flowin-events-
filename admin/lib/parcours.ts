@@ -418,7 +418,10 @@ export async function lookupJoueurByEmail(
     .limit(1)
   if (error || !data?.length) return null
   const j = data[0] as { id: string; email?: string; prenom?: string; nom?: string; tel?: string; code_postal?: string; age_tranche?: string; genre?: string; events?: string[]; ticket_code?: string }
-  const alreadyPlayed = Array.isArray(j.events) && j.events.indexOf(evId) > -1
+  const _today = new Date().toISOString().slice(0, 10)
+  const { data: _pjToday } = await supabase
+    .from('participations').select('id').eq('joueur_id', j.id).eq('event_id', evId).eq('played_date', _today).limit(1)
+  const alreadyPlayed = !!(_pjToday && _pjToday.length)
   return {
     id: j.id, email: j.email || emailLower, prenom: j.prenom, nom: j.nom, tel: j.tel,
     cp: j.code_postal, age: j.age_tranche, genre: j.genre,
@@ -435,15 +438,16 @@ export async function claimJoueur(
   extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; quizTicket?: boolean; bonusTicket?: boolean }
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
-  const { data: dup } = await supabase
-    .from('joueurs').select('id,ticket_code').eq('email_lower', emailLower).contains('events', [evId]).limit(1)
-  if (dup?.length) {
-    const d0 = dup[0] as { id?: string; ticket_code?: string }
-    rememberJoueur(d0.id, emailLower, joueur.prenom)
+  const today = new Date().toISOString().slice(0, 10)
+  // Dedup 1/jour/station : bloque le rejeu de CETTE station le MEME jour (rejouable un autre jour).
+  const { data: dupToday } = await supabase
+    .from('participations').select('ticket_code').eq('joueur_id', joueur.id).eq('event_id', evId).eq('played_date', today).limit(1)
+  if (dupToday?.length) {
+    const d0 = dupToday[0] as { ticket_code?: string }
+    rememberJoueur(joueur.id, emailLower, joueur.prenom)
     return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
   }
   const tc = generateTicket(prefix)
-  const today = new Date().toISOString().slice(0, 10)
   const { data: jrow } = await supabase.from('joueurs').select('events').eq('id', joueur.id).single()
   const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
   await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)

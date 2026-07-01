@@ -10,7 +10,7 @@ import { trackVisite } from '@/lib/track'
 import { buildInviteLink } from '@/lib/parrainage'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 
-type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil'
+type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil' | 'refusdigital'
 interface Props extends ParcoursPageData { evId: string }
 
 const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
@@ -149,11 +149,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<unknown>(null)
   const [placeMode, setPlaceMode] = useState(false)
+  const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
   const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
   const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
 
   useEffect(() => {
-    try { if (new URLSearchParams(window.location.search).get('place') === '1') { setPlaceMode(true); setScreen('carte') } } catch {}
+    try {
+      const sp = new URLSearchParams(window.location.search)
+      if (sp.get('place') === '1') { setPlaceMode(true); setScreen('carte') }
+      else if ((sp.get('source') || '').startsWith('reseaux-') && getJoueurLocal()) { setScreen('refusdigital') }
+    } catch {}
   }, [])
   // Log du scan/ouverture parcours NDS — alimente l'entonnoir (scans -> jeux -> coordonnées)
   useEffect(() => { trackVisite('nds2026', evId) }, [evId])
@@ -440,6 +445,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           prenom: j.prenom || f.prenom, nom: j.nom || f.nom, tel: j.tel || f.tel,
           cp: j.cp || f.cp, age: j.age || f.age, sexe: j.genre || f.sexe }))
         setEmailKnown({ prenom: j.prenom, alreadyPlayed: j.alreadyPlayed })
+        if (isDigitalLink) setScreen('refusdigital')
       } else { setEmailKnown(null) }
     } catch { /* silencieux */ }
     setLookingUp(false)
@@ -459,6 +465,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           cp: j.cp || f.cp, age: j.age || f.age, sexe: j.genre || f.sexe, optin: true }))
         setEmailKnown({ prenom: j.prenom, alreadyPlayed: j.alreadyPlayed })
         setRecoOpen(false); setRecoAsked(true)
+        if (isDigitalLink) { setScreen('refusdigital'); setRecoBusy(false); return }
       } else {
         setRecoMsg("On ne te trouve pas avec cet email. Tu pourras t'inscrire à la fin du quiz.")
       }
@@ -953,6 +960,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           </section>
         )}
 
+        {screen === 'refusdigital' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="res-head">
+              <div className="res-ico"><svg className="ic"><use href="#i-map" /></svg></div>
+              <div className="res-bravo disp">Rends-toi sur le lieu pour jouer</div>
+              <div className="res-sub">Ce lien digital est reserve a ta premiere participation. Ton compte existe deja : pour rejouer, flashe le QR sur place (stations du festival &amp; commerces partenaires).</div>
+            </div>
+            <div className="res-body padnav">
+              <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Voir la carte des partenaires</a>
+            </div>
+          </section>
+        )}
         {screen === 'final' && (
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="res-head">
