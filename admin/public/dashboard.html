@@ -3476,8 +3476,14 @@ function crmToggleBvDetail(id){ state.crmBvOpen = (state.crmBvOpen===id) ? null 
 function crmExportBrigadeTirage(){
   var rows = (state.crmLanding||[]).filter(function(r){ return r.source_label==='Landing Brigade Verte'; });
   if(!rows.length){ toast('Aucune entrée Brigade Verte à exporter','warning'); return; }
-  var lines = ['Prénom Nom;Téléphone;Email;Tickets'];
-  rows.forEach(function(r){ lines.push([r.enseigne||'', r.contact_tel||'', r.contact_email||'', r.bvTickets||1].join(';')); });
+  var lines = ['Prénom Nom;Téléphone;Email;Tickets;Date;Heure'];
+  rows.forEach(function(r){
+    var d=null; try{ d=new Date(r.created_at); }catch(e){}
+    var p=function(n){return n<10?'0'+n:''+n;};
+    var dateStr = d ? (p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()) : '';
+    var heureStr = d ? (p(d.getHours())+'h'+p(d.getMinutes())) : '';
+    lines.push([r.enseigne||'', r.contact_tel||'', r.contact_email||'', r.bvTickets||1, dateStr, heureStr].join(';'));
+  });
   var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
   var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'tirage-brigade-verte-'+(new Date().toISOString().slice(0,10))+'.csv';
