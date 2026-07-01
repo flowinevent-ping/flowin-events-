@@ -3852,6 +3852,12 @@ async function loadNdsParticipants(){
   state.ndsParticipants = Array.isArray(rows)?rows:[];
   render();
 }
+var NDS_BRIGADE_IDS = ['ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
+function ndsIsBrigade(p){
+  if(!p.events||!p.events.length) return false;
+  for(var i=0;i<p.events.length;i++){ if(NDS_BRIGADE_IDS.indexOf(p.events[i])>-1) return true; }
+  return false;
+}
 async function ndsDeleteJoueur(id){
   var p=(state.ndsParticipants||[]).filter(function(x){return x.id===id;})[0];
   var label = p ? (((p.prenom||'')+' '+(p.nom||'')).trim()||p.email||id) : id;
@@ -3875,11 +3881,18 @@ function renderNdsParticipants(){
   if(!state.ndsParticipants){ loadNdsParticipants(); return '<div class="page"><div class="page-header"><div class="page-title">&#128101; Participants NDS 2026</div></div><div class="empty-block">Chargement…</div></div>'; }
   var all=state.ndsParticipants;
   var q=(state.search && state.search.ndsPart ? state.search.ndsPart : '').toLowerCase().trim();
-  var list = q ? all.filter(function(p){ return (((p.prenom||'')+' '+(p.nom||'')+' '+(p.email||'')+' '+(p.tel||'')+' '+(p.code_postal||'')+' '+(p.ticket_code||'')).toLowerCase().indexOf(q)>-1); }) : all;
+  var stFilter=state.ndsPartStation||'';
+  var scoped = stFilter==='brigade' ? all.filter(ndsIsBrigade) : all;
+  var list = q ? scoped.filter(function(p){ return (((p.prenom||'')+' '+(p.nom||'')+' '+(p.email||'')+' '+(p.tel||'')+' '+(p.code_postal||'')+' '+(p.ticket_code||'')).toLowerCase().indexOf(q)>-1); }) : scoped;
   var h='<div class="page">';
   h+='<div class="page-header"><div><div class="page-title">&#128101; Participants NDS 2026</div><div class="page-subtitle">Toutes les stations — festival + commerces partenaires</div></div><div class="page-actions"><button class="btn" onclick="ndsParticipantsReload()">&#8635; Recharger</button></div></div>';
-  h+='<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">'+prospKpi(all.length,'Participants')+prospKpi(all.reduce(function(s,p){return s+(p.nb_tickets||0);},0),'Tickets cumulés')+prospKpi(all.reduce(function(s,p){return s+(p.nb_filleuls||0);},0),'Parrainages')+'</div>';
-  h+='<div class="filter-search" style="margin:12px 0"><input placeholder="Rechercher (nom, email, tél, CP, ticket)…" oninput="if(!state.search)state.search={};state.search.ndsPart=this.value;render()" value="'+esc(q)+'"/></div>';
+  h+='<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">'+prospKpi(list.length,'Participants'+(stFilter==='brigade'?' (Brigade Verte)':''))+prospKpi(list.reduce(function(s,p){return s+(p.nb_tickets||0);},0),'Tickets cumulés')+prospKpi(list.reduce(function(s,p){return s+(p.nb_filleuls||0);},0),'Parrainages')+'</div>';
+  h+='<div class="filter-search" style="margin:12px 0;display:flex;gap:8px;flex-wrap:wrap">';
+  h+='<input style="flex:1;min-width:180px" placeholder="Rechercher (nom, email, tél, CP, ticket)…" oninput="if(!state.search)state.search={};state.search.ndsPart=this.value;render()" value="'+esc(q)+'"/>';
+  h+='<select onchange="state.ndsPartStation=this.value;render()" style="padding:9px 12px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit">';
+  h+='<option value=""'+(stFilter===''?' selected':'')+'>Toutes les stations</option>';
+  h+='<option value="brigade"'+(stFilter==='brigade'?' selected':'')+'>🌿 Brigade Verte uniquement</option>';
+  h+='</select></div>';
   if(!list.length){ h+='<div class="empty-block">Aucun participant'+(q?(' pour « '+esc(q)+' »'):'')+'.</div></div>'; return h; }
   h+='<div style="overflow-x:auto;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:14px">';
   h+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
@@ -3900,7 +3913,7 @@ function renderNdsParticipants(){
     h+='</tr>';
   }
   h+='</tbody></table></div>';
-  h+='<div class="text-xs text-muted" style="margin-top:8px">'+list.length+(q?(' / '+all.length):'')+' participant'+(list.length>1?'s':'')+' · clique une ligne pour ouvrir la fiche &amp; l\'historique</div>';
+  h+='<div class="text-xs text-muted" style="margin-top:8px">'+list.length+((q||stFilter)?(' / '+all.length):'')+' participant'+(list.length>1?'s':'')+' · clique une ligne pour ouvrir la fiche &amp; l\'historique</div>';
   h+='</div>';
   return h;
 }
