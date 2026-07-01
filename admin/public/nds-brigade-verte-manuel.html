@@ -16,7 +16,7 @@
   html,body{height:100%}
   body{background:#0c0a12;font-family:'Manrope',system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:0}
   .ic{display:inline-block;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;flex-shrink:0}
-  .phone{position:relative;width:100%;max-width:480px;min-height:100dvh;background:#fff;display:flex;flex-direction:column}
+  .phone{position:relative;width:100%;max-width:480px;min-height:100dvh;background:#0c0a12;display:flex;flex-direction:column}
   .scr{display:none;flex-direction:column;min-height:0}
   .scr.on{display:flex}
   .scr.purple{background:linear-gradient(180deg,#2a1036,#160820)}
@@ -305,13 +305,24 @@
   };
 
   async function sbInsert(table, rows){
-    var r = await fetch(SUPA_URL+'/rest/v1/'+table, {
-      method:'POST',
-      headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json', 'Prefer':'return=representation' },
-      body: JSON.stringify(rows)
-    });
+    var r;
+    try{
+      r = await fetch(SUPA_URL+'/rest/v1/'+table, {
+        method:'POST',
+        headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+        body: JSON.stringify(rows)
+      });
+    } catch(netErr){
+      // Echec avant meme la reponse HTTP : reseau coupe, ou page ouverte en file:// (CORS/origin bloque),
+      // ou pas de connexion sur le terrain. On distingue explicitement ce cas.
+      throw new Error('Connexion impossible (réseau coupé, ou page ouverte en local plutôt qu\'en ligne). ' + (netErr && netErr.message ? netErr.message : ''));
+    }
     var data = null; try{ data = await r.json(); }catch(e){}
-    return { ok:r.ok, data:data };
+    if (!r.ok){
+      var reason = (data && (data.message || data.hint || data.details)) || ('HTTP ' + r.status);
+      throw new Error('Supabase a refusé l\'enregistrement (' + table + ') : ' + reason);
+    }
+    return { ok:true, data:data };
   }
 
   window.submitSurvey = async function(){
@@ -339,7 +350,7 @@
 
     try{
       var jr = await sbInsert('joueurs', [joueurRow]);
-      var joueurId = (jr.ok && jr.data && jr.data[0]) ? jr.data[0].id : null;
+      var joueurId = (jr.data && jr.data[0]) ? jr.data[0].id : null;
       if (joueurId){
         await sbInsert('participations', [{
           joueur_id: joueurId, event_id: EV_ID, bonus_answers: answers,
@@ -360,7 +371,7 @@
         if (c<=0){ clearInterval(t); showScreen('scrStart'); }
       }, 1000);
     } catch(e){
-      $('formErr').textContent = 'Erreur réseau — réessaie.';
+      $('formErr').textContent = (e && e.message) ? e.message : 'Erreur inconnue — réessaie.';
       $('formErr').style.display='block';
     }
     $('submitBtn').removeAttribute('disabled');
