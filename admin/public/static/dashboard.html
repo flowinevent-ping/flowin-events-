@@ -5980,43 +5980,53 @@ function drawerJoueur(j){
     if(events.length===0){
       html += '<div class="empty-block"><div class="ico">📅</div><div class="t">Aucune participation</div></div>';
     } else {
-      // Timeline des sessions de CE joueur (synthèse par event)
-      events.forEach((e,idx) => {
-        const lot = lots.find(l=>l.eventId===e.id);
-        // Mock cohérent : on génère la session à partir de l'id pour stabilité visuelle
-        const seedHash = (j.id+e.id).split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-        const hour = 9 + (seedHash % 11);
-        const min = (seedHash * 7) % 60;
-        const heure = String(hour).padStart(2,'0')+':'+String(min).padStart(2,'0');
-        const devices = ['iPhone 14','Samsung Galaxy S23','iPhone 13','Pixel 7','iPhone SE'];
-        const device = devices[seedHash % devices.length];
-        const browsers = ['Safari','Chrome','Safari','Firefox','Chrome'];
-        const browser = browsers[seedHash % browsers.length];
-        const lieu = e.lieu || 'sur place';
-        const dureeMin = 3 + (seedHash % 12);
-        html += '<div style="background:#fff;border:1px solid var(--sa-border);border-left:3px solid '+(e.couleur||'#7C2D92')+';border-radius:10px;padding:12px;margin-bottom:8px">'
-             + '<div style="display:flex;align-items:flex-start;gap:10px;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
-             +   '<div style="display:flex;flex-direction:column;align-items:center;background:var(--sa-subtle);padding:6px 10px;border-radius:6px;min-width:50px;line-height:1.1">'
-             +     '<span style="font-size:16px;font-weight:800">'+dayMonth(e.dateD).d+'</span>'
-             +     '<span style="font-size:9px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;margin-top:2px">'+dayMonth(e.dateD).m+'</span>'
-             +   '</div>'
-             +   '<div style="flex:1;min-width:0">'
-             +     '<div class="flex flex-between mb-2"><div class="fw-700">'+esc(e.nom)+'</div>'+statusChip(e.status)+'</div>'
-             +     '<div class="text-xs text-muted">'+moduleChip(e.module)+(j.scoreMoy?' · Score : '+esc(j.scoreMoy):'')+'</div>'
-             +   '</div>'
-             + '</div>';
-        // Session details
-        html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--sa-border);display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11.5px">'
-             + '<div><span class="text-muted">🕐 Connexion</span><div class="fw-700">'+heure+' · '+esc(fmt(e.dateD))+'</div></div>'
-             + '<div><span class="text-muted">📍 Lieu</span><div class="fw-700">'+esc(lieu)+'</div></div>'
-             + '<div><span class="text-muted">📱 Appareil</span><div class="fw-700">'+device+' · '+browser+'</div></div>'
-             + '<div><span class="text-muted">⏱ Durée session</span><div class="fw-700">'+dureeMin+' min</div></div>'
-             + '</div>';
-        if(lot){
-          html += '<div style="margin-top:10px;padding:6px 10px;background:#FEF3C7;border-radius:6px;font-size:12px"><span style="font-weight:800;color:#92400E">🏆 '+esc(lot.nom)+'</span> '+(lot.retire?'<span class="chip live" style="margin-left:6px">Retiré</span>':'<span class="chip warn" style="margin-left:6px">À retirer</span>')+'</div>';
-        }
-        html += '</div>';
-      });
+      // Vraies participations du joueur (chargées à la demande depuis Supabase)
+      if(!state.joueurPart) state.joueurPart={};
+      var _jp = state.joueurPart[j.id];
+      if(_jp===undefined || _jp===null){
+        if(_jp===undefined) loadJoueurParticips(j.id);
+        html += '<div class="text-sm text-muted" style="padding:12px">⏳ Chargement des parties…</div>';
+      } else if(_jp.length===0){
+        html += '<div class="empty-block"><div class="ico">📅</div><div class="t">Aucune partie enregistrée</div></div>';
+      } else {
+        _jp.forEach(function(p){
+          var e = findEvent(p.event_id) || {id:p.event_id,nom:p.event_id,couleur:'#7C2D92',module:'',status:'',dateD:''};
+          var lot = lots.find(function(l){return l.eventId===p.event_id;});
+          var dt = p.created_at ? new Date(p.created_at) : null;
+          var dLbl = dt ? dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
+          var hLbl = dt ? dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '—';
+          var dNum = dt ? dt.getDate() : '—';
+          var dMon = dt ? dt.toLocaleDateString('fr-FR',{month:'short'}).replace('.','') : '';
+          var sc = (p.score==null?0:p.score);
+          var tk = (p.tickets==null?0:p.tickets);
+          html += '<div style="background:#fff;border:1px solid var(--sa-border);border-left:3px solid '+(e.couleur||'#7C2D92')+';border-radius:10px;padding:12px;margin-bottom:8px">'
+               + '<div style="display:flex;align-items:flex-start;gap:10px;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
+               +   '<div style="display:flex;flex-direction:column;align-items:center;background:var(--sa-subtle);padding:6px 10px;border-radius:6px;min-width:50px;line-height:1.1">'
+               +     '<span style="font-size:16px;font-weight:800">'+dNum+'</span>'
+               +     '<span style="font-size:9px;font-weight:700;color:var(--sa-muted);text-transform:uppercase;margin-top:2px">'+dMon+'</span>'
+               +   '</div>'
+               +   '<div style="flex:1;min-width:0">'
+               +     '<div class="flex flex-between mb-2"><div class="fw-700">'+esc(e.nom)+'</div>'+statusChip(e.status)+'</div>'
+               +     '<div class="text-xs text-muted">'+moduleChip(e.module)+' · Score : '+sc+'/4 · '+tk+'🎫'+(p.ticket_code?(' · '+esc(p.ticket_code)):'')+'</div>'
+               +   '</div>'
+               + '</div>';
+          html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--sa-border);display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11.5px">'
+               + '<div><span class="text-muted">🕐 Joué le</span><div class="fw-700">'+hLbl+' · '+dLbl+'</div></div>'
+               + '<div><span class="text-muted">📍 Scan</span><div class="fw-700">'+esc(p.scan_statut||'—')+'</div></div>'
+               + '</div>';
+          var ba = (p.bonus_answers && typeof p.bonus_answers==='object') ? p.bonus_answers : {};
+          var bk = Object.keys(ba);
+          if(bk.length){
+            html += '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--sa-border)"><div class="text-xs text-muted mb-2">Réponses bonus</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+            bk.forEach(function(k){ html += '<span class="chip" style="font-size:10px">'+esc(k)+' : '+esc(String(ba[k]))+'</span>'; });
+            html += '</div></div>';
+          }
+          if(lot){
+            html += '<div style="margin-top:10px;padding:6px 10px;background:#FEF3C7;border-radius:6px;font-size:12px"><span style="font-weight:800;color:#92400E">🏆 '+esc(lot.nom)+'</span> '+(lot.retire?'<span class="chip live" style="margin-left:6px">Retiré</span>':'<span class="chip warn" style="margin-left:6px">À retirer</span>')+'</div>';
+          }
+          html += '</div>';
+        });
+      }
     }
   } else if(state.drawer.tab==='stats'){
     html += '<div class="alert info"><span class="ico">📊</span>Statistiques individuelles de <strong>'+esc(j.prenom||j.nom)+'</strong> · uniquement ce joueur.</div>';
@@ -8579,6 +8589,17 @@ function loadSEPassages(se){
     .then(function(r){ return r.json(); })
     .then(function(rows){ state.sePass[se.id]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
     .catch(function(){ state.sePass[se.id]=[]; if(typeof render==='function') render(); });
+}
+
+function loadJoueurParticips(id){
+  if(!state.joueurPart) state.joueurPart={};
+  if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.joueurPart[id]=[]; if(typeof render==='function') render(); return; }
+  state.joueurPart[id]=null; // marqueur 'en cours'
+  var url = FLOWIN_SUPA_URL+'/rest/v1/participations?joueur_id=eq.'+encodeURIComponent(id)+'&select=*&order=created_at.desc';
+  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON} })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){ state.joueurPart[id]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
+    .catch(function(){ state.joueurPart[id]=[]; if(typeof render==='function') render(); });
 }
 
 // ============ JEUX (catalogue) ============
