@@ -5,7 +5,7 @@ par overlays/delogo ffmpeg sur le **master plat CapCut** de Romain (pas de re-re
 
 ## État livré (VALIDÉ, commité)
 - `admin/public/nds/kit-digital/nds/video-ecran-8-partenaires.mp4` (1080x1920, 40.54s, audio intact).
-- QR → **ev-nds-ecrans** partout (8/8 pyzbar), URL `flash-events.vercel.app/parcours/nds2026?ev=ev-nds-ecrans`.
+- QR → **ev-nds-ecrans** partout (8/8 pyzbar), URL `flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-ecrans`.
 - Contenu :
   - petit logo NDS du bas **effacé** (delogo) sur GRAND JEU
   - logo NDS **ajouté au-dessus** de GRAND JEU / FLASH / JOUE / GAGNE (assets `nds_grandjeu.png`, `nds_mots.png`)
