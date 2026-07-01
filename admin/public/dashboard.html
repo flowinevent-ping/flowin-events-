@@ -1941,6 +1941,28 @@ function supaRowToData(row, type){
   return o;
 }
 
+// Cherche les bons de commande signes lies a un partenaire (email ou SIRET),
+// et injecte le resultat dans le tab "Contrat" du drawer (bouton manuel, pas de polling).
+async function loadBonsCommandeLies(partnerId, email, siret){
+  var box = document.getElementById('bcLinkedBox');
+  if(!box) return;
+  box.innerHTML = '<div class="text-xs text-muted">Recherche en cours…</div>';
+  var filters = [];
+  if(email) filters.push('email.eq.'+encodeURIComponent(email.toLowerCase()));
+  if(siret) filters.push('siret.eq.'+encodeURIComponent(siret));
+  if(!filters.length){ box.innerHTML = '<div class="text-xs text-muted">Aucun email ni SIRET renseigné sur ce profil pour lancer la recherche.</div>'; return; }
+  var rows = await supaFetch('bons_commande', 'or=('+filters.join(',')+')&select=id,offre_label,montant_ttc,date_signature,statut&order=created_at.desc');
+  if(!rows || !rows.length){ box.innerHTML = '<div class="text-xs text-muted">Aucun bon de commande signé trouvé pour cet email/SIRET.</div>'; return; }
+  var h = '<div class="section-h" style="margin-top:2px">Bons de commande signés liés</div>';
+  rows.forEach(function(b){
+    h += '<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      + '<div><div class="fw-700">'+esc(b.offre_label||b.id)+'</div><div class="text-xs text-muted">'+esc(b.date_signature||'')+(b.montant_ttc!=null?' · '+Number(b.montant_ttc).toLocaleString('fr-FR')+' € TTC':'')+'</div></div>'
+      + '<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'
+      + '</div>';
+  });
+  box.innerHTML = h;
+}
+
 async function supaLoadAll(){
   if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return null;
   try {
@@ -6653,7 +6675,16 @@ html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
   /* ══════════════════════════════ TAB CONTRAT ══════════════════════════════ */
   } else if(state.drawer.tab==='contrat'){
     html += '<div class="section-h">Convention</div>';
-    html += '<div class="card" style="margin:0">'+esc(p.contrat||'Aucun contrat formel · partenariat au passage')+'</div>';
+    var _ctxt = p.contrat||'';
+    if(_ctxt){
+      var _linkified = esc(_ctxt).replace(/(https?:\/\/[^\s<]+)/g, function(u){ return '<a href="'+u+'" target="_blank" rel="noopener" style="color:var(--sa-accent);font-weight:700">'+u+'</a>'; }).replace(/\n/g,'<br>');
+      html += '<div class="card" style="margin:0;white-space:pre-wrap;line-height:1.6">'+_linkified+'</div>';
+    } else {
+      html += '<div class="card" style="margin:0">Aucun contrat formel &middot; partenariat au passage</div>';
+    }
+    html += '<div id="bcLinkedBox" style="margin-top:14px">'
+      + '<button class="btn" onclick="loadBonsCommandeLies(\''+esc(p.id)+'\',\''+esc(p.contact_email||p.email||'')+'\',\''+esc(p.siret||'')+'\')">&#128269; Chercher les bons de commande sign&eacute;s li&eacute;s (email / SIRET)</button>'
+      + '</div>';
   }
 
   html += '</div>';

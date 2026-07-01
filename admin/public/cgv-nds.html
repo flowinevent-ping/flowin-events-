@@ -17,6 +17,13 @@
   .err{color:#b42318}
   .back{display:inline-block;margin-bottom:16px;font-size:13px;color:var(--accent);text-decoration:none;font-weight:700}
   .legal{font-size:11px;color:var(--faint);line-height:1.6;margin-top:22px;padding-top:14px;border-top:1px dashed var(--line)}
+  @page{size:A4;margin:16mm}
+  @media print{
+    html,body{background:#fff}
+    .wrap{max-width:100%;padding:0}
+    .card{box-shadow:none;border:none;border-radius:0;padding:0}
+    .back{display:none}
+  }
 </style>
 </head>
 <body>

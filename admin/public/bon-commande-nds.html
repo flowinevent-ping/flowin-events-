@@ -21,8 +21,7 @@
 
   /* En-tete cobrand clair */
   .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
-  .nds-chip .nds-name{font-family:'Bricolage Grotesque';font-weight:800;color:var(--ink);font-size:16px;line-height:1.05}
-  .nds-chip .nds-name span{display:block;font-size:10px;font-weight:600;color:var(--faint);margin-top:3px;letter-spacing:.08em}
+  .opc-logo{height:34px;width:auto;display:block}
   .x-sep{color:var(--faint);font-weight:700;font-size:14px}
   .flowin-mini{display:flex;align-items:center;gap:8px}
   .flowin-mini .fb-dot{width:30px;height:30px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
@@ -37,6 +36,7 @@
   .head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:26px;flex-wrap:wrap}
   .doc-eyebrow{font-family:'Bricolage Grotesque';font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
   .doc-type{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1.05;color:var(--ink)}
+  .doc-ref{font-size:11.5px;color:var(--faint);margin-top:6px;font-style:italic}
   .doc-meta{text-align:right;font-size:13px;color:var(--muted);line-height:1.7}
   .doc-meta b{color:var(--ink)}
   .docnum-edit{font:inherit;font-weight:700;color:var(--ink);background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;text-align:right;width:158px;padding:0 2px 1px}
@@ -111,17 +111,51 @@
     .totals{width:100%}
     .legal{padding:14px 18px}
   }
-  @page{size:A4;margin:14mm}
+  @page{size:A4;margin:10mm}
   @media print{
-    html,body{background:#fff;padding:0;margin:0;font-size:11.5px}
+    html,body{background:#fff;padding:0;margin:0;font-size:10.5px;line-height:1.32}
     .doc{box-shadow:none;border:none;border-radius:0;max-width:100%;width:100%}
-    .cobrand{padding:10px 0 12px}
-    .body{padding:16px 0 8px}
-    .legal{padding:12px 0;margin:0;border-radius:0}
+    .cobrand{padding:5px 0 6px}
+    .opc-logo{height:24px}
+    .body{padding:8px 0 4px}
+    .head{margin-bottom:9px}
+    .doc-eyebrow{margin-bottom:2px;font-size:9px}
+    .doc-type{font-size:19px}
+    .doc-ref{margin-top:2px;font-size:9.5px}
+    .party{padding:7px 10px}
+    .party .ttl{margin-bottom:4px}
+    .parties{gap:9px;margin-bottom:9px}
+    .fldrow{margin-bottom:1px}
+    .fld{padding:1px 2px;font-size:10.5px}
+    .offers-h{margin-bottom:6px;font-size:10px}
+    .offer{padding:8px 11px;gap:9px}
+    .offer-nm{font-size:14px}
+    .offer-sub{font-size:10.5px;margin-top:1px}
+    .offer-pr{font-size:15px!important}
+    .offer-lot{margin-top:4px;font-size:10px}
+    .offer-ul{margin-top:5px;gap:2px}
+    .offer-ul li{font-size:10px;line-height:1.25}
+    .offer-lotbox,.offer-mention{margin-top:6px;padding-top:6px}
+    .olb-ttl{margin-bottom:4px;font-size:8.5px}
+    .offer-lotbox .kv{margin-bottom:4px}
+    .offer-lotbox label,.offer-mention label{font-size:9px;margin-bottom:1px}
+    .fld-area{min-height:26px;padding:4px 6px;font-size:10px}
+    .totals{margin-top:8px}
+    .trow{padding:5px 12px;font-size:11px}
+    .total-note{font-size:9px;margin-top:4px}
+    .kvcard{margin-top:9px;padding:8px 10px}
+    .conditions{margin-top:6px;padding-top:5px;font-size:8.5px;line-height:1.35}
+    .sign-lbl{margin-top:5px;font-size:10px}
+    .signrow{margin-top:3px}
+    .legal{font-size:7.3px;line-height:1.32;padding:4px 0}
     .head,.party,.offer,.totals,.pay,.conditions,.sign-box{page-break-inside:avoid;break-inside:avoid}
     .offers{gap:9px}
-    .offer{padding:12px 14px}
     .offer.pop{box-shadow:none;border-color:var(--accent)}
+    /* Champs optionnels laissés vides : ne pas gaspiller de place a l'impression */
+    .fldrow:has(.fld:placeholder-shown){display:none}
+    .kv:has(.fld:placeholder-shown),.kv:has(.fld-area:placeholder-shown){display:none}
+    .offer-mention:has(.offer-mentiontxt:placeholder-shown){display:none}
+    .offer-lotbox:has(.offer-lotdesc:placeholder-shown):has(.offer-lotemis:placeholder-shown):has(.offer-lotuse:placeholder-shown){display:none}
   }
 
   /* --- Interactif : remplissable / signable --- */
@@ -150,17 +184,64 @@
   body.viewmode .viewonly{display:block}
   .sigimg{max-width:260px;max-height:120px;display:block;margin-top:6px}
   @media print{ .actions,.sigtools{display:none!important} .fld{border-bottom:none} }
+
+  /* Prix HT editable */
+  .ht-edit{font:inherit;font-weight:700;color:var(--ink);background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;text-align:right;width:100px;padding:0 2px 1px;font-variant-numeric:tabular-nums}
+  .ht-edit:focus{border-bottom-color:#E0218A;background:#faf6fc}
+  body.viewmode .ht-edit{border-bottom:none;width:auto;min-width:70px}
+  /* Prix pack + valeur lot editables inline sur la carte offre */
+  .offer-pr input.offer-price{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ink);width:98px;text-align:right;background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;font-variant-numeric:tabular-nums;padding:0 1px 1px}
+  .offer-pr input.offer-price:focus{border-bottom-color:#E0218A;background:#faf6fc}
+  .offer-lotval{font:inherit;font-weight:700;color:var(--ink);width:60px;text-align:right;background:transparent;border:none;border-bottom:1.5px dashed var(--gold);outline:none;font-variant-numeric:tabular-nums;padding:0 1px 1px}
+  .offer-lotval:focus{border-bottom-color:#E0218A;background:#fff8ee}
+  .lotnote{color:var(--faint)}
+  .offer-mention{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+  .offer-mention label{display:block;font-size:11px;font-weight:700;color:var(--rose);margin-bottom:4px}
+  .offer-lotbox{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+  .olb-ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+  .offer-lotbox .kv{margin-bottom:9px}
+  .offer-lotbox .kv:last-child{margin-bottom:0}
+  .offer-lotbox label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
+
+  /* Barre de selection (accordeon) : n'affiche que le pack coche */
+  .pack-switch{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .ps-btn{flex:1;min-width:120px;font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;color:var(--muted);background:var(--paper);border:1.5px solid var(--line);border-radius:11px;padding:11px 12px;cursor:pointer;transition:all .15s;text-align:center}
+  .ps-btn:hover{border-color:var(--accent)}
+  .ps-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px -6px rgba(59,92,196,.5)}
+  .offers-empty{font-size:12.5px;color:var(--faint);font-style:italic;padding:18px;text-align:center;border:1.5px dashed var(--line);border-radius:14px;margin-bottom:8px}
+  .offer{display:none}
+  .offer.sel{display:flex}
+  .chk{display:none}
+  body.viewmode .pack-switch,body.viewmode .offers-empty{display:none}
+  @media print{ .pack-switch,.offers-empty{display:none!important} }
+  body.viewmode .offer-price,body.viewmode .offer-lotval{border-bottom:none;width:auto;min-width:44px}
+  @media print{ .offer-price,.offer-lotval{border-bottom:none} }
+  /* Cartes lot / mention */
+  .kvcard{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+  .kvcard.lot{border-left:3px solid var(--gold)}
+  .kvcard.mention{border-left:3px solid var(--rose);background:#fff}
+  .kvcard>.ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  .kvcard .hint{font-size:11px;color:var(--faint);margin-top:9px;line-height:1.5}
+  .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+  .kv-grid .full{grid-column:1 / -1}
+  .kv label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
+  .fld-area{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line);border-radius:10px;background:var(--white);padding:9px 11px;width:100%;outline:none;resize:vertical;min-height:62px;line-height:1.5}
+  .fld-area:focus{border-color:var(--accent)}
+  .fld-area::placeholder{color:var(--faint);font-style:italic}
+  body.viewmode .fld-area{background:var(--paper);border-style:dashed}
+  @media(max-width:680px){ .kv-grid{grid-template-columns:1fr} }
+  @media print{ .fld-area{border:none;background:transparent;padding:0} .kvcard{background:#fff;page-break-inside:avoid;break-inside:avoid} }
 </style>
 </head>
 <body>
 <div class="doc">
 
   <div class="cobrand">
-    <div class="nds-chip"><div class="nds-name">Nuits du Sud<span>9 &rarr; 18 juillet 2026 &middot; Vence</span></div></div>
+    <img src="/opconsult-logo.png" alt="OPConsult" class="opc-logo">
     <span class="x-sep">&times;</span>
     <div class="flowin-block">
       <div class="flowin-mini"><div class="fb-dot">F</div><span class="fb-txt">Flow<span>in</span></span></div>
-      <div class="flowin-cap">un produit OPConsult &middot; BAITA EURL</div>
+      <div class="flowin-cap">solution marketing &eacute;v&eacute;nementiel &middot; OPConsult (BAITA EURL)</div>
     </div>
   </div>
 
@@ -170,6 +251,7 @@
       <div>
         <div class="doc-eyebrow">Partenariat Nuits du Sud 2026</div>
         <h1 class="doc-type">Bon de commande</h1>
+        <div class="doc-ref">R&eacute;f&eacute;rence jeu et animation commerciale &middot; Nuits du Sud 2026</div>
       </div>
       <div class="doc-meta">
         N&deg; <input id="docNum" type="text" spellcheck="false" autocomplete="off" class="docnum-edit" value="" title="Num\u00e9ro modifiable" /><br>
@@ -184,9 +266,8 @@
         <div class="nm">OPConsult</div>
         <div class="ln">
           40 rue des Arcs, 06140 Vence<br>
-          BAITA EURL &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907<br>
-          TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907<br>
-          04 93 59 91 37 &middot; info@opconsult.co
+          04 93 59 91 37 &middot; info@opconsult.co<br>
+          <span style="color:var(--faint)">Mentions l&eacute;gales compl&egrave;tes en bas de document</span>
         </div>
       </div>
       <div class="party client">
@@ -201,10 +282,16 @@
       </div>
     </div>
 
-    <div class="offers-h">Choisissez votre offre (cochez une case)</div>
-    <div class="offers">
+    <div class="offers-h" id="offersH">Choisissez votre offre</div>
+    <div class="pack-switch" id="packSwitch">
+      <button type="button" class="ps-btn" data-target="visibilite">Visibilit&eacute;</button>
+      <button type="button" class="ps-btn" data-target="animation">Animation</button>
+      <button type="button" class="ps-btn" data-target="sponsor">Sponsor officiel</button>
+    </div>
+    <div class="offers-empty" id="offersEmpty">Cochez un pack ci-dessus pour afficher son d&eacute;tail.</div>
+    <div class="offers" id="offersList">
 
-      <div class="offer" data-offre="visibilite" data-label="Visibilité" data-ht="590" role="button" tabindex="0">
+      <div class="offer" data-offre="visibilite" data-label="Visibilité" data-ht="590" data-lot="90" role="button" tabindex="0">
         <div class="chk"></div>
         <div class="offer-main">
           <div class="offer-top">
@@ -212,17 +299,27 @@
               <div class="offer-nm">Visibilit&eacute;</div>
               <div class="offer-sub">Votre pr&eacute;sence dans l&rsquo;op&eacute;ration</div>
             </div>
-            <div class="offer-prw"><div class="offer-pr">590 &euro;<span class="u">HT</span></div><div class="offer-ttc">soit 708 &euro; TTC</div></div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
           </div>
-          <div class="offer-lot">Lot mis en jeu : <b>90 &euro; en bon d&rsquo;achat</b> dans votre boutique.</div>
+          <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="90"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
           <ul class="offer-ul">
             <li><b>Votre apparition</b> dans la liste des partenaires</li>
             <li><b>Acc&egrave;s &agrave; vos contacts et r&eacute;seaux sociaux</b> depuis le jeu</li>
           </ul>
+          <div class="offer-lotbox">
+            <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
+            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
+            <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
+          </div>
+          <div class="offer-mention">
+            <label>Mention particuli&egrave;re / remise pour ce pack</label>
+            <textarea class="offer-mentiontxt fld-area" autocomplete="off" placeholder="ex. : remise exceptionnelle, tarif n&eacute;goci&eacute;, condition particuli&egrave;re convenue pour ce pack&hellip;"></textarea>
+          </div>
         </div>
       </div>
 
-      <div class="offer pop" data-offre="animation" data-label="Animation" data-ht="1490" role="button" tabindex="0">
+      <div class="offer pop" data-offre="animation" data-label="Animation" data-ht="1490" data-lot="159" role="button" tabindex="0">
         <div class="chk"></div>
         <div class="offer-main">
           <div class="offer-top">
@@ -230,19 +327,29 @@
               <div class="offer-nm">Animation<span class="badge">Le plus choisi</span></div>
               <div class="offer-sub">Faites revenir vos clients</div>
             </div>
-            <div class="offer-prw"><div class="offer-pr">1&nbsp;490 &euro;<span class="u">HT</span></div><div class="offer-ttc">soit 1&nbsp;788 &euro; TTC</div></div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="1490">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
           </div>
-          <div class="offer-lot">Lot mis en jeu : <b>159 &euro; en bon d&rsquo;achat</b> dans votre boutique.</div>
+          <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="159"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
           <ul class="offer-ul">
             <li>Tout le pack <b>Visibilit&eacute;</b></li>
             <li><b>Animation de votre client&egrave;le</b> &mdash; vos clients jouent et cumulent des tickets en venant chez vous</li>
             <li><b>Mise en avant</b> sur la carte parcours des partenaires</li>
             <li><b>Reporting de passage</b> de votre &eacute;tablissement</li>
           </ul>
+          <div class="offer-lotbox">
+            <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
+            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
+            <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
+          </div>
+          <div class="offer-mention">
+            <label>Mention particuli&egrave;re / remise pour ce pack</label>
+            <textarea class="offer-mentiontxt fld-area" autocomplete="off" placeholder="ex. : remise exceptionnelle, tarif n&eacute;goci&eacute;, condition particuli&egrave;re convenue pour ce pack&hellip;"></textarea>
+          </div>
         </div>
       </div>
 
-      <div class="offer" data-offre="sponsor" data-label="Sponsor officiel" data-ht="3590" role="button" tabindex="0">
+      <div class="offer" data-offre="sponsor" data-label="Sponsor officiel" data-ht="3590" data-lot="259" role="button" tabindex="0">
         <div class="chk"></div>
         <div class="offer-main">
           <div class="offer-top">
@@ -250,26 +357,36 @@
               <div class="offer-nm">Sponsor officiel</div>
               <div class="offer-sub">Visibilit&eacute; maximale</div>
             </div>
-            <div class="offer-prw"><div class="offer-pr">3&nbsp;590 &euro;<span class="u">HT</span></div><div class="offer-ttc">soit 4&nbsp;308 &euro; TTC</div></div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="3590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
           </div>
-          <div class="offer-lot">Lot mis en jeu : <b>259 &euro; en bon d&rsquo;achat</b> dans votre boutique.</div>
+          <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="259"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
           <ul class="offer-ul">
             <li>Tout le pack <b>Animation</b></li>
             <li><b>Pr&eacute;sence sur tous les supports &amp; stations</b> pendant le festival</li>
             <li><b>Apparition dans le bandeau d&eacute;filant</b> de l&rsquo;app</li>
             <li><b>Quiz personnalisable</b> à votre marque</li>
           </ul>
+          <div class="offer-lotbox">
+            <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
+            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
+            <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
+          </div>
+          <div class="offer-mention">
+            <label>Mention particuli&egrave;re / remise pour ce pack</label>
+            <textarea class="offer-mentiontxt fld-area" autocomplete="off" placeholder="ex. : remise exceptionnelle, tarif n&eacute;goci&eacute;, condition particuli&egrave;re convenue pour ce pack&hellip;"></textarea>
+          </div>
         </div>
       </div>
 
     </div>
 
     <div class="totals">
-      <div class="trow"><span>Total HT</span><span class="v" id="tHT">&mdash;</span></div>
+      <div class="trow"><span>Montant HT factur&eacute;</span><span class="v" id="tHT">&mdash;</span></div>
       <div class="trow"><span>TVA 20 %</span><span class="v" id="tTVA">&mdash;</span></div>
       <div class="trow ttc"><span>Net &agrave; payer TTC</span><span class="v" id="tTTC">&mdash;</span></div>
     </div>
-    <div class="total-note">Tarifs catalogue exprim&eacute;s en HT &middot; TVA au taux de 20 %</div>
+    <div class="total-note" id="catNote">Le prix du pack est modifiable directement sur l&rsquo;offre. Le lot est offert par le commer&ccedil;ant et d&eacute;duit en caisse &mdash; il n&rsquo;entre pas dans le total factur&eacute;.</div>
 
     <div class="pay">
       <div class="ttl">R&egrave;glement</div>
@@ -319,7 +436,7 @@
   </div>
 
   <div class="legal">
-    <b>Flowin</b> est un produit de <b>BAITA EURL</b> (OPConsult) &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907 &middot; IBAN FR76 1460 7003 3470 2211 6462 345 &middot; BIC CCBPFRPPMAR &middot; Document non contractuel tant que non sign&eacute; &laquo;&nbsp;Bon pour accord&nbsp;&raquo;.
+    <b>Flowin</b> est une solution marketing &eacute;v&eacute;nementiel &eacute;dit&eacute;e par <b>OPConsult</b>, marque de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907 &middot; IBAN FR76 1460 7003 3470 2211 6462 345 &middot; BIC CCBPFRPPMAR &middot; Document non contractuel tant que non sign&eacute; &laquo;&nbsp;Bon pour accord&nbsp;&raquo;.
   </div>
 
 </div>
@@ -332,20 +449,49 @@
   function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
   function qs(name){ var m=new RegExp('[?&]'+name+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
 
+  // --- Totaux (pilotes par le prix de l'offre selectionnee) ---
+  function parseNum(v){ if(v==null) return NaN; return parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(/\s/g,'').replace(',','.')); }
+  function selPrice(){ if(!sel) return NaN; var i=sel.querySelector('.offer-price'); return i?parseNum(i.value):NaN; }
+  function selLot(){ if(!sel) return NaN; var i=sel.querySelector('.offer-lotval'); return i?parseNum(i.value):NaN; }
+  function selMention(){ if(!sel) return ''; var t=sel.querySelector('.offer-mentiontxt'); return t?t.value.trim():''; }
+  function selVal(cls){ if(!sel) return ''; var e=sel.querySelector(cls); return e?e.value.trim():''; }
+  function computeTotals(){
+    var ht=selPrice();
+    if(isNaN(ht)){ $('tHT').innerHTML='&mdash;'; $('tTVA').innerHTML='&mdash;'; $('tTTC').innerHTML='&mdash;'; }
+    else { var tva=Math.round(ht*0.20); $('tHT').innerHTML=eur(ht); $('tTVA').innerHTML=eur(tva); $('tTTC').innerHTML=eur(ht+tva); }
+    if(isNaN(ht)) return null; var v=Math.round(ht*0.20); return {ht:ht,tva:v,ttc:ht+v};
+  }
+
   // --- Selection d'offre ---
   var offers=document.querySelectorAll('.offer'), sel=null;
+  var psBtns=document.querySelectorAll('.ps-btn');
   function pickOffer(el){
     sel=el;
     for(var i=0;i<offers.length;i++){ offers[i].className=offers[i].className.replace(/ sel/g,''); }
     el.className+=' sel';
-    var ht=parseFloat(el.getAttribute('data-ht'));
-    var tva=Math.round(ht*0.20), ttc=ht+tva;
-    $('tHT').innerHTML=eur(ht); $('tTVA').innerHTML=eur(tva); $('tTTC').innerHTML=eur(ttc);
+    var offreKey=el.getAttribute('data-offre');
+    for(var p=0;p<psBtns.length;p++){ psBtns[p].className='ps-btn'+(psBtns[p].getAttribute('data-target')===offreKey?' active':''); }
+    if($('offersEmpty')) $('offersEmpty').style.display='none';
+    if(!document.body.className.match(/viewmode/)){ var ld=el.querySelector('.offer-lotdesc'); if(ld && !ld.value) ld.value='Bon d\u2019achat \u00e0 valoir dans votre \u00e9tablissement'; }
+    computeTotals();
   }
   for(var i=0;i<offers.length;i++){ (function(el){
     el.addEventListener('click',function(){ pickOffer(el); });
-    el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pickOffer(el); } });
+    el.addEventListener('keydown',function(e){ var tg=e.target.tagName; if(tg==='INPUT'||tg==='TEXTAREA') return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pickOffer(el); } });
+    function bind(inp){ if(!inp) return;
+      inp.addEventListener('focus',function(){ if(sel!==el) pickOffer(el); });
+      inp.addEventListener('input',function(){ if(sel!==el) pickOffer(el); else computeTotals(); });
+      inp.addEventListener('click',function(e){ e.stopPropagation(); });
+    }
+    bind(el.querySelector('.offer-price')); bind(el.querySelector('.offer-lotval')); bind(el.querySelector('.offer-mentiontxt'));
+    bind(el.querySelector('.offer-lotdesc')); bind(el.querySelector('.offer-lotemis')); bind(el.querySelector('.offer-lotuse'));
   })(offers[i]); }
+  for(var b=0;b<psBtns.length;b++){ (function(btn){
+    btn.addEventListener('click',function(){
+      var key=btn.getAttribute('data-target');
+      for(var i=0;i<offers.length;i++){ if(offers[i].getAttribute('data-offre')===key){ pickOffer(offers[i]); offers[i].scrollIntoView({behavior:'smooth',block:'nearest'}); break; } }
+    });
+  })(psBtns[b]); }
 
   // --- Date du jour ---
   var today=new Date();
@@ -395,13 +541,23 @@
       if(!emailEnvoi||emailEnvoi.indexOf('@')<0){ setStatus("Adresse d'envoi invalide.","err"); return; }
       if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
       if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
-      var ht=parseFloat(sel.getAttribute('data-ht')), tva=Math.round(ht*0.20), ttc=ht+tva;
+      var t=computeTotals();
+      if(!t){ setStatus('Indiquez le prix du pack sur l\u2019offre choisie.','err'); return; }
+      var lotVal=selLot();
+      var lotDesc=selVal('.offer-lotdesc');
+      if(isNaN(lotVal)||!lotDesc){ setStatus('Compl\u00e9tez le lot du pack (valeur + descriptif).','err'); return; }
+      var ht=t.ht, tva=t.tva, ttc=t.ttc;
+      var catHt=parseFloat(sel.getAttribute('data-ht')); if(isNaN(catHt)) catHt=null;
       var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
       var rec={ id:id, super_event_id:'se-nds-2026', statut:'signe',
         raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
         contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
         offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
-        montant_ht:ht, montant_tva:tva, montant_ttc:ttc,
+        montant_ht:ht, montant_tva:tva, montant_ttc:ttc, montant_ht_catalogue:catHt,
+        mention_particuliere:selMention()||null,
+        lot_valeur:lotVal, lot_descriptif:lotDesc,
+        lot_validite:selVal('.offer-lotemis')||null,
+        lot_conditions:selVal('.offer-lotuse')||null,
         signataire:$('f_signataire').value.trim()||contact, date_signature:($('f_date').value.trim()||dstr), signature:cv.toDataURL('image/png'),
         cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
       $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
@@ -420,13 +576,28 @@
         if(!rows||!rows.length){ setStatus('Bon de commande introuvable.','err'); return; }
         var d=rows[0];
         document.body.className+=' viewmode';
-        function setv(id,v){ var el=$(id); if(el) el.value=v||''; }
+        if($('offersH')) $('offersH').textContent='Offre retenue';
+        function setv(id,v){ var el=$(id); if(el) el.value=(v==null?'':v); }
         setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
         setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
         setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
-        var inputs=document.querySelectorAll('.fld'); for(var k=0;k<inputs.length;k++){ inputs[k].setAttribute('readonly','readonly'); }
-        for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){ pickOffer(offers[j]); } }
-        if(d.montant_ht!=null){ $('tHT').innerHTML=eur(d.montant_ht); $('tTVA').innerHTML=eur(d.montant_tva); $('tTTC').innerHTML=eur(d.montant_ttc); }
+        var inputs=document.querySelectorAll('.fld, .fld-area, .offer-price, .offer-lotval, .offer-mentiontxt'); for(var k=0;k<inputs.length;k++){ inputs[k].setAttribute('readonly','readonly'); }
+        for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
+            var pi=offers[j].querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
+            var li=offers[j].querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
+            var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||'';
+            var ld=offers[j].querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
+            var le=offers[j].querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
+            var lu=offers[j].querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
+            pickOffer(offers[j]);
+        } }
+        computeTotals();
+        for(var m=0;m<offers.length;m++){ var isSel=offers[m]===sel;
+            var mb=offers[m].querySelector('.offer-mention'); var mtx=offers[m].querySelector('.offer-mentiontxt');
+            if(mb && (!isSel || !(mtx&&mtx.value.trim()))) mb.style.display='none';
+            var lb=offers[m].querySelector('.offer-lotbox'); if(lb && !isSel) lb.style.display='none';
+        }
+        if($('catNote')){ $('catNote').innerHTML = (d.montant_ht_catalogue!=null && Number(d.montant_ht_catalogue)!==Number(d.montant_ht)) ? ('Prix catalogue : <b>'+eur(d.montant_ht_catalogue)+' HT</b> \u2014 prix factur\u00e9 : <b>'+eur(d.montant_ht)+' HT</b>. Lot d\u00e9duit en caisse, non factur\u00e9.') : 'Le lot est offert par le commer\u00e7ant et d\u00e9duit en caisse \u2014 non factur\u00e9.'; }
         if($('sigImg')&&d.signature) $('sigImg').src=d.signature;
         if($('docNum')){ $('docNum').value=d.id; $('docNum').readOnly=true; }
         if($('payRef')) $('payRef').innerHTML=d.id;

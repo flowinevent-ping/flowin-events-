@@ -11,6 +11,21 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
 const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "NDS x Flowin <onboarding@resend.dev>";
 const DOC_BASE = Deno.env.get("BON_COMMANDE_URL") || "https://flowin-events.vercel.app/bon-commande-nds.html";
+const SUPA_URL = Deno.env.get("SUPABASE_URL") || "https://ywcqtupgoxfzkddqkztk.supabase.co";
+const SUPA_ANON = Deno.env.get("SUPABASE_ANON_KEY") || "sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1";
+const IBAN = "FR76 1460 7003 3470 2211 6462 345";
+const BIC = "CCBPFRPPMAR";
+
+async function fetchCgvText(): Promise<string> {
+  try {
+    const r = await fetch(SUPA_URL + "/rest/v1/documents_legaux?id=eq.cgv-nds-2026&select=contenu,version", {
+      headers: { apikey: SUPA_ANON, Authorization: "Bearer " + SUPA_ANON },
+    });
+    if (!r.ok) return "";
+    const rows = await r.json();
+    return rows && rows[0] && rows[0].contenu ? String(rows[0].contenu) : "";
+  } catch { return ""; }
+}
 
 function esc(v: unknown): string {
   if (v === null || v === undefined) return "—";
@@ -94,12 +109,24 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // 2) Envoi au client (adresse saisie dans le bon de commande), s'il y a un email valide
   if (emailValide) {
+    const reglementHtml =
+      '<div style="background:#f7f8fc;border:1px solid #e7e9f2;border-radius:10px;padding:14px 16px;margin:16px 4px;font-size:13px;color:#27314a">' +
+      '<div style="font-weight:800;color:#16203A;margin-bottom:6px">Règlement</div>' +
+      'Mode : Virement bancaire<br>IBAN : ' + IBAN + '<br>BIC : ' + BIC +
+      '<br>Référence à rappeler : ' + esc(r.id) + "</div>";
+    const cgvTxt = await fetchCgvText();
+    const cgvHtml = cgvTxt
+      ? '<div style="border-top:1px dashed #e0e3ee;margin:18px 4px 0;padding-top:14px">' +
+        '<div style="font-weight:800;color:#16203A;font-size:13px;margin-bottom:8px">Conditions générales de vente</div>' +
+        '<div style="font-size:11.5px;color:#5b6577;line-height:1.6;white-space:pre-wrap;max-height:none">' + esc(cgvTxt) + "</div></div>"
+      : '<div style="padding:10px 4px 0"><a href="https://flowin-events.vercel.app/cgv-nds.html" style="color:#3B5CC4;font-weight:700;font-size:12px">Consulter les conditions générales de vente</a></div>';
     const htmlClient =
       '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto">' +
       '<div style="background:#16203A;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">Votre bon de commande — Nuits du Sud 2026</div>' +
       '<table style="width:100%;border-collapse:collapse;background:#f7f8fc;border:1px solid #e7e9f2;border-top:none">' + trs + "</table>" +
-      '<div style="padding:18px 4px"><a href="' + link + '" style="display:inline-block;background:#3B5CC4;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;font-size:14px">Consulter votre bon de commande</a></div>' +
-      '<div style="color:#8A90A8;font-size:12px;padding:6px 4px 18px">Merci pour votre confiance. Le partenariat est confirmé à réception du règlement (virement). BAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36.</div>' +
+      '<div style="padding:18px 4px 0"><a href="' + link + '" style="display:inline-block;background:#3B5CC4;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:10px;font-size:14px">Consulter votre bon de commande</a></div>' +
+      reglementHtml + cgvHtml +
+      '<div style="color:#8A90A8;font-size:12px;padding:16px 4px 18px;border-top:1px dashed #e0e3ee;margin-top:16px">Merci pour votre confiance. Le partenariat est confirmé à réception du règlement (virement). BAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36.</div>' +
       "</div>";
     const textClient = "Votre bon de commande — Nuits du Sud 2026\n\n" +
       text + "\n\nBAITA EURL · OPConsult · info@opconsult.co · 06 16 35 49 36";
