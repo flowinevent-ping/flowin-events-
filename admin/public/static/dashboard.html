@@ -5974,6 +5974,36 @@ function drawerJoueur(j){
         html += '<div class="flex gap-2 flex-wrap">'+(j.tags||[]).map(t=>'<span class="chip purple">'+esc(t)+'</span>').join('')+(j.tags&&j.tags.length?'':'<span class="text-muted text-sm">Aucun tag</span>')+'</div>';
       }
       html += joueurClicsHtml(j);
+      // Parrainage & filleuls (donnees reelles, table parrainage, jointure external_id)
+      html += '<div class="section-h">Parrainage &amp; filleuls</div>';
+      var _ext = j.external_id;
+      if(!_ext){
+        html += '<div class="text-sm text-muted">Aucun parrainage (pas d\'identifiant de parrainage sur ce compte).</div>';
+      } else {
+        if(!state.joueurParr) state.joueurParr={};
+        var _pr = state.joueurParr[_ext];
+        if(_pr===undefined || _pr===null){
+          if(_pr===undefined) loadJoueurParrainage(_ext);
+          html += '<div class="text-sm text-muted">⏳ Chargement…</div>';
+        } else {
+          var _fill = _pr.filter(function(x){return x.sender===_ext;});
+          var _parr = _pr.filter(function(x){return x.destinataire===_ext;});
+          var _ins = _fill.filter(function(x){return x.destinataire_inscrit;}).length;
+          html += '<div class="kpi-grid" style="grid-template-columns:1fr 1fr">'+kpi('Filleuls invités',_fill.length)+kpi('Filleuls inscrits',_ins)+'</div>';
+          if(_parr.length){
+            html += '<div class="text-sm" style="margin:6px 0"><strong>Parrainé par</strong> · '+esc(_parr[0].sender_email||_parr[0].sender||'—')+(_parr[0].sender_etab?(' · '+esc(_parr[0].sender_etab)):'')+'</div>';
+          }
+          if(_fill.length){
+            html += '<div class="card" style="margin:6px 0 0">';
+            _fill.slice(0,20).forEach(function(x){
+              html += '<div class="flex flex-between mb-2" style="font-size:12px"><span>'+(x.destinataire_inscrit?'✅':'⏳')+' '+esc(x.sender_etab||'—')+' · '+esc(x.channel||'—')+'</span><span class="chip '+(x.statut==='valide'?'live':'past')+'">'+esc(x.statut||'—')+'</span></div>';
+            });
+            html += '</div>';
+          } else if(!_parr.length){
+            html += '<div class="text-sm text-muted">Aucun parrainage.</div>';
+          }
+        }
+      }
     }
   } else if(state.drawer.tab==='historique'){
     html += '<div class="alert info"><span class="ico">📅</span><strong>'+esc(j.prenom||j.nom)+'</strong> a participé à <strong>'+events.length+'</strong> event'+(events.length>1?'s':'')+'. Chaque ligne ci-dessous = une session distincte sur un event.</div>';
@@ -6049,25 +6079,32 @@ function drawerJoueur(j){
            + '</div>';
     });
 
-    // Stats de connexion (mocké mais cohérent)
-    html += '<div class="section-h">Connexions · données techniques</div>';
-    const seedH = j.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-    const devicesList = [['iPhone',Math.max(1,Math.floor(events.length*0.7))],['Android',Math.max(0,events.length-Math.floor(events.length*0.7))]].filter(d=>d[1]>0);
-    const totalSessions = events.length;
-    html += '<div class="card" style="margin:0">';
-    devicesList.forEach(([dev,count])=>{
-      const pct = (count/Math.max(totalSessions,1))*100;
-      html += '<div class="mb-3"><div class="flex flex-between mb-2"><span class="text-sm fw-700">'+(dev==='iPhone'?'📱 ':'🤖 ')+dev+'</span><span class="text-sm">'+count+' session'+(count>1?'s':'')+'</span></div><div class="meter"><div class="meter-bar"><div class="meter-fill" style="width:'+pct+'%"></div></div><div class="meter-val">'+Math.round(pct)+'%</div></div></div>';
-    });
-    html += '</div>';
-
-    html += '<div class="section-h">Plages horaires de connexion</div>';
-    html += '<div class="card" style="margin:0">';
-    [['Matin (8h-12h)',Math.floor(totalSessions*0.2)],['Midi (12h-14h)',Math.floor(totalSessions*0.15)],['Après-midi (14h-18h)',Math.floor(totalSessions*0.45)],['Soir (18h-23h)',Math.floor(totalSessions*0.2)]].forEach(([lbl,n]) => {
-      const pct = (n/Math.max(totalSessions,1))*100;
-      html += '<div class="mb-2"><div class="flex flex-between mb-2"><span class="text-sm">'+lbl+'</span><span class="text-sm fw-700">'+n+'</span></div><div class="meter" style="height:5px"><div class="meter-bar"><div class="meter-fill" style="width:'+pct+'%"></div></div></div></div>';
-    });
-    html += '</div>';
+    // Canal + plages REELS depuis les participations chargees (plus de mock device/plage)
+    if(!state.joueurPart) state.joueurPart={};
+    var _sp = state.joueurPart[j.id];
+    if(_sp===undefined || _sp===null){
+      if(_sp===undefined) loadJoueurParticips(j.id);
+      html += '<div class="text-sm text-muted" style="padding:8px 2px">⏳ Chargement des statistiques…</div>';
+    } else if(_sp.length===0){
+      html += '<div class="text-sm text-muted" style="padding:8px 2px">Aucune partie enregistrée.</div>';
+    } else {
+      var _nbDig=0,_nbPhy=0;
+      _sp.forEach(function(p){ if(p.source_qr && String(p.source_qr).indexOf('reseaux-')===0) _nbDig++; else _nbPhy++; });
+      html += '<div class="section-h">Canal d\'arrivée</div><div class="card" style="margin:0">';
+      [['📱 Digital (réseaux)',_nbDig],['📍 Physique (station)',_nbPhy]].forEach(function(row){
+        var pct=(row[1]/Math.max(_sp.length,1))*100;
+        html += '<div class="mb-3"><div class="flex flex-between mb-2"><span class="text-sm fw-700">'+row[0]+'</span><span class="text-sm">'+row[1]+' partie'+(row[1]>1?'s':'')+'</span></div><div class="meter"><div class="meter-bar"><div class="meter-fill" style="width:'+pct+'%"></div></div><div class="meter-val">'+Math.round(pct)+'%</div></div></div>';
+      });
+      html += '</div>';
+      var _bk=[['Matin (8h-12h)',0],['Midi (12h-14h)',0],['Après-midi (14h-18h)',0],['Soir (18h-23h)',0],['Nuit (23h-8h)',0]];
+      _sp.forEach(function(p){ if(!p.created_at) return; var _h=new Date(p.created_at).getHours();
+        if(_h>=8&&_h<12)_bk[0][1]++; else if(_h>=12&&_h<14)_bk[1][1]++; else if(_h>=14&&_h<18)_bk[2][1]++; else if(_h>=18&&_h<23)_bk[3][1]++; else _bk[4][1]++; });
+      html += '<div class="section-h">Plages horaires de jeu (réelles)</div><div class="card" style="margin:0">';
+      _bk.forEach(function(b){ var pct=(b[1]/Math.max(_sp.length,1))*100;
+        html += '<div class="mb-2"><div class="flex flex-between mb-2"><span class="text-sm">'+b[0]+'</span><span class="text-sm fw-700">'+b[1]+'</span></div><div class="meter" style="height:5px"><div class="meter-bar"><div class="meter-fill" style="width:'+pct+'%"></div></div></div></div>';
+      });
+      html += '</div>';
+    }
 
     html += '<div class="section-h">Valeur lifetime estimée</div>';
     const valeur = lots.reduce((s,l)=>s+(l.valeur||0)*l.quantite,0);
@@ -8600,6 +8637,17 @@ function loadJoueurParticips(id){
     .then(function(r){ return r.json(); })
     .then(function(rows){ state.joueurPart[id]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
     .catch(function(){ state.joueurPart[id]=[]; if(typeof render==='function') render(); });
+}
+
+function loadJoueurParrainage(extId){
+  if(!state.joueurParr) state.joueurParr={};
+  if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.joueurParr[extId]=[]; if(typeof render==='function') render(); return; }
+  state.joueurParr[extId]=null;
+  var url = FLOWIN_SUPA_URL+'/rest/v1/parrainage?or=(sender.eq.'+encodeURIComponent(extId)+',destinataire.eq.'+encodeURIComponent(extId)+')&select=*&order=ts.desc';
+  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON} })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){ state.joueurParr[extId]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
+    .catch(function(){ state.joueurParr[extId]=[]; if(typeof render==='function') render(); });
 }
 
 // ============ JEUX (catalogue) ============
