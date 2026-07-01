@@ -2028,6 +2028,10 @@ async function refreshFromSupabase(){
       DATA.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'});
     }
   });
+  // Landing agent Brigade Verte : outil manuel terrain, en brouillon jusqu'a validation finale + publication par Romain.
+  if(!DATA.landings.some(function(l){ return l && l.id==='lp-nds-brigade-verte'; })){
+    DATA.landings.push({id:'lp-nds-brigade-verte', nom:'Landing NDS \u2014 Brigade Verte (agent terrain)', deployUrl:'https://flowin-events.vercel.app/nds-brigade-verte-manuel.html', statut:'brouillon', published:false, externe:true, accentColor:'#22C55E', moduleJeu:'quiz', emoji:'\ud83c\udf3f', createdAt:'2026-07-01'});
+  }
 
   DATA.joueurs = data.joueurs;
   DATA.lots = data.lots;
@@ -3872,7 +3876,7 @@ async function ndsDeleteJoueur(id){
 }
 function ndsOrigine(p){
   var s=(''+(p.source||'')).toLowerCase();
-  var m={'nds2026':'Flash QR · NDS','paques':'Flash QR · Pâques','landing-flowin':'Landing Flowin','landing-nds':'Landing NDS','manuel':'Ajout manuel','import':'Import'};
+  var m={'nds2026':'Flash QR · NDS','paques':'Flash QR · Pâques','landing-flowin':'Landing Flowin','landing-nds':'Landing NDS','manuel':'Ajout manuel','import':'Import','brigade-manuel':'🌿 Brigade Verte (terrain)'};
   var lbl = m[s] || (s||'—');
   return p.decouverte ? (lbl+' · '+p.decouverte) : lbl;
 }

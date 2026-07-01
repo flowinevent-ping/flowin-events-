@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Brigade Verte — Sondage terrain · Flowin × Nuits du Sud 2026</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple:#7C2D92; --purple-deep:#5A1E6E;
+    --orange:#F5A100; --magenta:#E0218A; --magenta2:#8E2E9E;
+    --ink:#0a1020; --amber:#f4b544; --teal:#20e0c4; --violet:#964ee0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:#0c0a12;font-family:'Manrope',system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:0}
+  .ic{display:inline-block;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;flex-shrink:0}
+  .phone{position:relative;width:100%;max-width:480px;min-height:100dvh;background:#fff;display:flex;flex-direction:column}
+  .scr{display:none;flex-direction:column;min-height:0}
+  .scr.on{display:flex}
+  .scr.purple{background:linear-gradient(180deg,#2a1036,#160820)}
+
+  /* ===== BARRE AGENT — une seule ligne, sobre ===== */
+  .agentbar{background:#0c0a12;border-bottom:1px solid rgba(255,255,255,.08);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:rgba(255,255,255,.55)}
+  .agentbar b{color:#fff}
+  .counter{display:flex;align-items:center;gap:6px;background:rgba(22,163,74,.16);color:#4ade80;font-weight:800;padding:5px 11px;border-radius:20px;font-size:12px;white-space:nowrap;flex-shrink:0}
+
+  /* ===== ACCUEIL ===== */
+  .hero{background:#6e2785;padding:26px 22px 22px}
+  .htop{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.16em;color:#e7d4ef;text-transform:uppercase;margin-bottom:10px}
+  .hname{font-size:38px;line-height:1;font-weight:800;letter-spacing:-1.4px;color:#fff}
+  .hsub{font-size:14px;color:rgba(255,255,255,.75);margin-top:8px;line-height:1.5}
+  .stage{position:relative;background:linear-gradient(180deg,#6e2785 0%,#3a1450 45%,#160820 100%);padding:22px 0 26px;flex:1}
+  .prize{position:relative;z-index:1;margin:0 18px;border-radius:20px;background:rgba(20,8,22,.5);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);padding:17px 16px;box-shadow:0 16px 40px rgba(0,0,0,.3)}
+  .lbl{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:12px}
+  .prow{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 13px}
+  .sq{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;background:linear-gradient(135deg,var(--purple),var(--magenta))}
+  .nm{font-weight:800;font-size:16px;line-height:1.25;color:#fff}
+  .btn{display:block;width:calc(100% - 36px);margin:22px 18px 6px;text-align:center;border:none;border-radius:50px;padding:17px;font-family:'Manrope';font-weight:800;font-size:18px;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--magenta2),var(--magenta));box-shadow:0 0 0 5px rgba(247,168,212,.4),0 12px 26px rgba(224,33,138,.32)}
+  .btn[disabled]{opacity:.35;pointer-events:none;box-shadow:none}
+  .foot{position:relative;z-index:1;color:#9a8fa6;text-align:center;font-size:12px;padding:10px 24px 8px}
+
+  /* ===== CADRE CHARTE CINEMATIQUE (questionnaire + formulaire) ===== */
+  .cine-scr{background:var(--ink);position:relative;overflow:hidden;flex:1;min-height:0}
+  .cine-scr::before{content:'';position:absolute;inset:0;background:
+      radial-gradient(circle at 15% 0%, rgba(150,78,224,.35), transparent 55%),
+      radial-gradient(circle at 90% 8%, rgba(230,24,127,.32), transparent 50%),
+      radial-gradient(circle at 15% 100%, rgba(32,224,196,.22), transparent 55%);
+    pointer-events:none}
+  .cine-scr>.pad{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
+  .dhead{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-shrink:0}
+  .back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;cursor:pointer}
+  .back .ic{width:18px;height:18px}
+  .dtitle{font-family:'Manrope';font-weight:800;font-size:19px;background:linear-gradient(90deg,var(--amber),var(--magenta) 55%,var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dsub{font-size:12.5px;color:rgba(255,255,255,.5);margin-top:1px}
+  .progress{display:flex;gap:6px;margin-bottom:14px;flex-shrink:0}
+  .pstep{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+  .pstep.on{background:linear-gradient(90deg,var(--amber),var(--magenta))}
+
+  /* cadre a bordure degradee (frame) */
+  .frame{position:relative;border-radius:20px;padding:1.5px;background:linear-gradient(135deg,var(--amber),var(--magenta) 50%,var(--teal));box-shadow:0 10px 30px rgba(0,0,0,.35);margin-bottom:14px;flex-shrink:0}
+  .frame-in{background:#12081f;border-radius:18.5px;padding:18px}
+  .qtxt{font-family:'Manrope';font-size:17.5px;font-weight:700;line-height:1.32;margin-bottom:16px;color:#fff}
+  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:13px 15px;color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;margin-bottom:9px;cursor:pointer}
+  .opt.sel{border-color:var(--magenta);background:rgba(224,33,138,.18)}
+  .opt:last-child{margin-bottom:0}
+
+  /* ===== FORMULAIRE ===== */
+  .label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:5px}
+  .input{width:100%;padding:13px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:13px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit}
+  .input::placeholder{color:rgba(255,255,255,.32)}
+  select.input option{background:#12081f;color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fld{margin-bottom:12px}
+  .rgpd{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;font-size:11.5px;color:rgba(255,255,255,.6);line-height:1.5;cursor:pointer;padding:12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.03);flex-shrink:0}
+  .rgpd.on{border-color:var(--magenta);background:rgba(232,33,107,.08)}
+  .rc{width:22px;height:22px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+  .rgpd.on .rc{background:var(--magenta);border-color:var(--magenta)}
+  .rc .ic{width:13px;height:13px;stroke-width:3}
+  .err{color:#ff8fa3;font-size:11.5px;margin-top:8px;font-weight:700;flex-shrink:0}
+  .growspace{flex:1;min-height:8px}
+  .qnav{flex-shrink:0;margin-top:12px}
+
+  /* ===== CONFIRMATION ===== */
+  .res-head{position:relative;background:linear-gradient(180deg,var(--purple),var(--purple-deep));color:#fff;text-align:center;padding:46px 22px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .res-ico{width:74px;height:74px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .res-ico .ic{width:36px;height:36px;color:#fff}
+  .res-bravo{font-size:26px;font-weight:800;line-height:1.2}
+  .res-sub{font-size:14px;color:rgba(255,255,255,.82);margin-top:10px;max-width:280px}
+  .res-note{margin-top:22px;font-size:12.5px;color:rgba(255,255,255,.5)}
+
+  .flowincap{text-align:center;font-size:12px;color:rgba(255,255,255,.4);padding:10px 0 16px;font-weight:800;flex-shrink:0;background:#0c0a12}
+  .flowincap span{color:var(--magenta)}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="agentbar">
+    <span>🌿 <b>Brigade Verte</b> · sondage terrain</span>
+    <span class="counter">✅ <span id="counterN">0</span> aujourd'hui</span>
+  </div>
+
+  <!-- ===== ECRAN 1 : ACCUEIL ===== -->
+  <section class="scr on" id="scrStart">
+    <div class="hero">
+      <div class="htop">Flowin × Nuits du Sud 2026</div>
+      <div class="hname">Brigade Verte</div>
+      <div class="hsub">5 questions sur la mobilité et l'accès au festival, puis les coordonnées du festivalier pour le tirage au sort.</div>
+    </div>
+    <div class="stage">
+      <div class="prize">
+        <div class="lbl">À gagner</div>
+        <div class="prow">
+          <div class="sq"><svg class="ic"><use href="#i-gift"/></svg></div>
+          <div><div class="nm">2 places de concert</div><div style="font-size:12.5px;color:rgba(255,255,255,.6);margin-top:2px">Tirées chaque soir · + grand tirage final</div></div>
+        </div>
+      </div>
+      <a class="btn" onclick="startSurvey()">🎤 Nouveau sondage</a>
+      <div class="foot">Rempli par l'agent avec le festivalier, sur place</div>
+    </div>
+  </section>
+
+  <!-- ===== ECRAN 2 : QUESTIONS (cadre charte cinematique) ===== -->
+  <section class="scr cine-scr" id="scrQuiz">
+    <div class="pad">
+      <div class="dhead">
+        <div class="back" onclick="confirmBack('scrStart')"><svg class="ic"><use href="#i-arrowl"/></svg></div>
+        <div style="flex:1"><div class="dtitle">Sondage</div><div class="dsub" id="qProgress">1 / 5</div></div>
+      </div>
+      <div class="progress" id="progressBar"></div>
+      <div class="frame">
+        <div class="frame-in">
+          <div class="qtxt" id="qLabel"></div>
+          <div id="qOpts"></div>
+        </div>
+      </div>
+      <div class="growspace"></div>
+      <a class="btn qnav" id="qNextBtn" onclick="nextQuestion()">Suivant →</a>
+    </div>
+  </section>
+
+  <!-- ===== ECRAN 3 : FICHE FESTIVALIER (cadre charte cinematique) ===== -->
+  <section class="scr cine-scr" id="scrForm">
+    <div class="pad">
+      <div class="dhead">
+        <div class="back" onclick="confirmBack('scrQuiz')"><svg class="ic"><use href="#i-arrowl"/></svg></div>
+        <div><div class="dtitle">Coordonnées</div><div class="dsub">Pour le tirage au sort</div></div>
+      </div>
+      <div class="frame">
+        <div class="frame-in">
+          <div class="grid2 fld">
+            <div><label class="label">Prénom</label><input class="input" id="f_prenom" autocomplete="given-name"/></div>
+            <div><label class="label">Nom</label><input class="input" id="f_nom" autocomplete="family-name"/></div>
+          </div>
+          <div class="fld"><label class="label">Téléphone</label><input class="input" id="f_tel" type="tel" inputmode="tel" autocomplete="tel"/></div>
+          <div class="fld"><label class="label">Email <span style="opacity:.5;text-transform:none;font-weight:600">(optionnel)</span></label><input class="input" id="f_email" type="email" inputmode="email" autocapitalize="none"/></div>
+          <div class="grid2 fld">
+            <div><label class="label">Sexe</label><select class="input" id="f_sexe"><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
+            <div><label class="label">Tranche d'âge</label><select class="input" id="f_age">
+              <option value="">—</option>
+              <option value="-18">Moins de 18 ans</option>
+              <option value="18-25">18–25 ans</option>
+              <option value="26-35">26–35 ans</option>
+              <option value="36-50">36–50 ans</option>
+              <option value="51-65">51–65 ans</option>
+              <option value="65+">66 ans et plus</option>
+            </select></div>
+          </div>
+          <div class="fld" style="margin-bottom:0"><label class="label">Code postal <span style="opacity:.5;text-transform:none;font-weight:600">(optionnel)</span></label><input class="input" id="f_cp" inputmode="numeric" placeholder="—"/></div>
+        </div>
+      </div>
+      <div class="rgpd" id="optinBox" onclick="toggleOptin()">
+        <span class="rc" id="optinCheck"></span>
+        <div>Le festivalier a été informé : ses réponses servent à des statistiques RSE et ses coordonnées à le contacter en cas de gain (tirage au sort). Données non cédées.</div>
+      </div>
+      <div class="err" id="formErr" style="display:none"></div>
+      <div class="growspace"></div>
+      <a class="btn qnav" id="submitBtn" onclick="submitSurvey()">✅ Valider et enregistrer</a>
+    </div>
+  </section>
+
+  <!-- ===== ECRAN 4 : CONFIRMATION (auto-retour) ===== -->
+  <section class="scr" id="scrDone">
+    <div class="res-head">
+      <div class="res-ico"><svg class="ic"><use href="#i-checkc"/></svg></div>
+      <div class="res-bravo">Enregistré ✅</div>
+      <div class="res-sub" id="doneMsg">Merci ! Réponses et coordonnées bien enregistrées.</div>
+      <div class="res-note">Retour à l'accueil dans <span id="doneCountdown">3</span>s…</div>
+    </div>
+  </section>
+
+  <div class="flowincap">Flow<span>in</span> × Nuits du Sud 2026 — outil agent Brigade Verte</div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"/></symbol>
+  <symbol id="i-checkc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-arrowl" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</svg>
+
+<script>
+(function(){
+  var SUPA_URL = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var EV_ID = 'ev-nds-tablette-1'; // une seule ligne : pas de choix de brigade cote agent
+
+  var QUESTIONS = [
+    {id:'bv_venue',type:'single',label:"Comment es-tu venu·e ce soir ?",options:[
+      {val:'pied',label:'À pied / vélo'},{val:'tc',label:'Bus / navette'},{val:'covoit',label:'Covoiturage'},{val:'voiture',label:'Voiture (seul·e)'}]},
+    {id:'bv_acces',type:'single',label:"L'accès au festival, ça a été ?",options:[
+      {val:'ok',label:'Nickel.'},{val:'parking',label:'Galère de stationnement'},{val:'entree',label:"Dur de trouver l'entrée"},{val:'tc',label:'Compliqué en transports'}]},
+    {id:'bv_infos',type:'single',label:"Avant de venir, tu as trouvé les infos accès / parking / navettes ?",options:[
+      {val:'clair',label:'Oui, clair.'},{val:'manque',label:'Oui, mais incomplet'},{val:'non',label:'Non, galère'},{val:'pascherche',label:"J'ai pas cherché"}]},
+    {id:'bv_solutions',type:'multi',label:"Qu'est-ce qui t'aiderait à laisser la voiture ?",options:[
+      {val:'navette',label:'Des navettes'},{val:'covoit',label:'Du covoiturage'},{val:'velo',label:'Un parking vélo sécurisé'},{val:'horaires',label:'Des horaires calés sur les concerts'}]},
+    {id:'bv_engagement',type:'single',label:"Prêt·e à changer ta façon de venir, pour la planète ?",options:[
+      {val:'oui',label:'Oui, facile.'},{val:'oui_si',label:'Oui, si y a des solutions'},{val:'peut',label:'Peut-être'},{val:'non',label:'Non'}]}
+  ];
+
+  var qIdx = 0;
+  var answers = {};
+  var optin = false;
+  var counterKey = 'flowin_brigade_counter_' + (new Date().toISOString().slice(0,10));
+
+  function $(id){ return document.getElementById(id); }
+  function showScreen(id){
+    ['scrStart','scrQuiz','scrForm','scrDone'].forEach(function(s){ $(s).className = $(s).className.replace(/\s*on\b/,''); });
+    var el = $(id); el.className += ' on';
+    window.scrollTo(0,0);
+  }
+
+  function refreshCounter(){
+    var n = parseInt(localStorage.getItem(counterKey) || '0', 10);
+    $('counterN').textContent = n;
+  }
+  refreshCounter();
+
+  window.startSurvey = function(){
+    qIdx = 0; answers = {}; optin = false;
+    $('optinCheck').innerHTML = ''; $('optinBox').className = 'rgpd';
+    ['f_prenom','f_nom','f_tel','f_email','f_cp'].forEach(function(id){ $(id).value=''; });
+    $('f_sexe').value=''; $('f_age').value='';
+    $('formErr').style.display='none';
+    renderQuestion();
+    showScreen('scrQuiz');
+  };
+
+  // Confirmation avant de quitter en cours de sondage (pas de sortie a mi-parcours par erreur,
+  // pas de reponses laissees "vierges" en route).
+  window.confirmBack = function(target){
+    var hasProgress = Object.keys(answers).length > 0 || ($('f_prenom') && $('f_prenom').value.trim());
+    if (hasProgress && !confirm('Abandonner ce sondage en cours ? Les réponses saisies seront perdues.')) return;
+    showScreen(target);
+  };
+
+  function answerGiven(q){
+    var a = answers[q.id];
+    if (q.type === 'multi') return Array.isArray(a) && a.length > 0;
+    return !!a;
+  }
+
+  function renderQuestion(){
+    var q = QUESTIONS[qIdx];
+    $('qProgress').textContent = (qIdx+1)+' / '+QUESTIONS.length;
+    $('qLabel').textContent = q.label;
+    var pb = $('progressBar'); pb.innerHTML='';
+    for (var i=0;i<QUESTIONS.length;i++){ var d=document.createElement('div'); d.className='pstep'+(i<=qIdx?' on':''); pb.appendChild(d); }
+    var wrap = $('qOpts'); wrap.innerHTML='';
+    q.options.forEach(function(opt){
+      var b = document.createElement('button');
+      var ans = answers[q.id];
+      var isSel = Array.isArray(ans) ? ans.indexOf(opt.val)>-1 : ans===opt.val;
+      b.className = 'opt'+(isSel?' sel':'');
+      b.textContent = opt.label;
+      b.onclick = function(){
+        if (q.type==='multi'){
+          var cur = answers[q.id] || [];
+          var k = cur.indexOf(opt.val);
+          if (k>-1) cur.splice(k,1); else cur.push(opt.val);
+          answers[q.id] = cur;
+        } else { answers[q.id] = opt.val; }
+        renderQuestion();
+      };
+      wrap.appendChild(b);
+    });
+    var nextBtn = $('qNextBtn');
+    nextBtn.textContent = (qIdx+1 < QUESTIONS.length) ? 'Suivant →' : 'Continuer →';
+    // Pas de passage a une question vierge : bouton desactive tant que rien n'est coche.
+    if (answerGiven(q)) nextBtn.removeAttribute('disabled'); else nextBtn.setAttribute('disabled','disabled');
+  }
+  window.nextQuestion = function(){
+    var q = QUESTIONS[qIdx];
+    if (!answerGiven(q)) return; // garde-fou : jamais de passage sans reponse
+    if (qIdx+1 < QUESTIONS.length){ qIdx++; renderQuestion(); }
+    else { showScreen('scrForm'); }
+  };
+
+  window.toggleOptin = function(){
+    optin = !optin;
+    $('optinBox').className = 'rgpd'+(optin?' on':'');
+    $('optinCheck').innerHTML = optin ? '<svg class="ic"><use href="#i-check"/></svg>' : '';
+  };
+
+  async function sbInsert(table, rows){
+    var r = await fetch(SUPA_URL+'/rest/v1/'+table, {
+      method:'POST',
+      headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      body: JSON.stringify(rows)
+    });
+    var data = null; try{ data = await r.json(); }catch(e){}
+    return { ok:r.ok, data:data };
+  }
+
+  window.submitSurvey = async function(){
+    var prenom = $('f_prenom').value.trim();
+    var nom = $('f_nom').value.trim();
+    if (!prenom || !nom){ $('formErr').textContent='Prénom et nom requis.'; $('formErr').style.display='block'; return; }
+    if (!optin){ $('formErr').textContent='Coche la case de consentement avec le festivalier.'; $('formErr').style.display='block'; return; }
+    $('formErr').style.display='none';
+    $('submitBtn').setAttribute('disabled','disabled');
+    $('submitBtn').textContent='Enregistrement…';
+
+    var today = new Date().toISOString().slice(0,10);
+    var joueurRow = {
+      prenom: prenom, nom: nom,
+      tel: $('f_tel').value.trim() || null,
+      email: $('f_email').value.trim() || null,
+      genre: $('f_sexe').value || null,
+      age_tranche: $('f_age').value || null,
+      code_postal: $('f_cp').value.trim() || null,
+      events: [EV_ID],
+      source: 'brigade-manuel',
+      optin: true, optin_date: today,
+      first_seen: today, last_seen: today
+    };
+
+    try{
+      var jr = await sbInsert('joueurs', [joueurRow]);
+      var joueurId = (jr.ok && jr.data && jr.data[0]) ? jr.data[0].id : null;
+      if (joueurId){
+        await sbInsert('participations', [{
+          joueur_id: joueurId, event_id: EV_ID, bonus_answers: answers,
+          completed: true, tickets: 1, source_qr: 'brigade-manuel'
+        }]);
+      }
+      await sbInsert('sondage_brigade', [{ event_id: EV_ID, reponses: answers }]);
+
+      var n = parseInt(localStorage.getItem(counterKey) || '0', 10) + 1;
+      localStorage.setItem(counterKey, String(n));
+      refreshCounter();
+
+      $('doneMsg').textContent = 'Merci ' + prenom + ' ! Réponses et coordonnées bien enregistrées.';
+      showScreen('scrDone');
+      var c = 3; $('doneCountdown').textContent = c;
+      var t = setInterval(function(){
+        c--; $('doneCountdown').textContent = c;
+        if (c<=0){ clearInterval(t); showScreen('scrStart'); }
+      }, 1000);
+    } catch(e){
+      $('formErr').textContent = 'Erreur réseau — réessaie.';
+      $('formErr').style.display='block';
+    }
+    $('submitBtn').removeAttribute('disabled');
+    $('submitBtn').textContent = '✅ Valider et enregistrer';
+  };
+})();
+</script>
+</body>
+</html>
