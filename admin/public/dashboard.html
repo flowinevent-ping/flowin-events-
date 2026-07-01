@@ -6611,7 +6611,7 @@ function renderBiblioGagnants(){
          + '<td class="text-sm text-muted">'+fmt(l.dateAssign)+'</td>'
          + '<td>'+(l.retire?'<span class="chip live">Retiré '+fmt(l.dateRetrait)+'</span>':'<span class="chip warn">À retirer</span>')+'</td>'
          + '<td class="col-actions"><div class="row-actions">'
-         + '<button class="btn btn-icon btn-sm" title="QR retrait" onclick="openModal(\'qr\',{lotId:\''+l.id+'\'})">📱</button>'
+         + '<button class="btn btn-icon btn-sm" title="Ticket gagnant" onclick="openTicketModal(\''+l.id+'\')">🎫</button>'
          + (!l.retire?'<button class="btn btn-icon btn-sm btn-success" title="Marquer retiré" onclick="markLotRetire(\''+l.id+'\')">✓</button>':'')
          + '</div></td></tr>';
   });
@@ -6623,14 +6623,97 @@ function renderBiblioGagnants(){
 function bulkMarkRetires(){ toast('Sélectionnez d\'abord des lots dans le tableau','warn'); }
 
 // ============ MODAL QR retrait ============
+// ── Ticket Gagnant : code serie reel + persistance dans se_gains (find-or-create) ──
+function ticketSlug(s){ return (s||'x').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,14) || 'x'; }
+function ticketRandCode(){ return Math.random().toString(36).slice(2,6).toUpperCase(); }
+async function ensureSeGainForLot(lotId){
+  var lot = findLot(lotId); if(!lot) return null;
+  var j = findJoueur(lot.assigneA), e = findEvent(lot.eventId), p = findPartner(lot.partenaireId);
+  if(!j || !p) return null;
+  // Cherche un se_gains deja emis pour cette combinaison joueur+partenaire+event (evite les doublons)
+  var existing = (state.seGains||[]).find(function(g){
+    return g.joueur_id===j.id && g.partenaire_id===p.id && g.event_id===(e?e.id:lot.eventId);
+  });
+  if(existing) return existing;
+  var code = 'NDS-'+ticketSlug(p.nom).toUpperCase()+'-'+ticketRandCode();
+  var qrToken = 'FLW'+Date.now().toString(36).toUpperCase()+ticketRandCode();
+  var payload = {
+    super_event_id: (e && e.superEventId) || 'se-nds-2026',
+    joueur_id: j.id, event_id: e?e.id:lot.eventId, partenaire_id: p.id,
+    type: 'manuel', libelle: lot.nom||lot.titre||'Lot', code: code,
+    utilise: !!lot.retire, montant: lot.valeur||null, station: p.nom||null,
+    gagnant_nom: j.nom||null, gagnant_email: j.email||null, gagnant_tel: j.tel||null,
+    qr_token: qrToken, valide_jusqu_au: '2026-07-18'
+  };
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/se_gains', {
+      method:'POST',
+      headers:{ 'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_SUPA_ANON, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      body: JSON.stringify(payload)
+    });
+    var data = await r.json();
+    if(r.ok && data && data[0]){
+      if(!state.seGains) state.seGains=[];
+      state.seGains.unshift(data[0]);
+      return data[0];
+    }
+  }catch(err){ console.error('[Flowin] ensureSeGainForLot erreur', err); }
+  return null;
+}
+async function openTicketModal(lotId){
+  openModal('qr',{lotId:lotId});
+  if(!state.seGains) { try{ await loadSeGains(); }catch(e){} }
+  var g = await ensureSeGainForLot(lotId);
+  if(g){ state.ticketGain = state.ticketGain||{}; state.ticketGain[lotId]=g; renderModal(); }
+}
+async function sendTicketEmail(lotId){
+  var lot = findLot(lotId); if(!lot) return;
+  var j = findJoueur(lot.assigneA), p = findPartner(lot.partenaireId);
+  if(!j || !j.email){ toast('Aucun email pour ce gagnant','warning'); return; }
+  var g = (state.ticketGain||{})[lotId] || await ensureSeGainForLot(lotId);
+  if(!g){ toast('Impossible de générer le ticket','error'); return; }
+  var btn = document.getElementById('btnSendTicket-'+lotId);
+  if(btn){ btn.disabled=true; btn.textContent='Envoi…'; }
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/functions/v1/send-ticket-gagnant', {
+      method:'POST',
+      headers:{ 'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_SUPA_ANON, 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        gagnant_email: j.email, gagnant_nom: j.nom,
+        partenaire_nom: p?p.nom:'', lot_nom: lot.nom||lot.titre||'', lot_description: lot.description||'',
+        conditions: lot.conditions||'', code: g.code, valide_jusqu_au: g.valide_jusqu_au
+      })
+    });
+    var data = null; try{ data = await r.json(); }catch(e){}
+    if(r.ok && data && data.ok){ toast('Ticket envoyé à '+j.email,'success'); }
+    else { toast('Échec envoi : '+((data&&data.error)||('HTTP '+r.status)),'error'); }
+  }catch(err){ toast('Erreur réseau à l\'envoi','error'); console.error(err); }
+  if(btn){ btn.disabled=false; btn.textContent='📧 Envoyer au gagnant'; }
+}
+
 function modalQR(d){
   const lot = findLot(d.lotId); if(!lot) return '<div class="modal sm"><div class="modal-h"><div class="title">Lot introuvable</div><button class="drawer-close" onclick="closeModal()">×</button></div></div>';
   const j = findJoueur(lot.assigneA), e = findEvent(lot.eventId), p = findPartner(lot.partenaireId);
+  const g = (state.ticketGain||{})[d.lotId];
+  const code = g ? g.code : null;
+  const validite = g ? g.valide_jusqu_au : null;
+  const conditions = (lot.conditions && lot.conditions.trim()) ? lot.conditions.trim() : 'Lot à retirer sur présentation de ce ticket, dans les conditions du festival Nuits du Sud 2026 (9 → 18 juillet, Vence). Non échangeable, non remboursable, non cumulable.';
   return '<div class="modal sm">'
-    + '<div class="modal-h"><div><div class="title">QR de retrait</div><div class="subtitle">'+esc(lot.nom)+' · '+(lot.valeur||0)+' €</div></div><button class="drawer-close" onclick="closeModal()">×</button></div>'
-    + '<div class="modal-body" style="text-align:center">'
-    + '<div style="display:inline-block;background:#fff;padding:10px;border-radius:8px;border:1px solid var(--sa-border);margin-bottom:10px;line-height:0"><div style="width:160px;height:160px">'+genQRSvg('FLW-RETRAIT-'+lot.id.toUpperCase(), {size:160, color:'#000000'})+'</div></div>'
-    + '<div style="font-family:monospace;font-size:11px;color:var(--sa-muted)">FLW-'+lot.id.toUpperCase()+'</div>'
+    + '<div class="modal-h"><div><div class="title">🎫 Ticket gagnant</div><div class="subtitle">'+esc(lot.nom)+(lot.valeur?' · '+lot.valeur+' €':'')+'</div></div><button class="drawer-close" onclick="closeModal()">×</button></div>'
+    + '<div class="modal-body">'
+    + '<div id="ticketPrintArea-'+esc(d.lotId)+'" class="ticket-print-area" style="background:linear-gradient(160deg,#2a1036,#160820);border-radius:16px;padding:22px;color:#fff;text-align:center">'
+    + '<div style="font-size:10px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:6px">Flowin × Nuits du Sud 2026</div>'
+    + '<div style="font-weight:800;font-size:19px;margin-bottom:2px">'+esc(lot.nom||lot.titre||'Lot')+'</div>'
+    + (lot.description?'<div style="font-size:12px;color:rgba(255,255,255,.65);margin-bottom:12px">'+esc(lot.description)+'</div>':'<div style="margin-bottom:12px"></div>')
+    + (code
+        ? ('<div style="display:inline-block;background:#fff;padding:10px;border-radius:8px;margin-bottom:10px;line-height:0">'+genQRSvg(code,{size:150,color:'#000000'})+'</div>'
+           + '<div style="font-family:monospace;font-size:13px;font-weight:800;letter-spacing:.04em;color:#F5B544">'+esc(code)+'</div>')
+        : '<div class="text-xs" style="color:rgba(255,255,255,.6);padding:20px 0">Génération du ticket…</div>')
+    + '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:6px">'+esc(j?j.nom:'')+(validite?' · valable jusqu\'au '+esc(validite):'')+'</div>'
+    + '<div style="margin-top:14px;text-align:left;font-size:10.5px;line-height:1.5;color:rgba(255,255,255,.55);border-top:1px solid rgba(255,255,255,.15);padding-top:10px">'
+    + '<b style="color:rgba(255,255,255,.75)">Conditions d\'utilisation</b><br>'+esc(conditions)
+    + '</div>'
+    + '</div>'
     + '<div class="card mt-3" style="text-align:left;margin:14px 0 0">'
     + fieldRow('Gagnant',esc(j?j.nom:''))
     + fieldRow('Email',esc(j?j.email:''))
@@ -6642,10 +6725,22 @@ function modalQR(d){
     + '<div class="text-xs text-muted mt-3">Le partenaire scanne ce QR pour valider la remise du lot.</div>'
     + '</div>'
     + '<div class="modal-footer"><button class="btn" onclick="closeModal()">Fermer</button>'
-    + '<div class="flex gap-2"><button class="btn" onclick="toast(\'PDF imprimé\',\'success\')">🖨 Imprimer</button>'
+    + '<div class="flex gap-2">'
+    + '<button class="btn" onclick="printTicketArea(\''+d.lotId+'\')">🖨 Imprimer / PDF</button>'
+    + (j&&j.email?('<button id="btnSendTicket-'+esc(d.lotId)+'" class="btn btn-primary" onclick="sendTicketEmail(\''+d.lotId+'\')" '+(code?'':'disabled')+'>📧 Envoyer au gagnant</button>'):'')
     + (!lot.retire?'<button class="btn btn-success" onclick="markLotRetire(\''+lot.id+'\');closeModal()">✓ Marquer retiré</button>':'')
     + '</div></div>'
     + '</div>';
+}
+function printTicketArea(lotId){
+  var area = document.getElementById('ticketPrintArea-'+lotId);
+  if(!area) return;
+  var w = window.open('', '_blank', 'width=420,height=760');
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Ticket gagnant</title>'
+    + '<style>body{margin:0;padding:24px;background:#fff;font-family:Manrope,Arial,sans-serif}</style></head><body>'
+    + area.outerHTML + '</body></html>');
+  w.document.close();
+  w.onload = function(){ w.focus(); w.print(); };
 }
 // ============ BIBLIOTHÈQUE PARTENAIRES ============
 function ptOrigineLabel(src){
