@@ -6025,6 +6025,9 @@ function drawerJoueur(j){
           var dt = p.created_at ? new Date(p.created_at) : null;
           var dLbl = dt ? dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
           var hLbl = dt ? dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '—';
+          var st = p.started_at ? new Date(p.started_at) : null;
+          var stLbl = st ? st.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : null;
+          var dureeLbl = (st && dt && dt>=st) ? (function(){ var s=Math.round((dt-st)/1000); var m=Math.floor(s/60); return m>0?(m+' min '+(s%60)+'s'):(s+'s'); })() : null;
           var dNum = dt ? dt.getDate() : '—';
           var dMon = dt ? dt.toLocaleDateString('fr-FR',{month:'short'}).replace('.','') : '';
           var sc = (p.score==null?0:p.score);
@@ -6041,7 +6044,7 @@ function drawerJoueur(j){
                +   '</div>'
                + '</div>';
           html += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--sa-border);display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11.5px">'
-               + '<div><span class="text-muted">🕐 Joué le</span><div class="fw-700">'+hLbl+' · '+dLbl+'</div></div>'
+               + '<div><span class="text-muted">🕐 '+(stLbl?'Connexion → validé':'Joué le')+'</span><div class="fw-700">'+dLbl+' · '+(stLbl?(stLbl+' → '+hLbl):hLbl)+'</div>'+(dureeLbl?'<div class="text-xs text-muted">⏱ Temps de jeu : '+dureeLbl+'</div>':'')+'</div>'
                + '<div><span class="text-muted">📍 Scan</span><div class="fw-700">'+esc(p.scan_statut||'—')+'</div></div>'
                + '</div>';
           var ba = (p.bonus_answers && typeof p.bonus_answers==='object') ? p.bonus_answers : {};

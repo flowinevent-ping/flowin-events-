@@ -101,6 +101,7 @@ export interface JoueurPayload {
   ticket_code: string
   source: string
   source_qr?: string | null
+  started_at?: string | null
   prefix: string
   /** Tickets NDS : 1 ticket quiz (4/4) + 1 ticket bonus -> jusqu'à 2/station/jour. Défaut quiz=true (autres parcours), bonus=false. */
   quiz_ticket?: boolean
@@ -318,6 +319,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       tickets: nbTickets,
       bonus_answers: payload.bonus_reponses ?? null,
       source_qr: payload.source_qr ?? null,
+      started_at: payload.started_at ?? null,
       ...geo.scan,
     })
     if (partErr) {
@@ -435,7 +437,7 @@ export async function claimJoueur(
   evId: string,
   prefix: TicketPrefix,
   bonus?: Record<string, unknown>,
-  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; quizTicket?: boolean; bonusTicket?: boolean }
+  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; started_at?: string; quizTicket?: boolean; bonusTicket?: boolean }
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const today = new Date().toISOString().slice(0, 10)
@@ -456,7 +458,7 @@ export async function claimJoueur(
   const bonusTk = geo.onSite && extra?.bonusTicket === true
   const nbTickets = (quizTk ? 1 : 0) + (bonusTk ? 1 : 0)
   const sc = extra?.score ? (parseInt(String(extra.score).split('/')[0]) || 0) : 0
-  const { error: partErr2 } = await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: extra?.source_qr ?? null, ...geo.scan })
+  const { error: partErr2 } = await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: extra?.source_qr ?? null, started_at: extra?.started_at ?? null, ...geo.scan })
   if (partErr2) {
     if ((partErr2 as { code?: string }).code === '23505') { rememberJoueur(joueur.id, emailLower, joueur.prenom); return { success: false, duplicate: true, ticket: tc } }
     return { success: false, duplicate: false, ticket: tc, error: partErr2.message }
