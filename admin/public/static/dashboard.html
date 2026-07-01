@@ -2001,6 +2001,22 @@ async function supaLoadAll(){
   }
 }
 
+// Landings NDS statiques (pages HTML deployees, pas en table Supabase) : toujours presentes
+// dans le Kanban Landing Pages, quel que soit le chemin de chargement (boot ou refresh manuel).
+function injectStaticNdsLandings(){
+  if(!Array.isArray(DATA.landings)) DATA.landings = [];
+  [
+    {id:'lp-nds-presentation', nom:'Landing NDS \u2014 Pr\u00e9sentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html', statut:'active', published:true, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'},
+    {id:'lp-nds-entry', nom:'Landing NDS \u2014 Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds', statut:'active', published:true, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'},
+    {id:'lp-nds-super-event', nom:'Pr\u00e9sentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html', statut:'active', published:true, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'},
+    {id:'lp-nds-parcours-client', nom:'Pr\u00e9sentation parcours client', deployUrl:'https://flowin-events.vercel.app/nds-parcours-client.html', statut:'active', published:true, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'},
+    {id:'lp-nds-brigade-verte', nom:'Landing NDS \u2014 Brigade Verte (agent terrain)', deployUrl:'https://flowin-events.vercel.app/nds-brigade-verte-manuel.html', statut:'active', published:true, accentColor:'#22C55E', moduleJeu:'quiz', emoji:'\ud83c\udf3f', createdAt:'2026-07-01'}
+  ].forEach(function(_n){
+    var existing = DATA.landings.find(function(l){ return l && l.id===_n.id; });
+    if(!existing){ DATA.landings.push(Object.assign({externe:true}, _n)); }
+  });
+}
+
 // Recharger DATA depuis Supabase et rafraîchir l'UI
 async function refreshFromSupabase(){
   var data = await supaLoadAll();
@@ -2017,21 +2033,7 @@ async function refreshFromSupabase(){
   // FIX bug recurrent : les landings NDS sont des pages STATIQUES (pas en table Supabase).
   // Le fetch Supabase ci-dessus ecrase DATA.landings -> elles disparaissaient de la liste.
   // On les re-injecte ici apres le fetch (idempotent) pour qu'elles restent visibles.
-  if(!Array.isArray(DATA.landings)) DATA.landings = [];
-  [
-    {id:'lp-nds-presentation', nom:'Landing NDS \u2014 Pr\u00e9sentation partenaire', deployUrl:'https://flowin-events.vercel.app/nds-partenaire-presentation.html'},
-    {id:'lp-nds-entry', nom:'Landing NDS \u2014 Jeu festivalier (/nds)', deployUrl:'https://flowin-events.vercel.app/nds'},
-    {id:'lp-nds-super-event', nom:'Pr\u00e9sentation Super Event', deployUrl:'https://flowin-events.vercel.app/nds-super-event-pro.html'},
-    {id:'lp-nds-parcours-client', nom:'Pr\u00e9sentation parcours client', deployUrl:'https://flowin-events.vercel.app/nds-parcours-client.html'}
-  ].forEach(function(_n){
-    if(!DATA.landings.some(function(l){ return l && l.id===_n.id; })){
-      DATA.landings.push({id:_n.id, nom:_n.nom, statut:'active', published:true, externe:true, deployUrl:_n.deployUrl, accentColor:'#E0218A', moduleJeu:'quiz', emoji:'\ud83c\udfa1', createdAt:'2026-06-22'});
-    }
-  });
-  // Landing agent Brigade Verte : outil manuel terrain, en brouillon jusqu'a validation finale + publication par Romain.
-  if(!DATA.landings.some(function(l){ return l && l.id==='lp-nds-brigade-verte'; })){
-    DATA.landings.push({id:'lp-nds-brigade-verte', nom:'Landing NDS \u2014 Brigade Verte (agent terrain)', deployUrl:'https://flowin-events.vercel.app/nds-brigade-verte-manuel.html', statut:'brouillon', published:false, externe:true, accentColor:'#22C55E', moduleJeu:'quiz', emoji:'\ud83c\udf3f', createdAt:'2026-07-01'});
-  }
+  injectStaticNdsLandings();
 
   DATA.joueurs = data.joueurs;
   DATA.lots = data.lots;
@@ -12683,6 +12685,7 @@ document.addEventListener('DOMContentLoaded', async function(){
       DATA.participations = DATA.participations || [];
       DATA.lots = data.lots;
       if(data.banques && data.banques.length) DATA.banques = data.banques;
+      injectStaticNdsLandings();
       saveData();
       console.log('[Flowin] Supabase chargé :',{
         pros:DATA.pros.length,events:DATA.events.length,joueurs:DATA.joueurs.length,
