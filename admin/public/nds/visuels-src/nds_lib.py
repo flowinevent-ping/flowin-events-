@@ -105,7 +105,7 @@ def logo_card(path, card_w, card_h, pad_ratio=0.16, radius_ratio=0.14):
 # ============================================================================
 PARTNERS = [
     "bergerie", "pegase", "utile", "carrosserie-gp",
-    "giordano", "alafut", "charvolin", "dekra",
+    "giordano", "alafut", "charvolin", "dekra", "nook",
 ]
 PARTENAIRES_DIR = "/home/claude/repo/admin/public/nds/partenaires"
 
