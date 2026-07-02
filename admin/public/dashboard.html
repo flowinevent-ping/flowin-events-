@@ -3732,7 +3732,7 @@ function saveTicketBloc(pid){
 function renderNdsBonCommande(){
   var h='<div class="page">';
   h+='<div class="page-header"><div><div class="page-title">&#129534; Bon de commande NDS 2026</div><div class="page-subtitle">Remplis le bon, fais signer le partenaire, envoie-lui sa copie. Une copie part automatiquement à flowinevent@gmail.com.</div></div></div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:8px">';
+  h+='<div style="margin:6px 0 14px"><button class="btn btn-primary" onclick="window.open(\'/bons-commande-liste.html\',\'_blank\')">\uD83D\uDCC2 Voir tous les bons de commande &amp; factures (liste)</button></div>';h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:8px">';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">'
     +'<div style="font-size:34px">&#129534;</div>'
     +'<div style="font-size:18px;font-weight:800">Bon de commande digital</div>'
@@ -6926,7 +6926,7 @@ function drawerPartner(p){
     html += '<div class="section-h">📜 Docs & légal</div>';
 html += '<div class="mb-3 text-xs" style="line-height:1.9">';
 html += '<a href="'+cb+'/cgv-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">📜 CGV NDS 2026</a><br>';
-html += '<a href="'+cb+'/bon-commande-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">🧾 Bon de commande</a>';
+html += '<a href="'+cb+'/bon-commande-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">🧾 Nouveau bon de commande</a><br>';html += '<a href="'+cb+'/bons-commande-liste.html" target="_blank" style="color:#22D3C6;font-weight:700">📂 Tous les bons &amp; factures (liste CRM)</a>';
 html += '</div>';
 html += '<div class="section-h">✏️ Source éditable (Canva)</div>';
 html += '<div class="mb-3"><a href="'+cb+'/nds/kit-digital/svg/nds_a4_'+cslug+'.svg" target="_blank" style="color:#E8A33C;font-size:12px;font-weight:700">✏️ A4 SVG (texte modifiable Canva)</a></div>';

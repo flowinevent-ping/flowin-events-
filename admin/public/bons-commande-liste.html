@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bons de commande &amp; Factures — NDS 2026</title>
+<style>
+  :root{--bg:#0a1020;--card:#141c32;--card2:#1b2440;--line:#243056;--magenta:#e6187f;--amber:#f4b544;--teal:#2dd4a0;--white:#fff;--grey:#b0bacd;--bad:#ff5c7a}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Manrope',system-ui,Arial,sans-serif;background:var(--bg);color:var(--white);min-height:100vh}
+  header{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0;font-weight:800}
+  header .sub{color:var(--grey);font-size:13px}
+  .wrap{max-width:1150px;margin:0 auto;padding:20px 26px 80px}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .btn{border:1px solid var(--line);background:var(--card2);color:var(--white);font-weight:700;font-size:13px;padding:9px 14px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--magenta);border-color:var(--magenta)}
+  .btn.sm{font-size:12px;padding:6px 10px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:transparent;color:var(--grey);border:0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--card2);color:var(--amber)}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  th{color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+  tr:last-child td{border-bottom:0}
+  .num{font-weight:800;color:var(--amber)}
+  .st{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+  .st.brouillon{background:rgba(244,181,68,.15);color:var(--amber)}
+  .st.signe,.st.envoye{background:rgba(45,212,160,.15);color:var(--teal)}
+  .st.facture{background:rgba(230,24,127,.15);color:var(--magenta)}
+  .act a,.act button{margin-right:6px}
+  .loading{color:var(--grey);padding:24px}
+  .empty{color:var(--grey);padding:24px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🧾 Bons de commande &amp; Factures <span style="color:var(--magenta)">·</span> NDS 2026</h1>
+    <div class="sub">Liste répertoriée · accès direct · éditable et imprimable. Une facture se génère depuis un bon.</div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="bar">
+    <div class="seg" id="seg">
+      <button data-f="all" class="on">Tous</button>
+      <button data-f="bon">Bons de commande</button>
+      <button data-f="facture">Factures</button>
+    </div>
+    <a class="btn primary" href="/bon-commande-nds.html" target="_blank">+ Nouveau bon de commande</a>
+    <a class="btn" href="/bon-commande-nds-a4.html" target="_blank">Version A4 (papier)</a>
+  </div>
+  <div id="list"><div class="loading">Chargement…</div></div>
+</div>
+
+<script>
+const SB="https://ywcqtupgoxfzkddqkztk.supabase.co";
+const KEY="sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1";
+const H={apikey:KEY,Authorization:"Bearer "+KEY};
+let ROWS=[], FILTER="all";
+
+function isFacture(r){ return (r.statut==='facture') || String(r.id||'').indexOf('FAC-')===0; }
+function eur(n){ n=Number(n||0); return n.toLocaleString('fr-FR')+' €'; }
+
+async function load(){
+  const box=document.getElementById('list');
+  try{
+    const r=await fetch(SB+"/rest/v1/bons_commande?select=*&order=created_at.desc",{headers:H});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    ROWS=await r.json();
+  }catch(e){ box.innerHTML='<div class="empty">Impossible de charger ('+e.message+').</div>'; return; }
+  render();
+}
+
+function render(){
+  const box=document.getElementById('list');
+  let rows=ROWS.filter(r=> FILTER==='all' ? true : (FILTER==='facture'? isFacture(r) : !isFacture(r)));
+  if(!rows.length){ box.innerHTML='<div class="empty">Aucun document.</div>'; return; }
+  let h='<table><thead><tr><th>N°</th><th>Enseigne</th><th>Type</th><th>Offre</th><th>Montant TTC</th><th>Statut</th><th>Date</th><th></th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    const fac=isFacture(r);
+    h+='<tr>'
+      +'<td class="num">'+(r.id||'')+'</td>'
+      +'<td><b>'+(r.raison_sociale||'')+'</b><div style="color:var(--grey);font-size:11px">'+(r.ville||'')+'</div></td>'
+      +'<td>'+(fac?'Facture':'Bon de commande')+'</td>'
+      +'<td>'+(r.offre_label||r.offre||'—')+'</td>'
+      +'<td>'+eur(r.montant_ttc)+'</td>'
+      +'<td><span class="st '+(r.statut||'brouillon')+'">'+(r.statut||'brouillon')+'</span></td>'
+      +'<td>'+((r.created_at||'').slice(0,10))+'</td>'
+      +'<td class="act">'
+        +'<a class="btn sm" href="/bon-commande-nds.html?id='+encodeURIComponent(r.id)+'" target="_blank">Ouvrir / imprimer</a>'
+        +(fac?'':'<button class="btn sm" onclick="genFacture(\''+r.id+'\')">→ Facture</button>')
+      +'</td>'
+    +'</tr>';
+  });
+  h+='</tbody></table>';
+  box.innerHTML=h;
+}
+
+async function genFacture(bcId){
+  const bc=ROWS.find(x=>x.id===bcId); if(!bc) return;
+  // numéro facture séquentiel FAC-2026-XXXX
+  const nums=ROWS.filter(isFacture).map(x=>parseInt(String(x.id).replace(/\D/g,'').slice(-4),10)||0);
+  const next='FAC-2026-'+String((Math.max(0,...nums)+1)).padStart(4,'0');
+  const fac=Object.assign({},bc,{id:next,statut:'facture',created_at:new Date().toISOString()});
+  delete fac.signature; delete fac.date_signature;
+  try{
+    const r=await fetch(SB+"/rest/v1/bons_commande",{method:'POST',headers:{...H,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(fac)});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const [row]=await r.json(); ROWS.unshift(row); render();
+    alert('Facture '+next+' créée depuis '+bcId+'. Éditable/imprimable via « Ouvrir ».');
+  }catch(e){ alert("Création facture refusée ("+e.message+"). RLS bons_commande (insert anon) à autoriser."); }
+}
+
+document.getElementById('seg').addEventListener('click',function(e){
+  if(e.target.tagName!=='BUTTON') return;
+  FILTER=e.target.getAttribute('data-f');
+  [...this.children].forEach(b=>b.classList.toggle('on',b===e.target));
+  render();
+});
+load();
+</script>
+</body>
+</html>
