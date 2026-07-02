@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bon de commande — Partenaire Nuits du Sud 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#3B5CC4;--gold:#C97A14;--teal:#00897B;
+    --paper:#F7F8FC;--white:#ffffff;
+    --line:#e7e9f2;
+    --ink:#16203A;--text:#222B45;--muted:#525B78;--faint:#8A90A8;
+    --rose:#C9305F;--hl:#FFF3D6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;padding:24px}
+  .doc{width:100%;max-width:820px;margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 8px 28px -14px rgba(22,32,58,.22)}
+
+  /* En-tete cobrand clair */
+  .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
+  .opc-logo{height:34px;width:auto;display:block}
+  .x-sep{color:var(--faint);font-weight:700;font-size:14px}
+  .flowin-mini{display:flex;align-items:center;gap:8px}
+  .flowin-mini .fb-dot{width:30px;height:30px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
+  .flowin-mini .fb-txt{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;color:var(--teal);line-height:1}
+  .flowin-mini .fb-txt span{color:var(--ink)}
+  .flowin-block{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+  .flowin-cap{font-size:9px;font-weight:600;color:var(--faint);letter-spacing:.03em}
+
+  .body{padding:30px 36px 30px}
+
+  /* Bandeau titre + numero */
+  .head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:26px;flex-wrap:wrap}
+  .doc-eyebrow{font-family:'Bricolage Grotesque';font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+  .doc-type{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;line-height:1.05;color:var(--ink)}
+  .doc-ref{font-size:11.5px;color:var(--faint);margin-top:6px;font-style:italic}
+  .doc-meta{text-align:right;font-size:13px;color:var(--muted);line-height:1.7}
+  .doc-meta b{color:var(--ink)}
+  .docnum-edit{font:inherit;font-weight:700;color:var(--ink);background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;text-align:right;width:158px;padding:0 2px 1px}
+  .docnum-edit:focus{border-bottom-color:#E0218A;background:#faf6fc}
+  body.viewmode .docnum-edit{border-bottom:none;background:transparent;width:auto;min-width:140px}
+  @media(max-width:640px){.docnum-edit{text-align:left}}
+
+  /* Emetteur / client */
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
+  .party{padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+  .party.client{border-left:3px solid var(--rose)}
+  .party .ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .party .nm{font-family:'Bricolage Grotesque';font-size:16px;font-weight:800;color:var(--ink);margin-bottom:5px}
+  .party .ln{font-size:12.5px;color:var(--muted);line-height:1.65}
+  .party .ln.ph{color:var(--faint);font-style:italic}
+
+  /* Offres a cocher */
+  .offers-h{font-family:'Bricolage Grotesque';font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:12px}
+  .offers{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+  .offer{display:flex;gap:15px;align-items:flex-start;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--white)}
+  .offer.pop{border:1.5px solid var(--accent);box-shadow:0 4px 16px -10px rgba(59,92,196,.4)}
+  .chk{width:26px;height:26px;border:2px solid var(--accent);border-radius:7px;flex-shrink:0;margin-top:2px}
+  .offer-main{flex:1;min-width:0}
+  .offer-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .offer-nm{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:var(--ink)}
+  .offer-nm .badge{font-family:'Plus Jakarta Sans';font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--accent);border-radius:20px;padding:2px 9px;margin-left:9px;vertical-align:middle}
+  .offer-pr{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .offer-pr .u{font-family:'Plus Jakarta Sans';font-size:12px;font-weight:700;color:var(--faint);margin-left:3px}
+  .offer-sub{font-size:12.5px;color:var(--teal);font-weight:600;margin-top:2px}
+  .offer-lot{font-size:12px;color:var(--muted);margin-top:7px}
+  .offer-lot b{color:var(--ink)}
+  .offer-ul{list-style:none;margin-top:9px;display:flex;flex-direction:column;gap:5px}
+  .offer-ul li{font-size:12.5px;color:var(--muted);line-height:1.45;padding-left:18px;position:relative}
+  .offer-ul li::before{content:'✓';position:absolute;left:0;color:var(--teal);font-weight:800}
+  .offer-ul li b{color:var(--ink);font-weight:700}
+
+  /* Total */
+  .offer-prw{text-align:right}
+  .offer-ttc{font-size:11px;font-weight:600;color:var(--faint);margin-top:1px;font-variant-numeric:tabular-nums}
+  .total-note{text-align:right;font-size:11.5px;color:var(--faint);margin-top:12px}
+  .totals{margin:16px 0 0 auto;width:340px;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .trow{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;font-size:13.5px;color:var(--muted);border-bottom:1px solid var(--line)}
+  .trow .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+  .trow.ttc{border-bottom:none;background:var(--hl);border-top:1.5px dashed var(--gold)}
+  .trow.ttc span:first-child{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:var(--ink)}
+  .trow.ttc .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ink)}
+
+  /* Reglement */
+  .pay{margin-top:24px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+  .pay .ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  .pay .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;font-size:12.5px;color:var(--muted)}
+  .pay .grid b{color:var(--ink)}
+  .pay .iban{font-variant-numeric:tabular-nums;letter-spacing:.3px}
+
+  /* Conditions + signature + legal */
+  .conditions{font-size:11px;color:var(--muted);line-height:1.6;margin-top:20px;padding-top:14px;border-top:1px dashed var(--line)}
+  .conditions b{color:var(--ink)}
+  .sign-lbl{margin-top:18px;font-size:12px;color:var(--muted)}
+  .sign-lbl b{color:var(--ink)}
+  .sign-box{margin-top:7px;height:70px;border:1px dashed #c7cee0;border-radius:12px}
+  .legal{margin-top:0;padding:14px 36px;background:var(--ink);color:rgba(255,255,255,.78);font-size:10px;line-height:1.6}
+  .legal b{color:#fff}
+
+  @media (max-width:680px){
+    body{padding:12px}
+    .body{padding:22px 18px}
+    .parties{grid-template-columns:1fr}
+    .pay .grid{grid-template-columns:1fr}
+    .doc-type{font-size:24px}
+    .head{flex-direction:column}
+    .doc-meta{text-align:left}
+    .totals{width:100%}
+    .legal{padding:14px 18px}
+  }
+  @page{size:A4;margin:10mm}
+  @media print{
+    html,body{background:#fff;padding:0;margin:0;font-size:10.5px;line-height:1.32}
+    .doc{box-shadow:none;border:none;border-radius:0;max-width:100%;width:100%}
+    .cobrand{padding:5px 0 6px}
+    .opc-logo{height:24px}
+    .body{padding:8px 0 4px}
+    .head{margin-bottom:9px}
+    .doc-eyebrow{margin-bottom:2px;font-size:9px}
+    .doc-type{font-size:19px}
+    .doc-ref{margin-top:2px;font-size:9.5px}
+    .party{padding:7px 10px}
+    .party .ttl{margin-bottom:4px}
+    .parties{gap:9px;margin-bottom:9px}
+    .fldrow{margin-bottom:1px}
+    .fld{padding:1px 2px;font-size:10.5px}
+    .offers-h{margin-bottom:6px;font-size:10px}
+    .offer{padding:8px 11px;gap:9px}
+    .offer-nm{font-size:14px}
+    .offer-sub{font-size:10.5px;margin-top:1px}
+    .offer-pr{font-size:15px!important}
+    .offer-lot{margin-top:4px;font-size:10px}
+    .offer-ul{margin-top:5px;gap:2px}
+    .offer-ul li{font-size:10px;line-height:1.25}
+    .offer-lotbox,.offer-mention{margin-top:6px;padding-top:6px}
+    .olb-ttl{margin-bottom:4px;font-size:8.5px}
+    .offer-lotbox .kv{margin-bottom:4px}
+    .offer-lotbox label,.offer-mention label{font-size:9px;margin-bottom:1px}
+    .fld-area{min-height:26px;padding:4px 6px;font-size:10px}
+    .totals{margin-top:8px}
+    .trow{padding:5px 12px;font-size:11px}
+    .total-note{font-size:9px;margin-top:4px}
+    .kvcard{margin-top:9px;padding:8px 10px}
+    .conditions{margin-top:6px;padding-top:5px;font-size:8.5px;line-height:1.35}
+    .sign-lbl{margin-top:5px;font-size:10px}
+    .signrow{margin-top:3px}
+    .legal{font-size:7.3px;line-height:1.32;padding:4px 0}
+    .head,.party,.offer,.totals,.pay,.conditions,.sign-box{page-break-inside:avoid;break-inside:avoid}
+    .offers{gap:9px}
+    .offer.pop{box-shadow:none;border-color:var(--accent)}
+    /* Champs optionnels laissés vides : ne pas gaspiller de place a l'impression */
+    .fldrow:has(.fld:placeholder-shown){display:none}
+    .kv:has(.fld:placeholder-shown),.kv:has(.fld-area:placeholder-shown){display:none}
+    .offer-mention:has(.offer-mentiontxt:placeholder-shown){display:none}
+    .offer-lotbox:has(.offer-lotdesc:placeholder-shown):has(.offer-lotemis:placeholder-shown):has(.offer-lotuse:placeholder-shown){display:none}
+  }
+
+  /* --- Interactif : remplissable / signable --- */
+  .fld{font-family:inherit;font-size:12.5px;color:var(--ink);border:none;border-bottom:1.5px solid var(--line);background:transparent;padding:3px 2px;width:100%;outline:none}
+  .fld:focus{border-bottom-color:var(--accent)}
+  .fld::placeholder{color:var(--faint);font-style:italic}
+  .fldrow{margin-bottom:6px}
+  .offer{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .offer.sel{border:1.5px solid var(--accent);box-shadow:0 4px 16px -8px rgba(59,92,196,.45)}
+  .offer.sel .chk{background:var(--accent);position:relative}
+  .offer.sel .chk::after{content:'';position:absolute;left:7px;top:3px;width:7px;height:12px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
+  .sigpad{width:100%;max-width:360px;height:130px;border:1px dashed #c7cee0;border-radius:12px;background:#fff;touch-action:none;display:block;cursor:crosshair}
+  .sigtools{display:flex;gap:16px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .sigtools button{font-family:inherit;font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline}
+  .signrow{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+  .signrow .col{flex:1;min-width:150px}
+  .signrow label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
+  .actions{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .btn-primary{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--accent),#2d49a8);border:none;border-radius:12px;padding:13px 22px;cursor:pointer;box-shadow:0 6px 18px -8px rgba(59,92,196,.6)}
+  .btn-primary[disabled]{opacity:.5;cursor:default}
+  .btn-ghost{font-family:inherit;font-size:13px;font-weight:700;color:var(--accent);background:#fff;border:1.5px solid var(--accent);border-radius:12px;padding:11px 18px;cursor:pointer;text-decoration:none;display:inline-block}
+  .statusmsg{font-size:13px;font-weight:600}
+  .statusmsg.err{color:var(--rose)} .statusmsg.ok{color:var(--teal)}
+  .viewonly{display:none}
+  body.viewmode .editonly{display:none!important}
+  body.viewmode .viewonly{display:block}
+  .sigimg{max-width:260px;max-height:120px;display:block;margin-top:6px}
+  @media print{ .actions,.sigtools{display:none!important} .fld{border-bottom:none} }
+
+  /* Prix HT editable */
+  .ht-edit{font:inherit;font-weight:700;color:var(--ink);background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;text-align:right;width:100px;padding:0 2px 1px;font-variant-numeric:tabular-nums}
+  .ht-edit:focus{border-bottom-color:#E0218A;background:#faf6fc}
+  body.viewmode .ht-edit{border-bottom:none;width:auto;min-width:70px}
+  /* Prix pack + valeur lot editables inline sur la carte offre */
+  .offer-pr input.offer-price{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ink);width:98px;text-align:right;background:transparent;border:none;border-bottom:1.5px dashed #7C2D92;outline:none;font-variant-numeric:tabular-nums;padding:0 1px 1px}
+  .offer-pr input.offer-price:focus{border-bottom-color:#E0218A;background:#faf6fc}
+  .offer-lotval{font:inherit;font-weight:700;color:var(--ink);width:60px;text-align:right;background:transparent;border:none;border-bottom:1.5px dashed var(--gold);outline:none;font-variant-numeric:tabular-nums;padding:0 1px 1px}
+  .offer-lotval:focus{border-bottom-color:#E0218A;background:#fff8ee}
+  .lotnote{color:var(--faint)}
+  .offer-mention{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+  .offer-mention label{display:block;font-size:11px;font-weight:700;color:var(--rose);margin-bottom:4px}
+  .offer-lotbox{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+  .olb-ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+  .offer-lotbox .kv{margin-bottom:9px}
+  .offer-lotbox .kv:last-child{margin-bottom:0}
+  .offer-lotbox label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
+
+  /* Barre de selection (accordeon) : n'affiche que le pack coche */
+  .pack-switch{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .ps-btn{flex:1;min-width:120px;font-family:'Bricolage Grotesque';font-weight:700;font-size:13px;color:var(--muted);background:var(--paper);border:1.5px solid var(--line);border-radius:11px;padding:11px 12px;cursor:pointer;transition:all .15s;text-align:center}
+  .ps-btn:hover{border-color:var(--accent)}
+  .ps-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px -6px rgba(59,92,196,.5)}
+  .offers-empty{font-size:12.5px;color:var(--faint);font-style:italic;padding:18px;text-align:center;border:1.5px dashed var(--line);border-radius:14px;margin-bottom:8px}
+  .offer{display:none}
+  .offer.sel{display:flex}
+  .chk{display:none}
+  body.viewmode .pack-switch,body.viewmode .offers-empty{display:none}
+  @media print{ .pack-switch,.offers-empty{display:none!important} }
+  body.viewmode .offer-price,body.viewmode .offer-lotval{border-bottom:none;width:auto;min-width:44px}
+  @media print{ .offer-price,.offer-lotval{border-bottom:none} }
+  /* Cartes lot / mention */
+  .kvcard{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+  .kvcard.lot{border-left:3px solid var(--gold)}
+  .kvcard.mention{border-left:3px solid var(--rose);background:#fff}
+  .kvcard>.ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  .kvcard .hint{font-size:11px;color:var(--faint);margin-top:9px;line-height:1.5}
+  .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+  .kv-grid .full{grid-column:1 / -1}
+  .kv label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
+  .fld-area{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line);border-radius:10px;background:var(--white);padding:9px 11px;width:100%;outline:none;resize:vertical;min-height:62px;line-height:1.5}
+  .fld-area:focus{border-color:var(--accent)}
+  .fld-area::placeholder{color:var(--faint);font-style:italic}
+  body.viewmode .fld-area{background:var(--paper);border-style:dashed}
+  @media(max-width:680px){ .kv-grid{grid-template-columns:1fr} }
+  @media print{ .fld-area{border:none;background:transparent;padding:0} .kvcard{background:#fff;page-break-inside:avoid;break-inside:avoid} }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="cobrand">
+    <img src="/opconsult-logo.png" alt="OPConsult" class="opc-logo">
+    <span class="x-sep">&times;</span>
+    <div class="flowin-block">
+      <div class="flowin-mini"><div class="fb-dot">F</div><span class="fb-txt">Flow<span>in</span></span></div>
+      <div class="flowin-cap">solution marketing &eacute;v&eacute;nementiel &middot; OPConsult (BAITA EURL)</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div class="head">
+      <div>
+        <div class="doc-eyebrow">Partenariat Nuits du Sud 2026</div>
+        <h1 class="doc-type">Bon de commande</h1>
+        <div class="doc-ref">R&eacute;f&eacute;rence jeu et animation commerciale &middot; Nuits du Sud 2026</div>
+      </div>
+      <div class="doc-meta">
+        N&deg; <input id="docNum" type="text" spellcheck="false" autocomplete="off" class="docnum-edit" value="" title="Num\u00e9ro modifiable" /><br>
+        Date : <b id="docDate">__ / __ / 2026</b><br>
+        Cl&ocirc;ture des partenariats : <b>9 juillet 2026</b>
+      </div>
+    </div>
+
+    <div class="parties">
+      <div class="party emetteur">
+        <div class="ttl">&Eacute;metteur</div>
+        <div class="nm">OPConsult</div>
+        <div class="ln">
+          40 rue des Arcs, 06140 Vence<br>
+          04 93 59 91 37 &middot; info@opconsult.co<br>
+          <span style="color:var(--faint)">Mentions l&eacute;gales compl&egrave;tes en bas de document</span>
+        </div>
+      </div>
+      <div class="party client">
+        <div class="ttl">Partenaire</div>
+        <div class="fldrow"><input class="fld" id="f_raison" placeholder="Raison sociale *" autocomplete="organization"></div>
+        <div class="fldrow"><input class="fld" id="f_adresse" placeholder="Adresse" autocomplete="street-address"></div>
+        <div class="fldrow" style="display:flex;gap:10px"><input class="fld" id="f_cp" placeholder="Code postal" style="max-width:90px" inputmode="numeric"><input class="fld" id="f_ville" placeholder="Ville"></div>
+        <div class="fldrow"><input class="fld" id="f_contact" placeholder="Contact (nom) *" autocomplete="name"></div>
+        <div class="fldrow"><input class="fld" id="f_tel" placeholder="Téléphone *" inputmode="tel" autocomplete="tel"></div>
+        <div class="fldrow"><input class="fld" id="f_email" placeholder="Email *" inputmode="email" autocomplete="email"></div>
+        <div class="fldrow"><input class="fld" id="f_siret" placeholder="SIRET" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div class="offers-h" id="offersH">Choisissez votre offre</div>
+    <div class="pack-switch" id="packSwitch">
+      <button type="button" class="ps-btn" data-target="visibilite">Visibilit&eacute;</button>
+      <button type="button" class="ps-btn" data-target="animation">Animation</button>
+      <button type="button" class="ps-btn" data-target="sponsor">Sponsor officiel</button>
+    </div>
+    <div class="offers-empty" id="offersEmpty">Cochez un pack ci-dessus pour afficher son d&eacute;tail.</div>
+    <div class="offers" id="offersList">
+
+      <div class="offer" data-offre="visibilite" data-label="Visibilité" data-ht="590" data-lot="90" role="button" tabindex="0">
+        <div class="chk"></div>
+        <div class="offer-main">
+          <div class="offer-top">
+            <div>
+              <div class="offer-nm">Visibilit&eacute;</div>
+              <div class="offer-sub">Votre pr&eacute;sence dans l&rsquo;op&eacute;ration</div>
+            </div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
+          </div>
+          <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="90"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
+          <ul class="offer-ul">
+            <li><b>Votre apparition</b> dans la liste des partenaires</li>
+            <li><b>Acc&egrave;s &agrave; vos contacts et r&eacute;seaux sociaux</b> depuis le jeu</li>
+          </ul>
+          <div class="offer-lotbox">
+            <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
+            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
+            <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
+          </div>
+          <div class="offer-mention">
+            <label>Mention particuli&egrave;re / remise pour ce pack</label>
+            <textarea class="offer-mentiontxt fld-area" autocomplete="off" placeholder="ex. : remise exceptionnelle, tarif n&eacute;goci&eacute;, condition particuli&egrave;re convenue pour ce pack&hellip;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="offer pop" data-offre="animation" data-label="Animation" data-ht="1490" data-lot="159" role="button" tabindex="0">
+        <div class="chk"></div>
+        <div class="offer-main">
+          <div class="offer-top">
+            <div>
+              <div class="offer-nm">Animation<span class="badge">Le plus choisi</span></div>
+              <div class="offer-sub">Faites revenir vos clients</div>
+            </div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="1490">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
+          </div>
+          <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="159"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
+          <ul class="offer-ul">
+            <li>Tout le pack <b>Visibilit&eacute;</b></li>
+            <li><b>Animation de votre client&egrave;le</b> &mdash; vos clients jouent et cumulent des tickets en venant chez vous</li>
+            <li><b>Mise en avant</b> sur la carte parcours des partenaires</li>
+            <li><b>Reporting de passage</b> de votre &eacute;tablissement</li>
+          </ul>
+          <div class="offer-lotbox">
+            <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
+            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
+            <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
+          </div>
+          <div class="offer-mention">
+            <label>Mention particuli&egrave;re / remise pour ce pack</label>
+            <textarea class="offer-mentiontxt fld-area" autocomplete="off" placeholder="ex. : remise exceptionnelle, tarif n&eacute;goci&eacute;, condition particuli&egrave;re convenue pour ce pack&hellip;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="offer" data-offre="sponsor" data-label="Sponsor officiel" data-ht="3590" data-lot="259" role="button" tabindex="0">
+        <div class="chk"></div>
+        <div class="offer-main">
+          <div class="offer-top">
+            <div>
+              <div class="offer-nm">Sponsor officiel</div>
+              <div class="offer-sub">Visibilit&eacute; maximale</div>
+            </div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="3590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
+          </div>
+          <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="259"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
+          <ul class="offer-ul">
+            <li>Tout le pack <b>Animation</b></li>
+            <li><b>Pr&eacute;sence sur tous les supports &amp; stations</b> pendant le festival</li>
+            <li><b>Apparition dans le bandeau d&eacute;filant</b> de l&rsquo;app</li>
+            <li><b>Quiz personnalisable</b> à votre marque</li>
+          </ul>
+          <div class="offer-lotbox">
+            <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
+            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
+            <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
+          </div>
+          <div class="offer-mention">
+            <label>Mention particuli&egrave;re / remise pour ce pack</label>
+            <textarea class="offer-mentiontxt fld-area" autocomplete="off" placeholder="ex. : remise exceptionnelle, tarif n&eacute;goci&eacute;, condition particuli&egrave;re convenue pour ce pack&hellip;"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="totals">
+      <div class="trow"><span>Montant HT factur&eacute;</span><span class="v" id="tHT">&mdash;</span></div>
+      <div class="trow"><span>TVA 20 %</span><span class="v" id="tTVA">&mdash;</span></div>
+      <div class="trow ttc"><span>Net &agrave; payer TTC</span><span class="v" id="tTTC">&mdash;</span></div>
+    </div>
+    <div class="total-note" id="catNote">Le prix du pack est modifiable directement sur l&rsquo;offre. Le lot est offert par le commer&ccedil;ant et d&eacute;duit en caisse &mdash; il n&rsquo;entre pas dans le total factur&eacute;.</div>
+
+    <div class="pay">
+      <div class="ttl">R&egrave;glement</div>
+      <div class="grid">
+        <div>Mode : <b>Virement bancaire</b></div>
+        <div>BIC : <b>CCBPFRPPMAR</b></div>
+        <div style="grid-column:1 / -1">IBAN : <b class="iban">FR76 1460 7003 3470 2211 6462 345</b></div>
+        <div style="grid-column:1 / -1">R&eacute;f&eacute;rence &agrave; rappeler : <b id="payRef">NDS-2026-____</b></div>
+      </div>
+    </div>
+
+    <div class="conditions">
+      <b>Conditions.</b> Bon de commande &agrave; retourner dat&eacute; et sign&eacute; avec la mention &laquo;&nbsp;Bon pour accord&nbsp;&raquo;, accompagn&eacute; de l&rsquo;offre coch&eacute;e. Le partenariat est confirm&eacute; &agrave; r&eacute;ception du r&egrave;glement. Une facture d&eacute;finitive est &eacute;mise apr&egrave;s encaissement. Prestation rattach&eacute;e au festival Nuits du Sud (9&ndash;18 juillet 2026, Vence). <b>Cl&ocirc;ture des partenariats : 9 juillet 2026.</b> Pour toute question : <b>info@opconsult.co</b>.
+    </div>
+
+    <div class="sign-lbl"><b>Bon pour accord</b> (nom, date et signature) :</div>
+    <div class="editonly">
+      <canvas id="sigpad" class="sigpad"></canvas>
+      <div class="sigtools"><span style="font-size:11px;color:var(--faint)">Signez ci-dessus (doigt ou souris)</span><button type="button" id="sigClear">Effacer</button></div>
+    </div>
+    <img id="sigImg" class="sigimg viewonly" alt="Signature">
+    <div class="signrow">
+      <div class="col"><label>Nom du signataire</label><input class="fld" id="f_signataire" placeholder="Nom et fonction"></div>
+      <div class="col"><label>Date</label><input class="fld" id="f_date" placeholder="JJ / MM / AAAA"></div>
+    </div>
+
+    <div class="cgvrow editonly" style="margin-top:18px;display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--muted)">
+      <input type="checkbox" id="cgvChk" style="margin-top:3px;width:17px;height:17px;flex:none;accent-color:#7C2D92">
+      <label for="cgvChk" style="cursor:pointer">J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-nds.html" target="_blank" rel="noopener" style="color:#7C2D92;font-weight:700">conditions g&eacute;n&eacute;rales de vente</a>.</label>
+    </div>
+    <div class="sendrow editonly" style="margin-top:16px">
+      <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px">Envoyer le bon de commande signé à cette adresse :</label>
+      <input class="fld" id="f_email_envoi" type="email" autocomplete="email" placeholder="adresse e-mail du destinataire (par défaut : email du partenaire)">
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">Le destinataire reçoit sa copie à cette adresse. Une copie part aussi automatiquement à flowinevent@gmail.com.</div>
+    </div>
+    <div class="actions editonly">
+      <button type="button" id="submitBtn" class="btn-primary">Valider, signer et recevoir ma copie</button>
+      <span id="status" class="statusmsg"></span>
+    </div>
+    <div class="actions viewonly" style="flex-wrap:wrap;gap:10px">
+      <a href="#" id="dlBtn" class="btn-primary" onclick="window.print();return false;">Télécharger ma copie (PDF)</a>
+      <button type="button" id="copyLinkBtn" class="btn-primary" style="background:#3B5CC4">&#128203; Copier le lien à envoyer au client</button>
+      <a href="#" id="mailClientBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer par email au client</a>
+      <span style="font-size:12px;color:var(--teal)">✓ Bon de commande signé et enregistré</span>
+    </div>
+
+  </div>
+
+  <div class="legal">
+    <b>Flowin</b> est une solution marketing &eacute;v&eacute;nementiel &eacute;dit&eacute;e par <b>OPConsult</b>, marque de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907 &middot; IBAN FR76 1460 7003 3470 2211 6462 345 &middot; BIC CCBPFRPPMAR &middot; Document non contractuel tant que non sign&eacute; &laquo;&nbsp;Bon pour accord&nbsp;&raquo;.
+  </div>
+
+</div>
+<script>
+(function(){
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var CGV_VERSION='v1-draft'; // a mettre a jour quand les CGV passent en version validee par le juriste
+  function $(id){return document.getElementById(id);}
+  function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
+  function qs(name){ var m=new RegExp('[?&]'+name+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
+
+  // --- Totaux (pilotes par le prix de l'offre selectionnee) ---
+  function parseNum(v){ if(v==null) return NaN; return parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(/\s/g,'').replace(',','.')); }
+  function selPrice(){ if(!sel) return NaN; var i=sel.querySelector('.offer-price'); return i?parseNum(i.value):NaN; }
+  function selLot(){ if(!sel) return NaN; var i=sel.querySelector('.offer-lotval'); return i?parseNum(i.value):NaN; }
+  function selMention(){ if(!sel) return ''; var t=sel.querySelector('.offer-mentiontxt'); return t?t.value.trim():''; }
+  function selVal(cls){ if(!sel) return ''; var e=sel.querySelector(cls); return e?e.value.trim():''; }
+  function computeTotals(){
+    var ht=selPrice();
+    if(isNaN(ht)){ $('tHT').innerHTML='&mdash;'; $('tTVA').innerHTML='&mdash;'; $('tTTC').innerHTML='&mdash;'; }
+    else { var tva=Math.round(ht*0.20); $('tHT').innerHTML=eur(ht); $('tTVA').innerHTML=eur(tva); $('tTTC').innerHTML=eur(ht+tva); }
+    if(isNaN(ht)) return null; var v=Math.round(ht*0.20); return {ht:ht,tva:v,ttc:ht+v};
+  }
+
+  // --- Selection d'offre ---
+  var offers=document.querySelectorAll('.offer'), sel=null;
+  var psBtns=document.querySelectorAll('.ps-btn');
+  function pickOffer(el){
+    sel=el;
+    for(var i=0;i<offers.length;i++){ offers[i].className=offers[i].className.replace(/ sel/g,''); }
+    el.className+=' sel';
+    var offreKey=el.getAttribute('data-offre');
+    for(var p=0;p<psBtns.length;p++){ psBtns[p].className='ps-btn'+(psBtns[p].getAttribute('data-target')===offreKey?' active':''); }
+    if($('offersEmpty')) $('offersEmpty').style.display='none';
+    if(!document.body.className.match(/viewmode/)){ var ld=el.querySelector('.offer-lotdesc'); if(ld && !ld.value) ld.value='Bon d\u2019achat \u00e0 valoir dans votre \u00e9tablissement'; }
+    computeTotals();
+  }
+  for(var i=0;i<offers.length;i++){ (function(el){
+    el.addEventListener('click',function(){ pickOffer(el); });
+    el.addEventListener('keydown',function(e){ var tg=e.target.tagName; if(tg==='INPUT'||tg==='TEXTAREA') return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pickOffer(el); } });
+    function bind(inp){ if(!inp) return;
+      inp.addEventListener('focus',function(){ if(sel!==el) pickOffer(el); });
+      inp.addEventListener('input',function(){ if(sel!==el) pickOffer(el); else computeTotals(); });
+      inp.addEventListener('click',function(e){ e.stopPropagation(); });
+    }
+    bind(el.querySelector('.offer-price')); bind(el.querySelector('.offer-lotval')); bind(el.querySelector('.offer-mentiontxt'));
+    bind(el.querySelector('.offer-lotdesc')); bind(el.querySelector('.offer-lotemis')); bind(el.querySelector('.offer-lotuse'));
+  })(offers[i]); }
+  for(var b=0;b<psBtns.length;b++){ (function(btn){
+    btn.addEventListener('click',function(){
+      var key=btn.getAttribute('data-target');
+      for(var i=0;i<offers.length;i++){ if(offers[i].getAttribute('data-offre')===key){ pickOffer(offers[i]); offers[i].scrollIntoView({behavior:'smooth',block:'nearest'}); break; } }
+    });
+  })(psBtns[b]); }
+
+  // --- Date du jour ---
+  var today=new Date();
+  var dstr=('0'+today.getDate()).slice(-2)+' / '+('0'+(today.getMonth()+1)).slice(-2)+' / '+today.getFullYear();
+  // --- Numero de bon de commande : format FL-JJMM.AAAA, editable a la main ---
+  var defNum='FL-'+('0'+today.getDate()).slice(-2)+('0'+(today.getMonth()+1)).slice(-2)+'.'+today.getFullYear();
+  if($('docNum')){
+    $('docNum').value=defNum;
+    $('docNum').addEventListener('input',function(){ if($('payRef')) $('payRef').textContent=(this.value.trim()||defNum); });
+  }
+  if($('payRef')) $('payRef').textContent=defNum;
+  if($('docDate')) $('docDate').textContent=dstr;
+  if($('f_date')) $('f_date').value=dstr;
+  if($('docDate')) $('docDate').innerHTML=dstr;
+  if($('f_date')) $('f_date').addEventListener('input',function(){ if($('docDate')) $('docDate').innerHTML=$('f_date').value||'__ / __ / 2026'; });
+
+  // --- Pad de signature ---
+  var cv=$('sigpad'), ctx=cv?cv.getContext('2d'):null, drawing=false, hasInk=false;
+  function fit(){ if(!cv)return; var r=cv.getBoundingClientRect(); cv.width=r.width; cv.height=r.height; if(ctx){ctx.lineWidth=2.2;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#16203A';} }
+  function pos(e){ var r=cv.getBoundingClientRect(); var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; var y=(e.touches?e.touches[0].clientY:e.clientY)-r.top; return {x:x,y:y}; }
+  function start(e){ if(!ctx)return; drawing=true; var p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault(); }
+  function move(e){ if(!drawing||!ctx)return; var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); hasInk=true; e.preventDefault(); }
+  function end(){ drawing=false; }
+  if(cv){
+    fit(); window.addEventListener('resize',function(){ /* ne pas vider en view */ if(!document.body.className.match(/viewmode/)) { var d=hasInk?cv.toDataURL():null; fit(); } });
+    cv.addEventListener('mousedown',start); cv.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+    cv.addEventListener('touchstart',start,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',end);
+    if($('sigClear')) $('sigClear').addEventListener('click',function(){ ctx.clearRect(0,0,cv.width,cv.height); hasInk=false; });
+  }
+
+  // --- Soumission ---
+  function setStatus(msg,cls){ var s=$('status'); if(s){ s.innerHTML=msg; s.className='statusmsg '+(cls||''); } }
+  if($('f_email')&&$('f_email_envoi')){
+    var _envoiEdited=false;
+    $('f_email_envoi').addEventListener('input',function(){ _envoiEdited=true; });
+    $('f_email').addEventListener('input',function(){ if(!_envoiEdited) $('f_email_envoi').value=$('f_email').value; });
+  }
+  if($('submitBtn')){
+    $('submitBtn').addEventListener('click',function(){
+      var raison=$('f_raison').value.trim(), contact=$('f_contact').value.trim();
+      var tel=$('f_tel').value.trim(), email=$('f_email').value.trim();
+      var emailEnvoi=($('f_email_envoi')&&$('f_email_envoi').value.trim())||email;
+      if(!sel){ setStatus('Choisissez une offre (cliquez sur une carte).','err'); return; }
+      if(!raison){ setStatus('Indiquez la raison sociale.','err'); return; }
+      if(!contact||!tel){ setStatus('Indiquez le contact et le t\u00e9l\u00e9phone.','err'); return; }
+      if(!email||email.indexOf('@')<0){ setStatus('Email invalide.','err'); return; }
+      if(!emailEnvoi||emailEnvoi.indexOf('@')<0){ setStatus("Adresse d'envoi invalide.","err"); return; }
+      if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
+      if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
+      var t=computeTotals();
+      if(!t){ setStatus('Indiquez le prix du pack sur l\u2019offre choisie.','err'); return; }
+      var lotVal=selLot();
+      var lotDesc=selVal('.offer-lotdesc');
+      if(isNaN(lotVal)||!lotDesc){ setStatus('Compl\u00e9tez le lot du pack (valeur + descriptif).','err'); return; }
+      var ht=t.ht, tva=t.tva, ttc=t.ttc;
+      var catHt=parseFloat(sel.getAttribute('data-ht')); if(isNaN(catHt)) catHt=null;
+      var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
+      var rec={ id:id, super_event_id:'se-nds-2026', statut:'signe',
+        raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
+        contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
+        offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
+        montant_ht:ht, montant_tva:tva, montant_ttc:ttc, montant_ht_catalogue:catHt,
+        mention_particuliere:selMention()||null,
+        lot_valeur:lotVal, lot_descriptif:lotDesc,
+        lot_validite:selVal('.offer-lotemis')||null,
+        lot_conditions:selVal('.offer-lotuse')||null,
+        signataire:$('f_signataire').value.trim()||contact, date_signature:($('f_date').value.trim()||dstr), signature:cv.toDataURL('image/png'),
+        cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
+      $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
+      fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
+        .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); location.href='?id='+id; })
+        .catch(function(e){ $('submitBtn').disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\'enregistrement. R\u00e9essayez.','err'); });
+    });
+  }
+
+  // --- Mode lecture (?id=) : charge le doc rempli + signe ---
+  var viewId=qs('id');
+  if(viewId){
+    fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        if(!rows||!rows.length){ setStatus('Bon de commande introuvable.','err'); return; }
+        var d=rows[0];
+        document.body.className+=' viewmode';
+        if($('offersH')) $('offersH').textContent='Offre retenue';
+        function setv(id,v){ var el=$(id); if(el) el.value=(v==null?'':v); }
+        setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
+        setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
+        setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
+        var inputs=document.querySelectorAll('.fld, .fld-area, .offer-price, .offer-lotval, .offer-mentiontxt'); for(var k=0;k<inputs.length;k++){ inputs[k].setAttribute('readonly','readonly'); }
+        for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
+            var pi=offers[j].querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
+            var li=offers[j].querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
+            var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||'';
+            var ld=offers[j].querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
+            var le=offers[j].querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
+            var lu=offers[j].querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
+            pickOffer(offers[j]);
+        } }
+        computeTotals();
+        for(var m=0;m<offers.length;m++){ var isSel=offers[m]===sel;
+            var mb=offers[m].querySelector('.offer-mention'); var mtx=offers[m].querySelector('.offer-mentiontxt');
+            if(mb && (!isSel || !(mtx&&mtx.value.trim()))) mb.style.display='none';
+            var lb=offers[m].querySelector('.offer-lotbox'); if(lb && !isSel) lb.style.display='none';
+        }
+        if($('catNote')){ $('catNote').innerHTML = (d.montant_ht_catalogue!=null && Number(d.montant_ht_catalogue)!==Number(d.montant_ht)) ? ('Prix catalogue : <b>'+eur(d.montant_ht_catalogue)+' HT</b> \u2014 prix factur\u00e9 : <b>'+eur(d.montant_ht)+' HT</b>. Lot d\u00e9duit en caisse, non factur\u00e9.') : 'Le lot est offert par le commer\u00e7ant et d\u00e9duit en caisse \u2014 non factur\u00e9.'; }
+        if($('sigImg')&&d.signature) $('sigImg').src=d.signature;
+        if($('docNum')){ $('docNum').value=d.id; $('docNum').readOnly=true; }
+        if($('payRef')) $('payRef').innerHTML=d.id;
+        if($('docDate')) $('docDate').innerHTML=d.date_signature||dstr;
+        var _link=location.href;
+        var _mb=$('mailClientBtn');
+        if(_mb){
+          var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nOPConsult · BAITA EURL · info@opconsult.co · 06 16 35 49 36';
+          _mb.href='mailto:'+encodeURIComponent(d.email||'')+'?subject='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
+        }
+        var _cb=$('copyLinkBtn');
+        if(_cb){
+          _cb.addEventListener('click',function(){
+            var done=function(){ var t=_cb.innerHTML; _cb.innerHTML='✓ Lien copié — colle-le au client'; setTimeout(function(){ _cb.innerHTML=t; },2200); };
+            if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(_link).then(done,done); }
+            else { var ta=document.createElement('textarea'); ta.value=_link; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); done(); }
+          });
+        }
+      })
+      .catch(function(){ setStatus('Erreur de chargement.','err'); });
+  }
+})();
+</script>
+
+<script>
+(function(){
+  function ready(fn){ if(document.readyState!='loading'){fn();} else {document.addEventListener('DOMContentLoaded',fn);} }
+  ready(function(){
+    function setv(id,v){ var el=document.getElementById(id); if(el && v!=null) el.value = v; }
+    setv('f_raison', 'Électroménager J Giordano');
+    setv('f_adresse', '418 Av. Rhin et Danube');
+    setv('f_cp', '06140');
+    setv('f_ville', 'Vence');
+    setv('f_tel', '+33 4 93 24 02 66');
+    var offers = document.querySelectorAll('.offer');
+    var target = null;
+    for (var i=0;i<offers.length;i++){ if(offers[i].getAttribute('data-offre')==='visibilite'){ target = offers[i]; break; } }
+    if (target){
+      target.click();
+      setTimeout(function(){
+        var priceInp = target.querySelector('.offer-price'); if(priceInp && 590 !== null){ priceInp.value = 590; }
+        var lotvalInp = target.querySelector('.offer-lotval'); if(lotvalInp && 100 !== null){ lotvalInp.value = 100; }
+        var lotdescInp = target.querySelector('.offer-lotdesc'); if(lotdescInp){ lotdescInp.value = '100 € de dotation'; }
+        var lotemisInp = target.querySelector('.offer-lotemis'); if(lotemisInp){ lotemisInp.value = ''; }
+        var lotuseInp = target.querySelector('.offer-lotuse'); if(lotuseInp){ lotuseInp.value = '20 € de réduction pour tout achat supérieur à 80 €'; }
+        var mentionInp = target.querySelector('.offer-mentiontxt'); if(mentionInp){ mentionInp.value = ''; }
+        if (priceInp) priceInp.dispatchEvent(new Event('input'));
+      }, 60);
+    }
+  });
+})();
+</script>
+</body>
+
+</html>
