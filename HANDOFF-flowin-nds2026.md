@@ -1,3 +1,20 @@
+### SESSION 02/07 (suite) — Supports VIP régénérés + garde-fou (commit 5d1f4b0)
+
+**Fait & poussé :**
+- **Vidéo écran-8** `video-ecran-8-partenaires.mp4` régénérée via `ecran-8-partenaires/rebuild-video-ecran8.sh` → VIP à la place d'ALAFUT, **QR ev-nds-ecrans 8/8 OK** (résout le conflit : Notion pointait sur la version périmée, désormais à jour, même URL).
+- **Forex** (caisses PNG/SVG/PPTX) + **montage kit** régénérés depuis `nds_lib` (9 logos, VIP inclus) via `rebuild_partenaires.sh`.
+- **Dossier pro** `kit-digital/vip-coiffure/` créé au standard : `nds_a4_vip-coiffure.png` + `qr-station-vip-coiffure.png` (PHYSIQUE, 1/jour) + `qr-reseaux-vip-coiffure.png` (DIGITAL, 1×, `?source=reseaux-vip-coiffure`) + README. **`kit-digital/alafut/` retiré.**
+- **Garde-fou** `visuels-src/verify-supports.py` : vérifie source unique↔logos, dossiers pro + 2 QR (physique/digital) qui décodent, orphelins, QR écran, dérives listes en dur. **Bilan : 28 OK · 1 WARN · 0 FAIL.**
+
+**Prérequis env (à intégrer au socle) :** les scripts codent en dur `/home/claude/repo` (symlink requis) et attendent les QR stations dans `/home/claude/vid/qr/` (régénérables depuis la base). 
+
+**RESTE :**
+- WARN garde-fou : `gen_a4_pro.py` liste **5 pros en dur** vs 9 dans `nds_lib` → recâbler sur `nds_lib` (A4 pégase/utile/carrosserie/giordano OK mais charvolin/dekra/nook/vip pas régénérés par ce script).
+- Vidéo pro `video-vip-coiffure-9x16.mp4` (rendu lourd) non produite — dossier VIP sans sa vidéo pour l'instant.
+- **Cockpit « Gestion & Diffusion »** (onglet dashboard) + **onglet Communication par pro** : à construire (étapes 2-3). Le socle (régé unifiée + garde-fou) est posé.
+- Lots VIP en attente ; règlement jeu + politique confidentialité ; repo privé + PITR avant 9/07.
+
+---
 ### SESSION 02/07 — VIP Coiffure remplace À la Fût (commit d21ee82)
 
 **Fait & poussé :**
