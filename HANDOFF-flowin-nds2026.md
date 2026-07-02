@@ -1,3 +1,19 @@
+### SESSION 02/07 (corrections) — retrait dekra/VIP/à la fût + Pégase→ARA + fix régressions (commit 802aad0)
+
+**Fait & poussé :**
+- **Partenaires : 7** (bergerie, pegase, utile, carrosserie-gp, giordano, charvolin, nook). **Retirés partout** : dekra, VIP, à la fût (archivés base + retirés nds_lib, dossiers kit, A4 galerie, listes hardcodées dashboard, vidéo écran, forex, montage, carte auto).
+- **Pégase → « Auto-École de l'ARA »** : logo remplacé (PDF fourni → partenaires/pegase.png), nom màj (events+partenaires+nds_lib.NAMES+labels dashboard). **Slug, QR (ev-nds-pegase), coords et emplacement inchangés** comme demandé.
+- **Nook agrandi** : logo source rogné (5,2% → plein cadre) — plus gros partout.
+- **Régression A4 annulée** : `gen_a4_clean` (design X « STATION JEUX ») recâblé sur nds_lib et redistribué (galerie /visuels + dossiers pro). Fini le design pauvre gen_a4_pro.
+- **Vidéo écran + forex + montage** régénérés à 7 logos (QR écran 8/8 OK).
+- **Dashboard** : cockpit parallèle `gestion-diffusion.html` **supprimé** (doublon) ; onglet « Vidéo & média » nettoyé (listes hardcodées sans alafut/dekra, filtre archivés, Pégase→ARA) ; **cache VER bumpé 20260628→20260702v1** (débloque les 404 mis en cache + force les nouveaux visuels).
+- **Garde-fou** verify-supports.py : 31 OK / 0 WARN / 0 FAIL.
+
+**À VÉRIFIER / RESTE :**
+- **404 téléchargements** : cause probable = 404 mis en cache sur l'ancienne version ; le bump VER doit régler. **Si ça persiste**, c'est un souci de service Vercel sur les gros mp4 (écran = 45 Mo) — à checker côté déploiement (les fichiers existent bien dans le repo, pas de LFS).
+- **Ergonomie onglet média** : rangé « par pro » avec sélecteur (au lieu de tout dérouler) — pas encore fait, à améliorer.
+- SVG A4 par pro pas régénérés (PNG seulement). Vidéos pro (nds-pro-*-9x16) : pegase à re-render avec logo ARA.
+- Lots ; règlement+confidentialité ; repo privé + PITR avant 9/07.
 ### SESSION 02/07 (fin) — Socle + Cockpit Gestion & Diffusion (commit b93d61b)
 
 **Livré & poussé :**
