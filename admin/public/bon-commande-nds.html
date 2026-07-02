@@ -569,6 +569,25 @@
 
   // --- Mode lecture (?id=) : charge le doc rempli + signe ---
   var viewId=qs('id');
+  var prefillSlug = (!viewId) ? qs('prefill') : null;
+  if(prefillSlug){
+    fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        if(!rows||!rows.length) return;
+        var pp=rows[0];
+        function setpf(id,v){ var el=$(id); if(el && v!=null && v!=='') el.value=v; }
+        setpf('f_raison', pp.nom);
+        setpf('f_adresse', pp.adresse);
+        setpf('f_cp', pp.code_postal);
+        setpf('f_ville', pp.ville);
+        setpf('f_contact', pp.contact_nom||pp.contact);
+        setpf('f_tel', pp.contact_tel||pp.tel);
+        setpf('f_email', pp.contact_email||pp.email);
+        setpf('f_siret', pp.siret);
+        setStatus('Coordonn\u00e9es de '+(pp.nom||prefillSlug)+' pr\u00e9-remplies. Compl\u00e9tez l\u2019offre puis faites signer.','ok');
+      }).catch(function(){});
+  }
   if(viewId){
     fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
       .then(function(r){ return r.json(); })
