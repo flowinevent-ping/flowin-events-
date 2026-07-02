@@ -1,3 +1,18 @@
+### SESSION 02/07 (fin) — Socle + Cockpit Gestion & Diffusion (commit b93d61b)
+
+**Livré & poussé :**
+- **Recâblage source unique** : `nds_lib.NAMES` (noms d'affichage) ajouté ; `gen_a4_pro.py` boucle désormais sur `nds_lib.PARTNERS` (fini la liste en dur à 5). Les **9 A4** régénérés et rangés dans chaque `kit-digital/<slug>/`.
+- **Garde-fou** `verify-supports.py` : 39 OK / 0 WARN / 0 FAIL (logos, dossiers pro + 2 QR décodés, orphelins, QR écran, A4 présents, générateur piloté par la source).
+- **Cockpit** `admin/public/nds/gestion-diffusion.html` : lecture live Supabase (`partenaires`), 1 pro = 1 carte (logo, infos, statut, rattachement supports via flags logo_ecrans/forex/kit_comm/fiche_etab/bandeau, **2 QR physique/digital**, affiche A4, vidéo pro, dossier), + section supports partagés (écran-8, lancement, insta, fb, spot) prévisualisables/téléchargeables. Entrée **sidebar dashboard** « Gestion & Diffusion » (pattern `ext`).
+
+**À savoir / RESTE :**
+- Les **bascules de flags** du cockpit font un PATCH anon sur `partenaires` : si la **RLS** interdit l'écriture anon, elles ne persistent pas (message d'erreur affiché). → ajouter une policy d'update (ou passer par une edge function) pour les rendre persistantes.
+- **Vidéo pro `vip-coiffure-9x16`** (rendu lourd) toujours non produite.
+- Intégration plus profonde de l'onglet Communication *dans la fiche pro elle-même* (le cockpit le fait déjà par carte).
+- Prérequis env des renders (symlink `/home/claude/repo` + QR stations `/home/claude/vid/qr/`) à encapsuler dans un script de bootstrap.
+- Lots VIP en attente ; règlement jeu + politique confidentialité ; repo privé + PITR avant 9/07.
+
+---
 ### SESSION 02/07 (suite) — Supports VIP régénérés + garde-fou (commit 5d1f4b0)
 
 **Fait & poussé :**
