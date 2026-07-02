@@ -21,7 +21,7 @@ W, H = 1080, 1920
 
 BG=(8,16,29); MAGENTA=(230,24,127); AMBER=(244,181,68); TEAL=(45,212,160)
 BLUE=(66,133,244); WHITE=(255,255,255); GREY=(176,186,205)
-PARTNERS=["bergerie","pegase","utile","carrosserie-gp","giordano","vip-coiffure","charvolin","dekra"]
+PARTNERS=["bergerie","pegase","utile","carrosserie-gp","giordano","charvolin","nook","cycles963"]
 QR_URL="https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-ecrans"
 
 
