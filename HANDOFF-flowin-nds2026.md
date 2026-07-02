@@ -1,3 +1,19 @@
+### SESSION 02/07 — VIP Coiffure remplace À la Fût (commit d21ee82)
+
+**Fait & poussé :**
+- Supabase : créé `ev-nds-vip-coiffure` (cfg miroir d'`ev-nds-alafut`, qr_token `79085447cc`, lot « 2 places de concert », lotClause, quiz/RSE) + fiche `pt-vip-coiffure` (164 av. Émile Hugues, Vence 06140 · 04 93 24 72 23 · lat 43.721689 lng 7.108601 · logo_ecrans/forex/kit_comm/fiche_etab=true, bandeau=false car lots en attente). ALAFUT **archivé** (réversible) : `ev-nds-alafut.status='archived'`, `pt-alafut.actif=false/visible=false`. 0 participation → sans perte.
+- Webapp carte : **auto** via table `partenaires` (VIP visible, ALAFUT masqué) — aucun code TS à changer.
+- `nds_lib.PARTNERS` : `alafut` → `vip-coiffure` (source unique).
+- Logo `partenaires/vip-coiffure.png` (image VIP Vence rognée).
+- Vidéo **lancement 9x16** re-rendue (VIP à la place d'ALAFUT) — + refonte complète v4→v6 : Flash sans e, police intro agrandie, bandeau « plus tu joues », scène Où jouer en pastilles, logos partenaires agrandis (trim), QR **centré → ev-nds-ecrans**. Script versionné : `visuels-src/render_lancement_9x16.py` (+ font `visuels-src/fonts/Manrope-var.ttf`).
+
+**RESTE À FAIRE (débloqué par le swap nds_lib, non fait cette session) :**
+- Re-render **vidéo écran 8 partenaires** (`render_kref40`) avec VIP — ⚠️ traîne le bug pré-existant chevauchement logo/QR (Charvolin) à régler dans la même passe.
+- Re-générer **forex** (`gen_forex_layers`) + **A4** (`gen_a4_clean`) + **kit pro** VIP — via `rebuild_partenaires.sh` (lit nds_lib).
+- **Lots VIP** : en attente de confirmation (bandeau=false pour l'instant).
+- Toujours en suspens (hors VIP) : règlement de jeu + politique de confidentialité (documents_legaux = CGV seule), traçabilité RGPD (rgpd_at/optin_version), repo GitHub privé + PITR avant 9/07.
+
+---
 ## 🟢 SESSION 01/07 — Nook, corrections dashboard, anti-triche, vidéos, hub demos.html
 
 **Nouveau partenaire NOOK CAFÉ** (rue Louis Funel, Vence — FB/Insta fournis) : `ev-nds-nook` + `pt-nook` créés (module nds2026, cfg jeu copiée d'Utile), logo intégré + `nds_lib.PARTNERS` (9 partenaires), QR station + réseaux (one-shot) identifiés dans `kit-digital/nook/`. Lots volontairement EN SUSPENS (Romain). Adresse exacte + GPS + tél restent à fournir.
