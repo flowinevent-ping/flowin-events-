@@ -3017,8 +3017,7 @@ function renderSidebar(){
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
       {id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
-      {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'},
-      {id:'nds-diffusion',ico:'📡',lbl:'Gestion & Diffusion',ext:'/nds/gestion-diffusion.html'}
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -4020,9 +4019,9 @@ function renderNdsCarte(){
   return h;
 }
 
-var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-alafut','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-dekra','ev-nds-giordano','ev-nds-pegase','ev-nds-utile','ev-nds-nook'];
+var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-giordano','ev-nds-pegase','ev-nds-utile','ev-nds-nook'];
 function ndsStationLabel(evid){
-  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-alafut':'À la Fût','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-dekra':'DEKRA Vence','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':'Auto-Moto-École Pégase','ev-nds-utile':'Utile Vence','ev-nds-nook':'Nook Café'};
+  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':"Auto-École de l'ARA",'ev-nds-utile':'Utile Vence','ev-nds-nook':'Nook Café'};
   return m[evid]||evid;
 }
 function ndsStationsJoined(events){
@@ -4434,8 +4433,8 @@ function cgvSave(){
 
 function renderNdsMedia(){
   var cb='https://flowin-events.vercel.app';
-  var VER='?v=20260628v16';
-  var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1;});
+  var VER='?v=20260702v1';
+  var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1 && p.visible!==false && p.actif!==false;});
   if(!nds.length){ nds=(DATA.partenaires||[]).slice(0,6); }
   var sub=state.mediaTab||'nds2026';
   function lnk(u,label,col){ return '<a href="'+u+'" target="_blank" rel="noopener" style="color:'+(col||'#22D3C6')+';font-weight:700;text-decoration:none">'+label+'</a>'; }
@@ -4514,7 +4513,7 @@ function renderMaintenance(){
   h+=row('Base assets',lnk(base,'flowin-events.vercel.app'));
   h+='</div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">🎮 Parcours de test (stations NDS)</div><div class="text-xs" style="line-height:2">';
-  ['bergerie','pegase','utile','carrosserie-gp','giordano','alafut'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
+  ['bergerie','pegase','utile','carrosserie-gp','giordano','charvolin','nook'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
   h+=lnk(base+'/parcours/nds2026?ev=ev-nds-digitale','▶ Parcours festival (digitale)')+'<br></div></div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px"><div class="section-h" style="margin-top:0">📋 Notes</div><div class="text-xs text-muted" style="line-height:1.7">Advisors sécurité Supabase : 0 ERROR au dernier scan · durcissement RLS avancé prévu post-festival.<br>Supabase FREE → passer Pro avant le 9/07 (risque pause auto 7 j d’inactivité).<br>Resend : domaine flowin.events à vérifier pour débloquer les emails gagnants.</div></div>';
   h+='</div>'; return h;

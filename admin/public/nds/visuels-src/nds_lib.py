@@ -105,18 +105,16 @@ def logo_card(path, card_w, card_h, pad_ratio=0.16, radius_ratio=0.14):
 # ============================================================================
 PARTNERS = [
     "bergerie", "pegase", "utile", "carrosserie-gp",
-    "giordano", "vip-coiffure", "charvolin", "dekra", "nook",
+    "giordano", "charvolin", "nook",
 ]
 # Noms d'affichage — source unique (miroir de events.nom). MAJ si un partenaire change.
 NAMES = {
     "bergerie": "Domaine de la Bergerie",
-    "pegase": "Auto-Moto-École Pégase",
+    "pegase": "Auto-École de l'ARA",
     "utile": "Utile Vence",
     "carrosserie-gp": "Carrosserie GP",
     "giordano": "Électroménager J Giordano",
-    "vip-coiffure": "VIP Coiffure",
     "charvolin": "Assurance Charvolin",
-    "dekra": "DEKRA Vence",
     "nook": "Nook Café",
 }
 PARTENAIRES_DIR = "/home/claude/repo/admin/public/nds/partenaires"

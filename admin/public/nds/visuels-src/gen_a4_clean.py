@@ -380,16 +380,8 @@ def concert_icon(d,cx,cy,s,col):
 def icon_voucher_wrap(d,cx,cy,s,col):
     icon_voucher(d,cx,cy,s,col)
 
-PARTNERS = [
-    ("bergerie",       "Domaine de la Bergerie",  "1 nuit offerte au camping",        "nds_a4_bergerie"),
-    ("pegase",         "Auto-Moto-École Pégase",  "Formation 125 · 50 € remise permis","nds_a4_pegase"),
-    ("utile",          "Utile Vence",             "19 bons d'achat à gagner",         "nds_a4_utile"),
-    ("carrosserie-gp", "Carrosserie GP",          "2 bons d'achat révision",          "nds_a4_carrosserie-gp"),
-    ("giordano",       "Électroménager Giordano", "2 bons d'achat à gagner",          "nds_a4_giordano"),
-    ("alafut",         "À la Fût",                "",                                  "nds_a4_alafut"),
-    ("charvolin",      "Assurance Charvolin",     "",                                  "nds_a4_charvolin"),
-]
 if __name__=="__main__":
-    for slug,com,lot,fn in PARTNERS:
-        print("OK", a4(slug,com,lot,fn))
-    print("DONE", len(PARTNERS))
+    for slug in L.PARTNERS:
+        com=L.NAMES.get(slug,slug); fn="nds_a4_"+slug
+        print("OK", a4(slug,com,"2 places de concert",fn))
+    print("DONE", len(L.PARTNERS))
