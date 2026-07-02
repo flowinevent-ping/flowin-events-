@@ -3713,10 +3713,26 @@ function ndsFrontFiche(p, field, label, ph, ta){
   if(ta){ return '<label style="font-size:10px;color:var(--sa-muted);font-weight:700;display:block">'+label+'<textarea rows="2" placeholder="'+escAttr(ph||'')+'" onblur="ndsFrontField(\''+p.id+'\',\''+field+'\',this.value)" style="'+st+';resize:vertical;margin-top:3px">'+esc(v)+'</textarea></label>'; }
   return '<label style="font-size:10px;color:var(--sa-muted);font-weight:700;display:block">'+label+'<input value="'+escAttr(v)+'" placeholder="'+escAttr(ph||'')+'" onblur="ndsFrontField(\''+p.id+'\',\''+field+'\',this.value)" style="'+st+';margin-top:3px"></label>';
 }
+function saveTicketBloc(pid){
+  function _v(id){ var e=document.getElementById(id); return e?e.value:''; }
+  var lot={ nom:_v('tk-nom'), valeur:_v('tk-valeur'), validite:_v('tk-validite'), conditions:_v('tk-conditions') };
+  var p=(DATA.partenaires||[]).find(function(x){ return x.id===pid; });
+  var lots=(p&&Array.isArray(p.lots))?p.lots.slice():[];
+  if(lots.length){ lots[0]=Object.assign({},lots[0],lot); } else { lots=[lot]; }
+  if(p) p.lots=lots;
+  if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?id=eq.'+encodeURIComponent(pid), {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      body: JSON.stringify({ lots: lots })
+    }).then(function(r){ toast(r.ok?'Lot & conditions enregistrés · propagés aux tickets':'Écriture refusée (RLS partenaires ?)', r.ok?'success':'error'); })
+      .catch(function(){ toast('Erreur réseau','error'); });
+  } else { toast('Config Supabase absente','error'); }
+}
 function renderNdsBonCommande(){
   var h='<div class="page">';
   h+='<div class="page-header"><div><div class="page-title">&#129534; Bon de commande NDS 2026</div><div class="page-subtitle">Remplis le bon, fais signer le partenaire, envoie-lui sa copie. Une copie part automatiquement à flowinevent@gmail.com.</div></div></div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:8px">';
+  h+='<div style="margin:6px 0 14px"><button class="btn btn-primary" onclick="window.open(\'/bons-commande-liste.html\',\'_blank\')">\uD83D\uDCC2 Voir tous les bons de commande &amp; factures (liste)</button></div>';h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:8px">';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">'
     +'<div style="font-size:34px">&#129534;</div>'
     +'<div style="font-size:18px;font-weight:800">Bon de commande digital</div>'
@@ -4019,9 +4035,9 @@ function renderNdsCarte(){
   return h;
 }
 
-var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-alafut','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-dekra','ev-nds-giordano','ev-nds-pegase','ev-nds-utile','ev-nds-nook'];
+var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-giordano','ev-nds-pegase','ev-nds-utile','ev-nds-nook','ev-nds-cycles963'];
 function ndsStationLabel(evid){
-  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-alafut':'À la Fût','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-dekra':'DEKRA Vence','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':'Auto-Moto-École Pégase','ev-nds-utile':'Utile Vence','ev-nds-nook':'Nook Café'};
+  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':"Auto-École de l'ARA",'ev-nds-utile':'Utile Vence','ev-nds-nook':'Nook Café','ev-nds-cycles963':'Cycles 963'};
   return m[evid]||evid;
 }
 function ndsStationsJoined(events){
@@ -4433,8 +4449,8 @@ function cgvSave(){
 
 function renderNdsMedia(){
   var cb='https://flowin-events.vercel.app';
-  var VER='?v=20260628v16';
-  var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1;});
+  var VER='?v=20260702v2';
+  var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1 && p.visible!==false && p.actif!==false;});
   if(!nds.length){ nds=(DATA.partenaires||[]).slice(0,6); }
   var sub=state.mediaTab||'nds2026';
   function lnk(u,label,col){ return '<a href="'+u+'" target="_blank" rel="noopener" style="color:'+(col||'#22D3C6')+';font-weight:700;text-decoration:none">'+label+'</a>'; }
@@ -4513,7 +4529,7 @@ function renderMaintenance(){
   h+=row('Base assets',lnk(base,'flowin-events.vercel.app'));
   h+='</div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">🎮 Parcours de test (stations NDS)</div><div class="text-xs" style="line-height:2">';
-  ['bergerie','pegase','utile','carrosserie-gp','giordano','alafut'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
+  ['bergerie','pegase','utile','carrosserie-gp','giordano','charvolin','nook'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
   h+=lnk(base+'/parcours/nds2026?ev=ev-nds-digitale','▶ Parcours festival (digitale)')+'<br></div></div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px"><div class="section-h" style="margin-top:0">📋 Notes</div><div class="text-xs text-muted" style="line-height:1.7">Advisors sécurité Supabase : 0 ERROR au dernier scan · durcissement RLS avancé prévu post-festival.<br>Supabase FREE → passer Pro avant le 9/07 (risque pause auto 7 j d’inactivité).<br>Resend : domaine flowin.events à vérifier pour débloquer les emails gagnants.</div></div>';
   h+='</div>'; return h;
@@ -6890,12 +6906,27 @@ function drawerPartner(p){
     html += '<div class="mb-3"><a href="'+vidu+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">▶ video-'+esc(cslug)+'-9x16.mp4</a></div>';
     html += '<div class="section-h">🎟️ Tickets tombola (à imprimer)</div>';
     html += '<div class="mb-3"><a href="'+ticku+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">⬇ Planche tickets PDF</a> <span class="text-xs text-muted">(n° de série, champs gagnant à remplir)</span></div>';
+    /* ── Bloc éditable UNIQUE : montant + conditions, propagé à tous les tickets du pro ── */
+    var _lot = (Array.isArray(p.lots) && p.lots[0]) ? p.lots[0] : {};
+    html += '<div class="section-h">✏️ Lot &amp; conditions (bloc unique — se propage sur tous les tickets)</div>';
+    html += '<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px;margin-bottom:14px">';
+    html += '<div class="text-xs text-muted mb-2">Ces valeurs alimentent chaque ticket (avec n° de série, nom du gagnant, validité).</div>';
+    html += '<label class="text-xs" style="font-weight:700">Descriptif du lot</label>';
+    html += '<input id="tk-nom" value="'+esc(_lot.nom||'')+'" style="width:100%;margin:4px 0 10px;padding:7px 10px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit">';
+    html += '<div style="display:flex;gap:10px">';
+    html += '<div style="flex:1"><label class="text-xs" style="font-weight:700">Valeur</label><input id="tk-valeur" value="'+esc(_lot.valeur||'')+'" placeholder="45 €" style="width:100%;margin-top:4px;padding:7px 10px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit"></div>';
+    html += '<div style="flex:1"><label class="text-xs" style="font-weight:700">Validité</label><input id="tk-validite" value="'+esc(_lot.validite||'')+'" placeholder="4 mois" style="width:100%;margin-top:4px;padding:7px 10px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit"></div>';
+    html += '</div>';
+    html += '<label class="text-xs" style="font-weight:700;display:block;margin-top:10px">Conditions d\'utilisation</label>';
+    html += '<textarea id="tk-conditions" rows="2" style="width:100%;margin-top:4px;padding:7px 10px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit">'+esc(_lot.conditions||'')+'</textarea>';
+    html += '<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveTicketBloc(\''+esc(p.id)+'\')">💾 Enregistrer (propager aux tickets)</button>';
+    html += '</div>';
     html += '<div class="section-h">📦 Kit digital complet</div>';
     html += '<div class="mb-3"><a href="'+kitu+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">📁 /nds/kit-digital/'+esc(cslug)+'/</a> <span class="text-xs text-muted">(affiche + vidéo + README)</span></div>';
     html += '<div class="section-h">📜 Docs & légal</div>';
 html += '<div class="mb-3 text-xs" style="line-height:1.9">';
 html += '<a href="'+cb+'/cgv-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">📜 CGV NDS 2026</a><br>';
-html += '<a href="'+cb+'/bon-commande-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">🧾 Bon de commande</a>';
+html += '<a href="'+cb+'/bon-commande-nds.html" target="_blank" style="color:#22D3C6;font-weight:700">🧾 Nouveau bon de commande</a><br>';html += '<a href="'+cb+'/bons-commande-liste.html" target="_blank" style="color:#22D3C6;font-weight:700">📂 Tous les bons &amp; factures (liste CRM)</a>';
 html += '</div>';
 html += '<div class="section-h">✏️ Source éditable (Canva)</div>';
 html += '<div class="mb-3"><a href="'+cb+'/nds/kit-digital/svg/nds_a4_'+cslug+'.svg" target="_blank" style="color:#E8A33C;font-size:12px;font-weight:700">✏️ A4 SVG (texte modifiable Canva)</a></div>';
