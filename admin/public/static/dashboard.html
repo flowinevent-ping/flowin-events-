@@ -1971,6 +1971,7 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
       +'<div style="min-width:150px"><div class="fw-700">'+esc(b.offre_label||b.id)+' '+badge(b.statut)+'</div>'
       +'<div class="text-xs text-muted">'+esc(b.id)+(b.date_signature?' \u00b7 sign\u00e9 '+esc(b.date_signature):'')+' \u00b7 '+money(b.montant_ttc)+' TTC</div></div>'
       +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'
+      +((b.statut==='signe'||b.statut==='sign\u00e9')?'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?devis='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">\u00c9diter facture</a>':'')
       +'</div>';
   }); }
   h+='<div class="section-h" style="margin-top:14px">\ud83d\udcc4 Factures'+(facs.length?' ('+facs.length+')':'')+'</div>';
@@ -1979,7 +1980,7 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
     var bonId=(f.client&&f.client.bon_id)?f.client.bon_id:'';
     h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       +'<div><div class="fw-700">'+esc(f.numero)+' '+badge(f.statut)+'</div><div class="text-xs text-muted">'+esc(f.date_emission||'')+' \u00b7 '+money(f.total_ttc)+' TTC</div></div>'
-      +(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>':'')
+      +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/facture-nds.html?num='+encodeURIComponent(f.numero)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'+(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Devis</a>':'')
       +'</div>';
   }); }
   var slug=String(partnerId||'').replace('pt-','');
@@ -3045,7 +3046,7 @@ function renderSidebar(){
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
       {id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
-      {id:'nds-bon-commande',ico:'🧾',lbl:'Bon de commande'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -3759,7 +3760,7 @@ function saveTicketBloc(pid){
 }
 function renderNdsBonCommande(){
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">&#129534; Bon de commande NDS 2026</div><div class="page-subtitle">Remplis le bon, fais signer le partenaire, envoie-lui sa copie. Une copie part automatiquement à flowinevent@gmail.com.</div></div></div>';
+  h+='<div class="page-header"><div><div class="page-title">&#129534; Bons de commande &amp; Factures NDS 2026</div><div class="page-subtitle">Édite les bons (n° FL-2026-XXXX) et les factures (n° FL-2026-XXXX-01, même modèle). Bon et facture se rangent automatiquement dans la fiche du partenaire. Envoi client + copie auto à flowinevent@gmail.com.</div></div></div>';
   h+='<div style="margin:6px 0 14px"><button class="btn btn-primary" onclick="window.open(\'/bons-commande-liste.html\',\'_blank\')">\uD83D\uDCC2 Voir tous les bons de commande &amp; factures (liste)</button></div>';h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-top:8px">';
   h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">'
     +'<div style="font-size:34px">&#129534;</div>'
@@ -3772,6 +3773,12 @@ function renderNdsBonCommande(){
     +'<div style="font-size:18px;font-weight:800">Bon de commande A4 (papier)</div>'
     +'<div style="font-size:13px;color:var(--sa-muted);flex:1;line-height:1.5">Version vierge à imprimer et remplir à la main, pour le porte-à-porte. 1 page A4.</div>'
     +'<button class="btn" onclick="window.open(\'/bon-commande-nds-a4.html\',\'_blank\')">Ouvrir la version A4 &#8599;</button>'
+    +'</div>';
+  h+='<div style="background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px">'
+    +'<div style="font-size:34px">&#128196;</div>'
+    +'<div style="font-size:18px;font-weight:800">Éditeur de facture</div>'
+    +'<div style="font-size:13px;color:var(--sa-muted);flex:1;line-height:1.5">Édite la facture d\'un bon signé, sur le même modèle (n° FL-devis-édition). Elle se range automatiquement dans la fiche du partenaire.</div>'
+    +'<button class="btn btn-primary" onclick="window.open(\'/bons-commande-liste.html\',\'_blank\')">Choisir un bon à facturer &#8599;</button>'
     +'</div>';
   h+='</div>';
   h+='<div class="section-h" style="margin-top:24px">&#128203; Brouillons pré-remplis en attente (à vérifier puis envoyer)</div>';
