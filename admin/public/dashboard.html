@@ -1946,75 +1946,50 @@ function supaRowToData(row, type){
 async function loadBonsCommandeLies(partnerId, email, siret, nom){
   var box = document.getElementById('bcLinkedBox');
   if(!box) return;
-  if(!nom){ var _p = (typeof findPartner==='function') ? findPartner(partnerId) : null; if(_p) nom = _p.nom||''; }
+  if(!nom){ var _p=(typeof findPartner==='function')?findPartner(partnerId):null; if(_p) nom=_p.nom||''; }
   box.innerHTML = '<div class="text-xs text-muted">Chargement des contrats &amp; factures\u2026</div>';
-  var filters = [];
-  if(email) filters.push('email.eq.'+encodeURIComponent(String(email).toLowerCase()));
-  if(siret) filters.push('siret.eq.'+encodeURIComponent(siret));
-  if(nom)   filters.push('raison_sociale.ilike.'+encodeURIComponent('%'+nom+'%'));
-  if(!filters.length){ box.innerHTML = '<div class="text-xs text-muted">Aucun email, SIRET ni nom sur ce profil pour relier des documents.</div>'; return; }
-  var rows = await supaFetch('bons_commande', 'or=('+filters.join(',')+')&select=id,offre_label,montant_ht,montant_ttc,date_signature,statut,created_at&order=created_at.desc');
-  rows = rows || [];
-  var isFac = function(b){ return String(b.id||'').indexOf('FAC')===0 || b.statut==='facture'; };
-  var factures = rows.filter(isFac);
-  var contrats = rows.filter(function(b){ return !isFac(b); });
-  var money = function(v){ return (v!=null && v!=='') ? Number(v).toLocaleString('fr-FR')+' \u20ac' : '\u2014'; };
-  var badge = function(s){
-    var map={brouillon:['#B45309','#FEF3C7'],envoye:['#1E40AF','#DBEAFE'],'envoy\u00e9':['#1E40AF','#DBEAFE'],signe:['#047857','#D1FAE5'],'sign\u00e9':['#047857','#D1FAE5'],facture:['#6D28D9','#EDE9FE']};
-    var c=map[s]||['#475569','#F1F5F9'];
-    return '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:'+c[0]+';background:'+c[1]+';padding:2px 8px;border-radius:100px">'+esc(s||'\u2014')+'</span>';
+  var em = email?String(email).toLowerCase():'';
+  var bcF=[], fcF=[];
+  if(em){ bcF.push('email.eq.'+encodeURIComponent(em)); fcF.push('client->>email.eq.'+encodeURIComponent(em)); }
+  if(siret){ bcF.push('siret.eq.'+encodeURIComponent(siret)); fcF.push('client->>siret.eq.'+encodeURIComponent(siret)); }
+  if(nom){ bcF.push('raison_sociale.ilike.'+encodeURIComponent('%'+nom+'%')); fcF.push('client->>raison_sociale.ilike.'+encodeURIComponent('%'+nom+'%')); }
+  if(!bcF.length){ box.innerHTML='<div class="text-xs text-muted">Aucun email, SIRET ni nom sur ce profil pour relier des documents.</div>'; return; }
+  var bons = await supaFetch('bons_commande', 'or=('+bcF.join(',')+')&select=id,offre_label,montant_ht,montant_ttc,date_signature,statut,created_at&order=created_at.desc');
+  var facs = await supaFetch('factures', 'or=('+fcF.join(',')+')&select=numero,total_ttc,statut,date_emission,client&order=date_emission.desc');
+  bons=bons||[]; facs=facs||[];
+  var money=function(v){ return (v!=null&&v!=='')?Number(v).toLocaleString('fr-FR')+' \u20ac':'\u2014'; };
+  var badge=function(sv){
+    var map={brouillon:['#B45309','#FEF3C7'],envoye:['#1E40AF','#DBEAFE'],'envoy\u00e9':['#1E40AF','#DBEAFE'],signe:['#047857','#D1FAE5'],'sign\u00e9':['#047857','#D1FAE5'],emise:['#6D28D9','#EDE9FE'],'\u00e9mise':['#6D28D9','#EDE9FE'],payee:['#047857','#D1FAE5'],'pay\u00e9e':['#047857','#D1FAE5']};
+    var c=map[sv]||['#475569','#F1F5F9'];
+    return '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:'+c[0]+';background:'+c[1]+';padding:2px 8px;border-radius:100px">'+esc(sv||'\u2014')+'</span>';
   };
-  var h = '';
-  h += '<div class="section-h" style="margin-top:2px">\ud83e\uddfe Contrats &amp; bons de commande'+(contrats.length?' ('+contrats.length+')':'')+'</div>';
-  if(!contrats.length){
-    h += '<div class="card" style="margin:0 0 10px">Aucun bon de commande reli\u00e9 \u00e0 ce partenaire.</div>';
-  } else {
-    contrats.forEach(function(b){
-      var dejaFac = factures.some(function(f){ return (f.offre_label===b.offre_label) && (Number(f.montant_ttc)===Number(b.montant_ttc)); });
-      var signe = (b.statut==='signe'||b.statut==='sign\u00e9');
-      h += '<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
-        + '<div style="min-width:150px"><div class="fw-700">'+esc(b.offre_label||b.id)+' '+badge(b.statut)+'</div>'
-        + '<div class="text-xs text-muted">'+esc(b.id)+(b.date_signature?' \u00b7 sign\u00e9 '+esc(b.date_signature):'')+' \u00b7 '+money(b.montant_ttc)+' TTC</div></div>'
-        + '<div style="display:flex;gap:6px">'
-        + '<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'
-        + (signe && !dejaFac ? '<button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="genFactureDrawer(\''+esc(b.id)+'\',\''+esc(partnerId)+'\',\''+esc(email||'')+'\',\''+esc(siret||'')+'\')">G\u00e9n\u00e9rer facture</button>' : '')
-        + '</div></div>';
-    });
-  }
-  h += '<div class="section-h" style="margin-top:14px">\ud83d\udcc4 Factures'+(factures.length?' ('+factures.length+')':'')+'</div>';
-  if(!factures.length){
-    h += '<div class="card" style="margin:0">Aucune facture \u00e9mise. Elle se g\u00e9n\u00e8re depuis un bon sign\u00e9 (bouton ci-dessus).</div>';
-  } else {
-    factures.forEach(function(f){
-      h += '<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
-        + '<div><div class="fw-700">'+esc(f.id)+'</div><div class="text-xs text-muted">'+esc(f.offre_label||'')+' \u00b7 '+money(f.montant_ttc)+' TTC</div></div>'
-        + '<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(f.id)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'
-        + '</div>';
-    });
-  }
-  var slug = String(partnerId||'').replace('pt-','');
-  h += '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'
-    + '<a class="btn" style="font-size:12px" href="/bon-commande-nds.html?prefill='+encodeURIComponent(slug)+'" target="_blank" rel="noopener">\u2795 Nouveau bon pr\u00e9-rempli</a>'
-    + '<a class="btn" style="font-size:12px" href="/bons-commande-liste.html" target="_blank" rel="noopener">\ud83d\udcc2 Liste CRM compl\u00e8te</a>'
-    + '</div>';
-  box.innerHTML = h;
+  var h='';
+  h+='<div class="section-h" style="margin-top:2px">\ud83e\uddfe Contrats &amp; bons de commande'+(bons.length?' ('+bons.length+')':'')+'</div>';
+  if(!bons.length){ h+='<div class="card" style="margin:0 0 10px">Aucun bon de commande reli\u00e9 \u00e0 ce partenaire.</div>'; }
+  else { bons.forEach(function(b){
+    h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+      +'<div style="min-width:150px"><div class="fw-700">'+esc(b.offre_label||b.id)+' '+badge(b.statut)+'</div>'
+      +'<div class="text-xs text-muted">'+esc(b.id)+(b.date_signature?' \u00b7 sign\u00e9 '+esc(b.date_signature):'')+' \u00b7 '+money(b.montant_ttc)+' TTC</div></div>'
+      +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'
+      +'</div>';
+  }); }
+  h+='<div class="section-h" style="margin-top:14px">\ud83d\udcc4 Factures'+(facs.length?' ('+facs.length+')':'')+'</div>';
+  if(!facs.length){ h+='<div class="card" style="margin:0">Aucune facture \u00e9mise. La facture est g\u00e9n\u00e9r\u00e9e automatiquement \u00e0 la signature du bon.</div>'; }
+  else { facs.forEach(function(f){
+    var bonId=(f.client&&f.client.bon_id)?f.client.bon_id:'';
+    h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+      +'<div><div class="fw-700">'+esc(f.numero)+' '+badge(f.statut)+'</div><div class="text-xs text-muted">'+esc(f.date_emission||'')+' \u00b7 '+money(f.total_ttc)+' TTC</div></div>'
+      +(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>':'')
+      +'</div>';
+  }); }
+  var slug=String(partnerId||'').replace('pt-','');
+  h+='<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'
+    +'<a class="btn" style="font-size:12px" href="/bon-commande-nds.html?prefill='+encodeURIComponent(slug)+'" target="_blank" rel="noopener">\u2795 Nouveau bon pr\u00e9-rempli</a>'
+    +'<a class="btn" style="font-size:12px" href="/bons-commande-liste.html" target="_blank" rel="noopener">\ud83d\udcc2 Liste CRM compl\u00e8te</a>'
+    +'</div>';
+  box.innerHTML=h;
 }
 
-async function genFactureDrawer(bcId, partnerId, email, siret){
-  try{
-    var all = await supaFetch('bons_commande', 'select=id');
-    var nums = (all||[]).filter(function(x){ return String(x.id).indexOf('FAC')===0; }).map(function(x){ return parseInt(String(x.id).replace(/\D/g,'').slice(-4),10)||0; });
-    var next = 'FAC-2026-'+String((Math.max(0,...nums)+1)).padStart(4,'0');
-    var src = await supaFetch('bons_commande', 'id=eq.'+encodeURIComponent(bcId)+'&select=*');
-    if(!src || !src.length){ toast('Bon introuvable','error'); return; }
-    var fac = Object.assign({}, src[0], { id: next, statut: 'facture', created_at: new Date().toISOString() });
-    delete fac.signature; delete fac.date_signature;
-    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/bons_commande', { method:'POST', headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}, body: JSON.stringify(fac) });
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    toast('Facture '+next+' cr\u00e9\u00e9e depuis '+bcId,'success');
-    loadBonsCommandeLies(partnerId, email, siret);
-  }catch(e){ toast('Cr\u00e9ation facture refus\u00e9e ('+e.message+')','error'); }
-}
 
 async function supaLoadAll(){
   if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return null;
