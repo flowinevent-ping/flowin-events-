@@ -8,37 +8,44 @@
   :root{--bg:#0a1020;--card:#141c32;--card2:#1b2440;--line:#243056;--magenta:#e6187f;--amber:#f4b544;--teal:#2dd4a0;--white:#fff;--grey:#b0bacd;--bad:#ff5c7a}
   *{box-sizing:border-box}
   body{margin:0;font-family:'Manrope',system-ui,Arial,sans-serif;background:var(--bg);color:var(--white);min-height:100vh}
-  header{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header{padding:20px 26px;border-bottom:1px solid var(--line)}
   header h1{font-size:20px;margin:0;font-weight:800}
-  header .sub{color:var(--grey);font-size:13px}
-  .wrap{max-width:1150px;margin:0 auto;padding:20px 26px 80px}
+  header .sub{color:var(--grey);font-size:13px;margin-top:4px}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px 26px 80px}
   .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
   .btn{border:1px solid var(--line);background:var(--card2);color:var(--white);font-weight:700;font-size:13px;padding:9px 14px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}
   .btn.primary{background:var(--magenta);border-color:var(--magenta)}
+  .btn.teal{background:var(--teal);border-color:var(--teal);color:#06281f}
   .btn.sm{font-size:12px;padding:6px 10px}
   .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;color:var(--grey);border:0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
   .seg button.on{background:var(--card2);color:var(--amber)}
+  input.search{background:var(--card);border:1px solid var(--line);color:var(--white);border-radius:10px;padding:9px 12px;font-size:13px;min-width:220px}
   table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
   th{color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:1px}
-  tr:last-child td{border-bottom:0}
-  .num{font-weight:800;color:var(--amber)}
-  .st{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+  tr.row{cursor:pointer}
+  tr.row:hover td{background:var(--card2)}
+  tbody tr:last-child td{border-bottom:0}
+  .num{font-weight:800;color:var(--amber);white-space:nowrap}
+  .coord{color:var(--grey);font-size:11px;line-height:1.5;margin-top:3px}
+  .ev{font-size:11px;color:var(--teal);font-weight:700}
+  .st{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap}
   .st.brouillon{background:rgba(244,181,68,.15);color:var(--amber)}
-  .st.signe,.st.envoye{background:rgba(45,212,160,.15);color:var(--teal)}
-  .st.facture{background:rgba(230,24,127,.15);color:var(--magenta)}
+  .st.signe,.st.envoye,.st.paye,.st.payee{background:rgba(45,212,160,.15);color:var(--teal)}
+  .st.facture,.st.emise{background:rgba(230,24,127,.15);color:var(--magenta)}
+  .kind{font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px}
+  .kind.bon{background:rgba(59,92,196,.2);color:#8fa8ff}
+  .kind.facture{background:rgba(230,24,127,.15);color:var(--magenta)}
+  .act{white-space:nowrap}
   .act a,.act button{margin-right:6px}
-  .loading{color:var(--grey);padding:24px}
-  .empty{color:var(--grey);padding:24px;text-align:center}
+  .loading,.empty{color:var(--grey);padding:24px;text-align:center}
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <h1>🧾 Bons de commande &amp; Factures <span style="color:var(--magenta)">·</span> NDS 2026</h1>
-    <div class="sub">Liste répertoriée · accès direct · éditable et imprimable. Une facture se génère depuis un bon.</div>
-  </div>
+  <h1>🧾 Bons de commande &amp; Factures <span style="color:var(--magenta)">·</span> NDS 2026</h1>
+  <div class="sub">Vue CRM · clique une ligne pour ouvrir le document. Les bons et factures sont aussi rangés dans chaque profil partenaire.</div>
 </header>
 <div class="wrap">
   <div class="bar">
@@ -47,8 +54,9 @@
       <button data-f="bon">Bons de commande</button>
       <button data-f="facture">Factures</button>
     </div>
-    <a class="btn primary" href="/bon-commande-nds.html" target="_blank">+ Nouveau bon de commande</a>
-    <a class="btn" href="/bon-commande-nds-a4.html" target="_blank">Version A4 (papier)</a>
+    <input class="search" id="q" placeholder="Rechercher (entreprise, n°, ville)…">
+    <a class="btn primary" href="/bon-commande-nds.html" target="_blank">+ Nouveau bon</a>
+    <a class="btn" href="/bon-commande-nds-a4.html" target="_blank">A4 papier</a>
   </div>
   <div id="list"><div class="loading">Chargement…</div></div>
 </div>
@@ -57,59 +65,70 @@
 const SB="https://ywcqtupgoxfzkddqkztk.supabase.co";
 const KEY="sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1";
 const H={apikey:KEY,Authorization:"Bearer "+KEY};
-let ROWS=[], FILTER="all";
+let ROWS=[], FILTER="all", Q="";
 
-function isFacture(r){ return (r.statut==='facture') || String(r.id||'').indexOf('FAC-')===0; }
 function eur(n){ n=Number(n||0); return n.toLocaleString('fr-FR')+' €'; }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function eventLabel(se){ var m={'se-nds-2026':'Nuits du Sud 2026'}; return m[se]||se||'—'; }
+function isSigne(s){ return s==='signe'||s==='signé'||s==='valide'||s==='validé'||s==='paye'||s==='payé'; }
 
 async function load(){
   const box=document.getElementById('list');
   try{
-    const r=await fetch(SB+"/rest/v1/bons_commande?select=*&order=created_at.desc",{headers:H});
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    ROWS=await r.json();
+    const [rb,rf]=await Promise.all([
+      fetch(SB+"/rest/v1/bons_commande?select=*&order=created_at.desc",{headers:H}),
+      fetch(SB+"/rest/v1/factures?select=*&order=date_emission.desc",{headers:H})
+    ]);
+    if(!rb.ok) throw new Error("bons HTTP "+rb.status);
+    if(!rf.ok) throw new Error("factures HTTP "+rf.status);
+    const bons=await rb.json(), facs=await rf.json();
+    const B=bons.map(b=>({
+      kind:'bon', num:b.id, enseigne:b.raison_sociale||b.contact||'—',
+      ville:b.ville, email:b.email, tel:b.tel, event:b.super_event_id,
+      offre:b.offre_label||b.offre||'—', montant:b.montant_ttc, statut:b.statut||'brouillon',
+      date:(b.created_at||'').slice(0,10),
+      open:'/bon-commande-nds.html?id='+encodeURIComponent(b.id),
+      facture: isSigne(b.statut)?'/facture-nds.html?devis='+encodeURIComponent(b.id):null
+    }));
+    const F=facs.map(f=>{ const c=f.client||{}; const ln=(Array.isArray(f.lignes)&&f.lignes[0])||{};
+      return {
+      kind:'facture', num:f.numero, enseigne:c.raison_sociale||'—',
+      ville:c.ville, email:c.email, tel:c.tel, event:f.super_event_id,
+      offre:ln.label||'—', montant:f.total_ttc, statut:f.statut||'emise',
+      date:(f.date_emission||'').slice(0,10),
+      open:'/facture-nds.html?num='+encodeURIComponent(f.numero),
+      devisRef:c.devis_ref||c.bon_id||null
+    };});
+    ROWS=B.concat(F);
   }catch(e){ box.innerHTML='<div class="empty">Impossible de charger ('+e.message+').</div>'; return; }
   render();
 }
 
 function render(){
   const box=document.getElementById('list');
-  let rows=ROWS.filter(r=> FILTER==='all' ? true : (FILTER==='facture'? isFacture(r) : !isFacture(r)));
+  let rows=ROWS.filter(r=> FILTER==='all'?true:(FILTER==='facture'?r.kind==='facture':r.kind==='bon'));
+  if(Q){ const q=Q.toLowerCase(); rows=rows.filter(r=> (r.enseigne+' '+r.num+' '+(r.ville||'')).toLowerCase().indexOf(q)>=0); }
   if(!rows.length){ box.innerHTML='<div class="empty">Aucun document.</div>'; return; }
-  let h='<table><thead><tr><th>N°</th><th>Enseigne</th><th>Type</th><th>Offre</th><th>Montant TTC</th><th>Statut</th><th>Date</th><th></th></tr></thead><tbody>';
+  let h='<table><thead><tr><th>N°</th><th>Entreprise &amp; coordonnées</th><th>Type</th><th>Événement</th><th>Offre</th><th>Montant TTC</th><th>Statut</th><th>Date</th><th></th></tr></thead><tbody>';
   rows.forEach(r=>{
-    const fac=isFacture(r);
-    h+='<tr>'
-      +'<td class="num">'+(r.id||'')+'</td>'
-      +'<td><b>'+(r.raison_sociale||'')+'</b><div style="color:var(--grey);font-size:11px">'+(r.ville||'')+'</div></td>'
-      +'<td>'+(fac?'Facture':'Bon de commande')+'</td>'
-      +'<td>'+(r.offre_label||r.offre||'—')+'</td>'
-      +'<td>'+eur(r.montant_ttc)+'</td>'
-      +'<td><span class="st '+(r.statut||'brouillon')+'">'+(r.statut||'brouillon')+'</span></td>'
-      +'<td>'+((r.created_at||'').slice(0,10))+'</td>'
-      +'<td class="act">'
-        +'<a class="btn sm" href="/bon-commande-nds.html?id='+encodeURIComponent(r.id)+'" target="_blank">Ouvrir / imprimer</a>'
-        +(fac?'':'<button class="btn sm" onclick="genFacture(\''+r.id+'\')">→ Facture</button>')
+    const coord=[r.ville,r.email,r.tel].filter(Boolean).map(esc).join(' · ');
+    h+='<tr class="row" onclick="window.open(\''+r.open+'\',\'_blank\')">'
+      +'<td class="num">'+esc(r.num)+(r.devisRef?'<div class="coord">devis '+esc(r.devisRef)+'</div>':'')+'</td>'
+      +'<td><b>'+esc(r.enseigne)+'</b><div class="coord">'+(coord||'—')+'</div></td>'
+      +'<td><span class="kind '+r.kind+'">'+(r.kind==='facture'?'Facture':'Bon')+'</span></td>'
+      +'<td class="ev">'+esc(eventLabel(r.event))+'</td>'
+      +'<td>'+esc(r.offre)+'</td>'
+      +'<td>'+eur(r.montant)+'</td>'
+      +'<td><span class="st '+esc(r.statut)+'">'+esc(r.statut)+'</span></td>'
+      +'<td>'+esc(r.date)+'</td>'
+      +'<td class="act" onclick="event.stopPropagation()">'
+        +'<a class="btn sm" href="'+r.open+'" target="_blank">Ouvrir</a>'
+        +(r.facture?'<a class="btn sm teal" href="'+r.facture+'" target="_blank">→ Facture</a>':'')
       +'</td>'
     +'</tr>';
   });
   h+='</tbody></table>';
   box.innerHTML=h;
-}
-
-async function genFacture(bcId){
-  const bc=ROWS.find(x=>x.id===bcId); if(!bc) return;
-  // numéro facture séquentiel FAC-2026-XXXX
-  const nums=ROWS.filter(isFacture).map(x=>parseInt(String(x.id).replace(/\D/g,'').slice(-4),10)||0);
-  const next='FAC-2026-'+String((Math.max(0,...nums)+1)).padStart(4,'0');
-  const fac=Object.assign({},bc,{id:next,statut:'facture',created_at:new Date().toISOString()});
-  delete fac.signature; delete fac.date_signature;
-  try{
-    const r=await fetch(SB+"/rest/v1/bons_commande",{method:'POST',headers:{...H,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(fac)});
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    const [row]=await r.json(); ROWS.unshift(row); render();
-    alert('Facture '+next+' créée depuis '+bcId+'. Éditable/imprimable via « Ouvrir ».');
-  }catch(e){ alert("Création facture refusée ("+e.message+"). RLS bons_commande (insert anon) à autoriser."); }
 }
 
 document.getElementById('seg').addEventListener('click',function(e){
@@ -118,6 +137,7 @@ document.getElementById('seg').addEventListener('click',function(e){
   [...this.children].forEach(b=>b.classList.toggle('on',b===e.target));
   render();
 });
+document.getElementById('q').addEventListener('input',function(){ Q=this.value; render(); });
 load();
 </script>
 </body>
