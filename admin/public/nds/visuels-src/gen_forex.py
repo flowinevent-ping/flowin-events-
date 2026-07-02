@@ -130,6 +130,7 @@ JOBS = [
     ("ev-nds-caisse-2", "Caisse 2", "forex_70x70_caisse-2"),
     ("ev-nds-bar-1",    "Bar 1",    "forex_70x70_bar-1"),
     ("ev-nds-bar-2",    "Bar 2",    "forex_70x70_bar-2"),
+    ("ev-nds-bar-3",    "Bar 3",    "forex_70x70_bar-3"),
     ("ev-nds-ecrans",   "Festival", "forex_70x70_festival"),
 ]
 if __name__=="__main__":

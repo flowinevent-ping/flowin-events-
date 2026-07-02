@@ -4521,7 +4521,7 @@ function renderNdsMedia(){
     ['/nds/visuels/nds-jeu-video-16x9.mp4','Présentation du jeu (16×9)',false]
   ]));
   var fx='<div class="text-xs" style="line-height:2">';
-  ['caisse-1','caisse-2','bar-1','bar-2'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
+  ['caisse-1','caisse-2','bar-1','bar-2','bar-3'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
   fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
   var kt='';
   nds.forEach(function(p){ var s=(p.id||'').replace('pt-','');

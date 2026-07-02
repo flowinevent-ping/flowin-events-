@@ -30,7 +30,7 @@ import sys,os
 sys.path.insert(0, os.path.join(sys.argv[1],'admin/public/nds/visuels-src'))
 import nds_lib as L, qrcode
 base='https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-'
-ids=list(L.PARTNERS)+['2026','ecrans','digitale','caisse-1','caisse-2','caisse-3','bar-1','bar-2','festival','tablette-1','tablette-2','tablette-3']
+ids=list(L.PARTNERS)+['2026','ecrans','digitale','caisse-1','caisse-2','bar-1','bar-2','bar-3','festival','tablette-1','tablette-2','tablette-3']
 def mk(u,p,b):
     q=qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M,box_size=b,border=2);q.add_data(u);q.make(fit=True)
     q.make_image(fill_color='black',back_color='white').save(p)
