@@ -574,7 +574,9 @@
   }
   function postRec(rec, btn, onOk){
     btn.disabled=true; setStatus('Enregistrement\u2026','');
-    fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
+    var url=EDIT_MODE?(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(rec.id)):(SUPA+'/rest/v1/bons_commande');
+    var method=EDIT_MODE?'PATCH':'POST';
+    fetch(url,{method:method,headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
       .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); onOk(); })
       .catch(function(e){ btn.disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\u2019enregistrement. R\u00e9essayez.','err'); });
   }
@@ -599,7 +601,26 @@
 
   // --- Mode lecture (?id=) : charge le doc rempli + signe ---
   var viewId=qs('id');
+  var EDIT_MODE=!!(viewId && qs('edit')==='1');
   var prefillSlug = (!viewId) ? qs('prefill') : null;
+  function fillEditable(d){
+    if($('docNum')){ $('docNum').value=d.id; if($('payRef')) $('payRef').textContent=d.id; }
+    function setv(id,v){ var el=$(id); if(el) el.value=(v==null?'':v); }
+    setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
+    setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
+    setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
+    for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
+        var pi=offers[j].querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
+        var li=offers[j].querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
+        var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||'';
+        var ld=offers[j].querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
+        var le=offers[j].querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
+        var lu=offers[j].querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
+        pickOffer(offers[j]);
+    } }
+    computeTotals();
+    setStatus('Mode \\u00e9dition \\u2014 bon '+d.id+'. Modifie puis \\u00ab Enregistrer & envoyer au client \\u00e0 faire signer \\u00bb.','ok');
+  }
   if(prefillSlug){
     fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
       .then(function(r){ return r.json(); })
@@ -624,6 +645,7 @@
       .then(function(rows){
         if(!rows||!rows.length){ setStatus('Bon de commande introuvable.','err'); return; }
         var d=rows[0];
+        if(EDIT_MODE){ fillEditable(d); return; }
         document.body.className+=' viewmode';
         if($('offersH')) $('offersH').textContent='Offre retenue';
         function setv(id,v){ var el=$(id); if(el) el.value=(v==null?'':v); }

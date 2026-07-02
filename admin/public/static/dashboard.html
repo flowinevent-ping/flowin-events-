@@ -1970,7 +1970,8 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
     h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
       +'<div style="min-width:150px"><div class="fw-700">'+esc(b.offre_label||b.id)+' '+badge(b.statut)+'</div>'
       +'<div class="text-xs text-muted">'+esc(b.id)+(b.date_signature?' \u00b7 sign\u00e9 '+esc(b.date_signature):'')+' \u00b7 '+money(b.montant_ttc)+' TTC</div></div>'
-      +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'
+      +((b.statut==='signe'||b.statut==='sign\u00e9')?'':'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-right:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'&edit=1" target="_blank" rel="noopener">\u270f\ufe0f \u00c9diter / Valider</a>')
+      +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Lien client &#8599;</a>'
       +((b.statut==='signe'||b.statut==='sign\u00e9')?'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?devis='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">\u00c9diter facture</a>':'')
       +'</div>';
   }); }
@@ -1991,6 +1992,12 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
   box.innerHTML=h;
 }
 
+
+async function loadBonsCommande(){
+  var bons = await supaFetch('bons_commande','select=id,raison_sociale,offre_label,montant_ht,montant_ttc,statut,email,created_at&order=created_at.desc');
+  state.bonsCommande = bons||[];
+  render();
+}
 
 async function supaLoadAll(){
   if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return null;
@@ -3781,21 +3788,26 @@ function renderNdsBonCommande(){
     +'<button class="btn btn-primary" onclick="window.open(\'/bons-commande-liste.html\',\'_blank\')">Choisir un bon à facturer &#8599;</button>'
     +'</div>';
   h+='</div>';
-  h+='<div class="section-h" style="margin-top:24px">&#128203; Brouillons pré-remplis en attente (à vérifier puis envoyer)</div>';
-  var _drafts = [
-    {f:'01-bon-commande-giordano.html', nom:'Électroménager J Giordano', note:'590 € HT · Visibilité — prêt à envoyer'},
-    {f:'02-bon-commande-charvolin.html', nom:'Assurance Charvolin', note:'1 590 € HT · Animation — prêt à envoyer'},
-    {f:'03-bon-commande-auto-ecole-lara.html', nom:'Auto-École de Lara (ex Pégase)', note:'3 500 € HT · Sponsor — prêt à envoyer'},
-    {f:'04-bon-commande-bergerie.html', nom:'Domaine de la Bergerie', note:'⚠ Montant HT à confirmer avant envoi'}
-  ];
-  h+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
-  _drafts.forEach(function(d){
-    h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:12px;padding:12px 16px">'
-      +'<div><div style="font-weight:700;font-size:14px">'+d.nom+'</div><div style="font-size:12px;color:var(--sa-muted)">'+d.note+'</div></div>'
-      +'<button class="btn btn-sm" onclick="window.open(\'/bons-prets/'+d.f+'\',\'_blank\')">Ouvrir &#8599;</button>'
-      +'</div>';
-  });
-  h+='</div>';
+  h+='<div class="section-h" style="margin-top:24px">&#129534; Tes bons de commande \u2014 \u00e9diter / valider / envoyer</div>';
+  if(!state.bonsCommande){ loadBonsCommande(); h+='<div class="text-xs text-muted" style="margin-top:8px">Chargement des bons\u2026</div>'; }
+  else if(!state.bonsCommande.length){ h+='<div class="card" style="margin:8px 0 0">Aucun bon enregistr\u00e9. Cr\u00e9e-en un avec \u00ab Ouvrir le bon de commande \u00bb.</div>'; }
+  else {
+    var bcBadge=function(sv){var m={brouillon:['#B45309','#FEF3C7'],envoye:['#1E40AF','#DBEAFE'],'envoy\u00e9':['#1E40AF','#DBEAFE'],signe:['#047857','#D1FAE5'],'sign\u00e9':['#047857','#D1FAE5']};var c=m[sv]||['#475569','#F1F5F9'];return '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:'+c[0]+';background:'+c[1]+';padding:2px 8px;border-radius:100px">'+esc(sv||'\u2014')+'</span>';};
+    var bcMoney=function(v){return (v!=null&&v!=='')?Number(v).toLocaleString('fr-FR')+' \u20ac':'\u2014';};
+    h+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">';
+    state.bonsCommande.forEach(function(b){
+      var signe=(b.statut==='signe'||b.statut==='sign\u00e9');
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--sa-card);border:1px solid var(--sa-border);border-radius:12px;padding:12px 16px;flex-wrap:wrap">'
+        +'<div style="min-width:180px"><div style="font-weight:700;font-size:14px">'+esc(b.raison_sociale||b.id)+' '+bcBadge(b.statut)+'</div>'
+        +'<div style="font-size:12px;color:var(--sa-muted)">'+esc(b.id)+' \u00b7 '+esc(b.offre_label||'')+' \u00b7 '+bcMoney(b.montant_ttc)+' TTC</div></div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+        +(signe?'':'<button class="btn btn-sm btn-primary" onclick="window.open(\'/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'&edit=1\',\'_blank\')">\u270f\ufe0f \u00c9diter / Valider</button>')
+        +'<button class="btn btn-sm" onclick="window.open(\'/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'\',\'_blank\')">\ud83d\udd17 Lien client</button>'
+        +(signe?'<button class="btn btn-sm btn-primary" onclick="window.open(\'/facture-nds.html?devis='+encodeURIComponent(b.id)+'\',\'_blank\')">\ud83d\udcc4 Facture</button>':'')
+        +'</div></div>';
+    });
+    h+='</div>';
+  }
   h+='</div>';
   return h;
 }
