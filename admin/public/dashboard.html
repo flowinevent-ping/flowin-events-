@@ -3923,7 +3923,7 @@ function ndsCarteEnsureLeaflet(cb){
   js.onerror=function(){ toast('Carte indisponible (Leaflet)','error'); };
   document.head.appendChild(js);
 }
-var NDS_CARTE_STATIONS = ['ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
+var NDS_CARTE_STATIONS = ['ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3'];
 async function loadNdsCarte(){
   var ev = await supaFetch('events', 'select=id,nom,lat,lng,module&module=eq.nds2026&order=id.asc');
   var stations = [];
@@ -4070,9 +4070,9 @@ function renderNdsCarte(){
   return h;
 }
 
-var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisse-3','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-giordano','ev-nds-pegase','ev-nds-utile','ev-nds-nook','ev-nds-cycles963'];
+var NDS_EVENT_IDS = ['ev-nds-2026','ev-nds-caisse-1','ev-nds-caisse-2','ev-nds-caisses','ev-nds-bar','ev-nds-bar-1','ev-nds-bar-2','ev-nds-ecrans','ev-nds-digitale','ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3','ev-nds-bergerie','ev-nds-carrosserie-gp','ev-nds-charvolin','ev-nds-giordano','ev-nds-pegase','ev-nds-utile','ev-nds-nook','ev-nds-cycles963'];
 function ndsStationLabel(evid){
-  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisse-3':'Caisse 3','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':"Auto-École de l'ARA",'ev-nds-utile':'Utile Vence','ev-nds-nook':'Nook Café','ev-nds-cycles963':'Cycles 963'};
+  var m={'ev-nds-2026':'NDS','ev-nds-caisse-1':'Caisse 1','ev-nds-caisse-2':'Caisse 2','ev-nds-caisses':'Caisses','ev-nds-bar':'Bar','ev-nds-bar-1':'Bar 1','ev-nds-bar-2':'Bar 2','ev-nds-ecrans':'Écran','ev-nds-digitale':'Digital','ev-nds-tablette':'Brigade Verte','ev-nds-tablette-1':'Brigade Verte 1','ev-nds-tablette-2':'Brigade Verte 2','ev-nds-tablette-3':'Brigade Verte 3','ev-nds-bergerie':'Domaine de la Bergerie','ev-nds-carrosserie-gp':'Carrosserie GP','ev-nds-charvolin':'Assurance Charvolin','ev-nds-giordano':'Électroménager Giordano','ev-nds-pegase':"Auto-École de l'ARA",'ev-nds-utile':'Utile Vence','ev-nds-nook':'Nook Café','ev-nds-cycles963':'Cycles 963'};
   return m[evid]||evid;
 }
 function ndsStationsJoined(events){
@@ -4521,7 +4521,7 @@ function renderNdsMedia(){
     ['/nds/visuels/nds-jeu-video-16x9.mp4','Présentation du jeu (16×9)',false]
   ]));
   var fx='<div class="text-xs" style="line-height:2">';
-  ['caisse-1','caisse-2','caisse-3','bar-1','bar-2'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
+  ['caisse-1','caisse-2','bar-1','bar-2'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
   fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
   var kt='';
   nds.forEach(function(p){ var s=(p.id||'').replace('pt-','');

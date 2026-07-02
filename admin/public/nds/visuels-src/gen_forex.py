@@ -128,7 +128,6 @@ def forex(station_id, station_label, fname):
 JOBS = [
     ("ev-nds-caisse-1", "Caisse 1", "forex_70x70_caisse-1"),
     ("ev-nds-caisse-2", "Caisse 2", "forex_70x70_caisse-2"),
-    ("ev-nds-caisse-3", "Caisse 3", "forex_70x70_caisse-3"),
     ("ev-nds-bar-1",    "Bar 1",    "forex_70x70_bar-1"),
     ("ev-nds-bar-2",    "Bar 2",    "forex_70x70_bar-2"),
     ("ev-nds-ecrans",   "Festival", "forex_70x70_festival"),
