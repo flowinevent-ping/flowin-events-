@@ -21,7 +21,7 @@
 
   /* En-tete cobrand clair */
   .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
-  .opc-logo{height:34px;width:auto;display:block}
+  .opc-logo{height:54px;width:auto;display:block}
   .x-sep{color:var(--faint);font-weight:700;font-size:14px}
   .flowin-mini{display:flex;align-items:center;gap:8px}
   .flowin-mini .fb-dot{width:30px;height:30px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
@@ -49,8 +49,8 @@
   .party{padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
   .party.client{border-left:3px solid var(--rose)}
   .party .ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
-  .party .nm{font-family:'Bricolage Grotesque';font-size:16px;font-weight:800;color:var(--ink);margin-bottom:5px}
-  .party .ln{font-size:12.5px;color:var(--muted);line-height:1.65}
+  .party .nm{font-family:'Bricolage Grotesque';font-size:15px;font-weight:800;color:var(--ink);margin-bottom:5px}
+  .party .ln{font-size:11.5px;color:var(--muted);line-height:1.6}
   .party .ln.ph{color:var(--faint);font-style:italic}
 
   /* Offres a cocher */
@@ -116,7 +116,7 @@
     html,body{background:#fff;padding:0;margin:0;font-size:10.5px;line-height:1.32}
     .doc{box-shadow:none;border:none;border-radius:0;max-width:100%;width:100%}
     .cobrand{padding:5px 0 6px}
-    .opc-logo{height:24px}
+    .opc-logo{height:38px}
     .body{padding:8px 0 4px}
     .head{margin-bottom:9px}
     .doc-eyebrow{margin-bottom:2px;font-size:9px}
@@ -159,7 +159,7 @@
   }
 
   /* --- Interactif : remplissable / signable --- */
-  .fld{font-family:inherit;font-size:12.5px;color:var(--ink);border:none;border-bottom:1.5px solid var(--line);background:transparent;padding:3px 2px;width:100%;outline:none}
+  .fld{font-family:inherit;font-size:11.5px;color:var(--ink);border:none;border-bottom:1.5px solid var(--line);background:transparent;padding:3px 2px;width:100%;outline:none}
   .fld:focus{border-bottom-color:var(--accent)}
   .fld::placeholder{color:var(--faint);font-style:italic}
   .fldrow{margin-bottom:6px}
@@ -231,6 +231,14 @@
   body.viewmode .fld-area{background:var(--paper);border-style:dashed}
   @media(max-width:680px){ .kv-grid{grid-template-columns:1fr} }
   @media print{ .fld-area{border:none;background:transparent;padding:0} .kvcard{background:#fff;page-break-inside:avoid;break-inside:avoid} }
+  /* Mode signature client (bon ouvert non signé) */
+  .signonly{display:none}
+  body.signmode .editonly{display:block!important}
+  body.signmode .cgvrow{display:flex!important}
+  body.signmode .sendrow{display:none!important}
+  body.signmode #submitBtn,body.signmode #sendClientBtn{display:none!important}
+  body.signmode .viewonly{display:none!important}
+  body.signmode .signonly{display:flex!important;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
 </style>
 </head>
 <body>
@@ -423,7 +431,8 @@
       <div style="font-size:12px;color:var(--muted);margin-top:5px">Le destinataire reçoit sa copie à cette adresse. Une copie part aussi automatiquement à flowinevent@gmail.com.</div>
     </div>
     <div class="actions editonly">
-      <button type="button" id="submitBtn" class="btn-primary">Valider, signer et recevoir ma copie</button>
+      <button type="button" id="sendClientBtn" class="btn-primary" style="background:#1D9E75">&#128233; Enregistrer &amp; envoyer au client (à faire signer)</button>
+      <button type="button" id="submitBtn" class="btn-primary" style="background:#3B5CC4">Signer maintenant (client présent)</button>
       <span id="status" class="statusmsg"></span>
     </div>
     <div class="actions viewonly" style="flex-wrap:wrap;gap:10px">
@@ -431,6 +440,9 @@
       <button type="button" id="copyLinkBtn" class="btn-primary" style="background:#3B5CC4">&#128203; Copier le lien à envoyer au client</button>
       <a href="#" id="mailClientBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer par email au client</a>
       <span style="font-size:12px;color:var(--teal)">✓ Bon de commande signé et enregistré</span>
+    </div>
+    <div class="actions signonly">
+      <button type="button" id="clientSignBtn" class="btn-primary">&#9997;&#65039; Signer et valider ce bon</button>
     </div>
 
   </div>
@@ -516,7 +528,7 @@
   function move(e){ if(!drawing||!ctx)return; var p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); hasInk=true; e.preventDefault(); }
   function end(){ drawing=false; }
   if(cv){
-    fit(); window.addEventListener('resize',function(){ /* ne pas vider en view */ if(!document.body.className.match(/viewmode/)) { var d=hasInk?cv.toDataURL():null; fit(); } });
+    fit(); window.addEventListener('resize',function(){ /* ne pas vider en view */ if(!document.body.className.match(/viewmode/) || document.body.className.match(/signmode/)) { var d=hasInk?cv.toDataURL():null; fit(); } });
     cv.addEventListener('mousedown',start); cv.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
     cv.addEventListener('touchstart',start,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',end);
     if($('sigClear')) $('sigClear').addEventListener('click',function(){ ctx.clearRect(0,0,cv.width,cv.height); hasInk=false; });
@@ -529,41 +541,59 @@
     $('f_email_envoi').addEventListener('input',function(){ _envoiEdited=true; });
     $('f_email').addEventListener('input',function(){ if(!_envoiEdited) $('f_email_envoi').value=$('f_email').value; });
   }
+  function collectRec(withSig){
+    var raison=$('f_raison').value.trim(), contact=$('f_contact').value.trim();
+    var tel=$('f_tel').value.trim(), email=$('f_email').value.trim();
+    var emailEnvoi=($('f_email_envoi')&&$('f_email_envoi').value.trim())||email;
+    if(!sel){ setStatus('Choisissez une offre (cliquez sur une carte).','err'); return null; }
+    if(!raison){ setStatus('Indiquez la raison sociale.','err'); return null; }
+    if(!contact||!tel){ setStatus('Indiquez le contact et le t\u00e9l\u00e9phone.','err'); return null; }
+    if(!email||email.indexOf('@')<0){ setStatus('Email du partenaire invalide.','err'); return null; }
+    var t=computeTotals();
+    if(!t){ setStatus('Indiquez le prix du pack sur l\u2019offre choisie.','err'); return null; }
+    var lotVal=selLot(); var lotDesc=selVal('.offer-lotdesc');
+    if(isNaN(lotVal)||!lotDesc){ setStatus('Compl\u00e9tez le lot du pack (valeur + descriptif).','err'); return null; }
+    if(withSig){
+      if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return null; }
+      if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\u2019accepter les CGV avant de valider.','err'); return null; }
+    }
+    var catHt=parseFloat(sel.getAttribute('data-ht')); if(isNaN(catHt)) catHt=null;
+    var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
+    return { id:id, super_event_id:'se-nds-2026', statut: withSig?'signe':'envoye',
+      raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
+      contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
+      offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
+      montant_ht:t.ht, montant_tva:t.tva, montant_ttc:t.ttc, montant_ht_catalogue:catHt,
+      mention_particuliere:selMention()||null,
+      lot_valeur:lotVal, lot_descriptif:lotDesc,
+      lot_validite:selVal('.offer-lotemis')||null, lot_conditions:selVal('.offer-lotuse')||null,
+      signataire: withSig?($('f_signataire').value.trim()||contact):null,
+      date_signature: withSig?($('f_date').value.trim()||dstr):null,
+      signature: withSig?cv.toDataURL('image/png'):null,
+      cgv_version:CGV_VERSION, cgv_acceptee_at: withSig?new Date().toISOString():null };
+  }
+  function postRec(rec, btn, onOk){
+    btn.disabled=true; setStatus('Enregistrement\u2026','');
+    fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
+      .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); onOk(); })
+      .catch(function(e){ btn.disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\u2019enregistrement. R\u00e9essayez.','err'); });
+  }
   if($('submitBtn')){
     $('submitBtn').addEventListener('click',function(){
-      var raison=$('f_raison').value.trim(), contact=$('f_contact').value.trim();
-      var tel=$('f_tel').value.trim(), email=$('f_email').value.trim();
-      var emailEnvoi=($('f_email_envoi')&&$('f_email_envoi').value.trim())||email;
-      if(!sel){ setStatus('Choisissez une offre (cliquez sur une carte).','err'); return; }
-      if(!raison){ setStatus('Indiquez la raison sociale.','err'); return; }
-      if(!contact||!tel){ setStatus('Indiquez le contact et le t\u00e9l\u00e9phone.','err'); return; }
-      if(!email||email.indexOf('@')<0){ setStatus('Email invalide.','err'); return; }
-      if(!emailEnvoi||emailEnvoi.indexOf('@')<0){ setStatus("Adresse d'envoi invalide.","err"); return; }
-      if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
-      if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\'accepter les CGV avant de valider.','err'); return; }
-      var t=computeTotals();
-      if(!t){ setStatus('Indiquez le prix du pack sur l\u2019offre choisie.','err'); return; }
-      var lotVal=selLot();
-      var lotDesc=selVal('.offer-lotdesc');
-      if(isNaN(lotVal)||!lotDesc){ setStatus('Compl\u00e9tez le lot du pack (valeur + descriptif).','err'); return; }
-      var ht=t.ht, tva=t.tva, ttc=t.ttc;
-      var catHt=parseFloat(sel.getAttribute('data-ht')); if(isNaN(catHt)) catHt=null;
-      var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
-      var rec={ id:id, super_event_id:'se-nds-2026', statut:'signe',
-        raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
-        contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
-        offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
-        montant_ht:ht, montant_tva:tva, montant_ttc:ttc, montant_ht_catalogue:catHt,
-        mention_particuliere:selMention()||null,
-        lot_valeur:lotVal, lot_descriptif:lotDesc,
-        lot_validite:selVal('.offer-lotemis')||null,
-        lot_conditions:selVal('.offer-lotuse')||null,
-        signataire:$('f_signataire').value.trim()||contact, date_signature:($('f_date').value.trim()||dstr), signature:cv.toDataURL('image/png'),
-        cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
-      $('submitBtn').disabled=true; setStatus('Enregistrement\u2026','');
-      fetch(SUPA+'/rest/v1/bons_commande',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
-        .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); location.href='?id='+id; })
-        .catch(function(e){ $('submitBtn').disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\'enregistrement. R\u00e9essayez.','err'); });
+      var rec=collectRec(true); if(!rec) return;
+      postRec(rec, $('submitBtn'), function(){ location.href='?id='+encodeURIComponent(rec.id); });
+    });
+  }
+  if($('sendClientBtn')){
+    $('sendClientBtn').addEventListener('click',function(){
+      var rec=collectRec(false); if(!rec) return;
+      postRec(rec, $('sendClientBtn'), function(){
+        var lien=location.origin+location.pathname+'?id='+encodeURIComponent(rec.id);
+        var to=rec.email||'';
+        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n\u00b0 '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois sign\u00e9, vous en recevez une copie.\n\nOPConsult \u00b7 BAITA EURL \u00b7 info@opconsult.co \u00b7 06 16 35 49 36';
+        setStatus('Bon '+rec.id+' enregistr\u00e9 \u2014 \u00e0 signer par le client. Lien copiable : '+lien,'ok');
+        location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent('Votre bon de commande \u00e0 signer \u2014 Nuits du Sud 2026')+'&body='+encodeURIComponent(body);
+      });
     });
   }
 
@@ -618,6 +648,21 @@
         }
         if($('catNote')){ $('catNote').innerHTML = (d.montant_ht_catalogue!=null && Number(d.montant_ht_catalogue)!==Number(d.montant_ht)) ? ('Prix catalogue : <b>'+eur(d.montant_ht_catalogue)+' HT</b> \u2014 prix factur\u00e9 : <b>'+eur(d.montant_ht)+' HT</b>. Lot d\u00e9duit en caisse, non factur\u00e9.') : 'Le lot est offert par le commer\u00e7ant et d\u00e9duit en caisse \u2014 non factur\u00e9.'; }
         if($('sigImg')&&d.signature) $('sigImg').src=d.signature;
+        if(!d.signature){
+          document.body.className += ' signmode';
+          var _sg=$('f_signataire'); if(_sg) _sg.removeAttribute('readonly');
+          var _dt=$('f_date'); if(_dt) _dt.removeAttribute('readonly');
+          var _cs=$('clientSignBtn');
+          if(_cs){ _cs.addEventListener('click',function(){
+            if(!hasInk){ setStatus('Merci de signer dans le cadre.','err'); return; }
+            if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\u2019accepter les CGV.','err'); return; }
+            _cs.disabled=true; setStatus('Signature en cours\u2026','');
+            var _patch={ statut:'signe', signature:cv.toDataURL('image/png'), signataire:($('f_signataire').value.trim()||d.contact||d.raison_sociale||''), date_signature:($('f_date').value.trim()||dstr), cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
+            fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(d.id),{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(_patch)})
+              .then(function(r){ if(!r.ok) throw new Error('http '+r.status); location.href='?id='+encodeURIComponent(d.id); })
+              .catch(function(){ _cs.disabled=false; setStatus('\u00c9chec de la signature. R\u00e9essayez.','err'); });
+          }); }
+        }
         if($('docNum')){ $('docNum').value=d.id; $('docNum').readOnly=true; }
         if($('payRef')) $('payRef').innerHTML=d.id;
         if($('docDate')) $('docDate').innerHTML=d.date_signature||dstr;
