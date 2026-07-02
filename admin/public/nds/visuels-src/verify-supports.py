@@ -68,13 +68,19 @@ if os.path.exists(ev):
 else:
     say("FAIL", "video-ecran-8-partenaires.mp4 absente")
 
-print("\n== 5. Dérives de listes en dur (doivent refléter nds_lib) ==")
+print("\n== 5. A4 présent pour chaque partenaire + générateur piloté par la source ==")
+for s in L.PARTNERS:
+    p = os.path.join(KIT, s, f"nds_a4_{s}.png")
+    say("OK" if os.path.exists(p) else "WARN", f"A4 {s}" + ("" if os.path.exists(p) else " manquant"))
 a4 = os.path.join(HERE, "gen_a4_pro.py")
 if os.path.exists(a4):
-    n = len(re.findall(r'nds_a4_[a-z0-9-]+"', open(a4).read()))
-    say("OK" if n >= len(L.PARTNERS) else "WARN",
-        f"gen_a4_pro.py liste {n} pros vs {len(L.PARTNERS)} dans nds_lib" +
-        ("" if n >= len(L.PARTNERS) else " — liste en dur à recâbler sur nds_lib"))
+    piloted = "L.PARTNERS" in open(a4).read()
+    say("OK" if piloted else "WARN",
+        "gen_a4_pro.py " + ("piloté par nds_lib.PARTNERS" if piloted else "liste en dur — à recâbler"))
+if L.NAMES and set(L.PARTNERS) <= set(L.NAMES):
+    say("OK", f"nds_lib.NAMES couvre les {len(L.PARTNERS)} partenaires")
+else:
+    say("WARN", "nds_lib.NAMES incomplet vs PARTNERS")
 
 print(f"\n== BILAN : {ok} OK · {warn} WARN · {fail} FAIL ==")
 sys.exit(1 if fail else 0)

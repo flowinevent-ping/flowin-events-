@@ -104,15 +104,13 @@ def a4(qr_path, commerce, fname, bon_label="chez votre commerce"):
     ctext(d, W/2, H*0.988, L.CONTACT, 48, (190, 196, 224), 600)
     p = f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300, 300)); return p
 
-PARTNERS = [
-    ("/home/claude/vid/qr/bergerie_hd.png",       "Domaine de la Bergerie",    "nds_a4_bergerie",       "chez Domaine de la Bergerie"),
-    ("/home/claude/vid/qr/pegase_hd.png",         "Auto-Moto-École Pégase",    "nds_a4_pegase",         "chez Auto-Moto-École Pégase"),
-    ("/home/claude/vid/qr/utile_hd.png",          "Utile Vence",               "nds_a4_utile",          "chez Utile Vence"),
-    ("/home/claude/vid/qr/carrosserie-gp_hd.png", "Carrosserie GP",            "nds_a4_carrosserie-gp", "chez Carrosserie GP"),
-    ("/home/claude/vid/qr/giordano_hd.png",       "Électroménager J Giordano", "nds_a4_giordano",       "chez Électroménager Giordano"),
-]
-
+# Liste pilotee par la SOURCE UNIQUE nds_lib.PARTNERS + NAMES (plus de liste en dur).
+# QR = station/physique HD de chaque pro (/home/claude/vid/qr/<slug>_hd.png).
 if __name__ == "__main__":
-    for qr, com, fn, bon in PARTNERS:
-        print("OK", a4(qr, com, fn, bon))
-    print("DONE", len(PARTNERS))
+    n = 0
+    for slug in L.PARTNERS:
+        com = L.NAMES.get(slug, slug)
+        qr = f"/home/claude/vid/qr/{slug}_hd.png"
+        print("OK", a4(qr, com, f"nds_a4_{slug}", f"chez {com}"))
+        n += 1
+    print("DONE", n)

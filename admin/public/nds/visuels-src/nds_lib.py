@@ -107,6 +107,18 @@ PARTNERS = [
     "bergerie", "pegase", "utile", "carrosserie-gp",
     "giordano", "vip-coiffure", "charvolin", "dekra", "nook",
 ]
+# Noms d'affichage — source unique (miroir de events.nom). MAJ si un partenaire change.
+NAMES = {
+    "bergerie": "Domaine de la Bergerie",
+    "pegase": "Auto-Moto-École Pégase",
+    "utile": "Utile Vence",
+    "carrosserie-gp": "Carrosserie GP",
+    "giordano": "Électroménager J Giordano",
+    "vip-coiffure": "VIP Coiffure",
+    "charvolin": "Assurance Charvolin",
+    "dekra": "DEKRA Vence",
+    "nook": "Nook Café",
+}
 PARTENAIRES_DIR = "/home/claude/repo/admin/public/nds/partenaires"
 
 def partner_logo(slug):
