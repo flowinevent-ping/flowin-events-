@@ -1,3 +1,18 @@
+### SESSION 02/07 — Nouveau partenaire Cycles 963 (commit 0d5c1c6)
+
+- **Partenaires = 8** : bergerie, pegase(ARA), utile, carrosserie-gp, giordano, charvolin, nook, **cycles963**.
+- **Cycles 963** créé pour de vrai : event `ev-nds-cycles963` (token d14f9d6130, cfg miroir charvolin, catégorie Vélo) + fiche `pt-cycles963` (102 av. Henri Giraud Vence, 06 34 64 47 16, Cycles963@gmail.com, lat 43.725079 lng 7.106230, tous supports=true). **Lots** : 1 journée location vélo 45€ × 5, non cumulable, validité 4 mois, dès 2 jours (dans `partenaires.lots`).
+- Logo `partenaires/cycles963.png` (SVG fourni → PNG rogné). `nds_lib.PARTNERS`+`NAMES` mis à jour.
+- Régénérés à **8 logos** : vidéo écran (QR 8/8), forex, montage. A4 design X généré + distribué (galerie + dossier pro). Dossier `kit-digital/cycles963/` (A4 + qr-station + qr-reseaux + README).
+- **Bon de commande** : dynamique (lit `partenaires`) → Cycles 963 apparaît automatiquement avec ses lots. Listes hardcodées dashboard (NDS_EVENT_IDS + labels) mises à jour. Cache bumpé v2.
+- Garde-fou : 35 OK / 0 WARN / 0 FAIL.
+
+**Frictions repérées lors de l'insertion (utile pour le copilote self-service) :**
+- Prérequis env manuels : symlink `/home/claude/repo`, copie `nds_lib.py`→`/home/claude/vid/`, génération des QR stations dans `/home/claude/vid/qr/`, police Anton à fetch.
+- Listes **codées en dur** encore présentes hors `nds_lib` : `NDS_EVENT_IDS` + `ndsStationLabel` dans dashboard.html (à recâbler sur la base un jour).
+- Manque pour cycles963 : **vidéo perso** `video-cycles963-9x16.mp4` (rendu lourd, pas produit) + **SVG A4** (PNG seulement).
+
+RESTE : copilote self-service (upload manuel affiches/vidéos via Supabase Storage — attente choix sécurité a/b/c) ; ergonomie média par pro ; lots ; règlement+confidentialité ; repo privé + PITR avant 9/07.
 ### SESSION 02/07 (corrections) — retrait dekra/VIP/à la fût + Pégase→ARA + fix régressions (commit 802aad0)
 
 **Fait & poussé :**
