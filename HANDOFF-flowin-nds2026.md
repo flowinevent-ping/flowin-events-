@@ -1,3 +1,18 @@
+### SESSION 02/07 (soir) — CRM bons/factures + bloc éditable tickets (commit 2c80ba1)
+
+**Fait & poussé :**
+- **Fiche pro / onglet Élément comm** : réutilise déjà affiche+QR, vidéo, tickets (série+gagnant), kit, communs NDS. AJOUTÉ : bloc unique éditable montant/conditions (propagé aux tickets, lit partenaires.lots) + `saveTicketBloc` (PATCH partenaires).
+- **Bons de commande** : Charvolin FL-2026-0001 (1590€) + Nook FL-2026-0002 créés en base (format existant, num séquentiel).
+- **CRM `/bons-commande-liste.html`** : liste répertoriée de tous les bons+factures (accès direct, filtre, **génération facture FAC-2026-XXXX** depuis un bon). Branchée dans l'onglet BC + la fiche pro.
+
+**PROBLÈME DE FOND identifié :** `pros` (17) et `partenaires` (11) sont **2 tables séparées SANS lien** — d'où la confusion pro/partenaire et le fait que les bons (reliés par raison_sociale) ne remontent pas nativement. À unifier (architectural).
+
+**RESTE À FAIRE (non terminé, à poursuivre) :**
+1. `bon-commande-nds.html` : supporter `?id=` pour **charger/éditer/imprimer** un bon ou une facture existant (sinon « Ouvrir » ouvre un form vierge).
+2. **Unifier pros ↔ partenaires** (un pro peut être partenaire d'un event) — chantier archi, à cadrer.
+3. **Dossiers** : global Nuits du Sud (A4 + forex caisses/bars + vidéo écran + vidéo réseaux) + par pro (vidéo réseaux QR digital unique + A4 + fiche A5 comptoir + A2/A3). Règle QR : physique/écran→station jeux, FB/Insta→station NDS usage unique + **message accueil/fin webapp** (invite à regagner commerces/festival).
+4. **Kit digital** (section) + **CGV** + **règlement de jeu** à mettre à jour/créer (le règlement n'existe toujours pas — documents_legaux = CGV seule ; nécessite contenu).
+5. RLS : autoriser écriture anon sur `partenaires` (bloc tickets) + `bons_commande` (génération facture) sinon les enregistrements échouent.
 ### SESSION 02/07 — Nouveau partenaire Cycles 963 (commit 0d5c1c6)
 
 - **Partenaires = 8** : bergerie, pegase(ARA), utile, carrosserie-gp, giordano, charvolin, nook, **cycles963**.
