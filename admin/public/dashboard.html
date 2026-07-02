@@ -4484,7 +4484,7 @@ function cgvSave(){
 
 function renderNdsMedia(){
   var cb='https://flowin-events.vercel.app';
-  var VER='?v=20260702v2';
+  var VER='?v=20260703';
   var nds=(DATA.partenaires||[]).filter(function(p){return (p.image_url||'').indexOf('/nds/partenaires/')>-1 && p.visible!==false && p.actif!==false;});
   if(!nds.length){ nds=(DATA.partenaires||[]).slice(0,6); }
   var sub=state.mediaTab||'nds2026';
@@ -4564,7 +4564,7 @@ function renderMaintenance(){
   h+=row('Base assets',lnk(base,'flowin-events.vercel.app'));
   h+='</div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">🎮 Parcours de test (stations NDS)</div><div class="text-xs" style="line-height:2">';
-  ['bergerie','pegase','utile','carrosserie-gp','giordano','charvolin','nook'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
+  ['bergerie','pegase','utile','carrosserie-gp','giordano','charvolin','nook','cycles963'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
   h+=lnk(base+'/parcours/nds2026?ev=ev-nds-digitale','▶ Parcours festival (digitale)')+'<br></div></div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px"><div class="section-h" style="margin-top:0">📋 Notes</div><div class="text-xs text-muted" style="line-height:1.7">Advisors sécurité Supabase : 0 ERROR au dernier scan · durcissement RLS avancé prévu post-festival.<br>Supabase FREE → passer Pro avant le 9/07 (risque pause auto 7 j d’inactivité).<br>Resend : domaine flowin.events à vérifier pour débloquer les emails gagnants.</div></div>';
   h+='</div>'; return h;

@@ -322,19 +322,11 @@ def scene(t):
         lt = t - 23.0
         pop(img, tl("JOUE CHEZ NOS PARTENAIRES", 56, AMBER), W / 2, H * 0.115, ramp(lt, 0.0, 0.45))
         pop(img, tl("pendant toute la durée du festival !", 40, WHITE), W / 2, H * 0.175, ramp(lt, 0.2, 0.65))
-        tw, th = 330, 177; gx = W * 0.5
-        dx2 = tw/2 + 20            # demi-écart rangée à 2 colonnes
-        dx3 = tw + 24             # écart rangée à 3 colonnes
-        # rangée 1 (2 logos)
-        logo_tile(img, "bergerie", gx - dx2, H * 0.300, tw, th, ramp(lt, 0.50, 0.95))
-        logo_tile(img, "pegase",   gx + dx2, H * 0.300, tw, th, ramp(lt, 0.66, 1.11))
-        # rangée 2 (3 logos) — Charvolin au centre
-        logo_tile(img, "utile",          gx - dx3, H * 0.450, tw, th, ramp(lt, 0.82, 1.27))
-        logo_tile(img, "charvolin",      gx,       H * 0.450, tw, th, ramp(lt, 0.98, 1.43))
-        logo_tile(img, "carrosserie-gp", gx + dx3, H * 0.450, tw, th, ramp(lt, 1.14, 1.59))
-        # rangée 3 (2 logos) — reste au-dessus du QR badge (top badge ≈ y0.712)
-        logo_tile(img, "giordano", gx - dx2, H * 0.600, tw, th, ramp(lt, 1.30, 1.75))
-        logo_tile(img, "alafut",   gx + dx2, H * 0.600, tw, th, ramp(lt, 1.46, 1.91))
+        # grille DRY — source unique nds_lib.PARTNERS (8 logos, plus de liste en dur / plus d'alafut)
+        # bande verticale ~0.275..0.615 (au-dessus du QR badge, top ≈ y0.712) ; auto-layout 3-3-2
+        tiles = L.logo_grid(L.PARTNERS, W * 0.5, H * 0.445, int(W * 0.92), int(H * 0.34))
+        for i, (slug, tx, ty, tw, th) in enumerate(tiles):
+            logo_tile(img, slug, tx, ty, tw, th, ramp(lt, 0.50 + i * 0.11, 0.95 + i * 0.11))
     else:                                          # FINALE — titre + texte (QR ajoute par finale_qr)
         lt = t - 29.5
         pop(img, tl("FLASH LE QR", 116, AMBER), W / 2, H * 0.18, ramp(lt, 0.0, 0.45))
