@@ -2290,7 +2290,7 @@ const DATA = loadData();
 DATA.evJoueurs = {}; /* session uniquement — jamais persisté en localStorage */
 // ══ PURGE BANQUES ══
 try {
-  var _ok = ['bq-paques-vence']; // Banque officielle Pâques Vence
+  var _ok = ['bq-paques-vence','bq-croix-rouge','bq-nds-artistes','bq-nds-bar','bq-nds-caisses','bq-nds-ecrans','bq-nds-rse-mobilite','bq-nds-tablette']; // Banques officielles actives
   if(DATA && Array.isArray(DATA.banques)){
     DATA.banques = DATA.banques.filter(function(b){ return b && typeof b === 'object' && _ok.indexOf(b.id) >= 0; });
     SEED.banques.forEach(function(sb){ if(!DATA.banques.find(function(b){ return b.id===sb.id; })) DATA.banques.push(JSON.parse(JSON.stringify(sb))); });
@@ -2358,7 +2358,7 @@ try { /* dummy to avoid try-catch mismatch */
 } catch(_e){ console.warn('Purge banques:', _e); }
 // Normalisation défensive au boot — protège contre banques sans questions
 // Purge stricte — uniquement les 5 banques officielles, rien d'autre
-var _officialBqIds = ['bq-paques-vence','bq-croix-rouge']; // Banques officielles actives
+var _officialBqIds = ['bq-paques-vence','bq-croix-rouge','bq-nds-artistes','bq-nds-bar','bq-nds-caisses','bq-nds-ecrans','bq-nds-rse-mobilite','bq-nds-tablette']; // Banques officielles actives
 if(DATA.banques){
   DATA.banques = DATA.banques.filter(function(b){ return b && b.id && _officialBqIds.indexOf(b.id) >= 0; });
   DATA.banques.forEach(function(b){ if(!b.questions) b.questions=[]; if(!b.events) b.events=[]; });
