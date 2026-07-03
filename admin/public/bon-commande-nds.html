@@ -18,6 +18,9 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--paper);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;padding:24px}
   .doc{width:100%;max-width:820px;margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 8px 28px -14px rgba(22,32,58,.22)}
+  body.pdfexport{background:#fff!important}
+  body.pdfexport .doc{max-width:100%!important;width:100%!important;border:none!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;margin:0!important}
+  body.pdfexport .no-print{display:none!important}
 
   /* En-tete cobrand clair */
   .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
@@ -473,7 +476,10 @@ function exportPdf(){
   var d=document.getElementById("docNum");
   var num=(d&&d.value)?d.value:"bon";
   if(typeof html2pdf==="undefined"){ window.print(); return; }
-  html2pdf().set({margin:[6,6,8,6],filename:"bon-commande-"+num+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(el).save();
+  document.body.classList.add("pdfexport");
+  var opt={margin:[8,8,10,8],filename:"bon-commande-"+num+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:el.scrollWidth},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:[".offer",".pay",".signrow",".totals",".kvcard",".cobrand"]}};
+  var done=function(){ document.body.classList.remove("pdfexport"); };
+  html2pdf().set(opt).from(el).save().then(done).catch(done);
 }
 </script>
 <script>
