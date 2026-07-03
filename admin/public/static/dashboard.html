@@ -4654,11 +4654,17 @@ function renderPilotage(){
   var pqLots    = DATA.lots ? DATA.lots.filter(function(l){ return l.eventId==='ev-paques'; }).length : 8;
   var pqTxOptin = evPq.stats ? evPq.stats.txOptin : 73;
 
+  // KPIs NDS 2026 (données réelles) + synthèse bons de commande
+  if(!state.bonsCommande){ loadBonsCommande(); }
+  var _bc = state.bonsCommande || [];
+  var _bcN = state.bonsCommande ? _bc.length : '…';
+  var _bcSig = state.bonsCommande ? _bc.filter(function(b){return b.statut==='signe'||b.statut==='sign\u00e9';}).length : '…';
+  var _ndsPart = (DATA.partenaires||[]).length;
   html += '<div class="kpi-grid">'
-       + kpi('Participants', pqPart, {delta: pqGagn+' gagnants · '+pqLots+' lots', trend:'up'})
-       + kpi('Opt-in', pqOptin, {delta: pqTxOptin+' % opt-in', trend:'up'})
-       + kpi('Partenaires', pqPart3, {delta: 'Fêtes de Pâques 2026', trend:'flat'})
-       + kpi('Joueurs CRM', DATA.joueurs.length, {delta: '186 inscrits · 40 questions', trend:'flat'})
+       + kpi('Partenaires NDS', _ndsPart, {delta: 'Nuits du Sud 2026', trend:'up'})
+       + kpi('Bons de commande', _bcN, {delta: _bcSig+' sign\u00e9(s)', trend:'flat'})
+       + kpi('Joueurs CRM', DATA.joueurs.length, {delta: 'inscrits', trend:'flat'})
+       + kpi('Festival', '9\u201318 juil', {delta: 'Vence \u00b7 2026', trend:'flat'})
        + '</div>';
   html += '<div class="cockpit-grid">';
   html += '<div class="cockpit-col live">';
