@@ -497,13 +497,59 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function exportPdf(){
-  var el=document.querySelector(".doc");
-  var d=document.getElementById("docNum"); var num=(d&&d.value)?d.value:"bon";
-  if(typeof html2pdf==="undefined"){ window.print(); return; }
-  document.body.classList.add("pdfexport");
-  var opt={margin:[7,7,7,7],filename:"bon-commande-"+num+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",windowWidth:820,scrollX:0,scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["avoid-all","css"]}};
-  var done=function(){ document.body.classList.remove("pdfexport"); };
-  html2pdf().set(opt).from(el).save().then(done).catch(done);
+  if(!(window.jspdf&&window.jspdf.jsPDF)){ if(typeof html2pdf!=='undefined'){document.body.classList.add('pdfexport');html2pdf().set({margin:7,filename:'bon.pdf',jsPDF:{unit:'mm',format:'a4'}}).from(document.querySelector('.doc')).save().then(function(){document.body.classList.remove('pdfexport');});} else {window.print();} return; }
+  function S(t){return String(t==null?'':t).replace(/\u2713/g,'-').replace(/\u2022/g,'-').replace(/[\u2013\u2014]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');}
+  function gv(id){var e=document.getElementById(id);if(!e)return '';var v=(e.value!==undefined&&e.tagName!=='DIV'&&e.tagName!=='B')?e.value:e.textContent;return S((v||'').replace(/<[^>]*>/g,'').trim());}
+  function so(sel){var o=document.querySelector('.offer.sel')||document.querySelector('.offer');if(!o)return '';var e=o.querySelector(sel);if(!e)return '';return S((e.value!==undefined?e.value:e.textContent).trim());}
+  function offName(){var o=document.querySelector('.offer.sel')||document.querySelector('.offer');if(!o)return '';var e=o.querySelector('.offer-nm');if(!e)return '';return S((e.childNodes[0]?e.childNodes[0].textContent:e.textContent).trim());}
+  var jsPDF=window.jspdf.jsPDF, doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+  var W=210,M=14,x=M,y=15,CW=W-2*M;
+  var ink=[22,32,58],teal=[29,158,117],gold=[150,110,50],mut=[90,104,125],faint=[150,163,184],acc=[59,92,196],pink=[190,40,90];
+  function T(t,xx,yy,sz,st,col,al){doc.setFont('helvetica',st||'normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);doc.text(S(t),xx,yy,al?{align:al}:undefined);}
+  function para(t,xx,yy,sz,col,lh){doc.setFont('helvetica','normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);var w=doc.splitTextToSize(S(t),CW);for(var i=0;i<w.length;i++){doc.text(w[i],xx,yy);yy+=lh;}return yy;}
+  T('OPconsult',x,y,15,'bold',ink); T('x  Flowin',x+40,y,10,'bold',teal); T('solution marketing evenementiel',x+40,y+3.5,7,'normal',faint);
+  T('ANIMATION DIGITALE FLOWIN - NUITS DU SUD 2026',W-M,y-3,7,'bold',gold,'right');
+  y+=9; T('Bon de commande',x,y,17,'bold',ink);
+  T('No '+gv('docNum'),W-M,y-6,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-1.5,9,'normal',mut,'right'); T('Cloture des inscriptions : 7 juillet 2026',W-M,y+3,9,'normal',mut,'right');
+  y+=4; T('Reference jeu et animation commerciale - Nuits du Sud 2026',x,y,8,'italic',faint);
+  y+=7; var colW=(CW-8)/2;
+  doc.setDrawColor(225,228,235); doc.roundedRect(x,y,colW,29,2,2); doc.roundedRect(x+colW+8,y,colW,29,2,2);
+  T('EMETTEUR',x+4,y+5,7,'bold',teal); T('OPConsult',x+4,y+11,11,'bold',ink); T('40 rue des Arcs, 06140 Vence',x+4,y+16,8,'normal',mut); T('04 93 59 91 37 - info@opconsult.co',x+4,y+20,8,'normal',mut); T('Mentions legales completes en bas de page',x+4,y+24.5,7,'normal',faint);
+  var px=x+colW+12; T('PARTENAIRE',px,y+5,7,'bold',teal); T(gv('f_raison')||'-',px,y+11,11,'bold',ink); T(gv('f_adresse'),px,y+16,8,'normal',mut); T(((gv('f_cp')+'  '+gv('f_ville')).trim()),px,y+20,8,'normal',mut);
+  var pc=[gv('f_contact'),gv('f_tel'),gv('f_email')].filter(Boolean).join(' - '); T(pc,px,y+24,7.5,'normal',mut); T(gv('f_siret')?('SIRET '+gv('f_siret')):'',px,y+28,7.5,'normal',mut);
+  y+=35;
+  T('OFFRE RETENUE',x,y,8,'bold',teal); y+=6; T(offName()||'Offre',x,y,14,'bold',ink); T((so('.offer-price')||'-')+' EUR HT',W-M,y,15,'bold',ink,'right');
+  y+=5.5; T('Valeur du lot : '+(so('.offer-lotval')||'-')+' EUR',x,y,9,'normal',mut); y+=6;
+  T('PRESTATIONS INCLUSES',x,y,7.5,'bold',teal); y+=4.5;
+  var inc=(so('.offer-inclus')||'').split('\n').filter(function(l){return l.trim();});
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(ink[0],ink[1],ink[2]);
+  inc.forEach(function(l){var w=doc.splitTextToSize(S(l),CW-2);w.forEach(function(ln){doc.text(ln,x,y);y+=4.1;});});
+  y+=2.5;
+  var ld=so('.offer-lotdesc'),le=so('.offer-lotemis'),lu=so('.offer-lotuse');
+  if(ld||le||lu){ T('LOT - DESCRIPTIF & CONDITIONS',x,y,7.5,'bold',gold); y+=4.5;
+    if(ld){T('Descriptif : ',x,y,8.5,'bold',mut);T(ld,x+21,y,8.5,'normal',ink);y+=4.3;}
+    if(le){T('Validite : ',x,y,8.5,'bold',mut);T(le,x+21,y,8.5,'normal',ink);y+=4.3;}
+    if(lu){y=para('Utilisation : '+lu,x,y,8.5,ink,4.1);} y+=1.5; }
+  var mention=so('.offer-mentiontxt');
+  if(mention){ T('Mention particuliere : ',x,y,8.5,'bold',pink); y=para(mention,x,y+4,8.5,ink,4.1)+1; }
+  var tW=76,tx=W-M-tW,ty=y+1; doc.setDrawColor(225,228,235); doc.roundedRect(tx,ty,tW,20,2,2);
+  T('Montant HT facture',tx+4,ty+6,9,'normal',mut); T(gv('tHT')||'-',tx+tW-4,ty+6,9,'bold',ink,'right');
+  T('TVA 20 %',tx+4,ty+11.5,9,'normal',mut); T(gv('tTVA')||'-',tx+tW-4,ty+11.5,9,'bold',ink,'right');
+  doc.setFillColor(254,249,231); doc.rect(tx+0.4,ty+13.5,tW-0.8,6.1,'F');
+  T('Net a payer TTC',tx+4,ty+18,10,'bold',ink); T(gv('tTTC')||'-',tx+tW-4,ty+18,11,'bold',ink,'right');
+  y=ty+25; T("Le lot (bon d'achat) est offert par le commercant et deduit en caisse - non facture par OPConsult.",W-M,y,7.3,'italic',faint,'right'); y+=6;
+  doc.setDrawColor(225,228,235); doc.roundedRect(x,y,CW,15,2,2); T('REGLEMENT',x+4,y+5,7,'bold',teal);
+  T('Mode : Virement bancaire',x+4,y+9.5,8.5,'normal',ink); T('BIC : CCBPFRPPMAR',x+CW/2,y+9.5,8.5,'normal',ink);
+  T('IBAN : FR76 1460 7003 3470 2211 6462 345',x+4,y+13.5,8.5,'normal',ink); T('Ref : '+(gv('payRef')||gv('docNum')),x+CW/2,y+13.5,8.5,'normal',ink);
+  y+=19;
+  y=para("Conditions. Bon de commande a retourner date et signe avec la mention << Bon pour accord >>. L'animation digitale est confirmee a reception du reglement. Une facture definitive est emise apres encaissement. Prestation rattachee au festival Nuits du Sud (9-18 juillet 2026, Vence). Cloture des inscriptions : 7 juillet 2026. Pour toute question : info@opconsult.co.",x,y,7.4,mut,3.3)+2;
+  T('Bon pour accord (nom, date et signature) :',x,y,9,'bold',ink); y+=2.5;
+  doc.setDrawColor(200,206,224); doc.setLineDashPattern([1,1],0); doc.roundedRect(x,y,78,20,2,2); doc.setLineDashPattern([],0);
+  var sig=document.getElementById('sigImg'); if(sig&&sig.getAttribute('src')&&sig.getAttribute('src').indexOf('data:image')===0){try{doc.addImage(sig.getAttribute('src'),'PNG',x+2,y+2,74,16);}catch(e){}}
+  T('Nom : '+gv('f_signataire'),x+84,y+8,9,'normal',ink); T('Date : '+gv('f_date'),x+84,y+15,9,'normal',ink);
+  y+=25;
+  y=para('Flowin est une solution marketing evenementiel editee par OPConsult, marque de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN FR76 1460 7003 3470 2211 6462 345 - BIC CCBPFRPPMAR - Document non contractuel tant que non signe << Bon pour accord >>.',x,y,6.3,faint,2.5);
+  doc.save('bon-commande-'+(gv('docNum')||'bon')+'.pdf');
 }
 </script>
 <script>
