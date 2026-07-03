@@ -1,22 +1,20 @@
 # Kit réseaux — Cycles 963
 
-## Lien cliquable unique (à mettre en bio / story / commentaire)
+_À copier-coller par le partenaire sur Instagram / Facebook. Le lien est cliquable pour ceux qui regardent sur mobile (ils ne peuvent pas flasher la vidéo)._
+
+## 📲 Texte à poster (Insta / Facebook)
+🎉 Salut ! Bienvenue au GRAND JEU des Nuits du Sud 2026 🎶
+
+Cet été à Vence (9 → 18 juillet), viens jouer, cumule tes points et tente de gagner les lots de nos commerces partenaires !
+
+✨ Chez Cycles 963, gagne une journée de location de vélo (5 gagnants) 🚵 — pour partir explorer l'arrière-pays niçois et le Col de Vence !
+
+👉 Comment jouer ? Flashe le QR code de la vidéo — ou, si tu regardes sur ton téléphone, clique simplement ici pour lancer le jeu :
 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-cycles963&source=reseaux-cycles963
-_(usage unique · canal réseaux · à diffuser avec la vidéo pour ceux qui regardent sur mobile et ne peuvent pas flasher)_
 
-## Invitation courte (story / bio)
-🎉 Joue aux Nuits du Sud avec Cycles 963 : réponds au quiz, cumule des tickets et tente de gagner un bon d'achat chez nous + le grand tirage au sort à la clôture du festival !
+Réponds au quiz, cumule tes tickets, et rendez-vous au grand tirage au sort à la clôture du festival 🏆
 
-## Légende à coller sous le post Insta / Facebook
-🎶 NUITS DU SUD 2026 — JOUE CHEZ CYCLES 963 🎶
+#Vélo #VTT #ColDeVence #ArrièrePays #Cyclisme #ÉbikeCôteDAzur #NuitsDuSud #NuitsDuSud2026 #Vence #JeuConcours #Concours #Festival #CôteDAzur #Flowin
 
-Cet été à Vence (9 → 18 juillet), 24 000 festivaliers jouent au grand quiz des Nuits du Sud !
-Réponds aux questions, cumule des tickets et tente de gagner un bon d'achat chez Cycles 963 🎁, plus le grand tirage au sort à la clôture du festival.
-
-📱 Tu regardes cette vidéo sur ton téléphone ? Pas besoin de flasher le QR — clique directement pour jouer :
-👉 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-cycles963&source=reseaux-cycles963
-
-📍 Cycles 963 · Vence
-Un jeu proposé par Flowin, partenaire jeux des Nuits du Sud.
-
-#NuitsDuSud #NuitsDuSud2026 #Vence #JeuConcours #Concours #Festival #CôteDAzur #Alpesmaritimes #JeuFestival #Flowin #Cycles963
+## 🔗 Lien cliquable unique (usage unique · réseaux)
+https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-cycles963&source=reseaux-cycles963
