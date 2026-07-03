@@ -283,7 +283,7 @@
     <span class="x-sep">&times;</span>
     <div class="flowin-block">
       <div class="flowin-mini"><div class="fb-dot">F</div><span class="fb-txt">Flow<span>in</span></span></div>
-      <div class="flowin-cap">solution marketing &eacute;v&eacute;nementiel &middot; OPConsult (BAITA EURL)</div>
+      <div class="flowin-cap">Solution d&rsquo;animation commerciale &middot; Animer &middot; Fid&eacute;liser &middot; Booster</div>
     </div>
   </div>
 
@@ -493,7 +493,7 @@
 <div class="no-print" style="text-align:center;margin:18px auto 30px">
   <button type="button" onclick="exportPdf()" class="btn-primary" style="background:#7C2D92;font-size:15px;padding:12px 26px">&#128229; Convertir en PDF (A4)</button>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="/nds/vendor/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function exportPdf(){
@@ -508,7 +508,7 @@ function exportPdf(){
   var ink=[22,32,58],teal=[29,158,117],gold=[150,110,50],mut=[90,104,125],faint=[150,163,184],acc=[59,92,196],pink=[190,40,90];
   function T(t,xx,yy,sz,st,col,al){doc.setFont('helvetica',st||'normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);doc.text(S(t),xx,yy,al?{align:al}:undefined);}
   function para(t,xx,yy,sz,col,lh){doc.setFont('helvetica','normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);var w=doc.splitTextToSize(S(t),CW);for(var i=0;i<w.length;i++){doc.text(w[i],xx,yy);yy+=lh;}return yy;}
-  T('OPconsult',x,y,15,'bold',ink); T('x  Flowin',x+40,y,10,'bold',teal); T('solution marketing evenementiel',x+40,y+3.5,7,'normal',faint);
+  T('OPconsult',x,y,15,'bold',ink); T('x  Flowin',x+40,y,10,'bold',teal); T("Solution d'animation commerciale - Animer - Fideliser - Booster",x+40,y+3.5,6.5,'normal',faint);
   T('ANIMATION DIGITALE FLOWIN - NUITS DU SUD 2026',W-M,y-3,7,'bold',gold,'right');
   y+=9; T('Bon de commande',x,y,17,'bold',ink);
   T('No '+gv('docNum'),W-M,y-6,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-1.5,9,'normal',mut,'right');
