@@ -610,12 +610,18 @@ function exportPdf(){
     if(!document.body.className.match(/viewmode/)){ var ld=el.querySelector('.offer-lotdesc'); if(ld && !ld.value) ld.value='Bon d\u2019achat \u00e0 valoir dans votre \u00e9tablissement'; }
     computeTotals();
   }
+  function mirrorShared(inp){
+    var cls=['offer-lotval','offer-lotdesc','offer-lotemis','offer-lotuse','offer-mentiontxt'];
+    var m=null; for(var k=0;k<cls.length;k++){ if(inp.classList.contains(cls[k])){ m=cls[k]; break; } }
+    if(!m) return;
+    for(var o=0;o<offers.length;o++){ var tt=offers[o].querySelector('.'+m); if(tt && tt!==inp) tt.value=inp.value; }
+  }
   for(var i=0;i<offers.length;i++){ (function(el){
     el.addEventListener('click',function(){ pickOffer(el); });
     el.addEventListener('keydown',function(e){ var tg=e.target.tagName; if(tg==='INPUT'||tg==='TEXTAREA') return; if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pickOffer(el); } });
     function bind(inp){ if(!inp) return;
       inp.addEventListener('focus',function(){ if(sel!==el) pickOffer(el); });
-      inp.addEventListener('input',function(){ if(sel!==el) pickOffer(el); else computeTotals(); });
+      inp.addEventListener('input',function(){ if(sel!==el) pickOffer(el); else computeTotals(); mirrorShared(inp); });
       inp.addEventListener('click',function(e){ e.stopPropagation(); });
     }
     bind(el.querySelector('.offer-price')); bind(el.querySelector('.offer-lotval')); bind(el.querySelector('.offer-mentiontxt'));
@@ -761,15 +767,19 @@ function exportPdf(){
     setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
     setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
     setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
-    for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
-        var pi=offers[j].querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
-        var li=offers[j].querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
-        var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||''; var ic=offers[j].querySelector('.offer-inclus'); if(ic && d.prestations_incluses) ic.value=d.prestations_incluses;
-        var ld=offers[j].querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
-        var le=offers[j].querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
-        var lu=offers[j].querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
-        pickOffer(offers[j]);
-    } }
+    for(var j=0;j<offers.length;j++){ var oo=offers[j];
+      // Lot + mention identiques sur TOUTES les offres (un seul lot partenaire)
+      var li=oo.querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
+      var ld=oo.querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
+      var le=oo.querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
+      var lu=oo.querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
+      var mt=oo.querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||'';
+      if(oo.getAttribute('data-offre')===d.offre){
+        var pi=oo.querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
+        var ic=oo.querySelector('.offer-inclus'); if(ic && d.prestations_incluses) ic.value=d.prestations_incluses;
+        pickOffer(oo);
+      }
+    }
     computeTotals();
     setStatus('Mode \\u00e9dition \\u2014 bon '+d.id+'. Modifie puis \\u00ab Enregistrer & envoyer au client \\u00e0 faire signer \\u00bb.','ok');
   }
