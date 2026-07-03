@@ -212,7 +212,8 @@
   body.viewmode .viewonly{display:block}
   .sigimg{max-width:260px;max-height:120px;display:block;margin-top:6px}
   #sigImg:not([src]),#sigImg[src=""]{display:none}
-  @media print{.no-print{display:none!important}}
+  @media print{.no-print{display:none!important} .fb-dot{display:none!important}}
+  body.pdfexport .fb-dot{display:none!important}
   @media print{ .actions,.sigtools{display:none!important} .fld{border-bottom:none} }
 
   /* Prix HT editable */
@@ -296,8 +297,7 @@
       </div>
       <div class="doc-meta">
         N&deg; <input id="docNum" type="text" spellcheck="false" autocomplete="off" class="docnum-edit" value="" title="Num\u00e9ro modifiable" /><br>
-        Date : <b id="docDate">__ / __ / 2026</b><br>
-        Cl&ocirc;ture des inscriptions : <b>7 juillet 2026</b>
+        Date : <b id="docDate">__ / __ / 2026</b>
       </div>
     </div>
 
@@ -511,7 +511,7 @@ function exportPdf(){
   T('OPconsult',x,y,15,'bold',ink); T('x  Flowin',x+40,y,10,'bold',teal); T('solution marketing evenementiel',x+40,y+3.5,7,'normal',faint);
   T('ANIMATION DIGITALE FLOWIN - NUITS DU SUD 2026',W-M,y-3,7,'bold',gold,'right');
   y+=9; T('Bon de commande',x,y,17,'bold',ink);
-  T('No '+gv('docNum'),W-M,y-6,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-1.5,9,'normal',mut,'right'); T('Cloture des inscriptions : 7 juillet 2026',W-M,y+3,9,'normal',mut,'right');
+  T('No '+gv('docNum'),W-M,y-6,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-1.5,9,'normal',mut,'right');
   y+=4; T('Reference jeu et animation commerciale - Nuits du Sud 2026',x,y,8,'italic',faint);
   y+=7; var colW=(CW-8)/2;
   doc.setDrawColor(225,228,235); doc.roundedRect(x,y,colW,29,2,2); doc.roundedRect(x+colW+8,y,colW,29,2,2);
