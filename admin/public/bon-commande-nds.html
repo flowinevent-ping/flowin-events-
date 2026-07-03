@@ -433,7 +433,7 @@
       <div class="trow"><span>TVA 20 %</span><span class="v" id="tTVA">&mdash;</span></div>
       <div class="trow ttc"><span>Net &agrave; payer TTC</span><span class="v" id="tTTC">&mdash;</span></div>
     </div>
-    <div class="total-note" id="catNote">Le prix du pack est modifiable directement sur l&rsquo;offre. Le lot est offert par le commer&ccedil;ant et d&eacute;duit en caisse &mdash; il n&rsquo;entre pas dans le total factur&eacute;.</div>
+    <div class="total-note" id="catNote">Le prix du pack est modifiable directement sur l&rsquo;offre. Le lot (bon d&rsquo;achat) est offert par le commer&ccedil;ant et d&eacute;duit en caisse &mdash; non factur&eacute; par OPConsult.</div>
 
     <div class="pay">
       <div class="ttl">R&egrave;glement</div>
@@ -735,7 +735,7 @@ function exportPdf(){
             if(mb && (!isSel || !(mtx&&mtx.value.trim()))) mb.style.display='none';
             var lb=offers[m].querySelector('.offer-lotbox'); if(lb && !isSel) lb.style.display='none';
         }
-        if($('catNote')){ $('catNote').innerHTML = (d.montant_ht_catalogue!=null && Number(d.montant_ht_catalogue)!==Number(d.montant_ht)) ? ('Prix catalogue : <b>'+eur(d.montant_ht_catalogue)+' HT</b> \u2014 prix factur\u00e9 : <b>'+eur(d.montant_ht)+' HT</b>. Lot d\u00e9duit en caisse, non factur\u00e9.') : 'Le lot est offert par le commer\u00e7ant et d\u00e9duit en caisse \u2014 non factur\u00e9.'; }
+        if($('catNote')){ $('catNote').innerHTML = (d.montant_ht_catalogue!=null && Number(d.montant_ht_catalogue)!==Number(d.montant_ht)) ? ('Prix catalogue : <b>'+eur(d.montant_ht_catalogue)+' HT</b> \u2014 prix factur\u00e9 : <b>'+eur(d.montant_ht)+' HT</b>. Lot d\u00e9duit en caisse, non factur\u00e9 par OPConsult.') : 'Le lot (bon d\u2019achat) est offert par le commer\u00e7ant et d\u00e9duit en caisse \u2014 non factur\u00e9 par OPConsult.'; }
         if($('sigImg')&&d.signature) $('sigImg').src=d.signature;
         if(!d.signature){
           document.body.className += ' signmode';
