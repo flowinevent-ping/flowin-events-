@@ -308,7 +308,6 @@
         <div class="ln">
           40 rue des Arcs, 06140 Vence<br>
           04 93 59 91 37 &middot; info@opconsult.co<br>
-          <span style="color:var(--faint)">Mentions l&eacute;gales compl&egrave;tes en bas de document</span>
         </div>
       </div>
       <div class="party client">
@@ -344,7 +343,7 @@
           </div>
           <div class="offer-lot">Valeur du lot : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="90"> &euro;</div>
           <div class="offer-inclus-box">
-            <label class="inclus-lbl">Prestations incluses (modifiable)</label>
+            <label class="inclus-lbl">Prestations incluses</label>
             <textarea class="offer-inclus fld-area" autocomplete="off">✓ Votre apparition dans la liste des partenaires
 ✓ Fiche contact + liens Insta / Facebook / site dans l'appli jeu
 ✓ Vidéo partenaire à placer sur Insta / Facebook (lien cliquable unique)
@@ -375,7 +374,7 @@
           </div>
           <div class="offer-lot">Valeur du lot : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="159"> &euro;</div>
           <div class="offer-inclus-box">
-            <label class="inclus-lbl">Prestations incluses (modifiable)</label>
+            <label class="inclus-lbl">Prestations incluses</label>
             <textarea class="offer-inclus fld-area" autocomplete="off">✓ Tout le pack Visibilité
 ✓ Votre présence visuelle : borne de jeu · caisses 1 & 2 · bar 1 & 2
 ✓ Écran sur scène / entre-scène : vidéo jeu et partenaire
@@ -407,7 +406,7 @@
           </div>
           <div class="offer-lot">Valeur du lot : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="259"> &euro;</div>
           <div class="offer-inclus-box">
-            <label class="inclus-lbl">Prestations incluses (modifiable)</label>
+            <label class="inclus-lbl">Prestations incluses</label>
             <textarea class="offer-inclus fld-area" autocomplete="off">✓ Tout le pack Animation
 ✓ Présence sur tous les supports & stations pendant le festival
 ✓ Quiz personnalisable à votre marque
@@ -494,7 +493,7 @@
 <div class="no-print" style="text-align:center;margin:18px auto 30px">
   <button type="button" onclick="exportPdf()" class="btn-primary" style="background:#7C2D92;font-size:15px;padding:12px 26px">&#128229; Convertir en PDF (A4)</button>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function exportPdf(){
@@ -516,7 +515,7 @@ function exportPdf(){
   y+=4; T('Reference jeu et animation commerciale - Nuits du Sud 2026',x,y,8,'italic',faint);
   y+=7; var colW=(CW-8)/2;
   doc.setDrawColor(225,228,235); doc.roundedRect(x,y,colW,29,2,2); doc.roundedRect(x+colW+8,y,colW,29,2,2);
-  T('EMETTEUR',x+4,y+5,7,'bold',teal); T('OPConsult',x+4,y+11,11,'bold',ink); T('40 rue des Arcs, 06140 Vence',x+4,y+16,8,'normal',mut); T('04 93 59 91 37 - info@opconsult.co',x+4,y+20,8,'normal',mut); T('Mentions legales completes en bas de page',x+4,y+24.5,7,'normal',faint);
+  T('EMETTEUR',x+4,y+5,7,'bold',teal); T('OPConsult',x+4,y+11,11,'bold',ink); T('40 rue des Arcs, 06140 Vence',x+4,y+16,8,'normal',mut); T('04 93 59 91 37 - info@opconsult.co',x+4,y+20,8,'normal',mut);
   var px=x+colW+12; T('PARTENAIRE',px,y+5,7,'bold',teal); T(gv('f_raison')||'-',px,y+11,11,'bold',ink); T(gv('f_adresse'),px,y+16,8,'normal',mut); T(((gv('f_cp')+'  '+gv('f_ville')).trim()),px,y+20,8,'normal',mut);
   var pc=[gv('f_contact'),gv('f_tel'),gv('f_email')].filter(Boolean).join(' - '); T(pc,px,y+24,7.5,'normal',mut); T(gv('f_siret')?('SIRET '+gv('f_siret')):'',px,y+28,7.5,'normal',mut);
   y+=35;
