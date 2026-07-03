@@ -662,7 +662,18 @@ function exportPdf(){
         setpf('f_tel', pp.contact_tel||pp.tel);
         setpf('f_email', pp.contact_email||pp.email);
         setpf('f_siret', pp.siret);
-        setStatus('Coordonn\u00e9es de '+(pp.nom||prefillSlug)+' pr\u00e9-remplies. Compl\u00e9tez l\u2019offre puis faites signer.','ok');
+        // report du lot réel du partenaire (dashboard -> BC) sur toutes les offres
+        if(pp.lots && pp.lots.length){
+          var _lot=pp.lots[0];
+          var _lv=String(_lot.valeur!=null?_lot.valeur:'').replace(/[^0-9.,]/g,'').replace(',','.');
+          var _ofs=document.querySelectorAll('.offer');
+          for(var _oi=0;_oi<_ofs.length;_oi++){
+            var _od=_ofs[_oi].querySelector('.offer-lotdesc'); if(_od && _lot.nom) _od.value=_lot.nom;
+            var _ov=_ofs[_oi].querySelector('.offer-lotval'); if(_ov && _lv) _ov.value=_lv;
+            var _oc=_ofs[_oi].querySelector('.offer-lotuse'); if(_oc && _lot.conditions) _oc.value=_lot.conditions;
+          }
+        }
+        setStatus('Coordonn\u00e9es et lot de '+(pp.nom||prefillSlug)+' pr\u00e9-remplis. Compl\u00e9tez l\u2019offre puis faites signer.','ok');
       }).catch(function(){});
   }
   if(viewId){
