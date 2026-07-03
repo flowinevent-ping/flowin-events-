@@ -515,7 +515,7 @@ function exportPdf(){
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(29,158,117); doc.text('Flow',_fx+8,_fy+0.5); var _fw=doc.getTextWidth('Flow'); doc.setTextColor(22,32,58); doc.text('in',_fx+8+_fw,_fy+0.5);
   T("Solution d'animation commerciale - Animer - Fideliser - Booster",_fx,_fy+4.8,6.3,'normal',faint);
   T('ANIMATION DIGITALE FLOWIN - NUITS DU SUD 2026',W-M,y-3,7,'bold',gold,'right');
-  y+=9; T('Bon de commande',x,y,17,'bold',ink);
+  y+=13; T('Bon de commande',x,y,17,'bold',ink);
   T('No '+gv('docNum'),W-M,y-6,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-1.5,9,'normal',mut,'right');
   y+=4; T('Reference jeu et animation commerciale - Nuits du Sud 2026',x,y,8,'italic',faint);
   y+=7; var colW=(CW-8)/2;
@@ -524,7 +524,7 @@ function exportPdf(){
   var px=x+colW+12; T('PARTENAIRE',px,y+5,7,'bold',teal); T(gv('f_raison')||'-',px,y+11,11,'bold',ink); T(gv('f_adresse'),px,y+16,8,'normal',mut); T(((gv('f_cp')+'  '+gv('f_ville')).trim()),px,y+20,8,'normal',mut);
   var pc=[gv('f_contact'),gv('f_tel'),gv('f_email')].filter(Boolean).join(' - '); T(pc,px,y+24,7.5,'normal',mut); T(gv('f_siret')?('SIRET '+gv('f_siret')):'',px,y+28,7.5,'normal',mut);
   y+=35;
-  T('OFFRE RETENUE',x,y,8,'bold',teal); y+=6; T(offName()||'Offre',x,y,14,'bold',ink); T((so('.offer-price')||'-')+' EUR HT',W-M,y,15,'bold',ink,'right');
+  T('OFFRE RETENUE',x,y,8,'bold',teal); y+=6; var _offY=y-5; T(offName()||'Offre',x,y,14,'bold',ink); T((so('.offer-price')||'-')+' EUR HT',W-M,y,15,'bold',ink,'right');
   y+=5.5; T('Valeur du lot : '+(so('.offer-lotval')||'-')+' EUR',x,y,9,'normal',mut); y+=6;
   T('PRESTATIONS INCLUSES',x,y,7.5,'bold',teal); y+=4.5;
   var inc=(so('.offer-inclus')||'').split('\n').filter(function(l){return l.trim();});
@@ -537,13 +537,17 @@ function exportPdf(){
     if(le){T('Validite : ',x,y,8.5,'bold',mut);T(le,x+21,y,8.5,'normal',ink);y+=4.3;}
     if(lu){y=para('Utilisation : '+lu,x,y,8.5,ink,4.1);} y+=1.5; }
   var mention=so('.offer-mentiontxt');
-  var _mlines=mention?doc.splitTextToSize(S(mention),CW-8):[];
-  var _mbh=Math.max(13, 10 + _mlines.length*4);
-  doc.setDrawColor(232,205,214); doc.setFillColor(252,247,249); doc.roundedRect(x,y,CW,_mbh,2,2,'FD');
-  T('Mention particuliere / remise pour ce pack',x+4,y+5.5,7.3,'bold',pink);
-  if(mention){ doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(ink[0],ink[1],ink[2]); var _my=y+10.5; _mlines.forEach(function(ln){doc.text(ln,x+4,_my);_my+=4;}); }
-  else { T('(aucune remise / condition particuliere pour ce pack)',x+4,y+10.5,8,'italic',faint); }
-  y+=_mbh+3;
+  if(mention){
+    var _mlines=doc.splitTextToSize(S(mention),CW-8);
+    var _mbh=10 + _mlines.length*4;
+    doc.setDrawColor(225,228,235); doc.roundedRect(x,y,CW,_mbh,2,2);
+    T('Mention particuliere / remise pour ce pack',x+4,y+5.5,7.3,'bold',pink);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(ink[0],ink[1],ink[2]); var _my=y+10.5; _mlines.forEach(function(ln){doc.text(ln,x+4,_my);_my+=4;});
+    y+=_mbh+3;
+  } else { y+=1; }
+  // encadré bleu autour du module offre
+  doc.setDrawColor(59,92,196); doc.setLineWidth(0.5); doc.roundedRect(x-3,_offY,CW+6,(y-2)-_offY,3,3); doc.setLineWidth(0.2);
+  y+=2;
   var tW=76,tx=W-M-tW,ty=y+1; doc.setDrawColor(225,228,235); doc.roundedRect(tx,ty,tW,20,2,2);
   T('Montant HT facture',tx+4,ty+6,9,'normal',mut); T(gv('tHT')||'-',tx+tW-4,ty+6,9,'bold',ink,'right');
   T('TVA 20 %',tx+4,ty+11.5,9,'normal',mut); T(gv('tTVA')||'-',tx+tW-4,ty+11.5,9,'bold',ink,'right');
