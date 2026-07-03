@@ -229,6 +229,8 @@
   .kv label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
   .fld-area{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line);border-radius:10px;background:var(--white);padding:9px 11px;width:100%;outline:none;resize:vertical;min-height:62px;line-height:1.5;white-space:pre-wrap}
   .offer-mentiontxt{min-height:84px}
+  .offer-inclus{min-height:104px}
+  .inclus-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--teal);text-transform:uppercase;margin:14px 0 5px}
   .fld-area:focus{border-color:var(--accent)}
   .fld-area::placeholder{color:var(--faint);font-style:italic}
   body.viewmode .fld-area{background:var(--paper);border-style:dashed}
@@ -313,12 +315,13 @@
             <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
           </div>
           <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="90"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
-          <ul class="offer-ul">
-            <li><b>Votre apparition</b> dans la liste des partenaires</li>
-            <li><b>Fiche contact + liens</b> Insta / Facebook / site dans l&rsquo;appli jeu</li>
-            <li><b>Vid&eacute;o partenaire</b> &agrave; placer sur Insta / Facebook (lien cliquable unique)</li>
-            <li><b>Affiche en magasin</b> (jeu)</li>
-          </ul>
+          <div class="offer-inclus-box">
+            <label class="inclus-lbl">Prestations incluses (modifiable)</label>
+            <textarea class="offer-inclus fld-area" autocomplete="off">✓ Votre apparition dans la liste des partenaires
+✓ Fiche contact + liens Insta / Facebook / site dans l'appli jeu
+✓ Vidéo partenaire à placer sur Insta / Facebook (lien cliquable unique)
+✓ Affiche en magasin (jeu)</textarea>
+          </div>
           <div class="offer-lotbox">
             <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
             <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
@@ -343,13 +346,14 @@
             <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="1490">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
           </div>
           <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="159"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
-          <ul class="offer-ul">
-            <li>Tout le pack <b>Visibilit&eacute;</b></li>
-            <li><b>Votre pr&eacute;sence visuelle</b> : borne de jeu &middot; caisses 1 &amp; 2 &middot; bar 1 &amp; 2</li>
-            <li><b>&Eacute;cran sur sc&egrave;ne / entre-sc&egrave;ne</b> : vid&eacute;o jeu et partenaire</li>
-            <li><b>Vid&eacute;o de diffusion</b> Insta Nuits du Sud + partenaires</li>
-            <li><b>Appli jeu</b> : bandeau d&eacute;filant &middot; carte &middot; fiche contact &middot; liens r&eacute;seaux</li>
-          </ul>
+          <div class="offer-inclus-box">
+            <label class="inclus-lbl">Prestations incluses (modifiable)</label>
+            <textarea class="offer-inclus fld-area" autocomplete="off">✓ Tout le pack Visibilité
+✓ Votre présence visuelle : borne de jeu · caisses 1 & 2 · bar 1 & 2
+✓ Écran sur scène / entre-scène : vidéo jeu et partenaire
+✓ Vidéo de diffusion Insta Nuits du Sud + partenaires
+✓ Appli jeu : bandeau défilant · carte · fiche contact · liens réseaux</textarea>
+          </div>
           <div class="offer-lotbox">
             <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
             <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
@@ -374,12 +378,13 @@
             <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="3590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
           </div>
           <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="259"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
-          <ul class="offer-ul">
-            <li>Tout le pack <b>Animation</b></li>
-            <li><b>Pr&eacute;sence sur tous les supports &amp; stations</b> pendant le festival</li>
-            <li><b>Quiz personnalisable</b> &agrave; votre marque</li>
-            <li><b>Track record des passages</b> : votre magasin &middot; vos r&eacute;seaux sociaux &middot; clients &middot; visiteurs &middot; festival</li>
-          </ul>
+          <div class="offer-inclus-box">
+            <label class="inclus-lbl">Prestations incluses (modifiable)</label>
+            <textarea class="offer-inclus fld-area" autocomplete="off">✓ Tout le pack Animation
+✓ Présence sur tous les supports & stations pendant le festival
+✓ Quiz personnalisable à votre marque
+✓ Track record des passages : votre magasin · vos réseaux sociaux · clients · visiteurs · festival</textarea>
+          </div>
           <div class="offer-lotbox">
             <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
             <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
@@ -485,6 +490,7 @@ function exportPdf(){
   function selPrice(){ if(!sel) return NaN; var i=sel.querySelector('.offer-price'); return i?parseNum(i.value):NaN; }
   function selLot(){ if(!sel) return NaN; var i=sel.querySelector('.offer-lotval'); return i?parseNum(i.value):NaN; }
   function selMention(){ if(!sel) return ''; var t=sel.querySelector('.offer-mentiontxt'); return t?t.value.trim():''; }
+  function selInclus(){ if(!sel) return ''; var t=sel.querySelector('.offer-inclus'); return t?t.value.trim():''; }
   function selVal(cls){ if(!sel) return ''; var e=sel.querySelector(cls); return e?e.value.trim():''; }
   function computeTotals(){
     var ht=selPrice();
@@ -515,7 +521,7 @@ function exportPdf(){
       inp.addEventListener('click',function(e){ e.stopPropagation(); });
     }
     bind(el.querySelector('.offer-price')); bind(el.querySelector('.offer-lotval')); bind(el.querySelector('.offer-mentiontxt'));
-    bind(el.querySelector('.offer-lotdesc')); bind(el.querySelector('.offer-lotemis')); bind(el.querySelector('.offer-lotuse'));
+    bind(el.querySelector('.offer-lotdesc')); bind(el.querySelector('.offer-lotemis')); bind(el.querySelector('.offer-lotuse')); bind(el.querySelector('.offer-inclus'));
   })(offers[i]); }
   for(var b=0;b<psBtns.length;b++){ (function(btn){
     btn.addEventListener('click',function(){
@@ -584,6 +590,7 @@ function exportPdf(){
       offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
       montant_ht:t.ht, montant_tva:t.tva, montant_ttc:t.ttc, montant_ht_catalogue:catHt,
       mention_particuliere:selMention()||null,
+      prestations_incluses:selInclus()||null,
       lot_valeur:lotVal, lot_descriptif:lotDesc,
       lot_validite:selVal('.offer-lotemis')||null, lot_conditions:selVal('.offer-lotuse')||null,
       signataire: withSig?($('f_signataire').value.trim()||contact):null,
@@ -631,7 +638,7 @@ function exportPdf(){
     for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
         var pi=offers[j].querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
         var li=offers[j].querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
-        var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||'';
+        var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||''; var ic=offers[j].querySelector('.offer-inclus'); if(ic && d.prestations_incluses) ic.value=d.prestations_incluses;
         var ld=offers[j].querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
         var le=offers[j].querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
         var lu=offers[j].querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
@@ -675,7 +682,7 @@ function exportPdf(){
         for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
             var pi=offers[j].querySelector('.offer-price'); if(pi && d.montant_ht!=null) pi.value=d.montant_ht;
             var li=offers[j].querySelector('.offer-lotval'); if(li && d.lot_valeur!=null) li.value=d.lot_valeur;
-            var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||'';
+            var mt=offers[j].querySelector('.offer-mentiontxt'); if(mt) mt.value=d.mention_particuliere||''; var ic=offers[j].querySelector('.offer-inclus'); if(ic && d.prestations_incluses) ic.value=d.prestations_incluses;
             var ld=offers[j].querySelector('.offer-lotdesc'); if(ld) ld.value=d.lot_descriptif||'';
             var le=offers[j].querySelector('.offer-lotemis'); if(le) le.value=d.lot_validite||'';
             var lu=offers[j].querySelector('.offer-lotuse'); if(lu) lu.value=d.lot_conditions||'';
