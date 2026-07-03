@@ -334,7 +334,7 @@
 
     <div class="fac-actions no-print">
       <button type="button" id="saveBtn" class="btn-primary">Enregistrer la facture</button>
-      <a href="#" class="btn-primary" style="background:#3B5CC4" onclick="window.print();return false;">&#128424; Imprimer / PDF</a>
+      <a href="#" class="btn-primary" style="background:#3B5CC4" onclick="exportPdf();return false;">&#128229; Télécharger en PDF (A4)</a>
       <a href="#" id="mailBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer au client</a>
       <button type="button" id="editionBtn" class="btn-primary" style="background:#7C2D92" title="Cr&eacute;er une facture rectificative (&eacute;dition suivante)">+ Nouvelle &eacute;dition</button>
       <span id="status" class="statusmsg"></span>
@@ -488,6 +488,16 @@
     renderNum();
   }
 })();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function exportPdf(){
+  var el=document.querySelector(".doc");
+  var n=(document.getElementById("facNum")&&document.getElementById("facNum").textContent)||"facture";
+  n=String(n).replace(/[^A-Za-z0-9_-]/g,"");
+  if(typeof html2pdf==="undefined"){ window.print(); return; }
+  html2pdf().set({margin:[6,6,8,6],filename:"facture-"+n+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(el).save();
+}
 </script>
 </body>
 </html>
