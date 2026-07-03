@@ -21,14 +21,14 @@
 
   /* En-tete cobrand clair */
   .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
-  .opc-logo{height:54px;width:auto;display:block}
+  .opc-logo{height:100px;width:auto;display:block}
   .x-sep{color:var(--faint);font-weight:700;font-size:14px}
   .flowin-mini{display:flex;align-items:center;gap:8px}
-  .flowin-mini .fb-dot{width:30px;height:30px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
-  .flowin-mini .fb-txt{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;color:var(--teal);line-height:1}
+  .flowin-mini .fb-dot{width:42px;height:42px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px}
+  .flowin-mini .fb-txt{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:var(--teal);line-height:1}
   .flowin-mini .fb-txt span{color:var(--ink)}
   .flowin-block{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
-  .flowin-cap{font-size:9px;font-weight:600;color:var(--faint);letter-spacing:.03em}
+  .flowin-cap{font-size:11px;font-weight:600;color:var(--faint);letter-spacing:.03em}
 
   .body{padding:30px 36px 30px}
 
@@ -85,9 +85,9 @@
   .trow.ttc .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ink)}
 
   /* Reglement */
-  .pay{margin-top:24px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
-  .pay .ttl{font-family:'Bricolage Grotesque';font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
-  .pay .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;font-size:12.5px;color:var(--muted)}
+  .pay{margin-top:14px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+  .pay .ttl{font-family:'Bricolage Grotesque';font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:5px}
+  .pay .grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 22px;font-size:11px;color:var(--muted)}
   .pay .grid b{color:var(--ink)}
   .pay .iban{font-variant-numeric:tabular-nums;letter-spacing:.3px}
 
@@ -116,7 +116,7 @@
     html,body{background:#fff;padding:0;margin:0;font-size:10.5px;line-height:1.32}
     .doc{box-shadow:none;border:none;border-radius:0;max-width:100%;width:100%}
     .cobrand{padding:5px 0 6px}
-    .opc-logo{height:38px}
+    .opc-logo{height:64px}
     .body{padding:8px 0 4px}
     .head{margin-bottom:9px}
     .doc-eyebrow{margin-bottom:2px;font-size:9px}
@@ -183,6 +183,8 @@
   body.viewmode .editonly{display:none!important}
   body.viewmode .viewonly{display:block}
   .sigimg{max-width:260px;max-height:120px;display:block;margin-top:6px}
+  #sigImg:not([src]),#sigImg[src=""]{display:none}
+  @media print{.no-print{display:none!important}}
   @media print{ .actions,.sigtools{display:none!important} .fld{border-bottom:none} }
 
   /* Prix HT editable */
@@ -225,7 +227,8 @@
   .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
   .kv-grid .full{grid-column:1 / -1}
   .kv label{display:block;font-size:11px;color:var(--faint);margin-bottom:3px}
-  .fld-area{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line);border-radius:10px;background:var(--white);padding:9px 11px;width:100%;outline:none;resize:vertical;min-height:62px;line-height:1.5}
+  .fld-area{font-family:inherit;font-size:12.5px;color:var(--ink);border:1px solid var(--line);border-radius:10px;background:var(--white);padding:9px 11px;width:100%;outline:none;resize:vertical;min-height:62px;line-height:1.5;white-space:pre-wrap}
+  .offer-mentiontxt{min-height:84px}
   .fld-area:focus{border-color:var(--accent)}
   .fld-area::placeholder{color:var(--faint);font-style:italic}
   body.viewmode .fld-area{background:var(--paper);border-style:dashed}
@@ -257,14 +260,14 @@
 
     <div class="head">
       <div>
-        <div class="doc-eyebrow">Partenariat Nuits du Sud 2026</div>
+        <div class="doc-eyebrow">Animation digitale Flowin &middot; Nuits du Sud 2026</div>
         <h1 class="doc-type">Bon de commande</h1>
         <div class="doc-ref">R&eacute;f&eacute;rence jeu et animation commerciale &middot; Nuits du Sud 2026</div>
       </div>
       <div class="doc-meta">
         N&deg; <input id="docNum" type="text" spellcheck="false" autocomplete="off" class="docnum-edit" value="" title="Num\u00e9ro modifiable" /><br>
         Date : <b id="docDate">__ / __ / 2026</b><br>
-        Cl&ocirc;ture des partenariats : <b>9 juillet 2026</b>
+        Cl&ocirc;ture des inscriptions : <b>7 juillet 2026</b>
       </div>
     </div>
 
@@ -407,7 +410,7 @@
     </div>
 
     <div class="conditions">
-      <b>Conditions.</b> Bon de commande &agrave; retourner dat&eacute; et sign&eacute; avec la mention &laquo;&nbsp;Bon pour accord&nbsp;&raquo;, accompagn&eacute; de l&rsquo;offre coch&eacute;e. Le partenariat est confirm&eacute; &agrave; r&eacute;ception du r&egrave;glement. Une facture d&eacute;finitive est &eacute;mise apr&egrave;s encaissement. Prestation rattach&eacute;e au festival Nuits du Sud (9&ndash;18 juillet 2026, Vence). <b>Cl&ocirc;ture des partenariats : 9 juillet 2026.</b> Pour toute question : <b>info@opconsult.co</b>.
+      <b>Conditions.</b> Bon de commande &agrave; retourner dat&eacute; et sign&eacute; avec la mention &laquo;&nbsp;Bon pour accord&nbsp;&raquo;. L&rsquo;animation digitale est confirm&eacute;e &agrave; r&eacute;ception du r&egrave;glement. Une facture d&eacute;finitive est &eacute;mise apr&egrave;s encaissement. Prestation rattach&eacute;e au festival Nuits du Sud (9&ndash;18 juillet 2026, Vence). <b>Cl&ocirc;ture des inscriptions : 7 juillet 2026.</b> Pour toute question : <b>info@opconsult.co</b>.
     </div>
 
     <div class="sign-lbl"><b>Bon pour accord</b> (nom, date et signature) :</div>
@@ -436,7 +439,7 @@
       <span id="status" class="statusmsg"></span>
     </div>
     <div class="actions viewonly" style="flex-wrap:wrap;gap:10px">
-      <a href="#" id="dlBtn" class="btn-primary" onclick="window.print();return false;">Télécharger ma copie (PDF)</a>
+      <a href="#" id="dlBtn" class="btn-primary" onclick="exportPdf();return false;">&#128229; Télécharger en PDF (A4)</a>
       <button type="button" id="copyLinkBtn" class="btn-primary" style="background:#3B5CC4">&#128203; Copier le lien à envoyer au client</button>
       <a href="#" id="mailClientBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer par email au client</a>
       <span style="font-size:12px;color:var(--teal)">✓ Bon de commande signé et enregistré</span>
@@ -452,6 +455,19 @@
   </div>
 
 </div>
+<div class="no-print" style="text-align:center;margin:18px auto 30px">
+  <button type="button" onclick="exportPdf()" class="btn-primary" style="background:#7C2D92;font-size:15px;padding:12px 26px">&#128229; Convertir en PDF (A4)</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function exportPdf(){
+  var el=document.querySelector(".doc");
+  var d=document.getElementById("docNum");
+  var num=(d&&d.value)?d.value:"bon";
+  if(typeof html2pdf==="undefined"){ window.print(); return; }
+  html2pdf().set({margin:[6,6,8,6],filename:"bon-commande-"+num+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(el).save();
+}
+</script>
 <script>
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
