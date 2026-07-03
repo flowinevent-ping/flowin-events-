@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
-import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, shuffle, AGE_OPTIONS, writeSondageBrigade } from '@/lib/parcours'
+import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJoueurHistory, shuffle, AGE_OPTIONS, writeSondageBrigade } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
@@ -126,7 +126,23 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const lot2Desc = (cfg.lot2Desc as string) || 'Au grand tirage de fin de festival'
   const tirageHeure = (cfg.tirageHeure as string) || '12h30'
 
-  const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
+  const [questions, setQuestions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
+  // Anti-répétition : historique du joueur reconnu (device local), chargé en tâche de fond dès le montage.
+  // Reste vide (comportement actuel inchangé) pour tout joueur non reconnu — aucune régression possible.
+  const [joueurHistory, setJoueurHistory] = useState<{ answeredQuizIds: string[]; bonusDone: boolean }>({ answeredQuizIds: [], bonusDone: false })
+  useEffect(() => {
+    const jid = getJoueurLocal()?.id
+    if (!jid) return
+    fetchJoueurHistory(jid).then(setJoueurHistory).catch(() => { /* best-effort, pas de blocage */ })
+  }, [])
+  // Retire du tirage les questions déjà vues par ce joueur (tout le festival). Si le stock restant
+  // est insuffisant pour composer un jeu complet, on retombe sur le pool entier (jamais moins de nbQ).
+  function drawQuestions(): QuizQuestion[] {
+    const pool = [...allQs, ...customQs]
+    const fresh = pool.filter(q => !joueurHistory.answeredQuizIds.includes(q.id))
+    const source = fresh.length >= nbQ ? fresh : pool
+    return shuffle(source).slice(0, nbQ)
+  }
   const [screen, setScreen] = useState<Screen>('onboard')
   const [qIdx, setQIdx] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
@@ -800,7 +816,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   </div>
                   </>)}
                   <a className="btn" onClick={() => {
-                    setScreen(questions.length > 0 ? 'quiz' : (bonusQs.length > 0 ? 'bonus' : 'resultats'))
+                    const nextQuestions = drawQuestions()
+                    setQuestions(nextQuestions)
+                    if (nextQuestions.length > 0) { setScreen('quiz'); return }
+                    // Pas de quiz classique (banque vide) : passe au bonus, sauf si déjà répondu
+                    // par ce joueur (peu importe quand, tout le festival) -> routage neutre identique
+                    // à la fin normale du bonus (recurrent -> ticket direct, sinon -> inscription).
+                    if (bonusQs.length > 0 && !joueurHistory.bonusDone) { setScreen('bonus'); return }
+                    if (bonusQs.length > 0 && joueurHistory.bonusDone) { finaliser(); return }
+                    setScreen('resultats')
                   }}>{recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant'}</a>
                   <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
                 </>
@@ -922,7 +946,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   {bonusDone && ' · +1 ticket bonus\u202f🎟️'}
                 </div>
               </div>
-              {bonusQs.length > 0 && !bonusDone && (
+              {bonusQs.length > 0 && !bonusDone && !joueurHistory.bonusDone && (
                 <a className="bonusbtn" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
                   <svg className="ic"><use href="#i-spark" /></svg>
                   {' Réponds à la question bonus · +1 ticket'}

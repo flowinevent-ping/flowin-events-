@@ -403,6 +403,34 @@ export function getJoueurLocal(): { id: string; email: string; prenom?: string; 
   return null
 }
 
+/* ── Historique joueur (anti-répétition) ──
+   Récupère, sur TOUTES les participations passées d'un joueur reconnu (tout le festival, pas juste
+   la station courante) : les ids de questions de quiz déjà vues (à exclure du prochain tirage) et si
+   la question bonus a déjà été répondue au moins une fois (pour la masquer ensuite). Lecture seule,
+   best-effort : en cas d'erreur réseau on retourne un historique vide (comportement identique à
+   aujourd'hui, sans blocage ni régression pour les joueurs non reconnus). */
+export async function fetchJoueurHistory(joueurId: string): Promise<{ answeredQuizIds: string[]; bonusDone: boolean }> {
+  try {
+    const { data, error } = await supabase
+      .from('se_reponses')
+      .select('quiz_reponses,bonus_reponses')
+      .eq('joueur_id', joueurId)
+      .limit(200)
+    if (error || !data) return { answeredQuizIds: [], bonusDone: false }
+    const seen = new Set<string>()
+    let bonusDone = false
+    for (const row of data as { quiz_reponses?: { qid?: string }[] | null; bonus_reponses?: Record<string, unknown> | null }[]) {
+      if (Array.isArray(row.quiz_reponses)) {
+        for (const a of row.quiz_reponses) { if (a && a.qid) seen.add(a.qid) }
+      }
+      if (row.bonus_reponses && Object.keys(row.bonus_reponses).length > 0) bonusDone = true
+    }
+    return { answeredQuizIds: Array.from(seen), bonusDone }
+  } catch {
+    return { answeredQuizIds: [], bonusDone: false }
+  }
+}
+
 /* ── Bloc 2 — Reconnaissance par EMAIL (compte, pas appareil) ──
    Lecture seule. À l'accueil/inscription, on retrouve le compte par email_lower
    pour pré-remplir et router vers claimJoueur (garde-fou ticket par compte).
