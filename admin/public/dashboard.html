@@ -1981,7 +1981,7 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
     var bonId=(f.client&&f.client.bon_id)?f.client.bon_id:'';
     h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       +'<div><div class="fw-700">'+esc(f.numero)+' '+badge(f.statut)+'</div><div class="text-xs text-muted">'+esc(f.date_emission||'')+' \u00b7 '+money(f.total_ttc)+' TTC</div></div>'
-      +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/facture-nds.html?num='+encodeURIComponent(f.numero)+'" target="_blank" rel="noopener">Ouvrir &#8599;</a>'+(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Devis</a>':'')
+      +'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px" href="/facture-nds.html?num='+encodeURIComponent(f.numero)+'" target="_blank" rel="noopener">\u270f\ufe0f \u00c9diter / PDF</a>'+(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Devis</a>':'')
       +'</div>';
   }); }
   var slug=String(partnerId||'').replace('pt-','');
@@ -4666,6 +4666,7 @@ function renderPilotage(){
        + kpi('Joueurs CRM', DATA.joueurs.length, {delta: 'inscrits', trend:'flat'})
        + kpi('Festival', '9\u201318 juil', {delta: 'Vence \u00b7 2026', trend:'flat'})
        + '</div>';
+  html += '<div style="margin:0 0 16px"><button class="btn btn-primary btn-sm" onclick="goView(\'nds-bon-commande\')">\ud83e\uddfe Bons de commande &amp; Factures \u2192</button></div>';
   html += '<div class="cockpit-grid">';
   html += '<div class="cockpit-col live">';
   html += '<div class="cockpit-col-h"><div class="cockpit-col-title"><span>🔴</span>Live maintenant</div><span class="cockpit-col-count">'+live.length+'</span></div>';
