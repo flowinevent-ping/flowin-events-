@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Carte du système — Flowin × Nuits du Sud 2026 (v2)</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0e16; --card:#161a26; --hub:#7C2D92; --ink:#fff; --muted:#8a90a8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope',sans-serif;overflow-x:hidden}
+  .topbar{padding:16px 20px;border-bottom:1px solid #262b3d;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
+  .topbar h1{font-size:17px;margin:0;font-weight:800}
+  .topbar p{margin:0;font-size:12.5px;color:var(--muted)}
+  .legend{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap;max-width:520px}
+  .legend span{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);font-weight:700;white-space:nowrap}
+  .legend i{width:12px;height:4px;border-radius:2px;display:inline-block;flex-shrink:0}
+  .wrap{display:flex;min-height:calc(100vh - 76px)}
+  .mapzone{flex:1;overflow:auto;padding:20px}
+  svg{width:100%;min-width:1100px;height:auto;display:block}
+  .route{fill:none;stroke-width:6;stroke-linecap:round;opacity:.85}
+  .station{cursor:pointer}
+  .station circle{stroke:#0c0e16;stroke-width:3;transition:r .15s}
+  .station:hover circle{r:14}
+  .station.active circle{r:15;stroke:#fff}
+  .station.fragile circle{stroke:#ff4d4f;stroke-width:4;stroke-dasharray:3 2}
+  .station text{font-size:10.5px;font-weight:700;fill:#fff;pointer-events:none}
+  .hubnode circle{r:24;fill:var(--hub);stroke:#0c0e16;stroke-width:4}
+  .hubnode text{font-size:12px;font-weight:800}
+  .rowlabel{font-size:10px;font-weight:800;fill:#5a5f75;text-transform:uppercase;letter-spacing:.06em}
+  .side{width:400px;border-left:1px solid #262b3d;padding:22px;background:var(--card);flex-shrink:0;overflow-y:auto}
+  .side h2{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .side .tag{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+  .side .fragtag{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin:0 0 10px 6px;background:#ff4d4f22;color:#ff8080;border:1px solid #ff4d4f55}
+  .side p.desc{font-size:13px;line-height:1.6;color:#d8dae8;margin:10px 0 16px;white-space:pre-line}
+  .blk{margin-bottom:16px}
+  .blk h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 7px;font-weight:800}
+  .chip{display:block;background:#0c0e16;border:1px solid #262b3d;border-radius:8px;padding:8px 11px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#c9cce0;margin-bottom:6px;word-break:break-all}
+  .chip.tbl{color:#F5B544;border-color:#F5B54444}
+  .chip.file{color:#22D3C6;border-color:#22D3C6 44}
+  .codeblock{background:#080910;border:1px solid #262b3d;border-radius:10px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:11.3px;line-height:1.6;color:#a8f0c6;overflow-x:auto;white-space:pre}
+  .codeblock .k{color:#F5B544}
+  .empty{color:var(--muted);font-size:13px;line-height:1.6;padding-top:40px;text-align:center}
+  .empty b{color:#fff;display:block;margin-bottom:10px;font-size:15px}
+  a.openlink{display:inline-block;margin-top:4px;margin-right:10px;font-size:12.5px;color:#22D3C6;text-decoration:none;font-weight:700}
+  a.openlink:hover{text-decoration:underline}
+  .warnbox{background:#3a1010;border:1px solid #ff4d4f55;border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#ffc9c9;margin-bottom:16px}
+  .warnbox b{color:#ff8080}
+  .tree{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.75;color:#c9cce0;white-space:pre}
+  .tree .d{color:#22D3C6;font-weight:700}
+  .tree .m{color:#F5B544}
+  @media (max-width:900px){ .wrap{flex-direction:column} .side{width:auto;border-left:none;border-top:1px solid #262b3d} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>🗺️ Carte du système — Flowin × Nuits du Sud 2026 <span style="color:#8a90a8;font-weight:600;font-size:13px">v2</span></h1>
+    <p>Clique une station : explication simple + tables + fichiers + <b style="color:#a8f0c6">code réel</b>. Contour rouge pointillé = point fragile connu.</p>
+  </div>
+  <div class="legend">
+    <span><i style="background:#E0218A"></i>Parcours joueur</span>
+    <span><i style="background:#22D3C6"></i>Partenaires &amp; visuels</span>
+    <span><i style="background:#F5B544"></i>Commercial</span>
+    <span><i style="background:#22C55E"></i>Communication</span>
+    <span><i style="background:#5B7FFF"></i>Code &amp; modules</span>
+    <span><i style="background:#F43F9E"></i>Jeux &amp; Super Event</span>
+    <span><i style="background:#00B4A0"></i>CRM (Pros/Partenaires)</span>
+    <span><i style="background:#7C2D92"></i>Dashboard</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="mapzone">
+    <svg viewBox="0 0 1100 1160" id="mapsvg">
+      <text class="rowlabel" x="90" y="86">Parcours joueur</text>
+      <path class="route" d="M 90 100 L 1010 100" stroke="#E0218A"/>
+      <text class="rowlabel" x="90" y="206">Partenaires &amp; visuels</text>
+      <path class="route" d="M 90 220 L 1010 220" stroke="#22D3C6"/>
+      <text class="rowlabel" x="90" y="326">Commercial</text>
+      <path class="route" d="M 90 340 L 1010 340" stroke="#F5B544"/>
+      <text class="rowlabel" x="90" y="446">Communication</text>
+      <path class="route" d="M 90 460 L 1010 460" stroke="#22C55E"/>
+      <text class="rowlabel" x="90" y="606">Code &amp; modules (arborescence)</text>
+      <path class="route" d="M 90 620 L 1010 620" stroke="#5B7FFF"/>
+      <text class="rowlabel" x="90" y="726">Jeux &amp; Super Event</text>
+      <path class="route" d="M 90 740 L 1010 740" stroke="#F43F9E"/>
+      <text class="rowlabel" x="90" y="846">CRM — Pros &amp; Partenaires</text>
+      <path class="route" d="M 90 860 L 1010 860" stroke="#00B4A0"/>
+      <text class="rowlabel" x="90" y="966">Fiabilité &amp; données</text>
+      <path class="route" d="M 90 980 L 1010 980" stroke="#ff4d4f"/>
+
+      <path class="route" d="M 550 100 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
+      <path class="route" d="M 550 220 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
+      <path class="route" d="M 550 340 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
+      <path class="route" d="M 550 460 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
+      <path class="route" d="M 550 620 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
+      <path class="route" d="M 550 740 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
+      <path class="route" d="M 550 860 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
+      <path class="route" d="M 550 980 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
+
+      <g class="station hubnode" data-id="dashboard" transform="translate(550,280)">
+        <circle/>
+        <text text-anchor="middle" dy="5" fill="#fff">DASHBOARD</text>
+      </g>
+
+      <g id="line1"></g><g id="line2"></g><g id="line3"></g><g id="line4"></g>
+      <g id="line5"></g><g id="line6"></g><g id="line7"></g><g id="line8"></g>
+    </svg>
+  </div>
+
+  <div class="side" id="side">
+    <div class="empty">
+      <b>👋 Clique une station</b>
+      3 nouvelles lignes cette fois : le code &amp; les modules (arborescence réelle du repo), les jeux &amp; le Super Event, et une ligne dédiée à la fiabilité (points fragiles connus + où récupérer toutes les données).
+    </div>
+  </div>
+</div>
+
+<script>
+const STATIONS = {
+  "qr-scan": { line:"Parcours joueur", color:"#E0218A", x:130, y:100, label:"Scan QR",
+    desc:"Le festivalier flashe un QR — station physique (1 jeu/jour) ou lien réseaux (usage unique, tout le festival).",
+    tables:["events (cfg, quizBanques, quizBonusList)"], files:["admin/app/parcours/nds2026/page.tsx"] },
+  "questionnaire": { line:"Parcours joueur", color:"#E0218A", x:320, y:100, label:"Questionnaire (quiz)",
+    desc:"4 questions tirées au hasard, en excluant celles déjà vues par ce joueur (tout le festival, pas juste cette station).",
+    tables:["banques (questions)", "se_reponses (lu pour l'anti-répétition)"],
+    files:["admin/lib/parcours.ts → fetchJoueurHistory()"],
+    code:`export async function fetchJoueurHistory(joueurId) {
+  const { data } = await supabase
+    <span class="k">.from('se_reponses')</span>
+    .select('quiz_reponses,bonus_reponses')
+    .eq('joueur_id', joueurId).limit(200)
+  // construit la liste des qid deja vus + si le bonus est deja fait
+}` },
+  "bonus": { line:"Parcours joueur", color:"#E0218A", x:500, y:100, label:"Question bonus",
+    desc:"5 questions fixes (mobilité/RSE), masquées après la 1ère réponse d'un joueur reconnu — sur toute station flashable au QR. L'outil manuel Brigade Verte n'est pas concerné (fichier séparé).",
+    tables:["se_reponses (bonus_reponses)", "sondage_brigade (stats anonymes)"],
+    files:["admin/app/parcours/nds2026/NDS2026Client.tsx → finishBonus()"] },
+  "fiche": { line:"Parcours joueur", color:"#E0218A", x:680, y:100, label:"Fiche festivalier",
+    desc:"⚠️ Point de croisement important : remplir CE formulaire écrit dans 3 tables différentes en même temps. C'est le meilleur exemple de 'donnée multipliée' du système.",
+    tables:["joueurs (profil, 1 ligne par email)", "participations (résumé par event/jour)", "se_reponses (détail complet quiz + bonus + formulaire)"],
+    files:["admin/lib/parcours.ts → writeJoueur() / claimJoueur()"],
+    code:`await supabase.from('participations').insert({...})
+await writeSeReponses({ joueurId, evId, jour, form,
+  quiz_reponses, bonus_reponses })  // -> 2e ecriture
+await attribuerSuperEvent(joueurId, evId, today, ...)  // -> 3e systeme (se_tickets)` },
+  "ticket": { line:"Parcours joueur", color:"#E0218A", x:870, y:100, label:"Ticket & gains",
+    desc:"Ticket généré. Si un lot est attribué au tirage, un code série + QR de retrait sont créés dans se_gains.",
+    tables:["participations (tickets)", "lots (assigné à ce joueur)", "se_gains (code, QR, validité)"],
+    files:["admin/public/dashboard.html → ensureSeGainForLot()"] },
+
+  "fiche-partenaire": { line:"Partenaires & visuels", color:"#22D3C6", x:130, y:220, label:"Fiche partenaire",
+    desc:"Coordonnées + offre + lot. Sans lot renseigné : aucune affiche générée (pour ne jamais inventer une offre commerciale).",
+    tables:["partenaires"], files:["admin/public/dashboard.html → onglet Partenaires"] },
+  "logo": { line:"Partenaires & visuels", color:"#22D3C6", x:280, y:220, label:"Logo",
+    desc:"Source unique réutilisée ensuite partout (affiche, vidéo, mur de logos).",
+    tables:["partenaires.image_url"], files:["admin/public/nds/partenaires/&lt;slug&gt;.png"] },
+  "affiche": { line:"Partenaires & visuels", color:"#22D3C6", x:430, y:220, label:"Affiche A4",
+    desc:"Générée depuis le logo + le lot de la fiche partenaire.",
+    tables:[], files:["admin/public/nds/visuels/nds_a4_&lt;slug&gt;.png", "admin/public/nds/visuels-src/gen_a4_clean.py"],
+    live:"https://flowin-events.vercel.app/nds/kit-digital/" },
+  "video": { line:"Partenaires & visuels", color:"#22D3C6", x:590, y:220, label:"Vidéo réseaux/écran",
+    fragile:true,
+    desc:"Le mur de logos DEVRAIT être piloté par une seule liste centrale (nds_lib.PARTNERS). En réalité, 3 scripts ont chacun leur PROPRE liste codée en dur, non synchronisée. Voir la station ⚠️ ligne Fiabilité pour la preuve.",
+    tables:[], files:["admin/public/nds/kit-digital/&lt;slug&gt;/video-&lt;slug&gt;-9x16.mp4"] },
+  "qr-partenaire": { line:"Partenaires & visuels", color:"#22D3C6", x:750, y:220, label:"QR station/réseaux",
+    desc:"2 QR par partenaire : station (physique, 1/jour) et réseaux (digital, &source=reseaux-&lt;slug&gt;, usage unique).",
+    tables:["events (ev-nds-&lt;slug&gt;)"], files:["kit-digital/&lt;slug&gt;/qr-station-&lt;slug&gt;.png", "kit-digital/&lt;slug&gt;/qr-reseaux-&lt;slug&gt;.png"] },
+  "kit-digital": { line:"Partenaires & visuels", color:"#22D3C6", x:910, y:220, label:"Kit digital complet",
+    desc:"Dossier final envoyé au partenaire : tout regroupé + zip téléchargeable.",
+    tables:[], files:["admin/public/nds/kit-digital/&lt;slug&gt;/"], live:"https://flowin-events.vercel.app/nds/kit-digital/" },
+
+  "prospection": { line:"Commercial", color:"#F5B544", x:150, y:340, label:"Prospection",
+    desc:"Formulaire landing pour devenir partenaire.", tables:["crm_retours (origine=landing)"], files:[] },
+  "bon-commande": { line:"Commercial", color:"#F5B544", x:380, y:340, label:"Bon de commande",
+    desc:"Pré-rempli automatiquement depuis la fiche partenaire quand elle existe déjà.",
+    tables:["bons_commande"], files:["admin/public/bon-commande-nds.html", "admin/public/bons-prets/*.html"] },
+  "signature": { line:"Commercial", color:"#F5B544", x:600, y:340, label:"Signature → Facture",
+    desc:"⚠️ Autre point de croisement : signer le bon de commande déclenche AUTOMATIQUEMENT 2 écritures ailleurs — un vrai exemple de 'renvoi dans différents dossiers'.",
+    tables:["partenaires.contrat (rempli automatiquement)", "factures (créée automatiquement)"],
+    files:["fonction SQL fn_bon_commande_chain"],
+    code:`-- trigger SQL, se declenche a la signature du bon
+create trigger fn_bon_commande_chain
+after update on bons_commande
+-- 1) copie le resume dans partenaires.contrat
+-- 2) genere la facture FL-2026-XXXX-01 dans factures`},
+  "facture": { line:"Commercial", color:"#F5B544", x:820, y:340, label:"Facture",
+    desc:"Numérotée automatiquement depuis le n° du devis d'origine (FL-2026-XXXX-01).",
+    tables:["factures"], files:["admin/public/facture-nds.html"] },
+
+  "email-ticket": { line:"Communication", color:"#22C55E", x:180, y:460, label:"Email — ticket gagnant",
+    desc:"⚠️ Fichier NON versionné dans le repo — déployé directement sur Supabase, pas dans supabase/functions/. À rapatrier dans le repo pour cohérence.",
+    fragile:true,
+    tables:["se_gains"], files:["Déployé sur Supabase, absent du dossier supabase/functions/ du repo"] },
+  "email-bon": { line:"Communication", color:"#22C55E", x:420, y:460, label:"Email — bon de commande",
+    desc:"Envoie au partenaire son bon signé + conditions + RIB.", tables:["bons_commande"],
+    files:["supabase/functions/notify-bon-commande/index.ts"] },
+  "email-souscription": { line:"Communication", color:"#22C55E", x:660, y:460, label:"Email — souscription",
+    desc:"Notification à une nouvelle souscription partenaire.", tables:[],
+    files:["supabase/functions/notify-souscription/index.ts"] },
+  "email-copie": { line:"Communication", color:"#22C55E", x:900, y:460, label:"Copie systématique",
+    desc:"Tous les emails passent par Resend et copient toujours flowinevent@gmail.com.",
+    tables:[], files:["Secret Supabase : RESEND_API_KEY"] },
+
+  "arbo-app": { line:"Code & modules", color:"#5B7FFF", x:150, y:620, label:"admin/app/",
+    desc:"Les pages Next.js. Chaque dossier = une URL.", tables:[], files:[],
+    tree:`admin/app/
+├── <span class="d">parcours/</span>          ← tous les jeux
+│   ├── nds2026/       (orchestrateur NDS)
+│   ├── quiz/           <span class="m">module maître</span>
+│   ├── spin/            <span class="m">module maître</span>
+│   ├── tombola/        <span class="m">module maître</span>
+│   └── vote/             <span class="m">module maître</span>
+├── <span class="d">se/[se]/</span>          ← Super Event (fédère plusieurs jeux)
+├── <span class="d">dashboard/</span>       ← pages admin Next.js
+├── <span class="d">pro/</span>              ← espace partenaire
+└── <span class="d">rejoindre/[se]/</span> ← inscription à un Super Event` },
+  "arbo-lib": { line:"Code & modules", color:"#5B7FFF", x:340, y:620, label:"admin/lib/",
+    desc:"La logique métier partagée par toutes les pages. C'est ICI qu'il faut chercher en premier pour comprendre 'qui écrit quoi'.",
+    tables:[], files:["admin/lib/parcours.ts (joueur, quiz, historique)", "admin/lib/lots.ts", "admin/lib/track.ts (clics partenaires)", "admin/lib/ticket.ts (génération code)", "admin/lib/supabase.ts (connexion DB)"] },
+  "arbo-modules": { line:"Code & modules", color:"#5B7FFF", x:530, y:620, label:"Modules maîtres",
+    desc:"RÈGLE D'OR du projet : QuizClient.tsx, SpinClient.tsx, TombolaClient.tsx, VoteClient.tsx ne sont JAMAIS modifiés directement. Tout passe par la config (cfg) en base, événement par événement. NDS2026Client.tsx est l'orchestrateur spécifique NDS (autorisé à être modifié).",
+    tables:["events.cfg (jsonb — toute la personnalisation par event)"],
+    files:["admin/app/parcours/quiz/QuizClient.tsx", "admin/app/parcours/spin/SpinClient.tsx", "admin/app/parcours/nds2026/NDS2026Client.tsx (orchestrateur, modifiable)"] },
+  "arbo-visuels": { line:"Code & modules", color:"#5B7FFF", x:720, y:620, label:"Scripts visuels (Python)",
+    desc:"Génération des affiches/vidéos/tickets. Recette officielle pour ajouter un partenaire : 1 logo + 1 ligne dans nds_lib.PARTNERS + rebuild_partenaires.sh. En pratique, 3 scripts vidéo n'obéissent pas encore à cette règle (voir ligne Fiabilité).",
+    tables:[], files:["admin/public/nds/visuels-src/nds_lib.py (source unique — normalement)", "admin/public/nds/visuels-src/gen_a4_clean.py", "admin/public/nds/visuels-src/rebuild_partenaires.sh"] },
+  "arbo-functions": { line:"Code & modules", color:"#5B7FFF", x:900, y:620, label:"supabase/functions/",
+    desc:"Les emails automatiques (edge functions Deno, hébergées sur Supabase).",
+    tables:[], files:["supabase/functions/notify-bon-commande/", "supabase/functions/notify-souscription/", "⚠️ send-ticket-gagnant/ manque ici (voir ligne Fiabilité)"] },
+
+  "jeu-quiz": { line:"Jeux & Super Event", color:"#F43F9E", x:140, y:740, label:"Module Quiz",
+    desc:"Le mini-jeu générique 'questions à choix multiples'. NDS2026Client s'en inspire mais a sa propre version enrichie (bonus, historique, tickets multiples).",
+    tables:[], files:["admin/app/parcours/quiz/QuizClient.tsx"] },
+  "jeu-spin": { line:"Jeux & Super Event", color:"#F43F9E", x:310, y:740, label:"Module Spin (roue)",
+    desc:"Roue de la fortune — mini-jeu indépendant, utilisable par n'importe quel event via cfg.module='spin'.",
+    tables:[], files:["admin/app/parcours/spin/SpinClient.tsx"] },
+  "jeu-tombola": { line:"Jeux & Super Event", color:"#F43F9E", x:470, y:740, label:"Module Tombola",
+    desc:"Tirage au sort simple.", tables:[], files:["admin/app/parcours/tombola/TombolaClient.tsx"] },
+  "jeu-vote": { line:"Jeux & Super Event", color:"#F43F9E", x:620, y:740, label:"Module Vote",
+    desc:"Vote/sondage à choix.", tables:[], files:["admin/app/parcours/vote/VoteClient.tsx"] },
+  "super-event": { line:"Jeux & Super Event", color:"#F43F9E", x:800, y:740, label:"Super Event",
+    desc:"Un Super Event FÉDÈRE plusieurs events/stations sous un même chapeau (ex. se-nds-2026 regroupe les 4 stations + les 9 commerçants). Il centralise les tickets et les gains tous jeux confondus, indépendamment du module utilisé à chaque station.",
+    tables:["super_events", "se_tickets (tickets, tous jeux confondus)", "se_gains (gains, tous jeux confondus)"],
+    files:["admin/app/se/[se]/SuperEventClient.tsx", "admin/app/se/_components/SuperEventMap.tsx"],
+    code:`// admin/lib/parcours.ts — le pont entre UN jeu et LE Super Event
+export async function attribuerSuperEvent(joueurId, evId, today, onSite, tickets) {
+  const { data: ev } = await supabase.from('events')
+    .select('super_event_id,gain_immediat,gain_ticket').eq('id', evId).single()
+  if (!ev.super_event_id) return  // event pas rattache a un Super Event -> rien ne se passe
+  await supabase.from('se_tickets').upsert([...])   // 1 ticket, tous jeux confondus
+  if (ev.gain_immediat) await supabase.from('se_gains').insert({...})  // gain immediat
+}` },
+  "super-event-map": { line:"Jeux & Super Event", color:"#F43F9E", x:960, y:740, label:"Carte Super Event",
+    desc:"La carte interactive publique qui montre toutes les stations d'un Super Event (celle que le joueur utilise pour choisir où aller jouer).",
+    tables:[], files:["admin/app/se/_components/SuperEventMap.tsx"] },
+
+  "fragile-video": { line:"Fiabilité & données", color:"#ff4d4f", x:130, y:980, label:"⚠️ Recette partenaire vidéo",
+    fragile:true,
+    desc:"CORRIGÉ cette session. Les 3 scripts vidéo avaient chacun une vieille liste PARTNERS locale, jamais réellement utilisée par le rendu (qui s'appuyait déjà sur nds_lib.PARTNERS). Code mort trompeur, pas un bug actif — nettoyé pour éviter toute confusion future.",
+    tables:[], files:["admin/public/nds/visuels-src/render_spot40.py", "render_ecran40.py", "render_kref40.py"] },
+  "fragile-email": { line:"Fiabilité & données", color:"#ff4d4f", x:330, y:980, label:"⚠️ Fonction hors repo",
+    fragile:true,
+    desc:"CORRIGÉ cette session. send-ticket-gagnant avait été déployée directement sur Supabase, jamais commitée. Rapatriée dans le repo.",
+    tables:[], files:["supabase/functions/send-ticket-gagnant/index.ts (maintenant présent)"] },
+  "fragile-cockpit": { line:"Fiabilité & données", color:"#ff4d4f", x:530, y:980, label:"⚠️ Cockpit fantôme",
+    fragile:true,
+    desc:"Trouvé dans l'historique Git : un cockpit '/nds/gestion-diffusion.html' a été CONSTRUIT (commit b93d61b) puis VOLONTAIREMENT SUPPRIMÉ car jugé redondant avec le dashboard (commit 802aad0, 'cockpit parallèle retiré'). Le code actuel est propre, mais d'anciennes notes Notion en parlent encore comme s'il existait — source probable de confusion sur 'où est passé tel outil'.",
+    tables:[], files:["Supprimé — plus aucune trace dans dashboard.html actuel"] },
+  "fragile-rattachement": { line:"Fiabilité & données", color:"#ff4d4f", x:730, y:980, label:"⚠️ Rattachement bon de commande",
+    fragile:true,
+    desc:"LA cause probable du problème récurrent de renvoi entre bon de commande/facture et fiche partenaire : le rattachement se fait par email, SIRET, OU nom approximatif (ilike). Beaucoup de fiches n'ont NI email NI SIRET (ex. pt-pegase : les deux vides) — il ne reste QUE la correspondance floue sur le nom, qui casse si la raison sociale diffère un peu. Exemple réel trouvé et corrigé cette session : un bon portait 'Auto-École de Lara (ex ...)' alors que la fiche dit 'Auto-École de l'ARA' — ne se serait JAMAIS rattaché.",
+    tables:["bons_commande (raison_sociale)", "partenaires (nom, email, siret — souvent incomplets)"],
+    files:["admin/public/dashboard.html → loadBonsCommandeLies()"],
+    code:`if(em){ bcF.push('email.eq.'+em) }
+if(siret){ bcF.push('siret.eq.'+siret) }
+if(nom){ bcF.push('raison_sociale.ilike.%'+nom+'%') }
+// si email ET siret vides sur la fiche, tout repose
+// sur cette 3e ligne, fragile par nature` },
+  "export-donnees": { line:"Fiabilité & données", color:"#ff4d4f", x:930, y:980, label:"📊 Récupérer toutes les données",
+    desc:"Pour un rapport de fin de festival (par partenaire ou global) : 2 chemins possibles selon ce qu'il te faut.",
+    tables:["participations", "se_reponses", "joueurs"],
+    files:["Dashboard → onglet 'CRM Landing pages' → filtre par source → bouton Exporter (CSV)", "Ou requête SQL directe via Supabase (accès complet, plus flexible)"],
+    code:`-- Exemple : toutes les reponses quiz+bonus d'un partenaire, pretes pour un tableur
+select j.prenom, j.nom, j.email, j.code_postal, j.age_tranche, j.genre,
+       r.quiz_reponses, r.bonus_reponses, r.score, r.created_at
+from se_reponses r
+join joueurs j on j.id = r.joueur_id
+where r.event_id = 'ev-nds-<slug_du_partenaire>'
+order by r.created_at desc;
+
+-- Version globale festival (tous partenaires + stations confondus) :
+-- remplacer le where par r.super_event_id = 'se-nds-2026'` },
+
+  "crm-pros": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:190, y:860, label:"Table pros (15 lignes)",
+    desc:"NETTOYÉ cette session : 10 lignes de test supprimées (Boulangerie du Cours, Fleuriste Mimosa, Glacier Fenocchio, Socca House, etc. — noms génériques, zéro donnée réelle, 0 participation liée, vérifié avant suppression). Restent 15 lignes réelles : 7 historiques (Croix-Rouge, Ville de Vence, 4 stations festival, organisateur NDS) + 8 nouvelles, une par vrai partenaire NDS, créées et liées cette session.",
+    tables:["pros (id, nom, email, siret, tags, partenaire_id — nouvelle colonne)"], files:[] },
+  "crm-partenaires": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:420, y:860, label:"Table partenaires (8 actifs)",
+    desc:"Les 8 vrais commerces NDS. Chacun a maintenant une fiche pro miroir créée automatiquement (nom, adresse, tél copiés), liée par partenaires.id = pros.partenaire_id.",
+    tables:["partenaires"], files:[] },
+  "crm-conflit": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:660, y:860, label:"✅ Lien créé",
+    desc:"RÉSOLU cette session : nouvelle colonne pros.partenaire_id (clé étrangère vers partenaires.id). Les 8 vrais partenaires ont maintenant chacun leur fiche pro, visible dans les deux sens : la fiche pro affiche 'Ce pro est le partenaire NDS X →', la fiche partenaire affiche 'Fiche pro liée →'.",
+    tables:["pros.partenaire_id"],
+    files:["admin/public/dashboard.html → drawerPro() / drawerPartner()"],
+    code:`var _lpro = (DATA.pros||[]).find(pr => pr.partenaireId===p.id);
+// affiche desormais dans les 2 fiches, cliquable dans les 2 sens` },
+  "crm-decision": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:900, y:860, label:"Reste à décider",
+    desc:"Le lien existe maintenant, mais les 2 fiches restent indépendantes (modifier l'une ne met pas à jour l'autre automatiquement). À déterminer plus tard : faut-il une fusion complète des 2 tables (post-festival, chantier plus lourd), ou ce lien de consultation suffit-il pour l'usage courant ?",
+    tables:[], files:[] },
+
+  "arbo-repo": { line:"Fiabilité & données", color:"#ff4d4f", x:1030, y:980, label:"🗂️ Voir toute l'arborescence",
+    desc:"Vue condensée des dossiers principaux du repo (voir aussi les stations bleues 'Code & modules' pour le détail).",
+    tables:[], files:[],
+    tree:`flowin-events-/
+├── <span class="d">admin/</span>                    ← l'appli Next.js (le jeu + dashboard)
+│   ├── <span class="d">app/</span>                  ← pages (voir ligne Code & modules)
+│   ├── <span class="d">lib/</span>                  ← logique métier partagée
+│   └── <span class="d">public/</span>
+│       ├── dashboard.html      ← le back-office (1 seul gros fichier)
+│       ├── bon-commande-nds.html
+│       ├── bons-prets/         ← bons pré-remplis
+│       └── <span class="d">nds/</span>
+│           ├── partenaires/    ← logos
+│           ├── visuels/        ← affiches, tickets générés
+│           ├── visuels-src/    ← scripts Python qui génèrent tout ça
+│           └── kit-digital/    ← dossier final par partenaire
+├── <span class="d">supabase/functions/</span>       ← emails automatiques
+└── docs/, HANDOFF-*.md         ← documentation` },
+
+  "dashboard": { line:"Dashboard", color:"#7C2D92", x:0, y:0, label:"Dashboard",
+    desc:"Ne stocke rien de nouveau — lit et affiche toutes les tables. Point d'entrée pour tout retrouver ou corriger un doublon.",
+    tables:["Toutes les tables du système"], files:["admin/public/dashboard.html"],
+    live:"https://flowin-events.vercel.app/dashboard.html" }
+};
+
+const svg = document.getElementById('mapsvg');
+const groups = {
+  "Parcours joueur":"line1", "Partenaires & visuels":"line2", "Commercial":"line3", "Communication":"line4",
+  "Code & modules":"line5", "Jeux & Super Event":"line6", "CRM — Pros & Partenaires":"line8", "Fiabilité & données":"line7"
+};
+
+Object.entries(STATIONS).forEach(([id, s]) => {
+  if (id === 'dashboard') return;
+  const g = document.getElementById(groups[s.line]);
+  const el = document.createElementNS('http://www.w3.org/2000/svg','g');
+  el.setAttribute('class','station' + (s.fragile ? ' fragile' : ''));
+  el.setAttribute('data-id', id);
+  el.setAttribute('transform', `translate(${s.x},${s.y})`);
+  el.innerHTML = `<circle r="11" fill="${s.color}"/><text text-anchor="middle" y="-18">${s.label}</text>`;
+  el.addEventListener('click', () => selectStation(id));
+  g.appendChild(el);
+});
+document.querySelector('.hubnode').addEventListener('click', () => selectStation('dashboard'));
+
+function selectStation(id){
+  document.querySelectorAll('.station').forEach(el => el.classList.remove('active'));
+  const target = document.querySelector(`.station[data-id="${id}"]`) || document.querySelector('.hubnode');
+  target.classList.add('active');
+  const s = STATIONS[id];
+  const side = document.getElementById('side');
+  let tablesHtml = s.tables && s.tables.length ? s.tables.map(t => `<span class="chip tbl">${t}</span>`).join('') : '<span style="color:#555;font-size:12px">— aucune (étape visuelle/fichier)</span>';
+  let filesHtml = s.files && s.files.length ? s.files.map(f => `<span class="chip file">${f}</span>`).join('') : '<span style="color:#555;font-size:12px">—</span>';
+  side.innerHTML = `
+    <span class="tag" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55">${s.line}</span>
+    ${s.fragile ? '<span class="fragtag">⚠️ point fragile</span>' : ''}
+    <h2>${s.label}</h2>
+    <p class="desc">${s.desc}</p>
+    <div class="blk"><h3>📦 Table(s) Supabase</h3>${tablesHtml}</div>
+    <div class="blk"><h3>📁 Fichier(s) / chemin(s)</h3>${filesHtml}</div>
+    ${s.code ? `<div class="blk"><h3>💻 Code</h3><div class="codeblock">${s.code}</div></div>` : ''}
+    ${s.tree ? `<div class="blk"><h3>🗂️ Arborescence</h3><div class="codeblock tree">${s.tree}</div></div>` : ''}
+    ${s.live ? `<a class="openlink" href="${s.live}" target="_blank">↗ Ouvrir en direct</a>` : ''}
+  `;
+}
+</script>
+</body>
+</html>
