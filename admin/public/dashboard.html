@@ -5222,6 +5222,10 @@ function drawerPro(p){
     {id:'export',label:'Export'}
   ]);
   html += '<div class="drawer-body">';
+  if(p.partenaireId){
+    var _lp = findPartner(p.partenaireId);
+    html += '<div class="alert success" style="margin:0 0 12px"><span class="ico">🔗</span>Ce pro est le partenaire NDS 2026 <b>'+esc(_lp?_lp.nom:p.partenaireId)+'</b> — <a href="#" onclick="openDrawerFor(\'partenaire\',\''+esc(p.partenaireId)+'\');return false;">voir sa fiche partenaire →</a></div>';
+  }
 
   if(state.drawer.tab==='infos'){
     if(state.drawer.edit){
@@ -6945,8 +6949,10 @@ function drawerPartner(p){
     {id:'contrat', label:'Contrat'}
   ]);
   html += '<div class="drawer-body">';
-
-  /* ══════════════════════════════ TAB ÉLÉMENT COMM ══════════════════════════════ */
+  var _lpro = (DATA.pros||[]).find(function(pr){ return pr.partenaireId===p.id; });
+  if(_lpro){
+    html += '<div class="alert success" style="margin:0 0 12px"><span class="ico">🔗</span>Fiche pro liée : <b>'+esc(_lpro.nom)+'</b> — <a href="#" onclick="openDrawerFor(\'pro\',\''+esc(_lpro.id)+'\');return false;">voir la fiche pro →</a></div>';
+  }
   if(state.drawer.tab==='comm'){
     var cb = 'https://flowin-events.vercel.app';
     var cslug = (p.id||'').replace('pt-','');
