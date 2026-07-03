@@ -494,15 +494,17 @@
 <div class="no-print" style="text-align:center;margin:18px auto 30px">
   <button type="button" onclick="exportPdf()" class="btn-primary" style="background:#7C2D92;font-size:15px;padding:12px 26px">&#128229; Convertir en PDF (A4)</button>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function exportPdf(){
-  if(!(window.jspdf&&window.jspdf.jsPDF)){ if(typeof html2pdf!=='undefined'){document.body.classList.add('pdfexport');html2pdf().set({margin:7,filename:'bon.pdf',jsPDF:{unit:'mm',format:'a4'}}).from(document.querySelector('.doc')).save().then(function(){document.body.classList.remove('pdfexport');});} else {window.print();} return; }
+  var _JS=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||(window.jspdf&&window.jspdf.default);
+  if(!_JS){ window.print(); return; }
   function S(t){return String(t==null?'':t).replace(/\u2713/g,'-').replace(/\u2022/g,'-').replace(/[\u2013\u2014]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');}
   function gv(id){var e=document.getElementById(id);if(!e)return '';var v=(e.value!==undefined&&e.tagName!=='DIV'&&e.tagName!=='B')?e.value:e.textContent;return S((v||'').replace(/<[^>]*>/g,'').trim());}
   function so(sel){var o=document.querySelector('.offer.sel')||document.querySelector('.offer');if(!o)return '';var e=o.querySelector(sel);if(!e)return '';return S((e.value!==undefined?e.value:e.textContent).trim());}
   function offName(){var o=document.querySelector('.offer.sel')||document.querySelector('.offer');if(!o)return '';var e=o.querySelector('.offer-nm');if(!e)return '';return S((e.childNodes[0]?e.childNodes[0].textContent:e.textContent).trim());}
-  var jsPDF=window.jspdf.jsPDF, doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+  var doc=new _JS({unit:'mm',format:'a4',orientation:'portrait'});
   var W=210,M=14,x=M,y=15,CW=W-2*M;
   var ink=[22,32,58],teal=[29,158,117],gold=[150,110,50],mut=[90,104,125],faint=[150,163,184],acc=[59,92,196],pink=[190,40,90];
   function T(t,xx,yy,sz,st,col,al){doc.setFont('helvetica',st||'normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);doc.text(S(t),xx,yy,al?{align:al}:undefined);}
