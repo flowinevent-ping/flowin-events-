@@ -508,16 +508,16 @@ function exportPdf(){
   var ink=[22,32,58],teal=[29,158,117],gold=[150,110,50],mut=[90,104,125],faint=[150,163,184],acc=[59,92,196],pink=[190,40,90];
   function T(t,xx,yy,sz,st,col,al){doc.setFont('helvetica',st||'normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);doc.text(S(t),xx,yy,al?{align:al}:undefined);}
   function para(t,xx,yy,sz,col,lh){doc.setFont('helvetica','normal');doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2]);var w=doc.splitTextToSize(S(t),CW);for(var i=0;i<w.length;i++){doc.text(w[i],xx,yy);yy+=lh;}return yy;}
-  var _opc=document.querySelector('.opc-logo'); var _lh=13,_lw=34;
-  if(_opc&&_opc.naturalWidth){ _lw=_lh*(_opc.naturalWidth/_opc.naturalHeight); try{ var _cv=document.createElement('canvas'); _cv.width=_opc.naturalWidth; _cv.height=_opc.naturalHeight; _cv.getContext('2d').drawImage(_opc,0,0); doc.addImage(_cv.toDataURL('image/png'),'PNG',x,y-9,_lw,_lh); }catch(e){ try{doc.addImage(_opc,'PNG',x,y-9,_lw,_lh);}catch(e2){} } }
-  var _fx=x+_lw+7, _fy=y-1.5;
-  doc.setFillColor(29,158,117); doc.circle(_fx+3,_fy-1,3.1,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.text('F',_fx+3,_fy+0.4,{align:'center'});
-  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(29,158,117); doc.text('Flow',_fx+8,_fy+0.5); var _fw=doc.getTextWidth('Flow'); doc.setTextColor(22,32,58); doc.text('in',_fx+8+_fw,_fy+0.5);
-  T("Solution d'animation commerciale - Animer - Fideliser - Booster",_fx,_fy+4.8,6.3,'normal',faint);
-  T('ANIMATION DIGITALE FLOWIN - NUITS DU SUD 2026',W-M,y-3,7,'bold',gold,'right');
-  y+=13; T('Bon de commande',x,y,17,'bold',ink);
-  T('No '+gv('docNum'),W-M,y-6,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-1.5,9,'normal',mut,'right');
-  y+=4; T('Reference jeu et animation commerciale - Nuits du Sud 2026',x,y,8,'italic',faint);
+  var _opc=document.querySelector('.opc-logo'); var _lh=26,_lw=64;
+  if(_opc&&_opc.naturalWidth){ _lw=_lh*(_opc.naturalWidth/_opc.naturalHeight); try{ var _cv=document.createElement('canvas'); _cv.width=_opc.naturalWidth; _cv.height=_opc.naturalHeight; _cv.getContext('2d').drawImage(_opc,0,0); doc.addImage(_cv.toDataURL('image/png'),'PNG',x,y-3,_lw,_lh); }catch(e){ try{doc.addImage(_opc,'PNG',x,y-3,_lw,_lh);}catch(e2){} } }
+  var _fx=x+_lw+10, _fy=y+8;
+  doc.setFillColor(29,158,117); doc.circle(_fx+5.6,_fy-2,5.9,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text('F',_fx+5.6,_fy+1.3,{align:'center'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(29,158,117); doc.text('Flow',_fx+14,_fy+2); var _fw=doc.getTextWidth('Flow'); doc.setTextColor(22,32,58); doc.text('in',_fx+14+_fw,_fy+2);
+  T("Solution d'animation commerciale - Animer - Fideliser - Booster",_fx,_fy+8.5,7,'normal',faint);
+  T('ANIMATION DIGITALE FLOWIN - NUITS DU SUD 2026',W-M,y,7,'bold',gold,'right');
+  y+=31; T('Bon de commande',x,y,18,'bold',ink);
+  T('No '+gv('docNum'),W-M,y-7,10,'bold',ink,'right'); T('Date : '+gv('docDate'),W-M,y-2,9,'normal',mut,'right');
+  y+=5; T('Reference jeu et animation commerciale - Nuits du Sud 2026',x,y,8,'italic',faint);
   y+=7; var colW=(CW-8)/2;
   doc.setDrawColor(225,228,235); doc.roundedRect(x,y,colW,29,2,2); doc.roundedRect(x+colW+8,y,colW,29,2,2);
   T('EMETTEUR',x+4,y+5,7,'bold',teal); T('OPConsult',x+4,y+11,11,'bold',ink); T('40 rue des Arcs, 06140 Vence',x+4,y+16,8,'normal',mut); T('04 93 59 91 37 - info@opconsult.co',x+4,y+20,8,'normal',mut);
