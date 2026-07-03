@@ -18,9 +18,34 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--paper);font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;padding:24px}
   .doc{width:100%;max-width:820px;margin:0 auto;background:var(--white);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 8px 28px -14px rgba(22,32,58,.22)}
-  body.pdfexport{background:#fff!important}
+  /* ── Export PDF compact (html2pdf) : 1 page A4, sans entête navigateur ── */
+  body.pdfexport{background:#fff!important;font-size:10.5px;line-height:1.3}
   body.pdfexport .doc{max-width:100%!important;width:100%!important;border:none!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;margin:0!important}
-  body.pdfexport .no-print{display:none!important}
+  body.pdfexport .no-print,body.pdfexport .actions,body.pdfexport .sigtools,body.pdfexport .sendrow,body.pdfexport .offers-empty,body.pdfexport .pack-switch{display:none!important}
+  body.pdfexport .cobrand{padding:4px 0 5px}
+  body.pdfexport .opc-logo{height:70px}
+  body.pdfexport .body{padding:6px 0 4px}
+  body.pdfexport .head{margin-bottom:7px}
+  body.pdfexport .doc-type{font-size:20px}
+  body.pdfexport .party{padding:6px 10px}
+  body.pdfexport .parties{gap:9px;margin-bottom:7px}
+  body.pdfexport .fld{padding:1px 2px;font-size:11px}
+  body.pdfexport .offer{padding:7px 11px;gap:9px}
+  body.pdfexport .offer-nm{font-size:14px}
+  body.pdfexport .offer-pr{font-size:15px!important}
+  body.pdfexport .offer-lot{margin-top:3px;font-size:10px}
+  body.pdfexport .offer-ul li{font-size:10.5px;line-height:1.25}
+  body.pdfexport .offer-lotbox,body.pdfexport .offer-mention{margin-top:5px;padding-top:5px}
+  body.pdfexport .fld-area{min-height:20px;padding:3px 6px;font-size:10.5px}
+  body.pdfexport .totals{margin-top:5px}
+  body.pdfexport .trow{padding:4px 12px;font-size:11px}
+  body.pdfexport .conditions{margin-top:5px;padding-top:4px;font-size:8.6px;line-height:1.3}
+  body.pdfexport .sign-lbl{margin-top:5px;font-size:10.5px}
+  body.pdfexport .signrow{margin-top:3px}
+  body.pdfexport .sigpad{height:74px;max-width:300px}
+  body.pdfexport .cgvrow{margin-top:6px!important;font-size:11px!important}
+  body.pdfexport .legal{font-size:7.4px;line-height:1.3;padding:3px 0}
+  body.pdfexport .head,body.pdfexport .party,body.pdfexport .offer,body.pdfexport .totals,body.pdfexport .pay,body.pdfexport .conditions{page-break-inside:avoid;break-inside:avoid}
 
   /* En-tete cobrand clair */
   .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
@@ -315,7 +340,7 @@
               <div class="offer-nm">Visibilit&eacute;</div>
               <div class="offer-sub">Votre pr&eacute;sence dans l&rsquo;op&eacute;ration</div>
             </div>
-            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc"></div></div>
           </div>
           <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="90"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
           <div class="offer-inclus-box">
@@ -346,7 +371,7 @@
               <div class="offer-nm">Animation<span class="badge">Le plus choisi</span></div>
               <div class="offer-sub">Faites revenir vos clients</div>
             </div>
-            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="1490">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="1490">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc"></div></div>
           </div>
           <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="159"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
           <div class="offer-inclus-box">
@@ -378,7 +403,7 @@
               <div class="offer-nm">Sponsor officiel</div>
               <div class="offer-sub">Visibilit&eacute; maximale</div>
             </div>
-            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="3590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc">prix modifiable</div></div>
+            <div class="offer-prw"><div class="offer-pr"><input class="offer-price" inputmode="decimal" autocomplete="off" value="3590">&nbsp;<span class="u">&euro; HT</span></div><div class="offer-ttc"></div></div>
           </div>
           <div class="offer-lot">Lot offert : <input class="offer-lotval" inputmode="decimal" autocomplete="off" value="259"> &euro; <span class="lotnote">&mdash; d&eacute;duit en caisse par le commer&ccedil;ant, non factur&eacute;</span></div>
           <div class="offer-inclus-box">
@@ -471,7 +496,15 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-function exportPdf(){ try{ document.body.classList.remove("pdfexport"); }catch(e){} window.print(); }
+function exportPdf(){
+  var el=document.querySelector(".doc");
+  var d=document.getElementById("docNum"); var num=(d&&d.value)?d.value:"bon";
+  if(typeof html2pdf==="undefined"){ window.print(); return; }
+  document.body.classList.add("pdfexport");
+  var opt={margin:[7,7,7,7],filename:"bon-commande-"+num+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",windowWidth:820,scrollX:0,scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["avoid-all","css"]}};
+  var done=function(){ document.body.classList.remove("pdfexport"); };
+  html2pdf().set(opt).from(el).save().then(done).catch(done);
+}
 </script>
 <script>
 (function(){

@@ -21,6 +21,9 @@
   body.pdfexport{background:#fff!important}
   body.pdfexport .doc{max-width:100%!important;width:100%!important;border:none!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;margin:0!important}
   body.pdfexport .no-print{display:none!important}
+  body.pdfexport .fac-actions,body.pdfexport .no-print{display:none!important}
+  body.pdfexport{font-size:11px}
+  body.pdfexport .mentions{font-size:9px}
 
   /* En-tete cobrand clair */
   .cobrand{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--white)}
@@ -494,7 +497,16 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-function exportPdf(){ try{ document.body.classList.remove("pdfexport"); }catch(e){} window.print(); }
+function exportPdf(){
+  var el=document.querySelector(".doc");
+  var n=(document.getElementById("facNum")&&document.getElementById("facNum").textContent)||"facture";
+  n=String(n).replace(/[^A-Za-z0-9_-]/g,"");
+  if(typeof html2pdf==="undefined"){ window.print(); return; }
+  document.body.classList.add("pdfexport");
+  var opt={margin:[7,7,7,7],filename:"facture-"+n+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",windowWidth:820,scrollX:0,scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["avoid-all","css"]}};
+  var done=function(){ document.body.classList.remove("pdfexport"); };
+  html2pdf().set(opt).from(el).save().then(done).catch(done);
+}
 </script>
 </body>
 </html>
