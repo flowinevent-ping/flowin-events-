@@ -469,6 +469,7 @@
       <div style="font-size:12px;color:var(--muted);margin-top:5px">Le destinataire reçoit sa copie à cette adresse. Une copie part aussi automatiquement à flowinevent@gmail.com.</div>
     </div>
     <div class="actions editonly">
+      <button type="button" id="saveBtn" class="btn-primary" style="background:#3B5CC4">&#128190; Enregistrer les modifications</button>
       <button type="button" id="sendClientBtn" class="btn-primary" style="background:#1D9E75">&#128233; Enregistrer &amp; envoyer au client (à faire signer)</button>
       <button type="button" id="submitBtn" class="btn-primary" style="background:#3B5CC4">Signer maintenant (client présent)</button>
       <span id="status" class="statusmsg"></span>
@@ -695,6 +696,27 @@ function exportPdf(){
       signature: withSig?cv.toDataURL('image/png'):null,
       cgv_version:CGV_VERSION, cgv_acceptee_at: withSig?new Date().toISOString():null };
   }
+  function collectDraft(){
+    var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
+    var rec={ id:id, super_event_id:'se-nds-2026',
+      raison_sociale:$('f_raison').value.trim()||null,
+      adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
+      contact:$('f_contact').value.trim()||null, tel:$('f_tel').value.trim()||null,
+      email:((($('f_email_envoi')&&$('f_email_envoi').value.trim())||$('f_email').value.trim()||'').toLowerCase())||null,
+      siret:$('f_siret').value.trim()||null };
+    if(sel){
+      var t=computeTotals();
+      rec.offre=sel.getAttribute('data-offre'); rec.offre_label=sel.getAttribute('data-label');
+      if(t){ rec.montant_ht=t.ht; rec.montant_tva=t.tva; rec.montant_ttc=t.ttc; }
+      var catHt=parseFloat(sel.getAttribute('data-ht')); if(!isNaN(catHt)) rec.montant_ht_catalogue=catHt;
+      rec.mention_particuliere=selMention()||null;
+      rec.prestations_incluses=selInclus()||null;
+      var lv=selLot(); if(!isNaN(lv)) rec.lot_valeur=lv;
+      rec.lot_descriptif=selVal('.offer-lotdesc')||null;
+      rec.lot_validite=selVal('.offer-lotemis')||null; rec.lot_conditions=selVal('.offer-lotuse')||null;
+    }
+    return rec;
+  }
   function postRec(rec, btn, onOk){
     btn.disabled=true; setStatus('Enregistrement\u2026','');
     var url=EDIT_MODE?(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(rec.id)):(SUPA+'/rest/v1/bons_commande');
@@ -715,10 +737,17 @@ function exportPdf(){
       postRec(rec, $('sendClientBtn'), function(){
         var lien=location.origin+location.pathname+'?id='+encodeURIComponent(rec.id);
         var to=rec.email||'';
-        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n\u00b0 '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois sign\u00e9, vous en recevez une copie.\n\nOPConsult \u00b7 BAITA EURL \u00b7 info@opconsult.co \u00b7 06 16 35 49 36';
+        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n\u00b0 '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois sign\u00e9, vous en recevez une copie.\n\nFlowin (OPConsult \u00b7 BAITA EURL) \u00b7 flowinevent@gmail.com \u00b7 06 16 35 49 36';
         setStatus('Bon '+rec.id+' enregistr\u00e9 \u2014 \u00e0 signer par le client. Lien copiable : '+lien,'ok');
-        location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent('Votre bon de commande \u00e0 signer \u2014 Nuits du Sud 2026')+'&body='+encodeURIComponent(body);
+        location.href='mailto:'+encodeURIComponent(to)+'?cc=flowinevent@gmail.com&subject='+encodeURIComponent('Votre bon de commande \u00e0 signer \u2014 Nuits du Sud 2026')+'&body='+encodeURIComponent(body);
       });
+    });
+  }
+  if($('saveBtn')){
+    $('saveBtn').addEventListener('click',function(){
+      var rec=collectDraft();
+      if(!rec.id){ setStatus('Num\u00e9ro de bon manquant.','err'); return; }
+      postRec(rec, $('saveBtn'), function(){ var b=$('saveBtn'); if(b) b.disabled=false; setStatus('\u2713 Modifications enregistr\u00e9es \u2014 '+rec.id+'.','ok'); });
     });
   }
 
@@ -825,8 +854,8 @@ function exportPdf(){
         var _link=location.href;
         var _mb=$('mailClientBtn');
         if(_mb){
-          var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nOPConsult · BAITA EURL · info@opconsult.co · 06 16 35 49 36';
-          _mb.href='mailto:'+encodeURIComponent(d.email||'')+'?subject='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
+          var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 06 16 35 49 36';
+          _mb.href='mailto:'+encodeURIComponent(d.email||'')+'?cc=flowinevent@gmail.com&subject='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
         }
         var _cb=$('copyLinkBtn');
         if(_cb){
