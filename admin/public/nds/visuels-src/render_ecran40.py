@@ -72,7 +72,7 @@ def qr_band(base, t):
     yo = int((1 - appear) * 50)
     base.alpha_composite(band, (bx, by + yo))
 
-PARTNERS = ["bergerie", "pegase", "utile", "carrosserie-gp"]
+# (ancienne liste locale supprimee -- code mort, jamais utilisee : le rendu s appuie sur L.PARTNERS)
 DUR = 40.0; NF = int(DUR * FPS)
 TOP = 0.74  # le contenu kinetique vit au-dessus de la bande QR
 

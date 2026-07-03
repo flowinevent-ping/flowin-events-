@@ -245,7 +245,7 @@ def name_card(base, l1, l2, cx, cy, w, h, prog):
     cr = card.resize((nw, nh), Image.LANCZOS); al = cr.split()[3].point(lambda p: int(p*a/255)); cr.putalpha(al)
     yo = int((1 - eo(prog)) * 30); base.alpha_composite(cr, (int(cx-nw/2), int(cy-nh/2)+yo))
 
-PARTNERS = ["bergerie", "pegase", "utile", "carrosserie-gp"]
+# (ancienne liste locale supprimee -- code mort, jamais utilisee : le rendu s appuie sur L.PARTNERS)
 DUR = 40.0; NF = int(DUR * FPS)
 
 def finale_qr(base, lt, qr_img=None):
