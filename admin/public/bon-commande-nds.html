@@ -471,16 +471,7 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-function exportPdf(){
-  var el=document.querySelector(".doc");
-  var d=document.getElementById("docNum");
-  var num=(d&&d.value)?d.value:"bon";
-  if(typeof html2pdf==="undefined"){ window.print(); return; }
-  document.body.classList.add("pdfexport");
-  var opt={margin:[8,8,10,8],filename:"bon-commande-"+num+".pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:el.scrollWidth},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:[".offer",".pay",".signrow",".totals",".kvcard",".cobrand"]}};
-  var done=function(){ document.body.classList.remove("pdfexport"); };
-  html2pdf().set(opt).from(el).save().then(done).catch(done);
-}
+function exportPdf(){ try{ document.body.classList.remove("pdfexport"); }catch(e){} window.print(); }
 </script>
 <script>
 (function(){
