@@ -6926,7 +6926,7 @@ function newPartenaire(){
 // ----- PARTENAIRE drawer -----
 function drawerPartner(p){
   if(!p) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Partenaire introuvable</div>';
-  const lots   = DATA.lots.filter(l=>l.partenaireId===p.id || l.partenaire_id===p.id);
+  const lots   = DATA.lots.filter(l=>l.partenaireId===p.id || l.partenaire_id===p.id).concat((Array.isArray(p.lots)?p.lots:[]).map(function(x){return {nom:x.nom, valeur:String(x.valeur==null?'':x.valeur).replace(/[^0-9.,]/g,''), quantite:x.nb||x.quantite||1, conditions:x.conditions, _own:true};}));
   const events = (p.events||[]).map(findEvent).filter(Boolean);
   const valeur = lots.reduce(function(s,l){ return s+(l.valeur||0)*(l.quantite||1); },0);
 
@@ -6959,11 +6959,14 @@ function drawerPartner(p){
     html += '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">';
     html += '<img src="'+a4u+'" style="width:120px;border-radius:8px;border:1px solid #2a2f45" onerror="this.style.display=\'none\'">';
     html += '<div style="flex:1"><div class="text-xs text-muted mb-2">Affiche à la charte NDS, QR de la station du commerce.</div>';
-    html += '<a href="'+a4u+'" target="_blank" class="btn-sm" style="display:inline-block;background:#3B5CC4;color:#fff;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">⬇ Télécharger l\'A4</a></div></div>';
+    html += '<a href="'+a4u+'" download class="btn-sm" style="display:inline-block;background:#3B5CC4;color:#fff;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none">⬇ Télécharger l\'A4</a></div></div>';
     html += '<div class="section-h">🎬 Vidéo du commerce (9×16)</div>';
-    html += '<div class="mb-3"><a href="'+vidu+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">▶ video-'+esc(cslug)+'-9x16.mp4</a></div>';
+    html += '<div class="mb-3"><a href="'+vidu+'" download style="color:#22D3C6;font-size:12px;font-weight:700">⬇ Télécharger la vidéo (MP4) — video-'+esc(cslug)+'-9x16.mp4</a></div>';
+    html += '<div class="section-h">⬇ Tous les téléchargeables (à envoyer / imprimer)</div>';
+    var _dl=function(u,t){return '<a href="'+u+'" download class="btn-sm" style="display:inline-block;background:#1f2544;color:#cdd3f0;padding:6px 11px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;border:1px solid var(--sa-border);margin:0 6px 6px 0">'+t+'</a>';};
+    html += '<div style="margin-bottom:14px">'+_dl(kitu+cslug+'-kit.zip','⬇ ZIP complet')+_dl(kitu+'nds_a3_'+cslug+'.pdf','A3 PDF')+_dl(kitu+'nds_a4_'+cslug+'.pdf','A4 PDF')+_dl(kitu+'nds_a5_'+cslug+'.pdf','A5 PDF')+_dl(vidu,'🎬 Vidéo MP4')+_dl(kitu+'qr-station-'+cslug+'.png','QR station')+_dl(kitu+'qr-reseaux-'+cslug+'.png','QR réseaux')+_dl(kitu+'reseaux-texte.md','📱 Texte réseaux')+_dl(kitu+'nds_a4_'+cslug+'.svg','✏️ SVG')+'</div>';
     html += '<div class="section-h">🎟️ Tickets tombola (à imprimer)</div>';
-    html += '<div class="mb-3"><a href="'+ticku+'" target="_blank" style="color:#22D3C6;font-size:12px;font-weight:700">⬇ Planche tickets PDF</a> <span class="text-xs text-muted">(n° de série, champs gagnant à remplir)</span></div>';
+    html += '<div class="mb-3"><a href="'+ticku+'" download style="color:#22D3C6;font-size:12px;font-weight:700">⬇ Planche tickets PDF</a> <span class="text-xs text-muted">(n° de série, champs gagnant à remplir)</span></div>';
     /* ── Bloc éditable UNIQUE : montant + conditions, propagé à tous les tickets du pro ── */
     var _lot = (Array.isArray(p.lots) && p.lots[0]) ? p.lots[0] : {};
     html += '<div class="section-h">✏️ Lot &amp; conditions (bloc unique — se propage sur tous les tickets)</div>';
