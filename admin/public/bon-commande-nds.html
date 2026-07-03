@@ -524,30 +524,35 @@ function exportPdf(){
   var px=x+colW+12; T('PARTENAIRE',px,y+5,7,'bold',teal); T(gv('f_raison')||'-',px,y+11,11,'bold',ink); T(gv('f_adresse'),px,y+16,8,'normal',mut); T(((gv('f_cp')+'  '+gv('f_ville')).trim()),px,y+20,8,'normal',mut);
   var pc=[gv('f_contact'),gv('f_tel'),gv('f_email')].filter(Boolean).join(' - '); T(pc,px,y+24,7.5,'normal',mut); T(gv('f_siret')?('SIRET '+gv('f_siret')):'',px,y+28,7.5,'normal',mut);
   y+=35;
-  T('OFFRE RETENUE',x,y,8,'bold',teal); y+=6; var _offY=y-5; T(offName()||'Offre',x,y,14,'bold',ink); T((so('.offer-price')||'-')+' EUR HT',W-M,y,15,'bold',ink,'right');
-  y+=5.5; T('Valeur du lot : '+(so('.offer-lotval')||'-')+' EUR',x,y,9,'normal',mut); y+=6;
-  T('PRESTATIONS INCLUSES',x,y,7.5,'bold',teal); y+=4.5;
+  T('OFFRE RETENUE',x,y,8,'bold',teal); y+=6.5; var _offY=y-6;
+  T(offName()||'Offre',x+3,y,14,'bold',ink); T((so('.offer-price')||'-')+' EUR HT',W-M-3,y,15,'bold',ink,'right');
+  var _sub=so('.offer-sub'); if(_sub){ y+=4.6; T(_sub,x+3,y,9,'normal',teal); }
+  y+=5.5; T('Valeur du lot : '+(so('.offer-lotval')||'-')+' EUR',x+3,y,9,'normal',mut); y+=6;
+  T('PRESTATIONS INCLUSES',x+3,y,7.5,'bold',teal); y+=2.5;
   var inc=(so('.offer-inclus')||'').split('\n').filter(function(l){return l.trim();});
+  var _plines=[]; inc.forEach(function(l){ doc.splitTextToSize(S(l),CW-14).forEach(function(ln){_plines.push(ln);}); });
+  var _pbh=5.5 + _plines.length*4.1;
+  doc.setDrawColor(225,228,235); doc.roundedRect(x+3,y,CW-6,_pbh,2,2);
   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(ink[0],ink[1],ink[2]);
-  inc.forEach(function(l){var w=doc.splitTextToSize(S(l),CW-2);w.forEach(function(ln){doc.text(ln,x,y);y+=4.1;});});
-  y+=2.5;
+  var _py=y+5.5; _plines.forEach(function(ln){doc.text(ln,x+7,_py);_py+=4.1;});
+  y+=_pbh+3.5;
   var ld=so('.offer-lotdesc'),le=so('.offer-lotemis'),lu=so('.offer-lotuse');
-  if(ld||le||lu){ T('LOT - DESCRIPTIF & CONDITIONS',x,y,7.5,'bold',gold); y+=4.5;
-    if(ld){T('Descriptif : ',x,y,8.5,'bold',mut);T(ld,x+21,y,8.5,'normal',ink);y+=4.3;}
-    if(le){T('Validite : ',x,y,8.5,'bold',mut);T(le,x+21,y,8.5,'normal',ink);y+=4.3;}
-    if(lu){y=para('Utilisation : '+lu,x,y,8.5,ink,4.1);} y+=1.5; }
+  if(ld||le||lu){ T('LOT - DESCRIPTIF & CONDITIONS',x+3,y,7.5,'bold',gold); y+=4.5;
+    if(ld){T('Descriptif : ',x+3,y,8.5,'bold',mut);T(ld,x+24,y,8.5,'normal',ink);y+=4.3;}
+    if(le){T('Validite : ',x+3,y,8.5,'bold',mut);T(le,x+24,y,8.5,'normal',ink);y+=4.3;}
+    if(lu){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(ink[0],ink[1],ink[2]);var _lw=doc.splitTextToSize(S('Utilisation : '+lu),CW-8);_lw.forEach(function(ln){doc.text(ln,x+3,y);y+=4.1;});} y+=1.5; }
   var mention=so('.offer-mentiontxt');
   if(mention){
-    var _mlines=doc.splitTextToSize(S(mention),CW-8);
+    var _mlines=doc.splitTextToSize(S(mention),CW-14);
     var _mbh=10 + _mlines.length*4;
-    doc.setDrawColor(225,228,235); doc.roundedRect(x,y,CW,_mbh,2,2);
-    T('Mention particuliere / remise pour ce pack',x+4,y+5.5,7.3,'bold',pink);
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(ink[0],ink[1],ink[2]); var _my=y+10.5; _mlines.forEach(function(ln){doc.text(ln,x+4,_my);_my+=4;});
-    y+=_mbh+3;
-  } else { y+=1; }
-  // encadré bleu autour du module offre
-  doc.setDrawColor(59,92,196); doc.setLineWidth(0.5); doc.roundedRect(x-3,_offY,CW+6,(y-2)-_offY,3,3); doc.setLineWidth(0.2);
-  y+=2;
+    doc.setDrawColor(225,228,235); doc.roundedRect(x+3,y,CW-6,_mbh,2,2);
+    T('Mention particuliere / remise pour ce pack',x+7,y+5.5,7.3,'bold',gold);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(ink[0],ink[1],ink[2]); var _my=y+10.5; _mlines.forEach(function(ln){doc.text(ln,x+7,_my);_my+=4;});
+    y+=_mbh+3.5;
+  } else { y+=2; }
+  // encadré bleu autour du module offre (comme HTML)
+  doc.setDrawColor(59,92,196); doc.setLineWidth(0.6); doc.roundedRect(x,_offY,CW,(y-2)-_offY,3,3); doc.setLineWidth(0.2);
+  y+=2.5;
   var tW=76,tx=W-M-tW,ty=y+1; doc.setDrawColor(225,228,235); doc.roundedRect(tx,ty,tW,20,2,2);
   T('Montant HT facture',tx+4,ty+6,9,'normal',mut); T(gv('tHT')||'-',tx+tW-4,ty+6,9,'bold',ink,'right');
   T('TVA 20 %',tx+4,ty+11.5,9,'normal',mut); T(gv('tTVA')||'-',tx+tW-4,ty+11.5,9,'bold',ink,'right');
