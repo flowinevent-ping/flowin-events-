@@ -232,6 +232,10 @@ const RULES = {
     x:"Toute tâche terminée met à jour les 3 : (1) commit+push GitHub, (2) Supabase handoff_notes, (3) hub Notion. Le Notion est souvent oublié — étape obligatoire, jamais optionnelle."},
   "R-NEVER-INVENT":{t:"Ne jamais inventer de donnée", color:"var(--red)",
     x:"Lots, coordonnées, wording, URLs : si ce n'est pas sourcé de façon fiable, laisser vide. Réutiliser le contenu validé des versions précédentes (retrouvable via conversation_search) plutôt que d'en fabriquer."},
+  "R-ACCOUNT-TRAP":{t:"Piège des comptes Supabase", color:"var(--amber)",
+    x:"Le projet ywcqtupgoxfzkddqkztk est sous le compte Google romain.collin@gmail.com, org affichée « flowin revision olivia » (nom trompeur mais BON projet). Le compte GitHub flowinevent possède un AUTRE projet Supabase vide (atddutvzklcgiqxlpvla) — ne jamais le confondre. Pro souscrit → pas de mise en pause automatique. Consolidation des comptes prévue post-festival (le transfert ne change pas le ref ywcqtupgoxfzkddqkztk)."},
+  "R-PAT-EXPIRY":{t:"Token GitHub à durée limitée", color:"var(--teal)",
+    x:"Le PAT fine-grained (Contents R/W) expire ~17 sept 2026. Auth push : https://x-access-token:<TOKEN>@github.com/flowinevent-ping/flowin-events-.git. Sur push 401 → demander à Romain le token courant et mettre à jour uniquement cette ligne du handoff."},
 };
 
 const CIRCUITS = {
@@ -441,6 +445,39 @@ const CIRCUITS = {
    edges:[["fi-rattach","fi-crm"],["fi-crm","fi-cockpit"],["fi-cockpit","fi-video"],["fi-video","fi-export"]],
    crossLinks:[{to:"facturation",label:"rattachement"},{to:"partenaires-visuels",label:"logos vidéo"}]
  },
+
+ "infra":{ label:"Infrastructure & comptes", icon:"🔌", hex:"#5b7fff",
+   sub:"comptes · abonnements · outils · où Claude intervient",
+   nodes:[
+    {id:"in-github", x:80,y:120, label:"GitHub (repo)", sub:"flowinevent-ping", rules:["R-PAT-EXPIRY","R-COMMIT"],
+      desc:"Le code source. Repo flowinevent-ping/flowin-events-, branche main, racine du projet Next.js = /admin. Chaque push sur main redéploie Vercel. Accès de Claude par token (PAT).",
+      tables:[], files:["flowinevent-ping/flowin-events- (main, root /admin)","PAT fine-grained Contents R/W — expire ~17/09/2026"]},
+    {id:"in-vercel", x:340,y:120, label:"Vercel (hébergement)", sub:"auto-deploy",
+      desc:"Héberge et sert le site. Déploiement automatique à chaque push sur main, racine /admin. C'est Vercel qui sert la web app, le dashboard, les kits digitaux et cette carte.",
+      tables:[], files:["Live : https://flowin-events.vercel.app","Redéploie sur push main → root /admin"], live:BASE+"/"},
+    {id:"in-notion", x:600,y:120, label:"Notion (hub humain)", sub:"logs de session", rules:["R-3PILIERS"],
+      desc:"Le hub lisible par un humain : logs de session, journal des livrables. Point d'entrée pour reprendre le fil d'une conversation à l'autre.",
+      tables:[], files:["Hub Comm : page 38c6dcca-9add-81dd-9af2-c93139e06393","Kit complet : 38d6dcca-9add-81f1-bc65-cfea5f5b8399"]},
+    {id:"in-persist", x:880,y:120, label:"Persistance", sub:"⇄ 3 piliers", cross:true, rules:["R-3PILIERS"],
+      desc:"CARREFOUR de fin de tâche : toute tâche terminée converge ici et met à jour les 3 piliers en même temps — (1) commit+push GitHub, (2) Supabase handoff_notes, (3) hub Notion. Le Notion est le plus souvent oublié.",
+      tables:["handoff_notes (clé handoff-nds-2026-comm)"], files:["+ HANDOFF-flowin-nds2026.md (repo)"]},
+    {id:"in-supabase", x:80,y:280, label:"Supabase (données)", sub:"ywcqtupgoxfzkddqkztk", rules:["R-ACCOUNT-TRAP"],
+      desc:"La base de données + l'auth + les edge functions. Projet ywcqtupgoxfzkddqkztk (eu-west-1), plan Pro (pas d'auto-pause). ⚠ Sous le compte Google romain.collin@gmail.com, org « flowin revision olivia » — pas sous flowinevent.",
+      tables:["Toutes les tables du système"], files:["Projet ywcqtupgoxfzkddqkztk (eu-west-1, Pro)"]},
+    {id:"in-resend", x:340,y:280, label:"Resend (emails)", sub:"domaine à vérifier", rules:["R-COPIE-EMAIL"],
+      desc:"Le service d'envoi d'emails, appelé par les edge functions Supabase. Domaine non encore vérifié → tant que ce n'est pas fait, les envois ne partent que vers flowinevent@gmail.com.",
+      tables:[], files:["Secret Supabase : RESEND_API_KEY","edge functions : notify-bon-commande, send-ticket-gagnant, notify-souscription"]},
+    {id:"in-contact", x:600,y:280, label:"Contact / Gmail", sub:"flowinevent@gmail.com", rules:["R-CONTACT"],
+      desc:"L'adresse et le numéro affichés sur TOUS les supports partenaires : flowinevent@gmail.com · 06 16 35 49 36. Jamais « Romain Collin » sur un visuel/vidéo/document.",
+      tables:[], files:["flowinevent@gmail.com","06 16 35 49 36"]},
+    {id:"in-claude", x:880,y:280, label:"Où Claude intervient", sub:"MCP + fs éphémère", rules:["R-COMMIT","R-NEVER-INVENT"],
+      desc:"Séquence de bootstrap à chaque session : clone+push GitHub (token), test Supabase (select 1), lecture du handoff. Claude agit via GitHub (token), Supabase (MCP execute_sql/apply_migration) et Notion (MCP). Son disque /home/claude est ÉPHÉMÈRE → tout asset produit doit être commité dans la même session.",
+      tables:[], files:["clone+push GitHub (token)","Supabase MCP (execute_sql / apply_migration)","Notion MCP","/home/claude = éphémère"]},
+   ],
+   edges:[["in-github","in-vercel"],["in-github","in-persist"],["in-notion","in-persist"],
+          ["in-supabase","in-resend"],["in-supabase","in-persist"],["in-claude","in-persist"]],
+   crossLinks:[{to:"communication",label:"Resend envoie les emails"},{to:"partenaires-visuels",label:"Vercel sert les kits"},{to:"facturation",label:"triggers en base"},{to:"fiabilite",label:"points fragiles connus"}]
+ },
 };
 
 const OVERVIEW = [
@@ -452,7 +489,8 @@ const OVERVIEW = [
   {id:"facturation",          x:470, y:470},
   {id:"partenaires-visuels",  x:820, y:470},
   {id:"communication",        x:1170,y:470},
-  {id:"fiabilite",            x:645, y:800},
+  {id:"fiabilite",            x:470, y:800},
+  {id:"infra",                x:820, y:800},
 ];
 const OV_LINKS = [
   ["parcours-joueur","cycle-jeu"],["cycle-jeu","creer-event"],["creer-event","super-event"],
@@ -460,6 +498,7 @@ const OV_LINKS = [
   ["partenaires-visuels","communication"],["facturation","communication"],
   ["parcours-joueur","communication"],["prospection","partenaires-visuels"],
   ["facturation","fiabilite"],["partenaires-visuels","fiabilite"],
+  ["infra","communication"],["infra","partenaires-visuels"],["infra","fiabilite"],["infra","facturation"],
 ];
 
 /* ====================================================================
