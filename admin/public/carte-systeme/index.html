@@ -95,6 +95,15 @@
     #panel{width:100%;top:auto;height:76vh;border-left:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;transform:translateY(101%)}
     #panel.open{transform:none}
   }
+
+  .legend .cx{width:16px;height:0;border-top:2px solid #b7bed0;flex-shrink:0}
+  .plead2{padding:12px 20px;border-bottom:1px solid var(--line)}
+  .plead2 h4{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 8px;font-weight:800}
+  .conn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:20px;
+        border:1px solid var(--line);background:var(--soft);color:#33405a;cursor:pointer;margin:0 5px 5px 0}
+  .conn:hover{border-color:#b7bed0;background:#eef1f7}
+  .conn .cd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -116,15 +125,17 @@
     <g id="scene"></g>
   </svg>
 </div>
-<div class="hint" id="hint">Vue d'ensemble — <b>clique une fonction</b> pour l'ouvrir</div>
+<div class="hint" id="hint">Architecture de l'app — <b>clique un objet</b> pour voir ses connexions</div>
 <div class="legend">
   <b>Repères</b>
+  <div><span class="cx"></span> Connexion entre deux objets</div>
   <div><span class="di"></span> Carrefour — des données se croisent</div>
   <div><span class="fr"></span> Point de vigilance entre deux étapes</div>
 </div>
 <div id="panel">
   <div class="ph"><button class="close" id="pclose">✕</button><div class="tagrow" id="ptags"></div><h2 id="ptitle"></h2></div>
   <div class="plead" id="plead"></div>
+  <div class="plead2" id="plead2"></div>
   <div class="pbody" id="pbody"></div>
 </div>
 <div id="rulesModal"><div class="rcard">
@@ -187,295 +198,108 @@ const RULES = {
   "R-PAT-EXPIRY":{t:"Token GitHub à durée limitée", color:"var(--teal)",
     x:"Le PAT fine-grained (Contents R/W) expire ~17 sept 2026. Auth push : https://x-access-token:<TOKEN>@github.com/flowinevent-ping/flowin-events-.git. Sur push 401 → demander à Romain le token courant et mettre à jour uniquement cette ligne du handoff."},
 };
-
-const CIRCUITS = {
- "parcours-joueur":{ label:"Parcours du festivalier", icon:"🎡", hex:"#e6187f",
-   sub:"Scan QR → quiz → bonus → fiche → ticket",
-   nodes:[
-    {id:"pj-scan", x:80,y:180, label:"Scan QR", sub:"entrée", rules:["R-ANTICHEAT"],
-      desc:"Le festivalier flashe un QR : station physique (1 jeu/jour) ou lien réseaux (usage unique, tout le festival).",
-      tables:["events (cfg, quizBanques, quizBonusList)"], files:["admin/app/parcours/nds2026/page.tsx"]},
-    {id:"pj-quiz", x:330,y:180, label:"Questionnaire", sub:"quiz", rules:["R-TICKET"],
-      desc:"4 questions tirées au hasard, en excluant celles déjà vues par ce joueur (sur tout le festival, pas juste cette station).",
-      tables:["banques (questions)","se_reponses (lu — anti-répétition)"], files:["admin/lib/parcours.ts → fetchJoueurHistory()"],
-      code:"export async function fetchJoueurHistory(joueurId) {\n  const { data } = await supabase\n    .from('se_reponses')\n    .select('quiz_reponses,bonus_reponses')\n    .eq('joueur_id', joueurId).limit(200)\n  // liste des qid deja vus + si bonus deja fait\n}"},
-    {id:"pj-bonus", x:580,y:180, label:"Question bonus", sub:"mobilité/RSE",
-      desc:"5 questions fixes (mobilité/RSE), masquées après la 1ère réponse d'un joueur reconnu, sur toute station flashable. L'outil manuel Brigade Verte est un fichier séparé, non concerné.",
-      tables:["se_reponses (bonus_reponses)","sondage_brigade (stats anonymes)"], files:["admin/app/parcours/nds2026/NDS2026Client.tsx → finishBonus()"]},
-    {id:"pj-fiche", x:830,y:180, label:"Fiche festivalier", sub:"⇄ 3 tables", cross:true,
-      desc:"CARREFOUR MAJEUR : remplir ce formulaire écrit dans 3 tables en même temps. C'est le meilleur exemple de « donnée multipliée » du système — à surveiller pour tout doublon.",
-      tables:["joueurs (profil, 1 ligne/email)","participations (résumé event/jour)","se_reponses (détail quiz+bonus+formulaire)"],
-      files:["admin/lib/parcours.ts → writeJoueur() / claimJoueur()"],
-      code:"await supabase.from('participations').insert({...})\nawait writeSeReponses({ joueurId, evId, jour, form,\n  quiz_reponses, bonus_reponses })   // 2e ecriture\nawait attribuerSuperEvent(joueurId, evId, today, ...) // 3e systeme (se_tickets)"},
-    {id:"pj-ticket", x:1080,y:180, label:"Ticket & gains", sub:"sortie",
-      desc:"Ticket généré. Si un lot est attribué au tirage, un code série + un QR de retrait sont créés dans se_gains.",
-      tables:["participations (tickets)","lots (assigné au joueur)","se_gains (code, QR, validité)"],
-      files:["admin/public/dashboard.html → ensureSeGainForLot()"]},
-   ],
-   edges:[["pj-scan","pj-quiz"],["pj-quiz","pj-bonus"],["pj-bonus","pj-fiche"],["pj-fiche","pj-ticket"]],
-   crossLinks:[{to:"cycle-jeu",label:"le module rend le quiz"},{to:"super-event",label:"attribuerSuperEvent → se_tickets"},{to:"communication",label:"email ticket gagnant"}]
- },
-
- "cycle-jeu":{ label:"Cycle de vie d'un jeu", icon:"🎮", hex:"#a855f7",
-   sub:"config cfg → module maître → rendu joueur",
-   nodes:[
-    {id:"cj-cfg", x:100,y:180, label:"Config en base", sub:"events.cfg", rules:["R-MODULES-MAITRES"],
-      desc:"Toute la personnalisation d'un jeu vit dans events.cfg (jsonb) : quel module, quelles banques de questions, bonus, gains. On ne touche jamais au code du module — on change la config.",
-      tables:["events.cfg (jsonb)"], files:[]},
-    {id:"cj-modules", x:390,y:180, label:"Module maître", sub:"Quiz/Spin/Tombola/Vote", rules:["R-MODULES-MAITRES"],
-      desc:"Le mini-jeu générique choisi par cfg.module. Ces 4 fichiers sont la RÈGLE D'OR : jamais modifiés directement.",
-      tables:[], files:["admin/app/parcours/quiz/QuizClient.tsx","admin/app/parcours/spin/SpinClient.tsx","admin/app/parcours/tombola/TombolaClient.tsx","admin/app/parcours/vote/VoteClient.tsx"]},
-    {id:"cj-orch", x:690,y:180, label:"Orchestrateur NDS", sub:"modifiable",
-      desc:"NDS2026Client.tsx s'inspire du module Quiz mais a sa version enrichie (bonus, historique, tickets multiples, sondage Brigade). C'est le SEUL fichier de la couche jeu qu'on peut éditer.",
-      tables:["events.cfg"], files:["admin/app/parcours/nds2026/NDS2026Client.tsx"]},
-    {id:"cj-rendu", x:960,y:180, label:"Rendu joueur", sub:"page.tsx",
-      desc:"La page servie au festivalier assemble cfg + module + orchestrateur pour afficher le jeu.",
-      tables:[], files:["admin/app/parcours/nds2026/page.tsx"]},
-   ],
-   edges:[["cj-cfg","cj-modules"],["cj-modules","cj-orch"],["cj-orch","cj-rendu"]],
-   crossLinks:[{to:"parcours-joueur",label:"le joueur joue ce rendu"},{to:"creer-event",label:"cfg posée à la création"}]
- },
-
- "creer-event":{ label:"Créer un event", icon:"➕", hex:"#22d3c6",
-   sub:"fiche event → cfg → QR → rattachement",
-   nodes:[
-    {id:"ce-create", x:110,y:180, label:"Créer la fiche event", sub:"events",
-      desc:"Un event = une station/un jeu. Création de la ligne dans events (id ev-nds-<slug>, nom, dates).",
-      tables:["events"], files:["admin/lib/events.ts","admin/public/dashboard.html → onglet Events"]},
-    {id:"ce-cfg", x:390,y:180, label:"Configurer cfg", sub:"module + gains", rules:["R-MODULES-MAITRES","R-LOTS-SOURCE"],
-      desc:"On règle events.cfg : module (quiz/spin/…), banques de questions, question bonus, gain immédiat / ticket. Le lot vient de partenaires.lots — jamais saisi en double.",
-      tables:["events.cfg (jsonb)","banques"], files:[]},
-    {id:"ce-qr", x:670,y:180, label:"Générer les QR", sub:"station + réseaux", rules:["R-QR-PYZBAR"],
-      desc:"2 QR par event : station (physique, 1/jour) et réseaux (digital &source=reseaux-<slug>, usage unique). Toujours vérifiés pyzbar.",
-      tables:[], files:["admin/public/nds/visuels-src/composite_qr.py"], assets:"partners"},
-    {id:"ce-rattach", x:950,y:180, label:"Rattacher au Super Event", sub:"events.super_event_id",
-      desc:"On lie l'event à un Super Event : sans ce rattachement, attribuerSuperEvent() ne fait rien (pas de ticket centralisé).",
-      tables:["events.super_event_id","super_events"], files:["admin/lib/parcours.ts → attribuerSuperEvent()"]},
-   ],
-   edges:[["ce-create","ce-cfg"],["ce-cfg","ce-qr"],["ce-qr","ce-rattach"]],
-   crossLinks:[{to:"cycle-jeu",label:"cfg pilote le module"},{to:"super-event",label:"rattachement"},{to:"partenaires-visuels",label:"QR sur les affiches"}]
- },
-
- "super-event":{ label:"Créer un Super Event", icon:"🌐", hex:"#7c5cff",
-   sub:"fédère des events → tickets/gains centralisés",
-   nodes:[
-    {id:"se-create", x:110,y:180, label:"Créer le Super Event", sub:"super_events",
-      desc:"Le chapeau qui fédère plusieurs events/stations (ex. se-nds-2026 regroupe les stations + les 8 commerçants).",
-      tables:["super_events"], files:["admin/app/se/[se]/SuperEventClient.tsx"]},
-    {id:"se-rattach", x:380,y:180, label:"Rattacher les events", sub:"events.super_event_id",
-      desc:"Chaque event pointe vers le Super Event via events.super_event_id. C'est ce lien qui active la centralisation.",
-      tables:["events.super_event_id"], files:[]},
-    {id:"se-pont", x:650,y:180, label:"Le pont", sub:"⇄ attribuerSuperEvent()", cross:true,
-      desc:"CARREFOUR : la fonction qui relie UN jeu à LE Super Event. À chaque partie, elle écrit dans se_tickets (et se_gains si gain immédiat), quel que soit le module utilisé à la station.",
-      tables:["se_tickets","se_gains"], files:["admin/lib/parcours.ts → attribuerSuperEvent() (ligne ~130)"],
-      code:"export async function attribuerSuperEvent(joueurId, evId, today, onSite, tickets) {\n  const { data: ev } = await supabase.from('events')\n    .select('super_event_id,gain_immediat,gain_ticket').eq('id', evId).single()\n  if (!ev.super_event_id) return          // pas rattache -> rien\n  await supabase.from('se_tickets').upsert([...])   // ticket, tous jeux confondus\n  if (ev.gain_immediat) await supabase.from('se_gains').insert({...})\n}"},
-    {id:"se-tickets", x:900,y:120, label:"Tickets & gains centralisés", sub:"se_tickets / se_gains",
-      desc:"Tickets et gains agrégés tous jeux confondus, indépendamment du module de chaque station.",
-      tables:["se_tickets","se_gains","se_lots"], files:[]},
-    {id:"se-map", x:900,y:255, label:"Carte Super Event publique", sub:"SuperEventMap",
-      desc:"La carte interactive publique qui montre toutes les stations d'un Super Event — celle que le joueur utilise pour choisir où aller jouer.",
-      tables:[], files:["admin/app/parcours/_components (SuperEventMap)"]},
-   ],
-   edges:[["se-create","se-rattach"],["se-rattach","se-pont"],["se-pont","se-tickets"],["se-pont","se-map"]],
-   crossLinks:[{to:"parcours-joueur",label:"chaque partie alimente les tickets"},{to:"creer-event",label:"events rattachés"}]
- },
-
- "prospection":{ label:"Prospection", icon:"🎯", hex:"#f4b544",
-   sub:"contact → qualification → fiche partenaire",
-   nodes:[
-    {id:"pr-contact", x:110,y:180, label:"Contact / Landing", sub:"crm_retours",
-      desc:"Premier contact : formulaire landing « devenir partenaire » ou saisie manuelle. Atterrit dans crm_retours (origine=landing) ou prospection.",
-      tables:["crm_retours (origine=landing)","prospection"], files:["admin/lib/landing.ts"]},
-    {id:"pr-staging", x:390,y:180, label:"Staging à trier", sub:"prospection_staging", fragile:true, rules:["R-NEVER-INVENT"],
-      desc:"POINT FRAGILE : prospection_staging contient du scrap pollué par des données 84xxx (Vaucluse). Ne merger que les codes postaux 06 des villes prioritaires. prospection.id = GENERATED ALWAYS (ne jamais fournir à l'insert). 28 fiches de seed marquées 'SEED a verifier/remplacer'.",
-      tables:["prospection_staging","prospection"], files:[]},
-    {id:"pr-qualif", x:650,y:180, label:"Qualification", sub:"lead → contact",
-      desc:"Enrichissement (téléphones surtout présents, emails souvent manquants). Catégories encore à scraper : boucherie, pâtisserie, vêtement, contrôle technique, primeur/fromager, sport/vélo/téléphonie.",
-      tables:["prospection","leads_landing"], files:[]},
-    {id:"pr-fiche", x:920,y:180, label:"Devenir partenaire", sub:"partenaires",
-      desc:"Le prospect signé devient une fiche dans partenaires (coordonnées + offre + lot). NB : les 8 partenaires NDS ont été créés directement ici, sans passer par pros (contournement assumé).",
-      tables:["partenaires"], files:["admin/public/dashboard.html → onglet Partenaires"]},
-   ],
-   edges:[["pr-contact","pr-staging"],["pr-staging","pr-qualif"],["pr-qualif","pr-fiche"]],
-   crossLinks:[{to:"facturation",label:"la fiche pré-remplit le bon"},{to:"partenaires-visuels",label:"la fiche déclenche les visuels"}]
- },
-
- "facturation":{ label:"Facturation", icon:"🧾", hex:"#ff8a3d",
-   sub:"bon → signature → facture → email",
-   nodes:[
-    {id:"fa-bon", x:100,y:180, label:"Bon de commande", sub:"bons_commande", rules:["R-COHERENCE","R-PDF-JSPDF","R-LOTS-SOURCE"],
-      desc:"Pré-rempli automatiquement depuis la fiche partenaire (?prefill=<slug> tire coords + lot). Prestations, lot, mention éditables. PDF A4 via jsPDF programmatique.",
-      tables:["bons_commande"], files:["admin/public/bon-commande-nds.html"]},
-    {id:"fa-sign", x:370,y:180, label:"Signature", sub:"⇄ trigger 2 écritures", cross:true, rules:["R-COHERENCE"],
-      desc:"CARREFOUR : signer/valider le bon déclenche AUTOMATIQUEMENT 2 écritures ailleurs (chaîne trg_bon_commande_chain) + la coordonnée saisie remonte vers la fiche (trg_sync_bon_partenaire). Vrai exemple de « renvoi dans différents dossiers ».",
-      tables:["partenaires.contrat (rempli auto)","factures (créée auto)"], files:["trigger SQL trg_bon_commande_chain","trigger SQL trg_sync_bon_partenaire"],
-      code:"-- se declenche a statut valide/signe/accepte/paye\ncreate trigger trg_bon_commande_chain after update on bons_commande\n-- 1) cree la fiche partenaire + facture FL-2026-XXXX-01\n-- 2) cree le lead CRM\n-- trg_sync_bon_partenaire : coords du bon -> partenaires (COALESCE)"},
-    {id:"fa-facture", x:640,y:180, label:"Facture", sub:"factures", rules:["R-PDF-JSPDF","R-COHERENCE"],
-      desc:"Numérotée automatiquement depuis le n° du bon d'origine (FL-2026-XXXX-01). Ne doit jamais diverger du bon. PDF à basculer sur le même moteur jsPDF.",
-      tables:["factures"], files:["admin/public/facture-nds.html"]},
-    {id:"fa-rattach", x:370,y:325, label:"Rattachement bon ↔ fiche", sub:"email/siret/nom", fragile:true,
-      desc:"POINT FRAGILE — cause probable des renvois ratés entre bon/facture et fiche : le rattachement se fait par email OU siret OU nom approximatif (ilike). Beaucoup de fiches n'ont ni email ni siret → tout repose sur la correspondance floue du nom, qui casse si la raison sociale diffère.",
-      tables:["bons_commande (raison_sociale)","partenaires (nom/email/siret, souvent vides)"], files:["admin/public/dashboard.html → loadBonsCommandeLies()"],
-      code:"if(em){ bcF.push('email.eq.'+em) }\nif(siret){ bcF.push('siret.eq.'+siret) }\nif(nom){ bcF.push('raison_sociale.ilike.%'+nom+'%') }\n// email ET siret vides -> tout repose sur la 3e ligne, fragile"},
-    {id:"fa-email", x:900,y:180, label:"Email bon signé", sub:"→ Communication", rules:["R-COPIE-EMAIL"],
-      desc:"Envoie au partenaire son bon signé + conditions + RIB, avec copie systématique à flowinevent@gmail.com.",
-      tables:["bons_commande"], files:["supabase/functions/notify-bon-commande/index.ts"]},
-   ],
-   edges:[["fa-bon","fa-sign"],["fa-sign","fa-facture"],["fa-facture","fa-email"],["fa-bon","fa-rattach"]],
-   crossLinks:[{to:"prospection",label:"la fiche vient d'ici"},{to:"partenaires-visuels",label:"lot partagé"},{to:"communication",label:"email d'envoi"}]
- },
-
- "partenaires-visuels":{ label:"Partenaires & visuels", icon:"🎨", hex:"#22d3c6",
-   sub:"fiche → logo → affiche → vidéo → QR → kit",
-   nodes:[
-    {id:"pv-fiche", x:80,y:180, label:"Fiche partenaire", sub:"partenaires", rules:["R-COHERENCE","R-CONTACT","R-LOTS-SOURCE"],
-      desc:"Coordonnées + offre + lot. Sans lot renseigné : aucune affiche générée (ne jamais inventer une offre). Contact affiché sur les visuels = flowinevent@gmail.com / 06 16 35 49 36.",
-      tables:["partenaires"], files:["admin/public/dashboard.html → onglet Partenaires"]},
-    {id:"pv-logo", x:300,y:180, label:"Logo", sub:"source unique", rules:["R-LOGOS"],
-      desc:"Le logo est la source unique réutilisée partout ensuite (affiche, vidéo, mur de logos).",
-      tables:["partenaires.image_url"], files:["admin/public/nds/partenaires/<slug>.png"]},
-    {id:"pv-affiche", x:500,y:180, label:"Affiche A4", sub:"A3/A4/A5/PPTX",
-      desc:"Générée depuis le logo + le lot de la fiche. Déclinaisons A3/A4/A5 PDF + PNG + SVG + PPTX éditable.",
-      tables:[], files:["admin/public/nds/visuels-src/gen_a4_clean.py","admin/public/nds/visuels-src/rebuild_partenaires.sh"], assets:"partners"},
-    {id:"pv-video", x:700,y:180, label:"Vidéo réseaux/écran", sub:"⚠ logos + QR", rules:["R-LOGOS","R-QR-PYZBAR"],
-      desc:"1 vidéo master + 1 déclinaison par partenaire (QR unique = tracking). Le mur de logos doit contenir les 8 partenaires (source nds_lib.PARTNERS). QR intégré vérifié pyzbar (~frame 912).",
-      tables:[], files:["admin/public/nds/visuels-src/render_ecran40.py","render_spot40.py","render_kref40.py"], assets:"partners"},
-    {id:"pv-qr", x:900,y:180, label:"QR station/réseaux", sub:"2 par partenaire", rules:["R-QR-PYZBAR"],
-      desc:"2 QR par partenaire : station (physique, 1/jour) et réseaux (digital, usage unique). Toujours décodés pyzbar avant livraison.",
-      tables:["events (ev-nds-<slug>)"], files:["composite_qr.py"], assets:"partners"},
-    {id:"pv-kit", x:1100,y:180, label:"Kit digital", sub:"livrable final", rules:["R-COMMIT"],
-      desc:"Dossier final par partenaire : tout regroupé + zip téléchargeable. Chaque asset commité en séance (filesystem éphémère).",
-      tables:[], files:["admin/public/nds/kit-digital/<slug>/"], live:BASE+"/nds/kit-digital/", assets:"partners"},
-   ],
-   edges:[["pv-fiche","pv-logo"],["pv-logo","pv-affiche"],["pv-affiche","pv-video"],["pv-video","pv-qr"],["pv-qr","pv-kit"]],
-   crossLinks:[{to:"facturation",label:"lot partagé"},{to:"communication",label:"liens réseaux"}]
- },
-
- "communication":{ label:"Communication", icon:"✉️", hex:"#22c55e",
-   sub:"3 emails Resend + copie systématique",
-   nodes:[
-    {id:"co-ticket", x:120,y:180, label:"Email ticket gagnant", sub:"send-ticket-gagnant", rules:["R-COPIE-EMAIL"],
-      desc:"Envoie au gagnant son code de retrait + QR. Fonction rapatriée dans le repo (elle était déployée sur Supabase sans être versionnée).",
-      tables:["se_gains"], files:["supabase/functions/send-ticket-gagnant/index.ts"]},
-    {id:"co-bon", x:380,y:180, label:"Email bon de commande", sub:"notify-bon-commande", rules:["R-COPIE-EMAIL"],
-      desc:"Envoie au partenaire son bon signé + conditions + RIB.",
-      tables:["bons_commande"], files:["supabase/functions/notify-bon-commande/index.ts"]},
-    {id:"co-sous", x:640,y:180, label:"Email souscription", sub:"notify-souscription",
-      desc:"Notification à une nouvelle souscription partenaire.",
-      tables:[], files:["supabase/functions/notify-souscription/index.ts"]},
-    {id:"co-copie", x:900,y:180, label:"Copie systématique", sub:"flowinevent@gmail.com", rules:["R-COPIE-EMAIL"],
-      desc:"Tous les emails passent par Resend et copient toujours flowinevent@gmail.com. Domaine Resend à vérifier avant le 9/07 (sinon envoi limité à cette adresse).",
-      tables:[], files:["Secret Supabase : RESEND_API_KEY"]},
-   ],
-   edges:[["co-ticket","co-copie"],["co-bon","co-copie"],["co-sous","co-copie"]],
-   crossLinks:[{to:"facturation",label:"déclenche l'email bon"},{to:"parcours-joueur",label:"déclenche l'email ticket"}]
- },
-
- "fiabilite":{ label:"Fiabilité & données", icon:"🩺", hex:"#ff5a5c",
-   sub:"points fragiles + doublons + export",
-   nodes:[
-    {id:"fi-rattach", x:110,y:180, label:"Rattachement bon", sub:"fragile", fragile:true,
-      desc:"OUVERT : rattachement bon/facture ↔ fiche par email/siret/nom flou. Voir circuit Facturation, point « Rattachement bon ↔ fiche ». Renforcer email+siret sur les fiches réduit le risque.",
-      tables:["bons_commande","partenaires"], files:["admin/public/dashboard.html → loadBonsCommandeLies()"]},
-    {id:"fi-crm", x:360,y:180, label:"pros vs partenaires", sub:"doublon maîtrisé",
-      desc:"Deux tables séparées (pros / partenaires). Lien créé : pros.partenaire_id (FK) + affichage bidirectionnel dans le dashboard. Fusion complète non tranchée (post-festival). Modifier l'une ne met pas l'autre à jour automatiquement.",
-      tables:["pros.partenaire_id","partenaires"], files:["dashboard.html → drawerPro()/drawerPartner()"]},
-    {id:"fi-cockpit", x:610,y:180, label:"Cockpit fantôme", sub:"supprimé",
-      desc:"/nds/gestion-diffusion.html a été construit (b93d61b) puis volontairement supprimé (802aad0, jugé redondant). Le code actuel est propre, mais d'anciennes notes Notion en parlent encore — source de confusion « où est passé cet outil ».",
-      tables:[], files:["Supprimé — plus aucune trace dans dashboard.html"]},
-    {id:"fi-video", x:820,y:180, label:"Listes PARTNERS mortes", sub:"nettoyé", rules:["R-LOGOS"],
-      desc:"CORRIGÉ : 3 scripts vidéo avaient une liste PARTNERS locale jamais utilisée (code mort trompeur). Nettoyé. La source reste nds_lib.PARTNERS.",
-      tables:[], files:["render_spot40.py","render_ecran40.py","render_kref40.py"]},
-    {id:"fi-export", x:1050,y:180, label:"Export des données", sub:"rapport festival",
-      desc:"Pour un rapport (par partenaire ou global) : dashboard → CRM Landing pages → filtre source → Exporter (CSV), OU requête SQL directe (plus flexible).",
-      tables:["participations","se_reponses","joueurs"],
-      files:["Dashboard → CRM Landing → Exporter CSV","ou SQL direct via Supabase"],
-      code:"-- reponses quiz+bonus d'un partenaire, pretes pour tableur\nselect j.prenom,j.nom,j.email,j.code_postal,j.age_tranche,j.genre,\n       r.quiz_reponses,r.bonus_reponses,r.score,r.created_at\nfrom se_reponses r join joueurs j on j.id=r.joueur_id\nwhere r.event_id='ev-nds-<slug>' order by r.created_at desc;\n-- global : where r.super_event_id='se-nds-2026'"},
-   ],
-   edges:[["fi-rattach","fi-crm"],["fi-crm","fi-cockpit"],["fi-cockpit","fi-video"],["fi-video","fi-export"]],
-   crossLinks:[{to:"facturation",label:"rattachement"},{to:"partenaires-visuels",label:"logos vidéo"}]
- },
-
- "infra":{ label:"Infrastructure & comptes", icon:"🔌", hex:"#5b7fff",
-   sub:"comptes · abonnements · outils · où Claude intervient",
-   nodes:[
-    {id:"in-github", x:80,y:120, label:"GitHub (repo)", sub:"flowinevent-ping", rules:["R-PAT-EXPIRY","R-COMMIT"],
-      desc:"Le code source. Repo flowinevent-ping/flowin-events-, branche main, racine du projet Next.js = /admin. Chaque push sur main redéploie Vercel. Accès de Claude par token (PAT).",
-      tables:[], files:["flowinevent-ping/flowin-events- (main, root /admin)","PAT fine-grained Contents R/W — expire ~17/09/2026"]},
-    {id:"in-vercel", x:340,y:120, label:"Vercel (hébergement)", sub:"auto-deploy",
-      desc:"Héberge et sert le site. Déploiement automatique à chaque push sur main, racine /admin. C'est Vercel qui sert la web app, le dashboard, les kits digitaux et cette carte.",
-      tables:[], files:["Live : https://flowin-events.vercel.app","Redéploie sur push main → root /admin"], live:BASE+"/"},
-    {id:"in-notion", x:600,y:120, label:"Notion (hub humain)", sub:"logs de session", rules:["R-3PILIERS"],
-      desc:"Le hub lisible par un humain : logs de session, journal des livrables. Point d'entrée pour reprendre le fil d'une conversation à l'autre.",
-      tables:[], files:["Hub Comm : page 38c6dcca-9add-81dd-9af2-c93139e06393","Kit complet : 38d6dcca-9add-81f1-bc65-cfea5f5b8399"]},
-    {id:"in-persist", x:880,y:120, label:"Persistance", sub:"⇄ 3 piliers", cross:true, rules:["R-3PILIERS"],
-      desc:"CARREFOUR de fin de tâche : toute tâche terminée converge ici et met à jour les 3 piliers en même temps — (1) commit+push GitHub, (2) Supabase handoff_notes, (3) hub Notion. Le Notion est le plus souvent oublié.",
-      tables:["handoff_notes (clé handoff-nds-2026-comm)"], files:["+ HANDOFF-flowin-nds2026.md (repo)"]},
-    {id:"in-supabase", x:80,y:280, label:"Supabase (données)", sub:"ywcqtupgoxfzkddqkztk", rules:["R-ACCOUNT-TRAP"],
-      desc:"La base de données + l'auth + les edge functions. Projet ywcqtupgoxfzkddqkztk (eu-west-1), plan Pro (pas d'auto-pause). ⚠ Sous le compte Google romain.collin@gmail.com, org « flowin revision olivia » — pas sous flowinevent.",
-      tables:["Toutes les tables du système"], files:["Projet ywcqtupgoxfzkddqkztk (eu-west-1, Pro)"]},
-    {id:"in-resend", x:340,y:280, label:"Resend (emails)", sub:"domaine à vérifier", rules:["R-COPIE-EMAIL"],
-      desc:"Le service d'envoi d'emails, appelé par les edge functions Supabase. Domaine non encore vérifié → tant que ce n'est pas fait, les envois ne partent que vers flowinevent@gmail.com.",
-      tables:[], files:["Secret Supabase : RESEND_API_KEY","edge functions : notify-bon-commande, send-ticket-gagnant, notify-souscription"]},
-    {id:"in-contact", x:600,y:280, label:"Contact / Gmail", sub:"flowinevent@gmail.com", rules:["R-CONTACT"],
-      desc:"L'adresse et le numéro affichés sur TOUS les supports partenaires : flowinevent@gmail.com · 06 16 35 49 36. Jamais « Romain Collin » sur un visuel/vidéo/document.",
-      tables:[], files:["flowinevent@gmail.com","06 16 35 49 36"]},
-    {id:"in-claude", x:880,y:280, label:"Où Claude intervient", sub:"MCP + fs éphémère", rules:["R-COMMIT","R-NEVER-INVENT"],
-      desc:"Séquence de bootstrap à chaque session : clone+push GitHub (token), test Supabase (select 1), lecture du handoff. Claude agit via GitHub (token), Supabase (MCP execute_sql/apply_migration) et Notion (MCP). Son disque /home/claude est ÉPHÉMÈRE → tout asset produit doit être commité dans la même session.",
-      tables:[], files:["clone+push GitHub (token)","Supabase MCP (execute_sql / apply_migration)","Notion MCP","/home/claude = éphémère"]},
-   ],
-   edges:[["in-github","in-vercel"],["in-github","in-persist"],["in-notion","in-persist"],
-          ["in-supabase","in-resend"],["in-supabase","in-persist"],["in-claude","in-persist"]],
-   crossLinks:[{to:"communication",label:"Resend envoie les emails"},{to:"partenaires-visuels",label:"Vercel sert les kits"},{to:"facturation",label:"triggers en base"},{to:"fiabilite",label:"points fragiles connus"}]
- },
+/* ====================================================================
+   ARCHITECTURE RÉELLE — miroir des onglets du dashboard (renderSidebar)
+   tables = réellement lues par dashboard.html · files = fonction de rendu réelle
+   "à vérifier" = à confirmer, jamais affirmé sans preuve
+   ==================================================================== */
+const GROUPS = {
+ accueil:{label:"Accueil", color:"#5b62e6"},
+ crm:{label:"CRM", color:"#db1877"},
+ events:{label:"Events", color:"#0e9aa0"},
+ nds:{label:"NDS 2026", color:"#e2692a"},
+ acq:{label:"Acquisition B2B", color:"#c98700"},
+ jeux:{label:"Jeux", color:"#8b3bd8"},
+ reporting:{label:"Reporting", color:"#0891b2"},
+ systeme:{label:"Système", color:"#64748b"},
+ infra:{label:"Infrastructure", color:"#4f6bed"},
 };
+// disposition en 3 colonnes de groupes empilés
+const COLUMNS = [ ["crm","acq","reporting"], ["events","jeux","systeme","accueil"], ["nds","infra"] ];
 
-const OVERVIEW = [
-  {id:"parcours-joueur",      x:120, y:120},
-  {id:"cycle-jeu",            x:470, y:120},
-  {id:"creer-event",          x:820, y:120},
-  {id:"super-event",          x:1170,y:120},
-  {id:"prospection",          x:120, y:470},
-  {id:"facturation",          x:470, y:470},
-  {id:"partenaires-visuels",  x:820, y:470},
-  {id:"communication",        x:1170,y:470},
-  {id:"fiabilite",            x:470, y:800},
-  {id:"infra",                x:820, y:800},
+const NODES = [
+ // ACCUEIL
+ {id:"pilotage",group:"accueil",label:"Accueil / Pilotage",role:"Tableau de bord d'accueil : events live, cartes de synthèse.",
+  tables:["events","participations"],files:["dashboard.html → renderPilotage() ~l.4632"],links:["events","joueurs","rapports"]},
+
+ // CRM
+ {id:"pros",group:"crm",label:"Pros",entity:true,role:"Comptes professionnels (commerçants / clients). Point central : un Pro est relié à sa fiche, son jeu, son QR, ses factures, ses documents et ses visuels.",
+  tables:["pros","partenaires (via pros.partenaire_id)"],files:["dashboard.html → renderBiblioPros() ~l.4974","fiche détaillée : renderDrawer() ~l.5148"],rules:["R-COHERENCE"],
+  links:["partenaires","events","jeux","nds-track-qr","nds-bon-commande","nds-media","cgv","joueurs"]},
+ {id:"joueurs",group:"crm",label:"Joueurs",entity:true,role:"Festivaliers / participants. Un joueur = profil + participations + réponses + tickets + gains.",
+  tables:["joueurs","participations","se_reponses","se_tickets","se_gains"],files:["dashboard.html → renderBiblioJoueurs() ~l.5844","fiche : renderDrawer() ~l.5148"],rules:["R-ANTICHEAT"],
+  links:["events","gagnants","jeux","nds-participants"]},
+ {id:"gagnants",group:"crm",label:"Gagnants",role:"Joueurs ayant gagné un lot : code de retrait + QR + email de notification.",
+  tables:["se_gains","lots"],files:["dashboard.html → renderBiblioGagnants() ~l.6636"],links:["joueurs","infra-resend","nds-participants"]},
+ {id:"partenaires",group:"crm",label:"Partenaires",entity:true,role:"Fiche partenaire NDS : coordonnées + offre + lot. Source unique qui alimente l'app, les affiches, le bon et la facture.",
+  tables:["partenaires","lots"],files:["dashboard.html → renderBiblioPartenaires() ~l.6856"],rules:["R-COHERENCE","R-CONTACT","R-LOGOS","R-LOTS-SOURCE"],
+  links:["pros","events","jeux","nds-track-qr","nds-bon-commande","nds-media"]},
+
+ // EVENTS
+ {id:"events",group:"events",label:"Events",role:"Un event = une station / un jeu configuré. Porte la cfg (module, banques, bonus, gains).",
+  tables:["events"],files:["dashboard.html → wizard-event","admin/lib/events.ts"],rules:["R-MODULES-MAITRES"],links:["jeux","super-events","partenaires","nds-track-qr","pros"]},
+ {id:"super-events",group:"events",label:"Super Events",entity:true,cross:true,role:"Chapeau fédérant plusieurs events : tickets/gains centralisés tous jeux confondus. Relié aux events, aux joueurs et aux gagnants.",
+  tables:["super_events","se_tickets","se_gains","se_lots"],files:["admin/lib/parcours.ts → attribuerSuperEvent() ~l.130","admin/app/se/[se]/"],links:["events","joueurs","gagnants"]},
+
+ // NDS 2026
+ {id:"nds-front",group:"nds",label:"Front NDS",role:"Éditeur live du front NDS (ce que voit le joueur).",tables:["events.cfg"],files:["dashboard.html → renderNdsFront() ~l.3814"],links:["events","jeux"]},
+ {id:"nds-carte",group:"nds",label:"Carte NDS",role:"Carte publique des stations d'un Super Event.",tables:["events","super_events"],files:["dashboard.html → renderNdsCarte() ~l.4036"],links:["super-events","events"]},
+ {id:"nds-participants",group:"nds",label:"Participants NDS",role:"Liste des participants NDS (joueurs + réponses).",tables:["joueurs","participations","se_reponses"],files:["dashboard.html → renderNdsParticipants() ~l.4231"],links:["joueurs","rapports"]},
+ {id:"nds-track-qr",group:"nds",label:"Track QR",role:"Suivi des scans/clics QR (station vs réseaux) par partenaire.",tables:["partenaire_clics"],files:["dashboard.html → renderTrackQr() ~l.4114"],rules:["R-QR-PYZBAR"],links:["partenaires","events","nds-media"]},
+ {id:"nds-bon-commande",group:"nds",label:"Bons de commande & Factures",cross:true,role:"Bon pré-rempli depuis la fiche → signature (trigger) → facture. PDF via jsPDF.",
+  tables:["bons_commande","factures"],files:["dashboard.html → renderNdsBonCommande() ~l.3768","bon-commande-nds.html","facture-nds.html","trigger trg_bon_commande_chain"],rules:["R-COHERENCE","R-PDF-JSPDF"],links:["partenaires","pros","cgv","infra-resend"]},
+ {id:"nds-media",group:"nds",label:"Vidéo & média",role:"Toutes les vidéos réalisées + les textes réseaux (.md) + affiches — à visualiser et télécharger.",
+  tables:["visuels (à vérifier — wiring UI)"],files:["dashboard.html → renderNdsMedia() ~l.4497","admin/public/nds/kit-digital/<slug>/","admin/public/nds/visuels-src/"],rules:["R-LOGOS","R-QR-PYZBAR","R-COMMIT"],links:["partenaires","nds-track-qr","jeux"],assets:"partners"},
+
+ // ACQUISITION B2B
+ {id:"btob-prospects",group:"acq",label:"Prospects B2B",role:"Joueurs tagués B2B (prospects issus du jeu).",tables:["joueurs (tags = btob)"],files:["dashboard.html → sidebar (filtre)"],links:["joueurs","prospection"]},
+ {id:"prospection",group:"acq",label:"Prospection",fragile:true,role:"Base de prospection commerciale. ⚠ staging pollué par des 84xxx (Vaucluse) à trier ; prospection.id = GENERATED ALWAYS.",tables:["prospection","prospection_staging"],files:["dashboard.html → renderProspection() ~l.4272"],rules:["R-NEVER-INVENT"],links:["crm-retours","partenaires","btob-prospects"]},
+ {id:"crm-retours",group:"acq",label:"CRM Retours",role:"Retours entrants (landing, contact).",tables:["crm_retours"],files:["dashboard.html → renderCrmRetours() ~l.3348"],links:["crm-landing","prospection"]},
+ {id:"crm-landing",group:"acq",label:"CRM Landing pages",role:"Leads issus des landing pages, exportables (CSV).",tables:["crm_retours","leads_landing"],files:["dashboard.html → renderCrmLanding() ~l.3470"],links:["landing-page","crm-retours","rapports"]},
+ {id:"landing-page",group:"acq",label:"Landing Page",role:"Landing pages publiques (souscription partenaire, etc.).",tables:["landings"],files:["dashboard.html → sidebar (landings)"],links:["crm-landing","partenaires"]},
+
+ // JEUX
+ {id:"jeux",group:"jeux",label:"Jeux",entity:true,role:"Les jeux (Quiz / Spin / Tombola / Vote). La RÈGLE DU JEU vit ici : config via events.cfg, modules maîtres jamais modifiés, barème 4 réponses = 1 ticket.",
+  tables:["events.cfg","banques","questions","(pas de table 'jeux' — agrégation UI, à vérifier)"],files:["admin/app/parcours/{quiz,spin,tombola,vote}/*Client.tsx","admin/app/parcours/nds2026/NDS2026Client.tsx"],rules:["R-MODULES-MAITRES","R-TICKET","R-ANTICHEAT"],links:["events","joueurs","banques","nds-track-qr"]},
+ {id:"banques",group:"jeux",label:"Banques de questions",role:"Banques de questions du quiz (85 questions NDS).",tables:["banques","questions"],files:["/banques.html (page externe)"],links:["jeux"]},
+
+ // REPORTING
+ {id:"rapports",group:"reporting",label:"Rapports",role:"Reporting / export : par partenaire ou global (CSV, ou SQL direct).",tables:["participations","se_reponses","joueurs","partenaire_clics"],files:["dashboard.html → rapports","ou requête SQL directe"],links:["joueurs","nds-participants","crm-landing","nds-track-qr"]},
+
+ // SYSTÈME
+ {id:"cgv",group:"systeme",label:"CGV / Légal",role:"Documents légaux (CGV NDS). Statut draft → validé.",tables:["documents_legaux"],files:["dashboard.html → renderCgv() ~l.4470"],links:["nds-bon-commande"]},
+ {id:"parametres",group:"systeme",label:"Paramètres",role:"Réglages généraux de l'app.",tables:["config"],files:["dashboard.html → parametres"],links:["maintenance"]},
+ {id:"maintenance",group:"systeme",label:"Maintenance",maint:true,role:"Vue de maintenance : c'est ICI qu'on intervient techniquement (santé, migrations, cache). Passerelle vers l'infrastructure.",tables:["config_backups","handoff_notes"],files:["dashboard.html → renderMaintenance() ~l.4564"],rules:["R-3PILIERS"],links:["infra-supabase","infra-github","infra-vercel"]},
+
+ // INFRASTRUCTURE (entrer pour voir ce qui s'y trouve)
+ {id:"infra-supabase",group:"infra",label:"Supabase",infra:true,role:"Base + auth + edge functions. ⚠ Projet sous romain.collin@gmail.com, org affichée « flowin revision olivia » (nom trompeur, bon projet).",
+  tables:["ywcqtupgoxfzkddqkztk (eu-west-1, plan Pro)"],files:["Toutes les tables du système","edge : notify-bon-commande · send-ticket-gagnant · notify-souscription"],rules:["R-ACCOUNT-TRAP"],links:["infra-resend","maintenance"]},
+ {id:"infra-vercel",group:"infra",label:"Vercel",infra:true,role:"Hébergement. Auto-deploy à chaque push sur main (racine /admin).",tables:[],files:["Live : flowin-events.vercel.app"],links:["infra-github","maintenance"],live:"https://flowin-events.vercel.app/"},
+ {id:"infra-github",group:"infra",label:"GitHub",infra:true,role:"Code source. Repo flowinevent-ping/flowin-events- (main, /admin). PAT expire ~17/09/2026.",tables:[],files:["flowinevent-ping/flowin-events-"],rules:["R-PAT-EXPIRY","R-COMMIT"],links:["infra-vercel","maintenance"]},
+ {id:"infra-notion",group:"infra",label:"Notion",infra:true,role:"Hub humain : logs de session, journal des livrables.",tables:[],files:["Hub 38c6dcca-9add-81dd-9af2-c93139e06393"],rules:["R-3PILIERS"],links:["maintenance"]},
+ {id:"infra-resend",group:"infra",label:"Resend",infra:true,role:"Envoi d'emails via edge functions. Domaine à vérifier → sinon envois limités à flowinevent@gmail.com.",tables:[],files:["Secret RESEND_API_KEY","edge functions Supabase"],rules:["R-COPIE-EMAIL"],links:["infra-supabase","nds-bon-commande","gagnants"]},
 ];
-const OV_LINKS = [
-  ["parcours-joueur","cycle-jeu"],["cycle-jeu","creer-event"],["creer-event","super-event"],
-  ["super-event","parcours-joueur"],["prospection","facturation"],["facturation","partenaires-visuels"],
-  ["partenaires-visuels","communication"],["facturation","communication"],
-  ["parcours-joueur","communication"],["prospection","partenaires-visuels"],
-  ["facturation","fiabilite"],["partenaires-visuels","fiabilite"],
-  ["infra","communication"],["infra","partenaires-visuels"],["infra","fiabilite"],["infra","facturation"],
-];
-/* pictogrammes dessinés (inchangés) */
-const ICONS = {
- "parcours-joueur":c=>`<circle cx="7" cy="32" r="2.6" fill="${c}"/><path d="M7 31 C13 24,20 27,21 18 S28 11,32 8" fill="none" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/><path d="M31 7 v10 M31 7 h7 l-3 3 h4" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`,
- "cycle-jeu":c=>`<rect x="6" y="14" width="28" height="15" rx="7.5" fill="none" stroke="${c}" stroke-width="2.4"/><path d="M12 21.5h5 M14.5 19v5" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/><circle cx="26" cy="19.5" r="1.7" fill="${c}"/><circle cx="29" cy="23.5" r="1.7" fill="${c}"/>`,
- "creer-event":c=>`<circle cx="20" cy="20" r="12" fill="none" stroke="${c}" stroke-width="2.4"/><path d="M20 14v12 M14 20h12" stroke="${c}" stroke-width="2.4" stroke-linecap="round"/>`,
- "super-event":c=>`<circle cx="20" cy="20" r="4.2" fill="none" stroke="${c}" stroke-width="2.4"/><path d="M20 20L11 12 M20 20L30 12 M20 20L20 32" stroke="${c}" stroke-width="2.2"/><circle cx="11" cy="12" r="2.7" fill="${c}"/><circle cx="30" cy="12" r="2.7" fill="${c}"/><circle cx="20" cy="32" r="2.7" fill="${c}"/>`,
- "prospection":c=>`<circle cx="20" cy="20" r="12" fill="none" stroke="${c}" stroke-width="2.4"/><circle cx="20" cy="20" r="7" fill="none" stroke="${c}" stroke-width="2.2"/><circle cx="20" cy="20" r="2.4" fill="${c}"/>`,
- "facturation":c=>`<path d="M12 7 h16 v25 l-3 -2 -2.6 2 -2.4 -2 -2.4 2 -2.6 -2 -3 2 z" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round"/><path d="M16 14h8 M16 19h8 M16 24h5" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>`,
- "partenaires-visuels":c=>`<rect x="7" y="10" width="26" height="20" rx="3.4" fill="none" stroke="${c}" stroke-width="2.4"/><circle cx="15" cy="17" r="2.3" fill="${c}"/><path d="M9 29 l7 -8 5 4 4 -5 6 9" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/>`,
- "communication":c=>`<rect x="6" y="11" width="28" height="18" rx="3.4" fill="none" stroke="${c}" stroke-width="2.4"/><path d="M7 13 l13 9 13 -9" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/>`,
- "fiabilite":c=>`<path d="M5 20 h6 l3 -9 4.5 18 3.5 -9 h13" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`,
- "infra":c=>`<rect x="8" y="9" width="24" height="9" rx="2.4" fill="none" stroke="${c}" stroke-width="2.3"/><rect x="8" y="22" width="24" height="9" rx="2.4" fill="none" stroke="${c}" stroke-width="2.3"/><circle cx="13" cy="13.5" r="1.5" fill="${c}"/><circle cx="13" cy="26.5" r="1.5" fill="${c}"/><path d="M24 13.5h4 M24 26.5h4" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>`,
+const NODE_BY_ID={}; NODES.forEach(n=>NODE_BY_ID[n.id]=n);
+// adjacence non orientée (pour l'allumage des connexions)
+const ADJ={}; NODES.forEach(n=>ADJ[n.id]=new Set());
+NODES.forEach(n=>(n.links||[]).forEach(m=>{if(NODE_BY_ID[m]){ADJ[n.id].add(m);ADJ[m].add(n.id);}}));
+
+/* icônes de groupe (dessinées) */
+const GICONS={
+ accueil:c=>`<path d="M6 19 L20 8 L34 19 M10 17 V32 H30 V17" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`,
+ crm:c=>`<circle cx="14" cy="15" r="4.5" fill="none" stroke="${c}" stroke-width="2.2"/><path d="M6 30 c0 -6 4 -9 8 -9 s8 3 8 9" fill="none" stroke="${c}" stroke-width="2.2"/><circle cx="27" cy="17" r="3.4" fill="none" stroke="${c}" stroke-width="2"/><path d="M22 30 c0 -5 3 -7 5 -7 s5 2 5 6" fill="none" stroke="${c}" stroke-width="2"/>`,
+ events:c=>`<rect x="7" y="10" width="26" height="22" rx="3" fill="none" stroke="${c}" stroke-width="2.2"/><path d="M7 16 h26 M14 7 v6 M26 7 v6" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>`,
+ nds:c=>`<rect x="7" y="10" width="26" height="20" rx="3.4" fill="none" stroke="${c}" stroke-width="2.2"/><circle cx="15" cy="17" r="2.2" fill="${c}"/><path d="M9 29 l7 -8 5 4 4 -5 6 9" fill="none" stroke="${c}" stroke-width="2"/>`,
+ acq:c=>`<circle cx="20" cy="20" r="11" fill="none" stroke="${c}" stroke-width="2.2"/><circle cx="20" cy="20" r="6" fill="none" stroke="${c}" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="${c}"/>`,
+ jeux:c=>`<rect x="6" y="14" width="28" height="14" rx="7" fill="none" stroke="${c}" stroke-width="2.2"/><path d="M12 21h5 M14.5 18.5v5" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/><circle cx="26" cy="19" r="1.6" fill="${c}"/><circle cx="29" cy="23" r="1.6" fill="${c}"/>`,
+ reporting:c=>`<path d="M8 32 V20 M16 32 V12 M24 32 V16 M32 32 V8" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/>`,
+ systeme:c=>`<circle cx="20" cy="20" r="6" fill="none" stroke="${c}" stroke-width="2.2"/><path d="M20 6v5 M20 29v5 M6 20h5 M29 20h5 M10 10l3.5 3.5 M26.5 26.5 30 30 M30 10l-3.5 3.5 M13.5 26.5 10 30" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`,
+ infra:c=>`<rect x="8" y="9" width="24" height="9" rx="2.4" fill="none" stroke="${c}" stroke-width="2.2"/><rect x="8" y="22" width="24" height="9" rx="2.4" fill="none" stroke="${c}" stroke-width="2.2"/><circle cx="13" cy="13.5" r="1.4" fill="${c}"/><circle cx="13" cy="26.5" r="1.4" fill="${c}"/>`,
 };
-/* couleurs lisibles sur fond clair */
-const COLORS={"parcours-joueur":"#db1877","cycle-jeu":"#8b3bd8","creer-event":"#0e9aa0","super-event":"#5b62e6",
- "prospection":"#c98700","facturation":"#e2692a","partenaires-visuels":"#0891b2","communication":"#16a34a","fiabilite":"#e11d48","infra":"#4f6bed"};
-function col(id){return COLORS[id]||"#5b62e6";}
-/* liens principaux de la vue d'ensemble (épurés) */
-const OV_MAIN=[["parcours-joueur","cycle-jeu"],["creer-event","cycle-jeu"],["creer-event","super-event"],
- ["super-event","parcours-joueur"],["prospection","facturation"],["facturation","partenaires-visuels"],
- ["facturation","communication"],["partenaires-visuels","communication"],["facturation","fiabilite"],
- ["infra","communication"],["infra","fiabilite"]];
 
 const SVG=document.getElementById('map'),SCENE=document.getElementById('scene'),NS="http://www.w3.org/2000/svg";
-let view={x:0,y:0,k:1},target={x:0,y:0,k:1},anim=null,currentScene="overview";
-const nodeIndex={};Object.entries(CIRCUITS).forEach(([cid,c])=>c.nodes.forEach(n=>nodeIndex[n.id]={circuit:cid,node:n}));
+let view={x:0,y:0,k:1},target={x:0,y:0,k:1},anim=null,selId=null;
+const POS={}; // id -> {x,y,w,h,cx,cy}
 function el(t,a,h){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(h!=null)e.innerHTML=h;return e;}
 function esc(s){return(s==null?'':(''+s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function applyView(){SCENE.setAttribute('transform',`translate(${view.x},${view.y}) scale(${view.k})`);}
@@ -483,131 +307,132 @@ function animateTo(t){target=t;if(anim)cancelAnimationFrame(anim);const step=()=
   view.x+=(target.x-view.x)*.17;view.y+=(target.y-view.y)*.17;view.k+=(target.k-view.k)*.17;applyView();
   if(Math.abs(target.x-view.x)>.4||Math.abs(target.y-view.y)>.4||Math.abs(target.k-view.k)>.002)anim=requestAnimationFrame(step);
   else{view={...target};applyView();anim=null;}};anim=requestAnimationFrame(step);}
-function fitBBox(pad){pad=pad||80;let bb;try{bb=SCENE.getBBox();}catch(e){return;}if(!bb.width||!bb.height)return;
-  const w=SVG.clientWidth||1200,h=SVG.clientHeight||700;const k=Math.min(w/(bb.width+pad*2),h/(bb.height+pad*2),1.4);
+function fitBBox(pad){pad=pad||70;let bb;try{bb=SCENE.getBBox();}catch(e){return;}if(!bb.width||!bb.height)return;
+  const w=SVG.clientWidth||1200,h=SVG.clientHeight||700;const k=Math.min(w/(bb.width+pad*2),h/(bb.height+pad*2),1.3);
   animateTo({x:(w-bb.width*k)/2-bb.x*k,y:(h-bb.height*k)/2-bb.y*k,k});}
 function curve(ax,ay,bx,by){const mx=(ax+bx)/2;return `M ${ax} ${ay} C ${mx} ${ay}, ${mx} ${by}, ${bx} ${by}`;}
 
-// ombre douce
-(function(){const defs=SVG.querySelector('defs');const f=el('filter',{id:'sh',x:'-30%',y:'-30%',width:'160%',height:'160%'});
- f.innerHTML='<feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#1a2440" flood-opacity="0.12"/>';defs.appendChild(f);})();
+/* ---------- LAYOUT : colonnes de groupes, nœuds empilés ---------- */
+const COLW=300, COLGAP=70, BOXPADT=42, ROWH=42, ROWGAP=8, BOXPADB=14, GROUPGAP=34, X0=40, Y0=40;
+function layout(){
+  POS.length=0;for(const k in POS)delete POS[k];
+  COLUMNS.forEach((groupIds,ci)=>{const gx=X0+ci*(COLW+COLGAP);let gy=Y0;
+    groupIds.forEach(gid=>{const ns=NODES.filter(n=>n.group===gid);
+      const bh=BOXPADT+ns.length*ROWH+(ns.length-1)*ROWGAP+BOXPADB;
+      GROUPS[gid]._box={x:gx,y:gy,w:COLW,h:bh};
+      ns.forEach((n,i)=>{const ny=gy+BOXPADT+i*(ROWH+ROWGAP);
+        POS[n.id]={x:gx+14,y:ny,w:COLW-28,h:ROWH,cx:gx+14+(COLW-28)/2,cy:ny+ROWH/2};});
+      gy+=bh+GROUPGAP;});
+  });
+}
 
-/* ---------- VUE D'ENSEMBLE ---------- */
-const CW=232,CH=86;
-function renderOverview(){
-  currentScene="overview";SCENE.innerHTML="";closePanel();
-  document.getElementById('crumbs').innerHTML="<b>Vue d'ensemble</b>";
-  document.getElementById('btnBack').style.display="none";
-  document.getElementById('hint').innerHTML="Vue d'ensemble — <b>clique une fonction</b> pour l'ouvrir";
-  const pos={};OVERVIEW.forEach(p=>pos[p.id]=p);
-  OV_MAIN.forEach(([a,b])=>{const A=pos[a],B=pos[b];if(!A||!B)return;
-    const ax=A.x+CW/2,ay=A.y+CH/2,bx=B.x+CW/2,by=B.y+CH/2;
-    SCENE.appendChild(el('path',{d:curve(ax,ay,bx,by),fill:'none',stroke:'#ccd2e0','stroke-width':1.6,'marker-end':'url(#arr)'}));});
-  OVERVIEW.forEach(p=>{const c=CIRCUITS[p.id];const cc=col(p.id);
-    const g=el('g',{class:'porte',style:'cursor:pointer',transform:`translate(${p.x},${p.y})`});g.dataset.circuit=p.id;
-    g.appendChild(el('rect',{class:'cardbg',x:0,y:0,width:CW,height:CH,rx:14,fill:'#fff',stroke:'#e5e8f0','stroke-width':1.4,filter:'url(#sh)'}));
-    g.appendChild(el('rect',{x:0,y:0,width:5,height:CH,rx:2.5,fill:cc}));
-    g.appendChild(el('circle',{cx:36,cy:CH/2,r:19,fill:cc,'fill-opacity':.12}));
-    const ic=el('g',{transform:`translate(${36-18},${CH/2-18}) scale(0.9)`});ic.innerHTML=ICONS[p.id]?ICONS[p.id](cc):'';g.appendChild(ic);
-    const t=el('text',{x:66,y:CH/2-4,'font-size':14.5,'font-weight':800,fill:'#1b2333'});t.textContent=c.label;g.appendChild(t);
-    const s=el('text',{x:66,y:CH/2+16,'font-size':11,'font-weight':700,fill:cc});s.textContent=c.nodes.length+' étapes';g.appendChild(s);
-    g.addEventListener('mouseenter',()=>g.querySelector('.cardbg').setAttribute('stroke',cc));
-    g.addEventListener('mouseleave',()=>g.querySelector('.cardbg').setAttribute('stroke','#e5e8f0'));
-    g.addEventListener('click',()=>{if(!dragMoved)openCircuit(p.id);});SCENE.appendChild(g);});
-  requestAnimationFrame(()=>fitBBox(90));
+/* ---------- RENDU ---------- */
+function render(){
+  SCENE.innerHTML="";layout();
+  // connexions (dédupliquées)
+  const seen=new Set();const edges=[];
+  NODES.forEach(n=>(n.links||[]).forEach(m=>{if(!NODE_BY_ID[m])return;const key=[n.id,m].sort().join('|');if(seen.has(key))return;seen.add(key);edges.push([n.id,m]);}));
+  const eLayer=el('g',{});SCENE.appendChild(eLayer);
+  edges.forEach(([a,b])=>{const A=POS[a],B=POS[b];if(!A||!B)return;
+    // sortie par le bord droit de A vers bord gauche de B (ou inverse)
+    const aRight=A.cx<=B.cx; const ax=aRight?A.x+A.w:A.x, bx=aRight?B.x:B.x+B.w;
+    const p=el('path',{class:'edge','data-a':a,'data-b':b,d:curve(ax,A.cy,bx,B.cy),fill:'none',stroke:'#ccd2e0','stroke-width':1.4,'stroke-opacity':.55});
+    eLayer.appendChild(p);});
+  // groupes (boîtes)
+  for(const gid in GROUPS){const g=GROUPS[gid];const bx=g._box;if(!bx)continue;const gc=g.color;
+    const box=el('g',{class:'grp','data-grp':gid});
+    box.appendChild(el('rect',{x:bx.x,y:bx.y,width:bx.w,height:bx.h,rx:16,fill:'#ffffff',stroke:'#e7eaf2','stroke-width':1.4,filter:'url(#sh)'}));
+    box.appendChild(el('rect',{x:bx.x,y:bx.y,width:bx.w,height:34,rx:16,fill:gc,'fill-opacity':.08}));
+    const ic=el('g',{transform:`translate(${bx.x+12},${bx.y+7}) scale(0.5)`});ic.innerHTML=GICONS[gid]?GICONS[gid](gc):'';box.appendChild(ic);
+    const t=el('text',{x:bx.x+34,y:bx.y+22,'font-size':12.5,'font-weight':800,fill:gc,'letter-spacing':'.02em'});t.textContent=g.label;box.appendChild(t);
+    SCENE.appendChild(box);
+  }
+  // nœuds
+  NODES.forEach(n=>{const P=POS[n.id];const gc=GROUPS[n.group].color;
+    const g=el('g',{class:'node','data-id':n.id,style:'cursor:pointer'});
+    const stroke=n.cross?'#c98700':(n.fragile?'#e11d48':'#e7eaf2');
+    const sw=n.cross||n.fragile?2:1.3;
+    g.appendChild(el('rect',{class:'body',x:P.x,y:P.y,width:P.w,height:P.h,rx:10,fill:'#fff',stroke,'stroke-width':sw}));
+    g.appendChild(el('rect',{x:P.x,y:P.y,width:4,height:P.h,rx:2,fill:gc}));
+    const lab=el('text',{x:P.x+15,y:P.cy+4.5,'font-size':12.5,'font-weight':n.entity?800:700,fill:'#1b2333'});lab.textContent=n.label;g.appendChild(lab);
+    // marqueurs à droite
+    let mx=P.x+P.w-12;
+    if(n.entity){g.appendChild(el('circle',{cx:mx,cy:P.cy,r:3,fill:gc}));mx-=13;}
+    if(n.cross){const d=el('rect',{x:mx-5,y:P.cy-5,width:10,height:10,rx:2,fill:'#c98700',transform:`rotate(45 ${mx} ${P.cy})`});g.appendChild(d);mx-=15;}
+    if(n.fragile){g.appendChild(el('text',{x:mx,y:P.cy+4,'text-anchor':'middle','font-size':12,'font-weight':800,fill:'#e11d48'},'!'));mx-=13;}
+    if(n.infra){g.appendChild(el('circle',{cx:mx,cy:P.cy,r:3,fill:'none',stroke:'#4f6bed','stroke-width':1.6}));mx-=13;}
+    if(n.maint){g.appendChild(el('text',{x:mx,y:P.cy+4,'text-anchor':'middle','font-size':11,fill:'#64748b'},'⚙'));}
+    g.addEventListener('mouseenter',()=>{if(!selId)highlight(n.id,true);});
+    g.addEventListener('mouseleave',()=>{if(!selId)highlight(null);});
+    g.addEventListener('click',e=>{e.stopPropagation();if(!dragMoved)selectNode(n.id);});
+    SCENE.appendChild(g);
+  });
+  requestAnimationFrame(()=>fitBBox(70));
 }
-/* ---------- INTÉRIEUR : étapes reliées par des flèches ---------- */
-function openCircuit(cid){
-  currentScene=cid;SCENE.innerHTML="";closePanel();const c=CIRCUITS[cid];const cc=col(cid);const pos={};c.nodes.forEach(n=>pos[n.id]=n);
-  document.getElementById('crumbs').innerHTML=`<span class="lnk" onclick="__back()">Vue d'ensemble</span><span class="sep">›</span><b>${esc(c.label)}</b>`;
-  document.getElementById('btnBack').style.display="";
-  document.getElementById('hint').innerHTML=`<b>${esc(c.label)}</b> — <b>clique une étape</b> pour son détail`;
-  const NW=204,NH=62;
-  const tl=el('text',{x:70,y:56,'font-size':12,'font-weight':800,fill:cc,'letter-spacing':'.05em'});
-  tl.textContent=(c.label+' — de bout en bout').toUpperCase();SCENE.appendChild(tl);
-  c.edges.forEach(([a,b])=>{const A=pos[a],B=pos[b];if(!A||!B)return;
-    const ax=A.x+NW,ay=A.y+NH/2,bx=B.x,by=B.y+NH/2;let d;
-    if(Math.abs(ay-by)<2)d=`M ${ax} ${ay} L ${bx-3} ${by}`;else{const mx=(ax+bx)/2;d=`M ${ax} ${ay} C ${mx} ${ay}, ${mx} ${by}, ${bx-3} ${by}`;}
-    SCENE.appendChild(el('path',{d,fill:'none',stroke:'#c3cad9','stroke-width':2,'marker-end':'url(#arr)'}));
-    const B2=pos[b];if(B2&&(B2.fragile||B2.cross)){const mx=(ax+bx)/2,my=(ay+by)/2;const dc=B2.fragile?'#e11d48':'#c98700';
-      const inc=el('g',{transform:`translate(${mx},${my})`});
-      inc.appendChild(el('circle',{r:11,fill:'#fff',stroke:dc,'stroke-width':2,filter:'url(#sh)'}));
-      const s=el('text',{x:0,y:4.5,'text-anchor':'middle','font-size':13,'font-weight':800,fill:dc});s.textContent='!';inc.appendChild(s);
-      SCENE.appendChild(inc);}});
-  (c.crossLinks||[]).forEach((lk,i)=>{const tc=CIRCUITS[lk.to];if(!tc)return;const tcc=col(lk.to);const gx=1330,gy=150+i*88;
-    SCENE.appendChild(el('path',{d:`M 1250 ${gy+25} L ${gx-3} ${gy+25}`,fill:'none',stroke:'#c3cad9','stroke-width':1.6,'stroke-dasharray':'5 5','marker-end':'url(#arr)'}));
-    const g=el('g',{class:'porte',style:'cursor:pointer',transform:`translate(${gx},${gy})`});g.dataset.circuit=lk.to;
-    g.appendChild(el('rect',{x:0,y:0,width:236,height:50,rx:12,fill:'#fff',stroke:tcc,'stroke-width':1.4,filter:'url(#sh)'}));
-    g.appendChild(el('rect',{x:0,y:0,width:4,height:50,rx:2,fill:tcc}));
-    const ic=el('g',{transform:'translate(12,9) scale(0.78)'});ic.innerHTML=ICONS[lk.to]?ICONS[lk.to](tcc):'';g.appendChild(ic);
-    const t1=el('text',{x:44,y:22,'font-size':12.5,'font-weight':800,fill:'#1b2333'});t1.textContent=tc.label;g.appendChild(t1);
-    const t2=el('text',{x:44,y:39,'font-size':9.5,'font-weight':700,fill:tcc});t2.textContent='↳ '+lk.label;g.appendChild(t2);
-    g.addEventListener('click',()=>{if(!dragMoved)openCircuit(lk.to);});SCENE.appendChild(g);});
-  c.nodes.forEach((n,i)=>{const g=el('g',{class:'node',style:'cursor:pointer',transform:`translate(${n.x},${n.y})`});g.dataset.id=n.id;
-    const stroke=n.cross?'#c98700':(n.fragile?'#e11d48':cc);
-    g.appendChild(el('rect',{class:'body',x:0,y:0,width:NW,height:NH,rx:13,fill:'#fff',stroke,'stroke-width':n.cross||n.fragile?2.4:1.8,filter:'url(#sh)'}));
-    if(n.cross)g.appendChild(el('rect',{x:NW-22,y:NH/2-8,width:16,height:16,rx:3,fill:'#c98700',transform:`rotate(45 ${NW-14} ${NH/2})`}));
-    g.appendChild(el('circle',{cx:22,cy:NH/2,r:13,fill:cc,'fill-opacity':.13}));
-    const num=el('text',{x:22,y:NH/2+5,'text-anchor':'middle','font-size':13,'font-weight':800,fill:cc});num.textContent=(i+1);g.appendChild(num);
-    const lab=el('text',{x:42,y:n.sub?NH/2-3:NH/2+5,'font-size':12.5,'font-weight':800,fill:'#1b2333'});lab.textContent=n.label;g.appendChild(lab);
-    if(n.sub){const sb=el('text',{x:42,y:NH/2+14,'font-size':10,'font-weight':700,fill:'#8a93a8'});sb.textContent=n.sub;g.appendChild(sb);}
-    g.addEventListener('mouseenter',()=>g.querySelector('.body').setAttribute('stroke-width',n.cross||n.fragile?3:2.6));
-    g.addEventListener('mouseleave',()=>g.querySelector('.body').setAttribute('stroke-width',n.cross||n.fragile?2.4:1.8));
-    g.addEventListener('click',e=>{e.stopPropagation();if(!dragMoved)selectNode(n.id);});SCENE.appendChild(g);});
-  requestAnimationFrame(()=>fitBBox(90));
-}
-window.__back=renderOverview;
 
-/* ---------- FICHE en accordéon (replié) ---------- */
-function accBlock(title,count,inner){
-  const cnt=count?` <span style="color:#98a0b3;font-weight:700">(${count})</span>`:'';
-  return `<div class="acc"><div class="acc-h">${title}${cnt}<span class="cue">▸</span></div><div class="acc-c">${inner}</div></div>`;
+/* ---------- ALLUMAGE DES CONNEXIONS ---------- */
+function highlight(id,soft){
+  const nodes=document.querySelectorAll('.node'),edges=document.querySelectorAll('.edge'),grps=document.querySelectorAll('.grp');
+  if(!id){nodes.forEach(n=>n.setAttribute('opacity',1));edges.forEach(e=>{e.setAttribute('stroke','#ccd2e0');e.setAttribute('stroke-width',1.4);e.setAttribute('stroke-opacity',.55);});grps.forEach(g=>g.setAttribute('opacity',1));return;}
+  const nb=ADJ[id]||new Set();const keep=new Set([id,...nb]);
+  nodes.forEach(n=>n.setAttribute('opacity',keep.has(n.dataset.id)?1:.18));
+  grps.forEach(g=>g.setAttribute('opacity',.5));
+  edges.forEach(e=>{const on=(e.dataset.a===id||e.dataset.b===id);
+    e.setAttribute('stroke',on?GROUPS[NODE_BY_ID[id].group].color:'#ccd2e0');
+    e.setAttribute('stroke-width',on?2.4:1);e.setAttribute('stroke-opacity',on?.9:.12);});
 }
+
+/* ---------- FICHE ---------- */
+function accBlock(title,count,inner){const cnt=count?` <span style="color:#98a0b3;font-weight:700">(${count})</span>`:'';
+  return `<div class="acc"><div class="acc-h">${title}${cnt}<span class="cue">▸</span></div><div class="acc-c">${inner}</div></div>`;}
 function selectNode(id){
-  const {circuit,node:n}=nodeIndex[id];const c=CIRCUITS[circuit];const cc=col(circuit);
+  selId=id;highlight(id);
+  const n=NODE_BY_ID[id];const g=GROUPS[n.group];const gc=g.color;
   document.getElementById('ptitle').textContent=n.label;
-  const tags=[`<span class="tag" style="background:${cc}18;color:${cc};border:1px solid ${cc}55">${esc(c.label)}</span>`];
+  const tags=[`<span class="tag" style="background:${gc}18;color:${gc};border:1px solid ${gc}55">${esc(g.label)}</span>`];
+  if(n.entity)tags.push(`<span class="tag" style="background:#eef1f7;color:#4a5568;border:1px solid #e0e4ee">objet central</span>`);
   if(n.cross)tags.push('<span class="tag" style="background:#c9870018;color:#a06a00;border:1px solid #c9870055">⇄ carrefour</span>');
   if(n.fragile)tags.push('<span class="tag" style="background:#e11d4818;color:#e11d48;border:1px solid #e11d4855">⚠ vigilance</span>');
+  if(n.infra)tags.push('<span class="tag" style="background:#4f6bed18;color:#4f6bed;border:1px solid #4f6bed55">infrastructure</span>');
+  if(n.maint)tags.push('<span class="tag" style="background:#64748b18;color:#64748b;border:1px solid #64748b55">maintenance</span>');
   document.getElementById('ptags').innerHTML=tags.join('');
-  document.getElementById('plead').textContent=n.desc||'';
-  // rubrique 1 : code & données
-  const tbl=(n.tables&&n.tables.length)?`<div class="blk"><h4>Tables</h4>${n.tables.map(t=>`<span class="chip tbl">${esc(t)}</span>`).join('')}</div>`:'';
-  const fil=(n.files&&n.files.length)?`<div class="blk"><h4>Fichiers réels</h4>${n.files.map(f=>`<span class="chip file">${esc(f)}</span>`).join('')}</div>`:'';
-  const code=n.code?`<div class="codewrap"><span class="codetoggle" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.nextElementSibling.classList.contains('show')?'Masquer le code':'Voir le code réel'">Voir le code réel</span><div class="code">${esc(n.code)}</div></div>`:'';
-  const codeInner=(tbl+fil+code)||'<div class="none">— rien de spécifique</div>';
-  const codeCount=(n.tables?n.tables.length:0)+(n.files?n.files.length:0);
-  // rubrique 2 : visuel
+  document.getElementById('plead').textContent=n.role||'';
+  // connexions (en évidence, cliquables)
+  const nb=[...(ADJ[id]||[])];
+  const conns=nb.length?nb.map(m=>{const t=NODE_BY_ID[m];const cc=GROUPS[t.group].color;return `<span class="conn" onclick="selectNode('${m}')"><span class="cd" style="background:${cc}"></span>${esc(t.label)}</span>`;}).join(''):'<div class="none">— aucune connexion déclarée</div>';
+  document.getElementById('plead2').innerHTML=`<h4>🔗 Connecté à</h4><div class="badges">${conns}</div>`;
+  // rubriques
+  const tbl=(n.tables&&n.tables.length)?`<div class="blk"><h4>Tables Supabase</h4>${n.tables.map(t=>`<span class="chip tbl">${esc(t)}</span>`).join('')}</div>`:'';
+  const fil=(n.files&&n.files.length)?`<div class="blk"><h4>Où c'est dans le code</h4>${n.files.map(f=>`<span class="chip file">${esc(f)}</span>`).join('')}</div>`:'';
+  const codeInner=(tbl+fil)||'<div class="none">—</div>';
   let vis;
-  if(n.assets==="partners")vis=`<select class="psel" id="pvsel">${PARTNERS.map(s=>`<option value="${s}">${esc(PNAMES[s])}</option>`).join('')}</select><div id="pvlinks"></div>`+(n.live?`<a class="openlink" href="${n.live}" target="_blank">↗ Ouvrir le hub kit digital</a>`:'');
+  if(n.assets==="partners")vis=`<select class="psel" id="pvsel">${PARTNERS.map(s=>`<option value="${s}">${esc(PNAMES[s])}</option>`).join('')}</select><div id="pvlinks"></div>`;
   else if(n.live)vis=`<a class="openlink" href="${n.live}" target="_blank">↗ Ouvrir en direct</a>`;
-  else vis=`<div class="none">Pas d'élément visuel ici (surtout dans « Partenaires & visuels » et « Créer un event »).</div>`;
-  // rubrique 3 : règles
+  else vis=`<div class="none">Pas d'élément visuel ici.</div>`;
   const rules=(n.rules||[]);
-  const rul=rules.length?rules.map(rid=>{const r=RULES[rid];return r?`<div class="rule" style="border-left-color:${r.color}"><p class="rt"><span style="color:${r.color}">●</span> ${esc(r.t)} <span class="rid">${rid}</span></p><p class="rx">${esc(r.x)}</p></div>`:'';}).join('')+`<a class="openlink" href="#" onclick="document.getElementById('rulesModal').classList.add('open');return false;">↗ Tout le registre</a>`:'<div class="none">Aucune règle rattachée à cette étape.</div>';
-  document.getElementById('pbody').innerHTML=accBlock('Code & données',codeCount,codeInner)+accBlock('Élément visuel',n.assets==="partners"?PARTNERS.length:'',vis)+accBlock('Règle métier',rules.length,rul);
-  // accordéon : un seul ouvert à la fois
-  document.querySelectorAll('#pbody .acc-h').forEach(hd=>hd.addEventListener('click',()=>{
-    const acc=hd.parentElement;const wasOpen=acc.classList.contains('open');
-    document.querySelectorAll('#pbody .acc').forEach(a=>a.classList.remove('open'));
-    if(!wasOpen)acc.classList.add('open');}));
-  if(n.assets==="partners"){const sel=document.getElementById('pvsel');
-    const draw=()=>{document.getElementById('pvlinks').innerHTML='<div class="dl">'+partnerAssets(sel.value).map(a=>`<a class="${a.k==='file'?'file':''}" href="${a.u}" target="_blank" download>${a.k==='vid'?'▶':'⬇'} ${esc(a.t)}</a>`).join('')+'</div>';};
-    sel.addEventListener('change',draw);draw();}
+  const rul=rules.length?rules.map(rid=>{const r=RULES[rid];return r?`<div class="rule" style="border-left-color:${r.color}"><p class="rt"><span style="color:${r.color}">●</span> ${esc(r.t)} <span class="rid">${rid}</span></p><p class="rx">${esc(r.x)}</p></div>`:'';}).join('')+`<a class="openlink" href="#" onclick="document.getElementById('rulesModal').classList.add('open');return false;">↗ Tout le registre</a>`:'<div class="none">Aucune règle rattachée.</div>';
+  document.getElementById('pbody').innerHTML=accBlock("Code & données",(n.tables?n.tables.length:0)+(n.files?n.files.length:0),codeInner)+accBlock("Élément visuel",n.assets==="partners"?PARTNERS.length:(n.live?1:''),vis)+accBlock("Règle métier",rules.length,rul);
+  document.querySelectorAll('#pbody .acc-h').forEach(hd=>hd.addEventListener('click',()=>{const acc=hd.parentElement;const was=acc.classList.contains('open');document.querySelectorAll('#pbody .acc').forEach(a=>a.classList.remove('open'));if(!was)acc.classList.add('open');}));
+  if(n.assets==="partners"){const sel=document.getElementById('pvsel');const draw=()=>{document.getElementById('pvlinks').innerHTML='<div class="dl">'+partnerAssets(sel.value).map(a=>`<a class="${a.k==='file'?'file':''}" href="${a.u}" target="_blank" download>${a.k==='vid'?'▶':'⬇'} ${esc(a.t)}</a>`).join('')+'</div>';};sel.addEventListener('change',draw);draw();}
+  document.querySelectorAll('.node .body').forEach(b=>{});
+  document.querySelectorAll('.node').forEach(nd=>nd.querySelector('.body').setAttribute('stroke-width',nd.dataset.id===id?2.6:(NODE_BY_ID[nd.dataset.id].cross||NODE_BY_ID[nd.dataset.id].fragile?2:1.3)));
   document.getElementById('panel').classList.add('open');
+  document.getElementById('btnBack').style.display="";
 }
-function closePanel(){document.getElementById('panel').classList.remove('open');}
+function closePanel(){document.getElementById('panel').classList.remove('open');selId=null;highlight(null);
+  document.querySelectorAll('.node .body').forEach(b=>{});document.getElementById('btnBack').style.display="none";}
 function buildRulesList(){const wrap=document.getElementById('rulesList');let h="";
-  Object.entries(RULES).forEach(([rid,r])=>{const appl=[];Object.entries(CIRCUITS).forEach(([cid,c])=>c.nodes.forEach(n=>{if((n.rules||[]).includes(rid))appl.push(c.label+' › '+n.label);}));
+  Object.entries(RULES).forEach(([rid,r])=>{const appl=[];NODES.forEach(n=>{if((n.rules||[]).includes(rid))appl.push(n.label);});
     h+=`<div class="rule" style="border-left-color:${r.color}"><p class="rt"><span style="color:${r.color}">●</span> ${esc(r.t)} <span class="rid">${rid}</span></p><p class="rx">${esc(r.x)}</p><p class="appl">Rattachée à : <b>${appl.length?appl.map(esc).join(' · '):'—'}</b></p></div>`;});
   wrap.innerHTML=h;}
 
 /* pan/zoom sans capture (clics fiables) */
 let dragging=false,dragMoved=false,sx=0,sy=0;
-function isNode(t){return t&&t.closest&&t.closest('.node,.porte');}
+function isNode(t){return t&&t.closest&&t.closest('.node');}
 SVG.addEventListener('pointerdown',e=>{if(isNode(e.target))return;dragging=true;dragMoved=false;sx=e.clientX;sy=e.clientY;SVG.classList.add('grabbing');});
 window.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>3)dragMoved=true;view.x+=dx;view.y+=dy;sx=e.clientX;sy=e.clientY;applyView();target={...view};});
 window.addEventListener('pointerup',()=>{dragging=false;SVG.classList.remove('grabbing');setTimeout(()=>dragMoved=false,30);});
+SVG.addEventListener('click',e=>{if(!isNode(e.target)&&!dragMoved&&selId)closePanel();});
 SVG.addEventListener('wheel',e=>{e.preventDefault();const r=SVG.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
   const f=e.deltaY<0?1.12:1/1.12;const nk=Math.max(.2,Math.min(2.6,view.k*f));
   view.x=mx-(mx-view.x)*(nk/view.k);view.y=my-(my-view.y)*(nk/view.k);view.k=nk;applyView();target={...view};},{passive:false});
@@ -615,12 +440,13 @@ function zoomBtn(f){const r=SVG.getBoundingClientRect();const mx=r.width/2,my=r.
   animateTo({x:mx-(mx-view.x)*(nk/view.k),y:my-(my-view.y)*(nk/view.k),k:nk});}
 document.getElementById('zin').onclick=()=>zoomBtn(1.25);
 document.getElementById('zout').onclick=()=>zoomBtn(1/1.25);
-document.getElementById('zfit').onclick=()=>fitBBox(90);
-document.getElementById('btnBack').onclick=renderOverview;
+document.getElementById('zfit').onclick=()=>fitBBox(70);
+document.getElementById('btnBack').textContent="↩ Tout afficher";
+document.getElementById('btnBack').onclick=closePanel;
 document.getElementById('pclose').onclick=closePanel;
 document.getElementById('btnRules').onclick=()=>document.getElementById('rulesModal').classList.add('open');
-window.addEventListener('resize',()=>{if(!anim)fitBBox(90);});
-buildRulesList();renderOverview();
+window.addEventListener('resize',()=>{if(!anim)fitBBox(70);});
+buildRulesList();render();
 </script>
 </body>
 </html>
