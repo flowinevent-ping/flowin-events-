@@ -3,379 +3,674 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Carte du système — Flowin × Nuits du Sud 2026 (v2)</title>
+<title>Carte du système — Flowin × Nuits du Sud 2026 (v4)</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0c0e16; --card:#161a26; --hub:#7C2D92; --ink:#fff; --muted:#8a90a8;
+    --bg:#0a1020; --panel:#12172a; --card:#161c30; --line:#26304a; --ink:#f2f4fb; --muted:#8790ad;
+    --amber:#f4b544; --magenta:#e6187f; --teal:#22d3c6; --green:#22c55e; --red:#ff5a5c; --violet:#a855f7; --hub:#8b3bb0;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Manrope',sans-serif;overflow-x:hidden}
-  .topbar{padding:16px 20px;border-bottom:1px solid #262b3d;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
-  .topbar h1{font-size:17px;margin:0;font-weight:800}
-  .topbar p{margin:0;font-size:12.5px;color:var(--muted)}
-  .legend{display:flex;gap:12px;margin-left:auto;flex-wrap:wrap;max-width:520px}
-  .legend span{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);font-weight:700;white-space:nowrap}
-  .legend i{width:12px;height:4px;border-radius:2px;display:inline-block;flex-shrink:0}
-  .wrap{display:flex;min-height:calc(100vh - 76px)}
-  .mapzone{flex:1;overflow:auto;padding:20px}
-  svg{width:100%;min-width:1100px;height:auto;display:block}
-  .route{fill:none;stroke-width:6;stroke-linecap:round;opacity:.85}
-  .station{cursor:pointer}
-  .station circle{stroke:#0c0e16;stroke-width:3;transition:r .15s}
-  .station:hover circle{r:14}
-  .station.active circle{r:15;stroke:#fff}
-  .station.fragile circle{stroke:#ff4d4f;stroke-width:4;stroke-dasharray:3 2}
-  .station text{font-size:10.5px;font-weight:700;fill:#fff;pointer-events:none}
-  .hubnode circle{r:24;fill:var(--hub);stroke:#0c0e16;stroke-width:4}
-  .hubnode text{font-size:12px;font-weight:800}
-  .rowlabel{font-size:10px;font-weight:800;fill:#5a5f75;text-transform:uppercase;letter-spacing:.06em}
-  .side{width:400px;border-left:1px solid #262b3d;padding:22px;background:var(--card);flex-shrink:0;overflow-y:auto}
-  .side h2{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
-  .side .tag{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin-bottom:10px}
-  .side .fragtag{display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;margin:0 0 10px 6px;background:#ff4d4f22;color:#ff8080;border:1px solid #ff4d4f55}
-  .side p.desc{font-size:13px;line-height:1.6;color:#d8dae8;margin:10px 0 16px;white-space:pre-line}
-  .blk{margin-bottom:16px}
-  .blk h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 7px;font-weight:800}
-  .chip{display:block;background:#0c0e16;border:1px solid #262b3d;border-radius:8px;padding:8px 11px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#c9cce0;margin-bottom:6px;word-break:break-all}
-  .chip.tbl{color:#F5B544;border-color:#F5B54444}
-  .chip.file{color:#22D3C6;border-color:#22D3C6 44}
-  .codeblock{background:#080910;border:1px solid #262b3d;border-radius:10px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:11.3px;line-height:1.6;color:#a8f0c6;overflow-x:auto;white-space:pre}
-  .codeblock .k{color:#F5B544}
-  .empty{color:var(--muted);font-size:13px;line-height:1.6;padding-top:40px;text-align:center}
-  .empty b{color:#fff;display:block;margin-bottom:10px;font-size:15px}
-  a.openlink{display:inline-block;margin-top:4px;margin-right:10px;font-size:12.5px;color:#22D3C6;text-decoration:none;font-weight:700}
-  a.openlink:hover{text-decoration:underline}
-  .warnbox{background:#3a1010;border:1px solid #ff4d4f55;border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#ffc9c9;margin-bottom:16px}
-  .warnbox b{color:#ff8080}
-  .tree{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.75;color:#c9cce0;white-space:pre}
-  .tree .d{color:#22D3C6;font-weight:700}
-  .tree .m{color:#F5B544}
-  @media (max-width:900px){ .wrap{flex-direction:column} .side{width:auto;border-left:none;border-top:1px solid #262b3d} }
+  html,body{height:100%}
+  body{margin:0;background:
+      radial-gradient(1100px 520px at 78% -8%, #e6187f22, transparent 60%),
+      radial-gradient(900px 480px at 12% 108%, #22d3c61c, transparent 60%),
+      radial-gradient(700px 420px at 50% 45%, #5b7fff14, transparent 62%),
+      var(--bg);
+    color:var(--ink);font-family:'Manrope',sans-serif;overflow:hidden}
+
+  .top{position:fixed;top:0;left:0;right:0;height:60px;z-index:20;display:flex;align-items:center;gap:14px;
+       padding:0 18px;background:rgba(10,16,32,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .top h1{font-size:15px;font-weight:800;margin:0;white-space:nowrap}
+  .top h1 span{color:var(--muted);font-weight:600;font-size:12px}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:700;min-width:0}
+  .crumbs b{color:var(--ink)}
+  .crumbs .sep{opacity:.5}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--line);background:#0e1526;color:var(--ink);font-family:inherit;
+       font-weight:700;font-size:12.5px;padding:8px 12px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:.12s}
+  .btn:hover{border-color:#3b466a;background:#141c34}
+  .btn.ghost{background:transparent}
+  .zoomctl{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .zoomctl button{border:0;background:#0e1526;color:var(--ink);width:34px;height:36px;cursor:pointer;font-size:16px;font-weight:800}
+  .zoomctl button:hover{background:#141c34}
+  .zoomctl button+button{border-left:1px solid var(--line)}
+
+  #stage{position:fixed;inset:60px 0 0 0}
+  svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+  svg#map.grabbing{cursor:grabbing}
+  .edge{fill:none;stroke:#3c4870;stroke-width:2.4;opacity:.8}
+  .edge.cross{stroke-dasharray:5 5;opacity:.55}
+  .node{cursor:pointer}
+  .node .body{stroke:#0a1020;stroke-width:2;transition:filter .12s}
+  .node:hover .body{filter:brightness(1.12)}
+  .node.sel .body{stroke:#fff;stroke-width:2.5}
+  .node .lab{font-size:12px;font-weight:800;fill:#fff;pointer-events:none}
+  .node .sub{font-size:9.5px;font-weight:700;fill:#0a1020;opacity:.62;pointer-events:none}
+  .node .idx{font-size:10px;font-weight:800;fill:#0a1020;opacity:.55;pointer-events:none}
+  .badge{font-size:11px;font-weight:800;pointer-events:none}
+  .porte .glow{opacity:0;transition:opacity .15s}
+  .porte:hover .glow{opacity:.5}
+  .porte .plabel{font-size:15px;font-weight:800;fill:#fff;pointer-events:none}
+  .porte .psub{font-size:10.5px;font-weight:700;fill:#0a1020;opacity:.6;pointer-events:none}
+  .porte .picon{font-size:22px;pointer-events:none}
+  .rowlab{font-size:11px;font-weight:800;fill:#5b6a8f;text-transform:uppercase;letter-spacing:.06em;pointer-events:none}
+
+  #panel{position:fixed;top:60px;right:0;bottom:0;width:430px;max-width:92vw;background:var(--panel);
+         border-left:1px solid var(--line);transform:translateX(100%);transition:transform .22s ease;z-index:15;
+         display:flex;flex-direction:column}
+  #panel.open{transform:none}
+  .ph{padding:18px 20px 12px;border-bottom:1px solid var(--line);position:relative}
+  .ph .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+  .tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:20px}
+  .ph h2{margin:0;font-size:18px;font-weight:800;line-height:1.25;padding-right:32px}
+  .ph .close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+             background:#0e1526;color:var(--muted);cursor:pointer;font-size:13px;font-weight:800}
+  .ph .close:hover{color:#fff}
+  .pdesc{padding:14px 20px;font-size:13.5px;line-height:1.62;color:#d7dbec;white-space:pre-line;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;padding:0 12px;border-bottom:1px solid var(--line);gap:2px}
+  .tabs button{flex:1;border:0;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;
+               font-size:12px;padding:12px 6px;cursor:pointer;border-bottom:2px solid transparent}
+  .tabs button.on{color:#fff;border-bottom-color:var(--magenta)}
+  .pbody{padding:16px 20px 40px;overflow-y:auto;flex:1}
+  .blk{margin-bottom:18px}
+  .blk h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px;font-weight:800}
+  .chip{display:block;background:#0b1220;border:1px solid var(--line);border-radius:8px;
+        padding:8px 11px;font-size:12px;font-family:'JetBrains Mono',monospace;color:#c9cfe6;margin-bottom:6px;word-break:break-all}
+  .chip.tbl{color:var(--amber);border-color:#f4b54440}
+  .chip.file{color:var(--teal);border-color:#22d3c640}
+  .code{background:#070b16;border:1px solid var(--line);border-radius:10px;padding:12px 13px;
+        font-family:'JetBrains Mono',monospace;font-size:11.4px;line-height:1.62;color:#a8f0c6;overflow-x:auto;white-space:pre}
+  .none{color:#5b6a8f;font-size:12.5px;padding:6px 0}
+  .rule{background:#0b1220;border:1px solid var(--line);border-left-width:4px;border-radius:9px;padding:11px 13px;margin-bottom:10px}
+  .rule .rt{font-size:12.5px;font-weight:800;margin:0 0 5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .rule .rx{font-size:12px;line-height:1.55;color:#c9cfe6;margin:0}
+  .rule .rid{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);font-weight:600}
+  .dl{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .dl a{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;text-decoration:none;
+        padding:7px 11px;border-radius:8px;border:1px solid #22d3c640;color:var(--teal);background:#0b1220}
+  .dl a:hover{background:#10233b}
+  .dl a.file{border-color:#f4b54440;color:var(--amber)}
+  select.psel{width:100%;background:#0b1220;border:1px solid var(--line);color:#fff;font-family:inherit;font-weight:700;
+              font-size:12.5px;padding:9px 10px;border-radius:8px;margin-bottom:12px}
+  .openlink{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--teal);text-decoration:none;font-weight:700}
+  .openlink:hover{text-decoration:underline}
+
+  #rulesModal{position:fixed;inset:0;z-index:30;background:rgba(6,10,20,.72);backdrop-filter:blur(4px);
+              display:none;align-items:flex-start;justify-content:center;padding:70px 16px 24px;overflow:auto}
+  #rulesModal.open{display:flex}
+  .rcard{width:760px;max-width:100%;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  .rcard h2{margin:0 0 4px;font-size:18px;font-weight:800}
+  .rcard p.lead{margin:0 0 18px;font-size:13px;color:var(--muted);line-height:1.5}
+  .rcard .appl{margin-top:7px;font-size:11px;color:var(--muted)}
+  .rcard .appl b{color:#c9cfe6;font-weight:700}
+
+  .legend{position:fixed;left:14px;bottom:14px;z-index:12;background:rgba(12,18,36,.8);backdrop-filter:blur(8px);
+          border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:11px;max-width:250px}
+  .legend b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:7px;font-weight:800}
+  .legend div{display:flex;align-items:center;gap:8px;margin:4px 0;color:#c9cfe6;font-weight:700}
+  .legend i{width:16px;height:16px;border-radius:5px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
+  .legend .di{width:14px;height:14px;transform:rotate(45deg);border-radius:3px;background:var(--amber)}
+  .legend .fr{width:14px;height:14px;border-radius:50%;border:2px dashed var(--red)}
+  @media (max-width:820px){
+    .legend{display:none}
+    .top h1 span{display:none}
+    #panel{width:100%;top:auto;height:74vh;border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;transform:translateY(100%)}
+    #panel.open{transform:none}
+  }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div>
-    <h1>🗺️ Carte du système — Flowin × Nuits du Sud 2026 <span style="color:#8a90a8;font-weight:600;font-size:13px">v2</span></h1>
-    <p>Clique une station : explication simple + tables + fichiers + <b style="color:#a8f0c6">code réel</b>. Contour rouge pointillé = point fragile connu.</p>
-  </div>
-  <div class="legend">
-    <span><i style="background:#E0218A"></i>Parcours joueur</span>
-    <span><i style="background:#22D3C6"></i>Partenaires &amp; visuels</span>
-    <span><i style="background:#F5B544"></i>Commercial</span>
-    <span><i style="background:#22C55E"></i>Communication</span>
-    <span><i style="background:#5B7FFF"></i>Code &amp; modules</span>
-    <span><i style="background:#F43F9E"></i>Jeux &amp; Super Event</span>
-    <span><i style="background:#00B4A0"></i>CRM (Pros/Partenaires)</span>
-    <span><i style="background:#7C2D92"></i>Dashboard</span>
+<div class="top">
+  <h1>🗺️ Carte du système <span>· Flowin × NDS 2026 · v4</span></h1>
+  <div class="crumbs" id="crumbs"><b>Vue d'ensemble</b></div>
+  <div class="spacer"></div>
+  <button class="btn ghost" id="btnRules">📖 Règles métier</button>
+  <button class="btn" id="btnBack" style="display:none">↩ Vue d'ensemble</button>
+  <div class="zoomctl">
+    <button id="zin" title="Zoomer">+</button>
+    <button id="zout" title="Dézoomer">−</button>
+    <button id="zfit" title="Recentrer" style="font-size:13px">⤢</button>
   </div>
 </div>
 
-<div class="wrap">
-  <div class="mapzone">
-    <svg viewBox="0 0 1100 1160" id="mapsvg">
-      <text class="rowlabel" x="90" y="86">Parcours joueur</text>
-      <path class="route" d="M 90 100 L 1010 100" stroke="#E0218A"/>
-      <text class="rowlabel" x="90" y="206">Partenaires &amp; visuels</text>
-      <path class="route" d="M 90 220 L 1010 220" stroke="#22D3C6"/>
-      <text class="rowlabel" x="90" y="326">Commercial</text>
-      <path class="route" d="M 90 340 L 1010 340" stroke="#F5B544"/>
-      <text class="rowlabel" x="90" y="446">Communication</text>
-      <path class="route" d="M 90 460 L 1010 460" stroke="#22C55E"/>
-      <text class="rowlabel" x="90" y="606">Code &amp; modules (arborescence)</text>
-      <path class="route" d="M 90 620 L 1010 620" stroke="#5B7FFF"/>
-      <text class="rowlabel" x="90" y="726">Jeux &amp; Super Event</text>
-      <path class="route" d="M 90 740 L 1010 740" stroke="#F43F9E"/>
-      <text class="rowlabel" x="90" y="846">CRM — Pros &amp; Partenaires</text>
-      <path class="route" d="M 90 860 L 1010 860" stroke="#00B4A0"/>
-      <text class="rowlabel" x="90" y="966">Fiabilité &amp; données</text>
-      <path class="route" d="M 90 980 L 1010 980" stroke="#ff4d4f"/>
+<div id="stage">
+  <svg id="map" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#3c4870"/>
+      </marker>
+      <marker id="arrowc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="#5b6a8f"/>
+      </marker>
+    </defs>
+    <g id="scene"></g>
+  </svg>
+</div>
 
-      <path class="route" d="M 550 100 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
-      <path class="route" d="M 550 220 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
-      <path class="route" d="M 550 340 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
-      <path class="route" d="M 550 460 L 550 280" stroke="#7C2D92" stroke-width="4" opacity=".5"/>
-      <path class="route" d="M 550 620 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
-      <path class="route" d="M 550 740 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
-      <path class="route" d="M 550 860 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
-      <path class="route" d="M 550 980 L 550 280" stroke="#7C2D92" stroke-width="3" opacity=".3"/>
+<div class="legend">
+  <b>Repères</b>
+  <div><span class="di"></span> Carrefour (donnée qui se croise)</div>
+  <div><span class="fr"></span> Point fragile (erreur/doublon possible)</div>
+  <div><i style="background:#0b1220;border:1px solid var(--line)">▸</i> Clique un point → code · visuel · règle</div>
+</div>
 
-      <g class="station hubnode" data-id="dashboard" transform="translate(550,280)">
-        <circle/>
-        <text text-anchor="middle" dy="5" fill="#fff">DASHBOARD</text>
-      </g>
-
-      <g id="line1"></g><g id="line2"></g><g id="line3"></g><g id="line4"></g>
-      <g id="line5"></g><g id="line6"></g><g id="line7"></g><g id="line8"></g>
-    </svg>
+<div id="panel">
+  <div class="ph">
+    <button class="close" id="pclose">✕</button>
+    <div class="tagrow" id="ptags"></div>
+    <h2 id="ptitle"></h2>
   </div>
+  <div class="pdesc" id="pdesc"></div>
+  <div class="tabs">
+    <button data-tab="code" class="on">💻 Code</button>
+    <button data-tab="visuel">🖼️ Élément visuel</button>
+    <button data-tab="regle">📏 Règle du module</button>
+  </div>
+  <div class="pbody" id="pbody"></div>
+</div>
 
-  <div class="side" id="side">
-    <div class="empty">
-      <b>👋 Clique une station</b>
-      3 nouvelles lignes cette fois : le code &amp; les modules (arborescence réelle du repo), les jeux &amp; le Super Event, et une ligne dédiée à la fiabilité (points fragiles connus + où récupérer toutes les données).
-    </div>
+<div id="rulesModal">
+  <div class="rcard">
+    <button class="btn ghost" style="float:right" onclick="document.getElementById('rulesModal').classList.remove('open')">✕ Fermer</button>
+    <h2>📖 Registre des règles métier</h2>
+    <p class="lead">Chaque règle est rattachée aux points de la carte où elle s'applique — pour ne plus jamais en oublier une (ex. les logos partenaires sur toutes les vidéos). Clique un point de la carte puis l'onglet « Règle du module » pour voir ses règles.</p>
+    <div id="rulesList"></div>
   </div>
 </div>
 
 <script>
-const STATIONS = {
-  "qr-scan": { line:"Parcours joueur", color:"#E0218A", x:130, y:100, label:"Scan QR",
-    desc:"Le festivalier flashe un QR — station physique (1 jeu/jour) ou lien réseaux (usage unique, tout le festival).",
-    tables:["events (cfg, quizBanques, quizBonusList)"], files:["admin/app/parcours/nds2026/page.tsx"] },
-  "questionnaire": { line:"Parcours joueur", color:"#E0218A", x:320, y:100, label:"Questionnaire (quiz)",
-    desc:"4 questions tirées au hasard, en excluant celles déjà vues par ce joueur (tout le festival, pas juste cette station).",
-    tables:["banques (questions)", "se_reponses (lu pour l'anti-répétition)"],
-    files:["admin/lib/parcours.ts → fetchJoueurHistory()"],
-    code:`export async function fetchJoueurHistory(joueurId) {
-  const { data } = await supabase
-    <span class="k">.from('se_reponses')</span>
-    .select('quiz_reponses,bonus_reponses')
-    .eq('joueur_id', joueurId).limit(200)
-  // construit la liste des qid deja vus + si le bonus est deja fait
-}` },
-  "bonus": { line:"Parcours joueur", color:"#E0218A", x:500, y:100, label:"Question bonus",
-    desc:"5 questions fixes (mobilité/RSE), masquées après la 1ère réponse d'un joueur reconnu — sur toute station flashable au QR. L'outil manuel Brigade Verte n'est pas concerné (fichier séparé).",
-    tables:["se_reponses (bonus_reponses)", "sondage_brigade (stats anonymes)"],
-    files:["admin/app/parcours/nds2026/NDS2026Client.tsx → finishBonus()"] },
-  "fiche": { line:"Parcours joueur", color:"#E0218A", x:680, y:100, label:"Fiche festivalier",
-    desc:"⚠️ Point de croisement important : remplir CE formulaire écrit dans 3 tables différentes en même temps. C'est le meilleur exemple de 'donnée multipliée' du système.",
-    tables:["joueurs (profil, 1 ligne par email)", "participations (résumé par event/jour)", "se_reponses (détail complet quiz + bonus + formulaire)"],
-    files:["admin/lib/parcours.ts → writeJoueur() / claimJoueur()"],
-    code:`await supabase.from('participations').insert({...})
-await writeSeReponses({ joueurId, evId, jour, form,
-  quiz_reponses, bonus_reponses })  // -> 2e ecriture
-await attribuerSuperEvent(joueurId, evId, today, ...)  // -> 3e systeme (se_tickets)` },
-  "ticket": { line:"Parcours joueur", color:"#E0218A", x:870, y:100, label:"Ticket & gains",
-    desc:"Ticket généré. Si un lot est attribué au tirage, un code série + QR de retrait sont créés dans se_gains.",
-    tables:["participations (tickets)", "lots (assigné à ce joueur)", "se_gains (code, QR, validité)"],
-    files:["admin/public/dashboard.html → ensureSeGainForLot()"] },
+/* ====================================================================
+   DONNÉES — ancrées sur le réel (repo + Supabase, vérifié en session)
+   ==================================================================== */
+const PARTNERS = ["bergerie","pegase","utile","carrosserie-gp","giordano","charvolin","nook","cycles963"];
+const PNAMES = {bergerie:"Domaine de la Bergerie","pegase":"Auto-École de l'ARA",utile:"Utile Vence",
+  "carrosserie-gp":"Carrosserie GP",giordano:"Électroménager J Giordano",charvolin:"Assurance Charvolin",
+  nook:"Nook Café",cycles963:"Cycles 963"};
+const BASE = "https://flowin-events.vercel.app";
 
-  "fiche-partenaire": { line:"Partenaires & visuels", color:"#22D3C6", x:130, y:220, label:"Fiche partenaire",
-    desc:"Coordonnées + offre + lot. Sans lot renseigné : aucune affiche générée (pour ne jamais inventer une offre commerciale).",
-    tables:["partenaires"], files:["admin/public/dashboard.html → onglet Partenaires"] },
-  "logo": { line:"Partenaires & visuels", color:"#22D3C6", x:280, y:220, label:"Logo",
-    desc:"Source unique réutilisée ensuite partout (affiche, vidéo, mur de logos).",
-    tables:["partenaires.image_url"], files:["admin/public/nds/partenaires/&lt;slug&gt;.png"] },
-  "affiche": { line:"Partenaires & visuels", color:"#22D3C6", x:430, y:220, label:"Affiche A4",
-    desc:"Générée depuis le logo + le lot de la fiche partenaire.",
-    tables:[], files:["admin/public/nds/visuels/nds_a4_&lt;slug&gt;.png", "admin/public/nds/visuels-src/gen_a4_clean.py"],
-    live:"https://flowin-events.vercel.app/nds/kit-digital/" },
-  "video": { line:"Partenaires & visuels", color:"#22D3C6", x:590, y:220, label:"Vidéo réseaux/écran",
-    fragile:true,
-    desc:"Le mur de logos DEVRAIT être piloté par une seule liste centrale (nds_lib.PARTNERS). En réalité, 3 scripts ont chacun leur PROPRE liste codée en dur, non synchronisée. Voir la station ⚠️ ligne Fiabilité pour la preuve.",
-    tables:[], files:["admin/public/nds/kit-digital/&lt;slug&gt;/video-&lt;slug&gt;-9x16.mp4"] },
-  "qr-partenaire": { line:"Partenaires & visuels", color:"#22D3C6", x:750, y:220, label:"QR station/réseaux",
-    desc:"2 QR par partenaire : station (physique, 1/jour) et réseaux (digital, &source=reseaux-&lt;slug&gt;, usage unique).",
-    tables:["events (ev-nds-&lt;slug&gt;)"], files:["kit-digital/&lt;slug&gt;/qr-station-&lt;slug&gt;.png", "kit-digital/&lt;slug&gt;/qr-reseaux-&lt;slug&gt;.png"] },
-  "kit-digital": { line:"Partenaires & visuels", color:"#22D3C6", x:910, y:220, label:"Kit digital complet",
-    desc:"Dossier final envoyé au partenaire : tout regroupé + zip téléchargeable.",
-    tables:[], files:["admin/public/nds/kit-digital/&lt;slug&gt;/"], live:"https://flowin-events.vercel.app/nds/kit-digital/" },
-
-  "prospection": { line:"Commercial", color:"#F5B544", x:150, y:340, label:"Prospection",
-    desc:"Formulaire landing pour devenir partenaire.", tables:["crm_retours (origine=landing)"], files:[] },
-  "bon-commande": { line:"Commercial", color:"#F5B544", x:380, y:340, label:"Bon de commande",
-    desc:"Pré-rempli automatiquement depuis la fiche partenaire quand elle existe déjà.",
-    tables:["bons_commande"], files:["admin/public/bon-commande-nds.html", "admin/public/bons-prets/*.html"] },
-  "signature": { line:"Commercial", color:"#F5B544", x:600, y:340, label:"Signature → Facture",
-    desc:"⚠️ Autre point de croisement : signer le bon de commande déclenche AUTOMATIQUEMENT 2 écritures ailleurs — un vrai exemple de 'renvoi dans différents dossiers'.",
-    tables:["partenaires.contrat (rempli automatiquement)", "factures (créée automatiquement)"],
-    files:["fonction SQL fn_bon_commande_chain"],
-    code:`-- trigger SQL, se declenche a la signature du bon
-create trigger fn_bon_commande_chain
-after update on bons_commande
--- 1) copie le resume dans partenaires.contrat
--- 2) genere la facture FL-2026-XXXX-01 dans factures`},
-  "facture": { line:"Commercial", color:"#F5B544", x:820, y:340, label:"Facture",
-    desc:"Numérotée automatiquement depuis le n° du devis d'origine (FL-2026-XXXX-01).",
-    tables:["factures"], files:["admin/public/facture-nds.html"] },
-
-  "email-ticket": { line:"Communication", color:"#22C55E", x:180, y:460, label:"Email — ticket gagnant",
-    desc:"⚠️ Fichier NON versionné dans le repo — déployé directement sur Supabase, pas dans supabase/functions/. À rapatrier dans le repo pour cohérence.",
-    fragile:true,
-    tables:["se_gains"], files:["Déployé sur Supabase, absent du dossier supabase/functions/ du repo"] },
-  "email-bon": { line:"Communication", color:"#22C55E", x:420, y:460, label:"Email — bon de commande",
-    desc:"Envoie au partenaire son bon signé + conditions + RIB.", tables:["bons_commande"],
-    files:["supabase/functions/notify-bon-commande/index.ts"] },
-  "email-souscription": { line:"Communication", color:"#22C55E", x:660, y:460, label:"Email — souscription",
-    desc:"Notification à une nouvelle souscription partenaire.", tables:[],
-    files:["supabase/functions/notify-souscription/index.ts"] },
-  "email-copie": { line:"Communication", color:"#22C55E", x:900, y:460, label:"Copie systématique",
-    desc:"Tous les emails passent par Resend et copient toujours flowinevent@gmail.com.",
-    tables:[], files:["Secret Supabase : RESEND_API_KEY"] },
-
-  "arbo-app": { line:"Code & modules", color:"#5B7FFF", x:150, y:620, label:"admin/app/",
-    desc:"Les pages Next.js. Chaque dossier = une URL.", tables:[], files:[],
-    tree:`admin/app/
-├── <span class="d">parcours/</span>          ← tous les jeux
-│   ├── nds2026/       (orchestrateur NDS)
-│   ├── quiz/           <span class="m">module maître</span>
-│   ├── spin/            <span class="m">module maître</span>
-│   ├── tombola/        <span class="m">module maître</span>
-│   └── vote/             <span class="m">module maître</span>
-├── <span class="d">se/[se]/</span>          ← Super Event (fédère plusieurs jeux)
-├── <span class="d">dashboard/</span>       ← pages admin Next.js
-├── <span class="d">pro/</span>              ← espace partenaire
-└── <span class="d">rejoindre/[se]/</span> ← inscription à un Super Event` },
-  "arbo-lib": { line:"Code & modules", color:"#5B7FFF", x:340, y:620, label:"admin/lib/",
-    desc:"La logique métier partagée par toutes les pages. C'est ICI qu'il faut chercher en premier pour comprendre 'qui écrit quoi'.",
-    tables:[], files:["admin/lib/parcours.ts (joueur, quiz, historique)", "admin/lib/lots.ts", "admin/lib/track.ts (clics partenaires)", "admin/lib/ticket.ts (génération code)", "admin/lib/supabase.ts (connexion DB)"] },
-  "arbo-modules": { line:"Code & modules", color:"#5B7FFF", x:530, y:620, label:"Modules maîtres",
-    desc:"RÈGLE D'OR du projet : QuizClient.tsx, SpinClient.tsx, TombolaClient.tsx, VoteClient.tsx ne sont JAMAIS modifiés directement. Tout passe par la config (cfg) en base, événement par événement. NDS2026Client.tsx est l'orchestrateur spécifique NDS (autorisé à être modifié).",
-    tables:["events.cfg (jsonb — toute la personnalisation par event)"],
-    files:["admin/app/parcours/quiz/QuizClient.tsx", "admin/app/parcours/spin/SpinClient.tsx", "admin/app/parcours/nds2026/NDS2026Client.tsx (orchestrateur, modifiable)"] },
-  "arbo-visuels": { line:"Code & modules", color:"#5B7FFF", x:720, y:620, label:"Scripts visuels (Python)",
-    desc:"Génération des affiches/vidéos/tickets. Recette officielle pour ajouter un partenaire : 1 logo + 1 ligne dans nds_lib.PARTNERS + rebuild_partenaires.sh. En pratique, 3 scripts vidéo n'obéissent pas encore à cette règle (voir ligne Fiabilité).",
-    tables:[], files:["admin/public/nds/visuels-src/nds_lib.py (source unique — normalement)", "admin/public/nds/visuels-src/gen_a4_clean.py", "admin/public/nds/visuels-src/rebuild_partenaires.sh"] },
-  "arbo-functions": { line:"Code & modules", color:"#5B7FFF", x:900, y:620, label:"supabase/functions/",
-    desc:"Les emails automatiques (edge functions Deno, hébergées sur Supabase).",
-    tables:[], files:["supabase/functions/notify-bon-commande/", "supabase/functions/notify-souscription/", "⚠️ send-ticket-gagnant/ manque ici (voir ligne Fiabilité)"] },
-
-  "jeu-quiz": { line:"Jeux & Super Event", color:"#F43F9E", x:140, y:740, label:"Module Quiz",
-    desc:"Le mini-jeu générique 'questions à choix multiples'. NDS2026Client s'en inspire mais a sa propre version enrichie (bonus, historique, tickets multiples).",
-    tables:[], files:["admin/app/parcours/quiz/QuizClient.tsx"] },
-  "jeu-spin": { line:"Jeux & Super Event", color:"#F43F9E", x:310, y:740, label:"Module Spin (roue)",
-    desc:"Roue de la fortune — mini-jeu indépendant, utilisable par n'importe quel event via cfg.module='spin'.",
-    tables:[], files:["admin/app/parcours/spin/SpinClient.tsx"] },
-  "jeu-tombola": { line:"Jeux & Super Event", color:"#F43F9E", x:470, y:740, label:"Module Tombola",
-    desc:"Tirage au sort simple.", tables:[], files:["admin/app/parcours/tombola/TombolaClient.tsx"] },
-  "jeu-vote": { line:"Jeux & Super Event", color:"#F43F9E", x:620, y:740, label:"Module Vote",
-    desc:"Vote/sondage à choix.", tables:[], files:["admin/app/parcours/vote/VoteClient.tsx"] },
-  "super-event": { line:"Jeux & Super Event", color:"#F43F9E", x:800, y:740, label:"Super Event",
-    desc:"Un Super Event FÉDÈRE plusieurs events/stations sous un même chapeau (ex. se-nds-2026 regroupe les 4 stations + les 9 commerçants). Il centralise les tickets et les gains tous jeux confondus, indépendamment du module utilisé à chaque station.",
-    tables:["super_events", "se_tickets (tickets, tous jeux confondus)", "se_gains (gains, tous jeux confondus)"],
-    files:["admin/app/se/[se]/SuperEventClient.tsx", "admin/app/se/_components/SuperEventMap.tsx"],
-    code:`// admin/lib/parcours.ts — le pont entre UN jeu et LE Super Event
-export async function attribuerSuperEvent(joueurId, evId, today, onSite, tickets) {
-  const { data: ev } = await supabase.from('events')
-    .select('super_event_id,gain_immediat,gain_ticket').eq('id', evId).single()
-  if (!ev.super_event_id) return  // event pas rattache a un Super Event -> rien ne se passe
-  await supabase.from('se_tickets').upsert([...])   // 1 ticket, tous jeux confondus
-  if (ev.gain_immediat) await supabase.from('se_gains').insert({...})  // gain immediat
-}` },
-  "super-event-map": { line:"Jeux & Super Event", color:"#F43F9E", x:960, y:740, label:"Carte Super Event",
-    desc:"La carte interactive publique qui montre toutes les stations d'un Super Event (celle que le joueur utilise pour choisir où aller jouer).",
-    tables:[], files:["admin/app/se/_components/SuperEventMap.tsx"] },
-
-  "fragile-video": { line:"Fiabilité & données", color:"#ff4d4f", x:130, y:980, label:"⚠️ Recette partenaire vidéo",
-    fragile:true,
-    desc:"CORRIGÉ cette session. Les 3 scripts vidéo avaient chacun une vieille liste PARTNERS locale, jamais réellement utilisée par le rendu (qui s'appuyait déjà sur nds_lib.PARTNERS). Code mort trompeur, pas un bug actif — nettoyé pour éviter toute confusion future.",
-    tables:[], files:["admin/public/nds/visuels-src/render_spot40.py", "render_ecran40.py", "render_kref40.py"] },
-  "fragile-email": { line:"Fiabilité & données", color:"#ff4d4f", x:330, y:980, label:"⚠️ Fonction hors repo",
-    fragile:true,
-    desc:"CORRIGÉ cette session. send-ticket-gagnant avait été déployée directement sur Supabase, jamais commitée. Rapatriée dans le repo.",
-    tables:[], files:["supabase/functions/send-ticket-gagnant/index.ts (maintenant présent)"] },
-  "fragile-cockpit": { line:"Fiabilité & données", color:"#ff4d4f", x:530, y:980, label:"⚠️ Cockpit fantôme",
-    fragile:true,
-    desc:"Trouvé dans l'historique Git : un cockpit '/nds/gestion-diffusion.html' a été CONSTRUIT (commit b93d61b) puis VOLONTAIREMENT SUPPRIMÉ car jugé redondant avec le dashboard (commit 802aad0, 'cockpit parallèle retiré'). Le code actuel est propre, mais d'anciennes notes Notion en parlent encore comme s'il existait — source probable de confusion sur 'où est passé tel outil'.",
-    tables:[], files:["Supprimé — plus aucune trace dans dashboard.html actuel"] },
-  "fragile-rattachement": { line:"Fiabilité & données", color:"#ff4d4f", x:730, y:980, label:"⚠️ Rattachement bon de commande",
-    fragile:true,
-    desc:"LA cause probable du problème récurrent de renvoi entre bon de commande/facture et fiche partenaire : le rattachement se fait par email, SIRET, OU nom approximatif (ilike). Beaucoup de fiches n'ont NI email NI SIRET (ex. pt-pegase : les deux vides) — il ne reste QUE la correspondance floue sur le nom, qui casse si la raison sociale diffère un peu. Exemple réel trouvé et corrigé cette session : un bon portait 'Auto-École de Lara (ex ...)' alors que la fiche dit 'Auto-École de l'ARA' — ne se serait JAMAIS rattaché.",
-    tables:["bons_commande (raison_sociale)", "partenaires (nom, email, siret — souvent incomplets)"],
-    files:["admin/public/dashboard.html → loadBonsCommandeLies()"],
-    code:`if(em){ bcF.push('email.eq.'+em) }
-if(siret){ bcF.push('siret.eq.'+siret) }
-if(nom){ bcF.push('raison_sociale.ilike.%'+nom+'%') }
-// si email ET siret vides sur la fiche, tout repose
-// sur cette 3e ligne, fragile par nature` },
-  "export-donnees": { line:"Fiabilité & données", color:"#ff4d4f", x:930, y:980, label:"📊 Récupérer toutes les données",
-    desc:"Pour un rapport de fin de festival (par partenaire ou global) : 2 chemins possibles selon ce qu'il te faut.",
-    tables:["participations", "se_reponses", "joueurs"],
-    files:["Dashboard → onglet 'CRM Landing pages' → filtre par source → bouton Exporter (CSV)", "Ou requête SQL directe via Supabase (accès complet, plus flexible)"],
-    code:`-- Exemple : toutes les reponses quiz+bonus d'un partenaire, pretes pour un tableur
-select j.prenom, j.nom, j.email, j.code_postal, j.age_tranche, j.genre,
-       r.quiz_reponses, r.bonus_reponses, r.score, r.created_at
-from se_reponses r
-join joueurs j on j.id = r.joueur_id
-where r.event_id = 'ev-nds-<slug_du_partenaire>'
-order by r.created_at desc;
-
--- Version globale festival (tous partenaires + stations confondus) :
--- remplacer le where par r.super_event_id = 'se-nds-2026'` },
-
-  "crm-pros": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:190, y:860, label:"Table pros (15 lignes)",
-    desc:"NETTOYÉ cette session : 10 lignes de test supprimées (Boulangerie du Cours, Fleuriste Mimosa, Glacier Fenocchio, Socca House, etc. — noms génériques, zéro donnée réelle, 0 participation liée, vérifié avant suppression). Restent 15 lignes réelles : 7 historiques (Croix-Rouge, Ville de Vence, 4 stations festival, organisateur NDS) + 8 nouvelles, une par vrai partenaire NDS, créées et liées cette session.",
-    tables:["pros (id, nom, email, siret, tags, partenaire_id — nouvelle colonne)"], files:[] },
-  "crm-partenaires": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:420, y:860, label:"Table partenaires (8 actifs)",
-    desc:"Les 8 vrais commerces NDS. Chacun a maintenant une fiche pro miroir créée automatiquement (nom, adresse, tél copiés), liée par partenaires.id = pros.partenaire_id.",
-    tables:["partenaires"], files:[] },
-  "crm-conflit": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:660, y:860, label:"✅ Lien créé",
-    desc:"RÉSOLU cette session : nouvelle colonne pros.partenaire_id (clé étrangère vers partenaires.id). Les 8 vrais partenaires ont maintenant chacun leur fiche pro, visible dans les deux sens : la fiche pro affiche 'Ce pro est le partenaire NDS X →', la fiche partenaire affiche 'Fiche pro liée →'.",
-    tables:["pros.partenaire_id"],
-    files:["admin/public/dashboard.html → drawerPro() / drawerPartner()"],
-    code:`var _lpro = (DATA.pros||[]).find(pr => pr.partenaireId===p.id);
-// affiche desormais dans les 2 fiches, cliquable dans les 2 sens` },
-  "crm-decision": { line:"CRM — Pros & Partenaires", color:"#00B4A0", x:900, y:860, label:"Reste à décider",
-    desc:"Le lien existe maintenant, mais les 2 fiches restent indépendantes (modifier l'une ne met pas à jour l'autre automatiquement). À déterminer plus tard : faut-il une fusion complète des 2 tables (post-festival, chantier plus lourd), ou ce lien de consultation suffit-il pour l'usage courant ?",
-    tables:[], files:[] },
-
-  "arbo-repo": { line:"Fiabilité & données", color:"#ff4d4f", x:1030, y:980, label:"🗂️ Voir toute l'arborescence",
-    desc:"Vue condensée des dossiers principaux du repo (voir aussi les stations bleues 'Code & modules' pour le détail).",
-    tables:[], files:[],
-    tree:`flowin-events-/
-├── <span class="d">admin/</span>                    ← l'appli Next.js (le jeu + dashboard)
-│   ├── <span class="d">app/</span>                  ← pages (voir ligne Code & modules)
-│   ├── <span class="d">lib/</span>                  ← logique métier partagée
-│   └── <span class="d">public/</span>
-│       ├── dashboard.html      ← le back-office (1 seul gros fichier)
-│       ├── bon-commande-nds.html
-│       ├── bons-prets/         ← bons pré-remplis
-│       └── <span class="d">nds/</span>
-│           ├── partenaires/    ← logos
-│           ├── visuels/        ← affiches, tickets générés
-│           ├── visuels-src/    ← scripts Python qui génèrent tout ça
-│           └── kit-digital/    ← dossier final par partenaire
-├── <span class="d">supabase/functions/</span>       ← emails automatiques
-└── docs/, HANDOFF-*.md         ← documentation` },
-
-  "dashboard": { line:"Dashboard", color:"#7C2D92", x:0, y:0, label:"Dashboard",
-    desc:"Ne stocke rien de nouveau — lit et affiche toutes les tables. Point d'entrée pour tout retrouver ou corriger un doublon.",
-    tables:["Toutes les tables du système"], files:["admin/public/dashboard.html"],
-    live:"https://flowin-events.vercel.app/dashboard.html" }
-};
-
-const svg = document.getElementById('mapsvg');
-const groups = {
-  "Parcours joueur":"line1", "Partenaires & visuels":"line2", "Commercial":"line3", "Communication":"line4",
-  "Code & modules":"line5", "Jeux & Super Event":"line6", "CRM — Pros & Partenaires":"line8", "Fiabilité & données":"line7"
-};
-
-Object.entries(STATIONS).forEach(([id, s]) => {
-  if (id === 'dashboard') return;
-  const g = document.getElementById(groups[s.line]);
-  const el = document.createElementNS('http://www.w3.org/2000/svg','g');
-  el.setAttribute('class','station' + (s.fragile ? ' fragile' : ''));
-  el.setAttribute('data-id', id);
-  el.setAttribute('transform', `translate(${s.x},${s.y})`);
-  el.innerHTML = `<circle r="11" fill="${s.color}"/><text text-anchor="middle" y="-18">${s.label}</text>`;
-  el.addEventListener('click', () => selectStation(id));
-  g.appendChild(el);
-});
-document.querySelector('.hubnode').addEventListener('click', () => selectStation('dashboard'));
-
-function selectStation(id){
-  document.querySelectorAll('.station').forEach(el => el.classList.remove('active'));
-  const target = document.querySelector(`.station[data-id="${id}"]`) || document.querySelector('.hubnode');
-  target.classList.add('active');
-  const s = STATIONS[id];
-  const side = document.getElementById('side');
-  let tablesHtml = s.tables && s.tables.length ? s.tables.map(t => `<span class="chip tbl">${t}</span>`).join('') : '<span style="color:#555;font-size:12px">— aucune (étape visuelle/fichier)</span>';
-  let filesHtml = s.files && s.files.length ? s.files.map(f => `<span class="chip file">${f}</span>`).join('') : '<span style="color:#555;font-size:12px">—</span>';
-  side.innerHTML = `
-    <span class="tag" style="background:${s.color}22;color:${s.color};border:1px solid ${s.color}55">${s.line}</span>
-    ${s.fragile ? '<span class="fragtag">⚠️ point fragile</span>' : ''}
-    <h2>${s.label}</h2>
-    <p class="desc">${s.desc}</p>
-    <div class="blk"><h3>📦 Table(s) Supabase</h3>${tablesHtml}</div>
-    <div class="blk"><h3>📁 Fichier(s) / chemin(s)</h3>${filesHtml}</div>
-    ${s.code ? `<div class="blk"><h3>💻 Code</h3><div class="codeblock">${s.code}</div></div>` : ''}
-    ${s.tree ? `<div class="blk"><h3>🗂️ Arborescence</h3><div class="codeblock tree">${s.tree}</div></div>` : ''}
-    ${s.live ? `<a class="openlink" href="${s.live}" target="_blank">↗ Ouvrir en direct</a>` : ''}
-  `;
+function partnerAssets(slug){
+  const d = BASE+"/nds/kit-digital/"+slug;
+  return [
+    {t:"Affiche A4 (PNG)", u:d+"/nds_a4_"+slug+".png", k:"file"},
+    {t:"Affiche A4 (PDF)", u:d+"/nds_a4_"+slug+".pdf", k:"file"},
+    {t:"Affiche A3 (PDF)", u:d+"/nds_a3_"+slug+".pdf", k:"file"},
+    {t:"Affiche A5 (PDF)", u:d+"/nds_a5_"+slug+".pdf", k:"file"},
+    {t:"A4 éditable (PPTX)", u:d+"/nds_a4_"+slug+"-editable.pptx", k:"file"},
+    {t:"Vidéo réseaux 9×16", u:d+"/video-"+slug+"-9x16.mp4", k:"vid"},
+    {t:"QR station", u:d+"/qr-station-"+slug+".png", k:"vid"},
+    {t:"QR réseaux", u:d+"/qr-reseaux-"+slug+".png", k:"vid"},
+    {t:"Kit complet (ZIP)", u:d+"/"+slug+"-kit.zip", k:"file"},
+  ];
 }
+
+const RULES = {
+  "R-LOGOS":{t:"Logos partenaires sur TOUS les supports", color:"var(--red)",
+    x:"Les logos des 8 partenaires doivent apparaître sur CHAQUE support visuel : vidéo, forex, A4, présentation. Source unique = nds_lib.PARTNERS. À chaque nouveau partenaire signé : ajouter le slug + relancer rebuild_partenaires.sh. C'est LA règle historiquement oubliée qui a causé des régressions."},
+  "R-QR-PYZBAR":{t:"QR toujours vérifiés avec pyzbar", color:"var(--red)",
+    x:"Après génération d'un QR (affiche, vidéo, station), décoder avec pyzbar pour confirmer l'URL exacte. cv2.QRCodeDetector échoue silencieusement sur certains QR v5 — ne jamais s'y fier seul."},
+  "R-COHERENCE":{t:"Cohérence stricte des 4 supports", color:"var(--amber)",
+    x:"Une information doit être IDENTIQUE dans : (1) fiche partenaire, (2) web app (lots à gagner), (3) bon de commande, (4) facture. Une seule saisie se diffuse partout — jamais démultiplier. Lots : source = partenaires.lots. Coordonnées : master = partenaires (le bon remonte via trg_sync_bon_partenaire)."},
+  "R-LOTS-SOURCE":{t:"Lots = partenaires.lots (source unique)", color:"var(--amber)",
+    x:"Le lot/cadeau vient toujours de partenaires.lots (jsonb structuré). Il alimente la web app, la fiche et le pré-remplissage du bon. Sans lot renseigné : aucune affiche générée (ne jamais inventer une offre côté joueur)."},
+  "R-MODULES-MAITRES":{t:"Modules maîtres jamais modifiés directement", color:"var(--violet)",
+    x:"QuizClient.tsx, SpinClient.tsx, TombolaClient.tsx, VoteClient.tsx ne sont JAMAIS édités. Toute personnalisation passe par events.cfg (jsonb), event par event. Seul NDS2026Client.tsx (orchestrateur NDS) est modifiable."},
+  "R-TICKET":{t:"4 bonnes réponses = 1 ticket (+1 si bonus)", color:"var(--magenta)",
+    x:"Le barème est figé : 4 réponses correctes au quiz = 1 ticket, +1 ticket si la question bonus est complétée. Ne pas changer ce mécanisme."},
+  "R-ANTICHEAT":{t:"Anti-triche : source_qr + index uniques", color:"var(--magenta)",
+    x:"participations.source_qr distingue digital vs physique. uniq_participation_digital_oneshot = 1 participation digitale à vie. uniq_participation_physique_jour = 1 participation physique par joueur/station/jour. Retour digital d'un joueur connu → écran refusdigital."},
+  "R-PDF-JSPDF":{t:"PDF via jsPDF programmatique (jamais html2canvas)", color:"var(--amber)",
+    x:"Le bon et la facture génèrent leur PDF A4 en DESSINANT la page avec jsPDF (self-hébergé /nds/vendor/jspdf.umd.min.js). Jamais html2canvas/html2pdf (décalages, pages blanches — 10+ essais ratés)."},
+  "R-COPIE-EMAIL":{t:"Tous les emails copient flowinevent@gmail.com", color:"var(--green)",
+    x:"Chaque email (Resend) copie systématiquement flowinevent@gmail.com. Domaine Resend à vérifier : tant qu'il ne l'est pas, l'envoi ne part que vers flowinevent@gmail.com."},
+  "R-CONTACT":{t:"Contact partenaire = jamais « Romain Collin »", color:"var(--teal)",
+    x:"Sur tout visuel/vidéo/document partenaire, le contact affiché est flowinevent@gmail.com · 06 16 35 49 36. Ne jamais faire figurer « Romain Collin »."},
+  "R-COMMIT":{t:"Filesystem éphémère → tout committer en séance", color:"var(--teal)",
+    x:"/home/claude se réinitialise entre sessions. Chaque asset produit (rendu + script source) doit être commité sur GitHub DANS la même session, jamais laissé en local."},
+  "R-3PILIERS":{t:"3 piliers de persistance à chaque tâche", color:"var(--violet)",
+    x:"Toute tâche terminée met à jour les 3 : (1) commit+push GitHub, (2) Supabase handoff_notes, (3) hub Notion. Le Notion est souvent oublié — étape obligatoire, jamais optionnelle."},
+  "R-NEVER-INVENT":{t:"Ne jamais inventer de donnée", color:"var(--red)",
+    x:"Lots, coordonnées, wording, URLs : si ce n'est pas sourcé de façon fiable, laisser vide. Réutiliser le contenu validé des versions précédentes (retrouvable via conversation_search) plutôt que d'en fabriquer."},
+};
+
+const CIRCUITS = {
+ "parcours-joueur":{ label:"Parcours du festivalier", icon:"🎡", hex:"#e6187f",
+   sub:"Scan QR → quiz → bonus → fiche → ticket",
+   nodes:[
+    {id:"pj-scan", x:80,y:180, label:"Scan QR", sub:"entrée", rules:["R-ANTICHEAT"],
+      desc:"Le festivalier flashe un QR : station physique (1 jeu/jour) ou lien réseaux (usage unique, tout le festival).",
+      tables:["events (cfg, quizBanques, quizBonusList)"], files:["admin/app/parcours/nds2026/page.tsx"]},
+    {id:"pj-quiz", x:330,y:180, label:"Questionnaire", sub:"quiz", rules:["R-TICKET"],
+      desc:"4 questions tirées au hasard, en excluant celles déjà vues par ce joueur (sur tout le festival, pas juste cette station).",
+      tables:["banques (questions)","se_reponses (lu — anti-répétition)"], files:["admin/lib/parcours.ts → fetchJoueurHistory()"],
+      code:"export async function fetchJoueurHistory(joueurId) {\n  const { data } = await supabase\n    .from('se_reponses')\n    .select('quiz_reponses,bonus_reponses')\n    .eq('joueur_id', joueurId).limit(200)\n  // liste des qid deja vus + si bonus deja fait\n}"},
+    {id:"pj-bonus", x:580,y:180, label:"Question bonus", sub:"mobilité/RSE",
+      desc:"5 questions fixes (mobilité/RSE), masquées après la 1ère réponse d'un joueur reconnu, sur toute station flashable. L'outil manuel Brigade Verte est un fichier séparé, non concerné.",
+      tables:["se_reponses (bonus_reponses)","sondage_brigade (stats anonymes)"], files:["admin/app/parcours/nds2026/NDS2026Client.tsx → finishBonus()"]},
+    {id:"pj-fiche", x:830,y:180, label:"Fiche festivalier", sub:"⇄ 3 tables", cross:true,
+      desc:"CARREFOUR MAJEUR : remplir ce formulaire écrit dans 3 tables en même temps. C'est le meilleur exemple de « donnée multipliée » du système — à surveiller pour tout doublon.",
+      tables:["joueurs (profil, 1 ligne/email)","participations (résumé event/jour)","se_reponses (détail quiz+bonus+formulaire)"],
+      files:["admin/lib/parcours.ts → writeJoueur() / claimJoueur()"],
+      code:"await supabase.from('participations').insert({...})\nawait writeSeReponses({ joueurId, evId, jour, form,\n  quiz_reponses, bonus_reponses })   // 2e ecriture\nawait attribuerSuperEvent(joueurId, evId, today, ...) // 3e systeme (se_tickets)"},
+    {id:"pj-ticket", x:1080,y:180, label:"Ticket & gains", sub:"sortie",
+      desc:"Ticket généré. Si un lot est attribué au tirage, un code série + un QR de retrait sont créés dans se_gains.",
+      tables:["participations (tickets)","lots (assigné au joueur)","se_gains (code, QR, validité)"],
+      files:["admin/public/dashboard.html → ensureSeGainForLot()"]},
+   ],
+   edges:[["pj-scan","pj-quiz"],["pj-quiz","pj-bonus"],["pj-bonus","pj-fiche"],["pj-fiche","pj-ticket"]],
+   crossLinks:[{to:"cycle-jeu",label:"le module rend le quiz"},{to:"super-event",label:"attribuerSuperEvent → se_tickets"},{to:"communication",label:"email ticket gagnant"}]
+ },
+
+ "cycle-jeu":{ label:"Cycle de vie d'un jeu", icon:"🎮", hex:"#a855f7",
+   sub:"config cfg → module maître → rendu joueur",
+   nodes:[
+    {id:"cj-cfg", x:100,y:180, label:"Config en base", sub:"events.cfg", rules:["R-MODULES-MAITRES"],
+      desc:"Toute la personnalisation d'un jeu vit dans events.cfg (jsonb) : quel module, quelles banques de questions, bonus, gains. On ne touche jamais au code du module — on change la config.",
+      tables:["events.cfg (jsonb)"], files:[]},
+    {id:"cj-modules", x:390,y:180, label:"Module maître", sub:"Quiz/Spin/Tombola/Vote", rules:["R-MODULES-MAITRES"],
+      desc:"Le mini-jeu générique choisi par cfg.module. Ces 4 fichiers sont la RÈGLE D'OR : jamais modifiés directement.",
+      tables:[], files:["admin/app/parcours/quiz/QuizClient.tsx","admin/app/parcours/spin/SpinClient.tsx","admin/app/parcours/tombola/TombolaClient.tsx","admin/app/parcours/vote/VoteClient.tsx"]},
+    {id:"cj-orch", x:690,y:180, label:"Orchestrateur NDS", sub:"modifiable",
+      desc:"NDS2026Client.tsx s'inspire du module Quiz mais a sa version enrichie (bonus, historique, tickets multiples, sondage Brigade). C'est le SEUL fichier de la couche jeu qu'on peut éditer.",
+      tables:["events.cfg"], files:["admin/app/parcours/nds2026/NDS2026Client.tsx"]},
+    {id:"cj-rendu", x:960,y:180, label:"Rendu joueur", sub:"page.tsx",
+      desc:"La page servie au festivalier assemble cfg + module + orchestrateur pour afficher le jeu.",
+      tables:[], files:["admin/app/parcours/nds2026/page.tsx"]},
+   ],
+   edges:[["cj-cfg","cj-modules"],["cj-modules","cj-orch"],["cj-orch","cj-rendu"]],
+   crossLinks:[{to:"parcours-joueur",label:"le joueur joue ce rendu"},{to:"creer-event",label:"cfg posée à la création"}]
+ },
+
+ "creer-event":{ label:"Créer un event", icon:"➕", hex:"#22d3c6",
+   sub:"fiche event → cfg → QR → rattachement",
+   nodes:[
+    {id:"ce-create", x:110,y:180, label:"Créer la fiche event", sub:"events",
+      desc:"Un event = une station/un jeu. Création de la ligne dans events (id ev-nds-<slug>, nom, dates).",
+      tables:["events"], files:["admin/lib/events.ts","admin/public/dashboard.html → onglet Events"]},
+    {id:"ce-cfg", x:390,y:180, label:"Configurer cfg", sub:"module + gains", rules:["R-MODULES-MAITRES","R-LOTS-SOURCE"],
+      desc:"On règle events.cfg : module (quiz/spin/…), banques de questions, question bonus, gain immédiat / ticket. Le lot vient de partenaires.lots — jamais saisi en double.",
+      tables:["events.cfg (jsonb)","banques"], files:[]},
+    {id:"ce-qr", x:670,y:180, label:"Générer les QR", sub:"station + réseaux", rules:["R-QR-PYZBAR"],
+      desc:"2 QR par event : station (physique, 1/jour) et réseaux (digital &source=reseaux-<slug>, usage unique). Toujours vérifiés pyzbar.",
+      tables:[], files:["admin/public/nds/visuels-src/composite_qr.py"], assets:"partners"},
+    {id:"ce-rattach", x:950,y:180, label:"Rattacher au Super Event", sub:"events.super_event_id",
+      desc:"On lie l'event à un Super Event : sans ce rattachement, attribuerSuperEvent() ne fait rien (pas de ticket centralisé).",
+      tables:["events.super_event_id","super_events"], files:["admin/lib/parcours.ts → attribuerSuperEvent()"]},
+   ],
+   edges:[["ce-create","ce-cfg"],["ce-cfg","ce-qr"],["ce-qr","ce-rattach"]],
+   crossLinks:[{to:"cycle-jeu",label:"cfg pilote le module"},{to:"super-event",label:"rattachement"},{to:"partenaires-visuels",label:"QR sur les affiches"}]
+ },
+
+ "super-event":{ label:"Créer un Super Event", icon:"🌐", hex:"#7c5cff",
+   sub:"fédère des events → tickets/gains centralisés",
+   nodes:[
+    {id:"se-create", x:110,y:180, label:"Créer le Super Event", sub:"super_events",
+      desc:"Le chapeau qui fédère plusieurs events/stations (ex. se-nds-2026 regroupe les stations + les 8 commerçants).",
+      tables:["super_events"], files:["admin/app/se/[se]/SuperEventClient.tsx"]},
+    {id:"se-rattach", x:380,y:180, label:"Rattacher les events", sub:"events.super_event_id",
+      desc:"Chaque event pointe vers le Super Event via events.super_event_id. C'est ce lien qui active la centralisation.",
+      tables:["events.super_event_id"], files:[]},
+    {id:"se-pont", x:650,y:180, label:"Le pont", sub:"⇄ attribuerSuperEvent()", cross:true,
+      desc:"CARREFOUR : la fonction qui relie UN jeu à LE Super Event. À chaque partie, elle écrit dans se_tickets (et se_gains si gain immédiat), quel que soit le module utilisé à la station.",
+      tables:["se_tickets","se_gains"], files:["admin/lib/parcours.ts → attribuerSuperEvent() (ligne ~130)"],
+      code:"export async function attribuerSuperEvent(joueurId, evId, today, onSite, tickets) {\n  const { data: ev } = await supabase.from('events')\n    .select('super_event_id,gain_immediat,gain_ticket').eq('id', evId).single()\n  if (!ev.super_event_id) return          // pas rattache -> rien\n  await supabase.from('se_tickets').upsert([...])   // ticket, tous jeux confondus\n  if (ev.gain_immediat) await supabase.from('se_gains').insert({...})\n}"},
+    {id:"se-tickets", x:900,y:120, label:"Tickets & gains centralisés", sub:"se_tickets / se_gains",
+      desc:"Tickets et gains agrégés tous jeux confondus, indépendamment du module de chaque station.",
+      tables:["se_tickets","se_gains","se_lots"], files:[]},
+    {id:"se-map", x:900,y:255, label:"Carte Super Event publique", sub:"SuperEventMap",
+      desc:"La carte interactive publique qui montre toutes les stations d'un Super Event — celle que le joueur utilise pour choisir où aller jouer.",
+      tables:[], files:["admin/app/parcours/_components (SuperEventMap)"]},
+   ],
+   edges:[["se-create","se-rattach"],["se-rattach","se-pont"],["se-pont","se-tickets"],["se-pont","se-map"]],
+   crossLinks:[{to:"parcours-joueur",label:"chaque partie alimente les tickets"},{to:"creer-event",label:"events rattachés"}]
+ },
+
+ "prospection":{ label:"Prospection", icon:"🎯", hex:"#f4b544",
+   sub:"contact → qualification → fiche partenaire",
+   nodes:[
+    {id:"pr-contact", x:110,y:180, label:"Contact / Landing", sub:"crm_retours",
+      desc:"Premier contact : formulaire landing « devenir partenaire » ou saisie manuelle. Atterrit dans crm_retours (origine=landing) ou prospection.",
+      tables:["crm_retours (origine=landing)","prospection"], files:["admin/lib/landing.ts"]},
+    {id:"pr-staging", x:390,y:180, label:"Staging à trier", sub:"prospection_staging", fragile:true, rules:["R-NEVER-INVENT"],
+      desc:"POINT FRAGILE : prospection_staging contient du scrap pollué par des données 84xxx (Vaucluse). Ne merger que les codes postaux 06 des villes prioritaires. prospection.id = GENERATED ALWAYS (ne jamais fournir à l'insert). 28 fiches de seed marquées 'SEED a verifier/remplacer'.",
+      tables:["prospection_staging","prospection"], files:[]},
+    {id:"pr-qualif", x:650,y:180, label:"Qualification", sub:"lead → contact",
+      desc:"Enrichissement (téléphones surtout présents, emails souvent manquants). Catégories encore à scraper : boucherie, pâtisserie, vêtement, contrôle technique, primeur/fromager, sport/vélo/téléphonie.",
+      tables:["prospection","leads_landing"], files:[]},
+    {id:"pr-fiche", x:920,y:180, label:"Devenir partenaire", sub:"partenaires",
+      desc:"Le prospect signé devient une fiche dans partenaires (coordonnées + offre + lot). NB : les 8 partenaires NDS ont été créés directement ici, sans passer par pros (contournement assumé).",
+      tables:["partenaires"], files:["admin/public/dashboard.html → onglet Partenaires"]},
+   ],
+   edges:[["pr-contact","pr-staging"],["pr-staging","pr-qualif"],["pr-qualif","pr-fiche"]],
+   crossLinks:[{to:"facturation",label:"la fiche pré-remplit le bon"},{to:"partenaires-visuels",label:"la fiche déclenche les visuels"}]
+ },
+
+ "facturation":{ label:"Facturation", icon:"🧾", hex:"#ff8a3d",
+   sub:"bon → signature → facture → email",
+   nodes:[
+    {id:"fa-bon", x:100,y:180, label:"Bon de commande", sub:"bons_commande", rules:["R-COHERENCE","R-PDF-JSPDF","R-LOTS-SOURCE"],
+      desc:"Pré-rempli automatiquement depuis la fiche partenaire (?prefill=<slug> tire coords + lot). Prestations, lot, mention éditables. PDF A4 via jsPDF programmatique.",
+      tables:["bons_commande"], files:["admin/public/bon-commande-nds.html"]},
+    {id:"fa-sign", x:370,y:180, label:"Signature", sub:"⇄ trigger 2 écritures", cross:true, rules:["R-COHERENCE"],
+      desc:"CARREFOUR : signer/valider le bon déclenche AUTOMATIQUEMENT 2 écritures ailleurs (chaîne trg_bon_commande_chain) + la coordonnée saisie remonte vers la fiche (trg_sync_bon_partenaire). Vrai exemple de « renvoi dans différents dossiers ».",
+      tables:["partenaires.contrat (rempli auto)","factures (créée auto)"], files:["trigger SQL trg_bon_commande_chain","trigger SQL trg_sync_bon_partenaire"],
+      code:"-- se declenche a statut valide/signe/accepte/paye\ncreate trigger trg_bon_commande_chain after update on bons_commande\n-- 1) cree la fiche partenaire + facture FL-2026-XXXX-01\n-- 2) cree le lead CRM\n-- trg_sync_bon_partenaire : coords du bon -> partenaires (COALESCE)"},
+    {id:"fa-facture", x:640,y:180, label:"Facture", sub:"factures", rules:["R-PDF-JSPDF","R-COHERENCE"],
+      desc:"Numérotée automatiquement depuis le n° du bon d'origine (FL-2026-XXXX-01). Ne doit jamais diverger du bon. PDF à basculer sur le même moteur jsPDF.",
+      tables:["factures"], files:["admin/public/facture-nds.html"]},
+    {id:"fa-rattach", x:370,y:325, label:"Rattachement bon ↔ fiche", sub:"email/siret/nom", fragile:true,
+      desc:"POINT FRAGILE — cause probable des renvois ratés entre bon/facture et fiche : le rattachement se fait par email OU siret OU nom approximatif (ilike). Beaucoup de fiches n'ont ni email ni siret → tout repose sur la correspondance floue du nom, qui casse si la raison sociale diffère.",
+      tables:["bons_commande (raison_sociale)","partenaires (nom/email/siret, souvent vides)"], files:["admin/public/dashboard.html → loadBonsCommandeLies()"],
+      code:"if(em){ bcF.push('email.eq.'+em) }\nif(siret){ bcF.push('siret.eq.'+siret) }\nif(nom){ bcF.push('raison_sociale.ilike.%'+nom+'%') }\n// email ET siret vides -> tout repose sur la 3e ligne, fragile"},
+    {id:"fa-email", x:900,y:180, label:"Email bon signé", sub:"→ Communication", rules:["R-COPIE-EMAIL"],
+      desc:"Envoie au partenaire son bon signé + conditions + RIB, avec copie systématique à flowinevent@gmail.com.",
+      tables:["bons_commande"], files:["supabase/functions/notify-bon-commande/index.ts"]},
+   ],
+   edges:[["fa-bon","fa-sign"],["fa-sign","fa-facture"],["fa-facture","fa-email"],["fa-bon","fa-rattach"]],
+   crossLinks:[{to:"prospection",label:"la fiche vient d'ici"},{to:"partenaires-visuels",label:"lot partagé"},{to:"communication",label:"email d'envoi"}]
+ },
+
+ "partenaires-visuels":{ label:"Partenaires & visuels", icon:"🎨", hex:"#22d3c6",
+   sub:"fiche → logo → affiche → vidéo → QR → kit",
+   nodes:[
+    {id:"pv-fiche", x:80,y:180, label:"Fiche partenaire", sub:"partenaires", rules:["R-COHERENCE","R-CONTACT","R-LOTS-SOURCE"],
+      desc:"Coordonnées + offre + lot. Sans lot renseigné : aucune affiche générée (ne jamais inventer une offre). Contact affiché sur les visuels = flowinevent@gmail.com / 06 16 35 49 36.",
+      tables:["partenaires"], files:["admin/public/dashboard.html → onglet Partenaires"]},
+    {id:"pv-logo", x:300,y:180, label:"Logo", sub:"source unique", rules:["R-LOGOS"],
+      desc:"Le logo est la source unique réutilisée partout ensuite (affiche, vidéo, mur de logos).",
+      tables:["partenaires.image_url"], files:["admin/public/nds/partenaires/<slug>.png"]},
+    {id:"pv-affiche", x:500,y:180, label:"Affiche A4", sub:"A3/A4/A5/PPTX",
+      desc:"Générée depuis le logo + le lot de la fiche. Déclinaisons A3/A4/A5 PDF + PNG + SVG + PPTX éditable.",
+      tables:[], files:["admin/public/nds/visuels-src/gen_a4_clean.py","admin/public/nds/visuels-src/rebuild_partenaires.sh"], assets:"partners"},
+    {id:"pv-video", x:700,y:180, label:"Vidéo réseaux/écran", sub:"⚠ logos + QR", rules:["R-LOGOS","R-QR-PYZBAR"],
+      desc:"1 vidéo master + 1 déclinaison par partenaire (QR unique = tracking). Le mur de logos doit contenir les 8 partenaires (source nds_lib.PARTNERS). QR intégré vérifié pyzbar (~frame 912).",
+      tables:[], files:["admin/public/nds/visuels-src/render_ecran40.py","render_spot40.py","render_kref40.py"], assets:"partners"},
+    {id:"pv-qr", x:900,y:180, label:"QR station/réseaux", sub:"2 par partenaire", rules:["R-QR-PYZBAR"],
+      desc:"2 QR par partenaire : station (physique, 1/jour) et réseaux (digital, usage unique). Toujours décodés pyzbar avant livraison.",
+      tables:["events (ev-nds-<slug>)"], files:["composite_qr.py"], assets:"partners"},
+    {id:"pv-kit", x:1100,y:180, label:"Kit digital", sub:"livrable final", rules:["R-COMMIT"],
+      desc:"Dossier final par partenaire : tout regroupé + zip téléchargeable. Chaque asset commité en séance (filesystem éphémère).",
+      tables:[], files:["admin/public/nds/kit-digital/<slug>/"], live:BASE+"/nds/kit-digital/", assets:"partners"},
+   ],
+   edges:[["pv-fiche","pv-logo"],["pv-logo","pv-affiche"],["pv-affiche","pv-video"],["pv-video","pv-qr"],["pv-qr","pv-kit"]],
+   crossLinks:[{to:"facturation",label:"lot partagé"},{to:"communication",label:"liens réseaux"}]
+ },
+
+ "communication":{ label:"Communication", icon:"✉️", hex:"#22c55e",
+   sub:"3 emails Resend + copie systématique",
+   nodes:[
+    {id:"co-ticket", x:120,y:180, label:"Email ticket gagnant", sub:"send-ticket-gagnant", rules:["R-COPIE-EMAIL"],
+      desc:"Envoie au gagnant son code de retrait + QR. Fonction rapatriée dans le repo (elle était déployée sur Supabase sans être versionnée).",
+      tables:["se_gains"], files:["supabase/functions/send-ticket-gagnant/index.ts"]},
+    {id:"co-bon", x:380,y:180, label:"Email bon de commande", sub:"notify-bon-commande", rules:["R-COPIE-EMAIL"],
+      desc:"Envoie au partenaire son bon signé + conditions + RIB.",
+      tables:["bons_commande"], files:["supabase/functions/notify-bon-commande/index.ts"]},
+    {id:"co-sous", x:640,y:180, label:"Email souscription", sub:"notify-souscription",
+      desc:"Notification à une nouvelle souscription partenaire.",
+      tables:[], files:["supabase/functions/notify-souscription/index.ts"]},
+    {id:"co-copie", x:900,y:180, label:"Copie systématique", sub:"flowinevent@gmail.com", rules:["R-COPIE-EMAIL"],
+      desc:"Tous les emails passent par Resend et copient toujours flowinevent@gmail.com. Domaine Resend à vérifier avant le 9/07 (sinon envoi limité à cette adresse).",
+      tables:[], files:["Secret Supabase : RESEND_API_KEY"]},
+   ],
+   edges:[["co-ticket","co-copie"],["co-bon","co-copie"],["co-sous","co-copie"]],
+   crossLinks:[{to:"facturation",label:"déclenche l'email bon"},{to:"parcours-joueur",label:"déclenche l'email ticket"}]
+ },
+
+ "fiabilite":{ label:"Fiabilité & données", icon:"🩺", hex:"#ff5a5c",
+   sub:"points fragiles + doublons + export",
+   nodes:[
+    {id:"fi-rattach", x:110,y:180, label:"Rattachement bon", sub:"fragile", fragile:true,
+      desc:"OUVERT : rattachement bon/facture ↔ fiche par email/siret/nom flou. Voir circuit Facturation, point « Rattachement bon ↔ fiche ». Renforcer email+siret sur les fiches réduit le risque.",
+      tables:["bons_commande","partenaires"], files:["admin/public/dashboard.html → loadBonsCommandeLies()"]},
+    {id:"fi-crm", x:360,y:180, label:"pros vs partenaires", sub:"doublon maîtrisé",
+      desc:"Deux tables séparées (pros / partenaires). Lien créé : pros.partenaire_id (FK) + affichage bidirectionnel dans le dashboard. Fusion complète non tranchée (post-festival). Modifier l'une ne met pas l'autre à jour automatiquement.",
+      tables:["pros.partenaire_id","partenaires"], files:["dashboard.html → drawerPro()/drawerPartner()"]},
+    {id:"fi-cockpit", x:610,y:180, label:"Cockpit fantôme", sub:"supprimé",
+      desc:"/nds/gestion-diffusion.html a été construit (b93d61b) puis volontairement supprimé (802aad0, jugé redondant). Le code actuel est propre, mais d'anciennes notes Notion en parlent encore — source de confusion « où est passé cet outil ».",
+      tables:[], files:["Supprimé — plus aucune trace dans dashboard.html"]},
+    {id:"fi-video", x:820,y:180, label:"Listes PARTNERS mortes", sub:"nettoyé", rules:["R-LOGOS"],
+      desc:"CORRIGÉ : 3 scripts vidéo avaient une liste PARTNERS locale jamais utilisée (code mort trompeur). Nettoyé. La source reste nds_lib.PARTNERS.",
+      tables:[], files:["render_spot40.py","render_ecran40.py","render_kref40.py"]},
+    {id:"fi-export", x:1050,y:180, label:"Export des données", sub:"rapport festival",
+      desc:"Pour un rapport (par partenaire ou global) : dashboard → CRM Landing pages → filtre source → Exporter (CSV), OU requête SQL directe (plus flexible).",
+      tables:["participations","se_reponses","joueurs"],
+      files:["Dashboard → CRM Landing → Exporter CSV","ou SQL direct via Supabase"],
+      code:"-- reponses quiz+bonus d'un partenaire, pretes pour tableur\nselect j.prenom,j.nom,j.email,j.code_postal,j.age_tranche,j.genre,\n       r.quiz_reponses,r.bonus_reponses,r.score,r.created_at\nfrom se_reponses r join joueurs j on j.id=r.joueur_id\nwhere r.event_id='ev-nds-<slug>' order by r.created_at desc;\n-- global : where r.super_event_id='se-nds-2026'"},
+   ],
+   edges:[["fi-rattach","fi-crm"],["fi-crm","fi-cockpit"],["fi-cockpit","fi-video"],["fi-video","fi-export"]],
+   crossLinks:[{to:"facturation",label:"rattachement"},{to:"partenaires-visuels",label:"logos vidéo"}]
+ },
+};
+
+const OVERVIEW = [
+  {id:"parcours-joueur",      x:120, y:120},
+  {id:"cycle-jeu",            x:470, y:120},
+  {id:"creer-event",          x:820, y:120},
+  {id:"super-event",          x:1170,y:120},
+  {id:"prospection",          x:120, y:470},
+  {id:"facturation",          x:470, y:470},
+  {id:"partenaires-visuels",  x:820, y:470},
+  {id:"communication",        x:1170,y:470},
+  {id:"fiabilite",            x:645, y:800},
+];
+const OV_LINKS = [
+  ["parcours-joueur","cycle-jeu"],["cycle-jeu","creer-event"],["creer-event","super-event"],
+  ["super-event","parcours-joueur"],["prospection","facturation"],["facturation","partenaires-visuels"],
+  ["partenaires-visuels","communication"],["facturation","communication"],
+  ["parcours-joueur","communication"],["prospection","partenaires-visuels"],
+  ["facturation","fiabilite"],["partenaires-visuels","fiabilite"],
+];
+
+/* ====================================================================
+   MOTEUR — pan/zoom façon Miro + scènes
+   ==================================================================== */
+const SVG = document.getElementById('map');
+const SCENE = document.getElementById('scene');
+const NS = "http://www.w3.org/2000/svg";
+let view = {x:0,y:0,k:1}, target = {x:0,y:0,k:1}, anim=null;
+let currentScene = "overview";
+const nodeIndex = {};
+Object.entries(CIRCUITS).forEach(([cid,c])=>c.nodes.forEach(n=>nodeIndex[n.id]={circuit:cid,node:n}));
+
+function el(tag,attrs,html){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e;}
+function esc(s){return (s==null?'':(''+s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function applyView(){SCENE.setAttribute('transform',`translate(${view.x},${view.y}) scale(${view.k})`);}
+function animateTo(t){target=t;if(anim)cancelAnimationFrame(anim);
+  const step=()=>{
+    view.x+=(target.x-view.x)*.18; view.y+=(target.y-view.y)*.18; view.k+=(target.k-view.k)*.18;
+    applyView();
+    if(Math.abs(target.x-view.x)>.4||Math.abs(target.y-view.y)>.4||Math.abs(target.k-view.k)>.002){anim=requestAnimationFrame(step);}
+    else{view={...target};applyView();anim=null;}
+  }; anim=requestAnimationFrame(step);
+}
+function fitBBox(pad){
+  pad=pad||70;
+  const bb=SCENE.getBBox();
+  const w=SVG.clientWidth, h=SVG.clientHeight;
+  if(!bb.width||!bb.height){return;}
+  const k=Math.min(w/(bb.width+pad*2), h/(bb.height+pad*2), 1.6);
+  const x=(w-bb.width*k)/2 - bb.x*k;
+  const y=(h-bb.height*k)/2 - bb.y*k;
+  animateTo({x,y,k});
+}
+
+function renderOverview(){
+  currentScene="overview"; SCENE.innerHTML="";
+  document.getElementById('crumbs').innerHTML="<b>Vue d'ensemble</b>";
+  document.getElementById('btnBack').style.display="none";
+  closePanel();
+  const pos={}; OVERVIEW.forEach(p=>pos[p.id]=p);
+  const PW=300, PH=150;
+  OV_LINKS.forEach(([a,b])=>{
+    const A=pos[a],B=pos[b]; if(!A||!B)return;
+    SCENE.appendChild(el('path',{class:'edge cross',d:`M ${A.x+PW/2} ${A.y+PH/2} L ${B.x+PW/2} ${B.y+PH/2}`}));
+  });
+  SCENE.appendChild(el('text',{class:'rowlab',x:120,y:60},'Les portes du système — clique pour zoomer à l\'intérieur'));
+  OVERVIEW.forEach(p=>{
+    const c=CIRCUITS[p.id];
+    const g=el('g',{class:'porte',transform:`translate(${p.x},${p.y})`}); g.dataset.circuit=p.id;
+    g.appendChild(el('rect',{class:'glow',x:-8,y:-8,width:PW+16,height:PH+16,rx:22,fill:c.hex}));
+    g.appendChild(el('rect',{x:0,y:0,width:PW,height:PH,rx:18,fill:c.hex}));
+    g.appendChild(el('rect',{x:0,y:0,width:PW,height:PH,rx:18,fill:'#0a1020','fill-opacity':.14}));
+    g.appendChild(el('text',{class:'picon',x:20,y:44},esc(c.icon)));
+    g.appendChild(el('text',{class:'plabel',x:58,y:42},esc(c.label)));
+    g.appendChild(el('text',{class:'psub',x:20,y:78},esc(c.sub)));
+    const steps=c.nodes.length;
+    for(let i=0;i<steps;i++){
+      g.appendChild(el('circle',{cx:24+i*((PW-48)/Math.max(1,steps-1)),cy:112,r:6,fill:'#0a1020','fill-opacity':.32}));
+    }
+    g.appendChild(el('line',{x1:24,y1:112,x2:PW-24,y2:112,stroke:'#0a1020','stroke-width':2,'stroke-opacity':.22}));
+    g.appendChild(el('text',{x:20,y:138,'font-size':10,'font-weight':800,fill:'#0a1020','fill-opacity':.6},esc(steps+" étapes")));
+    g.addEventListener('click',()=>openCircuit(p.id));
+    SCENE.appendChild(g);
+  });
+  requestAnimationFrame(()=>fitBBox(80));
+}
+
+function openCircuit(cid){
+  currentScene=cid; SCENE.innerHTML=""; closePanel();
+  const c=CIRCUITS[cid];
+  document.getElementById('crumbs').innerHTML=`<span>Vue d'ensemble</span><span class="sep">›</span><b>${esc(c.icon)} ${esc(c.label)}</b>`;
+  document.getElementById('btnBack').style.display="";
+  const pos={}; c.nodes.forEach(n=>pos[n.id]=n);
+  const NW=196, NH=64;
+  SCENE.appendChild(el('text',{class:'rowlab',x:80,y:70,fill:c.hex},esc(c.label.toUpperCase()+' — chemin de bout en bout')));
+  c.edges.forEach(([a,b])=>{
+    const A=pos[a],B=pos[b]; if(!A||!B)return;
+    const ax=A.x+NW, ay=A.y+NH/2, bx=B.x, by=B.y+NH/2; let d;
+    if(Math.abs(ay-by)<2){ d=`M ${ax} ${ay} L ${bx-8} ${by}`; }
+    else { const mx=(ax+bx)/2; d=`M ${ax} ${ay} C ${mx} ${ay}, ${mx} ${by}, ${bx-8} ${by}`; }
+    SCENE.appendChild(el('path',{class:'edge',d,'marker-end':'url(#arrow)'}));
+  });
+  (c.crossLinks||[]).forEach((lk,i)=>{
+    const tc=CIRCUITS[lk.to]; if(!tc)return;
+    const gx=1330, gy=140+i*92;
+    const g=el('g',{class:'porte',transform:`translate(${gx},${gy})`}); g.dataset.circuit=lk.to;
+    SCENE.appendChild(el('path',{class:'edge cross',d:`M 1250 ${gy+26} L ${gx} ${gy+26}`,'marker-end':'url(#arrowc)'}));
+    g.appendChild(el('rect',{x:0,y:0,width:230,height:52,rx:12,fill:tc.hex,'fill-opacity':.16,stroke:tc.hex,'stroke-width':1.4}));
+    g.appendChild(el('text',{x:14,y:24,'font-size':13,'font-weight':800,fill:'#fff'},esc(tc.icon+' '+tc.label)));
+    g.appendChild(el('text',{x:14,y:42,'font-size':10,'font-weight':700,fill:tc.hex},esc('↳ '+lk.label)));
+    g.addEventListener('click',()=>openCircuit(lk.to));
+    SCENE.appendChild(g);
+  });
+  c.nodes.forEach((n,i)=>{
+    const g=el('g',{class:'node'+(n.fragile?' fragile':''),transform:`translate(${n.x},${n.y})`}); g.dataset.id=n.id;
+    if(n.cross){
+      g.appendChild(el('rect',{class:'body',x:0,y:0,width:NW,height:NH,rx:14,fill:c.hex,stroke:'#f4b544','stroke-width':3}));
+      g.appendChild(el('rect',{x:NW-26,y:NH/2-9,width:18,height:18,rx:3,fill:'#f4b544',transform:`rotate(45 ${NW-17} ${NH/2})`}));
+    } else {
+      g.appendChild(el('rect',{class:'body',x:0,y:0,width:NW,height:NH,rx:14,fill:c.hex}));
+    }
+    if(n.fragile){
+      g.appendChild(el('rect',{x:-4,y:-4,width:NW+8,height:NH+8,rx:16,fill:'none',stroke:'#ff5a5c','stroke-width':2.5,'stroke-dasharray':'6 4'}));
+      g.appendChild(el('text',{class:'badge',x:NW-20,y:20,fill:'#fff'},'⚠'));
+    }
+    g.appendChild(el('text',{class:'idx',x:14,y:24},(i+1)+''));
+    g.appendChild(el('text',{class:'lab',x:28,y:26},esc(n.label)));
+    if(n.sub) g.appendChild(el('text',{class:'sub',x:14,y:46},esc(n.sub)));
+    (n.rules||[]).slice(0,4).forEach((rid,j)=>{
+      const r=RULES[rid]; if(!r)return;
+      g.appendChild(el('circle',{cx:20+j*16,cy:NH-9,r:5,fill:r.color,stroke:'#0a1020','stroke-width':1}));
+    });
+    g.addEventListener('click',(e)=>{e.stopPropagation();selectNode(n.id);});
+    SCENE.appendChild(g);
+  });
+  requestAnimationFrame(()=>fitBBox(90));
+}
+
+function selectNode(id){
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('sel'));
+  const g=document.querySelector(`.node[data-id="${id}"]`); if(g)g.classList.add('sel');
+  const {circuit,node:n}=nodeIndex[id]; const c=CIRCUITS[circuit];
+  document.getElementById('ptitle').textContent=n.label;
+  const tags=[`<span class="tag" style="background:${c.hex}22;color:${c.hex};border:1px solid ${c.hex}66">${esc(c.icon)} ${esc(c.label)}</span>`];
+  if(n.cross) tags.push('<span class="tag" style="background:#f4b54422;color:#f4b544;border:1px solid #f4b54466">⇄ carrefour</span>');
+  if(n.fragile) tags.push('<span class="tag" style="background:#ff5a5c22;color:#ff8a8a;border:1px solid #ff5a5c66">⚠ point fragile</span>');
+  document.getElementById('ptags').innerHTML=tags.join('');
+  document.getElementById('pdesc').textContent=n.desc||'';
+  panelData=n; renderTab(currentTab);
+  document.getElementById('panel').classList.add('open');
+}
+let panelData=null, currentTab="code";
+function renderTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  const n=panelData; if(!n)return; let h="";
+  if(tab==="code"){
+    const tbl=(n.tables&&n.tables.length)?n.tables.map(t=>`<span class="chip tbl">${esc(t)}</span>`).join(''):'<div class="none">— aucune table (étape visuelle/fichier)</div>';
+    const fil=(n.files&&n.files.length)?n.files.map(f=>`<span class="chip file">${esc(f)}</span>`).join(''):'<div class="none">— aucun fichier</div>';
+    h+=`<div class="blk"><h3>📦 Table(s) Supabase</h3>${tbl}</div>`;
+    h+=`<div class="blk"><h3>📁 Fichier(s) / chemin(s) réel(s)</h3>${fil}</div>`;
+    if(n.code) h+=`<div class="blk"><h3>💻 Extrait de code réel</h3><div class="code">${esc(n.code)}</div></div>`;
+  } else if(tab==="visuel"){
+    if(n.assets==="partners"){
+      h+=`<div class="blk"><h3>🖼️ Visualiser & télécharger — par partenaire</h3>`;
+      h+=`<select class="psel" id="pvsel">${PARTNERS.map(s=>`<option value="${s}">${esc(PNAMES[s])}</option>`).join('')}</select>`;
+      h+=`<div id="pvlinks"></div></div>`;
+      if(n.live) h+=`<a class="openlink" href="${n.live}" target="_blank">↗ Ouvrir le hub kit digital</a>`;
+    } else if(n.live){
+      h+=`<div class="blk"><h3>🖼️ Élément visuel</h3><a class="openlink" href="${n.live}" target="_blank">↗ Ouvrir en direct</a></div>`;
+    } else {
+      h+=`<div class="none">Pas d'élément visuel téléchargeable rattaché à ce point. (Les points « visuels » se trouvent surtout dans les circuits Partenaires &amp; visuels et Créer un event.)</div>`;
+    }
+  } else if(tab==="regle"){
+    const rules=(n.rules||[]);
+    if(!rules.length){ h+=`<div class="none">Aucune règle métier spécifique rattachée à ce point.</div>`; }
+    else rules.forEach(rid=>{ const r=RULES[rid]; if(!r)return;
+      h+=`<div class="rule" style="border-left-color:${r.color}"><p class="rt"><span style="color:${r.color}">●</span> ${esc(r.t)} <span class="rid">${rid}</span></p><p class="rx">${esc(r.x)}</p></div>`;
+    });
+    h+=`<a class="openlink" href="#" onclick="document.getElementById('rulesModal').classList.add('open');return false;">↗ Voir tout le registre des règles</a>`;
+  }
+  const body=document.getElementById('pbody'); body.innerHTML=h; body.scrollTop=0;
+  if(tab==="visuel"&&n.assets==="partners"){
+    const sel=document.getElementById('pvsel');
+    const draw=()=>{ const s=sel.value;
+      document.getElementById('pvlinks').innerHTML='<div class="dl">'+partnerAssets(s).map(a=>`<a class="${a.k==='file'?'file':''}" href="${a.u}" target="_blank" download>${a.k==='vid'?'▶':'⬇'} ${esc(a.t)}</a>`).join('')+'</div>';
+    };
+    sel.addEventListener('change',draw); draw();
+  }
+}
+function closePanel(){document.getElementById('panel').classList.remove('open');document.querySelectorAll('.node').forEach(n=>n.classList.remove('sel'));panelData=null;}
+
+function buildRulesList(){
+  const wrap=document.getElementById('rulesList'); let h="";
+  Object.entries(RULES).forEach(([rid,r])=>{
+    const appl=[]; Object.entries(CIRCUITS).forEach(([cid,c])=>c.nodes.forEach(n=>{if((n.rules||[]).includes(rid))appl.push(c.label+" › "+n.label);}));
+    h+=`<div class="rule" style="border-left-color:${r.color}">
+      <p class="rt"><span style="color:${r.color}">●</span> ${esc(r.t)} <span class="rid">${rid}</span></p>
+      <p class="rx">${esc(r.x)}</p>
+      <p class="appl">Rattachée à : <b>${appl.length?appl.map(esc).join(' · '):'—'}</b></p></div>`;
+  });
+  wrap.innerHTML=h;
+}
+
+/* pan / zoom */
+let dragging=false, moved=false, sx=0, sy=0;
+SVG.addEventListener('pointerdown',e=>{dragging=true;moved=false;sx=e.clientX;sy=e.clientY;SVG.classList.add('grabbing');SVG.setPointerCapture(e.pointerId);});
+SVG.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>3)moved=true;view.x+=dx;view.y+=dy;sx=e.clientX;sy=e.clientY;applyView();target={...view};});
+SVG.addEventListener('pointerup',()=>{dragging=false;SVG.classList.remove('grabbing');});
+SVG.addEventListener('pointercancel',()=>{dragging=false;SVG.classList.remove('grabbing');});
+SVG.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=SVG.getBoundingClientRect(); const mx=e.clientX-r.left, my=e.clientY-r.top;
+  const f=e.deltaY<0?1.12:1/1.12; const nk=Math.max(.18,Math.min(3,view.k*f));
+  view.x=mx-(mx-view.x)*(nk/view.k); view.y=my-(my-view.y)*(nk/view.k); view.k=nk; applyView(); target={...view};
+},{passive:false});
+function zoomBtn(f){const r=SVG.getBoundingClientRect();const mx=r.width/2,my=r.height/2;const nk=Math.max(.18,Math.min(3,view.k*f));
+  animateTo({x:mx-(mx-view.x)*(nk/view.k),y:my-(my-view.y)*(nk/view.k),k:nk});}
+
+document.getElementById('zin').onclick=()=>zoomBtn(1.25);
+document.getElementById('zout').onclick=()=>zoomBtn(1/1.25);
+document.getElementById('zfit').onclick=()=>fitBBox(currentScene==="overview"?80:90);
+document.getElementById('btnBack').onclick=()=>renderOverview();
+document.getElementById('pclose').onclick=closePanel;
+document.getElementById('btnRules').onclick=()=>{document.getElementById('rulesModal').classList.add('open');};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>renderTab(b.dataset.tab));
+window.addEventListener('resize',()=>{ if(!anim) fitBBox(currentScene==="overview"?80:90); });
+
+buildRulesList();
+renderOverview();
 </script>
 </body>
 </html>
