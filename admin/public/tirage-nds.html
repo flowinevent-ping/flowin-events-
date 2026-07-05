@@ -87,7 +87,7 @@
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
   // ---- Sécurité admin : session requise ----
   var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
-  var AUTH=(_S&&_S.access_token&&(_S.expires_at*1000)>(Date.now()+30000))?_S.access_token:null;
+  var AUTH=(_S&&_S.access_token)?_S.access_token:null;
   if(!AUTH){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
   var H={'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json'};
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}

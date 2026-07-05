@@ -53,7 +53,7 @@
   (function(){
     try{
       var s=JSON.parse(localStorage.getItem('flowin_admin_session')||'null');
-      if(s && s.access_token && (s.expires_at*1000) > (Date.now()+60000)){ location.replace(nextUrl()); }
+      if(s && s.access_token){ location.replace(nextUrl()); }
     }catch(e){}
   })();
   async function doLogin(){

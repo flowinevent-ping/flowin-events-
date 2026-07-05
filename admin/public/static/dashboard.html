@@ -12,7 +12,7 @@
 (function(){
   try{
     var s=JSON.parse(localStorage.getItem('flowin_admin_session')||'null');
-    var ok = s && s.access_token && (s.expires_at*1000) > (Date.now()+30000);
+    var ok = s && s.access_token; // présence d'un jeton = connecté (validité réelle vérifiée côté serveur)
     if(!ok){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); }
   }catch(e){ location.replace('/admin-connexion.html'); }
 })();
@@ -13008,7 +13008,7 @@ localStorage.setItem('flowin_supa_anon', FLOWIN_SUPA_ANON);
 
 // ============ AUTH ADMIN (Supabase GoTrue) ============
 var FLOWIN_ADMIN_SESSION = (function(){ try{ return JSON.parse(localStorage.getItem('flowin_admin_session')||'null'); }catch(e){ return null; } })();
-var FLOWIN_AUTH = (FLOWIN_ADMIN_SESSION && FLOWIN_ADMIN_SESSION.access_token && (FLOWIN_ADMIN_SESSION.expires_at*1000) > (Date.now()+30000)) ? FLOWIN_ADMIN_SESSION.access_token : FLOWIN_SUPA_ANON;
+var FLOWIN_AUTH = (FLOWIN_ADMIN_SESSION && FLOWIN_ADMIN_SESSION.access_token) ? FLOWIN_ADMIN_SESSION.access_token : FLOWIN_SUPA_ANON;
 function _authSaveSess(d){
   var sess={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
   FLOWIN_ADMIN_SESSION=sess; FLOWIN_AUTH=d.access_token; localStorage.setItem('flowin_admin_session',JSON.stringify(sess));
