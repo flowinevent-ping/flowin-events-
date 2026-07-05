@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test connexion admin · Flowin</title>
+<style>
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
+  .card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;max-width:400px;width:100%}
+  h1{font-size:20px;margin:0 0 4px}
+  p.sub{color:#94a3b8;font-size:13px;margin:0 0 20px}
+  label{display:block;font-size:12px;color:#94a3b8;margin:12px 0 4px;font-weight:600}
+  input{width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px}
+  button{width:100%;margin-top:18px;padding:12px;border:none;border-radius:10px;background:#22c55e;color:#052e16;font-weight:800;font-size:15px;cursor:pointer}
+  button:disabled{opacity:.5}
+  .res{margin-top:16px;padding:12px;border-radius:10px;font-size:13px;line-height:1.5;display:none}
+  .res.ok{display:block;background:#052e16;border:1px solid #16a34a;color:#86efac}
+  .res.err{display:block;background:#450a0a;border:1px solid #dc2626;color:#fca5a5}
+  code{font-size:11px;word-break:break-all}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔐 Test de connexion admin</h1>
+    <p class="sub">Vérifie que le compte admin fonctionne, avant de sécuriser le dashboard.</p>
+    <label>E-mail</label>
+    <input id="email" type="email" value="flowinevent@gmail.com" autocomplete="username">
+    <label>Mot de passe</label>
+    <input id="pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+    <button id="btn">Se connecter</button>
+    <div id="res" class="res"></div>
+  </div>
+<script>
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var ANON='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var btn=document.getElementById('btn'), res=document.getElementById('res');
+  btn.addEventListener('click',async function(){
+    var email=document.getElementById('email').value.trim(), pass=document.getElementById('pass').value;
+    btn.disabled=true; res.className='res'; res.textContent='';
+    try{
+      var r=await fetch(SUPA+'/auth/v1/token?grant_type=password',{
+        method:'POST', headers:{'apikey':ANON,'Content-Type':'application/json'},
+        body: JSON.stringify({email:email,password:pass})
+      });
+      var d=await r.json();
+      btn.disabled=false;
+      if(r.ok && d.access_token){
+        res.className='res ok';
+        res.innerHTML='✅ <b>Connexion réussie !</b><br>Le compte admin fonctionne.<br>Token reçu (expire dans '+(d.expires_in||3600)+'s) :<br><code>'+String(d.access_token).slice(0,40)+'…</code><br><br>👉 Dis-le à l\'assistant, je sécurise le dashboard.';
+      } else {
+        res.className='res err';
+        res.innerHTML='❌ <b>Échec.</b><br>'+(d.error_description||d.msg||d.error||('HTTP '+r.status))+'<br><br>Vérifie le mot de passe, ou dis-le à l\'assistant.';
+      }
+    }catch(e){ btn.disabled=false; res.className='res err'; res.innerHTML='❌ Erreur réseau : '+e.message; }
+  });
+  document.getElementById('pass').addEventListener('keydown',function(e){ if(e.key==='Enter') btn.click(); });
+</script>
+</body>
+</html>
