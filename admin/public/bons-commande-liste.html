@@ -64,7 +64,11 @@
 <script>
 const SB="https://ywcqtupgoxfzkddqkztk.supabase.co";
 const KEY="sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1";
-const H={apikey:KEY,Authorization:"Bearer "+KEY};
+// ---- Sécurité admin : session requise ----
+var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
+var AUTH=(_S&&_S.access_token)?_S.access_token:null;
+if(!AUTH){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
+const H={apikey:KEY,Authorization:"Bearer "+AUTH};
 let ROWS=[], FILTER="all", Q="";
 
 function eur(n){ n=Number(n||0); return n.toLocaleString('fr-FR')+' €'; }
