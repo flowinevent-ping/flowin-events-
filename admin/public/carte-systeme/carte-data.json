@@ -1,0 +1,232 @@
+{
+ "genere_le": "2026-07-05T20:13:13",
+ "menu": [
+  {
+   "group": "CRM",
+   "items": [
+    {
+     "id": "pros",
+     "lbl": "Pros",
+     "ext": null
+    },
+    {
+     "id": "joueurs",
+     "lbl": "Joueurs",
+     "ext": null
+    },
+    {
+     "id": "gagnants",
+     "lbl": "Gagnants",
+     "ext": null
+    },
+    {
+     "id": "partenaires",
+     "lbl": "Partenaires",
+     "ext": null
+    }
+   ]
+  },
+  {
+   "group": "EVENTS",
+   "items": [
+    {
+     "id": "events",
+     "lbl": "Events",
+     "ext": null
+    },
+    {
+     "id": "super-events",
+     "lbl": "Super Events",
+     "ext": null
+    }
+   ]
+  },
+  {
+   "group": "NDS 2026",
+   "items": [
+    {
+     "id": "nds-front",
+     "lbl": "Front NDS",
+     "ext": null
+    },
+    {
+     "id": "nds-carte",
+     "lbl": "Carte NDS",
+     "ext": null
+    },
+    {
+     "id": "nds-participants",
+     "lbl": "Participants NDS",
+     "ext": null
+    },
+    {
+     "id": "nds-track-qr",
+     "lbl": "Track QR",
+     "ext": null
+    },
+    {
+     "id": "nds-bon-commande",
+     "lbl": "Bons de commande & Factures",
+     "ext": null
+    },
+    {
+     "id": "nds-tirages",
+     "lbl": "Lots & Gagnants",
+     "ext": "/tirage-nds.html"
+    },
+    {
+     "id": "nds-media",
+     "lbl": "Vidéo & média",
+     "ext": null
+    }
+   ]
+  },
+  {
+   "group": "ACQUISITION B2B",
+   "items": [
+    {
+     "id": "btob-prospects",
+     "lbl": "Prospects B2B",
+     "ext": null
+    },
+    {
+     "id": "prospection",
+     "lbl": "Prospection",
+     "ext": null
+    },
+    {
+     "id": "crm-retours",
+     "lbl": "CRM Retours",
+     "ext": null
+    },
+    {
+     "id": "crm-landing",
+     "lbl": "CRM Landing pages",
+     "ext": null
+    },
+    {
+     "id": "landing-page",
+     "lbl": "Landing Page",
+     "ext": null
+    }
+   ]
+  },
+  {
+   "group": "JEUX",
+   "items": [
+    {
+     "id": "jeux",
+     "lbl": "Jeux",
+     "ext": null
+    },
+    {
+     "id": "banques",
+     "lbl": "Banques de questions",
+     "ext": "/banques.html"
+    }
+   ]
+  },
+  {
+   "group": "REPORTING",
+   "items": [
+    {
+     "id": "rapports",
+     "lbl": "Rapports",
+     "ext": null
+    }
+   ]
+  },
+  {
+   "group": "SYSTÈME",
+   "items": [
+    {
+     "id": "cgv",
+     "lbl": "CGV / Légal",
+     "ext": null
+    },
+    {
+     "id": "parametres",
+     "lbl": "Paramètres",
+     "ext": null
+    }
+   ]
+  }
+ ],
+ "landings": [
+  {
+   "id": "lp-nds-presentation",
+   "nom": "Landing NDS — Présentation partenaire",
+   "url": "https://flowin-events.vercel.app/nds-partenaire-presentation.html",
+   "statut": "active",
+   "published": true,
+   "jeu": "quiz"
+  },
+  {
+   "id": "lp-nds-entry",
+   "nom": "Landing NDS — Jeu festivalier (/nds)",
+   "url": "https://flowin-events.vercel.app/nds",
+   "statut": "active",
+   "published": true,
+   "jeu": "quiz"
+  },
+  {
+   "id": "lp-nds-super-event",
+   "nom": "Présentation Super Event",
+   "url": "https://flowin-events.vercel.app/nds-super-event-pro.html",
+   "statut": "active",
+   "published": true,
+   "jeu": "quiz"
+  },
+  {
+   "id": "lp-nds-parcours-client",
+   "nom": "Présentation parcours client",
+   "url": "https://flowin-events.vercel.app/nds-parcours-client.html",
+   "statut": "active",
+   "published": true,
+   "jeu": "quiz"
+  },
+  {
+   "id": "lp-nds-brigade-verte",
+   "nom": "Landing NDS — Brigade Verte (agent terrain)",
+   "url": "https://flowin-events.vercel.app/nds-brigade-verte-manuel.html",
+   "statut": "active",
+   "published": true,
+   "jeu": "quiz"
+  }
+ ],
+ "pages": [
+  "admin-connexion.html",
+  "banques.html",
+  "bon-achat-template.html",
+  "bon-commande-nds-a4.html",
+  "bon-commande-nds.html",
+  "bons-commande-liste.html",
+  "carte.html",
+  "cgv-nds.html",
+  "dashboard.html",
+  "demos.html",
+  "facture-nds.html",
+  "flowin-partenaire-presentation.html",
+  "kit-controle.html",
+  "login-test.html",
+  "nds-brigade-verte-manuel.html",
+  "nds-parcours-client.html",
+  "nds-parcours.html",
+  "nds-partenaire-presentation.html",
+  "nds-partenaire.html",
+  "nds-pro.html",
+  "nds-spot-player.html",
+  "nds-super-event-pro.html",
+  "nds-visuels.html",
+  "parcours_user.html",
+  "pitch-nds.html",
+  "pro-nds-live.html",
+  "prospection.html",
+  "tirage-nds.html"
+ ],
+ "edge_functions": [
+  "notify-bon-commande",
+  "notify-souscription",
+  "send-ticket-gagnant"
+ ]
+}
