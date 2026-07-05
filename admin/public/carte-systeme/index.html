@@ -74,6 +74,8 @@
   .cbox.open .cbox-h .cue{transform:rotate(90deg)}
   .cbox-c{display:none;margin:0;background:#0f1526;color:#b7f0cf;padding:11px 12px;font-family:'JetBrains Mono',monospace;font-size:10.6px;line-height:1.55;overflow-x:auto;white-space:pre}
   .cbox.open .cbox-c{display:block}
+.legend .legline{cursor:pointer;border-radius:6px;padding:3px 5px;margin:2px -5px}
+  .legend .legline:hover{background:var(--soft)}
 </style>
 </head>
 <body>
@@ -200,13 +202,13 @@ const NODES = [
 
  // NDS 2026
  {id:"nds-front",group:"nds",label:"Front NDS",role:"Éditeur live du front NDS (ce que voit le joueur).",tables:["events.cfg"],files:["dashboard.html → renderNdsFront() ~l.3814"],links:["events","jeux"]},
- {id:"nds-carte",group:"nds",label:"Carte NDS",role:"Carte publique des stations d'un Super Event.",tables:["events","super_events"],files:["dashboard.html → renderNdsCarte() ~l.4036"],links:["super-events","events"]},
+ {id:"nds-carte",group:"nds",label:"Carte NDS",role:"Carte publique des stations d'un Super Event.",tables:["events","super_events"],files:["dashboard.html → renderNdsCarte() ~l.4036","admin/public/carte.html"],links:["super-events","events"]},
  {id:"nds-participants",group:"nds",label:"Participants NDS",role:"Liste des participants NDS (joueurs + réponses).",tables:["joueurs","participations","se_reponses"],files:["dashboard.html → renderNdsParticipants() ~l.4231"],links:["joueurs","rapports"]},
  {id:"nds-track-qr",group:"nds",label:"Track QR",role:"Suivi des scans/clics QR (station vs réseaux) par partenaire.",tables:["partenaire_clics"],files:["dashboard.html → renderTrackQr() ~l.4114"],rules:["R-QR-PYZBAR"],links:["partenaires","events","nds-media"]},
  {id:"nds-bon-commande",group:"nds",label:"Bons de commande & Factures",cross:true,role:"Bon pré-rempli depuis la fiche → signature (trigger) → facture. PDF via jsPDF.",
-  tables:["bons_commande","factures"],files:["dashboard.html → renderNdsBonCommande() ~l.3768","bon-commande-nds.html","facture-nds.html","trigger trg_bon_commande_chain"],rules:["R-COHERENCE","R-PDF-JSPDF"],links:["partenaires","pros","cgv","infra-resend"]},
+  tables:["bons_commande","factures"],files:["dashboard.html → renderNdsBonCommande() ~l.3768","admin/public/bon-commande-nds.html","admin/public/bon-commande-nds-a4.html","admin/public/bons-commande-liste.html","admin/public/facture-nds.html","trigger trg_bon_commande_chain"],rules:["R-COHERENCE","R-PDF-JSPDF"],links:["partenaires","pros","cgv","infra-resend"]},
  {id:"nds-media",group:"nds",label:"Vidéo & média",role:"Toutes les vidéos réalisées + les textes réseaux (.md) + affiches — à visualiser et télécharger.",
-  tables:["visuels (à vérifier — wiring UI)"],files:["dashboard.html → renderNdsMedia() ~l.4497","admin/public/nds/kit-digital/<slug>/","admin/public/nds/visuels-src/"],rules:["R-LOGOS","R-QR-PYZBAR","R-COMMIT"],links:["partenaires","nds-track-qr","jeux"],assets:"partners"},
+  tables:["visuels (à vérifier — wiring UI)"],files:["dashboard.html → renderNdsMedia() ~l.4497","admin/public/nds-visuels.html","admin/public/nds-spot-player.html","admin/public/nds/kit-digital/<slug>/","admin/public/nds/visuels-src/"],rules:["R-LOGOS","R-QR-PYZBAR","R-COMMIT"],links:["partenaires","nds-track-qr","jeux"],assets:"partners"},
 
  // ACQUISITION B2B
  {id:"btob-prospects",group:"acq",label:"Prospects B2B",role:"Joueurs tagués B2B (prospects issus du jeu).",tables:["joueurs (tags = btob)"],files:["dashboard.html → sidebar (filtre)"],links:["joueurs","prospection"]},
@@ -237,7 +239,7 @@ const NODES = [
  {id:"infra-resend",group:"infra",label:"Resend",infra:true,role:"Envoi d'emails via edge functions. Domaine à vérifier → sinon envois limités à flowinevent@gmail.com.",tables:[],files:["Secret RESEND_API_KEY","edge functions Supabase"],rules:["R-COPIE-EMAIL"],links:["infra-supabase","nds-bon-commande","gagnants"]},
  // WEB APP JOUEUR (le parcours + modules)
  {id:"wa-parcours",group:"webapp",label:"Parcours joueur (Web App)",entity:true,role:"Le mini-site que le festivalier utilise : Scan QR -> Quiz (4 questions) -> Question bonus -> Fiche -> Ticket & gains.",
-  tables:["events.cfg","joueurs","participations","se_reponses","se_tickets"],files:["admin/app/parcours/nds2026/page.tsx","admin/app/parcours/nds2026/NDS2026Client.tsx","admin/lib/parcours.ts"],rules:["R-TICKET","R-ANTICHEAT"],links:["jeux","joueurs","qr","super-events"]},
+  tables:["events.cfg","joueurs","participations","se_reponses","se_tickets"],files:["admin/app/parcours/nds2026/page.tsx","admin/app/parcours/nds2026/NDS2026Client.tsx","admin/lib/parcours.ts","admin/public/nds-parcours.html","admin/public/parcours_user.html"],rules:["R-TICKET","R-ANTICHEAT"],links:["jeux","joueurs","qr","super-events","brigade-verte"]},
  {id:"wa-modules",group:"webapp",label:"Modules de jeu (Quiz/Spin/Tombola/Vote)",role:"Les 4 mini-jeux generiques, jamais modifies directement ; personnalises via events.cfg. NDS2026Client = orchestrateur modifiable.",
   tables:["events.cfg"],files:["admin/app/parcours/{quiz,spin,tombola,vote}/*Client.tsx","admin/app/parcours/nds2026/NDS2026Client.tsx"],rules:["R-MODULES-MAITRES"],links:["jeux","wa-parcours"]},
  // VISUELS DES JEUX
@@ -247,6 +249,10 @@ const NODES = [
  {id:"qr",group:"qr",label:"QR codes (station & reseaux)",role:"2 QR par event/partenaire : station (physique, 1 jeu/jour) et reseaux (digital, usage unique). Toujours verifies pyzbar. Tracking via partenaire_clics.",
   tables:["partenaire_clics","events"],files:["admin/public/nds/visuels-src/composite_qr.py","dashboard.html -> renderTrackQr() ~l.4114"],rules:["R-QR-PYZBAR","R-ANTICHEAT"],links:["nds-track-qr","partenaires","events","nds-media","wa-parcours"]},
  {id:"nds-tirages",group:"nds",label:"Lots & Gagnants (Tirages)",role:"Page des tirages NDS. Tirage du soir : places de concert tirées parmi les joueurs du jour. Grand tirage : par lot partenaire, pondéré par le nombre de tickets, anti-doublon. Ouvre /tirage-nds.html depuis le menu NDS 2026.",tables:["tirages","se_tickets","lots","joueurs","partenaires"],files:["admin/public/tirage-nds.html","RPC Supabase tirage_soir / tirage_lot (SECURITY DEFINER)","dashboard.html → menu NDS 2026 « Lots & Gagnants »"],links:["gagnants","partenaires","joueurs","super-events"]},
+  {id:"secteurs",group:"acq",label:"Types de client (secteurs)",role:"Les catégories d'établissements ciblés : Boutique/Commerce, Restaurant/Café, Marché/Stand, Réseau/Animation, Entreprise/Asso, Tourisme/Collectivité. Servent à segmenter pros et prospection.",tables:["pros (categorie)","events (client_type, categorie)"],files:["dashboard.html → sidebar (catégories/secteurs)"],links:["pros","prospection","partenaires"]},
+ {id:"espace-pro",group:"crm",label:"Espace Pro (live)",role:"Les pages côté professionnel : cockpit live d'un pro, suivi de ses events et de son Super Event (« le jeu qui continue chez vous »).",tables:["pros","events","super_events","participations"],files:["admin/public/pro-nds-live.html","admin/public/nds-pro.html","admin/public/nds-super-event-pro.html"],links:["pros","events","super-events","joueurs"]},
+ {id:"presentations",group:"nds",label:"Présentations & Pitch partenaires",role:"Les supports commerciaux : présentation du Jeu RSE Nuits du Sud, présentation Flowin partenaire, et l'argumentaire téléphonique (pitch). Utilisés en prospection et en vente.",tables:[],files:["admin/public/nds-partenaire-presentation.html","admin/public/flowin-partenaire-presentation.html","admin/public/pitch-nds.html","admin/public/nds-partenaire.html"],rules:["R-CONTACT"],links:["partenaires","prospection","nds-bon-commande"]},
+ {id:"brigade-verte",group:"nds",label:"Brigade Verte",role:"Sondage terrain RSE (mobilité/RSE) mené par la Brigade Verte : manuel terrain + kit de contrôle des supports/QR. Réponses anonymes agrégées.",tables:["sondage_brigade"],files:["admin/public/nds-brigade-verte-manuel.html","admin/public/kit-controle.html","admin/app/parcours/nds2026/NDS2026Client.tsx (module sondage)"],links:["nds-participants","wa-parcours","qr"]},
 ];
 const NODE_BY_ID={}; NODES.forEach(n=>NODE_BY_ID[n.id]=n);
 // adjacence non orientée (pour l'allumage des connexions)
@@ -288,21 +294,33 @@ const COL = {  // ordre gauche -> droite (position de chaque station)
  "events":19,"nds-front":20,"nds-carte":21,
  "jeux":22,"banques":23,"wa-modules":24,"wa-parcours":25,
  "super-events":26,"joueurs":27,"nds-participants":28,"rapports":29,"gagnants":30,
- "pilotage":31,"parametres":32,"nds-tirages":33,
+ "pilotage":31,"parametres":32,"nds-tirages":33,"secteurs":10.5,"espace-pro":11.5,"presentations":14.5,"brigade-verte":28.5,
 };
 const LINES = [
  {id:"fact",  label:"Facturation",     color:"#E8A400", stations:["pros","cgv","partenaires","nds-bon-commande"]},
- {id:"crm",   label:"CRM",             color:"#3F6FE4", stations:["pros","partenaires","joueurs","gagnants","nds-tirages","pilotage"]},
- {id:"acq",   label:"Acquisition B2B", color:"#1DA64A", stations:["landing-page","crm-landing","crm-retours","prospection","btob-prospects","partenaires"]},
- {id:"vis",   label:"Visuels & médias",color:"#E2692A", stations:["partenaires","nds-media","jeux-visuels","qr"]},
+ {id:"crm",   label:"CRM",             color:"#3F6FE4", stations:["pros","espace-pro","partenaires","joueurs","gagnants","nds-tirages","pilotage"]},
+ {id:"acq",   label:"Acquisition B2B", color:"#1DA64A", stations:["landing-page","crm-landing","crm-retours","prospection","btob-prospects","secteurs","partenaires"]},
+ {id:"vis",   label:"Visuels & médias",color:"#E2692A", stations:["partenaires","presentations","nds-media","jeux-visuels","qr"]},
  {id:"qr",    label:"QR codes",        color:"#0FA3A3", stations:["partenaires","nds-media","qr","nds-track-qr","events"]},
  {id:"ev",    label:"Events",          color:"#7A5AF5", stations:["events","nds-front","nds-carte","super-events"]},
  {id:"jeux",  label:"Jeux",            color:"#8B3BD8", stations:["jeux-visuels","jeux","banques","wa-modules"]},
  {id:"web",   label:"Web App joueur",  color:"#E01E7B", stations:["qr","wa-modules","wa-parcours","super-events","joueurs"]},
- {id:"rep",   label:"Reporting",       color:"#94A3B8", stations:["nds-track-qr","nds-participants","rapports","joueurs"]},
+ {id:"rep",   label:"Reporting",       color:"#94A3B8", stations:["nds-track-qr","nds-participants","brigade-verte","rapports","joueurs"]},
  {id:"infra", label:"Infrastructure",  color:"#334155", stations:["infra-github","infra-vercel","infra-supabase","infra-resend","infra-notion","maintenance","parametres"]},
 ];
 // y (rangée) de chaque ligne
+const LINEDESC={
+ fact:"Comment on facture un partenaire : de sa fiche au bon de commande, puis la signature (qui crée automatiquement la facture), jusqu'à l'envoi par email.",
+ crm:"Le carnet d'adresses du projet : les pros et leurs partenaires, les joueurs, les gagnants — qui est qui et qui est relié à quoi. Inclut l'espace Pro et les tirages.",
+ acq:"Comment on trouve et convertit des clients : landing pages, prospection, retours entrants, segmentation par secteur, jusqu'à la fiche partenaire.",
+ vis:"Tout ce qui se voit : présentations partenaires, affiches, vidéos, QR — produits à partir de la fiche partenaire.",
+ qr:"Les QR : station (physique, 1 jeu/jour) et réseaux (digital, usage unique), leur suivi (Track QR) et la règle de vérification pyzbar.",
+ ev:"La brique de base : un event = une station/un jeu rattaché à UN pro ; un super-event fédère plusieurs events et pros (donc partenaires).",
+ jeux:"Les jeux et leurs règles : les modules (nds2026, quiz, spin, tombola…), le barème (4 bonnes réponses = 1 ticket) et les banques de questions.",
+ web:"Le parcours du festivalier sur son téléphone : scanner un QR, jouer, laisser sa fiche, gagner un ticket. Inclut le sondage Brigade Verte.",
+ rep:"Les données et le suivi : participations, sondage Brigade Verte, rapports et exports.",
+ infra:"Les outils sous le capot : GitHub (code), Vercel (hébergement), Supabase (données+emails), Notion (notes) et la maintenance."
+};
 const LINEY={}; LINES.forEach((l,i)=>LINEY[l.id]=140+i*88);
 const X0=120, CGAP=58;
 const X=col=>X0+col*CGAP;
@@ -337,7 +355,7 @@ function render(){
     SCENE.appendChild(el('path',{id,class:'metroline','data-line':l.id,d,fill:'none',stroke:l.color,'stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round'}));
     // pastille + libellé de ligne à gauche
     const st=l.stations.slice().sort((a,b)=>COL[a]-COL[b]);const lx=X(COL[st[0]])-14,ly=LINEY[l.id];
-    const lg=el('g',{});lg.appendChild(el('rect',{x:lx-92,y:ly-11,width:88,height:22,rx:11,fill:l.color}));
+    const lg=el('g',{style:'cursor:pointer'});lg.addEventListener('click',ev=>{ev.stopPropagation();if(!dragMoved)selectLine(l.id);});lg.appendChild(el('rect',{x:lx-92,y:ly-11,width:88,height:22,rx:11,fill:l.color}));
     const t=el('text',{x:lx-48,y:ly+4.5,'text-anchor':'middle','font-size':11,'font-weight':800,fill:'#fff'});t.textContent=l.label;lg.appendChild(t);
     SCENE.appendChild(lg);
     if(flowOn){const dot=el('circle',{r:3.4,fill:l.color,'fill-opacity':.9});
@@ -364,7 +382,7 @@ function render(){
 }
 
 function buildLegend(){document.getElementById('legend').innerHTML='<b>Lignes = services</b>'+
-  LINES.map(l=>`<div><i style="background:${l.color}"></i>${esc(l.label)}</div>`).join('')+
+  LINES.map(l=>`<div class="legline" onclick="selectLine('${l.id}')" onmouseenter="hoverLine('${l.id}')" onmouseleave="hoverLine(null)"><i style="background:${l.color}"></i>${esc(l.label)}</div>`).join('')+
   '<div style="margin-top:8px;display:flex;align-items:center;gap:8px;font-weight:700"><span style="width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid #334155;flex-shrink:0"></span>Correspondance</div>'+
   '<div style="margin-top:6px;font-weight:600;color:#556074;font-size:10.3px;line-height:1.45">Une station sur plusieurs lignes (cercle cerclé) relie ces services. <b>Clique-la</b> : ses lignes s\'allument et son contenu (dossiers, code, règles) s\'ouvre à droite.</div>';}
 
@@ -402,6 +420,22 @@ function highlight(id){const my=new Set(OCC[id]||[]);const nb=new Set([id,...(AD
   document.querySelectorAll('.station').forEach(g=>g.setAttribute('opacity',(my.has(g.dataset.line)||nb.has(g.dataset.id))?1:.22));}
 function resetHL(){document.querySelectorAll('.metroline,.corr,.station').forEach(x=>x.setAttribute('opacity',1));
   document.querySelectorAll('.corr').forEach(c=>{c.setAttribute('stroke','#a9b4c9');c.setAttribute('stroke-width',7);});}
+function selectLine(lid){const L=LINES.find(x=>x.id===lid);if(!L)return;selId=null;
+  const st=new Set(L.stations);
+  document.querySelectorAll('.metroline').forEach(p=>p.setAttribute('opacity',p.dataset.line===lid?1:.13));
+  document.querySelectorAll('.corr').forEach(c=>c.setAttribute('opacity',.1));
+  document.querySelectorAll('.station').forEach(g=>g.setAttribute('opacity',st.has(g.dataset.id)?1:.16));
+  document.getElementById('ptitle').textContent=L.label;
+  document.getElementById('ptags').innerHTML=`<span class="tag" style="background:${L.color}1e;color:${L.color};border:1px solid ${L.color}66">Rubrique / ligne</span>`;
+  document.getElementById('plead').textContent=LINEDESC[lid]||'';
+  const chips=L.stations.slice().sort((a,b)=>COL[a]-COL[b]).map(s=>{const nn=NODE_BY_ID[s];return nn?`<span class="conn" onclick="selectStation('${s}')"><span class="cd" style="background:${L.color}"></span>${esc(nn.label)}</span>`:'';}).join('');
+  document.getElementById('pbody').innerHTML=`<div class="blk"><h4>Les étapes de cette rubrique</h4><div class="badges">${chips}</div></div><div class="none" style="margin-top:10px">Clique une étape pour son détail : connexions, code réel et règles.</div>`;
+  document.getElementById('panel').classList.add('open');}
+function hoverLine(id){if(document.getElementById('panel').classList.contains('open'))return;if(!id){resetHL();return;}
+  const st=new Set((LINES.find(l=>l.id===id)||{stations:[]}).stations);
+  document.querySelectorAll('.metroline').forEach(p=>p.setAttribute('opacity',p.dataset.line===id?1:.22));
+  document.querySelectorAll('.corr').forEach(c=>c.setAttribute('opacity',.15));
+  document.querySelectorAll('.station').forEach(g=>g.setAttribute('opacity',st.has(g.dataset.id)?1:.28));}
 function closePanel(){document.getElementById('panel').classList.remove('open');selId=null;resetHL();}
 function buildRulesList(){const wrap=document.getElementById('rulesList');let h="";
   Object.entries(RULES).forEach(([rid,r])=>{const appl=[];NODES.forEach(n=>{if((n.rules||[]).includes(rid))appl.push(n.label);});
