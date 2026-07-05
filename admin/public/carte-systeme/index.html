@@ -193,10 +193,10 @@ const NODES = [
   links:["pros","events","jeux","nds-track-qr","nds-bon-commande","nds-media"]},
 
  // EVENTS
- {id:"events",group:"events",label:"Events",role:"Un event = une station / un jeu configuré. Porte la cfg (module, banques, bonus, gains).",
+ {id:"events",group:"events",label:"Events",role:"Un event = une station / un jeu déployé, rattaché à UN pro (event.pro_id → pros). Son module = le type de jeu : nds2026 (×25), quiz (×2), spin (×1), tombola (×1). Porte la cfg (banques, bonus, gains) et super_event_id.",
   tables:["events"],files:["dashboard.html → wizard-event","admin/lib/events.ts"],rules:["R-MODULES-MAITRES"],links:["jeux","super-events","partenaires","nds-track-qr","pros"]},
- {id:"super-events",group:"events",label:"Super Events",entity:true,cross:true,role:"Chapeau fédérant plusieurs events : tickets/gains centralisés tous jeux confondus. Relié aux events, aux joueurs et aux gagnants.",
-  tables:["super_events","se_tickets","se_gains","se_lots"],files:["admin/lib/parcours.ts → attribuerSuperEvent() ~l.130","admin/app/se/[se]/"],links:["events","joueurs","gagnants"]},
+ {id:"super-events",group:"events",label:"Super Events",entity:true,cross:true,role:"Chapeau qui agrège une LISTE d'events (9 stations pour « Nuits du Sud 2026 ») ET une liste de pros — donc, via les pros, les partenaires. Centralise tickets/gains tous jeux confondus. Différence clé : un event est rattaché à un seul pro ; le super-event fédère plusieurs pros/partenaires.",
+  tables:["super_events","se_tickets","se_gains","se_lots"],files:["admin/lib/parcours.ts → attribuerSuperEvent() ~l.130","admin/app/se/[se]/"],links:["events","pros","partenaires","joueurs","gagnants"]},
 
  // NDS 2026
  {id:"nds-front",group:"nds",label:"Front NDS",role:"Éditeur live du front NDS (ce que voit le joueur).",tables:["events.cfg"],files:["dashboard.html → renderNdsFront() ~l.3814"],links:["events","jeux"]},
@@ -213,10 +213,10 @@ const NODES = [
  {id:"prospection",group:"acq",label:"Prospection",fragile:true,role:"Base de prospection commerciale. ⚠ staging pollué par des 84xxx (Vaucluse) à trier ; prospection.id = GENERATED ALWAYS.",tables:["prospection","prospection_staging"],files:["dashboard.html → renderProspection() ~l.4272"],rules:["R-NEVER-INVENT"],links:["crm-retours","partenaires","btob-prospects"]},
  {id:"crm-retours",group:"acq",label:"CRM Retours",role:"Retours entrants (landing, contact).",tables:["crm_retours"],files:["dashboard.html → renderCrmRetours() ~l.3348"],links:["crm-landing","prospection"]},
  {id:"crm-landing",group:"acq",label:"CRM Landing pages",role:"Leads issus des landing pages, exportables (CSV).",tables:["crm_retours","leads_landing"],files:["dashboard.html → renderCrmLanding() ~l.3470"],links:["landing-page","crm-retours","rapports"]},
- {id:"landing-page",group:"acq",label:"Landing Page",role:"Landing pages publiques (souscription partenaire, etc.).",tables:["landings"],files:["dashboard.html → sidebar (landings)"],links:["crm-landing","partenaires"]},
+ {id:"landing-page",group:"acq",label:"Landing Page",role:"Les landing pages publiques. 2 réelles : « Landing Flowin — Prospection B2B » (active, module spin, /landing) et « Nuits du Sud 2026 — Partenaires » (draft). Chaque landing porte son tunnel, son hero, son pricing et son module de jeu.",tables:["landings"],files:["dashboard.html → renderCrmLanding / sidebar (landings)"],links:["crm-landing","partenaires"]},
 
  // JEUX
- {id:"jeux",group:"jeux",label:"Jeux",entity:true,role:"Les jeux (Quiz / Spin / Tombola / Vote). La RÈGLE DU JEU vit ici : config via events.cfg, modules maîtres jamais modifiés, barème 4 réponses = 1 ticket.",
+ {id:"jeux",group:"jeux",label:"Jeux",entity:true,role:"Les modules de jeu déployés en events : nds2026 (le parcours festival, ×25), quiz, spin, tombola, vote. La RÈGLE DU JEU vit ici : chaque module a son *Client.tsx (jamais modifié directement), personnalisé via events.cfg ; barème 4 bonnes réponses = 1 ticket (+1 si bonus).",
   tables:["events.cfg","banques","questions","(pas de table 'jeux' — agrégation UI, à vérifier)"],files:["admin/app/parcours/{quiz,spin,tombola,vote}/*Client.tsx","admin/app/parcours/nds2026/NDS2026Client.tsx"],rules:["R-MODULES-MAITRES","R-TICKET","R-ANTICHEAT"],links:["events","joueurs","banques","nds-track-qr"]},
  {id:"banques",group:"jeux",label:"Banques de questions",role:"Banques de questions du quiz (85 questions NDS).",tables:["banques","questions"],files:["/banques.html (page externe)"],links:["jeux"]},
 
@@ -241,8 +241,8 @@ const NODES = [
  {id:"wa-modules",group:"webapp",label:"Modules de jeu (Quiz/Spin/Tombola/Vote)",role:"Les 4 mini-jeux generiques, jamais modifies directement ; personnalises via events.cfg. NDS2026Client = orchestrateur modifiable.",
   tables:["events.cfg"],files:["admin/app/parcours/{quiz,spin,tombola,vote}/*Client.tsx","admin/app/parcours/nds2026/NDS2026Client.tsx"],rules:["R-MODULES-MAITRES"],links:["jeux","wa-parcours"]},
  // VISUELS DES JEUX
- {id:"jeux-visuels",group:"jeuxtheme",label:"Visuels & habillage des jeux",role:"L'apparence du jeu cote joueur (theme, couleurs, ecrans). Definie par la config, pas par le code du module. (branchement theme a verifier)",
-  tables:["events.cfg","themes (a verifier)"],files:["admin/app/parcours/nds2026/NDS2026Client.tsx (rendu)","cfg theme"],links:["jeux","nds-media","wa-parcours"]},
+ {id:"jeux-visuels",group:"jeuxtheme",label:"Visuels & habillage des jeux",role:"L'habillage et les écrans du jeu côté joueur pour NDS (couleurs, hero, écrans intro/outro), définis par la config de l'event et le Front NDS — pas par le code du module.",
+  tables:["events.cfg"],files:["admin/app/parcours/nds2026/NDS2026Client.tsx (rendu)","admin/app/parcours/_components/ParcoursOutro.tsx"],links:["jeux","nds-media","nds-front","wa-parcours"]},
  // QR CODES + regles
  {id:"qr",group:"qr",label:"QR codes (station & reseaux)",role:"2 QR par event/partenaire : station (physique, 1 jeu/jour) et reseaux (digital, usage unique). Toujours verifies pyzbar. Tracking via partenaire_clics.",
   tables:["partenaire_clics","events"],files:["admin/public/nds/visuels-src/composite_qr.py","dashboard.html -> renderTrackQr() ~l.4114"],rules:["R-QR-PYZBAR","R-ANTICHEAT"],links:["nds-track-qr","partenaires","events","nds-media","wa-parcours"]},
