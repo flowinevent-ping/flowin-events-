@@ -74,6 +74,14 @@
           expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))
         };
         localStorage.setItem('flowin_admin_session',JSON.stringify(sess));
+        // Vérifie que la session a bien été mémorisée (la navigation privée peut la bloquer)
+        var back=null; try{ back=JSON.parse(localStorage.getItem('flowin_admin_session')||'null'); }catch(e){}
+        if(!back || !back.access_token){
+          btn.disabled=false;
+          res.className='res err';
+          res.innerHTML='&#9888;&#65039; <b>Connexion OK mais impossible de mémoriser la session.</b><br>Ton navigateur bloque le stockage — c\'est le cas en <b>navigation privée</b>. Ouvre le dashboard dans une fenêtre <b>normale</b> (pas privée).';
+          return;
+        }
         res.className='res ok';
         res.innerHTML='&#9989; <b>Connexion réussie !</b><br>Ouverture du dashboard...';
         setTimeout(function(){ location.replace(nextUrl()); }, 500);
