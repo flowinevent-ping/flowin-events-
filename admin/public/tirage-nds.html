@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lots en jeu &amp; Tirages — Nuits du Sud 2026 · Flowin</title>
+<style>
+  :root{--ink:#16203a;--teal:#1d9e75;--gold:#b8863b;--muted:#5a687d;--faint:#94a3b8;--acc:#3b5cc4;--line:#e6eaf2;--bg:#f4f6fb;--white:#fff;--pink:#e6187f}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Manrope',-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+  .brand{font-size:15px;font-weight:800}.brand .t{color:var(--teal)}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--gold);text-transform:uppercase}
+  h1{font-size:26px;margin:2px 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .stat{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 16px;min-width:130px}
+  .stat b{font-size:22px;display:block}.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px;box-shadow:0 6px 20px -14px rgba(22,32,58,.18)}
+  .card h2{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .card .hint{color:var(--muted);font-size:12px;margin-bottom:14px}
+  .row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+  label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:4px}
+  input[type=date],input[type=text],input[type=number]{border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;font-family:inherit;color:var(--ink);background:#fbfcfe}
+  input[type=number]{width:90px}
+  .btn{border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;color:#fff;background:var(--acc)}
+  .btn.gold{background:var(--gold)}.btn.teal{background:var(--teal)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.sm{padding:7px 13px;font-size:13px}
+  .lot{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+  .lot-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .lot-nom{font-weight:800}
+  .lot-meta{font-size:12px;color:var(--muted)}
+  .pname{font-size:15px;font-weight:800;color:var(--acc);margin:0 0 2px}
+  .win{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px 10px;background:#f0fdf7;border:1px solid #bbf0d8;border-radius:8px;margin-top:8px}
+  .win .med{font-size:15px}
+  .win-soir{background:#fef6e7;border-color:#f3ddb0}
+  .empty{color:var(--faint);font-size:13px;font-style:italic;margin-top:8px}
+  .status{font-size:13px;margin-top:8px;min-height:18px}
+  .status.ok{color:var(--teal)}.status.err{color:#c0392b}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+  .chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+  .chip.soir{background:#fef6e7;color:#a5730f}.chip.grand{background:#eef2ff;color:#3b5cc4}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">OPConsult × <span class="t">Flowin</span></div>
+    <div class="eyebrow">Animation digitale · Nuits du Sud 2026</div>
+  </div>
+  <h1>Lots en jeu &amp; Tirages</h1>
+  <div class="sub">Tirage du soir (places de concert) et grand tirage des lots partenaires — uniquement parmi les joueurs Nuits du Sud, pondéré par le nombre de tickets.</div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card">
+    <h2>🎟️ Tirage du soir — Places de concert</h2>
+    <div class="hint">Tire des gagnants parmi les joueurs ayant validé un ticket <b>ce jour-là</b>. À lancer chaque soir.</div>
+    <div class="row">
+      <div><label>Date de la soirée</label><input type="date" id="soirDate"></div>
+      <div><label>Nombre de places</label><input type="number" id="soirNb" min="1" value="1"></div>
+      <div><label>Intitulé du lot</label><input type="text" id="soirLot" value="Place de concert" style="width:200px"></div>
+      <button class="btn gold" id="soirBtn">🎲 Tirer les places</button>
+    </div>
+    <div class="status" id="soirStatus"></div>
+    <div id="soirWins"></div>
+  </div>
+
+  <div class="card">
+    <h2>🎁 Lots en jeu — Grand tirage (fin de festival)</h2>
+    <div class="hint">Un bloc par partenaire. Tire le(s) gagnant(s) de chaque lot parmi <b>tous</b> les joueurs NDS.</div>
+    <div id="partners"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <div class="card">
+    <h2>🏆 Tous les gagnants</h2>
+    <div id="allWins"><div class="empty">Aucun tirage effectué.</div></div>
+  </div>
+</div>
+
+<script>
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function $(id){return document.getElementById(id);}
+  function lotVal(l){var v=l.valeur_euros!=null?l.valeur_euros:l.valeur; v=parseFloat(String(v).replace(/[^0-9.,]/g,'').replace(',','.')); return isNaN(v)?null:v;}
+  function lotNb(l){return parseInt(l.gagnants||l.quantite||l.nb||1,10)||1;}
+
+  var PARTNERS=[], TIRAGES=[];
+
+  async function load(){
+    try{
+      var pr=await fetch(SUPA+"/rest/v1/partenaires?super_event_id=eq.se-nds-2026&select=id,nom,lots&order=nom",{headers:H});
+      PARTNERS=(await pr.json())||[];
+      var tr=await fetch(SUPA+"/rest/v1/tirages?select=*&order=created_at.desc",{headers:H});
+      TIRAGES=(await tr.json())||[];
+      var st=await fetch(SUPA+"/rest/v1/v_nds_participants?select=nb_tickets",{headers:H});
+      var js=(await st.json())||[];
+      var joueurs=js.length, tickets=js.reduce(function(a,b){return a+(parseInt(b.nb_tickets,10)||0);},0);
+      $('stats').innerHTML='<div class="stat"><b>'+joueurs+'</b><span>Joueurs NDS</span></div>'
+        +'<div class="stat"><b>'+tickets+'</b><span>Tickets en jeu</span></div>'
+        +'<div class="stat"><b>'+TIRAGES.length+'</b><span>Gagnants tirés</span></div>';
+    }catch(e){ PARTNERS=[];TIRAGES=[]; }
+    renderPartners(); renderAllWins(); renderSoirWins();
+  }
+
+  function winsFor(pred){ return TIRAGES.filter(pred); }
+
+  function renderPartners(){
+    var box=$('partners');
+    if(!PARTNERS.length){ box.innerHTML='<div class="empty">Aucun partenaire NDS.</div>'; return; }
+    var html='';
+    PARTNERS.forEach(function(p){
+      var lots=Array.isArray(p.lots)?p.lots:[];
+      html+='<div style="margin:14px 0 4px"><div class="pname">'+esc(p.nom)+'</div>';
+      if(!lots.length){ html+='<div class="empty">Lot à compléter.</div></div>'; return; }
+      lots.forEach(function(l,idx){
+        var nb=lotNb(l), val=lotVal(l), nom=l.nom||l.titre||('Lot '+(idx+1));
+        var won=winsFor(function(t){return t.type==='grand'&&t.partenaire_id===p.id&&t.lot_nom===nom;});
+        html+='<div class="lot"><div class="lot-head">'
+          +'<div><div class="lot-nom">'+esc(nom)+'</div><div class="lot-meta">'+(val!=null?val+' € · ':'')+nb+' gagnant'+(nb>1?'s':'')+' · '+won.length+'/'+nb+' tiré'+(won.length>1?'s':'')+'</div></div>'
+          +'<button class="btn teal sm" '+(won.length>=nb?'disabled':'')+' onclick="tirerLot(\''+esc(p.id)+'\',\''+encodeURIComponent(nom)+'\','+(val==null?'null':val)+','+(nb-won.length)+',this)">🎲 Tirer'+(won.length?' le reste':'')+'</button>'
+          +'</div>';
+        won.forEach(function(w){ html+='<div class="win"><span class="med">🏅</span> <b>'+esc(w.joueur_nom||'—')+'</b> · '+esc(w.joueur_email||'')+(w.joueur_tel?' · '+esc(w.joueur_tel):'')+'</div>'; });
+        html+='</div>';
+      });
+      html+='</div>';
+    });
+    box.innerHTML=html;
+  }
+
+  function renderSoirWins(){
+    var d=$('soirDate').value;
+    var w=winsFor(function(t){return t.type==='soir'&&(!d||t.date_soir===d);});
+    $('soirWins').innerHTML=w.length? w.map(function(t){return '<div class="win win-soir"><span class="med">🎟️</span> <b>'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')+(t.joueur_tel?' · '+esc(t.joueur_tel):'')+' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')</div>';}).join('') : '';
+  }
+
+  function renderAllWins(){
+    if(!TIRAGES.length){ $('allWins').innerHTML='<div class="empty">Aucun tirage effectué.</div>'; return; }
+    var rows=TIRAGES.map(function(t){
+      return '<tr><td><span class="chip '+(t.type==='soir'?'soir':'grand')+'">'+(t.type==='soir'?'Soir':'Grand')+'</span></td>'
+        +'<td><b>'+esc(t.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(t.joueur_email||'')+'</span></td>'
+        +'<td>'+esc(t.lot_nom||'')+(t.lot_valeur?' <span class="lot-meta">('+t.lot_valeur+' €)</span>':'')+'</td>'
+        +'<td>'+esc(t.date_soir||(t.created_at||'').slice(0,10))+'</td></tr>';
+    }).join('');
+    $('allWins').innerHTML='<table><thead><tr><th>Type</th><th>Gagnant</th><th>Lot</th><th>Date</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+
+  async function rpc(fn,body){
+    var r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:'POST',headers:H,body:JSON.stringify(body)});
+    if(!r.ok) throw new Error('HTTP '+r.status+' '+(await r.text()));
+    return await r.json();
+  }
+
+  async function tirerSoir(){
+    var d=$('soirDate').value, nb=parseInt($('soirNb').value,10)||1, lot=$('soirLot').value.trim()||'Place de concert';
+    if(!d){ setS('soirStatus','Choisis une date.','err'); return; }
+    var b=$('soirBtn'); b.disabled=true; setS('soirStatus','Tirage en cours…','');
+    try{
+      var res=await rpc('tirage_soir',{p_date:d,p_nb:nb,p_lot:lot});
+      b.disabled=false;
+      if(!res.length){ setS('soirStatus','Aucun joueur éligible ce soir (ou tous déjà tirés).','err'); return; }
+      setS('soirStatus','✓ '+res.length+' gagnant(s) tiré(s).','ok');
+      await load();
+    }catch(e){ b.disabled=false; setS('soirStatus','Échec du tirage. '+e.message,'err'); }
+  }
+
+  async function tirerLot(pid,nomEnc,val,nb,btn){
+    var nom=decodeURIComponent(nomEnc);
+    btn.disabled=true;
+    try{
+      var res=await rpc('tirage_lot',{p_partenaire_id:pid,p_lot_nom:nom,p_valeur:val,p_nb:nb});
+      if(!res.length){ btn.disabled=false; alert('Aucun joueur éligible (ou tous déjà tirés pour ce lot).'); return; }
+      await load();
+    }catch(e){ btn.disabled=false; alert('Échec du tirage : '+e.message); }
+  }
+
+  function setS(id,msg,cls){ var e=$(id); e.textContent=msg; e.className='status '+(cls||''); }
+
+  window.tirerLot=tirerLot;
+  $('soirBtn').addEventListener('click',tirerSoir);
+  $('soirDate').addEventListener('change',renderSoirWins);
+  (function(){ var t=new Date(); $('soirDate').value=t.toISOString().slice(0,10); })();
+  load();
+</script>
+</body>
+</html>
