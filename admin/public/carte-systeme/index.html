@@ -84,6 +84,7 @@
   <div class="sbox"><input id="q" placeholder="Rechercher une station…"/></div>
   <div class="spacer"></div>
   <button class="btn" id="btnFlow">⏸ Flux</button>
+  <button class="btn" id="btnSom">☰ Sommaire</button>
   <button class="btn" id="btnRules">Règles</button>
   <div class="zoomctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit" style="font-size:13px">⤢</button></div>
 </div>
@@ -178,8 +179,8 @@ const COLUMNS = [ ["crm","acq","reporting"], ["events","jeux","systeme","accueil
 
 const NODES = [
  // ACCUEIL
- {id:"pilotage",group:"accueil",label:"Accueil / Pilotage",role:"Tableau de bord d'accueil : events live, cartes de synthèse.",
-  tables:["events","participations"],files:["dashboard.html → renderPilotage() ~l.4632"],links:["events","joueurs","rapports"]},
+ {id:"pilotage",group:"accueil",label:"Accueil / Pilotage",role:"Le point d'entrée du dashboard : vue d'ensemble avec les events en cours, et un accès direct aux joueurs, aux partenaires et aux rapports de synthèse. C'est de là qu'on part.",
+  tables:["events","participations"],files:["dashboard.html → renderPilotage() ~l.4632"],links:["events","super-events","joueurs","partenaires","rapports"]},
 
  // CRM
  {id:"pros",group:"crm",label:"Pros",entity:true,role:"Comptes professionnels (commerçants / clients). Point central : un Pro est relié à sa fiche, son jeu, son QR, ses factures, ses documents et ses visuels.",
@@ -215,7 +216,7 @@ const NODES = [
  {id:"prospection",group:"acq",label:"Prospection",fragile:true,role:"Base de prospection commerciale. ⚠ staging pollué par des 84xxx (Vaucluse) à trier ; prospection.id = GENERATED ALWAYS.",tables:["prospection","prospection_staging"],files:["dashboard.html → renderProspection() ~l.4272"],rules:["R-NEVER-INVENT"],links:["crm-retours","partenaires","btob-prospects"]},
  {id:"crm-retours",group:"acq",label:"CRM Retours",role:"Retours entrants (landing, contact).",tables:["crm_retours"],files:["dashboard.html → renderCrmRetours() ~l.3348"],links:["crm-landing","prospection"]},
  {id:"crm-landing",group:"acq",label:"CRM Landing pages",role:"Leads issus des landing pages, exportables (CSV).",tables:["crm_retours","leads_landing"],files:["dashboard.html → renderCrmLanding() ~l.3470"],links:["landing-page","crm-retours","rapports"]},
- {id:"landing-page",group:"acq",label:"Landing Page",role:"Les landing pages publiques. 2 réelles : « Landing Flowin — Prospection B2B » (active, module spin, /landing) et « Nuits du Sud 2026 — Partenaires » (draft). Chaque landing porte son tunnel, son hero, son pricing et son module de jeu.",tables:["landings"],files:["dashboard.html → renderCrmLanding / sidebar (landings)"],links:["crm-landing","partenaires"]},
+ {id:"landing-page",group:"acq",label:"Landing Pages",role:"Les landing pages publiques. 2 réelles : « Landing Flowin — Prospection B2B » (active, module spin, /landing) et « Nuits du Sud 2026 — Partenaires » (draft). Chaque landing porte son tunnel, son hero, son pricing et son module de jeu.",tables:["landings"],files:["dashboard.html → renderCrmLanding / sidebar (landings)"],links:["crm-landing","partenaires"]},
 
  // JEUX
  {id:"jeux",group:"jeux",label:"Jeux",entity:true,role:"Les modules de jeu déployés en events : nds2026 (le parcours festival, ×25), quiz, spin, tombola, vote. La RÈGLE DU JEU vit ici : chaque module a son *Client.tsx (jamais modifié directement), personnalisé via events.cfg ; barème 4 bonnes réponses = 1 ticket (+1 si bonus).",
@@ -299,7 +300,7 @@ const COL = {  // ordre global gauche->droite (cycle de vie du produit)
 };
 // LIGNES = les RUBRIQUES DU DASHBOARD (menu réel), dans l'ordre, à partir de l'Accueil
 const LINES = [
- {id:"accueil", label:"Accueil",         color:"#5b62e6", stations:["pilotage"]},
+ {id:"accueil", label:"Accueil",         color:"#5b62e6", stations:["pilotage","events","joueurs","partenaires","rapports"]},
  {id:"crm",     label:"CRM",             color:"#db1877", stations:["pros","espace-pro","partenaires","joueurs","gagnants"]},
  {id:"events",  label:"Events",          color:"#0FA3A3", stations:["pros","events","super-events"]},
  {id:"nds",     label:"NDS 2026",        color:"#E2692A", stations:["partenaires","presentations","nds-bon-commande","nds-media","qr","nds-track-qr","brigade-verte","nds-front","nds-carte","nds-participants","nds-tirages"]},
@@ -380,7 +381,14 @@ function render(){
   buildLegend();requestAnimationFrame(()=>fitBBox(70));
 }
 
-function buildLegend(){document.getElementById('legend').innerHTML='<b>Lignes = services</b>'+
+function openSommaire(){selId=null;resetHL();
+  document.getElementById('ptitle').textContent='Sommaire — tout le système';
+  document.getElementById('ptags').innerHTML=`<span class="tag" style="background:#eef1f7;color:#4a5568;border:1px solid #e0e4ee">${NODES.length} éléments · ${LINES.length} rubriques</span>`;
+  document.getElementById('plead').textContent="Toutes les rubriques du dashboard et tous leurs éléments. Clique pour ouvrir (code, connexions, règles). Un même élément peut apparaître dans plusieurs rubriques (= correspondance).";
+  let h='';LINES.forEach(L=>{const chips=L.stations.slice().sort((a,b)=>COL[a]-COL[b]).map(s=>{const nn=NODE_BY_ID[s];return nn?`<span class="conn" onclick="selectStation('${s}')"><span class="cd" style="background:${L.color}"></span>${esc(nn.label)}</span>`:'';}).join('');
+    h+=`<div class="blk"><h4 style="color:${L.color};font-size:11.5px">${esc(L.label)}</h4><div class="badges">${chips}</div></div>`;});
+  document.getElementById('pbody').innerHTML=h;document.getElementById('panel').classList.add('open');}
+function buildLegend(){document.getElementById('legend').innerHTML='<b>Lignes = rubriques du dashboard</b>'+
   LINES.map(l=>`<div class="legline" onclick="selectLine('${l.id}')" onmouseenter="hoverLine('${l.id}')" onmouseleave="hoverLine(null)"><i style="background:${l.color}"></i>${esc(l.label)}</div>`).join('')+
   '<div style="margin-top:8px;display:flex;align-items:center;gap:8px;font-weight:700"><span style="width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid #334155;flex-shrink:0"></span>Correspondance</div>'+
   '<div style="margin-top:6px;font-weight:600;color:#556074;font-size:10.3px;line-height:1.45">Une station sur plusieurs lignes (cercle cerclé) relie ces services. <b>Clique-la</b> : ses lignes s\'allument et son contenu (dossiers, code, règles) s\'ouvre à droite.</div>';}
@@ -462,6 +470,7 @@ document.getElementById('zout').onclick=()=>zoomBtn(1/1.25);
 document.getElementById('zfit').onclick=()=>fitBBox(70);
 document.getElementById('pclose').onclick=closePanel;
 document.getElementById('btnRules').onclick=()=>document.getElementById('rulesModal').classList.add('open');
+document.getElementById('btnSom').onclick=openSommaire;
 document.getElementById('btnFlow').onclick=function(){flowOn=!flowOn;this.textContent=flowOn?'⏸ Flux':'▶ Flux';render();};
 document.getElementById('q').addEventListener('input',e=>doSearch(e.target.value));
 window.addEventListener('resize',()=>{if(!anim)fitBBox(70);});
