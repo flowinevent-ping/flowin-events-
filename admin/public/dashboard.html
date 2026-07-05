@@ -3053,7 +3053,7 @@ function renderSidebar(){
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
       {id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
-      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Lots & Gagnants',ext:'/tirage-nds.html'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
