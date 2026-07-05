@@ -85,6 +85,9 @@
   .cbody .cdd{font-size:12px;color:#4a5568;line-height:1.45;margin-top:2px}
   .cbody .crule{font-size:11px;font-weight:700;margin-top:4px}
   .cbody .cstore{font-size:11px;color:#556074;margin-top:4px}.cbody .cstore b{color:#0b7a80;font-family:'JetBrains Mono',monospace}
+
+  .riskbox{background:#fef2f4;border:1px solid #f5c6ce;border-left:3px solid #e11d48;border-radius:7px;padding:8px 10px;font-size:11.5px;color:#a01029;line-height:1.45}
+  .cntbox{background:#e9f7f7;border:1px solid #c9ecec;border-radius:7px;padding:7px 10px;font-size:11.5px;color:#0b7a80}
 </style>
 </head>
 <body>
@@ -95,6 +98,7 @@
   <button class="btn" id="btnFlow">⏸ Flux</button>
   <button class="btn" id="btnSom">☰ Sommaire</button>
   <button class="btn" id="btnCirc">→ Circuits</button>
+  <button class="btn" id="btnRisk">⚠ Risques</button>
   <button class="btn" id="btnRules">Règles</button>
   <div class="zoomctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit" style="font-size:13px">⤢</button></div>
 </div>
@@ -265,6 +269,11 @@ const NODES = [
  {id:"presentations",group:"nds",label:"Présentations & Pitch partenaires",role:"Les supports commerciaux : présentation du Jeu RSE Nuits du Sud, présentation Flowin partenaire, et l'argumentaire téléphonique (pitch). Utilisés en prospection et en vente.",tables:[],files:["admin/public/nds-partenaire-presentation.html","admin/public/flowin-partenaire-presentation.html","admin/public/pitch-nds.html","admin/public/nds-partenaire.html"],rules:["R-CONTACT"],links:["partenaires","prospection","nds-bon-commande"]},
  {id:"brigade-verte",group:"nds",label:"Brigade Verte",role:"Sondage terrain RSE (mobilité/RSE) mené par la Brigade Verte : manuel terrain + kit de contrôle des supports/QR. Réponses anonymes agrégées.",tables:["sondage_brigade"],files:["admin/public/nds-brigade-verte-manuel.html","admin/public/kit-controle.html","admin/app/parcours/nds2026/NDS2026Client.tsx (module sondage)"],links:["nds-participants","wa-parcours","qr"]},
  {id:"envois",group:"nds",label:"Envois & Emails (notifications)",role:"Le moteur d'emails/notifications. Modèles (envois_templates : Billet d'activation, Rappel J+3, Streak 7j, Nouveau défi, Nouveau lot, Message libre), règles d'envoi (envois_regles), journal des envois (envois_log). Expédition via Resend (edge functions notify-bon-commande, send-ticket-gagnant, notify-souscription). Canaux : email, WhatsApp, in-app, QR.",tables:["envois_templates","envois_regles","envois_log"],files:["Supabase edge : notify-bon-commande · send-ticket-gagnant · notify-souscription","Secret RESEND_API_KEY"],rules:["R-COPIE-EMAIL"],links:["nds-bon-commande","gagnants","infra-resend","wa-parcours","infra-supabase"]},
+ {id:"hub-vercel",group:"infra",label:"Hub d'accès (Vercel)",role:"Le portail d'accès du projet, hébergé sur Vercel (page « Accès ») : liens vers le dashboard, la carte du système, les espaces pro/partenaire. Point d'entrée web — à NE PAS confondre avec le hub Notion.",tables:[],files:["admin/public/demos.html","Live : flowin-events.vercel.app/demos.html"],links:["pilotage","espace-pro","presentations","persistance"]},
+ {id:"automatismes",group:"infra",label:"Automatismes (triggers & RPC)",role:"La logique qui tourne sans se voir dans le dashboard. Triggers : trg_bon_commande_chain (bon→facture), trg_notify_bon_commande (email), trg_sync_bon_partenaire, trg_notify_souscription_partenaire, trg_prospection_dedup. RPC : tirage_soir/tirage_lot, attribuer_lot_auto, next_ticket_code_nds, generer/consommer_lien (QR usage unique), admin_delete_joueur (cascade), upsert_kpi_snapshot.",tables:["fonctions SECURITY DEFINER","triggers"],files:["Supabase : pg triggers + functions","docs/sql/"],rules:["R-ANTICHEAT"],links:["nds-bon-commande","envois","nds-tirages","prospection","qr","joueurs","gagnants"]},
+ {id:"edge-fn",group:"infra",label:"Edge functions",role:"Les fonctions serverless Supabase qui envoient les emails : notify-bon-commande (bon/facture), send-ticket-gagnant (gain), notify-souscription (nouveau partenaire).",tables:[],files:["supabase/functions/notify-bon-commande","supabase/functions/send-ticket-gagnant","supabase/functions/notify-souscription"],rules:["R-COPIE-EMAIL"],links:["envois","infra-resend","infra-supabase"]},
+ {id:"persistance",group:"infra",label:"Persistance & Handoff",role:"La règle des 3 piliers, à ne jamais oublier : chaque tâche = commit GitHub + mise à jour du handoff (Supabase handoff_notes) + hub (Notion & Vercel). C'est le fil qui évite d'oublier le chemin et les décisions prises.",tables:["handoff_notes","config_backups"],files:["HANDOFF-flowin-nds2026.md","Supabase handoff_notes (clé handoff-nds-2026-comm)"],rules:["R-3PILIERS","R-COMMIT"],links:["infra-github","infra-notion","hub-vercel","maintenance"]},
+ {id:"backups",group:"infra",label:"Sauvegardes & PITR",role:"Les sauvegardes : snapshots de config (config_backups), sauvegarde Google Apps Script (gas_backup_log), et le PITR Supabase (à activer avant le festival).",tables:["config_backups","gas_backup_log"],files:["Supabase PITR (dashboard)","GAS backup"],links:["maintenance","infra-supabase"]},
 ];
 const NODE_BY_ID={}; NODES.forEach(n=>NODE_BY_ID[n.id]=n);
 // adjacence non orientée (pour l'allumage des connexions)
@@ -307,7 +316,7 @@ const COL = {  // ordre global gauche->droite (cycle de vie du produit)
  "events":21,"nds-front":22,"nds-carte":23,"super-events":24,
  "joueurs":25,"nds-participants":26,"gagnants":27,"nds-tirages":28,"rapports":29,
  "cgv":30,"parametres":31,"maintenance":32,"envois":11.5,
- "infra-github":33,"infra-vercel":34,"infra-supabase":35,"infra-resend":36,"infra-notion":37,
+ "infra-github":33,"infra-vercel":34,"infra-supabase":35,"infra-resend":36,"infra-notion":37,"hub-vercel":38,"automatismes":39,"edge-fn":40,"persistance":41,"backups":42,
 };
 // LIGNES = les RUBRIQUES DU DASHBOARD (menu réel), dans l'ordre, à partir de l'Accueil
 const LINES = [
@@ -320,6 +329,7 @@ const LINES = [
  {id:"rep",     label:"Reporting",       color:"#16A34A", stations:["joueurs","nds-participants","rapports"]},
  {id:"systeme", label:"Système",         color:"#64748B", stations:["cgv","parametres","maintenance"]},
  {id:"infra",   label:"Infrastructure",  color:"#334155", stations:["maintenance","infra-github","infra-vercel","infra-supabase","infra-resend","infra-notion"]},
+ {id:"coulisses",label:"Coulisses (hors interface)", color:"#475569", stations:["hub-vercel","automatismes","edge-fn","persistance","backups","maintenance","envois"]},
 ];
 const LINEDESC={
  accueil:"Le point d'entrée du dashboard : la vue d'accueil (pilotage) avec les events en cours et les cartes de synthèse.",
@@ -357,6 +367,30 @@ const CIRCUITS=[
    {node:"partenaires",t:"Fiche partenaire (sortie)",detail:"Le pro devient partenaire NDS avec offre + lot.",store:"partenaires"},
  ]},
 ];
+const SNAP_DATE="05/07/2026";
+const COUNTS={pros:15,partenaires:8,events:29,"super-events":1,joueurs:231,"nds-participants":25,gagnants:0,"nds-bon-commande":8,prospection:1966,"crm-retours":2,"landing-page":2,banques:8,envois:6,"nds-tirages":0,"brigade-verte":10,"nds-track-qr":0};
+const RISKS={
+ "infra-supabase":"Piège de compte : GitHub / Supabase / Vercel sont 3 comptes séparés. Ne jamais utiliser le projet vide atddutvzklcgiqxlpvla. (R-ACCOUNT-TRAP)",
+ "edge-fn":"Domaine Resend à vérifier : sinon les emails ne partent qu'à flowinevent@gmail.com.",
+ "infra-resend":"Domaine d'envoi non vérifié → emails limités.",
+ "prospection":"Staging pollué par des 84xxx (Vaucluse) à trier avant fusion ; ne fusionner que les zones 06.",
+ "cgv":"CGV à faire valider par un juriste avant de passer le statut à « validé ».",
+ "persistance":"Risque récurrent : oublier un des 3 piliers (commit / handoff / hub Notion+Vercel). (R-3PILIERS)",
+ "infra-github":"Repo à passer en privé avant le festival ; le PAT expire ~17/09/2026.",
+ "backups":"PITR + sauvegarde manuelle Supabase à activer avant le 9 juillet.",
+ "gagnants":"se_gains = 0 : normal avant le festival, à surveiller pendant."
+};
+function openRisks(){selId=null;clearCircuit();
+  const risky=Object.keys(RISKS).filter(id=>NODE_BY_ID[id]);const set=new Set(risky);
+  document.querySelectorAll('.metroline,.corr').forEach(x=>x.setAttribute('opacity',.12));
+  document.querySelectorAll('.station').forEach(g=>g.setAttribute('opacity',set.has(g.dataset.id)?1:.14));
+  const rg=el('g',{id:'circuitLayer'});SCENE.appendChild(rg);
+  risky.forEach(id=>{const p=nodePos(id);rg.appendChild(el('circle',{cx:p.x,cy:p.y,r:14,fill:'none',stroke:'#e11d48','stroke-width':2.4,'stroke-dasharray':'3 3'}));});
+  document.getElementById('ptitle').textContent='Risques & incohérences';
+  document.getElementById('ptags').innerHTML=`<span class="tag" style="background:#e11d4818;color:#e11d48;border:1px solid #e11d4855">${risky.length} points de vigilance</span>`;
+  document.getElementById('plead').textContent="Les points à surveiller, tirés du travail réel. Clique pour ouvrir l'élément concerné.";
+  document.getElementById('pbody').innerHTML=risky.map(id=>`<div class="blk"><div class="conn" onclick="selectStation('${id}')"><span class="cd" style="background:#e11d48"></span>${esc(NODE_BY_ID[id].label)} ↗</div><div class="riskbox" style="margin-top:6px">${esc(RISKS[id])}</div></div>`).join('');
+  document.getElementById('panel').classList.add('open');}
 function nodePos(id){const ls=OCC[id]||[];const y=ls.length?Math.min(...ls.map(l=>LINEY[l])):200;return {x:X(COL[id]!=null?COL[id]:0),y};}
 function clearCircuit(){const o=document.getElementById('circuitLayer');if(o)o.remove();}
 function selectCircuit(cid){const C=CIRCUITS.find(c=>c.id===cid);if(!C)return;selId=null;clearCircuit();
@@ -462,6 +496,7 @@ function selectStation(id){
   const tags=[];if(n.entity)tags.push('<span class="tag" style="background:#eef1f7;color:#4a5568;border:1px solid #e0e4ee">objet central</span>');
   if(OCC[id].length>=2)tags.push('<span class="tag" style="background:#33415518;color:#334155;border:1px solid #33415555">correspondance</span>');
   if(n.fragile)tags.push('<span class="tag" style="background:#e11d4818;color:#e11d48;border:1px solid #e11d4855">⚠ vigilance</span>');
+  if(COUNTS[id]!=null)tags.push(`<span class="tag" style="background:#0b7a8018;color:#0b7a80;border:1px solid #0b7a8055">📊 ${COUNTS[id]} enreg.</span>`);
   document.getElementById('ptags').innerHTML=onLines+tags.join('');
   document.getElementById('plead').textContent=n.role||'';
   const nb=[...(ADJ[id]||[])];
@@ -475,7 +510,9 @@ function selectStation(id){
   const dp=(typeof DEEP!=='undefined'&&DEEP[id])?DEEP[id]:{};
   const foldSec=(dp.folders&&dp.folders.length)?`<div class="blk"><h4>📁 Dossiers réels</h4>${dp.folders.map(fd=>`<div class="tree"><div class="tree-h">${esc(fd.label)} <span class="tree-p">${esc(fd.path)}/</span></div>${fd.items.map(it=>`<div class="tree-i">${esc(it)}</div>`).join('')}</div>`).join('')}</div>`:'';
   const codeSec=(dp.code&&dp.code.length)?`<div class="blk"><h4>💻 Code réel</h4>${dp.code.map(b=>`<div class="cbox"><div class="cbox-h" onclick="this.parentElement.classList.toggle('open')"><span class="cue">▸</span>${esc(b.path)}</div><pre class="cbox-c">${esc(b.code)}</pre></div>`).join('')}</div>`:'';
-  document.getElementById('pbody').innerHTML=`<div class="blk"><h4>🔗 Connecté à</h4><div class="badges">${conns}</div></div>${tbl}${fil}${foldSec}${codeSec}${vis}${rul}`;
+  const riskBlk=RISKS[id]?`<div class="blk"><div class="riskbox">⚠ ${esc(RISKS[id])}</div></div>`:'';
+  const cntBlk=COUNTS[id]!=null?`<div class="blk"><div class="cntbox">📊 <b>${COUNTS[id]}</b> enregistrements — instantané du ${SNAP_DATE}</div></div>`:'';
+  document.getElementById('pbody').innerHTML=riskBlk+`<div class="blk"><h4>🔗 Connecté à</h4><div class="badges">${conns}</div></div>`+cntBlk+`${tbl}${fil}${foldSec}${codeSec}${vis}${rul}`;
   highlight(id);
   if(n.assets==="partners"){const sel=document.getElementById('pvsel');sel.innerHTML=PARTNERS.map(s=>`<option value="${s}">${esc(PNAMES[s])}</option>`).join('');
     const draw=()=>{document.getElementById('pvlinks').innerHTML='<div class="dl">'+partnerAssets(sel.value).map(a=>`<a class="${a.k==='file'?'file':''}" href="${a.u}" target="_blank" download>${a.k==='vid'?'▶':'⬇'} ${esc(a.t)}</a>`).join('')+'</div>';};sel.onchange=draw;draw();}
@@ -532,6 +569,7 @@ document.getElementById('pclose').onclick=closePanel;
 document.getElementById('btnRules').onclick=()=>document.getElementById('rulesModal').classList.add('open');
 document.getElementById('btnSom').onclick=openSommaire;
 document.getElementById('btnCirc').onclick=openCircuits;
+document.getElementById('btnRisk').onclick=openRisks;
 document.getElementById('btnFlow').onclick=function(){flowOn=!flowOn;this.textContent=flowOn?'⏸ Flux':'▶ Flux';render();};
 document.getElementById('q').addEventListener('input',e=>doSearch(e.target.value));
 window.addEventListener('resize',()=>{if(!anim)fitBBox(70);});
