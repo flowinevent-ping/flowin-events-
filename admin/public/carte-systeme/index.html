@@ -76,6 +76,15 @@
   .cbox.open .cbox-c{display:block}
 .legend .legline{cursor:pointer;border-radius:6px;padding:3px 5px;margin:2px -5px}
   .legend .legline:hover{background:var(--soft)}
+
+  .cstep{display:flex;gap:10px;margin-bottom:14px}
+  .cnum{flex-shrink:0;width:24px;height:24px;border-radius:50%;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .cbody{flex:1;border-left:2px solid var(--line);padding-left:11px}
+  .cbody .ct{font-size:13px;font-weight:800;color:#1b2333;cursor:pointer}
+  .cbody .ct:hover{text-decoration:underline}.cbody .ct .cgo{color:#98a0b3;font-weight:700;font-size:11px}
+  .cbody .cdd{font-size:12px;color:#4a5568;line-height:1.45;margin-top:2px}
+  .cbody .crule{font-size:11px;font-weight:700;margin-top:4px}
+  .cbody .cstore{font-size:11px;color:#556074;margin-top:4px}.cbody .cstore b{color:#0b7a80;font-family:'JetBrains Mono',monospace}
 </style>
 </head>
 <body>
@@ -85,6 +94,7 @@
   <div class="spacer"></div>
   <button class="btn" id="btnFlow">⏸ Flux</button>
   <button class="btn" id="btnSom">☰ Sommaire</button>
+  <button class="btn" id="btnCirc">→ Circuits</button>
   <button class="btn" id="btnRules">Règles</button>
   <div class="zoomctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit" style="font-size:13px">⤢</button></div>
 </div>
@@ -254,6 +264,7 @@ const NODES = [
  {id:"espace-pro",group:"crm",label:"Espace Pro (live)",role:"Les pages côté professionnel : cockpit live d'un pro, suivi de ses events et de son Super Event (« le jeu qui continue chez vous »).",tables:["pros","events","super_events","participations"],files:["admin/public/pro-nds-live.html","admin/public/nds-pro.html","admin/public/nds-super-event-pro.html"],links:["pros","events","super-events","joueurs"]},
  {id:"presentations",group:"nds",label:"Présentations & Pitch partenaires",role:"Les supports commerciaux : présentation du Jeu RSE Nuits du Sud, présentation Flowin partenaire, et l'argumentaire téléphonique (pitch). Utilisés en prospection et en vente.",tables:[],files:["admin/public/nds-partenaire-presentation.html","admin/public/flowin-partenaire-presentation.html","admin/public/pitch-nds.html","admin/public/nds-partenaire.html"],rules:["R-CONTACT"],links:["partenaires","prospection","nds-bon-commande"]},
  {id:"brigade-verte",group:"nds",label:"Brigade Verte",role:"Sondage terrain RSE (mobilité/RSE) mené par la Brigade Verte : manuel terrain + kit de contrôle des supports/QR. Réponses anonymes agrégées.",tables:["sondage_brigade"],files:["admin/public/nds-brigade-verte-manuel.html","admin/public/kit-controle.html","admin/app/parcours/nds2026/NDS2026Client.tsx (module sondage)"],links:["nds-participants","wa-parcours","qr"]},
+ {id:"envois",group:"nds",label:"Envois & Emails (notifications)",role:"Le moteur d'emails/notifications. Modèles (envois_templates : Billet d'activation, Rappel J+3, Streak 7j, Nouveau défi, Nouveau lot, Message libre), règles d'envoi (envois_regles), journal des envois (envois_log). Expédition via Resend (edge functions notify-bon-commande, send-ticket-gagnant, notify-souscription). Canaux : email, WhatsApp, in-app, QR.",tables:["envois_templates","envois_regles","envois_log"],files:["Supabase edge : notify-bon-commande · send-ticket-gagnant · notify-souscription","Secret RESEND_API_KEY"],rules:["R-COPIE-EMAIL"],links:["nds-bon-commande","gagnants","infra-resend","wa-parcours","infra-supabase"]},
 ];
 const NODE_BY_ID={}; NODES.forEach(n=>NODE_BY_ID[n.id]=n);
 // adjacence non orientée (pour l'allumage des connexions)
@@ -295,7 +306,7 @@ const COL = {  // ordre global gauche->droite (cycle de vie du produit)
  "banques":17,"jeux":18,"wa-modules":19,"wa-parcours":20,
  "events":21,"nds-front":22,"nds-carte":23,"super-events":24,
  "joueurs":25,"nds-participants":26,"gagnants":27,"nds-tirages":28,"rapports":29,
- "cgv":30,"parametres":31,"maintenance":32,
+ "cgv":30,"parametres":31,"maintenance":32,"envois":11.5,
  "infra-github":33,"infra-vercel":34,"infra-supabase":35,"infra-resend":36,"infra-notion":37,
 };
 // LIGNES = les RUBRIQUES DU DASHBOARD (menu réel), dans l'ordre, à partir de l'Accueil
@@ -303,7 +314,7 @@ const LINES = [
  {id:"accueil", label:"Accueil",         color:"#5b62e6", stations:["pilotage","events","joueurs","partenaires","rapports"]},
  {id:"crm",     label:"CRM",             color:"#db1877", stations:["pros","espace-pro","partenaires","joueurs","gagnants"]},
  {id:"events",  label:"Events",          color:"#0FA3A3", stations:["pros","events","super-events"]},
- {id:"nds",     label:"NDS 2026",        color:"#E2692A", stations:["partenaires","presentations","nds-bon-commande","nds-media","qr","nds-track-qr","brigade-verte","nds-front","nds-carte","nds-participants","nds-tirages"]},
+ {id:"nds",     label:"NDS 2026",        color:"#E2692A", stations:["partenaires","presentations","nds-bon-commande","envois","nds-media","qr","nds-track-qr","brigade-verte","nds-front","nds-carte","nds-participants","nds-tirages"]},
  {id:"acq",     label:"Acquisition B2B", color:"#C98700", stations:["landing-page","crm-landing","crm-retours","prospection","secteurs","btob-prospects","partenaires"]},
  {id:"jeux",    label:"Jeux",            color:"#8B3BD8", stations:["jeux-visuels","banques","jeux","wa-modules","wa-parcours","events"]},
  {id:"rep",     label:"Reporting",       color:"#16A34A", stations:["joueurs","nds-participants","rapports"]},
@@ -322,6 +333,55 @@ const LINEDESC={
  infra:"Sous le capot (hors menu, côté technique) : GitHub (code), Vercel (hébergement), Supabase (données+emails), Resend, Notion — reliés par la Maintenance."
 };
 const LINEY={}; LINES.forEach((l,i)=>LINEY[l.id]=140+i*88);
+const CIRCUITS=[
+ {id:"fact",label:"Facturation & envoi",color:"#E8A400",desc:"De la fiche partenaire jusqu'à la facture envoyée puis stockée.",steps:[
+   {node:"partenaires",t:"Fiche partenaire (source)",detail:"Coordonnées + offre + lot. Source unique qui alimente le bon.",rule:"R-COHERENCE",store:"partenaires"},
+   {node:"cgv",t:"CGV acceptées",detail:"Case obligatoire cochée dans le bon.",store:"documents_legaux"},
+   {node:"nds-bon-commande",t:"Bon édité puis signé",detail:"Bon pré-rempli (PDF jsPDF). À la signature, le trigger trg_bon_commande_chain crée la facture.",rule:"R-PDF-JSPDF",store:"bons_commande + factures"},
+   {node:"envois",t:"Email envoyé (Resend)",detail:"Modèle + règle d'envoi, via l'edge function notify-bon-commande.",rule:"R-COPIE-EMAIL",store:"envois_log"},
+   {node:"infra-supabase",t:"Stockage final",detail:"Tout est conservé côté Supabase.",store:"Supabase : bons_commande, factures, envois_log"},
+ ]},
+ {id:"joueur",label:"Parcours joueur → gain",color:"#E01E7B",desc:"Du scan d'un QR jusqu'au lot gagné et notifié.",steps:[
+   {node:"qr",t:"Scan du QR (entrée)",detail:"Station (physique, 1/jour) ou réseaux (digital, usage unique).",rule:"R-QR-PYZBAR",store:"partenaire_clics"},
+   {node:"wa-parcours",t:"Le joueur joue",detail:"Parcours NDS : quiz + question bonus + fiche.",store:"participations"},
+   {node:"jeux",t:"Règle du jeu",detail:"4 bonnes réponses = 1 ticket (+1 si bonus).",rule:"R-TICKET",store:"se_reponses + se_tickets"},
+   {node:"joueurs",t:"Fiche joueur",detail:"Profil + participations + tickets. Anti-triche appliqué.",rule:"R-ANTICHEAT",store:"joueurs"},
+   {node:"nds-tirages",t:"Tirage pondéré",detail:"Grand tirage par lot partenaire, pondéré par les tickets.",store:"tirages"},
+   {node:"gagnants",t:"Gagnant + email",detail:"Lot attribué, code de retrait, notification.",store:"se_gains"},
+   {node:"envois",t:"Email de gain (Resend)",detail:"send-ticket-gagnant.",rule:"R-COPIE-EMAIL",store:"envois_log"},
+ ]},
+ {id:"prospect",label:"Prospection → Partenaire",color:"#1DA64A",desc:"D'un contact capté jusqu'à une fiche partenaire active.",steps:[
+   {node:"landing-page",t:"Captation (entrée)",detail:"Landing page ou prospection commerciale.",store:"landings / prospection"},
+   {node:"crm-retours",t:"Retour entrant",detail:"Le contact répond / laisse ses infos.",store:"crm_retours"},
+   {node:"pros",t:"Devient un Pro",detail:"Création de la fiche professionnelle.",rule:"R-COHERENCE",store:"pros"},
+   {node:"partenaires",t:"Fiche partenaire (sortie)",detail:"Le pro devient partenaire NDS avec offre + lot.",store:"partenaires"},
+ ]},
+];
+function nodePos(id){const ls=OCC[id]||[];const y=ls.length?Math.min(...ls.map(l=>LINEY[l])):200;return {x:X(COL[id]!=null?COL[id]:0),y};}
+function clearCircuit(){const o=document.getElementById('circuitLayer');if(o)o.remove();}
+function selectCircuit(cid){const C=CIRCUITS.find(c=>c.id===cid);if(!C)return;selId=null;clearCircuit();
+  document.querySelectorAll('.metroline,.corr,.station').forEach(x=>x.setAttribute('opacity',.12));
+  const g=el('g',{id:'circuitLayer'});SCENE.appendChild(g);
+  const pts=C.steps.map(s=>nodePos(s.node));
+  for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];
+    g.appendChild(el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:C.color,'stroke-width':3.2,'stroke-dasharray':'1 7','stroke-linecap':'round','stroke-opacity':.9}));
+    const ang=Math.atan2(b.y-a.y,b.x-a.x),L=10,bx=b.x-15*Math.cos(ang),by=b.y-15*Math.sin(ang),a1=ang+2.6,a2=ang-2.6;
+    g.appendChild(el('path',{d:`M ${bx} ${by} L ${bx+L*Math.cos(a1)} ${by+L*Math.sin(a1)} L ${bx+L*Math.cos(a2)} ${by+L*Math.sin(a2)} Z`,fill:C.color}));}
+  pts.forEach((p,i)=>{g.appendChild(el('circle',{cx:p.x,cy:p.y,r:12,fill:C.color,stroke:'#fff','stroke-width':2.5}));
+    const tx=el('text',{x:p.x,y:p.y+4,'text-anchor':'middle','font-size':12,'font-weight':800,fill:'#fff'});tx.textContent=String(i+1);g.appendChild(tx);});
+  document.getElementById('ptitle').textContent='Circuit — '+C.label;
+  document.getElementById('ptags').innerHTML=`<span class="tag" style="background:${C.color}1e;color:${C.color};border:1px solid ${C.color}66">flux · ${C.steps.length} étapes</span>`;
+  document.getElementById('plead').textContent=C.desc;
+  const steps=C.steps.map((s,i)=>{const r=s.rule?RULES[s.rule]:null;
+    return `<div class="cstep"><div class="cnum" style="background:${C.color}">${i+1}</div><div class="cbody"><div class="ct" onclick="selectStation('${s.node}')">${esc(s.t)} <span class="cgo">↗</span></div><div class="cdd">${esc(s.detail||'')}</div>${r?`<div class="crule" style="color:${r.color}">● ${esc(r.t)} <span style="color:#98a0b3">${esc(s.rule)}</span></div>`:''}${s.store?`<div class="cstore">→ stocké dans : <b>${esc(s.store)}</b></div>`:''}</div></div>`;}).join('');
+  document.getElementById('pbody').innerHTML='<div class="blk">'+steps+'</div>';
+  document.getElementById('panel').classList.add('open');}
+function openCircuits(){selId=null;clearCircuit();resetHL();
+  document.getElementById('ptitle').textContent='Circuits — comment ça circule';
+  document.getElementById('ptags').innerHTML=`<span class="tag" style="background:#eef1f7;color:#4a5568;border:1px solid #e0e4ee">${CIRCUITS.length} flux de bout en bout</span>`;
+  document.getElementById('plead').textContent="Suis un processus du point d'entrée jusqu'au stockage de l'info : l'ordre des étapes, les règles appliquées, et où ça finit.";
+  document.getElementById('pbody').innerHTML=CIRCUITS.map(c=>`<div class="blk" style="margin-bottom:12px"><span class="conn" style="font-size:12.5px" onclick="selectCircuit('${c.id}')"><span class="cd" style="background:${c.color}"></span>${esc(c.label)} ↗</span><div class="none" style="margin-top:4px">${esc(c.desc)}</div></div>`).join('');
+  document.getElementById('panel').classList.add('open');}
 const X0=120, CGAP=58;
 const X=col=>X0+col*CGAP;
 // occurrences d'un élément (sur quelles lignes il passe) => correspondance si >=2
@@ -381,7 +441,7 @@ function render(){
   buildLegend();requestAnimationFrame(()=>fitBBox(70));
 }
 
-function openSommaire(){selId=null;resetHL();
+function openSommaire(){selId=null;clearCircuit();resetHL();
   document.getElementById('ptitle').textContent='Sommaire — tout le système';
   document.getElementById('ptags').innerHTML=`<span class="tag" style="background:#eef1f7;color:#4a5568;border:1px solid #e0e4ee">${NODES.length} éléments · ${LINES.length} rubriques</span>`;
   document.getElementById('plead').textContent="Toutes les rubriques du dashboard et tous leurs éléments. Clique pour ouvrir (code, connexions, règles). Un même élément peut apparaître dans plusieurs rubriques (= correspondance).";
@@ -395,7 +455,7 @@ function buildLegend(){document.getElementById('legend').innerHTML='<b>Lignes = 
 
 /* ---------- FICHE STATION ---------- */
 function selectStation(id){
-  selId=id;const n=NODE_BY_ID[id];if(!n)return;const g=GROUPS[n.group];const gc=g?g.color:'#889';
+  selId=id;clearCircuit();const n=NODE_BY_ID[id];if(!n)return;const g=GROUPS[n.group];const gc=g?g.color:'#889';
   document.querySelectorAll('.station .body').forEach(b=>b.setAttribute('stroke-opacity',1));
   document.getElementById('ptitle').textContent=n.label;
   const onLines=OCC[id].map(lid=>{const L=LINES.find(x=>x.id===lid);return `<span class="tag" style="background:${L.color}1e;color:${L.color};border:1px solid ${L.color}66">${esc(L.label)}</span>`;}).join('');
@@ -427,7 +487,7 @@ function highlight(id){const my=new Set(OCC[id]||[]);const nb=new Set([id,...(AD
   document.querySelectorAll('.station').forEach(g=>g.setAttribute('opacity',(my.has(g.dataset.line)||nb.has(g.dataset.id))?1:.22));}
 function resetHL(){document.querySelectorAll('.metroline,.corr,.station').forEach(x=>x.setAttribute('opacity',1));
   document.querySelectorAll('.corr').forEach(c=>{c.setAttribute('stroke','#a9b4c9');c.setAttribute('stroke-width',7);});}
-function selectLine(lid){const L=LINES.find(x=>x.id===lid);if(!L)return;selId=null;
+function selectLine(lid){const L=LINES.find(x=>x.id===lid);if(!L)return;selId=null;clearCircuit();
   const st=new Set(L.stations);
   document.querySelectorAll('.metroline').forEach(p=>p.setAttribute('opacity',p.dataset.line===lid?1:.13));
   document.querySelectorAll('.corr').forEach(c=>c.setAttribute('opacity',.1));
@@ -443,7 +503,7 @@ function hoverLine(id){if(document.getElementById('panel').classList.contains('o
   document.querySelectorAll('.metroline').forEach(p=>p.setAttribute('opacity',p.dataset.line===id?1:.22));
   document.querySelectorAll('.corr').forEach(c=>c.setAttribute('opacity',.15));
   document.querySelectorAll('.station').forEach(g=>g.setAttribute('opacity',st.has(g.dataset.id)?1:.28));}
-function closePanel(){document.getElementById('panel').classList.remove('open');selId=null;resetHL();}
+function closePanel(){document.getElementById('panel').classList.remove('open');selId=null;clearCircuit();resetHL();}
 function buildRulesList(){const wrap=document.getElementById('rulesList');let h="";
   Object.entries(RULES).forEach(([rid,r])=>{const appl=[];NODES.forEach(n=>{if((n.rules||[]).includes(rid))appl.push(n.label);});
     h+=`<div class="rule" style="border-left-color:${r.color}"><p class="rt"><span style="color:${r.color}">●</span> ${esc(r.t)} <span class="rid">${rid}</span></p><p class="rx">${esc(r.x)}</p><p class="appl">Rattachée à : <b>${appl.length?appl.map(esc).join(' · '):'—'}</b></p></div>`;});
@@ -471,6 +531,7 @@ document.getElementById('zfit').onclick=()=>fitBBox(70);
 document.getElementById('pclose').onclick=closePanel;
 document.getElementById('btnRules').onclick=()=>document.getElementById('rulesModal').classList.add('open');
 document.getElementById('btnSom').onclick=openSommaire;
+document.getElementById('btnCirc').onclick=openCircuits;
 document.getElementById('btnFlow').onclick=function(){flowOn=!flowOn;this.textContent=flowOn?'⏸ Flux':'▶ Flux';render();};
 document.getElementById('q').addEventListener('input',e=>doSearch(e.target.value));
 window.addEventListener('resize',()=>{if(!anim)fitBBox(70);});
