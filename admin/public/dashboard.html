@@ -13017,15 +13017,28 @@ function _flowinGate(){
   if(FLOWIN_AUTH!==FLOWIN_SUPA_ANON) return; // déjà connecté
   var ov=document.createElement('div'); ov.id='flowin-login-gate';
   ov.style.cssText='position:fixed;inset:0;z-index:2000000;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif';
-  ov.innerHTML='<div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;max-width:380px;width:100%;color:#e2e8f0"><h1 style="font-size:20px;margin:0 0 4px">&#128274; Dashboard Flowin</h1><p style="color:#94a3b8;font-size:13px;margin:0 0 18px">Connexion requise.</p><input id="_flogin_email" type="email" placeholder="E-mail" autocomplete="username" value="flowinevent@gmail.com" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;margin-bottom:10px"><input id="_flogin_pass" type="password" placeholder="Mot de passe" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px"><button id="_flogin_btn" style="width:100%;margin-top:16px;padding:12px;border:none;border-radius:10px;background:#22c55e;color:#052e16;font-weight:800;font-size:15px;cursor:pointer">Se connecter</button><div id="_flogin_err" style="color:#fca5a5;font-size:13px;margin-top:10px;min-height:16px"></div></div>';
+  var istyle='width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px';
+  ov.innerHTML='<div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;max-width:380px;width:100%;color:#e2e8f0"><h1 style="font-size:20px;margin:0 0 4px">&#128274; Dashboard Flowin</h1><p style="color:#94a3b8;font-size:13px;margin:0 0 18px">Connexion requise.</p><input id="_flogin_email" type="email" autocomplete="off" value="flowinevent@gmail.com" style="'+istyle+';margin-bottom:10px"><div style="position:relative"><input id="_flogin_pass" type="password" placeholder="Mot de passe" autocomplete="off" style="'+istyle+';padding-right:44px"><span id="_flogin_eye" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;user-select:none">&#128065;</span></div><button id="_flogin_btn" style="width:100%;margin-top:16px;padding:12px;border:none;border-radius:10px;background:#22c55e;color:#052e16;font-weight:800;font-size:15px;cursor:pointer">Se connecter</button><div id="_flogin_err" style="font-size:13px;margin-top:10px;min-height:16px;line-height:1.4"></div></div>';
   document.body.appendChild(ov); document.body.style.overflow='hidden';
-  var btn=document.getElementById('_flogin_btn');
-  async function doLogin(){ btn.disabled=true; document.getElementById('_flogin_err').textContent='Connexion...';
-    try{ await adminLogin(document.getElementById('_flogin_email').value.trim(), document.getElementById('_flogin_pass').value); location.reload(); }
-    catch(e){ btn.disabled=false; document.getElementById('_flogin_err').textContent='\u274c '+e.message; } }
+  var btn=document.getElementById('_flogin_btn'), err=document.getElementById('_flogin_err'), pass=document.getElementById('_flogin_pass');
+  document.getElementById('_flogin_eye').addEventListener('click',function(){ pass.type = pass.type==='password'?'text':'password'; });
+  function setErr(msg,ok){ err.style.color = ok?'#86efac':'#fca5a5'; err.textContent=msg; }
+  async function doLogin(){
+    btn.disabled=true; setErr('Connexion en cours...',true);
+    var email=document.getElementById('_flogin_email').value.trim(), pwd=pass.value;
+    try{
+      var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},15000);
+      var r=await fetch(FLOWIN_SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pwd}),signal:ctrl.signal});
+      clearTimeout(to);
+      var d=await r.json().catch(function(){return {};});
+      if(r.ok && d.access_token){ _authSaveSess(d); setErr('\u2705 Connexion réussie, chargement...',true); setTimeout(function(){location.reload();},400); }
+      else { btn.disabled=false; setErr('\u274c '+(d.error_description||d.msg||d.error||('Erreur '+r.status))+' (code '+r.status+')'); }
+    }catch(e){ btn.disabled=false; setErr('\u274c '+(e.name==='AbortError'?'Délai dépassé (réseau bloqué ?)':e.message)); }
+  }
   btn.addEventListener('click',doLogin);
-  document.getElementById('_flogin_pass').addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
+  pass.addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
 }
+
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_flowinGate); else _flowinGate();
 
 function saveSupaConfig(){
