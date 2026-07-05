@@ -578,6 +578,10 @@ function exportPdf(){
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  // ---- Sécurité admin : session requise ----
+  var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
+  var AUTH=(_S&&_S.access_token&&(_S.expires_at*1000)>(Date.now()+30000))?_S.access_token:null;
+  if(!AUTH){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
   var CGV_VERSION='v1-draft'; // a mettre a jour quand les CGV passent en version validee par le juriste
   function $(id){return document.getElementById(id);}
   function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
@@ -727,7 +731,7 @@ function exportPdf(){
     btn.disabled=true; setStatus('Enregistrement\u2026','');
     var url=EDIT_MODE?(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(rec.id)):(SUPA+'/rest/v1/bons_commande');
     var method=EDIT_MODE?'PATCH':'POST';
-    fetch(url,{method:method,headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
+    fetch(url,{method:method,headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
       .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); onOk(); })
       .catch(function(e){ btn.disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\u2019enregistrement. R\u00e9essayez.','err'); });
   }
@@ -784,7 +788,7 @@ function exportPdf(){
     setStatus('Mode \\u00e9dition \\u2014 bon '+d.id+'. Modifie puis \\u00ab Enregistrer & envoyer au client \\u00e0 faire signer \\u00bb.','ok');
   }
   if(prefillSlug){
-    fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+    fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}})
       .then(function(r){ return r.json(); })
       .then(function(rows){
         if(!rows||!rows.length) return;
@@ -813,7 +817,7 @@ function exportPdf(){
       }).catch(function(){});
   }
   if(viewId){
-    fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+    fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}})
       .then(function(r){ return r.json(); })
       .then(function(rows){
         if(!rows||!rows.length){ setStatus('Bon de commande introuvable.','err'); return; }
@@ -853,7 +857,7 @@ function exportPdf(){
             if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\u2019accepter les CGV.','err'); return; }
             _cs.disabled=true; setStatus('Signature en cours\u2026','');
             var _patch={ statut:'signe', signature:cv.toDataURL('image/png'), signataire:($('f_signataire').value.trim()||d.contact||d.raison_sociale||''), date_signature:($('f_date').value.trim()||dstr), cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
-            fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(d.id),{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(_patch)})
+            fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(d.id),{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(_patch)})
               .then(function(r){ if(!r.ok) throw new Error('http '+r.status); location.href='?id='+encodeURIComponent(d.id); })
               .catch(function(){ _cs.disabled=false; setStatus('\u00c9chec de la signature. R\u00e9essayez.','err'); });
           }); }
