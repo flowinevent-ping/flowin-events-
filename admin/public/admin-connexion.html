@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Connexion · Dashboard Flowin</title>
+<style>
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
+  .card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;max-width:400px;width:100%}
+  h1{font-size:20px;margin:0 0 4px}
+  p.sub{color:#94a3b8;font-size:13px;margin:0 0 20px}
+  label{display:block;font-size:12px;color:#94a3b8;margin:12px 0 4px;font-weight:600}
+  .field{position:relative}
+  input{width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px}
+  #pass{padding-right:46px}
+  #eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;user-select:none}
+  button{width:100%;margin-top:18px;padding:12px;border:none;border-radius:10px;background:#22c55e;color:#052e16;font-weight:800;font-size:15px;cursor:pointer}
+  button:disabled{opacity:.5}
+  .res{margin-top:16px;padding:12px;border-radius:10px;font-size:13px;line-height:1.5;display:none}
+  .res.ok{display:block;background:#052e16;border:1px solid #16a34a;color:#86efac}
+  .res.err{display:block;background:#450a0a;border:1px solid #dc2626;color:#fca5a5}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>&#128274; Dashboard Flowin</h1>
+    <p class="sub">Connexion requise pour accéder au tableau de bord.</p>
+    <label>E-mail</label>
+    <input id="email" type="email" value="flowinevent@gmail.com" autocomplete="username">
+    <label>Mot de passe</label>
+    <div class="field">
+      <input id="pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+      <span id="eye">&#128065;</span>
+    </div>
+    <button id="btn">Se connecter</button>
+    <div id="res" class="res"></div>
+  </div>
+<script>
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var ANON='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  // Destination après connexion (par défaut le dashboard). Sécurisé : uniquement un chemin local.
+  function nextUrl(){
+    try{
+      var p=new URLSearchParams(location.search).get('next')||'';
+      if(p && p.charAt(0)==='/' && p.indexOf('//')!==0) return p;
+    }catch(e){}
+    return '/dashboard.html';
+  }
+  var btn=document.getElementById('btn'), res=document.getElementById('res'), pass=document.getElementById('pass');
+  document.getElementById('eye').addEventListener('click',function(){ pass.type = pass.type==='password'?'text':'password'; });
+  // Si déjà connecté (session valide), on va directement au dashboard.
+  (function(){
+    try{
+      var s=JSON.parse(localStorage.getItem('flowin_admin_session')||'null');
+      if(s && s.access_token && (s.expires_at*1000) > (Date.now()+60000)){ location.replace(nextUrl()); }
+    }catch(e){}
+  })();
+  async function doLogin(){
+    var email=document.getElementById('email').value.trim(), pwd=pass.value;
+    btn.disabled=true; res.className='res'; res.textContent='';
+    try{
+      var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},15000);
+      var r=await fetch(SUPA+'/auth/v1/token?grant_type=password',{
+        method:'POST', headers:{'apikey':ANON,'Content-Type':'application/json'},
+        body: JSON.stringify({email:email,password:pwd}), signal:ctrl.signal
+      });
+      clearTimeout(to);
+      var d=await r.json().catch(function(){return {};});
+      if(r.ok && d.access_token){
+        var sess={
+          access_token:d.access_token,
+          refresh_token:d.refresh_token,
+          expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))
+        };
+        localStorage.setItem('flowin_admin_session',JSON.stringify(sess));
+        res.className='res ok';
+        res.innerHTML='&#9989; <b>Connexion réussie !</b><br>Ouverture du dashboard...';
+        setTimeout(function(){ location.replace(nextUrl()); }, 500);
+      } else {
+        btn.disabled=false;
+        res.className='res err';
+        res.innerHTML='&#10060; <b>Échec.</b> '+(d.error_description||d.msg||d.error||('Erreur '+r.status))+' (code '+r.status+')';
+      }
+    }catch(e){
+      btn.disabled=false; res.className='res err';
+      res.innerHTML='&#10060; '+(e.name==='AbortError'?'Délai dépassé (réseau bloqué ?)':('Erreur : '+e.message));
+    }
+  }
+  btn.addEventListener('click',doLogin);
+  pass.addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
