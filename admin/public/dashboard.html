@@ -1886,7 +1886,7 @@ async function supaFetch(table, params){
   try {
     var url = FLOWIN_SUPA_URL + '/rest/v1/' + table + '?' + (params || 'select=*');
     var r = await fetch(url, {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH}
     });
     if(!r.ok) { console.warn('[supaFetch] '+table+' status '+r.status); return []; }
     return await r.json();
@@ -2089,7 +2089,7 @@ async function supaUpsert(table, payload){
       method:'POST',
       headers:{
         'apikey':FLOWIN_SUPA_ANON,
-        'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+        'Authorization':'Bearer '+FLOWIN_AUTH,
         'Content-Type':'application/json',
         'Prefer':'resolution=merge-duplicates,return=minimal'
       },
@@ -3180,7 +3180,7 @@ function frontSave(eventId, silent){
     var payload = JSON.stringify({ cfg: e.cfg });
     fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(eventId), {
       method:'PATCH',
-      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'},
       body: payload
     }).catch(function(err){ console.warn('[frontSave] Supabase error:', err); });
   }
@@ -3201,7 +3201,7 @@ function toggleProVisib(evId, key){
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(evId), {
       method:'PATCH',
-      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'},
       body:JSON.stringify({pro_visib:e.proVisib})
     }).catch(function(err){console.warn('[proVisib]',err);});
   }
@@ -3627,7 +3627,7 @@ function crmExportBrigadeTirage(){
 var NDS_FRONT_SE = 'se-nds-2026';
 function ndsFrontRest(){ return FLOWIN_SUPA_URL + '/rest/v1/partenaires'; }
 function ndsFrontHeaders(extra){
-  var h = {'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+  var h = {'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH};
   if(extra){ for(var k in extra){ if(extra.hasOwnProperty(k)) h[k]=extra[k]; } }
   return h;
 }
@@ -3759,7 +3759,7 @@ function saveTicketBloc(pid){
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?id=eq.'+encodeURIComponent(pid), {
       method:'PATCH',
-      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'},
+      headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'},
       body: JSON.stringify({ lots: lots })
     }).then(function(r){ toast(r.ok?'Lot & conditions enregistrés · propagés aux tickets':'Écriture refusée (RLS partenaires ?)', r.ok?'success':'error'); })
       .catch(function(){ toast('Erreur réseau','error'); });
@@ -4215,7 +4215,7 @@ async function ndsDeleteJoueur(id){
   if(!confirm('Supprimer d\u00e9finitivement '+label+' ?\n\nEfface le joueur, ses parties, r\u00e9ponses, gains et parrainages. Irr\u00e9versible.')) return;
   if(!confirm('Derni\u00e8re confirmation : suppression TOTALE de '+label+' ?')) return;
   try{
-    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/admin_delete_joueur', { method:'POST', headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'}, body: JSON.stringify({p_id:id}) });
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/admin_delete_joueur', { method:'POST', headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json'}, body: JSON.stringify({p_id:id}) });
     var jr = await r.json();
     if(r.ok && jr && jr.ok){ if(typeof toast==='function') toast('Contact supprim\u00e9'); if(typeof closeDrawer==='function') closeDrawer(); state.ndsParticipants=null; loadNdsParticipants(); }
     else { if(typeof toast==='function') toast('\u00c9chec suppression'+(jr&&jr.reason?' : '+jr.reason:'')); }
@@ -4409,13 +4409,13 @@ function prospCopyScript(btn){
 function prospUpdate(id,field,val){
   var body={};body[field]=val;body.updated_at=new Date().toISOString();
   if(field==='etat')body.pas_interesse=(val==='pas_interesse');
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)})
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(body)})
     .then(function(r){if(r.ok){for(var i=0;i<state.prospection.length;i++){if(state.prospection[i].id===id){state.prospection[i][field]=val;if(field==='etat')state.prospection[i].pas_interesse=body.pas_interesse;}}toast('Enregistré');if(field==='etat'||field==='ville'||field==='type_commerce'||field==='tel')render();}else{toast('Erreur');}})
     .catch(function(){toast('Erreur réseau');});
 }
 function prospDelete(id){
   if(!confirm('Supprimer ce commerce de la liste ?'))return;
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'DELETE',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}})
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection?id=eq.'+id,{method:'DELETE',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'}})
     .then(function(r){if(r.ok){state.prospection=state.prospection.filter(function(p){return p.id!==id;});toast('Supprimé');render();}else{toast('Erreur');}})
     .catch(function(){toast('Erreur réseau');});
 }
@@ -4455,7 +4455,7 @@ function prospDoPaste(){
   if(!recs.length){toast('Aucun commerce détecté');return;}
   var payload=[];
   for(var i=0;i<recs.length;i++){payload.push({ville:ville,type_commerce:type,enseigne:recs[i].enseigne,adresse:recs[i].adresse,tel:recs[i].tel,etat:'a_contacter'});}
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection',{method:'POST',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)})
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/prospection',{method:'POST',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)})
     .then(function(r){if(r.ok){toast(payload.length+' commerces ajoutés');loadProspection();}else{toast('Erreur import');}})
     .catch(function(){toast('Erreur réseau');});
 }
@@ -4489,7 +4489,7 @@ function cgvSave(){
   var version=document.getElementById('cgvVersion').value.trim();
   var statut=document.getElementById('cgvStatut').value;
   var msg=document.getElementById('cgvSaveMsg'); if(msg) msg.textContent='Enregistrement…';
-  fetch(FLOWIN_SUPA_URL+'/rest/v1/documents_legaux?id=eq.cgv-nds-2026',{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({contenu:contenu,version:version,statut:statut,updated_at:new Date().toISOString()})})
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/documents_legaux?id=eq.cgv-nds-2026',{method:'PATCH',headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({contenu:contenu,version:version,statut:statut,updated_at:new Date().toISOString()})})
     .then(function(r){ if(!r.ok) throw new Error('http '+r.status); if(state.cgvDoc){state.cgvDoc.contenu=contenu;state.cgvDoc.version=version;state.cgvDoc.statut=statut;} if(msg) msg.textContent='✓ Enregistré'; toast('CGV enregistrées','success'); })
     .catch(function(){ if(msg) msg.textContent='Échec, réessayez'; toast('Erreur enregistrement CGV','error'); });
 }
@@ -5071,7 +5071,7 @@ async function loadEventJoueurs(evId){
   /* Toujours recharger — evJoueurs est une donnée de session */
   try {
     var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/joueurs?events=cs.{'+evId+'}&select=*&order=updated_at.desc', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH}
     });
     var rows = await r.json();
     if(!Array.isArray(rows)) rows = [];
@@ -5489,7 +5489,7 @@ function deleteEvent(id){
   saveData();
   // Supprimer dans Supabase
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
-    var H = {'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON};
+    var H = {'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH};
     fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?event_id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:H}).catch(function(){});
     fetch(FLOWIN_SUPA_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:H}).catch(function(){});
   }
@@ -5546,7 +5546,7 @@ function duplicateEvent(id){
   if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
     var H = {
       'apikey': FLOWIN_SUPA_ANON,
-      'Authorization': 'Bearer ' + FLOWIN_SUPA_ANON,
+      'Authorization': 'Bearer ' + FLOWIN_AUTH,
       'Content-Type': 'application/json',
       'Prefer': 'resolution=merge-duplicates,return=minimal'
     };
@@ -6743,7 +6743,7 @@ async function ensureSeGainForLot(lotId){
   try{
     var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/se_gains', {
       method:'POST',
-      headers:{ 'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_SUPA_ANON, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      headers:{ 'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_AUTH, 'Content-Type':'application/json', 'Prefer':'return=representation' },
       body: JSON.stringify(payload)
     });
     var data = await r.json();
@@ -6772,7 +6772,7 @@ async function sendTicketEmail(lotId){
   try{
     var r = await fetch(FLOWIN_SUPA_URL+'/functions/v1/send-ticket-gagnant', {
       method:'POST',
-      headers:{ 'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_SUPA_ANON, 'Content-Type':'application/json' },
+      headers:{ 'apikey':FLOWIN_SUPA_ANON, 'Authorization':'Bearer '+FLOWIN_AUTH, 'Content-Type':'application/json' },
       body: JSON.stringify({
         gagnant_email: j.email, gagnant_nom: j.nom,
         partenaire_nom: p?p.nom:'', lot_nom: lot.nom||lot.titre||'', lot_description: lot.description||'',
@@ -7271,7 +7271,7 @@ function deletePartenaire(id){
   if(FLOWIN_SUPA_URL) {
     fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?id=eq.'+encodeURIComponent(id), {
       method:'DELETE',
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'}
     }).catch(function(e){ console.warn('[Flowin] delete partenaire:', e); });
   }
   DATA.partenaires = DATA.partenaires.filter(function(x){ return x.id!==id; });
@@ -9190,7 +9190,7 @@ function loadSEPassages(se){
   if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.sePass[se.id]=[]; if(typeof render==='function') render(); return; }
   state.sePass[se.id]=[]; // marqueur 'en cours' pour ne pas refetch en boucle
   var url = FLOWIN_SUPA_URL+'/rest/v1/participations?event_id=in.('+ids.join(',')+')&select=*&order=created_at.desc';
-  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON} })
+  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH} })
     .then(function(r){ return r.json(); })
     .then(function(rows){ state.sePass[se.id]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
     .catch(function(){ state.sePass[se.id]=[]; if(typeof render==='function') render(); });
@@ -9201,7 +9201,7 @@ function loadJoueurParticips(id){
   if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.joueurPart[id]=[]; if(typeof render==='function') render(); return; }
   state.joueurPart[id]=null; // marqueur 'en cours'
   var url = FLOWIN_SUPA_URL+'/rest/v1/participations?joueur_id=eq.'+encodeURIComponent(id)+'&select=*&order=created_at.desc';
-  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON} })
+  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH} })
     .then(function(r){ return r.json(); })
     .then(function(rows){ state.joueurPart[id]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
     .catch(function(){ state.joueurPart[id]=[]; if(typeof render==='function') render(); });
@@ -9212,7 +9212,7 @@ function loadJoueurParrainage(extId){
   if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.joueurParr[extId]=[]; if(typeof render==='function') render(); return; }
   state.joueurParr[extId]=null;
   var url = FLOWIN_SUPA_URL+'/rest/v1/parrainage?or=(sender.eq.'+encodeURIComponent(extId)+',destinataire.eq.'+encodeURIComponent(extId)+')&select=*&order=ts.desc';
-  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON} })
+  fetch(url,{ headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH} })
     .then(function(r){ return r.json(); })
     .then(function(rows){ state.joueurParr[extId]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
     .catch(function(){ state.joueurParr[extId]=[]; if(typeof render==='function') render(); });
@@ -10290,7 +10290,7 @@ function lpDelete(ldId){
     if(FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
       fetch(FLOWIN_SUPA_URL+'/rest/v1/landings?id=eq.'+encodeURIComponent(ldId), {
         method:'DELETE',
-        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+        headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH}
       }).catch(function(e){ console.warn('[lpDelete Supabase]', e); });
     }
     toast('Landing supprimée', 'info');
@@ -11317,7 +11317,7 @@ async function supaDeleteLot(lotId){
   try {
     await fetch(FLOWIN_SUPA_URL+'/rest/v1/lots?id=eq.'+encodeURIComponent(lotId), {
       method:'DELETE',
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,'Prefer':'return=minimal'}
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'}
     });
   } catch(e){ console.error('[Flowin] supaDeleteLot FAILED', lotId, e); }
 }
@@ -12994,6 +12994,40 @@ let FLOWIN_SUPA_ANON = localStorage.getItem('flowin_supa_anon') || FLOWIN_SUPA_A
 localStorage.setItem('flowin_supa_url', FLOWIN_SUPA_URL);
 localStorage.setItem('flowin_supa_anon', FLOWIN_SUPA_ANON);
 
+// ============ AUTH ADMIN (Supabase GoTrue) ============
+var FLOWIN_ADMIN_SESSION = (function(){ try{ return JSON.parse(localStorage.getItem('flowin_admin_session')||'null'); }catch(e){ return null; } })();
+var FLOWIN_AUTH = (FLOWIN_ADMIN_SESSION && FLOWIN_ADMIN_SESSION.access_token && (FLOWIN_ADMIN_SESSION.expires_at*1000) > (Date.now()+30000)) ? FLOWIN_ADMIN_SESSION.access_token : FLOWIN_SUPA_ANON;
+function _authSaveSess(d){
+  var sess={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
+  FLOWIN_ADMIN_SESSION=sess; FLOWIN_AUTH=d.access_token; localStorage.setItem('flowin_admin_session',JSON.stringify(sess));
+}
+async function adminLogin(email,password){
+  var r=await fetch(FLOWIN_SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});
+  var d=await r.json(); if(!r.ok||!d.access_token) throw new Error(d.error_description||d.msg||d.error||'Identifiants invalides');
+  _authSaveSess(d); return true;
+}
+async function _authRefresh(){ try{ var s=FLOWIN_ADMIN_SESSION; if(!s||!s.refresh_token) return false;
+  var r=await fetch(FLOWIN_SUPA_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:s.refresh_token})});
+  if(!r.ok) return false; _authSaveSess(await r.json()); return true; }catch(e){ return false; } }
+function adminLogout(){ localStorage.removeItem('flowin_admin_session'); location.reload(); }
+// rafraîchit le token toutes les 45 min tant que l'onglet est ouvert
+setInterval(function(){ if(FLOWIN_AUTH!==FLOWIN_SUPA_ANON) _authRefresh(); }, 45*60*1000);
+// Portail de connexion : overlay bloquant si non authentifié
+function _flowinGate(){
+  if(FLOWIN_AUTH!==FLOWIN_SUPA_ANON) return; // déjà connecté
+  var ov=document.createElement('div'); ov.id='flowin-login-gate';
+  ov.style.cssText='position:fixed;inset:0;z-index:2000000;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif';
+  ov.innerHTML='<div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:28px;max-width:380px;width:100%;color:#e2e8f0"><h1 style="font-size:20px;margin:0 0 4px">&#128274; Dashboard Flowin</h1><p style="color:#94a3b8;font-size:13px;margin:0 0 18px">Connexion requise.</p><input id="_flogin_email" type="email" placeholder="E-mail" autocomplete="username" value="flowinevent@gmail.com" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;margin-bottom:10px"><input id="_flogin_pass" type="password" placeholder="Mot de passe" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:11px 13px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px"><button id="_flogin_btn" style="width:100%;margin-top:16px;padding:12px;border:none;border-radius:10px;background:#22c55e;color:#052e16;font-weight:800;font-size:15px;cursor:pointer">Se connecter</button><div id="_flogin_err" style="color:#fca5a5;font-size:13px;margin-top:10px;min-height:16px"></div></div>';
+  document.body.appendChild(ov); document.body.style.overflow='hidden';
+  var btn=document.getElementById('_flogin_btn');
+  async function doLogin(){ btn.disabled=true; document.getElementById('_flogin_err').textContent='Connexion...';
+    try{ await adminLogin(document.getElementById('_flogin_email').value.trim(), document.getElementById('_flogin_pass').value); location.reload(); }
+    catch(e){ btn.disabled=false; document.getElementById('_flogin_err').textContent='\u274c '+e.message; } }
+  btn.addEventListener('click',doLogin);
+  document.getElementById('_flogin_pass').addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_flowinGate); else _flowinGate();
+
 function saveSupaConfig(){
   const url = document.getElementById('supa-url');
   const anon = document.getElementById('supa-anon');
@@ -13015,7 +13049,7 @@ async function testSupaConnection(){
   if(!FLOWIN_SUPA_URL || !FLOWIN_SUPA_ANON) return false;
   try {
     var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/pros?limit=1', {
-      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON}
+      headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH}
     });
     return r.status < 400;
   } catch(e){ return false; }
@@ -13089,7 +13123,7 @@ function startRealtimePolling(){
       liveEvents.forEach(ev=>{
         // Comptage total participants
         fetch(FLOWIN_SUPA_URL+'/rest/v1/participations?event_id=eq.'+ev.id+'&select=count', {
-          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,
                    'Prefer':'count=exact','Range':'0-0'}
         }).then(function(r){
           var count = parseInt((r.headers.get('content-range')||'0/0').split('/')[1]||'0');
@@ -13101,7 +13135,7 @@ function startRealtimePolling(){
         // Comptage participants du JOUR (pour stats par commerce par jour)
         var todayStr = new Date().toISOString().slice(0,10);
         fetch(FLOWIN_SUPA_URL+'/rest/v1/participations?event_id=eq.'+ev.id+'&played_date=eq.'+todayStr+'&select=count', {
-          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_SUPA_ANON,
+          headers:{'apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,
                    'Prefer':'count=exact','Range':'0-0'}
         }).then(function(r){
           var countJour = parseInt((r.headers.get('content-range')||'0/0').split('/')[1]||'0');
