@@ -105,7 +105,8 @@ def logo_card(path, card_w, card_h, pad_ratio=0.16, radius_ratio=0.14):
 # ============================================================================
 PARTNERS = [
     "bergerie", "pegase", "utile", "carrosserie-gp",
-    "giordano", "charvolin", "nook", "cycles963",
+    "giordano", "charvolin", "nook",
+    # "cycles963" — SUSPENDU (ne fait pas partie de l'édition 2026)
 ]
 # Noms d'affichage — source unique (miroir de events.nom). MAJ si un partenaire change.
 NAMES = {
