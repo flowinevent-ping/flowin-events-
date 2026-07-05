@@ -13024,14 +13024,8 @@ async function _authRefresh(){ try{ var s=FLOWIN_ADMIN_SESSION; if(!s||!s.refres
 function adminLogout(){ localStorage.removeItem('flowin_admin_session'); location.reload(); }
 // rafraîchit le token toutes les 45 min tant que l'onglet est ouvert
 setInterval(function(){ if(FLOWIN_AUTH!==FLOWIN_SUPA_ANON) _authRefresh(); }, 45*60*1000);
-// Portail de connexion : redirection vers la page de connexion dédiée si non authentifié.
-// Purement synchrone (lecture localStorage) — aucune requête réseau ici, donc aucun risque de blocage.
-function _flowinGate(){
-  if(FLOWIN_AUTH!==FLOWIN_SUPA_ANON) return; // session admin valide -> accès autorisé
-  var next = encodeURIComponent(location.pathname + location.search);
-  location.replace('/admin-connexion.html?next=' + next);
-}
-_flowinGate();
+// Portail de connexion : géré par le script du <head> (premier exécuté). Pas de second contrôle ici
+// pour éviter tout renvoi après affichage du dashboard.
 
 function saveSupaConfig(){
   const url = document.getElementById('supa-url');
