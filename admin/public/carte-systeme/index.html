@@ -88,7 +88,7 @@
   <div class="zoomctl"><button id="zin">+</button><button id="zout">−</button><button id="zfit" style="font-size:13px">⤢</button></div>
 </div>
 <div id="stage"><svg id="map" xmlns="http://www.w3.org/2000/svg"><g id="scene"></g></svg></div>
-<div class="hint">Chaque <b>ligne</b> = un service · chaque <b>station</b> = un élément · les <b>correspondances</b> (verticales) = les connexions · <b>clique une station</b> pour son contenu</div>
+<div class="hint">Chaque <b>ligne</b> = une rubrique du dashboard · chaque <b>station</b> = un élément · les <b>correspondances</b> (verticales) = les connexions · <b>clique une station</b> pour son contenu</div>
 <div class="legend" id="legend"></div>
 <div id="panel">
   <div class="ph"><button class="close" id="pclose">✕</button><div class="tagrow" id="ptags"></div><h2 id="ptitle"></h2></div>
@@ -286,40 +286,39 @@ const DEEP = {"pros": {"code": [{"path": "admin/public/dashboard.html  (function
    Colonne globale par élément -> les correspondances sont des couloirs
    verticaux nets (comme un vrai plan de métro).
    ==================================================================== */
-const COL = {  // ordre gauche -> droite (position de chaque station)
- "infra-github":0,"infra-vercel":1,"infra-supabase":2,"infra-resend":3,"infra-notion":4,"maintenance":5,
- "landing-page":6,"crm-landing":7,"crm-retours":8,"prospection":9,"btob-prospects":10,
- "pros":11,"cgv":12,"partenaires":13,"nds-bon-commande":14,
- "nds-media":15,"jeux-visuels":16,"qr":17,"nds-track-qr":18,
- "events":19,"nds-front":20,"nds-carte":21,
- "jeux":22,"banques":23,"wa-modules":24,"wa-parcours":25,
- "super-events":26,"joueurs":27,"nds-participants":28,"rapports":29,"gagnants":30,
- "pilotage":31,"parametres":32,"nds-tirages":33,"secteurs":10.5,"espace-pro":11.5,"presentations":14.5,"brigade-verte":28.5,
+const COL = {  // ordre global gauche->droite (cycle de vie du produit)
+ "pilotage":0,
+ "landing-page":1,"crm-landing":2,"crm-retours":3,"prospection":4,"secteurs":5,"btob-prospects":6,
+ "pros":7,"espace-pro":8,"partenaires":9,
+ "presentations":10,"nds-bon-commande":11,"nds-media":12,"jeux-visuels":13,"qr":14,"nds-track-qr":15,"brigade-verte":16,
+ "banques":17,"jeux":18,"wa-modules":19,"wa-parcours":20,
+ "events":21,"nds-front":22,"nds-carte":23,"super-events":24,
+ "joueurs":25,"nds-participants":26,"gagnants":27,"nds-tirages":28,"rapports":29,
+ "cgv":30,"parametres":31,"maintenance":32,
+ "infra-github":33,"infra-vercel":34,"infra-supabase":35,"infra-resend":36,"infra-notion":37,
 };
+// LIGNES = les RUBRIQUES DU DASHBOARD (menu réel), dans l'ordre, à partir de l'Accueil
 const LINES = [
- {id:"fact",  label:"Facturation",     color:"#E8A400", stations:["pros","cgv","partenaires","nds-bon-commande"]},
- {id:"crm",   label:"CRM",             color:"#3F6FE4", stations:["pros","espace-pro","partenaires","joueurs","gagnants","nds-tirages","pilotage"]},
- {id:"acq",   label:"Acquisition B2B", color:"#1DA64A", stations:["landing-page","crm-landing","crm-retours","prospection","btob-prospects","secteurs","partenaires"]},
- {id:"vis",   label:"Visuels & médias",color:"#E2692A", stations:["partenaires","presentations","nds-media","jeux-visuels","qr"]},
- {id:"qr",    label:"QR codes",        color:"#0FA3A3", stations:["partenaires","nds-media","qr","nds-track-qr","events"]},
- {id:"ev",    label:"Events",          color:"#7A5AF5", stations:["events","nds-front","nds-carte","super-events"]},
- {id:"jeux",  label:"Jeux",            color:"#8B3BD8", stations:["jeux-visuels","jeux","banques","wa-modules"]},
- {id:"web",   label:"Web App joueur",  color:"#E01E7B", stations:["qr","wa-modules","wa-parcours","super-events","joueurs"]},
- {id:"rep",   label:"Reporting",       color:"#94A3B8", stations:["nds-track-qr","nds-participants","brigade-verte","rapports","joueurs"]},
- {id:"infra", label:"Infrastructure",  color:"#334155", stations:["infra-github","infra-vercel","infra-supabase","infra-resend","infra-notion","maintenance","parametres"]},
+ {id:"accueil", label:"Accueil",         color:"#5b62e6", stations:["pilotage"]},
+ {id:"crm",     label:"CRM",             color:"#db1877", stations:["pros","espace-pro","partenaires","joueurs","gagnants"]},
+ {id:"events",  label:"Events",          color:"#0FA3A3", stations:["pros","events","super-events"]},
+ {id:"nds",     label:"NDS 2026",        color:"#E2692A", stations:["partenaires","presentations","nds-bon-commande","nds-media","qr","nds-track-qr","brigade-verte","nds-front","nds-carte","nds-participants","nds-tirages"]},
+ {id:"acq",     label:"Acquisition B2B", color:"#C98700", stations:["landing-page","crm-landing","crm-retours","prospection","secteurs","btob-prospects","partenaires"]},
+ {id:"jeux",    label:"Jeux",            color:"#8B3BD8", stations:["jeux-visuels","banques","jeux","wa-modules","wa-parcours","events"]},
+ {id:"rep",     label:"Reporting",       color:"#16A34A", stations:["joueurs","nds-participants","rapports"]},
+ {id:"systeme", label:"Système",         color:"#64748B", stations:["cgv","parametres","maintenance"]},
+ {id:"infra",   label:"Infrastructure",  color:"#334155", stations:["maintenance","infra-github","infra-vercel","infra-supabase","infra-resend","infra-notion"]},
 ];
-// y (rangée) de chaque ligne
 const LINEDESC={
- fact:"Comment on facture un partenaire : de sa fiche au bon de commande, puis la signature (qui crée automatiquement la facture), jusqu'à l'envoi par email.",
- crm:"Le carnet d'adresses du projet : les pros et leurs partenaires, les joueurs, les gagnants — qui est qui et qui est relié à quoi. Inclut l'espace Pro et les tirages.",
- acq:"Comment on trouve et convertit des clients : landing pages, prospection, retours entrants, segmentation par secteur, jusqu'à la fiche partenaire.",
- vis:"Tout ce qui se voit : présentations partenaires, affiches, vidéos, QR — produits à partir de la fiche partenaire.",
- qr:"Les QR : station (physique, 1 jeu/jour) et réseaux (digital, usage unique), leur suivi (Track QR) et la règle de vérification pyzbar.",
- ev:"La brique de base : un event = une station/un jeu rattaché à UN pro ; un super-event fédère plusieurs events et pros (donc partenaires).",
- jeux:"Les jeux et leurs règles : les modules (nds2026, quiz, spin, tombola…), le barème (4 bonnes réponses = 1 ticket) et les banques de questions.",
- web:"Le parcours du festivalier sur son téléphone : scanner un QR, jouer, laisser sa fiche, gagner un ticket. Inclut le sondage Brigade Verte.",
+ accueil:"Le point d'entrée du dashboard : la vue d'accueil (pilotage) avec les events en cours et les cartes de synthèse.",
+ crm:"Le carnet d'adresses : les pros (et leur espace live), les joueurs, les gagnants, et les partenaires — qui est qui et qui est relié à quoi.",
+ events:"La brique de base : un event = une station/un jeu rattaché à UN pro ; un super-event fédère plusieurs events et pros (donc partenaires).",
+ nds:"L'univers NDS 2026 : le front du jeu, la carte des stations, les participants, le suivi QR, les bons & factures, les vidéos & médias, les tirages, les présentations partenaires et la Brigade Verte.",
+ acq:"Comment on acquiert des clients : landing pages, secteurs ciblés, prospection, retours entrants, jusqu'à la création de la fiche partenaire.",
+ jeux:"Les jeux et leurs règles : les modules (nds2026, quiz, spin…), les banques de questions, le parcours joueur et l'habillage.",
  rep:"Les données et le suivi : participations, sondage Brigade Verte, rapports et exports.",
- infra:"Les outils sous le capot : GitHub (code), Vercel (hébergement), Supabase (données+emails), Notion (notes) et la maintenance."
+ systeme:"Le système : CGV/légal, paramètres, et la maintenance.",
+ infra:"Sous le capot (hors menu, côté technique) : GitHub (code), Vercel (hébergement), Supabase (données+emails), Resend, Notion — reliés par la Maintenance."
 };
 const LINEY={}; LINES.forEach((l,i)=>LINEY[l.id]=140+i*88);
 const X0=120, CGAP=58;
