@@ -133,7 +133,14 @@ def ic_euro(sz=72):
     d.text((sz//2-d.textlength("€",font=f("ExtraBold",56))/2,4),"€",font=f("ExtraBold",56),fill=WHITE)
     return im
 
-def pastille(img,d,y,accent,icon,label,sub=None,ph=None):
+def ic_screen(sz=72):
+    im=Image.new("RGBA",(sz,sz),(0,0,0,0)); d=ImageDraw.Draw(im)
+    d.rounded_rectangle([8,12,sz-8,sz-24],5,outline=WHITE,width=5)
+    d.line([sz//2,sz-24,sz//2,sz-12],fill=WHITE,width=5)
+    d.line([sz//2-14,sz-8,sz//2+14,sz-8],fill=WHITE,width=5)
+    return im
+
+def pastille(img,d,y,accent,icon,label,sub=None,ph=None,ls=None):
     x0,x1=60,W-60; ph=ph or (104 if sub else 96)
     img.alpha_composite(rounded((x1-x0,ph),26,(20,28,52,240)),(x0,y))
     img.alpha_composite(rounded((10,ph-24),5,accent+(255,)),(x0+12,y+12))
@@ -142,10 +149,12 @@ def pastille(img,d,y,accent,icon,label,sub=None,ph=None):
     ic=icon(72); badge.alpha_composite(ic,((bd-72)//2,(bd-72)//2)); img.alpha_composite(badge,(bx,by))
     tx=bx+bd+26
     if sub:
-        d.text((tx,y+22),label,font=f("ExtraBold",42),fill=WHITE)
-        d.text((tx,y+66),sub,font=f("Medium",27),fill=GREY)
+        lf=f("ExtraBold",ls or 42); sf=f("Medium",int((ls or 42)*0.62)); lh=(ls or 42)+8; sh=int((ls or 42)*0.62)+8
+        ty=y+(ph-(lh+sh))//2
+        d.text((tx,ty),label,font=lf,fill=WHITE)
+        d.text((tx,ty+lh),sub,font=sf,fill=GREY)
     else:
-        d.text((tx,y+(ph-46)//2),label,font=f("ExtraBold",44),fill=WHITE)
+        d.text((tx,y+(ph-(ls or 44))//2-4),label,font=f("ExtraBold",ls or 44),fill=WHITE)
 
 # ================= SCENES =================
 def scene_intro():
@@ -197,23 +206,21 @@ def scene_comment():
 def scene_gagner():
     img=bg_base(); d=ImageDraw.Draw(img); header(img)
     tc(d,W//2,246,"À GAGNER",f("Bold",34),AMBER,sp=6)
-    pastille(img,d,360,MAGENTA,ic_note,"Des places de concert",sub="à gagner chaque soir du festival",ph=130)
-    pastille(img,d,516,AMBER,ic_euro,"Des bons d'achat",sub="chez les commerces partenaires",ph=130)
-    # rappel tickets
-    pastille(img,d,672,TEAL,ic_ticket,"+ des tickets tombola",sub="pour le grand tirage final",ph=130)
+    pastille(img,d,486,MAGENTA,ic_note,"Des places de concert",sub="à gagner chaque soir du festival",ph=200,ls=56)
+    pastille(img,d,742,AMBER,ic_euro,"Des bons d'achat",sub="chez les commerces partenaires",ph=200,ls=56)
     qr_block(img,d); img.convert("RGB").save(f"{OUT}/panel_gagner.png",quality=95); print("gagner OK")
 
 def scene_ouj():
     img=bg_base(); d=ImageDraw.Draw(img); header(img)
     tc(d,W//2,235,"OÙ JOUER ?",f("Bold",32),AMBER,sp=8)
-    tc(d,W//2,280,"Rendez-vous sur la carte",f("ExtraBold",60),WHITE)
-    d.rounded_rectangle([W//2-120,372,W//2+120,380],4,fill=AMBER)
-    d.text((70,430),"CE SOIR, AU FESTIVAL",font=f("Bold",28),fill=AMBER)
-    pastille(img,d,476,AMBER,ic_ticket,"Aux caisses")
-    pastille(img,d,586,MAGENTA,ic_glass,"Aux bars")
-    pastille(img,d,696,TEAL,ic_leaf,"Avec la Brigade Verte")
-    d.text((70,826),"ET CHEZ LES COMMERCES",font=f("Bold",28),fill=AMBER)
-    pastille(img,d,872,BLUE,ic_shop,"Tous les commerces",sub="tous les commerces participants")
+    tc(d,W//2,284,"Rendez-vous aux stations de jeux",f("ExtraBold",46),WHITE)
+    d.rounded_rectangle([W//2-120,360,W//2+120,368],4,fill=AMBER)
+    _py=440; _pg=104
+    pastille(img,d,_py,          AMBER,   ic_ticket,"Aux caisses")
+    pastille(img,d,_py+_pg,      MAGENTA, ic_glass, "Aux bars")
+    pastille(img,d,_py+2*_pg,    TEAL,    ic_leaf,  "À la Brigade Verte")
+    pastille(img,d,_py+3*_pg,    BLUE,    ic_screen,"Aux écrans scène")
+    pastille(img,d,_py+4*_pg+22,(139,92,246),ic_shop,"Chez les partenaires participants",ls=38)
     qr_block(img,d); img.convert("RGB").save(f"{OUT}/panel_ouj.png",quality=95); print("ouj OK")
 
 def scene_finale():
