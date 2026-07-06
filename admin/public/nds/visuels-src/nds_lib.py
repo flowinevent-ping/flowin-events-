@@ -104,8 +104,8 @@ def logo_card(path, card_w, card_h, pad_ratio=0.16, radius_ratio=0.14):
 # Tous les generateurs (forex, A4, videos, montage) lisent CETTE liste — plus de drift.
 # ============================================================================
 PARTNERS = [
-    "bergerie", "pegase", "utile", "carrosserie-gp",
-    "giordano", "charvolin", "nook",
+    "bergerie", "pegase", "utile", "nook",
+    "giordano", "charvolin", "carrosserie-gp",
     # "cycles963" — SUSPENDU (ne fait pas partie de l'édition 2026)
 ]
 # Noms d'affichage — source unique (miroir de events.nom). MAJ si un partenaire change.
