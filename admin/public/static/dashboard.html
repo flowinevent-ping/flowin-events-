@@ -4547,6 +4547,9 @@ function renderNdsMedia(){
   var fx='<div class="text-xs" style="line-height:2">';
   ['caisse-1','caisse-2','bar-1','bar-2','bar-3'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
   fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
+  var af='<div class="text-xs" style="line-height:2">';
+  ['caisse-1','caisse-2','bar-1','bar-2','bar-3','brigade-verte-1','brigade-verte-2'].forEach(function(c){ af+='<b>'+c+'</b> : '+lnk(cb+'/nds/kit-digital/nds/stations/station_a4_'+c+'.pdf'+VER,'PDF A4','#E8A33C')+' · '+lnk(cb+'/nds/kit-digital/nds/stations/station_'+c+'_editable_A4.pptx'+VER,'PPTX A4 éditable','#7CC6FF')+' · '+lnk(cb+'/nds/kit-digital/nds/stations/station_'+c+'_editable_A1.pptx'+VER,'PPTX A1 éditable','#7CC6FF')+'<br>'; });
+  af+='</div>'; h+=card('🖼️ Affiches station (A4 · A1 éditables)',af);
   var kt='';
   nds.forEach(function(p){ var s=(p.id||'').replace('pt-','');
     kt+='<div style="border:1px solid var(--sa-border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">';
