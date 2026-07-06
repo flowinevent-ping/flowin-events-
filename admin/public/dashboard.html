@@ -4522,11 +4522,13 @@ function renderNdsMedia(){
   nds.forEach(function(p){ var s=(p.id||'').replace('pt-',''); a4+='<div style="text-align:center"><img src="'+cb+'/nds/visuels/nds_a4_'+s+'.png'+VER+'" style="width:100%;border-radius:8px;border:1px solid var(--sa-border)" onerror="this.style.display=\'none\'"><div class="text-xs" style="margin:6px 0 4px;font-weight:700">'+esc(p.nom)+'</div>'+lnk(cb+'/nds/visuels/nds_a4_'+s+'.png'+VER,'⬇ A4')+' · '+lnk(cb+'/nds/kit-digital/svg/nds_a4_'+s+'.svg','✏️ SVG','#E8A33C')+'</div>'; });
   a4+='</div>'; h+=card('📄 Affiches A4 ('+nds.length+') — version à jour',a4);
   function vrow(items){ var s='<div>'; items.forEach(function(it){ s+=vid(cb+it[0]+VER,it[1],it[2]); }); return s+'</div>'; }
-  h+=card('🎬 Vidéo écran (QR → station écran)',vrow([
-    ['/nds/kit-digital/nds/video-ecran-8-partenaires.mp4','Vidéo écran — partenaires',true]
+  h+=card('🎬 Vidéo écran (QR → station écran)','<div class="text-xs" style="color:var(--sa-muted);line-height:1.6;margin-bottom:10px">Vidéo diffusée sur les <b>écrans du festival</b>. Le QR intégré pointe vers la <b>station de jeu écran</b> (<code>ev-nds-ecrans</code>) — flash <b>1×/jour</b> par joueur.</div>'+vrow([
+    ['/nds/kit-digital/nds/video-ecran-8-partenaires.mp4','Vidéo écran — Grand Jeu NDS',true]
   ]));
   var lj=[['bergerie','Bergerie'],['pegase',"Auto-École de l'ARA"],['utile','Utile'],['carrosserie-gp','Carrosserie GP'],['giordano','Giordano'],['charvolin','Allianz Charvolin'],['nook','Nook Café']];
-  h+=card('📱 Vidéo lancement jeux — 1 par partenaire (QR réseaux, usage unique)',vrow(lj.map(function(p){ return ['/nds/kit-digital/'+p[0]+'/video-'+p[0]+'-9x16.mp4',p[1],true]; })));
+  var ljIntro='<div class="text-xs" style="color:var(--sa-muted);line-height:1.6;margin-bottom:10px">1 vidéo par commerce partenaire, à diffuser sur ses réseaux (Insta / Facebook) et ses écrans. Le QR intégré est le <b>QR réseaux du partenaire</b> : il pointe vers <b>sa</b> station de jeu et est à <b>usage unique</b> par joueur. Le texte prêt à copier-coller est lié sous chaque vidéo.</div>';
+  var ljHtml=ljIntro+'<div>'+lj.map(function(p){ var vu=cb+'/nds/kit-digital/'+p[0]+'/video-'+p[0]+'-9x16.mp4'+VER; var tu=cb+'/nds/kit-digital/'+p[0]+'/reseaux-texte.md'; return '<div style="display:inline-block;vertical-align:top;margin:0 12px 14px 0;width:190px"><video src="'+vu+'" controls preload="metadata" playsinline style="width:100%;border-radius:10px;border:1px solid var(--sa-border);background:#000;display:block"></video><div class="text-xs" style="margin:5px 0 3px;font-weight:700">'+p[1]+'</div>'+lnk(vu,'⬇ Vidéo')+' · '+lnk(tu,'📱 Texte à poster','#E8A33C')+'</div>'; }).join('')+'</div>';
+  h+=card('📱 Vidéo lancement jeux — 1 par partenaire (QR réseaux, usage unique)',ljHtml);
   var fx='<div class="text-xs" style="line-height:2">';
   ['caisse-1','caisse-2','bar-1','bar-2','bar-3'].forEach(function(c){ fx+=lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.png'+VER,'⬇ Forex '+c+' (PNG)','#E8A33C')+' · '+lnk(cb+'/nds/visuels/forex/forex_70x70_'+c+'.pdf','PDF')+'<br>'; });
   fx+='</div>'; h+=card('🪧 Panneaux forex (70×70)',fx);
@@ -4577,7 +4579,7 @@ function renderMaintenance(){
   h+=row('Base assets',lnk(base,'flowin-events.vercel.app'));
   h+='</div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px"><div class="section-h" style="margin-top:0">🎮 Parcours de test (stations NDS)</div><div class="text-xs" style="line-height:2">';
-  ['bergerie','pegase','utile','carrosserie-gp','giordano','charvolin','nook','cycles963'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
+  ['bergerie','pegase','utile','carrosserie-gp','giordano','charvolin','nook'].forEach(function(s){ h+=lnk(base+'/parcours/quiz?ev=ev-nds-'+s,'▶ Quiz '+s)+'<br>'; });
   h+=lnk(base+'/parcours/nds2026?ev=ev-nds-digitale','▶ Parcours festival (digitale)')+'<br></div></div>';
   h+='<div style="background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:12px;padding:14px 16px"><div class="section-h" style="margin-top:0">📋 Notes</div><div class="text-xs text-muted" style="line-height:1.7">Advisors sécurité Supabase : 0 ERROR au dernier scan · durcissement RLS avancé prévu post-festival.<br>Supabase FREE → passer Pro avant le 9/07 (risque pause auto 7 j d’inactivité).<br>Resend : domaine flowin.events à vérifier pour débloquer les emails gagnants.</div></div>';
   h+='</div>'; return h;
