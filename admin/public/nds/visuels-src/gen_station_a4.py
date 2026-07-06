@@ -53,10 +53,8 @@ def qr_card(img, qr_path, cx, cy, qsz):
 
 # ---- ordre des sponsors : Auto-Ecole de l'ARA (pegase) AU CENTRE ----
 def sponsor_order():
-    base=[s for s in L.PARTNERS if s!='pegase']
-    mid=len(base)//2
-    order=base[:mid]+(['pegase'] if 'pegase' in L.PARTNERS else [])+base[mid:]
-    return order
+    # 5 sponsors demandes, Auto-Ecole de l'ARA (pegase) AU CENTRE
+    return ['utile','carrosserie-gp','pegase','charvolin','nook']
 
 def sponsor_strip(img, cy):
     d=ImageDraw.Draw(img,"RGBA")
@@ -98,8 +96,11 @@ def station_a4(station_id, station_label, fname):
     # bandeau sponsors (ARA au centre)
     sponsor_strip(img, H*0.760)
     # bas de page
-    L.ctext(img, W/2, H*0.902, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", L.font(k(28),700), (150,158,182))
-    L.ctext(img, W/2, H*0.938, "flowinevent@gmail.com · 06 16 35 49 36", L.font(k(28),700), (150,158,182))
+    L.ctext(img, W/2, H*0.895, "JEU GRATUIT · SANS OBLIGATION D'ACHAT", L.font(k(28),700), (150,158,182))
+    # logo Flowin (bas centre)
+    _flw=Image.open("/home/claude/repo/admin/public/nds/assets/flowin_logo.png").convert("RGBA")
+    _fw=int(W*0.24); _fh=int(_fw*_flw.height/_flw.width); _flw=_flw.resize((_fw,_fh),Image.LANCZOS)
+    img.alpha_composite(_flw,(int(W/2-_fw/2),int(H*0.935)))
     p=f"{OUT}/{fname}.png"; img.convert("RGB").save(p, quality=95, dpi=(300,300)); return p
 
 if __name__=="__main__":
@@ -107,7 +108,9 @@ if __name__=="__main__":
               ("ev-nds-caisse-2","Caisse 2","station_a4_caisse-2"),
               ("ev-nds-bar-1","Bar 1","station_a4_bar-1"),
               ("ev-nds-bar-2","Bar 2","station_a4_bar-2"),
-              ("ev-nds-bar-3","Bar 3","station_a4_bar-3")]
+              ("ev-nds-bar-3","Bar 3","station_a4_bar-3"),
+              ("ev-nds-tablette-1","Brigade Verte 1","station_a4_brigade-verte-1"),
+              ("ev-nds-tablette-2","Brigade Verte 2","station_a4_brigade-verte-2")]
     only=sys.argv[1] if len(sys.argv)>1 else None
     for sid,lbl,fn in stations:
         if only and only not in fn: continue
