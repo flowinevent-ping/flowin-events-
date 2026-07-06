@@ -21,7 +21,13 @@ W, H = 1080, 1920
 
 BG=(8,16,29); MAGENTA=(230,24,127); AMBER=(244,181,68); TEAL=(45,212,160)
 BLUE=(66,133,244); WHITE=(255,255,255); GREY=(176,186,205)
-PARTNERS=["bergerie","pegase","utile","carrosserie-gp","giordano","charvolin","nook","cycles963"]
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+try:
+    import nds_lib as _L
+    PARTNERS=list(_L.PARTNERS)   # SOURCE UNIQUE DE VERITE (nds_lib.PARTNERS)
+except Exception:
+    PARTNERS=["bergerie","pegase","utile","carrosserie-gp","giordano","charvolin","nook"]  # fallback : 7 actifs (sans cycles963)
 QR_URL="https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-ecrans"
 
 

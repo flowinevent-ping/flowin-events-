@@ -11,7 +11,7 @@ supports étaient oubliés (typiquement les vidéos). Désormais il y a **une se
 ```python
 PARTNERS = [
     "bergerie", "pegase", "utile", "carrosserie-gp",
-    "giordano", "alafut", "charvolin", "dekra",
+    "giordano", "charvolin", "nook",
 ]
 ```
 
@@ -63,7 +63,7 @@ frame-by-frame de toute la vidéo (~1 h 45). Désormais deux opérations rapides
 Le mur de logos est sur la source unique `nds_lib.PARTNERS` (comme forex/A4/autres vidéos).
 - Éditer `PARTNERS` dans `nds_lib.py` (1 ligne) + déposer `partenaires/<slug>.png`.
 - Re-rendre **uniquement** le clip mur-de-logos (156 frames, `render_partners_v2.py`,
-  désormais via `L.logo_grid(L.PARTNERS)` — 0 coordonnée à toucher, DEKRA inclus).
+  désormais via `L.logo_grid(L.PARTNERS)` — 0 coordonnée à toucher).
 - `NOQR=1 python3 render_partners_v2.py 0 156` → clip MASTER **sans QR**.
 
 ### 2. Attribuer une vidéo à UN pro avec SON QR  (→ ~30 s par pro, scan vérifié)
@@ -72,7 +72,7 @@ Le QR n'est plus « cuit » dans les frames : il est apposé en **1 passe ffmpeg
 # 1 pro :
 python3 stamp_pro.py <master_sans_qr.mp4> <slug> out/<slug>.mp4 --mode reseaux --window 1:6
 # tous les pros (boucle, ~4 min pour 8) :
-for s in bergerie pegase utile carrosserie-gp giordano alafut charvolin dekra; do
+for s in bergerie pegase utile carrosserie-gp giordano charvolin nook; do
   python3 stamp_pro.py master.mp4 $s out/$s.mp4 --mode reseaux ; done
 # QR festival générique :
 python3 stamp_pro.py master.mp4 digitale out/digitale.mp4 --mode digitale
@@ -89,4 +89,4 @@ overlay ffmpeg (`--at X:Y`, `--window A:B`) → **audio du master conservé** (`
 
 > Vidéo « complete » bergerie (avec musique CapCut) : `build_bergerie_video_test.py <src> <out> <slug>`
 > suit déjà ce principe (1 passe ffmpeg, audio intact). Il ne reste qu'à régénérer le clip
-> mur-de-logos en 8 logos (DEKRA) puis stamper le QR pro voulu.
+> mur-de-logos en 7 logos (nds_lib.PARTNERS) puis stamper le QR pro voulu.
