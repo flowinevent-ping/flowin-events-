@@ -541,8 +541,8 @@ function exportPdf(){
   y+=_pbh+3.5;
   var ld=so('.offer-lotdesc'),le=so('.offer-lotemis'),lu=so('.offer-lotuse');
   if(ld||le||lu){ T('LOT - DESCRIPTIF & CONDITIONS',x+3,y,7.5,'bold',gold); y+=4.5;
-    if(ld){T('Descriptif : ',x+3,y,8.5,'bold',mut);T(ld,x+24,y,8.5,'normal',ink);y+=4.3;}
-    if(le){T('Validite : ',x+3,y,8.5,'bold',mut);T(le,x+24,y,8.5,'normal',ink);y+=4.3;}
+    if(ld){T('Descriptif : ',x+3,y,8.5,'bold',mut);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(ink[0],ink[1],ink[2]);var _dl=doc.splitTextToSize(S(ld),CW-30);_dl.forEach(function(ln,ix){doc.text(ln,x+24,y+ix*4.1);});y+=Math.max(4.3,_dl.length*4.1);}
+    if(le){T('Validite : ',x+3,y,8.5,'bold',mut);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(ink[0],ink[1],ink[2]);var _le=doc.splitTextToSize(S(le),CW-30);_le.forEach(function(ln,ix){doc.text(ln,x+24,y+ix*4.1);});y+=Math.max(4.3,_le.length*4.1);}
     if(lu){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(ink[0],ink[1],ink[2]);var _lw=doc.splitTextToSize(S('Utilisation : '+lu),CW-8);_lw.forEach(function(ln){doc.text(ln,x+3,y);y+=4.1;});} y+=1.5; }
   var mention=so('.offer-mentiontxt');
   if(mention){
