@@ -472,12 +472,14 @@
       <button type="button" id="saveBtn" class="btn-primary" style="background:#3B5CC4">&#128190; Enregistrer les modifications</button>
       <button type="button" id="sendClientBtn" class="btn-primary" style="background:#1D9E75">&#128233; Enregistrer &amp; envoyer au client (à faire signer)</button>
       <button type="button" id="submitBtn" class="btn-primary" style="background:#3B5CC4">Signer maintenant (client présent)</button>
+      <a href="#" id="factureBtn" class="btn-primary" style="background:#7C2D92" target="_blank" rel="noopener">&#129534; Éditer la facture (reprend ce bon)</a>
       <span id="status" class="statusmsg"></span>
     </div>
     <div class="actions viewonly" style="flex-wrap:wrap;gap:10px">
       <a href="#" id="dlBtn" class="btn-primary" onclick="exportPdf();return false;">&#128229; Télécharger en PDF (A4)</a>
       <button type="button" id="copyLinkBtn" class="btn-primary" style="background:#3B5CC4">&#128203; Copier le lien à envoyer au client</button>
       <a href="#" id="mailClientBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer par email au client</a>
+      <a href="#" id="factureBtnV" class="btn-primary" style="background:#7C2D92" target="_blank" rel="noopener">&#129534; Éditer la facture</a>
       <span style="font-size:12px;color:var(--teal)">✓ Bon de commande signé et enregistré</span>
     </div>
     <div class="actions signonly">
@@ -763,6 +765,7 @@ function exportPdf(){
 
   // --- Mode lecture (?id=) : charge le doc rempli + signe ---
   var viewId=qs('id');
+  (function(){ var _fid=qs('id'); if(_fid){ ['factureBtn','factureBtnV'].forEach(function(bid){ var b=document.getElementById(bid); if(b) b.href='/facture-nds.html?devis='+encodeURIComponent(_fid); }); } })();
   var EDIT_MODE=!!(viewId && qs('edit')==='1');
   var prefillSlug = (!viewId) ? qs('prefill') : null;
   function fillEditable(d){
@@ -785,7 +788,7 @@ function exportPdf(){
       }
     }
     computeTotals();
-    setStatus('Mode \\u00e9dition \\u2014 bon '+d.id+'. Modifie puis \\u00ab Enregistrer & envoyer au client \\u00e0 faire signer \\u00bb.','ok');
+    setStatus('Mode édition — bon '+d.id+'. Modifie puis « Enregistrer & envoyer au client à faire signer ».','ok');
   }
   if(prefillSlug){
     fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}})
