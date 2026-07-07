@@ -1984,11 +1984,11 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
       +'<div class="text-xs text-muted">'+esc(b.id)+(b.date_signature?' \u00b7 sign\u00e9 '+esc(b.date_signature):'')+' \u00b7 '+money(b.montant_ttc)+' TTC</div></div>'
       +((b.statut==='signe'||b.statut==='sign\u00e9')?'':'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-right:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'&edit=1" target="_blank" rel="noopener">\u270f\ufe0f \u00c9diter / Valider</a>')
       +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Lien client &#8599;</a>'
-      +((b.statut==='signe'||b.statut==='sign\u00e9')?'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?devis='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">\u00c9diter facture</a>':'')
+      +'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?devis='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">\ud83e\uddfe Facture</a>'
       +'</div>';
   }); }
   h+='<div class="section-h" style="margin-top:14px">\ud83d\udcc4 Factures'+(facs.length?' ('+facs.length+')':'')+'</div>';
-  if(!facs.length){ h+='<div class="card" style="margin:0">Aucune facture \u00e9mise. La facture est g\u00e9n\u00e9r\u00e9e automatiquement \u00e0 la signature du bon.</div>'; }
+  if(!facs.length){ h+='<div class="card" style="margin:0">Aucune facture \u00e9mise. Utilise le bouton \ud83e\uddfe Facture d\'un bon ci-dessus pour la g\u00e9n\u00e9rer/\u00e9diter.</div>'; }
   else { facs.forEach(function(f){
     var bonId=(f.client&&f.client.bon_id)?f.client.bon_id:'';
     h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
