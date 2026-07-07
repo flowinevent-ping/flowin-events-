@@ -3777,6 +3777,38 @@ function saveTicketBloc(pid){
       .catch(function(){ toast('Erreur réseau','error'); });
   } else { toast('Config Supabase absente','error'); }
 }
+window.ptAddOwnLot=function(pid){
+  var p=(DATA.partenaires||[]).find(function(x){return x.id===pid;}); if(!p) return;
+  var nom=prompt('Descriptif du lot :',''); if(nom===null||!nom.trim()) return;
+  var valeur=prompt('Valeur (ex: 45 €) :','')||'';
+  var nb=parseInt(prompt('Quantité :','1'),10)||1;
+  var conditions=prompt('Conditions (optionnel) :','')||'';
+  p.lots=Array.isArray(p.lots)?p.lots:[];
+  p.lots.push({nom:nom.trim(),valeur:valeur,nb:nb,conditions:conditions});
+  _ptSaveLots(p);
+};
+window.ptEditOwnLot=function(pid,idx){
+  var p=(DATA.partenaires||[]).find(function(x){return x.id===pid;}); if(!p||!Array.isArray(p.lots)||!p.lots[idx]) return;
+  var l=p.lots[idx];
+  var nom=prompt('Descriptif du lot :',l.nom||''); if(nom===null) return;
+  var valeur=prompt('Valeur :',(l.valeur!=null?String(l.valeur):''))||'';
+  var nb=parseInt(prompt('Quantité :',String(l.nb||l.quantite||1)),10)||1;
+  var conditions=prompt('Conditions :',l.conditions||'')||'';
+  p.lots[idx]=Object.assign({},l,{nom:nom,valeur:valeur,nb:nb,conditions:conditions});
+  _ptSaveLots(p);
+};
+window.ptDeleteOwnLot=function(pid,idx){
+  var p=(DATA.partenaires||[]).find(function(x){return x.id===pid;}); if(!p||!Array.isArray(p.lots)) return;
+  if(!confirm('Supprimer ce lot ?')) return;
+  p.lots.splice(idx,1); _ptSaveLots(p);
+};
+function _ptSaveLots(p){
+  try{ if(typeof saveData==='function') saveData(); }catch(e){}
+  if(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON){
+    fetch(FLOWIN_SUPA_URL+'/rest/v1/partenaires?id=eq.'+encodeURIComponent(p.id),{method:'PATCH',headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'return=minimal'},body:JSON.stringify({lots:p.lots})}).then(function(r){ toast(r.ok?'Lots enregistrés':'Écriture refusée (RLS partenaires ?)',r.ok?'success':'error'); }).catch(function(){ toast('Erreur réseau','error'); });
+  }
+  try{ renderDrawer(); }catch(e){}
+}
 function renderNdsBonCommande(){
   var h='<div class="page">';
   h+='<div class="page-header"><div><div class="page-title">&#129534; Bons de commande &amp; Factures NDS 2026</div><div class="page-subtitle">Édite les bons (n° FL-2026-XXXX) et les factures (n° FL-2026-XXXX-01, même modèle). Bon et facture se rangent automatiquement dans la fiche du partenaire. Envoi client + copie auto à flowinevent@gmail.com.</div></div></div>';
@@ -7159,13 +7191,17 @@ html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
   } else if(state.drawer.tab==='lots'){
     html += '<div class="section-h">'+lots.length+' lot'+(lots.length>1?'s':'')+'</div>';
     if(lots.length===0) html += '<div class="empty-block"><div class="d">Aucun lot fourni.</div></div>';
-    else lots.forEach(function(l){
+    else { var _oi=-1;
+      lots.forEach(function(l){
       var e = findEvent(l.eventId||l.event_id);
+      var isOwn = !!l._own; if(isOwn) _oi++; var oi=_oi;
       html += '<div style="padding:12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px">'
            + '<div class="flex flex-between mb-2"><div class="fw-700">'+esc(l.nom||l.titre||'Lot')+(l.quantite>1?' x'+l.quantite:'')+'</div><div>'+(l.valeur||0)+' €</div></div>'
-           + '<div class="text-xs text-muted">'+(e?'<a onclick="openDrawerFor(\'event\',\''+e.id+'\')">'+esc(e.nom)+'</a>':'-')+(l.retire?' · <span class="chip live">Retiré</span>':'')+'</div>'
+           + '<div class="text-xs text-muted">'+(e?'<a onclick="openDrawerFor(\'event\',\''+e.id+'\')">'+esc(e.nom)+'</a>':(isOwn?'Lot propre au partenaire':'-'))+(l.retire?' · <span class="chip live">Retiré</span>':'')+'</div>'
+           + (isOwn?'<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-sm" style="font-size:11px" onclick="ptEditOwnLot(\''+esc(p.id)+'\','+oi+')">✏ Modifier</button><button class="btn btn-sm btn-danger" style="font-size:11px" onclick="ptDeleteOwnLot(\''+esc(p.id)+'\','+oi+')">× Supprimer</button></div>':'')
            + '</div>';
-    });
+    }); }
+    html += '<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="ptAddOwnLot(\''+esc(p.id)+'\')">+ Ajouter un lot</button></div>';
 
   /* ══════════════════════════════ TAB EVENTS ══════════════════════════════ */
   } else if(state.drawer.tab==='events'){
