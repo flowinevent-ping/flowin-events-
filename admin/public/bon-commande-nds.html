@@ -351,7 +351,7 @@
           </div>
           <div class="offer-lotbox">
             <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
-            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Descriptif du lot</label><textarea class="offer-lotdesc fld-area" rows="2" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></textarea></div>
             <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
             <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
           </div>
@@ -383,7 +383,7 @@
           </div>
           <div class="offer-lotbox">
             <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
-            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Descriptif du lot</label><textarea class="offer-lotdesc fld-area" rows="2" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></textarea></div>
             <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
             <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
           </div>
@@ -414,7 +414,7 @@
           </div>
           <div class="offer-lotbox">
             <div class="olb-ttl">Lot &mdash; descriptif &amp; conditions</div>
-            <div class="kv"><label>Descriptif du lot</label><input class="offer-lotdesc fld" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></div>
+            <div class="kv"><label>Descriptif du lot</label><textarea class="offer-lotdesc fld-area" rows="2" autocomplete="off" placeholder="ex. : bon d&rsquo;achat &agrave; valoir dans votre &eacute;tablissement"></textarea></div>
             <div class="kv"><label>Conditions d&rsquo;&eacute;mission / validit&eacute;</label><input class="offer-lotemis fld" autocomplete="off" placeholder="ex. : &agrave; retirer sur pr&eacute;sentation du gain &middot; valable jusqu&rsquo;au 31/12/2026"></div>
             <div class="kv"><label>Conditions d&rsquo;utilisation</label><textarea class="offer-lotuse fld-area" placeholder="ex. : non cumulable, non remboursable, une seule utilisation&hellip;"></textarea></div>
           </div>
@@ -753,7 +753,7 @@ function exportPdf(){
         var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n° '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois signé, vous en recevez une copie.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 06 16 35 49 36';
         try{ if(navigator.clipboard) navigator.clipboard.writeText('Objet : '+subject+'\n\n'+body); }catch(e){}
         setStatus('Bon '+rec.id+' enregistré. E-mail préparé pour '+(to||'le client')+' avec le lien de signature. Si le corps est vide dans ton webmail, le message est déjà copié — colle-le (Cmd/Ctrl+V). Lien : '+lien,'ok');
-        location.href='mailto:'+to+'?cc=flowinevent@gmail.com&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+        window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(to)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');
       });
     });
   }
@@ -876,7 +876,7 @@ function exportPdf(){
         var _mb=$('mailClientBtn');
         if(_mb){
           var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 06 16 35 49 36';
-          _mb.href='mailto:'+encodeURIComponent(d.email||'')+'?cc=flowinevent@gmail.com&subject='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
+          _mb.target='_blank'; _mb.href='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(d.email||'')+'&su='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
         }
         var _cb=$('copyLinkBtn');
         if(_cb){
@@ -889,6 +889,10 @@ function exportPdf(){
       })
       .catch(function(){ setStatus('Erreur de chargement.','err'); });
   }
+
+  function _autoGrowAll(){ document.querySelectorAll('textarea.fld-area').forEach(function(t){ t.style.height='auto'; t.style.height=(t.scrollHeight+2)+'px'; }); }
+  document.addEventListener('input',function(e){ if(e.target&&e.target.classList&&e.target.classList.contains('fld-area')){ e.target.style.height='auto'; e.target.style.height=(e.target.scrollHeight+2)+'px'; } });
+  window.addEventListener('load',function(){ setTimeout(_autoGrowAll,300); setTimeout(_autoGrowAll,900); setTimeout(_autoGrowAll,1600); });
 })();
 </script>
 </body>
