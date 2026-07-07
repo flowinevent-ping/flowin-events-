@@ -773,6 +773,7 @@ function exportPdf(){
     function setv(id,v){ var el=$(id); if(el) el.value=(v==null?'':v); }
     setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
     setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
+    if(d.raison_sociale && (!d.tel||!d.email||!d.contact||!d.siret)){ fetch(SUPA+'/rest/v1/partenaires?nom=eq.'+encodeURIComponent(d.raison_sociale)+'&select=tel,email,contact_tel,contact_email,contact_nom,contact,siret',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}}).then(function(r){return r.json();}).then(function(rows){ if(rows&&rows[0]){ var pp=rows[0]; function fb(id,v){ var el=$(id); if(el && (!el.value||!el.value.trim()) && v) el.value=v; } fb('f_contact',pp.contact_nom||pp.contact); fb('f_tel',pp.contact_tel||pp.tel); fb('f_email',pp.contact_email||pp.email); fb('f_siret',pp.siret); } }).catch(function(){}); }
     setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
     for(var j=0;j<offers.length;j++){ var oo=offers[j];
       // Lot + mention identiques sur TOUTES les offres (un seul lot partenaire)
@@ -831,6 +832,7 @@ function exportPdf(){
         function setv(id,v){ var el=$(id); if(el) el.value=(v==null?'':v); }
         setv('f_raison',d.raison_sociale); setv('f_adresse',d.adresse); setv('f_cp',d.cp); setv('f_ville',d.ville);
         setv('f_contact',d.contact); setv('f_tel',d.tel); setv('f_email',d.email); setv('f_siret',d.siret);
+    if(d.raison_sociale && (!d.tel||!d.email||!d.contact||!d.siret)){ fetch(SUPA+'/rest/v1/partenaires?nom=eq.'+encodeURIComponent(d.raison_sociale)+'&select=tel,email,contact_tel,contact_email,contact_nom,contact,siret',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}}).then(function(r){return r.json();}).then(function(rows){ if(rows&&rows[0]){ var pp=rows[0]; function fb(id,v){ var el=$(id); if(el && (!el.value||!el.value.trim()) && v) el.value=v; } fb('f_contact',pp.contact_nom||pp.contact); fb('f_tel',pp.contact_tel||pp.tel); fb('f_email',pp.contact_email||pp.email); fb('f_siret',pp.siret); } }).catch(function(){}); }
         setv('f_signataire',d.signataire); setv('f_date',d.date_signature);
         var inputs=document.querySelectorAll('.fld, .fld-area, .offer-price, .offer-lotval, .offer-mentiontxt'); for(var k=0;k<inputs.length;k++){ inputs[k].setAttribute('readonly','readonly'); }
         for(var j=0;j<offers.length;j++){ if(offers[j].getAttribute('data-offre')===d.offre){
