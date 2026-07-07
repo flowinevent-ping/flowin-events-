@@ -749,9 +749,11 @@ function exportPdf(){
       postRec(rec, $('sendClientBtn'), function(){
         var lien=location.origin+location.pathname+'?id='+encodeURIComponent(rec.id);
         var to=rec.email||'';
-        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n\u00b0 '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois sign\u00e9, vous en recevez une copie.\n\nFlowin (OPConsult \u00b7 BAITA EURL) \u00b7 flowinevent@gmail.com \u00b7 06 16 35 49 36';
-        setStatus('Bon '+rec.id+' enregistr\u00e9 \u2014 \u00e0 signer par le client. Lien copiable : '+lien,'ok');
-        location.href='mailto:'+encodeURIComponent(to)+'?cc=flowinevent@gmail.com&subject='+encodeURIComponent('Votre bon de commande \u00e0 signer \u2014 Nuits du Sud 2026')+'&body='+encodeURIComponent(body);
+        var subject='Votre bon de commande à signer — Nuits du Sud 2026';
+        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n° '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois signé, vous en recevez une copie.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 06 16 35 49 36';
+        try{ if(navigator.clipboard) navigator.clipboard.writeText('Objet : '+subject+'\n\n'+body); }catch(e){}
+        setStatus('Bon '+rec.id+' enregistré. E-mail préparé pour '+(to||'le client')+' avec le lien de signature. Si le corps est vide dans ton webmail, le message est déjà copié — colle-le (Cmd/Ctrl+V). Lien : '+lien,'ok');
+        location.href='mailto:'+to+'?cc=flowinevent@gmail.com&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
       });
     });
   }
