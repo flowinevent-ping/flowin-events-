@@ -1,0 +1,13 @@
+{
+  "name": "Brigade Verte — Sondage · Nuits du Sud 2026",
+  "short_name": "Brigade Verte",
+  "start_url": "/nds-brigade-verte-manuel.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a1020",
+  "theme_color": "#0a1020",
+  "icons": [
+    { "src": "/nds/icon-brigade-verte-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/nds/icon-brigade-verte-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
