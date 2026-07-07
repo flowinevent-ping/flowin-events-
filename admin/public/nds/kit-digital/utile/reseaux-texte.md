@@ -1,20 +1,21 @@
 # Kit réseaux — Utile Vence
 
-_À copier-coller par le partenaire sur Instagram / Facebook. Le lien est cliquable pour ceux qui regardent sur mobile (ils ne peuvent pas flasher la vidéo)._
+_À copier-coller sur Instagram / Facebook, en légende de la vidéo. Le lien est cliquable pour ceux qui regardent sur mobile (ils ne peuvent pas flasher la vidéo)._
 
-## 📲 Texte à poster (Insta / Facebook)
-🎉 Salut ! Bienvenue au GRAND JEU des Nuits du Sud 2026 🎶
+## 📲 Texte à poster (Instagram / Facebook)
+🎉 Utile Vence fête les Nuits du Sud 2026 ! 🎶
 
-Cet été à Vence (9 → 18 juillet), viens jouer, cumule tes points et tente de gagner les lots de nos commerces partenaires !
+Cet été à Vence (9 → 18 juillet), rejoins le GRAND JEU des Nuits du Sud : réponds au quiz, cumule des tickets et tente de gagner des places de concert 🎟️ + des bons d'achat chez nos commerces partenaires !
 
-✨ Chez Utile Vence, 19 bons d'achat à gagner pour tes courses du quotidien 🛒 — pratique, proche, et toujours ouvert !
+✨ Chez nous, à gagner : 19 bons d'achat pour tes courses du quotidien 🛒
 
-👉 Comment jouer ? Flashe le QR code de la vidéo — ou, si tu regardes sur ton téléphone, clique simplement ici pour lancer le jeu :
+👉 Pour jouer : flashe le QR de la vidéo, ou sur mobile clique ici 👇
 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-utile&source=reseaux-utile
 
-Réponds au quiz, cumule tes tickets, et rendez-vous au grand tirage au sort à la clôture du festival 🏆
+Plus tu joues, plus tu as de chances — rendez-vous au grand tirage au sort à la clôture du festival 🏆
+Jeu gratuit, sans obligation d'achat.
 
-#Courses #Supermarché #Vence #Proximité #BonPlan #NuitsDuSud #NuitsDuSud2026 #Vence #JeuConcours #Concours #Festival #CôteDAzur #Flowin
+#Supermarché #Courses #Commerce #Proximité #Vence #NuitsDuSud #NuitsDuSud2026 #Vence #CôteDAzur #FestivalVence #JeuConcours #Concours #GrandJeu #Gagnez #Flowin
 
-## 🔗 Lien cliquable unique (usage unique · réseaux)
+## 🔗 Lien cliquable (à mettre en story / bio / post)
 https://flowin-events.vercel.app/parcours/nds2026?ev=ev-nds-utile&source=reseaux-utile
