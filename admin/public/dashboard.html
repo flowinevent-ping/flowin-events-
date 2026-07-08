@@ -1998,7 +1998,7 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
   }); }
   var slug=String(partnerId||'').replace('pt-','');
   h+='<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'
-    +'<a class="btn" style="font-size:12px" href="/bon-commande-nds.html?prefill='+encodeURIComponent(slug)+'" target="_blank" rel="noopener">\u2795 Nouveau bon pr\u00e9-rempli</a>'
+    +'<a class="btn" style="font-size:12px" href="/bon-commande-nds.html?prefill='+encodeURIComponent(slug)+'&pn='+encodeURIComponent(nom||'')+'" target="_blank" rel="noopener">\u2795 Nouveau bon pr\u00e9-rempli</a>'
     +'<a class="btn" style="font-size:12px" href="/bons-commande-liste.html" target="_blank" rel="noopener">\ud83d\udcc2 Liste CRM compl\u00e8te</a>'
     +'</div>';
   box.innerHTML=h;

@@ -794,33 +794,38 @@ function exportPdf(){
     setStatus('Mode édition — bon '+d.id+'. Modifie puis « Enregistrer & envoyer au client à faire signer ».','ok');
   }
   if(prefillSlug){
-    fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}})
+    function applyPrefill(pp){
+      function setpf(id,v){ var el=$(id); if(el && v!=null && v!=='') el.value=v; }
+      setpf('f_raison', pp.nom); setpf('f_adresse', pp.adresse); setpf('f_cp', pp.code_postal); setpf('f_ville', pp.ville);
+      setpf('f_contact', pp.contact_nom||pp.contact); setpf('f_tel', pp.contact_tel||pp.tel);
+      setpf('f_email', pp.contact_email||pp.email); setpf('f_siret', pp.siret);
+      if(pp.lots && pp.lots.length){ var _lot=pp.lots[0];
+        var _lv=String(_lot.valeur!=null?_lot.valeur:'').replace(/[^0-9.,]/g,'').replace(',','.');
+        var _ofs=document.querySelectorAll('.offer');
+        for(var _oi=0;_oi<_ofs.length;_oi++){
+          var _od=_ofs[_oi].querySelector('.offer-lotdesc'); if(_od && _lot.nom) _od.value=_lot.nom;
+          var _ov=_ofs[_oi].querySelector('.offer-lotval'); if(_ov && _lv) _ov.value=_lv;
+          var _oc=_ofs[_oi].querySelector('.offer-lotuse'); if(_oc && _lot.conditions) _oc.value=_lot.conditions;
+        }
+      }
+      setStatus('Coordonn\u00e9es et lot de '+(pp.nom||prefillSlug)+' pr\u00e9-remplis. Compl\u00e9tez l\u2019offre puis faites signer.','ok');
+    }
+    var _H={'apikey':KEY,'Authorization':'Bearer '+AUTH};
+    fetch(SUPA+'/rest/v1/partenaires?id=eq.'+encodeURIComponent('pt-'+prefillSlug)+'&select=*',{headers:_H})
       .then(function(r){ return r.json(); })
       .then(function(rows){
-        if(!rows||!rows.length) return;
-        var pp=rows[0];
-        function setpf(id,v){ var el=$(id); if(el && v!=null && v!=='') el.value=v; }
-        setpf('f_raison', pp.nom);
-        setpf('f_adresse', pp.adresse);
-        setpf('f_cp', pp.code_postal);
-        setpf('f_ville', pp.ville);
-        setpf('f_contact', pp.contact_nom||pp.contact);
-        setpf('f_tel', pp.contact_tel||pp.tel);
-        setpf('f_email', pp.contact_email||pp.email);
-        setpf('f_siret', pp.siret);
-        // report du lot réel du partenaire (dashboard -> BC) sur toutes les offres
-        if(pp.lots && pp.lots.length){
-          var _lot=pp.lots[0];
-          var _lv=String(_lot.valeur!=null?_lot.valeur:'').replace(/[^0-9.,]/g,'').replace(',','.');
-          var _ofs=document.querySelectorAll('.offer');
-          for(var _oi=0;_oi<_ofs.length;_oi++){
-            var _od=_ofs[_oi].querySelector('.offer-lotdesc'); if(_od && _lot.nom) _od.value=_lot.nom;
-            var _ov=_ofs[_oi].querySelector('.offer-lotval'); if(_ov && _lv) _ov.value=_lv;
-            var _oc=_ofs[_oi].querySelector('.offer-lotuse'); if(_oc && _lot.conditions) _oc.value=_lot.conditions;
-          }
-        }
-        setStatus('Coordonn\u00e9es et lot de '+(pp.nom||prefillSlug)+' pr\u00e9-remplis. Compl\u00e9tez l\u2019offre puis faites signer.','ok');
-      }).catch(function(){});
+        if(rows && rows.length){ applyPrefill(rows[0]); return; }
+        var _pn=qs('pn'); var _sl=String(prefillSlug||'').replace(/-/g,' ').trim();
+        var _try2=_pn ? ('nom=eq.'+encodeURIComponent(_pn)) : ('nom=ilike.'+encodeURIComponent('%'+_sl+'%'));
+        return fetch(SUPA+'/rest/v1/partenaires?'+_try2+'&select=*',{headers:_H})
+          .then(function(r){ return r.json(); })
+          .then(function(r2){
+            if(r2 && r2.length){ applyPrefill(r2[0]); return; }
+            return fetch(SUPA+'/rest/v1/partenaires?nom=ilike.'+encodeURIComponent('%'+_sl+'%')+'&select=*',{headers:_H})
+              .then(function(r){ return r.json(); })
+              .then(function(r3){ if(r3 && r3.length){ applyPrefill(r3[0]); } else { setStatus('Partenaire introuvable \u2014 remplis manuellement.','err'); } });
+          });
+      }).catch(function(){ setStatus('Pr\u00e9-remplissage indisponible \u2014 remplis manuellement.','err'); });
   }
   if(viewId){
     fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}})
