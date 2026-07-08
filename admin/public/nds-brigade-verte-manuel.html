@@ -25,7 +25,7 @@
   html,body{height:100%}
   body{background:#0c0a12;font-family:'Manrope',system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:0}
   .ic{display:inline-block;width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;flex-shrink:0}
-  .phone{position:relative;width:100%;max-width:480px;min-height:100dvh;background:#0c0a12;display:flex;flex-direction:column}
+  .phone{position:relative;width:100%;max-width:560px;min-height:100dvh;background:#0c0a12;display:flex;flex-direction:column}
   .scr{display:none;flex-direction:column;min-height:0}
   .scr.on{display:flex}
   .scr.purple{background:linear-gradient(180deg,#2a1036,#160820)}
@@ -46,7 +46,7 @@
   .prow{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 13px}
   .sq{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;background:linear-gradient(135deg,var(--purple),var(--magenta))}
   .nm{font-weight:800;font-size:16px;line-height:1.25;color:#fff}
-  .btn{display:block;width:calc(100% - 36px);margin:22px 18px 6px;text-align:center;border:none;border-radius:50px;padding:17px;font-family:'Manrope';font-weight:800;font-size:18px;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--magenta2),var(--magenta));box-shadow:0 0 0 5px rgba(247,168,212,.4),0 12px 26px rgba(224,33,138,.32)}
+  .btn{display:block;width:calc(100% - 36px);margin:22px 18px 6px;text-align:center;border:none;border-radius:50px;padding:19px;font-family:'Manrope';font-weight:800;font-size:20px;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--magenta2),var(--magenta));box-shadow:0 0 0 5px rgba(247,168,212,.4),0 12px 26px rgba(224,33,138,.32)}
   .btn[disabled]{opacity:.35;pointer-events:none;box-shadow:none}
   .foot{position:relative;z-index:1;color:#9a8fa6;text-align:center;font-size:12px;padding:10px 24px 8px}
 
@@ -70,8 +70,8 @@
   /* cadre a bordure degradee (frame) */
   .frame{position:relative;border-radius:20px;padding:1.5px;background:linear-gradient(135deg,var(--amber),var(--magenta) 50%,var(--teal));box-shadow:0 10px 30px rgba(0,0,0,.35);margin-bottom:14px;flex-shrink:0}
   .frame-in{background:#12081f;border-radius:18.5px;padding:18px}
-  .qtxt{font-family:'Manrope';font-size:17.5px;font-weight:700;line-height:1.32;margin-bottom:16px;color:#fff}
-  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:13px 15px;color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;margin-bottom:9px;cursor:pointer}
+  .qtxt{font-family:'Manrope';font-size:21px;font-weight:700;line-height:1.3;margin-bottom:18px;color:#fff}
+  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:15px 17px;color:#fff;font-size:16.5px;font-weight:600;font-family:inherit;margin-bottom:11px;cursor:pointer}
   .opt.sel{border-color:var(--magenta);background:rgba(224,33,138,.18)}
   .opt:last-child{margin-bottom:0}
 
@@ -99,7 +99,7 @@
   .res-sub{font-size:14px;color:rgba(255,255,255,.82);margin-top:10px;max-width:280px}
   .res-note{margin-top:22px;font-size:12.5px;color:rgba(255,255,255,.5)}
 
-  .flowincap{text-align:center;font-size:12px;color:rgba(255,255,255,.4);padding:10px 0 16px;font-weight:800;flex-shrink:0;background:#0c0a12}
+  .flowincap{text-align:center;font-size:15px;color:rgba(255,255,255,.5);padding:14px 0 20px;font-weight:800;flex-shrink:0;background:#0c0a12}
   .flowincap span{color:var(--magenta)}
 </style>
 </head>
@@ -215,25 +215,38 @@
   var SUPA_URL = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
   var SUPA_ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
   var EV_ID = 'ev-nds-tablette-1'; // une seule ligne : pas de choix de brigade cote agent
+  var SE_ID = 'se-nds-2026';
 
   var QUESTIONS = [
-    {id:'bv_decouverte',type:'multi',label:"Comment as-tu connu le festival ?",options:[
+    {id:'bv_decouverte',titre:'Découverte',type:'multi',label:"Comment as-tu connu le festival ?",options:[
       {val:'reseaux',label:'Réseaux sociaux'},{val:'radio',label:'Publicité radio'},{val:'presse',label:'Presse / média'},{val:'affichage',label:'Affichage (ville, commerces, transports…)'},{val:'bouche',label:'Bouche-à-oreille'},{val:'web',label:'Site internet / recherche perso'}]},
-    {id:'bv_motivation',type:'multi',max:3,label:"Qu'est-ce qui te donne envie de venir à un festival plutôt qu'un autre ?",options:[
+    {id:'bv_motivation',titre:'Tes envies',type:'multi',max:3,label:"Qu'est-ce qui te donne envie de venir à un festival plutôt qu'un autre ?",options:[
       {val:'artistes',label:"La découverte d'artistes"},{val:'grandsnoms',label:'De grands noms de la musique'},{val:'ambiance',label:"L'ambiance et l'expérience sur place"},{val:'valeurs',label:'Les valeurs (écologie, inclusion, culture…)'},{val:'lieu',label:'Le lieu / le cadre'},{val:'prix',label:'Le prix des billets'},{val:'proximite',label:'La proximité avec mon lieu de vie'}]},
-    {id:'bv_venue',type:'single',label:"Comment es-tu venu·e ce soir ?",options:[
+    {id:'bv_venue',titre:'Ta venue',type:'single',label:"Comment es-tu venu·e ce soir ?",options:[
       {val:'pied',label:'À pied / vélo'},{val:'tc',label:'Bus / navette'},{val:'covoit',label:'Covoiturage'},{val:'voiture',label:'Voiture (seul·e)'}]},
-    {id:'bv_acces',type:'single',label:"L'accès au festival, ça a été ?",options:[
+    {id:'bv_acces',titre:"L'accès",type:'single',label:"L'accès au festival, ça a été ?",options:[
       {val:'ok',label:'Nickel.'},{val:'parking',label:'Galère de stationnement'},{val:'entree',label:"Dur de trouver l'entrée"},{val:'tc',label:'Compliqué en transports'}]},
-    {id:'bv_infos',type:'single',label:"Avant de venir, tu as trouvé les infos accès / parking / navettes ?",options:[
+    {id:'bv_infos',titre:"L'info avant venue",type:'single',label:"Avant de venir, tu as trouvé les infos accès / parking / navettes ?",options:[
       {val:'clair',label:'Oui, clair.'},{val:'manque',label:'Oui, mais incomplet'},{val:'non',label:'Non, galère'},{val:'pascherche',label:"J'ai pas cherché"}]},
-    {id:'bv_solutions',type:'multi',label:"Qu'est-ce qui t'aiderait à laisser la voiture ?",options:[
+    {id:'bv_solutions',titre:'Laisser la voiture',type:'multi',label:"Qu'est-ce qui t'aiderait à laisser la voiture ?",options:[
       {val:'navette',label:'Des navettes'},{val:'covoit',label:'Du covoiturage'},{val:'velo',label:'Un parking vélo sécurisé'},{val:'horaires',label:'Des horaires calés sur les concerts'}]},
-    {id:'bv_mobilite_si',type:'multi',label:"Je viendrais au festival autrement qu'en voiture si…",options:[
+    {id:'bv_mobilite_si',titre:'Venir autrement',type:'multi',label:"Je viendrais au festival autrement qu'en voiture si…",options:[
       {val:'infos',label:"Plus d'infos transport disponibles"},{val:'navettes',label:'Des navettes calées sur les horaires des concerts'},{val:'covoit',label:'Une solution de covoiturage'},{val:'parkings',label:'Des parkings relais mieux identifiés'},{val:'velo',label:'Des aménagements vélo / mobilités douces'},{val:'rien',label:'Rien, la voiture reste indispensable pour moi'}]},
-    {id:'bv_engagement',type:'single',label:"Prêt·e à changer ta façon de venir, pour la planète ?",options:[
+    {id:'bv_engagement',titre:'Ton engagement',type:'single',label:"Prêt·e à changer ta façon de venir, pour la planète ?",options:[
       {val:'oui',label:'Oui, facile.'},{val:'oui_si',label:'Oui, si y a des solutions'},{val:'peut',label:'Peut-être'},{val:'non',label:'Non'}]}
   ];
+
+  (function loadQuestionsFromBase(){
+    try{
+      fetch(SUPA_URL+'/rest/v1/rpc/get_sondage_questions', {
+        method:'POST',
+        headers:{ 'apikey':SUPA_ANON, 'Authorization':'Bearer '+SUPA_ANON, 'Content-Type':'application/json' },
+        body: JSON.stringify({ p_se: SE_ID })
+      }).then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if (Array.isArray(d) && d.length) QUESTIONS = d; })
+        .catch(function(){});
+    }catch(e){}
+  })();
 
   var qIdx = 0;
   var answers = {};
@@ -280,12 +293,19 @@
   function renderQuestion(){
     var q = QUESTIONS[qIdx];
     $('qProgress').textContent = (qIdx+1)+' / '+QUESTIONS.length;
-    $('qLabel').textContent = q.label;
+    var _lab = $('qLabel'); _lab.innerHTML = '';
+    if (q.titre){
+      var _t = document.createElement('div');
+      _t.style.cssText = 'font-size:12.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#f4b544;margin-bottom:9px';
+      _t.textContent = q.titre;
+      _lab.appendChild(_t);
+    }
+    var _q = document.createElement('div'); _q.textContent = q.label; _lab.appendChild(_q);
     if (q.type==='multi'){
       var _h = document.createElement('span');
-      _h.style.cssText = 'display:block;font-size:12.5px;color:rgba(255,255,255,.55);font-weight:700;margin-top:6px';
+      _h.style.cssText = 'display:block;font-size:13px;color:rgba(255,255,255,.55);font-weight:700;margin-top:8px';
       _h.textContent = q.max ? ('Plusieurs réponses · '+q.max+' max') : 'Plusieurs réponses possibles';
-      $('qLabel').appendChild(_h);
+      _lab.appendChild(_h);
     }
     var pb = $('progressBar'); pb.innerHTML='';
     for (var i=0;i<QUESTIONS.length;i++){ var d=document.createElement('div'); d.className='pstep'+(i<=qIdx?' on':''); pb.appendChild(d); }

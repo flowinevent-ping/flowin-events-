@@ -1,0 +1,25 @@
+-- 2026-07-08 — Questions du sondage Brigade : source de vérité EN BASE (plus en dur)
+-- Objectif (demande Romain) : questions modifiables sans toucher au code + exploitables pour les stats.
+--
+-- 1) Colonne sur le super event (source de vérité)
+-- alter table public.super_events add column if not exists sondage_questions jsonb;
+--    -> se-nds-2026.sondage_questions = [8 questions {id, titre, type, max?, label, options[]}]
+--
+-- 2) Lecture anon-safe (n'expose QUE les questions, pas qr_token/frais_pro/pct_flowin...)
+-- create or replace function public.get_sondage_questions(p_se text default 'se-nds-2026')
+--   returns jsonb language sql stable security definer set search_path = public
+--   as $$ select sondage_questions from public.super_events where id = p_se; $$;
+-- revoke all on function public.get_sondage_questions(text) from public;
+-- grant execute on function public.get_sondage_questions(text) to anon, authenticated;
+--
+-- 3) Front (nds-brigade-verte-MASTER.js + nds-brigade-verte-manuel.html)
+--    Au chargement : POST /rest/v1/rpc/get_sondage_questions {p_se:'se-nds-2026'} -> remplace QUESTIONS.
+--    Repli LOCAL (hors-ligne / réseau coupé) : la copie en dur reste la valeur par défaut si le fetch échoue.
+--    -> modifiable en base, tout en restant robuste sur tablette en mauvaise connexion.
+--
+-- STATS : les définitions (labels/options/titre) sont désormais requêtables :
+--   select jsonb_array_elements(sondage_questions) from super_events where id='se-nds-2026';
+-- Les réponses restent dans sondage_brigade.reponses + participations.bonus_answers (jsonb).
+--
+-- Pour MODIFIER une question à l'avenir : update super_events set sondage_questions = ... where id='se-nds-2026';
+-- (penser à garder la copie de repli des fichiers front en phase, ou l'accepter comme simple fallback hors-ligne).
