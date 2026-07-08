@@ -527,13 +527,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     return () => window.removeEventListener('online', onOnline)
   }, [])
 
-  // Cache hors-ligne (service worker chirurgical) — DORMANT. Passer ENABLE_SW à true pour l'activer,
-  // après test sur appareils et hors heure de pointe. Kill-switch: KILL=true dans public/sw.js.
-  const ENABLE_SW = false
+  // Cache hors-ligne (service worker chirurgical) — ACTIF, restreint au jeu (scope /parcours/).
+  // Ne touche PAS le dashboard/brigade/carte. Kill-switch: KILL=true dans public/sw.js (~2 min à se propager).
+  const ENABLE_SW = true
   useEffect(() => {
     if (!ENABLE_SW) return
     if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
+    navigator.serviceWorker.register('/sw.js', { scope: '/parcours/' }).catch(() => {})
   }, [ENABLE_SW])
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
