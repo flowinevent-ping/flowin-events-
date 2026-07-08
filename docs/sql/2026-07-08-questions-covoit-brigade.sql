@@ -1,0 +1,22 @@
+-- 2026-07-08 — Questions : covoiturage (app) + 3 nouvelles (Brigade)
+-- Contexte : validé par Romain. Aucune migration de schéma (réponses stockées en jsonb).
+--
+-- 1) APP (quiz bonus) — events.cfg.quizBonusList
+--    La question "rse_conso" (hydratation) est REMPLACÉE par "rse_covoit" (plateforme covoiturage).
+--    Appliqué aux 21 events NDS partageant le bonus 5-questions (ceux contenant rse_conso).
+--    Les 4 events tablette (ev-nds-tablette*) et ev-paques ont une autre config : non touchés.
+--
+-- update events
+-- set cfg = jsonb_set(cfg, '{quizBonusList}', $j$[ ...5 questions, rse_conso -> rse_covoit... ]$j$::jsonb)
+-- where cfg ? 'quizBonusList' and (cfg->'quizBonusList') @> '[{"id":"rse_conso"}]'::jsonb;
+--
+-- Nouvelle question rse_covoit :
+--   "Si une plateforme de covoiturage festival était mise en place, tu l'utiliserais ?"
+--   oui (Absolument, passager ou driver) / oui_retour (Oui, si le retour est assuré)
+--   / non_horaires (Non, trop complexe pour les horaires) / non_indep (Non, je préfère mon indépendance)
+--
+-- 2) BRIGADE (sondage agent) — nds-brigade-verte-MASTER.js + nds-brigade-verte-manuel.html
+--    Passage de 5 à 8 questions (les 3 nouvelles S'AJOUTENT, on garde bv_solutions), tutoiement.
+--    Nouvelles : bv_decouverte (multi), bv_motivation (multi, max 3), bv_mobilite_si (multi).
+--    Support "max N" ajouté au moteur multi (blocage au-delà de q.max + indice "3 max").
+--    Mécanique inchangée : joueurs (compte+email) + participations (tickets:1) + sondage_brigade.

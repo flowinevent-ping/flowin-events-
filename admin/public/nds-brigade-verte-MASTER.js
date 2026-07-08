@@ -8,6 +8,10 @@
   var EV_ID = window.EV_ID || 'ev-nds-tablette-1'; // une seule ligne : pas de choix de brigade cote agent
 
   var QUESTIONS = [
+    {id:'bv_decouverte',type:'multi',label:"Comment as-tu connu le festival ?",options:[
+      {val:'reseaux',label:'Réseaux sociaux'},{val:'radio',label:'Publicité radio'},{val:'presse',label:'Presse / média'},{val:'affichage',label:'Affichage (ville, commerces, transports…)'},{val:'bouche',label:'Bouche-à-oreille'},{val:'web',label:'Site internet / recherche perso'}]},
+    {id:'bv_motivation',type:'multi',max:3,label:"Qu'est-ce qui te donne envie de venir à un festival plutôt qu'un autre ?",options:[
+      {val:'artistes',label:"La découverte d'artistes"},{val:'grandsnoms',label:'De grands noms de la musique'},{val:'ambiance',label:"L'ambiance et l'expérience sur place"},{val:'valeurs',label:'Les valeurs (écologie, inclusion, culture…)'},{val:'lieu',label:'Le lieu / le cadre'},{val:'prix',label:'Le prix des billets'},{val:'proximite',label:'La proximité avec mon lieu de vie'}]},
     {id:'bv_venue',type:'single',label:"Comment es-tu venu·e ce soir ?",options:[
       {val:'pied',label:'À pied / vélo'},{val:'tc',label:'Bus / navette'},{val:'covoit',label:'Covoiturage'},{val:'voiture',label:'Voiture (seul·e)'}]},
     {id:'bv_acces',type:'single',label:"L'accès au festival, ça a été ?",options:[
@@ -16,6 +20,8 @@
       {val:'clair',label:'Oui, clair.'},{val:'manque',label:'Oui, mais incomplet'},{val:'non',label:'Non, galère'},{val:'pascherche',label:"J'ai pas cherché"}]},
     {id:'bv_solutions',type:'multi',label:"Qu'est-ce qui t'aiderait à laisser la voiture ?",options:[
       {val:'navette',label:'Des navettes'},{val:'covoit',label:'Du covoiturage'},{val:'velo',label:'Un parking vélo sécurisé'},{val:'horaires',label:'Des horaires calés sur les concerts'}]},
+    {id:'bv_mobilite_si',type:'multi',label:"Je viendrais au festival autrement qu'en voiture si…",options:[
+      {val:'infos',label:"Plus d'infos transport disponibles"},{val:'navettes',label:'Des navettes calées sur les horaires des concerts'},{val:'covoit',label:'Une solution de covoiturage'},{val:'parkings',label:'Des parkings relais mieux identifiés'},{val:'velo',label:'Des aménagements vélo / mobilités douces'},{val:'rien',label:'Rien, la voiture reste indispensable pour moi'}]},
     {id:'bv_engagement',type:'single',label:"Prêt·e à changer ta façon de venir, pour la planète ?",options:[
       {val:'oui',label:'Oui, facile.'},{val:'oui_si',label:'Oui, si y a des solutions'},{val:'peut',label:'Peut-être'},{val:'non',label:'Non'}]}
   ];
@@ -66,6 +72,12 @@
     var q = QUESTIONS[qIdx];
     $('qProgress').textContent = (qIdx+1)+' / '+QUESTIONS.length;
     $('qLabel').textContent = q.label;
+    if (q.type==='multi'){
+      var _h = document.createElement('span');
+      _h.style.cssText = 'display:block;font-size:12.5px;color:rgba(255,255,255,.55);font-weight:700;margin-top:6px';
+      _h.textContent = q.max ? ('Plusieurs réponses · '+q.max+' max') : 'Plusieurs réponses possibles';
+      $('qLabel').appendChild(_h);
+    }
     var pb = $('progressBar'); pb.innerHTML='';
     for (var i=0;i<QUESTIONS.length;i++){ var d=document.createElement('div'); d.className='pstep'+(i<=qIdx?' on':''); pb.appendChild(d); }
     var wrap = $('qOpts'); wrap.innerHTML='';
@@ -79,7 +91,8 @@
         if (q.type==='multi'){
           var cur = answers[q.id] || [];
           var k = cur.indexOf(opt.val);
-          if (k>-1) cur.splice(k,1); else cur.push(opt.val);
+          if (k>-1) cur.splice(k,1);
+          else { if (q.max && cur.length >= q.max) return; cur.push(opt.val); }
           answers[q.id] = cur;
         } else { answers[q.id] = opt.val; }
         renderQuestion();
