@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
-import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJoueurHistory, shuffle, AGE_OPTIONS, writeSondageBrigade } from '@/lib/parcours'
+import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJoueurHistory, shuffle, AGE_OPTIONS, writeSondageBrigade, ndsQueueWrite, ndsFlushQueue } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
@@ -26,8 +26,17 @@ const OPTIN_TEXT = "Je souhaite rester en contact avec les infos des Nuits du Su
    d'afficher une image cassée. Dès que le vrai PNG est déposé au chemin attendu, il s'affiche. */
 function PartnerLogo({ src, alt, fallback, imgStyle, className }: { src: string | null; alt: string; fallback: ReactNode; imgStyle?: CSSProperties; className?: string }) {
   const [broken, setBroken] = useState(false)
+  const loadedRef = useRef(false)
+  useEffect(() => {
+    loadedRef.current = false
+    setBroken(false)
+    if (!src) return
+    // Réseau lent : si le logo n'a pas chargé après 6 s, on affiche le repli au lieu d'un blanc.
+    const t = setTimeout(() => { if (!loadedRef.current) setBroken(true) }, 6000)
+    return () => clearTimeout(t)
+  }, [src])
   if (!src || broken) return <>{fallback}</>
-  return <img src={src} alt={alt} className={className} style={imgStyle} onError={() => setBroken(true)} />
+  return <img src={src} alt={alt} className={className} style={imgStyle} loading="lazy" decoding="async" onLoad={() => { loadedRef.current = true }} onError={() => setBroken(true)} />
 }
 
 /* Les 9 stations numérotées du festival (= référentiel unique, identique au dashboard).
@@ -510,6 +519,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) { setFly(f => f + 1); setCelebrate(c => c + 1) } }, [screen, quizPerfect, bonusDone])
   useEffect(() => { if (screen === 'tickets' || screen === 'final' || (screen === 'onboard' && saved)) refreshServerTickets() }, [screen, saved, refreshServerTickets])
 
+  // Écritures en attente (réseau coupé lors d'un jeu) : on rejoue au montage puis à chaque retour du réseau.
+  useEffect(() => {
+    ndsFlushQueue()
+    const onOnline = () => { ndsFlushQueue() }
+    window.addEventListener('online', onOnline)
+    return () => window.removeEventListener('online', onOnline)
+  }, [])
+
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
   async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
     const qrSource = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
@@ -553,7 +570,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     }
     const ok = res.success || res.duplicate
     setSaveError(!ok)
-    if (!ok) console.error('[nds2026] enregistrement Supabase échoué (réessai possible):', res.error)
+    if (!ok) {
+      // File d'attente durable : rejeu auto au retour du réseau (idempotent : dédup jour/station côté serveur).
+      const qrSrc = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
+      if (recurrent) {
+        ndsQueueWrite({ kind: 'claim', joueur: { id: recurrent.id, email: recurrent.email, prenom: recurrent.prenom }, evId, prefix: 'ND', bonus: bonusAnswers, extra: { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, source_qr: qrSrc, started_at: sessionStart, quizTicket: quizTk, bonusTicket: bonusTk } })
+      } else {
+        ndsQueueWrite({ kind: 'write', payload: { email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'nds2026', source_qr: qrSrc ?? null, started_at: sessionStart, prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers, optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk } })
+      }
+      console.error('[nds2026] enregistrement Supabase échoué — mis en file d\'attente (réessai auto):', res.error)
+    }
     return finalTicket
   }
 

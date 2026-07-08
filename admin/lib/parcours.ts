@@ -505,6 +505,44 @@ export async function claimJoueur(
   return { success: true, duplicate: false, ticket: tc }
 }
 
+/* ── File d'attente durable des écritures (option hors-ligne) ──
+   Si l'enregistrement d'un jeu échoue (réseau coupé), on stocke le job en local et on le rejoue
+   automatiquement au retour du réseau. Sûr : claimJoueur dédup par jour/station, writeJoueur rejoue
+   le même ticket_code -> pas de double comptage. On garde le job tant qu'il n'a pas abouti. */
+const NDS_WQ_KEY = 'flowin_nds_wq'
+type NdsWriteJob =
+  | { id: string; kind: 'claim'; joueur: { id: string; email: string; prenom?: string }; evId: string; prefix: TicketPrefix; bonus?: Record<string, unknown>; extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; started_at?: string; quizTicket?: boolean; bonusTicket?: boolean } }
+  | { id: string; kind: 'write'; payload: JoueurPayload }
+
+type NdsWriteJobInput = NdsWriteJob extends infer T ? (T extends { id: string } ? Omit<T, 'id'> : never) : never
+export function ndsQueueWrite(job: NdsWriteJobInput): void {
+  try {
+    const arr = JSON.parse(localStorage.getItem(NDS_WQ_KEY) || '[]') as NdsWriteJob[]
+    arr.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 8), ...job } as NdsWriteJob)
+    localStorage.setItem(NDS_WQ_KEY, JSON.stringify(arr.slice(-50)))
+  } catch { /* localStorage indispo : on ignore */ }
+}
+
+let _ndsFlushing = false
+export async function ndsFlushQueue(): Promise<void> {
+  if (_ndsFlushing) return
+  let arr: NdsWriteJob[] = []
+  try { arr = JSON.parse(localStorage.getItem(NDS_WQ_KEY) || '[]') as NdsWriteJob[] } catch { return }
+  if (!Array.isArray(arr) || arr.length === 0) return
+  _ndsFlushing = true
+  const remaining: NdsWriteJob[] = []
+  for (const job of arr) {
+    try {
+      const res = job.kind === 'claim'
+        ? await claimJoueur(job.joueur, job.evId, job.prefix, job.bonus, job.extra)
+        : await writeJoueur(job.payload)
+      if (!(res.success || res.duplicate)) remaining.push(job) // vrai échec réseau : on retente plus tard
+    } catch { remaining.push(job) }
+  }
+  try { localStorage.setItem(NDS_WQ_KEY, JSON.stringify(remaining)) } catch { /* ignore */ }
+  _ndsFlushing = false
+}
+
 /* ── Fisher-Yates shuffle ── */
 export function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice()
