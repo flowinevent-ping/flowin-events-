@@ -1984,7 +1984,7 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
       +'<div class="text-xs text-muted">'+esc(b.id)+(b.date_signature?' \u00b7 sign\u00e9 '+esc(b.date_signature):'')+' \u00b7 '+money(b.montant_ttc)+' TTC</div></div>'
       +((b.statut==='signe'||b.statut==='sign\u00e9')?'':'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-right:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'&edit=1" target="_blank" rel="noopener">\u270f\ufe0f \u00c9diter / Valider</a>')
       +'<a class="btn" style="padding:6px 12px;font-size:12px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">Lien client &#8599;</a>'
-      +'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?devis='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">\ud83e\uddfe Facture</a>'
+      +'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?devis='+encodeURIComponent(b.id)+'" target="_blank" rel="noopener">\ud83e\uddfe Facture</a>'+'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(b.id)+'&dl=1" target="_blank" rel="noopener">⬇ PDF</a>'
       +'</div>';
   }); }
   h+='<div class="section-h" style="margin-top:14px">\ud83d\udcc4 Factures'+(facs.length?' ('+facs.length+')':'')+'</div>';
@@ -1993,7 +1993,7 @@ async function loadBonsCommandeLies(partnerId, email, siret, nom){
     var bonId=(f.client&&f.client.bon_id)?f.client.bon_id:'';
     h+='<div style="padding:10px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
       +'<div><div class="fw-700">'+esc(f.numero)+' '+badge(f.statut)+'</div><div class="text-xs text-muted">'+esc(f.date_emission||'')+' \u00b7 '+money(f.total_ttc)+' TTC</div></div>'
-      +'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px" href="/facture-nds.html?num='+encodeURIComponent(f.numero)+'" target="_blank" rel="noopener">\u270f\ufe0f \u00c9diter / PDF</a>'+(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Devis</a>':'')
+      +'<a class="btn btn-primary" style="padding:6px 12px;font-size:12px" href="/facture-nds.html?num='+encodeURIComponent(f.numero)+'" target="_blank" rel="noopener">\u270f\ufe0f \u00c9diter</a>'+'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/facture-nds.html?num='+encodeURIComponent(f.numero)+'&dl=1" target="_blank" rel="noopener">⬇ PDF</a>'+(bonId?'<a class="btn" style="padding:6px 12px;font-size:12px;margin-left:6px" href="/bon-commande-nds.html?id='+encodeURIComponent(bonId)+'" target="_blank" rel="noopener">Devis</a>':'')
       +'</div>';
   }); }
   var slug=String(partnerId||'').replace('pt-','');
@@ -5197,9 +5197,9 @@ function renderDrawer(){
   else if(t==='superEvent') html = drawerSuperEvent(findSuperEvent(state.drawer.id));
   else html = '<div class="drawer-h"><div class="title">Fiche</div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Type inconnu</div>';
   $('#drawer').innerHTML = html;
-  if(state.drawer.open && state.drawer.type==='partenaire' && state.drawer.tab==='contrat'){
-    var _pc = findPartner(state.drawer.id);
-    if(_pc) loadBonsCommandeLies(_pc.id, _pc.contact_email||_pc.email||'', _pc.siret||'', _pc.nom||'');
+  if(state.drawer.open && state.drawer.tab==='contrat'){
+    if(state.drawer.type==='partenaire'){ var _pc = findPartner(state.drawer.id); if(_pc) loadBonsCommandeLies(_pc.id, _pc.contact_email||_pc.email||'', _pc.siret||'', _pc.nom||''); }
+    else if(state.drawer.type==='pro'){ var _po = findPro(state.drawer.id); if(_po) loadBonsCommandeLies(_po.id, _po.email||'', _po.siret||'', _po.nom||''); }
   }
   requestAnimationFrame(function(){
     var db2 = document.querySelector('.drawer-body');
@@ -5258,7 +5258,8 @@ function drawerPro(p){
     {id:'activite',label:'Activité'},
     {id:'stats',label:'Stats'},
     {id:'liens',label:'Joueurs · Partenaires',badge:joueursLies.length+partenairesLies.length||null},
-    {id:'export',label:'Export'}
+    {id:'export',label:'Export'},
+    {id:'contrat',label:'Documents'}
   ]);
   html += '<div class="drawer-body">';
   if(p.partenaireId){
@@ -5496,6 +5497,10 @@ function drawerPro(p){
     html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'events-pro\',\''+p.id+'\')">📥 Tous les events (CSV)</button>';
     html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'joueurs-pro\',\''+p.id+'\')">📥 Joueurs CRM rattachés (CSV)</button>';
     html += '<button class="btn btn-block" onclick="toast(\'Synthèse XLSX générée\',\'success\')">📊 Synthèse statistique (XLSX)</button>';
+  } else if(state.drawer.tab==='contrat'){
+    html += '<div class="alert info"><span class="ico">🧾</span>Bons de commande &amp; factures rattachés à ce compte.</div>';
+    html += '<div id="bcLinkedBox" style="margin-top:6px"><div class="text-xs text-muted">Chargement des contrats &amp; factures…</div></div>';
+    html += '<div style="margin-top:8px"><button class="btn btn-sm" onclick="loadBonsCommandeLies(\''+esc(p.id)+'\',\''+esc(p.email||'')+'\',\''+esc(p.siret||'')+'\',\''+esc(p.nom||'')+'\')">↻ Rafraîchir</button></div>';
   }
 
   html += '</div>';

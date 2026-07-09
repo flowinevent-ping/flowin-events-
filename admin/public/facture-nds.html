@@ -482,16 +482,16 @@
   if(num){
     fetch(SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(num)+'&select=*',{headers:H})
       .then(function(r){return r.json();})
-      .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); } else { setStatus('Facture introuvable.','err'); } });
+      .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } } else { setStatus('Facture introuvable.','err'); } });
   } else if(devis){
     // existe-t-il deja une facture pour ce devis ? sinon on la prepare depuis le bon
     fetch(SUPA+'/rest/v1/factures?client->>bon_id=eq.'+encodeURIComponent(devis)+'&select=*&order=numero.desc',{headers:H})
       .then(function(r){return r.json();})
       .then(function(facs){
-        if(facs&&facs.length){ fromFacture(facs[0]); setStatus('Facture existante charg\u00e9e. Modifiable puis \u00ab Enregistrer \u00bb.','ok'); return; }
+        if(facs&&facs.length){ fromFacture(facs[0]); setStatus('Facture existante charg\u00e9e. Modifiable puis \u00ab Enregistrer \u00bb.','ok'); if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } return; }
         return fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(devis)+'&select=*',{headers:H})
           .then(function(r){return r.json();})
-          .then(function(bons){ if(bons&&bons.length){ fromDevis(bons[0]); setStatus('Facture pr\u00e9par\u00e9e depuis le devis '+devis+'. \u00ab Enregistrer \u00bb pour \u00e9mettre.','ok'); } else { setStatus('Devis introuvable.','err'); } });
+          .then(function(bons){ if(bons&&bons.length){ fromDevis(bons[0]); setStatus('Facture pr\u00e9par\u00e9e depuis le devis '+devis+'\u2026 enregistrement automatique.','ok'); setTimeout(function(){ if(!STATE.existing && $('saveBtn')){ $('saveBtn').click(); } if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 1100); } }, 500); } else { setStatus('Devis introuvable.','err'); } });
       });
   } else {
     setStatus('Ouvrez une facture via ?devis=<n\u00b0 de devis> ou ?num=<n\u00b0 de facture>.','');

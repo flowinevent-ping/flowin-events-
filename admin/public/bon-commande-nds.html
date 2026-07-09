@@ -852,6 +852,7 @@ function exportPdf(){
             pickOffer(offers[j]);
         } }
         computeTotals();
+        if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 800); }
         for(var m=0;m<offers.length;m++){ var isSel=offers[m]===sel;
             var mb=offers[m].querySelector('.offer-mention'); var mtx=offers[m].querySelector('.offer-mentiontxt');
             if(mb && (!isSel || !(mtx&&mtx.value.trim()))) mb.style.display='none';
