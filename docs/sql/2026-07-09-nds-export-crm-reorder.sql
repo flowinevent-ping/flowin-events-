@@ -1,0 +1,18 @@
+-- 2026-07-09 — Onglet CRM_Backup (Google Sheet « backup flowin ») réordonné (demande Romain)
+-- Le Google Apps Script écrit les colonnes DYNAMIQUEMENT d'après les noms renvoyés par la fonction d'export
+-- => réordonner la fonction en base réordonne l'onglet au prochain backup, sans toucher au script.
+--
+-- Fonction : public.nds_export_crm(p_token text) — feed l'onglet CRM_Backup (1 ligne / scan).
+-- Filtre INCHANGÉ = joueurs du super event se-nds-2026 (via participations OU j.events),
+--   rattachés aux events NDS (= stations de jeu physiques + digitales/écran). Contacts non-NDS déjà exclus.
+--
+-- Changements :
+--  - NOUVEL ORDRE colonnes : joueur_id, jour, heure, station, nom, prenom, adresse, tel, optin,
+--    optin_date, email, code_postal, ville, station_lieu, categorie, source_qr, source, client_type,
+--    premiere_visite, date_naissance, total_tickets_joueur, tickets_partie, score, completed, horodatage.
+--  - TRI : p.created_at desc (plus récent en haut).
+--  - Postgres refuse CREATE OR REPLACE quand le type de retour change -> DROP + CREATE, puis
+--    revoke all from public + grant execute to anon, authenticated (même posture que les autres exports).
+--
+-- Onglet « Utilisateurs » (flowin_export_users) : INCHANGÉ = tous les utilisateurs (NDS + contacts).
+-- Pour VOIR le nouvel ordre : relancer le backup Apps Script (ou attendre le prochain run auto).
