@@ -182,9 +182,15 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   useEffect(() => {
     try {
       const sp = new URLSearchParams(window.location.search)
-      if (sp.get('place') === '1') { setPlaceMode(true); setScreen('carte') }
-      else if ((sp.get('source') || '').startsWith('reseaux-') && getJoueurLocal()) { setScreen('refusdigital') }
+      if (sp.get('place') === '1') { setPlaceMode(true); setScreen('carte'); return }
+      if ((sp.get('source') || '').startsWith('reseaux-') && getJoueurLocal()) { setScreen('refusdigital'); return }
+      // On a flashé une station (QR) ou on arrive par la carte : on saute l'écran d'accueil -> direct au quiz.
+      // Exceptions : station déjà jouée aujourd'hui (on garde le récap « déjà flashé ») ou station sans quiz.
+      let alreadyPlayed = false
+      try { alreadyPlayed = localStorage.getItem(lsKey) != null } catch {}
+      if (!alreadyPlayed && questions.length > 0) setScreen('quiz')
     } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   // Log du scan/ouverture parcours NDS — alimente l'entonnoir (scans -> jeux -> coordonnées)
   useEffect(() => { trackVisite('nds2026', evId) }, [evId])
@@ -507,7 +513,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     if (!recurrent && !form.prenom.trim()) errs.prenom = 'Requis'
     if (!recurrent && !form.nom.trim()) errs.nom = 'Requis'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
-    // Optin marketing facultatif (RGPD) : la participation reste possible sans cocher.
+    // Coordonnées : tous les champs obligatoires (seul l'opt-in marketing reste facultatif — RGPD).
+    if (!form.tel.trim()) errs.tel = 'Requis'
+    if (!form.cp.trim()) errs.cp = 'Requis'
+    if (!form.age) errs.age = 'Requis'
+    if (!form.sexe) errs.sexe = 'Requis'
     setErrors(errs)
     if (Object.keys(errs).length) return
     await persist()
@@ -888,12 +898,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   </div>
                 )}
               </div>
-              <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} /></div>
+              <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} />{errors.tel && <div className="err">{errors.tel}</div>}</div>
               <div className="grid2" style={{ marginBottom: 12 }}>
-                <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
-                <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
+                <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select>{errors.sexe && <div className="err">{errors.sexe}</div>}</div>
+                <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select>{errors.age && <div className="err">{errors.age}</div>}</div>
               </div>
-              <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} /></div>
+              <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />{errors.cp && <div className="err">{errors.cp}</div>}</div>
               <div><label className="label label-strong">Tu as connu le festival par…</label>
                 <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}><span className="chip-em">{SRC_EMOJI[s]}</span> {s}</span>)}</div>
               </div>
