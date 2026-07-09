@@ -4646,15 +4646,26 @@ function renderMaintenance(){
 }
 
 // ============ NDS · RÉSULTAT JOURNALIER (générique super event) ============
-var _ndsRes = { date:null, data:null, loading:false, station:null, winners:null, se:'se-nds-2026' };
-function ndsResDates(){
-  var out=[], d0=new Date(2026,6,9), d1=new Date(2026,6,18), t=new Date();
-  for(var d=new Date(d0); d<=d1; d.setDate(d.getDate()+1)){
-    var s=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
-    if(d<=t) out.push(s);
-  }
-  if(!out.length){ var n=new Date(); out.push(n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2)); }
-  return out;
+var _ndsRes = { se:null, seName:'', seList:null, days:null, date:null, data:null, loading:false, station:null, winners:null, _seLoading:false };
+async function ndsResInit(){
+  if(_ndsRes.seList || _ndsRes._seLoading) return;
+  _ndsRes._seLoading=true;
+  try{ _ndsRes.seList = await supaFetch('super_events','select=id,nom&order=date_d.desc.nullslast&limit=100') || []; }catch(e){ _ndsRes.seList=[]; }
+  if(!_ndsRes.se){ var nds=(_ndsRes.seList||[]).find(function(s){return s.id==='se-nds-2026';}); _ndsRes.se = nds ? nds.id : ((_ndsRes.seList[0]||{}).id||null); }
+  await ndsResLoadDays();
+}
+async function ndsResLoadDays(){
+  _ndsRes.days=null; _ndsRes.date=null; _ndsRes.data=null; render();
+  var se=_ndsRes.se; var seo=(_ndsRes.seList||[]).find(function(s){return s.id===se;}); _ndsRes.seName = seo?seo.nom:(se||'');
+  if(!se){ _ndsRes.days=[]; render(); return; }
+  try{ var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_days',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:se})}); _ndsRes.days = r.ok ? ((await r.json())||[]) : []; }catch(e){ _ndsRes.days=[]; }
+  _ndsRes.date = (_ndsRes.days && _ndsRes.days.length) ? _ndsRes.days[_ndsRes.days.length-1] : null;
+  if(_ndsRes.date){ await ndsResLoad(_ndsRes.date); } else { render(); }
+}
+function ndsResSetSe(se){ if(se===_ndsRes.se) return; _ndsRes.se=se; _ndsRes.winners=null; _ndsRes.station=null; ndsResLoadDays(); }
+function ndsResSeSelect(){
+  var opts=(_ndsRes.seList||[]).map(function(s){ return '<option value="'+esc(s.id)+'"'+(s.id===_ndsRes.se?' selected':'')+'>'+esc(s.nom||s.id)+'</option>'; }).join('');
+  return '<select onchange="ndsResSetSe(this.value)" style="padding:7px 10px;border:1.5px solid var(--sa-border);border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:var(--sa-text)">'+opts+'</select>';
 }
 async function ndsResLoad(date){
   _ndsRes.loading=true; _ndsRes.date=date; _ndsRes.station=null; _ndsRes.winners=null; render();
@@ -4726,14 +4737,15 @@ function ndsResMulti(list){
   return h;
 }
 function renderNdsResultat(){
-  if(!_ndsRes.date){ _ndsRes.date=ndsResDates().slice(-1)[0]; ndsResLoad(_ndsRes.date); }
-  var dates=ndsResDates();
+  if(!_ndsRes.seList){ ndsResInit(); }
+  var dates=_ndsRes.days||[];
   var h='<div class="page">';
-  h+='<div class="page-header"><div><div class="page-title">\ud83d\udcc5 R\u00e9sultat journalier</div><div class="page-subtitle">Nuits du Sud \u00b7 stations de jeu \u00b7 par jour</div></div></div>';
+  h+='<div class="page-header"><div><div class="page-title">\ud83d\udcc5 R\u00e9sultat journalier</div><div class="page-subtitle">'+esc(_ndsRes.seName||'\u2014')+' \u00b7 stations de jeu \u00b7 par jour</div></div>'+ndsResSeSelect()+'</div>';
   h+='<div class="ndsres-days">';
   dates.forEach(function(dt){ var on=dt===_ndsRes.date; var lbl=dt.slice(8)+'/'+dt.slice(5,7); h+='<button class="ndsres-day'+(on?' on':'')+'" onclick="ndsResLoad(\''+dt+'\')">'+lbl+'</button>'; });
   h+='</div>';
-  if(_ndsRes.loading || !_ndsRes.data){ h+='<div class="alert info"><span class="ico">\u23f3</span>Chargement du '+esc(_ndsRes.date||'')+'\u2026</div></div>'; return h; }
+  if(!_ndsRes.seList){ h+='<div class="alert info"><span class="ico">\u23f3</span>Chargement\u2026</div></div>'; return h; }
+  if(_ndsRes.loading || !_ndsRes.data){ h+='<div class="alert info"><span class="ico">\u23f3</span>'+(dates.length?('Chargement du '+esc(_ndsRes.date||'')+'\u2026'):'Aucune journ\u00e9e de jeu pour ce super event.')+'</div></div>'; return h; }
   var d=_ndsRes.data, k=d.kpis||{};
   h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+prospKpi((d.clics&&d.clics.total)||0,'Clics liens')+'</div>';
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
