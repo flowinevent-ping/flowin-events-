@@ -1,0 +1,21 @@
+-- 2026-07-09 — CAUSE RACINE : les factures ne se créaient/affichaient jamais
+-- La table `factures` avait RLS activé mais SEULEMENT une policy ALL:{authenticated}.
+-- Or le dashboard + les éditeurs (bon-commande-nds.html, facture-nds.html) utilisent la clé ANON.
+-- => l'enregistrement d'une facture (POST anon) échouait silencieusement, et le dashboard (anon)
+--    ne pouvait pas non plus la lire. D'où « Aucune facture émise » en permanence.
+-- `bons_commande` avait déjà INSERT+SELECT anon (c'est pourquoi les bons, eux, se sauvaient),
+-- mais PAS UPDATE anon => l'édition d'un bon ne persistait pas non plus.
+--
+-- Correctif (règle EN BASE, persistante, valable pour TOUS les partenaires ET pros — pas de code en dur) :
+-- create policy factures_anon_select on public.factures for select to anon using (true);
+-- create policy factures_anon_insert on public.factures for insert to anon with check (true);
+-- create policy factures_anon_update on public.factures for update to anon using (true) with check (true);
+-- create policy bons_commande_anon_update on public.bons_commande for update to anon using (true) with check (true);
+--
+-- Résultat : la facture (numéro FL-2026-XXXX-01, définitif car dérivé du devis + édition) se crée
+-- automatiquement à l'ouverture depuis un bon, reste éditable (UPDATE), et apparaît dans la fiche
+-- partenaire ET pro (filtre client->>email/siret/raison_sociale, champs bien remplis par l'éditeur).
+--
+-- SÉCURITÉ : ouvre l'écriture anon sur factures/bons (même posture que bons_commande aujourd'hui).
+-- À restreindre dans le durcissement RLS post-festival (séparer clé admin / clé anon jeu) :
+--   voir docs/sql/securite-durcissement-post-festival.md
