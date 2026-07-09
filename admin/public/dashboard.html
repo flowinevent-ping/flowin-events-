@@ -4709,8 +4709,19 @@ function ndsResClics(c){
   var pl=(c&&c.par_lien)||[];
   if(!pl.length){ h+='<div class="ndsres-sub">Aucun clic sur les liens (site, Insta, Facebook, itinéraire) ce jour.</div>'; }
   else { var maxL=Math.max.apply(null,pl.map(function(x){return x.n;}).concat([1])); pl.forEach(function(x){ h+=ndsResBar(ndsResLienLabel(x.lien), x.n, maxL, '#e87ba4'); }); }
+  var phc=(c&&c.par_heure)||[];
+  if(phc.length){ h+='<div class="ndsres-sub" style="margin:10px 0 4px">Par heure</div>'; var maxHc=Math.max.apply(null,phc.map(function(x){return x.n;}).concat([1])); phc.forEach(function(x){ h+=ndsResBar(x.tranche, x.n, maxHc, '#e87ba4'); }); }
   var pp=(c&&c.par_partenaire)||[];
   if(pp.length){ h+='<div class="ndsres-sub" style="margin:10px 0 4px">Par partenaire</div>'; var maxP=Math.max.apply(null,pp.map(function(x){return x.n;}).concat([1])); pp.forEach(function(x){ h+=ndsResBar(x.partenaire||'—', x.n, maxP, '#4a3aa7'); }); }
+  h+='</div>';
+  return h;
+}
+function ndsResMulti(list){
+  if(!list||!list.length) return '';
+  var h='<div class="ndsres-card"><div class="ndsres-h">🔁 Joueurs multi-parties <span class="ndsres-sub">· '+list.length+' joueur(s)</span></div>';
+  list.forEach(function(m){ var st=(m.stations||[]).join(', ');
+    h+='<div class="ndsres-jrow"><div><b>'+esc((m.prenom||'')+' '+(m.nom||''))+'</b> <span class="ndsres-badge">'+m.parties+'× · '+m.nb_stations+' stations</span></div><div class="ndsres-jc">'+esc(m.email||'—')+' · '+esc(m.tel||'—')+'</div><div class="ndsres-jc">'+esc(st)+(m.heures?' · '+esc(m.heures):'')+'</div></div>';
+  });
   h+='</div>';
   return h;
 }
@@ -4740,6 +4751,7 @@ function renderNdsResultat(){
     if(x.event_id===_ndsRes.station){ h+=ndsResStationDetail(x.event_id); } });
   if(!ps.length) h+='<div class="ndsres-sub">Aucune donn\u00e9e.</div>';
   h+='</div>';
+  h+=ndsResMulti(d.joueurs_multi||[]);
   var bg=d.brigade||{};
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf31 Brigade Verte</div>';
   h+='<div class="ndsres-sub"><b>'+(bg.nb_joueurs||0)+'</b> joueurs \u00b7 dont <b>'+(bg.aussi_ailleurs||0)+'</b> ont aussi jou\u00e9 d\'autres stations</div>';
