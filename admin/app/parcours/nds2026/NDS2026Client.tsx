@@ -1064,6 +1064,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
+              {(form.email || recurrent?.email) && (
+                <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
+              )}
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
             </div>
           </section>
