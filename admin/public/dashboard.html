@@ -678,6 +678,30 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .front-fld .input{padding:8px 10px;font-size:13px}
 
 /* ============== TIRAGE · RÈGLES & BILLETS GAGNANTS ============== */
+.ndsres-days{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.ndsres-day{padding:6px 12px;border:1.5px solid var(--sa-border);border-radius:8px;background:#fff;font-size:12px;font-weight:700;color:var(--sa-muted);cursor:pointer}
+.ndsres-day.on{border-color:var(--sa-accent);background:var(--sa-accent-soft);color:var(--sa-text)}
+.ndsres-card{background:#fff;border:1.5px solid var(--sa-border);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.ndsres-h{font-size:14px;font-weight:800;color:var(--sa-text);margin-bottom:10px}
+.ndsres-sub{font-size:12px;color:var(--sa-muted);font-weight:600}
+.ndsres-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+.ndsres-lbl{width:140px;font-size:12px;font-weight:600;color:var(--sa-text);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ndsres-track{flex:1;height:14px;background:#f1eff5;border-radius:7px;overflow:hidden}
+.ndsres-fill{height:100%;border-radius:7px;min-width:2px}
+.ndsres-val{width:36px;text-align:right;font-size:12px;font-weight:800;color:var(--sa-text)}
+.ndsres-winners{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.ndsres-winner{flex:1;min-width:200px;border:2px solid #16a34a;background:#e9f9ef;border-radius:10px;padding:10px 12px}
+.ndsres-wtag{font-size:10px;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:.08em}
+.ndsres-wname{font-size:16px;font-weight:800;color:var(--sa-text);margin:2px 0}
+.ndsres-wc{font-size:11px;color:var(--sa-muted)}
+.ndsres-detail{background:#faf9fc;border:1px solid var(--sa-border);border-radius:8px;padding:8px 10px;margin:2px 0 8px}
+.ndsres-jrow{padding:6px 0;border-bottom:1px solid var(--sa-border)}
+.ndsres-jc{font-size:11px;color:var(--sa-muted)}
+.ndsres-badge{font-size:10px;font-weight:700;background:#EF9F27;color:#fff;padding:1px 6px;border-radius:5px}
+.ndsres-sondage{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.ndsres-q{border:1px solid var(--sa-border);border-radius:8px;padding:8px 10px}
+.ndsres-qh{font-size:12px;font-weight:800;color:var(--sa-text);margin-bottom:4px}
+.ndsres-qa{display:flex;justify-content:space-between;font-size:11px;color:var(--sa-muted);padding:1px 0}
 .tirage-regles{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .tirage-regle{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:#fff;border:1.5px solid var(--sa-border);border-radius:10px;cursor:pointer;transition:all .15s}
 .tirage-regle:hover{border-color:var(--sa-accent-light)}
@@ -3064,6 +3088,7 @@ function renderSidebar(){
       {id:'nds-front',ico:'🎨',lbl:'Front NDS',n:(state.ndsFront?state.ndsFront.length:0)},
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
+      {id:'nds-resultat',ico:'📅',lbl:'Résultat journalier'},
       {id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
       {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Lots & Gagnants',ext:'/tirage-nds.html'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
@@ -4620,6 +4645,96 @@ function renderMaintenance(){
   h+='</div>'; return h;
 }
 
+// ============ NDS · RÉSULTAT JOURNALIER (générique super event) ============
+var _ndsRes = { date:null, data:null, loading:false, station:null, winners:null, se:'se-nds-2026' };
+function ndsResDates(){
+  var out=[], d0=new Date(2026,6,9), d1=new Date(2026,6,18), t=new Date();
+  for(var d=new Date(d0); d<=d1; d.setDate(d.getDate()+1)){
+    var s=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+    if(d<=t) out.push(s);
+  }
+  if(!out.length){ var n=new Date(); out.push(n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2)); }
+  return out;
+}
+async function ndsResLoad(date){
+  _ndsRes.loading=true; _ndsRes.date=date; _ndsRes.station=null; _ndsRes.winners=null; render();
+  try{
+    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_daily',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+    _ndsRes.data = r.ok ? await r.json() : null;
+  }catch(e){ _ndsRes.data=null; }
+  _ndsRes.loading=false; render();
+}
+function ndsResDraw(){
+  var d=_ndsRes.data; if(!d||!d.parties||!d.parties.length){ _ndsRes.winners=[]; render(); return; }
+  var byJ={}; d.parties.forEach(function(p){ if(!byJ[p.joueur_id]) byJ[p.joueur_id]={p:p,t:0}; byJ[p.joueur_id].t+=Math.max(1,parseInt(p.tickets||0,10)); });
+  var pool=[]; Object.keys(byJ).forEach(function(id){ for(var i=0;i<byJ[id].t;i++) pool.push(id); });
+  var winners=[], seen={}, guard=0, nJ=Object.keys(byJ).length, want=Math.min(2,nJ);
+  while(winners.length<want && guard<99999){ guard++;
+    var id=pool[Math.floor(Math.random()*pool.length)];
+    if(!seen[id]){ seen[id]=1; winners.push(byJ[id].p); }
+  }
+  _ndsRes.winners=winners; render();
+}
+function ndsResStation(evId){ _ndsRes.station=(_ndsRes.station===evId?null:evId); render(); }
+function ndsResBar(label, val, max, color, onclick){
+  var w = max>0 ? Math.round(val/max*100) : 0;
+  var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
+  return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
+}
+function ndsResStationDetail(evId){
+  var d=_ndsRes.data; var rows=(d.parties||[]).filter(function(p){return p.event_id===evId;});
+  var multiSet={}; (d.joueurs_multi||[]).forEach(function(m){ multiSet[m.joueur_id]=m; });
+  var h='<div class="ndsres-detail"><div class="ndsres-sub" style="margin-bottom:6px">'+rows.length+' joueur(s) — coordonnées</div>';
+  rows.forEach(function(p){ var m=multiSet[p.joueur_id];
+    h+='<div class="ndsres-jrow"><div><b>'+esc((p.prenom||'')+' '+(p.nom||''))+'</b>'+(m?' <span class="ndsres-badge">'+m.parties+'\u00d7 \u00b7 '+m.nb_stations+' stations</span>':'')+'</div><div class="ndsres-jc">'+esc(p.email||'\u2014')+' \u00b7 '+esc(p.tel||'\u2014')+' \u00b7 '+esc(p.cp||'')+'</div><div class="ndsres-jc">'+esc(p.heure||'')+' \u00b7 score '+((p.score!=null)?p.score:'\u2014')+' \u00b7 '+(p.tickets||0)+' ticket(s)</div></div>';
+  });
+  h+='</div>';
+  return h;
+}
+function ndsResSondage(parties){
+  var agg={};
+  parties.forEach(function(p){ var b=p.bonus||{}; Object.keys(b).forEach(function(q){ agg[q]=agg[q]||{}; var v=b[q]; var arr=Array.isArray(v)?v:[v]; arr.forEach(function(a){ if(a==null||a==='')return; agg[q][a]=(agg[q][a]||0)+1; }); }); });
+  var qs=Object.keys(agg); if(!qs.length) return '<div class="ndsres-sub" style="margin-top:8px">Pas de r\u00e9ponses sondage ce jour.</div>';
+  var h='<div class="ndsres-sondage">';
+  qs.forEach(function(q){ h+='<div class="ndsres-q"><div class="ndsres-qh">'+esc(q)+'</div>'; Object.keys(agg[q]).sort(function(a,b){return agg[q][b]-agg[q][a];}).forEach(function(a){ h+='<div class="ndsres-qa"><span>'+esc(a)+'</span><b>'+agg[q][a]+'</b></div>'; }); h+='</div>'; });
+  h+='</div>';
+  return h;
+}
+function renderNdsResultat(){
+  if(!_ndsRes.date){ _ndsRes.date=ndsResDates().slice(-1)[0]; ndsResLoad(_ndsRes.date); }
+  var dates=ndsResDates();
+  var h='<div class="page">';
+  h+='<div class="page-header"><div><div class="page-title">\ud83d\udcc5 R\u00e9sultat journalier</div><div class="page-subtitle">Nuits du Sud \u00b7 stations de jeu \u00b7 par jour</div></div></div>';
+  h+='<div class="ndsres-days">';
+  dates.forEach(function(dt){ var on=dt===_ndsRes.date; var lbl=dt.slice(8)+'/'+dt.slice(5,7); h+='<button class="ndsres-day'+(on?' on':'')+'" onclick="ndsResLoad(\''+dt+'\')">'+lbl+'</button>'; });
+  h+='</div>';
+  if(_ndsRes.loading || !_ndsRes.data){ h+='<div class="alert info"><span class="ico">\u23f3</span>Chargement du '+esc(_ndsRes.date||'')+'\u2026</div></div>'; return h; }
+  var d=_ndsRes.data, k=d.kpis||{};
+  h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+'</div>';
+  h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
+  h+='<button class="btn btn-primary" onclick="ndsResDraw()">\ud83c\udfb2 Tirer 2 gagnants</button>';
+  if(_ndsRes.winners){ if(!_ndsRes.winners.length){ h+='<div class="ndsres-sub" style="margin-top:10px">Aucun joueur ce jour.</div>'; } else { h+='<div class="ndsres-winners">'; _ndsRes.winners.forEach(function(w,i){ h+='<div class="ndsres-winner"><div class="ndsres-wtag">Gagnant '+(i+1)+'</div><div class="ndsres-wname">'+esc((w.prenom||'')+' '+(w.nom||''))+'</div><div class="ndsres-wc">'+esc(w.email||'\u2014')+' \u00b7 '+esc(w.tel||'\u2014')+'</div><div class="ndsres-wc">'+esc(w.station||'')+' \u00b7 '+esc(w.heure||'')+'</div></div>'; }); h+='</div>'; } }
+  h+='</div>';
+  var ph=d.par_heure||[]; var maxH=Math.max.apply(null,ph.map(function(x){return x.joueurs;}).concat([1]));
+  h+='<div class="ndsres-card"><div class="ndsres-h">Affluence par heure</div>';
+  ph.forEach(function(x){ h+=ndsResBar(x.tranche, x.joueurs, maxH, '#1baf7a'); });
+  if(!ph.length) h+='<div class="ndsres-sub">Aucune donn\u00e9e.</div>';
+  h+='</div>';
+  var ps=d.par_station||[]; var maxS=Math.max.apply(null,ps.map(function(x){return x.joueurs;}).concat([1]));
+  h+='<div class="ndsres-card"><div class="ndsres-h">Joueurs par station <span class="ndsres-sub">\u00b7 clique une station pour voir les joueurs</span></div>';
+  ps.forEach(function(x){ h+=ndsResBar(x.station+(x.event_id===_ndsRes.station?'  \u25be':''), x.joueurs, maxS, '#2a78d6', 'ndsResStation(\''+x.event_id+'\')');
+    if(x.event_id===_ndsRes.station){ h+=ndsResStationDetail(x.event_id); } });
+  if(!ps.length) h+='<div class="ndsres-sub">Aucune donn\u00e9e.</div>';
+  h+='</div>';
+  var bg=d.brigade||{};
+  h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf31 Brigade Verte</div>';
+  h+='<div class="ndsres-sub"><b>'+(bg.nb_joueurs||0)+'</b> joueurs \u00b7 dont <b>'+(bg.aussi_ailleurs||0)+'</b> ont aussi jou\u00e9 d\'autres stations</div>';
+  h+=ndsResSondage(bg.parties||[]);
+  h+='</div>';
+  h+='</div>';
+  return h;
+}
+
 function render(){
   var _fsActive=false,_fsS=0,_fsE=0;
   try{ var _ae=document.activeElement; if(_ae && _ae.matches && _ae.matches('#viewport .filter-search input, #viewport input.filter-search')){ _fsActive=true; _fsS=_ae.selectionStart; _fsE=_ae.selectionEnd; } }catch(e){}
@@ -4655,6 +4770,7 @@ function render(){
   else if(v==='nds-bon-commande') html = renderNdsBonCommande();
   else if(v==='landing-page') html = renderLandingPage();
 else if(v==='nds-media') html = renderNdsMedia();
+else if(v==='nds-resultat') html = renderNdsResultat();
 else if(v==='maintenance') html = renderMaintenance();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
