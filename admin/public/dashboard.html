@@ -4684,7 +4684,10 @@ function ndsResBar(label, val, max, color, onclick){
 function ndsResStationDetail(evId){
   var d=_ndsRes.data; var rows=(d.parties||[]).filter(function(p){return p.event_id===evId;});
   var multiSet={}; (d.joueurs_multi||[]).forEach(function(m){ multiSet[m.joueur_id]=m; });
-  var h='<div class="ndsres-detail"><div class="ndsres-sub" style="margin-bottom:6px">'+rows.length+' joueur(s) — coordonnées</div>';
+  var h='<div class="ndsres-detail">';
+  var _cl=((d.clics&&d.clics.par_station)||{})[evId]||{}; var _cls=Object.keys(_cl).map(function(kk){return ndsResLienLabel(kk)+': '+_cl[kk];}).join(' · ');
+  if(_cls) h+='<div class="ndsres-sub" style="margin-bottom:6px;color:#4a3aa7">🔗 Clics liens — '+_cls+'</div>';
+  h+='<div class="ndsres-sub" style="margin-bottom:6px">'+rows.length+' joueur(s) — coordonnées</div>';
   rows.forEach(function(p){ var m=multiSet[p.joueur_id];
     h+='<div class="ndsres-jrow"><div><b>'+esc((p.prenom||'')+' '+(p.nom||''))+'</b>'+(m?' <span class="ndsres-badge">'+m.parties+'\u00d7 \u00b7 '+m.nb_stations+' stations</span>':'')+'</div><div class="ndsres-jc">'+esc(p.email||'\u2014')+' \u00b7 '+esc(p.tel||'\u2014')+' \u00b7 '+esc(p.cp||'')+'</div><div class="ndsres-jc">'+esc(p.heure||'')+' \u00b7 score '+((p.score!=null)?p.score:'\u2014')+' \u00b7 '+(p.tickets||0)+' ticket(s)</div></div>';
   });
@@ -4700,6 +4703,17 @@ function ndsResSondage(parties){
   h+='</div>';
   return h;
 }
+function ndsResLienLabel(k){ var m={site_web:'Site web',instagram:'Instagram',facebook:'Facebook',maps:'Itinéraire'}; return m[k]||k; }
+function ndsResClics(c){
+  var h='<div class="ndsres-card"><div class="ndsres-h">🔗 Clics liens partenaires <span class="ndsres-sub">· '+((c&&c.total)||0)+' au total</span></div>';
+  var pl=(c&&c.par_lien)||[];
+  if(!pl.length){ h+='<div class="ndsres-sub">Aucun clic sur les liens (site, Insta, Facebook, itinéraire) ce jour.</div>'; }
+  else { var maxL=Math.max.apply(null,pl.map(function(x){return x.n;}).concat([1])); pl.forEach(function(x){ h+=ndsResBar(ndsResLienLabel(x.lien), x.n, maxL, '#e87ba4'); }); }
+  var pp=(c&&c.par_partenaire)||[];
+  if(pp.length){ h+='<div class="ndsres-sub" style="margin:10px 0 4px">Par partenaire</div>'; var maxP=Math.max.apply(null,pp.map(function(x){return x.n;}).concat([1])); pp.forEach(function(x){ h+=ndsResBar(x.partenaire||'—', x.n, maxP, '#4a3aa7'); }); }
+  h+='</div>';
+  return h;
+}
 function renderNdsResultat(){
   if(!_ndsRes.date){ _ndsRes.date=ndsResDates().slice(-1)[0]; ndsResLoad(_ndsRes.date); }
   var dates=ndsResDates();
@@ -4710,7 +4724,7 @@ function renderNdsResultat(){
   h+='</div>';
   if(_ndsRes.loading || !_ndsRes.data){ h+='<div class="alert info"><span class="ico">\u23f3</span>Chargement du '+esc(_ndsRes.date||'')+'\u2026</div></div>'; return h; }
   var d=_ndsRes.data, k=d.kpis||{};
-  h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+'</div>';
+  h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+prospKpi((d.clics&&d.clics.total)||0,'Clics liens')+'</div>';
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
   h+='<button class="btn btn-primary" onclick="ndsResDraw()">\ud83c\udfb2 Tirer 2 gagnants</button>';
   if(_ndsRes.winners){ if(!_ndsRes.winners.length){ h+='<div class="ndsres-sub" style="margin-top:10px">Aucun joueur ce jour.</div>'; } else { h+='<div class="ndsres-winners">'; _ndsRes.winners.forEach(function(w,i){ h+='<div class="ndsres-winner"><div class="ndsres-wtag">Gagnant '+(i+1)+'</div><div class="ndsres-wname">'+esc((w.prenom||'')+' '+(w.nom||''))+'</div><div class="ndsres-wc">'+esc(w.email||'\u2014')+' \u00b7 '+esc(w.tel||'\u2014')+'</div><div class="ndsres-wc">'+esc(w.station||'')+' \u00b7 '+esc(w.heure||'')+'</div></div>'; }); h+='</div>'; } }
@@ -4731,6 +4745,7 @@ function renderNdsResultat(){
   h+='<div class="ndsres-sub"><b>'+(bg.nb_joueurs||0)+'</b> joueurs \u00b7 dont <b>'+(bg.aussi_ailleurs||0)+'</b> ont aussi jou\u00e9 d\'autres stations</div>';
   h+=ndsResSondage(bg.parties||[]);
   h+='</div>';
+  h+=ndsResClics(d.clics||{});
   h+='</div>';
   return h;
 }
