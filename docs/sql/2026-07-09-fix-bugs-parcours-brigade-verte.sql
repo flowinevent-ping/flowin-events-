@@ -1,0 +1,22 @@
+-- 2026-07-09 — Correctif 4 bugs parcours de jeu (QR Brigade Verte du JEU, pas les landing agent)
+--
+-- CAUSE RACINE Bug 2 & 4 : les stations Brigade Verte du jeu (ev-nds-tablette, -1, -2, -3) étaient
+-- configurées en SONDAGE SEUL : quizBanques=[], quizNbQuestions=0, sondageAnonyme=true.
+-- => elles sautaient le quiz et allaient direct au bonus/sondage (ou à l'écran gains si déjà jouée).
+-- Or une banque de quiz DÉDIÉE existe (bq-nds-tablette, 25 questions), simplement non assignée = erreur de config.
+--
+-- CORRECTIF CONFIG (SQL) : leur donner le parcours normal, identique aux Caisses/Écran :
+-- update events set cfg = jsonb_set(jsonb_set(jsonb_set(cfg,
+--   '{quizBanques}','["bq-nds-tablette"]'), '{quizNbQuestions}','4'), '{sondageAnonyme}','false')
+-- where id in ('ev-nds-tablette','ev-nds-tablette-1','ev-nds-tablette-2','ev-nds-tablette-3');
+-- => reconnexion email -> quiz (4 Q) -> bonus (5 RSE) -> ticket, comme les autres stations.
+--
+-- CORRECTIF CODE (NDS2026Client.tsx) :
+--  - Bug 1 : la pop-up « déjà inscrit ? / reconnexion email » ne se déclenchait que sur screen==='quiz'.
+--    Élargie à (screen==='quiz' || screen==='bonus') -> apparaît sur tous les parcours (quiz-first ou bonus-first).
+--  - Bug 3 : au flash d'une station déjà jouée aujourd'hui (onboard + saved), le message « Station validée »
+--    était ambigu. Remplacé par « Tu as déjà flashé cette station aujourd'hui … file vers une autre station ».
+--    (Le message existait déjà pour le clic carte in-app / scanTarget, pas au flash direct.)
+--
+-- ndsFamily : ev-nds-tablette-1/2/3 sont des familles distinctes (pas de collision de dédup entre BV1/2/3).
+-- Validé : tsc --noEmit 0 erreur + next build OK.

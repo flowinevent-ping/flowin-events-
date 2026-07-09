@@ -243,7 +243,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Popup « Déjà inscrit ? » : à l'arrivée sur le quiz, si le joueur n'est pas déjà
   // reconnu (localStorage/email) et qu'on ne l'a pas encore demandé cette session.
   useEffect(() => {
-    if (screen === 'quiz' && !recurrent && !recoAsked && !saved) {
+    if ((screen === 'quiz' || screen === 'bonus') && !recurrent && !recoAsked && !saved) {
       setRecoMode('ask'); setRecoMsg(null); setRecoOpen(true)
     }
   }, [screen, recurrent, recoAsked, saved])
@@ -799,7 +799,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(22,163,74,.16)', border: '1px solid rgba(22,163,74,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
                     <svg className="ic" style={{ width: 20, height: 20, color: '#4ade80', flexShrink: 0 }}><use href="#i-checkc" /></svg>
-                    <span>Station validée ! Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir.</span>
+                    <span>Tu as déjà flashé <b>cette station</b> aujourd&apos;hui — ton ticket est gardé (<b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b>). File vers une <b>autre station</b> pour en gagner un de plus&nbsp;!</span>
                   </div>
                   {STATIONS.filter(s => ndsPlayedToday(s.id)).length < STATIONS.length ? (
                     <>
