@@ -215,6 +215,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   }, [recurrent])
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
+  const [dejaJoue, setDejaJoue] = useState(false)
   const [scanTarget, setScanTarget] = useState<{ id?: string; nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
@@ -230,9 +231,17 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   const lsKey = `flowin_played_${ndsFamily(evId)}_${ndsYmd()}`
 
+  // Anti retour-arrière : si la page est restaurée depuis la mémoire du navigateur (bfcache),
+  // on recharge -> on repasse par la règle "déjà joué" au lieu de pouvoir rejouer la même station.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted) window.location.reload() }
+    window.addEventListener('pageshow', onShow)
+    return () => window.removeEventListener('pageshow', onShow)
+  }, [])
+
   useEffect(() => {
     ndsMigrateLegacy()
-    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); if (s !== 'played') setTicket(s) } } catch {}
+    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); setDejaJoue(true); if (s !== 'played') setTicket(s) } } catch {}
     // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
     const prof = getJoueurLocal()
     if (prof) {
@@ -787,6 +796,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
       <div className="phone">
+        {dejaJoue && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(12,10,18,.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>🎯</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Tu as déjà flashé cette station aujourd&apos;hui&nbsp;!</div>
+              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 18, lineHeight: 1.4 }}>Ton ticket est bien gardé. File vers une <b>autre station</b> pour gagner <b>+1 ticket</b> et plus de chances au tirage.</div>
+              <button onClick={() => { setDejaJoue(false); setScreen('carte') }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>📍 Voir la carte &amp; les autres stations</button>
+              <button onClick={() => { setDejaJoue(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#f3eef7', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '13px', fontFamily: 'inherit', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 10 }}>📷 Scanner une autre station</button>
+              <a onClick={() => setDejaJoue(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Fermer</a>
+            </div>
+          </div>
+        )}
         {screen === 'onboard' && (
           <section className="scr on">
             <div className="hero">
