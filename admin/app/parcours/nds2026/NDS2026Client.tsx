@@ -1056,10 +1056,25 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   <a onClick={retrySave} style={{ display: 'inline-block', marginTop: 8, fontWeight: 700, color: '#3B5CC4', cursor: 'pointer' }}>{saving ? 'Nouvelle tentative…' : 'Réessayer maintenant ↻'}</a>
                 </div>
               )}
+              {(() => { const pc = STATIONS.filter(s => ndsPlayedToday(s.id)).length; const done = pc >= STATIONS.length; return (
+                <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                    <div style={{ fontSize: 15, fontWeight: 800 }}>{pc} / {STATIONS.length} stations jouées</div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>🎟️ {ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
+                  </div>
+                  <div style={{ height: 10, background: 'rgba(255,255,255,.25)', borderRadius: 999, overflow: 'hidden', marginBottom: 12 }}>
+                    <div style={{ height: '100%', width: `${Math.round(pc / STATIONS.length * 100)}%`, background: '#F5B544', borderRadius: 999, transition: 'width .6s ease' }} />
+                  </div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? 'Toutes les stations jouées, bravo ! 🎉' : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
+                  {!done && (
+                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>📷 Scanner la prochaine station</button>
+                  )}
+                </div>
+              ); })()}
               <div className="res-eyebrow">Joue les autres stations ce soir</div>
               <div className="nextcard">
                 {STATIONS.filter(s => s.id !== evId).map(s => { const dn = ndsPlayedToday(s.id); return (
-                  <div className="nextline" key={s.id}><span className={`em${dn ? '' : ' nds-mk-pulse'}`} style={{ background: dn ? '#F5B544' : '#16a34a' }}><svg className="ic"><use href={`#${dn ? 'i-checkc' : s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{dn ? 'validée ✓' : s.ou}</div></div></div>
+                  <div className="nextline" key={s.id} onClick={() => setScreen('carte')} style={{ cursor: 'pointer' }}><span className={`em${dn ? '' : ' nds-mk-pulse'}`} style={{ background: dn ? '#F5B544' : '#16a34a' }}><svg className="ic"><use href={`#${dn ? 'i-checkc' : s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{dn ? 'validée ✓' : s.ou}</div></div></div>
                 )})}
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
@@ -1067,6 +1082,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {(form.email || recurrent?.email) && (
                 <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
               )}
+              {partnerBand}
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
             </div>
           </section>
