@@ -175,6 +175,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const mapObjRef = useRef<unknown>(null)
   const [placeMode, setPlaceMode] = useState(false)
   const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
+  const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
   const [sessionStart] = useState<string>(() => new Date().toISOString())
   const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
   const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
@@ -188,7 +189,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       // Exceptions : station déjà jouée aujourd'hui (on garde le récap « déjà flashé ») ou station sans quiz.
       let alreadyPlayed = false
       try { alreadyPlayed = localStorage.getItem(lsKey) != null } catch {}
-      if (!alreadyPlayed && questions.length > 0) setScreen('quiz')
+      if (!preview && !alreadyPlayed && questions.length > 0) setScreen('quiz')
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -234,14 +235,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Anti retour-arrière : si la page est restaurée depuis la mémoire du navigateur (bfcache),
   // on recharge -> on repasse par la règle "déjà joué" au lieu de pouvoir rejouer la même station.
   useEffect(() => {
-    const onShow = (e: PageTransitionEvent) => { if (e.persisted) window.location.reload() }
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted && !preview) window.location.reload() }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
   }, [])
 
   useEffect(() => {
     ndsMigrateLegacy()
-    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); setDejaJoue(true); if (s !== 'played') setTicket(s) } } catch {}
+    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); if (!preview) setDejaJoue(true); if (s !== 'played') setTicket(s) } } catch {}
     // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
     const prof = getJoueurLocal()
     if (prof) {
@@ -258,7 +259,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Popup « Déjà inscrit ? » : à l'arrivée sur le quiz, si le joueur n'est pas déjà
   // reconnu (localStorage/email) et qu'on ne l'a pas encore demandé cette session.
   useEffect(() => {
-    if ((screen === 'quiz' || screen === 'bonus') && !recurrent && !recoAsked && !saved) {
+    if (!preview && (screen === 'quiz' || screen === 'bonus') && !recurrent && !recoAsked && !saved) {
       setRecoMode('ask'); setRecoMsg(null); setRecoOpen(true)
     }
   }, [screen, recurrent, recoAsked, saved])
@@ -557,6 +558,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
   async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+    if (preview) return { success: true, duplicate: false, ticket: tc }
     const qrSource = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
     return recurrent
       ? await claimJoueur(recurrent, evId, 'ND', bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, source_qr: qrSource, started_at: sessionStart, quizTicket: quizTk, bonusTicket: bonusTk })
@@ -796,6 +798,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
 
       <div className="phone">
+        {preview && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 4000, background: 'rgba(26,18,38,.96)', padding: '8px 10px', display: 'flex', gap: 6, overflowX: 'auto', boxShadow: '0 2px 10px rgba(0,0,0,.3)' }}>
+            <span style={{ color: '#F5B544', fontWeight: 800, fontSize: 11, whiteSpace: 'nowrap', alignSelf: 'center', paddingRight: 4 }}>APERÇU</span>
+            {([['onboard', 'Accueil'], ['quiz', 'Quiz'], ['resultats', 'Résultats'], ['bonus', 'Bonus'], ['inscription', 'Inscription'], ['final', 'Fin'], ['tickets', 'Tickets'], ['carte', 'Carte'], ['partenaires', 'Partenaires'], ['profil', 'Profil']] as const).map(([sc, lb]) => (
+              <button key={sc} onClick={() => setScreen(sc)} style={{ background: screen === sc ? '#E0218A' : 'rgba(255,255,255,.14)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>{lb}</button>
+            ))}
+          </div>
+        )}
         {dejaJoue && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(12,10,18,.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
