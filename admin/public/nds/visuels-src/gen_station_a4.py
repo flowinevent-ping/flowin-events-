@@ -110,7 +110,8 @@ if __name__=="__main__":
               ("ev-nds-bar-2","Bar 2","station_a4_bar-2"),
               ("ev-nds-bar-3","Bar 3","station_a4_bar-3"),
               ("ev-nds-tablette-1","Brigade Verte 1","station_a4_brigade-verte-1"),
-              ("ev-nds-tablette-2","Brigade Verte 2","station_a4_brigade-verte-2")]
+              ("ev-nds-tablette-2","Brigade Verte 2","station_a4_brigade-verte-2"),
+              ("ev-nds-safer","SAFER","station_a4_safer")]
     only=sys.argv[1] if len(sys.argv)>1 else None
     for sid,lbl,fn in stations:
         if only and only not in fn: continue
