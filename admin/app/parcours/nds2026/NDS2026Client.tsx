@@ -804,6 +804,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             {([['onboard', 'Accueil'], ['quiz', 'Quiz'], ['resultats', 'Résultats'], ['bonus', 'Bonus'], ['inscription', 'Inscription'], ['final', 'Fin'], ['tickets', 'Tickets'], ['carte', 'Carte'], ['partenaires', 'Partenaires'], ['profil', 'Profil']] as const).map(([sc, lb]) => (
               <button key={sc} onClick={() => setScreen(sc)} style={{ background: screen === sc ? '#E0218A' : 'rgba(255,255,255,.14)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>{lb}</button>
             ))}
+            <button onClick={() => setDejaJoue(true)} style={{ background: '#F5B544', color: '#1a1226', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>Pop-up</button>
           </div>
         )}
         {dejaJoue && (
@@ -1361,6 +1362,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <nav className="nav on" id="nav">
               <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
               <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
+              <button onClick={() => { setScreen('carte'); setScanOpen(true) }} aria-label="Scanner une station" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 16, padding: '9px 6px 6px', fontFamily: 'inherit', fontWeight: 800, fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, boxShadow: '0 6px 16px rgba(224,33,138,.5)', transform: 'translateY(-10px)', minWidth: 62 }}><span style={{ fontSize: 22, lineHeight: 1 }}>📷</span>Scanner</button>
               <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
               <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
             </nav>
