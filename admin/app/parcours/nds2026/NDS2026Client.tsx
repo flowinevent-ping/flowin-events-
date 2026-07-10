@@ -217,6 +217,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [scanOpen, setScanOpen] = useState(false)
   const [scanErr, setScanErr] = useState(false)
   const [dejaJoue, setDejaJoue] = useState(false)
+  const [victoryPopup, setVictoryPopup] = useState(false)
+  const victoryShownRef = useRef(false)
   const [scanTarget, setScanTarget] = useState<{ id?: string; nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
@@ -537,6 +539,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
   const quizPerfect = questions.length === 0 || score >= questions.length
   useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) { setFly(f => f + 1); setCelebrate(c => c + 1) } }, [screen, quizPerfect, bonusDone])
+  useEffect(() => { if (!preview && screen === 'final' && (quizPerfect || bonusDone) && !victoryShownRef.current) { victoryShownRef.current = true; setVictoryPopup(true) } }, [screen, quizPerfect, bonusDone, preview])
   useEffect(() => { if (screen === 'tickets' || screen === 'final' || (screen === 'onboard' && saved)) refreshServerTickets() }, [screen, saved, refreshServerTickets])
 
   // Écritures en attente (réseau coupé lors d'un jeu) : on rejoue au montage puis à chaque retour du réseau.
@@ -796,6 +799,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
+      <style dangerouslySetInnerHTML={{ __html: '@keyframes nds-pop{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}' }} />
 
       <div className="phone">
         {preview && (
@@ -805,17 +809,29 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <button key={sc} onClick={() => setScreen(sc)} style={{ background: screen === sc ? '#E0218A' : 'rgba(255,255,255,.14)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>{lb}</button>
             ))}
             <button onClick={() => setDejaJoue(true)} style={{ background: '#F5B544', color: '#1a1226', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>Pop-up</button>
+            <button onClick={() => setVictoryPopup(true)} style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>Victoire</button>
           </div>
         )}
         {dejaJoue && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(12,10,18,.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-            <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
+            <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.4)', animation: 'nds-pop .3s cubic-bezier(.2,1.3,.5,1) both' }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>🎯</div>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Tu as déjà flashé cette station aujourd&apos;hui&nbsp;!</div>
               <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 18, lineHeight: 1.4 }}>Ton ticket est bien gardé. File vers une <b>autre station</b> pour gagner <b>+1 ticket</b> et plus de chances au tirage.</div>
               <button onClick={() => { setDejaJoue(false); setScreen('carte') }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>📍 Voir la carte &amp; les autres stations</button>
               <button onClick={() => { setDejaJoue(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#f3eef7', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '13px', fontFamily: 'inherit', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 10 }}>📷 Scanner une autre station</button>
               <a onClick={() => setDejaJoue(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Fermer</a>
+            </div>
+          </div>
+        )}
+        {victoryPopup && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 3200, background: 'rgba(12,10,18,.74)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 22, padding: '26px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.45)', animation: 'nds-pop .32s cubic-bezier(.2,1.3,.5,1) both' }}>
+              <div style={{ fontSize: 48, marginBottom: 6 }}>🎉</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Bravo, +1 ticket&nbsp;!</div>
+              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 16, lineHeight: 1.4 }}>Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir. {(() => { const rest = STATIONS.length - STATIONS.filter(s => ndsPlayedToday(s.id)).length; return rest > 0 ? `Plus que ${rest} station${rest > 1 ? 's' : ''} pour le max de chances !` : 'Tu as tout fait, énorme\u00a0!' })()}</div>
+              <button onClick={() => { setVictoryPopup(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>📷 Scanner la prochaine station</button>
+              <a onClick={() => setVictoryPopup(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Plus tard</a>
             </div>
           </div>
         )}
