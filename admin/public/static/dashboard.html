@@ -4675,7 +4675,9 @@ async function ndsResLoad(date){
     try{
       var rf=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_funnel',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
       _ndsRes.funnel = rf.ok ? await rf.json() : null;
-    }catch(e2){ _ndsRes.funnel=null; }
+      var rc=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_clics',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+      _ndsRes.clics = rc.ok ? await rc.json() : null;
+    }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; }
   }catch(e){ _ndsRes.data=null; _ndsRes.funnel=null; }
   _ndsRes.loading=false; render();
 }
@@ -4695,6 +4697,50 @@ function ndsResBar(label, val, max, color, onclick){
   var w = max>0 ? Math.round(val/max*100) : 0;
   var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
   return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
+}
+function ndsResClicsPart(c){
+  if(!c) return '';
+  var TYP={fiche:'Ouverture de fiche',site_web:'Site web',instagram:'Instagram',facebook:'Facebook',maps:'Itin\u00e9raire (Maps)'};
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udfea Int\u00e9r\u00eat partenaires \u2014 fiches ouvertes &amp; liens cliqu\u00e9s</div>';
+  h+='<div class="kpi-grid" style="margin-bottom:6px">';
+  h+=prospKpi(c.jour_total||0,'Clics du jour');
+  h+=prospKpi(c.jour_personnes||0,'Personnes du jour');
+  h+=prospKpi(c.cumul_total||0,'Clics depuis le d\u00e9but');
+  h+=prospKpi(c.cumul_personnes||0,'Personnes au total');
+  h+='</div>';
+  h+='<div class="ndsres-sub" style="margin:4px 0 10px">Jour : <b>'+(c.jour_fiches||0)+'</b> fiche(s) ouverte(s) \u00b7 <b>'+(c.jour_sortants||0)+'</b> lien(s) sortant(s). Cumul : <b>'+(c.cumul_fiches||0)+'</b> / <b>'+(c.cumul_sortants||0)+'</b>.</div>';
+  if(!(c.cumul_total>0)){
+    h+='<div class="alert info"><span class="ico">\u2139\ufe0f</span>Aucun clic enregistr\u00e9 \u00e0 ce jour. Le tra\u00e7age de l\u2019<b>ouverture des fiches</b> est actif depuis le 11/07 (avant, seuls les liens sortants \u00e9taient compt\u00e9s, et personne n\u2019en avait cliqu\u00e9).</div></div>';
+    return h;
+  }
+  var pp=c.par_partenaire||[];
+  if(pp.length){
+    var maxP=Math.max.apply(null,pp.map(function(x){return x.cumul;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:10px">Par partenaire <span class="ndsres-sub">(cumul \u00b7 jour)</span></div>';
+    pp.forEach(function(x){ h+=ndsResBar(x.partenaire+' \u2014 '+x.jour+' auj.', x.cumul, maxP, '#7C2D92'); });
+  }
+  var pt=c.par_type||[];
+  if(pt.length){
+    var maxT=Math.max.apply(null,pt.map(function(x){return x.cumul;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:12px">Par type d\u2019action</div>';
+    pt.forEach(function(x){ h+=ndsResBar(TYP[x.type]||x.type, x.cumul, maxT, '#eda100'); });
+  }
+  var pe=c.personnes||[];
+  if(pe.length){
+    h+='<div class="ndsres-h" style="margin-top:12px">Qui a cliqu\u00e9 <span class="ndsres-sub">('+pe.length+' personne(s) identifi\u00e9e(s))</span></div>';
+    h+='<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Joueur</th><th>Contact</th><th>Partenaires</th><th>Clics</th><th>Dernier</th></tr></thead><tbody>';
+    pe.forEach(function(x){
+      var nm=esc(((x.prenom||'')+' '+(x.nom||'')).trim()||'\u2014');
+      var ct=esc(x.email||x.tel||'\u2014');
+      h+='<tr style="cursor:pointer" onclick="ndsResOuvrirJoueur(\''+esc(x.joueur_id)+'\')"><td><b>'+nm+'</b></td><td>'+ct+'</td><td>'+esc(x.partenaires||'')+'</td><td>'+x.clics+'</td><td>'+esc(x.dernier||'')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
+  return h;
+}
+function ndsResOuvrirJoueur(jid){
+  try{ openDrawerFor('joueur', jid, 'infos'); }catch(e){ console.error('[Flowin] ouverture fiche joueur', jid, e); }
 }
 function ndsResFunnel(f){
   if(!f) return '';
@@ -4797,6 +4843,7 @@ function renderNdsResultat(){
   var d=_ndsRes.data, k=d.kpis||{};
   h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+prospKpi((d.clics&&d.clics.total)||0,'Clics liens')+'</div>';
   h+=ndsResFunnel(_ndsRes.funnel);
+  h+=ndsResClicsPart(_ndsRes.clics);
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
   h+='<button class="btn btn-primary" onclick="ndsResDraw()">\ud83c\udfb2 Tirer 2 gagnants</button>';
   if(_ndsRes.winners){ if(!_ndsRes.winners.length){ h+='<div class="ndsres-sub" style="margin-top:10px">Aucun joueur ce jour.</div>'; } else { h+='<div class="ndsres-winners">'; _ndsRes.winners.forEach(function(w,i){ h+='<div class="ndsres-winner" onclick="openDrawerFor(\'joueur\',\''+esc(w.joueur_id||'')+'\')" style="cursor:pointer" title="Voir la fiche joueur"><div class="ndsres-wtag">Gagnant '+(i+1)+'</div><div class="ndsres-wname">'+esc((w.prenom||'')+' '+(w.nom||''))+'</div><div class="ndsres-wc">'+esc(w.email||'\u2014')+' \u00b7 '+esc(w.tel||'\u2014')+'</div><div class="ndsres-wc">'+esc(w.station||'')+' \u00b7 '+esc(w.heure||'')+'</div><div class="ndsres-wc" style="color:#16a34a;font-weight:700;margin-top:5px">Voir la fiche \u2192</div></div>'; }); h+='</div>'; } }

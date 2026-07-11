@@ -449,7 +449,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         const ccls = cdone ? '' : 'nds-mk-pulse'
         const html = `<div class="${ccls}" style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${cbg};border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
         const icon = LL.divIcon({ html, className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz] })
-        LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => setFiche(c))
+        LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => { logClicPartenaire(c.id, 'fiche', null); setFiche(c) })
       })
       // Position du joueur (géoloc) — affichée sur les deux vues
       if (typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -674,8 +674,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
 
   // Tracking clic partenaire : qui (joueur) · quel partenaire · quel lien · quelle station · quand
+  // lienKey='fiche' (ouverture de la fiche, url null) ou 'site_web'/'instagram'/'facebook'/'maps' (lien sortant)
   function logClicPartenaire(partenaireId: string, lienKey: string, url: string | null) {
-    if (!url) return
+    if (!partenaireId) return
+    if (lienKey !== 'fiche' && !url) return
     try {
       const jid = recurrent?.id || getJoueurLocal()?.id || null
       void supabase.from('partenaire_clics').insert({
@@ -1318,7 +1320,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {partenaires.length === 0 && <div className="pt-banner"><svg className="ic"><use href="#i-store" /></svg><div>Espace partenaires — la liste réelle s&apos;affichera ici (logos, promo, réseaux).</div></div>}
               <div className="pt-grid">
                 {partenaires.map((p, i) => (
-                  <div className="pt-card" key={p.id} onClick={() => setSheetPart(i)}>
+                  <div className="pt-card" key={p.id} onClick={() => { logClicPartenaire(p.id, 'fiche', null); setSheetPart(i) }}>
                     <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
                     <div className="pt-nm">{p.nom}</div>
                   </div>
