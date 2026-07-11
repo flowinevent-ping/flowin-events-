@@ -195,6 +195,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   }, [])
   // Log du scan/ouverture parcours NDS — alimente l'entonnoir (scans -> jeux -> coordonnées)
   useEffect(() => { trackVisite('nds2026', evId) }, [evId])
+  // Log des étapes franchies (1 seule fois par étape/station) — mesure du décrochage
+  const etapesVues = useRef<Record<string, boolean>>({})
+  useEffect(() => {
+    const k = String(evId || '-') + ':' + screen
+    if (etapesVues.current[k]) return
+    etapesVues.current[k] = true
+    trackVisite('nds2026', evId, screen)
+  }, [screen, evId])
   const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
   // Popup reconnaissance « Déjà inscrit ? » — s'affiche au milieu du quiz après le flash
   const [recoOpen, setRecoOpen] = useState(false)

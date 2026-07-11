@@ -4672,7 +4672,11 @@ async function ndsResLoad(date){
   try{
     var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_daily',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
     _ndsRes.data = r.ok ? await r.json() : null;
-  }catch(e){ _ndsRes.data=null; }
+    try{
+      var rf=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_funnel',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+      _ndsRes.funnel = rf.ok ? await rf.json() : null;
+    }catch(e2){ _ndsRes.funnel=null; }
+  }catch(e){ _ndsRes.data=null; _ndsRes.funnel=null; }
   _ndsRes.loading=false; render();
 }
 function ndsResDraw(){
@@ -4691,6 +4695,41 @@ function ndsResBar(label, val, max, color, onclick){
   var w = max>0 ? Math.round(val/max*100) : 0;
   var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
   return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
+}
+function ndsResFunnel(f){
+  if(!f) return '';
+  var lbl={onboard:'Arriv\u00e9e (scan)',inscription:'Coordonn\u00e9es',quiz:'Quiz',resultats:'R\u00e9sultats',bonus:'Bonus',final:'Fin de parcours',tickets:'Tickets',carte:'Carte',partenaires:'Partenaires',profil:'Profil',refusdigital:'Refus digital'};
+  var ordre=['onboard','inscription','quiz','resultats','bonus','final','tickets'];
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udd3d Entonnoir \u2014 scans \u2192 parcours termin\u00e9s</div>';
+  var chg=f.chargements||0, vis=f.visiteurs||0, jou=f.joueurs||0, actif=!!f.tracking_visiteur_actif;
+  h+='<div class="kpi-grid" style="margin-bottom:6px">';
+  h+=prospKpi(chg,'Chargements de page');
+  h+=prospKpi(actif?vis:'\u2014','Visiteurs uniques');
+  h+=prospKpi(jou,'Ont termin\u00e9');
+  h+=prospKpi(actif&&f.taux_completion!=null?(f.taux_completion+' %'):'\u2014','Taux de compl\u00e9tion');
+  h+='</div>';
+  if(!actif){
+    h+='<div class="alert info" style="margin:8px 0"><span class="ico">\u2139\ufe0f</span>Visiteurs uniques non mesurables sur cette date : le tra\u00e7age anonyme (visiteur_id) est actif depuis le 11/07. Les \u00ab\u00a0chargements\u00a0\u00bb incluent les rechargements et les changements de station, ils ne repr\u00e9sentent donc pas un nombre de personnes.</div>';
+  } else {
+    var perdus=Math.max(0,vis-jou);
+    h+='<div class="ndsres-sub" style="margin:6px 0"><b>'+perdus+'</b> visiteur(s) ont scann\u00e9 sans terminer le parcours.</div>';
+  }
+  var pe=(f.par_etape||[]).slice().sort(function(a,b){ var ia=ordre.indexOf(a.etape), ib=ordre.indexOf(b.etape); return (ia<0?99:ia)-(ib<0?99:ib); });
+  if(pe.length){
+    var maxE=Math.max.apply(null,pe.map(function(x){return x.visiteurs;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:12px">D\u00e9crochage par \u00e9tape</div>';
+    pe.forEach(function(x){ h+=ndsResBar(lbl[x.etape]||x.etape, x.visiteurs, maxE, '#eda100'); });
+  } else {
+    h+='<div class="ndsres-sub" style="margin-top:10px">Suivi par \u00e9tape actif depuis le 11/07 \u2014 les donn\u00e9es appara\u00eetront ici.</div>';
+  }
+  var ps=f.par_source||[];
+  if(ps.length){
+    var maxS=Math.max.apply(null,ps.map(function(x){return x.n;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:12px">Origine des arriv\u00e9es</div>';
+    ps.forEach(function(x){ h+=ndsResBar(x.source, x.n, maxS, '#2a78d6'); });
+  }
+  h+='</div>';
+  return h;
 }
 function ndsResBarStack(label, mono, multi, max){
   var tot=mono+multi; var wm=max>0?Math.round(mono/max*100):0; var wx=max>0?Math.round(multi/max*100):0;
@@ -4752,6 +4791,7 @@ function renderNdsResultat(){
   if(_ndsRes.loading || !_ndsRes.data){ h+='<div class="alert info"><span class="ico">\u23f3</span>'+(dates.length?('Chargement du '+esc(_ndsRes.date||'')+'\u2026'):'Aucune journ\u00e9e de jeu pour ce super event.')+'</div></div>'; return h; }
   var d=_ndsRes.data, k=d.kpis||{};
   h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+prospKpi((d.clics&&d.clics.total)||0,'Clics liens')+'</div>';
+  h+=ndsResFunnel(_ndsRes.funnel);
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
   h+='<button class="btn btn-primary" onclick="ndsResDraw()">\ud83c\udfb2 Tirer 2 gagnants</button>';
   if(_ndsRes.winners){ if(!_ndsRes.winners.length){ h+='<div class="ndsres-sub" style="margin-top:10px">Aucun joueur ce jour.</div>'; } else { h+='<div class="ndsres-winners">'; _ndsRes.winners.forEach(function(w,i){ h+='<div class="ndsres-winner" onclick="openDrawerFor(\'joueur\',\''+esc(w.joueur_id||'')+'\')" style="cursor:pointer" title="Voir la fiche joueur"><div class="ndsres-wtag">Gagnant '+(i+1)+'</div><div class="ndsres-wname">'+esc((w.prenom||'')+' '+(w.nom||''))+'</div><div class="ndsres-wc">'+esc(w.email||'\u2014')+' \u00b7 '+esc(w.tel||'\u2014')+'</div><div class="ndsres-wc">'+esc(w.station||'')+' \u00b7 '+esc(w.heure||'')+'</div><div class="ndsres-wc" style="color:#16a34a;font-weight:700;margin-top:5px">Voir la fiche \u2192</div></div>'; }); h+='</div>'; } }
