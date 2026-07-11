@@ -23,6 +23,15 @@ export function getVisiteurId(): string | null {
 }
 
 /**
+ * Trace un incident (réseau, écriture, JS) de façon anonyme.
+ * Permet de distinguer un abandon volontaire d'un échec technique.
+ */
+export async function trackErreur(page: string, eventId?: string, type?: string) {
+  const offline = (typeof navigator !== 'undefined' && navigator.onLine === false) ? '-offline' : ''
+  return trackVisite(page, eventId, 'err:' + (type || 'inconnu') + offline)
+}
+
+/**
  * Enregistre une visite / une étape du parcours de façon anonyme.
  * Best-effort : ne bloque jamais l'affichage et n'échoue jamais visiblement.
  * Sert à mesurer l'entonnoir : arrivées (scan / clic) -> jeu -> coordonnées.

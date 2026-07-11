@@ -6,7 +6,7 @@ import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJou
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
-import { trackVisite } from '@/lib/track'
+import { trackVisite, trackErreur } from '@/lib/track'
 import { buildInviteLink } from '@/lib/parrainage'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 
@@ -553,10 +553,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Écritures en attente (réseau coupé lors d'un jeu) : on rejoue au montage puis à chaque retour du réseau.
   useEffect(() => {
     ndsFlushQueue()
-    const onOnline = () => { ndsFlushQueue() }
+    const onErr = (e: ErrorEvent) => { void trackErreur('nds2026', evId, 'js:' + String(e.message || '').slice(0, 60)) }
+    const onRej = () => { void trackErreur('nds2026', evId, 'promise') }
+    window.addEventListener('error', onErr)
+    window.addEventListener('unhandledrejection', onRej)
+    const onOnline = () => { void trackErreur('nds2026', evId, 'reprise-reseau'); ndsFlushQueue() }
     window.addEventListener('online', onOnline)
-    return () => window.removeEventListener('online', onOnline)
-  }, [])
+    return () => {
+      window.removeEventListener('online', onOnline)
+      window.removeEventListener('error', onErr)
+      window.removeEventListener('unhandledrejection', onRej)
+    }
+  }, [evId])
 
   // Cache hors-ligne (service worker chirurgical) — ACTIF, restreint au jeu (scope /parcours/).
   // Ne touche PAS le dashboard/brigade/carte. Kill-switch: KILL=true dans public/sw.js (~2 min à se propager).
@@ -619,6 +627,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       } else {
         ndsQueueWrite({ kind: 'write', payload: { email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'nds2026', source_qr: qrSrc ?? null, started_at: sessionStart, prefix: 'ND', bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers, optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk } })
       }
+      void trackErreur('nds2026', evId, 'ecriture')
       console.error('[nds2026] enregistrement Supabase échoué — mis en file d\'attente (réessai auto):', res.error)
     }
     return finalTicket

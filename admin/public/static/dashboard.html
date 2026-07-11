@@ -4714,7 +4714,12 @@ function ndsResFunnel(f){
     var perdus=Math.max(0,vis-jou);
     h+='<div class="ndsres-sub" style="margin:6px 0"><b>'+perdus+'</b> visiteur(s) ont scann\u00e9 sans terminer le parcours.</div>';
   }
-  var pe=(f.par_etape||[]).slice().sort(function(a,b){ var ia=ordre.indexOf(a.etape), ib=ordre.indexOf(b.etape); return (ia<0?99:ia)-(ib<0?99:ib); });
+  var errs=(f.par_etape||[]).filter(function(x){ return String(x.etape||'').indexOf('err:')===0; });
+  if(errs.length){
+    var nErr=0; errs.forEach(function(x){ nErr+=x.visiteurs; });
+    h+='<div class="alert warn" style="margin:8px 0"><span class="ico">\u26a0\ufe0f</span><b>'+nErr+'</b> incident(s) technique(s) d\u00e9tect\u00e9(s) \u2014 '+errs.map(function(x){ return esc(String(x.etape).replace('err:',''))+' ('+x.visiteurs+')'; }).join(' \u00b7 ')+'</div>';
+  }
+  var pe=(f.par_etape||[]).filter(function(x){ return String(x.etape||'').indexOf('err:')!==0; }).slice().sort(function(a,b){ var ia=ordre.indexOf(a.etape), ib=ordre.indexOf(b.etape); return (ia<0?99:ia)-(ib<0?99:ib); });
   if(pe.length){
     var maxE=Math.max.apply(null,pe.map(function(x){return x.visiteurs;}).concat([1]));
     h+='<div class="ndsres-h" style="margin-top:12px">D\u00e9crochage par \u00e9tape</div>';
