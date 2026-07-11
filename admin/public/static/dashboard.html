@@ -4692,6 +4692,10 @@ function ndsResBar(label, val, max, color, onclick){
   var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
   return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
 }
+function ndsResBarStack(label, mono, multi, max){
+  var tot=mono+multi; var wm=max>0?Math.round(mono/max*100):0; var wx=max>0?Math.round(multi/max*100):0;
+  return '<div class="ndsres-row"><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track" style="display:flex;overflow:hidden"><div style="width:'+wm+'%;background:#2a78d6"></div><div style="width:'+wx+'%;background:#1baf7a"></div></div><div class="ndsres-val">'+tot+'</div></div>';
+}
 function ndsResStationDetail(evId){
   var d=_ndsRes.data; var rows=(d.parties||[]).filter(function(p){return p.event_id===evId;});
   var multiSet={}; (d.joueurs_multi||[]).forEach(function(m){ multiSet[m.joueur_id]=m; });
@@ -4752,9 +4756,11 @@ function renderNdsResultat(){
   h+='<button class="btn btn-primary" onclick="ndsResDraw()">\ud83c\udfb2 Tirer 2 gagnants</button>';
   if(_ndsRes.winners){ if(!_ndsRes.winners.length){ h+='<div class="ndsres-sub" style="margin-top:10px">Aucun joueur ce jour.</div>'; } else { h+='<div class="ndsres-winners">'; _ndsRes.winners.forEach(function(w,i){ h+='<div class="ndsres-winner" onclick="openDrawerFor(\'joueur\',\''+esc(w.joueur_id||'')+'\')" style="cursor:pointer" title="Voir la fiche joueur"><div class="ndsres-wtag">Gagnant '+(i+1)+'</div><div class="ndsres-wname">'+esc((w.prenom||'')+' '+(w.nom||''))+'</div><div class="ndsres-wc">'+esc(w.email||'\u2014')+' \u00b7 '+esc(w.tel||'\u2014')+'</div><div class="ndsres-wc">'+esc(w.station||'')+' \u00b7 '+esc(w.heure||'')+'</div><div class="ndsres-wc" style="color:#16a34a;font-weight:700;margin-top:5px">Voir la fiche \u2192</div></div>'; }); h+='</div>'; } }
   h+='</div>';
+  var multiSite={}; (d.joueurs_multi||[]).forEach(function(m){ if((m.nb_stations||0)>1) multiSite[m.joueur_id]=1; });
+  var phSplit={}; (d.parties||[]).forEach(function(p){ var tr=(p.heure||'').slice(0,2)+'h'; if(!phSplit[tr]) phSplit[tr]={mono:{},multi:{}}; if(multiSite[p.joueur_id]) phSplit[tr].multi[p.joueur_id]=1; else phSplit[tr].mono[p.joueur_id]=1; });
   var ph=d.par_heure||[]; var maxH=Math.max.apply(null,ph.map(function(x){return x.joueurs;}).concat([1]));
-  h+='<div class="ndsres-card"><div class="ndsres-h">Affluence par heure</div>';
-  ph.forEach(function(x){ h+=ndsResBar(x.tranche, x.joueurs, maxH, '#1baf7a'); });
+  h+='<div class="ndsres-card"><div class="ndsres-h">Affluence par heure <span class="ndsres-sub">\u00b7 <span style="color:#2a78d6">mono-station</span> / <span style="color:#1baf7a">multi-sites</span></span></div>';
+  ph.forEach(function(x){ var sp=phSplit[x.tranche]||{mono:{},multi:{}}; h+=ndsResBarStack(x.tranche, Object.keys(sp.mono).length, Object.keys(sp.multi).length, maxH); });
   if(!ph.length) h+='<div class="ndsres-sub">Aucune donn\u00e9e.</div>';
   h+='</div>';
   var ps=d.par_station||[]; var maxS=Math.max.apply(null,ps.map(function(x){return x.joueurs;}).concat([1]));
