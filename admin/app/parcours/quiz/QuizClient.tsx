@@ -6,6 +6,7 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
+import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'quiz' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
@@ -24,6 +25,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
 
   const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
   const [screen, setScreen] = useState<Screen>('landing')
+  useParcoursTracking('quiz', evId, screen)
   const [qIdx, setQIdx] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [answered, setAnswered] = useState(false)

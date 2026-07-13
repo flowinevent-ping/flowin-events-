@@ -4,6 +4,7 @@ import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
+import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'quiz' | 'result' | 'form' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
@@ -20,6 +21,7 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
 
   const [questions] = useState(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
   const [screen, setScreen] = useState<Screen>('landing')
+  useParcoursTracking('quizsolo', evId, screen)
   const [qIdx, setQIdx] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [answered, setAnswered] = useState(false)

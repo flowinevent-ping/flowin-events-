@@ -5,6 +5,7 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
+import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'ticket' | 'already'
 interface Segment { label: string; color: string; perdant?: boolean; stock?: number }
@@ -33,7 +34,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const confettiRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
-  useEffect(() => { trackVisite('spin', evId) }, [evId])
+  useParcoursTracking('spin', evId, screen)
 
   /* Bloc 2 — compte déjà créé : on saute le formulaire et on attribue directement */
   const [reco, setReco] = useState(false)

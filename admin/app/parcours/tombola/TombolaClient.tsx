@@ -5,6 +5,7 @@ import { generateTicket } from '@/lib/ticket'
 import { getJoueurLocal, claimJoueur, writeJoueur } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
+import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 
@@ -28,6 +29,7 @@ interface Props {
 
 export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const [screen, setScreen] = useState<Screen>('landing')
+  useParcoursTracking('tombola', evId, screen)
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', genre: '', age: '', cp: '', source: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)

@@ -4,6 +4,7 @@ import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
+import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'wait' | 'vote' | 'form' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
@@ -16,6 +17,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
   const allQs = banques.flatMap(b => b.questions ?? [])
   const [questions] = useState(() => shuffle(allQs).slice(0, (cfg.quizNbQuestions as number) ?? 5))
   const [screen, setScreen] = useState<Screen>('landing')
+  useParcoursTracking('quizmaster', evId, screen)
   const [qIdx, setQIdx] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [score, setScore] = useState(0)

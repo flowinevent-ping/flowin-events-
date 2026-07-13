@@ -4,6 +4,7 @@ import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJo
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
+import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'vote' | 'form' | 'ticket' | 'already'
 interface VoteItem { id: string; nom: string; emoji?: string; genre?: string; desc?: string }
@@ -19,6 +20,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   const lsKey = `flowin_played_${evId}`
 
   const [screen, setScreen] = useState<Screen>('landing')
+  useParcoursTracking('vote', evId, screen)
   const [votes, setVotes] = useState<Record<string, number>>({})
   const [form, setForm] = useState({ prenom:'',nom:'',email:'',tel:'',genre:'',age:'',cp:'',source:'' })
   const [errors, setErrors] = useState<Record<string,string>>({})

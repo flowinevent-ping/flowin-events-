@@ -3507,7 +3507,8 @@ function crmLandingDate(s){
 var _bvStats=null;
 async function loadBvStats(){
   try{
-    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/nds_sondage_bv_stats',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({})});
+    var _se=(typeof _ndsRes!=='undefined' && _ndsRes && _ndsRes.se) ? _ndsRes.se : 'se-nds-2026';
+    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_sondage',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_se})});
     _bvStats = r.ok ? await r.json() : null;
   }catch(e){ _bvStats=null; }
   render();
@@ -3515,18 +3516,18 @@ async function loadBvStats(){
 function ndsBvSondage(){
   if(_bvStats===null){ loadBvStats(); return '<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage Brigade Verte</div><div class="ndsres-sub">Chargement\u2026</div></div>'; }
   var st=_bvStats; if(!st) return '';
-  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage Brigade Verte \u2014 r\u00e9sultats</div>';
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage \u2014 r\u00e9sultats</div>';
   h+='<div class="kpi-grid" style="margin-bottom:8px">';
-  h+=prospKpi(st.formulaires||0,'Formulaires remplis');
+  h+=prospKpi(st.participations||0,'Participations');
   h+=prospKpi(st.avec_reponses||0,'Ont r\u00e9pondu au sondage');
-  h+=prospKpi(st.ont_joue_ailleurs||0,'Ont aussi jou\u00e9 ailleurs');
-  h+=prospKpi(st.uniquement_bv||0,'Brigade Verte uniquement');
+  h+=prospKpi(st.personnes||0,'Personnes distinctes');
+  h+=prospKpi((st.taux_reponse!=null?st.taux_reponse+' %':'\u2014'),'Taux de r\u00e9ponse');
   h+='</div>';
   var pj=st.par_jour||[];
   if(pj.length){
-    var maxJ=Math.max.apply(null,pj.map(function(x){return x.formulaires;}).concat([1]));
+    var maxJ=Math.max.apply(null,pj.map(function(x){return x.participations||0;}).concat([1]));
     h+='<div class="ndsres-h" style="margin-top:10px">Par jour <span class="ndsres-sub">(formulaires \u00b7 dont r\u00e9pondants)</span></div>';
-    pj.forEach(function(x){ h+=ndsResBarStack(x.jour+' \u2014 '+x.repondants+' r\u00e9p.', Math.max(0,x.formulaires-x.repondants), x.repondants, maxJ); });
+    pj.forEach(function(x){ h+=ndsResBarStack(x.jour+' \u2014 '+x.repondants+' r\u00e9p.', Math.max(0,(x.participations||0)-x.repondants), x.repondants, maxJ); });
   }
   var qs=st.questions||[];
   qs.forEach(function(q){
