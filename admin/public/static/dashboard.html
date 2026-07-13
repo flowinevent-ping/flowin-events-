@@ -3516,7 +3516,7 @@ async function loadBvStats(){
 function ndsBvSondage(){
   if(_bvStats===null){ loadBvStats(); return '<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage Brigade Verte</div><div class="ndsres-sub">Chargement\u2026</div></div>'; }
   var st=_bvStats; if(!st) return '';
-  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage \u2014 r\u00e9sultats</div>';
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage Brigade Verte \u2014 r\u00e9sultats <span class="ndsres-sub">(landing / tablettes \u00b7 distinct du bonus RSE de l\'app)</span></div>';
   h+='<div class="kpi-grid" style="margin-bottom:8px">';
   h+=prospKpi(st.participations||0,'Participations');
   h+=prospKpi(st.avec_reponses||0,'Ont r\u00e9pondu au sondage');
