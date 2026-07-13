@@ -3531,16 +3531,16 @@ function ndsBvSondage(){
     h+='</div>';
   }
   h+='<div class="kpi-grid" style="margin-bottom:8px">';
-  h+=prospKpi(st.participations||0,'Participations');
-  h+=prospKpi(st.avec_reponses||0,'Ont r\u00e9pondu au sondage');
-  h+=prospKpi(st.personnes||0,'Personnes distinctes');
-  h+=prospKpi((st.taux_reponse!=null?st.taux_reponse+' %':'\u2014'),'Taux de r\u00e9ponse');
+  h+=prospKpi(st.sondages||0,'Sondages ouverts');
+  h+=prospKpi(st.complets||0,'Complets ('+(st.nb_questions||0)+'/'+(st.nb_questions||0)+')');
+  h+=prospKpi(st.partiels||0,'Partiels');
+  h+=prospKpi((st.taux_completion!=null?st.taux_completion+' %':'\u2014'),'Taux de compl\u00e9tion');
   h+='</div>';
   var pj=st.par_jour||[];
   if(pj.length){
-    var maxJ=Math.max.apply(null,pj.map(function(x){return x.participations||0;}).concat([1]));
-    h+='<div class="ndsres-h" style="margin-top:10px">Par jour <span class="ndsres-sub">(formulaires \u00b7 dont r\u00e9pondants)</span></div>';
-    pj.forEach(function(x){ h+=ndsResBarStack(x.jour+' \u2014 '+x.repondants+' r\u00e9p.', Math.max(0,(x.participations||0)-x.repondants), x.repondants, maxJ); });
+    var maxJ=Math.max.apply(null,pj.map(function(x){return x.sondages||0;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:10px">Par jour <span class="ndsres-sub">(sondages \u00b7 dont complets)</span></div>';
+    pj.forEach(function(x){ h+=ndsResBarStack(x.jour+' \u2014 '+x.complets+'/'+x.sondages+' complets', Math.max(0,(x.sondages||0)-(x.complets||0)), x.complets||0, maxJ); });
   }
   var qs=st.questions||[];
   qs.forEach(function(q){
