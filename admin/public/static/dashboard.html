@@ -3504,19 +3504,32 @@ function crmLandingDate(s){
   if(!s)return '—';
   try{var d=new Date(s);var p=function(n){return n<10?'0'+n:''+n;};return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+'h'+p(d.getMinutes());}catch(e){return '—';}
 }
-var _bvStats=null;
+var _bvStats=null; var _bvJour=null;
 async function loadBvStats(){
   try{
     var _se=(typeof _ndsRes!=='undefined' && _ndsRes && _ndsRes.se) ? _ndsRes.se : 'se-nds-2026';
-    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_sondage',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_se})});
+    var body={p_se:_se}; if(_bvJour) body.p_date=_bvJour;
+    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_sondage',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify(body)});
     _bvStats = r.ok ? await r.json() : null;
   }catch(e){ _bvStats=null; }
   render();
 }
+function bvSetJour(j){ _bvJour = j || null; _bvStats = null; loadBvStats(); }
+function bvJourLabel(j){ var p=String(j).split('-'); return p.length===3 ? p[2]+'/'+p[1] : j; }
 function ndsBvSondage(){
   if(_bvStats===null){ loadBvStats(); return '<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage Brigade Verte</div><div class="ndsres-sub">Chargement\u2026</div></div>'; }
   var st=_bvStats; if(!st) return '';
   var h='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf3f Sondage Brigade Verte \u2014 r\u00e9sultats <span class="ndsres-sub">(landing / tablettes \u00b7 distinct du bonus RSE de l\'app)</span></div>';
+  var jd=st.jours_disponibles||[];
+  if(jd.length){
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">';
+    h+='<button class="btn-sm'+(!_bvJour?' active':'')+'" style="'+(!_bvJour?'background:#1baf7a;color:#fff;border-color:#1baf7a':'')+'" onclick="bvSetJour(null)">Tous les jours</button>';
+    jd.forEach(function(j){
+      var on = (_bvJour===j);
+      h+='<button class="btn-sm" style="'+(on?'background:#1baf7a;color:#fff;border-color:#1baf7a':'')+'" onclick="bvSetJour(\''+j+'\')">'+bvJourLabel(j)+'</button>';
+    });
+    h+='</div>';
+  }
   h+='<div class="kpi-grid" style="margin-bottom:8px">';
   h+=prospKpi(st.participations||0,'Participations');
   h+=prospKpi(st.avec_reponses||0,'Ont r\u00e9pondu au sondage');
