@@ -4712,7 +4712,9 @@ async function ndsResLoad(date){
       _ndsRes.funnel = rf.ok ? await rf.json() : null;
       var rc=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_clics',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
       _ndsRes.clics = rc.ok ? await rc.json() : null;
-    }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; }
+      var rs=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_stations',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+      _ndsRes.stations = rs.ok ? await rs.json() : null;
+    }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; _ndsRes.stations=null; }
   }catch(e){ _ndsRes.data=null; _ndsRes.funnel=null; }
   _ndsRes.loading=false; render();
 }
@@ -4732,6 +4734,37 @@ function ndsResBar(label, val, max, color, onclick){
   var w = max>0 ? Math.round(val/max*100) : 0;
   var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
   return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
+}
+function ndsResStations(d){
+  if(!d) return '';
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udcf1 Scans QR &amp; jeux par station</div>';
+  h+='<div class="kpi-grid" style="margin-bottom:8px">';
+  h+=prospKpi(d.total_scans||0,'Scans QR du jour');
+  h+=prospKpi(d.total_jeux||0,'Jeux jou\u00e9s');
+  h+=prospKpi((d.total_scans>0? Math.round(1000*(d.total_jeux||0)/d.total_scans)/10 : 0)+' %','Conversion');
+  h+=prospKpi((d.femmes||0)+' F / '+(d.hommes||0)+' H','R\u00e9partition');
+  h+='</div>';
+  var ps=(d.par_station||[]).filter(function(x){ return (x.scans||0)>0 || (x.jeux||0)>0; });
+  if(ps.length){
+    var maxS=Math.max.apply(null,ps.map(function(x){return x.scans||0;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:10px">Scans <span style="color:#c9c7c0">\u25a0</span> vs jeux <span style="color:#1baf7a">\u25a0</span></div>';
+    ps.forEach(function(x){ h+=ndsResBarStack(x.station+' \u00b7 '+(x.conversion!=null?x.conversion+'%':'\u2014'), Math.max(0,(x.scans||0)-(x.jeux||0)), x.jeux||0, maxS); });
+    h+='<div style="overflow-x:auto;margin-top:10px"><table class="tbl"><thead><tr><th>Station</th><th>Scans</th><th>Jeux</th><th>Conv.</th><th>F/H</th><th>\u00c2ge</th><th>CP</th><th>Pic</th></tr></thead><tbody>';
+    ps.forEach(function(x){
+      h+='<tr><td><b>'+esc(x.station)+'</b></td><td>'+(x.scans||0)+'</td><td>'+(x.jeux||0)+'</td><td>'+(x.conversion!=null?x.conversion+'%':'\u2014')+'</td><td>'+(x.femmes||0)+'/'+(x.hommes||0)+'</td><td>'+esc(x.age||'\u2014')+'</td><td>'+esc(x.cp||'\u2014')+'</td><td>'+esc(x.pic||'\u2014')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  var ld=d.liens_digitaux||[];
+  h+='<div class="ndsres-h" style="margin-top:14px">\ud83d\udd17 Liens digitaux (r\u00e9seaux &amp; parrainage)</div>';
+  if(ld.length){
+    var maxL=Math.max.apply(null,ld.map(function(x){return x.acces;}).concat([1]));
+    ld.forEach(function(x){ h+=ndsResBar(x.lien+' \u2014 '+x.parties+' partie(s)', x.acces, maxL, '#7C2D92'); });
+  } else {
+    h+='<div class="ndsres-sub">Aucun acc\u00e8s via un lien digital ce jour.</div>';
+  }
+  h+='</div>';
+  return h;
 }
 function ndsResClicsPart(c){
   if(!c) return '';
@@ -4878,6 +4911,7 @@ function renderNdsResultat(){
   var d=_ndsRes.data, k=d.kpis||{};
   h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+prospKpi((d.clics&&d.clics.total)||0,'Clics liens')+'</div>';
   h+=ndsResFunnel(_ndsRes.funnel);
+  h+=ndsResStations(_ndsRes.stations);
   h+=ndsResClicsPart(_ndsRes.clics);
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
   h+='<button class="btn btn-primary" onclick="ndsResDraw()">\ud83c\udfb2 Tirer 2 gagnants</button>';
