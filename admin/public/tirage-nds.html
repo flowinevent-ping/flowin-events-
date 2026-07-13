@@ -134,6 +134,48 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function $(id){return document.getElementById(id);}
   function lotVal(l){var v=l.valeur_euros!=null?l.valeur_euros:l.valeur; v=parseFloat(String(v).replace(/[^0-9.,]/g,'').replace(',','.')); return isNaN(v)?null:v;}
+  // ---- Envoi des billets aux gagnants via Gmail (compose pré-rempli) ----------
+  // Ouvre Gmail avec destinataire, objet et message déjà écrits. Le lien du billet
+  // digital (saisi ci-dessus) est inséré automatiquement s'il est renseigné.
+  function billetLien(){ var e=$('billetLien'); return e && e.value ? e.value.trim() : ''; }
+  function dateFr(d){ try{ var p=String(d).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }catch(e){ return d; } }
+  function mailSujet(t){ return 'Nuits du Sud — tu as gagné ta place de concert !'; }
+  function mailCorps(t){
+    var prenom=(String(t.joueur_nom||'').trim().split(/\s+/)[0])||'';
+    var lien=billetLien();
+    var L=[];
+    L.push('Bonjour '+prenom+',');
+    L.push('');
+    L.push('On est super contents pour toi : tu as gagné ta place de concert pour les Nuits du Sud, pour la soirée du '+dateFr(t.date_soir)+' !');
+    L.push('');
+    if(lien){ L.push('Voici ton billet : '+lien); L.push(''); }
+    L.push('Les Nuits du Sud, la Ville de Vence et Flowin te remercient pour ta participation.');
+    L.push('');
+    L.push('Pendant le festival, le jeu continue : rends-toi sur l\'application, découvre le parcours, invite tes amis.');
+    L.push('D\'autres places sont à gagner chaque soir, et de nombreux lots chez nos commerçants partenaires lors du grand tirage de clôture.');
+    L.push('');
+    L.push('À très vite, et excellente soirée !');
+    L.push('L\'équipe des Nuits du Sud & Flowin');
+    L.push('flowinevent@gmail.com · 06 16 35 49 36');
+    return L.join('\n');
+  }
+  function gmailUrl(t){
+    return 'https://mail.google.com/mail/?view=cm&fs=1'
+      + '&to='+encodeURIComponent(t.joueur_email||'')
+      + '&su='+encodeURIComponent(mailSujet(t))
+      + '&body='+encodeURIComponent(mailCorps(t));
+  }
+  function envoyerGagnant(i){
+    var t=(_soirWins||[])[i]; if(!t||!t.joueur_email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
+    window.open(gmailUrl(t),'_blank','noopener');
+  }
+  function envoyerTous(){
+    var w=(_soirWins||[]).filter(function(t){return t.joueur_email;});
+    if(!w.length){ alert('Aucun gagnant avec email.'); return; }
+    if(!confirm('Ouvrir '+w.length+' brouillon(s) Gmail ?')) return;
+    w.forEach(function(t,i){ setTimeout(function(){ window.open(gmailUrl(t),'_blank','noopener'); }, i*700); });
+  }
+  var _soirWins=[];
   function lotNb(l){return parseInt(l.gagnants||l.quantite||l.nb||1,10)||1;}
 
   var PARTNERS=[], TIRAGES=[];
@@ -182,7 +224,22 @@
   function renderSoirWins(){
     var d=$('soirDate').value;
     var w=winsFor(function(t){return t.type==='soir'&&(!d||t.date_soir===d);});
-    $('soirWins').innerHTML=w.length? w.map(function(t){return '<div class="win win-soir"><span class="med">🎟️</span> <b>'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')+(t.joueur_tel?' · '+esc(t.joueur_tel):'')+' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')</div>';}).join('') : '';
+    _soirWins = w || [];
+    $('soirWins').innerHTML = w.length ? (
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 6px">'
+      + '<label style="font-size:12px;color:#666">Lien du billet digital (optionnel)</label>'
+      + '<input id="billetLien" type="url" placeholder="https://…" style="flex:1;min-width:260px;padding:8px 10px;border:1px solid #d9d9e3;border-radius:8px">'
+      + '<button onclick="envoyerTous()" style="background:#1baf7a;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer à tous</button>'
+      + '</div>'
+      + w.map(function(t,i){
+          return '<div class="win win-soir" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+            + '<span class="med">🎟️</span> <b>'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
+            + (t.joueur_tel?' · '+esc(t.joueur_tel):'')
+            + ' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')'
+            + '<button onclick="envoyerGagnant('+i+')" style="margin-left:auto;background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer</button>'
+            + '</div>';
+        }).join('')
+    ) : '';
   }
 
   function renderAllWins(){
