@@ -728,16 +728,21 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
         .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        /* Barre de navigation TOUJOURS visible, collée au bas de l'écran.
-           On n'ancre QUE la barre : le bandeau de logos reste dans le flux
-           (sinon il mangerait le bas de l'écran). */
-        .ndsbody .padnav{padding-bottom:96px}
-        .ndsbody .botdock,.ndsbody .footdock{position:static;box-shadow:none;background:transparent}
-        .ndsbody .botdock .nav,.ndsbody .footdock .nav,.ndsbody .nav.on{
+        /* Bas d'écran ancré : le bandeau de logos glisse AU-DESSUS de la barre,
+           la barre reste collée au bas. Les deux sont dans le même bloc fixe,
+           donc plus aucun chevauchement ni logo coupé. */
+        .ndsbody .padnav{padding-bottom:158px}
+        .ndsbody .botdock,.ndsbody .footdock{
           position:fixed !important;left:50%;transform:translateX(-50%);
           width:100%;max-width:480px;bottom:0;z-index:1000;
-          background:#fff;box-shadow:0 -8px 24px rgba(20,8,30,.12);
+          display:flex;flex-direction:column;background:#fff;
+          box-shadow:0 -10px 28px rgba(20,8,30,.14);
           padding-bottom:env(safe-area-inset-bottom,0px)}
+        .ndsbody .botdock .logoband,.ndsbody .footdock .logoband{
+          order:1;border-radius:0;border-left:none;border-right:none;
+          border-top:1px solid #f0e9f5;border-bottom:1px solid #f0e9f5;margin:0}
+        .ndsbody .botdock .nav,.ndsbody .footdock .nav{
+          order:2;position:static !important;transform:none;box-shadow:none;background:#fff}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .botdock{position:sticky;bottom:0;z-index:40;background:#fff;box-shadow:0 -6px 18px rgba(20,8,30,.07)}
         .ndsbody .botdock .nav{position:static;box-shadow:none}
@@ -824,18 +829,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:7px 10px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;background:transparent;color:#7C2D92}
         .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
         @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-        /* --- Boutons d'action : pile CENTRÉE (icône + titre sur une ligne, promesse en pastille) --- */
-        .cta{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
-             width:100%;border:none;border-radius:18px;padding:16px 18px 15px;margin-top:11px;cursor:pointer;
-             font-family:inherit;color:#fff;overflow:hidden;text-align:center;
-             box-shadow:inset 0 1px 0 rgba(255,255,255,.28);-webkit-tap-highlight-color:transparent}
-        .cta-row{display:inline-flex;align-items:center;justify-content:center;gap:10px}
-        .cta .ic{width:22px;height:22px;flex:0 0 auto;opacity:.95}
-        .cta .cta-t{font-weight:800;font-size:17px;line-height:1.15;letter-spacing:-.2px;
-             text-shadow:0 1px 2px rgba(0,0,0,.2)}
-        .cta .cta-sub{margin-top:8px;font-weight:800;font-size:12px;line-height:1;letter-spacing:.3px;
-             padding:6px 13px;border-radius:20px;background:rgba(0,0,0,.18);
-             border:1px solid rgba(255,255,255,.28)}
+        /* --- Boutons d'action : carte "quête" (pastille icône + texte à gauche + chevron) --- */
+        .cta{position:relative;display:flex;align-items:center;gap:13px;width:100%;
+             border:none;border-radius:20px;padding:14px 16px;margin-top:11px;cursor:pointer;
+             font-family:inherit;color:#fff;overflow:hidden;text-align:left;
+             box-shadow:inset 0 1px 0 rgba(255,255,255,.32);-webkit-tap-highlight-color:transparent}
+        .cta-badge{flex:0 0 auto;width:46px;height:46px;border-radius:15px;display:flex;
+             align-items:center;justify-content:center;background:rgba(255,255,255,.24);
+             border:1px solid rgba(255,255,255,.4);box-shadow:0 3px 10px rgba(0,0,0,.14)}
+        .cta-badge .ic{width:24px;height:24px}
+        .cta-txt{flex:1;min-width:0}
+        .cta-t{display:block;font-weight:800;font-size:16.5px;line-height:1.2;letter-spacing:-.2px;
+             text-shadow:0 1px 2px rgba(0,0,0,.22)}
+        .cta-sub{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-weight:800;
+             font-size:11.5px;line-height:1;letter-spacing:.3px;padding:5px 10px;border-radius:20px;
+             background:rgba(255,255,255,.96);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+        .cta-shop .cta-sub{color:#C2410C}
+        .cta-bonus .cta-sub{color:#0F6E56}
+        .cta-go{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+             justify-content:center;background:rgba(255,255,255,.22);font-size:15px;font-weight:900;
+             animation:ctaNudge 1.6s ease-in-out infinite}
+        @keyframes ctaNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
         .cta:active{transform:scale(.985)}
         /* --- Bloc héros : cagnotte de tickets + progression des stations --- */
         .hero{position:relative;background:linear-gradient(135deg,#2B0F3A,#7C2D92);border-radius:18px;
@@ -943,7 +957,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         )})}
                       </div>
                       <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
-                      <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-row"><svg className="ic"><use href="#i-store" /></svg><span className="cta-t">Scanne chez nos commerçants</span></span><span className="cta-sub">+1 ticket par commerce</span></a>
+                      <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Scanne chez nos commerçants</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
                     </>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(224,33,138,.14)', border: '1px solid rgba(224,33,138,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
@@ -1111,7 +1125,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               {bonusQs.length > 0 && !bonusDone && !joueurHistory.bonusDone && (
                 <a className="cta cta-bonus" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
-                  <span className="cta-row"><svg className="ic"><use href="#i-spark" /></svg><span className="cta-t">Gagne 1 ticket de plus</span></span><span className="cta-sub">5 questions rapides · 30 s</span>
+                  <span className="cta-badge"><svg className="ic"><use href="#i-spark" /></svg></span><span className="cta-txt"><span className="cta-t">Gagne 1 ticket de plus</span><span className="cta-sub">⏱️ 5 questions · 30 secondes</span></span><span className="cta-go">›</span>
                 </a>
               )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
@@ -1196,11 +1210,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
-              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-row"><svg className="ic"><use href="#i-store" /></svg><span className="cta-t">Scanne chez nos commerçants</span></span><span className="cta-sub">+1 ticket par commerce</span></a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Scanne chez nos commerçants</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
               {(form.email || recurrent?.email) && (
                 <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
               )}
-              {partnerBand}
               <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
             </div>
           </section>
@@ -1227,7 +1240,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {(form.email || recurrent?.email) && (
                 <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
               )}
-              {partnerBand}
             </div>
           </section>
         )}
@@ -1456,7 +1468,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
-              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-row"><svg className="ic"><use href="#i-store" /></svg><span className="cta-t">Scanne chez nos commerçants</span></span><span className="cta-sub">+1 ticket par commerce</span></a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Scanne chez nos commerçants</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
             </div>
           </section>
