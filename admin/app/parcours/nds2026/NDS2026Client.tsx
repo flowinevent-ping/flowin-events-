@@ -789,6 +789,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%)}
         /* Alignement : tous les blocs de contenu partagent la même gouttière. */
         .ndsbody .scr .cta,.ndsbody .scr .coll,.ndsbody .scr .infocard{margin-left:0;margin-right:0}
+        /* --- Accueil : moins de SCROLL sans rien retirer.
+           On resserre les ESPACES (marges, gouttières), jamais les contenus :
+           les 3 étapes, les lots, le bandeau "+ vous jouez" restent tous visibles. --- */
+        .ndsbody .scr .pad{padding-top:10px}
+        .ndsbody .howcard,.ndsbody .lotcard{margin-top:9px !important}
+        .ndsbody .howrow{padding:6px 0 !important}
+        .ndsbody .plusband{margin-top:9px !important;padding:9px 12px !important}
+        .ndsbody .sechead{margin-top:12px !important;margin-bottom:6px !important}
+        /* Le bouton principal reste généreux : c'est lui qui doit rester visible. */
+        .ndsbody .scr .btn.primary,.ndsbody .scr .cta{margin-top:12px}
         .ndsbody .botdock,.ndsbody .footdock{
           position:fixed !important;left:50%;transform:translateX(-50%);
           width:100%;max-width:480px;bottom:0;z-index:1000;
