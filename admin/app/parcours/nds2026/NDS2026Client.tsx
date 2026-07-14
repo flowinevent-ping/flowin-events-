@@ -728,7 +728,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
         .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
         .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        .ndsbody .padnav{padding-bottom:192px}
+        /* Barre de navigation TOUJOURS visible, collée au bas de l'écran.
+           On n'ancre QUE la barre : le bandeau de logos reste dans le flux
+           (sinon il mangerait le bas de l'écran). */
+        .ndsbody .padnav{padding-bottom:96px}
+        .ndsbody .botdock,.ndsbody .footdock{position:static;box-shadow:none;background:transparent}
+        .ndsbody .botdock .nav,.ndsbody .footdock .nav,.ndsbody .nav.on{
+          position:fixed !important;left:50%;transform:translateX(-50%);
+          width:100%;max-width:480px;bottom:0;z-index:1000;
+          background:#fff;box-shadow:0 -8px 24px rgba(20,8,30,.12);
+          padding-bottom:env(safe-area-inset-bottom,0px)}
         .ndsbody .nav{position:sticky;bottom:0}
         .ndsbody .botdock{position:sticky;bottom:0;z-index:40;background:#fff;box-shadow:0 -6px 18px rgba(20,8,30,.07)}
         .ndsbody .botdock .nav{position:static;box-shadow:none}
