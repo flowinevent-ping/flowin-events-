@@ -5049,11 +5049,36 @@ function ndsResFunnel(f){
     var nErr=0; errs.forEach(function(x){ nErr+=x.visiteurs; });
     h+='<div class="alert warn" style="margin:8px 0"><span class="ico">\u26a0\ufe0f</span><b>'+nErr+'</b> incident(s) technique(s) d\u00e9tect\u00e9(s) \u2014 '+errs.map(function(x){ return esc(String(x.etape).replace('err:',''))+' ('+x.visiteurs+')'; }).join(' \u00b7 ')+'</div>';
   }
-  var pe=(f.par_etape||[]).filter(function(x){ return String(x.etape||'').indexOf('err:')!==0; }).slice().sort(function(a,b){ var ia=ordre.indexOf(a.etape), ib=ordre.indexOf(b.etape); return (ia<0?99:ia)-(ib<0?99:ib); });
-  if(pe.length){
-    h+='<div class="ndsres-h" style="margin-top:12px">Entonnoir \u2014 d\u00e9crochage par \u00e9tape</div>';
-    h+=fxFunnel(pe.map(function(x){ return lbl[x.etape]||x.etape; }), pe.map(function(x){ return x.visiteurs; }), 40+pe.length*32);
-  } else {
+  // VRAI ENTONNOIR : uniquement les étapes du parcours, dans l'ordre réel du jeu.
+  // Carte / Partenaires / Profil sont des écrans ANNEXES, pas des étapes.
+  var m={}; (f.par_etape||[]).forEach(function(x){ m[x.etape]=x.visiteurs; });
+  var FUN=[['onboard','Arriv\u00e9e (scan)'],['quiz','D\u00e9marre le quiz'],['resultats','Voit son r\u00e9sultat'],['inscription','Remplit ses coordonn\u00e9es'],['final','Termine le parcours']];
+  var depart=m['onboard']||0;
+  var rows=FUN.map(function(e){return {lbl:e[1], n:(m[e[0]]||0)};}).filter(function(r){return r.n>0;});
+  if(rows.length){
+    h+='<div class="ndsres-h" style="margin-top:12px">Entonnoir du parcours <span class="ndsres-sub">\u00b7 combien restent \u00e0 chaque \u00e9tape</span></div>';
+    h+='<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>\u00c9tape</th><th>Restants</th><th>% du d\u00e9part</th><th>Perdus ici</th></tr></thead><tbody>';
+    rows.forEach(function(r,i){
+      var prev=i>0?rows[i-1].n:r.n;
+      var perdus=Math.max(0,prev-r.n);
+      var pct=depart?Math.round(100*r.n/depart):0;
+      var alerte=(i>0 && prev>0 && perdus/prev>=0.25);
+      h+='<tr'+(alerte?' style="background:rgba(194,65,12,.06)"':'')+'>'
+       + '<td><b>'+esc(r.lbl)+'</b><div class="ndsres-track" style="margin-top:5px;height:7px"><div class="ndsres-fill" style="width:'+pct+'%;background:'+(alerte?'#c2410c':'#1baf7a')+'"></div></div></td>'
+       + '<td><b>'+r.n+'</b></td><td>'+pct+' %</td>'
+       + '<td>'+(i===0?'\u2014':(perdus>0?'<b style="color:#c2410c">\u2212'+perdus+'</b>':'0'))+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+    h+='<div class="ndsres-sub" style="margin-top:8px">Le <b>bonus</b> est facultatif : on peut terminer sans lui. Ce n\u2019est donc pas une \u00e9tape de l\u2019entonnoir.</div>';
+  }
+  var ANN=[['bonus','Bonus (facultatif)'],['tickets','Mes tickets'],['carte','Carte'],['partenaires','Partenaires'],['profil','Profil']];
+  var an=ANN.map(function(e){return {lbl:e[1], n:(m[e[0]]||0)};}).filter(function(x){return x.n>0;});
+  if(an.length){
+    var maxA=Math.max.apply(null,an.map(function(x){return x.n;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:14px">\u00c9crans consult\u00e9s <span class="ndsres-sub">\u00b7 hors parcours obligatoire</span></div>';
+    an.forEach(function(x){ h+=ndsResBar(x.lbl, x.n, maxA, '#2a78d6'); });
+  }
+  if(!rows.length && !an.length){
     h+='<div class="ndsres-sub" style="margin-top:10px">Suivi par \u00e9tape actif depuis le 11/07 \u2014 les donn\u00e9es appara\u00eetront ici.</div>';
   }
   var ps=f.par_source||[];
