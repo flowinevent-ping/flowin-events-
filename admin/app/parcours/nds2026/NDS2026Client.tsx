@@ -1354,7 +1354,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   </div>
                 )
               })()}
-              <div className="infocard b-magenta" style={{ marginTop: 14 }}><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code : <b>{ticket || '—'}</b></div></div>
               {ticketCount < STATIONS.length * 2 && (
                 <>
                   <div className="tk-tip" style={{ marginTop: 12 }}><svg className="ic"><use href="#i-layers" /></svg><div>Réponds aux quiz des autres stations : <b>chaque station = 1 ticket de plus</b> et plus de chances au tirage.</div></div>
@@ -1603,7 +1602,6 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   </div>
                 )
               })()}
-              <div className="infocard b-magenta"><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code ticket : <b>{ticket || '—'}</b></div></div>
               <div className="infocard b-green" style={{ marginTop: 10 }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir</div></div>
 
               <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 16 }}>
