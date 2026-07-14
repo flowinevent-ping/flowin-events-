@@ -4732,7 +4732,9 @@ async function ndsResLoad(date){
       _ndsRes.engag = re.ok ? await re.json() : null;
       var rb=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_bonus',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
       _ndsRes.bonus = rb.ok ? await rb.json() : null;
-    }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; _ndsRes.stations=null; _ndsRes.engag=null; _ndsRes.bonus=null; }
+      var rr=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_repondants',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+      _ndsRes.repond = rr.ok ? await rr.json() : null;
+    }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; _ndsRes.stations=null; _ndsRes.engag=null; _ndsRes.bonus=null; _ndsRes.repond=null; }
   }catch(e){ _ndsRes.data=null; _ndsRes.funnel=null; }
   _ndsRes.loading=false; render();
 }
@@ -4752,6 +4754,31 @@ function ndsResBar(label, val, max, color, onclick){
   var w = max>0 ? Math.round(val/max*100) : 0;
   var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
   return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
+}
+function ndsResRepondants(r){
+  if(!r) return '';
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udc65 R\u00e9pondants uniques <span class="ndsres-sub">(bonus stations \u00d7 sondage landing \u00b7 sans doublon)</span></div>';
+  h+='<div class="kpi-grid" style="margin-bottom:8px">';
+  h+=prospKpi(r.joueurs||0,'Joueurs');
+  h+=prospKpi(r.repondants_uniques||0,'R\u00e9pondants uniques');
+  h+=prospKpi((r.taux_couverture!=null?r.taux_couverture+' %':'\u2014'),'Couverture');
+  h+=prospKpi(r.les_deux||0,'Ont fait les deux');
+  h+='</div>';
+  var rows=[
+    ['Bonus seulement',       r.bonus_seulement||0, '#1baf7a'],
+    ['Landing BV seulement',  r.landing_seulement||0,'#2a78d6'],
+    ['Les deux',              r.les_deux||0,        '#7C2D92'],
+    ['Aucun des deux',        r.aucun||0,           '#c2410c']
+  ];
+  var mx=Math.max.apply(null,rows.map(function(x){return x[1];}).concat([1]));
+  h+='<div class="ndsres-h" style="margin-top:10px">R\u00e9partition des joueurs</div>';
+  rows.forEach(function(x){ h+=ndsResBar(x[0], x[1], mx, x[2]); });
+  var t=[['Total bonus', r.total_bonus||0, '#1baf7a'],['Total landing BV', r.total_landing||0, '#2a78d6']];
+  var mt=Math.max.apply(null,t.map(function(x){return x[1];}).concat([1]));
+  h+='<div class="ndsres-h" style="margin-top:12px">Par source <span class="ndsres-sub">(les totaux se recoupent de '+(r.les_deux||0)+' personne(s))</span></div>';
+  t.forEach(function(x){ h+=ndsResBar(x[0], x[1], mt, x[2]); });
+  h+='</div>';
+  return h;
 }
 function ndsResBonusRep(b){
   if(!b) return '';
@@ -4994,6 +5021,7 @@ function renderNdsResultat(){
   h+=ndsResFunnel(_ndsRes.funnel);
   h+=ndsResStations(_ndsRes.stations);
   h+=ndsResEngagement(_ndsRes.engag);
+  h+=ndsResRepondants(_ndsRes.repond);
   h+=ndsResBonusRep(_ndsRes.bonus);
   h+=ndsResClicsPart(_ndsRes.clics);
   h+='<div class="ndsres-card"><div class="ndsres-h">\ud83c\udf9f\ufe0f Tirage du soir \u2014 2 gagnants (pond\u00e9r\u00e9 par tickets)</div>';
