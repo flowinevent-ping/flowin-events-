@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lots · visuels & messages — Flowin</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f4f5f9;--card:#fff;--line:#e4e6ef;--txt:#1a1f36;--muted:#6b7394;--ok:#1baf7a;--warn:#c2410c;--acc:#7C2D92}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:Manrope,system-ui,Arial,sans-serif;padding:24px}
+  .wrap{max-width:1100px;margin:0 auto}
+  .top{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+  h1{font-size:26px;font-weight:800}
+  .sub{color:var(--muted);font-size:13.5px;margin-bottom:20px;line-height:1.6}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+  .lot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .lot h3{font-size:15px;font-weight:800;margin-bottom:2px}
+  .lot .id{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace;margin-bottom:10px}
+  .stock{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .pill{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;background:#eef0f7;color:var(--muted)}
+  .pill.ok{background:rgba(27,175,122,.12);color:var(--ok)}
+  .pill.zero{background:rgba(194,65,12,.12);color:var(--warn)}
+  .prev{width:100%;height:150px;border:1px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;
+        background:#fafbfe;overflow:hidden;margin-bottom:10px;color:var(--muted);font-size:12.5px;text-align:center;padding:8px}
+  .prev img{width:100%;height:100%;object-fit:contain}
+  label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin:9px 0 4px;letter-spacing:.3px}
+  input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-family:inherit;font-size:13px;background:#fff}
+  textarea{min-height:110px;resize:vertical;line-height:1.5}
+  .row{display:flex;gap:8px;margin-top:10px}
+  button{border:none;border-radius:9px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+  .b-up{background:#fff;border:1px solid var(--acc);color:var(--acc)}
+  .b-save{background:var(--ok);color:#fff;flex:1}
+  .msg{font-size:12px;margin-top:8px;min-height:16px}
+  .msg.ok{color:var(--ok)} .msg.err{color:var(--warn)}
+  .vars{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6}
+  .vars code{background:#eef0f7;padding:1px 5px;border-radius:4px;font-size:10.5px}
+  .note{background:#fff;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;line-height:1.6;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>🎁 Lots — visuels &amp; messages</h1></div>
+  <div class="sub">Un bloc par lot. Charge l'image du billet ou du bon, écris le message d'accompagnement : ils seront utilisés à l'envoi au gagnant.</div>
+
+  <div class="note">
+    <b>Comment ça marche.</b> À chaque tirage, un code est <b>réservé automatiquement</b> dans le stock et attribué au gagnant.
+    L'e-mail reprend ce code, le lien de l'image du lot et le message ci-dessous.
+    <br><b>Limite Gmail :</b> une pièce jointe ne peut pas être ajoutée par lien — l'image est donc <b>hébergée</b> et son lien est inséré dans le message.
+    Le gagnant clique et récupère son billet.
+  </div>
+
+  <div id="grid" class="grid"><div style="color:var(--muted)">Chargement…</div></div>
+</div>
+
+<script>
+(function(){
+  var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
+  if(!_S||!_S.access_token){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname)); return; }
+  var AUTH=_S.access_token;
+
+  function _login(){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname)); }
+  async function refreshToken(){
+    if(!_S.refresh_token){ _login(); return false; }
+    try{
+      var r=await fetch(SUPA+'/auth/v1/token?grant_type=refresh_token',{method:'POST',
+        headers:{'apikey':KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({refresh_token:_S.refresh_token})});
+      var d=await r.json();
+      if(!r.ok||!d.access_token){ _login(); return false; }
+      _S={access_token:d.access_token,refresh_token:d.refresh_token||_S.refresh_token,
+          expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
+      localStorage.setItem('flowin_admin_session',JSON.stringify(_S));
+      AUTH=d.access_token; return true;
+    }catch(e){ _login(); return false; }
+  }
+  async function api(path, opt){
+    opt=opt||{}; opt.headers=Object.assign({'apikey':KEY,'Authorization':'Bearer '+AUTH}, opt.headers||{});
+    var exp=_S.expires_at||0;
+    if(exp && Math.floor(Date.now()/1000) > exp-60){ await refreshToken(); opt.headers['Authorization']='Bearer '+AUTH; }
+    var r=await fetch(SUPA+path, opt);
+    if(r.status===401){ if(await refreshToken()){ opt.headers['Authorization']='Bearer '+AUTH; r=await fetch(SUPA+path, opt); } }
+    return r;
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  var LOTS=[];
+  async function load(){
+    var r=await api('/rest/v1/rpc/lots_stock_etat',{method:'POST',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify({})});
+    LOTS = r.ok ? await r.json() : [];
+    render();
+  }
+
+  function corpsDefaut(l){
+    return "Bonjour {prenom},\n\nOn est super contents pour toi : tu as gagné " + (l.libelle||'ton lot')
+      + " aux Nuits du Sud !\n\nTon code : {code}\nTon billet : {image}\n\n"
+      + "Les Nuits du Sud, la Ville de Vence et Flowin te remercient pour ta participation.\n\n"
+      + "Le jeu continue : rends-toi sur l'application, découvre le parcours, invite tes amis. "
+      + "D'autres lots sont à gagner chez nos commerçants partenaires lors du grand tirage de clôture.\n\n"
+      + "À très vite !\nL'équipe des Nuits du Sud & Flowin\nflowinevent@gmail.com · 06 16 35 49 36";
+  }
+
+  function render(){
+    var g=document.getElementById('grid');
+    if(!LOTS.length){ g.innerHTML='<div style="color:var(--muted)">Aucun lot en stock.</div>'; return; }
+    g.innerHTML = LOTS.map(function(l,i){
+      var dispo=l.disponibles||0;
+      return '<div class="lot">'
+        + '<h3>'+esc(l.libelle||l.lot_id)+'</h3>'
+        + '<div class="id">'+esc(l.lot_id)+(l.partenaire?' · '+esc(l.partenaire):'')+'</div>'
+        + '<div class="stock">'
+          + '<span class="pill '+(dispo>0?'ok':'zero')+'">'+dispo+' disponible'+(dispo>1?'s':'')+'</span>'
+          + '<span class="pill">'+(l.attribues||0)+' attribué'+((l.attribues||0)>1?'s':'')+'</span>'
+          + '<span class="pill">'+(l.total||0)+' au total</span>'
+        + '</div>'
+        + '<div class="prev" id="prev'+i+'">'+(l.image_url
+            ? '<img src="'+esc(l.image_url)+'" alt="">'
+            : 'Aucun visuel — charge l\'image du billet')+'</div>'
+        + '<input type="file" id="file'+i+'" accept="image/*,application/pdf" style="display:none">'
+        + '<button class="b-up" onclick="document.getElementById(\'file'+i+'\').click()">📎 Charger le visuel</button>'
+        + '<label>Nom du lot (affiché au gagnant)</label>'
+        + '<input type="text" id="lib'+i+'" value="'+esc(l.libelle||'')+'" placeholder="Place de concert…">'
+        + '<label>Objet de l\'e-mail</label>'
+        + '<input type="text" id="obj'+i+'" value="'+esc(l.message_objet||'Nuits du Sud — tu as gagné !')+'">'
+        + '<label>Message d\'accompagnement</label>'
+        + '<textarea id="cor'+i+'">'+esc(l.message_corps||corpsDefaut(l))+'</textarea>'
+        + '<div class="vars">Variables : <code>{prenom}</code> <code>{nom}</code> <code>{code}</code> <code>{image}</code> <code>{lot}</code> <code>{date}</code></div>'
+        + '<div class="row"><button class="b-save" onclick="saveLot('+i+')">💾 Enregistrer</button></div>'
+        + '<div class="msg" id="msg'+i+'"></div>'
+        + '</div>';
+    }).join('');
+    LOTS.forEach(function(l,i){
+      var f=document.getElementById('file'+i);
+      if(f) f.addEventListener('change', function(){ upload(i, f.files[0]); });
+    });
+  }
+
+  async function upload(i, file){
+    if(!file) return;
+    var l=LOTS[i], m=document.getElementById('msg'+i);
+    m.className='msg'; m.textContent='Envoi du visuel…';
+    var ext=(file.name.split('.').pop()||'png').toLowerCase();
+    var path=encodeURIComponent(l.lot_id)+'-'+Date.now()+'.'+ext;
+    var r=await api('/storage/v1/object/lots/'+path,{method:'POST',
+      headers:{'Content-Type':file.type||'application/octet-stream','x-upsert':'true'}, body:file});
+    if(!r.ok){ var t=await r.text(); m.className='msg err'; m.textContent='Échec de l\'envoi : '+t.slice(0,120); return; }
+    var url=SUPA+'/storage/v1/object/public/lots/'+path;
+    LOTS[i].image_url=url;
+    var p=document.getElementById('prev'+i);
+    p.innerHTML='<img src="'+url+'" alt="">';
+    m.className='msg ok'; m.textContent='✓ Visuel chargé — pense à enregistrer.';
+  }
+
+  window.saveLot = async function(i){
+    var l=LOTS[i], m=document.getElementById('msg'+i);
+    var body={ lot_id:l.lot_id,
+      libelle: document.getElementById('lib'+i).value.trim() || null,
+      image_url: l.image_url || null,
+      message_objet: document.getElementById('obj'+i).value.trim() || null,
+      message_corps: document.getElementById('cor'+i).value,
+      maj: new Date().toISOString() };
+    m.className='msg'; m.textContent='Enregistrement…';
+    var r=await api('/rest/v1/lots_visuels?on_conflict=lot_id',{method:'POST',
+      headers:{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(body)});
+    if(!r.ok){ var t=await r.text(); m.className='msg err'; m.textContent='Échec : '+t.slice(0,140); return; }
+    LOTS[i].libelle=body.libelle; LOTS[i].message_objet=body.message_objet; LOTS[i].message_corps=body.message_corps;
+    m.className='msg ok'; m.textContent='✓ Enregistré.';
+  };
+
+  load();
+})();
+</script>
+</body>
+</html>
