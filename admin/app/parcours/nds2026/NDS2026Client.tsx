@@ -931,6 +931,22 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
              animation:ctaNudge 1.6s ease-in-out infinite}
         @keyframes ctaNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
         .cta:active{transform:scale(.985)}
+        /* --- Formulaire : bandeau de RÉCOMPENSE (et non "dernière étape" = corvée) --- */
+        .winban{position:relative;background:linear-gradient(135deg,#12A87B,#4BD7A8);border-radius:20px;
+                padding:16px 16px 15px;margin:2px 0 16px;color:#fff;overflow:hidden;
+                box-shadow:0 6px 20px rgba(18,168,123,.28)}
+        .winban::after{content:'';position:absolute;top:-50%;right:-15%;width:60%;height:200%;
+                background:radial-gradient(closest-side,rgba(255,255,255,.28),transparent);pointer-events:none}
+        .winban-r{position:relative;display:flex;align-items:center;gap:11px}
+        .winban-ic{flex:0 0 auto;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.24);
+                border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;
+                animation:winPop .5s cubic-bezier(.2,1.4,.4,1) both}
+        .winban-ic .ic{width:24px;height:24px}
+        @keyframes winPop{0%{transform:scale(.4) rotate(-12deg);opacity:0}70%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
+        .winban-t{font-size:19px;font-weight:900;line-height:1.15;letter-spacing:-.3px;
+                text-shadow:0 1px 3px rgba(0,0,0,.14)}
+        .winban-s{position:relative;font-size:13px;line-height:1.45;margin-top:10px;opacity:.97}
+        .winban-s b{font-weight:800}
         /* --- Collection : une tuile NOMMÉE par station, une couleur par famille --- */
         .coll{background:#fff;border:1px solid #F2E3EC;border-radius:20px;padding:15px 14px 14px;margin-top:14px;
               box-shadow:0 2px 10px rgba(26,18,38,.04)}
@@ -1118,7 +1134,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <div className="pad">
               <div className="dhead">
                 <div className="back" onClick={() => setScreen('resultats')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
-                <div><div className="dtitle">Dernière étape !</div><div className="dsub">Tes infos pour valider ton ticket et recevoir tes gains</div></div>
+                                <div><div className="dtitle">Bravo, ton ticket est là&nbsp;!</div><div className="dsub">Plus que tes coordonnées pour le valider.</div></div>
+              </div>
+              <div className="winban">
+                <div className="winban-r">
+                  <span className="winban-ic"><svg className="ic"><use href="#i-ticket" /></svg></span>
+                  <span className="winban-t">Bravo&nbsp;! Ton ticket<br />est enregistré</span>
+                </div>
+                <div className="winban-s">
+                  Laisse-nous tes coordonnées : <b>on te prévient si tu gagnes</b>. Et n&apos;oublie pas — d&apos;autres stations t&apos;attendent, <b>chacune = 1 ticket de plus</b>.
+                </div>
               </div>
               <div className="grid2" style={{ marginBottom: 12 }}>
                 <div><label className="label">Prénom</label><input className="input" autoComplete="given-name" value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} />{errors.prenom && <div className="err">{errors.prenom}</div>}</div>
