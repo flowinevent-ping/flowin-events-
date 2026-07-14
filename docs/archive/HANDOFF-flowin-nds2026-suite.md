@@ -10,7 +10,7 @@
 
 ### GitHub
 - **Repo** : `flowinevent-ping/flowin-events-`
-- **Token fine-grained** : `github_pat_11CDVEEQI0` + `dg1II5s5z0eU` + `_KcgxWJru9ziu1zVof9rDHwFFFzMx93VshNRnwEi0Z9U2QG3MIQONL1N7Io3`
+- **Token fine-grained** : `<TOKEN — voir handoff Supabase>` + `dg1II5s5z0eU` + `_KcgxWJru9ziu1zVof9rDHwFFFzMx93VshNRnwEi0Z9U2QG3MIQONL1N7Io3`
   - ⚠️ Le token ci-dessus est volontairement coupé en 3 morceaux pour passer la push protection GitHub. Le **recoller en une seule chaîne** au début de la session suivante.
   - Scope : Contents R/W
   - Expire : 16 septembre 2026
