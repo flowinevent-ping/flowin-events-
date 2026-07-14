@@ -982,6 +982,7 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
   display: block;
 }
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
 
@@ -4734,6 +4735,8 @@ async function ndsResLoad(date){
       _ndsRes.bonus = rb.ok ? await rb.json() : null;
       var rr=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_repondants',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
       _ndsRes.repond = rr.ok ? await rr.json() : null;
+      var ro=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_optin',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+      _ndsRes.optin = ro.ok ? await ro.json() : null;
     }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; _ndsRes.stations=null; _ndsRes.engag=null; _ndsRes.bonus=null; _ndsRes.repond=null; }
   }catch(e){ _ndsRes.data=null; _ndsRes.funnel=null; }
   _ndsRes.loading=false; render();
@@ -4755,6 +4758,43 @@ function ndsResBar(label, val, max, color, onclick){
   var cl = onclick ? ' style="cursor:pointer" onclick="'+onclick+'"' : '';
   return '<div class="ndsres-row"'+cl+'><div class="ndsres-lbl">'+esc(label)+'</div><div class="ndsres-track"><div class="ndsres-fill" style="width:'+w+'%;background:'+color+'"></div></div><div class="ndsres-val">'+val+'</div></div>';
 }
+function ndsResOptin(o){
+  if(!o) return '';
+  var c=o.cumul||{};
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udee1\ufe0f Conformit\u00e9 RGPD &amp; compl\u00e9tion</div>';
+  h+='<div class="kpi-grid" style="margin-bottom:10px">';
+  h+=prospKpi((o.taux_optin!=null?o.taux_optin+' %':'\u2014'),'Opt-in du jour');
+  h+=prospKpi((c.taux_optin!=null?c.taux_optin+' %':'\u2014'),'Opt-in cumul\u00e9');
+  h+=prospKpi((o.taux_completion!=null?o.taux_completion+' %':'\u2014'),'Compl\u00e9tion du jour');
+  h+=prospKpi((c.taux_completion!=null?c.taux_completion+' %':'\u2014'),'Compl\u00e9tion cumul\u00e9e');
+  h+='</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">';
+  h+='<div><div class="ndsres-h">Opt-in \u2014 jour s\u00e9lectionn\u00e9</div>'
+     + fxDonut(['Opt-in accept\u00e9','Refus\u00e9'], [o.optin_oui||0, o.optin_non||0], [FX.VERT, FX.GRIS], 190) + '</div>';
+  h+='<div><div class="ndsres-h">Opt-in \u2014 cumul\u00e9 ('+(c.joueurs||0)+' joueurs)</div>'
+     + fxDonut(['Opt-in accept\u00e9','Refus\u00e9'], [c.optin_oui||0, c.optin_non||0], [FX.VIOLET, FX.GRIS], 190) + '</div>';
+  h+='</div>';
+  var pj=o.par_jour||[];
+  if(pj.length){
+    var labs=pj.map(function(x){ return bvJourLabel(x.jour); });
+    h+='<div class="ndsres-h" style="margin-top:14px">\u00c9volution \u2014 joueurs et taux</div>';
+    h+=fxLine(labs, [
+      {label:'Joueurs',              data:pj.map(function(x){return x.joueurs||0;}),        color:FX.VIOLET, fill:true},
+      {label:'Taux opt-in',          data:pj.map(function(x){return x.taux_optin;}),        color:FX.VERT,  axis:'y1'},
+      {label:'Taux de compl\u00e9tion', data:pj.map(function(x){return x.taux_completion;}), color:FX.AMBRE, axis:'y1'}
+    ], 240);
+  }
+  var ps=o.par_station||[];
+  if(ps.length){
+    h+='<div class="ndsres-h" style="margin-top:14px">Opt-in par station</div>';
+    h+=fxStackedBar(ps.map(function(x){return String(x.station).replace('ev-nds-','');}), [
+      {label:'Opt-in', data:ps.map(function(x){return x.optin_oui||0;}), color:FX.VERT},
+      {label:'Refus',  data:ps.map(function(x){return (x.joueurs||0)-(x.optin_oui||0);}), color:FX.GRIS}
+    ], 220, true, true);
+  }
+  h+='</div>';
+  return h;
+}
 function ndsResRepondants(r){
   if(!r) return '';
   var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udc65 R\u00e9pondants uniques <span class="ndsres-sub">(bonus stations \u00d7 sondage landing \u00b7 sans doublon)</span></div>';
@@ -4764,19 +4804,14 @@ function ndsResRepondants(r){
   h+=prospKpi((r.taux_couverture!=null?r.taux_couverture+' %':'\u2014'),'Couverture');
   h+=prospKpi(r.les_deux||0,'Ont fait les deux');
   h+='</div>';
-  var rows=[
-    ['Bonus seulement',       r.bonus_seulement||0, '#1baf7a'],
-    ['Landing BV seulement',  r.landing_seulement||0,'#2a78d6'],
-    ['Les deux',              r.les_deux||0,        '#7C2D92'],
-    ['Aucun des deux',        r.aucun||0,           '#c2410c']
-  ];
-  var mx=Math.max.apply(null,rows.map(function(x){return x[1];}).concat([1]));
   h+='<div class="ndsres-h" style="margin-top:10px">R\u00e9partition des joueurs</div>';
-  rows.forEach(function(x){ h+=ndsResBar(x[0], x[1], mx, x[2]); });
-  var t=[['Total bonus', r.total_bonus||0, '#1baf7a'],['Total landing BV', r.total_landing||0, '#2a78d6']];
-  var mt=Math.max.apply(null,t.map(function(x){return x[1];}).concat([1]));
+  h+=fxDonut(['Bonus seulement','Landing BV seulement','Les deux','Aucun des deux'],
+             [r.bonus_seulement||0, r.landing_seulement||0, r.les_deux||0, r.aucun||0],
+             [FX.VERT, FX.BLEU, FX.VIOLET, FX.GRIS], 210);
   h+='<div class="ndsres-h" style="margin-top:12px">Par source <span class="ndsres-sub">(les totaux se recoupent de '+(r.les_deux||0)+' personne(s))</span></div>';
-  t.forEach(function(x){ h+=ndsResBar(x[0], x[1], mt, x[2]); });
+  h+=fxStackedBar(['Bonus (stations)','Landing Brigade Verte'], [
+     {label:'R\u00e9pondants', data:[r.total_bonus||0, r.total_landing||0], color:FX.VIOLET}
+  ], 150, true, false);
   h+='</div>';
   return h;
 }
@@ -4817,22 +4852,19 @@ function ndsResEngagement(e){
   h+=prospKpi((e.taux_bonus!=null?e.taux_bonus+' %':'\u2014'),'Ont fait le bonus');
   h+='</div>';
   // rejeu vs une partie
-  var maxA=Math.max(e.une_partie||0, e.ont_rejoue||0, 1);
-  h+='<div class="ndsres-h" style="margin-top:10px">Ont rejou\u00e9 vs une seule partie</div>';
-  h+=ndsResBar('Une seule partie', e.une_partie||0, maxA, '#c9c7c0');
-  h+=ndsResBar('Ont rejou\u00e9',      e.ont_rejoue||0, maxA, '#1baf7a');
-  // repartition
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">';
+  h+='<div><div class="ndsres-h">Rejeu</div>'
+     + fxDonut(['Une seule partie','Ont rejou\u00e9'], [e.une_partie||0, e.ont_rejoue||0], [FX.GRIS, FX.VERT], 190) + '</div>';
+  h+='<div><div class="ndsres-h">Questions bonus</div>'
+     + fxDonut(['Ont r\u00e9pondu','N\u2019ont pas r\u00e9pondu'], [e.bonus_oui||0, e.bonus_non||0], [FX.VERT, FX.GRIS], 190) + '</div>';
+  h+='</div>';
   var rp=e.repartition||[];
   if(rp.length){
-    var maxR=Math.max.apply(null,rp.map(function(x){return x.n;}).concat([1]));
-    h+='<div class="ndsres-h" style="margin-top:12px">Nombre de parties par joueur</div>';
-    rp.forEach(function(x){ h+=ndsResBar(x.label, x.n, maxR, '#2a78d6'); });
+    h+='<div class="ndsres-h" style="margin-top:14px">Nombre de parties par joueur</div>';
+    h+=fxStackedBar(rp.map(function(x){return x.label;}), [
+       {label:'Joueurs', data:rp.map(function(x){return x.n;}), color:FX.BLEU}
+    ], 190, false, false);
   }
-  // bonus
-  var maxB=Math.max(e.bonus_oui||0, e.bonus_non||0, 1);
-  h+='<div class="ndsres-h" style="margin-top:12px">Questions bonus</div>';
-  h+=ndsResBar('Ont r\u00e9pondu',      e.bonus_oui||0, maxB, '#1baf7a');
-  h+=ndsResBar('N\u2019ont pas r\u00e9pondu', e.bonus_non||0, maxB, '#c2410c');
   // par station
   var ps=e.par_station||[];
   if(ps.length){
@@ -4943,9 +4975,8 @@ function ndsResFunnel(f){
   }
   var pe=(f.par_etape||[]).filter(function(x){ return String(x.etape||'').indexOf('err:')!==0; }).slice().sort(function(a,b){ var ia=ordre.indexOf(a.etape), ib=ordre.indexOf(b.etape); return (ia<0?99:ia)-(ib<0?99:ib); });
   if(pe.length){
-    var maxE=Math.max.apply(null,pe.map(function(x){return x.visiteurs;}).concat([1]));
-    h+='<div class="ndsres-h" style="margin-top:12px">D\u00e9crochage par \u00e9tape</div>';
-    pe.forEach(function(x){ h+=ndsResBar(lbl[x.etape]||x.etape, x.visiteurs, maxE, '#eda100'); });
+    h+='<div class="ndsres-h" style="margin-top:12px">Entonnoir \u2014 d\u00e9crochage par \u00e9tape</div>';
+    h+=fxFunnel(pe.map(function(x){ return lbl[x.etape]||x.etape; }), pe.map(function(x){ return x.visiteurs; }), 40+pe.length*32);
   } else {
     h+='<div class="ndsres-sub" style="margin-top:10px">Suivi par \u00e9tape actif depuis le 11/07 \u2014 les donn\u00e9es appara\u00eetront ici.</div>';
   }
@@ -5018,6 +5049,7 @@ function renderNdsResultat(){
   if(_ndsRes.loading || !_ndsRes.data){ h+='<div class="alert info"><span class="ico">\u23f3</span>'+(dates.length?('Chargement du '+esc(_ndsRes.date||'')+'\u2026'):'Aucune journ\u00e9e de jeu pour ce super event.')+'</div></div>'; return h; }
   var d=_ndsRes.data, k=d.kpis||{};
   h+='<div class="kpi-grid">'+prospKpi(k.joueurs||0,'Joueurs uniques')+prospKpi(k.parties||0,'Parties')+prospKpi(k.tickets||0,'Tickets')+prospKpi((k.score_moyen!=null?k.score_moyen:'\u2014')+' / 4','Score moyen')+prospKpi(k.multi_joueurs||0,'Ont rejou\u00e9')+prospKpi((d.clics&&d.clics.total)||0,'Clics liens')+'</div>';
+  h+=ndsResOptin(_ndsRes.optin);
   h+=ndsResFunnel(_ndsRes.funnel);
   h+=ndsResStations(_ndsRes.stations);
   h+=ndsResEngagement(_ndsRes.engag);
@@ -5051,6 +5083,156 @@ function renderNdsResultat(){
   h+='</div>';
   return h;
 }
+
+/* ===== MOTEUR DE GRAPHIQUES (Chart.js) — charte Flowin =====
+   Les fonctions de rendu retournent du HTML : les graphiques sont donc empilés
+   puis instanciés par fxFlush() une fois le HTML injecté dans le DOM.
+   fxDonut · fxLine · fxStackedBar · fxFunnel
+============================================================ */
+var FX = { VIOLET:'#7C2D92', VERT:'#1baf7a', BLEU:'#2a78d6', AMBRE:'#eda100',
+           ORANGE:'#c2410c', ROSE:'#e6187f', GRIS:'#c9c7c0', TXT:'#898781', GRID:'#e9e8e4' };
+var _fxQueue = [], _fxIds = 0, _fxLive = [];
+
+function fxCanvas(cfg, h) {
+  var id = 'fx' + (++_fxIds);
+  _fxQueue.push({ id: id, cfg: cfg });
+  return '<div style="position:relative;width:100%;height:' + (h || 200) + 'px"><canvas id="' + id + '"></canvas></div>';
+}
+
+function fxFlush() {
+  _fxLive.forEach(function (c) { try { c.destroy(); } catch (e) {} });
+  _fxLive = [];
+  if (typeof Chart === 'undefined') { _fxQueue = []; return; }
+  _fxQueue.forEach(function (sp) {
+    var el = document.getElementById(sp.id);
+    if (!el) return;
+    try { _fxLive.push(new Chart(el, sp.cfg)); } catch (e) { console.error('[Flowin] chart', sp.id, e); }
+  });
+  _fxQueue = [];
+}
+
+function fxTip(total) {
+  return function (c) {
+    var t = total || c.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+    var p = t > 0 ? Math.round((c.parsed.y !== undefined ? c.parsed.y : c.parsed) / t * 1000) / 10 : 0;
+    return c.label + ' : ' + (c.parsed.y !== undefined ? c.parsed.y : c.parsed) + ' (' + p + ' %)';
+  };
+}
+
+/* Anneau — répartitions (opt-in, F/H, bonus, répondants) */
+function fxDonut(labels, data, colors, h) {
+  var cfg = {
+    type: 'doughnut',
+    data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'right', labels: { color: FX.TXT, font: { size: 11 }, boxWidth: 12, padding: 10 } },
+        tooltip: { callbacks: { label: fxTip(null) } }
+      }
+    }
+  };
+  return fxCanvas(cfg, h || 200);
+}
+
+/* Courbes — évolution, superposables (axe % en option) */
+function fxLine(labels, series, h) {
+  var hasPct = series.some(function (s) { return s.axis === 'y1'; });
+  var ds = series.map(function (s) {
+    return {
+      label: s.label, data: s.data, borderColor: s.color, backgroundColor: s.color + '22',
+      fill: !!s.fill, tension: 0.35, pointRadius: 4, pointBackgroundColor: s.color,
+      borderWidth: 2, yAxisID: s.axis || 'y'
+    };
+  });
+  var scales = {
+    x: { grid: { display: false }, ticks: { color: FX.TXT, font: { size: 11 } } },
+    y: { beginAtZero: true, ticks: { color: FX.TXT }, grid: { color: FX.GRID } }
+  };
+  if (hasPct) {
+    scales.y1 = {
+      position: 'right', beginAtZero: true, max: 100, grid: { display: false },
+      ticks: { color: FX.TXT, callback: function (v) { return v + ' %'; } }
+    };
+  }
+  var cfg = {
+    type: 'line',
+    data: { labels: labels, datasets: ds },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: series.length > 1, labels: { color: FX.TXT, font: { size: 11 }, boxWidth: 12 } } },
+      scales: scales
+    }
+  };
+  return fxCanvas(cfg, h || 210);
+}
+
+/* Barres empilées ou groupées — croisements */
+function fxStackedBar(labels, series, h, horizontal, stacked) {
+  var st = (stacked !== false);
+  var ds = series.map(function (s) {
+    return { label: s.label, data: s.data, backgroundColor: s.color, borderRadius: 4, maxBarThickness: horizontal ? 22 : 48 };
+  });
+  var scales = horizontal
+    ? {
+        x: { stacked: st, beginAtZero: true, ticks: { color: FX.TXT }, grid: { color: FX.GRID } },
+        y: { stacked: st, grid: { display: false }, ticks: { color: FX.TXT, font: { size: 11 } } }
+      }
+    : {
+        x: { stacked: st, grid: { display: false }, ticks: { color: FX.TXT, font: { size: 11 } } },
+        y: { stacked: st, beginAtZero: true, ticks: { color: FX.TXT, precision: 0 }, grid: { color: FX.GRID } }
+      };
+  var cfg = {
+    type: 'bar',
+    data: { labels: labels, datasets: ds },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
+      plugins: {
+        legend: { display: series.length > 1, labels: { color: FX.TXT, font: { size: 11 }, boxWidth: 12 } },
+        tooltip: { mode: 'index' }
+      },
+      scales: scales
+    }
+  };
+  return fxCanvas(cfg, h || 210);
+}
+
+/* Entonnoir — barres horizontales décroissantes, % du départ */
+function fxFunnel(labels, data, h) {
+  var cols = [FX.GRIS, FX.BLEU, FX.VIOLET, FX.AMBRE, FX.VERT];
+  var cfg = {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: labels.map(function (_, i) { return cols[i % cols.length]; }),
+        borderRadius: 4, maxBarThickness: 26
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function (c) {
+              var first = c.dataset.data[0] || 1;
+              return c.parsed.x + ' (' + Math.round(c.parsed.x / first * 100) + ' % du depart)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { beginAtZero: true, ticks: { color: FX.TXT }, grid: { color: FX.GRID } },
+        y: { grid: { display: false }, ticks: { color: FX.TXT, font: { size: 11 } } }
+      }
+    }
+  };
+  return fxCanvas(cfg, h || 220);
+}
+
 
 function render(){
   var _fsActive=false,_fsS=0,_fsE=0;
@@ -5093,6 +5275,7 @@ else if(v==='maintenance') html = renderMaintenance();
   // live-control supprimé — remplacé par drawer stats
   else html = '<div class="page"><div class="empty-block">Vue inconnue</div></div>';
   $('#viewport').innerHTML = html;
+  try{ fxFlush(); }catch(e){ console.error('[Flowin] fxFlush', e); }
   if(_fsActive){ try{ var _ni=document.querySelector('#viewport .filter-search input, #viewport input.filter-search'); if(_ni){ _ni.focus(); _ni.setSelectionRange(_fsS,_fsE); } }catch(e){} }
   if(state.drawer.open && !state._pollingRender) renderDrawer();
   if(state.modal.open) renderModal();
