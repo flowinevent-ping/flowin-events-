@@ -3090,7 +3090,7 @@ function renderSidebar(){
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
       {id:'nds-resultat',ico:'📅',lbl:'Résultat journalier'},
-      {id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
+      {id:'nds-lots',ico:'🎁',lbl:'Lots & stock'},{id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
       {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Lots & Gagnants',ext:'/tirage-nds.html'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
@@ -5186,6 +5186,171 @@ function renderNdsResultat(){
   return h;
 }
 
+/* ===================== NDS 2026 — LOTS & STOCK =====================
+   Tableau par partenaire. Source du stock : lots_stock_etat (= bons de commande).
+   "Tirer un gagnant" -> RPC tirer_et_attribuer_lot (authentifie) : tire UN joueur
+   pondere par ses tickets, reserve un code, ecrit se_gains. Le lot SORT du tirage,
+   il n'est jamais donne directement (garde-fou metier).
+   "Envoyer" -> Gmail compose pre-rempli (code + lien image + message).
+=================================================================== */
+var _ndsLots = { se:'se-nds-2026', data:null, loading:false, busy:null, results:{} };
+
+async function ndsLotsLoad(){
+  _ndsLots.loading = true; render();
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/lots_stock_etat',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({p_se:_ndsLots.se})
+    });
+    _ndsLots.data = r.ok ? ((await r.json())||[]) : [];
+  }catch(e){ _ndsLots.data = []; }
+  _ndsLots.loading = false; render();
+}
+
+async function ndsLotsDraw(pid, pnom){
+  if(_ndsLots.busy) return;
+  var row = (_ndsLots.data||[]).find(function(x){return x.partenaire_id===pid;});
+  if(row && (row.disponibles||0) <= 0){ toast('Stock epuise pour '+pnom,'error'); return; }
+  if(!confirm('Tirer un gagnant pour '+pnom+' ?\n\nUn joueur est tire au sort (pondere par ses tickets) et un lot lui est reserve. Action definitive.')) return;
+  _ndsLots.busy = pid; render();
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/tirer_et_attribuer_lot',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_AUTH,'Content-Type':'application/json'},
+      body:JSON.stringify({p_partenaire:pid,p_se:_ndsLots.se,p_station:'dashboard'})
+    });
+    var res = null; try{ res = await r.json(); }catch(e){}
+    if(r.status===401 || r.status===403){ toast('Non autorise — reconnecte-toi (le tirage exige une session admin).','error'); }
+    else if(!r.ok){ toast('Echec du tirage : '+((res&&res.message)||('HTTP '+r.status)),'error'); }
+    else if(res && res.ok===false){ toast(res.erreur||'Tirage impossible','error'); }
+    else if(res && res.ok){
+      if(!_ndsLots.results[pid]) _ndsLots.results[pid]=[];
+      _ndsLots.results[pid].unshift(res);
+      toast('Gagnant tire : '+((res.gagnant&&res.gagnant.nom)||res.code)+' · reste '+res.stock_restant,'success');
+    } else { toast('Reponse inattendue du serveur','error'); }
+  }catch(e){ toast('Erreur reseau : '+e.message,'error'); }
+  _ndsLots.busy = null;
+  await ndsLotsLoad();
+}
+
+function _ndsLotsAbs(u){
+  if(!u) return '';
+  return /^https?:/.test(u) ? u : (location.origin + (u.charAt(0)==='/'?'':'/') + u);
+}
+
+function ndsLotsMailUrl(g){
+  var prenom = (g.gagnant && g.gagnant.prenom) || '';
+  var objet = g.message_objet || ('Nuits du Sud — tu as gagne un lot chez nos commercants partenaires !');
+  var L = [];
+  if(g.message_corps){ L.push(g.message_corps); }
+  else {
+    L.push('Bonjour '+prenom+',');
+    L.push('');
+    L.push('Bonne nouvelle : au grand tirage des Nuits du Sud, tu as gagne un lot chez notre commercant partenaire !');
+    L.push('');
+    L.push('Lot : '+(g.libelle||''));
+  }
+  L.push('');
+  L.push('Ton code a presenter en boutique : '+(g.code||''));
+  if(g.image_url){ L.push('Visuel du lot : '+_ndsLotsAbs(g.image_url)); }
+  L.push('');
+  L.push('Les Nuits du Sud, la Ville de Vence et Flowin te remercient pour ta participation.');
+  L.push('flowinevent@gmail.com · 06 16 35 49 36');
+  return 'https://mail.google.com/mail/?view=cm&fs=1'
+    + '&to='+encodeURIComponent((g.gagnant&&g.gagnant.email)||'')
+    + '&su='+encodeURIComponent(objet)
+    + '&body='+encodeURIComponent(L.join('\n'));
+}
+
+function ndsLotsMail(pid, idx){
+  var g = ((_ndsLots.results[pid]||[])[idx]);
+  if(!g){ return; }
+  if(!(g.gagnant && g.gagnant.email)){ alert('Ce gagnant n\'a pas d\'email enregistre. Contacte-le par telephone : '+((g.gagnant&&g.gagnant.tel)||'—')); return; }
+  window.open(ndsLotsMailUrl(g),'_blank','noopener');
+}
+
+function renderNdsLots(){
+  if(_ndsLots.data===null && !_ndsLots.loading){ ndsLotsLoad(); }
+  var rows = _ndsLots.data||[];
+  var totDispo=0, totAttr=0, totTot=0;
+  rows.forEach(function(x){ totDispo+=(x.disponibles||0); totAttr+=(x.attribues||0); totTot+=(x.total||0); });
+
+  var css = '<style id="ndslots-css">'
+    + '.ndslots-strip{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 18px}'
+    + '.ndslots-kpi{flex:1;min-width:150px;background:linear-gradient(135deg,#fff,#faf7fc);border:1.5px solid var(--sa-border);border-radius:14px;padding:16px 18px}'
+    + '.ndslots-kpi b{display:block;font-size:30px;font-weight:800;line-height:1;color:var(--sa-navy)}'
+    + '.ndslots-kpi.acc b{color:#7C2D92}.ndslots-kpi.ok b{color:#1baf7a}'
+    + '.ndslots-kpi span{font-size:12px;color:var(--sa-text);opacity:.7;font-weight:600}'
+    + '.ndslots-card{border:1.5px solid var(--sa-border);border-radius:16px;padding:16px 18px;margin-bottom:14px;background:#fff;transition:box-shadow .15s}'
+    + '.ndslots-card:hover{box-shadow:0 6px 22px rgba(124,45,146,.08)}'
+    + '.ndslots-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}'
+    + '.ndslots-logo{width:46px;height:46px;border-radius:11px;object-fit:cover;background:#f3f1ee;flex-shrink:0}'
+    + '.ndslots-name{font-size:16px;font-weight:800;color:var(--sa-navy)}'
+    + '.ndslots-lots{font-size:11.5px;color:var(--sa-text);opacity:.65}'
+    + '.ndslots-count{margin-left:auto;text-align:right}'
+    + '.ndslots-count b{font-size:26px;font-weight:800;color:#1baf7a}'
+    + '.ndslots-count.empty b{color:#c9c7c0}'
+    + '.ndslots-count span{display:block;font-size:11px;opacity:.6}'
+    + '.ndslots-bar{height:8px;border-radius:6px;background:#eee;overflow:hidden;margin:12px 0 6px}'
+    + '.ndslots-bar i{display:block;height:100%;background:linear-gradient(90deg,#7C2D92,#b249c9)}'
+    + '.ndslots-warn{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:20px;padding:3px 11px;margin-top:4px}'
+    + '.ndslots-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}'
+    + '.ndslots-btn{background:#7C2D92;color:#fff;border:none;padding:9px 16px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer}'
+    + '.ndslots-btn:disabled{background:#d8d5da;cursor:not-allowed}'
+    + '.ndslots-win{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:9px 12px;margin-top:8px}'
+    + '.ndslots-win .code{font-family:ui-monospace,Menlo,monospace;font-weight:800;color:#065f46;background:#dcfce7;padding:2px 8px;border-radius:6px}'
+    + '.ndslots-send{margin-left:auto;background:#fff;border:1.5px solid #1baf7a;color:#1baf7a;padding:6px 13px;border-radius:8px;font-weight:700;cursor:pointer}'
+    + '.ndslots-send.nomail{border-color:#e0a800;color:#a16207}'
+    + '</style>';
+
+  var h = '<div class="page">'+css;
+  h += '<div class="page-header"><div><div class="page-title">🎁 Lots &amp; stock</div><div class="page-subtitle">Nuits du Sud 2026 · grand tirage des lots partenaires · source : bons de commande</div></div></div>';
+
+  if(_ndsLots.loading && !rows.length){ h+='<div class="alert info"><span class="ico">⏳</span>Chargement du stock…</div></div>'; return h; }
+
+  h += '<div class="ndslots-strip">'
+    + '<div class="ndslots-kpi ok"><b>'+totDispo+'</b><span>Lots disponibles</span></div>'
+    + '<div class="ndslots-kpi acc"><b>'+totAttr+'</b><span>Lots attribues</span></div>'
+    + '<div class="ndslots-kpi"><b>'+totTot+'</b><span>Total (bons de commande)</span></div>'
+    + '<div class="ndslots-kpi"><b>'+rows.length+'</b><span>Partenaires dotes</span></div>'
+    + '</div>';
+
+  if(!rows.length){ h+='<div class="alert info"><span class="ico">ℹ️</span>Aucun lot en stock pour ce super event.</div></div>'; return h; }
+
+  rows.forEach(function(x){
+    var dispo=x.disponibles||0, attr=x.attribues||0, tot=x.total||0;
+    var pct = tot>0 ? Math.round(attr/tot*100) : 0;
+    var busy = _ndsLots.busy===x.partenaire_id;
+    var pnomSafe = (x.partenaire||'').replace(/'/g,' ');
+    h += '<div class="ndslots-card">';
+    h += '<div class="ndslots-top">';
+    if(x.image_url){ h+='<img class="ndslots-logo" src="'+esc(x.image_url)+'" alt="" onerror="this.style.visibility=\'hidden\'">'; }
+    else { h+='<div class="ndslots-logo"></div>'; }
+    h += '<div><div class="ndslots-name">'+esc(x.partenaire||x.partenaire_id)+'</div><div class="ndslots-lots">'+esc(x.lots||'')+'</div></div>';
+    h += '<div class="ndslots-count'+(dispo?'':' empty')+'"><b>'+dispo+'</b><span>sur '+tot+' · '+attr+' attribue'+(attr>1?'s':'')+'</span></div>';
+    h += '</div>';
+    h += '<div class="ndslots-bar"><i style="width:'+pct+'%"></i></div>';
+    if(!x.visuel_pret){ h += '<div class="ndslots-warn">⚠️ Visuel du lot non charge — le mail partira sans image (a charger sur /lots-nds.html)</div>'; }
+    h += '<div class="ndslots-act">';
+    h += '<button class="ndslots-btn" '+((dispo<=0||busy)?'disabled':'')+' onclick="ndsLotsDraw(\''+esc(x.partenaire_id)+'\',\''+esc(pnomSafe)+'\')">'+(busy?'⏳ Tirage…':'🎲 Tirer un gagnant')+'</button>';
+    h += '</div>';
+    var wins = _ndsLots.results[x.partenaire_id]||[];
+    wins.forEach(function(g,idx){
+      var em = g.gagnant && g.gagnant.email;
+      h += '<div class="ndslots-win"><span>🏅</span> <b>'+esc((g.gagnant&&g.gagnant.nom)||'—')+'</b>'
+        + ' <span class="code">'+esc(g.code||'')+'</span>'
+        + ' <span class="ndslots-lots">'+esc(em||((g.gagnant&&g.gagnant.tel)||'pas de contact'))+'</span>'
+        + '<button class="ndslots-send'+(em?'':' nomail')+'" onclick="ndsLotsMail(\''+esc(x.partenaire_id)+'\','+idx+')">'+(em?'✉️ Envoyer':'☎️ Pas d\'email')+'</button>'
+        + '</div>';
+    });
+    h += '</div>';
+  });
+
+  h += '</div>';
+  return h;
+}
+
 /* ===== MOTEUR DE GRAPHIQUES (Chart.js) — charte Flowin =====
    Les fonctions de rendu retournent du HTML : les graphiques sont donc empilés
    puis instanciés par fxFlush() une fois le HTML injecté dans le DOM.
@@ -5372,6 +5537,7 @@ function render(){
   else if(v==='landing-page') html = renderLandingPage();
 else if(v==='nds-media') html = renderNdsMedia();
 else if(v==='nds-resultat') html = renderNdsResultat();
+else if(v==='nds-lots') html = renderNdsLots();
 else if(v==='maintenance') html = renderMaintenance();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
