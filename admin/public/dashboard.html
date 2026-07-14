@@ -4830,25 +4830,43 @@ function ndsResOptin(o){
   h+='</div>';
   return h;
 }
+function ndsResDemoAges(pa, tot, titre){
+  if(!pa || !pa.length) return '';
+  var mx=Math.max.apply(null,pa.map(function(x){return x.total;}).concat([1]));
+  var h='<div class="ndsres-h" style="margin-top:12px">'+titre+' <span class="ndsres-sub">\u00b7 <span style="color:#2a78d6">hommes</span> / <span style="color:#E0218A">femmes</span></span></div>';
+  pa.forEach(function(x){
+    var pct = tot ? Math.round(100*x.total/tot) : 0;
+    h+=ndsResBarStack(x.tranche+' \u00b7 '+x.total+' ('+pct+'%)', x.hommes||0, x.femmes||0, mx);
+  });
+  return h;
+}
 function ndsResDemo(d){
-  if(!d || !(d.joueurs>0)) return '';
-  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udc65 \u00c2ge &amp; sexe des joueurs</div>';
+  if(!d || !((d.joueurs||0)>0 || ((d.cumul&&d.cumul.joueurs)||0)>0)) return '';
   var f=d.femmes||0, m=d.hommes||0, tot=d.joueurs||0;
   var pa=d.par_age||[];
   var dom=pa.slice().sort(function(a,b){return b.total-a.total;})[0];
+  var cu=d.cumul||{};
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udc65 \u00c2ge &amp; sexe des joueurs</div>';
   h+='<div class="kpi-grid" style="margin-bottom:8px">';
-  h+=prospKpi(tot,'Joueurs');
+  h+=prospKpi(tot,'Joueurs du jour');
   h+=prospKpi(f+(tot?' \u00b7 '+Math.round(100*f/tot)+'%':''),'Femmes');
   h+=prospKpi(m+(tot?' \u00b7 '+Math.round(100*m/tot)+'%':''),'Hommes');
   h+=prospKpi(dom?esc(dom.tranche):'\u2014','Tranche dominante');
   h+='</div>';
-  if(pa.length){
-    var mx=Math.max.apply(null,pa.map(function(x){return x.total;}).concat([1]));
-    h+='<div class="ndsres-h" style="margin-top:10px">Par tranche d\u2019\u00e2ge <span class="ndsres-sub">\u00b7 <span style="color:#2a78d6">hommes</span> / <span style="color:#E0218A">femmes</span></span></div>';
-    pa.forEach(function(x){
-      var pct = tot ? Math.round(100*x.total/tot) : 0;
-      h+=ndsResBarStack(x.tranche+' \u00b7 '+x.total+' ('+pct+'%)', x.hommes||0, x.femmes||0, mx);
+  h+=ndsResDemoAges(pa, tot, 'Ce jour \u2014 par tranche d\u2019\u00e2ge');
+  if(cu.par_age && cu.par_age.length){
+    h+='<div style="border-top:1px solid var(--sa-border);margin-top:14px;padding-top:2px"></div>';
+    h+=ndsResDemoAges(cu.par_age, cu.joueurs||0, 'Cumul du festival \u2014 '+(cu.joueurs||0)+' joueurs \u00b7 '+(cu.femmes||0)+' F / '+(cu.hommes||0)+' H');
+  }
+  var ps=d.par_station||[];
+  if(ps.length){
+    h+='<div class="ndsres-h" style="margin-top:14px">Par station <span class="ndsres-sub">(tranche dominante \u00b7 F/H)</span></div>';
+    h+='<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Station</th><th>Joueurs</th><th>Dominante</th><th>F / H</th><th>R\u00e9partition</th></tr></thead><tbody>';
+    ps.forEach(function(x){
+      var det=(x.par_age||[]).map(function(a){ return esc(a.tranche)+':'+a.total; }).join(' \u00b7 ');
+      h+='<tr><td><b>'+esc(String(x.station).replace('ev-nds-',''))+'</b></td><td>'+x.joueurs+'</td><td>'+esc(x.dominante||'\u2014')+'</td><td>'+(x.femmes||0)+' / '+(x.hommes||0)+'</td><td class="text-xs">'+det+'</td></tr>';
     });
+    h+='</tbody></table></div>';
   }
   h+='</div>';
   return h;
