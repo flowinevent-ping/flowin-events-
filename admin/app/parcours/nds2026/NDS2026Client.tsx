@@ -893,7 +893,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         )})}
                       </div>
                       <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
-                      <a className="btn" onClick={() => setScreen('partenaires')} style={{ marginTop: 10, background: '#f3eef7', color: '#7C2D92' }}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-store" /></svg>Chez nos commerçants : +1 ticket &amp; un bon d&apos;achat</a>
+                      <a className="btn" onClick={() => setScreen('partenaires')} style={{ marginTop: 10, background: '#f3eef7', color: '#7C2D92' }}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-store" /></svg>Scanne chez nos commerçants : +1 ticket par commerce</a>
                     </>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(224,33,138,.14)', border: '1px solid rgba(224,33,138,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
@@ -1147,7 +1147,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
-              <a className="double" onClick={() => setScreen('partenaires')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-store" /></svg> Joue chez nos commerçants : +1 ticket &amp; un bon d&apos;achat</a>
+              <a className="double" onClick={() => setScreen('partenaires')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-store" /></svg> Scanne chez nos commerçants : +1 ticket par commerce</a>
               {(form.email || recurrent?.email) && (
                 <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
               )}
@@ -1318,7 +1318,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr" style={{ background: '#fff' }}>
             <div className="pad padnav">
               <div className="pt-hero">Nos partenaires jeux</div>
-              <div className="pt-sub">Joue chez nos commerçants : chaque commerce = 1 ticket de plus, et un bon d’achat à gagner. Touche un logo pour voir son offre.</div>
+              <div className="pt-sub">Scanne le QR chez nos commerçants : chaque commerce joué = 1 ticket de plus pour le grand tirage. Plus tu as de tickets, plus tu as de chances de gagner leurs bons d’achat.</div>
               {partenaires.length === 0 && <div className="pt-banner"><svg className="ic"><use href="#i-store" /></svg><div>Espace partenaires — la liste réelle s&apos;affichera ici (logos, promo, réseaux).</div></div>}
               <div className="pt-grid">
                 {partenaires.map((p, i) => (
@@ -1386,7 +1386,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
-              <a className="double" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg> Nos commerçants : +1 ticket &amp; un bon d&apos;achat à gagner</a>
+              <a className="double" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg> Nos commerçants : scanne et gagne des tickets</a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
             </div>
           </section>
