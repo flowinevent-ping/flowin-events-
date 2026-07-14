@@ -4768,6 +4768,8 @@ async function ndsResLoad(date){
       _ndsRes.bonus = rb.ok ? await rb.json() : null;
       var rr=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_repondants',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
       _ndsRes.repond = rr.ok ? await rr.json() : null;
+      var rd=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_demographie',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
+      _ndsRes.demo = rd.ok ? await rd.json() : null;
       var ro=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_optin',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:_ndsRes.se,p_date:date})});
       _ndsRes.optin = ro.ok ? await ro.json() : null;
     }catch(e2){ _ndsRes.funnel=null; _ndsRes.clics=null; _ndsRes.stations=null; _ndsRes.engag=null; _ndsRes.bonus=null; _ndsRes.repond=null; }
@@ -4824,6 +4826,29 @@ function ndsResOptin(o){
       {label:'Opt-in', data:ps.map(function(x){return x.optin_oui||0;}), color:FX.VERT},
       {label:'Refus',  data:ps.map(function(x){return (x.joueurs||0)-(x.optin_oui||0);}), color:FX.GRIS}
     ], 220, true, true);
+  }
+  h+='</div>';
+  return h;
+}
+function ndsResDemo(d){
+  if(!d || !(d.joueurs>0)) return '';
+  var h='<div class="ndsres-card"><div class="ndsres-h">\ud83d\udc65 \u00c2ge &amp; sexe des joueurs</div>';
+  var f=d.femmes||0, m=d.hommes||0, tot=d.joueurs||0;
+  var pa=d.par_age||[];
+  var dom=pa.slice().sort(function(a,b){return b.total-a.total;})[0];
+  h+='<div class="kpi-grid" style="margin-bottom:8px">';
+  h+=prospKpi(tot,'Joueurs');
+  h+=prospKpi(f+(tot?' \u00b7 '+Math.round(100*f/tot)+'%':''),'Femmes');
+  h+=prospKpi(m+(tot?' \u00b7 '+Math.round(100*m/tot)+'%':''),'Hommes');
+  h+=prospKpi(dom?esc(dom.tranche):'\u2014','Tranche dominante');
+  h+='</div>';
+  if(pa.length){
+    var mx=Math.max.apply(null,pa.map(function(x){return x.total;}).concat([1]));
+    h+='<div class="ndsres-h" style="margin-top:10px">Par tranche d\u2019\u00e2ge <span class="ndsres-sub">\u00b7 <span style="color:#2a78d6">hommes</span> / <span style="color:#E0218A">femmes</span></span></div>';
+    pa.forEach(function(x){
+      var pct = tot ? Math.round(100*x.total/tot) : 0;
+      h+=ndsResBarStack(x.tranche+' \u00b7 '+x.total+' ('+pct+'%)', x.hommes||0, x.femmes||0, mx);
+    });
   }
   h+='</div>';
   return h;
@@ -5086,6 +5111,7 @@ function renderNdsResultat(){
   h+=ndsResFunnel(_ndsRes.funnel);
   h+=ndsResStations(_ndsRes.stations);
   h+=ndsResEngagement(_ndsRes.engag);
+  h+=ndsResDemo(_ndsRes.demo);
   h+=ndsResRepondants(_ndsRes.repond);
   h+=ndsResBonusRep(_ndsRes.bonus);
   h+=ndsResClicsPart(_ndsRes.clics);
