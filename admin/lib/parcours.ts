@@ -52,8 +52,10 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   if (seId) {
     const { data } = await supabase
       .from('partenaires')
-      .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif')
+      .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,ordre')
       .eq('super_event_id', seId)
+      .order('ordre', { ascending: true, nullsFirst: false })
+      .order('nom', { ascending: true })
     partenaires = ((data ?? []) as FlowinPartenaire[]).filter(p => p.actif !== false)
   } else {
     const partIds = (cfg.partenaires ?? []) as string[]

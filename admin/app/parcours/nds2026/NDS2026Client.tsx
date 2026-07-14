@@ -787,6 +787,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           height:72px;padding:9px 16px;overflow:hidden;justify-content:center}
         .ndsbody .botdock .logoslot img,.ndsbody .footdock .logoslot img{
           max-height:54px;max-width:150px;width:auto;height:auto;object-fit:contain}
+        /* Grille partenaires : TOUS les logos à la même échelle.
+           Ils gardaient leur taille native -> Giordano minuscule, Bergerie énorme. */
+        .ndsbody .pt-logo{width:110px;height:110px;margin:0 auto 10px}
+        .ndsbody .pt-logo img{width:100%;height:100%;object-fit:contain;display:block}
+        .ndsbody .pt-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+          padding:16px 10px 14px;border-radius:18px;background:#fff;border:1px solid #F2E3EC;
+          box-shadow:0 2px 10px rgba(26,18,38,.05)}
+        .ndsbody .pt-nm{font-size:13px;font-weight:800;color:#4a4358;text-align:center;line-height:1.25}
         /* Coupes adoucies : les logos s'estompent sur les bords au lieu d'être tranchés net. */
         .ndsbody .botdock .logoband,.ndsbody .footdock .logoband{
           position:relative;
