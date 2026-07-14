@@ -13,8 +13,14 @@ sans rien perdre de la méthode ni du contexte.**
 > 1. Vérifie tes DEUX accès : (a) `git clone` du repo + `git log` + test de push ;
 >    (b) Supabase MCP → `execute_sql SELECT 1`.
 >    **Si l'un des deux manque : STOP, dis-le-moi, ne travaille jamais en mode dégradé.**
-> 2. Lis le handoff : Supabase table `handoff_notes`, clé `handoff-nds-2026-comm`
->    (`select left(contenu, 9000) from handoff_notes where cle='handoff-nds-2026-comm'`).
+> 2. Lis le handoff — **ATTENTION, la commande exacte** :
+>    ```sql
+>    select left(contenu, 12000) from handoff_notes where cle='handoff-nds-2026-comm';
+>    ```
+>    ⚠️ Le handoff fait ~400 000 caractères, mais **la PASSATION COMPLÈTE est dans les
+>    12 000 premiers**. En lire moins = repartir de zéro et poser des questions déjà tranchées.
+>    Tout ce qui suit « FIN DE LA PASSATION » est l'historique chronologique, à ne consulter
+>    qu'au besoin.
 > 3. Lis `docs/BOOTSTRAP-nouvelle-conversation.md` et `docs/METHODE-mode-preview.md`.
 > 4. Établis la liste FAIT / RESTE À FAIRE et montre-la-moi avant de commencer.
 
@@ -135,9 +141,11 @@ les statistiques suivent d'elles-mêmes.**
 
 ---
 
-## 9. Où on en est (à mettre à jour à chaque session)
+## 9. Où on en est
 
-Voir le handoff Supabase, qui fait foi. En résumé au 14/07 :
+**Le handoff Supabase fait foi** (sa section « PASSATION COMPLÈTE », en tête, contient TOUT :
+accès, méthode, garde-fous, chiffres de référence, décisions prises, pièges déjà rencontrés,
+reste à faire). En résumé au 14/07 :
 
 - **Quiz passé de 4 à 3 questions** (73 % → 93 % de sans-faute attendu).
 - **Le gros chantier restant : le quiz perd 102 personnes sur 198** (51 %). On ne sait pas
