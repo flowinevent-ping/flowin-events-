@@ -829,6 +829,21 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
              line-height:1;letter-spacing:.2px;padding:5px 11px;border-radius:20px;
              background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.3)}
         .cta:active{transform:scale(.985)}
+        /* --- Bloc héros : cagnotte de tickets + progression des stations --- */
+        .hero{position:relative;background:linear-gradient(135deg,#2B0F3A,#7C2D92);border-radius:18px;
+             padding:18px 16px 16px;margin:2px 0 12px;color:#fff;overflow:hidden;text-align:center}
+        .hero::after{content:'';position:absolute;top:-40%;right:-20%;width:70%;height:180%;
+             background:radial-gradient(closest-side,rgba(224,33,138,.45),transparent);pointer-events:none}
+        .hero-n{position:relative;font-size:46px;font-weight:900;line-height:1;letter-spacing:-1.5px;
+             animation:heroPop .5s cubic-bezier(.2,1.4,.4,1) both}
+        @keyframes heroPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+        .hero-l{position:relative;font-size:12.5px;font-weight:800;letter-spacing:1.4px;
+             text-transform:uppercase;opacity:.9;margin-top:4px}
+        .hero-bar{position:relative;display:flex;gap:4px;margin-top:14px}
+        .hero-seg{flex:1;height:7px;border-radius:6px;background:rgba(255,255,255,.2)}
+        .hero-seg.on{background:linear-gradient(90deg,#F5B544,#FF6A00);box-shadow:0 0 8px rgba(255,106,0,.7)}
+        .hero-p{position:relative;margin-top:9px;font-size:12.5px;font-weight:700;opacity:.95}
+        .hero-p b{color:#F5B544}
         .cta::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
              background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);
              transform:skewX(-18deg);animation:ctaShine 3.4s ease-in-out infinite}
@@ -1401,6 +1416,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </div>
               </div>
 
+              {(() => {
+                const total = STATIONS.length
+                const faites = STATIONS.filter(st => ndsPlayedToday(st.id)).length
+                const reste = Math.max(0, total - faites)
+                return (
+                  <div className="hero">
+                    <div className="hero-n">{ticketCount || 0}</div>
+                    <div className="hero-l">{(ticketCount || 0) > 1 ? 'tickets pour le tirage' : 'ticket pour le tirage'}</div>
+                    <div className="hero-bar">
+                      {Array.from({ length: total }).map((_, k) => (
+                        <div key={k} className={`hero-seg${k < faites ? ' on' : ''}`} />
+                      ))}
+                    </div>
+                    <div className="hero-p">
+                      {reste > 0
+                        ? <>Encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à scanner pour maximiser tes chances</>
+                        : <>Toutes les stations jouées — tu as le <b>maximum de chances</b> !</>}
+                    </div>
+                  </div>
+                )
+              })()}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-ticket" /></svg><div>Ton code ticket : <b>{ticket || '—'}</b></div></div>
               <div className="infocard b-green" style={{ marginTop: 10 }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir</div></div>
 
