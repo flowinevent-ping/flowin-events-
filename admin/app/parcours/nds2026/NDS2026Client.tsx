@@ -114,6 +114,7 @@ type Commerce = {
   id: string; nom: string; pack: string | null
   latitude: number; longitude: number
   image_url: string | null; en_avant: boolean | null
+  lot_resume?: string | null; lots_dispo?: number | null
   ville: string | null; adresse: string | null
   site_web: string | null; instagram: string | null; facebook: string | null
   promo_text: string | null; tickets_par_scan: number | null; ordre_carte: number | null
@@ -230,6 +231,25 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [scanTarget, setScanTarget] = useState<{ id?: string; nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
   const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
   const [commerces, setCommerces] = useState<Commerce[]>([])
+  const [maPos, setMaPos] = useState<{ lat: number; lng: number } | null>(null)
+
+  // Distance à vol d'oiseau (Haversine) + temps de marche estimé (5 km/h)
+  function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+    const R = 6371000, r = Math.PI / 180
+    const dLat = (b.lat - a.lat) * r, dLng = (b.lng - a.lng) * r
+    const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLng / 2) ** 2
+    return Math.round(2 * R * Math.asin(Math.sqrt(x)))
+  }
+  function distanceTxt(c: { latitude: number; longitude: number }) {
+    if (!maPos) return null
+    const m = distanceM(maPos, { lat: c.latitude, lng: c.longitude })
+    const min = Math.max(1, Math.round(m / 83))
+    return m < 1000 ? `À ${m} m · ${min} min à pied` : `À ${(m / 1000).toFixed(1)} km · ${min} min à pied`
+  }
+  function itineraire(c: { latitude: number; longitude: number; nom: string }) {
+    const u = `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}&travelmode=walking`
+    try { window.open(u, '_blank', 'noopener') } catch { /* ignore */ }
+  }
   const [bandPartners, setBandPartners] = useState<{ id: string; nom: string; image_url: string | null; emoji: string | null }[]>([])
   const [fiche, setFiche] = useState<Commerce | null>(null)
   // Bandeau partenaires : placeholders « Votre logo ici » tant que les partenaires ne sont pas validés (avec logo) dans le dashboard.
@@ -449,11 +469,20 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         const ccls = cdone ? '' : 'nds-mk-pulse'
         const html = `<div class="${ccls}" style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${cbg};border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
         const icon = LL.divIcon({ html, className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz] })
+        const tk = (c as Commerce).tickets_par_scan || 1
+        const gain = cdone ? '\u2713 fait' : (tk > 1 ? `+${tk} tickets` : '+1 ticket')
+        const gbg = cdone ? '#16a34a' : (tk > 1 ? '#7C2D92' : '#F97C4A')
+        const tag = LL.divIcon({
+          html: `<div style="transform:translate(-50%,-100%);white-space:nowrap;background:#fff;border-radius:9px;padding:3px 7px;font:800 10.5px Manrope,system-ui;color:#1a1226;box-shadow:0 3px 10px rgba(0,0,0,.18);border:1px solid #eee">${c.nom.length > 14 ? c.nom.slice(0, 13) + '\u2026' : c.nom} <span style="color:${gbg}">${gain}</span></div>`,
+          className: '', iconSize: [0, 0], iconAnchor: [0, sz + 6],
+        })
+        LL.marker([c.latitude, c.longitude], { icon: tag, interactive: false }).addTo(map)
         LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => { logClicPartenaire(c.id, 'fiche', null); setFiche(c) })
       })
       // Position du joueur (géoloc) — affichée sur les deux vues
       if (typeof navigator !== 'undefined' && navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
+          setMaPos({ lat: pos.coords.latitude, lng: pos.coords.longitude })
           if (cancelled || mapObjRef.current !== map) return
           const uhtml = '<div style="width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.25)"></div>'
           const uicon = LL.divIcon({ html: uhtml, className: '', iconSize: [18, 18], iconAnchor: [9, 9] })
@@ -1374,7 +1403,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       <span><b style={{ color: '#1a1226' }}>Tél — </b><a href={`tel:${tel}`} style={{ color: '#7C2D92', fontWeight: 700 }}>{tel}</a></span>
                     </div>
                   ) : null })()}
-                  <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}><b>Le jeu — </b>{fiche.tickets_par_scan ? `Rends-toi sur place et flashe le QR du commerce pour gagner +${fiche.tickets_par_scan} ticket${fiche.tickets_par_scan > 1 ? 's' : ''} pour le tirage.` : "Rends-toi sur place et profite de l'offre partenaire."}</div>
+                  {distanceTxt(fiche) && (
+                    <div style={{ fontSize: 13.5, color: '#6b6478', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-map" /></svg>{distanceTxt(fiche)}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 10, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}><b>Le jeu — </b>{`Flashe le QR sur place pour gagner +${fiche.tickets_par_scan || 1} ticket${(fiche.tickets_par_scan || 1) > 1 ? 's' : ''} pour le tirage.`}</div>
+                  {fiche.lot_resume ? (
+                    <div style={{ fontSize: 13.5, color: '#9A3412', lineHeight: 1.5, marginBottom: 12, background: '#FFF7ED', border: '1px solid #FBD9C2', borderRadius: 12, padding: '11px 13px' }}>
+                      <b>À gagner ici — </b>{fiche.lot_resume}
+                      {(fiche.lots_dispo || 0) > 0 && <span style={{ display: 'block', marginTop: 4, fontWeight: 800 }}>{fiche.lots_dispo} lot{(fiche.lots_dispo || 0) > 1 ? 's' : ''} encore à gagner au tirage</span>}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13.5, color: '#5B1E6B', lineHeight: 1.5, marginBottom: 12, background: '#F6F0FA', border: '1px solid #E7DAF0', borderRadius: 12, padding: '11px 13px' }}>
+                      <b>Double tes chances — </b>ici tu gagnes <b>2 tickets</b> d&apos;un coup. Plus de tickets, plus de chances de remporter <b>n&apos;importe lequel</b> des lots du grand tirage.
+                    </div>
+                  )}
+                  <a className="cta cta-shop" onClick={() => itineraire(fiche)}>
+                    <span className="cta-badge"><svg className="ic"><use href="#i-map" /></svg></span>
+                    <span className="cta-txt"><span className="cta-t">M&apos;y rendre</span><span className="cta-sub">🚶 Itinéraire à pied</span></span>
+                    <span className="cta-go">›</span>
+                  </a>
 {(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const ls = pp && Array.isArray(pp.lots) ? pp.lots : []; return ls.length ? (
   <div className="pt-lots" style={{ marginBottom: 12 }}>
     <div className="pt-lots-h"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-gift" /></svg> Lots à gagner</div>
