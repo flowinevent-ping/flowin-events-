@@ -731,7 +731,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         /* Bas d'écran ancré : le bandeau de logos glisse AU-DESSUS de la barre,
            la barre reste collée au bas. Les deux sont dans le même bloc fixe,
            donc plus aucun chevauchement ni logo coupé. */
-        .ndsbody .padnav{padding-bottom:158px}
+        /* Le dock (bandeau + barre) est ancré : TOUT écran doit réserver la place,
+           sinon il masque le dernier bouton. On protège globalement, pas écran par écran. */
+        .ndsbody .pad{padding-bottom:172px}
+        .ndsbody .padnav{padding-bottom:172px}
+        .ndsbody .scr{padding-bottom:8px}
         .ndsbody .botdock,.ndsbody .footdock{
           position:fixed !important;left:50%;transform:translateX(-50%);
           width:100%;max-width:480px;bottom:0;z-index:1000;
