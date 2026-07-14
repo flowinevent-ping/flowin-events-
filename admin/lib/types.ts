@@ -105,6 +105,7 @@ export interface PartenaireLot {
 }
 
 export interface FlowinPartenaire {
+  ordre?: number | null
   id: string
   nom: string
   emoji: string | null
