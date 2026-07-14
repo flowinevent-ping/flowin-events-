@@ -781,7 +781,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .pad,.ndsbody .padnav{padding-bottom:0}
         /* Dans le dock, le bandeau est COMPACT (les logos restent lisibles mais
            n'écrasent pas l'écran) : 104px -> 72px. */
-        .ndsbody .botdock .logoslot,.ndsbody .footdock .logoslot{height:72px;padding:10px 18px}
+        /* Encart compact : l'image doit RESTER DANS le cadre (elle débordait :
+           l'encart était passé à 72px mais l'img gardait max-height:82px). */
+        .ndsbody .botdock .logoslot,.ndsbody .footdock .logoslot{
+          height:72px;padding:9px 16px;overflow:hidden;justify-content:center}
+        .ndsbody .botdock .logoslot img,.ndsbody .footdock .logoslot img{
+          max-height:54px;max-width:150px;width:auto;height:auto;object-fit:contain}
         /* Coupes adoucies : les logos s'estompent sur les bords au lieu d'être tranchés net. */
         .ndsbody .botdock .logoband,.ndsbody .footdock .logoband{
           position:relative;
