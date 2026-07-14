@@ -762,9 +762,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
            donc plus aucun chevauchement ni logo coupé. */
         /* Le dock (bandeau + barre) est ancré : TOUT écran doit réserver la place,
            sinon il masque le dernier bouton. On protège globalement, pas écran par écran. */
-        .ndsbody .pad{padding-bottom:172px}
-        .ndsbody .padnav{padding-bottom:172px}
-        .ndsbody .scr{padding-bottom:8px}
+        /* La place du dock est réservée sur la SECTION elle-même : tout écran est protégé,
+           qu'il ait un conteneur .pad ou non (l'accueil n'en a pas). */
+        .ndsbody .scr{padding-bottom:176px}
+        .ndsbody .pad,.ndsbody .padnav{padding-bottom:0}
         .ndsbody .botdock,.ndsbody .footdock{
           position:fixed !important;left:50%;transform:translateX(-50%);
           width:100%;max-width:480px;bottom:0;z-index:1000;
