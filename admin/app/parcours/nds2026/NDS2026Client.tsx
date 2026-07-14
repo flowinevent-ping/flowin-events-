@@ -765,10 +765,30 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         /* La place du dock est réservée sur la SECTION elle-même : tout écran est protégé,
            qu'il ait un conteneur .pad ou non (l'accueil n'en a pas). */
         .ndsbody .scr{padding-bottom:200px}
+        /* --- Écran d'accueil COMPACT : le bouton "Je joue maintenant" doit être
+               visible SANS scroller. On resserre les hauteurs, on ne retire rien. --- */
+        .ndsbody .hero{padding:14px 16px 12px !important}
+        .ndsbody .hlogo{height:78px !important;margin-bottom:8px !important}
+        .ndsbody .scr.on .pad,.ndsbody .scr.on .pad2{padding-top:10px !important}
+        .ndsbody .howcard{padding:10px 12px !important;margin-top:8px !important}
+        .ndsbody .howrow{padding:7px 0 !important}
+        .ndsbody .howrow .ic,.ndsbody .howicon{width:34px !important;height:34px !important}
+        .ndsbody .lotcard{padding:10px 12px !important;margin-top:8px !important}
+        .ndsbody .lotrow{padding:7px 0 !important}
+        .ndsbody .cumulband{padding:9px 12px !important;margin-top:8px !important;font-size:13px !important}
+        .ndsbody .htitle{margin-top:10px !important;margin-bottom:4px !important;font-size:15.5px !important}
+        .ndsbody .cgu{margin-top:8px !important;font-size:11px !important}
         .ndsbody .pad,.ndsbody .padnav{padding-bottom:0}
         /* Dans le dock, le bandeau est COMPACT (les logos restent lisibles mais
            n'écrasent pas l'écran) : 104px -> 72px. */
         .ndsbody .botdock .logoslot,.ndsbody .footdock .logoslot{height:72px;padding:10px 18px}
+        /* Coupes adoucies : les logos s'estompent sur les bords au lieu d'être tranchés net. */
+        .ndsbody .botdock .logoband,.ndsbody .footdock .logoband{
+          position:relative;
+          -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%)}
+        /* Alignement : tous les blocs de contenu partagent la même gouttière. */
+        .ndsbody .scr .cta,.ndsbody .scr .coll,.ndsbody .scr .infocard{margin-left:0;margin-right:0}
         .ndsbody .botdock,.ndsbody .footdock{
           position:fixed !important;left:50%;transform:translateX(-50%);
           width:100%;max-width:480px;bottom:0;z-index:1000;
@@ -888,19 +908,28 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
              animation:ctaNudge 1.6s ease-in-out infinite}
         @keyframes ctaNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
         .cta:active{transform:scale(.985)}
-        /* --- Collection : 1 badge par station, "compléter la série" --- */
-        .coll{background:#fff;border:1px solid #F2E3EC;border-radius:18px;padding:14px 14px 13px;margin-top:14px}
-        .coll-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
-        .coll-t{font-size:14px;font-weight:800;color:#1a1226}
-        .coll-c{font-size:12.5px;font-weight:800;color:#C2410C}
-        .coll-g{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
-        .coll-b{aspect-ratio:1;border-radius:13px;display:flex;align-items:center;justify-content:center;
-                background:#F7EEF4;border:1px dashed #E4CFDD;color:#C9B4C2}
-        .coll-b .ic{width:19px;height:19px}
-        .coll-b.on{background:linear-gradient(145deg,#FFB86B,#F97C4A);border:1px solid #F97C4A;color:#fff;
-                box-shadow:0 3px 9px rgba(249,124,74,.34);animation:collPop .45s cubic-bezier(.2,1.4,.4,1) both}
-        @keyframes collPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
-        .coll-p{font-size:12.5px;color:#6b6478;margin-top:11px;line-height:1.45}
+        /* --- Collection : une tuile NOMMÉE par station, une couleur par famille --- */
+        .coll{background:#fff;border:1px solid #F2E3EC;border-radius:20px;padding:15px 14px 14px;margin-top:14px;
+              box-shadow:0 2px 10px rgba(26,18,38,.04)}
+        .coll-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .coll-t{font-size:15px;font-weight:800;color:#1a1226}
+        .coll-c{font-size:12px;font-weight:800;color:#C2410C;background:#FFF1E7;border:1px solid #FBD9C2;
+                padding:4px 10px;border-radius:20px}
+        .coll-g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+        .coll-b{border-radius:16px;padding:11px 6px 9px;display:flex;flex-direction:column;align-items:center;
+                gap:6px;background:#F8F4FA;border:1.5px dashed #E4D6EA;color:#B7A6C2;text-align:center}
+        .coll-b .ic{width:22px;height:22px}
+        .coll-n{font-size:10.5px;font-weight:800;line-height:1.15;letter-spacing:-.1px}
+        /* débloqué : la couleur de sa famille + une coche */
+        .coll-b.on{color:#fff;border:1.5px solid transparent;position:relative;
+                animation:collPop .45s cubic-bezier(.2,1.4,.4,1) both}
+        .coll-b.on::after{content:'\\2713';position:absolute;top:5px;right:7px;font-size:10px;font-weight:900;opacity:.95}
+        .coll-b.on.f-caisse{background:linear-gradient(145deg,#F5B544,#E8912A);box-shadow:0 3px 9px rgba(232,145,42,.32)}
+        .coll-b.on.f-bar{background:linear-gradient(145deg,#E8547F,#D12F6B);box-shadow:0 3px 9px rgba(209,47,107,.32)}
+        .coll-b.on.f-ecran{background:linear-gradient(145deg,#5B8DEF,#3566CC);box-shadow:0 3px 9px rgba(53,102,204,.32)}
+        .coll-b.on.f-brigade{background:linear-gradient(145deg,#4BD7A8,#12A87B);box-shadow:0 3px 9px rgba(18,168,123,.32)}
+        @keyframes collPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+        .coll-p{font-size:12.5px;color:#6b6478;margin-top:12px;line-height:1.45;text-align:center}
         .coll-p b{color:#C2410C}
         /* --- Bloc héros : cagnotte de tickets + progression des stations --- */
         .hero{position:relative;background:linear-gradient(135deg,#2B0F3A,#7C2D92);border-radius:18px;
@@ -1291,9 +1320,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                     <div className="coll-g">
                       {STATIONS.map(st => {
                         const on = ndsPlayedToday(st.id)
+                        const fam = st.id.includes('caisse') ? 'f-caisse'
+                          : st.id.includes('bar') ? 'f-bar'
+                          : st.id.includes('ecran') ? 'f-ecran' : 'f-brigade'
                         return (
-                          <div key={st.id} className={`coll-b${on ? ' on' : ''}`} title={st.nom}>
-                            <svg className="ic"><use href={`#${on ? 'i-checkc' : st.icon}`} /></svg>
+                          <div key={st.id} className={`coll-b ${fam}${on ? ' on' : ''}`} title={st.ou}>
+                            <svg className="ic"><use href={`#${st.icon}`} /></svg>
+                            <span className="coll-n">{st.nom}</span>
                           </div>
                         )
                       })}
