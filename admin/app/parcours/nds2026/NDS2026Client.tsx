@@ -573,7 +573,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     setScreen('final')
   }
 
-  // Tickets NDS : 1 ticket si quiz parfait (4/4) + 1 ticket si question bonus faite -> jusqu'à 2/station/jour
+  // Tickets NDS : 1 ticket si quiz parfait (sans-faute) + 1 ticket si bonus fait -> jusqu'à 2/station/jour.
+  // Le nombre de questions vient de cfg.quizNbQuestions (3 depuis le 14/07, 4 avant) : la règle s'adapte seule.
   const quizPerfect = questions.length === 0 || score >= questions.length
   useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) { setFly(f => f + 1); setCelebrate(c => c + 1) } }, [screen, quizPerfect, bonusDone])
   useEffect(() => { if (!preview && screen === 'final' && (quizPerfect || bonusDone) && !victoryShownRef.current) { victoryShownRef.current = true; setVictoryPopup(true) } }, [screen, quizPerfect, bonusDone, preview])
@@ -622,7 +623,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   async function persist(bonusOverride?: boolean): Promise<string> {
     if (saved) return ticket
     setSaving(true)
-    // 2 tickets possibles : quiz (4/4) + bonus. bonusOverride force l'état frais quand le bonus vient d'être validé.
+    // 2 tickets possibles : quiz (sans-faute) + bonus. bonusOverride force l'état frais quand le bonus vient d'être validé.
     // Sans quiz (banque vide = brigade sondage), aucun ticket quiz : seul le sondage/bonus rapporte le point.
     const quizTk = questions.length > 0 && quizPerfect
     const bonusTk = bonusOverride ?? bonusDone
