@@ -815,6 +815,27 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:7px 10px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;background:transparent;color:#7C2D92}
         .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
         @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        /* --- Boutons d'action animés : commerçants (orange) & bonus (vert) --- */
+        .cta{position:relative;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+             border:none;border-radius:14px;padding:16px 14px;margin-top:10px;cursor:pointer;
+             font-family:inherit;font-weight:800;font-size:15.5px;line-height:1.25;color:#fff;
+             text-align:center;overflow:hidden;-webkit-tap-highlight-color:transparent}
+        .cta .ic{width:20px;height:20px;flex:0 0 auto}
+        .cta:active{transform:scale(.985)}
+        .cta::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+             background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);
+             transform:skewX(-18deg);animation:ctaShine 3.4s ease-in-out infinite}
+        @keyframes ctaShine{0%{left:-60%}55%{left:120%}100%{left:120%}}
+        .cta-shop{background:linear-gradient(135deg,#FF6A00,#F5B544);
+             box-shadow:0 6px 18px rgba(255,106,0,.42);animation:ctaPulseShop 2.2s ease-in-out infinite}
+        @keyframes ctaPulseShop{0%,100%{box-shadow:0 6px 18px rgba(255,106,0,.42),0 0 0 0 rgba(255,106,0,.55)}
+             55%{box-shadow:0 6px 18px rgba(255,106,0,.42),0 0 0 12px rgba(255,106,0,0)}}
+        .cta-bonus{background:linear-gradient(135deg,#16a34a,#3ED598);
+             box-shadow:0 6px 18px rgba(22,163,74,.4);animation:ctaPulseBonus 2.2s ease-in-out infinite}
+        @keyframes ctaPulseBonus{0%,100%{box-shadow:0 6px 18px rgba(22,163,74,.4),0 0 0 0 rgba(22,163,74,.5)}
+             55%{box-shadow:0 6px 18px rgba(22,163,74,.4),0 0 0 12px rgba(22,163,74,0)}}
+        .cta-sub{display:block;font-weight:600;font-size:12.5px;opacity:.95;margin-top:2px}
+        @media (prefers-reduced-motion:reduce){.cta,.cta::after{animation:none}}
         @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
       ` }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
@@ -893,7 +914,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         )})}
                       </div>
                       <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
-                      <a className="btn" onClick={() => setScreen('partenaires')} style={{ marginTop: 10, background: '#f3eef7', color: '#7C2D92' }}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-store" /></svg>Scanne chez nos commerçants : +1 ticket par commerce</a>
+                      <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg><span>Scanne chez nos commerçants<span className="cta-sub">+1 ticket par commerce</span></span></a>
                     </>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(224,33,138,.14)', border: '1px solid rgba(224,33,138,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
@@ -1060,9 +1081,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </div>
               </div>
               {bonusQs.length > 0 && !bonusDone && !joueurHistory.bonusDone && (
-                <a className="bonusbtn" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
+                <a className="cta cta-bonus" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
                   <svg className="ic"><use href="#i-spark" /></svg>
-                  {' Réponds à la question bonus · +1 ticket'}
+                  <span>Gagne 1 ticket de plus<span className="cta-sub">5 questions rapides · 30 secondes</span></span>
                 </a>
               )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
@@ -1147,7 +1168,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
-              <a className="double" onClick={() => setScreen('partenaires')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-store" /></svg> Scanne chez nos commerçants : +1 ticket par commerce</a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg><span>Scanne chez nos commerçants<span className="cta-sub">+1 ticket par commerce</span></span></a>
               {(form.email || recurrent?.email) && (
                 <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
               )}
@@ -1386,7 +1407,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
-              <a className="double" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg> Nos commerçants : scanne et gagne des tickets</a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><svg className="ic"><use href="#i-store" /></svg><span>Scanne chez nos commerçants<span className="cta-sub">+1 ticket par commerce pour le grand tirage</span></span></a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
             </div>
           </section>
