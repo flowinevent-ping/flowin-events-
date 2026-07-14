@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inventaire du système — Flowin</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f4f5f9;--card:#fff;--line:#e4e6ef;--txt:#1a1f36;--muted:#6b7394;--ok:#1baf7a;--acc:#7C2D92;--warn:#c2410c}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:Manrope,system-ui,Arial,sans-serif;padding:26px}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1{font-size:26px;font-weight:800;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:13.5px;margin-bottom:6px}
+  .gen{color:var(--muted);font-size:12px;margin-bottom:22px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:26px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .n{font-size:26px;font-weight:800}
+  .kpi .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+  h2{font-size:16px;font-weight:800;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 0;overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:10px 16px;font-weight:700}
+  td{padding:9px 16px;border-top:1px solid var(--line)}
+  td.mono{font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#eef0f7;color:var(--muted)}
+  .tag.ok{background:rgba(27,175,122,.12);color:var(--ok)}
+  .tag.acc{background:rgba(124,45,146,.1);color:var(--acc)}
+  .tag.warn{background:rgba(194,65,12,.12);color:var(--warn)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+  a{color:var(--acc)}
+  .note{background:#fff;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;line-height:1.6;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🗺️ Inventaire du système</h1>
+  <div class="sub">Extrait des vraies sources par le contrôleur. Aucune invention : ce qui est listé existe.</div>
+  <div class="gen" id="gen">Chargement…</div>
+
+  <div class="note">
+    <b>Règle du socle.</b> Les RPC <code>super_event_*</code> sont <b>génériques</b> : tout super-event ou station créé en hérite
+    automatiquement, sans écrire une ligne de code. Chacun est <b>borné à la période de son événement</b>
+    (<code>date_d</code> → <code>date_f</code>), donc deux événements ne peuvent jamais être mélangés.
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+  <div id="body"></div>
+</div>
+
+<script>
+(function(){
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  fetch('carte-data.json?v='+Date.now()).then(function(r){ return r.json(); }).then(function(d){
+    document.getElementById('gen').textContent = 'Généré le ' + (d.genere_le||'—').replace('T',' à ');
+
+    var kpi=[
+      ['pages', (d.pages||[]).length, 'Pages'],
+      ['rpc',   (d.rpc||[]).length,   'RPC Supabase'],
+      ['menu',  (d.menu||[]).length,  'Rubriques'],
+      ['land',  (d.landings||[]).length, 'Landings'],
+      ['edge',  (d.edge_functions||[]).length, 'Edge functions'],
+      ['trk',   (d.tracking||[]).length, 'Briques de traçage']
+    ];
+    document.getElementById('kpis').innerHTML = kpi.map(function(k){
+      return '<div class="kpi"><div class="n">'+k[1]+'</div><div class="l">'+esc(k[2])+'</div></div>';
+    }).join('');
+
+    var h='';
+
+    var rpc=d.rpc||[];
+    if(rpc.length){
+      var socle=rpc.filter(function(r){ return r.nom.indexOf('super_event_')===0; });
+      var lots =rpc.filter(function(r){ return r.nom==='attribuer_lot'||r.nom==='lots_stock_etat'; });
+      var exp  =rpc.filter(function(r){ return r.nom.indexOf('export')>=0; });
+      function tbl(title,rows,tag){
+        if(!rows.length) return '';
+        return '<h2>'+title+' <span class="tag '+(tag||'')+'">'+rows.length+'</span></h2><div class="card"><table>'
+          + '<thead><tr><th>Fonction</th><th>Paramètres</th><th>Rôle</th></tr></thead><tbody>'
+          + rows.map(function(r){
+              return '<tr><td class="mono"><b>'+esc(r.nom)+'</b></td><td class="mono">'+esc(r.args||'')+'</td><td>'+esc(r.role||'')+'</td></tr>';
+            }).join('')
+          + '</tbody></table></div>';
+      }
+      h += tbl('Socle statistiques — générique, borné à la période', socle, 'ok');
+      h += tbl('Lots & gagnants', lots, 'acc');
+      h += tbl('Exports (Google Sheet)', exp);
+    }
+
+    var trk=d.tracking||[];
+    if(trk.length){
+      h += '<h2>Traçage <span class="tag ok">'+trk.length+'</span></h2><div class="card"><table>'
+        + '<thead><tr><th>Brique</th><th>Rôle</th></tr></thead><tbody>'
+        + trk.map(function(t){ return '<tr><td class="mono"><b>'+esc(t.nom)+'</b></td><td>'+esc(t.role||'')+'</td></tr>'; }).join('')
+        + '</tbody></table></div>';
+    }
+
+    var land=d.landings||[];
+    if(land.length){
+      h += '<h2>Landings <span class="tag">'+land.length+'</span></h2><div class="card"><table>'
+        + '<thead><tr><th>Landing</th><th>Module</th><th>Statut</th><th>URL</th></tr></thead><tbody>'
+        + land.map(function(l){
+            return '<tr><td><b>'+esc(l.nom)+'</b><div class="mono" style="font-size:11px;color:var(--muted)">'+esc(l.id)+'</div></td>'
+              + '<td class="mono">'+esc(l.jeu||'—')+'</td>'
+              + '<td><span class="tag '+(l.published?'ok':'warn')+'">'+(l.published?'publiée':esc(l.statut||'brouillon'))+'</span></td>'
+              + '<td>'+(l.url?'<a href="'+esc(l.url)+'" target="_blank" rel="noopener">ouvrir</a>':'—')+'</td></tr>';
+          }).join('')
+        + '</tbody></table></div>';
+    }
+
+    var pages=d.pages||[];
+    if(pages.length){
+      h += '<h2>Pages <span class="tag">'+pages.length+'</span></h2><div class="card"><table><tbody>'
+        + '<tr><td style="padding:14px 16px;border-top:none;line-height:2.2">'
+        + pages.map(function(p){
+            var f = (typeof p==='string') ? p : (p.fichier||p.nom||'');
+            return '<a href="/'+esc(f)+'" target="_blank" rel="noopener" class="mono" style="margin-right:14px;white-space:nowrap">'+esc(f)+'</a>';
+          }).join('')
+        + '</td></tr></tbody></table></div>';
+    }
+
+    var menu=d.menu||[];
+    if(menu.length){
+      h += '<h2>Menu du dashboard <span class="tag">'+menu.length+'</span></h2><div class="grid2">'
+        + menu.map(function(g){
+            return '<div class="card" style="padding:12px 16px"><div style="font-weight:800;font-size:13px;margin-bottom:8px">'+esc(g.group)+'</div>'
+              + (g.items||[]).map(function(i){ return '<div style="font-size:12.5px;color:var(--muted);padding:3px 0">'+esc(i.lbl)+'</div>'; }).join('')
+              + '</div>';
+          }).join('')
+        + '</div>';
+    }
+
+    document.getElementById('body').innerHTML = h;
+  }).catch(function(e){
+    document.getElementById('gen').textContent = 'Impossible de charger carte-data.json : ' + e;
+  });
+})();
+</script>
+</body>
+</html>

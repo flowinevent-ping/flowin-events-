@@ -37,6 +37,36 @@ def extract_menu(s):
         groups.append({"group":udec(g.group(1)),"items":items})
     return groups
 
+RPC = [
+  # Socle générique — tout super-event en hérite, borné à sa période (date_d/date_f)
+  {"nom":"super_event_daily",       "args":"p_se, p_date", "role":"KPI du jour, tirage, stations"},
+  {"nom":"super_event_days",        "args":"p_se",         "role":"jours disponibles"},
+  {"nom":"super_event_funnel",      "args":"p_se, p_date", "role":"scans -> etapes -> completion, incidents"},
+  {"nom":"super_event_stations",    "args":"p_se, p_date", "role":"scans/jeux par station, demographie, liens digitaux"},
+  {"nom":"super_event_clics",       "args":"p_se, p_date", "role":"fiches partenaires ouvertes, liens cliques, qui a clique"},
+  {"nom":"super_event_sondage",     "args":"p_se, p_date", "role":"sondage landing (sondage_questions)"},
+  {"nom":"super_event_bonus",       "args":"p_se, p_date", "role":"questions bonus des stations (cfg.quizBonusList)"},
+  {"nom":"super_event_engagement",  "args":"p_se, p_date", "role":"rejeu + bonus fait/non fait, par station"},
+  {"nom":"super_event_repondants",  "args":"p_se, p_date", "role":"repondants uniques (bonus x sondage, sans doublon)"},
+  {"nom":"super_event_optin",       "args":"p_se, p_date", "role":"opt-in RGPD"},
+  # Lots & gagnants
+  {"nom":"attribuer_lot",           "args":"lot_id, joueur_id, se, station, type", "role":"reserve un code du stock, decompte, cree se_gains"},
+  {"nom":"lots_stock_etat",         "args":"p_se",         "role":"etat du stock par lot + visuel + message"},
+  # Exports (Google Sheet, 5 onglets)
+  {"nom":"nds_export_crm",             "args":"p_token", "role":"1 ligne par PARTIE (onglet CRM_Backup)"},
+  {"nom":"nds_export_joueurs_uniques", "args":"p_token", "role":"1 ligne par PERSONNE (onglet Joueurs_uniques)"},
+  {"nom":"flowin_export_users",        "args":"p_token", "role":"tous les utilisateurs"},
+  {"nom":"flowin_export_pros",         "args":"p_token", "role":"pros"},
+  {"nom":"flowin_export_partenaires",  "args":"p_token", "role":"partenaires"},
+]
+
+TRACKING = [
+  {"nom":"lib/parcours-tracking.ts", "role":"SOURCE UNIQUE : useParcoursTracking(page, evId, screen) + logClicPartenaire"},
+  {"nom":"visites",          "role":"scan (etape NULL) + 1 ligne par etape franchie + incidents (etape err:*)"},
+  {"nom":"partenaire_clics", "role":"ouverture de fiche (lien_key=fiche) + liens sortants"},
+  {"nom":"modules traces",   "role":"nds2026, quiz, quizmaster, quizsolo, tombola, vote, spin (6+1)"},
+]
+
 def list_pages():
     return sorted(f for f in os.listdir(PUB) if f.endswith(".html")) if os.path.isdir(PUB) else []
 
@@ -70,6 +100,8 @@ def main():
       "landings": landings,
       "pages": pages,
       "edge_functions": edge,
+        "rpc": RPC,
+        "tracking": TRACKING
     }
     out=os.path.join(os.path.dirname(__file__),"carte-data.json")
     json.dump(data, open(out,"w",encoding="utf-8"), ensure_ascii=False, indent=1)
