@@ -3091,7 +3091,7 @@ function renderSidebar(){
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
       {id:'nds-resultat',ico:'📅',lbl:'Résultat journalier'},
       {id:'nds-lots',ico:'🎁',lbl:'Lots & stock'},{id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
-      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Lots & Gagnants',ext:'/tirage-nds.html'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Lots & Gagnants',ext:'/tirage-nds.html'},{id:'nds-comm',ico:'📣',lbl:'Kit com partenaire'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -5351,6 +5351,143 @@ function renderNdsLots(){
   return h;
 }
 
+/* ===================== NDS 2026 — KIT COM PARTENAIRE =====================
+   Génère les 3 messages standardisés (email clients · Instagram · Facebook)
+   pour un partenaire. AUCUN texte en dur ici : tout vient des RPC
+   comm_partenaires() et comm_kit() qui lisent les gabarits de la table
+   comm_templates et résolvent le lien + le téléphone + la clause métier
+   (un partenaire sans lot ne prétend jamais en doter).
+======================================================================== */
+var _ndsComm = { se:'se-nds-2026', list:null, ev:null, kit:null, loading:false };
+
+async function ndsCommInit(){
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/comm_partenaires',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({p_se:_ndsComm.se})
+    });
+    _ndsComm.list = r.ok ? ((await r.json())||[]) : [];
+  }catch(e){ _ndsComm.list = []; }
+  render();
+}
+
+async function ndsCommPick(ev){
+  _ndsComm.ev = ev; _ndsComm.kit = null;
+  if(!ev){ render(); return; }
+  _ndsComm.loading = true; render();
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/comm_kit',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({p_event_id:ev})
+    });
+    var k = await r.json();
+    _ndsComm.kit = (k && k.ok) ? k : null;
+    if(!_ndsComm.kit){ toast((k&&k.erreur)||'Kit indisponible','error'); }
+  }catch(e){ _ndsComm.kit = null; toast('Erreur réseau','error'); }
+  _ndsComm.loading = false; render();
+}
+
+function ndsCommCopy(txt, label){
+  try{
+    navigator.clipboard.writeText(txt).then(function(){ toast((label||'Texte')+' copié','success'); },
+      function(){ toast('Copie refusée par le navigateur','error'); });
+  }catch(e){ toast('Copie impossible','error'); }
+}
+// accès sûr à une valeur du kit pour les onclick (évite d'injecter le texte dans le HTML)
+function ndsCommGet(path){
+  var k=_ndsComm.kit; if(!k) return '';
+  var p=path.split('.'), v=k; for(var i=0;i<p.length;i++){ v=v&&v[p[i]]; }
+  return v||'';
+}
+function ndsCommVideo(){
+  var ev=_ndsComm.ev||''; if(!ev) return '';
+  return location.origin+'/nds/visuels/nds-pro-'+ev.replace('ev-nds-','')+'-9x16.mp4';
+}
+
+function renderNdsComm(){
+  if(_ndsComm.list===null){ ndsCommInit(); }
+
+  var css='<style id="ndscomm-css">'
+    + '.ndscomm-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 18px}'
+    + '.ndscomm-sel{padding:10px 12px;border:1.5px solid var(--sa-border);border-radius:10px;background:#fff;font-size:14px;font-weight:600;color:var(--sa-text);min-width:260px}'
+    + '.ndscomm-meta{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 18px}'
+    + '.ndscomm-pill{font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;background:#eef1fb;color:#3B5CC4}'
+    + '.ndscomm-pill.ok{background:#f0fdf4;color:#1baf7a}.ndscomm-pill.warn{background:#fff7ed;color:#b45309}'
+    + '.ndscomm-card{border:1.5px solid var(--sa-border);border-radius:16px;margin-bottom:16px;background:#fff;overflow:hidden}'
+    + '.ndscomm-ch{display:flex;align-items:center;gap:10px;padding:13px 18px;background:#f6f7fb;border-bottom:1px solid #eceef5}'
+    + '.ndscomm-ch b{font-size:14.5px;color:var(--sa-navy)}'
+    + '.ndscomm-ch .tag{font-size:11px;color:#8a90a4;font-weight:600}'
+    + '.ndscomm-copy{margin-left:auto;background:#3B5CC4;color:#fff;border:none;padding:8px 15px;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer}'
+    + '.ndscomm-copy.ghost{background:#fff;border:1.5px solid #3B5CC4;color:#3B5CC4}'
+    + '.ndscomm-body{padding:16px 18px}'
+    + '.ndscomm-pre{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.55;color:#33384a;margin:0}'
+    + '.ndscomm-obj{font-size:13px;color:#5a6072;margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed #e6e8f0}'
+    + '.ndscomm-htag{margin-top:12px;padding-top:12px;border-top:1px dashed #e6e8f0;font-size:13px;color:#3B5CC4;line-height:1.5}'
+    + '.ndscomm-note{font-size:12.5px;color:#8a90a4;margin-top:6px}'
+    + '.ndscomm-link{color:#3B5CC4;word-break:break-all}'
+    + '</style>';
+
+  var h='<div class="page">'+css;
+  h+='<div class="page-header"><div><div class="page-title">📣 Kit com partenaire</div><div class="page-subtitle">Email clients · Instagram · Facebook — générés depuis les gabarits en base, lien &amp; téléphone résolus automatiquement</div></div></div>';
+
+  if(_ndsComm.list===null){ h+='<div class="alert info"><span class="ico">⏳</span>Chargement des partenaires…</div></div>'; return h; }
+
+  // sélecteur
+  var opts='<option value="">— Choisir un partenaire —</option>';
+  (_ndsComm.list||[]).forEach(function(p){
+    opts+='<option value="'+esc(p.ev)+'"'+(p.ev===_ndsComm.ev?' selected':'')+'>'+esc(p.partenaire)+(p.a_lot?'':' (partenaire du jeu, sans lot)')+'</option>';
+  });
+  h+='<div class="ndscomm-head"><select class="ndscomm-sel" onchange="ndsCommPick(this.value)">'+opts+'</select></div>';
+
+  if(!_ndsComm.ev){ h+='<div class="alert info"><span class="ico">ℹ️</span>Choisis un partenaire pour générer ses 3 messages prêts à copier-coller.</div></div>'; return h; }
+  if(_ndsComm.loading || !_ndsComm.kit){ h+='<div class="alert info"><span class="ico">⏳</span>Génération…</div></div>'; return h; }
+
+  var k=_ndsComm.kit, m=k.meta||{};
+  // méta
+  h+='<div class="ndscomm-meta">';
+  h+='<span class="ndscomm-pill '+(m.a_lot?'ok':'warn')+'">'+(m.a_lot?'Dote un lot':'Partenaire du jeu · sans lot')+'</span>';
+  if(m.tickets_par_scan>1){ h+='<span class="ndscomm-pill">'+m.tickets_par_scan+' tickets / scan</span>'; }
+  if(m.tel){ h+='<span class="ndscomm-pill">Tél. '+esc(m.tel)+'</span>'; }
+  h+='</div>';
+  h+='<div class="ndscomm-note">Lien unique : <a class="ndscomm-link" href="'+esc(m.lien)+'" target="_blank">'+esc(m.lien)+'</a></div>';
+  var vid=ndsCommVideo();
+  h+='<div class="ndscomm-note">Vidéo (si fournie) : <a class="ndscomm-link" href="'+esc(vid)+'" target="_blank">'+esc(vid)+'</a></div>';
+
+  // 1) EMAIL
+  h+='<div class="ndscomm-card" style="margin-top:16px">';
+  h+='<div class="ndscomm-ch">✉️ <b>Email clients</b> <span class="tag">à copier-coller · vouvoiement</span>'
+   + '<button class="ndscomm-copy" onclick="ndsCommCopy(ndsCommGet(\'email.corps\'),\'Email\')">Copier le message</button></div>';
+  h+='<div class="ndscomm-body">';
+  h+='<div class="ndscomm-obj"><strong>Objet :</strong> '+esc((k.email&&k.email.objet)||'')
+   + ' <button class="ndscomm-copy ghost" style="padding:3px 9px;font-size:11px;margin-left:6px" onclick="ndsCommCopy(ndsCommGet(\'email.objet\'),\'Objet\')">copier</button></div>';
+  h+='<pre class="ndscomm-pre">'+esc((k.email&&k.email.corps)||'')+'</pre>';
+  h+='</div></div>';
+
+  // 2) INSTAGRAM
+  h+='<div class="ndscomm-card">';
+  h+='<div class="ndscomm-ch">📸 <b>Instagram</b> <span class="tag">tutoiement · lien en bio</span>'
+   + '<button class="ndscomm-copy" onclick="ndsCommCopy(ndsCommGet(\'instagram.corps\'),\'Légende Insta\')">Copier la légende</button></div>';
+  h+='<div class="ndscomm-body"><pre class="ndscomm-pre">'+esc((k.instagram&&k.instagram.corps)||'')+'</pre>';
+  h+='<div class="ndscomm-htag">'+esc((k.instagram&&k.instagram.hashtags)||'')
+   + ' <button class="ndscomm-copy ghost" style="padding:3px 9px;font-size:11px" onclick="ndsCommCopy(ndsCommGet(\'instagram.hashtags\'),\'Hashtags\')">copier les hashtags</button></div>';
+  h+='</div></div>';
+
+  // 3) FACEBOOK
+  h+='<div class="ndscomm-card">';
+  h+='<div class="ndscomm-ch">👍 <b>Facebook</b> <span class="tag">vouvoiement · lien cliquable dans le post</span>'
+   + '<button class="ndscomm-copy" onclick="ndsCommCopy(ndsCommGet(\'facebook.corps\'),\'Post Facebook\')">Copier le post</button></div>';
+  h+='<div class="ndscomm-body"><pre class="ndscomm-pre">'+esc((k.facebook&&k.facebook.corps)||'')+'</pre>';
+  h+='<div class="ndscomm-htag">'+esc((k.facebook&&k.facebook.hashtags)||'')
+   + ' <button class="ndscomm-copy ghost" style="padding:3px 9px;font-size:11px" onclick="ndsCommCopy(ndsCommGet(\'facebook.hashtags\'),\'Hashtags\')">copier les hashtags</button></div>';
+  h+='</div></div>';
+
+  h+='<div class="ndscomm-note">Pour modifier un gabarit (sans toucher au code) : table <strong>comm_templates</strong> · contexte du festival : <strong>comm_config</strong>.</div>';
+  h+='</div>';
+  return h;
+}
+
 /* ===== MOTEUR DE GRAPHIQUES (Chart.js) — charte Flowin =====
    Les fonctions de rendu retournent du HTML : les graphiques sont donc empilés
    puis instanciés par fxFlush() une fois le HTML injecté dans le DOM.
@@ -5538,6 +5675,7 @@ function render(){
 else if(v==='nds-media') html = renderNdsMedia();
 else if(v==='nds-resultat') html = renderNdsResultat();
 else if(v==='nds-lots') html = renderNdsLots();
+else if(v==='nds-comm') html = renderNdsComm();
 else if(v==='maintenance') html = renderMaintenance();
   else if(v==='wizard-event') html = renderWizardEvent();
   // live-control supprimé — remplacé par drawer stats
