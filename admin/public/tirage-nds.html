@@ -62,6 +62,8 @@
   .fiche-send{width:100%;background:var(--teal);color:#fff;border:none;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px}
   .fiche-send:disabled{opacity:.5;cursor:default}
   .grow{cursor:pointer}.grow:hover{background:#f6f8ff}
+  .sent{display:inline-flex;align-items:center;gap:4px;background:#e9f9f0;color:#12855c;border:1px solid #b7e6cd;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;cursor:pointer}
+  .sent.ro{cursor:default}
 </style>
 </head>
 <body>
@@ -190,12 +192,28 @@
   function envoyerGagnant(i){
     var t=(_soirWins||[])[i]; if(!t||!t.joueur_email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
     window.open(gmailUrl(t),'_blank','noopener');
+    if(t.id) marquerNotifie(t.id, true);
   }
   function envoyerTous(){
     var w=(_soirWins||[]).filter(function(t){return t.joueur_email;});
     if(!w.length){ alert('Aucun gagnant avec email.'); return; }
     if(!confirm('Ouvrir '+w.length+' brouillon(s) Gmail ?')) return;
-    w.forEach(function(t,i){ setTimeout(function(){ window.open(gmailUrl(t),'_blank','noopener'); }, i*700); });
+    w.forEach(function(t,i){ setTimeout(function(){ window.open(gmailUrl(t),'_blank','noopener'); if(t.id) marquerNotifie(t.id,true); }, i*700); });
+  }
+  // Marqueur "email envoyé" persisté en base (RPC marquer_notifie), puis MAJ locale + rendu.
+  async function marquerNotifie(tid, on){
+    tid=Number(tid); if(!tid) return;
+    try{
+      var res=await rpc('marquer_notifie',{p_tirage_id:tid, p_on:!!on});
+      if(!res || res.ok===false) return;
+      var v = on ? (res.notifie_at || new Date().toISOString()) : null;
+      (TIRAGES||[]).forEach(function(x){ if(Number(x.id)===tid) x.notifie_at=v; });
+      (WINS_FULL||[]).forEach(function(x){ if(Number(x.tirage_id)===tid) x.notifie_at=v; });
+      if(_ficheT && Number(_ficheT.tirage_id)===tid){ _ficheT.notifie_at=v; }
+      renderSoirWins(); renderAllWins();
+      var ov=document.getElementById('ficheOv');
+      if(ov && ov.style.display!=='none' && _ficheData){ ficheModal(ficheHtml(_ficheData,_ficheT)); }
+    }catch(e){}
   }
   // ---- Fiche contact du gagnant (coordonnées complètes + envoi) ---------------
   // Cliquer un nom -> RPC fiche_gagnant (authentifié, PII) -> modale + envoi Gmail.
@@ -219,8 +237,9 @@
     h+='<div class="fiche-row"><div class="k">Téléphone</div><div class="v">'+(d.tel?esc(d.tel):'<span class="fiche-empty">non renseigné</span>')+cpBtn(d.tel)+'</div></div>';
     h+='<div class="fiche-row"><div class="k">Adresse</div><div class="v">'+(adr?esc(adr):'<span class="fiche-empty">non renseignée</span>')+'</div></div>';
     if(t){ h+='<div class="fiche-row"><div class="k">Gain</div><div class="v">'+esc(t.lot_nom||'')+(t.date_soir?' · '+esc(t.date_soir):'')+'</div></div>'; }
+    if(t){ h+='<div class="fiche-row"><div class="k">Statut</div><div class="v">'+(t.notifie_at?'<span class="sent ro">✓ Email envoyé</span>':'<span class="fiche-empty">Non envoyé</span>')+'</div></div>'; }
     h+='</div>';
-    h+='<div class="fiche-ft"><button class="fiche-send" '+(d.email?'':'disabled')+' onclick="ficheSend()">✉️ Envoyer le mail</button></div>';
+    h+='<div class="fiche-ft"><button class="fiche-send" '+(d.email?'':'disabled')+' onclick="ficheSend()">✉️ '+((t&&t.notifie_at)?'Renvoyer le mail':'Envoyer le mail')+'</button></div>';
     return h;
   }
   function ficheSend(){
@@ -228,12 +247,14 @@
     var t=_ficheT || {joueur_email:d.email, joueur_nom:((d.prenom||'')+' '+(d.nom||'')).trim(), type:'soir', date_soir:'', lot_nom:'Place de concert'};
     if(!t.joueur_email) t.joueur_email=d.email;
     window.open(gmailUrl(t),'_blank','noopener');
+    if(_ficheT && _ficheT.tirage_id) marquerNotifie(_ficheT.tirage_id, true);
   }
   async function openFiche(jid, tid){
     var w=(WINS_FULL||[]).filter(function(x){return String(x.tirage_id)===String(tid);})[0]
         ||(TIRAGES||[]).filter(function(x){return String(x.id)===String(tid);})[0]||null;
     var t = w ? { joueur_email:(w.joueur_email||w.email||''), joueur_nom:(w.joueur_nom||''),
-                  type:(w.type||'soir'), date_soir:(w.date_soir||w.date||''), lot_nom:(w.lot_nom||'') } : null;
+                  type:(w.type||'soir'), date_soir:(w.date_soir||w.date||''), lot_nom:(w.lot_nom||''),
+                  tirage_id:(w.tirage_id||w.id||null), notifie_at:(w.notifie_at||null) } : null;
     var mail=t?(t.joueur_email||''):'';
     ficheModal(ficheShell('<div class="fiche-empty">Chargement…</div>'));
     try{
@@ -302,11 +323,13 @@
       + '<button onclick="envoyerTous()" style="background:#1baf7a;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer à tous</button>'
       + '</div>'
       + w.map(function(t,i){
+          var sent=!!t.notifie_at;
           return '<div class="win win-soir" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
             + '<span class="med">🎟️</span> <b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
             + (t.joueur_tel?' · '+esc(t.joueur_tel):'')
             + ' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')'
-            + '<button onclick="envoyerGagnant('+i+')" style="margin-left:auto;background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer</button>'
+            + (sent?'<span class="sent" style="margin-left:auto" title="Cliquer pour annuler le marquage" onclick="marquerNotifie('+t.id+',false)">✓ Envoyé</span>':'')
+            + '<button onclick="envoyerGagnant('+i+')" style="'+(sent?'':'margin-left:auto;')+'background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>'
             + '</div>';
         }).join('')
     ) : '';
@@ -319,7 +342,7 @@
       var adr=[w.adresse, ((w.code_postal||'')+' '+(w.ville||'')).trim()].filter(function(x){return x&&x.trim();}).join(', ');
       return '<tr class="grow" onclick="openFiche(\''+(w.joueur_id||'')+'\',\''+(w.tirage_id||'')+'\')">'
         +'<td><span class="chip '+(w.type==='soir'?'soir':'grand')+'">'+(w.type==='soir'?'Soir':'Grand')+'</span></td>'
-        +'<td><b>'+esc(w.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(w.email||'')+'</span></td>'
+        +'<td><b>'+esc(w.joueur_nom||'—')+'</b>'+(w.notifie_at?' <span class="sent ro">✓ Envoyé</span>':'')+'<br><span class="lot-meta">'+esc(w.email||'')+'</span></td>'
         +'<td>'+(w.tel?esc(w.tel):'<span class="lot-meta">—</span>')+'</td>'
         +'<td>'+(adr?esc(adr):'<span class="lot-meta">—</span>')+'</td>'
         +'<td>'+esc(w.lot_nom||'')+(w.lot_valeur?' <span class="lot-meta">('+w.lot_valeur+' €)</span>':'')+'</td>'
