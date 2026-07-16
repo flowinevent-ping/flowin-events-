@@ -66,3 +66,18 @@ Données purement admin (le joueur n'y touche jamais) → `anon` aucun accès :
 - [ ] Bon de commande partenaire (INSERT + signature + CGV) OK.
 - [ ] Dashboard admin : lecture, édition, suppression OK avec l'accès authentifié.
 - [ ] Scan `get_advisors security` : plus aucun `rls_policy_always_true` sur les tables sensibles.
+
+---
+
+## Incident 17/07 — v_nds_participants (écran Participants NDS vide)
+
+**Symptôme** : dashboard → « Participants NDS 2026 » affichait 0 / « Aucun participant », alors que la vue contenait 465 lignes.
+
+**Cause** : `v_nds_participants` était la SEULE ressource avec `anon SELECT` révoqué, alors que `joueurs`, `pros`, `partenaires`, `events`, `tirages` (mêmes données PII) restent anon-lisibles. Le dashboard lit au niveau anon (`FLOWIN_AUTH` retombe sur la clé anon quand la session admin n'est pas/plus établie), d'où l'échec sur cette seule vue.
+
+**Correctif immédiat** : `grant select on public.v_nds_participants to anon;` — réaligne la vue sur le reste. Aucune exposition nouvelle : la PII est déjà accessible via `public.joueurs` (anon=true).
+
+**À traiter dans le refactor RLS post-festival** (le vrai correctif) :
+- Verrouiller `joueurs` ET les vues dérivées (`v_nds_participants`) derrière l'accès authentifié.
+- Ajouter le refresh automatique du token dans `dashboard.html` (comme `tirage-nds.html`), pour que les lectures authentifiées ne retombent pas silencieusement en anon après expiration.
+- Une fois l'auth fiable, re-révoquer `anon SELECT` sur `joueurs` + `v_nds_participants`.
