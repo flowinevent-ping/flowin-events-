@@ -44,6 +44,23 @@
   th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.03em}
   .chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
   .chip.soir{background:#fef6e7;color:#a5730f}.chip.grand{background:#eef2ff;color:#3b5cc4}
+  .gname{cursor:pointer;color:var(--acc);text-decoration:underline dotted;text-underline-offset:3px}
+  .gname:hover{color:var(--pink)}
+  .fiche-ov{position:fixed;inset:0;background:rgba(22,32,58,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+  .fiche-bx{background:#fff;border-radius:16px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 20px 60px -20px rgba(0,0,0,.4)}
+  .fiche-hd{background:var(--ink);color:#fff;padding:15px 20px;display:flex;align-items:center;justify-content:space-between}
+  .fiche-hd b{font-size:17px}
+  .fiche-x{background:transparent;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+  .fiche-bd{padding:14px 20px}
+  .fiche-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .fiche-row:last-child{border-bottom:none}
+  .fiche-row .k{color:var(--muted);width:92px;flex-shrink:0;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.02em;padding-top:3px}
+  .fiche-row .v{color:var(--ink);flex:1;word-break:break-word}
+  .fiche-row .v .cp{background:#eef2ff;border:none;color:var(--acc);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;cursor:pointer;margin-left:6px}
+  .fiche-empty{color:var(--faint);font-style:italic}
+  .fiche-ft{padding:8px 20px 18px}
+  .fiche-send{width:100%;background:var(--teal);color:#fff;border:none;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px}
+  .fiche-send:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
@@ -139,14 +156,18 @@
   // digital (saisi ci-dessus) est inséré automatiquement s'il est renseigné.
   function billetLien(){ var e=$('billetLien'); return e && e.value ? e.value.trim() : ''; }
   function dateFr(d){ try{ var p=String(d).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }catch(e){ return d; } }
-  function mailSujet(t){ return 'Nuits du Sud — tu as gagné ta place de concert !'; }
+  function mailSujet(t){ return (t&&t.type==='grand') ? 'Nuits du Sud — tu as gagné un lot !' : 'Nuits du Sud — tu as gagné ta place de concert !'; }
   function mailCorps(t){
     var prenom=(String(t.joueur_nom||'').trim().split(/\s+/)[0])||'';
     var lien=billetLien();
     var L=[];
     L.push('Bonjour '+prenom+',');
     L.push('');
-    L.push('On est super contents pour toi : tu as gagné ta place de concert pour les Nuits du Sud, pour la soirée du '+dateFr(t.date_soir)+' !');
+    if(t&&t.type==='grand'){
+      L.push('On est super contents pour toi : au grand tirage des Nuits du Sud, tu as gagné '+(t.lot_nom||'un lot')+' chez notre commerçant partenaire !');
+    } else {
+      L.push('On est super contents pour toi : tu as gagné ta place de concert pour les Nuits du Sud, pour la soirée du '+dateFr(t.date_soir)+' !');
+    }
     L.push('');
     if(lien){ L.push('Voici ton billet : '+lien); L.push(''); }
     L.push('Les Nuits du Sud, la Ville de Vence et Flowin te remercient pour ta participation.');
@@ -175,6 +196,50 @@
     if(!confirm('Ouvrir '+w.length+' brouillon(s) Gmail ?')) return;
     w.forEach(function(t,i){ setTimeout(function(){ window.open(gmailUrl(t),'_blank','noopener'); }, i*700); });
   }
+  // ---- Fiche contact du gagnant (coordonnées complètes + envoi) ---------------
+  // Cliquer un nom -> RPC fiche_gagnant (authentifié, PII) -> modale + envoi Gmail.
+  var _ficheT=null, _ficheData=null;
+  function ficheShell(inner){ return '<div class="fiche-hd"><b>Fiche gagnant</b><button class="fiche-x" onclick="closeFiche()">×</button></div><div class="fiche-bd">'+inner+'</div>'; }
+  function ficheModal(inner){
+    var ov=document.getElementById('ficheOv');
+    if(!ov){ ov=document.createElement('div'); ov.id='ficheOv'; ov.className='fiche-ov';
+      ov.addEventListener('click',function(e){ if(e.target===ov) closeFiche(); }); document.body.appendChild(ov); }
+    ov.innerHTML='<div class="fiche-bx">'+inner+'</div>'; ov.style.display='flex';
+  }
+  function closeFiche(){ var ov=document.getElementById('ficheOv'); if(ov) ov.style.display='none'; }
+  function ficheCopy(txt){ try{ navigator.clipboard.writeText(txt); }catch(e){} }
+  function ficheHtml(d,t){
+    var nom=((d.prenom||'')+' '+(d.nom||'')).trim()||'—';
+    var adr=[d.adresse, ((d.code_postal||'')+' '+(d.ville||'')).trim()].filter(function(x){return x&&x.trim();}).join(', ');
+    var cpBtn=function(v){ return v?('<button class="cp" onclick="ficheCopy(\''+esc(v)+'\')">copier</button>'):''; };
+    var h='<div class="fiche-hd"><b>'+esc(nom)+'</b><button class="fiche-x" onclick="closeFiche()">×</button></div>';
+    h+='<div class="fiche-bd">';
+    h+='<div class="fiche-row"><div class="k">Email</div><div class="v">'+(d.email?esc(d.email):'<span class="fiche-empty">non renseigné</span>')+cpBtn(d.email)+'</div></div>';
+    h+='<div class="fiche-row"><div class="k">Téléphone</div><div class="v">'+(d.tel?esc(d.tel):'<span class="fiche-empty">non renseigné</span>')+cpBtn(d.tel)+'</div></div>';
+    h+='<div class="fiche-row"><div class="k">Adresse</div><div class="v">'+(adr?esc(adr):'<span class="fiche-empty">non renseignée</span>')+'</div></div>';
+    if(t){ h+='<div class="fiche-row"><div class="k">Gain</div><div class="v">'+esc(t.lot_nom||'')+(t.date_soir?' · '+esc(t.date_soir):'')+'</div></div>'; }
+    h+='</div>';
+    h+='<div class="fiche-ft"><button class="fiche-send" '+(d.email?'':'disabled')+' onclick="ficheSend()">✉️ Envoyer le mail</button></div>';
+    return h;
+  }
+  function ficheSend(){
+    var d=_ficheData; if(!d||!d.email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
+    var t=_ficheT || {joueur_email:d.email, joueur_nom:((d.prenom||'')+' '+(d.nom||'')).trim(), type:'soir', date_soir:'', lot_nom:'Place de concert'};
+    if(!t.joueur_email) t.joueur_email=d.email;
+    window.open(gmailUrl(t),'_blank','noopener');
+  }
+  async function openFiche(jid, tid){
+    var t=(TIRAGES||[]).filter(function(x){return String(x.id)===String(tid);})[0]||null;
+    var mail=t?(t.joueur_email||''):'';
+    ficheModal(ficheShell('<div class="fiche-empty">Chargement…</div>'));
+    try{
+      var res=await rpc('fiche_gagnant',{p_joueur_id:(jid||null), p_email:(mail||null)});
+      if(!res || res.ok===false){ ficheModal(ficheShell('<div class="fiche-empty">Fiche introuvable.</div>')); return; }
+      _ficheT=t; _ficheData=res;
+      ficheModal(ficheHtml(res,t));
+    }catch(e){ ficheModal(ficheShell('<div class="fiche-empty">Erreur : '+esc(e.message)+'</div>')); }
+  }
+
   var _soirWins=[];
   function lotNb(l){return parseInt(l.gagnants||l.quantite||l.nb||1,10)||1;}
 
@@ -213,7 +278,7 @@
           +'<div><div class="lot-nom">'+esc(nom)+'</div><div class="lot-meta">'+(val!=null?val+' € · ':'')+nb+' gagnant'+(nb>1?'s':'')+' · '+won.length+'/'+nb+' tiré'+(won.length>1?'s':'')+'</div></div>'
           +'<button class="btn teal sm" '+(won.length>=nb?'disabled':'')+' onclick="tirerLot(\''+esc(p.id)+'\',\''+encodeURIComponent(nom)+'\','+(val==null?'null':val)+','+(nb-won.length)+',this)">🎲 Tirer'+(won.length?' le reste':'')+'</button>'
           +'</div>';
-        won.forEach(function(w){ html+='<div class="win"><span class="med">🏅</span> <b>'+esc(w.joueur_nom||'—')+'</b> · '+esc(w.joueur_email||'')+(w.joueur_tel?' · '+esc(w.joueur_tel):'')+'</div>'; });
+        won.forEach(function(w){ html+='<div class="win"><span class="med">🏅</span> <b class="gname" onclick="openFiche(\''+(w.joueur_id||'')+'\',\''+(w.id||'')+'\')">'+esc(w.joueur_nom||'—')+'</b> · '+esc(w.joueur_email||'')+(w.joueur_tel?' · '+esc(w.joueur_tel):'')+'</div>'; });
         html+='</div>';
       });
       html+='</div>';
@@ -233,7 +298,7 @@
       + '</div>'
       + w.map(function(t,i){
           return '<div class="win win-soir" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
-            + '<span class="med">🎟️</span> <b>'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
+            + '<span class="med">🎟️</span> <b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
             + (t.joueur_tel?' · '+esc(t.joueur_tel):'')
             + ' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')'
             + '<button onclick="envoyerGagnant('+i+')" style="margin-left:auto;background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer</button>'
@@ -246,7 +311,7 @@
     if(!TIRAGES.length){ $('allWins').innerHTML='<div class="empty">Aucun tirage effectué.</div>'; return; }
     var rows=TIRAGES.map(function(t){
       return '<tr><td><span class="chip '+(t.type==='soir'?'soir':'grand')+'">'+(t.type==='soir'?'Soir':'Grand')+'</span></td>'
-        +'<td><b>'+esc(t.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(t.joueur_email||'')+'</span></td>'
+        +'<td><b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(t.joueur_email||'')+'</span></td>'
         +'<td>'+esc(t.lot_nom||'')+(t.lot_valeur?' <span class="lot-meta">('+t.lot_valeur+' €)</span>':'')+'</td>'
         +'<td>'+esc(t.date_soir||(t.created_at||'').slice(0,10))+'</td></tr>';
     }).join('');
