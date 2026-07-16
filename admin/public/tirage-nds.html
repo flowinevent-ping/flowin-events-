@@ -61,6 +61,7 @@
   .fiche-ft{padding:8px 20px 18px}
   .fiche-send{width:100%;background:var(--teal);color:#fff;border:none;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px}
   .fiche-send:disabled{opacity:.5;cursor:default}
+  .grow{cursor:pointer}.grow:hover{background:#f6f8ff}
 </style>
 </head>
 <body>
@@ -229,7 +230,10 @@
     window.open(gmailUrl(t),'_blank','noopener');
   }
   async function openFiche(jid, tid){
-    var t=(TIRAGES||[]).filter(function(x){return String(x.id)===String(tid);})[0]||null;
+    var w=(WINS_FULL||[]).filter(function(x){return String(x.tirage_id)===String(tid);})[0]
+        ||(TIRAGES||[]).filter(function(x){return String(x.id)===String(tid);})[0]||null;
+    var t = w ? { joueur_email:(w.joueur_email||w.email||''), joueur_nom:(w.joueur_nom||''),
+                  type:(w.type||'soir'), date_soir:(w.date_soir||w.date||''), lot_nom:(w.lot_nom||'') } : null;
     var mail=t?(t.joueur_email||''):'';
     ficheModal(ficheShell('<div class="fiche-empty">Chargement…</div>'));
     try{
@@ -243,7 +247,7 @@
   var _soirWins=[];
   function lotNb(l){return parseInt(l.gagnants||l.quantite||l.nb||1,10)||1;}
 
-  var PARTNERS=[], TIRAGES=[];
+  var PARTNERS=[], TIRAGES=[], WINS_FULL=[];
 
   async function load(){
     try{
@@ -251,6 +255,7 @@
       PARTNERS=(await pr.json())||[];
       var tr=await fetch(SUPA+"/rest/v1/tirages?select=*&order=created_at.desc",{headers:H});
       TIRAGES=(await tr.json())||[];
+      try{ WINS_FULL=await rpc('gagnants_complets',{}); if(!Array.isArray(WINS_FULL)) WINS_FULL=[]; }catch(e){ WINS_FULL=[]; }
       var st=await fetch(SUPA+"/rest/v1/v_nds_participants?select=nb_tickets",{headers:H});
       var js=(await st.json())||[];
       var joueurs=js.length, tickets=js.reduce(function(a,b){return a+(parseInt(b.nb_tickets,10)||0);},0);
@@ -308,14 +313,20 @@
   }
 
   function renderAllWins(){
-    if(!TIRAGES.length){ $('allWins').innerHTML='<div class="empty">Aucun tirage effectué.</div>'; return; }
-    var rows=TIRAGES.map(function(t){
-      return '<tr><td><span class="chip '+(t.type==='soir'?'soir':'grand')+'">'+(t.type==='soir'?'Soir':'Grand')+'</span></td>'
-        +'<td><b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(t.joueur_email||'')+'</span></td>'
-        +'<td>'+esc(t.lot_nom||'')+(t.lot_valeur?' <span class="lot-meta">('+t.lot_valeur+' €)</span>':'')+'</td>'
-        +'<td>'+esc(t.date_soir||(t.created_at||'').slice(0,10))+'</td></tr>';
+    var W = (WINS_FULL && WINS_FULL.length) ? WINS_FULL : null;
+    if(!W){ $('allWins').innerHTML='<div class="empty">Aucun tirage effectué.</div>'; return; }
+    var rows=W.map(function(w){
+      var adr=[w.adresse, ((w.code_postal||'')+' '+(w.ville||'')).trim()].filter(function(x){return x&&x.trim();}).join(', ');
+      return '<tr class="grow" onclick="openFiche(\''+(w.joueur_id||'')+'\',\''+(w.tirage_id||'')+'\')">'
+        +'<td><span class="chip '+(w.type==='soir'?'soir':'grand')+'">'+(w.type==='soir'?'Soir':'Grand')+'</span></td>'
+        +'<td><b>'+esc(w.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(w.email||'')+'</span></td>'
+        +'<td>'+(w.tel?esc(w.tel):'<span class="lot-meta">—</span>')+'</td>'
+        +'<td>'+(adr?esc(adr):'<span class="lot-meta">—</span>')+'</td>'
+        +'<td>'+esc(w.lot_nom||'')+(w.lot_valeur?' <span class="lot-meta">('+w.lot_valeur+' €)</span>':'')+'</td>'
+        +'<td>'+esc(w.date||'')+'</td></tr>';
     }).join('');
-    $('allWins').innerHTML='<table><thead><tr><th>Type</th><th>Gagnant</th><th>Lot</th><th>Date</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    $('allWins').innerHTML='<div class="lot-meta" style="margin:0 0 8px">Clique une ligne pour ouvrir la fiche complète.</div>'
+      +'<table><thead><tr><th>Type</th><th>Gagnant</th><th>Téléphone</th><th>Adresse</th><th>Lot</th><th>Date</th></tr></thead><tbody>'+rows+'</tbody></table>';
   }
 
   async function rpc(fn,body){
