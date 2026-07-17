@@ -81,3 +81,9 @@ Données purement admin (le joueur n'y touche jamais) → `anon` aucun accès :
 - Verrouiller `joueurs` ET les vues dérivées (`v_nds_participants`) derrière l'accès authentifié.
 - Ajouter le refresh automatique du token dans `dashboard.html` (comme `tirage-nds.html`), pour que les lectures authentifiées ne retombent pas silencieusement en anon après expiration.
 - Une fois l'auth fiable, re-révoquer `anon SELECT` sur `joueurs` + `v_nds_participants`.
+
+## 17/07 — RPC gagnants ouvertes à anon (vue Gagnants dashboard)
+
+`gagnants_complets`, `fiche_gagnant`, `marquer_notifie` : `grant execute ... to anon`.
+Raison : le dashboard lit au niveau anon ; ces RPC exposent des données déjà accessibles via `tirages` + `joueurs` (anon-lisibles). `marquer_notifie` = simple flag sur données opérationnelles.
+À re-verrouiller au refactor RLS post-festival, une fois le refresh de token en place sur `dashboard.html` (les appeler alors avec le token authentifié et re-révoquer anon).

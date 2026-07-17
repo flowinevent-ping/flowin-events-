@@ -7738,6 +7738,7 @@ function renderBiblioGagnants(){
        + kpi('Valeur totale',valeurTotale.toLocaleString('fr-FR')+' €')
        + '</div>';
   html += seGainsSectionHtml();
+  html += gagWinsSectionHtml();
 
   html += '<div class="filter-bar">'
        + '<div class="filter-search"><input placeholder="Rechercher (joueur, event, partenaire, lot)…" oninput="state.search.gagnants=this.value;render()" value="'+esc(state.search.gagnants)+'"/></div>'
@@ -7781,6 +7782,129 @@ function renderBiblioGagnants(){
   return html;
 }
 function bulkMarkRetires(){ toast('Sélectionnez d\'abord des lots dans le tableau','warn'); }
+
+/* ===== DASHBOARD · GAGNANTS — section "Tous les gagnants" (tirages) =====
+   Liste complète des gagnants (RPC gagnants_complets), fiche cliquable (RPC
+   fiche_gagnant) + envoi mail Gmail + marqueur d'envoi (RPC marquer_notifie).
+   Portage de la logique de tirage-nds.html, préfixe gw* pour éviter les collisions.
+======================================================================= */
+async function gagWinsLoad(){
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/gagnants_complets',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({p_se:'se-nds-2026'})
+    });
+    var d = r.ok ? await r.json() : [];
+    state.gagWins = Array.isArray(d) ? d : [];
+  }catch(e){ state.gagWins = []; }
+  render();
+}
+function gagWinsSectionHtml(){
+  var css = '<style id="gwf-css">'
+    + '.gwf-ov{position:fixed;inset:0;background:rgba(20,24,45,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:99999}'
+    + '.gwf-bx{background:#fff;border-radius:16px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 24px 60px -20px rgba(0,0,0,.45)}'
+    + '.gwf-hd{background:#1e2450;color:#fff;padding:15px 20px;display:flex;align-items:center;justify-content:space-between}'
+    + '.gwf-hd b{font-size:16px}.gwf-x{background:transparent;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1}'
+    + '.gwf-bd{padding:14px 20px}'
+    + '.gwf-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #eef0f6;font-size:14px}.gwf-row:last-child{border-bottom:none}'
+    + '.gwf-k{color:#8a90a4;width:92px;flex-shrink:0;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.02em;padding-top:3px}'
+    + '.gwf-v{flex:1;word-break:break-word;color:#22263a}'
+    + '.gwf-cp{background:#eef2ff;border:none;color:#3B5CC4;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;cursor:pointer;margin-left:6px}'
+    + '.gwf-ft{padding:8px 20px 18px}'
+    + '.gwf-send{width:100%;background:#1baf7a;color:#fff;border:none;padding:11px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px}'
+    + '.gwf-send:disabled{opacity:.5;cursor:default}.gwrow:hover{background:#f6f8ff}'
+    + '</style>';
+  if(!state.gagWins){ gagWinsLoad(); return css+'<div class="section-h">&#127942; Tous les gagnants</div><div class="text-sm text-muted">Chargement…</div>'; }
+  var W = state.gagWins;
+  var h = css + '<div class="section-h">&#127942; Tous les gagnants — tirages ('+W.length+') <button class="btn-sm" style="margin-left:8px" onclick="state.gagWins=null;render()">&#8635;</button></div>';
+  if(!W.length){ return h+'<div class="text-sm text-muted">Aucun tirage enregistré.</div>'; }
+  h += '<div class="text-xs text-muted" style="margin:0 0 6px">Cliquez une ligne pour ouvrir la fiche et envoyer le mail.</div>';
+  h += '<table class="tbl"><thead><tr><th>Type</th><th>Gagnant</th><th>Téléphone</th><th>Statut</th><th>Lot</th><th>Date</th></tr></thead><tbody>';
+  W.forEach(function(w){
+    var sent=!!w.notifie_at;
+    h += '<tr class="gwrow" style="cursor:pointer" onclick="gwOpenFiche(\''+(w.joueur_id||'')+'\',\''+(w.tirage_id||'')+'\')">'
+      + '<td><span class="chip '+(w.type==='soir'?'warn':'live')+'">'+(w.type==='soir'?'Soir':'Grand')+'</span></td>'
+      + '<td><strong>'+esc(w.joueur_nom||'—')+'</strong><div class="text-xs text-muted">'+esc(w.email||'')+'</div></td>'
+      + '<td>'+(w.tel?esc(w.tel):'<span class="text-muted">—</span>')+'</td>'
+      + '<td>'+(sent?'<span class="chip live">&#10003; Envoyé</span>':'<span class="chip warn">&#9675; Non envoyé</span>')+'</td>'
+      + '<td>'+esc(w.lot_nom||'—')+'</td>'
+      + '<td class="text-sm text-muted">'+esc(w.date||'')+'</td></tr>';
+  });
+  h += '</tbody></table>';
+  return h;
+}
+
+var _gwT=null, _gwD=null;
+function gwFicheShell(inner){ return '<div class="gwf-hd"><b>Fiche gagnant</b><button class="gwf-x" onclick="gwCloseFiche()">&times;</button></div><div class="gwf-bd">'+inner+'</div>'; }
+function gwModal(inner){
+  var ov=document.getElementById('gwOv');
+  if(!ov){ ov=document.createElement('div'); ov.id='gwOv'; ov.className='gwf-ov';
+    ov.addEventListener('click',function(e){ if(e.target===ov) gwCloseFiche(); }); document.body.appendChild(ov); }
+  ov.innerHTML='<div class="gwf-bx">'+inner+'</div>'; ov.style.display='flex';
+}
+function gwCloseFiche(){ var ov=document.getElementById('gwOv'); if(ov) ov.style.display='none'; }
+function gwCopy(t){ try{ navigator.clipboard.writeText(t); }catch(e){} }
+function gwFicheHtml(d,t){
+  var nom=((d.prenom||'')+' '+(d.nom||'')).trim()||'—';
+  var adr=[d.adresse,((d.code_postal||'')+' '+(d.ville||'')).trim()].filter(function(x){return x&&x.trim();}).join(', ');
+  var cp=function(v){ return v?'<button class="gwf-cp" onclick="gwCopy(\''+esc(v)+'\')">copier</button>':''; };
+  var h='<div class="gwf-hd"><b>'+esc(nom)+'</b><button class="gwf-x" onclick="gwCloseFiche()">&times;</button></div><div class="gwf-bd">';
+  h+='<div class="gwf-row"><div class="gwf-k">Email</div><div class="gwf-v">'+(d.email?esc(d.email):'<i class="text-muted">non renseigné</i>')+cp(d.email)+'</div></div>';
+  h+='<div class="gwf-row"><div class="gwf-k">Téléphone</div><div class="gwf-v">'+(d.tel?esc(d.tel):'<i class="text-muted">non renseigné</i>')+cp(d.tel)+'</div></div>';
+  h+='<div class="gwf-row"><div class="gwf-k">Adresse</div><div class="gwf-v">'+(adr?esc(adr):'<i class="text-muted">non renseignée</i>')+'</div></div>';
+  if(t){ h+='<div class="gwf-row"><div class="gwf-k">Gain</div><div class="gwf-v">'+esc(t.lot_nom||'')+(t.date?' · '+esc(t.date):'')+'</div></div>'; }
+  if(t){ h+='<div class="gwf-row"><div class="gwf-k">Statut</div><div class="gwf-v">'+(t.notifie_at?'<span class="chip live">&#10003; Email envoyé</span>':'<span class="chip warn">Non envoyé</span>')+'</div></div>'; }
+  h+='</div><div class="gwf-ft"><button class="gwf-send" '+(d.email?'':'disabled')+' onclick="gwFicheSend()">&#9993; '+((t&&t.notifie_at)?'Renvoyer le mail':'Envoyer le mail')+'</button></div>';
+  return h;
+}
+function gwMailUrl(t,d){
+  var prenom=(d.prenom||String((t&&t.joueur_nom)||'').trim().split(/\s+/)[0]||'');
+  var grand=(t&&t.type==='grand');
+  var obj=grand?'Nuits du Sud — tu as gagné un lot !':'Nuits du Sud — tu as gagné ta place de concert !';
+  var L=['Bonjour '+prenom+',',''];
+  if(grand){ L.push('On est super contents pour toi : au grand tirage des Nuits du Sud, tu as gagné '+((t&&t.lot_nom)||'un lot')+' chez notre commerçant partenaire !'); }
+  else { L.push('On est super contents pour toi : tu as gagné ta place de concert pour les Nuits du Sud'+((t&&t.date)?', pour la soirée du '+t.date:'')+' !'); }
+  L.push('','Présente-toi avec cet email, on s\'occupe du reste.','','Les Nuits du Sud, la Ville de Vence et Flowin te remercient pour ta participation.','flowinevent@gmail.com · 06 16 35 49 36');
+  return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(d.email||'')+'&su='+encodeURIComponent(obj)+'&body='+encodeURIComponent(L.join('\n'));
+}
+function gwFicheSend(){
+  var d=_gwD,t=_gwT; if(!d||!d.email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
+  window.open(gwMailUrl(t,d),'_blank','noopener');
+  if(t&&t.tirage_id) gwMarquerNotifie(t.tirage_id,true);
+}
+async function gwMarquerNotifie(tid,on){
+  tid=Number(tid); if(!tid) return;
+  try{
+    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/marquer_notifie',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({p_tirage_id:tid,p_on:!!on})
+    });
+    var res=await r.json(); if(!res||res.ok===false) return;
+    var v=on?(res.notifie_at||new Date().toISOString()):null;
+    (state.gagWins||[]).forEach(function(x){ if(Number(x.tirage_id)===tid) x.notifie_at=v; });
+    if(_gwT&&Number(_gwT.tirage_id)===tid) _gwT.notifie_at=v;
+    var ov=document.getElementById('gwOv'); if(ov&&ov.style.display!=='none'&&_gwD){ gwModal(gwFicheHtml(_gwD,_gwT)); }
+    render();
+  }catch(e){}
+}
+async function gwOpenFiche(jid,tid){
+  var w=(state.gagWins||[]).filter(function(x){return String(x.tirage_id)===String(tid);})[0]||null;
+  var t=w?{tirage_id:w.tirage_id,type:w.type,lot_nom:w.lot_nom,date:w.date,joueur_nom:w.joueur_nom,notifie_at:w.notifie_at}:null;
+  var mail=w?(w.email||''):'';
+  gwModal(gwFicheShell('<div class="text-muted">Chargement…</div>'));
+  try{
+    var r=await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/fiche_gagnant',{
+      method:'POST',
+      headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({p_joueur_id:(jid||null),p_email:(mail||null)})
+    });
+    var res=await r.json();
+    if(!res||res.ok===false){ gwModal(gwFicheShell('<div class="text-muted">Fiche introuvable.</div>')); return; }
+    _gwT=t; _gwD=res; gwModal(gwFicheHtml(res,t));
+  }catch(e){ gwModal(gwFicheShell('<div class="text-muted">Erreur : '+esc(e.message)+'</div>')); }
+}
 
 // ============ MODAL QR retrait ============
 // ── Ticket Gagnant : code serie reel + persistance dans se_gains (find-or-create) ──
