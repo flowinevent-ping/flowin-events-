@@ -7827,7 +7827,7 @@ function gagWinsSectionHtml(){
       + '<td><span class="chip '+(w.type==='soir'?'warn':'live')+'">'+(w.type==='soir'?'Soir':'Grand')+'</span></td>'
       + '<td><strong>'+esc(w.joueur_nom||'—')+'</strong><div class="text-xs text-muted">'+esc(w.email||'')+'</div></td>'
       + '<td>'+(w.tel?esc(w.tel):'<span class="text-muted">—</span>')+'</td>'
-      + '<td>'+(sent?'<span class="chip live">&#10003; Envoyé</span>':'<span class="chip warn">&#9675; Non envoyé</span>')+'</td>'
+      + '<td>'+(w.statut==='retire'?'<span class="chip warn">&#8617; Retiré</span>':(sent?'<span class="chip live">&#10003; Envoyé</span>':'<span class="chip warn">&#9675; Non envoyé</span>'))+'</td>'
       + '<td>'+esc(w.lot_nom||'—')+'</td>'
       + '<td class="text-sm text-muted">'+esc(w.date||'')+'</td></tr>';
   });

@@ -65,6 +65,7 @@
   .sent{display:inline-flex;align-items:center;gap:4px;background:#e9f9f0;color:#12855c;border:1px solid #b7e6cd;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;cursor:pointer}
   .sent.ro{cursor:default}
   .unsent{display:inline-flex;align-items:center;gap:4px;background:#f1f3f8;color:#8a90a4;border:1px solid #dfe3ec;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;cursor:pointer}
+  .retired{display:inline-flex;align-items:center;gap:4px;background:#fff7ed;color:#a16207;border:1px solid #fed7aa;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px}
 </style>
 </head>
 <body>
@@ -196,7 +197,7 @@
     if(t.id) marquerNotifie(t.id, true);
   }
   function envoyerTous(){
-    var w=(_soirWins||[]).filter(function(t){return t.joueur_email;});
+    var w=(_soirWins||[]).filter(function(t){return t.joueur_email && t.statut!=='retire';});
     if(!w.length){ alert('Aucun gagnant avec email.'); return; }
     if(!confirm('Ouvrir '+w.length+' brouillon(s) Gmail ?')) return;
     w.forEach(function(t,i){ setTimeout(function(){ window.open(gmailUrl(t),'_blank','noopener'); if(t.id) marquerNotifie(t.id,true); }, i*700); });
@@ -316,27 +317,48 @@
   function renderSoirWins(){
     var d=$('soirDate').value;
     var w=winsFor(function(t){return t.type==='soir'&&(!d||t.date_soir===d);});
-    _soirWins = w || [];
+    w = (w||[]).slice().sort(function(a,b){ return (a.statut==='retire'?1:0)-(b.statut==='retire'?1:0); });
+    _soirWins = w;
+    var nbActifs = w.filter(function(t){return t.statut!=='retire';}).length;
     $('soirWins').innerHTML = w.length ? (
       '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 6px">'
       + '<label style="font-size:12px;color:#666">Lien du billet digital (optionnel)</label>'
       + '<input id="billetLien" type="url" placeholder="https://…" style="flex:1;min-width:260px;padding:8px 10px;border:1px solid #d9d9e3;border-radius:8px">'
-      + '<button onclick="envoyerTous()" style="background:#1baf7a;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer à tous</button>'
+      + '<button onclick="envoyerTous()" style="background:#1baf7a;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer à tous ('+nbActifs+')</button>'
       + '</div>'
       + w.map(function(t,i){
+          var retired = (t.statut==='retire');
           var sent=!!t.notifie_at;
-          var badge = sent
-            ? '<span class="sent" style="margin-left:auto" title="Envoyé'+(t.notifie_at?' le '+String(t.notifie_at).slice(0,10):'')+' — cliquer pour annuler" onclick="marquerNotifie('+t.id+',false)">✓ Envoyé</span>'
-            : '<span class="unsent" style="margin-left:auto" title="Cliquer pour marquer comme envoyé" onclick="marquerNotifie('+t.id+',true)">○ Non envoyé</span>';
-          return '<div class="win win-soir" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+          var badge = retired
+            ? '<span class="retired" style="margin-left:auto">↩ Place remise en jeu</span>'
+            : (sent
+                ? '<span class="sent" style="margin-left:auto" title="Envoyé'+(t.notifie_at?' le '+String(t.notifie_at).slice(0,10):'')+' — cliquer pour annuler" onclick="marquerNotifie('+t.id+',false)">✓ Envoyé</span>'
+                : '<span class="unsent" style="margin-left:auto" title="Cliquer pour marquer comme envoyé" onclick="marquerNotifie('+t.id+',true)">○ Non envoyé</span>');
+          var actions = retired
+            ? '<button onclick="retirerGagnant('+i+',false)" style="background:#fff;border:1px solid #8a90a4;color:#5a6072;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">↺ Rétablir</button>'
+            : '<button onclick="envoyerGagnant('+i+')" style="background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>'
+              + '<button onclick="retirerGagnant('+i+',true)" title="Retirer ce gagnant et remettre sa place en jeu" style="background:#fff;border:1px solid #e0a800;color:#a16207;padding:6px 10px;border-radius:8px;font-weight:700;cursor:pointer">↩ Remettre en jeu</button>';
+          return '<div class="win win-soir" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap'+(retired?';opacity:.55':'')+'">'
             + '<span class="med">🎟️</span> <b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
             + (t.joueur_tel?' · '+esc(t.joueur_tel):'')
             + ' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')'
             + badge
-            + '<button onclick="envoyerGagnant('+i+')" style="background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>'
+            + actions
             + '</div>';
         }).join('')
     ) : '';
+  }
+
+  async function retirerGagnant(i, on){
+    var t=(_soirWins||[])[i]; if(!t||!t.id) return;
+    if(on && !confirm('Retirer '+(t.joueur_nom||'ce gagnant')+' et remettre sa place en jeu ?\n\nIl ne sera pas re-tiré. Tu pourras tirer une autre personne à sa place (relance « Tirer les places »).')) return;
+    try{
+      var res=await rpc('retirer_gagnant',{p_tirage_id:Number(t.id), p_on:!!on});
+      if(!res || res.ok===false){ alert((res&&res.erreur)||'Action impossible'); return; }
+      (TIRAGES||[]).forEach(function(x){ if(Number(x.id)===Number(t.id)) x.statut=res.statut; });
+      (WINS_FULL||[]).forEach(function(x){ if(Number(x.tirage_id)===Number(t.id)) x.statut=res.statut; });
+      renderSoirWins(); renderAllWins();
+    }catch(e){ alert('Erreur : '+e.message); }
   }
 
   function renderAllWins(){
@@ -349,7 +371,7 @@
         +'<td><b>'+esc(w.joueur_nom||'—')+'</b><br><span class="lot-meta">'+esc(w.email||'')+'</span></td>'
         +'<td>'+(w.tel?esc(w.tel):'<span class="lot-meta">—</span>')+'</td>'
         +'<td>'+(adr?esc(adr):'<span class="lot-meta">—</span>')+'</td>'
-        +'<td>'+(w.notifie_at?'<span class="sent ro" title="Envoyé le '+String(w.notifie_at).slice(0,10)+'">✓ Envoyé</span>':'<span class="unsent ro">○ Non envoyé</span>')+'</td>'
+        +'<td>'+(w.statut==='retire'?'<span class="retired">↩ Retiré</span>':(w.notifie_at?'<span class="sent ro" title="Envoyé le '+String(w.notifie_at).slice(0,10)+'">✓ Envoyé</span>':'<span class="unsent ro">○ Non envoyé</span>'))+'</td>'
         +'<td>'+esc(w.lot_nom||'')+(w.lot_valeur?' <span class="lot-meta">('+w.lot_valeur+' €)</span>':'')+'</td>'
         +'<td>'+esc(w.date||'')+'</td></tr>';
     }).join('');
