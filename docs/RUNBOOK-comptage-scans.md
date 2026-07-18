@@ -62,6 +62,41 @@ un même visiteur → 4 scans fantômes).
 à déployer sur validation explicite (bénéfice limité à la dernière soirée du 18/07 ;
 à défaut, à poser à froid post-festival).
 
+## 4 bis. RÈGLE — les compteurs sont DÉRIVÉS, jamais incrémentés à la main
+
+**Incident 18/07 (audit depuis le 09/07)** : les cartes Events affichaient des chiffres faux
+sur TOUTES les stations. Total affiché 730 parties vs **887 réelles** (−157, soit **−18 %**).
+Exemples : Caisse 2 123→149, Caisse 1 96→121, Bar 3 55→74, Brigade Verte 1 2→12.
+
+**Cause** : `events.participants` était un compteur dénormalisé incrémenté (`participants + 1`)
+**à l'intérieur d'une RPC** appelée sur le chemin nominal du jeu. Toute écriture de participation
+hors de ce chemin — en particulier le **rejeu de la file offline** (`flowin_nds_wq`, qui insère
+directement dans `participations`) — n'incrémentait pas le compteur. La dérive était donc
+proportionnelle aux coupures réseau, et **définitive** (jamais rattrapée).
+
+**Règle appliquée (migration `fix_events_participants_derive_trigger`)** :
+- `events.participants` = `count(*)` des `participations` de l'event. **Point.**
+- Maintenu par le trigger `trg_sync_event_participants`
+  (`AFTER INSERT OR DELETE OR UPDATE OF event_id ON participations`), donc correct
+  quel que soit le chemin d'écriture (RPC, rejeu offline, insert direct, suppression).
+- Backfill effectué sur tous les events : écart ramené à 0 partout.
+- **Interdit désormais** : tout `UPDATE events SET participants = participants + 1`.
+  Si un tel code subsiste dans une RPC, il est redondant et doit être retiré (le trigger
+  recalcule la vraie valeur derrière, mais l'incrément fausse transitoirement l'affichage).
+
+**Généralisation** : tout compteur agrégé (participants, gagnants, tickets) doit être dérivé
+de sa table de faits, jamais maintenu par incrément côté client ou RPC.
+
+## 4 ter. Plafonds de requête dashboard (chiffres tronqués)
+
+La sidebar affichait « Joueurs 500 » alors que la table en contient **769** : la requête
+portait un `limit=500`, et le compteur affiché = longueur du tableau reçu. Trois plafonds relevés
+dans `dashboard.html` : `joueurs` 500→20000, `joueurs` Brigade Verte 500→20000,
+`participations` 5000→50000.
+
+**Règle** : un compteur affiché ne doit jamais être la longueur d'une liste paginée.
+Vérifier le `limit` avant d'interpréter tout total du dashboard.
+
 ## 5. Métrique fiable côté pilotage
 
 Le compteur « scans » est un **nombre de flashs bruts** (gonflé par re-scans/itinérance,

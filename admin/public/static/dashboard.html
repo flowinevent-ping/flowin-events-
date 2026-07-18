@@ -2045,7 +2045,7 @@ async function supaLoadAll(){
       supaFetch('partenaires', 'select=*'),
       supaFetch('events'),
       supaFetch('super_events', 'select=*&limit=50'),
-      supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=500'),
+      supaFetch('joueurs', 'select=*&order=updated_at.desc&limit=20000'),
       supaFetch('lots'),
       supaFetch('banques'),
       supaFetch('landings')
@@ -3449,7 +3449,7 @@ function renderCrmRetours(){
 async function loadJoueursTicketsSummary(){
   state.joueursTickets = {}; // placeholder immédiat pour ne pas relancer le fetch à chaque render
   try{
-    var rows = await supaFetch('participations','select=joueur_id,tickets,created_at&order=created_at.desc&limit=5000');
+    var rows = await supaFetch('participations','select=joueur_id,tickets,created_at&order=created_at.desc&limit=50000');
     var out = {};
     (rows||[]).forEach(function(p){
       if(!p.joueur_id) return;
@@ -3470,7 +3470,7 @@ async function loadCrmLanding(){
   // Landing Brigade Verte (sondage terrain) : pas dans crm_retours (pipeline B2B), on la merge
   // depuis joueurs+participations pour qu'elle apparaisse comme une source de plus, ici.
   try{
-    var bvJoueurs = await supaFetch('joueurs','select=id,prenom,nom,tel,email,genre,age_tranche,code_postal,first_seen,updated_at&source=eq.brigade-manuel&order=updated_at.desc&limit=500');
+    var bvJoueurs = await supaFetch('joueurs','select=id,prenom,nom,tel,email,genre,age_tranche,code_postal,first_seen,updated_at&source=eq.brigade-manuel&order=updated_at.desc&limit=20000');
     if(bvJoueurs && bvJoueurs.length){
       var bvIds = bvJoueurs.map(function(j){return j.id;});
       var bvPart = await supaFetch('participations','select=joueur_id,bonus_answers,tickets,played_date&joueur_id=in.('+bvIds.join(',')+')');
