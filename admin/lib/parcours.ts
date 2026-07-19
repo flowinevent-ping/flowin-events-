@@ -243,18 +243,42 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
 
-  /* Anti-doublon */
-  const { data: dup } = await supabase
+  /* Anti-doublon — CORRIGE (19/07).
+     AVANT : .eq('email_lower', …).contains('events', [evId]) — sans aucune borne de date.
+     Or `events` est reecrit a chaque partie avec la seule station courante (events: [evId]).
+     Consequence : un joueur revenant sur LA MEME station un autre jour etait considere
+     comme doublon et REJETE (success:false, aucune participation ecrite), alors que la
+     regle metier est « 1 ticket par station ET PAR JOUR ». Il n'y echappait que s'il avait
+     joue une autre station entre-temps. Mesure NDS 2026 : 828 des 891 couples
+     joueur/station n'existaient que sur un seul jour.
+     APRES : on resout l'identite par email, puis on ne bloque que si une participation
+     existe deja pour CE joueur, CETTE station, AUJOURD'HUI. */
+  const { data: dejaConnu } = await supabase
     .from('joueurs')
-    .select('id,ticket_code')
+    .select('id,ticket_code,prenom,nom,tel,code_postal,age_tranche,genre')
     .eq('email_lower', emailLower)
-    .contains('events', [evId])
     .limit(1)
 
-  if (dup?.length) {
-    const d0 = dup[0] as { id?: string; ticket_code?: string }
-    rememberJoueur(d0.id, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
-    return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
+  if (dejaConnu?.length) {
+    const d0 = dejaConnu[0] as {
+      id: string; ticket_code?: string; prenom?: string; nom?: string;
+      tel?: string; code_postal?: string; age_tranche?: string; genre?: string
+    }
+    const debutJour = new Date(); debutJour.setHours(0, 0, 0, 0)
+    const { data: dejaJoue } = await supabase
+      .from('participations')
+      .select('id')
+      .eq('joueur_id', d0.id)
+      .eq('event_id', evId)
+      .gte('created_at', debutJour.toISOString())
+      .limit(1)
+
+    if (dejaJoue?.length) {
+      rememberJoueur(d0.id, emailLower, d0.prenom, {
+        nom: d0.nom, tel: d0.tel, cp: d0.code_postal, age: d0.age_tranche, genre: d0.genre,
+      })
+      return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
+    }
   }
 
   const tc = payload.ticket_code || generateTicket(payload.prefix as TicketPrefix)
