@@ -274,7 +274,17 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     scorePct = tot > 0 ? Math.round((bon / tot) * 100) : bon
   }
 
-  const { data: joueurRows, error: joueurErr } = await supabase.from('joueurs').upsert({
+  /* FAILLE CORRIGEE (19/07) : l'upsert se faisait sur `external_id`, qui contient le
+     PREFIXE de l'evenement (j-nd-…, j-pq-…). Or `email_lower` est une colonne GENEREE
+     ALWAYS = lower(email) portant un index UNIQUE GLOBAL. Consequence : un joueur deja
+     connu sous `j-pq-<email>` qui rejoue sur un autre evenement produisait
+     `j-nd-<email>` -> external_id different -> l'upsert tentait un INSERT -> violation
+     de joueurs_email_lower_unique -> erreur 23505 -> success:false, AUCUNE participation
+     ecrite, joueur rejete en silence. Mesure au NDS 2026 : 0 des 191 anciens joueurs
+     (186 Paques + 5 Spin) n'a pu s'inscrire.
+     Correctif : on resout l'identite par l'email (verite unique globale), puis UPDATE
+     cible si la personne existe deja, INSERT sinon. Le prefixe ne conditionne plus rien. */
+  const joueurFields = {
     external_id: extId,
     email: emailLower,
     prenom: payload.prenom?.trim() || null,
@@ -293,12 +303,35 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     optin: payload.optin !== false,
     optin_date: today,
     optin_version: payload.optin_version || null,
-    first_seen: today,
     last_seen: today,
     events: payload.events,
     ticket_code: tc,
     source: payload.source,
-  }, { onConflict: 'external_id' }).select('id')
+  }
+
+  const { data: existant } = await supabase
+    .from('joueurs')
+    .select('id')
+    .eq('email_lower', emailLower)
+    .limit(1)
+
+  let joueurRows: { id: string }[] | null = null
+  let joueurErr: { message: string } | null = null
+
+  if (existant?.length) {
+    // Joueur deja connu (quel que soit l'evenement d'origine) -> mise a jour ciblee.
+    const dejaId = (existant[0] as { id: string }).id
+    const r = await supabase.from('joueurs').update(joueurFields).eq('id', dejaId).select('id')
+    joueurRows = r.data as { id: string }[] | null
+    joueurErr = r.error
+  } else {
+    const r = await supabase
+      .from('joueurs')
+      .insert({ ...joueurFields, first_seen: today })
+      .select('id')
+    joueurRows = r.data as { id: string }[] | null
+    joueurErr = r.error
+  }
 
   if (joueurErr) {
     console.error('[writeJoueur] upsert joueur échoué:', joueurErr.message)
