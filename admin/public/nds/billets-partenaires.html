@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Billets gagnants — Partenaires Nuits du Sud 2026</title>
+<style>
+  :root{ --nds:#7C2D92; --or:#E0218A; --ink:#1a1024; --mut:#6b6076; --bd:#e6e0ec; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:#f4f1f7}
+  header{background:linear-gradient(135deg,#4a1259,#7C2D92 55%,#E0218A);color:#fff;padding:22px 26px}
+  header h1{margin:0;font-size:21px;letter-spacing:.2px}
+  header p{margin:6px 0 0;opacity:.9;font-size:13px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;padding:14px 26px;background:#fff;border-bottom:1px solid var(--bd);
+       position:sticky;top:0;z-index:10}
+  .bar button,.bar select{font:inherit;font-size:13px;padding:8px 14px;border-radius:9px;border:1px solid var(--bd);
+       background:#fff;cursor:pointer}
+  .bar button.p{background:var(--nds);color:#fff;border-color:var(--nds);font-weight:700}
+  .wrap{padding:22px 26px;max-width:1100px;margin:0 auto}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin:26px 0 12px}
+
+  /* ---------- BILLET ---------- */
+  .billet{background:#fff;border-radius:16px;overflow:hidden;margin:0 0 16px;
+          box-shadow:0 2px 10px rgba(40,10,60,.10);border:1px solid var(--bd);
+          display:grid;grid-template-columns:1fr 190px}
+  .b-main{padding:0}
+  .b-band{background:linear-gradient(135deg,#4a1259,#7C2D92 55%,#E0218A);color:#fff;
+          padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .b-band .ev{font-size:12px;letter-spacing:2.4px;text-transform:uppercase;opacity:.92;font-weight:700}
+  .b-band .yr{font-size:12px;opacity:.85}
+  .b-body{padding:18px 20px 20px}
+  .b-logo{height:64px;max-width:230px;object-fit:contain;display:block;margin:0 0 12px}
+  .b-part{font-size:22px;font-weight:800;margin:0 0 2px;color:var(--nds)}
+  .b-lot{font-size:17px;font-weight:700;margin:10px 0 2px}
+  .b-cond{font-size:11.5px;color:var(--mut);line-height:1.45;margin:4px 0 0}
+  .b-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin:16px 0 0;
+          border-top:1px dashed var(--bd);padding-top:14px}
+  .f-lab{font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:var(--mut)}
+  .f-val{font-size:14px;font-weight:600;word-break:break-word}
+  .b-stub{background:#faf7fc;border-left:2px dashed var(--bd);padding:16px 14px;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .stub-lab{font-size:9.5px;text-transform:uppercase;letter-spacing:1.1px;color:var(--mut);margin-bottom:6px}
+  .stub-no{font-size:17px;font-weight:800;letter-spacing:.6px;color:var(--nds);word-break:break-all}
+  .stub-val{margin-top:12px;font-size:26px;font-weight:800;color:var(--or)}
+  .stub-box{margin-top:14px;width:44px;height:44px;border:2px solid var(--nds);border-radius:8px}
+  .stub-box-l{font-size:9px;color:var(--mut);margin-top:5px;letter-spacing:.4px}
+
+  /* ---------- LISTE CAISSE ---------- */
+  .liste{background:#fff;border-radius:14px;border:1px solid var(--bd);overflow:hidden;margin-bottom:22px;
+         page-break-inside:avoid}
+  .l-head{background:linear-gradient(135deg,#4a1259,#7C2D92);color:#fff;padding:14px 18px;
+          display:flex;align-items:center;gap:14px}
+  .l-head img{height:38px;max-width:120px;object-fit:contain;background:#fff;border-radius:6px;padding:4px}
+  .l-head h3{margin:0;font-size:17px}
+  .l-head span{font-size:12px;opacity:.9;display:block;margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#faf7fc;text-align:left;padding:9px 12px;font-size:10.5px;text-transform:uppercase;
+     letter-spacing:.7px;color:var(--mut);border-bottom:1px solid var(--bd)}
+  td{padding:10px 12px;border-bottom:1px solid #f1ecf5;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  .chk{width:22px;height:22px;border:2px solid var(--nds);border-radius:5px;display:inline-block}
+  .tk{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--nds);white-space:nowrap}
+  .note{background:#fff8e6;border:1px solid #f0dfae;border-radius:10px;padding:12px 14px;font-size:12.5px;
+        color:#6a5320;margin:10px 0 20px}
+
+  @media print{
+    body{background:#fff}
+    header,.bar,.note{display:none}
+    .wrap{padding:0;max-width:none}
+    h2{page-break-before:always;margin-top:0}
+    h2:first-of-type{page-break-before:auto}
+    .billet{page-break-inside:avoid;box-shadow:none;margin-bottom:10px}
+    .hide-print{display:none!important}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Billets gagnants — Commerces partenaires</h1>
+  <p>Le Grand Jeu des Nuits du Sud 2026 · Vence · 51 lots attribués</p>
+</header>
+
+<div class="bar">
+  <select id="filtre"><option value="">Tous les partenaires</option></select>
+  <button class="p" onclick="window.print()">Imprimer</button>
+  <button onclick="show('billets')">Billets</button>
+  <button onclick="show('listes')">Listes de caisse</button>
+  <span style="margin-left:auto;font-size:12px;color:#6b6076;align-self:center" id="cpt"></span>
+</div>
+
+<div class="wrap">
+  <div class="note hide-print">
+    <b>Mode d'emploi.</b> « Billets » : un billet par gagnant, à envoyer par email ou à imprimer.
+    « Listes de caisse » : une liste par commerce, à remettre au partenaire pour cocher les lots retirés.
+    Le bouton Imprimer respecte la vue affichée.
+  </div>
+  <div id="out"></div>
+</div>
+
+<script>
+var LOGO = {
+  'pt-pegase':'/nds/partenaires/pegase.png',
+  'pt-carrosserie-gp':'/nds/partenaires/carrosserie-gp.png',
+  'pt-bergerie':'/nds/partenaires/bergerie.png',
+  'pt-giordano':'/nds/partenaires/giordano.png',
+  'pt-nook':'/nds/partenaires/nook.png',
+  'pt-utile':'/nds/partenaires/utile.png',
+  'pt-charvolin':'/nds/partenaires/charvolin.png'
+};
+var ADR = {
+  'pt-pegase':"Av. Émile Hugues, 06140 Vence · 04 93 58 94 17",
+  'pt-carrosserie-gp':"236 Av. Émile Hugues, 06140 Vence · 06 51 52 69 68",
+  'pt-bergerie':"1330 Chem. de la Sine, 06140 Vence · 04 93 58 09 36",
+  'pt-giordano':"418 Av. Rhin et Danube, 06140 Vence · 04 93 24 02 66",
+  'pt-nook':"rue Louis Funel, 06140 Vence",
+  'pt-utile':"40 Pl. du Grand Jardin, 06140 Vence · 04 93 58 44 44",
+  'pt-charvolin':"326 Av. Rhin & Danube, 06140 Vence · 04 93 58 41 41"
+};
+var COND = {
+  'pt-pegase':"Non cumulable · valable 4 mois",
+  'pt-carrosserie-gp':"Valable dès 90 € d'achat · entretien véhicule et carrosserie · non cumulable · valable 4 mois",
+  'pt-bergerie':"Valable dès 2 nuits de location · hébergements Pod et emplacement de tente · non cumulable · valable 4 mois",
+  'pt-giordano':"Valable dès 70 € d'achat · non cumulable · valable 4 mois",
+  'pt-nook':"Au choix : 1 café offert pour 1 acheté · formule petit-déjeuner offerte · 1 boisson achetée = 1 salé offert · non cumulable · valable 4 mois",
+  'pt-utile':"Valable dès 22 € d'achat en magasin · non cumulable · valable 4 mois",
+  'pt-charvolin':"Non cumulable · valable 4 mois"
+};
+
+var W = [
+{p:'pt-pegase',pn:"Auto-École de l'ARA",lot:"Bon 150 € — formation scooter",v:150,n:"Fabien Lavallee",e:"lavalleef@wanadoo.fr",t:"ND-2026-5397"},
+{p:'pt-pegase',pn:"Auto-École de l'ARA",lot:"Bon 150 € — formation moto",v:150,n:"Eric Zapata",e:"eric.zapata06@gmail.com",t:"ND-2026-8187"},
+{p:'pt-pegase',pn:"Auto-École de l'ARA",lot:"50 € de remise — permis moto ou voiture",v:50,n:"Myriam Bercot",e:"bercot.myriam22@gmail.com",t:"ND-2026-8935"},
+{p:'pt-carrosserie-gp',pn:"Carrosserie GP",lot:"Bon d'achat 30 €",v:30,n:"Gaëlle Hachard",e:"gaelle.hachard@wanadoo.fr",t:"ND-2026-7513"},
+{p:'pt-carrosserie-gp',pn:"Carrosserie GP",lot:"Bon d'achat 30 €",v:30,n:"Sandrine Clement",e:"sandrine.clement06@icloud.com",t:"ND-2026-2536"},
+{p:'pt-carrosserie-gp',pn:"Carrosserie GP",lot:"Bon d'achat 30 €",v:30,n:"Caroline Marques Timoteo",e:"mtcaroline26@gmail.com",t:"ND-2026-8442"},
+{p:'pt-carrosserie-gp',pn:"Carrosserie GP",lot:"Bon d'achat 30 €",v:30,n:"Isabelle Bernard",e:"myapart75014@gmail.com",t:"ND-2026-8034"},
+{p:'pt-carrosserie-gp',pn:"Carrosserie GP",lot:"Bon d'achat 30 €",v:30,n:"Claudine Frankinet",e:"frankinetclaudine@gmail.com",t:"ND-2026-4544"},
+{p:'pt-carrosserie-gp',pn:"Carrosserie GP",lot:"Bon d'achat 30 €",v:30,n:"Nathalie Peltier",e:"natpeltier83@gmail.com",t:"ND-2026-8004"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Alexandre Barclais",e:"barclaisalx@yahoo.fr",t:"ND-2026-6744"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Marianne Vaglio",e:"mandarine06@orange.fr",t:"ND-2026-2334"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Brent Wagner",e:"alexroding@gmail.com",t:"ND-2026-2229"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Laurence Bernadin",e:"lbernadi@hitmail.com",t:"ND-2026-9716"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Natalia Slahuckova",e:"nslahuckova@gmail.com",t:"ND-2026-3503"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Nicolas Magnet",e:"nicolas.magnet007@orange.fr",t:"ND-2026-3459"},
+{p:'pt-bergerie',pn:"Domaine de la Bergerie",lot:"Bon d'achat 20 €",v:20,n:"Hugo Clivio",e:"hclivio@gmail.com",t:"ND-2026-8278"},
+{p:'pt-giordano',pn:"Électroménager J Giordano",lot:"Bon d'achat 20 €",v:20,n:"Xavier Carlier",e:"xavier.carl@hotmail.fr",t:"ND-2026-1979"},
+{p:'pt-giordano',pn:"Électroménager J Giordano",lot:"Bon d'achat 20 €",v:20,n:"Nicolas Vidal",e:"nicolasvidal40@hotmail.fr",t:"ND-2026-4497"},
+{p:'pt-giordano',pn:"Électroménager J Giordano",lot:"Bon d'achat 20 €",v:20,n:"Martine Casacci",e:"martine.casacci@gmail.com",t:"ND-2026-1429"},
+{p:'pt-giordano',pn:"Électroménager J Giordano",lot:"Bon d'achat 20 €",v:20,n:"Emile Bique",e:"vieuxh971@gmail.com",t:"ND-2026-1313"},
+{p:'pt-giordano',pn:"Électroménager J Giordano",lot:"Bon d'achat 20 €",v:20,n:"Clara Aubertin",e:"aubertin.clara1301@gmail.com",t:"ND-2026-1919"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Véronique Desoutter",e:"desoutter.veronique@gmail.c",t:"ND-2026-7502",bad:1},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Jérôme Espinet",e:"jerome_espinet@orange.fr",t:"ND-2026-6286"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Françoise Pignol",e:"francoise.pignol08@gmail.com",t:"ND-2026-7037"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Joanna Coelho Monteiro",e:"joanna.coelho-monteiro@hotmail.fr",t:"ND-2026-2275"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Marleen Geoffray",e:"marleengeoffray@gmail.com",t:"ND-2026-3376"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Alexandre Lomet",e:"alexandre.lomet@gmail.com",t:"ND-2026-6682"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Michael Carton",e:"ardkor@gmail.com",t:"ND-2026-6936"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Clarence Louis-Ducret",e:"louisducretclarence@gmail.com",t:"ND-2026-7226"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Angélique Pardoel",e:"a.pardoel@laposte.net",t:"ND-2026-3281"},
+{p:'pt-nook',pn:"Nook Café",lot:"Offre gourmande",v:6,n:"Isabelle Bernard",e:"myapart75014@gmail.com",t:"ND-2026-8034"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Frederic Poggi",e:"frederic.poggi@hotmail.com",t:"ND-2026-9931"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Marianne Vaglio",e:"mandarine06@orange.fr",t:"ND-2026-2334"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Laurent Torres",e:"torreslaurent8@gmail.com",t:"ND-2026-7642"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Nelly Gautier",e:"nguyen.tnelly06@gmail.com",t:"ND-2026-7798"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Yoan Mencarelli",e:"tigerfever@hotmail.fr",t:"ND-2026-2601"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Mélissa Zircon",e:"melissa.zircon@hotmail.fr",t:"ND-2026-4704"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Sébastien Serrier",e:"sugeseb@gmail.com",t:"ND-2026-8797"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Clémentine Ciel",e:"elfia06390@gmail.com",t:"ND-2026-7114"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Isabelle Bernard",e:"myapart75014@gmail.com",t:"ND-2026-8034"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Montserrat Argente",e:"montse1@free.fr",t:"ND-2026-8403"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Sonia Manceau",e:"sonia.manceau@icloud.com",t:"ND-2026-1076"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Tangi Guyonvarc'h",e:"tangi_guyonvarch@yahoo.fr",t:"ND-2026-6384"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Julie Dhéret",e:"juliecalisto@yahoo.com",t:"ND-2026-3241"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Isabelle Marqueze",e:"isabellemarqueze@yahoo.fr",t:"ND-2026-8374"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Mélanie Gastaud",e:"melanie.gastaud@yahoo.fr",t:"ND-2026-7483"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Aurore Holodzion",e:"lamiss395@live.fr",t:"ND-2026-3212"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Lucie Garric",e:"lucynissa@yahoo.fr",t:"ND-2026-5254"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Aurélia Lachenal",e:"aurelialalala@yahoo.fr",t:"ND-2026-5742"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Orlane Torres",e:"orlane.torres21@gmail.com",t:"ND-2026-5439"},
+{p:'pt-utile',pn:"Utile Vence",lot:"Bon d'achat 10 €",v:10,n:"Clara Aubertin",e:"aubertin.clara1301@gmail.com",t:"ND-2026-1919"}
+];
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+var VUE='billets';
+function show(v){ VUE=v; render(); }
+
+function billet(w){
+  return '<div class="billet">'
+   + '<div class="b-main">'
+     + '<div class="b-band"><span class="ev">Le Grand Jeu des Nuits du Sud</span><span class="yr">Vence · 2026</span></div>'
+     + '<div class="b-body">'
+       + '<img class="b-logo" src="'+LOGO[w.p]+'" alt="'+esc(w.pn)+'">'
+       + '<div class="b-part">'+esc(w.pn)+'</div>'
+       + '<div class="b-cond">'+esc(ADR[w.p]||'')+'</div>'
+       + '<div class="b-lot">'+esc(w.lot)+'</div>'
+       + '<div class="b-cond">'+esc(COND[w.p]||'')+'</div>'
+       + '<div class="b-grid">'
+         + '<div><div class="f-lab">Nom et prénom</div><div class="f-val">'+esc(w.n)+'</div></div>'
+         + '<div><div class="f-lab">Email</div><div class="f-val">'+esc(w.e)+'</div></div>'
+       + '</div>'
+     + '</div>'
+   + '</div>'
+   + '<div class="b-stub">'
+     + '<div class="stub-lab">N° de billet</div>'
+     + '<div class="stub-no">'+esc(w.t)+'</div>'
+     + '<div class="stub-val">'+esc(w.v)+' €</div>'
+     + '<div class="stub-box"></div><div class="stub-box-l">Retiré</div>'
+   + '</div>'
+  + '</div>';
+}
+
+function listes(rows){
+  var by={}; rows.forEach(function(w){ (by[w.p]=by[w.p]||[]).push(w); });
+  var h='';
+  Object.keys(by).forEach(function(pid){
+    var g=by[pid], tot=0; g.forEach(function(x){ tot+=Number(x.v)||0; });
+    h+='<div class="liste"><div class="l-head">'
+      + '<img src="'+LOGO[pid]+'" alt="">'
+      + '<div><h3>'+esc(g[0].pn)+'</h3><span>'+g.length+' lot(s) à remettre · valeur totale '+tot+' € · '+esc(ADR[pid]||'')+'</span></div></div>'
+      + '<table><thead><tr><th style="width:52px">Remis</th><th>N° billet</th><th>Nom et prénom</th><th>Email</th><th>Lot</th><th style="width:150px">Date / signature</th></tr></thead><tbody>';
+    g.forEach(function(w){
+      h+='<tr><td><span class="chk"></span></td><td class="tk">'+esc(w.t)+'</td><td><b>'+esc(w.n)+'</b></td><td>'+esc(w.e)+'</td><td>'+esc(w.lot)+'</td><td></td></tr>';
+    });
+    h+='</tbody></table></div>';
+  });
+  return h;
+}
+
+function render(){
+  var f=document.getElementById('filtre').value;
+  var rows=W.filter(function(w){ return !f || w.p===f; });
+  document.getElementById('cpt').textContent=rows.length+' gagnant(s)';
+  document.getElementById('out').innerHTML =
+    VUE==='billets' ? rows.map(billet).join('') : listes(rows);
+}
+
+(function init(){
+  var seen={}, sel=document.getElementById('filtre');
+  W.forEach(function(w){ if(!seen[w.p]){ seen[w.p]=1;
+    var o=document.createElement('option'); o.value=w.p; o.textContent=w.pn; sel.appendChild(o); } });
+  sel.addEventListener('change',render);
+  render();
+})();
+</script>
+</body>
+</html>
