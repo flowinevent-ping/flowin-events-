@@ -4,90 +4,101 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Billets gagnants — Nuits du Sud 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--nuit:#1B0B2E;--vio:#6D28A8;--mag:#E0218A;--or:#F5B841;--cr:#FFFDF9;--ink:#2A1338;--mut:#8B7E97;--bd:#EDE6F2}
+:root{
+  --purple:#7C2D92; --mag:#E0218A; --or:#F5B544;
+  --ink:#1a1226; --ink2:#52455e; --mut:#7a708a;
+  --bd:#ece7f2; --bd2:#e7def0; --paper:#ffffff; --soft:#faf7fd;
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);background:#EFEAF4}
-header{background:linear-gradient(120deg,#160823,#4C1A73 45%,#B01E77);color:#fff;padding:24px 28px}
-header h1{margin:0;font-family:'Playfair Display',Georgia,serif;font-size:23px;font-weight:800}
-header p{margin:6px 0 0;opacity:.85;font-size:13px}
-.bar{display:flex;gap:8px;flex-wrap:wrap;padding:14px 28px;background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:20}
-.bar button,.bar select{font:inherit;font-size:13px;padding:8px 15px;border-radius:9px;border:1px solid var(--bd);background:#fff;cursor:pointer}
-.bar button.p{background:var(--vio);color:#fff;border-color:var(--vio);font-weight:700}
-.wrap{padding:26px 28px;max-width:1000px;margin:0 auto}
+body{margin:0;font-family:'Manrope',system-ui,-apple-system,Segoe UI,sans-serif;
+     color:var(--ink);background:#f2eef7}
+header{background:linear-gradient(135deg,var(--purple),var(--mag));color:#fff;padding:24px 28px}
+header h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.2px}
+header p{margin:6px 0 0;opacity:.9;font-size:13px;font-weight:500}
+.bar{display:flex;gap:8px;flex-wrap:wrap;padding:14px 28px;background:#fff;
+     border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:20}
+.bar button,.bar select{font:inherit;font-size:13px;font-weight:600;padding:8px 15px;
+     border-radius:10px;border:1px solid var(--bd2);background:#fff;cursor:pointer;color:var(--ink2)}
+.bar button.p{background:var(--purple);color:#fff;border-color:var(--purple)}
+.wrap{padding:26px 28px;max-width:960px;margin:0 auto}
 
-/* ====== BILLET ====== */
-.tk{position:relative;width:100%;max-width:760px;margin:0 auto 26px;background:var(--cr);border-radius:20px;
-    box-shadow:0 10px 34px rgba(27,11,46,.16);overflow:hidden;display:grid;grid-template-columns:1fr 224px}
-.tk::before,.tk::after{content:'';position:absolute;right:216px;width:22px;height:22px;background:#EFEAF4;border-radius:50%;z-index:3}
-.tk::before{top:-11px}.tk::after{bottom:-11px}
-.perf{position:absolute;top:0;bottom:0;right:224px;width:1px;
-      background-image:linear-gradient(var(--bd) 55%,transparent 0);background-size:1px 11px;z-index:2}
+/* ===== BILLET — format formel, une seule pièce ===== */
+.tk{width:100%;max-width:660px;margin:0 auto 24px;background:var(--paper);
+    border:1px solid var(--bd);border-radius:18px;overflow:hidden;
+    box-shadow:0 6px 22px rgba(26,18,38,.10)}
 
-.side{position:relative;background:linear-gradient(160deg,#160823,#4C1A73 52%,#8E1C86);color:#fff;
-      padding:26px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
-.side::after{content:'';position:absolute;inset:-40% -60%;
-      background:radial-gradient(circle at 30% 20%,rgba(245,184,65,.28),transparent 55%),
-                 radial-gradient(circle at 75% 85%,rgba(224,33,138,.34),transparent 55%)}
-.side>*{position:relative;z-index:1}
-.side-lab{font-size:9px;letter-spacing:2.2px;text-transform:uppercase;opacity:.72;margin-bottom:7px}
-.side-no{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:15.5px;font-weight:700;letter-spacing:.5px;
-      background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.26);border-radius:8px;padding:7px 10px;word-break:break-all}
-.side-val{margin-top:18px;font-family:'Playfair Display',Georgia,serif;font-size:44px;font-weight:800;line-height:1;
-      color:var(--or);text-shadow:0 2px 14px rgba(245,184,65,.3)}
-.side-cur{font-size:20px;vertical-align:super;margin-left:2px}
-.side-exp{margin-top:20px;font-size:9.5px;line-height:1.65;opacity:.82;letter-spacing:.3px}
-.side-exp b{display:block;font-size:12px;opacity:1;margin-top:2px;color:var(--or)}
+.tk-head{background:linear-gradient(135deg,var(--purple),var(--mag));color:#fff;
+    padding:18px 26px;display:flex;align-items:center;gap:16px}
+.tk-head img{height:40px;object-fit:contain}
+.tk-head .sep{width:1px;height:32px;background:rgba(255,255,255,.3)}
+.tk-head b{display:block;font-size:15px;font-weight:800;letter-spacing:-.1px}
+.tk-head span{display:block;font-size:10px;font-weight:600;letter-spacing:1.8px;
+    text-transform:uppercase;opacity:.82;margin-top:3px}
 
-.main{padding:0;display:flex;flex-direction:column}
-.band{background:linear-gradient(120deg,#160823,#4C1A73 55%,#B01E77);padding:15px 26px;display:flex;align-items:center;gap:16px}
-.band img{height:38px;object-fit:contain}
-.band .sep{width:1px;height:30px;background:rgba(255,255,255,.28)}
-.band .ttl{color:#fff}
-.band .ttl b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:600;letter-spacing:.2px}
-.band .ttl span{display:block;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;opacity:.75;margin-top:2px}
+.tk-rule{height:3px;background:var(--or)}
 
-.body{padding:24px 26px 22px;flex:1}
-.top{display:flex;align-items:center;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--bd)}
-.plogo{height:74px;max-width:190px;object-fit:contain;flex:none}
-.pinfo b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:600;color:var(--nuit);line-height:1.25}
-.pinfo span{display:block;font-size:11.5px;color:var(--mut);margin-top:5px;line-height:1.5}
+/* bandeau partenaire */
+.tk-part{padding:22px 26px;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--bd)}
+.tk-part img{height:66px;max-width:180px;object-fit:contain;flex:none}
+.tk-part b{display:block;font-size:19px;font-weight:800;color:var(--ink);line-height:1.3}
+.tk-part span{display:block;font-size:12px;font-weight:500;color:var(--mut);margin-top:4px;line-height:1.5}
 
-.type{display:inline-block;margin:18px 0 0;padding:5px 13px;border-radius:999px;background:var(--mag);color:#fff;
-      font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px}
-.lot{font-family:'Playfair Display',Georgia,serif;font-size:25px;font-weight:800;color:var(--nuit);margin:10px 0 0;line-height:1.25}
-.cond{font-size:11px;color:var(--mut);line-height:1.6;margin:9px 0 0;max-width:96%}
+/* lot */
+.tk-lot{padding:24px 26px 22px;text-align:center;background:var(--soft);border-bottom:1px solid var(--bd)}
+.tk-type{display:inline-block;padding:5px 14px;border-radius:999px;background:var(--purple);color:#fff;
+    font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px}
+.tk-name{font-size:23px;font-weight:800;color:var(--ink);margin:12px 0 0;line-height:1.3;letter-spacing:-.3px}
+.tk-val{font-size:15px;font-weight:700;color:var(--mag);margin-top:6px}
+.tk-cond{font-size:11.5px;font-weight:500;color:var(--mut);line-height:1.6;margin:12px auto 0;max-width:88%}
 
-.holder{margin-top:20px;padding-top:16px;border-top:1px dashed var(--bd);display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
-.lab{font-size:9px;text-transform:uppercase;letter-spacing:1.1px;color:var(--mut);margin-bottom:3px}
-.val{font-size:14.5px;font-weight:600;word-break:break-word;color:var(--ink)}
-.foot{padding:11px 26px;background:#F7F2FA;border-top:1px solid var(--bd);font-size:9.5px;color:var(--mut);
-      display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* beneficiaire */
+.tk-benef{padding:20px 26px;display:grid;grid-template-columns:1fr 1fr;gap:16px 22px;border-bottom:1px solid var(--bd)}
+.tk-benef .full{grid-column:1/-1}
+.lab{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--mut);margin-bottom:4px}
+.val{font-size:14.5px;font-weight:700;color:var(--ink);word-break:break-word}
+.val.num{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;color:var(--purple);letter-spacing:.5px}
 
-/* ====== LISTE CAISSE ====== */
-.liste{background:#fff;border-radius:16px;border:1px solid var(--bd);overflow:hidden;margin:0 auto 24px;max-width:900px;page-break-inside:avoid}
-.lh{background:linear-gradient(120deg,#160823,#4C1A73 60%,#B01E77);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:16px}
-.lh img{height:44px;max-width:130px;object-fit:contain;background:#fff;border-radius:8px;padding:5px}
-.lh h3{margin:0;font-family:'Playfair Display',Georgia,serif;font-size:19px;font-weight:600}
-.lh span{font-size:11.5px;opacity:.85;display:block;margin-top:3px}
+/* validite */
+.tk-valid{padding:14px 26px;background:#fff8e8;border-bottom:1px solid var(--bd);
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-size:12.5px;font-weight:700;color:#7a5a10;text-align:center}
+
+/* mentions */
+.tk-ment{padding:16px 26px 18px;background:#fff}
+.tk-ment h4{margin:0 0 7px;font-size:9px;font-weight:800;text-transform:uppercase;
+    letter-spacing:1.3px;color:var(--mut)}
+.tk-ment p{margin:0;font-size:9.5px;font-weight:500;line-height:1.7;color:var(--mut)}
+.tk-foot{padding:11px 26px;background:var(--ink);color:rgba(255,255,255,.72);
+    font-size:9.5px;font-weight:600;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tk-foot b{color:#fff}
+
+/* ===== LISTE CAISSE ===== */
+.liste{background:#fff;border-radius:16px;border:1px solid var(--bd);overflow:hidden;
+    margin:0 auto 24px;max-width:900px;page-break-inside:avoid}
+.lh{background:linear-gradient(135deg,var(--purple),var(--mag));color:#fff;padding:16px 20px;
+    display:flex;align-items:center;gap:16px}
+.lh img{height:42px;max-width:126px;object-fit:contain;background:#fff;border-radius:8px;padding:5px}
+.lh h3{margin:0;font-size:18px;font-weight:800}
+.lh span{font-size:11.5px;font-weight:500;opacity:.88;display:block;margin-top:3px}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{background:#FAF6FC;text-align:left;padding:10px 12px;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);border-bottom:1px solid var(--bd)}
-td{padding:11px 12px;border-bottom:1px solid #F4EEF8}
+th{background:var(--soft);text-align:left;padding:10px 12px;font-size:9.5px;font-weight:800;
+   text-transform:uppercase;letter-spacing:.8px;color:var(--mut);border-bottom:1px solid var(--bd)}
+td{padding:11px 12px;border-bottom:1px solid #f4eff8;font-weight:500}
 tr:last-child td{border-bottom:0}
-.chk{width:22px;height:22px;border:2px solid var(--vio);border-radius:6px;display:inline-block}
-.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--vio);white-space:nowrap}
-.note{background:#FFF8E8;border:1px solid #F0DFAE;border-radius:12px;padding:13px 16px;font-size:12.5px;color:#6A5320;margin:0 auto 22px;max-width:900px}
+.chk{width:22px;height:22px;border:2px solid var(--purple);border-radius:6px;display:inline-block}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--purple);white-space:nowrap}
+.note{background:#fff8e8;border:1px solid #f0dfae;border-radius:12px;padding:13px 16px;
+   font-size:12.5px;font-weight:500;color:#6a5320;margin:0 auto 22px;max-width:900px}
 
 @media print{
-  @page{margin:11mm}
+  @page{margin:12mm}
   body{background:#fff}
   header,.bar,.note{display:none}
   .wrap{padding:0;max-width:none}
-  .tk{box-shadow:none;border:1px solid var(--bd);page-break-inside:avoid;margin-bottom:14px}
-  .tk::before,.tk::after{background:#fff}
+  .tk{box-shadow:none;page-break-inside:avoid;margin-bottom:16px;max-width:none}
   .liste{page-break-inside:avoid}
-  h2{page-break-before:always}h2:first-of-type{page-break-before:auto}
 }
 </style>
 </head>
@@ -101,10 +112,10 @@ tr:last-child td{border-bottom:0}
   <button class="p" onclick="window.print()">Imprimer / PDF</button>
   <button onclick="show('billets')">Billets</button>
   <button onclick="show('listes')">Listes de caisse</button>
-  <span style="margin-left:auto;font-size:12px;color:#8B7E97;align-self:center" id="cpt"></span>
+  <span style="margin-left:auto;font-size:12px;color:#7a708a;align-self:center" id="cpt"></span>
 </div>
 <div class="wrap">
-  <div class="note">Billets : un par gagnant, à joindre en PDF à l'email. Listes de caisse : une par commerce, à remettre au partenaire pour pointer les lots retirés.</div>
+  <div class="note">Billets : un par gagnant, à joindre en PDF à l'email. Listes de caisse : une par commerce, pour pointer les lots retirés.</div>
   <div id="out"></div>
 </div>
 <script>
@@ -195,39 +206,43 @@ function typeBon(lot){
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
+var MENTIONS = "Jeu gratuit sans obligation d'achat organise dans le cadre des Nuits du Sud 2026 a Vence, "
+ + "du 9 au 18 juillet 2026. Lot attribue par tirage au sort parmi les participants au jeu. "
+ + "Billet nominatif, incessible, non remboursable et non echangeable contre especes ou tout autre lot. "
+ + "A presenter en boutique chez le commercant partenaire indique ci-dessus. Un seul billet par personne et par lot. "
+ + "Le commercant se reserve le droit de demander une piece d'identite. Reglement complet disponible sur simple demande "
+ + "a flowinevent@gmail.com.";
+
 var VUE='billets';
 function show(v){ VUE=v; render(); }
 
 function billet(w){
-  return '<div class="tk"><span class="perf"></span>'
-  + '<div class="main">'
-    + '<div class="band">'
-      + '<img src="'+NDS+'" alt="Nuits du Sud">'
-      + '<span class="sep"></span>'
-      + '<span class="ttl"><b>Le Grand Jeu</b><span>Vence · Édition 2026</span></span>'
-    + '</div>'
-    + '<div class="body">'
-      + '<div class="top">'
-        + '<img class="plogo" src="'+LOGO[w.p]+'" alt="'+esc(w.pn)+'">'
-        + '<span class="pinfo"><b>'+esc(w.pn)+'</b><span>'+esc(ADR[w.p]||'')+'</span></span>'
-      + '</div>'
-      + '<div class="type">'+esc(typeBon(w.lot))+'</div>'
-      + '<div class="lot">'+esc(w.lot)+'</div>'
-      + '<div class="cond">'+esc(COND[w.p]||'')+'</div>'
-      + '<div class="holder">'
-        + '<div><div class="lab">Bénéficiaire</div><div class="val">'+esc(w.n)+'</div></div>'
-        + '<div><div class="lab">Email</div><div class="val">'+esc(w.e)+'</div></div>'
-      + '</div>'
-    + '</div>'
-    + '<div class="foot"><span>Billet nominatif · non remboursable · non échangeable contre espèces</span>'
-      + '<span>flowinevent@gmail.com · 06 16 35 49 36</span></div>'
+  return '<div class="tk">'
+  + '<div class="tk-head">'
+    + '<img src="'+NDS+'" alt="Nuits du Sud">'
+    + '<span class="sep"></span>'
+    + '<span><b>Le Grand Jeu</b><span>Vence · Edition 2026</span></span>'
   + '</div>'
-  + '<div class="side">'
-    + '<div class="side-lab">Billet n°</div>'
-    + '<div class="side-no">'+esc(w.t)+'</div>'
-    + '<div class="side-val">'+esc(w.v)+'<span class="side-cur">€</span></div>'
-    + '<div class="side-exp">Valable jusqu\'au<b>25 octobre 2026</b></div>'
+  + '<div class="tk-rule"></div>'
+  + '<div class="tk-part">'
+    + '<img src="'+LOGO[w.p]+'" alt="'+esc(w.pn)+'">'
+    + '<span><b>'+esc(w.pn)+'</b><span>'+esc(ADR[w.p]||'')+'</span></span>'
   + '</div>'
+  + '<div class="tk-lot">'
+    + '<div class="tk-type">'+esc(typeBon(w.lot))+'</div>'
+    + '<div class="tk-name">'+esc(w.lot)+'</div>'
+    + '<div class="tk-val">Valeur : '+esc(w.v)+' €</div>'
+    + '<div class="tk-cond">'+esc(COND[w.p]||'')+'</div>'
+  + '</div>'
+  + '<div class="tk-benef">'
+    + '<div><div class="lab">Beneficiaire</div><div class="val">'+esc(w.n)+'</div></div>'
+    + '<div><div class="lab">Numero de billet</div><div class="val num">'+esc(w.t)+'</div></div>'
+    + '<div class="full"><div class="lab">Email</div><div class="val">'+esc(w.e)+'</div></div>'
+  + '</div>'
+  + '<div class="tk-valid">A presenter en boutique · valable jusqu\'au 25 octobre 2026</div>'
+  + '<div class="tk-ment"><h4>Conditions du jeu</h4><p>'+esc(MENTIONS)+'</p></div>'
+  + '<div class="tk-foot"><span><b>Le Grand Jeu des Nuits du Sud</b> · Vence 2026</span>'
+    + '<span>flowinevent@gmail.com · 06 16 35 49 36</span></div>'
   + '</div>';
 }
 
@@ -237,8 +252,8 @@ function listes(rows){
   Object.keys(by).forEach(function(pid){
     var g=by[pid], tot=0; g.forEach(function(x){ tot+=Number(x.v)||0; });
     h+='<div class="liste"><div class="lh"><img src="'+LOGO[pid]+'" alt="">'
-     + '<div><h3>'+esc(g[0].pn)+'</h3><span>'+g.length+' lot(s) à remettre · valeur totale '+tot+' € · '+esc(ADR[pid]||'')+'</span></div></div>'
-     + '<table><thead><tr><th style="width:54px">Remis</th><th>N° billet</th><th>Bénéficiaire</th><th>Email</th><th>Lot</th><th style="width:150px">Date / signature</th></tr></thead><tbody>';
+     + '<div><h3>'+esc(g[0].pn)+'</h3><span>'+g.length+' lot(s) a remettre · valeur totale '+tot+' € · '+esc(ADR[pid]||'')+'</span></div></div>'
+     + '<table><thead><tr><th style="width:54px">Remis</th><th>N° billet</th><th>Beneficiaire</th><th>Email</th><th>Lot</th><th style="width:150px">Date / signature</th></tr></thead><tbody>';
     g.forEach(function(w){
       h+='<tr><td><span class="chk"></span></td><td class="mono">'+esc(w.t)+'</td><td><b>'+esc(w.n)+'</b></td><td>'+esc(w.e)+'</td><td>'+esc(w.lot)+'</td><td></td></tr>';
     });
