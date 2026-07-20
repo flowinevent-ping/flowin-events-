@@ -1,0 +1,618 @@
+﻿prenom,nom,email,tel,code_postal,genre,age_tranche,optin,ticket_code,first_seen,decouverte,parties,tickets,stations
+Isabelle,BERNARD,myapart75014@gmail.com,0612226193,06700,F,36-50,True,ND-2026-8034,2026-07-09,,38,38,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 1 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · Caisse 3 | NDS · L'Écran
+Alexandre,Lomet,alexandre.lomet@gmail.com,0684844707,75014,H,36-50,True,ND-2026-6682,2026-07-09,Bouche à oreille,23,24,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 1 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+Aurélia,Lachenal,aurelialalala@yahoo.fr,0620145494,06140,F,36-50,False,ND-2026-5742,2026-07-09,Affiche,18,17,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2 | Nook Café | SAFER
+Yohan,Desjardins,pcintelcorei3@icloud.com,0777054052,06330,H,36-50,True,ND-2026-8134,2026-07-09,,11,11,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+Ghislaine,IAFRATE,magik.gigi@gmail.com,0699886512,69560,F,51-65,False,ND-2026-3561,2026-07-17,,9,9,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Cassandra,Lecompte,cassandra.lecompte@outlook.fr,0777468516,06330,F,26-35,False,ND-2026-8228,2026-07-10,,8,9,NDS · Bar 1 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · L'Écran | SAFER
+Nicolas,Ducray,ducray84.nicolas@gmail.com,0781806161,06140,H,36-50,True,ND-2026-9044,2026-07-10,Autre,8,8,NDS · Bar 1 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · L'Écran | SAFER
+Quentin,Lemmen,quentin.lemmen@hotmail.fr,0686064128,06510,H,26-35,False,ND-2026-3160,2026-07-11,Bouche à oreille,10,8,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Caisse 1
+Alexis,Lerebourg,lerebourg.alexis@hotmail.fr,0626388852,83310,H,26-35,False,ND-2026-7355,2026-07-16,Bouche à oreille,8,8,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+Solene,Souffrin,solene62510@hotmail.fr,0630886879,83240,F,36-50,True,ND-2026-4503,2026-07-16,Autre,8,8,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+alexandre,barclais,barclaisalx@yahoo.fr,0667920579,06150,H,51-65,True,ND-2026-6744,2026-07-09,Bouche à oreille,7,7,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Clémentine,Ciel,elfia06390@gmail.com,0651889062,06200,F,26-35,False,ND-2026-7114,2026-07-11,Bouche à oreille,6,7,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2
+Yohann,COMONT,yoyocomo@hotmail.com,+33664752906,06160,H,36-50,True,ND-2026-5856,2026-07-11,,7,7,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 3 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Boris,Khalkhal,boris.khalkhal@gmail.com,,06140,H,36-50,True,ND-2026-7828,2026-07-09,,6,7,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Caisse 2 | Nook Café
+Clara,Aubertin,aubertin.clara1301@gmail.com,+33651009868,06200,F,18-25,False,ND-2026-1919,2026-07-16,,8,6,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+PAULINE,DIQUERO,paulinediquero96@gmail.com,+33614488306,06800,F,26-35,True,ND-2026-8529,2026-07-17,Bouche à oreille,6,6,NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+Christine,Durante,chdurante@free.fr,0609852118,06270,F,51-65,True,ND-2026-9887,2026-07-10,Affiche,6,6,NDS · Bar 1 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Jérôme,Espinet,jerome_espinet@orange.fr,+33680583926,06600,H,36-50,False,ND-2026-6286,2026-07-10,,5,6,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2
+Marie Noelle,Gouy,manoelle.gouy@gmail.com,0688861823,06250,F,65+,True,ND-2026-5358,2026-07-10,Affiche,6,6,NDS · Bar 1 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Jaymes,Kalala,jaymes.kalala@gmail.com,0678522450,060000,F,26-35,True,ND-2026-1446,2026-07-09,Affiche,7,6,NDS · Bar 1 | NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+Mélanie,PHILIP,melaxellerep@gmail.com,0668015828,06800,F,26-35,False,ND-2026-8554,2026-07-18,Bouche à oreille,6,6,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 3 | NDS · Caisse 2 | NDS · L'Écran
+Rémy,Boeringer,boeringer.remy@protonmail.com,0650326402,06100,H,36-50,False,ND-2026-4431,2026-07-09,Bouche à oreille,3,5,NDS · Bar 1 | NDS · Bar 2
+Mathis,Diquero,diqueromathis@gmail.com,+33783263120,06140,F,-18,False,ND-2026-1683,2026-07-17,Instagram,5,5,NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 2 | SAFER
+Maria,Mendoza,peyrat.mendoza@gmail.com,0760356303,06140,F,36-50,False,ND-2026-6847,2026-07-10,Autre,4,5,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 2
+Geraldine,Pailler,geraldinepailler@gmail.com,0634453537,06150,F,36-50,True,ND-2026-7842,2026-07-09,Bouche à oreille,8,5,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Warren,Priori,warren.priori@club-internet.fr,+33617577128,06600,F,36-50,False,ND-2026-7351,2026-07-10,Bouche à oreille,6,5,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2
+Marianne,VAGLIO,mandarine06@orange.fr,0621058688,06700,F,36-50,True,ND-2026-2334,2026-07-10,Autre,4,5,NDS · Caisse 1 | NDS · Caisse 2
+Delphine,Aime,delfinette83@gmail.com,+33619515038,83600,F,36-50,True,ND-2026-9747,2026-07-10,,4,4,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 2
+Anne-Laure,Cherbuy,annelaure.cherbuy@gmail.com,+33687289576,06100,F,36-50,False,ND-2026-6341,2026-07-17,,5,4,NDS · Bar 1 | NDS · Bar 3 | NDS · Caisse 2 | NDS · L'Écran | SAFER
+Hugo,CLIVIO,hclivio@gmail.com,+33768203854,06300,H,26-35,True,ND-2026-8278,2026-07-09,Instagram,8,4,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Caisse 1
+Sebastien,COUGNARD,cougnards@icloud.com,+33664380074,06390,H,51-65,True,ND-2026-6741,2026-07-10,Bouche à oreille,3,4,NDS · Bar 1 | NDS · Brigade Verte 3 | NDS · Caisse 1
+Lorenzo,De Clemente,lorenzo.de.clemente@outlook.fr,+33626898478,06200,H,26-35,True,ND-2026-2423,2026-07-11,Bouche à oreille,3,4,NDS · Bar 2 | NDS · Bar 3 | NDS · L'Écran
+Celine,DIEBOLD,dieboldceline@gmail.com,0649688881,06000,F,36-50,True,ND-2026-2538,2026-07-10,Affiche,4,4,NDS · Caisse 1 | NDS · Caisse 2 | NDS · L'Écran
+Margot,Exposito,cherry13420@gmail.com,0659227306,06480,F,26-35,False,ND-2026-3683,2026-07-10,Bouche à oreille,3,4,NDS · Bar 1 | NDS · Caisse 2
+Nelly,Gautier,nguyen.tnelly06@gmail.com,0658328890,06200,F,36-50,True,ND-2026-7798,2026-07-10,,3,4,NDS · Bar 1 | NDS · Brigade Verte 2 | NDS · Caisse 1
+marleen,geoffray,marleengeoffray@gmail.com,0624776560,06140,F,36-50,False,ND-2026-3376,2026-07-11,Autre,4,4,Auto-École de l'ARA | NDS · Caisse 2
+Coralie,Leclercq,coralie-leclercq@hotmail.com,0640609850,06210,F,26-35,False,ND-2026-6948,2026-07-18,Bouche à oreille,3,4,NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · L'Écran
+Alix,Legrand,legrand.palmiers@gmail.com,0768159761,06640,F,-18,False,ND-2026-8268,2026-07-16,Instagram,4,4,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1
+Elisabeth,Nannini,nicedecor@hotmail.com,0666910372,06790,F,51-65,True,ND-2026-5787,2026-07-10,Bouche à oreille,3,4,NDS · Caisse 1
+Kelys,Nkodia,nkodiakelys@gmail.com,+33621166165,06300,F,-18,False,ND-2026-3809,2026-07-10,Autre,3,4,NDS · Bar 1 | NDS · Caisse 1 | NDS · Caisse 2
+Sébastien,Patron,krolbab@gmail.com,+33663748953,06150,H,51-65,True,ND-2026-9661,2026-07-09,,3,4,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3
+Lydia,Peno,lydia.peno@free.fr,0614487213,06140,F,36-50,True,ND-2026-1811,2026-07-09,Bouche à oreille,4,4,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 2
+Vanessa,Santoire,vanillavet06@gmail.com,+33668966112,06140,F,36-50,True,ND-2026-8548,2026-07-17,Bouche à oreille,6,4,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Muriel,Adancourt,murieladancourt@free.fr,0621910342,06500,F,51-65,True,ND-2026-7492,2026-07-10,,2,3,NDS · Brigade Verte 3 | NDS · Caisse 1
+Montserrat,ARGENTE,montse1@free.fr,+33686853702,06140,F,65+,False,ND-2026-8403,2026-07-01,,6,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Brigade Verte 2 | NDS · Caisse 1 | NDS · Caisse 2
+Dominique,Bardin,dominique.bardin06@laposte.net,+33609729529,06140,F,65+,False,ND-2026-9748,2026-07-10,,4,3,NDS · Caisse 1 | NDS · Caisse 2 | SAFER
+Leslie,CAIGNAN,leslie.olivia.caignan@gmail.com,+33658390448,06140,F,36-50,True,ND-2026-6713,2026-07-17,Affiche,3,3,NDS · Bar 1 | NDS · Bar 3
+FREDERIC,CLAVEL,mailcom.clavel@laposte.net,+33676285228,06140,H,51-65,True,ND-2026-2862,2026-07-10,,2,3,NDS · Caisse 2
+Laurence,De Lecluse,laurence.delecluse@orange.fr,06 16 79 36 83,06610,F,51-65,True,ND-2026-2639,2026-07-10,,4,3,NDS · Bar 1 | NDS · Brigade Verte 2 | NDS · Caisse 1 | NDS · Caisse 2
+Dorian,Dufour,dorian.dufour77@gmail.com,0675507921,06600,H,26-35,True,ND-2026-9489,2026-07-10,Affiche,2,3,NDS · Caisse 2 | NDS · L'Écran
+Erik,Flambart,flambart.e@gmail.com,06229188887,06510,H,36-50,False,ND-2026-5878,2026-07-11,Bouche à oreille,3,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3
+Cyrielle,Heraud,cyrielle.heraud@gmail.com,0671893697,06140,F,36-50,False,ND-2026-7752,2026-07-09,,4,3,NDS · Bar 1 | NDS · Brigade Verte 2 | NDS · Caisse 1 | SAFER
+nathalie,hoijtink,nathalie.hoijtink@gmail.com,06 20 02 13 62,06140,F,51-65,True,ND-2026-7615,2026-07-11,Bouche à oreille,3,3,NDS · Bar 3 | NDS · Caisse 2
+Eddy,Kieffer,eddy.schwarzy@hotmail.fr,0682620892,06510,H,26-35,False,ND-2026-1081,2026-07-11,Autre,3,3,NDS · Bar 2 | NDS · Caisse 1 | NDS · L'Écran
+Anne,LE NEST,lenestanne@gmail.com,+33698515933,06800,F,36-50,True,ND-2026-4302,2026-07-10,Instagram,4,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | SAFER
+Ange,Manso,manso.ange@gmail.com,603939350,06570,H,18-25,True,ND-2026-1922,2026-07-11,Bouche à oreille,3,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3
+Mitch,Mitch,matthieu.collin.fr@gmail.com,,,Garçon,,False,ND-2026-7728,,,3,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3
+Nathalie,PELTIER,natpeltier83@gmail.com,0689135783,83600,F,51-65,True,ND-2026-8004,2026-07-10,Affiche,2,3,NDS · Bar 1 | NDS · Caisse 1
+Djamila,Platillero,djamip13@gmail.com,0609341935,06600,F,51-65,True,ND-2026-9449,2026-07-10,,3,3,NDS · Bar 1 | NDS · Caisse 1 | SAFER
+Frank,Platillero,fplatillero13@gmail.com,0698880645,06330,H,51-65,False,ND-2026-8493,2026-07-10,Affiche,3,3,NDS · Bar 1 | NDS · Caisse 1 | SAFER
+Hermine,Pollet,herminezumba@gmail.com,+33671006035,83440,F,51-65,False,ND-2026-3309,2026-07-09,,3,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Brigade Verte 2
+Alisson,Ragazzo,alissonragazzo@gmail.com,+33661991783,06000,F,26-35,False,ND-2026-1911,2026-07-11,Instagram,2,3,NDS · Bar 2 | NDS · L'Écran
+MD ZIAUR,Rahman,ziaurrafiju@gmail.com,+33758026416,06140,H,26-35,True,ND-2026-3436,2026-07-09,Autre,2,3,NDS · Caisse 2
+Maxime,Roth,pointsellier@gmail.com,0615198559,0640,H,36-50,False,ND-2026-8342,2026-07-16,Bouche à oreille,3,3,NDS · Bar 2 | NDS · Bar 3
+Marc Antoine,Rouyer,marc06140@gmail.com,0615683296,06140,H,36-50,True,ND-2026-8049,2026-07-11,Affiche,2,3,NDS · Bar 1 | SAFER
+Sophie,SALHAB,salhabsophie@gmail.com,+33622368773,06400,F,36-50,False,ND-2026-7395,2026-07-10,,2,3,NDS · Bar 1 | NDS · Caisse 2
+Alexandra,SERRE,nenemse@gmail.com,0663304615,06140,F,36-50,True,ND-2026-4043,2026-07-09,Bouche à oreille,3,3,NDS · Bar 1 | NDS · Bar 3
+Léonie,Spettel,leonie.spettel@icloud.com,0668159079,06140,F,26-35,True,ND-2026-5032,2026-07-09,Affiche,2,3,Nook Café
+Malaury,Trouchard,malaury.trouchard@gmail.com,0768978544,83590,F,36-50,True,ND-2026-4365,2026-07-11,Bouche à oreille,4,3,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3 | NDS · L'Écran
+Saphinaise,Zaky,saphinaise@yahoo.fr,+33698729851,06800,F,36-50,True,ND-2026-4437,2026-07-10,Instagram,2,3,NDS · Caisse 2 | NDS · L'Écran
+Mélissa,Zircon,melissa.zircon@hotmail.fr,0619765642,06200,F,26-35,False,ND-2026-4704,2026-07-10,Bouche à oreille,3,3,NDS · Bar 1 | NDS · Caisse 2
+Paul,Albertini,albertiniph@hotmail.com,0680460515,06730,H,36-50,False,ND-2026-4882,2026-07-10,,1,2,NDS · Brigade Verte 2
+Ivan,ALLAGUY,yvanatbiot@gmail.com,0677183428,06410,H,51-65,True,ND-2026-2792,2026-07-10,,2,2,NDS · Brigade Verte 2 | NDS · Caisse 2
+Max,Amato,maxamato@hotmail.fr,0649351378,06460,H,36-50,False,ND-2026-4743,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Yannick,Ancarno,newmanpastore10@gmail.com,0643320549,06410,H,36-50,False,ND-2026-4907,2026-07-10,,2,2,NDS · Brigade Verte 2 | NDS · Caisse 2
+Cindy,André,andre.cin83@gmail.com,+33613613372,83720,F,36-50,True,ND-2026-8765,2026-07-10,Bouche à oreille,2,2,NDS · Bar 1 | NDS · Caisse 1
+Marie Pierre,ANDRIAMAHANINA,matou06800@gmail.com,0771652735,06480,F,65+,True,ND-2026-7696,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 2
+fred,andrieux,frederic.andrieux@hotmail.fr,0619486325,06200,H,65+,False,ND-2026-7582,2026-07-17,Affiche,1,2,NDS · Brigade Verte 3
+Fred,Arconte,fraecn@icloud.com,0695611329,06000,F,51-65,False,ND-2026-9677,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Pauline,Banfi Mallamaci,pauline.salis23@gmail.com,0665149188,06160,F,18-25,False,ND-2026-7260,2026-07-09,Instagram,1,2,NDS · Caisse 2
+Camille,Battistini,battistini.camille@icloud.com,0641699569,06200,F,26-35,False,ND-2026-6046,2026-07-09,Bouche à oreille,1,2,NDS · Caisse 2
+Hamel,Ben ali,hamelbenali@gmail.com,0629352892,06300,F,36-50,True,ND-2026-4365,2026-07-10,Instagram,1,2,NDS · Caisse 2
+Benoît,Benoît,benoitharmand@hotmail.com,0780414894,06140,H,36-50,False,ND-2026-7009,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Manon,Bergamaschi,manon.bergamaschi@gmail.com,0783868963,06640,F,26-35,False,ND-2026-1056,2026-07-09,,1,2,NDS · Bar 1
+Laurence,Bernadin,lbernadi@hitmail.com,0687864686,06800,F,36-50,False,ND-2026-9716,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 2
+Vincent,Bertin,vincent.bertinn@gmail.com,0677752585,06300,H,26-35,False,ND-2026-1345,2026-07-10,Bouche à oreille,1,2,NDS · Brigade Verte 3
+Vanessa,BETILLE,vanessa.betille@gmail.com,+33664193631,06140,F,36-50,True,ND-2026-6741,2026-07-09,Affiche,1,2,NDS · Caisse 1
+Carla,Beuve,carla.beuve@outlook.fr,0764941616,06520,F,26-35,False,ND-2026-6741,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 2
+alexandre,bigeard,alexandre.bigeard@gmail.com,+33624513968,06140,H,51-65,False,ND-2026-1603,2026-07-11,,1,2,Utile Vence
+Jacques,Bobinski,jacquesbobinski@gmail.com,0750404979,06270,H,51-65,True,ND-2026-8680,2026-07-10,,2,2,NDS · Bar 1 | NDS · Brigade Verte 3
+Clément,Boilletot,clement.fitnessmanager@gmail.com,0676976981,06220,H,36-50,False,ND-2026-6218,2026-07-18,Bouche à oreille,1,2,NDS · Bar 3
+Joëlle,BONNETOUCHE,joelle.bonnetouche@gmail.com,615785576,06600,F,65+,True,ND-2026-9001,2026-07-10,Affiche,1,2,NDS · Caisse 2
+Marie-Laure,Bosano,mlaurebos@gmail.com,0601739313,06300,F,51-65,True,ND-2026-8271,2026-07-09,Bouche à oreille,1,2,NDS · Caisse 1
+Marion,Boutillon,marion.boutillon@gmail.com,0650087448,83120,F,36-50,True,ND-2026-7372,2026-07-09,,1,2,NDS · Caisse 1
+Julie,Bruschini,julie.bruschini@gmail.com,0634298923,06110,F,36-50,False,ND-2026-2888,2026-07-09,Autre,1,2,NDS · Bar 3
+Carine,BUONOMANO,carine.buonomano@hotmail.fr,0611940032,06800,F,51-65,False,ND-2026-5512,2026-07-10,Instagram,1,2,NDS · Caisse 1
+kevin,capecchi,kevin.capecchi@gmail.com,0647050543,06480,H,36-50,True,ND-2026-3966,2026-07-18,Affiche,1,2,NDS · L'Écran
+Serge,Capella,serge.capella@hotmail.fr,0660355652,06140,H,65+,True,ND-2026-9482,2026-07-09,,1,2,NDS · Caisse 2
+Sara,Cappelletto,sara.el260504@gmail.com,0788987857,06800,F,18-25,True,ND-2026-3412,2026-07-18,Instagram,2,2,NDS · Brigade Verte 2 | NDS · Caisse 2
+Melissa,CAPY,capimelissa35@gmail.com,0622482247,83720,F,18-25,True,ND-2026-9343,2026-07-10,Autre,1,2,NDS · L'Écran
+Cyril,CASACCI,cyril.casacci@gmail.com,+33615278868,06140,H,36-50,False,ND-2026-7746,2026-07-18,,1,2,NDS · Brigade Verte 2
+Soizic,CAVAILLÉ,l.s.cavaille@gmail.com,+33684104372,06600,F,36-50,True,ND-2026-8905,2026-07-09,Bouche à oreille,1,2,NDS · Caisse 2
+Louis,Chalancon,chalanconlouis31@gmail.com,0623312035,06610,H,18-25,False,ND-2026-9754,2026-07-16,Instagram,3,2,NDS · Bar 1 | NDS · Bar 2 | NDS · Bar 3
+Stéphanie,CHAMPION,stephaniechampion3@gmail.com,+33685678486,06800,H,36-50,False,ND-2026-3013,2026-07-10,,1,2,NDS · Bar 1
+sylvie,charlin,sylvie06.charlin@gmail.com,0675390828,06510,F,51-65,True,ND-2026-3852,2026-07-10,Instagram,1,2,NDS · L'Écran
+Benjamin,Cinque,bcinque@orange.fr,+33686073626,83480,H,36-50,False,ND-2026-1206,2026-07-10,Bouche à oreille,2,2,NDS · Bar 1 | NDS · Caisse 1
+Charlotte,Combe,combe.charlotte@gmail.com,0640369179,06200,F,36-50,True,ND-2026-2243,2026-07-18,,1,2,NDS · L'Écran
+jeff,condet,jeffnice-info@yahoo.fr,0670996818,06100,H,51-65,True,ND-2026-6175,2026-07-10,Autre,1,2,NDS · Bar 1
+Aurélie,Cornudet,gilbertaurelie@hotmail.fr,0668078048,06640,F,36-50,False,ND-2026-7557,2026-07-11,Affiche,1,2,NDS · L'Écran
+constance,coutier,coutierconstance05@gmail.com,0767474940,75012,F,18-25,False,ND-2026-4173,2026-07-18,Instagram,2,2,NDS · Bar 3 | NDS · Brigade Verte 3
+MICKAEL,DELHERBE,m6d0@live.fr,0677368892,06130,H,26-35,False,ND-2026-5283,2026-07-17,,1,2,NDS · Brigade Verte 3
+Sandra,Demongeot,sandra.demongeot@wanadoo.fr,+33786509148,87000,F,51-65,False,ND-2026-7429,2026-07-10,Bouche à oreille,4,2,NDS · Bar 1 | NDS · Brigade Verte 2 | NDS · Caisse 1 | NDS · Caisse 2
+Pierre,DENISET,pierre.deniset@gmail.com,+33612624121,06140,H,65+,False,ND-2026-7426,2026-07-11,,1,2,NDS · L'Écran
+Rayann,Deojee,rayann.deojee@laposte.net,0664417050,06400,H,26-35,True,ND-2026-3490,2026-07-10,,2,2,NDS · Brigade Verte 3 | NDS · Caisse 2
+Johan,Desjardins,yoan76@live.fr,0761754204,06140,H,36-50,False,ND-2026-5800,2026-07-10,Affiche,1,2,NDS · Brigade Verte 3
+Quentin,Deveyer,plgr@hotmail.fr,0625589307,06460,H,26-35,True,ND-2026-3208,2026-07-18,Autre,2,2,NDS · Bar 1 | NDS · Bar 2
+Julie,Dhéret,juliecalisto@yahoo.com,0614263393,06140,F,36-50,True,ND-2026-3241,2026-07-09,Bouche à oreille,1,2,NDS · Caisse 2
+Amandine,Dione,dione.amandine@gmail.com,0624824761,06110,F,26-35,False,ND-2026-6400,2026-07-18,,1,2,NDS · Brigade Verte 3
+Frédéric,DIQUERO,f.diquero@gmail.com,+33676698777,06140,H,51-65,False,ND-2026-9366,2026-07-17,Bouche à oreille,1,2,NDS · Bar 3
+Morgane,Dubos,morgane-simon@wanadoo.fr,0682490072,35200,F,51-65,True,ND-2026-9006,2026-07-11,Autre,1,2,NDS · L'Écran
+Floflo,Dudup,puydou@hotmail.com,0601322319,83600,H,36-50,False,ND-2026-1038,2026-07-10,Autre,1,2,NDS · Caisse 1
+Marjorie,Dura,marjoriedura@yahoo.fr,0626670120,06600,F,36-50,False,ND-2026-4428,2026-07-09,,1,2,NDS · Caisse 1
+Lydie,Durand,durand.lydie@outlook.fr,0659386432,06340,F,36-50,True,ND-2026-3068,2026-07-10,,2,2,NDS · Brigade Verte 2 | NDS · L'Écran
+imrane,elallouki,elkimrane1@gmail.com,0756134657,06140,H,36-50,True,ND-2026-9309,2026-07-09,Affiche,1,2,Utile Vence
+Hélène,Eouzan,helene.eouzan@hotmail.fr,0646882234,06140,F,26-35,False,ND-2026-4205,2026-07-11,,1,2,NDS · L'Écran
+Emilie,Fabre,emifabre@hotmail.fr,+33663623070,06140,F,36-50,True,ND-2026-2391,2026-07-09,Affiche,1,2,NDS · Caisse 2
+Valérie,Ferrucci,valerie.ferrucci@hotmail.fr,0627071964,06800,F,51-65,True,ND-2026-6887,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Jean Noël,Fontaine,rcoeur08@gmail.com,0616253585,06140,H,51-65,True,ND-2026-2008,2026-07-09,,2,2,NDS · Bar 1 | NDS · Bar 2
+Franckine,Foulon,franckinef@gmail.com,0743381297,06140,F,36-50,True,ND-2026-9001,2026-07-10,,1,2,NDS · Brigade Verte 3
+Claudine,Frankinet,frankinetclaudine@gmail.com,0615652243,06140,F,51-65,False,ND-2026-4544,2026-07-10,Affiche,1,2,NDS · Brigade Verte 2
+Roger,Frankinet,frankinetr@gmail.com,0626863392,06140,H,65+,False,ND-2026-1162,2026-07-10,Affiche,1,2,NDS · Brigade Verte 2
+Marie,Fredet,mfdt944@gmail.com,0623432952,062002,F,26-35,True,ND-2026-4256,2026-07-10,Bouche à oreille,1,2,NDS · Bar 1
+Lucie,Garric,lucynissa@yahoo.fr,+33664932270,06200,F,26-35,False,ND-2026-5254,2026-07-09,,2,2,NDS · Bar 3 | NDS · Brigade Verte 3
+Julien,Genest,genestjulien06270@gmail.com,0688107791,06800,H,26-35,True,ND-2026-6904,2026-07-11,Autre,1,2,NDS · L'Écran
+Nathalie,GEORG,ngeorg@free.fr,0607805496,06560,F,51-65,False,ND-2026-1066,2026-07-09,Bouche à oreille,1,2,NDS · Caisse 2
+Marion,Gherlich,gherlichmarion@hotmail.fr,0645827601,06700,F,36-50,False,ND-2026-5953,2026-07-10,Instagram,2,2,NDS · Bar 1 | NDS · Caisse 2
+florence,girin,florencegirin83@gmail.com,0663642762,83300,F,36-50,False,ND-2026-8285,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 2
+Adeline,Goepfert,goepfertad@aol.com,0689261541,06000,F,26-35,True,ND-2026-4821,2026-07-11,Instagram,1,2,NDS · L'Écran
+Camille,Grandjean,camillemultinu@live.fr,0677104957,06200,F,36-50,False,ND-2026-7360,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 1
+Sandy,Griffa,diablotinette06@hotmail.fr,+33613076407,06510,F,36-50,False,ND-2026-6047,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Gaëlle,Hachard,gaelle.hachard@wanadoo.fr,0683046945,06510,F,36-50,False,ND-2026-7513,2026-07-10,Affiche,1,2,NDS · Bar 1
+Paola,Hajjar,paola.hajjar@free.fr,0610204837,06800,F,51-65,True,ND-2026-5443,2026-07-10,,1,2,NDS · Caisse 1
+Agnès,Hellegouarch,hellegouarch.agnes@orange.fr,+33629330817,06410,F,51-65,True,ND-2026-2520,2026-07-17,,2,2,NDS · Brigade Verte 2 | NDS · Brigade Verte 3
+Melissa,Hermant,melissa.hermant@outlook.com,0678026291,06600,F,26-35,False,ND-2026-2948,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Daniel,Hohweiller,daniel.hohweiller@gmail.com,+33629982333,83520,H,51-65,False,ND-2026-1940,2026-07-17,,2,2,NDS · Brigade Verte 2 | SAFER
+Sean,Honniball,s.honniball@gmail.com,+33672607039,06150,H,26-35,True,ND-2026-9851,2026-07-09,Instagram,1,2,NDS · Bar 3
+Teixeira,Jose,joseteixeiralopes.83@gmail.com,+33652436820,06000,H,36-50,True,ND-2026-7636,2026-07-10,Bouche à oreille,1,2,NDS · Bar 1
+Myriam,Koffi,mymykoffi@gmail.com,0610533495,83600,F,51-65,False,ND-2026-6633,2026-07-10,Bouche à oreille,1,2,NDS · Bar 1
+Laëtitia,Koï,laetitiakoi@gmail.com,+33770570861,06270,F,36-50,True,ND-2026-1248,2026-07-10,,1,2,NDS · Bar 1
+Patrick,Lannoy,pat.lannoy@wanadoo.fr,0783839141,06800,H,51-65,True,ND-2026-2113,2026-07-10,,1,2,NDS · Caisse 1
+Léa,Lanteri,lea.lanteri@laposte.net,+33771173863,06800,F,18-25,True,ND-2026-4598,2026-07-09,Instagram,1,2,NDS · Brigade Verte 3
+Stephane,Lanteri,lanterst@laposte.net,+33617221304,06800,H,51-65,True,ND-2026-6265,2026-07-09,Instagram,1,2,NDS · Brigade Verte 3
+Marine,Largaud,marine.largaud@icloud.com,0622754942,06200,F,26-35,False,ND-2026-3886,2026-07-10,Bouche à oreille,1,2,NDS · Brigade Verte 2
+Fabien,Lavallee,lavalleef@wanadoo.fr,+33768717858,06500,H,51-65,True,ND-2026-5397,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Florent,Le ny,florentleny29@gmail.com,0604444465,06640,H,18-25,False,ND-2026-8225,2026-07-18,Autre,1,2,NDS · L'Écran
+ANGELIQUE,LE TALLEC,angel700@hotmail.fr,+33699488472,06300,F,36-50,True,ND-2026-3453,2026-07-09,Instagram,1,2,NDS · Caisse 2
+Stéphanie,Lecomte,steph.lec06@gmail.com,0650621128,06320,F,36-50,True,ND-2026-2361,2026-07-16,Bouche à oreille,1,2,NDS · Caisse 1
+Ingrid,Lefin,fredingrid2@icloud.com,0613962493,06800,F,36-50,True,ND-2026-7982,2026-07-11,Autre,1,2,NDS · Bar 2
+Alain,Leonardi,alainleonardi@hotmail.com,0660910568,06340,H,65+,True,ND-2026-2789,2026-07-10,,1,2,NDS · Caisse 2
+Margot,Lesne,margot.lesne@gmail.com,+33662521591,06600,F,26-35,False,ND-2026-5063,2026-07-09,,1,2,NDS · Bar 3
+Marie,Longo,marielongo57@gmail.com,0761964381,06130,F,36-50,False,ND-2026-9198,2026-07-09,Bouche à oreille,1,2,NDS · Caisse 2
+Clarence,LOUIS-DUCRET,louisducretclarence@gmail.com,0633608485,06800,H,26-35,False,ND-2026-7226,2026-07-10,,1,2,NDS · Bar 2
+TRISTAN,LUCAS,tristan.lucas@sdis06.fr,+33618667638,06330,H,36-50,False,ND-2026-1290,2026-07-09,,1,2,NDS · Caisse 1
+Jean Jacques,LUCAS,jjlucas1955@yahoo.fr,+33 6 80 72 91 37,06400,H,65+,True,ND-2026-4901,2026-07-17,Bouche à oreille,1,2,NDS · Brigade Verte 2
+Rose,Macabee,novolita@gmail.com,0619774700,06800,F,36-50,False,ND-2026-8870,2026-07-10,Affiche,1,2,NDS · Caisse 2
+Cecile,Mallamaci,cecile.salis@outlook.com,0613814326,06160,F,51-65,True,ND-2026-7833,2026-07-09,,1,2,NDS · Caisse 2
+Guillaume,Marcille,guihob@hotmail.fr,+33674123152,06200,H,26-35,True,ND-2026-4953,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Eva,Marcoux,eva.marcoux@gmail.com,+33667060444,34070,F,18-25,False,ND-2026-2670,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Léa,Martinvalet,lea.martinvalet@yahoo.fr,0601091012,06100,F,26-35,True,ND-2026-1442,2026-07-10,Bouche à oreille,2,2,NDS · Bar 1 | NDS · Bar 2
+Christine,Massaloup,christine.davy099@orange.fr,0789692229,06800,F,51-65,True,ND-2026-6810,2026-07-10,Affiche,3,2,NDS · Bar 1 | NDS · Caisse 1 | SAFER
+Marie-Margaux,Mazere,mazere.mmargaux@gmail.com,0603275638,06100,F,36-50,True,ND-2026-3508,2026-07-17,Affiche,1,2,NDS · Brigade Verte 3
+Yoan,Mencarelli,tigerfever@hotmail.fr,0627222505,06610,H,36-50,False,ND-2026-2601,2026-07-11,,1,2,NDS · Bar 3
+Marck,Mirdita,marck06@hotmail.fr,0662296233,06140,H,36-50,True,ND-2026-7620,2026-07-18,,1,2,NDS · L'Écran
+Géraldine,MOREAU,geraldine.moreau29@gmail.com,+33632778827,06330,F,36-50,True,ND-2026-2209,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Justine,Moreira,jerkjustine@gmail.com,0614515375,06700,F,26-35,False,ND-2026-8368,2026-07-17,,1,2,NDS · Bar 3
+John,Munnelly,hattwoodsauce@gmail.com,17183128313,06157,H,36-50,True,ND-2026-2198,2026-07-09,Affiche,1,2,NDS · Caisse 2
+Nicolas,Nauroy,n.nauroy@gmail.com,+33676750751,06140,H,36-50,False,ND-2026-8668,2026-07-10,Autre,1,2,NDS · Brigade Verte 2
+Laurence,Or,laurenceor@sfr.fr,06 16 02 41 18,06800,F,51-65,True,ND-2026-1920,2026-07-10,,1,2,NDS · Brigade Verte 3
+Morgane,Oudy,oudymorgane@gmail.com,0698815732,06580,F,26-35,False,ND-2026-3789,2026-07-10,Instagram,2,2,NDS · Bar 1 | NDS · Caisse 1
+Carole,Parent,troisilets2@wanadoo.fr,0660919714,06110,F,36-50,False,ND-2026-4719,2026-07-10,Autre,1,2,NDS · Caisse 2
+Loïc,Paris,loic.paris06100@gmail.com,+33662801125,06800,H,51-65,True,ND-2026-7411,2026-07-10,Bouche à oreille,2,2,NDS · Bar 1 | NDS · Caisse 1
+Claudine,Payet,payetcl@orange.fr,979629084,06190,F,51-65,True,ND-2026-8243,2026-07-10,,1,2,NDS · Bar 3
+Marilyn,Peeters,milloona22@hotmail.com,0664705989,06800,F,36-50,False,ND-2026-4996,2026-07-11,,1,2,NDS · Brigade Verte 3
+Marc,Peltier,mc.peltier@wanadoo.fr,0608317293,06600,H,36-50,False,ND-2026-5132,2026-07-10,Bouche à oreille,1,2,NDS · L'Écran
+Aurore,Perez,perez.aurore06@gmail.com,+33663076979,06140,F,36-50,False,ND-2026-9641,2026-07-17,,2,2,NDS · Brigade Verte 2 | SAFER
+Fabien,Pernot,pernotfabien@neuf.fr,0612713402,06810,H,51-65,True,ND-2026-8277,2026-07-11,Autre,1,2,NDS · L'Écran
+Stephane,Perrot,stephane.perrot06@gmail.com,0689182490,06800,H,51-65,True,ND-2026-7631,2026-07-10,Autre,1,2,NDS · Caisse 1
+Aurélie,Peset,apeset@laposte.net,0660789198,06140,F,36-50,True,ND-2026-5632,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 2
+Françoise,Pignol,francoise.pignol08@gmail.com,+300617878689,06570,F,51-65,True,ND-2026-7037,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 1
+Amélie,Plouvier,redamely@hotmail.com,+33678157360,06140,F,36-50,False,ND-2026-4837,2026-07-16,,2,2,NDS · Bar 3 | NDS · Brigade Verte 2
+Noé,Poltzien,noepoltzien@gmail.com,0749204857,89340,H,-18,True,ND-2026-6299,2026-07-17,Affiche,2,2,NDS · L'Écran
+Margot,Pons,margot.pons96@gmail.com,+33622191990,06200,F,26-35,False,ND-2026-8154,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 2
+Anthony,PORCINO,antho.alphatauri@gmail.com,+33621647560,06130,H,36-50,False,ND-2026-1496,2026-07-10,,1,2,NDS · Bar 1
+Catherine,Pospiech,cathpospiech@gmail.com,0635360041,06210,F,36-50,True,ND-2026-6606,2026-07-10,,2,2,NDS · Caisse 1 | SAFER
+Céline,Provost,provost.celine15081968@gmail.com,0658924243,83600,F,51-65,True,ND-2026-7817,2026-07-10,Bouche à oreille,1,2,NDS · Caisse 1
+Marie line,Radier,malunarobert@icloud.com,0631029716,06140,F,51-65,True,ND-2026-5492,2026-07-09,Bouche à oreille,1,2,NDS · Bar 3
+Faliana,Razafitsoma,faliana84@gmail.com,0614330607,13300,H,26-35,False,ND-2026-7426,2026-07-18,Autre,1,2,NDS · L'Écran
+Nina,RENARD,ninafoxrenard@gmail.com,0667261811,06140,F,-18,True,ND-2026-9718,2026-07-09,Affiche,1,2,NDS · Caisse 2
+Catherine,Ricci,catherine.ricci-06@orange.fr,0664999074,06140,F,51-65,True,ND-2026-2714,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Elodie,RINGUET,elodie.ringuet@gmail.com,+33674810009,83600,F,26-35,False,ND-2026-4717,2026-07-10,,1,2,NDS · Caisse 1
+Laurent,Robles,robleslaurent1@gmail.com,0674082382,06510,H,36-50,True,ND-2026-1006,2026-07-10,Instagram,2,2,NDS · L'Écran
+Delphine,Rotthier,delphine.rotthier@gmail.com,0640613525,98000,F,51-65,True,ND-2026-6853,2026-07-17,Instagram,1,2,NDS · Caisse 2
+Julia,Rousselet,ju.rousselet@outlook.fr,629136346,06200,F,26-35,False,ND-2026-2081,2026-07-11,Autre,1,2,NDS · Bar 2
+Aude,RYDALEVSKY,aude06@yahoo.fr,0609393531,06100,F,51-65,True,ND-2026-2907,2026-07-10,Affiche,1,2,NDS · Caisse 1
+Angie,SALENGH,a.salengh@gmail.com,0628578289,06800,F,26-35,False,ND-2026-5834,2026-07-10,Autre,2,2,NDS · Bar 1 | NDS · Caisse 1
+Yannick,Sanchez-huebra,yannick.sanchezhuebra@gmail.com,+33661364165,06200,H,26-35,False,ND-2026-3146,2026-07-11,Instagram,1,2,NDS · L'Écran
+Audrey,SARETE,sarete.audrey@orange.fr,0672245977,06800,F,36-50,False,ND-2026-4256,2026-07-17,Autre,2,2,NDS · Caisse 1 | NDS · Caisse 2
+Cecile,Sciorella,cecile.sciorella@hotmail.fr,0616192266,06140,F,36-50,True,ND-2026-7138,2026-07-10,Bouche à oreille,2,2,NDS · Caisse 2 | NDS · L'Écran
+Cloé,Scotto,feebleu@hotmail.fr,0687907488,06130,F,36-50,False,ND-2026-9625,2026-07-10,Autre,2,2,NDS · Bar 1 | NDS · Caisse 1
+Nathalie,Sejourne,eleange06@gmail.com,+33625553276,06100,F,36-50,False,ND-2026-8951,2026-07-11,,1,2,NDS · Bar 2
+Kiara,Seywert,kiara-s@orange.fr,0787602382,06150,F,18-25,False,ND-2026-6262,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+Vincent,Simard,vincentsimard06@gmail.com,+33695365752,06800,H,18-25,False,ND-2026-1407,2026-07-15,,1,2,Électroménager J Giordano
+Christopher,Soleille,soleille.c06@gmail.com,0645425370,06220,H,36-50,False,ND-2026-9929,2026-07-17,Bouche à oreille,1,2,NDS · Brigade Verte 3
+Amandine,Souris,a.souris@sfr.fr,0661669162,06200,F,36-50,True,ND-2026-8972,2026-07-09,Instagram,1,2,NDS · Bar 3
+Laurent,Soussi,cara.ls@hotmail.fr,0663478158,06800,H,51-65,True,ND-2026-4892,2026-07-18,,1,2,NDS · Brigade Verte 3
+Alexandra,Soutar,alex.soutar@live.fr,+33660027216,Vallauris,F,36-50,True,ND-2026-4737,2026-07-10,Autre,1,2,NDS · Caisse 2
+Cyril,STAUBER,stoypro@gmail.com,+33652634621,06210,H,36-50,True,ND-2026-7954,2026-07-09,,1,2,NDS · Caisse 2
+Karine,Torres,karine.torres74@free.fr,0622014869,06140,F,51-65,True,ND-2026-3759,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Orlane,Torres,orlane.torres21@gmail.com,+33783315592,06140,F,18-25,True,ND-2026-5439,2026-07-10,,2,2,NDS · Bar 1 | NDS · Caisse 1
+Céline,Toulmonde,celinetoulmonde@gmail.com,+33627657339,06150,F,51-65,True,ND-2026-8985,2026-07-09,,1,2,NDS · Caisse 2
+Eric,Viale,eric.viale.ev@gmail.com,06 88 95 12 94,06110,H,36-50,False,ND-2026-8744,2026-07-09,,1,2,NDS · Caisse 2
+Luminita,Viale,vialeluminita@gmail.com,0783541297,06110,F,36-50,False,ND-2026-5488,2026-07-09,,1,2,NDS · Caisse 2
+Isabelle,vigreux,isabelle.vigreux06@gmail.com,+33658077805,06140,F,36-50,True,ND-2026-1599,2026-07-11,Instagram,1,2,SAFER
+Alicia,Youssouf,alicia.yous@gmail.com,0620804146,83200,F,26-35,False,ND-2026-6868,2026-07-18,Affiche,1,2,NDS · L'Écran
+Eric,Zapata,eric.zapata06@gmail.com,0663794597,06510,H,36-50,True,ND-2026-8187,2026-07-11,Bouche à oreille,1,2,NDS · L'Écran
+may,acheson,dmacheson@yahoo.com,8766105448,06140,F,18-25,True,ND-2026-8142,2026-07-11,,1,1,NDS · Bar 1
+Carine,Adam,ctadam.biot@gmail.com,0678837588,06410,F,36-50,False,ND-2026-6255,2026-07-10,,1,1,NDS · Caisse 2
+Jean-Marc,ALBERT,albert.jean-marc@outlook.fr,+33672571228,06200,H,65+,True,ND-2026-2717,2026-07-09,,2,1,NDS · Bar 2 | NDS · Caisse 2
+Christophe,Allabrune,christophe.allabrune@gmail.com,0646408833,06220,H,51-65,True,ND-2026-4317,2026-07-10,Autre,1,1,NDS · Bar 3
+Yvan,Allaguy,yvan.allaguy@gmail.com,0677183428,06410,H,51-65,True,,2026-07-10,,1,1,NDS · Brigade Verte 2
+Djamila,Amdouni,amdouni476@yahoo.fr,0769973728,06000,F,36-50,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Luc,Amendola,amendola.luc@gmail.com,+33611036150,06410,H,36-50,False,ND-2026-7741,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Émilie,ANDRIAMAHANINA,andriaemily@gmail.com,0620535771,06140,F,36-50,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Emilie,Ansseau,emilie.ansseau@gmail.com,0744838985,06140,F,36-50,True,ND-2026-4981,2026-07-18,Affiche,1,1,NDS · Brigade Verte 3
+Yasmine,Arbi-bey Janton,yab0404@gmail.com,0410089392,06200,F,65+,True,ND-2026-9941,2026-07-17,,1,1,NDS · Brigade Verte 2
+Nathalie,Aubert,nathy.aubert@gmail.com,0650060753,06570,F,51-65,False,ND-2026-9703,2026-07-15,Bouche à oreille,1,1,Électroménager J Giordano
+Bertrand,Aveline,bertrand.aveline.ba@gmail.com,0620445294,06140,H,36-50,False,ND-2026-7566,2026-07-09,Bouche à oreille,1,1,NDS · Bar 3
+Nathalie,Avella,mcanathalie@gmail.com,+33777757334,06600,F,51-65,True,ND-2026-5363,2026-07-17,Bouche à oreille,1,1,NDS · L'Écran
+Patrice,Avella,patriceavella@me.com,0603295027,06600,H,51-65,True,ND-2026-9190,2026-07-17,Bouche à oreille,1,1,NDS · L'Écran
+Basma,AYED,basma.oualdi@gmail.com,0608764448,06300,F,51-65,True,ND-2026-3918,2026-07-18,,1,1,NDS · Brigade Verte 2
+Sinclair,BALIVET,sinclair.blvt@gmail.com,+33781920926,06200,H,18-25,True,ND-2026-6581,2026-07-18,Bouche à oreille,1,1,NDS · Bar 1
+William,BALOUCOUNE,run2william@hotmail.com,0629499068,06140,H,51-65,True,ND-2026-5379,2026-07-10,,1,1,NDS · Bar 1
+Audrey,Bardi,audrey.bardi.17@gmail.com,0667259665,06610,F,26-35,False,ND-2026-3962,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Doriane,Barillé,doriane.barille@gmail.com,+33766313241,06600,F,26-35,False,ND-2026-4443,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Isabelle,Baudoin,isabellebaudoin35@gmail.com,0661712547,35520,F,51-65,True,ND-2026-4308,2026-07-10,Bouche à oreille,2,1,NDS · Bar 1 | SAFER
+Tommy,Bayet,bayet.tommy@gmail.com,0629616639,06600,H,36-50,False,ND-2026-9462,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+Sandrine,Bazile,s.bazile@hotmail.fr,+33680358745,06140,F,51-65,True,ND-2026-9056,2026-07-17,,1,1,NDS · Brigade Verte 2
+Gerard,Ben soussan,g.bensou@orange.fr,0615751225,06140,H,65+,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Myriam,Bercot,bercot.myriam22@gmail.com,+33666285106,06500,F,51-65,True,ND-2026-8935,2026-07-10,,1,1,NDS · Caisse 2
+Myriam,Bercot,bercot.myriam@outlook.fr,0666285106,06500,F,51-65,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Laurie,Bernard,laurie.fracasso@gmail.com,0788082803,06140,F,51-65,True,ND-2026-7143,2026-07-17,,1,1,NDS · Brigade Verte 2
+Justine,Bernard,justine.bernard1997@hotmail.fr,+33662621268,06300,F,26-35,False,ND-2026-4510,2026-07-09,Bouche à oreille,1,1,NDS · Bar 2
+Julia,Bernard,juj.b@wanadoo.fr,0684842886,83400,F,26-35,True,ND-2026-9600,2026-07-17,Autre,2,1,NDS · Brigade Verte 3
+Héloïse,Bertin,heloise_lolie@hotmail.fr,0777887901,06250,F,36-50,False,ND-2026-6202,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Cecile,Beyrand,cecile.beyrand06@gmail.com,0615212833,06600,F,51-65,True,ND-2026-4607,2026-07-16,,1,1,NDS · Brigade Verte 2
+Sébastien,Bial,sebastien.bial@gmail.com,+33671043933,06140,H,36-50,True,ND-2026-2884,2026-07-18,Instagram,1,1,NDS · Bar 3
+Vanessa,Billard,vbillard40@gmail.com,+33767095521,06800,F,36-50,False,ND-2026-5819,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Sébastien,Billard,billardseb06@gmail.com,0612834327,06140,H,36-50,False,ND-2026-7433,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Daniel,BINELLI,danielbinelli@aol.fr,+33686244337,06480,H,51-65,True,ND-2026-3166,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Sylvie,Biosi,sylvie.escach@orange.fr,+33687141753,06110,F,51-65,True,ND-2026-7775,2026-07-10,,1,1,NDS · Brigade Verte 2
+Émile,Bique,vieuxh@gmail.com,0771260740,06140,H,51-65,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Emile,Bique,vieuxh971@gmail.com,+33771260740,06140,H,51-65,True,ND-2026-1313,2026-07-10,,1,1,NDS · Brigade Verte 3
+Valentine,Blasi,valentine.blasiguyon@orange.fr,0787203458,06140,F,18-25,True,ND-2026-2366,2026-07-18,,1,1,NDS · Brigade Verte 2
+vir,blois,vblois06@gmail.com,0606574372,06400,F,36-50,True,ND-2026-2394,2026-07-10,,1,1,NDS · Caisse 2
+Naëlle,Bodart,myriam.bodart1@gmail.com,0652865011,06140,F,-18,True,ND-2026-6202,2026-07-10,Autre,1,1,NDS · Bar 1
+Isabel,Bogas,georgesbogas@gmail.com,0633530703,06320,F,51-65,True,ND-2026-7643,2026-07-10,,1,1,NDS · Caisse 2
+Laura,Bolufer,lauratikha@hotmail.fr,0771061314,06,F,26-35,True,ND-2026-5630,2026-07-11,Instagram,1,1,NDS · L'Écran
+fred,bonfante,bim06@hotmail.fr,0661213899,06140,H,36-50,False,ND-2026-7063,2026-07-16,Affiche,1,1,NDS · Bar 1
+CharLy,Bonnet,charly.bonnet06@gmail.com,786803384,06220,H,36-50,True,ND-2026-3563,2026-07-18,,1,1,NDS · Brigade Verte 3
+Lola,Bonnet,lolabonnet06@yahoo.fr,0781664524,06480,F,18-25,False,ND-2026-8477,2026-07-11,Bouche à oreille,1,1,NDS · Caisse 2
+Pauline,Bonnet,pauline.bonnet06480@gmail.com,0658503226,06480,F,18-25,False,ND-2026-7648,2026-07-11,Affiche,1,1,NDS · Caisse 2
+laetitia,bonzom,baro.laetitia@gmail.com,0760136184,06800,F,36-50,False,ND-2026-7093,2026-07-10,,1,1,NDS · Caisse 2
+Killian,Borderioux,killian.liw@gmail.com,0695268193,06200,H,26-35,False,ND-2026-8803,2026-07-18,,1,1,NDS · Brigade Verte 2
+Amjad,BOUAB,bouabamjad4@gmail.com,+33663953384,06220,H,18-25,True,ND-2026-8283,2026-07-16,,1,1,NDS · L'Écran
+Christel,Bouchet,chrisdom.bouchet@orange.fr,0683180789,06150,F,51-65,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+BOUAB,BOUCHRA,bibicha4@gmail.com,+33625034822,06220,F,51-65,True,ND-2026-7829,2026-07-16,,1,1,NDS · L'Écran
+marion,boulay,marion.pays@gmail.com,0687165757,06370,F,36-50,False,ND-2026-7132,2026-07-09,,1,1,NDS · Caisse 1
+Adam,Bouyssou,adambouyssou804@gmail.com,+33659093732,06480,H,18-25,False,ND-2026-1058,2026-07-10,,1,1,NDS · Caisse 1
+Dorine,Boxberger,joetdo38@hotmail.fr,0646894629,06130,F,36-50,True,ND-2026-5951,2026-07-16,Autre,1,1,NDS · L'Écran
+Samuel,Bricaud,atbstaff@orange.fr,0660588948,06140,H,51-65,True,ND-2026-3916,2026-07-16,Affiche,1,1,NDS · Brigade Verte 2
+Lionel,Brochot,lionelbrochot@sfr.fr,0615338438,06800,H,51-65,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Jean,Bruneel,bruneeljph@yahoo.fr,0676458068,06000,H,51-65,True,ND-2026-2831,2026-07-18,,1,1,NDS · L'Écran
+Marie,Bruzzone,mariebruzzone065@gmail.com,0666781219,06510,F,18-25,False,ND-2026-1496,2026-07-18,,1,1,NDS · Caisse 1
+Marvin,C,marvalow2@gmail.com,0635148523,06140,H,26-35,False,ND-2026-9058,2026-07-11,,1,1,NDS · Caisse 1
+Shirley,Cabiac,familypio@hotmail.frf,+33622220572,06140,F,36-50,True,ND-2026-1899,2026-07-18,,1,1,NDS · Brigade Verte 3
+Ruben,Calvario,rubenc45t@gmail.com,062224029,06000,H,-18,True,ND-2026-8419,2026-07-18,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Tony,Campbell-Brown,tonycampbellbrown@icloud.com,0765776118,06140,H,36-50,True,ND-2026-4868,2026-07-09,,1,1,NDS · Caisse 2
+Thierry,Campello,camp.thierry@wanadoo.fr,0613167176,06140,H,51-65,False,ND-2026-6046,2026-07-10,Autre,1,1,NDS · Bar 1
+Eddy,Caprio,eddycagnes@gmail.com,+33607933168,06800,H,36-50,True,ND-2026-4358,2026-07-18,,1,1,NDS · Brigade Verte 2
+Xavier,Carlier,xavier.carl@hotmail.fr,0767513671,06300,H,26-35,True,ND-2026-1979,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 1
+Christine,Carobbi,christine_carobbi@hotmail.com,0612688776,06800,F,36-50,False,ND-2026-1046,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 1
+Michael,Carton,ardkor@gmail.com,0672859233,06510,H,36-50,False,ND-2026-6936,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Martine,Casacci,martine.casacci@gmail.com,0612843246,0614,F,65+,True,ND-2026-1429,2026-07-17,,1,1,NDS · Brigade Verte 2
+Océane,Casetto,oceanecasetto@gmail.com,0602684664,06200,F,18-25,False,ND-2026-9075,2026-07-18,Bouche à oreille,1,1,NDS · Caisse 2
+Romain,Castelle,romain.castelle@gmail.com,0679929703,06480,H,36-50,True,ND-2026-7331,2026-07-10,,1,1,NDS · Bar 3
+Pauline,CASTELLE,pauline.castelle@gmail.com,+33625640619,06480,F,36-50,False,ND-2026-5784,2026-07-10,,1,1,NDS · Bar 3
+Philippe,Castello,philippecast@hotmail.fr,+33699675749,06110,H,65+,True,ND-2026-6225,2026-07-10,Autre,1,1,NDS · Caisse 1
+Rudy,Castié,rudy.castie@hotmail.fr,+33674522018,06150,H,36-50,True,ND-2026-7901,2026-07-09,,1,1,NDS · Caisse 2
+Julie,Caux,julie.caux19@gmail.com,0787075230,06800,F,26-35,False,ND-2026-9613,2026-07-16,Instagram,1,1,NDS · Brigade Verte 2
+Sabine,Cazanave,sabinecazanave@gmail.com,0630614058,06810,F,51-65,True,ND-2026-8110,2026-07-10,Bouche à oreille,1,1,NDS · Bar 1
+Diane,Ceschel,cescheldiane@gmail.com,0618170797,06700,F,36-50,False,ND-2026-5517,2026-07-16,,1,1,NDS · Brigade Verte 2
+Nathalie,Cetre,natfilfred@gmail.com,+33672342012,06390,F,51-65,True,ND-2026-6149,2026-07-17,Instagram,1,1,NDS · L'Écran
+Mickael,Chabot,michael612chabot@gmail.com,+33766851930,06800,H,36-50,True,ND-2026-7623,2026-07-16,,1,1,NDS · Brigade Verte 2
+Brice,Chambrette,contact@metreaucarre.fr,0650827817,06140,H,36-50,True,ND-2026-3722,2026-07-15,Affiche,1,1,Électroménager J Giordano
+Caroline,Charvolin,c.charvolin@agglo-casa.fr,0659448522,06140,F,36-50,False,ND-2026-2987,2026-07-14,Bouche à oreille,1,1,Assurance Charvolin
+julien,chevalier,pub.juju78@gmail.com,0680221127,06800,H,36-50,True,ND-2026-7397,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+julie,chevallier,chevallier.julie.pro@gmail.com,0661761186,06140,F,26-35,False,ND-2026-3114,2026-07-10,,1,1,NDS · Caisse 2
+Mathilde,Choix,mathildechoix@hotmail.fr,0760770631,06370,F,26-35,False,ND-2026-1994,2026-07-17,,1,1,NDS · Brigade Verte 2
+Marie Caroline,CIAVALDINI,ciavaldini.mariecaroline@gmail.com,+33662006355,06330,F,36-50,True,ND-2026-7235,2026-07-09,Autre,1,1,NDS · Caisse 1
+Céline,CIVARDI,celinecivardi@live.fr,+33622823080,06800,F,36-50,True,ND-2026-5456,2026-07-18,,1,1,NDS · Brigade Verte 2
+Stéphane,Claus,zouk06@icloud.com,0611580512,06800,H,,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Axel,Claux,axel40.claux@gmail.com,0786578740,06100,H,18-25,False,ND-2026-3477,2026-07-16,,1,1,NDS · Brigade Verte 2
+Fred,Clerico,frederi.clerico@gmail.com,0609372404,06140,H,36-50,True,ND-2026-7788,2026-07-09,Affiche,1,1,NDS · Caisse 2
+Joanna,Coelho monteiro,joanna.coelho-monteiro@hotmail.fr,0609510321,06600,F,26-35,False,ND-2026-2275,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+sacha,colatoni_giordan,sacha-1@hotmail.fr,+33 6 02 77 03 06,65000,H,26-35,False,ND-2026-9927,2026-07-09,,1,1,NDS · Caisse 2
+Romain,Collin,romain.collib@gmail.com,0616354936,06140,H,36-50,True,ND-2026-1297,2026-07-09,Bouche à oreille,5,1,NDS · Bar 1 | NDS · Bar 3 | NDS · Brigade Verte 2 | NDS · Brigade Verte 3 | NDS · Caisse 2
+Celine,Conry,celine.conry@orange.fr,0642638482,06600,F,36-50,True,ND-2026-1071,2026-07-18,Affiche,1,1,NDS · L'Écran
+laetita,coppola,laetitiacoppola@gmail.com,0667565305,06700,F,36-50,False,ND-2026-8891,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Desmours,Corre,desmours.corre@outlook.fr,+33769454136,06640,H,26-35,False,ND-2026-5136,2026-07-10,Instagram,1,1,NDS · Brigade Verte 2
+Olivier,Cortambert,cortambert.olivier@yahoo.fr,0622735868,06700,H,36-50,False,ND-2026-7998,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 2
+Rosalie,Courboulex,rosana1744@gmail.com,0614701465,06200,F,36-50,True,ND-2026-6088,2026-07-17,,1,1,NDS · Brigade Verte 3
+Cannelle,Courteboeuf,cannelle.courteboeuf@gmail.com,0609204477,06100,F,26-35,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+Fanny,Courtois,,0787112969,83440,F,36-50,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Frederic,Cretin,fred.cretin@gmail.com,0660797060,06800,H,26-35,False,ND-2026-6531,2026-07-18,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Aurélia,Cudel,aureliacudel@hotmail.fr,0617750203,06100,F,26-35,False,ND-2026-4173,2026-07-11,Bouche à oreille,1,1,NDS · Caisse 2
+Miguel,Cunha,miguel250@sapo.pt,0631250172,06000,H,36-50,True,ND-2026-9492,2026-07-09,,1,1,NDS · Caisse 2
+Valérie,CURRERI,v.maire@hotmail.fr,0663698402,06300,F,36-50,False,ND-2026-5471,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Amandine,Dalidet,amandine.dalidet@hotmail.fr,0785544846,06700,F,36-50,False,ND-2026-9772,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 2
+Stephanie,Dalmasso,steph97438@gmail.com,0666322344,06500,F,36-50,True,ND-2026-2269,2026-07-13,Affiche,1,1,Utile Vence
+Alexandre,DARBOIS,darboisalex@gmail.com,0610240227,06140,H,36-50,False,ND-2026-1292,2026-07-18,,1,1,NDS · Brigade Verte 2
+laurent,davy,davy1411@gmail.com,+33658922153,35520,H,51-65,True,ND-2026-6576,2026-07-10,Affiche,1,1,NDS · Bar 1
+Xavier,De moya,xavierdemoya@live.fr,0633665910,06140,H,36-50,True,ND-2026-2996,2026-07-10,Instagram,1,1,NDS · Brigade Verte 2
+Anne-Sophie,De Moya,annesophie.demoya@live.fr,+33621063254,06510,F,26-35,True,ND-2026-8248,2026-07-10,,1,1,NDS · Brigade Verte 2
+Muriel,Dechambre,dechambremuriel@yahoo.fr,0670704698,06140,F,51-65,True,ND-2026-7015,2026-07-09,,1,1,NDS · Bar 1
+Amélie,DELAVILLE,melie8690@live.fr,0751264756,06140,F,36-50,False,ND-2026-9906,2026-07-16,,1,1,NDS · Brigade Verte 2
+Alain,DELAVILLE,a.delaville@outlook.com,+33611780365,06140,H,36-50,False,ND-2026-5121,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Julie,DeMoss,juju.demoss@gmail.com,0626677178,06220,F,18-25,True,ND-2026-7215,2026-07-09,Bouche à oreille,1,1,NDS · Bar 1
+Pieter,den Hartog,pieterdenhartog2@gmail.com,00310648653487,2611 JX,H,18-25,False,ND-2026-7242,2026-07-16,,1,1,NDS · Caisse 2
+VALERIE,DENAPPE,valden084@yahoo.com,+33631785193,06200,F,51-65,True,ND-2026-6256,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+Celine,DENARO,celinedenaro@yahoo.fr,0679667128,06220,F,36-50,True,ND-2026-9927,2026-07-09,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Dylan,Deraedt,dylan.deraedt@hotmail.fr,0659464199,06100,H,18-25,True,ND-2026-2727,2026-07-09,,1,1,Électroménager J Giordano
+Manon,Desandre,desandre.manon@gmail.com,0659264458,06140,F,18-25,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+Milene,Deschamps,m.tinca@icloud.com,0658816834,06360,F,36-50,False,ND-2026-5890,2026-07-16,,1,1,NDS · Caisse 1
+VERONIQUE,DESOUTTER,desoutter.veronique@gmail.c,0680308060,06400,F,51-65,False,ND-2026-7502,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Brenda,DIAKITE,brendabridou06@gmail.com,0659655858,06100,F,26-35,False,ND-2026-9328,2026-07-18,Instagram,1,1,NDS · L'Écran
+Chloe,Didier,cloclodidier@gmail.com,0623666549,06130,F,18-25,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Chloe,DIDIER,cloclodidier@orange.fr,0623666549,06130,F,18-25,False,ND-2026-1145,2026-07-10,Affiche,1,1,NDS · Brigade Verte 3
+Aurelie,Dietz,aurelie.geant@gmail.com,0634431523,06130,F,36-50,False,ND-2026-2259,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Franck,Dillies,franck.dillies@icloud.com,0612495770,06510,H,36-50,True,ND-2026-5547,2026-07-17,Affiche,1,1,NDS · L'Écran
+Emily,Dillies,emily.bedford@hotmail.fr,0663024014,06510,F,36-50,True,ND-2026-8057,2026-07-17,Autre,1,1,NDS · L'Écran
+Johanna,Diop,johanna.diop@gmail.com,0613551130,06200,F,26-35,False,ND-2026-9492,2026-07-18,,1,1,NDS · Brigade Verte 3
+Elodie,DOGLIO,elodie.doglio@gmail.com,+33628450600,06140,F,26-35,False,ND-2026-1479,2026-07-18,Autre,1,1,NDS · L'Écran
+Elisabeth,Dolce,augredujour@gmail.com,+33686781397,06600,F,65+,True,ND-2026-7124,2026-07-11,,1,1,NDS · Bar 1
+Viviane,Douas,douas.alliez@icloud.com,0782981061,06800,F,36-50,False,ND-2026-7068,2026-07-10,,1,1,NDS · Bar 1
+Melody,Duboisset,melody.duboisset@gmail.com,0602358680,06140,F,26-35,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+Muriel,Ducousso,murielducousso@aol.com,0664240526,06100,F,36-50,False,ND-2026-9203,2026-07-18,Affiche,1,1,NDS · Brigade Verte 3
+Jonathan,Dupouy,jayzus13@gmail.com,0609320062,06140,H,36-50,True,ND-2026-9501,2026-07-09,Affiche,1,1,NDS · Caisse 2
+Sandra,Dussel,viegas@orange.fr,0663903014,06270,F,51-65,True,ND-2026-7906,2026-07-10,,1,1,NDS · Bar 1
+Marion,Dutheil,mdutheilmd@gmail.com,0673390094,06340,F,26-35,True,ND-2026-9426,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 2
+Lea,Ellia,ellia.lea@gmail.com,0645110494,06140,F,26-35,False,ND-2026-7627,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Marie,etienne,marie.etienne2306@gmail.com,0760887249,06700,F,26-35,False,ND-2026-4697,2026-07-11,,1,1,NDS · Caisse 2
+Christelle,Evariste,k_evariste@msn.com,+33623126229,06800,F,51-65,True,ND-2026-1376,2026-07-11,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Emilie,Exbrayat,emilie.exbrt@gmail.com,0617516934,06160,F,26-35,False,ND-2026-3839,2026-07-17,,1,1,NDS · Brigade Verte 2
+Nicolas,Faivret,nfaivret@hotmail.com,0633423290,06300,H,51-65,True,ND-2026-6836,2026-07-16,Bouche à oreille,1,1,NDS · Bar 1
+Rym,FAKHARDJI,rymfakhardji1987@gmail.com,0771004833,06000,F,26-35,True,ND-2026-8061,2026-07-09,,1,1,NDS · Caisse 2
+Adrien,Faraud,adrien.faraud@gmail.com,0680773623,06670,H,26-35,True,ND-2026-2920,2026-07-17,Affiche,1,1,NDS · Brigade Verte 2
+Marielle,Femenias,much34@gmail.com,06 50 50 40 51,06140,F,65+,True,ND-2026-3281,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Frédéric,Fey,fey.frederic@gmail.com,0612444338,06270,H,36-50,False,ND-2026-6364,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Marie,Flesch,fleschm@live.fr,+33674710577,06140,F,36-50,False,ND-2026-8839,2026-07-10,Bouche à oreille,1,1,NDS · Bar 1
+Flouriot,Flouriot,pascalf06@gmail.com,0645583509,06560,H,51-65,True,ND-2026-6919,2026-07-17,,1,1,NDS · L'Écran
+Tatiana,Fonseca Oliveira,tatioliveira76@gmail.com,+33640145178,06140,F,36-50,True,ND-2026-7358,2026-07-16,,1,1,NDS · Brigade Verte 2
+Lauria,Fossey,lowriane@hotmail.fr,0614972134,06140,F,36-50,False,ND-2026-7349,2026-07-10,Autre,1,1,NDS · Caisse 1
+Roxane,FOURNIER,roxanebastanti@gmail.com,0684135209,06110,F,51-65,True,ND-2026-8429,2026-07-10,,1,1,NDS · Caisse 1
+Marie,Franze,marie.franze@hotmail.com,0781917213,06140,F,51-65,True,ND-2026-8729,2026-07-11,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Virginie,Fuste,commandeinternet17@gmail.com,0662192778,06610,F,36-50,False,ND-2026-5948,2026-07-10,,1,1,NDS · Caisse 2
+Fantine,Fuzellier,fuzellier.fantine@gmail.com,0651749578,06600,F,18-25,True,ND-2026-4339,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 1
+NAVARD,GAEL,gaelnavard@gmail.com,+33650211637,06000,H,36-50,False,ND-2026-7791,2026-07-10,,1,1,NDS · Bar 1
+Mona,Garadja,mgaradja@hotmail.fr,06 60 77 07 40,06110,F,51-65,True,ND-2026-3365,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+jean,garcia,garciajean@hotmail.fr,0675813038,06200,H,36-50,True,ND-2026-7420,2026-07-10,,1,1,NDS · Caisse 2
+Caroline,Garino,caroline.garino18@gmail.com,10667470760,06670,F,36-50,True,ND-2026-6053,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 2
+Lucie,Garric,garriclucie4@gmail.com,0664932270,06200,F,18-25,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Mélanie,Gastaud,melanie.gastaud@yahoo.fr,+33611623040,06530,F,36-50,False,ND-2026-7483,2026-07-18,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Margaux,GATTI,margauxg8@gmail.com,+33689577473,57130,F,36-50,False,ND-2026-2657,2026-07-09,,1,1,NDS · Caisse 1
+Fabienne,Gautier,gautierfab@hotmail.com,+33616095607,77330,F,51-65,True,ND-2026-3966,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 2
+Grâce,Gbeassor,grace.gbeassor@gmail.com,0677746495,06140,F,18-25,True,ND-2026-8877,2026-07-14,Autre,1,1,NDS · Caisse 1
+Adeline,GEANT,adeline.geant@gmail.com,0659781693,06810,F,26-35,True,ND-2026-8304,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Clémentine,Geoffroy,geoffroyclementine@gmail.com,06 95 00 68 25,06270,F,18-25,False,ND-2026-4854,2026-07-18,Instagram,1,1,NDS · L'Écran
+Camelia,Gheorghe,camelia.gheorghe@orange.fr,0614377954,06130,F,51-65,True,ND-2026-8220,2026-07-10,,1,1,NDS · Caisse 2
+Djamel,GHEZALI,ghezali.djamel@wanadoo.fr,0674661603,06100,H,51-65,True,ND-2026-6740,2026-07-09,Affiche,1,1,NDS · Brigade Verte 3
+Roxane,Giametta,roxane.gia@gmail.com,0680400207,83170,F,26-35,False,ND-2026-3768,2026-07-17,Affiche,1,1,NDS · Brigade Verte 3
+Kévin,GIANNINI,kevingiannini06@gmail.com,0686309965,06140,H,36-50,True,ND-2026-4120,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Céline,Giauffret,celinegiauffret@hotmail.com,+33620866330,06100,F,36-50,True,ND-2026-7404,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 1
+Dominique,Girard,domy.girard@gmail.com,0668764510,06100,F,51-65,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+caroline,Gouzée de Harven,carolinegdeh@gmail.com,+33637024439,06100,F,51-65,True,ND-2026-9013,2026-07-17,Affiche,1,1,NDS · Caisse 2
+HELENA,GRACIS,helenafeza@gmail.com,+33615772249,06700,F,51-65,True,ND-2026-5986,2026-07-18,,1,1,NDS · L'Écran
+Viviana,Guenzi,viviana.guenzi@gmail.com,+393478300290,28046,F,36-50,False,ND-2026-8664,2026-07-10,,1,1,NDS · Caisse 2
+Aurelie,Guibout,aurelieguibout24@gmail.com,0609734511,06500,F,26-35,False,ND-2026-6976,2026-07-18,Instagram,1,1,NDS · L'Écran
+Joanna,Guimbaud,joannaguimbaud@aol.fr,+33785653787,06140,F,26-35,True,ND-2026-6073,2026-07-18,Affiche,1,1,NDS · Brigade Verte 3
+Alice,Guinet,guinetalice@gmail.com,0643244713,06460,F,18-25,False,ND-2026-5557,2026-07-16,Autre,1,1,NDS · L'Écran
+Dominique,Guinet,guinetdominique@gmail.com,0607417789,06620,H,51-65,True,ND-2026-6078,2026-07-16,Bouche à oreille,1,1,NDS · L'Écran
+TANGI,GUYONVARC'H,tangi_guyonvarch@yahoo.fr,+33680720180,06140,H,51-65,False,ND-2026-6384,2026-07-11,Affiche,1,1,NDS · Caisse 2
+Frederique,Hardy,hardy.frederique@yahoo.fr,0662352649,06200,F,51-65,True,ND-2026-9818,2026-07-18,Affiche,1,1,NDS · Caisse 2
+Maxime,Hennebert,m.hennebert@yahoo.fr,+33679826123,06390,H,36-50,True,ND-2026-6109,2026-07-09,Instagram,1,1,NDS · Brigade Verte 3
+Géraldine,Hennebert,,0664712082,06390,F,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Cyrielle,Heraud,,0671893697,06140,F,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+Consuelo,Herraiz,consuelo.herraiz28@gmail.com,0617626152,06140,F,51-65,False,ND-2026-6213,2026-07-10,Affiche,1,1,NDS · Brigade Verte 2
+Aurore,Holodzion,lamiss395@live.fr,0671339095,06140,F,26-35,False,ND-2026-3212,2026-07-11,Affiche,1,1,NDS · L'Écran
+Stéphanie,Honorine,stef.on@hotmail.fr,0612439214,06800,F,36-50,False,ND-2026-8669,2026-07-17,Autre,1,1,NDS · Brigade Verte 3
+Clement,IAICH,clement.iaich@gmail.com,0651419241,06140,H,18-25,False,ND-2026-4983,2026-07-12,,1,1,NDS · Caisse 2
+Gautier,Isoardi,gogo1303@hotmail.fr,0658560200,06670,H,26-35,False,ND-2026-4731,2026-07-17,,1,1,NDS · Brigade Verte 2
+Anne Marie,Jacques,agnesjacques98735@gmail.com,0772409588,06800,F,65+,False,ND-2026-9258,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Anne,Janry,anne.janry@gmail.com,0684238291,06560,F,51-65,False,ND-2026-1344,2026-07-09,Instagram,1,1,NDS · Caisse 1
+Chrystelle,JEAN,chrystelle.jean13@gmail.com,+33667666309,06140,F,36-50,True,ND-2026-6339,2026-07-11,Affiche,1,1,NDS · Caisse 2
+Dora,Jelil,d.jil@icloud.com,0647360971,06140,F,36-50,True,ND-2026-6562,2026-07-09,Instagram,1,1,Nook Café
+Chichi,Jll,chirazjelil82@gmail.com,+33686462576,06140,F,26-35,True,ND-2026-2762,2026-07-16,,1,1,NDS · Brigade Verte 2
+Marie,joly,mariejolytabarant@gmail.com,+330661920888,06140,F,51-65,True,ND-2026-9809,2026-07-09,Bouche à oreille,1,1,Nook Café
+Jean-Marc,JOSA,ajmrenov@gmail.com,+33698039665,06640,H,51-65,True,ND-2026-7016,2026-07-15,,1,1,Électroménager J Giordano
+Gabry,karin,karin.gabry@gmail.com,+33624747522,06140,F,51-65,False,ND-2026-4156,2026-07-11,,1,1,NDS · Caisse 2
+Sylvain,Keller,sylvain.keller.sk@gmail.com,+33682322017,06200,H,51-65,False,ND-2026-1176,2026-07-16,,1,1,NDS · Brigade Verte 2
+Nicolas,Knecht,nicolas.knecht@hotmail.fr,06 98 54 52 49,06140,H,36-50,False,ND-2026-1785,2026-07-17,,1,1,NDS · Caisse 1
+Linda,Kovacs,lr.kovacs@gmail.com,+33623620944,06700,F,36-50,True,ND-2026-6597,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Johanna,Kozinski,johannakozinski@yahoo.fr,0648539951,06480,F,26-35,True,ND-2026-4384,2026-07-17,Affiche,1,1,NDS · Caisse 1
+Sophie,La perna,soft1971@hotmail.fr,0607572160,06300,F,51-65,False,ND-2026-3316,2026-07-18,Bouche à oreille,1,1,NDS · Caisse 2
+Laurence,Lamothe,laurencelamothe06@gmail.com,+33762767628,06140,F,51-65,True,ND-2026-1688,2026-07-10,Affiche,1,1,NDS · Bar 1
+GABRIELLE,LANOË,lanoegabrielle@gmail.com,+33629123952,06390,F,51-65,True,ND-2026-8864,2026-07-10,Bouche à oreille,1,1,NDS · Bar 3
+Céline,Lasnier,lesage.celine@hotmail.fr,0673010523,06550,F,36-50,False,ND-2026-1157,2026-07-09,,1,1,NDS · Caisse 1
+alexia,launay,alexia.launay@yahoo.com,0662615524,06480,F,51-65,True,ND-2026-2243,2026-07-11,,1,1,NDS · Caisse 2
+Chantal,LAURELLA,chantal.laurella@orange.fr,+33623390878,06140,F,51-65,False,ND-2026-7953,2026-07-17,,1,1,Électroménager J Giordano
+Fanny,Lautru,fannylautru83@yahoo.com,0630244520,06140,F,36-50,True,ND-2026-5051,2026-07-17,,1,1,NDS · Brigade Verte 2
+Rachel,LE CORNEC,rachel-lec@hotmail.fr,0668188819,06600,F,26-35,False,ND-2026-7810,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 2
+Laurène,Le guen,laurene.leguen@laposte.net,+33 (0) 6 20 63 53 74,41250,F,18-25,True,ND-2026-7682,2026-07-18,,1,1,NDS · L'Écran
+Sophie,Le Meur,sophielemeur@gmail.com,0789505850,83170,F,51-65,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+Marc,Lecerf,marc.lecerf@st.com,0781845899,83470,H,51-65,True,ND-2026-8993,2026-07-10,Autre,1,1,NDS · Caisse 2
+Aude,Lehmann,aude.lehmann@live.fr,0679625391,06410,F,26-35,False,ND-2026-3529,2026-07-16,,1,1,NDS · Brigade Verte 2
+Eric,Lejeune,leujfamily@wanadoo.fr,+33672262401,06140,H,51-65,False,ND-2026-4849,2026-07-17,,2,1,NDS · Bar 2 | NDS · Bar 3
+Melyssa,Lemoing,melyssalemoing@gmail.com,+33626440596,06130,F,36-50,True,ND-2026-1845,2026-07-10,,2,1,NDS · Brigade Verte 3 | NDS · L'Écran
+Romain,Lhuissier,romain.lhuissier@hotmail.fr,0615565646,06700,H,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Catherine,Lisi Gille,cathygille0@gmail.com,0615343648,06650,F,51-65,False,ND-2026-4175,2026-07-10,,1,1,NDS · Caisse 2
+Roxanne,Llorens,roxanne.llorens@gmail.com,0685663291,06730,F,26-35,False,ND-2026-5900,2026-07-15,,1,1,Assurance Charvolin
+Monique,LORSOLD,monick.creations75@gmail.com,0683520176,06150,F,51-65,True,ND-2026-4209,2026-07-10,Affiche,1,1,NDS · Caisse 2
+ELODIE,LOUIS,moon06louis@gmail.co,+33632993805,06800,F,36-50,False,ND-2026-5015,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+Pascale,Luiggi,plumesdecriture@gmail.com,0698596094,06750,F,51-65,False,ND-2026-1710,2026-07-17,,1,1,NDS · Brigade Verte 3
+Rémi,Madelbos,rems04601@gmail.com,0618767767,06800,H,18-25,True,ND-2026-9945,2026-07-16,,1,1,NDS · Brigade Verte 2
+Florence,Madiot,florencemadiot1968@gmail.com,0640381340,77230,F,51-65,True,ND-2026-7212,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Nolwenn,Madiot,nolwenn.madiot1@gmail.com,0643757172,06700,F,26-35,False,ND-2026-3704,2026-07-16,Instagram,1,1,NDS · Brigade Verte 2
+Nicolas,Magnet,nicolas.magnet007@orange.fr,+33784329920,78250,H,51-65,True,ND-2026-3459,2026-07-17,,1,1,NDS · L'Écran
+Florence,Mallet,florence.mallet66@gmail.com,0603521676,06140,F,51-65,True,ND-2026-7362,2026-07-18,,2,1,NDS · Brigade Verte 3 | NDS · Caisse 2
+Audrey,Malvaldi,audrey.malvaldi@laposte.net,0687016931,06460,F,36-50,True,ND-2026-2763,2026-07-16,Affiche,1,1,NDS · Brigade Verte 2
+Amélia,MAMBOLE,amelia.mambole@gmail.com,+33761129217,69200,F,26-35,True,ND-2026-3175,2026-07-09,,1,1,NDS · Caisse 1
+Florian,Mareau,florianmareau06@gmail.com,0766048058,06130,H,18-25,False,ND-2026-6213,2026-07-18,,1,1,NDS · L'Écran
+Viviane,Marie Sainte,viviane.mariesainte@free.fr,0695146389,06370,F,51-65,False,ND-2026-6471,2026-07-10,Bouche à oreille,1,1,NDS · Bar 3
+Ghislaine,Marin,ghis.marin@hotmail.fr,+33665315068,06600,F,65+,True,ND-2026-8152,2026-07-17,,1,1,NDS · Brigade Verte 3
+Caroline,marques timoteo,mtcaroline26@gmail.com,0665078312,06600,F,18-25,False,ND-2026-8442,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+Isabelle,Marqueze,isabellemarqueze@yahoo.fr,+33681368744,06560,F,51-65,True,ND-2026-8374,2026-07-10,,1,1,NDS · Caisse 2
+Léna,Marro,lenamarro@icloud.com,0788214670,06340,F,18-25,True,ND-2026-2623,2026-07-11,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Thierry,Martin,thierry.martin42@wanadoo.fr,679747216,06610,H,51-65,True,ND-2026-5387,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Axel,MARTINEZ,martinezaxel87@gmail.com,+33623415421,06200,H,36-50,False,ND-2026-7765,2026-07-18,,1,1,NDS · Brigade Verte 2
+Sandrine,Mary,,0612531523,06200,F,51-65,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Philippe,Masseglia,maspy06@gmail.com,690889889,06140,H,51-65,True,ND-2026-4541,2026-07-10,,1,1,NDS · Brigade Verte 2
+Alexia,Massiera,alexia_tom@hotmail.fr,0610835266,06100,F,26-35,False,ND-2026-3686,2026-07-09,,1,1,NDS · Caisse 2
+Hanae,Mayen,hanaemayen@gmail.com,778024307,06800,F,18-25,True,ND-2026-8257,2026-07-11,Instagram,1,1,NDS · L'Écran
+Maëva,Meillier,maevameillier.mm@gmail.com,+33665956105,06140,F,36-50,False,ND-2026-1490,2026-07-16,,1,1,NDS · Brigade Verte 2
+Christelle,Meja,mejachristelle@gmail.com,0610597366,06150,F,36-50,False,ND-2026-8548,2026-07-16,Bouche à oreille,1,1,NDS · L'Écran
+Magali,MEJEAN,magali.mejean@gmail.com,0647941832,3017,F,36-50,True,ND-2026-4173,2026-07-10,Affiche,1,1,NDS · Bar 1
+Chantal,Melon,chantal.melon@laposte.net,0609055743,06100,F,65+,True,ND-2026-2459,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 2
+benjamin,meny,benjaminmeny@gmail.com,0616853184,06700,H,36-50,True,ND-2026-6284,2026-07-11,Autre,1,1,NDS · Bar 3
+Jessica,Merzlic,jmerzlic@gmail.com,0634135128,06580,F,26-35,False,ND-2026-4757,2026-07-16,Affiche,1,1,NDS · Brigade Verte 2
+Barbara,Miceli,christen.barbara@hotmaim.fr,0677347814,06140,F,65+,True,ND-2026-3305,2026-07-10,,2,1,NDS · Brigade Verte 2 | NDS · Caisse 2
+Barbara,Miceli,christen.barbara@hotmail.fr,0677347814,06140,F,65+,True,,2026-07-11,,1,1,NDS · Brigade Verte 3
+chloé,Michaud,chloe.michaud@hotmail.fr,0628804814,06140,F,36-50,True,ND-2026-7504,2026-07-18,,1,1,NDS · Brigade Verte 2
+Tiphaine,Miramont,miramont.tiphaine@gmail.com,0615635863,06140,F,26-35,True,ND-2026-2090,2026-07-17,Autre,1,1,NDS · Brigade Verte 2
+Linda,Misse,linda.misse@icloud.com,0781585316,06140,F,36-50,True,ND-2026-8491,2026-07-17,,1,1,NDS · Caisse 2
+Lola,Monnet,monnetlola@gmail.com,+33646430345,06800,F,18-25,False,ND-2026-1539,2026-07-10,,1,1,NDS · Caisse 2
+Elodie,Montoya,elodiemontoya94@gmail.com,+33762903272,06140,F,26-35,False,ND-2026-6994,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+Aurore,Nannini,aurore.nannini@latelierdubois.pro,+33664035824,06790,F,36-50,True,ND-2026-1443,2026-07-10,Instagram,1,1,NDS · Caisse 1
+Jean Paul,Naze,jpn974@hotmail.fr,0661367743,06140,H,36-50,True,ND-2026-6896,2026-07-10,Affiche,1,1,NDS · Brigade Verte 2
+Chloe,Nicolas,chloebonventre.bvd@orange.fr,0624322660,06200,F,36-50,True,ND-2026-7005,2026-07-17,,1,1,NDS · Brigade Verte 3
+Christine,Noble,christinenoble356@gmail.com,0622337703,06200,F,51-65,False,ND-2026-1558,2026-07-17,,1,1,NDS · Brigade Verte 2
+Virginie,Nunes,virginiepottier@orange.fr,0645168473,06270,F,36-50,True,ND-2026-5284,2026-07-16,Instagram,1,1,NDS · Brigade Verte 2
+Eva,Occelli,,0770321342,,,,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Elisabeth,Oddo,e_oddo@hotmail.com,0686214489,06140,F,51-65,True,ND-2026-9712,2026-07-09,Bouche à oreille,1,1,Nook Café
+Valerie,Oppedisano,valerie.oppedisano@nicecotedazur.org,0688875711,06000,F,51-65,True,ND-2026-5366,2026-07-17,Autre,1,1,NDS · Bar 3
+Laurence,Oreffia,,0616024118,06800,F,51-65,True,,2026-07-10,,1,1,NDS · Brigade Verte 3
+Marie-Hélène,ORSELLI,m-h.orselli@laposte.net,+33681416102,06200,F,51-65,False,ND-2026-2079,2026-07-17,,1,1,NDS · Brigade Verte 3
+Mathis,Orsini,mathisorsini@outlook.fr,0687559762,06100,H,18-25,True,ND-2026-8610,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Axel,Pagliaro,axel.pagliaro@orange.fr,0781868590,06200,H,18-25,False,ND-2026-2436,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 2
+Angélique,Pardoel,a.pardoel@laposte.net,0761558577,06200,F,36-50,True,ND-2026-3281,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Romain,Patimo,patimo.romain@gmail.com,+33625551483,06480,H,36-50,True,ND-2026-9277,2026-07-17,Autre,1,1,NDS · Bar 1
+Bérénice,PATIMO,berenice_pierret@hotmail.com,+33650582665,06480,F,36-50,False,ND-2026-3320,2026-07-17,Instagram,1,1,NDS · Bar 1
+Gautier,Paul,gautier.paul06@icloud.com,0632383380,06100,H,26-35,False,ND-2026-6888,2026-07-11,Instagram,1,1,NDS · L'Écran
+antoine,pechuzal,montana0481@gmail.com,0683556757,06800,H,36-50,True,ND-2026-8242,2026-07-18,,1,1,NDS · Brigade Verte 2
+Sunil,Pednekar,jjoysunny@gmail.com,0768665344,06100,H,36-50,True,ND-2026-1068,2026-07-18,Instagram,1,1,NDS · Brigade Verte 2
+Diane,Perret,,0768038791,,F,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Emma,Perret,mariniuk@hotmail.fr,0637750808,78500,F,-18,False,ND-2026-6410,2026-07-09,,1,1,NDS · Brigade Verte 3
+Luc,PERRIER,lucp3r@gmail.com,06215384,06200,H,65+,True,ND-2026-6145,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 1
+Fabienne,Perrin,fabi.visto@gmail.com,0684155298,06100,F,51-65,True,ND-2026-3086,2026-07-17,Affiche,1,1,SAFER
+Magali,Perron,kawanah@gmail.com,0613156280,06800,F,36-50,False,ND-2026-4471,2026-07-17,Autre,1,1,NDS · Brigade Verte 2
+Aliénor,Petitjean,alienor.petitjean57@gmail.com,0767116469,06640,F,18-25,False,ND-2026-5927,2026-07-17,Autre,1,1,NDS · L'Écran
+Samantha,Picard,samantha.picard@hotmail.fr,+33603822459,06480,F,26-35,True,ND-2026-2410,2026-07-16,Bouche à oreille,1,1,NDS · Bar 1
+Julie,PIERRET,juliepierret@gmail.com,0650582908,06610,F,36-50,False,ND-2026-4779,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+pascal,pinceau,papipaco972@gmail.com,+33749602172,06670,H,51-65,False,ND-2026-7442,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 2
+Chantal,Pinceau,aquarelle06@hotmail.fr,0660822826,06390,F,51-65,True,ND-2026-5974,2026-07-10,,2,1,NDS · Brigade Verte 3 | NDS · Caisse 1
+Denis,Plisson,denis_plisson@hotmail.com,+33661415868,06140,H,36-50,False,ND-2026-4289,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Frederic,Poggi,frederic.poggi@hotmail.com,0642978758,06140,H,26-35,True,ND-2026-9931,2026-07-18,Bouche à oreille,1,1,NDS · Bar 3
+Hermine,Pollet,herminezumba@gmaail.com,0671006035,83440,F,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+Jean-Luc,POMARES,jlpomares@gmail.com,+33649814029,06100,H,36-50,True,ND-2026-5617,2026-07-18,,1,1,NDS · L'Écran
+Elodie,PONSIGNON,eloique@gmail.com,0492087811,06670,F,36-50,True,ND-2026-2518,2026-07-09,,1,1,NDS · Caisse 2
+Catherine,Porcel,cporcel@wanadoo.fr,0681134001,06210,F,51-65,True,ND-2026-3333,2026-07-17,Affiche,1,1,NDS · Brigade Verte 3
+Geraldine,Prevot,geraldinelopeze@gmail.com,0678859771,95150,F,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 2
+celine,PUMENT,celine.pument@gmail.com,+33619081444,06700,F,51-65,True,ND-2026-9261,2026-07-17,,1,1,NDS · Brigade Verte 2
+Betty,Pungeot,bettypungeot@gmail.com,+33680573654,06510,F,36-50,False,ND-2026-4437,2026-07-16,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Francoise,Puren,fr.pap06@gmail.com,0634174565,06140,F,65+,True,ND-2026-7043,2026-07-10,Affiche,1,1,NDS · Caisse 2
+Lydie,Rabhi,liliange06270@hotmail.fr,0664693182,06140,F,36-50,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Sylvie,RAFFIN,rouxsyl@aol.com,0643921967,06510,F,51-65,False,ND-2026-8199,2026-07-18,,1,1,NDS · Bar 3
+Cyria,Rafin,rafin.cyria@gmail.com,0636911174,06100,F,36-50,True,,2026-07-10,,1,1,NDS · Brigade Verte 2
+Nathalie,Refalo,nathalierefalo52@gmail.com,0660344105,06000,F,51-65,True,ND-2026-1185,2026-07-16,Affiche,1,1,NDS · Brigade Verte 2
+Mélanie,Renard,renardmelanie@hotmail.fr,0622264619,06140,F,36-50,False,ND-2026-1504,2026-07-18,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Oceane,renaudin,oceaneghattas@gmail.com,+33673781682,06600,F,26-35,True,ND-2026-9662,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+Christine,Revertegat,kittyreve@yahoo.fr,0686993937,06610,F,51-65,False,ND-2026-3043,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Marc,Rhouma,rhoumamarc@gmail.com,0759854310,06000,H,26-35,True,ND-2026-2068,2026-07-10,Affiche,1,1,NDS · Caisse 2
+Jonathan,Ribaric,cruise83@hotmail.fr,0650811571,06800,H,36-50,False,ND-2026-9143,2026-07-18,Affiche,1,1,NDS · Brigade Verte 3
+Quentin,Richard,qrleon@gmail.com,0769969337,06000,H,36-50,True,ND-2026-1070,2026-07-18,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Raphaël,Riou,raphaelriou5@gmail.com,667323976,06600,H,18-25,False,ND-2026-5983,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 1
+hugo,rochette,rochette.lionel.06@gmail.com,0623021898,06200,H,18-25,False,ND-2026-3135,2026-07-16,Autre,1,1,NDS · Brigade Verte 2
+sylvie,RODOT VAN ELSLANDE,docteur.rodot@gmail.com,+33685324340,06300,F,51-65,False,ND-2026-7894,2026-07-17,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Elena,Rodygina,technicienneelena@gmail.com,0766874144,06140,F,26-35,False,ND-2026-9763,2026-07-10,Affiche,1,1,Nook Café
+Ingrid,Roudière,ingrid.roudi@gmail.com,0667618474,06000,F,36-50,False,ND-2026-8182,2026-07-09,,1,1,NDS · Caisse 2
+jean-pierre,Rousseau,jeanpierrerousseau30@yahoo.fr,0781810248,06000,H,18-25,False,ND-2026-4809,2026-07-09,Affiche,1,1,Domaine de la Bergerie
+Thomas,Rovira,tomaalex@hotmail.fr,0695892296,06140,H,36-50,True,ND-2026-4118,2026-07-10,Autre,1,1,NDS · L'Écran
+Karine,Roy,roykarine06480@gmail.com,0670477277,06480,F,51-65,False,ND-2026-3624,2026-07-18,Autre,1,1,NDS · L'Écran
+Aude,SABARTHÈS,aude.sabarthes@hotmail.fr,0610603293,06640,F,51-65,True,ND-2026-9088,2026-07-10,Affiche,1,1,NDS · Caisse 2
+Stéphanir,Saint-Amand,ssaintamand06@gmail.com,06 23 94 42 68,06800,F,36-50,True,ND-2026-4378,2026-07-18,,1,1,NDS · Brigade Verte 3
+Loetitia,Saint-Blancard,loetitia.saintblancard@gmail.com,+33615094122,06510,F,51-65,True,ND-2026-3896,2026-07-09,Autre,1,1,NDS · Bar 2
+Delphîne,Sassi,delphino.ds@gmail.com,0685992852,06400,F,36-50,True,ND-2026-3905,2026-07-10,Bouche à oreille,1,1,NDS · Brigade Verte 3
+Astrid,Saunier,gribsa06200@gmail.com,0610776868,06600,F,36-50,True,ND-2026-2601,2026-07-18,Autre,1,1,NDS · Brigade Verte 3
+KILLIAN,SCHMITT--ALLABRUNE,killian.sc.al@gmail.com,+33769770043,06220,H,18-25,False,ND-2026-8871,2026-07-18,Bouche à oreille,1,1,NDS · L'Écran
+Sebastien,Sébastien,sebgrosse86@gmail.com,+33617484850,06140,H,36-50,False,ND-2026-4232,2026-07-10,,1,1,NDS · Bar 1
+Timothée,Secail,timothee.secail@essca.eu,0602506950,06620,H,18-25,False,ND-2026-3431,2026-07-16,Instagram,1,1,NDS · L'Écran
+morgane,selidoniau,morganeselidoniau@gmail.com,0672020011,06140,F,18-25,False,ND-2026-6014,2026-07-17,Affiche,1,1,NDS · Caisse 2
+Bianca,Sendrea,biancasendrea.bs@gmail.com,0744588789,06140,F,26-35,True,ND-2026-1513,2026-07-16,Affiche,1,1,NDS · Brigade Verte 2
+Pascale,Seneclauze,seneclauzep@yahoo.fr,+33622666919,06800,F,51-65,False,ND-2026-5740,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 1
+Laurent,Seni,suwalki06640@gmail.com,0662536378,06800,H,26-35,False,ND-2026-2984,2026-07-10,Affiche,1,1,NDS · Caisse 2
+Caroline,Serra,cocoline13@hotmail.fr,0624123869,06140,F,36-50,False,ND-2026-6177,2026-07-09,,1,1,NDS · Caisse 2
+Sébastien,SERRIER,sugeseb@gmail.com,+33661711747,83490,H,36-50,False,ND-2026-8797,2026-07-18,Autre,1,1,NDS · Brigade Verte 3
+Marlène,SEZILLE,marlene.sezille.94@gmail.com,0615615369,83440,F,26-35,True,ND-2026-9185,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 1
+Damien,SIBILLE,sibille_damien@yahoo.fr,0668794780,06130,H,51-65,True,ND-2026-6826,2026-07-17,Autre,1,1,NDS · L'Écran
+Paulo jorge,Silva monteiro,rastapahio@me.com,+33605686065,06300,H,36-50,True,ND-2026-3921,2026-07-10,Bouche à oreille,1,1,NDS · Caisse 2
+Louis,Simon,louis110702@gmail.com,0763152355,06160,H,18-25,False,ND-2026-1569,2026-07-16,Instagram,1,1,NDS · L'Écran
+Natalia,Slahuckova,nslahuckova@gmail.com,90898982262,06140,F,18-25,False,ND-2026-3503,2026-07-18,Bouche à oreille,1,1,NDS · Brigade Verte 2
+Julien,Solimando,solimandojulien@gmail.com,0753424455,06400,H,36-50,True,ND-2026-4214,2026-07-17,Bouche à oreille,1,1,NDS · Bar 2
+Solene,Souffrin,solene.souffrin@hotmail.fr,0630886879,83240,F,36-50,True,,2026-07-16,,1,1,NDS · Brigade Verte 3
+Sabrina,STEPHANOU,sabcat58@gmail.com,+33630767517,06600,F,36-50,True,ND-2026-1483,2026-07-10,Bouche à oreille,1,1,NDS · Bar 1
+Melina,Tedesco,meli31590@gmail.com,0651670976,06300,F,26-35,False,ND-2026-9573,2026-07-11,Affiche,1,1,NDS · L'Écran
+Manon,Théus,manon.theus@gmail.com,0626329589,06700,F,26-35,True,ND-2026-6118,2026-07-16,,1,1,NDS · Brigade Verte 2
+Jacques,THEVENOT,jacthevenot@hotmail.fr,0676891568,06440,H,65+,True,ND-2026-7400,2026-07-17,Affiche,1,1,NDS · Brigade Verte 2
+JEAN LUC,THOMANN,jl_thomann@hotmail.com,+33674685235,06470,H,51-65,False,ND-2026-1964,2026-07-17,Affiche,1,1,NDS · Brigade Verte 3
+Ugo,Thomas,ugo.thomas17@gmail.com,+33632880715,06110,H,26-35,True,ND-2026-9381,2026-07-16,Instagram,1,1,NDS · L'Écran
+Benjamin,Thorent,b.thorent@gmail.com,+33673366652,06480,H,36-50,False,ND-2026-1852,2026-07-18,Autre,1,1,NDS · L'Écran
+François,Timpano,kyoto773@gmail.com,+33662181416,06100,H,26-35,False,ND-2026-1202,2026-07-10,,1,1,NDS · Caisse 1
+Laurent,Torres,torreslaurent8@gmail.com,0782175636,06140,H,36-50,True,ND-2026-7642,2026-07-09,Bouche à oreille,1,1,NDS · Caisse 1
+Damon,Torry,damontorry@gmail.com,0620878158,06000,H,51-65,False,ND-2026-3021,2026-07-17,,1,1,NDS · Brigade Verte 3
+Justine,Troia,justine.troia@outlook.fr,0614533621,06140,F,26-35,True,ND-2026-6069,2026-07-11,Autre,1,1,NDS · Caisse 2
+MARYLENE,TURCI,maryturci@hotmail.com,+33670298681,06450,F,36-50,False,ND-2026-5028,2026-07-10,,1,1,NDS · Bar 1
+annie,Ubaldi,ubaldi.annie@gmail.com,+33686837090,06610,F,51-65,True,ND-2026-4439,2026-07-18,Bouche à oreille,1,1,NDS · Caisse 1
+Kelly,Vaiarelli,,0667351822,06200,F,26-35,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Maëlle,Vallet,maelle-vallet@hotmail.fr,0619159224,06140,F,26-35,True,,2026-07-11,,1,1,NDS · Brigade Verte 3
+Florent,Vareillas,florent.vareillas@icloud.com,0604189275,06140,H,36-50,True,ND-2026-9493,2026-07-18,Autre,1,1,NDS · Brigade Verte 2
+Quentin,Vareillas,qvareillas@gmail.com,0658672929,06140,H,26-35,False,ND-2026-7201,2026-07-10,Autre,1,1,Utile Vence
+Maya,Vendramin,mayahiroka@gmail.com,0660553838,06570,F,26-35,True,ND-2026-7187,2026-07-16,Autre,1,1,NDS · Caisse 1
+Stéphanie,Vercellone,stefypierre@live.fr,+33675870707,06830,F,36-50,False,ND-2026-8782,2026-07-17,Autre,1,1,NDS · Brigade Verte 2
+Brent,Wagner,alexroding@gmail.com,9494007064,90405,H,36-50,False,ND-2026-2229,2026-07-16,Bouche à oreille,1,1,NDS · Caisse 2
+Alexandre,Wybo,wybo.alex@gmail.com,+33770117572,06100,H,18-25,False,ND-2026-4366,2026-07-11,,1,1,NDS · Brigade Verte 3
+Lila,Zaidi,tadmet2002@yahoo.ft,0650834636,06600,F,51-65,True,,2026-07-09,,1,1,NDS · Brigade Verte 3
+Paul,Zandrini,paul.zandrini@gmail.com,+33 6 67 51 64 32,06600,H,36-50,True,ND-2026-6491,2026-07-10,,1,1,NDS · Bar 1
+Sébastien,Zani,mrzanisebastien@hotmail.com,+33667115717,06300,H,36-50,False,ND-2026-5723,2026-07-16,,1,1,NDS · Brigade Verte 2
+Valentine,Astre,astrevalentine@gmail.com,+33604026153,06600,F,18-25,False,ND-2026-4465,2026-07-09,Instagram,1,0,NDS · Bar 1
+Peggy,Benazet,labeug@hotmail.com,0777783825,83700,F,51-65,False,ND-2026-3989,2026-07-10,Instagram,1,0,NDS · Caisse 1
+Alison,Bertaux,alison.bertaux06@gmail.com,+33669058276,06800,F,36-50,True,ND-2026-9619,2026-07-11,Bouche à oreille,1,0,NDS · Bar 3
+Clotilde,Bertin,emolova@hotmail.fr,0644100554,06220,F,26-35,False,ND-2026-4294,2026-07-17,,1,0,NDS · Brigade Verte 2
+Isabelle,Bougrain,isabellebougraî@yahoo.fr,0698160271,06000,F,36-50,False,ND-2026-8208,2026-07-17,Bouche à oreille,1,0,NDS · Brigade Verte 3
+Ludmilla,Buduca,millagwada@gmail.com,+33615647391,06000,F,36-50,True,ND-2026-3263,2026-07-10,,1,0,NDS · Caisse 2
+Sibylle,Bui,sibyllebui@hotmail.com,0663214864,06740,F,36-50,False,ND-2026-1558,2026-07-09,Bouche à oreille,1,0,NDS · Caisse 1
+Maria,Campello,campellomaria4@gmail.com,0662151087,06140,F,51-65,False,ND-2026-6702,2026-07-10,,1,0,NDS · Caisse 1
+Davina,Cappè,davina.cappe@gmail.com,0621290176,06140,F,36-50,False,ND-2026-8529,2026-07-18,Bouche à oreille,1,0,NDS · L'Écran
+Florence,Cesar,cesar.florence@gmail.com,+33683348247,06800,F,51-65,True,ND-2026-9445,2026-07-17,,1,0,NDS · Brigade Verte 2
+Matéo,Chaves,mateo.chaves5@gmail.com,0783421270,13700,H,18-25,False,ND-2026-1283,2026-07-16,Autre,1,0,NDS · Brigade Verte 2
+Gregory,Courteval,gcourteval@yahoo.fr,0677518651,06510,H,36-50,False,ND-2026-8834,2026-07-16,Bouche à oreille,1,0,NDS · Brigade Verte 2
+Régis,De Luca,redoliv@gmail.com,+33610735158,06140,H,36-50,True,ND-2026-1292,2026-07-16,,1,0,NDS · Brigade Verte 2
+Meg,Declerieux,declerieuxmeg@gmail.com,0687979513,06800,F,26-35,False,ND-2026-5049,2026-07-18,Bouche à oreille,1,0,NDS · L'Écran
+Solange,dehais,soso06480@hotmail.fr,0614761980,06480,F,65+,False,ND-2026-6504,2026-07-17,Autre,1,0,NDS · Brigade Verte 2
+gilles,Dehais,dgilles06@hotmail.com,0781207098,06480,H,51-65,False,ND-2026-9224,2026-07-17,Bouche à oreille,1,0,NDS · Brigade Verte 2
+XAVIER,Drac,zax07@live.fr,0609546862,06130,H,36-50,False,ND-2026-1270,2026-07-09,Bouche à oreille,1,0,NDS · Caisse 2
+Christian,Esmingeaud,esmingeaudc@gmail.com,+33676325253,83700,H,51-65,True,ND-2026-2831,2026-07-16,,1,0,NDS · Brigade Verte 2
+Alexandra,Fargette,alexandrafargette6@gmail.com,+33695103412,06140,F,36-50,True,ND-2026-7119,2026-07-18,,1,0,NDS · L'Écran
+Marion,Gauthier,marion.coroller.gthr@gmail.com,+33777390607,06100,F,36-50,False,ND-2026-6549,2026-07-16,,1,0,NDS · Brigade Verte 2
+Danni,Green,dannigreen1989@gmail.com,0033651525657,06220,F,36-50,False,ND-2026-6796,2026-07-18,,1,0,NDS · Bar 3
+Eugénie,Greve,eugeniegreve@gmail.com,+33783250199,06000,F,18-25,False,ND-2026-6703,2026-07-11,Instagram,1,0,NDS · Brigade Verte 3
+Sylvie,Hohweiller,sylvie.hohweiller@gmail.com,0616120033,83520,F,51-65,False,ND-2026-2075,2026-07-17,,1,0,NDS · Brigade Verte 2
+Fabien,Kaplanas,kaplanas@hotmail.com,+33685842574,06570,H,51-65,False,ND-2026-7635,2026-07-09,,1,0,Utile Vence
+Sarah,Kuppich,leomox@hotmail.fr,+33674886709,06140,F,51-65,True,ND-2026-9260,2026-07-16,Bouche à oreille,1,0,NDS · Brigade Verte 2
+Lydia,LAGOAS-CATARINO,catly06@hotmail.fr,0679528621,06800,F,26-35,False,ND-2026-6904,2026-07-18,Autre,1,0,NDS · Caisse 2
+Cristina,Lamberti,lamberti.cristina12@gmail.com,0662831339,06510,F,65+,True,ND-2026-1090,2026-07-09,Bouche à oreille,1,0,NDS · Brigade Verte 2
+Laurence,Limelette,lolorencebis@yahoo.fr,0625751708,06660,F,51-65,False,ND-2026-8391,2026-07-10,Bouche à oreille,1,0,NDS · Caisse 2
+Sandrine,MARY,s.mary@orange.fr,+33612531523,06200,F,51-65,True,ND-2026-6937,2026-07-09,Autre,1,0,NDS · Brigade Verte 3
+Laurie,Moreno,lauriecastelli06@gmail.com,+330635252445,06670,F,26-35,False,ND-2026-3105,2026-07-18,Bouche à oreille,1,0,NDS · L'Écran
+Pauline,Nadaud,paulinen47@outlook.fr,0668410178,06100,F,26-35,True,ND-2026-6218,2026-07-10,Instagram,1,0,NDS · Caisse 2
+Gaelle,Nougaret,nougaretgaelle@gmail.com,0678600261,06410,F,36-50,True,ND-2026-1178,2026-07-09,Affiche,1,0,NDS · Caisse 2
+Virginie,Nutin,republik170319@gmail.com,+33622840022,06800,F,36-50,True,ND-2026-3790,2026-07-10,Bouche à oreille,1,0,SAFER
+Margaux,Octobon,margaux.octobon@hotmail.com,0621352998,06140,F,26-35,False,ND-2026-3483,2026-07-18,Autre,1,0,NDS · Brigade Verte 3
+Diane,perret,ptitpouipoui@gmail.com,0768038791,06140,F,36-50,False,ND-2026-2593,2026-07-09,,1,0,NDS · Brigade Verte 3
+Lea,Ricci,lea.riicci@gmail.com,+33664899432,06640,F,26-35,False,ND-2026-7791,2026-07-18,,1,0,NDS · Brigade Verte 3
+Laurent,Rivera,laurent.rivera@hotmail.fr,0611307332,06140,H,36-50,False,ND-2026-7352,2026-07-18,Bouche à oreille,1,0,NDS · Brigade Verte 2
+Sandrine,Russo,sansrine.russo11@gmail.com,0685974766,06130,F,51-65,False,ND-2026-3505,2026-07-16,Bouche à oreille,1,0,NDS · Brigade Verte 2
+Juliette,Sammarcelli,juliette.sammarcelli@gmail.com,0665038412,75001,F,18-25,False,ND-2026-7910,2026-07-11,,1,0,NDS · Brigade Verte 3
+Amelie,Schenck,amelie.derestrepo@yahoo.fr,0611223344,06480,F,36-50,False,ND-2026-3878,2026-07-18,,1,0,NDS · Bar 3
+Julie,Schillaci,july.valencin@gmail.com,0623454643,06140,F,36-50,True,ND-2026-7108,2026-07-09,Bouche à oreille,1,0,NDS · Caisse 2
+Laurence,Touati,touatil@hotmail.com,+33616312059,06200,F,51-65,True,ND-2026-6106,2026-07-17,,1,0,NDS · Brigade Verte 3
