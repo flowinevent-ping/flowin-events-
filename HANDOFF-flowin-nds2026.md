@@ -1,3 +1,69 @@
+### SESSION 19-20/07 — AUDIT COMPTAGE, CLÔTURE, TIRAGES, BILLETS (commits 7010ee4 → 8a53337)
+
+**PÉRIMÈTRE DE TRAVAIL** : `super_event_id='se-nds-2026'`, fenêtre **09 → 18 juillet 2026**. Ne jamais mélanger avec la base joueurs globale ni avec d'autres événements. Un joueur ayant joué à Pâques puis au NDS n'est **pas** un doublon.
+
+#### Chiffres de référence (arrêtés 20/07)
+| Indicateur | Valeur |
+|---|--:|
+| Flashs QR | 2 449 |
+| Parties jouées | 986 |
+| Contacts uniques | 617 |
+| Tickets attribués | 1 046 |
+| Opt-in | 338 (55 %) |
+| Gagnants lots partenaires | 51 |
+| Gagnants places de concert | 21 |
+
+Qualité base : 0 sans nom/prénom, 8 sans email, 2 sans tél, 3 sans CP. `ville` vide partout (jamais collectée).
+Démographie : 65,7 % femmes · 65 % ont 36–65 ans · 22,9 % Vence (06140) · bouche à oreille = 1er canal.
+
+#### 6 BUGS CORRIGÉS — ne pas régresser
+| # | Correction | Commit |
+|---|---|---|
+| 1 | Station Caisse 3 créée (absente de `events` → invisible partout) | 7010ee4 |
+| 2 | Scans résilients : file localStorage + rejeu `online` + dédup anti-rafale | 83dc03c |
+| 3 | `events.participants` dérivé par trigger `trg_sync_event_participants` (était faux de −18 %) | 5a74657 |
+| 4 | Plafonds dashboard `limit=500` → 20000 | 5a74657 |
+| 5 | Identité joueur résolue par **email**, plus par `external_id` préfixé par l'event (bloquait 191 anciens joueurs) | 093531c |
+| 6 | Anti-doublon borné à **la journée en cours** (rejetait les habitués revenant sur la même station) | 6787961 |
+
+**RÈGLES ÉTABLIES** : tout compteur agrégé est dérivé de sa table de faits, jamais incrémenté à la main · un compteur affiché n'est jamais la longueur d'une liste paginée · toute écriture de télémétrie doit être durable (file + rejeu) · l'identité d'un joueur est l'email, jamais un identifiant dérivé d'un événement · toute déduplication métier doit être bornée par sa fenêtre temporelle et s'appuyer sur la table de faits · tout livrable imprimable doit être autonome (assets embarqués en base64).
+
+**Non corrigeable rétroactivement** : `visiteur_id` absent les 09–10/07 (100 % des flashs) · marqueurs d'étape inexistants avant le 11/07 · redirections partenaires jamais instrumentées (`partenaire_clics` vide — diagnostic complet fait : RLS OK, grants OK, test d'insertion réussi, séquence à 7 → absence d'usage, pas perte de données).
+
+#### RESTE À FAIRE
+1. **Billets gagnants — VALIDATION EN ATTENTE**
+   - Valider le template `admin/public/nds/billets-partenaires.html` (v4, commit 8a53337) : charte de l'app (Manrope, #7C2D92→#E0218A, or #F5B544), pièce unique **sans talon**, mentions du jeu en pied, « à présenter en boutique · valable jusqu'au 25 octobre 2026 ».
+   - Valider la **liste à transmettre aux commerçants** (vue « Listes de caisse » : case à cocher, n° billet, bénéficiaire, email, lot, date/signature).
+   - Trancher : retirer ou non du billet les conditions propres au lot (montant min. d'achat, non cumulable) ?
+   - Après validation : intégrer le template dans l'onglet **Communication & éléments** de chaque fiche partenaire du dashboard.
+   - Mettre en place la **génération PDF** du billet, jointe automatiquement à l'email.
+2. **Analyse par station** : joueurs, profils (sexe, âge, CP), réponses aux questions (quiz + bonus RSE), croisement profil × station.
+3. **Statistiques d'ensemble du jeu** : flashs, parties, joueurs, tickets, entonnoir, par jour et par station, taux de conversion. RPC disponibles : `super_event_daily`, `super_event_funnel`, `super_event_stations`, `super_event_clics`, `super_event_sondage`, `super_event_engagement`, `super_event_bonus`, `super_event_nouveaux_inscrits`.
+4. **Statistiques du formulaire Brigade Verte** : réponses `bv_*` (74 répondants) + démographie. **Ne jamais mélanger `bv_*` et `rse_*`.**
+5. **Mise en page des rapports** : (a) prestataires / commerçants partenaires ; (b) service événementiel des Nuits du Sud.
+6. **Outils marketing / argumentaire de vente futurs festivals** : nombre de joueurs · nombre de parties · flashs et connexions · stations où les partenaires étaient visibles · écrans et passages en visibilité · nombre de lots et de gagnants, places de concert incluses.
+
+#### EN ATTENTE DE DÉCISION ROMAIN
+1. Prolonger `date_f` des events partenaires (18/07) si le jeu continue jusqu'au 25/07, sinon le jeu refusera les parties.
+2. Cohérence calendrier : 51 tirages partenaires **déjà faits** vs tirage final annoncé au 25/07. Option retenue : remise immédiate + tirage final supplémentaire. Alternative : `DELETE FROM tirages WHERE type='grand'` puis refaire le 25/07.
+3. Harmoniser `partenaires.lots.conditions` (« valable 4 mois ») avec les billets (« jusqu'au 25 octobre 2026 »).
+4. **Assurance Charvolin** : `lots: []`, aucun tirage possible. Déclarer le lot si prévu.
+5. Email tronqué `desoutter.veronique@gmail.c` (Nook, ND-2026-7502) → 06 80 30 80 60.
+6. Domaine Resend non vérifié → envoi de masse via Gmail.
+7. **Places de concert** : la base enregistre **21 places sur 3 dates** (2 le 11/07, 4 le 13/07, 15 le 17/07), et non 4 par soir sur toute la durée. À clarifier avant communication.
+
+#### LIVRABLES PRODUITS
+| Livrable | Emplacement |
+|---|---|
+| Audit du comptage | `docs/RAPPORT-audit-comptage-NDS2026.md` |
+| Clôture (résultats, partenaires, tirage) | `docs/RESULTATS-NDS2026-cloture.md` |
+| Sondages + tirages | `docs/RESULTATS-NDS2026-sondages-tirages.md` |
+| Runbook comptage et règles | `docs/RUNBOOK-comptage-scans.md` |
+| Emails de clôture | `docs/EMAILS-NDS2026-cloture.md` |
+| Export 617 contacts | `docs/NDS2026_CONTACTS_617_complets.csv` |
+| Nouveaux inscrits station/jour | `docs/NDS2026_nouveaux_inscrits_par_station_par_jour.csv` |
+| Billets + listes de caisse | `admin/public/nds/billets-partenaires.html` |
+
 ### SESSION 02/07 (soir) — CRM bons/factures + bloc éditable tickets (commit 2c80ba1)
 
 **Fait & poussé :**
