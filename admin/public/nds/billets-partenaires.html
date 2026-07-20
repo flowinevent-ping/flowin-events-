@@ -32,7 +32,10 @@
   .b-body{padding:18px 20px 20px}
   .b-logo{height:64px;max-width:230px;object-fit:contain;display:block;margin:0 0 12px}
   .b-part{font-size:22px;font-weight:800;margin:0 0 2px;color:var(--nds)}
-  .b-lot{font-size:17px;font-weight:700;margin:10px 0 2px}
+  .b-type{display:inline-block;margin:14px 0 0;padding:4px 12px;border-radius:999px;
+          background:var(--nds);color:#fff;font-size:10.5px;font-weight:800;
+          text-transform:uppercase;letter-spacing:1.2px}
+  .b-lot{font-size:17px;font-weight:700;margin:8px 0 2px}
   .b-cond{font-size:11.5px;color:var(--mut);line-height:1.45;margin:4px 0 0}
   .b-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin:16px 0 0;
           border-top:1px dashed var(--bd);padding-top:14px}
@@ -43,8 +46,8 @@
   .stub-lab{font-size:9.5px;text-transform:uppercase;letter-spacing:1.1px;color:var(--mut);margin-bottom:6px}
   .stub-no{font-size:17px;font-weight:800;letter-spacing:.6px;color:var(--nds);word-break:break-all}
   .stub-val{margin-top:12px;font-size:26px;font-weight:800;color:var(--or)}
-  .stub-box{margin-top:14px;width:44px;height:44px;border:2px solid var(--nds);border-radius:8px}
-  .stub-box-l{font-size:9px;color:var(--mut);margin-top:5px;letter-spacing:.4px}
+  .stub-exp{margin-top:14px;font-size:10px;color:var(--mut);line-height:1.5}
+  .stub-exp b{color:var(--ink);font-size:11.5px}
 
   /* ---------- LISTE CAISSE ---------- */
   .liste{background:#fff;border-radius:14px;border:1px solid var(--bd);overflow:hidden;margin-bottom:22px;
@@ -118,14 +121,24 @@ var ADR = {
   'pt-charvolin':"326 Av. Rhin & Danube, 06140 Vence · 04 93 58 41 41"
 };
 var COND = {
-  'pt-pegase':"Non cumulable · valable 4 mois",
-  'pt-carrosserie-gp':"Valable dès 90 € d'achat · entretien véhicule et carrosserie · non cumulable · valable 4 mois",
-  'pt-bergerie':"Valable dès 2 nuits de location · hébergements Pod et emplacement de tente · non cumulable · valable 4 mois",
-  'pt-giordano':"Valable dès 70 € d'achat · non cumulable · valable 4 mois",
-  'pt-nook':"Au choix : 1 café offert pour 1 acheté · formule petit-déjeuner offerte · 1 boisson achetée = 1 salé offert · non cumulable · valable 4 mois",
-  'pt-utile':"Valable dès 22 € d'achat en magasin · non cumulable · valable 4 mois",
-  'pt-charvolin':"Non cumulable · valable 4 mois"
+  'pt-pegase':"Non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+  'pt-carrosserie-gp':"Valable dès 90 € d'achat · entretien véhicule (freins, plaquettes, huile…) et carrosserie · non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+  'pt-bergerie':"Valable dès 2 nuits de location · hébergements Pod et emplacement de tente · non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+  'pt-giordano':"Valable dès 70 € d'achat · non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+  'pt-nook':"Au choix : 1 café offert pour 1 acheté · formule petit-déjeuner offerte · 1 boisson achetée = 1 salé offert · non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+  'pt-utile':"Valable dès 22 € d'achat en magasin · non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+  'pt-charvolin':"Non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026"
 };
+
+/* Nature du bon, deduite du libelle du lot. */
+function typeBon(lot){
+  var l = String(lot||'').toLowerCase();
+  if (l.indexOf('remise') !== -1) return "Bon de remise";
+  if (l.indexOf('offre') !== -1)  return "Offre gourmande";
+  if (l.indexOf("bon d'achat") !== -1) return "Bon d'achat";
+  if (l.indexOf('bon') !== -1) return "Bon cadeau";
+  return "Bon cadeau";
+}
 
 var W = [
 {p:'pt-pegase',pn:"Auto-École de l'ARA",lot:"Bon 150 € — formation scooter",v:150,n:"Fabien Lavallee",e:"lavalleef@wanadoo.fr",t:"ND-2026-5397"},
@@ -195,6 +208,7 @@ function billet(w){
        + '<img class="b-logo" src="'+LOGO[w.p]+'" alt="'+esc(w.pn)+'">'
        + '<div class="b-part">'+esc(w.pn)+'</div>'
        + '<div class="b-cond">'+esc(ADR[w.p]||'')+'</div>'
+       + '<div class="b-type">'+esc(typeBon(w.lot))+'</div>'
        + '<div class="b-lot">'+esc(w.lot)+'</div>'
        + '<div class="b-cond">'+esc(COND[w.p]||'')+'</div>'
        + '<div class="b-grid">'
@@ -207,7 +221,7 @@ function billet(w){
      + '<div class="stub-lab">N° de billet</div>'
      + '<div class="stub-no">'+esc(w.t)+'</div>'
      + '<div class="stub-val">'+esc(w.v)+' €</div>'
-     + '<div class="stub-box"></div><div class="stub-box-l">Retiré</div>'
+     + '<div class="stub-exp">Valable jusqu\'au<br><b>25 octobre 2026</b></div>'
    + '</div>'
   + '</div>';
 }
