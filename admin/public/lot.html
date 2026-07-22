@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Validation d'un lot — Nuits du Sud 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--vio:#7C2D92;--mag:#E0218A;--gold:#F5B544;--ink:#1b1226;--muted:#6b6478;--ok:#1e9e6a;--bad:#c23b3b;--line:#ece7f1}
+  body{font-family:'Manrope',system-ui,sans-serif;background:#f4f0f8;color:var(--ink);min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:18px}
+  .wrap{width:100%;max-width:460px}
+  .hd{background:linear-gradient(135deg,var(--vio),var(--mag));border-radius:18px 18px 0 0;padding:22px 22px 18px;color:#fff}
+  .hd .kick{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+  .hd h1{font-size:20px;font-weight:800;margin-top:4px}
+  .card{background:#fff;border:1px solid var(--line);border-top:none;border-radius:0 0 18px 18px;
+    padding:22px;box-shadow:0 12px 30px rgba(60,20,80,.10)}
+  .state{display:none}
+  .state.on{display:block}
+  .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--mag);border-radius:50%;
+    margin:26px auto;animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .center{text-align:center;color:var(--muted);font-weight:600;font-size:14px}
+  .badge{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12px;letter-spacing:.5px;
+    text-transform:uppercase;padding:7px 13px;border-radius:999px;margin-bottom:16px}
+  .badge.ok{background:rgba(30,158,106,.12);color:var(--ok)}
+  .badge.bad{background:rgba(194,59,59,.10);color:var(--bad)}
+  .badge.gold{background:rgba(245,181,68,.15);color:#a86e07}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+  .lot{font-size:22px;font-weight:800;line-height:1.25;margin-bottom:2px}
+  .val{display:inline-block;background:rgba(245,181,68,.18);color:#8f5e05;font-weight:800;
+    padding:3px 10px;border-radius:8px;font-size:14px;margin-bottom:16px}
+  .rows{border-top:1px solid var(--line);padding-top:14px}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:14px}
+  .row .k{color:var(--muted);font-weight:600}
+  .row .v{font-weight:700;text-align:right}
+  .num{font-variant-numeric:tabular-nums;letter-spacing:.5px}
+  button{width:100%;border:none;border-radius:12px;padding:15px;font-family:inherit;font-weight:800;
+    font-size:16px;cursor:pointer;margin-top:20px}
+  .btn-go{background:linear-gradient(135deg,var(--vio),var(--mag));color:#fff}
+  .btn-go:active{transform:translateY(1px)}
+  .btn-go[disabled]{opacity:.55;cursor:default}
+  .big{font-size:44px;text-align:center;margin:6px 0 2px}
+  .msg{text-align:center;font-weight:700;font-size:17px;margin-bottom:4px}
+  .sub{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.5}
+  .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:18px;line-height:1.6}
+  .foot b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <div class="kick">Le Grand Jeu · Nuits du Sud 2026</div>
+    <h1>Validation d'un lot</h1>
+  </div>
+  <div class="card">
+
+    <div id="s-load" class="state on">
+      <div class="spin"></div>
+      <div class="center">Lecture du billet…</div>
+    </div>
+
+    <div id="s-valable" class="state">
+      <span class="badge ok"><span class="dot"></span>Billet valable</span>
+      <div id="v-lot" class="lot"></div>
+      <div id="v-val" class="val"></div>
+      <div class="rows">
+        <div class="row"><span class="k">Bénéficiaire</span><span id="v-nom" class="v"></span></div>
+        <div class="row"><span class="k">Commerce</span><span id="v-part" class="v"></span></div>
+        <div class="row"><span class="k">N° de billet</span><span id="v-num" class="v num"></span></div>
+      </div>
+      <button id="btn-valider" class="btn-go">Valider le retrait du lot</button>
+    </div>
+
+    <div id="s-deja" class="state">
+      <span class="badge bad"><span class="dot"></span>Déjà retiré</span>
+      <div id="d-lot" class="lot"></div>
+      <div class="rows">
+        <div class="row"><span class="k">Bénéficiaire</span><span id="d-nom" class="v"></span></div>
+        <div class="row"><span class="k">N° de billet</span><span id="d-num" class="v num"></span></div>
+        <div class="row"><span class="k">Retiré le</span><span id="d-date" class="v"></span></div>
+      </div>
+      <div class="sub" style="margin-top:14px">Ce lot a déjà été remis. Un billet ne peut être validé qu'une seule fois.</div>
+    </div>
+
+    <div id="s-done" class="state">
+      <div class="big">✓</div>
+      <div class="msg" style="color:var(--ok)">Retrait validé</div>
+      <div id="done-lot" class="sub" style="margin-top:6px;margin-bottom:14px"></div>
+      <div class="rows">
+        <div class="row"><span class="k">Bénéficiaire</span><span id="done-nom" class="v"></span></div>
+        <div class="row"><span class="k">N° de billet</span><span id="done-num" class="v num"></span></div>
+        <div class="row"><span class="k">Validé le</span><span id="done-date" class="v"></span></div>
+      </div>
+      <div class="sub" style="margin-top:14px">Le stock a été décompté automatiquement. Vous pouvez remettre le lot.</div>
+    </div>
+
+    <div id="s-introuvable" class="state">
+      <div class="big">✕</div>
+      <div class="msg" style="color:var(--bad)">Billet introuvable</div>
+      <div class="sub" style="margin-top:6px">Ce code ne correspond à aucun lot. Vérifiez que le QR est bien celui d'un billet gagnant des Nuits du Sud 2026.</div>
+    </div>
+
+    <div id="s-erreur" class="state">
+      <div class="big">!</div>
+      <div class="msg">Connexion impossible</div>
+      <div class="sub" style="margin-top:6px">Vérifiez votre connexion internet puis rechargez la page.</div>
+    </div>
+
+    <div class="foot">
+      Une question ? <b>flowinevent@gmail.com</b> · <b>06 16 35 49 36</b>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var PART = {
+    'pt-bergerie':'Domaine de la Bergerie', 'pt-pegase':"Auto-École de l'ARA",
+    'pt-utile':'Utile Vence', 'pt-nook':'Nook Café', 'pt-giordano':'Électroménager J Giordano',
+    'pt-charvolin':'Assurance Charvolin', 'pt-carrosserie-gp':'Carrosserie GP'
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function show(id){
+    var st = document.querySelectorAll('.state');
+    for (var i=0;i<st.length;i++){ st[i].classList.remove('on'); }
+    $(id).classList.add('on');
+  }
+  function partName(p){ return PART[p] || (p ? p.replace('pt-','') : '—'); }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    var p = function(n){ return (n<10?'0':'')+n; };
+    return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' à '+p(d.getHours())+'h'+p(d.getMinutes());
+  }
+  function token(){
+    var m = /[?&]t=([^&]+)/.exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  function rpc(fn, body){
+    return fetch(SUPA+'/rest/v1/rpc/'+fn, {
+      method:'POST',
+      headers:{ 'apikey':ANON, 'Authorization':'Bearer '+ANON, 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    }).then(function(r){
+      if(!r.ok) throw new Error('http '+r.status);
+      return r.json();
+    });
+  }
+
+  var TOK = token();
+
+  function renderValable(d){
+    $('v-lot').textContent = d.lot || 'Lot';
+    $('v-val').textContent = (d.valeur!=null ? ('Valeur : '+d.valeur+' €') : '');
+    $('v-nom').textContent = d.gagnant || '—';
+    $('v-part').textContent = partName(d.partenaire);
+    $('v-num').textContent = d.ticket_code || '—';
+    show('s-valable');
+  }
+  function renderDeja(d){
+    $('d-lot').textContent = d.lot || 'Lot';
+    $('d-nom').textContent = d.gagnant || '—';
+    $('d-num').textContent = d.ticket_code || '—';
+    $('d-date').textContent = fmtDate(d.retire_at);
+    show('s-deja');
+  }
+  function renderDone(d){
+    $('done-lot').textContent = (d.lot || 'Lot') + (d.valeur!=null ? (' · '+d.valeur+' €') : '');
+    $('done-nom').textContent = d.gagnant || '—';
+    $('done-num').textContent = d.ticket_code || '—';
+    $('done-date').textContent = fmtDate(d.retire_at);
+    show('s-done');
+  }
+
+  function valider(){
+    var b = $('btn-valider');
+    b.disabled = true; b.textContent = 'Validation…';
+    rpc('valider_lot', { p_token: TOK }).then(function(res){
+      var d = Array.isArray(res) ? res[0] : res;
+      if (d && d.ok) { renderDone(d); }
+      else if (d && d.raison === 'deja_utilise') { renderDeja(d); }
+      else { show('s-introuvable'); }
+    }).catch(function(){
+      b.disabled = false; b.textContent = 'Valider le retrait du lot';
+      show('s-erreur');
+    });
+  }
+
+  function init(){
+    if(!TOK){ show('s-introuvable'); return; }
+    rpc('consulter_lot', { p_token: TOK }).then(function(res){
+      var d = Array.isArray(res) ? res[0] : res;
+      if (!d || !d.ok) { show('s-introuvable'); return; }
+      if (d.raison === 'deja_utilise') { renderDeja(d); return; }
+      renderValable(d);
+      $('btn-valider').addEventListener('click', valider);
+    }).catch(function(){ show('s-erreur'); });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
