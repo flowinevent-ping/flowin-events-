@@ -290,6 +290,38 @@
   }
 
   function winsFor(pred){ return TIRAGES.filter(pred); }
+  // ---- Helpers unifiés soir + grand (auto : envoi, remise en jeu, remplaçant) -
+  function tById(id){ id=Number(id); for(var i=0;i<TIRAGES.length;i++){ if(Number(TIRAGES[i].id)===id) return TIRAGES[i]; } return null; }
+  function envoyerParId(id){ var t=tById(id); if(!t||!t.joueur_email){ alert('Ce gagnant n\'a pas d\'email.'); return; } window.open(gmailUrl(t),'_blank','noopener'); if(t.id) marquerNotifie(t.id,true); }
+  async function remettreEnJeu(id, on){
+    id=Number(id); var t=tById(id); if(!t) return;
+    if(on && !confirm('Retirer '+(t.joueur_nom||'ce gagnant')+' et remettre le lot en jeu ?\n\nIl ne sera pas re-tiré. Tu pourras tirer un remplaçant ('+((t.type==='grand')?'bouton « Tirer le reste »':'bouton « Tirer les places »')+').')) return;
+    try{
+      var res=await rpc('retirer_gagnant',{p_tirage_id:id, p_on:!!on});
+      if(!res || res.ok===false){ alert((res&&res.erreur)||'Action impossible'); return; }
+      (TIRAGES||[]).forEach(function(x){ if(Number(x.id)===id){ x.statut=res.statut; x.retire_at=(res.statut==='retire')?new Date().toISOString():null; } });
+      (WINS_FULL||[]).forEach(function(x){ if(Number(x.tirage_id)===id) x.statut=res.statut; });
+      renderSoirWins(); renderPartners(); renderAllWins();
+    }catch(e){ alert('Erreur : '+e.message); }
+  }
+  // Rangée gagnant unifiée : nom cliquable (fiche), badge envoyé/à-envoyer, envoyer, remettre en jeu / rétablir.
+  function winRow(t, icon){
+    var retired=(t.statut==='retire'), sent=!!t.notifie_at;
+    var badge = retired
+      ? '<span class="retired" style="margin-left:auto">↩ Remis en jeu</span>'
+      : (sent
+          ? '<span class="sent" style="margin-left:auto" title="Envoyé'+(t.notifie_at?' le '+String(t.notifie_at).slice(0,10):'')+' — cliquer pour annuler" onclick="marquerNotifie('+t.id+',false)">✓ Envoyé</span>'
+          : '<span class="unsent" style="margin-left:auto" title="Cliquer pour marquer comme envoyé" onclick="marquerNotifie('+t.id+',true)">○ Non envoyé</span>');
+    var actions = retired
+      ? '<button onclick="remettreEnJeu('+t.id+',false)" style="background:#fff;border:1px solid #8a90a4;color:#5a6072;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">↺ Rétablir</button>'
+      : '<button onclick="envoyerParId('+t.id+')" style="background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>'
+        + '<button onclick="remettreEnJeu('+t.id+',true)" title="Retirer ce gagnant et remettre le lot en jeu" style="background:#fff;border:1px solid #e0a800;color:#a16207;padding:6px 10px;border-radius:8px;font-weight:700;cursor:pointer">↩ Remettre en jeu</button>';
+    var meta = (t.type==='soir') ? (' — <i>'+esc(t.lot_nom)+'</i>') : '';
+    return '<div class="win'+(t.type==='soir'?' win-soir':'')+'" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap'+(retired?';opacity:.55':'')+'">'
+      + '<span class="med">'+icon+'</span> <b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
+      + (t.joueur_tel?' · '+esc(t.joueur_tel):'')
+      + meta + badge + actions + '</div>';
+  }
 
   function renderPartners(){
     var box=$('partners');
@@ -301,12 +333,16 @@
       if(!lots.length){ html+='<div class="empty">Lot à compléter.</div></div>'; return; }
       lots.forEach(function(l,idx){
         var nb=lotNb(l), val=lotVal(l), nom=l.nom||l.titre||('Lot '+(idx+1));
-        var won=winsFor(function(t){return t.type==='grand'&&t.partenaire_id===p.id&&t.lot_nom===nom;});
+        var wonAll=winsFor(function(t){return t.type==='grand'&&t.partenaire_id===p.id&&t.lot_nom===nom;});
+        var actifs=wonAll.filter(function(t){return t.statut!=='retire';});
+        var enJeu=wonAll.length-actifs.length;
+        var reste=nb-actifs.length;
         html+='<div class="lot"><div class="lot-head">'
-          +'<div><div class="lot-nom">'+esc(nom)+'</div><div class="lot-meta">'+(val!=null?val+' € · ':'')+nb+' gagnant'+(nb>1?'s':'')+' · '+won.length+'/'+nb+' tiré'+(won.length>1?'s':'')+'</div></div>'
-          +'<button class="btn teal sm" '+(won.length>=nb?'disabled':'')+' onclick="tirerLot(\''+esc(p.id)+'\',\''+encodeURIComponent(nom)+'\','+(val==null?'null':val)+','+(nb-won.length)+',this)">🎲 Tirer'+(won.length?' le reste':'')+'</button>'
+          +'<div><div class="lot-nom">'+esc(nom)+'</div><div class="lot-meta">'+(val!=null?val+' € · ':'')+nb+' gagnant'+(nb>1?'s':'')+' · '+actifs.length+'/'+nb+' actif'+(actifs.length>1?'s':'')+(enJeu?' · '+enJeu+' remis en jeu':'')+'</div></div>'
+          +'<button class="btn teal sm" '+(reste<=0?'disabled':'')+' onclick="tirerLot(\''+esc(p.id)+'\',\''+encodeURIComponent(nom)+'\','+(val==null?'null':val)+','+reste+',this)">🎲 Tirer'+(actifs.length?' le reste':'')+'</button>'
           +'</div>';
-        won.forEach(function(w){ html+='<div class="win"><span class="med">🏅</span> <b class="gname" onclick="openFiche(\''+(w.joueur_id||'')+'\',\''+(w.id||'')+'\')">'+esc(w.joueur_nom||'—')+'</b> · '+esc(w.joueur_email||'')+(w.joueur_tel?' · '+esc(w.joueur_tel):'')+'</div>'; });
+        wonAll.slice().sort(function(a,b){return (a.statut==='retire'?1:0)-(b.statut==='retire'?1:0);})
+          .forEach(function(w){ html+=winRow(w,'🏅'); });
         html+='</div>';
       });
       html+='</div>';
@@ -314,39 +350,44 @@
     box.innerHTML=html;
   }
 
+  function soirDatesDispo(){
+    var s={}; TIRAGES.forEach(function(t){ if(t.type==='soir'&&t.date_soir) s[t.date_soir]=1; });
+    return Object.keys(s).sort();
+  }
   function renderSoirWins(){
-    var d=$('soirDate').value;
-    var w=winsFor(function(t){return t.type==='soir'&&(!d||t.date_soir===d);});
-    w = (w||[]).slice().sort(function(a,b){ return (a.statut==='retire'?1:0)-(b.statut==='retire'?1:0); });
-    _soirWins = w;
-    var nbActifs = w.filter(function(t){return t.statut!=='retire';}).length;
-    $('soirWins').innerHTML = w.length ? (
-      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 6px">'
-      + '<label style="font-size:12px;color:#666">Lien du billet digital (optionnel)</label>'
-      + '<input id="billetLien" type="url" placeholder="https://…" style="flex:1;min-width:260px;padding:8px 10px;border:1px solid #d9d9e3;border-radius:8px">'
-      + '<button onclick="envoyerTous()" style="background:#1baf7a;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer à tous ('+nbActifs+')</button>'
-      + '</div>'
-      + w.map(function(t,i){
-          var retired = (t.statut==='retire');
-          var sent=!!t.notifie_at;
-          var badge = retired
-            ? '<span class="retired" style="margin-left:auto">↩ Place remise en jeu</span>'
-            : (sent
-                ? '<span class="sent" style="margin-left:auto" title="Envoyé'+(t.notifie_at?' le '+String(t.notifie_at).slice(0,10):'')+' — cliquer pour annuler" onclick="marquerNotifie('+t.id+',false)">✓ Envoyé</span>'
-                : '<span class="unsent" style="margin-left:auto" title="Cliquer pour marquer comme envoyé" onclick="marquerNotifie('+t.id+',true)">○ Non envoyé</span>');
-          var actions = retired
-            ? '<button onclick="retirerGagnant('+i+',false)" style="background:#fff;border:1px solid #8a90a4;color:#5a6072;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">↺ Rétablir</button>'
-            : '<button onclick="envoyerGagnant('+i+')" style="background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>'
-              + '<button onclick="retirerGagnant('+i+',true)" title="Retirer ce gagnant et remettre sa place en jeu" style="background:#fff;border:1px solid #e0a800;color:#a16207;padding:6px 10px;border-radius:8px;font-weight:700;cursor:pointer">↩ Remettre en jeu</button>';
-          return '<div class="win win-soir" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap'+(retired?';opacity:.55':'')+'">'
-            + '<span class="med">🎟️</span> <b class="gname" onclick="openFiche(\''+(t.joueur_id||'')+'\',\''+(t.id||'')+'\')">'+esc(t.joueur_nom||'—')+'</b> · '+esc(t.joueur_email||'')
-            + (t.joueur_tel?' · '+esc(t.joueur_tel):'')
-            + ' — <i>'+esc(t.lot_nom)+'</i> ('+esc(t.date_soir)+')'
-            + badge
-            + actions
-            + '</div>';
-        }).join('')
-    ) : '';
+    var host=$('soirWins'); var dates=soirDatesDispo();
+    if(!dates.length){ host.innerHTML='<div class="empty">Aucune place tirée pour le moment.</div>'; _soirWins=[]; return; }
+    var filt=$('soirFiltre')?$('soirFiltre').value:'';
+    var shown = filt ? [filt] : dates;
+    var opts='<option value="">Toutes les soirées ('+dates.length+')</option>'
+      + dates.map(function(d){ var n=TIRAGES.filter(function(t){return t.type==='soir'&&t.date_soir===d;}).length; return '<option value="'+d+'"'+(d===filt?' selected':'')+'>'+dateFr(d)+' — '+n+' gagnant'+(n>1?'s':'')+'</option>'; }).join('');
+    var html='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px">'
+      +'<label style="font-size:12px;color:#666">Soirée</label>'
+      +'<select id="soirFiltre" onchange="renderSoirWins()" style="padding:8px 10px;border:1px solid #d9d9e3;border-radius:8px">'+opts+'</select>'
+      +'<label style="font-size:12px;color:#666;margin-left:8px">Lien du billet (optionnel)</label>'
+      +'<input id="billetLien" type="url" placeholder="https://…" style="flex:1;min-width:220px;padding:8px 10px;border:1px solid #d9d9e3;border-radius:8px">'
+      +'</div>';
+    var allShown=[];
+    shown.forEach(function(d){
+      var w=TIRAGES.filter(function(t){return t.type==='soir'&&t.date_soir===d;})
+              .slice().sort(function(a,b){return (a.statut==='retire'?1:0)-(b.statut==='retire'?1:0);});
+      var actifs=w.filter(function(t){return t.statut!=='retire';});
+      var nonEnv=actifs.filter(function(t){return !t.notifie_at && t.joueur_email;}).length;
+      allShown=allShown.concat(w);
+      html+='<div style="margin:14px 0 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+        +'<b style="font-size:14px">🎟️ Soirée du '+dateFr(d)+'</b>'
+        +'<span class="lot-meta">'+actifs.length+' gagnant'+(actifs.length>1?'s':'')+(w.length>actifs.length?' · '+(w.length-actifs.length)+' remis en jeu':'')+'</span>'
+        +(nonEnv?'<button onclick="envoyerSoiree(\''+d+'\')" style="margin-left:auto;background:#1baf7a;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ Envoyer les non-envoyés ('+nonEnv+')</button>':(actifs.length?'<span class="sent ro" style="margin-left:auto">✓ Tout envoyé</span>':''))
+        +'</div>';
+      w.forEach(function(t){ html+=winRow(t,'🎟️'); });
+    });
+    _soirWins=allShown; host.innerHTML=html;
+  }
+  function envoyerSoiree(d){
+    var w=TIRAGES.filter(function(t){return t.type==='soir'&&t.date_soir===d&&t.joueur_email&&t.statut!=='retire'&&!t.notifie_at;});
+    if(!w.length){ alert('Rien à envoyer.'); return; }
+    if(!confirm('Ouvrir '+w.length+' brouillon(s) Gmail pour la soirée du '+dateFr(d)+' ?')) return;
+    w.forEach(function(t,i){ setTimeout(function(){ window.open(gmailUrl(t),'_blank','noopener'); if(t.id) marquerNotifie(t.id,true); }, i*700); });
   }
 
   async function retirerGagnant(i, on){
