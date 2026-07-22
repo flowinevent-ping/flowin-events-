@@ -31,6 +31,10 @@
   .lot{font-size:22px;font-weight:800;line-height:1.25;margin-bottom:2px}
   .val{display:inline-block;background:rgba(245,181,68,.18);color:#8f5e05;font-weight:800;
     padding:3px 10px;border-radius:8px;font-size:14px;margin-bottom:16px}
+  .plogo{max-height:56px;max-width:180px;width:auto;height:auto;display:none;margin:2px auto 16px;object-fit:contain}
+  .brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding-top:15px;
+    border-top:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+  .brand img{height:19px;width:auto;opacity:.92}
   .rows{border-top:1px solid var(--line);padding-top:14px}
   .row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:14px}
   .row .k{color:var(--muted);font-weight:600}
@@ -62,6 +66,7 @@
     </div>
 
     <div id="s-valable" class="state">
+      <img id="v-logo" class="plogo" alt="">
       <span class="badge ok"><span class="dot"></span>Billet valable</span>
       <div id="v-lot" class="lot"></div>
       <div id="v-val" class="val"></div>
@@ -74,6 +79,7 @@
     </div>
 
     <div id="s-deja" class="state">
+      <img id="d-logo" class="plogo" alt="">
       <span class="badge bad"><span class="dot"></span>Déjà retiré</span>
       <div id="d-lot" class="lot"></div>
       <div class="rows">
@@ -85,6 +91,7 @@
     </div>
 
     <div id="s-done" class="state">
+      <img id="done-logo" class="plogo" alt="">
       <div class="big">✓</div>
       <div class="msg" style="color:var(--ok)">Retrait validé</div>
       <div id="done-lot" class="sub" style="margin-top:6px;margin-bottom:14px"></div>
@@ -108,6 +115,7 @@
       <div class="sub" style="margin-top:6px">Vérifiez votre connexion internet puis rechargez la page.</div>
     </div>
 
+    <div class="brand">Propulsé par <img src="/nds/assets/flowin_logo.png" alt="Flowin"></div>
     <div class="foot">
       Une question ? <b>flowinevent@gmail.com</b> · <b>06 16 35 49 36</b>
     </div>
@@ -131,6 +139,12 @@
     $(id).classList.add('on');
   }
   function partName(p){ return PART[p] || (p ? p.replace('pt-','') : '—'); }
+  function partLogo(p){ return p ? ('/nds/partenaires/'+p.replace('pt-','')+'.png') : ''; }
+  function setLogo(id, p){
+    var el = $(id), src = partLogo(p);
+    if (src) { el.onerror = function(){ el.style.display='none'; }; el.src = src; el.style.display='block'; }
+    else { el.style.display='none'; }
+  }
   function fmtDate(iso){
     if(!iso) return '—';
     var d = new Date(iso);
@@ -157,6 +171,7 @@
   var TOK = token();
 
   function renderValable(d){
+    setLogo('v-logo', d.partenaire);
     $('v-lot').textContent = d.lot || 'Lot';
     $('v-val').textContent = (d.valeur!=null ? ('Valeur : '+d.valeur+' €') : '');
     $('v-nom').textContent = d.gagnant || '—';
@@ -165,6 +180,7 @@
     show('s-valable');
   }
   function renderDeja(d){
+    setLogo('d-logo', d.partenaire);
     $('d-lot').textContent = d.lot || 'Lot';
     $('d-nom').textContent = d.gagnant || '—';
     $('d-num').textContent = d.ticket_code || '—';
@@ -172,6 +188,7 @@
     show('s-deja');
   }
   function renderDone(d){
+    setLogo('done-logo', d.partenaire);
     $('done-lot').textContent = (d.lot || 'Lot') + (d.valeur!=null ? (' · '+d.valeur+' €') : '');
     $('done-nom').textContent = d.gagnant || '—';
     $('done-num').textContent = d.ticket_code || '—';
