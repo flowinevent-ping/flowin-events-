@@ -75,6 +75,14 @@
         <div class="row"><span class="k">Commerce</span><span id="v-part" class="v"></span></div>
         <div class="row"><span class="k">N° de billet</span><span id="v-num" class="v num"></span></div>
       </div>
+      <div style="margin:14px 0 4px;text-align:left">
+        <label for="v-pin" style="display:block;font-size:12px;color:var(--muted,#667);margin-bottom:5px">
+          Confirmez le n° de billet (il figure sur votre liste de gagnants)
+        </label>
+        <input id="v-pin" type="text" inputmode="text" autocomplete="off" placeholder="ND-2026-…"
+               style="width:100%;padding:11px 12px;border:1.5px solid var(--line,#d9d9e3);border-radius:9px;font-size:15px;letter-spacing:.5px;box-sizing:border-box">
+        <div id="v-pin-err" style="display:none;margin-top:6px;font-size:12.5px;color:#c0392b"></div>
+      </div>
       <button id="btn-valider" class="btn-go">Valider le retrait du lot</button>
     </div>
 
@@ -197,11 +205,23 @@
   }
 
   function valider(){
-    var b = $('btn-valider');
+    var b = $('btn-valider'), pinEl = $('v-pin'), err = $('v-pin-err');
+    var pin = pinEl ? pinEl.value.trim() : '';
+    if(err){ err.style.display='none'; err.textContent=''; }
+    if(!pin){
+      if(err){ err.textContent = 'Saisissez le n° de billet pour confirmer le retrait.'; err.style.display='block'; }
+      if(pinEl) pinEl.focus();
+      return;
+    }
     b.disabled = true; b.textContent = 'Validation…';
-    rpc('valider_lot', { p_token: TOK }).then(function(res){
+    rpc('valider_lot', { p_token: TOK, p_pin: pin }).then(function(res){
       var d = Array.isArray(res) ? res[0] : res;
       if (d && d.ok) { renderDone(d); }
+      else if (d && d.raison === 'pin_invalide') {
+        b.disabled = false; b.textContent = 'Valider le retrait du lot';
+        if(err){ err.textContent = d.message || 'N° de billet incorrect.'; err.style.display='block'; }
+        if(pinEl){ pinEl.focus(); pinEl.select(); }
+      }
       else if (d && d.raison === 'deja_utilise') { renderDeja(d); }
       else { show('s-introuvable'); }
     }).catch(function(){
