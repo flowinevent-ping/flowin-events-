@@ -40,14 +40,22 @@ export default function Sidebar() {
       group: 'EVENTS',
       items: [
         { id: 'events', icon: '📅', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
-        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
+        /* Pas encore portee en Next : on renvoie au monolithe plutot que de servir un 404. */
+        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard.html#super-events', external: true },
       ],
     },
     {
       group: 'ACQUISITION B2B',
       items: [
-        { id: 'btob', icon: '🎯', label: 'Prospects B2B', count: 0, href: '/dashboard/btob' },
+        /* Pas encore portee en Next : on renvoie au monolithe plutot que de servir un 404. */
+        { id: 'btob', icon: '🎯', label: 'Prospects B2B', count: 0, href: '/dashboard.html#btob-prospects', external: true },
         { id: 'landing', icon: '🌐', label: 'Landing Page', count: 1, href: '/dashboard.html#landing', external: true },
+      ],
+    },
+    {
+      group: 'NDS 2026',
+      items: [
+        { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
       ],
     },
     {
