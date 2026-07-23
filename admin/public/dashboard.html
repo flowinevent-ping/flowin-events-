@@ -8683,15 +8683,29 @@ function renderBiblioEvents(){
   return html;
 }
 
+/* Statut réel déduit des dates : la colonne `status` en base n'est pas remise à jour
+   après la fin d'un event (NDS restait 'upcoming' après le 18/07). On garde `status`
+   en repli quand l'event n'a aucune date. Lecture seule : la base n'est pas modifiée. */
+function evStatut(e){
+  var d = e.dateD||e.date_d, f = e.dateF||e.date_f||d;
+  if(!d) return e.status||'upcoming';
+  var t=new Date(); t.setHours(0,0,0,0);
+  var dd=new Date(d); dd.setHours(0,0,0,0);
+  var ff=new Date(f); ff.setHours(23,59,59,999);
+  if(ff<t) return 'past';
+  if(dd>t) return 'upcoming';
+  return 'live';
+}
 function renderEventsKanban(list){
-  const past = list.filter(e=>e.status==='past').sort((a,b)=>new Date(b.dateD)-new Date(a.dateD));
-  const live = list.filter(e=>e.status==='live').sort((a,b)=>new Date(a.dateD)-new Date(b.dateD));
-  const upcoming = list.filter(e=>e.status==='upcoming').sort((a,b)=>new Date(a.dateD)-new Date(b.dateD));
+  const past = list.filter(e=>evStatut(e)==='past').sort((a,b)=>new Date(b.dateD||0)-new Date(a.dateD||0));
+  const live = list.filter(e=>evStatut(e)==='live').sort((a,b)=>new Date(a.dateD||0)-new Date(b.dateD||0));
+  const upcoming = list.filter(e=>evStatut(e)==='upcoming').sort((a,b)=>new Date(a.dateD||0)-new Date(b.dateD||0));
 
+  /* Ordre demandé : ce qui se passe maintenant, puis ce qui arrive, puis l'archive. */
   let html = '<div class="kanban">';
-  html += renderKanbanColumn('past','📁 Passés',past,'#94A3B8','#F1F5F9');
   html += renderKanbanColumn('live','🔴 En cours',live,'#10B981','#ECFDF5');
   html += renderKanbanColumn('upcoming','📅 À venir',upcoming,'#3B82F6','#EFF6FF');
+  html += renderKanbanColumn('past','📁 Passés',past,'#94A3B8','#F1F5F9');
   html += '</div>';
   return html;
 }
@@ -8788,11 +8802,12 @@ function renderEventsTable(list){
 }
 
 function renderEventsTimeline(){
-  const sorted = DATA.events.slice().sort((a,b)=>new Date(a.dateD)-new Date(b.dateD));
+  /* Les events sans date affichaient "1 JANV" (new Date(null) = epoch 1970). On les écarte. */
+  const sorted = DATA.events.filter(e=>!!(e.dateD||e.date_d)).slice().sort((a,b)=>new Date(a.dateD)-new Date(b.dateD));
   let html = '<div class="timeline">';
   sorted.forEach((e,i) => {
     const dm = dayMonth(e.dateD);
-    html += '<div class="tl-item '+e.status+'" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
+    html += '<div class="tl-item '+evStatut(e)+'" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
          + '<div class="dot"></div>'
          + '<div class="date">'+dm.d+' '+dm.m+'</div>'
          + '<div class="ev">'+esc(e.nom.length>14?e.nom.slice(0,14)+'…':e.nom)+'</div>'
