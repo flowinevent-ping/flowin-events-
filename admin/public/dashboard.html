@@ -7987,12 +7987,23 @@ function gwFicheHtml(d,t){
   if(t){ h+='<div class="gwf-row"><div class="gwf-k">Gain</div><div class="gwf-v">'+esc(t.lot_nom||'')+(t.date?' · '+esc(t.date):'')+'</div></div>'; }
   if(t){ h+='<div class="gwf-row"><div class="gwf-k">Statut</div><div class="gwf-v">'+(t.notifie_at?'<span class="chip live">&#10003; Email envoyé</span>':'<span class="chip warn">Non envoyé</span>')+'</div></div>'; }
   var _tok = (t && t.retrait_token) || '';
-  h+='</div><div class="gwf-ft">'
-   + (_tok ? '<a href="'+escAttr(location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(_tok)+'&print=1')+'"'
-           + ' target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;'
-           + 'background:#fff;border:1.5px solid #1e2450;color:#1e2450;padding:10px;border-radius:10px;'
-           + 'font-weight:800;font-size:13px;margin-bottom:8px">&#128196; Voir / imprimer le billet</a>' : '')
-   + '<button class="gwf-send" '+(d.email?'':'disabled')+' onclick="gwFicheSend()">&#9993; '
+  var _url = _tok ? (location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(_tok)) : '';
+  h+='</div><div class="gwf-ft">';
+  if(_url){
+    h+= '<div style="display:flex;gap:7px;margin-bottom:9px">'
+      + '<a href="'+escAttr(_url+'&print=1')+'" target="_blank" rel="noopener"'
+      + ' style="flex:1;text-align:center;text-decoration:none;background:#fff;border:1.5px solid #1e2450;'
+      + 'color:#1e2450;padding:10px 6px;border-radius:10px;font-weight:800;font-size:12.5px">'
+      + '&#11015; T\u00e9l\u00e9charger le PDF</a>'
+      + '<button onclick="gwCopierLien(\''+escAttr(_url)+'\')"'
+      + ' style="flex:1;background:#fff;border:1.5px solid #cbd5e1;color:#475569;padding:10px 6px;'
+      + 'border-radius:10px;font-weight:800;font-size:12.5px;cursor:pointer">&#128279; Copier le lien</button>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#8a90a4;margin-bottom:9px;line-height:1.5">'
+      + 'Le lien du billet est d\u00e9j\u00e0 dans l\'email ci-dessous : le gagnant l\'ouvre lui-m\u00eame. '
+      + 'T\u00e9l\u00e9chargez le PDF seulement si vous voulez le joindre en plus.</div>';
+  }
+  h+= '<button class="gwf-send" '+(d.email?'':'disabled')+' onclick="gwFicheSend()">&#9993; '
    + ((t&&t.notifie_at)?'Renvoyer le mail':'Envoyer le mail')+'</button></div>';
   return h;
 }
@@ -8002,6 +8013,10 @@ function gwMailUrl(t,d){
   Object.keys(t||{}).forEach(function(k){ m[k]=t[k]; });
   if(d){ if(d.email) m.email=d.email; if(d.prenom) m.prenom=d.prenom; if(d.tel) m.tel=d.tel; }
   return mailGagnantUrl(m);
+}
+function gwCopierLien(u){
+  try{ navigator.clipboard.writeText(u); toast('Lien du billet copié','success'); }
+  catch(e){ prompt('Copiez le lien du billet :', u); }
 }
 function gwFicheSend(){
   var d=_gwD,t=_gwT; if(!d||!d.email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
@@ -8416,12 +8431,14 @@ function mailGagnantUrl(t){
            '   '+(t.lot_nom||'un lot')+(t.lot_valeur!=null?' - valeur '+t.lot_valeur+' EUR':''));
     if(comm){ L.push('   chez '+comm); }
     if(coord){ L.push('   '+coord); }
-    L.push('','Merci d avoir participe, et bravo encore : tu faisais partie de plus de 600 joueurs.','');
+    L.push('');
     if(lien){
-      L.push('TON BILLET','',
+      L.push('>>> TON BILLET EST ICI <<<','',
              '   '+lien,'',
-             'Ouvre ce lien : tu peux imprimer ton billet ou simplement le garder sur ton telephone.','');
+             'Clique sur ce lien : tu peux l imprimer ou le garder sur ton telephone.',
+             'C est ce billet, avec son QR code, que tu presenteras en boutique.','');
     }
+    L.push('Merci d avoir participe, et bravo encore : tu faisais partie de plus de 600 joueurs.','');
     L.push('COMMENT EN PROFITER, EN 3 ETAPES','',
            '   1. Rends-toi chez '+(comm||'notre commercant partenaire'),
            '   2. Presente ton billet, papier ou ecran',
@@ -8437,8 +8454,8 @@ function mailGagnantUrl(t){
   }
   L.push('Les Nuits du Sud, la Ville de Vence et Flowin',
          'flowinevent@gmail.com - 06 16 35 49 36');
-  var obj = grand ? 'Waouh, bravo - tu as gagne aux Nuits du Sud !'
-                  : 'Nuits du Sud - tu as gagne ta place de concert !';
+  var obj = grand ? 'Nuits du Sud & Flowin - Grand Jeu Concours - Vous avez gagne !'
+                  : 'Nuits du Sud & Flowin - Grand Jeu Concours - Vous avez gagne une place !';
   return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(t.email||t.joueur_email||'')
     + '&su='+encodeURIComponent(obj)
     + '&body='+encodeURIComponent(L.join('\n'));
