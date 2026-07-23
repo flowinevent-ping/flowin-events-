@@ -139,8 +139,19 @@ function billet(pid,w,i){
    +'<div class="qrz"><div class="box" data-url="'+esc(url)+'"></div>'
    +'<div class="num">'+esc(w.ticket_code||"\u2014")+'</div>'
    +'<div class="cap">Le commer\u00e7ant scanne ce code pour valider</div></div>'
-   +'<div class="ben"><div><div class="lab">B\u00e9n\u00e9ficiaire</div><div class="v">'+esc(w.joueur_nom)+'</div></div>'
-   +'<div><div class="lab">Email</div><div class="v sm">'+esc(w.joueur_email||"\u2014")+'</div></div></div>'
+   +(function(){
+       /* Le billet ne devient nominatif qu au moment de l envoi (etat confirme).
+          Avant, il reste attribuable : si le gagnant tire ne repond pas, le lot part a un autre. */
+       var confirme = (w.etat && w.etat !== 'a_confirmer') || !!w.notifie_at;
+       if(!confirme){
+         return '<div class="ben"><div><div class="lab">B\u00e9n\u00e9ficiaire</div>'
+              + '<div class="v" style="color:var(--mut);font-style:italic">\u00c0 attribuer</div>'
+              + '<div class="lab" style="margin-top:7px;letter-spacing:.8px;text-transform:none;font-weight:600">'
+              + 'Le nom sera inscrit \u00e0 l\'envoi</div></div></div>';
+       }
+       return '<div class="ben"><div><div class="lab">B\u00e9n\u00e9ficiaire</div><div class="v">'+esc(w.joueur_nom)+'</div></div>'
+            + '<div><div class="lab">Email</div><div class="v sm">'+esc(w.joueur_email||"\u2014")+'</div></div></div>';
+     })()
    +'<div class="use"><h4>Conditions d\'utilisation</h4><ul>'+puces(w.conditions)+'</ul></div>'
    +'<div class="ment"><p>'+esc(MENTIONS)+'</p></div>'
    +'<div class="ft"><b>Grand Jeu des Nuits du Sud</b> \u00b7 flowinevent@gmail.com \u00b7 06 16 35 49 36</div>'

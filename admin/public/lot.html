@@ -279,7 +279,16 @@
     $('v-lot').textContent  = d.lot || 'Lot';
     if (d.valeur != null) { $('v-val').textContent = 'Valeur : '+d.valeur+' €'; $('v-valwrap').style.display=''; }
     else { $('v-valwrap').style.display='none'; }
-    $('v-nom').textContent  = d.gagnant || '—';
+    /* Billet nominatif a l envoi : avant confirmation, aucun nom n est affiche. */
+    if (d.etat === 'a_confirmer' || !d.gagnant) {
+      $('v-nom').textContent = 'À attribuer';
+      $('v-nom').style.color = 'var(--muted)';
+      $('v-nom').style.fontStyle = 'italic';
+    } else {
+      $('v-nom').textContent = d.gagnant;
+      $('v-nom').style.color = '';
+      $('v-nom').style.fontStyle = '';
+    }
     $('v-num').textContent  = d.ticket_code || '—';
     $('v-cond').textContent = COND[d.partenaire] || COND_DEF;
     show('s-valable');
@@ -288,7 +297,7 @@
     setLogo('d-logo', d.partenaire);
     $('d-part').textContent = partName(d.partenaire);
     $('d-lot').textContent  = d.lot || 'Lot';
-    $('d-nom').textContent  = d.gagnant || '—';
+    $('d-nom').textContent  = d.gagnant || 'À attribuer';
     $('d-num').textContent  = d.ticket_code || '—';
     $('d-date').textContent = fmtDate(d.retire_at);
     show('s-deja');
@@ -297,7 +306,7 @@
     setLogo('done-logo', d.partenaire);
     $('done-part').textContent = partName(d.partenaire);
     $('done-lot').textContent  = (d.lot || 'Lot') + (d.valeur!=null ? (' · '+d.valeur+' €') : '');
-    $('done-nom').textContent  = d.gagnant || '—';
+    $('done-nom').textContent  = d.gagnant || 'À attribuer';
     $('done-num').textContent  = d.ticket_code || '—';
     $('done-date').textContent = fmtDate(d.retire_at);
     if (d.stock_restant != null) {
