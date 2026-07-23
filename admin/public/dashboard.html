@@ -5,6 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
+<script src="/nds/mail-gagnant.js"></script>
 <script>
 /* GATE SÉCURITÉ — premier script exécuté, avant tout le reste.
    Redirige vers l'écran de connexion si aucune session admin valide.
@@ -8416,50 +8417,8 @@ function renderRoadmap(){
 /* Corps unique de l email au gagnant, utilise par toutes les vues.
    Gmail ne permet pas de joindre par URL : on met donc le LIEN du billet dans le corps,
    le gagnant l ouvre et l enregistre lui-meme. */
-function mailGagnantUrl(t){
-  var prenom = String(t.prenom || t.joueur_nom || '').trim().split(/\s+/)[0] || '';
-  var grand  = (t.type !== 'soir');
-  var lien   = t.retrait_token ? (location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(t.retrait_token)) : '';
-  var comm   = t.partenaire_nom || '';
-  var coord  = [t.partenaire_adresse, t.partenaire_tel].filter(Boolean).join(' - ');
-  var cond   = t.conditions ? String(t.conditions).split('\u00b7')
-                 .map(function(c){return '   - '+c.trim();})
-                 .filter(function(c){return c.length>5;}).join('\n') : '';
-  var L = ['Bonjour '+prenom+',',''];
-  if(grand){
-    L.push('Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagne :','',
-           '   '+(t.lot_nom||'un lot')+(t.lot_valeur!=null?' - valeur '+t.lot_valeur+' EUR':''));
-    if(comm){ L.push('   chez '+comm); }
-    if(coord){ L.push('   '+coord); }
-    L.push('');
-    if(lien){
-      L.push('>>> TON BILLET EST ICI <<<','',
-             '   '+lien,'',
-             'Clique sur ce lien : tu peux l imprimer ou le garder sur ton telephone.',
-             'C est ce billet, avec son QR code, que tu presenteras en boutique.','');
-    }
-    L.push('Merci d avoir participe, et bravo encore : tu faisais partie de plus de 600 joueurs.','');
-    L.push('COMMENT EN PROFITER, EN 3 ETAPES','',
-           '   1. Rends-toi chez '+(comm||'notre commercant partenaire'),
-           '   2. Presente ton billet, papier ou ecran',
-           '   3. Le commercant scanne le QR code et valide - c est tout','');
-    if(cond){ L.push('A SAVOIR','',cond,''); }
-    if(t.ticket_code){ L.push('Ton numero de billet : '+t.ticket_code,''); }
-    L.push('Encore bravo, et a bientot chez notre partenaire.','');
-  } else {
-    L.push('Waouh, bravo ! Tu as gagne ta place de concert pour les Nuits du Sud'
-           +(t.date?', pour la soiree du '+t.date:'')+' !','',
-           'Presente-toi avec cet email a l entree, on s occupe du reste.','',
-           'Merci d avoir participe.','');
-  }
-  L.push('Les Nuits du Sud, la Ville de Vence et Flowin',
-         'flowinevent@gmail.com - 06 16 35 49 36');
-  var obj = grand ? 'Nuits du Sud & Flowin - Grand Jeu Concours - Vous avez gagne !'
-                  : 'Nuits du Sud & Flowin - Grand Jeu Concours - Vous avez gagne une place !';
-  return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(t.email||t.joueur_email||'')
-    + '&su='+encodeURIComponent(obj)
-    + '&body='+encodeURIComponent(L.join('\n'));
-}
+/* Le texte vit dans /nds/mail-gagnant.js — source unique. Ne rien recopier ici. */
+function mailGagnantUrl(t){ return flowinMailGagnant.gmailUrl(t||{}); }
 function ptMailRemerciement(p){
   var lien = location.origin + '/nds/bilan/email-partenaire.html?p=' + encodeURIComponent(p.id);
   var L = [

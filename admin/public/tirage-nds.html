@@ -104,6 +104,7 @@
   </div>
 </div>
 
+<script src="/nds/mail-gagnant.js"></script>
 <script>
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
@@ -161,74 +162,26 @@
   // digital (saisi ci-dessus) est inséré automatiquement s'il est renseigné.
   function billetLien(){ var e=$('billetLien'); return e && e.value ? e.value.trim() : ''; }
   function dateFr(d){ try{ var p=String(d).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }catch(e){ return d; } }
-  function mailSujet(t){
-    return (t&&t.type==='grand')
-      ? 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné !'
-      : 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné une place !';
-  }
-  /* Texte unique, aligne sur celui du dashboard. Le lien du billet est construit
-     automatiquement depuis le token : le gagnant ouvre son billet et l imprime lui-meme. */
-  function partNom(pid){
-    var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0];
-    return p ? p.nom : '';
-  }
+  /* Le texte vit dans /nds/mail-gagnant.js — source unique. Ne rien recopier ici. */
+  function partNom(pid){ var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0]; return p?p.nom:''; }
   function partCond(pid, lot){
     var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0];
     if(!p||!p.lots) return '';
-    var arr = (typeof p.lots==='string') ? JSON.parse(p.lots) : p.lots;
-    var m=(arr||[]).filter(function(l){ return l && (l.nom===lot || l.titre===lot); })[0];
-    return (m && m.conditions) || '';
+    var arr=(typeof p.lots==='string')?JSON.parse(p.lots):p.lots;
+    var m=(arr||[]).filter(function(l){ return l && (l.nom===lot||l.titre===lot); })[0];
+    return (m&&m.conditions)||'';
   }
-  function mailCorps(t){
-    var prenom=(String(t.joueur_nom||'').trim().split(/\s+/)[0])||'';
-    var manuel=billetLien();
-    var lien = manuel || (t.retrait_token
-      ? (location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(t.retrait_token)) : '');
-    var comm = partNom(t.partenaire_id);
-    var cond = partCond(t.partenaire_id, t.lot_nom);
-    var L=['Bonjour '+prenom+',',''];
-    if(t&&t.type==='grand'){
-      L.push('Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagné :','',
-             '   '+(t.lot_nom||'un lot')+(t.lot_valeur!=null?' — valeur '+t.lot_valeur+' €':''));
-      if(comm) L.push('   chez '+comm);
-      L.push('');
-      if(lien){
-        L.push('>>> TON BILLET EST ICI <<<','',
-               '   '+lien,'',
-               'Clique sur ce lien : tu peux l\'imprimer ou le garder sur ton téléphone.',
-               'C\'est ce billet, avec son QR code, que tu présenteras en boutique.','');
-      }
-      L.push('Merci d\'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.','',
-             'COMMENT EN PROFITER, EN 3 ÉTAPES','',
-             '   1. Rends-toi chez '+(comm||'notre commerçant partenaire'),
-             '   2. Présente ton billet, papier ou écran',
-             '   3. Le commerçant scanne le QR code et valide — c\'est tout','');
-      if(cond){
-        L.push('À SAVOIR','');
-        String(cond).split('\u00b7').forEach(function(c){
-          c=c.trim(); if(c.length>5) L.push('   - '+c);
-        });
-        L.push('');
-      }
-      if(t.ticket_code) L.push('Ton numéro de billet : '+t.ticket_code,'');
-      L.push('Encore bravo, et à bientôt chez notre partenaire.','');
-    } else {
-      L.push('Waouh, bravo ! Tu as gagné ta place de concert pour les Nuits du Sud'
-             +(t.date_soir?', pour la soirée du '+dateFr(t.date_soir):'')+' !','');
-      if(lien){ L.push('Voici ton billet : '+lien,''); }
-      L.push('Présente-toi avec cet email à l\'entrée, on s\'occupe du reste.','',
-             'Merci d\'avoir participé.','');
-    }
-    L.push('Les Nuits du Sud, la Ville de Vence et Flowin',
-           'flowinevent@gmail.com · 06 16 35 49 36');
-    return L.join('\n');
+  function mailCtx(t){
+    var c={}; Object.keys(t||{}).forEach(function(k){ c[k]=t[k]; });
+    c.email = t.joueur_email;
+    c.partenaire_nom = partNom(t.partenaire_id);
+    c.conditions = partCond(t.partenaire_id, t.lot_nom);
+    var manuel = billetLien(); if(manuel) c.billet_lien = manuel;
+    return c;
   }
-  function gmailUrl(t){
-    return 'https://mail.google.com/mail/?view=cm&fs=1'
-      + '&to='+encodeURIComponent(t.joueur_email||'')
-      + '&su='+encodeURIComponent(mailSujet(t))
-      + '&body='+encodeURIComponent(mailCorps(t));
-  }
+  function mailSujet(t){ return flowinMailGagnant.sujet(mailCtx(t)); }
+  function mailCorps(t){ return flowinMailGagnant.corps(mailCtx(t)); }
+  function gmailUrl(t){ return flowinMailGagnant.gmailUrl(mailCtx(t)); }
   function envoyerGagnant(i){
     var t=(_soirWins||[])[i]; if(!t||!t.joueur_email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
     window.open(gmailUrl(t),'_blank','noopener');
