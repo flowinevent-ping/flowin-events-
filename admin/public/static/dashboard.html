@@ -3113,7 +3113,7 @@ function renderSidebar(){
     ]},
     {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length}, {id:'banques',ico:'🎯',lbl:'Banques de questions',ext:'/banques.html'} ]},
     {group:'REPORTING', list:[ {id:'rapports',ico:'📊',lbl:'Rapports'} ]},
-    {group:'SYSTÈME', list:[ {id:'cgv',ico:'📜',lbl:'CGV / Légal'}, {id:'parametres',ico:'⚙️',lbl:'Paramètres'} ]}
+    {group:'SYSTÈME', list:[ {id:'roadmap',ico:'🗺️',lbl:'Feuille de route'}, {id:'cgv',ico:'📜',lbl:'CGV / Légal'}, {id:'parametres',ico:'⚙️',lbl:'Paramètres'} ]}
   ];
   // En mode Pro : pas de "Pros" (lui-même), pas de "Super Events" (SA), Jeux et CRM réduits
   const itemsPro = [
@@ -5668,6 +5668,7 @@ function render(){
   const v = state.view;
   let html = '';
   if(v==='pilotage') html = renderPilotage();
+  else if(v==='roadmap') html = renderRoadmap();
   else if(v==='pros') html = renderBiblioPros();
   else if(v==='joueurs') { if(!state.joueursTickets) loadJoueursTicketsSummary(); html = renderBiblioJoueurs(); }
   else if(v==='gagnants') html = renderBiblioGagnants();
@@ -8207,6 +8208,76 @@ function ptEnvoiPack(pid){
     + '&su='+encodeURIComponent('Nuits du Sud 2026 - vos gagnants, vos billets et vos visuels')
     + '&body='+encodeURIComponent(ptMailPack(p, list));
   window.open(url,'_blank','noopener');
+}
+/* ══════════ FEUILLE DE ROUTE — état d'avancement du chantier Flowin ══════════
+   Source unique de vérité côté dashboard. Mise à jour à chaque session.        */
+var ROADMAP = {
+  maj: '23/07/2026',
+  blocs: [
+    { titre:'Opérationnel NDS 2026 — envoi aux partenaires', items:[
+      ['ok','Liste des gagnants par commerce','Fiche partenaire → Gagnants & billets'],
+      ['ok','Billets avec nom + QR de validation','/nds/billets-partenaires.html (live, filtrable)'],
+      ['ok','Procédure de validation en caisse','Intégrée au billet et à l\'email'],
+      ['ok','Déstockage automatique au scan','valider_lot : consomme 1 unité lots_stock'],
+      ['ok','Double authentification','QR du billet + n° de billet saisi par le commerçant'],
+      ['ok','Pack d\'envoi complet par partenaire','Fiche partenaire → Emails & com → Pack d\'envoi'],
+      ['ok','3 emails types éditables par partenaire','Annonce jeu · lot gagné · liste gagnants']
+    ]},
+    { titre:'Dashboard — ergonomie', items:[
+      ['ok','Fiche partenaire en 6 onglets sans doublon','Infos · Stats · Lots & stock · Gagnants & billets · Emails & com · Contrat'],
+      ['ok','Stock et gagnants rattachés à chaque partenaire','Plus besoin d\'aller dans les listes globales'],
+      ['ok','Sidebar en sous-onglets repliables','Groupe NDS 2026 accentué, ouverture auto du groupe actif'],
+      ['ok','Dates events corrigées','Statut déduit des dates + ordre En cours › À venir › Passés'],
+      ['ok','Places de concert visibles par soirée','/tirage-nds.html, fin du filtre date piégeux'],
+      ['todo','Filtres anti-scroll sur les grandes listes','Gagnants (82), Joueurs (856), Events (31)']
+    ]},
+    { titre:'Refonte — modèle une seule entité', items:[
+      ['todo','Supprimer la distinction Pro / Partenaire','Un pro est un professionnel ; partenaire = rôle sur un super event'],
+      ['todo','Socle commun de fiche','Infos · point map · QR · com & kit digital, indépendants de tout event'],
+      ['todo','Sous-onglet cloisonné par super event','Lots, gagnants, stock, billets, emails, facturation propres à chaque super'],
+      ['todo','Déparamétrer NDS codé en dur','PT_SE = se-nds-2026 est figé dans le code'],
+      ['todo','Création de stations de jeu par pro','Chaque station rattachée à un pro et à un event']
+    ]},
+    { titre:'Automatisation des envois', items:[
+      ['hold','Email de remerciement aux joueurs','En attente : connecteur Brevo ou équivalent'],
+      ['todo','Connecteur emailing depuis le dashboard','Brevo à connecter — démarches côté compte en cours'],
+      ['todo','PDF du billet en pièce jointe',''],
+      ['todo','Envoi réel automatisé','Domaine Resend non vérifié — Gmail en attendant']
+    ]},
+    { titre:'Technique', items:[
+      ['todo','Migration du monolithe vers Next.js (.tsx)','dashboard.html ~1 Mo → app/dashboard. Chantier à cadrer, zéro régression exigée'],
+      ['todo','Durcissement sécurité','Séparer clé admin de la clé anon, RLS avancé'],
+      ['todo','Généricité super-event','Cloner NDS à blanc pour Jazz à Nice, Fête du Poète']
+    ]}
+  ]
+};
+function renderRoadmap(){
+  var tot=0, fait=0;
+  ROADMAP.blocs.forEach(function(b){ b.items.forEach(function(i){ tot++; if(i[0]==='ok') fait++; }); });
+  var pct = tot ? Math.round(fait*100/tot) : 0;
+  var h = '<div class="page">';
+  h += '<div class="page-head"><div><h1>🗺️ Feuille de route</h1>'
+     + '<div class="page-sub">État d\'avancement du chantier Flowin · mise à jour '+ROADMAP.maj+'</div></div></div>';
+  h += '<div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr">'
+     + kpi('Terminé', fait+' / '+tot) + kpi('Avancement', pct+' %') + kpi('Restant', (tot-fait)) + '</div>';
+  h += '<div style="height:9px;background:var(--sa-border);border-radius:6px;overflow:hidden;margin:2px 0 18px">'
+     + '<div style="height:100%;width:'+pct+'%;background:var(--sa-accent)"></div></div>';
+  ROADMAP.blocs.forEach(function(b){
+    var n = b.items.filter(function(i){ return i[0]==='ok'; }).length;
+    h += '<div class="section-h">'+esc(b.titre)+' <span class="text-xs text-muted">('+n+'/'+b.items.length+')</span></div>';
+    b.items.forEach(function(i){
+      var st = i[0];
+      var chip = st==='ok'   ? '<span class="chip live">✓ Fait</span>'
+               : st==='hold' ? '<span class="chip">⏸ En attente</span>'
+               :               '<span class="chip past">○ À faire</span>';
+      h += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--sa-subtle);border-radius:9px;margin-bottom:6px'+(st==='ok'?';opacity:.72':'')+'">'
+        +  '<div style="min-width:78px">'+chip+'</div>'
+        +  '<div style="flex:1"><div class="fw-700" style="font-size:13px">'+esc(i[1])+'</div>'
+        +  (i[2]?'<div class="text-xs text-muted mt-2">'+esc(i[2])+'</div>':'')+'</div></div>';
+    });
+  });
+  h += '</div>';
+  return h;
 }
 function sbToggle(g){
   if(!state.sbOpen) state.sbOpen = {};
