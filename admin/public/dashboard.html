@@ -2860,7 +2860,18 @@ function thSort(view,key,label,extraCls){
 
 // ----- TOAST -----
 let toastTimer = null;
-function parcoursUrl(m,ev){return ev?'/parcours/'+encodeURIComponent(m)+'?ev='+encodeURIComponent(ev):'/parcours/'+encodeURIComponent(m||'quiz')+'.html';}
+/* Les parcours sont des ROUTES Next.js (/parcours/quiz), pas des fichiers .html.
+   L ancien repli ajoutait '.html' : l apercu chargeait une page inexistante et restait vide. */
+/* Event de demonstration par module, pour les apercus du dashboard. */
+var EV_DEMO = {
+  quiz:'ev-demo-quiz', vote:'ev-demo-vote', tombola:'ev-demo-tombola',
+  quizsolo:'ev-demo-quizsolo', quizmaster:'ev-demo-quizmaster',
+  spin:'ev-flowin-demo', nds2026:'ev-nds-2026'
+};
+function parcoursUrl(m,ev){
+  var base = '/parcours/'+encodeURIComponent(m||'quiz');
+  return ev ? (base+'?ev='+encodeURIComponent(ev)) : base;
+}
 function proUrl(ev,pro){return ev?'/pro?ev='+encodeURIComponent(ev):pro?'/pro?pro='+encodeURIComponent(pro):'/pro';}
 function toast(msg,type){
   const el = $('#toast');
@@ -11033,7 +11044,7 @@ function renderBiblioJeux(){
     {id:'tombola',    ico:'🎟', nom:'Tombola',        color:'#1D9E75', tag:'STANDARD'},
     {id:'quizsolo',   ico:'🏆', nom:'Quiz Solo',      color:'#F59E0B', tag:'COMPÉTITION'},
     {id:'quizmaster', ico:'⚡', nom:'Quiz Master',    color:'#7C3AED', tag:'GAMIFICATION'},
-    {id:'standup',    ico:'🌟', nom:'Stand Up',       color:'#9333EA', tag:'ÉVÉNEMENTIEL'}
+    {id:'standup',    ico:'🌟', nom:'Stand Up',       color:'#9333EA', tag:'ÉVÉNEMENTIEL', sansParcours:true}
   ];
 
   var html = '<div class="page">';
@@ -11267,12 +11278,20 @@ function renderBiblioJeux(){
      via son .html (sans ?ev= → pas d'écrasement par Supabase).
      Exception Spin : on affiche la spin Flowin (couleur Flowin) via ev-flowin-demo. */
   var _masterUrl;
-  if(tab === 'spin') {
-    _masterUrl = parcoursUrl('spin', 'ev-flowin-demo');
-  } else {
-    _masterUrl = '/parcours/'+encodeURIComponent(tab)+'.html';
-  }
+  /* Chaque module a son event de demo. Sans parametre ev la page renvoie "Aucun event.",
+     et avec un event d un autre module elle redirige vers ce module : l apercu montrait
+     donc toujours la spin. EV_DEMO donne le bon event pour chaque onglet. */
+  _masterUrl = parcoursUrl(tab, EV_DEMO[tab] || ('ev-demo-'+tab));
   var _jmIframeId = 'iframe-master-'+tab;
+  var _modDef = modDefs.filter(function(m){return m.id===tab;})[0] || {};
+  if(_modDef.sansParcours){
+    html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur</div>';
+    html += '<div class="alert warn" style="margin-bottom:18px"><span class="ico">⚠️</span>'
+         +  'Le module <b>'+esc(_modDef.nom)+'</b> n\'a pas encore de parcours joueur. '
+         +  'Aucune route /parcours/'+esc(tab)+' n\'existe : il ne peut donc pas être prévisualisé ni diffusé.</div>';
+    html += '</div>';
+    return html;
+  }
   html += '<div class="section-h" style="margin-bottom:10px">📱 Parcours joueur · complet</div>';
   html += '<div class="flowin-phone-wrap">';
   html += '<div class="flowin-phone-nav-row"><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'prev\')">‹</button><button class="flowin-phone-nav" onclick="flowinNavIframe(\''+_jmIframeId+'\',\'next\')">›</button></div>';
