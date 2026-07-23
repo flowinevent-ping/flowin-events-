@@ -160,7 +160,9 @@ function render(){
   var out=document.getElementById("out"),html="",n=0,i=0;
   var liste = SCOPE ? [[SCOPE,NOMS[SCOPE]||SCOPE]] : PARTS;
   liste.forEach(function(p){(DATA[p[0]]||[]).forEach(function(w){html+=billet(p[0],w,i++);n++;});});
-  out.innerHTML = html || '<div class="empty">Aucun billet pour cette s\u00e9lection.</div>';
+  out.innerHTML = html || (SCOPE
+      ? '<div class="empty">Aucun billet confirm\u00e9 pour l\'instant.<br><span style="font-weight:600;font-size:12px">Les gagnants apparaissent ici au fur et \u00e0 mesure qu\'ils sont contact\u00e9s et valid\u00e9s par l\'organisateur.</span></div>'
+      : '<div class="empty">Aucun billet pour cette s\u00e9lection.</div>');
   document.getElementById("cnt").textContent = n+" billet"+(n>1?"s":"");
   document.querySelectorAll(".box").forEach(function(el){
     if(el.childNodes.length) return;
@@ -179,9 +181,13 @@ function render(){
     sc.innerHTML="\u26a0\ufe0f Vue interne, tous commerces confondus. Pour envoyer \u00e0 un commer\u00e7ant, utilisez le lien de sa fiche partenaire.";
     sel.style.display="";
   }
+  /* Cycle de vie : TIRE (interne) -> CONFIRME (visible partenaire) -> RETIRE.
+     Le lien partenaire (?p=) ne charge QUE les confirmes. Le filtrage est cote serveur :
+     modifier l URL ne peut pas exposer un gagnant non encore appele. */
+  var MODE = SCOPE ? "partenaire" : "interne";
   var cible = SCOPE?[[SCOPE,NOMS[SCOPE]]]:PARTS;
   Promise.all(cible.map(function(p){
-    return rpc("partenaire_gagnants",{p_partenaire_id:p[0],p_se:"se-nds-2026"}).then(function(j){DATA[p[0]]=Array.isArray(j)?j:[];});
+    return rpc("partenaire_gagnants",{p_partenaire_id:p[0],p_se:"se-nds-2026",p_mode:MODE}).then(function(j){DATA[p[0]]=Array.isArray(j)?j:[];});
   })).then(function(){
     if(!SCOPE){
       sel.innerHTML='<option value="">Tous les commerces</option>'+PARTS.filter(function(p){return (DATA[p[0]]||[]).length;})

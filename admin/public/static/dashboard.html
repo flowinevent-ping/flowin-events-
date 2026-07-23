@@ -5373,13 +5373,20 @@ function renderNdsLots(){
     h += '</div>';
     /* Gagnants deja en base : billet, email, statut d envoi. */
     if(nbTires){
+      var reste = nbTires - nbEnvoyes;
       h += '<div style="margin-top:12px;border-top:1px solid var(--sa-border);padding-top:11px">'
         +  '<div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sa-muted);margin-bottom:8px">'
-        +  'Gagnants tirés ('+nbTires+') · '+nbEnvoyes+' notifié'+(nbEnvoyes>1?'s':'')+'</div>';
+        +  'Gagnants tirés ('+nbTires+') · '+nbEnvoyes+' confirmé'+(nbEnvoyes>1?'s':'')+' · '+nbRetires+' retiré'+(nbRetires>1?'s':'')+'</div>'
+        +  (reste>0
+            ? '<div class="alert warn" style="margin:0 0 9px;font-size:12px"><span class="ico">☎</span>'
+              +reste+' gagnant'+(reste>1?'s':'')+' à appeler. Le partenaire ne les verra qu\'une fois confirmés.</div>'
+            : '<div class="alert info" style="margin:0 0 9px;font-size:12px"><span class="ico">✅</span>Tous les gagnants sont confirmés et visibles du partenaire.</div>');
       tires.forEach(function(t){
         var em = t.joueur_email||'';
-        var st = t.retire_at ? '<span class="chip live">✓ Retiré</span>'
-               : (t.notifie_at ? '<span class="chip">✉️ Envoyé</span>' : '<span class="chip warn">○ À envoyer</span>');
+        /* Cycle : à confirmer -> confirmé (visible du partenaire) -> retiré en caisse. */
+        var st = t.retire_at ? '<span class="chip live">✓ Retiré en caisse</span>'
+               : (t.notifie_at ? '<span class="chip live">✓ Confirmé · visible du partenaire</span>'
+                               : '<span class="chip warn">☎ À appeler</span>');
         h += '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 10px;background:var(--sa-subtle);border-radius:9px;margin-bottom:5px">'
           +  '<span style="flex:1;min-width:150px"><b style="font-size:13px">'+esc(t.joueur_nom||'—')+'</b>'
           +  '<span class="text-xs text-muted"> · '+esc(t.lot_nom||'')+'</span></span>'
@@ -5388,6 +5395,7 @@ function renderNdsLots(){
           +  '<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="'+escAttr(ptBilletUrl(t.retrait_token))+'">🎫 Billet</a>'
           +  (em ? '<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(\''+escAttr(em)+'\',\'Email\')">📋 '+esc(em)+'</button>'
                  : '<span class="text-xs text-muted">pas d\'email</span>')
+          +  (t.notifie_at ? '' : '<button class="btn btn-sm btn-primary" style="font-size:11px" onclick="gagConfirmer('+(t.tirage_id||0)+',\''+escAttr(x.partenaire_id)+'\')">✓ Confirmer</button>')
           +  '</div>';
       });
       h += '</div>';
@@ -8375,6 +8383,16 @@ function renderRoadmap(){
   });
   h += '</div>';
   return h;
+}
+/* Confirme un gagnant : il devient visible du partenaire. RPC marquer_notifie deja en place. */
+function gagConfirmer(tirageId, pid){
+  if(!tirageId) return;
+  if(!confirm('Confirmer ce gagnant ?\n\nIl apparaitra alors dans la liste et les billets du partenaire.')) return;
+  ptRpc('marquer_notifie',{p_tirage_id:tirageId}).then(function(){
+    delete _ptData.gag[pid];
+    ptLoadGagnants(pid);
+    toast('Gagnant confirmé · visible du partenaire','success');
+  }).catch(function(){ toast('Erreur lors de la confirmation','warn'); });
 }
 function sbToggle(g){
   if(!state.sbOpen) state.sbOpen = {};
