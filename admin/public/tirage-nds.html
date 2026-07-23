@@ -161,28 +161,66 @@
   // digital (saisi ci-dessus) est inséré automatiquement s'il est renseigné.
   function billetLien(){ var e=$('billetLien'); return e && e.value ? e.value.trim() : ''; }
   function dateFr(d){ try{ var p=String(d).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }catch(e){ return d; } }
-  function mailSujet(t){ return (t&&t.type==='grand') ? 'Nuits du Sud — tu as gagné un lot !' : 'Nuits du Sud — tu as gagné ta place de concert !'; }
+  function mailSujet(t){
+    return (t&&t.type==='grand')
+      ? 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné !'
+      : 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné une place !';
+  }
+  /* Texte unique, aligne sur celui du dashboard. Le lien du billet est construit
+     automatiquement depuis le token : le gagnant ouvre son billet et l imprime lui-meme. */
+  function partNom(pid){
+    var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0];
+    return p ? p.nom : '';
+  }
+  function partCond(pid, lot){
+    var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0];
+    if(!p||!p.lots) return '';
+    var arr = (typeof p.lots==='string') ? JSON.parse(p.lots) : p.lots;
+    var m=(arr||[]).filter(function(l){ return l && (l.nom===lot || l.titre===lot); })[0];
+    return (m && m.conditions) || '';
+  }
   function mailCorps(t){
     var prenom=(String(t.joueur_nom||'').trim().split(/\s+/)[0])||'';
-    var lien=billetLien();
-    var L=[];
-    L.push('Bonjour '+prenom+',');
-    L.push('');
+    var manuel=billetLien();
+    var lien = manuel || (t.retrait_token
+      ? (location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(t.retrait_token)) : '');
+    var comm = partNom(t.partenaire_id);
+    var cond = partCond(t.partenaire_id, t.lot_nom);
+    var L=['Bonjour '+prenom+',',''];
     if(t&&t.type==='grand'){
-      L.push('On est super contents pour toi : au grand tirage des Nuits du Sud, tu as gagné '+(t.lot_nom||'un lot')+' chez notre commerçant partenaire !');
+      L.push('Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagné :','',
+             '   '+(t.lot_nom||'un lot')+(t.lot_valeur!=null?' — valeur '+t.lot_valeur+' €':''));
+      if(comm) L.push('   chez '+comm);
+      L.push('');
+      if(lien){
+        L.push('>>> TON BILLET EST ICI <<<','',
+               '   '+lien,'',
+               'Clique sur ce lien : tu peux l\'imprimer ou le garder sur ton téléphone.',
+               'C\'est ce billet, avec son QR code, que tu présenteras en boutique.','');
+      }
+      L.push('Merci d\'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.','',
+             'COMMENT EN PROFITER, EN 3 ÉTAPES','',
+             '   1. Rends-toi chez '+(comm||'notre commerçant partenaire'),
+             '   2. Présente ton billet, papier ou écran',
+             '   3. Le commerçant scanne le QR code et valide — c\'est tout','');
+      if(cond){
+        L.push('À SAVOIR','');
+        String(cond).split('\u00b7').forEach(function(c){
+          c=c.trim(); if(c.length>5) L.push('   - '+c);
+        });
+        L.push('');
+      }
+      if(t.ticket_code) L.push('Ton numéro de billet : '+t.ticket_code,'');
+      L.push('Encore bravo, et à bientôt chez notre partenaire.','');
     } else {
-      L.push('On est super contents pour toi : tu as gagné ta place de concert pour les Nuits du Sud, pour la soirée du '+dateFr(t.date_soir)+' !');
+      L.push('Waouh, bravo ! Tu as gagné ta place de concert pour les Nuits du Sud'
+             +(t.date_soir?', pour la soirée du '+dateFr(t.date_soir):'')+' !','');
+      if(lien){ L.push('Voici ton billet : '+lien,''); }
+      L.push('Présente-toi avec cet email à l\'entrée, on s\'occupe du reste.','',
+             'Merci d\'avoir participé.','');
     }
-    L.push('');
-    if(lien){ L.push('Voici ton billet : '+lien); L.push(''); }
-    L.push('Les Nuits du Sud, la Ville de Vence et Flowin te remercient pour ta participation.');
-    L.push('');
-    L.push('Pendant le festival, le jeu continue : rends-toi sur l\'application, découvre le parcours, invite tes amis.');
-    L.push('D\'autres places sont à gagner chaque soir, et de nombreux lots chez nos commerçants partenaires lors du grand tirage de clôture.');
-    L.push('');
-    L.push('À très vite, et excellente soirée !');
-    L.push('L\'équipe des Nuits du Sud & Flowin');
-    L.push('flowinevent@gmail.com · 06 16 35 49 36');
+    L.push('Les Nuits du Sud, la Ville de Vence et Flowin',
+           'flowinevent@gmail.com · 06 16 35 49 36');
     return L.join('\n');
   }
   function gmailUrl(t){
@@ -314,7 +352,10 @@
           : '<span class="unsent" style="margin-left:auto" title="Cliquer pour marquer comme envoyé" onclick="marquerNotifie('+t.id+',true)">○ Non envoyé</span>');
     var actions = retired
       ? '<button onclick="remettreEnJeu('+t.id+',false)" style="background:#fff;border:1px solid #8a90a4;color:#5a6072;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">↺ Rétablir</button>'
-      : '<button onclick="envoyerParId('+t.id+')" style="background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>'
+      : ((t.retrait_token
+           ? '<a href="'+location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(t.retrait_token)+'&print=1" target="_blank" rel="noopener" style="background:#fff;border:1px solid #1e2450;color:#1e2450;padding:6px 12px;border-radius:8px;font-weight:700;text-decoration:none;margin-right:6px">⬇ Billet</a>'
+           : '')
+        + '<button onclick="envoyerParId('+t.id+')" style="background:#fff;border:1px solid #1baf7a;color:#1baf7a;padding:6px 12px;border-radius:8px;font-weight:700;cursor:pointer">✉️ '+(sent?'Renvoyer':'Envoyer')+'</button>')
         + '<button onclick="remettreEnJeu('+t.id+',true)" title="Retirer ce gagnant et remettre le lot en jeu" style="background:#fff;border:1px solid #e0a800;color:#a16207;padding:6px 10px;border-radius:8px;font-weight:700;cursor:pointer">↩ Remettre en jeu</button>';
     var meta = (t.type==='soir') ? (' — <i>'+esc(t.lot_nom)+'</i>') : '';
     return '<div class="win'+(t.type==='soir'?' win-soir':'')+'" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap'+(retired?';opacity:.55':'')+'">'
