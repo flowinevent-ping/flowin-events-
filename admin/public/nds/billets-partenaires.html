@@ -118,11 +118,29 @@ function typeBon(l){l=String(l||"").toLowerCase();
   if(l.indexOf("s\u00e9jour")>-1)return "S\u00e9jour";
   if(l.indexOf("formation")>-1)return "Formation";
   return "Bon cadeau";}
-/* Les conditions viennent de la base (partenaires.lots[].conditions), decoupees sur les separateurs. */
-function puces(txt){
-  var parts=String(txt||"").split("\u00b7").map(function(x){return x.trim();}).filter(Boolean);
-  if(!parts.length) parts=["Billet nominatif \u00b7 non remboursable \u00b7 validable une seule fois"];
-  return parts.map(function(p){return "<li>"+esc(p)+"</li>";}).join("");
+/* CONDITIONS D UTILISATION — composees automatiquement, jamais laissees incompletes.
+   Un billet doit toujours dire SUR QUOI le bon s applique, OU l utiliser et JUSQU A QUAND,
+   sinon le porteur peut se le voir refuser en boutique. On assemble donc :
+     1. l objet du bon, tire du nom du lot  (toujours present)
+     2. le lieu d utilisation, tire du commerce (toujours present)
+     3. les conditions commerciales saisies en base (partenaires.lots[].conditions)
+   Les restrictions type "non cumulable" ne suffisent pas seules : elles restent affichees,
+   mais apres l objet et le lieu. */
+function puces(w, nomCommerce){
+  var out = [];
+  if(w.lot_nom){ out.push("À valoir sur : <b>"+esc(w.lot_nom)+"</b>"); }
+  var ou = nomCommerce ? ("À présenter chez <b>"+esc(nomCommerce)+"</b>"
+            + (w.partenaire_adresse ? ", "+esc(w.partenaire_adresse) : "")) : "";
+  if(ou) out.push(ou);
+  String(w.conditions||"").split("\u00b7").forEach(function(c){
+    c = c.trim();
+    if(!c) return;
+    /* on ne repete pas l objet du bon s il est deja dans la condition saisie */
+    if(w.lot_nom && c.toLowerCase() === String(w.lot_nom).toLowerCase()) return;
+    out.push(esc(c));
+  });
+  if(out.length < 3){ out.push("Billet nominatif, non remboursable, validable une seule fois"); }
+  return out.map(function(p){ return "<li>"+p+"</li>"; }).join("");
 }
 function billet(pid,w,i){
   var nom=w.partenaire_nom||NOMS[pid]||pid;
@@ -152,7 +170,7 @@ function billet(pid,w,i){
        return '<div class="ben"><div><div class="lab">B\u00e9n\u00e9ficiaire</div><div class="v">'+esc(w.joueur_nom)+'</div></div>'
             + '<div><div class="lab">Email</div><div class="v sm">'+esc(w.joueur_email||"\u2014")+'</div></div></div>';
      })()
-   +'<div class="use"><h4>Conditions d\'utilisation</h4><ul>'+puces(w.conditions)+'</ul></div>'
+   +'<div class="use"><h4>Conditions d\'utilisation</h4><ul>'+puces(w, nom)+'</ul></div>'
    +'<div class="ment"><p>'+esc(MENTIONS)+'</p></div>'
    +'<div class="ft"><b>Grand Jeu des Nuits du Sud</b> \u00b7 flowinevent@gmail.com \u00b7 06 16 35 49 36</div>'
    +'</div>'

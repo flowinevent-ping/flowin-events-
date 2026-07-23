@@ -290,7 +290,18 @@
       $('v-nom').style.fontStyle = '';
     }
     $('v-num').textContent  = d.ticket_code || '—';
-    $('v-cond').textContent = COND[d.partenaire] || COND_DEF;
+    /* Memes conditions que sur le billet : objet du bon, lieu, puis conditions saisies.
+       Un commercant ne doit jamais lire une condition differente de celle du billet presente. */
+    var _c = [];
+    if(d.lot) _c.push('À valoir sur : '+d.lot);
+    var _nom = d.partenaire_nom || partName(d.partenaire);
+    if(_nom) _c.push('À présenter chez '+_nom + (d.partenaire_adresse ? ', '+d.partenaire_adresse : ''));
+    String(d.conditions || COND[d.partenaire] || '').split('·').forEach(function(c){
+      c = c.trim();
+      if(c && (!d.lot || c.toLowerCase() !== String(d.lot).toLowerCase())) _c.push(c);
+    });
+    if(_c.length < 3) _c.push(COND_DEF);
+    $('v-cond').textContent = _c.join(' · ');
     show('s-valable');
   }
   function renderDeja(d){
