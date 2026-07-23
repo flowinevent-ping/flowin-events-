@@ -5395,7 +5395,9 @@ function renderNdsLots(){
           +  '<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="'+escAttr(ptBilletUrl(t.retrait_token))+'">🎫 Billet</a>'
           +  (em ? '<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(\''+escAttr(em)+'\',\'Email\')">📋 '+esc(em)+'</button>'
                  : '<span class="text-xs text-muted">pas d\'email</span>')
-          +  (t.notifie_at ? '' : '<button class="btn btn-sm btn-primary" style="font-size:11px" onclick="gagConfirmer('+(t.tirage_id||0)+',\''+escAttr(x.partenaire_id)+'\')">✓ Confirmer</button>')
+          +  '<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="'
+             +escAttr(location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(t.retrait_token||'')+'&print=1')+'">📄 PDF</a>'
+          +  (t.notifie_at ? '' : '<button class="btn btn-sm btn-primary" style="font-size:11px" onclick="gagConfirmerEtEnvoyer('+(t.tirage_id||0)+',\''+escAttr(x.partenaire_id)+'\',\''+escAttr(t.retrait_token||'')+'\')">✓ Confirmer &amp; envoyer</button>')
           +  '</div>';
       });
       h += '</div>';
@@ -6586,6 +6588,7 @@ function drawerPro(p){
     html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'joueurs-pro\',\''+p.id+'\')">📥 Joueurs CRM rattachés (CSV)</button>';
     html += '<button class="btn btn-block" onclick="toast(\'Synthèse XLSX générée\',\'success\')">📊 Synthèse statistique (XLSX)</button>';
   } else if(state.drawer.tab==='contrat'){
+    if(state.drawer.type==='partenaire'){ html += ptPinHtml(p); }
     html += '<div class="alert info"><span class="ico">🧾</span>Bons de commande &amp; factures rattachés à ce compte.</div>';
     html += '<div id="bcLinkedBox" style="margin-top:6px"><div class="text-xs text-muted">Chargement des contrats &amp; factures…</div></div>';
     html += '<div style="margin-top:8px"><button class="btn btn-sm" onclick="loadBonsCommandeLies(\''+esc(p.id)+'\',\''+esc(p.email||'')+'\',\''+esc(p.siret||'')+'\',\''+esc(p.nom||'')+'\')">↻ Rafraîchir</button></div>';
@@ -8385,6 +8388,100 @@ function renderRoadmap(){
   return h;
 }
 /* Confirme un gagnant : il devient visible du partenaire. RPC marquer_notifie deja en place. */
+/* Confirmer & envoyer : genere le PDF du billet, ouvre l email au gagnant puis l email
+   au commerce, et bascule le gagnant en CONFIRME (son nom s inscrit alors sur le billet). */
+/* PIN du commerce : valide un retrait en caisse et ouvre son espace.
+   Stocke en base (partenaires.code_pin) pour pouvoir le lui redonner en cas de perte. */
+function ptPinHtml(p){
+  var pin = (p && (p.code_pin || p.codePin)) || '';
+  return '<div class="section-h">🔐 Code de validation en caisse</div>'
+    + '<div style="display:flex;align-items:center;gap:14px;background:#fff8ea;border:1px solid #f2e1b6;'
+    + 'border-radius:12px;padding:14px 16px;margin-bottom:10px">'
+    + '<div><div class="text-xs" style="font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#a1690a">PIN du commerce</div>'
+    + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:26px;font-weight:800;letter-spacing:7px;color:#23142c;margin-top:4px">'
+    + esc(pin || '—') + '</div></div>'
+    + (pin ? '<button class="btn btn-sm" style="margin-left:auto" onclick="ptCopy(\''+escAttr(pin)+'\',\'PIN\')">📋 Copier</button>' : '')
+    + '</div>'
+    + '<div class="text-xs text-muted" style="margin-bottom:16px">Confidentiel. Le commerçant le saisit pour valider un billet. '
+    + 'À ne jamais afficher côté client.</div>';
+}
+function gagMailGagnant(t, p){
+  var prenom = String(t.joueur_nom||'').trim().split(/\s+/)[0] || '';
+  var cond = t.conditions ? String(t.conditions).split('\u00b7').map(function(c){return '   - '+c.trim();}).filter(function(c){return c.length>5;}).join('\n') : '';
+  var L = [
+    'Bonjour '+prenom+',','',
+    'Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagne :','',
+    '   '+(t.lot_nom||'un lot')+(t.lot_valeur!=null?' - valeur '+t.lot_valeur+' EUR':''),
+    '   chez '+((p&&p.nom)||t.partenaire_nom||''),
+    ((t.partenaire_adresse||'')+(t.partenaire_tel?' - '+t.partenaire_tel:'')).trim(),'',
+    'Merci d avoir participe, et bravo encore : tu faisais partie de plus de 600 joueurs.','',
+    'TON BILLET EST EN PIECE JOINTE, en PDF. Imprime-le ou garde-le sur ton telephone.','',
+    'COMMENT EN PROFITER, EN 3 ETAPES','',
+    '   1. Rends-toi chez '+((p&&p.nom)||t.partenaire_nom||''),
+    '   2. Presente ton billet, papier ou ecran',
+    '   3. Le commercant scanne le QR code et valide - c est tout','',
+    (cond ? 'A SAVOIR\n'+cond+'\n' : ''),
+    'Ton numero de billet : '+(t.ticket_code||''),'',
+    'Encore bravo, et a bientot chez notre partenaire.','',
+    'Les Nuits du Sud, la Ville de Vence et Flowin',
+    'flowinevent@gmail.com - 06 16 35 49 36'
+  ];
+  return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(t.joueur_email||'')
+    + '&su='+encodeURIComponent('Waouh, bravo - tu as gagne aux Nuits du Sud !')
+    + '&body='+encodeURIComponent(L.join('\n'));
+}
+function gagMailCommerce(t, p){
+  var L = [
+    'Bonjour,','',
+    'Un nouveau gagnant vient d etre confirme pour votre commerce.',
+    'Nous l avons contacte, il est informe et son billet lui a ete envoye.','',
+    'LE GAGNANT',
+    '   '+(t.joueur_nom||'')+' - '+(t.joueur_email||'')+(t.joueur_tel?' - '+t.joueur_tel:''),'',
+    'SON LOT',
+    '   '+(t.lot_nom||'')+(t.lot_valeur!=null?' - valeur '+t.lot_valeur+' EUR':''),
+    '   Numero de billet : '+(t.ticket_code||''),'',
+    'QUAND IL SE PRESENTERA','',
+    '   1. Il vous montre son billet, papier ou telephone',
+    '   2. Vous scannez le QR code avec votre appareil photo',
+    '   3. Vous verifiez que le numero affiche correspond a celui ci-dessus',
+    '   4. Vous saisissez votre code PIN'+((p&&p.code_pin)?' ('+p.code_pin+')':'')+' et vous validez','',
+    'Le destockage de votre lot est automatique.',
+    'Un billet ne peut etre valide qu une seule fois, aucun risque de double retrait.','',
+    'VOTRE LISTE A JOUR',
+    '   '+location.origin+'/nds/billets-partenaires.html?p='+encodeURIComponent(t.partenaire_id||''),
+    '   Elle se complete au fur et a mesure que nous confirmons les gagnants.','',
+    'Le billet du gagnant est en piece jointe.','',
+    'Merci pour votre participation a cette edition - et bonne vente !','',
+    'Les Nuits du Sud & Flowin',
+    'flowinevent@gmail.com - 06 16 35 49 36'
+  ];
+  return 'https://mail.google.com/mail/?view=cm&fs=1'
+    + ((p&&p.email)?'&to='+encodeURIComponent(p.email):'')
+    + '&su='+encodeURIComponent('Nuits du Sud - un gagnant vient d etre confirme chez vous')
+    + '&body='+encodeURIComponent(L.join('\n'));
+}
+function gagConfirmerEtEnvoyer(tirageId, pid, token){
+  if(!tirageId) return;
+  var list = _ptData.gag[pid] || [];
+  var t = null;
+  list.forEach(function(x){ if(Number(x.tirage_id)===Number(tirageId)) t = x; });
+  if(!t){ toast('Gagnant introuvable, rechargez la page','warn'); return; }
+  var p = findPartner(pid) || {};
+  if(!confirm('Confirmer '+(t.joueur_nom||'ce gagnant')+' ?\n\n'
+      + '1. Le PDF de son billet s ouvre pour telechargement\n'
+      + '2. L email au gagnant s ouvre dans Gmail\n'
+      + '3. L email a ' + (p.nom||'son commerce') + ' s ouvre ensuite\n\n'
+      + 'Son nom sera alors inscrit sur le billet et il apparaitra chez le commercant.')) return;
+
+  ptRpc('marquer_notifie',{p_tirage_id:Number(tirageId)}).then(function(){
+    if(token) window.open(location.origin+'/nds/billets-partenaires.html?t='+encodeURIComponent(token)+'&print=1','_blank','noopener');
+    setTimeout(function(){ window.open(gagMailGagnant(t,p),'_blank','noopener'); }, 900);
+    setTimeout(function(){ window.open(gagMailCommerce(t,p),'_blank','noopener'); }, 1800);
+    delete _ptData.gag[pid];
+    ptLoadGagnants(pid);
+    toast('Gagnant confirme - PDF et emails ouverts','success');
+  }).catch(function(){ toast('Erreur lors de la confirmation','warn'); });
+}
 function gagConfirmer(tirageId, pid){
   if(!tirageId) return;
   if(!confirm('Confirmer ce gagnant ?\n\nIl apparaitra alors dans la liste et les billets du partenaire.')) return;
@@ -8490,7 +8587,9 @@ function drawerPartner(p){
     html += '<div class="alert info" style="margin-bottom:10px"><span class="ico">✅</span>Tout ce que le commerçant doit recevoir, réuni ici.</div>';
     html += '<div style="display:grid;gap:6px;margin-bottom:10px">';
     var _lignes = [
+      ['✉️','Email de remerciement (chiffres + son PIN)', _org+'/nds/bilan/email-partenaire.html?p='+encodeURIComponent(p.id)],
       ['🎟️','Billets de ses gagnants (QR de validation)', _org+'/nds/billets-partenaires.html?p='+encodeURIComponent(p.id)],
+      ['📊','Visuel bilan (image seule)', _org+'/nds/bilan/bilan-nds-2026.png'],
       ['🧾','Bon de commande / facture', '#bc'],
       ['📄','Affiche A4 boutique', _org+'/nds/visuels/nds_a4_'+_slug+'.png'],
       ['🎫','Planche de tickets (PDF)', _org+'/nds/visuels/tickets/nds_tickets_'+_slug+'.pdf'],

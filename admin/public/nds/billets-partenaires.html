@@ -182,6 +182,24 @@ function render(){
   });
 }
 (function init(){
+  /* ?t=<token> : un seul billet, impression immediate. C est le PDF envoye au gagnant.
+     ?p=<slug>  : la planche du commerce (gagnants confirmes uniquement). */
+  var TOK = qs("t")||null;
+  if(TOK){
+    document.querySelector(".top").style.display="none";
+    rpc("billet_par_token",{p_token:TOK}).then(function(j){
+      var w = Array.isArray(j)?j[0]:j;
+      if(!w || !w.retrait_token){ document.getElementById("out").innerHTML='<div class="empty">Billet introuvable.</div>'; return; }
+      var pid = w.partenaire_id || "";
+      document.getElementById("out").innerHTML = billet(pid, w, 0);
+      document.querySelectorAll(".box").forEach(function(el){
+        try{ new QRCode(el,{text:location.origin+"/lot.html?t="+encodeURIComponent(w.retrait_token),
+             width:168,height:168,correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+      });
+      if(qs("print")==="1") setTimeout(function(){ window.print(); }, 700);
+    });
+    return;
+  }
   SCOPE=qs("p")||null;
   var lbl=document.getElementById("lbl"),sc=document.getElementById("scope"),sel=document.getElementById("sel");
   if(SCOPE){
