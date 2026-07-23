@@ -5296,7 +5296,10 @@ function renderNdsLots(){
   if(_ndsLots.data===null && !_ndsLots.loading){ ndsLotsLoad(); }
   var rows = _ndsLots.data||[];
   var totDispo=0, totAttr=0, totTot=0;
-  rows.forEach(function(x){ totDispo+=(x.disponibles||0); totAttr+=(x.attribues||0); totTot+=(x.total||0); });
+  rows.forEach(function(x){
+    totDispo+=(x.disponibles||0); totTot+=(x.total||0);
+    totAttr += ((_ptData.gag[x.partenaire_id]||[]).length);
+  });
 
   var css = '<style id="ndslots-css">'
     + '.ndslots-strip{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 18px}'
@@ -5333,16 +5336,27 @@ function renderNdsLots(){
 
   h += '<div class="ndslots-strip">'
     + '<div class="ndslots-kpi ok"><b>'+totDispo+'</b><span>Lots disponibles</span></div>'
-    + '<div class="ndslots-kpi acc"><b>'+totAttr+'</b><span>Lots attribues</span></div>'
+    + '<div class="ndslots-kpi acc"><b>'+totAttr+'</b><span>Gagnants tirés</span></div>'
     + '<div class="ndslots-kpi"><b>'+totTot+'</b><span>Total (bons de commande)</span></div>'
     + '<div class="ndslots-kpi"><b>'+rows.length+'</b><span>Partenaires dotes</span></div>'
     + '</div>';
 
   if(!rows.length){ h+='<div class="alert info"><span class="ico">ℹ️</span>Aucun lot en stock pour ce super event.</div></div>'; return h; }
 
+  /* Les gagnants deja tires vivent dans `tirages`, pas dans lots_stock.
+     lots_stock.utilise ne passe a true qu au RETRAIT en caisse : c est pour ca que
+     la page affichait "0 attribue" alors que 61 gagnants existaient. On lit donc les
+     deux sources, via le helper deja en place (ptLoadGagnants / _ptData.gag). */
+  rows.forEach(function(x){ if(!_ptData.gag[x.partenaire_id]) ptLoadGagnants(x.partenaire_id); });
+
   rows.forEach(function(x){
-    var dispo=x.disponibles||0, attr=x.attribues||0, tot=x.total||0;
-    var pct = tot>0 ? Math.round(attr/tot*100) : 0;
+    var tires = _ptData.gag[x.partenaire_id] || [];
+    var nbTires = tires.length;
+    var nbRetires = tires.filter(function(t){ return !!t.retire_at; }).length;
+    var nbEnvoyes = tires.filter(function(t){ return !!t.notifie_at; }).length;
+    var dispo=x.disponibles||0, tot=x.total||0;
+    var attr = nbTires;
+    var pct = tot>0 ? Math.round(Math.min(attr,tot)/tot*100) : 0;
     var busy = _ndsLots.busy===x.partenaire_id;
     var pnomSafe = (x.partenaire||'').replace(/'/g,' ');
     h += '<div class="ndslots-card">';
@@ -5350,13 +5364,34 @@ function renderNdsLots(){
     if(x.image_url){ h+='<img class="ndslots-logo" src="'+esc(x.image_url)+'" alt="" onerror="this.style.visibility=\'hidden\'">'; }
     else { h+='<div class="ndslots-logo"></div>'; }
     h += '<div><div class="ndslots-name">'+esc(x.partenaire||x.partenaire_id)+'</div><div class="ndslots-lots">'+esc(x.lots||'')+'</div></div>';
-    h += '<div class="ndslots-count'+(dispo?'':' empty')+'"><b>'+dispo+'</b><span>sur '+tot+' · '+attr+' attribue'+(attr>1?'s':'')+'</span></div>';
+    h += '<div class="ndslots-count'+(dispo?'':' empty')+'"><b>'+attr+'</b><span>gagnant'+(attr>1?'s':'')+' tire'+(attr>1?'s':'')+' sur '+tot+'<br>'+nbRetires+' retire'+(nbRetires>1?'s':'')+' en caisse</span></div>';
     h += '</div>';
     h += '<div class="ndslots-bar"><i style="width:'+pct+'%"></i></div>';
     if(!x.visuel_pret){ h += '<div class="ndslots-warn">⚠️ Visuel du lot non charge — le mail partira sans image (a charger sur /lots-nds.html)</div>'; }
     h += '<div class="ndslots-act">';
     h += '<button class="ndslots-btn" '+((dispo<=0||busy)?'disabled':'')+' onclick="ndsLotsDraw(\''+esc(x.partenaire_id)+'\',\''+esc(pnomSafe)+'\')">'+(busy?'⏳ Tirage…':'🎲 Tirer un gagnant')+'</button>';
     h += '</div>';
+    /* Gagnants deja en base : billet, email, statut d envoi. */
+    if(nbTires){
+      h += '<div style="margin-top:12px;border-top:1px solid var(--sa-border);padding-top:11px">'
+        +  '<div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sa-muted);margin-bottom:8px">'
+        +  'Gagnants tirés ('+nbTires+') · '+nbEnvoyes+' notifié'+(nbEnvoyes>1?'s':'')+'</div>';
+      tires.forEach(function(t){
+        var em = t.joueur_email||'';
+        var st = t.retire_at ? '<span class="chip live">✓ Retiré</span>'
+               : (t.notifie_at ? '<span class="chip">✉️ Envoyé</span>' : '<span class="chip warn">○ À envoyer</span>');
+        h += '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 10px;background:var(--sa-subtle);border-radius:9px;margin-bottom:5px">'
+          +  '<span style="flex:1;min-width:150px"><b style="font-size:13px">'+esc(t.joueur_nom||'—')+'</b>'
+          +  '<span class="text-xs text-muted"> · '+esc(t.lot_nom||'')+'</span></span>'
+          +  '<span class="text-xs" style="font-family:ui-monospace,Menlo,monospace;color:#7C2D92;font-weight:700">'+esc(t.ticket_code||'—')+'</span>'
+          +  st
+          +  '<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="'+escAttr(ptBilletUrl(t.retrait_token))+'">🎫 Billet</a>'
+          +  (em ? '<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(\''+escAttr(em)+'\',\'Email\')">📋 '+esc(em)+'</button>'
+                 : '<span class="text-xs text-muted">pas d\'email</span>')
+          +  '</div>';
+      });
+      h += '</div>';
+    }
     var wins = _ndsLots.results[x.partenaire_id]||[];
     wins.forEach(function(g,idx){
       var em = g.gagnant && g.gagnant.email;
