@@ -20,14 +20,18 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:#efe
 
 .tk{width:100%;max-width:460px;margin:0 auto 10px;background:#fff;border-radius:22px;overflow:hidden;
     box-shadow:0 16px 40px rgba(40,12,60,.14)}
-.hd{background:linear-gradient(118deg,#6d2585 0%,#9b2a90 52%,var(--mag) 100%);
-    padding:15px 18px;display:flex;align-items:center;gap:14px}
-.hd img.nds{height:46px;width:auto;flex:none;object-fit:contain}
-.hd img.fw{height:28px;width:auto;flex:none;object-fit:contain}
-.hd .t{flex:1;min-width:0;color:#fff;font-size:10px;font-weight:800;letter-spacing:2px;
-       text-transform:uppercase;text-align:center;line-height:1.45}
+.hd{position:relative;background:#5f1f74;padding:22px 22px 20px;display:flex;
+    align-items:center;gap:16px;overflow:hidden}
+.hd::before{content:'';position:absolute;left:50%;top:50%;width:300px;height:190px;
+            transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+            background:radial-gradient(ellipse,rgba(224,33,138,.55),rgba(224,33,138,0) 70%)}
+.hd > *{position:relative}
+.hd img.nds{height:44px;width:auto;flex:none;object-fit:contain}
+.hd img.fw{height:26px;width:auto;flex:none;object-fit:contain}
+.hd .t{flex:1;min-width:0;color:#fff;font-size:10.5px;font-weight:800;letter-spacing:2.2px;
+       text-transform:uppercase;text-align:center;line-height:1.5}
 .rule{height:4px;background:linear-gradient(90deg,var(--or),#ffe0a0,var(--or))}
-.shop{padding:16px 18px 14px;text-align:center;border-bottom:1px solid var(--line)}
+.shop{padding:20px 18px 16px;text-align:center;border-bottom:1px solid var(--line)}
 .shop img{height:104px;max-width:82%;object-fit:contain;display:block;margin:0 auto 9px}
 .shop .lb{font-size:7.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
 .shop b{display:block;font-size:18px;font-weight:800;line-height:1.25}
@@ -54,8 +58,8 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:#efe
 .use li::before{content:'';flex:none;width:4px;height:4px;border-radius:50%;background:var(--or);margin-top:6px}
 .ment{padding:9px 18px 11px}
 .ment p{font-size:8px;font-weight:500;line-height:1.65;color:var(--mut)}
-.ft{background:var(--ink);padding:9px 18px;text-align:center;font-size:8.5px;font-weight:600;
-    color:rgba(255,255,255,.6);line-height:1.65}
+.ft{background:var(--ink);padding:15px 20px;text-align:center;font-size:8.5px;font-weight:600;
+    color:rgba(255,255,255,.62);line-height:1.75}
 .ft b{color:rgba(255,255,255,.92)}
 .acts{display:flex;gap:7px;justify-content:center;max-width:460px;margin:0 auto 22px}
 .acts button{font:inherit;font-size:11.5px;font-weight:700;padding:7px 13px;border-radius:9px;

@@ -15,10 +15,15 @@
   .tk{background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 18px 44px rgba(50,16,70,.14)}
 
   /* En-tête : charte Nuits du Sud */
-  .hd{background:linear-gradient(135deg,var(--vio) 0%,var(--mag) 100%);padding:20px 22px 18px;color:#fff;position:relative}
-  .hd::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--gold)}
-  .hd-top{display:flex;align-items:center;gap:13px}
-  .hd-top img{height:42px;width:auto;object-fit:contain}
+  .hd{background:#5f1f74;padding:22px 22px 20px;color:#fff;position:relative;overflow:hidden}
+  .hd::before{content:'';position:absolute;left:50%;top:42%;width:280px;height:180px;
+    transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+    background:radial-gradient(ellipse,rgba(224,33,138,.55),rgba(224,33,138,0) 70%)}
+  .hd::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;
+    background:linear-gradient(90deg,var(--gold),#ffe0a0,var(--gold))}
+  .hd > *{position:relative}
+  .hd-top{display:flex;align-items:center;gap:14px}
+  .hd-top img{height:44px;width:auto;object-fit:contain}
   .hd-top .bar{width:1px;height:30px;background:rgba(255,255,255,.34)}
   .hd-top .kick{font-size:9.5px;font-weight:800;letter-spacing:2.1px;text-transform:uppercase;opacity:.88;line-height:1.5}
   .hd h1{font-size:19px;font-weight:800;margin-top:14px;letter-spacing:-.2px}
@@ -86,10 +91,10 @@
   .sub{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.55}
 
   /* Pied : Flowin sur fond sombre pour rester lisible */
-  .foot{background:var(--ink);padding:16px 22px;text-align:center}
+  .foot{background:var(--ink);padding:20px 22px;text-align:center}
   .foot .by{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:9px}
   .foot .by span{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.55)}
-  .foot .by img{height:22px;width:auto;filter:brightness(0) invert(1)}
+  .foot .by img{height:24px;width:auto}
   .foot .ct{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.62);line-height:1.6}
   .foot .ct b{color:rgba(255,255,255,.9)}
 </style>
@@ -194,7 +199,7 @@
     </div>
 
     <div class="foot">
-      <div class="by"><span>Animation digitale par</span><img src="/nds/assets/flowin_logo.png" alt="Flowin" onerror="this.style.display='none'"></div>
+      <div class="by"><span>Animation digitale par</span><img src="/nds/assets/flowin_blanc.png" alt="Flowin" onerror="this.style.display='none'"></div>
       <div class="ct">Une question ? <b>flowinevent@gmail.com</b> · <b>06 16 35 49 36</b></div>
     </div>
 
