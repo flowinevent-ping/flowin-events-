@@ -528,6 +528,17 @@ code{font-family:'SF Mono',Consolas,monospace;font-size:.92em}
 .tomb-mock-cb input{margin-top:2px}
 .tomb-mock-btn{margin-top:10px;width:100%;padding:11px;background:var(--sa-accent);color:#fff;border-radius:8px;font-weight:800;font-size:13px;border:none;cursor:pointer}
 
+.sb-group-btn{display:flex;align-items:center;gap:7px;width:100%;background:none;border:none;cursor:pointer;
+  font:inherit;color:var(--sa-sb-text-dim);font-size:9px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;padding:10px 12px 5px;transition:color .15s}
+.sb-group-btn:hover{color:var(--sa-sb-text)}
+.sb-chev{font-size:9px;opacity:.75;width:9px;display:inline-block}
+.sb-gcount{background:rgba(255,255,255,.10);border-radius:9px;padding:1px 6px;font-size:9px;font-weight:700}
+.sb-group-nds{color:#F5C86B}
+.sb-group-nds:hover{color:#FFD98A}
+.sb-item.sb-sub{padding-left:22px}
+.sb-item.sb-sub::before{content:'';position:absolute;left:12px;top:50%;width:4px;height:1px;background:rgba(255,255,255,.18)}
+.sb-item{position:relative}
 /* KANBAN EVENTS */
 .kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:flex-start}
 @media(max-width:600px){.kanban{grid-template-columns:1fr}}
@@ -3121,13 +3132,24 @@ function renderSidebar(){
   let html = '<div class="sb-logo"><span class="dot"></span>Flow<em>in</em></div>';
   html += '<div class="sb-main">';
   html += '<button class="sb-pilot '+(state.view==='pilotage'?'active':'')+'" onclick="goView(\'pilotage\')"><span class="ico">🏠</span><span style="flex:1">'+(isPro?'Mon dashboard':'Accueil')+'</span>'+(liveCount>0?'<span class="badge">'+liveCount+' LIVE</span>':'')+'</button>';
+  /* Groupes repliables : on n'ouvre que celui de la vue courante, les autres sont fermés.
+     Évite de scroller toute la sidebar pour atteindre une section. L'état est mémorisé. */
+  if(!state.sbOpen) state.sbOpen = {};
   items.forEach(g => {
-    html += '<div class="sb-group">'+g.group+'</div>';
+    var hasActive = g.list.some(function(it){ return state.view===it.id; });
+    var open = (state.sbOpen[g.group] !== undefined) ? state.sbOpen[g.group] : hasActive;
+    var isNds = g.group.indexOf('NDS') === 0;
+    html += '<button class="sb-group sb-group-btn'+(isNds?' sb-group-nds':'')+'" onclick="sbToggle(\''+g.group+'\')">'
+         +  '<span class="sb-chev">'+(open?'\u25be':'\u25b8')+'</span>'
+         +  '<span style="flex:1;text-align:left">'+g.group+'</span>'
+         +  (open?'':'<span class="sb-gcount">'+g.list.length+'</span>')
+         +  '</button>';
+    if(!open) return;
     g.list.forEach(it => {
       const active = state.view===it.id ? 'active' : '';
       const badge = it.live ? '<span class="badge">'+it.live+'</span>' : (it.n!=null ? '<span class="text-xs" style="color:var(--sa-sb-text-dim);font-weight:700">'+it.n+'</span>':'');
       var _click = it.ext ? 'window.open(\''+it.ext+'\',\'_blank\')' : 'goView(\''+it.id+'\')';
-      html += '<button class="sb-item '+active+'" onclick="'+_click+'"><span class="ico">'+it.ico+'</span><span class="lbl">'+it.lbl+'</span>'+badge+'</button>';
+      html += '<button class="sb-item sb-sub '+active+'" onclick="'+_click+'"><span class="ico">'+it.ico+'</span><span class="lbl">'+it.lbl+'</span>'+badge+'</button>';
     });
   });
   html += '</div>';
@@ -8153,6 +8175,47 @@ function ptLoadKit(pid){
     _ptData.kit[pid] = (j&&j.ok)?j:{}; _ptData.busy['k'+pid]=0; render();
   }).catch(function(){ _ptData.kit[pid]={}; _ptData.busy['k'+pid]=0; render(); });
 }
+// Email complet au commerçant : ses gagnants + tous les liens du pack.
+function ptMailPack(p, list){
+  var slug = String(p.id||'').replace('pt-',''), org = location.origin, n = (list||[]).length;
+  return 'Bonjour,\n\n'
+    + 'Merci pour votre participation au grand jeu des Nuits du Sud 2026. Voici tout ce qui vous concerne.\n\n'
+    + '1) VOS GAGNANTS ('+n+')\n'
+    + (n ? list.map(function(t,i){ return '   '+(i+1)+'. '+(t.joueur_nom||'-')+' - '+(t.lot_nom||'')+(t.ticket_code?' - n° '+t.ticket_code:''); }).join('\n')
+        : '   (aucun gagnant tire a ce jour)')
+    + '\n\n2) LES BILLETS A IMPRIMER OU CONSULTER\n   '+org+'/nds/billets-partenaires.html\n'
+    + '   (selectionnez votre commerce dans le menu deroulant)\n\n'
+    + '3) COMMENT VALIDER UN RETRAIT EN CAISSE\n'
+    + '   a. Le client presente son billet (papier ou telephone)\n'
+    + '   b. Scannez le QR du billet avec l\'appareil photo\n'
+    + '   c. Verifiez que le n° affiche figure dans votre liste ci-dessus\n'
+    + '   d. Saisissez ce n° puis validez - le stock se decompte automatiquement\n'
+    + '   Un billet ne peut etre valide qu\'une seule fois.\n\n'
+    + '4) VOS VISUELS\n'
+    + '   Affiche A4 : '+org+'/nds/visuels/nds_a4_'+slug+'.png\n'
+    + '   Tickets PDF : '+org+'/nds/visuels/tickets/nds_tickets_'+slug+'.pdf\n'
+    + '   Kit digital : '+org+'/nds/kit-digital/'+slug+'/\n\n'
+    + 'Votre facture est jointe a cet envoi.\n\n'
+    + 'Merci encore pour votre confiance, et a tres vite.\n\n'
+    + 'L\'equipe des Nuits du Sud & Flowin\nflowinevent@gmail.com · 06 16 35 49 36';
+}
+function ptEnvoiPack(pid){
+  var p = findPartner(pid); if(!p) return;
+  var list = _ptData.gag[pid] || [];
+  var url = 'https://mail.google.com/mail/?view=cm&fs=1'
+    + (p.email ? '&to='+encodeURIComponent(p.email) : '')
+    + '&su='+encodeURIComponent('Nuits du Sud 2026 - vos gagnants, vos billets et vos visuels')
+    + '&body='+encodeURIComponent(ptMailPack(p, list));
+  window.open(url,'_blank','noopener');
+}
+function sbToggle(g){
+  if(!state.sbOpen) state.sbOpen = {};
+  var items = (state.mode==='pro') ? null : null;
+  var cur = state.sbOpen[g];
+  if(cur === undefined){ cur = false; }
+  state.sbOpen[g] = !cur;
+  render();
+}
 function ptGagCount(pid){ var g=_ptData.gag[pid]; return g?g.length:null; }
 function ptStockFor(pid){
   if(!_ptData.stock) return null;
@@ -8233,6 +8296,34 @@ function drawerPartner(p){
     var _kit=_ptData.kit[p.id], _gl=_ptData.gag[p.id];
     if(!_kit){ ptLoadKit(p.id); }
     if(!_gl){ ptLoadGagnants(p.id); }
+    /* ── PACK D'ENVOI PARTENAIRE : tout ce qu'on envoie au commerçant, réuni ── */
+    var _slug = String(p.id||'').replace('pt-','');
+    var _org  = location.origin;
+    if(!_ptData.gag[p.id]){ ptLoadGagnants(p.id); }
+    html += '<div class="section-h">📦 Pack d\'envoi — '+esc(p.nom)+'</div>';
+    html += '<div class="alert info" style="margin-bottom:10px"><span class="ico">✅</span>Tout ce que le commerçant doit recevoir, réuni ici.</div>';
+    html += '<div style="display:grid;gap:6px;margin-bottom:10px">';
+    var _lignes = [
+      ['🎟️','Billets de ses gagnants (QR de validation)', _org+'/nds/billets-partenaires.html'],
+      ['🧾','Bon de commande / facture', '#bc'],
+      ['📄','Affiche A4 boutique', _org+'/nds/visuels/nds_a4_'+_slug+'.png'],
+      ['🎫','Planche de tickets (PDF)', _org+'/nds/visuels/tickets/nds_tickets_'+_slug+'.pdf'],
+      ['🎨','Kit digital complet', _org+'/nds/kit-digital/'+_slug+'/'],
+      ['🔗','Page de validation en caisse', _org+'/lot.html']
+    ];
+    _lignes.forEach(function(l){
+      var act = (l[2]==='#bc')
+        ? '<button class="btn btn-sm" style="font-size:11px" onclick="goView(\'nds-bon-commande\')">Ouvrir</button>'
+        : '<a class="btn btn-sm" style="font-size:11px;text-decoration:none" href="'+escAttr(l[2])+'" target="_blank" rel="noopener">Ouvrir</a>'
+          +'<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(\''+escAttr(l[2])+'\',\'Lien\')">Copier</button>';
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sa-subtle);border-radius:8px">'
+           +  '<span>'+l[0]+'</span><span style="flex:1;font-size:12.5px">'+esc(l[1])+'</span>'+act+'</div>';
+    });
+    html += '</div>';
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">'
+         +  '<button class="btn btn-primary btn-sm" onclick="ptEnvoiPack(\''+esc(p.id)+'\')">✉️ Ouvrir l\'email complet (Gmail)</button>'
+         +  '<button class="btn btn-sm" onclick="ptCopy(ptMailPack(findPartner(\''+esc(p.id)+'\'),(_ptData.gag[\''+esc(p.id)+'\']||[])),\'Email pack\')">📋 Copier l\'email complet</button>'
+         +  '</div>';
     html += '<div class="section-h">✉️ Emails types de '+esc(p.nom)+'</div>';
     html += '<div class="text-xs text-muted mb-2">Modifiables avant envoi : éditez le texte puis copiez.</div>';
     var _mailBox=function(id,titre,sujet,corps,note){
