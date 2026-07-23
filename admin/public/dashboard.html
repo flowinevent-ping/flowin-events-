@@ -8392,6 +8392,40 @@ function renderRoadmap(){
    au commerce, et bascule le gagnant en CONFIRME (son nom s inscrit alors sur le billet). */
 /* PIN du commerce : valide un retrait en caisse et ouvre son espace.
    Stocke en base (partenaires.code_pin) pour pouvoir le lui redonner en cas de perte. */
+/* Email 1 : remerciement au commerce. Version courte avec lien vers la page bilan
+   (plutot qu un collage HTML) : le PIN et les chiffres vivent sur la page, reouvrable. */
+function ptMailRemerciement(p){
+  var lien = location.origin + '/nds/bilan/email-partenaire.html?p=' + encodeURIComponent(p.id);
+  var L = [
+    'Bonjour,','',
+    'Merci d avoir participe au grand jeu des Nuits du Sud 2026.',
+    'Voici le bilan de l operation, avec les chiffres et la marche a suivre pour vos gagnants :','',
+    '   '+lien,'',
+    'CE QUI VA SE PASSER MAINTENANT','',
+    'Nous appelons chaque gagnant un par un. A chaque gagnant confirme, vous recevrez',
+    'un email avec ses coordonnees et son billet, celui qu il vous presentera en boutique.',
+    'Vous n avez rien a faire d ici la.','',
+    'QUAND UN CLIENT SE PRESENTERA','',
+    '   1. Il vous montre son billet, papier ou telephone',
+    '   2. Vous scannez le QR code avec votre appareil photo',
+    '   3. Vous saisissez votre code de validation et vous validez','',
+    'Le destockage de votre lot est automatique.',
+    'Un billet ne peut etre valide qu une seule fois.','',
+    'VOTRE CODE DE VALIDATION est indique sur la page ci-dessus.',
+    'Il est personnel : ne le communiquez pas a vos clients.','',
+    'Merci encore, et a bientot.','',
+    'Les Nuits du Sud & Flowin',
+    'flowinevent@gmail.com - 06 16 35 49 36'
+  ];
+  return 'https://mail.google.com/mail/?view=cm&fs=1'
+    + (p.email ? '&to='+encodeURIComponent(p.email) : '')
+    + '&su='+encodeURIComponent('Merci pour votre participation - Nuits du Sud 2026')
+    + '&body='+encodeURIComponent(L.join('\n'));
+}
+function ptEnvoiRemerciement(pid){
+  var p = findPartner(pid); if(!p) return;
+  window.open(ptMailRemerciement(p),'_blank','noopener');
+}
 function ptPinHtml(p){
   var pin = (p && (p.code_pin || p.codePin)) || '';
   return '<div class="section-h">🔐 Code de validation en caisse</div>'
@@ -8606,7 +8640,8 @@ function drawerPartner(p){
     });
     html += '</div>';
     html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">'
-         +  '<button class="btn btn-primary btn-sm" onclick="ptEnvoiPack(\''+esc(p.id)+'\')">✉️ Ouvrir l\'email complet (Gmail)</button>'
+         +  '<button class="btn btn-primary btn-sm" onclick="ptEnvoiRemerciement(\''+esc(p.id)+'\')">✉️ Email de remerciement (Gmail)</button>'
+         +  '<button class="btn btn-sm" onclick="ptEnvoiPack(\''+esc(p.id)+'\')">📦 Email pack complet</button>'
          +  '<button class="btn btn-sm" onclick="ptCopy(ptMailPack(findPartner(\''+esc(p.id)+'\'),(_ptData.gag[\''+esc(p.id)+'\']||[])),\'Email pack\')">📋 Copier l\'email complet</button>'
          +  '</div>';
     html += '<div class="section-h">✉️ Emails types de '+esc(p.nom)+'</div>';
