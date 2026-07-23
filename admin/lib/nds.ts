@@ -143,3 +143,42 @@ export function composerConditions(g: {
   if (out.length < 3) out.push('Billet nominatif, non remboursable, validable une seule fois')
   return out
 }
+
+/* ── Résultat journalier ───────────────────────────────────────────────── */
+
+export interface StationJour {
+  event_id: string
+  nom: string
+  type: 'station' | 'commerce'
+  scans: number
+  visiteurs: number
+  commencees: number
+  terminees: number
+  joueurs: number
+}
+
+export interface JourActivite {
+  jour: string
+  commencees: number
+  terminees: number
+  joueurs: number
+  hors_periode: boolean
+}
+
+/** Jours ou le jeu a tourne, avec reperage des journees hors periode de festival. */
+export async function fetchJours(se: string = SE_DEFAUT): Promise<JourActivite[]> {
+  const { data, error } = await supabase.rpc('super_event_jours', { p_se: se })
+  if (error) { console.error('[fetchJours]', error.message); return [] }
+  return Array.isArray(data) ? (data as JourActivite[]) : []
+}
+
+/**
+ * Stations actives un jour donne. Separe les stations du festival des commerces
+ * partenaires : les melanger rendait le compteur par partenaire introuvable.
+ */
+export async function fetchStations(jour: string | null, se: string = SE_DEFAUT): Promise<StationJour[]> {
+  const { data, error } = await supabase.rpc('super_event_stations', { p_se: se, p_date: jour })
+  if (error) { console.error('[fetchStations]', error.message); return [] }
+  const arr = (data as { par_station?: StationJour[] } | null)?.par_station
+  return Array.isArray(arr) ? arr : []
+}
