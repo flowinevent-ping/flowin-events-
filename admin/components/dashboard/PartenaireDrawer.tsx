@@ -1,9 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertPartenaire, deletePartenaire } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader } from './DashboardUI'
+import {
+  fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant,
+  lienBillet, packEnvoi,
+  type GagnantPartenaire, type EtatPartenaire,
+} from '@/lib/nds'
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
 
 export default function PartenaireDrawer() {
@@ -12,8 +17,34 @@ export default function PartenaireDrawer() {
   const [form, setForm] = useState<Partial<FlowinPartenaire>>({})
   const [saving, setSaving] = useState(false)
   const [logoPreview, setLogoPreview] = useState('')
+  /* Gagnants du partenaire : charges a l ouverture de l onglet, jamais au montage,
+     pour ne pas alourdir le tiroir quand on ne consulte que les infos. */
+  const [gagnants, setGagnants] = useState<GagnantPartenaire[] | null>(null)
+  const [etatG, setEtatG] = useState<EtatPartenaire | null>(null)
+  const [chargeG, setChargeG] = useState(false)
 
   const p = useMemo(() => partenaires.find(x => x.id === drawer.id), [partenaires, drawer.id])
+
+  const pid = drawer.id
+  const ongletGagnants = drawer.tab === 'gagnants' || drawer.tab === 'comm'
+  useEffect(() => {
+    if (!pid || !ongletGagnants || chargeG) return
+    let vivant = true
+    setChargeG(true)
+    Promise.all([fetchGagnantsPartenaire(pid), fetchEtatPartenaire(pid)])
+      .then(([g, e]) => { if (vivant) { setGagnants(g); setEtatG(e) } })
+      .finally(() => { if (vivant) setChargeG(false) })
+    return () => { vivant = false }
+  }, [pid, ongletGagnants, chargeG])
+
+  async function onConfirmer(tirageId: number) {
+    if (!pid) return
+    if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
+    const ok = await confirmerGagnant(tirageId)
+    if (!ok) { alert('La confirmation a échoué.'); return }
+    const [g, e] = await Promise.all([fetchGagnantsPartenaire(pid), fetchEtatPartenaire(pid)])
+    setGagnants(g); setEtatG(e)
+  }
 
   if (!p) return (
     <div className="sa-drawer-empty">
@@ -69,11 +100,15 @@ export default function PartenaireDrawer() {
 
   const typeChip = p.type === 'National' ? 'purple' : p.type === 'Récurrent' ? 'live' : 'past'
 
+  /* Meme decoupage que le monolithe : 6 onglets, sans doublon.
+     Les events sont dans Infos (ils decrivent le partenaire, pas une action a part). */
   const tabs = [
-    { id: 'infos', label: 'Infos' },
-    { id: 'stats', label: 'Stats' },
-    { id: 'lots', label: 'Lots', badge: pLots.length },
-    { id: 'events', label: 'Events', badge: pEvents.length },
+    { id: 'infos',    label: 'Infos' },
+    { id: 'stats',    label: 'Stats' },
+    { id: 'lots',     label: 'Lots & stock', badge: pLots.length },
+    { id: 'gagnants', label: 'Gagnants & billets', badge: etatG?.tires },
+    { id: 'comm',     label: 'Emails & com' },
+    { id: 'contrat',  label: 'Contrat' },
   ]
 
   return (
@@ -281,6 +316,87 @@ export default function PartenaireDrawer() {
                 </div>
               </div>
             ))}
+          </>
+        )}
+
+        {drawer.tab === 'gagnants' && (
+          <>
+            <SectionHeader>🏆 Gagnants &amp; billets</SectionHeader>
+            {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
+            {!chargeG && etatG && (
+              <>
+                <div className="sa-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 12 }}>
+                  {([['Tirés', etatG.tires], ['À appeler', etatG.a_confirmer], ['Confirmés', etatG.confirmes], ['Retirés', etatG.retires]] as [string, number][]).map(([lib, val]) => (
+                    <div key={lib} style={{ background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 800 }}>{val}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>{lib}</div>
+                    </div>
+                  ))}
+                </div>
+                {etatG.a_confirmer > 0 && (
+                  <div className="sa-alert warn" style={{ marginBottom: 10, fontSize: 12.5 }}>
+                    ☎ {etatG.a_confirmer} gagnant{etatG.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
+                  </div>
+                )}
+              </>
+            )}
+            {!chargeG && gagnants?.length === 0 && <div className="sa-muted" style={{ fontSize: 13 }}>Aucun gagnant tiré pour ce partenaire.</div>}
+            {!chargeG && (gagnants ?? []).map(g => (
+              <div key={g.tirage_id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6 }}>
+                <span style={{ flex: 1, minWidth: 150 }}>
+                  <b style={{ fontSize: 13 }}>{g.etat === 'a_confirmer' ? 'À attribuer' : (g.joueur_nom ?? '—')}</b>
+                  <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}> · {g.lot_nom}</span>
+                </span>
+                <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7C2D92' }}>{g.ticket_code ?? '—'}</span>
+                <span className={`sa-chip ${g.etat === 'retire' ? 'live' : g.etat === 'confirme' ? 'live' : 'past'}`}>
+                  {g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}
+                </span>
+                {g.retrait_token && (
+                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
+                )}
+                {g.etat === 'a_confirmer' && (
+                  <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
+                )}
+              </div>
+            ))}
+          </>
+        )}
+
+        {drawer.tab === 'comm' && (
+          <>
+            <SectionHeader>📦 Pack d&apos;envoi</SectionHeader>
+            <div className="sa-alert info" style={{ marginBottom: 10, fontSize: 12.5 }}>
+              Tout ce que le commerçant doit recevoir, réuni ici.
+            </div>
+            {packEnvoi(p.id).map(el => (
+              <div key={el.libelle} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 8, marginBottom: 6 }}>
+                <span>{el.icone}</span>
+                <span style={{ flex: 1, fontSize: 12.5 }}>{el.libelle}</span>
+                <a className="sa-btn sm" href={el.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Ouvrir</a>
+                <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(el.url)}>Copier</button>
+              </div>
+            ))}
+          </>
+        )}
+
+        {drawer.tab === 'contrat' && (
+          <>
+            <SectionHeader>🔐 Code de validation en caisse</SectionHeader>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff8ea', border: '1px solid #f2e1b6', borderRadius: 12, padding: '14px 16px', marginBottom: 10 }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: '#a1690a' }}>PIN du commerce</div>
+                <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 26, fontWeight: 800, letterSpacing: 7, color: '#23142c', marginTop: 4 }}>
+                  {(p as unknown as Record<string, string>).code_pin ?? '—'}
+                </div>
+              </div>
+              {(p as unknown as Record<string, string>).code_pin && (
+                <button className="sa-btn sm" style={{ marginLeft: 'auto' }}
+                  onClick={() => navigator.clipboard?.writeText(String((p as unknown as Record<string, string>).code_pin))}>📋 Copier</button>
+              )}
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 16 }}>
+              Confidentiel. Le commerçant le saisit pour valider un billet. À ne jamais afficher côté client.
+            </div>
           </>
         )}
 
