@@ -3090,8 +3090,8 @@ function renderSidebar(){
       {id:'nds-carte',ico:'🗺️',lbl:'Carte NDS'},
       {id:'nds-participants',ico:'👥',lbl:'Participants NDS',n:(state.ndsParticipants?state.ndsParticipants.length:0)},
       {id:'nds-resultat',ico:'📅',lbl:'Résultat journalier'},
-      {id:'nds-lots',ico:'🎁',lbl:'Lots & stock'},{id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
-      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Lots & Gagnants',ext:'/tirage-nds.html'},{id:'nds-comm',ico:'📣',lbl:'Kit com partenaire'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
+      {id:'nds-lots',ico:'📦',lbl:'Stock des lots'},{id:'nds-track-qr',ico:'🔗',lbl:'Track QR',n:(state.trackQrClics?state.trackQrClics.length:0)},
+      {id:'nds-bon-commande',ico:'🧾',lbl:'Bons de commande & Factures'},{id:'nds-tirages',ico:'🎟️',lbl:'Tirages & gagnants',ext:'/tirage-nds.html'},{id:'nds-comm',ico:'📣',lbl:'Kit com partenaire'},{id:'nds-media',ico:'🎬',lbl:'Vidéo & média'}
     ]},
     {group:'ACQUISITION B2B', list:[
       {id:'btob-prospects',ico:'🎯',lbl:'Prospects B2B',n:DATA.joueurs.filter(function(j){return j.tags&&j.tags.indexOf('btob')>-1;}).length},
@@ -8118,6 +8118,84 @@ function newPartenaire(){
 }
 
 // ----- PARTENAIRE drawer -----
+/* ═══════════════ PARTENAIRE · données NDS par partenaire (cache + lazy load) ═══════════════
+   Alimente les onglets « Lots & stock », « Gagnants & billets » et « Emails & com » de la
+   fiche partenaire, à partir des RPC existantes. Aucune écriture : lecture seule.        */
+var _ptData = { gag:{}, stock:null, kit:{}, busy:{} };
+var PT_SE = 'se-nds-2026';
+
+function ptRpc(name, body){
+  return fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/'+name, {
+    method:'POST',
+    headers:{apikey:FLOWIN_SUPA_ANON, Authorization:'Bearer '+FLOWIN_SUPA_ANON, 'Content-Type':'application/json'},
+    body:JSON.stringify(body||{})
+  }).then(function(r){ return r.ok ? r.json() : null; });
+}
+// Gagnants + billets d'un partenaire (RPC partenaire_gagnants : inclut retrait_token).
+function ptLoadGagnants(pid){
+  if(_ptData.busy['g'+pid]) return; _ptData.busy['g'+pid]=1;
+  ptRpc('partenaire_gagnants',{p_partenaire_id:pid, p_se:PT_SE}).then(function(j){
+    _ptData.gag[pid] = Array.isArray(j)?j:[]; _ptData.busy['g'+pid]=0; render();
+  }).catch(function(){ _ptData.gag[pid]=[]; _ptData.busy['g'+pid]=0; render(); });
+}
+// Stock global (RPC lots_stock_etat), filtré ensuite par partenaire.
+function ptLoadStock(){
+  if(_ptData.busy.stock) return; _ptData.busy.stock=1;
+  ptRpc('lots_stock_etat',{p_se:PT_SE}).then(function(j){
+    _ptData.stock = Array.isArray(j)?j:[]; _ptData.busy.stock=0; render();
+  }).catch(function(){ _ptData.stock=[]; _ptData.busy.stock=0; render(); });
+}
+// Kit com (emails) d'un partenaire, via son event ev-nds-<slug>.
+function ptLoadKit(pid){
+  var ev='ev-nds-'+String(pid||'').replace('pt-','');
+  if(_ptData.busy['k'+pid]) return; _ptData.busy['k'+pid]=1;
+  ptRpc('comm_kit',{p_event_id:ev}).then(function(j){
+    _ptData.kit[pid] = (j&&j.ok)?j:{}; _ptData.busy['k'+pid]=0; render();
+  }).catch(function(){ _ptData.kit[pid]={}; _ptData.busy['k'+pid]=0; render(); });
+}
+function ptGagCount(pid){ var g=_ptData.gag[pid]; return g?g.length:null; }
+function ptStockFor(pid){
+  if(!_ptData.stock) return null;
+  for(var i=0;i<_ptData.stock.length;i++){ if(_ptData.stock[i].partenaire_id===pid) return _ptData.stock[i]; }
+  return {total:0,attribues:0,disponibles:0,lots:''};
+}
+function ptBilletUrl(t){ return t&&t.retrait_token ? (location.origin+'/lot.html?t='+encodeURIComponent(t.retrait_token)) : ''; }
+// Marque un gagnant notifié (RPC marquer_notifie, déjà utilisée par tirage-nds).
+function ptNotifie(pid, tid, on){
+  ptRpc('marquer_notifie',{p_tirage_id:Number(tid), p_on:!!on}).then(function(res){
+    if(!res || res.ok===false){ toast('Action impossible','error'); return; }
+    var g=_ptData.gag[pid]||[];
+    for(var i=0;i<g.length;i++){ if(Number(g[i].tirage_id)===Number(tid)) g[i].notifie_at = on ? (res.notifie_at||new Date().toISOString()) : null; }
+    toast(on?'Marqué envoyé':'Marque retirée','success'); render();
+  });
+}
+function ptCopy(txt,label){ try{ navigator.clipboard.writeText(txt).then(function(){ toast((label||'Texte')+' copié','success'); }); }catch(e){ toast('Copie impossible','error'); } }
+// Corps des 2 mails « gagnant » (lot remporté) et « billet », personnalisés au partenaire.
+function ptMailLot(p, t){
+  var prenom=(String(t&&t.joueur_nom||'').trim().split(/\s+/)[0])||'';
+  var url=ptBilletUrl(t);
+  return 'Bonjour '+prenom+',\n\n'
+    + 'Excellente nouvelle : au grand tirage des Nuits du Sud 2026, vous avez gagné '+((t&&t.lot_nom)||'un lot')+' chez '+(p.nom||'notre partenaire')+' !\n\n'
+    + 'Votre billet à présenter en boutique :\n'+(url||'(lien du billet)')+'\n'
+    + (t&&t.ticket_code?'N° de billet : '+t.ticket_code+'\n':'')
+    + '\nPrésentez ce billet (QR) directement chez '+(p.nom||'')+(p.adresse?' — '+p.adresse:'')+'.\n'
+    + 'Le commerçant scanne le QR et valide le retrait de votre lot.\n\n'
+    + 'Merci de votre participation, et à très vite.\n\n'
+    + 'L\'équipe des Nuits du Sud & Flowin\nflowinevent@gmail.com · 06 16 35 49 36';
+}
+function ptMailPartenaire(p, list){
+  var n=(list||[]).length;
+  return 'Bonjour,\n\n'
+    + 'Voici la liste des '+n+' gagnant'+(n>1?'s':'')+' de vos lots pour les Nuits du Sud 2026.\n\n'
+    + (list||[]).map(function(t,i){ return (i+1)+'. '+(t.joueur_nom||'—')+' — '+(t.lot_nom||'')+(t.ticket_code?' — n° '+t.ticket_code:''); }).join('\n')
+    + '\n\nChaque gagnant reçoit un billet avec un QR unique. À sa présentation en boutique :\n'
+    + '  1. Scannez le QR du billet (ou ouvrez le lien qu\'il contient)\n'
+    + '  2. Vérifiez le n° de billet dans cette liste\n'
+    + '  3. Validez le retrait — le billet devient inutilisable\n\n'
+    + 'Un billet ne peut être validé qu\'une seule fois.\n\n'
+    + 'Merci pour votre participation,\nL\'équipe des Nuits du Sud & Flowin\nflowinevent@gmail.com · 06 16 35 49 36';
+}
+
 function drawerPartner(p){
   if(!p) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Partenaire introuvable</div>';
   const lots   = DATA.lots.filter(l=>l.partenaireId===p.id || l.partenaire_id===p.id).concat((Array.isArray(p.lots)?p.lots:[]).map(function(x){return {nom:x.nom, valeur:String(x.valeur==null?'':x.valeur).replace(/[^0-9.,]/g,''), quantite:x.nb||x.quantite||1, conditions:x.conditions, _own:true};}));
@@ -8133,9 +8211,9 @@ function drawerPartner(p){
   html += drawerTabs([
     {id:'infos',   label:'Infos'},
     {id:'stats',   label:'Stats'},
-    {id:'lots',    label:'Lots',   badge:lots.length||null},
-    {id:'events',  label:'Events', badge:events.length||null},
-    {id:'comm',    label:'Élément comm'},
+    {id:'lots',    label:'Lots & stock',       badge:lots.length||null},
+    {id:'gagnants',label:'Gagnants & billets', badge:ptGagCount(p.id)},
+    {id:'comm',    label:'Emails & com'},
     {id:'contrat', label:'Contrat'}
   ]);
   html += '<div class="drawer-body">';
@@ -8151,6 +8229,44 @@ function drawerPartner(p){
     var kitu = cb+'/nds/kit-digital/'+cslug+'/';
     var ticku = cb+'/nds/visuels/tickets/nds_tickets_'+cslug+'.pdf';
     html += '<div class="alert info"><span class="ico">🎨</span>Éléments de communication de '+esc(p.nom)+' — prêts à imprimer / diffuser.</div>';
+    /* ── Les 3 emails du partenaire (annonce du jeu · lots gagnés · billets) ── */
+    var _kit=_ptData.kit[p.id], _gl=_ptData.gag[p.id];
+    if(!_kit){ ptLoadKit(p.id); }
+    if(!_gl){ ptLoadGagnants(p.id); }
+    html += '<div class="section-h">✉️ Emails types de '+esc(p.nom)+'</div>';
+    html += '<div class="text-xs text-muted mb-2">Modifiables avant envoi : éditez le texte puis copiez.</div>';
+    var _mailBox=function(id,titre,sujet,corps,note){
+      return '<div style="border:1.5px solid var(--sa-border);border-radius:12px;margin-bottom:12px;overflow:hidden">'
+        + '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sa-subtle);border-bottom:1px solid var(--sa-border)">'
+        + '<b style="font-size:13.5px">'+titre+'</b>'
+        + '<button class="btn btn-sm" style="margin-left:auto;font-size:11px" onclick="ptCopy(document.getElementById(\''+id+'\').value,\'Message\')">📋 Copier</button></div>'
+        + '<div style="padding:12px 14px">'
+        + (sujet?'<div class="text-xs text-muted mb-2"><b>Objet :</b> '+esc(sujet)+' <button class="btn btn-sm" style="font-size:10px" onclick="ptCopy('+JSON.stringify(sujet).replace(/"/g,'&quot;')+',\'Objet\')">copier</button></div>':'')
+        + '<textarea id="'+id+'" style="width:100%;min-height:150px;padding:10px;border-radius:8px;border:1px solid var(--sa-border);background:var(--sa-card);color:inherit;font-size:12.5px;line-height:1.55;font-family:inherit">'+esc(corps)+'</textarea>'
+        + (note?'<div class="text-xs text-muted mt-2">'+note+'</div>':'')
+        + '</div></div>';
+    };
+    // 1) Annonce du jeu — gabarit officiel en base (RPC comm_kit)
+    if(_kit && _kit.email){
+      html += _mailBox('pt-mail-jeu','1 · Annonce du jeu (clients)', _kit.email.objet||'', _kit.email.corps||'',
+        'Source : gabarit en base · lien & téléphone résolus automatiquement.');
+    } else {
+      html += '<div class="empty-block" style="margin-bottom:12px"><div class="d">1 · Annonce du jeu — chargement…</div></div>';
+    }
+    // 2) Annonce du lot gagné — personnalisé au partenaire (exemple sur le 1er gagnant)
+    if(_gl && _gl.length){
+      html += _mailBox('pt-mail-lot','2 · Annonce du lot gagné (gagnant)','Nuits du Sud 2026 — vous avez gagné !', ptMailLot(p,_gl[0]),
+        'Exemple généré sur « '+esc(_gl[0].joueur_nom||'')+' ». Le lien du billet est propre à chaque gagnant — utilisez l\'onglet <b>Gagnants &amp; billets</b> pour l\'envoi individuel.');
+      // 3) Récap billets pour le commerçant
+      html += _mailBox('pt-mail-billets','3 · Liste des gagnants & billets (commerçant)','Nuits du Sud 2026 — vos gagnants et la marche à suivre', ptMailPartenaire(p,_gl),
+        'À envoyer à '+esc(p.nom)+' pour lui permettre de décompter les lots retirés.');
+    } else if(_gl){
+      html += '<div class="empty-block" style="margin-bottom:12px"><div class="d">2 &amp; 3 · Emails lots/billets — aucun gagnant tiré pour ce partenaire.</div></div>';
+    } else {
+      html += '<div class="empty-block" style="margin-bottom:12px"><div class="d">2 &amp; 3 · Emails lots/billets — chargement…</div></div>';
+    }
+    html += '<div class="text-xs text-muted mb-3">Vue globale des kits : <a href="#" onclick="goView(\'nds-comm\');return false;">Kit com partenaire →</a></div>';
+
     html += '<div class="section-h">📄 Affiche A4 (boutique)</div>';
     html += '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">';
     html += '<img src="'+a4u+'" style="width:120px;border-radius:8px;border:1px solid #2a2f45" onerror="this.style.display=\'none\'">';
@@ -8329,6 +8445,14 @@ html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
         html += '<div class="section-h">Notes</div>';
         html += '<div style="background:var(--sa-subtle);padding:12px;border-radius:8px;font-size:13px;line-height:1.5">'+esc(p.notes)+'</div>';
       }
+      /* Events sponsorisés (fusionnés ici : plus d'onglet Events en doublon) */
+      html += '<div class="section-h">📅 Events / stations ('+events.length+')</div>';
+      if(!events.length) html += '<div class="empty-block"><div class="d">Aucun event.</div></div>';
+      events.forEach(function(e){
+        html += '<div style="padding:11px 12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
+             + '<div class="flex flex-between"><div class="fw-700">'+esc(e.nom)+'</div>'+statusChip(e.status)+'</div>'
+             + '<div class="text-xs text-muted mt-2">'+fmt(e.dateD||e.date_d)+' · '+moduleChip(e.module)+'</div></div>';
+      });
     }
 
   /* ══════════════════════════════ TAB STATS ══════════════════════════════ */
@@ -8355,16 +8479,56 @@ html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
            + '</div>';
     }); }
     html += '<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="ptAddOwnLot(\''+esc(p.id)+'\')">+ Ajouter un lot</button></div>';
+    /* ── Stock du partenaire (RPC lots_stock_etat) ── */
+    var _st = ptStockFor(p.id);
+    if(_st===null){ ptLoadStock(); html += '<div class="section-h">📦 Stock</div><div class="empty-block"><div class="d">Chargement du stock…</div></div>'; }
+    else {
+      var _dispo=_st.disponibles||0, _attr=_st.attribues||0, _tot=_st.total||0;
+      var _pct=_tot?Math.round(_attr*100/_tot):0;
+      html += '<div class="section-h">📦 Stock des lots</div>';
+      html += '<div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr">'
+           + kpi('Total', _tot) + kpi('Attribués', _attr) + kpi('Disponibles', _dispo) + '</div>';
+      html += '<div style="height:7px;background:var(--sa-border);border-radius:6px;overflow:hidden;margin:2px 0 8px"><div style="height:100%;width:'+_pct+'%;background:var(--sa-accent)"></div></div>';
+      if(_st.lots) html += '<div class="text-xs text-muted mb-2">Références : <code>'+esc(_st.lots)+'</code></div>';
+      if(!_tot) html += '<div class="alert warn" style="margin-top:6px"><span class="ico">⚠️</span>Aucun stock enregistré (source : bons de commande).</div>';
+      html += '<div class="text-xs text-muted">Vue globale : <a href="#" onclick="goView(\'nds-lots\');return false;">Stock des lots →</a></div>';
+    }
+
 
   /* ══════════════════════════════ TAB EVENTS ══════════════════════════════ */
-  } else if(state.drawer.tab==='events'){
-    html += '<div class="section-h">'+events.length+' event'+(events.length>1?'s':'')+' sponsorisé'+(events.length>1?'s':'')+'</div>';
-    if(events.length===0) html += '<div class="empty-block"><div class="d">Aucun event.</div></div>';
-    events.forEach(function(e){
-      html += '<div style="padding:12px;background:var(--sa-subtle);border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="openDrawerFor(\'event\',\''+e.id+'\')">'
-           + '<div class="flex flex-between"><div class="fw-700">'+esc(e.nom)+'</div>'+statusChip(e.status)+'</div>'
-           + '<div class="text-xs text-muted mt-2">'+fmt(e.dateD||e.date_d)+' · '+moduleChip(e.module)+'</div></div>';
-    });
+  /* ══════════════════════ TAB GAGNANTS & BILLETS ══════════════════════ */
+  } else if(state.drawer.tab==='gagnants'){
+    var _g = _ptData.gag[p.id];
+    if(!_g){ ptLoadGagnants(p.id); html += '<div class="empty-block"><div class="d">Chargement des gagnants…</div></div>'; }
+    else if(!_g.length){ html += '<div class="empty-block"><div class="d">Aucun gagnant tiré pour ce partenaire.</div></div>'; }
+    else {
+      var _act=_g.filter(function(t){return t.statut!=='retire';});
+      var _env=_g.filter(function(t){return !!t.notifie_at;});
+      var _ret=_g.filter(function(t){return !!t.retire_at;});
+      html += '<div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">'
+           + kpi('Gagnants', _g.length) + kpi('Envoyés', _env.length)
+           + kpi('À envoyer', Math.max(0,_act.length-_env.length)) + kpi('Retirés', _ret.length) + '</div>';
+      html += '<div style="margin:4px 0 12px"><button class="btn btn-sm" onclick="ptCopy(ptMailPartenaire(findPartner(\''+esc(p.id)+'\'),(_ptData.gag[\''+esc(p.id)+'\']||[])),\'Liste gagnants\')">📋 Copier la liste pour le commerçant</button></div>';
+      var _byLot={}; _g.forEach(function(t){ (_byLot[t.lot_nom||'—']=_byLot[t.lot_nom||'—']||[]).push(t); });
+      Object.keys(_byLot).forEach(function(ln){
+        html += '<div class="section-h">🎁 '+esc(ln)+' <span class="text-xs text-muted">('+_byLot[ln].length+')</span></div>';
+        _byLot[ln].forEach(function(t){
+          var url=ptBilletUrl(t), sent=!!t.notifie_at, done=!!t.retire_at;
+          html += '<div style="padding:11px 12px;background:var(--sa-subtle);border-radius:9px;margin-bottom:7px'+(done?';opacity:.6':'')+'">'
+               + '<div class="flex flex-between" style="gap:8px;flex-wrap:wrap"><div class="fw-700">'+esc(t.joueur_nom||'—')+'</div>'
+               + '<div>'+(done?'<span class="chip past">✓ Retiré</span>':(sent?'<span class="chip live">✓ Envoyé</span>':'<span class="chip">○ À envoyer</span>'))+'</div></div>'
+               + '<div class="text-xs text-muted mt-2">'+esc(t.joueur_email||'')+(t.joueur_tel?' · '+esc(t.joueur_tel):'')+(t.ticket_code?' · n° '+esc(t.ticket_code):'')+'</div>'
+               + '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'
+               + (url?'<a class="btn btn-sm" href="'+escAttr(url)+'" target="_blank" rel="noopener" style="font-size:11px;text-decoration:none">🎟️ Voir le billet</a>':'<span class="text-xs text-muted">Billet indisponible (token manquant)</span>')
+               + (url?'<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(\''+escAttr(url)+'\',\'Lien du billet\')">🔗 Copier le lien</button>':'')
+               + '<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(ptMailLot(findPartner(\''+esc(p.id)+'\'),(_ptData.gag[\''+esc(p.id)+'\']||[]).filter(function(x){return Number(x.tirage_id)==='+Number(t.tirage_id)+';})[0]),\'Email gagnant\')">✉️ Copier l\'email</button>'
+               + (t.joueur_email?'<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(t.joueur_email)+'&su='+encodeURIComponent('Nuits du Sud 2026 — vous avez gagné !')+'">📨 Gmail</a>':'')
+               + '<button class="btn btn-sm" style="font-size:11px" onclick="ptNotifie(\''+esc(p.id)+'\','+Number(t.tirage_id)+','+(sent?'false':'true')+')">'+(sent?'↺ Annuler « envoyé »':'✓ Marquer envoyé')+'</button>'
+               + '</div></div>';
+        });
+      });
+      html += '<div class="text-xs text-muted mt-2">Liste complète tous partenaires : <a href="/tirage-nds.html" target="_blank" rel="noopener">Tirages & gagnants →</a></div>';
+    }
 
   /* ══════════════════════════════ TAB CONTRAT ══════════════════════════════ */
   } else if(state.drawer.tab==='contrat'){
