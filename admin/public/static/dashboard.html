@@ -8246,8 +8246,8 @@ function ptMailPack(p, list){
     + '1) VOS GAGNANTS ('+n+')\n'
     + (n ? list.map(function(t,i){ return '   '+(i+1)+'. '+(t.joueur_nom||'-')+' - '+(t.lot_nom||'')+(t.ticket_code?' - n° '+t.ticket_code:''); }).join('\n')
         : '   (aucun gagnant tire a ce jour)')
-    + '\n\n2) LES BILLETS A IMPRIMER OU CONSULTER\n   '+org+'/nds/billets-partenaires.html\n'
-    + '   (selectionnez votre commerce dans le menu deroulant)\n\n'
+    + '\n\n2) LES BILLETS A IMPRIMER OU CONSULTER\n   '+org+'/nds/billets-partenaires.html?p='+encodeURIComponent(p.id)+'\n'
+    + '   (ce lien n affiche que vos billets)\n\n'
     + '3) COMMENT VALIDER UN RETRAIT EN CAISSE\n'
     + '   a. Le client presente son billet (papier ou telephone)\n'
     + '   b. Scannez le QR du billet avec l\'appareil photo\n'
@@ -8437,7 +8437,7 @@ function drawerPartner(p){
     html += '<div class="alert info" style="margin-bottom:10px"><span class="ico">✅</span>Tout ce que le commerçant doit recevoir, réuni ici.</div>';
     html += '<div style="display:grid;gap:6px;margin-bottom:10px">';
     var _lignes = [
-      ['🎟️','Billets de ses gagnants (QR de validation)', _org+'/nds/billets-partenaires.html'],
+      ['🎟️','Billets de ses gagnants (QR de validation)', _org+'/nds/billets-partenaires.html?p='+encodeURIComponent(p.id)],
       ['🧾','Bon de commande / facture', '#bc'],
       ['📄','Affiche A4 boutique', _org+'/nds/visuels/nds_a4_'+_slug+'.png'],
       ['🎫','Planche de tickets (PDF)', _org+'/nds/visuels/tickets/nds_tickets_'+_slug+'.pdf'],

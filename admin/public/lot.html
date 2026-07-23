@@ -7,126 +7,197 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  :root{--vio:#7C2D92;--mag:#E0218A;--gold:#F5B544;--ink:#1b1226;--muted:#6b6478;--ok:#1e9e6a;--bad:#c23b3b;--line:#ece7f1}
-  body{font-family:'Manrope',system-ui,sans-serif;background:#f4f0f8;color:var(--ink);min-height:100vh;
-    display:flex;flex-direction:column;align-items:center;padding:18px}
-  .wrap{width:100%;max-width:460px}
-  .hd{background:linear-gradient(135deg,var(--vio),var(--mag));border-radius:18px 18px 0 0;padding:22px 22px 18px;color:#fff}
-  .hd .kick{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.85}
-  .hd h1{font-size:20px;font-weight:800;margin-top:4px}
-  .card{background:#fff;border:1px solid var(--line);border-top:none;border-radius:0 0 18px 18px;
-    padding:22px;box-shadow:0 12px 30px rgba(60,20,80,.10)}
-  .state{display:none}
-  .state.on{display:block}
-  .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--mag);border-radius:50%;
-    margin:26px auto;animation:sp .8s linear infinite}
+  :root{--vio:#7C2D92;--mag:#E0218A;--gold:#F5B544;--ink:#191024;--ink2:#4a4058;
+        --muted:#7c7389;--ok:#1e9e6a;--bad:#c23b3b;--line:#efeaf4;--soft:#faf7fc}
+  body{font-family:'Manrope',system-ui,sans-serif;background:#f2edf7;color:var(--ink);
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 28px}
+  .wrap{width:100%;max-width:440px}
+  .tk{background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 18px 44px rgba(50,16,70,.14)}
+
+  /* En-tête : charte Nuits du Sud */
+  .hd{background:linear-gradient(135deg,var(--vio) 0%,var(--mag) 100%);padding:20px 22px 18px;color:#fff;position:relative}
+  .hd::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--gold)}
+  .hd-top{display:flex;align-items:center;gap:13px}
+  .hd-top img{height:42px;width:auto;object-fit:contain}
+  .hd-top .bar{width:1px;height:30px;background:rgba(255,255,255,.34)}
+  .hd-top .kick{font-size:9.5px;font-weight:800;letter-spacing:2.1px;text-transform:uppercase;opacity:.88;line-height:1.5}
+  .hd h1{font-size:19px;font-weight:800;margin-top:14px;letter-spacing:-.2px}
+
+  /* Bandeau titre du billet */
+  .band{background:var(--ink);color:#fff;padding:11px 22px;text-align:center}
+  .band b{font-size:12.5px;font-weight:800;letter-spacing:2.6px;text-transform:uppercase}
+
+  .card{padding:22px}
+  .state{display:none}.state.on{display:block}
+  .spin{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--mag);
+        border-radius:50%;margin:30px auto;animation:sp .8s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
   .center{text-align:center;color:var(--muted);font-weight:600;font-size:14px}
-  .badge{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12px;letter-spacing:.5px;
-    text-transform:uppercase;padding:7px 13px;border-radius:999px;margin-bottom:16px}
+
+  /* Bloc commerce : logo mis en avant */
+  .shop{background:var(--soft);border:1px solid var(--line);border-radius:16px;
+        padding:20px 18px 16px;text-align:center;margin-bottom:18px}
+  .shop img{max-height:104px;max-width:220px;width:auto;display:none;margin:0 auto 12px;object-fit:contain}
+  .shop .nm{font-size:16.5px;font-weight:800;line-height:1.3}
+  .shop .lb{font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+
+  .badge{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:11.5px;letter-spacing:.6px;
+         text-transform:uppercase;padding:7px 14px;border-radius:999px;margin-bottom:14px}
   .badge.ok{background:rgba(30,158,106,.12);color:var(--ok)}
   .badge.bad{background:rgba(194,59,59,.10);color:var(--bad)}
-  .badge.gold{background:rgba(245,181,68,.15);color:#a86e07}
+  .badge.gold{background:rgba(245,181,68,.17);color:#a1690a}
   .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
-  .lot{font-size:22px;font-weight:800;line-height:1.25;margin-bottom:2px}
+
+  /* Le lot */
+  .lotbox{text-align:center;padding:4px 0 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .type{display:inline-block;padding:5px 14px;border-radius:999px;background:var(--vio);color:#fff;
+        font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:11px}
+  .lot{font-size:25px;font-weight:800;line-height:1.22;letter-spacing:-.5px}
   .val{display:inline-block;background:rgba(245,181,68,.18);color:#8f5e05;font-weight:800;
-    padding:3px 10px;border-radius:8px;font-size:14px;margin-bottom:16px}
-  .plogo{max-height:56px;max-width:180px;width:auto;height:auto;display:none;margin:2px auto 16px;object-fit:contain}
-  .brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding-top:15px;
-    border-top:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
-  .brand img{height:19px;width:auto;opacity:.92}
-  .rows{border-top:1px solid var(--line);padding-top:14px}
-  .row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:14px}
+       padding:4px 12px;border-radius:9px;font-size:14px;margin-top:9px}
+
+  .rows{margin-bottom:4px}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;font-size:14px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
   .row .k{color:var(--muted);font-weight:600}
   .row .v{font-weight:700;text-align:right}
-  .num{font-variant-numeric:tabular-nums;letter-spacing:.5px}
-  button{width:100%;border:none;border-radius:12px;padding:15px;font-family:inherit;font-weight:800;
-    font-size:16px;cursor:pointer;margin-top:20px}
-  .btn-go{background:linear-gradient(135deg,var(--vio),var(--mag));color:#fff}
-  .btn-go:active{transform:translateY(1px)}
-  .btn-go[disabled]{opacity:.55;cursor:default}
-  .big{font-size:44px;text-align:center;margin:6px 0 2px}
-  .msg{text-align:center;font-weight:700;font-size:17px;margin-bottom:4px}
-  .sub{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.5}
-  .foot{text-align:center;color:var(--muted);font-size:12px;margin-top:18px;line-height:1.6}
-  .foot b{color:var(--ink)}
+  .row .v.num{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--vio);letter-spacing:.5px}
+
+  /* Conditions */
+  .cond{background:#fff8ea;border:1px solid #f2e1b6;border-radius:13px;padding:13px 15px;margin-top:16px}
+  .cond h4{font-size:9px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;color:#a1690a;margin-bottom:6px}
+  .cond p{font-size:11.5px;font-weight:500;line-height:1.65;color:#6e5417}
+
+  /* Saisie + action */
+  .field{margin-top:18px}
+  .field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink2);margin-bottom:7px}
+  .field input{width:100%;padding:13px 14px;border:1.5px solid #ddd4e6;border-radius:12px;
+               font-family:inherit;font-size:16px;font-weight:700;letter-spacing:.6px;color:var(--ink);background:#fff}
+  .field input:focus{outline:none;border-color:var(--vio);box-shadow:0 0 0 3px rgba(124,45,146,.10)}
+  .err{display:none;margin-top:7px;font-size:12.5px;font-weight:600;color:var(--bad)}
+  button{width:100%;border:none;border-radius:13px;padding:15px;font-family:inherit;
+         font-weight:800;font-size:16px;cursor:pointer;margin-top:16px;color:#fff;
+         background:linear-gradient(135deg,var(--vio),var(--mag))}
+  button:active{transform:translateY(1px)}
+  button[disabled]{opacity:.55;cursor:default}
+
+  .big{font-size:42px;text-align:center;margin:8px 0 4px}
+  .msg{text-align:center;font-weight:800;font-size:18px;margin-bottom:5px}
+  .sub{text-align:center;color:var(--muted);font-size:13.5px;line-height:1.55}
+
+  /* Pied : Flowin sur fond sombre pour rester lisible */
+  .foot{background:var(--ink);padding:16px 22px;text-align:center}
+  .foot .by{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:9px}
+  .foot .by span{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.55)}
+  .foot .by img{height:22px;width:auto;filter:brightness(0) invert(1)}
+  .foot .ct{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.62);line-height:1.6}
+  .foot .ct b{color:rgba(255,255,255,.9)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="hd">
-    <div class="kick">Le Grand Jeu · Nuits du Sud 2026</div>
-    <h1>Validation d'un lot</h1>
-  </div>
-  <div class="card">
+  <div class="tk">
 
-    <div id="s-load" class="state on">
-      <div class="spin"></div>
-      <div class="center">Lecture du billet…</div>
-    </div>
-
-    <div id="s-valable" class="state">
-      <img id="v-logo" class="plogo" alt="">
-      <span class="badge ok"><span class="dot"></span>Billet valable</span>
-      <div id="v-lot" class="lot"></div>
-      <div id="v-val" class="val"></div>
-      <div class="rows">
-        <div class="row"><span class="k">Bénéficiaire</span><span id="v-nom" class="v"></span></div>
-        <div class="row"><span class="k">Commerce</span><span id="v-part" class="v"></span></div>
-        <div class="row"><span class="k">N° de billet</span><span id="v-num" class="v num"></span></div>
+    <div class="hd">
+      <div class="hd-top">
+        <img src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" onerror="this.style.display='none'">
+        <span class="bar"></span>
+        <span class="kick">Le Grand Jeu<br>Vence · Édition 2026</span>
       </div>
-      <div style="margin:14px 0 4px;text-align:left">
-        <label for="v-pin" style="display:block;font-size:12px;color:var(--muted,#667);margin-bottom:5px">
-          Confirmez le n° de billet (il figure sur votre liste de gagnants)
-        </label>
-        <input id="v-pin" type="text" inputmode="text" autocomplete="off" placeholder="ND-2026-…"
-               style="width:100%;padding:11px 12px;border:1.5px solid var(--line,#d9d9e3);border-radius:9px;font-size:15px;letter-spacing:.5px;box-sizing:border-box">
-        <div id="v-pin-err" style="display:none;margin-top:6px;font-size:12.5px;color:#c0392b"></div>
+      <h1>Validation d'un lot</h1>
+    </div>
+    <div class="band"><b>Billet gagnant</b></div>
+
+    <div class="card">
+
+      <div id="s-load" class="state on">
+        <div class="spin"></div>
+        <div class="center">Lecture du billet…</div>
       </div>
-      <button id="btn-valider" class="btn-go">Valider le retrait du lot</button>
-    </div>
 
-    <div id="s-deja" class="state">
-      <img id="d-logo" class="plogo" alt="">
-      <span class="badge bad"><span class="dot"></span>Déjà retiré</span>
-      <div id="d-lot" class="lot"></div>
-      <div class="rows">
-        <div class="row"><span class="k">Bénéficiaire</span><span id="d-nom" class="v"></span></div>
-        <div class="row"><span class="k">N° de billet</span><span id="d-num" class="v num"></span></div>
-        <div class="row"><span class="k">Retiré le</span><span id="d-date" class="v"></span></div>
+      <div id="s-valable" class="state">
+        <div class="shop">
+          <img id="v-logo" alt="">
+          <div class="lb">Commerce partenaire</div>
+          <div class="nm" id="v-part"></div>
+        </div>
+        <div style="text-align:center"><span class="badge ok"><span class="dot"></span>Billet valable</span></div>
+        <div class="lotbox">
+          <div class="type" id="v-type">Bon cadeau</div>
+          <div class="lot" id="v-lot"></div>
+          <div id="v-valwrap"><span class="val" id="v-val"></span></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="k">Bénéficiaire</span><span class="v" id="v-nom"></span></div>
+          <div class="row"><span class="k">N° de billet</span><span class="v num" id="v-num"></span></div>
+        </div>
+        <div class="cond">
+          <h4>Conditions d'utilisation</h4>
+          <p id="v-cond"></p>
+        </div>
+        <div class="field">
+          <label for="v-pin">Confirmez le n° de billet <span style="color:var(--muted);font-weight:600">(il figure sur votre liste de gagnants)</span></label>
+          <input id="v-pin" type="text" inputmode="text" autocomplete="off" placeholder="ND-2026-…">
+          <div id="v-pin-err" class="err"></div>
+        </div>
+        <button id="btn-valider">Valider le retrait du lot</button>
       </div>
-      <div class="sub" style="margin-top:14px">Ce lot a déjà été remis. Un billet ne peut être validé qu'une seule fois.</div>
-    </div>
 
-    <div id="s-done" class="state">
-      <img id="done-logo" class="plogo" alt="">
-      <div class="big">✓</div>
-      <div class="msg" style="color:var(--ok)">Retrait validé</div>
-      <div id="done-lot" class="sub" style="margin-top:6px;margin-bottom:14px"></div>
-      <div class="rows">
-        <div class="row"><span class="k">Bénéficiaire</span><span id="done-nom" class="v"></span></div>
-        <div class="row"><span class="k">N° de billet</span><span id="done-num" class="v num"></span></div>
-        <div class="row"><span class="k">Validé le</span><span id="done-date" class="v"></span></div>
+      <div id="s-deja" class="state">
+        <div class="shop">
+          <img id="d-logo" alt="">
+          <div class="lb">Commerce partenaire</div>
+          <div class="nm" id="d-part"></div>
+        </div>
+        <div style="text-align:center"><span class="badge bad"><span class="dot"></span>Déjà utilisé</span></div>
+        <div class="lotbox">
+          <div class="lot" id="d-lot"></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="k">Bénéficiaire</span><span class="v" id="d-nom"></span></div>
+          <div class="row"><span class="k">N° de billet</span><span class="v num" id="d-num"></span></div>
+          <div class="row"><span class="k">Retiré le</span><span class="v" id="d-date"></span></div>
+        </div>
+        <div class="sub" style="margin-top:16px">Ce billet a déjà été validé. Un billet ne peut être utilisé qu'une seule fois.</div>
       </div>
-      <div class="sub" style="margin-top:14px">Le stock a été décompté automatiquement. Vous pouvez remettre le lot.</div>
+
+      <div id="s-done" class="state">
+        <div class="big">✅</div>
+        <div class="msg">Retrait validé</div>
+        <div class="sub">Le lot peut être remis au client.</div>
+        <div class="shop" style="margin-top:18px">
+          <img id="done-logo" alt="">
+          <div class="lb">Commerce partenaire</div>
+          <div class="nm" id="done-part"></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="k">Lot</span><span class="v" id="done-lot"></span></div>
+          <div class="row"><span class="k">Bénéficiaire</span><span class="v" id="done-nom"></span></div>
+          <div class="row"><span class="k">N° de billet</span><span class="v num" id="done-num"></span></div>
+          <div class="row"><span class="k">Validé le</span><span class="v" id="done-date"></span></div>
+          <div class="row" id="done-stockrow" style="display:none"><span class="k">Stock restant</span><span class="v" id="done-stock"></span></div>
+        </div>
+      </div>
+
+      <div id="s-introuvable" class="state">
+        <div class="big">🔍</div>
+        <div class="msg">Billet introuvable</div>
+        <div class="sub">Ce lien ne correspond à aucun billet. Vérifiez que le QR a bien été scanné en entier.</div>
+      </div>
+
+      <div id="s-erreur" class="state">
+        <div class="big">⚠️</div>
+        <div class="msg">Connexion impossible</div>
+        <div class="sub">Vérifiez votre connexion internet puis réessayez.</div>
+      </div>
+
     </div>
 
-    <div id="s-introuvable" class="state">
-      <div class="big">✕</div>
-      <div class="msg" style="color:var(--bad)">Billet introuvable</div>
-      <div class="sub" style="margin-top:6px">Ce code ne correspond à aucun lot. Vérifiez que le QR est bien celui d'un billet gagnant des Nuits du Sud 2026.</div>
-    </div>
-
-    <div id="s-erreur" class="state">
-      <div class="big">!</div>
-      <div class="msg">Connexion impossible</div>
-      <div class="sub" style="margin-top:6px">Vérifiez votre connexion internet puis rechargez la page.</div>
-    </div>
-
-    <div class="brand">Propulsé par <img src="/nds/assets/flowin_logo.png" alt="Flowin"></div>
     <div class="foot">
-      Une question ? <b>flowinevent@gmail.com</b> · <b>06 16 35 49 36</b>
+      <div class="by"><span>Animation digitale par</span><img src="/nds/assets/flowin_logo.png" alt="Flowin" onerror="this.style.display='none'"></div>
+      <div class="ct">Une question ? <b>flowinevent@gmail.com</b> · <b>06 16 35 49 36</b></div>
     </div>
+
   </div>
 </div>
 
@@ -139,6 +210,16 @@
     'pt-utile':'Utile Vence', 'pt-nook':'Nook Café', 'pt-giordano':'Électroménager J Giordano',
     'pt-charvolin':'Assurance Charvolin', 'pt-carrosserie-gp':'Carrosserie GP'
   };
+  /* Conditions propres a chaque commerce, affichees sur le billet. */
+  var COND = {
+    'pt-pegase':"Non cumulable avec une autre offre · valable jusqu'au 25 octobre 2026",
+    'pt-carrosserie-gp':"Valable dès 90 € d'achat · entretien véhicule (freins, plaquettes, huile…) et carrosserie · non cumulable · valable jusqu'au 25 octobre 2026",
+    'pt-bergerie':"Valable dès 2 nuits de location · hébergements Pod et emplacement de tente · non cumulable · valable jusqu'au 25 octobre 2026",
+    'pt-giordano':"Valable dès 70 € d'achat · non cumulable · valable jusqu'au 25 octobre 2026",
+    'pt-nook':"Au choix : 1 café offert pour 1 acheté · formule petit-déjeuner offerte · 1 boisson achetée = 1 salé offert · non cumulable · valable jusqu'au 25 octobre 2026",
+    'pt-utile':"Valable dès 22 € d'achat en magasin · non cumulable · valable jusqu'au 25 octobre 2026"
+  };
+  var COND_DEF = "Billet nominatif et incessible · non remboursable et non échangeable contre espèces · utilisable une seule fois · valable jusqu'au 25 octobre 2026";
 
   function $(id){ return document.getElementById(id); }
   function show(id){
@@ -153,6 +234,15 @@
     if (src) { el.onerror = function(){ el.style.display='none'; }; el.src = src; el.style.display='block'; }
     else { el.style.display='none'; }
   }
+  function typeBon(lot){
+    var l = String(lot||'').toLowerCase();
+    if (l.indexOf('remise') !== -1) return 'Bon de réduction';
+    if (l.indexOf("bon d'achat") !== -1) return "Bon d'achat";
+    if (l.indexOf('offre') !== -1) return 'Offre gourmande';
+    if (l.indexOf('séjour') !== -1 || l.indexOf('sejour') !== -1) return 'Séjour';
+    if (l.indexOf('formation') !== -1) return 'Formation';
+    return 'Bon cadeau';
+  }
   function fmtDate(iso){
     if(!iso) return '—';
     var d = new Date(iso);
@@ -161,10 +251,9 @@
     return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' à '+p(d.getHours())+'h'+p(d.getMinutes());
   }
   function token(){
-    var m = /[?&]t=([^&]+)/.exec(window.location.search);
+    var m = new RegExp('[?&]t=([^&]*)').exec(location.search);
     return m ? decodeURIComponent(m[1]) : '';
   }
-
   function rpc(fn, body){
     return fetch(SUPA+'/rest/v1/rpc/'+fn, {
       method:'POST',
@@ -180,27 +269,36 @@
 
   function renderValable(d){
     setLogo('v-logo', d.partenaire);
-    $('v-lot').textContent = d.lot || 'Lot';
-    $('v-val').textContent = (d.valeur!=null ? ('Valeur : '+d.valeur+' €') : '');
-    $('v-nom').textContent = d.gagnant || '—';
     $('v-part').textContent = partName(d.partenaire);
-    $('v-num').textContent = d.ticket_code || '—';
+    $('v-type').textContent = typeBon(d.lot);
+    $('v-lot').textContent  = d.lot || 'Lot';
+    if (d.valeur != null) { $('v-val').textContent = 'Valeur : '+d.valeur+' €'; $('v-valwrap').style.display=''; }
+    else { $('v-valwrap').style.display='none'; }
+    $('v-nom').textContent  = d.gagnant || '—';
+    $('v-num').textContent  = d.ticket_code || '—';
+    $('v-cond').textContent = COND[d.partenaire] || COND_DEF;
     show('s-valable');
   }
   function renderDeja(d){
     setLogo('d-logo', d.partenaire);
-    $('d-lot').textContent = d.lot || 'Lot';
-    $('d-nom').textContent = d.gagnant || '—';
-    $('d-num').textContent = d.ticket_code || '—';
+    $('d-part').textContent = partName(d.partenaire);
+    $('d-lot').textContent  = d.lot || 'Lot';
+    $('d-nom').textContent  = d.gagnant || '—';
+    $('d-num').textContent  = d.ticket_code || '—';
     $('d-date').textContent = fmtDate(d.retire_at);
     show('s-deja');
   }
   function renderDone(d){
     setLogo('done-logo', d.partenaire);
-    $('done-lot').textContent = (d.lot || 'Lot') + (d.valeur!=null ? (' · '+d.valeur+' €') : '');
-    $('done-nom').textContent = d.gagnant || '—';
-    $('done-num').textContent = d.ticket_code || '—';
+    $('done-part').textContent = partName(d.partenaire);
+    $('done-lot').textContent  = (d.lot || 'Lot') + (d.valeur!=null ? (' · '+d.valeur+' €') : '');
+    $('done-nom').textContent  = d.gagnant || '—';
+    $('done-num').textContent  = d.ticket_code || '—';
     $('done-date').textContent = fmtDate(d.retire_at);
+    if (d.stock_restant != null) {
+      $('done-stock').textContent = d.stock_restant;
+      $('done-stockrow').style.display = '';
+    }
     show('s-done');
   }
 
