@@ -7823,6 +7823,58 @@ async function gagWinsLoad(){
   }catch(e){ state.gagWins = []; }
   render();
 }
+/* Filtres de la liste "Tous les gagnants" : evite d'afficher 82 lignes a plat.
+   Etat memorise dans state.gwF ; affichage limite avec bouton "voir plus". */
+function gwF(){
+  if(!state.gwF) state.gwF = { q:'', type:'', statut:'', date:'', lot:'', limit:25 };
+  return state.gwF;
+}
+function gwSet(k,v){ var f=gwF(); f[k]=v; if(k!=='limit') f.limit=25; render(); }
+function gwReset(){ state.gwF = { q:'', type:'', statut:'', date:'', lot:'', limit:25 }; render(); }
+function gwMatch(w){
+  var f=gwF();
+  if(f.type   && w.type!==f.type) return false;
+  if(f.date   && w.date!==f.date) return false;
+  if(f.lot    && (w.lot_nom||'')!==f.lot) return false;
+  if(f.statut){
+    var sent=!!w.notifie_at, ret=(w.statut==='retire');
+    if(f.statut==='envoye'    && !(sent&&!ret)) return false;
+    if(f.statut==='a_envoyer' && !(!sent&&!ret)) return false;
+    if(f.statut==='retire'    && !ret) return false;
+  }
+  if(f.q){
+    var q=f.q.toLowerCase();
+    var hay=((w.joueur_nom||'')+' '+(w.email||'')+' '+(w.lot_nom||'')+' '+(w.tel||'')).toLowerCase();
+    if(hay.indexOf(q)===-1) return false;
+  }
+  return true;
+}
+function gwOptions(list, key){
+  var seen={}, out=[];
+  list.forEach(function(w){ var v=w[key]; if(v && !seen[v]){ seen[v]=1; out.push(v); } });
+  return out.sort();
+}
+function gwFilterBarHtml(W){
+  var f=gwF();
+  var dates=gwOptions(W,'date'), lots=gwOptions(W,'lot_nom');
+  var sel=function(id,cur,opts,lbl){
+    return '<select onchange="gwSet(\'' +id+ '\',this.value)" style="padding:7px 9px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-card);color:inherit;font-size:12.5px">'
+      + '<option value="">'+lbl+'</option>'
+      + opts.map(function(o){ var v=(typeof o==='string')?o:o[0], t=(typeof o==='string')?o:o[1];
+          return '<option value="'+escAttr(v)+'"'+(cur===v?' selected':'')+'>'+esc(t)+'</option>'; }).join('')
+      + '</select>';
+  };
+  var actifs = (f.q?1:0)+(f.type?1:0)+(f.statut?1:0)+(f.date?1:0)+(f.lot?1:0);
+  return '<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 10px">'
+    + '<input placeholder="Rechercher un gagnant, un lot…" value="'+escAttr(f.q)+'" oninput="gwSet(\'q\',this.value)"'
+    + ' style="flex:1;min-width:190px;padding:7px 10px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-card);color:inherit;font-size:12.5px"/>'
+    + sel('type', f.type, [['grand','Grand tirage'],['soir','Tirage du soir']], 'Tous les tirages')
+    + sel('statut', f.statut, [['a_envoyer','À envoyer'],['envoye','Envoyés'],['retire','Retirés']], 'Tous les statuts')
+    + sel('date', f.date, dates, 'Toutes les dates')
+    + sel('lot', f.lot, lots, 'Tous les lots')
+    + (actifs ? '<button class="btn btn-sm" style="font-size:11px" onclick="gwReset()">✕ Réinitialiser ('+actifs+')</button>' : '')
+    + '</div>';
+}
 function gagWinsSectionHtml(){
   var css = '<style id="gwf-css">'
     + '.gwf-ov{position:fixed;inset:0;background:rgba(20,24,45,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:99999}'
@@ -7842,9 +7894,16 @@ function gagWinsSectionHtml(){
   var W = state.gagWins;
   var h = css + '<div class="section-h">&#127942; Tous les gagnants — tirages ('+W.length+') <button class="btn-sm" style="margin-left:8px" onclick="state.gagWins=null;render()">&#8635;</button></div>';
   if(!W.length){ return h+'<div class="text-sm text-muted">Aucun tirage enregistré.</div>'; }
-  h += '<div class="text-xs text-muted" style="margin:0 0 6px">Cliquez une ligne pour ouvrir la fiche et envoyer le mail.</div>';
+  h += gwFilterBarHtml(W);
+  var F = W.filter(gwMatch);
+  var lim = gwF().limit, shown = F.slice(0, lim);
+  h += '<div class="text-xs text-muted" style="margin:0 0 6px">'
+     + (F.length===W.length ? 'Cliquez une ligne pour ouvrir la fiche et envoyer le mail.'
+        : F.length+' résultat'+(F.length>1?'s':'')+' sur '+W.length+' · cliquez une ligne pour ouvrir la fiche.')
+     + '</div>';
+  if(!F.length){ return h+'<div class="empty-block"><div class="d">Aucun gagnant pour cette sélection.</div></div>'; }
   h += '<table class="tbl"><thead><tr><th>Type</th><th>Gagnant</th><th>Téléphone</th><th>Statut</th><th>Lot</th><th>Date</th></tr></thead><tbody>';
-  W.forEach(function(w){
+  shown.forEach(function(w){
     var sent=!!w.notifie_at;
     h += '<tr class="gwrow" style="cursor:pointer" onclick="gwOpenFiche(\''+(w.joueur_id||'')+'\',\''+(w.tirage_id||'')+'\')">'
       + '<td><span class="chip '+(w.type==='soir'?'warn':'live')+'">'+(w.type==='soir'?'Soir':'Grand')+'</span></td>'
@@ -7855,6 +7914,9 @@ function gagWinsSectionHtml(){
       + '<td class="text-sm text-muted">'+esc(w.date||'')+'</td></tr>';
   });
   h += '</tbody></table>';
+  if(F.length > shown.length){
+    h += '<div style="text-align:center;margin-top:10px"><button class="btn btn-sm" onclick="gwSet(\'limit\','+(lim+50)+')">Voir 50 de plus ('+(F.length-shown.length)+' restants)</button></div>';
+  }
   return h;
 }
 
@@ -8229,7 +8291,7 @@ var ROADMAP = {
       ['ok','Sidebar en sous-onglets repliables','Groupe NDS 2026 accentué, ouverture auto du groupe actif'],
       ['ok','Dates events corrigées','Statut déduit des dates + ordre En cours › À venir › Passés'],
       ['ok','Places de concert visibles par soirée','/tirage-nds.html, fin du filtre date piégeux'],
-      ['todo','Filtres anti-scroll sur les grandes listes','Gagnants (82), Joueurs (856), Events (31)']
+      ['ok','Filtres anti-scroll sur les grandes listes','Gagnants : recherche + type + statut + date + lot + pagination · Events : filtre par super event · Joueurs : pagination 50/page deja en place']
     ]},
     { titre:'Refonte — modèle une seule entité', items:[
       ['todo','Supprimer la distinction Pro / Partenaire','Un pro est un professionnel ; partenaire = rôle sur un super event'],
@@ -8809,6 +8871,11 @@ function renderBiblioEvents(){
     list = list.filter(e => e.proId===proId);
   }
   if(search) list = list.filter(e=>e.nom.toLowerCase().includes(search)||e.lieu.toLowerCase().includes(search)||(findPro(e.proId)||{nom:''}).nom.toLowerCase().includes(search));
+  /* Portee : n'afficher que les events d'un super event donne (evite de melanger NDS,
+     Paques et les futurs supers dans une meme liste). '' = tous. */
+  var _seF = state.eventsSuperFilter || '';
+  if(_seF==='__none__') list = list.filter(function(e){ return !(e.superEventId||e.super_event_id); });
+  else if(_seF) list = list.filter(function(e){ return (e.superEventId||e.super_event_id||'')===_seF; });
 
   let html = '<div class="page">';
   html += '<div class="page-header">'
@@ -8828,8 +8895,18 @@ function renderBiblioEvents(){
     html += '<div class="alert info"><span class="ico">👁</span>Vous consultez vos events en lecture seule. Pour créer ou modifier un event, contactez votre Super Admin.</div>';
   }
 
+  var _seOpts = (DATA.superEvents||[]).map(function(se){
+    var n = DATA.events.filter(function(e){ return (e.superEventId||e.super_event_id||'')===se.id; }).length;
+    return '<option value="'+escAttr(se.id)+'"'+(_seF===se.id?' selected':'')+'>'+esc(se.nom)+' ('+n+')</option>';
+  }).join('');
   html += '<div class="filter-bar">'
        + '<div class="filter-search"><input placeholder="Rechercher (nom, lieu'+(isPro?'':', pro')+')…" oninput="state.search.events=this.value;render()" value="'+esc(state.search.events)+'"/></div>'
+       + '<select onchange="state.eventsSuperFilter=this.value;render()" style="padding:8px 10px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-card);color:inherit;font-size:13px">'
+       +   '<option value="">Tous les super events ('+DATA.events.length+')</option>'+_seOpts
+       +   (function(){ var n=DATA.events.filter(function(e){return !(e.superEventId||e.super_event_id);}).length;
+             return n ? '<option value="__none__"'+(_seF==='__none__'?' selected':'')+'>Sans super event ('+n+')</option>' : ''; })()
+       + '</select>'
+       + (_seF?'<button class="btn btn-sm" style="font-size:11px" onclick="state.eventsSuperFilter=\'\';render()">✕ Toute la liste</button>':'')
        + '</div>';
 
   // Timeline
