@@ -480,3 +480,87 @@ export function controlerChiffre(c: Chiffres, valeur: number): string | null {
   if (interdit) return `Valeur interdite (${valeur}) — ${interdit.motif ?? 'non publiable'}`
   return null
 }
+
+/* ── Rapport detaille par point de jeu ─────────────────────────────────── */
+
+/**
+ * Un POINT DE JEU est un `ev-<id>` : une station d un super event, ou un partenaire.
+ *
+ * REGLE DE TRACKING (Romain, 25/07) — le SUPPORT ne compte pas.
+ * Affiche, forex, video, sticker : c est le meme QR. Ce qui compte est l identite :
+ *   ev=<id>    porte QUI (station ou partenaire)
+ *   reseaux-   porte LA REGLE ANTI-REJEU du lien digital unique (one-shot), rien d autre.
+ * Ne jamais reintroduire de dimension "support" dans le modele de donnees.
+ */
+export interface PointJeu {
+  event_id: string
+  nom: string
+  type: 'Station' | 'Partenaire'
+  flashs: number
+  flashs_lien_unique: number
+  visiteurs_mesures: number
+  flashs_sans_id: number
+  parties: number
+  joueurs: number
+  parties_lien_unique: number
+  joueurs_lien_unique: number
+  score_moyen: number | null
+  ont_rejoue: number
+  avec_coordonnees: number
+  optin: number
+  avec_code_postal: number
+  repondants_bonus: number
+  repondants_rse: number
+  repondants_bv: number
+  heure_pic: number | null
+}
+
+export interface RapportPoints {
+  perimetre: { super_event: string; nom: string; date_d: string; date_f: string }
+  points: PointJeu[]
+  totaux: {
+    flashs: number; flashs_lien_unique: number
+    parties: number; parties_lien_unique: number; joueurs_lien_unique: number
+    ont_rejoue: number; points_actifs: number
+  }
+  lecture: Record<string, string>
+}
+
+/** Rapport par point de jeu, borne aux dates du super event. */
+export async function fetchRapportPoints(se: string = SE_DEFAUT): Promise<RapportPoints | null> {
+  const { data, error } = await supabase.rpc('super_event_rapport_points', { p_se: se })
+  if (error) { console.error('[fetchRapportPoints]', error.message); return null }
+  return (data as RapportPoints) ?? null
+}
+
+/* ── Depouillement des questions bonus ─────────────────────────────────── */
+
+export interface ReponseBonus { reponse: string; n: number; pct: number | null }
+export interface QuestionBonus {
+  cle: string
+  repondants: number
+  choix_multiple: boolean
+  reponses: ReponseBonus[]
+}
+export interface FamilleBonus {
+  famille: string
+  repondants: number
+  questions: QuestionBonus[]
+}
+export interface BonusResultats {
+  super_event: string
+  repondants_total: number
+  familles: FamilleBonus[]
+  lecture: string
+}
+
+/**
+ * Depouillement des questions bonus.
+ * Les FAMILLES (prefixe avant le _) sont des questionnaires DISTINCTS poses a des
+ * publics differents : ne jamais les agreger entre elles ni additionner leurs repondants.
+ */
+export async function fetchBonusResultats(se: string = SE_DEFAUT): Promise<BonusResultats | null> {
+  const { data, error } = await supabase.rpc('super_event_bonus_resultats', { p_se: se })
+  if (error) { console.error('[fetchBonusResultats]', error.message); return null }
+  return (data as BonusResultats) ?? null
+}
