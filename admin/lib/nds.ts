@@ -535,9 +535,17 @@ export async function fetchRapportPoints(se: string = SE_DEFAUT): Promise<Rappor
 
 /* ── Depouillement des questions bonus ─────────────────────────────────── */
 
-export interface ReponseBonus { reponse: string; n: number; pct: number | null }
+export interface ReponseBonus {
+  code: string
+  reponse: string
+  libelle_trouve: boolean
+  n: number
+  pct: number | null
+}
 export interface QuestionBonus {
   cle: string
+  libelle: string
+  libelle_trouve: boolean
   repondants: number
   choix_multiple: boolean
   reponses: ReponseBonus[]

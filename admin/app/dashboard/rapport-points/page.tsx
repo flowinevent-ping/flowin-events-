@@ -173,14 +173,21 @@ export default function Page() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 10 }}>
                     {fam.questions.map(q => (
                       <div key={q.cle} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2 }}>{q.cle}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2, lineHeight: 1.35 }}>
+                          {q.libelle}
+                        </div>
                         <div className="sa-muted" style={{ fontSize: 10.5, marginBottom: 9 }}>
                           {q.repondants} réponses{q.choix_multiple ? ' · choix multiple' : ''}
+                          {!q.libelle_trouve && (
+                            <span style={{ color: '#c46a6a' }}> · libellé absent de la configuration</span>
+                          )}
                         </div>
                         {q.reponses.map(rep => (
                           <div key={rep.reponse} style={{ marginBottom: 6 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, marginBottom: 2 }}>
-                              <span>{rep.reponse}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, marginBottom: 2, gap: 8 }}>
+                              <span style={rep.libelle_trouve ? undefined : { fontStyle: 'italic', color: 'var(--sa-muted)' }}>
+                                {rep.reponse}
+                              </span>
                               <span style={{ fontWeight: 700 }}>{rep.n} <span className="sa-muted">({rep.pct} %)</span></span>
                             </div>
                             <div style={{ height: 5, borderRadius: 3, background: 'var(--sa-border)', overflow: 'hidden' }}>
