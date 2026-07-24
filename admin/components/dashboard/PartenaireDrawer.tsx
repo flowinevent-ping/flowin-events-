@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertPartenaire, deletePartenaire } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader } from './DashboardUI'
+import { TableauStations } from './TableauStations'
 import {
   fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant,
   lienBillet, packEnvoi,
@@ -270,6 +271,14 @@ export default function PartenaireDrawer() {
           </>
         )}
 
+        {drawer.tab === 'stats' && (
+          <>
+            <SectionHeader>📡 Tracking de sa station</SectionHeader>
+            <div style={{ marginBottom: 18 }}>
+              <TableauStations partenaireId={p.id} titre={`Station ${p.nom}`} />
+            </div>
+          </>
+        )}
         {drawer.tab === 'stats' && (
           <>
             <div className="sa-kpi-grid-2">

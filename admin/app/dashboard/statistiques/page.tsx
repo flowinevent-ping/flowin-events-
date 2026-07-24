@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CarteChaleur } from '@/components/dashboard/CarteChaleur'
+import { TableauStations } from '@/components/dashboard/TableauStations'
 import {
   fetchRapport, fetchPics, fetchSuperEvents,
   type Rapport, type Pics, type SuperEvent,
@@ -147,8 +148,13 @@ export default function Page() {
           ))}
         </div>
 
+        <SectionHeader>📡 Tracking par station</SectionHeader>
+        <div style={{ marginBottom: 22 }}>
+          <TableauStations se={se} />
+        </div>
+
         {tableau(
-          `🎮 Stations de jeu (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
+          `🎮 Activité par jour (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
           lignes, 'Aucune activité sur cette sélection.')}
 
         {pics?.cellules?.length ? (

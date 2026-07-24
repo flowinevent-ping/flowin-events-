@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertPro, deletePro } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
+import { TableauStations } from './TableauStations'
 import type { FlowinPro } from '@/lib/types'
 
 export default function ProDrawer() {
@@ -49,6 +50,7 @@ export default function ProDrawer() {
   const tabs = [
     { id: 'infos', label: 'Infos' },
     { id: 'events', label: 'Events', badge: proEvents.length },
+    { id: 'tracking', label: 'Tracking' },
   ]
 
   const initials = p.nom.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -107,6 +109,13 @@ export default function ProDrawer() {
               <label className="sa-label">Notes</label>
               <textarea className="sa-input" rows={3} value={form.notes ?? ''} onChange={ff('notes')} />
             </div>
+          </>
+        )}
+
+        {drawer.tab === 'tracking' && (
+          <>
+            <SectionHeader>📡 Tracking de ses stations</SectionHeader>
+            <TableauStations proId={p.id} titre={`Stations de ${p.nom}`} />
           </>
         )}
 

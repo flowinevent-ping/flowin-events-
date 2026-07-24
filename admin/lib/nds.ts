@@ -365,3 +365,50 @@ export function libelleSource(s: string): string {
   if (s.startsWith('reseaux-')) return `Réseaux · ${s.slice(8)}`
   return s
 }
+
+/* ── Tracking par station : la colonne vertebrale ──────────────────────── */
+
+export interface StationTracking {
+  event_id: string
+  station: string
+  type: 'nds' | 'partenaire'
+  pro_id: string | null
+  flashs: number
+  physique: number
+  digital: number
+  parties: number
+  joueurs: number
+  rejoue: number
+  heure_pic: number | null
+}
+export interface TrackingTotaux {
+  flashs: number; physique: number; digital: number
+  parties: number; joueurs: number; rejoue: number
+}
+export interface Tracking {
+  stations: StationTracking[]
+  totaux: TrackingTotaux
+}
+
+/**
+ * Tracking par station. Filtrable par pro ou par partenaire pour reutiliser
+ * le meme tableau dans une fiche individuelle.
+ *
+ * DEFINITIONS — ne jamais les melanger :
+ *   flash    une ouverture du QR. Une personne qui rescanne compte plusieurs fois.
+ *            Ce n est PAS un compteur de personnes.
+ *   physique flash sans parametre source (QR de l affiche)
+ *   digital  flash avec source reseaux- (lien partage)
+ */
+export async function fetchTracking(
+  se: string = SE_DEFAUT,
+  opts: { proId?: string; partenaireId?: string } = {}
+): Promise<Tracking | null> {
+  const { data, error } = await supabase.rpc('station_tracking', {
+    p_se: se,
+    p_pro: opts.proId ?? null,
+    p_partenaire: opts.partenaireId ?? null,
+  })
+  if (error) { console.error('[fetchTracking]', error.message); return null }
+  return (data as Tracking) ?? null
+}
