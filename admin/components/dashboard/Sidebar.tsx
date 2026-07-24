@@ -56,6 +56,7 @@ export default function Sidebar() {
       items: [
         { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
         { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
+        { id: 'nds-participants', icon: '👥', label: 'Participants', href: '/dashboard/nds-participants' },
       ],
     },
     {

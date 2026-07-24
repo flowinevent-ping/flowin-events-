@@ -244,3 +244,31 @@ export function slugSuperEvent(nom: string): string {
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
   return base ? `se-${base}` : ''
 }
+
+/* ── Participants d un super event ─────────────────────────────────────── */
+
+export interface Participant {
+  joueur_id: string
+  nom: string | null
+  prenom: string | null
+  email: string | null
+  tel: string | null
+  ville: string | null
+  code_postal: string | null
+  optin: boolean | null
+  nb_tickets: number | null
+  nb_parties: number | null
+  premiere: string | null
+  derniere: string | null
+}
+
+/**
+ * Participants d un super event, avec leur activite.
+ * Les dates sont des jours d exploitation : une partie jouee a 3h du matin est
+ * rattachee a la soiree de la veille, pas au lendemain.
+ */
+export async function fetchParticipants(se: string = SE_DEFAUT): Promise<Participant[]> {
+  const { data, error } = await supabase.rpc('super_event_participants', { p_se: se })
+  if (error) { console.error('[fetchParticipants]', error.message); return [] }
+  return Array.isArray(data) ? (data as Participant[]) : []
+}
