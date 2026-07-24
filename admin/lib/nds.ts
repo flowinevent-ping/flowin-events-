@@ -272,3 +272,41 @@ export async function fetchParticipants(se: string = SE_DEFAUT): Promise<Partici
   if (error) { console.error('[fetchParticipants]', error.message); return [] }
   return Array.isArray(data) ? (data as Participant[]) : []
 }
+
+/* ── Rapport de fin d operation ────────────────────────────────────────── */
+
+export interface LigneJourStation {
+  jour: string; event_id: string; station: string
+  type: 'station' | 'commerce'
+  clics: number; appareils: number; parties: number; joueurs: number
+  primo_inscrits: number; joueurs_revenus: number
+}
+export interface Redirection {
+  partenaire: string; jour: string; heure: number
+  clics: number; depuis_reseaux: number
+}
+export interface MeilleurJoueur {
+  joueur_id: string; nom: string | null; prenom: string | null
+  code_postal: string | null; parties: number; gains: number; optin: boolean | null
+}
+export interface Repartition { valeur: string; n: number }
+
+export interface Rapport {
+  par_jour_station: LigneJourStation[]
+  redirections_partenaires: Redirection[]
+  meilleurs_joueurs: MeilleurJoueur[]
+  genre: Repartition[]
+  age: Repartition[]
+  decouverte: Repartition[]
+  totaux: {
+    joueurs: number; parties: number
+    clics_stations: number; clics_partenaires: number; clics_depuis_reseaux: number
+  }
+}
+
+/** Rapport complet d un super event. Toutes les dates sont des jours d exploitation. */
+export async function fetchRapport(se: string = SE_DEFAUT): Promise<Rapport | null> {
+  const { data, error } = await supabase.rpc('super_event_rapport', { p_se: se })
+  if (error) { console.error('[fetchRapport]', error.message); return null }
+  return (data as Rapport) ?? null
+}

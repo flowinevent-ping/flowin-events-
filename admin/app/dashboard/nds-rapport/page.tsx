@@ -1,0 +1,162 @@
+'use client'
+
+/**
+ * Rapport de fin d operation — vue unique et complete.
+ * Activite par date et par station (stations du festival ET commerces),
+ * redirections partenaires avec pics horaires, demographie en camemberts,
+ * et classement des meilleurs joueurs croise avec leurs gains.
+ */
+import { useEffect, useMemo, useState } from 'react'
+import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
+import { Camembert } from '@/components/dashboard/Camembert'
+import { fetchRapport, type Rapport } from '@/lib/nds'
+
+const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
+
+export default function Page() {
+  const [r, setR] = useState<Rapport | null>(null)
+  const [charge, setCharge] = useState(true)
+  const [jour, setJour] = useState<string | 'tous'>('tous')
+
+  useEffect(() => { fetchRapport().then(x => { setR(x); setCharge(false) }) }, [])
+
+  const jours = useMemo(() => {
+    const s = new Set((r?.par_jour_station ?? []).map(l => l.jour))
+    return Array.from(s).sort()
+  }, [r])
+
+  const lignes = useMemo(() => {
+    const l = r?.par_jour_station ?? []
+    return jour === 'tous' ? l : l.filter(x => x.jour === jour)
+  }, [r, jour])
+
+  /* Pic de redirections : jour et heure ou les partenaires ont le plus renvoye. */
+  const pic = useMemo(() => {
+    const l = r?.redirections_partenaires ?? []
+    return l.length ? l.reduce((a, b) => (b.clics > a.clics ? b : a)) : null
+  }, [r])
+
+  const parPartenaire = useMemo(() => {
+    const m = new Map<string, { clics: number; reseaux: number }>()
+    for (const x of r?.redirections_partenaires ?? []) {
+      const c = m.get(x.partenaire) ?? { clics: 0, reseaux: 0 }
+      c.clics += x.clics; c.reseaux += x.depuis_reseaux
+      m.set(x.partenaire, c)
+    }
+    return Array.from(m, ([valeur, v]) => ({ valeur, n: v.clics, reseaux: v.reseaux }))
+      .sort((a, b) => b.n - a.n)
+  }, [r])
+
+  if (charge) return <div className="sa-content"><div className="sa-page"><div className="sa-muted">Chargement du rapport…</div></div></div>
+  if (!r) return <div className="sa-content"><div className="sa-page"><EmptyState title="Rapport indisponible" /></div></div>
+
+  const t = r.totaux
+  const stations = lignes.filter(l => l.type === 'station')
+  const commerces = lignes.filter(l => l.type === 'commerce')
+
+  const tableau = (titre: string, l: typeof lignes, vide: string) => (
+    <>
+      <SectionHeader>{titre}</SectionHeader>
+      {l.length === 0 && <div className="sa-muted" style={{ fontSize: 13, marginBottom: 14 }}>{vide}</div>}
+      {l.length > 0 && (
+        <div style={{ overflowX: 'auto', marginBottom: 18 }}>
+          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+            <thead><tr>
+              <th>Jour</th><th>Station</th><th style={{ textAlign: 'right' }}>Clics</th>
+              <th style={{ textAlign: 'right' }}>Parties</th><th style={{ textAlign: 'right' }}>Joueurs</th>
+              <th style={{ textAlign: 'right' }}>1<sup>re</sup> fois</th><th style={{ textAlign: 'right' }}>Revenus</th>
+            </tr></thead>
+            <tbody>
+              {l.map((x, i) => (
+                <tr key={`${x.jour}-${x.event_id}-${i}`}>
+                  <td style={{ whiteSpace: 'nowrap' }}>{fr(x.jour)}</td>
+                  <td style={{ fontWeight: 700 }}>{x.station}</td>
+                  <td style={{ textAlign: 'right' }}>{x.clics}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 700 }}>{x.parties}</td>
+                  <td style={{ textAlign: 'right' }}>{x.joueurs}</td>
+                  <td style={{ textAlign: 'right', color: '#1D9E75', fontWeight: 700 }}>{x.primo_inscrits}</td>
+                  <td style={{ textAlign: 'right', color: '#7C2D92', fontWeight: 700 }}>{x.joueurs_revenus}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  )
+
+  return (
+    <div className="sa-content">
+      <div className="sa-page">
+        <PageHeader title="📊 Rapport de fin d'opération" subtitle="Activité, audience et retombées partenaires" />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 20 }}>
+          {([['Joueurs', t.joueurs], ['Parties', t.parties], ['Clics stations', t.clics_stations],
+             ['Clics partenaires', t.clics_partenaires], ['Dont réseaux', t.clics_depuis_reseaux]] as [string, number][])
+            .map(([lib, val]) => (
+            <div key={lib} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '15px 12px' }}>
+              <div style={{ fontSize: 23, fontWeight: 800 }}>{val}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginTop: 4 }}>{lib}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+          <button className={`sa-btn sm${jour === 'tous' ? ' primary' : ''}`} onClick={() => setJour('tous')}>Toutes les dates</button>
+          {jours.map(j => (
+            <button key={j} className={`sa-btn sm${jour === j ? ' primary' : ''}`} onClick={() => setJour(j)}>{fr(j)}</button>
+          ))}
+        </div>
+
+        {tableau(`🎪 Stations du festival (${stations.length})`, stations, 'Aucune activité sur cette sélection.')}
+        {tableau(`🤝 Commerces partenaires (${commerces.length})`, commerces, 'Aucune activité commerce sur cette sélection.')}
+
+        <SectionHeader>🔗 Redirections vers les partenaires</SectionHeader>
+        {pic && (
+          <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
+            Pic de redirections : <b>{pic.clics} clics</b> vers <b>{pic.partenaire}</b> le <b>{fr(pic.jour)}</b> à <b>{String(pic.heure).padStart(2, '0')}h</b>.
+          </div>
+        )}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+          <Camembert titre="Clics par partenaire" parts={parPartenaire} unite="clics" />
+          <Camembert titre="Origine des clics partenaires" unite="clics"
+            parts={[
+              { valeur: 'Depuis les réseaux sociaux', n: t.clics_depuis_reseaux },
+              { valeur: 'Origine non déclarée', n: t.clics_partenaires - t.clics_depuis_reseaux },
+            ]} />
+        </div>
+
+        <SectionHeader>👥 Profil de l&apos;audience</SectionHeader>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+          <Camembert titre="Genre" parts={r.genre} unite="joueurs" />
+          <Camembert titre="Tranche d'âge" parts={r.age} unite="joueurs" />
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <Camembert titre="Comment ont-ils connu le festival ?" parts={r.decouverte} unite="joueurs" />
+        </div>
+
+        <SectionHeader>🏅 Meilleurs joueurs</SectionHeader>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+            <thead><tr>
+              <th>#</th><th>Joueur</th><th>Code postal</th>
+              <th style={{ textAlign: 'right' }}>Parties</th><th style={{ textAlign: 'right' }}>Lots gagnés</th><th>Contact</th>
+            </tr></thead>
+            <tbody>
+              {r.meilleurs_joueurs.map((j, i) => (
+                <tr key={j.joueur_id} style={j.gains > 0 ? { background: 'rgba(245,161,0,.08)' } : undefined}>
+                  <td style={{ fontWeight: 800, color: 'var(--sa-muted)' }}>{i + 1}</td>
+                  <td style={{ fontWeight: 700 }}>{[j.prenom, j.nom].filter(Boolean).join(' ') || '—'}</td>
+                  <td>{j.code_postal ?? '—'}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 800 }}>{j.parties}</td>
+                  <td style={{ textAlign: 'right' }}>{j.gains > 0 ? <b style={{ color: '#a1690a' }}>🏆 {j.gains}</b> : '—'}</td>
+                  <td>{j.optin ? <span className="sa-chip live">✓</span> : <span className="sa-chip past">—</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
