@@ -332,3 +332,36 @@ export async function fetchPics(se: string = SE_DEFAUT): Promise<Pics | null> {
   if (error) { console.error('[fetchPics]', error.message); return null }
   return (data as Pics) ?? null
 }
+
+/* ── Origines du trafic (Track QR) ─────────────────────────────────────── */
+
+export interface Origine { source: string; evenements: number; visiteurs: number }
+export interface ClicSortant { partenaire_id: string; nom: string; lien: string; clics: number }
+export interface TrackQr {
+  origines: Origine[]
+  total_visiteurs: number
+  clics_par_partenaire: { partenaire_id: string; nom: string; clics: number; joueurs: number }[]
+  clics_par_lien: { lien: string; clics: number }[]
+  total_clics: number
+  diagnostic: {
+    parties_sans_source: number
+    parties_totales: number
+    clics_sortants_enregistres: number
+  }
+}
+
+/** Origines du trafic et clics sortants. */
+export async function fetchTrackQr(se: string = SE_DEFAUT): Promise<TrackQr | null> {
+  const { data, error } = await supabase.rpc('super_event_track_qr', { p_se: se })
+  if (error) { console.error('[fetchTrackQr]', error.message); return null }
+  return (data as TrackQr) ?? null
+}
+
+/** Libelle lisible d une source technique : reseaux-nook -> "Réseaux · nook". */
+export function libelleSource(s: string): string {
+  if (s === 'direct') return 'Direct — QR sur place'
+  if (s === 'parrainage') return 'Parrainage'
+  if (s === 'qr') return 'QR générique'
+  if (s.startsWith('reseaux-')) return `Réseaux · ${s.slice(8)}`
+  return s
+}

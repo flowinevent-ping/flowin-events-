@@ -55,6 +55,7 @@ export default function Sidebar() {
       group: 'ANALYSE',
       items: [
         { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
+        { id: 'track-qr', icon: '🔗', label: 'Origines du trafic', href: '/dashboard/track-qr' },
       ],
     },
     {
