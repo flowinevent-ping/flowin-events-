@@ -52,12 +52,17 @@ export default function Sidebar() {
       ],
     },
     {
+      group: 'ANALYSE',
+      items: [
+        { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
+      ],
+    },
+    {
       group: 'NDS 2026',
       items: [
         { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
         { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
         { id: 'nds-participants', icon: '👥', label: 'Participants', href: '/dashboard/nds-participants' },
-        { id: 'nds-rapport', icon: '📊', label: 'Rapport final', href: '/dashboard/nds-rapport' },
       ],
     },
     {

@@ -313,3 +313,22 @@ export async function fetchRapport(se: string = SE_DEFAUT): Promise<Rapport | nu
   if (error) { console.error('[fetchRapport]', error.message); return null }
   return (data as Rapport) ?? null
 }
+
+/* ── Pics de jeu ───────────────────────────────────────────────────────── */
+
+export interface CellulePic { soiree: string; heure: number; parties: number; joueurs: number }
+export interface Pics {
+  cellules: CellulePic[]
+  maximum: number
+  pic: { soiree: string; heure: number; parties: number } | null
+  heure_min: number
+  heure_max: number
+  creneau_dense: { debut: number; fin: number; parties: number; part: number } | null
+}
+
+/** Matrice soiree x heure. La plage horaire est deduite des donnees, jamais imposee. */
+export async function fetchPics(se: string = SE_DEFAUT): Promise<Pics | null> {
+  const { data, error } = await supabase.rpc('super_event_pics', { p_se: se })
+  if (error) { console.error('[fetchPics]', error.message); return null }
+  return (data as Pics) ?? null
+}

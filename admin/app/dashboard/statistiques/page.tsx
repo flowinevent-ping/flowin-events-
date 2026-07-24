@@ -9,16 +9,39 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
-import { fetchRapport, type Rapport } from '@/lib/nds'
+import { CarteChaleur } from '@/components/dashboard/CarteChaleur'
+import {
+  fetchRapport, fetchPics, fetchSuperEvents,
+  type Rapport, type Pics, type SuperEvent,
+} from '@/lib/nds'
 
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
 
 export default function Page() {
+  /* Aucun super event code en dur : on charge la liste et on selectionne le plus recent.
+     Les memes indicateurs valent pour toute edition presente ou future. */
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  const [se, setSe] = useState<string>('')
   const [r, setR] = useState<Rapport | null>(null)
+  const [pics, setPics] = useState<Pics | null>(null)
   const [charge, setCharge] = useState(true)
   const [jour, setJour] = useState<string | 'tous'>('tous')
 
-  useEffect(() => { fetchRapport().then(x => { setR(x); setCharge(false) }) }, [])
+  useEffect(() => {
+    fetchSuperEvents().then(l => {
+      setSupers(l)
+      if (l.length) setSe(l[0].id)
+      else setCharge(false)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!se) return
+    setCharge(true); setJour('tous')
+    Promise.all([fetchRapport(se), fetchPics(se)])
+      .then(([a, b]) => { setR(a); setPics(b) })
+      .finally(() => setCharge(false))
+  }, [se])
 
   const jours = useMemo(() => {
     const s = new Set((r?.par_jour_station ?? []).map(l => l.jour))
@@ -94,7 +117,17 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="📊 Rapport de fin d'opération" subtitle="Activité, audience et retombées partenaires" />
+        <PageHeader title="📊 Statistiques & résultats" subtitle="Activité, audience et retombées partenaires" />
+
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+                {x.nom}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 20 }}>
           {([['Joueurs', t.joueurs], ['Parties', t.parties], ['Clics stations', t.clics_stations],
@@ -117,6 +150,25 @@ export default function Page() {
         {tableau(
           `🎮 Stations de jeu (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
           lignes, 'Aucune activité sur cette sélection.')}
+
+        {pics?.cellules?.length ? (
+          <>
+            <SectionHeader>🔥 Pics de jeu</SectionHeader>
+            {pics.pic && (
+              <div className="sa-alert info" style={{ marginBottom: 12, fontSize: 12.5 }}>
+                Pic absolu : <b>{pics.pic.parties} parties</b> le <b>{pics.pic.soiree.split('-').reverse().join('/')}</b> entre{' '}
+                <b>{pics.pic.heure}h et {(pics.pic.heure + 1) % 24}h</b>.
+                {pics.creneau_dense && (
+                  <> Le créneau <b>{pics.creneau_dense.debut}h-{pics.creneau_dense.fin}h</b> concentre{' '}
+                  <b>{pics.creneau_dense.part} %</b> de l&apos;activité.</>
+                )}
+              </div>
+            )}
+            <div style={{ marginBottom: 20 }}>
+              <CarteChaleur cellules={pics.cellules} maximum={pics.maximum} titre="Parties par soirée et par heure" />
+            </div>
+          </>
+        ) : null}
 
         <SectionHeader>🗺️ Consultation des partenaires dans l&apos;application</SectionHeader>
         <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
