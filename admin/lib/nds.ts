@@ -298,9 +298,12 @@ export interface Rapport {
   genre: Repartition[]
   age: Repartition[]
   decouverte: Repartition[]
+  ecrans?: { carte: number; partenaires: number; tickets: number }
+  clics_sortants_detail?: { partenaire_id: string; nom: string; lien: string; clics: number }[]
   totaux: {
     joueurs: number; parties: number
     clics_stations: number; clics_partenaires: number; clics_depuis_reseaux: number
+    clics_sortants?: number
   }
 }
 

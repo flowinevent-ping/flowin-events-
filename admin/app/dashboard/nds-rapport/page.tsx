@@ -51,8 +51,10 @@ export default function Page() {
   if (!r) return <div className="sa-content"><div className="sa-page"><EmptyState title="Rapport indisponible" /></div></div>
 
   const t = r.totaux
-  const stations = lignes.filter(l => l.type === 'station')
-  const commerces = lignes.filter(l => l.type === 'commerce')
+  /* Un commerce partenaire EST une station de jeu : on ne les separe plus en deux
+     tableaux, on les distingue par un marqueur dans la meme liste. */
+  const nbCommerces = lignes.filter(l => l.type === 'commerce').length
+  const nbStations = lignes.length - nbCommerces
 
   const tableau = (titre: string, l: typeof lignes, vide: string) => (
     <>
@@ -70,7 +72,11 @@ export default function Page() {
               {l.map((x, i) => (
                 <tr key={`${x.jour}-${x.event_id}-${i}`}>
                   <td style={{ whiteSpace: 'nowrap' }}>{fr(x.jour)}</td>
-                  <td style={{ fontWeight: 700 }}>{x.station}</td>
+                  <td style={{ fontWeight: 700 }}>
+                    <span title={x.type === 'commerce' ? 'Station chez un commerce partenaire' : 'Station du festival'}>
+                      {x.type === 'commerce' ? '🤝 ' : '🎪 '}
+                    </span>{x.station}
+                  </td>
                   <td style={{ textAlign: 'right' }}>{x.clics}</td>
                   <td style={{ textAlign: 'right', fontWeight: 700 }}>{x.parties}</td>
                   <td style={{ textAlign: 'right' }}>{x.joueurs}</td>
@@ -108,8 +114,20 @@ export default function Page() {
           ))}
         </div>
 
-        {tableau(`🎪 Stations du festival (${stations.length})`, stations, 'Aucune activité sur cette sélection.')}
-        {tableau(`🤝 Commerces partenaires (${commerces.length})`, commerces, 'Aucune activité commerce sur cette sélection.')}
+        {tableau(
+          `🎮 Stations de jeu (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
+          lignes, 'Aucune activité sur cette sélection.')}
+
+        <SectionHeader>🗺️ Consultation des partenaires dans l&apos;application</SectionHeader>
+        <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
+          <b>{r.ecrans?.carte ?? 0} appareils</b> ont ouvert la carte des partenaires et{' '}
+          <b>{r.ecrans?.partenaires ?? 0}</b> l&apos;écran partenaires.
+          {(r.totaux.clics_sortants ?? 0) === 0 && (
+            <> Le détail par partenaire n&apos;est pas disponible pour cette édition :
+            le suivi des clics sortants a été mis en service le 22/07, après la clôture du 18.
+            Il est actif pour les prochaines opérations.</>
+          )}
+        </div>
 
         <SectionHeader>🔗 Redirections vers les partenaires</SectionHeader>
         {pic && (
