@@ -412,3 +412,71 @@ export async function fetchTracking(
   if (error) { console.error('[fetchTracking]', error.message); return null }
   return (data as Tracking) ?? null
 }
+
+/* ── Chiffres publiables : source unique et opposable ──────────────────── */
+
+/**
+ * LA regle de comptage du projet, portee par le code et non par une note.
+ *
+ * Trois erreurs ont ete commises et re-commises sur ce projet :
+ *   1. publier des chiffres NON BORNES aux dates du super event
+ *      (1 022 parties au lieu de 986, 640 joueurs au lieu de 617)
+ *   2. presenter le nombre de lignes de la table `visites` comme des scans
+ *      (8 103 lignes annoncees comme « scans » : c est faux, marqueurs d etape inclus)
+ *   3. publier un nombre de visiteurs uniques sans dire qu il n est pas mesurable
+ *      sur toute la periode (43 % des flashs du festival sont sans identifiant)
+ *
+ * `super_event_chiffres` renvoie les chiffres deja bornes, l avertissement de
+ * fiabilite, et la liste des valeurs INTERDITES a la publication.
+ * Tout support commercial ou rapport doit lire ici — et nulle part ailleurs.
+ */
+export interface ChiffresPubliables {
+  flashs: number
+  parties: number
+  joueurs: number
+  definition_flash: string
+  definition_joueur: string
+}
+
+export interface ChiffresFiabilite {
+  premier_jour_fiable: string | null
+  flashs_sans_identifiant: number
+  pct_flashs_aveugles: number | null
+  visiteurs_uniques_mesures: number
+  avertissement_visiteurs: string
+}
+
+export interface ChiffresEcarts {
+  parties_hors_bornes: number
+  joueurs_hors_bornes: number
+  joueurs_rattaches_sans_partie: number
+  lignes_table_visites: number
+  piege_lignes_visites: string
+}
+
+export interface Chiffres {
+  perimetre: { super_event: string; nom: string; date_d: string; date_f: string }
+  publiable: ChiffresPubliables
+  fiabilite: ChiffresFiabilite
+  ecarts: ChiffresEcarts
+  controles: { regle: string; attendu?: number; valeur_interdite?: number; motif?: string }[]
+  calcule_le: string
+}
+
+/** Chiffres publiables d un super event. Aucun calcul cote client. */
+export async function fetchChiffres(se: string = SE_DEFAUT): Promise<Chiffres | null> {
+  const { data, error } = await supabase.rpc('super_event_chiffres', { p_se: se })
+  if (error) { console.error('[fetchChiffres]', error.message); return null }
+  return (data as Chiffres) ?? null
+}
+
+/**
+ * Controle opposable : un chiffre affiche quelque part est-il conforme ?
+ * Renvoie null si conforme, sinon le motif du rejet.
+ * Sert a faire echouer un support qui contredit la source unique.
+ */
+export function controlerChiffre(c: Chiffres, valeur: number): string | null {
+  const interdit = c.controles.find(x => x.valeur_interdite === valeur)
+  if (interdit) return `Valeur interdite (${valeur}) — ${interdit.motif ?? 'non publiable'}`
+  return null
+}

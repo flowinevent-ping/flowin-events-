@@ -11,6 +11,7 @@ import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/Da
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CarteChaleur } from '@/components/dashboard/CarteChaleur'
 import { TableauStations } from '@/components/dashboard/TableauStations'
+import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
   fetchRapport, fetchPics, fetchSuperEvents,
   type Rapport, type Pics, type SuperEvent,
@@ -147,6 +148,9 @@ export default function Page() {
             <button key={j} className={`sa-btn sm${jour === j ? ' primary' : ''}`} onClick={() => setJour(j)}>{fr(j)}</button>
           ))}
         </div>
+
+        <SectionHeader>🔢 Chiffres de référence</SectionHeader>
+        <BandeauChiffres se={se} />
 
         <SectionHeader>📡 Tracking par station</SectionHeader>
         <div style={{ marginBottom: 22 }}>
