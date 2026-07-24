@@ -182,3 +182,65 @@ export async function fetchStations(jour: string | null, se: string = SE_DEFAUT)
   const arr = (data as { par_station?: StationJour[] } | null)?.par_station
   return Array.isArray(arr) ? arr : []
 }
+
+/* ── Super events : duplication ────────────────────────────────────────── */
+
+export interface SuperEvent {
+  id: string
+  nom: string
+  status: string | null
+  date_d: string | null
+  date_f: string | null
+  description: string | null
+}
+
+export interface ResultatDuplication {
+  ok: boolean
+  raison?: string
+  super_event?: string
+  events_source?: number
+  events_dupliques?: number
+  events_hors_convention?: number
+  partenaires_reutilisables?: number
+  note?: string
+}
+
+export async function fetchSuperEvents(): Promise<SuperEvent[]> {
+  const { data, error } = await supabase
+    .from('super_events')
+    .select('id, nom, status, date_d, date_f, description')
+    .order('date_d', { ascending: false })
+  if (error) { console.error('[fetchSuperEvents]', error.message); return [] }
+  return (data ?? []) as SuperEvent[]
+}
+
+/**
+ * Duplique la STRUCTURE d un super event : parametres, events, stations.
+ * Les donnees d edition (joueurs, tirages, gagnants, stock consomme) ne sont
+ * jamais copiees — une nouvelle edition repart a zero.
+ */
+export async function dupliquerSuperEvent(params: {
+  source: string
+  nouveauId: string
+  nouveauNom: string
+  dateD?: string | null
+  dateF?: string | null
+}): Promise<ResultatDuplication> {
+  const { data, error } = await supabase.rpc('dupliquer_super_event', {
+    p_source: params.source,
+    p_nouveau_id: params.nouveauId,
+    p_nouveau_nom: params.nouveauNom,
+    p_date_d: params.dateD || null,
+    p_date_f: params.dateF || null,
+    p_avec_partenaires: true,
+  })
+  if (error) { console.error('[dupliquerSuperEvent]', error.message); return { ok: false, raison: error.message } }
+  return (data ?? { ok: false, raison: 'reponse_vide' }) as ResultatDuplication
+}
+
+/** Normalise un nom en identifiant : "Jazz à Nice 2027" -> "se-jazz-a-nice-2027". */
+export function slugSuperEvent(nom: string): string {
+  const base = nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return base ? `se-${base}` : ''
+}

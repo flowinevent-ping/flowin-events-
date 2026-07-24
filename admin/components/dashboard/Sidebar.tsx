@@ -40,8 +40,7 @@ export default function Sidebar() {
       group: 'EVENTS',
       items: [
         { id: 'events', icon: '📅', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
-        /* Pas encore portee en Next : on renvoie au monolithe plutot que de servir un 404. */
-        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard.html#super-events', external: true },
+        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
       ],
     },
     {
