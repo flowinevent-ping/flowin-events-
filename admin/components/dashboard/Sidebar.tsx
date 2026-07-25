@@ -68,6 +68,14 @@ export default function Sidebar() {
       ],
     },
     {
+      group: 'COMMERCE',
+      items: [
+        { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
+        { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
+        { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
+      ],
+    },
+    {
       group: 'JEUX',
       items: [
         { id: 'jeux', icon: '🎮', label: 'Jeux', count: 6, href: '/dashboard/jeux' },
