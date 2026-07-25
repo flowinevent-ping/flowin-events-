@@ -52,6 +52,12 @@ export default function Sidebar() {
       ],
     },
     {
+      group: 'PILOTAGE',
+      items: [
+        { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
+      ],
+    },
+    {
       group: 'ANALYSE',
       items: [
         { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
@@ -70,6 +76,8 @@ export default function Sidebar() {
     {
       group: 'COMMERCE',
       items: [
+        { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
+        { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
         { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
         { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
         { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
