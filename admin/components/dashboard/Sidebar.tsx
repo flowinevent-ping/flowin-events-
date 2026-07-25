@@ -71,6 +71,7 @@ export default function Sidebar() {
         { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
         { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
         { id: 'nds-participants', icon: '👥', label: 'Participants', href: '/dashboard/nds-participants' },
+        { id: 'nds-carte', icon: '🗺️', label: 'Carte NDS', href: '/dashboard/nds-carte' },
         { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
         { id: 'nds-comm', icon: '📣', label: 'Kit com partenaire', href: '/dashboard/nds-comm' },
         { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
