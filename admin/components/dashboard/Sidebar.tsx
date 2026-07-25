@@ -100,6 +100,13 @@ export default function Sidebar() {
         { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
       ],
     },
+    {
+      group: 'SYSTÈME',
+      items: [
+        { id: 'parametres', icon: '⚙️', label: 'Paramètres', href: '/dashboard/parametres' },
+        { id: 'maintenance', icon: '🛠️', label: 'Maintenance', href: '/dashboard/maintenance' },
+      ],
+    },
   ]
 
   const isActive = (href: string) => {
