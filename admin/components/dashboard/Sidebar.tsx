@@ -71,12 +71,15 @@ export default function Sidebar() {
         { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
         { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
         { id: 'nds-participants', icon: '👥', label: 'Participants', href: '/dashboard/nds-participants' },
+        { id: 'nds-comm', icon: '📣', label: 'Kit com partenaire', href: '/dashboard/nds-comm' },
+        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
       ],
     },
     {
       group: 'COMMERCE',
       items: [
         { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
+        { id: 'btob-prospects', icon: '🎯', label: 'Prospects B2B', href: '/dashboard/btob-prospects' },
         { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
         { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
         { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
