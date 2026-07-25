@@ -572,3 +572,29 @@ export async function fetchBonusResultats(se: string = SE_DEFAUT): Promise<Bonus
   if (error) { console.error('[fetchBonusResultats]', error.message); return null }
   return (data as BonusResultats) ?? null
 }
+
+/* ── Questionnaire de la landing (canal hors parcours) ─────────────────── */
+
+/**
+ * DEUX CANAUX DE COLLECTE, une seule banque de questions :
+ *   1. bonus en jeu  -> se_reponses     (fetchBonusResultats)
+ *   2. landing       -> sondage_brigade (fetchSondageLanding)
+ * Ne jamais additionner les repondants des deux sans le preciser : une meme personne
+ * peut avoir repondu par les deux chemins.
+ */
+export interface SondageLanding {
+  super_event: string
+  canal: string
+  saisies_total: number
+  par_point: { point: string; saisies: number }[]
+  periode: { du: string | null; au: string | null }
+  questions: QuestionBonus[]
+  lecture: string
+}
+
+/** Depouillement du questionnaire saisi hors parcours de jeu. */
+export async function fetchSondageLanding(se: string = SE_DEFAUT): Promise<SondageLanding | null> {
+  const { data, error } = await supabase.rpc('super_event_sondage_landing', { p_se: se })
+  if (error) { console.error('[fetchSondageLanding]', error.message); return null }
+  return (data as SondageLanding) ?? null
+}

@@ -14,17 +14,48 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
-  fetchRapportPoints, fetchBonusResultats, fetchSuperEvents,
-  type RapportPoints, type BonusResultats, type PointJeu, type SuperEvent,
+  fetchRapportPoints, fetchBonusResultats, fetchSondageLanding, fetchSuperEvents,
+  type RapportPoints, type BonusResultats, type SondageLanding,
+  type PointJeu, type QuestionBonus, type SuperEvent,
 } from '@/lib/nds'
 
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((100 * n) / d)} %` : '—')
+
+/** Carte d une question : intitule reel, effectifs, pourcentages. Aucun code brut affiche
+ *  sauf si le libelle est introuvable — auquel cas c est signale explicitement. */
+function CarteQuestion({ q }: { q: QuestionBonus }) {
+  return (
+    <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: 12 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2, lineHeight: 1.35 }}>{q.libelle}</div>
+      <div className="sa-muted" style={{ fontSize: 10.5, marginBottom: 9 }}>
+        {q.repondants} réponses{q.choix_multiple ? ' · choix multiple' : ''}
+        {!q.libelle_trouve && <span style={{ color: '#c46a6a' }}> · libellé absent de la configuration</span>}
+      </div>
+      {q.reponses.map(rep => (
+        <div key={rep.code} style={{ marginBottom: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, marginBottom: 2, gap: 8 }}>
+            <span style={rep.libelle_trouve ? undefined : { fontStyle: 'italic', color: 'var(--sa-muted)' }}>
+              {rep.reponse}
+            </span>
+            <span style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+              {rep.n} <span className="sa-muted">({rep.pct} %)</span>
+            </span>
+          </div>
+          <div style={{ height: 5, borderRadius: 3, background: 'var(--sa-border)', overflow: 'hidden' }}>
+            <div style={{ width: `${rep.pct ?? 0}%`, height: '100%', background: 'var(--sa-accent, #f4b544)' }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function Page() {
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [se, setSe] = useState('')
   const [r, setR] = useState<RapportPoints | null>(null)
   const [b, setB] = useState<BonusResultats | null>(null)
+  const [ld, setLd] = useState<SondageLanding | null>(null)
   const [charge, setCharge] = useState(true)
   const [filtre, setFiltre] = useState<'tous' | 'Station' | 'Partenaire'>('tous')
 
@@ -39,8 +70,8 @@ export default function Page() {
   useEffect(() => {
     if (!se) return
     setCharge(true)
-    Promise.all([fetchRapportPoints(se), fetchBonusResultats(se)])
-      .then(([rp, bo]) => { setR(rp); setB(bo) })
+    Promise.all([fetchRapportPoints(se), fetchBonusResultats(se), fetchSondageLanding(se)])
+      .then(([rp, bo, la]) => { setR(rp); setB(bo); setLd(la) })
       .finally(() => setCharge(false))
   }, [se])
 
@@ -171,35 +202,32 @@ export default function Page() {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 10 }}>
-                    {fam.questions.map(q => (
-                      <div key={q.cle} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2, lineHeight: 1.35 }}>
-                          {q.libelle}
-                        </div>
-                        <div className="sa-muted" style={{ fontSize: 10.5, marginBottom: 9 }}>
-                          {q.repondants} réponses{q.choix_multiple ? ' · choix multiple' : ''}
-                          {!q.libelle_trouve && (
-                            <span style={{ color: '#c46a6a' }}> · libellé absent de la configuration</span>
-                          )}
-                        </div>
-                        {q.reponses.map(rep => (
-                          <div key={rep.reponse} style={{ marginBottom: 6 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, marginBottom: 2, gap: 8 }}>
-                              <span style={rep.libelle_trouve ? undefined : { fontStyle: 'italic', color: 'var(--sa-muted)' }}>
-                                {rep.reponse}
-                              </span>
-                              <span style={{ fontWeight: 700 }}>{rep.n} <span className="sa-muted">({rep.pct} %)</span></span>
-                            </div>
-                            <div style={{ height: 5, borderRadius: 3, background: 'var(--sa-border)', overflow: 'hidden' }}>
-                              <div style={{ width: `${rep.pct ?? 0}%`, height: '100%', background: 'var(--sa-accent, #f4b544)' }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
+                    {fam.questions.map(q => <CarteQuestion key={q.cle} q={q} />)}
                   </div>
                 </div>
               ))}
+            </>
+          )}
+
+          <SectionHeader>🗂️ Questionnaire de la landing</SectionHeader>
+
+          {!ld || !ld.questions.length ? (
+            <EmptyState icon="🗂️" title="Aucune saisie" desc="Le questionnaire hors parcours n'a pas encore été utilisé." />
+          ) : (
+            <>
+              <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 10, lineHeight: 1.5 }}>
+                <b>{ld.saisies_total} saisies</b>
+                {ld.periode?.du ? ` du ${ld.periode.du} au ${ld.periode.au}` : ''}
+                {ld.par_point?.length
+                  ? ` — ${ld.par_point.map(p => `${p.point} ${p.saisies}`).join(' · ')}`
+                  : ''}
+                .<br />
+                {ld.lecture}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 10 }}>
+                {ld.questions.map(q => <CarteQuestion key={q.cle} q={q} />)}
+              </div>
             </>
           )}
         </>
