@@ -104,6 +104,7 @@ export default function Sidebar() {
     {
       group: 'SYSTÈME',
       items: [
+        { id: 'wizard-event', icon: '✨', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
         { id: 'roadmap', icon: '🗺️', label: 'Feuille de route', href: '/dashboard/roadmap' },
         { id: 'parametres', icon: '⚙️', label: 'Paramètres', href: '/dashboard/parametres' },
         { id: 'maintenance', icon: '🛠️', label: 'Maintenance', href: '/dashboard/maintenance' },
