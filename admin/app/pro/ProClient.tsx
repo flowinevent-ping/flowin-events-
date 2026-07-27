@@ -21,6 +21,7 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   const [refreshing, setRefreshing] = useState(false)
   const [tirageDone, setTirageDone] = useState(false)
   const [gagnant, setGagnant] = useState<FlowinJoueur | null>(null)
+  const [excluded, setExcluded] = useState<Set<string>>(new Set())
   const [seStats, setSeStats] = useState<{ tickets: number; gains: number; gainsUtilises: number } | null>(null)
   const [proGains, setProGains] = useState<ProGainRow[]>([])
   const [codeInput, setCodeInput] = useState('')
@@ -128,18 +129,27 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   }, [ev?.status, proId])
 
   async function lancerTirage() {
-    const elig = evJoueurs.filter(j => j.ticket_code)
-    if (!elig.length) return
+    const elig = evJoueurs.filter(j => j.ticket_code && !excluded.has(j.id))
+    if (!elig.length) { setGagnant(null); setTirageDone(false); return }
     const g = elig[Math.floor(Math.random() * elig.length)]
     setGagnant(g)
-    setTirageDone(true)
+    setTirageDone(false) // proposé mais pas encore confirmé/enregistré
+  }
+  async function confirmerPresent() {
+    if (!gagnant) return
     try {
       await enregistrerTirage({
         superEventId: (ev as unknown as { super_event_id?: string | null })?.super_event_id ?? null,
         eventId: ev?.id ?? null,
-        joueur: { id: g.id, prenom: g.prenom, nom: g.nom, email: g.email, tel: g.tel },
+        joueur: { id: gagnant.id, prenom: gagnant.prenom, nom: gagnant.nom, email: gagnant.email, tel: gagnant.tel },
       })
     } catch { /* persistance best-effort, le tirage reste affiché */ }
+    setTirageDone(true)
+  }
+  function marquerAbsent() {
+    if (gagnant) setExcluded(prev => new Set(prev).add(gagnant.id))
+    setGagnant(null)
+    lancerTirage()
   }
 
   function exportCSV() {
@@ -370,19 +380,31 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
                     {gagnant.ticket_code}
                   </code>
                 )}
+                <div style={{ fontSize:12,color:'#15803D',fontWeight:700,marginBottom:8 }}>✅ Enregistré — email + PDF + QR envoyés</div>
                 <br/>
-                <button className="btn-ghost" style={{ marginTop:12 }} onClick={()=>{setTirageDone(false);setGagnant(null)}}>
+                <button className="btn-ghost" style={{ marginTop:4 }} onClick={()=>{setTirageDone(false);setGagnant(null);setExcluded(new Set())}}>
                   Relancer le tirage
                 </button>
+              </div>
+            ) : gagnant ? (
+              <div style={{ textAlign:'center',padding:'16px 0' }}>
+                <div style={{ fontSize:11,fontWeight:800,color:'#94A3B8',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:8 }}>Tiré au sort — à confirmer</div>
+                <div style={{ fontWeight:900,fontSize:20,marginBottom:4 }}>{gagnant.prenom} {gagnant.nom}</div>
+                <div style={{ fontSize:13,color:'#64748B',marginBottom:16 }}>{gagnant.email}{gagnant.tel ? ` · ${gagnant.tel}` : ''}</div>
+                <div style={{ display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap' }}>
+                  <button className="btn-main" onClick={confirmerPresent}>✅ Joint — confirmer &amp; envoyer</button>
+                  <button className="btn-ghost" onClick={marquerAbsent}>❌ Absent — passer au suivant</button>
+                </div>
               </div>
             ) : (
               <>
                 <div style={{ fontSize:13,color:'#64748B',marginBottom:12 }}>
-                  {evJoueurs.filter(j=>j.ticket_code).length} participants éligibles
+                  {evJoueurs.filter(j=>j.ticket_code && !excluded.has(j.id)).length} participants éligibles
+                  {excluded.size > 0 ? ` · ${excluded.size} marqué(s) absent(s) ce tour` : ''}
                 </div>
                 <button className="btn-main" onClick={lancerTirage}
-                  disabled={evJoueurs.filter(j=>j.ticket_code).length===0}>
-                  🎰 Lancer le tirage
+                  disabled={evJoueurs.filter(j=>j.ticket_code && !excluded.has(j.id)).length===0}>
+                  🎰 Tirer un nom
                 </button>
               </>
             )}
