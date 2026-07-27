@@ -3,6 +3,7 @@ import { fetchProDashboard } from '@/lib/pro'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
 import SuperEventMap from '@/app/se/_components/SuperEventMap'
+import { Camembert } from '@/components/dashboard/Camembert'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string } }) {
@@ -26,6 +27,33 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
   const tri = data.events.slice().sort((a, b) => (b.participants ?? 0) - (a.participants ?? 0))
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const hk = (v: React.ReactNode, k: string) => <div style={{ flex: 1, minWidth: 90 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 11.5, opacity: 0.9 }}>{k}</div></div>
+
+  /* Camembert sexe (composant partage SA, aucune barre inventee) */
+  const nF = data.joueurs.filter(j => (j as any).genre === 'F').length
+  const nH = data.joueurs.filter(j => (j as any).genre === 'H').length
+  const sexeParts = [{ valeur: 'Femmes', n: nF }, { valeur: 'Hommes', n: nH }]
+
+  /* Camembert tranches d'age */
+  const tranches = ['-18', '18-25', '26-35', '36-50', '51-65', '65+']
+  const ageParts = tranches
+    .map(t => ({ valeur: t, n: data.joueurs.filter(j => (j as any).age_tranche === t).length }))
+    .filter(p => p.n > 0)
+
+  /* Camembert origine (visites.source, reel) */
+  const { data: visites } = evIds.length
+    ? await supabase.from('visites').select('source, visiteur_id').in('event_id', evIds).not('visiteur_id', 'is', null)
+    : { data: [] as any[] }
+  const seen = new Set<string>()
+  const origMap = new Map<string, number>()
+  ;(visites ?? []).forEach((v: any) => {
+    const key = v.visiteur_id
+    if (seen.has(key)) return
+    seen.add(key)
+    const lbl = v.source === 'parrainage' ? 'Parrainage' : 'Accès direct'
+    origMap.set(lbl, (origMap.get(lbl) ?? 0) + 1)
+  })
+  const origParts = Array.from(origMap.entries()).map(([valeur, n]) => ({ valeur, n }))
+
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
       <h1 style={H1}>Ma participation{seId ? ' — Nuits du Sud 2026' : ''}</h1>
@@ -35,6 +63,13 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
         <div style={{ fontSize: 22, fontWeight: 900, margin: '4px 0 14px' }}>{data.pro?.nom ?? 'Mon établissement'}</div>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>{hk(joueurs, 'mes joueurs')}{hk(parties, 'parties')}{hk(stations.length, 'mes stations')}</div>
       </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginBottom: 16 }}>
+        <Camembert titre="Sexe" parts={sexeParts} unite="joueurs" />
+        <Camembert titre="Tranches d'âge" parts={ageParts} unite="joueurs" />
+        <Camembert titre="Origine" parts={origParts} unite="visiteurs" />
+      </div>
+
       <style>{`@media (max-width:820px){.pro-map-wrap{display:none !important}}`}</style>
       <div className="pro-map-wrap" style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px 0' }}>
