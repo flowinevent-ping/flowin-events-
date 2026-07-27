@@ -32,7 +32,7 @@ export default function ProDashboardPage() {
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 0px)', minHeight: '80vh' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'auto', minHeight: '86vh' }}>
       <div style={bar}>
         <div style={{ fontWeight: 800, fontSize: 15 }}>Dashboard Pro</div>
         <span style={{ fontSize: 12, color: 'var(--sa-muted,#64748B)' }}>Parcours pro validé — navigable de bout en bout</span>
@@ -54,7 +54,7 @@ export default function ProDashboardPage() {
           style={{
             border: 'none',
             width: vue === 'mobile' ? 430 : '100%',
-            height: '100%', minHeight: 640,
+            height: 'calc(100dvh - 70px)', minHeight: 1200,
             background: 'transparent',
           }}
         />
