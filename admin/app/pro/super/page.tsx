@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
+import { fetchStations } from '@/lib/nds'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
 import SuperEventMap from '@/app/se/_components/SuperEventMap'
@@ -9,46 +10,46 @@ import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
-  const evIds = data.events.map(e => e.id)
+  const evIds = new Set(data.events.map(e => e.id))
   const seId = data.events.find(e => e.super_event_id)?.super_event_id ?? null
 
+  /* Même RPC que le SA (super_event_stations), filtrée aux seules stations du pro — parité garantie */
+  const allStations = seId ? await fetchStations(null, seId) : []
+  const myStations = allStations.filter(s => evIds.has(s.event_id))
+  const tri = myStations.slice().sort((a, b) => (b.commencees ?? 0) - (a.commencees ?? 0))
+
   let lieux: any[] = []
-  if (evIds.length) {
+  if (evIds.size) {
     const { data: lieuxRes } = await supabase
       .from('events')
       .select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires')
-      .in('id', evIds)
+      .in('id', Array.from(evIds))
     lieux = lieuxRes ?? []
   }
 
   const joueurs = data.joueurs.length
-  const parties = data.events.reduce((s, e) => s + (e.participants ?? 0), 0)
-  const stations = data.events
-  const tri = data.events.slice().sort((a, b) => (b.participants ?? 0) - (a.participants ?? 0))
+  const parties = myStations.reduce((s, x) => s + (x.commencees ?? 0), 0)
+  const scans = myStations.reduce((s, x) => s + (x.scans ?? 0), 0)
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const hk = (v: React.ReactNode, k: string) => <div style={{ flex: 1, minWidth: 90 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 11.5, opacity: 0.9 }}>{k}</div></div>
 
-  /* Camembert sexe (composant partage SA, aucune barre inventee) */
   const nF = data.joueurs.filter(j => (j as any).genre === 'F').length
   const nH = data.joueurs.filter(j => (j as any).genre === 'H').length
   const sexeParts = [{ valeur: 'Femmes', n: nF }, { valeur: 'Hommes', n: nH }]
 
-  /* Camembert tranches d'age */
   const tranches = ['-18', '18-25', '26-35', '36-50', '51-65', '65+']
   const ageParts = tranches
     .map(t => ({ valeur: t, n: data.joueurs.filter(j => (j as any).age_tranche === t).length }))
     .filter(p => p.n > 0)
 
-  /* Camembert origine (visites.source, reel) */
-  const { data: visites } = evIds.length
-    ? await supabase.from('visites').select('source, visiteur_id').in('event_id', evIds).not('visiteur_id', 'is', null)
+  const { data: visites } = evIds.size
+    ? await supabase.from('visites').select('source, visiteur_id').in('event_id', Array.from(evIds)).not('visiteur_id', 'is', null)
     : { data: [] as any[] }
   const seen = new Set<string>()
   const origMap = new Map<string, number>()
   ;(visites ?? []).forEach((v: any) => {
-    const key = v.visiteur_id
-    if (seen.has(key)) return
-    seen.add(key)
+    if (seen.has(v.visiteur_id)) return
+    seen.add(v.visiteur_id)
     const lbl = v.source === 'parrainage' ? 'Parrainage' : 'Accès direct'
     origMap.set(lbl, (origMap.get(lbl) ?? 0) + 1)
   })
@@ -57,11 +58,11 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
       <h1 style={H1}>Ma participation{seId ? ' — Nuits du Sud 2026' : ''}</h1>
-      <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est réservé à l'organisateur (Super Admin).</div>
+      <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est réservé à l'organisateur (Super Admin). Chiffres calculés via la même fonction que le Super Admin (super_event_stations).</div>
       <div style={{ borderRadius: 18, padding: 20, color: '#fff', marginBottom: 16, background: 'linear-gradient(135deg,#FF8A14 0%,#EA580C 55%,#C2410C 100%)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>
         <div style={{ fontSize: 22, fontWeight: 900, margin: '4px 0 14px' }}>{data.pro?.nom ?? 'Mon établissement'}</div>
-        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>{hk(joueurs, 'mes joueurs')}{hk(parties, 'parties')}{hk(stations.length, 'mes stations')}</div>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>{hk(joueurs, 'mes joueurs')}{hk(parties, 'parties')}{hk(scans, 'flashs QR')}{hk(myStations.length, 'mes stations actives')}</div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginBottom: 16 }}>
@@ -84,8 +85,8 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
         <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Mes stations</div>
         {tri.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station.</div> : (
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
-            <thead><tr><th style={TH}>Station</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th></tr></thead>
-            <tbody>{tri.map(e => (<tr key={e.id}><td style={TD}><b>{e.nom}</b></td><td style={TD}>{e.participants ?? 0}</td><td style={{ ...TD, ...MUTED }}>{e.participants ?? 0}</td></tr>))}</tbody>
+            <thead><tr><th style={TH}>Station</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th><th style={TH}>Flashs QR</th></tr></thead>
+            <tbody>{tri.map(s => (<tr key={s.event_id}><td style={TD}><b>{s.nom}</b></td><td style={TD}>{s.joueurs ?? 0}</td><td style={TD}>{s.commencees ?? 0}</td><td style={{ ...TD, ...MUTED }}>{s.scans ?? 0}</td></tr>))}</tbody>
           </table>
         )}
       </div>
