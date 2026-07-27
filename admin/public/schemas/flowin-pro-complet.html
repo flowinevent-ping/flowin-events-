@@ -274,8 +274,10 @@
       <div class="bank sel" onclick="tog(this)"><span class="bk"></span> Découverte du festival — « comment avez-vous connu ? » <small>1 q. · sondage</small></div>
       <div class="mini"><button><svg class="i"><use href="#s-plus"/></svg>Créer une banque</button><button><svg class="i"><use href="#s-ai"/></svg>Assistant IA</button><button><svg class="i"><use href="#s-upload"/></svg>Importer</button></div>
 
-      <div class="lbl" style="margin-top:6px">Lieux d'affichage (mes stations)</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px" id="locChips"></div>
+      <div class="lbl" style="margin-top:6px">Lieux d'affichage — mes stations de jeu <span style="text-transform:none;font-weight:600;color:var(--mut)">· chaque station = un QR à tracker</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center" id="locChips"></div>
+      <button class="btn ghost sm" style="margin-top:10px" onclick="addStation()"><svg class="i"><use href="#s-plus"/></svg> Créer une station</button>
+      <div id="newStationRow" style="display:none;margin-top:10px;gap:8px;align-items:center;flex-wrap:wrap"><input class="inp" id="newStationName" placeholder="Nom de la station (ex. Bar 4)" style="margin:0;max-width:260px"><button class="btn sm" onclick="confirmStation()">Ajouter</button><button class="btn ghost sm" onclick="cancelStation()">Annuler</button></div>
     </div>
 
     <div class="card">
@@ -291,7 +293,7 @@
     <div id="playerModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:100;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)hidePlayer()">
       <div style="background:#fff;border-radius:20px;max-width:380px;width:100%;padding:18px;max-height:90vh;overflow:auto">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><b style="font-size:15px">Écran joueur — aperçu</b><button onclick="hidePlayer()" style="border:0;background:none;font-size:20px;cursor:pointer;color:var(--mut)">×</button></div>
-        <div class="qphone"><div class="qt"><span>Question 1 / 8</span><span>3 min</span></div><div class="qq">Sur quelle place de Vence se déroulent les Nuits du Sud ?</div><div class="qo good">Place du Grand Jardin ✓</div><div class="qo">Place du Peyra</div><div class="qo">Place Clemenceau</div><div class="qo">Place Surian</div></div>
+        <div id="pvBody"></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px"><button class="btn ghost sm" onclick="pvNav(-1)">‹ Précédent</button><span id="pvCount" style="font-size:12px;color:var(--mut);font-weight:700"></span><button class="btn ghost sm" onclick="pvNav(1)">Suivant ›</button></div>
         <div class="qphone" style="margin-top:10px;background:linear-gradient(160deg,#3a2d0f,#0f172a)"><div style="font-size:10px;font-weight:800;color:#FCD34D;margin-bottom:8px">QUESTION BONUS · SONDAGE</div><div class="qq" style="font-size:14px">Comment êtes-vous venu·e au festival ?</div><div style="display:flex;flex-wrap:wrap;gap:6px"><span class="qo" style="margin:0">À pied / vélo</span><span class="qo" style="margin:0">Navette</span><span class="qo" style="margin:0">Covoiturage</span><span class="qo" style="margin:0">Voiture</span></div></div>
         <div class="qphone" style="margin-top:10px;background:linear-gradient(160deg,#241a33,#0f172a)"><div style="font-size:10px;font-weight:800;color:#C084FC;margin-bottom:8px">CAPTATION · OBLIGATOIRE</div><div style="display:flex;gap:8px;margin-bottom:6px"><span class="qo" style="flex:1;margin:0">Prénom</span><span class="qo" style="flex:1;margin:0">Nom</span></div><div style="display:flex;gap:8px"><span class="qo" style="flex:1;margin:0">Email</span><span class="qo" style="flex:1;margin:0">Téléphone</span></div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:8px">Opt-in requis — alimente votre CRM</div></div>
       </div>
@@ -422,10 +424,18 @@
     qList.querySelectorAll('[data-del]').forEach(function(x){x.addEventListener('click',function(){QUESTIONS.splice(+x.getAttribute('data-del'),1);rq();});});
   }
   rq();
-  // lieux d'affichage (stations)
+  // lieux d'affichage (stations) = points de tracking QR
   var lc=document.getElementById('locChips');
-  if(lc)lc.innerHTML=MYST.map(function(x){return '<span class="bank sel" style="margin:0;padding:7px 11px;cursor:pointer" onclick="tog(this)"><span class="bk"></span> '+x[0]+'</span>';}).join('');
-  window.showPlayer=function(){document.getElementById('playerModal').style.display='flex';};
+  function renderLoc(){if(!lc)return;lc.innerHTML=MYST.map(function(x){return '<span class="bank sel" style="margin:0;padding:7px 11px;cursor:pointer" onclick="tog(this)"><span class="bk"></span> '+x[0]+' <small style="margin-left:6px;background:rgba(124,45,146,.1);color:var(--acc);border-radius:5px;padding:1px 6px;font-size:10px;font-weight:800">QR</small></span>';}).join('');}
+  renderLoc();
+  window.addStation=function(){var r=document.getElementById('newStationRow');r.style.display='flex';document.getElementById('newStationName').focus();};
+  window.cancelStation=function(){document.getElementById('newStationRow').style.display='none';document.getElementById('newStationName').value='';};
+  window.confirmStation=function(){var v=document.getElementById('newStationName').value.trim();if(!v)return;MYST.push([v,0,0,'—']);renderLoc();fillMy('myStations');fillMy('myStations2');window.cancelStation();};
+  // visualisation utilisateur : navigation question par question
+  var pv=0;
+  function renderPlayer(){var q=QUESTIONS[pv];if(!q)return;var o=q.o.map(function(op,oi){return '<div class="qo'+(oi===q.b?' good':'')+'">'+op+(oi===q.b?' ✓':'')+'</div>';}).join('');document.getElementById('pvBody').innerHTML='<div class="qphone"><div class="qt"><span>Question '+(pv+1)+' / '+QUESTIONS.length+'</span><span>3 min</span></div><div class="qq">'+q.t+'</div>'+o+'</div>';document.getElementById('pvCount').textContent='Question '+(pv+1)+' / '+QUESTIONS.length;}
+  window.pvNav=function(d){pv=(pv+d+QUESTIONS.length)%QUESTIONS.length;renderPlayer();};
+  window.showPlayer=function(){pv=0;renderPlayer();document.getElementById('playerModal').style.display='flex';};
   window.hidePlayer=function(){document.getElementById('playerModal').style.display='none';};
   var qa=document.getElementById('qAdd');if(qa)qa.addEventListener('click',function(){QUESTIONS.push({t:"Nouvelle question ?",o:["Bonne réponse","Autre option"],b:0});rq();});
   buildQR();
