@@ -74,14 +74,7 @@ export default function Sidebar() {
     {
       group: 'ESPACE PRO',
       items: [
-        { id: 'pro', icon: '🟣', label: 'Dashboard Pro', href: '/dashboard/pro' },
-        { id: 'pro-comptes', icon: '🔗', label: 'Comptes & participation', href: '/dashboard/pro/comptes' },
-        { id: 'pro-events', icon: '📅', label: 'Mes events', href: '/dashboard/pro/events' },
-        { id: 'pro-lots', icon: '🎁', label: 'Lots & distribution', href: '/dashboard/pro/lots' },
-        { id: 'pro-crm', icon: '👥', label: 'Mon CRM', href: '/dashboard/pro/crm' },
-        { id: 'pro-tracking', icon: '🔗', label: 'Tracking liens & QR', href: '/dashboard/pro/tracking' },
-        { id: 'pro-gagnants', icon: '🎲', label: 'Gagnants & tirage', href: '/dashboard/pro/gagnants' },
-        { id: 'pro-super', icon: '⭐', label: 'Super Event', href: '/dashboard/pro/super' },
+        { id: 'pro', icon: '', label: 'Espace Pro', href: '/pro' },
       ],
     },
     {
