@@ -253,27 +253,47 @@
     </div>
   </div>
 
-  <!-- JEU -->
+  <!-- JEU (historique event passe) -->
   <div class="sec" id="jeu">
-    <h1>Choisir un jeu</h1><div class="sub">Sélectionnez, éditez vos questions, publiez.</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">
-      <div class="game sel"><span class="ic"><svg class="i"><use href="#s-brain"/></svg></span><div><b>Quiz</b></div><span class="chk"></span></div>
-      <div class="game"><span class="ic"><svg class="i"><use href="#s-wheel"/></svg></span><div><b>Roue</b></div><span class="chk"></span></div>
-      <div class="game"><span class="ic"><svg class="i"><use href="#s-ticket"/></svg></span><div><b>Tombola</b></div><span class="chk"></span></div>
-    </div>
-    <div class="grid2">
-      <div>
-        <div class="lbl">Aperçu — écran joueur</div>
-        <div class="qphone"><div class="qt"><span>Question 1 / 8</span><span>3 min</span></div><div class="qq">Sur quelle place de Vence se déroulent les Nuits du Sud ?</div><div class="qo good">Place du Grand Jardin ✓</div><div class="qo">Place du Peyra</div><div class="qo">Place Clemenceau</div><div class="qo">Place Surian</div></div>
+    <h1>Le jeu de cet événement</h1>
+    <div class="sub">Nuits du Sud 2026 — événement terminé. Vous consultez l'historique (lecture seule).</div>
+    <div class="toolbar">Événement passé : le format et les banques utilisés sont <b>figés</b>. Pour un nouvel événement, tout redevient modifiable dans « Créer un event ».</div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div class="lbl" style="margin:0">Format utilisé</div>
+        <button class="btn ghost sm" onclick="showPlayer()"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg> Visualisation utilisateur</button>
       </div>
-      <div>
-        <div class="lbl">Banques de questions</div>
-        <div class="bank sel" onclick="tog(this)"><span class="bk"></span> Festival & artistes <small>99 q.</small></div>
-        <div class="bank" onclick="tog(this)"><span class="bk"></span> NDS — Le Bar <small>25 q.</small></div>
-        <div class="mini"><button><svg class="i"><use href="#s-plus"/></svg>Créer une banque</button><button><svg class="i"><use href="#s-ai"/></svg>Assistant IA</button><button><svg class="i"><use href="#s-upload"/></svg>Importer</button></div>
-        <div class="lbl">Questions — modifier / réordonner / supprimer</div>
-        <div id="qList"></div>
-        <button class="btn ghost sm" id="qAdd"><svg class="i"><use href="#s-plus"/></svg> Ajouter une question</button>
+      <div class="game sel" style="max-width:280px;margin-top:10px;cursor:default"><span class="ic"><svg class="i"><use href="#s-brain"/></svg></span><div><b>Quiz</b><div style="font-size:12px;color:var(--mut)">QCM + bonus + sondage</div></div><span class="tag on" style="margin-left:auto">utilisé</span></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl">Banques de questions utilisées (3)</div>
+      <div class="bank sel" onclick="tog(this)"><span class="bk"></span> Nuits du Sud — Festival & artistes <small>99 q. · jeu</small></div>
+      <div class="bank sel" onclick="tog(this)"><span class="bk"></span> Questions bonus — sondage <small>2 q. · bonus</small></div>
+      <div class="bank sel" onclick="tog(this)"><span class="bk"></span> Découverte du festival — « comment avez-vous connu ? » <small>1 q. · sondage</small></div>
+      <div class="mini"><button><svg class="i"><use href="#s-plus"/></svg>Créer une banque</button><button><svg class="i"><use href="#s-ai"/></svg>Assistant IA</button><button><svg class="i"><use href="#s-upload"/></svg>Importer</button></div>
+
+      <div class="lbl" style="margin-top:6px">Lieux d'affichage (mes stations)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px" id="locChips"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="lbl" style="margin:0">Questions — présentation compacte</div>
+        <span class="sub" style="margin:0">modifier / réordonner / supprimer</span>
+      </div>
+      <div id="qList" style="margin-top:10px"></div>
+      <button class="btn ghost sm" id="qAdd"><svg class="i"><use href="#s-plus"/></svg> Ajouter une question</button>
+    </div>
+
+    <!-- MODAL visualisation utilisateur -->
+    <div id="playerModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:100;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)hidePlayer()">
+      <div style="background:#fff;border-radius:20px;max-width:380px;width:100%;padding:18px;max-height:90vh;overflow:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><b style="font-size:15px">Écran joueur — aperçu</b><button onclick="hidePlayer()" style="border:0;background:none;font-size:20px;cursor:pointer;color:var(--mut)">×</button></div>
+        <div class="qphone"><div class="qt"><span>Question 1 / 8</span><span>3 min</span></div><div class="qq">Sur quelle place de Vence se déroulent les Nuits du Sud ?</div><div class="qo good">Place du Grand Jardin ✓</div><div class="qo">Place du Peyra</div><div class="qo">Place Clemenceau</div><div class="qo">Place Surian</div></div>
+        <div class="qphone" style="margin-top:10px;background:linear-gradient(160deg,#3a2d0f,#0f172a)"><div style="font-size:10px;font-weight:800;color:#FCD34D;margin-bottom:8px">QUESTION BONUS · SONDAGE</div><div class="qq" style="font-size:14px">Comment êtes-vous venu·e au festival ?</div><div style="display:flex;flex-wrap:wrap;gap:6px"><span class="qo" style="margin:0">À pied / vélo</span><span class="qo" style="margin:0">Navette</span><span class="qo" style="margin:0">Covoiturage</span><span class="qo" style="margin:0">Voiture</span></div></div>
+        <div class="qphone" style="margin-top:10px;background:linear-gradient(160deg,#241a33,#0f172a)"><div style="font-size:10px;font-weight:800;color:#C084FC;margin-bottom:8px">CAPTATION · OBLIGATOIRE</div><div style="display:flex;gap:8px;margin-bottom:6px"><span class="qo" style="flex:1;margin:0">Prénom</span><span class="qo" style="flex:1;margin:0">Nom</span></div><div style="display:flex;gap:8px"><span class="qo" style="flex:1;margin:0">Email</span><span class="qo" style="flex:1;margin:0">Téléphone</span></div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:8px">Opt-in requis — alimente votre CRM</div></div>
       </div>
     </div>
   </div>
@@ -402,6 +422,11 @@
     qList.querySelectorAll('[data-del]').forEach(function(x){x.addEventListener('click',function(){QUESTIONS.splice(+x.getAttribute('data-del'),1);rq();});});
   }
   rq();
+  // lieux d'affichage (stations)
+  var lc=document.getElementById('locChips');
+  if(lc)lc.innerHTML=MYST.map(function(x){return '<span class="bank sel" style="margin:0;padding:7px 11px;cursor:pointer" onclick="tog(this)"><span class="bk"></span> '+x[0]+'</span>';}).join('');
+  window.showPlayer=function(){document.getElementById('playerModal').style.display='flex';};
+  window.hidePlayer=function(){document.getElementById('playerModal').style.display='none';};
   var qa=document.getElementById('qAdd');if(qa)qa.addEventListener('click',function(){QUESTIONS.push({t:"Nouvelle question ?",o:["Bonne réponse","Autre option"],b:0});rq();});
   buildQR();
 </script>
