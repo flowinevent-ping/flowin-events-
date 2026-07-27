@@ -140,11 +140,11 @@
   <!-- ACCUEIL -->
   <div class="sec on" id="accueil">
     <h1>Bonjour, Service événementiel de Vence</h1>
-    <div class="sub">Nuits du Sud 2026 · votre activité en un coup d'œil.</div>
+    <div class="sub">Votre activité sur vos stations de jeu — Nuits du Sud 2026.</div>
     <div class="kpis">
-      <a class="kpi" onclick="go('crm')"><div class="v acc">617</div><div class="k">joueurs <span class="go">→ CRM</span></div></a>
-      <a class="kpi" onclick="go('direct')"><div class="v">986</div><div class="k">parties <span class="go">→ En direct</span></div></a>
-      <a class="kpi" onclick="go('super')"><div class="v">12</div><div class="k">stations <span class="go">→ Super</span></div></a>
+      <a class="kpi" onclick="go('crm')"><div class="v acc">430</div><div class="k">mes joueurs <span class="go">→ CRM</span></div></a>
+      <a class="kpi" onclick="go('direct')"><div class="v">648</div><div class="k">parties <span class="go">→ En direct</span></div></a>
+      <a class="kpi" onclick="go('super')"><div class="v">10</div><div class="k">mes stations <span class="go">→ Ma participation</span></div></a>
       <a class="kpi" onclick="go('gagnants')"><div class="v" style="color:var(--warn)">2</div><div class="k">gagnants à valider <span class="go">→</span></div></a>
     </div>
     <button class="btn" onclick="go('creer')"><svg class="i"><use href="#s-plus"/></svg> Créer un événement</button>
@@ -158,37 +158,41 @@
 
   <!-- EN DIRECT -->
   <div class="sec" id="direct">
-    <h1>En direct</h1>
-    <div class="sub" style="display:flex;align-items:center;gap:8px"><span class="live-dot"></span> Nuits du Sud 2026 · 12 stations · maintenant</div>
+    <h1>Mon activité en direct</h1>
+    <div class="sub" style="display:flex;align-items:center;gap:8px"><span class="live-dot"></span> Service événementiel de Vence · mes 10 stations de jeu</div>
     <div class="kpis">
-      <a class="kpi" onclick="go('crm')"><div class="v acc">617</div><div class="k">joueurs <span class="go">→ CRM</span></div></a>
-      <div class="kpi" style="cursor:default"><div class="v">986</div><div class="k">parties jouées</div></div>
-      <div class="kpi" style="cursor:default"><div class="v">2 446</div><div class="k">flashs</div></div>
-      <div class="kpi" style="cursor:default"><div class="v">622</div><div class="k">visiteurs uniques</div></div>
+      <a class="kpi" onclick="go('crm')"><div class="v acc">430</div><div class="k">mes joueurs <span class="go">→ CRM</span></div></a>
+      <div class="kpi" style="cursor:default"><div class="v">648</div><div class="k">parties jouées</div></div>
+      <div class="kpi" style="cursor:default"><div class="v">1,5</div><div class="k">parties / joueur</div></div>
+      <div class="kpi" style="cursor:default"><div class="v">91%</div><div class="k">taux de transformation</div></div>
     </div>
     <div class="grid2">
-      <div class="card"><div class="lbl">Qui joue</div><div class="donut"><div class="in"><b>66%</b><span>de femmes</span></div></div><div style="text-align:center;font-size:12px;color:var(--mut);margin-top:10px">406 femmes · 211 hommes</div></div>
+      <div class="card"><div class="lbl">Sexe</div><div class="donut" style="background:conic-gradient(var(--acc) 0 63%,#E7E3EF 63% 100%)"><div class="in"><b>63%</b><span>de femmes</span></div></div><div style="text-align:center;font-size:12px;color:var(--mut);margin-top:10px">271 femmes · 159 hommes</div></div>
       <div class="card"><div class="lbl">Tranches d'âge</div>
-        <div class="bar"><span class="bn">-18</span><span class="bt"><span class="bf" style="width:4%"></span></span><span class="bv">8</span></div>
-        <div class="bar"><span class="bn">18–25</span><span class="bt"><span class="bf" style="width:25%"></span></span><span class="bv">63</span></div>
-        <div class="bar"><span class="bn">26–35</span><span class="bt"><span class="bf" style="width:48%"></span></span><span class="bv">122</span></div>
-        <div class="bar"><span class="bn">36–50</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">255</span></div>
-        <div class="bar"><span class="bn">51–65</span><span class="bt"><span class="bf" style="width:63%"></span></span><span class="bv">162</span></div>
-        <div class="bar"><span class="bn">65+</span><span class="bt"><span class="bf" style="width:11%"></span></span><span class="bv">28</span></div>
+        <div class="bar"><span class="bn">-18</span><span class="bt"><span class="bf" style="width:3%"></span></span><span class="bv">5</span></div>
+        <div class="bar"><span class="bn">18–25</span><span class="bt"><span class="bf" style="width:25%"></span></span><span class="bv">44</span></div>
+        <div class="bar"><span class="bn">26–35</span><span class="bt"><span class="bf" style="width:48%"></span></span><span class="bv">85</span></div>
+        <div class="bar"><span class="bn">36–50</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">178</span></div>
+        <div class="bar"><span class="bn">51–65</span><span class="bt"><span class="bf" style="width:55%"></span></span><span class="bv">98</span></div>
+        <div class="bar"><span class="bn">65+</span><span class="bt"><span class="bf" style="width:11%"></span></span><span class="bv">20</span></div>
       </div>
     </div>
     <div class="grid2">
-      <div class="card"><div class="lbl">Origine du trafic <span style="text-transform:none;font-weight:600;color:var(--acc);cursor:pointer" onclick="go('tracking')">· détail →</span></div>
-        <div class="bar"><span class="bn">Accès direct (QR)</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">748</span></div>
-        <div class="bar"><span class="bn">Parrainage</span><span class="bt"><span class="bf" style="width:2%"></span></span><span class="bv">12</span></div>
-        <div class="bar"><span class="bn">Réseaux · Charvolin</span><span class="bt"><span class="bf" style="width:1%"></span></span><span class="bv">8</span></div>
-        <div class="bar"><span class="bn">Réseaux · Bergerie</span><span class="bt"><span class="bf" style="width:1%"></span></span><span class="bv">2</span></div>
+      <div class="card"><div class="lbl">Origine des clients <span style="text-transform:none;font-weight:600;color:var(--acc);cursor:pointer" onclick="go('tracking')">· détail →</span></div>
+        <div class="bar"><span class="bn">QR sur mes stations</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">380</span></div>
+        <div class="bar"><span class="bn">Ma landing page</span><span class="bt"><span class="bf" style="width:8%"></span></span><span class="bv">32</span></div>
+        <div class="bar"><span class="bn">Parrainage joueur</span><span class="bt"><span class="bf" style="width:3%"></span></span><span class="bv">10</span></div>
+        <div class="bar"><span class="bn">Mon lien digital</span><span class="bt"><span class="bf" style="width:2%"></span></span><span class="bv">8</span></div>
       </div>
-      <div class="card"><div class="lbl">Top stations <span style="text-transform:none;font-weight:600;color:var(--acc);cursor:pointer" onclick="go('super')">· les 12 →</span></div>
-        <div class="bar"><span class="bn">NDS · Caisse 2</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">98</span></div>
-        <div class="bar"><span class="bn">NDS · L'Écran</span><span class="bt"><span class="bf" style="width:89%"></span></span><span class="bv">87</span></div>
-        <div class="bar"><span class="bn">NDS · Brigade Verte</span><span class="bt"><span class="bf" style="width:76%"></span></span><span class="bv">74</span></div>
+      <div class="card"><div class="lbl">Engagement</div>
+        <div class="bar"><span class="bn">Opt-in (recontactables)</span><span class="bt"><span class="bf" style="width:68%"></span></span><span class="bv">68%</span></div>
+        <div class="bar"><span class="bn">Parties par joueur (moyenne)</span><span class="bt"><span class="bf" style="width:50%"></span></span><span class="bv">1,5</span></div>
+        <div class="bar"><span class="bn">Visiteurs → joueurs</span><span class="bt"><span class="bf" style="width:91%"></span></span><span class="bv">91%</span></div>
+        <div class="bar"><span class="bn">Parties terminées</span><span class="bt"><span class="bf" style="width:86%"></span></span><span class="bv">86%</span></div>
       </div>
+    </div>
+    <div class="card"><div class="lbl">Mes stations de jeu — joueurs par station</div>
+      <table><thead><tr><th>Station</th><th>Joueurs</th><th>Parties</th><th>Opt-in</th></tr></thead><tbody id="myStations"></tbody></table>
     </div>
   </div>
 
@@ -300,20 +304,31 @@
 
   <!-- GAGNANTS -->
   <div class="sec" id="gagnants">
-    <h1>Gagnants & tirage</h1><div class="sub">Tirage global mutualisé — tirer, envoyer, valider.</div>
-    <div class="card"><div class="lbl">Grand tirage (fin de festival)</div>
-      <div class="row"><span class="ic"><svg class="i"><use href="#s-gift"/></svg></span><span class="nm">Formation 125 — 280 €<div class="ds">Fabien L. · lavalleef@wanadoo.fr</div></span><span class="tag live">Envoyé</span> <button class="btn ghost sm">Renvoyer</button></div>
-      <div class="row"><span class="ic"><svg class="i"><use href="#s-gift"/></svg></span><span class="nm">Bon d'achat — 78 €<div class="ds">Eric Z. · eric.z@gmail.com</div></span><span class="tag on">Non envoyé</span> <button class="btn sm">Envoyer</button></div>
-      <div class="row"><span class="ic"><svg class="i"><use href="#s-gift"/></svg></span><span class="nm">Remise permis — 50 €<div class="ds">Myriam B. · bercot.m@gmail.com</div></span><span class="tag live">Envoyé</span> <button class="btn ghost sm">Billet</button></div>
-      <div style="margin-top:12px"><button class="btn or"><svg class="i"><use href="#s-dice"/></svg> Tirer le reste</button></div>
+    <h1>Gagnants & tirage</h1>
+    <div class="sub">Vue compacte — tout sur une ligne, moins de scroll.</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Lot</th><th>Gagnant</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody>
+          <tr><td><b>Formation 125</b> <span style="color:var(--mut)">280 €</span></td><td>Fabien L.<div style="font-size:11px;color:var(--mut)">lavalleef@wanadoo.fr</div></td><td><span class="tag live">Envoyé</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Renvoyer</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Remettre</button></td></tr>
+          <tr><td><b>Bon d'achat</b> <span style="color:var(--mut)">78 €</span></td><td>Eric Z.<div style="font-size:11px;color:var(--mut)">eric.z@gmail.com</div></td><td><span class="tag on">À envoyer</span></td><td style="text-align:right;white-space:nowrap"><button class="btn sm">Envoyer</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button></td></tr>
+          <tr><td><b>Remise permis</b> <span style="color:var(--mut)">50 €</span></td><td>Myriam B.<div style="font-size:11px;color:var(--mut)">bercot.m@gmail.com</div></td><td><span class="tag live">Envoyé</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Renvoyer</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Remettre</button></td></tr>
+        </tbody>
+      </table>
     </div>
+    <div style="display:flex;gap:10px;align-items:center"><button class="btn or"><svg class="i"><use href="#s-dice"/></svg> Tirer le reste</button><span class="sub" style="margin:0">Modèle candidat pour unifier le SA (moins de scroll).</span></div>
   </div>
 
   <!-- SUPER -->
   <div class="sec" id="super">
-    <h1>Super Event</h1><div class="sub">Nuits du Sud 2026 · Place du Grand Jardin · 9→18 juillet.</div>
-    <div class="card" style="color:#fff;background:linear-gradient(135deg,#FF8A14,#EA580C)"><div style="font-size:11px;font-weight:800;letter-spacing:.1em;opacity:.9">SUPER EVENT · BILAN</div><div style="font-size:22px;font-weight:900;margin:4px 0 12px">Nuits du Sud 2026</div><div style="display:flex;gap:20px;flex-wrap:wrap"><div><div style="font-size:26px;font-weight:900">617</div><div style="font-size:11px;opacity:.9">joueurs</div></div><div><div style="font-size:26px;font-weight:900">986</div><div style="font-size:11px;opacity:.9">parties</div></div><div><div style="font-size:26px;font-weight:900">622</div><div style="font-size:11px;opacity:.9">visiteurs</div></div><div><div style="font-size:26px;font-weight:900">12</div><div style="font-size:11px;opacity:.9">stations</div></div></div></div>
-    <div class="card"><div class="lbl">Les 12 stations & commerces</div><table><thead><tr><th>Station</th><th>Type</th><th>Joueurs</th><th>Parties</th></tr></thead><tbody id="stations"></tbody></table></div>
+    <h1>Ma participation — Nuits du Sud 2026</h1>
+    <div class="sub">Vous participez au super event organisé par la Ville de Vence. Vous ne voyez ici que vos stations.</div>
+    <div class="card" style="background:var(--sub);border-color:rgba(124,45,146,.2)"><div style="font-size:13px;color:#6B248A;line-height:1.55"><b>Cloisonnement des données.</b> Le bilan global du super event (tous les pros et partenaires, l'ensemble des joueurs) est réservé à l'organisateur (Super Admin). Vous accédez uniquement à vos 10 stations et à vos joueurs.</div></div>
+    <div class="kpis"><div class="kpi" style="cursor:default"><div class="v acc">10</div><div class="k">mes stations</div></div><a class="kpi" onclick="go('crm')"><div class="v">430</div><div class="k">mes joueurs <span class="go">→ CRM</span></a><div class="kpi" style="cursor:default"><div class="v">648</div><div class="k">parties</div></div></div>
+    <div class="card"><div class="lbl">Mes stations dans NDS 2026</div>
+      <table><thead><tr><th>Station</th><th>Joueurs</th><th>Parties</th><th>Opt-in</th></tr></thead><tbody id="myStations2"></tbody></table>
+    </div>
+    <button class="btn ghost sm" onclick="go('direct')"><svg class="i"><use href="#s-chart"/></svg> Voir le détail en direct</button>
   </div>
 
   <!-- TRACKING -->
@@ -356,6 +371,9 @@
   function buildQR(){var q=document.getElementById('qr');if(!q||q.dataset.done)return;q.dataset.done='1';q.innerHTML='';for(var k=0;k<121;k++){var c=document.createElement('b');if(Math.random()<=0.5)c.style.background='transparent';q.appendChild(c)}}
   // stations reelles (12)
   var ST=[["NDS · Caisse 2","Station",98,140],["NDS · L'Écran","Station",87,131],["NDS · Brigade Verte","Station",74,118],["NDS · Caisse 1","Station",66,102],["NDS · Tablette","Station",58,90],["NDS · Le Bar","Commerce",47,71],["Nook Café","Commerce",39,54],["Utile Vence","Commerce",34,48],["Domaine de la Bergerie","Commerce",28,40],["Électroménager Giordano","Commerce",21,29],["Carrosserie GP","Commerce",17,23],["Assurance Charvolin","Commerce",12,18]];
+  var MYST=[["NDS · Caisse 2",98,140,"72%"],["NDS · Brigade Verte",74,118,"70%"],["NDS · Caisse 1",66,102,"68%"],["NDS · Bar 1",42,64,"66%"],["NDS · Bar 2",35,52,"69%"],["NDS · Brigade 1",31,47,"65%"],["NDS · Bar 3",28,41,"64%"],["NDS · Brigade 2",26,38,"67%"],["NDS · Brigade 3",18,26,"61%"],["Ma landing page",12,20,"75%"]];
+  function fillMy(id){var t=document.getElementById(id);if(t)t.innerHTML=MYST.map(function(x){return '<tr><td><b>'+x[0]+'</b></td><td>'+x[1]+'</td><td style="color:var(--mut)">'+x[2]+'</td><td style="color:var(--mut)">'+x[3]+'</td></tr>';}).join('');}
+  fillMy('myStations');fillMy('myStations2');
   var tb=document.getElementById('stations');
   if(tb)tb.innerHTML=ST.map(function(s){return '<tr><td><b>'+s[0]+'</b></td><td style="color:var(--mut)">'+s[1]+'</td><td>'+s[2]+'</td><td style="color:var(--mut)">'+s[3]+'</td></tr>';}).join('');
   // editeur questions
