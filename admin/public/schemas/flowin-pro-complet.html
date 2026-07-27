@@ -346,13 +346,95 @@
   <!-- SUPER -->
   <div class="sec" id="super">
     <h1>Ma participation — Nuits du Sud 2026</h1>
-    <div class="sub">Vous participez au super event organisé par la Ville de Vence. Vous ne voyez ici que vos stations.</div>
-    <div class="card" style="background:var(--sub);border-color:rgba(124,45,146,.2)"><div style="font-size:13px;color:#6B248A;line-height:1.55"><b>Cloisonnement des données.</b> Le bilan global du super event (tous les pros et partenaires, l'ensemble des joueurs) est réservé à l'organisateur (Super Admin). Vous accédez uniquement à vos 10 stations et à vos joueurs.</div></div>
-    <div class="kpis"><div class="kpi" style="cursor:default"><div class="v acc">10</div><div class="k">mes stations</div></div><a class="kpi" onclick="go('crm')"><div class="v">430</div><div class="k">mes joueurs <span class="go">→ CRM</span></a><div class="kpi" style="cursor:default"><div class="v">648</div><div class="k">parties</div></div></div>
-    <div class="card"><div class="lbl">Mes stations dans NDS 2026</div>
-      <table><thead><tr><th>Station</th><th>Joueurs</th><th>Parties</th><th>Opt-in</th></tr></thead><tbody id="myStations2"></tbody></table>
+    <div class="sub">Vous participez au super event organisé par la Ville de Vence.</div>
+    <div class="card" style="background:var(--sub);border-color:rgba(124,45,146,.2)"><div style="font-size:13px;color:#6B248A;line-height:1.55"><b>Cloisonnement des données.</b> Le bilan global du super event (tous les pros, tous les partenaires) est réservé à l'organisateur (Super Admin). Vous accédez uniquement à vos stations et à vos joueurs.</div></div>
+
+    <div style="display:flex;gap:2px;border-bottom:1px solid var(--bd);margin-bottom:16px;overflow-x:auto">
+      <button class="subtab on" data-st="st-dir" onclick="stab('st-dir')" style="background:0;border:0;padding:10px 14px;font-size:12.5px;font-weight:800;color:var(--mut);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent">Stations en direct</button>
+      <button class="subtab" data-st="st-com" onclick="stab('st-com')" style="background:0;border:0;padding:10px 14px;font-size:12.5px;font-weight:800;color:var(--mut);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent">Communication</button>
+      <button class="subtab" data-st="st-lot" onclick="stab('st-lot')" style="background:0;border:0;padding:10px 14px;font-size:12.5px;font-weight:800;color:var(--mut);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent">Lots, gagnants & tirage</button>
+      <button class="subtab" data-st="st-stat" onclick="stab('st-stat')" style="background:0;border:0;padding:10px 14px;font-size:12.5px;font-weight:800;color:var(--mut);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent">Statistiques</button>
     </div>
-    <button class="btn ghost sm" onclick="go('direct')"><svg class="i"><use href="#s-chart"/></svg> Voir le détail en direct</button>
+
+    <!-- STATIONS EN DIRECT -->
+    <div class="stpane on" id="st-dir">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <span class="lbl" style="margin:0">Jour :</span>
+        <div id="dayChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div class="kpis"><div class="kpi" style="cursor:default"><div class="v acc" id="dJoueurs">—</div><div class="k">joueurs ce jour</div></div><div class="kpi" style="cursor:default"><div class="v" id="dParties">—</div><div class="k">parties ce jour</div></div><a class="kpi" onclick="go('crm')"><div class="v">430</div><div class="k">mes joueurs (total) <span class="go">→ CRM</span></div></a></div>
+      <div class="card"><div class="lbl">Mes stations — ce jour</div><table><thead><tr><th>Station</th><th>Joueurs</th><th>Parties</th><th>Opt-in</th></tr></thead><tbody id="myStations2"></tbody></table></div>
+    </div>
+
+    <!-- COMMUNICATION -->
+    <div class="stpane" id="st-com" style="display:none">
+      <div class="card"><div class="lbl">QR & liens par station</div>
+        <table><thead><tr><th>Station</th><th>Lien unique</th><th>Scans</th><th></th></tr></thead><tbody id="commRows"></tbody></table>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="lbl">Matériel de communication</div>
+          <div class="supports" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="supp"><span class="ic" style="width:32px;height:32px"><svg class="i"><use href="#s-qr"/></svg></span>Affiche A4</div>
+            <div class="supp"><span class="ic" style="width:32px;height:32px"><svg class="i"><use href="#s-image"/></svg></span>Sticker</div>
+            <div class="supp"><span class="ic" style="width:32px;height:32px"><svg class="i"><use href="#s-insta"/></svg></span>Story IG</div>
+            <div class="supp"><span class="ic" style="width:32px;height:32px"><svg class="i"><use href="#s-link"/></svg></span>Lien bio</div>
+          </div>
+        </div>
+        <div class="card"><div class="lbl">Emails automatiques</div>
+          <div class="row" style="cursor:default"><span class="ic"><svg class="i"><use href="#s-gift"/></svg></span><span class="nm">Email au gagnant<div class="ds">PDF + QR joints — envoi immédiat</div></span><span class="tag live">actif</span></div>
+          <div class="row" style="cursor:default"><span class="ic"><svg class="i"><use href="#s-star"/></svg></span><span class="nm">Annonce réseaux sociaux<div class="ds">Story auto à la clôture du tirage</div></span><span class="tag on">à activer</span></div>
+        </div>
+      </div>
+      <div class="toolbar">Chaque QR/lien créé ici est immédiatement visible et identique côté Super Admin — même source, aucun doublon.</div>
+      <button class="btn ghost sm" onclick="addStation()"><svg class="i"><use href="#s-plus"/></svg> Créer une station de jeu (QR)</button>
+      <div id="newStationRow" style="display:none;margin-top:10px;gap:8px;align-items:center;flex-wrap:wrap"><input class="inp" id="newStationName" placeholder="Nom de la station (ex. Bar 4)" style="margin:0;max-width:220px"><button class="btn sm" onclick="confirmStation()">Ajouter</button><button class="btn ghost sm" onclick="cancelStation()">Annuler</button></div>
+    </div>
+
+    <!-- LOTS GAGNANTS TIRAGE -->
+    <div class="stpane" id="st-lot" style="display:none">
+      <div class="toolbar">Ces lots (« 1re / 2e / 3e place », « Places de concert ») appartiennent au tirage de l'organisateur. Les lots commerciaux (Formation 125, Bon d'achat…) appartiennent aux partenaires et n'apparaissent que dans leur propre espace.</div>
+      <div class="card"><div class="lbl">Mes lots</div><table><thead><tr><th>Lot</th><th>Quantité</th><th>Statut</th></tr></thead><tbody>
+        <tr><td><b>1re place</b></td><td>2</td><td><span class="tag on">à tirer</span></td></tr>
+        <tr><td><b>2e place</b></td><td>1</td><td><span class="tag on">à tirer</span></td></tr>
+        <tr><td><b>3e place</b></td><td>1</td><td><span class="tag on">à tirer</span></td></tr>
+        <tr><td><b>Places de concert</b></td><td>12</td><td><span class="tag live">en cours</span></td></tr>
+      </tbody></table></div>
+
+      <div class="card"><div class="lbl">Tirage manuel — Places de concert</div>
+        <div id="drawZone">
+          <div style="text-align:center;padding:14px 0"><button class="btn or" onclick="drawOne()"><svg class="i"><use href="#s-dice"/></svg> Tirer un nom</button></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Lot</th><th>Gagnant</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody>
+          <tr><td><b>Place de concert</b></td><td>Marc Antoine Rouyer<div style="font-size:11px;color:var(--mut)">marc06140@gmail.com</div></td><td><span class="tag on">Actif · non notifié</span></td><td style="text-align:right;white-space:nowrap"><button class="btn sm">Notifier</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button></td></tr>
+          <tr><td><b>Place de concert</b></td><td>Isabelle Bernard<div style="font-size:11px;color:var(--mut)">myapart75014@gmail.com</div></td><td><span class="tag live">Notifié · actif</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Renvoyer</button></td></tr>
+          <tr><td><b>Place de concert</b></td><td>Florence Madiot<div style="font-size:11px;color:var(--mut)">florencemadiot1968@gmail.com</div></td><td><span class="tag" style="background:rgba(100,116,139,.12);color:var(--mut)">Retiré</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- STATISTIQUES -->
+    <div class="stpane" id="st-stat" style="display:none">
+      <div class="grid2">
+        <div class="card"><div class="lbl">Sexe (ce jour)</div><div class="donut" style="background:conic-gradient(var(--acc) 0 61%,#E7E3EF 61% 100%)"><div class="in"><b>61%</b><span>de femmes</span></div></div></div>
+        <div class="card"><div class="lbl">Tranches d'âge (ce jour)</div>
+          <div class="bar"><span class="bn">-18</span><span class="bt"><span class="bf" style="width:5%"></span></span><span class="bv">3</span></div>
+          <div class="bar"><span class="bn">18–25</span><span class="bt"><span class="bf" style="width:30%"></span></span><span class="bv">18</span></div>
+          <div class="bar"><span class="bn">26–35</span><span class="bt"><span class="bf" style="width:55%"></span></span><span class="bv">33</span></div>
+          <div class="bar"><span class="bn">36–50</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">59</span></div>
+          <div class="bar"><span class="bn">51+</span><span class="bt"><span class="bf" style="width:40%"></span></span><span class="bv">24</span></div>
+        </div>
+      </div>
+      <div class="card"><div class="lbl">Origine — code postal (ce jour)</div>
+        <div class="bar"><span class="bn">06140 Vence</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">88</span></div>
+        <div class="bar"><span class="bn">06130 Grasse</span><span class="bt"><span class="bf" style="width:32%"></span></span><span class="bv">28</span></div>
+        <div class="bar"><span class="bn">06000 Nice</span><span class="bt"><span class="bf" style="width:24%"></span></span><span class="bv">21</span></div>
+      </div>
+      <div class="card"><div class="lbl">Pic horaire de jeu (ce jour)</div><div style="font-size:13px;color:var(--mut);line-height:1.6">Pic absolu : <b style="color:var(--tx)">42 parties</b> entre <b style="color:var(--tx)">21h et 22h</b>. Le créneau <b style="color:var(--tx)">20h-23h</b> concentre <b style="color:var(--tx)">78%</b> de l'activité du jour.</div></div>
+    </div>
   </div>
 
   <!-- TRACKING -->
@@ -398,6 +480,58 @@
   var MYST=[["NDS · Caisse 2",98,140,"72%"],["NDS · Brigade Verte",74,118,"70%"],["NDS · Caisse 1",66,102,"68%"],["NDS · Bar 1",42,64,"66%"],["NDS · Bar 2",35,52,"69%"],["NDS · Brigade 1",31,47,"65%"],["NDS · Bar 3",28,41,"64%"],["NDS · Brigade 2",26,38,"67%"],["NDS · Brigade 3",18,26,"61%"],["Ma landing page",12,20,"75%"]];
   function fillMy(id){var t=document.getElementById(id);if(t)t.innerHTML=MYST.map(function(x){return '<tr><td><b>'+x[0]+'</b></td><td>'+x[1]+'</td><td style="color:var(--mut)">'+x[2]+'</td><td style="color:var(--mut)">'+x[3]+'</td></tr>';}).join('');}
   fillMy('myStations');fillMy('myStations2');
+
+  // ---- sous-onglets 'Ma participation' ----
+  window.stab=function(id){
+    document.querySelectorAll('.stpane').forEach(function(x){x.style.display=(x.id===id?'block':'none');});
+    document.querySelectorAll('.subtab').forEach(function(b){var on=b.getAttribute('data-st')===id;b.classList.toggle('on',on);b.style.color=on?'var(--acc)':'var(--mut)';b.style.borderBottomColor=on?'var(--acc)':'transparent';});
+  };
+  stab('st-dir');
+
+  // ---- selecteur de jour (donnees par jour simulees a partir du total) ----
+  var DAYS=[["09 juil.",38,54],["10 juil.",41,58],["11 juil.",52,71],["12 juil.",60,84],["13 juil.",71,99],["14 juil.",65,92],["15 juil.",58,80],["16 juil.",47,66],["17 juil.",81,112],["18 juil.",73,102]];
+  var curDay=8; // 17 juil. par defaut (le plus actif)
+  function renderDayChips(){
+    var el=document.getElementById('dayChips');if(!el)return;
+    el.innerHTML=DAYS.map(function(d,i){return '<button data-d="'+i+'" style="border:1.5px solid '+(i===curDay?'var(--acc)':'var(--bd)')+';background:'+(i===curDay?'rgba(124,45,146,.08)':'#fff')+';color:'+(i===curDay?'var(--acc)':'var(--tx)')+';border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">'+d[0]+'</button>';}).join('');
+    el.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){curDay=+b.getAttribute('data-d');renderDayChips();renderDayKpis();});});
+  }
+  function renderDayKpis(){
+    var d=DAYS[curDay];
+    var jj=document.getElementById('dJoueurs'),pp=document.getElementById('dParties');
+    if(jj)jj.textContent=d[1];if(pp)pp.textContent=d[2];
+  }
+  renderDayChips();renderDayKpis();
+
+  // ---- Communication : QR/liens par station (memes stations que MYST) ----
+  function renderComm(){
+    var el=document.getElementById('commRows');if(!el)return;
+    el.innerHTML=MYST.map(function(x){
+      var slug=x[0].toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      return '<tr><td><b>'+x[0]+'</b></td><td><code style="font-size:12px;color:var(--acc)">flowin.gg/vence-'+slug+'</code></td><td>'+(x[2]||0)+'</td><td style="text-align:right"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Copier</button></td></tr>';
+    }).join('');
+  }
+  renderComm();
+  var _renderLoc0=renderLoc; renderLoc=function(){_renderLoc0();renderComm();fillMy('myStations');fillMy('myStations2');};
+
+  // ---- tirage manuel : tirer / appeler / passer si absent / envoyer ----
+  var POOL=[["Camille Bernard","camille.bernard@gmail.com"],["Julien Faure","julien.faure@outlook.com"],["Nadia Kerbaj","nadia.kerbaj@icloud.com"],["Thomas Ricci","t.ricci@gmail.com"],["Salomé Petit","salome.petit@hotmail.fr"]];
+  function drawOne(){
+    if(!POOL.length){document.getElementById('drawZone').innerHTML='<div class="sub" style="text-align:center;padding:10px 0">Plus personne à tirer pour ce lot.</div>';return;}
+    var idx=Math.floor(Math.random()*POOL.length);var w=POOL[idx];
+    document.getElementById('drawZone').innerHTML=
+      '<div class="card" style="background:var(--sub);border-color:rgba(124,45,146,.25)">'
+      +'<div class="lbl" style="margin-bottom:6px">Tiré au sort</div>'
+      +'<div style="font-size:16px;font-weight:800">'+w[0]+'</div>'
+      +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">'+w[1]+'</div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<button class="btn sm" onclick="winConfirm(\''+idx+'\')">Joint — envoyer email + QR</button>'
+      +'<button class="btn ghost sm" onclick="winSkip(\''+idx+'\')">Absent — passer au suivant</button>'
+      +'</div></div>';
+  }
+  window.drawOne=drawOne;
+  window.winSkip=function(idx){POOL.splice(+idx,1);drawOne();};
+  window.winConfirm=function(idx){var w=POOL[+idx];POOL.splice(+idx,1);document.getElementById('drawZone').innerHTML='<div class="card" style="background:rgba(21,128,61,.06);border-color:rgba(21,128,61,.25)"><div style="font-weight:800;color:var(--ok)">✓ Email + PDF + QR envoyés à '+w[0]+'</div><div style="margin-top:10px"><button class="btn or" onclick="drawOne()"><svg class=\'i\'><use href=\'#s-dice\'/></svg> Tirer le suivant</button></div></div>';};
   var tb=document.getElementById('stations');
   if(tb)tb.innerHTML=ST.map(function(s){return '<tr><td><b>'+s[0]+'</b></td><td style="color:var(--mut)">'+s[1]+'</td><td>'+s[2]+'</td><td style="color:var(--mut)">'+s[3]+'</td></tr>';}).join('');
   // editeur questions
