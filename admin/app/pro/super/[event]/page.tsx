@@ -50,6 +50,18 @@ export default async function ProStationPage({ params, searchParams }: { params:
     })
   }
 
+  /* Ouverture / finition / coupures reseau : source reelle visites.etape (etape='quiz'/'resultats'/'err:reprise-reseau') */
+  let ontOuvert = 0, ontFini = 0, coupures = 0
+  {
+    let vq = supabase.from('visites').select('etape,visiteur_id,created_at').eq('event_id', ev.id)
+    const { data: vis } = await vq
+    const filtered = jourSel ? (vis ?? []).filter((v: any) => (v.created_at ?? '').slice(0, 10) === jourSel) : (vis ?? [])
+    ontOuvert = new Set(filtered.filter((v: any) => v.etape === 'quiz').map((v: any) => v.visiteur_id)).size
+    ontFini = new Set(filtered.filter((v: any) => v.etape === 'resultats').map((v: any) => v.visiteur_id)).size
+    coupures = filtered.filter((v: any) => v.etape === 'err:reprise-reseau').length
+  }
+  const finitionPct = ontOuvert ? Math.round((ontFini / ontOuvert) * 100) : null
+
   const kpi = (v: React.ReactNode, k: string) => <div style={{ ...CARD, flex: 1, minWidth: 130 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>{k}</div></div>
 
   return (
@@ -78,6 +90,17 @@ export default async function ProStationPage({ params, searchParams }: { params:
         {kpi(stat?.terminees ?? 0, 'parties terminées')}
         {kpi(stat?.scans ?? 0, 'flashs QR')}
         {kpi(stat?.visiteurs ?? 0, 'visiteurs')}
+      </div>
+
+      <div style={{ ...CARD, marginBottom: 14 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Taux de finition du quiz</div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {kpi(ontOuvert, 'ont ouvert')}
+          {kpi(ontFini, 'ont fini')}
+          {kpi(finitionPct !== null ? `${finitionPct}%` : '—', 'finition')}
+          {kpi(coupures, 'coupures réseau')}
+        </div>
+        <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 8 }}>Coupures réseau = reprises après perte de connexion pendant le jeu (source : suivi de parcours réel).</div>
       </div>
 
       <div style={{ ...CARD, marginBottom: 14 }}>
