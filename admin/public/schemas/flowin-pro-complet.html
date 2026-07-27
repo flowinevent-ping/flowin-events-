@@ -303,11 +303,12 @@
   <!-- LOTS -->
   <div class="sec" id="lots">
     <h1>Lots & distribution</h1><div class="sub">Votre catalogue de lots.</div>
-    <div class="card"><table><thead><tr><th>Lot</th><th>Valeur</th><th>Quantité</th><th>Statut</th></tr></thead><tbody>
-      <tr><td><b>Formation 125</b></td><td>280 €</td><td>1</td><td><span class="tag on">à tirer</span></td></tr>
-      <tr><td><b>Bon d'achat</b></td><td>78 €</td><td>2</td><td><span class="tag on">à tirer</span></td></tr>
-      <tr><td><b>Nuit offerte</b></td><td>51 €</td><td>5</td><td><span class="tag on">à tirer</span></td></tr>
-      <tr><td><b>Remise permis 50€</b></td><td>50 €</td><td>1</td><td><span class="tag on">à tirer</span></td></tr>
+    <div class="toolbar">Les lots affichés ici sont ceux de <b>votre</b> tirage (organisateur). Les lots des partenaires (Auto-École de l'ARA, Utile Vence, Giordano, Carrosserie GP, la Bergerie) appartiennent à leur propre espace — ils n'apparaissent pas ici.</div>
+    <div class="card"><table><thead><tr><th>Lot</th><th>Quantité</th><th>Statut</th></tr></thead><tbody>
+      <tr><td><b>1re place</b></td><td>2</td><td><span class="tag on">à tirer</span></td></tr>
+      <tr><td><b>2e place</b></td><td>1</td><td><span class="tag on">à tirer</span></td></tr>
+      <tr><td><b>3e place</b></td><td>1</td><td><span class="tag on">à tirer</span></td></tr>
+      <tr><td><b>Places de concert</b></td><td>12</td><td><span class="tag live">en cours de tirage</span></td></tr>
     </tbody></table>
     <div style="margin-top:12px"><button class="btn ghost sm">+ Ajouter un lot</button> <button class="btn sm" onclick="go('gagnants')">Aller au tirage →</button></div></div>
   </div>
@@ -328,13 +329,14 @@
   <div class="sec" id="gagnants">
     <h1>Gagnants & tirage</h1>
     <div class="sub">Vue compacte — tout sur une ligne, moins de scroll.</div>
+    <div class="toolbar">Ces lots (« 1re / 2e / 3e place », « Places de concert ») appartiennent au tirage de l'organisateur — Service événementiel de Vence. Les lots commerciaux (Formation 125, Bon d'achat, Nuit offerte…) appartiennent aux partenaires (Auto-École de l'ARA, Utile Vence, Giordano, Carrosserie GP, la Bergerie) et n'apparaissent que dans leur propre espace.</div>
     <div class="card" style="padding:0;overflow:hidden">
       <table>
         <thead><tr><th>Lot</th><th>Gagnant</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
         <tbody>
-          <tr><td><b>Formation 125</b> <span style="color:var(--mut)">280 €</span></td><td>Fabien L.<div style="font-size:11px;color:var(--mut)">lavalleef@wanadoo.fr</div></td><td><span class="tag live">Envoyé</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Renvoyer</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Remettre</button></td></tr>
-          <tr><td><b>Bon d'achat</b> <span style="color:var(--mut)">78 €</span></td><td>Eric Z.<div style="font-size:11px;color:var(--mut)">eric.z@gmail.com</div></td><td><span class="tag on">À envoyer</span></td><td style="text-align:right;white-space:nowrap"><button class="btn sm">Envoyer</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button></td></tr>
-          <tr><td><b>Remise permis</b> <span style="color:var(--mut)">50 €</span></td><td>Myriam B.<div style="font-size:11px;color:var(--mut)">bercot.m@gmail.com</div></td><td><span class="tag live">Envoyé</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Renvoyer</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Remettre</button></td></tr>
+          <tr><td><b>Place de concert</b></td><td>Marc Antoine Rouyer<div style="font-size:11px;color:var(--mut)">marc06140@gmail.com</div></td><td><span class="tag on">Actif · non notifié</span></td><td style="text-align:right;white-space:nowrap"><button class="btn sm">Notifier</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button></td></tr>
+          <tr><td><b>Place de concert</b></td><td>Isabelle Bernard<div style="font-size:11px;color:var(--mut)">myapart75014@gmail.com</div></td><td><span class="tag live">Notifié · actif</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button> <button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Renvoyer</button></td></tr>
+          <tr><td><b>Place de concert</b></td><td>Florence Madiot<div style="font-size:11px;color:var(--mut)">florencemadiot1968@gmail.com</div></td><td><span class="tag" style="background:rgba(100,116,139,.12);color:var(--mut)">Retiré</span></td><td style="text-align:right;white-space:nowrap"><button style="border:1px solid var(--bd);background:#fff;border-radius:7px;padding:5px 9px;font-size:11.5px;font-weight:700;color:var(--acc);cursor:pointer">Billet</button></td></tr>
         </tbody>
       </table>
     </div>
