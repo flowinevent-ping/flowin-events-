@@ -31,6 +31,7 @@ export default function Sidebar() {
       items: [
         { id: 'pro', icon: '🟣', label: 'Dashboard Pro', href: '/dashboard/pro' },
         { id: 'pro-comptes', icon: '🔗', label: 'Comptes & participation', href: '/dashboard/pro/comptes' },
+        { id: 'pro-gagnants', icon: '🎲', label: 'Gagnants & tirage', href: '/dashboard/pro/gagnants' },
       ],
     },
     {
