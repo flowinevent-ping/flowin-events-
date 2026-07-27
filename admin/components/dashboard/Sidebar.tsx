@@ -27,6 +27,12 @@ export default function Sidebar() {
 
   const groups: NavGroup[] = [
     {
+      group: 'ESPACE PRO',
+      items: [
+        { id: 'pro', icon: '🟣', label: 'Dashboard Pro', href: '/dashboard/pro' },
+      ],
+    },
+    {
       group: 'CRM',
       items: [
         { id: 'accueil', icon: '🏠', label: 'Accueil', href: '/dashboard' },
