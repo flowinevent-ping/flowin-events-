@@ -1,0 +1,112 @@
+import Link from 'next/link'
+import { fetchProDashboard } from '@/lib/pro'
+import { fetchJours, fetchStations } from '@/lib/nds'
+import { supabase } from '@/lib/supabase'
+import ProShell from '@/components/pro/ProShell'
+import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
+
+const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
+
+export default async function ProStationPage({ params, searchParams }: { params: { event: string }, searchParams: { pro?: string; jour?: string } }) {
+  const proId = searchParams.pro ?? ''
+  const data = await fetchProDashboard(proId)
+  const ev = data.events.find(e => e.id === params.event)
+  const seId = data.events.find(e => e.super_event_id)?.super_event_id ?? null
+  const q = proId ? `&pro=${encodeURIComponent(proId)}` : ''
+
+  if (!ev) {
+    return <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
+      <h1 style={H1}>Station introuvable</h1>
+      <div style={SUB}>Cette station n'appartient pas à votre espace.</div>
+    </ProShell>
+  }
+
+  const jours = seId ? await fetchJours(seId) : []
+  const jourSel = searchParams.jour ?? jours[jours.length - 1]?.jour ?? null
+  const stationsJour = seId ? await fetchStations(jourSel, seId) : []
+  const stat = stationsJour.find(s => s.event_id === ev.id)
+
+  /* Reponses reelles : score + bonus_answers, filtres event + jour, cles decouvertes dynamiquement (aucun nom de question code en dur) */
+  let scoreDist: Record<string, number> = {}
+  let bonusTally: Record<string, Record<string, number>> = {}
+  let nbReponses = 0
+  {
+    let query = supabase.from('participations').select('score,bonus_answers,played_date').eq('event_id', ev.id)
+    if (jourSel) query = query.eq('played_date', jourSel)
+    const { data: parts } = await query
+    ;(parts ?? []).forEach((p: any) => {
+      const s = String(p.score ?? '—')
+      scoreDist[s] = (scoreDist[s] ?? 0) + 1
+      const ba = p.bonus_answers
+      if (ba && typeof ba === 'object') {
+        const keys = Object.keys(ba)
+        if (keys.length) nbReponses++
+        keys.forEach(k => {
+          const v = Array.isArray(ba[k]) ? ba[k].join(', ') : String(ba[k])
+          bonusTally[k] = bonusTally[k] ?? {}
+          bonusTally[k][v] = (bonusTally[k][v] ?? 0) + 1
+        })
+      }
+    })
+  }
+
+  const kpi = (v: React.ReactNode, k: string) => <div style={{ ...CARD, flex: 1, minWidth: 130 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>{k}</div></div>
+
+  return (
+    <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
+      <div style={{ fontSize: 13, marginBottom: 6 }}><Link href={`/pro/super?pro=${encodeURIComponent(proId)}`} style={{ color: ACC, textDecoration: 'none', fontWeight: 700 }}>← Mes stations</Link></div>
+      <h1 style={H1}>{ev.nom}</h1>
+      <div style={{ ...SUB, marginBottom: 16 }}>Activité par jour — sélectionnez une date.</div>
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        {jours.map(j => (
+          <Link key={j.jour} href={`/pro/super/${ev.id}?jour=${j.jour}${q}`}
+            style={{
+              textDecoration: 'none', fontSize: 12.5, fontWeight: 700, borderRadius: 20, padding: '6px 12px',
+              border: `1.5px solid ${j.jour === jourSel ? ACC : '#E2E8F0'}`,
+              background: j.jour === jourSel ? 'rgba(124,45,146,.08)' : '#fff',
+              color: j.jour === jourSel ? ACC : '#0F172A',
+            }}>
+            {fr(j.jour)}{j.hors_periode ? ' ⚠' : ''}
+          </Link>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+        {kpi(stat?.joueurs ?? 0, 'joueurs ce jour')}
+        {kpi(stat?.commencees ?? 0, 'parties commencées')}
+        {kpi(stat?.terminees ?? 0, 'parties terminées')}
+        {kpi(stat?.scans ?? 0, 'flashs QR')}
+        {kpi(stat?.visiteurs ?? 0, 'visiteurs')}
+      </div>
+
+      <div style={{ ...CARD, marginBottom: 14 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Scores obtenus (quiz)</div>
+        {Object.keys(scoreDist).length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune partie ce jour-là.</div> : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead><tr><th style={TH}>Score</th><th style={TH}>Joueurs</th></tr></thead>
+            <tbody>{Object.entries(scoreDist).sort((a, b) => Number(b[0]) - Number(a[0])).map(([s, n]) => (
+              <tr key={s}><td style={TD}>{s}</td><td style={TD}>{n}</td></tr>
+            ))}</tbody>
+          </table>
+        )}
+      </div>
+
+      <div style={CARD}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Réponses aux questions bonus{nbReponses ? ` (${nbReponses} joueurs ont répondu)` : ''}</div>
+        {Object.keys(bonusTally).length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune réponse bonus ce jour-là.</div> : (
+          Object.entries(bonusTally).map(([question, vals]) => (
+            <div key={question} style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 6 }}>{question}</div>
+              {Object.entries(vals).sort((a, b) => b[1] - a[1]).map(([v, n]) => (
+                <div key={v} style={{ display: 'flex', gap: 8, fontSize: 12.5, padding: '3px 0', color: '#334155' }}>
+                  <span style={{ flex: 1 }}>{v}</span><span style={{ fontWeight: 800 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+    </ProShell>
+  )
+}

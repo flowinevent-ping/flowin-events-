@@ -86,7 +86,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
         {tri.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station.</div> : (
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
             <thead><tr><th style={TH}>Station</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th><th style={TH}>Flashs QR</th></tr></thead>
-            <tbody>{tri.map(s => (<tr key={s.event_id}><td style={TD}><b>{s.nom}</b></td><td style={TD}>{s.joueurs ?? 0}</td><td style={TD}>{s.commencees ?? 0}</td><td style={{ ...TD, ...MUTED }}>{s.scans ?? 0}</td></tr>))}</tbody>
+            <tbody>{tri.map(s => (<tr key={s.event_id}><td style={TD}><Link href={`/pro/super/${s.event_id}${q ? `?${q.slice(1)}` : ''}`} style={{ color: ACC, fontWeight: 800, textDecoration: 'none' }}>{s.nom} →</Link></td><td style={TD}>{s.joueurs ?? 0}</td><td style={TD}>{s.commencees ?? 0}</td><td style={{ ...TD, ...MUTED }}>{s.scans ?? 0}</td></tr>))}</tbody>
           </table>
         )}
       </div>
