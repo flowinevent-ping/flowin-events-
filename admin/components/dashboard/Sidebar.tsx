@@ -55,7 +55,7 @@ const ICON_BY_ID: Record<string, string> = {
   'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map',
   'nds-front': 'palette', 'nds-comm': 'megaphone', 'nds-media': 'film', prospection: 'phone', 'nds-bon-commande': 'receipt',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
-  roadmap: 'map', parametres: 'settings', maintenance: 'wrench', pro: 'layout', 'pro-comptes': 'link', 'pro-gagnants': 'dice', 'pro-crm': 'users', 'pro-tracking': 'target',
+  roadmap: 'map', parametres: 'settings', maintenance: 'wrench', pro: 'layout', 'pro-comptes': 'link', 'pro-gagnants': 'dice', 'pro-crm': 'users', 'pro-tracking': 'target', 'pro-super': 'star',
 }
 function SbIcon({ id, fallback }: { id: string; fallback: string }) {
   const p = ICON_PATHS[ICON_BY_ID[id]]
@@ -79,6 +79,7 @@ export default function Sidebar() {
         { id: 'pro-crm', icon: '👥', label: 'Mon CRM', href: '/dashboard/pro/crm' },
         { id: 'pro-tracking', icon: '🔗', label: 'Tracking liens & QR', href: '/dashboard/pro/tracking' },
         { id: 'pro-gagnants', icon: '🎲', label: 'Gagnants & tirage', href: '/dashboard/pro/gagnants' },
+        { id: 'pro-super', icon: '⭐', label: 'Super Event', href: '/dashboard/pro/super' },
       ],
     },
     {
