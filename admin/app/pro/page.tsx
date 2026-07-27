@@ -20,8 +20,11 @@ export default async function ProAccueilPage({ searchParams }: Props) {
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
 
   const card: React.CSSProperties = { background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: 18 }
-  const kpi = (v: React.ReactNode, k: string, acc = false) => (
-    <div style={card}><div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-1px', color: acc ? '#7C2D92' : '#0F172A' }}>{v}</div><div style={{ fontSize: 12.5, color: '#64748B', marginTop: 2 }}>{k}</div></div>
+  const kpi = (v: React.ReactNode, k: string, href: string, acc = false) => (
+    <Link href={href} style={{ ...card, textDecoration: 'none', color: 'inherit', display: 'block' }}>
+      <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-1px', color: acc ? '#7C2D92' : '#0F172A' }}>{v}</div>
+      <div style={{ fontSize: 12.5, color: '#64748B', marginTop: 2 }}>{k} <span style={{ color: '#7C2D92', fontWeight: 800 }}>→</span></div>
+    </Link>
   )
   const optin = data.joueurs.filter(j => j.optin).length
 
@@ -29,16 +32,16 @@ export default async function ProAccueilPage({ searchParams }: Props) {
     <ProShell proName={proName} proId={proId} active="accueil">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-.6px' }}>Bonjour, {proName} 👋</h1>
+          <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-.6px' }}>Bonjour, {proName}</h1>
           <div style={{ fontSize: 14, color: '#64748B', marginTop: 2 }}>Voici votre activité en un coup d'œil.</div>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14, marginBottom: 18 }}>
-        {kpi(data.joueurs.length, 'joueurs', true)}
-        {kpi(data.events.length, 'events')}
-        {kpi(optin, 'contacts opt-in')}
-        {kpi(data.lots.length, 'lots')}
+        {kpi(data.joueurs.length, 'joueurs', `/pro/crm${q}`, true)}
+        {kpi(data.events.length, 'events', `/pro/events${q}`)}
+        {kpi(optin, 'contacts opt-in', `/pro/crm${q}`)}
+        {kpi(data.lots.length, 'lots', `/pro/lots${q}`)}
       </div>
 
       <div style={{ ...card, marginBottom: 16 }}>
