@@ -8,14 +8,14 @@ import Link from 'next/link'
 interface NavItem { key: string; label: string; icon: string; route?: string; group: string }
 const NAV: NavItem[] = [
   { key: 'accueil', label: 'Accueil', icon: 'home', route: '/pro', group: 'TABLEAU DE BORD' },
-  { key: 'entreprise', label: 'Mon entreprise', icon: 'shop', group: 'MON COMPTE' },
-  { key: 'jeu', label: 'Choisir un jeu', icon: 'game', group: 'MES CAMPAGNES' },
-  { key: 'events', label: 'Mes events', icon: 'calendar', group: 'MES CAMPAGNES' },
-  { key: 'lots', label: 'Lots & distribution', icon: 'gift', group: 'MES CAMPAGNES' },
-  { key: 'crm', label: 'Mon CRM', icon: 'users', group: 'MES DONNÉES' },
+  { key: 'entreprise', label: 'Mon entreprise', icon: 'shop', route: '/pro/entreprise', group: 'MON COMPTE' },
+  { key: 'jeu', label: 'Choisir un jeu', icon: 'game', route: '/pro/jeu', group: 'MES CAMPAGNES' },
+  { key: 'events', label: 'Mes events', icon: 'calendar', route: '/pro/events', group: 'MES CAMPAGNES' },
+  { key: 'lots', label: 'Lots & distribution', icon: 'gift', route: '/pro/lots', group: 'MES CAMPAGNES' },
+  { key: 'crm', label: 'Mon CRM', icon: 'users', route: '/pro/crm', group: 'MES DONNÉES' },
   { key: 'gagnants', label: 'Gagnants & tirage', icon: 'dice', route: '/pro/tirage', group: 'MES DONNÉES' },
-  { key: 'tracking', label: 'Tracking liens & QR', icon: 'target', group: 'MES DONNÉES' },
-  { key: 'super', label: 'Super Event', icon: 'star', group: 'ALLER PLUS LOIN' },
+  { key: 'tracking', label: 'Tracking liens & QR', icon: 'target', route: '/pro/tracking', group: 'MES DONNÉES' },
+  { key: 'super', label: 'Super Event', icon: 'star', route: '/pro/super', group: 'ALLER PLUS LOIN' },
 ]
 const ICONS: Record<string, string> = {
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
