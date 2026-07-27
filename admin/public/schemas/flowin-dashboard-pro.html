@@ -515,13 +515,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
  <div class="main">
   <div class="topbar">
    <div class="breadcrumb"><span>Flowin Pro</span> › <span class="current" id="crumb">Mon entreprise</span></div>
+   <span style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#7C2D92;background:rgba(124,45,146,.08);border:1px solid rgba(124,45,146,.22);border-radius:20px;padding:4px 11px;white-space:nowrap"><span style="font-size:9px;font-weight:800;background:#7C2D92;color:#fff;border-radius:5px;padding:1px 6px">PRO</span> Nuits du Sud — Ville de Vence</span>
    <div class="search"><svg class="ic-svg"><use href="#i-search"/></svg> Rechercher…</div>
   </div>
   <div class="content" id="content">
 
    <!-- ACCUEIL -->
    <div class="page" data-page="accueil">
-    <div class="ph"><div><h1>Bonjour, Le Bistrot du Port <svg class="ic-svg"><use href="#i-hand"/></svg></h1><div class="sub">Voici votre activité en un coup d'œil.</div></div><button class="sa-btn primary" data-goto="event">+ Nouvelle campagne</button></div>
+    <div class="ph"><div><h1>Bonjour, Ville de Vence <svg class="ic-svg"><use href="#i-hand"/></svg></h1><div class="sub">Voici votre activité en un coup d'œil.</div></div><button class="sa-btn primary" data-goto="event">+ Nouvelle campagne</button></div>
     <div class="grid4" style="margin-bottom:16px">
      <button class="kpi kpi-clik" data-goto="crm"><div class="v acc" id="hKpi1">248</div><div class="k">joueurs (campagne en cours)</div><span class="kpi-go">→</span></button>
      <button class="kpi kpi-clik" data-goto="crm"><div class="v">182</div><div class="k">contacts dans mon CRM</div><span class="kpi-go">→</span></button>
@@ -554,7 +555,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <div class="hintbar"><span class="e"><svg class="ic-svg"><use href="#i-lock"/></svg></span> Vous ne voyez que votre établissement. Les autres pros sont invisibles pour vous.</div>
     <div class="grid2">
      <div class="card">
-      <div class="field"><label class="label">Établissement</label><input class="input" value="Le Bistrot du Port"></div>
+      <div class="field"><label class="label">Établissement</label><input class="input" value="Ville de Vence"></div>
       <div class="row2">
        <div class="field"><label class="label">Secteur</label><input class="input" value="Restaurant"></div>
        <div class="field"><label class="label">SIRET</label><input class="input" value="•••• •••• •••• 41"></div>
@@ -1261,7 +1262,11 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   // ---- editeur quiz interactif (ajouter/retirer/modifier) ----
   var QUESTIONS=[
    {texte:"Sur quelle place de Vence se déroulent les Nuits du Sud ?",opts:["Place du Grand Jardin","Place du Peyra","Place Clemenceau","Place Surian"],bon:0},
-   {texte:"Combien de soirées de concerts compte l'édition 2026 ?",opts:["3","4","6","8"],bon:2}
+   {texte:"Combien de soirées de concerts compte l'édition 2026 ?",opts:["3","4","6","8"],bon:2},
+   {texte:"En quelle année le festival Nuits du Sud a-t-il été créé ?",opts:["1997","2001","2008","2012"],bon:0},
+   {texte:"Quel style est le plus représenté à la programmation ?",opts:["Musiques du monde","Musique classique","Métal","Techno"],bon:0},
+   {texte:"Quel est le nom de la place principale du festival ?",opts:["Grand Jardin","Peyra","Frêne","Clemenceau"],bon:0},
+   {texte:"Les concerts en soirée sont-ils en accès libre ?",opts:["Oui, gratuits","Non, payants","Sur réservation","Le week-end seulement"],bon:0}
   ];
   var BONUS=[
    {label:"Comment êtes-vous venu·e au festival ce soir ?",multi:false,opts:["À pied ou à vélo","Transports en commun / navette","Covoiturage","En voiture (seul·e)"]},
@@ -1269,13 +1274,39 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   ];
   var qList=document.getElementById('qList'),bList=document.getElementById('bList');
   function esc(s){return s.replace(/"/g,'&quot;');}
+  function pidx(a){return a.split('-').map(Number);}
   function renderQuestions(){
     qList.innerHTML=QUESTIONS.map(function(q,i){
-      var opts=q.opts.map(function(o,oi){return '<span class="qopt'+(oi===q.bon?' ok':'')+'">'+o+(oi===q.bon?' ✓':'')+'</span>';}).join('');
-      return '<div class="qrow qcard"><div class="qhead"><span class="qn">'+(i+1)+'</span><input class="qtxt" value="'+esc(q.texte)+'" data-qi="'+i+'"><span class="qtag">QCM</span><button class="del" data-qdel="'+i+'" title="Supprimer">✕</button></div><div class="qopts">'+opts+'</div></div>';
+      var opts=q.opts.map(function(o,oi){
+        var ok=oi===q.bon;
+        return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
+          +'<button data-qmark="'+i+'-'+oi+'" title="Marquer comme bonne réponse" style="width:22px;height:22px;border-radius:50%;border:2px solid '+(ok?'#15803D':'#CBD5E1')+';background:'+(ok?'#15803D':'#fff')+';color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;line-height:1">'+(ok?'✓':'')+'</button>'
+          +'<input data-qopt="'+i+'-'+oi+'" value="'+esc(o)+'" style="flex:1;border:1px solid '+(ok?'#15803D':'#E2E8F0')+';border-radius:8px;padding:6px 9px;font-size:13px;background:'+(ok?'rgba(21,128,61,.05)':'#fff')+'">'
+          +'<button data-qoptdel="'+i+'-'+oi+'" title="Supprimer l\'option" style="border:0;background:none;color:#94A3B8;cursor:pointer;font-size:17px;flex-shrink:0;line-height:1">×</button>'
+          +'</div>';
+      }).join('');
+      return '<div class="qrow qcard" style="border:1px solid #E2E8F0;border-radius:12px;padding:12px;margin-bottom:10px;background:#fff">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+        +'<span style="width:24px;height:24px;border-radius:7px;background:rgba(124,45,146,.1);color:#7C2D92;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</span>'
+        +'<input class="qtxt" data-qi="'+i+'" value="'+esc(q.texte)+'" style="flex:1;min-width:0;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;font-size:13.5px;font-weight:600">'
+        +'<span style="font-size:10px;font-weight:800;color:#7C2D92;background:rgba(124,45,146,.1);border-radius:6px;padding:3px 7px">QCM</span>'
+        +'<button data-qup="'+i+'" title="Monter" style="border:1px solid #E2E8F0;background:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#64748B">↑</button>'
+        +'<button data-qdown="'+i+'" title="Descendre" style="border:1px solid #E2E8F0;background:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#64748B">↓</button>'
+        +'<button data-qdel="'+i+'" title="Supprimer la question" style="border:1px solid #FCA5A5;background:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#DC2626">✕</button>'
+        +'</div>'
+        +'<div style="padding-left:32px">'+opts
+        +'<button data-qoptadd="'+i+'" style="border:1px dashed #CBD5E1;background:none;border-radius:8px;padding:5px 10px;font-size:12px;color:#7C2D92;font-weight:700;cursor:pointer;margin-top:2px">+ ajouter une option</button>'
+        +'</div></div>';
     }).join('');
     qList.querySelectorAll('[data-qi]').forEach(function(inp){inp.addEventListener('input',function(){QUESTIONS[+inp.getAttribute('data-qi')].texte=inp.value;});});
+    qList.querySelectorAll('[data-qopt]').forEach(function(inp){inp.addEventListener('input',function(){var p=pidx(inp.getAttribute('data-qopt'));QUESTIONS[p[0]].opts[p[1]]=inp.value;});});
+    qList.querySelectorAll('[data-qmark]').forEach(function(b){b.addEventListener('click',function(){var p=pidx(b.getAttribute('data-qmark'));QUESTIONS[p[0]].bon=p[1];renderQuestions();});});
+    qList.querySelectorAll('[data-qoptdel]').forEach(function(b){b.addEventListener('click',function(){var p=pidx(b.getAttribute('data-qoptdel'));var q=QUESTIONS[p[0]];if(q.opts.length>2){q.opts.splice(p[1],1);if(q.bon>=q.opts.length)q.bon=0;renderQuestions();}});});
+    qList.querySelectorAll('[data-qoptadd]').forEach(function(b){b.addEventListener('click',function(){QUESTIONS[+b.getAttribute('data-qoptadd')].opts.push('Nouvelle option');renderQuestions();});});
+    qList.querySelectorAll('[data-qup]').forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-qup');if(i>0){var t=QUESTIONS[i];QUESTIONS[i]=QUESTIONS[i-1];QUESTIONS[i-1]=t;renderQuestions();}});});
+    qList.querySelectorAll('[data-qdown]').forEach(function(b){b.addEventListener('click',function(){var i=+b.getAttribute('data-qdown');if(i<QUESTIONS.length-1){var t=QUESTIONS[i];QUESTIONS[i]=QUESTIONS[i+1];QUESTIONS[i+1]=t;renderQuestions();}});});
     qList.querySelectorAll('[data-qdel]').forEach(function(b){b.addEventListener('click',function(){QUESTIONS.splice(+b.getAttribute('data-qdel'),1);renderQuestions();});});
+    var c=document.getElementById('qCount');if(c)c.textContent=QUESTIONS.length+' affichées · 99 dans la banque';
   }
   function renderBonus(){
     bList.innerHTML=BONUS.map(function(q,i){
