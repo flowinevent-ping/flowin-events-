@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flowin Pro · Mobile</title>
+<style>
+:root{
+  --bg:#F1F5F9;--card:#FFFFFF;--border:#E9EDF3;--text:#0F172A;--muted:#64748B;--subtle:#F8FAFC;
+  --sb:#1E293B;--sb2:#172033;
+  --acc:#7C2D92;--acc2:#A855F7;--accd:#6B248A;--accsoft:rgba(168,85,247,.10);
+  --ok:#15803D;--okbg:rgba(34,197,94,.12);--warn:#B45309;--warnbg:rgba(245,158,11,.14);
+  --orange:#EA580C;--orange2:#FF8A14;
+  --teal:#0E9488;--rose:#B23A5B;--indigo:#4F5BD5;--amber:#E8873A;
+  --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);background:radial-gradient(1200px 700px at 50% -100px,#2a3550,#0b1120);min-height:100vh;color:var(--text);display:flex;flex-direction:column;align-items:center;padding:26px 12px 40px}
+.wrap-title{color:#fff;text-align:center;margin-bottom:20px}
+.wrap-title .lg{font-size:22px;font-weight:900;letter-spacing:-.5px}
+.wrap-title .lg .i{color:var(--acc2)}
+.wrap-title .sub{font-size:13px;color:rgba(255,255,255,.55);margin-top:4px}
+
+/* phone frame */
+.phone{width:390px;max-width:100%;height:820px;background:var(--bg);border-radius:44px;border:11px solid #0b0f1a;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 2px rgba(255,255,255,.04) inset;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:26px;background:#0b0f1a;border-radius:0 0 18px 18px;z-index:60}
+.status{height:44px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:12px;font-weight:700;flex:none;z-index:40;position:relative}
+.status .r{display:flex;gap:6px;align-items:center}
+
+/* scroll area */
+.scr{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.scr::-webkit-scrollbar{display:none}
+.screen{display:none;padding:6px 16px 30px;animation:fade .3s}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+
+svg.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---- generic ---- */
+.h1{font-size:23px;font-weight:900;letter-spacing:-.6px}
+.h1 .wave{font-size:20px}
+.sub{font-size:13px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);margin-bottom:14px}
+.lbl{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.btn{border:none;font-family:inherit;border-radius:14px;padding:14px;font-size:15px;font-weight:800;width:100%;background:var(--acc);color:#fff;cursor:pointer;transition:.15s}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:var(--subtle);color:var(--text);border:1px solid var(--border)}
+.btn.orange{background:linear-gradient(135deg,var(--orange2),var(--orange))}
+.chip{font-size:10.5px;font-weight:800;border-radius:99px;padding:4px 10px;display:inline-flex;align-items:center;gap:5px}
+.chip.live{background:var(--okbg);color:var(--ok)}
+.chip.live .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.input{width:100%;border:1.5px solid var(--border);border-radius:13px;padding:13px 14px;font-size:15px;font-family:inherit;background:var(--subtle);outline:none;margin-bottom:12px}
+.input:focus{border-color:var(--acc2);background:#fff}
+.field-lbl{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;display:block}
+
+/* ---- onboarding ---- */
+#s-onboard{padding-top:20px}
+.ob-logo{font-size:30px;font-weight:900;letter-spacing:-1px;text-align:center;margin-bottom:6px}
+.ob-logo .i{color:var(--acc2)}
+.ob-hero{text-align:center;margin:18px 0 22px}
+.ob-hero .em{font-size:46px}
+.ob-hero h2{font-size:24px;font-weight:900;letter-spacing:-.6px;margin-top:8px}
+.ob-hero p{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.55;padding:0 8px}
+.ob-feat{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px 14px;margin-bottom:10px}
+.ob-feat .ei{width:40px;height:40px;border-radius:11px;background:var(--accsoft);color:var(--acc);display:flex;align-items:center;justify-content:center;flex:none}
+.ob-feat b{font-size:14px;display:block}
+.ob-feat span{font-size:12px;color:var(--muted)}
+.steps{display:flex;gap:6px;justify-content:center;margin:16px 0}
+.steps i{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.steps i.on{background:var(--acc);width:20px;border-radius:99px}
+
+/* ---- app header ---- */
+.apphead{display:flex;align-items:center;justify-content:space-between;padding:8px 2px 14px}
+.apphead .av{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.apphead .bell{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
+.apphead .bell .n{position:absolute;top:-4px;right:-4px;background:var(--orange);color:#fff;font-size:9px;font-weight:800;border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+/* live campaign */
+.livecard{background:linear-gradient(135deg,#241d3f,#141024);color:#fff;border-radius:20px;padding:18px;position:relative;overflow:hidden;margin-bottom:14px}
+.livecard .glow{position:absolute;top:-40px;right:-30px;width:150px;height:150px;border-radius:50%;background:rgba(168,85,247,.4);filter:blur(45px)}
+.livecard .top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+.livecard .nm{font-size:17px;font-weight:800;margin-top:12px;position:relative;z-index:2}
+.livecard .meta{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;position:relative;z-index:2}
+.livecard .big{display:flex;align-items:baseline;gap:8px;margin-top:14px;position:relative;z-index:2}
+.livecard .big .v{font-size:40px;font-weight:900;letter-spacing:-1.5px}
+.livecard .big .u{font-size:13px;color:rgba(255,255,255,.65);font-weight:600}
+.livecard .up{margin-left:auto;background:rgba(34,197,94,.2);color:#4ADE80;font-size:12px;font-weight:800;border-radius:99px;padding:4px 10px}
+
+/* kpi grid */
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.kbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+.kbox .v{font-size:24px;font-weight:900;letter-spacing:-1px}
+.kbox .v.acc{color:var(--acc)}
+.kbox .k{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px}
+
+/* quick */
+.quick{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px 14px;margin-bottom:9px;width:100%;text-align:left;font-family:inherit;cursor:pointer}
+.quick .qe{width:38px;height:38px;border-radius:11px;background:var(--accsoft);color:var(--acc);display:flex;align-items:center;justify-content:center;flex:none}
+.quick b{font-size:14px;display:block}
+.quick span{font-size:11.5px;color:var(--muted)}
+.quick .ar{margin-left:auto;color:var(--acc);font-weight:800}
+
+/* ---- co-pilote activite ---- */
+.copilot-hero{background:linear-gradient(135deg,var(--orange2),var(--orange) 70%,#C2410C);color:#fff;border-radius:22px;padding:20px;position:relative;overflow:hidden;margin-bottom:14px}
+.copilot-hero .glow{position:absolute;top:-50px;right:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,220,150,.4);filter:blur(45px)}
+.copilot-hero .k{font-size:12px;font-weight:700;opacity:.9;position:relative;z-index:2}
+.copilot-hero .big{font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1;margin:6px 0;position:relative;z-index:2}
+.copilot-hero .sub2{font-size:13px;opacity:.9;position:relative;z-index:2}
+.spark{display:flex;align-items:flex-end;gap:4px;height:44px;margin-top:14px;position:relative;z-index:2}
+.spark i{flex:1;background:rgba(255,255,255,.45);border-radius:4px 4px 0 0;min-height:6px}
+.spark i.hi{background:#fff}
+
+.sec-title{font-size:15px;font-weight:800;margin:2px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-title .em{font-size:17px}
+
+/* donut */
+.donut-row{display:flex;align-items:center;gap:18px}
+.donut{width:104px;height:104px;flex:none;position:relative}
+.donut svg{transform:rotate(-90deg)}
+.donut .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut .c .v{font-size:22px;font-weight:900;color:var(--acc)}
+.donut .c .k{font-size:10px;color:var(--muted);font-weight:700}
+.legend .lg{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:8px}
+.legend .lg .sw{width:12px;height:12px;border-radius:4px;flex:none}
+.legend .lg .n{margin-left:auto;font-weight:800}
+
+/* age bars */
+.agebars{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:8px}
+.agebars .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.agebars .bar{width:100%;border-radius:7px 7px 0 0;background:linear-gradient(180deg,var(--acc2),var(--acc));min-height:8px;position:relative}
+.agebars .bar.top{background:linear-gradient(180deg,#FF8A14,#EA580C)}
+.agebars .num{font-size:11px;font-weight:800}
+.agebars .lab{font-size:9.5px;color:var(--muted);font-weight:700}
+
+/* mobility */
+.mob{display:flex;gap:10px}
+.mob .m{flex:1;background:var(--subtle);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.mob .m .em{font-size:22px}
+.mob .m .v{font-size:19px;font-weight:900;margin-top:4px}
+.mob .m .k{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:1px}
+
+/* source rows */
+.srow{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:13px}
+.srow .lab{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .bar{width:60px;height:7px;border-radius:99px;background:var(--border);overflow:hidden;flex:none}
+.srow .fill{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));border-radius:99px}
+.srow .n{font-weight:800;min-width:34px;text-align:right}
+
+/* gauge */
+.gauge-wrap{text-align:center}
+.gauge{font-size:40px;font-weight:900;color:var(--acc);letter-spacing:-1.5px}
+.gauge-lbl{font-size:12px;color:var(--muted);font-weight:600}
+.gbar{height:12px;border-radius:99px;background:var(--border);overflow:hidden;margin:12px 0 6px}
+.gbar .f{height:100%;border-radius:99px;background:linear-gradient(90deg,#0E9488,#15803D)}
+
+/* contacts */
+.searchbar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:11px 13px;margin-bottom:12px;color:var(--muted)}
+.searchbar input{border:none;background:none;outline:none;font-family:inherit;font-size:14px;flex:1;color:var(--text)}
+.person{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 13px;margin-bottom:9px}
+.person .pav{width:38px;height:38px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
+.person .pn{font-size:14px;font-weight:700}
+.person .pm{font-size:11.5px;color:var(--muted);margin-top:1px}
+.person .pt{margin-left:auto;font-size:10.5px;color:var(--muted);text-align:right;flex:none}
+.person .pt .src{display:block;font-weight:800;color:var(--acc)}
+
+/* jeu / QR */
+.qrbox{width:150px;height:150px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:11px;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:2px;margin:0 auto 12px}
+.qrbox i{background:#0F172A;border-radius:1px}.qrbox i.o{background:transparent}
+.linkm{display:flex;align-items:center;gap:10px;background:var(--subtle);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px}
+.linkm .li{width:34px;height:34px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--acc);flex:none}
+.linkm b{font-size:13px;display:block}
+.linkm span{font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
+.linkm .cp{margin-left:auto;font-size:11px;font-weight:800;color:var(--acc);border:1px solid var(--border);border-radius:8px;padding:6px 10px;background:#fff;flex:none}
+.linkm.perm{border-color:rgba(168,85,247,.4);background:var(--accsoft)}
+
+/* bottom tabs */
+.tabs{flex:none;display:flex;background:var(--card);border-top:1px solid var(--border);padding:8px 6px 20px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;font-family:inherit;color:var(--muted);cursor:pointer;padding:5px}
+.tab .ic{width:23px;height:23px}
+.tab span{font-size:10px;font-weight:700}
+.tab.on{color:var(--acc)}
+
+.hint{display:flex;gap:9px;align-items:flex-start;background:var(--accsoft);border:1px solid rgba(168,85,247,.2);border-radius:13px;padding:11px 13px;font-size:12px;color:var(--accd);line-height:1.5;margin-bottom:14px}
+.hint svg{flex:none;stroke:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap-title">
+  <div class="lg">Flow<span class="i">in</span> Pro — mobile</div>
+  <div class="sub">Parcours pro : souscription → activité en direct. Maquette navigable.</div>
+</div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status"><span id="clock">9:41</span><span class="r">📶 &nbsp;🔋</span></div>
+
+  <div class="scr" id="scr">
+
+    <!-- ONBOARDING / SOUSCRIPTION -->
+    <div class="screen on" data-m="onboard" id="s-onboard">
+      <div class="ob-logo">Flow<span class="i">in</span> Pro</div>
+      <div class="ob-hero">
+        <div class="em">🎯</div>
+        <h2>Votre jeu, vos joueurs, votre CRM.</h2>
+        <p>Créez un jeu, diffusez votre QR, et voyez en direct qui joue et revient chez vous.</p>
+      </div>
+      <div class="ob-feat"><div class="ei"><svg class="ic"><path d="M12 2v20M2 12h20"/></svg></div><div><b>Créez en 3 clics</b><span>Choisir un jeu · régler les lots · publier</span></div></div>
+      <div class="ob-feat"><div class="ei"><svg class="ic"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><div><b>Suivez l'activité en direct</b><span>Trafic, profils, provenance — en temps réel</span></div></div>
+      <div class="ob-feat"><div class="ei"><svg class="ic"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><b>Un CRM qui se remplit seul</b><span>Chaque joueur devient un contact</span></div></div>
+      <div class="steps"><i class="on"></i><i></i><i></i></div>
+      <button class="btn" data-go="signup">Créer mon espace →</button>
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="screen" data-m="signup">
+      <div class="apphead"><div class="h1">Créer mon espace</div></div>
+      <div class="sub" style="margin:-8px 0 16px">Enregistré une fois. Vous êtes seul à voir vos données.</div>
+      <label class="field-lbl">Nom de l'établissement</label>
+      <input class="input" value="Le Bistrot du Port">
+      <label class="field-lbl">Email</label>
+      <input class="input" value="contact@bistrotduport.fr">
+      <label class="field-lbl">Créez votre code PIN (4 chiffres)</label>
+      <input class="input" value="••••" style="letter-spacing:8px;text-align:center;font-size:20px">
+      <div class="hint"><svg class="ic"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Votre PIN protège votre espace. Vous ne verrez que votre établissement.</div>
+      <button class="btn" data-go="accueil">C'est parti →</button>
+      <button class="btn ghost" style="margin-top:10px" data-go="onboard">← Retour</button>
+    </div>
+
+    <!-- ACCUEIL -->
+    <div class="screen" data-m="accueil">
+      <div class="apphead">
+        <div><div class="h1">Bonjour <span class="wave">👋</span></div><div class="sub">Le Bistrot du Port</div></div>
+        <div class="bell"><svg class="ic"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="n">2</span></div>
+      </div>
+      <div class="livecard">
+        <div class="glow"></div>
+        <div class="top"><span class="chip live"><span class="dot"></span>EN LIGNE</span><span style="font-size:11px;color:rgba(255,255,255,.6)">01 → 31 juil.</span></div>
+        <div class="nm">🎡 Roue de l'été</div>
+        <div class="meta">Roue · gain immédiat</div>
+        <div class="big"><span class="v" id="homeLive">248</span><span class="u">joueurs</span><span class="up">▲ aujourd'hui</span></div>
+      </div>
+      <div class="kgrid">
+        <div class="kbox"><div class="v acc">182</div><div class="k">contacts CRM</div></div>
+        <div class="kbox"><div class="v" style="color:var(--warn)">2</div><div class="k">gagnants à valider</div></div>
+      </div>
+      <button class="quick" data-go="activite"><span class="qe"><svg class="ic"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span><span style="flex:1"><b>Voir mon activité en direct</b><span>Le copilote de votre campagne</span></span><span class="ar">→</span></button>
+      <button class="quick" data-go="jeu"><span class="qe"><svg class="ic"><rect x="2" y="6" width="20" height="12" rx="4"/><circle cx="8" cy="12" r="1.5"/></svg></span><span style="flex:1"><b>Mon jeu &amp; mon QR</b><span>Diffuser, modifier</span></span><span class="ar">→</span></button>
+      <button class="quick" data-go="contacts"><span class="qe"><svg class="ic"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span><span style="flex:1"><b>Mes contacts</b><span>182 clients dans mon CRM</span></span><span class="ar">→</span></button>
+    </div>
+
+    <!-- ACTIVITE / CO-PILOTE -->
+    <div class="screen" data-m="activite">
+      <div class="apphead"><div><div class="h1">Mon activité</div><div class="sub">Roue de l'été · en direct</div></div><span class="chip live"><span class="dot"></span>LIVE</span></div>
+
+      <div class="copilot-hero">
+        <div class="glow"></div>
+        <div class="k">JOUEURS AUJOURD'HUI</div>
+        <div class="big" id="coBig">38</div>
+        <div class="sub2">▲ +12 % vs hier · 248 au total ce mois</div>
+        <div class="spark" id="coSpark"></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title"><span class="em">👥</span> Qui joue chez vous</div>
+        <div class="donut-row">
+          <div class="donut">
+            <svg viewBox="0 0 120 120" width="104" height="104">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#E9EDF3" stroke-width="16"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--acc)" stroke-width="16" stroke-linecap="round" stroke-dasharray="207 314"/>
+            </svg>
+            <div class="c"><div class="v">66%</div><div class="k">femmes</div></div>
+          </div>
+          <div class="legend" style="flex:1">
+            <div class="lg"><span class="sw" style="background:var(--acc)"></span> Femmes <span class="n">406</span></div>
+            <div class="lg"><span class="sw" style="background:#E9EDF3"></span> Hommes <span class="n">211</span></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Public plutôt féminin — utile pour vos offres.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title"><span class="em">🎂</span> Leur âge <span style="font-size:11px;font-weight:600;color:var(--muted);margin-left:auto">dominante 36-50</span></div>
+        <div class="agebars" id="ageBars"></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title"><span class="em">🚗</span> Comment ils viennent</div>
+        <div class="mob">
+          <div class="m"><div class="em">🚲</div><div class="v">35</div><div class="k">à pied / vélo</div></div>
+          <div class="m"><div class="em">🚗</div><div class="v">35</div><div class="k">covoiturage</div></div>
+          <div class="m"><div class="em">🅿️</div><div class="v">28</div><div class="k">voiture</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title"><span class="em">📍</span> D'où ils arrivent</div>
+        <div id="srcRows"></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-title"><span class="em">⚡</span> Engagement</div>
+        <div class="gauge-wrap">
+          <div class="gauge">986</div>
+          <div class="gauge-lbl">parties jouées · 2 446 flashs QR</div>
+          <div class="gbar"><div class="f" style="width:78%"></div></div>
+          <div style="font-size:12px;color:var(--muted)">1,6 partie par joueur en moyenne</div>
+        </div>
+      </div>
+
+      <div class="hint"><svg class="ic"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Tout ce que vous voyez ici vient de vos joueurs réels — mis à jour en continu pendant la campagne.</div>
+    </div>
+
+    <!-- CONTACTS / CRM -->
+    <div class="screen" data-m="contacts">
+      <div class="apphead"><div><div class="h1">Mes contacts</div><div class="sub">182 clients · votre CRM</div></div><span class="chip" style="background:var(--accsoft);color:var(--acc)">↑ Exporter</span></div>
+      <div class="searchbar"><svg class="ic" style="width:18px;height:18px"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Rechercher un client…"></div>
+      <div id="people"></div>
+      <div class="hint"><svg class="ic"><path d="M12 5v14M5 12h14"/></svg> Chaque joueur qui laisse son e-mail rejoint votre CRM automatiquement.</div>
+    </div>
+
+    <!-- JEU -->
+    <div class="screen" data-m="jeu">
+      <div class="apphead"><div><div class="h1">Mon jeu</div><div class="sub">Roue de l'été · en ligne</div></div></div>
+      <div class="card" style="text-align:center">
+        <div class="lbl" style="margin-bottom:12px">Votre QR — à diffuser partout</div>
+        <div class="qrbox" id="qr"></div>
+        <button class="btn orange" style="max-width:220px;margin:0 auto"><svg class="ic" style="width:17px;height:17px;vertical-align:-3px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg> Télécharger le QR</button>
+      </div>
+      <div class="lbl" style="margin:4px 0 8px">Mes liens tracés</div>
+      <div class="linkm"><span class="li"><svg class="ic" style="width:17px;height:17px"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></span><div><b>Bio / réseaux</b><span>flowin.fr/nds/bio</span></div><button class="cp">Copier</button></div>
+      <div class="linkm"><span class="li"><svg class="ic" style="width:17px;height:17px"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></span><div><b>Story / Reel</b><span>flowin.fr/nds/reel</span></div><button class="cp">Copier</button></div>
+      <div class="linkm perm"><span class="li"><svg class="ic" style="width:17px;height:17px"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></span><div><b>Lien permanent</b><span>flowin.fr/nds</span></div><button class="cp">Copier</button></div>
+      <button class="btn ghost" style="margin-top:8px" data-go="activite">Voir l'activité de ce jeu →</button>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM TABS -->
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-go="accueil"><svg class="ic"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Accueil</span></button>
+    <button class="tab" data-go="activite"><svg class="ic"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg><span>Activité</span></button>
+    <button class="tab" data-go="contacts"><svg class="ic"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Contacts</span></button>
+    <button class="tab" data-go="jeu"><svg class="ic"><rect x="2" y="6" width="20" height="12" rx="4"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/></svg><span>Jeu</span></button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var scr=document.getElementById('scr');
+  function show(m){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-m')===m);});
+    var appTabs=['accueil','activite','contacts','jeu'];
+    document.getElementById('tabs').style.display=(m==='onboard'||m==='signup')?'none':'flex';
+    document.querySelectorAll('#tabs .tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-go')===m);});
+    scr.scrollTop=0;
+  }
+  document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){show(b.getAttribute('data-go'));});});
+
+  // clock
+  (function(){var d=new Date();var el=document.getElementById('clock');if(el)el.textContent=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');})();
+
+  // spark (copilote)
+  (function(){var el=document.getElementById('coSpark');if(!el)return;var v=[8,12,10,16,14,22,19,26,24,31,29,38];var mx=38;
+    el.innerHTML=v.map(function(x,i){return '<i class="'+(i===v.length-1?'hi':'')+'" style="height:'+Math.round(x/mx*100)+'%"></i>';}).join('');})();
+
+  // age bars (reel)
+  (function(){var el=document.getElementById('ageBars');if(!el)return;
+    var A=[['-18',8],['18-25',63],['26-35',122],['36-50',255],['51-65',162],['65+',28]];var mx=255;
+    el.innerHTML=A.map(function(a){var top=a[1]===mx;return '<div class="col"><div class="num">'+a[1]+'</div><div class="bar'+(top?' top':'')+'" style="height:'+Math.max(6,Math.round(a[1]/mx*100))+'%"></div><div class="lab">'+a[0]+'</div></div>';}).join('');})();
+
+  // sources (reel)
+  (function(){var el=document.getElementById('srcRows');if(!el)return;
+    var S=[['Accès direct (QR/lien)',748],['Parrainage',12],['Réseaux — Charvolin',8],['Réseaux — Bergerie',2],['Réseaux — Giordano',1]];var mx=748;
+    el.innerHTML=S.map(function(s){return '<div class="srow"><span class="lab">'+s[0]+'</span><span class="bar"><span class="fill" style="width:'+Math.max(3,Math.round(s[1]/mx*100))+'%"></span></span><span class="n">'+s[1]+'</span></div>';}).join('');})();
+
+  // people (crm demo)
+  (function(){var el=document.getElementById('people');if(!el)return;
+    var cols=['#7C2D92','#0E9488','#B23A5B','#4F5BD5','#E8873A','#15803D'];
+    var P=[['Léa M.','Vence (06140)','Instagram','20:14'],['Marc D.','Cagnes (06800)','Vitrine','20:31'],['Sophie L.','Nice (06000)','Instagram','12:02'],['Thomas B.','Vence (06140)','Facebook','13:47'],['Inès R.','Antibes (06600)','QR vitrine','14:20'],['Karim B.','La Colle (06480)','Bio réseaux','15:05']];
+    el.innerHTML=P.map(function(p,i){var ini=p[0].split(' ').map(function(x){return x[0];}).join('');
+      return '<div class="person"><div class="pav" style="background:'+cols[i%cols.length]+'">'+ini+'</div><div><div class="pn">'+p[0]+'</div><div class="pm">'+p[1]+'</div></div><div class="pt"><span class="src">'+p[2]+'</span>'+p[3]+'</div></div>';}).join('');})();
+
+  // qr
+  (function(){var el=document.getElementById('qr');if(!el)return;
+    var pat=[1,1,1,0,1,1,1, 1,0,1,0,1,0,1, 1,1,0,1,0,1,1, 0,1,1,0,1,1,0, 1,0,1,1,0,0,1, 1,1,0,1,1,1,0, 1,0,1,0,1,0,1];
+    for(var i=0;i<49;i++){var s=document.createElement('i');if(!pat[i])s.className='o';el.appendChild(s);}})();
+
+  // copy
+  document.querySelectorAll('.cp').forEach(function(b){b.addEventListener('click',function(){var t=b.textContent;b.textContent='Copié ✓';setTimeout(function(){b.textContent=t;},1200);});});
+
+  // live counter tick on copilote
+  var coBig=document.getElementById('coBig');
+  document.querySelectorAll('[data-go="activite"]').forEach(function(b){b.addEventListener('click',function(){
+    if(!coBig)return;var n=38;coBig.textContent=0;var t=setInterval(function(){n2=+coBig.textContent;if(n2>=n){clearInterval(t);coBig.textContent=n;}else coBig.textContent=n2+2;},28);
+  });});
+
+  show('onboard');
+})();
+</script>
+</body>
+</html>
