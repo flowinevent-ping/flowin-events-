@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
-import { fetchStations } from '@/lib/nds'
+import { fetchStations, fetchSondageLanding } from '@/lib/nds'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
 import SuperEventMap from '@/app/se/_components/SuperEventMap'
 import { Camembert } from '@/components/dashboard/Camembert'
+import SondageLandingPro from '@/components/pro/SondageLandingPro'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string } }) {
@@ -15,6 +16,9 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
 
   /* Même RPC que le SA (super_event_stations), filtrée aux seules stations du pro — parité garantie */
   const allStations = seId ? await fetchStations(null, seId) : []
+  /* Canal de collecte hors parcours (landing) — meme RPC que le SA, filtre aux points du pro */
+  const sondage = seId ? await fetchSondageLanding(seId) : null
+  const nomsDuPro = new Set(data.events.map(e => e.nom))
   const myStations = allStations.filter(s => evIds.has(s.event_id))
   const tri = myStations.slice().sort((a, b) => (b.commencees ?? 0) - (a.commencees ?? 0))
 
@@ -90,6 +94,8 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
           </table>
         )}
       </div>
+      {sondage ? <SondageLandingPro s={sondage} nomsDuPro={nomsDuPro} /> : null}
+
       <div style={{ ...CARD, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 200 }}><div style={{ fontWeight: 800, fontSize: 14 }}>🎲 Gagnants &amp; tirage</div><div style={{ fontSize: 12.5, ...MUTED }}>Tirage global mutualisé.</div></div>
         <Link href={`/pro/tirage${q}`} style={{ background: ACC, color: '#fff', borderRadius: 12, padding: '10px 16px', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Ouvrir le tirage →</Link>
