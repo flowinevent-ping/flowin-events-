@@ -1,12 +1,21 @@
 import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchStations } from '@/lib/nds'
+import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
+import SuperEventMap from '@/app/se/_components/SuperEventMap'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
   const [data, stations] = await Promise.all([fetchProDashboard(proId), fetchStations(null)])
+  const seId = data.events.find(e => e.super_event_id)?.super_event_id ?? 'se-nds-2026'
+  const { data: lieuxRes } = await supabase
+    .from('events')
+    .select('id,nom,module,lat,lng,couleur,gain_immediat,gain_ticket,adresse,description,categorie,tel,site_web,photo_url,horaires')
+    .eq('super_event_id', seId)
+    .neq('status', 'pending')
+  const lieux = lieuxRes ?? []
   const joueurs = stations.reduce((s, x) => s + (x.joueurs ?? 0), 0)
   const parties = stations.reduce((s, x) => s + (x.commencees ?? 0), 0)
   const visiteurs = stations.reduce((s, x) => s + (x.visiteurs ?? 0), 0)
@@ -20,6 +29,16 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>SUPER EVENT · BILAN</div>
         <div style={{ fontSize: 22, fontWeight: 900, margin: '4px 0 14px' }}>Nuits du Sud 2026</div>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>{hk(joueurs || 617, 'joueurs')}{hk(parties || 986, 'parties')}{hk(visiteurs || 622, 'visiteurs')}{hk(stations.length || 12, 'stations')}</div>
+      </div>
+      <style>{`@media (max-width:820px){.pro-map-wrap{display:none !important}}`}</style>
+      <div className="pro-map-wrap" style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 18px 0' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B' }}>Carte du super event</div>
+          <div style={{ ...SUB, marginBottom: 10 }}>Même carte, même source que le Super Admin — affichage ordinateur uniquement.</div>
+        </div>
+        <div style={{ height: 360 }}>
+          <SuperEventMap lieux={lieux as any} mode="vitrine" height="100%" showPosition={false} />
+        </div>
       </div>
       <div style={{ ...CARD, overflowX: 'auto' }}>
         <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Stations &amp; commerces participants</div>
