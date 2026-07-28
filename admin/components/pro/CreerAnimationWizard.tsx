@@ -37,7 +37,7 @@ const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0
 const btnPrimary: React.CSSProperties = { background: ACC, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 22px', fontWeight: 800, fontSize: 14, cursor: 'pointer' }
 const btnGhost: React.CSSProperties = { background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 12, padding: '12px 20px', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: '#0F172A' }
 
-export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { proId: string; banqueQuizExistante: Banque[] }) {
+export default function CreerAnimationWizard({ proId, partenaireId, banqueQuizExistante }: { proId: string; partenaireId: string | null; banqueQuizExistante: Banque[] }) {
   const router = useRouter()
   const [etape, setEtape] = useState(1)
   const [module_, setModule] = useState<string | null>(null)
@@ -253,6 +253,15 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
               </label>
             ))}
           </div>
+          {diffQr && (
+            <a
+              style={{ ...btnGhost, textDecoration: 'none', display: 'inline-block', marginBottom: 8, borderColor: ACC, color: ACC }}
+              target="_blank" rel="noreferrer"
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=flowinevent@gmail.com&su=${encodeURIComponent('Assistance tracking — ' + (nom || 'nouvelle animation'))}&body=${encodeURIComponent(`Bonjour,\n\nLe partenaire ${proId} sollicite votre assistance pour la mise en place du lien de tracking sur son animation « ${nom || '—'} ».\n\nVeuillez le contacter.`)}`}
+            >
+              ✉️ Solliciter l&apos;assistance Flowin pour le tracking
+            </a>
+          )}
           <div style={{ fontSize: 11.5, ...MUTED, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '9px 12px', marginBottom: 4 }}>
             Le QR code physique est toujours généré depuis notre centre de pilotage — jamais directement par vous. Votre demande nous arrive automatiquement.
           </div>
@@ -270,6 +279,22 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>✓ Votre animation est prête</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>Voici de quoi l&apos;annoncer, à télécharger ou à envoyer à votre base de contacts.</div>
 
+          <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Récapitulatif</div>
+            {[
+              ['Jeu', JEUX.find(j => j.m === module_)?.t ?? '—'],
+              ...(etapeBanque ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? 'Aucune sélectionnée']] : []),
+              ['Récompense', typeRecompense === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'],
+              ['Lot', `${lotNom || '—'} × ${lotQuantite}`],
+              ['Dates', dateD && dateF ? `${dateD} → ${dateF}` : 'Non précisées'],
+              ['Diffusion', [diffPhysique && 'QR physique', diffDigital && 'Lien digital', diffQr && 'QR tracking'].filter(Boolean).join(' · ') || 'Aucune'],
+            ].map(([l, v]) => (
+              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 12.5, padding: '6px 0', borderBottom: '1px solid #E2E8F0' }}>
+                <span style={MUTED}>{l}</span><span style={{ fontWeight: 700, textAlign: 'right' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+
           <div id="visuel-annonce" style={{ background: 'linear-gradient(135deg,#7C2D92 0%,#A855F7 100%)', borderRadius: 16, padding: '28px 24px', color: '#fff', textAlign: 'center', marginBottom: 16 }}>
             <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.85 }}>Nouvelle animation</div>
             <div style={{ fontSize: 22, fontWeight: 900, margin: '8px 0 6px', letterSpacing: '-.4px' }}>{nom}</div>
@@ -278,7 +303,18 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
             <div style={{ marginTop: 14, fontSize: 11, opacity: 0.75 }}>QR code ajouté dès sa génération par notre équipe</div>
           </div>
           <style>{`@media print{ body *{visibility:hidden} #visuel-annonce,#visuel-annonce *{visibility:visible} #visuel-annonce{position:fixed;inset:0;border-radius:0} }`}</style>
-          <button style={{ ...btnGhost, width: '100%', marginBottom: 20 }} onClick={() => window.print()}>⬇ Télécharger / imprimer ce visuel</button>
+          <button style={{ ...btnGhost, width: '100%', marginBottom: 12 }} onClick={() => window.print()}>⬇ Télécharger / imprimer ce visuel</button>
+          {partenaireId ? (
+            <a
+              style={{ ...btnGhost, width: '100%', textDecoration: 'none', display: 'block', textAlign: 'center', boxSizing: 'border-box', marginBottom: 20 }}
+              target="_blank" rel="noreferrer"
+              href={`/nds/billets-partenaires.html?p=${encodeURIComponent(partenaireId)}`}
+            >
+              🎫 Voir le billet gagnant (logo, conditions, valable {dateD && dateF ? `du ${dateD} au ${dateF}` : 'pendant l\u2019animation'})
+            </a>
+          ) : (
+            <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 20 }}>Le billet gagnant visuel sera disponible une fois votre compte relié à un partenaire.</div>
+          )}
 
           <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 8 }}>Annoncer à votre base de contacts</div>
           <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>Copiez ce texte dans Brevo, Mailchimp ou votre outil habituel — ou envoyez-le-vous pour le garder sous la main.</div>

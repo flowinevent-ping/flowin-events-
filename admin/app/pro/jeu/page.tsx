@@ -14,7 +14,7 @@ export default async function ProJeuPage({ searchParams }: { searchParams: { pro
   const [data, banques] = await Promise.all([fetchProDashboard(proId), fetchBanquesPro(proId)])
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="jeu">
-      <CreerAnimationWizard proId={proId} banqueQuizExistante={banques} />
+      <CreerAnimationWizard proId={proId} partenaireId={data.pro?.partenaire_id ?? null} banqueQuizExistante={banques} />
     </ProShell>
   )
 }
