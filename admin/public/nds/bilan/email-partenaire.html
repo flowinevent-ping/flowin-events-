@@ -50,11 +50,10 @@
   <div class="section">
     <div class="eyebrow">Résultats de l'opération</div>
     <div class="h2">Quelques chiffres</div>
-    <div class="stats" id="stats">
+    <div class="stats" id="stats" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat"><b>—</b><span>Joueurs</span></div>
       <div class="stat"><b>—</b><span>Parties jouées</span></div>
       <div class="stat"><b>—</b><span>Flashs QR</span></div>
-      <div class="stat"><b>—</b><span>Ont rejoué</span></div>
     </div>
   </div>
 
@@ -146,12 +145,17 @@
     .then(function(res){
       if(!res || !res.totaux) return;
       var t = res.totaux;
+      function arrondi(n){
+        n = Number(n)||0;
+        if(n >= 1000) return (Math.floor(n/100)*100).toLocaleString('fr-FR');
+        if(n >= 100) return (Math.floor(n/10)*10).toString();
+        return n.toString();
+      }
       var els = document.querySelectorAll('#stats b');
-      if(els.length >= 4){
-        els[0].textContent = t.joueurs ?? '—';
-        els[1].textContent = t.parties ?? '—';
-        els[2].textContent = t.flashs ?? '—';
-        els[3].textContent = t.rejoue ?? '—';
+      if(els.length >= 3){
+        els[0].textContent = arrondi(t.joueurs);
+        els[1].textContent = arrondi(t.parties);
+        els[2].textContent = arrondi(t.flashs);
       }
     })
     .catch(function(){});

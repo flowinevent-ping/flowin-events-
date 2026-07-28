@@ -226,7 +226,7 @@
       (TIRAGES||[]).forEach(function(x){ if(Number(x.id)===tid) x.notifie_at=v; });
       (WINS_FULL||[]).forEach(function(x){ if(Number(x.tirage_id)===tid) x.notifie_at=v; });
       if(_ficheT && Number(_ficheT.tirage_id)===tid){ _ficheT.notifie_at=v; }
-      renderSoirWins(); renderAllWins();
+      renderSoirWins(); renderAllWins(); renderPartners();
       var ov=document.getElementById('ficheOv');
       if(ov && ov.style.display!=='none' && _ficheData){ ficheModal(ficheHtml(_ficheData,_ficheT)); }
     }catch(e){}

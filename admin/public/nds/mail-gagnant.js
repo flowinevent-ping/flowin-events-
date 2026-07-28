@@ -63,7 +63,7 @@
                "Clique sur ce lien : tu peux l'imprimer ou le garder sur ton téléphone.",
                "C'est ce billet, avec son QR code, que tu présenteras en boutique.", '');
       }
-      L.push("Merci d'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.", '',
+      L.push("Merci d'avoir participé, et bravo encore !", '',
              'COMMENT EN PROFITER, EN 3 ÉTAPES', '',
              '   1. Rends-toi chez ' + (comm || 'notre commerçant partenaire'),
              '   2. Présente ton billet, papier ou écran',
