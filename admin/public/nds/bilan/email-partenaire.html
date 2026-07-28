@@ -28,7 +28,7 @@
   .pin-box .val{margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:26px;font-weight:800;letter-spacing:7px;color:var(--ink)}
   .pin-box .note{margin-top:6px;font-size:11px;color:#8A6410}
   .planche-btn{display:inline-block;margin-top:14px;background:var(--acc);color:#fff;font-weight:800;font-size:13px;text-decoration:none;padding:12px 20px;border-radius:10px}
-  .cta{background:#150C1C;border-radius:16px;padding:26px 24px;color:#fff}
+  .cta{background:linear-gradient(135deg,var(--acc) 0%,var(--acc2) 100%);border-radius:16px;padding:26px 24px;color:#fff}
   .cta .h2{color:#fff}
   .cta p{font-size:12.5px;line-height:1.65;color:rgba(255,255,255,.68);margin:0}
   .cta a{display:inline-block;margin-top:16px;background:#E0218A;color:#fff;font-weight:800;font-size:13.5px;padding:13px 24px;border-radius:10px;text-decoration:none}
@@ -50,14 +50,9 @@
   <div class="section">
     <div class="eyebrow">Résultats de l'opération</div>
     <div class="h2">Quelques chiffres</div>
-    <div class="card" style="text-align:center;padding:26px 22px;margin-bottom:12px">
+    <div class="card" style="text-align:center;padding:26px 22px">
       <div style="font-size:40px;font-weight:900;color:var(--acc);letter-spacing:-1px" id="visites-total">—</div>
       <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:4px">visites sur l'application Flowin</div>
-    </div>
-    <div class="stats" id="stats" style="grid-template-columns:repeat(3,1fr)">
-      <div class="stat"><b>—</b><span>Joueurs</span></div>
-      <div class="stat"><b>—</b><span>Parties jouées</span></div>
-      <div class="stat"><b>—</b><span>Flashs QR</span></div>
     </div>
   </div>
 
@@ -86,15 +81,16 @@
 
   <div class="section">
     <div class="cta">
-      <div class="eyebrow" style="color:#F5A100">Plug &amp; play</div>
-      <div class="h2">Envie d'aller plus loin ?</div>
-      <p>Contactez-nous si vous souhaitez implémenter une animation Flowin, prête à l'emploi, pour développer votre CRM, renforcer votre image ou faire vivre votre boutique toute l'année.</p>
+      <div class="eyebrow" style="color:#FDE68A">Plug &amp; play</div>
+      <p style="margin-top:10px">Contactez-nous si vous souhaitez implémenter une animation Flowin, prête à l'emploi, pour développer votre CRM, renforcer votre image ou faire vivre votre boutique toute l'année.</p>
       <a href="tel:+33616354936">Contactez-nous — 06 16 35 49 36</a>
     </div>
   </div>
 
   <div class="sign">
     <b>Flowin</b>
+    <div style="font-size:10.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;opacity:.8;margin:6px 0 2px">Animation digitale</div>
+    <div style="font-size:14px;font-weight:800;color:#F5A100;margin-bottom:10px">Plug &amp; Play</div>
     Animez · Fidélisez · Boostez<br>
     flowinevent@gmail.com · 06 16 35 49 36
   </div>
@@ -145,32 +141,6 @@
     .then(function(total){
       var el = document.getElementById('visites-total');
       if(el && total != null) el.textContent = '+' + (Math.floor(total/100)*100).toLocaleString('fr-FR');
-    })
-    .catch(function(){});
-
-  /* Chiffres reels du pro rattache a ce partenaire, via station_tracking deja utilisee par
-     /pro/tracking (verifiee cette session). Recherche le pro_id lie a ce partenaire. */
-  fetch(SUPA+"/rest/v1/pros?partenaire_id=eq."+encodeURIComponent(pid)+"&select=id",{headers:H})
-    .then(function(r){ return r.ok ? r.json() : []; })
-    .then(function(pros){
-      var proId = pros && pros[0] ? pros[0].id : null;
-      return rpc('station_tracking', {p_se:'se-nds-2026', p_pro: proId, p_partenaire: proId ? null : pid});
-    })
-    .then(function(res){
-      if(!res || !res.totaux) return;
-      var t = res.totaux;
-      function arrondi(n){
-        n = Number(n)||0;
-        if(n >= 1000) return (Math.floor(n/100)*100).toLocaleString('fr-FR');
-        if(n >= 100) return (Math.floor(n/10)*10).toString();
-        return n.toString();
-      }
-      var els = document.querySelectorAll('#stats b');
-      if(els.length >= 3){
-        els[0].textContent = arrondi(t.joueurs);
-        els[1].textContent = arrondi(t.parties);
-        els[2].textContent = arrondi(t.flashs);
-      }
     })
     .catch(function(){});
 })();
