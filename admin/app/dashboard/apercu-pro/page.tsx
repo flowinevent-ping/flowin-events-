@@ -57,7 +57,7 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page" style={{ marginBottom: 16 }}>
-        <PageHeader title="👁 Aperçu Pro" subtitle="Prototype de validation + accès direct aux vrais dashboards partenaires" />
+        <PageHeader title="Aperçu Pro" subtitle="Prototype de validation + accès direct aux vrais dashboards partenaires" />
         <div style={{ padding: '0 24px 20px' }}>
           <a
             href="/schemas/flowin-pro-navigation.html"
@@ -69,7 +69,7 @@ export default function Page() {
               borderRadius: 12, padding: '14px 16px',
             }}
           >
-            <span style={{ fontSize: 22 }}>🧭</span>
+            <span style={{ width: 22, height: 22, borderRadius: 6, background: '#9F1A4D', flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#9F1A4D' }}>Prototype navigable — desktop / tablette / mobile</div>
               <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 2 }}>
@@ -82,7 +82,7 @@ export default function Page() {
       </div>
 
       <div className="sa-page">
-        <PageHeader title="🤝 Dashboards des pros" subtitle={`${total} compte${total > 1 ? 's' : ''} — ouvre le vrai dashboard, en direct`} />
+        <PageHeader title="Dashboards des pros" subtitle={`${total} compte${total > 1 ? 's' : ''} — ouvre le vrai dashboard, en direct`} />
         <SearchBar value={search} onChange={setSearch} placeholder="Rechercher un pro (nom, ville)…" />
 
         {nTechniques > 0 && (
@@ -98,7 +98,7 @@ export default function Page() {
               <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--sa-muted)', marginBottom: 10 }}>
                 {g.secteur} <span style={{ fontWeight: 600 }}>· {g.items.length}</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: 12 }}>
                 {g.items.map(p => {
                   const logo = p.partenaire_id ? logoParPartenaireId.get(p.partenaire_id) : null
                   return (
@@ -110,21 +110,21 @@ export default function Page() {
                       title={p.id}
                       style={{
                         textDecoration: 'none', color: 'inherit', border: '1px solid var(--sa-border)',
-                        borderRadius: 12, padding: '12px', background: 'var(--sa-card)',
-                        display: 'flex', alignItems: 'center', gap: 10,
+                        borderRadius: 14, padding: '16px 12px', background: 'var(--sa-card)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 10,
                       }}
                     >
                       {logo ? (
-                        <img src={logo} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'contain', background: '#fff', border: '1px solid var(--sa-border)', flexShrink: 0 }}
+                        <img src={logo} alt="" style={{ width: 72, height: 72, borderRadius: 12, objectFit: 'contain', background: '#fff', border: '1px solid var(--sa-border)', flexShrink: 0 }}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                       ) : (
-                        <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, color: 'var(--sa-muted)', flexShrink: 0 }}>
+                        <div style={{ width: 72, height: 72, borderRadius: 12, background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, color: 'var(--sa-muted)', flexShrink: 0 }}>
                           {(p.nom || '?')[0].toUpperCase()}
                         </div>
                       )}
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nom || 'Sans nom'}</div>
-                        <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>{p.ville || '—'}</div>
+                      <div style={{ minWidth: 0, width: '100%' }}>
+                        <div style={{ fontWeight: 700, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nom || 'Sans nom'}</div>
+                        <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginTop: 2 }}>{p.ville || '—'}</div>
                       </div>
                     </a>
                   )
