@@ -183,6 +183,7 @@ export interface FlowinPro {
   entree_p: string | null
   notes: string
   tags: string[]
+  partenaire_id: string | null
 }
 
 export interface FlowinSuperEvent {
