@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import ProShell from '@/components/pro/ProShell'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC, kpiGrid } from '@/lib/proui'
@@ -8,9 +9,10 @@ export default async function ProCrmPage({ searchParams }: { searchParams: { pro
   const j = data.joueurs
   const optin = j.filter(x => x.optin).length
   const rows = j.slice(0, 200)
+  const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="crm">
-      <h1 style={H1}>Mon CRM</h1><div style={SUB}>Vos contacts — chaque joueur devient un client.</div>
+      <h1 style={H1}>Mon CRM</h1><div style={SUB}>Vos contacts — chaque joueur devient un client. Cliquez une ligne pour voir la fiche complète.</div>
       <div style={{ ...kpiGrid(), marginTop: 16 }}>
         <div style={CARD}><div style={{ fontSize: 26, fontWeight: 900, color: ACC }}>{j.length}</div><div style={{ fontSize: 12, ...MUTED }}>contacts</div></div>
         <div style={CARD}><div style={{ fontSize: 26, fontWeight: 900 }}>{optin}</div><div style={{ fontSize: 12, ...MUTED }}>opt-in (recontactables)</div></div>
@@ -18,7 +20,7 @@ export default async function ProCrmPage({ searchParams }: { searchParams: { pro
       <div style={{ ...CARD, overflowX: 'auto' }}>
         {rows.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucun contact pour ce compte.</div> : (
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
-            <thead><tr><th style={TH}>Contact</th><th style={TH}>Email</th><th style={TH}>Ville</th><th style={TH}>Source</th><th style={TH}>Opt-in</th></tr></thead>
+            <thead><tr><th style={TH}>Contact</th><th style={TH}>Email</th><th style={TH}>Ville</th><th style={TH}>Source</th><th style={TH}>Opt-in</th><th style={TH}></th></tr></thead>
             <tbody>
               {rows.map((x: any, i: number) => (
                 <tr key={x.id ?? i}>
@@ -27,6 +29,7 @@ export default async function ProCrmPage({ searchParams }: { searchParams: { pro
                   <td style={{ ...TD, ...MUTED }}>{x.ville || '—'}</td>
                   <td style={{ ...TD, ...MUTED }}>{x.decouverte || '—'}</td>
                   <td style={TD}>{x.optin ? <span style={{ color: '#15803D', fontWeight: 800 }}>✓</span> : <span style={MUTED}>—</span>}</td>
+                  <td style={TD}>{x.id && <Link href={`/pro/crm/${x.id}${q}`} style={{ color: ACC, fontWeight: 700, textDecoration: 'none', fontSize: 12 }}>Voir →</Link>}</td>
                 </tr>
               ))}
             </tbody>
