@@ -3171,10 +3171,8 @@ function renderSidebar(){
     return '<option value="'+p.id+'"'+((state.currentProId||'')===p.id?' selected':'')+'>'+esc(p.nom)+'</option>';
   }).join('');
   html += '<div class="sb-mode-toggle">'
-       +'<div style="font-size:9px;color:var(--sa-sb-text-dim);font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:0 4px 4px;width:100%">👁 Voir comme</div>'
-       +'<button class="sb-mode-btn '+(!isPro?'active':'')+'" onclick="setMode(\'sa\')">🔐 SA</button>'
-       +'<button class="sb-mode-btn '+(isPro?'active':'')+'" onclick="(function(){if(!state.currentProId&&DATA.pros.length)state.currentProId=DATA.pros[0].id;setMode(\'pro\');})()">\ud83d\udc64 Pro</button>'
-       +(isPro?'<select style="width:100%;margin-top:6px;padding:4px 6px;font-size:10px;font-weight:700;border-radius:6px;border:1px solid var(--sa-sb-border);background:var(--sa-sb-hover);color:var(--sa-sb-text);font-family:inherit" onchange="state.currentProId=this.value;render()">'+proSelOpts+'</select>':'')
+       +'<div style="font-size:9px;color:var(--sa-sb-text-dim);font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:0 4px 4px;width:100%">👁 Aperçu Pro</div>'
+       +'<a href="/dashboard/apercu-pro" style="display:block;width:100%;text-align:center;padding:6px 8px;font-size:11px;font-weight:800;border-radius:8px;background:var(--sa-sb-hover);color:var(--sa-sb-text);text-decoration:none">→ Voir les dashboards Pro</a>'
        +'</div>';
   html += '<div class="sb-user"><div class="sb-avatar">'+(isPro?(curPro?curPro.nom[0].toUpperCase():'P'):'R')+'</div>'
        +'<div class="sb-userinfo"><div class="sb-username">'+(isPro?(curPro?esc(curPro.nom):'Pro'):'Romain')+'</div><div class="sb-userrole">'+(isPro?'Pro \u00b7 Lecture seule':'Super Admin')+'</div></div></div>'
@@ -9449,8 +9447,8 @@ function drawerEvent(e){
     // Bandeau pour basculer en Vue Pro
     if(state.mode==='sa'){
       html += '<div style="background:linear-gradient(135deg,#FBEAF0,#fff);border:1px solid #F4C0D5;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
-           + '<div><div style="font-size:12px;font-weight:800;color:#9F1A4D">👁 Voir comme le Pro</div><div style="font-size:11px;color:var(--sa-muted)">Bascule en mode Pro pour voir exactement ce que '+esc(pro?pro.nom:'le pro')+' voit sur cet event.</div></div>'
-           + '<button class="btn btn-sm" onclick="setMode(\'pro\');state.currentProId=\''+(e.proId)+'\';closeDrawer();goView(\'events\');setTimeout(()=>openDrawerFor(\'event\',\''+e.id+'\',\'stats\'),100)">→ Vue Pro</button>'
+           + '<div><div style="font-size:12px;font-weight:800;color:#9F1A4D">👁 Voir le dashboard du Pro</div><div style="font-size:11px;color:var(--sa-muted)">Ouvre le vrai dashboard de '+esc(pro?pro.nom:'ce pro')+', exactement ce qu\'il voit.</div></div>'
+           + '<a class="btn btn-sm" href="/pro?pro='+(e.proId)+'" target="_blank" rel="noreferrer">→ Ouvrir</a>'
            + '</div>';
     }
 

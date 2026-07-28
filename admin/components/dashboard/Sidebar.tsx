@@ -74,7 +74,7 @@ export default function Sidebar() {
     {
       group: 'ESPACE PRO',
       items: [
-        { id: 'pro', icon: '', label: 'Espace Pro', href: '/pro' },
+        { id: 'apercu-pro', icon: '👁', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
       ],
     },
     {
