@@ -4,11 +4,22 @@
 // via la meme passerelle Resend deja utilisee par notify-bon-commande / notify-souscription.
 // Appelee directement depuis le dashboard (client-side) avec la cle publishable.
 //
-// SECRETS REQUIS : RESEND_API_KEY (deja configure sur le projet)
-// Optionnels : NOTIFY_FROM (defaut "NDS x Flowin <onboarding@resend.dev>"), NOTIFY_TO (copie interne, defaut flowinevent@gmail.com)
+// SECRETS REQUIS : RESEND_API_KEY (deja configure sur le projet, compte Resend enregistre
+// sur flowinevent@gmail.com)
+// Optionnels : NOTIFY_FROM (adresse d'envoi technique verifiee, defaut "NDS x Flowin <onboarding@resend.dev>"),
+//              NOTIFY_TO (copie interne, defaut flowinevent@gmail.com)
+//
+// 28/07/2026 — parametrage par pro (Romain) : Resend n'autorise l'envoi FROM que depuis un
+// domaine verifie -- on ne peut donc pas expedier depuis l'adresse email de chaque pro sans
+// verifier son domaine chez Resend au prealable (hors scope ici). Ce qui EST personnalisable
+// sans contrainte technique : le nom affiche dans le champ From ("De : <nom du pro>") et le
+// Reply-To, qui devient l'email du pro -- un gagnant qui repond a l'email tombe directement
+// chez le pro, pas chez Flowin. body.from_name et body.reply_to sont optionnels et
+// retro-compatibles : si absents, comportement identique a avant.
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
-const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "NDS x Flowin <onboarding@resend.dev>";
+const NOTIFY_FROM_ADDR = Deno.env.get("NOTIFY_FROM_ADDR") || "onboarding@resend.dev";
+const NOTIFY_FROM_DEFAULT_NAME = Deno.env.get("NOTIFY_FROM_NAME") || "NDS x Flowin";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
 
 function esc(v: unknown): string {
@@ -40,6 +51,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     "Lot \u00e0 retirer sur pr\u00e9sentation de ce ticket, dans les conditions du festival Nuits du Sud 2026 (9 \u2192 18 juillet, Vence). Non \u00e9changeable, non remboursable, non cumulable.";
   const code = String(body.code || "");
   const valide = String(body.valide_jusqu_au || "");
+
+  /* Personnalisation par pro : nom affiche dans From + adresse de reponse. L'adresse
+     technique d'envoi (NOTIFY_FROM_ADDR) reste fixe -- domaine verifie chez Resend, non
+     substituable par l'email d'un pro sans verification prealable de son propre domaine. */
+  const fromName = String(body.from_name || "").trim() || NOTIFY_FROM_DEFAULT_NAME;
+  const from = `${fromName} <${NOTIFY_FROM_ADDR}>`;
+  const replyTo = String(body.reply_to || "").trim() || NOTIFY_TO;
 
   if (!gagnantEmail || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(gagnantEmail)) {
     return new Response(JSON.stringify({ ok: false, error: "email gagnant invalide" }), { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -75,7 +93,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: NOTIFY_FROM, to: [to], reply_to: NOTIFY_TO, subject, html, text }),
+      body: JSON.stringify({ from, to: [to], reply_to: replyTo, subject, html, text }),
     });
     const bodyTxt = await res.text();
     return { to, ok: res.ok, status: res.status, body: bodyTxt };

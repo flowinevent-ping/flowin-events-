@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import ProShell from '@/components/pro/ProShell'
-import { CARD, MUTED, H1, SUB } from '@/lib/proui'
+import { CARD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 import type { FlowinEvent } from '@/lib/types'
 
 /**
@@ -18,6 +19,10 @@ import type { FlowinEvent } from '@/lib/types'
  * stations, ce qui inversait la lecture. Les events autonomes (sans super_event_id)
  * sont desormais affiches en premier dans chaque colonne et distingues visuellement :
  * c est ce qui rend a nouveau visible l event principal du pro.
+ *
+ * Ajout (28/07/2026, suite) : les cartes STATION sont cliquables et menent au detail
+ * reel /pro/super/[event] -- MEME route que depuis l onglet Super Event, aucune page
+ * dupliquee. Un event autonome n est pas un point de jeu : sa carte reste simple.
  *
  * Generique : aucun identifiant ni nom d event code en dur.
  */
@@ -45,6 +50,7 @@ const COLS = [
 export default async function ProEventsPage({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
+  const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
 
   const m: Record<Etat, FlowinEvent[]> = { a_venir: [], en_cours: [], passe: [], archive: [] }
   data.events.forEach(e => m[etat(e)].push(e))
@@ -78,13 +84,19 @@ export default async function ProEventsPage({ searchParams }: { searchParams: { 
             </div>
             {m[c.k].length === 0 ? <div style={{ fontSize: 12, ...MUTED }}>—</div> : m[c.k].map(e => {
               const station = !!e.super_event_id
-              return (
-                <div key={e.id} style={{ background: '#fff', border: station ? '1px solid #E2E8F0' : '1.5px solid rgba(168,85,247,.45)', borderRadius: 11, padding: '11px 12px', marginBottom: 9 }}>
+              const cardStyle: React.CSSProperties = {
+                display: 'block', textDecoration: 'none', color: 'inherit',
+                background: '#fff', border: station ? '1px solid #E2E8F0' : '1.5px solid rgba(168,85,247,.45)',
+                borderRadius: 11, padding: '11px 12px', marginBottom: 9,
+              }
+              const inner = (
+                <>
                   <div style={{ fontWeight: 700, fontSize: 13, display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
                     <span>{e.nom || 'Sans nom'}</span>
                     {station
                       ? <span style={{ fontSize: 9.5, fontWeight: 800, color: '#EA580C', background: 'rgba(234,88,12,.09)', borderRadius: 5, padding: '1px 5px' }}>STATION</span>
                       : <span style={{ fontSize: 9.5, fontWeight: 800, color: '#7C2D92', background: 'rgba(168,85,247,.11)', borderRadius: 5, padding: '1px 5px' }}>EVENT</span>}
+                    {station && <span style={{ marginLeft: 'auto', color: ACC, fontWeight: 800, fontSize: 12 }}>Voir l&apos;activité →</span>}
                   </div>
                   <div style={{ fontSize: 11.5, ...MUTED, marginTop: 3, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 700 }}>{String(e.module ?? '')}</span>
@@ -92,18 +104,22 @@ export default async function ProEventsPage({ searchParams }: { searchParams: { 
                     {e.participants ? <span>{e.participants} joueurs</span> : null}
                   </div>
                   <div style={{ fontSize: 10.5, color: '#94A3B8', marginTop: 3, fontFamily: 'ui-monospace,monospace' }}>{e.id}</div>
-                </div>
+                </>
               )
+              return station
+                ? <Link key={e.id} href={`/pro/super/${e.id}${q}`} style={cardStyle}>{inner}</Link>
+                : <div key={e.id} style={cardStyle}>{inner}</div>
             })}
           </div>
         ))}
       </div>
 
       <div style={{ ...CARD, marginTop: 14, background: '#F8FAFC', fontSize: 12.5, ...MUTED, lineHeight: 1.6 }}>
-        <b>STATION</b> — point de jeu rattaché à un super event : le QR porte son propre <code>ev=</code>, mais le bilan est mutualisé.
+        <b>STATION</b> — point de jeu rattaché à un super event : le QR porte son propre <code>ev=</code>, mais le bilan est mutualisé. Cliquez une station pour voir son activité en détail.
         {' '}<b>EVENT</b> — campagne autonome, avec ses propres lots et son propre tirage.
         {' '}Les events <b>archivés</b> ne sont plus jouables : ils restent listés pour l&apos;historique et n&apos;apparaissent plus comme « à venir ».
       </div>
     </ProShell>
   )
 }
+

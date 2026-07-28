@@ -175,6 +175,42 @@ export async function fetchProGains(eventIds: string[]): Promise<ProGainRow[]> {
   return rows.map(r => ({ id: r.id, libelle: r.libelle, code: r.code, utilise: r.utilise, event_id: r.event_id, joueur: r.joueur_id ? (names[r.joueur_id] || '—') : '—' }))
 }
 
+/* ── Tirage au sort : envoi reel du ticket gagnant par email ──
+ * Reutilise la fonction edge send-ticket-gagnant (Resend, compte enregistre sur
+ * flowinevent@gmail.com) deja deployee -- rien de recode. Parametrable par pro
+ * (28/07/2026, demande Romain) : fromName et replyTo personnalisent le "De :" et le
+ * "Répondre à :" avec l'identite du pro, sans toucher a l'adresse technique d'envoi
+ * (verifiee chez Resend, non substituable par domaine de pro sans verification prealable). */
+export async function envoyerTicketGagnant(params: {
+  gagnantEmail: string
+  gagnantNom: string
+  lotNom: string
+  lotDescription?: string
+  code: string
+  conditions?: string
+  validejusquAu?: string
+  fromName?: string
+  replyTo?: string
+}): Promise<{ ok: boolean; error?: string }> {
+  const { data, error } = await supabase.functions.invoke('send-ticket-gagnant', {
+    body: {
+      gagnant_email: params.gagnantEmail,
+      gagnant_nom: params.gagnantNom,
+      lot_nom: params.lotNom,
+      lot_description: params.lotDescription ?? '',
+      code: params.code,
+      conditions: params.conditions ?? '',
+      valide_jusqu_au: params.validejusquAu ?? '',
+      from_name: params.fromName ?? '',
+      reply_to: params.replyTo ?? '',
+    },
+  })
+  if (error) { console.error('[envoyerTicketGagnant]', error.message); return { ok: false, error: error.message } }
+  const res = data as { ok?: boolean; error?: string } | null
+  if (res && res.ok === false) return { ok: false, error: res.error ?? 'échec envoi' }
+  return { ok: true }
+}
+
 /* ── Tirage au sort : persiste le gagnant tiré (sinon perdu au rechargement) ── */
 export async function enregistrerTirage(params: {
   superEventId: string | null

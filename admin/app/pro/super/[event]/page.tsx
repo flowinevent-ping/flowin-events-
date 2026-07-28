@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
-import { fetchJours, fetchStations } from '@/lib/nds'
+import { fetchJours, fetchStations, fetchRapportPoints } from '@/lib/nds'
+import { fetchEventSuperEventStats } from '@/lib/dashboard'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
@@ -25,6 +26,27 @@ export default async function ProStationPage({ params, searchParams }: { params:
   const jourSel = searchParams.jour ?? jours[jours.length - 1]?.jour ?? null
   const stationsJour = seId ? await fetchStations(jourSel, seId) : []
   const stat = stationsJour.find(s => s.event_id === ev.id)
+
+  /* Bilan sur TOUTE la periode du festival (pas seulement le jour selectionne) : reutilise le RPC
+   * super_event_rapport_points deja cable cote SA (rapport-points/page.tsx). PointJeu contient deja
+   * score_moyen, ont_rejoue, optin, avec_coordonnees, repondants_bonus/rse/bv, heure_pic -- rien de
+   * recalcule ici, on filtre juste au point de cette station. */
+  const rapport = seId ? await fetchRapportPoints(seId) : null
+  const pointStation = rapport?.points.find(p => p.event_id === ev.id) ?? null
+
+  /* Tickets/gains emis sur cette station : fonction deja cablee cote SA (ProClient.tsx, onglet tirage). */
+  const ticketsGains = await fetchEventSuperEventStats(ev.id)
+
+  /* Courbe d'evolution : parties commencees par jour, memes appels fetchStations() que le selecteur de
+   * jour ci-dessus, juste rejoues pour chaque jour au lieu d'un seul. Generique, aucun jour code en dur. */
+  const parJour = seId
+    ? await Promise.all(jours.map(async j => {
+        const s = await fetchStations(j.jour, seId)
+        const st = s.find(x => x.event_id === ev.id)
+        return { jour: j.jour, parties: st?.commencees ?? 0 }
+      }))
+    : []
+  const maxParJour = Math.max(1, ...parJour.map(p => p.parties))
 
   /* Reponses reelles : score + bonus_answers, filtres event + jour, cles decouvertes dynamiquement (aucun nom de question code en dur) */
   let scoreDist: Record<string, number> = {}
@@ -91,6 +113,60 @@ export default async function ProStationPage({ params, searchParams }: { params:
         {kpi(stat?.scans ?? 0, 'flashs QR')}
         {kpi(stat?.visiteurs ?? 0, 'visiteurs')}
       </div>
+
+      {pointStation && (
+        <div style={{ ...CARD, marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>
+            Bilan sur toute la période du festival
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {kpi(pointStation.score_moyen != null ? pointStation.score_moyen.toFixed(1) : '—', 'score moyen')}
+            {kpi(pointStation.ont_rejoue, 'ont rejoué')}
+            {kpi(pointStation.joueurs ? `${Math.round((pointStation.optin / pointStation.joueurs) * 100)}%` : '—', 'opt-in')}
+            {kpi(pointStation.avec_coordonnees, 'avec coordonnées')}
+            {kpi(pointStation.heure_pic != null ? `${pointStation.heure_pic}h` : '—', 'heure de pic')}
+          </div>
+          <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 8 }}>
+            Borné aux dates du super event — même source que le rapport détaillé du Super Admin (<code>super_event_rapport_points</code>), aucun recalcul.
+          </div>
+        </div>
+      )}
+
+      <div style={{ ...CARD, marginBottom: 14 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>
+          Tickets &amp; gains émis sur cette station
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {kpi(ticketsGains.tickets, 'tickets émis')}
+          {kpi(ticketsGains.gains, 'gains émis')}
+          {kpi(ticketsGains.gainsUtilises, 'gains retirés')}
+        </div>
+      </div>
+
+      {parJour.length > 1 && (
+        <div style={{ ...CARD, marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 12 }}>
+            Évolution — parties commencées par jour
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 90 }}>
+            {parJour.map(p => (
+              <Link
+                key={p.jour}
+                href={`/pro/super/${ev.id}?jour=${p.jour}${q}`}
+                title={`${fr(p.jour)} — ${p.parties} partie${p.parties > 1 ? 's' : ''}`}
+                style={{
+                  flex: 1, minWidth: 8, borderRadius: '4px 4px 0 0', textDecoration: 'none',
+                  height: `${Math.max(3, Math.round((p.parties / maxParJour) * 100))}%`,
+                  background: p.jour === jourSel ? ACC : '#E2E8F0',
+                }}
+              />
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, fontSize: 9.5, color: '#94A3B8' }}>
+            {parJour.map(p => <div key={p.jour} style={{ flex: 1, minWidth: 8, textAlign: 'center' }}>{fr(p.jour)}</div>)}
+          </div>
+        </div>
+      )}
 
       <div style={{ ...CARD, marginBottom: 14 }}>
         <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Taux de finition du quiz</div>

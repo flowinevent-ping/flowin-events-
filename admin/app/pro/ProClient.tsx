@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { fetchProDashboard, getQrUrl, type ProDashboardData } from '@/lib/pro'
-import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, enregistrerTirage, fetchProClics, type ProGainRow } from '@/lib/dashboard'
+import { fetchEventSuperEventStats, fetchProGains, marquerGainUtilise, enregistrerTirage, fetchProClics, envoyerTicketGagnant, type ProGainRow } from '@/lib/dashboard'
 import type { FlowinEvent, FlowinJoueur, FlowinLot } from '@/lib/types'
 
 type Tab = 'stats' | 'gains' | 'tirage' | 'participants' | 'lots' | 'qr' | 'export'
@@ -22,6 +22,8 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   const [tirageDone, setTirageDone] = useState(false)
   const [gagnant, setGagnant] = useState<FlowinJoueur | null>(null)
   const [excluded, setExcluded] = useState<Set<string>>(new Set())
+  const [envoiEmail, setEnvoiEmail] = useState<'idle' | 'envoi' | 'ok' | 'echec'>('idle')
+  const [envoiErreur, setEnvoiErreur] = useState('')
   const [seStats, setSeStats] = useState<{ tickets: number; gains: number; gainsUtilises: number } | null>(null)
   const [proGains, setProGains] = useState<ProGainRow[]>([])
   const [codeInput, setCodeInput] = useState('')
@@ -134,21 +136,45 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
     const g = elig[Math.floor(Math.random() * elig.length)]
     setGagnant(g)
     setTirageDone(false) // proposé mais pas encore confirmé/enregistré
+    setEnvoiEmail('idle')
   }
   async function confirmerPresent() {
     if (!gagnant) return
+    let code = ''
     try {
-      await enregistrerTirage({
+      const res = await enregistrerTirage({
         superEventId: (ev as unknown as { super_event_id?: string | null })?.super_event_id ?? null,
         eventId: ev?.id ?? null,
         joueur: { id: gagnant.id, prenom: gagnant.prenom, nom: gagnant.nom, email: gagnant.email, tel: gagnant.tel },
       })
+      code = res.code
     } catch { /* persistance best-effort, le tirage reste affiché */ }
     setTirageDone(true)
+
+    /* Envoi reel du ticket par email (fonction edge send-ticket-gagnant, Resend deja cablé).
+     * Reply-To et nom d'expediteur personnalises avec l'identite du pro : un gagnant qui
+     * repond tombe chez le pro, pas chez Flowin. Sans email joueur, on ne tente rien. */
+    if (gagnant.email) {
+      setEnvoiEmail('envoi')
+      const r = await envoyerTicketGagnant({
+        gagnantEmail: gagnant.email,
+        gagnantNom: `${gagnant.prenom ?? ''} ${gagnant.nom ?? ''}`.trim() || 'Gagnant',
+        lotNom: ev?.nom ? `Lot — ${ev.nom}` : 'Lot',
+        code: code || gagnant.ticket_code || '',
+        fromName: data.pro?.nom ?? undefined,
+        replyTo: data.pro?.email ?? undefined,
+      })
+      setEnvoiEmail(r.ok ? 'ok' : 'echec')
+      setEnvoiErreur(r.error ?? '')
+    } else {
+      setEnvoiEmail('echec')
+      setEnvoiErreur('Ce joueur n\u2019a pas d\u2019email enregistré.')
+    }
   }
   function marquerAbsent() {
     if (gagnant) setExcluded(prev => new Set(prev).add(gagnant.id))
     setGagnant(null)
+    setEnvoiEmail('idle')
     lancerTirage()
   }
 
@@ -380,9 +406,18 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
                     {gagnant.ticket_code}
                   </code>
                 )}
-                <div style={{ fontSize:12,color:'#15803D',fontWeight:700,marginBottom:8 }}>✅ Enregistré — email + PDF + QR envoyés</div>
+                <div style={{ fontSize:12,color:'#15803D',fontWeight:700,marginBottom:8 }}>✅ Tirage enregistré</div>
+                {envoiEmail === 'envoi' && (
+                  <div style={{ fontSize:12,color:'#64748B',fontWeight:700,marginBottom:8 }}>✉️ Envoi de l&apos;email en cours…</div>
+                )}
+                {envoiEmail === 'ok' && (
+                  <div style={{ fontSize:12,color:'#15803D',fontWeight:700,marginBottom:8 }}>✅ Email envoyé{data.pro?.email ? ` — réponses redirigées vers ${data.pro.email}` : ''}</div>
+                )}
+                {envoiEmail === 'echec' && (
+                  <div style={{ fontSize:12,color:'#B45309',fontWeight:700,marginBottom:8 }}>⚠️ Email non envoyé{envoiErreur ? ` — ${envoiErreur}` : ''}. Le tirage reste enregistré, transmettez le code manuellement.</div>
+                )}
                 <br/>
-                <button className="btn-ghost" style={{ marginTop:4 }} onClick={()=>{setTirageDone(false);setGagnant(null);setExcluded(new Set())}}>
+                <button className="btn-ghost" style={{ marginTop:4 }} onClick={()=>{setTirageDone(false);setGagnant(null);setExcluded(new Set());setEnvoiEmail('idle')}}>
                   Relancer le tirage
                 </button>
               </div>
