@@ -6,6 +6,26 @@ import { creerAnimation } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 
+const ICONES: Record<string, React.ReactNode> = {
+  quiz: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#7C2D92" strokeWidth="1.8" />
+      <path d="M9.5 9.2c0-1.4 1.1-2.4 2.5-2.4s2.5 1 2.5 2.2c0 1.6-2.5 1.8-2.5 3.6" stroke="#7C2D92" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="16.3" r="1" fill="#7C2D92" /></svg>
+  ),
+  spin: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#7C2D92" strokeWidth="1.8" />
+      <path d="M12 2v10l7 4" stroke="#7C2D92" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="1.6" fill="#7C2D92" /></svg>
+  ),
+  tombola: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="11" rx="2" stroke="#7C2D92" strokeWidth="1.8" />
+      <path d="M9 7v11M15 7v11" stroke="#7C2D92" strokeWidth="1.6" strokeDasharray="1.5 2.5" /><path d="M3 12h4M17 12h4" stroke="#7C2D92" strokeWidth="1.8" /></svg>
+  ),
+  vote: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="#7C2D92" strokeWidth="1.8" />
+      <path d="M8 12.5l2.5 2.5L16 9.5" stroke="#7C2D92" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  ),
+}
+
 const JEUX = [
   { m: 'quiz', t: 'Quiz', s: 'QCM + questions bonus', banque: true },
   { m: 'spin', t: 'Roue de la fortune', s: 'Tirage instantané, segments = lots', banque: false },
@@ -38,7 +58,7 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
 
   const jeu = JEUX.find(j => j.m === module_)
   const etapeBanque = jeu?.banque ?? false
-  const totalEtapes = etapeBanque ? 5 : 4
+  const totalEtapes = etapeBanque ? 6 : 5
 
   function suivant() { setEtape(e => e + 1) }
   function precedent() { setEtape(e => Math.max(1, e - 1)) }
@@ -53,7 +73,7 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
     })
     if (res.ok) {
       setEnvoi('ok')
-      setTimeout(() => router.push(`/pro/events?pro=${encodeURIComponent(proId)}`), 1400)
+      setEtape(e => e + 1) // étape "livraison"
     } else {
       setEnvoi('echec')
     }
@@ -87,6 +107,7 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
                   background: module_ === g.m ? 'rgba(168,85,247,.06)' : '#fff',
                 }}
               >
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(124,45,146,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>{ICONES[g.m]}</div>
                 <div style={{ fontWeight: 800, fontSize: 14.5 }}>{g.t}</div>
                 <div style={{ fontSize: 12, ...MUTED, marginTop: 4 }}>{g.s}</div>
               </div>
@@ -223,8 +244,51 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
               {envoi === 'envoi' ? 'Création…' : 'Créer mon animation ✓'}
             </button>
           </div>
-          {envoi === 'ok' && <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, color: '#15803D' }}>✅ Animation créée — direction vos events…</div>}
           {envoi === 'echec' && <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, color: '#B91C1C' }}>Échec de la création, réessayez.</div>}
+        </div>
+      )}
+      {etape === (etapeBanque ? 6 : 5) && envoi === 'ok' && (
+        <div style={CARD}>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>✓ Votre animation est prête</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>Voici de quoi l&apos;annoncer, à télécharger ou à envoyer à votre base de contacts.</div>
+
+          <div id="visuel-annonce" style={{ background: 'linear-gradient(135deg,#7C2D92 0%,#A855F7 100%)', borderRadius: 16, padding: '28px 24px', color: '#fff', textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.85 }}>Nouvelle animation</div>
+            <div style={{ fontSize: 22, fontWeight: 900, margin: '8px 0 6px', letterSpacing: '-.4px' }}>{nom}</div>
+            <div style={{ fontSize: 13, opacity: 0.9 }}>{dateD && dateF ? `Du ${dateD} au ${dateF}` : 'Bientôt disponible'}</div>
+            <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-block' }}>🎁 {lotNom}</div>
+            <div style={{ marginTop: 14, fontSize: 11, opacity: 0.75 }}>QR code ajouté dès sa génération par notre équipe</div>
+          </div>
+          <style>{`@media print{ body *{visibility:hidden} #visuel-annonce,#visuel-annonce *{visibility:visible} #visuel-annonce{position:fixed;inset:0;border-radius:0} }`}</style>
+          <button style={{ ...btnGhost, width: '100%', marginBottom: 20 }} onClick={() => window.print()}>⬇ Télécharger / imprimer ce visuel</button>
+
+          <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 8 }}>Annoncer à votre base de contacts</div>
+          <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>Copiez ce texte dans Brevo, Mailchimp ou votre outil habituel — ou envoyez-le-vous pour le garder sous la main.</div>
+          <textarea
+            readOnly
+            id="texte-annonce"
+            style={{ ...input, minHeight: 140, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}
+            value={[
+              `Objet : ${nom} — jouez et tentez de gagner !`, '',
+              `Bonjour,`, '',
+              `On lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.`,
+              `Jouez et tentez de gagner : ${lotNom}.`, '',
+              `À très vite !`,
+            ].join('\n')}
+          />
+          <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 20 }}>
+            <button style={btnGhost} onClick={() => {
+              const el = document.getElementById('texte-annonce') as HTMLTextAreaElement | null
+              el?.select(); document.execCommand('copy')
+            }}>📋 Copier le texte</button>
+            <a
+              style={{ ...btnGhost, textDecoration: 'none', display: 'inline-block' }}
+              target="_blank" rel="noreferrer"
+              href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nom + ' — jouez et tentez de gagner !')}&body=${encodeURIComponent(`Bonjour,\n\nOn lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.\nJouez et tentez de gagner : ${lotNom}.\n\nÀ très vite !`)}`}
+            >✉️ Ouvrir dans Gmail</a>
+          </div>
+
+          <button style={{ ...btnPrimary, width: '100%' }} onClick={() => router.push(`/pro/events?pro=${encodeURIComponent(proId)}`)}>Terminer — voir mes events →</button>
         </div>
       )}
     </div>
