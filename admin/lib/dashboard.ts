@@ -138,6 +138,31 @@ export async function fetchJoueurTicketsGains(joueurId: string): Promise<{ ticke
   return { tickets: (tk.data ?? []) as SeTicketRow[], gains: (ga.data ?? []) as SeGainRow[] }
 }
 
+/* ── Gains reels (table tirages, retrait_token/QR -- 28/07/2026) ──
+ * A NE PAS confondre avec se_gains ci-dessus (systeme different, plus vieux, sans QR) ni avec
+ * lots.assigne_a (attribution directe hors tirage). C'est cette table que lisent lot.html,
+ * valider_lot, billets-partenaires.html -- les vrais gains avec billet/QR exploitables. */
+export interface TirageRow {
+  id: string
+  lot_nom: string | null
+  lot_valeur: number | null
+  partenaire_id: string | null
+  super_event_id: string | null
+  retrait_token: string | null
+  retire_at: string | null
+  statut: string | null
+  created_at: string | null
+}
+export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
+  const { data, error } = await supabase
+    .from('tirages')
+    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,retrait_token,retire_at,statut,created_at')
+    .eq('joueur_id', joueurId)
+    .order('created_at', { ascending: false })
+  if (error) { console.error('[fetchJoueurTirages]', error.message); return [] }
+  return (data ?? []) as TirageRow[]
+}
+
 /* ── Super Event : stats agrégées d'un commerce (espace pro) ── */
 export async function fetchEventSuperEventStats(eventId: string): Promise<{ tickets: number; gains: number; gainsUtilises: number }> {
   const [tk, ga] = await Promise.all([

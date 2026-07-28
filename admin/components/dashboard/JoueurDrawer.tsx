@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, type SeTicketRow, type SeGainRow } from '@/lib/dashboard'
+import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, fetchJoueurTirages, type SeTicketRow, type SeGainRow, type TirageRow } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip } from './DashboardUI'
 import type { FlowinJoueur } from '@/lib/types'
 
@@ -18,6 +18,7 @@ export default function JoueurDrawer() {
   const [saving, setSaving] = useState(false)
   const [seTickets, setSeTickets] = useState<SeTicketRow[]>([])
   const [seGains, setSeGains] = useState<SeGainRow[]>([])
+  const [tirages, setTirages] = useState<TirageRow[]>([])
 
   const j = useMemo(() => joueurs.find(x => x.id === drawer.id), [joueurs, drawer.id])
 
@@ -25,6 +26,7 @@ export default function JoueurDrawer() {
     if (!drawer.id) return
     let on = true
     fetchJoueurTicketsGains(drawer.id).then(r => { if (on) { setSeTickets(r.tickets); setSeGains(r.gains) } })
+    fetchJoueurTirages(drawer.id).then(r => { if (on) setTirages(r) })
     return () => { on = false }
   }, [drawer.id])
 
@@ -71,6 +73,7 @@ export default function JoueurDrawer() {
     { id: 'infos', label: 'Infos' },
     { id: 'events', label: 'Events', badge: joueurEvents.length },
     { id: 'lots', label: 'Lots', badge: joueurLots.length },
+    { id: 'gagne', label: 'Lots gagnés', badge: tirages.length },
     { id: 'se', label: 'Tickets', badge: seTickets.length },
   ]
 
@@ -154,6 +157,31 @@ export default function JoueurDrawer() {
                 <div>{l.titre || l.nom} — {l.valeur} €</div>
               </div>
             ))}
+          </>
+        )}
+
+        {drawer.tab === 'gagne' && (
+          <>
+            <SectionHeader>{tirages.length} lot{tirages.length > 1 ? 's' : ''} gagné{tirages.length > 1 ? 's' : ''} par tirage</SectionHeader>
+            {tirages.length === 0 && <div className="sa-empty-inline">Aucun lot gagné par tirage (table tirages)</div>}
+            {tirages.map(t => {
+              const partenaire = t.partenaire_id ? t.partenaire_id.replace(/^pt-/, '') : 'Nuits du Sud'
+              const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'
+              const lien = t.retrait_token ? `/nds/billets-partenaires.html?t=${t.retrait_token}` : null
+              return (
+                <div key={t.id} className="sa-list-item" style={{ alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: 18 }}>🎫</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700 }}>{t.lot_nom ?? 'Lot'}</div>
+                    <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{partenaire} · {date}</div>
+                    {lien && <a href={lien} target="_blank" rel="noreferrer" style={{ fontSize: 11 }}>Voir le billet →</a>}
+                  </div>
+                  {t.retire_at
+                    ? <span className="sa-chip">Retiré</span>
+                    : <span className="sa-chip live">À retirer</span>}
+                </div>
+              )
+            })}
           </>
         )}
 
