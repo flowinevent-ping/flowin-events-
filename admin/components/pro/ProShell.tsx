@@ -83,6 +83,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
   return (
     <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: '#F1F5F9', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif', color: '#0F172A' }}>
       <style>{`
+        :root { --sa-bg:#F1F5F9; --sa-card:#FFFFFF; --sa-border:#E2E8F0; --sa-text:#0F172A; --sa-muted:#64748B; --sa-subtle:#F8FAFC; }
         .pro-sidebar { position: sticky; top: 0; }
         .pro-hamburger, .pro-drawer-backdrop { display: none; }
         @media (max-width: 860px) {
