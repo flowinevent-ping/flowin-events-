@@ -121,58 +121,77 @@ export default function Page() {
       )}
 
       {!charge && filtres.length > 0 && (
-        <div style={{ overflowX: 'auto' }}>
-          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
-            <thead>
-              <tr>
-                {th('enseigne', 'Nom / Enseigne')}
-                {th('source_label', 'Origine')}
-                <th style={{ ...cell, textAlign: 'left' }}>Contact</th>
-                {th('ville', 'Ville')}
-                {th('cp', 'CP')}
-                <th style={{ ...cell, textAlign: 'left' }}>Profil</th>
-                {th('etat', 'État')}
-                <th style={{ ...cell, textAlign: 'right' }}>Montant</th>
-                {th('created_at', 'Date')}
-              </tr>
-            </thead>
-            <tbody>
-              {filtres.map(r => (
-                <tr key={r.id}>
-                  <td style={{ ...cell, fontWeight: 600 }}>{r.enseigne ?? '—'}</td>
-                  <td style={cell}>
-                    <span className="sa-chip" style={{ fontSize: 10 }}>{r.source_label}</span>
-                  </td>
-                  <td style={cell}>
-                    {r.contact_email ? <a href={`mailto:${r.contact_email}`}>{r.contact_email}</a> : '—'}
-                    {r.contact_tel && <div className="sa-muted" style={{ fontSize: 10.5 }}>{r.contact_tel}</div>}
-                  </td>
-                  <td style={cell}>{r.ville ?? '—'}</td>
-                  <td style={cell}>{r.cp ?? '—'}</td>
-                  <td style={cell}>
-                    {r.commercial
-                      ? <span className="sa-muted">—</span>
-                      : [r.bv_genre, r.bv_age].filter(Boolean).join(' · ') || <span className="sa-muted">—</span>}
-                  </td>
-                  <td style={cell}>
-                    {r.etat ? (
-                      <span
-                        className="sa-chip"
-                        style={{ fontSize: 10, color: COULEUR_ETAT[r.etat] ?? undefined, borderColor: COULEUR_ETAT[r.etat] ?? undefined }}
-                      >
-                        {r.etat.replace(/_/g, ' ')}
-                      </span>
-                    ) : (
-                      <span className="sa-muted" style={{ fontSize: 11 }}>hors pipeline</span>
-                    )}
-                  </td>
-                  <td style={{ ...cell, textAlign: 'right' }}>{euros(r.montant)}</td>
-                  <td style={cell}>{dateFr(r.created_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {commerciaux.length > 0 && (
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Pipeline commercial — prospection partenaires ({commerciaux.length})</div>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+                  <thead><tr>
+                    <th style={{ ...cell, textAlign: 'left' }}>Enseigne</th>
+                    <th style={{ ...cell, textAlign: 'left' }}>Contact</th>
+                    <th style={{ ...cell, textAlign: 'left' }}>Ville</th>
+                    <th style={{ ...cell, textAlign: 'left' }}>État</th>
+                    <th style={{ ...cell, textAlign: 'right' }}>Montant</th>
+                    <th style={{ ...cell, textAlign: 'left' }}>Date</th>
+                  </tr></thead>
+                  <tbody>
+                    {commerciaux.map(r => (
+                      <tr key={r.id}>
+                        <td style={{ ...cell, fontWeight: 600 }}>{r.enseigne ?? '—'}</td>
+                        <td style={cell}>
+                          {r.contact_email ? <a href={`mailto:${r.contact_email}`}>{r.contact_email}</a> : '—'}
+                          {r.contact_tel && <div className="sa-muted" style={{ fontSize: 10.5 }}>{r.contact_tel}</div>}
+                        </td>
+                        <td style={cell}>{r.ville ?? '—'}</td>
+                        <td style={cell}>
+                          {r.etat && (
+                            <span className="sa-chip" style={{ fontSize: 10, color: COULEUR_ETAT[r.etat] ?? undefined, borderColor: COULEUR_ETAT[r.etat] ?? undefined }}>
+                              {r.etat.replace(/_/g, ' ')}
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ ...cell, textAlign: 'right' }}>{euros(r.montant)}</td>
+                        <td style={cell}>{dateFr(r.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Collecte terrain — contacts joueurs ({terrain.length})</div>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+                <thead><tr>
+                  {th('source_label', 'Origine')}
+                  <th style={{ ...cell, textAlign: 'left' }}>Contact</th>
+                  {th('ville', 'Ville')}
+                  {th('cp', 'CP')}
+                  <th style={{ ...cell, textAlign: 'left' }}>Profil</th>
+                  {th('created_at', 'Date')}
+                </tr></thead>
+                <tbody>
+                  {terrain.map(r => (
+                    <tr key={r.id}>
+                      <td style={cell}><span className="sa-chip" style={{ fontSize: 10 }}>{r.source_label}</span></td>
+                      <td style={cell}>
+                        {r.contact_email ? <a href={`mailto:${r.contact_email}`}>{r.contact_email}</a> : '—'}
+                        {r.contact_tel && <div className="sa-muted" style={{ fontSize: 10.5 }}>{r.contact_tel}</div>}
+                      </td>
+                      <td style={cell}>{r.ville ?? '—'}</td>
+                      <td style={cell}>{r.cp ?? '—'}</td>
+                      <td style={cell}>{[r.bv_genre, r.bv_age].filter(Boolean).join(' · ') || <span className="sa-muted">—</span>}</td>
+                      <td style={cell}>{dateFr(r.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
