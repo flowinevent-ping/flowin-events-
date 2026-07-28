@@ -44,8 +44,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [banqueId, setBanqueId] = useState<string | null>(null)
   const [banques, setBanques] = useState<Banque[]>(banqueQuizExistante)
   const [typeRecompense, setTypeRecompense] = useState<'tirage' | 'instantane'>('tirage')
-  const [lotNom, setLotNom] = useState('')
-  const [lotQuantite, setLotQuantite] = useState(10)
+  const [lots, setLots] = useState<{ id: string; nom: string; quantite: number }[]>([{ id: 'l1', nom: '', quantite: 10 }])
+  const [modeInstant, setModeInstant] = useState<'tousLesX' | 'aleatoire'>('aleatoire')
+  const [everyX, setEveryX] = useState(10)
+  const [probabilite, setProbabilite] = useState(15)
   const [nom, setNom] = useState('')
   const [dateD, setDateD] = useState('')
   const [dateF, setDateF] = useState('')
@@ -62,13 +64,21 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
   function suivant() { setEtape(e => e + 1) }
   function precedent() { setEtape(e => Math.max(1, e - 1)) }
+  function ajouterLot() { setLots(l => [...l, { id: 'l' + Date.now(), nom: '', quantite: 5 }]) }
+  function retirerLot(id: string) { setLots(l => l.length > 1 ? l.filter(x => x.id !== id) : l) }
+  function majLot(id: string, champ: 'nom' | 'quantite', valeur: string | number) {
+    setLots(l => l.map(x => x.id === id ? { ...x, [champ]: valeur } : x))
+  }
 
   async function valider() {
-    if (!module_ || !nom.trim() || !lotNom.trim()) return
+    const lotsValides = lots.filter(l => l.nom.trim())
+    if (!module_ || !nom.trim() || lotsValides.length === 0) return
     setEnvoi('envoi')
     const res = await creerAnimation({
       proId, module: module_, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null,
-      banqueId, typeRecompense, lotNom: lotNom.trim(), lotQuantite,
+      banqueId, typeRecompense,
+      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite })),
+      regleRecompense: typeRecompense === 'instantane' ? { mode: modeInstant, everyX, probabilite } : undefined,
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
     if (res.ok) {
@@ -80,6 +90,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   }
 
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
+  const lotsTexte = lots.filter(l => l.nom.trim()).map(l => l.nom).join(', ') || '—'
 
   return (
     <div>
@@ -194,19 +205,54 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ flex: 2, minWidth: 200 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Nom du lot</label>
-              <input style={input} value={lotNom} onChange={e => setLotNom(e.target.value)} placeholder="Ex. Café gourmand offert" />
+
+          {typeRecompense === 'instantane' && (
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Règle du gain immédiat</div>
+              <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                {(['aleatoire', 'tousLesX'] as const).map(m => (
+                  <div key={m} onClick={() => setModeInstant(m)} style={{ flex: 1, border: modeInstant === m ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 10, padding: 10, cursor: 'pointer', background: modeInstant === m ? 'rgba(168,85,247,.06)' : '#fff' }}>
+                    <div style={{ fontWeight: 700, fontSize: 12.5 }}>{m === 'aleatoire' ? 'Chance aléatoire' : '1 gain tous les X'}</div>
+                  </div>
+                ))}
+              </div>
+              {modeInstant === 'aleatoire' ? (
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Probabilité de gagner (%)</label>
+                  <input style={{ ...input, maxWidth: 120 }} type="number" min={1} max={100} value={probabilite} onChange={e => setProbabilite(Number(e.target.value))} />
+                </div>
+              ) : (
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Un gain toutes les … parties</label>
+                  <input style={{ ...input, maxWidth: 120 }} type="number" min={2} value={everyX} onChange={e => setEveryX(Number(e.target.value))} />
+                </div>
+              )}
             </div>
-            <div style={{ flex: 1, minWidth: 100 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Quantité</label>
-              <input style={input} type="number" min={1} value={lotQuantite} onChange={e => setLotQuantite(Number(e.target.value))} />
-            </div>
+          )}
+
+          <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Vos lots {lots.length > 1 ? `(${lots.length})` : ''}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10 }}>
+            {lots.map(l => (
+              <div key={l.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                <div style={{ flex: 2, minWidth: 140 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Nom du lot</label>
+                  <input style={input} value={l.nom} onChange={e => majLot(l.id, 'nom', e.target.value)} placeholder="Ex. Café gourmand offert" />
+                </div>
+                <div style={{ flex: 1, minWidth: 80 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Quantité</label>
+                  <input style={input} type="number" min={1} value={l.quantite} onChange={e => majLot(l.id, 'quantite', Number(e.target.value))} />
+                </div>
+                {lots.length > 1 && (
+                  <button onClick={() => retirerLot(l.id)} style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, width: 40, height: 42, cursor: 'pointer', color: '#B91C1C', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>×</button>
+                )}
+              </div>
+            ))}
           </div>
+          <button onClick={ajouterLot} style={{ ...btnGhost, fontSize: 12.5, padding: '9px 14px' }}>+ Ajouter un lot / sous-lot</button>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
-            <button style={{ ...btnPrimary, opacity: lotNom.trim() ? 1 : 0.4 }} disabled={!lotNom.trim()} onClick={suivant}>Suivant →</button>
+            <button style={{ ...btnPrimary, opacity: lots.some(l => l.nom.trim()) ? 1 : 0.4 }} disabled={!lots.some(l => l.nom.trim())} onClick={suivant}>Suivant →</button>
           </div>
         </div>
       )}
@@ -290,7 +336,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
               ['Jeu', JEUX.find(j => j.m === module_)?.t ?? '—'],
               ...(etapeBanque ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? 'Aucune sélectionnée']] : []),
               ['Récompense', typeRecompense === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'],
-              ['Lot', `${lotNom || '—'} × ${lotQuantite}`],
+              ['Lots', lots.filter(l => l.nom.trim()).map(l => `${l.nom} × ${l.quantite}`).join(', ') || '—'],
               ['Dates', dateD && dateF ? `${dateD} → ${dateF}` : 'Non précisées'],
               ['Diffusion', [diffPhysique && 'QR physique', diffDigital && 'Lien digital', diffQr && 'QR tracking'].filter(Boolean).join(' · ') || 'Aucune'],
             ].map(([l, v]) => (
@@ -304,7 +350,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.85 }}>Nouvelle animation</div>
             <div style={{ fontSize: 22, fontWeight: 900, margin: '8px 0 6px', letterSpacing: '-.4px' }}>{nom}</div>
             <div style={{ fontSize: 13, opacity: 0.9 }}>{dateD && dateF ? `Du ${dateD} au ${dateF}` : 'Bientôt disponible'}</div>
-            <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-block' }}>🎁 {lotNom}</div>
+            <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-block' }}>🎁 {lotsTexte}</div>
             <div style={{ marginTop: 14, fontSize: 11.5, opacity: 0.85, display: 'flex', flexDirection: 'column', gap: 3 }}>
               {diffPhysique && <div>📍 QR code physique — en attente de génération par notre équipe</div>}
               {diffDigital && <div>🔗 Lien digital — en attente de génération par notre équipe</div>}
@@ -335,7 +381,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
               `Objet : ${nom} — jouez et tentez de gagner !`, '',
               `Bonjour,`, '',
               `On lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.`,
-              `Jouez et tentez de gagner : ${lotNom}.`, '',
+              `Jouez et tentez de gagner : ${lotsTexte}.`, '',
               `À très vite !`,
             ].join('\n')}
           />
@@ -347,7 +393,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             <a
               style={{ ...btnGhost, textDecoration: 'none', display: 'inline-block' }}
               target="_blank" rel="noreferrer"
-              href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nom + ' — jouez et tentez de gagner !')}&body=${encodeURIComponent(`Bonjour,\n\nOn lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.\nJouez et tentez de gagner : ${lotNom}.\n\nÀ très vite !`)}`}
+              href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nom + ' — jouez et tentez de gagner !')}&body=${encodeURIComponent(`Bonjour,\n\nOn lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.\nJouez et tentez de gagner : ${lotsTexte}.\n\nÀ très vite !`)}`}
             >✉️ Ouvrir dans Gmail</a>
           </div>
 

@@ -75,14 +75,15 @@ export interface CreationAnimation {
   dateF: string | null
   banqueId?: string | null
   typeRecompense: 'tirage' | 'instantane'
-  lotNom: string
-  lotQuantite: number
+  lots: { nom: string; quantite: number }[]
+  regleRecompense?: { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
   diffusionPhysique: boolean
   diffusionDigital: boolean
   diffusionQrTracking: boolean
 }
 export async function creerAnimation(params: CreationAnimation): Promise<{ ok: boolean; eventId: string | null; error?: string }> {
   const id = 'ev-' + params.proId.replace(/^pro-/, '') + '-' + Math.random().toString(36).slice(2, 8)
+  const premierLot = params.lots[0]
   const { error } = await supabase.from('events').insert({
     id,
     pro_id: params.proId,
@@ -92,12 +93,15 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     date_d: params.dateD,
     date_f: params.dateF,
     gain_ticket: params.typeRecompense === 'tirage',
-    gain_immediat: params.typeRecompense === 'instantane' ? params.lotNom : null,
+    gain_immediat: params.typeRecompense === 'instantane' ? (premierLot?.nom ?? null) : null,
     cfg: {
       quizBanques: params.banqueId ? [params.banqueId] : [],
-      lotNom: params.lotNom,
-      lotQuantite: params.lotQuantite,
+      // lotNom/lotQuantite conserves pour compatibilite avec du code qui lirait encore un lot unique
+      lotNom: premierLot?.nom ?? '',
+      lotQuantite: premierLot?.quantite ?? 0,
+      lots: params.lots,
       typeRecompense: params.typeRecompense,
+      regleRecompense: params.regleRecompense ?? null,
       diffusion_demandee: {
         physique: params.diffusionPhysique,
         digital: params.diffusionDigital,
