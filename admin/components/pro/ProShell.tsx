@@ -19,7 +19,7 @@ interface NavItem { key: string; label: string; icon: string; route?: string; gr
 const NAV: NavItem[] = [
   { key: 'accueil', label: 'Accueil', icon: 'home', route: '/pro', group: 'TABLEAU DE BORD' },
   { key: 'entreprise', label: 'Mon entreprise', icon: 'shop', route: '/pro/entreprise', group: 'MON COMPTE' },
-  { key: 'jeu', label: 'Choisir un jeu', icon: 'game', route: '/pro/jeu', group: 'MES CAMPAGNES' },
+  { key: 'jeu', label: 'Créer mon animation', icon: 'game', route: '/pro/jeu', group: 'MES CAMPAGNES' },
   { key: 'banques', label: 'Mes banques', icon: 'bank', route: '/pro/banques', group: 'MES CAMPAGNES' },
   { key: 'events', label: 'Mes events', icon: 'calendar', route: '/pro/events', group: 'MES CAMPAGNES' },
   { key: 'lots', label: 'Lots & distribution', icon: 'gift', route: '/pro/lots', group: 'MES CAMPAGNES' },
