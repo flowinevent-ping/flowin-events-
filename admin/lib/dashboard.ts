@@ -187,6 +187,10 @@ export async function envoyerTicketGagnant(params: {
   lotNom: string
   lotDescription?: string
   code: string
+  retraitToken?: string | null
+  partenaireNom?: string | null
+  partenaireAdresse?: string | null
+  partenaireTel?: string | null
   conditions?: string
   validejusquAu?: string
   fromName?: string
@@ -199,6 +203,10 @@ export async function envoyerTicketGagnant(params: {
       lot_nom: params.lotNom,
       lot_description: params.lotDescription ?? '',
       code: params.code,
+      retrait_token: params.retraitToken ?? '',
+      partenaire_nom: params.partenaireNom ?? '',
+      partenaire_adresse: params.partenaireAdresse ?? '',
+      partenaire_tel: params.partenaireTel ?? '',
       conditions: params.conditions ?? '',
       valide_jusqu_au: params.validejusquAu ?? '',
       from_name: params.fromName ?? '',
@@ -215,23 +223,25 @@ export async function envoyerTicketGagnant(params: {
 export async function enregistrerTirage(params: {
   superEventId: string | null
   eventId: string | null
+  lotNom: string
+  partenaireId?: string | null
+  lotValeur?: number | null
   joueur: { id: string; prenom?: string | null; nom?: string | null; email?: string | null; tel?: string | null }
-}): Promise<{ ok: boolean; code: string }> {
-  const code = 'T-' + Math.random().toString(36).slice(2, 8).toUpperCase()
-  const { error } = await supabase.from('se_gains').insert({
-    super_event_id: params.superEventId,
-    event_id: params.eventId,
-    joueur_id: params.joueur.id,
-    type: 'tirage',
-    libelle: 'Tirage au sort',
-    code,
-    utilise: false,
-    gagnant_nom: `${params.joueur.prenom ?? ''} ${params.joueur.nom ?? ''}`.trim() || null,
-    gagnant_email: params.joueur.email ?? null,
-    gagnant_tel: params.joueur.tel ?? null,
+}): Promise<{ ok: boolean; code: string; retraitToken: string | null }> {
+  /* 28/07/2026 -- remplace l'ecriture dans se_gains (dead-end, aucun retrait_token, aucun
+   * billet exploitable) par attribuer_gain_joueur(), RPC additive miroir de tirage_lot() deja
+   * en prod. Ecrit dans `tirages`, meme table que le mecanisme de validation QR deja utilise
+   * pendant le festival (lot.html / valider_lot / billets-partenaires.html). */
+  const { data, error } = await supabase.rpc('attribuer_gain_joueur', {
+    p_joueur_id: params.joueur.id,
+    p_lot_nom: params.lotNom,
+    p_partenaire_id: params.partenaireId ?? null,
+    p_valeur: params.lotValeur ?? null,
+    p_super_event_id: params.superEventId,
   })
-  if (error) console.error('[enregistrerTirage] insert échoué:', error.message)
-  return { ok: !error, code }
+  if (error) { console.error('[enregistrerTirage] rpc échouée:', error.message); return { ok: false, code: '', retraitToken: null } }
+  const row = Array.isArray(data) ? data[0] : data
+  return { ok: !!row, code: row?.ticket_code ?? '', retraitToken: row?.retrait_token ?? null }
 }
 
 /* ── Clics partenaires rattachés à un pro (via partenaires.event_id ∈ events du pro) ── */

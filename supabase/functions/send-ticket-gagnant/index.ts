@@ -1,30 +1,42 @@
 // supabase/functions/send-ticket-gagnant/index.ts
 //
-// Envoie le ticket gagnant (lot attribue manuellement) par email au gagnant,
-// via la meme passerelle Resend deja utilisee par notify-bon-commande / notify-souscription.
-// Appelee directement depuis le dashboard (client-side) avec la cle publishable.
+// Envoie le ticket gagnant par email, via Resend (compte enregistre sur flowinevent@gmail.com).
 //
-// SECRETS REQUIS : RESEND_API_KEY (deja configure sur le projet, compte Resend enregistre
-// sur flowinevent@gmail.com)
-// Optionnels : NOTIFY_FROM (adresse d'envoi technique verifiee, defaut "NDS x Flowin <onboarding@resend.dev>"),
-//              NOTIFY_TO (copie interne, defaut flowinevent@gmail.com)
+// 28/07/2026 -- REECRITURE pour reprendre le texte EXACT, mot pour mot, de
+// public/nds/mail-gagnant.js, la "source unique du message au gagnant" deja validee
+// (commentaire du fichier : "ne jamais recopier ce texte ailleurs, le corriger ici, une seule
+// fois"). Cette fonction edge est justement cette seule autre copie legitime -- le texte est
+// porte fidelement depuis le JS navigateur vers Deno, aucun mot change. Avant cette reecriture,
+// la fonction envoyait un texte invente qui ne correspondait pas a la reference -- corrige.
 //
-// 28/07/2026 — parametrage par pro (Romain) : Resend n'autorise l'envoi FROM que depuis un
-// domaine verifie -- on ne peut donc pas expedier depuis l'adresse email de chaque pro sans
-// verifier son domaine chez Resend au prealable (hors scope ici). Ce qui EST personnalisable
-// sans contrainte technique : le nom affiche dans le champ From ("De : <nom du pro>") et le
-// Reply-To, qui devient l'email du pro -- un gagnant qui repond a l'email tombe directement
-// chez le pro, pas chez Flowin. body.from_name et body.reply_to sont optionnels et
-// retro-compatibles : si absents, comportement identique a avant.
+// Le lien du billet pointe desormais vers /nds/billets-partenaires.html?t=<retrait_token>
+// (le vrai design de billet deja valide : QR genere en direct, logo, mise en page), et non plus
+// vers un simple code texte.
+//
+// SECRETS REQUIS : RESEND_API_KEY (deja configure)
+// Optionnels : NOTIFY_FROM_ADDR, NOTIFY_FROM_NAME, NOTIFY_TO, SITE_ORIGIN (defaut
+// https://flowin-events.vercel.app)
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_FROM_ADDR = Deno.env.get("NOTIFY_FROM_ADDR") || "onboarding@resend.dev";
 const NOTIFY_FROM_DEFAULT_NAME = Deno.env.get("NOTIFY_FROM_NAME") || "NDS x Flowin";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
+const SITE_ORIGIN = Deno.env.get("SITE_ORIGIN") || "https://flowin-events.vercel.app";
 
 function esc(v: unknown): string {
-  if (v === null || v === undefined || v === "") return "\u2014";
+  if (v === null || v === undefined || v === "") return "";
   return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function prenomDe(nom: string): string {
+  return String(nom || "").trim().split(/\s+/)[0] || "";
+}
+function lienBillet(retraitToken: string): string {
+  if (!retraitToken) return "";
+  return SITE_ORIGIN + "/nds/billets-partenaires.html?t=" + encodeURIComponent(retraitToken);
+}
+function puces(conditions: string): string[] {
+  if (!conditions) return [];
+  return conditions.split("\u00b7").map((c) => c.trim()).filter((c) => c.length > 5);
 }
 
 const corsHeaders = {
@@ -45,16 +57,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const gagnantEmail = String(body.gagnant_email || "").trim();
   const gagnantNom = String(body.gagnant_nom || "").trim();
   const partenaireNom = String(body.partenaire_nom || "");
-  const lotNom = String(body.lot_nom || "Lot");
-  const lotDescription = String(body.lot_description || "");
-  const conditions = String(body.conditions || "").trim() ||
-    "Lot \u00e0 retirer sur pr\u00e9sentation de ce ticket, dans les conditions du festival Nuits du Sud 2026 (9 \u2192 18 juillet, Vence). Non \u00e9changeable, non remboursable, non cumulable.";
+  const partenaireAdresse = String(body.partenaire_adresse || "");
+  const partenaireTel = String(body.partenaire_tel || "");
+  const lotNom = String(body.lot_nom || "un lot");
+  const conditions = String(body.conditions || "");
   const code = String(body.code || "");
-  const valide = String(body.valide_jusqu_au || "");
+  const retraitToken = String(body.retrait_token || "");
 
-  /* Personnalisation par pro : nom affiche dans From + adresse de reponse. L'adresse
-     technique d'envoi (NOTIFY_FROM_ADDR) reste fixe -- domaine verifie chez Resend, non
-     substituable par l'email d'un pro sans verification prealable de son propre domaine. */
   const fromName = String(body.from_name || "").trim() || NOTIFY_FROM_DEFAULT_NAME;
   const from = `${fromName} <${NOTIFY_FROM_ADDR}>`;
   const replyTo = String(body.reply_to || "").trim() || NOTIFY_TO;
@@ -66,28 +75,39 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ ok: false, error: "RESEND_API_KEY absent (configuration serveur)" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const html =
-    '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto">' +
-    '<div style="background:linear-gradient(160deg,#2a1036,#160820);border-radius:16px 16px 0 0;padding:22px 22px 26px;color:#fff;text-align:center">' +
-    '<div style="font-size:10px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:8px">Flowin \u00d7 Nuits du Sud 2026</div>' +
-    '<div style="font-size:20px;font-weight:800;margin-bottom:4px">\ud83c\udf89 F\u00e9licitations ' + esc(gagnantNom) + ' !</div>' +
-    '<div style="font-size:13.5px;color:rgba(255,255,255,.75)">Tu as gagn\u00e9 : <b style="color:#F5B544">' + esc(lotNom) + '</b></div>' +
-    (lotDescription ? '<div style="font-size:12.5px;color:rgba(255,255,255,.6);margin-top:6px">' + esc(lotDescription) + '</div>' : '') +
-    (partenaireNom ? '<div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:10px">Offert par ' + esc(partenaireNom) + '</div>' : '') +
-    '</div>' +
-    '<div style="background:#f7f8fc;border:1px solid #e7e9f2;border-top:none;padding:20px 22px">' +
-    '<div style="text-align:center;background:#fff;border:1px dashed #d8d4e0;border-radius:12px;padding:14px;margin-bottom:16px">' +
-    '<div style="font-size:10px;color:#8A90A8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Code de ton ticket</div>' +
-    '<div style="font-family:monospace;font-size:18px;font-weight:800;color:#16203A;letter-spacing:.05em">' + esc(code) + '</div>' +
-    (valide ? '<div style="font-size:11px;color:#8A90A8;margin-top:4px">Valable jusqu\u2019au ' + esc(valide) + '</div>' : '') +
-    '</div>' +
-    '<div style="font-size:11.5px;color:#5b6577;line-height:1.6">' +
-    '<b style="color:#16203A">Conditions d\u2019utilisation</b><br>' + esc(conditions) +
-    '</div>' +
-    '<div style="color:#8A90A8;font-size:11px;padding-top:16px;margin-top:16px;border-top:1px dashed #e0e3ee">Pr\u00e9sente ce code (ou l\u2019email) directement au commer\u00e7ant partenaire pour r\u00e9cup\u00e9rer ton lot. BAITA EURL \u00b7 OPConsult \u00b7 info@opconsult.co.</div>' +
-    '</div></div>';
+  // ---- Texte du corps, PORTE MOT POUR MOT depuis mail-gagnant.js (fonction corps(), branche "grand") ----
+  const lien = lienBillet(retraitToken);
+  const coord = [partenaireAdresse, partenaireTel].filter(Boolean).join(" \u2014 ");
+  const prenom = prenomDe(gagnantNom);
 
-  const text = `Felicitations ${gagnantNom} !\n\nTu as gagne : ${lotNom}${partenaireNom ? ' (offert par ' + partenaireNom + ')' : ''}\n\nCode de ton ticket : ${code}${valide ? '\nValable jusqu\'au ' + valide : ''}\n\nConditions d'utilisation :\n${conditions}\n\nPresente ce code au commercant partenaire pour recuperer ton lot.`;
+  const lignes: string[] = [`Bonjour ${prenom},`, ""];
+  lignes.push("Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagn\u00e9 :", "",
+    "   " + lotNom);
+  if (partenaireNom) lignes.push("   chez " + partenaireNom);
+  if (coord) lignes.push("   " + coord);
+  lignes.push("");
+  if (lien) {
+    lignes.push(">>> TON BILLET EST ICI <<<", "", "   " + lien, "",
+      "Clique sur ce lien : tu peux l'imprimer ou le garder sur ton t\u00e9l\u00e9phone.",
+      "C'est ce billet, avec son QR code, que tu pr\u00e9senteras en boutique.", "");
+  }
+  lignes.push("Merci d'avoir participé, et bravo encore : tu faisais partie de plus de 600 joueurs.", "",
+    "COMMENT EN PROFITER, EN 3 \u00c9TAPES", "",
+    "   1. Rends-toi chez " + (partenaireNom || "notre commer\u00e7ant partenaire"),
+    "   2. Pr\u00e9sente ton billet, papier ou \u00e9cran",
+    "   3. Le commer\u00e7ant scanne le QR code et valide \u2014 c'est tout", "");
+  const c = puces(conditions);
+  if (c.length) { lignes.push("\u00c0 SAVOIR", ""); c.forEach((x) => lignes.push("   - " + x)); lignes.push(""); }
+  if (code) lignes.push("Ton num\u00e9ro de billet : " + code, "");
+  lignes.push("Encore bravo, et \u00e0 bient\u00f4t chez notre partenaire.", "",
+    "Les Nuits du Sud, la Ville de Vence et Flowin",
+    "flowinevent@gmail.com \u00b7 06 16 35 49 36");
+
+  const text = lignes.join("\n");
+  const html = "<pre style=\"font-family:-apple-system,Segoe UI,Roboto,sans-serif;white-space:pre-wrap;font-size:14px;line-height:1.6;color:#16203A\">"
+    + esc(text).replace(lien, `<a href="${esc(lien)}">${esc(lien)}</a>`) + "</pre>";
+
+  const sujet = "Nuits du Sud & Flowin \u2014 Grand Jeu Concours \u2014 Vous avez gagn\u00e9 !";
 
   async function envoyer(to: string, subject: string) {
     const res = await fetch("https://api.resend.com/emails", {
@@ -100,7 +120,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   const results = [];
-  results.push(await envoyer(gagnantEmail, "\ud83c\udf89 Ton ticket gagnant \u2014 " + lotNom + " \u2014 Nuits du Sud 2026"));
+  results.push(await envoyer(gagnantEmail, sujet));
   results.push(await envoyer(NOTIFY_TO, "Copie ticket envoy\u00e9 \u2014 " + esc(gagnantNom) + " \u2014 " + lotNom));
 
   const anyFail = results.some((r) => r.ok === false);

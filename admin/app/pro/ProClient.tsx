@@ -141,17 +141,22 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
   async function confirmerPresent() {
     if (!gagnant) return
     let code = ''
+    let retraitToken: string | null = null
     try {
       const res = await enregistrerTirage({
         superEventId: (ev as unknown as { super_event_id?: string | null })?.super_event_id ?? null,
         eventId: ev?.id ?? null,
+        lotNom: ev?.nom ? `Lot — ${ev.nom}` : 'Lot',
+        partenaireId: (data.pro as unknown as { partenaire_id?: string | null })?.partenaire_id ?? null,
         joueur: { id: gagnant.id, prenom: gagnant.prenom, nom: gagnant.nom, email: gagnant.email, tel: gagnant.tel },
       })
       code = res.code
+      retraitToken = res.retraitToken
     } catch { /* persistance best-effort, le tirage reste affiché */ }
     setTirageDone(true)
 
-    /* Envoi reel du ticket par email (fonction edge send-ticket-gagnant, Resend deja cablé).
+    /* Envoi reel du ticket par email (fonction edge send-ticket-gagnant, Resend deja cablé,
+     * texte repris mot pour mot de public/nds/mail-gagnant.js -- la reference validee).
      * Reply-To et nom d'expediteur personnalises avec l'identite du pro : un gagnant qui
      * repond tombe chez le pro, pas chez Flowin. Sans email joueur, on ne tente rien. */
     if (gagnant.email) {
@@ -161,6 +166,8 @@ export default function ProClient({ initialData, proId, defaultEvId }: Props) {
         gagnantNom: `${gagnant.prenom ?? ''} ${gagnant.nom ?? ''}`.trim() || 'Gagnant',
         lotNom: ev?.nom ? `Lot — ${ev.nom}` : 'Lot',
         code: code || gagnant.ticket_code || '',
+        retraitToken,
+        partenaireNom: data.pro?.nom ?? undefined,
         fromName: data.pro?.nom ?? undefined,
         replyTo: data.pro?.email ?? undefined,
       })
