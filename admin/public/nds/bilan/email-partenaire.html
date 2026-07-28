@@ -50,6 +50,10 @@
   <div class="section">
     <div class="eyebrow">Résultats de l'opération</div>
     <div class="h2">Quelques chiffres</div>
+    <div class="card" style="text-align:center;padding:26px 22px;margin-bottom:12px">
+      <div style="font-size:40px;font-weight:900;color:var(--acc);letter-spacing:-1px" id="visites-total">—</div>
+      <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:4px">visites sur l'application Flowin</div>
+    </div>
     <div class="stats" id="stats" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat"><b>—</b><span>Joueurs</span></div>
       <div class="stat"><b>—</b><span>Parties jouées</span></div>
@@ -62,7 +66,7 @@
     <div class="h2">Comment ça va se passer</div>
     <div class="card">
       <p style="margin:0 0 14px;font-size:13px;line-height:1.7;color:#453B51">
-        Nous confirmons vos gagnants au fur et à mesure. <b>À chaque gagnant confirmé, vous recevez un email</b> avec son nom et son billet — celui qu'il vous présentera.
+        Nous contactons chaque gagnant, un par un, pour l'informer de son gain. <b>À chaque gagnant confirmé, vous recevez un email</b> avec son nom et son billet — celui qu'il vous présentera.
       </p>
       <div class="step"><b class="n">1.</b><span>Le client vous présente son billet, papier ou téléphone</span></div>
       <div class="step"><b class="n">2.</b><span>Vous scannez le <b>QR code</b> avec votre téléphone</span></div>
@@ -74,6 +78,9 @@
         <div class="note">Personnel et confidentiel — ne le communiquez pas à vos clients.</div>
       </div>
       <a class="planche-btn" id="planche-lien" href="#" target="_blank" rel="noreferrer">Voir la liste de vos gagnants →</a>
+      <p style="margin:16px 0 0;font-size:12.5px;line-height:1.6;color:var(--muted)">
+        On s'occupe de tout, de A à Z : à vous, on ne demande rien de plus que d'accueillir vos gagnants avec le sourire. Belle réussite à vous !
+      </p>
     </div>
   </div>
 
@@ -133,6 +140,13 @@
     });
 
   document.getElementById('planche-lien').href = location.origin + '/nds/billets-partenaires.html?p=' + encodeURIComponent(pid);
+
+  rpc('super_event_visites_total', {p_se:'se-nds-2026'})
+    .then(function(total){
+      var el = document.getElementById('visites-total');
+      if(el && total != null) el.textContent = '+' + (Math.floor(total/100)*100).toLocaleString('fr-FR');
+    })
+    .catch(function(){});
 
   /* Chiffres reels du pro rattache a ce partenaire, via station_tracking deja utilisee par
      /pro/tracking (verifiee cette session). Recherche le pro_id lie a ce partenaire. */

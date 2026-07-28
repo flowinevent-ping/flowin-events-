@@ -8428,17 +8428,19 @@ function renderRoadmap(){
    le gagnant l ouvre et l enregistre lui-meme. */
 /* Le texte vit dans /nds/mail-gagnant.js — source unique. Ne rien recopier ici. */
 function mailGagnantUrl(t){ return flowinMailGagnant.gmailUrl(t||{}); }
-function ptMailRemerciement(p){
+function ptMailRemerciement(p, totalVisites){
   var lien = location.origin + '/nds/bilan/email-partenaire.html?p=' + encodeURIComponent(p.id);
+  var visites = totalVisites ? ('+'+(Math.floor(totalVisites/100)*100).toLocaleString('fr-FR')+' visites sur l\'application Flowin') : null;
   var L = [
     'Bonjour,','',
     'Merci d avoir participe au grand jeu des Nuits du Sud 2026.',
+    (visites ? visites+' au total sur l operation : le trafic etait bien la.' : null),
     'Voici le bilan de l operation, avec les chiffres et la marche a suivre pour vos gagnants :','',
     '   '+lien,'',
     'CE QUI VA SE PASSER MAINTENANT','',
-    'Nous appelons chaque gagnant un par un. A chaque gagnant confirme, vous recevrez',
-    'un email avec ses coordonnees et son billet, celui qu il vous presentera en boutique.',
-    'Vous n avez rien a faire d ici la.','',
+    'Nous contactons chaque gagnant, un par un, pour l informer de son gain. A chaque gagnant',
+    'confirme, vous recevrez un email avec ses coordonnees et son billet, celui qu il vous',
+    'presentera en boutique. Vous n avez rien a faire d ici la.','',
     'QUAND UN CLIENT SE PRESENTERA','',
     '   1. Il vous montre son billet, papier ou telephone',
     '   2. Vous scannez le QR code avec votre appareil photo',
@@ -8447,18 +8449,24 @@ function ptMailRemerciement(p){
     'Un billet ne peut etre valide qu une seule fois.','',
     'VOTRE CODE DE VALIDATION est indique sur la page ci-dessus.',
     'Il est personnel : ne le communiquez pas a vos clients.','',
-    'Merci encore, et a bientot.','',
+    'On s occupe de tout, de A a Z : a vous, on ne demande rien de plus que d accueillir vos',
+    'gagnants avec le sourire. Belle reussite a vous !','',
     'Les Nuits du Sud & Flowin',
     'flowinevent@gmail.com - 06 16 35 49 36'
-  ];
+  ].filter(function(x){ return x !== null; });
   return 'https://mail.google.com/mail/?view=cm&fs=1'
     + (p.email ? '&to='+encodeURIComponent(p.email) : '')
     + '&su='+encodeURIComponent('Merci pour votre participation - Nuits du Sud 2026')
     + '&body='+encodeURIComponent(L.join('\n'));
 }
-function ptEnvoiRemerciement(pid){
+async function ptEnvoiRemerciement(pid){
   var p = findPartner(pid); if(!p) return;
-  window.open(ptMailRemerciement(p),'_blank','noopener');
+  var total = null;
+  try{
+    var r = await fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/super_event_visites_total',{method:'POST',headers:{apikey:FLOWIN_SUPA_ANON,Authorization:'Bearer '+FLOWIN_SUPA_ANON,'Content-Type':'application/json'},body:JSON.stringify({p_se:'se-nds-2026'})});
+    total = r.ok ? await r.json() : null;
+  }catch(e){}
+  window.open(ptMailRemerciement(p, total),'_blank','noopener');
 }
 function ptPinHtml(p){
   var pin = (p && (p.code_pin || p.codePin)) || '';
