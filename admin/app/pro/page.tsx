@@ -54,10 +54,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
       </div>
 
       <div style={{ ...card, background: '#F8FAFC', fontSize: 12.5, color: '#64748B', lineHeight: 1.6 }}>
-        Espace Pro brandé (identité Flowin Pro) — connecté aux vraies données de votre compte{proId ? '' : ' (ajoutez ?pro=VOTRE_ID pour cibler un compte)'}.
-        {' '}Les écrans jeu / events / lots / CRM / tracking / super arrivent au même design. Aperçu complet du parcours :{' '}
-        <a href="/schemas/flowin-dashboard-pro.html" target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>desktop</a>{' · '}
-        <a href="/schemas/flowin-pro-mobile.html" target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>mobile</a>.
+        Espace Pro connecté aux données réelles de votre compte{proId ? '' : ' (ajoutez ?pro=VOTRE_ID pour cibler un compte)'}.
       </div>
     </ProShell>
   )
