@@ -37,7 +37,7 @@ const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0
 const btnPrimary: React.CSSProperties = { background: ACC, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 22px', fontWeight: 800, fontSize: 14, cursor: 'pointer' }
 const btnGhost: React.CSSProperties = { background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 12, padding: '12px 20px', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: '#0F172A' }
 
-export default function CreerAnimationWizard({ proId, partenaireId, banqueQuizExistante }: { proId: string; partenaireId: string | null; banqueQuizExistante: Banque[] }) {
+export default function CreerAnimationWizard({ proId, partenaireId, proName, banqueQuizExistante }: { proId: string; partenaireId: string | null; proName: string; banqueQuizExistante: Banque[] }) {
   const router = useRouter()
   const [etape, setEtape] = useState(1)
   const [module_, setModule] = useState<string | null>(null)
@@ -147,7 +147,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, banqueQuizEx
             {banques.filter(b => !(b.tags || []).includes('bonus')).length === 0 && (
               <div style={{ fontSize: 13, ...MUTED }}>Aucune banque pour l&apos;instant.</div>
             )}
-            <a href={`/pro/banques/nouvelle${q}&tags=quiz`} target="_blank" rel="noreferrer" style={{ fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 4 }}>
+            <a href={`/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 4 }}>
               + Créer une nouvelle banque (nouvel onglet)
             </a>
           </div>
@@ -257,7 +257,12 @@ export default function CreerAnimationWizard({ proId, partenaireId, banqueQuizEx
             <a
               style={{ ...btnGhost, textDecoration: 'none', display: 'inline-block', marginBottom: 8, borderColor: ACC, color: ACC }}
               target="_blank" rel="noreferrer"
-              href={`https://mail.google.com/mail/?view=cm&fs=1&to=flowinevent@gmail.com&su=${encodeURIComponent('Assistance tracking — ' + (nom || 'nouvelle animation'))}&body=${encodeURIComponent(`Bonjour,\n\nLe partenaire ${proId} sollicite votre assistance pour la mise en place du lien de tracking sur son animation « ${nom || '—'} ».\n\nVeuillez le contacter.`)}`}
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=flowinevent@gmail.com&su=${encodeURIComponent('Assistance tracking — ' + (proName || nom || 'nouvelle animation'))}&body=${encodeURIComponent(
+                `Bonjour,\n\n${proName || 'Un partenaire'} sollicite votre assistance pour la mise en place du lien de tracking sur son animation « ${nom || '—'} ».\n\n` +
+                `Merci de nous recontacter pour la mise en place du QR code de tracking.\n\n` +
+                `Nos coordonnées :\n   Téléphone : \n   Meilleur moment pour appeler : \n\n` +
+                `Merci de nous répondre rapidement.`
+              )}`}
             >
               ✉️ Solliciter l&apos;assistance Flowin pour le tracking
             </a>
@@ -300,7 +305,11 @@ export default function CreerAnimationWizard({ proId, partenaireId, banqueQuizEx
             <div style={{ fontSize: 22, fontWeight: 900, margin: '8px 0 6px', letterSpacing: '-.4px' }}>{nom}</div>
             <div style={{ fontSize: 13, opacity: 0.9 }}>{dateD && dateF ? `Du ${dateD} au ${dateF}` : 'Bientôt disponible'}</div>
             <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-block' }}>🎁 {lotNom}</div>
-            <div style={{ marginTop: 14, fontSize: 11, opacity: 0.75 }}>QR code ajouté dès sa génération par notre équipe</div>
+            <div style={{ marginTop: 14, fontSize: 11.5, opacity: 0.85, display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {diffPhysique && <div>📍 QR code physique — en attente de génération par notre équipe</div>}
+              {diffDigital && <div>🔗 Lien digital — en attente de génération par notre équipe</div>}
+              {diffQr && <div>📊 QR de tracking — en attente de mise en place</div>}
+            </div>
           </div>
           <style>{`@media print{ body *{visibility:hidden} #visuel-annonce,#visuel-annonce *{visibility:visible} #visuel-annonce{position:fixed;inset:0;border-radius:0} }`}</style>
           <button style={{ ...btnGhost, width: '100%', marginBottom: 12 }} onClick={() => window.print()}>⬇ Télécharger / imprimer ce visuel</button>
