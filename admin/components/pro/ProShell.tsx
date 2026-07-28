@@ -1,9 +1,19 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 
 /**
  * Coquille brandee de l'espace Pro (identite Flowin Pro de la maquette validee).
  * Sidebar sombre, accent violet, en-tete pro. Utilisee par les ecrans /pro/*.
  * Les items non encore portes sont affiches en "bientot" (pas de 404).
+ *
+ * Ajout (28/07/2026) : responsive mobile. La sidebar fixe de 248px ecrasait le contenu
+ * sur les ecrans etroits (aucun media query n existait -- constate sur capture d ecran
+ * mobile reelle). En dessous de 860px, la sidebar devient un tiroir masque par defaut,
+ * ouvert par un bouton hamburger dans la barre du haut. Aucun pattern mobile equivalent
+ * trouve cote SA (dashboard.tsx, outil interne desktop-only) : construit ici pour Pro
+ * specifiquement, memes couleurs/icones que la version desktop deja validee.
  */
 interface NavItem { key: string; label: string; icon: string; route?: string; group: string }
 const NAV: NavItem[] = [
@@ -37,39 +47,63 @@ function Icon({ k }: { k: string }) {
 export default function ProShell({ proName, proId, active, children }: { proName: string; proId: string; active: string; children: React.ReactNode }) {
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const groups = Array.from(new Set(NAV.map(n => n.group)))
+  const [open, setOpen] = useState(false)
+
+  const sidebar = (
+    <aside className="pro-sidebar" style={{ width: 248, flexShrink: 0, background: `linear-gradient(180deg,${SB},${SB2})`, color: 'rgba(255,255,255,.78)', padding: '20px 14px', height: '100dvh', overflowY: 'auto' }}>
+      <div style={{ fontWeight: 900, fontSize: 20, color: '#fff', letterSpacing: '-.5px', padding: '0 8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: ACCENT, marginRight: 8, verticalAlign: 'middle' }} />Flow<span style={{ color: ACCENT }}>in</span> Pro</span>
+        <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,.6)', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>×</button>
+      </div>
+      <div style={{ background: 'rgba(168,85,247,.16)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 12, padding: '10px 12px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 9 }}>
+        <span style={{ fontSize: 10, fontWeight: 800, background: ACCENT_D, color: '#fff', borderRadius: 6, padding: '2px 7px' }}>PRO</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{proName || 'Mon établissement'}</span>
+      </div>
+      {groups.map(g => (
+        <div key={g} style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', color: 'rgba(255,255,255,.42)', padding: '0 8px 6px' }}>{g}</div>
+          {NAV.filter(n => n.group === g).map(n => {
+            const on = n.key === active
+            const inner = (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 10, marginBottom: 2, background: on ? 'rgba(168,85,247,.20)' : 'transparent', color: on ? '#fff' : (n.route ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.34)'), fontSize: 13.5, fontWeight: on ? 700 : 500 }}>
+                <span style={{ width: 30, height: 30, borderRadius: 9, background: on ? ACCENT_D : 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: on ? '#fff' : 'rgba(255,255,255,.7)' }}><Icon k={n.icon} /></span>
+                <span style={{ flex: 1 }}>{n.label}</span>
+                {!n.route && <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.35)' }}>bientôt</span>}
+              </div>
+            )
+            return n.route
+              ? <Link key={n.key} href={`${n.route}${q}`} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>{inner}</Link>
+              : <div key={n.key}>{inner}</div>
+          })}
+        </div>
+      ))}
+    </aside>
+  )
+
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', background: '#F1F5F9', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif', color: '#0F172A' }}>
-      <aside style={{ width: 248, flexShrink: 0, background: `linear-gradient(180deg,${SB},${SB2})`, color: 'rgba(255,255,255,.78)', padding: '20px 14px', position: 'sticky', top: 0, height: '100dvh', overflowY: 'auto' }}>
-        <div style={{ fontWeight: 900, fontSize: 20, color: '#fff', letterSpacing: '-.5px', padding: '0 8px 16px' }}>
-          <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: ACCENT, marginRight: 8, verticalAlign: 'middle' }} />
-          Flow<span style={{ color: ACCENT }}>in</span> Pro
-        </div>
-        <div style={{ background: 'rgba(168,85,247,.16)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 12, padding: '10px 12px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 9 }}>
-          <span style={{ fontSize: 10, fontWeight: 800, background: ACCENT_D, color: '#fff', borderRadius: 6, padding: '2px 7px' }}>PRO</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{proName || 'Mon établissement'}</span>
-        </div>
-        {groups.map(g => (
-          <div key={g} style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', color: 'rgba(255,255,255,.42)', padding: '0 8px 6px' }}>{g}</div>
-            {NAV.filter(n => n.group === g).map(n => {
-              const on = n.key === active
-              const inner = (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 10, marginBottom: 2, background: on ? 'rgba(168,85,247,.20)' : 'transparent', color: on ? '#fff' : (n.route ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.34)'), fontSize: 13.5, fontWeight: on ? 700 : 500 }}>
-                  <span style={{ width: 30, height: 30, borderRadius: 9, background: on ? ACCENT_D : 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: on ? '#fff' : 'rgba(255,255,255,.7)' }}><Icon k={n.icon} /></span>
-                  <span style={{ flex: 1 }}>{n.label}</span>
-                  {!n.route && <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.35)' }}>bientôt</span>}
-                </div>
-              )
-              return n.route ? <Link key={n.key} href={`${n.route}${q}`} style={{ textDecoration: 'none' }}>{inner}</Link> : <div key={n.key}>{inner}</div>
-            })}
-          </div>
-        ))}
-      </aside>
+    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: '#F1F5F9', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif', color: '#0F172A' }}>
+      <style>{`
+        .pro-sidebar { position: sticky; top: 0; }
+        .pro-hamburger, .pro-drawer-backdrop { display: none; }
+        @media (max-width: 860px) {
+          .pro-sidebar { position: fixed; left: 0; top: 0; z-index: 40; transform: translateX(-100%); transition: transform .22s ease; }
+          .pro-shell.open .pro-sidebar { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,.25); }
+          .pro-drawer-close { display: block !important; }
+          .pro-hamburger { display: inline-flex !important; }
+          .pro-shell.open .pro-drawer-backdrop { display: block; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
+          .pro-main-pad { padding: 18px !important; }
+        }
+      `}</style>
+      {sidebar}
+      <div className="pro-drawer-backdrop" onClick={() => setOpen(false)} />
       <main style={{ flex: 1, minWidth: 0 }}>
         <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '14px 26px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748B' }}>
+          <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Ouvrir le menu" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginRight: 4 }}>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0F172A" strokeWidth={2} strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+          </button>
           <span style={{ fontWeight: 600 }}>Flowin Pro</span><span>›</span><span style={{ fontWeight: 800, color: '#0F172A' }}>{NAV.find(n => n.key === active)?.label ?? 'Accueil'}</span>
         </div>
-        <div style={{ padding: '26px', maxWidth: 1120 }}>{children}</div>
+        <div className="pro-main-pad" style={{ padding: '26px', maxWidth: 1120 }}>{children}</div>
       </main>
     </div>
   )
