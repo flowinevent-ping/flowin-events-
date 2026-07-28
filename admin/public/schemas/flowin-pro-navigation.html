@@ -99,6 +99,8 @@
   td{padding:11px 10px;border-bottom:1px solid var(--border);font-size:13px}
   tr.rowlink{cursor:pointer}
   tr.rowlink:hover td{background:#FAF5FF}
+  div.rowlink{cursor:pointer;transition:border-color .12s,transform .12s}
+  div.rowlink:hover{border-color:rgba(168,85,247,.5) !important;transform:translateY(-1px)}
   .tbl-wrap{overflow-x:auto}
 
   .muted{color:var(--muted)}
@@ -448,43 +450,47 @@
 
     <!-- ============ SUPER EVENT — detail station (drill-down) ============ -->
     <div class="view" id="v-station">
-      <a class="back" onclick="goTab('super')">← Retour à mes stations</a>
+      <a class="back" id="back-station" onclick="goTab('super')">← Retour à mes stations</a>
       <h1 id="statTitle">NDS · Caisse 2</h1>
       <div class="sub" style="margin-bottom:16px">Détail par jour — même source que le Super Admin.</div>
 
-      <div class="chips">
+      <div class="chips" id="statChips">
         <div class="chip on">09 juil.</div><div class="chip">10 juil.</div><div class="chip">11 juil.</div>
         <div class="chip">12 juil.</div><div class="chip">13 juil.</div><div class="chip">…</div><div class="chip">18 juil.</div>
       </div>
 
       <div class="grid grid-kpi" style="grid-template-columns:repeat(4,1fr)">
-        <div class="card kpi"><div class="v acc">148</div><div class="k">joueurs</div></div>
-        <div class="card kpi"><div class="v">162</div><div class="k">parties commencées</div></div>
-        <div class="card kpi"><div class="v">456</div><div class="k">flashs QR</div></div>
-        <div class="card kpi"><div class="v">54</div><div class="k">ont rejoué</div></div>
+        <div class="card kpi"><div class="v acc" id="statJ">148</div><div class="k">joueurs</div></div>
+        <div class="card kpi"><div class="v" id="statP">162</div><div class="k">parties commencées</div></div>
+        <div class="card kpi"><div class="v" id="statF">456</div><div class="k">flashs QR</div></div>
+        <div class="card kpi"><div class="v" id="statR">54</div><div class="k">ont rejoué</div></div>
       </div>
 
-      <div class="card">
-        <div class="eyebrow">Taux de finition du quiz</div>
-        <div class="bar-row"><div class="top"><span>Ont ouvert le quiz</span><span><b>162</b></span></div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div></div>
-        <div class="bar-row"><div class="top"><span>Sont allés au bout</span><span><b>141 · 87%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:87%"></div></div></div>
-        <div class="bar-row"><div class="top"><span>Coupure réseau pendant la partie</span><span><b>6 · 4%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:4%;background:#EA580C"></div></div></div>
+      <div id="statEmpty" class="card empty" style="display:none">Aucune activité enregistrée sur cette station sur la période. Le QR n'a pas été flashé, ou aucune partie n'a été commencée.</div>
+
+      <div id="statDetail">
+        <div class="card">
+          <div class="eyebrow">Taux de finition du quiz</div>
+          <div class="bar-row"><div class="top"><span>Ont ouvert le quiz</span><span><b id="statOuvert">162</b></span></div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div></div>
+          <div class="bar-row"><div class="top"><span>Sont allés au bout</span><span><b id="statFini">141 · 87%</b></span></div><div class="bar-track"><div class="bar-fill" id="statFiniBar" style="width:87%"></div></div></div>
+          <div class="bar-row"><div class="top"><span>Coupure réseau pendant la partie</span><span><b id="statCoupure">6 · 4%</b></span></div><div class="bar-track"><div class="bar-fill" id="statCoupureBar" style="width:4%;background:#EA580C"></div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">Scores du quiz</div>
+          <div class="bar-row"><div class="top"><span>Score moyen</span><span><b>7,4 / 10</b></span></div><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">Réponses aux questions bonus</div>
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:4px">Ton moment préféré des Nuits du Sud ?</div>
+          <div class="bar-row"><div class="top"><span>Les concerts en plein air</span><span><b>61%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:61%"></div></div></div>
+          <div class="bar-row"><div class="top"><span>L'ambiance / les rencontres</span><span><b>27%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:27%"></div></div></div>
+          <div class="bar-row"><div class="top"><span>La découverte des commerces</span><span><b>12%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:12%"></div></div></div>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="eyebrow">Scores du quiz</div>
-        <div class="bar-row"><div class="top"><span>Score moyen</span><span><b>7,4 / 10</b></span></div><div class="bar-track"><div class="bar-fill" style="width:74%"></div></div></div>
-      </div>
-
-      <div class="card">
-        <div class="eyebrow">Réponses aux questions bonus</div>
-        <div style="font-size:12.5px;font-weight:700;margin-bottom:4px">Ton moment préféré des Nuits du Sud ?</div>
-        <div class="bar-row"><div class="top"><span>Les concerts en plein air</span><span><b>61%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:61%"></div></div></div>
-        <div class="bar-row"><div class="top"><span>L'ambiance / les rencontres</span><span><b>27%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:27%"></div></div></div>
-        <div class="bar-row"><div class="top"><span>La découverte des commerces</span><span><b>12%</b></span></div><div class="bar-track"><div class="bar-fill" style="width:12%"></div></div></div>
-      </div>
-
-      <div class="note-box">Réutilise <code>fetchJours()</code> + <code>fetchStations(jour, se)</code>, déjà génériques — aucun nom de station ni de question codé en dur, marche pour n'importe quel point / n'importe quelle banque de questions.</div>
+      <div class="note-box">Réutilise <code>fetchJours()</code> + <code>fetchStations(jour, se)</code>, déjà génériques — aucun nom de station ni de question codé en dur, marche pour n'importe quel point / n'importe quelle banque de questions. KPI en haut : réels. Finition / scores / réponses bonus ci-dessous : illustratifs sur ce prototype, à rebrancher sur <code>se_reponses</code> / <code>visites.etape</code> comme déjà fait dans <code>/pro/super/[event]</code> réel.</div>
     </div>
 
   </div>
@@ -520,51 +526,83 @@ function goTab(name, el){
   document.querySelector('.viewport').scrollTo({top:0,behavior:'instant'});
 }
 
-/* Stations reelles (station_tracking, p_pro='pro-nds-2026') */
+/* Stations reelles — station_tracking(se-nds-2026, p_pro='pro-nds-2026'), toutes les 12 stations
+   du pro, y compris celles a zero activite (absentes du RPC car aucun flash n a ete enregistre). */
 const STATIONS = [
-  {id:'ev-nds-caisse-2', nom:"NDS · Caisse 2", j:148, p:162, f:456},
-  {id:'ev-nds-tablette-2', nom:"NDS · Brigade Verte 2", j:144, p:149, f:426},
-  {id:'ev-nds-bar-1', nom:"NDS · Bar 1", j:111, p:126, f:332},
-  {id:'ev-nds-caisse-1', nom:"NDS · Caisse 1", j:108, p:126, f:314},
-  {id:'ev-nds-tablette-3', nom:"NDS · Brigade Verte 3", j:113, p:123, f:291},
-  {id:'ev-nds-ecrans', nom:"NDS · L'Écran", j:101, p:112, f:286},
-  {id:'ev-nds-bar-3', nom:"NDS · Bar 3", j:73, p:88, f:206},
-  {id:'ev-nds-bar-2', nom:"NDS · Bar 2", j:49, p:58, f:121},
-  {id:'ev-nds-tablette-1', nom:"NDS · Brigade Verte 1", j:11, p:13, f:33},
-  {id:'ev-nds-caisse-3', nom:"NDS · Caisse 3", j:1, p:2, f:19},
+  {id:'ev-nds-caisse-2',   nom:"NDS · Caisse 2",        j:148, p:162, f:456, rejoue:54, pic:20},
+  {id:'ev-nds-tablette-2', nom:"NDS · Brigade Verte 2", j:144, p:149, f:426, rejoue:33, pic:19},
+  {id:'ev-nds-bar-1',      nom:"NDS · Bar 1",           j:111, p:126, f:332, rejoue:76, pic:21},
+  {id:'ev-nds-caisse-1',   nom:"NDS · Caisse 1",        j:108, p:126, f:314, rejoue:56, pic:19},
+  {id:'ev-nds-tablette-3', nom:"NDS · Brigade Verte 3", j:113, p:123, f:291, rejoue:24, pic:19},
+  {id:'ev-nds-ecrans',     nom:"NDS · L'Écran",         j:101, p:112, f:286, rejoue:27, pic:21},
+  {id:'ev-nds-bar-3',      nom:"NDS · Bar 3",           j:73,  p:88,  f:206, rejoue:48, pic:20},
+  {id:'ev-nds-bar-2',      nom:"NDS · Bar 2",           j:49,  p:58,  f:121, rejoue:42, pic:22},
+  {id:'ev-nds-tablette-1', nom:"NDS · Brigade Verte 1", j:11,  p:13,  f:33,  rejoue:4,  pic:18},
+  {id:'ev-nds-caisse-3',   nom:"NDS · Caisse 3",        j:1,   p:2,   f:19,  rejoue:1,  pic:22},
+  {id:'ev-nds-bar',        nom:"NDS · Le Bar",          j:0,   p:0,   f:14,  rejoue:0,  pic:9},
+  {id:'ev-nds-tablette',   nom:"NDS · Brigade Verte",   j:0,   p:0,   f:3,   rejoue:0,  pic:2},
+  {id:'ev-nds-digitale',   nom:"NDS · Digital",         j:0,   p:0,   f:0,   rejoue:0,  pic:null},
+  {id:'ev-nds-caisses',    nom:"NDS · Les Caisses",     j:0,   p:0,   f:0,   rejoue:0,  pic:null},
 ];
+const STATION_BY_ID = {};
+STATIONS.forEach(s=>STATION_BY_ID[s.id]=s);
+
 const rows = document.getElementById('stationRows');
-STATIONS.forEach(s=>{
+STATIONS.filter(s=>s.f>0).forEach(s=>{
   const tr = document.createElement('tr');
   tr.className = 'rowlink';
-  tr.onclick = ()=>openStation(s);
+  tr.onclick = ()=>openStation(s,'super');
   tr.innerHTML = `<td style="color:var(--acc);font-weight:800">${s.nom} →</td><td>${s.j}</td><td>${s.p}</td><td class="muted">${s.f}</td>`;
   rows.appendChild(tr);
 });
-function openStation(s){
+
+/* Vue detail station — reutilisee depuis "Mes events" ET depuis "Super Event", memes donnees. */
+function openStation(s, from){
   document.getElementById('statTitle').textContent = s.nom;
+  document.getElementById('statJ').textContent = s.j;
+  document.getElementById('statP').textContent = s.p;
+  document.getElementById('statF').textContent = s.f;
+  document.getElementById('statR').textContent = s.rejoue;
+  document.getElementById('back-station').onclick = ()=>goTab(from === 'events' ? 'events' : 'super');
+  document.getElementById('back-station').textContent = from === 'events' ? '← Retour à mes events' : '← Retour à mes stations';
+
+  const hasActivite = s.p > 0;
+  document.getElementById('statEmpty').style.display = hasActivite ? 'none' : 'block';
+  document.getElementById('statDetail').style.display = hasActivite ? 'block' : 'none';
+  document.getElementById('statChips').style.display = hasActivite ? 'flex' : 'none';
+
+  if(hasActivite){
+    const fini = Math.round(s.p * 0.87), finiPct = 87;
+    const coupure = Math.max(0, Math.round(s.p * 0.04)), coupurePct = 4;
+    document.getElementById('statOuvert').textContent = s.p;
+    document.getElementById('statFini').textContent = fini + ' · ' + finiPct + '%';
+    document.getElementById('statFiniBar').style.width = finiPct + '%';
+    document.getElementById('statCoupure').textContent = coupure + ' · ' + coupurePct + '%';
+    document.getElementById('statCoupureBar').style.width = coupurePct + '%';
+  }
   goTab('station');
 }
 
-/* Events reels (pro-nds-2026) */
+/* Events reels (pro-nds-2026) — les 12 stations pointent vers les memes objets STATIONS,
+   fusion des chiffres reels ET du statut (etat/dates) tel qu affiche sur /pro/events. */
 const EVENTS = [
   {nom:"Nuits du Sud 2026", id:"ev-nds-2026", station:false, etat:'passe', dates:"09 → 18 juil.", j:617},
-  {nom:"NDS · Caisse 2", id:"ev-nds-caisse-2", station:true, etat:'passe', dates:"09 → 18 juil.", j:148},
-  {nom:"NDS · Brigade Verte 2", id:"ev-nds-tablette-2", station:true, etat:'passe', dates:"09 → 18 juil.", j:144},
-  {nom:"NDS · Bar 1", id:"ev-nds-bar-1", station:true, etat:'passe', dates:"09 → 18 juil.", j:111},
-  {nom:"NDS · Caisse 1", id:"ev-nds-caisse-1", station:true, etat:'passe', dates:"09 → 18 juil.", j:108},
-  {nom:"NDS · Brigade Verte 3", id:"ev-nds-tablette-3", station:true, etat:'passe', dates:"09 → 18 juil.", j:113},
-  {nom:"NDS · L'Écran", id:"ev-nds-ecrans", station:true, etat:'passe', dates:"09 → 18 juil.", j:101},
-  {nom:"NDS · Digital", id:"ev-nds-digitale", station:true, etat:'passe', dates:"09 → 18 juil.", j:0},
-  {nom:"NDS · Bar 3", id:"ev-nds-bar-3", station:true, etat:'passe', dates:"09 → 18 juil.", j:73},
-  {nom:"NDS · Bar 2", id:"ev-nds-bar-2", station:true, etat:'passe', dates:"09 → 18 juil.", j:49},
-  {nom:"NDS · Brigade Verte 1", id:"ev-nds-tablette-1", station:true, etat:'passe', dates:"09 → 18 juil.", j:11},
-  {nom:"NDS · Caisse 3", id:"ev-nds-caisse-3", station:true, etat:'passe', dates:"09 → 18 juil.", j:1},
+  {nom:"NDS · Caisse 2", id:"ev-nds-caisse-2", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Brigade Verte 2", id:"ev-nds-tablette-2", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Bar 1", id:"ev-nds-bar-1", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Caisse 1", id:"ev-nds-caisse-1", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Brigade Verte 3", id:"ev-nds-tablette-3", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · L'Écran", id:"ev-nds-ecrans", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Digital", id:"ev-nds-digitale", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Bar 3", id:"ev-nds-bar-3", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Bar 2", id:"ev-nds-bar-2", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Brigade Verte 1", id:"ev-nds-tablette-1", station:true, etat:'passe', dates:"09 → 18 juil."},
+  {nom:"NDS · Caisse 3", id:"ev-nds-caisse-3", station:true, etat:'passe', dates:"09 → 18 juil."},
   {nom:"À la Fût", id:"ev-nds-alafut", station:false, etat:'archive', dates:"sans date", j:0},
-  {nom:"NDS · Le Bar", id:"ev-nds-bar", station:true, etat:'archive', dates:"sans date", j:0},
-  {nom:"NDS · Les Caisses", id:"ev-nds-caisses", station:true, etat:'archive', dates:"sans date", j:0},
+  {nom:"NDS · Le Bar", id:"ev-nds-bar", station:true, etat:'archive', dates:"sans date"},
+  {nom:"NDS · Les Caisses", id:"ev-nds-caisses", station:true, etat:'archive', dates:"sans date"},
   {nom:"DEKRA Vence", id:"ev-nds-dekra", station:false, etat:'archive', dates:"sans date", j:0},
-  {nom:"NDS · Brigade Verte", id:"ev-nds-tablette", station:true, etat:'archive', dates:"sans date", j:0},
+  {nom:"NDS · Brigade Verte", id:"ev-nds-tablette", station:true, etat:'archive', dates:"sans date"},
   {nom:"VIP Coiffure", id:"ev-nds-vip-coiffure", station:false, etat:'archive', dates:"sans date", j:0},
 ];
 const COLS = [
@@ -582,11 +620,15 @@ COLS.forEach(c=>{
     <span style="width:8px;height:8px;border-radius:50%;background:${c.dot}"></span> ${c.label} <span style="margin-left:auto">${list.length}</span></div>`;
   if(list.length===0){ inner += '<div class="empty">—</div>'; }
   list.forEach(e=>{
-    inner += `<div style="background:#fff;border:${e.station?'1px solid var(--border)':'1.5px solid rgba(168,85,247,.45)'};border-radius:11px;padding:11px 12px;margin-bottom:9px">
+    const st = STATION_BY_ID[e.id];
+    const joueurs = e.station ? (st ? st.j : 0) : (e.j || 0);
+    const clickable = e.station; // les stations s'ouvrent toujours (activite visible, meme a zero) ; l'event autonome reste une carte simple pour l'instant
+    inner += `<div class="${clickable ? 'rowlink' : ''}" style="background:#fff;border:${e.station?'1px solid var(--border)':'1.5px solid rgba(168,85,247,.45)'};border-radius:11px;padding:11px 12px;margin-bottom:9px"${clickable ? ` onclick="openStation(STATION_BY_ID['${e.id}'],'events')"` : ''}>
       <div style="font-weight:700;font-size:13px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap">
         <span>${e.nom}</span>${e.station?'<span class="pill station">STATION</span>':'<span class="pill event">EVENT</span>'}
+        ${clickable ? '<span style="margin-left:auto;color:var(--acc);font-weight:800;font-size:12px">Voir l\'activité →</span>' : ''}
       </div>
-      <div class="muted" style="font-size:11.5px;margin-top:3px">${e.dates}${e.j?' · '+e.j+' joueurs':''}</div>
+      <div class="muted" style="font-size:11.5px;margin-top:3px">${e.dates}${joueurs ? ' · '+joueurs+' joueurs' : (e.station ? ' · aucune activité' : '')}</div>
       <div style="font-size:10.5px;color:var(--muted2);margin-top:3px;font-family:ui-monospace,monospace">${e.id}</div>
     </div>`;
   });
