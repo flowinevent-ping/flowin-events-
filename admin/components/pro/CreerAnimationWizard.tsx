@@ -83,6 +83,7 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
 
   return (
     <div>
+      <a href={`/pro/events${q}`} style={{ fontSize: 12.5, color: MUTED.color, fontWeight: 700, textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>← Quitter sans créer</a>
       <div style={{ borderRadius: 18, padding: '18px 20px', color: '#fff', marginBottom: 18, background: 'linear-gradient(135deg,#7C2D92 0%,#A855F7 100%)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>CRÉER MON ANIMATION</div>
         <div style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 2px' }}>Étape {etape} sur {totalEtapes}</div>
@@ -150,6 +151,23 @@ export default function CreerAnimationWizard({ proId, banqueQuizExistante }: { p
               + Créer une nouvelle banque (nouvel onglet)
             </a>
           </div>
+          {banqueId && (() => {
+            const b = banques.find(x => x.id === banqueId)
+            const apercu = (b?.questions ?? []).slice(0, 3)
+            if (!apercu.length) return null
+            return (
+              <div style={{ marginTop: 16, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
+                <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>
+                  Aperçu — {apercu.length} question{apercu.length > 1 ? 's' : ''} sur {b?.questions.length}
+                </div>
+                {apercu.map((qq, i) => (
+                  <div key={qq.id} style={{ fontSize: 12.5, marginBottom: i < apercu.length - 1 ? 8 : 0 }}>
+                    <b>{i + 1}.</b> {qq.type === 'qcm' ? qq.texte : qq.label}
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
             <button style={btnPrimary} onClick={suivant}>{banqueId ? 'Suivant →' : 'Continuer sans banque →'}</button>
