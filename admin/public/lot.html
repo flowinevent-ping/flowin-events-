@@ -97,6 +97,15 @@
   .foot .by img{height:24px;width:auto}
   .foot .ct{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.62);line-height:1.6}
   .foot .ct b{color:rgba(255,255,255,.9)}
+  .btn-dl{width:100%;margin-top:10px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--vio);
+    background:#fff;color:var(--vio);font-weight:800;font-size:14px;cursor:pointer}
+  .btn-dl:active{background:#faf5fc}
+  @media print{
+    body{background:#fff}
+    .hd,.field,.btn-dl,#btn-valider{display:none!important}
+    .wrap{padding:0}
+    .tk{box-shadow:none}
+  }
 </style>
 </head>
 <body>
@@ -146,6 +155,7 @@
           <div id="v-pin-err" class="err"></div>
         </div>
         <button id="btn-valider">Valider le retrait du lot</button>
+        <button class="btn-dl" onclick="window.print()" type="button">Télécharger / imprimer le billet</button>
       </div>
 
       <div id="s-deja" class="state">
