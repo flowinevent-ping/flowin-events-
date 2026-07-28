@@ -129,6 +129,21 @@
         <div class="center">Lecture du billet…</div>
       </div>
 
+      <div id="s-pin" class="state">
+        <div class="shop">
+          <img id="p-logo" alt="">
+          <div class="lb">Commerce partenaire</div>
+          <div class="nm" id="p-part"></div>
+        </div>
+        <div class="field">
+          <label for="p-code">Code professionnel</label>
+          <div class="sub" style="margin:0 0 10px">Reçu par email lors de votre inscription. Il autorise la validation des billets de votre établissement.</div>
+          <input id="p-code" type="text" inputmode="numeric" autocomplete="off" placeholder="0000" maxlength="4">
+          <div id="p-code-err" class="err"></div>
+        </div>
+        <button id="btn-pin">Accéder à la validation</button>
+      </div>
+
       <div id="s-valable" class="state">
         <div class="shop">
           <img id="v-logo" alt="">
@@ -363,14 +378,45 @@
     });
   }
 
+  var PENDING = null; // donnees du billet en attente d affichage post-PIN
+
+  function accederApresPin(){
+    var b = $('btn-pin'), pinEl = $('p-code'), err = $('p-code-err');
+    var pin = pinEl ? pinEl.value.trim() : '';
+    if(err){ err.style.display='none'; err.textContent=''; }
+    b.disabled = true; b.textContent = 'Vérification…';
+    rpc('verifier_pin_pro', { p_token: TOK, p_pin: pin }).then(function(ok){
+      b.disabled = false; b.textContent = 'Accéder à la validation';
+      if (ok === true) { renderValable(PENDING); $('btn-valider').addEventListener('click', valider); }
+      else {
+        if(err){ err.textContent = 'Code professionnel incorrect.'; err.style.display='block'; }
+        if(pinEl){ pinEl.focus(); pinEl.select(); }
+      }
+    }).catch(function(){
+      b.disabled = false; b.textContent = 'Accéder à la validation';
+      if(err){ err.textContent = 'Connexion impossible, réessayez.'; err.style.display='block'; }
+    });
+  }
+
   function init(){
     if(!TOK){ show('s-introuvable'); return; }
     rpc('consulter_lot', { p_token: TOK }).then(function(res){
       var d = Array.isArray(res) ? res[0] : res;
       if (!d || !d.ok) { show('s-introuvable'); return; }
       if (d.raison === 'deja_utilise') { renderDeja(d); return; }
-      renderValable(d);
-      $('btn-valider').addEventListener('click', valider);
+      /* Porte PIN professionnel : uniquement pour les lots rattaches a un partenaire commerce.
+         Les lots de l organisateur (partenaire_id null) restent sans cette etape. */
+      if (d.partenaire) {
+        PENDING = d;
+        setLogo('p-logo', d.partenaire);
+        $('p-part').textContent = partName(d.partenaire);
+        show('s-pin');
+        $('btn-pin').addEventListener('click', accederApresPin);
+        $('p-code').addEventListener('keydown', function(e){ if (e.key === 'Enter') accederApresPin(); });
+      } else {
+        renderValable(d);
+        $('btn-valider').addEventListener('click', valider);
+      }
     }).catch(function(){ show('s-erreur'); });
   }
 
