@@ -164,6 +164,29 @@
   function dateFr(d){ try{ var p=String(d).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }catch(e){ return d; } }
   /* Le texte vit dans /nds/mail-gagnant.js — source unique. Ne rien recopier ici. */
   function partNom(pid){ var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0]; return p?p.nom:''; }
+  function partenaireEmail(pid){ var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0]; return p?p.email:''; }
+  /* Double controle demande par Romain (28/07/2026) : quand le billet gagnant part au client,
+     le partenaire recoit aussi un email lui annoncant CE gagnant precis (nom + billet), pour
+     qu il sache a l avance qui se presentera et puisse le reconnaitre en caisse. */
+  function mailPartenaireGagnantUrl(t){
+    var nomPart = partNom(t.partenaire_id);
+    var emailPart = partenaireEmail(t.partenaire_id);
+    var lien = flowinMailGagnant.lienBillet(t);
+    var sujet = 'Nouveau gagnant à valider — '+(t.lot_nom||'votre lot');
+    var L = ['Bonjour,','',
+      'Un nouveau gagnant pour votre lot chez vous :','',
+      '   '+(t.joueur_nom||'—'),
+      '   '+(t.lot_nom||''),
+      (t.ticket_code?'   N° de billet : '+t.ticket_code:''),'',
+      'Son billet, avec le QR à scanner pour valider le retrait :','',
+      '   '+lien,'',
+      'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez.','',
+      'Merci,','Les Nuits du Sud & Flowin','flowinevent@gmail.com · 06 16 35 49 36'];
+    return 'https://mail.google.com/mail/?view=cm&fs=1'
+      + (emailPart?'&to='+encodeURIComponent(emailPart):'')
+      + '&su='+encodeURIComponent(sujet)
+      + '&body='+encodeURIComponent(L.join('\n'));
+  }
   function partCond(pid, lot){
     var p=(PARTNERS||[]).filter(function(x){return x.id===pid;})[0];
     if(!p||!p.lots) return '';
@@ -265,7 +288,7 @@
 
   async function load(){
     try{
-      var pr=await fetch(SUPA+"/rest/v1/partenaires?super_event_id=eq.se-nds-2026&select=id,nom,lots&order=nom",{headers:H});
+      var pr=await fetch(SUPA+"/rest/v1/partenaires?super_event_id=eq.se-nds-2026&select=id,nom,email,lots&order=nom",{headers:H});
       PARTNERS=(await pr.json())||[];
       var tr=await fetch(SUPA+"/rest/v1/tirages?select=*&order=created_at.desc",{headers:H});
       TIRAGES=(await tr.json())||[];
@@ -283,7 +306,16 @@
   function winsFor(pred){ return TIRAGES.filter(pred); }
   // ---- Helpers unifiés soir + grand (auto : envoi, remise en jeu, remplaçant) -
   function tById(id){ id=Number(id); for(var i=0;i<TIRAGES.length;i++){ if(Number(TIRAGES[i].id)===id) return TIRAGES[i]; } return null; }
-  function envoyerParId(id){ var t=tById(id); if(!t||!t.joueur_email){ alert('Ce gagnant n\'a pas d\'email.'); return; } window.open(gmailUrl(t),'_blank','noopener'); if(t.id) marquerNotifie(t.id,true); }
+  function envoyerParId(id){
+    var t=tById(id); if(!t||!t.joueur_email){ alert('Ce gagnant n\'a pas d\'email.'); return; }
+    window.open(gmailUrl(t),'_blank','noopener');
+    if(t.id) marquerNotifie(t.id,true);
+    if(t.partenaire_id){
+      var eP = partenaireEmail(t.partenaire_id);
+      setTimeout(function(){ window.open(mailPartenaireGagnantUrl(t),'_blank','noopener'); }, 600);
+      if(!eP) console.warn('Partenaire '+t.partenaire_id+' sans email — fenêtre ouverte sans destinataire pré-rempli.');
+    }
+  }
   async function remettreEnJeu(id, on){
     id=Number(id); var t=tById(id); if(!t) return;
     if(on && !confirm('Retirer '+(t.joueur_nom||'ce gagnant')+' et remettre le lot en jeu ?\n\nIl ne sera pas re-tiré. Tu pourras tirer un remplaçant ('+((t.type==='grand')?'bouton « Tirer le reste »':'bouton « Tirer les places »')+').')) return;
