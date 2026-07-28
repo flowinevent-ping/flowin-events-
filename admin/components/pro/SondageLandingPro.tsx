@@ -1,5 +1,6 @@
 import type { SondageLanding } from '@/lib/nds'
 import { CARD, TH, TD, MUTED, ACC } from '@/lib/proui'
+import DepouillementAccordion from './DepouillementAccordion'
 
 /**
  * Questionnaire de la landing — canal de collecte HORS parcours de jeu.
@@ -84,28 +85,8 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', margin: '20px 0 10px' }}>
             Dépouillement — {total} saisie{total > 1 ? 's' : ''}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 12 }}>
-            {(s.questions ?? []).map(q => (
-              <div key={q.cle} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 13 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 800, lineHeight: 1.35, marginBottom: 2 }}>{q.libelle}</div>
-                <div style={{ fontSize: 11, ...MUTED, marginBottom: 10 }}>
-                  {q.repondants} réponse{q.repondants > 1 ? 's' : ''}{q.choix_multiple ? ' · choix multiple' : ''}
-                  {!q.libelle_trouve && <span style={{ color: '#B45309' }}> · libellé absent de la configuration</span>}
-                </div>
-                {q.reponses.map(r => (
-                  <div key={r.code} style={{ marginBottom: 7 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, marginBottom: 3 }}>
-                      <span style={r.libelle_trouve ? undefined : { fontStyle: 'italic', color: '#94A3B8' }}>{r.reponse}</span>
-                      <span style={{ fontWeight: 800, whiteSpace: 'nowrap' }}>{r.n} <span style={MUTED}>({r.pct} %)</span></span>
-                    </div>
-                    <div style={{ height: 5, borderRadius: 3, background: '#E2E8F0', overflow: 'hidden' }}>
-                      <div style={{ width: `${r.pct ?? 0}%`, height: '100%', background: `linear-gradient(90deg,#A855F7,${ACC})` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+          <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>Cliquez une question pour voir le détail des réponses.</div>
+          <DepouillementAccordion questions={s.questions} />
         </>
       )}
     </div>
