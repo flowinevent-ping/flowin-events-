@@ -1,6 +1,6 @@
 import type { SondageLanding } from '@/lib/nds'
 import { CARD, TH, TD, MUTED, ACC } from '@/lib/proui'
-import DepouillementAccordion from './DepouillementAccordion'
+import DepouillementAccordion, { ResumeVisuelDepouillement } from './DepouillementAccordion'
 
 /**
  * Questionnaire de la landing — canal de collecte HORS parcours de jeu.
@@ -85,7 +85,9 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', margin: '20px 0 10px' }}>
             Dépouillement — {total} saisie{total > 1 ? 's' : ''}
           </div>
-          <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>Cliquez une question pour voir le détail des réponses.</div>
+          <div style={{ fontSize: 12, ...MUTED, marginBottom: 12 }}>Vue d&apos;ensemble — réponse dominante par question.</div>
+          <ResumeVisuelDepouillement questions={s.questions} />
+          <div style={{ fontSize: 12, ...MUTED, margin: '18px 0 10px' }}>Cliquez une question pour voir le détail des réponses.</div>
           <DepouillementAccordion questions={s.questions} />
         </>
       )}

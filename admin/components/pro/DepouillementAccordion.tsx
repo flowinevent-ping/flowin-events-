@@ -5,6 +5,34 @@ import { MUTED, ACC } from '@/lib/proui'
 import type { SondageLanding } from '@/lib/nds'
 
 /**
+ * Resume visuel -- vue d'ensemble avant de plonger dans l'accordeon question par question.
+ * Une carte par question : sa reponse dominante + le poids en un coup d'oeil. Demande
+ * explicite (29/07/2026) : donner un panorama immediat, l'accordeon reste pour le detail.
+ */
+export function ResumeVisuelDepouillement({ questions }: { questions: SondageLanding['questions'] }) {
+  if (!questions?.length) return null
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 10 }}>
+      {questions.map(q => {
+        const top = (q.reponses ?? []).slice().sort((a, b) => b.n - a.n)[0]
+        if (!top) return null
+        const pct = top.pct ?? 0
+        return (
+          <div key={q.cle} style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 12, padding: '12px 13px' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 7, lineHeight: 1.35, minHeight: 27 }}>{q.libelle}</div>
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6, lineHeight: 1.3 }}>{top.reponse}</div>
+            <div style={{ width: '100%', height: 5, borderRadius: 99, background: '#E2E8F0', overflow: 'hidden', marginBottom: 5 }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#A855F7,${ACC})`, borderRadius: 99 }} />
+            </div>
+            <div style={{ fontSize: 11, color: '#64748B' }}>{pct} % · {q.repondants} réponse{q.repondants > 1 ? 's' : ''}</div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
  * Depouillement en accordeon -- une question ouverte a la fois, plutot que la grille
  * qui affichait toutes les questions (et toutes leurs reponses) simultanement.
  * Demande explicite de Romain (28/07/2026) : "trop d'informations d'un coup", "des

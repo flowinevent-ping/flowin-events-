@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { creerAnimation } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
+import { Ico } from '@/lib/proicons'
 
 const ICONES: Record<string, React.ReactNode> = {
   quiz: (
@@ -109,14 +110,16 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Quel jeu pour votre animation ?</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Choisissez le format que vos clients joueront.</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 12 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
             {JEUX.map(g => (
               <div
                 key={g.m}
                 onClick={() => setModule(g.m)}
                 style={{
+                  flex: '1 1 200px', maxWidth: 240, textAlign: 'center',
                   border: module_ === g.m ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 14, padding: 16, cursor: 'pointer',
                   background: module_ === g.m ? 'rgba(168,85,247,.06)' : '#fff',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
                 }}
               >
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(124,45,146,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>{ICONES[g.m]}</div>
@@ -310,7 +313,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                 `Merci de nous répondre rapidement.`
               )}`}
             >
-              ✉️ Solliciter l&apos;assistance Flowin pour le tracking
+              <Ico k="mail" size={14} style={{ marginRight: 7 }} />Solliciter l&apos;assistance Flowin pour le tracking
             </a>
           )}
           <div style={{ fontSize: 11.5, ...MUTED, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '9px 12px', marginBottom: 4 }}>
@@ -319,7 +322,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
             <button style={{ ...btnPrimary, opacity: envoi === 'envoi' ? 0.6 : 1 }} disabled={envoi === 'envoi'} onClick={valider}>
-              {envoi === 'envoi' ? 'Création…' : 'Créer mon animation ✓'}
+              {envoi === 'envoi' ? 'Création…' : 'Créer mon animation'}
             </button>
           </div>
           {envoi === 'echec' && <div style={{ marginTop: 12, fontSize: 13, fontWeight: 700, color: '#B91C1C' }}>Échec de la création, réessayez.</div>}
@@ -327,7 +330,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
       )}
       {etape === (etapeBanque ? 6 : 5) && envoi === 'ok' && (
         <div style={CARD}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>✓ Votre animation est prête</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 7 }}><Ico k="check" size={16} style={{ color: '#15803D' }} />Votre animation est prête</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>Voici de quoi l&apos;annoncer, à télécharger ou à envoyer à votre base de contacts.</div>
 
           <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, marginBottom: 16 }}>
@@ -350,22 +353,22 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.85 }}>Nouvelle animation</div>
             <div style={{ fontSize: 22, fontWeight: 900, margin: '8px 0 6px', letterSpacing: '-.4px' }}>{nom}</div>
             <div style={{ fontSize: 13, opacity: 0.9 }}>{dateD && dateF ? `Du ${dateD} au ${dateF}` : 'Bientôt disponible'}</div>
-            <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-block' }}>🎁 {lotsTexte}</div>
-            <div style={{ marginTop: 14, fontSize: 11.5, opacity: 0.85, display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {diffPhysique && <div>📍 QR code physique — en attente de génération par notre équipe</div>}
-              {diffDigital && <div>🔗 Lien digital — en attente de génération par notre équipe</div>}
-              {diffQr && <div>📊 QR de tracking — en attente de mise en place</div>}
+            <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-flex', alignItems: 'center', gap: 7 }}><Ico k="gift" size={14} />{lotsTexte}</div>
+            <div style={{ marginTop: 14, fontSize: 11.5, opacity: 0.85, display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {diffPhysique && <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}><Ico k="pin" size={12} />QR code physique — en attente de génération par notre équipe</div>}
+              {diffDigital && <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}><Ico k="link" size={12} />Lien digital — en attente de génération par notre équipe</div>}
+              {diffQr && <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}><Ico k="chart" size={12} />QR de tracking — en attente de mise en place</div>}
             </div>
           </div>
           <style>{`@media print{ body *{visibility:hidden} #visuel-annonce,#visuel-annonce *{visibility:visible} #visuel-annonce{position:fixed;inset:0;border-radius:0} }`}</style>
-          <button style={{ ...btnGhost, width: '100%', marginBottom: 12 }} onClick={() => window.print()}>⬇ Télécharger / imprimer ce visuel</button>
+          <button style={{ ...btnGhost, width: '100%', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={() => window.print()}><Ico k="download" size={14} />Télécharger / imprimer ce visuel</button>
           {partenaireId ? (
             <a
-              style={{ ...btnGhost, width: '100%', textDecoration: 'none', display: 'block', textAlign: 'center', boxSizing: 'border-box', marginBottom: 20 }}
+              style={{ ...btnGhost, width: '100%', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textAlign: 'center', boxSizing: 'border-box', marginBottom: 20 }}
               target="_blank" rel="noreferrer"
               href={`/nds/billets-partenaires.html?p=${encodeURIComponent(partenaireId)}`}
             >
-              🎫 Voir le billet gagnant (logo, conditions, valable {dateD && dateF ? `du ${dateD} au ${dateF}` : 'pendant l\u2019animation'})
+              <Ico k="ticket" size={14} />Voir le billet gagnant (logo, conditions, valable {dateD && dateF ? `du ${dateD} au ${dateF}` : 'pendant l\u2019animation'})
             </a>
           ) : (
             <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 20 }}>Le billet gagnant visuel sera disponible une fois votre compte relié à un partenaire.</div>
@@ -386,15 +389,15 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             ].join('\n')}
           />
           <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 20 }}>
-            <button style={btnGhost} onClick={() => {
+            <button style={{ ...btnGhost, display: 'flex', alignItems: 'center', gap: 7 }} onClick={() => {
               const el = document.getElementById('texte-annonce') as HTMLTextAreaElement | null
               el?.select(); document.execCommand('copy')
-            }}>📋 Copier le texte</button>
+            }}><Ico k="list" size={13} />Copier le texte</button>
             <a
-              style={{ ...btnGhost, textDecoration: 'none', display: 'inline-block' }}
+              style={{ ...btnGhost, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 }}
               target="_blank" rel="noreferrer"
               href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nom + ' — jouez et tentez de gagner !')}&body=${encodeURIComponent(`Bonjour,\n\nOn lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.\nJouez et tentez de gagner : ${lotsTexte}.\n\nÀ très vite !`)}`}
-            >✉️ Ouvrir dans Gmail</a>
+            ><Ico k="mail" size={13} />Ouvrir dans Gmail</a>
           </div>
 
           <button style={{ ...btnPrimary, width: '100%' }} onClick={() => router.push(`/pro/events?pro=${encodeURIComponent(proId)}`)}>Terminer — voir mes events →</button>

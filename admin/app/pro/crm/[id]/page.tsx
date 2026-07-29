@@ -2,6 +2,7 @@ import { fetchProDashboard } from '@/lib/pro'
 import { fetchJoueurTirages } from '@/lib/dashboard'
 import ProShell from '@/components/pro/ProShell'
 import { CARD, MUTED, H1, SUB, ACC } from '@/lib/proui'
+import { Ico } from '@/lib/proicons'
 
 /**
  * Fiche contact CRM cote Pro. N'existait pas -- les lignes de /pro/crm etaient de simples
@@ -42,7 +43,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
         <div style={{ width: 52, height: 52, borderRadius: 999, background: ACC, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>{initiales}</div>
         <div>
           <div style={{ fontSize: 17, fontWeight: 800 }}>{nom}</div>
-          <div style={{ fontSize: 12.5, ...MUTED }}>{j.optin ? '✓ Opt-in — recontactable' : 'Pas d\u2019opt-in'}</div>
+          <div style={{ fontSize: 12.5, ...MUTED, display: 'flex', alignItems: 'center', gap: 5 }}>{j.optin ? <><Ico k="check" size={12} style={{ color: '#15803D' }} />Opt-in — recontactable</> : 'Pas d\u2019opt-in'}</div>
         </div>
       </div>
 
@@ -63,7 +64,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
         {tirages.length === 0 && <div style={{ fontSize: 13, ...MUTED }}>Aucun lot gagné pour l&apos;instant.</div>}
         {tirages.map(t => (
           <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid #F1F5F9' }}>
-            <span style={{ fontSize: 16 }}>🎫</span>
+            <span style={{ color: ACC }}><Ico k="ticket" size={16} /></span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 13 }}>{t.lot_nom ?? 'Lot'}</div>
               <div style={{ fontSize: 11, ...MUTED }}>{t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'}</div>

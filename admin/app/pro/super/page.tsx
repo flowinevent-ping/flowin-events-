@@ -7,6 +7,7 @@ import SuperEventMap from '@/app/se/_components/SuperEventMap'
 import { Camembert } from '@/components/dashboard/Camembert'
 import SondageLandingPro from '@/components/pro/SondageLandingPro'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
+import { Ico } from '@/lib/proicons'
 
 export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
@@ -97,7 +98,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       {sondage ? <SondageLandingPro s={sondage} nomsDuPro={nomsDuPro} /> : null}
 
       <div style={{ ...CARD, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200 }}><div style={{ fontWeight: 800, fontSize: 14 }}>🎲 Gagnants &amp; tirage</div><div style={{ fontSize: 12.5, ...MUTED }}>Tirage global mutualisé.</div></div>
+        <div style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: ACC }}><Ico k="dice" size={16} /></span><div><div style={{ fontWeight: 800, fontSize: 14 }}>Gagnants &amp; tirage</div><div style={{ fontSize: 12.5, ...MUTED }}>Tirage global mutualisé.</div></div></div>
         <Link href={`/pro/tirage${q}`} style={{ background: ACC, color: '#fff', borderRadius: 12, padding: '10px 16px', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Ouvrir le tirage →</Link>
       </div>
     </ProShell>

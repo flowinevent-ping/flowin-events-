@@ -98,3 +98,61 @@ export function blocDeQuatre(bonus: boolean): QuestionBanque[] {
   const f = bonus ? nouvelleQuestionBonus : nouvelleQuestionQuiz
   return [f(), f(), f(), f()]
 }
+
+/**
+ * Import texte colle par le pro -> questions. Format tolerant, pas de CSV strict exige :
+ *   - blocs separes par une ligne vide (ou une ligne "---")
+ *   - 1ere ligne du bloc = intitule de la question
+ *   - lignes suivantes = les reponses, une par ligne
+ *   - pour un quiz, prefixer la bonne reponse par "*" (sinon la 1ere reponse est prise par defaut)
+ * Marche a l'identique pour quiz et bonus (seul le mapping de sortie change).
+ */
+export function parseImportQuestions(texte: string, bonus: boolean): QuestionBanque[] {
+  const blocs = texte
+    .split(/\r?\n\s*(?:---+\s*)?\r?\n/)
+    .map(b => b.trim())
+    .filter(Boolean)
+  const out: QuestionBanque[] = []
+  for (const bloc of blocs) {
+    const lignes = bloc.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+    if (lignes.length < 3) continue // au moins 1 intitule + 2 reponses
+    const [intitule, ...reponses] = lignes
+    const propre = (s: string) => s.replace(/^[-*]\s*/, '').trim()
+    if (bonus) {
+      const q = nouvelleQuestionBonus()
+      q.label = propre(intitule)
+      q.type = reponses.some(r => /^\[x\]|^\*/.test(r)) ? 'multi' : 'single'
+      q.options = reponses.map((r, i) => ({ val: String.fromCharCode(97 + i), label: propre(r) }))
+      out.push(q)
+    } else {
+      const q = nouvelleQuestionQuiz()
+      q.texte = propre(intitule)
+      q.options = reponses.map(propre)
+      const idx = reponses.findIndex(r => r.trim().startsWith('*'))
+      q.bonne = idx >= 0 ? idx : 0
+      out.push(q)
+    }
+  }
+  return out
+}
+
+/** Reponse attendue de /api/pro/generer-questions, mappee vers les types internes. */
+export function mapQuestionsIA(brut: any[], bonus: boolean): QuestionBanque[] {
+  return brut.map(b => {
+    if (bonus) {
+      const q = nouvelleQuestionBonus()
+      q.label = String(b.label ?? '').trim()
+      q.type = b.type === 'multi' ? 'multi' : 'single'
+      const opts: string[] = Array.isArray(b.options) ? b.options : []
+      q.options = opts.map((o, i) => ({ val: String.fromCharCode(97 + i), label: String(o).trim() }))
+      return q
+    }
+    const q = nouvelleQuestionQuiz()
+    q.texte = String(b.texte ?? '').trim()
+    const opts: string[] = Array.isArray(b.options) ? b.options : []
+    q.options = opts.map(o => String(o).trim())
+    const bonne = Number(b.bonne)
+    q.bonne = Number.isFinite(bonne) && bonne >= 0 && bonne < q.options.length ? bonne : 0
+    return q
+  }).filter(q => bonus ? (q as QuestionBonus).label : (q as QuestionQuiz).texte)
+}

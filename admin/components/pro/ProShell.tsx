@@ -14,6 +14,12 @@ import { useState } from 'react'
  * ouvert par un bouton hamburger dans la barre du haut. Aucun pattern mobile equivalent
  * trouve cote SA (dashboard.tsx, outil interne desktop-only) : construit ici pour Pro
  * specifiquement, memes couleurs/icones que la version desktop deja validee.
+ *
+ * Ajout (29/07/2026) : barre de navigation mobile en bas, demande explicite de Romain.
+ * Remplace le hamburger comme point d'entree principal sur mobile (garde le meme tiroir
+ * complet pour le reste du menu, ouvert desormais via le bouton "Plus" de la barre basse).
+ * 4 raccourcis les plus utilises + "Plus" pour tout le reste -- jamais tout le menu en bas,
+ * ecran trop etroit pour 10 items.
  */
 interface NavItem { key: string; label: string; icon: string; route?: string; group: string }
 const NAV: NavItem[] = [
@@ -28,6 +34,8 @@ const NAV: NavItem[] = [
   { key: 'tracking', label: 'Tracking liens & QR', icon: 'target', route: '/pro/tracking', group: 'MES DONNÉES' },
   { key: 'super', label: 'Super Event', icon: 'star', route: '/pro/super', group: 'ALLER PLUS LOIN' },
 ]
+/* Raccourcis de la barre basse mobile -- les 4 les plus utilises + Plus (ouvre le tiroir complet) */
+const NAV_BASSE: string[] = ['accueil', 'jeu', 'crm', 'gagnants']
 const ICONS: Record<string, string> = {
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
   shop: '<path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M4 9h16"/>',
@@ -39,6 +47,7 @@ const ICONS: Record<string, string> = {
   dice: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="16" r="1"/>',
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
   star: '<path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/>',
+  more: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
 }
 const ACCENT = '#A855F7', ACCENT_D = '#7C2D92', SB = '#1E293B', SB2 = '#172033'
 
@@ -82,32 +91,58 @@ export default function ProShell({ proName, proId, active, children }: { proName
     </aside>
   )
 
+  const barreBasse = (
+    <nav className="pro-bottom-nav" style={{ display: 'none' }}>
+      {NAV_BASSE.map(key => {
+        const n = NAV.find(x => x.key === key)!
+        const on = n.key === active
+        return (
+          <Link key={n.key} href={`${n.route}${q}`} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? '#fff' : 'rgba(255,255,255,.55)' }}>
+            <span style={{ color: on ? ACCENT : 'inherit' }}><Icon k={n.icon} /></span>
+            <span style={{ fontSize: 10, fontWeight: on ? 800 : 600, lineHeight: 1 }}>{n.label.split(' ')[0]}</span>
+          </Link>
+        )
+      })}
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Voir tout le menu"
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.55)', fontFamily: 'inherit' }}
+      >
+        <Icon k="more" />
+        <span style={{ fontSize: 10, fontWeight: 600, lineHeight: 1 }}>Plus</span>
+      </button>
+    </nav>
+  )
+
   return (
     <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: '#F1F5F9', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif', color: '#0F172A' }}>
       <style>{`
         :root { --sa-bg:#F1F5F9; --sa-card:#FFFFFF; --sa-border:#E2E8F0; --sa-text:#0F172A; --sa-muted:#64748B; --sa-subtle:#F8FAFC; }
         .pro-sidebar { position: sticky; top: 0; }
-        .pro-hamburger, .pro-drawer-backdrop { display: none; }
+        .pro-hamburger, .pro-drawer-backdrop, .pro-bottom-nav { display: none; }
         @media (max-width: 860px) {
           .pro-sidebar { position: fixed; left: 0; top: 0; z-index: 40; transform: translateX(-100%); transition: transform .22s ease; }
           .pro-shell.open .pro-sidebar { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,.25); }
           .pro-drawer-close { display: block !important; }
-          .pro-hamburger { display: inline-flex !important; }
+          .pro-drawer-backdrop { display: none; }
           .pro-shell.open .pro-drawer-backdrop { display: block; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
-          .pro-main-pad { padding: 18px !important; }
+          .pro-main-pad { padding: 18px !important; padding-bottom: 78px !important; }
+          .pro-bottom-nav {
+            display: flex !important; position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
+            background: linear-gradient(180deg,${SB},${SB2}); border-top: 1px solid rgba(255,255,255,.08);
+            padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -6px 20px rgba(0,0,0,.18);
+          }
         }
       `}</style>
       {sidebar}
       <div className="pro-drawer-backdrop" onClick={() => setOpen(false)} />
       <main style={{ flex: 1, minWidth: 0 }}>
         <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '14px 26px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748B' }}>
-          <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Ouvrir le menu" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginRight: 4 }}>
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0F172A" strokeWidth={2} strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
-          </button>
           <span style={{ fontWeight: 600 }}>Flowin Pro</span><span>›</span><span style={{ fontWeight: 800, color: '#0F172A' }}>{NAV.find(n => n.key === active)?.label ?? 'Accueil'}</span>
         </div>
         <div className="pro-main-pad" style={{ padding: '26px', maxWidth: 1120 }}>{children}</div>
       </main>
+      {barreBasse}
     </div>
   )
 }

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
+import { Ico } from '@/lib/proicons'
 
 export const metadata: Metadata = { title: 'Dashboard Pro — Flowin' }
 
@@ -48,7 +49,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.05em', textTransform: 'uppercase', color: '#64748B', marginBottom: 12 }}>Que voulez-vous faire ?</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 10 }}>
           <Link href={`/pro/tirage${q}`} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', border: '1px solid #E2E8F0', borderRadius: 13, textDecoration: 'none', color: 'inherit' }}>
-            <span style={{ fontSize: 20 }}>🎲</span><span style={{ flex: 1 }}><b style={{ fontSize: 14 }}>Gagnants &amp; tirage</b><br /><small style={{ color: '#64748B' }}>Tirage, billets, envoi des lots</small></span><span style={{ color: '#7C2D92', fontWeight: 800 }}>→</span>
+            <span style={{ color: '#7C2D92' }}><Ico k="dice" size={20} /></span><span style={{ flex: 1 }}><b style={{ fontSize: 14 }}>Gagnants &amp; tirage</b><br /><small style={{ color: '#64748B' }}>Tirage, billets, envoi des lots</small></span><span style={{ color: '#7C2D92', fontWeight: 800 }}>→</span>
           </Link>
         </div>
       </div>

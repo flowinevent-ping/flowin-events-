@@ -90,7 +90,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
               background: j.jour === jourSel ? 'rgba(124,45,146,.08)' : '#fff',
               color: j.jour === jourSel ? ACC : '#0F172A',
             }}>
-            {fr(j.jour)}{j.hors_periode ? ' ⚠' : ''}
+            {fr(j.jour)}{j.hors_periode ? ' (hors période)' : ''}
           </Link>
         ))}
       </div>
