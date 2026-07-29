@@ -53,6 +53,7 @@
     <div class="card" style="text-align:center;padding:26px 22px">
       <div style="font-size:40px;font-weight:900;color:var(--acc);letter-spacing:-1px" id="visites-total">—</div>
       <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:4px">visites sur l'application Flowin</div>
+      <a href="/nds/bilan/bilan-nds-2026.png" download class="planche-btn" style="margin-top:16px">Télécharger le bilan complet →</a>
     </div>
   </div>
 
@@ -104,7 +105,7 @@
   var m=/[?&]p=([^&]*)/.exec(location.search), pid=m?decodeURIComponent(m[1]):"";
 
   function rpc(fn, body){
-    return fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",headers:Object.assign({},H,{"Content-Type":"application/json"}),body:JSON.stringify(body)})
+    return fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:ANON,Authorization:"Bearer "+ANON,"Content-Type":"application/json"},body:JSON.stringify(body)})
       .then(function(r){ return r.ok ? r.json() : null; });
   }
 
