@@ -158,7 +158,7 @@ function Telephone({ ecran }: { ecran: Ecran }) {
   )
 }
 
-export default function ParcoursMobil({ eventNom }: { eventNom?: string }) {
+export default function ParcoursMobil({ eventNom, showTitle = true }: { eventNom?: string; showTitle?: boolean }) {
   const [tab, setTab] = useState<'event' | 'super'>('event')
   const [i, setI] = useState(0)
   const ecrans = tab === 'event' ? PARCOURS_EVENT : PARCOURS_SUPER
@@ -182,10 +182,14 @@ export default function ParcoursMobil({ eventNom }: { eventNom?: string }) {
 
   return (
     <div>
-      <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-.6px' }}>Parcours mobil</div>
-      <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 18 }}>
-        Aperçu de ce que vivent vos clients sur leur téléphone{eventNom ? ` — ${eventNom}` : ''}. Cliquez pour dérouler les étapes.
-      </div>
+      {showTitle && (
+        <>
+          <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-.6px' }}>Parcours mobil</div>
+          <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 18 }}>
+            Aperçu de ce que vivent vos clients sur leur téléphone{eventNom ? ` — ${eventNom}` : ''}. Cliquez pour dérouler les étapes.
+          </div>
+        </>
+      )}
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 22 }}>
         {tabBtn('event', 'Parcours event', 'Votre animation, en 4 écrans')}
