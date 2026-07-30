@@ -33,6 +33,7 @@ const NAV: NavItem[] = [
   { key: 'gagnants', label: 'Gagnants & tirage', icon: 'dice', route: '/pro/tirage', group: 'MES DONNÉES' },
   { key: 'tracking', label: 'Tracking liens & QR', icon: 'target', route: '/pro/tracking', group: 'MES DONNÉES' },
   { key: 'super', label: 'Super Event', icon: 'star', route: '/pro/super', group: 'ALLER PLUS LOIN' },
+  { key: 'parcours', label: 'Parcours mobil', icon: 'phone', route: '/pro/parcours', group: 'PARCOURS MOBIL' },
 ]
 /* Raccourcis de la barre basse mobile -- les 4 les plus utilises + Plus (ouvre le tiroir complet) */
 const NAV_BASSE: string[] = ['accueil', 'jeu', 'crm', 'gagnants']
@@ -47,6 +48,7 @@ const ICONS: Record<string, string> = {
   dice: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="16" r="1"/>',
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
   star: '<path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/>',
+  phone: '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10.5 18.5h3"/>',
   more: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
 }
 const ACCENT = '#A855F7', ACCENT_D = '#7C2D92', SB = '#1E293B', SB2 = '#172033'
