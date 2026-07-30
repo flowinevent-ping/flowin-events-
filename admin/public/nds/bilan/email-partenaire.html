@@ -107,7 +107,6 @@
           <div class="legrow"><span class="dot" style="background:#C9B6E8"></span><span class="lab">Au-delà de 30 km</span><span class="pct">23 %</span></div>
         </div>
       </div>
-      <div class="zone-note">Vos participants venaient de <b>100 communes</b> différentes. Près d'un sur deux habite à <b>moins de 15 minutes</b> de votre commerce.</div>
     </div>
   </div>
 
@@ -127,7 +126,7 @@
         <div class="val" id="pin">----</div>
         <div class="note">Personnel et confidentiel — ne le communiquez pas à vos clients.</div>
       </div>
-      <a class="planche-btn" id="planche-lien" href="#" target="_blank" rel="noreferrer">Voir la liste de vos gagnants →</a>
+      <p class="step-note">Vous recevrez les gagnants <b>au fur et à mesure</b>. Une fois tous les gagnants contactés, vous recevrez la <b>liste complète</b>.</p>
     </div>
   </div>
 
@@ -154,11 +153,6 @@
   var ANON="sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1";
   var H={apikey:ANON,Authorization:"Bearer "+ANON};
   var m=/[?&]p=([^&]*)/.exec(location.search), pid=m?decodeURIComponent(m[1]):"";
-
-  // lien vers la planche imprimable de tous les billets gagnants du pro (recap caisse)
-  if(pid){
-    document.getElementById('planche-lien').href = location.origin + '/nds/billets-partenaires.html?p=' + encodeURIComponent(pid);
-  }
 
   if(!pid){ document.getElementById('pin').textContent='----'; return; }
 
