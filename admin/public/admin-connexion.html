@@ -49,11 +49,18 @@
   }
   var btn=document.getElementById('btn'), res=document.getElementById('res'), pass=document.getElementById('pass');
   document.getElementById('eye').addEventListener('click',function(){ pass.type = pass.type==='password'?'text':'password'; });
-  // Si déjà connecté (session valide), on va directement au dashboard.
+  // Si déjà connecté avec une session VALIDE et NON EXPIREE, on va directement au dashboard.
+  // Sinon on purge la session perimee et on affiche le formulaire — sans quoi une page protegee
+  // (ex. tirage-nds.html) qui redirige ici sur token expire serait renvoyee en boucle (clignotement).
   (function(){
     try{
       var s=JSON.parse(localStorage.getItem('flowin_admin_session')||'null');
-      if(s && s.access_token){ location.replace(nextUrl()); }
+      var now=Math.floor(Date.now()/1000);
+      if(s && s.access_token && s.expires_at && (now < s.expires_at - 60)){
+        location.replace(nextUrl());
+      } else if(s){
+        localStorage.removeItem('flowin_admin_session');
+      }
     }catch(e){}
   })();
   async function doLogin(){
