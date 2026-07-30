@@ -48,7 +48,7 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
   const [evId, setEvId] = useState(events[0]?.id ?? '')
   const ev = events.find(e => e.id === evId) ?? events[0]
 
-  const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}` : ''
+  const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
   const superUrl = seId ? `/se/${encodeURIComponent(seId)}` : ''
   const url = tab === 'event' ? eventUrl : superUrl
   const empty = tab === 'event'
@@ -96,9 +96,9 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
           )}
 
           <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 14, lineHeight: 1.5, maxWidth: 360 }}>
-            Ceci est le <b>vrai parcours en direct</b> (pas une maquette).{' '}
+            Le <b>vrai parcours</b> (pas une maquette), en <b>mode aperçu</b>.{' '}
             {tab === 'event'
-              ? 'C\u2019est exactement ce que voient vos clients après avoir scanné le QR code.'
+              ? 'Une barre en haut permet de parcourir tous les écrans : accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil.'
               : 'La carte publique du festival, avec les stations et les lots.'}
           </p>
         </div>
