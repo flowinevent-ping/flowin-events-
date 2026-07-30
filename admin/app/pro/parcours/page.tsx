@@ -3,18 +3,18 @@ import ProShell from '@/components/pro/ProShell'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 
 /**
- * Parcours mobil (30/07/2026, demande Romain) : onglet du profil partenaire donnant acces a
- * l'apercu du parcours joueur mobile (event + super event). Server component minimal qui recupere
- * le nom du pro et de son animation pour le contexte, puis delegue au composant client.
+ * Parcours mobil — profil partenaire (v2). Passe les VRAIS evenements du pro au composant,
+ * qui affiche le parcours reel en direct (/parcours/<module>?ev=<id>) dans le cadre telephone.
  */
 export default async function ProParcoursPage({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
-  const eventNom = data.events?.[0]?.nom ?? undefined
+  const events = (data.events ?? []).map(e => ({ id: e.id, module: e.module, nom: e.nom }))
+  const seId = data.events?.find(e => e.super_event_id)?.super_event_id ?? undefined
 
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="parcours">
-      <ParcoursMobil eventNom={eventNom} />
+      <ParcoursMobil events={events} seId={seId} />
     </ProShell>
   )
 }
