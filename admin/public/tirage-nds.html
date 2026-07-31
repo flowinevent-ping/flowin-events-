@@ -365,7 +365,7 @@
         var reste=nb-actifs.length;
         html+='<div class="lot"><div class="lot-head">'
           +'<div><div class="lot-nom">'+esc(nom)+'</div><div class="lot-meta">'+(val!=null?val+' € · ':'')+nb+' gagnant'+(nb>1?'s':'')+' · '+actifs.length+'/'+nb+' actif'+(actifs.length>1?'s':'')+(enJeu?' · '+enJeu+' remis en jeu':'')+'</div></div>'
-          +'<button class="btn teal sm" '+(reste<=0?'disabled':'')+' onclick="tirerLot(\''+esc(p.id)+'\',\''+encodeURIComponent(nom)+'\','+(val==null?'null':val)+','+reste+',this)">🎲 Tirer'+(actifs.length?' le reste':'')+'</button>'
+          +'<button class="btn teal sm" '+(reste<=0?'disabled':'')+' onclick="tirerLot(\''+esc(p.id)+'\',\''+encodeURIComponent(nom).replace(/\x27/g,'%27')+'\','+(val==null?'null':val)+','+reste+',this)">🎲 Tirer'+(actifs.length?' le reste':'')+'</button>'
           +'</div>';
         wonAll.slice().sort(function(a,b){return (a.statut==='retire'?1:0)-(b.statut==='retire'?1:0);})
           .forEach(function(w){ html+=winRow(w,'🏅'); });
