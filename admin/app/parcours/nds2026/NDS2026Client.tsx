@@ -1341,14 +1341,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
                     <div style={{ fontSize: 15, fontWeight: 800 }}>{pc} / {STATIONS.length} stations jouées</div>
-                    <div style={{ fontSize: 13, fontWeight: 700 }}>🎟️ {ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>{cfg.mbLayout ? <svg className="ic" style={{ width: 15, height: 15 }}><use href="#i-ticket" /></svg> : <span>🎟️</span>}{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
                   </div>
                   <div style={{ height: 10, background: 'rgba(255,255,255,.25)', borderRadius: 999, overflow: 'hidden', marginBottom: 12 }}>
                     <div style={{ height: '100%', width: `${Math.round(pc / STATIONS.length * 100)}%`, background: '#F5B544', borderRadius: 999, transition: 'width .6s ease' }} />
                   </div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? 'Toutes les stations jouées, bravo ! 🎉' : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? (cfg.mbLayout ? 'Toutes les stations jouées, bravo\u00a0!' : 'Toutes les stations jouées, bravo ! 🎉') : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
                   {!done && (
-                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>📷 Scanner la prochaine station</button>
+                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>{cfg.mbLayout ? 'Scanner la prochaine station' : '📷 Scanner la prochaine station'}</button>
                   )}
                 </div>
               ); })()}
