@@ -177,6 +177,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [placeMode, setPlaceMode] = useState(false)
   const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
   const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
+  const MB = preview || !!cfg.mbLayout  // nouveau layout marque blanche : master (flag cfg) OU preview (validation) — NDS live non-preview inchange
   const [sessionStart] = useState<string>(() => new Date().toISOString())
   const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
   const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
@@ -1049,13 +1050,13 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {bonusPopup && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 3200, background: 'rgba(12,10,18,.74)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             <div style={{ background: '#fff', borderRadius: 22, padding: '26px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.45)', animation: 'nds-pop .32s cubic-bezier(.2,1.3,.5,1) both' }}>
-              <div style={{ width: 60, height: 60, borderRadius: '50%', margin: '0 auto 12px', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.1L5.5 9z" /></svg>
+              <div style={{ width: 60, height: 60, borderRadius: '50%', margin: '0 auto 12px', background: 'linear-gradient(135deg,#16a34a,#3ED598)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.5a1.8 1.8 0 0 0 0 3.4V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.6a1.8 1.8 0 0 0 0-3.4z" /><path d="M13 7v10" strokeDasharray="1.5 2.5" /></svg>
               </div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Il te reste une chance&nbsp;!</div>
-              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 16, lineHeight: 1.4 }}>Réponds à la <b>question bonus</b> et repars avec ton ticket. Ça prend 10 secondes.</div>
-              <button onClick={() => { setBonusPopup(false); setScreen('bonus') }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>Répondre à la question bonus</button>
-              <a onClick={() => setBonusPopup(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Plus tard</a>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Gagne un ticket supplémentaire&nbsp;!</div>
+              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 16, lineHeight: 1.4 }}>Réponds à la <b>question bonus</b> et repars avec un ticket de plus. Ça prend 10 secondes.</div>
+              <button onClick={() => { setBonusPopup(false); setScreen('bonus') }} style={{ width: '100%', background: 'linear-gradient(135deg,#16a34a,#3ED598)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>Répondre à la question bonus</button>
+              <a onClick={() => setBonusPopup(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Ce n&apos;est pas maintenant</a>
             </div>
           </div>
         )}
@@ -1341,18 +1342,18 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
                     <div style={{ fontSize: 15, fontWeight: 800 }}>{pc} / {STATIONS.length} stations jouées</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>{cfg.mbLayout ? <svg className="ic" style={{ width: 15, height: 15 }}><use href="#i-ticket" /></svg> : <span>🎟️</span>}{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>{MB ? <svg className="ic" style={{ width: 15, height: 15 }}><use href="#i-ticket" /></svg> : <span>🎟️</span>}{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
                   </div>
                   <div style={{ height: 10, background: 'rgba(255,255,255,.25)', borderRadius: 999, overflow: 'hidden', marginBottom: 12 }}>
                     <div style={{ height: '100%', width: `${Math.round(pc / STATIONS.length * 100)}%`, background: '#F5B544', borderRadius: 999, transition: 'width .6s ease' }} />
                   </div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? (cfg.mbLayout ? 'Toutes les stations jouées, bravo\u00a0!' : 'Toutes les stations jouées, bravo ! 🎉') : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? (MB ? 'Toutes les stations jouées, bravo\u00a0!' : 'Toutes les stations jouées, bravo ! 🎉') : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
                   {!done && (
-                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>{cfg.mbLayout ? 'Scanner la prochaine station' : '📷 Scanner la prochaine station'}</button>
+                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>{MB ? 'Scanner la prochaine station' : '📷 Scanner la prochaine station'}</button>
                   )}
                 </div>
               ); })()}
-              {cfg.mbLayout ? (() => { const faites = STATIONS.filter(s => ndsPlayedToday(s.id)).length; return (
+              {MB ? (() => { const faites = STATIONS.filter(s => ndsPlayedToday(s.id)).length; return (
                 <div className="coll" style={{ marginBottom: 14 }}>
                   <div className="coll-h"><span className="coll-t">Autres stations ce soir</span><span className="coll-c">{faites} / {STATIONS.length}</span></div>
                   <div className="coll-g">
