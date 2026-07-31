@@ -976,6 +976,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         @keyframes collPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
         .coll-p{font-size:12.5px;color:#6b6478;margin-top:12px;line-height:1.45;text-align:center}
         .coll-p b{color:#C2410C}
+        /* Page Fin (master marque blanche) : done = vert uni, todo = carte grise pointillee */
+        .coll-b.mbf.on{background:linear-gradient(145deg,#22C55E,#12A87B);box-shadow:0 3px 9px rgba(18,168,123,.32)}
         /* --- Bloc héros : cagnotte de tickets + progression des stations --- */
         .hero{position:relative;background:linear-gradient(135deg,#2B0F3A,#7C2D92);border-radius:18px;
              padding:18px 16px 16px;margin:2px 0 12px;color:#fff;overflow:hidden;text-align:center}
@@ -1350,12 +1352,28 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   )}
                 </div>
               ); })()}
-              <div className="res-eyebrow">Joue les autres stations ce soir</div>
-              <div className="nextcard">
-                {STATIONS.filter(s => s.id !== evId).map(s => { const dn = ndsPlayedToday(s.id); return (
-                  <div className="nextline" key={s.id} onClick={() => setScreen('carte')} style={{ cursor: 'pointer' }}><span className={`em${dn ? '' : ' nds-mk-pulse'}`} style={{ background: dn ? '#F5B544' : '#16a34a' }}><svg className="ic"><use href={`#${dn ? 'i-checkc' : s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{dn ? 'validée ✓' : s.ou}</div></div></div>
-                )})}
-              </div>
+              {cfg.mbLayout ? (() => { const faites = STATIONS.filter(s => ndsPlayedToday(s.id)).length; return (
+                <div className="coll" style={{ marginBottom: 14 }}>
+                  <div className="coll-h"><span className="coll-t">Autres stations ce soir</span><span className="coll-c">{faites} / {STATIONS.length}</span></div>
+                  <div className="coll-g">
+                    {STATIONS.map(st => { const on = ndsPlayedToday(st.id); return (
+                      <div key={st.id} className={`coll-b mbf${on ? ' on' : ''}`} title={st.ou} onClick={() => setScreen('carte')} style={{ cursor: 'pointer' }}>
+                        <svg className="ic"><use href={`#${st.icon}`} /></svg>
+                        <span className="coll-n">{st.nom}</span>
+                      </div>
+                    )})}
+                  </div>
+                </div>
+              ); })() : (
+                <>
+                  <div className="res-eyebrow">Joue les autres stations ce soir</div>
+                  <div className="nextcard">
+                    {STATIONS.filter(s => s.id !== evId).map(s => { const dn = ndsPlayedToday(s.id); return (
+                      <div className="nextline" key={s.id} onClick={() => setScreen('carte')} style={{ cursor: 'pointer' }}><span className={`em${dn ? '' : ' nds-mk-pulse'}`} style={{ background: dn ? '#F5B544' : '#16a34a' }}><svg className="ic"><use href={`#${dn ? 'i-checkc' : s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{dn ? 'validée ✓' : s.ou}</div></div></div>
+                    )})}
+                  </div>
+                </>
+              )}
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
               <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
