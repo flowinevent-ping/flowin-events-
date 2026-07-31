@@ -80,7 +80,7 @@
       L.push("Présente-toi avec cet email à l'entrée, on s'occupe du reste.", '',
              "Merci d'avoir participé.", '');
     }
-    L.push('Les Nuits du Sud, la Ville de Vence et Flowin',
+    L.push('Flowin, les Nuits du Sud, la Ville de Vence',
            'flowinevent@gmail.com · 06 16 35 49 36');
     return L.join('\n');
   }
