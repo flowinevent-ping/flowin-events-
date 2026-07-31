@@ -178,6 +178,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
   const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
   const MB = preview || !!cfg.mbLayout  // nouveau layout marque blanche : master (flag cfg) OU preview (validation) — NDS live non-preview inchange
+  const [profilTab, setProfilTab] = useState<'tickets' | 'infos'>('tickets')  // fusion Tickets+Profil (MB)
   const [sessionStart] = useState<string>(() => new Date().toISOString())
   const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
   const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
@@ -1645,7 +1646,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {screen === 'profil' && (
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="pad padnav">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 16 }}>
                 <span style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 28, height: 28, color: '#fff' }}><use href="#i-user" /></svg></span>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226' }}>{form.prenom || recurrent?.prenom || 'Mon profil'}</div>
@@ -1653,39 +1654,69 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </div>
               </div>
 
-              {(() => {
+              {MB && (
+                <div style={{ display: 'flex', gap: 6, background: '#f3eef7', borderRadius: 12, padding: 4, marginBottom: 16 }}>
+                  {([['tickets', 'Mes tickets'], ['infos', 'Mes coordonnées']] as const).map(([k, lb]) => (
+                    <button key={k} onClick={() => setProfilTab(k)} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px', fontFamily: 'inherit', fontWeight: 800, fontSize: 13, cursor: 'pointer', background: profilTab === k ? '#fff' : 'transparent', color: profilTab === k ? '#7C2D92' : '#7a708a', boxShadow: profilTab === k ? '0 1px 4px rgba(124,45,146,.15)' : 'none' }}>{lb}</button>
+                  ))}
+                </div>
+              )}
+
+              {(!MB || profilTab === 'tickets') && (() => {
                 const total = STATIONS.length
                 const faites = STATIONS.filter(st => ndsPlayedToday(st.id)).length
                 const reste = Math.max(0, total - faites)
                 return (
-                  <div className="hero">
-                    <div className="hero-n">{ticketCount || 0}</div>
-                    <div className="hero-l">{(ticketCount || 0) > 1 ? 'tickets pour le tirage' : 'ticket pour le tirage'}</div>
-                    <div className="hero-bar">
-                      {Array.from({ length: total }).map((_, k) => (
-                        <div key={k} className={`hero-seg${k < faites ? ' on' : ''}`} />
-                      ))}
+                  <>
+                    <div className="hero">
+                      <div className="hero-n">{ticketCount || 0}</div>
+                      <div className="hero-l">{(ticketCount || 0) > 1 ? 'tickets pour le tirage' : 'ticket pour le tirage'}</div>
+                      <div className="hero-bar">
+                        {Array.from({ length: total }).map((_, k) => (<div key={k} className={`hero-seg${k < faites ? ' on' : ''}`} />))}
+                      </div>
+                      <div className="hero-p">{reste > 0 ? <>Encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à scanner pour maximiser tes chances</> : <>Toutes les stations jouées — tu as le <b>maximum de chances</b> !</>}</div>
                     </div>
-                    <div className="hero-p">
-                      {reste > 0
-                        ? <>Encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à scanner pour maximiser tes chances</>
-                        : <>Toutes les stations jouées — tu as le <b>maximum de chances</b> !</>}
-                    </div>
-                  </div>
+                    {MB && (
+                      <div className="coll" style={{ marginTop: 14 }}>
+                        <div className="coll-h"><span className="coll-t">Mes stations</span><span className="coll-c">{faites} / {total}</span></div>
+                        <div className="coll-g">
+                          {STATIONS.map(st => { const on = ndsPlayedToday(st.id); return (
+                            <div key={st.id} className={`coll-b mbf${on ? ' on' : ''}`} title={st.ou}><svg className="ic"><use href={`#${st.icon}`} /></svg><span className="coll-n">{st.nom}</span></div>
+                          )})}
+                        </div>
+                        <div className="coll-p">{reste > 0 ? <>Encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à débloquer pour plus de tickets.</> : <>Toutes les stations faites — <b>maximum de chances</b> !</>}</div>
+                      </div>
+                    )}
+                    <div className="infocard b-green" style={{ marginTop: MB ? 12 : 10 }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir{MB ? ' · cumul sur toute la durée du festival' : ''}</div></div>
+                  </>
                 )
               })()}
-              <div className="infocard b-green" style={{ marginTop: 10 }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir</div></div>
 
-              <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>
-                  <svg className="ic" style={{ width: 17, height: 17, color: 'var(--magenta)' }}><use href="#i-spark" /></svg>
-                  Tu restes informé
-                </div>
-                <div style={{ fontSize: 13, color: '#52455e', lineHeight: 1.5 }}>Tu recevras les infos du festival, les offres et nouveautés des commerçants partenaires. Désinscription à tout moment.</div>
-              </div>
+              {(!MB || profilTab === 'infos') && (
+                <>
+                  {MB && (
+                    <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 4 }}>
+                      <div className="coll-t" style={{ marginBottom: 10 }}>Mes coordonnées</div>
+                      {([['Prénom', form.prenom || recurrent?.prenom], ['Email', form.email || recurrent?.email], ['Téléphone', form.tel]] as const).map(([lb, val]) => (
+                        <div key={lb} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderBottom: '1px solid #ece6f3', fontSize: 13.5 }}>
+                          <span style={{ color: '#7a708a', fontWeight: 600 }}>{lb}</span>
+                          <span style={{ color: '#1a1226', fontWeight: 700, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{val || '—'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>
+                      <svg className="ic" style={{ width: 17, height: 17, color: 'var(--magenta)' }}><use href="#i-spark" /></svg>
+                      Tu restes informé
+                    </div>
+                    <div style={{ fontSize: 13, color: '#52455e', lineHeight: 1.5 }}>Tu recevras les infos du festival, les offres et nouveautés des commerçants partenaires. Désinscription à tout moment.</div>
+                  </div>
+                </>
+              )}
 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
-              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">{MB ? '+1 ticket par commerce' : '🎟️ +1 ticket par commerce'}</span></span><span className="cta-go">›</span></a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
             </div>
           </section>
@@ -1699,7 +1730,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
               <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
               <button onClick={() => { setScreen('carte'); setScanOpen(true) }} aria-label="Scanner une station" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 16, padding: '9px 6px 6px', fontFamily: 'inherit', fontWeight: 800, fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, boxShadow: '0 6px 16px rgba(224,33,138,.5)', transform: 'translateY(-10px)', minWidth: 62 }}><span style={{ fontSize: 22, lineHeight: 1 }}>📷</span>Scanner</button>
-              <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>
+              {!MB && <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>}
               <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
             </nav>
             )}
