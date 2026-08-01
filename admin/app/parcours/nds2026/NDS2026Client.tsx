@@ -14,7 +14,7 @@ type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'fina
 interface Props extends ParcoursPageData { evId: string }
 
 const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
-const SRC_EMOJI: Record<string, string> = { 'Instagram': '📸', 'Affiche': '📋', 'Bouche à oreille': '🗣️', 'Autre': '✨' }
+const SRC_ICON: Record<string, string> = { 'Instagram': 'i-insta', 'Affiche': 'i-poster', 'Bouche à oreille': 'i-chat', 'Autre': 'i-spark' }
 
 /* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
    Incrémenter la version à chaque modification du texte. */
@@ -751,7 +751,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   return (
     <div className="ndsbody">
-      {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;🎟️</div>}
+      {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;<svg className="ic" style={{ width: 16, height: 16, verticalAlign: -3 }}><use href="#i-ticket" /></svg></div>}
       {celebrate > 0 && (
         <div className="confetti-wrap" key={celebrate} aria-hidden="true">
           {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
@@ -1028,11 +1028,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {dejaJoue && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(12,10,18,.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.4)', animation: 'nds-pop .3s cubic-bezier(.2,1.3,.5,1) both' }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>🎯</div>
+              <div style={{ width: 56, height: 56, margin: '0 auto 12px', borderRadius: '50%', background: '#f3eef7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg className="ic" style={{ width: 28, height: 28, color: '#7C2D92' }}><use href="#i-pin" /></svg></div>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Tu as déjà flashé cette station aujourd&apos;hui&nbsp;!</div>
               <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 18, lineHeight: 1.4 }}>Ton ticket est bien gardé. File vers une <b>autre station</b> pour gagner <b>+1 ticket</b> et plus de chances au tirage.</div>
-              <button onClick={() => { setDejaJoue(false); setScreen('carte') }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>📍 Voir la carte &amp; les autres stations</button>
-              <button onClick={() => { setDejaJoue(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#f3eef7', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '13px', fontFamily: 'inherit', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 10 }}>📷 Scanner une autre station</button>
+              <button onClick={() => { setDejaJoue(false); setScreen('carte') }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><svg className="ic" style={{ width: 18, height: 18 }}><use href="#i-map" /></svg>Voir la carte &amp; les autres stations</button>
+              <button onClick={() => { setDejaJoue(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#f3eef7', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '13px', fontFamily: 'inherit', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><svg className="ic" style={{ width: 17, height: 17 }}><use href="#i-scan" /></svg>Scanner une autre station</button>
               <a onClick={() => setDejaJoue(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Fermer</a>
             </div>
           </div>
@@ -1040,10 +1040,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {victoryPopup && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 3200, background: 'rgba(12,10,18,.74)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
             <div style={{ background: '#fff', borderRadius: 22, padding: '26px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.45)', animation: 'nds-pop .32s cubic-bezier(.2,1.3,.5,1) both' }}>
-              <div style={{ fontSize: 48, marginBottom: 6 }}>🎉</div>
+              <div style={{ width: 64, height: 64, margin: '0 auto 10px', borderRadius: '50%', background: 'linear-gradient(135deg,#F5B544,#E0218A)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg className="ic" style={{ width: 32, height: 32, color: '#fff' }}><use href="#i-trophy" /></svg></div>
               <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Bravo, +1 ticket&nbsp;!</div>
               <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 16, lineHeight: 1.4 }}>Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage de ce soir. {(() => { const rest = STATIONS.length - STATIONS.filter(s => ndsPlayedToday(s.id)).length; return rest > 0 ? `Plus que ${rest} station${rest > 1 ? 's' : ''} pour le max de chances !` : 'Tu as tout fait, énorme\u00a0!' })()}</div>
-              <button onClick={() => { setVictoryPopup(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>📷 Scanner la prochaine station</button>
+              <button onClick={() => { setVictoryPopup(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><svg className="ic" style={{ width: 17, height: 17 }}><use href="#i-scan" /></svg>Scanner la prochaine station</button>
               <a onClick={() => setVictoryPopup(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Plus tard</a>
             </div>
           </div>
@@ -1100,12 +1100,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                         )})}
                       </div>
                       <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
-                      <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
+                      <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">+1 ticket par commerce</span></span><span className="cta-go">›</span></a>
                     </>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(224,33,138,.14)', border: '1px solid rgba(224,33,138,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
                       <svg className="ic" style={{ width: 20, height: 20, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-ticket" /></svg>
-                      <span>Toutes les stations jouées ! Tu as le <b>maximum de tickets</b> pour ce soir. Bonne chance au tirage 🎉</span>
+                      <span>Toutes les stations jouées ! Tu as le <b>maximum de tickets</b> pour ce soir. Bonne chance au tirage&nbsp;!</span>
                     </div>
                   )}
                   <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7C2D92', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('tickets')}>Voir mes tickets</a>
@@ -1177,8 +1177,8 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 {emailKnown && (
                   <div style={{ background: '#EEF2FF', border: '1px solid #3B5CC4', borderRadius: 12, padding: '10px 12px', marginTop: 8, color: '#23357a', fontSize: 13.5 }}>
                     {emailKnown.alreadyPlayed
-                      ? <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''} 👋 Tu as déjà joué cette station — tu gardes ton ticket.</>
-                      : <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''} 👋 On a pré-rempli tes infos, vérifie et valide.</>}
+                      ? <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''}&nbsp;! Tu as déjà joué cette station — tu gardes ton ticket.</>
+                      : <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''}&nbsp;! On a pré-rempli tes infos, vérifie et valide.</>}
                   </div>
                 )}
               </div>
@@ -1189,7 +1189,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               </div>
               <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />{errors.cp && <div className="err">{errors.cp}</div>}</div>
               <div><label className="label label-strong">Tu as connu le festival par…</label>
-                <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}><span className="chip-em">{SRC_EMOJI[s]}</span> {s}</span>)}</div>
+                <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}><svg className="ic" style={{ width: 14, height: 14, marginRight: 3, verticalAlign: -2 }}><use href={`#${SRC_ICON[s]}`} /></svg>{s}</span>)}</div>
               </div>
               <div className={`rgpd rgpd-check${form.optin ? ' on' : ''}`} onClick={() => setForm(f => ({ ...f, optin: !f.optin }))} role="checkbox" aria-checked={form.optin} tabIndex={0}>
                 <span className="rc">{form.optin && <svg className="ic"><use href="#i-check" /></svg>}</span>
@@ -1263,21 +1263,21 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           <section className="scr on" style={{ background: '#fff' }}>
             <div className="res-head">
               <div className="res-ico"><svg className="ic"><use href="#i-trophy" /></svg></div>
-              <div className="res-bravo disp">{quizPerfect ? 'Wow, super\u202f! \u{1F389}' : (bonusDone ? 'Bravo\u202f!' : 'Il te reste une chance\u202f!')}</div>
+              <div className="res-bravo disp">{quizPerfect ? 'Wow, super\u202f!' : (bonusDone ? 'Bravo\u202f!' : 'Il te reste une chance\u202f!')}</div>
               <div className="res-sub">{quizPerfect ? 'Continue comme ça et cumule tes tickets\u202f!' : (bonusDone ? 'Ton ticket est validé pour le tirage' : 'Réponds au bonus juste en dessous et repars avec ton ticket')}</div>
             </div>
             <div className="res-body">
               <div className="score-card">
                 <div className="score disp">{score}/{questions.length}</div>
                 <div className="score-line">
-                  {quizPerfect ? 'Sans faute — 1 ticket\u202f🎟️'
+                  {quizPerfect ? 'Sans faute — 1 ticket'
                     : `${score}/${questions.length} — le bonus te donne quand même ton ticket`}
-                  {bonusDone && ' · +1 ticket bonus\u202f🎟️'}
+                  {bonusDone && ' · +1 ticket bonus'}
                 </div>
               </div>
               {bonusQs.length > 0 && !bonusDone && !joueurHistory.bonusDone && (
                 <a className="cta cta-bonus" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
-                  <span className="cta-badge"><svg className="ic"><use href="#i-spark" /></svg></span><span className="cta-txt"><span className="cta-t">Rattrape ton ticket</span><span className="cta-sub">⚡ 5 questions · 30 secondes chrono</span></span><span className="cta-go">›</span>
+                  <span className="cta-badge"><svg className="ic"><use href="#i-spark" /></svg></span><span className="cta-txt"><span className="cta-t">Rattrape ton ticket</span><span className="cta-sub">5 questions · 30 secondes chrono</span></span><span className="cta-go">›</span>
                 </a>
               )}
               <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>
@@ -1343,14 +1343,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
                     <div style={{ fontSize: 15, fontWeight: 800 }}>{pc} / {STATIONS.length} stations jouées</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>{MB ? <svg className="ic" style={{ width: 15, height: 15 }}><use href="#i-ticket" /></svg> : <span>🎟️</span>}{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}><svg className="ic" style={{ width: 15, height: 15 }}><use href="#i-ticket" /></svg>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
                   </div>
                   <div style={{ height: 10, background: 'rgba(255,255,255,.25)', borderRadius: 999, overflow: 'hidden', marginBottom: 12 }}>
                     <div style={{ height: '100%', width: `${Math.round(pc / STATIONS.length * 100)}%`, background: '#F5B544', borderRadius: 999, transition: 'width .6s ease' }} />
                   </div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? (MB ? 'Toutes les stations jouées, bravo\u00a0!' : 'Toutes les stations jouées, bravo ! 🎉') : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? 'Toutes les stations jouées, bravo\u00a0!' : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
                   {!done && (
-                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>{MB ? 'Scanner la prochaine station' : '📷 Scanner la prochaine station'}</button>
+                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>Scanner la prochaine station</button>
                   )}
                 </div>
               ); })()}
@@ -1378,7 +1378,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               )}
               <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>Chaque station jouée = 1 ticket de plus. Tirage chaque soir · 1 grand tirage à la clôture du festival.</div>
               <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>
-              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">🎟️ +1 ticket par commerce</span></span><span className="cta-go">›</span></a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">+1 ticket par commerce</span></span><span className="cta-go">›</span></a>
               {(form.email || recurrent?.email) && (
                 <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
               )}
@@ -1523,7 +1523,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   ) : null}
                   {(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const tel = pp?.tel; return tel ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
-                      <span style={{ width: 15, textAlign: 'center', flexShrink: 0 }}>📞</span>
+                      <svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-phone" /></svg>
                       <span><b style={{ color: '#1a1226' }}>Tél — </b><a href={`tel:${tel}`} style={{ color: '#7C2D92', fontWeight: 700 }}>{tel}</a></span>
                     </div>
                   ) : null })()}
@@ -1545,7 +1545,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                   )}
                   <a className="cta cta-shop" onClick={() => itineraire(fiche)}>
                     <span className="cta-badge"><svg className="ic"><use href="#i-map" /></svg></span>
-                    <span className="cta-txt"><span className="cta-t">M&apos;y rendre</span><span className="cta-sub">🚶 Itinéraire à pied</span></span>
+                    <span className="cta-txt"><span className="cta-t">M&apos;y rendre</span><span className="cta-sub">Itinéraire à pied</span></span>
                     <span className="cta-go">›</span>
                   </a>
 {(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const ls = pp && Array.isArray(pp.lots) ? pp.lots : []; return ls.length ? (
@@ -1716,7 +1716,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               )}
 
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
-              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">{MB ? '+1 ticket par commerce' : '🎟️ +1 ticket par commerce'}</span></span><span className="cta-go">›</span></a>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">+1 ticket par commerce</span></span><span className="cta-go">›</span></a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
             </div>
           </section>
@@ -1729,7 +1729,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
             <nav className="nav on" id="nav">
               <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
               <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>
-              <button onClick={() => { setScreen('carte'); setScanOpen(true) }} aria-label="Scanner une station" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 16, padding: '9px 6px 6px', fontFamily: 'inherit', fontWeight: 800, fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, boxShadow: '0 6px 16px rgba(224,33,138,.5)', transform: 'translateY(-10px)', minWidth: 62 }}><span style={{ fontSize: 22, lineHeight: 1 }}>📷</span>Scanner</button>
+              <button onClick={() => { setScreen('carte'); setScanOpen(true) }} aria-label="Scanner une station" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 16, padding: '9px 6px 6px', fontFamily: 'inherit', fontWeight: 800, fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, boxShadow: '0 6px 16px rgba(224,33,138,.5)', transform: 'translateY(-10px)', minWidth: 62 }}><svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>Scanner</button>
               {!MB && <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>}
               <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
             </nav>
