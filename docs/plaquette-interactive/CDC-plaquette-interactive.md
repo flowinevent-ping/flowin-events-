@@ -1,76 +1,58 @@
-# Cahier des charges — Plaquette interactive Flowin Event / Super Event
+# KICKOFF — Plaquette interactive Flowin Event / Super Event
+_À coller tel quel en ouverture de la nouvelle conversation. Faits vérifiés au 04/08/2026._
 
-Fichier de référence : `docs/plaquette-interactive/flowin-plaquette-interactive.html` (commit `30b5d08`)
+Tu reprends un travail en cours sur la plaquette commerciale interactive de Flowin (SaaS gamification événementielle). Ne recrée rien à l'aveugle, lis d'abord le cahier des charges ci-dessous et le fichier existant en entier. La partie Event est quasi terminée — le vrai travail à faire est sur Super Event.
 
-## Diagnostic de la session précédente (à lire avant de reprendre)
-Le travail a dérivé en qualité à force de patchs ponctuels successifs sans relecture
-globale régulière. **Ne pas reprendre en mode patch.** À la prochaine session : relire
-tout le fichier, comparer à ce cahier des charges, et refaire un passage cohérent plutôt
-que d'empiler un nouveau correctif.
+## 1) BOOTSTRAP (avant toute prod)
+1. Demande le **PAT GitHub** courant (ne jamais le committer, repo public → secret-scanning révoque tout token détecté). Fine-grained, permission Contents = Read and write.
+2. Clone `flowinevent-ping/flowin-events-` et vérifie DEUX accès : (a) `git fetch` + push OK, (b) Supabase MCP `select 1`. Si un manque → STOP, le signaler.
+3. Lis dans l'ordre : ce fichier (`docs/plaquette-interactive/CDC-plaquette-interactive.md`), puis `docs/plaquette-interactive/flowin-plaquette-interactive.html` (le fichier lui-même, en entier — pas par extraits).
+4. Lis aussi le handoff Supabase `handoff_notes` clé `handoff-nds-2026-comm` et le hub Notion (page `38c6dcca-9add-81dd-9af2-c93139e06393`) pour le diagnostic de la session précédente.
 
----
+## 2) ACCÈS / IDs
+- Repo : `flowinevent-ping/flowin-events-` (PUBLIC)
+- Supabase (MCP, seul accès DB) : `ywcqtupgoxfzkddqkztk` (eu-west-1)
+- Notion hub : `38c6dcca-9add-81dd-9af2-c93139e06393`
+- Fichier de travail : `docs/plaquette-interactive/flowin-plaquette-interactive.html`
+- Événement démo réel (couleurs/segments de la roue) : `ev-flowin-demo`
+- Démo live roue : `https://flowin-events.vercel.app/parcours/spin?ev=ev-flowin-demo`
 
-## Structure générale
-- Fichier HTML/CSS/JS autonome, navigation type "story" (clic pour avancer, flèche retour
-  visible en haut à droite sauf sur l'accueil, points de progression en bas)
-- Un tag de version discret en bas à droite (`build YYYY-MM-DD-xxx`) pour détecter les
-  problèmes de cache navigateur pendant les tests — technique à garder
-- Écran d'accueil : logo "Flowin" (pas d'accroche en dessous), puis signature verticale
-  (« Animation digitale » / pastille « Plug & Play »), puis 2 boutons de parcours :
-  **Flowin Event** et **Super Event** (le mot "Super" en police Bangers façon comic-book,
-  "Event" en texte simple — appliqué aussi au badge permanent en haut à côté du logo,
-  visible uniquement pendant le parcours Super Event)
+## 3) MÉTHODE — ce qui a raté la fois précédente, à ne pas reproduire
+Le travail avait dérivé en qualité par accumulation de patchs ponctuels sans jamais reprendre une vue d'ensemble, amplifié par des demandes qui se sont contredites d'un tour à l'autre sans être signalées comme telles.
+**Règle absolue pour cette session** : avant toute modification, relire le fichier HTML en entier et le comparer à ce CDC. Si une nouvelle demande contredit une décision déjà actée ici, le dire explicitement avant d'exécuter, pas l'appliquer silencieusement. Ne jamais faire un nouveau patch sans relecture globale préalable. Valider systématiquement (Acorn pour le JS, Playwright pour l'absence de débordement) avant chaque livraison.
 
-## Parcours Flowin Event
-1. **« Il joue »** — toggle Roulette / Quiz
-   - Roulette : roue canvas fidèle au vrai composant `SpinClient.tsx` (jante chromée,
-     LED ambrées, dégradés radiaux par segment, pointeur chromé, moyeu vert texte
-     "FLOWIN"), segments/couleurs repris de l'event réel `ev-flowin-demo`
-   - Quiz : vraie question de la banque NDS 2026 (Danakil/Marly-le-Roi), style exact
-     repris de `NDS2026Client.tsx` (`.opt.correct` vert + ✓, `.opt.wrong` rouge + ✕,
-     encart d'explication), bouton "Voir mon gain" après réponse → déclenche le popup
-   - Popup de gain : format billet réaliste (ex. café gourmand offert), conditions,
-     bouton téléchargement fonctionnel (génère un vrai fichier), bouton fermer
-2. **« Vous captez, vous fidélisez »** — 3 widgets façon tableau de bord : donut
-   répartition sexe, barres tranches d'âge, graphique horaire (pic de fréquentation)
-3. **« Des lots qui ont du sens »** — 4 cartes (faire revenir / lancer un produit /
-   promotion / écouler un stock), pas de texte d'intro redondant
-4. **« En trois mots »** — Animez / Fidélisez / Boostez, disposition horizontale,
-   Boostez en orange, lien vers Super Event
+## 4) OBJECTIFS DE LA PLAQUETTE
+Un support commercial interactif (clic pour avancer, pas de slides statiques) qui fait *ressentir* le produit plutôt que le décrire — roue et quiz réellement jouables, popup de gain réaliste, avant de présenter l'argumentaire. Deux produits, deux parcours indépendants accessibles depuis l'accueil :
 
-## Parcours Super Event
-1. Intro « Rejoignez l'événement » — générique, pas de référence à un client nommé
-2. **« L'effet boule de neige »** — LE POINT DE FRICTION DE LA SESSION PRÉCÉDENTE.
-   Spécification la plus récente et validée par Romain (à ne plus faire varier sans
-   son accord explicite) :
-   - L'événement communique auprès du public
-   - Le commerce communique aussi auprès du public
-   - **Le commerce communique en plus auprès de SES PROPRES clients** au sujet de
-     l'événement — c'est ce relais qui crée l'effet d'écho/boule de neige
-   - Deux canaux de ce relais : **affichage physique** + **communication digitale**
-     (prospection, mail, invitation, jeu concours pour gagner des places)
-   - Le commerce annonce sa participation, puis pendant toute la durée de l'événement,
-     contribue à sa communication — devenant un support de communication additionnel
-   - Le schéma doit rendre visible ce sens de circulation précis, animé, pas juste
-     des pictogrammes statiques
-3. **« Deux façons de participer »** — toggle Annonceur / Acteur du trafic, chaque
-   panneau : icône centrée + titre + description + séparateur + 3 vignettes
-4. **« À qui ça s'adresse »** — toggle Organisateur / Commerce (pas 2 cartes côte à
-   côte — une seule info affichée à la fois), même gabarit icône+titre+description+
-   vignettes, plus un schéma illustrant le flux propre à chaque profil
+**Flowin Event** — le jeu à l'échelle d'un commerce seul
+- Cible / persona : un commerçant individuel qui veut animer sa caisse simplement
+- Attraits à faire ressentir : zéro friction (« clic, clic, clic »), plug & play, installation en quelques secondes, jeu qui capte des données client (CRM) sans formulaire imposé, fidélise par le lot à retirer en boutique (pas juste une remise — un vrai objectif : faire revenir, lancer un produit, faire une promotion, écouler un stock)
+- Modules : Quiz, Roulette, Bonus — le commerçant choisit
 
-## Écran final (CTA, partagé, atteint depuis les deux parcours)
-- Logo "Flowin" (pas de titre texte à la place)
-- Sous-texte : rappel qu'on vient de jouer, comme un vrai client
-- 3 icônes valeurs : Capter / Visualiser / Fidéliser
-- Bouton **« Nous contacter »** → ouvre un popup avec lien mail cliquable et lien
-  téléphone cliquable (pas de bloc contact en clair sur l'écran)
-- Signature Animation digitale / Plug & Play
-- Lien retour à l'accueil
+**Flowin Super Event** — le réseau qui fédère plusieurs commerces autour d'un événement
+- Cible / persona : un organisateur d'événement/festival (type Nuits du Sud) OU une association de commerçants qui veut dynamiser/unifier un territoire
+- Attrait central à faire ressentir : l'**effet boule de neige** de la communication — voir section 5, c'est le point le plus important et le moins abouti visuellement à ce jour
+- Deux façons de participer : en tant qu'annonceur/co-annonceur (profite du trafic et de la notoriété, sans rien gérer) ou en tant qu'acteur du trafic (diffuse sa propre offre, devient point de jeu)
+- Mise en place : aussi simple qu'un sticker sur la porte + présentation en caisse + invitation à jouer ; retrait du lot en un scan (billet digital, employé avec téléphone + code)
 
-## Règles transverses
-- Toujours valider le JS (Acorn) et vérifier l'absence de débordement (Playwright,
-  bounding boxes) avant de livrer — a évité plusieurs régressions cette session
+## 5) LE SCHÉMA "EFFET BOULE DE NEIGE" — spec figée, ne plus faire varier sans accord explicite de Romain
+C'est le point qui a le plus régressé. Voici le flux exact à représenter, validé :
+- L'événement communique auprès du public
+- Le commerce communique **aussi**, de son côté, auprès du public
+- Le commerce communique **en plus** auprès de **ses propres clients** au sujet de l'événement — c'est précisément ce relais de proximité qui crée l'effet d'écho / boule de neige, pas juste la diffusion de l'événement seul
+- Deux canaux concrets pour ce relais : **affichage physique** (en boutique) et **communication digitale** (prospection, mail, invitation, jeu concours pour gagner des places)
+- Le commerce annonce sa participation à l'événement, puis pendant toute la durée de l'événement contribue à sa communication — il devient un support de communication additionnel pour l'événement, pas seulement un bénéficiaire
+
+Le schéma doit rendre ce sens de circulation lisible et animé au premier coup d'œil — pas un diagramme statique avec juste des pictogrammes, un vrai flux qu'on voit circuler.
+
+## 6) CONCEPTION VISUELLE — cohérence à préserver sur toutes les pages
+- Palette de marque fixe : violet `#7C2D92`, magenta `#E0218A`, or `#F5A100`, bleu `#3B5CC4`, violet clair `#A855F7`, teal `#00B4A0` — Event utilise plutôt magenta/or, Super Event plutôt bleu/violet (déjà en place, à conserver)
+- Un seul gabarit de présentation "argumentaire" partout où il s'applique : icône centrée + titre + description + séparateur + 3 vignettes — déjà utilisé sur plusieurs écrans, à répliquer fidèlement partout où un nouvel écran de ce type est nécessaire, pas réinventer à chaque fois
+- Les éléments jouables (roue, quiz) doivent rester fidèles aux vrais composants de production (`SpinClient.tsx`, `NDS2026Client.tsx`) — ne pas réinterpréter leur style, les porter fidèlement
+- Toujours vérifier avant de livrer : le JS est valide, aucun texte ne déborde sur la bande "cliquez pour continuer" en bas, le logo "Flowin" n'a jamais l'italique par défaut du `<em>` HTML (bug déjà rencontré, la règle CSS doit être générique, pas scopée à un seul écran)
+
+## 7) RÈGLES DE LIVRAISON (héritées de la méthode générale du projet)
+- 3 piliers à chaque étape significative : GitHub (commit + push) + Supabase `handoff_notes` (prepend) + Notion hub (`insert_content` position start)
 - Pas d'emoji produit
-- Cohérence des couleurs de marque : violet `#7C2D92`, magenta `#E0218A`,
-  or `#F5A100`, bleu `#3B5CC4`, violet clair `#A855F7`, teal `#00B4A0`
+- Français voice-to-text — interpréter par le contexte, ne pas hésiter à reformuler poliment ce qui semble incohérent plutôt que l'exécuter tel quel
+- Un tag de version discret dans le HTML (`build YYYY-MM-DD-xxx`, coin bas droit) à chaque livraison, pour trancher immédiatement les cas de cache navigateur pendant les tests — technique qui a fait ses preuves
