@@ -96,14 +96,6 @@ export default function Sidebar() {
       ],
     },
     {
-      group: 'ACQUISITION B2B',
-      items: [
-        /* Pas encore portee en Next : on renvoie au monolithe plutot que de servir un 404. */
-        { id: 'btob', icon: '🎯', label: 'Prospects B2B', count: 0, href: '/dashboard.html#btob-prospects', external: true },
-        { id: 'landing', icon: '🌐', label: 'Landing Page', count: 1, href: '/dashboard.html#landing', external: true },
-      ],
-    },
-    {
       group: 'PILOTAGE',
       items: [
         { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
