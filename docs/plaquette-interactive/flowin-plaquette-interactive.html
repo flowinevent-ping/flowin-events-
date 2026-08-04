@@ -275,16 +275,6 @@
          white-space:nowrap;z-index:2}
   .ms-echo{font-size:10px;font-weight:700;color:rgba(255,255,255,.75);text-align:center;margin-top:4px;font-style:italic}
 
-  .relay-row{display:flex;gap:9px;margin-top:16px}
-  .relay-i{flex:1;background:rgba(255,255,255,.14);border-radius:12px;padding:12px 8px;text-align:center;
-          display:flex;flex-direction:column;align-items:center;gap:6px}
-  .relay-i svg{width:19px;height:19px;color:#fff}
-  .relay-i span{font-size:10px;font-weight:800;color:#fff;line-height:1.3}
-
-    .tgpoints{display:flex;flex-direction:column;gap:9px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2)}
-  .tgpt{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:700;color:#fff}
-  .tgpt svg{width:16px;height:16px;flex-shrink:0;color:rgba(255,255,255,.85)}
-
   /* ===== SE setup row ===== */
   .setup-row{display:flex;justify-content:center;gap:16px;margin-top:28px}
   .setup-i{display:flex;flex-direction:column;align-items:center;gap:13px;width:132px}
@@ -511,9 +501,9 @@
   <!-- ===================== SUPER EVENT TRACK ===================== -->
   <div class="scr" id="se0" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(59,92,196,.24), transparent)">
     <div class="inner">
-      <div class="eyebrow se">Flowin Super Event</div>
+      <div class="logo" style="font-size:clamp(30px,6.4vw,46px);display:flex;align-items:baseline;gap:10px;justify-content:center;margin-bottom:6px"><span class="super-logo" style="font-size:1.1em">Super</span><span>Event</span></div>
       <h1 class="mega">Rejoignez <em class="b">l'événement</em>.</h1>
-      <p class="lede">Un événement central, des commerces qui en profitent — et qui le nourrissent en retour.</p>
+      <p class="lede">Plus vous êtes nombreux à le rejoindre, plus il rayonne. Et plus il rayonne, plus vous en profitez.</p>
     </div>
   </div>
 
@@ -630,34 +620,28 @@
       <div class="tgpanel" id="panelCom" style="--pc1:#E0218A;--pc2:#F5A100">
         <div class="tgi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div>
         <div class="tgt">Un commerce, une association</div>
-        <div class="tgd">Le commerce communique aussi auprès du public — et relaie l'événement directement à ses propres clients. C'est ce relais de proximité qui crée l'effet d'écho.</div>
+        <div class="tgd">Le commerce relaie l'événement à ses propres clients — ce relais de proximité crée l'effet d'écho.</div>
 
-        <div class="mini-schema">
-          <svg viewBox="0 0 220 130">
-            <path d="M40,65 L172,28" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-dasharray="2 5"/>
-            <path d="M40,65 L172,102" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.5" stroke-dasharray="2 5"/>
-            <path d="M172,102 Q220,65 172,28" fill="none" stroke="rgba(245,161,0,.5)" stroke-width="1.5" stroke-dasharray="2 5"/>
-            <circle r="4" fill="#fff"><animateMotion dur="2.2s" repeatCount="indefinite" path="M40,65 L172,28"/></circle>
-            <circle r="4" fill="#fff"><animateMotion dur="2.2s" repeatCount="indefinite" path="M40,65 L172,102" begin="0.4s"/></circle>
-            <circle r="4" fill="var(--gold)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M172,102 Q220,65 172,28" begin="0.8s"/></circle>
+        <div class="mini-schema" style="max-width:250px;height:200px;margin-top:12px">
+          <svg viewBox="0 0 250 195">
+            <path d="M92,95 L165,68" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="2 5"/>
+            <path d="M92,120 L165,148" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="2 5"/>
+            <circle r="3.5" fill="#fff"><animateMotion dur="2.2s" repeatCount="indefinite" path="M92,95 L165,68"/></circle>
+            <circle r="3.5" fill="#fff"><animateMotion dur="2.2s" repeatCount="indefinite" path="M92,120 L165,148" begin="0.4s"/></circle>
+            <path d="M195,148 Q235,108 195,68" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="2 5" opacity=".85"/>
+            <circle r="3.5" fill="var(--gold)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M195,148 Q235,108 195,68" begin="0.9s"/></circle>
           </svg>
-          <div class="ms-node sm" style="left:40px;top:65px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div>
-          <div class="ms-lbl" style="left:40px;top:90px">Commerce</div>
-          <div class="ms-node sm" style="left:172px;top:28px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="ms-lbl" style="left:172px;top:12px">Public</div>
-          <div class="ms-node sm" style="left:172px;top:102px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-          <div class="ms-lbl" style="left:172px;top:118px">Ses clients</div>
+          <div class="ms-node" style="left:65px;top:108px;width:60px;height:60px;margin:-30px 0 0 -30px;background:linear-gradient(135deg,var(--gold),var(--magenta))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div>
+          <div class="ms-lbl" style="left:65px;top:142px;font-size:10.5px">Commerce</div>
+          <div class="ms-node" style="left:195px;top:68px;width:46px;height:46px;margin:-23px 0 0 -23px;background:linear-gradient(135deg,var(--teal),var(--blue))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="ms-lbl" style="left:195px;top:97px;font-size:10.5px">Public</div>
+          <div class="ms-node" style="left:195px;top:148px;width:46px;height:46px;margin:-23px 0 0 -23px;background:linear-gradient(135deg,var(--blue),var(--violet))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="ms-lbl" style="left:195px;top:177px;font-size:10.5px">Ses clients</div>
         </div>
-        <div class="ms-echo">↳ retour vers l'événement, via ses clients</div>
 
-        <div class="relay-row">
-          <div class="relay-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/><circle cx="8" cy="13" r="1.5"/><line x1="12" y1="13" x2="17" y2="13"/></svg><span>Affichage physique</span></div>
-          <div class="relay-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Communication digitale</span></div>
-        </div>
-        <div class="tgpoints">
-          <div class="tgpt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Un seul jeu pour tout le quartier</span></div>
-          <div class="tgpt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Lots mutualisés entre commerces</span></div>
-          <div class="tgpt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Fréquentation du centre-ville boostée</span></div>
+        <div class="netlabels">
+          <div class="nl"><span class="dotc" style="background:var(--blue)"></span>Commerce → Public et ses clients (diffusion)</div>
+          <div class="nl"><span class="dotc" style="background:var(--gold)"></span>Ses clients → Public (retour, écho)</div>
         </div>
       </div>
 
@@ -1104,6 +1088,6 @@
   render();
 })();
 </script>
-<div style="position:fixed;bottom:4px;right:6px;font-size:8px;color:rgba(255,255,255,.25);z-index:999;font-family:monospace;pointer-events:none">build 2026-08-04-compact</div>
+<div style="position:fixed;bottom:4px;right:6px;font-size:8px;color:rgba(255,255,255,.25);z-index:999;font-family:monospace;pointer-events:none">build 2026-08-04-se0logo</div>
 </body>
 </html>
