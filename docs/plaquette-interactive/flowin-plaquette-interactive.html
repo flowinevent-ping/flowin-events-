@@ -256,15 +256,15 @@
   .tgbtn{flex:1;border:none;background:transparent;color:var(--muted);font-family:inherit;font-weight:800;font-size:12.5px;
         padding:11px 10px;border-radius:100px;cursor:pointer;transition:.25s}
   .tgbtn.on{background:#fff;color:var(--ink)}
-  .tgpanel{display:none;margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;text-align:center;
+  .tgpanel{display:none;margin-top:28px;max-width:400px;margin-left:auto;margin-right:auto;text-align:center;
           opacity:0;transform:translateY(8px);transition:opacity .35s ease,transform .35s ease}
   .tgpanel.on{display:block;opacity:1;transform:translateY(0)}
-  .tgpanel .tgi{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--pc1),var(--pc2));display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .tgpanel .tgi{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--pc1),var(--pc2));display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
   .tgpanel .tgi svg{width:28px;height:28px;color:#fff}
   .tgpanel .tgt{font-size:16px;font-weight:800;color:#fff;text-align:center}
   .tgpanel .tgd{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.55;font-weight:600;text-align:center}
   .tgpanel .tgpoints{border-top:1px solid rgba(255,255,255,.14)}
-  .mini-schema{position:relative;width:100%;max-width:230px;height:135px;margin:16px auto 0}
+  .mini-schema{position:relative;width:100%;max-width:230px;height:158px;margin:16px auto 0}
   .mini-schema svg{position:absolute;inset:0;width:100%;height:100%}
   .ms-node{position:absolute;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;
           background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;z-index:2}
@@ -538,27 +538,27 @@
 
       <div class="toggle-row">
         <button class="tgbtn on" id="tgAnn" type="button">Annonceur</button>
-        <button class="tgbtn" id="tgAct" type="button">Pro partenaire</button>
+        <button class="tgbtn" id="tgAct" type="button">Partenaire Pro</button>
       </div>
 
       <div class="tgpanel on" id="panelAnn" style="--pc1:#3B5CC4;--pc2:#A855F7">
         <div class="tgi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1Z"/><path d="M15 8.5a3.5 3.5 0 0 1 0 7"/><path d="M18 5.5a7.5 7.5 0 0 1 0 13"/></svg></div>
         <div class="tgt">Co-annonceur sur l'événement</div>
-        <div class="tgd">Votre marque associée à l'événement. Vous profitez de sa notoriété et de son trafic — sans rien gérer sur place.</div>
+        <div class="tgd">Pas une station de jeu : vous sponsorisez un lot ou associez votre marque à l'événement, et profitez de sa pleine visibilité — sans rien gérer sur place.</div>
         <div class="value-row">
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,#3B5CC4,#A855F7)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="vt">Visibilité</div></div>
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,#3B5CC4,#00B4A0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12 11 14 15 10"/><circle cx="12" cy="12" r="10"/></svg></div><div class="vt">Simplicité</div></div>
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,#F5A100,#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 9.5 8.5 2 9l6 5.2L6.2 22 12 17.8 17.8 22 16 14.2 22 9l-7.5-.5Z"/></svg></div><div class="vt">Notoriété</div></div>
+          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--blue),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="vt">Visibilité</div></div>
+          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12 11 14 15 10"/><circle cx="12" cy="12" r="10"/></svg></div><div class="vt">Simplicité</div></div>
+          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--purple),var(--gold))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M17 4h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4M7 4H4a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/></svg></div><div class="vt">Notoriété</div></div>
         </div>
       </div>
       <div class="tgpanel" id="panelAct" style="--pc1:#E0218A;--pc2:#F5A100">
         <div class="tgi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div>
-        <div class="tgt">Pro partenaire, en boutique</div>
-        <div class="tgd">Votre commerce devient point de jeu. Diffusez votre offre pendant toute la durée de l'événement, augmentez votre fréquentation.</div>
+        <div class="tgt">Partenaire Pro, en boutique</div>
+        <div class="tgd">Votre commerce devient une station de jeu. Diffusez avant, pendant et après l'événement — augmentez votre visibilité et votre fréquentation.</div>
         <div class="value-row">
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,#E0218A,#7C2D92)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div><div class="vt">Trafic</div></div>
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,#F5A100,#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div><div class="vt">Lots</div></div>
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,#3B5CC4,#00B4A0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div><div class="vt">Mesure</div></div>
+          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v3a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-2"/><path d="M8 11h9l4-4-4-4H8v8Z"/><path d="M8 11H4a2 2 0 0 0 0 4h4"/></svg></div><div class="vt">Diffusion</div></div>
+          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div><div class="vt">Lots</div></div>
+          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div><div class="vt">Mesure</div></div>
         </div>
       </div>
     </div>
@@ -567,11 +567,11 @@
   <div class="scr" id="se3" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(59,92,196,.24), transparent)">
     <div class="inner">
       <div class="eyebrow se">Mise en place</div>
-      <h1 class="mega" style="font-size:clamp(26px,6vw,42px)">Aussi simple que de coller un <em class="b">cœur</em>.</h1>
+      <h1 class="mega" style="font-size:clamp(26px,6vw,42px)">Aussi simple que de coller un <em class="b">QR code</em>.</h1>
       <div class="setup-row">
-        <div class="setup-i"><div class="si" style="background:linear-gradient(135deg,#3B5CC4,#A855F7)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M12 12v4"/></svg></div><div class="st">On s'occupe de tout, on vous livre tout</div></div>
-        <div class="setup-i"><div class="si" style="background:linear-gradient(135deg,#3B5CC4,#00B4A0)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="4"/></svg></div><div class="st">Support physique, affiche</div></div>
-        <div class="setup-i"><div class="si" style="background:linear-gradient(135deg,#A855F7,#E0218A)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg></div><div class="st">Vous informez vos clients, on s'occupe du reste</div></div>
+        <div class="setup-i"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M12 12v4"/></svg></div><div class="st">On s'occupe de tout, on vous livre tout</div></div>
+        <div class="setup-i"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="4"/></svg></div><div class="st">Support physique, affiche</div></div>
+        <div class="setup-i"><div class="si" style="background:linear-gradient(135deg,var(--purple),var(--magenta))"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/></svg></div><div class="st">Vous informez vos clients, on s'occupe du reste</div></div>
       </div>
     </div>
   </div>
@@ -609,11 +609,23 @@
         <div class="tgt">Créateur d'événements, festival, organisation qui reçoit du public</div>
         <div class="tgd">Votre communication se démultiplie à travers chaque commerce partenaire, sur le terrain comme en ligne.</div>
 
-        <div class="value-row" style="margin-top:22px">
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--gold),var(--magenta))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 9.5 8.5 2 9l6 5.2L6.2 22 12 17.8 17.8 22 16 14.2 22 9l-7.5-.5Z"/></svg></div><div class="vt">Événement</div></div>
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--teal),var(--blue))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="vt">Public</div></div>
-          <div class="value-c"><div class="vi" style="background:linear-gradient(135deg,var(--blue),var(--violet))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div><div class="vt">Commerçants</div></div>
+        <div class="mini-schema">
+          <svg viewBox="0 0 220 140">
+            <path d="M65,65 L172,28" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="2 5"/>
+            <path d="M65,72 L172,102" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1.5" stroke-dasharray="2 5"/>
+            <circle r="4" fill="#fff"><animateMotion dur="2.2s" repeatCount="indefinite" path="M65,65 L172,28"/></circle>
+            <circle r="4" fill="#fff"><animateMotion dur="2.2s" repeatCount="indefinite" path="M65,72 L172,102" begin="0.4s"/></circle>
+            <path d="M172,110 Q110,145 55,88" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="2 5" opacity=".85"/>
+            <circle r="4" fill="var(--gold)"><animateMotion dur="2.6s" repeatCount="indefinite" path="M172,110 Q110,145 55,88" begin="0.9s"/></circle>
+          </svg>
+          <div class="ms-node" style="left:55px;top:68px;background:linear-gradient(135deg,var(--gold),var(--magenta))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 9.5 8.5 2 9l6 5.2L6.2 22 12 17.8 17.8 22 16 14.2 22 9l-7.5-.5Z"/></svg></div>
+          <div class="ms-lbl" style="left:55px;top:95px">Événement</div>
+          <div class="ms-node sm" style="left:172px;top:28px;background:linear-gradient(135deg,var(--teal),var(--blue))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="ms-lbl" style="left:172px;top:12px">Public</div>
+          <div class="ms-node sm" style="left:172px;top:110px;background:linear-gradient(135deg,var(--blue),var(--violet))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3"/><path d="M2 9h20l-1.2 3.3a2 2 0 0 1-1.9 1.3H5.1a2 2 0 0 1-1.9-1.3Z"/><path d="M4 13.6V20a1 1 0 0 0 1 1h5v-5h4v5h5a1 1 0 0 0 1-1v-6.4"/></svg></div>
+          <div class="ms-lbl" style="left:172px;top:135px">Commerçants</div>
         </div>
+        <div class="ms-echo">↳ retour vers l'événement : bénéfice partagé, visibilité pour le commerce</div>
 
         <div class="tgpoints">
           <div class="tgpt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Notoriété redistribuée aux partenaires</span></div>
@@ -727,7 +739,7 @@
 (function(){
   var TRACKS = {
     event: ['ev0','ev1','ev2','ev3'],
-    se: ['se0','se1','se2','se3','se4','se5'],
+    se: ['se0','se1','se2','se3','se5'],
   };
   var track = 'home', idx = 0;
   var glow = document.getElementById('glow');
@@ -1100,6 +1112,6 @@
   render();
 })();
 </script>
-<div style="position:fixed;bottom:4px;right:6px;font-size:8px;color:rgba(255,255,255,.25);z-index:999;font-family:monospace;pointer-events:none">build 2026-08-04-vignettes</div>
+<div style="position:fixed;bottom:4px;right:6px;font-size:8px;color:rgba(255,255,255,.25);z-index:999;font-family:monospace;pointer-events:none">build 2026-08-04-fixround2</div>
 </body>
 </html>
