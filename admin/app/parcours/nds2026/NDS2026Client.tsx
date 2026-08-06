@@ -89,6 +89,19 @@ function ndsCumul(): number { return Math.max(1, ndsLedgerGet().length) }
 function ndsPlayedToday(famId: string): boolean {
   try { return localStorage.getItem('flowin_played_' + famId + '_' + ndsYmd()) != null } catch { return false }
 }
+/* Favoris (partenaires) — liste persistante, pas de reset quotidien. */
+const NDS_FAVORIS_KEY = 'flowin_favoris_partenaires'
+function ndsFavorisList(): string[] {
+  try { const r = localStorage.getItem(NDS_FAVORIS_KEY); return r ? (JSON.parse(r) as string[]) : [] } catch { return [] }
+}
+function ndsIsFavori(id: string): boolean { return ndsFavorisList().indexOf(id) !== -1 }
+function ndsToggleFavori(id: string): string[] {
+  const l = ndsFavorisList()
+  const i = l.indexOf(id)
+  if (i === -1) l.push(id); else l.splice(i, 1)
+  try { localStorage.setItem(NDS_FAVORIS_KEY, JSON.stringify(l)) } catch {}
+  return l
+}
 /* Migration unique des anciennes clés permanentes (flowin_played_* / flowin_bonus_*
    sans suffixe de date) vers le ledger, pour ne pas faire régresser le cumul d'un
    appareil de test déjà utilisé. */
@@ -178,7 +191,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
   const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
   const MB = preview || !!cfg.mbLayout  // nouveau layout marque blanche : master (flag cfg) OU preview (validation) — NDS live non-preview inchange
-  const [profilTab, setProfilTab] = useState<'tickets' | 'infos'>('tickets')  // fusion Tickets+Profil (MB)
+  const [profilTab, setProfilTab] = useState<'tickets' | 'infos' | 'favoris'>('tickets')  // fusion Tickets+Profil (MB)
+  const [favTick, setFavTick] = useState(0)  // incrémenté pour forcer le re-render après toggle favori (localStorage)
+  const toggleFav = (id: string) => { ndsToggleFavori(id); setFavTick(t => t + 1) }
   const [sessionStart] = useState<string>(() => new Date().toISOString())
   const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
   const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
@@ -1602,7 +1617,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
               {partenaires.length === 0 && <div className="pt-banner"><svg className="ic"><use href="#i-store" /></svg><div>Espace partenaires — la liste réelle s&apos;affichera ici (logos, promo, réseaux).</div></div>}
               <div className="pt-grid">
                 {partenaires.map((p, i) => (
-                  <div className="pt-card" key={p.id} onClick={() => { logClicPartenaire(p.id, 'fiche', null); setSheetPart(i) }}>
+                  <div className="pt-card" key={p.id} style={{ position: 'relative' }} onClick={() => { logClicPartenaire(p.id, 'fiche', null); setSheetPart(i) }}>
+                    {preview && (
+                      <button
+                        aria-label={ndsIsFavori(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                        onClick={(e) => { e.stopPropagation(); toggleFav(p.id) }}
+                        style={{ position: 'absolute', top: 6, right: 6, zIndex: 2, width: 26, height: 26, border: 'none', borderRadius: '50%', background: 'rgba(255,255,255,.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,.15)', cursor: 'pointer' }}
+                      >
+                        <svg className="ic" style={{ width: 14, height: 14, color: ndsIsFavori(p.id) ? '#E0218A' : '#b8adc4' }}><use href={ndsIsFavori(p.id) ? '#i-heartf' : '#i-heart'} /></svg>
+                      </button>
+                    )}
                     <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
                     <div className="pt-nm">{p.nom}</div>
                   </div>
@@ -1656,7 +1680,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
               {MB && (
                 <div style={{ display: 'flex', gap: 6, background: '#f3eef7', borderRadius: 12, padding: 4, marginBottom: 16 }}>
-                  {([['tickets', 'Mes tickets'], ['infos', 'Mes coordonnées']] as const).map(([k, lb]) => (
+                  {([['tickets', 'Mes tickets'], ['infos', 'Mes coordonnées'], ...(preview ? [['favoris', 'Mes favoris'] as const] : [])] as const).map(([k, lb]) => (
                     <button key={k} onClick={() => setProfilTab(k)} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px', fontFamily: 'inherit', fontWeight: 800, fontSize: 13, cursor: 'pointer', background: profilTab === k ? '#fff' : 'transparent', color: profilTab === k ? '#7C2D92' : '#7a708a', boxShadow: profilTab === k ? '0 1px 4px rgba(124,45,146,.15)' : 'none' }}>{lb}</button>
                   ))}
                 </div>
@@ -1715,9 +1739,40 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 </>
               )}
 
+              {preview && profilTab === 'favoris' && (() => {
+                const favs = partenaires.filter(p => ndsIsFavori(p.id))
+                return (
+                  <div key={favTick}>
+                    {favs.length === 0 ? (
+                      <div className="infocard" style={{ marginTop: 4 }}>
+                        <svg className="ic"><use href="#i-heart" /></svg>
+                        <div>Touche le cœur sur une fiche partenaire pour l&apos;ajouter ici.</div>
+                      </div>
+                    ) : (
+                      <div className="pt-grid" style={{ marginTop: 4 }}>
+                        {favs.map((p, i) => (
+                          <div className="pt-card" key={p.id} style={{ position: 'relative' }} onClick={() => { const idx = partenaires.findIndex(x => x.id === p.id); logClicPartenaire(p.id, 'fiche', null); setSheetPart(idx) }}>
+                            <button
+                              aria-label="Retirer des favoris"
+                              onClick={(e) => { e.stopPropagation(); toggleFav(p.id) }}
+                              style={{ position: 'absolute', top: 6, right: 6, zIndex: 2, width: 26, height: 26, border: 'none', borderRadius: '50%', background: 'rgba(255,255,255,.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,.15)', cursor: 'pointer' }}
+                            >
+                              <svg className="ic" style={{ width: 14, height: 14, color: '#E0218A' }}><use href="#i-heartf" /></svg>
+                            </button>
+                            <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
+                            <div className="pt-nm">{p.nom}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
               <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
               <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Cumule tes tickets en boutique</span><span className="cta-sub">+1 ticket par commerce</span></span><span className="cta-go">›</span></a>
               <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>
+              {preview && <a className="double" onClick={shareParrainage} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-share" /></svg> Partager &amp; gagner un ticket</a>}
             </div>
           </section>
         )}
