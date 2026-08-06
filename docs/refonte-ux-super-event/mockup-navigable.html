@@ -19,7 +19,7 @@
        display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
   .ic{width:20px;height:20px;display:inline-block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 
-  .phone{width:min(390px,88vw);aspect-ratio:390/844;height:auto;max-height:92vh;background:var(--paper);border-radius:38px;
+  .phone{width:min(390px,88vw,42.5vh);aspect-ratio:390/844;height:auto;background:var(--paper);border-radius:38px;
          overflow:hidden;position:relative;box-shadow:0 30px 70px rgba(20,10,30,.35);border:9px solid #1a1226}
   .camdot{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#1a1226;border-radius:50%;z-index:50}
   .stage{position:relative;height:100%;overflow:hidden}
@@ -53,20 +53,7 @@
   .prow .nm{font-size:13.5px;font-weight:800}
   .prow .vl{font-size:11.5px;color:var(--muted)}
   .pdiv{height:1px;background:var(--line);margin:6px 0}
-  .stepbox{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 16px;margin-top:14px}
-  .step{display:flex;align-items:center;gap:11px;padding:7px 0}
-  .step .si2{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .step .si2 svg{width:16px;height:16px;color:#fff}
-  .step .st{font-size:13.5px;color:var(--ink2)}
-  .step .st b{color:var(--ink)}
-  .step .ss{font-size:11.5px;opacity:.75;display:block}
-  .morechance{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,rgba(0,180,160,.14),rgba(224,33,138,.14));
-             border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-top:14px;font-weight:800;font-size:13.5px;color:var(--ink);text-align:center}
   .alreadybox{display:flex;align-items:center;gap:10px;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);border-radius:14px;padding:14px 15px;font-size:13px;font-weight:600;color:var(--ink2)}
-  .stdotrow{display:flex;align-items:center;gap:10px;font-size:13px;padding:5px 0;color:var(--ink2)}
-  .stdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .stdot.done{background:#16a34a}
-  .stdot.todo{background:var(--muted)}
 
   /* ===== POPUP ENTREE "deja joue ?" ===== */
   .gatecard{background:#fff;border-radius:22px;padding:26px 22px;max-width:320px;margin:0 auto;text-align:center;box-shadow:0 24px 60px rgba(20,8,40,.3)}
@@ -267,25 +254,6 @@
           <div class="xr"><span class="xn">3</span>Cumule tes points, remporte le lot</div>
         </div>
         <button class="btn" onclick="go('jeu')">Flasher un QR &amp; jouer</button>
-      </div>
-    </div>
-
-    <!-- ONBOARD (variante retour - deja joue cette station aujourd'hui) -->
-    <div class="scr" id="onboardBack">
-      <div class="pad">
-        <div style="text-align:center"><span style="font-size:26px;font-weight:900;letter-spacing:-.03em">Flow<em style="font-style:normal;color:var(--magenta)">in</em></span></div>
-        <div class="prizebox">
-          <div class="lbl">À gagner chaque soir</div>
-          <div class="prow"><span class="sq"><svg class="ic" style="color:#fff"><use href="#i-ticket"/></svg></span><div><div class="nm">Bon d&apos;achat 10€</div><div class="vl">La Bergerie</div></div></div>
-        </div>
-        <div class="alreadybox" style="margin-top:16px"><svg class="ic" style="width:20px;height:20px;color:#16a34a;flex-shrink:0"><use href="#i-check"/></svg><span>Tu as déjà flashé <b>cette station</b> aujourd&apos;hui — ton ticket est gardé (<b>3 tickets</b>). File vers une autre station pour en gagner un de plus&nbsp;!</span></div>
-        <div class="stepbox">
-          <div class="stdotrow"><span class="stdot done"></span><span><b>La Bergerie</b> — validée ✓</span></div>
-          <div class="stdotrow"><span class="stdot todo"></span><span><b>Giordano</b> — à jouer</span></div>
-          <div class="stdotrow"><span class="stdot todo"></span><span><b>Nook</b> — à jouer</span></div>
-        </div>
-        <button class="btn" onclick="go('carte')">Gagner d&apos;autres tickets</button>
-        <button class="btn ghost" onclick="go('profil')">Voir mes tickets</button>
       </div>
     </div>
 
@@ -639,7 +607,7 @@
   function gateAnswer(alreadyPlayed){
     document.getElementById('gateDim').classList.remove('on');
     document.getElementById('gateWrap').style.display = 'none';
-    go(alreadyPlayed ? 'onboardBack' : 'explication');
+    go(alreadyPlayed ? 'carte' : 'explication');
   }
   function optSel(btn){ btn.parentElement.querySelectorAll('.optb').forEach(function(b){ b.classList.remove('sel'); }); btn.classList.add('sel'); }
   function chipSel(btn){ btn.parentElement.querySelectorAll('.chip').forEach(function(b){ b.classList.remove('sel'); }); btn.classList.add('sel'); }
