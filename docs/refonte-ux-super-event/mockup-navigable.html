@@ -21,22 +21,21 @@
        display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
   .ic{width:20px;height:20px;display:inline-block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 
-  .phone{width:390px;max-width:100%;height:844px;max-height:92vh;background:var(--paper);border-radius:52px;
-         overflow:hidden;position:relative;box-shadow:0 30px 70px rgba(20,10,30,.35);border:10px solid #0b0710}
-  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#0b0710;border-radius:20px;z-index:50}
-  .homebar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:#0b0710;border-radius:100px;z-index:50;opacity:.3}
+  .phone{width:390px;max-width:100%;height:844px;max-height:92vh;background:var(--paper);border-radius:38px;
+         overflow:hidden;position:relative;box-shadow:0 30px 70px rgba(20,10,30,.35);border:9px solid #1a1226}
+  .camdot{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#1a1226;border-radius:50%;z-index:50}
   .stage{position:relative;height:100%;overflow:hidden}
   .scr{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;
        transform:translateY(14px);transition:opacity .35s ease,transform .35s ease;overflow-y:auto}
   .scr.on{opacity:1;pointer-events:auto;transform:translateY(0)}
-  .pad{padding:54px 18px 100px}
+  .pad{padding:34px 18px 100px}
 
   .eyebrow{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--magenta);display:flex;align-items:center;gap:6px}
   .h1{font-size:22px;font-weight:900;letter-spacing:-.02em;margin-top:6px;line-height:1.15}
   .sub{font-size:12.5px;color:var(--muted);margin-top:4px;font-weight:600;line-height:1.4}
 
   .back{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-  .topbar{display:flex;align-items:center;gap:10px;padding:50px 18px 0}
+  .topbar{display:flex;align-items:center;gap:10px;padding:30px 18px 0}
 
   .btn{display:block;width:100%;text-align:center;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;
       border:none;font-family:inherit;font-weight:800;font-size:14px;padding:15px;border-radius:100px;cursor:pointer;margin-top:16px;
@@ -47,7 +46,7 @@
   .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(30,18,40,.06);border:1px solid var(--line)}
 
   /* ===== ONBOARD ===== */
-  #onboard .pad{padding-top:54px}
+  #onboard .pad{padding-top:34px}
   .prizebox{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:16px}
   .prizebox .lbl{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
   .prow{display:flex;align-items:center;gap:11px;padding:5px 0}
@@ -71,14 +70,30 @@
   .stdot.done{background:#16a34a}
   .stdot.todo{background:var(--muted)}
 
-  /* ===== JEU (quiz) ===== */
-  .quizcard{margin-top:18px}
+  /* ===== POPUP ENTREE "deja joue ?" ===== */
+  .gatecard{background:#fff;border-radius:22px;padding:26px 22px;max-width:320px;margin:0 auto;text-align:center;box-shadow:0 24px 60px rgba(20,8,40,.3)}
+  .gatecard .gi{width:54px;height:54px;margin:0 auto 14px;border-radius:16px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:flex;align-items:center;justify-content:center}
+  .gatecard .gi svg{width:26px;height:26px;color:#fff}
+  .gatecard h2{font-size:18px;font-weight:800;color:var(--ink)}
+  .gatecard p{font-size:12.5px;color:var(--muted);margin:8px 0 18px;line-height:1.5}
+
+  /* ===== EXPLICATION (schema 1-2-3) ===== */
+  .schemabox{margin:18px auto 0;max-width:280px}
+  .explist{display:flex;flex-direction:column;gap:9px;margin-top:16px;text-align:left}
+  .explist .xr{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink2)}
+  .explist .xn{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .progress{display:flex;gap:5px;margin-bottom:14px}
+  .pstep{flex:1;height:4px;border-radius:100px;background:var(--line)}
+  .pstep.on{background:linear-gradient(90deg,var(--purple),var(--magenta))}
+  .quizcard{margin-top:0}
   .qz-q{font-size:16px;font-weight:800;line-height:1.35;margin-top:4px}
   .qz-opts{margin-top:14px;display:flex;flex-direction:column;gap:9px}
   .qz-opt{background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-family:inherit;font-weight:700;
          font-size:13.5px;color:var(--ink);text-align:left;cursor:pointer}
   .qz-opt.correct{border-color:#16a34a;background:#eafaf0}
   .qz-opt.wrong{border-color:#ef4444;background:#fdecec}
+  .qexpl{margin-top:12px;background:var(--paper);border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+  .qexpl b{color:#16a34a}
 
   /* ===== BONUS teaser (sheet) + écran plein ===== */
   .dim{position:fixed;inset:0;background:rgba(26,18,38,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -183,11 +198,10 @@
 <body>
 
 <div class="phone">
-  <div class="notch"></div>
-  <div class="homebar"></div>
+  <div class="camdot"></div>
   <div class="stage" id="stage">
 
-    <!-- ONBOARD -->
+    <!-- ONBOARD (coquille de base, sous le popup au chargement) -->
     <div class="scr on" id="onboard">
       <div class="pad">
         <div style="text-align:center"><span style="font-size:26px;font-weight:900;letter-spacing:-.03em">Flow<em style="font-style:normal;color:var(--magenta)">in</em></span></div>
@@ -197,15 +211,28 @@
           <div class="pdiv"></div>
           <div class="prow"><span class="sq"><svg class="ic" style="color:#fff"><use href="#i-gift"/></svg></span><div><div class="nm">-15% en boutique</div><div class="vl">Giordano</div></div></div>
         </div>
+      </div>
+    </div>
+
+    <!-- EXPLICATION (reponse "Non" au popup) - schema 1-2-3 -->
+    <div class="scr" id="explication">
+      <div class="pad">
+        <div style="text-align:center"><span style="font-size:26px;font-weight:900;letter-spacing:-.03em">Flow<em style="font-style:normal;color:var(--magenta)">in</em></span></div>
         <div style="text-align:center;margin-top:18px;font-size:16px;font-weight:800">Comment jouer&nbsp;?</div>
-        <div class="stepbox">
-          <div class="step"><span class="si2"><svg class="ic" style="color:#fff;width:16px;height:16px"><use href="#i-map"/></svg></span><span class="st"><b>Rends-toi à une station jeux</b><span class="ss">Sur la carte — festival et partenaires</span></span></div>
-          <div class="step"><span class="si2"><svg class="ic" style="color:#fff;width:16px;height:16px"><use href="#i-scan"/></svg></span><span class="st"><b>Flash le QR code</b><span class="ss">À la station</span></span></div>
-          <div class="step"><span class="si2"><svg class="ic" style="color:#fff;width:16px;height:16px"><use href="#i-check"/></svg></span><span class="st"><b>Réponds au quizz</b><span class="ss">Et gagne des tickets</span></span></div>
+        <div class="schemabox">
+          <svg viewBox="0 0 280 190" width="100%">
+            <path d="M40,150 Q75,110 110,120 Q145,175 175,140 Q200,110 235,90" fill="none" stroke="#F5A100" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
+            <circle cx="40" cy="150" r="19" fill="#3B5CC4"/><text x="40" y="150" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="13" font-weight="700" font-family="Manrope">1</text>
+            <circle cx="110" cy="120" r="19" fill="#7C2D92"/><text x="110" y="120" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="13" font-weight="700" font-family="Manrope">2</text>
+            <circle cx="235" cy="90" r="19" fill="#E0218A"/><text x="235" y="90" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="13" font-weight="700" font-family="Manrope">3</text>
+          </svg>
         </div>
-        <div class="morechance">+ Vous jouez, + vos chances augmentent</div>
+        <div class="explist">
+          <div class="xr"><span class="xn">1</span>Rends-toi aux différentes stations, regarde la carte</div>
+          <div class="xr"><span class="xn">2</span>Découvre les gains et les lots à chaque station</div>
+          <div class="xr"><span class="xn">3</span>Cumule tes points, remporte le lot</div>
+        </div>
         <button class="btn" onclick="go('jeu')">Flasher un QR &amp; jouer</button>
-        <div style="text-align:center;margin-top:14px"><a style="font-size:11px;color:var(--muted);font-weight:700;cursor:pointer" onclick="go('onboardBack')">Exemple : vue si déjà joué cette station aujourd&apos;hui →</a></div>
       </div>
     </div>
 
@@ -225,30 +252,44 @@
         </div>
         <button class="btn" onclick="go('carte')">Gagner d&apos;autres tickets</button>
         <button class="btn ghost" onclick="go('profil')">Voir mes tickets</button>
-        <div style="text-align:center;margin-top:14px"><a style="font-size:11px;color:var(--muted);font-weight:700;cursor:pointer" onclick="go('onboard')">← Retour à l&apos;exemple précédent</a></div>
       </div>
     </div>
 
     <!-- JEU -->
     <div class="scr" id="jeu">
-      <div class="topbar"><div class="back" onclick="go('onboard')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">La Bergerie</div></div>
+      <div class="topbar"><div class="back" onclick="go('explication')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div style="flex:1"><div style="font-weight:800;font-size:14px">La Bergerie</div><div style="font-size:11px;color:var(--muted)" id="quizProgLbl">Quiz · 1 / 3</div></div></div>
       <div class="pad">
-        <div class="h1">3 questions, <span style="color:var(--magenta)">1 ticket</span>.</div>
-        <div class="card quizcard">
-          <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)">Question 1 / 3</div>
-          <div class="qz-q">En quelle année les Nuits du Sud ont-elles été créées ?</div>
-          <div class="qz-opts">
-            <button class="qz-opt" onclick="qzAnswer(this,false)">1987</button>
-            <button class="qz-opt" onclick="qzAnswer(this,true)">1995</button>
-            <button class="qz-opt" onclick="qzAnswer(this,false)">2001</button>
+        <div class="progress" id="quizDots"></div>
+        <div class="card quizcard" id="quizCard"></div>
+      </div>
+    </div>
+
+    <!-- RESULTATS -->
+    <div class="scr" id="resultats">
+      <div class="pad" style="padding-top:40px">
+        <div style="text-align:center">
+          <div class="thanks" style="padding:0 0 10px">
+            <div class="ti" style="background:linear-gradient(135deg,var(--gold),var(--magenta));color:#fff"><svg class="ic" style="width:26px;height:26px;color:#fff"><use href="#i-gift"/></svg></div>
           </div>
+          <div class="h1" id="resTitle">Bravo&nbsp;!</div>
+          <div class="sub" id="resSub">Ton ticket est validé pour le tirage</div>
         </div>
+        <div class="prizebox" style="text-align:center;margin-top:18px">
+          <div style="font-size:30px;font-weight:900" id="resScore">3/3</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px" id="resScoreLbl">Sans faute — 1 ticket</div>
+        </div>
+        <div class="rc" id="bonusCta" style="cursor:pointer" onclick="go('bonus')">
+          <div class="rt">Rattrape ton ticket</div>
+          <div class="rd">1 question bonus · 15 secondes chrono</div>
+        </div>
+        <div class="alreadybox" style="margin-top:14px"><svg class="ic" style="width:20px;height:20px;color:var(--magenta);flex-shrink:0"><use href="#i-gift"/></svg><span>Lot&nbsp;: <b>Bon d&apos;achat 10€</b></span></div>
+        <button class="btn" onclick="go('coordonnees')">Valider et recevoir mon ticket →</button>
       </div>
     </div>
 
     <!-- COORDONNEES -->
     <div class="scr" id="coordonnees">
-      <div class="topbar"><div class="back" onclick="go('jeu')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Dernière étape</div></div>
+      <div class="topbar"><div class="back" onclick="go('resultats')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Dernière étape</div></div>
       <div class="pad">
         <div class="h1">Bravo, ton<br>ticket est là.</div>
         <div class="sub">Laisse-nous tes coordonnées : on te prévient si tu gagnes.</div>
@@ -282,7 +323,7 @@
 
     <!-- BONUS (écran plein, options a choix multiples) -->
     <div class="scr" id="bonus">
-      <div class="topbar"><div class="back" onclick="go('final')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">1 / 2 · double tes chances</div></div>
+      <div class="topbar"><div class="back" onclick="go('resultats')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Question bonus · double tes chances</div></div>
       <div class="pad">
         <div class="qcard">
           <div class="qtxt">Quel type d&apos;animation préfères-tu pendant les Nuits du Sud ?</div>
@@ -291,7 +332,7 @@
           <button class="optb" onclick="optSel(this)">Animations pour enfants</button>
           <button class="optb" onclick="optSel(this)">Dégustations locales</button>
         </div>
-        <button class="btn" onclick="go('coordonnees')">Suivant →</button>
+        <button class="btn" onclick="go('coordonnees')">Terminer →</button>
       </div>
     </div>
 
@@ -396,14 +437,16 @@
 
   </div>
 
-  <!-- BONUS sheet -->
-  <div class="dim" id="bonusDim" onclick="hideTeaser()"></div>
-  <div class="sheet" id="bonusSheet">
-    <div class="wm-badge"><svg class="ic" style="color:#fff"><use href="#i-gift"/></svg></div>
-    <div style="font-size:16px;font-weight:800">Question bonus disponible</div>
-    <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Double tes chances de gagner en répondant.</div>
-    <button class="btn" onclick="openBonus()">Répondre à la question bonus</button>
-    <button class="btn ghost" onclick="skipBonus()">Plus tard</button>
+  <!-- POPUP ENTREE -->
+  <div class="dim on" id="gateDim"></div>
+  <div style="position:absolute;inset:0;z-index:41;display:flex;align-items:center;justify-content:center;padding:24px" id="gateWrap">
+    <div class="gatecard">
+      <div class="gi"><svg class="ic" style="color:#fff;width:26px;height:26px"><use href="#i-help"/></svg></div>
+      <h2>Avez-vous déjà joué&nbsp;?</h2>
+      <p>Une station par jour suffit pour garder ton ticket.</p>
+      <button class="btn" onclick="gateAnswer(true)">Oui, déjà joué</button>
+      <button class="btn ghost" onclick="gateAnswer(false)">Non, jamais joué</button>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -429,6 +472,7 @@
 
 <svg width="0" height="0" style="position:absolute">
   <symbol id="i-arrowl" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></symbol>
   <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14"/><path d="M15 6v14"/></symbol>
   <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9.5"/><path d="M3 9.5 4.6 4h14.8L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></symbol>
@@ -451,6 +495,7 @@
     document.querySelectorAll('.nb[data-nb]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nb') === id); });
     if (id === 'jeu') { document.getElementById('navbar').classList.add('off'); document.getElementById('banddock').classList.add('off'); }
     if (id === 'carte') setTimeout(initMap, 50);
+    if (id === 'jeu') startQuiz();
   }
 
   var mapInited = false;
@@ -469,25 +514,56 @@
     L.circleMarker([43.7229, 7.1135], { radius: 7, color: '#3B5CC4', fillColor: '#3B5CC4', fillOpacity: 1, weight: 3 }).addTo(map);
   }
 
-  var qzAnswered = false;
-  function qzAnswer(btn, correct){
-    if (qzAnswered) return; qzAnswered = true;
-    document.querySelectorAll('.qz-opt').forEach(function(b){ b.disabled = true; });
-    btn.classList.add(correct ? 'correct' : 'wrong');
-    setTimeout(function(){
-      document.getElementById('bonusDim').classList.add('on');
-      document.getElementById('bonusSheet').classList.add('on');
-    }, 500);
+  var QUESTIONS = [
+    { texte: 'En quelle année les Nuits du Sud ont-elles été créées ?', options: ['1987', '1995', '2001'], bonne: 1, explication: 'Le festival existe depuis bientôt 30 ans à Vence.' },
+    { texte: 'Où se déroule le festival ?', options: ['Vence', 'Grasse', 'Cagnes-sur-Mer'], bonne: 0, explication: 'Les Nuits du Sud animent le centre historique de Vence chaque été.' },
+    { texte: 'Que gagnes-tu à chaque station réussie ?', options: ['Un ticket pour le tirage', 'Rien', 'Une réduction immédiate'], bonne: 0, explication: 'Chaque station validée ajoute un ticket pour le tirage du soir.' }
+  ];
+  var qIdx = 0, qAnswered = false, qSelected = -1, qScore = 0;
+  function renderQuiz(){
+    var dots = document.getElementById('quizDots'); dots.innerHTML = '';
+    QUESTIONS.forEach(function(_, k){ var d = document.createElement('div'); d.className = 'pstep' + (k <= qIdx ? ' on' : ''); dots.appendChild(d); });
+    document.getElementById('quizProgLbl').textContent = 'Quiz · ' + (qIdx + 1) + ' / ' + QUESTIONS.length;
+    var q = QUESTIONS[qIdx];
+    var html = '<div class="qz-q">' + q.texte + '</div><div class="qz-opts">';
+    q.options.forEach(function(opt, i){
+      var cls = 'qz-opt';
+      if (qAnswered) { if (i === q.bonne) cls += ' correct'; else if (i === qSelected) cls += ' wrong'; }
+      html += '<button class="' + cls + '" ' + (qAnswered ? 'disabled' : '') + ' onclick="quizAnswer(' + i + ')">' + opt + '</button>';
+    });
+    html += '</div>';
+    if (qAnswered) {
+      html += '<div class="qexpl">' + (qSelected === q.bonne ? '<b>Bonne réponse ✓</b>' : 'Bonne réponse : <b>' + q.options[q.bonne] + '</b>') + '<div style="margin-top:6px">' + q.explication + '</div></div>';
+      html += '<button class="btn" onclick="quizNext()">' + (qIdx + 1 < QUESTIONS.length ? 'Question suivante →' : 'Voir mon résultat →') + '</button>';
+    }
+    document.getElementById('quizCard').innerHTML = html;
   }
-  function hideTeaser(){
-    document.getElementById('bonusDim').classList.remove('on');
-    document.getElementById('bonusSheet').classList.remove('on');
+  function quizAnswer(i){
+    if (qAnswered) return;
+    qAnswered = true; qSelected = i;
+    if (i === QUESTIONS[qIdx].bonne) qScore++;
+    renderQuiz();
   }
-  function openBonus(){ hideTeaser(); go('bonus'); }
-  function skipBonus(){ hideTeaser(); go('coordonnees'); }
+  function quizNext(){
+    if (qIdx + 1 < QUESTIONS.length) { qIdx++; qAnswered = false; qSelected = -1; renderQuiz(); return; }
+    var perfect = qScore === QUESTIONS.length;
+    document.getElementById('resScore').textContent = qScore + '/' + QUESTIONS.length;
+    document.getElementById('resTitle').textContent = perfect ? 'Wow, super !' : 'Il te reste une chance !';
+    document.getElementById('resSub').textContent = perfect ? 'Continue comme ça et cumule tes tickets !' : 'Réponds au bonus juste en dessous et repars avec ton ticket';
+    document.getElementById('resScoreLbl').textContent = perfect ? 'Sans faute — 1 ticket' : (qScore + '/' + QUESTIONS.length + ' — le bonus te donne quand même ton ticket');
+    document.getElementById('bonusCta').style.display = perfect ? 'none' : 'block';
+    go('resultats');
+  }
+  function startQuiz(){ qIdx = 0; qAnswered = false; qSelected = -1; qScore = 0; renderQuiz(); }
+
+  function gateAnswer(alreadyPlayed){
+    document.getElementById('gateDim').classList.remove('on');
+    document.getElementById('gateWrap').style.display = 'none';
+    go(alreadyPlayed ? 'onboardBack' : 'explication');
+  }
   function optSel(btn){ btn.parentElement.querySelectorAll('.optb').forEach(function(b){ b.classList.remove('sel'); }); btn.classList.add('sel'); }
   function chipSel(btn){ btn.parentElement.querySelectorAll('.chip').forEach(function(b){ b.classList.remove('sel'); }); btn.classList.add('sel'); }
-  function finishGame(){ qzAnswered = false; go('final'); }
+  function finishGame(){ go('final'); }
 
   var toastTimer;
   function toast(msg){
