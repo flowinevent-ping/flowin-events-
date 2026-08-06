@@ -474,6 +474,24 @@
     </div>
   </div>
 
+  <div class="scr" id="ev4" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(18,168,123,.2), transparent)">
+    <div class="inner">
+      <div class="eyebrow">Le retrait du lot</div>
+      <h1 class="mega" style="font-size:clamp(26px,6vw,42px)">Simple comme <em class="b">un scan</em>.</h1>
+      <p class="lede">Le client montre son billet digital. N'importe quel employé, avec son téléphone et un code, valide et décompte le lot.</p>
+      <div class="retrait-card">
+        <div class="rt-badge">● Billet valable</div>
+        <div class="rt-lot">Bon d'achat 10€</div>
+        <div class="rt-sub">À retirer en boutique</div>
+        <div class="rt-pin">
+          <div class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+          <div class="pc">••••</div>
+        </div>
+        <div class="rt-btn">Valider le retrait du lot</div>
+      </div>
+    </div>
+  </div>
+
   <div class="scr" id="ev3" data-glow="radial-gradient(60% 50% at 50% 40%, rgba(224,33,138,.18), transparent)">
     <div class="inner">
       <div class="eyebrow">En trois mots</div>
@@ -650,7 +668,7 @@
 <script>
 (function(){
   var TRACKS = {
-    event: ['ev0','ev1','ev2','ev3'],
+    event: ['ev0','ev1','ev2','ev4','ev3'],
     se: ['se0','se1','se3','se5'],
   };
   var track = 'home', idx = 0;
@@ -1026,6 +1044,6 @@
   render();
 })();
 </script>
-<div style="position:fixed;bottom:4px;right:6px;font-size:8px;color:rgba(255,255,255,.25);z-index:999;font-family:monospace;pointer-events:none">build 2026-08-06-diffbadges</div>
+<div style="position:fixed;bottom:4px;right:6px;font-size:8px;color:rgba(255,255,255,.25);z-index:999;font-family:monospace;pointer-events:none">build 2026-08-06-ev4retrait</div>
 </body>
 </html>
