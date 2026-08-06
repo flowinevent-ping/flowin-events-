@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
     --ink:#1a1226; --ink2:#33283b; --purple:#7C2D92; --magenta:#E0218A;
@@ -59,31 +61,43 @@
   .qz-opt.correct{border-color:#16a34a;background:#eafaf0}
   .qz-opt.wrong{border-color:#ef4444;background:#fdecec}
 
-  /* ===== BONUS popup ===== */
+  /* ===== BONUS teaser (sheet) + écran plein ===== */
   .dim{position:fixed;inset:0;background:rgba(26,18,38,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
   .dim.on{opacity:1;pointer-events:auto}
   .sheet{position:absolute;left:0;right:0;bottom:-100%;background:#fff;border-radius:24px 24px 0 0;padding:26px 22px 30px;z-index:41;
         transition:bottom .35s cubic-bezier(.2,.8,.25,1);box-shadow:0 -14px 40px rgba(0,0,0,.2)}
   .sheet.on{bottom:0}
   .sheet .wm-badge{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--magenta));display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .qcard{margin-top:18px}
+  .qtxt{font-size:16px;font-weight:800;line-height:1.35}
+  .optb{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;
+       font-family:inherit;font-weight:700;font-size:13.5px;color:var(--ink);margin-top:9px;cursor:pointer}
+  .optb.sel{border-color:var(--magenta);background:linear-gradient(135deg,rgba(224,33,138,.08),rgba(124,45,146,.08))}
 
   /* ===== COORDONNEES ===== */
   .field{margin-top:12px}
   .field label{font-size:11.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:6px}
-  .field input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:13.5px;background:#fff}
+  .field input,.field select{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--ink)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .optin{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.5}
   .optin input{margin-top:2px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .chip{font-size:11.5px;font-weight:700;padding:8px 13px;border-radius:100px;background:#fff;border:1.5px solid var(--line);color:var(--ink2);cursor:pointer}
+  .chip.sel{background:linear-gradient(135deg,var(--purple),var(--magenta));border-color:transparent;color:#fff}
+  .knownhint{background:#EEF2FF;border:1px solid var(--blue);border-radius:12px;padding:10px 12px;margin-top:8px;color:#23357a;font-size:12.5px}
 
   /* ===== CARTE ===== */
-  .maparea{margin:0 18px;height:220px;border-radius:18px;position:relative;overflow:hidden;
-           background:radial-gradient(70% 60% at 30% 20%,rgba(124,45,146,.16),transparent),radial-gradient(60% 50% at 80% 70%,rgba(224,33,138,.14),transparent),#efe9f6}
-  .pin{position:absolute;width:32px;height:32px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,var(--magenta),var(--purple));
-      transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(224,33,138,.35);cursor:pointer}
-  .pin svg{transform:rotate(45deg);width:15px;height:15px;color:#fff}
-  .youare{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 6px rgba(59,92,196,.18)}
+  .maparea{margin:0 18px;height:220px;border-radius:18px;position:relative;overflow:hidden;background:#efe9f6}
+  .maparea #leafletmap{width:100%;height:100%;filter:saturate(.5) brightness(1.05) contrast(.96) sepia(.12) hue-rotate(265deg)}
+  .pin-wrap{width:32px;height:32px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,var(--magenta),var(--purple));
+      transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(224,33,138,.35)}
+  .pin-wrap svg{transform:rotate(45deg);width:15px;height:15px;color:#fff}
   .stlist{display:flex;flex-direction:column;gap:8px;padding:14px 18px 0}
   .strow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
-  .strow .si{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logoslot{width:100%;height:100%;object-fit:contain;border-radius:inherit;display:none}
+  .logoslot.on{display:block}
+  .strow .si{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden}
+  .ptlogo,.fi{position:relative;overflow:hidden}
   .strow .si svg{width:17px;height:17px;color:#fff}
   .strow .nm{font-size:13px;font-weight:800}
   .strow .ds{font-size:11px;color:var(--muted);font-weight:600}
@@ -184,12 +198,48 @@
     <div class="scr" id="coordonnees">
       <div class="topbar"><div class="back" onclick="go('jeu')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Dernière étape</div></div>
       <div class="pad">
-        <div class="h1">Récupère<br>ton ticket.</div>
-        <div class="sub">Un seul formulaire pour tout le festival.</div>
-        <div class="field"><label>Prénom</label><input placeholder="Ton prénom"></div>
-        <div class="field"><label>Email</label><input placeholder="ton@email.fr"></div>
-        <label class="optin"><input type="checkbox" checked> Je souhaite rester informé des Nuits du Sud et des offres partenaires.</label>
-        <button class="btn" onclick="finishGame()">Obtenir mon ticket</button>
+        <div class="h1">Bravo, ton<br>ticket est là.</div>
+        <div class="sub">Laisse-nous tes coordonnées : on te prévient si tu gagnes.</div>
+        <div class="grid2">
+          <div class="field"><label>Prénom</label><input placeholder=""></div>
+          <div class="field"><label>Nom</label><input placeholder=""></div>
+        </div>
+        <div class="field">
+          <label>Email</label><input type="email" placeholder="">
+          <div class="knownhint">Content de te revoir&nbsp;! On a pré-rempli tes infos, vérifie et valide.</div>
+        </div>
+        <div class="field"><label>Téléphone</label><input type="tel" placeholder=""></div>
+        <div class="grid2">
+          <div class="field"><label>Sexe</label><select><option value="">—</option><option>Homme</option><option>Femme</option></select></div>
+          <div class="field"><label>Tranche d&apos;âge</label><select><option value="">Tranche d&apos;âge</option><option>Moins de 18 ans</option><option>18–25 ans</option><option>26–35 ans</option><option>36–50 ans</option><option>51–65 ans</option><option>66 ans et plus</option></select></div>
+        </div>
+        <div class="field"><label>Code postal</label><input inputmode="numeric" placeholder="—"></div>
+        <div class="field">
+          <label style="font-weight:800;color:var(--ink)">Tu as connu le festival par…</label>
+          <div class="chips">
+            <span class="chip sel" onclick="chipSel(this)">Instagram</span>
+            <span class="chip" onclick="chipSel(this)">Affiche</span>
+            <span class="chip" onclick="chipSel(this)">Bouche à oreille</span>
+            <span class="chip" onclick="chipSel(this)">Autre</span>
+          </div>
+        </div>
+        <label class="optin"><input type="checkbox" checked> Je souhaite rester en contact avec les infos des Nuits du Sud et de Flowin. Mes coordonnées ne sont ni vendues ni cédées.</label>
+        <button class="btn" onclick="finishGame()">Valider mon ticket →</button>
+      </div>
+    </div>
+
+    <!-- BONUS (écran plein, options a choix multiples) -->
+    <div class="scr" id="bonus">
+      <div class="topbar"><div class="back" onclick="go('final')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">1 / 2 · double tes chances</div></div>
+      <div class="pad">
+        <div class="qcard">
+          <div class="qtxt">Quel type d&apos;animation préfères-tu pendant les Nuits du Sud ?</div>
+          <button class="optb sel" onclick="optSel(this)">Concerts en plein air</button>
+          <button class="optb" onclick="optSel(this)">Marché artisanal</button>
+          <button class="optb" onclick="optSel(this)">Animations pour enfants</button>
+          <button class="optb" onclick="optSel(this)">Dégustations locales</button>
+        </div>
+        <button class="btn" onclick="go('coordonnees')">Suivant →</button>
       </div>
     </div>
 
@@ -211,16 +261,11 @@
       <div class="pad" style="padding-bottom:170px">
         <div class="eyebrow" style="margin-top:16px;margin-left:18px">Carte</div>
         <div class="h1" style="margin-left:18px">Toutes les stations.</div>
-        <div class="maparea" style="margin-top:12px">
-          <div class="pin" style="top:38%;left:24%" onclick="toast('La Bergerie — déjà scanné')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
-          <div class="pin" style="top:20%;left:56%" onclick="toast('Giordano')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
-          <div class="pin" style="top:58%;left:68%" onclick="toast('Nook')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
-          <div class="youare" style="top:62%;left:32%"></div>
-        </div>
+        <div class="maparea" style="margin-top:12px"><div id="leafletmap"></div></div>
         <div class="stlist">
-          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">180 m</div></div><span class="pill done">Joué</span></div>
-          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Giordano</div><div class="ds">240 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
-          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Nook</div><div class="ds">310 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
+          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">180 m</div></div><span class="pill done">Joué</span></div>
+          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Giordano</div><div class="ds">240 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
+          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Nook</div><div class="ds">310 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
         </div>
       </div>
     </div>
@@ -230,7 +275,7 @@
       <div class="pad" style="padding-bottom:170px">
         <div class="prow" style="margin-top:16px">
           <div class="avat"><svg class="ic" style="color:#fff;width:24px;height:24px"><use href="#i-user"/></svg></div>
-          <div><div style="font-size:17px;font-weight:800">Camille</div><div style="font-size:12px;color:var(--muted)">Participant Nuits du Sud</div></div>
+          <div><div style="font-size:17px;font-weight:800">Mon profil</div><div style="font-size:12px;color:var(--muted)">Participant Nuits du Sud</div></div>
         </div>
         <div class="hero"><div class="n">3</div><div class="l">tickets pour le tirage</div></div>
         <div class="tabs">
@@ -239,13 +284,13 @@
         </div>
         <div class="tabpane on" id="pt-tickets">
           <div class="stlist" style="padding:0">
-            <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">Aujourd&apos;hui</div></div><span class="pill done">Joué</span></div>
+            <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">Aujourd&apos;hui</div></div><span class="pill done">Joué</span></div>
           </div>
           <button class="btn blue" style="margin-top:14px" onclick="shareIt()"><svg class="ic" style="width:15px;height:15px;color:#fff;margin-right:6px"><use href="#i-share"/></svg>Partager &amp; gagner un ticket</button>
         </div>
         <div class="tabpane" id="pt-favoris">
           <div class="favgrid">
-            <div class="favcard"><button class="heartbtn" onclick="unfav(this)"><svg class="ic" style="width:12px;height:12px;color:var(--magenta)"><use href="#i-heartf"/></svg></button><div class="fi" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="fn">La Bergerie</div></div>
+            <div class="favcard"><button class="heartbtn" onclick="unfav(this)"><svg class="ic" style="width:12px;height:12px;color:var(--magenta)"><use href="#i-heartf"/></svg></button><div class="fi" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="fn">La Bergerie</div></div>
           </div>
           <div class="favempty" style="display:none" id="favempty">Touche le cœur sur une fiche partenaire pour l&apos;ajouter ici.</div>
         </div>
@@ -258,15 +303,17 @@
         <div class="eyebrow" style="margin-top:16px">Nos partenaires</div>
         <div class="h1">Découvre-les.</div>
         <div class="ptgrid">
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">La Bergerie</div></div>
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Giordano</div></div>
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Nook</div></div>
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Utile</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">La Bergerie</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Giordano</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Nook</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Utile</div></div>
         </div>
         <div class="rc">
           <div class="rt">Vous êtes commerçant ?</div>
           <div class="rd">Rejoignez le Super Event et devenez une station de jeu.</div>
           <button class="btn" style="margin-top:10px" onclick="go('souscrire')">Faire souscrire mon commerce</button>
+          <button class="btn ghost" onclick="toast('Réservation espace pro — à cadrer')">Réserver un espace pro</button>
+          <button class="btn ghost" onclick="shareIt()"><svg class="ic" style="width:15px;height:15px;margin-right:6px"><use href="#i-share"/></svg>Partager à un ami</button>
         </div>
       </div>
     </div>
@@ -303,8 +350,8 @@
     <div class="wm-badge"><svg class="ic" style="color:#fff"><use href="#i-gift"/></svg></div>
     <div style="font-size:16px;font-weight:800">Question bonus disponible</div>
     <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Double tes chances de gagner en répondant.</div>
-    <button class="btn" onclick="closeBonus()">Répondre à la question bonus</button>
-    <button class="btn ghost" onclick="closeBonus()">Plus tard</button>
+    <button class="btn" onclick="openBonus()">Répondre à la question bonus</button>
+    <button class="btn ghost" onclick="skipBonus()">Plus tard</button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -351,6 +398,23 @@
     document.getElementById('banddock').classList.toggle('off', BAND_SCREENS.indexOf(id) === -1);
     document.querySelectorAll('.nb[data-nb]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nb') === id); });
     if (id === 'jeu') { document.getElementById('navbar').classList.add('off'); document.getElementById('banddock').classList.add('off'); }
+    if (id === 'carte') setTimeout(initMap, 50);
+  }
+
+  var mapInited = false;
+  function initMap(){
+    if (mapInited) { return; } mapInited = true;
+    var map = L.map('leafletmap', { zoomControl: false, attributionControl: false, dragging: true, scrollWheelZoom: false }).setView([43.7229, 7.1138], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    var pinHtml = '<div class="pin-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9.5"/><path d="M3 9.5 4.6 4h14.8L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></svg></div>';
+    var pinIcon = L.divIcon({ html: pinHtml, className: '', iconSize: [32, 32], iconAnchor: [16, 30] });
+    var stations = [
+      { name: 'La Bergerie', lat: 43.7233, lng: 7.1128, msg: 'La Bergerie — déjà scanné' },
+      { name: 'Giordano', lat: 43.7224, lng: 7.1148, msg: 'Giordano' },
+      { name: 'Nook', lat: 43.7238, lng: 7.1152, msg: 'Nook' }
+    ];
+    stations.forEach(function(s){ L.marker([s.lat, s.lng], { icon: pinIcon }).addTo(map).on('click', function(){ toast(s.msg); }); });
+    L.circleMarker([43.7229, 7.1135], { radius: 7, color: '#3B5CC4', fillColor: '#3B5CC4', fillOpacity: 1, weight: 3 }).addTo(map);
   }
 
   var qzAnswered = false;
@@ -363,11 +427,14 @@
       document.getElementById('bonusSheet').classList.add('on');
     }, 500);
   }
-  function closeBonus(){
+  function hideTeaser(){
     document.getElementById('bonusDim').classList.remove('on');
     document.getElementById('bonusSheet').classList.remove('on');
-    go('coordonnees');
   }
+  function openBonus(){ hideTeaser(); go('bonus'); }
+  function skipBonus(){ hideTeaser(); go('coordonnees'); }
+  function optSel(btn){ btn.parentElement.querySelectorAll('.optb').forEach(function(b){ b.classList.remove('sel'); }); btn.classList.add('sel'); }
+  function chipSel(btn){ btn.parentElement.querySelectorAll('.chip').forEach(function(b){ b.classList.remove('sel'); }); btn.classList.add('sel'); }
   function finishGame(){ qzAnswered = false; go('final'); }
 
   var toastTimer;
