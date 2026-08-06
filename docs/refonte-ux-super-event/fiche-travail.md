@@ -7,14 +7,21 @@ Source : brief oral du 06/08/2026.
 
 Simplifier l'UX/UI du parcours joueur Super Event. **Le contenu, les règles et les mécaniques de jeu ne changent pas.** Seule l'interface évolue, en reprenant le langage visuel développé pour la plaquette interactive.
 
-## Ce qui ne change pas (verrouillé)
+## Ce qui ne change pas (verrouillé — confirmé par Romain le 06/08)
 
 - La séquence des écrans (process actuel conservé à l'identique)
 - Les règles de jeu et les mécaniques
+- Les règles d'envoi d'e-mail
+- Les règles d'envoi de billet, de stockage des billets gagnants, de déstockage des billets gagnants
+- Les formulaires de remplissage des données
 - QR code, français, horodatage (date / heure / lieu)
 - Le traçage : chaque flash enregistré, chaque joueur enregistré par station, nombre de stations jouées, nombre de joueurs par station
 - Les composants maîtres (`SpinClient.tsx`, `QuizClient.tsx`) : non modifiés, toute config passe par `cfg`
 - Aucune régression fonctionnelle. On ne repart pas de zéro — on reprend l'existant (même logique que le chantier marque blanche : dupliquer/adapter, pas recréer)
+
+## Ce qui est ouvert (confirmé par Romain le 06/08)
+
+Tout le visuel, y compris la Carte (initialement en question, maintenant confirmée ouverte à la refonte). Objectif explicite : réduire l'information affichée, rendre plus ergonomique, plus facile à lire et à comprendre, un jeu interactif "sympa" et simple. On avance par tranches validées, pas tout d'un bloc.
 
 ## Écrans concernés (séquence conservée)
 
@@ -27,8 +34,9 @@ Simplifier l'UX/UI du parcours joueur Super Event. **Le contenu, les règles et 
 7. Page partenaire — lien partenaire, inchangée
 8. Bandeaux défilants — inchangés
 
-## Carte — refonte ergonomie
+## Carte — refonte confirmée ouverte
 
+- Refonte visuelle complète confirmée (pas seulement l'ergonomie des points)
 - Forte amélioration de l'ergonomie sur les points/stations
 - Plus de distinction prestataires / partenaires : **une seule et même carte**, un seul type de point
 
