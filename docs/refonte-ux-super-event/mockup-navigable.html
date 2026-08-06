@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Flowin Super Event — Mockup navigable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1226; --ink2:#33283b; --purple:#7C2D92; --magenta:#E0218A;
+    --gold:#F5A100; --teal:#00B4A0; --blue:#3B5CC4; --violet:#A855F7;
+    --paper:#F5F3F9; --card:#ffffff; --muted:#7a708a; --line:#ece6f3;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:#e8e3ee}
+  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;
+       display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .ic{width:20px;height:20px;display:inline-block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+
+  .phone{width:390px;max-width:100%;height:844px;max-height:92vh;background:var(--paper);border-radius:34px;
+         overflow:hidden;position:relative;box-shadow:0 30px 70px rgba(20,10,30,.35);border:8px solid #1a1226}
+  .stage{position:relative;height:100%;overflow:hidden}
+  .scr{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;
+       transform:translateY(14px);transition:opacity .35s ease,transform .35s ease;overflow-y:auto}
+  .scr.on{opacity:1;pointer-events:auto;transform:translateY(0)}
+  .pad{padding:20px 18px 100px}
+
+  .eyebrow{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--magenta);display:flex;align-items:center;gap:6px}
+  .h1{font-size:22px;font-weight:900;letter-spacing:-.02em;margin-top:6px;line-height:1.15}
+  .sub{font-size:12.5px;color:var(--muted);margin-top:4px;font-weight:600;line-height:1.4}
+
+  .back{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .topbar{display:flex;align-items:center;gap:10px;padding:16px 18px 0}
+
+  .btn{display:block;width:100%;text-align:center;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;
+      border:none;font-family:inherit;font-weight:800;font-size:14px;padding:15px;border-radius:100px;cursor:pointer;margin-top:16px;
+      box-shadow:0 10px 24px rgba(224,33,138,.28)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+  .btn.blue{background:linear-gradient(135deg,var(--blue),var(--violet));box-shadow:0 10px 24px rgba(59,92,196,.28)}
+
+  .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(30,18,40,.06);border:1px solid var(--line)}
+
+  /* ===== ONBOARD ===== */
+  #onboard .pad{display:flex;flex-direction:column;justify-content:center;height:100%;text-align:center;padding-bottom:20px}
+  #onboard .logo{font-size:38px;font-weight:900;letter-spacing:-.03em}
+  #onboard .logo em{font-style:normal;color:var(--magenta)}
+  .badge-super{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;
+              font-size:10.5px;font-weight:800;padding:6px 14px;border-radius:100px;margin-top:10px}
+  #onboard .sub{max-width:280px;margin:14px auto 0}
+
+  /* ===== JEU (quiz) ===== */
+  .quizcard{margin-top:18px}
+  .qz-q{font-size:16px;font-weight:800;line-height:1.35;margin-top:4px}
+  .qz-opts{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  .qz-opt{background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;font-family:inherit;font-weight:700;
+         font-size:13.5px;color:var(--ink);text-align:left;cursor:pointer}
+  .qz-opt.correct{border-color:#16a34a;background:#eafaf0}
+  .qz-opt.wrong{border-color:#ef4444;background:#fdecec}
+
+  /* ===== BONUS popup ===== */
+  .dim{position:fixed;inset:0;background:rgba(26,18,38,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
+  .dim.on{opacity:1;pointer-events:auto}
+  .sheet{position:absolute;left:0;right:0;bottom:-100%;background:#fff;border-radius:24px 24px 0 0;padding:26px 22px 30px;z-index:41;
+        transition:bottom .35s cubic-bezier(.2,.8,.25,1);box-shadow:0 -14px 40px rgba(0,0,0,.2)}
+  .sheet.on{bottom:0}
+  .sheet .wm-badge{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--magenta));display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+
+  /* ===== COORDONNEES ===== */
+  .field{margin-top:12px}
+  .field label{font-size:11.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:6px}
+  .field input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:13.5px;background:#fff}
+  .optin{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .optin input{margin-top:2px}
+
+  /* ===== CARTE ===== */
+  .maparea{margin:0 18px;height:220px;border-radius:18px;position:relative;overflow:hidden;
+           background:radial-gradient(70% 60% at 30% 20%,rgba(124,45,146,.16),transparent),radial-gradient(60% 50% at 80% 70%,rgba(224,33,138,.14),transparent),#efe9f6}
+  .pin{position:absolute;width:32px;height:32px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,var(--magenta),var(--purple));
+      transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(224,33,138,.35);cursor:pointer}
+  .pin svg{transform:rotate(45deg);width:15px;height:15px;color:#fff}
+  .youare{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 6px rgba(59,92,196,.18)}
+  .stlist{display:flex;flex-direction:column;gap:8px;padding:14px 18px 0}
+  .strow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+  .strow .si{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .strow .si svg{width:17px;height:17px;color:#fff}
+  .strow .nm{font-size:13px;font-weight:800}
+  .strow .ds{font-size:11px;color:var(--muted);font-weight:600}
+  .pill{font-size:9px;font-weight:800;padding:4px 9px;border-radius:100px;margin-left:auto;flex-shrink:0}
+  .pill.done{background:#dff5e8;color:#0F6E56}
+  .pill.todo{background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff}
+
+  /* ===== PROFIL ===== */
+  .avat{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--magenta));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .prow{display:flex;align-items:center;gap:13px}
+  .hero{background:linear-gradient(135deg,var(--purple),var(--magenta));border-radius:18px;padding:20px;text-align:center;color:#fff;margin-top:16px}
+  .hero .n{font-size:34px;font-weight:900}
+  .hero .l{font-size:12px;font-weight:700;opacity:.9;margin-top:2px}
+  .tabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;margin-top:16px}
+  .tabbtn{flex:1;border:none;background:transparent;border-radius:9px;padding:9px;font-family:inherit;font-weight:800;font-size:11.5px;color:var(--muted);cursor:pointer}
+  .tabbtn.on{background:var(--paper);color:var(--purple)}
+  .tabpane{display:none;margin-top:14px}
+  .tabpane.on{display:block}
+  .favempty{text-align:center;padding:30px 10px;color:var(--muted);font-size:12.5px;font-weight:600}
+  .favgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .favcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;position:relative}
+  .favcard .fi{width:40px;height:40px;border-radius:11px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+  .favcard .fi svg{width:18px;height:18px;color:#fff}
+  .favcard .fn{font-size:11.5px;font-weight:800}
+  .heartbtn{position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.12);display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+  /* ===== PARTENAIRES ===== */
+  .ptgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .ptcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+  .ptlogo{width:44px;height:44px;border-radius:13px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
+  .ptlogo svg{width:20px;height:20px;color:#fff}
+  .ptnm{font-size:12px;font-weight:800}
+
+  /* ===== SOUSCRIRE (commerce) ===== */
+  .rc{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px;margin-top:16px}
+  .rc .rt{font-size:13.5px;font-weight:800}
+  .rc .rd{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .thanks{text-align:center;padding:40px 10px}
+  .thanks .ti{width:60px;height:60px;border-radius:50%;background:#dff5e8;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .thanks .ti svg{width:28px;height:28px;color:#0F6E56}
+
+  /* ===== NAV ===== */
+  .navbar{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+         border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-end;padding:9px 0 16px;z-index:10}
+  .navbar.off{display:none}
+  .nb{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;font-family:inherit;cursor:pointer;color:var(--muted)}
+  .nb svg{width:19px;height:19px}
+  .nb span{font-size:9px;font-weight:700}
+  .nb.on{color:var(--magenta)}
+  .nb.on span{font-weight:800}
+  .nb.scanbtn{background:linear-gradient(135deg,var(--purple),var(--magenta));border-radius:16px;padding:9px 15px;margin-top:-16px;box-shadow:0 8px 18px rgba(224,33,138,.35)}
+  .nb.scanbtn svg{color:#fff;width:21px;height:21px}
+
+  .toast{position:absolute;left:18px;right:18px;bottom:96px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;
+        padding:11px 15px;border-radius:12px;text-align:center;z-index:30;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;transform:translateY(6px)}
+  .toast.on{opacity:1;transform:translateY(0)}
+
+  .banddock{position:absolute;left:0;right:0;bottom:78px;overflow:hidden;background:#fff;border-top:1px solid var(--line);padding:8px 0;z-index:9}
+  .banddock.off{display:none}
+  .bandtrack{display:flex;gap:26px;white-space:nowrap;animation:scrollband 14s linear infinite;font-size:11px;font-weight:800;color:var(--purple)}
+  @keyframes scrollband{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="stage" id="stage">
+
+    <!-- ONBOARD -->
+    <div class="scr on" id="onboard">
+      <div class="pad">
+        <div class="logo">Flow<em>in</em></div>
+        <div class="badge-super">Super Event · Nuits du Sud</div>
+        <div class="sub">Scanne, joue, gagne des tickets pour le tirage — dans tous les commerces partenaires.</div>
+        <button class="btn" onclick="go('jeu')">Jouer maintenant</button>
+        <button class="btn ghost" onclick="go('carte')">Voir la carte des stations</button>
+      </div>
+    </div>
+
+    <!-- JEU -->
+    <div class="scr" id="jeu">
+      <div class="topbar"><div class="back" onclick="go('onboard')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">La Bergerie</div></div>
+      <div class="pad">
+        <div class="h1">3 questions, <span style="color:var(--magenta)">1 ticket</span>.</div>
+        <div class="card quizcard">
+          <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)">Question 1 / 3</div>
+          <div class="qz-q">En quelle année les Nuits du Sud ont-elles été créées ?</div>
+          <div class="qz-opts">
+            <button class="qz-opt" onclick="qzAnswer(this,false)">1987</button>
+            <button class="qz-opt" onclick="qzAnswer(this,true)">1995</button>
+            <button class="qz-opt" onclick="qzAnswer(this,false)">2001</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COORDONNEES -->
+    <div class="scr" id="coordonnees">
+      <div class="topbar"><div class="back" onclick="go('jeu')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Dernière étape</div></div>
+      <div class="pad">
+        <div class="h1">Récupère<br>ton ticket.</div>
+        <div class="sub">Un seul formulaire pour tout le festival.</div>
+        <div class="field"><label>Prénom</label><input placeholder="Ton prénom"></div>
+        <div class="field"><label>Email</label><input placeholder="ton@email.fr"></div>
+        <label class="optin"><input type="checkbox" checked> Je souhaite rester informé des Nuits du Sud et des offres partenaires.</label>
+        <button class="btn" onclick="finishGame()">Obtenir mon ticket</button>
+      </div>
+    </div>
+
+    <!-- FINAL -->
+    <div class="scr" id="final">
+      <div class="pad" style="display:flex;flex-direction:column;justify-content:center;height:100%;text-align:center">
+        <div class="thanks" style="padding:0">
+          <div class="ti"><svg class="ic" style="width:26px;height:26px;color:#0F6E56"><use href="#i-check"/></svg></div>
+          <div class="h1">1 ticket gagné.</div>
+          <div class="sub">Scanne d&apos;autres commerces pour cumuler tes chances.</div>
+        </div>
+        <button class="btn" onclick="go('carte')">Voir les autres stations</button>
+        <button class="btn ghost" onclick="go('profil')">Aller à mon profil</button>
+      </div>
+    </div>
+
+    <!-- CARTE -->
+    <div class="scr" id="carte">
+      <div class="pad" style="padding-bottom:170px">
+        <div class="eyebrow" style="margin-top:16px;margin-left:18px">Carte</div>
+        <div class="h1" style="margin-left:18px">Toutes les stations.</div>
+        <div class="maparea" style="margin-top:12px">
+          <div class="pin" style="top:38%;left:24%" onclick="toast('La Bergerie — déjà scanné')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+          <div class="pin" style="top:20%;left:56%" onclick="toast('Giordano')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+          <div class="pin" style="top:58%;left:68%" onclick="toast('Nook')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+          <div class="youare" style="top:62%;left:32%"></div>
+        </div>
+        <div class="stlist">
+          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">180 m</div></div><span class="pill done">Joué</span></div>
+          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Giordano</div><div class="ds">240 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
+          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Nook</div><div class="ds">310 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFIL -->
+    <div class="scr" id="profil">
+      <div class="pad" style="padding-bottom:170px">
+        <div class="prow" style="margin-top:16px">
+          <div class="avat"><svg class="ic" style="color:#fff;width:24px;height:24px"><use href="#i-user"/></svg></div>
+          <div><div style="font-size:17px;font-weight:800">Camille</div><div style="font-size:12px;color:var(--muted)">Participant Nuits du Sud</div></div>
+        </div>
+        <div class="hero"><div class="n">3</div><div class="l">tickets pour le tirage</div></div>
+        <div class="tabs">
+          <button class="tabbtn on" data-pt="tickets" onclick="ptab('tickets')">Mes tickets</button>
+          <button class="tabbtn" data-pt="favoris" onclick="ptab('favoris')">Mes favoris</button>
+        </div>
+        <div class="tabpane on" id="pt-tickets">
+          <div class="stlist" style="padding:0">
+            <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">Aujourd&apos;hui</div></div><span class="pill done">Joué</span></div>
+          </div>
+          <button class="btn blue" style="margin-top:14px" onclick="shareIt()"><svg class="ic" style="width:15px;height:15px;color:#fff;margin-right:6px"><use href="#i-share"/></svg>Partager &amp; gagner un ticket</button>
+        </div>
+        <div class="tabpane" id="pt-favoris">
+          <div class="favgrid">
+            <div class="favcard"><button class="heartbtn" onclick="unfav(this)"><svg class="ic" style="width:12px;height:12px;color:var(--magenta)"><use href="#i-heartf"/></svg></button><div class="fi" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="fn">La Bergerie</div></div>
+          </div>
+          <div class="favempty" style="display:none" id="favempty">Touche le cœur sur une fiche partenaire pour l&apos;ajouter ici.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARTENAIRES -->
+    <div class="scr" id="partenaires">
+      <div class="pad" style="padding-bottom:170px">
+        <div class="eyebrow" style="margin-top:16px">Nos partenaires</div>
+        <div class="h1">Découvre-les.</div>
+        <div class="ptgrid">
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">La Bergerie</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Giordano</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Nook</div></div>
+          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Utile</div></div>
+        </div>
+        <div class="rc">
+          <div class="rt">Vous êtes commerçant ?</div>
+          <div class="rd">Rejoignez le Super Event et devenez une station de jeu.</div>
+          <button class="btn" style="margin-top:10px" onclick="go('souscrire')">Faire souscrire mon commerce</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOUSCRIRE -->
+    <div class="scr" id="souscrire">
+      <div class="topbar"><div class="back" onclick="go('partenaires')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Rejoindre le Super Event</div></div>
+      <div class="pad">
+        <div class="h1">On s&apos;installe<br>maintenant.</div>
+        <div class="sub">2 minutes, directement depuis votre boutique.</div>
+        <div class="field"><label>Nom du commerce</label><input placeholder="Nom de la boutique"></div>
+        <div class="field"><label>Votre email</label><input placeholder="contact@commerce.fr"></div>
+        <div class="field"><label>Téléphone</label><input placeholder="06 00 00 00 00"></div>
+        <button class="btn" onclick="go('merci')">Je souscris au Super Event</button>
+      </div>
+    </div>
+
+    <div class="scr" id="merci">
+      <div class="pad" style="display:flex;flex-direction:column;justify-content:center;height:100%">
+        <div class="thanks">
+          <div class="ti"><svg class="ic" style="width:26px;height:26px;color:#0F6E56"><use href="#i-check"/></svg></div>
+          <div class="h1">Bienvenue dans<br>le Super Event.</div>
+          <div class="sub">On revient vers vous sous 24h pour l&apos;installation.</div>
+        </div>
+        <button class="btn ghost" onclick="go('onboard')">Retour à l&apos;accueil</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BONUS sheet -->
+  <div class="dim" id="bonusDim" onclick="closeBonus()"></div>
+  <div class="sheet" id="bonusSheet">
+    <div class="wm-badge"><svg class="ic" style="color:#fff"><use href="#i-gift"/></svg></div>
+    <div style="font-size:16px;font-weight:800">Question bonus disponible</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Double tes chances de gagner en répondant.</div>
+    <button class="btn" onclick="closeBonus()">Répondre à la question bonus</button>
+    <button class="btn ghost" onclick="closeBonus()">Plus tard</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="banddock" id="banddock">
+    <div class="bandtrack">
+      <span>La Bergerie · -10% sur présentation du billet</span>
+      <span>Giordano · Offre du moment</span>
+      <span>Nook · Nouveau lot disponible</span>
+      <span>La Bergerie · -10% sur présentation du billet</span>
+      <span>Giordano · Offre du moment</span>
+      <span>Nook · Nouveau lot disponible</span>
+    </div>
+  </div>
+
+  <div class="navbar" id="navbar">
+    <button class="nb" data-nb="profil" onclick="go('profil')"><svg class="ic"><use href="#i-user"/></svg><span>Profil</span></button>
+    <button class="nb" data-nb="carte" onclick="go('carte')"><svg class="ic"><use href="#i-map"/></svg><span>Carte</span></button>
+    <button class="nb scanbtn" onclick="go('jeu')"><svg class="ic"><use href="#i-scan"/></svg></button>
+    <button class="nb" data-nb="partenaires" onclick="go('partenaires')"><svg class="ic"><use href="#i-store"/></svg><span>Partenaires</span></button>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-arrowl" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14"/><path d="M15 6v14"/></symbol>
+  <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9.5"/><path d="M3 9.5 4.6 4h14.8L21 9.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8"/><path d="M16.5 8a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8"/></symbol>
+  <symbol id="i-heartf" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-3.9M8.6 13.5l6.8 3.9"/></symbol>
+</svg>
+
+<script>
+  var NAVBAR_SCREENS = ['profil','carte','partenaires'];
+  var BAND_SCREENS = ['carte','profil','partenaires'];
+
+  function go(id){
+    document.querySelectorAll('.scr').forEach(function(s){ s.classList.toggle('on', s.id === id); });
+    var nb = NAVBAR_SCREENS.indexOf(id) !== -1;
+    document.getElementById('navbar').classList.toggle('off', !nb);
+    document.getElementById('banddock').classList.toggle('off', BAND_SCREENS.indexOf(id) === -1);
+    document.querySelectorAll('.nb[data-nb]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-nb') === id); });
+    if (id === 'jeu') { document.getElementById('navbar').classList.add('off'); document.getElementById('banddock').classList.add('off'); }
+  }
+
+  var qzAnswered = false;
+  function qzAnswer(btn, correct){
+    if (qzAnswered) return; qzAnswered = true;
+    document.querySelectorAll('.qz-opt').forEach(function(b){ b.disabled = true; });
+    btn.classList.add(correct ? 'correct' : 'wrong');
+    setTimeout(function(){
+      document.getElementById('bonusDim').classList.add('on');
+      document.getElementById('bonusSheet').classList.add('on');
+    }, 500);
+  }
+  function closeBonus(){
+    document.getElementById('bonusDim').classList.remove('on');
+    document.getElementById('bonusSheet').classList.remove('on');
+    go('coordonnees');
+  }
+  function finishGame(){ qzAnswered = false; go('final'); }
+
+  var toastTimer;
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('on'); }, 1800);
+  }
+  function shareIt(){ toast('Lien de partage copié'); }
+  function unfav(btn){ btn.closest('.favcard').remove(); if(!document.querySelector('.favcard')) document.getElementById('favempty').style.display='block'; }
+
+  function ptab(k){
+    document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-pt')===k); });
+    document.querySelectorAll('.tabpane').forEach(function(p){ p.classList.toggle('on', p.id === 'pt-'+k); });
+  }
+
+  go('onboard');
+</script>
+</body>
+</html>
