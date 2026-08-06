@@ -21,7 +21,7 @@
        display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
   .ic{width:20px;height:20px;display:inline-block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
 
-  .phone{width:390px;max-width:100%;height:844px;max-height:92vh;background:var(--paper);border-radius:38px;
+  .phone{width:min(390px,88vw);aspect-ratio:390/844;height:auto;max-height:92vh;background:var(--paper);border-radius:38px;
          overflow:hidden;position:relative;box-shadow:0 30px 70px rgba(20,10,30,.35);border:9px solid #1a1226}
   .camdot{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#1a1226;border-radius:50%;z-index:50}
   .stage{position:relative;height:100%;overflow:hidden}
@@ -78,7 +78,16 @@
   .gatecard p{font-size:12.5px;color:var(--muted);margin:8px 0 18px;line-height:1.5}
 
   /* ===== EXPLICATION (schema 1-2-3) ===== */
-  .schemabox{margin:18px auto 0;max-width:280px}
+  .exp-logo{font-size:32px;font-weight:900;letter-spacing:-.03em;text-align:center}
+  .exp-logo em{font-style:normal;color:var(--magenta)}
+  .exp-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;
+             font-size:10px;font-weight:800;padding:5px 13px;border-radius:100px;margin-top:8px}
+  .exp-head{text-align:center;margin-top:22px}
+  .exp-head h1{font-size:24px;font-weight:900;letter-spacing:-.02em;line-height:1.15}
+  .exp-head h1 em{font-style:normal;background:linear-gradient(120deg,var(--magenta),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .exp-head p{font-size:12.5px;color:var(--muted);margin-top:6px;font-weight:600}
+  .schemabox{margin:14px auto 0;max-width:280px;position:relative;border-radius:20px;padding:10px 0;
+            background:radial-gradient(65% 65% at 50% 40%,rgba(224,33,138,.1),transparent)}
   .explist{display:flex;flex-direction:column;gap:9px;margin-top:16px;text-align:left}
   .explist .xr{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink2)}
   .explist .xn{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -108,7 +117,18 @@
        font-family:inherit;font-weight:700;font-size:13.5px;color:var(--ink);margin-top:9px;cursor:pointer}
   .optb.sel{border-color:var(--magenta);background:linear-gradient(135deg,rgba(224,33,138,.08),rgba(124,45,146,.08))}
 
-  /* ===== COORDONNEES ===== */
+  /* ===== FICHE PARTENAIRE (sheet) ===== */
+  .psheet-head{display:flex;align-items:center;gap:12px}
+  .psheet-head .pi{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden}
+  .psheet-head .pi svg{width:24px;height:24px;color:#fff}
+  .psheet-head h3{font-size:17px;font-weight:800}
+  .psheet-desc{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:14px;text-align:left}
+  .psheet-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:16px;text-align:left}
+  .psheet-lots{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+  .psheet-lot{display:flex;align-items:center;gap:9px;background:var(--paper);border-radius:11px;padding:9px 12px;font-size:12.5px;font-weight:700;color:var(--ink2);text-align:left}
+  .psheet-links{display:flex;gap:9px;margin-top:16px}
+  .psheet-lk{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:11px 6px;font-size:10.5px;font-weight:700;color:var(--ink2)}
+  .psheet-lk svg{width:18px;height:18px;color:var(--purple)}
   .field{margin-top:12px}
   .field label{font-size:11.5px;font-weight:800;color:var(--muted);display:block;margin-bottom:6px}
   .field input,.field select{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--ink)}
@@ -127,7 +147,7 @@
       transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(224,33,138,.35)}
   .pin-wrap svg{transform:rotate(45deg);width:15px;height:15px;color:#fff}
   .stlist{display:flex;flex-direction:column;gap:8px;padding:14px 18px 0}
-  .strow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+  .strow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer}
   .logoslot{width:100%;height:100%;object-fit:contain;border-radius:inherit;display:none}
   .logoslot.on{display:block}
   .strow .si{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden}
@@ -152,7 +172,7 @@
   .tabpane.on{display:block}
   .favempty{text-align:center;padding:30px 10px;color:var(--muted);font-size:12.5px;font-weight:600}
   .favgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .favcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;position:relative}
+  .favcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;position:relative;cursor:pointer}
   .favcard .fi{width:40px;height:40px;border-radius:11px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
   .favcard .fi svg{width:18px;height:18px;color:#fff}
   .favcard .fn{font-size:11.5px;font-weight:800}
@@ -160,7 +180,7 @@
 
   /* ===== PARTENAIRES ===== */
   .ptgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-  .ptcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+  .ptcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;cursor:pointer}
   .ptlogo{width:44px;height:44px;border-radius:13px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
   .ptlogo svg{width:20px;height:20px;color:#fff}
   .ptnm{font-size:12px;font-weight:800}
@@ -217,8 +237,14 @@
     <!-- EXPLICATION (reponse "Non" au popup) - schema 1-2-3 -->
     <div class="scr" id="explication">
       <div class="pad">
-        <div style="text-align:center"><span style="font-size:26px;font-weight:900;letter-spacing:-.03em">Flow<em style="font-style:normal;color:var(--magenta)">in</em></span></div>
-        <div style="text-align:center;margin-top:18px;font-size:16px;font-weight:800">Comment jouer&nbsp;?</div>
+        <div>
+          <div class="exp-logo">Flow<em>in</em></div>
+          <div style="text-align:center"><span class="exp-badge">Super Event · Nuits du Sud</span></div>
+        </div>
+        <div class="exp-head">
+          <h1>Ton <em>aventure</em><br>commence ici.</h1>
+          <p>3 stations, 3 lots à découvrir, un tirage chaque soir.</p>
+        </div>
         <div class="schemabox">
           <svg viewBox="0 0 280 190" width="100%">
             <path d="M40,150 Q75,110 110,120 Q145,175 175,140 Q200,110 235,90" fill="none" stroke="#F5A100" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
@@ -278,7 +304,7 @@
           <div style="font-size:30px;font-weight:900" id="resScore">3/3</div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px" id="resScoreLbl">Sans faute — 1 ticket</div>
         </div>
-        <div class="rc" id="bonusCta" style="cursor:pointer" onclick="go('bonus')">
+        <div class="rc" id="bonusCta" style="cursor:pointer" onclick="openBonusPopup()">
           <div class="rt">Rattrape ton ticket</div>
           <div class="rd">1 question bonus · 15 secondes chrono</div>
         </div>
@@ -321,20 +347,6 @@
       </div>
     </div>
 
-    <!-- BONUS (écran plein, options a choix multiples) -->
-    <div class="scr" id="bonus">
-      <div class="topbar"><div class="back" onclick="go('resultats')"><svg class="ic" style="width:15px;height:15px"><use href="#i-arrowl"/></svg></div><div class="eyebrow">Question bonus · double tes chances</div></div>
-      <div class="pad">
-        <div class="qcard">
-          <div class="qtxt">Quel type d&apos;animation préfères-tu pendant les Nuits du Sud ?</div>
-          <button class="optb sel" onclick="optSel(this)">Concerts en plein air</button>
-          <button class="optb" onclick="optSel(this)">Marché artisanal</button>
-          <button class="optb" onclick="optSel(this)">Animations pour enfants</button>
-          <button class="optb" onclick="optSel(this)">Dégustations locales</button>
-        </div>
-        <button class="btn" onclick="go('coordonnees')">Terminer →</button>
-      </div>
-    </div>
 
     <!-- FINAL -->
     <div class="scr" id="final">
@@ -356,9 +368,9 @@
         <div class="h1" style="margin-left:18px">Toutes les stations.</div>
         <div class="maparea" style="margin-top:12px"><div id="leafletmap"></div></div>
         <div class="stlist">
-          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">180 m</div></div><span class="pill done">Joué</span></div>
-          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Giordano</div><div class="ds">240 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
-          <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Nook</div><div class="ds">310 m</div></div><span class="pill todo" onclick="go('jeu')">Scanner</span></div>
+          <div class="strow" onclick="openPartnerSheet('bergerie')"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">180 m</div></div><span class="pill done">Joué</span></div>
+          <div class="strow" onclick="openPartnerSheet('giordano')"><div class="si" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Giordano</div><div class="ds">240 m</div></div><span class="pill todo" onclick="event.stopPropagation();go('jeu')">Scanner</span></div>
+          <div class="strow" onclick="openPartnerSheet('nook')"><div class="si" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">Nook</div><div class="ds">310 m</div></div><span class="pill todo" onclick="event.stopPropagation();go('jeu')">Scanner</span></div>
         </div>
       </div>
     </div>
@@ -377,13 +389,13 @@
         </div>
         <div class="tabpane on" id="pt-tickets">
           <div class="stlist" style="padding:0">
-            <div class="strow"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">Aujourd&apos;hui</div></div><span class="pill done">Joué</span></div>
+            <div class="strow" onclick="openPartnerSheet('bergerie')"><div class="si" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div><div class="nm">La Bergerie</div><div class="ds">Aujourd&apos;hui</div></div><span class="pill done">Joué</span></div>
           </div>
           <button class="btn blue" style="margin-top:14px" onclick="shareIt()"><svg class="ic" style="width:15px;height:15px;color:#fff;margin-right:6px"><use href="#i-share"/></svg>Partager &amp; gagner un ticket</button>
         </div>
         <div class="tabpane" id="pt-favoris">
           <div class="favgrid">
-            <div class="favcard"><button class="heartbtn" onclick="unfav(this)"><svg class="ic" style="width:12px;height:12px;color:var(--magenta)"><use href="#i-heartf"/></svg></button><div class="fi" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="fn">La Bergerie</div></div>
+            <div class="favcard" onclick="openPartnerSheet('bergerie')"><button class="heartbtn" onclick="event.stopPropagation();unfav(this)"><svg class="ic" style="width:12px;height:12px;color:var(--magenta)"><use href="#i-heartf"/></svg></button><div class="fi" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="fn">La Bergerie</div></div>
           </div>
           <div class="favempty" style="display:none" id="favempty">Touche le cœur sur une fiche partenaire pour l&apos;ajouter ici.</div>
         </div>
@@ -396,10 +408,10 @@
         <div class="eyebrow" style="margin-top:16px">Nos partenaires</div>
         <div class="h1">Découvre-les.</div>
         <div class="ptgrid">
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">La Bergerie</div></div>
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Giordano</div></div>
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Nook</div></div>
-          <div class="ptcard"><div class="ptlogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Utile</div></div>
+          <div class="ptcard" onclick="openPartnerSheet('bergerie')"><div class="ptlogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">La Bergerie</div></div>
+          <div class="ptcard" onclick="openPartnerSheet('giordano')"><div class="ptlogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Giordano</div></div>
+          <div class="ptcard" onclick="openPartnerSheet('nook')"><div class="ptlogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Nook</div></div>
+          <div class="ptcard" onclick="openPartnerSheet('utile')"><div class="ptlogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div><div class="ptnm">Utile</div></div>
         </div>
         <div class="rc">
           <div class="rt">Vous êtes commerçant ?</div>
@@ -435,6 +447,40 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- FICHE PARTENAIRE -->
+  <div class="dim" id="partDim" onclick="closePartnerSheet()"></div>
+  <div class="sheet" id="partSheet">
+    <div class="psheet-head">
+      <div class="pi" id="psHeadIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <h3 id="psName">—</h3>
+    </div>
+    <div class="psheet-desc" id="psDesc"></div>
+    <div class="psheet-lbl">Lots proposés</div>
+    <div class="psheet-lots" id="psLots"></div>
+    <div class="psheet-links">
+      <a class="psheet-lk" href="#" onclick="return false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>Instagram</a>
+      <a class="psheet-lk" href="#" onclick="return false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3Z"/></svg>Facebook</a>
+      <a class="psheet-lk" href="#" onclick="return false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg>Site web</a>
+    </div>
+    <button class="btn ghost" onclick="closePartnerSheet()">Fermer</button>
+  </div>
+
+  <!-- POPUP BONUS -->
+  <div class="dim" id="bonusDim" onclick="closeBonusPopup()"></div>
+  <div class="sheet" id="bonusSheet">
+    <div class="wm-badge"><svg class="ic" style="color:#fff"><use href="#i-gift"/></svg></div>
+    <div style="font-size:16px;font-weight:800">Question bonus</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:4px;margin-bottom:14px">Gagne un point supplémentaire en répondant.</div>
+    <div class="qcard" style="margin-top:0">
+      <div class="qtxt">Quel type d&apos;animation préfères-tu pendant les Nuits du Sud ?</div>
+      <button class="optb sel" onclick="optSel(this)">Concerts en plein air</button>
+      <button class="optb" onclick="optSel(this)">Marché artisanal</button>
+      <button class="optb" onclick="optSel(this)">Animations pour enfants</button>
+      <button class="optb" onclick="optSel(this)">Dégustations locales</button>
+    </div>
+    <button class="btn" onclick="validateBonusPopup()">Valider ma réponse →</button>
   </div>
 
   <!-- POPUP ENTREE -->
@@ -556,6 +602,28 @@
   }
   function startQuiz(){ qIdx = 0; qAnswered = false; qSelected = -1; qScore = 0; renderQuiz(); }
 
+  var PARTNERS = {
+    bergerie: { nom: 'La Bergerie', desc: 'Restaurant traditionnel provençal, terrasse ombragée au cœur de Vence.', lots: ['Bon d\u2019achat 10€', 'Café gourmand offert'], grad: 'linear-gradient(135deg,var(--magenta),var(--purple))' },
+    giordano: { nom: 'Giordano', desc: 'Prêt-à-porter et accessoires, collections saison.', lots: ['-15% en boutique', 'Article offert dès 50€'], grad: 'linear-gradient(135deg,var(--blue),var(--teal))' },
+    nook: { nom: 'Nook', desc: 'Concept store déco et objets locaux.', lots: ['Bon d\u2019achat 5€', '-10% sur une sélection'], grad: 'linear-gradient(135deg,var(--gold),#EC5B45)' },
+    utile: { nom: 'Utile', desc: 'Épicerie de proximité, produits du quotidien.', lots: ['Bon d\u2019achat 5€'], grad: 'linear-gradient(135deg,var(--purple),var(--violet))' }
+  };
+  function openPartnerSheet(key){
+    var p = PARTNERS[key]; if (!p) return;
+    document.getElementById('psName').textContent = p.nom;
+    document.getElementById('psDesc').textContent = p.desc;
+    document.getElementById('psHeadIcon').style.background = p.grad;
+    document.getElementById('psLots').innerHTML = p.lots.map(function(l){ return '<div class="psheet-lot">' + l + '</div>'; }).join('');
+    document.getElementById('partDim').classList.add('on');
+    document.getElementById('partSheet').classList.add('on');
+  }
+  function closePartnerSheet(){
+    document.getElementById('partDim').classList.remove('on');
+    document.getElementById('partSheet').classList.remove('on');
+  }
+  function openBonusPopup(){ document.getElementById('bonusDim').classList.add('on'); document.getElementById('bonusSheet').classList.add('on'); }
+  function closeBonusPopup(){ document.getElementById('bonusDim').classList.remove('on'); document.getElementById('bonusSheet').classList.remove('on'); }
+  function validateBonusPopup(){ closeBonusPopup(); go('coordonnees'); }
   function gateAnswer(alreadyPlayed){
     document.getElementById('gateDim').classList.remove('on');
     document.getElementById('gateWrap').style.display = 'none';
