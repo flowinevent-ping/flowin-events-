@@ -197,9 +197,12 @@
         padding:11px 15px;border-radius:12px;text-align:center;z-index:30;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;transform:translateY(6px)}
   .toast.on{opacity:1;transform:translateY(0)}
 
-  .banddock{position:absolute;left:0;right:0;bottom:78px;overflow:hidden;background:#fff;border-top:1px solid var(--line);padding:8px 0;z-index:9}
+  .banddock{position:absolute;left:0;right:0;bottom:78px;overflow:hidden;background:#faf7fd;border-top:1px solid var(--line);padding:13px 0;z-index:9;
+      -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
   .banddock.off{display:none}
-  .bandtrack{display:flex;gap:26px;white-space:nowrap;animation:scrollband 14s linear infinite;font-size:11px;font-weight:800;color:var(--purple)}
+  .bandtrack{display:flex;gap:14px;align-items:center;animation:scrollband 18s linear infinite}
+  .blogo{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden}
+  .blogo svg{width:26px;height:26px;color:#fff}
   @keyframes scrollband{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 </style>
 </head>
@@ -318,7 +321,7 @@
             <span class="chip" onclick="chipSel(this)">Autre</span>
           </div>
         </div>
-        <label class="optin"><input type="checkbox" checked> Je souhaite rester en contact avec les infos des Nuits du Sud et de Flowin. Mes coordonnées ne sont ni vendues ni cédées.</label>
+        <label class="optin"><input type="checkbox" checked> Je souhaite rester en contact avec les infos de mes prochains événements et de Flowin. Mes coordonnées ne sont ni vendues ni cédées.</label>
         <button class="btn" onclick="finishGame()">Valider mon ticket →</button>
       </div>
     </div>
@@ -342,7 +345,7 @@
       <div class="pad" style="padding-bottom:170px">
         <div class="eyebrow" style="margin-top:16px;margin-left:18px">Carte</div>
         <div class="h1" style="margin-left:18px">Toutes les stations.</div>
-        <div class="maparea" style="margin-top:12px">
+        <div class="maparea" style="margin-top:12px;height:280px">
           <svg viewBox="0 0 340 220" preserveAspectRatio="none">
             <rect width="340" height="220" fill="#EAE6F2"/>
             <rect x="0" y="0" width="340" height="220" fill="#E4DEF0"/>
@@ -466,8 +469,8 @@
   <div class="dim" id="bonusDim" onclick="closeBonusPopup()"></div>
   <div class="sheet" id="bonusSheet">
     <div class="wm-badge"><svg class="ic" style="color:#fff"><use href="#i-gift"/></svg></div>
-    <div style="font-size:16px;font-weight:800">Question bonus</div>
-    <div style="font-size:12.5px;color:var(--muted);margin-top:4px;margin-bottom:14px">Gagne un point supplémentaire en répondant.</div>
+    <div style="font-size:16px;font-weight:800;line-height:1.35">Participe à la question bonus,<br>gagne un point supplémentaire&nbsp;!</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:6px;margin-bottom:14px">15 secondes chrono.</div>
     <div class="qcard" style="margin-top:0">
       <div class="qtxt">Quel type d&apos;animation préfères-tu pendant les Nuits du Sud ?</div>
       <button class="optb sel" onclick="optSel(this)">Concerts en plein air</button>
@@ -494,12 +497,14 @@
 
   <div class="banddock" id="banddock">
     <div class="bandtrack">
-      <span>La Bergerie · -10% sur présentation du billet</span>
-      <span>Giordano · Offre du moment</span>
-      <span>Nook · Nouveau lot disponible</span>
-      <span>La Bergerie · -10% sur présentation du billet</span>
-      <span>Giordano · Offre du moment</span>
-      <span>Nook · Nouveau lot disponible</span>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--magenta),var(--purple))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--gold),#EC5B45)"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
+      <div class="blogo" style="background:linear-gradient(135deg,var(--purple),var(--violet))"><img class="logoslot" alt="" onerror="this.remove()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-store"/></svg></div>
     </div>
   </div>
 
