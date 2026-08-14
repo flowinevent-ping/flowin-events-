@@ -4,13 +4,13 @@
  * Camembert (donut) en SVG pur, sans dependance.
  * Romain a explicitement refuse les barres horizontales pour les repartitions.
  */
-export interface PartCamembert { valeur: string; n: number }
+export interface PartCamembert { valeur: string; n: number; id?: string }
 
 const PALETTE = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#cfc4d8', '#9d4edd', '#ff8fab']
 
 export function Camembert({
-  titre, parts, total, unite = '',
-}: { titre: string; parts: PartCamembert[]; total?: number; unite?: string }) {
+  titre, parts, total, unite = '', onSlice,
+}: { titre: string; parts: PartCamembert[]; total?: number; unite?: string; onSlice?: (id: string) => void }) {
   const somme = total ?? parts.reduce((s, p) => s + p.n, 0)
   if (!somme) return null
 
@@ -39,16 +39,22 @@ export function Camembert({
           <text x="100" y="115" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--sa-muted)">{unite}</text>
         </svg>
         <div style={{ flex: 1, minWidth: 180 }}>
-          {parts.map((p, i) => (
-            <div key={p.valeur} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 0', borderBottom: i < parts.length - 1 ? '1px solid var(--sa-border)' : 'none' }}>
-              <span style={{ width: 11, height: 11, borderRadius: 3, background: PALETTE[i % PALETTE.length], flex: 'none' }} />
-              <span style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>{p.valeur}</span>
-              <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>{p.n}</span>
-              <span style={{ fontSize: 13, fontWeight: 800, color: '#7C2D92', width: 46, textAlign: 'right' }}>
-                {Math.round((p.n / somme) * 1000) / 10} %
-              </span>
-            </div>
-          ))}
+          {parts.map((p, i) => {
+            const clic = p.id && onSlice ? () => onSlice(p.id!) : undefined
+            return (
+              <div key={p.valeur}
+                onClick={clic}
+                title={clic ? 'Voir le détail de cette station' : undefined}
+                style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 0', borderBottom: i < parts.length - 1 ? '1px solid var(--sa-border)' : 'none', cursor: clic ? 'pointer' : 'default' }}>
+                <span style={{ width: 11, height: 11, borderRadius: 3, background: PALETTE[i % PALETTE.length], flex: 'none' }} />
+                <span style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>{p.valeur}</span>
+                <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>{p.n}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#7C2D92', width: 46, textAlign: 'right' }}>
+                  {Math.round((p.n / somme) * 1000) / 10} %
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

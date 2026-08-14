@@ -6,15 +6,26 @@
  * Generique : un onglet par super event, aucun identifiant en dur.
  */
 import { useEffect, useState } from 'react'
+import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { fetchTrackQr, fetchSuperEvents, libelleSource, type TrackQr, type SuperEvent } from '@/lib/nds'
 
 export default function Page() {
+  const { partenaires, openDrawer } = useDashboard()
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [se, setSe] = useState('')
   const [t, setT] = useState<TrackQr | null>(null)
   const [charge, setCharge] = useState(true)
+
+  /* Une source "reseaux-<slug>" correspond toujours au partenaire pt-<slug>
+     (meme convention que le lien genere dans nds-comm). Direct/Parrainage/QR
+     generique ne sont rattaches a aucune station : pas de detail a ouvrir. */
+  const partenaireDeSource = (source: string): string | null => {
+    if (!source.startsWith('reseaux-')) return null
+    const pid = `pt-${source.slice(8)}`
+    return partenaires.some(p => p.id === pid) ? pid : null
+  }
 
   useEffect(() => {
     fetchSuperEvents().then(l => { setSupers(l); if (l.length) setSe(l[0].id); else setCharge(false) })
@@ -26,7 +37,7 @@ export default function Page() {
   }, [se])
 
   const parts = (t?.origines ?? [])
-    .map(o => ({ valeur: libelleSource(o.source), n: o.visiteurs }))
+    .map(o => ({ valeur: libelleSource(o.source), n: o.visiteurs, id: partenaireDeSource(o.source) ?? undefined }))
     .filter(o => o.n > 0)
 
   return (
@@ -60,7 +71,8 @@ export default function Page() {
 
             <SectionHeader>📍 Origine des visiteurs</SectionHeader>
             <div style={{ marginBottom: 20 }}>
-              <Camembert titre="Répartition par source" parts={parts} unite="visiteurs" />
+              <Camembert titre="Répartition par source" parts={parts} unite="visiteurs"
+                onSlice={pid => openDrawer('partenaire', pid, 'stats')} />
             </div>
 
             <SectionHeader>📊 Détail par source</SectionHeader>
@@ -71,16 +83,22 @@ export default function Page() {
                   <th style={{ textAlign: 'right' }}>Événements</th><th style={{ textAlign: 'right' }}>Par visiteur</th>
                 </tr></thead>
                 <tbody>
-                  {t.origines.map(o => (
-                    <tr key={o.source}>
-                      <td style={{ fontWeight: 700 }}>{libelleSource(o.source)}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 800 }}>{o.visiteurs}</td>
-                      <td style={{ textAlign: 'right' }}>{o.evenements}</td>
-                      <td style={{ textAlign: 'right', color: 'var(--sa-muted)' }}>
-                        {o.visiteurs ? Math.round((o.evenements / o.visiteurs) * 10) / 10 : '—'}
-                      </td>
-                    </tr>
-                  ))}
+                  {t.origines.map(o => {
+                    const pid = partenaireDeSource(o.source)
+                    return (
+                      <tr key={o.source}
+                        onClick={pid ? () => openDrawer('partenaire', pid, 'stats') : undefined}
+                        style={pid ? { cursor: 'pointer' } : undefined}
+                        title={pid ? 'Voir le détail de cette station' : undefined}>
+                        <td style={{ fontWeight: 700 }}>{libelleSource(o.source)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 800 }}>{o.visiteurs}</td>
+                        <td style={{ textAlign: 'right' }}>{o.evenements}</td>
+                        <td style={{ textAlign: 'right', color: 'var(--sa-muted)' }}>
+                          {o.visiteurs ? Math.round((o.evenements / o.visiteurs) * 10) / 10 : '—'}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -98,7 +116,10 @@ export default function Page() {
                   <thead><tr><th>Partenaire</th><th style={{ textAlign: 'right' }}>Clics</th><th style={{ textAlign: 'right' }}>Joueurs</th></tr></thead>
                   <tbody>
                     {t.clics_par_partenaire.map(c => (
-                      <tr key={c.partenaire_id}>
+                      <tr key={c.partenaire_id}
+                        onClick={() => openDrawer('partenaire', c.partenaire_id, 'stats')}
+                        style={{ cursor: 'pointer' }}
+                        title="Voir le détail de cette station">
                         <td style={{ fontWeight: 700 }}>{c.nom}</td>
                         <td style={{ textAlign: 'right', fontWeight: 800 }}>{c.clics}</td>
                         <td style={{ textAlign: 'right' }}>{c.joueurs}</td>
