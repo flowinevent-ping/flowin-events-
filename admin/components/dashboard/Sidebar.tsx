@@ -82,6 +82,7 @@ export default function Sidebar() {
       items: [
         { id: 'accueil', icon: '🏠', label: 'Accueil', href: '/dashboard' },
         { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
+        { id: 'demandes-rattachement', icon: '🤝', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
         { id: 'joueurs', icon: '👥', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
         { id: 'gagnants', icon: '🏆', label: 'Gagnants', href: '/dashboard/gagnants' },
         { id: 'partenaires', icon: '🤝', label: 'Partenaires', count: partenaires.length, href: '/dashboard/partenaires' },

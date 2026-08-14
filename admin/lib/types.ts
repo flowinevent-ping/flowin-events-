@@ -184,6 +184,8 @@ export interface FlowinPro {
   notes: string
   tags: string[]
   partenaire_id: string | null
+  statut: 'en_attente' | 'valide' | 'refuse'
+  auth_id: string | null
 }
 
 export interface FlowinSuperEvent {
@@ -193,6 +195,27 @@ export interface FlowinSuperEvent {
   events: string[]
   description: string
   created_at: string
+  date_d: string | null
+  date_f: string | null
+  status: 'upcoming' | 'live' | 'past'
+}
+
+export interface DemandeRattachement {
+  id: number
+  pro_id: string
+  super_event_id: string
+  lat: number | null
+  lng: number | null
+  regle_jeu: string | null
+  logo_url: string | null
+  lots: unknown[]
+  offre: string | null
+  date_debut_souhaite: string | null
+  date_fin_souhaite: string | null
+  statut: 'en_attente' | 'approuve' | 'refuse'
+  note_sa: string | null
+  created_at: string
+  traite_at: string | null
 }
 
 export interface DashboardData {
