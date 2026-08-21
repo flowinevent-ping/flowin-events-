@@ -98,6 +98,29 @@ export default function Page() {
             </div>
           )}
 
+          {lien && (
+            <div style={{ border: '1px solid var(--sa-border)', borderRadius: 12, marginBottom: 14, padding: '14px 16px', display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 8 }}>QR code du lien</div>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(lien)}&bgcolor=ffffff&margin=8`}
+                  alt={`QR code ${partenaire?.nom ?? ''}`}
+                  style={{ borderRadius: 8, border: '1px solid var(--sa-border)' }}
+                  width={160} height={160}
+                />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 8 }}>Logo partenaire</div>
+                <img
+                  src={`/nds/partenaires/${slug}.png`}
+                  alt={`Logo ${partenaire?.nom ?? ''}`}
+                  style={{ maxWidth: 160, maxHeight: 160, borderRadius: 8, border: '1px solid var(--sa-border)', background: '#fff', padding: 8, objectFit: 'contain' }}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              </div>
+            </div>
+          )}
+
           {actifs.map(t => {
             const objet = resoudreGabarit(t.objet, vars)
             const corps = resoudreGabarit(t.corps, vars)
