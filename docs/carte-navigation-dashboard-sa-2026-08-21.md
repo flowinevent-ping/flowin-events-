@@ -7,6 +7,7 @@ Réponse directe à « où se trouve tout ça ? ». Chaque ligne = un système r
 | Système | Où | État |
 |---|---|---|
 | Tirer un nom manuellement (par pro/partenaire) | `/pro/tirage?pro=<id>` | Existe, fonctionne. Bug de fond connu et non corrigé cette session (voir "Reste à faire") |
+| **Système de tirage dédié SA (soir + grand tirage lots)** | **`/tirage-nds.html`** (lien restauré dans le menu, groupe NDS 2026) | **Retrouvé** : construit et testé le 06/07 (RPC `tirage_soir`/`tirage_lot`/`gagnants_complets`/`fiche_gagnant`), jamais cassé — juste orphelin du menu depuis la migration Next.js |
 | Visuel du billet gagnant (celui du joueur) | `nds/billets-partenaires.html?t=<retrait_token>` | OK |
 | Retrait sur place (scan QR + PIN pro) | fonctions `consulter_lot` / `valider_lot` | OK, audité 01/08 |
 | Liste de tous les gagnants (vue SA) | `/dashboard/gagnants` | Corrigé ce soir (lisait la mauvaise table) |
