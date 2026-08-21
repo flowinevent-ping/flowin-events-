@@ -8,7 +8,7 @@ import { TableauStations } from './TableauStations'
 import type { FlowinPro } from '@/lib/types'
 
 export default function ProDrawer() {
-  const { drawer, closeDrawer, setDrawerTab, pros, setPros, events } = useDashboard()
+  const { drawer, closeDrawer, setDrawerTab, pros, setPros, events, openDrawer } = useDashboard()
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinPro>>({})
   const [saving, setSaving] = useState(false)
@@ -125,9 +125,10 @@ export default function ProDrawer() {
               <div className="sa-alert live">🔴 {liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
             )}
             <SectionHeader>{proEvents.length} event{proEvents.length > 1 ? 's' : ''}</SectionHeader>
+            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 8 }}>Toucher un event ouvre sa fiche détaillée : stations, participants et gagnants.</div>
             {proEvents.length === 0 && <div className="sa-empty-inline">Aucun event</div>}
             {proEvents.map(ev => (
-              <div key={ev.id} className="sa-list-item">
+              <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id, 'stats')} style={{ cursor: 'pointer' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{ev.nom}</div>
                   <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{ev.date_d ?? '-'}</div>

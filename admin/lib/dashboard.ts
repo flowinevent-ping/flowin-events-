@@ -96,11 +96,24 @@ export async function deletePro(id: string): Promise<boolean> {
 }
 
 /* ── Participations par event ── */
+/**
+ * Participants reels d'un event donne. Corrigeait auparavant via
+ * joueurs.events (array containment) -- pattern deja identifie comme
+ * inexact pour un scoping precis par event/station (cf lecons apprises
+ * sur les requetes gagnants). La table participations est la source
+ * correcte : une ligne par (joueur, event), alimentee a chaque partie.
+ */
 export async function fetchEventParticipants(eventId: string): Promise<FlowinJoueur[]> {
+  const { data: parts } = await supabase
+    .from('participations')
+    .select('joueur_id')
+    .eq('event_id', eventId)
+  const joueurIds = Array.from(new Set((parts ?? []).map(p => p.joueur_id).filter(Boolean)))
+  if (!joueurIds.length) return []
   const { data } = await supabase
     .from('joueurs')
     .select('*')
-    .contains('events', [eventId])
+    .in('id', joueurIds)
     .order('updated_at', { ascending: false })
   return (data ?? []) as FlowinJoueur[]
 }
