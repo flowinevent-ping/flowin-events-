@@ -7,6 +7,7 @@ export interface BonCommande {
   created_at: string | null
   super_event_id: string | null
   raison_sociale: string | null
+  adresse: string | null
   ville: string | null
   cp: string | null
   contact: string | null
@@ -26,12 +27,22 @@ export interface BonCommande {
   cgv_acceptee_at: string | null
   lot_valeur: number | null
   lot_descriptif: string | null
+  lot_validite: string | null
+  lot_conditions: string | null
+  prestations_incluses: string | null
+  mention_particuliere: string | null
 }
 
 /** Un bon est signe si son statut vaut 'signe' (accentue ou non selon la saisie). */
 export function estSigne(b: BonCommande): boolean {
   const s = (b.statut ?? '').toLowerCase()
   return s === 'signe' || s === 'signé'
+}
+
+export async function majBonCommande(id: string, champs: Partial<BonCommande>): Promise<boolean> {
+  const { error } = await supabase.from('bons_commande').update(champs).eq('id', id)
+  if (error) { console.error('[majBonCommande]', error.message); return false }
+  return true
 }
 
 /**
