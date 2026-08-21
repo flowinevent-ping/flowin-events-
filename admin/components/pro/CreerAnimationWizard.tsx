@@ -42,14 +42,15 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const router = useRouter()
   const [etape, setEtape] = useState(1)
   const [module_, setModule] = useState<string | null>(null)
+  const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
   const [banques, setBanques] = useState<Banque[]>(banqueQuizExistante)
-  const [typeRecompense, setTypeRecompense] = useState<'tirage' | 'instantane'>('tirage')
-  const [lots, setLots] = useState<{ id: string; nom: string; quantite: number }[]>([{ id: 'l1', nom: '', quantite: 10 }])
+  const [lots, setLots] = useState<{ id: string; nom: string; quantite: number; type: 'tirage' | 'instantane'; conditions: string }[]>(
+    [{ id: 'l1', nom: '', quantite: 10, type: 'tirage', conditions: '' }]
+  )
   const [modeInstant, setModeInstant] = useState<'tousLesX' | 'aleatoire'>('aleatoire')
   const [everyX, setEveryX] = useState(10)
   const [probabilite, setProbabilite] = useState(15)
-  const [nom, setNom] = useState('')
   const [dateD, setDateD] = useState('')
   const [dateF, setDateF] = useState('')
   const [diffPhysique, setDiffPhysique] = useState(true)
@@ -62,12 +63,13 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const jeu = JEUX.find(j => j.m === module_)
   const etapeBanque = jeu?.banque ?? false
   const totalEtapes = etapeBanque ? 6 : 5
+  const aUnLotInstantane = lots.some(l => l.type === 'instantane')
 
   function suivant() { setEtape(e => e + 1) }
   function precedent() { setEtape(e => Math.max(1, e - 1)) }
-  function ajouterLot() { setLots(l => [...l, { id: 'l' + Date.now(), nom: '', quantite: 5 }]) }
+  function ajouterLot() { setLots(l => [...l, { id: 'l' + Date.now(), nom: '', quantite: 5, type: 'tirage', conditions: '' }]) }
   function retirerLot(id: string) { setLots(l => l.length > 1 ? l.filter(x => x.id !== id) : l) }
-  function majLot(id: string, champ: 'nom' | 'quantite', valeur: string | number) {
+  function majLot(id: string, champ: 'nom' | 'quantite' | 'type' | 'conditions', valeur: string | number) {
     setLots(l => l.map(x => x.id === id ? { ...x, [champ]: valeur } : x))
   }
 
@@ -77,9 +79,9 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
     setEnvoi('envoi')
     const res = await creerAnimation({
       proId, module: module_, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null,
-      banqueId, typeRecompense,
-      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite })),
-      regleRecompense: typeRecompense === 'instantane' ? { mode: modeInstant, everyX, probabilite } : undefined,
+      banqueId,
+      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, type: l.type, conditions: l.conditions.trim() })),
+      regleRecompense: aUnLotInstantane ? { mode: modeInstant, everyX, probabilite } : undefined,
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
     if (res.ok) {
@@ -108,8 +110,11 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
       {etape === 1 && (
         <div style={CARD}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Quel jeu pour votre animation ?</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Choisissez le format que vos clients joueront.</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Nom et jeu de votre animation</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Le nom sert à l&apos;identifier dans vos events. Choisissez ensuite le format joué.</div>
+          <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Nom de l&apos;animation</label>
+          <input style={{ ...input, marginBottom: 18 }} value={nom} onChange={e => setNom(e.target.value)} placeholder="Ex. Jeu d'été chez nous" />
+          <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 8 }}>Quel jeu ?</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
             {JEUX.map(g => (
               <div
@@ -129,7 +134,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
-            <button style={{ ...btnPrimary, opacity: module_ ? 1 : 0.4 }} disabled={!module_} onClick={suivant}>Suivant →</button>
+            <button style={{ ...btnPrimary, opacity: module_ && nom.trim() ? 1 : 0.4 }} disabled={!module_ || !nom.trim()} onClick={suivant}>Suivant →</button>
           </div>
         </div>
       )}
@@ -165,6 +170,19 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
               + Créer une nouvelle banque (nouvel onglet)
             </a>
           </div>
+          <a
+            style={{ display: 'flex', gap: 10, alignItems: 'flex-start', border: '1.5px dashed #CBD5E1', borderRadius: 12, padding: 13, marginTop: 14, textDecoration: 'none', color: 'inherit' }}
+            target="_blank" rel="noreferrer"
+            href={`https://mail.google.com/mail/?view=cm&fs=1&to=flowinevent@gmail.com&su=${encodeURIComponent('Demande de quiz — ' + (proName || nom || 'nouvelle animation'))}&body=${encodeURIComponent(
+              `Bonjour,\n\n${proName || 'Un partenaire'} souhaite que l'équipe Flowin réalise le quiz de son animation « ${nom || '—'} ».\n\nMerci de nous recontacter pour en discuter.\n\nNos coordonnées :\n   Téléphone : \n   Meilleur moment pour appeler : \n\nMerci de nous répondre rapidement.`
+            )}`}
+          >
+            <span style={{ fontSize: 18 }}>✉️</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 12.5 }}>Demander à Flowin de réaliser un quiz →</div>
+              <div style={{ fontSize: 11, ...MUTED }}>Envoie un email à notre équipe, on prépare les questions pour vous</div>
+            </div>
+          </a>
           {banqueId && (() => {
             const b = banques.find(x => x.id === banqueId)
             const apercu = (b?.questions ?? []).slice(0, 3)
@@ -192,26 +210,55 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
       {etape === (etapeBanque ? 3 : 2) && (
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Quelle récompense ?</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Tirage au sort après coup, ou gain immédiat si bonne réponse.</div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-            {(['tirage', 'instantane'] as const).map(v => (
-              <div
-                key={v}
-                onClick={() => setTypeRecompense(v)}
-                style={{
-                  flex: 1, border: typeRecompense === v ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 12, padding: 14, cursor: 'pointer',
-                  background: typeRecompense === v ? 'rgba(168,85,247,.06)' : '#fff',
-                }}
-              >
-                <div style={{ fontWeight: 800, fontSize: 13.5 }}>{v === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}</div>
-                <div style={{ fontSize: 11.5, ...MUTED, marginTop: 3 }}>{v === 'tirage' ? 'Vous tirez les gagnants après coup' : 'Le client gagne en direct sur bonne réponse'}</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Par lot : tirage au sort après coup, ou gain immédiat si bonne réponse.</div>
+
+          <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Vos lots {lots.length > 1 ? `(${lots.length})` : ''}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 10 }}>
+            {lots.map(l => (
+              <div key={l.id} style={{ border: '1.5px solid #E2E8F0', borderRadius: 12, padding: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 10 }}>
+                  <div style={{ flex: 2, minWidth: 140 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Nom du lot</label>
+                    <input style={input} value={l.nom} onChange={e => majLot(l.id, 'nom', e.target.value)} placeholder="Ex. Café gourmand offert" />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 80 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Quantité</label>
+                    <input style={input} type="number" min={1} value={l.quantite} onChange={e => majLot(l.id, 'quantite', Number(e.target.value))} />
+                  </div>
+                  {lots.length > 1 && (
+                    <button onClick={() => retirerLot(l.id)} style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, width: 40, height: 42, cursor: 'pointer', color: '#B91C1C', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>×</button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                  {(['tirage', 'instantane'] as const).map(v => (
+                    <div
+                      key={v}
+                      onClick={() => majLot(l.id, 'type', v)}
+                      style={{
+                        flex: 1, textAlign: 'center', border: l.type === v ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 8, padding: 7, cursor: 'pointer',
+                        background: l.type === v ? 'rgba(168,85,247,.06)' : '#fff', color: l.type === v ? ACC : '#0F172A', fontWeight: 700, fontSize: 12,
+                      }}
+                    >
+                      {v === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}
+                    </div>
+                  ))}
+                </div>
+                <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Conditions du lot</label>
+                <textarea
+                  style={{ ...input, minHeight: 54, resize: 'vertical', fontFamily: 'inherit' }}
+                  value={l.conditions}
+                  onChange={e => majLot(l.id, 'conditions', e.target.value)}
+                  placeholder="Ex. Valable 1 exemplaire par client, sur présentation du billet"
+                />
               </div>
             ))}
           </div>
+          <button onClick={ajouterLot} style={{ ...btnGhost, fontSize: 12.5, padding: '9px 14px' }}>+ Ajouter un lot / sous-lot</button>
 
-          {typeRecompense === 'instantane' && (
-            <div style={{ marginBottom: 18 }}>
+          {aUnLotInstantane && (
+            <div style={{ marginTop: 18 }}>
               <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Règle du gain immédiat</div>
+              <div style={{ fontSize: 11, ...MUTED, marginBottom: 8 }}>S&apos;applique à tous les lots réglés en gain immédiat.</div>
               <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
                 {(['aleatoire', 'tousLesX'] as const).map(m => (
                   <div key={m} onClick={() => setModeInstant(m)} style={{ flex: 1, border: modeInstant === m ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 10, padding: 10, cursor: 'pointer', background: modeInstant === m ? 'rgba(168,85,247,.06)' : '#fff' }}>
@@ -233,26 +280,6 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             </div>
           )}
 
-          <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Vos lots {lots.length > 1 ? `(${lots.length})` : ''}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10 }}>
-            {lots.map(l => (
-              <div key={l.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-                <div style={{ flex: 2, minWidth: 140 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Nom du lot</label>
-                  <input style={input} value={l.nom} onChange={e => majLot(l.id, 'nom', e.target.value)} placeholder="Ex. Café gourmand offert" />
-                </div>
-                <div style={{ flex: 1, minWidth: 80 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Quantité</label>
-                  <input style={input} type="number" min={1} value={l.quantite} onChange={e => majLot(l.id, 'quantite', Number(e.target.value))} />
-                </div>
-                {lots.length > 1 && (
-                  <button onClick={() => retirerLot(l.id)} style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, width: 40, height: 42, cursor: 'pointer', color: '#B91C1C', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>×</button>
-                )}
-              </div>
-            ))}
-          </div>
-          <button onClick={ajouterLot} style={{ ...btnGhost, fontSize: 12.5, padding: '9px 14px' }}>+ Ajouter un lot / sous-lot</button>
-
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
             <button style={{ ...btnPrimary, opacity: lots.some(l => l.nom.trim()) ? 1 : 0.4 }} disabled={!lots.some(l => l.nom.trim())} onClick={suivant}>Suivant →</button>
@@ -262,10 +289,8 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
       {etape === (etapeBanque ? 4 : 3) && (
         <div style={CARD}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Nom et dates</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Le nom sert à identifier votre animation dans vos events.</div>
-          <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Nom de l&apos;animation</label>
-          <input style={{ ...input, marginBottom: 14 }} value={nom} onChange={e => setNom(e.target.value)} placeholder="Ex. Jeu d'été chez nous" />
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Dates de l&apos;animation</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Période pendant laquelle vos clients pourront jouer.</div>
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Du</label>
@@ -278,7 +303,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
-            <button style={{ ...btnPrimary, opacity: nom.trim() ? 1 : 0.4 }} disabled={!nom.trim()} onClick={suivant}>Suivant →</button>
+            <button style={btnPrimary} onClick={suivant}>Suivant →</button>
           </div>
         </div>
       )}
@@ -330,16 +355,19 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
       )}
       {etape === (etapeBanque ? 6 : 5) && envoi === 'ok' && (
         <div style={CARD}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 7 }}><Ico k="check" size={16} style={{ color: '#15803D' }} />Votre animation est prête</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>Voici de quoi l&apos;annoncer, à télécharger ou à envoyer à votre base de contacts.</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 7 }}><Ico k="check" size={16} style={{ color: '#15803D' }} />Votre demande est enregistrée</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>Transmise à l&apos;équipe Flowin pour validation avant mise en ligne.</div>
 
           <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Récapitulatif</div>
             {[
+              ['Nom', nom || '—'],
               ['Jeu', JEUX.find(j => j.m === module_)?.t ?? '—'],
               ...(etapeBanque ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? 'Aucune sélectionnée']] : []),
-              ['Récompense', typeRecompense === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'],
-              ['Lots', lots.filter(l => l.nom.trim()).map(l => `${l.nom} × ${l.quantite}`).join(', ') || '—'],
+              ...lots.filter(l => l.nom.trim()).map((l, i) => [
+                lots.filter(x => x.nom.trim()).length > 1 ? `Lot ${i + 1}` : 'Lot',
+                `${l.nom} × ${l.quantite} — ${l.type === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}`,
+              ]),
               ['Dates', dateD && dateF ? `${dateD} → ${dateF}` : 'Non précisées'],
               ['Diffusion', [diffPhysique && 'QR physique', diffDigital && 'Lien digital', diffQr && 'QR tracking'].filter(Boolean).join(' · ') || 'Aucune'],
             ].map(([l, v]) => (
@@ -349,16 +377,12 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             ))}
           </div>
 
-          <div id="visuel-annonce" style={{ background: 'linear-gradient(135deg,#7C2D92 0%,#A855F7 100%)', borderRadius: 16, padding: '28px 24px', color: '#fff', textAlign: 'center', marginBottom: 16 }}>
-            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.85 }}>Nouvelle animation</div>
-            <div style={{ fontSize: 22, fontWeight: 900, margin: '8px 0 6px', letterSpacing: '-.4px' }}>{nom}</div>
-            <div style={{ fontSize: 13, opacity: 0.9 }}>{dateD && dateF ? `Du ${dateD} au ${dateF}` : 'Bientôt disponible'}</div>
-            <div style={{ marginTop: 14, fontSize: 13, fontWeight: 700, background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 14px', display: 'inline-flex', alignItems: 'center', gap: 7 }}><Ico k="gift" size={14} />{lotsTexte}</div>
-            <div style={{ marginTop: 14, fontSize: 11.5, opacity: 0.85, display: 'flex', flexDirection: 'column', gap: 5 }}>
-              {diffPhysique && <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}><Ico k="pin" size={12} />QR code physique — en attente de génération par notre équipe</div>}
-              {diffDigital && <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}><Ico k="link" size={12} />Lien digital — en attente de génération par notre équipe</div>}
-              {diffQr && <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}><Ico k="chart" size={12} />QR de tracking — en attente de mise en place</div>}
-            </div>
+          <div id="visuel-annonce" style={{ background: 'linear-gradient(135deg,#7C2D92 0%,#A855F7 100%)', borderRadius: 16, padding: '20px 24px', color: '#fff', textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.85 }}>Statut</div>
+            <div style={{ fontSize: 19, fontWeight: 900, margin: '8px 0 2px' }}>En attente de validation Flowin</div>
+          </div>
+          <div style={{ fontSize: 11.5, ...MUTED, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '9px 12px', marginBottom: 16 }}>
+            Le QR code physique et la diffusion restent validés par l&apos;équipe Flowin avant mise en ligne. Vous serez prévenu dès l&apos;activation.
           </div>
           <style>{`@media print{ body *{visibility:hidden} #visuel-annonce,#visuel-annonce *{visibility:visible} #visuel-annonce{position:fixed;inset:0;border-radius:0} }`}</style>
           <button style={{ ...btnGhost, width: '100%', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={() => window.print()}><Ico k="download" size={14} />Télécharger / imprimer ce visuel</button>
