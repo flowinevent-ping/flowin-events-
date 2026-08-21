@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, ModuleChip, StatusChip } from '@/components/dashboard/DashboardUI'
 
@@ -14,17 +15,23 @@ const MODULES = [
 
 export default function JeuxPage() {
   const { events, openDrawer } = useDashboard()
+  const [ouvert, setOuvert] = useState<string | null>(null)
 
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="🎮 Jeux" subtitle="6 modules disponibles dans Flowin" />
+        <PageHeader title="🎮 Jeux" subtitle="6 modules disponibles dans Flowin — cliquer une carte affiche ses events" />
         <div style={{ padding: 24, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {MODULES.map(m => {
             const moduleEvents = events.filter(e => e.module === m.id)
             const live = moduleEvents.filter(e => e.status === 'live')
+            const actif = ouvert === m.id
             return (
-              <div key={m.id} style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: '1px solid var(--sa-border)' }}>
+              <div
+                key={m.id}
+                onClick={() => setOuvert(actif ? null : m.id)}
+                style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: actif ? '2px solid var(--sa-accent)' : '1px solid var(--sa-border)', cursor: 'pointer', gridColumn: actif ? 'span 3' : undefined }}
+              >
                 <div style={{ fontSize: 36, marginBottom: 10 }}>{m.icon}</div>
                 <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{m.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 12 }}>{m.desc}</div>
@@ -34,7 +41,22 @@ export default function JeuxPage() {
                 </div>
                 {moduleEvents.length > 0 && (
                   <div style={{ marginTop: 10, fontSize: 12, color: 'var(--sa-muted)' }}>
-                    {moduleEvents.length} event{moduleEvents.length > 1 ? 's' : ''} associé{moduleEvents.length > 1 ? 's' : ''}
+                    {moduleEvents.length} event{moduleEvents.length > 1 ? 's' : ''} associé{moduleEvents.length > 1 ? 's' : ''} — {actif ? 'toucher pour refermer' : 'toucher pour voir'}
+                  </div>
+                )}
+                {actif && (
+                  <div style={{ marginTop: 14, borderTop: '1px solid var(--sa-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }} onClick={e => e.stopPropagation()}>
+                    {moduleEvents.length === 0 && <div style={{ fontSize: 12, color: 'var(--sa-muted)' }}>Aucun event sur ce module.</div>}
+                    {moduleEvents.map(ev => (
+                      <div
+                        key={ev.id}
+                        onClick={() => openDrawer('event', ev.id)}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer' }}
+                      >
+                        <span style={{ fontWeight: 600, fontSize: 12.5 }}>{ev.nom}</span>
+                        <StatusChip status={ev.status} />
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
