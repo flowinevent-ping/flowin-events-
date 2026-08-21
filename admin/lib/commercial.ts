@@ -53,6 +53,44 @@ export async function fetchBonsCommande(superEventId?: string): Promise<BonComma
   return (data as BonCommande[]) ?? []
 }
 
+/* ── Catalogue des packs de participation (Super Event) ──────────────────
+ * Source de verite unique pour les 3 offres (Visibilite / Animation /
+ * Sponsor officiel). Reprend telles quelles les valeurs deja utilisees dans
+ * les bons de commande NDS 2026 (admin/public/bon-commande-nds.html et
+ * bons-prets/*.html) — rien invente, juste rendu editable et publiable en
+ * direct depuis le dashboard SA au lieu de rester fige dans du HTML statique.
+ */
+
+export interface PackParticipation {
+  id: string
+  nom: string
+  sous_titre: string | null
+  prix_ht: number
+  badge: string | null
+  lot_valeur: number | null
+  inclusions: string | null
+  ordre: number
+  updated_at: string | null
+}
+
+export async function fetchPacksParticipation(): Promise<PackParticipation[]> {
+  const { data, error } = await supabase
+    .from('packs_participation')
+    .select('*')
+    .order('ordre', { ascending: true })
+  if (error) { console.error('[fetchPacksParticipation]', error.message); return [] }
+  return (data as PackParticipation[]) ?? []
+}
+
+export async function majPackParticipation(id: string, champs: Partial<PackParticipation>): Promise<boolean> {
+  const { error } = await supabase
+    .from('packs_participation')
+    .update({ ...champs, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) { console.error('[majPackParticipation]', error.message); return false }
+  return true
+}
+
 /* ── Prospection ───────────────────────────────────────────────────────── */
 
 export interface Prospect {
