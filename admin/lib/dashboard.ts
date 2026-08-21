@@ -163,6 +163,34 @@ export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]>
   return (data ?? []) as TirageRow[]
 }
 
+/* ── Gagnants (liste complete, dashboard SA) ──
+ * Meme table tirages que fetchJoueurTirages ci-dessus, non filtree par joueur cette fois.
+ * Remplace l ancienne lecture sur joueurs.gains (colonne jamais alimentee par le vrai systeme
+ * de tirage -- 0 lignes > 0 verifie en base -- cause du "0 resultat" constate sur /dashboard/gagnants). */
+export interface GagnantRow {
+  id: string
+  joueur_nom: string | null
+  joueur_email: string | null
+  ticket_code: string | null
+  lot_nom: string | null
+  lot_valeur: number | null
+  partenaire_id: string | null
+  super_event_id: string | null
+  statut: string | null
+  notifie_at: string | null
+  retire_at: string | null
+  retrait_token: string | null
+  created_at: string | null
+}
+export async function fetchGagnants(): Promise<GagnantRow[]> {
+  const { data, error } = await supabase
+    .from('tirages')
+    .select('id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,statut,notifie_at,retire_at,retrait_token,created_at')
+    .order('created_at', { ascending: false })
+  if (error) { console.error('[fetchGagnants]', error.message); return [] }
+  return (data ?? []) as GagnantRow[]
+}
+
 /* ── Super Event : stats agrégées d'un commerce (espace pro) ── */
 export async function fetchEventSuperEventStats(eventId: string): Promise<{ tickets: number; gains: number; gainsUtilises: number }> {
   const [tk, ga] = await Promise.all([

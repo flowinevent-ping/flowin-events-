@@ -75,7 +75,7 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
       </div>
 
       <div style={{ display: 'flex', gap: 36, alignItems: 'flex-start', flexWrap: 'wrap', paddingLeft: 4 }}>
-        <div style={{ flex: 1, minWidth: 260, order: 1 }}>
+        <div style={{ flex: '0 1 360px', minWidth: 260, maxWidth: 400, order: 1 }}>
           {tab === 'event' && events.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: '#64748B', marginBottom: 8 }}>Événement à prévisualiser</div>
