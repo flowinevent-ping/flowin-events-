@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchJours, fetchStations, type JourActivite, type StationJour } from '@/lib/nds'
+import { useDashboard } from '@/contexts/DashboardContext'
 
 const fr = (d: string) => {
   const p = d.split('-')
@@ -18,6 +19,7 @@ const fr = (d: string) => {
 }
 
 export default function Page() {
+  const { openDrawer } = useDashboard()
   const [jours, setJours] = useState<JourActivite[] | null>(null)
   const [jour, setJour] = useState<string | null>(null)
   const [stations, setStations] = useState<StationJour[] | null>(null)
@@ -45,13 +47,18 @@ export default function Page() {
       <SectionHeader>{titre}</SectionHeader>
       {liste.length === 0 && <div className="sa-muted" style={{ fontSize: 13, marginBottom: 16 }}>{vide}</div>}
       {liste.map(s => (
-        <div key={s.event_id} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6 }}>
+        <div
+          key={s.event_id}
+          onClick={() => openDrawer('event', s.event_id, 'stats')}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6, cursor: 'pointer' }}
+        >
           <span style={{ flex: 1, minWidth: 160, fontWeight: 700, fontSize: 13 }}>{s.nom}</span>
           <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>{s.visiteurs} visiteur{s.visiteurs > 1 ? 's' : ''}</span>
           <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>
             {s.terminees} partie{s.terminees > 1 ? 's' : ''} terminée{s.terminees > 1 ? 's' : ''}
             {s.commencees !== s.terminees && ` sur ${s.commencees} commencée${s.commencees > 1 ? 's' : ''}`}
           </span>
+          <span style={{ fontSize: 11.5, color: 'var(--sa-accent)', fontWeight: 700 }}>Voir le détail →</span>
         </div>
       ))}
     </>
