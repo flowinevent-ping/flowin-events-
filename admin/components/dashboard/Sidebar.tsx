@@ -72,85 +72,85 @@ export default function Sidebar() {
 
   const groups: NavGroup[] = [
     {
-      group: 'ESPACE PRO',
-      items: [
-        { id: 'apercu-pro', icon: '👁', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
-      ],
-    },
-    {
-      group: 'CRM',
+      group: 'ACCUEIL',
       items: [
         { id: 'accueil', icon: '🏠', label: 'Accueil', href: '/dashboard' },
-        { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
-        { id: 'demandes-rattachement', icon: '🤝', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
-        { id: 'joueurs', icon: '👥', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
-        { id: 'gagnants', icon: '🏆', label: 'Gagnants', href: '/dashboard/gagnants' },
-        { id: 'partenaires', icon: '🤝', label: 'Partenaires', count: partenaires.length, href: '/dashboard/partenaires' },
-      ],
-    },
-    {
-      group: 'EVENTS',
-      items: [
-        { id: 'events', icon: '📅', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
-        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
-        { id: 'parcours', icon: '📱', label: 'Parcours mobil', href: '/dashboard/parcours' },
-      ],
-    },
-    {
-      group: 'PILOTAGE',
-      items: [
-        { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
-      ],
-    },
-    {
-      group: 'ANALYSE',
-      items: [
-        { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
-        { id: 'rapport-points', icon: '📍', label: 'Rapport détaillé', href: '/dashboard/rapport-points' },
-        { id: 'track-qr', icon: '🔗', label: 'Origines du trafic', href: '/dashboard/track-qr' },
-      ],
-    },
-    {
-      group: 'NDS 2026',
-      items: [
-        { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
-        { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
-        { id: 'tirage-nds', icon: '🎰', label: 'Lots & Gagnants (tirage)', href: '/tirage-nds.html' },
-        { id: 'nds-participants', icon: '👥', label: 'Participants', href: '/dashboard/nds-participants' },
-        { id: 'nds-carte', icon: '🗺️', label: 'Carte NDS', href: '/dashboard/nds-carte' },
-        { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
-        { id: 'nds-comm', icon: '📣', label: 'Kit com partenaire', href: '/dashboard/nds-comm' },
-        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
-      ],
-    },
-    {
-      group: 'COMMERCE',
-      items: [
-        { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
-        { id: 'btob-prospects', icon: '🎯', label: 'Prospects B2B', href: '/dashboard/btob-prospects' },
-        { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
-        { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
-        { id: 'crm-landing', icon: '📥', label: 'CRM Landing pages', href: '/dashboard/crm-landing' },
-        { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
-        { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
-        { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
       ],
     },
     {
       group: 'JEUX',
       items: [
-        { id: 'jeux', icon: '🎮', label: 'Jeux', count: 6, href: '/dashboard/jeux' },
+        { id: 'jeux', icon: '🎮', label: 'Jeux (templates)', count: 6, href: '/dashboard/jeux' },
       ],
     },
     {
-      group: 'REPORTING',
+      group: 'EVENTS',
       items: [
-        { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
+        { id: 'events', icon: '📅', label: 'Events (kanban)', count: events.length, live: liveCount, href: '/dashboard/events' },
+        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
+        { id: 'parcours', icon: '📱', label: 'Parcours mobil', href: '/dashboard/parcours' },
+      ],
+    },
+    {
+      group: 'CRM',
+      items: [
+        { id: 'apercu-pro', icon: '👁', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
+        { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
+        { id: 'demandes-rattachement', icon: '🤝', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
+        { id: 'joueurs', icon: '👥', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
+        { id: 'partenaires', icon: '🤝', label: 'Partenaires (fiche commerce)', count: partenaires.length, href: '/dashboard/partenaires' },
+      ],
+    },
+    {
+      group: 'TIRAGE & GAGNANTS',
+      items: [
+        { id: 'tirage-nds', icon: '🎰', label: 'Tirage au sort', href: '/tirage-nds.html' },
+        { id: 'gagnants', icon: '🏆', label: 'Liste des gagnants', href: '/dashboard/gagnants' },
+        { id: 'nds-comm', icon: '📣', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm' },
+        { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
+      ],
+    },
+    {
+      group: 'STATISTIQUES',
+      items: [
+        { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
+        { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
+        { id: 'rapport-points', icon: '📍', label: 'Rapport détaillé', href: '/dashboard/rapport-points' },
+        { id: 'track-qr', icon: '🔗', label: 'Origines du trafic', href: '/dashboard/track-qr' },
+        { id: 'nds-participants', icon: '👥', label: 'Participants (super event)', href: '/dashboard/nds-participants' },
+      ],
+    },
+    {
+      group: 'COMMERCIAL',
+      items: [
+        { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
+        { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
+        { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
+      ],
+    },
+    {
+      group: 'LANDING & PROSPECTION',
+      items: [
+        { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
+        { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
+        { id: 'btob-prospects', icon: '🎯', label: 'Prospects B2B', href: '/dashboard/btob-prospects' },
+        { id: 'crm-landing', icon: '📥', label: 'CRM Landing pages', href: '/dashboard/crm-landing' },
+        { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
+      ],
+    },
+    {
+      group: 'NDS 2026 — ASSETS',
+      items: [
+        { id: 'nds-carte', icon: '🗺️', label: 'Carte NDS', href: '/dashboard/nds-carte' },
+        { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
+        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
       ],
     },
     {
       group: 'SYSTÈME',
       items: [
+        { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
+        { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
         { id: 'wizard-event', icon: '✨', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
         { id: 'roadmap', icon: '🗺️', label: 'Feuille de route', href: '/dashboard/roadmap' },
         { id: 'parametres', icon: '⚙️', label: 'Paramètres', href: '/dashboard/parametres' },
