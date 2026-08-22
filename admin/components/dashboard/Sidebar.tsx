@@ -133,6 +133,9 @@ export default function Sidebar() {
       items: [
         { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
         { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html' },
+        { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html' },
+        { id: 'nds-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire (v1)', href: '/nds-partenaire-presentation.html' },
+        { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire (v2)', href: '/flowin-partenaire-presentation.html' },
         { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
         { id: 'btob-prospects', icon: '🎯', label: 'Prospects B2B', href: '/dashboard/btob-prospects' },
         { id: 'crm-landing', icon: '📥', label: 'CRM Landing pages', href: '/dashboard/crm-landing' },
