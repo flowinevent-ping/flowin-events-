@@ -25,8 +25,10 @@ interface DashboardStore {
   setPros: (p: FlowinPro[]) => void
   setLots: (l: FlowinLot[]) => void
   drawer: DrawerState
+  drawerCanGoBack: boolean
   openDrawer: (type: DrawerType, id: string, tab?: string) => void
   openDrawerEdit: (type: DrawerType, id: string) => void
+  goBackDrawer: () => void
   closeDrawer: () => void
   setDrawerTab: (tab: string) => void
   setDrawerEdit: (edit: boolean) => void
@@ -58,17 +60,39 @@ export function DashboardProvider({
   const [drawer, setDrawer] = useState<DrawerState>({
     open: false, type: null, id: null, tab: 'infos', edit: false,
   })
+  const [drawerHistory, setDrawerHistory] = useState<DrawerState[]>([])
 
   const openDrawer = useCallback((type: DrawerType, id: string, tab = 'infos') => {
-    setDrawer({ open: true, type, id, tab, edit: false })
+    setDrawer(prev => {
+      // Ouvrir la MEME fiche (ex. changer d'onglet) ne s'empile pas dans l'historique.
+      if (prev.open && (prev.type !== type || prev.id !== id)) {
+        setDrawerHistory(h => [...h, prev])
+      }
+      return { open: true, type, id, tab, edit: false }
+    })
   }, [])
 
   const openDrawerEdit = useCallback((type: DrawerType, id: string) => {
-    setDrawer({ open: true, type, id, tab: 'infos', edit: true })
+    setDrawer(prev => {
+      if (prev.open && (prev.type !== type || prev.id !== id)) {
+        setDrawerHistory(h => [...h, prev])
+      }
+      return { open: true, type, id, tab: 'infos', edit: true }
+    })
+  }, [])
+
+  const goBackDrawer = useCallback(() => {
+    setDrawerHistory(h => {
+      if (h.length === 0) return h
+      const prev = h[h.length - 1]
+      setDrawer(prev)
+      return h.slice(0, -1)
+    })
   }, [])
 
   const closeDrawer = useCallback(() => {
     setDrawer({ open: false, type: null, id: null, tab: 'infos', edit: false })
+    setDrawerHistory([])
   }, [])
 
   const setDrawerTab = useCallback((tab: string) => {
@@ -83,7 +107,8 @@ export function DashboardProvider({
     <DashboardContext.Provider value={{
       joueurs, events, partenaires, pros, lots,
       setJoueurs, setEvents, setPartenaires, setPros, setLots,
-      drawer, openDrawer, openDrawerEdit, closeDrawer, setDrawerTab, setDrawerEdit,
+      drawer, drawerCanGoBack: drawerHistory.length > 0,
+      openDrawer, openDrawerEdit, goBackDrawer, closeDrawer, setDrawerTab, setDrawerEdit,
     }}>
       {children}
     </DashboardContext.Provider>
