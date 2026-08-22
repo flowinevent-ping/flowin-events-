@@ -166,6 +166,37 @@ export interface TirageRow {
   statut: string | null
   created_at: string | null
 }
+/**
+ * Historique reel de jeu d'un joueur : quelle station (source_qr), quelle
+ * heure (started_at), quel score, quelles reponses bonus. Distinct de
+ * j.events (simple liste d'ids sur la fiche joueur, sans detail) -- la table
+ * participations est la seule a porter le detail station-level demande par
+ * Romain pour la fiche joueur (historique de navigation, stations, heures,
+ * lots, reponses).
+ */
+export interface ParticipationRow {
+  id: string
+  event_id: string
+  score: number | null
+  ticket_code: string | null
+  bonus_answers: Record<string, unknown> | null
+  completed: boolean | null
+  tickets: number | null
+  source_qr: string | null
+  played_date: string | null
+  started_at: string | null
+  created_at: string | null
+}
+export async function fetchJoueurParticipations(joueurId: string): Promise<ParticipationRow[]> {
+  const { data, error } = await supabase
+    .from('participations')
+    .select('id,event_id,score,ticket_code,bonus_answers,completed,tickets,source_qr,played_date,started_at,created_at')
+    .eq('joueur_id', joueurId)
+    .order('created_at', { ascending: false })
+  if (error) { console.error('[fetchJoueurParticipations]', error.message); return [] }
+  return (data ?? []) as ParticipationRow[]
+}
+
 export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
   const { data, error } = await supabase
     .from('tirages')

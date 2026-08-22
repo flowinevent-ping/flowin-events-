@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, fetchJoueurTirages, type SeTicketRow, type SeGainRow, type TirageRow } from '@/lib/dashboard'
+import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, fetchJoueurTirages, fetchJoueurParticipations, type SeTicketRow, type SeGainRow, type TirageRow, type ParticipationRow } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip } from './DashboardUI'
 import type { FlowinJoueur } from '@/lib/types'
 
@@ -19,6 +19,7 @@ export default function JoueurDrawer() {
   const [seTickets, setSeTickets] = useState<SeTicketRow[]>([])
   const [seGains, setSeGains] = useState<SeGainRow[]>([])
   const [tirages, setTirages] = useState<TirageRow[]>([])
+  const [participations, setParticipations] = useState<ParticipationRow[]>([])
 
   const j = useMemo(() => joueurs.find(x => x.id === drawer.id), [joueurs, drawer.id])
 
@@ -27,6 +28,7 @@ export default function JoueurDrawer() {
     let on = true
     fetchJoueurTicketsGains(drawer.id).then(r => { if (on) { setSeTickets(r.tickets); setSeGains(r.gains) } })
     fetchJoueurTirages(drawer.id).then(r => { if (on) setTirages(r) })
+    fetchJoueurParticipations(drawer.id).then(r => { if (on) setParticipations(r) })
     return () => { on = false }
   }, [drawer.id])
 
@@ -37,7 +39,6 @@ export default function JoueurDrawer() {
     </div>
   )
 
-  const joueurEvents = (j.events ?? []).map(eid => events.find(e => e.id === eid)).filter(Boolean)
   const joueurLots   = lots.filter(l => (l as unknown as { assigne_a: string }).assigne_a === j.id)
   const ticketsByEvent = Array.from(
     seTickets.reduce((m, t) => { if (t.event_id) m.set(t.event_id, (m.get(t.event_id) || 0) + 1); return m }, new Map<string, number>())
@@ -71,7 +72,7 @@ export default function JoueurDrawer() {
 
   const tabs = [
     { id: 'infos', label: 'Infos' },
-    { id: 'events', label: 'Events', badge: joueurEvents.length },
+    { id: 'events', label: 'Historique de jeu', badge: participations.length },
     { id: 'lots', label: 'Lots', badge: joueurLots.length },
     { id: 'gagne', label: 'Lots gagnés', badge: tirages.length },
     { id: 'se', label: 'Tickets', badge: seTickets.length },
@@ -136,14 +137,32 @@ export default function JoueurDrawer() {
 
         {drawer.tab === 'events' && (
           <>
-            <SectionHeader>{joueurEvents.length} event{joueurEvents.length > 1 ? 's' : ''}</SectionHeader>
-            {joueurEvents.length === 0 && <div className="sa-empty-inline">Aucun event</div>}
-            {joueurEvents.map(ev => ev && (
-              <div key={ev.id} className="sa-list-item">
-                <div style={{ fontWeight: 700 }}>{ev.nom}</div>
-                <StatusChip status={ev.status} />
-              </div>
-            ))}
+            <SectionHeader>{participations.length} partie{participations.length > 1 ? 's' : ''}</SectionHeader>
+            {participations.length === 0 && <div className="sa-empty-inline">Aucune partie enregistrée</div>}
+            {participations.map(p => {
+              const ev = events.find(e => e.id === p.event_id)
+              const heure = p.started_at ?? p.created_at
+              const reponses = p.bonus_answers && Object.keys(p.bonus_answers).length > 0 ? p.bonus_answers : null
+              return (
+                <div key={p.id} className="sa-list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ fontWeight: 700 }}>{ev?.nom ?? p.event_id}</div>
+                    {ev && <StatusChip status={ev.status} />}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+                    {heure ? new Date(heure).toLocaleString('fr-FR') : 'Heure inconnue'}
+                    {p.source_qr ? ` · station ${p.source_qr}` : ''}
+                    {p.score != null ? ` · score ${p.score}` : ''}
+                    {p.completed === false ? ' · non terminée' : ''}
+                  </div>
+                  {reponses && (
+                    <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+                      Réponses bonus : {Object.entries(reponses).map(([k, v]) => `${k}=${String(v)}`).join(', ')}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </>
         )}
 
