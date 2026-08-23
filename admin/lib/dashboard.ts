@@ -197,6 +197,62 @@ export async function fetchJoueurParticipations(joueurId: string): Promise<Parti
   return (data ?? []) as ParticipationRow[]
 }
 
+/* ── QR stations & liens ephemeres (par event, geres cote SA) ──────────────
+ * Deux formats de diffusion demandes par Romain, generes automatiquement
+ * cote SA puis publies (rendus visibles) pour le pro :
+ * 1. QR fixe trackable, declinable en plusieurs stations pour un meme
+ *    commerce (ex. Caisse 1 / Bar 1 / Bar 2)
+ * 2. Lien ephemere a usage unique -- consomme via consommer_lien_ephemere(),
+ *    devient invalide des la premiere utilisation reelle.
+ */
+export interface QrStation {
+  id: string
+  event_id: string
+  nom: string
+  source_qr: string
+  publie: boolean
+  created_at: string
+}
+export async function fetchQrStations(eventId: string): Promise<QrStation[]> {
+  const { data, error } = await supabase.from('qr_stations').select('*').eq('event_id', eventId).order('created_at')
+  if (error) { console.error('[fetchQrStations]', error.message); return [] }
+  return (data ?? []) as QrStation[]
+}
+export async function creerQrStation(eventId: string, nom: string): Promise<boolean> {
+  const source = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const { error } = await supabase.from('qr_stations').insert({ event_id: eventId, nom, source_qr: source || 'station' })
+  if (error) { console.error('[creerQrStation]', error.message); return false }
+  return true
+}
+export async function publierQrStation(id: string, publie: boolean): Promise<boolean> {
+  const { error } = await supabase.from('qr_stations').update({ publie }).eq('id', id)
+  return !error
+}
+
+export interface LienEphemere {
+  id: string
+  event_id: string
+  nom: string | null
+  token: string
+  publie: boolean
+  used_at: string | null
+  created_at: string
+}
+export async function fetchLiensEphemeres(eventId: string): Promise<LienEphemere[]> {
+  const { data, error } = await supabase.from('liens_ephemeres').select('*').eq('event_id', eventId).order('created_at')
+  if (error) { console.error('[fetchLiensEphemeres]', error.message); return [] }
+  return (data ?? []) as LienEphemere[]
+}
+export async function creerLienEphemere(eventId: string, nom: string): Promise<boolean> {
+  const { error } = await supabase.from('liens_ephemeres').insert({ event_id: eventId, nom })
+  if (error) { console.error('[creerLienEphemere]', error.message); return false }
+  return true
+}
+export async function publierLienEphemere(id: string, publie: boolean): Promise<boolean> {
+  const { error } = await supabase.from('liens_ephemeres').update({ publie }).eq('id', id)
+  return !error
+}
+
 export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
   const { data, error } = await supabase
     .from('tirages')
