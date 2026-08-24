@@ -11,9 +11,51 @@ import {
   type GagnantPartenaire, type EtatPartenaire,
 } from '@/lib/nds'
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
+import { Ico } from '@/lib/proicons'
+
+declare global {
+  interface Window {
+    flowinMailGagnant?: {
+      sujet: (t: Record<string, unknown>) => string
+      corps: (t: Record<string, unknown>) => string
+      gmailUrl: (t: Record<string, unknown>) => string
+      lienBillet: (t: Record<string, unknown>) => string
+    }
+  }
+}
+
+/** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici. */
+function useMailGagnant() {
+  useEffect(() => {
+    if (window.flowinMailGagnant || document.getElementById('flowin-mail-gagnant-script')) return
+    const s = document.createElement('script')
+    s.id = 'flowin-mail-gagnant-script'
+    s.src = '/nds/mail-gagnant.js'
+    document.head.appendChild(s)
+  }, [])
+}
+
+/** Meme structure que mailPartenaireGagnantUrl() dans tirage-nds.html -- portee a l'identique. */
+function mailPartenaireUrl(g: { joueur_nom?: string | null; lot_nom?: string | null; ticket_code?: string | null; retrait_token?: string | null }, partenaireNom: string, partenaireEmail: string | null) {
+  const lien = g.retrait_token ? `${window.location.origin}/nds/billets-partenaires.html?t=${encodeURIComponent(g.retrait_token)}` : ''
+  const sujet = `Nouveau gagnant à valider — ${g.lot_nom || 'votre lot'}`
+  const corps = [
+    `Bonjour ${partenaireNom || ''},`, '',
+    'Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 :', '',
+    `   ${g.joueur_nom || '—'}`,
+    `   ${g.lot_nom || ''}`,
+    g.ticket_code ? `   N° de billet : ${g.ticket_code}` : '', '',
+    'Le billet à télécharger (le même que celui reçu par le client), avec le QR à scanner pour valider le retrait :', '',
+    `   ${lien}`, '',
+    'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez. Le lot est déstocké automatiquement.', '',
+    'Merci,', 'Flowin & les Nuits du Sud', 'flowinevent@gmail.com · 06 16 35 49 36',
+  ].join('\n')
+  return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
+}
 
 export default function PartenaireDrawer() {
   const { drawer, closeDrawer, setDrawerTab, partenaires, setPartenaires, events, lots, pros, openDrawer } = useDashboard()
+  useMailGagnant()
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinPartenaire>>({})
   const [saving, setSaving] = useState(false)
@@ -27,7 +69,7 @@ export default function PartenaireDrawer() {
   const p = useMemo(() => partenaires.find(x => x.id === drawer.id), [partenaires, drawer.id])
 
   const pid = drawer.id
-  const ongletGagnants = drawer.tab === 'gagnants' || drawer.tab === 'comm'
+  const ongletGagnants = drawer.tab === 'gagnants' || drawer.tab === 'comm' || drawer.tab === 'lots'
   useEffect(() => {
     if (!pid || !ongletGagnants || chargeG) return
     let vivant = true
@@ -318,11 +360,22 @@ export default function PartenaireDrawer() {
 
         {drawer.tab === 'lots' && (
           <>
-            <SectionHeader>{pLots.length} lot{pLots.length > 1 ? 's' : ''}</SectionHeader>
-            {pLots.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
-            {pLots.map(l => (
+            <SectionHeader>{(gagnants ?? pLots).length} lot{(gagnants ?? pLots).length > 1 ? 's' : ''}</SectionHeader>
+            {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
+            {!chargeG && gagnants && gagnants.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
+            {!chargeG && gagnants && gagnants.map(g => (
+              <div key={g.tirage_id} className="sa-list-item">
+                <Ico k="gift" size={20} style={{ color: 'var(--sa-accent)' }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{g.lot_nom}</div>
+                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.joueur_nom ?? '—'}</div>
+                </div>
+                {g.etat === 'retire' && <span className="sa-chip live">Retiré</span>}
+              </div>
+            ))}
+            {!gagnants && !chargeG && pLots.map(l => (
               <div key={l.id} className="sa-list-item">
-                <span style={{ fontSize: 22 }}>{l.emoji ?? '🎁'}</span>
+                <Ico k="gift" size={20} style={{ color: 'var(--sa-accent)' }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
                   <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
@@ -366,6 +419,28 @@ export default function PartenaireDrawer() {
                 </span>
                 {g.retrait_token && (
                   <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
+                )}
+                {g.etat !== 'a_confirmer' && (
+                  <>
+                    <button
+                      className="sa-btn sm"
+                      onClick={() => {
+                        const url = window.flowinMailGagnant?.gmailUrl({
+                          joueur_nom: g.joueur_nom, email: g.joueur_email, lot_nom: g.lot_nom,
+                          ticket_code: g.ticket_code, retrait_token: g.retrait_token, type: 'lot',
+                        })
+                        if (url) window.open(url, '_blank', 'noopener')
+                      }}
+                    >
+                      ✉️ Gagnant
+                    </button>
+                    <button
+                      className="sa-btn sm"
+                      onClick={() => window.open(mailPartenaireUrl(g, p.nom, p.email ?? null), '_blank', 'noopener')}
+                    >
+                      ✉️ Vous
+                    </button>
+                  </>
                 )}
                 {g.etat === 'a_confirmer' && (
                   <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
