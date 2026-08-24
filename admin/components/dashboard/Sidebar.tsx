@@ -124,6 +124,9 @@ export default function Sidebar() {
       group: 'COMMERCIAL',
       items: [
         { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
+        { id: 'bons-commande-liste', icon: '📋', label: 'Bons de commande & Factures (liste)', href: '/bons-commande-liste.html' },
+        { id: 'facture-nds', icon: '💶', label: 'Générer une facture', href: '/facture-nds.html' },
+        { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html' },
         { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
         { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
       ],

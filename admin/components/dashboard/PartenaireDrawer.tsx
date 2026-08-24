@@ -377,6 +377,13 @@ export default function PartenaireDrawer() {
 
         {drawer.tab === 'comm' && (
           <>
+            <a
+              href={`/nds/kit-digital/index.html#${p.id.replace(/^pt-/, '')}`}
+              target="_blank" rel="noreferrer"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
+            >
+              📦 Dossier complet (A3/A4/A5, vidéo, QR, zip) →
+            </a>
             <SectionHeader>📦 Pack d&apos;envoi</SectionHeader>
             <div className="sa-alert info" style={{ marginBottom: 10, fontSize: 12.5 }}>
               Tout ce que le commerçant doit recevoir, réuni ici.
