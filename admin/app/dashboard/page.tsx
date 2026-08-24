@@ -6,8 +6,12 @@ import { KpiCard, StatusChip, ModuleChip } from '@/components/dashboard/Dashboar
 export default function DashboardPage() {
   const { joueurs, events, partenaires, pros, lots } = useDashboard()
 
-  const liveEvents    = events.filter(e => e.status === 'live')
-  const upcomingEvents = events.filter(e => e.status === 'upcoming')
+  // Les fiches "Démo · X" (pro_id null) servent à tester chaque module de jeu,
+  // pas a representer une activite operationnelle reelle -- exclues de l'accueil
+  // pour ne pas polluer la vue "ce qui se passe reellement en ce moment".
+  const estDemo = (e: { pro_id: string | null; nom: string }) => e.pro_id === null && e.nom.startsWith('Démo')
+  const liveEvents    = events.filter(e => e.status === 'live' && !estDemo(e))
+  const upcomingEvents = events.filter(e => e.status === 'upcoming' && !estDemo(e))
   const totalOptins   = joueurs.filter(j => j.optin).length
   const totalGagnants = joueurs.filter(j => j.gains > 0).length
   const totalLots     = lots.length
