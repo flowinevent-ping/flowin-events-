@@ -33,8 +33,12 @@ export default function Page() {
 
   useEffect(() => {
     fetchSuperEvents().then(l => {
-      setSupers(l)
-      if (l.length) setSe(l[0].id)
+      // Le Master est un gabarit de duplication, jamais joue reellement -- le
+      // montrer ici comme un onglet au meme titre que le vrai festival induit
+      // en erreur (le selectionner afficherait un rapport a zero partout).
+      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      setSupers(reels)
+      if (reels.length) setSe(reels[0].id)
       else setCharge(false)
     })
   }, [])
@@ -57,6 +61,22 @@ export default function Page() {
     return jour === 'tous' ? l : l.filter(x => x.jour === jour)
   }, [r, jour])
 
+  /* KPI d'en-tete : totaux globaux si "Toutes les dates", sinon vraiment
+     recalcules sur la selection -- avant ce correctif le clic changeait
+     bien l'etat mais ces 5 cartes restaient figees sur r.totaux. */
+  const tAffiche = useMemo(() => {
+    if (!r) return { joueurs: 0, parties: 0, clics_stations: 0, clics_partenaires: 0, clics_depuis_reseaux: 0 }
+    if (jour === 'tous') return r.totaux
+    const rJour = (r.redirections_partenaires ?? []).filter(x => x.jour === jour)
+    return {
+      joueurs: lignes.reduce((a, x) => a + x.joueurs, 0),
+      parties: lignes.reduce((a, x) => a + x.parties, 0),
+      clics_stations: lignes.reduce((a, x) => a + x.clics, 0),
+      clics_partenaires: rJour.reduce((a, x) => a + x.clics, 0),
+      clics_depuis_reseaux: rJour.reduce((a, x) => a + x.depuis_reseaux, 0),
+    }
+  }, [r, jour, lignes])
+
   /* Pic de redirections : jour et heure ou les partenaires ont le plus renvoye. */
   const pic = useMemo(() => {
     const l = r?.redirections_partenaires ?? []
@@ -77,7 +97,7 @@ export default function Page() {
   if (charge) return <div className="sa-content"><div className="sa-page"><div className="sa-muted">Chargement du rapport…</div></div></div>
   if (!r) return <div className="sa-content"><div className="sa-page"><EmptyState title="Rapport indisponible" /></div></div>
 
-  const t = r.totaux
+  const t = tAffiche
   /* Un commerce partenaire EST une station de jeu : on ne les separe plus en deux
      tableaux, on les distingue par un marqueur dans la meme liste. */
   const nbCommerces = lignes.filter(l => l.type === 'commerce').length
