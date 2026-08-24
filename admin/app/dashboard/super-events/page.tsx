@@ -8,7 +8,7 @@
  * La duplication ne copie QUE la structure. Les gagnants, joueurs et stock
  * consomme appartiennent a une edition et ne sont jamais repris.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState, StatusChip } from '@/components/dashboard/DashboardUI'
 import {
@@ -74,74 +74,136 @@ export default function Page() {
     if (r.ok) { setNom(''); setDateD(''); setDateF(''); setSource(null); charger() }
   }
 
+  /* Vue demandee par Romain : les super events groupes par statut reel
+     (En cours / A venir / Termine), pas une liste plate ou tout se ressemble. */
+  const parStatut = useMemo(() => {
+    const g: Record<'en_cours' | 'a_venir' | 'passe', SuperEvent[]> = { en_cours: [], a_venir: [], passe: [] }
+    ;(liste ?? []).forEach(se => g[statutReel(se)].push(se))
+    return g
+  }, [liste])
+  const master = (liste ?? []).find(s => s.id === 'se-master-superevent') ?? null
+
+  const accesRapides: { icone: string; label: string; href: string }[] = [
+    { icone: '🏢', label: 'Pros', href: '/dashboard/pros' },
+    { icone: '🤝', label: 'Partenaires', href: '/dashboard/partenaires' },
+    { icone: '👥', label: 'Joueurs', href: '/dashboard/joueurs' },
+    { icone: '🎁', label: 'Lots', href: '/dashboard/nds-lots' },
+    { icone: '🏆', label: 'Gagnants', href: '/dashboard/gagnants' },
+  ]
+
   return (
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="⭐ Super Events" subtitle="Éditions et duplication de structure" />
 
+        {master && (
+          <button
+            className="sa-btn primary"
+            style={{ marginBottom: 18 }}
+            onClick={() => { setSource(master); setNom(''); setRes(null) }}
+          >
+            ✨ Nouveau Super Event depuis le template
+          </button>
+        )}
+
         {liste === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {liste?.length === 0 && <EmptyState title="Aucun super event" />}
 
-        {(liste ?? []).map(se => {
-          const st = statutReel(se)
-          const seEvents = events.filter(e => e.super_event_id === se.id)
-          const colonnes: { cle: EtatStation; titre: string }[] = [
-            { cle: 'live', titre: '🔴 En cours' },
-            { cle: 'upcoming', titre: '📅 À venir' },
-            { cle: 'past', titre: '✅ Passées' },
-            { cle: 'archive', titre: '🗄️ Archivées' },
-          ]
-          return (
-            <div key={se.id} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <b style={{ fontSize: 15 }}>{se.nom}</b>
-                <span className={`sa-chip ${st === 'en_cours' ? 'live' : 'past'}`}>{libStatut[st]}</span>
-                <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>
-                  {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
-                </span>
-                <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
-                  {ouvert === se.id ? 'Masquer' : `📍 ${seEvents.length} station${seEvents.length > 1 ? 's' : ''}`}
-                </button>
-                <button className="sa-btn sm primary" style={{ marginLeft: 'auto' }}
-                  onClick={() => { setSource(se); setNom(''); setRes(null) }}>
-                  🔁 Dupliquer
-                </button>
-              </div>
-              <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11, color: 'var(--sa-muted)', marginTop: 6 }}>{se.id}</div>
-
-              {ouvert === se.id && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sa-border)' }}>
-                  {colonnes.map(col => {
-                    const cardsCol = seEvents.filter(e => etatStation(e) === col.cle)
-                    return (
-                      <div key={col.cle}>
-                        <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 8 }}>{col.titre} ({cardsCol.length})</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {cardsCol.length === 0 && <div style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>—</div>}
-                          {cardsCol.map(ev => {
-                            const pro = pros.find(p => p.id === ev.pro_id)
-                            return (
-                              <div
-                                key={ev.id}
-                                onClick={() => openDrawer('event', ev.id)}
-                                style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer' }}
-                              >
-                                <div style={{ fontWeight: 700, fontSize: 12.5 }}>{ev.nom}</div>
-                                <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>
-                                  {ev.pro_id === 'pro-nds-2026' ? 'Organisateur' : (pro?.nom ?? 'Partenaire')} · {ev.participants ?? 0} 👥
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
+        {liste !== null && liste.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {([['en_cours', '🔴 En cours'], ['a_venir', '📅 À venir'], ['passe', '📁 Terminé']] as const).map(([cle, titreCol]) => (
+              <div key={cle}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                  {titreCol} ({parStatut[cle].length})
                 </div>
-              )}
-            </div>
-          )
-        })}
+                {parStatut[cle].length === 0 && <div style={{ fontSize: 12, color: 'var(--sa-muted)' }}>—</div>}
+                {parStatut[cle].map(se => {
+                  const st = statutReel(se)
+                  const seEvents = events.filter(e => e.super_event_id === se.id)
+                  const colonnes: { cle: EtatStation; titre: string }[] = [
+                    { cle: 'live', titre: '🔴 En cours' },
+                    { cle: 'upcoming', titre: '📅 À venir' },
+                    { cle: 'past', titre: '✅ Passées' },
+                    { cle: 'archive', titre: '🗄️ Archivées' },
+                  ]
+                  return (
+                    <div key={se.id} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <b style={{ fontSize: 14.5 }}>{se.nom}</b>
+                        <span className={`sa-chip ${st === 'en_cours' ? 'live' : 'past'}`} style={{ fontSize: 10 }}>{libStatut[st]}</span>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>
+                        {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
+                      </div>
+                      <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 4 }}>{se.id}</div>
+
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                        {accesRapides.map(a => (
+                          <a key={a.label} href={a.href} className="sa-btn sm" style={{ textDecoration: 'none', fontSize: 11 }}>
+                            {a.icone} {a.label}
+                          </a>
+                        ))}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                        <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
+                          {ouvert === se.id ? 'Masquer' : `📍 ${seEvents.length} station${seEvents.length > 1 ? 's' : ''}`}
+                        </button>
+                        <button className="sa-btn sm primary" style={{ marginLeft: 'auto' }}
+                          onClick={() => { setSource(se); setNom(''); setRes(null) }}>
+                          🔁 Dupliquer
+                        </button>
+                      </div>
+
+                      {ouvert === se.id && (
+                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                            {colonnes.map(col => {
+                              const cardsCol = seEvents.filter(e => etatStation(e) === col.cle)
+                              return (
+                                <div key={col.cle}>
+                                  <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 6 }}>{col.titre} ({cardsCol.length})</div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                    {cardsCol.length === 0 && <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>—</div>}
+                                    {cardsCol.map(ev => {
+                                      const pro = pros.find(p => p.id === ev.pro_id)
+                                      return (
+                                        <div
+                                          key={ev.id}
+                                          onClick={() => openDrawer('event', ev.id)}
+                                          style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer' }}
+                                        >
+                                          <div style={{ fontWeight: 700, fontSize: 12 }}>{ev.nom}</div>
+                                          <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}>
+                                            {ev.pro_id === 'pro-nds-2026' ? 'Organisateur' : (pro?.nom ?? 'Partenaire')} · {ev.participants ?? 0} 👥
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          <a
+                            href="/dashboard/wizard-event"
+                            target="_blank" rel="noreferrer"
+                            style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px', border: '1px dashed var(--sa-border)', borderRadius: 8, fontSize: 11.5, fontWeight: 700, color: 'var(--sa-accent)', textDecoration: 'none' }}
+                          >
+                            + Ajouter une station
+                          </a>
+                          <div style={{ fontSize: 10, color: 'var(--sa-muted)', marginTop: 4, textAlign: 'center' }}>
+                            Créée hors de ce Super Event — à rattacher ensuite via sa fiche → Éditer → Super Event.
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        )}
 
         {source && (
           <>

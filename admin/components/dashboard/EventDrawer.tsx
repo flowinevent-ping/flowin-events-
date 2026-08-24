@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type GagnantRow } from '@/lib/dashboard'
+import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
@@ -51,6 +52,13 @@ export default function EventDrawer() {
 
   const [filtreG, setFiltreG] = useState<'tous' | 'actifs' | 'retires'>('tous')
   const [triG, setTriG] = useState<'recent' | 'nom' | 'valeur'>('recent')
+
+  /* Aucun endroit dans l'UI ne permet de rattacher un event a un super event
+     (le champ n'existait dans aucun formulaire) -- ajoute ici pour fermer ce
+     trou, signale par Romain (creation de station "style kanban" impossible
+     sans ca). */
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
   const gagnantsAffiches = useMemo(() => {
     let base = gagnants
@@ -174,6 +182,7 @@ export default function EventDrawer() {
                 <option value="upcoming">À venir</option>
                 <option value="live">En cours</option>
                 <option value="past">Passé</option>
+                <option value="archived">Archivé</option>
               </select>
             </div>
             <div className="sa-field">
@@ -191,6 +200,13 @@ export default function EventDrawer() {
             <div className="sa-field">
               <label className="sa-label">Couleur</label>
               <input className="sa-input" type="color" value={form.couleur ?? '#7C2D92'} onChange={f('couleur')} />
+            </div>
+            <div className="sa-field">
+              <label className="sa-label">Super Event</label>
+              <select className="sa-input" value={form.super_event_id ?? ''} onChange={e => setForm(p => ({ ...p, super_event_id: e.target.value || null }))}>
+                <option value="">— Aucun (event autonome)</option>
+                {supers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
+              </select>
             </div>
             <div className="sa-field">
               <label className="sa-label">Description</label>
