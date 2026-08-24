@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { upsertEvent, deleteEvent, fetchEventParticipants } from '@/lib/dashboard'
+import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
@@ -12,7 +12,7 @@ function fmt(d?: string | null) {
 }
 
 export default function EventDrawer() {
-  const { drawer, closeDrawer, setDrawerTab, events, setEvents, pros, lots, partenaires } = useDashboard()
+  const { drawer, closeDrawer, setDrawerTab, events, setEvents, pros, lots, partenaires, openDrawer } = useDashboard()
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinEvent>>({})
   const [saving, setSaving] = useState(false)
@@ -40,6 +40,13 @@ export default function EventDrawer() {
 
   const pro = pros.find(p => p.id === ev.pro_id)
   const evLots = lots.filter(l => l.event_id === ev.id)
+  const [gagnants, setGagnants] = useState<GagnantRow[]>([])
+  useEffect(() => {
+    if (!pro?.partenaire_id) { setGagnants([]); return }
+    let on = true
+    fetchGagnants().then(all => { if (on) setGagnants(all.filter(g => g.partenaire_id === pro.partenaire_id)) })
+    return () => { on = false }
+  }, [pro?.partenaire_id])
   const evParts = ((ev.cfg?.partenaires ?? []) as string[]).map((id: string) => partenaires.find(p => p.id === id)).filter((x): x is FlowinPartenaire => !!x)
   const qrUrl = `https://flowin-events.vercel.app/parcours/${ev.module}?ev=${ev.id}`
 
@@ -67,7 +74,7 @@ export default function EventDrawer() {
     { id: 'infos', label: 'Infos' },
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
-    { id: 'lots', label: 'Lots', badge: evLots.length },
+    { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
     { id: 'qr', label: 'QR' },
     { id: 'export', label: 'Export' },
   ]
@@ -157,7 +164,7 @@ export default function EventDrawer() {
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.participants}</div><div className="sa-kpi-lbl">Participants</div></div>
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.joueurs_optin}</div><div className="sa-kpi-lbl">Opt-in</div></div>
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.gagnants}</div><div className="sa-kpi-lbl">Gagnants</div></div>
-            <div className="sa-kpi"><div className="sa-kpi-val">{evLots.length}</div><div className="sa-kpi-lbl">Lots</div></div>
+            <div className="sa-kpi"><div className="sa-kpi-val">{gagnants.length || evLots.length}</div><div className="sa-kpi-lbl">Lots</div></div>
           </div>
         )}
 
@@ -186,18 +193,49 @@ export default function EventDrawer() {
 
         {drawer.tab === 'lots' && (
           <>
-            <SectionHeader>{evLots.length} lot{evLots.length > 1 ? 's' : ''}</SectionHeader>
-            {evLots.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
-            {evLots.map(l => (
-              <div key={l.id} className="sa-list-item">
-                <span style={{ fontSize: 22 }}>{l.emoji ?? '🎁'}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
-                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
+            {pro?.partenaire_id ? (
+              <>
+                <div
+                  onClick={() => openDrawer('partenaire', pro.partenaire_id as string)}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, cursor: 'pointer', fontSize: 12.5, fontWeight: 700 }}
+                >
+                  🤝 Voir la fiche partenaire complète (billets, facture, com) →
                 </div>
-                {l.retire && <span className="sa-chip live">Retiré</span>}
-              </div>
-            ))}
+                <SectionHeader>{gagnants.length} gagnant{gagnants.length > 1 ? 's' : ''}</SectionHeader>
+                {gagnants.length === 0 && <div className="sa-empty-inline">Aucun gagnant</div>}
+                {gagnants.map(g => (
+                  <a
+                    key={g.id}
+                    className="sa-list-item"
+                    href={g.retrait_token ? `https://flowin-events.vercel.app/lot.html?t=${g.retrait_token}` : undefined}
+                    target="_blank" rel="noreferrer"
+                    style={{ textDecoration: 'none', color: 'inherit', cursor: g.retrait_token ? 'pointer' : 'default' }}
+                  >
+                    <span style={{ fontSize: 22 }}>🎁</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700 }}>{g.joueur_nom ?? '—'} — {g.lot_nom ?? '—'}</div>
+                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.lot_valeur != null ? `${g.lot_valeur} €` : ''}{g.retrait_token ? ' · voir le billet' : ''}</div>
+                    </div>
+                    <span className={`sa-chip${g.statut === 'retire' ? ' live' : ''}`}>{g.statut === 'retire' ? 'Retiré' : 'Actif'}</span>
+                  </a>
+                ))}
+              </>
+            ) : (
+              <>
+                <SectionHeader>{evLots.length} lot{evLots.length > 1 ? 's' : ''}</SectionHeader>
+                {evLots.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
+                {evLots.map(l => (
+                  <div key={l.id} className="sa-list-item">
+                    <span style={{ fontSize: 22 }}>{l.emoji ?? '🎁'}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
+                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
+                    </div>
+                    {l.retire && <span className="sa-chip live">Retiré</span>}
+                  </div>
+                ))}
+              </>
+            )}
           </>
         )}
 
