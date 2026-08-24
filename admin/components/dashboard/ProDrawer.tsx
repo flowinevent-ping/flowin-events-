@@ -141,7 +141,7 @@ export default function ProDrawer() {
         {drawer.tab === 'tracking' && (
           <>
             <SectionHeader>📡 Tracking de ses stations</SectionHeader>
-            <TableauStations proId={p.id} titre={`Stations de ${p.nom}`} />
+            <TableauStations proId={p.id} titre={`Stations de ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
           </>
         )}
 

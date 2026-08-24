@@ -321,7 +321,7 @@ export default function PartenaireDrawer() {
           <>
             <SectionHeader>📡 Tracking de sa station</SectionHeader>
             <div style={{ marginBottom: 18 }}>
-              <TableauStations partenaireId={p.id} titre={`Station ${p.nom}`} />
+              <TableauStations partenaireId={p.id} titre={`Station ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
             </div>
           </>
         )}

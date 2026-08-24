@@ -8,8 +8,10 @@
  * compte plusieurs fois. C est ce qui explique l ecart avec le nombre de parties,
  * et l en-tete le rappelle pour qu on ne le reinterprete pas a chaque lecture.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { fetchTracking, SE_DEFAUT, type Tracking, type StationTracking } from '@/lib/nds'
+
+type Champ = keyof StationTracking
 
 export function TableauStations({
   se = SE_DEFAUT, proId, partenaireId, titre = 'Tracking par station', compact = false,
@@ -21,11 +23,33 @@ export function TableauStations({
 }) {
   const [t, setT] = useState<Tracking | null>(null)
   const [charge, setCharge] = useState(true)
+  const [tri, setTri] = useState<{ champ: Champ; sens: 1 | -1 }>({ champ: 'flashs', sens: -1 })
 
   useEffect(() => {
     setCharge(true)
     fetchTracking(se, { proId, partenaireId }).then(setT).finally(() => setCharge(false))
   }, [se, proId, partenaireId])
+
+  const stations = useMemo(() => {
+    if (!t) return []
+    return [...t.stations].sort((a, b) => {
+      const va = a[tri.champ], vb = b[tri.champ]
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * tri.sens
+      return String(va ?? '').localeCompare(String(vb ?? ''), 'fr') * tri.sens
+    })
+  }, [t, tri])
+
+  function trierPar(champ: Champ) {
+    setTri(x => x.champ === champ ? { champ, sens: x.sens === 1 ? -1 : 1 } : { champ, sens: -1 })
+  }
+  function Th({ champ, children, right }: { champ: Champ; children: React.ReactNode; right?: boolean }) {
+    const actif = tri.champ === champ
+    return (
+      <th style={{ textAlign: right ? 'right' : 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trierPar(champ)}>
+        {children} <span style={{ opacity: actif ? 1 : 0.25, fontSize: 10 }}>{actif && tri.sens === 1 ? '▲' : '▼'}</span>
+      </th>
+    )
+  }
 
   if (charge) return <div className="sa-muted" style={{ fontSize: 13 }}>Chargement du tracking…</div>
   if (!t || !t.stations.length) return <div className="sa-muted" style={{ fontSize: 13 }}>Aucun flash enregistré.</div>
@@ -55,17 +79,17 @@ export function TableauStations({
       <div style={{ overflowX: 'auto' }}>
         <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
           <thead><tr>
-            <th>Station</th><th>Type</th>
-            <th style={{ textAlign: 'right' }}>Flashs</th>
-            <th style={{ textAlign: 'right' }}>Physique</th>
-            <th style={{ textAlign: 'right' }}>Digital</th>
-            <th style={{ textAlign: 'right' }}>Parties</th>
-            <th style={{ textAlign: 'right' }}>Joueurs</th>
-            <th style={{ textAlign: 'right' }}>Rejoué</th>
-            <th style={{ textAlign: 'right' }}>Pic</th>
+            <Th champ="station">Station</Th><Th champ="type">Type</Th>
+            <Th champ="flashs" right>Flashs</Th>
+            <Th champ="physique" right>Physique</Th>
+            <Th champ="digital" right>Digital</Th>
+            <Th champ="parties" right>Parties</Th>
+            <Th champ="joueurs" right>Joueurs</Th>
+            <Th champ="rejoue" right>Rejoué</Th>
+            <Th champ="heure_pic" right>Pic</Th>
           </tr></thead>
           <tbody>
-            {t.stations.map(s => (
+            {stations.map(s => (
               <tr key={s.event_id}
                 onClick={onStation ? () => onStation(s) : undefined}
                 style={onStation ? { cursor: 'pointer' } : undefined}

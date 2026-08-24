@@ -7,6 +7,7 @@
  * et classement des meilleurs joueurs croise avec leurs gains.
  */
 import { useEffect, useMemo, useState } from 'react'
+import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CarteChaleur } from '@/components/dashboard/CarteChaleur'
@@ -20,6 +21,7 @@ import {
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
 
 export default function Page() {
+  const { openDrawer } = useDashboard()
   /* Aucun super event code en dur : on charge la liste et on selectionne le plus recent.
      Les memes indicateurs valent pour toute edition presente ou future. */
   const [supers, setSupers] = useState<SuperEvent[]>([])
@@ -154,7 +156,7 @@ export default function Page() {
 
         <SectionHeader>📡 Tracking par station</SectionHeader>
         <div style={{ marginBottom: 22 }}>
-          <TableauStations se={se} />
+          <TableauStations se={se} onStation={s => openDrawer('event', s.event_id)} />
         </div>
 
         {tableau(
