@@ -13,7 +13,7 @@ import {
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
 
 export default function PartenaireDrawer() {
-  const { drawer, closeDrawer, setDrawerTab, partenaires, setPartenaires, events, lots } = useDashboard()
+  const { drawer, closeDrawer, setDrawerTab, partenaires, setPartenaires, events, lots, pros, openDrawer } = useDashboard()
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinPartenaire>>({})
   const [saving, setSaving] = useState(false)
@@ -55,7 +55,11 @@ export default function PartenaireDrawer() {
   )
 
   const pLots  = lots.filter(l => l.partenaire_id === p.id)
-  const pEvents = ((p.events ?? []) as string[]).map((eid: string) => events.find(e => e.id === eid)).filter((x): x is FlowinEvent => !!x)
+  // p.events (array stocke sur la fiche partenaire) n'est pas garanti synchronise --
+  // meme famille de probleme que joueurs.events. events.pro_id -> pros.partenaire_id
+  // est la relation vivante (mise a jour a chaque creation d'event), donc fiable.
+  const proLie = pros.find(pr => pr.partenaire_id === p.id)
+  const pEvents = proLie ? events.filter(e => e.pro_id === proLie.id) : []
 
   function enterEdit() {
     setForm({ ...p })
@@ -414,7 +418,7 @@ export default function PartenaireDrawer() {
             <SectionHeader>{pEvents.length} event{pEvents.length > 1 ? 's' : ''} sponsorisé{pEvents.length > 1 ? 's' : ''}</SectionHeader>
             {pEvents.length === 0 && <div className="sa-empty-inline">Aucun event</div>}
             {pEvents.map((ev: FlowinEvent) => ev && (
-              <div key={ev.id} className="sa-list-item">
+              <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id)} style={{ cursor: 'pointer' }}>
                 <div style={{ flex: 1, fontWeight: 700 }}>{(ev as { nom: string }).nom}</div>
               </div>
             ))}
