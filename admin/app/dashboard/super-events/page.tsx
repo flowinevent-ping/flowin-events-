@@ -29,6 +29,24 @@ function statutReel(se: SuperEvent): 'passe' | 'en_cours' | 'a_venir' {
 }
 const libStatut = { passe: '📁 Terminé', en_cours: '🔴 En cours', a_venir: '📅 À venir' } as const
 
+/* Le kanban filtrait sur e.status brut (colonnes live/upcoming/past) sans jamais
+   prevoir le statut 'archived' -- deja identifie et corrige le 28/07 sur /pro/events
+   (meme logique reprise ici a l identique) : 'archived' fait foi quand il est present,
+   sinon on classe par dates. Consequence avant ce fix : les stations archivees
+   (ex. 3 sur se-nds-2026 : Brigade Verte, Les Caisses, Le Bar) ne matchaient aucune
+   des 3 colonnes et disparaissaient silencieusement du kanban. */
+type EtatStation = 'live' | 'upcoming' | 'past' | 'archive'
+function etatStation(e: { status?: string | null; date_d?: string | null; date_f?: string | null }): EtatStation {
+  if (String(e.status) === 'archived') return 'archive'
+  if (!e.date_d) return 'upcoming'
+  const j = new Date(); j.setHours(0, 0, 0, 0)
+  const d = new Date(e.date_d); d.setHours(0, 0, 0, 0)
+  const f = new Date(e.date_f ?? e.date_d); f.setHours(23, 59, 59, 999)
+  if (f < j) return 'past'
+  if (d > j) return 'upcoming'
+  return 'live'
+}
+
 export default function Page() {
   const { events, pros, openDrawer } = useDashboard()
   const [liste, setListe] = useState<SuperEvent[] | null>(null)
@@ -67,10 +85,11 @@ export default function Page() {
         {(liste ?? []).map(se => {
           const st = statutReel(se)
           const seEvents = events.filter(e => e.super_event_id === se.id)
-          const colonnes: { cle: string; titre: string }[] = [
+          const colonnes: { cle: EtatStation; titre: string }[] = [
             { cle: 'live', titre: '🔴 En cours' },
             { cle: 'upcoming', titre: '📅 À venir' },
             { cle: 'past', titre: '✅ Passées' },
+            { cle: 'archive', titre: '🗄️ Archivées' },
           ]
           return (
             <div key={se.id} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
@@ -91,9 +110,9 @@ export default function Page() {
               <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11, color: 'var(--sa-muted)', marginTop: 6 }}>{se.id}</div>
 
               {ouvert === se.id && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sa-border)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sa-border)' }}>
                   {colonnes.map(col => {
-                    const cardsCol = seEvents.filter(e => e.status === col.cle)
+                    const cardsCol = seEvents.filter(e => etatStation(e) === col.cle)
                     return (
                       <div key={col.cle}>
                         <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 8 }}>{col.titre} ({cardsCol.length})</div>

@@ -154,12 +154,19 @@ export default function Page() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 20 }}>
-          {([['Joueurs', t.joueurs], ['Parties', t.parties], ['Clics stations', t.clics_stations],
-             ['Clics partenaires', t.clics_partenaires], ['Dont réseaux', t.clics_depuis_reseaux]] as [string, number][])
-            .map(([lib, val]) => (
-            <div key={lib} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '15px 12px' }}>
+          {([['Joueurs', t.joueurs, 'section-joueurs'], ['Parties', t.parties, 'section-activite'],
+             ['Clics stations', t.clics_stations, 'section-tracking'],
+             ['Clics partenaires', t.clics_partenaires, 'section-redirections'],
+             ['Dont réseaux', t.clics_depuis_reseaux, 'section-redirections']] as [string, number, string][])
+            .map(([lib, val, cible]) => (
+            <div
+              key={lib}
+              onClick={() => document.getElementById(cible)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '15px 12px', cursor: 'pointer' }}
+              title="Voir le détail"
+            >
               <div style={{ fontSize: 23, fontWeight: 800 }}>{val}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginTop: 4 }}>{lib}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginTop: 4 }}>{lib} ↓</div>
             </div>
           ))}
         </div>
@@ -174,11 +181,13 @@ export default function Page() {
         <SectionHeader>🔢 Chiffres de référence</SectionHeader>
         <BandeauChiffres se={se} />
 
+        <div id="section-tracking" />
         <SectionHeader>📡 Tracking par station</SectionHeader>
         <div style={{ marginBottom: 22 }}>
           <TableauStations se={se} onStation={s => openDrawer('event', s.event_id)} />
         </div>
 
+        <div id="section-activite" />
         {tableau(
           `🎮 Activité par jour (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
           lignes, 'Aucune activité sur cette sélection.')}
@@ -213,6 +222,7 @@ export default function Page() {
           )}
         </div>
 
+        <div id="section-redirections" />
         <SectionHeader>🔗 Redirections vers les partenaires</SectionHeader>
         {pic && (
           <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
@@ -237,6 +247,7 @@ export default function Page() {
           <Camembert titre="Comment ont-ils connu le festival ?" parts={r.decouverte} unite="joueurs" />
         </div>
 
+        <div id="section-joueurs" />
         <SectionHeader>🏅 Meilleurs joueurs</SectionHeader>
         <div style={{ overflowX: 'auto' }}>
           <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
