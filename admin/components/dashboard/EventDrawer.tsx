@@ -163,7 +163,7 @@ export default function EventDrawer() {
           <div className="sa-kpi-grid-2">
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.participants}</div><div className="sa-kpi-lbl">Participants</div></div>
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.joueurs_optin}</div><div className="sa-kpi-lbl">Opt-in</div></div>
-            <div className="sa-kpi"><div className="sa-kpi-val">{ev.gagnants}</div><div className="sa-kpi-lbl">Gagnants</div></div>
+            <div className="sa-kpi"><div className="sa-kpi-val">{gagnants.length || ev.gagnants}</div><div className="sa-kpi-lbl">Gagnants</div></div>
             <div className="sa-kpi"><div className="sa-kpi-val">{gagnants.length || evLots.length}</div><div className="sa-kpi-lbl">Lots</div></div>
           </div>
         )}
@@ -178,7 +178,7 @@ export default function EventDrawer() {
             {loadingPart && <div className="sa-loading">Chargement…</div>}
             {!loadingPart && participants.length === 0 && <div className="sa-empty-inline">Aucun participant</div>}
             {participants.map(p => (
-              <div key={p.id} className="sa-list-item">
+              <div key={p.id} className="sa-list-item" onClick={() => openDrawer('joueur', p.id)} style={{ cursor: 'pointer' }}>
                 <div className="sa-avatar-sm">{((p.prenom?.[0] ?? '') + (p.nom?.[0] ?? '')).toUpperCase() || '?'}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{p.prenom} {p.nom}</div>
@@ -253,6 +253,22 @@ export default function EventDrawer() {
             <button className="sa-btn" style={{ marginTop: 12 }} onClick={() => navigator.clipboard?.writeText(qrUrl)}>
               📋 Copier le lien
             </button>
+            {pro && (
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--sa-border)', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div
+                  onClick={() => openDrawer('pro', pro.id, 'qrliens')}
+                  style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, display: 'flex', justifyContent: 'space-between' }}
+                >
+                  📱 QR multi-stations & liens à usage unique <span>→</span>
+                </div>
+                <a
+                  href="/dashboard/nds-comm" target="_blank" rel="noreferrer"
+                  style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, fontWeight: 700, display: 'flex', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
+                >
+                  🖼️ Logo, kit com et visuels du partenaire <span>→</span>
+                </a>
+              </div>
+            )}
           </div>
         )}
 
@@ -260,11 +276,11 @@ export default function EventDrawer() {
           <div style={{ padding: '0 4px' }}>
             <SectionHeader>Exports disponibles</SectionHeader>
             {[
-              { label: '👥 Joueurs (CSV)', desc: `${ev.participants} participants` },
-              { label: '✅ Opt-in (CSV)', desc: `${ev.joueurs_optin} contacts` },
-              { label: '📊 Rapport PDF', desc: 'Stats complètes' },
+              { label: '👥 Joueurs (CSV)', desc: `${participants.length} participants`, fn: () => telechargerCsv(`joueurs-${ev.id}.csv`, participants, ['prenom', 'nom', 'email', 'ticket_code', 'optin']) },
+              { label: '✅ Opt-in (CSV)', desc: `${participants.filter(j => j.optin).length} contacts`, fn: () => telechargerCsv(`optin-${ev.id}.csv`, participants.filter(j => j.optin), ['prenom', 'nom', 'email']) },
+              { label: '🎁 Gagnants (CSV)', desc: `${gagnants.length} gagnants`, fn: () => telechargerCsv(`gagnants-${ev.id}.csv`, gagnants, ['joueur_nom', 'joueur_email', 'lot_nom', 'lot_valeur', 'statut']) },
             ].map(item => (
-              <div key={item.label} className="sa-list-item" style={{ cursor: 'pointer' }}>
+              <div key={item.label} className="sa-list-item" style={{ cursor: 'pointer' }} onClick={item.fn}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{item.label}</div>
                   <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{item.desc}</div>
@@ -296,4 +312,20 @@ export default function EventDrawer() {
       </div>
     </>
   )
+}
+
+/** Genere un CSV en memoire et declenche son telechargement -- aucun backend requis. */
+function telechargerCsv<T extends object>(nomFichier: string, lignes: T[], colonnes: (keyof T)[]) {
+  const entete = colonnes.join(';')
+  const corps = lignes.map(l => colonnes.map(c => {
+    const v = l[c]
+    const s = v == null ? '' : String(v)
+    return s.includes(';') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s
+  }).join(';')).join('\n')
+  const blob = new Blob(['\uFEFF' + entete + '\n' + corps], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = nomFichier
+  document.body.appendChild(a); a.click(); document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
