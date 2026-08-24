@@ -87,10 +87,10 @@
     <div class="h2">Quelques chiffres</div>
     <div class="lede">Les résultats de votre jeu <b>Flowin</b> pendant le festival.</div>
     <div class="stats">
-      <div class="stat"><b>+7 000</b><span>Flashs QR code</span></div>
-      <div class="stat"><b>+85 %</b><span>De conversion des joueurs</span></div>
-      <div class="stat"><b>+55 %</b><span>Restent en contact</span></div>
-      <div class="stat"><b>78</b><span>Lots distribués</span></div>
+      <div class="stat"><b id="statFlashs">…</b><span>Flashs QR code</span></div>
+      <div class="stat"><b id="statConv">…</b><span>De conversion des joueurs</span></div>
+      <div class="stat"><b id="statRejoue">…</b><span>Rejouent</span></div>
+      <div class="stat"><b id="statLots">…</b><span>Lots distribués</span></div>
     </div>
   </div>
 
@@ -154,7 +154,11 @@
   var H={apikey:ANON,Authorization:"Bearer "+ANON};
   var m=/[?&]p=([^&]*)/.exec(location.search), pid=m?decodeURIComponent(m[1]):"";
 
-  if(!pid){ document.getElementById('pin').textContent='----'; return; }
+  if(!pid){
+    document.getElementById('pin').textContent='----';
+    ['statFlashs','statConv','statRejoue','statLots'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent='—'; });
+    return;
+  }
 
   fetch(SUPA+"/rest/v1/partenaires?id=eq."+encodeURIComponent(pid)+"&select=nom,code_pin",{headers:H})
     .then(function(r){ return r.ok ? r.json() : []; })
@@ -180,6 +184,28 @@
         }catch(e){ btn.textContent='Sélectionnez puis Cmd+C'; }
       };
     });
+
+  /* Stats reelles du partenaire -- remplacent les valeurs en dur (identiques pour
+     tous les partenaires jusqu'ici, dont le fameux "+7 000" signale par Romain).
+     station_tracking et partenaire_gagnants_etat existent deja et sont bornees
+     aux vraies dates du festival (fix du 24/08). */
+  function setStat(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
+  fetch(SUPA+"/rest/v1/rpc/station_tracking",{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H),
+    body:JSON.stringify({p_se:'se-nds-2026',p_pro:null,p_partenaire:pid})})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(t){
+      var tot=(t&&t.totaux)||{};
+      var flashs=tot.flashs||0, parties=tot.parties||0, joueurs=tot.joueurs||0, rejoue=tot.rejoue||0;
+      setStat('statFlashs', flashs);
+      setStat('statConv', flashs>0 ? Math.round(parties/flashs*100)+' %' : '—');
+      setStat('statRejoue', joueurs>0 ? Math.round(rejoue/joueurs*100)+' %' : '—');
+    })
+    .catch(function(){ setStat('statFlashs','—'); setStat('statConv','—'); setStat('statRejoue','—'); });
+  fetch(SUPA+"/rest/v1/rpc/partenaire_gagnants_etat",{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H),
+    body:JSON.stringify({p_partenaire_id:pid,p_se:'se-nds-2026'})})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(e){ setStat('statLots', (e&&e.retires)||0); })
+    .catch(function(){ setStat('statLots','—'); });
 })();
 </script>
 </body>

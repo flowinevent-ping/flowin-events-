@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { upsertPartenaire, deletePartenaire } from '@/lib/dashboard'
+import { upsertPartenaire, deletePartenaire, fetchFacturePartenaire, type FacturePartenaire } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader } from './DashboardUI'
 import { TableauStations } from './TableauStations'
 import {
@@ -65,6 +65,9 @@ export default function PartenaireDrawer() {
   const [gagnants, setGagnants] = useState<GagnantPartenaire[] | null>(null)
   const [etatG, setEtatG] = useState<EtatPartenaire | null>(null)
   const [chargeG, setChargeG] = useState(false)
+  /* Facture reelle (bons_commande + factures) -- jusqu'ici seul un drapeau manuel
+     facture_emise existait, jamais relie a la vraie facture. */
+  const [factureReelle, setFactureReelle] = useState<FacturePartenaire | null>(null)
 
   const p = useMemo(() => partenaires.find(x => x.id === drawer.id), [partenaires, drawer.id])
 
@@ -79,6 +82,13 @@ export default function PartenaireDrawer() {
       .finally(() => { if (vivant) setChargeG(false) })
     return () => { vivant = false }
   }, [pid, ongletGagnants, chargeG])
+
+  useEffect(() => {
+    if (!pid) return
+    let vivant = true
+    fetchFacturePartenaire(pid).then(f => { if (vivant) setFactureReelle(f) })
+    return () => { vivant = false }
+  }, [pid])
 
   async function onConfirmer(tirageId: number) {
     if (!pid) return
@@ -342,19 +352,50 @@ export default function PartenaireDrawer() {
                 ? <span className="sa-chip live">✅ Reçu</span>
                 : <span className="sa-chip">⏳ En attente</span>
             } />
-            <FieldRow label="Facture" value={
-              p.facture_emise
-                ? <span className="sa-chip live">🧾 Émise</span>
-                : <span className="sa-chip">— Non émise</span>
-            } />
-            <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-              {p.statut_paiement === 'valide'
-                ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Paiement en attente</button>
-                : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le paiement</button>}
-              {p.facture_emise
-                ? <button className="sa-btn" onClick={() => setFacture(false)}>↩ Facture non émise</button>
-                : <button className="sa-btn" onClick={() => setFacture(true)}>🧾 Marquer facture émise</button>}
-            </div>
+            {factureReelle ? (
+              <>
+                <FieldRow label="Bon de commande" value={<code className="sa-code">{factureReelle.bonId}</code>} />
+                <FieldRow label="Facture" value={
+                  factureReelle.factureNumero
+                    ? <span className="sa-chip live">🧾 {factureReelle.factureNumero}{factureReelle.dateEmission ? ` · ${new Date(factureReelle.dateEmission).toLocaleDateString('fr-FR')}` : ''}</span>
+                    : <span className="sa-chip">— Pas encore émise (devis {factureReelle.bonStatut ?? 'brouillon'})</span>
+                } />
+                <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                  {p.statut_paiement === 'valide'
+                    ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Paiement en attente</button>
+                    : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le paiement</button>}
+                  <a
+                    className="sa-btn"
+                    href={factureReelle.factureNumero
+                      ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}`
+                      : `/facture-nds.html?devis=${encodeURIComponent(factureReelle.bonId)}`}
+                    target="_blank" rel="noreferrer"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    🧾 {factureReelle.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'} →
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <FieldRow label="Facture" value={
+                  p.facture_emise
+                    ? <span className="sa-chip live">🧾 Émise</span>
+                    : <span className="sa-chip">— Non émise</span>
+                } />
+                <div className="sa-alert info" style={{ marginTop: 10, marginBottom: 10, fontSize: 12 }}>
+                  Aucun bon de commande lié à ce partenaire — statut suivi manuellement.
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                  {p.statut_paiement === 'valide'
+                    ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Paiement en attente</button>
+                    : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le paiement</button>}
+                  {p.facture_emise
+                    ? <button className="sa-btn" onClick={() => setFacture(false)}>↩ Facture non émise</button>
+                    : <button className="sa-btn" onClick={() => setFacture(true)}>🧾 Marquer facture émise</button>}
+                </div>
+              </>
+            )}
           </>
         )}
 

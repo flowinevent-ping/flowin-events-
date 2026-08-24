@@ -129,6 +129,15 @@ export default function EventDrawer() {
       <div className="sa-drawer-body">
         {drawer.tab === 'infos' && !edit && (
           <>
+            {pro?.partenaire_id && (
+              <a
+                href={`/nds/kit-digital/index.html#${(pro.partenaire_id as string).replace(/^pt-/, '')}`}
+                target="_blank" rel="noreferrer"
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', marginBottom: 14, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
+              >
+                📦 Dossier complet du partenaire (A3/A4/A5, vidéo, QR, zip) →
+              </a>
+            )}
             <FieldRow label="Nom" value={ev.nom} />
             <FieldRow label="Module" value={<ModuleChip module={ev.module} />} />
             <FieldRow label="Statut" value={<StatusChip status={ev.status} />} />

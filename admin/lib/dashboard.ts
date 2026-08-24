@@ -407,3 +407,45 @@ export async function fetchProClics(eventIds: string[]): Promise<number> {
   const { count } = await supabase.from('partenaire_clics').select('id', { count: 'exact', head: true }).in('partenaire_id', ids)
   return count ?? 0
 }
+
+/* ── Facturation réelle d'un partenaire ──
+ * bons_commande.partenaire_id ajouté ce soir (colonne absente jusqu'ici -- la
+ * fiche Partenaire n'affichait qu'un drapeau manuel facture_emise, jamais
+ * relié à la vraie facture. 8/8 bons NDS 2026 rapprochés et liés). */
+export interface FacturePartenaire {
+  bonId: string
+  montantTtc: number | null
+  bonStatut: string | null
+  factureNumero: string | null
+  factureStatut: string | null
+  dateEmission: string | null
+}
+export async function fetchFacturePartenaire(partenaireId: string): Promise<FacturePartenaire | null> {
+  const { data: bons, error: e1 } = await supabase
+    .from('bons_commande')
+    .select('id, montant_ttc, statut')
+    .eq('partenaire_id', partenaireId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+  if (e1) { console.error('[fetchFacturePartenaire] bons', e1.message); return null }
+  const bon = bons?.[0]
+  if (!bon) return null
+
+  const { data: factures, error: e2 } = await supabase
+    .from('factures')
+    .select('numero, statut, date_emission')
+    .eq('client->>bon_id', bon.id)
+    .order('numero', { ascending: false })
+    .limit(1)
+  if (e2) { console.error('[fetchFacturePartenaire] factures', e2.message) }
+  const fac = factures?.[0]
+
+  return {
+    bonId: bon.id,
+    montantTtc: bon.montant_ttc,
+    bonStatut: bon.statut,
+    factureNumero: fac?.numero ?? null,
+    factureStatut: fac?.statut ?? null,
+    dateEmission: fac?.date_emission ?? null,
+  }
+}
