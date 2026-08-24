@@ -269,6 +269,7 @@ export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]>
  * de tirage -- 0 lignes > 0 verifie en base -- cause du "0 resultat" constate sur /dashboard/gagnants). */
 export interface GagnantRow {
   id: string
+  joueur_id: string | null
   joueur_nom: string | null
   joueur_email: string | null
   ticket_code: string | null
@@ -285,7 +286,7 @@ export interface GagnantRow {
 export async function fetchGagnants(): Promise<GagnantRow[]> {
   const { data, error } = await supabase
     .from('tirages')
-    .select('id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,statut,notifie_at,retire_at,retrait_token,created_at')
+    .select('id,joueur_id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,statut,notifie_at,retire_at,retrait_token,created_at')
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchGagnants]', error.message); return [] }
   return (data ?? []) as GagnantRow[]

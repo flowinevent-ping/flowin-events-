@@ -10,6 +10,10 @@ function fmt(d?: string | null) {
   if (!d) return '-'
   return new Date(d).toLocaleDateString('fr-FR')
 }
+function fmtDT(d?: string | null) {
+  if (!d) return '-'
+  return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
 
 export default function EventDrawer() {
   const { drawer, closeDrawer, setDrawerTab, events, setEvents, pros, lots, partenaires, openDrawer } = useDashboard()
@@ -20,6 +24,9 @@ export default function EventDrawer() {
   const [loadingPart, setLoadingPart] = useState(false)
 
   const ev = useMemo(() => events.find(x => x.id === drawer.id), [events, drawer.id])
+  // pro ne peut pas etre un hook (pas besoin), mais doit rester AVANT le early return
+  // pour que les hooks qui en dependent (gagnants) restent, eux, inconditionnels.
+  const pro = pros.find(p => p.id === ev?.pro_id)
 
   useEffect(() => {
     if (drawer.tab === 'participants' && ev && participants.length === 0) {
@@ -31,15 +38,9 @@ export default function EventDrawer() {
     }
   }, [drawer.tab, ev])
 
-  if (!ev) return (
-    <div className="sa-drawer-empty">
-      <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
-      <div>Event introuvable</div>
-    </div>
-  )
-
-  const pro = pros.find(p => p.id === ev.pro_id)
-  const evLots = lots.filter(l => l.event_id === ev.id)
+  // Ex-violation des Rules of Hooks : ces 2 hooks (+ tri/filtre ci-dessous) etaient
+  // declares APRES le `if (!ev) return` -> nombre de hooks variable selon les renders,
+  // source potentielle de crash React en changeant d'event dans le drawer. Remontes ici.
   const [gagnants, setGagnants] = useState<GagnantRow[]>([])
   useEffect(() => {
     if (!pro?.partenaire_id) { setGagnants([]); return }
@@ -47,6 +48,36 @@ export default function EventDrawer() {
     fetchGagnants().then(all => { if (on) setGagnants(all.filter(g => g.partenaire_id === pro.partenaire_id)) })
     return () => { on = false }
   }, [pro?.partenaire_id])
+
+  const [filtreG, setFiltreG] = useState<'tous' | 'actifs' | 'retires'>('tous')
+  const [triG, setTriG] = useState<'recent' | 'nom' | 'valeur'>('recent')
+
+  const gagnantsAffiches = useMemo(() => {
+    let base = gagnants
+    if (filtreG === 'actifs') base = base.filter(g => g.statut !== 'retire')
+    if (filtreG === 'retires') base = base.filter(g => g.statut === 'retire')
+    const arr = [...base]
+    if (triG === 'nom') arr.sort((a, b) => (a.joueur_nom ?? '').localeCompare(b.joueur_nom ?? '', 'fr'))
+    else if (triG === 'valeur') arr.sort((a, b) => (Number(b.lot_valeur) || 0) - (Number(a.lot_valeur) || 0))
+    else arr.sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
+    return arr
+  }, [gagnants, filtreG, triG])
+
+  // Un tirage != une personne : un meme joueur peut gagner plusieurs lots (2 cas
+  // confirmes sur Auto-Ecole de l'ARA). D'ou la distinction affichee dans l'entete.
+  const distinctGagnants = useMemo(
+    () => new Set(gagnants.map(g => g.joueur_id ?? g.joueur_email ?? g.joueur_nom)).size,
+    [gagnants]
+  )
+
+  if (!ev) return (
+    <div className="sa-drawer-empty">
+      <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
+      <div>Event introuvable</div>
+    </div>
+  )
+
+  const evLots = lots.filter(l => l.event_id === ev.id)
   const evParts = ((ev.cfg?.partenaires ?? []) as string[]).map((id: string) => partenaires.find(p => p.id === id)).filter((x): x is FlowinPartenaire => !!x)
   const qrUrl = `https://flowin-events.vercel.app/parcours/${ev.module}?ev=${ev.id}`
 
@@ -201,23 +232,67 @@ export default function EventDrawer() {
                 >
                   🤝 Voir la fiche partenaire complète (billets, facture, com) →
                 </div>
-                <SectionHeader>{gagnants.length} gagnant{gagnants.length > 1 ? 's' : ''}</SectionHeader>
+                <SectionHeader>{gagnants.length} tirage{gagnants.length > 1 ? 's' : ''}</SectionHeader>
+                {gagnants.length > 0 && (
+                  <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginTop: -6, marginBottom: 10 }}>
+                    {distinctGagnants} gagnant{distinctGagnants > 1 ? 's' : ''} distinct{distinctGagnants > 1 ? 's' : ''}
+                    {distinctGagnants < gagnants.length ? ' — certains ont gagné plusieurs lots' : ''}
+                  </div>
+                )}
+                {gagnants.length > 0 && (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
+                    {([['tous', 'Tous'], ['actifs', 'Libres'], ['retires', 'Retirés']] as const).map(([k, l]) => (
+                      <button
+                        key={k}
+                        className={`sa-btn sm${filtreG === k ? ' primary' : ''}`}
+                        onClick={() => setFiltreG(k)}
+                      >
+                        {l}
+                      </button>
+                    ))}
+                    <select
+                      className="sa-input"
+                      style={{ marginLeft: 'auto', fontSize: 11.5, padding: '4px 8px', width: 'auto' }}
+                      value={triG}
+                      onChange={e => setTriG(e.target.value as 'recent' | 'nom' | 'valeur')}
+                    >
+                      <option value="recent">Plus récent</option>
+                      <option value="nom">Nom A→Z</option>
+                      <option value="valeur">Valeur</option>
+                    </select>
+                  </div>
+                )}
                 {gagnants.length === 0 && <div className="sa-empty-inline">Aucun gagnant</div>}
-                {gagnants.map(g => (
-                  <a
+                {gagnants.length > 0 && gagnantsAffiches.length === 0 && <div className="sa-empty-inline">Aucun résultat pour ce filtre</div>}
+                {gagnantsAffiches.map(g => (
+                  <div
                     key={g.id}
                     className="sa-list-item"
-                    href={g.retrait_token ? `https://flowin-events.vercel.app/lot.html?t=${g.retrait_token}` : undefined}
-                    target="_blank" rel="noreferrer"
-                    style={{ textDecoration: 'none', color: 'inherit', cursor: g.retrait_token ? 'pointer' : 'default' }}
+                    onClick={() => g.joueur_id && openDrawer('joueur', g.joueur_id)}
+                    style={{ cursor: g.joueur_id ? 'pointer' : 'default' }}
                   >
                     <span style={{ fontSize: 22 }}>🎁</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700 }}>{g.joueur_nom ?? '—'} — {g.lot_nom ?? '—'}</div>
-                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.lot_valeur != null ? `${g.lot_valeur} €` : ''}{g.retrait_token ? ' · voir le billet' : ''}</div>
+                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+                        {g.lot_valeur != null ? `${g.lot_valeur} €` : ''}
+                        {g.retrait_token && (
+                          <> · <a
+                            href={`https://flowin-events.vercel.app/lot.html?t=${g.retrait_token}`}
+                            target="_blank" rel="noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            style={{ color: 'inherit' }}
+                          >voir le billet</a></>
+                        )}
+                      </div>
                     </div>
-                    <span className={`sa-chip${g.statut === 'retire' ? ' live' : ''}`}>{g.statut === 'retire' ? 'Retiré' : 'Actif'}</span>
-                  </a>
+                    <div style={{ textAlign: 'right' }}>
+                      <span className={`sa-chip${g.statut === 'retire' ? ' live' : ''}`}>{g.statut === 'retire' ? 'Retiré' : 'Libre'}</span>
+                      {g.statut === 'retire' && g.retire_at && (
+                        <div style={{ fontSize: 9.5, color: 'var(--sa-muted)', marginTop: 3 }}>{fmtDT(g.retire_at)}</div>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </>
             ) : (
