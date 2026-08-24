@@ -111,7 +111,7 @@ export function packEnvoi(partenaireId: string): ElementPack[] {
     { icone: '📊', libelle: 'Visuel bilan',                                url: `${o}/nds/bilan/bilan-nds-2026.png` },
     { icone: '📄', libelle: 'Affiche A4 boutique',                         url: `${o}/nds/visuels/nds_a4_${slug}.png` },
     { icone: '🎫', libelle: 'Planche de tickets (PDF)',                    url: `${o}/nds/visuels/tickets/nds_tickets_${slug}.pdf` },
-    { icone: '🎨', libelle: 'Kit digital complet',                         url: `${o}/nds/kit-digital/${slug}/` },
+    { icone: '🎨', libelle: 'Kit digital complet',                         url: `${o}/nds/kit-digital/index.html#${slug}` },
     { icone: '🔗', libelle: 'Page de validation en caisse',                url: `${o}/lot.html` },
   ]
 }
