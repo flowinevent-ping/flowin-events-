@@ -9,7 +9,8 @@
  * consomme appartiennent a une edition et ne sont jamais repris.
  */
 import { useEffect, useState } from 'react'
-import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
+import { useDashboard } from '@/contexts/DashboardContext'
+import { PageHeader, SectionHeader, EmptyState, StatusChip } from '@/components/dashboard/DashboardUI'
 import {
   fetchSuperEvents, dupliquerSuperEvent, slugSuperEvent,
   type SuperEvent, type ResultatDuplication,
@@ -29,7 +30,9 @@ function statutReel(se: SuperEvent): 'passe' | 'en_cours' | 'a_venir' {
 const libStatut = { passe: '📁 Terminé', en_cours: '🔴 En cours', a_venir: '📅 À venir' } as const
 
 export default function Page() {
+  const { events, pros, openDrawer } = useDashboard()
   const [liste, setListe] = useState<SuperEvent[] | null>(null)
+  const [ouvert, setOuvert] = useState<string | null>(null)
   const [source, setSource] = useState<SuperEvent | null>(null)
   const [nom, setNom] = useState('')
   const [dateD, setDateD] = useState('')
@@ -63,6 +66,12 @@ export default function Page() {
 
         {(liste ?? []).map(se => {
           const st = statutReel(se)
+          const seEvents = events.filter(e => e.super_event_id === se.id)
+          const colonnes: { cle: string; titre: string }[] = [
+            { cle: 'live', titre: '🔴 En cours' },
+            { cle: 'upcoming', titre: '📅 À venir' },
+            { cle: 'past', titre: '✅ Passées' },
+          ]
           return (
             <div key={se.id} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -71,12 +80,46 @@ export default function Page() {
                 <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>
                   {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
                 </span>
+                <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
+                  {ouvert === se.id ? 'Masquer' : `📍 ${seEvents.length} station${seEvents.length > 1 ? 's' : ''}`}
+                </button>
                 <button className="sa-btn sm primary" style={{ marginLeft: 'auto' }}
                   onClick={() => { setSource(se); setNom(''); setRes(null) }}>
                   🔁 Dupliquer
                 </button>
               </div>
               <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11, color: 'var(--sa-muted)', marginTop: 6 }}>{se.id}</div>
+
+              {ouvert === se.id && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--sa-border)' }}>
+                  {colonnes.map(col => {
+                    const cardsCol = seEvents.filter(e => e.status === col.cle)
+                    return (
+                      <div key={col.cle}>
+                        <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 8 }}>{col.titre} ({cardsCol.length})</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {cardsCol.length === 0 && <div style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>—</div>}
+                          {cardsCol.map(ev => {
+                            const pro = pros.find(p => p.id === ev.pro_id)
+                            return (
+                              <div
+                                key={ev.id}
+                                onClick={() => openDrawer('event', ev.id)}
+                                style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer' }}
+                              >
+                                <div style={{ fontWeight: 700, fontSize: 12.5 }}>{ev.nom}</div>
+                                <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>
+                                  {ev.pro_id === 'pro-nds-2026' ? 'Organisateur' : (pro?.nom ?? 'Partenaire')} · {ev.participants ?? 0} 👥
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )
         })}
