@@ -14,8 +14,16 @@ commande...) mais cliquer dessus ne fait rien.
 **Cause récurrente** : le composant importe `openDrawer` (ou équivalent) et parfois
 même l'utilise pour un bouton d'édition, mais jamais sur la ligne elle-même.
 
+**Variante trouvée le 24/08** : un bouton peut avoir `cursor: pointer` en style
+sans le moindre `onClick` — visuellement cliquable, fonctionnellement mort.
+Repéré sur les 3 boutons "Export" d'EventDrawer (aucun ne téléchargeait quoi
+que ce soit). `grep -c onClick` sur un fichier ne suffit pas si le bouton
+suspect n'a simplement pas de handler du tout — vérifier chaque bouton à
+`cursor: 'pointer'` individuellement.
+
 **Déjà trouvé et corrigé sur** : nds-resultat, nds-bon-commande, jeux (templates),
-EventDrawer → onglet Events du ProDrawer et du PartenaireDrawer.
+EventDrawer → onglet Events du ProDrawer et du PartenaireDrawer, EventDrawer →
+onglet Participants, EventDrawer → onglet Export (3 boutons décoratifs).
 
 **Comment vérifier** : `grep -rl "<table" admin/app/dashboard --include=page.tsx`
 puis pour chaque fichier, `grep -c onClick` — si 0, c'est suspect.
