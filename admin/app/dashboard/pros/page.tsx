@@ -17,16 +17,35 @@ export default function Page() {
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'en_attente'>('tous')
   const [enCours, setEnCours] = useState<string | null>(null)
+  const [tri, setTri] = useState<{ champ: keyof FlowinPro; sens: 1 | -1 }>({ champ: 'nom', sens: 1 })
+
+  function trierPar(champ: keyof FlowinPro) {
+    setTri(t => t.champ === champ ? { champ, sens: t.sens === 1 ? -1 : 1 } : { champ, sens: 1 })
+  }
+  function Th({ champ, children }: { champ: keyof FlowinPro; children: React.ReactNode }) {
+    const actif = tri.champ === champ
+    return (
+      <th onClick={() => trierPar(champ)} style={{ cursor: 'pointer', userSelect: 'none' }}>
+        {children} <span style={{ opacity: actif ? 1 : 0.25, fontSize: 10 }}>{actif && tri.sens === -1 ? '▲' : '▼'}</span>
+      </th>
+    )
+  }
 
   const nbEnAttente = pros.filter((p: FlowinPro) => p.statut === 'en_attente').length
 
   const base = filtre === 'en_attente' ? pros.filter((p: FlowinPro) => p.statut === 'en_attente') : pros
 
   const list = useMemo(() => {
-    if (!search.trim()) return base
-    const q = search.toLowerCase()
-    return base.filter((item: FlowinPro) => ((item as any).nom ?? "").toLowerCase().includes(q) || ((item as any).ville ?? "").toLowerCase().includes(q) || ((item as any).secteur ?? "").toLowerCase().includes(q))
-  }, [base, search])
+    let l = base
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      l = l.filter((item: FlowinPro) => ((item as any).nom ?? "").toLowerCase().includes(q) || ((item as any).ville ?? "").toLowerCase().includes(q) || ((item as any).secteur ?? "").toLowerCase().includes(q))
+    }
+    return [...l].sort((a: any, b: any) => {
+      const va = String(a[tri.champ] ?? ''); const vb = String(b[tri.champ] ?? '')
+      return va.localeCompare(vb, 'fr') * tri.sens
+    })
+  }, [base, search, tri])
 
   async function traiter(id: string, statut: 'valide' | 'refuse') {
     setEnCours(id)
@@ -53,7 +72,7 @@ export default function Page() {
           <table className="sa-tbl" style={{width:'100%'}}>
             <thead><tr>
               <th className="col-check"><input type="checkbox" /></th>
-              <th>Pro</th><th>Ville</th><th>Secteur</th><th>Contact</th><th>Email</th><th>Statut</th>
+              <Th champ="nom">Pro</Th><Th champ="ville">Ville</Th><Th champ="secteur">Secteur</Th><Th champ="contact">Contact</Th><Th champ="email">Email</Th><Th champ="statut">Statut</Th>
               <th className="col-actions"></th>
             </tr></thead>
             <tbody>
