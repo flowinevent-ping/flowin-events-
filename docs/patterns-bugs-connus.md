@@ -72,7 +72,20 @@ jeu réel, pas juste de l'affichage)** : `admin/lib/joueurs.ts` → `checkDuplic
 existe, marche, mais n'apparaît nulle part dans la sidebar.
 
 **Déjà trouvé et corrigé** : tirage-nds.html, plaquette-nds.html,
-pitch-nds.html, nds-partenaire-presentation.html, flowin-partenaire-presentation.html.
+pitch-nds.html, nds-partenaire-presentation.html, flowin-partenaire-presentation.html,
+**et le plus important, trouvé le 24/08 après insistance justifiée de Romain** :
+`nds/kit-digital/index.html` (page complète "Dossiers partenaires" — 7 vrais
+partenaires, aperçu, zip, A3/A4/A5/PPTX/SVG/vidéo/QR par partenaire),
+`facture-nds.html` (vrai générateur de facture, en-tête OPConsult, lié au
+devis), `bons-commande-liste.html`. Ces trois-là étaient des systèmes complets
+et soignés, pas des brouillons — leur absence du menu pendant des semaines a
+fait perdre à Romain un temps considérable à en redemander l'existence.
+
+**Leçon** : quand Romain insiste ("on a fabriqué ça, je ne comprends pas
+pourquoi tu dis que ça n'existe pas"), le chercher LARGEMENT (tout le repo,
+pas seulement `admin/public/*.html` à la racine — `kit-digital/` était un
+sous-dossier) avant de répondre "je ne trouve pas" ou pire, avant de proposer
+de le reconstruire.
 
 **Comment vérifier** : lister `admin/public/*.html` et `docs/**/*.html`, comparer
 aux `href` présents dans `admin/components/dashboard/Sidebar.tsx`.
