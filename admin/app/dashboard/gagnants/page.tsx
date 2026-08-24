@@ -7,6 +7,7 @@
  * meme que lisent lot.html, valider_lot et billets-partenaires.html.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 
@@ -14,6 +15,7 @@ const euros = (n: number | null) => (n == null ? '—' : `${n} €`)
 const dateFr = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 
 export default function Page() {
+  const { openDrawer } = useDashboard()
   const [list, setList] = useState<GagnantRow[] | null>(null)
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'actifs' | 'retires'>('tous')
@@ -66,7 +68,7 @@ export default function Page() {
                 <tr><td colSpan={6} style={{ padding: 0 }}><EmptyState title="Aucun résultat" /></td></tr>
               )}
               {filtered.map(t => (
-                <tr key={t.id}>
+                <tr key={t.id} onClick={() => t.joueur_id && openDrawer('joueur', t.joueur_id)} style={{ cursor: t.joueur_id ? 'pointer' : 'default' }}>
                   <td>
                     <div style={{ fontWeight: 700 }}>{t.joueur_nom ?? '—'}</div>
                     <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{t.joueur_email ?? '—'}</div>
