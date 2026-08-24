@@ -15,7 +15,9 @@ export default function Page() {
 
   const base = useMemo(() => {
     if (!cacherDemo) return events
-    return events.filter((e: FlowinEvent & Record<string, unknown>) => !(e.pro_id === null && String(e.nom ?? '').startsWith('Démo')))
+    return events.filter((e: FlowinEvent & Record<string, unknown>) =>
+      !(e.pro_id === null && String(e.nom ?? '').startsWith('Démo')) &&
+      e.super_event_id !== 'se-master-superevent')
   }, [events, cacherDemo])
 
   const list = useMemo(() => {
@@ -41,7 +43,7 @@ export default function Page() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
           <SearchBar value={search} onChange={setSearch} placeholder="Rechercher…" />
           <button className={`sa-btn sm${cacherDemo ? ' primary' : ''}`} onClick={() => setCacherDemo(v => !v)}>
-            {cacherDemo ? '✓ Démos masquées' : 'Afficher les démos'}
+            {cacherDemo ? '✓ Démos & template masqués' : 'Afficher démos & template'}
           </button>
         </div>
 
