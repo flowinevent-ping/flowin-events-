@@ -12,13 +12,36 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import {
   fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant,
-  lienBillet, SE_DEFAUT,
+  lienBillet, mailPartenaireUrl, SE_DEFAUT,
   type GagnantPartenaire, type EtatPartenaire,
 } from '@/lib/nds'
+
+declare global {
+  interface Window {
+    flowinMailGagnant?: {
+      sujet: (t: Record<string, unknown>) => string
+      corps: (t: Record<string, unknown>) => string
+      gmailUrl: (t: Record<string, unknown>) => string
+      lienBillet: (t: Record<string, unknown>) => string
+    }
+  }
+}
+/** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici
+ * (deja utilise depuis PartenaireDrawer, meme pattern repris a l'identique). */
+function useMailGagnant() {
+  useEffect(() => {
+    if (window.flowinMailGagnant || document.getElementById('flowin-mail-gagnant-script')) return
+    const s = document.createElement('script')
+    s.id = 'flowin-mail-gagnant-script'
+    s.src = '/nds/mail-gagnant.js'
+    document.head.appendChild(s)
+  }, [])
+}
 
 interface Ligne {
   id: string
   nom: string
+  email: string | null
   gagnants: GagnantPartenaire[]
   etat: EtatPartenaire
 }
@@ -26,6 +49,7 @@ interface Ligne {
 export default function Page() {
   const { partenaires, openDrawer } = useDashboard()
   const [lignes, setLignes] = useState<Ligne[] | null>(null)
+  useMailGagnant()
 
   /* Seuls les partenaires dotes d au moins un lot nous interessent ici. */
   const dotes = partenaires.filter(p => Array.isArray(p.lots) && p.lots.length > 0)
@@ -37,7 +61,7 @@ export default function Page() {
           fetchGagnantsPartenaire(p.id, SE_DEFAUT),
           fetchEtatPartenaire(p.id, SE_DEFAUT),
         ])
-        return { id: p.id, nom: p.nom, gagnants, etat } as Ligne
+        return { id: p.id, nom: p.nom, email: p.email ?? null, gagnants, etat } as Ligne
       })
     )
     setLignes(res.filter(l => l.etat.tires > 0 || l.gagnants.length > 0))
@@ -111,6 +135,28 @@ export default function Page() {
                 </span>
                 {g.retrait_token && (
                   <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
+                )}
+                {g.etat !== 'a_confirmer' && (
+                  <>
+                    <button
+                      className="sa-btn sm"
+                      onClick={() => {
+                        const url = window.flowinMailGagnant?.gmailUrl({
+                          joueur_nom: g.joueur_nom, email: g.joueur_email, lot_nom: g.lot_nom,
+                          ticket_code: g.ticket_code, retrait_token: g.retrait_token, type: 'lot',
+                        })
+                        if (url) window.open(url, '_blank', 'noopener')
+                      }}
+                    >
+                      ✉️ Gagnant
+                    </button>
+                    <button
+                      className="sa-btn sm"
+                      onClick={() => window.open(mailPartenaireUrl(g, l.nom, l.email), '_blank', 'noopener')}
+                    >
+                      ✉️ Partenaire
+                    </button>
+                  </>
                 )}
                 {g.etat === 'a_confirmer' && (
                   <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>

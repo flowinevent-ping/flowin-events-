@@ -184,7 +184,7 @@ export default function Page() {
         <div id="section-tracking" />
         <SectionHeader>📡 Tracking par station</SectionHeader>
         <div style={{ marginBottom: 22 }}>
-          <TableauStations se={se} onStation={s => openDrawer('event', s.event_id)} />
+          <TableauStations se={se} jour={jour === 'tous' ? undefined : jour} onStation={s => openDrawer('event', s.event_id)} />
         </div>
 
         <div id="section-activite" />

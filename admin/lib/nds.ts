@@ -94,6 +94,28 @@ export function lienBillet(token: string, print = false): string {
 export function lienPlanchePartenaire(partenaireId: string): string {
   return `${origine()}/nds/billets-partenaires.html?p=${encodeURIComponent(partenaireId)}`
 }
+/** Email au PARTENAIRE (pas au gagnant) pour l'informer d'un nouveau gagnant a valider.
+ * Source unique -- etait dupliquee dans PartenaireDrawer.tsx, extraite ici pour etre
+ * reutilisee depuis nds-lots aussi (meme principe que mail-gagnant.js : ne jamais recopier). */
+export function mailPartenaireUrl(
+  g: { joueur_nom?: string | null; lot_nom?: string | null; ticket_code?: string | null; retrait_token?: string | null },
+  partenaireNom: string, partenaireEmail: string | null
+): string {
+  const lien = g.retrait_token ? `${origine()}/nds/billets-partenaires.html?t=${encodeURIComponent(g.retrait_token)}` : ''
+  const sujet = `Nouveau gagnant à valider — ${g.lot_nom || 'votre lot'}`
+  const corps = [
+    `Bonjour ${partenaireNom || ''},`, '',
+    'Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 :', '',
+    `   ${g.joueur_nom || '—'}`,
+    `   ${g.lot_nom || ''}`,
+    g.ticket_code ? `   N° de billet : ${g.ticket_code}` : '', '',
+    'Le billet à télécharger (le même que celui reçu par le client), avec le QR à scanner pour valider le retrait :', '',
+    `   ${lien}`, '',
+    'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez. Le lot est déstocké automatiquement.', '',
+    'Merci,', 'Flowin & les Nuits du Sud', 'flowinevent@gmail.com · 06 16 35 49 36',
+  ].join('\n')
+  return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
+}
 /** Page bilan + procedure + PIN, destinee au commercant. */
 export function lienBilanPartenaire(partenaireId: string): string {
   return `${origine()}/nds/bilan/email-partenaire.html?p=${encodeURIComponent(partenaireId)}`
@@ -402,12 +424,13 @@ export interface Tracking {
  */
 export async function fetchTracking(
   se: string = SE_DEFAUT,
-  opts: { proId?: string; partenaireId?: string } = {}
+  opts: { proId?: string; partenaireId?: string; jour?: string } = {}
 ): Promise<Tracking | null> {
   const { data, error } = await supabase.rpc('station_tracking', {
     p_se: se,
     p_pro: opts.proId ?? null,
     p_partenaire: opts.partenaireId ?? null,
+    p_jour: opts.jour ?? null,
   })
   if (error) { console.error('[fetchTracking]', error.message); return null }
   return (data as Tracking) ?? null

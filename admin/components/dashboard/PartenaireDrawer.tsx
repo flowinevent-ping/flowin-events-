@@ -7,7 +7,7 @@ import { DrawerTabs, FieldRow, SectionHeader } from './DashboardUI'
 import { TableauStations } from './TableauStations'
 import {
   fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant,
-  lienBillet, packEnvoi,
+  lienBillet, packEnvoi, mailPartenaireUrl,
   type GagnantPartenaire, type EtatPartenaire,
 } from '@/lib/nds'
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
@@ -33,24 +33,6 @@ function useMailGagnant() {
     s.src = '/nds/mail-gagnant.js'
     document.head.appendChild(s)
   }, [])
-}
-
-/** Meme structure que mailPartenaireGagnantUrl() dans tirage-nds.html -- portee a l'identique. */
-function mailPartenaireUrl(g: { joueur_nom?: string | null; lot_nom?: string | null; ticket_code?: string | null; retrait_token?: string | null }, partenaireNom: string, partenaireEmail: string | null) {
-  const lien = g.retrait_token ? `${window.location.origin}/nds/billets-partenaires.html?t=${encodeURIComponent(g.retrait_token)}` : ''
-  const sujet = `Nouveau gagnant à valider — ${g.lot_nom || 'votre lot'}`
-  const corps = [
-    `Bonjour ${partenaireNom || ''},`, '',
-    'Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 :', '',
-    `   ${g.joueur_nom || '—'}`,
-    `   ${g.lot_nom || ''}`,
-    g.ticket_code ? `   N° de billet : ${g.ticket_code}` : '', '',
-    'Le billet à télécharger (le même que celui reçu par le client), avec le QR à scanner pour valider le retrait :', '',
-    `   ${lien}`, '',
-    'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez. Le lot est déstocké automatiquement.', '',
-    'Merci,', 'Flowin & les Nuits du Sud', 'flowinevent@gmail.com · 06 16 35 49 36',
-  ].join('\n')
-  return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
 }
 
 export default function PartenaireDrawer() {

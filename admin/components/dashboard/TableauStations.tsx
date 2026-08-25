@@ -14,10 +14,10 @@ import { fetchTracking, SE_DEFAUT, type Tracking, type StationTracking } from '@
 type Champ = keyof StationTracking
 
 export function TableauStations({
-  se = SE_DEFAUT, proId, partenaireId, titre = 'Tracking par station', compact = false,
+  se = SE_DEFAUT, proId, partenaireId, jour, titre = 'Tracking par station', compact = false,
   onStation,
 }: {
-  se?: string; proId?: string; partenaireId?: string
+  se?: string; proId?: string; partenaireId?: string; jour?: string
   titre?: string; compact?: boolean
   onStation?: (s: StationTracking) => void
 }) {
@@ -27,8 +27,8 @@ export function TableauStations({
 
   useEffect(() => {
     setCharge(true)
-    fetchTracking(se, { proId, partenaireId }).then(setT).finally(() => setCharge(false))
-  }, [se, proId, partenaireId])
+    fetchTracking(se, { proId, partenaireId, jour }).then(setT).finally(() => setCharge(false))
+  }, [se, proId, partenaireId, jour])
 
   const stations = useMemo(() => {
     if (!t) return []

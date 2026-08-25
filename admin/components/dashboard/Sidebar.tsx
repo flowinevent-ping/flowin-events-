@@ -150,6 +150,7 @@ export default function Sidebar() {
         { id: 'nds-carte', icon: '🗺️', label: 'Carte NDS', href: '/dashboard/nds-carte' },
         { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
         { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
+        { id: 'nds-visuels', icon: '🖼️', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html' },
       ],
     },
     {
