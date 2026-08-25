@@ -78,6 +78,16 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parPro])
 
+  /* Memes acces rapides que sur /dashboard/super-events, meme carte -- Romain
+     demande explicitement la meme presentation. "Pros" retire ici (on est
+     deja sur une vue par pro, redondant). */
+  const accesRapides: { icone: string; label: string; href: string }[] = [
+    { icone: '🤝', label: 'Partenaires', href: '/dashboard/partenaires' },
+    { icone: '👥', label: 'Joueurs', href: '/dashboard/joueurs' },
+    { icone: '🎁', label: 'Lots', href: '/dashboard/nds-lots' },
+    { icone: '🏆', label: 'Gagnants', href: '/dashboard/gagnants' },
+  ]
+
   return (
     <div className="sa-content">
       <div className="sa-page">
@@ -103,12 +113,26 @@ export default function Page() {
                     <div key={pid} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <b style={{ fontSize: 14.5 }}>{pro?.nom ?? pid}</b>
-                        {enCours > 0 && <span className="sa-chip live" style={{ fontSize: 10 }}>🔴 {enCours}</span>}
+                        {enCours > 0 && <span className="sa-chip live" style={{ fontSize: 10 }}>🔴 {enCours} en cours</span>}
                       </div>
-                      <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>{animations.length} animation{animations.length > 1 ? 's' : ''}</div>
-                      <button className="sa-btn sm" style={{ marginTop: 10 }} onClick={() => setOuvert(ouvert === pid ? null : pid)}>
-                        {ouvert === pid ? 'Masquer' : '📍 Voir le détail'}
-                      </button>
+                      <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>
+                        {animations.length} animation{animations.length > 1 ? 's' : ''}
+                      </div>
+                      <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 4 }}>{pid}</div>
+
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                        {accesRapides.map(a => (
+                          <a key={a.label} href={a.href} className="sa-btn sm" style={{ textDecoration: 'none', fontSize: 11 }}>
+                            {a.icone} {a.label}
+                          </a>
+                        ))}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                        <button className="sa-btn sm" onClick={() => setOuvert(ouvert === pid ? null : pid)}>
+                          {ouvert === pid ? 'Masquer' : `📍 ${animations.length} animation${animations.length > 1 ? 's' : ''}`}
+                        </button>
+                      </div>
 
                       {ouvert === pid && (
                         <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
