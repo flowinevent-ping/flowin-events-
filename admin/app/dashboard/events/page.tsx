@@ -64,6 +64,23 @@ export default function Page() {
       .sort((a, b) => b.animations.length - a.animations.length)
   }, [list, pros])
 
+  /* Statut global d'un pro (pour le classer en colonne, meme principe que
+     statutReel() sur /dashboard/super-events) : en_cours si au moins une
+     animation live, sinon a_venir si au moins une upcoming, sinon passe. */
+  type ColPro = 'en_cours' | 'a_venir' | 'passe'
+  const statutPro = (animations: (FlowinEvent & Record<string, unknown>)[]): ColPro => {
+    if (animations.some(a => a.status === 'live')) return 'en_cours'
+    if (animations.some(a => a.status === 'upcoming')) return 'a_venir'
+    return 'passe'
+  }
+
+  const parStatutCol = useMemo(() => {
+    const g: Record<ColPro, typeof parPro> = { en_cours: [], a_venir: [], passe: [] }
+    for (const item of parPro) g[statutPro(item.animations)].push(item)
+    return g
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parPro])
+
   return (
     <div className="sa-content">
       <div className="sa-page">
@@ -77,54 +94,68 @@ export default function Page() {
 
         {list.length === 0 && <EmptyState title="Aucun résultat" />}
 
-        {parPro.map(({ pro, pid, animations }) => {
-          const parStatut = (statut: EtatAnim) => animations.filter(a => String(a.status ?? 'past') === statut)
-          const enCours = parStatut('live').length
-          return (
-            <div key={pid} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <b style={{ fontSize: 14.5 }}>{pro?.nom ?? pid}</b>
-                {enCours > 0 && <span className="sa-chip live" style={{ fontSize: 10 }}>🔴 {enCours} en cours</span>}
-                <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>{animations.length} animation{animations.length > 1 ? 's' : ''}</span>
-                <button className="sa-btn sm" style={{ marginLeft: 'auto' }} onClick={() => setOuvert(ouvert === pid ? null : pid)}>
-                  {ouvert === pid ? 'Masquer' : 'Voir le détail'}
-                </button>
-              </div>
-
-              {ouvert === pid && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
-                  {COLONNES.map(col => {
-                    const cardsCol = parStatut(col.cle)
-                    return (
-                      <div key={col.cle}>
-                        <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 6 }}>{col.titre} ({cardsCol.length})</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                          {cardsCol.length === 0 && <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>—</div>}
-                          {cardsCol.map(ev => (
-                            <div
-                              key={String(ev.id)}
-                              onClick={() => openDrawer('event', String(ev.id))}
-                              style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer', position: 'relative' }}
-                            >
-                              <div style={{ fontWeight: 700, fontSize: 12 }}>{String(ev.nom ?? '—')}</div>
-                              <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}>👥 {String(ev.participants ?? 0)}</div>
-                              <button
-                                className="sa-btn icon sm"
-                                title="Éditer"
-                                onClick={e => { e.stopPropagation(); openDrawerEdit('event', String(ev.id)) }}
-                                style={{ position: 'absolute', top: 5, right: 5, opacity: 0.6 }}
-                              >✏</button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
+        {list.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {([['en_cours', '🔴 En cours'], ['a_venir', '📅 À venir'], ['passe', '📁 Terminé']] as const).map(([cle, titreCol]) => (
+              <div key={cle}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                  {titreCol} ({parStatutCol[cle].length})
                 </div>
-              )}
-            </div>
-          )
-        })}
+                {parStatutCol[cle].length === 0 && <div style={{ fontSize: 12, color: 'var(--sa-muted)' }}>—</div>}
+                {parStatutCol[cle].map(({ pro, pid, animations }) => {
+                  const parStatut = (statut: EtatAnim) => animations.filter(a => String(a.status ?? 'past') === statut)
+                  const enCours = parStatut('live').length
+                  return (
+                    <div key={pid} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <b style={{ fontSize: 14.5 }}>{pro?.nom ?? pid}</b>
+                        {enCours > 0 && <span className="sa-chip live" style={{ fontSize: 10 }}>🔴 {enCours}</span>}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>{animations.length} animation{animations.length > 1 ? 's' : ''}</div>
+                      <button className="sa-btn sm" style={{ marginTop: 10 }} onClick={() => setOuvert(ouvert === pid ? null : pid)}>
+                        {ouvert === pid ? 'Masquer' : '📍 Voir le détail'}
+                      </button>
+
+                      {ouvert === pid && (
+                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                            {COLONNES.map(col => {
+                              const cardsCol = parStatut(col.cle)
+                              return (
+                                <div key={col.cle}>
+                                  <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 6 }}>{col.titre} ({cardsCol.length})</div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                    {cardsCol.length === 0 && <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>—</div>}
+                                    {cardsCol.map(ev => (
+                                      <div
+                                        key={String(ev.id)}
+                                        onClick={() => openDrawer('event', String(ev.id))}
+                                        style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer', position: 'relative' }}
+                                      >
+                                        <div style={{ fontWeight: 700, fontSize: 12 }}>{String(ev.nom ?? '—')}</div>
+                                        <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}>👥 {String(ev.participants ?? 0)}</div>
+                                        <button
+                                          className="sa-btn icon sm"
+                                          title="Éditer"
+                                          onClick={e => { e.stopPropagation(); openDrawerEdit('event', String(ev.id)) }}
+                                          style={{ position: 'absolute', top: 5, right: 5, opacity: 0.6 }}
+                                        >✏</button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
