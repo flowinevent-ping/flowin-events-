@@ -51,6 +51,7 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
   const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
   const superUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1&screen=carte` : ''
   const url = tab === 'event' ? eventUrl : superUrl
+  const phoneUrl = url ? `${url}&bar=0` : ''
   const empty = 'Aucun événement à prévisualiser pour le moment.'
 
   const tabBtn = (t: 'event' | 'super', label: string, sous: string) => (
@@ -94,15 +95,15 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
           )}
 
           <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 14, lineHeight: 1.5, maxWidth: 360 }}>
-            Le <b>vrai parcours</b> (pas une maquette), en <b>mode aperçu</b>.{' '}
+            Le <b>vrai parcours</b> (pas une maquette). Le cadre ci-contre montre le <b>visuel réel</b>, sans barre d'admin.{' '}
             {tab === 'event'
-              ? 'Une barre en haut permet de parcourir tous les écrans : accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil.'
+              ? 'En plein écran, une barre en haut permet en plus de parcourir tous les écrans (accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil) — pratique pour la démo ou la comm.'
               : 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec un event seul : l\'accès aux autres stations et au multi-partenaire.'}
           </p>
         </div>
 
         <div style={{ order: 2 }}>
-          <Phone src={url || undefined} empty={empty} />
+          <Phone src={phoneUrl || undefined} empty={empty} />
         </div>
       </div>
     </div>

@@ -190,6 +190,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [placeMode, setPlaceMode] = useState(false)
   const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
   const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
+  const [barreVisible] = useState<boolean>(() => {
+    try { return preview && new URLSearchParams(window.location.search).get('bar') !== '0' } catch { return preview }
+  })
   const MB = !!cfg.mbLayout  // nouveau layout marque blanche : uniquement pilote par cfg (jamais par preview seul) --
     // preview=1 sert a valider SANS polluer les vraies donnees (skip auto-jump quiz, popups, etc.), pas a forcer
     // le layout marque blanche. Avant ce fix, previsualiser un vrai event NDS 2026 (aucun cfg.mbLayout) affichait
@@ -1033,7 +1036,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       <style dangerouslySetInnerHTML={{ __html: '@keyframes nds-pop{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}' }} />
 
       <div className="phone">
-        {preview && (
+        {barreVisible && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 4000, background: 'rgba(26,18,38,.96)', padding: '8px 10px', display: 'flex', gap: 6, overflowX: 'auto', boxShadow: '0 2px 10px rgba(0,0,0,.3)' }}>
             <span style={{ color: '#F5B544', fontWeight: 800, fontSize: 11, whiteSpace: 'nowrap', alignSelf: 'center', paddingRight: 4 }}>APERÇU</span>
             {([['onboard', 'Accueil'], ['quiz', 'Quiz'], ['resultats', 'Résultats'], ['bonus', 'Bonus'], ['inscription', 'Inscription'], ['final', 'Fin'], ['tickets', 'Tickets'], ['carte', 'Carte'], ['partenaires', 'Partenaires'], ['profil', 'Profil']] as const).map(([sc, lb]) => (
