@@ -5,13 +5,15 @@
  * de Romain (25/08) : la liste plate groupee uniquement par statut etait
  * illisible (stations NDS et animations boutique melangees sans reperes).
  *
- * Regle etablie avec Romain : un "event" en base reste inchange (garde
- * pro_id ET super_event_id simultanement, comme avant) -- ce n'est PAS une
- * exclusion structurelle. La MEME animation/station est simplement visible
- * depuis deux entrees differentes : ici par pro (ex. "Nook Café" -> ses
- * animations), et dans Super Events par festival. Terminologie : "Animation"
- * cote pro (ce que ce pro fait, festival ou pas) ; "Station jeux" reste le
- * terme cote Super Event (deja en place dans /dashboard/super-events).
+ * REGLE CONFIRMEE avec Romain (25/08, apres clarification explicite -- "ce
+ * qui est bon dans Super Event n'existe pas dans Anim, point") : EXCLUSIVITE
+ * STRICTE A L'AFFICHAGE. Un event rattache a un super event (super_event_id
+ * non nul, ex. toutes les stations NDS 2026) n'apparait JAMAIS ici, seulement
+ * dans /dashboard/super-events. Seuls les events SANS super_event_id (ex.
+ * "Fetes de Paques 2026", animations boutique hors festival) apparaissent
+ * dans cette page. La donnee en base reste inchangee (pro_id + super_event_id
+ * peuvent toujours coexister sur un event) -- seul le FILTRE D'AFFICHAGE de
+ * cette page applique l'exclusivite, pas une contrainte structurelle.
  */
 import { useState, useMemo } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
@@ -33,10 +35,12 @@ export default function Page() {
   const [ouvert, setOuvert] = useState<string | null>(null)
 
   const base = useMemo(() => {
-    if (!cacherDemo) return events
-    return events.filter((e: FlowinEvent & Record<string, unknown>) =>
-      !(e.pro_id === null && String(e.nom ?? '').startsWith('Démo')) &&
-      e.super_event_id !== 'se-master-superevent')
+    let l = events.filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id)
+    if (cacherDemo) {
+      l = l.filter((e: FlowinEvent & Record<string, unknown>) =>
+        !(e.pro_id === null && String(e.nom ?? '').startsWith('Démo')))
+    }
+    return l
   }, [events, cacherDemo])
 
   const list = useMemo(() => {
@@ -63,7 +67,7 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="🎬 Animations" subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — groupées par pro`} />
+        <PageHeader title="🎬 Animations" subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
           <SearchBar value={search} onChange={setSearch} placeholder="Rechercher…" />
           <button className={`sa-btn sm${cacherDemo ? ' primary' : ''}`} onClick={() => setCacherDemo(v => !v)}>
@@ -103,10 +107,7 @@ export default function Page() {
                               style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer', position: 'relative' }}
                             >
                               <div style={{ fontWeight: 700, fontSize: 12 }}>{String(ev.nom ?? '—')}</div>
-                              <div style={{ fontSize: 10, color: 'var(--sa-muted)', display: 'flex', justifyContent: 'space-between' }}>
-                                <span>👥 {String(ev.participants ?? 0)}</span>
-                                {ev.super_event_id ? <span title="Rattaché à un super event">⭐</span> : null}
-                              </div>
+                              <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}>👥 {String(ev.participants ?? 0)}</div>
                               <button
                                 className="sa-btn icon sm"
                                 title="Éditer"
