@@ -31,17 +31,14 @@ const COLONNES: { cle: EtatAnim; titre: string }[] = [
 export default function Page() {
   const { events, pros, openDrawer, openDrawerEdit } = useDashboard()
   const [search, setSearch] = useState('')
-  const [cacherDemo, setCacherDemo] = useState(true)
   const [ouvert, setOuvert] = useState<string | null>(null)
 
-  const base = useMemo(() => {
-    let l = events.filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id)
-    if (cacherDemo) {
-      l = l.filter((e: FlowinEvent & Record<string, unknown>) =>
-        !(e.pro_id === null && String(e.nom ?? '').startsWith('Démo')))
-    }
-    return l
-  }, [events, cacherDemo])
+  /* Cette page groupe PAR PRO : un event sans pro_id (ex. la demo B2B "Découvrez
+     Flowin", sans pro rattache) n'a pas sa place ici -- il faisait apparaitre une
+     fausse carte "-" avant ce fix. Meme regle qu'avant pour les super events. */
+  const base = useMemo(() =>
+    events.filter((e: FlowinEvent & Record<string, unknown>) => !e.super_event_id && !!e.pro_id),
+  [events])
 
   const list = useMemo(() => {
     if (!search.trim()) return base
@@ -87,9 +84,6 @@ export default function Page() {
         <PageHeader title="🎬 Animations" subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
           <SearchBar value={search} onChange={setSearch} placeholder="Rechercher…" />
-          <button className={`sa-btn sm${cacherDemo ? ' primary' : ''}`} onClick={() => setCacherDemo(v => !v)}>
-            {cacherDemo ? '✓ Démos & template masqués' : 'Afficher démos & template'}
-          </button>
         </div>
 
         {list.length === 0 && <EmptyState title="Aucun résultat" />}
