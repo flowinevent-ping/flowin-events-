@@ -49,11 +49,9 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
   const ev = events.find(e => e.id === evId) ?? events[0]
 
   const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
-  const superUrl = seId ? `/se/${encodeURIComponent(seId)}` : ''
+  const superUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1&screen=carte` : ''
   const url = tab === 'event' ? eventUrl : superUrl
-  const empty = tab === 'event'
-    ? 'Aucun événement à prévisualiser pour le moment.'
-    : 'Aucun super event associé à prévisualiser.'
+  const empty = 'Aucun événement à prévisualiser pour le moment.'
 
   const tabBtn = (t: 'event' | 'super', label: string, sous: string) => (
     <button onClick={() => setTab(t)} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${ACC}` : '2px solid #E2E8F0', background: tab === t ? 'rgba(124,45,146,.06)' : '#fff' }}>
@@ -76,7 +74,7 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
 
       <div style={{ display: 'flex', gap: 36, alignItems: 'flex-start', flexWrap: 'wrap', paddingLeft: 4 }}>
         <div style={{ flex: '0 1 360px', minWidth: 260, maxWidth: 400, order: 1 }}>
-          {tab === 'event' && events.length > 0 && (
+          {events.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: '#64748B', marginBottom: 8 }}>Événement à prévisualiser</div>
               <select
@@ -99,7 +97,7 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
             Le <b>vrai parcours</b> (pas une maquette), en <b>mode aperçu</b>.{' '}
             {tab === 'event'
               ? 'Une barre en haut permet de parcourir tous les écrans : accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil.'
-              : 'La carte publique du festival, avec les stations et les lots.'}
+              : 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec un event seul : l\'accès aux autres stations et au multi-partenaire.'}
           </p>
         </div>
 

@@ -190,7 +190,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const [placeMode, setPlaceMode] = useState(false)
   const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
   const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
-  const MB = preview || !!cfg.mbLayout  // nouveau layout marque blanche : master (flag cfg) OU preview (validation) — NDS live non-preview inchange
+  const MB = !!cfg.mbLayout  // nouveau layout marque blanche : uniquement pilote par cfg (jamais par preview seul) --
+    // preview=1 sert a valider SANS polluer les vraies donnees (skip auto-jump quiz, popups, etc.), pas a forcer
+    // le layout marque blanche. Avant ce fix, previsualiser un vrai event NDS 2026 (aucun cfg.mbLayout) affichait
+    // a tort le nouveau layout au lieu du vrai visuel historique -- signale par Romain (Parcours mobil, 25/08).
   const [profilTab, setProfilTab] = useState<'tickets' | 'infos' | 'favoris'>('tickets')  // fusion Tickets+Profil (MB)
   const [favTick, setFavTick] = useState(0)  // incrémenté pour forcer le re-render après toggle favori (localStorage)
   const toggleFav = (id: string) => { ndsToggleFavori(id); setFavTick(t => t + 1) }
@@ -202,6 +205,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     try {
       const sp = new URLSearchParams(window.location.search)
       if (sp.get('place') === '1') { setPlaceMode(true); setScreen('carte'); return }
+      if (sp.get('screen') === 'carte') { setScreen('carte'); return }
       if ((sp.get('source') || '').startsWith('reseaux-') && getJoueurLocal()) { setScreen('refusdigital'); return }
       // On a flashé une station (QR) ou on arrive par la carte : on saute l'écran d'accueil -> direct au quiz.
       // Exceptions : station déjà jouée aujourd'hui (on garde le récap « déjà flashé ») ou station sans quiz.
