@@ -287,6 +287,7 @@ export async function fetchGagnants(): Promise<GagnantRow[]> {
   const { data, error } = await supabase
     .from('tirages')
     .select('id,joueur_id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,statut,notifie_at,retire_at,retrait_token,created_at')
+    .neq('statut', 'annule')
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchGagnants]', error.message); return [] }
   return (data ?? []) as GagnantRow[]

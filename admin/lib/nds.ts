@@ -82,6 +82,25 @@ export async function confirmerGagnant(tirageId: number): Promise<boolean> {
   return true
 }
 
+/** Re-tirage : annule le tirage en cours (uniquement si jamais confirme -- protection
+ * cote SQL) puis relance tirage_lot() pour le meme partenaire/lot. tirage_lot exclut
+ * deja tout joueur ayant un tirage actif, donc la personne annulee ne peut pas
+ * re-gagner immediatement le meme lot. */
+export async function annulerEtRetirer(
+  tirageId: number, partenaireId: string, lotNom: string, lotValeur: number
+): Promise<{ ok: boolean; erreur?: string }> {
+  const { data: annul, error: e1 } = await supabase.rpc('annuler_tirage', { p_tirage_id: tirageId })
+  if (e1) { console.error('[annulerEtRetirer] annuler', e1.message); return { ok: false, erreur: e1.message } }
+  const r = annul as { ok: boolean; erreur?: string } | null
+  if (!r?.ok) return { ok: false, erreur: r?.erreur ?? 'annulation refusée' }
+
+  const { error: e2 } = await supabase.rpc('tirage_lot', {
+    p_partenaire_id: partenaireId, p_lot_nom: lotNom, p_valeur: lotValeur, p_nb: 1,
+  })
+  if (e2) { console.error('[annulerEtRetirer] tirage_lot', e2.message); return { ok: false, erreur: e2.message } }
+  return { ok: true }
+}
+
 /* ── Liens ─────────────────────────────────────────────────────────────── */
 
 const origine = () => (typeof window !== 'undefined' ? window.location.origin : '')

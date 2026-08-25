@@ -11,7 +11,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import {
-  fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant,
+  fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant, annulerEtRetirer,
   lienBillet, mailPartenaireUrl, SE_DEFAUT,
   type GagnantPartenaire, type EtatPartenaire,
 } from '@/lib/nds'
@@ -73,6 +73,13 @@ export default function Page() {
   async function onConfirmer(tirageId: number) {
     if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors chez le commerçant et son nom s\'inscrira sur le billet.')) return
     if (!await confirmerGagnant(tirageId)) { alert('La confirmation a échoué.'); return }
+    charger()
+  }
+
+  async function onRetirer(g: GagnantPartenaire, partenaireId: string) {
+    if (!confirm(`Annuler ce tirage (${g.joueur_nom ?? 'gagnant'}) et en tirer un nouveau pour le même lot (${g.lot_nom}) ?\n\nÀ utiliser uniquement si la personne ne répond pas à l'appel. Le tirage annulé reste en base pour historique mais disparaît de cette liste.`)) return
+    const r = await annulerEtRetirer(g.tirage_id, partenaireId, g.lot_nom ?? '', Number(g.lot_valeur ?? 0))
+    if (!r.ok) { alert('Le re-tirage a échoué : ' + (r.erreur ?? 'raison inconnue')); return }
     charger()
   }
 
@@ -159,7 +166,10 @@ export default function Page() {
                   </>
                 )}
                 {g.etat === 'a_confirmer' && (
-                  <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
+                  <>
+                    <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
+                    <button className="sa-btn sm" onClick={() => onRetirer(g, l.id)} title="Annuler et tirer un nouveau gagnant pour ce lot">🔁 Re-tirer</button>
+                  </>
                 )}
               </div>
             ))}
