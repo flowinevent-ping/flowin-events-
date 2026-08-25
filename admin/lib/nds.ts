@@ -319,6 +319,7 @@ export async function fetchParticipants(se: string = SE_DEFAUT): Promise<Partici
 export interface LigneJourStation {
   jour: string; event_id: string; station: string
   type: 'station' | 'commerce'
+  hors_festival: boolean
   clics: number; appareils: number; parties: number; joueurs: number
   primo_inscrits: number; joueurs_revenus: number
 }

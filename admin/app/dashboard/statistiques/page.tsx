@@ -52,8 +52,9 @@ export default function Page() {
   }, [se])
 
   const jours = useMemo(() => {
-    const s = new Set((r?.par_jour_station ?? []).map(l => l.jour))
-    return Array.from(s).sort()
+    const m = new Map<string, boolean>()
+    for (const l of r?.par_jour_station ?? []) m.set(l.jour, l.hors_festival)
+    return Array.from(m.entries()).sort(([a], [b]) => a.localeCompare(b))
   }, [r])
 
   const lignes = useMemo(() => {
@@ -171,11 +172,20 @@ export default function Page() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4, alignItems: 'center' }}>
           <button className={`sa-btn sm${jour === 'tous' ? ' primary' : ''}`} onClick={() => setJour('tous')}>Toutes les dates</button>
-          {jours.map(j => (
+          {jours.filter(([, hf]) => !hf).map(([j]) => (
             <button key={j} className={`sa-btn sm${jour === j ? ' primary' : ''}`} onClick={() => setJour(j)}>{fr(j)}</button>
           ))}
+          {jours.some(([, hf]) => hf) && (
+            <span style={{ fontSize: 10.5, color: 'var(--sa-muted)', margin: '0 4px' }}>· après clôture (09/07→18/07) →</span>
+          )}
+          {jours.filter(([, hf]) => hf).map(([j]) => (
+            <button key={j} className={`sa-btn sm${jour === j ? ' primary' : ''}`} style={{ opacity: 0.75 }} onClick={() => setJour(j)}>{fr(j)}</button>
+          ))}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginBottom: 16 }}>
+          Les dates après clôture (visiteurs revenus après le 18/07) sont réelles mais hors période officielle — jamais dans les "Chiffres de référence" ci-dessous.
         </div>
 
         <SectionHeader>🔢 Chiffres de référence</SectionHeader>
