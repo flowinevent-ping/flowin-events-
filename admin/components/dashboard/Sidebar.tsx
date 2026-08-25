@@ -86,7 +86,7 @@ export default function Sidebar() {
     {
       group: 'EVENTS',
       items: [
-        { id: 'events', icon: '📅', label: 'Events (liste triée)', count: events.length, live: liveCount, href: '/dashboard/events' },
+        { id: 'events', icon: '🎬', label: 'Animations (par pro)', count: events.length, live: liveCount, href: '/dashboard/events' },
         { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
         { id: 'parcours', icon: '📱', label: 'Parcours mobil', href: '/dashboard/parcours' },
       ],

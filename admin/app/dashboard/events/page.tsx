@@ -1,17 +1,36 @@
 'use client'
 
+/**
+ * Animations (ex-"Events") — reorganise en kanban par pro, demande explicite
+ * de Romain (25/08) : la liste plate groupee uniquement par statut etait
+ * illisible (stations NDS et animations boutique melangees sans reperes).
+ *
+ * Regle etablie avec Romain : un "event" en base reste inchange (garde
+ * pro_id ET super_event_id simultanement, comme avant) -- ce n'est PAS une
+ * exclusion structurelle. La MEME animation/station est simplement visible
+ * depuis deux entrees differentes : ici par pro (ex. "Nook Café" -> ses
+ * animations), et dans Super Events par festival. Terminologie : "Animation"
+ * cote pro (ce que ce pro fait, festival ou pas) ; "Station jeux" reste le
+ * terme cote Super Event (deja en place dans /dashboard/super-events).
+ */
 import { useState, useMemo } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { PageHeader, SearchBar, StatusChip, ModuleChip, EmptyState } from '@/components/dashboard/DashboardUI'
+import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/DashboardUI'
 import type { FlowinEvent } from '@/lib/types'
 
-const ORDRE_STATUT: Record<string, number> = { live: 0, upcoming: 1, past: 2, archived: 3 }
-const TITRES: Record<string, string> = { live: '🔴 En cours', upcoming: '📅 À venir', past: '✅ Passés', archived: '🗄️ Archivés' }
+type EtatAnim = 'live' | 'upcoming' | 'past' | 'archived'
+const COLONNES: { cle: EtatAnim; titre: string }[] = [
+  { cle: 'live', titre: '🔴 Active' },
+  { cle: 'upcoming', titre: '📅 À venir' },
+  { cle: 'past', titre: '✅ Passée' },
+  { cle: 'archived', titre: '🗄️ Archivée' },
+]
 
 export default function Page() {
-  const { events, openDrawer, openDrawerEdit, pros } = useDashboard()
+  const { events, pros, openDrawer, openDrawerEdit } = useDashboard()
   const [search, setSearch] = useState('')
   const [cacherDemo, setCacherDemo] = useState(true)
+  const [ouvert, setOuvert] = useState<string | null>(null)
 
   const base = useMemo(() => {
     if (!cacherDemo) return events
@@ -26,20 +45,25 @@ export default function Page() {
     return base.filter((item: FlowinEvent) => ((item as any).nom ?? '').toLowerCase().includes(q))
   }, [base, search])
 
-  const groupes = useMemo(() => {
-    const g: Record<string, (FlowinEvent & Record<string, unknown>)[]> = {}
+  /* Groupement par pro (vignette), animations de chaque pro triees par statut
+     a l'interieur -- meme pattern que /dashboard/super-events (carte depliable
+     -> mini-kanban), pour rester coherent avec ce qui existe deja. */
+  const parPro = useMemo(() => {
+    const g = new Map<string, (FlowinEvent & Record<string, unknown>)[]>()
     for (const ev of list as (FlowinEvent & Record<string, unknown>)[]) {
-      const s = String(ev.status ?? 'past')
-      if (!g[s]) g[s] = []
-      g[s].push(ev)
+      const pid = String(ev.pro_id ?? '—')
+      if (!g.has(pid)) g.set(pid, [])
+      g.get(pid)!.push(ev)
     }
-    return Object.entries(g).sort((a, b) => (ORDRE_STATUT[a[0]] ?? 9) - (ORDRE_STATUT[b[0]] ?? 9))
-  }, [list])
+    return Array.from(g.entries())
+      .map(([pid, animations]) => ({ pro: pros.find(p => p.id === pid), pid, animations }))
+      .sort((a, b) => b.animations.length - a.animations.length)
+  }, [list, pros])
 
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="📅 Events" subtitle={`${list.length} résultat${list.length > 1 ? 's' : ''}`} />
+        <PageHeader title="🎬 Animations" subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — groupées par pro`} />
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
           <SearchBar value={search} onChange={setSearch} placeholder="Rechercher…" />
           <button className={`sa-btn sm${cacherDemo ? ' primary' : ''}`} onClick={() => setCacherDemo(v => !v)}>
@@ -49,36 +73,57 @@ export default function Page() {
 
         {list.length === 0 && <EmptyState title="Aucun résultat" />}
 
-        {groupes.map(([statut, liste]) => (
-          <div key={statut} style={{ marginBottom: 24 }}>
-            <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 10, color: 'var(--sa-muted)' }}>
-              {TITRES[statut] ?? statut} ({liste.length})
+        {parPro.map(({ pro, pid, animations }) => {
+          const parStatut = (statut: EtatAnim) => animations.filter(a => String(a.status ?? 'past') === statut)
+          const enCours = parStatut('live').length
+          return (
+            <div key={pid} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <b style={{ fontSize: 14.5 }}>{pro?.nom ?? pid}</b>
+                {enCours > 0 && <span className="sa-chip live" style={{ fontSize: 10 }}>🔴 {enCours} en cours</span>}
+                <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>{animations.length} animation{animations.length > 1 ? 's' : ''}</span>
+                <button className="sa-btn sm" style={{ marginLeft: 'auto' }} onClick={() => setOuvert(ouvert === pid ? null : pid)}>
+                  {ouvert === pid ? 'Masquer' : 'Voir le détail'}
+                </button>
+              </div>
+
+              {ouvert === pid && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
+                  {COLONNES.map(col => {
+                    const cardsCol = parStatut(col.cle)
+                    return (
+                      <div key={col.cle}>
+                        <div style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 6 }}>{col.titre} ({cardsCol.length})</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                          {cardsCol.length === 0 && <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>—</div>}
+                          {cardsCol.map(ev => (
+                            <div
+                              key={String(ev.id)}
+                              onClick={() => openDrawer('event', String(ev.id))}
+                              style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer', position: 'relative' }}
+                            >
+                              <div style={{ fontWeight: 700, fontSize: 12 }}>{String(ev.nom ?? '—')}</div>
+                              <div style={{ fontSize: 10, color: 'var(--sa-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                                <span>👥 {String(ev.participants ?? 0)}</span>
+                                {ev.super_event_id ? <span title="Rattaché à un super event">⭐</span> : null}
+                              </div>
+                              <button
+                                className="sa-btn icon sm"
+                                title="Éditer"
+                                onClick={e => { e.stopPropagation(); openDrawerEdit('event', String(ev.id)) }}
+                                style={{ position: 'absolute', top: 5, right: 5, opacity: 0.6 }}
+                              >✏</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
-              {liste.map(ev => {
-                const pro = pros.find(p => p.id === ev.pro_id)
-                return (
-                  <div
-                    key={String(ev.id)}
-                    onClick={() => openDrawer('event', String(ev.id))}
-                    style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: 14, cursor: 'pointer' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                      <ModuleChip module={String(ev.module ?? '')} />
-                      <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('event', String(ev.id)) }}>✏</button>
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 4 }}>{String(ev.nom ?? '—')}</div>
-                    {pro && <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginBottom: 6 }}>{pro.nom}</div>}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11.5, color: 'var(--sa-muted)' }}>
-                      <span>👥 {String(ev.participants ?? 0)}</span>
-                      <StatusChip status={String(ev.status ?? '')} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
