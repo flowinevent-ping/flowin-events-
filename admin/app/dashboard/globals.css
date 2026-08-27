@@ -7,7 +7,7 @@
 }
 /* ── Layout shell ── */
 .sa-shell{display:flex;height:100vh;overflow:hidden;background:var(--sa-bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;font-size:14px;color:var(--sa-text)}
-.sa-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.sa-main{flex:1;display:flex;flex-direction:column;overflow-y:auto}
 .sa-content{flex:1;overflow-y:auto;padding:24px}
 /* ── Sidebar ── */
 .sa-sb{width:240px;background:var(--sa-sb-bg);flex-shrink:0;display:flex;flex-direction:column;height:100vh;border-right:1px solid var(--sa-sb-border)}

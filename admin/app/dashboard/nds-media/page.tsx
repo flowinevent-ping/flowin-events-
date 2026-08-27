@@ -16,19 +16,9 @@ import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/Da
 import { useDashboard } from '@/contexts/DashboardContext'
 
 const BASE = 'https://flowin-events.vercel.app'
-
-interface Support {
-  cle: string
-  libelle: string
-  url: (slug: string) => string
-  note: string
-}
-
-const SUPPORTS: Support[] = [
-  { cle: 'a4', libelle: 'Affiche A4', note: 'à imprimer sur place', url: s => `${BASE}/nds/affiches/nds_a4_${s}.png` },
-  { cle: 'qr', libelle: 'QR seul', note: 'à intégrer dans un visuel', url: s => `${BASE}/nds/qr/qr-${s}.png` },
-  { cle: 'logo', libelle: 'Logo partenaire', note: 'tel que fourni', url: s => `${BASE}/nds/partenaires/${s}.png` },
-]
+const lienPartenaire = (slug: string) => `${BASE}/parcours/nds2026?ev=ev-nds-${slug}&source=reseaux-${slug}`
+const qrPartenaire = (slug: string) =>
+  `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(lienPartenaire(slug))}&bgcolor=ffffff&margin=8`
 
 export default function Page() {
   const { partenaires } = useDashboard()
@@ -95,17 +85,31 @@ export default function Page() {
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  {SUPPORTS.map(s => (
+                  <a
+                    href={qrPartenaire(p.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 11.5, fontWeight: 600, textDecoration: 'none' }}
+                  >
+                    QR seul <span className="sa-muted" style={{ fontWeight: 400 }}>— généré depuis le lien partenaire, à intégrer dans un visuel</span>
+                  </a>
+                  {p.image_url ? (
                     <a
-                      key={s.cle}
-                      href={s.url(p.slug)}
+                      href={p.image_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ fontSize: 11.5, fontWeight: 600, textDecoration: 'none' }}
                     >
-                      {s.libelle} <span className="sa-muted" style={{ fontWeight: 400 }}>— {s.note}</span>
+                      Logo partenaire <span className="sa-muted" style={{ fontWeight: 400 }}>— tel que fourni</span>
                     </a>
-                  ))}
+                  ) : (
+                    <div style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--sa-muted)' }}>
+                      Logo partenaire <span style={{ fontWeight: 400 }}>— aucun logo enregistré</span>
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--sa-muted)' }}>
+                    Affiche A4 <span style={{ fontWeight: 400 }}>— pas encore disponible (aucun visuel généré pour ce partenaire)</span>
+                  </div>
                 </div>
 
                 {(p.instagram || p.facebook || p.site_web) && (
