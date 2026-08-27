@@ -100,6 +100,18 @@ export async function fetchRetoursCrm(): Promise<RetourCrm[]> {
  * Avancement d un dossier : les trois jalons sont INDEPENDANTS.
  * Ne jamais deduire l un de l autre — un paiement recu n implique pas la facture emise.
  */
+export async function majRetourCrm(
+  id: number,
+  champs: Partial<Pick<RetourCrm, 'etat' | 'note' | 'date_relance' | 'montant' | 'logo_envoye' | 'facture_emise' | 'paiement_recu'>>
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('crm_retours')
+    .update({ ...champs, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) { console.error('[majRetourCrm]', error.message); return false }
+  return true
+}
+
 export function jalonsRetour(r: RetourCrm): { libelle: string; fait: boolean }[] {
   return [
     { libelle: 'Logo reçu', fait: r.logo_envoye === true },
