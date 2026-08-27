@@ -356,11 +356,28 @@
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
-  // ---- Sécurité admin : session requise ----
+  // ---- Sécurité admin : session requise, avec rafraîchissement automatique du token
+  // (identique à dashboard.html) ----
   var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
-  var AUTH=(_S&&_S.access_token)?_S.access_token:null;
-  if(!AUTH){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
-  var H={'apikey':KEY,'Authorization':'Bearer '+AUTH};
+  if(!_S||!_S.access_token){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
+  var AUTH=_S.access_token;
+  function _saveSess(d){
+    _S={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
+    AUTH=d.access_token; localStorage.setItem('flowin_admin_session',JSON.stringify(_S));
+  }
+  async function _authRefresh(){
+    try{
+      if(!_S||!_S.refresh_token) return false;
+      var r=await fetch(SUPA+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:_S.refresh_token})});
+      if(!r.ok) return false;
+      _saveSess(await r.json()); return true;
+    }catch(e){ return false; }
+  }
+  async function _ensureFreshToken(){
+    var margin=5*60;
+    if(!_S.expires_at || (_S.expires_at - Math.floor(Date.now()/1000)) < margin){ await _authRefresh(); }
+  }
+  function H(){ return {'apikey':KEY,'Authorization':'Bearer '+AUTH}; }
   function $(id){return document.getElementById(id);}
   function qs(n){ var m=new RegExp('[?&]'+n+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
   function pad2(n){ return String(n).length<2?('0'+n):String(n); }
@@ -455,8 +472,8 @@
       $('saveBtn').disabled=true; setStatus('Enregistrement\u2026','');
       var url=SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(p.numero);
       var opt=STATE.existing
-        ? {method:'PATCH',headers:Object.assign({},H,{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(p)}
-        : {method:'POST',headers:Object.assign({},H,{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(p)};
+        ? {method:'PATCH',headers:Object.assign({},H(),{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(p)}
+        : {method:'POST',headers:Object.assign({},H(),{'Content-Type':'application/json','Prefer':'return=minimal'}),body:JSON.stringify(p)};
       fetch(STATE.existing?url:(SUPA+'/rest/v1/factures'),opt)
         .then(function(r){ if(!r.ok) throw new Error('http '+r.status); STATE.existing=true; $('saveBtn').disabled=false; setStatus('Facture '+p.numero+' enregistr\u00e9e.','ok'); })
         .catch(function(e){ $('saveBtn').disabled=false; setStatus('\u00c9chec de l\u2019enregistrement ('+e.message+').','err'); });
@@ -478,18 +495,20 @@
   }
 
   // --- Chargement ---
+  (async function(){
+  await _ensureFreshToken();
   var num=qs('num'), devis=qs('devis');
   if(num){
-    fetch(SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(num)+'&select=*',{headers:H})
+    fetch(SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(num)+'&select=*',{headers:H()})
       .then(function(r){return r.json();})
       .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } } else { setStatus('Facture introuvable.','err'); } });
   } else if(devis){
     // existe-t-il deja une facture pour ce devis ? sinon on la prepare depuis le bon
-    fetch(SUPA+'/rest/v1/factures?client->>bon_id=eq.'+encodeURIComponent(devis)+'&select=*&order=numero.desc',{headers:H})
+    fetch(SUPA+'/rest/v1/factures?client->>bon_id=eq.'+encodeURIComponent(devis)+'&select=*&order=numero.desc',{headers:H()})
       .then(function(r){return r.json();})
       .then(function(facs){
         if(facs&&facs.length){ fromFacture(facs[0]); setStatus('Facture existante charg\u00e9e. Modifiable puis \u00ab Enregistrer \u00bb.','ok'); if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } return; }
-        return fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(devis)+'&select=*',{headers:H})
+        return fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(devis)+'&select=*',{headers:H()})
           .then(function(r){return r.json();})
           .then(function(bons){ if(bons&&bons.length){ fromDevis(bons[0]); setStatus('Facture pr\u00e9par\u00e9e depuis le devis '+devis+'\u2026 enregistrement automatique.','ok'); setTimeout(function(){ if(!STATE.existing && $('saveBtn')){ $('saveBtn').click(); } if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 1100); } }, 500); } else { setStatus('Devis introuvable.','err'); } });
       });
@@ -497,6 +516,7 @@
     setStatus('Ouvrez une facture via ?devis=<n\u00b0 de devis> ou ?num=<n\u00b0 de facture>.','');
     renderNum();
   }
+  })();
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>

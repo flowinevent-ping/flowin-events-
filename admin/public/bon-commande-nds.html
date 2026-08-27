@@ -580,10 +580,26 @@ function exportPdf(){
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
-  // ---- Sécurité admin : session requise ----
+  // ---- Sécurité admin : session requise, avec rafraîchissement automatique du token
+  // (identique à dashboard.html) ----
   var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
-  var AUTH=(_S&&_S.access_token)?_S.access_token:null;
-  if(!AUTH){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
+  if(!_S||!_S.access_token){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
+  var AUTH=_S.access_token;
+  function _saveSess(d){
+    _S={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
+    AUTH=d.access_token; localStorage.setItem('flowin_admin_session',JSON.stringify(_S));
+  }
+  function _authRefresh(){
+    if(!_S||!_S.refresh_token) return Promise.resolve(false);
+    return fetch(SUPA+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:_S.refresh_token})})
+      .then(function(r){ if(!r.ok) return false; return r.json().then(function(d){ _saveSess(d); return true; }); })
+      .catch(function(){ return false; });
+  }
+  function _ensureFreshToken(){
+    var margin=5*60;
+    if(!_S.expires_at || (_S.expires_at - Math.floor(Date.now()/1000)) < margin){ return _authRefresh(); }
+    return Promise.resolve(true);
+  }
   var CGV_VERSION='v1-draft'; // a mettre a jour quand les CGV passent en version validee par le juriste
   function $(id){return document.getElementById(id);}
   function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
@@ -733,7 +749,9 @@ function exportPdf(){
     btn.disabled=true; setStatus('Enregistrement\u2026','');
     var url=EDIT_MODE?(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(rec.id)):(SUPA+'/rest/v1/bons_commande');
     var method=EDIT_MODE?'PATCH':'POST';
-    fetch(url,{method:method,headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)})
+    _ensureFreshToken().then(function(){
+      return fetch(url,{method:method,headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(rec)});
+    })
       .then(function(r){ if(r.status===409){ throw new Error('dup'); } if(!r.ok) throw new Error('http '+r.status); onOk(); })
       .catch(function(e){ btn.disabled=false; setStatus((e&&e.message==='dup')?'Ce num\u00e9ro existe d\u00e9j\u00e0 \u2014 choisissez-en un autre.':'\u00c9chec de l\u2019enregistrement. R\u00e9essayez.','err'); });
   }
@@ -870,7 +888,9 @@ function exportPdf(){
             if(!$('cgvChk')||!$('cgvChk').checked){ setStatus('Merci d\u2019accepter les CGV.','err'); return; }
             _cs.disabled=true; setStatus('Signature en cours\u2026','');
             var _patch={ statut:'signe', signature:cv.toDataURL('image/png'), signataire:($('f_signataire').value.trim()||d.contact||d.raison_sociale||''), date_signature:($('f_date').value.trim()||dstr), cgv_version:CGV_VERSION, cgv_acceptee_at:new Date().toISOString() };
-            fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(d.id),{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(_patch)})
+            _ensureFreshToken().then(function(){
+              return fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(d.id),{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(_patch)});
+            })
               .then(function(r){ if(!r.ok) throw new Error('http '+r.status); location.href='?id='+encodeURIComponent(d.id); })
               .catch(function(){ _cs.disabled=false; setStatus('\u00c9chec de la signature. R\u00e9essayez.','err'); });
           }); }
