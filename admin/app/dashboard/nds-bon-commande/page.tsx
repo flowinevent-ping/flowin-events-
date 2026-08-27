@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchBonsCommande, majBonCommande, estSigne, remise, type BonCommande } from '@/lib/commercial'
+import { fetchFacturePartenaire, type FacturePartenaire } from '@/lib/dashboard'
 
 const euros = (n: number | null) =>
   n == null ? '—' : n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -32,11 +33,22 @@ export default function Page() {
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [brouillon, setBrouillon] = useState<Record<string, string>>({})
   const [enregistrement, setEnregistrement] = useState(false)
+  const [factureReelle, setFactureReelle] = useState<FacturePartenaire | null>(null)
+  const [triCle, setTriCle] = useState<keyof BonCommande>('created_at')
+  const [triAsc, setTriAsc] = useState(false)
 
   const recharger = () => fetchBonsCommande().then(setList).finally(() => setCharge(false))
   useEffect(() => { recharger() }, [])
 
   const bon = list.find(b => b.id === ouvert) ?? null
+
+  useEffect(() => {
+    setFactureReelle(null)
+    if (!bon?.partenaire_id) return
+    let vivant = true
+    fetchFacturePartenaire(bon.partenaire_id).then(f => { if (vivant) setFactureReelle(f) })
+    return () => { vivant = false }
+  }, [bon?.partenaire_id])
 
   function ouvrir(b: BonCommande) {
     setOuvert(b.id)
@@ -71,14 +83,29 @@ export default function Page() {
 
   const filtres = useMemo(() => {
     const t = q.trim().toLowerCase()
-    return list.filter(b => {
+    const base = list.filter(b => {
       if (filtre === 'signes' && !estSigne(b)) return false
       if (filtre === 'en_attente' && estSigne(b)) return false
       if (!t) return true
       return [b.raison_sociale, b.ville, b.contact, b.offre_label, b.id].some(v =>
         (v ?? '').toLowerCase().includes(t))
     })
-  }, [list, q, filtre])
+    return [...base].sort((a, b) => {
+      const va = a[triCle], vb = b[triCle]
+      if (typeof va === 'number' || typeof vb === 'number') {
+        const cmp = (Number(va) || 0) - (Number(vb) || 0)
+        return triAsc ? cmp : -cmp
+      }
+      const cmp = String(va ?? '').localeCompare(String(vb ?? ''))
+      return triAsc ? cmp : -cmp
+    })
+  }, [list, q, filtre, triCle, triAsc])
+
+  function trier(cle: keyof BonCommande) {
+    if (cle === triCle) setTriAsc(a => !a)
+    else { setTriCle(cle); setTriAsc(true) }
+  }
+  const flecheTri = (cle: keyof BonCommande) => (triCle === cle ? (triAsc ? ' ▲' : ' ▼') : '')
 
   const signes = list.filter(estSigne)
   const htSigne = signes.reduce((a, b) => a + (b.montant_ht ?? 0), 0)
@@ -145,15 +172,15 @@ export default function Page() {
           <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
             <thead>
               <tr>
-                <th style={{ ...cell, textAlign: 'left' }}>Raison sociale</th>
-                <th style={{ ...cell, textAlign: 'left' }}>Ville</th>
-                <th style={{ ...cell, textAlign: 'left' }}>Offre</th>
-                <th style={{ ...cell, textAlign: 'right' }}>HT facturé</th>
-                <th style={{ ...cell, textAlign: 'right' }}>Catalogue</th>
+                <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('raison_sociale')}>Raison sociale{flecheTri('raison_sociale')}</th>
+                <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('ville')}>Ville{flecheTri('ville')}</th>
+                <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('offre_label')}>Offre{flecheTri('offre_label')}</th>
+                <th style={{ ...cell, textAlign: 'right', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('montant_ht')}>HT facturé{flecheTri('montant_ht')}</th>
+                <th style={{ ...cell, textAlign: 'right', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('montant_ht_catalogue')}>Catalogue{flecheTri('montant_ht_catalogue')}</th>
                 <th style={{ ...cell, textAlign: 'right' }}>Remise</th>
-                <th style={{ ...cell, textAlign: 'right' }}>TTC</th>
-                <th style={{ ...cell, textAlign: 'left' }}>Statut</th>
-                <th style={{ ...cell, textAlign: 'left' }}>CGV</th>
+                <th style={{ ...cell, textAlign: 'right', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('montant_ttc')}>TTC{flecheTri('montant_ttc')}</th>
+                <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('statut')}>Statut{flecheTri('statut')}</th>
+                <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('cgv_acceptee_at')}>CGV{flecheTri('cgv_acceptee_at')}</th>
               </tr>
             </thead>
             <tbody>
@@ -235,6 +262,31 @@ export default function Page() {
               </div>
             )}
             {bon.lot_conditions && <div className="sa-muted" style={{ fontSize: 11, marginTop: 2 }}>{bon.lot_conditions}</div>}
+
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--sa-muted)', margin: '18px 0 8px' }}>Facturation</div>
+            {factureReelle ? (
+              <>
+                <div style={{ fontSize: 13, marginBottom: 4 }}>
+                  {factureReelle.factureNumero
+                    ? <span className="sa-chip live">🧾 {factureReelle.factureNumero}{factureReelle.dateEmission ? ` · ${dateFr(factureReelle.dateEmission)}` : ''}</span>
+                    : <span className="sa-chip">— Pas encore émise (devis {factureReelle.bonStatut ?? 'brouillon'})</span>}
+                </div>
+                <a
+                  className="sa-btn sm"
+                  href={factureReelle.factureNumero
+                    ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}`
+                    : `/facture-nds.html?devis=${encodeURIComponent(factureReelle.bonId)}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ textDecoration: 'none', display: 'inline-block', marginTop: 2, marginBottom: 4 }}
+                >
+                  🧾 {factureReelle.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'} →
+                </a>
+              </>
+            ) : (
+              <div className="sa-muted" style={{ fontSize: 12 }}>
+                {bon.partenaire_id ? 'Chargement…' : 'Ce bon n\'est pas encore relié à une fiche partenaire.'}
+              </div>
+            )}
 
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--sa-muted)', margin: '18px 0 8px' }}>Suivi commercial</div>
 

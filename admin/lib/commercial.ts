@@ -31,6 +31,7 @@ export interface BonCommande {
   lot_conditions: string | null
   prestations_incluses: string | null
   mention_particuliere: string | null
+  partenaire_id: string | null
 }
 
 /** Un bon est signe si son statut vaut 'signe' (accentue ou non selon la saisie). */

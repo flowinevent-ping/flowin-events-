@@ -39,6 +39,8 @@ export default function Page() {
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState<'tous' | Etat>('tous')
   const [pro, setPro] = useState('')
+  const [triCle, setTriCle] = useState<'joueur_nom' | 'pro' | 'lot_nom' | 'lot_valeur' | 'ticket_code' | 'etat' | 'created_at'>('created_at')
+  const [triAsc, setTriAsc] = useState(false)
 
   useEffect(() => { fetchGagnants().then(setList) }, [])
 
@@ -60,14 +62,32 @@ export default function Page() {
   }, [list, filtre, pro])
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return base
-    const q = search.toLowerCase()
-    return base.filter(t =>
-      (t.joueur_nom ?? '').toLowerCase().includes(q) ||
-      (t.joueur_email ?? '').toLowerCase().includes(q) ||
-      (t.lot_nom ?? '').toLowerCase().includes(q) ||
-      (t.ticket_code ?? '').toLowerCase().includes(q))
-  }, [base, search])
+    let l = base
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      l = l.filter(t =>
+        (t.joueur_nom ?? '').toLowerCase().includes(q) ||
+        (t.joueur_email ?? '').toLowerCase().includes(q) ||
+        (t.lot_nom ?? '').toLowerCase().includes(q) ||
+        (t.ticket_code ?? '').toLowerCase().includes(q))
+    }
+    return [...l].sort((a, b) => {
+      let va: string | number = ''
+      let vb: string | number = ''
+      if (triCle === 'pro') { va = nomPartenaire(a.partenaire_id); vb = nomPartenaire(b.partenaire_id) }
+      else if (triCle === 'etat') { va = etatDe(a); vb = etatDe(b) }
+      else if (triCle === 'lot_valeur') { va = a.lot_valeur ?? 0; vb = b.lot_valeur ?? 0 }
+      else { va = a[triCle] ?? ''; vb = b[triCle] ?? '' }
+      const cmp = typeof va === 'number' ? va - (vb as number) : String(va).localeCompare(String(vb))
+      return triAsc ? cmp : -cmp
+    })
+  }, [base, search, triCle, triAsc])
+
+  function trier(cle: typeof triCle) {
+    if (cle === triCle) setTriAsc(a => !a)
+    else { setTriCle(cle); setTriAsc(true) }
+  }
+  const flecheTri = (cle: typeof triCle) => (triCle === cle ? (triAsc ? ' ▲' : ' ▼') : '')
 
   return (
     <div className="sa-content">
@@ -97,7 +117,13 @@ export default function Page() {
           <table className="sa-tbl" style={{ width: '100%' }}>
             <thead>
               <tr>
-                <th>Joueur</th><th>Pro</th><th>Lot</th><th>Valeur</th><th>Ticket</th><th>Statut</th><th>Tiré le</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('joueur_nom')}>Joueur{flecheTri('joueur_nom')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('pro')}>Pro{flecheTri('pro')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('lot_nom')}>Lot{flecheTri('lot_nom')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('lot_valeur')}>Valeur{flecheTri('lot_valeur')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('ticket_code')}>Ticket{flecheTri('ticket_code')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('etat')}>Statut{flecheTri('etat')}</th>
+                <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('created_at')}>Tiré le{flecheTri('created_at')}</th>
               </tr>
             </thead>
             <tbody>
