@@ -136,7 +136,7 @@ export default function Sidebar() {
       items: [
         { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
         { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html' },
-        { id: 'flowin-landing-offres', icon: '💶', label: 'Landing page — Offres & tarifs', href: '/flowin-landing-offres.html' },
+        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs (packs partenaires)', href: '/nds' },
         { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html' },
         { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html' },
         { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
