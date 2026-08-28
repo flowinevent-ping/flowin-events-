@@ -1,5 +1,13 @@
 # Mission — Réorganisation du dashboard (à partir du 28/08/2026)
 
+> ⚠️ **Si cette session tourne dans Cowork** : le repo `flowinevent-ping/flowin-events-`
+> doit être attaché comme **source de la tâche au moment de sa création**, dans
+> l'UI, avant de coller ce document. Un git push échouant avec
+> `access denied by the git proxy: ... is not in this session's authorized
+> repository set → 403` n'est PAS un problème de token — c'est ce réglage,
+> et aucune information textuelle ne peut le contourner. Rencontré et
+> documenté le 28/08.
+
 Ce document remplace la logique "réagir signalement par signalement" par une
 mission de fond, donnée directement par Romain le 28/08. Toute session qui
 reprend ce travail doit lire ce fichier + `docs/patterns-bugs-connus.md` +
@@ -78,7 +86,34 @@ Romain insiste : "avoir des fiches pro complètes" — la fiche d'un pro doit
 regrouper tout ce qui le concerne (voir §1 Pattern G : c'est précisément ce
 qui manque aujourd'hui, chaque brique existe séparément).
 
-## 3. Comment reprendre ce travail
+## 3. Corrections apportées par une autre session (28/08, vérifiées code + base)
+
+À prendre en compte, ces 4 points corrigent des éléments écrits plus haut
+dans ce document ou dans le handoff précédent :
+
+1. **`/nds` n'est pas un lien mort.** Le contrôleur qui l'avait signalé ne
+   scannait que `/dashboard` et `/pro` ; en scannant tout `admin/app`, 0 lien
+   mort réel trouvé.
+2. **`cfg` n'est vide pour aucun des 59 events** — le wizard écrit toujours
+   `qrUrl`. Le vrai problème reste néanmoins celui décrit en §1 : le wizard
+   dit lui-même (ligne ~240) que "la configuration fine se règle après
+   création", et cet écran n'existe pas. Les 49 events NDS ont leur `cfg`
+   peuplé par SQL directement, pas par le wizard ; `quizmaster` et
+   `quizsolo` sortent nus. **Le chantier ne change pas**, juste sa
+   description technique précise.
+3. **`cfg.spinSegments` a un écrivain** : `rejoindre/[se]/RejoindreClient.tsx:67`
+   (valeurs par défaut côté pro).
+4. **`nds-resultat` / `nds-participants` ne sont pas câblées en dur.**
+   `lib/nds.ts` est déjà générique — `SE_DEFAUT` n'est qu'une valeur par
+   défaut de paramètre. Les 2 pages appellent `fetchJours()`/`fetchParticipants()`
+   sans passer `se`. Correctif : coller le sélecteur déjà présent sur
+   `statistiques`. Environ 1h, pas un chantier.
+
+Écarts de comptage de routes (36 vs 37, 14 vs 18 selon les sessions) :
+pure question de convention (avec ou sans les segments `[id]`), rien n'a
+changé dans le code entre les deux relevés.
+
+## 4. Comment reprendre ce travail
 
 1. Lire ce fichier en entier + les 2 docs référencés en intro.
 2. Ne pas commencer à construire la nouvelle structure sans avoir fait
