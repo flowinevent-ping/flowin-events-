@@ -74,10 +74,10 @@ Contenu déjà existant à 90 %, seule la navigation (11 groupes → 8 blocs) et
 ## 6. Corrections — liste priorisée
 | # | Correction | Ampleur | État |
 |---|---|---|---|
-| 1 | Fiche station cliquable depuis Origines du trafic (Camembert + tableaux) | Petit | ✅ Codé, build OK, **non poussé** |
-| 2 | Sélecteur Parcours mobil : filtrer par super event choisi + allowlist canonique (porter `NDS_EVENT_IDS` + libellés depuis dashboard.html) | Moyen | À faire |
-| 3 | Mise en page Parcours mobil : plafonner la colonne gauche pour éviter le téléphone collé à droite | Petit | À faire |
-| 4 | Vue « clics par jour » par station (porter `renderTrackQr()` timeline) | Moyen-grand | À faire |
+| 1 | Fiche station cliquable depuis Origines du trafic (Camembert + tableaux) | Petit | ✅ Fait et poussé (vérifié dans le code au 28/08, la note "non poussé" ci-dessus était donc caduque) |
+| 2 | Sélecteur Parcours mobil : filtrer par super event choisi + allowlist canonique (porter `NDS_EVENT_IDS` + libellés depuis dashboard.html) | Moyen | ✅ Fait différemment le 26/08 (groupement par pro, pas allowlist — décision prise avec Romain, ne pas revenir dessus) |
+| 3 | Mise en page Parcours mobil : plafonner la colonne gauche pour éviter le téléphone collé à droite | Petit | ✅ Fait (maxWidth déjà en place, vérifié au 28/08) |
+| 4 | Vue « clics par jour » par station (porter `renderTrackQr()` timeline) | Moyen-grand | ✅ Fait 28/08 (RPC `super_event_track_qr_quotidien` + `CourbeQuotidienne.tsx`, courbe pas timeline brute — répond à la question "combien par jour", pas au détail ligne par ligne) |
 | 5 | Fusionner Accueil / Pilotage / Rapports en une seule page | Moyen | À faire |
 | 6 | Relier ou fusionner Joueurs / Participants | Moyen | À faire |
 | 7 | Vue fréquence joueur × station × réponses | Grand — nécessite vérif Supabase d'abord | À investiguer |

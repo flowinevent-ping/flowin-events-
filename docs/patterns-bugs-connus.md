@@ -110,7 +110,49 @@ GROUP BY c.relname HAVING NOT bool_or(p.roles::text LIKE '%anon%' OR p.roles::te
 pas `{anon}` — un filtre texte naïf sur "anon" donne de faux positifs, vérifier
 `public` aussi.)
 
-## Protocole d'audit autonome (à exécuter en début de session, sans attendre un signalement)
+## Pattern F — Token de session non rafraîchi (outils HTML avec login)
+
+**Symptôme** : une page qui nécessite une connexion (`admin-connexion.html` +
+`flowin_admin_session` en localStorage) échoue en HTTP 401 après un certain
+temps, alors que la session semblait valide (l'utilisateur vient de se
+connecter, ou l'onglet est resté ouvert).
+
+**Cause récurrente** : `dashboard.html` a un mécanisme de rafraîchissement
+automatique du token (`_authRefresh()`, via `refresh_token`, toutes les 45
+min + proactif si expiration proche). Les outils plus récents qui
+réutilisent la même session (lecture de `flowin_admin_session`) n'ont pas
+tous reçu ce mécanisme — ils lisent l'`access_token` une fois au chargement
+et ne le renouvellent jamais.
+
+**Déjà trouvé et corrigé le 27-28/08** : `bons-commande-liste.html`,
+`facture-nds.html`, `bon-commande-nds.html`. Déjà présent (à ne pas
+retoucher) : `dashboard.html`, `tirage-nds.html`, `lots-nds.html`.
+
+**Comment vérifier** : `grep -L "_authRefresh\|refresh_token" $(grep -rl "flowin_admin_session" admin/public --include="*.html")`
+— tout fichier listé (donc sans le pattern) est suspect.
+
+## Pattern G — 3 systèmes dashboard jamais fusionnés (méta-pattern)
+
+**Symptôme** : Romain dit "ça a disparu" / "tu as réécrit un truc qui
+existait" / "ça ne correspond pas à ce qu'on avait fait" à propos d'un outil
+CRM, commercial ou de reporting.
+
+**Cause de fond** : `admin/public/dashboard.html` (legacy, ~930 Ko, encore
+modifié le 31/07), le dashboard SA Next.js (`admin/app/dashboard/*`), et une
+collection d'outils HTML statiques autonomes (`admin/public/*.html` —
+factures, bons de commande, kit-digital...) coexistent **sans jamais avoir
+été fusionnés**. Voir `docs/audit-dashboard-organisation-2026-08.md` pour le
+détail. Une fonctionnalité peut très bien être complète et soignée dans UNE
+des trois couches et absente/différente dans les deux autres.
+
+**Réflexe avant de dire "ça n'existe pas" ou de recoder quelque chose** :
+chercher dans les 3 couches, pas seulement celle sur laquelle on travaille.
+`grep -rl "<mot-clé>" admin/public admin/app admin/components` avant toute
+reconstruction. Lire `docs/SPEC-TECHNIQUE-flowin.md` et les docs d'audit
+existants (`docs/*audit*`, `docs/*carte-navigation*`) en tout début de
+session, pas seulement quand un problème remonte.
+
+
 
 1. Pattern A : lister toutes les pages avec `<table` mais 0 `onClick`
 2. Pattern B/C : `grep` les patterns ci-dessus, vérifier au cas par cas si c'est
