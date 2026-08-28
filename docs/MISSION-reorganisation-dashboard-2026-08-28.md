@@ -117,6 +117,26 @@ dans ce document ou dans le handoff précédent :
 pure question de convention (avec ou sans les segments `[id]`), rien n'a
 changé dans le code entre les deux relevés.
 
+## 3bis. Inventaire complet + proposition de zones — 29/08, en attente de validation
+
+**✅ Fait** : `docs/inventaire-zones-2026-08-29.md`, généré par
+`admin/public/carte-systeme/controleur.py` (v2 — lit désormais la vraie
+Sidebar Next.js en prod au lieu du seul menu legacy figé au 14/07, comme le
+faisait v1). Contient l'inventaire réel (Sidebar : 10 groupes/44 entrées,
+routes App Router, pages HTML orphelines) et une **proposition** de
+correspondance aux 4 zones (Super Event / Events kanban / Comm & outils /
+CRM 4 vues).
+
+Au passage, rebranché `/dashboard/operations` dans la Sidebar (seule route
+réellement orpheline, confirmée indépendamment par 3 sessions différentes
+les 28 et 29/08 — page réelle sur `v_se_dashboard`, jamais un doute sur son
+existence, juste jamais reliée).
+
+**⏳ En attente de validation point par point par Romain avant toute
+construction des zones** (règle du §4 ci-dessous, non négociable — ce
+n'est pas parce que l'inventaire est fait que la correspondance proposée
+est correcte).
+
 ## 4. Comment reprendre ce travail
 
 1. Lire ce fichier en entier + les 2 docs référencés en intro.

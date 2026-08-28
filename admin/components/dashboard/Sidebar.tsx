@@ -21,6 +21,7 @@ interface NavGroup {
 /* Refonte visuelle : icones SVG trait (meme registre que l'espace Pro), repli emoji si non mappe. */
 const ICON_PATHS: Record<string, string> = {
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+  gauge: '<path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path d="M12 12l4-4M8 12a4 4 0 0 1 4-4"/>',
   building: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/>',
   users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
   trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M6 4h12v5a6 6 0 0 1-12 0z"/><path d="M8 21h8M12 15v6"/>',
@@ -54,6 +55,7 @@ const ICON_BY_ID: Record<string, string> = {
   'landing-page': 'globe', pilotage: 'target', statistiques: 'chart', rapports: 'chart', 'rapport-points': 'pin',
   'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map',
   'nds-front': 'palette', 'nds-comm': 'megaphone', 'nds-media': 'film', prospection: 'phone', 'nds-bon-commande': 'receipt', 'nds-packs': 'gift',
+  operations: 'gauge',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
   roadmap: 'map', parametres: 'settings', maintenance: 'wrench', pro: 'layout', 'pro-comptes': 'link', 'pro-gagnants': 'dice', 'pro-crm': 'users', 'pro-tracking': 'target', 'pro-super': 'star', 'pro-events': 'calendar', 'pro-lots': 'gift',
 }
@@ -88,6 +90,7 @@ export default function Sidebar() {
       items: [
         { id: 'events', icon: '🎬', label: 'Animations (par pro)', count: events.length, live: liveCount, href: '/dashboard/events' },
         { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
+        { id: 'operations', icon: '📊', label: 'Opérations (commerces, tickets, CA)', href: '/dashboard/operations' },
         { id: 'parcours', icon: '📱', label: 'Parcours mobil', href: '/dashboard/parcours' },
       ],
     },
