@@ -1,14 +1,27 @@
 import { supabase } from './supabase'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinLot, FlowinPro } from './types'
 
+/**
+ * Colonnes lisibles par la clé anon sur `joueurs` (verifie en base, exclut
+ * `password_hash` -- durci par securite, cf. handoff securite). `select('*')`
+ * echoue ENTIEREMENT pour ce role (pas de droit table-level, uniquement
+ * colonne par colonne) : l'erreur est silencieuse (pas de check `error` sur
+ * ces appels), donnees vides sans aucun signal. Trouve le 28/08 -- affectait
+ * fetchAllJoueurs (donc TOUT le dashboard via le contexte partage) et
+ * fetchEventParticipants. Toujours utiliser cette liste, jamais '*', sur
+ * `joueurs` en anon.
+ */
+const COLONNES_JOUEURS_ANON = 'id,ts,pseudo,prenom,nom,email,ecole,classe,genre,ref,pwa_installed,pwa_installed_at,pts_total,streak,updated_at,user_id,push_token,niveau_id,derniere_session,tel,ddn,rgpd_at,profil_complet,code_postal,date_naissance,last_seen,external_id,optin,optin_date,first_seen,ville,events,source,client_type,score_moy,email_lower,ticket_code,gains,age_tranche,enseigne,lot_gagne,decouverte,adresse,tags,secteur,optin_version,classe_id,visiteur_id,etablissement_id,actif,sexe,tranche_age'
+
 /* ── Joueurs ── */
 export async function fetchAllJoueurs(): Promise<FlowinJoueur[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('joueurs')
-    .select('*')
+    .select(COLONNES_JOUEURS_ANON)
     .order('updated_at', { ascending: false })
     .limit(1000)
-  return (data ?? []) as FlowinJoueur[]
+  if (error) console.error('[fetchAllJoueurs]', error.message)
+  return (data ?? []) as unknown as FlowinJoueur[]
 }
 
 export async function updateJoueur(id: string, fields: Partial<FlowinJoueur>): Promise<boolean> {
@@ -110,12 +123,13 @@ export async function fetchEventParticipants(eventId: string): Promise<FlowinJou
     .eq('event_id', eventId)
   const joueurIds = Array.from(new Set((parts ?? []).map(p => p.joueur_id).filter(Boolean)))
   if (!joueurIds.length) return []
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('joueurs')
-    .select('*')
+    .select(COLONNES_JOUEURS_ANON)
     .in('id', joueurIds)
     .order('updated_at', { ascending: false })
-  return (data ?? []) as FlowinJoueur[]
+  if (error) console.error('[fetchEventParticipants]', error.message)
+  return (data ?? []) as unknown as FlowinJoueur[]
 }
 
 /* ── Stats globales ── */

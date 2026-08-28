@@ -30,9 +30,13 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
 
   const evIds = events.map(e => e.id)
 
-  /* Joueurs scopés aux events du pro */
+  /* Joueurs scopés aux events du pro
+     select('*') echoue silencieusement pour anon (pas de droit table-level sur
+     joueurs, uniquement colonne par colonne depuis le durcissement securite --
+     cf. admin/lib/dashboard.ts). Liste explicite, meme colonnes que fetchAllJoueurs. */
+  const COLS_JOUEURS = 'id,ts,pseudo,prenom,nom,email,ecole,classe,genre,ref,pwa_installed,pwa_installed_at,pts_total,streak,updated_at,user_id,push_token,niveau_id,derniere_session,tel,ddn,rgpd_at,profil_complet,code_postal,date_naissance,last_seen,external_id,optin,optin_date,first_seen,ville,events,source,client_type,score_moy,email_lower,ticket_code,gains,age_tranche,enseigne,lot_gagne,decouverte,adresse,tags,secteur,optin_version,classe_id,visiteur_id,etablissement_id,actif,sexe,tranche_age'
   const joueurPromises = evIds.map(eid =>
-    supabase.from('joueurs').select('*').contains('events', [eid])
+    supabase.from('joueurs').select(COLS_JOUEURS).contains('events', [eid])
   )
   const joueurResults = await Promise.all(joueurPromises)
   const joueurMap = new Map<string, FlowinJoueur>()
