@@ -79,7 +79,7 @@ Contenu déjà existant à 90 %, seule la navigation (11 groupes → 8 blocs) et
 | 3 | Mise en page Parcours mobil : plafonner la colonne gauche pour éviter le téléphone collé à droite | Petit | ✅ Fait (maxWidth déjà en place, vérifié au 28/08) |
 | 4 | Vue « clics par jour » par station (porter `renderTrackQr()` timeline) | Moyen-grand | ✅ Fait 28/08 (RPC `super_event_track_qr_quotidien` + `CourbeQuotidienne.tsx`, courbe pas timeline brute — répond à la question "combien par jour", pas au détail ligne par ligne) |
 | 5 | Fusionner Accueil / Pilotage / Rapports en une seule page | Moyen | À faire |
-| 6 | Relier ou fusionner Joueurs / Participants | Moyen | À faire |
+| 6 | Relier ou fusionner Joueurs / Participants | Moyen | ✅ Fait 28/08 (Participants ouvre maintenant la fiche Joueur au clic ; le sens inverse — JoueurDrawer → Historique de jeu — existait déjà) |
 | 7 | Vue fréquence joueur × station × réponses | Grand — nécessite vérif Supabase d'abord | À investiguer |
 | 8 | Mode « pro » dans Parcours mobil | Grand — chantier déjà identifié par Romain | À construire |
 | 9 | Réorganiser la sidebar SA en 8 blocs | Moyen | À faire, après validation de Romain |
