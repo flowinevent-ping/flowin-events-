@@ -58,6 +58,16 @@ export async function fetchBanquesPro(proId: string): Promise<Banque[]> {
   return (data ?? []) as Banque[]
 }
 
+/** Le SA n'est pas scope a un pro -- liste toutes les banques, tous pros confondus. */
+export async function fetchBanquesToutes(): Promise<Banque[]> {
+  const { data, error } = await supabase
+    .from('banques')
+    .select('*')
+    .order('updated_at', { ascending: false })
+  if (error) { console.error('[fetchBanquesToutes]', error.message); return [] }
+  return (data ?? []) as Banque[]
+}
+
 export async function fetchBanque(id: string): Promise<Banque | null> {
   const { data, error } = await supabase.from('banques').select('*').eq('id', id).maybeSingle()
   if (error) { console.error('[fetchBanque]', error.message); return null }

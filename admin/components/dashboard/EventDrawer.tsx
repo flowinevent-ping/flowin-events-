@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
+import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
@@ -24,6 +25,11 @@ export default function EventDrawer() {
   const [savingJeu, setSavingJeu] = useState(false)
   const [segments, setSegments] = useState<{ label: string; color: string; perdant?: boolean }[]>([])
   const [segmentsInit, setSegmentsInit] = useState(false)
+  const [banques, setBanques] = useState<Banque[]>([])
+  const [quizBanquesSel, setQuizBanquesSel] = useState<string[]>([])
+  const [quizNbQ, setQuizNbQ] = useState(5)
+  const [quizTimerOn, setQuizTimerOn] = useState(true)
+  const [quizTimerSec, setQuizTimerSec] = useState(30)
   const [participants, setParticipants] = useState<FlowinJoueur[]>([])
   const [loadingPart, setLoadingPart] = useState(false)
 
@@ -46,8 +52,16 @@ export default function EventDrawer() {
     setSegmentsInit(false)
     const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
     setSegments(((cfg.spinSegments as typeof segments) ?? []))
+    setQuizBanquesSel(((cfg.quizBanques as string[]) ?? []))
+    setQuizNbQ((cfg.quizNbQuestions as number) ?? 5)
+    const qt = cfg.quizTimer
+    setQuizTimerOn(qt !== false)
+    setQuizTimerSec(typeof qt === 'number' ? qt : 30)
     setSegmentsInit(true)
   }, [ev?.id])
+
+  // Liste globale, non scopee a un event -- chargee une seule fois (Pattern G : le SA n'est pas un pro).
+  useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
 
   const COULEURS_SEGMENT = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#cfc4d8', '#9d4edd', '#ff8fab']
 
@@ -55,6 +69,20 @@ export default function EventDrawer() {
     if (!ev) return
     setSavingJeu(true)
     const cfg = { ...((ev.cfg ?? {}) as Record<string, unknown>), spinSegments: segments }
+    const ok = await upsertEvent({ id: ev.id, cfg: cfg as FlowinEvent['cfg'] })
+    if (ok) setEvents(events.map(x => x.id === ev.id ? { ...x, cfg: cfg as FlowinEvent['cfg'] } : x))
+    setSavingJeu(false)
+  }
+
+  async function saveQuiz() {
+    if (!ev) return
+    setSavingJeu(true)
+    const cfg = {
+      ...((ev.cfg ?? {}) as Record<string, unknown>),
+      quizBanques: quizBanquesSel,
+      quizNbQuestions: quizNbQ,
+      quizTimer: quizTimerOn ? quizTimerSec : false,
+    }
     const ok = await upsertEvent({ id: ev.id, cfg: cfg as FlowinEvent['cfg'] })
     if (ok) setEvents(events.map(x => x.id === ev.id ? { ...x, cfg: cfg as FlowinEvent['cfg'] } : x))
     setSavingJeu(false)
@@ -110,6 +138,14 @@ export default function EventDrawer() {
   const evParts = ((ev.cfg?.partenaires ?? []) as string[]).map((id: string) => partenaires.find(p => p.id === id)).filter((x): x is FlowinPartenaire => !!x)
   const qrUrl = `https://flowin-events.vercel.app/parcours/${ev.module}?ev=${ev.id}`
 
+  // Contenu du jeu quiz -- verifie dans le code reel (grep "cfg\." dans chaque *Client.tsx, Pattern H) :
+  // QuizClient et QuizsoloClient lisent banques + customQuestions, QuizmasterClient lit SEULEMENT les banques.
+  const isQuizFamily = ev.module === 'quiz' || ev.module === 'quizmaster' || ev.module === 'quizsolo'
+  const banquesSelectionnees = banques.filter(b => quizBanquesSel.includes(b.id))
+  const totalBanques = banquesSelectionnees.reduce((s, b) => s + (b.questions ?? []).filter(q => q.type === 'qcm').length, 0)
+  const customCount = ((ev.cfg?.customQuestions as unknown[]) ?? []).length
+  const totalDispo = totalBanques + (ev.module !== 'quizmaster' ? customCount : 0)
+
   function enterEdit() { setForm({ ...ev }); setEdit(true) }
 
   async function save() {
@@ -133,6 +169,7 @@ export default function EventDrawer() {
   const tabs = [
     { id: 'infos', label: 'Infos' },
     ...(ev.module === 'spin' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: segments.length }] : []),
+    ...(isQuizFamily ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: totalDispo }] : []),
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
@@ -237,7 +274,7 @@ export default function EventDrawer() {
           </>
         )}
 
-        {drawer.tab === 'jeu' && segmentsInit && (
+        {drawer.tab === 'jeu' && segmentsInit && ev.module === 'spin' && (
           <div>
             <SectionHeader>🎡 Segments de la roue</SectionHeader>
             {segments.length === 0 && (
@@ -277,6 +314,93 @@ export default function EventDrawer() {
             <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 10 }}>
               Un segment "Perdant" ne remet aucun lot. Les autres doivent correspondre à un lot réel
               (onglet Lots) pour que le stock se décrémente correctement au tirage.
+            </div>
+          </div>
+        )}
+
+        {drawer.tab === 'jeu' && segmentsInit && isQuizFamily && (
+          <div>
+            <SectionHeader>🎯 Banques de questions</SectionHeader>
+            {banques.length === 0 && (
+              <div className="sa-empty-inline" style={{ marginBottom: 12 }}>Aucune banque en base.</div>
+            )}
+            {banques.map(b => {
+              const nbQcm = (b.questions ?? []).filter(q => q.type === 'qcm').length
+              const checked = quizBanquesSel.includes(b.id)
+              const proBanque = pros.find(p => p.id === b.pro_id)
+              return (
+                <div key={b.id} className="sa-list-item" style={{ alignItems: 'flex-start' }}>
+                  <label style={{ display: 'flex', gap: 8, flex: 1, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox" checked={checked} style={{ marginTop: 3 }}
+                      onChange={e => setQuizBanquesSel(
+                        e.target.checked ? [...quizBanquesSel, b.id] : quizBanquesSel.filter(x => x !== b.id)
+                      )}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700 }}>{b.nom}</div>
+                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+                        {nbQcm} question{nbQcm !== 1 ? 's' : ''} qcm · {b.statut === 'valide' ? 'Validée' : 'Brouillon'} · {proBanque?.nom ?? b.pro_id}
+                      </div>
+                    </div>
+                  </label>
+                  <a
+                    href={`/pro/banques/${b.id}`} target="_blank" rel="noreferrer"
+                    className="sa-btn sm" style={{ flexShrink: 0 }}
+                  >
+                    Éditer →
+                  </a>
+                </div>
+              )
+            })}
+
+            <SectionHeader>⚙️ Paramètres</SectionHeader>
+            <div className="sa-field">
+              <label className="sa-label">Nombre de questions posées</label>
+              <input
+                className="sa-input" type="number" min={1} max={50} value={quizNbQ}
+                onChange={e => setQuizNbQ(parseInt(e.target.value) || 1)}
+                style={{ maxWidth: 120 }}
+              />
+            </div>
+            {ev.module === 'quiz' && (
+              <div className="sa-field">
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, fontWeight: 700, marginBottom: 6 }}>
+                  <input type="checkbox" checked={quizTimerOn} onChange={e => setQuizTimerOn(e.target.checked)} />
+                  Chrono par question
+                </label>
+                {quizTimerOn && (
+                  <input
+                    className="sa-input" type="number" min={5} max={120} value={quizTimerSec}
+                    onChange={e => setQuizTimerSec(parseInt(e.target.value) || 30)}
+                    style={{ maxWidth: 120 }}
+                  />
+                )}
+              </div>
+            )}
+
+            {totalDispo === 0 && (
+              <div className="sa-alert warn">
+                ⚠️ Jeu vide — aucune banque sélectionnée ou banques sans question qcm. Le joueur verra un quiz sans questions.
+              </div>
+            )}
+            {totalDispo > 0 && quizNbQ > totalDispo && (
+              <div className="sa-alert warn">
+                ⚠️ {quizNbQ} questions demandées mais {totalDispo} seulement disponibles
+                {customCount > 0 && ev.module !== 'quizmaster' ? ` (banques + ${customCount} personnalisée${customCount > 1 ? 's' : ''})` : ''}.
+                Le jeu tirera au maximum {totalDispo}.
+              </div>
+            )}
+            {ev.module === 'quizmaster' && customCount > 0 && (
+              <div className="sa-muted" style={{ fontSize: 11, marginTop: 4, marginBottom: 10 }}>
+                ℹ️ {customCount} question{customCount > 1 ? 's' : ''} personnalisée{customCount > 1 ? 's' : ''} en base mais ignorée{customCount > 1 ? 's' : ''} : Quiz Master ne lit que les banques.
+              </div>
+            )}
+
+            <div style={{ marginTop: 18 }}>
+              <button className="sa-btn primary" onClick={saveQuiz} disabled={savingJeu}>
+                {savingJeu ? 'Enregistrement…' : '✓ Enregistrer'}
+              </button>
             </div>
           </div>
         )}

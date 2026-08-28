@@ -154,6 +154,36 @@ session, pas seulement quand un problème remonte.
 
 
 
+## Pattern H — `lib/types.ts` désynchronisé du composant réel
+
+**Symptôme** : un écran de config écrit une clé `cfg.xxx` qui n'est lue par
+aucun composant joueur, ou omet une clé réellement lue — l'event paraît
+configuré côté admin mais rien ne change côté joueur (ou l'inverse).
+
+**Cause de fond** : `EventCfg` (`lib/types.ts`) a `[key: string]: unknown`,
+donc TypeScript n'attrape aucun écart entre le type déclaré et ce que lit
+vraiment le composant `*Client.tsx` du module. Écarts déjà trouvés :
+`voteSections` et `tombolaChamps` étaient déclarés et lus **nulle part**
+(vote lit en réalité `voteItems`/`voteMode`) ; `quizCustomQuestions` est
+déclaré mais jamais lu (la vraie clé est `customQuestions`) ; `customQuestions`,
+`quizNbQuestions`, `quizTimer`, `tirageDate` étaient lus par des composants
+et absents du type avant le 28/08 (corrigé).
+
+**Nuance confirmée le 28/08 en lisant les 3 fichiers quiz ligne à ligne**
+(`grep -n "cfg\." sur chaque *Client.tsx`, ne jamais supposer par analogie) :
+
+| Clé cfg | quiz | quizmaster | quizsolo |
+|---|---|---|---|
+| `quizBanques` (banques) | ✅ | ✅ | ✅ |
+| `customQuestions` | ✅ | ❌ jamais lu | ✅ |
+| `quizNbQuestions` | ✅ (défaut 5) | ✅ (défaut 5) | ✅ (défaut 5) |
+| `quizTimer` | ✅ (défaut 30, `false`=off) | ❌ jamais lu | ❌ jamais lu (chrono fixe 30s en dur, pas piloté par cfg) |
+
+Avant tout écran de config : `grep -rn "cfg\." admin/app/parcours/<module>/*Client.tsx`
+— ne jamais généraliser le comportement d'un module à un autre du même
+"type" (quiz/quizmaster/quizsolo se ressemblent mais divergent précisément
+sur ces 2 points).
+
 1. Pattern A : lister toutes les pages avec `<table` mais 0 `onClick`
 2. Pattern B/C : `grep` les patterns ci-dessus, vérifier au cas par cas si c'est
    un vrai defaut (contexte partenaire/event réel) ou un usage légitime (Pattern B

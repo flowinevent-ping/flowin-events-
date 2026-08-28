@@ -17,10 +17,19 @@ export interface EventCfg {
   spinSegments?: Array<{ label: string; color: string; perdant?: boolean; stock?: number }>
   voteSections?: Array<{ titre: string; options: string[] }>
   quizBanques?: string[]
+  /** Deprecated : cle jamais lue par le code reel, garder pour compat lecture legacy uniquement. La vraie cle est `customQuestions`. */
   quizCustomQuestions?: unknown[]
+  /** Questions personnalisees a l'event, lues par QuizClient.tsx et QuizsoloClient.tsx (PAS QuizmasterClient.tsx). */
+  customQuestions?: unknown[]
+  /** Nombre de questions tirees par partie. Lu par les 3 modules quiz, defaut 5. */
+  quizNbQuestions?: number
+  /** Chrono en secondes par question. Lu UNIQUEMENT par QuizClient.tsx (quiz) -- `false` desactive, non lu par quizmaster/quizsolo. */
+  quizTimer?: number | false
   quizBonusList?: Array<{ label: string; type: string; options: Array<{ label: string }> }>
   tombolaChamps?: string[]
   drawDate?: string
+  /** Texte affiche du tirage ("Tirage lundi 11h"), lu par quiz/quizmaster/quizsolo/spin/vote. */
+  tirageDate?: string
   subtitle?: string
   nomCourt?: string
   datesLabel?: string
