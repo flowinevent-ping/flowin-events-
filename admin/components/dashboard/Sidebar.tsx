@@ -90,7 +90,6 @@ export default function Sidebar() {
       items: [
         { id: 'events', icon: '🎬', label: 'Animations (par pro)', count: events.length, live: liveCount, href: '/dashboard/events' },
         { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
-        { id: 'operations', icon: '📊', label: 'Opérations (commerces, tickets, CA)', href: '/dashboard/operations' },
         { id: 'parcours', icon: '📱', label: 'Parcours mobil', href: '/dashboard/parcours' },
       ],
     },
