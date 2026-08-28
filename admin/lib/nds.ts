@@ -641,3 +641,19 @@ export async function fetchSondageLanding(se: string = SE_DEFAUT): Promise<Sonda
   if (error) { console.error('[fetchSondageLanding]', error.message); return null }
   return (data as SondageLanding) ?? null
 }
+
+export interface TrackQrJour {
+  jour: string
+  scans_station: number
+  scans_reseaux: number
+  visiteurs: number
+  clics: number
+}
+
+/** Tendance quotidienne des scans/clics — un point par jour sur toute la période de l'event. */
+export async function fetchTrackQrQuotidien(se: string = SE_DEFAUT): Promise<TrackQrJour[]> {
+  const { data, error } = await supabase.rpc('super_event_track_qr_quotidien', { p_se: se })
+  if (error) { console.error('[fetchTrackQrQuotidien]', error.message); return [] }
+  return (data as TrackQrJour[]) ?? []
+}
+

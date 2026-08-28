@@ -9,13 +9,15 @@ import { useEffect, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
-import { fetchTrackQr, fetchSuperEvents, libelleSource, type TrackQr, type SuperEvent } from '@/lib/nds'
+import { CourbeQuotidienne } from '@/components/dashboard/CourbeQuotidienne'
+import { fetchTrackQr, fetchTrackQrQuotidien, fetchSuperEvents, libelleSource, type TrackQr, type TrackQrJour, type SuperEvent } from '@/lib/nds'
 
 export default function Page() {
   const { partenaires, openDrawer } = useDashboard()
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [se, setSe] = useState('')
   const [t, setT] = useState<TrackQr | null>(null)
+  const [jours, setJours] = useState<TrackQrJour[]>([])
   const [charge, setCharge] = useState(true)
 
   /* Une source "reseaux-<slug>" correspond toujours au partenaire pt-<slug>
@@ -33,7 +35,9 @@ export default function Page() {
   useEffect(() => {
     if (!se) return
     setCharge(true)
-    fetchTrackQr(se).then(setT).finally(() => setCharge(false))
+    Promise.all([fetchTrackQr(se), fetchTrackQrQuotidien(se)])
+      .then(([tq, tqj]) => { setT(tq); setJours(tqj) })
+      .finally(() => setCharge(false))
   }, [se])
 
   const parts = (t?.origines ?? [])
@@ -68,6 +72,21 @@ export default function Page() {
                 </div>
               ))}
             </div>
+
+            {jours.length > 0 && (
+              <>
+                <SectionHeader>📈 Tendance quotidienne</SectionHeader>
+                <CourbeQuotidienne
+                  titre=""
+                  points={jours.map(j => ({ jour: j.jour, valeurs: { station: j.scans_station, reseaux: j.scans_reseaux, clics: j.clics } }))}
+                  series={[
+                    { cle: 'station', label: 'Scans QR station', couleur: '#7C2D92' },
+                    { cle: 'reseaux', label: 'Scans QR réseaux', couleur: '#378ADD' },
+                    { cle: 'clics', label: 'Clics sortants', couleur: '#E0218A' },
+                  ]}
+                />
+              </>
+            )}
 
             <SectionHeader>📍 Origine des visiteurs</SectionHeader>
             <div style={{ marginBottom: 20 }}>
