@@ -14,7 +14,7 @@ export interface EventCfgFront {
 export interface EventCfg {
   front?: EventCfgFront
   partenaires?: string[]
-  spinSegments?: Array<{ label: string; proba: number; couleur?: string }>
+  spinSegments?: Array<{ label: string; color: string; perdant?: boolean; stock?: number }>
   voteSections?: Array<{ titre: string; options: string[] }>
   quizBanques?: string[]
   quizCustomQuestions?: unknown[]

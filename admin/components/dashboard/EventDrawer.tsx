@@ -21,6 +21,9 @@ export default function EventDrawer() {
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinEvent>>({})
   const [saving, setSaving] = useState(false)
+  const [savingJeu, setSavingJeu] = useState(false)
+  const [segments, setSegments] = useState<{ label: string; color: string; perdant?: boolean }[]>([])
+  const [segmentsInit, setSegmentsInit] = useState(false)
   const [participants, setParticipants] = useState<FlowinJoueur[]>([])
   const [loadingPart, setLoadingPart] = useState(false)
 
@@ -38,6 +41,24 @@ export default function EventDrawer() {
       })
     }
   }, [drawer.tab, ev])
+
+  useEffect(() => {
+    setSegmentsInit(false)
+    const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
+    setSegments(((cfg.spinSegments as typeof segments) ?? []))
+    setSegmentsInit(true)
+  }, [ev?.id])
+
+  const COULEURS_SEGMENT = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#cfc4d8', '#9d4edd', '#ff8fab']
+
+  async function saveSegments() {
+    if (!ev) return
+    setSavingJeu(true)
+    const cfg = { ...((ev.cfg ?? {}) as Record<string, unknown>), spinSegments: segments }
+    const ok = await upsertEvent({ id: ev.id, cfg: cfg as FlowinEvent['cfg'] })
+    if (ok) setEvents(events.map(x => x.id === ev.id ? { ...x, cfg: cfg as FlowinEvent['cfg'] } : x))
+    setSavingJeu(false)
+  }
 
   // Ex-violation des Rules of Hooks : ces 2 hooks (+ tri/filtre ci-dessous) etaient
   // declares APRES le `if (!ev) return` -> nombre de hooks variable selon les renders,
@@ -111,6 +132,7 @@ export default function EventDrawer() {
 
   const tabs = [
     { id: 'infos', label: 'Infos' },
+    ...(ev.module === 'spin' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: segments.length }] : []),
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
@@ -213,6 +235,50 @@ export default function EventDrawer() {
               <textarea className="sa-input" value={form.description ?? ''} onChange={f('description')} rows={3} />
             </div>
           </>
+        )}
+
+        {drawer.tab === 'jeu' && segmentsInit && (
+          <div>
+            <SectionHeader>🎡 Segments de la roue</SectionHeader>
+            {segments.length === 0 && (
+              <div className="sa-empty-inline" style={{ marginBottom: 12 }}>
+                Aucun segment — le joueur verra une roue vide. Ajoute au moins 2 segments.
+              </div>
+            )}
+            {segments.map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{ width: 20, height: 20, borderRadius: 5, background: s.color, flexShrink: 0, border: '1px solid var(--sa-border)' }} />
+                <input
+                  className="sa-input" value={s.label} placeholder="Libellé du segment"
+                  onChange={e => setSegments(segments.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
+                  style={{ flex: 1 }}
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: 'var(--sa-muted)', whiteSpace: 'nowrap' }}>
+                  <input
+                    type="checkbox" checked={!!s.perdant}
+                    onChange={e => setSegments(segments.map((x, j) => j === i ? { ...x, perdant: e.target.checked } : x))}
+                  />
+                  Perdant
+                </label>
+                <button className="sa-btn sm" onClick={() => setSegments(segments.filter((_, j) => j !== i))}>Retirer</button>
+              </div>
+            ))}
+            <button
+              className="sa-btn sm" style={{ marginTop: 4 }}
+              onClick={() => setSegments([...segments, { label: '', color: COULEURS_SEGMENT[segments.length % COULEURS_SEGMENT.length] }])}
+            >
+              + Ajouter un segment
+            </button>
+            <div style={{ marginTop: 18 }}>
+              <button className="sa-btn primary" onClick={saveSegments} disabled={savingJeu}>
+                {savingJeu ? 'Enregistrement…' : '✓ Enregistrer les segments'}
+              </button>
+            </div>
+            <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 10 }}>
+              Un segment "Perdant" ne remet aucun lot. Les autres doivent correspondre à un lot réel
+              (onglet Lots) pour que le stock se décrémente correctement au tirage.
+            </div>
+          </div>
         )}
 
         {drawer.tab === 'stats' && (
