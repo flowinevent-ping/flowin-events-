@@ -32,6 +32,8 @@ soit.
 
 ### Non résolu, cause identifiée précisément
 - **Wizard "Nouvel événement"** ne correspond pas à la réalité de l'app : crée bien l'event (identité/module/dates/lots/visibilité) mais **il n'existe nulle part d'écran pour configurer le contenu de jeu après création** (segments de roue, candidats de vote, questions de quiz...). Le code le dit littéralement : *"la configuration fine du parcours passe par `cfg` et se règle après création"* — sauf que cet écran n'existe pas. C'est la même cause que "les jeux sont vides" signalé plus tôt : un event créé par le wizard est une coquille sans contenu.
+  **⏳ En cours, 28/08 (commit `a5522b7`)** : premier écran construit — onglet "Contenu du jeu" dans EventDrawer, module `spin` uniquement (segments : ajouter/retirer/couleur/perdant). Vérifié sur données réelles (`ev-flowin-demo`). Au passage : `lib/types.ts` déclarait `spinSegments` avec des champs (`proba`, `couleur`) que le vrai composant `SpinClient.tsx` n'utilise pas — type jamais synchronisé avec la réalité, corrigé.
+  **Reste à faire, même chantier** : vote (`voteItems`), tombola (`partenaires`), quiz/quizmaster/quizsolo (`customQuestions` ou banques). **Vérifier `lib/types.ts` AVANT de construire chaque écran** — `voteSections`/`quizBanques`/`quizCustomQuestions`/`tombolaChamps` sont probablement, eux aussi, désynchronisés du composant réel (même erreur que `spinSegments`), à ne pas prendre pour argent comptant.
 - Roadmap (`/dashboard/roadmap`) : liste statique maintenue à la main (`lib/roadmap.ts`), ne reflète pas automatiquement l'avancement réel (ex. les points de l'audit du 10/08 cochés ailleurs ne remontent pas ici)
 
 ### En attente de confirmation de Romain
