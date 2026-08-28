@@ -184,6 +184,38 @@ Avant tout écran de config : `grep -rn "cfg\." admin/app/parcours/<module>/*Cli
 "type" (quiz/quizmaster/quizsolo se ressemblent mais divergent précisément
 sur ces 2 points).
 
+## Pattern I — Bornage de date oublié sur une seule CTE (RPC de comptage)
+
+**Symptôme** : une colonne d'un rapport borné aux dates du super event affiche
+une valeur incohérente avec les autres colonnes de la même ligne (ex.
+« répondants bonus » supérieur au nombre de joueurs du même point de jeu).
+
+**Cause récurrente** : un RPC de comptage assemble plusieurs CTE (une par
+métrique). Chaque CTE borne ses lignes aux dates du super event
+(`(x.created_at at time zone 'Europe/Paris')::date between se.date_d and
+se.date_f`) — **sauf une**, oubliée lors de l'écriture initiale. Elle continue
+de compter des lignes hors festival (ex. des réponses de **test** créées
+avant l'ouverture, le 01/07 pour NDS 2026) indéfiniment, sans qu'aucune
+erreur ne se déclenche — la fonction reste syntaxiquement valide.
+
+**Déjà trouvé et corrigé le 29/08** : `super_event_rapport_points()` (CTE
+`bo`) et `super_event_bonus_resultats()` (CTE `base`) — les deux lisaient
+`se_reponses` sans bornage alors que `visites`/`participations` en avaient un
+partout ailleurs dans les mêmes fonctions. Réel : le total
+« 321 répondants bonus » publié à Romain le 25/07 était gonflé de
+19 répondants (321 − 302 après correctif, delta directement vérifiable). Signalé une première fois le
+25/07 (hypothèse de cause fausse : désalignement `event_id`), persistait
+encore le 29/08 — la vraie cause n'avait jamais été trouvée.
+
+**Comment vérifier** : pour tout RPC agrégeant plusieurs CTE bornées aux
+dates d'un super event, lister CHAQUE CTE et vérifier individuellement
+qu'elle porte bien la condition de bornage — ne jamais supposer qu'une CTE
+suit la même règle que ses voisines parce qu'elle leur ressemble
+structurellement (même erreur de fond que le Pattern H sur les types : la
+similarité de forme ne garantit pas l'identité de comportement).
+`pg_get_functiondef(oid)` (`from pg_proc where proname = '...'`) pour lire
+le SQL réel d'un RPC avant de le corriger à l'aveugle.
+
 1. Pattern A : lister toutes les pages avec `<table` mais 0 `onClick`
 2. Pattern B/C : `grep` les patterns ci-dessus, vérifier au cas par cas si c'est
    un vrai defaut (contexte partenaire/event réel) ou un usage légitime (Pattern B

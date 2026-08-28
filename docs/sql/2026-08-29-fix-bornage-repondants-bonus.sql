@@ -1,0 +1,42 @@
+-- 29/08/2026 — Fix bornage manquant sur les repondants bonus
+--
+-- SIGNALE PAR ROMAIN : capture d'ecran de /dashboard/rapport-points montrant
+-- que l'anomalie documentee le 25/07 ("Brigade Verte 1 : repondants bonus (6)
+-- depasse le nombre de joueurs (2)") persistait toujours.
+--
+-- CAUSE RACINE REELLE (differente de l'hypothese du 25/07 qui parlait d'un
+-- desalignement event_id) : dans super_event_rapport_points() ET
+-- super_event_bonus_resultats(), TOUTES les CTE bornent leurs lignes aux
+-- dates du super event (f, p, rj, co, pic / se.date_d..se.date_f) SAUF la
+-- CTE "bo"/"base" qui lit se_reponses.bonus_reponses SANS AUCUN bornage de
+-- date. Des reponses de TEST du 01/07 (avant le festival 09-18/07) restaient
+-- donc comptees indefiniment.
+--
+-- IMPACT CHIFFRE (verifie avant/apres) :
+--   - super_event_rapport_points('se-nds-2026') : l'anomalie
+--     repondants_bonus > joueurs disparait totalement (0 point concerne,
+--     Brigade Verte 1 tombe a 0 repondant reel — les 6 reponses etaient
+--     100% des donnees de test).
+--   - super_event_bonus_resultats('se-nds-2026') : repondants_total
+--     321 -> 302 (deja publie a Romain le 25/07 comme chiffre final).
+--     Par famille : RSE 247 -> 240, BV 74 -> 63.
+--     Les pourcentages par question de ce rapport etaient donc calcules sur
+--     un denominateur legerement gonfle — a reconsulter si un support
+--     commercial a deja repris le detail question par question (pas
+--     seulement les totaux 247/74).
+--
+-- CORRECTIF : ajout de `and r.jour between se.date_d and se.date_f` (colonne
+-- `jour`, deja presente sur se_reponses, deja utilisee pour l'exploitation-day
+-- ailleurs dans le projet) sur les deux CTE concernees. Migrations Supabase
+-- appliquees directement (apply_migration), pas de fichier de migration
+-- versionne cote Supabase — ce fichier sert d'archive/preuve, comme pour les
+-- autres fixes de ce dossier.
+--
+-- Cf. nouveau Pattern I dans docs/patterns-bugs-connus.md : verifier
+-- INDIVIDUELLEMENT chaque CTE d'un RPC de comptage, jamais supposer qu'elle
+-- suit la meme regle de bornage que ses voisines.
+
+-- Definitions completes appliquees : voir migrations Supabase
+--   fix_super_event_rapport_points_bornage_bonus
+--   fix_super_event_bonus_resultats_bornage
+-- (recuperables via `select pg_get_functiondef(oid) from pg_proc where proname = '...'`)
