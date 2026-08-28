@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchParticipants, type Participant } from '@/lib/nds'
+import { useDashboard } from '@/contexts/DashboardContext'
 
 const PAGE = 50
 const fr = (d: string | null) => {
@@ -18,6 +19,7 @@ const fr = (d: string | null) => {
 }
 
 export default function Page() {
+  const { openDrawer } = useDashboard()
   const [liste, setListe] = useState<Participant[] | null>(null)
   const [q, setQ] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'optin' | 'fideles'>('tous')
@@ -98,7 +100,8 @@ export default function Page() {
         {liste !== null && filtres.length === 0 && <EmptyState title="Aucun participant pour cette sélection" />}
 
         {filtres.slice(0, limite).map(p => (
-          <div key={p.joueur_id} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 5 }}>
+          <div key={p.joueur_id} onClick={() => openDrawer('joueur', p.joueur_id)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '9px 12px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 5, cursor: 'pointer' }}>
             <span style={{ flex: 1, minWidth: 170 }}>
               <b style={{ fontSize: 13 }}>{[p.prenom, p.nom].filter(Boolean).join(' ') || '—'}</b>
               <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>{p.code_postal ? ` · ${p.code_postal}` : ''}</span>
