@@ -216,6 +216,33 @@ similarité de forme ne garantit pas l'identité de comportement).
 `pg_get_functiondef(oid)` (`from pg_proc where proname = '...'`) pour lire
 le SQL réel d'un RPC avant de le corriger à l'aveugle.
 
+## Pattern J — Rebrancher une page orpheline sans vérifier son style
+
+**Symptôme** : une page réintégrée au menu (cf. Pattern D) s'affiche avec une
+palette, une police ou une mise en page complètement différentes du reste
+du dashboard — visuellement, on dirait une autre application.
+
+**Cause récurrente** : une page a été codée à un moment où le système visuel
+`sa-*` (composants `SectionHeader`, `sa-kpi-grid`, `sa-card`, etc.) n'existait
+pas encore, ou par une session qui l'a ignoré. Le code fonctionne, les
+données sont réelles — mais le style est resté un one-off (ex. objet `S`
+de styles inline propre à la page, palette sombre violette/rose, police
+différente). Retrouver une page orpheline via Pattern D ne dit rien de
+son état visuel : existence fonctionnelle ≠ intégration visuelle.
+
+**Trouvé le 29/08** : `/dashboard/operations` rebranchée dans la Sidebar
+sans vérification de style — palette et police entièrement disjointes de
+`sa-*`. Repéré par Romain sur capture d'écran, lien retiré dans la foulée
+(commit `9aafd40`) en attendant une décision (restyler ou laisser de côté).
+
+**Règle à partir de maintenant** : avant de relier une page orpheline dans
+la Sidebar, ouvrir son code et vérifier qu'elle utilise les composants
+`sa-*` partagés (`grep -n "S\.\|style={{" ` sur le fichier — un objet de
+styles inline dédié est un signal d'alerte). Si elle ne les utilise pas,
+le rebranchement n'est pas une simple entrée de menu : c'est un chantier
+de restylage, à traiter et annoncer comme tel, pas glissé au passage d'un
+inventaire.
+
 1. Pattern A : lister toutes les pages avec `<table` mais 0 `onClick`
 2. Pattern B/C : `grep` les patterns ci-dessus, vérifier au cas par cas si c'est
    un vrai defaut (contexte partenaire/event réel) ou un usage légitime (Pattern B
