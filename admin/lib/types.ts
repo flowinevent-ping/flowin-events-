@@ -15,7 +15,12 @@ export interface EventCfg {
   front?: EventCfgFront
   partenaires?: string[]
   spinSegments?: Array<{ label: string; color: string; perdant?: boolean; stock?: number }>
+  /** Deprecated : cle jamais lue par le code reel (Pattern H). La vraie cle est `voteItems`. */
   voteSections?: Array<{ titre: string; options: string[] }>
+  /** Elements a voter, lus par VoteClient.tsx (avec repli legacy cfg.comediens / cfg.standupComediens en lecture). */
+  voteItems?: Array<{ id: string; nom: string; emoji?: string; genre?: string; desc?: string }>
+  /** Mode de vote, defaut 'stars' -- seul mode implemente cote composant a ce jour, mais deja stocke en base par vote. */
+  voteMode?: string
   quizBanques?: string[]
   /** Deprecated : cle jamais lue par le code reel, garder pour compat lecture legacy uniquement. La vraie cle est `customQuestions`. */
   quizCustomQuestions?: unknown[]

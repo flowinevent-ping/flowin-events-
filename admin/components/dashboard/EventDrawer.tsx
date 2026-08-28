@@ -30,6 +30,7 @@ export default function EventDrawer() {
   const [quizNbQ, setQuizNbQ] = useState(5)
   const [quizTimerOn, setQuizTimerOn] = useState(true)
   const [quizTimerSec, setQuizTimerSec] = useState(30)
+  const [voteItems, setVoteItems] = useState<{ id: string; nom: string; emoji?: string; genre?: string; desc?: string }[]>([])
   const [participants, setParticipants] = useState<FlowinJoueur[]>([])
   const [loadingPart, setLoadingPart] = useState(false)
 
@@ -57,6 +58,7 @@ export default function EventDrawer() {
     const qt = cfg.quizTimer
     setQuizTimerOn(qt !== false)
     setQuizTimerSec(typeof qt === 'number' ? qt : 30)
+    setVoteItems(((cfg.voteItems as typeof voteItems) ?? (cfg.comediens as typeof voteItems) ?? (cfg.standupComediens as typeof voteItems) ?? []))
     setSegmentsInit(true)
   }, [ev?.id])
 
@@ -83,6 +85,15 @@ export default function EventDrawer() {
       quizNbQuestions: quizNbQ,
       quizTimer: quizTimerOn ? quizTimerSec : false,
     }
+    const ok = await upsertEvent({ id: ev.id, cfg: cfg as FlowinEvent['cfg'] })
+    if (ok) setEvents(events.map(x => x.id === ev.id ? { ...x, cfg: cfg as FlowinEvent['cfg'] } : x))
+    setSavingJeu(false)
+  }
+
+  async function saveVote() {
+    if (!ev) return
+    setSavingJeu(true)
+    const cfg = { ...((ev.cfg ?? {}) as Record<string, unknown>), voteItems }
     const ok = await upsertEvent({ id: ev.id, cfg: cfg as FlowinEvent['cfg'] })
     if (ok) setEvents(events.map(x => x.id === ev.id ? { ...x, cfg: cfg as FlowinEvent['cfg'] } : x))
     setSavingJeu(false)
@@ -170,6 +181,7 @@ export default function EventDrawer() {
     { id: 'infos', label: 'Infos' },
     ...(ev.module === 'spin' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: segments.length }] : []),
     ...(isQuizFamily ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: totalDispo }] : []),
+    ...(ev.module === 'vote' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: voteItems.length }] : []),
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
@@ -401,6 +413,52 @@ export default function EventDrawer() {
               <button className="sa-btn primary" onClick={saveQuiz} disabled={savingJeu}>
                 {savingJeu ? 'Enregistrement…' : '✓ Enregistrer'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {drawer.tab === 'jeu' && segmentsInit && ev.module === 'vote' && (
+          <div>
+            <SectionHeader>⭐ Éléments à voter</SectionHeader>
+            {voteItems.length === 0 && (
+              <div className="sa-empty-inline" style={{ marginBottom: 12 }}>
+                Aucun élément — le joueur verra un vote vide. Ajoute au moins 2 éléments.
+              </div>
+            )}
+            {voteItems.map((it, i) => (
+              <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <input
+                  className="sa-input" value={it.emoji ?? ''} placeholder="🎤"
+                  onChange={e => setVoteItems(voteItems.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))}
+                  style={{ width: 48, textAlign: 'center', flexShrink: 0, padding: '9px 4px' }}
+                />
+                <input
+                  className="sa-input" value={it.nom} placeholder="Nom"
+                  onChange={e => setVoteItems(voteItems.map((x, j) => j === i ? { ...x, nom: e.target.value } : x))}
+                  style={{ flex: 1 }}
+                />
+                <input
+                  className="sa-input" value={it.genre ?? ''} placeholder="Genre (optionnel)"
+                  onChange={e => setVoteItems(voteItems.map((x, j) => j === i ? { ...x, genre: e.target.value } : x))}
+                  style={{ flex: 1 }}
+                />
+                <button className="sa-btn sm" onClick={() => setVoteItems(voteItems.filter((_, j) => j !== i))}>Retirer</button>
+              </div>
+            ))}
+            <button
+              className="sa-btn sm" style={{ marginTop: 4 }}
+              onClick={() => setVoteItems([...voteItems, { id: 'vi-' + Math.random().toString(36).slice(2, 8), nom: '', emoji: '🎤' }])}
+            >
+              + Ajouter un élément
+            </button>
+            <div style={{ marginTop: 18 }}>
+              <button className="sa-btn primary" onClick={saveVote} disabled={savingJeu}>
+                {savingJeu ? 'Enregistrement…' : '✓ Enregistrer'}
+              </button>
+            </div>
+            <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 10 }}>
+              Vote par étoiles (1 à 5) — seul mode actuellement implémenté côté joueur. Chaque vote
+              est enregistré par participant, exploitable via <code className="sa-code">participations.bonus_answers</code>.
             </div>
           </div>
         )}
