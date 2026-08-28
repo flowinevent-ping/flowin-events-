@@ -8,7 +8,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
-import { fetchParticipants, type Participant } from '@/lib/nds'
+import { fetchParticipants, fetchSuperEvents, type Participant, type SuperEvent } from '@/lib/nds'
 import { useDashboard } from '@/contexts/DashboardContext'
 
 const PAGE = 50
@@ -20,12 +20,23 @@ const fr = (d: string | null) => {
 
 export default function Page() {
   const { openDrawer } = useDashboard()
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  const [se, setSe] = useState<string>('')
   const [liste, setListe] = useState<Participant[] | null>(null)
   const [q, setQ] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'optin' | 'fideles'>('tous')
   const [limite, setLimite] = useState(PAGE)
 
-  useEffect(() => { fetchParticipants().then(setListe) }, [])
+  useEffect(() => {
+    fetchSuperEvents().then(l => {
+      // Le Master est un gabarit de duplication, jamais joue reellement.
+      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      setSupers(reels)
+      if (reels.length) setSe(reels[0].id)
+    })
+  }, [])
+
+  useEffect(() => { if (se) fetchParticipants(se).then(setListe) }, [se])
 
   const filtres = useMemo(() => {
     let r = liste ?? []
@@ -70,6 +81,16 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="👥 Participants" subtitle="Joueurs du super event et leur activité" />
+
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+                {x.nom}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 18 }}>
           {([['Participants', stats.total], ['Acceptent le contact', stats.optin],

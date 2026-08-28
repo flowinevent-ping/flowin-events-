@@ -10,7 +10,7 @@
  */
 import { useEffect, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
-import { fetchJours, fetchStations, type JourActivite, type StationJour } from '@/lib/nds'
+import { fetchJours, fetchStations, fetchSuperEvents, type JourActivite, type StationJour, type SuperEvent } from '@/lib/nds'
 import { useDashboard } from '@/contexts/DashboardContext'
 
 const fr = (d: string) => {
@@ -20,23 +20,35 @@ const fr = (d: string) => {
 
 export default function Page() {
   const { openDrawer } = useDashboard()
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  const [se, setSe] = useState<string>('')
   const [jours, setJours] = useState<JourActivite[] | null>(null)
   const [jour, setJour] = useState<string | null>(null)
   const [stations, setStations] = useState<StationJour[] | null>(null)
 
   useEffect(() => {
-    fetchJours().then(j => {
-      setJours(j)
-      if (j.length && !jour) setJour(j[j.length - 1].jour)
+    fetchSuperEvents().then(l => {
+      // Le Master est un gabarit de duplication, jamais joue reellement.
+      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      setSupers(reels)
+      if (reels.length) setSe(reels[0].id)
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    if (!jour) return
+    if (!se) return
+    setJour(null)
+    fetchJours(se).then(j => {
+      setJours(j)
+      if (j.length) setJour(j[j.length - 1].jour)
+    })
+  }, [se])
+
+  useEffect(() => {
+    if (!jour || !se) return
     setStations(null)
-    fetchStations(jour).then(setStations)
-  }, [jour])
+    fetchStations(jour, se).then(setStations)
+  }, [jour, se])
 
   const courant = jours?.find(j => j.jour === jour)
   const festival = (stations ?? []).filter(s => s.type === 'station')
@@ -68,6 +80,16 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="📅 Résultat journalier" subtitle="Stations de jeu et commerces partenaires, par jour" />
+
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+                {x.nom}
+              </button>
+            ))}
+          </div>
+        )}
 
         {jours === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {jours?.length === 0 && <EmptyState title="Aucune activité enregistrée" />}
