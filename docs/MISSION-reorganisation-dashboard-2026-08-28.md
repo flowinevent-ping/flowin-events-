@@ -107,7 +107,7 @@ dans ce document ou dans le handoff précédent :
    `lib/nds.ts` est déjà générique — `SE_DEFAUT` n'est qu'une valeur par
    défaut de paramètre. Les 2 pages appellent `fetchJours()`/`fetchParticipants()`
    sans passer `se`. Correctif : coller le sélecteur déjà présent sur
-   `statistiques`. Environ 1h, pas un chantier.
+   `statistiques`. Environ 1h, pas un chantier. **✅ Fait 28/08, commit `a97da3c`.**
 
 Écarts de comptage de routes (36 vs 37, 14 vs 18 selon les sessions) :
 pure question de convention (avec ou sans les segments `[id]`), rien n'a
