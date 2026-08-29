@@ -166,6 +166,16 @@ export default function PartenaireDrawer() {
         <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
       </div>
 
+      {proLie && (
+        <div
+          onClick={() => openDrawer('pro', proLie.id)}
+          style={{ margin: '0 20px 14px', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <span style={{ fontSize: 12.5, fontWeight: 700 }}>🏢 Compte pro lié — connexion, tracking, QR & liens</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--sa-accent)' }}>Ouvrir →</span>
+        </div>
+      )}
+
       <DrawerTabs tabs={tabs} active={drawer.tab} onSelect={setDrawerTab} />
 
       <div className="sa-drawer-body">

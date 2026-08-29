@@ -307,17 +307,26 @@ export async function fetchGagnants(): Promise<GagnantRow[]> {
   return (data ?? []) as GagnantRow[]
 }
 
-/* ── Super Event : stats agrégées d'un commerce (espace pro) ── */
+/* ── Super Event : stats agrégées d'un commerce (espace pro) ──
+   FIX 29/08 : lisait se_gains (table abandonnee le 28/07, toujours vide,
+   meme bug que v_se_dashboard cote SA -- cf. migration
+   fix_v_se_dashboard_gains_tirages). Les vrais gains vivent dans tirages,
+   lie par partenaire_id (pas event_id) -- resolu via events -> pros. */
 export async function fetchEventSuperEventStats(eventId: string): Promise<{ tickets: number; gains: number; gainsUtilises: number }> {
-  const [tk, ga] = await Promise.all([
+  const { data: ev } = await supabase.from('events').select('pro_id,super_event_id').eq('id', eventId).single()
+  const [tk, pro] = await Promise.all([
     supabase.from('se_tickets').select('id', { count: 'exact', head: true }).eq('event_id', eventId),
-    supabase.from('se_gains').select('utilise').eq('event_id', eventId),
+    ev?.pro_id ? supabase.from('pros').select('partenaire_id').eq('id', ev.pro_id).single() : Promise.resolve({ data: null }),
   ])
-  const gainsRows = (ga.data ?? []) as { utilise: boolean | null }[]
+  const partenaireId = (pro as { data: { partenaire_id: string | null } | null } | undefined)?.data?.partenaire_id
+  if (!partenaireId || !ev?.super_event_id) return { tickets: tk.count ?? 0, gains: 0, gainsUtilises: 0 }
+  const { data: tirages } = await supabase.from('tirages').select('statut')
+    .eq('partenaire_id', partenaireId).eq('super_event_id', ev.super_event_id)
+  const rows = (tirages ?? []) as { statut: string | null }[]
   return {
     tickets: tk.count ?? 0,
-    gains: gainsRows.length,
-    gainsUtilises: gainsRows.filter((g) => g.utilise).length,
+    gains: rows.length,
+    gainsUtilises: rows.filter((g) => g.statut === 'retire').length,
   }
 }
 
