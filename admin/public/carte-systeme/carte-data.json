@@ -1,5 +1,5 @@
 {
- "genere_le": "2026-08-28T23:43:36",
+ "genere_le": "2026-08-29T00:04:30",
  "sidebar_prod": [
   {
    "group": "ACCUEIL",
@@ -12,12 +12,42 @@
    ]
   },
   {
-   "group": "JEUX",
+   "group": "SUPER EVENT",
    "items": [
     {
-     "id": "jeux",
-     "label": "Jeux (templates)",
-     "href": "/dashboard/jeux"
+     "id": "super-events",
+     "label": "Super Events",
+     "href": "/dashboard/super-events"
+    },
+    {
+     "id": "statistiques",
+     "label": "Statistiques & résultats",
+     "href": "/dashboard/statistiques"
+    },
+    {
+     "id": "rapport-points",
+     "label": "Rapport détaillé",
+     "href": "/dashboard/rapport-points"
+    },
+    {
+     "id": "nds-resultat",
+     "label": "Résultat journalier",
+     "href": "/dashboard/nds-resultat"
+    },
+    {
+     "id": "track-qr",
+     "label": "Origines du trafic",
+     "href": "/dashboard/track-qr"
+    },
+    {
+     "id": "pilotage",
+     "label": "Pilotage",
+     "href": "/dashboard/pilotage"
+    },
+    {
+     "id": "rapports",
+     "label": "Rapports",
+     "href": "/dashboard/rapports"
     }
    ]
   },
@@ -30,19 +60,139 @@
      "href": "/dashboard/events"
     },
     {
-     "id": "super-events",
-     "label": "Super Events",
-     "href": "/dashboard/super-events"
-    },
-    {
-     "id": "operations",
-     "label": "Opérations (commerces, tickets, CA)",
-     "href": "/dashboard/operations"
-    },
-    {
      "id": "parcours",
      "label": "Parcours mobil",
      "href": "/dashboard/parcours"
+    },
+    {
+     "id": "wizard-event",
+     "label": "Nouvel événement",
+     "href": "/dashboard/wizard-event"
+    }
+   ]
+  },
+  {
+   "group": "COMM & OUTILS",
+   "items": [
+    {
+     "id": "jeux",
+     "label": "Jeux (templates)",
+     "href": "/dashboard/jeux"
+    },
+    {
+     "id": "landing-page",
+     "label": "Landing pages",
+     "href": "/dashboard/landing-page"
+    },
+    {
+     "id": "plaquette-nds",
+     "label": "Plaquette commerciale",
+     "href": "/plaquette-nds.html"
+    },
+    {
+     "id": "nds-partenaire-offres",
+     "label": "Plaquette offres & tarifs (packs partenaires)",
+     "href": "/nds"
+    },
+    {
+     "id": "pitch-nds",
+     "label": "Argumentaire téléphonique",
+     "href": "/pitch-nds.html"
+    },
+    {
+     "id": "flowin-partenaire-presentation",
+     "label": "Présentation partenaire",
+     "href": "/flowin-partenaire-presentation.html"
+    },
+    {
+     "id": "nds-carte",
+     "label": "Carte NDS",
+     "href": "/dashboard/nds-carte"
+    },
+    {
+     "id": "nds-front",
+     "label": "Front NDS",
+     "href": "/dashboard/nds-front"
+    },
+    {
+     "id": "nds-media",
+     "label": "Vidéo & média",
+     "href": "/dashboard/nds-media"
+    },
+    {
+     "id": "nds-visuels",
+     "label": "Visuels & vidéos (A4/réseaux/spot)",
+     "href": "/nds-visuels.html"
+    },
+    {
+     "id": "tirage-nds",
+     "label": "Tirage au sort",
+     "href": "/tirage-nds.html"
+    },
+    {
+     "id": "gagnants",
+     "label": "Liste des gagnants",
+     "href": "/dashboard/gagnants"
+    },
+    {
+     "id": "nds-comm",
+     "label": "Billets & kit com partenaire",
+     "href": "/dashboard/nds-comm"
+    },
+    {
+     "id": "nds-lots",
+     "label": "Stock des lots",
+     "href": "/dashboard/nds-lots"
+    },
+    {
+     "id": "nds-bon-commande",
+     "label": "Bons de commande",
+     "href": "/dashboard/nds-bon-commande"
+    },
+    {
+     "id": "bons-commande-liste",
+     "label": "Bons de commande & Factures (liste)",
+     "href": "/bons-commande-liste.html"
+    },
+    {
+     "id": "facture-nds",
+     "label": "Générer une facture",
+     "href": "/facture-nds.html"
+    },
+    {
+     "id": "kit-digital",
+     "label": "Dossiers partenaires (A3/A4/vidéo/QR)",
+     "href": "/nds/kit-digital/index.html"
+    },
+    {
+     "id": "nds-packs",
+     "label": "Packs de participation",
+     "href": "/dashboard/nds-packs"
+    },
+    {
+     "id": "cgv",
+     "label": "CGV & légal",
+     "href": "/dashboard/cgv"
+    },
+    {
+     "id": "prospection",
+     "label": "Prospection",
+     "href": "/dashboard/prospection"
+    },
+    {
+     "id": "btob-prospects",
+     "label": "Prospects B2B",
+     "href": "/dashboard/btob-prospects"
+    },
+    {
+     "id": "crm-landing",
+     "label": "CRM Landing pages",
+     "href": "/dashboard/crm-landing"
+    },
+    {
+     "id": "crm-retours",
+     "label": "Retours CRM",
+     "href": "/dashboard/crm-retours"
     }
    ]
   },
@@ -73,56 +223,6 @@
      "id": "partenaires",
      "label": "Partenaires (fiche commerce)",
      "href": "/dashboard/partenaires"
-    }
-   ]
-  },
-  {
-   "group": "TIRAGE & GAGNANTS",
-   "items": [
-    {
-     "id": "tirage-nds",
-     "label": "Tirage au sort",
-     "href": "/tirage-nds.html"
-    },
-    {
-     "id": "gagnants",
-     "label": "Liste des gagnants",
-     "href": "/dashboard/gagnants"
-    },
-    {
-     "id": "nds-comm",
-     "label": "Billets & kit com partenaire",
-     "href": "/dashboard/nds-comm"
-    },
-    {
-     "id": "nds-lots",
-     "label": "Stock des lots",
-     "href": "/dashboard/nds-lots"
-    }
-   ]
-  },
-  {
-   "group": "STATISTIQUES",
-   "items": [
-    {
-     "id": "statistiques",
-     "label": "Statistiques & résultats",
-     "href": "/dashboard/statistiques"
-    },
-    {
-     "id": "nds-resultat",
-     "label": "Résultat journalier",
-     "href": "/dashboard/nds-resultat"
-    },
-    {
-     "id": "rapport-points",
-     "label": "Rapport détaillé",
-     "href": "/dashboard/rapport-points"
-    },
-    {
-     "id": "track-qr",
-     "label": "Origines du trafic",
-     "href": "/dashboard/track-qr"
     },
     {
      "id": "nds-participants",
@@ -132,133 +232,8 @@
    ]
   },
   {
-   "group": "COMMERCIAL",
-   "items": [
-    {
-     "id": "nds-bon-commande",
-     "label": "Bons de commande",
-     "href": "/dashboard/nds-bon-commande"
-    },
-    {
-     "id": "bons-commande-liste",
-     "label": "Bons de commande & Factures (liste)",
-     "href": "/bons-commande-liste.html"
-    },
-    {
-     "id": "facture-nds",
-     "label": "Générer une facture",
-     "href": "/facture-nds.html"
-    },
-    {
-     "id": "kit-digital",
-     "label": "Dossiers partenaires (A3/A4/vidéo/QR)",
-     "href": "/nds/kit-digital/index.html"
-    },
-    {
-     "id": "nds-packs",
-     "label": "Packs de participation",
-     "href": "/dashboard/nds-packs"
-    },
-    {
-     "id": "cgv",
-     "label": "CGV & légal",
-     "href": "/dashboard/cgv"
-    }
-   ]
-  },
-  {
-   "group": "LANDING & PROSPECTION",
-   "items": [
-    {
-     "id": "landing-page",
-     "label": "Landing pages",
-     "href": "/dashboard/landing-page"
-    },
-    {
-     "id": "plaquette-nds",
-     "label": "Plaquette commerciale",
-     "href": "/plaquette-nds.html"
-    },
-    {
-     "id": "nds-partenaire-offres",
-     "label": "Plaquette offres & tarifs (packs partenaires)",
-     "href": "/nds"
-    },
-    {
-     "id": "pitch-nds",
-     "label": "Argumentaire téléphonique",
-     "href": "/pitch-nds.html"
-    },
-    {
-     "id": "flowin-partenaire-presentation",
-     "label": "Présentation partenaire",
-     "href": "/flowin-partenaire-presentation.html"
-    },
-    {
-     "id": "prospection",
-     "label": "Prospection",
-     "href": "/dashboard/prospection"
-    },
-    {
-     "id": "btob-prospects",
-     "label": "Prospects B2B",
-     "href": "/dashboard/btob-prospects"
-    },
-    {
-     "id": "crm-landing",
-     "label": "CRM Landing pages",
-     "href": "/dashboard/crm-landing"
-    },
-    {
-     "id": "crm-retours",
-     "label": "Retours CRM",
-     "href": "/dashboard/crm-retours"
-    }
-   ]
-  },
-  {
-   "group": "NDS 2026 — ASSETS",
-   "items": [
-    {
-     "id": "nds-carte",
-     "label": "Carte NDS",
-     "href": "/dashboard/nds-carte"
-    },
-    {
-     "id": "nds-front",
-     "label": "Front NDS",
-     "href": "/dashboard/nds-front"
-    },
-    {
-     "id": "nds-media",
-     "label": "Vidéo & média",
-     "href": "/dashboard/nds-media"
-    },
-    {
-     "id": "nds-visuels",
-     "label": "Visuels & vidéos (A4/réseaux/spot)",
-     "href": "/nds-visuels.html"
-    }
-   ]
-  },
-  {
    "group": "SYSTÈME",
    "items": [
-    {
-     "id": "pilotage",
-     "label": "Pilotage",
-     "href": "/dashboard/pilotage"
-    },
-    {
-     "id": "rapports",
-     "label": "Rapports",
-     "href": "/dashboard/rapports"
-    },
-    {
-     "id": "wizard-event",
-     "label": "Nouvel événement",
-     "href": "/dashboard/wizard-event"
-    },
     {
      "id": "roadmap",
      "label": "Feuille de route",
@@ -510,6 +485,7 @@
  ],
  "liens_morts_sidebar": [],
  "routes_orphelines": [
+  "/dashboard/operations",
   "/pro/banques",
   "/pro/banques/nouvelle",
   "/pro/connexion",
