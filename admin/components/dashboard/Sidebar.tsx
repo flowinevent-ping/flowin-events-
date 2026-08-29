@@ -83,6 +83,7 @@ export default function Sidebar() {
       group: 'SUPER EVENT',
       items: [
         { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
+        { id: 'operations', icon: '📊', label: 'Opérations (vue complète)', href: '/dashboard/operations' },
         { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
         { id: 'rapport-points', icon: '📍', label: 'Rapport détaillé', href: '/dashboard/rapport-points' },
         { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },

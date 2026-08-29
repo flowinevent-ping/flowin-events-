@@ -1,5 +1,5 @@
 {
- "genere_le": "2026-08-29T00:04:30",
+ "genere_le": "2026-08-29T16:46:40",
  "sidebar_prod": [
   {
    "group": "ACCUEIL",
@@ -18,6 +18,11 @@
      "id": "super-events",
      "label": "Super Events",
      "href": "/dashboard/super-events"
+    },
+    {
+     "id": "operations",
+     "label": "Opérations (vue complète)",
+     "href": "/dashboard/operations"
     },
     {
      "id": "statistiques",
@@ -485,7 +490,6 @@
  ],
  "liens_morts_sidebar": [],
  "routes_orphelines": [
-  "/dashboard/operations",
   "/pro/banques",
   "/pro/banques/nouvelle",
   "/pro/connexion",
