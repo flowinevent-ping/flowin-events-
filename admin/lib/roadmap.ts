@@ -20,7 +20,7 @@ export interface BlocRoadmap {
   items: ItemRoadmap[]
 }
 
-export const MAJ = '25/07/2026'
+export const MAJ = '30/08/2026'
 
 export const LIBELLE_ETAT: Record<EtatItem, string> = {
   ok: '✓ Fait',
@@ -60,7 +60,7 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'ok', titre: 'Dépouillement des questions bonus', detail: 'Libellés réels résolus depuis la banque, jamais de code brut' },
       { etat: 'ok', titre: 'Questionnaire de la landing dépouillé', detail: 'Canal distinct du bonus en jeu, jamais additionné sans le dire' },
       { etat: 'todo', titre: 'Marqueur par question du quiz', detail: '47 % des joueurs abandonnent dans le quiz sans qu\u2019on sache à quelle question' },
-      { etat: 'todo', titre: 'Alignement se_reponses.event_id sur participations.event_id', detail: 'La ventilation des répondants bonus par point est faussée' },
+      { etat: 'ok', titre: 'Ventilation des répondants bonus par point corrigée', detail: '29/08 : cause reelle differente de l\u2019hypothese initiale -- pas un desalignement event_id mais un bornage de date manquant sur 2 RPC (super_event_rapport_points, super_event_bonus_resultats), laissant fuiter des reponses de test hors festival. Corrige : total 321 -> 302 repondants reels.' },
     ],
   },
   {
@@ -90,7 +90,7 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'todo', titre: 'Durcissement sécurité', detail: "Séparer la clé d'administration de la clé anon, RLS avancé" },
       { etat: 'todo', titre: 'Contrôle serveur de l\u2019anti-rejeu du lien unique', detail: 'Aujourd\u2019hui dans le navigateur : ne bloque pas, ne s\u2019applique pas' },
       { etat: 'todo', titre: 'Généricité super-event', detail: 'Cloner NDS à blanc pour un autre festival' },
-      { etat: 'todo', titre: 'Hygiène de base', detail: 'Tables d\u2019un autre produit présentes dans la base de production' },
+      { etat: 'ok', titre: 'Hygiène de base', detail: 'Tables Revision Olivia migrees vers leur propre projet Supabase le 28/08 (moloagrmhrptbhodwwob) -- verifie le 30/08 : plus aucune table Revision dans le projet NDS partage.' },
     ],
   },
 ]
