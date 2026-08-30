@@ -8,14 +8,36 @@
  * en un seul indicateur.
  *
  * MAJ 30/08 -- Romain signale une regression : le monolithe legacy avait une preview
- * navigable en cadre telephone (iframe-landing-apercu, fleches precedent/suivant),
- * jamais portee lors de la reecriture Next.js. Restauree ici (navigation entre les
- * differentes landings, pas entre des sous-pages d'une meme landing -- interpretation
- * la plus utile : parcourir ce qu'on a sans quitter le dashboard).
+ * navigable en cadre telephone (iframe-landing-apercu, fleches precedent/suivant).
+ * Restauree une premiere fois en ne couvrant que la table `landings` (2 lignes gerees) --
+ * INCOMPLET : Romain a remarque l'absence de "Prospection". Verifie dans le legacy
+ * (dashboard.html:4733, tableau `lands`) : la vraie liste couvre 12 pages, dont 9 pages
+ * HTML statiques de presentation/prospection jamais suivies dans la table `landings`
+ * (elle ne sert qu'aux 2 landings VRAIMENT pilotables : prix, statut, module de jeu).
+ * Les 9 autres sont fusionnees ici en dur, comme dans le legacy -- fichiers verifies
+ * presents sur le disque avant integration, pas supposes.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchLandings, type Landing } from '@/lib/administratif'
+
+const BASE = 'https://flowin-events.vercel.app'
+
+/** Pages de presentation/prospection statiques, hors table `landings` (verifiees sur disque le 30/08). */
+const PAGES_STATIQUES: Landing[] = [
+  { id: 'pg-landing-flowin', nom: 'Landing Flowin', statut: null, published: true, deploy_url: `${BASE}/landing`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-nds', nom: 'Landing NDS', statut: null, published: true, deploy_url: `${BASE}/nds`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-pro', nom: 'Pro (connexion)', statut: null, published: true, deploy_url: `${BASE}/pro`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-nds-pro', nom: 'NDS Pro (présentation)', statut: null, published: true, deploy_url: `${BASE}/nds-pro.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-nds-super-event-pro', nom: 'Super-event Pro (stats/gagnants)', statut: null, published: true, deploy_url: `${BASE}/nds-super-event-pro.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-nds-partenaire-presentation', nom: 'Partenaire (présentation)', statut: null, published: true, deploy_url: `${BASE}/nds-partenaire-presentation.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-flowin-partenaire-presentation', nom: 'Flowin partenaire', statut: null, published: true, deploy_url: `${BASE}/flowin-partenaire-presentation.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-pitch-nds', nom: 'Pitch NDS', statut: null, published: true, deploy_url: `${BASE}/pitch-nds.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-pro-nds-live', nom: 'Pro NDS live', statut: null, published: true, deploy_url: `${BASE}/pro-nds-live.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-prospection', nom: 'Prospection', statut: null, published: true, deploy_url: `${BASE}/prospection.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-demos', nom: 'Démos', statut: null, published: true, deploy_url: `${BASE}/demos.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+  { id: 'pg-carte', nom: 'Carte', statut: null, published: true, deploy_url: `${BASE}/carte.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
+]
 
 function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Landing | null; onPrev: () => void; onNext: () => void; position: string }) {
   const W = 220, H = 442, SCALE = 0.586
@@ -77,7 +99,7 @@ export default function Page() {
     return list.filter(l => (l.nom ?? l.id).toLowerCase().includes(t))
   }, [list, q])
 
-  const avecUrl = useMemo(() => list.filter(l => l.deploy_url), [list])
+  const avecUrl = useMemo(() => [...list.filter(l => l.deploy_url), ...PAGES_STATIQUES], [list])
   const courant = avecUrl[idx] ?? null
 
   const enLigne = list.filter(l => l.published === true).length
@@ -91,16 +113,16 @@ export default function Page() {
     <div className="sa-page">
       <PageHeader
         title="Landing pages"
-        subtitle={`${list.length} landing${list.length > 1 ? 's' : ''} · ${enLigne} en ligne`}
+        subtitle={`${list.length} landing${list.length > 1 ? 's' : ''} gérée${list.length > 1 ? 's' : ''} · ${enLigne} en ligne · ${avecUrl.length} pages prévisualisables au total`}
       />
 
       {!charge && avecUrl.length > 0 && (
-        <div style={{ background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <PhoneApercu
             landing={courant}
             onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
             onNext={() => setIdx(i => (i + 1) % avecUrl.length)}
-            position={`${idx + 1} / ${avecUrl.length}`}
+            position={`${idx + 1} / ${avecUrl.length}${courant?.id.startsWith('pg-') ? ' · page de référence' : ' · landing gérée'}`}
           />
         </div>
       )}
