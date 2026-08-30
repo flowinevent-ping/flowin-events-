@@ -1,5 +1,5 @@
 {
- "genere_le": "2026-08-29T16:46:40",
+ "genere_le": "2026-08-30T00:45:51",
  "sidebar_prod": [
   {
    "group": "ACCUEIL",
@@ -53,6 +53,11 @@
      "id": "rapports",
      "label": "Rapports",
      "href": "/dashboard/rapports"
+    },
+    {
+     "id": "wizard-event-se",
+     "label": "Nouvel événement",
+     "href": "/dashboard/wizard-event"
     }
    ]
   },

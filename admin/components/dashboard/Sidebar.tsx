@@ -90,6 +90,7 @@ export default function Sidebar() {
         { id: 'track-qr', icon: '🔗', label: 'Origines du trafic', href: '/dashboard/track-qr' },
         { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
         { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
+        { id: 'wizard-event-se', icon: '✨', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
       ],
     },
     {
