@@ -10,7 +10,13 @@
  */
 import { useEffect, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
-import { fetchJours, fetchStations, fetchSuperEvents, type JourActivite, type StationJour, type SuperEvent } from '@/lib/nds'
+import { Camembert } from '@/components/dashboard/Camembert'
+import {
+  fetchJours, fetchStations, fetchSuperEvents,
+  fetchOptinJour, fetchEngagementJour, fetchRepondantsJour,
+  type JourActivite, type StationJour, type SuperEvent,
+  type OptinJour, type EngagementJour, type RepondantsJour,
+} from '@/lib/nds'
 import { useDashboard } from '@/contexts/DashboardContext'
 
 const fr = (d: string) => {
@@ -25,6 +31,9 @@ export default function Page() {
   const [jours, setJours] = useState<JourActivite[] | null>(null)
   const [jour, setJour] = useState<string | null>(null)
   const [stations, setStations] = useState<StationJour[] | null>(null)
+  const [optin, setOptin] = useState<OptinJour | null>(null)
+  const [engag, setEngag] = useState<EngagementJour | null>(null)
+  const [repond, setRepond] = useState<RepondantsJour | null>(null)
 
   useEffect(() => {
     fetchSuperEvents().then(l => {
@@ -48,6 +57,9 @@ export default function Page() {
     if (!jour || !se) return
     setStations(null)
     fetchStations(jour, se).then(setStations)
+    fetchOptinJour(se, jour).then(setOptin)
+    fetchEngagementJour(se, jour).then(setEngag)
+    fetchRepondantsJour(se, jour).then(setRepond)
   }, [jour, se])
 
   const courant = jours?.find(j => j.jour === jour)
@@ -128,6 +140,56 @@ export default function Page() {
         {courant && courant.commencees !== courant.terminees && (
           <div className="sa-alert info" style={{ marginBottom: 16, fontSize: 12.5 }}>
             {courant.commencees - courant.terminees} partie{courant.commencees - courant.terminees > 1 ? 's' : ''} commencée{courant.commencees - courant.terminees > 1 ? 's' : ''} sans être terminée{courant.commencees - courant.terminees > 1 ? 's' : ''}. L&apos;écart entre les deux compteurs vient de là.
+          </div>
+        )}
+
+        {optin && (
+          <div style={{ marginBottom: 20 }}>
+            <SectionHeader>🛡️ Conformité RGPD & complétion</SectionHeader>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 14 }}>
+              {([
+                [`${optin.taux_optin ?? 0} %`, 'Opt-in du jour'],
+                [`${optin.cumul?.taux_optin ?? 0} %`, 'Opt-in cumulé'],
+                [`${optin.taux_completion ?? 0} %`, 'Complétion du jour'],
+                [`${optin.cumul?.taux_completion ?? 0} %`, 'Complétion cumulée'],
+              ] as [string, string][]).map(([val, lib]) => (
+                <div key={lib} style={{ background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800 }}>{val}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>{lib}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14 }}>
+              <Camembert titre="Opt-in — jour sélectionné" unite="joueurs"
+                parts={[{ valeur: 'Accepté', n: optin.optin_oui ?? 0 }, { valeur: 'Refusé', n: optin.optin_non ?? 0 }]} />
+              <Camembert titre={`Opt-in — cumulé (${optin.cumul?.joueurs ?? 0} joueurs)`} unite="joueurs"
+                parts={[{ valeur: 'Accepté', n: optin.cumul?.optin_oui ?? 0 }, { valeur: 'Refusé', n: optin.cumul?.optin_non ?? 0 }]} />
+            </div>
+          </div>
+        )}
+
+        {(engag || repond) && (
+          <div style={{ marginBottom: 20 }}>
+            <SectionHeader>🎯 Engagement du jour</SectionHeader>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14 }}>
+              {engag && (
+                <Camembert titre="Une partie vs rejoué" unite="joueurs"
+                  parts={[{ valeur: 'Une seule partie', n: engag.une_partie ?? 0 }, { valeur: 'Ont rejoué', n: engag.ont_rejoue ?? 0 }]} />
+              )}
+              {engag && (
+                <Camembert titre="Question bonus" unite="joueurs"
+                  parts={[{ valeur: 'Ont répondu', n: engag.bonus_oui ?? 0 }, { valeur: 'N\u2019ont pas répondu', n: engag.bonus_non ?? 0 }]} />
+              )}
+              {repond && (
+                <Camembert titre="Couverture bonus + landing Brigade Verte" unite="joueurs"
+                  parts={[
+                    { valeur: 'Bonus seulement', n: repond.bonus_seulement ?? 0 },
+                    { valeur: 'Landing BV seulement', n: repond.landing_seulement ?? 0 },
+                    { valeur: 'Les deux', n: repond.les_deux ?? 0 },
+                    { valeur: 'Aucun des deux', n: repond.aucun ?? 0 },
+                  ]} />
+              )}
+            </div>
           </div>
         )}
 

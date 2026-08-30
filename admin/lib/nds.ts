@@ -224,6 +224,38 @@ export async function fetchStations(jour: string | null, se: string = SE_DEFAUT)
   return Array.isArray(arr) ? arr : []
 }
 
+/* ── Résultat journalier : donuts RGPD/engagement (restauration du rapport
+   legacy `ndsRes`, jamais porte en Next.js -- disparu de /dashboard/nds-resultat
+   lors de la reecriture du 26/07, signale par Romain le 30/08). ── */
+
+export interface OptinJour {
+  cumul: { joueurs: number; optin_oui: number; optin_non: number; taux_optin: number; taux_completion: number }
+  joueurs: number; optin_oui: number; optin_non: number; taux_optin: number; taux_completion: number
+}
+export async function fetchOptinJour(se: string, jour: string): Promise<OptinJour | null> {
+  const { data, error } = await supabase.rpc('super_event_optin', { p_se: se, p_date: jour })
+  if (error) { console.error('[fetchOptinJour]', error.message); return null }
+  return (data as OptinJour) ?? null
+}
+
+export interface EngagementJour {
+  joueurs: number; une_partie: number; ont_rejoue: number; bonus_oui: number; bonus_non: number
+}
+export async function fetchEngagementJour(se: string, jour: string): Promise<EngagementJour | null> {
+  const { data, error } = await supabase.rpc('super_event_engagement', { p_se: se, p_date: jour })
+  if (error) { console.error('[fetchEngagementJour]', error.message); return null }
+  return (data as EngagementJour) ?? null
+}
+
+export interface RepondantsJour {
+  bonus_seulement: number; landing_seulement: number; les_deux: number; aucun: number
+}
+export async function fetchRepondantsJour(se: string, jour: string): Promise<RepondantsJour | null> {
+  const { data, error } = await supabase.rpc('super_event_repondants', { p_se: se, p_date: jour })
+  if (error) { console.error('[fetchRepondantsJour]', error.message); return null }
+  return (data as RepondantsJour) ?? null
+}
+
 /* ── Super events : duplication ────────────────────────────────────────── */
 
 export interface SuperEvent {
