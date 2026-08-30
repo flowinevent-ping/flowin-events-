@@ -76,10 +76,11 @@ export const BLOCS: BlocRoadmap[] = [
   {
     titre: 'Automatisation des envois',
     items: [
-      { etat: 'hold', titre: 'Email de remerciement aux joueurs', detail: 'En attente du connecteur emailing' },
-      { etat: 'todo', titre: 'Connecteur emailing depuis le dashboard' },
-      { etat: 'todo', titre: 'PDF du billet en pièce jointe' },
-      { etat: 'todo', titre: 'Envoi réel automatisé', detail: 'Domaine expéditeur à vérifier' },
+      { etat: 'ok', titre: 'Envois devis, factures, listes gagnants et billets vers les pros/partenaires', detail: 'Liens Gmail pre-remplis (mailPartenaireUrl, flowinMailGagnant), utilises en production sur PartenaireDrawer, CRM Landing, CRM Retours, BtoB Prospects' },
+      { etat: 'ok', titre: 'Emails aux gagnants (annonce lot + billet)', detail: 'Meme mecanisme, deja envoye en prod' },
+      { etat: 'hold', titre: 'Email de remerciement en masse aux ~840 joueurs', detail: 'Le mecanisme Gmail pre-rempli marche 1 par 1 (gagnants, quelques pros) -- pas exploitable pour un envoi en masse a tous les joueurs. En attente d\u2019un vrai connecteur emailing (API/service d\u2019envoi en masse), pas d\u2019un connecteur emailing en general (qui existe deja pour les envois unitaires).' },
+      { etat: 'todo', titre: 'PDF du billet en pièce jointe', detail: 'Le mail actuel envoie un LIEN vers le billet, pas un PDF attache -- limite technique des liens mailto/Gmail compose (ne peuvent pas joindre de fichier)' },
+      { etat: 'todo', titre: 'Envoi automatise sans etape humaine', detail: 'Aujourd\u2019hui, un humain doit ouvrir Gmail et cliquer Envoyer a chaque fois -- domaine expediteur a verifier avant tout envoi serveur-a-serveur' },
     ],
   },
   {
