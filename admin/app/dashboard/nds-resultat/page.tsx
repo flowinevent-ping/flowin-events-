@@ -150,6 +150,20 @@ export default function Page() {
           </div>
         )}
 
+        {stations !== null && stations.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap', padding: '10px 12px', background: 'var(--sa-subtle)', borderRadius: 10 }}>
+            <label style={{ fontSize: 11.5, fontWeight: 800 }}>🎯 Filtrer par event / station :</label>
+            <select className="sa-input" style={{ maxWidth: 320 }} value={stationFiltre} onChange={e => setStationFiltre(e.target.value)}>
+              <option value="toutes">Toutes les stations / tous les commerces</option>
+              {stations.map(s => <option key={s.event_id} value={s.event_id}>{s.type === 'station' ? '🎪' : '🤝'} {s.nom}</option>)}
+            </select>
+            {stationFiltre !== 'toutes' && (
+              <button className="sa-btn sm" onClick={() => setStationFiltre('toutes')}>✕ Réinitialiser</button>
+            )}
+            <span className="sa-muted" style={{ fontSize: 10.5 }}>(filtre la liste stations/commerces en bas de page — les chiffres et donuts ci-dessus restent au niveau du super event entier)</span>
+          </div>
+        )}
+
         {courant?.hors_periode && (
           <div className="sa-alert warn" style={{ marginBottom: 14, fontSize: 12.5 }}>
             ⚠ Journée <b>hors période de festival</b> (avant le 09/07 ou après le 18/07) — activité de test ou résiduelle, pas comptée dans les chiffres officiels du festival.
@@ -223,19 +237,6 @@ export default function Page() {
                   ]} />
               )}
             </div>
-          </div>
-        )}
-
-        {stations !== null && stations.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-            <label className="sa-muted" style={{ fontSize: 11.5, fontWeight: 700 }}>Filtrer par event :</label>
-            <select className="sa-input" style={{ maxWidth: 320 }} value={stationFiltre} onChange={e => setStationFiltre(e.target.value)}>
-              <option value="toutes">Toutes les stations / tous les commerces</option>
-              {stations.map(s => <option key={s.event_id} value={s.event_id}>{s.type === 'station' ? '🎪' : '🤝'} {s.nom}</option>)}
-            </select>
-            {stationFiltre !== 'toutes' && (
-              <button className="sa-btn sm" onClick={() => setStationFiltre('toutes')}>✕ Réinitialiser</button>
-            )}
           </div>
         )}
 
