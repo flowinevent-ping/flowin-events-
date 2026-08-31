@@ -1,6 +1,7 @@
 'use client'
 
 import { DashboardProvider } from '@/contexts/DashboardContext'
+import { ScopeProvider } from '@/contexts/ScopeContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Drawer from '@/components/dashboard/Drawer'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinPro, FlowinLot } from '@/lib/types'
@@ -30,13 +31,16 @@ export default function DashboardShell({
       initialPros={initialPros}
       initialLots={initialLots}
     >
-      <div className="sa-shell">
-        <Sidebar />
-        <div className="sa-main">
-          {children}
+      {/* ScopeProvider est A L INTERIEUR : ScopeBar lit les events du DashboardContext. */}
+      <ScopeProvider>
+        <div className="sa-shell">
+          <Sidebar />
+          <div className="sa-main">
+            {children}
+          </div>
+          <Drawer />
         </div>
-        <Drawer />
-      </div>
+      </ScopeProvider>
     </DashboardProvider>
   )
 }
