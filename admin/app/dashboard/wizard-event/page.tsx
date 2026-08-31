@@ -14,10 +14,11 @@
  *  - l enregistrement est REFUSE tant qu un controle echoue, plutot que d ecrire un
  *    event a moitie defini qu il faudra corriger a la main ensuite.
  */
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { useScope } from '@/contexts/ScopeContext'
 import {
   brouillonVide, controler, enregistrer, nbJours, statutDeduit, urlQr,
   type BrouillonEvent, type BrouillonLot,
@@ -83,10 +84,24 @@ const VISIBILITES: { cle: string; label: string }[] = [
 export default function Page() {
   const router = useRouter()
   const { pros, partenaires } = useDashboard()
+  const { seId, superEvents } = useScope()
   const [d, setD] = useState<BrouillonEvent>(brouillonVide())
   const [etape, setEtape] = useState<Etape>('A')
   const [envoi, setEnvoi] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
+
+  /* Rattachement pre-rempli : ?se=<id> (lien « Ajouter un point de jeu » depuis
+     l espace Super Event) sinon la portee globale courante. Fermait un vrai
+     trou : le wizard n exposait AUCUN champ super event, il fallait creer
+     l event puis le rattacher a la main dans son drawer.
+     window.location plutot que useSearchParams : pas de rendu dynamique force,
+     donc pas de <Suspense> a poser autour de la page. */
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get('se')
+    const cible = p || seId
+    if (cible) setD(x => (x.super_event_id ? x : { ...x, super_event_id: cible }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seId])
 
   const maj = (champs: Partial<BrouillonEvent>) => setD(x => ({ ...x, ...champs }))
   const problemes = useMemo(() => controler(d), [d])
@@ -198,6 +213,15 @@ export default function Page() {
                 onChange={e => maj({ pro_id: e.target.value })}>
                 <option value="">— choisir —</option>
                 {pros.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+              </select>)}
+            {/* Le rattachement au super event n existait dans AUCUN formulaire :
+                il fallait creer l event, puis le rattacher a la main dans son
+                drawer. Il se choisit desormais des la creation. */}
+            {ligne('Super event', false,
+              <select className="sa-input" style={{ width: '100%' }} value={d.super_event_id ?? ''}
+                onChange={e => maj({ super_event_id: e.target.value || null })}>
+                <option value="">Aucun (event autonome)</option>
+                {superEvents.map(x => <option key={x.id} value={x.id}>{x.nom}</option>)}
               </select>)}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {ligne('Date de début', true,

@@ -14,34 +14,26 @@ import { CarteChaleur } from '@/components/dashboard/CarteChaleur'
 import { TableauStations } from '@/components/dashboard/TableauStations'
 import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
-  fetchRapport, fetchPics, fetchSuperEvents,
-  type Rapport, type Pics, type SuperEvent,
+  fetchRapport, fetchPics,
+  type Rapport, type Pics,
 } from '@/lib/nds'
 
+import { useScope } from '@/contexts/ScopeContext'
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
 
 export default function Page() {
   const { openDrawer } = useDashboard()
   /* Aucun super event code en dur : on charge la liste et on selectionne le plus recent.
      Les memes indicateurs valent pour toute edition presente ou future. */
-  const [supers, setSupers] = useState<SuperEvent[]>([])
-  const [se, setSe] = useState<string>('')
+  // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
+  // selecteur local, la selection suit desormais d une page a l autre et
+  // s inscrit dans l URL (?se=).
+  const { seId, superEvents: supers } = useScope()
+  const se = seId ?? ''
   const [r, setR] = useState<Rapport | null>(null)
   const [pics, setPics] = useState<Pics | null>(null)
   const [charge, setCharge] = useState(true)
   const [jour, setJour] = useState<string | 'tous'>('tous')
-
-  useEffect(() => {
-    fetchSuperEvents().then(l => {
-      // Le Master est un gabarit de duplication, jamais joue reellement -- le
-      // montrer ici comme un onglet au meme titre que le vrai festival induit
-      // en erreur (le selectionner afficherait un rapport a zero partout).
-      const reels = l.filter(x => x.id !== 'se-master-superevent')
-      setSupers(reels)
-      if (reels.length) setSe(reels[0].id)
-      else setCharge(false)
-    })
-  }, [])
 
   useEffect(() => {
     if (!se) return
@@ -143,16 +135,6 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="📊 Statistiques & résultats" subtitle="Activité, audience et retombées partenaires" />
-
-        {supers.length > 1 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
-            {supers.map(x => (
-              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
-                {x.nom}
-              </button>
-            ))}
-          </div>
-        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 20 }}>
           {([['Joueurs', t.joueurs, 'section-joueurs'], ['Parties', t.parties, 'section-activite'],

@@ -14,11 +14,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
-  fetchRapportPoints, fetchBonusResultats, fetchSondageLanding, fetchSuperEvents,
+  fetchRapportPoints, fetchBonusResultats, fetchSondageLanding,
   type RapportPoints, type BonusResultats, type SondageLanding,
-  type PointJeu, type QuestionBonus, type SuperEvent,
+  type PointJeu, type QuestionBonus,
 } from '@/lib/nds'
 
+import { useScope } from '@/contexts/ScopeContext'
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((100 * n) / d)} %` : '—')
 
 /** Carte d une question : intitule reel, effectifs, pourcentages. Aucun code brut affiche
@@ -51,21 +52,16 @@ function CarteQuestion({ q }: { q: QuestionBonus }) {
 }
 
 export default function Page() {
-  const [supers, setSupers] = useState<SuperEvent[]>([])
-  const [se, setSe] = useState('')
+  // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
+  // selecteur local, la selection suit desormais d une page a l autre et
+  // s inscrit dans l URL (?se=).
+  const { seId, superEvents: supers } = useScope()
+  const se = seId ?? ''
   const [r, setR] = useState<RapportPoints | null>(null)
   const [b, setB] = useState<BonusResultats | null>(null)
   const [ld, setLd] = useState<SondageLanding | null>(null)
   const [charge, setCharge] = useState(true)
   const [filtre, setFiltre] = useState<'tous' | 'Station' | 'Partenaire'>('tous')
-
-  useEffect(() => {
-    fetchSuperEvents().then(l => {
-      setSupers(l)
-      if (l.length) setSe(l[0].id)
-      else setCharge(false)
-    })
-  }, [])
 
   useEffect(() => {
     if (!se) return
@@ -88,13 +84,6 @@ export default function Page() {
       <PageHeader
         title="Rapport détaillé"
         subtitle="Par point de jeu — station du super event ou partenaire"
-        actions={
-          supers.length > 1 ? (
-            <select className="sa-input" value={se} onChange={e => setSe(e.target.value)}>
-              {supers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-            </select>
-          ) : null
-        }
       />
 
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement du rapport…</div>}
