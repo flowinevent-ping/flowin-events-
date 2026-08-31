@@ -132,12 +132,17 @@
 .sa-diff-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .sa-phone{border:8px solid #16202E;border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 8px 26px -12px rgba(15,23,42,.45);flex-shrink:0}
 .sa-empty-mini{font-size:13px;color:var(--sa-muted);padding:14px;border:1px dashed var(--sa-border);border-radius:10px}
-/* Affiche A4 : invisible a l'ecran, seule chose imprimee */
+/* Affiche A4 : invisible à l'écran, et n'accapare l'impression QUE pendant une
+   impression déclenchée depuis le composant Diffusion (classe posée sur <body>
+   juste avant window.print(), retirée juste après).
+   Sans ce garde-fou, la règle s'appliquait à toutes les routes /dashboard/* :
+   un Ctrl+P sur un bon de commande ou les CGV sortait une feuille blanche. */
 .sa-affiche{display:none}
 @media print{
-  body *{visibility:hidden}
-  .sa-affiche,.sa-affiche *{visibility:visible}
-  .sa-affiche{display:block;position:fixed;inset:0;background:#fff}
+  body.sa-impression-affiche *{visibility:hidden}
+  body.sa-impression-affiche .sa-affiche,
+  body.sa-impression-affiche .sa-affiche *{visibility:visible}
+  body.sa-impression-affiche .sa-affiche{display:block;position:fixed;inset:0;background:#fff}
   .sa-affiche-in{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24mm;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
   .sa-affiche-titre{font-size:34pt;font-weight:900;line-height:1.05;color:#0F172A}
   .sa-affiche-sous{font-size:15pt;color:#475569;font-weight:600}
@@ -145,6 +150,13 @@
   .sa-affiche-cta{font-size:20pt;font-weight:800;color:#7C2D92}
   .sa-affiche-url{font-size:10pt;color:#64748B;word-break:break-all}
 }
+/* Hub : l'onglet nomme deja la page, son titre propre ferait doublon avec
+   celui du hub. Le sous-titre et les actions, eux, restent utiles. */
+.sa-hub-body .sa-page-header .sa-page-title{display:none}
+.sa-hub-body .sa-page-header{padding-top:14px}
+/* Certaines pages ont .sa-page pour racine (nds-comm) au lieu de .sa-content :
+   sans ça, elles s'affichent collées aux bords, contrairement à leurs voisines. */
+.sa-hub-body > .sa-page{margin:14px 24px 24px}
 /* ── Raccourcis vers une page existante, déjà cadrée par la portée (lot 3) ── */
 .sa-racc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:10px}
 .sa-racc{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--sa-border);border-radius:10px;background:var(--sa-card);text-decoration:none;color:inherit;transition:border-color .15s,background .15s}
@@ -206,3 +218,5 @@ a:hover{text-decoration:underline}
 /* La page rendue apporte déjà son propre .sa-content : on neutralise le double cadre. */
 .sa-hub-body > .sa-content{padding-top:14px}
 .sa-hub-body .sa-page{border-radius:0}
+.sa-scope-lien{display:block;font-size:11px;font-weight:700;color:var(--sa-accent-light);text-decoration:none;padding:3px 1px 0}
+.sa-scope-lien:hover{text-decoration:underline}

@@ -51,8 +51,8 @@ const ENTREES: Entree[] = [
   { pole: 'Super events', label: 'Rapport détaillé', href: '/dashboard/rapport-points', destination: 'Onglet « Résultats »', alias: 'rapport points' },
   { pole: 'Super events', label: 'Statistiques & résultats', href: '/dashboard/statistiques', destination: 'Onglet « Résultats »' },
   { pole: 'Super events', label: 'Origines du trafic', href: '/dashboard/track-qr', destination: 'Onglet « Résultats »', alias: 'track qr tracking' },
-  { pole: 'Super events', label: 'Carte NDS', href: '/dashboard/nds-carte', destination: 'Onglet « Landing & diffusion »' },
-  { pole: 'Super events', label: 'Front NDS', href: '/dashboard/nds-front', destination: 'Onglet « Landing & diffusion »' },
+  { pole: 'Super events', label: 'Carte NDS', href: '/dashboard/nds-carte', destination: 'Onglet « Communication » du super event' },
+  { pole: 'Super events', label: 'Front NDS', href: '/dashboard/nds-front', destination: 'Onglet « Communication » du super event' },
 
   { pole: 'Events', label: 'Kanban des events', href: '/dashboard/events', destination: 'Events', alias: 'liste des events parcours mobil' },
   { pole: 'Events', label: 'Nouvel event', href: '/dashboard/wizard-event', destination: 'Events', alias: 'wizard creation nouvel evenement' },
@@ -81,7 +81,7 @@ const ENTREES: Entree[] = [
 
   { pole: 'Outils & documents', label: 'Landing pages (aperçus)', href: '/dashboard/landing-page', destination: 'Outils & documents' },
   { pole: 'Outils & documents', label: 'Plaquette commerciale', href: '/plaquette-nds.html', statique: true, destination: 'Plaquettes & pitchs' },
-  { pole: 'Outils & documents', label: 'Plaquette offres & tarifs', href: '/nds', destination: 'Plaquettes & pitchs', alias: 'packs partenaires' },
+  { pole: 'Outils & documents', label: 'Plaquette offres & tarifs', href: '/nds', statique: true, destination: 'Plaquettes & pitchs', alias: 'packs partenaires' },
   { pole: 'Outils & documents', label: 'Argumentaire téléphonique', href: '/pitch-nds.html', statique: true, destination: 'Plaquettes & pitchs' },
   { pole: 'Outils & documents', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html', statique: true, destination: 'Plaquettes & pitchs' },
   { pole: 'Outils & documents', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html', statique: true, destination: 'Kits partenaires' },

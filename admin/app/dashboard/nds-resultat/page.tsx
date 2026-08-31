@@ -30,19 +30,30 @@ export default function Page() {
   // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
   // selecteur local, la selection suit desormais d une page a l autre et
   // s inscrit dans l URL (?se=).
-  const { seId, superEvents: supers } = useScope()
+  const { seId, evId } = useScope()
   const se = seId ?? ''
   const [jours, setJours] = useState<JourActivite[] | null>(null)
   const [jour, setJour] = useState<string | null>(null)
   const [voirHorsFestival, setVoirHorsFestival] = useState(false)
   const [stations, setStations] = useState<StationJour[] | null>(null)
   const [stationFiltre, setStationFiltre] = useState<string>('toutes')
+
+  /* Le second selecteur de la barre de contexte (l event) pilote ce filtre :
+     sans consommateur, ce serait un bouton qui ne fait rien sous les yeux de
+     l utilisateur. Le filtre local reste modifiable ensuite. */
+  useEffect(() => { setStationFiltre(evId ?? 'toutes') }, [evId])
   const [optin, setOptin] = useState<OptinJour | null>(null)
   const [engag, setEngag] = useState<EngagementJour | null>(null)
   const [repond, setRepond] = useState<RepondantsJour | null>(null)
 
   useEffect(() => {
-    if (!se) return
+    // Sans portee (aucun super event selectionnable) : liste vide, pas un
+    // « Chargement… » perpetuel -- il n y a plus de selecteur local pour s en sortir.
+    if (!se) { setJours([]); return }
+    // La portee peut changer depuis la sidebar, sur n importe quel ecran : on
+    // repasse en chargement, sinon la page montrerait les jours du super event
+    // precedent sous le nom du nouveau.
+    setJours(null)
     setJour(null)
     fetchJours(se).then(j => {
       setJours(j)

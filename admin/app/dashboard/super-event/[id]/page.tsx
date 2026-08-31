@@ -26,6 +26,7 @@ import { DrawerTabs, StatusChip, ModuleChip, EmptyState, SectionHeader } from '@
 import Diffusion, { type LienDiffusion } from '@/components/dashboard/Diffusion'
 
 const ONGLET_DEFAUT = 'apercu'
+const ONGLETS = ['apercu', 'events', 'participants', 'pros', 'lots', 'landing', 'resultats', 'comm']
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—')
 
@@ -48,7 +49,7 @@ export default function SuperEventPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const h = window.location.hash.replace('#', '')
-    if (h) setTab(h)
+    if (h && ONGLETS.includes(h)) setTab(h)
   }, [])
 
   // Arriver ici cale la portee globale : tout le reste du dashboard suit.
@@ -61,7 +62,9 @@ export default function SuperEventPage({ params }: { params: { id: string } }) {
 
   const changerTab = (t: string) => {
     setTab(t)
-    window.history.replaceState(null, '', `${window.location.pathname}#${t}`)
+    // La query string porte la portee (?se=&ev=) : la jeter ici viderait le
+    // lien copie juste apres, ce qui annulerait tout l interet du contexte global.
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${t}`)
   }
 
   const se = superEvents.find(s => s.id === id) ?? null
@@ -233,7 +236,12 @@ export default function SuperEventPage({ params }: { params: { id: string } }) {
               <div className="sa-racc-grid" style={{ marginTop: 14 }}>
                 <Raccourci href="/dashboard/nds-lots" titre="Stock des lots" desc="Quantités configurées et restantes" />
                 <Raccourci href="/dashboard/gagnants" titre="Liste des gagnants" desc="Tirages, confirmations, retraits" />
-                <Raccourci href="/tirage-nds.html" titre="Tirage au sort" desc="Outil de tirage (à scoper — chantier ouvert)" />
+                {/* Fichier statique de public/ : next/link ne sait pas le router. */}
+                <a href="/tirage-nds.html" target="_blank" rel="noreferrer" className="sa-racc">
+                  <span className="sa-racc-t">Tirage au sort</span>
+                  <span className="sa-racc-d">Outil de tirage (à scoper — chantier ouvert)</span>
+                  <span className="sa-racc-f" aria-hidden="true">↗</span>
+                </a>
               </div>
             </>
           )}
@@ -269,6 +277,7 @@ export default function SuperEventPage({ params }: { params: { id: string } }) {
               <Raccourci href="/dashboard/envoi-masse" titre="Envoi en masse" desc="Liens Gmail par lots de 40 en BCC" />
               <Raccourci href="/dashboard/nds-media" titre="Vidéo & média" desc="Spot, visuels réseaux, QR HD" />
               <Raccourci href="/dashboard/nds-carte" titre="Carte NDS" desc="Carte des points de jeu" />
+              <Raccourci href="/dashboard/nds-front" titre="Front NDS" desc="Réglages de la page publique" />
             </div>
           )}
         </div>

@@ -18,7 +18,7 @@ export default function Page() {
   // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
   // selecteur local, la selection suit desormais d une page a l autre et
   // s inscrit dans l URL (?se=).
-  const { seId, superEvents: supers } = useScope()
+  const { seId } = useScope()
   const se = seId ?? ''
   const [t, setT] = useState<TrackQr | null>(null)
   const [jours, setJours] = useState<TrackQrJour[]>([])
@@ -33,7 +33,7 @@ export default function Page() {
     return partenaires.some(p => p.id === pid) ? pid : null
   }
   useEffect(() => {
-    if (!se) return
+    if (!se) { setCharge(false); return }
     setCharge(true)
     Promise.all([fetchTrackQr(se), fetchTrackQrQuotidien(se)])
       .then(([tq, tqj]) => { setT(tq); setJours(tqj) })

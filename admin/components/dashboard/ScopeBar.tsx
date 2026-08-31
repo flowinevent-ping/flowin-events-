@@ -12,6 +12,7 @@
  */
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { useScope } from '@/contexts/ScopeContext'
 import { useDashboard } from '@/contexts/DashboardContext'
 
@@ -58,6 +59,20 @@ export default function ScopeBar() {
           <option key={e.id} value={e.id}>{e.nom}</option>
         ))}
       </select>
+
+      {/* Choisir un event doit faire quelque chose de visible tout de suite :
+          les pages qui savent se filtrer par event le font, et d ici on ouvre
+          directement sa fiche. */}
+      {evId && (
+        <Link href={`/dashboard/event/${evId}`} className="sa-scope-lien">
+          Ouvrir la fiche de l&apos;event →
+        </Link>
+      )}
+      {seId && !evId && (
+        <Link href={`/dashboard/super-event/${seId}`} className="sa-scope-lien">
+          Ouvrir l&apos;espace du super event →
+        </Link>
+      )}
     </div>
   )
 }

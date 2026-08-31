@@ -87,7 +87,7 @@ function SbIcon({ id, fallback }: { id: string; fallback: string }) {
 export default function Sidebar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { joueurs, events, partenaires, pros } = useDashboard()
+  const { joueurs, events, pros } = useDashboard()
 
   const liveCount = events.filter(e => e.status === 'live').length
 
@@ -143,7 +143,7 @@ export default function Sidebar() {
       items: [
         { id: 'landing-page', icon: '🌐', label: 'Landing pages (aperçus)', href: '/dashboard/landing-page' },
         { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html', external: true },
-        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds' },
+        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds', external: true },
         { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html', external: true },
         { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html', external: true },
         { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html', external: true },

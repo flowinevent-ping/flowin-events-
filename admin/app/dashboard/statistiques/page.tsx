@@ -28,7 +28,7 @@ export default function Page() {
   // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
   // selecteur local, la selection suit desormais d une page a l autre et
   // s inscrit dans l URL (?se=).
-  const { seId, superEvents: supers } = useScope()
+  const { seId } = useScope()
   const se = seId ?? ''
   const [r, setR] = useState<Rapport | null>(null)
   const [pics, setPics] = useState<Pics | null>(null)
@@ -36,7 +36,7 @@ export default function Page() {
   const [jour, setJour] = useState<string | 'tous'>('tous')
 
   useEffect(() => {
-    if (!se) return
+    if (!se) { setCharge(false); return }
     setCharge(true); setJour('tous')
     Promise.all([fetchRapport(se), fetchPics(se)])
       .then(([a, b]) => { setR(a); setPics(b) })

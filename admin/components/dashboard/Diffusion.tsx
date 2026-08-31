@@ -19,7 +19,7 @@
  * mise a l echelle par transform, pour que la page s affiche comme sur mobile.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import QRCode from 'qrcode'
 
 export const BASE_PUBLIQUE = 'https://flowin-events.vercel.app'
@@ -74,7 +74,6 @@ export default function Diffusion({ liens, nomFichier, titreAffiche, sousTitreAf
   const [qrPng, setQrPng] = useState<string>('')
   const [qrSvg, setQrSvg] = useState<string>('')
   const [erreurQr, setErreurQr] = useState<string | null>(null)
-  const zoneImpression = useRef<HTMLDivElement>(null)
 
   const lien = liens[Math.min(i, liens.length - 1)]
   const url = useMemo(() => (lien ? `${BASE_PUBLIQUE}${lien.chemin}` : ''), [lien])
@@ -105,11 +104,31 @@ export default function Diffusion({ liens, nomFichier, titreAffiche, sousTitreAf
   }
 
   function telechargerPng() {
-    if (!qrPng) return
-    const bin = atob(qrPng.split(',')[1])
-    const buf = new Uint8Array(bin.length)
-    for (let k = 0; k < bin.length; k++) buf[k] = bin.charCodeAt(k)
-    telecharger(`qr-${slug(nomFichier)}-${slug(lien.cle)}.png`, new Blob([buf], { type: 'image/png' }))
+    const base64 = qrPng.split(',')[1]
+    if (!base64) { setErreurQr('QR non généré, rien à télécharger.'); return }
+    try {
+      const bin = atob(base64)
+      const buf = new Uint8Array(bin.length)
+      for (let k = 0; k < bin.length; k++) buf[k] = bin.charCodeAt(k)
+      telecharger(`qr-${slug(nomFichier)}-${slug(lien.cle)}.png`, new Blob([buf], { type: 'image/png' }))
+    } catch (e) {
+      // Un echec silencieux (bouton qui ne fait rien) est pire qu un message.
+      setErreurQr(e instanceof Error ? e.message : 'Téléchargement impossible.')
+    }
+  }
+
+  /* L affiche n accapare l impression que le temps de cette impression-ci :
+     sinon la regle @media print viderait toutes les pages du dashboard. */
+  function imprimerAffiche() {
+    document.body.classList.add('sa-impression-affiche')
+    const fin = () => {
+      document.body.classList.remove('sa-impression-affiche')
+      window.removeEventListener('afterprint', fin)
+    }
+    window.addEventListener('afterprint', fin)
+    window.print()
+    // Filet : certains navigateurs n emettent pas afterprint.
+    setTimeout(fin, 1000)
   }
 
   function telechargerSvg() {
@@ -186,7 +205,7 @@ export default function Diffusion({ liens, nomFichier, titreAffiche, sousTitreAf
                 <div className="sa-diff-btns">
                   <button className="sa-btn sm" onClick={telechargerPng}>PNG 1024px</button>
                   <button className="sa-btn sm" onClick={telechargerSvg}>SVG (vectoriel)</button>
-                  <button className="sa-btn sm" onClick={() => window.print()}>Affiche A4</button>
+                  <button className="sa-btn sm" onClick={imprimerAffiche}>Affiche A4</button>
                 </div>
                 <p className="sa-diff-aide" style={{ marginTop: 8 }}>
                   Le QR est calculé ici, dans le navigateur — c&apos;est un vrai fichier,
@@ -199,7 +218,7 @@ export default function Diffusion({ liens, nomFichier, titreAffiche, sousTitreAf
       </div>
 
       {/* Affiche A4 : masquee a l ecran, seule visible a l impression. */}
-      <div className="sa-affiche" ref={zoneImpression} aria-hidden="true">
+      <div className="sa-affiche" aria-hidden="true">
         <div className="sa-affiche-in">
           <div className="sa-affiche-titre">{titreAffiche ?? nomFichier}</div>
           {sousTitreAffiche && <div className="sa-affiche-sous">{sousTitreAffiche}</div>}

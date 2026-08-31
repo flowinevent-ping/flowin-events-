@@ -21,6 +21,9 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import EventDrawer from '@/components/dashboard/EventDrawer'
 
 const ONGLET_DEFAUT = 'infos'
+/* Onglets servis par EventDrawer. Valider le hash evite qu une URL bricolee
+   (#nimporte) affiche la barre d onglets au-dessus d un corps vide. */
+const ONGLETS = ['infos', 'jeu', 'stats', 'participants', 'lots', 'qr', 'export']
 
 // Next 14 : params est un objet simple (le Promise, c est Next 15).
 export default function EventPage({ params }: { params: { id: string } }) {
@@ -31,12 +34,14 @@ export default function EventPage({ params }: { params: { id: string } }) {
   // Restauration de l onglet depuis le hash, puis synchronisation.
   useEffect(() => {
     const h = window.location.hash.replace('#', '')
-    if (h) setTab(h)
+    if (h && ONGLETS.includes(h)) setTab(h)
   }, [])
 
   const changerTab = (t: string) => {
     setTab(t)
-    window.history.replaceState(null, '', `${window.location.pathname}#${t}`)
+    // La query string porte la portee (?se=&ev=) : la jeter ici viderait le
+    // lien copie juste apres, ce qui annulerait tout l interet du contexte global.
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${t}`)
   }
 
   const ev = events.find(e => e.id === id)

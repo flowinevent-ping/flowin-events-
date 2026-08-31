@@ -25,7 +25,7 @@ export default function Page() {
   // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
   // selecteur local, la selection suit desormais d une page a l autre et
   // s inscrit dans l URL (?se=).
-  const { seId, superEvents: supers } = useScope()
+  const { seId } = useScope()
   const se = seId ?? ''
   const [liste, setListe] = useState<Participant[] | null>(null)
   const [q, setQ] = useState('')
@@ -33,7 +33,16 @@ export default function Page() {
   const [limite, setLimite] = useState(PAGE)
   const { tri, onSort } = useTri<Col>('derniere')
 
-  useEffect(() => { if (se) fetchParticipants(se).then(setListe) }, [se])
+  useEffect(() => {
+    // Sans portee : liste vide plutot qu un « Chargement… » perpetuel double de
+    // KPI a zero presentes comme des mesures.
+    if (!se) { setListe([]); return }
+    // Remise a null avant le fetch : la portee peut changer depuis la sidebar, et
+    // afficher nominativement les participants du super event precedent sous le
+    // titre du nouveau serait pire qu un ecran vide.
+    setListe(null)
+    fetchParticipants(se).then(setListe)
+  }, [se])
 
   const filtres = useMemo(() => {
     let r = liste ?? []

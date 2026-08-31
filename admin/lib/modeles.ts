@@ -104,7 +104,9 @@ export function appliquerModele(d: BrouillonEvent, m: ModeleEvent): BrouillonEve
   return {
     ...d,
     module: m.module,
-    cfg: { ...(m.cfg ?? {}) },
+    // Fusion et non remplacement : cfg porte aussi diffusion_demandee, saisie a
+    // l etape Diffusion du wizard. L ecraser effacerait ce choix sans le dire.
+    cfg: { ...d.cfg, ...(m.cfg ?? {}) },
     lots: (m.lots ?? []).map(l => ({ ...l })),
     pro_visib: { ...d.pro_visib, ...(m.pro_visib ?? {}) },
     couleur: m.couleur ?? d.couleur,

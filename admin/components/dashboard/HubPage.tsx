@@ -57,7 +57,9 @@ export default function HubPage({ titre, sousTitre, onglets, liens = [] }: Props
 
   const changer = (t: string) => {
     setTab(t)
-    window.history.replaceState(null, '', `${window.location.pathname}#${t}`)
+    // La query string porte la portee (?se=&ev=) : la jeter ici viderait le
+    // lien copie juste apres, ce qui annulerait tout l interet du contexte global.
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${t}`)
   }
 
   const actif = onglets.find(o => o.id === tab) ?? onglets[0]
@@ -77,7 +79,10 @@ export default function HubPage({ titre, sousTitre, onglets, liens = [] }: Props
                 key={l.href}
                 className="sa-btn sm"
                 href={l.href}
-                {...(l.statique ? {} : {})}
+                /* Outil HTML de public/ : cible un nouvel onglet plutot que de
+                   remplacer le hub, on ne perd pas l ecran en cours. */
+                target={l.statique ? '_blank' : undefined}
+                rel={l.statique ? 'noreferrer' : undefined}
               >
                 {l.label} ↗
               </a>
