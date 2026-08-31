@@ -243,6 +243,31 @@ le rebranchement n'est pas une simple entrée de menu : c'est un chantier
 de restylage, à traiter et annoncer comme tel, pas glissé au passage d'un
 inventaire.
 
+## Pattern K — Distinguer données de test de données réelles par la répartition temporelle
+
+**Symptôme** : un total agrégé (ex. « 214 lots tirés ») dépasse largement ce qui a été
+réellement configuré/vendu/promis, sans qu'aucun statut en base ne distingue
+explicitement le test du réel.
+
+**Piège évité le 31/08** : deux colonnes indépendantes existaient sur `tirages`
+(`notifie_at`, posé quand le SA confirme manuellement, et `retire_at`, posé par un
+circuit de retrait séparé côté joueur/partenaire) — une ligne pouvait avoir `retire_at`
+renseigné SANS jamais avoir eu `notifie_at`. Une estimation rapide (« ni l'un ni
+l'autre = jamais touché ») aurait sous-estimé le problème d'un facteur 75 (2 lignes vs
+153 réellement concernées).
+
+**Méthode qui a marché** : avant toute action sur des données ambiguës, regrouper les
+horodatages par heure (`date_trunc('hour', colonne)`). Une activité réelle (festivaliers
+récupérant un lot en boutique) s'étale sur des jours/semaines à un rythme irrégulier.
+Une activité de test/dev se regroupe en **rafales de quelques heures**, souvent avec des
+dizaines d'occurrences dans la même heure — un rythme humain ne produit jamais ça.
+`select date_trunc('hour', colonne), count(*) from table group by 1 order by 1` suffit à
+trancher en une requête, avant de conclure quoi que ce soit sur l'origine des données.
+
+**Ne jamais agir sur une hypothèse de comptage sans avoir vérifié la répartition
+temporelle réelle** — l'écart entre l'estimation initiale et la réalité vérifiée peut
+être énorme, dans un sens comme dans l'autre.
+
 1. Pattern A : lister toutes les pages avec `<table` mais 0 `onClick`
 2. Pattern B/C : `grep` les patterns ci-dessus, vérifier au cas par cas si c'est
    un vrai defaut (contexte partenaire/event réel) ou un usage légitime (Pattern B

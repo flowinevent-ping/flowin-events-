@@ -42,9 +42,40 @@
 -- supabase_read_only_user, revoque immediatement apres) : un appel sur un lot deja a
 -- quota (Nook Cafe / Cafe gourmand, 43/10) retourne bien 0 ligne, aucun insert.
 --
--- DECISION EN ATTENTE DE ROMAIN (pas prise unilateralement) : que faire des 155
--- tirages fantomes deja en base (jamais confirmes, jamais destines a l'etre) ?
--- Option la plus simple : les annuler via la fonction annuler_tirage() deja existante
--- et deja sure (ne touche que les tirages jamais confirmes ET jamais retires -- exactement
--- la condition des 155 lignes en question), en gardant une trace complete de l'operation
--- dans docs/sql/. Pas execute sans confirmation explicite.
+-- ============================================================================
+-- ADDENDUM 31/08/2026 (meme jour, suite) -- NETTOYAGE EXECUTE
+-- ============================================================================
+-- Romain a confirme : "vire le tirage fantome... va dans la liste de gagnants et des
+-- billets envoyes a chaque pro et email participants, tu retrouveras les vrais
+-- gagnants" -- methode de verification qu'il a lui-meme indiquee : notifie_at est
+-- precisement le marqueur pose quand le SA confirme un gagnant, etape qui declenche
+-- l'envoi de l'email/billet. notifie_at IS NULL = jamais notifie = jamais d'email/
+-- billet envoye.
+--
+-- CORRECTION IMPORTANTE PAR RAPPORT A L'ESTIMATION INITIALE CI-DESSUS : l'estimation
+-- de "155 tirages fantomes, jamais confirmes ET jamais retires" etait imprecise.
+-- Verification plus fine juste avant execution : sur les 155 lignes non-notifiees,
+-- seules 2 etaient vraiment "jamais touchees" (ni notifie_at ni retire_at) -- les
+-- 153 autres avaient retire_at RENSEIGNE (marquees "retirees") SANS jamais avoir ete
+-- notifiees. Verifie avant de conclure : regroupees en seulement 3 rafales de
+-- quelques heures chacune (28/07 15h-16h x47, 31/07 11h-16h x80, 03/08 12h-14h x26) --
+-- profil de test/dev sans ambiguite, pas des festivaliers venant recuperer un lot
+-- etale sur des jours/semaines. Coincide avec la periode de mise au point du circuit
+-- de retrait (consulter_lot/valider_lot/verifier_pin_pro, cf. handoff du projet).
+--
+-- EXECUTE :
+--   UPDATE tirages SET statut='annule'
+--   WHERE partenaire_id IS NOT NULL AND notifie_at IS NULL AND statut <> 'annule';
+--
+-- RESULTAT VERIFIE APRES EXECUTION :
+--   - 59 tirages actifs restants (partenaire_id non nul, statut<>'annule')
+--   - 59 notifies (100% des restants) -- correspond EXACTEMENT au total configure
+--   - 155 tirages annules (statut='annule', trace conservee, rien supprime)
+--   - 21 tirages du grand tirage de cloture (partenaire_id null) totalement intouches
+--
+-- Aucun code applicatif modifie : partenaire_gagnants_etat() et partenaire_gagnants()
+-- filtraient deja statut<>'annule' (verifie avant d'executer), /dashboard/nds-lots
+-- reflete donc les chiffres corrects sans aucun changement de code -- seule la donnee
+-- a change. Le bandeau d'alerte ajoute plus tot ce meme jour ne s'affiche plus
+-- (totalFantome recalcule automatiquement a 0).
+
