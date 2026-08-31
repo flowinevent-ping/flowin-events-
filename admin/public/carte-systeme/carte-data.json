@@ -1,5 +1,5 @@
 {
- "genere_le": "2026-08-31T09:37:13",
+ "genere_le": "2026-08-31T14:26:22",
  "sidebar_prod": [
   {
    "group": "ACCUEIL",
@@ -138,6 +138,11 @@
      "id": "nds-comm",
      "label": "Billets & kit com partenaire",
      "href": "/dashboard/nds-comm"
+    },
+    {
+     "id": "envoi-masse",
+     "label": "Envoi en masse",
+     "href": "/dashboard/envoi-masse"
     },
     {
      "id": "nds-lots",
@@ -432,6 +437,7 @@
   "/dashboard/crm-landing",
   "/dashboard/crm-retours",
   "/dashboard/demandes-rattachement",
+  "/dashboard/envoi-masse",
   "/dashboard/events",
   "/dashboard/gagnants",
   "/dashboard/jeux",
