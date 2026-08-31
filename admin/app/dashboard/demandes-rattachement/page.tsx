@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { PageHeader, EmptyState, useTri } from '@/components/dashboard/DashboardUI'
+import { PageHeader, EmptyState, SearchBar, useTri } from '@/components/dashboard/DashboardUI'
 import { supabase } from '@/lib/supabase'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { DemandeRattachement } from '@/lib/types'
@@ -21,6 +21,7 @@ export default function Page() {
   const [charge, setCharge] = useState(true)
   const [enCours, setEnCours] = useState<number | null>(null)
   const { tri, onSort } = useTri<Col>('created_at')
+  const [q, setQ] = useState('')
 
   async function recharger() {
     setCharge(true)
@@ -44,10 +45,14 @@ export default function Page() {
 
   const nbEnAttente = lignes.filter(l => l.statut === 'en_attente').length
 
-  const triees = useMemo(() => [...lignes].sort((a, b) => {
-    const va = String(a[tri.col] ?? ''); const vb = String(b[tri.col] ?? '')
-    return va.localeCompare(vb, 'fr') * (tri.asc ? 1 : -1)
-  }), [lignes, tri])
+  const triees = useMemo(() => {
+    const t = q.trim().toLowerCase()
+    const base = t ? lignes.filter(l => [l.pro_nom, l.se_nom, l.offre].some(v => String(v ?? '').toLowerCase().includes(t))) : lignes
+    return [...base].sort((a, b) => {
+      const va = String(a[tri.col] ?? ''); const vb = String(b[tri.col] ?? '')
+      return va.localeCompare(vb, 'fr') * (tri.asc ? 1 : -1)
+    })
+  }, [lignes, tri, q])
 
   return (
     <div className="sa-content">
@@ -57,7 +62,9 @@ export default function Page() {
           subtitle={`${lignes.length} demande${lignes.length > 1 ? 's' : ''}${nbEnAttente ? ` · ${nbEnAttente} en attente` : ''}`}
         />
 
-        <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+        <SearchBar value={q} onChange={setQ} placeholder="Rechercher un pro, un super event, une offre…" />
+
+        <div style={{ display: 'flex', gap: 4, marginBottom: 14, marginTop: 10 }}>
           {([['created_at', 'Date'], ['pro_nom', 'Pro'], ['statut', 'Statut']] as [Col, string][]).map(([c, l]) => (
             <button key={c} className={`sa-btn sm${tri.col === c ? ' primary' : ''}`} onClick={() => onSort(c)}>
               {l}{tri.col === c ? (tri.asc ? ' ▲' : ' ▼') : ''}
@@ -67,6 +74,7 @@ export default function Page() {
 
         {charge && <div style={{ color: 'var(--sa-muted)', fontSize: 13.5 }}>Chargement…</div>}
         {!charge && lignes.length === 0 && <EmptyState title="Aucune demande pour le moment" />}
+        {!charge && lignes.length > 0 && triees.length === 0 && <EmptyState title="Aucun résultat pour cette recherche" />}
 
         {!charge && triees.map(l => {
           const st = STATUT_STYLE[l.statut] ?? STATUT_STYLE.en_attente
