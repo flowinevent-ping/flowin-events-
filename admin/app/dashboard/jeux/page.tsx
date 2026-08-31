@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, ModuleChip, StatusChip } from '@/components/dashboard/DashboardUI'
+import ParcoursMobil from '@/components/pro/ParcoursMobil'
 
 const MODULES = [
   { id: 'tombola', icon: '🎟️', name: 'Tombola', desc: 'Inscription CRM + tirage au sort' },
@@ -57,6 +58,18 @@ export default function JeuxPage() {
                         <StatusChip status={ev.status} />
                       </div>
                     ))}
+                  </div>
+                )}
+                {actif && moduleEvents.length > 0 && (
+                  <div style={{ marginTop: 16, borderTop: '1px solid var(--sa-border)', paddingTop: 14 }} onClick={e => e.stopPropagation()}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 10 }}>
+                      👁 Aperçu navigable — le vrai parcours joueur
+                    </div>
+                    <ParcoursMobil
+                      events={moduleEvents.map(ev => ({ id: ev.id, module: ev.module, nom: ev.nom }))}
+                      seId={moduleEvents.find(ev => ev.super_event_id)?.super_event_id ?? undefined}
+                      showTitle={false}
+                    />
                   </div>
                 )}
               </div>

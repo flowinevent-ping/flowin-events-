@@ -8,7 +8,7 @@
  *  3. journees hors festival non signalees                     -> badge explicite
  *  4. ecart parties commencees / terminees non explique        -> les deux affichees
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import {
@@ -30,6 +30,7 @@ export default function Page() {
   const [se, setSe] = useState<string>('')
   const [jours, setJours] = useState<JourActivite[] | null>(null)
   const [jour, setJour] = useState<string | null>(null)
+  const [voirHorsFestival, setVoirHorsFestival] = useState(false)
   const [stations, setStations] = useState<StationJour[] | null>(null)
   const [optin, setOptin] = useState<OptinJour | null>(null)
   const [engag, setEngag] = useState<EngagementJour | null>(null)
@@ -49,7 +50,11 @@ export default function Page() {
     setJour(null)
     fetchJours(se).then(j => {
       setJours(j)
-      if (j.length) setJour(j[j.length - 1].jour)
+      // Premier jour DU FESTIVAL par defaut, jamais un jour de test -- 31/08 (fix) : avant
+      // ce fix, un jour de test pouvait etre le "dernier" de la liste et s'ouvrir par defaut.
+      const festivaux = j.filter(x => !x.hors_periode)
+      const defaut = festivaux.length ? festivaux[festivaux.length - 1] : j[j.length - 1]
+      if (defaut) setJour(defaut.jour)
     })
   }, [se])
 
@@ -61,6 +66,9 @@ export default function Page() {
     fetchEngagementJour(se, jour).then(setEngag)
     fetchRepondantsJour(se, jour).then(setRepond)
   }, [jour, se])
+
+  const joursFestival = useMemo(() => (jours ?? []).filter(j => !j.hors_periode), [jours])
+  const joursHorsFestival = useMemo(() => (jours ?? []).filter(j => j.hors_periode), [jours])
 
   const courant = jours?.find(j => j.jour === jour)
   const festival = (stations ?? []).filter(s => s.type === 'station')
@@ -106,27 +114,49 @@ export default function Page() {
         {jours === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {jours?.length === 0 && <EmptyState title="Aucune activité enregistrée" />}
 
-        {!!jours?.length && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
-            {jours.map(j => (
-              <button key={j.jour} onClick={() => setJour(j.jour)}
-                className={`sa-btn sm${j.jour === jour ? ' primary' : ''}`}
-                title={j.hors_periode ? 'Journée hors période de festival' : undefined}>
-                {fr(j.jour)}{j.hors_periode ? ' ⚠' : ''}
+        {!!joursFestival.length && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+            {joursFestival.map(j => (
+              <button key={j.jour} onClick={() => setJour(j.jour)} className={`sa-btn sm${j.jour === jour ? ' primary' : ''}`}>
+                {fr(j.jour)}
               </button>
             ))}
           </div>
         )}
 
+        {!!joursHorsFestival.length && (
+          <div style={{ marginBottom: 18 }}>
+            <button
+              className="sa-btn sm"
+              onClick={() => setVoirHorsFestival(v => !v)}
+              style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}
+            >
+              {voirHorsFestival ? '▲ Masquer' : '▼ Voir'} les {joursHorsFestival.length} jours hors festival (tests, avant/après le 9-18/07)
+            </button>
+            {voirHorsFestival && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+                {joursHorsFestival.map(j => (
+                  <button key={j.jour} onClick={() => setJour(j.jour)}
+                    className={`sa-btn sm${j.jour === jour ? ' primary' : ''}`}
+                    title="Journée hors période de festival">
+                    {fr(j.jour)} ⚠
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {courant?.hors_periode && (
           <div className="sa-alert warn" style={{ marginBottom: 14, fontSize: 12.5 }}>
-            ⚠ Journée <b>hors période de festival</b>. Des joueurs ont trouvé un QR encore actif après la clôture.
+            ⚠ Journée <b>hors période de festival</b> (avant le 09/07 ou après le 18/07) — activité de test ou résiduelle, pas comptée dans les chiffres officiels du festival.
           </div>
         )}
 
         {courant && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 20 }}>
-            {([['Parties terminées', courant.terminees],
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 20 }}>
+            {([['Flashs', courant.flashs],
+               ['Parties terminées', courant.terminees],
                ['Parties commencées', courant.commencees],
                ['Joueurs uniques', courant.joueurs]] as [string, number][]).map(([lib, val]) => (
               <div key={lib} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '16px 14px' }}>

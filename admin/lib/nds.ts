@@ -203,6 +203,7 @@ export interface JourActivite {
   commencees: number
   terminees: number
   joueurs: number
+  flashs: number
   hors_periode: boolean
 }
 
