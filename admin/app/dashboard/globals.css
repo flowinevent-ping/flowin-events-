@@ -37,7 +37,8 @@
 .sa-topbar-search input{padding:7px 12px 7px 32px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-subtle);font-size:13px;width:240px;outline:none}
 .sa-topbar-search input:focus{border-color:var(--sa-accent-light)}
 /* ── Page ── */
-.sa-page{background:var(--sa-card);border-radius:12px;padding:0;overflow:hidden}
+.sa-page{background:var(--sa-card);border-radius:12px;padding:0}
+.sa-page-header{border-radius:12px 12px 0 0;overflow:hidden}
 .sa-page-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--sa-border)}
 .sa-page-title{font-size:20px;font-weight:800}
 .sa-page-subtitle{font-size:12px;color:var(--sa-muted);margin-top:2px}
