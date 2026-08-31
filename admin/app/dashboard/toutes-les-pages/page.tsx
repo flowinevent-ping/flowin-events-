@@ -58,26 +58,26 @@ const ENTREES: Entree[] = [
   { pole: 'Events', label: 'Nouvel event', href: '/dashboard/wizard-event', destination: 'Events', alias: 'wizard creation nouvel evenement' },
   { pole: 'Events', label: 'Bibliothèque de jeux', href: '/dashboard/jeux', destination: 'Events', alias: 'jeux templates modules' },
 
-  { pole: 'Général', label: 'Stats globales', href: '/dashboard/rapports', destination: 'Général', alias: 'rapports' },
-  { pole: 'Général', label: 'Pilotage', href: '/dashboard/pilotage', destination: 'Général' },
-  { pole: 'Général', label: 'Pros', href: '/dashboard/pros', destination: 'CRM pros & commerces' },
-  { pole: 'Général', label: 'Commerces partenaires', href: '/dashboard/partenaires', destination: 'CRM pros & commerces', alias: 'partenaires fiche commerce' },
-  { pole: 'Général', label: 'Aperçu Pro', href: '/dashboard/apercu-pro', destination: 'CRM pros & commerces' },
-  { pole: 'Général', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement', destination: 'CRM pros & commerces', alias: 'rattachement' },
-  { pole: 'Général', label: 'Joueurs', href: '/dashboard/joueurs', destination: 'CRM participants' },
-  { pole: 'Général', label: 'Contacts landing (CRM)', href: '/dashboard/crm-landing', destination: 'CRM participants', alias: 'crm landing pages' },
-  { pole: 'Général', label: 'Retours CRM', href: '/dashboard/crm-retours', destination: 'CRM participants' },
-  { pole: 'Général', label: 'Prospection terrain', href: '/dashboard/prospection', destination: 'Prospection & B2B' },
-  { pole: 'Général', label: 'Prospects B2B (suivi)', href: '/dashboard/btob-prospects', destination: 'Prospection & B2B', alias: 'btob' },
-  { pole: 'Général', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm', destination: 'Communication' },
-  { pole: 'Général', label: 'Envoi en masse', href: '/dashboard/envoi-masse', destination: 'Communication', alias: 'emailing gmail' },
-  { pole: 'Général', label: 'Vidéo & média', href: '/dashboard/nds-media', destination: 'Communication' },
-  { pole: 'Général', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html', statique: true, destination: 'Communication' },
-  { pole: 'Général', label: 'Créer un bon de commande', href: '/dashboard/nds-bon-commande', destination: 'Facturation & admin' },
-  { pole: 'Général', label: 'Bons & factures (liste)', href: '/bons-commande-liste.html', statique: true, destination: 'Facturation & admin' },
-  { pole: 'Général', label: 'Générer une facture', href: '/facture-nds.html', statique: true, destination: 'Facturation & admin' },
-  { pole: 'Général', label: 'Packs de participation', href: '/dashboard/nds-packs', destination: 'Facturation & admin' },
-  { pole: 'Général', label: 'CGV & légal', href: '/dashboard/cgv', destination: 'Facturation & admin' },
+  { pole: 'Général', label: 'Stats globales', href: '/dashboard/rapports', destination: 'Hub Stats globales', alias: 'rapports' },
+  { pole: 'Général', label: 'Pilotage', href: '/dashboard/pilotage', destination: 'Hub Stats globales' },
+  { pole: 'Général', label: 'Pros', href: '/dashboard/pros', destination: 'Hub CRM pros & commerces' },
+  { pole: 'Général', label: 'Commerces partenaires', href: '/dashboard/partenaires', destination: 'Hub CRM pros & commerces', alias: 'partenaires fiche commerce' },
+  { pole: 'Général', label: 'Aperçu Pro', href: '/dashboard/apercu-pro', destination: 'Hub CRM pros & commerces' },
+  { pole: 'Général', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement', destination: 'Hub CRM pros & commerces', alias: 'rattachement' },
+  { pole: 'Général', label: 'Joueurs', href: '/dashboard/joueurs', destination: 'Hub CRM participants' },
+  { pole: 'Général', label: 'Contacts landing (CRM)', href: '/dashboard/crm-landing', destination: 'Hub CRM participants', alias: 'crm landing pages' },
+  { pole: 'Général', label: 'Retours CRM', href: '/dashboard/crm-retours', destination: 'Hub CRM participants' },
+  { pole: 'Général', label: 'Prospection terrain', href: '/dashboard/prospection', destination: 'Hub Prospection & B2B' },
+  { pole: 'Général', label: 'Prospects B2B (suivi)', href: '/dashboard/btob-prospects', destination: 'Hub Prospection & B2B', alias: 'btob' },
+  { pole: 'Général', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm', destination: 'Hub Communication' },
+  { pole: 'Général', label: 'Envoi en masse', href: '/dashboard/envoi-masse', destination: 'Hub Communication', alias: 'emailing gmail' },
+  { pole: 'Général', label: 'Vidéo & média', href: '/dashboard/nds-media', destination: 'Hub Communication' },
+  { pole: 'Général', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html', statique: true, destination: 'Hub Communication' },
+  { pole: 'Général', label: 'Créer un bon de commande', href: '/dashboard/nds-bon-commande', destination: 'Hub Facturation & admin' },
+  { pole: 'Général', label: 'Bons & factures (liste)', href: '/bons-commande-liste.html', statique: true, destination: 'Hub Facturation & admin' },
+  { pole: 'Général', label: 'Générer une facture', href: '/facture-nds.html', statique: true, destination: 'Hub Facturation & admin' },
+  { pole: 'Général', label: 'Packs de participation', href: '/dashboard/nds-packs', destination: 'Hub Facturation & admin' },
+  { pole: 'Général', label: 'CGV & légal', href: '/dashboard/cgv', destination: 'Hub Facturation & admin' },
 
   { pole: 'Outils & documents', label: 'Landing pages (aperçus)', href: '/dashboard/landing-page', destination: 'Outils & documents' },
   { pole: 'Outils & documents', label: 'Plaquette commerciale', href: '/plaquette-nds.html', statique: true, destination: 'Plaquettes & pitchs' },
@@ -89,6 +89,18 @@ const ENTREES: Entree[] = [
   { pole: 'Système', label: 'Feuille de route', href: '/dashboard/roadmap', destination: 'Système' },
   { pole: 'Système', label: 'Paramètres', href: '/dashboard/parametres', destination: 'Système' },
   { pole: 'Système', label: 'Maintenance', href: '/dashboard/maintenance', destination: 'Système' },
+]
+
+/** Ecrans crees par la reorganisation. */
+const NOUVEAUX: Entree[] = [
+  { pole: 'Super events', label: "Espace Super Event (8 onglets)", href: '/dashboard/super-events', destination: 'Ouvre un super event depuis la liste', alias: 'onglets sous-onglets espace' },
+  { pole: 'Events', label: "Espace Event (7 onglets, page pleine)", href: '/dashboard/events', destination: 'Ouvre un event depuis le kanban', alias: 'onglets sous-onglets fiche' },
+  { pole: 'Général', label: 'Hub CRM pros & commerces', href: '/dashboard/crm-pros', destination: 'Pros · Commerces · Demandes · Aperçu pro' },
+  { pole: 'Général', label: 'Hub CRM participants', href: '/dashboard/crm-participants', destination: 'Joueurs · Participants · Contacts landing · Retours' },
+  { pole: 'Général', label: 'Hub Communication', href: '/dashboard/communication', destination: 'Billets · Envoi en masse · Médias' },
+  { pole: 'Général', label: 'Hub Facturation & admin', href: '/dashboard/facturation', destination: 'Bon de commande · Packs · CGV' },
+  { pole: 'Général', label: 'Hub Prospection & B2B', href: '/dashboard/prospection-b2b', destination: 'Terrain · Prospects B2B' },
+  { pole: 'Général', label: 'Hub Stats globales', href: '/dashboard/stats-globales', destination: 'Rapports · Pilotage' },
 ]
 
 /** Ecrans qui ne sont dans aucun menu mais restent joignables. */
@@ -104,7 +116,7 @@ export default function ToutesLesPagesPage() {
   const [q, setQ] = useState('')
 
   const filtrees = useMemo(() => {
-    const toutes = [...ENTREES, ...HORS_MENU]
+    const toutes = [...ENTREES, ...NOUVEAUX, ...HORS_MENU]
     const t = q.trim().toLowerCase()
     if (!t) return toutes
     return toutes.filter(e =>
@@ -129,7 +141,7 @@ export default function ToutesLesPagesPage() {
       <div className="sa-page">
         <PageHeader
           title="🧭 Toutes les pages"
-          subtitle={`${ENTREES.length + HORS_MENU.length} écrans — tout ce qui existe, même ce qui n'est plus dans le menu`}
+          subtitle={`${ENTREES.length + NOUVEAUX.length + HORS_MENU.length} écrans — tout ce qui existe, même ce qui n'est plus dans le menu`}
         />
         <div className="sa-filter-bar">
           <div className="sa-filter-search" style={{ flex: 1 }}>
