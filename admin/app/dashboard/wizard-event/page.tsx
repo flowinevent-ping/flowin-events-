@@ -19,19 +19,33 @@ import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { useScope } from '@/contexts/ScopeContext'
+import { fetchBanquesToutes, type Banque } from '@/lib/banques'
+import Diffusion, { type LienDiffusion } from '@/components/dashboard/Diffusion'
 import {
   brouillonVide, controler, enregistrer, nbJours, statutDeduit, urlQr,
   type BrouillonEvent, type BrouillonLot,
 } from '@/lib/wizard'
 import type { Module } from '@/lib/types'
 
+/**
+ * Parcours aligne sur celui de l espace pro (CreerAnimationWizard) : une
+ * decision a la fois, dans l ordre, avec Precedent / Suivant. Les trois etapes
+ * que le wizard SA n avait pas et que le pro avait deja :
+ *  - Contenu du jeu : c est la cause racine des « jeux vides » -- un quiz cree
+ *    ici sortait sans banque de questions, il fallait y penser apres coup.
+ *  - Recompenses typees : tirage vs gain immediat, comme cote pro.
+ *  - Diffusion : ce que le terrain attend (QR imprime, lien, QR de tracking).
+ * Plus l ecran de livraison, apres creation.
+ */
 const ETAPES = [
   { id: 'A', label: 'Identité' },
   { id: 'B', label: 'Module' },
-  { id: 'C', label: 'Configuration' },
-  { id: 'D', label: 'Lots' },
-  { id: 'E', label: 'Visibilité pro' },
-  { id: 'F', label: 'Récapitulatif' },
+  { id: 'C', label: 'Contenu du jeu' },
+  { id: 'D', label: 'Récompenses' },
+  { id: 'E', label: 'Réglages' },
+  { id: 'F', label: 'Diffusion' },
+  { id: 'G', label: 'Visibilité pro' },
+  { id: 'H', label: 'Récapitulatif' },
 ] as const
 type Etape = typeof ETAPES[number]['id']
 
@@ -89,6 +103,13 @@ export default function Page() {
   const [etape, setEtape] = useState<Etape>('A')
   const [envoi, setEnvoi] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
+  const [banques, setBanques] = useState<Banque[]>([])
+  /* Ecran de livraison : renseigne apres creation reussie. Tant qu il est nul,
+     on est dans le wizard. Le SA repartait jusqu ici sur la liste des events
+     apres 1,4 s, sans rien pour diffuser -- le pro, lui, avait cet ecran. */
+  const [livre, setLivre] = useState<{ id: string; nom: string } | null>(null)
+
+  useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
 
   /* Rattachement pre-rempli : ?se=<id> (lien « Ajouter un point de jeu » depuis
      l espace Super Event) sinon la portee globale courante. Fermait un vrai
@@ -117,11 +138,37 @@ export default function Page() {
     setEnvoi(false)
     if (r.ok) {
       setRetour({ ok: true, texte: `Événement créé — ${r.partiel?.join(', ')}.` })
-      setTimeout(() => router.push('/dashboard/events'), 1400)
+      if (r.eventId) setLivre({ id: r.eventId, nom: d.nom.trim() })
     } else {
       setRetour({ ok: false, texte: r.erreur ?? 'Échec de l\u2019enregistrement.' })
     }
   }
+
+  /* Les cles ecrites dans cfg sont EXACTEMENT celles que lisent les parcours
+     joueur et l onglet « Contenu du jeu » du drawer (verifie dans EventDrawer et
+     dans les *Client.tsx) : un event cree ici s ouvre donc deja configure. */
+  const cfgJeu = d.cfg as Record<string, unknown>
+  const banquesSel = (cfgJeu.quizBanques as string[]) ?? []
+  const nbQuestions = (cfgJeu.quizNbQuestions as number) ?? 5
+  const chrono = cfgJeu.quizTimer
+  const segments = (cfgJeu.spinSegments as { label: string; color: string; perdant?: boolean }[]) ?? []
+  const voteItems = (cfgJeu.voteItems as { id: string; nom: string; emoji?: string }[]) ?? []
+  const majCfg = (champs: Record<string, unknown>) => maj({ cfg: { ...cfgJeu, ...champs } })
+
+  const familleQuiz = d.module === 'quiz' || d.module === 'quizsolo' || d.module === 'quizmaster'
+  const questionsDispo = banques
+    .filter(b => banquesSel.includes(b.id))
+    .reduce((n, b) => n + (b.questions ?? []).filter(q => q.type === 'qcm').length, 0)
+
+  const COULEURS_SEGMENT = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#9d4edd']
+
+  const diffusion = (cfgJeu.diffusion_demandee as Record<string, unknown>) ?? {}
+  const majDiffusion = (champs: Record<string, unknown>) =>
+    majCfg({ diffusion_demandee: { ...diffusion, ...champs, statut: 'en_attente_sa' } })
+
+  const iEtape = ETAPES.findIndex(e => e.id === etape)
+  const precedente = iEtape > 0 ? ETAPES[iEtape - 1] : null
+  const suivante = iEtape < ETAPES.length - 1 ? ETAPES[iEtape + 1] : null
 
   const ligne = (label: string, requis: boolean, champ: React.ReactNode) => (
     <div style={{ marginBottom: 12 }}>
@@ -131,6 +178,83 @@ export default function Page() {
       {champ}
     </div>
   )
+
+  /* ── ECRAN DE LIVRAISON ──────────────────────────────────────────────────
+     Le wizard pro finissait sur un ecran de remise (recapitulatif, visuel
+     imprimable, texte d annonce, lien Gmail). Le wizard SA, lui, redirigeait
+     vers la liste apres 1,4 s : l event etait cree, et il fallait ensuite
+     retrouver ou recuperer son QR. C est ce trou-la qu on ferme. */
+  if (livre) {
+    const liens: LienDiffusion[] = [
+      {
+        cle: 'Parcours joueur',
+        chemin: `/parcours/${d.module || 'quiz'}?ev=${livre.id}`,
+        aide: "Le lien du QR. C'est celui qui part sur les affiches et les supports.",
+      },
+      ...(d.super_event_id ? [{
+        cle: 'Page dans le super event',
+        chemin: `/se/${d.super_event_id}/${livre.id}`,
+        aide: "La fiche de ce point de jeu sur la page publique du super event.",
+      }] : []),
+    ]
+    const annonce = [
+      `${livre.nom} — ${d.lieu || 'sur place'}`,
+      d.date_d ? `À partir du ${d.date_d}${d.date_f && d.date_f !== d.date_d ? ` et jusqu'au ${d.date_f}` : ''}.` : '',
+      d.lots.length ? `À gagner : ${d.lots.filter(l => l.nom?.trim()).map(l => l.nom.trim()).join(', ')}.` : '',
+      `Scannez le QR sur place, ou jouez ici : https://flowin-events.vercel.app/parcours/${d.module || 'quiz'}?ev=${livre.id}`,
+    ].filter(Boolean).join('\n')
+
+    return (
+      <div className="sa-page">
+        <PageHeader
+          title="✅ Événement créé"
+          subtitle={livre.nom}
+          actions={
+            <>
+              <button className="sa-btn" onClick={() => { setLivre(null); setD(brouillonVide(d.super_event_id)); setEtape('A'); setRetour(null) }}>
+                Créer un autre
+              </button>
+              <button className="sa-btn primary" onClick={() => router.push(`/dashboard/event/${livre.id}`)}>
+                Ouvrir la fiche
+              </button>
+            </>
+          }
+        />
+
+        <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: 18 }}>
+          <Diffusion
+            liens={liens}
+            nomFichier={livre.nom}
+            titreAffiche={livre.nom}
+            sousTitreAffiche={[d.lieu, d.date_d].filter(Boolean).join(' — ')}
+          />
+
+          <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--sa-border)' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: 'var(--sa-muted)', marginBottom: 8 }}>
+              Texte d&apos;annonce
+            </div>
+            <textarea className="sa-input" readOnly value={annonce}
+              style={{ width: '100%', minHeight: 96, fontSize: 12.5, lineHeight: 1.5 }}
+              onFocus={e => e.currentTarget.select()} />
+            <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+              <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(annonce)}>Copier le texte</button>
+              <a
+                className="sa-btn sm"
+                target="_blank" rel="noreferrer"
+                href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(livre.nom)}&body=${encodeURIComponent(annonce)}`}
+              >
+                Préparer un mail Gmail ↗
+              </a>
+            </div>
+            <p className="sa-diff-aide" style={{ marginTop: 10 }}>
+              Même mécanisme que pour les gagnants et les partenaires : un lien Gmail
+              pré-rempli, pas de dépendance à un service d&apos;envoi.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="sa-page">
@@ -280,6 +404,133 @@ export default function Page() {
 
         {etape === 'C' && (
           <>
+            {!d.module && (
+              <div className="sa-muted" style={{ fontSize: 12 }}>
+                Choisis d&apos;abord un module à l&apos;étape précédente.
+              </div>
+            )}
+
+            {familleQuiz && (
+              <>
+                <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 4 }}>Banques de questions</div>
+                <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10, lineHeight: 1.5 }}>
+                  Sans banque, le jeu démarre vide. C&apos;est la cause des « jeux vides »
+                  constatés : le wizard ne posait jamais la question.
+                </div>
+                {banques.length === 0 && <div className="sa-muted" style={{ fontSize: 11.5 }}>Chargement des banques…</div>}
+                {banques.map(b => {
+                  const coche = banquesSel.includes(b.id)
+                  const n = (b.questions ?? []).filter(q => q.type === 'qcm').length
+                  return (
+                    <label key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 0', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={coche}
+                        onChange={e => majCfg({
+                          quizBanques: e.target.checked
+                            ? [...banquesSel, b.id]
+                            : banquesSel.filter(x => x !== b.id),
+                        })}
+                      />
+                      <span style={{ fontSize: 12.5, fontWeight: 600 }}>{b.nom}</span>
+                      <span className="sa-muted" style={{ fontSize: 11 }}>{n} question{n > 1 ? 's' : ''}</span>
+                    </label>
+                  )
+                })}
+                <div style={{
+                  marginTop: 10, padding: '9px 11px', borderRadius: 9, fontSize: 11.5,
+                  border: `1px solid ${questionsDispo >= nbQuestions ? 'var(--sa-border)' : '#b4791f'}`,
+                  background: questionsDispo >= nbQuestions ? 'transparent' : 'rgba(244,181,68,.10)',
+                }}>
+                  <b>{questionsDispo}</b> question{questionsDispo > 1 ? 's' : ''} disponible{questionsDispo > 1 ? 's' : ''}
+                  {questionsDispo < nbQuestions && ` — moins que les ${nbQuestions} demandées par partie.`}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 12 }}>
+                  {ligne('Questions par partie', false,
+                    <input type="number" min={1} className="sa-input" style={{ width: '100%' }} value={nbQuestions}
+                      onChange={e => majCfg({ quizNbQuestions: Number(e.target.value) || 1 })} />)}
+                  {ligne('Chronomètre', false,
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <button type="button" className={`sa-btn sm${chrono !== false ? ' primary' : ''}`}
+                        onClick={() => majCfg({ quizTimer: chrono === false ? 30 : chrono })}>Activé</button>
+                      <button type="button" className={`sa-btn sm${chrono === false ? ' primary' : ''}`}
+                        onClick={() => majCfg({ quizTimer: false })}>Sans</button>
+                      {chrono !== false && (
+                        <input type="number" min={5} className="sa-input" style={{ width: 80 }}
+                          value={typeof chrono === 'number' ? chrono : 30}
+                          onChange={e => majCfg({ quizTimer: Number(e.target.value) || 30 })} />
+                      )}
+                      {chrono !== false && <span className="sa-muted" style={{ fontSize: 11 }}>s</span>}
+                    </div>)}
+                </div>
+              </>
+            )}
+
+            {d.module === 'spin' && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800 }}>Segments de la roue ({segments.length})</div>
+                  <button className="sa-btn sm primary" onClick={() => majCfg({
+                    spinSegments: [...segments, { label: '', color: COULEURS_SEGMENT[segments.length % COULEURS_SEGMENT.length] }],
+                  })}>+ Ajouter</button>
+                </div>
+                {segments.length === 0 && (
+                  <div className="sa-muted" style={{ fontSize: 11.5 }}>
+                    Une roue sans segment ne tourne sur rien. Ajoute au moins deux segments.
+                  </div>
+                )}
+                {segments.map((sg, i) => (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 54px auto auto', gap: 8, alignItems: 'center', marginBottom: 7 }}>
+                    <input className="sa-input" placeholder="Intitulé du segment" value={sg.label}
+                      onChange={e => majCfg({ spinSegments: segments.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })} />
+                    <input type="color" className="sa-input" style={{ height: 34, padding: 2 }} value={sg.color}
+                      onChange={e => majCfg({ spinSegments: segments.map((x, j) => j === i ? { ...x, color: e.target.value } : x) })} />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5, whiteSpace: 'nowrap' }}>
+                      <input type="checkbox" checked={!!sg.perdant}
+                        onChange={e => majCfg({ spinSegments: segments.map((x, j) => j === i ? { ...x, perdant: e.target.checked } : x) })} />
+                      perdant
+                    </label>
+                    <button className="sa-btn sm" onClick={() => majCfg({ spinSegments: segments.filter((_, j) => j !== i) })}>Retirer</button>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {d.module === 'vote' && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800 }}>Éléments à voter ({voteItems.length})</div>
+                  <button className="sa-btn sm primary" onClick={() => majCfg({
+                    voteItems: [...voteItems, { id: `v-${Date.now().toString(36)}`, nom: '' }],
+                  })}>+ Ajouter</button>
+                </div>
+                {voteItems.length === 0 && (
+                  <div className="sa-muted" style={{ fontSize: 11.5 }}>Sans élément, le public n&apos;a rien à départager.</div>
+                )}
+                {voteItems.map((it, i) => (
+                  <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '64px 1fr auto', gap: 8, alignItems: 'center', marginBottom: 7 }}>
+                    <input className="sa-input" placeholder="🎭" value={it.emoji ?? ''}
+                      onChange={e => majCfg({ voteItems: voteItems.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x) })} />
+                    <input className="sa-input" placeholder="Nom" value={it.nom}
+                      onChange={e => majCfg({ voteItems: voteItems.map((x, j) => j === i ? { ...x, nom: e.target.value } : x) })} />
+                    <button className="sa-btn sm" onClick={() => majCfg({ voteItems: voteItems.filter((_, j) => j !== i) })}>Retirer</button>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {d.module === 'tombola' && (
+              <div className="sa-muted" style={{ fontSize: 12, lineHeight: 1.55 }}>
+                Rien à configurer ici : la tombola tire parmi les participants inscrits.
+                Ce sont les lots, à l&apos;étape suivante, qui définissent ce qui est à gagner.
+              </div>
+            )}
+          </>
+        )}
+
+        {etape === 'E' && (
+          <>
             {ligne('Description', false,
               <textarea className="sa-input" style={{ width: '100%', minHeight: 90 }} value={d.description}
                 onChange={e => maj({ description: e.target.value })} />)}
@@ -305,7 +556,7 @@ export default function Page() {
                 {d.lots.length} lot{d.lots.length > 1 ? 's' : ''}
               </div>
               <button className="sa-btn sm primary"
-                onClick={() => setD(x => ({ ...x, lots: [...x.lots, { nom: '', quantite: 1, valeur: 0 }] }))}>
+                onClick={() => setD(x => ({ ...x, lots: [...x.lots, { nom: '', quantite: 1, valeur: 0, type: 'tirage' }] }))}>
                 + Ajouter un lot
               </button>
             </div>
@@ -333,18 +584,65 @@ export default function Page() {
                     Retirer
                   </button>
                 </div>
-                {ligne('Partenaire (facultatif)', false,
-                  <select className="sa-input" style={{ width: '100%' }} value={l.partenaire_id ?? ''}
-                    onChange={e => majLot(i, { partenaire_id: e.target.value || null })}>
-                    <option value="">— aucun —</option>
-                    {partenaires.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
-                  </select>)}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {/* Typage aligne sur le wizard pro, qui distinguait deja les deux
+                      alors que le wizard SA creait tout en tirage par defaut. */}
+                  {ligne('Comment il se gagne', false,
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button type="button" className={`sa-btn sm${(l.type ?? 'tirage') === 'tirage' ? ' primary' : ''}`}
+                        onClick={() => majLot(i, { type: 'tirage' })}>🎟️ Tirage au sort</button>
+                      <button type="button" className={`sa-btn sm${l.type === 'instantane' ? ' primary' : ''}`}
+                        onClick={() => majLot(i, { type: 'instantane' })}>⚡ Gain immédiat</button>
+                    </div>)}
+                  {ligne('Partenaire (facultatif)', false,
+                    <select className="sa-input" style={{ width: '100%' }} value={l.partenaire_id ?? ''}
+                      onChange={e => majLot(i, { partenaire_id: e.target.value || null })}>
+                      <option value="">— aucun —</option>
+                      {partenaires.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+                    </select>)}
+                </div>
+                {ligne('Conditions de retrait (facultatif)', false,
+                  <input className="sa-input" style={{ width: '100%' }} value={l.conditions ?? ''}
+                    placeholder="À retirer en boutique avant le 30/09, sur présentation du billet…"
+                    onChange={e => majLot(i, { conditions: e.target.value || null })} />)}
               </div>
             ))}
           </>
         )}
 
-        {etape === 'E' && (
+        {etape === 'F' && (
+          <>
+            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 12, lineHeight: 1.5 }}>
+              Comment ce point de jeu sera porté sur le terrain. Même question que
+              dans le wizard pro, qui la posait déjà — le wizard SA, non.
+            </div>
+            {([
+              ['physique', 'QR imprimé sur place', 'Affiche, chevalet, sticker à poser au point de jeu.'],
+              ['digital', 'Lien digital', 'Partagé en story, en newsletter, sur le site du commerce.'],
+              ['qr_tracking', 'QR de tracking', "QR distinct par support, pour savoir d'où viennent les scans."],
+            ] as const).map(([cle, titre, desc]) => (
+              <label key={cle} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '9px 0', cursor: 'pointer', borderBottom: '1px solid var(--sa-border)' }}>
+                <input
+                  type="checkbox"
+                  style={{ marginTop: 3 }}
+                  checked={!!diffusion[cle]}
+                  onChange={e => majDiffusion({ [cle]: e.target.checked })}
+                />
+                <span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, display: 'block' }}>{titre}</span>
+                  <span className="sa-muted" style={{ fontSize: 11.5 }}>{desc}</span>
+                </span>
+              </label>
+            ))}
+            <div className="sa-muted" style={{ fontSize: 11, marginTop: 12, lineHeight: 1.5 }}>
+              Ce choix est enregistré comme une demande (<code>cfg.diffusion_demandee</code>),
+              pas comme une commande : c&apos;est le même champ que celui rempli par les pros.
+              Le QR téléchargeable, lui, est disponible dès la création.
+            </div>
+          </>
+        )}
+
+        {etape === 'G' && (
           <>
             <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10, lineHeight: 1.5 }}>
               Ce que le pro client voit depuis son espace. Chaque bloc est indépendant.
@@ -362,7 +660,7 @@ export default function Page() {
           </>
         )}
 
-        {etape === 'F' && (
+        {etape === 'H' && (
           <>
             <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 10 }}>Récapitulatif</div>
             {([
@@ -388,6 +686,32 @@ export default function Page() {
             </div>
           </>
         )}
+
+        {/* Navigation guidee : une decision a la fois, comme cote pro. Les
+            pastilles d etapes restent cliquables pour revenir en arriere vite. */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
+          <button className="sa-btn" disabled={!precedente}
+            onClick={() => precedente && setEtape(precedente.id)}>
+            ← {precedente?.label ?? 'Début'}
+          </button>
+          <span className="sa-muted" style={{ fontSize: 11.5, marginLeft: 'auto' }}>
+            Étape {iEtape + 1} sur {ETAPES.length}
+          </span>
+          {suivante ? (
+            <button className="sa-btn primary" onClick={() => setEtape(suivante.id)}>
+              {suivante.label} →
+            </button>
+          ) : (
+            <button
+              className="sa-btn primary"
+              onClick={enregistrement}
+              disabled={envoi || problemes.length > 0}
+              title={problemes.length ? problemes[0].message : undefined}
+            >
+              {envoi ? 'Enregistrement…' : 'Créer l\u2019événement'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
