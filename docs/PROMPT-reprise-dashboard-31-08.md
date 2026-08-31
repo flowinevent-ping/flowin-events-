@@ -3,7 +3,33 @@
 Ce fichier est le point d'entrée obligatoire pour toute nouvelle conversation
 qui reprend ce travail. Lire dans l'ordre, ne rien sauter.
 
-## 0. Test d'accès — À FAIRE EN PREMIER, AVANT TOUTE LECTURE
+## ⛔ 0. AVANT TOUT — le vrai problème qui revient, ce n'est JAMAIS le token
+
+Si un push renvoie une erreur du type *"repository is not in this session's
+authorized repository set"* (403) : **ce n'est pas un problème de token.**
+C'est un blocage au niveau du proxy git de la session, qui vérifie si le
+repo fait partie des **sources attachées à la conversation**, AVANT même de
+regarder l'authentification. Un nouveau PAT, une Deploy Key, rien de tout
+ça ne change quoi que ce soit tant que le repo n'est pas dans les sources.
+
+**Le fix** :
+- Si cette conversation fait partie du **Projet** Claude existant : elle
+  devrait hériter automatiquement des mêmes sources. Si l'erreur apparaît
+  quand même, vérifier dans les paramètres du Projet que
+  `flowinevent-ping/flowin-events-` est bien dans les sources GitHub.
+- Si c'est une tâche Cowork/conversation **hors Projet** : attacher
+  explicitement `flowinevent-ping/flowin-events-` dans les sources de
+  cette tâche précise (paramètres de la conversation → sources → GitHub)
+  **avant** de lancer le moindre travail.
+- Une fois le clone testé (il réussira toujours, le repo est public — ça
+  ne prouve rien) : tester un **vrai push**. Si ça échoue en 403 malgré le
+  repo attaché, s'arrêter et le signaler à Romain en une phrase, ne
+  jamais essayer de contourner avec un token différent.
+
+Déjà rencontré et diagnostiqué identiquement les 28/08 et 31/08 — même
+cause, même solution, à chaque fois. Ne pas re-déboguer depuis zéro.
+
+## 1. Test d'accès — À FAIRE ENSUITE, AVANT TOUTE LECTURE
 
 1. `git clone https://github.com/flowinevent-ping/flowin-events-.git`
 2. **Le token GitHub est dans Notion** (hub `38c6dcca-9add-81dd-9af2-c93139e06393`,
@@ -21,7 +47,7 @@ qui reprend ce travail. Lire dans l'ordre, ne rien sauter.
 5. Si push OU Supabase MCP échoue : **STOP immédiat**, le dire en une phrase,
    ne jamais continuer en mode dégradé.
 
-## 1. Lecture obligatoire, dans cet ordre
+## 2. Lecture obligatoire, dans cet ordre
 
 1. Ce fichier en entier.
 2. Supabase, table `handoff_notes`, clé `handoff-nds-2026-comm` (contexte
@@ -37,7 +63,7 @@ qui reprend ce travail. Lire dans l'ordre, ne rien sauter.
 6. `admin/lib/roadmap.ts` (page `/dashboard/roadmap` en prod) — la feuille
    de route réelle, avec état par item (ok/hold/todo).
 
-## 2. Discipline non négociable
+## 3. Discipline non négociable
 
 - **3 piliers à chaque étape** : commit+push GitHub, `handoff_notes`
   Supabase (prepend, jamais écraser), Notion hub (insert_content en tête).
@@ -60,7 +86,7 @@ qui reprend ce travail. Lire dans l'ordre, ne rien sauter.
   les 3 couches (monolithe legacy `dashboard.html`, dashboard Next.js,
   `admin/public/*.html` standalone) avant de coder quoi que ce soit.
 
-## 3. État complet au 31/08/2026 soir
+## 4. État complet au 31/08/2026 soir
 
 Session très longue (28/08 au 31/08), des dizaines de commits. Résumé par
 thème plutôt que liste chronologique complète (voir `git log` pour le détail) :
@@ -114,7 +140,7 @@ fusionné en 1 seule page (kanban + Parcours mobil + bouton Nouvel event).
   `flowin-partenaire-presentation.html`, `tirage-nds.html` (confirmé déjà
   clair, `--bg:#f4f6fb`).
 
-## 4. Audit du menu — 31/08 soir, à corriger dans LA PROCHAINE conversation
+## 5. Audit du menu — 31/08 soir, à corriger dans LA PROCHAINE conversation
 
 Romain (captures d'écran du menu complet) : "il manque de rangement, on ne
 voit pas bien Events et Super Event, agrandis les [en-têtes de groupe] en
@@ -159,13 +185,13 @@ fait (organisateur visible sur la carte Super Event, lien vers
 explicitement demandé l'audit maintenant, l'exécution dans la conversation
 suivante.**
 
-## 5. Déploiement
+## 6. Déploiement
 
 Vercel : auto-deploy sur push `main`, racine `/admin`, domaine
 `flowin-events.vercel.app`. Le push suffit, ne jamais toucher à Vercel
 directement.
 
-## 6. Ce qui n'a jamais été construit (roadmap priorité basse, section
+## 7. Ce qui n'a jamais été construit (roadmap priorité basse, section
 "Dashboard SA — chantiers identifiés")
 
 Voir `admin/lib/roadmap.ts` pour le détail à jour. Au 31/08 soir, tout ce
