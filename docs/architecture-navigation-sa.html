@@ -151,10 +151,10 @@ footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font
 
 <div class="wrap">
 <header>
-  <p class="eyebrow">Dashboard SA · proposition d'architecture</p>
+  <p class="eyebrow">Dashboard SA · architecture livrée</p>
   <h1>Trois pôles pour Flowin</h1>
-  <p class="lede">Un seul sélecteur de contexte, trois espaces qui ne se mélangent plus, et le même parcours de création côté pro et côté SA. Tout est déjà en base — il manque la façon d'y accéder.</p>
-  <p class="meta"><span>31 août 2026</span><span>·</span><span>Audit du code réel, pas de supposition</span><span>·</span><span>Rien n'est encore exécuté</span></p>
+  <p class="lede">Un seul sélecteur de contexte, trois espaces qui ne se mélangent plus, et le même parcours de création côté pro et côté SA. Les huit lots sont écrits, vérifiés et en production.</p>
+  <p class="meta"><span>31 août 2026</span><span>·</span><span>Audit du code réel, pas de supposition</span><span>·</span><span>8 lots poussés sur <code>main</code></span></p>
 </header>
 
 <section style="margin-top:0">
@@ -426,7 +426,7 @@ footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font
 
 <section>
   <h2><span class="num">07</span> Plan d'exécution</h2>
-  <p class="sub">Sept lots enchaînés sans pause, mais poussés séparément avec les 3 piliers (GitHub, <code>handoff_notes</code> Supabase, hub Notion) : si quelque chose casse, un seul commit est en cause et se révoque seul. Revue d'ensemble à la fin.</p>
+  <p class="sub">Sept lots enchaînés, poussés séparément avec les 3 piliers (GitHub, <code>handoff_notes</code> Supabase, hub Notion), plus un huitième né d'un audit adverse du résultat. <b>Tout est fait.</b></p>
   <div class="lots">
     <div class="lot"><div class="k">Lot 1</div><div><h4>Contexte global + sidebar + « Toutes les pages »</h4><p>Barre de contexte, <code>?se=</code> / <code>?ev=</code> dans l'URL, 6 groupes colorés et lisibles, 45 entrées → 19, et l'index de secours. Aucune route supprimée.</p></div></div>
     <div class="lot"><div class="k">Lot 2</div><div><h4>Espace Event</h4><p>Les 7 onglets en page pleine, à partir de l'EventDrawer existant. Le drawer reste pour l'aperçu rapide.</p></div></div>
@@ -435,15 +435,23 @@ footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font
     <div class="lot"><div class="k">Lot 5</div><div><h4>Wizard unifié</h4><p>Les 8 étapes partagées pro / SA, plus l'écran de livraison. Wizard de super event dans la foulée.</p></div></div>
     <div class="lot"><div class="k">Lot 6</div><div><h4>Regroupements du pôle Général</h4><p>Les 6 pages à onglets, et les renommages qui font disparaître les 3 paires ambiguës.</p></div></div>
     <div class="lot"><div class="k">Lot 7</div><div><h4>Modèles d'event réutilisables</h4><p>Enregistrer un event configuré (banque, lots, règles) comme modèle, et en créer un nouveau en un clic depuis ce modèle. Nouvelle table Supabase — c'est le seul lot qui touche au schéma.</p></div></div>
+    <div class="lot"><div class="k">Lot 8</div><div><h4>Corrections d'audit</h4><p>Un audit adverse du résultat a trouvé 11 régressions, toutes corrigées. Les trois qui comptaient : chargement infini sur les 5 pages débranchées de leur sélecteur, impression cassée sur tout le dashboard, et portée perdue à chaque clic d'onglet.</p></div></div>
   </div>
+
+  <h3>Ce que l'audit a appris</h3>
+  <p>Trois pièges valent d'être retenus, parce qu'ils reviendront au prochain chantier de ce type.</p>
+  <p><b>Débrancher un sélecteur local casse le cas vide.</b> Chacune des cinq pages avait, dans l'effet qu'on a remplacé, un <code>else setCharge(false)</code> pour le cas « zéro super event ». Supprimé avec le sélecteur, jamais remplacé : le spinner tournait pour toujours, et il n'y avait plus de sélecteur local pour s'en sortir.</p>
+  <p><b>Une règle <code>@media print</code> dans une feuille globale s'applique à tout.</b> Le <code>body *{visibility:hidden}</code> de l'affiche A4 vivait dans <code>globals.css</code>, importé par le layout : un Ctrl+P sur un bon de commande sortait une feuille blanche. Une capacité qui marchait avant et ne marchait plus.</p>
+  <p><b>Une portée devenue globale change les règles d'affichage.</b> Tant que le sélecteur était local à la page, elle ne pouvait pas changer d'opération sous les pieds de l'utilisateur. Maintenant si — d'où la remise à zéro des listes avant chaque chargement, sans quoi on affiche les participants d'une opération sous le titre d'une autre.</p>
 </section>
 
 <section>
-  <h2><span class="num">08</span> Décisions actées</h2>
+  <h2><span class="num">08</span> Décisions actées, et ce qui reste</h2>
   <div class="note">
     <p style="margin:0 0 10px"><b>Fiche event en page pleine</b>, avec le drawer conservé pour le coup d'œil rapide depuis un tableau. C'est ce qui donne à chaque event une URL à lui, donc un lien partageable — impossible aujourd'hui.</p>
     <p style="margin:0 0 10px"><b>Bibliothèque de jeux ET modèles réutilisables.</b> Le catalogue des 6 modules arrive au lot 1 ; les modèles enregistrés font l'objet du lot 7, parce qu'ils demandent une table côté Supabase.</p>
-    <p style="margin:0"><b>Les 7 lots enchaînés, revue à la fin</b> — sous les deux règles anti-régression de la section 04 : aucune route supprimée, et l'index « Toutes les pages » comme filet.</p>
+    <p style="margin:0 0 10px"><b>Les 7 lots enchaînés, revue à la fin</b> — sous les deux règles anti-régression de la section 04 : aucune route supprimée, et l'index « Toutes les pages » comme filet. Les deux règles ont tenu de bout en bout.</p>
+    <p style="margin:0"><b>Le seul reste identifié.</b> <code>Opérations</code> et <code>Stock des lots</code> sont dans le pôle Super events mais ne lisent pas encore la portée : changer de super event ne les fait pas bouger, et rien ne le signale. C'est le même chantier que « déparamétrer NDS codé en dur », déjà inscrit à la feuille de route.</p>
   </div>
 </section>
 
