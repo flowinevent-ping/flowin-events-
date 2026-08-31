@@ -1,0 +1,414 @@
+<title>Trois pôles pour Flowin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EEF2F7; --card:#FFFFFF; --sunk:#F8FAFC; --line:#E2E8F0; --line-hard:#CBD5E1;
+  --ink:#0F172A; --ink-2:#334155; --muted:#64748B;
+  --rail:#1E293B; --rail-2:#152032; --rail-ink:rgba(255,255,255,.80); --rail-dim:rgba(255,255,255,.46); --rail-line:rgba(255,255,255,.09);
+  --accent:#7C2D92; --accent-lt:#A855F7;
+  --se:#A855F7; --se-soft:rgba(168,85,247,.12);
+  --ev:#10B981; --ev-soft:rgba(16,185,129,.12);
+  --gen:#3B82F6; --gen-soft:rgba(59,130,246,.12);
+  --out:#F59E0B; --out-soft:rgba(245,158,11,.12);
+  --sys:#94A3B8; --sys-soft:rgba(148,163,184,.14);
+  --bad:#E11D48; --bad-soft:rgba(225,29,72,.10);
+  --ok:#059669;
+  --shadow:0 1px 2px rgba(15,23,42,.05),0 8px 24px -12px rgba(15,23,42,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1220; --card:#131C2B; --sunk:#0F1826; --line:#243247; --line-hard:#33445E;
+    --ink:#E8EEF7; --ink-2:#B7C4D6; --muted:#8496AE;
+    --rail:#0A1120; --rail-2:#070D18; --rail-ink:rgba(255,255,255,.82); --rail-dim:rgba(255,255,255,.45); --rail-line:rgba(255,255,255,.08);
+    --accent:#C084FC; --accent-lt:#D8B4FE;
+    --se:#C084FC; --se-soft:rgba(192,132,252,.16);
+    --ev:#34D399; --ev-soft:rgba(52,211,153,.15);
+    --gen:#60A5FA; --gen-soft:rgba(96,165,250,.15);
+    --out:#FBBF24; --out-soft:rgba(251,191,36,.15);
+    --sys:#94A3B8; --sys-soft:rgba(148,163,184,.16);
+    --bad:#FB7185; --bad-soft:rgba(251,113,133,.14);
+    --ok:#34D399;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --card:#131C2B; --sunk:#0F1826; --line:#243247; --line-hard:#33445E;
+  --ink:#E8EEF7; --ink-2:#B7C4D6; --muted:#8496AE;
+  --rail:#0A1120; --rail-2:#070D18; --rail-ink:rgba(255,255,255,.82); --rail-dim:rgba(255,255,255,.45); --rail-line:rgba(255,255,255,.08);
+  --accent:#C084FC; --accent-lt:#D8B4FE;
+  --se:#C084FC; --se-soft:rgba(192,132,252,.16);
+  --ev:#34D399; --ev-soft:rgba(52,211,153,.15);
+  --gen:#60A5FA; --gen-soft:rgba(96,165,250,.15);
+  --out:#FBBF24; --out-soft:rgba(251,191,36,.15);
+  --sys:#94A3B8; --sys-soft:rgba(148,163,184,.16);
+  --bad:#FB7185; --bad-soft:rgba(251,113,133,.14);
+  --ok:#34D399;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:15.5px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 24px 96px}
+h1,h2,h3,.disp{font-family:"Bricolage Grotesque","Public Sans",sans-serif; text-wrap:balance; letter-spacing:-.02em}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em}
+code{background:var(--sunk); border:1px solid var(--line); border-radius:5px; padding:1px 5px; color:var(--ink-2)}
+a{color:var(--accent)}
+
+/* ── entête ── */
+header{padding:72px 0 40px; border-bottom:1px solid var(--line); margin-bottom:44px}
+.eyebrow{font-size:11.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); margin:0 0 14px}
+h1{font-size:clamp(38px,6.2vw,62px); font-weight:800; line-height:1.02; margin:0 0 18px}
+.lede{font-size:19px; color:var(--ink-2); max-width:62ch; margin:0}
+.meta{margin-top:26px; font-size:12.5px; color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 18px}
+
+/* ── constat ── */
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow)}
+.fact{background:var(--card); padding:20px 22px}
+.fact b{display:block; font-family:"Bricolage Grotesque",sans-serif; font-size:34px; font-weight:800; line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums}
+.fact span{display:block; font-size:12.5px; color:var(--muted); margin-top:7px; line-height:1.4}
+.fact.warn b{color:var(--bad)}
+
+section{margin:64px 0 0}
+h2{font-size:30px; font-weight:800; margin:0 0 6px; display:flex; align-items:baseline; gap:12px}
+h2 .num{font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:500; color:var(--muted); letter-spacing:0}
+.sub{color:var(--muted); font-size:14.5px; margin:0 0 26px; max-width:66ch}
+h3{font-size:17px; font-weight:700; margin:34px 0 12px}
+p{max-width:68ch}
+
+/* ── rail : maquette sidebar ── */
+.blueprint{display:grid; grid-template-columns:262px 1fr; gap:26px; align-items:start}
+@media(max-width:820px){.blueprint{grid-template-columns:1fr}}
+.rail{background:linear-gradient(180deg,var(--rail),var(--rail-2)); border-radius:14px; padding:0 0 12px; overflow:hidden; box-shadow:var(--shadow); position:sticky; top:20px}
+.rail-logo{padding:16px 18px; border-bottom:1px solid var(--rail-line); color:#fff; font-family:"Bricolage Grotesque",sans-serif; font-weight:800; font-size:19px; display:flex; align-items:center; gap:8px}
+.rail-logo i{width:8px;height:8px;border-radius:50%;background:var(--accent-lt);box-shadow:0 0 10px var(--accent-lt);font-style:normal}
+.rail-scope{margin:12px 12px 6px; background:rgba(255,255,255,.06); border:1px solid var(--rail-line); border-radius:9px; padding:9px 11px}
+.rail-scope small{display:block; font-size:9.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--rail-dim); margin-bottom:5px}
+.rail-scope div{color:#fff; font-size:12.5px; font-weight:600; display:flex; justify-content:space-between; align-items:center; gap:6px}
+.rail-scope div + div{margin-top:5px; color:var(--rail-ink); font-weight:500}
+.rail-scope em{font-style:normal; color:var(--rail-dim); font-size:11px}
+.rail-g{display:flex; align-items:center; gap:8px; padding:16px 16px 7px; font-size:11.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase}
+.rail-g i{width:5px; height:14px; border-radius:3px; display:block; flex-shrink:0}
+.rail-i{display:flex; align-items:center; gap:9px; padding:7px 16px 7px 21px; color:var(--rail-ink); font-size:12.5px; font-weight:500}
+.rail-i.on{color:#fff; font-weight:700; background:linear-gradient(90deg,rgba(168,85,247,.20),transparent); box-shadow:inset 3px 0 0 var(--accent-lt)}
+.rail-i b{margin-left:auto; font-size:10px; font-weight:700; background:rgba(255,255,255,.13); border-radius:99px; padding:1px 7px}
+.rail-i.sub{padding-left:34px; font-size:12px; color:var(--rail-dim)}
+
+/* ── panneau onglets ── */
+.pane{background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden}
+.pane + .pane{margin-top:22px}
+.pane-h{padding:16px 20px 0}
+.pane-t{font-family:"Bricolage Grotesque",sans-serif; font-weight:800; font-size:17px; display:flex; align-items:center; gap:9px}
+.pane-t .dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+.pane-p{font-size:12.5px; color:var(--muted); margin:4px 0 14px; font-family:"JetBrains Mono",monospace}
+.tabs{display:flex; flex-wrap:wrap; gap:4px; padding:0 20px; border-bottom:1px solid var(--line)}
+.tab{font-size:12.5px; font-weight:600; padding:8px 12px; border-radius:8px 8px 0 0; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px}
+.tab.on{color:var(--ink); border-bottom-color:currentColor}
+.tab.new{color:var(--ink)}
+.tab.new::after{content:"nouveau"; font-size:9px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; margin-left:6px; padding:1px 5px; border-radius:99px; background:var(--ev-soft); color:var(--ev); vertical-align:1px}
+.pane-b{padding:16px 20px 20px; font-size:13.5px; color:var(--ink-2)}
+.pane-b ul{margin:0; padding-left:18px}
+.pane-b li{margin:5px 0}
+
+/* ── tables ── */
+.tw{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--card); box-shadow:var(--shadow)}
+table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:560px}
+th{text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); padding:12px 16px; border-bottom:1px solid var(--line-hard); white-space:nowrap; background:var(--sunk)}
+td{padding:10px 16px; border-bottom:1px solid var(--line); vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.mono{font-size:12px; color:var(--muted); white-space:nowrap}
+.pill{display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:2px 8px; border-radius:99px; white-space:nowrap}
+.p-se{background:var(--se-soft); color:var(--se)} .p-ev{background:var(--ev-soft); color:var(--ev)}
+.p-gen{background:var(--gen-soft); color:var(--gen)} .p-out{background:var(--out-soft); color:var(--out)}
+.p-sys{background:var(--sys-soft); color:var(--muted)}
+
+/* ── flux wizard ── */
+.flow{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px}
+.step{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 15px; box-shadow:var(--shadow); position:relative}
+.step .n{font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:500; color:var(--muted)}
+.step .t{font-family:"Bricolage Grotesque",sans-serif; font-weight:800; font-size:14.5px; margin:3px 0 5px}
+.step .d{font-size:12.5px; color:var(--muted); line-height:1.45}
+.step.gap{border-color:var(--bad); background:linear-gradient(0deg,var(--bad-soft),var(--bad-soft)),var(--card)}
+.step.gap .n{color:var(--bad)}
+.step .tagm{position:absolute; top:-8px; right:12px; font-size:9px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; padding:2px 7px; border-radius:99px; background:var(--bad); color:#fff}
+
+/* ── notes ── */
+.note{border-left:3px solid var(--accent); background:var(--card); border-radius:0 12px 12px 0; padding:16px 20px; margin:24px 0; font-size:14px; color:var(--ink-2); box-shadow:var(--shadow)}
+.note b{color:var(--ink)}
+.q{border-left-color:var(--out)}
+
+/* ── lots ── */
+.lots{display:flex; flex-direction:column; gap:10px}
+.lot{display:grid; grid-template-columns:56px 1fr; gap:16px; align-items:start; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:15px 18px; box-shadow:var(--shadow)}
+.lot .k{font-family:"Bricolage Grotesque",sans-serif; font-weight:800; font-size:13px; color:#fff; background:var(--accent); border-radius:8px; text-align:center; padding:5px 0}
+.lot h4{margin:0 0 3px; font-family:"Bricolage Grotesque",sans-serif; font-size:15.5px; font-weight:800}
+.lot p{margin:0; font-size:13px; color:var(--muted); max-width:none}
+footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Dashboard SA · proposition d'architecture</p>
+  <h1>Trois pôles pour Flowin</h1>
+  <p class="lede">Un seul sélecteur de contexte, trois espaces qui ne se mélangent plus, et le même parcours de création côté pro et côté SA. Tout est déjà en base — il manque la façon d'y accéder.</p>
+  <p class="meta"><span>31 août 2026</span><span>·</span><span>Audit du code réel, pas de supposition</span><span>·</span><span>Rien n'est encore exécuté</span></p>
+</header>
+
+<section style="margin-top:0">
+  <h2><span class="num">01</span> Le constat</h2>
+  <p class="sub">Chiffres relevés dans le code, pas estimés : <code>components/dashboard/Sidebar.tsx</code>, les 19 pages du dashboard et les deux wizards.</p>
+  <div class="facts">
+    <div class="fact"><b>46</b><span>entrées dans la sidebar, toutes dépliées en permanence</span></div>
+    <div class="fact warn"><b>24</b><span>entrées dans le seul groupe « Comm &amp; outils », contre 1 dans « Events »</span></div>
+    <div class="fact warn"><b>5/19</b><span>pages seulement savent se filtrer par super event — chacune avec sa propre UI</span></div>
+    <div class="fact warn"><b>0</b><span>page partageable par URL : aucun <code>?se=</code> ni <code>?ev=</code> nulle part</span></div>
+    <div class="fact warn"><b>2</b><span>wizards de création sans une ligne de code commune</span></div>
+  </div>
+
+  <h3>Ce que ça produit à l'écran</h3>
+  <p>Le groupe « Super Event » contient en réalité quatre rapports NDS. Le groupe « Events » contient une seule ligne. Neuf entrées ouvrent des pages HTML autonomes qui n'ont rien à voir entre elles. Et surtout : quand tu changes de super event sur <em>Résultat journalier</em>, la page suivante repart sur le premier de la liste, parce que la sélection n'existe que dans le <code>useState</code> de cette page-là.</p>
+  <p>Le problème n'est donc pas « il manque des onglets ». C'est qu'<b>il n'existe aucune notion de « sur quoi je travaille en ce moment »</b>. Chaque page se débrouille seule. Ajouter des sous-onglets sans régler ça reproduirait le désordre un cran plus bas.</p>
+</section>
+
+<section>
+  <h2><span class="num">02</span> Le principe</h2>
+  <p class="sub">Une seule idée porte toute la réorganisation : sortir la sélection de son <code>useState</code> local pour en faire un contexte global, visible en permanence et inscrit dans l'URL.</p>
+
+  <div class="note">
+    <b>La barre de contexte.</b> En haut de la sidebar, deux sélecteurs : le super event, puis l'event (ou « tous »). Ils écrivent <code>?se=se-nds-2026&amp;ev=ev-…</code> dans l'URL, sont mémorisés d'un écran à l'autre, et toutes les pages scopables les lisent. Un seul mécanisme remplace les cinq sélecteurs divergents d'aujourd'hui — et chaque écran devient partageable par lien, ce qui n'existe nulle part actuellement.
+  </div>
+
+  <p>À partir de là, la navigation se lit en trois pôles, avec une couleur par pôle qui répond à ta remarque sur les en-têtes de groupe illisibles (aujourd'hui <code>font-size:10px</code> en gris terne, sans icône ni couleur) :</p>
+
+  <div class="tw" style="margin-top:16px">
+  <table>
+    <thead><tr><th>Pôle</th><th>Ce qu'on y fait</th><th>Portée</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-se">Super events</span></td><td>Piloter une opération complète : ses stations, ses lots, ses résultats, sa landing</td><td>Scopé au super event choisi</td></tr>
+      <tr><td><span class="pill p-ev">Events</span></td><td>Créer et gérer un point de jeu : contenu, participants, gagnants, QR</td><td>Scopé à l'event choisi</td></tr>
+      <tr><td><span class="pill p-gen">Général</span></td><td>Tout ce qui traverse les opérations : CRM, comm, stats, facturation</td><td>Jamais scopé — toute la base</td></tr>
+      <tr><td><span class="pill p-out">Outils</span></td><td>Les documents commerciaux et kits autonomes, rangés ensemble</td><td>Hors périmètre données</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span> La nouvelle sidebar</h2>
+  <p class="sub">De 46 entrées à 19. Rien n'est supprimé : ~28 entrées descendent en sous-onglets, là où elles ont un sens.</p>
+
+  <div class="blueprint">
+    <div class="rail" aria-label="Maquette de la sidebar proposée">
+      <div class="rail-logo"><i></i>Flowin <span style="color:var(--accent-lt)">SA</span></div>
+      <div class="rail-scope">
+        <small>Contexte</small>
+        <div>NDS 2026 <em>▾</em></div>
+        <div>Tous les events <em>▾</em></div>
+      </div>
+      <div class="rail-g" style="color:var(--sys)"><i style="background:var(--sys)"></i>Accueil</div>
+      <div class="rail-i">🏠 Vue d'ensemble</div>
+
+      <div class="rail-g" style="color:var(--se)"><i style="background:var(--se)"></i>Super events</div>
+      <div class="rail-i on">🎪 Mes super events <b>3</b></div>
+      <div class="rail-i">✨ Nouveau super event</div>
+
+      <div class="rail-g" style="color:var(--ev)"><i style="background:var(--ev)"></i>Events</div>
+      <div class="rail-i">🗂️ Kanban des events <b>42</b></div>
+      <div class="rail-i">✨ Nouvel event</div>
+      <div class="rail-i">🎮 Bibliothèque de jeux</div>
+
+      <div class="rail-g" style="color:var(--gen)"><i style="background:var(--gen)"></i>Général</div>
+      <div class="rail-i">📊 Stats globales</div>
+      <div class="rail-i">🏢 CRM pros &amp; commerces</div>
+      <div class="rail-i">👥 CRM participants</div>
+      <div class="rail-i">📣 Communication</div>
+      <div class="rail-i">🎯 Prospection &amp; B2B</div>
+      <div class="rail-i">🧾 Facturation &amp; admin</div>
+
+      <div class="rail-g" style="color:var(--out)"><i style="background:var(--out)"></i>Outils &amp; documents</div>
+      <div class="rail-i">📕 Plaquettes &amp; pitchs</div>
+      <div class="rail-i">🎁 Kits partenaires</div>
+      <div class="rail-i">🖼️ Visuels &amp; médias</div>
+
+      <div class="rail-g" style="color:var(--sys)"><i style="background:var(--sys)"></i>Système</div>
+      <div class="rail-i">🗺️ Feuille de route</div>
+      <div class="rail-i">⚙️ Paramètres</div>
+      <div class="rail-i">🛠️ Maintenance</div>
+    </div>
+
+    <div>
+      <div class="pane">
+        <div class="pane-h">
+          <div class="pane-t"><span class="dot" style="background:var(--se)"></span>Espace Super Event</div>
+          <div class="pane-p">/dashboard/super-event/[id]/[onglet]</div>
+        </div>
+        <div class="tabs">
+          <span class="tab on" style="color:var(--se)">Vue d'ensemble</span>
+          <span class="tab new">Events</span>
+          <span class="tab new">Participants</span>
+          <span class="tab new">Pros &amp; partenaires</span>
+          <span class="tab new">Lots &amp; tirages</span>
+          <span class="tab new">Landing &amp; diffusion</span>
+          <span class="tab">Résultats</span>
+          <span class="tab new">Communication</span>
+        </div>
+        <div class="pane-b">
+          <ul>
+            <li><b>Events</b> — le kanban filtré sur ce super event, avec le bouton « ajouter une station » qui pré-remplit le rattachement (aujourd'hui il faut créer l'event puis le rattacher à la main dans le drawer).</li>
+            <li><b>Lots &amp; tirages</b> — stock, tirage au sort scopé, gagnants. C'est l'item « tirage au sort : scoper par event / super event » qui traîne dans la roadmap.</li>
+            <li><b>Landing &amp; diffusion</b> — aperçu de <code>/se/[id]</code>, lien copiable, QR téléchargeable. Ça n'existe nulle part aujourd'hui.</li>
+            <li><b>Résultats</b> — regroupe résultat journalier, rapport détaillé, rapport de points et origines du trafic, qui sont aujourd'hui quatre entrées de sidebar séparées avec quatre sélecteurs différents.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-h">
+          <div class="pane-t"><span class="dot" style="background:var(--ev)"></span>Espace Event</div>
+          <div class="pane-p">/dashboard/event/[id]/[onglet] — extension de l'EventDrawer existant</div>
+        </div>
+        <div class="tabs">
+          <span class="tab on" style="color:var(--ev)">Infos</span>
+          <span class="tab">Contenu du jeu</span>
+          <span class="tab">Participants</span>
+          <span class="tab">Lots &amp; gagnants</span>
+          <span class="tab new">Landing &amp; diffusion</span>
+          <span class="tab">Stats</span>
+          <span class="tab">Export</span>
+        </div>
+        <div class="pane-b">
+          Six de ces sept onglets existent déjà dans <code>EventDrawer.tsx</code> et fonctionnent. Ils passent simplement en page pleine, adressable par URL, le drawer restant pour le coup d'œil rapide depuis un tableau. Seul <b>Landing &amp; diffusion</b> est à construire.
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-h">
+          <div class="pane-t"><span class="dot" style="background:var(--gen)"></span>Pôle Général</div>
+          <div class="pane-p">6 pages, chacune à onglets — remplace 18 entrées de sidebar</div>
+        </div>
+        <div class="pane-b">
+          <ul>
+            <li><b>CRM pros &amp; commerces</b> · Pros · Commerces partenaires · Demandes de participation · Aperçu pro</li>
+            <li><b>CRM participants</b> · Joueurs · Participants super event · Contacts landing · Retours</li>
+            <li><b>Communication</b> · Billets &amp; kit partenaire · Envoi en masse · Médias · Visuels</li>
+            <li><b>Facturation &amp; admin</b> · Créer un bon de commande · Bons &amp; factures · Packs · CGV</li>
+            <li><b>Prospection &amp; B2B</b> · Prospection terrain · Prospects B2B</li>
+            <li><b>Stats globales</b> · KPI toutes opérations · Rapports</li>
+          </ul>
+          <p style="margin:12px 0 0">Ce regroupement règle au passage les 3 paires de noms trop proches relevées dans l'audit : « Bons de commande » vs « Bons de commande &amp; factures (liste) », « Prospection » vs « Prospects B2B », « Landing pages » vs « CRM landing pages ». Elles deviennent deux onglets d'une même page, où la distinction outil / suivi se lit d'elle-même.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span> Où va chaque page actuelle</h2>
+  <p class="sub">Aucune fonctionnalité ne disparaît. Le tableau est la garantie que rien n'est perdu en route.</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Aujourd'hui</th><th>Demain</th><th>Pôle</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">super-events</td><td>Mes super events</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">operations · operations/[id]</td><td>Vue d'ensemble du super event</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">nds-resultat · rapport-points · statistiques · track-qr</td><td>Onglet « Résultats »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">nds-participants</td><td>Onglet « Participants »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">nds-lots · tirage-nds.html · gagnants</td><td>Onglet « Lots &amp; tirages »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">nds-carte · nds-front</td><td>Onglet « Landing &amp; diffusion »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">events</td><td>Kanban des events</td><td><span class="pill p-ev">EV</span></td></tr>
+      <tr><td class="mono">wizard-event</td><td>Nouvel event (wizard unifié)</td><td><span class="pill p-ev">EV</span></td></tr>
+      <tr><td class="mono">jeux</td><td>Bibliothèque de jeux (catalogue)</td><td><span class="pill p-ev">EV</span></td></tr>
+      <tr><td class="mono">EventDrawer (7 onglets)</td><td>Espace Event en page pleine</td><td><span class="pill p-ev">EV</span></td></tr>
+      <tr><td class="mono">pros · partenaires · apercu-pro · demandes-rattachement</td><td>CRM pros &amp; commerces</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">joueurs · crm-landing · crm-retours</td><td>CRM participants</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">nds-comm · envoi-masse · nds-media · nds-visuels.html</td><td>Communication</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">nds-bon-commande · bons-commande-liste.html · facture-nds.html · nds-packs · cgv</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">prospection · btob-prospects</td><td>Prospection &amp; B2B</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">rapports · pilotage</td><td>Stats globales</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">landing-page</td><td>Aperçu global des landings (Outils) + onglets Diffusion par entité</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">plaquette-nds · pitch-nds · flowin-partenaire-presentation · nds</td><td>Plaquettes &amp; pitchs</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">kit-digital</td><td>Kits partenaires</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">roadmap · parametres · maintenance</td><td>inchangé</td><td><span class="pill p-sys">SYS</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">05</span> Le parcours de création unifié</h2>
+  <p class="sub">Tu as raison : ce ne sont pas deux variantes du même wizard, ce sont deux logiciels différents. <code>lib/wizard.ts</code> n'est importé que par la page SA, le pro écrit via <code>creerAnimation()</code> dans <code>lib/pro.ts</code>. Zéro ligne partagée.</p>
+
+  <div class="tw" style="margin-bottom:26px">
+  <table>
+    <thead><tr><th>Ce que fait le pro</th><th>Ce que fait le SA aujourd'hui</th></tr></thead>
+    <tbody>
+      <tr><td>5 ou 6 étapes guidées, une seule décision à la fois</td><td>6 onglets libres, tout ouvert d'un coup</td></tr>
+      <tr><td>Choisit sa banque de questions <b>à la création</b></td><td>Rien — le jeu sort vide, à configurer après coup dans le drawer</td></tr>
+      <tr><td>Lots typés tirage / gain immédiat + règle de gain</td><td>Lots sans type ni règle</td></tr>
+      <tr><td>Choisit sa diffusion (QR physique, lien, QR tracking)</td><td>Absent</td></tr>
+      <tr><td><b>Écran de livraison</b> : récap, visuel imprimable, billet, texte d'annonce, lien Gmail</td><td>Redirection sèche vers la liste des events après 1,4 s</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>La proposition : un seul composant <code>&lt;EventWizard variant="pro" | "sa" /&gt;</code>, huit étapes, la variante SA ajoutant ses champs propres (lieu, horaires, couleur, score minimum, visibilité pro) sans casser le guidage.</p>
+
+  <div class="flow" style="margin-top:18px">
+    <div class="step"><span class="n">01</span><div class="t">Identité</div><div class="d">Nom, pro client, rattachement au super event</div></div>
+    <div class="step"><span class="n">02</span><div class="t">Module de jeu</div><div class="d">Les 6 modules, mêmes icônes des deux côtés</div></div>
+    <div class="step gap"><span class="tagm">manquant</span><span class="n">03</span><div class="t">Contenu du jeu</div><div class="d">Banque, questions, segments, éléments à voter — la cause racine des jeux vides</div></div>
+    <div class="step gap"><span class="tagm">manquant</span><span class="n">04</span><div class="t">Récompenses</div><div class="d">Lots typés tirage / instantané + règle de gain</div></div>
+    <div class="step"><span class="n">05</span><div class="t">Dates &amp; lieu</div><div class="d">Période, horaires, adresse, statut déduit</div></div>
+    <div class="step gap"><span class="tagm">manquant</span><span class="n">06</span><div class="t">Diffusion</div><div class="d">QR physique, lien digital, QR de tracking</div></div>
+    <div class="step"><span class="n">07</span><div class="t">Visibilité pro</div><div class="d">Les 6 cases <code>pro_visib</code> — étape SA uniquement</div></div>
+    <div class="step gap"><span class="tagm">manquant</span><span class="n">08</span><div class="t">Livraison</div><div class="d">Récap, aperçu de la landing, QR téléchargeable, visuel A4, texte d'annonce, lien Gmail</div></div>
+  </div>
+
+  <h3>Et le super event</h3>
+  <p>Aujourd'hui on ne peut pas en créer un : on <b>duplique</b> le template <code>se-master-superevent</code> via l'RPC <code>dupliquer_super_event</code>, et le bouton disparaît si ce template n'existe pas en base. Même coquille de wizard, cinq étapes — identité, dates, lots communs, partenaires, landing — et le même écran de livraison à la fin. La duplication reste offerte comme option « partir d'un modèle », elle n'est plus le seul chemin.</p>
+</section>
+
+<section>
+  <h2><span class="num">06</span> Aperçus et téléchargements</h2>
+  <p class="sub">C'est le manque le plus concret de ta liste, et le plus vite comblé.</p>
+
+  <h3>Ce qui existe vraiment</h3>
+  <p>Deux aperçus en cadre téléphone : <code>PhoneApercu</code> sur la page Landing pages, alimenté par une liste de 12 pages <b>écrite en dur</b> dans le fichier ; et <code>ParcoursMobil</code>, qui affiche le parcours joueur. Aucun aperçu de <code>/se/[se]</code>, aucun par event, aucun sur la fiche partenaire.</p>
+  <p>Pour les QR : aucune génération locale. Toutes les images sont des <code>&lt;img&gt;</code> vers <code>api.qrserver.com</code>. Conséquence directe — <b>on ne peut rien télécharger</b>, puisqu'il n'y a pas de fichier, juste une image distante. Les seuls téléchargements du dashboard sont des CSV.</p>
+
+  <div class="note q">
+    <b>Proposition — un composant « Diffusion », un seul, réutilisé partout.</b> Aperçu téléphone navigable + lien copiable + QR <b>généré localement</b> (bibliothèque <code>qrcode</code>, en remplacement de l'appel externe) + boutons PNG, SVG et affiche A4 en PDF. Il se pose sur l'onglet Landing de l'espace Event, celui de l'espace Super Event, l'écran de livraison des deux wizards et la fiche partenaire.
+  </div>
+
+  <p>Il couvre les cinq familles d'URL du produit : <code>/se/[se]</code>, <code>/se/[se]/[event]</code>, <code>/parcours/[module]?ev=</code>, et les deux landings <code>/rejoindre/[se]</code> et <code>/sponsor/[se]</code> — qui existent, fonctionnent, et vers lesquelles <b>aucun lien ne pointe nulle part dans l'app</b>. Elles redeviennent accessibles au passage.</p>
+</section>
+
+<section>
+  <h2><span class="num">07</span> Plan d'exécution</h2>
+  <p class="sub">Six lots, chacun poussé séparément avec les 3 piliers (GitHub, <code>handoff_notes</code> Supabase, hub Notion), chacun vérifiable en prod avant de passer au suivant.</p>
+  <div class="lots">
+    <div class="lot"><div class="k">Lot 1</div><div><h4>Contexte global + sidebar</h4><p>Barre de contexte, <code>?se=</code> / <code>?ev=</code> dans l'URL, 6 groupes colorés et lisibles, 46 entrées → 19. La nouvelle structure est visible dès ce lot.</p></div></div>
+    <div class="lot"><div class="k">Lot 2</div><div><h4>Espace Event</h4><p>Les 7 onglets en page pleine, à partir de l'EventDrawer existant. Le drawer reste pour l'aperçu rapide.</p></div></div>
+    <div class="lot"><div class="k">Lot 3</div><div><h4>Espace Super Event</h4><p>Les 8 onglets, en rebranchant les pages de résultats existantes sur le contexte au lieu de leurs sélecteurs locaux.</p></div></div>
+    <div class="lot"><div class="k">Lot 4</div><div><h4>Composant Diffusion</h4><p>Aperçus landing, QR généré localement, téléchargements PNG / SVG / PDF A4.</p></div></div>
+    <div class="lot"><div class="k">Lot 5</div><div><h4>Wizard unifié</h4><p>Les 8 étapes partagées pro / SA, plus l'écran de livraison. Wizard de super event dans la foulée.</p></div></div>
+    <div class="lot"><div class="k">Lot 6</div><div><h4>Regroupements du pôle Général</h4><p>Les 6 pages à onglets, et les renommages qui font disparaître les 3 paires ambiguës.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">08</span> Ce qu'il me faut de toi</h2>
+  <div class="note">
+    <p style="margin:0 0 10px"><b>1. Le découpage tient-il ?</b> Notamment : j'ai mis « Bibliothèque de jeux » (le catalogue des 6 modules) dans le pôle Events, et « contenu du jeu » comme onglet de chaque event. Tu parlais de « template de jeux » dans Events — je crois que c'est bien ça, mais dis-moi si tu voyais autre chose.</p>
+    <p style="margin:0 0 10px"><b>2. Page pleine ou drawer ?</b> Je propose de passer l'event en page pleine avec onglets tout en gardant le drawer. C'est un peu plus de travail que de garder seulement le drawer, mais c'est ce qui rend un event partageable par lien.</p>
+    <p style="margin:0"><b>3. L'ordre.</b> Le lot 1 rend la structure visible tout de suite ; le lot 4 (aperçus + QR téléchargeables) est le plus petit et le plus immédiatement utile. Si tu préfères voir les téléchargements en premier, je commence par là.</p>
+  </div>
+</section>
+
+<footer>
+  Établi à partir du code de <code>flowinevent-ping/flowin-events-</code> au commit <code>06a6a1c</code> — sidebar, 19 pages du dashboard, les deux wizards, <code>EventDrawer</code>, <code>lib/wizard.ts</code>, <code>lib/pro.ts</code> et <code>lib/roadmap.ts</code>. Vérifié dans le code et les données ; aucun rendu écran vérifié — Claude n'a pas d'accès navigateur.
+</footer>
+</div>
