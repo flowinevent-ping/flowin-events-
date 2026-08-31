@@ -120,6 +120,9 @@ export default function Page() {
                 {parStatut[cle].map(se => {
                   const st = statutReel(se)
                   const seEvents = events.filter(e => e.super_event_id === se.id)
+                  // Meme convention que plus bas dans ce fichier : le pro 'pro-nds-2026'
+                  // (ou equivalent id se-<x>) porte le role organisateur du super event.
+                  const orga = pros.find(p => p.id === `pro-${se.id.replace(/^se-/, '')}`) ?? pros.find(p => p.id === 'pro-nds-2026' && se.id === 'se-nds-2026')
                   const colonnes: { cle: EtatStation; titre: string }[] = [
                     { cle: 'live', titre: '🔴 En cours' },
                     { cle: 'upcoming', titre: '📅 À venir' },
@@ -136,6 +139,16 @@ export default function Page() {
                         {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
                       </div>
                       <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 4 }}>{se.id}</div>
+                      {orga && (
+                        <div
+                          onClick={() => openDrawer('pro', orga.id)}
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '6px 10px', background: 'var(--sa-subtle)', borderRadius: 8, cursor: 'pointer', width: 'fit-content' }}
+                        >
+                          <span style={{ fontSize: 12 }}>🏛️</span>
+                          <span style={{ fontSize: 11.5, fontWeight: 700 }}>{orga.nom}</span>
+                          <span className="sa-muted" style={{ fontSize: 10.5 }}>· fiche complète →</span>
+                        </div>
+                      )}
 
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
                         {accesRapides.map(a => (
@@ -146,10 +159,13 @@ export default function Page() {
                       </div>
 
                       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                        <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm primary" style={{ textDecoration: 'none' }}>
+                          📊 Fiche complète (KPIs, commerces, tarif)
+                        </a>
                         <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
                           {ouvert === se.id ? 'Masquer' : `📍 ${seEvents.length} station${seEvents.length > 1 ? 's' : ''}`}
                         </button>
-                        <button className="sa-btn sm primary" style={{ marginLeft: 'auto' }}
+                        <button className="sa-btn sm" style={{ marginLeft: 'auto' }}
                           onClick={() => { setSource(se); setNom(''); setRes(null) }}>
                           🔁 Dupliquer
                         </button>
