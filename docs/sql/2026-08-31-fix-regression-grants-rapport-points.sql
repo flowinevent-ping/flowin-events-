@@ -1,0 +1,34 @@
+-- 31/08/2026 — Regression : Rapport détaillé affichait "Aucune donnée" en prod
+--
+-- SIGNALE PAR ROMAIN (capture d'écran) : /dashboard/rapport-points vide pour
+-- Nuits du Sud 2026 alors que les vraies données existent.
+--
+-- CAUSE : MOI. En corrigeant le bornage de super_event_rapport_points() et
+-- super_event_bonus_resultats() plus tôt dans la nuit, j'ai écrit
+-- `grant execute ... to authenticated` — un réflexe de durcissement qui ne
+-- correspond PAS à l'architecture réelle de cette application : le dashboard SA
+-- tourne entièrement sur la clé anon (pas de session Supabase Auth), exactement
+-- comme super_event_optin, super_event_jours, super_event_engagement, etc.
+-- (tous grantés à PUBLIC). En restreignant à `authenticated` seul, j'ai rendu
+-- ces 2 fonctions inappelables par l'application réelle.
+--
+-- VÉRIFIÉ avant de conclure : la RPC elle-même retournait bien les vraies données
+-- (2446 flashs, 986 parties, 18 points actifs) quand appelée avec les bons droits —
+-- ce n'était pas un problème de données, uniquement de permissions.
+--
+-- CORRIGÉ :
+--   revoke all on function super_event_rapport_points(text) from public, anon, authenticated, supabase_read_only_user;
+--   grant execute on function super_event_rapport_points(text) to public;
+--   (idem pour super_event_bonus_resultats)
+--
+-- Vérifié après coup : grantee = PUBLIC sur les deux, comme le reste des RPC
+-- super_event_*. Vérifié aussi qu'aucune autre RPC touchée cette nuit n'a le même
+-- problème (tirage_lot, annuler_tirage, partenaire_gagnants, partenaire_gagnants_etat,
+-- super_event_engagement, super_event_repondants, super_event_optin, super_event_jours
+-- — toutes correctement accessibles).
+--
+-- LEÇON : sur ce projet, ne jamais restreindre une RPC lue par le dashboard SA à
+-- `authenticated` — il n'y a pas de session Supabase Auth ici, seulement la clé
+-- anon. Le durcissement réel (séparer clé admin / clé anon) est un chantier à part
+-- entière, déjà identifié dans docs/sql/securite-durcissement-post-festival.md,
+-- pas quelque chose à faire RPC par RPC au fil de l'eau.
