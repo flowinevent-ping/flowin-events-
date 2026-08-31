@@ -1,5 +1,5 @@
 {
- "genere_le": "2026-08-30T16:50:02",
+ "genere_le": "2026-08-31T09:37:13",
  "sidebar_prod": [
   {
    "group": "ACCUEIL",
@@ -66,18 +66,8 @@
    "items": [
     {
      "id": "events",
-     "label": "Animations (par pro)",
+     "label": "Events",
      "href": "/dashboard/events"
-    },
-    {
-     "id": "parcours",
-     "label": "Parcours mobil",
-     "href": "/dashboard/parcours"
-    },
-    {
-     "id": "wizard-event",
-     "label": "Nouvel événement",
-     "href": "/dashboard/wizard-event"
     }
    ]
   },
@@ -495,6 +485,7 @@
  ],
  "liens_morts_sidebar": [],
  "routes_orphelines": [
+  "/dashboard/parcours",
   "/pro/banques",
   "/pro/banques/nouvelle",
   "/pro/connexion",

@@ -96,9 +96,7 @@ export default function Sidebar() {
     {
       group: 'EVENTS',
       items: [
-        { id: 'events', icon: '🎬', label: 'Animations (par pro)', count: events.length, live: liveCount, href: '/dashboard/events' },
-        { id: 'parcours', icon: '📱', label: 'Parcours mobil', href: '/dashboard/parcours' },
-        { id: 'wizard-event', icon: '✨', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
+        { id: 'events', icon: '🎬', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
       ],
     },
     {

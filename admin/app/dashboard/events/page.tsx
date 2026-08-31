@@ -16,8 +16,10 @@
  * cette page applique l'exclusivite, pas une contrainte structurelle.
  */
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/DashboardUI'
+import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent } from '@/lib/types'
 
 type EtatAnim = 'live' | 'upcoming' | 'past' | 'archived'
@@ -32,6 +34,21 @@ export default function Page() {
   const { events, pros, openDrawer, openDrawerEdit } = useDashboard()
   const [search, setSearch] = useState('')
   const [ouvert, setOuvert] = useState<string | null>(null)
+  const [onglet, setOnglet] = useState<'kanban' | 'parcours'>('kanban')
+
+  const evsParcours = useMemo(() => {
+    const reels = (events ?? []).filter(e => e.module && e.super_event_id && e.super_event_id !== 'se-master-superevent')
+    const parPro = new Map<string, typeof reels[number]>()
+    for (const e of reels) {
+      const cle = e.pro_id ?? e.id
+      const actuel = parPro.get(cle)
+      if (!actuel || (e.status === 'live' && actuel.status !== 'live')) parPro.set(cle, e)
+    }
+    return Array.from(parPro.values())
+      .map(e => ({ id: e.id, module: e.module, nom: pros.find(p => p.id === e.pro_id)?.nom ?? e.nom }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+  }, [events, pros])
+  const seIdParcours = events?.find(e => e.super_event_id && e.super_event_id !== 'se-master-superevent')?.super_event_id ?? undefined
 
   /* Cette page groupe PAR PRO : un event sans pro_id (ex. la demo B2B "Découvrez
      Flowin", sans pro rattache) n'a pas sa place ici -- il faisait apparaitre une
@@ -91,7 +108,22 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="🎬 Animations" subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`} />
+        <PageHeader
+          title="🎬 Events"
+          subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`}
+          actions={<Link href="/dashboard/wizard-event" className="sa-btn primary sm">✨ Nouvel event</Link>}
+        />
+
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+          <button className={`sa-btn sm${onglet === 'kanban' ? ' primary' : ''}`} onClick={() => setOnglet('kanban')}>📋 Kanban</button>
+          <button className={`sa-btn sm${onglet === 'parcours' ? ' primary' : ''}`} onClick={() => setOnglet('parcours')}>📱 Parcours mobil</button>
+        </div>
+
+        {onglet === 'parcours' && (
+          <ParcoursMobil events={evsParcours} seId={seIdParcours} showTitle={false} />
+        )}
+
+        {onglet === 'kanban' && (<>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
           <SearchBar value={search} onChange={setSearch} placeholder="Rechercher…" />
         </div>
@@ -174,6 +206,7 @@ export default function Page() {
             ))}
           </div>
         )}
+        </>)}
       </div>
     </div>
   )
