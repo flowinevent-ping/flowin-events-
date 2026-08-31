@@ -115,6 +115,36 @@
 .sa-drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
 .sa-drawer-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--sa-border);flex-shrink:0;background:var(--sa-card)}
 .sa-drawer-empty{padding:40px;text-align:center;color:var(--sa-muted)}
+/* ── Diffusion : aperçu + lien + QR téléchargeable (lot 4) ── */
+.sa-diff{display:flex;flex-direction:column;gap:14px}
+.sa-diff-onglets{display:flex;gap:4px;flex-wrap:wrap}
+.sa-diff-onglet{padding:6px 12px;border-radius:99px;border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-muted);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.sa-diff-onglet:hover{color:var(--sa-text);border-color:var(--sa-text)}
+.sa-diff-onglet.actif{background:var(--sa-accent);border-color:var(--sa-accent);color:#fff}
+.sa-diff-aide{font-size:12.5px;color:var(--sa-muted);margin:0;max-width:70ch}
+.sa-diff-err{font-size:12.5px;color:#E24B4A;background:rgba(226,75,74,.08);border:1px solid rgba(226,75,74,.25);border-radius:8px;padding:8px 10px}
+.sa-diff-grid{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.sa-diff-col{flex:1;min-width:260px;display:flex;flex-direction:column;gap:18px}
+.sa-diff-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--sa-muted);margin-bottom:8px}
+.sa-diff-lien{display:flex;gap:6px;align-items:center}
+.sa-diff-lien input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-subtle);font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--sa-text);outline:none}
+.sa-diff-qr{border:1px solid var(--sa-border);border-radius:10px;background:#fff;padding:8px;display:block}
+.sa-diff-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.sa-phone{border:8px solid #16202E;border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 8px 26px -12px rgba(15,23,42,.45);flex-shrink:0}
+.sa-empty-mini{font-size:13px;color:var(--sa-muted);padding:14px;border:1px dashed var(--sa-border);border-radius:10px}
+/* Affiche A4 : invisible a l'ecran, seule chose imprimee */
+.sa-affiche{display:none}
+@media print{
+  body *{visibility:hidden}
+  .sa-affiche,.sa-affiche *{visibility:visible}
+  .sa-affiche{display:block;position:fixed;inset:0;background:#fff}
+  .sa-affiche-in{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24mm;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+  .sa-affiche-titre{font-size:34pt;font-weight:900;line-height:1.05;color:#0F172A}
+  .sa-affiche-sous{font-size:15pt;color:#475569;font-weight:600}
+  .sa-affiche-qr{width:105mm;height:105mm;margin:6mm 0}
+  .sa-affiche-cta{font-size:20pt;font-weight:800;color:#7C2D92}
+  .sa-affiche-url{font-size:10pt;color:#64748B;word-break:break-all}
+}
 /* ── Fil d'ariane + fiche en page pleine (lot 2) ── */
 .sa-fil{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sa-muted);margin-bottom:12px;flex-wrap:wrap}
 .sa-fil a{color:var(--sa-muted);text-decoration:none;padding:2px 6px;border-radius:5px}

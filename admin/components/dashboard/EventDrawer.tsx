@@ -7,6 +7,7 @@ import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type G
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
+import Diffusion, { type LienDiffusion } from './Diffusion'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -170,7 +171,20 @@ export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: Ev
 
   const evLots = lots.filter(l => l.event_id === ev.id)
   const evParts = ((ev.cfg?.partenaires ?? []) as string[]).map((id: string) => partenaires.find(p => p.id === id)).filter((x): x is FlowinPartenaire => !!x)
-  const qrUrl = `https://flowin-events.vercel.app/parcours/${ev.module}?ev=${ev.id}`
+  /* Pages publiques de cet event. Celle du super event n est proposee que si
+     l event y est rattache : jamais de lien qui renverrait un 404. */
+  const liensDiffusion: LienDiffusion[] = [
+    {
+      cle: 'Parcours joueur',
+      chemin: `/parcours/${ev.module}?ev=${ev.id}`,
+      aide: "La page que le joueur ouvre en scannant le QR. C'est ce lien qui part sur les supports imprimes.",
+    },
+    ...(ev.super_event_id ? [{
+      cle: 'Page dans le super event',
+      chemin: `/se/${ev.super_event_id}/${ev.id}`,
+      aide: "La fiche de cet event sur la page publique du super event.",
+    }] : []),
+  ]
 
   // Contenu du jeu quiz -- verifie dans le code reel (grep "cfg\." dans chaque *Client.tsx, Pattern H) :
   // QuizClient et QuizsoloClient lisent banques + customQuestions, QuizmasterClient lit SEULEMENT les banques.
@@ -209,7 +223,7 @@ export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: Ev
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
-    { id: 'qr', label: 'QR' },
+    { id: 'qr', label: 'Landing & QR' },
     { id: 'export', label: 'Export' },
   ]
 
@@ -623,21 +637,18 @@ export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: Ev
         )}
 
         {tabActif === 'qr' && (
-          <div style={{ textAlign: 'center', padding: 24 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--sa-muted)' }}>QR CODE D&apos;ACCÈS</div>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`}
-              alt="QR Code"
-              style={{ width: 200, height: 200, margin: '0 auto', display: 'block', borderRadius: 12, border: '1px solid var(--sa-border)' }}
+          <div>
+            {/* Le QR est genere dans le navigateur (lib qrcode) et non plus
+                appele en <img> sur api.qrserver.com : c est ce qui le rend
+                telechargeable en PNG et en SVG. L apercu montre la vraie page. */}
+            <Diffusion
+              liens={liensDiffusion}
+              nomFichier={ev.nom}
+              titreAffiche={ev.nom}
+              sousTitreAffiche={[ev.lieu, fmt(ev.date_d)].filter(Boolean).join(' — ')}
             />
-            <div style={{ marginTop: 16, fontSize: 12, background: 'var(--sa-subtle)', padding: '8px 12px', borderRadius: 8, wordBreak: 'break-all' }}>
-              {qrUrl}
-            </div>
-            <button className="sa-btn" style={{ marginTop: 12 }} onClick={() => navigator.clipboard?.writeText(qrUrl)}>
-              📋 Copier le lien
-            </button>
             {pro && (
-              <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--sa-border)', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--sa-border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div
                   onClick={() => openDrawer('pro', pro.id, 'qrliens')}
                   style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, display: 'flex', justifyContent: 'space-between' }}
