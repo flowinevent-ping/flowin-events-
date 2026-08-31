@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
@@ -17,9 +18,31 @@ function fmtDT(d?: string | null) {
   return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
-export default function EventDrawer() {
+/**
+ * Fiche event. DEUX SURFACES, UN SEUL CODE :
+ *  - mode 'drawer' (defaut) : panneau lateral, pilote par DashboardContext.
+ *  - mode 'page'            : page pleine /dashboard/event/[id], pilotee par
+ *                             les props -> l event a enfin une URL a lui, donc
+ *                             un lien partageable, ce qui etait impossible avant.
+ * Aucune duplication : les onglets ne peuvent pas diverger entre les deux vues.
+ */
+interface EventDrawerProps {
+  /** Mode page : id fourni par la route au lieu du drawer. */
+  eventId?: string
+  /** Mode page : onglet actif, porte par l URL (#onglet). */
+  tab?: string
+  onTab?: (t: string) => void
+  mode?: 'drawer' | 'page'
+}
+
+export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: EventDrawerProps = {}) {
+  const router = useRouter()
   const { drawer, closeDrawer, setDrawerTab, events, setEvents, pros, lots, partenaires, openDrawer } = useDashboard()
-  const [edit, setEdit] = useState(drawer.edit)
+  const enPage = mode === 'page'
+  const evId = eventId ?? drawer.id
+  const tabActif = tab ?? drawer.tab
+  const majTab = onTab ?? setDrawerTab
+  const [edit, setEdit] = useState(enPage ? false : drawer.edit)
   const [form, setForm] = useState<Partial<FlowinEvent>>({})
   const [saving, setSaving] = useState(false)
   const [savingJeu, setSavingJeu] = useState(false)
@@ -34,20 +57,20 @@ export default function EventDrawer() {
   const [participants, setParticipants] = useState<FlowinJoueur[]>([])
   const [loadingPart, setLoadingPart] = useState(false)
 
-  const ev = useMemo(() => events.find(x => x.id === drawer.id), [events, drawer.id])
+  const ev = useMemo(() => events.find(x => x.id === evId), [events, evId])
   // pro ne peut pas etre un hook (pas besoin), mais doit rester AVANT le early return
   // pour que les hooks qui en dependent (gagnants) restent, eux, inconditionnels.
   const pro = pros.find(p => p.id === ev?.pro_id)
 
   useEffect(() => {
-    if (drawer.tab === 'participants' && ev && participants.length === 0) {
+    if (tabActif === 'participants' && ev && participants.length === 0) {
       setLoadingPart(true)
       fetchEventParticipants(ev.id).then(rows => {
         setParticipants(rows)
         setLoadingPart(false)
       })
     }
-  }, [drawer.tab, ev])
+  }, [tabActif, ev])
 
   useEffect(() => {
     setSegmentsInit(false)
@@ -140,7 +163,7 @@ export default function EventDrawer() {
 
   if (!ev) return (
     <div className="sa-drawer-empty">
-      <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
+      {!enPage && <button className="sa-drawer-close" onClick={closeDrawer}>×</button>}
       <div>Event introuvable</div>
     </div>
   )
@@ -171,7 +194,8 @@ export default function EventDrawer() {
     if (!confirm(`Supprimer l'event "${ev.nom}" ? Action irréversible.`)) return
     await deleteEvent(ev.id)
     setEvents(events.filter(x => x.id !== ev.id))
-    closeDrawer()
+    if (enPage) router.push('/dashboard/events')
+    else closeDrawer()
   }
 
   const f = (k: keyof FlowinEvent) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -200,13 +224,24 @@ export default function EventDrawer() {
             <span>{pro?.nom ?? '-'}</span>
           </div>
         </div>
-        <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {!enPage && (
+            <button
+              className="sa-btn sm"
+              title="Ouvrir en page pleine (lien partageable)"
+              onClick={() => { closeDrawer(); router.push(`/dashboard/event/${ev.id}#${tabActif}`) }}
+            >
+              Ouvrir en page ↗
+            </button>
+          )}
+          {!enPage && <button className="sa-drawer-close" onClick={closeDrawer}>×</button>}
+        </div>
       </div>
 
-      <DrawerTabs tabs={tabs} active={drawer.tab} onSelect={setDrawerTab} />
+      <DrawerTabs tabs={tabs} active={tabActif} onSelect={majTab} />
 
       <div className="sa-drawer-body">
-        {drawer.tab === 'infos' && !edit && (
+        {tabActif === 'infos' && !edit && (
           <>
             {pro?.partenaire_id && (
               <a
@@ -240,7 +275,7 @@ export default function EventDrawer() {
           </>
         )}
 
-        {drawer.tab === 'infos' && edit && (
+        {tabActif === 'infos' && edit && (
           <>
             <div className="sa-alert info">✏️ Mode édition</div>
             <div className="sa-field">
@@ -286,7 +321,7 @@ export default function EventDrawer() {
           </>
         )}
 
-        {drawer.tab === 'jeu' && segmentsInit && ev.module === 'spin' && (
+        {tabActif === 'jeu' && segmentsInit && ev.module === 'spin' && (
           <div>
             <SectionHeader>🎡 Segments de la roue</SectionHeader>
             {segments.length === 0 && (
@@ -330,7 +365,7 @@ export default function EventDrawer() {
           </div>
         )}
 
-        {drawer.tab === 'jeu' && segmentsInit && isQuizFamily && (
+        {tabActif === 'jeu' && segmentsInit && isQuizFamily && (
           <div>
             <SectionHeader>🎯 Banques de questions</SectionHeader>
             {banques.length === 0 && (
@@ -417,7 +452,7 @@ export default function EventDrawer() {
           </div>
         )}
 
-        {drawer.tab === 'jeu' && segmentsInit && ev.module === 'vote' && (
+        {tabActif === 'jeu' && segmentsInit && ev.module === 'vote' && (
           <div>
             <SectionHeader>⭐ Éléments à voter</SectionHeader>
             {voteItems.length === 0 && (
@@ -463,7 +498,7 @@ export default function EventDrawer() {
           </div>
         )}
 
-        {drawer.tab === 'stats' && (
+        {tabActif === 'stats' && (
           <div className="sa-kpi-grid-2">
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.participants}</div><div className="sa-kpi-lbl">Participants</div></div>
             <div className="sa-kpi"><div className="sa-kpi-val">{ev.joueurs_optin}</div><div className="sa-kpi-lbl">Opt-in</div></div>
@@ -472,7 +507,7 @@ export default function EventDrawer() {
           </div>
         )}
 
-        {drawer.tab === 'participants' && (
+        {tabActif === 'participants' && (
           <>
             <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
               <div className="sa-kpi-mini">{participants.length} <span>total</span></div>
@@ -495,7 +530,7 @@ export default function EventDrawer() {
           </>
         )}
 
-        {drawer.tab === 'lots' && (
+        {tabActif === 'lots' && (
           <>
             {pro?.partenaire_id ? (
               <>
@@ -587,7 +622,7 @@ export default function EventDrawer() {
           </>
         )}
 
-        {drawer.tab === 'qr' && (
+        {tabActif === 'qr' && (
           <div style={{ textAlign: 'center', padding: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--sa-muted)' }}>QR CODE D&apos;ACCÈS</div>
             <img
@@ -620,7 +655,7 @@ export default function EventDrawer() {
           </div>
         )}
 
-        {drawer.tab === 'export' && (
+        {tabActif === 'export' && (
           <div style={{ padding: '0 4px' }}>
             <SectionHeader>Exports disponibles</SectionHeader>
             {[

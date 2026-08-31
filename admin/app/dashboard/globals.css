@@ -115,6 +115,15 @@
 .sa-drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
 .sa-drawer-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--sa-border);flex-shrink:0;background:var(--sa-card)}
 .sa-drawer-empty{padding:40px;text-align:center;color:var(--sa-muted)}
+/* ── Fil d'ariane + fiche en page pleine (lot 2) ── */
+.sa-fil{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sa-muted);margin-bottom:12px;flex-wrap:wrap}
+.sa-fil a{color:var(--sa-muted);text-decoration:none;padding:2px 6px;border-radius:5px}
+.sa-fil a:hover{background:var(--sa-card);color:var(--sa-text)}
+.sa-fil .courant{color:var(--sa-text);font-weight:700}
+.sa-page-fiche{overflow:hidden}
+.sa-page-fiche .sa-drawer-h{padding:20px 24px 16px}
+.sa-page-fiche .sa-drawer-tabs{padding:0 24px}
+.sa-page-fiche .sa-drawer-body{padding:20px 24px 24px;overflow:visible}
 /* ── Form fields ── */
 .sa-field{margin-bottom:12px}
 .sa-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px}
