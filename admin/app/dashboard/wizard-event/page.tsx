@@ -21,6 +21,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { useScope } from '@/contexts/ScopeContext'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import Diffusion, { type LienDiffusion } from '@/components/dashboard/Diffusion'
+import { fetchModeles, appliquerModele, type ModeleEvent } from '@/lib/modeles'
 import {
   brouillonVide, controler, enregistrer, nbJours, statutDeduit, urlQr,
   type BrouillonEvent, type BrouillonLot,
@@ -109,7 +110,11 @@ export default function Page() {
      apres 1,4 s, sans rien pour diffuser -- le pro, lui, avait cet ecran. */
   const [livre, setLivre] = useState<{ id: string; nom: string } | null>(null)
 
+  const [modeles, setModeles] = useState<ModeleEvent[]>([])
+  const [modeleApplique, setModeleApplique] = useState<string | null>(null)
+
   useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
+  useEffect(() => { fetchModeles().then(setModeles) }, [])
 
   /* Rattachement pre-rempli : ?se=<id> (lien « Ajouter un point de jeu » depuis
      l espace Super Event) sinon la portee globale courante. Fermait un vrai
@@ -383,6 +388,35 @@ export default function Page() {
         )}
 
         {etape === 'B' && (
+          <>
+            {modeles.length > 0 && (
+              <div style={{ marginBottom: 18, paddingBottom: 16, borderBottom: '1px solid var(--sa-border)' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 4 }}>Partir d&apos;un modèle</div>
+                <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10, lineHeight: 1.5 }}>
+                  Reprend le module, le contenu du jeu, les lots et la visibilité pro d&apos;un
+                  événement déjà réglé. Ton nom, ton pro client et tes dates sont conservés.
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {modeles.map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className={`sa-btn sm${modeleApplique === m.id ? ' primary' : ''}`}
+                      onClick={() => { setD(x => appliquerModele(x, m)); setModeleApplique(m.id) }}
+                      title={m.description ?? undefined}
+                    >
+                      {m.nom}
+                      <span style={{ opacity: 0.6, marginLeft: 6 }}>{m.module}</span>
+                    </button>
+                  ))}
+                </div>
+                {modeleApplique && (
+                  <div style={{ marginTop: 8, fontSize: 11.5, color: '#2f7d4f', fontWeight: 600 }}>
+                    Modèle appliqué — vérifie le contenu du jeu et les lots aux étapes suivantes.
+                  </div>
+                )}
+              </div>
+            )}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 }}>
             {MODULES.map(m => (
               <button key={m.id} type="button" onClick={() => maj({ module: m.id })}
@@ -400,6 +434,7 @@ export default function Page() {
               </button>
             ))}
           </div>
+          </>
         )}
 
         {etape === 'C' && (

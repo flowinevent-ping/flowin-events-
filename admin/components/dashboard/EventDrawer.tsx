@@ -8,6 +8,7 @@ import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import Diffusion, { type LienDiffusion } from './Diffusion'
+import { enregistrerModele } from '@/lib/modeles'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -134,6 +135,10 @@ export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: Ev
     return () => { on = false }
   }, [pro?.partenaire_id])
 
+  /* Enregistrer la structure de cet event comme modele reutilisable (lot 7). */
+  const [modeleEtat, setModeleEtat] = useState<'repos' | 'envoi' | 'ok' | 'ko'>('repos')
+  const [modeleMsg, setModeleMsg] = useState('')
+
   const [filtreG, setFiltreG] = useState<'tous' | 'actifs' | 'retires'>('tous')
   const [triG, setTriG] = useState<'recent' | 'nom' | 'valeur'>('recent')
 
@@ -210,6 +215,31 @@ export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: Ev
     setEvents(events.filter(x => x.id !== ev.id))
     if (enPage) router.push('/dashboard/events')
     else closeDrawer()
+  }
+
+  async function enregistrerCommeModele() {
+    const nom = window.prompt('Nom du modèle :', `Modèle — ${ev.nom}`)
+    if (!nom?.trim()) return
+    setModeleEtat('envoi'); setModeleMsg('')
+    const r = await enregistrerModele({
+      nom,
+      module: ev.module,
+      cfg: (ev.cfg ?? {}) as Record<string, unknown>,
+      lots: evLots.map(l => ({
+        nom: l.titre || l.nom,
+        valeur: l.valeur,
+        quantite: l.quantite,
+        emoji: l.emoji,
+        description: l.description,
+        partenaire_id: l.partenaire_id,
+      })),
+      pro_visib: ev.pro_visib ?? {},
+      couleur: ev.couleur,
+      score_min: ev.score_min,
+      origine_event_id: ev.id,
+    })
+    setModeleEtat(r.ok ? 'ok' : 'ko')
+    setModeleMsg(r.ok ? 'Modèle enregistré — disponible dans le wizard.' : (r.erreur ?? 'Échec.'))
   }
 
   const f = (k: keyof FlowinEvent) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -668,6 +698,22 @@ export default function EventDrawer({ eventId, tab, onTab, mode = 'drawer' }: Ev
 
         {tabActif === 'export' && (
           <div style={{ padding: '0 4px' }}>
+            <SectionHeader>Réutiliser cet événement</SectionHeader>
+            <div style={{ border: '1px solid var(--sa-border)', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+              <div style={{ fontSize: 12.5, color: 'var(--sa-muted)', lineHeight: 1.5, marginBottom: 10 }}>
+                Enregistre la <b>structure</b> — module, contenu du jeu, lots, visibilité
+                pro — comme modèle réutilisable. Aucune donnée d&apos;édition n&apos;est copiée :
+                ni participants, ni gagnants, ni dates.
+              </div>
+              <button className="sa-btn sm" disabled={modeleEtat === 'envoi'} onClick={enregistrerCommeModele}>
+                {modeleEtat === 'envoi' ? 'Enregistrement…' : '📋 Enregistrer comme modèle'}
+              </button>
+              {modeleMsg && (
+                <div style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: modeleEtat === 'ok' ? '#2f7d4f' : '#c46a6a' }}>
+                  {modeleMsg}
+                </div>
+              )}
+            </div>
             <SectionHeader>Exports disponibles</SectionHeader>
             {[
               { label: '👥 Joueurs (CSV)', desc: `${participants.length} participants`, fn: () => telechargerCsv(`joueurs-${ev.id}.csv`, participants, ['prenom', 'nom', 'email', 'ticket_code', 'optin']) },
