@@ -6,21 +6,20 @@ qui reprend ce travail. Lire dans l'ordre, ne rien sauter.
 ## 0. Test d'accès — À FAIRE EN PREMIER, AVANT TOUTE LECTURE
 
 1. `git clone https://github.com/flowinevent-ping/flowin-events-.git`
-2. Demander à Romain le **PAT GitHub courant** (jamais stocké nulle part —
-   ni ici, ni dans le repo, ni dans les échanges). Générer un nouveau si besoin :
-   `https://github.com/settings/tokens/new` — scope `public_repo` suffit
-   (le repo est public), expiration 7 jours.
+2. **Le token GitHub est dans Notion** (hub `38c6dcca-9add-81dd-9af2-c93139e06393`,
+   section « 🔑 ACCÈS » en tête de page) — demande explicite de Romain le
+   31/08 pour ne plus avoir à le redonner à chaque conversation. **Ne pas
+   redemander à Romain sans avoir d'abord vérifié Notion.** Si le token n'y
+   est plus ou ne fonctionne plus, proposer la solution Deploy Key (décrite
+   dans la même section Notion) avant de redemander un simple PAT.
 3. Commit test + push réel (pas juste un clone — le repo est public, le clone
-   réussit toujours et ne prouve rien) :
-   `git remote set-url origin https://x-access-token:<TOKEN>@github.com/flowinevent-ping/flowin-events-.git`
+   réussit toujours et ne prouve rien) avec le token trouvé dans Notion.
 4. Supabase MCP : `execute_sql("select 1")` sur le projet `ywcqtupgoxfzkddqkztk`
    (compte Google `romain.collin@gmail.com`, org affichée « flowin revision
-   olivia » — nom trompeur, c'est le bon projet).
+   olivia » — nom trompeur, c'est le bon projet). Accès MCP automatique,
+   aucun token à gérer.
 5. Si push OU Supabase MCP échoue : **STOP immédiat**, le dire en une phrase,
-   ne jamais continuer en mode dégradé. Cause connue possible : conversation
-   dont le repo n'était pas attaché aux sources à sa création (résolu en
-   ouvrant une conversation où le repo est explicitement attaché dès le
-   départ, pas résolu en insistant avec un token dans la même conversation).
+   ne jamais continuer en mode dégradé.
 
 ## 1. Lecture obligatoire, dans cet ordre
 
