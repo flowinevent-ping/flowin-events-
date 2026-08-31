@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 /* ── KPI Card ── */
 interface KpiProps {
   label: string
@@ -7,6 +9,34 @@ interface KpiProps {
   trend?: 'up' | 'down' | 'flat'
   sub?: string
 }
+/** Cellule d'en-tete de tableau triable, fleche ▲▼ -- meme comportement partout,
+ * demande explicite de Romain (31/08) : une seule page l'avait avant ce composant. */
+export function SortableTh<C extends string>({
+  col, label, tri, onSort, style,
+}: {
+  col: C
+  label: string
+  tri: { col: C; asc: boolean }
+  onSort: (col: C) => void
+  style?: React.CSSProperties
+}) {
+  return (
+    <th
+      style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none', fontSize: 11, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', padding: '8px 10px', ...style }}
+      onClick={() => onSort(col)}
+    >
+      {label}{tri.col === col ? (tri.asc ? ' ▲' : ' ▼') : ''}
+    </th>
+  )
+}
+
+/** Hook de tri generique -- meme etat et meme logique de bascule partout. */
+export function useTri<C extends string>(defaut: C) {
+  const [tri, setTri] = useState<{ col: C; asc: boolean }>({ col: defaut, asc: false })
+  const onSort = (col: C) => setTri(t => (t.col === col ? { col, asc: !t.asc } : { col, asc: true }))
+  return { tri, onSort }
+}
+
 export function KpiCard({ label, value, trend, sub }: KpiProps) {
   return (
     <div className="sa-kpi">

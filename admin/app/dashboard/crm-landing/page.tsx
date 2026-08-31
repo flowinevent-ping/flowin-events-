@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchCrmLanding, COULEUR_ETAT, type LigneCrmLanding } from '@/lib/crmLanding'
+import { useDashboard } from '@/contexts/DashboardContext'
 
 const euros = (n: number | null) =>
   n == null ? '—' : n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -24,6 +25,7 @@ const dateFr = (s: string | null) => {
 type Colonne = 'created_at' | 'enseigne' | 'source_label' | 'ville' | 'cp' | 'etat'
 
 export default function Page() {
+  const { openDrawer } = useDashboard()
   const [list, setList] = useState<LigneCrmLanding[]>([])
   const [charge, setCharge] = useState(true)
   const [q, setQ] = useState('')
@@ -174,11 +176,17 @@ export default function Page() {
                   {th('created_at', 'Date')}
                 </tr></thead>
                 <tbody>
-                  {terrain.map(r => (
-                    <tr key={r.id}>
+                  {terrain.map(r => {
+                    const joueurId = r.id.startsWith('bv-') ? r.id.slice(3) : null
+                    return (
+                    <tr
+                      key={r.id}
+                      onClick={joueurId ? () => openDrawer('joueur', joueurId) : undefined}
+                      style={joueurId ? { cursor: 'pointer' } : undefined}
+                    >
                       <td style={cell}><span className="sa-chip" style={{ fontSize: 10 }}>{r.source_label}</span></td>
                       <td style={cell}>
-                        {r.contact_email ? <a href={`mailto:${r.contact_email}`}>{r.contact_email}</a> : '—'}
+                        {r.contact_email ? <a href={`mailto:${r.contact_email}`} onClick={e => e.stopPropagation()}>{r.contact_email}</a> : '—'}
                         {r.contact_tel && <div className="sa-muted" style={{ fontSize: 10.5 }}>{r.contact_tel}</div>}
                       </td>
                       <td style={cell}>{r.ville ?? '—'}</td>
@@ -186,7 +194,8 @@ export default function Page() {
                       <td style={cell}>{[r.bv_genre, r.bv_age].filter(Boolean).join(' · ') || <span className="sa-muted">—</span>}</td>
                       <td style={cell}>{dateFr(r.created_at)}</td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

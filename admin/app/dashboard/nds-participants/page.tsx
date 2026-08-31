@@ -7,11 +7,12 @@
  * matin appartient a la soiree de la veille.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
+import { PageHeader, EmptyState, useTri } from '@/components/dashboard/DashboardUI'
 import { fetchParticipants, fetchSuperEvents, type Participant, type SuperEvent } from '@/lib/nds'
 import { useDashboard } from '@/contexts/DashboardContext'
 
 const PAGE = 50
+type Col = 'nom' | 'nb_parties' | 'derniere'
 const fr = (d: string | null) => {
   if (!d) return '—'
   const p = d.split('-')
@@ -26,6 +27,7 @@ export default function Page() {
   const [q, setQ] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'optin' | 'fideles'>('tous')
   const [limite, setLimite] = useState(PAGE)
+  const { tri, onSort } = useTri<Col>('derniere')
 
   useEffect(() => {
     fetchSuperEvents().then(l => {
@@ -47,8 +49,15 @@ export default function Page() {
       r = r.filter(p => [p.nom, p.prenom, p.email, p.tel, p.code_postal]
         .some(v => String(v ?? '').toLowerCase().includes(t)))
     }
-    return r
-  }, [liste, q, filtre])
+    return [...r].sort((a, b) => {
+      let va: string | number, vb: string | number
+      if (tri.col === 'nb_parties') { va = a.nb_parties ?? 0; vb = b.nb_parties ?? 0 }
+      else if (tri.col === 'derniere') { va = a.derniere ?? ''; vb = b.derniere ?? '' }
+      else { va = [a.prenom, a.nom].filter(Boolean).join(' '); vb = [b.prenom, b.nom].filter(Boolean).join(' ') }
+      const cmp = typeof va === 'number' ? va - (vb as number) : String(va).localeCompare(String(vb), 'fr')
+      return tri.asc ? cmp : -cmp
+    })
+  }, [liste, q, filtre, tri])
 
   useEffect(() => { setLimite(PAGE) }, [q, filtre])
 
@@ -112,6 +121,13 @@ export default function Page() {
             </button>
           ))}
           <button className="sa-btn sm" onClick={exporterCsv} disabled={!filtres.length}>⬇ Export CSV</button>
+          <span style={{ display: 'flex', gap: 4, marginLeft: 8 }}>
+            {([['nom', 'Nom'], ['nb_parties', 'Parties'], ['derniere', 'Activité']] as [Col, string][]).map(([c, l]) => (
+              <button key={c} className={`sa-btn sm${tri.col === c ? ' primary' : ''}`} onClick={() => onSort(c)}>
+                {l}{tri.col === c ? (tri.asc ? ' ▲' : ' ▼') : ''}
+              </button>
+            ))}
+          </span>
           <span style={{ fontSize: 12, color: 'var(--sa-muted)', marginLeft: 'auto' }}>
             {filtres.length} résultat{filtres.length > 1 ? 's' : ''}{liste && filtres.length !== liste.length ? ` sur ${liste.length}` : ''}
           </span>

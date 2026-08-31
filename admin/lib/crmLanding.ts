@@ -84,7 +84,7 @@ export async function fetchCrmLanding(): Promise<LigneCrmLanding[]> {
     const nomComplet = [j.prenom, j.nom].filter(Boolean).join(' ')
     return {
       id: `bv-${j.id}`,
-      source_label: 'Landing Brigade Verte',
+      source_label: 'Brigade Verte — saisie terrain (pas une landing)',
       created_at: j.updated_at ?? j.first_seen,
       enseigne: nomComplet || null,
       contact_nom: nomComplet || null,
