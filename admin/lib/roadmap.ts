@@ -20,7 +20,7 @@ export interface BlocRoadmap {
   items: ItemRoadmap[]
 }
 
-export const MAJ = '30/08/2026'
+export const MAJ = '31/08/2026'
 
 export const LIBELLE_ETAT: Record<EtatItem, string> = {
   ok: '✓ Fait',
@@ -46,7 +46,7 @@ export const BLOCS: BlocRoadmap[] = [
     items: [
       { etat: 'ok', titre: 'Fiche partenaire en 6 onglets sans doublon', detail: 'Infos · Stats · Lots & stock · Gagnants & billets · Emails & com · Contrat' },
       { etat: 'ok', titre: 'Stock et gagnants rattachés à chaque partenaire' },
-      { etat: 'ok', titre: 'Sidebar en sous-onglets repliables', detail: 'Ouverture automatique du groupe actif' },
+      { etat: 'ok', titre: 'Sidebar reorganisee en 3 poles colores', detail: '31/08 : l item precedent (\u00ab sous-onglets repliables \u00bb) etait faux pour le dashboard Next -- il ne decrivait que le monolithe legacy. Reellement fait : 46 -> 25 entrees, 6 groupes colores (Super events violet, Events vert, General bleu, Outils ambre), en-tetes passes de 10px gris terne a 11.5px colores avec barre. Aucune route supprimee, tout reste liste dans /dashboard/toutes-les-pages.' },
       { etat: 'ok', titre: 'Dates events corrigées', detail: 'Statut déduit des dates, ordre En cours › À venir › Passés' },
       { etat: 'ok', titre: 'Places de concert visibles par soirée', detail: 'Fin du filtre par date piégeux' },
       { etat: 'ok', titre: 'Filtres anti-scroll sur les grandes listes', detail: 'Recherche, type, statut, date, lot, pagination' },
@@ -95,12 +95,26 @@ export const BLOCS: BlocRoadmap[] = [
     ],
   },
   {
+    titre: 'Réorganisation de la navigation (31/08/2026)',
+    items: [
+      { etat: 'ok', titre: 'Contexte global de portée (super event + event)', detail: 'ScopeContext : une seule selection, ecrite dans l URL (?se=&ev=) et memorisee. Remplace les 5 selecteurs locaux divergents (UI differentes, defauts differents, aucune persistance, aucun deep-link).' },
+      { etat: 'ok', titre: 'Espace Event en page pleine', detail: '/dashboard/event/[id]#onglet -- 7 onglets, URL partageable. Le drawer et la page partagent le meme composant : aucune duplication possible.' },
+      { etat: 'ok', titre: 'Espace Super Event a 8 onglets', detail: '/dashboard/super-event/[id]#onglet : Vue d ensemble, Events, Participants, Pros & partenaires, Lots & tirages, Landing & diffusion, Resultats, Communication.' },
+      { etat: 'ok', titre: 'Aperçus de landing et QR téléchargeables', detail: 'Composant Diffusion. Cause du manque : aucun QR n etait genere localement, tout passait par api.qrserver.com -- pas de fichier, donc rien a telecharger. QR calcule dans le navigateur : PNG 1024, SVG vectoriel, affiche A4. Expose aussi /rejoindre/[se] et /sponsor/[se], vers lesquelles aucun lien ne menait.' },
+      { etat: 'ok', titre: 'Wizard SA aligné sur le parcours pro', detail: '8 etapes guidees + ecran de livraison. Ajoute les 4 etapes que seul le pro avait : contenu du jeu (cause racine des jeux vides), recompenses typees tirage/instantane, diffusion, livraison. Rattachement au super event enfin present a la creation.' },
+      { etat: 'ok', titre: 'Pôle Général regroupé en 6 hubs à onglets', detail: '20 entrees de sidebar -> 6. Chaque onglet rend la page existante (chargement paresseux), il ne la copie pas : les URLs d origine repondent a l identique.' },
+      { etat: 'ok', titre: 'Modèles d\u2019event réutilisables', detail: 'Table event_modeles. Enregistrer la structure d un event (module, contenu du jeu, lots, visibilite) et en repartir depuis le wizard. Aucune donnee d edition copiee.' },
+      { etat: 'ok', titre: 'Page « Toutes les pages » (filet anti-régression)', detail: '/dashboard/toutes-les-pages : les 57 ecrans avec leur destination, cherchables par ancien libelle. Regle tenue sur toute la reorganisation : aucune route supprimee.' },
+      { etat: 'todo', titre: 'Étendre la portée aux pages qui l\u2019ignorent encore', detail: 'operations et nds-lots sont dans le pole Super events mais ne lisent pas la portee : changer de super event ne les fait pas bouger, sans aucun signal. Meme chantier que \u00ab deparametrer NDS code en dur \u00bb.' },
+    ],
+  },
+  {
     titre: 'Dashboard SA — chantiers identifiés, priorité basse (à faire en dernier)',
     items: [
-      { etat: 'todo', titre: 'CRM : clic sur une ligne (Super Event, Pro) doit ouvrir une fiche complète', detail: 'Descriptif organisateur, dates, etc. — au-dela du simple tri/clic deja en place' },
+      { etat: 'ok', titre: 'CRM : clic sur une ligne (Super Event, Pro) doit ouvrir une fiche complète', detail: '31/08 : un super event ouvre son espace a 8 onglets, un event sa page pleine a 7 onglets, tous deux adressables par URL.' },
       { etat: 'ok', titre: 'Wizard "Nouvel événement" (SA) : icônes et modules alignés sur le wizard pro', detail: 'Les 6 modules (dont quizmaster/quizsolo, exclusifs SA) étaient déjà présents. Icônes SVG désormais identiques au wizard pro (cercle/forme + trait dans carré arrondi teinté) au lieu de simples emojis.' },
-      { etat: 'todo', titre: 'Harmoniser visuellement les 8 outils HTML autonomes', detail: 'bons-commande-liste.html, facture-nds.html, tirage-nds.html, plaquette-nds.html, pitch-nds.html, flowin-partenaire-presentation.html, nds-visuels.html, kit-digital -- chacun a sa propre charte graphique, aucun ne suit sa-*. Piste retenue : bandeau d\\u2019en-tete coherent, pas une reecriture complete (outils metier reels, risque a rester prudent)' },
-      { etat: 'todo', titre: 'Tirage au sort : scoper par event / super event', detail: 'Module actuel pas clairement filtrable par event ou super event' },
+      { etat: 'todo', titre: 'Harmoniser visuellement les 8 outils HTML autonomes', detail: '2/8 faits (bons-commande-liste.html et kit-digital passes en theme clair, palette sa-*). Reste : nds-visuels.html (couleurs codees en dur, passe dediee), et 5 non auditees. Liste complete : bons-commande-liste.html, facture-nds.html, tirage-nds.html, plaquette-nds.html, pitch-nds.html, flowin-partenaire-presentation.html, nds-visuels.html, kit-digital -- chacun a sa propre charte graphique, aucun ne suit sa-*. Piste retenue : bandeau d\\u2019en-tete coherent, pas une reecriture complete (outils metier reels, risque a rester prudent)' },
+      { etat: 'todo', titre: 'Tirage au sort : scoper par event / super event', detail: 'L outil tirage-nds.html est desormais range dans l onglet Lots & tirages du super event, mais il ne lit toujours pas la portee : c est un HTML autonome, il faudra lui passer ?se= et le lui faire respecter.' },
       { etat: 'todo', titre: 'Module d\\u2019envoi en masse (emailing)', detail: 'Distinct des envois unitaires deja fonctionnels (devis/factures/gagnants) -- necessaire pour un message aux ~840 joueurs' },
     ],
   },
