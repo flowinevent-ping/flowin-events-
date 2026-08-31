@@ -21,6 +21,7 @@ export type EtatGagnant = 'a_confirmer' | 'confirme' | 'retire'
 
 export interface GagnantPartenaire {
   tirage_id: number
+  joueur_id: string | null
   joueur_nom: string | null
   joueur_email: string | null
   joueur_tel: string | null

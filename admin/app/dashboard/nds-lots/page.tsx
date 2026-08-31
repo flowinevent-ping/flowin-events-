@@ -93,6 +93,14 @@ export default function Page() {
     { tires: 0, a_confirmer: 0, confirmes: 0, retires: 0 }
   )
 
+  /* "213 lots tires" (ci-dessus) compte des LOTS, pas des personnes -- une meme personne
+     peut legitimement gagner plusieurs fois a des moments differents (des qu'elle a retire
+     son lot precedent, elle redevient eligible). Compteur distinct reel, demande par Romain
+     ("erreur dans le nombre de gagnants") : dedoublonne par joueur_id. */
+  const gagnantsDistincts = new Set(
+    (lignes ?? []).flatMap(l => l.gagnants.map(g => g.joueur_id).filter((id): id is string => !!id))
+  ).size
+
   return (
     <div className="sa-content">
       <div className="sa-page">
@@ -101,8 +109,8 @@ export default function Page() {
           subtitle="Gagnants tirés, confirmations et retraits en caisse"
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 18 }}>
-          {([['Gagnants tirés', total.tires], ['À appeler', total.a_confirmer],
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 18 }}>
+          {([['Lots tirés', total.tires], ['Gagnants distincts', gagnantsDistincts], ['À appeler', total.a_confirmer],
              ['Confirmés', total.confirmes], ['Retirés en caisse', total.retires]] as [string, number][])
             .map(([lib, val]) => (
             <div key={lib} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '16px 14px' }}>
@@ -110,6 +118,9 @@ export default function Page() {
               <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.05em', marginTop: 4 }}>{lib}</div>
             </div>
           ))}
+        </div>
+        <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 18, marginTop: -10 }}>
+          « Lots tirés » ≠ « Gagnants distincts » : une même personne peut gagner plusieurs fois, à des moments différents (dès qu'elle a retiré son lot précédent, elle redevient éligible).
         </div>
 
         {lignes === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
