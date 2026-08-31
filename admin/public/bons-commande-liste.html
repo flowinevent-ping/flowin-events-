@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bons de commande &amp; Factures — NDS 2026</title>
 <style>
-  :root{--bg:#0a1020;--card:#141c32;--card2:#1b2440;--line:#243056;--magenta:#e6187f;--amber:#f4b544;--teal:#2dd4a0;--white:#fff;--grey:#b0bacd;--bad:#ff5c7a}
+  /* Theme clair 31/08 (fix -- etait sombre, incoherent avec le reste du dashboard,
+     signale par Romain). Toutes les regles ci-dessous passent par ces variables,
+     seules leurs VALEURS changent -- aucune classe, aucune logique modifiee. */
+  :root{--bg:#F1F5F9;--card:#FFFFFF;--card2:#F8FAFC;--line:#E2E8F0;--magenta:#7C2D92;--amber:#B45309;--teal:#15803D;--white:#0F172A;--grey:#64748B;--bad:#DC2626}
   *{box-sizing:border-box}
   body{margin:0;font-family:'Manrope',system-ui,Arial,sans-serif;background:var(--bg);color:var(--white);min-height:100vh}
   header{padding:20px 26px;border-bottom:1px solid var(--line)}
@@ -14,8 +17,8 @@
   .wrap{max-width:1200px;margin:0 auto;padding:20px 26px 80px}
   .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
   .btn{border:1px solid var(--line);background:var(--card2);color:var(--white);font-weight:700;font-size:13px;padding:9px 14px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}
-  .btn.primary{background:var(--magenta);border-color:var(--magenta)}
-  .btn.teal{background:var(--teal);border-color:var(--teal);color:#06281f}
+  .btn.primary{background:var(--magenta);border-color:var(--magenta);color:#fff}
+  .btn.teal{background:var(--teal);border-color:var(--teal);color:#fff}
   .btn.sm{font-size:12px;padding:6px 10px}
   .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .seg button{background:transparent;color:var(--grey);border:0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
