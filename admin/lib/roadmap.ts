@@ -94,6 +94,16 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'ok', titre: 'Hygiène de base', detail: 'Tables Revision Olivia migrees vers leur propre projet Supabase le 28/08 (moloagrmhrptbhodwwob) -- verifie le 30/08 : plus aucune table Revision dans le projet NDS partage.' },
     ],
   },
+  {
+    titre: 'Dashboard SA — chantiers identifiés, priorité basse (à faire en dernier)',
+    items: [
+      { etat: 'todo', titre: 'CRM : clic sur une ligne (Super Event, Pro) doit ouvrir une fiche complète', detail: 'Descriptif organisateur, dates, etc. — au-dela du simple tri/clic deja en place' },
+      { etat: 'todo', titre: 'Wizard "Nouvel événement" (SA) à restyler', detail: 'Meme presentation que le wizard pro autonome (/pro/jeu), en ajoutant les modules pas encore ouverts aux pros (quizmaster, quizsolo)' },
+      { etat: 'todo', titre: 'Harmoniser visuellement les 8 outils HTML autonomes', detail: 'bons-commande-liste.html, facture-nds.html, tirage-nds.html, plaquette-nds.html, pitch-nds.html, flowin-partenaire-presentation.html, nds-visuels.html, kit-digital -- chacun a sa propre charte graphique, aucun ne suit sa-*. Piste retenue : bandeau d\\u2019en-tete coherent, pas une reecriture complete (outils metier reels, risque a rester prudent)' },
+      { etat: 'todo', titre: 'Tirage au sort : scoper par event / super event', detail: 'Module actuel pas clairement filtrable par event ou super event' },
+      { etat: 'todo', titre: 'Module d\\u2019envoi en masse (emailing)', detail: 'Distinct des envois unitaires deja fonctionnels (devis/factures/gagnants) -- necessaire pour un message aux ~840 joueurs' },
+    ],
+  },
 ]
 
 export function avancement(blocs: BlocRoadmap[] = BLOCS) {
