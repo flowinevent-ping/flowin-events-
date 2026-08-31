@@ -58,7 +58,7 @@ function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Landing |
                 src={landing.deploy_url}
                 title={`Aperçu — ${landing.nom ?? landing.id}`}
                 loading="lazy"
-                style={{ width: IW, height: IH, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left', pointerEvents: 'none' }}
+                style={{ width: IW, height: IH, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left' }}
               />
             ) : (
               <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 20, textAlign: 'center', color: '#64748B', fontSize: 13 }}>
