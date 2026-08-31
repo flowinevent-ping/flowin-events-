@@ -101,6 +101,20 @@ export default function Page() {
     (lignes ?? []).flatMap(l => l.gagnants.map(g => g.joueur_id).filter((id): id is string => !!id))
   ).size
 
+  /* FIX 31/08 (cf. docs/sql/2026-08-31-fix-tirage-lot-quantite.sql) : tirage_lot() ne
+     verifiait pas la quantite configuree avant ce fix -- des lots ont ete tires bien
+     au-dela du stock reel (ex. Nook Cafe : 10 configures, 43 tires). Le controle humain
+     (confirmer un par un) a jusqu'ici empeche tout depassement REEL envers les partenaires
+     (confirmes+retires == configure, exactement), mais des tirages "fantomes" jamais
+     destines a etre confirmes restent affiches. Comparaison visible pour que ça ne passe
+     plus inaperçu -- signale par Romain. */
+  const totalConfigure = partenaires.reduce(
+    (n, p) => n + (Array.isArray(p.lots) ? p.lots.reduce((s: number, l: any) => s + (Number(l?.quantite) || 0), 0) : 0),
+    0
+  )
+  const totalHonore = total.confirmes + total.retires
+  const totalFantome = total.tires - totalHonore
+
   return (
     <div className="sa-content">
       <div className="sa-page">
@@ -108,6 +122,12 @@ export default function Page() {
           title="🎁 Stock des lots"
           subtitle="Gagnants tirés, confirmations et retraits en caisse"
         />
+
+        {totalFantome > 0 && (
+          <div className="sa-alert warn" style={{ marginBottom: 16, fontSize: 12.5 }}>
+            ⚠ {totalConfigure} lots configurés au total, {totalHonore} réellement confirmés/retirés (les deux correspondent — aucun partenaire lésé) — mais {totalFantome} tirages restent en base sans jamais avoir été destinés à être honorés, tirés au-delà du stock avant la correction du 31/08. Voir <code className="sa-code">docs/sql/2026-08-31-fix-tirage-lot-quantite.sql</code>.
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 18 }}>
           {([['Lots tirés', total.tires], ['Gagnants distincts', gagnantsDistincts], ['À appeler', total.a_confirmer],

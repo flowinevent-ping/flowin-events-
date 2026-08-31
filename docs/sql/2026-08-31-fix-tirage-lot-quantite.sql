@@ -1,0 +1,50 @@
+-- 31/08/2026 — Fix critique : tirage_lot() ne verifiait jamais la quantite configuree
+--
+-- SIGNALE PAR ROMAIN : "il n'y aura pas un total de deux cent quatorze lots" -- en
+-- sommant les lots reellement offerts par Marche Utile, Nook Cafe, Giordano, Auto-Ecole
+-- de l'ARA, Carrosserie GP.
+--
+-- VERIFIE (requetes reelles, pas suppose) :
+--   - Total configure (partenaires.lots ->quantite, somme sur tous les partenaires) : 59
+--   - Total tirages en base (partenaire_id non nul)                                  : 214
+--   - Total confirme+retire (notifie_at non nul)                                     : 59
+--
+-- Le total confirme+retire correspond EXACTEMENT au total configure -- un controle
+-- humain manuel (Romain validant "Confirmer" un par un dans Stock des lots) a jusqu'ici
+-- empeche tout depassement REEL envers les partenaires. Aucun partenaire n'a ete lese.
+--
+-- Mais 155 tirages (214-59) existent en base, JAMAIS confirmes, JAMAIS destines a
+-- l'etre (le quota reel est deja atteint partout) -- des noms reels affiches comme
+-- "a appeler" qui ne seront jamais appeles. Cause : tirage_lot(p_partenaire_id,
+-- p_lot_nom, p_valeur, p_nb) inserait p_nb nouveaux tirages a chaque appel, sans
+-- jamais verifier combien avaient deja ete tires pour ce meme lot. Rappele plusieurs
+-- fois (tests, script re-execute, usage repete du bouton "Re-tirer") entre le 20/07
+-- et le 03/08 -- tous les tirages en trop sont posterieurs a la cloture du festival
+-- (18/07), le grand tirage de cloture ("Place de concert", hors partenaire) lui est
+-- reste correctement borne aux dates du festival.
+--
+-- Detail par lot (ecart = tirages_reels - quantite_configuree) :
+--   Utile Vence        Bon d'achat 10€           quantite 20  tires 60  ecart +40
+--   Nook Cafe          Cafe gourmand              quantite 10  tires 43  ecart +33
+--   Domaine Bergerie   Bon d'achat 20€           quantite  7  tires 29  ecart +22
+--   Carrosserie GP     Bon d'achat 30€           quantite  6  tires 21  ecart +15
+--   Nook Cafe          1 bagel offert             quantite  3  tires 17  ecart +14
+--   Giordano           Bon d'achat 20€           quantite  5  tires 18  ecart +13
+--   Auto-Ecole ARA     50€ remise permis auto     quantite  1  tires  9  ecart  +8
+--   Nook Cafe          Formule complete           quantite  3  tires  8  ecart  +5
+--   Auto-Ecole ARA     100€ remise BSR            quantite  2  tires  4  ecart  +2
+--   Auto-Ecole ARA     100€ remise 125            quantite  2  tires  4  ecart  +2
+--
+-- CORRIGE (migration fix_tirage_lot_verifier_quantite) : tirage_lot() calcule desormais
+-- le stock restant (quantite configuree - deja tires hors annule) et borne p_nb a ce
+-- restant. Si le stock est deja epuise, retourne un ensemble vide (aucun insert), plus
+-- de depassement silencieux possible. Verifie par appel reel (grant temporaire
+-- supabase_read_only_user, revoque immediatement apres) : un appel sur un lot deja a
+-- quota (Nook Cafe / Cafe gourmand, 43/10) retourne bien 0 ligne, aucun insert.
+--
+-- DECISION EN ATTENTE DE ROMAIN (pas prise unilateralement) : que faire des 155
+-- tirages fantomes deja en base (jamais confirmes, jamais destines a l'etre) ?
+-- Option la plus simple : les annuler via la fonction annuler_tirage() deja existante
+-- et deja sure (ne touche que les tirages jamais confirmes ET jamais retires -- exactement
+-- la condition des 155 lignes en question), en gardant une trace complete de l'operation
+-- dans docs/sql/. Pas execute sans confirmation explicite.
