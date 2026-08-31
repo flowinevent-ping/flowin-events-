@@ -108,6 +108,12 @@
 <script>
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  // Super event scope — 31/08 (fix) : etait code en dur 'se-nds-2026' dans la requete
+  // partenaires ET la requete tirages ne filtrait meme pas par super event du tout
+  // (ramenait TOUS les tirages, tous super events confondus). Parametre ?se=xxx dans
+  // l'URL pour choisir, defaut inchange (se-nds-2026) pour ne casser aucun lien/favori
+  // existant.
+  var SE=new URLSearchParams(location.search).get('se')||'se-nds-2026';
   // ---- Sécurité admin : session requise ----
   var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
   var AUTH=(_S&&_S.access_token)?_S.access_token:null;
@@ -288,9 +294,9 @@
 
   async function load(){
     try{
-      var pr=await fetch(SUPA+"/rest/v1/partenaires?super_event_id=eq.se-nds-2026&select=id,nom,email,lots&order=nom",{headers:H});
+      var pr=await fetch(SUPA+"/rest/v1/partenaires?super_event_id=eq."+encodeURIComponent(SE)+"&select=id,nom,email,lots&order=nom",{headers:H});
       PARTNERS=(await pr.json())||[];
-      var tr=await fetch(SUPA+"/rest/v1/tirages?select=*&order=created_at.desc",{headers:H});
+      var tr=await fetch(SUPA+"/rest/v1/tirages?select=*&super_event_id=eq."+encodeURIComponent(SE)+"&order=created_at.desc",{headers:H});
       TIRAGES=(await tr.json())||[];
       try{ WINS_FULL=await rpc('gagnants_complets',{}); if(!Array.isArray(WINS_FULL)) WINS_FULL=[]; }catch(e){ WINS_FULL=[]; }
       var st=await fetch(SUPA+"/rest/v1/v_nds_participants?select=nb_tickets",{headers:H});

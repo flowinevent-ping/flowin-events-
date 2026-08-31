@@ -32,6 +32,7 @@ export default function Page() {
   const [jour, setJour] = useState<string | null>(null)
   const [voirHorsFestival, setVoirHorsFestival] = useState(false)
   const [stations, setStations] = useState<StationJour[] | null>(null)
+  const [stationFiltre, setStationFiltre] = useState<string>('toutes')
   const [optin, setOptin] = useState<OptinJour | null>(null)
   const [engag, setEngag] = useState<EngagementJour | null>(null)
   const [repond, setRepond] = useState<RepondantsJour | null>(null)
@@ -61,6 +62,7 @@ export default function Page() {
   useEffect(() => {
     if (!jour || !se) return
     setStations(null)
+    setStationFiltre('toutes')
     fetchStations(jour, se).then(setStations)
     fetchOptinJour(se, jour).then(setOptin)
     fetchEngagementJour(se, jour).then(setEngag)
@@ -71,8 +73,9 @@ export default function Page() {
   const joursHorsFestival = useMemo(() => (jours ?? []).filter(j => j.hors_periode), [jours])
 
   const courant = jours?.find(j => j.jour === jour)
-  const festival = (stations ?? []).filter(s => s.type === 'station')
-  const commerces = (stations ?? []).filter(s => s.type === 'commerce')
+  const stationsFiltrees = stationFiltre === 'toutes' ? (stations ?? []) : (stations ?? []).filter(s => s.event_id === stationFiltre)
+  const festival = stationsFiltrees.filter(s => s.type === 'station')
+  const commerces = stationsFiltrees.filter(s => s.type === 'commerce')
 
   const bloc = (titre: string, liste: StationJour[], vide: string) => (
     <>
@@ -220,6 +223,19 @@ export default function Page() {
                   ]} />
               )}
             </div>
+          </div>
+        )}
+
+        {stations !== null && stations.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <label className="sa-muted" style={{ fontSize: 11.5, fontWeight: 700 }}>Filtrer par event :</label>
+            <select className="sa-input" style={{ maxWidth: 320 }} value={stationFiltre} onChange={e => setStationFiltre(e.target.value)}>
+              <option value="toutes">Toutes les stations / tous les commerces</option>
+              {stations.map(s => <option key={s.event_id} value={s.event_id}>{s.type === 'station' ? '🎪' : '🤝'} {s.nom}</option>)}
+            </select>
+            {stationFiltre !== 'toutes' && (
+              <button className="sa-btn sm" onClick={() => setStationFiltre('toutes')}>✕ Réinitialiser</button>
+            )}
           </div>
         )}
 
