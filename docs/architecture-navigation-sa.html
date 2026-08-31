@@ -306,32 +306,70 @@ footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font
 </section>
 
 <section>
-  <h2><span class="num">04</span> Où va chaque page actuelle</h2>
-  <p class="sub">Aucune fonctionnalité ne disparaît. Le tableau est la garantie que rien n'est perdu en route.</p>
+  <h2><span class="num">04</span> Les 45 entrées, une par une</h2>
+  <p class="sub">Ta crainte de régression est la bonne question. Voici donc les 45 entrées de la sidebar actuelle, relevées ligne à ligne dans <code>Sidebar.tsx</code>, avec la destination de chacune. Rien n'est résumé, rien n'est regroupé pour faire joli.</p>
+
+  <div class="note">
+    <b>Deux règles qui rendent la régression impossible par construction.</b>
+    <p style="margin:8px 0 0"><b>1. Aucune route n'est supprimée.</b> Seule la sidebar change. <code>/dashboard/gagnants</code>, <code>/tirage-nds.html</code>, <code>/dashboard/nds-comm</code> répondent exactement comme aujourd'hui, même quand ils ne sont plus dans le menu. Les liens et favoris existants continuent de fonctionner.</p>
+    <p style="margin:8px 0 0"><b>2. Une page « Toutes les pages »</b>, dans Système, liste ces 45 entrées de A à Z avec leur nouvelle destination. Filet de sécurité permanent : ce qui n'est plus dans le menu reste à un clic.</p>
+  </div>
+
   <div class="tw">
   <table>
-    <thead><tr><th>Aujourd'hui</th><th>Demain</th><th>Pôle</th></tr></thead>
+    <thead><tr><th>Groupe actuel</th><th>Entrée actuelle</th><th>Destination</th><th>Pôle</th></tr></thead>
     <tbody>
-      <tr><td class="mono">super-events</td><td>Mes super events</td><td><span class="pill p-se">SE</span></td></tr>
-      <tr><td class="mono">operations · operations/[id]</td><td>Vue d'ensemble du super event</td><td><span class="pill p-se">SE</span></td></tr>
-      <tr><td class="mono">nds-resultat · rapport-points · statistiques · track-qr</td><td>Onglet « Résultats »</td><td><span class="pill p-se">SE</span></td></tr>
-      <tr><td class="mono">nds-participants</td><td>Onglet « Participants »</td><td><span class="pill p-se">SE</span></td></tr>
-      <tr><td class="mono">nds-lots · tirage-nds.html · gagnants</td><td>Onglet « Lots &amp; tirages »</td><td><span class="pill p-se">SE</span></td></tr>
-      <tr><td class="mono">nds-carte · nds-front</td><td>Onglet « Landing &amp; diffusion »</td><td><span class="pill p-se">SE</span></td></tr>
-      <tr><td class="mono">events</td><td>Kanban des events</td><td><span class="pill p-ev">EV</span></td></tr>
-      <tr><td class="mono">wizard-event</td><td>Nouvel event (wizard unifié)</td><td><span class="pill p-ev">EV</span></td></tr>
-      <tr><td class="mono">jeux</td><td>Bibliothèque de jeux (catalogue)</td><td><span class="pill p-ev">EV</span></td></tr>
-      <tr><td class="mono">EventDrawer (7 onglets)</td><td>Espace Event en page pleine</td><td><span class="pill p-ev">EV</span></td></tr>
-      <tr><td class="mono">pros · partenaires · apercu-pro · demandes-rattachement</td><td>CRM pros &amp; commerces</td><td><span class="pill p-gen">GÉN</span></td></tr>
-      <tr><td class="mono">joueurs · crm-landing · crm-retours</td><td>CRM participants</td><td><span class="pill p-gen">GÉN</span></td></tr>
-      <tr><td class="mono">nds-comm · envoi-masse · nds-media · nds-visuels.html</td><td>Communication</td><td><span class="pill p-gen">GÉN</span></td></tr>
-      <tr><td class="mono">nds-bon-commande · bons-commande-liste.html · facture-nds.html · nds-packs · cgv</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
-      <tr><td class="mono">prospection · btob-prospects</td><td>Prospection &amp; B2B</td><td><span class="pill p-gen">GÉN</span></td></tr>
-      <tr><td class="mono">rapports · pilotage</td><td>Stats globales</td><td><span class="pill p-gen">GÉN</span></td></tr>
-      <tr><td class="mono">landing-page</td><td>Aperçu global des landings (Outils) + onglets Diffusion par entité</td><td><span class="pill p-out">OUT</span></td></tr>
-      <tr><td class="mono">plaquette-nds · pitch-nds · flowin-partenaire-presentation · nds</td><td>Plaquettes &amp; pitchs</td><td><span class="pill p-out">OUT</span></td></tr>
-      <tr><td class="mono">kit-digital</td><td>Kits partenaires</td><td><span class="pill p-out">OUT</span></td></tr>
-      <tr><td class="mono">roadmap · parametres · maintenance</td><td>inchangé</td><td><span class="pill p-sys">SYS</span></td></tr>
+      <tr><td class="mono">Accueil</td><td>Accueil</td><td>Accueil · Vue d'ensemble</td><td><span class="pill p-sys">SYS</span></td></tr>
+
+      <tr><td class="mono">Super event</td><td>Super Events</td><td>Mes super events</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Opérations (vue complète)</td><td>Onglet « Vue d'ensemble » + liste toutes opérations</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Statistiques &amp; résultats</td><td>Onglet « Résultats »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Rapport détaillé</td><td>Onglet « Résultats »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Résultat journalier</td><td>Onglet « Résultats »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Origines du trafic</td><td>Onglet « Résultats »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Pilotage</td><td>Stats globales</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Rapports</td><td>Stats globales</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Super event</td><td>Nouvel événement</td><td>Nouvel event (wizard unifié)</td><td><span class="pill p-ev">EV</span></td></tr>
+
+      <tr><td class="mono">Events</td><td>Events</td><td>Kanban des events</td><td><span class="pill p-ev">EV</span></td></tr>
+
+      <tr><td class="mono">Comm &amp; outils</td><td>Jeux (templates)</td><td>Bibliothèque de jeux</td><td><span class="pill p-ev">EV</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Landing pages</td><td>Aperçu de toutes les landings + onglet Diffusion par entité</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Plaquette commerciale</td><td>Plaquettes &amp; pitchs</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Plaquette offres &amp; tarifs</td><td>Plaquettes &amp; pitchs</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Argumentaire téléphonique</td><td>Plaquettes &amp; pitchs</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Présentation partenaire</td><td>Plaquettes &amp; pitchs</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Carte NDS</td><td>Onglet « Landing &amp; diffusion »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Front NDS</td><td>Onglet « Landing &amp; diffusion »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Vidéo &amp; média</td><td>Communication</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Visuels &amp; vidéos (A4/réseaux/spot)</td><td>Communication</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td><b>Tirage au sort</b></td><td>Onglet « Lots &amp; tirages », enfin scopé par super event</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td><b>Liste des gagnants</b></td><td>Onglet « Lots &amp; tirages » du SE + onglet « Lots &amp; gagnants » de l'event</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td><b>Billets &amp; kit com partenaire</b></td><td>Communication</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Envoi en masse</td><td>Communication</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Stock des lots</td><td>Onglet « Lots &amp; tirages »</td><td><span class="pill p-se">SE</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Bons de commande</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Bons de commande &amp; Factures (liste)</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Générer une facture</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Dossiers partenaires (A3/A4/vidéo/QR)</td><td>Kits partenaires</td><td><span class="pill p-out">OUT</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Packs de participation</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>CGV &amp; légal</td><td>Facturation &amp; admin</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Prospection</td><td>Prospection &amp; B2B</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Prospects B2B</td><td>Prospection &amp; B2B</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>CRM Landing pages</td><td>CRM participants</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">Comm &amp; outils</td><td>Retours CRM</td><td>CRM participants</td><td><span class="pill p-gen">GÉN</span></td></tr>
+
+      <tr><td class="mono">CRM</td><td>Aperçu Pro</td><td>CRM pros &amp; commerces</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">CRM</td><td>Pros</td><td>CRM pros &amp; commerces</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">CRM</td><td>Demandes de participation</td><td>CRM pros &amp; commerces</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">CRM</td><td>Joueurs</td><td>CRM participants</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">CRM</td><td>Partenaires (fiche commerce)</td><td>CRM pros &amp; commerces</td><td><span class="pill p-gen">GÉN</span></td></tr>
+      <tr><td class="mono">CRM</td><td>Participants (super event)</td><td>Onglet « Participants »</td><td><span class="pill p-se">SE</span></td></tr>
+
+      <tr><td class="mono">Système</td><td>Feuille de route</td><td>inchangé</td><td><span class="pill p-sys">SYS</span></td></tr>
+      <tr><td class="mono">Système</td><td>Paramètres</td><td>inchangé</td><td><span class="pill p-sys">SYS</span></td></tr>
+      <tr><td class="mono">Système</td><td>Maintenance</td><td>inchangé</td><td><span class="pill p-sys">SYS</span></td></tr>
+      <tr><td class="mono">—</td><td><b>Toutes les pages</b> <span class="pill p-ev">nouveau</span></td><td>Index A→Z des 45 entrées et de leur destination</td><td><span class="pill p-sys">SYS</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -388,23 +426,24 @@ footer{margin-top:72px; padding-top:24px; border-top:1px solid var(--line); font
 
 <section>
   <h2><span class="num">07</span> Plan d'exécution</h2>
-  <p class="sub">Six lots, chacun poussé séparément avec les 3 piliers (GitHub, <code>handoff_notes</code> Supabase, hub Notion), chacun vérifiable en prod avant de passer au suivant.</p>
+  <p class="sub">Sept lots enchaînés sans pause, mais poussés séparément avec les 3 piliers (GitHub, <code>handoff_notes</code> Supabase, hub Notion) : si quelque chose casse, un seul commit est en cause et se révoque seul. Revue d'ensemble à la fin.</p>
   <div class="lots">
-    <div class="lot"><div class="k">Lot 1</div><div><h4>Contexte global + sidebar</h4><p>Barre de contexte, <code>?se=</code> / <code>?ev=</code> dans l'URL, 6 groupes colorés et lisibles, 46 entrées → 19. La nouvelle structure est visible dès ce lot.</p></div></div>
+    <div class="lot"><div class="k">Lot 1</div><div><h4>Contexte global + sidebar + « Toutes les pages »</h4><p>Barre de contexte, <code>?se=</code> / <code>?ev=</code> dans l'URL, 6 groupes colorés et lisibles, 45 entrées → 19, et l'index de secours. Aucune route supprimée.</p></div></div>
     <div class="lot"><div class="k">Lot 2</div><div><h4>Espace Event</h4><p>Les 7 onglets en page pleine, à partir de l'EventDrawer existant. Le drawer reste pour l'aperçu rapide.</p></div></div>
     <div class="lot"><div class="k">Lot 3</div><div><h4>Espace Super Event</h4><p>Les 8 onglets, en rebranchant les pages de résultats existantes sur le contexte au lieu de leurs sélecteurs locaux.</p></div></div>
     <div class="lot"><div class="k">Lot 4</div><div><h4>Composant Diffusion</h4><p>Aperçus landing, QR généré localement, téléchargements PNG / SVG / PDF A4.</p></div></div>
     <div class="lot"><div class="k">Lot 5</div><div><h4>Wizard unifié</h4><p>Les 8 étapes partagées pro / SA, plus l'écran de livraison. Wizard de super event dans la foulée.</p></div></div>
     <div class="lot"><div class="k">Lot 6</div><div><h4>Regroupements du pôle Général</h4><p>Les 6 pages à onglets, et les renommages qui font disparaître les 3 paires ambiguës.</p></div></div>
+    <div class="lot"><div class="k">Lot 7</div><div><h4>Modèles d'event réutilisables</h4><p>Enregistrer un event configuré (banque, lots, règles) comme modèle, et en créer un nouveau en un clic depuis ce modèle. Nouvelle table Supabase — c'est le seul lot qui touche au schéma.</p></div></div>
   </div>
 </section>
 
 <section>
-  <h2><span class="num">08</span> Ce qu'il me faut de toi</h2>
+  <h2><span class="num">08</span> Décisions actées</h2>
   <div class="note">
-    <p style="margin:0 0 10px"><b>1. Le découpage tient-il ?</b> Notamment : j'ai mis « Bibliothèque de jeux » (le catalogue des 6 modules) dans le pôle Events, et « contenu du jeu » comme onglet de chaque event. Tu parlais de « template de jeux » dans Events — je crois que c'est bien ça, mais dis-moi si tu voyais autre chose.</p>
-    <p style="margin:0 0 10px"><b>2. Page pleine ou drawer ?</b> Je propose de passer l'event en page pleine avec onglets tout en gardant le drawer. C'est un peu plus de travail que de garder seulement le drawer, mais c'est ce qui rend un event partageable par lien.</p>
-    <p style="margin:0"><b>3. L'ordre.</b> Le lot 1 rend la structure visible tout de suite ; le lot 4 (aperçus + QR téléchargeables) est le plus petit et le plus immédiatement utile. Si tu préfères voir les téléchargements en premier, je commence par là.</p>
+    <p style="margin:0 0 10px"><b>Fiche event en page pleine</b>, avec le drawer conservé pour le coup d'œil rapide depuis un tableau. C'est ce qui donne à chaque event une URL à lui, donc un lien partageable — impossible aujourd'hui.</p>
+    <p style="margin:0 0 10px"><b>Bibliothèque de jeux ET modèles réutilisables.</b> Le catalogue des 6 modules arrive au lot 1 ; les modèles enregistrés font l'objet du lot 7, parce qu'ils demandent une table côté Supabase.</p>
+    <p style="margin:0"><b>Les 7 lots enchaînés, revue à la fin</b> — sous les deux règles anti-régression de la section 04 : aucune route supprimée, et l'index « Toutes les pages » comme filet.</p>
   </div>
 </section>
 
