@@ -34,6 +34,34 @@ const ETAPES = [
 ] as const
 type Etape = typeof ETAPES[number]['id']
 
+const ICONES_MODULE: Record<Module, React.ReactNode> = {
+  quiz: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <path d="M9.5 9.2c0-1.4 1.1-2.4 2.5-2.4s2.5 1 2.5 2.2c0 1.6-2.5 1.8-2.5 3.6" stroke="var(--sa-accent)" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="16.3" r="1" fill="var(--sa-accent)" /></svg>
+  ),
+  quizsolo: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7.5" r="3" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5" stroke="var(--sa-accent)" strokeWidth="1.8" strokeLinecap="round" /></svg>
+  ),
+  quizmaster: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="9" y="2" width="6" height="11" rx="3" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V22M8.5 22h7" stroke="var(--sa-accent)" strokeWidth="1.8" strokeLinecap="round" /></svg>
+  ),
+  spin: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <path d="M12 2v10l7 4" stroke="var(--sa-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="1.6" fill="var(--sa-accent)" /></svg>
+  ),
+  vote: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <path d="M8 12.5l2.5 2.5L16 9.5" stroke="var(--sa-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  ),
+  tombola: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="11" rx="2" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <path d="M9 7v11M15 7v11" stroke="var(--sa-accent)" strokeWidth="1.6" strokeDasharray="1.5 2.5" /><path d="M3 12h4M17 12h4" stroke="var(--sa-accent)" strokeWidth="1.8" /></svg>
+  ),
+}
+
 const MODULES: { id: Module; nom: string; desc: string; emoji: string }[] = [
   { id: 'quiz', nom: 'Quiz', desc: 'Questions à choix multiple', emoji: '❓' },
   { id: 'quizsolo', nom: 'Quiz solo', desc: 'Parcours individuel', emoji: '🧍' },
@@ -207,17 +235,20 @@ export default function Page() {
         )}
 
         {etape === 'B' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 9 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 }}>
             {MODULES.map(m => (
               <button key={m.id} type="button" onClick={() => maj({ module: m.id })}
                 style={{
-                  textAlign: 'left', cursor: 'pointer', padding: 13, borderRadius: 10,
-                  background: 'transparent',
-                  border: `2px solid ${d.module === m.id ? 'var(--sa-accent, #f4b544)' : 'var(--sa-border)'}`,
+                  textAlign: 'center', cursor: 'pointer', padding: '18px 13px', borderRadius: 14,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  background: d.module === m.id ? 'var(--sa-subtle)' : 'transparent',
+                  border: `2px solid ${d.module === m.id ? 'var(--sa-accent)' : 'var(--sa-border)'}`,
                 }}>
-                <div style={{ fontSize: 20, marginBottom: 4 }}>{m.emoji}</div>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>{m.nom}</div>
-                <div className="sa-muted" style={{ fontSize: 11 }}>{m.desc}</div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                  {ICONES_MODULE[m.id]}
+                </div>
+                <div style={{ fontSize: 13.5, fontWeight: 800 }}>{m.nom}</div>
+                <div className="sa-muted" style={{ fontSize: 11, marginTop: 3 }}>{m.desc}</div>
               </button>
             ))}
           </div>
