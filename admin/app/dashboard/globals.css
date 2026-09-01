@@ -15,7 +15,15 @@
 .sa-sb-logo em{font-style:normal;color:var(--sa-accent-light)}
 .sa-sb-logo-dot{width:9px;height:9px;border-radius:50%;background:var(--sa-accent-light);box-shadow:0 0 8px var(--sa-accent-light);flex-shrink:0}
 .sa-sb-main{flex:1;overflow-y:auto;padding:8px 0}
-.sa-sb-group{font-size:10px;font-weight:800;color:var(--sa-sb-text-dim);padding:14px 22px 6px;letter-spacing:.1em;text-transform:uppercase}
+/* En-tetes de groupe : etaient 10px gris terne, identiques entre eux. */
+.sa-sb-bloc + .sa-sb-bloc{border-top:1px solid var(--sa-sb-border);margin-top:6px}
+.sa-sb-group{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:var(--sa-sb-text-dim);padding:15px 20px 7px;letter-spacing:.09em;text-transform:uppercase}
+.sa-sb-group-bar{width:5px;height:14px;border-radius:3px;background:currentColor;flex-shrink:0}
+.sa-sb-group.ton-se{color:#C084FC}
+.sa-sb-group.ton-ev{color:#34D399}
+.sa-sb-group.ton-crm{color:#60A5FA}
+.sa-sb-group.ton-out{color:#FBBF24}
+.sa-sb-group.ton-sys{color:#94A3B8}
 .sa-sb-item{display:flex;align-items:center;gap:10px;padding:9px 22px;color:var(--sa-sb-text);cursor:pointer;width:100%;font-size:13px;font-weight:600;transition:all .15s;text-align:left;border:none;background:none;border-left:3px solid transparent}
 .sa-sb-item:hover{background:var(--sa-sb-hover);color:#fff}
 .sa-sb-item.active{background:linear-gradient(90deg,rgba(168,85,247,.18),rgba(168,85,247,.03));color:#fff;border-left-color:var(--sa-accent-light);font-weight:700}
