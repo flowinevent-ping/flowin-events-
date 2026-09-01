@@ -149,7 +149,12 @@ fusionné en 1 seule page (kanban + Parcours mobil + bouton Nouvel event).
   `flowin-partenaire-presentation.html`, `tirage-nds.html` (confirmé déjà
   clair, `--bg:#f4f6fb`).
 
-## 5. Audit du menu — 31/08 soir, à corriger dans LA PROCHAINE conversation
+## 5. Audit du menu — 31/08 soir
+
+> **FAIT le 01/09/2026** (commits `c9ca816` → `11c8008`). Les trois
+> points 4.1, 4.2 et 4.3 sont traités ou tranchés : voir la section 8
+> en fin de fichier. Cette section reste pour le raisonnement, pas
+> comme une liste de tâches ouvertes.
 
 Romain (captures d'écran du menu complet) : "il manque de rangement, on ne
 voit pas bien Events et Super Event, agrandis les [en-têtes de groupe] en
@@ -207,3 +212,95 @@ Voir `admin/lib/roadmap.ts` pour le détail à jour. Au 31/08 soir, tout ce
 qui y était marqué a été fait sauf : harmonisation complète des 8 outils
 HTML (2/8 faits), sous-onglets par event/super event (section 4.3
 ci-dessus).
+
+## 8. 01/09/2026 — Réorganisation du drawer : 4 lots + auto-audit
+
+Demande de Romain : « ok on doit tout faire alors fait tout attention pas de
+casse pas de régression pas de doublons », après avoir exigé — et obtenu —
+**une maquette cliquable validée avant toute ligne de code**
+(`docs/maquette-drawers.html`, commit `19b3ee2`, ~8 itérations).
+
+### 8.1 La logique de domaine qui commande tout le découpage
+
+Posée par Romain, à ne jamais reperdre :
+
+- un **event** = une station de jeu, individuelle, appartenant à **un** pro ;
+- un **super event** regroupe plusieurs stations ;
+- on doit pouvoir entrer dans chacun **avec la vision pro ou la vision
+  event**, et atteindre l'info individuelle (stats, jeu en cours, station,
+  joueurs) ;
+- **les mêmes modules à trois niveaux de portée** : général Flowin, dans
+  chaque pro, et par event / super event.
+
+« Ne recrée rien, tout existe déjà, c'est un rangement du drawer qu'il
+faut. » Aucun écran n'a été refait : les écrans lourds sont atteints par un
+composant `<Raccourci>`, jamais recopiés.
+
+### 8.2 Les 4 lots
+
+| Lot | Commit | Contenu |
+|---|---|---|
+| 1 | `c9ca816` | `SousOnglets.tsx` (2ᵉ niveau de navigation) + `SuperEventDrawer.tsx`, le 5ᵉ drawer, le seul qui n'existait pas — 6 onglets, zéro requête nouvelle |
+| 2 | `ce76410` | `EventDrawer` : compteurs inertes de Participants → sous-onglets ; filtres Lots ré-habillés en `<SousOnglets>` sur le **même** state `filtreG` |
+| 3 | `de56e30` | **Une seule fiche pro** : `PartenaireDrawer` accepte `partenaireId / tab / onTab / inline`, `ProDrawer` le rend `inline` sous 4 onglets commerce. Les 9 commerces en double (`pro-safer` + `pt-safer`) sont résolus **dans l'UI, zéro changement de schéma** |
+| 4 | `241e748` | Sidebar : 45 entrées rangées en 6 groupes colorés. **Les 45 sont conservées** — vérifié par comptage *et* par comparaison des ensembles d'`id` et de `href` contre `c8dca31` |
+
+### 8.3 La règle du sous-onglet vide
+
+Apprise d'un vrai bug que Romain a repéré sur une capture : « Contrat & CGV »
+affichait le contenu de « Général ». **Un sous-onglet sans contenu propre
+doit le dire** (`<SousOngletVide>`). Afficher le voisin est pire qu'un écran
+vide : rien ne signale l'erreur, on lit un chiffre en croyant qu'il concerne
+autre chose.
+
+### 8.4 Auto-audit adversarial — 8 régressions, 8 corrigées (`11c8008`)
+
+Lancé après le push des 4 lots, parce que la nuit du 31/08 a prouvé qu'**un
+build qui passe ne prouve pas qu'une navigation marche**.
+
+1. **Critique** — `PartenaireDrawer` en mode `inline` affichait son footer :
+   la fiche pro avait **deux** boutons « Supprimer », celui du haut
+   supprimant l'enregistrement *partenaire* avec un texte de confirmation
+   ambigu.
+2. `chargeG` à la fois dans les deps du `useEffect` et posé dedans → les 4
+   onglets commerce bloqués sur « Chargement… ».
+3. `EventDrawer` : liste des participants jamais rechargée entre deux events.
+   Corrigé par une remise à zéro sur `ev?.id` **et** un chargement piloté par
+   `partEvId` (l'event réellement chargé) — pas par `participants.length === 0`,
+   qui bouclerait à l'infini sur un event sans aucun participant.
+4. `ProDrawer` : onglet commerce sur un pro sans `partenaire_id` → écran blanc
+   muet, remplacé par `<SousOngletVide>` qui dit pourquoi.
+5. `TableauStations` borné dans les nouveaux drawers : l'en-tête annonçait 21
+   stations, le tableau en listait 18. `tout` passé partout.
+6. Sidebar : `/nds` marqué `external` alors que c'est une vraie route Next.
+7. `SuperEventDrawer` : deux états vides empilés sur l'onglet Stations.
+8. `sql/2026-09-01-station-tracking-tout-historique.sql` ne contenait que des
+   **commentaires** : une reconstruction depuis `sql/` aurait laissé
+   `station_tracking` en 4 arguments et cassé **tous** les `TableauStations`
+   d'un coup. Corps complet + `DROP` de l'ancienne signature + `GRANT`s
+   écrits, et vérifié identique octet pour octet à la prod (md5
+   `8213ecaa1cebff74a9297028d18bcb36`, 5 108 octets).
+
+### 8.5 Pièges revus ce jour-là, à ne pas reperdre
+
+- `tsconfig` cible **ES5** : `[...new Set(x)]` échoue (TS2802). Écrire
+  `x.filter((v,i,a)=>a.indexOf(v)===i)`.
+- Un remplacement global naïf transforme `const t = tab ?? drawer.tab` en
+  `const t = tab ?? t` (TS2448). C'est arrivé **deux** fois.
+- **Pas de session Supabase Auth sur ce projet** : tout tourne sur la clé
+  anon. Une RPC ou une policy restreinte à `authenticated` casse la prod en
+  silence. Policies : rôle `public`, `using(true)`.
+- `execute_sql` du MCP est en lecture seule ici : les écritures passent par
+  `apply_migration`.
+
+### 8.6 Reste à faire (identifié, pas commencé)
+
+- brancher `/pro/rejoindre` et `/pro/jeu` dans « + Nouvel event » et
+  « + Créer un super event » du dashboard SA ;
+- composant `<Diffusion>` : prévisualisation de la landing + QR
+  téléchargeable **généré localement** (PNG / SVG / A4) ;
+- `/dashboard/demandes-rattachement` ne fait que basculer un statut : il ne
+  sait pas transformer une demande acceptée en event (table vide) ;
+- `operations` et `nds-lots` ne lisent aucune portée ;
+- event de test `htghc` sur Ville de Vence ; 15 events sans super event, 6
+  sans pro.
