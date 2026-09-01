@@ -478,13 +478,20 @@ export interface Tracking {
  */
 export async function fetchTracking(
   se: string = SE_DEFAUT,
-  opts: { proId?: string; partenaireId?: string; jour?: string } = {}
+  opts: { proId?: string; partenaireId?: string; jour?: string; tout?: boolean } = {}
 ): Promise<Tracking | null> {
+  /* tout = true : tout l historique, sans bornage aux dates du super event.
+     Par defaut false, donc les appels existants (fiches pro et partenaire)
+     gardent exactement le comportement d avant. Verifie en base le 01/09 :
+     borne 2 446 flashs / 18 stations, tout l historique 2 847 / 21 -- trois
+     stations n apparaissaient nulle part parce que toute leur activite tombe
+     hors de la periode officielle. */
   const { data, error } = await supabase.rpc('station_tracking', {
     p_se: se,
     p_pro: opts.proId ?? null,
     p_partenaire: opts.partenaireId ?? null,
     p_jour: opts.jour ?? null,
+    p_tout: opts.tout ?? false,
   })
   if (error) { console.error('[fetchTracking]', error.message); return null }
   return (data as Tracking) ?? null

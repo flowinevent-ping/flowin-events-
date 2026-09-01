@@ -14,10 +14,13 @@ import { fetchTracking, SE_DEFAUT, type Tracking, type StationTracking } from '@
 type Champ = keyof StationTracking
 
 export function TableauStations({
-  se = SE_DEFAUT, proId, partenaireId, jour, titre = 'Tracking par station', compact = false,
+  se = SE_DEFAUT, proId, partenaireId, jour, tout = false,
+  titre = 'Tracking par station', compact = false,
   onStation,
 }: {
   se?: string; proId?: string; partenaireId?: string; jour?: string
+  /* true : tout l historique. false (defaut) : periode officielle du super event. */
+  tout?: boolean
   titre?: string; compact?: boolean
   onStation?: (s: StationTracking) => void
 }) {
@@ -27,8 +30,8 @@ export function TableauStations({
 
   useEffect(() => {
     setCharge(true)
-    fetchTracking(se, { proId, partenaireId, jour }).then(setT).finally(() => setCharge(false))
-  }, [se, proId, partenaireId, jour])
+    fetchTracking(se, { proId, partenaireId, jour, tout }).then(setT).finally(() => setCharge(false))
+  }, [se, proId, partenaireId, jour, tout])
 
   const stations = useMemo(() => {
     if (!t) return []
@@ -74,6 +77,16 @@ export function TableauStations({
 
       <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 8 }}>
         <b>{titre}</b> — un flash est une ouverture du QR, pas une personne : un joueur qui rescanne compte plusieurs fois.
+        {' '}
+        {/* La periode couverte doit etre ecrite noir sur blanc : ce total n est
+            PAS le chiffre publiable des que l historique complet est affiche. */}
+        <b style={{ color: tout ? 'var(--sa-accent)' : 'inherit' }}>
+          {jour
+            ? `Journée du ${jour}.`
+            : tout
+              ? 'Tout l\u2019historique, y compris après la clôture — à ne pas reprendre comme chiffre publiable.'
+              : 'Période officielle du super event uniquement.'}
+        </b>
       </div>
 
       <div style={{ overflowX: 'auto' }}>

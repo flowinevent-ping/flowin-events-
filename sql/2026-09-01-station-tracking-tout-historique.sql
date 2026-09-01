@@ -1,0 +1,34 @@
+-- 01/09/2026 — « Toutes les dates » doit vouloir dire toutes les dates.
+-- Applique en prod via Supabase MCP, repris ici pour garder le schema dans le repo.
+--
+-- CONSTAT (verifie en base, pas suppose) : le tableau « Tracking par station »
+-- clippait TOUJOURS sur date_d..date_f du super event des que p_jour etait NULL,
+-- y compris apres un clic sur « Toutes les dates ». Sur NDS 2026 :
+--   flashs   2 446 affiches  vs 2 847 reels   (401 invisibles)
+--   jours       10 affiches  vs    53 reels
+--   stations    18 listees   vs    21 reelles
+-- Les trois manquantes (NDS · Le Bar, NDS · Brigade Verte, NDS · Les Caisses)
+-- ont toute leur activite hors periode : elles retombaient a 0 flash et etaient
+-- ecartees par le WHERE final. Elles n apparaissaient sur AUCUN ecran.
+--
+-- CORRECTIF : nouveau parametre p_tout (defaut false). Les appels existants
+-- (fiches pro et partenaire) gardent exactement le comportement d avant ; seul
+-- l appelant qui veut dire « tout l historique » passe p_tout => true.
+-- Les « chiffres publiables » ne passent pas par cette RPC : ils restent bornes.
+--
+-- L ancienne signature a 4 arguments est supprimee : la garder rendrait un appel
+-- a 4 arguments ambigu avec la nouvelle (dont le 5e a un defaut).
+--
+-- VERIFIE PAR APPEL REEL, pas par relecture :
+--   station_tracking('se-nds-2026')                          -> 2446 flashs, 18 stations (inchange)
+--   station_tracking('se-nds-2026',null,null,null,true)      -> 2847 flashs, 21 stations
+--   station_tracking('se-nds-2026',null,null,'2026-07-18')   ->  329 flashs, 13 stations (inchange)
+--
+-- Le corps complet de la fonction est celui applique en prod ; voir la migration
+-- station_tracking_option_tout_historique. Points de vigilance pour la suite :
+--   * les grants doivent etre reappliques apres tout DROP : PUBLIC est
+--     obligatoire, ce projet n a pas de session Supabase Auth, tout le dashboard
+--     tourne sur la cle anon. Restreindre a `authenticated` casse la prod en
+--     silence (regression vecue le 31/08 sur 2 RPC).
+--   * p_tout n a d effet que si p_jour est NULL : un jour precis reste un jour
+--     d exploitation borne par bascule_h.
