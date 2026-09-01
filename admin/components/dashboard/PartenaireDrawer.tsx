@@ -75,14 +75,14 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
   const pid = pidActif
   const ongletGagnants = tabActif === 'gagnants' || tabActif === 'comm' || tabActif === 'lots'
   useEffect(() => {
-    if (!pid || !ongletGagnants || chargeG) return
+    if (!pid || !ongletGagnants) return
     let vivant = true
     setChargeG(true)
     Promise.all([fetchGagnantsPartenaire(pid), fetchEtatPartenaire(pid)])
       .then(([g, e]) => { if (vivant) { setGagnants(g); setEtatG(e) } })
       .finally(() => { if (vivant) setChargeG(false) })
     return () => { vivant = false }
-  }, [pid, ongletGagnants, chargeG])
+  }, [pid, ongletGagnants])
 
   useEffect(() => {
     if (!pid) return
@@ -344,7 +344,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
           <>
             <SectionHeader>📡 Tracking de sa station</SectionHeader>
             <div style={{ marginBottom: 18 }}>
-              <TableauStations partenaireId={p.id} titre={`Station ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
+              <TableauStations partenaireId={p.id} tout titre={`Station ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
             </div>
           </>
         )}
@@ -562,6 +562,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
         )}
       </div>
 
+      {!inline && (
       <div className="sa-drawer-footer">
         {edit ? (
           <>
@@ -578,6 +579,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
           </>
         )}
       </div>
+      )}
     </>
   )
 }

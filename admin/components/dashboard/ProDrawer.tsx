@@ -11,6 +11,7 @@ import {
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { TableauStations } from './TableauStations'
 import PartenaireDrawer from './PartenaireDrawer'
+import { SousOngletVide } from './SousOnglets'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { FlowinPro } from '@/lib/types'
 
@@ -163,8 +164,15 @@ export default function ProDrawer() {
         {drawer.tab === 'tracking' && (
           <>
             <SectionHeader>📡 Tracking de ses stations</SectionHeader>
-            <TableauStations proId={p.id} titre={`Stations de ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
+            <TableauStations proId={p.id} tout titre={`Stations de ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
           </>
+        )}
+
+        {ONGLET_COMMERCE[drawer.tab] && !p.partenaire_id && (
+          <SousOngletVide
+            libelle="Fiche commerce"
+            raison="Ce compte pro n'a pas de fiche commerce liée : pas de lots, de gagnants ni de contrat à afficher."
+          />
         )}
 
         {ONGLET_COMMERCE[drawer.tab] && p.partenaire_id && (

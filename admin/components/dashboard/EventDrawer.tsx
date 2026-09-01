@@ -37,21 +37,37 @@ export default function EventDrawer() {
   const [vueParticipants, setVueParticipants] = useState<'tous' | 'optin' | 'sans'>('tous')
   const [participants, setParticipants] = useState<FlowinJoueur[]>([])
   const [loadingPart, setLoadingPart] = useState(false)
+  const [partEvId, setPartEvId] = useState<string | null>(null)
 
   const ev = useMemo(() => events.find(x => x.id === drawer.id), [events, drawer.id])
   // pro ne peut pas etre un hook (pas besoin), mais doit rester AVANT le early return
   // pour que les hooks qui en dependent (gagnants) restent, eux, inconditionnels.
   const pro = pros.find(p => p.id === ev?.pro_id)
 
+  /* Le drawer n est jamais demonte entre deux events : sans remise a zero, on
+     affichait la liste de l event precedent sous le nom du nouveau — et depuis
+     que les compteurs sont des sous-onglets, on affichait aussi ses chiffres.
+     On memorise l event REELLEMENT charge (partEvId) au lieu de tester une liste
+     vide : un event sans aucun participant est un cas legitime, et le tester par
+     participants.length === 0 relancerait la requete en boucle. */
   useEffect(() => {
-    if (drawer.tab === 'participants' && ev && participants.length === 0) {
-      setLoadingPart(true)
-      fetchEventParticipants(ev.id).then(rows => {
-        setParticipants(rows)
-        setLoadingPart(false)
-      })
-    }
-  }, [drawer.tab, ev])
+    setParticipants([])
+    setVueParticipants('tous')
+  }, [ev?.id])
+
+  useEffect(() => {
+    if (drawer.tab !== 'participants' || !ev || partEvId === ev.id) return
+    let vivant = true
+    const idCharge = ev.id
+    setLoadingPart(true)
+    fetchEventParticipants(idCharge).then(rows => {
+      if (!vivant) return
+      setParticipants(rows)
+      setPartEvId(idCharge)
+      setLoadingPart(false)
+    })
+    return () => { vivant = false }
+  }, [drawer.tab, ev, partEvId])
 
   useEffect(() => {
     setSegmentsInit(false)

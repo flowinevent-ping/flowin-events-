@@ -157,7 +157,7 @@ export default function Sidebar() {
         { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
         { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
         { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html', external: true },
-        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds', external: true },
+        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds' },
         { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html', external: true },
         { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html', external: true },
         { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html', external: true },

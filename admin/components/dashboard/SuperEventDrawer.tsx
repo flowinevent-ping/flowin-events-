@@ -21,7 +21,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
-import { DrawerTabs, SectionHeader, StatusChip, ModuleChip, EmptyState } from './DashboardUI'
+import { DrawerTabs, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide, sousOngletActif, type SousOnglet } from './SousOnglets'
 import { TableauStations } from './TableauStations'
 
@@ -199,7 +199,7 @@ export default function SuperEventDrawer() {
             <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
               <SectionHeader>Tracking détaillé</SectionHeader>
               {/* Le composant deja utilise par la page Statistiques et les fiches pro. */}
-              <TableauStations se={seId} compact titre="Flashs par station" onStation={s => openDrawer('event', s.event_id)} />
+              <TableauStations se={seId} tout compact titre="Flashs par station" onStation={s => openDrawer('event', s.event_id)} />
             </div>
           </>
         )}
@@ -306,9 +306,6 @@ export default function SuperEventDrawer() {
           </>
         )}
 
-        {ong.id === 'stations' && evs.length === 0 && sActif !== 'kanban' && (
-          <EmptyState title="Aucune station" desc="Aucun event n'est rattaché à ce super event." />
-        )}
       </div>
     </>
   )
