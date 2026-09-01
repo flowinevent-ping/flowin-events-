@@ -6,6 +6,7 @@ import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type G
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
+import { SousOnglets, SousOngletVide } from './SousOnglets'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -31,6 +32,9 @@ export default function EventDrawer() {
   const [quizTimerOn, setQuizTimerOn] = useState(true)
   const [quizTimerSec, setQuizTimerSec] = useState(30)
   const [voteItems, setVoteItems] = useState<{ id: string; nom: string; emoji?: string; genre?: string; desc?: string }[]>([])
+  /* Sous-onglet de l onglet Participants. Les 3 compteurs affiches la n etaient
+     pas cliquables : ils deviennent le filtre lui-meme, sans rien ajouter. */
+  const [vueParticipants, setVueParticipants] = useState<'tous' | 'optin' | 'sans'>('tous')
   const [participants, setParticipants] = useState<FlowinJoueur[]>([])
   const [loadingPart, setLoadingPart] = useState(false)
 
@@ -472,16 +476,33 @@ export default function EventDrawer() {
           </div>
         )}
 
-        {drawer.tab === 'participants' && (
+        {drawer.tab === 'participants' && (() => {
+          const vus = vueParticipants === 'optin' ? participants.filter(j => j.optin)
+            : vueParticipants === 'sans' ? participants.filter(j => !j.optin)
+            : participants
+          return (
           <>
-            <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-              <div className="sa-kpi-mini">{participants.length} <span>total</span></div>
-              <div className="sa-kpi-mini">{participants.filter(j => j.optin).length} <span>opt-in</span></div>
-              <div className="sa-kpi-mini">{participants.filter(j => !j.optin).length} <span>sans opt-in</span></div>
+            <div style={{ marginBottom: 12 }}>
+              <SousOnglets
+                libelle="Vue"
+                actif={vueParticipants}
+                onSelect={v => setVueParticipants(v as 'tous' | 'optin' | 'sans')}
+                onglets={[
+                  { id: 'tous', label: 'Tous', badge: participants.length },
+                  { id: 'optin', label: 'Opt-in', badge: participants.filter(j => j.optin).length },
+                  { id: 'sans', label: 'Sans opt-in', badge: participants.filter(j => !j.optin).length },
+                ]}
+              />
             </div>
             {loadingPart && <div className="sa-loading">Chargement…</div>}
             {!loadingPart && participants.length === 0 && <div className="sa-empty-inline">Aucun participant</div>}
-            {participants.map(p => (
+            {!loadingPart && participants.length > 0 && vus.length === 0 && (
+              <SousOngletVide
+                libelle={vueParticipants === 'optin' ? 'Opt-in' : 'Sans opt-in'}
+                raison={`Aucun participant dans cette vue, sur ${participants.length} au total.`}
+              />
+            )}
+            {vus.map(p => (
               <div key={p.id} className="sa-list-item" onClick={() => openDrawer('joueur', p.id)} style={{ cursor: 'pointer' }}>
                 <div className="sa-avatar-sm">{((p.prenom?.[0] ?? '') + (p.nom?.[0] ?? '')).toUpperCase() || '?'}</div>
                 <div style={{ flex: 1 }}>
@@ -493,7 +514,8 @@ export default function EventDrawer() {
               </div>
             ))}
           </>
-        )}
+          )
+        })()}
 
         {drawer.tab === 'lots' && (
           <>
@@ -513,16 +535,20 @@ export default function EventDrawer() {
                   </div>
                 )}
                 {gagnants.length > 0 && (
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 10 }}>
-                    {([['tous', 'Tous'], ['actifs', 'Libres'], ['retires', 'Retirés']] as const).map(([k, l]) => (
-                      <button
-                        key={k}
-                        className={`sa-btn sm${filtreG === k ? ' primary' : ''}`}
-                        onClick={() => setFiltreG(k)}
-                      >
-                        {l}
-                      </button>
-                    ))}
+                  <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {/* Meme filtre qu avant, meme etat : seul l habillage rejoint
+                        celui des sous-onglets, pour qu il n y ait qu une seule
+                        facon de filtrer dans tout le dashboard. */}
+                    <SousOnglets
+                      libelle="Vue"
+                      actif={filtreG}
+                      onSelect={v => setFiltreG(v as 'tous' | 'actifs' | 'retires')}
+                      onglets={[
+                        { id: 'tous', label: 'Tous' },
+                        { id: 'actifs', label: 'Libres' },
+                        { id: 'retires', label: 'Retirés' },
+                      ]}
+                    />
                     <select
                       className="sa-input"
                       style={{ marginLeft: 'auto', fontSize: 11.5, padding: '4px 8px', width: 'auto' }}

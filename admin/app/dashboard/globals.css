@@ -107,6 +107,7 @@
 .sa-sous-onglet.actif{background:var(--sa-accent);border-color:var(--sa-accent);color:#fff}
 .sa-sous-onglet-n{font-size:10px;font-weight:800;background:var(--sa-subtle);border-radius:99px;padding:0 5px;color:var(--sa-muted)}
 .sa-sous-onglet.actif .sa-sous-onglet-n{background:rgba(255,255,255,.22);color:#fff}
+.sa-drawer-body .sa-sous-onglets{background:none;border-bottom:0;padding:0;margin:0}
 .sa-sous-onglet-vide{border:1px dashed var(--sa-border);border-radius:10px;padding:22px;text-align:center;color:var(--sa-muted)}
 .sa-sous-onglet-vide .t{font-weight:800;font-size:13px;color:var(--sa-text)}
 .sa-sous-onglet-vide .d{font-size:12px;margin-top:5px}
