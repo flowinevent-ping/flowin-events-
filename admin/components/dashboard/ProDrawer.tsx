@@ -10,6 +10,8 @@ import {
 } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { TableauStations } from './TableauStations'
+import PartenaireDrawer from './PartenaireDrawer'
+import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { FlowinPro } from '@/lib/types'
 
 export default function ProDrawer() {
@@ -17,6 +19,10 @@ export default function ProDrawer() {
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinPro>>({})
   const [saving, setSaving] = useState(false)
+  /* Noms des super events, pour grouper les stations. Un pro peut en avoir 33
+     reparties sur plusieurs operations : a plat, la liste est illisible. */
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
   const p = useMemo(() => pros.find(x => x.id === drawer.id), [pros, drawer.id])
 
@@ -52,12 +58,28 @@ export default function ProDrawer() {
     closeDrawer()
   }
 
+  /* UNE SEULE FICHE PAR COMMERCE. 9 pros sur 16 ont une fiche partenaire liee
+     (SAFER = pro-safer + pt-safer) : selon l ecran d ou l on cliquait, on
+     tombait sur l une OU l autre, jamais sur les deux. Les onglets de la fiche
+     commerce sont donc rendus ICI, par le composant PartenaireDrawer lui-meme
+     en mode inline -- aucune ligne dupliquee, aucune divergence possible. */
+  const aFicheCommerce = !!p.partenaire_id
   const tabs = [
     { id: 'infos', label: 'Infos' },
-    { id: 'events', label: 'Events', badge: proEvents.length },
+    { id: 'events', label: 'Ses stations', badge: proEvents.length },
+    ...(aFicheCommerce ? [
+      { id: 'c-lots', label: 'Lots & stock' },
+      { id: 'c-gagnants', label: 'Gagnants & billets' },
+      { id: 'c-comm', label: 'Emails & com' },
+      { id: 'c-contrat', label: 'Contrat' },
+    ] : []),
     { id: 'qrliens', label: 'QR & Liens' },
     { id: 'tracking', label: 'Tracking' },
   ]
+  /* Correspondance onglet pro -> onglet de la fiche commerce. */
+  const ONGLET_COMMERCE: Record<string, string> = {
+    'c-lots': 'lots', 'c-gagnants': 'gagnants', 'c-comm': 'comm', 'c-contrat': 'contrat',
+  }
 
   const initials = p.nom.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
@@ -145,26 +167,54 @@ export default function ProDrawer() {
           </>
         )}
 
+        {ONGLET_COMMERCE[drawer.tab] && p.partenaire_id && (
+          <PartenaireDrawer
+            inline
+            partenaireId={p.partenaire_id}
+            tab={ONGLET_COMMERCE[drawer.tab]}
+            onTab={() => { /* la navigation reste pilotee par les onglets du pro */ }}
+          />
+        )}
+
         {drawer.tab === 'events' && (
           <>
             {liveEvents.length > 0 && (
               <div className="sa-alert live">🔴 {liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
             )}
-            <SectionHeader>{proEvents.length} event{proEvents.length > 1 ? 's' : ''}</SectionHeader>
-            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 8 }}>Toucher un event ouvre sa fiche détaillée : stations, participants et gagnants.</div>
-            {proEvents.length === 0 && <div className="sa-empty-inline">Aucun event</div>}
-            {proEvents.map(ev => (
-              <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id, 'stats')} style={{ cursor: 'pointer' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700 }}>{ev.nom}</div>
-                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{ev.date_d ?? '-'}</div>
+            <SectionHeader>{proEvents.length} station{proEvents.length > 1 ? 's' : ''}</SectionHeader>
+            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 8 }}>Toucher une station ouvre sa fiche : jeu, participants, lots et gagnants.</div>
+            {proEvents.length === 0 && <div className="sa-empty-inline">Aucune station</div>}
+            {/* Groupees par super event : le jeu et la comm changent d une
+                operation a l autre, les melanger a plat n a pas de sens. */}
+            {proEvents
+              .map(e => e.super_event_id ?? '(hors super event)')
+              .filter((v, i, a) => a.indexOf(v) === i)
+              .map(cle => {
+              const nom = cle === '(hors super event)'
+                ? 'Hors super event'
+                : (supers.find(x => x.id === cle)?.nom ?? cle)
+              const liste = proEvents.filter(e => (e.super_event_id ?? '(hors super event)') === cle)
+              return (
+                <div key={cle}>
+                  <div className="sa-grp">{nom} · {liste.length}</div>
+                  {liste.map(ev => (
+                    <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id, 'stats')} style={{ cursor: 'pointer' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700 }}>{ev.nom}</div>
+                        <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+                          {ev.module} · {ev.date_d ?? 'sans date'} · {ev.participants ?? 0} participations
+                        </div>
+                      </div>
+                      <StatusChip status={ev.status} />
+                      <ModuleChip module={ev.module} />
+                    </div>
+                  ))}
                 </div>
-                <StatusChip status={ev.status} />
-                <ModuleChip module={ev.module} />
-              </div>
-            ))}
+              )
+            })}
           </>
         )}
+
       </div>
 
       <div className="sa-drawer-footer">

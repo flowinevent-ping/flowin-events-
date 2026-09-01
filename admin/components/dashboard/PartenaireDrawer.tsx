@@ -35,7 +35,23 @@ function useMailGagnant() {
   }, [])
 }
 
-export default function PartenaireDrawer() {
+/**
+ * Fiche commerce. DEUX SURFACES, UN SEUL CODE.
+ *  - drawer autonome (defaut) : pilote par DashboardContext, comportement inchange ;
+ *  - rendu DANS la fiche pro (inline) : meme composant, meme code, pilote par les
+ *    props. C est ce qui permet d avoir UNE fiche par commerce sans dupliquer
+ *    une ligne : 9 commerces sur 16 existent en double en base (un compte pro
+ *    + une fiche partenaire), et on ne voyait jamais les deux d un coup.
+ */
+interface PartenaireDrawerProps {
+  partenaireId?: string
+  tab?: string
+  onTab?: (t: string) => void
+  /** true : rendu a l interieur d une autre fiche -- pas d en-tete, pas d onglets. */
+  inline?: boolean
+}
+
+export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = false }: PartenaireDrawerProps = {}) {
   const { drawer, closeDrawer, setDrawerTab, partenaires, setPartenaires, events, lots, pros, openDrawer } = useDashboard()
   useMailGagnant()
   const [edit, setEdit] = useState(drawer.edit)
@@ -51,10 +67,13 @@ export default function PartenaireDrawer() {
      facture_emise existait, jamais relie a la vraie facture. */
   const [factureReelle, setFactureReelle] = useState<FacturePartenaire | null>(null)
 
-  const p = useMemo(() => partenaires.find(x => x.id === drawer.id), [partenaires, drawer.id])
+  const pidActif = partenaireId ?? drawer.id
+  const tabActif = tab ?? drawer.tab
+  const majTab = onTab ?? setDrawerTab
+  const p = useMemo(() => partenaires.find(x => x.id === pidActif), [partenaires, pidActif])
 
-  const pid = drawer.id
-  const ongletGagnants = drawer.tab === 'gagnants' || drawer.tab === 'comm' || drawer.tab === 'lots'
+  const pid = pidActif
+  const ongletGagnants = tabActif === 'gagnants' || tabActif === 'comm' || tabActif === 'lots'
   useEffect(() => {
     if (!pid || !ongletGagnants || chargeG) return
     let vivant = true
@@ -83,7 +102,7 @@ export default function PartenaireDrawer() {
 
   if (!p) return (
     <div className="sa-drawer-empty">
-      <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
+      {!inline && <button className="sa-drawer-close" onClick={closeDrawer}>×</button>}
       <div>Partenaire introuvable</div>
     </div>
   )
@@ -152,6 +171,7 @@ export default function PartenaireDrawer() {
 
   return (
     <>
+      {!inline && (
       <div className="sa-drawer-h">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {p.image_url
@@ -165,8 +185,9 @@ export default function PartenaireDrawer() {
         </div>
         <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
       </div>
+      )}
 
-      {proLie && (
+      {!inline && proLie && (
         <div
           onClick={() => openDrawer('pro', proLie.id)}
           style={{ margin: '0 20px 14px', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
@@ -176,10 +197,10 @@ export default function PartenaireDrawer() {
         </div>
       )}
 
-      <DrawerTabs tabs={tabs} active={drawer.tab} onSelect={setDrawerTab} />
+      {!inline && <DrawerTabs tabs={tabs} active={tabActif} onSelect={majTab} />}
 
-      <div className="sa-drawer-body">
-        {drawer.tab === 'infos' && !edit && (
+      <div className={inline ? '' : 'sa-drawer-body'}>
+        {tabActif === 'infos' && !edit && (
           <>
             {p.image_url && (
               <div style={{ marginBottom: 16, textAlign: 'center' }}>
@@ -207,7 +228,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'infos' && edit && (
+        {tabActif === 'infos' && edit && (
           <>
             {/* Logo preview */}
             <SectionHeader>🖼 Logo & Identité</SectionHeader>
@@ -319,7 +340,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'stats' && (
+        {tabActif === 'stats' && (
           <>
             <SectionHeader>📡 Tracking de sa station</SectionHeader>
             <div style={{ marginBottom: 18 }}>
@@ -327,7 +348,7 @@ export default function PartenaireDrawer() {
             </div>
           </>
         )}
-        {drawer.tab === 'stats' && (
+        {tabActif === 'stats' && (
           <>
             <div className="sa-kpi-grid-2">
               <div className="sa-kpi"><div className="sa-kpi-val">{pLots.length}</div><div className="sa-kpi-lbl">Lots fournis</div></div>
@@ -391,7 +412,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'lots' && (
+        {tabActif === 'lots' && (
           <>
             <SectionHeader>{(gagnants ?? pLots).length} lot{(gagnants ?? pLots).length > 1 ? 's' : ''}</SectionHeader>
             {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
@@ -418,7 +439,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'gagnants' && (
+        {tabActif === 'gagnants' && (
           <>
             <SectionHeader>🏆 Gagnants &amp; billets</SectionHeader>
             {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
@@ -483,7 +504,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'comm' && (
+        {tabActif === 'comm' && (
           <>
             <a
               href={`/nds/kit-digital/index.html#${p.id.replace(/^pt-/, '')}`}
@@ -507,7 +528,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'contrat' && (
+        {tabActif === 'contrat' && (
           <>
             <SectionHeader>🔐 Code de validation en caisse</SectionHeader>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff8ea', border: '1px solid #f2e1b6', borderRadius: 12, padding: '14px 16px', marginBottom: 10 }}>
@@ -528,7 +549,7 @@ export default function PartenaireDrawer() {
           </>
         )}
 
-        {drawer.tab === 'events' && (
+        {tabActif === 'events' && (
           <>
             <SectionHeader>{pEvents.length} event{pEvents.length > 1 ? 's' : ''} sponsorisé{pEvents.length > 1 ? 's' : ''}</SectionHeader>
             {pEvents.length === 0 && <div className="sa-empty-inline">Aucun event</div>}
