@@ -5,6 +5,7 @@ import JoueurDrawer from './JoueurDrawer'
 import EventDrawer from './EventDrawer'
 import PartenaireDrawer from './PartenaireDrawer'
 import ProDrawer from './ProDrawer'
+import SuperEventDrawer from './SuperEventDrawer'
 
 export default function Drawer() {
   const { drawer, closeDrawer, drawerCanGoBack, goBackDrawer } = useDashboard()
@@ -17,6 +18,7 @@ export default function Drawer() {
       case 'event':       return <EventDrawer />
       case 'partenaire':  return <PartenaireDrawer />
       case 'pro':         return <ProDrawer />
+      case 'superevent':  return <SuperEventDrawer />
       default:            return null
     }
   })()

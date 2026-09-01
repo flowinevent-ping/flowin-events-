@@ -159,7 +159,13 @@ export default function Page() {
                       </div>
 
                       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                        <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm primary" style={{ textDecoration: 'none' }}>
+                        <button
+                          className="sa-btn sm primary"
+                          onClick={() => openDrawer('superevent', se.id)}
+                        >
+                          🎪 Ouvrir la fiche
+                        </button>
+                        <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm" style={{ textDecoration: 'none' }}>
                           📊 Fiche complète (KPIs, commerces, tarif)
                         </a>
                         <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>

@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinPro, FlowinLot } from '@/lib/types'
 
-export type DrawerType = 'joueur' | 'event' | 'partenaire' | 'pro' | null
+export type DrawerType = 'joueur' | 'event' | 'partenaire' | 'pro' | 'superevent' | null
 
 export interface DrawerState {
   open: boolean

@@ -99,6 +99,28 @@
 .sa-drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
 .sa-drawer-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--sa-border);flex-shrink:0;background:var(--sa-card)}
 .sa-drawer-empty{padding:40px;text-align:center;color:var(--sa-muted)}
+/* ── Sous-onglets : deuxieme niveau dans un drawer ── */
+.sa-sous-onglets{display:flex;gap:6px;padding:10px 20px;background:var(--sa-subtle);border-bottom:1px solid var(--sa-border);overflow-x:auto;flex-shrink:0}
+.sa-sous-onglets-lbl{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sa-muted);align-self:center;margin-right:4px;flex-shrink:0}
+.sa-sous-onglet{padding:5px 12px;border-radius:99px;border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.sa-sous-onglet:hover{color:var(--sa-text);border-color:var(--sa-text)}
+.sa-sous-onglet.actif{background:var(--sa-accent);border-color:var(--sa-accent);color:#fff}
+.sa-sous-onglet-n{font-size:10px;font-weight:800;background:var(--sa-subtle);border-radius:99px;padding:0 5px;color:var(--sa-muted)}
+.sa-sous-onglet.actif .sa-sous-onglet-n{background:rgba(255,255,255,.22);color:#fff}
+.sa-sous-onglet-vide{border:1px dashed var(--sa-border);border-radius:10px;padding:22px;text-align:center;color:var(--sa-muted)}
+.sa-sous-onglet-vide .t{font-weight:800;font-size:13px;color:var(--sa-text)}
+.sa-sous-onglet-vide .d{font-size:12px;margin-top:5px}
+/* Fil : rappelle ou l'on est quand on descend dans les niveaux */
+.sa-fil-drawer{font-size:11px;color:var(--sa-muted);margin-bottom:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.sa-fil-drawer b{color:var(--sa-accent)}
+/* Ligne cliquable generique dans un drawer */
+.sa-ligne{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--sa-border);border-radius:10px;margin-bottom:6px;background:var(--sa-card);cursor:pointer;width:100%;text-align:left;font-family:inherit}
+.sa-ligne:hover{border-color:var(--sa-accent);background:var(--sa-subtle)}
+.sa-ligne .n{font-weight:700;font-size:13px;color:var(--sa-text)}
+.sa-ligne .d{font-size:11.5px;color:var(--sa-muted);margin-top:2px}
+.sa-ligne .r{margin-left:auto;text-align:right;font-size:11.5px;color:var(--sa-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.sa-grp{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--sa-muted);margin:14px 0 7px}
+.sa-grp:first-child{margin-top:0}
 /* ── Form fields ── */
 .sa-field{margin-bottom:12px}
 .sa-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px}
