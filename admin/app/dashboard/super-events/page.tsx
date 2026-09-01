@@ -159,10 +159,7 @@ export default function Page() {
                       </div>
 
                       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                        <a href={`/dashboard/super-event/${se.id}`} className="sa-btn sm primary" style={{ textDecoration: 'none' }}>
-                          🎪 Ouvrir l&apos;espace (8 onglets)
-                        </a>
-                        <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm" style={{ textDecoration: 'none' }}>
+                        <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm primary" style={{ textDecoration: 'none' }}>
                           📊 Fiche complète (KPIs, commerces, tarif)
                         </a>
                         <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
@@ -189,7 +186,7 @@ export default function Page() {
                                       return (
                                         <div
                                           key={ev.id}
-                                          onClick={() => { window.location.href = `/dashboard/event/${ev.id}` }}
+                                          onClick={() => openDrawer('event', ev.id)}
                                           style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer' }}
                                         >
                                           <div style={{ fontWeight: 700, fontSize: 12 }}>{ev.nom}</div>
@@ -205,13 +202,14 @@ export default function Page() {
                             })}
                           </div>
                           <a
-                            href={`/dashboard/wizard-event?se=${encodeURIComponent(se.id)}`}
+                            href="/dashboard/wizard-event"
+                            target="_blank" rel="noreferrer"
                             style={{ display: 'block', textAlign: 'center', marginTop: 10, padding: '8px', border: '1px dashed var(--sa-border)', borderRadius: 8, fontSize: 11.5, fontWeight: 700, color: 'var(--sa-accent)', textDecoration: 'none' }}
                           >
                             + Ajouter une station
                           </a>
                           <div style={{ fontSize: 10, color: 'var(--sa-muted)', marginTop: 4, textAlign: 'center' }}>
-                            Le rattachement à ce Super Event est pré-rempli.
+                            Créée hors de ce Super Event — à rattacher ensuite via sa fiche → Éditer → Super Event.
                           </div>
                         </div>
                       )}

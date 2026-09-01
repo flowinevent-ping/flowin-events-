@@ -15,23 +15,7 @@
 .sa-sb-logo em{font-style:normal;color:var(--sa-accent-light)}
 .sa-sb-logo-dot{width:9px;height:9px;border-radius:50%;background:var(--sa-accent-light);box-shadow:0 0 8px var(--sa-accent-light);flex-shrink:0}
 .sa-sb-main{flex:1;overflow-y:auto;padding:8px 0}
-/* ── Barre de portee (super event + event), lot 1 de la reorganisation ── */
-.sa-scope{margin:12px;padding:10px 11px;background:rgba(255,255,255,.055);border:1px solid var(--sa-sb-border);border-radius:10px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
-.sa-scope-lbl{font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--sa-sb-text-dim)}
-.sa-scope-sel{width:100%;background:rgba(0,0,0,.28);color:#fff;border:1px solid var(--sa-sb-border);border-radius:7px;padding:6px 26px 6px 8px;font-size:12.5px;font-weight:700;font-family:inherit;outline:none;cursor:pointer;appearance:none;background-image:linear-gradient(45deg,transparent 50%,rgba(255,255,255,.48) 50%),linear-gradient(135deg,rgba(255,255,255,.48) 50%,transparent 50%);background-position:calc(100% - 14px) calc(50% + 1px),calc(100% - 9px) calc(50% + 1px);background-size:5px 5px,5px 5px;background-repeat:no-repeat}
-.sa-scope-sel.sub{font-weight:500;color:var(--sa-sb-text)}
-.sa-scope-sel:focus-visible{border-color:var(--sa-accent-light);box-shadow:0 0 0 2px rgba(168,85,247,.3)}
-.sa-scope-sel:disabled{opacity:.5;cursor:default}
-.sa-scope-sel option{background:var(--sa-sb-bg-2);color:#fff}
-/* ── En-tetes de groupe : une couleur par pole, taille lisible ── */
-.sa-sb-bloc + .sa-sb-bloc{border-top:1px solid var(--sa-sb-border);margin-top:6px}
-.sa-sb-group{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:var(--sa-sb-text-dim);padding:15px 20px 7px;letter-spacing:.09em;text-transform:uppercase}
-.sa-sb-group-bar{width:5px;height:14px;border-radius:3px;background:currentColor;flex-shrink:0}
-.sa-sb-group.ton-se{color:#C084FC}
-.sa-sb-group.ton-ev{color:#34D399}
-.sa-sb-group.ton-gen{color:#60A5FA}
-.sa-sb-group.ton-out{color:#FBBF24}
-.sa-sb-group.ton-sys{color:#94A3B8}
+.sa-sb-group{font-size:10px;font-weight:800;color:var(--sa-sb-text-dim);padding:14px 22px 6px;letter-spacing:.1em;text-transform:uppercase}
 .sa-sb-item{display:flex;align-items:center;gap:10px;padding:9px 22px;color:var(--sa-sb-text);cursor:pointer;width:100%;font-size:13px;font-weight:600;transition:all .15s;text-align:left;border:none;background:none;border-left:3px solid transparent}
 .sa-sb-item:hover{background:var(--sa-sb-hover);color:#fff}
 .sa-sb-item.active{background:linear-gradient(90deg,rgba(168,85,247,.18),rgba(168,85,247,.03));color:#fff;border-left-color:var(--sa-accent-light);font-weight:700}
@@ -115,64 +99,6 @@
 .sa-drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
 .sa-drawer-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--sa-border);flex-shrink:0;background:var(--sa-card)}
 .sa-drawer-empty{padding:40px;text-align:center;color:var(--sa-muted)}
-/* ── Diffusion : aperçu + lien + QR téléchargeable (lot 4) ── */
-.sa-diff{display:flex;flex-direction:column;gap:14px}
-.sa-diff-onglets{display:flex;gap:4px;flex-wrap:wrap}
-.sa-diff-onglet{padding:6px 12px;border-radius:99px;border:1px solid var(--sa-border);background:var(--sa-card);color:var(--sa-muted);font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
-.sa-diff-onglet:hover{color:var(--sa-text);border-color:var(--sa-text)}
-.sa-diff-onglet.actif{background:var(--sa-accent);border-color:var(--sa-accent);color:#fff}
-.sa-diff-aide{font-size:12.5px;color:var(--sa-muted);margin:0;max-width:70ch}
-.sa-diff-err{font-size:12.5px;color:#E24B4A;background:rgba(226,75,74,.08);border:1px solid rgba(226,75,74,.25);border-radius:8px;padding:8px 10px}
-.sa-diff-grid{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
-.sa-diff-col{flex:1;min-width:260px;display:flex;flex-direction:column;gap:18px}
-.sa-diff-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--sa-muted);margin-bottom:8px}
-.sa-diff-lien{display:flex;gap:6px;align-items:center}
-.sa-diff-lien input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--sa-border);border-radius:8px;background:var(--sa-subtle);font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--sa-text);outline:none}
-.sa-diff-qr{border:1px solid var(--sa-border);border-radius:10px;background:#fff;padding:8px;display:block}
-.sa-diff-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.sa-phone{border:8px solid #16202E;border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 8px 26px -12px rgba(15,23,42,.45);flex-shrink:0}
-.sa-empty-mini{font-size:13px;color:var(--sa-muted);padding:14px;border:1px dashed var(--sa-border);border-radius:10px}
-/* Affiche A4 : invisible à l'écran, et n'accapare l'impression QUE pendant une
-   impression déclenchée depuis le composant Diffusion (classe posée sur <body>
-   juste avant window.print(), retirée juste après).
-   Sans ce garde-fou, la règle s'appliquait à toutes les routes /dashboard/* :
-   un Ctrl+P sur un bon de commande ou les CGV sortait une feuille blanche. */
-.sa-affiche{display:none}
-@media print{
-  body.sa-impression-affiche *{visibility:hidden}
-  body.sa-impression-affiche .sa-affiche,
-  body.sa-impression-affiche .sa-affiche *{visibility:visible}
-  body.sa-impression-affiche .sa-affiche{display:block;position:fixed;inset:0;background:#fff}
-  .sa-affiche-in{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24mm;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-  .sa-affiche-titre{font-size:34pt;font-weight:900;line-height:1.05;color:#0F172A}
-  .sa-affiche-sous{font-size:15pt;color:#475569;font-weight:600}
-  .sa-affiche-qr{width:105mm;height:105mm;margin:6mm 0}
-  .sa-affiche-cta{font-size:20pt;font-weight:800;color:#7C2D92}
-  .sa-affiche-url{font-size:10pt;color:#64748B;word-break:break-all}
-}
-/* Hub : l'onglet nomme deja la page, son titre propre ferait doublon avec
-   celui du hub. Le sous-titre et les actions, eux, restent utiles. */
-.sa-hub-body .sa-page-header .sa-page-title{display:none}
-.sa-hub-body .sa-page-header{padding-top:14px}
-/* Certaines pages ont .sa-page pour racine (nds-comm) au lieu de .sa-content :
-   sans ça, elles s'affichent collées aux bords, contrairement à leurs voisines. */
-.sa-hub-body > .sa-page{margin:14px 24px 24px}
-/* ── Raccourcis vers une page existante, déjà cadrée par la portée (lot 3) ── */
-.sa-racc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:10px}
-.sa-racc{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--sa-border);border-radius:10px;background:var(--sa-card);text-decoration:none;color:inherit;transition:border-color .15s,background .15s}
-.sa-racc:hover{border-color:var(--sa-accent);background:var(--sa-subtle)}
-.sa-racc-t{font-size:13.5px;font-weight:700}
-.sa-racc-d{grid-column:1;font-size:11.5px;color:var(--sa-muted);margin-top:3px}
-.sa-racc-f{grid-column:2;grid-row:1 / span 2;color:var(--sa-muted);font-size:16px}
-/* ── Fil d'ariane + fiche en page pleine (lot 2) ── */
-.sa-fil{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sa-muted);margin-bottom:12px;flex-wrap:wrap}
-.sa-fil a{color:var(--sa-muted);text-decoration:none;padding:2px 6px;border-radius:5px}
-.sa-fil a:hover{background:var(--sa-card);color:var(--sa-text)}
-.sa-fil .courant{color:var(--sa-text);font-weight:700}
-.sa-page-fiche{overflow:hidden}
-.sa-page-fiche .sa-drawer-h{padding:20px 24px 16px}
-.sa-page-fiche .sa-drawer-tabs{padding:0 24px}
-.sa-page-fiche .sa-drawer-body{padding:20px 24px 24px;overflow:visible}
 /* ── Form fields ── */
 .sa-field{margin-bottom:12px}
 .sa-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted);margin-bottom:5px}
@@ -206,17 +132,3 @@
 .sa-badge-pill.green{background:rgba(29,155,117,.12);color:#0F6E56}
 a{color:var(--sa-accent);text-decoration:none}
 a:hover{text-decoration:underline}
-/* ── Hub : page à onglets qui rend les pages existantes (lot 6) ── */
-.sa-hub{display:flex;flex-direction:column;min-height:0}
-.sa-hub-h{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:20px 24px 14px;background:var(--sa-card);border-bottom:1px solid var(--sa-border)}
-.sa-hub-t{font-size:20px;font-weight:800}
-.sa-hub-s{font-size:12px;color:var(--sa-muted);margin-top:2px}
-.sa-hub-liens{display:flex;gap:6px;flex-wrap:wrap}
-.sa-hub-liens a{text-decoration:none}
-.sa-hub .sa-drawer-tabs{padding:0 24px}
-.sa-hub-body{flex:1;min-height:0}
-/* La page rendue apporte déjà son propre .sa-content : on neutralise le double cadre. */
-.sa-hub-body > .sa-content{padding-top:14px}
-.sa-hub-body .sa-page{border-radius:0}
-.sa-scope-lien{display:block;font-size:11px;font-weight:700;color:var(--sa-accent-light);text-decoration:none;padding:3px 1px 0}
-.sa-scope-lien:hover{text-decoration:underline}

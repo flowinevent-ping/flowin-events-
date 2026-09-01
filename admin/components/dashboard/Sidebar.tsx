@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
-import ScopeBar from './ScopeBar'
 
 interface NavItem {
   id: string
@@ -11,20 +10,11 @@ interface NavItem {
   count?: number
   href: string
   live?: number
-  /** true = fichier statique hors routeur Next : navigation dure obligatoire. */
   external?: boolean
 }
 
-/**
- * Ton du groupe : pilote la couleur de l en-tete (cf. .sa-sb-group.ton-*).
- * Les 3 poles metier ont chacun leur couleur, pour qu on distingue d un coup
- * d oeil ce qui est scope par super event, par event, ou global.
- */
-type TonGroupe = 'se' | 'ev' | 'gen' | 'out' | 'sys'
-
 interface NavGroup {
   group: string
-  ton: TonGroupe
   items: NavItem[]
 }
 
@@ -68,15 +58,6 @@ const ICON_BY_ID: Record<string, string> = {
   operations: 'gauge',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
   roadmap: 'map', parametres: 'settings', maintenance: 'wrench', pro: 'layout', 'pro-comptes': 'link', 'pro-gagnants': 'dice', 'pro-crm': 'users', 'pro-tracking': 'target', 'pro-super': 'star', 'pro-events': 'calendar', 'pro-lots': 'gift',
-  // Ajouts lot 1 : entrees qui tombaient en repli emoji faute de mapping.
-  'wizard-event-se': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
-  'demandes-rattachement': 'handshake', 'tirage-nds': 'dice', 'nds-visuels': 'palette',
-  'plaquette-nds': 'receipt', 'nds-partenaire-offres': 'receipt', 'pitch-nds': 'phone',
-  'flowin-partenaire-presentation': 'layout', 'bons-commande-liste': 'clipboard',
-  'facture-nds': 'receipt', 'kit-digital': 'gift', 'toutes-les-pages': 'clipboard',
-  // Lot 6 : les 6 hubs du pole General remplacent 20 entrees.
-  'stats-globales': 'chart', 'crm-pros': 'building', 'crm-participants': 'users',
-  communication: 'megaphone', 'prospection-b2b': 'target', facturation: 'receipt',
 }
 function SbIcon({ id, fallback }: { id: string; fallback: string }) {
   const p = ICON_PATHS[ICON_BY_ID[id]]
@@ -87,73 +68,81 @@ function SbIcon({ id, fallback }: { id: string; fallback: string }) {
 export default function Sidebar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { joueurs, events, pros } = useDashboard()
+  const { joueurs, events, partenaires, pros } = useDashboard()
 
   const liveCount = events.filter(e => e.status === 'live').length
 
-  /**
-   * Menu ramene de 46 a 25 entrees, en 6 groupes colores.
-   * AUCUNE ROUTE N EST SUPPRIMEE : ce qui a quitte le menu reste joignable par
-   * son URL d origine, par les onglets des espaces Event / Super Event / hubs
-   * du pole General, et par /dashboard/toutes-les-pages qui liste tout.
-   */
   const groups: NavGroup[] = [
     {
-      group: 'Accueil',
-      ton: 'sys',
+      group: 'ACCUEIL',
       items: [
-        { id: 'accueil', icon: '🏠', label: 'Vue d\'ensemble', href: '/dashboard' },
+        { id: 'accueil', icon: '🏠', label: 'Accueil', href: '/dashboard' },
       ],
     },
     {
-      group: 'Super events',
-      ton: 'se',
+      group: 'SUPER EVENT',
       items: [
-        { id: 'super-events', icon: '⭐', label: 'Mes super events', href: '/dashboard/super-events' },
+        { id: 'super-events', icon: '⭐', label: 'Super Events', count: 0, href: '/dashboard/super-events' },
         { id: 'operations', icon: '📊', label: 'Opérations (vue complète)', href: '/dashboard/operations' },
-        { id: 'statistiques', icon: '📊', label: 'Résultats & statistiques', href: '/dashboard/statistiques' },
-        { id: 'nds-participants', icon: '👥', label: 'Participants', href: '/dashboard/nds-participants' },
-        { id: 'nds-lots', icon: '🎁', label: 'Lots, tirages & gagnants', href: '/dashboard/nds-lots' },
+        { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
+        { id: 'rapport-points', icon: '📍', label: 'Rapport détaillé', href: '/dashboard/rapport-points' },
+        { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
+        { id: 'track-qr', icon: '🔗', label: 'Origines du trafic', href: '/dashboard/track-qr' },
+        { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
+        { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
+        { id: 'wizard-event-se', icon: '✨', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
       ],
     },
     {
-      group: 'Events',
-      ton: 'ev',
+      group: 'EVENTS',
       items: [
-        { id: 'events', icon: '🎬', label: 'Kanban des events', count: events.length, live: liveCount, href: '/dashboard/events' },
-        { id: 'wizard-event-se', icon: '✨', label: 'Nouvel event', href: '/dashboard/wizard-event' },
-        { id: 'jeux', icon: '🎮', label: 'Bibliothèque de jeux', count: 6, href: '/dashboard/jeux' },
+        { id: 'events', icon: '🎬', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
       ],
     },
     {
-      group: 'Général',
-      ton: 'gen',
+      group: 'COMM & OUTILS',
       items: [
-        { id: 'stats-globales', icon: '📊', label: 'Stats globales', href: '/dashboard/stats-globales' },
-        { id: 'crm-pros', icon: '🏢', label: 'CRM pros & commerces', count: pros.length, href: '/dashboard/crm-pros' },
-        { id: 'crm-participants', icon: '👥', label: 'CRM participants', count: joueurs.length, href: '/dashboard/crm-participants' },
-        { id: 'communication', icon: '📣', label: 'Communication', href: '/dashboard/communication' },
-        { id: 'prospection-b2b', icon: '🎯', label: 'Prospection & B2B', href: '/dashboard/prospection-b2b' },
-        { id: 'facturation', icon: '🧾', label: 'Facturation & admin', href: '/dashboard/facturation' },
+        { id: 'jeux', icon: '🎮', label: 'Jeux (templates)', count: 6, href: '/dashboard/jeux' },
+        { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
+        { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html' },
+        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs (packs partenaires)', href: '/nds' },
+        { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html' },
+        { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html' },
+        { id: 'nds-carte', icon: '🗺️', label: 'Carte NDS', href: '/dashboard/nds-carte' },
+        { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
+        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
+        { id: 'nds-visuels', icon: '🖼️', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html' },
+        { id: 'tirage-nds', icon: '🎰', label: 'Tirage au sort', href: '/tirage-nds.html' },
+        { id: 'gagnants', icon: '🏆', label: 'Liste des gagnants', href: '/dashboard/gagnants' },
+        { id: 'nds-comm', icon: '📣', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm' },
+        { id: 'envoi-masse', icon: '📢', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
+        { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
+        { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
+        { id: 'bons-commande-liste', icon: '📋', label: 'Bons de commande & Factures (liste)', href: '/bons-commande-liste.html' },
+        { id: 'facture-nds', icon: '💶', label: 'Générer une facture', href: '/facture-nds.html' },
+        { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html' },
+        { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
+        { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
+        { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
+        { id: 'btob-prospects', icon: '🎯', label: 'Prospects B2B', href: '/dashboard/btob-prospects' },
+        { id: 'crm-landing', icon: '📥', label: 'CRM Landing pages', href: '/dashboard/crm-landing' },
+        { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
       ],
     },
     {
-      group: 'Outils & documents',
-      ton: 'out',
+      group: 'CRM',
       items: [
-        { id: 'landing-page', icon: '🌐', label: 'Landing pages (aperçus)', href: '/dashboard/landing-page' },
-        { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html', external: true },
-        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds', external: true },
-        { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html', external: true },
-        { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html', external: true },
-        { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html', external: true },
+        { id: 'apercu-pro', icon: '👁', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
+        { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
+        { id: 'demandes-rattachement', icon: '🤝', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
+        { id: 'joueurs', icon: '👥', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
+        { id: 'partenaires', icon: '🤝', label: 'Partenaires (fiche commerce)', count: partenaires.length, href: '/dashboard/partenaires' },
+        { id: 'nds-participants', icon: '👥', label: 'Participants (super event)', href: '/dashboard/nds-participants' },
       ],
     },
     {
-      group: 'Système',
-      ton: 'sys',
+      group: 'SYSTÈME',
       items: [
-        { id: 'toutes-les-pages', icon: '🧭', label: 'Toutes les pages', href: '/dashboard/toutes-les-pages' },
         { id: 'roadmap', icon: '🗺️', label: 'Feuille de route', href: '/dashboard/roadmap' },
         { id: 'parametres', icon: '⚙️', label: 'Paramètres', href: '/dashboard/parametres' },
         { id: 'maintenance', icon: '🛠️', label: 'Maintenance', href: '/dashboard/maintenance' },
@@ -174,17 +163,11 @@ export default function Sidebar() {
         <span>Flow<em>in</em></span>
       </div>
 
-      {/* Portee de travail : super event + event, partages par tout le dashboard */}
-      <ScopeBar />
-
       {/* Navigation */}
       <div className="sa-sb-main">
         {groups.map(g => (
-          <div key={g.group} className="sa-sb-bloc">
-            <div className={`sa-sb-group ton-${g.ton}`}>
-              <span className="sa-sb-group-bar" />
-              {g.group}
-            </div>
+          <div key={g.group}>
+            <div className="sa-sb-group">{g.group}</div>
             {g.items.map(item => (
               <button
                 key={item.id}

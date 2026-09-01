@@ -10,16 +10,12 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CourbeQuotidienne } from '@/components/dashboard/CourbeQuotidienne'
-import { fetchTrackQr, fetchTrackQrQuotidien, libelleSource, type TrackQr, type TrackQrJour } from '@/lib/nds'
+import { fetchTrackQr, fetchTrackQrQuotidien, fetchSuperEvents, libelleSource, type TrackQr, type TrackQrJour, type SuperEvent } from '@/lib/nds'
 
-import { useScope } from '@/contexts/ScopeContext'
 export default function Page() {
   const { partenaires, openDrawer } = useDashboard()
-  // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
-  // selecteur local, la selection suit desormais d une page a l autre et
-  // s inscrit dans l URL (?se=).
-  const { seId } = useScope()
-  const se = seId ?? ''
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  const [se, setSe] = useState('')
   const [t, setT] = useState<TrackQr | null>(null)
   const [jours, setJours] = useState<TrackQrJour[]>([])
   const [charge, setCharge] = useState(true)
@@ -32,8 +28,12 @@ export default function Page() {
     const pid = `pt-${source.slice(8)}`
     return partenaires.some(p => p.id === pid) ? pid : null
   }
+
   useEffect(() => {
-    if (!se) { setCharge(false); return }
+    fetchSuperEvents().then(l => { setSupers(l); if (l.length) setSe(l[0].id); else setCharge(false) })
+  }, [])
+  useEffect(() => {
+    if (!se) return
     setCharge(true)
     Promise.all([fetchTrackQr(se), fetchTrackQrQuotidien(se)])
       .then(([tq, tqj]) => { setT(tq); setJours(tqj) })
@@ -48,6 +48,14 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="🔗 Origines du trafic" subtitle="D'où viennent les visiteurs, où vont les clics" />
+
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>{x.nom}</button>
+            ))}
+          </div>
+        )}
 
         {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {!charge && !t && <EmptyState title="Aucune donnée de trafic" />}

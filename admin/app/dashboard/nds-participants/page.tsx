@@ -8,10 +8,9 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState, useTri } from '@/components/dashboard/DashboardUI'
-import { fetchParticipants, type Participant } from '@/lib/nds'
+import { fetchParticipants, fetchSuperEvents, type Participant, type SuperEvent } from '@/lib/nds'
 import { useDashboard } from '@/contexts/DashboardContext'
 
-import { useScope } from '@/contexts/ScopeContext'
 const PAGE = 50
 type Col = 'nom' | 'nb_parties' | 'derniere'
 const fr = (d: string | null) => {
@@ -22,11 +21,8 @@ const fr = (d: string | null) => {
 
 export default function Page() {
   const { openDrawer } = useDashboard()
-  // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
-  // selecteur local, la selection suit desormais d une page a l autre et
-  // s inscrit dans l URL (?se=).
-  const { seId } = useScope()
-  const se = seId ?? ''
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  const [se, setSe] = useState<string>('')
   const [liste, setListe] = useState<Participant[] | null>(null)
   const [q, setQ] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'optin' | 'fideles'>('tous')
@@ -34,15 +30,15 @@ export default function Page() {
   const { tri, onSort } = useTri<Col>('derniere')
 
   useEffect(() => {
-    // Sans portee : liste vide plutot qu un « Chargement… » perpetuel double de
-    // KPI a zero presentes comme des mesures.
-    if (!se) { setListe([]); return }
-    // Remise a null avant le fetch : la portee peut changer depuis la sidebar, et
-    // afficher nominativement les participants du super event precedent sous le
-    // titre du nouveau serait pire qu un ecran vide.
-    setListe(null)
-    fetchParticipants(se).then(setListe)
-  }, [se])
+    fetchSuperEvents().then(l => {
+      // Le Master est un gabarit de duplication, jamais joue reellement.
+      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      setSupers(reels)
+      if (reels.length) setSe(reels[0].id)
+    })
+  }, [])
+
+  useEffect(() => { if (se) fetchParticipants(se).then(setListe) }, [se])
 
   const filtres = useMemo(() => {
     let r = liste ?? []
@@ -94,6 +90,16 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="👥 Participants" subtitle="Joueurs du super event et leur activité" />
+
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+                {x.nom}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 18 }}>
           {([['Participants', stats.total], ['Acceptent le contact', stats.optin],

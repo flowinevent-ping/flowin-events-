@@ -25,13 +25,6 @@ export interface BrouillonLot {
   quantite?: number
   emoji?: string | null
   description?: string | null
-  /* Aligne sur le wizard pro, qui typait deja ses lots alors que le wizard SA
-     ne le faisait pas : un lot de tirage se gagne au tirage au sort, un lot
-     instantane se gagne pendant la partie. La table `lots` n a pas de colonne
-     pour ca -- l information est donc miroitee dans cfg.lots, exactement comme
-     le fait creerAnimation() cote pro. */
-  type?: 'tirage' | 'instantane'
-  conditions?: string | null
 }
 
 export interface BrouillonEvent {
@@ -143,24 +136,8 @@ export async function enregistrer(
   const evId = mode === 'edit' && d.id ? d.id : identifiant('ev')
   const fait: string[] = []
 
-  /* qrUrl calcule sur l identifiant definitif, jamais avant.
-     cfg.lots miroite le type et les conditions de chaque lot, absents de la
-     table `lots` : sans ca, un lot cree "instantane" cote SA ressortait comme
-     un lot de tirage, alors que le meme lot cree cote pro gardait son type. */
-  const cfg = {
-    ...d.cfg,
-    qrUrl: urlQr(d.module, evId),
-    lots: d.lots
-      .filter(l => l.nom?.trim())
-      .map(l => ({
-        nom: l.nom.trim(),
-        type: l.type ?? 'tirage',
-        quantite: l.quantite ?? 1,
-        valeur: l.valeur ?? 0,
-        conditions: l.conditions ?? null,
-      })),
-  }
-  const premierInstantane = d.lots.find(l => l.type === 'instantane' && l.nom?.trim())
+  /* qrUrl calcule sur l identifiant definitif, jamais avant. */
+  const cfg = { ...d.cfg, qrUrl: urlQr(d.module, evId) }
 
   const ligne: Partial<FlowinEvent> = {
     id: evId,
@@ -183,21 +160,11 @@ export async function enregistrer(
     super_event_id: d.super_event_id,
   }
 
-  /* Deux colonnes que le wizard pro renseignait et pas le wizard SA -- d ou des
-     events SA ou le parcours joueur ne savait pas s il y avait un ticket a
-     delivrer. Ecrites en dehors de `ligne` : elles ne sont pas dans le type
-     FlowinEvent, qui ne decrit que ce que le dashboard lit. */
-  const ligneComplete: Record<string, unknown> = {
-    ...ligne,
-    gain_ticket: d.lots.some(l => l.type !== 'instantane' && l.nom?.trim()),
-    gain_immediat: premierInstantane?.nom?.trim() ?? null,
-  }
-
   if (mode === 'create') {
-    Object.assign(ligneComplete, { participants: 0, gagnants: 0, joueurs_optin: 0 })
+    Object.assign(ligne, { participants: 0, gagnants: 0, joueurs_optin: 0 })
   }
 
-  const { error: errEvent } = await supabase.from('events').upsert(ligneComplete, { onConflict: 'id' })
+  const { error: errEvent } = await supabase.from('events').upsert(ligne, { onConflict: 'id' })
   if (errEvent) return { ok: false, erreur: `Événement non enregistré — ${errEvent.message}` }
   fait.push('événement')
 

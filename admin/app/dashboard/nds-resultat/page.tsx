@@ -12,14 +12,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import {
-  fetchJours, fetchStations,
+  fetchJours, fetchStations, fetchSuperEvents,
   fetchOptinJour, fetchEngagementJour, fetchRepondantsJour,
-  type JourActivite, type StationJour,
+  type JourActivite, type StationJour, type SuperEvent,
   type OptinJour, type EngagementJour, type RepondantsJour,
 } from '@/lib/nds'
 import { useDashboard } from '@/contexts/DashboardContext'
 
-import { useScope } from '@/contexts/ScopeContext'
 const fr = (d: string) => {
   const p = d.split('-')
   return p.length === 3 ? `${p[2]}/${p[1]}` : d
@@ -27,33 +26,28 @@ const fr = (d: string) => {
 
 export default function Page() {
   const { openDrawer } = useDashboard()
-  // Portee pilotee par la barre de contexte globale (ScopeContext) : plus de
-  // selecteur local, la selection suit desormais d une page a l autre et
-  // s inscrit dans l URL (?se=).
-  const { seId, evId } = useScope()
-  const se = seId ?? ''
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  const [se, setSe] = useState<string>('')
   const [jours, setJours] = useState<JourActivite[] | null>(null)
   const [jour, setJour] = useState<string | null>(null)
   const [voirHorsFestival, setVoirHorsFestival] = useState(false)
   const [stations, setStations] = useState<StationJour[] | null>(null)
   const [stationFiltre, setStationFiltre] = useState<string>('toutes')
-
-  /* Le second selecteur de la barre de contexte (l event) pilote ce filtre :
-     sans consommateur, ce serait un bouton qui ne fait rien sous les yeux de
-     l utilisateur. Le filtre local reste modifiable ensuite. */
-  useEffect(() => { setStationFiltre(evId ?? 'toutes') }, [evId])
   const [optin, setOptin] = useState<OptinJour | null>(null)
   const [engag, setEngag] = useState<EngagementJour | null>(null)
   const [repond, setRepond] = useState<RepondantsJour | null>(null)
 
   useEffect(() => {
-    // Sans portee (aucun super event selectionnable) : liste vide, pas un
-    // « Chargement… » perpetuel -- il n y a plus de selecteur local pour s en sortir.
-    if (!se) { setJours([]); return }
-    // La portee peut changer depuis la sidebar, sur n importe quel ecran : on
-    // repasse en chargement, sinon la page montrerait les jours du super event
-    // precedent sous le nom du nouveau.
-    setJours(null)
+    fetchSuperEvents().then(l => {
+      // Le Master est un gabarit de duplication, jamais joue reellement.
+      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      setSupers(reels)
+      if (reels.length) setSe(reels[0].id)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!se) return
     setJour(null)
     fetchJours(se).then(j => {
       setJours(j)
@@ -109,6 +103,16 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="📅 Résultat journalier" subtitle="Stations de jeu et commerces partenaires, par jour" />
+
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+                {x.nom}
+              </button>
+            ))}
+          </div>
+        )}
 
         {jours === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {jours?.length === 0 && <EmptyState title="Aucune activité enregistrée" />}
