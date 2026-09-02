@@ -18,6 +18,9 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
+import ApercuApp from '@/components/dashboard/ApercuApp'
+import ConfigJeu from '@/components/dashboard/ConfigJeu'
+import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   brouillonVide, controler, enregistrer, nbJours, statutDeduit, urlQr,
@@ -100,10 +103,20 @@ function Wizard() {
   const { pros, partenaires } = useDashboard()
   const [d, setD] = useState<BrouillonEvent>(brouillonVide())
   const [etape, setEtape] = useState<Etape>('A')
+  /* L ecran d apercu montre : il suit l etape, mais reste pilotable a la main. */
+  const [ecranApercu, setEcranApercu] = useState<'accueil' | 'lots' | 'fin'>('accueil')
+  /* Les banques de questions, pour parametrer un quiz DES la creation. Meme
+     source que la fiche event : une seule liste, pas deux. */
+  const [banques, setBanques] = useState<Banque[]>([])
+  useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
   const [envoi, setEnvoi] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
 
   const maj = (champs: Partial<BrouillonEvent>) => setD(x => ({ ...x, ...champs }))
+
+  /* Sur l etape Lots, on montre l ecran des lots : l apercu suit ce qu on est
+     en train de saisir au lieu de rester bloque sur l accueil. */
+  useEffect(() => { setEcranApercu(etape === 'D' ? 'lots' : 'accueil') }, [etape])
 
   /* Pre-saisie depuis l URL, appliquee UNE SEULE FOIS.
      Sans ce verrou, un re-rendu qui change l identite de `params` reappliquerait
@@ -216,6 +229,7 @@ function Wizard() {
         </div>
       )}
 
+      <div className="sa-parc-avec-apercu">
       <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: 16 }}>
 
         {etape === 'A' && (
@@ -314,9 +328,21 @@ function Wizard() {
                 <input type="number" min={0} className="sa-input" style={{ width: '100%' }} value={d.score_min}
                   onChange={e => maj({ score_min: Number(e.target.value) || 0 })} />)}
             </div>
-            <div className="sa-muted" style={{ fontSize: 11, lineHeight: 1.5, marginTop: 4 }}>
-              La configuration fine du parcours passe par <code>cfg</code> et se règle après création.
-              Les modules du parcours joueur ne sont jamais modifiés depuis ici.
+            {/* LE MANQUE SIGNALE LE 02/09 : cette etape ne configurait PAS le jeu.
+                Elle disait « se regle apres creation » — on creait donc un event,
+                puis on rouvrait sa fiche pour choisir les questions. Le
+                parametrage est ici, ecrit dans le MEME `cfg` que lit le parcours
+                joueur : aucune cle nouvelle, sinon le jeu ne saurait pas la lire. */}
+            <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--sa-border)' }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 10 }}>
+                🎮 Paramétrage du jeu
+              </div>
+              <ConfigJeu
+                module={d.module}
+                cfg={d.cfg}
+                onChange={cfg => maj({ cfg })}
+                banques={banques}
+              />
             </div>
           </>
         )}
@@ -422,6 +448,19 @@ function Wizard() {
           occupe={envoi}
           bloque={problemes.length ? `${problemes.length} point${problemes.length > 1 ? 's' : ''} à compléter — voir la liste ci-dessus.` : undefined}
         />
+      </div>
+
+      {/* Le visuel se construit pendant la saisie — demande du 02/09. */}
+      <ApercuApp
+        ecran={ecranApercu}
+        onEcran={setEcranApercu}
+        d={{
+          nom: d.nom, module: d.module, couleur: d.couleur,
+          lieu: d.lieu, dateD: d.date_d,
+          lots: d.lots.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur })),
+          superEvent: supers.find(se => se.id === d.super_event_id)?.nom ?? null,
+        }}
+      />
       </div>
     </div>
   )

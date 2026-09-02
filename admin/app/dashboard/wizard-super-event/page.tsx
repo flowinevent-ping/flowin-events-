@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
+import ApercuApp from '@/components/dashboard/ApercuApp'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
@@ -53,6 +54,11 @@ export default function Page() {
   const [choisis, setChoisis] = useState<Record<string, string>>({}) // pro_id -> module
   const [recherchePro, setRecherchePro] = useState('')
 
+  /* L apercu montre la station en cours de reglage : sans ca, on parametre
+     cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
+  const [apercuPro, setApercuPro] = useState('')
+  const [ecranApercu, setEcranApercu] = useState<'accueil' | 'lots' | 'fin'>('accueil')
+
   const [occupe, setOccupe] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
 
@@ -65,6 +71,7 @@ export default function Page() {
   }, [pros, recherchePro])
 
   const nbChoisis = Object.keys(choisis).length
+  const proApercu = (apercuPro && choisis[apercuPro]) ? apercuPro : Object.keys(choisis)[0] ?? ''
 
   const basculerPro = (proId: string) =>
     setChoisis(c => {
@@ -186,7 +193,8 @@ export default function Page() {
                     key={m.id}
                     titre={m.nom} sous={m.sous} icone={m.icone}
                     actif={choisis[proId] === m.id}
-                    onClick={() => setChoisis(c => ({ ...c, [proId]: m.id }))}
+                    // Choisir un jeu montre AUSSI cette station dans l apercu.
+                    onClick={() => { setChoisis(c => ({ ...c, [proId]: m.id })); setApercuPro(proId) }}
                   />
                 ))}
               </div>
@@ -260,17 +268,34 @@ export default function Page() {
           actions={<Link href="/dashboard/super-events" className="sa-btn sm">← Super Events</Link>}
         />
 
-        <Parcours
-          etapes={etapes}
-          onTerminer={creer}
-          libelleFin="Créer le super event"
-          occupe={occupe}
-          message={retour && (
-            <div className={`sa-alert ${retour.ok ? 'info' : 'warn'}`} style={{ marginTop: 14, fontSize: 12.5 }}>
-              {retour.texte}
-            </div>
-          )}
-        />
+        <div className="sa-parc-avec-apercu">
+          <Parcours
+            etapes={etapes}
+            onTerminer={creer}
+            libelleFin="Créer le super event"
+            occupe={occupe}
+            message={retour && (
+              <div className={`sa-alert ${retour.ok ? 'info' : 'warn'}`} style={{ marginTop: 14, fontSize: 12.5 }}>
+                {retour.texte}
+              </div>
+            )}
+          />
+
+          {/* Le visuel se construit pendant la saisie. Un super event n a pas
+              d ecran a lui : ce qu on montre, c est la STATION en cours de
+              reglage — c est elle que le joueur ouvrira. */}
+          <ApercuApp
+            ecran={ecranApercu}
+            onEcran={setEcranApercu}
+            d={{
+              nom: proApercu ? (pros.find(p => p.id === proApercu)?.nom ?? proApercu) : nom,
+              module: proApercu ? choisis[proApercu] : '',
+              couleur: '#7C2D92',
+              dateD: dateD || null,
+              superEvent: nom || null,
+            }}
+          />
+        </div>
 
         <ZoneSuppression />
       </div>
