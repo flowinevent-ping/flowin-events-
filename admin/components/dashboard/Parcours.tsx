@@ -136,3 +136,71 @@ export function VignetteChoix({
     </button>
   )
 }
+
+/**
+ * La BARRE d etapes seule, pour un ecran qui gere deja son propre etat d etape.
+ * C est le cas du wizard event, dont les 6 blocs existent depuis longtemps :
+ * on lui donne l ergonomie du parcours sans toucher au contenu des etapes, ce
+ * qui serait la reecrire — donc risquer de perdre quelque chose.
+ */
+export function BarreParcours<T extends string>({
+  etapes, actif, onAller, atteint,
+}: {
+  etapes: { id: T; label: string }[]
+  actif: T
+  onAller: (id: T) => void
+  /** Index le plus loin atteint ; au-dela, les etapes ne sont pas cliquables. */
+  atteint?: number
+}) {
+  const iActif = etapes.findIndex(e => e.id === actif)
+  const max = atteint ?? etapes.length - 1
+  return (
+    <ol className="sa-parc-barre">
+      {etapes.map((x, n) => {
+        const accessible = n <= max
+        return (
+          <li key={x.id}>
+            <button
+              className={`sa-parc-pas${n === iActif ? ' actif' : ''}${n < iActif ? ' fait' : ''}`}
+              onClick={() => accessible && onAller(x.id)}
+              disabled={!accessible}
+              title={accessible ? x.label : 'Étape pas encore atteinte'}
+            >
+              <span className="n">{n < iActif ? '✓' : n + 1}</span>
+              <span className="l">{x.label}</span>
+            </button>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+/** Le PIED de navigation seul, pendant de <BarreParcours>. */
+export function PiedParcours<T extends string>({
+  etapes, actif, onAller, onTerminer, libelleFin, occupe = false, bloque,
+}: {
+  etapes: { id: T; label: string }[]
+  actif: T
+  onAller: (id: T) => void
+  onTerminer: () => void
+  libelleFin: string
+  occupe?: boolean
+  bloque?: string
+}) {
+  const i = etapes.findIndex(e => e.id === actif)
+  const dernier = i === etapes.length - 1
+  return (
+    <div className="sa-parc-pied">
+      <button className="sa-btn" onClick={() => onAller(etapes[i - 1].id)} disabled={i <= 0 || occupe}>
+        ← Précédent
+      </button>
+      <span className="sa-parc-compte">Étape {i + 1} sur {etapes.length}</span>
+      {dernier
+        ? (bloque
+          ? <span className="sa-parc-bloque">{bloque}</span>
+          : <button className="sa-btn primary" onClick={onTerminer} disabled={occupe}>{occupe ? '…' : libelleFin}</button>)
+        : <button className="sa-btn primary" onClick={() => onAller(etapes[i + 1].id)}>Suivant →</button>}
+    </div>
+  )
+}

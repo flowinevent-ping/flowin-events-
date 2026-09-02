@@ -17,6 +17,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
+import { BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   brouillonVide, controler, enregistrer, nbJours, statutDeduit, urlQr,
@@ -196,17 +197,11 @@ function Wizard() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 16 }}>
-        {ETAPES.map((s, i) => (
-          <button
-            key={s.id}
-            className={`sa-btn sm${etape === s.id ? ' primary' : ''}`}
-            onClick={() => setEtape(s.id)}
-          >
-            <span style={{ opacity: 0.6, marginRight: 5 }}>{i + 1}</span>{s.label}
-          </button>
-        ))}
-      </div>
+      {/* Meme barre que le parcours de creation de super event : Romain, 02/09,
+          « parcours events comme demande pour parcours creation super event ».
+          Le CONTENU des 6 etapes n est pas touche — le reecrire, ce serait
+          risquer d en perdre un morceau. Seule la navigation change. */}
+      <BarreParcours<Etape> etapes={ETAPES.map(s => ({ id: s.id, label: s.label }))} actif={etape} onAller={setEtape} />
 
       {problemes.length > 0 && (
         <div style={{
@@ -426,6 +421,16 @@ function Wizard() {
             </div>
           </>
         )}
+
+        <PiedParcours<Etape>
+          etapes={ETAPES.map(s => ({ id: s.id, label: s.label }))}
+          actif={etape}
+          onAller={setEtape}
+          onTerminer={enregistrement}
+          libelleFin="Créer l’événement"
+          occupe={envoi}
+          bloque={problemes.length ? `${problemes.length} point${problemes.length > 1 ? 's' : ''} à compléter — voir la liste ci-dessus.` : undefined}
+        />
       </div>
     </div>
   )
