@@ -212,3 +212,35 @@ a:hover{text-decoration:underline}
 .sa-kpi-clic{border:1px solid var(--sa-border);border-radius:10px;font-family:inherit;
   text-align:left;cursor:pointer;transition:box-shadow .12s,transform .12s,border-color .12s}
 .sa-kpi-clic:hover{border-color:var(--sa-accent);box-shadow:0 4px 14px rgba(15,23,42,.09);transform:translateY(-1px)}
+
+/* ---- Vignettes de commerce : logo + mini-infos, rangees par secteur ---- */
+/* Demande du 02/09 : « des vignettes avec logo et mini info, cliquables,
+   rangees par categorie de secteur ». La liste etait a plat, sans logo. */
+.sa-vign-secteur{display:flex;align-items:center;gap:8px;margin:0 0 9px;
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--sa-muted)}
+.sa-vign-secteur .lbl{white-space:nowrap}
+.sa-vign-secteur::after{content:'';flex:1;height:1px;background:var(--sa-border);order:1}
+.sa-vign-secteur .n{order:2;background:var(--sa-subtle);border:1px solid var(--sa-border);
+  border-radius:99px;padding:1px 7px;font-size:10px}
+.sa-vign-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
+.sa-vign{display:flex;gap:10px;text-align:left;font-family:inherit;cursor:pointer;
+  background:var(--sa-card);border:1px solid var(--sa-border);border-radius:12px;padding:11px;
+  transition:box-shadow .12s,transform .12s,border-color .12s;min-width:0}
+.sa-vign:hover{border-color:var(--sa-accent);box-shadow:0 4px 14px rgba(15,23,42,.10);transform:translateY(-1px)}
+.sa-vign .logo{width:46px;height:46px;flex-shrink:0;border-radius:9px;border:1px solid;
+  background:#fff;display:grid;place-items:center;overflow:hidden}
+.sa-vign .logo img{max-width:100%;max-height:100%;object-fit:contain}
+.sa-vign .logo .init{font-size:19px;font-weight:900;color:var(--sa-muted)}
+.sa-vign .corps{min-width:0;flex:1}
+.sa-vign .nom{font-weight:800;font-size:13px;line-height:1.25;color:var(--sa-text)}
+.sa-vign .ligne{font-size:11px;color:var(--sa-muted);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sa-vign .pieds{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:7px;font-size:10.5px}
+.sa-vign .pieds .ok{color:#2f7d4f;font-weight:700}
+.sa-vign .pieds .ko{color:var(--sa-muted)}
+
+/* Le meme logo, en miniature, dans la vue liste : on reconnait le commerce
+   d un coup d oeil sans quitter le format tableau. */
+.sa-vign-mini{width:26px;height:26px;flex-shrink:0;border-radius:6px;border:1px solid;
+  background:#fff;display:grid;place-items:center;overflow:hidden;font-size:12px;font-weight:900;color:var(--sa-muted)}
+.sa-vign-mini img{max-width:100%;max-height:100%;object-fit:contain}

@@ -58,7 +58,9 @@ export interface SelecteurCRM {
 }
 
 export interface ListeCRMProps<T> {
-  titre: string
+  titre?: string
+  /** Liste IMBRIQUEE dans un ecran qui a deja son titre : pas de PageHeader. */
+  sansEntete?: boolean
   sousTitre?: string
   /** `null` = chargement en cours (le sous-titre le dit, comme sur Gagnants). */
   lignes: T[] | null
@@ -90,7 +92,7 @@ export interface ListeCRMProps<T> {
 const texte = (v: unknown) => (v === null || v === undefined ? '' : String(v))
 
 export default function ListeCRM<T>({
-  titre, sousTitre, lignes, colonnes, cle, onLigne,
+  titre, sansEntete = false, sousTitre, lignes, colonnes, cle, onLigne,
   triDefaut, triDescendant = false, placeholderRecherche = 'Rechercher…',
   filtres, selecteurs, categorie, sousCategorie, legende, actions, entete,
   videTitre = 'Aucun résultat', videDesc,
@@ -177,7 +179,7 @@ export default function ListeCRM<T>({
 
   return (
     <>
-      <PageHeader title={titre} subtitle={sousTitreCalcule} actions={actions} />
+      {!sansEntete && <PageHeader title={titre ?? ''} subtitle={sousTitreCalcule} actions={actions} />}
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
         <SearchBar value={q} onChange={setQ} placeholder={placeholderRecherche} />

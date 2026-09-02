@@ -1,10 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+/**
+ * DETAIL D UN SUPER EVENT.
+ *
+ * Romain, 02/09 : « il y a une regression de presentation sur cette page
+ * detail : soit on a la meme presentation type CRM, liste, fleche de filtre,
+ * clic + info ; soit on a des vignettes avec logo et mini info, cliquables,
+ * rangees par categorie de secteur. Mais on n a jamais eu cette presentation.
+ * Corrige. »
+ *
+ * La liste des partenaires etait A PLAT : ni logo, ni tri, ni recherche, ni
+ * regroupement — juste 22 lignes empilees. Les deux presentations demandees
+ * sont desormais disponibles, au choix d un bouton :
+ *   - VIGNETTES : logo, mini-infos, cliquables, groupees par secteur ;
+ *   - LISTE CRM : le gabarit unique (<ListeCRM>), colonnes triables par
+ *     fleche, recherche, meme regroupement par secteur.
+ * Dans les deux cas le clic ouvre la meme fiche event qu avant.
+ */
+
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, KpiCard, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
+import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 
 type Se = any
 type Com = {
@@ -13,12 +32,42 @@ type Com = {
   couleur: string | null; qr_token: string | null; pro_nom: string | null
 }
 type Parr = { commerce: string; parrainages_total: number; filleuls_confirmes: number; en_attente: number; tickets_attribues: number }
+type Fiche = { id: string; nom: string | null; image_url: string | null; emoji: string | null; event_id: string | null; description: string | null }
+
+/** Le secteur qui range la vignette. Jamais vide : sinon la carte tombe hors de tout groupe. */
+const secteurDe = (c: Com) => (c.categorie && c.categorie.trim()) || 'Sans secteur'
 
 const n = (v: any) => (v == null ? 0 : v)
 const slug = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 24)
 
-export default function OpsDetailClient({ se, commerces, parr, landing }: { se: Se; commerces: Com[]; parr: Parr[]; landing: any }) {
+export default function OpsDetailClient({ se, commerces, parr, landing, fiches = [] }: { se: Se; commerces: Com[]; parr: Parr[]; landing: any; fiches?: Fiche[] }) {
   const { openDrawer } = useDashboard()
+  const [vue, setVue] = useState<'vignettes' | 'liste'>('vignettes')
+
+  /* Rapprochement commerce -> fiche commerce, pour recuperer le LOGO.
+     Par event_id d abord (le lien explicite), par nom ensuite : 2 fiches sur 11
+     n ont pas d event_id, les ignorer ferait disparaitre leur logo. */
+  const ficheDe = useMemo(() => {
+    const parEvent: Record<string, Fiche> = {}
+    const parNom: Record<string, Fiche> = {}
+    fiches.forEach(fi => {
+      if (fi.event_id) parEvent[fi.event_id] = fi
+      if (fi.nom) parNom[fi.nom.trim().toLowerCase()] = fi
+    })
+    return (c: Com) => parEvent[c.id] ?? parNom[(c.nom || '').trim().toLowerCase()] ?? null
+  }, [fiches])
+
+  /* Groupement par secteur, pour la vue vignettes. */
+  const parSecteur = useMemo(() => {
+    const ordre: string[] = []
+    const par: Record<string, Com[]> = {}
+    commerces.forEach(c => {
+      const s = secteurDe(c)
+      if (!par[s]) { par[s] = []; ordre.push(s) }
+      par[s].push(c)
+    })
+    return ordre.sort((a, b) => a.localeCompare(b, 'fr')).map(s => ({ secteur: s, lot: par[s] }))
+  }, [commerces])
 
   const [prix, setPrix] = useState<string>(landing?.pricing?.prix ?? landing?.pricing?.price ?? '')
   const [savingPrix, setSavingPrix] = useState(false)
@@ -69,6 +118,49 @@ export default function OpsDetailClient({ se, commerces, parr, landing }: { se: 
     } catch (e: any) { setAddMsg('Erreur : ' + (e?.message || e)); setAdding(false) }
   }
 
+  const colonnesListe: ColonneCRM<Com>[] = [
+    {
+      id: 'nom', label: 'Commerce', valeur: c => c.nom,
+      rendu: c => {
+        const fi = ficheDe(c)
+        return (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span className="sa-vign-mini" style={{ borderColor: c.couleur || 'var(--sa-border)' }}>
+              {fi?.image_url
+                ? <img src={fi.image_url} alt="" />
+                : <span>{fi?.emoji || (c.nom || '?').trim().charAt(0).toUpperCase()}</span>}
+            </span>
+            <span>
+              <span style={{ fontWeight: 700, display: 'block' }}>{c.nom}</span>
+              <span style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{c.pro_nom ?? '—'}</span>
+            </span>
+          </span>
+        )
+      },
+    },
+    { id: 'adresse', label: 'Adresse', valeur: c => c.adresse, style: { fontSize: 12 } },
+    { id: 'tel', label: 'Téléphone', valeur: c => c.tel, style: { fontSize: 12 } },
+    {
+      id: 'qr_token', label: 'QR', valeur: c => c.qr_token,
+      rendu: c => (c.qr_token ? <code className="sa-code">{c.qr_token}</code> : '—'),
+    },
+    {
+      id: 'carte', label: 'Carte', valeur: c => (c.lat && c.lng ? 1 : 0), horsRecherche: true,
+      rendu: c => (c.lat && c.lng ? '✓' : <span style={{ color: 'var(--sa-muted)' }}>✗</span>),
+    },
+    {
+      id: 'paiement', label: 'Paiement', valeur: c => c.paiement ?? c.status,
+      rendu: c => (
+        <span className={`sa-chip ${c.status === 'paye' || c.paiement === 'paye' ? 'live' : 'warn'}`}>
+          {c.paiement || c.status || '—'}
+        </span>
+      ),
+    },
+    {
+      id: 'filleuls', label: 'Filleuls', valeur: c => parrBy(c.nom)?.filleuls_confirmes ?? 0, horsRecherche: true,
+    },
+  ]
+
   return (
     <div className="sa-content">
       <div className="sa-page">
@@ -103,39 +195,78 @@ export default function OpsDetailClient({ se, commerces, parr, landing }: { se: 
           )}
 
           <div className="sa-card" style={{ padding: 18, marginBottom: 16 }}>
-            <SectionHeader>🤝 Partenaires ({commerces.length})</SectionHeader>
-            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 8 }}>Toucher un commerce ouvre sa fiche event détaillée.</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <SectionHeader>🤝 Partenaires ({commerces.length})</SectionHeader>
+              <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                <button className={`sa-btn sm${vue === 'vignettes' ? ' primary' : ''}`} onClick={() => setVue('vignettes')}>▦ Vignettes</button>
+                <button className={`sa-btn sm${vue === 'liste' ? ' primary' : ''}`} onClick={() => setVue('liste')}>☰ Liste CRM</button>
+              </span>
+            </div>
+            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 12 }}>
+              Toucher un commerce ouvre sa fiche event détaillée.
+            </div>
+
             {commerces.length === 0 && <EmptyState title="Aucun commerce rattaché" />}
-            {commerces.map((c) => {
-              const p = parrBy(c.nom)
-              const festival = c.id === 'ev-nds-2026'
-              return (
-                <div
-                  key={c.id} className="sa-list-item" style={{ cursor: 'pointer' }}
-                  onClick={() => openDrawer('event', c.id)}
-                >
-                  <div style={{ width: 4, alignSelf: 'stretch', borderRadius: 3, background: c.couleur || 'var(--sa-accent)', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 7 }}>
-                      {c.nom}
-                      {festival && <span className="sa-chip warn" style={{ fontSize: 9 }}>QR FESTIVAL</span>}
-                    </div>
-                    <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 2 }}>
-                      {c.categorie || '—'}{c.adresse ? ' · ' + c.adresse : ''}{c.tel ? ' · ' + c.tel : ''}
-                    </div>
-                    <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 2 }}>
-                      QR <code className="sa-code">{c.qr_token || '—'}</code>
-                      {c.lat && c.lng ? ` · carte ✓` : ` · carte ✗`}
-                      {c.site_web ? ' · site ✓' : ''}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
-                    <span className={`sa-chip ${c.status === 'paye' || c.paiement === 'paye' ? 'live' : 'warn'}`}>{c.paiement || c.status || '—'}</span>
-                    {p && <span className="sa-muted" style={{ fontSize: 11, fontWeight: 700 }}>{p.filleuls_confirmes} filleuls</span>}
-                  </div>
+
+            {commerces.length > 0 && vue === 'vignettes' && parSecteur.map(({ secteur, lot }) => (
+              <div key={secteur} style={{ marginBottom: 18 }}>
+                <div className="sa-vign-secteur">
+                  <span className="lbl">{secteur}</span>
+                  <span className="n">{lot.length}</span>
                 </div>
-              )
-            })}
+                <div className="sa-vign-grille">
+                  {lot.map(c => {
+                    const fi = ficheDe(c)
+                    const p = parrBy(c.nom)
+                    const festival = c.id === 'ev-nds-2026'
+                    return (
+                      <button key={c.id} className="sa-vign" onClick={() => openDrawer('event', c.id)} title={`Ouvrir ${c.nom}`}>
+                        <div className="logo" style={{ borderColor: c.couleur || 'var(--sa-border)' }}>
+                          {fi?.image_url
+                            ? <img src={fi.image_url} alt="" />
+                            : <span className="init">{fi?.emoji || (c.nom || '?').trim().charAt(0).toUpperCase()}</span>}
+                        </div>
+                        <div className="corps">
+                          <div className="nom">
+                            {c.nom}
+                            {festival && <span className="sa-chip warn" style={{ fontSize: 9, marginLeft: 6 }}>QR FESTIVAL</span>}
+                          </div>
+                          <div className="ligne">{c.adresse || '—'}</div>
+                          <div className="ligne">{c.tel || '—'}</div>
+                          <div className="pieds">
+                            <span className={`sa-chip ${c.status === 'paye' || c.paiement === 'paye' ? 'live' : 'warn'}`}>
+                              {c.paiement || c.status || '—'}
+                            </span>
+                            {c.lat && c.lng ? <span className="ok">carte ✓</span> : <span className="ko">carte ✗</span>}
+                            {c.site_web && <span className="ok">site ✓</span>}
+                            {p && p.filleuls_confirmes > 0 && <span className="ok">{p.filleuls_confirmes} filleuls</span>}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {commerces.length > 0 && vue === 'liste' && (
+              <ListeCRM<Com>
+                sansEntete
+                lignes={commerces}
+                cle={c => c.id}
+                onLigne={c => openDrawer('event', c.id)}
+                triDefaut="nom"
+                placeholderRecherche="Rechercher un commerce, un secteur, une adresse…"
+                categorie={c => ({ id: secteurDe(c), label: secteurDe(c) })}
+                colonnes={colonnesListe}
+                filtres={[
+                  { id: 'tous', label: 'Tous' },
+                  { id: 'payes', label: 'Payés', test: c => c.status === 'paye' || c.paiement === 'paye' },
+                  { id: 'attente', label: 'En attente', test: c => !(c.status === 'paye' || c.paiement === 'paye') },
+                  { id: 'horscarte', label: 'Hors carte', test: c => !(c.lat && c.lng) },
+                ]}
+              />
+            )}
           </div>
 
           <div className="sa-card" style={{ padding: 18 }}>
