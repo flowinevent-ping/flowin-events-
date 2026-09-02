@@ -163,3 +163,52 @@
 .sa-badge-pill.green{background:rgba(29,155,117,.12);color:#0F6E56}
 a{color:var(--sa-accent);text-decoration:none}
 a:hover{text-decoration:underline}
+
+/* ---- Liste CRM : le gabarit unique (categories et sous-categories) ---- */
+/* Le rangement demande le 02/09 : « range par categorie et sous-categorie :
+   event, pro ». Les lignes de groupe vivent DANS le tableau, donc les colonnes
+   restent alignees d un groupe a l autre — c est tout l interet par rapport a
+   plusieurs tableaux empiles. */
+.sa-crm-cat > td{background:var(--sa-subtle);border-bottom:1px solid var(--sa-border);
+  padding:9px 16px;font-size:11.5px;font-weight:800;letter-spacing:.02em;
+  position:sticky;top:0;z-index:1}
+.sa-crm-cat{cursor:pointer}
+.sa-crm-cat:hover > td{color:var(--sa-accent)}
+.sa-crm-cat .chev{display:inline-block;width:14px;color:var(--sa-muted)}
+.sa-crm-cat .n{margin-left:8px;font-size:10px;font-weight:800;color:var(--sa-muted);
+  border:1px solid var(--sa-border);border-radius:99px;padding:1px 7px;background:var(--sa-card)}
+.sa-crm-sous > td{padding:6px 16px 6px 32px;font-size:10.5px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted);
+  border-bottom:1px solid var(--sa-border)}
+.sa-crm-sous{cursor:default}
+.sa-crm-sous .n{margin-left:7px;font-weight:700;text-transform:none;letter-spacing:0}
+
+/* ---- Kanban horizontal de vignettes cliquables (accueil, et reutilisable) ---- */
+/* Colonnes de largeur fixe qui defilent horizontalement : le nombre de colonnes
+   ne doit pas ecraser la largeur des vignettes, sinon le titre d un event passe
+   sur quatre lignes des qu on ajoute un statut. */
+.sa-kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.sa-kb-col{flex:0 0 268px;background:var(--sa-subtle);border:1px solid var(--sa-border);
+  border-radius:12px;padding:10px;min-width:0}
+.sa-kb-tete{display:flex;align-items:center;gap:7px;padding:2px 4px 10px;
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted)}
+.sa-kb-tete .pastille{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sa-kb-tete .t{flex:1;min-width:0}
+.sa-kb-tete .n{background:var(--sa-card);border:1px solid var(--sa-border);border-radius:99px;
+  padding:1px 7px;font-size:10px}
+.sa-kb-corps{display:flex;flex-direction:column;gap:8px}
+.sa-kb-vide{font-size:11.5px;color:var(--sa-muted);padding:8px 4px}
+.sa-kb-vignette{display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
+  background:var(--sa-card);border:1px solid var(--sa-border);border-left:4px solid var(--sa-accent);
+  border-radius:10px;padding:11px 12px;transition:box-shadow .12s,transform .12s}
+.sa-kb-vignette:hover{box-shadow:0 4px 14px rgba(15,23,42,.10);transform:translateY(-1px)}
+.sa-kb-vignette .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.sa-kb-vignette .nom{font-weight:800;font-size:13.5px;line-height:1.25;color:var(--sa-text)}
+.sa-kb-vignette .pro{font-size:11.5px;color:var(--sa-muted);margin-top:3px}
+.sa-kb-vignette .meta{display:flex;gap:12px;font-size:11.5px;color:var(--sa-muted);margin-top:6px}
+
+/* Une tuile de chiffre qui s ouvre : meme apparence que .sa-kpi, mais c est un
+   bouton, donc il faut neutraliser le style natif et rendre le clic visible. */
+.sa-kpi-clic{border:1px solid var(--sa-border);border-radius:10px;font-family:inherit;
+  text-align:left;cursor:pointer;transition:box-shadow .12s,transform .12s,border-color .12s}
+.sa-kpi-clic:hover{border-color:var(--sa-accent);box-shadow:0 4px 14px rgba(15,23,42,.09);transform:translateY(-1px)}
