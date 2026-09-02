@@ -304,3 +304,81 @@ build qui passe ne prouve pas qu'une navigation marche**.
 - `operations` et `nds-lots` ne lisent aucune portée ;
 - event de test `htghc` sur Ville de Vence ; 15 events sans super event, 6
   sans pro.
+
+## 9. 02/09/2026 — Diffusion, parcours d'inscription, et un bug de données
+
+### 9.1 ⚠️ Les aperçus du dashboard fabriquaient de VRAIS scans
+
+Les cadres téléphone du dashboard SA — `ParcoursMobil` depuis le 30/07, sur
+4 écrans — chargent le vrai parcours dans une iframe. Or `trackVisite()`
+(`admin/lib/track.ts`) ne testait **jamais** `preview` : chaque ouverture d'un
+aperçu écrivait une ligne `visites` avec `etape IS NULL`, c'est-à-dire **un
+flash**, sur l'event réel. Seul `/parcours/nds2026` gérait `preview` ; les 6
+autres modules l'ignoraient.
+
+Corrigé **à la source**, une seule fois dans le tronc commun :
+
+```ts
+if (params.has('preview')) return
+```
+
+Nettoyage : 110 lignes repérées par leur `referrer`, **archivées** dans
+`visites_archive_apercu_2026_09` puis retirées
+(`sql/2026-09-02-visites-apercu-dashboard.sql`).
+
+| | Avant | Après | Écart |
+|---|---|---|---|
+| Chiffre publiable (période officielle) | 2 446 | **2 445** | −1 |
+| Tout l'historique | 2 847 | **2 799** | −48 |
+| Stations listées (tout l'historique) | 21 | **20** | −1 |
+
+**Les chiffres publiés étaient justes** — un seul aperçu était tombé dans la
+période officielle.
+
+**Correction d'une affirmation du 01/09** : sur les 3 stations annoncées comme
+« invisibles sur tous les écrans », `NDS · Le Bar` passe de 21 à **14** flashs
+réels, `NDS · Brigade Verte` de 18 à **5**, et `NDS · Les Caisses` de 1 à
+**0** — son unique flash était un aperçu. Cette station n'a jamais eu la
+moindre activité réelle ; sa disparition n'est pas une régression.
+
+### 9.2 Diffusion (`db1ccf5`) — le QR devient un livrable
+
+Le QR était **partout** une `<img>` vers `api.qrserver.com` : intéléchargeable
+(cross-origin), illisible en A4, et hors service si ce tiers tombe.
+`components/dashboard/Diffusion.tsx` le génère **dans le navigateur** (paquet
+`qrcode`, import dynamique) : PNG 1024, SVG dimensionné, affiche A4, copie,
+aperçu dépliable, mode `vignette` pour les listes. Câblé à 2 endroits :
+`EventDrawer` onglet QR, `ProDrawer` onglet QR & Liens. `nds-media` et
+`nds-comm` ne sont **pas** touchés.
+
+L'aperçu réutilise la technique de `ParcoursMobil` — pas un second système.
+Le QR a été **décodé** (jsqr) pour prouver sa validité, pas relu.
+
+### 9.3 Inscription (`b6870e3`) — le raccord manquant
+
+Ce ne sont **pas des doublons** : `/pro/rejoindre` (parcours pro, 8 étapes,
+écrit dans `demandes_rattachement_super_event`) et `/dashboard/wizard-event`
+(création côté SA) existaient tous les deux ; `demandes-rattachement` ne savait
+que basculer un statut. Le wizard accepte désormais
+`?pro=&se=&nom=&d=&f=` et s'ouvre pré-rempli — pré-saisie **verrouillée à une
+seule application** (`useRef`), sinon un re-rendu écraserait les corrections du
+SA. `useSearchParams` impose une frontière `Suspense` : posée, la page reste
+prérendue en statique.
+
+### 9.4 Auto-audit (`9dbbc00`) — 9 points
+
+Au-delà du 9.1 : la vignette QR avait **disparu** de la liste des stations
+(régression du lot Diffusion) ; un pro pré-rempli absent de la liste rendait le
+`<select>` vide **sans rien signaler** ; le `super_event_id` était écrit en base
+mais n'apparaissait **nulle part** dans le wizard ; un échec de rattachement
+passait sous silence avec « Événement créé » à l'écran ; SVG sans dimensions ;
+« Copié » affiché à tort ; message d'erreur qui ne partait plus ; QR affiché une
+frame sous le nom du suivant ; échec d'enregistrement muet.
+
+### 9.5 Reste à faire
+
+- `operations` et `nds-lots` ne lisent aucune portée ;
+- event de test `htghc` sur Ville de Vence ; 15 events sans super event, 6 sans
+  pro ;
+- `nds-media` / `nds-comm` utilisent encore `api.qrserver.com` (outils
+  distincts, non touchés volontairement).
