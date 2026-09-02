@@ -92,6 +92,27 @@ export default function Sidebar() {
    * une couleur. La profondeur (sous-onglets, fiches) est portee par les
    * drawers, pas par le menu.
    */
+  /**
+   * REGROUPEMENT SEUL — aucune entree n est supprimee, aucune route ne dispa-
+   * rait. Elles changent de groupe et gagnent une couleur. La profondeur
+   * (sous-onglets, fiches) est portee par les drawers, pas par le menu.
+   *
+   * MAJ 02/09, demandes de Romain :
+   *  - « tout ce qui appartient seulement a NDS doit etre range dans un onglet
+   *    NDS » -> groupe « NDS 2026 » en bas, qui rassemble les 10 outils propres
+   *    a cette operation (tirage HTML borne a se-nds-2026, front, kit com,
+   *    plaquettes, visuels, dossiers partenaires). Ils etaient jusqu ici
+   *    melanges aux outils generiques, ce qui laissait croire qu ils
+   *    marchaient pour n importe quelle operation.
+   *  - « les jeux sont a part et peuvent fonctionner pour events et super
+   *    events » -> groupe « Jeux » a lui seul, hors du groupe Events.
+   *  - « il manque les sections CRM » -> le CRM rassemble desormais TOUTES les
+   *    listes de personnes et d entreprises, y compris « CRM Participants »
+   *    qui vivait sous Super events alors que c est une liste de gens.
+   *
+   * Ce qui reste sous « Super events » est ce qui se lit PAR operation et
+   * fonctionne pour n importe laquelle — plus seulement pour NDS.
+   */
   const groups: NavGroup[] = [
     {
       group: 'Accueil',
@@ -107,16 +128,13 @@ export default function Sidebar() {
         { id: 'super-events', icon: '⭐', label: 'Super Events', href: '/dashboard/super-events' },
         { id: 'wizard-super-event', icon: '✨', label: 'Créer un super event', href: '/dashboard/wizard-super-event' },
         { id: 'operations', icon: '📊', label: 'Opérations (vue complète)', href: '/dashboard/operations' },
-        { id: 'nds-participants', icon: '👥', label: 'Participants (super event)', href: '/dashboard/nds-participants' },
         { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },
-        { id: 'tirage-nds', icon: '🎰', label: 'Tirage au sort', href: '/tirage-nds.html', external: true },
         { id: 'gagnants', icon: '🏆', label: 'Liste des gagnants', href: '/dashboard/gagnants' },
         { id: 'nds-resultat', icon: '📅', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
         { id: 'rapport-points', icon: '📍', label: 'Rapport détaillé', href: '/dashboard/rapport-points' },
         { id: 'statistiques', icon: '📊', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
         { id: 'track-qr', icon: '🔗', label: 'Origines du trafic', href: '/dashboard/track-qr' },
-        { id: 'nds-carte', icon: '🗺️', label: 'Carte NDS', href: '/dashboard/nds-carte' },
-        { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
+        { id: 'nds-carte', icon: '🗺️', label: 'Carte du super event', href: '/dashboard/nds-carte' },
       ],
     },
     {
@@ -125,6 +143,14 @@ export default function Sidebar() {
       items: [
         { id: 'events', icon: '🎬', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
         { id: 'wizard-event-se', icon: '✨', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
+      ],
+    },
+    {
+      /* A part, volontairement : un jeu n appartient ni a un event ni a un
+         super event, il sert aux deux. */
+      group: 'Jeux',
+      ton: 'ev',
+      items: [
         { id: 'jeux', icon: '🎮', label: 'Jeux (templates)', count: 6, href: '/dashboard/jeux' },
       ],
     },
@@ -132,11 +158,12 @@ export default function Sidebar() {
       group: 'CRM',
       ton: 'crm',
       items: [
+        { id: 'nds-participants', icon: '👥', label: 'CRM Participants', href: '/dashboard/nds-participants' },
+        { id: 'joueurs', icon: '👤', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
         { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
         { id: 'partenaires', icon: '🤝', label: 'Partenaires (fiche commerce)', count: partenaires.length, href: '/dashboard/partenaires' },
         { id: 'apercu-pro', icon: '👁', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
-        { id: 'demandes-rattachement', icon: '🤝', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
-        { id: 'joueurs', icon: '👥', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
+        { id: 'demandes-rattachement', icon: '📨', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },
         { id: 'crm-landing', icon: '📥', label: 'CRM Landing pages', href: '/dashboard/crm-landing' },
         { id: 'crm-retours', icon: '📋', label: 'Retours CRM', href: '/dashboard/crm-retours' },
         { id: 'prospection', icon: '📞', label: 'Prospection', href: '/dashboard/prospection' },
@@ -147,23 +174,34 @@ export default function Sidebar() {
       group: 'Comm & outils',
       ton: 'out',
       items: [
-        { id: 'nds-comm', icon: '📣', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm' },
         { id: 'envoi-masse', icon: '📢', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
-        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
-        { id: 'nds-visuels', icon: '🖼️', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html', external: true },
         { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
         { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
         { id: 'bons-commande-liste', icon: '📋', label: 'Bons de commande & Factures (liste)', href: '/bons-commande-liste.html', external: true },
         { id: 'facture-nds', icon: '💶', label: 'Générer une facture', href: '/facture-nds.html', external: true },
         { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
         { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
+        { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
+        { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
+      ],
+    },
+    {
+      /* Propre a l operation Nuits du Sud 2026 : ces outils sont bornes a
+         se-nds-2026 ou portent son identite. Les melanger aux outils
+         generiques laissait croire qu ils servaient pour toute operation. */
+      group: 'NDS 2026',
+      ton: 'out',
+      items: [
+        { id: 'tirage-nds', icon: '🎰', label: 'Tirage au sort', href: '/tirage-nds.html', external: true },
+        { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
+        { id: 'nds-comm', icon: '📣', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm' },
+        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
+        { id: 'nds-visuels', icon: '🖼️', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html', external: true },
         { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html', external: true },
         { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds' },
         { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html', external: true },
         { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html', external: true },
         { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html', external: true },
-        { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
-        { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
       ],
     },
     {
