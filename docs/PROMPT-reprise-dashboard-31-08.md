@@ -382,3 +382,78 @@ frame sous le nom du suivant ; échec d'enregistrement muet.
   pro ;
 - `nds-media` / `nds-comm` utilisent encore `api.qrserver.com` (outils
   distincts, non touchés volontairement).
+
+## 10. 02/09/2026 (soir) — Réorganisation demandée sur captures : 10 lots
+
+Romain, 12 captures à l'appui : *« confirme que tu as compris, établis une liste
+de travail, pas de perte ni invention ni interprétation, puis travaille sans
+t'arrêter »*.
+
+### 10.1 La règle qui commande tout le reste
+
+> « Toutes les listes nommées CRM ou listes d'info type Excel doivent être
+> présentées de la même manière […] **le format liste CRM liste des gagnants est
+> le bon format**, fais la même chose partout avec les infos qui leur sont
+> propres », et « **rangé par catégorie et sous-catégorie : event, pro** ».
+
+Plus le principe de rattachement : *« tout ce qui concerne un pro ou un event et
+super events doit être rassemblé vers ce qui le concerne. On doit entrer dans un
+event et voir les pros puis leur détail, idem pour le super event. »*
+
+### 10.2 Les 10 lots
+
+| # | Commit | Ce qui change |
+|---|---|---|
+| 1 | `6ca7b11` | **`ListeCRM.tsx`** — le gabarit unique, extrait de Liste des gagnants. N'ajoute que le regroupement à deux niveaux |
+| 2 | `6ca7b11` | Accueil en **kanban horizontal**. Les cartes étaient déjà cliquables ; les **4 tuiles du haut** ne l'avaient jamais été |
+| 3 | `4e5ae01` | **CRM Participants** : super event → station, colonne Source, accès total « Tout Flowin » |
+| 4 | `4e5ae01` | **Gagnants** sur le gabarit, catégories super event → pro |
+| 5 | `e82cfbd` | **Fiche opération** : vignettes à logo par secteur **ou** liste CRM |
+| 6 | `ee7f9c5` | **Statistiques** : 12 blocs empilés → 7 vues sélectionnables |
+| 7 | `effe069` | **Carte** : elle superposait deux opérations |
+| 8 | `dc45606` | **`Parcours.tsx`** + création de super event en carrousel, **+ suppression** |
+| 9 | `61ba2db` | Wizard event : même barre et même pied |
+| 10 | `d3e22ed` | Menu : groupe **NDS 2026**, **Jeux à part**, CRM complet — 46 entrées, zéro perdue |
+
+### 10.3 Trois constats qui corrigent des idées reçues
+
+1. **La carte ne mélangeait pas, elle superposait.** Elle ne filtrait sur rien :
+   22 stations de NDS 2026 **plus** 22 du Master, d'où les « 44 stations » et
+   les doublons dans la liste latérale.
+2. **Les tuiles de statistiques étaient cliquables** — elles faisaient défiler
+   vers un bloc souvent déjà visible, donc rien ne semblait se passer. Le défaut
+   était le geste choisi, pas un `onClick` manquant.
+3. **`operations` n'est pas « sans portée »** : c'est déjà une vue par super
+   event. La note du handoff était fausse, elle est corrigée.
+
+### 10.4 Auto-audit (`51a36e9`) — 12 corrections
+
+- **L'export CSV du CRM était faux.** La recherche et les filtres vivent dans
+  `ListeCRM` : les tuiles et le CSV portaient sur la liste complète pendant
+  qu'on voyait trois lignes. On tapait « dupont », le CSV téléchargeait 3 000
+  lignes — un fichier faux qui part chez un partenaire.
+- **Le tri était mort** sur les colonnes servant de (sous-)catégorie : tri à
+  plat puis regroupement, donc la flèche s'affichait et rien ne bougeait.
+- **Identifiants d'events tronqués à 60 caractères** → collisions et stations
+  perdues en silence sur un nom d'opération long.
+- **Les deux nouvelles RPC n'étaient pas dans le dépôt** — exactement le piège
+  du 01/09. `sql/2026-09-02-crm-participants.sql` et
+  `sql/2026-09-02-supprimer-super-event.sql` sont écrits, exécutables, GRANTs
+  compris, et vérifiés **identiques octet pour octet** à la prod.
+- `parties` et `clics_stations` avaient disparu des statistiques ; deux boutons
+  « Créer l'événement » ; le QR token manquait à la vignette.
+
+### 10.5 Deux bugs de données trouvés en chemin
+
+- `crm_participants` : la jointure interne sur `joueurs` perdait les
+  participations sans fiche joueur (un joueur NDS a 3 parties réelles sur
+  Bar 1/2/3 et aucune ligne dans `joueurs`). 639 au lieu de 640. Jointure
+  externe → **640 = 640**.
+- La carte superposait deux opérations (§ 10.3).
+
+### 10.6 Reste à faire
+
+- le **tirage au sort** est toujours `tirage-nds.html`, statique et borné à
+  `se-nds-2026` : il n'est pas passé au gabarit CRM ;
+- l'event de test `htghc` sur Ville de Vence est toujours en base ;
+- `nds-media` / `nds-comm` utilisent encore `api.qrserver.com`.
