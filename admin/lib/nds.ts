@@ -369,8 +369,16 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
   fait.push('super event')
 
   const ids: string[] = []
+  /* IDENTIFIANT D EVENT — le suffixe aleatoire n est pas une coquetterie.
+     Sans lui, `<se>-<pro>` tronque a 60 caracteres faisait collisionner deux
+     pros des que le nom de l operation etait long (« se-festival-international-
+     du-jazz-de-juan-les-pins-2027 » laisse 5 caracteres au pro) ou que deux
+     pros partageaient un prefixe. L INSERT echouait alors sur la cle primaire
+     et la station etait perdue en silence. `events.id` est un TEXT sans limite :
+     la troncature etait auto-infligee, elle est supprimee. */
   for (const p of d.pros) {
-    const evId = `${d.id.replace(/^se-/, 'ev-')}-${p.pro_id.replace(/^pro-/, '')}`.slice(0, 60)
+    const alea = Math.random().toString(36).slice(2, 6)
+    const evId = `${d.id.replace(/^se-/, 'ev-')}-${p.pro_id.replace(/^pro-/, '')}-${alea}`
     const { error } = await supabase.from('events').insert({
       id: evId,
       pro_id: p.pro_id,
@@ -410,11 +418,16 @@ export interface ResultatSuppressionSE {
   tirages?: number
   nom?: string
   events_supprimes?: number
+  /** Message brut renvoye par la base quand l appel lui-meme a echoue. */
+  message?: string
 }
 
 export async function supprimerSuperEvent(id: string, confirmation: string): Promise<ResultatSuppressionSE> {
   const { data, error } = await supabase.rpc('supprimer_super_event', { p_id: id, p_confirmation: confirmation })
-  if (error) { console.error('[supprimerSuperEvent]', error.message); return { ok: false, raison: 'introuvable' } }
+  // Un echec RPC (droits, reseau, exception) n est PAS « introuvable » : dire
+  // « super event introuvable » d une operation choisie dans la liste juste
+  // au-dessus envoie chercher au mauvais endroit.
+  if (error) { console.error('[supprimerSuperEvent]', error.message); return { ok: false, message: error.message } }
   return (data ?? { ok: false }) as ResultatSuppressionSE
 }
 
@@ -476,7 +489,9 @@ export interface CrmParticipant {
 
 export async function fetchCrmParticipants(se?: string | null): Promise<CrmParticipant[]> {
   const { data, error } = await supabase.rpc('crm_participants', { p_se: se ?? null })
-  if (error) { console.error('[fetchCrmParticipants]', error.message); return [] }
+  // On propage l erreur : renvoyer [] silencieusement affiche « aucun
+  // participant », strictement indiscernable d une operation reellement vide.
+  if (error) { console.error('[fetchCrmParticipants]', error.message); throw new Error(error.message) }
   return Array.isArray(data) ? (data as CrmParticipant[]) : []
 }
 

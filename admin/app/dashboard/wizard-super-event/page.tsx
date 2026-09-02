@@ -318,7 +318,12 @@ function ZoneSuppression() {
       setRetour({ ok: false, texte: `Le nom saisi ne correspond pas. Attendu exactement : « ${r.attendu} ».` })
       return
     }
-    setRetour({ ok: false, texte: 'Super event introuvable.' })
+    setRetour({
+      ok: false,
+      texte: r.message
+        ? `La suppression a échoué — ${r.message}`
+        : 'Super event introuvable.',
+    })
   }
 
   return (

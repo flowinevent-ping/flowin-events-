@@ -172,19 +172,10 @@ function Wizard() {
       <PageHeader
         title="Nouvel événement"
         subtitle={d.nom || 'Brouillon'}
-        actions={
-          <>
-            <button className="sa-btn" onClick={() => router.push('/dashboard/events')}>Annuler</button>
-            <button
-              className="sa-btn primary"
-              onClick={enregistrement}
-              disabled={envoi || problemes.length > 0}
-              title={problemes.length ? problemes[0].message : undefined}
-            >
-              {envoi ? 'Enregistrement…' : 'Créer l\u2019événement'}
-            </button>
-          </>
-        }
+        /* Un seul bouton de creation, en bas du parcours, la ou on arrive apres
+           le recapitulatif. En garder un second en haut faisait deux boutons
+           « Creer l evenement » a l ecran, avec deux regles differentes. */
+        actions={<button className="sa-btn" onClick={() => router.push('/dashboard/events')}>Annuler</button>}
       />
 
       {retour && (

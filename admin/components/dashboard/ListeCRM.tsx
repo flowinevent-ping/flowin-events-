@@ -24,7 +24,7 @@
  * deja chargées par l'appelant, il les filtre, les trie et les affiche.
  */
 
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, PageHeader, SearchBar } from './DashboardUI'
 
 /** Une colonne : ce qu'on affiche, et sur quelle valeur on trie et on cherche. */
@@ -87,6 +87,16 @@ export interface ListeCRMProps<T> {
   entete?: React.ReactNode
   videTitre?: string
   videDesc?: string
+  /**
+   * Les lignes reellement visibles apres recherche, filtre et tri.
+   * INDISPENSABLE : la recherche et les boutons de filtre vivent DANS ce
+   * composant. Sans ce rappel, un ecran qui calcule ses propres totaux ou
+   * exporte un CSV le ferait sur la liste complete pendant que l utilisateur
+   * en voit trois lignes — un fichier faux part alors chez un partenaire.
+   */
+  onVisibles?: (lignes: T[]) => void
+  /** Certaines lignes ne menent nulle part (pas de fiche liee) : pas de curseur main. */
+  ligneCliquable?: (l: T) => boolean
 }
 
 const texte = (v: unknown) => (v === null || v === undefined ? '' : String(v))
@@ -95,7 +105,7 @@ export default function ListeCRM<T>({
   titre, sansEntete = false, sousTitre, lignes, colonnes, cle, onLigne,
   triDefaut, triDescendant = false, placeholderRecherche = 'Rechercher…',
   filtres, selecteurs, categorie, sousCategorie, legende, actions, entete,
-  videTitre = 'Aucun résultat', videDesc,
+  videTitre = 'Aucun résultat', videDesc, onVisibles, ligneCliquable,
 }: ListeCRMProps<T>) {
   const [q, setQ] = useState('')
   const [filtre, setFiltre] = useState(filtres?.[0]?.id ?? '')
@@ -133,7 +143,9 @@ export default function ListeCRM<T>({
       if (aVide) return 1
       if (bVide) return -1
       if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * sens
-      return texte(va).localeCompare(texte(vb), 'fr', { numeric: true }) * sens
+      // Pas de `numeric:true` : sur des dates ISO il classerait « …02.9 » apres
+      // « …02.12 ». Le tri numerique reel est deja couvert par la branche `number`.
+      return texte(va).localeCompare(texte(vb), 'fr') * sens
     })
   }, [lignes, filtres, filtre, q, colonnes, triCol, triAsc])
 
@@ -151,12 +163,34 @@ export default function ListeCRM<T>({
       if (!g.sous[s.id]) { g.sous[s.id] = { label: s.label, lignes: [] }; g.sousOrdre.push(s.id) }
       g.sous[s.id].lignes.push(l)
     })
-    return ordre.map(id => ({
-      id,
-      label: par[id].label,
-      sous: par[id].sousOrdre.map(sid => ({ id: sid, label: par[id].sous[sid].label, lignes: par[id].sous[sid].lignes })),
-    }))
-  }, [visibles, categorie, sousCategorie])
+    /* L ordre des GROUPES suit le tri courant, pas l ordre d apparition : sinon
+       cliquer sur une colonne qui sert de categorie affiche la fleche et ne
+       change rien, parce que le regroupement a deja fige l ordre. */
+    const col = colonnes.find(c => c.id === triCol)
+    const sens = triAsc ? 1 : -1
+    const valeurTri = (l: T | undefined) => (l && col ? texte(col.valeur(l)) : '')
+    const trierGroupes = (a: { lignes: T[] }, b: { lignes: T[] }) =>
+      valeurTri(a.lignes[0]).localeCompare(valeurTri(b.lignes[0]), 'fr') * sens
+
+    return ordre
+      .map(id => ({
+        id,
+        label: par[id].label,
+        sous: par[id].sousOrdre
+          .map(sid => ({ id: sid, label: par[id].sous[sid].label, lignes: par[id].sous[sid].lignes }))
+          .sort(trierGroupes),
+      }))
+      .sort((a, b) => trierGroupes({ lignes: a.sous[0]?.lignes ?? [] }, { lignes: b.sous[0]?.lignes ?? [] }))
+  }, [visibles, categorie, sousCategorie, colonnes, triCol, triAsc])
+
+  /* Remonte les lignes visibles au parent, apres le rendu. Un `useRef` evite de
+     rappeler le parent quand le tableau n a pas change d identite. */
+  const dernieres = useRef<T[] | null>(null)
+  useEffect(() => {
+    if (!onVisibles || dernieres.current === visibles) return
+    dernieres.current = visibles
+    onVisibles(visibles)
+  }, [visibles, onVisibles])
 
   const nb = visibles.length
   const sousTitreCalcule = lignes === null
@@ -167,15 +201,18 @@ export default function ListeCRM<T>({
     <td key={c.id} style={c.style}>{c.rendu ? c.rendu(l) : (texte(c.valeur(l)) || '—')}</td>
   ))
 
-  const corps = (lot: T[]) => lot.map(l => (
-    <tr
-      key={cle(l)}
-      onClick={onLigne ? () => onLigne(l) : undefined}
-      style={{ cursor: onLigne ? 'pointer' : 'default' }}
-    >
-      {cellules(l)}
-    </tr>
-  ))
+  const corps = (lot: T[]) => lot.map(l => {
+    const ouvrable = !!onLigne && (ligneCliquable ? ligneCliquable(l) : true)
+    return (
+      <tr
+        key={cle(l)}
+        onClick={ouvrable ? () => onLigne!(l) : undefined}
+        style={{ cursor: ouvrable ? 'pointer' : 'default' }}
+      >
+        {cellules(l)}
+      </tr>
+    )
+  })
 
   return (
     <>

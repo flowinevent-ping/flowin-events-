@@ -50,18 +50,29 @@ export default function Page() {
      super event a la fois. */
   const [se, setSe] = useState('')
   const [pro, setPro] = useState('')
+  const [erreur, setErreur] = useState('')
 
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
   useEffect(() => {
     let vivant = true
-    setListe(null)
-    fetchCrmParticipants(se || null).then(l => { if (vivant) setListe(l) })
+    setListe(null); setErreur('')
+    fetchCrmParticipants(se || null)
+      .then(l => { if (vivant) setListe(l) })
+      // Sans ce message, un echec afficherait « aucun participant » — on
+      // croirait l operation vide au lieu de voir qu elle n a pas repondu.
+      .catch(e => { if (vivant) { setErreur(String(e?.message ?? e)); setListe([]) } })
     return () => { vivant = false }
   }, [se])
 
   const visibles = useMemo(
     () => (liste === null ? null : (pro ? liste.filter(p => p.pro_id === pro) : liste)),
     [liste, pro])
+
+  /* La recherche et les boutons de filtre vivent DANS <ListeCRM>. Sans ce
+     rappel, les tuiles et l export CSV porteraient sur la liste complete
+     pendant qu on en voit trois lignes a l ecran — et un CSV faux part chez
+     un partenaire. `affichees` est donc ce que l utilisateur voit vraiment. */
+  const [affichees, setAffichees] = useState<CrmParticipant[]>([])
 
   const pros = useMemo(() => {
     const vus: Record<string, string> = {}
@@ -72,7 +83,7 @@ export default function Page() {
   }, [liste])
 
   const stats = useMemo(() => {
-    const l = visibles ?? []
+    const l = affichees
     const parJoueur: Record<string, { optin: boolean; parties: number }> = {}
     l.forEach(p => {
       const j = parJoueur[p.joueur_id] ?? { optin: false, parties: 0 }
@@ -90,10 +101,10 @@ export default function Page() {
       pct: ids.length ? Math.round(optin / ids.length * 100) : 0,
       moyenne: ids.length ? (parties / ids.length).toFixed(1) : '0',
     }
-  }, [visibles])
+  }, [affichees])
 
   function exporterCsv() {
-    const l = visibles ?? []
+    const l = affichees
     if (!l.length) return
     const entetes = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Code postal', 'Ville', 'Opt-in',
       'Source', 'Super event', 'Station', 'Pro', 'Parties', 'Tickets', 'Première', 'Dernière']
@@ -134,7 +145,7 @@ export default function Page() {
     { id: 'pro_nom', label: 'Pro', valeur: p => p.pro_nom, style: { fontSize: 12.5 } },
     {
       id: 'nb_parties', label: 'Parties', valeur: p => p.nb_parties,
-      rendu: p => <span className="sa-chip past">{p.nb_parties}</span>,
+      rendu: p => <span className="sa-chip">{p.nb_parties}</span>,
     },
     {
       id: 'derniere', label: 'Activité', valeur: p => p.derniere, horsRecherche: true,
@@ -172,7 +183,8 @@ export default function Page() {
           }] : undefined}
           categorie={p => ({ id: p.super_event_id ?? '_hors', label: p.super_event_nom })}
           sousCategorie={p => ({ id: p.event_id, label: p.event_nom })}
-          actions={<button className="sa-btn sm" onClick={exporterCsv} disabled={!(visibles ?? []).length}>⬇ Export CSV</button>}
+          onVisibles={setAffichees}
+          actions={<button className="sa-btn sm" onClick={exporterCsv} disabled={!affichees.length}>⬇ Export CSV</button>}
           legende={
             <>
               Une ligne = <b>un participant sur une station</b>. Quelqu&apos;un passé à trois
@@ -182,6 +194,11 @@ export default function Page() {
           }
           entete={
             <>
+              {erreur && (
+                <div className="sa-alert warn" style={{ marginBottom: 12, fontSize: 12.5 }}>
+                  La liste n&apos;a pas pu être chargée — {erreur}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
                 <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--sa-muted)', marginRight: 4 }}>
                   Portée

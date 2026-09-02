@@ -233,6 +233,9 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
                           </div>
                           <div className="ligne">{c.adresse || '—'}</div>
                           <div className="ligne">{c.tel || '—'}</div>
+                          {/* Le QR etait sur chaque ligne de l ancienne liste :
+                              il reste visible sans avoir a changer de vue. */}
+                          <div className="ligne">QR <code className="sa-code">{c.qr_token || '—'}</code></div>
                           <div className="pieds">
                             <span className={`sa-chip ${c.status === 'paye' || c.paiement === 'paye' ? 'live' : 'warn'}`}>
                               {c.paiement || c.status || '—'}

@@ -78,7 +78,9 @@ export default function DashboardPage() {
 
   const kpis: { val: number; lbl: string; sub: string; href: string }[] = [
     { val: joueurs.length, lbl: 'Joueurs CRM', sub: `${totalOptins} opt-in · ${totalGagnants} gagnants`, href: '/dashboard/joueurs' },
-    { val: reels.length, lbl: 'Events', sub: `${nbLive} en cours · ${nbUpcoming} à venir`, href: '/dashboard/events' },
+    // `filtres`, pas `reels` : avec une portee active, le total doit compter ce
+    // que le kanban affiche dessous, pas tout Flowin.
+    { val: filtres.length, lbl: 'Events', sub: `${nbLive} en cours · ${nbUpcoming} à venir`, href: '/dashboard/events' },
     { val: partenaires.length, lbl: 'Partenaires', sub: `${lots.length} lots · ${pros.length} pros`, href: '/dashboard/partenaires' },
     { val: totalOptins, lbl: 'Opt-in newsletter', sub: `${joueurs.length ? Math.round(totalOptins / joueurs.length * 100) : 0}% de taux`, href: '/dashboard/nds-participants' },
   ]

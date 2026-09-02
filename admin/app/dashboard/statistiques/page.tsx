@@ -151,8 +151,11 @@ export default function Page() {
 
   const VUES: { id: string; icone: string; titre: string; chiffre: string | number; sous: string }[] = [
     { id: 'reference', icone: '🔢', titre: 'Chiffres de référence', chiffre: t.joueurs, sous: 'joueurs · publiables' },
-    { id: 'stations', icone: '📡', titre: 'Tracking par station', chiffre: nbStations + nbCommerces, sous: `${nbStations} festival · ${nbCommerces} partenaires` },
-    { id: 'activite', icone: '🎮', titre: 'Activité par jour', chiffre: lignes.length, sous: 'lignes jour × station' },
+    /* `parties` et `clics_stations` etaient dans l ancien bandeau de 5 KPI :
+       ils doivent rester lisibles quelque part, sinon le total de parties du
+       festival disparait purement et simplement de l ecran. */
+    { id: 'stations', icone: '📡', titre: 'Tracking par station', chiffre: t.clics_stations, sous: `clics · ${nbStations} festival, ${nbCommerces} partenaires` },
+    { id: 'activite', icone: '🎮', titre: 'Activité par jour', chiffre: t.parties, sous: `parties · ${lignes.length} lignes jour × station` },
     { id: 'pics', icone: '🔥', titre: 'Pics de jeu', chiffre: pics?.pic?.parties ?? '—', sous: pics?.pic ? `le ${fr(pics.pic.soiree)} à ${pics.pic.heure}h` : 'aucun pic' },
     { id: 'partenaires', icone: '🔗', titre: 'Retombées partenaires', chiffre: t.clics_partenaires, sous: `${t.clics_depuis_reseaux} depuis les réseaux` },
     { id: 'audience', icone: '👥', titre: "Profil de l'audience", chiffre: t.joueurs, sous: 'genre · âge · découverte' },
