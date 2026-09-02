@@ -22,6 +22,7 @@ import {
   brouillonVide, controler, enregistrer, nbJours, statutDeduit, urlQr,
   type BrouillonEvent, type BrouillonLot,
 } from '@/lib/wizard'
+import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { Module } from '@/lib/types'
 
 const ETAPES = [
@@ -127,6 +128,17 @@ function Wizard() {
     }))
   }, [params])
   const problemes = useMemo(() => controler(d), [d])
+
+  /* Un pro pre-rempli qui n existe pas dans la liste rend le <select> VIDE sans
+     rien signaler : `controler` ne teste que « pro_id non vide ». Le SA croirait
+     a un bug d affichage et validerait un event rattache a un pro fantome. */
+  const proInconnu = !!d.pro_id && pros.length > 0 && !pros.some(p => p.id === d.pro_id)
+
+  /* Le super event etait ecrit en base mais n apparaissait NULLE PART dans le
+     wizard : arrivant depuis une demande, le SA ne pouvait ni le verifier ni le
+     corriger. Il est desormais affiche et modifiable. */
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
   const jours = nbJours(d)
 
   const majLot = (i: number, champs: Partial<BrouillonLot>) =>
@@ -230,11 +242,23 @@ function Wizard() {
             {ligne("Nom de l'événement", true,
               <input className="sa-input" style={{ width: '100%' }} value={d.nom}
                 onChange={e => maj({ nom: e.target.value })} placeholder="Nuits du Sud 2027…" />)}
+            {proInconnu && (
+              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, background: '#FEF3C7', color: '#92400E', fontSize: 11.5 }}>
+                ⚠ Le pro pré-rempli (<b>{d.pro_id}</b>) est introuvable dans la liste —
+                sélectionnez-le manuellement ci-dessous.
+              </div>
+            )}
             {ligne('Pro client', true,
-              <select className="sa-input" style={{ width: '100%' }} value={d.pro_id}
+              <select className="sa-input" style={{ width: '100%' }} value={proInconnu ? '' : d.pro_id}
                 onChange={e => maj({ pro_id: e.target.value })}>
                 <option value="">— choisir —</option>
                 {pros.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+              </select>)}
+            {ligne('Super event', false,
+              <select className="sa-input" style={{ width: '100%' }} value={d.super_event_id ?? ''}
+                onChange={e => maj({ super_event_id: e.target.value || null })}>
+                <option value="">— aucun —</option>
+                {supers.map(se => <option key={se.id} value={se.id}>{se.nom}</option>)}
               </select>)}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {ligne('Date de début', true,
@@ -381,6 +405,7 @@ function Wizard() {
             {([
               ['Nom', d.nom || '—'],
               ['Pro client', pros.find(p => p.id === d.pro_id)?.nom ?? '—'],
+              ['Super event', supers.find(se => se.id === d.super_event_id)?.nom ?? '—'],
               ['Module', MODULES.find(m => m.id === d.module)?.nom ?? '—'],
               ['Dates', d.date_d ? `${d.date_d}${d.date_f && d.date_f !== d.date_d ? ` → ${d.date_f}` : ''} (${jours} j)` : '—'],
               ['Lieu', d.lieu || '—'],

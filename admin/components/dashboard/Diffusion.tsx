@@ -33,6 +33,8 @@ type Props = {
   sousTitre?: string
   /** Version reduite : QR plus petit, pas d'apercu telephone. */
   compact?: boolean
+  /** Vignette seule : le QR, sans lien ni boutons. Pour les listes. */
+  vignette?: number
 }
 
 /** Nom de fichier sur : pas d'accent, pas d'espace, pas de separateur de chemin. */
@@ -56,41 +58,51 @@ function telecharger(nom: string, blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(href), 4000)
 }
 
-export default function Diffusion({ url, titre, sousTitre, compact = false }: Props) {
-  const [png, setPng] = useState('')
-  const [svg, setSvg] = useState('')
+export default function Diffusion({ url, titre, sousTitre, compact = false, vignette }: Props) {
+  /* L etat porte SON url : sans ca, en changeant d event dans un drawer qui
+     n est jamais demonte, on affiche une frame le QR du precedent sous le nom
+     et le lien du nouveau — avec les boutons de telechargement actifs. */
+  const [qr, setQr] = useState<{ url: string; png: string; svg: string } | null>(null)
+  const png = qr && qr.url === url ? qr.png : ''
+  const svg = qr && qr.url === url ? qr.svg : ''
   const [erreur, setErreur] = useState('')
   const [copie, setCopie] = useState(false)
   const [apercu, setApercu] = useState(false)
 
-  const taille = compact ? 132 : 208
+  const taille = vignette ?? (compact ? 132 : 208)
 
   useEffect(() => {
     if (!url) return
     let vivant = true
     setErreur('')
-    setPng(''); setSvg('')
     import('qrcode')
       .then(async mod => {
         const QR = mod.default ?? mod
         const [p, s] = await Promise.all([
           QR.toDataURL(url, { width: 1024, margin: 2, errorCorrectionLevel: 'M' }),
-          QR.toString(url, { type: 'svg', margin: 2, errorCorrectionLevel: 'M' }),
+          QR.toString(url, { type: 'svg', width: 1024, margin: 2, errorCorrectionLevel: 'M' }),
         ])
         if (!vivant) return
-        setPng(p); setSvg(s as string)
+        setQr({ url, png: p, svg: s as string })
       })
       .catch(() => { if (vivant) setErreur("Le QR n'a pas pu être généré dans ce navigateur.") })
     return () => { vivant = false }
   }, [url])
 
   function copier() {
-    navigator.clipboard?.writeText(url)
-    setCopie(true)
-    setTimeout(() => setCopie(false), 1800)
+    setErreur('')
+    const p = navigator.clipboard?.writeText(url)
+    if (!p) { setErreur('Copie impossible dans ce navigateur.'); return }
+    // Ne dire « copié » que si ça l a vraiment été : un accusé de reception faux
+    // est pire que pas d accusé du tout.
+    p.then(() => {
+      setCopie(true)
+      setTimeout(() => setCopie(false), 1800)
+    }).catch(() => setErreur('Copie impossible dans ce navigateur.'))
   }
 
   function dlPng() {
+    setErreur('')
     if (!png) return
     // dataURL -> octets, sans refaire un aller-retour reseau.
     const b64 = png.split(',')[1]
@@ -101,12 +113,14 @@ export default function Diffusion({ url, titre, sousTitre, compact = false }: Pr
   }
 
   function dlSvg() {
+    setErreur('')
     if (!svg) return
     telecharger(`qr-${slug(titre)}.svg`, new Blob([svg], { type: 'image/svg+xml' }))
   }
 
   /** Affiche A4 : QR vectoriel, donc net a l'impression quelle que soit la taille. */
   function affiche() {
+    setErreur('')
     if (!svg) return
     const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
@@ -145,16 +159,23 @@ export default function Diffusion({ url, titre, sousTitre, compact = false }: Pr
 
   const btn: React.CSSProperties = { fontSize: 12 }
 
+  const cadre = (
+    <div style={{
+      width: taille, height: taille, margin: vignette ? 0 : '0 auto', display: 'grid', placeItems: 'center',
+      borderRadius: vignette ? 6 : 12, border: '1px solid var(--sa-border)', background: '#fff',
+      padding: vignette ? 3 : 8, flexShrink: 0,
+    }}>
+      {png
+        ? <img src={png} alt={`QR code — ${titre}`} style={{ width: '100%', height: '100%' }} />
+        : <span style={{ fontSize: 10, color: 'var(--sa-muted)' }}>{erreur ? '—' : '…'}</span>}
+    </div>
+  )
+
+  if (vignette) return cadre
+
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{
-        width: taille, height: taille, margin: '0 auto', display: 'grid', placeItems: 'center',
-        borderRadius: 12, border: '1px solid var(--sa-border)', background: '#fff', padding: 8,
-      }}>
-        {png
-          ? <img src={png} alt={`QR code — ${titre}`} style={{ width: '100%', height: '100%' }} />
-          : <span style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{erreur ? '—' : 'Génération…'}</span>}
-      </div>
+      {cadre}
 
       <div style={{
         marginTop: 12, fontSize: 11.5, background: 'var(--sa-subtle)', padding: '8px 12px',
@@ -185,7 +206,12 @@ export default function Diffusion({ url, titre, sousTitre, compact = false }: Pr
           <div style={{ borderRadius: 30, padding: 9, background: '#0F172A' }}>
             <div style={{ borderRadius: 24, overflow: 'hidden', background: '#fff', width: 236, height: 472 }}>
               <iframe
-                src={url.includes('?') ? `${url}&preview=1&bar=0` : `${url}?preview=1&bar=0`}
+                /* URL relative : en preview Vercel ou en local, on veut voir CE
+                   deploiement, pas la production. preview=1 empeche le comptage. */
+                src={(() => {
+                  const rel = url.replace(/^https?:\/\/[^/]+/, '')
+                  return rel.includes('?') ? `${rel}&preview=1&bar=0` : `${rel}?preview=1&bar=0`
+                })()}
                 title={`Aperçu — ${titre}`}
                 loading="lazy"
                 style={{

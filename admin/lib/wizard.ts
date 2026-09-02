@@ -199,6 +199,13 @@ export async function enregistrer(
   if (d.super_event_id) {
     const { data, error } = await supabase
       .from('super_events').select('events').eq('id', d.super_event_id).maybeSingle()
+    /* Avant : un echec de lecture faisait sauter le rattachement EN SILENCE, et
+       le message affiche restait « Evenement cree ». L event l est bien, mais la
+       liste `super_events.events` ne le contenait pas — ecart invisible. On ne
+       transforme pas ca en echec (l event existe vraiment), on le DIT. */
+    if (error || !data) {
+      fait.push('⚠ rattachement au super event à faire à la main')
+    }
     if (!error && data) {
       const actuels: string[] = (data as { events: string[] | null }).events ?? []
       if (!actuels.includes(evId)) {

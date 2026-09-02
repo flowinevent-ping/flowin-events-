@@ -115,7 +115,7 @@ export default function Page() {
             <>
               <Link href="/dashboard/wizard-event" className="sa-btn primary sm">✨ Nouvel event</Link>
               {/* L autre porte d entree : un pro qui demande a participer depuis /pro/rejoindre. */}
-              <Link href="/dashboard/demandes-rattachement" className="sa-btn sm" style={{ marginLeft: 8 }}>🤝 Demandes des pros</Link>
+              <Link href="/dashboard/demandes-rattachement" className="sa-btn sm">🤝 Demandes de participation</Link>
             </>
           }
         />

@@ -104,6 +104,16 @@ export async function trackVisite(page: string, eventId?: string, etape?: string
   if (typeof window === 'undefined') return
   try {
     const params = new URLSearchParams(window.location.search)
+    /* Un APERCU n est pas une visite. Les cadres telephone du dashboard SA
+       (ParcoursMobil, Diffusion) chargent le VRAI parcours dans une iframe avec
+       ?preview=1 : sans ce garde-fou, chaque ouverture d apercu ecrivait une
+       ligne `visites` avec etape IS NULL, c est-a-dire un FLASH, sur l event
+       reel. Constate en base le 02/09 : 52 flashs fabriques par les apercus,
+       dont 48 sur NDS 2026 (1 seul dans la periode officielle, donc les
+       chiffres publies etaient justes ; c est l historique complet qui etait
+       gonfle). Seul /parcours/nds2026 testait `preview`, les 6 autres modules
+       non : le garde-fou est mis ICI, une fois, pour tous. */
+    if (params.has('preview')) return
     const source = params.get('source') || params.get('utm_source') || 'direct'
     const ua = navigator.userAgent || ''
     const device = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) ? 'mobile' : 'desktop'

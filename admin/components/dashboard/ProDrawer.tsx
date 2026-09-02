@@ -292,6 +292,9 @@ function QrLiensEvent({ eventId, eventNom }: { eventId: string; eventNom: string
       {stations.map(s => (
         <div key={s.id} style={{ padding: '7px 0', borderBottom: '1px solid var(--sa-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* La vignette existait avant (via api.qrserver.com) : elle est
+                conservee, mais generee localement comme le reste. */}
+            <Diffusion vignette={44} url={qrUrl(s.source_qr)} titre={s.nom} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: 12.5 }}>{s.nom}</div>
               <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>?source={s.source_qr}</div>

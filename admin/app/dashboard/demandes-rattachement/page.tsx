@@ -36,6 +36,7 @@ export default function Page() {
   const [lignes, setLignes] = useState<Ligne[]>([])
   const [charge, setCharge] = useState(true)
   const [enCours, setEnCours] = useState<number | null>(null)
+  const [erreur, setErreur] = useState('')
   const { tri, onSort } = useTri<Col>('created_at')
   const [q, setQ] = useState('')
 
@@ -54,8 +55,12 @@ export default function Page() {
 
   async function traiter(id: number, statut: 'approuve' | 'refuse') {
     setEnCours(id)
+    setErreur('')
     const { error } = await supabase.from('demandes_rattachement_super_event').update({ statut, traite_at: new Date().toISOString() }).eq('id', id)
-    if (!error) setLignes(lignes.map(l => l.id === id ? { ...l, statut, traite_at: new Date().toISOString() } : l))
+    // Sans ce message, un echec ne produisait RIEN a l ecran : le statut restait
+    // « En attente » et personne ne pouvait savoir pourquoi.
+    if (error) setErreur(`Statut non enregistré — ${error.message}`)
+    else setLignes(lignes.map(l => l.id === id ? { ...l, statut, traite_at: new Date().toISOString() } : l))
     setEnCours(null)
   }
 
@@ -77,6 +82,10 @@ export default function Page() {
           title="🤝 Demandes de participation"
           subtitle={`${lignes.length} demande${lignes.length > 1 ? 's' : ''}${nbEnAttente ? ` · ${nbEnAttente} en attente` : ''}`}
         />
+
+        {erreur && (
+          <div style={{ background: '#FEE2E2', color: '#991B1B', fontSize: 12.5, padding: '9px 12px', borderRadius: 9, marginBottom: 10 }}>{erreur}</div>
+        )}
 
         <SearchBar value={q} onChange={setQ} placeholder="Rechercher un pro, un super event, une offre…" />
 
