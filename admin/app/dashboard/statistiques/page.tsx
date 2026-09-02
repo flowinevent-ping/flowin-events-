@@ -18,6 +18,7 @@ import {
   type Rapport, type Pics, type SuperEvent,
 } from '@/lib/nds'
 
+import { usePorteeInitiale } from '@/lib/portee'
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
 
 export default function Page() {
@@ -26,6 +27,12 @@ export default function Page() {
      Les memes indicateurs valent pour toute edition presente ou future. */
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [se, setSe] = useState<string>('')
+  /* Portee recue de la fiche qui nous a ouverts : on arrive DEJA cadre sur son
+     super event. Sans ca, ouvrir ce module depuis « Jazz a Nice 2027 » affichait
+     Nuits du Sud. Les boutons de l ecran restent maitres ensuite. */
+  const porteeUrl = usePorteeInitiale()
+  useEffect(() => { if (porteeUrl.se) setSe(porteeUrl.se) }, [porteeUrl.se])
+
   const [r, setR] = useState<Rapport | null>(null)
   const [pics, setPics] = useState<Pics | null>(null)
   const [charge, setCharge] = useState(true)

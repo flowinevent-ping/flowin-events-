@@ -109,7 +109,20 @@ let ROWS=[], FILTER="all", Q="";
 
 function eur(n){ n=Number(n||0); return n.toLocaleString('fr-FR')+' €'; }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function eventLabel(se){ var m={'se-nds-2026':'Nuits du Sud 2026'}; return m[se]||se||'—'; }
+/* PORTEE — ?se=<id> cadre la liste sur une operation. Ouvert depuis le menu,
+   sans parametre, la liste reste generale : c est le meme module, pas une copie.
+   NB : cette liste ne filtrait sur rien ; le 'se-nds-2026' qui trainait ici
+   n etait qu un libelle en dur, remplace par le vrai nom lu en base. */
+var PORTEE_SE = new URLSearchParams(location.search).get('se') || '';
+var SE_NOMS = {};
+function eventLabel(se){ return SE_NOMS[se] || se || '—'; }
+async function chargerNomsSuperEvents(){
+  try{
+    const r = await fetch(SB+"/rest/v1/super_events?select=id,nom", {headers:H()});
+    if(!r.ok) return;
+    (await r.json()).forEach(function(x){ SE_NOMS[x.id] = x.nom; });
+  }catch(e){ /* best-effort : sans les noms on affiche l identifiant */ }
+}
 function isSigne(s){ return s==='signe'||s==='signé'||s==='valide'||s==='validé'||s==='paye'||s==='payé'; }
 
 async function load(){
@@ -140,7 +153,10 @@ async function load(){
       open:'/facture-nds.html?num='+encodeURIComponent(f.numero),
       devisRef:c.devis_ref||c.bon_id||null
     };});
+    await chargerNomsSuperEvents();
     ROWS=B.concat(F);
+    // Cadrage sur l operation, quand on arrive depuis sa fiche.
+    if(PORTEE_SE) ROWS=ROWS.filter(function(r){ return r.event===PORTEE_SE; });
   }catch(e){ box.innerHTML='<div class="empty">Impossible de charger ('+e.message+').</div>'; return; }
   render();
 }

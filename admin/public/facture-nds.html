@@ -402,7 +402,11 @@
   function addDays(iso,days){ var d=new Date(String(iso).slice(0,10)); d.setDate(d.getDate()+days); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
   function setStatus(t,c){ var s=$('status'); if(s){ s.textContent=t||''; s.className='statusmsg'+(c?(' '+c):''); } }
 
-  var STATE={ numero:null, devisId:null, edition:1, superEvent:'se-nds-2026', cibleId:null, dateEmission:today(), existing:false };
+  /* PORTEE — ?se=<id> fixe l operation d une facture creee de zero. Chargee
+     depuis un bon ou une facture existante, elle prend celle de la piece
+     (voir plus bas) : le defaut ne sert qu a la creation. */
+  var PORTEE_SE = new URLSearchParams(location.search).get('se') || 'se-nds-2026';
+  var STATE={ numero:null, devisId:null, edition:1, superEvent:PORTEE_SE, cibleId:null, dateEmission:today(), existing:false };
 
   function compute(){
     var qte=parseNum($('l_qte').value)||1;
@@ -436,7 +440,7 @@
   }
 
   function fromDevis(b){
-    STATE.devisId=b.id; STATE.superEvent=b.super_event_id||'se-nds-2026';
+    STATE.devisId=b.id; STATE.superEvent=b.super_event_id||PORTEE_SE;
     STATE.cibleId='p-bc-'+b.id;
     fillClient({raison_sociale:b.raison_sociale,adresse:b.adresse,cp:b.cp,ville:b.ville,siret:b.siret,email:b.email});
     $('l_label').value=b.offre_label||b.offre||'Partenariat NDS 2026';
@@ -449,7 +453,7 @@
     var cl=f.client||{};
     STATE.devisId=cl.devis_ref||cl.bon_id||null;
     STATE.edition=cl.edition||1;
-    STATE.superEvent=f.super_event_id||'se-nds-2026';
+    STATE.superEvent=f.super_event_id||PORTEE_SE;
     STATE.cibleId=f.cible_id||null;
     STATE.dateEmission=f.date_emission||today();
     fillClient(cl);

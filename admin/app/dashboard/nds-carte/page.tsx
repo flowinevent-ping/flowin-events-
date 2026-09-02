@@ -29,6 +29,7 @@ import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { supabase } from '@/lib/supabase'
 import { fetchSuperEvents, SE_DEFAUT, type SuperEvent } from '@/lib/nds'
 
+import { usePorteeInitiale } from '@/lib/portee'
 /* Vence, centre de la carte par defaut */
 const CENTRE: [number, number] = [43.7229, 7.1116]
 
@@ -76,6 +77,12 @@ async function enregistrerPosition(couche: Couche, id: string, lat: number, lng:
 
 export default function Page() {
   const [se, setSe] = useState<string>(SE_DEFAUT)
+  /* Portee recue de la fiche qui nous a ouverts : on arrive DEJA cadre sur son
+     super event. Sans ca, ouvrir ce module depuis « Jazz a Nice 2027 » affichait
+     Nuits du Sud. Les boutons de l ecran restent maitres ensuite. */
+  const porteeUrl = usePorteeInitiale()
+  useEffect(() => { if (porteeUrl.se) setSe(porteeUrl.se) }, [porteeUrl.se])
+
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [couche, setCouche] = useState<Couche>('stations')
   const [stations, setStations] = useState<Point[]>([])

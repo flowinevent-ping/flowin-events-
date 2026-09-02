@@ -24,6 +24,7 @@ import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { DrawerTabs, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide, sousOngletActif, type SousOnglet } from './SousOnglets'
 import { TableauStations } from './TableauStations'
+import { lienPortee } from '@/lib/portee'
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—')
 
@@ -57,12 +58,21 @@ const ONGLETS: { id: string; label: string; sous: SousOnglet[] }[] = [
   ] },
 ]
 
-function Raccourci({ href, titre, desc, statique }: { href: string; titre: string; desc: string; statique?: boolean }) {
+/**
+ * Un module ouvert DEPUIS cette fiche, deja cadre sur elle.
+ * `se` est ajoute a l URL par <Raccourci> lui-meme : c est ce qui manquait —
+ * les 11 raccourcis ouvraient la page GENERALE, donc on cliquait « Tirage »
+ * depuis « Jazz a Nice 2027 » et on tombait sur les tirages de Nuits du Sud.
+ */
+function Raccourci({ href, titre, desc, statique, se }: { href: string; titre: string; desc: string; statique?: boolean; se?: string }) {
   const router = useRouter()
   return (
     <button
       className="sa-ligne"
-      onClick={() => { if (statique) window.location.href = href; else router.push(href) }}
+      onClick={() => {
+        const url = lienPortee(href, { se })
+        if (statique) window.location.href = url; else router.push(url)
+      }}
     >
       <span>
         <span className="n">{titre}</span>
@@ -235,9 +245,9 @@ export default function SuperEventDrawer() {
               La liste nominative, la recherche, les filtres et l&apos;export vivent sur leur page —
               elle est déjà cadrée sur ce super event.
             </p>
-            <Raccourci href="/dashboard/nds-participants" titre="Participants du super event" desc="Recherche, opt-in, fidèles, export CSV" />
-            <Raccourci href="/dashboard/joueurs" titre="Tous les joueurs" desc="Base complète, toutes opérations" />
-            <Raccourci href="/dashboard/crm-landing" titre="Contacts landing" desc="Contacts capturés par les pages publiques" />
+            <Raccourci se={seId} href="/dashboard/nds-participants" titre="Participants du super event" desc="Recherche, opt-in, fidèles, export CSV" />
+            <Raccourci se={seId} href="/dashboard/joueurs" titre="Tous les joueurs" desc="Base complète, toutes opérations" />
+            <Raccourci se={seId} href="/dashboard/crm-landing" titre="Contacts landing" desc="Contacts capturés par les pages publiques" />
           </>
         )}
 
@@ -263,9 +273,9 @@ export default function SuperEventDrawer() {
 
         {ong.id === 'lots' && sActif === 'acces' && (
           <>
-            <Raccourci href="/dashboard/nds-lots" titre="Stock des lots" desc="Quantités configurées et restantes" />
-            <Raccourci href="/dashboard/gagnants" titre="Liste des gagnants" desc="Tirages, confirmations, retraits" />
-            <Raccourci href="/tirage-nds.html" titre="Tirage au sort" desc="Outil de tirage (HTML autonome)" statique />
+            <Raccourci se={seId} href="/dashboard/nds-lots" titre="Stock des lots" desc="Quantités configurées et restantes" />
+            <Raccourci se={seId} href="/dashboard/gagnants" titre="Liste des gagnants" desc="Tirages, confirmations, retraits" />
+            <Raccourci se={seId} href="/tirage-nds.html" titre="Tirage au sort" desc="Outil de tirage (HTML autonome)" statique />
           </>
         )}
 
@@ -287,7 +297,11 @@ export default function SuperEventDrawer() {
                 </button>
               ))}
               <div style={{ marginTop: 14 }}>
-                <Raccourci href="/dashboard/demandes-rattachement" titre="Demandes de participation" desc="Commerces qui demandent à rejoindre une opération" />
+                <Raccourci se={seId} href="/dashboard/demandes-rattachement" titre="Demandes de participation" desc="Commerces qui demandent à rejoindre une opération" />
+                {/* Le commercial de CETTE operation : les memes outils que dans
+                    le menu, mais deja cadres sur elle. */}
+                <Raccourci se={seId} href="/bons-commande-liste.html" titre="Bons de commande & factures" desc="Ce qui a été signé et facturé sur cette opération" statique />
+                <Raccourci se={seId} href="/facture-nds.html" titre="Générer une facture" desc="Nouvelle facture rattachée à cette opération" statique />
               </div>
             </>
           )
@@ -299,10 +313,10 @@ export default function SuperEventDrawer() {
               Ces quatre rapports existent et fonctionnent. Ils sont regroupés ici, ils ne
               sont pas refaits : le calcul, les bornes et les colonnes restent les leurs.
             </p>
-            <Raccourci href="/dashboard/nds-resultat" titre="Résultat journalier" desc="Jour par jour, station par station" />
-            <Raccourci href="/dashboard/rapport-points" titre="Rapport détaillé" desc="Par point de jeu, bonus et sondage landing" />
-            <Raccourci href="/dashboard/statistiques" titre="Statistiques & résultats" desc="Vue complète, chiffres publiables, pics" />
-            <Raccourci href="/dashboard/track-qr" titre="Origines du trafic" desc="D'où viennent les visiteurs" />
+            <Raccourci se={seId} href="/dashboard/nds-resultat" titre="Résultat journalier" desc="Jour par jour, station par station" />
+            <Raccourci se={seId} href="/dashboard/rapport-points" titre="Rapport détaillé" desc="Par point de jeu, bonus et sondage landing" />
+            <Raccourci se={seId} href="/dashboard/statistiques" titre="Statistiques & résultats" desc="Vue complète, chiffres publiables, pics" />
+            <Raccourci se={seId} href="/dashboard/track-qr" titre="Origines du trafic" desc="D'où viennent les visiteurs" />
           </>
         )}
 

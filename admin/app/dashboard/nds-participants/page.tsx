@@ -34,6 +34,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import { fetchCrmParticipants, fetchSuperEvents, type CrmParticipant, type SuperEvent } from '@/lib/nds'
 
+import { usePorteeInitiale } from '@/lib/portee'
 const fr = (d: string | null) => {
   if (!d) return '—'
   const p = d.split('-')
@@ -49,6 +50,12 @@ export default function Page() {
      participants » demandee : elle n existait pas, on etait force a un seul
      super event a la fois. */
   const [se, setSe] = useState('')
+  /* Portee recue de la fiche qui nous a ouverts : on arrive DEJA cadre sur son
+     super event. Sans ca, ouvrir ce module depuis « Jazz a Nice 2027 » affichait
+     Nuits du Sud. Les boutons de l ecran restent maitres ensuite. */
+  const porteeUrl = usePorteeInitiale()
+  useEffect(() => { if (porteeUrl.se) setSe(porteeUrl.se) }, [porteeUrl.se])
+
   const [pro, setPro] = useState('')
   const [erreur, setErreur] = useState('')
 

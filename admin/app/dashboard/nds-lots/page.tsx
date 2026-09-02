@@ -16,6 +16,7 @@ import {
   type GagnantPartenaire, type EtatPartenaire, type SuperEvent,
 } from '@/lib/nds'
 
+import { usePorteeInitiale } from '@/lib/portee'
 declare global {
   interface Window {
     flowinMailGagnant?: {
@@ -58,6 +59,12 @@ export default function Page() {
      SE_DEFAUT reste la valeur de depart : aucun changement de comportement
      tant qu on ne touche pas au selecteur. */
   const [se, setSe] = useState<string>(SE_DEFAUT)
+  /* Portee recue de la fiche qui nous a ouverts : on arrive DEJA cadre sur son
+     super event. Sans ca, ouvrir ce module depuis « Jazz a Nice 2027 » affichait
+     Nuits du Sud. Les boutons de l ecran restent maitres ensuite. */
+  const porteeUrl = usePorteeInitiale()
+  useEffect(() => { if (porteeUrl.se) setSe(porteeUrl.se) }, [porteeUrl.se])
+
   const [supers, setSupers] = useState<SuperEvent[]>([])
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
