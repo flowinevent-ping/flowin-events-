@@ -1,7 +1,17 @@
 'use client'
 
 /**
- * Carte NDS — deux couches SEPAREES : stations du festival et commerces partenaires.
+ * Carte d un super event — deux couches SEPAREES : stations et commerces partenaires.
+ *
+ * Romain, 02/09 : « la carte doit fonctionner par super event, on doit avoir une
+ * carte independante a chaque super event pour ne rien melanger ».
+ * CONSTAT EN BASE : la carte ne filtrait sur RIEN. Elle chargeait tous les
+ * events porteurs d un super_event_id, tous super events confondus — soit
+ * 22 stations de « Nuits du Sud 2026 » PLUS 22 stations de « Master — Super
+ * Event (marque blanche) », d ou les 44 points annonces et les doublons dans la
+ * liste (« Assurance Charvolin » deux fois, « NDS · Bar 1 » deux fois...).
+ * Ce n etait pas un bug d affichage : deux operations distinctes etaient
+ * superposees sur la meme carte.
  *
  * Les deux couches ne se melangent jamais. Une station n est pas un commerce : elles
  * n ont ni le meme role, ni le meme public, ni les memes horaires. Les afficher
@@ -17,6 +27,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { supabase } from '@/lib/supabase'
+import { fetchSuperEvents, SE_DEFAUT, type SuperEvent } from '@/lib/nds'
 
 /* Vence, centre de la carte par defaut */
 const CENTRE: [number, number] = [43.7229, 7.1116]
@@ -31,21 +42,22 @@ interface Point {
 
 type Couche = 'stations' | 'partenaires'
 
-async function fetchStations(): Promise<Point[]> {
+async function fetchStations(se: string): Promise<Point[]> {
   const { data, error } = await supabase
     .from('events')
     .select('id,nom,lat,lng,lieu')
-    .not('super_event_id', 'is', null)
+    .eq('super_event_id', se)
     .order('nom')
   if (error) { console.error('[carte stations]', error.message); return [] }
   return ((data ?? []) as { id: string; nom: string | null; lat: number | null; lng: number | null; lieu: string | null }[])
     .map(e => ({ id: e.id, nom: e.nom ?? e.id, latitude: e.lat, longitude: e.lng, ville: e.lieu }))
 }
 
-async function fetchCommerces(): Promise<Point[]> {
+async function fetchCommerces(se: string): Promise<Point[]> {
   const { data, error } = await supabase
     .from('partenaires')
     .select('id,nom,latitude,longitude,ville')
+    .eq('super_event_id', se)
     .order('nom')
   if (error) { console.error('[carte partenaires]', error.message); return [] }
   return ((data ?? []) as { id: string; nom: string | null; latitude: number | null; longitude: number | null; ville: string | null }[])
@@ -63,6 +75,8 @@ async function enregistrerPosition(couche: Couche, id: string, lat: number, lng:
 }
 
 export default function Page() {
+  const [se, setSe] = useState<string>(SE_DEFAUT)
+  const [supers, setSupers] = useState<SuperEvent[]>([])
   const [couche, setCouche] = useState<Couche>('stations')
   const [stations, setStations] = useState<Point[]>([])
   const [commerces, setCommerces] = useState<Point[]>([])
@@ -74,12 +88,17 @@ export default function Page() {
   const carte = useRef<any>(null)
   const marqueurs = useRef<any[]>([])
 
+  useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
+
   const recharger = useCallback(() => {
     setCharge(true)
-    Promise.all([fetchStations(), fetchCommerces()])
-      .then(([s, c]) => { setStations(s); setCommerces(c) })
+    // On vide AVANT de recharger : sinon, en changeant de super event, on voit
+    // les points du precedent sous le nom du nouveau pendant toute la requete.
+    setStations([]); setCommerces([])
+    Promise.all([fetchStations(se), fetchCommerces(se)])
+      .then(([s2, c]) => { setStations(s2); setCommerces(c) })
       .finally(() => setCharge(false))
-  }, [])
+  }, [se])
 
   useEffect(recharger, [recharger])
 
@@ -151,10 +170,25 @@ export default function Page() {
   return (
     <div className="sa-page">
       <PageHeader
-        title="Carte NDS"
-        subtitle="Deux couches séparées — stations du festival et commerces partenaires"
+        title="🗺️ Carte du super event"
+        subtitle={`${supers.find(x => x.id === se)?.nom ?? se} — deux couches séparées : stations et commerces partenaires`}
         actions={<button className="sa-btn" onClick={recharger}>Recharger</button>}
       />
+
+      {/* Une carte PAR super event : sans ce choix, les stations de deux
+          operations distinctes se superposaient sur la meme carte. */}
+      {supers.length > 1 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--sa-muted)', marginRight: 4 }}>
+            Super event
+          </span>
+          {supers.map(x => (
+            <button key={x.id} className={`sa-btn sm${se === x.id ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+              {x.nom}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: 'inline-flex', gap: 4, background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: 4, marginBottom: 12 }}>
         {([['stations', `📍 Stations (${stations.length})`], ['partenaires', `🏪 Partenaires (${commerces.length})`]] as const).map(([k, l]) => (
