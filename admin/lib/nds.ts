@@ -348,6 +348,33 @@ export async function fetchParticipants(se: string = SE_DEFAUT): Promise<Partici
   return Array.isArray(data) ? (data as Participant[]) : []
 }
 
+/**
+ * CRM Participants — une ligne par (joueur, event).
+ *
+ * DISTINCTE de fetchParticipants, qui agrege par joueur sur UN super event et
+ * sert les rapports : celle-ci porte le super event, l event, le pro et la
+ * SOURCE, pour pouvoir ranger « par super event, sous-categorie event » et
+ * repondre a « qui est passe a la Caisse 2 ».
+ * `se` omis = acces total, toutes operations confondues.
+ */
+export interface CrmParticipant {
+  joueur_id: string
+  nom: string | null; prenom: string | null; email: string | null; tel: string | null
+  code_postal: string | null; ville: string | null
+  optin: boolean | null; source: string | null
+  super_event_id: string | null; super_event_nom: string
+  event_id: string; event_nom: string
+  pro_id: string | null; pro_nom: string | null
+  nb_parties: number; nb_tickets: number
+  premiere: string | null; derniere: string | null
+}
+
+export async function fetchCrmParticipants(se?: string | null): Promise<CrmParticipant[]> {
+  const { data, error } = await supabase.rpc('crm_participants', { p_se: se ?? null })
+  if (error) { console.error('[fetchCrmParticipants]', error.message); return [] }
+  return Array.isArray(data) ? (data as CrmParticipant[]) : []
+}
+
 /* ── Rapport de fin d operation ────────────────────────────────────────── */
 
 export interface LigneJourStation {
