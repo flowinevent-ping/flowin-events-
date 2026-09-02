@@ -105,6 +105,7 @@ export default function Sidebar() {
       ton: 'se',
       items: [
         { id: 'super-events', icon: '⭐', label: 'Super Events', href: '/dashboard/super-events' },
+        { id: 'wizard-super-event', icon: '✨', label: 'Créer un super event', href: '/dashboard/wizard-super-event' },
         { id: 'operations', icon: '📊', label: 'Opérations (vue complète)', href: '/dashboard/operations' },
         { id: 'nds-participants', icon: '👥', label: 'Participants (super event)', href: '/dashboard/nds-participants' },
         { id: 'nds-lots', icon: '🎁', label: 'Stock des lots', href: '/dashboard/nds-lots' },

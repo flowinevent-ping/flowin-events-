@@ -313,6 +313,111 @@ export async function dupliquerSuperEvent(params: {
   return (data ?? { ok: false, raison: 'reponse_vide' }) as ResultatDuplication
 }
 
+/**
+ * CREATION d un super event, de zero.
+ *
+ * A ne pas confondre avec deux choses qui existaient deja :
+ *  - `dupliquerSuperEvent`, qui rejoue la STRUCTURE d une edition precedente ;
+ *  - le parcours pro /pro/rejoindre, qui depose une DEMANDE DE PARTICIPATION.
+ * Ici c est le SA qui cree l operation et y rattache directement des pros :
+ * aucune demande, aucune validation en aval.
+ *
+ * Chaque pro choisi recoit UNE station (un event) rattachee au super event.
+ * L ecriture est faite etape par etape et rend compte de ce qui a reellement
+ * abouti : mieux vaut dire « super event cree, 2 stations sur 3 » que laisser
+ * croire a un succes complet.
+ */
+export interface BrouillonSuperEvent {
+  id: string
+  nom: string
+  dateD: string | null
+  dateF: string | null
+  description: string | null
+  geofenceM: number | null
+  tirageGlobal: boolean
+  /** Les pros a rattacher, avec le module de jeu de leur station. */
+  pros: { pro_id: string; nom: string; module: string }[]
+}
+
+export interface ResultatCreationSE {
+  ok: boolean
+  id?: string
+  fait: string[]
+  erreur?: string
+}
+
+export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatCreationSE> {
+  const fait: string[] = []
+  if (!d.id || !d.nom.trim()) return { ok: false, fait, erreur: 'Nom et identifiant obligatoires.' }
+
+  const { data: deja } = await supabase.from('super_events').select('id').eq('id', d.id).maybeSingle()
+  if (deja) return { ok: false, fait, erreur: `L identifiant ${d.id} est deja pris.` }
+
+  const { error: errSe } = await supabase.from('super_events').insert({
+    id: d.id,
+    nom: d.nom.trim(),
+    date_d: d.dateD || null,
+    date_f: d.dateF || null,
+    description: d.description || null,
+    geofence_m: d.geofenceM ?? null,
+    tirage_global: d.tirageGlobal,
+    status: 'upcoming',
+    events: [],
+    pros: d.pros.map(p => p.pro_id),
+  })
+  if (errSe) return { ok: false, fait, erreur: `Super event non cree — ${errSe.message}` }
+  fait.push('super event')
+
+  const ids: string[] = []
+  for (const p of d.pros) {
+    const evId = `${d.id.replace(/^se-/, 'ev-')}-${p.pro_id.replace(/^pro-/, '')}`.slice(0, 60)
+    const { error } = await supabase.from('events').insert({
+      id: evId,
+      pro_id: p.pro_id,
+      nom: p.nom,
+      module: p.module,
+      status: 'upcoming',
+      super_event_id: d.id,
+      date_d: d.dateD || null,
+      date_f: d.dateF || null,
+      participants: 0, gagnants: 0, joueurs_optin: 0,
+    })
+    // Une station qui echoue ne doit pas annuler les autres : on continue et on
+    // le dira. Le SA verra dans la liste laquelle manque.
+    if (!error) ids.push(evId)
+  }
+  if (ids.length) {
+    await supabase.from('super_events').update({ events: ids }).eq('id', d.id)
+    fait.push(`${ids.length} station${ids.length > 1 ? 's' : ''}`)
+  }
+  if (ids.length < d.pros.length) {
+    return { ok: true, id: d.id, fait, erreur: `${d.pros.length - ids.length} station(s) non creee(s) — a reprendre a la main.` }
+  }
+  return { ok: true, id: d.id, fait }
+}
+
+/**
+ * SUPPRESSION d un super event cree par erreur.
+ * Refusee si l operation porte des participations ou des tirages : on
+ * n efface pas de l activite joueur ni des gagnants. Le nom doit etre
+ * ressaisi exactement. Les `pros` ne sont jamais supprimes.
+ */
+export interface ResultatSuppressionSE {
+  ok: boolean
+  raison?: 'introuvable' | 'confirmation' | 'activite'
+  attendu?: string
+  participations?: number
+  tirages?: number
+  nom?: string
+  events_supprimes?: number
+}
+
+export async function supprimerSuperEvent(id: string, confirmation: string): Promise<ResultatSuppressionSE> {
+  const { data, error } = await supabase.rpc('supprimer_super_event', { p_id: id, p_confirmation: confirmation })
+  if (error) { console.error('[supprimerSuperEvent]', error.message); return { ok: false, raison: 'introuvable' } }
+  return (data ?? { ok: false }) as ResultatSuppressionSE
+}
+
 /** Normalise un nom en identifiant : "Jazz à Nice 2027" -> "se-jazz-a-nice-2027". */
 export function slugSuperEvent(nom: string): string {
   const base = nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '')

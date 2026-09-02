@@ -105,6 +105,9 @@ export default function Page() {
               ✨ Nouveau Super Event depuis le template
             </button>
           )}
+          {/* La creation DE ZERO, distincte de la duplication ci-contre : on choisit
+              les pros et leurs jeux au lieu de rejouer une structure existante. */}
+          <a href="/dashboard/wizard-super-event" className="sa-btn primary">✨ Créer un super event</a>
           {/* Cote pro, « participer a un super event » passe par /pro/rejoindre :
               les demandes atterrissent ici, c est la meme porte vue du SA. */}
           <a href="/dashboard/demandes-rattachement" className="sa-btn">🤝 Demandes de participation</a>
