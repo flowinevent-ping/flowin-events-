@@ -12,8 +12,8 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import {
   fetchGagnantsPartenaire, fetchEtatPartenaire, confirmerGagnant, annulerEtRetirer,
-  lienBillet, mailPartenaireUrl, SE_DEFAUT,
-  type GagnantPartenaire, type EtatPartenaire,
+  lienBillet, mailPartenaireUrl, SE_DEFAUT, fetchSuperEvents,
+  type GagnantPartenaire, type EtatPartenaire, type SuperEvent,
 } from '@/lib/nds'
 
 declare global {
@@ -51,22 +51,35 @@ export default function Page() {
   const [lignes, setLignes] = useState<Ligne[] | null>(null)
   useMailGagnant()
 
+  /* PORTEE. Cette page etait figee sur SE_DEFAUT : elle ne pouvait montrer que
+     les lots de NDS 2026, quel que soit le nombre de super events en base. Le
+     selecteur reprend exactement le motif de /dashboard/statistiques — meme
+     source (fetchSuperEvents), meme rendu — plutot que d en inventer un autre.
+     SE_DEFAUT reste la valeur de depart : aucun changement de comportement
+     tant qu on ne touche pas au selecteur. */
+  const [se, setSe] = useState<string>(SE_DEFAUT)
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
+
   /* Seuls les partenaires dotes d au moins un lot nous interessent ici. */
   const dotes = partenaires.filter(p => Array.isArray(p.lots) && p.lots.length > 0)
 
   const charger = useCallback(async () => {
+    // Vider AVANT de recharger : sinon, en changeant de super event, on lit les
+    // lots du precedent sous le nom du nouveau pendant toute la requete.
+    setLignes(null)
     const res = await Promise.all(
       dotes.map(async p => {
         const [gagnants, etat] = await Promise.all([
-          fetchGagnantsPartenaire(p.id, SE_DEFAUT),
-          fetchEtatPartenaire(p.id, SE_DEFAUT),
+          fetchGagnantsPartenaire(p.id, se),
+          fetchEtatPartenaire(p.id, se),
         ])
         return { id: p.id, nom: p.nom, email: p.email ?? null, gagnants, etat } as Ligne
       })
     )
     setLignes(res.filter(l => l.etat.tires > 0 || l.gagnants.length > 0))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [partenaires.length])
+  }, [partenaires.length, se])
 
   useEffect(() => { charger() }, [charger])
 
@@ -122,6 +135,17 @@ export default function Page() {
           title="🎁 Stock des lots"
           subtitle="Gagnants tirés, confirmations et retraits en caisse"
         />
+
+        {/* Meme selecteur que /dashboard/statistiques, a l identique. */}
+        {supers.length > 1 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
+            {supers.map(x => (
+              <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
+                {x.nom}
+              </button>
+            ))}
+          </div>
+        )}
 
         {totalFantome > 0 && (
           <div className="sa-alert warn" style={{ marginBottom: 16, fontSize: 12.5 }}>
