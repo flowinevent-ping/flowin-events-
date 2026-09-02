@@ -30,6 +30,8 @@ export default function Page() {
   const [pics, setPics] = useState<Pics | null>(null)
   const [charge, setCharge] = useState(true)
   const [jour, setJour] = useState<string | 'tous'>('tous')
+  /* La vue affichee. Les 12 blocs empiles deviennent 7 vues selectionnables. */
+  const [section, setSection] = useState('reference')
 
   useEffect(() => {
     fetchSuperEvents().then(l => {
@@ -98,6 +100,14 @@ export default function Page() {
   if (charge) return <div className="sa-content"><div className="sa-page"><div className="sa-muted">Chargement du rapport…</div></div></div>
   if (!r) return <div className="sa-content"><div className="sa-page"><EmptyState title="Rapport indisponible" /></div></div>
 
+  /* Romain, 02/09 : « statistique n est pas bien organise, pareil categorie
+     events puis info sous-categorisee, soit en vignette cliquable soit en
+     carrousel, mais la c est insupportable [...] les vignettes ne sont pas
+     cliquables ».
+     Les tuiles ETAIENT cliquables, mais elles ne faisaient que DEFILER vers une
+     section deja a l ecran : rien ne semblait se passer. Elles selectionnent
+     desormais la section affichee, et on ne voit qu elle. Les 12 blocs empiles
+     deviennent 7 vues. Aucun calcul n est modifie : c est le meme ecran, range. */
   const t = tAffiche
   /* Un commerce partenaire EST une station de jeu : on ne les separe plus en deux
      tableaux, on les distingue par un marqueur dans la meme liste. */
@@ -139,13 +149,26 @@ export default function Page() {
     </>
   )
 
+  const VUES: { id: string; icone: string; titre: string; chiffre: string | number; sous: string }[] = [
+    { id: 'reference', icone: '🔢', titre: 'Chiffres de référence', chiffre: t.joueurs, sous: 'joueurs · publiables' },
+    { id: 'stations', icone: '📡', titre: 'Tracking par station', chiffre: nbStations + nbCommerces, sous: `${nbStations} festival · ${nbCommerces} partenaires` },
+    { id: 'activite', icone: '🎮', titre: 'Activité par jour', chiffre: lignes.length, sous: 'lignes jour × station' },
+    { id: 'pics', icone: '🔥', titre: 'Pics de jeu', chiffre: pics?.pic?.parties ?? '—', sous: pics?.pic ? `le ${fr(pics.pic.soiree)} à ${pics.pic.heure}h` : 'aucun pic' },
+    { id: 'partenaires', icone: '🔗', titre: 'Retombées partenaires', chiffre: t.clics_partenaires, sous: `${t.clics_depuis_reseaux} depuis les réseaux` },
+    { id: 'audience', icone: '👥', titre: "Profil de l'audience", chiffre: t.joueurs, sous: 'genre · âge · découverte' },
+    { id: 'joueurs', icone: '🏅', titre: 'Meilleurs joueurs', chiffre: r.meilleurs_joueurs.length, sous: 'classement' },
+  ]
+
   return (
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader title="📊 Statistiques & résultats" subtitle="Activité, audience et retombées partenaires" />
 
         {supers.length > 1 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--sa-muted)', marginRight: 4 }}>
+              Super event
+            </span>
             {supers.map(x => (
               <button key={x.id} className={`sa-btn sm${x.id === se ? ' primary' : ''}`} onClick={() => setSe(x.id)}>
                 {x.nom}
@@ -153,24 +176,6 @@ export default function Page() {
             ))}
           </div>
         )}
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 20 }}>
-          {([['Joueurs', t.joueurs, 'section-joueurs'], ['Parties', t.parties, 'section-activite'],
-             ['Clics stations', t.clics_stations, 'section-tracking'],
-             ['Clics partenaires', t.clics_partenaires, 'section-redirections'],
-             ['Dont réseaux', t.clics_depuis_reseaux, 'section-redirections']] as [string, number, string][])
-            .map(([lib, val, cible]) => (
-            <div
-              key={lib}
-              onClick={() => document.getElementById(cible)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '15px 12px', cursor: 'pointer' }}
-              title="Voir le détail"
-            >
-              <div style={{ fontSize: 23, fontWeight: 800 }}>{val}</div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginTop: 4 }}>{lib} ↓</div>
-            </div>
-          ))}
-        </div>
 
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4, alignItems: 'center' }}>
           <button className={`sa-btn sm${jour === 'tous' ? ' primary' : ''}`} onClick={() => setJour('tous')}>Toutes les dates</button>
@@ -185,100 +190,143 @@ export default function Page() {
           ))}
         </div>
         <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginBottom: 16 }}>
-          Les dates après clôture (visiteurs revenus après le 18/07) sont réelles mais hors période officielle — jamais dans les "Chiffres de référence" ci-dessous.
+          Les dates après clôture (visiteurs revenus après le 18/07) sont réelles mais hors période officielle — jamais dans les &quot;Chiffres de référence&quot;.
         </div>
 
-        <SectionHeader>🔢 Chiffres de référence</SectionHeader>
-        <BandeauChiffres se={se} />
-
-        <div id="section-tracking" />
-        <SectionHeader>📡 Tracking par station</SectionHeader>
-        <div style={{ marginBottom: 22 }}>
-          <TableauStations se={se} jour={jour === 'tous' ? undefined : jour} tout={jour === 'tous'} onStation={s => openDrawer('event', s.event_id)} />
+        {/* Les vignettes NE DEFILENT PLUS vers une section : elles la selectionnent.
+            Un clic qui fait defiler vers un bloc deja visible donne l impression
+            que rien ne se passe — c est ce qui etait signale. */}
+        <div className="sa-vue-grille">
+          {VUES.map(v => (
+            <button
+              key={v.id}
+              className={`sa-vue${section === v.id ? ' actif' : ''}`}
+              onClick={() => setSection(v.id)}
+              aria-pressed={section === v.id}
+            >
+              <span className="ic">{v.icone}</span>
+              <span className="ch">{v.chiffre}</span>
+              <span className="ti">{v.titre}</span>
+              <span className="so">{v.sous}</span>
+            </button>
+          ))}
         </div>
 
-        <div id="section-activite" />
-        {tableau(
+        {section === 'reference' && (
+          <>
+            <SectionHeader>🔢 Chiffres de référence</SectionHeader>
+            <BandeauChiffres se={se} />
+          </>
+        )}
+
+        {section === 'stations' && (
+          <>
+            <SectionHeader>📡 Tracking par station</SectionHeader>
+            <div style={{ marginBottom: 22 }}>
+              <TableauStations se={se} jour={jour === 'tous' ? undefined : jour} tout={jour === 'tous'} onStation={s2 => openDrawer('event', s2.event_id)} />
+            </div>
+          </>
+        )}
+
+        {section === 'activite' && tableau(
           `🎮 Activité par jour (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
           lignes, 'Aucune activité sur cette sélection.')}
 
-        {pics?.cellules?.length ? (
+        {section === 'pics' && (
+          pics?.cellules?.length ? (
+            <>
+              <SectionHeader>🔥 Pics de jeu</SectionHeader>
+              {pics.pic && (
+                <div className="sa-alert info" style={{ marginBottom: 12, fontSize: 12.5 }}>
+                  Pic absolu : <b>{pics.pic.parties} parties</b> le <b>{pics.pic.soiree.split('-').reverse().join('/')}</b> entre{' '}
+                  <b>{pics.pic.heure}h et {(pics.pic.heure + 1) % 24}h</b>.
+                  {pics.creneau_dense && (
+                    <> Le créneau <b>{pics.creneau_dense.debut}h-{pics.creneau_dense.fin}h</b> concentre{' '}
+                    <b>{pics.creneau_dense.part} %</b> de l&apos;activité.</>
+                  )}
+                </div>
+              )}
+              <div style={{ marginBottom: 20 }}>
+                <CarteChaleur cellules={pics.cellules} maximum={pics.maximum} titre="Parties par soirée et par heure" />
+              </div>
+            </>
+          ) : (
+            <div className="sa-muted" style={{ fontSize: 13 }}>Aucun pic mesurable sur cette sélection.</div>
+          )
+        )}
+
+        {section === 'partenaires' && (
           <>
-            <SectionHeader>🔥 Pics de jeu</SectionHeader>
-            {pics.pic && (
-              <div className="sa-alert info" style={{ marginBottom: 12, fontSize: 12.5 }}>
-                Pic absolu : <b>{pics.pic.parties} parties</b> le <b>{pics.pic.soiree.split('-').reverse().join('/')}</b> entre{' '}
-                <b>{pics.pic.heure}h et {(pics.pic.heure + 1) % 24}h</b>.
-                {pics.creneau_dense && (
-                  <> Le créneau <b>{pics.creneau_dense.debut}h-{pics.creneau_dense.fin}h</b> concentre{' '}
-                  <b>{pics.creneau_dense.part} %</b> de l&apos;activité.</>
-                )}
+            <SectionHeader>🗺️ Consultation des partenaires dans l&apos;application</SectionHeader>
+            <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
+              <b>{r.ecrans?.carte ?? 0} appareils</b> ont ouvert la carte des partenaires et{' '}
+              <b>{r.ecrans?.partenaires ?? 0}</b> l&apos;écran partenaires.
+              {(r.totaux.clics_sortants ?? 0) === 0 && (
+                <> Le détail par partenaire n&apos;est pas disponible pour cette édition :
+                le suivi des clics sortants a été mis en service le 22/07, après la clôture du 18.
+                Il est actif pour les prochaines opérations.</>
+              )}
+            </div>
+
+            <SectionHeader>🔗 Redirections vers les partenaires</SectionHeader>
+            {pic && (
+              <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
+                Pic de redirections : <b>{pic.clics} clics</b> vers <b>{pic.partenaire}</b> le <b>{fr(pic.jour)}</b> à <b>{String(pic.heure).padStart(2, '0')}h</b>.
               </div>
             )}
-            <div style={{ marginBottom: 20 }}>
-              <CarteChaleur cellules={pics.cellules} maximum={pics.maximum} titre="Parties par soirée et par heure" />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+              <Camembert titre="Clics par partenaire" parts={parPartenaire} unite="clics" />
+              <Camembert titre="Origine des clics partenaires" unite="clics"
+                parts={[
+                  { valeur: 'Depuis les réseaux sociaux', n: t.clics_depuis_reseaux },
+                  { valeur: 'Origine non déclarée', n: t.clics_partenaires - t.clics_depuis_reseaux },
+                ]} />
             </div>
           </>
-        ) : null}
-
-        <SectionHeader>🗺️ Consultation des partenaires dans l&apos;application</SectionHeader>
-        <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
-          <b>{r.ecrans?.carte ?? 0} appareils</b> ont ouvert la carte des partenaires et{' '}
-          <b>{r.ecrans?.partenaires ?? 0}</b> l&apos;écran partenaires.
-          {(r.totaux.clics_sortants ?? 0) === 0 && (
-            <> Le détail par partenaire n&apos;est pas disponible pour cette édition :
-            le suivi des clics sortants a été mis en service le 22/07, après la clôture du 18.
-            Il est actif pour les prochaines opérations.</>
-          )}
-        </div>
-
-        <div id="section-redirections" />
-        <SectionHeader>🔗 Redirections vers les partenaires</SectionHeader>
-        {pic && (
-          <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
-            Pic de redirections : <b>{pic.clics} clics</b> vers <b>{pic.partenaire}</b> le <b>{fr(pic.jour)}</b> à <b>{String(pic.heure).padStart(2, '0')}h</b>.
-          </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-          <Camembert titre="Clics par partenaire" parts={parPartenaire} unite="clics" />
-          <Camembert titre="Origine des clics partenaires" unite="clics"
-            parts={[
-              { valeur: 'Depuis les réseaux sociaux', n: t.clics_depuis_reseaux },
-              { valeur: 'Origine non déclarée', n: t.clics_partenaires - t.clics_depuis_reseaux },
-            ]} />
-        </div>
 
-        <SectionHeader>👥 Profil de l&apos;audience</SectionHeader>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-          <Camembert titre="Genre" parts={r.genre} unite="joueurs" />
-          <Camembert titre="Tranche d'âge" parts={r.age} unite="joueurs" />
-        </div>
-        <div style={{ marginBottom: 20 }}>
-          <Camembert titre="Comment ont-ils connu le festival ?" parts={r.decouverte} unite="joueurs" />
-        </div>
+        {section === 'audience' && (
+          <>
+            <SectionHeader>👥 Profil de l&apos;audience</SectionHeader>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+              <Camembert titre="Genre" parts={r.genre} unite="joueurs" />
+              <Camembert titre="Tranche d'âge" parts={r.age} unite="joueurs" />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <Camembert titre="Comment ont-ils connu le festival ?" parts={r.decouverte} unite="joueurs" />
+            </div>
+          </>
+        )}
 
-        <div id="section-joueurs" />
-        <SectionHeader>🏅 Meilleurs joueurs</SectionHeader>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
-            <thead><tr>
-              <th>#</th><th>Joueur</th><th>Code postal</th>
-              <th style={{ textAlign: 'right' }}>Parties</th><th style={{ textAlign: 'right' }}>Lots gagnés</th><th>Contact</th>
-            </tr></thead>
-            <tbody>
-              {r.meilleurs_joueurs.map((j, i) => (
-                <tr key={j.joueur_id} style={j.gains > 0 ? { background: 'rgba(245,161,0,.08)' } : undefined}>
-                  <td style={{ fontWeight: 800, color: 'var(--sa-muted)' }}>{i + 1}</td>
-                  <td style={{ fontWeight: 700 }}>{[j.prenom, j.nom].filter(Boolean).join(' ') || '—'}</td>
-                  <td>{j.code_postal ?? '—'}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 800 }}>{j.parties}</td>
-                  <td style={{ textAlign: 'right' }}>{j.gains > 0 ? <b style={{ color: '#a1690a' }}>🏆 {j.gains}</b> : '—'}</td>
-                  <td>{j.optin ? <span className="sa-chip live">✓</span> : <span className="sa-chip past">—</span>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {section === 'joueurs' && (
+          <>
+            <SectionHeader>🏅 Meilleurs joueurs</SectionHeader>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+                <thead><tr>
+                  <th>#</th><th>Joueur</th><th>Code postal</th>
+                  <th style={{ textAlign: 'right' }}>Parties</th><th style={{ textAlign: 'right' }}>Lots gagnés</th><th>Contact</th>
+                </tr></thead>
+                <tbody>
+                  {r.meilleurs_joueurs.map((j, i) => (
+                    <tr
+                      key={j.joueur_id}
+                      onClick={() => openDrawer('joueur', j.joueur_id)}
+                      style={{ cursor: 'pointer', ...(j.gains > 0 ? { background: 'rgba(245,161,0,.08)' } : {}) }}
+                    >
+                      <td style={{ fontWeight: 800, color: 'var(--sa-muted)' }}>{i + 1}</td>
+                      <td style={{ fontWeight: 700 }}>{[j.prenom, j.nom].filter(Boolean).join(' ') || '—'}</td>
+                      <td>{j.code_postal ?? '—'}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 800 }}>{j.parties}</td>
+                      <td style={{ textAlign: 'right' }}>{j.gains > 0 ? <b style={{ color: '#a1690a' }}>🏆 {j.gains}</b> : '—'}</td>
+                      <td>{j.optin ? <span className="sa-chip live">✓</span> : <span className="sa-chip past">—</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
