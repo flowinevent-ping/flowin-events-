@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageHeader, EmptyState, SearchBar, useTri } from '@/components/dashboard/DashboardUI'
 import { supabase } from '@/lib/supabase'
 import { useDashboard } from '@/contexts/DashboardContext'
@@ -15,7 +16,22 @@ const STATUT_STYLE: Record<string, { bg: string; c: string; label: string }> = {
   refuse: { bg: '#FEE2E2', c: '#991B1B', label: 'Refusé' },
 }
 
+/**
+ * Relie le parcours pro (/pro/rejoindre) a la creation d event cote SA.
+ * On ne fabrique pas d event ici : on pre-remplit le wizard existant.
+ */
+function urlWizard(l: Ligne): string {
+  const p = new URLSearchParams()
+  if (l.pro_id) p.set('pro', l.pro_id)
+  if (l.super_event_id) p.set('se', l.super_event_id)
+  if (l.pro_nom) p.set('nom', l.pro_nom)
+  if (l.date_debut_souhaite) p.set('d', l.date_debut_souhaite)
+  if (l.date_fin_souhaite) p.set('f', l.date_fin_souhaite)
+  return `/dashboard/wizard-event?${p.toString()}`
+}
+
 export default function Page() {
+  const router = useRouter()
   const { openDrawer } = useDashboard()
   const [lignes, setLignes] = useState<Ligne[]>([])
   const [charge, setCharge] = useState(true)
@@ -113,13 +129,26 @@ export default function Page() {
                   <button className="sa-btn sm" disabled={enCours === l.id} onClick={() => traiter(l.id, 'refuse')}>Refuser</button>
                 </div>
               )}
+
+              {l.statut === 'approuve' && (
+                <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Ouvre le wizard EXISTANT deja rempli : rien n est ecrit ici, le SA valide. */}
+                  <button className="sa-btn sm primary" onClick={() => router.push(urlWizard(l))}>
+                    ✨ Créer l&apos;event depuis cette demande
+                  </button>
+                  <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>
+                    Le wizard s&apos;ouvre pré-rempli (pro, super event, dates) — rien n&apos;est enregistré avant votre validation.
+                  </span>
+                </div>
+              )}
             </div>
           )
         })}
 
         {!charge && lignes.some(l => l.statut === 'approuve') && (
           <div style={{ fontSize: 12.5, color: 'var(--sa-muted)', marginTop: 16, background: '#F8FAFC', padding: '10px 14px', borderRadius: 10 }}>
-            Une demande approuvée n&apos;est pas encore convertie automatiquement en fiche partenaire — ça reste une étape manuelle pour le moment.
+            Une demande approuvée ouvre le wizard de création pré-rempli. La conversion
+            reste volontaire : aucun event n&apos;est créé tant que vous n&apos;avez pas validé.
           </div>
         )}
       </div>

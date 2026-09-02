@@ -14,8 +14,8 @@
  *  - l enregistrement est REFUSE tant qu un controle echoue, plutot que d ecrire un
  *    event a moitie defini qu il faudra corriger a la main ensuite.
  */
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
@@ -80,8 +80,21 @@ const VISIBILITES: { cle: string; label: string }[] = [
   { cle: 'activite', label: 'Activité en direct' },
 ]
 
-export default function Page() {
+/**
+ * Le wizard accepte une PRE-SAISIE par parametres d URL :
+ *   ?pro=<pro_id>&se=<super_event_id>&nom=<nom>&d=<date_debut>&f=<date_fin>
+ * C est ce qui relie enfin le parcours d inscription des pros
+ * (/pro/rejoindre -> table demandes_rattachement_super_event) a la creation
+ * d event cote SA : la demande approuvee ouvre ce wizard deja rempli, au lieu
+ * d obliger a tout ressaisir de memoire.
+ *
+ * Rien n est ecrit automatiquement : le SA voit, corrige et valide. Les
+ * controles de coherence habituels s appliquent, l enregistrement reste refuse
+ * tant qu un probleme subsiste.
+ */
+function Wizard() {
   const router = useRouter()
+  const params = useSearchParams()
   const { pros, partenaires } = useDashboard()
   const [d, setD] = useState<BrouillonEvent>(brouillonVide())
   const [etape, setEtape] = useState<Etape>('A')
@@ -89,6 +102,30 @@ export default function Page() {
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
 
   const maj = (champs: Partial<BrouillonEvent>) => setD(x => ({ ...x, ...champs }))
+
+  /* Pre-saisie depuis l URL, appliquee UNE SEULE FOIS.
+     Sans ce verrou, un re-rendu qui change l identite de `params` reappliquerait
+     les valeurs de l URL par-dessus les corrections deja faites par le SA :
+     il verrait ses modifications disparaitre sans comprendre pourquoi. */
+  const preSaisieFaite = useRef(false)
+  useEffect(() => {
+    if (preSaisieFaite.current) return
+    const pro = params.get('pro') ?? ''
+    const se = params.get('se') ?? ''
+    const nom = params.get('nom') ?? ''
+    const dd = params.get('d')
+    const df = params.get('f')
+    if (!pro && !se && !nom && !dd && !df) return
+    preSaisieFaite.current = true
+    setD(x => ({
+      ...x,
+      pro_id: pro || x.pro_id,
+      super_event_id: se || x.super_event_id,
+      nom: nom || x.nom,
+      date_d: dd || x.date_d,
+      date_f: df || dd || x.date_f,
+    }))
+  }, [params])
   const problemes = useMemo(() => controler(d), [d])
   const jours = nbJours(d)
 
@@ -366,5 +403,15 @@ export default function Page() {
         )}
       </div>
     </div>
+  )
+}
+
+/* useSearchParams impose une frontiere Suspense en App Router : sans elle, la
+   page bascule en rendu dynamique et le build echoue. */
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="sa-page"><div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div></div>}>
+      <Wizard />
+    </Suspense>
   )
 }

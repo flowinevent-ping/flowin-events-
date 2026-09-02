@@ -96,15 +96,19 @@ export default function Page() {
       <div className="sa-page">
         <PageHeader title="⭐ Super Events" subtitle="Éditions et duplication de structure" />
 
-        {master && (
-          <button
-            className="sa-btn primary"
-            style={{ marginBottom: 18 }}
-            onClick={() => { setSource(master); setNom(''); setRes(null) }}
-          >
-            ✨ Nouveau Super Event depuis le template
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
+          {master && (
+            <button
+              className="sa-btn primary"
+              onClick={() => { setSource(master); setNom(''); setRes(null) }}
+            >
+              ✨ Nouveau Super Event depuis le template
+            </button>
+          )}
+          {/* Cote pro, « participer a un super event » passe par /pro/rejoindre :
+              les demandes atterrissent ici, c est la meme porte vue du SA. */}
+          <a href="/dashboard/demandes-rattachement" className="sa-btn">🤝 Demandes de participation</a>
+        </div>
 
         {liste === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
         {liste?.length === 0 && <EmptyState title="Aucun super event" />}

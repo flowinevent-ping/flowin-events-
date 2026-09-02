@@ -111,7 +111,13 @@ export default function Page() {
         <PageHeader
           title="🎬 Events"
           subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`}
-          actions={<Link href="/dashboard/wizard-event" className="sa-btn primary sm">✨ Nouvel event</Link>}
+          actions={
+            <>
+              <Link href="/dashboard/wizard-event" className="sa-btn primary sm">✨ Nouvel event</Link>
+              {/* L autre porte d entree : un pro qui demande a participer depuis /pro/rejoindre. */}
+              <Link href="/dashboard/demandes-rattachement" className="sa-btn sm" style={{ marginLeft: 8 }}>🤝 Demandes des pros</Link>
+            </>
+          }
         />
 
         <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
