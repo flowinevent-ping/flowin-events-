@@ -7,6 +7,7 @@ import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide } from './SousOnglets'
+import Diffusion from './Diffusion'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -632,17 +633,8 @@ export default function EventDrawer() {
         {drawer.tab === 'qr' && (
           <div style={{ textAlign: 'center', padding: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--sa-muted)' }}>QR CODE D&apos;ACCÈS</div>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`}
-              alt="QR Code"
-              style={{ width: 200, height: 200, margin: '0 auto', display: 'block', borderRadius: 12, border: '1px solid var(--sa-border)' }}
-            />
-            <div style={{ marginTop: 16, fontSize: 12, background: 'var(--sa-subtle)', padding: '8px 12px', borderRadius: 8, wordBreak: 'break-all' }}>
-              {qrUrl}
-            </div>
-            <button className="sa-btn" style={{ marginTop: 12 }} onClick={() => navigator.clipboard?.writeText(qrUrl)}>
-              📋 Copier le lien
-            </button>
+            {/* QR genere dans le navigateur : telechargeable (PNG/SVG/A4), plus aucun appel a un tiers. */}
+            <Diffusion url={qrUrl} titre={ev.nom} sousTitre="Scannez pour jouer" />
             {pro && (
               <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--sa-border)', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div

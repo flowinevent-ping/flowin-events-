@@ -11,6 +11,7 @@ import {
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { TableauStations } from './TableauStations'
 import PartenaireDrawer from './PartenaireDrawer'
+import Diffusion from './Diffusion'
 import { SousOngletVide } from './SousOnglets'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { FlowinPro } from '@/lib/types'
@@ -250,6 +251,7 @@ function QrLiensEvent({ eventId, eventNom }: { eventId: string; eventNom: string
   const [stations, setStations] = useState<QrStation[]>([])
   const [liens, setLiens] = useState<LienEphemere[]>([])
   const [nomStation, setNomStation] = useState('')
+  const [ouvert, setOuvert] = useState('')
   const [nomLien, setNomLien] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -288,16 +290,26 @@ function QrLiensEvent({ eventId, eventNom }: { eventId: string; eventNom: string
         QR fixes ({stations.length})
       </div>
       {stations.map(s => (
-        <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid var(--sa-border)' }}>
-          <img src={`https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(qrUrl(s.source_qr))}`} alt="" width={44} height={44} style={{ borderRadius: 6, border: '1px solid var(--sa-border)' }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 12.5 }}>{s.nom}</div>
-            <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>?source={s.source_qr}</div>
+        <div key={s.id} style={{ padding: '7px 0', borderBottom: '1px solid var(--sa-border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 12.5 }}>{s.nom}</div>
+              <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>?source={s.source_qr}</div>
+            </div>
+            {/* Les supports (QR telechargeable, affiche A4) se deplient : la liste reste lisible. */}
+            <button className="sa-btn sm" onClick={() => setOuvert(o => (o === s.id ? '' : s.id))}>
+              {ouvert === s.id ? '▲ Supports' : '▼ Supports'}
+            </button>
+            <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(qrUrl(s.source_qr))}>Copier</button>
+            <button className={`sa-btn sm${s.publie ? ' primary' : ''}`} onClick={() => publierQrStation(s.id, !s.publie).then(charger)}>
+              {s.publie ? '✓ Publié' : 'Publier'}
+            </button>
           </div>
-          <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(qrUrl(s.source_qr))}>Copier</button>
-          <button className={`sa-btn sm${s.publie ? ' primary' : ''}`} onClick={() => publierQrStation(s.id, !s.publie).then(charger)}>
-            {s.publie ? '✓ Publié' : 'Publier'}
-          </button>
+          {ouvert === s.id && (
+            <div style={{ padding: '10px 0 4px' }}>
+              <Diffusion compact url={qrUrl(s.source_qr)} titre={`${eventNom} — ${s.nom}`} sousTitre={s.nom} />
+            </div>
+          )}
         </div>
       ))}
       <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
