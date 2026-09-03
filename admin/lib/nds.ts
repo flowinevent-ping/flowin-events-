@@ -267,6 +267,10 @@ export interface SuperEvent {
   date_d: string | null
   date_f: string | null
   description: string | null
+  /** Logo de l operation, affiche en tete du parcours joueur. Colonne ajoutee
+   *  le 03/09 (sql/2026-09-03-super-events-logo-url.sql). Vide = emplacement
+   *  laisse libre, comme le demande le gabarit marque blanche. */
+  logo_url?: string | null
 }
 
 export interface ResultatDuplication {
@@ -283,7 +287,7 @@ export interface ResultatDuplication {
 export async function fetchSuperEvents(): Promise<SuperEvent[]> {
   const { data, error } = await supabase
     .from('super_events')
-    .select('id, nom, status, date_d, date_f, description')
+    .select('id, nom, status, date_d, date_f, description, logo_url')
     .order('date_d', { ascending: false })
   if (error) { console.error('[fetchSuperEvents]', error.message); return [] }
   return (data ?? []) as SuperEvent[]
@@ -335,6 +339,9 @@ export interface BrouillonSuperEvent {
   description: string | null
   geofenceM: number | null
   tirageGlobal: boolean
+  /** Logo de l operation : il est recopie dans le cfg de chaque station, ce que
+   *  le parcours joueur lit deja. */
+  logoUrl?: string | null
   /** Les pros a rattacher, avec le module de jeu de leur station. */
   pros: { pro_id: string; nom: string; module: string }[]
 }
@@ -361,6 +368,7 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
     description: d.description || null,
     geofence_m: d.geofenceM ?? null,
     tirage_global: d.tirageGlobal,
+    logo_url: d.logoUrl || null,
     status: 'upcoming',
     events: [],
     pros: d.pros.map(p => p.pro_id),
@@ -388,6 +396,10 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
       super_event_id: d.id,
       date_d: d.dateD || null,
       date_f: d.dateF || null,
+      /* Le logo de l operation descend dans le cfg de la station : c est la que
+         le parcours joueur le lit (`cfg.logoUrl`). Une station peut ensuite
+         avoir le sien depuis sa fiche, sans toucher a l operation. */
+      cfg: d.logoUrl ? { logoUrl: d.logoUrl } : {},
       participants: 0, gagnants: 0, joueurs_optin: 0,
     })
     // Une station qui echoue ne doit pas annuler les autres : on continue et on

@@ -24,6 +24,38 @@
 
 import { useState } from 'react'
 
+/** La teinte du parcours — convention deja etablie dans RejoindreWizard :
+ *  bleu = pro, orange = super event, violet = l accent Flowin. */
+export type TeinteParcours = 'event' | 'super' | 'pro'
+const CLASSE_TEINTE: Record<TeinteParcours, string> = { event: '', super: ' t-super', pro: ' t-pro' }
+
+/**
+ * Le bandeau du parcours pro : le nom de ce qu on cree, l etape en cours, et la
+ * jauge de segments. C est lui qui donne aux trois creations le meme air que
+ * l app pro, au lieu du bandeau de page du dashboard.
+ */
+export function BandeauParcours({
+  titre, i, total,
+}: {
+  /** Ce qu on est en train de creer, en capitales — « CREER UN SUPER EVENT ». */
+  titre: string
+  /** Index de l etape en cours, base 0. */
+  i: number
+  total: number
+}) {
+  return (
+    <div className="sa-parc-bandeau">
+      <div className="ey">{titre}</div>
+      <div className="et">Étape {i + 1} sur {total}</div>
+      <div className="jauge">
+        {Array.from({ length: total }).map((_, n) => (
+          <span key={n} className={n <= i ? 'on' : ''} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export interface EtapeParcours {
   id: string
   titre: string
@@ -37,12 +69,16 @@ export interface EtapeParcours {
 
 export function Parcours({
   etapes, onTerminer, libelleFin = 'Terminer', occupe = false, message,
+  teinte = 'event', bandeau,
 }: {
   etapes: EtapeParcours[]
   onTerminer: () => void
   libelleFin?: string
   occupe?: boolean
   message?: React.ReactNode
+  teinte?: TeinteParcours
+  /** Le titre du bandeau. Absent, le bandeau n est pas affiche. */
+  bandeau?: string
 }) {
   const [i, setI] = useState(0)
   /* Le plus loin qu on ait atteint : on peut revenir librement en arriere, mais
@@ -60,7 +96,8 @@ export function Parcours({
   }
 
   return (
-    <div className="sa-parc">
+    <div className={`sa-parc${CLASSE_TEINTE[teinte]}`}>
+      {bandeau && <BandeauParcours titre={bandeau} i={i} total={etapes.length} />}
       <ol className="sa-parc-barre">
         {etapes.map((x, n) => {
           const accessible = n <= atteint

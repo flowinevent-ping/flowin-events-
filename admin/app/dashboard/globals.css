@@ -263,62 +263,107 @@ a:hover{text-decoration:underline}
 .sa-vue .so{font-size:10.5px;color:var(--sa-muted);margin-top:2px;line-height:1.3}
 
 /* ---- Parcours : carrousel d etapes, commun aux creations du dashboard ---- */
-/* Reprend la mecanique du parcours pro (RejoindreWizard) au lieu d en inventer
-   une troisieme : une etape a la fois, barre de progression, Precedent/Suivant.
-   La barre est cliquable EN ARRIERE — revenir sur une saisie ne doit pas
-   demander cinq clics. */
-.sa-parc{background:var(--sa-card);border:1px solid var(--sa-border);border-radius:16px;padding:18px}
-.sa-parc-barre{display:flex;gap:6px;list-style:none;margin:0 0 18px;padding:0;overflow-x:auto}
-.sa-parc-barre li{flex:1 1 0;min-width:104px}
-.sa-parc-pas{width:100%;display:flex;align-items:center;gap:7px;font-family:inherit;text-align:left;
-  cursor:pointer;background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:10px;
-  padding:8px 10px;transition:border-color .12s,background .12s}
-.sa-parc-pas:disabled{cursor:default;opacity:.55}
-.sa-parc-pas:not(:disabled):hover{border-color:var(--sa-accent)}
-.sa-parc-pas .n{width:20px;height:20px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;
-  font-size:10.5px;font-weight:900;background:var(--sa-card);border:1px solid var(--sa-border);color:var(--sa-muted)}
-.sa-parc-pas .l{font-size:11px;font-weight:800;line-height:1.2;color:var(--sa-muted);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sa-parc-pas.fait .n{background:#1D9E75;border-color:#1D9E75;color:#fff}
-.sa-parc-pas.actif{background:var(--sa-card);border-color:var(--sa-accent);
-  box-shadow:inset 0 0 0 1px var(--sa-accent)}
-.sa-parc-pas.actif .n{background:var(--sa-accent);border-color:var(--sa-accent);color:#fff}
-.sa-parc-pas.actif .l{color:var(--sa-text)}
+/* ═══════════════════════════════════════════════════════════════════════════
+   PARCOURS DE CREATION — l habillage de l app pro, pas celui du dashboard.
 
-.sa-parc-scene{min-height:240px}
-/* L etape entre par la droite : on sent qu on avance, sans animation bavarde. */
+   Romain, 03/09 : « je souhaite avoir un parcours de creation d events, de
+   super events, de creation de pro dans le meme style que celui de l app comme
+   pour le parcours pro de creation d event et participation au super events »,
+   puis « les visuels que tu as donnes sont ceux du jeu pour la version
+   participants, pas pro ni dashboard SA creation ».
+
+   Les jetons ci-dessous sont ceux de components/pro/RejoindreWizard.tsx et
+   CreerAnimationWizard.tsx, releves un par un, pas approches :
+     carte    #fff, bord 1px #E2E8F0, rayon 16, padding 18
+     bandeau  rayon 18, padding 18/20, texte blanc, degrade de la teinte
+     jauge    5px de haut, rayon 99, blanche a l avancement
+     champ    bord 1.5px #E2E8F0, rayon 10, padding 11/13, 14px
+     libelle  12px, 700
+     bouton   rayon 12, padding 12/22, 14px, 800 ; fantome bord 1.5px #E2E8F0
+     vignette rayon 14, padding 16, bord 2px teinte quand choisie
+     muted    #64748B
+   La TEINTE suit la convention deja etablie la-bas : bleu #2746A6 = pro,
+   orange #C2410C = super event, violet #7C2D92 = l accent Flowin.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.sa-parc{--parc:#7C2D92;--parc2:#9B45B4}
+.sa-parc.t-super{--parc:#C2410C;--parc2:#FF8A14}
+.sa-parc.t-pro{--parc:#2746A6;--parc2:#3B7DE0}
+
+/* Le bandeau du parcours pro : eyebrow, numero d etape, jauge de segments. */
+.sa-parc-bandeau{border-radius:18px;padding:18px 20px;color:#fff;margin-bottom:18px;
+  background:linear-gradient(135deg,var(--parc2),var(--parc))}
+.sa-parc-bandeau .ey{font-size:11px;font-weight:800;letter-spacing:.1em;opacity:.9;text-transform:uppercase}
+.sa-parc-bandeau .et{font-size:20px;font-weight:900;margin:4px 0 2px}
+.sa-parc-bandeau .jauge{display:flex;gap:4px;margin-top:12px}
+.sa-parc-bandeau .jauge span{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.3)}
+.sa-parc-bandeau .jauge span.on{background:#fff}
+
+/* La barre d etapes reste cliquable en arriere — revenir sur une saisie ne doit
+   pas demander cinq clics de « Precedent ». */
+.sa-parc-barre{display:flex;gap:6px;list-style:none;margin:0 0 16px;padding:0;overflow-x:auto}
+.sa-parc-barre li{flex:1 1 0;min-width:104px}
+.sa-parc-pas{width:100%;display:flex;align-items:center;gap:8px;font-family:inherit;text-align:left;
+  cursor:pointer;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;
+  padding:10px 12px;transition:border-color .12s,box-shadow .12s}
+.sa-parc-pas:disabled{cursor:default;opacity:.5}
+.sa-parc-pas:not(:disabled):hover{border-color:var(--parc)}
+.sa-parc-pas .n{width:22px;height:22px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;
+  font-size:11px;font-weight:900;background:#F8FAFC;border:1.5px solid #E2E8F0;color:#64748B}
+.sa-parc-pas .l{font-size:12px;font-weight:800;line-height:1.2;color:#64748B;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sa-parc-pas.fait .n{background:#0F9E73;border-color:#0F9E73;color:#fff}
+.sa-parc-pas.actif{border-color:var(--parc);box-shadow:0 0 0 3px color-mix(in srgb, var(--parc) 12%, transparent)}
+.sa-parc-pas.actif .n{background:var(--parc);border-color:var(--parc);color:#fff}
+.sa-parc-pas.actif .l{color:#0F172A}
+
+/* La carte de l etape : celle du parcours pro, blanche et aeree. */
+.sa-parc-scene{background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:22px 22px 20px}
 @keyframes sa-parc-entree{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
 .sa-parc-vue{animation:sa-parc-entree .18s ease-out}
 @media (prefers-reduced-motion:reduce){.sa-parc-vue{animation:none}}
-.sa-parc-tete{display:flex;gap:11px;align-items:flex-start;margin-bottom:16px}
-.sa-parc-tete .ic{font-size:24px;line-height:1}
-.sa-parc-tete h2{margin:0;font-size:17px;font-weight:900;letter-spacing:-.01em}
-.sa-parc-tete p{margin:3px 0 0;font-size:12.5px;color:var(--sa-muted);line-height:1.45}
+.sa-parc-tete{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px}
+.sa-parc-tete .ic{font-size:26px;line-height:1}
+.sa-parc-tete h2{margin:0;font-size:19px;font-weight:900;letter-spacing:-.3px;color:#0F172A}
+.sa-parc-tete p{margin:4px 0 0;font-size:13px;color:#64748B;line-height:1.55;max-width:62ch}
 
-.sa-parc-pied{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:14px;
-  border-top:1px solid var(--sa-border)}
-.sa-parc-compte{font-size:11.5px;color:var(--sa-muted);margin-left:auto;margin-right:auto}
-.sa-parc-bloque{font-size:11.5px;font-weight:700;color:#b4791f;text-align:right;max-width:320px;line-height:1.35}
+/* Champs : ceux du parcours pro, plus grands que ceux du dashboard. */
+.sa-parc .sa-input,.sa-parc textarea.sa-input,.sa-parc select.sa-input{
+  width:100%;border:1.5px solid #E2E8F0;border-radius:10px;padding:11px 13px;
+  font-size:14px;font-family:inherit;background:#fff;color:#0F172A}
+.sa-parc .sa-input:focus{outline:2px solid var(--parc);outline-offset:1px;border-color:var(--parc)}
+.sa-parc .sa-lbl{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:#0F172A}
+.sa-parc .sa-aide{display:block;font-size:11.5px;color:#64748B;margin-top:5px;line-height:1.5}
 
-/* Vignette de choix — la carte cliquable du parcours pro, extraite. */
-.sa-choix{position:relative;display:flex;flex-direction:column;gap:3px;text-align:left;
-  font-family:inherit;cursor:pointer;background:var(--sa-card);border:1.5px solid var(--sa-border);
-  border-radius:13px;padding:13px 14px;transition:border-color .12s,box-shadow .12s,transform .12s}
-.sa-choix:hover{border-color:var(--sa-accent);transform:translateY(-1px)}
-.sa-choix.actif{border-color:var(--sa-accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--sa-accent) 16%, transparent)}
-.sa-choix .ic{font-size:20px;line-height:1;margin-bottom:3px}
-.sa-choix .ti{font-size:13.5px;font-weight:800;color:var(--sa-text);line-height:1.25;padding-right:20px}
-.sa-choix .so{font-size:11.5px;color:var(--sa-muted);line-height:1.35}
-.sa-choix .bd{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.sa-choix .bd span{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-  background:var(--sa-subtle);border:1px solid var(--sa-border);border-radius:99px;padding:2px 7px;color:var(--sa-muted)}
-.sa-choix .cochee{position:absolute;top:11px;right:12px;width:18px;height:18px;border-radius:50%;
+/* Pied : Precedent fantome a gauche, Suivant plein a droite. */
+.sa-parc-pied{display:flex;align-items:center;gap:12px;margin-top:20px}
+.sa-parc-pied .sa-btn{background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;
+  padding:12px 20px;font-weight:700;font-size:14px;color:#0F172A}
+.sa-parc-pied .sa-btn.primary{background:var(--parc);border-color:var(--parc);color:#fff;
+  padding:12px 22px;font-weight:800}
+.sa-parc-pied .sa-btn:disabled{opacity:.4}
+.sa-parc-compte{font-size:12.5px;color:#64748B;margin-left:auto;margin-right:auto}
+.sa-parc-bloque{font-size:12.5px;font-weight:800;color:#B45309;text-align:right;max-width:340px;line-height:1.4}
+
+/* Vignette de choix — la carte cliquable du parcours pro. */
+.sa-choix{position:relative;display:flex;flex-direction:column;gap:4px;text-align:left;
+  font-family:inherit;cursor:pointer;background:#fff;border:1.5px solid #E2E8F0;
+  border-radius:14px;padding:16px;transition:border-color .12s,box-shadow .12s,background .12s}
+.sa-choix:hover{border-color:var(--parc,#7C2D92)}
+.sa-choix.actif{border:2px solid var(--parc,#7C2D92);padding:15px;
+  background:color-mix(in srgb, var(--parc,#7C2D92) 5%, #fff)}
+.sa-choix .ic{font-size:22px;line-height:1;margin-bottom:4px}
+.sa-choix .ti{font-size:14.5px;font-weight:800;color:#0F172A;line-height:1.25;padding-right:22px}
+.sa-choix .so{font-size:12px;color:#64748B;line-height:1.45;margin-bottom:2px}
+.sa-choix .bd{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sa-choix .bd span{font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 8px;
+  background:color-mix(in srgb, var(--parc,#7C2D92) 10%, transparent);color:var(--parc,#7C2D92)}
+.sa-choix .cochee{position:absolute;top:13px;right:13px;width:18px;height:18px;border-radius:50%;
   display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;
-  background:var(--sa-accent);opacity:0;transition:opacity .12s}
+  background:var(--parc,#7C2D92);opacity:0;transition:opacity .12s}
 .sa-choix.actif .cochee{opacity:1}
-.sa-choix-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.sa-choix-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px}
 
-/* Libelle et aide de champ — utilises par les parcours de creation. */
+/* Libelle et aide hors carte de parcours (fiches, drawers) : inchanges. */
 .sa-lbl{display:block;font-size:11.5px;font-weight:800;margin-bottom:5px;color:var(--sa-text)}
 .sa-aide{display:block;font-size:11px;color:var(--sa-muted);margin-top:5px;line-height:1.45}
 
@@ -342,7 +387,7 @@ a:hover{text-decoration:underline}
 /* Le viewport du parcours : 430px de large, mis a l echelle, pas redessine. */
 .sa-vp{position:absolute;top:0;left:0}
 .sa-vp code{font-family:inherit}
-.sa-apercu-pas{display:flex;gap:5px;margin-top:12px}
+.sa-apercu-pas{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap;max-width:272px}
 .sa-apercu-note{font-size:10.5px;color:var(--sa-muted);line-height:1.45;margin:10px 0 0;max-width:272px}
 
 /* Le parcours passe a deux colonnes quand l apercu l accompagne. */

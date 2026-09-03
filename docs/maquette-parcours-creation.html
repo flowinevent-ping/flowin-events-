@@ -701,8 +701,11 @@ function donneesApercu(){
     var s = E.superevent;
     var ids = Object.keys(s.pros);
     var id = ids[0] || '';
+    /* Sans pro encore choisi, on montre quand meme le gabarit : c'est lui qui
+       sera joue. Renvoyer un jeu vide faisait retomber l'apercu sur l'ancien
+       rendu generique — le « visuel hors sujet » du 03/09. */
     return { nom: id ? nomPro(id) : (s.nom||'Nom de l’opération'),
-             jeu: id ? s.pros[id] : '', couleur:'#C2410C',
+             jeu: id ? s.pros[id] : 'nds2026', couleur:'#C2410C',
              sur: s.nom || null, date:s.dateD, lots:[], nbPart:ids.length, multi:true };
   }
   var p = E.pro;

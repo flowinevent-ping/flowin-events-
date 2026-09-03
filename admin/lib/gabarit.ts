@@ -58,7 +58,7 @@ export const DEROULE: EtapeJoueur[] = [
   { ecran: 'quiz', titre: 'Le quiz', detail: 'Les questions tirées au hasard dans les banques cochées. Une réponse par question, correction affichée tout de suite, avec l’explication quand la question en porte une.' },
   { ecran: 'resultats', titre: 'Le score', detail: 'Le score sur le total. Sans faute : le ticket est acquis. Sinon, le bonus le rattrape.' },
   { ecran: 'bonus', titre: 'Le bonus', detail: 'Les questions bonus, tirées dans les banques bonus cochées. Elles rattrapent le ticket manqué et en ajoutent un.' },
-  { ecran: 'inscription', titre: 'L’inscription', detail: 'Prénom, nom, email, téléphone, sexe, tranche d’âge, code postal, comment il a connu l’opération, et le consentement. Un joueur déjà venu est reconnu à son email et saute cette étape.' },
+  { ecran: 'inscription', titre: 'L’inscription', detail: 'Prénom, nom, email, téléphone, sexe, tranche d’âge, code postal, comment il a connu l’opération, et le consentement. Un joueur qui a déjà un compte Flowin est reconnu sur son appareil, ou retrouvé à son email — il ne resaisit rien et garde ses tickets.' },
   { ecran: 'final', titre: 'Le ticket', detail: 'Le ticket est affiché et compte pour le tirage.' },
   { ecran: 'carte', titre: 'La carte des stations', detail: 'La carte des autres stations à jouer, chacune valant un ticket de plus.', multistation: true },
   { ecran: 'partenaires', titre: 'Les partenaires', detail: 'Les commerces de l’opération, leurs lots et leurs liens. « +1 ticket par commerce ».', multistation: true },
@@ -81,6 +81,7 @@ export const REGLES: RegleJeu[] = [
   { titre: 'Quiz sans faute = 1 ticket', texte: 'Le sans-faute donne le ticket directement.' },
   { titre: 'Bonus = 1 ticket de plus', texte: 'Les questions bonus rattrapent le ticket manqué et en ajoutent un — jusqu’à 2 tickets par jour.' },
   { titre: 'Le cumul ne se perd pas', texte: 'Les tickets gagnés sont conservés : le compteur ne redescend jamais.' },
+  { titre: 'Déjà un compte : on ne resaisit rien', texte: 'Un joueur reconnu sur son appareil, ou qui donne son email, retrouve ses informations et ses tickets — le formulaire ne lui est plus demandé.' },
   { titre: 'Chaque station en plus = 1 ticket', portee: 'super', texte: 'Jouer une autre station de l’opération ajoute un ticket.' },
   { titre: 'Chaque commerce = 1 ticket', portee: 'super', texte: 'Passer chez un commerce partenaire ajoute un ticket.' },
 ]

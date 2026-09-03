@@ -53,6 +53,7 @@ export default function Page() {
   const [dateD, setDateD] = useState('')
   const [dateF, setDateF] = useState('')
   const [description, setDescription] = useState('')
+  const [logoUrl, setLogoUrl] = useState('')
   const [geofence, setGeofence] = useState('150')
   const [tirageGlobal, setTirageGlobal] = useState(true)
   const [choisis, setChoisis] = useState<Record<string, string>>({}) // pro_id -> module
@@ -91,6 +92,7 @@ export default function Page() {
       id, nom, dateD: dateD || null, dateF: dateF || null,
       description: description || null,
       geofenceM: geofence ? Number(geofence) : null,
+      logoUrl: logoUrl.trim() || null,
       tirageGlobal,
       pros: Object.keys(choisis).map(proId => ({
         pro_id: proId,
@@ -139,6 +141,16 @@ export default function Page() {
               <input className="sa-input" type="date" value={dateF} onChange={e => setDateF(e.target.value)} />
             </label>
           </div>
+          <label>
+            <span className="sa-lbl">Logo de l’opération</span>
+            <input className="sa-input" value={logoUrl} onChange={e => setLogoUrl(e.target.value)}
+              placeholder="https://…/logo.png" />
+            <span className="sa-aide">
+              Il s’affiche en tête du parcours joueur, sur <b>toutes les stations</b> de
+              l’opération. Laissé vide, la place reste libre — le gabarit n’affiche
+              alors aucune marque.
+            </span>
+          </label>
           <label>
             <span className="sa-lbl">Description</span>
             <textarea className="sa-input" rows={3} value={description} onChange={e => setDescription(e.target.value)}
@@ -274,6 +286,8 @@ export default function Page() {
 
         <div className="sa-parc-avec-apercu">
           <Parcours
+            teinte="super"
+            bandeau="Créer un super event"
             etapes={etapes}
             onTerminer={creer}
             libelleFin="Créer le super event"
@@ -298,6 +312,7 @@ export default function Page() {
                  stations et la carte partenaires font partie du parcours. */
               multistation: true,
               nbStations: Object.keys(choisis).length,
+              logoUrl: logoUrl.trim() || null,
               nbPartenaires: Object.keys(choisis).length,
             }}
           />

@@ -153,6 +153,11 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     .flatMap(b => b.questions ?? [])
     .filter(q => { const t = (q as { type?: string }).type; return t === 'single' || t === 'multi' }) as unknown as BonusQuestion[]
   const bonusQs = ((cfg.quizBonusList as BonusQuestion[] | undefined) ?? (bonusDesBanques.length ? bonusDesBanques : [])) as BonusQuestion[]
+  /* `logoUrl` explicite -> ce logo ; chaine vide -> aucun logo, la place reste ;
+     absent -> le logo du festival, comme avant. */
+  const logoUrl: string | null = cfg.logoUrl === undefined
+    ? '/nds/logo_nds_blanc_hd.png'
+    : ((cfg.logoUrl as string) || null)
   const lotNom = (cfg.lotNom as string) || '3 places offertes'
   const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
   const lotResume = (cfg.lotResume as string) || '3 places pour ton prochain concert'
@@ -845,7 +850,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
         {screen === 'onboard' && (
           <section className="scr on">
             <div className="hero">
-              <img className="hlogo" src="/nds/logo_nds_blanc_hd.png" alt="Nuits du Sud" />
+              {/* Le logo vient de la configuration de la station depuis le
+                  03/09 (gabarit marque blanche). Les events du festival n ont
+                  pas cette cle : ils gardent le logo des Nuits du Sud, a
+                  l identique. Une station sans logo laisse la place vide,
+                  plutot que d afficher la marque de quelqu un d autre. */}
+              {logoUrl === null
+                ? <div className="hlogo" aria-hidden="true" />
+                : <img className="hlogo" src={logoUrl} alt={nom} />}
               <div className="prize">
                 <div className="lbl">À gagner chaque soir</div>
                 <div className="prow">

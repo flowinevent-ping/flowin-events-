@@ -60,6 +60,8 @@ export interface BrouillonApercu {
   nbPartenaires?: number
   /** Texte d'accueil libre : remplace « Comment jouer ? » quand il est rempli. */
   intro?: string | null
+  /** Logo affiche en tete. Vide ou absent : la place reste reservee. */
+  logoUrl?: string | null
 }
 
 /* Le viewport reel du parcours (`.phone { max-width: 480px }`) et la place
@@ -112,10 +114,15 @@ function ecranOnboard(d: BrouillonApercu): string {
          <span>+ Vous jouez, + vos chances augmentent</span>
        </div>`
 
+  /* L'emplacement du logo : rempli des qu'une operation ou une station en a un,
+     laisse libre sinon — c'est ce que Romain demande du gabarit. */
+  const logo = (d.logoUrl ?? '').trim()
+    ? `<img class="hlogo" src="${esc(d.logoUrl)}" alt="">`
+    : '<div class="gab-logo"><span>Emplacement du logo</span></div>'
+
   return `<section class="scr on">
     <div class="hero">
-      <!-- L'emplacement du logo, laisse libre : c'est la seule chose retiree du gabarit. -->
-      <div class="gab-logo"><span>Emplacement du logo</span></div>
+      ${logo}
       <div class="prize">
         <div class="lbl">À gagner</div>
         <div class="prow">

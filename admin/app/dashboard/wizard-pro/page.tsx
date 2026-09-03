@@ -270,6 +270,8 @@ export default function Page() {
         subtitle="Les mêmes étapes que le parcours pro — le SA saisit ce que le pro remplirait lui-même"
       />
       <Parcours
+        teinte="pro"
+        bandeau="Créer un pro"
         etapes={etapes}
         onTerminer={creer}
         libelleFin="Créer le pro"

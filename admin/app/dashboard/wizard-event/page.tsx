@@ -17,7 +17,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
-import { BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
+import { BandeauParcours, BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
 import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
@@ -132,6 +132,8 @@ function Wizard() {
      l apercu le dit, plutot que de laisser croire a un quiz qui n a rien a
      poser. Les deux formats vivent dans la meme table, on trie par type. */
   const cfgEv = (d.cfg ?? {}) as Record<string, unknown>
+
+
   const nbDispo = useMemo(() => {
     const idsQuiz = (cfgEv.quizBanques as string[]) ?? []
     const idsBonus = (cfgEv.bonusBanques as string[]) ?? []
@@ -177,6 +179,23 @@ function Wizard() {
      corriger. Il est desormais affiche et modifiable. */
   const [supers, setSupers] = useState<SuperEvent[]>([])
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
+
+  /* LE LOGO DE LA STATION, dans l ordre ou on le trouve :
+     1. celui saisi ici ; 2. celui de l operation, s il y en a une ;
+     3. celui de la fiche commerce du pro — « pour chaque pro on mettra le logo
+     au meme endroit » (Romain, 03/09). Rien : la place reste libre. */
+  const logoOperation = supers.find(se => se.id === d.super_event_id)?.logo_url ?? ''
+  const logoPro = (() => {
+    if (!d.pro_id) return ''
+    const p = pros.find(x => x.id === d.pro_id)
+    const parId = p?.partenaire_id
+      ? partenaires.find(x => x.id === p.partenaire_id)
+      : undefined
+    const parNom = partenaires.find(x => (x.nom ?? '').trim().toLowerCase() === (p?.nom ?? '').trim().toLowerCase())
+    return (parId ?? parNom)?.image_url ?? ''
+  })()
+  const logoSaisi = (cfgEv.logoUrl as string) ?? ''
+  const logoEffectif = logoSaisi || logoOperation || logoPro
   const jours = nbJours(d)
 
   const majLot = (i: number, champs: Partial<BrouillonLot>) =>
@@ -204,8 +223,13 @@ function Wizard() {
     </div>
   )
 
+  const iEtape = ETAPES.findIndex(x => x.id === etape)
+
   return (
-    <div className="sa-page">
+    /* `sa-parc` porte les jetons de l app pro (carte blanche, champs et boutons
+       du parcours pro) — voir le bloc PARCOURS DE CREATION dans globals.css.
+       Sans cette classe, l ecran retombe sur l habillage dense du dashboard. */
+    <div className="sa-page sa-parc">
       <PageHeader
         title="Nouvel événement"
         subtitle={d.nom || 'Brouillon'}
@@ -229,6 +253,7 @@ function Wizard() {
           « parcours events comme demande pour parcours creation super event ».
           Le CONTENU des 6 etapes n est pas touche — le reecrire, ce serait
           risquer d en perdre un morceau. Seule la navigation change. */}
+      <BandeauParcours titre="Créer un événement" i={iEtape} total={ETAPES.length} />
       <BarreParcours<Etape> etapes={ETAPES.map(s => ({ id: s.id, label: s.label }))} actif={etape} onAller={setEtape} />
 
       {problemes.length > 0 && (
@@ -254,7 +279,7 @@ function Wizard() {
       )}
 
       <div className="sa-parc-avec-apercu">
-      <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: 16 }}>
+      <div className="sa-parc-scene">
 
         {etape === 'A' && (
           <>
@@ -284,6 +309,21 @@ function Wizard() {
                 <option value="">— aucun —</option>
                 {supers.map(se => <option key={se.id} value={se.id}>{se.nom}</option>)}
               </select>)}
+            {ligne('Logo affiché en tête du jeu', false,
+              <>
+                <input className="sa-input" style={{ width: '100%' }} value={logoSaisi}
+                  onChange={e => maj({ cfg: { ...cfgEv, logoUrl: e.target.value } })}
+                  placeholder={logoOperation || logoPro || 'https://…/logo.png'} />
+                <span className="sa-aide">
+                  {logoSaisi
+                    ? 'Logo propre à cette station.'
+                    : logoOperation
+                      ? 'Repris de l’opération. Renseignez ce champ pour en mettre un autre.'
+                      : logoPro
+                        ? 'Repris de la fiche commerce du pro. Renseignez ce champ pour en mettre un autre.'
+                        : 'Aucun logo disponible — la place reste libre dans le jeu.'}
+                </span>
+              </>)}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {ligne('Date de début', true,
                 <input type="date" className="sa-input" style={{ width: '100%' }} value={d.date_d ?? ''}
@@ -489,6 +529,7 @@ function Wizard() {
           nbQuestions: nbDispo.quiz,
           nbBonus: nbDispo.bonus,
           intro: (cfgEv.intro as string) ?? null,
+          logoUrl: logoEffectif || null,
         }}
       />
       </div>
