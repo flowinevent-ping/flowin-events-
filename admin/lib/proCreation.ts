@@ -25,14 +25,18 @@
  * une demande, pas une creation. Le SA, lui, cree pour de bon.
  */
 
-/* Reprise EXACTE de components/pro/RejoindreWizard.tsx : le pro voit deja cette
-   liste quand il rejoint une operation. En avoir une deuxieme ailleurs, c'est
-   se retrouver avec « Restauration » d'un cote et « Restaurateur » de l'autre,
-   et un regroupement par secteur qui ne regroupe rien. */
+/* Corrige le 03/09 : cette liste avait ete inventee (« Grande distribution »,
+   « Banque · Assurance »… ) sans etre confrontee aux valeurs reellement en
+   base. Requete sur `pros.secteur` le 03/09 : Commerce & Négoce (8),
+   Collectivité (1), Collectivité / Festival (1), Institution (1),
+   Association (1), plus station-festival (4) — un tag technique pose sur les
+   comptes multistation, jamais choisi par un humain dans ce formulaire, donc
+   absent de la liste ci-dessous. Reprise a l'identique dans
+   components/pro/RejoindreWizard.tsx : une seule liste, sinon le
+   regroupement par secteur ne regroupe rien. */
 export const SECTEURS_PRO = [
-  'Grande distribution', 'Banque · Assurance', 'Automobile', 'Immobilier',
-  'Restauration', 'Commerce', 'Collectivité', 'Association', 'Tourisme',
-  'Énergie', 'Autre',
+  'Commerce & Négoce', 'Collectivité', 'Collectivité / Festival',
+  'Association', 'Institution', 'Autre',
 ] as const
 
 /* Les deux profils du parcours pro, avec leurs propres mots. */

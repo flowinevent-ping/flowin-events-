@@ -1,0 +1,348 @@
+<title>Audit des parcours Flowin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+
+<style>
+/* La police est Manrope parce que c'est celle du produit — et parce que le fait
+   qu'elle ne serve aujourd'hui qu'au parcours joueur est l'un des constats. */
+:root{
+  --fond:#F6F4F8; --carte:#FFFFFF; --creux:#FAF8FC;
+  --encre:#17131F; --gris:#6B6076; --trait:#E6E0EC;
+  --acc:#7C2D92; --acc-pale:rgba(124,45,146,.08);
+  --bloque:#B4261F; --manque:#B45309; --erreur:#7A2E8F; --ok:#0F7C5C;
+  --bloque-f:rgba(180,38,31,.09); --manque-f:rgba(180,83,9,.10);
+  --erreur-f:rgba(122,46,143,.10); --ok-f:rgba(15,124,92,.10);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fond:#100C15; --carte:#191320; --creux:#1F1828;
+    --encre:#F2EEF6; --gris:#A093AE; --trait:#302738;
+    --acc:#C77BDD; --acc-pale:rgba(199,123,221,.12);
+    --bloque:#F0847C; --manque:#E0A85C; --erreur:#C77BDD; --ok:#4FCFA6;
+    --bloque-f:rgba(240,132,124,.12); --manque-f:rgba(224,168,92,.12);
+    --erreur-f:rgba(199,123,221,.12); --ok-f:rgba(79,207,166,.12);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#100C15; --carte:#191320; --creux:#1F1828;
+  --encre:#F2EEF6; --gris:#A093AE; --trait:#302738;
+  --acc:#C77BDD; --acc-pale:rgba(199,123,221,.12);
+  --bloque:#F0847C; --manque:#E0A85C; --erreur:#C77BDD; --ok:#4FCFA6;
+  --bloque-f:rgba(240,132,124,.12); --manque-f:rgba(224,168,92,.12);
+  --erreur-f:rgba(199,123,221,.12); --ok-f:rgba(79,207,166,.12);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--fond); color:var(--encre);
+  font-family:Manrope,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85em;
+  background:var(--acc-pale);border-radius:5px;padding:1px 5px;color:var(--acc);white-space:nowrap}
+
+.page{max-width:900px;margin:0 auto;padding:34px 22px 72px}
+
+/* ── En-tête ─────────────────────────────────────────────────────────────── */
+header{border-bottom:1px solid var(--trait);padding-bottom:22px;margin-bottom:30px}
+.sur{font-size:11px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--acc)}
+h1{font-size:clamp(27px,4.4vw,37px);font-weight:800;letter-spacing:-.024em;margin:8px 0 10px;text-wrap:balance}
+.chapo{margin:0;color:var(--gris);font-size:15px;max-width:64ch}
+.chapo b{color:var(--encre);font-weight:700}
+
+.compte{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.compte div{flex:1 1 130px;background:var(--carte);border:1px solid var(--trait);
+  border-radius:11px;padding:11px 13px}
+.compte .n{font-size:23px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.compte .l{font-size:11.5px;color:var(--gris);margin-top:4px;line-height:1.35}
+.compte .b .n{color:var(--bloque)} .compte .m .n{color:var(--manque)}
+.compte .e .n{color:var(--erreur)} .compte .s .n{color:var(--acc)}
+
+/* ── Sections ────────────────────────────────────────────────────────────── */
+h2{font-size:19px;font-weight:800;letter-spacing:-.012em;margin:40px 0 4px;text-wrap:balance}
+h2 + .intro{margin:0 0 16px;color:var(--gris);font-size:13.5px;max-width:64ch}
+
+/* Un constat : une puce de gravité, le fait, la preuve. */
+.constat{background:var(--carte);border:1px solid var(--trait);border-radius:13px;
+  padding:15px 17px;margin-bottom:11px;display:grid;
+  grid-template-columns:auto minmax(0,1fr);gap:4px 13px;align-items:start}
+.puce{grid-row:1 / span 3;width:27px;height:27px;border-radius:8px;display:grid;place-items:center;
+  font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.g-bloque .puce{background:var(--bloque-f);color:var(--bloque)}
+.g-manque .puce{background:var(--manque-f);color:var(--manque)}
+.g-erreur .puce{background:var(--erreur-f);color:var(--erreur)}
+.constat .t{font-size:15px;font-weight:800;line-height:1.35}
+.constat .d{font-size:13.5px;color:var(--gris);line-height:1.6}
+.constat .p{font-size:12.5px;color:var(--gris);background:var(--creux);border:1px solid var(--trait);
+  border-radius:9px;padding:8px 11px;margin-top:7px;line-height:1.55}
+.constat .p b{color:var(--encre);font-weight:700}
+
+/* ── Les deux rôles ──────────────────────────────────────────────────────── */
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;margin-top:6px}
+.role{background:var(--carte);border:1px solid var(--trait);border-radius:13px;overflow:hidden}
+.role > .tete{padding:13px 17px;border-bottom:1px solid var(--trait);background:var(--creux)}
+.role .qui{font-size:15px;font-weight:800}
+.role .quoi{font-size:12px;color:var(--gris);margin-top:2px}
+.role ul{list-style:none;margin:0;padding:5px 17px 13px}
+.role li{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--trait);font-size:13.5px}
+.role li:last-child{border-bottom:none}
+.etat{flex:none;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  border-radius:99px;padding:3px 8px;min-width:74px;text-align:center}
+.e-ok{background:var(--ok-f);color:var(--ok)}
+.e-part{background:var(--manque-f);color:var(--manque)}
+.e-non{background:var(--bloque-f);color:var(--bloque)}
+
+/* ── L'ordre : une vraie séquence, donc numérotée ────────────────────────── */
+ol.ordre{list-style:none;counter-reset:o;margin:6px 0 0;padding:0}
+ol.ordre li{counter-increment:o;display:grid;grid-template-columns:auto minmax(0,1fr);gap:13px;
+  padding:13px 0;border-bottom:1px solid var(--trait)}
+ol.ordre li::before{content:counter(o);width:25px;height:25px;border-radius:50%;
+  background:var(--acc);color:#fff;display:grid;place-items:center;
+  font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+ol.ordre .t{font-size:14.5px;font-weight:800}
+ol.ordre .d{font-size:13px;color:var(--gris);line-height:1.55;margin-top:2px}
+
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
+  font-size:12.5px;color:var(--gris);line-height:1.65}
+</style>
+
+<div class="page">
+
+<header>
+  <div class="sur">Flowin · 3 septembre 2026</div>
+  <h1>Audit des parcours de création</h1>
+  <p class="chapo">
+    Six parcours, relevés un par un dans le code et vérifiés en base. Ce document
+    ne liste que des faits contrôlables : une route, une colonne, un compte.
+    <b>Trois de ces constats viennent de mes propres erreurs</b> — ils sont marqués
+    comme tels.
+  </p>
+  <div class="compte">
+    <div class="b"><div class="n">2</div><div class="l">bloquants — un parcours ne s’ouvre pas</div></div>
+    <div class="m"><div class="n">5</div><div class="l">manques que vous avez signalés</div></div>
+    <div class="e"><div class="n">1</div><div class="l">erreur de ma part, à corriger avant tout</div></div>
+    <div class="s"><div class="n">4</div><div class="l">incohérences de style</div></div>
+  </div>
+</header>
+
+<h2>Ce qui bloque l’accès</h2>
+<p class="intro">Vous avez raison sur les mots de passe. Voici pourquoi, exactement.</p>
+
+<div class="constat g-bloque">
+  <span class="puce">1</span>
+  <div class="t">Aucun pro n’a de compte — le parcours « rejoindre une opération » n’a jamais pu s’ouvrir</div>
+  <div class="d">
+    Sur les 16 pros en base, <b>zéro</b> possède un compte de connexion.
+    <code>/pro/rejoindre</code> exige une session, un pro rattaché à cette session,
+    et un statut <code>valide</code>. Les trois conditions échouent, donc la page
+    renvoie systématiquement vers l’écran de connexion. Ce n’est pas votre mot de
+    passe qui est mauvais : il n’y a aucun compte à ouvrir.
+  </div>
+  <div class="p"><b>Vérifié en base :</b> <code>select count(*) from pros where auth_id is not null</code> → 0 sur 16.</div>
+</div>
+
+<div class="constat g-bloque">
+  <span class="puce">2</span>
+  <div class="t"><code>/pro/jeu</code> ne demande rien du tout</div>
+  <div class="d">
+    L’inverse du précédent. Cette page lit l’identifiant du pro dans l’URL et
+    n’effectue <b>aucune vérification</b> : n’importe qui connaissant l’adresse peut
+    ouvrir le parcours de création d’animation de n’importe quel commerce et écrire
+    en son nom. Sans identifiant dans l’URL, elle s’ouvre sur un pro vide — c’est
+    ce que vous avez vu.
+  </div>
+  <div class="p"><b>Dans le code :</b> <code>app/pro/jeu/page.tsx</code> lit <code>searchParams.pro</code> et appelle directement le wizard. Aucun appel à <code>supabase.auth</code>.</div>
+</div>
+
+<h2>Les manques que vous signalez</h2>
+<p class="intro">Tous confirmés. Deux d’entre eux ont une cause commune.</p>
+
+<div class="constat g-manque">
+  <span class="puce">3</span>
+  <div class="t">Créer un pro : pas de logo, pas de site, pas de réseaux sociaux</div>
+  <div class="d">
+    Ces trois informations n’existent pas sur la fiche pro. Elles vivent sur la
+    <b>fiche commerce</b>, qui est une autre table. Le parcours crée la fiche pro
+    et s’arrête là — le commerce, lui, n’est jamais créé. C’est aussi pour cela
+    que le logo n’apparaît nulle part ensuite.
+  </div>
+  <div class="p"><b>Où sont les données :</b> <code>partenaires.image_url</code> (le logo), <code>partenaires.site_web</code>, <code>partenaires.instagram</code>, <code>partenaires.facebook</code>. Le lien entre les deux fiches est <code>pros.partenaire_id</code>.</div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">4</span>
+  <div class="t">Le SIRET est saisi, mais dans une seule des deux fiches</div>
+  <div class="d">
+    Il est bien demandé, à l’étape « Où il se trouve ». Il part dans
+    <code>pros.siret</code> — alors que <code>partenaires.siret</code> existe aussi.
+    Deux colonnes pour la même donnée, et les factures ne lisent pas forcément
+    la même.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">5</span>
+  <div class="t">Créer un super event : quatre choses manquent</div>
+  <div class="d">
+    <b>Insérer un pro</b> — on ne peut que cocher ceux qui existent déjà, pas en
+    créer un depuis le parcours. <b>La carte</b> — l’opération est multi-stations
+    par nature, elle ne se voit nulle part. <b>Le visuel des pros</b> — les
+    vignettes n’affichent ni logo ni photo. <b>L’aperçu de la publication</b> —
+    on ne voit pas ce que l’opération donnera une fois publiée.
+  </div>
+</div>
+
+<div class="constat g-erreur">
+  <span class="puce">6</span>
+  <div class="t">Mon erreur : la liste des secteurs ne correspond pas à vos données</div>
+  <div class="d">
+    J’ai repris la liste écrite dans le parcours pro sans la comparer à la base.
+    Elle propose « Grande distribution », « Banque · Assurance », « Restauration ».
+    <b>Vos vrais secteurs sont autres.</b> Conséquence concrète : rouvrir la fiche
+    d’un pro existant avec cette liste ne retrouve pas son secteur, et
+    l’enregistrer l’efface. À corriger avant tout autre enregistrement.
+  </div>
+  <div class="p"><b>Les secteurs réellement en base :</b> Commerce &amp; Négoce (9 pros), Collectivité, Collectivité / Festival, Association, Institution, station-festival (4 comptes techniques).</div>
+</div>
+
+<h2>Le style, d’un bout à l’autre</h2>
+<p class="intro">Vous avez raison : ce n’est pas tenu. Voici où, précisément.</p>
+
+<div class="constat g-manque">
+  <span class="puce">7</span>
+  <div class="t">Emoji ou pictogramme, selon la page</div>
+  <div class="d">
+    30 titres de page portent un emoji, au moins 5 n’en ont pas — « Aperçu Pro »,
+    « Prospects B2B », « CGV & documents légaux », « CRM Landing pages »,
+    « Retours CRM ». Et la même donnée change de forme selon l’écran : les modules
+    de jeu sont des emoji dans une liste, des pictogrammes dessinés dans une autre.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">8</span>
+  <div class="t">La police du produit n’est pas utilisée par le produit</div>
+  <div class="d">
+    Manrope est téléchargée sur chaque page de l’application. Seul le
+    <b>parcours joueur</b> s’en sert. Le dashboard et l’espace pro sont en police
+    système. Vous avez donc deux typographies pour un seul produit — et un
+    téléchargement inutile sur deux surfaces sur trois.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">9</span>
+  <div class="t">Les couleurs sont déclarées à quatre endroits</div>
+  <div class="d">
+    Le dashboard, l’espace pro et deux fichiers de style pro redéclarent chacun
+    leur violet, leur gris, leur bordure. Elles concordent aujourd’hui — c’est un
+    hasard heureux, pas une garantie. Une seule modification suffit à les
+    désynchroniser sans que rien ne le signale.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">10</span>
+  <div class="t">L’espace pro suit sa propre logique d’écrans</div>
+  <div class="d">
+    Le fond de page, la carte flottante et les libellés en capitales de l’espace
+    pro ne se retrouvent nulle part ailleurs. Les couleurs sont bonnes, la grammaire
+    ne l’est pas : ce n’est pas la même façon de poser un titre, un champ, un bouton.
+  </div>
+</div>
+
+<h2>L’architecture que vous décrivez</h2>
+<p class="intro">
+  Deux rôles, deux parcours. Voici ce que chacun doit pouvoir faire, et où on
+  en est réellement pour chaque capacité.
+</p>
+
+<div class="roles">
+  <div class="role">
+    <div class="tete">
+      <div class="qui">Le Super Admin</div>
+      <div class="quoi">Il crée et il valide</div>
+    </div>
+    <ul>
+      <li><span class="etat e-ok">Existe</span><span>Créer un super event</span></li>
+      <li><span class="etat e-ok">Existe</span><span>Créer un event</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Créer un pro — sans logo, site ni réseaux</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Ajouter un pro à un super event — seulement un pro déjà créé</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Valider les demandes — la page existe, la demande de création de super event n’existe pas</span></li>
+    </ul>
+  </div>
+
+  <div class="role">
+    <div class="tete">
+      <div class="qui">Le Pro</div>
+      <div class="quoi">Il rejoint, il crée, il gère</div>
+    </div>
+    <ul>
+      <li><span class="etat e-non">Bloqué</span><span>Intégrer un super event en cours — aucun compte n’existe</span></li>
+      <li><span class="etat e-non">Manque</span><span>La liste des opérations en cours et leur simulation</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Créer son compte — le parcours existe, la fiche commerce n’est pas créée</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Créer sa station de jeu — la page ne vérifie rien</span></li>
+      <li><span class="etat e-ok">Existe</span><span>Gérer ses infos</span></li>
+      <li><span class="etat e-non">Manque</span><span>Confier le paramétrage du jeu à Flowin</span></li>
+    </ul>
+  </div>
+</div>
+
+<h2>L’ordre dans lequel je corrige</h2>
+<p class="intro">Chaque étape rend la suivante vérifiable. Dites-moi si l’ordre vous va.</p>
+
+<ol class="ordre">
+  <li>
+    <div>
+      <div class="t">Vous rendre l’accès</div>
+      <div class="d">Un compte de démonstration validé, et une entrée depuis le dashboard qui ouvre les parcours pro sans mot de passe. Vous pourrez tout parcourir de bout en bout.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Corriger les secteurs</div>
+      <div class="d">Reprendre ceux de la base, avant qu’un enregistrement n’en efface un. C’est mon erreur, elle passe en premier.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Compléter « créer un pro »</div>
+      <div class="d">Logo, site, réseaux sociaux — donc création de la fiche commerce en même temps que la fiche pro, et un seul SIRET.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Compléter « créer un super event »</div>
+      <div class="d">Insérer un pro depuis le parcours, la carte des stations, les logos sur les vignettes, l’aperçu de la publication.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Ouvrir le parcours pro qui manque</div>
+      <div class="d">La liste des opérations en cours avec leur simulation, pour qu’un pro voie ce qu’il rejoint avant de le rejoindre.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Unifier le style</div>
+      <div class="d">Une seule source de couleurs, une seule police, et un choix tranché entre emoji et pictogramme — appliqué partout, y compris dans l’espace pro.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Fermer <code>/pro/jeu</code></div>
+      <div class="d">Exiger une session, comme les autres pages de l’espace pro.</div>
+    </div>
+  </li>
+</ol>
+
+<footer>
+  Relevé le 3 septembre 2026 sur la branche <code>main</code>, commit <code>dd95b30</code>.
+  Les chiffres de base viennent de requêtes directes sur le projet Supabase, pas d’une estimation.
+  Ce qui n’est pas listé ici n’a pas été audité : ce document couvre les six parcours de
+  création et leur habillage, pas le reste du dashboard.
+</footer>
+
+</div>

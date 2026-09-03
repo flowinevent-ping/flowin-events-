@@ -19,6 +19,7 @@ import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { fetchPacksParticipation, type PackParticipation } from '@/lib/commercial'
 import type { SuperEvent } from '@/lib/nds'
 import { Ico } from '@/lib/proicons'
+import { SECTEURS_PRO } from '@/lib/proCreation'
 
 const ORANGE = '#C2410C'
 const BLUE = '#2746A6'
@@ -26,7 +27,9 @@ const GREEN = '#0F9E73'
 const ACCENT_D_LOCAL = '#7C2D92'
 
 const CATEGORIES = ['Boulangerie', 'Restaurant', 'Bar · Café', 'Caviste', 'Fleuriste', 'Librairie', 'Épicerie fine', 'Mode', 'Beauté · Coiffure', 'Décoration', 'Autre']
-const SECTEURS = ['Grande distribution', 'Banque · Assurance', 'Automobile', 'Immobilier', 'Restauration', 'Commerce', 'Collectivité', 'Association', 'Tourisme', 'Énergie', 'Autre']
+/* 03/09 : reprend lib/proCreation.ts au lieu d'une liste locale — meme
+   secteurs qu'a la creation du pro, confrontes aux valeurs reelles en base. */
+const SECTEURS = SECTEURS_PRO
 
 const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', marginBottom: 12 }
 const label: React.CSSProperties = { fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }
