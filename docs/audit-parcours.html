@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Audit des parcours Flowin</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,19 +112,21 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
 <div class="page">
 
 <header>
-  <div class="sur">Flowin · 3 septembre 2026</div>
+  <div class="sur">Flowin · 3 septembre 2026 — mis à jour, deuxième passe</div>
   <h1>Audit des parcours de création</h1>
   <p class="chapo">
-    Six parcours, relevés un par un dans le code et vérifiés en base. Ce document
-    ne liste que des faits contrôlables : une route, une colonne, un compte.
-    <b>Trois de ces constats viennent de mes propres erreurs</b> — ils sont marqués
-    comme tels.
+    Première version : 6 constats, en partie devinés. <b>Ce n’était pas un vrai
+    recensement</b> — vous aviez raison de le dire. Cette version relit le code
+    ligne par ligne (wizards, lib d’écriture, drawers de fiche) et croise chaque
+    écran avec le schéma réel des 15 tables qu’il touche. Un constat corrigé par
+    rapport à la première version est marqué <b>« précision »</b> — rien n’est
+    effacé silencieusement.
   </p>
   <div class="compte">
-    <div class="b"><div class="n">2</div><div class="l">bloquants — un parcours ne s’ouvre pas</div></div>
-    <div class="m"><div class="n">5</div><div class="l">manques que vous avez signalés</div></div>
-    <div class="e"><div class="n">1</div><div class="l">erreur de ma part, à corriger avant tout</div></div>
-    <div class="s"><div class="n">4</div><div class="l">incohérences de style</div></div>
+    <div class="b"><div class="n">3</div><div class="l">bloquants — accès ou sécurité</div></div>
+    <div class="m"><div class="n">10</div><div class="l">manques confirmés dans le code</div></div>
+    <div class="e"><div class="n">1</div><div class="l">erreur de ma part — corrigée le 3/09</div></div>
+    <div class="s"><div class="n">4</div><div class="l">incohérences de style, chiffrées</div></div>
   </div>
 </header>
 
@@ -156,23 +159,55 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
   <div class="p"><b>Dans le code :</b> <code>app/pro/jeu/page.tsx</code> lit <code>searchParams.pro</code> et appelle directement le wizard. Aucun appel à <code>supabase.auth</code>.</div>
 </div>
 
+<div class="constat g-bloque">
+  <span class="puce">3</span>
+  <div class="t">Quatre tables sont ouvertes à n’importe qui possédant la clé publique</div>
+  <div class="d">
+    Ceci ne vient pas d’une lecture de code mais de l’auditeur de sécurité intégré
+    à Supabase, exécuté en vérifiant les autres constats : la Row Level Security
+    est <b>désactivée</b> sur quatre tables. N’importe qui muni de la clé anonyme
+    (publique, elle est dans vos pages web) peut lire et écrire ces tables
+    directement, sans passer par le dashboard.
+  </div>
+  <div class="p">
+    <b>Tables concernées :</b> <code>comm_config</code>, <code>comm_templates</code>
+    (config et modèles des communications), <code>visites_archive_2026_06</code>,
+    <code>visites_archive_apercu_2026_09</code> (archives de visites).
+    Aucune de ces quatre n’est utilisée par les parcours de création — je ne l’ai
+    donc pas corrigée moi-même : activer la RLS sans les bonnes règles peut couper
+    l’accès à des pages qui en dépendent. Le SQL de correction existe, à valider
+    avec vous avant de l’exécuter :
+    <code>alter table public.comm_config enable row level security;</code> (et les
+    trois autres tables de la même façon).
+  </div>
+</div>
+
 <h2>Les manques que vous signalez</h2>
 <p class="intro">Tous confirmés. Deux d’entre eux ont une cause commune.</p>
 
 <div class="constat g-manque">
-  <span class="puce">3</span>
+  <span class="puce">4</span>
   <div class="t">Créer un pro : pas de logo, pas de site, pas de réseaux sociaux</div>
   <div class="d">
     Ces trois informations n’existent pas sur la fiche pro. Elles vivent sur la
     <b>fiche commerce</b>, qui est une autre table. Le parcours crée la fiche pro
-    et s’arrête là — le commerce, lui, n’est jamais créé. C’est aussi pour cela
-    que le logo n’apparaît nulle part ensuite.
+    et s’arrête là — le commerce, lui, n’est jamais créé.
   </div>
-  <div class="p"><b>Où sont les données :</b> <code>partenaires.image_url</code> (le logo), <code>partenaires.site_web</code>, <code>partenaires.instagram</code>, <code>partenaires.facebook</code>. Le lien entre les deux fiches est <code>pros.partenaire_id</code>.</div>
+  <div class="p">
+    <b>Précision :</b> le lien entre les deux fiches, <code>pros.partenaire_id</code>,
+    est déjà LU à trois endroits du dashboard (la fiche pro l’affiche sous
+    « 🤝 Fiche partenaire liée », la fiche commerce le relit dans l’autre sens,
+    le tracking aussi) — l’écran qui montrerait le logo existe. Mais cette colonne
+    n’est ÉCRITE nulle part : ni le parcours de création, ni la fiche pro, ni la
+    fiche commerce n’offrent de bouton pour la renseigner. Résultat : même en
+    ouvrant la fiche d’un pro après coup, on tombe sur « Ce compte pro n’a pas de
+    fiche commerce liée » sans aucune action possible pour changer ça — pas
+    seulement pour les pros créés par ce parcours, pour tous.
+  </div>
 </div>
 
 <div class="constat g-manque">
-  <span class="puce">4</span>
+  <span class="puce">5</span>
   <div class="t">Le SIRET est saisi, mais dans une seule des deux fiches</div>
   <div class="d">
     Il est bien demandé, à l’étape « Où il se trouve ». Il part dans
@@ -183,46 +218,187 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
 </div>
 
 <div class="constat g-manque">
-  <span class="puce">5</span>
-  <div class="t">Créer un super event : quatre choses manquent</div>
+  <span class="puce">6</span>
+  <div class="t">Créer un super event : quatre choses manquent — une cinquième précisée</div>
   <div class="d">
     <b>Insérer un pro</b> — on ne peut que cocher ceux qui existent déjà, pas en
-    créer un depuis le parcours. <b>La carte</b> — l’opération est multi-stations
-    par nature, elle ne se voit nulle part. <b>Le visuel des pros</b> — les
-    vignettes n’affichent ni logo ni photo. <b>L’aperçu de la publication</b> —
-    on ne voit pas ce que l’opération donnera une fois publiée.
+    créer un depuis le parcours. <b>Le visuel des pros</b> — les vignettes
+    n’affichent ni logo ni photo, un icône 🏢 fixe pour tous. <b>L’aperçu de la
+    publication</b> — on ne voit pas ce que l’opération donnera une fois publiée.
+  </div>
+  <div class="p">
+    <b>Précision sur la carte :</b> une carte par super event <b>existe déjà</b>,
+    à <code>/dashboard/nds-carte</code> — filtrée par opération, avec ses deux
+    couches stations/commerces. Le manque réel n’est pas « aucune carte » mais
+    deux choses : elle n’est reliée nulle part depuis le parcours de création, et
+    elle resterait vide même reliée — aucune des deux façons de créer une station
+    (ce parcours, ou l’approbation d’une demande pro) n’enregistre jamais ses
+    coordonnées GPS. Voir le constat 9 ci-dessous.
   </div>
 </div>
 
-<div class="constat g-erreur">
-  <span class="puce">6</span>
-  <div class="t">Mon erreur : la liste des secteurs ne correspond pas à vos données</div>
-  <div class="d">
-    J’ai repris la liste écrite dans le parcours pro sans la comparer à la base.
-    Elle propose « Grande distribution », « Banque · Assurance », « Restauration ».
-    <b>Vos vrais secteurs sont autres.</b> Conséquence concrète : rouvrir la fiche
-    d’un pro existant avec cette liste ne retrouve pas son secteur, et
-    l’enregistrer l’efface. À corriger avant tout autre enregistrement.
-  </div>
-  <div class="p"><b>Les secteurs réellement en base :</b> Commerce &amp; Négoce (9 pros), Collectivité, Collectivité / Festival, Association, Institution, station-festival (4 comptes techniques).</div>
-</div>
-
-<h2>Le style, d’un bout à l’autre</h2>
-<p class="intro">Vous avez raison : ce n’est pas tenu. Voici où, précisément.</p>
+<h2>Recensement approfondi — vérifié dans le code, pas deviné</h2>
+<p class="intro">
+  Ce que la première version n’avait pas cherché : chaque colonne des sept tables
+  que ces parcours touchent, comparée à ce que l’écran capte réellement.
+</p>
 
 <div class="constat g-manque">
   <span class="puce">7</span>
-  <div class="t">Emoji ou pictogramme, selon la page</div>
+  <div class="t">Le « périmètre de jeu » du super event ne fait rien</div>
   <div class="d">
-    30 titres de page portent un emoji, au moins 5 n’en ont pas — « Aperçu Pro »,
-    « Prospects B2B », « CGV & documents légaux », « CRM Landing pages »,
-    « Retours CRM ». Et la même donnée change de forme selon l’écran : les modules
-    de jeu sont des emoji dans une liste, des pictogrammes dessinés dans une autre.
+    L’étape « Réglages de l’opération » du parcours demande une distance en
+    mètres et l’explique : « distance maximale entre le joueur et la station pour
+    qu’une partie compte ». En réalité, cette distance n’est <b>jamais appliquée</b>.
+  </div>
+  <div class="p">
+    <b>Dans le code :</b> <code>lib/parcours.ts</code>, fonction
+    <code>captureScanGeo</code> — le contrôle de position n’a lieu que si
+    <code>super_events.geo_controle</code> vaut <code>true</code>. C’est une
+    colonne <b>distincte</b> du périmètre en mètres, et ni ce parcours, ni aucune
+    fiche d’édition du super event, ne l’activent jamais : elle reste à sa valeur
+    par défaut, <code>false</code>. Et même activée à la main en base, elle
+    resterait sans effet : la fonction a aussi besoin de <code>events.lat</code> /
+    <code>events.lng</code> par station, que ni ce parcours ni le parcours event
+    n’écrivent jamais. Le champ affiché à l’écran donne l’impression d’une
+    protection active ; il n’en existe aucune, à aucun niveau.
   </div>
 </div>
 
 <div class="constat g-manque">
   <span class="puce">8</span>
+  <div class="t">Une demande de pro approuvée perd la moitié de ce qu’il a rempli</div>
+  <div class="d">
+    Quand un pro demande à rejoindre une opération depuis
+    <code>/pro/rejoindre</code>, sa demande contient sa position GPS, son logo,
+    son adresse complète, son secteur et les lots qu’il propose — onze colonnes de
+    <code>demandes_rattachement_super_event</code>. Sur l’écran
+    « Demandes de participation », approuver une demande ouvre le parcours
+    « créer un événement » pré-rempli — mais avec <b>quatre champs seulement</b> :
+    le pro, le super event, le nom, les dates.
+  </div>
+  <div class="p">
+    <b>Dans le code :</b> <code>app/dashboard/demandes-rattachement/page.tsx</code>,
+    fonction <code>urlWizard()</code> — elle ne transmet que
+    <code>pro</code>, <code>se</code>, <code>nom</code>, <code>d</code>, <code>f</code>.
+    Le logo, l’adresse, le secteur, la position GPS et les lots proposés par le pro
+    ne sont même pas affichés à l’écran de validation pour que vous les
+    consultiez avant de retaper — ils existent en base, invisibles, et se perdent
+    au moment de la conversion.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">9</span>
+  <div class="t">Sept réglages du super event n’ont d’écran nulle part</div>
+  <div class="d">
+    Au-delà du géofencing (constat 7), sept colonnes de <code>super_events</code>
+    n’ont aucune interface d’édition — ni à la création, ni ensuite : les
+    conditions commerciales (<code>frais_pro</code>, <code>pct_flowin</code>),
+    le nombre de gagnants finaux (<code>nb_gagnants_final</code>), le fuseau
+    horaire et l’heure de bascule de journée, le thème visuel, les questions de
+    sondage. Chaque super event créé reçoit les mêmes valeurs par défaut
+    (49&nbsp;€, 20&nbsp;%, 0 gagnant…) quelle que soit l’opération réelle — la
+    seule façon de les changer aujourd’hui est une écriture directe en base.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">10</span>
+  <div class="t">Huit informations d’événement n’ont pas de champ dans le parcours</div>
+  <div class="d">
+    <code>events</code> porte huit colonnes que le parcours de création ne
+    remplit jamais : catégorie, téléphone, site web, photo, horaires texte,
+    statut de paiement, gain immédiat, et si le gain donne droit à un ticket.
+    Elles restent vides ou à leur valeur par défaut pour chaque événement créé —
+    à moins d’être renseignées ailleurs, ce que je n’ai pas trouvé dans le reste
+    du dashboard.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">11</span>
+  <div class="t">L’espace pro a son propre parcours de création d’event — déconnecté du gabarit</div>
+  <div class="d">
+    <code>/pro/jeu</code> ouvre <code>CreerAnimationWizard.tsx</code>, un parcours
+    entièrement distinct du travail de marque blanche fait cette session côté SA :
+    il propose Quiz, Roue, Tombola, Vote — <b>pas le gabarit « Quiz + bonus »</b>
+    construit à partir de NDS 2026. Un pro qui crée lui-même son événement ne
+    peut donc pas choisir le gabarit de référence ; seul le SA le peut, depuis le
+    dashboard.
+  </div>
+  <div class="p">
+    <b>Précision sur « déléguer le jeu à Flowin » :</b> l’audit précédent disait
+    cette option absente — c’est inexact. Elle existe, mais seulement comme un
+    lien <code>mailto:</code> (« Demander à Flowin de réaliser un quiz → ») :
+    une simple ouverture de client mail, sans trace en base ni visibilité dans le
+    dashboard SA. Ce n’est pas une fonctionnalité manquante, c’est une
+    fonctionnalité non structurée.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">12</span>
+  <div class="t">Le formulaire de lot n’expose pas tous les champs qu’il enregistre</div>
+  <div class="d">
+    L’étape « Lots » du parcours event ne propose que nom, valeur et quantité.
+    Le type <code>BrouillonLot</code> et la fonction d’enregistrement gèrent
+    aussi l’emoji et la description du lot — le code est prêt, l’écran ne les
+    demande pas.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">13</span>
+  <div class="t">Deux tables existent en base sans aucune page qui les utilise</div>
+  <div class="d">
+    <code>event_modeles</code> (« modèles d’event réutilisables », 0 ligne) et
+    <code>qr_stations</code> (0 ligne) : aucune page du dashboard ne les lit ni
+    ne les écrit. Elles ont été préparées pour une fonctionnalité qui n’a pas
+    encore d’écran — je ne devine pas laquelle, ce serait inventer.
+  </div>
+</div>
+
+<div class="constat g-erreur">
+  <span class="puce">14</span>
+  <div class="t">Mon erreur, corrigée le 3/09 : la liste des secteurs ne correspondait pas à vos données</div>
+  <div class="d">
+    J’avais repris la liste écrite dans le parcours pro sans la comparer à la base.
+    Elle proposait « Grande distribution », « Banque · Assurance », « Restauration ».
+    Conséquence concrète : rouvrir la fiche d’un pro existant avec cette liste ne
+    retrouvait pas son secteur, et l’enregistrer l’aurait effacé.
+  </div>
+  <div class="p">
+    <b>Corrigé</b> — commit <code>2302855</code> : la liste vient maintenant des
+    valeurs réellement en base (Commerce &amp; Négoce, Collectivité, Collectivité /
+    Festival, Association, Institution), à un seul endroit
+    (<code>lib/proCreation.ts</code>), que <code>RejoindreWizard.tsx</code> importe
+    au lieu de dupliquer sa propre liste.
+  </div>
+</div>
+
+<h2>Le style, d’un bout à l’autre</h2>
+<p class="intro">Vous avez raison : ce n’est pas tenu. Voici où, précisément — compté, pas estimé.</p>
+
+<div class="constat g-manque">
+  <span class="puce">15</span>
+  <div class="t">Emoji ou pictogramme, selon la page — y compris entre les trois parcours audités</div>
+  <div class="d">
+    Sur les titres de page du dashboard, <b>au moins 16 n’ont pas d’emoji</b> —
+    « Nouvel événement », « Paramètres », « Pilotage », « Prospection »,
+    « Maintenance », « Feuille de route », « Front NDS », « Landing pages »,
+    « Bons de commande », « Dashboards des pros », « Kit com partenaire »,
+    « Prospects B2B », « Aperçu Pro », « CGV &amp; documents légaux »,
+    « CRM Landing pages », « Retours CRM » — contre une trentaine qui en portent
+    un. Le plus parlant : à l’intérieur même des trois parcours de création audités,
+    « Nouvel événement » n’a pas d’emoji quand « ⭐ Créer un super event » et
+    « 🏢 Créer un pro » en ont un. Trois écrans de la même famille, deux
+    conventions différentes.
+  </div>
+</div>
+
+<div class="constat g-manque">
+  <span class="puce">16</span>
   <div class="t">La police du produit n’est pas utilisée par le produit</div>
   <div class="d">
     Manrope est téléchargée sur chaque page de l’application. Seul le
@@ -233,7 +409,7 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
 </div>
 
 <div class="constat g-manque">
-  <span class="puce">9</span>
+  <span class="puce">17</span>
   <div class="t">Les couleurs sont déclarées à quatre endroits</div>
   <div class="d">
     Le dashboard, l’espace pro et deux fichiers de style pro redéclarent chacun
@@ -244,7 +420,7 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
 </div>
 
 <div class="constat g-manque">
-  <span class="puce">10</span>
+  <span class="puce">18</span>
   <div class="t">L’espace pro suit sa propre logique d’écrans</div>
   <div class="d">
     Le fond de page, la carte flottante et les libellés en capitales de l’espace
@@ -268,9 +444,10 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
     <ul>
       <li><span class="etat e-ok">Existe</span><span>Créer un super event</span></li>
       <li><span class="etat e-ok">Existe</span><span>Créer un event</span></li>
-      <li><span class="etat e-part">Partiel</span><span>Créer un pro — sans logo, site ni réseaux</span></li>
-      <li><span class="etat e-part">Partiel</span><span>Ajouter un pro à un super event — seulement un pro déjà créé</span></li>
-      <li><span class="etat e-part">Partiel</span><span>Valider les demandes — la page existe, la demande de création de super event n’existe pas</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Créer un pro — sans logo, site ni réseaux, et sans moyen de les ajouter ensuite</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Ajouter un pro à un super event — seulement un pro déjà créé, pas de carte ni de visuel</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Valider les demandes — la page existe, mais approuver ne reprend ni le logo, ni l’adresse, ni les lots proposés par le pro</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Régler les conditions d’un super event — frais, %, géofencing : aucun écran, seulement les valeurs par défaut</span></li>
     </ul>
   </div>
 
@@ -282,10 +459,10 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
     <ul>
       <li><span class="etat e-non">Bloqué</span><span>Intégrer un super event en cours — aucun compte n’existe</span></li>
       <li><span class="etat e-non">Manque</span><span>La liste des opérations en cours et leur simulation</span></li>
-      <li><span class="etat e-part">Partiel</span><span>Créer son compte — le parcours existe, la fiche commerce n’est pas créée</span></li>
-      <li><span class="etat e-part">Partiel</span><span>Créer sa station de jeu — la page ne vérifie rien</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Créer son compte — le parcours existe, la fiche commerce n’est jamais créée ni reliable ensuite</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Créer sa station de jeu — <code>/pro/jeu</code> ne vérifie rien, et n’offre pas le gabarit Quiz + bonus</span></li>
       <li><span class="etat e-ok">Existe</span><span>Gérer ses infos</span></li>
-      <li><span class="etat e-non">Manque</span><span>Confier le paramétrage du jeu à Flowin</span></li>
+      <li><span class="etat e-part">Partiel</span><span>Confier le jeu à Flowin — un lien mail existe, rien de structuré ni de suivi côté SA</span></li>
     </ul>
   </div>
 </div>
@@ -296,53 +473,57 @@ footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--trait);
 <ol class="ordre">
   <li>
     <div>
-      <div class="t">Vous rendre l’accès</div>
-      <div class="d">Un compte de démonstration validé, et une entrée depuis le dashboard qui ouvre les parcours pro sans mot de passe. Vous pourrez tout parcourir de bout en bout.</div>
+      <div class="t">Vous rendre l’accès, et fermer <code>/pro/jeu</code></div>
+      <div class="d">Un compte de démonstration validé, une entrée depuis le dashboard qui ouvre les parcours pro sans mot de passe — et dans le même geste, exiger une session sur <code>/pro/jeu</code>, qui ne vérifie rien aujourd’hui. Les deux corrections touchent la même zone.</div>
     </div>
   </li>
   <li>
     <div>
-      <div class="t">Corriger les secteurs</div>
-      <div class="d">Reprendre ceux de la base, avant qu’un enregistrement n’en efface un. C’est mon erreur, elle passe en premier.</div>
+      <div class="t">Décider des quatre tables sans RLS</div>
+      <div class="d">Valider avec vous le SQL d’activation avant de l’exécuter — je ne l’applique pas seul, une règle mal posée coupe l’accès à des pages qui en dépendent.</div>
     </div>
   </li>
   <li>
     <div>
-      <div class="t">Compléter « créer un pro »</div>
-      <div class="d">Logo, site, réseaux sociaux — donc création de la fiche commerce en même temps que la fiche pro, et un seul SIRET.</div>
+      <div class="t">Donner un chemin d’écriture à <code>pros.partenaire_id</code></div>
+      <div class="d">Aujourd’hui aucun écran ne l’écrit, même pour un pro déjà créé. Créer ou lier la fiche commerce en même temps que la fiche pro — logo, site, réseaux, SIRET unique — puis rendre ce lien modifiable depuis la fiche pro existante.</div>
+    </div>
+  </li>
+  <li>
+    <div>
+      <div class="t">Reconstruire la conversion demande → event</div>
+      <div class="d">Afficher le logo, l’adresse et les lots que le pro a proposés sur l’écran de validation, et les reprendre dans le wizard pré-rempli au lieu de les laisser se perdre.</div>
     </div>
   </li>
   <li>
     <div>
       <div class="t">Compléter « créer un super event »</div>
-      <div class="d">Insérer un pro depuis le parcours, la carte des stations, les logos sur les vignettes, l’aperçu de la publication.</div>
+      <div class="d">Insérer un pro depuis le parcours, relier la carte déjà existante, les logos sur les vignettes, l’aperçu de la publication — et un écran pour les réglages qui n’en ont aucun (conditions commerciales, nombre de gagnants, géofencing réellement actif).</div>
     </div>
   </li>
   <li>
     <div>
       <div class="t">Ouvrir le parcours pro qui manque</div>
-      <div class="d">La liste des opérations en cours avec leur simulation, pour qu’un pro voie ce qu’il rejoint avant de le rejoindre.</div>
+      <div class="d">La liste des opérations en cours avec leur simulation, pour qu’un pro voie ce qu’il rejoint avant de le rejoindre — et rapprocher <code>/pro/jeu</code> du gabarit Quiz + bonus, aujourd’hui hors de sa portée.</div>
     </div>
   </li>
   <li>
     <div>
       <div class="t">Unifier le style</div>
-      <div class="d">Une seule source de couleurs, une seule police, et un choix tranché entre emoji et pictogramme — appliqué partout, y compris dans l’espace pro.</div>
-    </div>
-  </li>
-  <li>
-    <div>
-      <div class="t">Fermer <code>/pro/jeu</code></div>
-      <div class="d">Exiger une session, comme les autres pages de l’espace pro.</div>
+      <div class="d">Une seule source de couleurs, une seule police, et un choix tranché entre emoji et pictogramme — appliqué partout, y compris entre les trois parcours de création eux-mêmes.</div>
     </div>
   </li>
 </ol>
 
 <footer>
-  Relevé le 3 septembre 2026 sur la branche <code>main</code>, commit <code>dd95b30</code>.
-  Les chiffres de base viennent de requêtes directes sur le projet Supabase, pas d’une estimation.
-  Ce qui n’est pas listé ici n’a pas été audité : ce document couvre les six parcours de
-  création et leur habillage, pas le reste du dashboard.
+  Relevé le 3 septembre 2026 sur la branche <code>main</code>. Première version au commit
+  <code>dd95b30</code> ; cette version, plus approfondie, au commit <code>2302855</code> — elle
+  relit chaque colonne des tables <code>events</code>, <code>super_events</code>,
+  <code>pros</code>, <code>partenaires</code> et <code>demandes_rattachement_super_event</code>
+  face au code des parcours, plutôt que les seuls écrans. Les chiffres de base viennent de
+  requêtes directes sur le projet Supabase, pas d’une estimation. Ce qui n’est pas listé ici
+  n’a pas été audité : ce document couvre les six parcours de création, leur habillage, et
+  les tables qu’ils écrivent — pas le reste du dashboard.
 </footer>
 
 </div>
