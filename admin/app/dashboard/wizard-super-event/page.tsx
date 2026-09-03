@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
-import ApercuApp from '@/components/dashboard/ApercuApp'
+import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
@@ -57,7 +57,7 @@ export default function Page() {
   /* L apercu montre la station en cours de reglage : sans ca, on parametre
      cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
   const [apercuPro, setApercuPro] = useState('')
-  const [ecranApercu, setEcranApercu] = useState<'accueil' | 'lots' | 'fin'>('accueil')
+  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('accueil')
 
   const [occupe, setOccupe] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
@@ -293,6 +293,9 @@ export default function Page() {
               couleur: '#7C2D92',
               dateD: dateD || null,
               superEvent: nom || null,
+              /* Le parcours affiche « Nos N partenaires » : N, ce sont les pros
+                 rattaches a l operation, ceux qu on vient de cocher. */
+              nbPartenaires: Object.keys(choisis).length,
             }}
           />
         </div>

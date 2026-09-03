@@ -18,7 +18,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
-import ApercuApp from '@/components/dashboard/ApercuApp'
+import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { useDashboard } from '@/contexts/DashboardContext'
@@ -104,7 +104,7 @@ function Wizard() {
   const [d, setD] = useState<BrouillonEvent>(brouillonVide())
   const [etape, setEtape] = useState<Etape>('A')
   /* L ecran d apercu montre : il suit l etape, mais reste pilotable a la main. */
-  const [ecranApercu, setEcranApercu] = useState<'accueil' | 'lots' | 'fin'>('accueil')
+  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('accueil')
   /* Les banques de questions, pour parametrer un quiz DES la creation. Meme
      source que la fiche event : une seule liste, pas deux. */
   const [banques, setBanques] = useState<Banque[]>([])
@@ -114,9 +114,10 @@ function Wizard() {
 
   const maj = (champs: Partial<BrouillonEvent>) => setD(x => ({ ...x, ...champs }))
 
-  /* Sur l etape Lots, on montre l ecran des lots : l apercu suit ce qu on est
-     en train de saisir au lieu de rester bloque sur l accueil. */
-  useEffect(() => { setEcranApercu(etape === 'D' ? 'lots' : 'accueil') }, [etape])
+  /* L apercu suit l etape. Il n existe PAS d ecran « lots » dans le parcours
+     joueur : les lots s affichent dans la carte de l accueil (quiz, tombola).
+     Au recapitulatif on montre la fin du parcours, c est-a-dire le ticket. */
+  useEffect(() => { setEcranApercu(etape === 'F' ? 'ticket' : 'accueil') }, [etape])
 
   /* Pre-saisie depuis l URL, appliquee UNE SEULE FOIS.
      Sans ce verrou, un re-rendu qui change l identite de `params` reappliquerait
@@ -456,7 +457,7 @@ function Wizard() {
         onEcran={setEcranApercu}
         d={{
           nom: d.nom, module: d.module, couleur: d.couleur,
-          lieu: d.lieu, dateD: d.date_d,
+          dateD: d.date_d,
           lots: d.lots.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur })),
           superEvent: supers.find(se => se.id === d.super_event_id)?.nom ?? null,
         }}

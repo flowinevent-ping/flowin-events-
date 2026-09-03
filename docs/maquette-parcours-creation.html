@@ -182,24 +182,39 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 .apercu{position:sticky;top:18px}
 .apercu .titre{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .apercu .st{font-size:11px;color:var(--muted);margin:3px 0 11px}
-.tel{width:238px;border-radius:30px;padding:9px;background:#0F172A;box-shadow:0 22px 46px -22px rgba(15,23,42,.75)}
-.tel-ecran{position:relative;width:220px;height:440px;border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
-.encoche{position:absolute;top:0;left:50%;transform:translateX(-50%);width:74px;height:16px;background:#0F172A;border-radius:0 0 11px 11px}
-.tel-corps{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:28px 18px 22px;text-align:center;color:#fff}
-.tel-corps .sur{font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
-.tel-corps .marque{font-size:15px;font-weight:800;line-height:1.2;margin-bottom:15px}
-.tel-corps .gros{font-size:19px;font-weight:800;line-height:1.2}
-.tel-corps .petit{font-size:11.5px;opacity:.82;margin-top:6px;line-height:1.4}
-.tel-corps .cta{margin-top:17px;background:#fff;border-radius:99px;padding:9px 22px;font-size:12.5px;font-weight:800}
-.tel-corps .bas{position:absolute;bottom:15px;left:0;right:0;font-size:10px;opacity:.75}
-.tel-corps .liste{width:100%;margin-top:12px;display:flex;flex-direction:column;gap:6px}
-.tel-corps .item{display:flex;justify-content:space-between;gap:8px;align-items:baseline;
-  background:rgba(255,255,255,.15);border-radius:9px;padding:7px 10px;text-align:left}
-.tel-corps .item .n{font-size:11.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tel-corps .item .q{font-size:10px;opacity:.85;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tel{width:272px;border-radius:30px;padding:9px;background:#0F172A;box-shadow:0 22px 46px -22px rgba(15,23,42,.75)}
+.tel-ecran{position:relative;width:254px;height:508px;border-radius:24px;overflow:hidden;background:#0F172A}
+.encoche{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:3;width:74px;height:16px;background:#0F172A;border-radius:0 0 11px 11px}
 .ecrans{display:flex;gap:5px;margin-top:12px}
-.apercu .avert{font-size:10.5px;color:var(--muted);line-height:1.45;margin:10px 0 0;max-width:238px}
+.apercu .avert{font-size:10.5px;color:var(--muted);line-height:1.45;margin:10px 0 0;max-width:272px}
+
+/* ── LA CHARTE DU PARCOURS JOUEUR ────────────────────────────────────────────
+   Copie mot pour mot de parcoursCSS() — admin/lib/parcours.ts, la feuille de
+   style unique des six parcours. Seule modification : chaque selecteur est
+   prefixe par `.vp` (telle quelle, la regle `html,body` repeindrait la page).
+   Rien n'est redessine ici : le viewport fait ses 430px reels et c'est le
+   conteneur qui est mis a l'echelle. */
+.vp{position:absolute;top:0;left:0;background:#0F172A}
+.vp *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+.vp .app{max-width:430px;margin:0 auto;display:flex;flex-direction:column;background:#0F172A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:860px}
+.vp .screen{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column}
+.vp .btn{width:100%;padding:14px;border:none;border-radius:50px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.vp .btn-cta{width:100%;padding:16px;border:none;border-radius:50px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.vp .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.55);font-size:13px;padding:10px;cursor:pointer;width:100%;font-family:inherit;margin-top:6px}
+.vp .input{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit}
+.vp .label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:5px}
+.vp .header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.vp .title{font-weight:800;font-size:17px}
+.vp .sub{font-size:12px;color:rgba(255,255,255,.45)}
+.vp .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px}
+.vp .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vp .ticket-code{font-size:28px;font-weight:900;letter-spacing:.1em;margin:12px 0;font-family:monospace;text-align:center}
+.vp .rgpd{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;font-size:11px;color:rgba(255,255,255,.45);line-height:1.5}
+.vp .rgpd-check{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+.vp .lot-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.vp .lot-row:last-child{border-bottom:none}
+.vp .mention{font-size:10px;text-align:center;color:rgba(255,255,255,.3);margin:6px 0 8px}
+.vp .badge-tirage{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);border-radius:10px;padding:10px 14px;text-align:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:14px}
 </style>
 
 <div class="enveloppe">
@@ -261,7 +276,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
     </div>
 
     <aside class="apercu">
-      <div class="titre">Aperçu du jeu</div>
+      <div class="titre">Aperçu du parcours joueur</div>
       <div class="st" id="apercu-st">Construit à partir de la saisie</div>
       <div class="tel">
         <div class="tel-ecran" id="tel"></div>
@@ -300,13 +315,17 @@ var BANQUES = [
   { id:'bq-vence',  n:'Vence & son patrimoine', q:18, st:'valide' },
   { id:'bq-auto',   n:'Sécurité routière',      q:12, st:'brouillon' }
 ];
-var ECRAN_JEU = {
-  quiz:      { t:'Prêt pour le quiz ?', a:'Commencer', s:'Quelques questions, puis votre score' },
-  quizsolo:  { t:'Quiz',                a:'Commencer', s:'À votre rythme' },
-  quizmaster:{ t:'Quiz Master',         a:'Rejoindre', s:'Un meneur lance les questions' },
-  spin:      { t:'Tournez la roue',     a:'Lancer la roue', s:'Un tour, un résultat immédiat' },
-  tombola:   { t:'Tombola',             a:'Participer', s:'Tirage au sort différé' },
-  vote:      { t:'À vous de voter',     a:'Voter',      s:'Le public départage' }
+/* L'ecran d'accueil REEL de chaque module, releve dans app/parcours/<module>.
+   ic = l'icone affichee, s = le sous-titre par defaut, a = le libelle du bouton,
+   lots = combien de lots la carte d'accueil montre, m = la mention
+   « Jeu gratuit », p = le prefixe du code ticket. Rien n'est reformule. */
+var ACCUEIL_JEU = {
+  quiz:      { ic:'🎮', s:'',                                          a:'🎮 Jouer gratuitement →',      lots:3, m:true,  p:'QZ' },
+  quizsolo:  { ic:'⏱️', s:'Quiz chronométré · 30s par question',        a:'⏱️ Démarrer le quiz →',        lots:0, m:false, p:'QS' },
+  quizmaster:{ ic:'🎮', s:'Quiz en direct · Réponds sur ton téléphone', a:'🎮 Rejoindre le quiz →',       lots:0, m:false, p:'QM' },
+  spin:      { ic:'🎡', s:'Tentez votre chance !',                      a:'Faire tourner la roue →',      lots:0, m:true,  p:'SP' },
+  tombola:   { ic:'✚',  s:'',                                          a:'Je m’inscris à la tombola →',  lots:5, m:true,  p:'TB' },
+  vote:      { ic:'⭐', s:'Votez pour vos favoris !',                   a:'⭐ Voter maintenant →',        lots:0, m:false, p:'VT' }
 };
 
 /* ── État, un par parcours ───────────────────────────────────────────────── */
@@ -647,19 +666,22 @@ function rendre(){
             ? '<button class="btn pri" onclick="alert(\'Maquette : rien n\\u2019est écrit en base.\')">'+esc(fin)+'</button>'
             : '<button class="btn pri" onclick="allerEtape('+(i+1)+')">Suivant →</button>'));
 
-  /* L'aperçu suit l'étape : sur les lots, on montre les lots. */
-  if (e.t === 'Récompense' || e.t === 'Vos lots') ecranApercu = 'lots';
-  else if (dernier) ecranApercu = 'fin';
-  else ecranApercu = 'accueil';
+  /* L'aperçu suit l'étape. Il n'existe PAS d'écran « lots » dans le parcours
+     joueur : les lots s'affichent dans la carte de l'accueil (quiz, tombola).
+     Sur la dernière étape on montre la fin, c'est-à-dire le ticket. */
+  ecranApercu = dernier ? 'ticket' : 'accueil';
 
   rendreApercu();
 }
 
 function donneesApercu(){
+  /* `sur` = l'opération, qui donne le libellé du tirage ; `nbPart` = le nombre
+     de pros rattachés, que le parcours affiche en « Nos N partenaires ».
+     Le lieu ne figure sur aucun écran du parcours : il n'est donc pas repris. */
   if (courant==='event'){
     var d = E.event;
     return { nom:d.nom||'Nom de l’animation', jeu:d.jeu, couleur:d.couleur,
-             sur:'Nuits du Sud 2026', lieu:d.lieu, date:d.dateD, lots:d.lots };
+             sur:'Nuits du Sud 2026', date:d.dateD, lots:d.lots, nbPart:PROS.length };
   }
   if (courant==='superevent'){
     var s = E.superevent;
@@ -667,62 +689,144 @@ function donneesApercu(){
     var id = ids[0] || '';
     return { nom: id ? nomPro(id) : (s.nom||'Nom de l’opération'),
              jeu: id ? s.pros[id] : '', couleur:'#C2410C',
-             sur: s.nom || null, lieu:'', date:s.dateD, lots:[] };
+             sur: s.nom || null, date:s.dateD, lots:[], nbPart:ids.length };
   }
   var p = E.pro;
   return { nom:p.enseigne||'Votre enseigne', jeu:'spin', couleur:'#2746A6',
            sur: p.se==='se-nds-2026' ? 'Nuits du Sud 2026' : 'Jazz à Nice 2027',
-           lieu:p.adresse, date:'', lots:p.lots };
+           date:'', lots:p.lots, nbPart:0 };
 }
 
 function rendreApercu(){
   var d = donneesApercu();
-  var acc = d.couleur;
-  var m = ECRAN_JEU[d.jeu] || { t:'Votre jeu', a:'Commencer', s:'Choisissez un jeu pour voir l’écran' };
+  var c = d.couleur;
+  var a = ACCUEIL_JEU[d.jeu] || { ic:'🎮', s:'', a:'Jouer →', lots:3, m:false, p:'FL' };
   var lots = (d.lots||[]).filter(function(x){ return (x.n||'').trim(); });
+  var code = a.p + '-000000';
+  var tirage = d.sur ? '🗓️ Tirage — ' + esc(d.sur) : '';
   var corps = '';
 
   if (ecranApercu === 'accueil'){
-    corps = (d.sur ? '<div class="sur">'+esc(d.sur)+'</div>' : '')
-      + '<div class="marque">'+esc(d.nom)+'</div>'
-      + '<div class="gros">'+esc(m.t)+'</div>'
-      + '<div class="petit">'+esc(m.s)+'</div>'
-      + '<div class="cta" style="color:'+acc+'">'+esc(m.a)+'</div>'
-      + ((d.lieu||d.date) ? '<div class="bas">'
-          + (d.lieu ? '📍 '+esc(d.lieu) : '')
-          + (d.lieu && d.date ? ' · ' : '')
-          + (d.date ? '📅 '+esc(d.date) : '') + '</div>' : '');
-  } else if (ecranApercu === 'lots'){
-    corps = '<div class="gros" style="margin-top:4px">À gagner</div>'
-      + (lots.length ? '' : '<div class="petit">Aucun lot saisi pour l’instant.</div>')
-      + '<div class="liste">'
-      + lots.slice(0,5).map(function(l){
-          return '<div class="item"><span class="n">'+esc(l.n)+'</span>'
-            + '<span class="q">×'+esc(l.q)+(l.t==='instantane'?' · immédiat':'')+'</span></div>';
-        }).join('')
-      + (lots.length>5 ? '<div class="petit">+ '+(lots.length-5)+' autre(s)</div>' : '')
+    /* app/parcours/<module> — ecran `landing` */
+    var icone = d.jeu === 'tombola'
+      ? '<svg viewBox="0 0 100 100" width="84" height="84" style="display:block;margin:0 auto">'
+        + '<circle cx="50" cy="50" r="50" fill="#fff"/>'
+        + '<rect x="38" y="16" width="24" height="68" rx="5" fill="'+c+'"/>'
+        + '<rect x="16" y="38" width="68" height="24" rx="5" fill="'+c+'"/></svg>'
+      : '<div style="font-size:48px">'+a.ic+'</div>';
+    corps = '<div class="screen" style="padding-top:32px">'
+      + '<div style="text-align:center;margin-bottom:16px">'
+      +   '<div style="margin-bottom:14px">'+icone+'</div>'
+      +   '<div style="font-size:24px;font-weight:900;line-height:1.2;margin-bottom:8px">'+esc(d.nom)+'</div>'
+      +   (a.s ? '<div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:8px">'+esc(a.s)+'</div>' : '')
+      +   (d.date ? '<div style="font-size:12px;color:rgba(255,255,255,.4)">'+esc(d.date)+'</div>' : '')
+      + '</div>'
+      + (a.lots && lots.length
+          ? '<div class="card" style="margin-bottom:14px;padding:0">'
+            + lots.slice(0, a.lots).map(function(l,i){
+                return '<div class="lot-row"><span style="font-size:18px">'
+                  + (['🥇','🥈','🥉','🎁','🎁'][i]||'🎁') + '</span>'
+                  + '<span style="font-size:13px;font-weight:800">'+esc(l.n)+'</span></div>';
+              }).join('')
+            + '</div>'
+          : '')
+      + (tirage ? '<div class="badge-tirage">'+tirage+'</div>' : '')
+      + '<button class="'+(d.jeu==='tombola'?'btn-cta':'btn')+'" style="background:'+c+'">'+esc(a.a)+'</button>'
+      + (a.m ? '<div class="mention">Jeu gratuit · Sans achat obligatoire</div>' : '')
+      + (d.nbPart ? '<button class="btn-ghost">🤝 Nos '+d.nbPart+' partenaires</button>' : '')
       + '</div>';
+
+  } else if (ecranApercu === 'formulaire'){
+    /* Le meme ecran `form` dans les six modules. */
+    corps = '<div class="screen">'
+      + '<div class="header"><div><div class="title">Crée ton compte</div>'
+      +   '<div class="sub">'+esc(d.nom)+'</div></div></div>'
+      + '<div class="grid2" style="margin-bottom:12px">'
+      +   '<div><label class="label">Prénom *</label><input class="input" readonly></div>'
+      +   '<div><label class="label">Nom *</label><input class="input" readonly></div>'
+      + '</div>'
+      + '<div style="margin-bottom:12px"><label class="label">Email *</label><input class="input" readonly></div>'
+      + '<div style="margin-bottom:12px"><label class="label">Téléphone *</label><input class="input" readonly></div>'
+      + '<div class="grid2" style="margin-bottom:12px">'
+      +   '<div><label class="label">Tranche d’âge</label><input class="input" readonly value="Tranche d’âge"></div>'
+      +   '<div><label class="label">CP</label><input class="input" readonly></div>'
+      + '</div>'
+      + '<div class="rgpd"><div class="rgpd-check" style="background:'+c+'">✓</div>'
+      +   '<div>J’accepte d’être recontacté(e). Données jamais cédées.</div></div>'
+      + '<button class="btn" style="margin-top:16px;background:'+c+'">✓ Valider →</button>'
+      + '</div>';
+
+  } else if (d.jeu === 'spin'){
+    /* SpinClient : la carte teal, la seule du produit. */
+    corps = '<div class="screen" style="justify-content:center;align-items:center;text-align:center;'
+      + 'background:radial-gradient(ellipse at 50% 40%, #0a1f2e 0%, #060d18 70%)">'
+      + '<div style="width:88%;max-width:360px;border-radius:18px;overflow:hidden;border:2px solid #14B8A6;'
+      +   'box-shadow:0 0 40px rgba(20,184,166,.5);background:#071620">'
+      +   '<div style="background:linear-gradient(180deg,#16C8B0,#0E9E8C);padding:12px 0;font-size:14px;'
+      +     'font-weight:900;letter-spacing:3px;color:#fff">✦ FÉLICITATIONS ✦</div>'
+      +   '<div style="padding:22px 20px 26px">'
+      +     '<div style="font-size:46px;margin-bottom:10px">🥳</div>'
+      +     '<div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#2DD4BF;margin-bottom:4px">VOUS AVEZ GAGNÉ</div>'
+      +     '<div style="font-size:26px;font-weight:900;color:#fff;margin-bottom:18px;text-transform:uppercase">Vous</div>'
+      +     '<div style="border:1px solid rgba(45,212,191,.4);border-radius:12px;padding:14px 16px;margin-bottom:16px;background:rgba(20,184,166,.06)">'
+      +       '<div style="font-size:11px;font-weight:700;color:#2DD4BF;margin-bottom:4px">Votre lot</div>'
+      +       '<div style="font-size:19px;font-weight:900;color:#fff">'+esc(lots.length?lots[0].n:'Lot offert')+'</div>'
+      +     '</div>'
+      +     '<div style="font-size:12px;color:rgba(255,255,255,.55)">Ticket <span style="font-weight:800;color:#fff;letter-spacing:1px">'+code+'</span></div>'
+      +     '<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:14px;letter-spacing:1px">Powered by Flowin</div>'
+      +   '</div></div></div>';
+
+  } else if (d.jeu === 'tombola'){
+    /* TombolaClient : « INSCRIPTION CONFIRMÉE ». */
+    corps = '<div class="screen" style="justify-content:center">'
+      + '<div style="text-align:center;margin-bottom:24px">'
+      +   '<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);'
+      +     'border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:4px 14px;font-size:10px;'
+      +     'font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px">'
+      +     '<span style="width:8px;height:8px;border-radius:50%;background:'+c+'"></span>INSCRIPTION CONFIRMÉE</div>'
+      +   '<div style="font-size:22px;font-weight:900;margin-bottom:6px">Tu es dans la course ! 🎉</div>'
+      +   '<div style="font-size:14px;color:rgba(255,255,255,.55)">Ton numéro de tombola a été enregistré</div>'
+      + '</div>'
+      + '<div style="background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;'
+      +   'padding:20px;text-align:center;border-top:4px solid '+c+'">'
+      +   '<div style="font-size:32px;margin-bottom:8px">🎟️</div>'
+      +   '<div style="font-size:15px;font-weight:800;margin-bottom:4px">Ton ticket tombola</div>'
+      +   '<div style="font-size:11px;font-weight:800;color:rgba(255,255,255,.4)">'+esc(d.nom)+'</div>'
+      +   '<div class="ticket-code" style="color:'+c+'">'+code+'</div>'
+      +   (tirage ? '<div style="font-size:11px;color:rgba(255,255,255,.45)">'+tirage+'</div>' : '')
+      + '</div></div>';
+
   } else {
-    corps = '<div class="gros" style="margin-top:26px">Merci d’avoir joué</div>'
-      + '<div class="petit">Votre résultat s’affiche ici, puis le billet si vous gagnez.</div>'
-      + '<div class="cta" style="color:'+acc+'">Voir mon billet</div>';
+    /* QuizClient, QuizsoloClient, QuizmasterClient : le ticket generique. */
+    corps = '<div class="screen" style="justify-content:center;text-align:center">'
+      + '<div style="font-size:48px;margin-bottom:12px">🎉</div>'
+      + '<div style="font-size:22px;font-weight:900;margin-bottom:6px">Bravo !</div>'
+      + '<div style="font-size:14px;color:rgba(255,255,255,.55);margin-bottom:20px">'+esc(d.nom)+'</div>'
+      + '<div class="card" style="border-top:4px solid '+c+';margin-bottom:16px">'
+      +   '<div style="font-size:32px;margin-bottom:8px">🎟️</div>'
+      +   '<div class="ticket-code" style="color:'+c+'">'+code+'</div>'
+      +   (tirage ? '<div style="font-size:11px;color:rgba(255,255,255,.45)">'+tirage+'</div>' : '')
+      + '</div>'
+      + (d.nbPart ? '<button class="btn-ghost">🤝 Nos partenaires</button>' : '')
+      + '</div>';
   }
 
-  var tel = document.getElementById('tel');
-  tel.style.background = 'linear-gradient(160deg, '+acc+' 0%, '+acc+'CC 46%, #0F172A 100%)';
-  tel.innerHTML = '<div class="encoche"></div><div class="tel-corps">'+corps+'</div>';
+  document.getElementById('tel').innerHTML =
+    '<div class="encoche"></div>'
+    + '<div class="vp" style="width:430px;height:860px;transform:scale(0.5907);transform-origin:top left">'
+    +   '<div class="app">'+corps+'</div></div>';
 
   document.getElementById('ecrans').innerHTML =
-    [['accueil','Accueil'],['lots','Lots'],['fin','Fin']].map(function(x){
+    [['accueil','Accueil'],['formulaire','Formulaire'],['ticket','Ticket']].map(function(x){
       return '<button class="btn sm'+(ecranApercu===x[0]?' pri':'')+'" onclick="voirEcran(\''+x[0]+'\')">'+x[1]+'</button>';
     }).join('');
 
   document.getElementById('apercu-st').textContent =
-    courant==='superevent' ? 'La station en cours de réglage' : 'Construit à partir de la saisie';
+    courant==='superevent' ? 'La station en cours de réglage' : 'Les écrans réels, remplis par la saisie';
 
   document.getElementById('avert').innerHTML = courant==='superevent'
     ? 'Un super event n’a pas d’écran à lui : ce que le joueur ouvre, c’est <b>une station</b>. C’est donc elle qu’on montre.'
-    : 'Rendu de la saisie, pas le parcours final : l’animation n’existe pas encore. Une fois créée, sa fiche affiche le <b>vrai</b> parcours en direct.';
+    : 'Ce sont les <b>écrans réels</b> du parcours, avec leur feuille de style d’origine. Le code ticket est un exemple — le vrai est généré à l’inscription. Les écrans de jeu (roue, questions, vote) ne tournent pas ici.';
 }
 
 rendre();
