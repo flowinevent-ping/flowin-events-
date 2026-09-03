@@ -28,6 +28,7 @@ import {
 } from '@/lib/wizard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { Module } from '@/lib/types'
+import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 
 const ETAPES = [
   { id: 'A', label: 'Identité' },
@@ -40,6 +41,10 @@ const ETAPES = [
 type Etape = typeof ETAPES[number]['id']
 
 const ICONES_MODULE: Record<Module, React.ReactNode> = {
+  nds2026: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--sa-accent)" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4.6" stroke="var(--sa-accent)" strokeWidth="1.6" /><circle cx="12" cy="12" r="1.4" fill="var(--sa-accent)" /></svg>
+  ),
   quiz: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="var(--sa-accent)" strokeWidth="1.8" />
       <path d="M9.5 9.2c0-1.4 1.1-2.4 2.5-2.4s2.5 1 2.5 2.2c0 1.6-2.5 1.8-2.5 3.6" stroke="var(--sa-accent)" strokeWidth="1.8" strokeLinecap="round" />
@@ -68,6 +73,8 @@ const ICONES_MODULE: Record<Module, React.ReactNode> = {
 }
 
 const MODULES: { id: Module; nom: string; desc: string; emoji: string }[] = [
+  /* Le gabarit de reference en premier : on part de NDS 2026, pas de zero. */
+  { id: GABARIT_MODULE as Module, nom: GABARIT_NOM, desc: 'Le gabarit de référence — quiz, bonus, ticket', emoji: '🎯' },
   { id: 'quiz', nom: 'Quiz', desc: 'Questions à choix multiple', emoji: '❓' },
   { id: 'quizsolo', nom: 'Quiz solo', desc: 'Parcours individuel', emoji: '🧍' },
   { id: 'quizmaster', nom: 'Quiz master', desc: 'Animé en direct', emoji: '🎤' },
@@ -104,7 +111,7 @@ function Wizard() {
   const [d, setD] = useState<BrouillonEvent>(brouillonVide())
   const [etape, setEtape] = useState<Etape>('A')
   /* L ecran d apercu montre : il suit l etape, mais reste pilotable a la main. */
-  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('accueil')
+  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
   /* Les banques de questions, pour parametrer un quiz DES la creation. Meme
      source que la fiche event : une seule liste, pas deux. */
   const [banques, setBanques] = useState<Banque[]>([])
@@ -114,10 +121,26 @@ function Wizard() {
 
   const maj = (champs: Partial<BrouillonEvent>) => setD(x => ({ ...x, ...champs }))
 
-  /* L apercu suit l etape. Il n existe PAS d ecran « lots » dans le parcours
-     joueur : les lots s affichent dans la carte de l accueil (quiz, tombola).
-     Au recapitulatif on montre la fin du parcours, c est-a-dire le ticket. */
-  useEffect(() => { setEcranApercu(etape === 'F' ? 'ticket' : 'accueil') }, [etape])
+  /* L apercu suit l etape, en montrant l ecran que cette etape fabrique : la
+     configuration remplit le quiz, le recapitulatif montre le resultat. Les
+     lots n ont pas d ecran a eux — ils vivent dans la carte de l accueil. */
+  useEffect(() => {
+    setEcranApercu(etape === 'C' ? 'quiz' : etape === 'F' ? 'resultats' : 'onboard')
+  }, [etape])
+
+  /* Combien de questions les banques cochees rendent reellement disponibles :
+     l apercu le dit, plutot que de laisser croire a un quiz qui n a rien a
+     poser. Les deux formats vivent dans la meme table, on trie par type. */
+  const cfgEv = (d.cfg ?? {}) as Record<string, unknown>
+  const nbDispo = useMemo(() => {
+    const idsQuiz = (cfgEv.quizBanques as string[]) ?? []
+    const idsBonus = (cfgEv.bonusBanques as string[]) ?? []
+    const quiz = banques.filter(b => idsQuiz.includes(b.id))
+      .reduce((n, b) => n + (b.questions ?? []).filter(q => q.type === 'qcm').length, 0)
+    const bonus = banques.filter(b => idsBonus.includes(b.id))
+      .reduce((n, b) => n + (b.questions ?? []).filter(q => q.type === 'single' || q.type === 'multi').length, 0)
+    return { quiz, bonus }
+  }, [banques, cfgEv])
 
   /* Pre-saisie depuis l URL, appliquee UNE SEULE FOIS.
      Sans ce verrou, un re-rendu qui change l identite de `params` reappliquerait
@@ -456,10 +479,16 @@ function Wizard() {
         ecran={ecranApercu}
         onEcran={setEcranApercu}
         d={{
-          nom: d.nom, module: d.module, couleur: d.couleur,
-          dateD: d.date_d,
-          lots: d.lots.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur })),
+          nom: d.nom,
           superEvent: supers.find(se => se.id === d.super_event_id)?.nom ?? null,
+          /* Un event rattache a une operation EST une station parmi d autres :
+             la carte des stations et la carte partenaires font alors partie de
+             son parcours. Seul l event isole les perd. */
+          multistation: !!d.super_event_id,
+          lots: d.lots.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur })),
+          nbQuestions: nbDispo.quiz,
+          nbBonus: nbDispo.bonus,
+          intro: (cfgEv.intro as string) ?? null,
         }}
       />
       </div>

@@ -67,7 +67,7 @@ const ICON_BY_ID: Record<string, string> = {
   'nds-front': 'palette', 'nds-comm': 'megaphone', 'nds-media': 'film', prospection: 'phone', 'nds-bon-commande': 'receipt', 'nds-packs': 'gift',
   operations: 'gauge',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
-  'wizard-event-se': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
+  'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
   'demandes-rattachement': 'handshake', 'tirage-nds': 'dice', 'nds-visuels': 'palette',
   'plaquette-nds': 'receipt', 'nds-partenaire-offres': 'receipt', 'pitch-nds': 'phone',
   'flowin-partenaire-presentation': 'layout', 'bons-commande-liste': 'clipboard',
@@ -152,7 +152,7 @@ export default function Sidebar() {
       group: 'Jeux',
       ton: 'ev',
       items: [
-        { id: 'jeux', icon: '🎮', label: 'Jeux (templates)', count: 6, href: '/dashboard/jeux' },
+        { id: 'jeux', icon: '🎮', label: 'Jeux (templates)', count: 7, href: '/dashboard/jeux' },
       ],
     },
     {
@@ -162,6 +162,7 @@ export default function Sidebar() {
         { id: 'nds-participants', icon: '👥', label: 'CRM Participants', href: '/dashboard/nds-participants' },
         { id: 'joueurs', icon: '👤', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
         { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
+        { id: 'wizard-pro', icon: '✨', label: 'Créer un pro', href: '/dashboard/wizard-pro' },
         { id: 'partenaires', icon: '🤝', label: 'Partenaires (fiche commerce)', count: partenaires.length, href: '/dashboard/partenaires' },
         { id: 'apercu-pro', icon: '👁', label: 'Aperçu Pro', href: '/dashboard/apercu-pro' },
         { id: 'demandes-rattachement', icon: '📨', label: 'Demandes de participation', href: '/dashboard/demandes-rattachement' },

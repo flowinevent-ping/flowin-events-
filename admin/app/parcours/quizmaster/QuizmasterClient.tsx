@@ -14,7 +14,9 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
   const c = ev?.couleur ?? '#7C2D92'
   const nom = ev?.nom ?? 'Quiz Master'
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
-  const allQs = banques.flatMap(b => b.questions ?? [])
+  /* Ne prendre que les QCM : depuis le 03/09 une banque bonus peut se trouver
+     dans le meme tableau. Sans banque bonus cochee, ce filtre ne retire rien. */
+  const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm')
   const [questions] = useState(() => shuffle(allQs).slice(0, (cfg.quizNbQuestions as number) ?? 5))
   const [screen, setScreen] = useState<Screen>('landing')
   useParcoursTracking('quizmaster', evId, screen)

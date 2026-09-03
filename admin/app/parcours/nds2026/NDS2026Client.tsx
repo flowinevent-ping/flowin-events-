@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
 import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJoueurHistory, shuffle, AGE_OPTIONS, writeSondageBrigade, ndsQueueWrite, ndsFlushQueue } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
-import { NDS_CSS, NDS_SPRITE } from '@/lib/nds2026Design'
+import { NDS_CSS, NDS_CSS_APP, NDS_SPRITE } from '@/lib/nds2026Design'
 import { supabase } from '@/lib/supabase'
 import { trackVisite, trackErreur } from '@/lib/track'
 import { buildInviteLink } from '@/lib/parrainage'
@@ -138,10 +138,21 @@ const CONFETTI_PIECES = Array.from({ length: 20 }).map((_, i) => ({ l: (i * 5.3 
 export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: Props) {
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
   const nom = ev?.nom ?? 'Nuits du Sud'
-  const allQs = banques.flatMap(b => b.questions ?? [])
+  /* Le quiz ne prend que les QCM. Le filtre est ajoute le 03/09 : depuis que
+     les banques bonus sont chargees dans le meme tableau, une banque de
+     sondage glisserait sinon ses questions dans le quiz. Pour NDS 2026, dont
+     toutes les banques sont des QCM, il ne retire rien. */
+  const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm') as QuizQuestion[]
   const customQs = (cfg.customQuestions ?? []) as QuizQuestion[]
   const nbQ = (cfg.quizNbQuestions as number) ?? 4
-  const bonusQs = (cfg.quizBonusList ?? []) as BonusQuestion[]
+  /* Les questions bonus : la liste ecrite a la main sur l event si elle existe
+     — c est le cas de NDS 2026, rien ne change pour lui — sinon celles des
+     banques bonus cochees, ce qui est le chemin des events crees depuis le
+     gabarit. */
+  const bonusDesBanques = banques
+    .flatMap(b => b.questions ?? [])
+    .filter(q => { const t = (q as { type?: string }).type; return t === 'single' || t === 'multi' }) as unknown as BonusQuestion[]
+  const bonusQs = ((cfg.quizBonusList as BonusQuestion[] | undefined) ?? (bonusDesBanques.length ? bonusDesBanques : [])) as BonusQuestion[]
   const lotNom = (cfg.lotNom as string) || '3 places offertes'
   const lotDesc = (cfg.lotDesc as string) || 'Pour ton prochain concert'
   const lotResume = (cfg.lotResume as string) || '3 places pour ton prochain concert'
@@ -779,259 +790,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
         </div>
       )}
-      <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + `
-        html,body{height:auto !important;min-height:100dvh !important;max-height:none !important;overflow-x:hidden !important;overflow-y:auto !important;display:block !important;padding:0 !important;background:#160820}
-        .ndsbody{width:100%;min-height:100vh;min-height:100dvh;display:block;background:#fff;font-family:'Manrope',system-ui,sans-serif;color:#1a1226;padding:0}
-        .ndsbody .phone{overflow:visible !important}
-        .ndsbody .phone{width:100%;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:#160820;position:relative;display:flex;flex-direction:column;overflow:hidden}
-        .ndsbody .scr{position:static !important;inset:auto !important;display:flex !important;flex-direction:column;flex:1;min-height:0;width:100%}
-        .ndsbody .scr>.stage{flex:1 0 auto;display:flex;flex-direction:column;justify-content:center}
-        .ndsbody .scr#carteScr,.ndsbody .scr.carte{position:relative !important;min-height:70vh;width:100%}
-        /* Bas d'écran ancré : le bandeau de logos glisse AU-DESSUS de la barre,
-           la barre reste collée au bas. Les deux sont dans le même bloc fixe,
-           donc plus aucun chevauchement ni logo coupé. */
-        /* Le dock (bandeau + barre) est ancré : TOUT écran doit réserver la place,
-           sinon il masque le dernier bouton. On protège globalement, pas écran par écran. */
-        /* La place du dock est réservée sur la SECTION elle-même : tout écran est protégé,
-           qu'il ait un conteneur .pad ou non (l'accueil n'en a pas). */
-        .ndsbody .scr{padding-bottom:200px}
-        /* --- Écran d'accueil COMPACT : le bouton "Je joue maintenant" doit être
-               visible SANS scroller. On resserre les hauteurs, on ne retire rien. --- */
-        .ndsbody .hero{padding:14px 16px 12px !important}
-        .ndsbody .hlogo{height:78px !important;margin-bottom:8px !important}
-        .ndsbody .scr.on .pad,.ndsbody .scr.on .pad2{padding-top:10px !important}
-        .ndsbody .howcard{padding:10px 12px !important;margin-top:8px !important}
-        .ndsbody .howrow{padding:7px 0 !important}
-        .ndsbody .howrow .ic,.ndsbody .howicon{width:34px !important;height:34px !important}
-        .ndsbody .lotcard{padding:10px 12px !important;margin-top:8px !important}
-        .ndsbody .lotrow{padding:7px 0 !important}
-        .ndsbody .cumulband{padding:9px 12px !important;margin-top:8px !important;font-size:13px !important}
-        .ndsbody .htitle{margin-top:10px !important;margin-bottom:4px !important;font-size:15.5px !important}
-        .ndsbody .cgu{margin-top:8px !important;font-size:11px !important}
-        .ndsbody .pad,.ndsbody .padnav{padding-bottom:0}
-        /* Dans le dock, le bandeau est COMPACT (les logos restent lisibles mais
-           n'écrasent pas l'écran) : 104px -> 72px. */
-        /* Encart compact : l'image doit RESTER DANS le cadre (elle débordait :
-           l'encart était passé à 72px mais l'img gardait max-height:82px). */
-        .ndsbody .botdock .logoslot,.ndsbody .footdock .logoslot{
-          height:72px;padding:9px 16px;overflow:hidden;justify-content:center}
-        .ndsbody .botdock .logoslot img,.ndsbody .footdock .logoslot img{
-          max-height:54px;max-width:150px;width:auto;height:auto;object-fit:contain}
-        /* Grille partenaires : TOUS les logos à la même échelle.
-           Ils gardaient leur taille native -> Giordano minuscule, Bergerie énorme. */
-        .ndsbody .pt-logo{width:110px;height:110px;margin:0 auto 10px}
-        .ndsbody .pt-logo img{width:100%;height:100%;object-fit:contain;display:block}
-        .ndsbody .pt-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-          padding:16px 10px 14px;border-radius:18px;background:#fff;border:1px solid #F2E3EC;
-          box-shadow:0 2px 10px rgba(26,18,38,.05)}
-        .ndsbody .pt-nm{font-size:13px;font-weight:800;color:#4a4358;text-align:center;line-height:1.25}
-        /* Coupes adoucies : les logos s'estompent sur les bords au lieu d'être tranchés net. */
-        .ndsbody .botdock .logoband,.ndsbody .footdock .logoband{
-          position:relative;
-          -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%);
-          mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%)}
-        /* Alignement : tous les blocs de contenu partagent la même gouttière. */
-        .ndsbody .scr .cta,.ndsbody .scr .coll,.ndsbody .scr .infocard{margin-left:0;margin-right:0}
-        /* --- Accueil : moins de SCROLL sans rien retirer.
-           On resserre les ESPACES (marges, gouttières), jamais les contenus :
-           les 3 étapes, les lots, le bandeau "+ vous jouez" restent tous visibles. --- */
-        .ndsbody .scr .pad{padding-top:10px}
-        .ndsbody .howcard,.ndsbody .lotcard{margin-top:9px !important}
-        .ndsbody .howrow{padding:6px 0 !important}
-        .ndsbody .plusband{margin-top:9px !important;padding:9px 12px !important}
-        .ndsbody .sechead{margin-top:12px !important;margin-bottom:6px !important}
-        /* Le bouton principal reste généreux : c'est lui qui doit rester visible. */
-        .ndsbody .scr .btn.primary,.ndsbody .scr .cta{margin-top:12px}
-        .ndsbody .botdock,.ndsbody .footdock{
-          position:fixed !important;left:50%;transform:translateX(-50%);
-          width:100%;max-width:480px;bottom:0;z-index:1000;
-          display:flex;flex-direction:column;background:#fff;
-          box-shadow:0 -10px 28px rgba(20,8,30,.14);
-          padding-bottom:env(safe-area-inset-bottom,0px)}
-        .ndsbody .botdock .logoband,.ndsbody .footdock .logoband{
-          order:1;border-radius:0;border-left:none;border-right:none;
-          border-top:1px solid #f0e9f5;border-bottom:1px solid #f0e9f5;margin:0}
-        .ndsbody .botdock .nav,.ndsbody .footdock .nav{
-          order:2;position:static !important;transform:none;box-shadow:none;background:#fff}
-        .ndsbody .nav{position:sticky;bottom:0}
-        .ndsbody .botdock{position:sticky;bottom:0;z-index:40;background:#fff;box-shadow:0 -6px 18px rgba(20,8,30,.07)}
-        .ndsbody .botdock .nav{position:static;box-shadow:none}
-        .ndsbody .botdock .logoband{border-left:none;border-right:none;border-radius:0}
-        .ndsbody .footdock{position:sticky;bottom:0;z-index:1000;display:flex;flex-direction:column;width:100%}
-        .ndsbody .footdock .nav{position:static}
-        .ndsbody .logoband-dock{margin:0;border-radius:0;border-left:0;border-right:0;border-bottom:0;border-top:1px solid #ece7f2;background:rgba(255,255,255,.97)}
-        .ndsbody .map-fake{flex:1;width:100%;min-height:340px;background:linear-gradient(160deg,#241233,#3a1450);position:relative}
-        @keyframes ndsMk{0%,100%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 0 rgba(22,163,74,.7)}50%{box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 9px rgba(22,163,74,0)}}
-        .nds-mk-pulse{animation:ndsMk 1.2s infinite}
-        .ndsbody .stdot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}
-        .ndsbody .stdot-done{background:#F5B544}
-        .ndsbody .stdot-todo{background:#16a34a;animation:ndsMk 1.2s infinite}
-        .ndsbody .map-real{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-        .ndsbody .map-list{position:absolute;left:14px;right:14px;bottom:14px;z-index:600;display:flex;flex-direction:column;align-items:stretch;gap:10px}
-        .ndsbody .stn{display:flex;align-items:center;gap:13px;background:#fff;color:#1a1020;border-radius:16px;padding:13px 15px;box-shadow:0 6px 22px rgba(20,26,38,.22);cursor:pointer;border:none;text-align:left;width:100%;font-family:inherit;transition:transform .12s}
-        .ndsbody .stn:active{transform:scale(.98)}
-        .ndsbody .stn.cur{outline:2px solid var(--magenta)}
-        .ndsbody .stn .go{margin-left:auto;flex-shrink:0;color:var(--magenta)}
-        .ndsbody .stn .go .ic{width:18px;height:18px}
-        .ndsbody .stn .em{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
-        .ndsbody .stn .em .ic{width:22px;height:22px}
-        .ndsbody .stn .nm{font-weight:800;font-size:15px}
-        .ndsbody .stn .ou{font-size:12px;color:#6b6076;margin-top:1px}
-        .ndsbody .stn .tg{margin-left:auto;font-size:11px;font-weight:800;padding:4px 9px;border-radius:100px;flex-shrink:0}
-        .ndsbody .pt-sheet2{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:1300;max-height:82vh;overflow-y:auto;background:#fff;color:#1a1020;border-radius:22px 22px 0 0;padding:22px 20px calc(30px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.3)}
-        .ndsbody .pt-dim2{position:fixed;inset:0;background:rgba(10,4,16,.55);z-index:1250}
-        .ndsbody .sh-row{display:flex;align-items:center;gap:9px;margin-top:10px;text-decoration:none;color:var(--purple);font-weight:700;font-size:14px}
-        .ndsbody .opt.correct{border-color:#16a34a !important;background:rgba(22,163,74,.18) !important;color:#fff}
-        .ndsbody .opt.wrong{border-color:#ef4444 !important;background:rgba(239,68,68,.18) !important;color:#fff}
-        .ndsbody .opt.correct::after{content:'✓';float:right;font-weight:800;color:#4ade80}
-        .ndsbody .opt.wrong::after{content:'✕';float:right;font-weight:800;color:#f87171}
-        .ndsbody .qexpl{margin-top:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.9)}
-        .ndsbody .qexpl b{color:#4ade80}
-        /* A — fond blanc partout (couleurs uniquement, dimensions inchangees) */
-        .ndsbody .phone{background:#fff !important}
-        .ndsbody .scr.purple{background:#fff !important}
-        .ndsbody .stage{background:#fff !important;flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
-        .ndsbody .prize{background:#fff !important;border:1px solid #ece7f2 !important;box-shadow:0 8px 26px rgba(30,16,46,.10) !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
-        .ndsbody .prize .lbl{color:#9a8fa6 !important}
-        .ndsbody .prize .nm{color:#1a1226 !important}
-        .ndsbody .prize .div{background:#ece7f2 !important}
-        .ndsbody .prize .tir{color:#52455e !important}
-        .ndsbody .qcard{background:#fff !important;border:1px solid #ece7f2 !important}
-        .ndsbody .qtxt{color:#1a1226 !important}
-        .ndsbody .opt{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
-        .ndsbody .opt.sel{border-color:var(--magenta) !important;background:rgba(224,33,138,.10) !important;color:#7C2D92 !important}
-        .ndsbody .optb.sel{border-color:#3B5CC4 !important;background:rgba(59,92,196,.12) !important;color:#3B5CC4 !important}
-        .ndsbody .rgpd, .ndsbody .rgpd-check{color:#52455e !important}
-        .ndsbody .rgpd-check div{color:#52455e !important;font-weight:600}
-        .ndsbody .rgpd-check{border:1.5px solid #d9cfe6 !important;background:#faf7fd !important}
-        .ndsbody .rgpd-check.on{border-color:var(--magenta) !important;background:rgba(232,33,107,.07) !important}
-        .ndsbody .rgpd .rc{border:2px solid #b9a9cc !important;background:#fff !important}
-        .ndsbody .rgpd-check.on .rc{background:var(--magenta) !important;border-color:var(--magenta) !important;color:#fff !important}
-        .ndsbody .label-strong{color:#3a2f49 !important;font-weight:800 !important}
-        .ndsbody .chip-em{font-size:15px}
-        .ndsbody .opt.correct{color:#14532d !important}
-        .ndsbody .opt.wrong{color:#7f1d1d !important}
-        .ndsbody .dtitle{color:#1a1226 !important}
-        .ndsbody .dsub{color:#7a708a !important}
-        .ndsbody .dhead .back{background:#f3eef8 !important;color:#7C2D92 !important}
-        .ndsbody .progress .pstep{background:#ece7f2 !important}
-        .ndsbody .label{color:#7a708a !important}
-        .ndsbody .input{background:#faf7fd !important;border-color:#e7def0 !important;color:#1a1226 !important}
-        .ndsbody .input::placeholder{color:#b8aec6 !important}
-        .ndsbody .chip{background:#faf7fd !important;border-color:#e7def0 !important;color:#52455e !important}
-        .ndsbody .chip.sel{background:rgba(224,33,138,.10) !important;border-color:var(--magenta) !important;color:#7C2D92 !important}
-        .ndsbody .qexpl{background:#f6f3fb !important;border-color:#e7def0 !important;color:#52455e !important}
-        .ndsbody .foot{color:#9a8fa6 !important}
-        /* B — bandeau hero a hauteur fixe avec image NDS d'origine (onboard uniquement). L'image vit dans .hero (pas dans .stage scrollable) ; le voile garantit la lisibilite du label+logo et le fondu vers le theme clair. La prize-card chevauche le bas via margin:-56px d'origine. */
-        .ndsbody .scr.on .hero{position:relative;background:#190a25 url(/nds/bg-stage.webp) center 30%/cover no-repeat;padding:20px 16px 18px;display:flex;flex-direction:column;align-items:stretch}
-        .ndsbody .scr.on .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,6,24,.42) 0%,rgba(15,6,24,.10) 32%,rgba(15,6,24,.28) 100%);pointer-events:none}
-        .ndsbody .scr.on .hlogo{position:relative;z-index:1;align-self:flex-start;height:110px;width:auto;max-width:86%;margin-bottom:14px}
-        .ndsbody .scr.on .hero .prize{position:relative;z-index:1;margin:0 !important}
-        /* D — bandeau partenaires défilant (logos depuis la table partenaires) */
-        .ndsbody .logoband{margin:16px 0 4px;border:1px solid #ece7f2;border-radius:14px;background:#faf7fd;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-        .ndsbody .logotrack{display:flex;gap:14px;width:max-content;padding:9px 12px;align-items:center;animation:logoscroll 52s linear infinite}
-        .ndsbody .logoband:active .logotrack{animation-play-state:paused}
-        .ndsbody .logoslot{flex:0 0 auto;border:1px solid #e7def0;border-radius:13px;padding:16px 26px;color:#7C2D92;font-weight:700;font-size:16.5px;white-space:nowrap;background:#fff;display:flex;align-items:center;gap:9px;height:104px}
-        .ndsbody .logoslot img{max-height:82px;max-width:215px;object-fit:contain;display:block}
-        .ndsbody .logoslot-ph{border:1.5px dashed #cdbbe0;color:#9a86b5;background:#fff;min-width:196px;justify-content:center;font-size:16px;font-weight:800;letter-spacing:.01em}
-        .ndsbody .logoband-inline{margin:0}
-        .ndsbody .map-switch{display:flex;gap:6px;background:rgba(255,255,255,.94);border-radius:14px;padding:4px;box-shadow:0 8px 24px rgba(20,26,38,.22)}
-        .ndsbody .map-switch button{flex:1;border:none;border-radius:10px;padding:7px 10px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer;background:transparent;color:#7C2D92}
-        .ndsbody .map-switch button.on{background:linear-gradient(135deg,#7C2D92,#E0218A);color:#fff}
-        @keyframes logoscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-        /* --- Boutons d'action : carte "quête" (pastille icône + texte à gauche + chevron) --- */
-        .cta{position:relative;display:flex;align-items:center;gap:13px;width:100%;
-             border:none;border-radius:20px;padding:14px 16px;margin-top:11px;cursor:pointer;
-             font-family:inherit;color:#fff;overflow:hidden;text-align:left;
-             box-shadow:inset 0 1px 0 rgba(255,255,255,.32);-webkit-tap-highlight-color:transparent}
-        .cta-badge{flex:0 0 auto;width:46px;height:46px;border-radius:15px;display:flex;
-             align-items:center;justify-content:center;background:rgba(255,255,255,.24);
-             border:1px solid rgba(255,255,255,.4);box-shadow:0 3px 10px rgba(0,0,0,.14)}
-        .cta-badge .ic{width:24px;height:24px}
-        .cta-txt{flex:1;min-width:0}
-        .cta-t{display:block;font-weight:800;font-size:16.5px;line-height:1.2;letter-spacing:-.2px;
-             text-shadow:0 1px 2px rgba(0,0,0,.22)}
-        .cta-sub{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-weight:800;
-             font-size:11.5px;line-height:1;letter-spacing:.3px;padding:5px 10px;border-radius:20px;
-             background:rgba(255,255,255,.96);box-shadow:0 2px 6px rgba(0,0,0,.12)}
-        .cta-shop .cta-sub{color:#C2410C}
-        .cta-bonus .cta-sub{color:#0F6E56}
-        .cta-go{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
-             justify-content:center;background:rgba(255,255,255,.22);font-size:15px;font-weight:900;
-             animation:ctaNudge 1.6s ease-in-out infinite}
-        @keyframes ctaNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
-        .cta:active{transform:scale(.985)}
-        /* --- Formulaire : bandeau de RÉCOMPENSE (et non "dernière étape" = corvée) --- */
-        .winban{position:relative;background:linear-gradient(135deg,#12A87B,#4BD7A8);border-radius:20px;
-                padding:16px 16px 15px;margin:2px 0 16px;color:#fff;overflow:hidden;
-                box-shadow:0 6px 20px rgba(18,168,123,.28)}
-        .winban::after{content:'';position:absolute;top:-50%;right:-15%;width:60%;height:200%;
-                background:radial-gradient(closest-side,rgba(255,255,255,.28),transparent);pointer-events:none}
-        .winban-r{position:relative;display:flex;align-items:center;gap:11px}
-        .winban-ic{flex:0 0 auto;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.24);
-                border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;
-                animation:winPop .5s cubic-bezier(.2,1.4,.4,1) both}
-        .winban-ic .ic{width:24px;height:24px}
-        @keyframes winPop{0%{transform:scale(.4) rotate(-12deg);opacity:0}70%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
-        .winban-t{font-size:19px;font-weight:900;line-height:1.15;letter-spacing:-.3px;
-                text-shadow:0 1px 3px rgba(0,0,0,.14)}
-        .winban-s{position:relative;font-size:13px;line-height:1.45;margin-top:10px;opacity:.97}
-        .winban-s b{font-weight:800}
-        /* --- Collection : une tuile NOMMÉE par station, une couleur par famille --- */
-        .coll{background:#fff;border:1px solid #F2E3EC;border-radius:20px;padding:15px 14px 14px;margin-top:14px;
-              box-shadow:0 2px 10px rgba(26,18,38,.04)}
-        .coll-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-        .coll-t{font-size:15px;font-weight:800;color:#1a1226}
-        .coll-c{font-size:12px;font-weight:800;color:#C2410C;background:#FFF1E7;border:1px solid #FBD9C2;
-                padding:4px 10px;border-radius:20px}
-        .coll-g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-        .coll-b{border-radius:16px;padding:11px 6px 9px;display:flex;flex-direction:column;align-items:center;
-                gap:6px;background:#F8F4FA;border:1.5px dashed #E4D6EA;color:#B7A6C2;text-align:center}
-        .coll-b .ic{width:22px;height:22px}
-        .coll-n{font-size:10.5px;font-weight:800;line-height:1.15;letter-spacing:-.1px}
-        /* débloqué : la couleur de sa famille + une coche */
-        .coll-b.on{color:#fff;border:1.5px solid transparent;position:relative;
-                animation:collPop .45s cubic-bezier(.2,1.4,.4,1) both}
-        .coll-b.on::after{content:'\\2713';position:absolute;top:5px;right:7px;font-size:10px;font-weight:900;opacity:.95}
-        .coll-b.on.f-caisse{background:linear-gradient(145deg,#F5B544,#E8912A);box-shadow:0 3px 9px rgba(232,145,42,.32)}
-        .coll-b.on.f-bar{background:linear-gradient(145deg,#E8547F,#D12F6B);box-shadow:0 3px 9px rgba(209,47,107,.32)}
-        .coll-b.on.f-ecran{background:linear-gradient(145deg,#5B8DEF,#3566CC);box-shadow:0 3px 9px rgba(53,102,204,.32)}
-        .coll-b.on.f-brigade{background:linear-gradient(145deg,#4BD7A8,#12A87B);box-shadow:0 3px 9px rgba(18,168,123,.32)}
-        @keyframes collPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
-        .coll-p{font-size:12.5px;color:#6b6478;margin-top:12px;line-height:1.45;text-align:center}
-        .coll-p b{color:#C2410C}
-        /* Page Fin (master marque blanche) : done = vert uni, todo = carte grise pointillee */
-        .coll-b.mbf.on{background:linear-gradient(145deg,#22C55E,#12A87B);box-shadow:0 3px 9px rgba(18,168,123,.32)}
-        /* --- Bloc héros : cagnotte de tickets + progression des stations --- */
-        .hero{position:relative;background:linear-gradient(135deg,#2B0F3A,#7C2D92);border-radius:18px;
-             padding:18px 16px 16px;margin:2px 0 12px;color:#fff;overflow:hidden;text-align:center}
-        .hero::after{content:'';position:absolute;top:-40%;right:-20%;width:70%;height:180%;
-             background:radial-gradient(closest-side,rgba(224,33,138,.45),transparent);pointer-events:none}
-        .hero-n{position:relative;font-size:46px;font-weight:900;line-height:1;letter-spacing:-1.5px;
-             animation:heroPop .5s cubic-bezier(.2,1.4,.4,1) both}
-        @keyframes heroPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
-        .hero-l{position:relative;font-size:12.5px;font-weight:800;letter-spacing:1.4px;
-             text-transform:uppercase;opacity:.9;margin-top:4px}
-        .hero-bar{position:relative;display:flex;gap:4px;margin-top:14px}
-        .hero-seg{flex:1;height:7px;border-radius:6px;background:rgba(255,255,255,.2)}
-        .hero-seg.on{background:linear-gradient(90deg,#F5B544,#FF6A00);box-shadow:0 0 8px rgba(255,106,0,.7)}
-        .hero-p{position:relative;margin-top:9px;font-size:12.5px;font-weight:700;opacity:.95}
-        .hero-p b{color:#F5B544}
-        .cta::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
-             background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);
-             transform:skewX(-18deg);animation:ctaShine 3.4s ease-in-out infinite}
-        @keyframes ctaShine{0%{left:-60%}55%{left:120%}100%{left:120%}}
-        .cta-shop{background:linear-gradient(135deg,#FF6A00,#F5B544);
-             box-shadow:0 6px 18px rgba(255,106,0,.42);animation:ctaPulseShop 2.2s ease-in-out infinite}
-        @keyframes ctaPulseShop{0%,100%{box-shadow:0 6px 18px rgba(255,106,0,.42),0 0 0 0 rgba(255,106,0,.55)}
-             55%{box-shadow:0 6px 18px rgba(255,106,0,.42),0 0 0 12px rgba(255,106,0,0)}}
-        .cta-bonus{background:linear-gradient(135deg,#16a34a,#3ED598);
-             box-shadow:0 6px 18px rgba(22,163,74,.4);animation:ctaPulseBonus 2.2s ease-in-out infinite}
-        @keyframes ctaPulseBonus{0%,100%{box-shadow:0 6px 18px rgba(22,163,74,.4),0 0 0 0 rgba(22,163,74,.5)}
-             55%{box-shadow:0 6px 18px rgba(22,163,74,.4),0 0 0 12px rgba(22,163,74,0)}}
-        @media (prefers-reduced-motion:reduce){.cta,.cta::after{animation:none}}
-        @media(prefers-reduced-motion:reduce){.ndsbody .logotrack{animation:none}}
-      ` }} />
+      <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + NDS_CSS_APP }} />
       <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
       <style dangerouslySetInnerHTML={{ __html: '@keyframes nds-pop{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}' }} />
 

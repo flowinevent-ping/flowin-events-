@@ -16,7 +16,9 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
   const front = (cfg.front ?? {}) as Record<string, string>
   const c = ev?.couleur ?? '#7C2D92'
   const nom = ev?.nom ?? 'Quiz'
-  const allQs = banques.flatMap(b => b.questions ?? [])
+  /* Ne prendre que les QCM : depuis le 03/09 une banque bonus peut se trouver
+     dans le meme tableau. Sans banque bonus cochee, ce filtre ne retire rien. */
+  const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm')
   const customQs = (cfg.customQuestions ?? []) as QuizQuestion[]
   const nbQ = (cfg.quizNbQuestions as number) ?? 5
   const timerSec = cfg.quizTimer !== false ? ((cfg.quizTimer as number) || 30) : 0

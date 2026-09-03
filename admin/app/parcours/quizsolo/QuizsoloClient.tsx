@@ -16,7 +16,9 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
   const nbQ = (cfg.quizNbQuestions as number) ?? 5
   const timerSec = 30
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
-  const allQs = banques.flatMap(b => b.questions ?? [])
+  /* Ne prendre que les QCM : depuis le 03/09 une banque bonus peut se trouver
+     dans le meme tableau. Sans banque bonus cochee, ce filtre ne retire rien. */
+  const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm')
   const customQs = (cfg.customQuestions ?? []) as QuizQuestion[]
 
   const [questions] = useState(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))

@@ -1,320 +1,329 @@
 'use client'
 
 /**
- * APERCU APP — le VRAI parcours joueur, rendu a partir du brouillon.
+ * APERCU — le gabarit marque blanche, rendu tel qu'il tourne.
  *
- * Romain, 03/09 : « l apercu ne correspond a rien d existant, contenu, charte
- * graphique : tu as invente au lieu de prendre l existant. »
+ * Romain, 03/09 : « on prend super events NDS 2026 comme support de reference
+ * et realisons un template a partir de celui-ci "marque blanche" [...] les UX
+ * et UI peuvent etre les memes que pour NDS 2026, tu peux simplement supprimer
+ * le logo (laisse l'espace disponible) [...] Pour events le parcours est 100%
+ * le meme a l'exception qu'il n'y a pas la carte de multistation jeux et la
+ * carte partenaire. »
  *
- * Il avait raison. La premiere version dessinait un telephone violet avec des
- * ecrans « Accueil / Lots / Fin » et des phrases (« Merci d avoir joue »,
- * « Voir mon billet ») qui n existent NULLE PART dans le produit. Rien de tout
- * cela n etait repris du parcours joueur.
+ * D'OU VIENT CE QUI S'AFFICHE. De trois endroits, tous existants :
+ *   - `NDS_CSS` + `NDS_CSS_APP` + `NDS_SPRITE` (lib/nds2026Design.ts) : la
+ *     charte et les surcharges du parcours, aux memes octets.
+ *   - le balisage des ecrans, releve dans app/parcours/nds2026/NDS2026Client.tsx.
+ *   - `lib/gabarit.ts` pour ce qui depend de la portee.
+ * Aucun ecran, aucune phrase, aucune couleur n'est invente ici.
  *
- * Ce fichier ne dessine plus rien de son cru. Il importe `parcoursCSS()` — la
- * feuille de style unique de tous les parcours, dans `lib/parcours.ts` — et
- * reproduit les ecrans tels qu ils sont ecrits dans les six clients de
- * `app/parcours/*` :
+ * POURQUOI UN IFRAME. La charte NDS pose des regles sur `html`, `body` et
+ * `:root`, et une douzaine de `@keyframes`. Les prefixer une par une pour les
+ * confiner au dashboard, c'est les reecrire — donc s'en ecarter. L'iframe
+ * donne un document a part : la feuille de style s'applique mot pour mot,
+ * exactement comme sur le telephone du joueur, et ne peut rien repeindre du
+ * dashboard.
  *
- *   accueil    landing   — icone / nom / sous-titre / lots / badge tirage /
- *                          CTA / « Jeu gratuit · Sans achat obligatoire » /
- *                          bouton partenaires
- *   formulaire form      — Prenom, Nom, Email, Telephone, Tranche d age, CP,
- *                          bandeau RGPD, « ✓ Valider → »
- *   ticket     ticket    — la carte ticket du module (trois variantes reelles :
- *                          generique quiz, tombola, et la carte teal de spin)
- *
- * Chaque libelle ci-dessous est copie du client correspondant, avec la meme
- * valeur par defaut. Les seuls ecarts, tous assumes et signales a l ecran :
- *
- *  - Le code ticket affiche est un exemple (« XX-000000 ») : le vrai est genere
- *    a l inscription du joueur.
- *  - La date saisie occupe le creneau `cfg.datesLabel` du parcours, qui est un
- *    texte libre : on y met la date du brouillon, faute de mieux.
- *  - Les questions, la roue et le vote ne tournent pas ici : ce sont des ecrans
- *    de jeu, pas de presentation. Une fois l event cree, sa fiche affiche le
- *    vrai parcours en iframe (ParcoursMobil).
- *
- * La CSS des parcours est SCOPEE sous `.sa-vp` avant injection : telle quelle,
- * elle repeint le body du dashboard en #0F172A.
+ * DEUX ECARTS, ASSUMES ET ECRITS A L'ECRAN. Le logo est retire, comme demande,
+ * et sa place reste reservee. Le code ticket et les compteurs sont des
+ * exemples : l'evenement n'existe pas encore.
  */
 
 import { useMemo } from 'react'
-import { parcoursCSS } from '@/lib/parcours'
+import { NDS_CSS, NDS_CSS_APP, NDS_SPRITE } from '@/lib/nds2026Design'
 
-export type EcranApercu = 'accueil' | 'formulaire' | 'ticket'
+export type EcranApercu = 'onboard' | 'quiz' | 'resultats' | 'bonus' | 'inscription'
+
+export const ECRANS_APERCU: { id: EcranApercu; label: string }[] = [
+  { id: 'onboard', label: 'Accueil' },
+  { id: 'quiz', label: 'Quiz' },
+  { id: 'resultats', label: 'Résultats' },
+  { id: 'bonus', label: 'Bonus' },
+  { id: 'inscription', label: 'Inscription' },
+]
 
 export interface BrouillonApercu {
   nom?: string
-  module?: string
-  couleur?: string
-  dateD?: string | null
-  /** Les lots saisis — le parcours en affiche les 3 (quiz) ou 5 (tombola) premiers. */
-  lots?: { nom?: string; quantite?: number; valeur?: number }[]
-  /** Nom de l operation, pour le libelle du tirage. */
+  /** Nom de l'operation, affiche en sous-titre du quiz. */
   superEvent?: string | null
-  /** Nombre de pros rattaches — le parcours affiche « Nos N partenaires ». */
+  /** true = super event : les blocs multi-stations et partenaires existent. */
+  multistation?: boolean
+  /** Les lots saisis — les deux premiers occupent la carte « À gagner ». */
+  lots?: { nom?: string; quantite?: number; valeur?: number }[]
+  /** Nombre de questions quiz disponibles dans les banques cochees. */
+  nbQuestions?: number
+  /** Nombre de questions bonus disponibles dans les banques bonus cochees. */
+  nbBonus?: number
+  /** Nombre de stations de l'operation, pour la ligne « autres stations ». */
+  nbStations?: number
+  /** Nombre de pros rattaches, pour la carte partenaires. */
   nbPartenaires?: number
+  /** Texte d'accueil libre : remplace « Comment jouer ? » quand il est rempli. */
+  intro?: string | null
 }
 
-/* Largeur reelle du parcours (`.app { max-width: 430px }`) et largeur de
-   l ecran dans la maquette de telephone : le rendu est mis a l echelle, pas
-   redessine — un bouton fait donc ici exactement ce qu il fait sur le vrai
-   telephone, en plus petit. */
-const LARGEUR_REELLE = 430
+/* Le viewport reel du parcours (`.phone { max-width: 480px }`) et la place
+   disponible dans la maquette de telephone. On met a l'echelle, on ne
+   redessine pas : ce qui est vu ici est ce qui sera vu la-bas. */
+const LARGEUR_REELLE = 480
 const LARGEUR_ECRAN = 254
 const HAUTEUR_ECRAN = 508
 const ECHELLE = LARGEUR_ECRAN / LARGEUR_REELLE
 const HAUTEUR_REELLE = Math.round(HAUTEUR_ECRAN / ECHELLE)
 
-/** Prefixe chaque selecteur par la racine ; jette `html` et `body`, qui
- *  repeindraient le dashboard. La CSS des parcours est plate (aucun @media,
- *  aucune imbrication), ce que cette regex suppose. */
-function scoper(css: string, racine: string): string {
-  return css.replace(/([^{}]+)\{([^{}]*)\}/g, (_m, sel: string, corps: string) => {
-    const parts = (sel as string)
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean)
-      .filter(s => s !== 'html' && s !== 'body')
-      .map(s => (s === '*' ? `${racine} *` : `${racine} ${s}`))
-    return parts.length ? `${parts.join(',')}{${corps}}` : ''
-  })
+function esc(s: unknown): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
-/* Ecran d accueil de chaque module, releve dans son client. */
-type Accueil = { icone: React.ReactNode; sous: string; cta: React.ReactNode; lots: number; mention: boolean }
+const ic = (id: string, style = '') =>
+  `<svg class="ic"${style ? ` style="${style}"` : ''}><use href="#${id}"/></svg>`
 
-function accueilDe(mod: string, c: string, nbPart: number): Accueil {
-  const part = nbPart > 0
-  switch (mod) {
-    /* app/parcours/spin/SpinClient.tsx */
-    case 'spin':
-      return {
-        icone: <i className="ti ti-rotate-clockwise" style={{ fontSize: 48, color: c }} aria-hidden="true" />,
-        sous: 'Tentez votre chance !',
-        cta: <><i className="ti ti-rotate-clockwise" style={{ marginRight: 6 }} aria-hidden="true" />Faire tourner la roue →</>,
-        lots: 0, mention: true,
-      }
-    /* app/parcours/quiz/QuizClient.tsx */
-    case 'quiz':
-      return { icone: <span style={{ fontSize: 48 }}>🎮</span>, sous: '', cta: '🎮 Jouer gratuitement →', lots: 3, mention: true }
-    /* app/parcours/quizsolo/QuizsoloClient.tsx */
-    case 'quizsolo':
-      return { icone: <span style={{ fontSize: 48 }}>⏱️</span>, sous: 'Quiz chronométré · 30s par question', cta: '⏱️ Démarrer le quiz →', lots: 0, mention: false }
-    /* app/parcours/quizmaster/QuizmasterClient.tsx */
-    case 'quizmaster':
-      return { icone: <span style={{ fontSize: 48 }}>🎮</span>, sous: 'Quiz en direct · Réponds sur ton téléphone', cta: '🎮 Rejoindre le quiz →', lots: 0, mention: false }
-    /* app/parcours/vote/VoteClient.tsx */
-    case 'vote':
-      return { icone: <span style={{ fontSize: 48 }}>⭐</span>, sous: 'Votez pour vos favoris !', cta: '⭐ Voter maintenant →', lots: 0, mention: false }
-    /* app/parcours/tombola/TombolaClient.tsx */
-    case 'tombola':
-      return { icone: <CroixTombola c={c} />, sous: '', cta: 'Je m’inscris à la tombola →', lots: 5, mention: true }
-    default:
-      return { icone: <span style={{ fontSize: 48 }}>🎮</span>, sous: '', cta: 'Jouer →', lots: 3, mention: part }
+/* ── ACCUEIL — NDS2026Client, `screen === 'onboard'`, etat non joue ───────── */
+function ecranOnboard(d: BrouillonApercu): string {
+  const lots = (d.lots ?? []).filter(l => (l.nom ?? '').trim())
+  const l1 = lots[0]
+  const l2 = lots[1]
+  const sq = 'background:linear-gradient(135deg,#E0218A,#8E2E9E)'
+
+  /* Les trois etapes de « Comment jouer ? ». La premiere parle de la carte des
+     stations : elle n'a pas de sens pour une station seule, elle disparait. */
+  const etapes = [
+    d.multistation ? { i: 'i-map', t: 'Rends-toi à une station jeux', s: 'Sur la carte — festival et partenaires' } : null,
+    { i: 'i-scan', t: 'Flash le QR code', s: 'À la station' },
+    { i: 'i-help', t: 'Réponds au quizz', s: 'Et gagne des tickets' },
+  ].filter(Boolean) as { i: string; t: string; s: string }[]
+
+  const bloc = d.intro?.trim()
+    ? `<div style="background:#faf7fd;border:1px solid #ece7f2;border-radius:16px;padding:16px 18px;margin-bottom:14px;font-size:14.5px;line-height:1.55;color:#1a1226;font-weight:600;box-shadow:0 8px 22px rgba(30,16,46,.10)">${esc(d.intro)}</div>`
+    : `<div style="text-align:center;margin-bottom:8px;margin-top:2px">
+         <div style="font-size:17px;font-weight:800;color:#1a1226">Comment jouer&#8239;?</div>
+       </div>
+       <div style="background:#faf7fd;border:1px solid #ece7f2;border-radius:16px;padding:13px 16px;margin-bottom:12px;box-shadow:0 8px 22px rgba(30,16,46,.10)">
+         ${etapes.map(s => `
+           <div style="display:flex;align-items:center;gap:11px;padding:7px 0">
+             <span style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--magenta));display:flex;align-items:center;justify-content:center;flex-shrink:0">${ic(s.i, 'width:17px;height:17px;color:#fff')}</span>
+             <span style="font-size:13.5px;color:#52455e;line-height:1.3"><b style="color:#1a1226">${esc(s.t)}</b><br><span style="font-size:12.5px;opacity:.85">${esc(s.s)}</span></span>
+           </div>`).join('')}
+       </div>
+       <div style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16));border:1px solid #ece7f2;border-radius:14px;padding:11px 14px;margin-bottom:14px;font-weight:800;font-size:14.5px;color:#1a1226;text-align:center">
+         ${ic('i-layers', 'width:18px;height:18px;color:var(--magenta);flex-shrink:0')}
+         <span>+ Vous jouez, + vos chances augmentent</span>
+       </div>`
+
+  return `<section class="scr on">
+    <div class="hero">
+      <!-- L'emplacement du logo, laisse libre : c'est la seule chose retiree du gabarit. -->
+      <div class="gab-logo"><span>Emplacement du logo</span></div>
+      <div class="prize">
+        <div class="lbl">À gagner</div>
+        <div class="prow">
+          <span class="sq" style="${sq}">${ic('i-ticket')}</span>
+          <div><div class="nm">${esc(l1?.nom || 'Premier lot')}</div><div class="vl">${l1 ? esc([l1.valeur ? l1.valeur + ' €' : '', l1.quantite ? '×' + l1.quantite : ''].filter(Boolean).join(' · ')) : 'À saisir à l’étape Lots'}</div></div>
+        </div>
+        <div class="div"></div>
+        <div class="prow">
+          <span class="sq" style="${sq}">${ic('i-voucher')}</span>
+          <div><div class="nm">${esc(l2?.nom || 'Deuxième lot')}</div><div class="vl">${l2 ? esc([l2.valeur ? l2.valeur + ' €' : '', l2.quantite ? '×' + l2.quantite : ''].filter(Boolean).join(' · ')) : 'À saisir à l’étape Lots'}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="stage">
+      ${bloc}
+      <a class="btn">Je joue maintenant</a>
+      <div class="foot">En participant, tu acceptes notre politique de confidentialité.</div>
+    </div>
+  </section>`
+}
+
+/* ── QUIZ — NDS2026Client, `screen === 'quiz'` ────────────────────────────── */
+function ecranQuiz(d: BrouillonApercu): string {
+  const n = d.nbQuestions ?? 0
+  const total = Math.min(n || 4, 4)
+  const vide = n === 0
+  return `<section class="scr purple on"><div class="pad">
+    <div class="dhead">
+      <div class="back">${ic('i-arrowl')}</div>
+      <div style="flex:1"><div class="dtitle">${esc(d.nom || 'Nom de l’événement')}</div><div class="dsub">Quiz · 1 / ${total}</div></div>
+    </div>
+    <div class="progress">${Array.from({ length: total }).map((_, k) => `<div class="pstep${k === 0 ? ' on' : ''}"></div>`).join('')}</div>
+    <div class="qcard">
+      <div class="qtxt">${vide ? 'Aucune banque de questions cochée — le quiz n’aurait rien à poser.' : 'La question tirée dans les banques cochées s’affiche ici.'}</div>
+      ${vide ? '' : ['Première réponse', 'Deuxième réponse', 'Troisième réponse', 'Quatrième réponse']
+        .map((o, i) => `<button class="opt${i === 1 ? ' sel' : ''}">${o}</button>`).join('')}
+    </div>
+    ${vide ? '' : `<div class="preview">${n} question${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''} · ${total} posée${total > 1 ? 's' : ''} au hasard</div>`}
+  </div></section>`
+}
+
+/* ── RESULTATS — NDS2026Client, `screen === 'resultats'` ──────────────────── */
+function ecranResultats(d: BrouillonApercu): string {
+  const lots = (d.lots ?? []).filter(l => (l.nom ?? '').trim())
+  const total = Math.min(d.nbQuestions || 4, 4)
+  const bonus = (d.nbBonus ?? 0) > 0
+  return `<section class="scr on" style="background:#fff">
+    <div class="res-head">
+      <div class="res-ico">${ic('i-trophy')}</div>
+      <div class="res-bravo disp">Wow, super&#8239;!</div>
+      <div class="res-sub">Continue comme ça et cumule tes tickets&#8239;!</div>
+    </div>
+    <div class="res-body">
+      <div class="score-card">
+        <div class="score disp">${total}/${total}</div>
+        <div class="score-line">Sans faute — 1 ticket</div>
+      </div>
+      ${bonus ? `<a class="cta cta-bonus"><span class="cta-badge">${ic('i-spark')}</span><span class="cta-txt"><span class="cta-t">Rattrape ton ticket</span><span class="cta-sub">${d.nbBonus} question${(d.nbBonus ?? 0) > 1 ? 's' : ''} bonus</span></span><span class="cta-go">›</span></a>` : ''}
+      <div class="infocard b-magenta">${ic('i-gift')}<div>Lot : <b>${esc(lots[0]?.nom || 'à saisir à l’étape Lots')}</b></div></div>
+      <div class="infocard b-green">${ic('i-checkc')}<div>Participation enregistrée&#8239;!</div></div>
+      ${d.multistation ? `
+      <div class="infocard b-magenta" style="flex-direction:column;gap:4px">
+        <div><b>Continue comme ça&#8239;!</b> Chaque action = +1 ticket :</div>
+        <div style="font-size:13.5px;color:#52455e">• Va dans les autres stations &nbsp;• Réponds aux questions bonus &nbsp;• Parraine tes amis</div>
+      </div>
+      <a class="cta cta-shop"><span class="cta-badge">${ic('i-store')}</span><span class="cta-txt"><span class="cta-t">Cumule tes tickets en boutique</span><span class="cta-sub">+1 ticket par commerce</span></span><span class="cta-go">›</span></a>
+      <a class="double">${ic('i-map')} Voir la carte des partenaires</a>` : ''}
+      <a class="btn" style="margin-top:10px">Valider et recevoir mon ticket →</a>
+    </div>
+  </section>`
+}
+
+/* ── BONUS — NDS2026Client, `screen === 'bonus'` ──────────────────────────── */
+function ecranBonus(d: BrouillonApercu): string {
+  const n = d.nbBonus ?? 0
+  if (!n) {
+    return `<section class="scr purple on"><div class="pad">
+      <div class="dhead"><div class="back">${ic('i-arrowl')}</div><div style="flex:1"><div class="dtitle">Bonus</div><div class="dsub">aucune banque bonus cochée</div></div></div>
+      <div class="qcard"><div class="qtxt">Sans banque bonus, cet écran n’existe pas : le joueur passe des résultats directement à l’inscription.</div></div>
+    </div></section>`
   }
+  return `<section class="scr purple on"><div class="pad">
+    <div class="dhead"><div class="back">${ic('i-arrowl')}</div><div style="flex:1"><div class="dtitle">Bonus</div><div class="dsub">1 / ${n} · double tes chances</div></div></div>
+    <div class="qcard">
+      <div class="qtxt">La question bonus tirée dans les banques cochées s’affiche ici.</div>
+      ${['Premier choix', 'Deuxième choix', 'Troisième choix'].map((o, i) => `<button class="opt${i === 0 ? ' sel' : ''}">${o}</button>`).join('')}
+    </div>
+    <a class="btn">Terminer →</a>
+  </div></section>`
 }
 
-/* Le logo de la tombola, copie de TombolaClient. */
-function CroixTombola({ c }: { c: string }) {
-  return (
-    <svg viewBox="0 0 100 100" width={84} height={84} style={{ display: 'block', margin: '0 auto', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,.4))' }}>
-      <circle cx="50" cy="50" r="50" fill="#fff" />
-      <rect x="38" y="16" width="24" height="68" rx="5" fill={c} />
-      <rect x="16" y="38" width="68" height="24" rx="5" fill={c} />
-    </svg>
-  )
+/* ── INSCRIPTION — NDS2026Client, `screen === 'inscription'` ──────────────── */
+function ecranInscription(d: BrouillonApercu): string {
+  const champ = (l: string, v = '') =>
+    `<div><label class="label">${l}</label><input class="input" value="${esc(v)}" readonly></div>`
+  return `<section class="scr purple on"><div class="pad">
+    <div class="dhead">
+      <div class="back">${ic('i-arrowl')}</div>
+      <div><div class="dtitle">Bravo, ton ticket est là&nbsp;!</div><div class="dsub">Plus que tes coordonnées pour le valider.</div></div>
+    </div>
+    <div class="winban">
+      <div class="winban-r"><span class="winban-ic">${ic('i-ticket')}</span><span class="winban-t">Bravo&nbsp;! Ton ticket<br>est enregistré</span></div>
+      <div class="winban-s">Laisse-nous tes coordonnées : <b>on te prévient si tu gagnes</b>.${d.multistation ? ' Et n’oublie pas — d’autres stations t’attendent, <b>chacune = 1 ticket de plus</b>.' : ''}</div>
+    </div>
+    <div class="grid2" style="margin-bottom:12px">${champ('Prénom')}${champ('Nom')}</div>
+    <div style="margin-bottom:12px">${champ('Email')}</div>
+    <div style="margin-bottom:12px">${champ('Téléphone')}</div>
+    <div class="grid2" style="margin-bottom:12px">${champ('Sexe')}${champ('Tranche d’âge')}</div>
+    <div style="margin-bottom:12px">${champ('Code postal')}</div>
+    <div><label class="label label-strong">Tu as connu ${esc(d.superEvent || d.nom || 'l’événement')} par…</label>
+      <div class="chips">${['Instagram', 'Affiche', 'Bouche à oreille', 'Autre'].map((s, i) => `<span class="chip${i === 0 ? ' sel' : ''}">${s}</span>`).join('')}</div>
+    </div>
+    <div class="rgpd rgpd-check"><span class="rc"></span><div>Je souhaite rester en contact avec les infos de l’opération et de Flowin. Mes coordonnées ne sont ni vendues ni cédées.</div></div>
+    <a class="btn">Valider mon ticket →</a>
+  </div></section>`
 }
 
-const PREFIXE: Record<string, string> = { spin: 'SP', quiz: 'QZ', quizsolo: 'QS', quizmaster: 'QM', vote: 'VT', tombola: 'TB' }
+/* CE QUE LE GABARIT RETIRE A LA CHARTE NDS — et rien d'autre.
+ *
+ * Deux elements de la charte portent la marque du festival, pas le gabarit :
+ * le logo (`<img class="hlogo" src="/nds/logo_nds_blanc_hd.png">`) et la photo
+ * de scene posee en fond du bandeau d'accueil
+ * (`.ndsbody .scr.on .hero { background: url(/nds/bg-stage.webp) }`). Les deux
+ * sont neutralises ici. La place reste : le bandeau garde sa hauteur et son
+ * fond sombre, pret a recevoir le visuel de l'operation.
+ *
+ * Le reste ne bouge pas : c'est ce qui fait que l'apercu ressemble a ce qui
+ * tourne. On fige seulement la hauteur du document, l'apercu n'ayant pas a
+ * defiler comme un vrai telephone.
+ */
+const CSS_GABARIT = `
+  html,body{height:${HAUTEUR_REELLE}px !important;min-height:0 !important;overflow:hidden !important}
+  .ndsbody,.ndsbody .phone{min-height:${HAUTEUR_REELLE}px !important;height:${HAUTEUR_REELLE}px !important}
+  .ndsbody .scr{padding-bottom:24px !important;overflow-y:auto}
+  .ndsbody .scr.on .hero{background:#190a25 !important;background-image:none !important}
+  .ndsbody .scr.on .hero::before{background:none !important}
+  .gab-logo{height:78px;margin-bottom:10px;border:1.5px dashed rgba(255,255,255,.26);border-radius:14px;
+    display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03)}
+  .gab-logo span{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+`
 
 export default function ApercuApp({
-  d, ecran = 'accueil', onEcran,
+  d, ecran = 'onboard', onEcran,
 }: {
   d: BrouillonApercu
   ecran?: EcranApercu
   onEcran?: (e: EcranApercu) => void
 }) {
-  const c = d.couleur || '#7C2D92'
-  const mod = d.module ?? ''
-  const nom = d.nom?.trim() || 'Nom de l’événement'
-  const nbPart = d.nbPartenaires ?? 0
-  const a = accueilDe(mod, c, nbPart)
-  const lots = (d.lots ?? []).filter(l => (l.nom ?? '').trim())
-  const dates = d.dateD ? new Date(d.dateD).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''
-  const tirage = d.superEvent && d.dateD ? `🗓️ Tirage — ${d.superEvent}` : ''
-  const codeExemple = `${PREFIXE[mod] ?? 'FL'}-000000`
-
-  /* `.btn-cta` n est pas dans parcoursCSS : il est declare dans TombolaClient.
-     On le reprend a l identique plutot que de le remplacer par `.btn`. */
-  const css = useMemo(() => scoper(parcoursCSS(c), '.sa-vp') + `
-    .sa-vp .app{min-height:${HAUTEUR_REELLE}px}
-    .sa-vp .btn-cta{width:100%;padding:16px;border:none;border-radius:50px;background:${c};color:#fff;font-size:15px;font-weight:800;font-family:inherit}
-    .sa-vp .lot-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
-    .sa-vp .lot-row:last-child{border-bottom:none}
-  `, [c])
+  const doc = useMemo(() => {
+    const corps =
+      ecran === 'quiz' ? ecranQuiz(d)
+        : ecran === 'resultats' ? ecranResultats(d)
+          : ecran === 'bonus' ? ecranBonus(d)
+            : ecran === 'inscription' ? ecranInscription(d)
+              : ecranOnboard(d)
+    return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap">
+<style>${NDS_CSS}${NDS_CSS_APP}${CSS_GABARIT}</style>
+</head><body><div class="ndsbody">
+<div style="display:none">${NDS_SPRITE}</div>
+<div class="phone">${corps}</div>
+</div></body></html>`
+  }, [d, ecran])
 
   return (
     <div className="sa-apercu">
       <div className="sa-apercu-tete">
         <span className="t">Aperçu du parcours joueur</span>
-        <span className="d">Les écrans réels, remplis par votre saisie</span>
+        <span className="d">
+          Gabarit <b>Quiz + bonus</b> — {d.multistation ? 'super event, multi-stations' : 'event, station seule'}
+        </span>
       </div>
 
       <div className="sa-tel">
+        {/* Pas d'encoche : le parcours occupe toute la page, il n'a pas de
+            barre d'etat a lui. En dessiner une masquerait son en-tete. */}
         <div className="sa-tel-ecran">
-          <div className="sa-tel-encoche" />
-          <style dangerouslySetInnerHTML={{ __html: css }} />
-          <div
+          <iframe
             className="sa-vp"
-            style={{ width: LARGEUR_REELLE, height: HAUTEUR_REELLE, transform: `scale(${ECHELLE})`, transformOrigin: 'top left', background: '#0F172A' }}
-          >
-            <div className="app">
-
-              {/* ── ACCUEIL — l ecran `landing` du module ─────────────────── */}
-              {ecran === 'accueil' && (
-                <div className="screen" style={{ paddingTop: 32, textAlign: mod === 'quiz' || mod === 'tombola' ? undefined : 'center' }}>
-                  <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                    <div style={{ marginBottom: 14 }}>{a.icone}</div>
-                    <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>{nom}</div>
-                    {a.sous && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', marginBottom: 8 }}>{a.sous}</div>}
-                    {dates && <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', marginBottom: 8 }}>{dates}</div>}
-                  </div>
-
-                  {a.lots > 0 && lots.length > 0 && (
-                    <div className="card" style={{ marginBottom: 14, padding: 0 }}>
-                      {lots.slice(0, a.lots).map((l, i) => (
-                        <div key={i} className="lot-row">
-                          <span style={{ fontSize: 18 }}>{['🥇', '🥈', '🥉', '🎁', '🎁'][i] || '🎁'}</span>
-                          <span style={{ fontSize: 13, fontWeight: 800 }}>{l.nom}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {tirage && (
-                    <div style={{ background: 'rgba(168,85,247,.1)', border: '1px solid rgba(168,85,247,.25)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)', marginBottom: 14 }}>
-                      {tirage}
-                    </div>
-                  )}
-
-                  <button className={mod === 'tombola' ? 'btn-cta' : 'btn'} type="button">{a.cta}</button>
-
-                  {a.mention && (
-                    <div style={{ fontSize: 10, textAlign: 'center', color: 'rgba(255,255,255,.3)', margin: '6px 0 8px' }}>
-                      Jeu gratuit · Sans achat obligatoire
-                    </div>
-                  )}
-
-                  {nbPart > 0 && (
-                    <button className="btn-ghost" type="button">🤝 Nos {nbPart} partenaires</button>
-                  )}
-                </div>
-              )}
-
-              {/* ── FORMULAIRE — l ecran `form`, identique dans les 6 modules ─ */}
-              {ecran === 'formulaire' && (
-                <div className="screen">
-                  <div className="header">
-                    <div>
-                      <div className="title">Crée ton compte</div>
-                      <div className="sub">{nom}</div>
-                    </div>
-                  </div>
-                  <div className="grid2" style={{ marginBottom: 12 }}>
-                    <div><label className="label">Prénom *</label><input className="input" readOnly defaultValue="" /></div>
-                    <div><label className="label">Nom *</label><input className="input" readOnly defaultValue="" /></div>
-                  </div>
-                  <div style={{ marginBottom: 12 }}><label className="label">Email *</label><input className="input" readOnly defaultValue="" /></div>
-                  <div style={{ marginBottom: 12 }}><label className="label">Téléphone *</label><input className="input" readOnly defaultValue="" /></div>
-                  <div className="grid2" style={{ marginBottom: 12 }}>
-                    <div><label className="label">Tranche d’âge</label><input className="input" readOnly defaultValue="Tranche d’âge" /></div>
-                    <div><label className="label">CP</label><input className="input" readOnly defaultValue="" /></div>
-                  </div>
-                  <div className="rgpd">
-                    <div className="rgpd-check">✓</div>
-                    <div>J’accepte d’être recontacté(e). Données jamais cédées.</div>
-                  </div>
-                  <button className="btn" type="button" style={{ marginTop: 16 }}>✓ Valider →</button>
-                </div>
-              )}
-
-              {/* ── TICKET — trois variantes reelles selon le module ───────── */}
-              {ecran === 'ticket' && mod === 'spin' && (
-                <div className="screen" style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center', background: 'radial-gradient(ellipse at 50% 40%, #0a1f2e 0%, #060d18 70%)' }}>
-                  <div style={{ width: '88%', maxWidth: 360, borderRadius: 18, overflow: 'hidden', border: '2px solid #14B8A6', boxShadow: '0 0 40px rgba(20,184,166,.5),0 12px 48px rgba(0,0,0,.6)', background: '#071620' }}>
-                    <div style={{ background: 'linear-gradient(180deg,#16C8B0,#0E9E8C)', padding: '12px 0', fontSize: 14, fontWeight: 900, letterSpacing: 3, color: '#fff' }}>✦ FÉLICITATIONS ✦</div>
-                    <div style={{ padding: '22px 20px 26px' }}>
-                      <div style={{ fontSize: 46, marginBottom: 10 }}>🥳</div>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 2, color: '#2DD4BF', marginBottom: 4 }}>VOUS AVEZ GAGNÉ</div>
-                      <div style={{ fontSize: 26, fontWeight: 900, color: '#fff', marginBottom: 18, textTransform: 'uppercase' }}>Vous</div>
-                      <div style={{ border: '1px solid rgba(45,212,191,.4)', borderRadius: 12, padding: '14px 16px', marginBottom: 16, background: 'rgba(20,184,166,.06)' }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#2DD4BF', marginBottom: 4 }}>Votre lot</div>
-                        <div style={{ fontSize: 19, fontWeight: 900, color: '#fff' }}>{lots[0]?.nom || 'Lot offert'}</div>
-                      </div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,.55)' }}>Ticket <span style={{ fontWeight: 800, color: '#fff', letterSpacing: 1 }}>{codeExemple}</span></div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,.3)', marginTop: 14, letterSpacing: 1 }}>Powered by Flowin</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {ecran === 'ticket' && mod === 'tombola' && (
-                <div className="screen" style={{ justifyContent: 'center' }}>
-                  <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.12)', borderRadius: 100, padding: '4px 14px', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 16 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
-                      INSCRIPTION CONFIRMÉE
-                    </div>
-                    <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Tu es dans la course ! 🎉</div>
-                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Ton numéro de tombola a été enregistré</div>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,.06)', border: '1.5px solid rgba(255,255,255,.15)', borderRadius: 16, padding: 20, textAlign: 'center', borderTop: `4px solid ${c}` }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🎟️</div>
-                    <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Ton ticket tombola</div>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.4)' }}>{nom}</div>
-                    <div style={{ fontSize: 28, fontWeight: 900, color: c, letterSpacing: '.1em', margin: '12px 0', fontFamily: 'monospace' }}>{codeExemple}</div>
-                    {tirage && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)' }}>{tirage}</div>}
-                  </div>
-                </div>
-              )}
-
-              {ecran === 'ticket' && mod !== 'spin' && mod !== 'tombola' && (
-                <div className="screen" style={{ justifyContent: 'center', textAlign: 'center' }}>
-                  <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Bravo !</div>
-                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)', marginBottom: 20 }}>{nom}</div>
-                  <div className="card" style={{ borderTop: `4px solid ${c}`, marginBottom: 16 }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🎟️</div>
-                    <div className="ticket-code">{codeExemple}</div>
-                    {tirage && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)' }}>{tirage}</div>}
-                  </div>
-                  {nbPart > 0 && <button className="btn-ghost" type="button">🤝 Nos partenaires</button>}
-                </div>
-              )}
-
-            </div>
-          </div>
+            title="Aperçu du parcours joueur"
+            sandbox=""
+            srcDoc={doc}
+            style={{
+              width: LARGEUR_REELLE, height: HAUTEUR_REELLE, border: 0,
+              transform: `scale(${ECHELLE})`, transformOrigin: 'top left',
+            }}
+          />
         </div>
       </div>
 
       {onEcran && (
         <div className="sa-apercu-pas">
-          {([['accueil', 'Accueil'], ['formulaire', 'Formulaire'], ['ticket', 'Ticket']] as const).map(([id, lbl]) => (
-            <button key={id} className={`sa-btn sm${ecran === id ? ' primary' : ''}`} onClick={() => onEcran(id)}>
-              {lbl}
+          {ECRANS_APERCU.map(e => (
+            <button key={e.id} className={`sa-btn sm${ecran === e.id ? ' primary' : ''}`} onClick={() => onEcran(e.id)}>
+              {e.label}
             </button>
           ))}
         </div>
       )}
 
       <p className="sa-apercu-note">
-        Ce sont les <b>écrans réels</b> du parcours <code>{mod || '—'}</code>, avec leur
-        feuille de style d’origine. Le code ticket est un exemple — le vrai est
-        généré à l’inscription. Les écrans de jeu (roue, questions, vote) ne
-        tournent pas ici : une fois l’événement créé, sa fiche affiche le vrai
-        parcours en direct.
+        Charte et écrans repris de <b>NDS 2026</b>, aux mêmes octets — c’est le
+        gabarit de référence. Le logo est retiré et sa place laissée libre.
+        {d.multistation
+          ? ' En super event, la carte des stations et la carte partenaires font partie du parcours.'
+          : ' En event, la carte des stations et la carte partenaires n’existent pas : une station seule n’a rien à cumuler.'}
       </p>
     </div>
   )

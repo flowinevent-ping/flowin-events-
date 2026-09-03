@@ -1,4 +1,9 @@
-export type Module = 'quiz' | 'quizmaster' | 'quizsolo' | 'spin' | 'vote' | 'tombola'
+/* `nds2026` n'est pas un module nouveau : c'est celui qui tourne depuis juillet,
+   deja ecrit en base sur les events du festival et deja route par
+   app/parcours/nds2026. Il manquait simplement a cette union, ce qui le rendait
+   invisible des listes du dashboard. Il porte le gabarit marque blanche
+   « Quiz + bonus » — voir lib/gabarit.ts. */
+export type Module = 'quiz' | 'quizmaster' | 'quizsolo' | 'spin' | 'vote' | 'tombola' | 'nds2026'
 export type Status = 'upcoming' | 'live' | 'past'
 export type ClientType = 'btoc' | 'btob'
 
@@ -31,6 +36,9 @@ export interface EventCfg {
   /** Chrono en secondes par question. Lu UNIQUEMENT par QuizClient.tsx (quiz) -- `false` desactive, non lu par quizmaster/quizsolo. */
   quizTimer?: number | false
   quizBonusList?: Array<{ label: string; type: string; options: Array<{ label: string }> }>
+  /** Banques dont les questions sont des sondages single/multi — le bonus du gabarit.
+      Lues par fetchParcoursData en plus de `quizBanques`. */
+  bonusBanques?: string[]
   tombolaChamps?: string[]
   drawDate?: string
   /** Texte affiche du tirage ("Tirage lundi 11h"), lu par quiz/quizmaster/quizsolo/spin/vote. */

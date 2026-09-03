@@ -30,8 +30,12 @@ import {
   creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
   type SuperEvent,
 } from '@/lib/nds'
+import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 
 const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
+  /* Le gabarit de reference en tete, et par defaut : c est de NDS 2026 qu on
+     part, pas d une page blanche (Romain, 03/09). */
+  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Le gabarit de référence — quiz, bonus, ticket', icone: '🎯' },
   { id: 'spin', nom: 'Roue', sous: 'Un tour, un lot immédiat', icone: '🎡' },
   { id: 'quiz', nom: 'Quiz', sous: 'Questions à la suite', icone: '🧠' },
   { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur', icone: '🎤' },
@@ -57,7 +61,7 @@ export default function Page() {
   /* L apercu montre la station en cours de reglage : sans ca, on parametre
      cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
   const [apercuPro, setApercuPro] = useState('')
-  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('accueil')
+  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
 
   const [occupe, setOccupe] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
@@ -77,7 +81,7 @@ export default function Page() {
     setChoisis(c => {
       const n = { ...c }
       if (n[proId]) delete n[proId]
-      else n[proId] = 'spin'
+      else n[proId] = GABARIT_MODULE
       return n
     })
 
@@ -289,12 +293,11 @@ export default function Page() {
             onEcran={setEcranApercu}
             d={{
               nom: proApercu ? (pros.find(p => p.id === proApercu)?.nom ?? proApercu) : nom,
-              module: proApercu ? choisis[proApercu] : '',
-              couleur: '#7C2D92',
-              dateD: dateD || null,
               superEvent: nom || null,
-              /* Le parcours affiche « Nos N partenaires » : N, ce sont les pros
-                 rattaches a l operation, ceux qu on vient de cocher. */
+              /* Un super event groupe plusieurs stations : la carte des
+                 stations et la carte partenaires font partie du parcours. */
+              multistation: true,
+              nbStations: Object.keys(choisis).length,
               nbPartenaires: Object.keys(choisis).length,
             }}
           />

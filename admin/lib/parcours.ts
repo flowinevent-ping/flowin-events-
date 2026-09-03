@@ -68,8 +68,16 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
     }
   }
 
-  /* Banques de questions */
-  const banqueIds = (cfg.quizBanques ?? []) as string[]
+  /* Banques de questions.
+     `quizBanques` = les QCM ; `bonusBanques` = les questions bonus (format
+     sondage). Les deux vivent dans la MEME table `banques`, distinguees par le
+     `type` de leurs questions (voir l en-tete de lib/banques.ts) — on les
+     charge donc ensemble, et c est le parcours qui trie par type au moment de
+     s en servir. Ajout du 03/09, purement additif : un event sans
+     `bonusBanques` charge exactement ce qu il chargeait avant. */
+  const banqueIds = ((cfg.quizBanques ?? []) as string[])
+    .concat((cfg.bonusBanques ?? []) as string[])
+    .filter((id, i, a) => a.indexOf(id) === i)
   let banques: ParcoursBanque[] = []
   if (banqueIds.length) {
     const { data } = await supabase.from('banques').select('*').in('id', banqueIds)

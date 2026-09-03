@@ -98,7 +98,7 @@ export function StatusChip({ status }: { status: string }) {
 /* ── Module chip ── */
 export function ModuleChip({ module }: { module: string }) {
   const map: Record<string, string> = {
-    tombola: '🎟️', quiz: '🧠', quizmaster: '🎮', quizsolo: '⏱️', spin: '🎡', vote: '⭐',
+    nds2026: '🎯', tombola: '🎟️', quiz: '🧠', quizmaster: '🎮', quizsolo: '⏱️', spin: '🎡', vote: '⭐',
   }
   return <span className="sa-chip purple">{map[module] ?? '🎮'} {module}</span>
 }
