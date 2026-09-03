@@ -164,6 +164,19 @@ export default function Page() {
       sous: 'Chaque pro sélectionné reçoit une station de jeu rattachée à cette opération. On peut en ajouter d’autres plus tard.',
       contenu: (
         <>
+          {/* Romain, 03/09 : « il faut voir si tu as bien fait la distinction
+              parcours entre lorsque dashboard SA crée un super event et un pro
+              qui souhaite s inscrire à un super event ». Les deux existent et
+              n ecrivent pas au meme endroit — on le dit a l ecran, la ou la
+              confusion peut se produire, plutot que dans un commentaire. */}
+          <div className="sa-alert info texte" style={{ fontSize: 12.5, lineHeight: 1.65, marginBottom: 14, maxWidth: 760 }}>
+            <b>Ici, vous rattachez.</b> Le pro coché reçoit sa station immédiatement,
+            sans validation — c’est vous qui décidez.{' '}
+            <b>Un pro qui demande à participer</b>, lui, passe par son espace
+            (<code className="sa-code">/pro/rejoindre</code>) : sa demande atterrit dans{' '}
+            <Link href="/dashboard/demandes-rattachement" className="sa-lien">Demandes de participation</Link>,
+            et c’est son approbation qui ouvre la création de sa station.
+          </div>
           <input
             className="sa-input" style={{ maxWidth: 340, marginBottom: 12 }}
             value={recherchePro} onChange={e => setRecherchePro(e.target.value)}
