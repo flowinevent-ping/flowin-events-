@@ -1,0 +1,729 @@
+<title>Parcours de création Flowin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+
+<style>
+/* ───────────────────────────────────────────────────────────────────────────
+   Les jetons sont ceux du produit, pas d'une charte inventée pour la maquette :
+   accent #7C2D92 (lib/proui.ts), bordure #E2E8F0, muted #64748B, carte blanche
+   radius 16, bouton radius 12. Orange #C2410C = super event, bleu #2746A6 =
+   pro : conventions déjà établies dans RejoindreWizard.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root{
+  --ground:#F1F2F6; --carte:#FFFFFF; --sous:#F8FAFC;
+  --encre:#0F172A; --muted:#64748B; --bord:#E2E8F0;
+  --acc:#7C2D92; --acc-doux:rgba(124,45,146,.07);
+  --orange:#C2410C; --bleu:#2746A6; --vert:#0F9E73; --ambre:#B45309;
+  --ombre:0 1px 2px rgba(15,23,42,.05), 0 12px 28px -18px rgba(15,23,42,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B0A10; --carte:#17151F; --sous:#1F1C29;
+    --encre:#F3F1F7; --muted:#9C94AE; --bord:#2E2A3B;
+    --acc:#C77BDD; --acc-doux:rgba(199,123,221,.12);
+    --orange:#F08A5D; --bleu:#7EA0F0; --vert:#4FCFA6; --ambre:#E0A85C;
+    --ombre:0 1px 2px rgba(0,0,0,.5), 0 12px 28px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B0A10; --carte:#17151F; --sous:#1F1C29;
+  --encre:#F3F1F7; --muted:#9C94AE; --bord:#2E2A3B;
+  --acc:#C77BDD; --acc-doux:rgba(199,123,221,.12);
+  --orange:#F08A5D; --bleu:#7EA0F0; --vert:#4FCFA6; --ambre:#E0A85C;
+  --ombre:0 1px 2px rgba(0,0,0,.5), 0 12px 28px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--encre);
+  font-family:Manrope,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em}
+
+.enveloppe{max-width:1180px;margin:0 auto;padding:26px 22px 60px}
+
+/* ── En-tête ─────────────────────────────────────────────────────────────── */
+.chapeau{margin-bottom:22px}
+.chapeau .marque{
+  font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);
+}
+.chapeau h1{
+  font-size:clamp(25px,3.6vw,34px);font-weight:800;letter-spacing:-.022em;
+  margin:6px 0 8px;text-wrap:balance;
+}
+.chapeau p{margin:0;color:var(--muted);font-size:14px;max-width:66ch}
+.chapeau b{color:var(--encre);font-weight:700}
+
+/* Le principe, posé une fois : trois créations, les mêmes briques. */
+.principe{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;
+  background:var(--bord);border:1px solid var(--bord);border-radius:14px;overflow:hidden;
+  margin:20px 0 24px;
+}
+.principe > div{background:var(--carte);padding:13px 15px}
+.principe .q{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.principe .r{font-size:13px;font-weight:700;margin-top:4px}
+.principe .r span{color:var(--muted);font-weight:500}
+
+/* ── Onglets de parcours ─────────────────────────────────────────────────── */
+.onglets{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.onglet{
+  font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  background:var(--carte);color:var(--encre);border:1.5px solid var(--bord);
+  border-radius:12px;padding:9px 15px;display:flex;align-items:center;gap:8px;
+  transition:border-color .14s,box-shadow .14s;
+}
+.onglet:hover{border-color:var(--acc)}
+.onglet[aria-selected="true"]{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-doux)}
+.onglet .pastille{width:8px;height:8px;border-radius:50%;flex:none}
+.onglet .ou{font-size:10.5px;font-weight:700;color:var(--muted)}
+.onglet:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* ── Scène : parcours + aperçu ───────────────────────────────────────────── */
+.scene{display:grid;grid-template-columns:minmax(0,1fr) 262px;gap:22px;align-items:start}
+@media (max-width:940px){.scene{grid-template-columns:minmax(0,1fr)}}
+
+.carte{background:var(--carte);border:1px solid var(--bord);border-radius:16px;padding:18px;box-shadow:var(--ombre)}
+
+/* Barre d'étapes — celle du parcours pro, rendue cliquable en arrière. */
+.pas{display:flex;gap:6px;list-style:none;margin:0 0 18px;padding:0;overflow-x:auto}
+.pas li{flex:1 1 0;min-width:96px}
+.pas button{
+  width:100%;display:flex;align-items:center;gap:7px;font-family:inherit;text-align:left;
+  cursor:pointer;background:var(--sous);border:1px solid var(--bord);border-radius:10px;padding:8px 10px;
+  transition:border-color .14s,background .14s;
+}
+.pas button:disabled{cursor:default;opacity:.5}
+.pas button:not(:disabled):hover{border-color:var(--acc)}
+.pas button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.pas .n{
+  width:20px;height:20px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:10.5px;font-weight:800;background:var(--carte);border:1px solid var(--bord);color:var(--muted);
+}
+.pas .l{font-size:11px;font-weight:800;color:var(--muted);line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pas .fait .n{background:var(--vert);border-color:var(--vert);color:#fff}
+.pas .actif{background:var(--carte);border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.pas .actif .n{background:var(--acc);border-color:var(--acc);color:#fff}
+.pas .actif .l{color:var(--encre)}
+
+.vue h2{font-size:16px;font-weight:800;margin:0;letter-spacing:-.01em}
+.vue .intro{font-size:12.5px;color:var(--muted);margin:3px 0 16px;max-width:60ch}
+@keyframes entree{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.vue{animation:entree .18s ease-out}
+@media (prefers-reduced-motion:reduce){.vue{animation:none}}
+
+label.champ{display:block;margin-bottom:13px}
+.lbl{display:block;font-size:11.5px;font-weight:800;margin-bottom:5px}
+.aide{display:block;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+input[type=text],input[type=date],input[type=number],textarea,select{
+  width:100%;border:1.5px solid var(--bord);border-radius:10px;padding:10px 12px;
+  font-size:13.5px;font-family:inherit;background:var(--carte);color:var(--encre);
+}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:1px;border-color:var(--acc)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Vignette de choix — la carte du parcours pro. */
+.choix-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(184px,1fr));gap:10px}
+.choix{
+  position:relative;display:flex;flex-direction:column;gap:3px;text-align:left;font-family:inherit;
+  cursor:pointer;background:var(--carte);border:1.5px solid var(--bord);border-radius:13px;padding:13px;
+  transition:border-color .14s,box-shadow .14s,transform .14s;color:var(--encre);
+}
+.choix:hover{border-color:var(--acc);transform:translateY(-1px)}
+.choix[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-doux);box-shadow:0 0 0 3px var(--acc-doux)}
+.choix:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.choix .ic{font-size:20px;line-height:1;margin-bottom:3px}
+.choix .ti{font-size:13px;font-weight:800;padding-right:20px;line-height:1.25}
+.choix .so{font-size:11.5px;color:var(--muted);line-height:1.35}
+.choix .ok{
+  position:absolute;top:11px;right:11px;width:17px;height:17px;border-radius:50%;
+  display:grid;place-items:center;font-size:10px;font-weight:800;color:#fff;background:var(--acc);
+  opacity:0;transition:opacity .14s;
+}
+.choix[aria-pressed="true"] .ok{opacity:1}
+
+.ligne-lot{display:grid;grid-template-columns:2fr 78px 128px auto;gap:8px;align-items:end;margin-bottom:9px}
+@media (max-width:620px){.ligne-lot{grid-template-columns:1fr 1fr}}
+
+.btn{
+  font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;border-radius:12px;padding:10px 18px;
+  background:var(--carte);color:var(--encre);border:1.5px solid var(--bord);
+}
+.btn:hover{border-color:var(--acc)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:disabled:hover{border-color:var(--bord)}
+.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.sm{font-size:12px;padding:7px 12px;border-radius:10px}
+.btn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+.pied{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:15px;border-top:1px solid var(--bord)}
+.pied .compte{font-size:11.5px;color:var(--muted);margin-inline:auto}
+.pied .bloque{font-size:11.5px;font-weight:700;color:var(--ambre);text-align:right;max-width:300px;line-height:1.35}
+
+.recap{border-top:1px solid var(--bord)}
+.recap div{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--bord)}
+.recap .k{font-size:11.5px;color:var(--muted)}
+.recap .v{font-size:12.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+
+.note{
+  font-size:11.5px;line-height:1.5;color:var(--muted);
+  background:var(--sous);border:1px solid var(--bord);border-left:3px solid var(--acc);
+  border-radius:0 10px 10px 0;padding:11px 13px;margin-top:16px;
+}
+.note b{color:var(--encre)}
+
+/* ── Aperçu app ──────────────────────────────────────────────────────────── */
+.apercu{position:sticky;top:18px}
+.apercu .titre{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.apercu .st{font-size:11px;color:var(--muted);margin:3px 0 11px}
+.tel{width:238px;border-radius:30px;padding:9px;background:#0F172A;box-shadow:0 22px 46px -22px rgba(15,23,42,.75)}
+.tel-ecran{position:relative;width:220px;height:440px;border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+.encoche{position:absolute;top:0;left:50%;transform:translateX(-50%);width:74px;height:16px;background:#0F172A;border-radius:0 0 11px 11px}
+.tel-corps{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 18px 22px;text-align:center;color:#fff}
+.tel-corps .sur{font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;opacity:.75;margin-bottom:6px}
+.tel-corps .marque{font-size:15px;font-weight:800;line-height:1.2;margin-bottom:15px}
+.tel-corps .gros{font-size:19px;font-weight:800;line-height:1.2}
+.tel-corps .petit{font-size:11.5px;opacity:.82;margin-top:6px;line-height:1.4}
+.tel-corps .cta{margin-top:17px;background:#fff;border-radius:99px;padding:9px 22px;font-size:12.5px;font-weight:800}
+.tel-corps .bas{position:absolute;bottom:15px;left:0;right:0;font-size:10px;opacity:.75}
+.tel-corps .liste{width:100%;margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.tel-corps .item{display:flex;justify-content:space-between;gap:8px;align-items:baseline;
+  background:rgba(255,255,255,.15);border-radius:9px;padding:7px 10px;text-align:left}
+.tel-corps .item .n{font-size:11.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tel-corps .item .q{font-size:10px;opacity:.85;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ecrans{display:flex;gap:5px;margin-top:12px}
+.apercu .avert{font-size:10.5px;color:var(--muted);line-height:1.45;margin:10px 0 0;max-width:238px}
+</style>
+
+<div class="enveloppe">
+
+  <header class="chapeau">
+    <div class="marque">Flowin · maquette navigable</div>
+    <h1>Parcours de création</h1>
+    <p>
+      On ne repart pas de zéro : cette maquette reprend l'UX/UI des <b>deux parcours pro
+      qui existent déjà</b> — <code>RejoindreWizard</code> (participer à une opération) et
+      <code>CreerAnimationWizard</code> (créer sa propre animation). Mêmes cartes, même
+      accent, mêmes vignettes de choix, mêmes boutons. Ce qui change, c'est que le
+      dashboard s'en sert aussi, au lieu d'avoir sa version à lui.
+    </p>
+  </header>
+
+  <div class="principe">
+    <div>
+      <div class="q">Doublon</div>
+      <div class="r">Deux codes <span>qui font la même chose</span></div>
+    </div>
+    <div>
+      <div class="q">Complémentaire</div>
+      <div class="r">Un code <span>utilisé à trois endroits</span></div>
+    </div>
+    <div>
+      <div class="q">Ce qui est partagé</div>
+      <div class="r">Étapes, vignettes, aperçu <span>— les briques</span></div>
+    </div>
+    <div>
+      <div class="q">Ce qui diffère</div>
+      <div class="r">Le contenu des étapes <span>— pas l'ergonomie</span></div>
+    </div>
+  </div>
+
+  <div class="onglets" role="tablist" aria-label="Parcours">
+    <button class="onglet" role="tab" id="t-event" aria-selected="true" onclick="allerParcours('event')">
+      <span class="pastille" style="background:var(--acc)"></span>
+      Créer un event
+      <span class="ou">dashboard</span>
+    </button>
+    <button class="onglet" role="tab" id="t-superevent" aria-selected="false" onclick="allerParcours('superevent')">
+      <span class="pastille" style="background:var(--orange)"></span>
+      Créer un super event
+      <span class="ou">dashboard</span>
+    </button>
+    <button class="onglet" role="tab" id="t-pro" aria-selected="false" onclick="allerParcours('pro')">
+      <span class="pastille" style="background:var(--bleu)"></span>
+      Souscription pro
+      <span class="ou">existe déjà</span>
+    </button>
+  </div>
+
+  <div class="scene">
+    <div class="carte">
+      <ol class="pas" id="pas"></ol>
+      <div class="vue" id="vue"></div>
+      <div class="pied" id="pied"></div>
+    </div>
+
+    <aside class="apercu">
+      <div class="titre">Aperçu du jeu</div>
+      <div class="st" id="apercu-st">Construit à partir de la saisie</div>
+      <div class="tel">
+        <div class="tel-ecran" id="tel"></div>
+      </div>
+      <div class="ecrans" id="ecrans"></div>
+      <p class="avert" id="avert"></p>
+    </aside>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Données réelles du produit — pas de lorem. Les jeux sont ceux de
+   CreerAnimationWizard, les pros ceux de Nuits du Sud 2026.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var JEUX = [
+  { id:'quiz',       ic:'🧠', t:'Quiz',              s:'QCM + questions bonus',            banque:true  },
+  { id:'quizsolo',   ic:'🎯', t:'Quiz Solo',         s:'Le joueur seul, à son rythme',     banque:true  },
+  { id:'quizmaster', ic:'🎤', t:'Quiz Master',       s:'Animé par un meneur',              banque:true  },
+  { id:'spin',       ic:'🎡', t:'Roue de la fortune',s:'Tirage instantané, segments = lots',banque:false },
+  { id:'tombola',    ic:'🎟️', t:'Tombola',           s:'Inscription + grand tirage',       banque:false },
+  { id:'vote',       ic:'🗳️', t:'Vote',              s:'Vote produits / artistes',         banque:false }
+];
+var PROS = [
+  { id:'pro-charvolin',   n:'Assurance Charvolin',      v:'Vence' },
+  { id:'pro-pegase',      n:"Auto-École de l'ARA",      v:'Vence' },
+  { id:'pro-carrosserie', n:'Carrosserie GP',           v:'Vence' },
+  { id:'pro-bergerie',    n:'Domaine de la Bergerie',   v:'Vence' },
+  { id:'pro-giordano',    n:'Électroménager J Giordano',v:'Vence' },
+  { id:'pro-nook',        n:'Nook Café',                v:'Vence' },
+  { id:'pro-utile',       n:'Utile Vence',              v:'Vence' },
+  { id:'pro-safer',       n:'SAFER',                    v:'Vence' }
+];
+var BANQUES = [
+  { id:'bq-nds',    n:'Culture Nuits du Sud',  q:24, st:'valide' },
+  { id:'bq-vence',  n:'Vence & son patrimoine', q:18, st:'valide' },
+  { id:'bq-auto',   n:'Sécurité routière',      q:12, st:'brouillon' }
+];
+var ECRAN_JEU = {
+  quiz:      { t:'Prêt pour le quiz ?', a:'Commencer', s:'Quelques questions, puis votre score' },
+  quizsolo:  { t:'Quiz',                a:'Commencer', s:'À votre rythme' },
+  quizmaster:{ t:'Quiz Master',         a:'Rejoindre', s:'Un meneur lance les questions' },
+  spin:      { t:'Tournez la roue',     a:'Lancer la roue', s:'Un tour, un résultat immédiat' },
+  tombola:   { t:'Tombola',             a:'Participer', s:'Tirage au sort différé' },
+  vote:      { t:'À vous de voter',     a:'Voter',      s:'Le public départage' }
+};
+
+/* ── État, un par parcours ───────────────────────────────────────────────── */
+var E = {
+  event: {
+    nom:'', pro:'', se:'se-nds-2026', jeu:'', banque:'', couleur:'#7C2D92',
+    dateD:'', dateF:'', lieu:'',
+    lots:[{ n:'Bon d’achat 30 €', q:10, t:'tirage' }],
+    proba:15, diffPhysique:true, diffDigital:true
+  },
+  superevent: {
+    nom:'', id:'', dateD:'', dateF:'', desc:'',
+    pros:{}, geofence:150, tirage:'global'
+  },
+  pro: {
+    persona:'', se:'se-nds-2026', enseigne:'', adresse:'',
+    lots:[{ n:'', q:5, t:'tirage' }], pack:''
+  }
+};
+var courant = 'event';
+var etape = { event:0, superevent:0, pro:0 };
+var atteint = { event:0, superevent:0, pro:0 };
+var ecranApercu = 'accueil';
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function nomPro(id){ var p=PROS.filter(function(x){return x.id===id})[0]; return p?p.n:''; }
+function jeuDe(id){ return JEUX.filter(function(x){return x.id===id})[0]; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Les trois parcours. Le contenu diffère, la mécanique est la même.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function etapesEvent(){
+  var d = E.event, j = jeuDe(d.jeu);
+  var l = [
+    { t:'Identité', ic:'🎬', h:'De quoi s’agit-il ?',
+      i:'Le nom que verront les joueurs, et le commerce chez qui ça se passe.',
+      bloque: !d.nom.trim() ? 'Donnez un nom à l’animation.' : (!d.pro ? 'Choisissez le pro chez qui elle a lieu.' : (!d.dateD ? 'La date de début est nécessaire.' : '')),
+      c: function(){ return ''
+        + champ('Nom de l’animation *', input('text','event.nom', d.nom, 'Quiz de l’été chez Nook'))
+        + '<div class="lbl">Pro client *</div>'
+        + '<div class="choix-grille" style="margin-bottom:13px">'
+          + PROS.map(function(p){ return vignette(p.n, p.v, '🏢', d.pro===p.id, "choisir('event','pro','"+p.id+"')"); }).join('')
+        + '</div>'
+        + '<div class="duo">'
+          + champ('Début *', input('date','event.dateD', d.dateD))
+          + champ('Fin', input('date','event.dateF', d.dateF))
+        + '</div>'
+        + champ('Lieu', input('text','event.lieu', d.lieu, '12 av. Émile Hugues, Vence'));
+      }},
+    { t:'Le jeu', ic:'🎮', h:'Quel jeu ?',
+      i:'Le module décide de l’écran que verra le joueur — et des réglages de l’étape suivante.',
+      bloque: !d.jeu ? 'Choisissez un jeu pour continuer.' : '',
+      c: function(){ return '<div class="choix-grille">'
+        + JEUX.map(function(x){ return vignette(x.t, x.s, x.ic, d.jeu===x.id, "choisir('event','jeu','"+x.id+"')"); }).join('')
+        + '</div>'; }}
+  ];
+
+  /* Étape conditionnelle, exactement comme dans CreerAnimationWizard :
+     la banque de questions n'apparaît que pour les jeux qui en ont besoin. */
+  if (j && j.banque) {
+    l.push({ t:'Questions', ic:'🎯', h:'Quelles questions ?',
+      i:'Une banque existante, ou aucune — vous pourrez la rattacher plus tard.',
+      bloque:'',
+      c: function(){ return '<div class="choix-grille">'
+          + BANQUES.map(function(b){
+              return vignette(b.n, b.q+' questions · '+(b.st==='valide'?'Validée':'Brouillon'), '📚',
+                d.banque===b.id, "choisir('event','banque','"+b.id+"')");
+            }).join('')
+          + '</div>'
+          + '<div class="note">Aucune banque ne convient ? Le parcours pro propose déjà '
+          + '<b>« Demander à Flowin de réaliser un quiz »</b> — un email part à l’équipe. '
+          + 'Le dashboard reprend ce bouton tel quel.</div>'; }});
+  }
+
+  l.push(
+    { t:'Récompense', ic:'🎁', h:'Quelle récompense ?',
+      i:'Par lot : tirage au sort après coup, ou gain immédiat si bonne réponse.',
+      bloque:'',
+      c: function(){
+        var aInstant = d.lots.some(function(x){ return x.t==='instantane'; });
+        return d.lots.map(function(lo,i){ return ''
+          + '<div class="ligne-lot">'
+          + champ(i===0?'Nom du lot':'', input('text','event.lots.'+i+'.n', lo.n, 'Bon d’achat 30 €'))
+          + champ(i===0?'Qté':'', input('number','event.lots.'+i+'.q', lo.q))
+          + champ(i===0?'Type':'',
+              '<select oninput="maj(\'event.lots.'+i+'.t\', this.value)">'
+              + '<option value="tirage"'+(lo.t==='tirage'?' selected':'')+'>Tirage au sort</option>'
+              + '<option value="instantane"'+(lo.t==='instantane'?' selected':'')+'>Gain immédiat</option>'
+              + '</select>')
+          + '<button class="btn sm" onclick="retirerLot('+i+')">Retirer</button>'
+          + '</div>';
+        }).join('')
+        + '<button class="btn sm" onclick="ajouterLot()">+ Ajouter un lot</button>'
+        + (aInstant ? champ('Probabilité de gain immédiat (%)',
+            input('number','event.proba', d.proba)) : '')
+        + '<div class="note">Ces deux types existent déjà côté pro. Le dashboard ne '
+        + 'proposait <b>ni le type, ni la probabilité</b> — il fallait créer l’event '
+        + 'puis rouvrir sa fiche.</div>';
+      }},
+    { t:'Diffusion', ic:'📣', h:'Comment on le diffuse ?',
+      i:'Le support ne change pas le tracking : affiche, sticker ou vidéo portent le même QR.',
+      bloque:'',
+      c: function(){ return '<div class="choix-grille">'
+        + vignette('Sur place', 'Affiche A4, sticker, chevalet', '🖨️', d.diffPhysique, "bascule('event','diffPhysique')")
+        + vignette('En ligne', 'Lien unique, réseaux sociaux', '🔗', d.diffDigital, "bascule('event','diffDigital')")
+        + '</div>'
+        + '<div class="note">Le QR est généré à la création, sur l’identifiant définitif — '
+        + 'jamais avant, sinon il pointerait dans le vide et l’erreur ne se verrait '
+        + '<b>qu’une fois les affiches posées</b>.</div>'; }},
+    { t:'Récapitulatif', ic:'✅', h:'On récapitule',
+      i:'Rien n’est écrit tant que vous n’avez pas validé ici.',
+      bloque:'',
+      c: function(){ return recap([
+        ['Nom', d.nom || '—'],
+        ['Pro', nomPro(d.pro) || '—'],
+        ['Jeu', j ? j.t : '—'],
+        ['Banque', d.banque ? (BANQUES.filter(function(b){return b.id===d.banque})[0]||{}).n : 'aucune'],
+        ['Dates', d.dateD ? (d.dateD + (d.dateF && d.dateF!==d.dateD ? ' → '+d.dateF : '')) : '—'],
+        ['Lots', d.lots.filter(function(x){return x.n.trim()}).length + ' · ' + d.lots.reduce(function(a,x){return a+(+x.q||0)},0) + ' unités'],
+        ['Diffusion', [d.diffPhysique?'sur place':'', d.diffDigital?'en ligne':''].filter(Boolean).join(' + ') || 'aucune']
+      ]); }}
+  );
+  return l;
+}
+
+function etapesSuperEvent(){
+  var d = E.superevent;
+  var choisisIds = Object.keys(d.pros);
+  return [
+    { t:'L’opération', ic:'⭐', h:'L’opération',
+      i:'Le nom que verront les joueurs, et les dates pendant lesquelles on joue.',
+      bloque: !d.nom.trim() ? 'Donnez un nom à l’opération.' : (!d.dateD ? 'La date de début est nécessaire.' : ''),
+      c: function(){ return ''
+        + champ('Nom de l’opération *', input('text','superevent.nom', d.nom, 'Jazz à Nice 2027'))
+        + champ('Identifiant',
+            input('text','superevent.id', d.id, slug(d.nom) || 'se-…')
+            + '<span class="aide">Déduit du nom : <code>' + esc(d.id || slug(d.nom) || 'se-…')
+            + '</code>. Il sert dans les liens et les QR — il ne change plus une fois lancée.</span>')
+        + '<div class="duo">'
+          + champ('Début *', input('date','superevent.dateD', d.dateD))
+          + champ('Fin', input('date','superevent.dateF', d.dateF))
+        + '</div>'
+        + champ('Description', '<textarea rows="3" oninput="maj(\'superevent.desc\', this.value)" placeholder="Ce que l’opération propose, en une ou deux phrases.">'+esc(d.desc)+'</textarea>'); }},
+    { t:'Les pros', ic:'🏢', h:'Qui participe ?',
+      i:'Chaque pro sélectionné reçoit une station de jeu rattachée à l’opération.',
+      bloque:'',
+      c: function(){ return '<div class="choix-grille">'
+        + PROS.map(function(p){ return vignette(p.n, p.v, '🏢', !!d.pros[p.id], "basculePro('"+p.id+"')"); }).join('')
+        + '</div>'
+        + '<div class="note">' + (choisisIds.length
+            ? '<b>' + choisisIds.length + ' pro' + (choisisIds.length>1?'s':'') + '</b> sélectionné' + (choisisIds.length>1?'s':'') + '. Chacun aura sa station, avec son propre jeu.'
+            : 'Aucun pro pour l’instant — l’opération peut être créée vide et remplie ensuite.')
+        + '</div>'; }},
+    { t:'Les jeux', ic:'🎮', h:'Le jeu de chaque station',
+      i:'Deux stations de la même opération peuvent proposer des jeux différents.',
+      bloque:'',
+      c: function(){
+        if (!choisisIds.length) return '<p class="intro">Aucun pro sélectionné à l’étape précédente — rien à régler ici.</p>';
+        return choisisIds.map(function(id){ return ''
+          + '<div style="font-weight:800;font-size:13px;margin:0 0 7px">' + esc(nomPro(id)) + '</div>'
+          + '<div class="choix-grille" style="margin-bottom:16px">'
+          + JEUX.map(function(x){ return vignette(x.t, x.s, x.ic, d.pros[id]===x.id, "choisirJeuPro('"+id+"','"+x.id+"')"); }).join('')
+          + '</div>'; }).join('');
+      }},
+    { t:'Réglages', ic:'⚙️', h:'Réglages de l’opération',
+      i:'Ce qui vaut pour toutes les stations à la fois.',
+      bloque:'',
+      c: function(){ return ''
+        + champ('Périmètre de jeu (mètres)',
+            input('number','superevent.geofence', d.geofence)
+            + '<span class="aide">Distance maximale entre le joueur et la station pour qu’une partie compte. Vide = aucun contrôle.</span>')
+        + '<div class="choix-grille" style="max-width:430px">'
+          + vignette('Tirage global', 'Un tirage commun à toutes les stations', '🎰', d.tirage==='global', "choisir('superevent','tirage','global')")
+          + vignette('Tirage par station', 'Chaque pro tire chez lui', '🏪', d.tirage==='station', "choisir('superevent','tirage','station')")
+        + '</div>'; }},
+    { t:'Récapitulatif', ic:'✅', h:'On récapitule',
+      i:'Rien n’est écrit tant que vous n’avez pas validé ici.',
+      bloque:'',
+      c: function(){ return recap([
+        ['Nom', d.nom || '—'],
+        ['Identifiant', d.id || slug(d.nom) || '—'],
+        ['Dates', d.dateD ? (d.dateD + (d.dateF && d.dateF!==d.dateD ? ' → '+d.dateF : '')) : '—'],
+        ['Pros rattachés', choisisIds.length || 'aucun'],
+        ['Stations créées', choisisIds.length],
+        ['Périmètre', d.geofence ? d.geofence + ' m' : 'aucun contrôle'],
+        ['Tirage', d.tirage==='global' ? 'global' : 'par station']
+      ]) + '<div class="note">Ici on <b>crée</b> l’opération et on y rattache des pros. '
+        + 'Ce n’est pas une demande de participation : les stations existent en sortant.</div>'; }}
+  ];
+}
+
+function etapesPro(){
+  var d = E.pro;
+  return [
+    { t:'Vous êtes', ic:'👋', h:'Vous êtes…',
+      i:'Le parcours s’adapte : un commerce tient une station, un annonceur cherche de la visibilité.',
+      bloque: !d.persona ? 'Choisissez votre profil pour continuer.' : '',
+      c: function(){ return '<div class="choix-grille">'
+        + vignette('Un commerce', 'Vous accueillez une station de jeu', '🏪', d.persona==='commerce', "choisir('pro','persona','commerce')")
+        + vignette('Un annonceur', 'Vous cherchez de la visibilité', '📣', d.persona==='annonceur', "choisir('pro','persona','annonceur')")
+        + '</div>'
+        + '<div class="note">Cette étape existe <b>déjà</b> dans <code>RejoindreWizard</code>. '
+        + 'C’est elle qui a servi de modèle aux vignettes de choix des deux parcours du dashboard.</div>'; }},
+    { t:'L’opération', ic:'⭐', h:'Quelle opération ?',
+      i:'Les opérations ouvertes aux nouvelles participations.',
+      bloque:'',
+      c: function(){ return '<div class="choix-grille">'
+        + vignette('Nuits du Sud 2026', '09/07 → 18/07 · Vence', '⭐', d.se==='se-nds-2026', "choisir('pro','se','se-nds-2026')")
+        + vignette('Jazz à Nice 2027', 'À venir · Nice', '⭐', d.se==='se-jazz-nice-2027', "choisir('pro','se','se-jazz-nice-2027')")
+        + '</div>'; }},
+    { t:'Votre commerce', ic:'🏢', h:'Votre établissement',
+      i:'Ce qui apparaîtra sur la carte et dans l’application des joueurs.',
+      bloque: !d.enseigne.trim() ? 'Le nom de l’enseigne est nécessaire.' : '',
+      c: function(){ return ''
+        + champ('Enseigne *', input('text','pro.enseigne', d.enseigne, 'Nook Café'))
+        + champ('Adresse', input('text','pro.adresse', d.adresse, '12 av. Émile Hugues, 06140 Vence')); }},
+    { t:'Vos lots', ic:'🎁', h:'Ce que vous offrez',
+      i:'Les lots que les joueurs pourront gagner chez vous.',
+      bloque:'',
+      c: function(){ return d.lots.map(function(lo,i){ return ''
+          + '<div class="ligne-lot">'
+          + champ(i===0?'Nom du lot':'', input('text','pro.lots.'+i+'.n', lo.n, 'Un café offert'))
+          + champ(i===0?'Qté':'', input('number','pro.lots.'+i+'.q', lo.q))
+          + '<div></div><div></div>'
+          + '</div>'; }).join('')
+        + '<div class="note">Le dashboard reprend exactement cette étape pour la création '
+        + 'd’event — <b>même mise en page, même vocabulaire</b>.</div>'; }},
+    { t:'Récapitulatif', ic:'✅', h:'On récapitule',
+      i:'Votre demande part ensuite à l’équipe Flowin, qui la valide.',
+      bloque:'',
+      c: function(){ return recap([
+        ['Profil', d.persona==='commerce' ? 'Commerce' : (d.persona==='annonceur' ? 'Annonceur' : '—')],
+        ['Opération', d.se==='se-nds-2026' ? 'Nuits du Sud 2026' : 'Jazz à Nice 2027'],
+        ['Enseigne', d.enseigne || '—'],
+        ['Lots', d.lots.filter(function(x){return x.n.trim()}).length]
+      ]) + '<div class="note">Différence avec les deux autres : ici on dépose une '
+        + '<b>demande de participation</b>. Côté dashboard, le SA crée directement.</div>'; }}
+  ];
+}
+
+function etapes(){
+  if (courant==='event') return etapesEvent();
+  if (courant==='superevent') return etapesSuperEvent();
+  return etapesPro();
+}
+
+/* ── Fabriques d'UI ──────────────────────────────────────────────────────── */
+function champ(l, inner){ return '<label class="champ">' + (l ? '<span class="lbl">'+esc(l)+'</span>' : '') + inner + '</label>'; }
+function input(type, chemin, val, ph){
+  return '<input type="'+type+'" value="'+esc(val)+'"'
+    + (ph ? ' placeholder="'+esc(ph)+'"' : '')
+    + ' oninput="maj(\''+chemin+'\', this.value)">';
+}
+function vignette(t, s, ic, actif, action){
+  return '<button class="choix" aria-pressed="'+(actif?'true':'false')+'" onclick="'+action+'">'
+    + '<span class="ic">'+ic+'</span>'
+    + '<span class="ti">'+esc(t)+'</span>'
+    + (s ? '<span class="so">'+esc(s)+'</span>' : '')
+    + '<span class="ok" aria-hidden="true">✓</span>'
+    + '</button>';
+}
+function recap(paires){
+  return '<div class="recap">' + paires.map(function(p){
+    return '<div><span class="k">'+esc(p[0])+'</span><span class="v">'+esc(p[1])+'</span></div>';
+  }).join('') + '</div>';
+}
+function slug(n){
+  var b = (n||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  return b ? 'se-'+b : '';
+}
+
+/* ── Mutations ───────────────────────────────────────────────────────────── */
+function maj(chemin, val){
+  var p = chemin.split('.'), o = E;
+  for (var i=0;i<p.length-1;i++) o = o[p[i]];
+  var cle = p[p.length-1];
+  o[cle] = (typeof o[cle] === 'number') ? (parseInt(val,10) || 0) : val;
+  rendreApercu();
+}
+function choisir(parc, cle, val){ E[parc][cle] = val; rendre(); }
+function bascule(parc, cle){ E[parc][cle] = !E[parc][cle]; rendre(); }
+function basculePro(id){
+  if (E.superevent.pros[id]) delete E.superevent.pros[id];
+  else E.superevent.pros[id] = 'spin';
+  rendre();
+}
+function choisirJeuPro(idPro, idJeu){ E.superevent.pros[idPro] = idJeu; rendre(); }
+function ajouterLot(){ E.event.lots.push({ n:'', q:5, t:'tirage' }); rendre(); }
+function retirerLot(i){ E.event.lots.splice(i,1); rendre(); }
+
+function allerParcours(p){
+  courant = p;
+  ['event','superevent','pro'].forEach(function(x){
+    document.getElementById('t-'+x).setAttribute('aria-selected', x===p ? 'true' : 'false');
+  });
+  rendre();
+}
+function allerEtape(n){
+  var max = etapes().length - 1;
+  etape[courant] = Math.max(0, Math.min(max, n));
+  atteint[courant] = Math.max(atteint[courant], etape[courant]);
+  rendre();
+}
+function voirEcran(e){ ecranApercu = e; rendreApercu(); }
+
+/* ── Rendu ───────────────────────────────────────────────────────────────── */
+function rendre(){
+  var l = etapes(), i = Math.min(etape[courant], l.length-1);
+  etape[courant] = i;
+
+  document.getElementById('pas').innerHTML = l.map(function(x,n){
+    var accessible = n <= atteint[courant];
+    var cls = (n===i ? 'actif' : '') + (n<i ? ' fait' : '');
+    return '<li><button class="'+cls+'"'
+      + (accessible ? '' : ' disabled')
+      + ' onclick="allerEtape('+n+')" title="'+esc(x.t)+'">'
+      + '<span class="n">'+(n<i ? '✓' : (n+1))+'</span>'
+      + '<span class="l">'+esc(x.t)+'</span></button></li>';
+  }).join('');
+
+  var e = l[i];
+  document.getElementById('vue').innerHTML =
+    '<h2>'+(e.ic?e.ic+' ':'')+esc(e.h)+'</h2>'
+    + '<p class="intro">'+esc(e.i)+'</p>'
+    + e.c();
+
+  var dernier = i === l.length-1;
+  var fin = courant==='event' ? 'Créer l’animation'
+          : courant==='superevent' ? 'Créer le super event'
+          : 'Envoyer ma demande';
+  document.getElementById('pied').innerHTML =
+    '<button class="btn" onclick="allerEtape('+(i-1)+')"'+(i===0?' disabled':'')+'>← Précédent</button>'
+    + '<span class="compte">Étape '+(i+1)+' sur '+l.length+'</span>'
+    + (e.bloque
+        ? '<span class="bloque">'+esc(e.bloque)+'</span>'
+        : (dernier
+            ? '<button class="btn pri" onclick="alert(\'Maquette : rien n\\u2019est écrit en base.\')">'+esc(fin)+'</button>'
+            : '<button class="btn pri" onclick="allerEtape('+(i+1)+')">Suivant →</button>'));
+
+  /* L'aperçu suit l'étape : sur les lots, on montre les lots. */
+  if (e.t === 'Récompense' || e.t === 'Vos lots') ecranApercu = 'lots';
+  else if (dernier) ecranApercu = 'fin';
+  else ecranApercu = 'accueil';
+
+  rendreApercu();
+}
+
+function donneesApercu(){
+  if (courant==='event'){
+    var d = E.event;
+    return { nom:d.nom||'Nom de l’animation', jeu:d.jeu, couleur:d.couleur,
+             sur:'Nuits du Sud 2026', lieu:d.lieu, date:d.dateD, lots:d.lots };
+  }
+  if (courant==='superevent'){
+    var s = E.superevent;
+    var ids = Object.keys(s.pros);
+    var id = ids[0] || '';
+    return { nom: id ? nomPro(id) : (s.nom||'Nom de l’opération'),
+             jeu: id ? s.pros[id] : '', couleur:'#C2410C',
+             sur: s.nom || null, lieu:'', date:s.dateD, lots:[] };
+  }
+  var p = E.pro;
+  return { nom:p.enseigne||'Votre enseigne', jeu:'spin', couleur:'#2746A6',
+           sur: p.se==='se-nds-2026' ? 'Nuits du Sud 2026' : 'Jazz à Nice 2027',
+           lieu:p.adresse, date:'', lots:p.lots };
+}
+
+function rendreApercu(){
+  var d = donneesApercu();
+  var acc = d.couleur;
+  var m = ECRAN_JEU[d.jeu] || { t:'Votre jeu', a:'Commencer', s:'Choisissez un jeu pour voir l’écran' };
+  var lots = (d.lots||[]).filter(function(x){ return (x.n||'').trim(); });
+  var corps = '';
+
+  if (ecranApercu === 'accueil'){
+    corps = (d.sur ? '<div class="sur">'+esc(d.sur)+'</div>' : '')
+      + '<div class="marque">'+esc(d.nom)+'</div>'
+      + '<div class="gros">'+esc(m.t)+'</div>'
+      + '<div class="petit">'+esc(m.s)+'</div>'
+      + '<div class="cta" style="color:'+acc+'">'+esc(m.a)+'</div>'
+      + ((d.lieu||d.date) ? '<div class="bas">'
+          + (d.lieu ? '📍 '+esc(d.lieu) : '')
+          + (d.lieu && d.date ? ' · ' : '')
+          + (d.date ? '📅 '+esc(d.date) : '') + '</div>' : '');
+  } else if (ecranApercu === 'lots'){
+    corps = '<div class="gros" style="margin-top:4px">À gagner</div>'
+      + (lots.length ? '' : '<div class="petit">Aucun lot saisi pour l’instant.</div>')
+      + '<div class="liste">'
+      + lots.slice(0,5).map(function(l){
+          return '<div class="item"><span class="n">'+esc(l.n)+'</span>'
+            + '<span class="q">×'+esc(l.q)+(l.t==='instantane'?' · immédiat':'')+'</span></div>';
+        }).join('')
+      + (lots.length>5 ? '<div class="petit">+ '+(lots.length-5)+' autre(s)</div>' : '')
+      + '</div>';
+  } else {
+    corps = '<div class="gros" style="margin-top:26px">Merci d’avoir joué</div>'
+      + '<div class="petit">Votre résultat s’affiche ici, puis le billet si vous gagnez.</div>'
+      + '<div class="cta" style="color:'+acc+'">Voir mon billet</div>';
+  }
+
+  var tel = document.getElementById('tel');
+  tel.style.background = 'linear-gradient(160deg, '+acc+' 0%, '+acc+'CC 46%, #0F172A 100%)';
+  tel.innerHTML = '<div class="encoche"></div><div class="tel-corps">'+corps+'</div>';
+
+  document.getElementById('ecrans').innerHTML =
+    [['accueil','Accueil'],['lots','Lots'],['fin','Fin']].map(function(x){
+      return '<button class="btn sm'+(ecranApercu===x[0]?' pri':'')+'" onclick="voirEcran(\''+x[0]+'\')">'+x[1]+'</button>';
+    }).join('');
+
+  document.getElementById('apercu-st').textContent =
+    courant==='superevent' ? 'La station en cours de réglage' : 'Construit à partir de la saisie';
+
+  document.getElementById('avert').innerHTML = courant==='superevent'
+    ? 'Un super event n’a pas d’écran à lui : ce que le joueur ouvre, c’est <b>une station</b>. C’est donc elle qu’on montre.'
+    : 'Rendu de la saisie, pas le parcours final : l’animation n’existe pas encore. Une fois créée, sa fiche affiche le <b>vrai</b> parcours en direct.';
+}
+
+rendre();
+</script>
