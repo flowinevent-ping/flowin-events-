@@ -538,3 +538,51 @@ export async function fetchFacturePartenaire(partenaireId: string): Promise<Fact
     dateEmission: fac?.date_emission ?? null,
   }
 }
+
+/* ── Tirage au sort depuis l'espace pro ─────────────────────────────────────
+ *
+ * Romain, 04/09 : « si on est sur un evenement il faut pouvoir faire le tirage
+ * et le retirage et tout le process ».
+ *
+ * Le vivier : les joueurs qui ont REELLEMENT joue sur cet event, lus dans
+ * `participations` -- pas dans `joueurs.events`, tableau non fiable pour
+ * l'attribution exacte a une station.
+ *
+ * Deux exclusions permanentes, deja appliquees a toutes les requetes de vivier
+ * du projet : les comptes de test « collin », et « Lucie Giordano », qui est le
+ * vrai contact du partenaire Giordano et non une joueuse.
+ */
+export interface JoueurEligible { id: string; nom: string; email: string | null; tel: string | null }
+
+export async function fetchJoueursEligibles(eventId: string, exclureIds: string[] = []): Promise<JoueurEligible[]> {
+  const { data: parts } = await supabase
+    .from('participations').select('joueur_id').eq('event_id', eventId).not('joueur_id', 'is', null)
+  const ids = Array.from(new Set(((parts ?? []) as { joueur_id: string }[]).map(p => p.joueur_id)))
+    .filter(id => !exclureIds.includes(id))
+  if (!ids.length) return []
+
+  const { data: js } = await supabase.from('joueurs').select('id,prenom,nom,email,tel').in('id', ids)
+  return ((js ?? []) as { id: string; prenom: string | null; nom: string | null; email: string | null; tel: string | null }[])
+    .map(j => ({ id: j.id, nom: `${j.prenom ?? ''} ${j.nom ?? ''}`.trim() || '—', email: j.email, tel: j.tel }))
+    .filter(j => {
+      const n = j.nom.toLowerCase()
+      return !n.includes('collin') && n !== 'lucie giordano'
+    })
+}
+
+/**
+ * Annule un tirage — c'est le « retirage » : on libere le lot, puis on en tire
+ * un autre. Le statut passe a 'annule', valeur deja utilisee en base (155
+ * lignes au 04/09), et non a une suppression : on garde la trace de qui avait
+ * ete tire et ecarte.
+ *
+ * NE PAS EXPOSER SUR UN SUPER EVENT : Romain, 04/09 -- « en autonomie pour les
+ * events, en revanche pas pour les super events, SA reste pilote ». Le garde-fou
+ * est a l'ecran, cette fonction ne fait qu'executer.
+ */
+export async function annulerTiragePro(tirageId: string): Promise<boolean> {
+  const { error } = await supabase.from('tirages')
+    .update({ statut: 'annule' }).eq('id', tirageId)
+  if (error) console.error('[annulerTiragePro]', error.message)
+  return !error
+}

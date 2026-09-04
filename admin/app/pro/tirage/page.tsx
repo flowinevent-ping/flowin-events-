@@ -30,9 +30,23 @@ export default async function ProTiragePage({ searchParams }: Props) {
     .filter(e => e.super_event_id !== 'se-master-superevent')
     .map(e => ({ id: e.id, nom: e.nom, super_event_id: e.super_event_id ?? null }))
 
+  const joueurs = (data.joueurs ?? []).map(j => ({
+    id: j.id, prenom: j.prenom ?? null, nom: j.nom ?? null,
+    email: j.email ?? null, tel: j.tel ?? null,
+    ticket_code: j.ticket_code ?? null,
+    events: Array.isArray(j.events) ? j.events : null,
+  }))
+
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="gagnants">
-      <GagnantsClient proId={proId} events={events} />
+      <GagnantsClient
+        proId={proId}
+        events={events}
+        joueurs={joueurs}
+        proNom={data.pro?.nom ?? 'Mon établissement'}
+        proEmail={data.pro?.email ?? null}
+        partenaireId={(data.pro as unknown as { partenaire_id?: string | null })?.partenaire_id ?? null}
+      />
     </ProShell>
   )
 }

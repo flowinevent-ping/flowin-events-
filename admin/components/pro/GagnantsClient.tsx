@@ -28,7 +28,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { fetchProGains, marquerGainUtilise, type ProGainRow } from '@/lib/dashboard'
+import { fetchProGains, marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, type ProGainRow } from '@/lib/dashboard'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 
 const input: React.CSSProperties = {
@@ -37,8 +37,15 @@ const input: React.CSSProperties = {
 }
 
 interface EventLigne { id: string; nom: string; super_event_id: string | null }
+export interface JoueurLigne {
+  id: string; prenom: string | null; nom: string | null
+  email: string | null; tel: string | null; ticket_code: string | null; events: string[] | null
+}
 
-export default function GagnantsClient({ proId, events }: { proId: string; events: EventLigne[] }) {
+export default function GagnantsClient({ proId, events, joueurs, proNom, proEmail, partenaireId }: {
+  proId: string; events: EventLigne[]; joueurs: JoueurLigne[]
+  proNom: string; proEmail: string | null; partenaireId: string | null
+}) {
   /* Le choix explicite remplace le `find` qui prenait le premier event
      rattache a un super event, dans l ordre ou il arrivait — c est ce qui
      faisait afficher des zeros sur les pages qui devinaient. */
@@ -50,6 +57,20 @@ export default function GagnantsClient({ proId, events }: { proId: string; event
   const [pin, setPin] = useState('')
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null)
   const [envoi, setEnvoi] = useState(false)
+
+  /* TIRAGE — Romain, 04/09 : « si on est sur un evenement il faut pouvoir faire
+     le tirage et le retirage et tout le process, email, texte, billet,
+     visualisation ».
+     Rien n est reecrit : enregistrerTirage() (RPC attribuer_gain_joueur, qui
+     ecrit dans `tirages` et rend le jeton de retrait) et envoyerTicketGagnant()
+     (fonction edge send-ticket-gagnant, texte deja valide) existent et sont
+     ceux qu utilisait ProClient. On les pose dans la grammaire commune.
+     `exclus` porte le RETIRAGE : un gagnant injoignable est ecarte et on
+     relance, exactement comme le « marquer absent » d avant. */
+  const [propose, setPropose] = useState<JoueurLigne | null>(null)
+  const [exclus, setExclus] = useState<Set<string>>(new Set())
+  const [mail, setMail] = useState<'idle' | 'envoi' | 'ok' | 'echec'>('idle')
+  const [dernierToken, setDernierToken] = useState<string | null>(null)
 
   const recharger = () => {
     if (!evId) { setGains([]); return }
@@ -85,6 +106,55 @@ export default function GagnantsClient({ proId, events }: { proId: string; event
       ? { ok: true, texte: g.utilise ? 'Gain remis en attente.' : 'Gain marqué comme remis.' }
       : { ok: false, texte: 'Échec de la mise à jour.' })
     if (ok) recharger()
+  }
+
+  /* Eligibles : les joueurs de CET event qui ont un ticket, moins ceux deja
+     ecartes. `joueurs.events` est la liste des events joues. */
+  const eligibles = useMemo(
+    () => joueurs.filter(j => j.ticket_code && (j.events ?? []).includes(evId) && !exclus.has(j.id)),
+    [joueurs, evId, exclus],
+  )
+
+  const tirer = () => {
+    setMessage(null); setMail('idle'); setDernierToken(null)
+    if (!eligibles.length) { setPropose(null); setMessage({ ok: false, texte: 'Aucun joueur éligible : il faut au moins un ticket émis sur cet événement.' }); return }
+    setPropose(eligibles[Math.floor(Math.random() * eligibles.length)])
+  }
+
+  /* Le gagnant propose n est enregistre QU A LA CONFIRMATION : tant qu on
+     relance, rien n est ecrit en base, donc aucun tirage fantome. */
+  const confirmer = async () => {
+    if (!propose || !ev) return
+    setEnvoi(true)
+    const res = await enregistrerTirage({
+      superEventId: ev.super_event_id,
+      eventId: ev.id,
+      lotNom: `Lot — ${ev.nom}`,
+      partenaireId,
+      joueur: { id: propose.id, prenom: propose.prenom, nom: propose.nom, email: propose.email, tel: propose.tel },
+    })
+    if (!res.ok) { setEnvoi(false); setMessage({ ok: false, texte: 'Le tirage n’a pas pu être enregistré.' }); return }
+    setDernierToken(res.retraitToken)
+
+    if (propose.email) {
+      setMail('envoi')
+      const r = await envoyerTicketGagnant({
+        gagnantEmail: propose.email,
+        gagnantNom: `${propose.prenom ?? ''} ${propose.nom ?? ''}`.trim() || 'Gagnant',
+        lotNom: `Lot — ${ev.nom}`,
+        code: res.code || propose.ticket_code || '',
+        retraitToken: res.retraitToken,
+        partenaireNom: proNom,
+        fromName: proNom,
+        replyTo: proEmail ?? undefined,
+      })
+      setMail(r.ok ? 'ok' : 'echec')
+    } else {
+      setMail('echec')
+    }
+    setEnvoi(false)
+    setPropose(null)
+    recharger()
   }
 
   const kpi = (n: number | string, l: string) => (
@@ -129,6 +199,64 @@ export default function GagnantsClient({ proId, events }: { proId: string; event
         }}>{message.texte}</div>
       )}
 
+      {/* LE TIRAGE — seulement sur un event du pro. Sur un super event, Romain,
+          04/09 : « en autonomie pour les events, en revanche pas pour les
+          super events, SA reste pilote ». */}
+      {ev && !ev.super_event_id && (
+        <div style={{ ...CARD, marginBottom: 16 }}>
+          <div style={{ fontWeight: 800, fontSize: 14.5, marginBottom: 4 }}>Tirage au sort</div>
+          <div style={{ fontSize: 12, ...MUTED, marginBottom: 14 }}>
+            {eligibles.length} joueur{eligibles.length > 1 ? 's' : ''} éligible{eligibles.length > 1 ? 's' : ''}
+            {exclus.size > 0 && ` · ${exclus.size} écarté${exclus.size > 1 ? 's' : ''}`}
+            {' '}— il faut un ticket émis sur cet événement. Rien n’est enregistré tant que vous n’avez pas confirmé.
+          </div>
+
+          {!propose && (
+            <button onClick={tirer} disabled={envoi}
+              style={{ background: ACC, color: '#fff', border: 'none', borderRadius: 10, padding: '12px 20px', fontWeight: 800, fontSize: 13.5, cursor: 'pointer', fontFamily: 'inherit' }}
+            >🎲 Lancer le tirage</button>
+          )}
+
+          {propose && (
+            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 6 }}>Gagnant proposé</div>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{`${propose.prenom ?? ''} ${propose.nom ?? ''}`.trim() || 'Joueur'}</div>
+              <div style={{ fontSize: 12, ...MUTED, marginTop: 2 }}>
+                {propose.email ?? 'pas d’email'}{propose.tel ? ` · ${propose.tel}` : ''}{propose.ticket_code ? ` · ticket ${propose.ticket_code}` : ''}
+              </div>
+              {!propose.email && (
+                <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 8 }}>
+                  Sans email, le billet ne peut pas lui être envoyé — il faudra le prévenir vous-même.
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+                <button onClick={confirmer} disabled={envoi}
+                  style={{ background: ACC, color: '#fff', border: 'none', borderRadius: 10, padding: '11px 18px', fontWeight: 800, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', opacity: envoi ? 0.5 : 1 }}
+                >{envoi ? 'Enregistrement…' : 'Confirmer et envoyer le billet'}</button>
+                {/* LE RETIRAGE : on ecarte celui-la et on relance. Il n a rien
+                    ete ecrit en base, donc rien a annuler. */}
+                <button
+                  onClick={() => { setExclus(p => new Set(p).add(propose.id)); setPropose(null); setTimeout(tirer, 0) }}
+                  disabled={envoi}
+                  style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 16px', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit' }}
+                >Injoignable — retirer au sort</button>
+              </div>
+            </div>
+          )}
+
+          {mail !== 'idle' && !propose && (
+            <div style={{ marginTop: 12, fontSize: 12, fontWeight: 600, color: mail === 'ok' ? '#15803D' : mail === 'echec' ? '#B45309' : '#64748B' }}>
+              {mail === 'envoi' && 'Envoi du billet…'}
+              {mail === 'ok' && 'Billet envoyé par email au gagnant.'}
+              {mail === 'echec' && 'Tirage enregistré, mais le billet n’a pas pu être envoyé par email.'}
+              {dernierToken && (
+                <> · <a href={`/lot.html?token=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: ACC, fontWeight: 700 }}>voir le billet</a></>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <div style={CARD}>
         {gains === null && <div style={{ fontSize: 12.5, ...MUTED }}>Chargement…</div>}
         {gains !== null && gains.length === 0 && (
@@ -145,6 +273,10 @@ export default function GagnantsClient({ proId, events }: { proId: string; event
                   {g.libelle ?? 'Lot'}{g.valeur ? ` · ${g.valeur} €` : ''}{g.code ? ` · ticket ${g.code}` : ''}
                 </div>
                 {g.email && <div style={{ fontSize: 11.5, ...MUTED }}>{g.email}</div>}
+                {g.retraitToken && (
+                  <a href={`/lot.html?token=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
+                    style={{ fontSize: 11.5, color: ACC, fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
+                )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{
