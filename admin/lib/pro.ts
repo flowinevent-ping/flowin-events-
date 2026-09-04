@@ -122,3 +122,61 @@ export function getConversionRate(joueurs: FlowinJoueur[], total: number): numbe
   if (!total) return 0
   return Math.round((joueurs.filter(j => j.optin).length / total) * 100)
 }
+
+/**
+ * DEMANDE DE QUIZ REALISE PAR FLOWIN — la trace en base.
+ *
+ * Romain, 04/09 : « toujours du tracking, toujours zero perte ».
+ *
+ * La demande ne partait que par email (constat 12 de docs/audit-parcours.html) :
+ * cote dashboard SA, rien ne disait qu un pro avait demande un quiz. Si le mail
+ * se perdait, ou si le pro fermait l onglet Gmail sans envoyer, la demande
+ * n existait nulle part.
+ *
+ * Elle est ecrite dans `crm_retours`, la table des demandes entrantes deja
+ * lue par /dashboard/crm-retours -- pas dans une table nouvelle. Ses colonnes
+ * correspondent deja (enseigne, contact_nom/tel/email, origine, produit, offre,
+ * etat, note), et `origine` distingue la provenance : elle vaut aujourd hui
+ * « bon-commande » et « landing », elle vaut desormais aussi
+ * « pro-quiz-flowin ».
+ *
+ * ECRITE AVANT L OUVERTURE DU MAIL, volontairement : le mail depend d un client
+ * externe qu on ne controle pas. La trace ne doit pas dependre de son envoi.
+ */
+export interface DemandeQuizFlowin {
+  proId: string
+  proNom: string
+  theme: string
+  contactNom: string
+  contactTel: string
+  contactEmail: string
+  dispo?: string
+  animationNom?: string
+  jeu?: string
+  dateD?: string | null
+  dateF?: string | null
+}
+
+export async function enregistrerDemandeQuiz(d: DemandeQuizFlowin): Promise<{ ok: boolean; error?: string }> {
+  const note = [
+    `Thème souhaité : ${d.theme.trim() || '—'}`,
+    d.animationNom?.trim() ? `Animation : ${d.animationNom.trim()}` : null,
+    d.jeu ? `Jeu : ${d.jeu}` : null,
+    (d.dateD || d.dateF) ? `Dates : ${d.dateD || '—'}${d.dateF ? ` → ${d.dateF}` : ''}` : null,
+    d.dispo?.trim() ? `Meilleur moment pour appeler : ${d.dispo.trim()}` : null,
+    `Pro : ${d.proId}`,
+  ].filter(Boolean).join('\n')
+
+  const { error } = await supabase.from('crm_retours').insert({
+    enseigne: d.proNom || d.proId,
+    contact_nom: d.contactNom.trim() || null,
+    contact_tel: d.contactTel.trim() || null,
+    contact_email: d.contactEmail.trim() || null,
+    origine: 'pro-quiz-flowin',
+    produit: 'Quiz réalisé par Flowin',
+    etat: 'nouveau',
+    note,
+  })
+  if (error) { console.error('[enregistrerDemandeQuiz]', error.message); return { ok: false, error: error.message } }
+  return { ok: true }
+}

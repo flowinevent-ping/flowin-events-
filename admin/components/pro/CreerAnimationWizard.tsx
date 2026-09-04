@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { creerAnimation } from '@/lib/pro'
+import { creerAnimation, enregistrerDemandeQuiz } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
@@ -76,6 +76,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [contactEmail, setContactEmail] = useState('')
   const [dispo, setDispo] = useState('')
   const [demandeEnvoyee, setDemandeEnvoyee] = useState(false)
+  const [demandeTracee, setDemandeTracee] = useState<'idle' | 'ok' | 'echec'>('idle')
   const [module_, setModule] = useState<string | null>(null)
   const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
@@ -351,7 +352,19 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                 <a
                   href={demandeFormOk ? mailDemande : undefined}
                   target="_blank" rel="noreferrer"
-                  onClick={() => { if (demandeFormOk) setDemandeEnvoyee(true) }}
+                  onClick={async () => {
+                    if (!demandeFormOk) return
+                    setDemandeEnvoyee(true)
+                    /* La trace part AVANT le mail : l ouverture de Gmail depend
+                       d un client externe, la demande ne doit pas en dependre. */
+                    const r = await enregistrerDemandeQuiz({
+                      proId, proNom: proName, theme: themeQuiz,
+                      contactNom, contactTel, contactEmail, dispo,
+                      animationNom: nom, jeu: jeu?.t ?? module_,
+                      dateD: dateD || null, dateF: dateF || null,
+                    })
+                    setDemandeTracee(r.ok ? 'ok' : 'echec')
+                  }}
                   style={{
                     ...btnPrimary, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7,
                     opacity: demandeFormOk ? 1 : 0.45, pointerEvents: demandeFormOk ? 'auto' : 'none',
@@ -366,8 +379,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
               </div>
 
               {demandeEnvoyee && (
-                <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid #15803D', color: '#15803D', fontSize: 12, fontWeight: 600 }}>
-                  Demande envoyée. Vous pouvez continuer : l’animation partira en attente de validation, et l’équipe y attachera votre banque de questions.
+                <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, border: `1px solid ${demandeTracee === 'echec' ? '#B45309' : '#15803D'}`, color: demandeTracee === 'echec' ? '#B45309' : '#15803D', fontSize: 12, fontWeight: 600 }}>
+                  {demandeTracee === 'echec'
+                    ? 'Le mail est prêt, mais nous n’avons pas pu enregistrer la demande de notre côté. Envoyez-le, ou appelez-nous au numéro ci-dessus — nous ne la verrons pas autrement.'
+                    : 'Demande enregistrée. Vous pouvez continuer : l’animation partira en attente de validation, et l’équipe y attachera votre banque de questions.'}
                 </div>
               )}
             </div>
