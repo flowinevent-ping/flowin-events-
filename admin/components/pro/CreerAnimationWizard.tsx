@@ -6,8 +6,15 @@ import { creerAnimation } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
+import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 
 const ICONES: Record<string, React.ReactNode> = {
+  /* Le gabarit de reference. Meme dessin que cote SA (app/dashboard/wizard-event) :
+     deux surfaces, une seule identite visuelle pour le meme gabarit. */
+  [GABARIT_MODULE]: (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#7C2D92" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4.6" stroke="#7C2D92" strokeWidth="1.6" /><circle cx="12" cy="12" r="1.4" fill="#7C2D92" /></svg>
+  ),
   quiz: (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#7C2D92" strokeWidth="1.8" />
       <path d="M9.5 9.2c0-1.4 1.1-2.4 2.5-2.4s2.5 1 2.5 2.2c0 1.6-2.5 1.8-2.5 3.6" stroke="#7C2D92" strokeWidth="1.8" strokeLinecap="round" />
@@ -28,6 +35,13 @@ const ICONES: Record<string, React.ReactNode> = {
 }
 
 const JEUX = [
+  /* LE GABARIT MANQUAIT ICI (constat 11 de docs/audit-parcours.html) : cette
+     liste proposait quiz / roue / tombola / vote, jamais « Quiz + bonus ». Un
+     pro ne pouvait donc pas creer son animation sur le gabarit de reference —
+     seul le SA le pouvait. Le nom et l identifiant viennent de lib/gabarit.ts,
+     source unique : les recopier ici en dur ferait une deuxieme definition que
+     rien ne resynchroniserait. */
+  { m: GABARIT_MODULE, t: GABARIT_NOM, s: 'Le gabarit de référence — quiz, bonus, ticket', banque: true },
   { m: 'quiz', t: 'Quiz', s: 'QCM + questions bonus', banque: true },
   { m: 'spin', t: 'Roue de la fortune', s: 'Tirage instantané, segments = lots', banque: false },
   { m: 'tombola', t: 'Tombola', s: 'Inscription + grand tirage', banque: false },

@@ -29,6 +29,7 @@ import {
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { Module } from '@/lib/types'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
+import { fetchModeles, appliquerModele, resumeModele, type EventModele } from '@/lib/modeles'
 
 const ETAPES = [
   { id: 'A', label: 'Identité' },
@@ -116,6 +117,13 @@ function Wizard() {
      source que la fiche event : une seule liste, pas deux. */
   const [banques, setBanques] = useState<Banque[]>([])
   useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
+  /* Les modeles de jeu enregistres. `event_modeles` existe en base depuis
+     l origine ; elle n avait aucun ecran. Si la lecture echoue, le bloc
+     « partir d un modele » disparait simplement : le parcours reste
+     utilisable module par module comme avant. */
+  const [modeles, setModeles] = useState<EventModele[]>([])
+  const [modeleApplique, setModeleApplique] = useState<string | null>(null)
+  useEffect(() => { fetchModeles().then(setModeles).catch(() => setModeles([])) }, [])
   const [envoi, setEnvoi] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
 
@@ -360,6 +368,46 @@ function Wizard() {
         )}
 
         {etape === 'B' && (
+          <>
+          {/* PARTIR D UN MODELE — « meme frame, personnalisable depuis SA »
+              (Romain, 04/09). Les modeles vivent dans `event_modeles`, table
+              qui existait deja en base sans aucun ecran. Choisir un modele
+              remplit le module, la configuration de jeu, les lots, la
+              visibilite pro et la couleur ; le nom, le pro et les dates deja
+              saisis ne sont PAS ecrases (voir appliquerModele). */}
+          {modeles.length > 0 && (
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 4 }}>Partir d’un modèle</div>
+              <div className="sa-muted" style={{ fontSize: 11, marginBottom: 10 }}>
+                Le modèle apporte le jeu et les lots. Le nom, le pro et les dates que vous avez saisis restent en place.
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 10 }}>
+                {modeles.map(m => (
+                  <button key={m.id} type="button"
+                    onClick={() => { setD(x => appliquerModele(m, x)); setModeleApplique(m.id) }}
+                    style={{
+                      textAlign: 'left', cursor: 'pointer', padding: '13px 14px', borderRadius: 12,
+                      background: modeleApplique === m.id ? 'var(--sa-subtle)' : 'transparent',
+                      border: `2px solid ${modeleApplique === m.id ? 'var(--sa-accent)' : 'var(--sa-border)'}`,
+                    }}>
+                    <div style={{ fontSize: 13, fontWeight: 800 }}>{m.nom}</div>
+                    {m.description && (
+                      <div className="sa-muted" style={{ fontSize: 11, marginTop: 3 }}>{m.description}</div>
+                    )}
+                    <div className="sa-muted" style={{ fontSize: 10.5, marginTop: 6 }}>
+                      {resumeModele(m).join(' · ') || 'Aucun contenu de jeu enregistré'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {modeleApplique && (
+                <div style={{ marginTop: 10, padding: '9px 11px', borderRadius: 9, border: '1px solid #2f7d4f', color: '#2f7d4f', fontSize: 11.5 }}>
+                  Modèle appliqué. Tout reste modifiable aux étapes suivantes.
+                </div>
+              )}
+              <div className="sa-muted" style={{ fontSize: 11, margin: '14px 0 8px' }}>ou choisir un module directement :</div>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 }}>
             {MODULES.map(m => (
               <button key={m.id} type="button" onClick={() => maj({ module: m.id })}
@@ -377,6 +425,7 @@ function Wizard() {
               </button>
             ))}
           </div>
+          </>
         )}
 
         {etape === 'C' && (
