@@ -103,7 +103,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
   /* Le contact Flowin affiche aux partenaires. Jamais une adresse personnelle
      ni info@opconsult.co : c est celui de tous les supports partenaires. */
-  const TEL_FLOWIN = '06 16 35 49 36'
+  const TEL_FLOWIN = '04 93 59 91 37'
   const MAIL_FLOWIN = 'flowinevent@gmail.com'
 
   /* Le modele de billet, charge une fois depuis public/. */
