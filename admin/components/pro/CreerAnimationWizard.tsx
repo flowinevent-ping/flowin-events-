@@ -662,16 +662,26 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           </div>
           <style>{`@media print{ body *{visibility:hidden} #visuel-annonce,#visuel-annonce *{visibility:visible} #visuel-annonce{position:fixed;inset:0;border-radius:0} }`}</style>
           <button style={{ ...btnGhost, width: '100%', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={() => window.print()}><Ico k="download" size={14} />Télécharger / imprimer ce visuel</button>
-          {partenaireId ? (
-            <a
-              style={{ ...btnGhost, width: '100%', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textAlign: 'center', boxSizing: 'border-box', marginBottom: 20 }}
-              target="_blank" rel="noreferrer"
-              href={`/nds/billets-partenaires.html?p=${encodeURIComponent(partenaireId)}`}
-            >
-              <Ico k="ticket" size={14} />Voir le billet gagnant (logo, conditions, valable {dateD && dateF ? `du ${dateD} au ${dateF}` : 'pendant l\u2019animation'})
-            </a>
+          {/* CE BOUTON NE MONTRAIT RIEN (constate le 04/09). Il ouvrait
+              /nds/billets-partenaires.html?p=<partenaire>, qui liste les billets
+              DEJA EMIS a des gagnants reels via un RPC. Une animation qui vient
+              d etre creee n a aucun gagnant : la page s ouvrait vide, et le pro
+              y voyait un bug.
+              On affiche a la place le meme apercu qu a l etape « recompense » —
+              le modele public/bon-achat-template.html rempli avec sa saisie.
+              C est ce qu il voulait voir : son billet, pas ceux des autres. */}
+          {billetHtml ? (
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 6 }}>Le billet que recevra le gagnant</div>
+              <iframe
+                title="Billet gagnant"
+                sandbox=""
+                srcDoc={billetHtml}
+                style={{ width: '100%', height: 460, border: '1px solid #E2E8F0', borderRadius: 12, background: '#fff' }}
+              />
+            </div>
           ) : (
-            <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 20 }}>Le billet gagnant visuel sera disponible une fois votre compte relié à un partenaire.</div>
+            <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 20 }}>Le billet s’affichera dès qu’un lot aura un nom.</div>
           )}
 
           <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 8 }}>Annoncer à votre base de contacts</div>
