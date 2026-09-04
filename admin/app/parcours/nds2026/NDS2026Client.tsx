@@ -923,9 +923,21 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16))', border: '1px solid #ece7f2', borderRadius: 14, padding: '11px 14px', marginBottom: 14, fontWeight: 800, fontSize: 14.5, color: '#1a1226', textAlign: 'center' }}>
-                    <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-layers" /></svg>
-                    <span>+ Vous jouez, + vos chances augmentent</span>
+                  {/* Romain, 04/09 : « l info cumul tes points aux autres stations
+                      jeux doit etre visible avec le reste ». Elle n existait qu APRES
+                      avoir joue (ecrans resultats et ticket) : a l accueil, seul
+                      « + vous jouez, + vos chances augmentent » s affichait, qui ne dit
+                      pas OU on rejoue. La regle est ecrite ici avec les memes mots que
+                      l ecran ticket — « chaque station = 1 ticket de plus » — pour ne
+                      pas annoncer deux regles differentes selon l ecran. */}
+                  <div style={{ background: 'linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16))', border: '1px solid #ece7f2', borderRadius: 14, padding: '11px 14px', marginBottom: 14, color: '#1a1226', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 800, fontSize: 14.5 }}>
+                      <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-layers" /></svg>
+                      <span>+ Vous jouez, + vos chances augmentent</span>
+                    </div>
+                    <div style={{ fontSize: 12.5, lineHeight: 1.4, color: '#52455e', marginTop: 5 }}>
+                      Tes tickets se <b>cumulent d’une station à l’autre</b> : {STATIONS.length} stations à jouer, <b>chacune = 1 ticket de plus</b>.
+                    </div>
                   </div>
                   </>)}
                   <a className="btn" onClick={() => {

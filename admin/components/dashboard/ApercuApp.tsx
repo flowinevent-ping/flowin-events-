@@ -113,9 +113,15 @@ function ecranOnboard(d: BrouillonApercu): string {
              <span style="font-size:13.5px;color:#52455e;line-height:1.3"><b style="color:#1a1226">${esc(s.t)}</b><br><span style="font-size:12.5px;opacity:.85">${esc(s.s)}</span></span>
            </div>`).join('')}
        </div>
-       <div style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16));border:1px solid #ece7f2;border-radius:14px;padding:11px 14px;margin-bottom:14px;font-weight:800;font-size:14.5px;color:#1a1226;text-align:center">
-         ${ic('i-layers', 'width:18px;height:18px;color:var(--magenta);flex-shrink:0')}
-         <span>+ Vous jouez, + vos chances augmentent</span>
+       <div style="background:linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16));border:1px solid #ece7f2;border-radius:14px;padding:11px 14px;margin-bottom:14px;color:#1a1226;text-align:center">
+         <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:14.5px">
+           ${ic('i-layers', 'width:18px;height:18px;color:var(--magenta);flex-shrink:0')}
+           <span>+ Vous jouez, + vos chances augmentent</span>
+         </div>
+         ${d.multistation ? `
+         <div style="font-size:12.5px;line-height:1.4;color:#52455e;margin-top:5px">
+           Tes tickets se <b>cumulent d&rsquo;une station &agrave; l&rsquo;autre</b>${(d.nbStations ?? 0) > 1 ? ` : ${d.nbStations} stations &agrave; jouer` : ''}, <b>chacune = 1 ticket de plus</b>.
+         </div>` : ''}
        </div>`
 
   /* L'emplacement du logo : rempli des qu'une operation ou une station en a un,
