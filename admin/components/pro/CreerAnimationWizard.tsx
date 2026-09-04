@@ -7,6 +7,7 @@ import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
+import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
 
 const ICONES: Record<string, React.ReactNode> = {
   /* Le gabarit de reference. Meme dessin que cote SA (app/dashboard/wizard-event) :
@@ -55,6 +56,12 @@ const btnGhost: React.CSSProperties = { background: '#fff', border: '1.5px solid
 export default function CreerAnimationWizard({ proId, partenaireId, proName, banqueQuizExistante }: { proId: string; partenaireId: string | null; proName: string; banqueQuizExistante: Banque[] }) {
   const router = useRouter()
   const [etape, setEtape] = useState(1)
+  /* L APERCU DE L APP, cote pro. Meme composant que les parcours SA — Romain,
+     04/09 : « il faut ajouter la visualisation de l app [...] et il faut la
+     meme chose meme style ». Il ne s affiche que sur le gabarit : les autres
+     modules (roue, tombola, vote) ont leurs propres ecrans, montrer celui du
+     quiz a leur place serait un aperçu faux. */
+  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
   const [module_, setModule] = useState<string | null>(null)
   const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
@@ -75,6 +82,16 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   useEffect(() => { setBanques(banqueQuizExistante) }, [banqueQuizExistante])
 
   const jeu = JEUX.find(j => j.m === module_)
+  const avecApercu = module_ === GABARIT_MODULE
+  /* Une animation pro est une station seule : pas de multi-stations, donc pas
+     de carte des stations ni de carte partenaires (lib/gabarit.ts). */
+  const dApercu = {
+    nom: nom || 'Mon animation',
+    multistation: false,
+    lots: lots.filter(l => l.nom.trim()).map(l => ({ nom: l.nom, quantite: l.quantite })),
+    nbQuestions: banques.find(b => b.id === banqueId)?.questions?.filter(x => x.type === 'qcm').length ?? 0,
+    nbBonus: banques.find(b => b.id === banqueId)?.questions?.filter(x => x.type === 'single' || x.type === 'multi').length ?? 0,
+  }
   const etapeBanque = jeu?.banque ?? false
   const totalEtapes = etapeBanque ? 6 : 5
   const aUnLotInstantane = lots.some(l => l.type === 'instantane')
@@ -121,6 +138,13 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           ))}
         </div>
       </div>
+
+      {/* Deux colonnes des que le gabarit est choisi : la saisie a gauche, le
+          parcours joueur a droite. `sa-parc-avec-apercu` vient de
+          components/dashboard/apercu.css, importe par ApercuApp — la meme
+          grille que les parcours SA, pas une deuxieme. */}
+      <div className={avecApercu ? 'sa-parc-avec-apercu' : undefined}>
+      <div>
 
       {etape === 1 && (
         <div style={CARD}>
@@ -441,6 +465,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           <button style={{ ...btnPrimary, width: '100%' }} onClick={() => router.push(`/pro/events?pro=${encodeURIComponent(proId)}`)}>Terminer — voir mes events →</button>
         </div>
       )}
+
+      </div>
+      {avecApercu && <ApercuApp d={dApercu} ecran={ecranApercu} onEcran={setEcranApercu} />}
+      </div>
     </div>
   )
 }

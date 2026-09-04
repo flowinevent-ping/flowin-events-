@@ -20,6 +20,7 @@ import { fetchPacksParticipation, type PackParticipation } from '@/lib/commercia
 import type { SuperEvent } from '@/lib/nds'
 import { Ico } from '@/lib/proicons'
 import { SECTEURS_PRO } from '@/lib/proCreation'
+import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
 
 const ORANGE = '#C2410C'
 const BLUE = '#2746A6'
@@ -42,6 +43,14 @@ const lotVide = (): Lot => ({ id: 'l' + Date.now(), titre: '', valeur_euros: '',
 
 export default function RejoindreWizard({ proId, proNom, supers }: { proId: string; proNom: string; supers: SuperEvent[] }) {
   const [etape, setEtape] = useState(1)
+  /* L APERCU DE L APP — Romain, 04/09 : « il faut la meme chose meme style pour
+     integrer le super event ». Meme composant que le parcours SA et que
+     « creer mon animation » : une seule visualisation du gabarit dans toute
+     l app. Un commerce qui rejoint une operation est une STATION d un super
+     event, donc multistation = true : la carte des stations et la carte
+     partenaires font partie de ce qu il rejoint, et c est justement ce qu il
+     doit voir avant de s engager. */
+  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
   const [persona, setPersona] = useState<'commerce' | 'annonceur' | null>(null)
   const accent = persona === 'annonceur' ? GREEN : BLUE
 
@@ -76,6 +85,23 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
     fetchPacksParticipation().then(p => { setPacks(p); if (p.length && !packId) setPackId(p[0].id) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const seChoisi = supers.find(x => x.id === seId)
+  const dApercu = {
+    nom: nomCommerce || proNom,
+    superEvent: seChoisi?.nom ?? null,
+    multistation: true,
+    /* Le lot du wizard porte `titre` / `valeur_euros` / `quantite` en TEXTE
+       (champs de saisie). L apercu attend des nombres : on convertit ici, on ne
+       change pas le type de saisie — un champ qui refuse une frappe en cours
+       est pire qu une conversion a l affichage. */
+    lots: lots.filter(l => l.titre.trim()).map(l => ({
+      nom: l.titre,
+      quantite: Number(l.quantite) || undefined,
+      valeur: Number(l.valeur_euros) || undefined,
+    })),
+    logoUrl: seChoisi?.logo_url ?? null,
+  }
 
   const banqueQuiz = banques.find(b => !(b.tags || []).includes('bonus'))
   const totalEtapes = 8
@@ -132,6 +158,11 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
           ))}
         </div>
       </div>
+
+      {/* Deux colonnes, meme grille que les parcours SA et que « creer mon
+          animation » : la saisie a gauche, ce que le joueur verra a droite. */}
+      <div className="sa-parc-avec-apercu">
+      <div>
 
       {etape === 1 && (
         <div style={CARD}>
@@ -370,6 +401,10 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
           </div>
         </div>
       )}
+
+      </div>
+      <ApercuApp d={dApercu} ecran={ecranApercu} onEcran={setEcranApercu} />
+      </div>
     </div>
   )
 }

@@ -31,6 +31,10 @@
 
 import { useMemo } from 'react'
 import { NDS_CSS, NDS_CSS_APP, NDS_SPRITE } from '@/lib/nds2026Design'
+/* La coque de l apercu voyage avec le composant : sans cet import, il sort sans
+   telephone ni pastilles des qu il est pose hors du dashboard (l espace pro n a
+   pas de layout chargeant app/dashboard/globals.css). */
+import './apercu.css'
 
 export type EcranApercu = 'onboard' | 'quiz' | 'resultats' | 'bonus' | 'inscription'
 
@@ -318,7 +322,10 @@ export default function ApercuApp({
       {onEcran && (
         <div className="sa-apercu-pas">
           {ECRANS_APERCU.map(e => (
-            <button key={e.id} className={`sa-btn sm${ecran === e.id ? ' primary' : ''}`} onClick={() => onEcran(e.id)}>
+            /* `sa-btn` n existe que dans le CSS du dashboard. La classe
+               `sa-apercu-btn`, portee par apercu.css, voyage avec le composant :
+               les pastilles restent des boutons dans l espace pro. */
+            <button key={e.id} className={`sa-btn sm sa-apercu-btn${ecran === e.id ? ' primary actif' : ''}`} onClick={() => onEcran(e.id)}>
               {e.label}
             </button>
           ))}

@@ -1,0 +1,43 @@
+/* ---- Apercu app : la coque, deplacee depuis app/dashboard/globals.css ----
+
+   Elle vivait dans le CSS du dashboard, donc l apercu ne s affichait
+   correctement QUE dans le dashboard. L espace pro n a pas de layout qui charge
+   ce fichier : le meme composant y sortait sans telephone ni pastilles.
+
+   Romain, 04/09 : « il faut ajouter la visualisation de l app [au parcours pro]
+   et il faut la meme chose meme style pour integrer le super event ».
+
+   Les regles sont donc ici, importees par ApercuApp lui-meme : le composant
+   emporte son habillage partout ou on le pose. Elles ne sont PAS dupliquees —
+   elles ont ete retirees de globals.css au meme commit.
+
+   Les variables --sa-* n existent pas cote pro : chaque appel porte sa valeur
+   de repli, reprise telle quelle du dashboard. */
+
+.sa-apercu{position:sticky;top:16px;align-self:start}
+.sa-apercu-tete{margin-bottom:10px}
+.sa-apercu-tete .t{display:block;font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--sa-muted,#64748B)}
+.sa-apercu-tete .d{display:block;font-size:11px;color:var(--sa-muted,#64748B);margin-top:2px}
+.sa-tel{width:272px;border-radius:30px;padding:9px;background:#0F172A;
+  box-shadow:0 20px 50px rgba(15,23,42,.26)}
+.sa-tel-ecran{position:relative;width:254px;height:508px;border-radius:24px;overflow:hidden;
+  background:#0F172A}
+.sa-tel-encoche{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:3;
+  width:74px;height:16px;background:#0F172A;border-radius:0 0 11px 11px}
+/* Le viewport du parcours : mis a l echelle, pas redessine. */
+.sa-vp{position:absolute;top:0;left:0}
+.sa-vp code{font-family:inherit}
+.sa-apercu-pas{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap;max-width:272px}
+.sa-apercu-note{font-size:10.5px;color:var(--sa-muted,#64748B);line-height:1.45;margin:10px 0 0;max-width:272px}
+
+/* Le parcours passe a deux colonnes quand l apercu l accompagne. */
+.sa-parc-avec-apercu{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:20px;align-items:start}
+@media (max-width: 1180px){ .sa-parc-avec-apercu{grid-template-columns:minmax(0,1fr)} .sa-apercu{position:static} }
+
+/* Les pastilles d ecran, cote pro : le dashboard a .sa-btn, l espace pro non. */
+.sa-apercu-pas .sa-apercu-btn{border:1.5px solid var(--sa-border,#E2E8F0);background:var(--sa-card,#fff);
+  border-radius:9px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;
+  color:var(--sa-text,#0F172A);font-family:inherit}
+.sa-apercu-pas .sa-apercu-btn.actif{border-color:var(--sa-accent,#7C2D92);
+  background:var(--sa-subtle,rgba(124,45,146,.08))}
