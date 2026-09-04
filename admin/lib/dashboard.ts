@@ -330,27 +330,92 @@ export async function fetchEventSuperEventStats(eventId: string): Promise<{ tick
   }
 }
 
-/* ── Super Event : marquer un gain comme utilisé ── */
+/* ── Marquer un gain comme retire ───────────────────────────────────────────
+ *
+ * CORRIGE LE 04/09, meme cause que fetchProGains : cette fonction ecrivait
+ * dans `se_gains`, table vide et lue par personne. Une validation faite depuis
+ * l'espace pro ne destockait donc RIEN, sans que rien ne le signale.
+ *
+ * Elle ecrit maintenant dans `tirages`, aux memes colonnes que le dashboard
+ * SA : `statut` et `retire_at`.
+ *
+ * Ceci reste le marquage manuel depuis l'espace pro. La validation en caisse
+ * avec code PIN passe, elle, par valider_lot(token, pin) -- RPC existant, seul
+ * chemin qui verifie le PIN. Les deux ecrivent au meme endroit, donc ne se
+ * contredisent plus. */
 export async function marquerGainUtilise(gainId: string, utilise: boolean): Promise<boolean> {
-  const { error } = await supabase.from('se_gains').update({ utilise, utilise_ts: utilise ? new Date().toISOString() : null }).eq('id', gainId)
+  const { error } = await supabase.from('tirages').update({
+    /* Les seuls statuts en base sont 'actif', 'retire', 'annule' (verifie le
+       04/09 : 57 / 23 / 155). Ecrire 'attribue' aurait cree une quatrieme
+       valeur qu aucune requete du projet ne connait. */
+    statut: utilise ? 'retire' : 'actif',
+    retire_at: utilise ? new Date().toISOString() : null,
+  }).eq('id', gainId)
+  if (error) console.error('[marquerGainUtilise]', error.message)
   return !error
 }
 
-/* ── Super Event : gains émis par les commerces d'un pro (validation utilisation) ── */
-export interface ProGainRow { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; joueur: string }
+/* ── Gains d'un commerce : la liste que voit le pro ─────────────────────────
+ *
+ * CORRIGE LE 04/09. Cette fonction lisait `se_gains`, table ABANDONNEE LE
+ * 28/07 et vide depuis : 0 ligne, quand `tirages` en compte 235 dont 80
+ * actives. L'espace pro affichait donc toujours zero gagnant, quel que soit le
+ * commerce -- constate par Romain sur /pro/tirage.
+ *
+ * C'est le meme bug que celui deja corrige cote SA en juillet sur
+ * `v_se_dashboard` et `fetchEventSuperEventStats` ; il etait reste ici.
+ *
+ * La vraie source est `tirages`, exactement celle que lit le dashboard SA
+ * (fetchGagnants). Le lien passe par le PARTENAIRE, pas par l'event : un
+ * tirage porte `partenaire_id`, pas `event_id`. On resout donc
+ * events -> pros.partenaire_id, comme le fait deja
+ * fetchEventSuperEventStats.
+ *
+ * `statut = 'retire'` remplace l'ancien booleen `utilise` : c'est la valeur
+ * qu'ecrit valider_lot(), le RPC qui destocke reellement. */
+export interface ProGainRow {
+  id: string; libelle: string | null; code: string | null; utilise: boolean | null
+  event_id: string | null; joueur: string
+  email: string | null; valeur: number | null; retraitToken: string | null; superEventId: string | null
+}
 export async function fetchProGains(eventIds: string[]): Promise<ProGainRow[]> {
   if (!eventIds.length) return []
+
+  const { data: evs } = await supabase.from('events').select('id,pro_id').in('id', eventIds)
+  const proIds = Array.from(new Set((evs ?? []).map(e => (e as { pro_id: string | null }).pro_id).filter(Boolean))) as string[]
+  if (!proIds.length) return []
+
+  const { data: pros } = await supabase.from('pros').select('id,partenaire_id').in('id', proIds)
+  const partIds = Array.from(new Set((pros ?? [])
+    .map(p => (p as { partenaire_id: string | null }).partenaire_id).filter(Boolean))) as string[]
+  if (!partIds.length) return []
+
   const { data } = await supabase
-    .from('se_gains').select('id,libelle,code,utilise,event_id,joueur_id,created_at')
-    .in('event_id', eventIds).order('created_at', { ascending: false })
-  const rows = (data ?? []) as { id: string; libelle: string | null; code: string | null; utilise: boolean | null; event_id: string | null; joueur_id: string | null }[]
-  const jids = Array.from(new Set(rows.map(r => r.joueur_id).filter(Boolean))) as string[]
-  const names: Record<string, string> = {}
-  if (jids.length) {
-    const { data: js } = await supabase.from('joueurs').select('id,prenom,nom').in('id', jids)
-    ;(js ?? []).forEach((j: { id: string; prenom?: string | null; nom?: string | null }) => { names[j.id] = `${j.prenom ?? ''} ${j.nom ?? ''}`.trim() || '—' })
-  }
-  return rows.map(r => ({ id: r.id, libelle: r.libelle, code: r.code, utilise: r.utilise, event_id: r.event_id, joueur: r.joueur_id ? (names[r.joueur_id] || '—') : '—' }))
+    .from('tirages')
+    .select('id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,statut,retrait_token,super_event_id,created_at')
+    .in('partenaire_id', partIds).neq('statut', 'annule')
+    .order('created_at', { ascending: false })
+
+  const rows = (data ?? []) as {
+    id: string; joueur_nom: string | null; joueur_email: string | null; ticket_code: string | null
+    lot_nom: string | null; lot_valeur: number | null; statut: string | null
+    retrait_token: string | null; super_event_id: string | null
+  }[]
+
+  /* `event_id` reste a null : un tirage n'en porte pas. Le rattachement d'un
+     gain a une station precise n'existe pas en base -- ne pas en inventer un. */
+  return rows.map(r => ({
+    id: r.id,
+    libelle: r.lot_nom,
+    code: r.ticket_code,
+    utilise: r.statut === 'retire',
+    event_id: null,
+    joueur: r.joueur_nom || '—',
+    email: r.joueur_email,
+    valeur: r.lot_valeur,
+    retraitToken: r.retrait_token,
+    superEventId: r.super_event_id,
+  }))
 }
 
 /* ── Tirage au sort : envoi reel du ticket gagnant par email ──
