@@ -49,7 +49,7 @@ const JEUX = [
   { m: 'vote', t: 'Vote', s: 'Vote produits / artistes', banque: false },
 ]
 
-const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit' }
+const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }
 const btnPrimary: React.CSSProperties = { background: ACC, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 22px', fontWeight: 800, fontSize: 14, cursor: 'pointer' }
 const btnGhost: React.CSSProperties = { background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 12, padding: '12px 20px', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: '#0F172A' }
 
@@ -115,6 +115,13 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   }, [])
 
   const lotPrincipal = lots.find(l => l.nom.trim()) ?? null
+
+  /* Une animation ne se programme pas dans le passe : le champ le refuse au
+     lieu de laisser saisir une date qui ne s ouvrira jamais. */
+  const aujourdhui = new Date().toISOString().slice(0, 10)
+  const dureeJours = (dateD && dateF && dateF >= dateD)
+    ? Math.round((new Date(dateF).getTime() - new Date(dateD).getTime()) / 86400000) + 1
+    : null
 
   /* Remplissage des placeholders du modele avec la saisie en cours. Les valeurs
      inconnues a ce stade (numero de ticket, nom du gagnant, date de validite)
@@ -519,16 +526,39 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Dates de l&apos;animation</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Période pendant laquelle vos clients pourront jouer.</div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <div style={{ flex: 1 }}>
+          {/* `minWidth: 0` : un enfant de flex vaut par defaut au moins la
+              largeur intrinseque de son contenu, et un champ date en a une.
+              Sans ca les deux colonnes refusent de se reduire et poussent la
+              seconde hors de la carte. */}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 180px', minWidth: 0 }}>
               <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Du</label>
-              <input style={input} type="date" value={dateD} onChange={e => setDateD(e.target.value)} />
+              <input
+                style={input} type="date" value={dateD}
+                min={aujourdhui}
+                onChange={e => {
+                  const v = e.target.value
+                  setDateD(v)
+                  /* Une fin anterieure au debut donnait une animation qui ne
+                     s ouvre jamais, sans que rien ne le signale. */
+                  if (dateF && v && dateF < v) setDateF(v)
+                }}
+              />
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: '1 1 180px', minWidth: 0 }}>
               <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Au</label>
-              <input style={input} type="date" value={dateF} onChange={e => setDateF(e.target.value)} />
+              <input
+                style={input} type="date" value={dateF}
+                min={dateD || aujourdhui}
+                onChange={e => setDateF(e.target.value)}
+              />
             </div>
           </div>
+          {dureeJours !== null && (
+            <div style={{ marginTop: 10, fontSize: 12, color: '#15803D', fontWeight: 600 }}>
+              {dureeJours === 1 ? 'Une seule journée de jeu.' : `${dureeJours} jours de jeu.`}
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
             <button style={btnPrimary} onClick={suivant}>Suivant →</button>

@@ -32,7 +32,7 @@ const CATEGORIES = ['Boulangerie', 'Restaurant', 'Bar · Café', 'Caviste', 'Fle
    secteurs qu'a la creation du pro, confrontes aux valeurs reelles en base. */
 const SECTEURS = SECTEURS_PRO
 
-const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', marginBottom: 12 }
+const input: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', marginBottom: 12, boxSizing: 'border-box' }
 const label: React.CSSProperties = { fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }
 const CARD: React.CSSProperties = { background: '#fff', border: '1px solid #E2E8F0', borderRadius: 16, padding: 18, marginBottom: 14 }
 const MUTED: React.CSSProperties = { color: '#64748B' }
