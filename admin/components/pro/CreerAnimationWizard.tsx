@@ -80,8 +80,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
   const [banques, setBanques] = useState<Banque[]>(banqueQuizExistante)
-  const [lots, setLots] = useState<{ id: string; nom: string; quantite: number; type: 'tirage' | 'instantane'; conditions: string }[]>(
-    [{ id: 'l1', nom: '', quantite: 10, type: 'tirage', conditions: '' }]
+  /* `valeur` ajoute le 04/09 : le billet imprime affiche « Valeur du bon », le
+     parcours ne la demandait nulle part. Sans elle, le bon sortait a 0 EUR. */
+  const [lots, setLots] = useState<{ id: string; nom: string; quantite: number; valeur: number; type: 'tirage' | 'instantane'; conditions: string }[]>(
+    [{ id: 'l1', nom: '', quantite: 10, valeur: 0, type: 'tirage', conditions: '' }]
   )
   const [modeInstant, setModeInstant] = useState<'tousLesX' | 'aleatoire'>('aleatoire')
   const [everyX, setEveryX] = useState(10)
@@ -102,6 +104,36 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
      ni info@opconsult.co : c est celui de tous les supports partenaires. */
   const TEL_FLOWIN = '06 16 35 49 36'
   const MAIL_FLOWIN = 'flowinevent@gmail.com'
+
+  /* Le modele de billet, charge une fois depuis public/. */
+  const [billetModele, setBilletModele] = useState<string | null>(null)
+  useEffect(() => {
+    fetch('/bon-achat-template.html')
+      .then(r => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+      .then(setBilletModele)
+      .catch(() => setBilletModele(null))
+  }, [])
+
+  const lotPrincipal = lots.find(l => l.nom.trim()) ?? null
+
+  /* Remplissage des placeholders du modele avec la saisie en cours. Les valeurs
+     inconnues a ce stade (numero de ticket, nom du gagnant, date de validite)
+     restent des exemples : l animation n existe pas encore. */
+  const billetHtml = (() => {
+    if (!billetModele || !lotPrincipal) return null
+    const val = Math.max(0, Number(lotPrincipal.valeur) || 0)
+    const remplacements: Record<string, string> = {
+      partenaire_nom: proName || 'Votre commerce',
+      partenaire_adresse: '', partenaire_cp: '', partenaire_ville: '',
+      montant_int: String(Math.floor(val)),
+      montant_dec: String(Math.round((val % 1) * 100)).padStart(2, '0'),
+      ticket_num: 'EXEMPLE-0000', ticket_num_court: '0000',
+      gagnant_nom_or_placeholder: 'Nom du gagnant',
+      gagnant_class: '', gain_id: '',
+      valide_jusqu_au: dateF || 'date de fin de l’animation',
+    }
+    return billetModele.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, cle: string) => remplacements[cle] ?? '')
+  })()
 
   const demandeFormOk = !!(themeQuiz.trim() && contactNom.trim() && contactTel.trim() && contactEmail.trim())
 
@@ -149,9 +181,9 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
   function suivant() { setEtape(e => e + 1) }
   function precedent() { setEtape(e => Math.max(1, e - 1)) }
-  function ajouterLot() { setLots(l => [...l, { id: 'l' + Date.now(), nom: '', quantite: 5, type: 'tirage', conditions: '' }]) }
+  function ajouterLot() { setLots(l => [...l, { id: 'l' + Date.now(), nom: '', quantite: 5, valeur: 0, type: 'tirage', conditions: '' }]) }
   function retirerLot(id: string) { setLots(l => l.length > 1 ? l.filter(x => x.id !== id) : l) }
-  function majLot(id: string, champ: 'nom' | 'quantite' | 'type' | 'conditions', valeur: string | number) {
+  function majLot(id: string, champ: 'nom' | 'quantite' | 'valeur' | 'type' | 'conditions', valeur: string | number) {
     setLots(l => l.map(x => x.id === id ? { ...x, [champ]: valeur } : x))
   }
 
@@ -366,7 +398,14 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
       {etape === (etapeBanque ? 3 : 2) && (
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Quelle récompense ?</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Par lot : tirage au sort après coup, ou gain immédiat si bonne réponse.</div>
+          {/* Romain, 04/09 : « il faut une explication plus simple ». L ancienne
+              phrase parlait de « tirage au sort apres coup » sans jamais dire ce
+              qu on met dans un lot. */}
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>
+            Mettez en jeu ce que vous voulez : <b>une remise</b>, <b>un cadeau</b>, une invitation.
+            Pour chacun, indiquez la quantité, sa valeur et les conditions d’utilisation.
+            Le joueur peut le gagner <b>au tirage au sort</b> à la fin, ou <b>tout de suite</b> s’il répond juste.
+          </div>
 
           <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Vos lots {lots.length > 1 ? `(${lots.length})` : ''}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 10 }}>
@@ -380,6 +419,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                   <div style={{ flex: 1, minWidth: 80 }}>
                     <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Quantité</label>
                     <input style={input} type="number" min={1} value={l.quantite} onChange={e => majLot(l.id, 'quantite', Number(e.target.value))} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 80 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Valeur (€)</label>
+                    <input style={input} type="number" min={0} value={l.valeur} onChange={e => majLot(l.id, 'valeur', Number(e.target.value))} />
                   </div>
                   {lots.length > 1 && (
                     <button onClick={() => retirerLot(l.id)} style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, width: 40, height: 42, cursor: 'pointer', color: '#B91C1C', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>×</button>
@@ -399,7 +442,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                     </div>
                   ))}
                 </div>
-                <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Conditions du lot</label>
+                <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Conditions d’utilisation</label>
                 <textarea
                   style={{ ...input, minHeight: 54, resize: 'vertical', fontFamily: 'inherit' }}
                   value={l.conditions}
@@ -410,6 +453,35 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             ))}
           </div>
           <button onClick={ajouterLot} style={{ ...btnGhost, fontSize: 12.5, padding: '9px 14px' }}>+ Ajouter un lot / sous-lot</button>
+
+          {/* LE BILLET — Romain, 04/09 : « a la fin il faut la visualisation du
+              billet, billet toujours le meme pour tous les pros (tu as le
+              modele avec le QR code) ».
+              Le modele est public/bon-achat-template.html, celui qui a servi aux
+              bons NDS 2026. Il est CHARGE, pas recopie : les placeholders
+              {{...}} sont remplis avec la saisie en cours et le document reel
+              s affiche dans une iframe. Redessiner un billet ici en ferait un
+              deuxieme, qui divergerait du premier a la premiere retouche. */}
+          {lotPrincipal && (
+            <div style={{ marginTop: 20, borderTop: '1px solid #E2E8F0', paddingTop: 16 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 4 }}>Le billet que recevra le gagnant</div>
+              <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 12 }}>
+                Le même pour tous les commerces — seuls votre nom, le montant et vos conditions changent.
+                Le gagnant le présente chez vous, vous le validez, et la quantité mise en jeu diminue d’autant.
+              </div>
+              {billetHtml
+                ? (
+                  <iframe
+                    title="Aperçu du billet"
+                    sandbox=""
+                    srcDoc={billetHtml}
+                    style={{ width: '100%', height: 460, border: '1px solid #E2E8F0', borderRadius: 12, background: '#fff' }}
+                  />
+                )
+                : <div style={{ fontSize: 12, ...MUTED }}>Chargement du modèle…</div>}
+            </div>
+          )}
+
 
           {aUnLotInstantane && (
             <div style={{ marginTop: 18 }}>

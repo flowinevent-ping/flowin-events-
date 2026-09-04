@@ -78,7 +78,8 @@ export interface CreationAnimation {
   dateD: string | null
   dateF: string | null
   banqueId?: string | null
-  lots: { nom: string; quantite: number; type: 'tirage' | 'instantane'; conditions: string }[]
+  /* `valeur` : montant affiche sur le billet (« Valeur du bon »). */
+  lots: { nom: string; quantite: number; valeur?: number; type: 'tirage' | 'instantane'; conditions: string }[]
   regleRecompense?: { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
   diffusionPhysique: boolean
   diffusionDigital: boolean
