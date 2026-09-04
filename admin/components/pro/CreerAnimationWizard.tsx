@@ -62,6 +62,20 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
      modules (roue, tombola, vote) ont leurs propres ecrans, montrer celui du
      quiz a leur place serait un aperçu faux. */
   const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
+
+  /* CONFIER LE QUIZ A FLOWIN — Romain, 04/09 : « on peut pas continuer sans
+     banque, soit le pro selectionne une banque, soit il la cree, soit Flowin
+     lui cree ». La troisieme voie n etait qu un lien mailto au corps vide de
+     contenu utile : il partait sans le theme voulu ni aucune coordonnee, donc
+     l equipe devait rappeler pour tout demander. Le formulaire ci-dessous
+     collecte ce qu il faut AVANT d ouvrir le mail. */
+  const [voieBanque, setVoieBanque] = useState<'mienne' | 'flowin' | null>(null)
+  const [themeQuiz, setThemeQuiz] = useState('')
+  const [contactNom, setContactNom] = useState('')
+  const [contactTel, setContactTel] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [dispo, setDispo] = useState('')
+  const [demandeEnvoyee, setDemandeEnvoyee] = useState(false)
   const [module_, setModule] = useState<string | null>(null)
   const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
@@ -83,6 +97,43 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
   const jeu = JEUX.find(j => j.m === module_)
   const avecApercu = module_ === GABARIT_MODULE
+
+  /* Le contact Flowin affiche aux partenaires. Jamais une adresse personnelle
+     ni info@opconsult.co : c est celui de tous les supports partenaires. */
+  const TEL_FLOWIN = '06 16 35 49 36'
+  const MAIL_FLOWIN = 'flowinevent@gmail.com'
+
+  const demandeFormOk = !!(themeQuiz.trim() && contactNom.trim() && contactTel.trim() && contactEmail.trim())
+
+  /* L etape n est franchissable que par une des trois voies : une banque
+     choisie, ou une demande reellement envoyee a Flowin. */
+  const etapeBanqueOk = !!banqueId || (voieBanque === 'flowin' && demandeEnvoyee)
+
+  const mailDemande = `https://mail.google.com/mail/?view=cm&fs=1&to=${MAIL_FLOWIN}&su=${encodeURIComponent(
+    `Demande de quiz — ${proName || 'partenaire'}`
+  )}&body=${encodeURIComponent(
+    [
+      'Bonjour,',
+      '',
+      `${proName || 'Notre établissement'} souhaite que l'équipe Flowin réalise les questions du quiz de son animation${nom.trim() ? ` « ${nom.trim()} »` : ''}.`,
+      '',
+      'THÈME SOUHAITÉ',
+      themeQuiz.trim() || '—',
+      '',
+      'COORDONNÉES',
+      `   Établissement : ${proName || '—'}`,
+      `   Contact : ${contactNom.trim() || '—'}`,
+      `   Téléphone : ${contactTel.trim() || '—'}`,
+      `   Email : ${contactEmail.trim() || '—'}`,
+      `   Meilleur moment pour appeler : ${dispo.trim() || '—'}`,
+      '',
+      'ANIMATION',
+      `   Jeu : ${jeu?.t ?? module_}`,
+      `   Dates : ${dateD || '—'}${dateF ? ` → ${dateF}` : ''}`,
+      '',
+      'Merci de nous recontacter pour la réalisation des questions personnalisées.',
+    ].join('\n')
+  )}`
   /* Une animation pro est une station seule : pas de multi-stations, donc pas
      de carte des stations ni de carte partenaires (lib/gabarit.ts). */
   const dApercu = {
@@ -180,12 +231,12 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
       {etape === 2 && etapeBanque && (
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Quelle banque de questions ?</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Vos banques déjà validées, ou continuez sans en choisir une maintenant.</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Choisissez une de vos banques, créez-en une, ou demandez à Flowin d’écrire les questions. Un jeu sans questions ne peut pas tourner.</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {banques.filter(b => !(b.tags || []).includes('bonus')).map(b => (
               <div
                 key={b.id}
-                onClick={() => setBanqueId(banqueId === b.id ? null : b.id)}
+                onClick={() => { const n = banqueId === b.id ? null : b.id; setBanqueId(n); setVoieBanque(n ? 'mienne' : null) }}
                 style={{
                   border: banqueId === b.id ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 12, padding: 13, cursor: 'pointer',
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -209,18 +260,80 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             </a>
           </div>
           <a
-            style={{ display: 'flex', gap: 10, alignItems: 'flex-start', border: '1.5px dashed #CBD5E1', borderRadius: 12, padding: 13, marginTop: 14, textDecoration: 'none', color: 'inherit' }}
-            target="_blank" rel="noreferrer"
-            href={`https://mail.google.com/mail/?view=cm&fs=1&to=flowinevent@gmail.com&su=${encodeURIComponent('Demande de quiz — ' + (proName || nom || 'nouvelle animation'))}&body=${encodeURIComponent(
-              `Bonjour,\n\n${proName || 'Un partenaire'} souhaite que l'équipe Flowin réalise le quiz de son animation « ${nom || '—'} ».\n\nMerci de nous recontacter pour en discuter.\n\nNos coordonnées :\n   Téléphone : \n   Meilleur moment pour appeler : \n\nMerci de nous répondre rapidement.`
-            )}`}
+            onClick={() => { setVoieBanque('flowin'); setBanqueId(null) }}
+            style={{ display: 'flex', gap: 10, alignItems: 'flex-start', border: voieBanque === 'flowin' ? `2px solid ${ACC}` : '1.5px dashed #CBD5E1', borderRadius: 12, padding: 13, marginTop: 14, textDecoration: 'none', color: 'inherit', cursor: 'pointer', background: voieBanque === 'flowin' ? 'rgba(168,85,247,.06)' : '#fff' }}
           >
             <span style={{ fontSize: 18 }}>✉️</span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 12.5 }}>Demander à Flowin de réaliser un quiz →</div>
-              <div style={{ fontSize: 11, ...MUTED }}>Envoie un email à notre équipe, on prépare les questions pour vous</div>
+              <div style={{ fontWeight: 700, fontSize: 12.5 }}>Demander à Flowin de réaliser le quiz</div>
+              <div style={{ fontSize: 11, ...MUTED }}>On écrit les questions pour vous, à partir du thème que vous choisissez</div>
             </div>
           </a>
+
+          {voieBanque === 'flowin' && (
+            <div style={{ marginTop: 12, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 15 }}>
+              <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 14 }}>
+                Dites-nous sur quoi porte le quiz et comment vous joindre. Tout part dans un seul message, on ne vous rappellera pas pour redemander.
+              </div>
+
+              <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Thème des questions *</label>
+              <textarea
+                style={{ ...input, minHeight: 74, resize: 'vertical', marginBottom: 14 }}
+                value={themeQuiz} onChange={e => setThemeQuiz(e.target.value)}
+                placeholder="Ex. notre métier, l'histoire du quartier, nos produits, l'écologie au quotidien…"
+              />
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Personne à contacter *</label>
+                  <input style={input} value={contactNom} onChange={e => setContactNom(e.target.value)} placeholder="Prénom et nom" />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Téléphone *</label>
+                  <input style={input} value={contactTel} onChange={e => setContactTel(e.target.value)} placeholder="06 …" />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Email *</label>
+                  <input style={input} value={contactEmail} onChange={e => setContactEmail(e.target.value)} placeholder="vous@exemple.fr" />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Quand vous appeler ?</label>
+                  <input style={input} value={dispo} onChange={e => setDispo(e.target.value)} placeholder="Ex. matins avant 11h" />
+                </div>
+              </div>
+
+              {!demandeFormOk && (
+                <div style={{ fontSize: 11.5, color: '#B45309', marginBottom: 12 }}>
+                  Thème, personne à contacter, téléphone et email sont nécessaires pour que l’équipe puisse travailler sans vous relancer.
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                <a
+                  href={demandeFormOk ? mailDemande : undefined}
+                  target="_blank" rel="noreferrer"
+                  onClick={() => { if (demandeFormOk) setDemandeEnvoyee(true) }}
+                  style={{
+                    ...btnPrimary, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7,
+                    opacity: demandeFormOk ? 1 : 0.45, pointerEvents: demandeFormOk ? 'auto' : 'none',
+                  }}
+                ><Ico k="mail" size={14} />Envoyer ma demande par email</a>
+
+                {/* « option appelez avec le numero de tel qui s affiche » : le
+                    numero est ecrit en clair, et cliquable sur mobile. */}
+                <a href={`tel:${TEL_FLOWIN.replace(/\s/g, '')}`} style={{ ...btnGhost, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                  📞 Ou appelez-nous — {TEL_FLOWIN}
+                </a>
+              </div>
+
+              {demandeEnvoyee && (
+                <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid #15803D', color: '#15803D', fontSize: 12, fontWeight: 600 }}>
+                  Demande envoyée. Vous pouvez continuer : l’animation partira en attente de validation, et l’équipe y attachera votre banque de questions.
+                </div>
+              )}
+            </div>
+          )}
+
           {banqueId && (() => {
             const b = banques.find(x => x.id === banqueId)
             const apercu = (b?.questions ?? []).slice(0, 3)
@@ -240,7 +353,12 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           })()}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
-            <button style={btnPrimary} onClick={suivant}>{banqueId ? 'Suivant →' : 'Continuer sans banque →'}</button>
+            {/* Plus de « Continuer sans banque » : le jeu sortait vide du
+                parcours et rien ne le signalait avant la mise en ligne. */}
+            <button
+              style={{ ...btnPrimary, opacity: etapeBanqueOk ? 1 : 0.45, cursor: etapeBanqueOk ? 'pointer' : 'not-allowed' }}
+              disabled={!etapeBanqueOk} onClick={suivant}
+            >Suivant →</button>
           </div>
         </div>
       )}
@@ -401,7 +519,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             {[
               ['Nom', nom || '—'],
               ['Jeu', JEUX.find(j => j.m === module_)?.t ?? '—'],
-              ...(etapeBanque ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? 'Aucune sélectionnée']] : []),
+              /* « Aucune sélectionnée » ne peut plus arriver : l etape ne se
+                 franchit qu avec une banque ou une demande envoyee. Le recap
+                 dit donc laquelle des deux. */
+              ...(etapeBanque ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? (demandeEnvoyee ? 'Réalisée par Flowin — demande envoyée' : '—')]] : []),
               ...lots.filter(l => l.nom.trim()).map((l, i) => [
                 lots.filter(x => x.nom.trim()).length > 1 ? `Lot ${i + 1}` : 'Lot',
                 `${l.nom} × ${l.quantite} — ${l.type === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}`,
