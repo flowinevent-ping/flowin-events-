@@ -357,6 +357,21 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
   const fait: string[] = []
   if (!d.id || !d.nom.trim()) return { ok: false, fait, erreur: 'Nom et identifiant obligatoires.' }
 
+  /* GARDE-FOU SUR L IDENTIFIANT — chemin d ecriture en production.
+     Le 04/09, un identifiant saisi a la main (« Fetes du haut et moyen pays
+     Vençois », espace final compris) est parti brut en base. La page
+     /dashboard/operations/<id> ne le retrouvait plus, et la station creee juste
+     en dessous en heritait : `d.id.replace(/^se-/, 'ev-')` ne fait rien quand le
+     prefixe `se-` est absent, donc l identifiant d event — celui qui part dans
+     le QR imprime — contenait l espace et la cedille.
+     Le formulaire slugifie desormais a la source ; ce controle est la deuxieme
+     ligne, pour les autres appelants. On REFUSE plutot que de corriger en
+     silence : un identifiant different de celui affiche a l ecran surprendrait
+     autant que la valeur fausse. */
+  if (d.id !== slugSuperEvent(d.id)) {
+    return { ok: false, fait, erreur: `Identifiant invalide — utilisez « ${slugSuperEvent(d.id)} » (ni espace, ni accent, ni majuscule : il part dans les liens et les QR).` }
+  }
+
   const { data: deja } = await supabase.from('super_events').select('id').eq('id', d.id).maybeSingle()
   if (deja) return { ok: false, fait, erreur: `L identifiant ${d.id} est deja pris.` }
 

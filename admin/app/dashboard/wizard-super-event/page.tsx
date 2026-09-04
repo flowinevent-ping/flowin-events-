@@ -67,7 +67,18 @@ export default function Page() {
   const [occupe, setOccupe] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
 
-  const id = idManuel || slugSuperEvent(nom)
+  /* L IDENTIFIANT EST TOUJOURS SLUGIFIE, y compris quand il est saisi a la main.
+     Sans ca, `idManuel` partait BRUT en base : « Fetes du haut et moyen pays
+     Vençois » a ainsi ete ecrit tel quel comme identifiant, espace final et
+     cedille compris. Consequences constatees le 04/09 :
+       - /dashboard/operations/<id> renvoyait « Super event introuvable », l URL
+         encodee ne redonnant jamais l espace final ;
+       - creerSuperEvent derive l identifiant des stations de celui-ci
+         (`d.id.replace(/^se-/, 'ev-')`) : le prefixe `se-` etant absent, la
+         station a herite du nom brut, et son QR avec.
+     L identifiant sert dans les liens et les QR imprimes : il ne peut pas
+     contenir d espace, d accent ni de majuscule. */
+  const id = slugSuperEvent(idManuel || nom)
 
   const prosFiltres = useMemo(() => {
     const q = recherchePro.trim().toLowerCase()
@@ -129,6 +140,9 @@ export default function Page() {
             <span className="sa-aide">
               Déduit du nom : <code className="sa-code">{id || 'se-…'}</code>. Il sert dans les liens
               et les QR — il ne se change plus une fois l’opération lancée.
+              {idManuel && slugSuperEvent(idManuel) !== idManuel && (
+                <> Votre saisie est normalisée : ni espace, ni accent, ni majuscule.</>
+              )}
             </span>
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
