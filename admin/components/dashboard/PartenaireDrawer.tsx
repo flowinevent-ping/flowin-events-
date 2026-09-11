@@ -300,6 +300,156 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             </div>
             <div className="sa-field"><label className="sa-label">Adresse</label><input className="sa-input" value={form.adresse ?? ''} onChange={ff('adresse')} /></div>
             <div className="sa-field"><label className="sa-label">Notes</label><textarea className="sa-input" rows={2} value={form.notes ?? ''} onChange={ff('notes')} /></div>
+          </>
+        )}
+
+        {tabActif === 'lots' && (
+          <>
+            <SectionHeader>{(gagnants ?? pLots).length} lot{(gagnants ?? pLots).length > 1 ? 's' : ''}</SectionHeader>
+            {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
+            {!chargeG && gagnants && gagnants.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
+            {!chargeG && gagnants && gagnants.map(g => (
+              <div key={g.tirage_id} className="sa-list-item">
+                <Ico k="gift" size={20} style={{ color: 'var(--sa-accent)' }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{g.lot_nom}</div>
+                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.joueur_nom ?? '—'}</div>
+                </div>
+                {g.etat === 'retire' && <span className="sa-chip live">Retiré</span>}
+              </div>
+            ))}
+            {!gagnants && !chargeG && pLots.map(l => (
+              <div key={l.id} className="sa-list-item">
+                <Ico k="gift" size={20} style={{ color: 'var(--sa-accent)' }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
+                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Le PIN vit ici, pas dans « Contrat » : c est le code que le
+            commercant saisit pour valider un billet, donc a cote des billets. */}
+        {tabActif === 'gagnants' && (
+          <>
+            <SectionHeader>🔐 Code de validation en caisse</SectionHeader>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff8ea', border: '1px solid #f2e1b6', borderRadius: 12, padding: '14px 16px', marginBottom: 10 }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: '#a1690a' }}>PIN du commerce</div>
+                <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 26, fontWeight: 800, letterSpacing: 7, color: '#23142c', marginTop: 4 }}>
+                  {(p as unknown as Record<string, string>).code_pin ?? '—'}
+                </div>
+              </div>
+              {(p as unknown as Record<string, string>).code_pin && (
+                <button className="sa-btn sm" style={{ marginLeft: 'auto' }}
+                  onClick={() => navigator.clipboard?.writeText(String((p as unknown as Record<string, string>).code_pin))}>📋 Copier</button>
+              )}
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 16 }}>
+              Confidentiel. Le commerçant le saisit pour valider un billet. À ne jamais afficher côté client.
+            </div>
+          </>
+        )}
+
+        {tabActif === 'gagnants' && (
+          <>
+            <SectionHeader>🏆 Gagnants &amp; billets</SectionHeader>
+            {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
+            {!chargeG && etatG && (
+              <>
+                <div className="sa-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 12 }}>
+                  {([['Tirés', etatG.tires], ['À appeler', etatG.a_confirmer], ['Confirmés', etatG.confirmes], ['Retirés', etatG.retires]] as [string, number][]).map(([lib, val]) => (
+                    <div key={lib} style={{ background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 800 }}>{val}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>{lib}</div>
+                    </div>
+                  ))}
+                </div>
+                {etatG.a_confirmer > 0 && (
+                  <div className="sa-alert warn" style={{ marginBottom: 10, fontSize: 12.5 }}>
+                    ☎ {etatG.a_confirmer} gagnant{etatG.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
+                  </div>
+                )}
+              </>
+            )}
+            {!chargeG && gagnants?.length === 0 && <div className="sa-muted" style={{ fontSize: 13 }}>Aucun gagnant tiré pour ce partenaire.</div>}
+            {!chargeG && (gagnants ?? []).map(g => (
+              <div key={g.tirage_id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6 }}>
+                <span style={{ flex: 1, minWidth: 150 }}>
+                  <b style={{ fontSize: 13 }}>{g.etat === 'a_confirmer' ? 'À attribuer' : (g.joueur_nom ?? '—')}</b>
+                  <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}> · {g.lot_nom}</span>
+                </span>
+                <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7C2D92' }}>{g.ticket_code ?? '—'}</span>
+                <span className={`sa-chip ${g.etat === 'retire' ? 'live' : g.etat === 'confirme' ? 'live' : 'past'}`}>
+                  {g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}
+                </span>
+                {g.retrait_token && (
+                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
+                )}
+                {g.etat !== 'a_confirmer' && (
+                  <>
+                    <button
+                      className="sa-btn sm"
+                      onClick={() => {
+                        const url = window.flowinMailGagnant?.gmailUrl({
+                          joueur_nom: g.joueur_nom, email: g.joueur_email, lot_nom: g.lot_nom,
+                          ticket_code: g.ticket_code, retrait_token: g.retrait_token, type: 'lot',
+                        })
+                        if (url) window.open(url, '_blank', 'noopener')
+                      }}
+                    >
+                      ✉️ Gagnant
+                    </button>
+                    <button
+                      className="sa-btn sm"
+                      onClick={() => window.open(mailPartenaireUrl(g, p.nom, p.email ?? null), '_blank', 'noopener')}
+                    >
+                      ✉️ Vous
+                    </button>
+                  </>
+                )}
+                {g.etat === 'a_confirmer' && (
+                  <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
+                )}
+              </div>
+            ))}
+          </>
+        )}
+
+        {tabActif === 'comm' && (
+          <>
+            <a
+              href={`/nds/kit-digital/index.html#${p.id.replace(/^pt-/, '')}`}
+              target="_blank" rel="noreferrer"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
+            >
+              📦 Dossier complet (A3/A4/A5, vidéo, QR, zip) →
+            </a>
+            <SectionHeader>📦 Pack d&apos;envoi</SectionHeader>
+            <div className="sa-alert info" style={{ marginBottom: 10, fontSize: 12.5 }}>
+              Tout ce que le commerçant doit recevoir, réuni ici.
+            </div>
+            {packEnvoi(p.id).map(el => (
+              <div key={el.libelle} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 8, marginBottom: 6 }}>
+                <span>{el.icone}</span>
+                <span style={{ flex: 1, fontSize: 12.5 }}>{el.libelle}</span>
+                <a className="sa-btn sm" href={el.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Ouvrir</a>
+                <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(el.url)}>Copier</button>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* L ONGLET CONTRAT NE CONTENAIT QUE LE CODE PIN (constate le 11/09) :
+            le bon de commande, la facture, le montant et le paiement etaient
+            restes dans l onglet Infos. L onglet s appelait « Contrat » et ne
+            montrait aucun contrat.
+            Le PIN, lui, sert a valider un billet en caisse : il est deplace
+            dans « Gagnants & billets », a cote des billets qu il valide. */}
+        {tabActif === 'contrat' && (
+          <>
             <SectionHeader>💶 Sponsoring &amp; facturation</SectionHeader>
             <div className="sa-field">
               <label className="sa-label">Formule / offre choisie</label>
@@ -409,143 +559,6 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                 </div>
               </>
             )}
-          </>
-        )}
-
-        {tabActif === 'lots' && (
-          <>
-            <SectionHeader>{(gagnants ?? pLots).length} lot{(gagnants ?? pLots).length > 1 ? 's' : ''}</SectionHeader>
-            {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
-            {!chargeG && gagnants && gagnants.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
-            {!chargeG && gagnants && gagnants.map(g => (
-              <div key={g.tirage_id} className="sa-list-item">
-                <Ico k="gift" size={20} style={{ color: 'var(--sa-accent)' }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700 }}>{g.lot_nom}</div>
-                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.joueur_nom ?? '—'}</div>
-                </div>
-                {g.etat === 'retire' && <span className="sa-chip live">Retiré</span>}
-              </div>
-            ))}
-            {!gagnants && !chargeG && pLots.map(l => (
-              <div key={l.id} className="sa-list-item">
-                <Ico k="gift" size={20} style={{ color: 'var(--sa-accent)' }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
-                  <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
-
-        {tabActif === 'gagnants' && (
-          <>
-            <SectionHeader>🏆 Gagnants &amp; billets</SectionHeader>
-            {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
-            {!chargeG && etatG && (
-              <>
-                <div className="sa-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 12 }}>
-                  {([['Tirés', etatG.tires], ['À appeler', etatG.a_confirmer], ['Confirmés', etatG.confirmes], ['Retirés', etatG.retires]] as [string, number][]).map(([lib, val]) => (
-                    <div key={lib} style={{ background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 20, fontWeight: 800 }}>{val}</div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>{lib}</div>
-                    </div>
-                  ))}
-                </div>
-                {etatG.a_confirmer > 0 && (
-                  <div className="sa-alert warn" style={{ marginBottom: 10, fontSize: 12.5 }}>
-                    ☎ {etatG.a_confirmer} gagnant{etatG.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
-                  </div>
-                )}
-              </>
-            )}
-            {!chargeG && gagnants?.length === 0 && <div className="sa-muted" style={{ fontSize: 13 }}>Aucun gagnant tiré pour ce partenaire.</div>}
-            {!chargeG && (gagnants ?? []).map(g => (
-              <div key={g.tirage_id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6 }}>
-                <span style={{ flex: 1, minWidth: 150 }}>
-                  <b style={{ fontSize: 13 }}>{g.etat === 'a_confirmer' ? 'À attribuer' : (g.joueur_nom ?? '—')}</b>
-                  <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}> · {g.lot_nom}</span>
-                </span>
-                <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7C2D92' }}>{g.ticket_code ?? '—'}</span>
-                <span className={`sa-chip ${g.etat === 'retire' ? 'live' : g.etat === 'confirme' ? 'live' : 'past'}`}>
-                  {g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}
-                </span>
-                {g.retrait_token && (
-                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
-                )}
-                {g.etat !== 'a_confirmer' && (
-                  <>
-                    <button
-                      className="sa-btn sm"
-                      onClick={() => {
-                        const url = window.flowinMailGagnant?.gmailUrl({
-                          joueur_nom: g.joueur_nom, email: g.joueur_email, lot_nom: g.lot_nom,
-                          ticket_code: g.ticket_code, retrait_token: g.retrait_token, type: 'lot',
-                        })
-                        if (url) window.open(url, '_blank', 'noopener')
-                      }}
-                    >
-                      ✉️ Gagnant
-                    </button>
-                    <button
-                      className="sa-btn sm"
-                      onClick={() => window.open(mailPartenaireUrl(g, p.nom, p.email ?? null), '_blank', 'noopener')}
-                    >
-                      ✉️ Vous
-                    </button>
-                  </>
-                )}
-                {g.etat === 'a_confirmer' && (
-                  <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
-                )}
-              </div>
-            ))}
-          </>
-        )}
-
-        {tabActif === 'comm' && (
-          <>
-            <a
-              href={`/nds/kit-digital/index.html#${p.id.replace(/^pt-/, '')}`}
-              target="_blank" rel="noreferrer"
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
-            >
-              📦 Dossier complet (A3/A4/A5, vidéo, QR, zip) →
-            </a>
-            <SectionHeader>📦 Pack d&apos;envoi</SectionHeader>
-            <div className="sa-alert info" style={{ marginBottom: 10, fontSize: 12.5 }}>
-              Tout ce que le commerçant doit recevoir, réuni ici.
-            </div>
-            {packEnvoi(p.id).map(el => (
-              <div key={el.libelle} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 8, marginBottom: 6 }}>
-                <span>{el.icone}</span>
-                <span style={{ flex: 1, fontSize: 12.5 }}>{el.libelle}</span>
-                <a className="sa-btn sm" href={el.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Ouvrir</a>
-                <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(el.url)}>Copier</button>
-              </div>
-            ))}
-          </>
-        )}
-
-        {tabActif === 'contrat' && (
-          <>
-            <SectionHeader>🔐 Code de validation en caisse</SectionHeader>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff8ea', border: '1px solid #f2e1b6', borderRadius: 12, padding: '14px 16px', marginBottom: 10 }}>
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: '#a1690a' }}>PIN du commerce</div>
-                <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 26, fontWeight: 800, letterSpacing: 7, color: '#23142c', marginTop: 4 }}>
-                  {(p as unknown as Record<string, string>).code_pin ?? '—'}
-                </div>
-              </div>
-              {(p as unknown as Record<string, string>).code_pin && (
-                <button className="sa-btn sm" style={{ marginLeft: 'auto' }}
-                  onClick={() => navigator.clipboard?.writeText(String((p as unknown as Record<string, string>).code_pin))}>📋 Copier</button>
-              )}
-            </div>
-            <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 16 }}>
-              Confidentiel. Le commerçant le saisit pour valider un billet. À ne jamais afficher côté client.
-            </div>
           </>
         )}
 
