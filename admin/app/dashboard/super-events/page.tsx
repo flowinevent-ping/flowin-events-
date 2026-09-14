@@ -83,12 +83,18 @@ export default function Page() {
   }, [liste])
   const master = (liste ?? []).find(s => s.id === 'se-master-superevent') ?? null
 
-  const accesRapides: { icone: string; label: string; href: string }[] = [
-    { icone: '🏢', label: 'Pros', href: '/dashboard/pros' },
-    { icone: '🤝', label: 'Partenaires', href: '/dashboard/partenaires' },
-    { icone: '👥', label: 'Joueurs', href: '/dashboard/joueurs' },
-    { icone: '🎁', label: 'Lots', href: '/dashboard/nds-lots' },
-    { icone: '🏆', label: 'Gagnants', href: '/dashboard/gagnants' },
+  const accesRapides = (seId: string): { icone: string; label: string; href: string }[] => [
+    /* LES CINQ LIENS OUVRAIENT LES PAGES GLOBALES (constate le 14/09) : depuis
+       la carte des Nuits du Sud, « Pros » affichait les 16 pros du compte, dont
+       la Croix Rouge qui n a jamais participe au festival. Le super event de la
+       carte n etait transmis nulle part.
+       Ils portent desormais ?se=<id>, et les pages destinataires filtrent
+       dessus. */
+    { icone: '🏢', label: 'Pros', href: `/dashboard/pros?se=${encodeURIComponent(seId)}` },
+    { icone: '🤝', label: 'Partenaires', href: `/dashboard/partenaires?se=${encodeURIComponent(seId)}` },
+    { icone: '👥', label: 'Joueurs', href: `/dashboard/joueurs?se=${encodeURIComponent(seId)}` },
+    { icone: '🎁', label: 'Lots', href: `/dashboard/nds-lots?se=${encodeURIComponent(seId)}` },
+    { icone: '🏆', label: 'Gagnants', href: `/dashboard/gagnants?se=${encodeURIComponent(seId)}` },
   ]
 
   return (
@@ -158,7 +164,7 @@ export default function Page() {
                       )}
 
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-                        {accesRapides.map(a => (
+                        {accesRapides(se.id).map(a => (
                           <a key={a.label} href={a.href} className="sa-btn sm" style={{ textDecoration: 'none', fontSize: 11 }}>
                             {a.icone} {a.label}
                           </a>

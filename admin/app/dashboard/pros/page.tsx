@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { Suspense, useState, useMemo } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SearchBar, StatusChip, ModuleChip, EmptyState } from '@/components/dashboard/DashboardUI'
 import { upsertPro } from '@/lib/dashboard'
 import type { FlowinPro } from '@/lib/types'
+import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
 
 const STATUT_STYLE: Record<string, { bg: string; c: string; label: string }> = {
   en_attente: { bg: '#FEF3C7', c: '#92400E', label: 'En attente' },
@@ -12,7 +13,7 @@ const STATUT_STYLE: Record<string, { bg: string; c: string; label: string }> = {
   refuse: { bg: '#FEE2E2', c: '#991B1B', label: 'Refusé' },
 }
 
-export default function Page() {
+function ProsContenu() {
   const { pros, setPros, openDrawer, openDrawerEdit } = useDashboard()
   const [search, setSearch] = useState('')
   const [filtre, setFiltre] = useState<'tous' | 'en_attente'>('tous')
@@ -33,7 +34,13 @@ export default function Page() {
 
   const nbEnAttente = pros.filter((p: FlowinPro) => p.statut === 'en_attente').length
 
-  const base = filtre === 'en_attente' ? pros.filter((p: FlowinPro) => p.statut === 'en_attente') : pros
+  /* Depuis la carte d un super event, on n affiche que les pros qui y tiennent
+     une station. Sans ?se=, la page reste la vue d ensemble. */
+  const { seId, proIds } = useFiltreSuperEvent()
+  const prosVisibles = proIds ? pros.filter((p: FlowinPro) => proIds.has(p.id)) : pros
+  const base = filtre === 'en_attente'
+    ? prosVisibles.filter((p: FlowinPro) => p.statut === 'en_attente')
+    : prosVisibles
 
   const list = useMemo(() => {
     let l = base
@@ -61,6 +68,14 @@ export default function Page() {
           title="🏢 Pros"
           subtitle={`${list.length} résultat${list.length > 1 ? "s" : ""}${nbEnAttente ? ` · ${nbEnAttente} en attente de validation` : ''}`}
         />
+        {/* Une liste filtree doit le DIRE, sinon elle passe pour la liste
+            complete -- et un pro absent passe pour une donnee perdue. */}
+        {seId && (
+          <div className="sa-alert info" style={{ marginBottom: 12, fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span>Pros de l’opération <code className="sa-code">{seId}</code> uniquement.</span>
+            <a className="sa-btn sm" href="/dashboard/pros" style={{ textDecoration: 'none' }}>Voir tous les pros</a>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           <button className={filtre === 'tous' ? 'sa-btn sm primary' : 'sa-btn sm'} onClick={() => setFiltre('tous')}>Tous</button>
           <button className={filtre === 'en_attente' ? 'sa-btn sm primary' : 'sa-btn sm'} onClick={() => setFiltre('en_attente')}>
@@ -106,5 +121,14 @@ export default function Page() {
         </div>
       </div>
     </div>
+  )
+}
+
+/* useSearchParams impose une frontiere Suspense au build (bailout CSR). */
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <ProsContenu />
+    </Suspense>
   )
 }
