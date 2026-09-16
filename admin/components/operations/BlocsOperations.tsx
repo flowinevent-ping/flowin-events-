@@ -274,13 +274,13 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
   const c = op.contrat
   if (!c) return <Vide>Aucun contrat enregistré pour cette opération.</Vide>
   const paye = c.statutPaiement === 'valide' || c.statutPaiement === 'paye'
-  const commerceSE = op.type === 'super' && c.offre !== null
+  const commerceSE = c.source === 'commerce'
   async function majPaiement(v: string) {
     /* Super event : le paiement est celui du commerce (partenaires) ; event
        autonome : celui de l event (events.paiement_statut). */
     const { error } = commerceSE
       ? (partenaireId ? await supabase.from('partenaires').update({ statut_paiement: v }).eq('id', partenaireId) : { error: { message: 'pas de fiche commerce' } })
-      : await supabase.from('events').update({ paiement_statut: v }).eq('id', op.stations[0]?.id ?? '')
+      : await supabase.from('events').update({ paiement_statut: v }).in('id', op.stations.map(st => st.id))
     if (error) { alert('Échec de la mise à jour.'); return }
     onChange()
   }

@@ -408,7 +408,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             {banques.filter(b => !(b.tags || []).includes('bonus')).length === 0 && (
               <div style={{ fontSize: 13, ...MUTED }}>Aucune banque pour l&apos;instant.</div>
             )}
-            <a href={`/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 4 }}>
+            <a href={`/pro/banques/nouvelle${q ? `${q}&` : '?'}tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 4 }}>
               + Créer une nouvelle banque (nouvel onglet)
             </a>
           </div>
@@ -530,7 +530,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                   )
                 })}
               </div>
-              <a href={`/pro/banques/nouvelle${q}&tags=bonus&depuis=jeu`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 8 }}>
+              <a href={`/pro/banques/nouvelle${q ? `${q}&` : '?'}tags=bonus&depuis=jeu`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 8 }}>
                 + Créer une banque bonus (nouvel onglet)
               </a>
             </div>

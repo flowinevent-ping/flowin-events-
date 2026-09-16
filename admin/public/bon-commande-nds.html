@@ -611,6 +611,8 @@ function exportPdf(){
   var BON_SE = qs('se') || (BON_EV ? null : 'se-nds-2026');
   var BON_PT = qs('pt');
   function rattacher(rec){
+    /* En edition sans parametre, le bon garde son rattachement d origine. */
+    if (EDIT_MODE && !qs('se') && !qs('ev') && !qs('pt')) return rec;
     rec.super_event_id = BON_SE;
     if (BON_EV) rec.event_id = BON_EV;
     if (BON_PT) rec.partenaire_id = BON_PT;

@@ -541,7 +541,7 @@ export default function EventDrawer() {
 
         {drawer.tab === 'lots' && (
           <>
-            <ReglesDiffusion eventId={ev.id} superEventId={ev.super_event_id} />
+            <ReglesDiffusion eventId={ev.id} superEventId={ev.super_event_id} module={ev.module} />
             {pro?.partenaire_id ? (
               <>
                 <div

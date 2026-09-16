@@ -1,5 +1,5 @@
 -- LOT 2 — referentiel 8 : « gain immediat / apres tirage » enfin applique par les jeux.
--- Appliquee le 16/09/2026 sur le projet ywcqtupgoxfzkddqkztk.
+-- Appliquee le 16/09/2026 sur le projet ywcqtupgoxfzkddqkztk (+ garde roue : appliquer_regle_gain_roue).
 --
 -- Le parcours « Creer mon animation » enregistrait la regle (cfg.regleRecompense :
 -- mode tousLesX / aleatoire, everyX, probabilite) et le type de chaque lot
@@ -24,7 +24,7 @@ declare
   e record; r jsonb; v_mode text; v_x int; v_p numeric; v_n int;
   l record; t record; v_gagne boolean := false;
 begin
-  select id, super_event_id, cfg, pro_id into e from events where id = p_event_id;
+  select id, super_event_id, cfg, pro_id, module into e from events where id = p_event_id;
   if not found or e.super_event_id is not null then
     return jsonb_build_object('gagne', false);
   end if;
@@ -44,6 +44,8 @@ begin
     if not found then return jsonb_build_object('gagne', false); end if;
     v_gagne := true;
   else
+    -- Roue : seul le segment gagnant attribue un lot (jamais la regle).
+    if e.module = 'spin' then return jsonb_build_object('gagne', false); end if;
     r := e.cfg -> 'regleRecompense';
     if r is null or jsonb_typeof(r) <> 'object' then return jsonb_build_object('gagne', false); end if;
     v_mode := coalesce(r->>'mode', 'aleatoire');

@@ -22,7 +22,9 @@ type Regle = { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: numb
 
 const estInstant = (note: string | null) => /instantan/i.test(note ?? '')
 
-export default function ReglesDiffusion({ eventId, superEventId }: { eventId: string; superEventId: string | null }) {
+export default function ReglesDiffusion({ eventId, superEventId, module }: { eventId: string; superEventId: string | null; module?: string | null }) {
+  /* Roue : le segment decide du gain, aucune regle aleatoire en plus. */
+  const roue = module === 'spin'
   const [lots, setLots] = useState<LotLigne[] | null>(null)
   const [regle, setRegle] = useState<Regle>({ mode: 'aleatoire', everyX: 10, probabilite: 15 })
   const [etat, setEtat] = useState<'' | 'envoi' | 'ok' | 'ko'>('')
@@ -71,7 +73,7 @@ export default function ReglesDiffusion({ eventId, superEventId }: { eventId: st
     const { data } = await supabase.from('events').select('cfg').eq('id', eventId).maybeSingle()
     const actuel = ((data as { cfg: Record<string, unknown> | null } | null)?.cfg) ?? {}
     const { error } = await supabase.from('events').update({
-      cfg: { ...actuel, regleRecompense: aInstant ? regle : null },
+      cfg: { ...actuel, regleRecompense: aInstant && !roue ? regle : null },
       gain_ticket: (lots ?? []).some(l => !estInstant(l.note)),
     }).eq('id', eventId)
     if (error) ko = true
@@ -102,7 +104,10 @@ export default function ReglesDiffusion({ eventId, superEventId }: { eventId: st
         </div>
       ))}
 
-      {aInstant && (
+      {aInstant && roue && (
+        <div className="sa-muted" style={{ fontSize: 12, marginBottom: 8 }}>Roue : le lot est gagné quand la roue s’arrête sur le segment du même nom.</div>
+      )}
+      {aInstant && !roue && (
         <div style={{ border: '1px solid var(--sa-border)', borderRadius: 10, padding: 10, marginBottom: 8 }}>
           <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 6 }}>Gain immédiat : quand le joueur gagne-t-il ?</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>

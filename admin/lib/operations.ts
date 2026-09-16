@@ -187,6 +187,9 @@ export interface ContratOperation {
   bonMontantTtc: number | null
   factureNumero: string | null
   dateEmission: string | null
+  /** 'commerce' : paiement porte par la fiche commerce (partenaires) ;
+   *  'station' : paiement porte par l event / la station (events.paiement_statut). */
+  source: 'commerce' | 'station'
   /** Referentiel 41 : tous les bons de l operation, chacun avec sa facture. */
   bons: { id: string; statut: string | null; montantTtc: number | null; date: string | null; factureNumero: string | null }[]
 }
@@ -363,14 +366,16 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
         factureEmise: partenaire.facture_emise,
         bonId: bon?.id ?? null, bonStatut: bon?.statut ?? null, bonMontantTtc: bon?.montantTtc ?? null,
         factureNumero: fac?.numero ?? null, dateEmission: fac?.date_emission ?? null,
+        source: 'commerce',
         bons: bonsOp,
       }
     } else {
-      const ps = op.type === 'event' ? ((op.stations[0] as unknown as { paiement_statut?: string | null }).paiement_statut ?? null) : null
+      const ps = op.stations.map(st => (st as unknown as { paiement_statut?: string | null }).paiement_statut ?? null).find(Boolean) ?? null
       contrat = {
         offre: null, montant: null, paiementMode: null, statutPaiement: ps, factureEmise: null,
         bonId: bon?.id ?? null, bonStatut: bon?.statut ?? null, bonMontantTtc: bon?.montantTtc ?? null,
         factureNumero: fac?.numero ?? null, dateEmission: fac?.date_emission ?? null,
+        source: 'station',
         bons: bonsOp,
       }
     }
