@@ -416,9 +416,14 @@ export interface StatsOperation {
   par_jour: { jour: string; parties: number }[]
   sexe: { valeur: string; n: number }[]
   age: { valeur: string; n: number }[]
+  /** Referentiel 22 : 8 premiers codes postaux, le reste en « Autres ». */
+  code_postal?: { valeur: string; n: number }[]
 }
 
 export interface SuiviOperation {
+  /** Referentiel 31 : sur un super event, les chiffres de TOUTE l operation
+   *  (toutes stations), en plus de ceux des stations du pro. */
+  global?: StatsOperation | null
   stations: StationSuivi[]
   totaux: { flashs: number; physique: number; digital: number; parties: number; joueurs: number; rejoue: number }
   stats: StatsOperation | null
@@ -431,16 +436,25 @@ export interface SuiviOperation {
  */
 export async function fetchSuiviOperation(op: Operation, proId: string): Promise<SuiviOperation | null> {
   const ids = op.stations.map(s => s.id)
-  const [{ data, error }, st] = await Promise.all([
+  const toutesStations = async (): Promise<StatsOperation | null> => {
+    if (op.type !== 'super') return null
+    const { data: evs } = await supabase.from('events').select('id').eq('super_event_id', op.id)
+    const tous = ((evs ?? []) as { id: string }[]).map(e => e.id)
+    if (!tous.length) return null
+    const { data: g } = await supabase.rpc('operation_stats', { p_events: tous, p_se: op.id })
+    return (g as StatsOperation) ?? null
+  }
+  const [{ data, error }, st, global] = await Promise.all([
     op.type === 'super'
       ? supabase.rpc('station_tracking', { p_se: op.id, p_pro: proId, p_partenaire: null, p_jour: null, p_tout: false })
       : supabase.rpc('evenement_tracking', { p_events: ids }),
     supabase.rpc('operation_stats', { p_events: ids, p_se: op.type === 'super' ? op.id : null }),
+    toutesStations(),
   ])
   if (error) { console.error('[fetchSuiviOperation]', error.message); return null }
   if (st.error) console.error('[fetchSuiviOperation] stats', st.error.message)
   if (!data) return null
-  return { ...(data as Omit<SuiviOperation, 'stats'>), stats: (st.data as StatsOperation) ?? null }
+  return { ...(data as Omit<SuiviOperation, 'stats'>), stats: (st.data as StatsOperation) ?? null, global }
 }
 
 /* ── Libelles d etat ───────────────────────────────────────────────────────── */

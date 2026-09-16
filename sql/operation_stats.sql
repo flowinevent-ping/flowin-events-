@@ -1,5 +1,7 @@
 -- STATS UNIFORMES D UNE OPERATION (super event ou event autonome).
--- Appliquee le 16/09/2026 sur le projet ywcqtupgoxfzkddqkztk (migrations operation_stats puis operation_stats_sans_bonus -- ce fichier est l etat final).
+-- Appliquee le 16/09/2026 sur le projet ywcqtupgoxfzkddqkztk (migrations operation_stats,
+-- operation_stats_sans_bonus puis operation_stats_code_postal -- ce fichier est l etat final).
+-- Referentiel 22 (lot 5) : + repartition par code postal (8 premiers, le reste en « Autres »).
 --
 -- Romain, 16/09 : « parties rejouees » = les deux (meme jour ET d un jour a
 -- l autre) ; « pic de frequentation » = les deux (par heure ET par jour).
@@ -40,7 +42,9 @@ mj as (select joueur_id from pa where joueur_id is not null group by joueur_id, 
 aj as (select joueur_id from pa where joueur_id is not null group by joueur_id having count(distinct jour) > 1),
 ph as (select heure, count(*) n from pa group by 1),
 pj as (select jour, count(*) n from pa group by 1),
-jo as (select jj.genre, jj.age_tranche from joueurs jj join j on j.joueur_id = jj.id)
+jo as (select jj.genre, jj.age_tranche, nullif(btrim(jj.code_postal), '') cp from joueurs jj join j on j.joueur_id = jj.id),
+cps as (select coalesce(cp, 'Non renseigné') v, count(*) n from jo group by 1),
+cpr as (select v, n, row_number() over (order by (v = 'Non renseigné'), n desc, v) rg from cps)
 select jsonb_build_object(
   'parties', (select count(*) from pa),
   'joueurs', (select count(*) from j),
@@ -55,7 +59,10 @@ select jsonb_build_object(
             from jo group by 1) s), '[]'::jsonb),
   'age', coalesce((select jsonb_agg(jsonb_build_object('valeur', v, 'n', n) order by v) from (
             select coalesce(nullif(age_tranche, ''), 'Non renseigné') v, count(*) n
-            from jo group by 1) a), '[]'::jsonb)
+            from jo group by 1) a), '[]'::jsonb),
+  'code_postal', coalesce((select jsonb_agg(jsonb_build_object('valeur', v, 'n', n) order by n desc) from (
+            select case when rg <= 8 then v else 'Autres' end v, sum(n)::int n
+            from cpr group by 1) c), '[]'::jsonb)
 );
 $function$;
 grant execute on function public.operation_stats(text[], text) to public, anon, authenticated;

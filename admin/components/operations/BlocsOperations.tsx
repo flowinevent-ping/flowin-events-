@@ -20,9 +20,10 @@ import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/n
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
+import { ContenuCrm, ContenuReponses } from './DataOperation'
 
 export type Mode = 'sa' | 'pro'
-export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking'
+export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking' | 'crm'
 
 const ACC = 'var(--sa-accent, #7C2D92)'
 const MUT = 'var(--sa-muted, #64748B)'
@@ -314,7 +315,7 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
 /* ── Tracking ──────────────────────────────────────────────────────────────── */
 
 export function ContenuTracking({ op, proId, onStation }: {
-  op: Operation; proId: string; onStation?: (eventId: string) => void
+  op: DonneesOperation; proId: string; onStation?: (eventId: string) => void
 }) {
   const [s, setS] = useState<SuiviOperation | null | undefined>(undefined)
   const [origines, setOrigines] = useState<{ source: string; n: number }[]>([])
@@ -346,6 +347,20 @@ export function ContenuTracking({ op, proId, onStation }: {
   const t = s.totaux
   return (
     <>
+      {op.type === 'super' && s.global && (
+        <>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, marginBottom: 4 }}>Toute l’opération — toutes stations</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+            <Mini v={s.global.parties} l="parties" />
+            <Mini v={s.global.joueurs} l="joueurs" />
+            <Mini v={s.global.rejoue_autre_jour} l="revenus un autre jour" />
+            <Mini v={s.global.pic_heure ? `${s.global.pic_heure.heure}h` : '—'} l="pic horaire" />
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, marginBottom: 4 }}>
+            {op.stations.length > 1 ? 'Vos stations' : 'Votre station'}
+          </div>
+        </>
+      )}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <Mini v={t.flashs} l="flashs QR" />
         <Mini v={t.physique} l="dont physique" />
@@ -379,6 +394,8 @@ export function ContenuTracking({ op, proId, onStation }: {
           ))}
         </>
       )}
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '14px 0 6px' }}>Réponses aux questions</div>
+      <ContenuReponses op={op} />
     </>
   )
 }
@@ -399,6 +416,7 @@ function StatsUniformes({ st }: { st: StatsOperation }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 10, marginBottom: 8 }}>
           <Camembert titre="Sexe" parts={st.sexe} unite="joueurs" />
           <Camembert titre="Tranches d’âge" parts={st.age} unite="joueurs" />
+          {st.code_postal && st.code_postal.length > 0 && <Camembert titre="Codes postaux" parts={st.code_postal} unite="joueurs" />}
         </div>
       )}
     </>
@@ -452,6 +470,7 @@ export function OngletOperationsSA({ proId, onglet, onStation }: {
           {onglet === 'contrat' && <ContenuContrat op={op} mode="sa" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={proId} onStation={onStation} />}
           {onglet === 'stations' && <ContenuStations op={op} onStation={onStation} />}
+          {onglet === 'crm' && <ContenuCrm op={op} />}
           {onglet === 'qr' && op.stations.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} module={ev.module} />)}
         </BlocOperation>
       ))}
@@ -489,6 +508,7 @@ export const ONGLETS_FICHE: { id: string; label: string; onglet?: OngletOperatio
   { id: 'c-contrat', label: 'Contrat', onglet: 'contrat' },
   { id: 'qrliens', label: 'QR & Liens', onglet: 'qr' },
   { id: 'tracking', label: 'Tracking', onglet: 'tracking' },
+  { id: 'crm', label: 'CRM', onglet: 'crm' },
 ]
 
 /** Les onglets « donnees » du dashboard pro -- memes blocs que la fiche SA. */
@@ -511,6 +531,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation }: {
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} />}
+          {onglet === 'crm' && <ContenuCrm op={op} />}
         </BlocOperation>
       ))}
     </>
