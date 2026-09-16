@@ -41,6 +41,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
           <h1 style={H1}>Mes opérations</h1>
           <div style={SUB}>Vos animations et super events, du plus récent au plus ancien.</div>
         </div>
+        <Link href={`/pro/parcours${q}`} style={{ ...BTN2, textDecoration: 'none' }}>Parcours mobil</Link>
         <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, textDecoration: 'none' }}>+ Nouvelle opération</Link>
       </div>
 

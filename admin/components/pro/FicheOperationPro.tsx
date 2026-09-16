@@ -10,7 +10,7 @@ import { fetchOperationsPro, libelleDates, libelleModule, libelleStatut, type Op
 import { ContenuLots, ContenuComm, ContenuContrat, ContenuTracking } from '@/components/operations/BlocsOperations'
 import { ContenuCrm } from '@/components/operations/DataOperation'
 import { BlocGagnants } from '@/components/pro/GagnantsClient'
-import ApercuJeu from '@/components/parcours/ApercuJeu'
+import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, BTN2 } from '@/lib/proui'
 
@@ -28,13 +28,12 @@ export type OngletOp = typeof ONGLETS_OP[number]['id']
 export default function FicheOperationPro({ initial, cle, onglet: ongletInitial }: { initial: OperationsPro; cle: string; onglet: OngletOp }) {
   const [data, setData] = useState(initial)
   const [onglet, setOnglet] = useState<OngletOp>(ongletInitial)
-  const [station, setStation] = useState<string | null>(null)
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
   const op = data.operations.find(o => o.cle === cle)
   const q = `?pro=${encodeURIComponent(initial.proId)}`
   if (!op) return <div style={CARD}>Opération introuvable. <a href={`/pro${q}`} style={{ color: C.accent, fontWeight: 700 }}>Mes opérations</a></div>
   const pt = data.partenaire
-  const st = op.stations.find(s => s.id === station) ?? op.stations[0]
+  const st = op.stations[0]
 
   function changer(o: OngletOp) {
     setOnglet(o)
@@ -72,34 +71,25 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
 
       <div style={CARD}>
         {onglet === 'jeu' && st && (
-          <div className="nop-grille">
-            <style>{`.nop-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
-              @media (max-width:1020px){.nop-grille{grid-template-columns:1fr}}`}</style>
+          <div>
             <div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{libelleModule(st.module)}</div>
               <div style={{ fontSize: 13, ...MUTED, marginTop: 3, marginBottom: 14 }}>
                 {op.type === 'super' ? 'Le jeu du super event, identique sur chaque station.' : 'Le jeu de votre animation, tel que vos clients le voient.'}
               </div>
               {op.type === 'super' && (
-                <>
-                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', color: C.attenue, marginBottom: 6 }}>
-                    {op.stations.length > 1 ? 'Vos stations' : 'Votre station'}
-                  </div>
-                  {op.stations.map(s => (
-                    <button key={s.id} onClick={() => setStation(s.id)}
-                      style={{ display: 'block', width: '100%', textAlign: 'left', marginBottom: 6, borderRadius: 14, padding: '10px 14px', cursor: 'pointer',
-                        border: s.id === st.id ? `2px solid ${C.magenta}` : `1.5px solid ${C.bordureChamp}`, background: s.id === st.id ? 'rgba(224,33,138,.07)' : C.champ }}>
-                      <b>{s.nom}</b> <span style={MUTED}>· {s.participants ?? 0} participations</span>
-                    </button>
-                  ))}
-                  <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginTop: 8 }}>Carte et bilan du super event</a>
-                </>
+                <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Carte et bilan du super event</a>
               )}
               {op.type === 'event' && (
                 <a href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Activité détaillée</a>
               )}
             </div>
-            <ApercuJeu module={st.module} eventId={st.id} saisie={{}} titre="Votre jeu en ce moment" />
+          </div>
+        )}
+        {onglet === 'jeu' && (
+          <div style={{ marginTop: 18 }}>
+            {/* Parcours mobil d origine : parcours event + parcours super event, choix de la station. */}
+            <ParcoursMobil events={op.stations.map(s => ({ id: s.id, module: s.module, nom: s.nom, super_event_id: s.super_event_id }))} showTitle={false} />
           </div>
         )}
         {onglet === 'lots' && <ContenuLots op={op} />}
