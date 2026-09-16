@@ -226,3 +226,17 @@ Base : sections 1 à 3 (le référentiel) + les captures de Romain (17:28) + le 
 2. Aucun élément visuel créé : chaque écran part d'un fichier existant nommé dans la colonne « Éléments existants ». S'il n'existe rien, maquette montrée avant d'écrire du code.
 3. Ce que je remarque en plus va dans « À trancher », jamais dans le code.
 4. Fin de lot : liste des URL à ouvrir pour vérifier, écran par écran.
+
+### Réalisé le 16/09 (commit 5bdac6e) — P1 à P7
+
+| N° | Fait | Où vérifier |
+|---|---|---|
+| P1 | Menu pro à 4 entrées (barre latérale et barre du bas mobile). Les anciennes pages (events, lots, com, parcours, crm, tirage, tracking, contrat, entreprise, jeu, rejoindre) renvoient vers leur nouvelle place. Fiche opération à onglets : Jeu · Lots · Diffusion · Gagnants · Trafic · Contacts · Contrat | `/pro`, `/pro/operation?op=…`, `/pro/donnees`, `/pro/compte` |
+| P2 | Un seul parcours : choix (animation / rejoindre / super event) puis Établissement → Jeu → Lots → Diffusion & récap. `CreerAnimationWizard` et `RejoindreWizard` supprimés | `/pro/nouvelle` |
+| P3 | Cadre téléphone = vraie page du jeu sur un event de démo (`ev-demo-nds2026`, `ev-demo-quiz`, `ev-demo-quizsolo`, `ev-demo-quizmaster`, `ev-demo-spin`, `ev-demo-vote`, `ev-demo-tombola`) avec `?preview=1&apercu=` : nom, lots et contenu saisis s'affichent, rien n'est écrit. Aussi dans les parcours SA (wizard event et super event) | étape Jeu de `/pro/nouvelle`, bouton « Ouvrir en plein écran » |
+| P4 | Billet unique = `nds/billets-partenaires.html` (logo officiel, nom de l'opération hors NDS, mode aperçu sans boutons). Tous les liens « Voir mon billet » y mènent, sauf la carte « Gagné tout de suite » de `NDS2026Client.tsx` (fichier protégé, garde `lot.html`, déjà à la charte NDS). `bon-achat-template.html` supprimé | étape Lots de `/pro/nouvelle` |
+| P5 | Rejoindre : adresse seule, aperçu sur l'accueil du jeu de la station, pack seulement si le super event en a un | `/pro/nouvelle?type=rejoindre` |
+| P6 | `CHARTE_PRO` (lib/charte.ts) : Manrope, fond #f2edf7, accent #7C2D92, boutons dégradé magenta, filet or → magenta. Espace pro entier repeint | toutes les pages `/pro` |
+| P7 | `parcoursCSS` commun (boutons, cartes, choix, ticket) + fond et police NDS sur Quiz, Quiz solo, Quiz master, Roue, Vote, Tombola | `/parcours/<jeu>?ev=ev-demo-<jeu>` |
+
+SQL appliqué : `billet_unique.sql`, `evenements_demo_apercu.sql`, `controle_incoherences.sql` (events de démo exclus des contrôles).
