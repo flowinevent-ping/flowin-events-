@@ -39,7 +39,8 @@ const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
   /* Le gabarit de reference en tete, et par defaut : c est de NDS 2026 qu on
      part, pas d une page blanche (Romain, 03/09). */
   { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Le gabarit de référence — quiz, bonus, ticket', icone: '🎯' },
-  { id: 'spin', nom: 'Roue', sous: 'Un tour, un lot immédiat', icone: '🎡' },
+  /* Pas de roue : un super event se joue en tirage au sort uniquement
+     (referentiel 34) — la roue distribue un lot immediat. */
   { id: 'quiz', nom: 'Quiz', sous: 'Questions à la suite', icone: '🧠' },
   { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur', icone: '🎤' },
   { id: 'quizsolo', nom: 'Quiz Solo', sous: 'Le joueur seul, à son rythme', icone: '🎯' },
@@ -59,12 +60,12 @@ export default function Page() {
   const [logoUrl, setLogoUrl] = useState('')
   const [geofence, setGeofence] = useState('150')
   const [tirageGlobal, setTirageGlobal] = useState(true)
-  const [choisis, setChoisis] = useState<Record<string, string>>({}) // pro_id -> module
+  const [choisis, setChoisis] = useState<Record<string, true>>({})
   const [recherchePro, setRecherchePro] = useState('')
-  /* FAMILLE G — le contenu du jeu se regle A LA CREATION, station par station.
-     Les stations sortaient avec un cfg vide (ni banque, ni qrUrl) : « Assurance
-     Charvolin » aux Fetes du Haut Pays en est la trace. */
-  const [cfgs, setCfgs] = useState<Record<string, Record<string, unknown>>>({})
+  /* REFERENTIEL 25/33 — le jeu est choisi UNE fois, par le createur du super
+     event, et chaque station en herite (super_events.module / cfg_jeu). */
+  const [module, setModule] = useState<string>(GABARIT_MODULE)
+  const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
   const [banques, setBanques] = useState<Banque[]>([])
   useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
 
@@ -96,17 +97,18 @@ export default function Page() {
   }, [pros, recherchePro])
 
   const nbChoisis = Object.keys(choisis).length
-  const stationsSansQuestions = Object.keys(choisis)
-    .filter(pid => JEUX_A_QUESTIONS.indexOf(choisis[pid]) >= 0 && nbSourcesQuestions(cfgs[pid]) === 0)
+  const jeuSansQuestions = JEUX_A_QUESTIONS.indexOf(module) >= 0 && nbSourcesQuestions(cfgJeu) === 0
   const proApercu = (apercuPro && choisis[apercuPro]) ? apercuPro : Object.keys(choisis)[0] ?? ''
 
-  const basculerPro = (proId: string) =>
+  const basculerPro = (proId: string) => {
+    if (!choisis[proId]) setApercuPro(proId)
     setChoisis(c => {
       const n = { ...c }
       if (n[proId]) delete n[proId]
-      else n[proId] = GABARIT_MODULE
+      else n[proId] = true
       return n
     })
+  }
 
   async function creer() {
     setOccupe(true); setRetour(null)
@@ -116,11 +118,11 @@ export default function Page() {
       geofenceM: geofence ? Number(geofence) : null,
       logoUrl: logoUrl.trim() || null,
       tirageGlobal,
+      module,
+      cfgJeu,
       pros: Object.keys(choisis).map(proId => ({
         pro_id: proId,
         nom: pros.find(p => p.id === proId)?.nom ?? proId,
-        module: choisis[proId],
-        cfg: cfgs[proId] ?? {},
       })),
     })
     setOccupe(false)
@@ -186,6 +188,28 @@ export default function Page() {
       ),
     },
     {
+      id: 'jeux', icone: '🎮', titre: 'Le jeu de l’opération',
+      sous: 'Choisi une fois pour toute l’opération : chaque station, présente ou à venir, propose ce jeu. Tirage au sort uniquement.',
+      bloque: jeuSansQuestions ? 'Choisissez les questions du jeu pour continuer.' : undefined,
+      contenu: (
+        <div style={{ display: 'grid', gap: 14 }}>
+          <div className="sa-choix-grille">
+            {MODULES.map(m => (
+              <VignetteChoix
+                key={m.id}
+                titre={m.nom} sous={m.sous} icone={m.icone}
+                actif={module === m.id}
+                onClick={() => { setModule(m.id); setCfgJeu({}) }}
+              />
+            ))}
+          </div>
+          <div style={{ paddingLeft: 10, borderLeft: '3px solid var(--sa-border)' }}>
+            <ConfigJeu module={module} cfg={cfgJeu} onChange={setCfgJeu} banques={banques} />
+          </div>
+        </div>
+      ),
+    },
+    {
       id: 'pros', icone: '🏢', titre: 'Les pros participants',
       sous: 'Chaque pro sélectionné reçoit une station de jeu rattachée à cette opération. On peut en ajouter d’autres plus tard.',
       contenu: (
@@ -201,7 +225,7 @@ export default function Page() {
             <b>Un pro qui demande à participer</b>, lui, passe par son espace
             (<code className="sa-code">/pro/rejoindre</code>) : sa demande atterrit dans{' '}
             <Link href="/dashboard/demandes-rattachement" className="sa-lien">Demandes de participation</Link>,
-            et c’est son approbation qui ouvre la création de sa station.
+            et son approbation crée sa station avec tout ce qu’il a saisi.
           </div>
           <input
             className="sa-input" style={{ maxWidth: 340, marginBottom: 12 }}
@@ -226,47 +250,6 @@ export default function Page() {
             ))}
           </div>
         </>
-      ),
-    },
-    {
-      id: 'jeux', icone: '🎮', titre: 'Le jeu de chaque station',
-      sous: 'Les jeux sont indépendants de l’opération : deux stations du même super event peuvent proposer des jeux différents.',
-      bloque: stationsSansQuestions.length
-        ? `Choisissez les questions de : ${stationsSansQuestions.map(pid => pros.find(p => p.id === pid)?.nom ?? pid).join(', ')}.`
-        : undefined,
-      contenu: nbChoisis === 0 ? (
-        <div className="sa-muted" style={{ fontSize: 13 }}>
-          Aucun pro sélectionné à l’étape précédente — rien à configurer ici.
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: 14 }}>
-          {Object.keys(choisis).map(proId => (
-            <div key={proId}>
-              <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 7 }}>
-                {pros.find(p => p.id === proId)?.nom ?? proId}
-              </div>
-              <div className="sa-choix-grille">
-                {MODULES.map(m => (
-                  <VignetteChoix
-                    key={m.id}
-                    titre={m.nom} sous={m.sous} icone={m.icone}
-                    actif={choisis[proId] === m.id}
-                    // Choisir un jeu montre AUSSI cette station dans l apercu.
-                    onClick={() => { setChoisis(c => ({ ...c, [proId]: m.id })); setApercuPro(proId) }}
-                  />
-                ))}
-              </div>
-              <div style={{ marginTop: 10, paddingLeft: 10, borderLeft: '3px solid var(--sa-border)' }}>
-                <ConfigJeu
-                  module={choisis[proId]}
-                  cfg={cfgs[proId] ?? {}}
-                  onChange={cfg => setCfgs(c => ({ ...c, [proId]: cfg }))}
-                  banques={banques}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
       ),
     },
     {
@@ -304,6 +287,7 @@ export default function Page() {
             ['Nom', nom || '—'],
             ['Identifiant', id || '—'],
             ['Dates', dateD ? `${dateD}${dateF && dateF !== dateD ? ` → ${dateF}` : ''}` : '—'],
+            ['Jeu', MODULES.find(m => m.id === module)?.nom ?? module],
             ['Pros rattachés', nbChoisis ? `${nbChoisis}` : 'aucun'],
             ['Stations créées', nbChoisis ? `${nbChoisis}` : '0'],
             ['Périmètre', geofence ? `${geofence} m` : 'aucun contrôle'],
@@ -316,7 +300,7 @@ export default function Page() {
           ))}
           {nbChoisis > 0 && (
             <div style={{ marginTop: 12, fontSize: 11.5, color: 'var(--sa-muted)', lineHeight: 1.5 }}>
-              Les stations sont créées en statut « à venir », avec le contenu de jeu choisi
+              Les stations sont créées en statut « à venir », avec le jeu de l’opération
               et leur lien de QR. Leurs lots se règlent ensuite depuis la fiche de chaque station.
             </div>
           )}

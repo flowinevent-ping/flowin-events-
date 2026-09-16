@@ -15,7 +15,8 @@
  */
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { fetchBanquesPro, type Banque } from '@/lib/banques'
+import { fetchBanquesToutes, type Banque } from '@/lib/banques'
+import { libelleModule, iconeModule } from '@/lib/operations'
 import { fetchPacksParticipation, type PackParticipation } from '@/lib/commercial'
 import type { SuperEvent } from '@/lib/nds'
 import { Ico } from '@/lib/proicons'
@@ -80,7 +81,7 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
   const [envoi, setEnvoi] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [erreur, setErreur] = useState('')
 
-  useEffect(() => { fetchBanquesPro(proId).then(setBanques) }, [proId])
+  useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
   useEffect(() => {
     fetchPacksParticipation().then(p => { setPacks(p); if (p.length && !packId) setPackId(p[0].id) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +104,10 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
     logoUrl: seChoisi?.logo_url ?? null,
   }
 
-  const banqueQuiz = banques.find(b => !(b.tags || []).includes('bonus'))
+  /* Referentiel 25 : le jeu est celui choisi par le createur du super event.
+     Le pro le voit, il ne le choisit pas. */
+  const cfgSe = (seChoisi?.cfg_jeu ?? {}) as { quizBanques?: string[]; bonusBanques?: string[] }
+  const banquesSe = banques.filter(b => (cfgSe.quizBanques ?? []).indexOf(b.id) >= 0 || (cfgSe.bonusBanques ?? []).indexOf(b.id) >= 0)
   const totalEtapes = 8
   const skip = (n: number) => persona === 'annonceur' && (n === 3 || n === 4)
 
@@ -126,7 +130,8 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
       pro_id: proId, super_event_id: seId,
       persona, categorie, adresse: persona === 'commerce' ? adresse : null,
       code_postal: persona === 'commerce' ? codePostal : null, ville,
-      regle_jeu: persona === 'commerce' ? 'quiz' : null,
+      nom_commerce: nomCommerce.trim() || null,
+      regle_jeu: persona === 'commerce' ? (seChoisi?.module ?? 'nds2026') : null,
       offre, date_debut_souhaite: dateDebut || null, date_fin_souhaite: dateFin || null,
       lots: lotsPropres, pack_id: packId,
       diffusion_physique: diffPhysique, diffusion_digital: diffDigital, diffusion_qr_tracking: diffQr,
@@ -252,19 +257,16 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
 
       {etape === 3 && (
         <div style={CARD}>
-          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Votre banque de questions</div>
-          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Attribuée par Flowin à votre compte partenaire — pas de création ni de questions personnalisées sur les super events.</div>
-          {banqueQuiz ? (
-            <div style={{ border: `2px solid ${BLUE}`, background: 'rgba(39,70,166,.05)', borderRadius: 12, padding: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13.5 }}>{banqueQuiz.nom}</div>
-                <div style={{ fontSize: 11.5, ...MUTED }}>{(banqueQuiz.questions || []).length} questions</div>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Le jeu de l&apos;opération</div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Choisi par l&apos;organisateur du super event : votre station propose ce jeu, en tirage au sort.</div>
+          <div style={{ border: `2px solid ${BLUE}`, background: 'rgba(39,70,166,.05)', borderRadius: 12, padding: 13 }}>
+            <div style={{ fontWeight: 800, fontSize: 14 }}>{iconeModule(seChoisi?.module)} {libelleModule(seChoisi?.module ?? 'nds2026')}</div>
+            {banquesSe.length > 0 && (
+              <div style={{ fontSize: 11.5, ...MUTED, marginTop: 4 }}>
+                {banquesSe.map(b => `${b.nom} (${(b.questions || []).length} questions)`).join(' · ')}
               </div>
-              <span style={{ fontSize: 10.5, fontWeight: 800, color: '#15803D' }}>VALIDÉE</span>
-            </div>
-          ) : (
-            <div style={{ fontSize: 13, ...MUTED }}>Votre banque sera attribuée par l&apos;équipe Flowin.</div>
-          )}
+            )}
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>
             <button style={{ background: accent, color: '#fff', border: 'none', borderRadius: 12, padding: '12px 22px', fontWeight: 800, fontSize: 14, cursor: 'pointer' }} onClick={suivant}>Suivant →</button>
@@ -380,6 +382,7 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
               ['Vous êtes', persona === 'commerce' ? 'Commerce participant' : 'Annonceur / sponsor'],
               ['Super event', supers.find(s => s.id === seId)?.nom ?? '— à choisir —'],
               ['Nom', nomCommerce || '—'],
+              ...(persona === 'commerce' ? [['Jeu', libelleModule(seChoisi?.module ?? 'nds2026')]] : []),
               ...(persona === 'commerce' ? [['Lots', lots.filter(l => l.titre.trim()).map(l => `${l.titre} × ${l.quantite}`).join(', ') || '—']] : []),
               ['Pack', packs.find(p => p.id === packId) ? `${packs.find(p => p.id === packId)!.nom} — ${packs.find(p => p.id === packId)!.prix_ht.toLocaleString('fr-FR')} € HT` : '—'],
               ['Diffusion', [diffPhysique && 'QR physique', diffDigital && 'Lien digital', diffQr && 'QR tracking'].filter(Boolean).join(' · ') || 'Aucune'],

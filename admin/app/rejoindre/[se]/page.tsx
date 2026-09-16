@@ -14,7 +14,7 @@ const NOTFOUND = (
 export default async function Page({ params }: Props) {
   const { data: se } = await supabase
     .from('super_events')
-    .select('id,nom,description,date_d,date_f,frais_pro')
+    .select('id,nom,description,date_d,date_f,frais_pro,module')
     .eq('id', params.se)
     .single()
 

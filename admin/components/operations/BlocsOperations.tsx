@@ -119,14 +119,15 @@ export function ContenuLots({ op }: { op: DonneesOperation }) {
             </div>
             {l.conditions && <div style={{ fontSize: 11, color: MUT }}>{l.conditions}</div>}
           </div>
-          <Pastille ton={l.source === 'engagement' ? 'acc' : 'neutre'}>{l.source === 'engagement' ? 'engagé' : 'sur la station'}</Pastille>
+          {(() => {
+            /* Referentiel 43 : le stock se lit par lot, dans son operation. */
+            if (l.stock) return <Pastille ton={l.stock.dispo > 0 ? 'ok' : 'warn'}>stock {l.stock.dispo} / {l.stock.total}</Pastille>
+            const tiresLot = op.gagnants.filter(g => g.lotNom === l.nom).length
+            const reste = Math.max(0, l.quantite - tiresLot)
+            return <Pastille ton={reste > 0 ? 'neutre' : 'warn'}>{reste} restant{reste > 1 ? 's' : ''} / {l.quantite}</Pastille>
+          })()}
         </div>
       ))}
-      {op.stock && op.stock.total === 0 && op.lots.length > 0 && (
-        <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 8 }}>
-          Aucune unité de stock enregistrée : la validation en caisse ne pourra rien décompter.
-        </div>
-      )}
     </>
   )
 }

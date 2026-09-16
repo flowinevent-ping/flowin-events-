@@ -150,10 +150,12 @@ export interface LotOperation {
   valeur: number | null
   quantite: number
   conditions: string | null
-  /** 'engagement' : lot promis dans l operation (partenaires.lots).
-   *  'station'    : lot enregistre sur un event (table lots). */
-  source: 'engagement' | 'station'
+  /** Referentiel 29 : un lot vit dans la table `lots`, sur sa station, que
+   *  l operation soit un event ou un super event. */
+  source: 'station'
   stationNom: string | null
+  /** Stock physique de ce lot (lots_stock.lot_id), null si non gere en stock. */
+  stock: { total: number; dispo: number } | null
 }
 
 export interface GagnantOperation {
@@ -187,7 +189,8 @@ export interface ContratOperation {
 
 export interface DonneesOperation extends Operation {
   lots: LotOperation[]
-  /** Stock physique du commerce -- n existe que pour le super event auquel sa fiche partenaire est rattachee. */
+  /** Stock physique de l operation (referentiel 43) : les codes de lots_stock
+   *  rattaches aux lots de ses stations. null si aucun lot n est gere en stock. */
   stock: { total: number; dispo: number } | null
   gagnants: GagnantOperation[]
   contrat: ContratOperation | null
@@ -256,8 +259,13 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
         .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,created_at,super_event_id,event_id,statut,type')
         .in('event_id', evIds).neq('statut', 'annule')
       : Promise.resolve({ data: [] }),
-    partenaireId
-      ? supabase.from('lots_stock').select('id,utilise').eq('partenaire', partenaireId)
+    evIds.length
+      ? supabase.from('lots').select('id').in('event_id', evIds)
+        .then(async r => {
+          const lotIds = ((r.data ?? []) as { id: string }[]).map(x => x.id)
+          if (!lotIds.length) return { data: [] }
+          return supabase.from('lots_stock').select('id,lot_id,utilise').in('lot_id', lotIds)
+        })
       : Promise.resolve({ data: [] }),
     partenaireId
       ? supabase.from('bons_commande').select('id,super_event_id,montant_ttc,statut,created_at').eq('partenaire_id', partenaireId).order('created_at', { ascending: false })
@@ -266,7 +274,11 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
   const partenaire = (partRes.data ?? null) as PartenaireMin | null
   const lotsTable = (lotsRes.data ?? []) as Record<string, unknown>[]
-  const stock = (stockRes.data ?? []) as { utilise: boolean | null }[]
+  const stock = (stockRes.data ?? []) as { lot_id: string | null; utilise: boolean | null }[]
+  const stockDe = (lotIds: Set<string>) => {
+    const l = stock.filter(x => x.lot_id && lotIds.has(x.lot_id))
+    return l.length ? { total: l.length, dispo: l.filter(x => !x.utilise).length } : null
+  }
   const bons = (bonsRes.data ?? []) as { id: string; super_event_id: string | null; montant_ttc: number | null; statut: string | null }[]
 
   /* Tirages : dedoublonnes par id (un tirage d event pris dans un super event
@@ -299,40 +311,23 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
       .forEach(f => { const b = f.client?.bon_id; if (b && !facturesParBon.has(b)) facturesParBon.set(b, f) })
   }
 
-  const engagements = Array.isArray(partenaire?.lots) ? (partenaire!.lots as Record<string, unknown>[]) : []
-
   const operations: DonneesOperation[] = ops.map(op => {
     const ids = new Set(op.stations.map(s => s.id))
     const nomStation = (id: string) => op.stations.find(s => s.id === id)?.nom ?? id
     const estSEduPartenaire = op.type === 'super' && !!partenaire && partenaire.super_event_id === op.id
 
-    /* Lots. Sur le super event du partenaire, l engagement (partenaires.lots)
-       fait foi ; les lignes de la table `lots` qui le dupliquent (meme id)
-       ne sont pas repetees. */
-    const lots: LotOperation[] = []
-    const vus = new Set<string>()
-    if (estSEduPartenaire) {
-      engagements.forEach((l, i) => {
-        const id = String(l.id ?? `eng-${i}`)
-        vus.add(id)
-        lots.push({
-          id, nom: String(l.titre ?? l.nom ?? 'Lot'), emoji: (l.emoji as string) ?? null,
-          valeur: num(l.valeur_euros ?? l.valeur),
-          quantite: num(l.quantite ?? l.nb ?? l.gagnants) ?? 1,
-          conditions: (l.conditions as string) ?? null,
-          source: 'engagement', stationNom: null,
-        })
-      })
-    }
-    lotsTable.filter(l => ids.has(String(l.event_id))).forEach(l => {
+    /* Lots : une seule source, la table `lots` (referentiel 29). Les
+       engagements NDS (partenaires.lots) y ont ete recopies sur la station du
+       commerce (sql/operation_unique_lot1.sql). */
+    const lots: LotOperation[] = lotsTable.filter(l => ids.has(String(l.event_id))).map(l => {
       const id = String(l.id)
-      if (vus.has(id)) return
-      lots.push({
+      return {
         id, nom: String(l.titre ?? l.nom ?? 'Lot'), emoji: (l.emoji as string) ?? null,
         valeur: num(l.valeur_euros ?? l.valeur), quantite: num(l.quantite) ?? 1,
         conditions: (l.conditions as string) ?? null,
-        source: 'station', stationNom: op.type === 'super' ? nomStation(String(l.event_id)) : null,
-      })
+        source: 'station' as const, stationNom: op.type === 'super' ? nomStation(String(l.event_id)) : null,
+        stock: stockDe(new Set([id])),
+      }
     })
 
     const gagnants = tirages.filter(t =>
@@ -359,7 +354,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
     return {
       ...op, lots, gagnants, contrat,
-      stock: estSEduPartenaire ? { total: stock.length, dispo: stock.filter(s => !s.utilise).length } : null,
+      stock: stockDe(new Set(lots.map(l => l.id))),
     }
   })
 

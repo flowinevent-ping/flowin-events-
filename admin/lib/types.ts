@@ -230,11 +230,19 @@ export interface DemandeRattachement {
   lng: number | null
   regle_jeu: string | null
   logo_url: string | null
+  persona?: 'commerce' | 'annonceur' | null
+  nom_commerce?: string | null
+  categorie?: string | null
+  adresse?: string | null
+  code_postal?: string | null
+  ville?: string | null
+  /** Station creee a l approbation (approuver_demande_rattachement). */
+  event_id?: string | null
   lots: unknown[]
   offre: string | null
   date_debut_souhaite: string | null
   date_fin_souhaite: string | null
-  statut: 'en_attente' | 'approuve' | 'refuse'
+  statut: 'en_attente' | 'validee' | 'refusee'
   note_sa: string | null
   created_at: string
   traite_at: string | null

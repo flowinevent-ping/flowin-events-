@@ -1,50 +1,34 @@
 'use client'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { libelleModule, iconeModule } from '@/lib/operations'
 
-type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; frais_pro?: number | null }
+type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; frais_pro?: number | null; module?: string | null }
 
-const MODULES = [
-  { v: 'spin', label: 'Roue de la chance 🎡', c: '#F59E0B' },
-  { v: 'quiz', label: 'Quiz 🧠', c: '#3B5CC4' },
-  { v: 'quizsolo', label: 'Quiz solo 🎯', c: '#0EA5A4' },
-  { v: 'quizmaster', label: 'Quiz Master 👑', c: '#4F46E5' },
-  { v: 'vote', label: 'Vote ⭐', c: '#0EA5A4' },
-  { v: 'tombola', label: 'Tombola 🎟️', c: '#E11D48' },
-]
 const CATEGORIES = ['Boulangerie', 'Restaurant', 'Bar · Café', 'Caviste', 'Fleuriste', 'Librairie', 'Épicerie fine', 'Mode', 'Beauté · Coiffure', 'Décoration', 'Autre']
-
-const SPIN_DEFAULT = [
-  { label: '🎁 Surprise', color: '#0F9E73' },
-  { label: 'Rejoue', color: '#64748B', perdant: true },
-  { label: '-10%', color: '#F59E0B' },
-  { label: '🎟️ +1 ticket', color: '#3B5CC4' },
-  { label: 'Pas cette fois', color: '#64748B', perdant: true },
-  { label: 'Cadeau', color: '#E11D48' },
-]
 
 const HERO = '#2746A6'
 
 function slug(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28)
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28)
 }
 
 export default function RejoindreClient({ se }: { se: SE }) {
   const frais = se.frais_pro ?? 49
-  const [done, setDone] = useState<{ evId: string } | null>(null)
+  const [done, setDone] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [err, setErr] = useState('')
   const [f, setF] = useState({
     commerce: '', categorie: '', adresse: '',
     prenom: '', nom: '', email: '', tel: '',
-    module: 'spin', gain: '',
+    lot: '', quantite: '1', conditions: '',
   })
 
   function set<K extends keyof typeof f>(k: K, v: string) { setF(p => ({ ...p, [k]: v })) }
 
   async function submit() {
     setErr('')
-    if (!f.commerce.trim() || !f.categorie || !f.adresse.trim() || !f.prenom.trim() || !f.nom.trim() || !f.email.includes('@') || f.tel.replace(/\s/g, '').length < 8 || !f.module) {
+    if (!f.commerce.trim() || !f.categorie || !f.adresse.trim() || !f.prenom.trim() || !f.nom.trim() || !f.email.includes('@') || f.tel.replace(/\s/g, '').length < 8) {
       setErr('Merci de remplir tous les champs obligatoires.')
       return
     }
@@ -52,23 +36,27 @@ export default function RejoindreClient({ se }: { se: SE }) {
     try {
       const emailLower = f.email.toLowerCase().trim()
       const proId = 'pro-' + slug(emailLower)
-      const evId = 'ev-' + slug(se.id).replace(/^se-/, '') + '-' + Math.random().toString(36).slice(2, 7)
-      const mod = MODULES.find(m => m.v === f.module) ?? MODULES[0]
 
       await supabase.from('pros').upsert({
         id: proId, nom: f.commerce.trim(), adresse: f.adresse.trim(), secteur: f.categorie,
         contact: `${f.prenom.trim()} ${f.nom.trim()}`, email: emailLower, tel: f.tel.trim(),
       }, { onConflict: 'id' })
 
-      const { error: evErr } = await supabase.from('events').insert({
-        id: evId, nom: f.commerce.trim(), module: f.module, super_event_id: se.id, pro_id: proId,
-        status: 'pending', categorie: f.categorie, adresse: f.adresse.trim(),
-        gain_immediat: f.gain.trim() || null, gain_ticket: true, couleur: mod.c,
-        cfg: f.module === 'spin' ? { subtitle: 'Tente ta chance !', spinSegments: SPIN_DEFAULT } : {},
+      /* REFERENTIEL 24 — UN SEUL CHEMIN. Cette page creait directement une
+         station avec un jeu choisi par le commerce (roue par defaut) : le jeu du
+         super event etait ignore et la demande n apparaissait nulle part cote
+         SA. Elle depose maintenant la meme demande que /pro/rejoindre ;
+         l approbation SA cree la station avec le jeu du super event. */
+      const { error: dErr } = await supabase.from('demandes_rattachement_super_event').insert({
+        pro_id: proId, super_event_id: se.id, persona: 'commerce',
+        nom_commerce: f.commerce.trim(), categorie: f.categorie, adresse: f.adresse.trim(),
+        regle_jeu: se.module ?? 'nds2026',
+        lots: f.lot.trim() ? [{ titre: f.lot.trim(), valeur_euros: 0, quantite: Number(f.quantite) || 1, conditions: f.conditions.trim() }] : [],
+        statut: 'en_attente',
       })
-      if (evErr) { setErr("Une erreur est survenue. Réessayez."); setSubmitting(false); return }
+      if (dErr) { setErr("Une erreur est survenue. Réessayez."); setSubmitting(false); return }
 
-      setDone({ evId })
+      setDone(true)
     } catch {
       setErr("Une erreur est survenue. Réessayez.")
     }
@@ -91,7 +79,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
         <div style={{ ...card, marginTop: -18 }}>
           <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', boxShadow: '0 6px 24px rgba(20,26,38,.08)' }}>
             <div style={{ fontSize: 15.5, lineHeight: 1.6, color: '#374151' }}>
-              Merci <strong>{f.prenom}</strong> ! Le commerce <strong>{f.commerce}</strong> est enregistré pour l&apos;opération <strong>{se.nom}</strong>.
+              Merci <strong>{f.prenom}</strong> ! La demande de <strong>{f.commerce}</strong> pour l&apos;opération <strong>{se.nom}</strong> est enregistrée.
             </div>
             <div style={{ background: '#EFF3FE', borderRadius: 14, padding: '15px 16px', margin: '18px 0', fontSize: 14.5, lineHeight: 1.6, color: '#2c3a63' }}>
               Nous validons votre commerce sous 24–48h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
@@ -141,17 +129,21 @@ export default function RejoindreClient({ se }: { se: SE }) {
           <div style={field}><label style={label}>Email *</label><input style={input} type="email" inputMode="email" autoCapitalize="none" value={f.email} onChange={e => set('email', e.target.value)} /></div>
           <div style={field}><label style={label}>Téléphone *</label><input style={input} type="tel" inputMode="tel" value={f.tel} onChange={e => set('tel', e.target.value)} /></div>
 
-          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}>🎮 Votre jeu</div>
-          <div style={field}>
-            <label style={label}>Module de jeu *</label>
-            <select style={input} value={f.module} onChange={e => set('module', e.target.value)}>
-              {MODULES.map(m => <option key={m.v} value={m.v}>{m.label}</option>)}
-            </select>
+          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}>🎮 Le jeu de l&apos;opération</div>
+          <div style={{ ...field, background: '#EFF3FE', borderRadius: 13, padding: '12px 14px', fontSize: 14.5, color: '#2c3a63' }}>
+            <strong>{iconeModule(se.module)} {libelleModule(se.module ?? 'nds2026')}</strong>
+            <div style={{ fontSize: 12.5, marginTop: 4 }}>Choisi par l&apos;organisateur. Les gagnants sont désignés par tirage au sort.</div>
+          </div>
+
+          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}>🎁 Votre lot pour le tirage</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: 11, marginBottom: 15 }}>
+            <div><label style={label}>Lot offert</label><input style={input} value={f.lot} onChange={e => set('lot', e.target.value)} placeholder="ex : 1 bon d'achat de 20 €" /></div>
+            <div><label style={label}>Quantité</label><input style={input} inputMode="numeric" value={f.quantite} onChange={e => set('quantite', e.target.value)} /></div>
           </div>
           <div style={field}>
-            <label style={label}>Gain immédiat offert (optionnel)</label>
-            <input style={input} value={f.gain} onChange={e => set('gain', e.target.value)} placeholder="ex : 1 café offert, -10%…" />
-            <div style={{ fontSize: 12, color: '#9aa0ad', marginTop: 6 }}>Laissez vide pour ne proposer qu&apos;un ticket pour le tirage final.</div>
+            <label style={label}>Conditions d&apos;utilisation</label>
+            <input style={input} value={f.conditions} onChange={e => set('conditions', e.target.value)} placeholder="ex : valable sur présentation du billet" />
+            <div style={{ fontSize: 12, color: '#9aa0ad', marginTop: 6 }}>Facultatif : vous pourrez compléter vos lots avec l&apos;équipe Flowin.</div>
           </div>
 
           {err && <div style={{ background: '#FEECEC', color: '#B42318', borderRadius: 12, padding: '11px 14px', fontSize: 13.5, marginBottom: 14 }}>{err}</div>}

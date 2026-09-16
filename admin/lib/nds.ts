@@ -271,6 +271,9 @@ export interface SuperEvent {
    *  le 03/09 (sql/2026-09-03-super-events-logo-url.sql). Vide = emplacement
    *  laisse libre, comme le demande le gabarit marque blanche. */
   logo_url?: string | null
+  /** Jeu impose a toutes les stations (referentiel 25). */
+  module?: string | null
+  cfg_jeu?: Record<string, unknown> | null
 }
 
 export interface ResultatDuplication {
@@ -289,7 +292,7 @@ export interface ResultatDuplication {
 export async function fetchSuperEvents(opts: { avecGabarit?: boolean } = {}): Promise<SuperEvent[]> {
   const { data, error } = await supabase
     .from('super_events')
-    .select('id, nom, status, date_d, date_f, description, logo_url')
+    .select('id, nom, status, date_d, date_f, description, logo_url, module, cfg_jeu')
     .order('date_d', { ascending: false })
   if (error) { console.error('[fetchSuperEvents]', error.message); return [] }
   const l = (data ?? []) as SuperEvent[]
@@ -345,8 +348,12 @@ export interface BrouillonSuperEvent {
   /** Logo de l operation : il est recopie dans le cfg de chaque station, ce que
    *  le parcours joueur lit deja. */
   logoUrl?: string | null
-  /** Les pros a rattacher, avec le module de jeu de leur station. */
-  pros: { pro_id: string; nom: string; module: string; cfg?: Record<string, unknown> }[]
+  /** Referentiel 25/33 : le jeu est choisi UNE fois, par le createur du super
+   *  event. Il est enregistre sur le super event et chaque station en herite. */
+  module: string
+  cfgJeu: Record<string, unknown>
+  /** Les pros a rattacher : une station chacun, avec le jeu du super event. */
+  pros: { pro_id: string; nom: string }[]
 }
 
 export interface ResultatCreationSE {
@@ -387,6 +394,8 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
     geofence_m: d.geofenceM ?? null,
     tirage_global: d.tirageGlobal,
     logo_url: d.logoUrl || null,
+    module: d.module,
+    cfg_jeu: d.cfgJeu ?? {},
     status: 'upcoming',
     events: [],
     pros: d.pros.map(p => p.pro_id),
@@ -409,7 +418,7 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
       id: evId,
       pro_id: p.pro_id,
       nom: p.nom,
-      module: p.module,
+      module: d.module,
       status: 'upcoming',
       super_event_id: d.id,
       date_d: d.dateD || null,
@@ -421,11 +430,13 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
          et lien du QR, calcule sur l identifiant definitif -- meme regle que
          lib/wizard.ts. Sans eux la station sortait vide (famille G). */
       cfg: {
-        ...(p.cfg ?? {}),
+        ...(d.cfgJeu ?? {}),
         ...(d.logoUrl ? { logoUrl: d.logoUrl } : {}),
-        qrUrl: `https://flowin-events.vercel.app/parcours/${p.module || 'quiz'}?ev=${evId}`,
+        qrUrl: `https://flowin-events.vercel.app/parcours/${d.module || 'nds2026'}?ev=${evId}`,
       },
       participants: 0, gagnants: 0, joueurs_optin: 0,
+      // Referentiel 34 : super event = tirage au sort uniquement.
+      gain_ticket: true, gain_immediat: null,
     })
     // Une station qui echoue ne doit pas annuler les autres : on continue et on
     // le dira. Le SA verra dans la liste laquelle manque.
