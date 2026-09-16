@@ -4,6 +4,7 @@ import { fetchJours, fetchStations, fetchRapportPoints } from '@/lib/nds'
 import { fetchEventSuperEventStats } from '@/lib/dashboard'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
+import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
@@ -170,6 +171,12 @@ export default async function ProStationPage({ params, searchParams }: { params:
             </div>
           ))
         )}
+      </div>
+
+      {/* FAMILLE I — un event qui existe se previsualise par son vrai parcours. */}
+      <div style={CARD}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Aperçu du parcours joueur</div>
+        <ParcoursMobil events={[{ id: ev.id, module: ev.module, nom: ev.nom, super_event_id: ev.super_event_id }]} showTitle={false} />
       </div>
     </ProShell>
   )

@@ -587,7 +587,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Vous pouvez cocher plusieurs options.</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
             {[
-              { k: 'physique', v: diffPhysique, set: setDiffPhysique, t: 'QR code physique', s: 'Généré par notre équipe, à afficher chez vous — demande envoyée automatiquement' },
+              { k: 'physique', v: diffPhysique, set: setDiffPhysique, t: 'QR code physique', s: 'Produit par notre équipe, à afficher chez vous — la demande est enregistrée avec votre animation, nous revenons vers vous' },
               { k: 'digital', v: diffDigital, set: setDiffDigital, t: 'Lien digital', s: 'Un lien à usage unique, à insérer dans vos posts et réseaux' },
               { k: 'qr', v: diffQr, set: setDiffQr, t: 'QR codes de tracking', s: 'Pour mesurer chaque support précisément — demande envoyée à notre équipe' },
             ].map(o => (
@@ -615,7 +615,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             </a>
           )}
           <div style={{ fontSize: 11.5, ...MUTED, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '9px 12px', marginBottom: 4 }}>
-            Le QR code physique est toujours généré depuis notre centre de pilotage — jamais directement par vous. Votre demande nous arrive automatiquement.
+            Le QR code physique est produit par notre équipe. Votre demande est enregistrée avec l’animation et apparaît dans votre fiche côté Flowin ; aucun email n’est envoyé automatiquement.
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
             <button style={btnGhost} onClick={precedent}>← Précédent</button>

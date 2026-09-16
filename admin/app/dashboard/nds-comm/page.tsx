@@ -13,6 +13,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
+import Diffusion from '@/components/dashboard/Diffusion'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   fetchCommTemplates, fetchCommConfig, resoudreGabarit, variablesComm,
@@ -102,12 +103,9 @@ export default function Page() {
             <div style={{ border: '1px solid var(--sa-border)', borderRadius: 12, marginBottom: 14, padding: '14px 16px', display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 8 }}>QR code du lien</div>
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(lien)}&bgcolor=ffffff&margin=8`}
-                  alt={`QR code ${partenaire?.nom ?? ''}`}
-                  style={{ borderRadius: 8, border: '1px solid var(--sa-border)' }}
-                  width={160} height={160}
-                />
+                {/* FAMILLE F : genere localement, comme partout ailleurs (Diffusion),
+                    plus par api.qrserver.com -- image distante, non telechargeable. */}
+                <Diffusion compact url={lien} titre={partenaire?.nom ?? 'QR'} sousTitre="Scannez pour jouer" />
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 8 }}>Logo partenaire</div>

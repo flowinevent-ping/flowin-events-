@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { libelleModule, iconeModule } from '@/lib/operations'
 
 /* ── KPI Card ── */
 interface KpiProps {
@@ -96,11 +97,10 @@ export function StatusChip({ status }: { status: string }) {
 }
 
 /* ── Module chip ── */
+/* FAMILLE A : la pastille affichait l identifiant brut (« nds2026 »). Libelle
+   et icone viennent de lib/operations.ts, source unique. */
 export function ModuleChip({ module }: { module: string }) {
-  const map: Record<string, string> = {
-    nds2026: '🎯', tombola: '🎟️', quiz: '🧠', quizmaster: '🎮', quizsolo: '⏱️', spin: '🎡', vote: '⭐',
-  }
-  return <span className="sa-chip purple">{map[module] ?? '🎮'} {module}</span>
+  return <span className="sa-chip purple">{iconeModule(module)} {libelleModule(module)}</span>
 }
 
 /* ── Empty state ── */

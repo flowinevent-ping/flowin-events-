@@ -32,6 +32,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import { libelleModule } from '@/lib/operations'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
 import Diffusion from '@/components/dashboard/Diffusion'
@@ -157,7 +158,7 @@ export default function Page() {
                     </span>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div className="nom">{ev.nom}</div>
-                      <div className="mod">{ev.module}</div>
+                      <div className="mod">{libelleModule(ev.module)}</div>
                     </div>
                   </div>
 

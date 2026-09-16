@@ -28,6 +28,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
+import { usePorteeInitiale } from '@/lib/portee'
 
 type Etat = 'a_confirmer' | 'confirme' | 'retire'
 const LIB_ETAT: Record<Etat, string> = { a_confirmer: 'En attente', confirme: 'Confirmé', retire: 'Utilisé' }
@@ -47,6 +48,11 @@ export default function Page() {
   const [list, setList] = useState<GagnantRow[] | null>(null)
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [pro, setPro] = useState('')
+  /* FILTRE ?se= (acces rapide « Gagnants » de la carte d un super event) :
+     la page s ouvre cadree sur l operation, le selecteur reste maitre ensuite. */
+  const [se, setSe] = useState('')
+  const portee = usePorteeInitiale()
+  useEffect(() => { if (portee.se) setSe(portee.se) }, [portee.se])
 
   useEffect(() => { fetchGagnants().then(setList) }, [])
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
@@ -65,12 +71,14 @@ export default function Page() {
   }, [list, partenaires])
 
   const visibles = useMemo(
-    () => (list === null ? null : (pro ? list.filter(t => t.partenaire_id === pro) : list)),
-    [list, pro])
+    () => (list === null ? null : list
+      .filter(t => !pro || t.partenaire_id === pro)
+      .filter(t => !se || t.super_event_id === se)),
+    [list, pro, se])
 
   const colonnes: ColonneCRM<GagnantRow>[] = [
     {
-      id: 'joueur_nom', label: 'Joueur', valeur: t => t.joueur_nom ?? t.joueur_email,
+      id: 'joueur_nom', label: 'Joueur', valeur: t => t.joueur_nom ?? t.joueur_email, multiligne: true,
       rendu: t => (
         <>
           <div style={{ fontWeight: 700 }}>{t.joueur_nom ?? '—'}</div>
@@ -86,7 +94,7 @@ export default function Page() {
       rendu: t => (t.ticket_code ? <code className="sa-code">{t.ticket_code}</code> : '—'),
     },
     {
-      id: 'etat', label: 'Statut', valeur: t => etatDe(t),
+      id: 'etat', label: 'Statut', valeur: t => etatDe(t), multiligne: true,
       rendu: t => {
         const etat = etatDe(t)
         return (
@@ -129,6 +137,9 @@ export default function Page() {
             { id: 'retire', label: 'Utilisés', test: t => etatDe(t) === 'retire' },
           ]}
           selecteurs={[{
+            id: 'se', libelleTout: 'Tous les super events',
+            options: supers.map(x => ({ id: x.id, label: x.nom })), valeur: se, onChange: setSe,
+          }, {
             id: 'pro', libelleTout: 'Tous les pros',
             options: partenairesAvecGagnant, valeur: pro, onChange: setPro,
           }]}

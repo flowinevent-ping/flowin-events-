@@ -105,6 +105,9 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     gain_immediat: premierInstantane?.nom ?? null,
     cfg: {
       quizBanques: params.banqueId ? [params.banqueId] : [],
+      /* Lien du QR, sur l identifiant definitif -- meme regle que lib/wizard.ts
+         (famille G : 3 events sortaient sans). */
+      qrUrl: `https://flowin-events.vercel.app/parcours/${params.module}?ev=${id}`,
       // lotNom/lotQuantite conserves pour compatibilite avec du code qui lirait encore un lot unique
       lotNom: premierLot?.nom ?? '',
       lotQuantite: premierLot?.quantite ?? 0,

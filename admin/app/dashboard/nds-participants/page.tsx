@@ -131,7 +131,7 @@ export default function Page() {
 
   const colonnes: ColonneCRM<CrmParticipant>[] = [
     {
-      id: 'nom', label: 'Participant',
+      id: 'nom', label: 'Participant', multiligne: true,
       valeur: p => nomComplet(p) || p.email || p.joueur_id,
       rendu: p => (
         <>

@@ -3,11 +3,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertPro, deletePro } from '@/lib/dashboard'
-import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
-import QrLiensEvent from './QrLiensEvent'
+import { DrawerTabs, FieldRow, SectionHeader } from './DashboardUI'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
-import { grouperOperations, libelleModule } from '@/lib/operations'
-import { BlocOperation, AucuneOperation, OngletOperationsSA, type OngletOperation } from '@/components/operations/BlocsOperations'
+import { grouperOperations } from '@/lib/operations'
+import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/BlocsOperations'
 import type { FlowinPro } from '@/lib/types'
 
 export default function ProDrawer() {
@@ -61,20 +60,10 @@ export default function ProDrawer() {
      « 0 lot » a cote de « 5 stations »). Ils existent donc pour tous les pros,
      avec ou sans fiche commerce. */
   const operations = grouperOperations(proEvents, supers)
-  const tabs = [
-    { id: 'infos', label: 'Infos' },
-    { id: 'events', label: 'Ses stations', badge: operations.reduce((n, o) => n + o.stations.length, 0) },
-    { id: 'c-lots', label: 'Lots & stock' },
-    { id: 'c-gagnants', label: 'Gagnants & billets' },
-    { id: 'c-comm', label: 'Emails & com' },
-    { id: 'c-contrat', label: 'Contrat' },
-    { id: 'qrliens', label: 'QR & Liens' },
-    { id: 'tracking', label: 'Tracking' },
-  ]
-  /* Correspondance onglet de la fiche -> contenu par operation. */
-  const ONGLET_OPERATION: Record<string, OngletOperation> = {
-    'c-lots': 'lots', 'c-gagnants': 'gagnants', 'c-comm': 'comm', 'c-contrat': 'contrat', tracking: 'tracking',
-  }
+  const nbStations = operations.reduce((n, o) => n + o.stations.length, 0)
+  /* Memes onglets que la fiche partenaire rattachee (ONGLETS_FICHE, famille J). */
+  const tabs = ONGLETS_FICHE.map(t => ({ id: t.id, label: t.label, badge: t.id === 'events' ? nbStations : undefined }))
+  const ongletActif = ONGLETS_FICHE.find(t => t.id === drawer.tab)?.onglet
 
   const initials = p.nom.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
@@ -145,52 +134,20 @@ export default function ProDrawer() {
           </>
         )}
 
-        {drawer.tab === 'qrliens' && (
-          <>
-            <p className="sa-muted" style={{ fontSize: 11.5, marginBottom: 14 }}>
-              Généré et publié par vous — le pro n&apos;y accède qu&apos;une fois « Publié » activé.
-            </p>
-            {operations.length === 0 && <AucuneOperation />}
-            {operations.map(op => (
-              <BlocOperation key={op.cle} op={op}>
-                {op.stations.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} />)}
-              </BlocOperation>
-            ))}
-          </>
+        {drawer.tab === 'events' && liveEvents.length > 0 && (
+          <div className="sa-alert live">🔴 {liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
         )}
-
-        {ONGLET_OPERATION[drawer.tab] && (
+        {drawer.tab === 'qrliens' && (
+          <p className="sa-muted" style={{ fontSize: 11.5, marginBottom: 14 }}>
+            Généré et publié par vous — le pro n&apos;y accède qu&apos;une fois « Publié » activé.
+          </p>
+        )}
+        {ongletActif && (
           <OngletOperationsSA
             proId={p.id}
-            onglet={ONGLET_OPERATION[drawer.tab]}
-            onStation={id => openDrawer('event', id)}
+            onglet={ongletActif}
+            onStation={id => openDrawer('event', id, 'stats')}
           />
-        )}
-
-        {drawer.tab === 'events' && (
-          <>
-            {liveEvents.length > 0 && (
-              <div className="sa-alert live">🔴 {liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
-            )}
-            <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 8 }}>Toucher une station ouvre sa fiche : jeu, participants, lots et gagnants.</div>
-            {operations.length === 0 && <AucuneOperation />}
-            {operations.map(op => (
-              <BlocOperation key={op.cle} op={op}>
-                {op.stations.map(ev => (
-                  <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id, 'stats')} style={{ cursor: 'pointer' }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 700 }}>{ev.nom}</div>
-                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
-                        {libelleModule(ev.module)} · {ev.participants ?? 0} participations
-                      </div>
-                    </div>
-                    <StatusChip status={ev.status} />
-                    <ModuleChip module={ev.module} />
-                  </div>
-                ))}
-              </BlocOperation>
-            ))}
-          </>
         )}
 
       </div>

@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import { libelleModule } from '@/lib/operations'
 import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
@@ -228,7 +229,7 @@ export default function SuperEventDrawer() {
                     <button key={e.id} className="sa-ligne" style={{ marginBottom: 6, padding: '8px 9px' }} onClick={() => openDrawer('event', e.id)}>
                       <span>
                         <span className="n" style={{ fontSize: 12 }}>{e.nom}</span>
-                        <span className="d" style={{ fontSize: 10.5 }}>{e.module} · {e.participants ?? 0} particip.</span>
+                        <span className="d" style={{ fontSize: 10.5 }}>{libelleModule(e.module)} · {e.participants ?? 0} particip.</span>
                       </span>
                     </button>
                   ))}

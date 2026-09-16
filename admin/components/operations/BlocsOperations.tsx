@@ -17,9 +17,11 @@ import {
   type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/nds'
+import Diffusion from '@/components/dashboard/Diffusion'
+import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 
 export type Mode = 'sa' | 'pro'
-export type OngletOperation = 'lots' | 'gagnants' | 'comm' | 'contrat' | 'tracking'
+export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking'
 
 const ACC = 'var(--sa-accent, #7C2D92)'
 const MUT = 'var(--sa-muted, #64748B)'
@@ -237,25 +239,44 @@ export function ContenuComm({ op, partenaireId, partenaireSe, mode }: {
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '14px 0 4px' }}>
         Lien de jeu {op.type === 'super' ? 'par station' : ''}
       </div>
-      {op.stations.map(s => {
-        const dd = (s.cfg as Record<string, unknown> | null)?.diffusion_demandee as { statut?: string; physique?: boolean; digital?: boolean; qr_tracking?: boolean } | undefined
-        const demandes = dd ? [dd.physique && 'supports imprimés', dd.digital && 'diffusion digitale', dd.qr_tracking && 'QR de suivi'].filter(Boolean) : []
-        return (
-          <div key={s.id} style={ligne}>
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <div style={{ fontWeight: 700, fontSize: 12.5 }}>{s.nom}</div>
-              <div style={{ fontSize: 10.5, color: MUT, wordBreak: 'break-all' }}>{lienJeu(s)}</div>
-              {demandes.length > 0 && (
-                <div style={{ fontSize: 11, color: '#B45309', marginTop: 2 }}>
-                  Demande enregistrée ({demandes.join(', ')}) — {mode === 'sa' ? 'à traiter : aucun envoi automatique.' : 'Flowin la traite manuellement ; rien n’est envoyé automatiquement.'}
-                </div>
-              )}
-            </div>
-            <button style={btn} onClick={() => navigator.clipboard?.writeText(lienJeu(s))}>Copier</button>
-          </div>
-        )
-      })}
+      {op.stations.map(s => <LienJeu key={s.id} s={s} mode={mode} />)}
     </>
+  )
+}
+
+/* Une station : son lien, son QR genere localement (famille F : plus
+   d api.qrserver.com), le partage direct -- ce que portait l ancien ProClient
+   dans sa grammaire mobile, repris ici dans la grammaire commune. */
+function LienJeu({ s, mode }: { s: DonneesOperation['stations'][number]; mode: Mode }) {
+  const [ouvert, setOuvert] = useState(false)
+  const url = lienJeu(s)
+  const texte = `Participez à ${s.nom} : ${url}`
+  const dd = (s.cfg as Record<string, unknown> | null)?.diffusion_demandee as { statut?: string; physique?: boolean; digital?: boolean; qr_tracking?: boolean } | undefined
+  const demandes = dd ? [dd.physique && 'supports imprimés', dd.digital && 'diffusion digitale', dd.qr_tracking && 'QR de suivi'].filter(Boolean) : []
+  return (
+          <div style={{ borderTop: `1px solid ${BRD}`, padding: '8px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div style={{ fontWeight: 700, fontSize: 12.5 }}>{s.nom}</div>
+                <div style={{ fontSize: 10.5, color: MUT, wordBreak: 'break-all' }}>{url}</div>
+                {demandes.length > 0 && (
+                  <div style={{ fontSize: 11, color: '#B45309', marginTop: 2 }}>
+                    Demande enregistrée ({demandes.join(', ')}) — {mode === 'sa' ? 'à traiter : aucun envoi automatique.' : 'Flowin la traite manuellement ; rien n’est envoyé automatiquement.'}
+                  </div>
+                )}
+              </div>
+              <button style={btn} onClick={() => setOuvert(o => !o)}>{ouvert ? '▲ QR' : '▼ QR & partage'}</button>
+            </div>
+            {ouvert && (
+              <div style={{ paddingTop: 10 }}>
+                <Diffusion compact url={url} titre={s.nom} sousTitre="Scannez pour jouer" />
+                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                  <a style={btn} href={`https://wa.me/?text=${encodeURIComponent(texte)}`} target="_blank" rel="noopener noreferrer">📲 WhatsApp</a>
+                  <a style={btn} href={`sms:?body=${encodeURIComponent(texte)}`}>💬 SMS</a>
+                </div>
+              </div>
+            )}
+          </div>
   )
 }
 
@@ -427,11 +448,45 @@ export function OngletOperationsSA({ proId, onglet, onStation }: {
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="sa" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="sa" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={proId} onStation={onStation} />}
+          {onglet === 'stations' && <ContenuStations op={op} onStation={onStation} />}
+          {onglet === 'qr' && op.stations.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} />)}
         </BlocOperation>
       ))}
     </>
   )
 }
+
+/* ── Stations d une operation ──────────────────────────────────────────────── */
+
+export function ContenuStations({ op, onStation }: { op: DonneesOperation; onStation?: (eventId: string) => void }) {
+  if (!op.stations.length) return <Vide>Aucune station.</Vide>
+  return (
+    <>
+      {op.stations.map(ev => (
+        <div key={ev.id} style={{ ...ligne, cursor: onStation ? 'pointer' : 'default' }} onClick={() => onStation?.(ev.id)}>
+          <div style={{ flex: 1, minWidth: 160 }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>{ev.nom}</div>
+            <div style={{ fontSize: 11, color: MUT }}>{libelleModule(ev.module)} · {ev.participants ?? 0} participations</div>
+          </div>
+          {ev.status && <Pastille ton={ev.status === 'live' ? 'ok' : ev.status === 'upcoming' ? 'acc' : 'neutre'}>{libelleStatut(ev.status)}</Pastille>}
+          {onStation && <span style={{ color: ACC, fontWeight: 800, fontSize: 12 }}>→</span>}
+        </div>
+      ))}
+    </>
+  )
+}
+
+/** Onglets communs de la fiche pro ET de la fiche partenaire rattachee a un pro (famille J). */
+export const ONGLETS_FICHE: { id: string; label: string; onglet?: OngletOperation }[] = [
+  { id: 'infos', label: 'Infos' },
+  { id: 'events', label: 'Ses stations', onglet: 'stations' },
+  { id: 'c-lots', label: 'Lots & stock', onglet: 'lots' },
+  { id: 'c-gagnants', label: 'Gagnants & billets', onglet: 'gagnants' },
+  { id: 'c-comm', label: 'Emails & com', onglet: 'comm' },
+  { id: 'c-contrat', label: 'Contrat', onglet: 'contrat' },
+  { id: 'qrliens', label: 'QR & Liens', onglet: 'qr' },
+  { id: 'tracking', label: 'Tracking', onglet: 'tracking' },
+]
 
 /** Les onglets « donnees » du dashboard pro -- memes blocs que la fiche SA. */
 export function OngletOperationsPro({ initial, onglet, prefixeStation }: {

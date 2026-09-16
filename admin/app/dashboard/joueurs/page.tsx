@@ -1,148 +1,86 @@
 'use client'
 
 /**
- * Joueurs — vue "style tableur" demandee par Romain (on avait ca en juillet,
- * dashboard.html : xls-table avec en-tetes triables fleche ▲▼⇅ + colonnes
- * detaillees). Reprend le meme principe de tri par colonne, avec le jeu de
- * colonnes explicitement demande : date entree, nom, prenom, adresse, ville,
- * tel, email, event, source, optin. Scope volontairement plus reduit que
- * l'original : pas de selection groupee / export CSV / dropdowns de filtre
- * par valeur (ville/event/optin) -- a ajouter si demande separement.
+ * Joueurs — gabarit unique des listes (ListeCRM, famille H) et filtre `?se=`.
+ *
+ * Colonnes demandees par Romain : date d entree, source, nom, prenom, adresse,
+ * ville, tel, email, opt-in, gains.
+ *
+ * Filtre super event : les joueurs qui ont REELLEMENT joue sur une station de
+ * l operation (table `participations`), pas `joueurs.events` (Pattern C).
  */
-import { useState, useMemo } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/DashboardUI'
+import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import type { FlowinJoueur } from '@/lib/types'
-
-type Cle = 'date' | 'source' | 'nom' | 'prenom' | 'adresse' | 'ville' | 'tel' | 'email' | 'optin' | 'gains'
-type Sens = 1 | -1
+import { supabase } from '@/lib/supabase'
+import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
+import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
 
 const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 
-export default function Page() {
+function JoueursContenu() {
   const { joueurs, openDrawer, openDrawerEdit } = useDashboard()
-  const [search, setSearch] = useState('')
-  const [tri, setTri] = useState<{ cle: Cle; sens: Sens }>({ cle: 'date', sens: -1 })
+  const { seId, eventIds } = useFiltreSuperEvent()
+  const [idsSe, setIdsSe] = useState<Set<string> | null>(null)
 
-  const base = joueurs
+  useEffect(() => {
+    if (!seId || !eventIds) { setIdsSe(null); return }
+    let vivant = true
+    const ids = Array.from(eventIds)
+    if (!ids.length) { setIdsSe(new Set()); return }
+    supabase.from('participations').select('joueur_id').in('event_id', ids).not('joueur_id', 'is', null)
+      .then(({ data }) => {
+        if (vivant) setIdsSe(new Set(((data ?? []) as { joueur_id: string }[]).map(p => p.joueur_id)))
+      })
+    return () => { vivant = false }
+  }, [seId, eventIds])
 
-  const filtres = useMemo(() => {
-    if (!search.trim()) return base
-    const q = search.toLowerCase()
-    return base.filter((j: FlowinJoueur) =>
-      (j.prenom ?? '').toLowerCase().includes(q) ||
-      (j.nom ?? '').toLowerCase().includes(q) ||
-      (j.email ?? '').toLowerCase().includes(q) ||
-      (j.ville ?? '').toLowerCase().includes(q) ||
-      (j.adresse ?? '').toLowerCase().includes(q) ||
-      (j.code_postal ?? '').includes(q))
-  }, [base, search])
+  const lignes = seId ? (idsSe ? joueurs.filter(j => idsSe.has(j.id)) : null) : joueurs
 
-  const list = useMemo(() => {
-    const arr = [...filtres]
-    const { cle, sens } = tri
-    const val = (j: FlowinJoueur): string | number => {
-      switch (cle) {
-        case 'date': return j.first_seen ?? j.ts ?? ''
-        case 'source': return (j.source ?? '').toLowerCase()
-        case 'nom': return (j.nom ?? '').toLowerCase()
-        case 'prenom': return (j.prenom ?? '').toLowerCase()
-        case 'adresse': return (j.adresse ?? '').toLowerCase()
-        case 'ville': return (j.ville ?? '').toLowerCase()
-        case 'tel': return j.tel ?? ''
-        case 'email': return (j.email ?? '').toLowerCase()
-        case 'optin': return j.optin ? 1 : 0
-        case 'gains': return j.gains ?? 0
-      }
-    }
-    arr.sort((a, b) => {
-      const va = val(a), vb = val(b)
-      if (va < vb) return -1 * sens
-      if (va > vb) return 1 * sens
-      return 0
-    })
-    return arr
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtres, tri])
-
-  function trier(cle: Cle) {
-    setTri(prev => prev.cle === cle ? { cle, sens: (prev.sens * -1) as Sens } : { cle, sens: 1 })
-  }
-
-  function Th({ cle, label, width }: { cle: Cle; label: string; width?: number }) {
-    const actif = tri.cle === cle
-    const fleche = actif ? (tri.sens === 1 ? '▲' : '▼') : '⇅'
-    return (
-      <th style={{ width, cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }} onClick={() => trier(cle)}>
-        {label} <span style={{ opacity: actif ? 1 : 0.35, fontSize: 10 }}>{fleche}</span>
-      </th>
-    )
-  }
+  const lien = (href: string, texte: string) => (
+    <a href={href} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{texte}</a>
+  )
+  const colonnes: ColonneCRM<FlowinJoueur>[] = [
+    { id: 'date', label: 'Date entrée', valeur: j => j.first_seen ?? j.ts ?? '', rendu: j => fmtDate(j.first_seen ?? j.ts), largeur: 100, horsRecherche: true },
+    { id: 'source', label: 'Source', valeur: j => j.source, largeur: 110 },
+    { id: 'nom', label: 'Nom', valeur: j => j.nom, rendu: j => <b>{j.nom || '—'}</b>, largeur: 140 },
+    { id: 'prenom', label: 'Prénom', valeur: j => j.prenom, largeur: 120 },
+    { id: 'adresse', label: 'Adresse', valeur: j => j.adresse, largeur: 170 },
+    { id: 'ville', label: 'Ville', valeur: j => `${j.ville ?? ''}${j.code_postal ? ` (${j.code_postal})` : ''}`.trim(), largeur: 140 },
+    { id: 'tel', label: 'Tél.', valeur: j => j.tel, rendu: j => (j.tel ? lien(`tel:${j.tel}`, j.tel) : '—'), largeur: 120 },
+    { id: 'email', label: 'Email', valeur: j => j.email, rendu: j => (j.email ? lien(`mailto:${j.email}`, j.email) : '—'), largeur: 210 },
+    { id: 'optin', label: 'Opt-in', valeur: j => (j.optin ? 1 : 0), rendu: j => (j.optin ? <span className="sa-chip live">✓</span> : <span className="sa-chip">—</span>), largeur: 70, aligne: 'centre', horsRecherche: true },
+    { id: 'gains', label: 'Gains', valeur: j => j.gains ?? 0, largeur: 60, aligne: 'droite', horsRecherche: true },
+    {
+      id: 'actions', label: '', valeur: () => '', horsRecherche: true, nonTriable: true, largeur: 60, aligne: 'droite',
+      rendu: j => <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('joueur', j.id) }}>✏</button>,
+    },
+  ]
 
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader
-          title="👥 Joueurs"
-          subtitle={`${list.length} résultat${list.length > 1 ? 's' : ''} — cliquer un en-tête pour trier`}
+        <ListeCRM<FlowinJoueur>
+          titre="👥 Joueurs"
+          lignes={lignes}
+          colonnes={colonnes}
+          cle={j => j.id}
+          onLigne={j => openDrawer('joueur', j.id)}
+          triDefaut="date"
+          triDescendant
+          placeholderRecherche="Rechercher (nom, email, ville, adresse, code postal)…"
+          entete={seId ? <BandeauFiltreSE seId={seId} quoi="Joueurs" retour="/dashboard/joueurs" /> : undefined}
         />
-        <SearchBar value={search} onChange={setSearch} placeholder="Rechercher (nom, email, ville, adresse, code postal)…" />
-        <div style={{ overflowX: 'auto' }}>
-          <table className="sa-tbl" style={{ width: '100%' }}>
-            <thead><tr>
-              <th className="col-check"><input type="checkbox" /></th>
-              <Th cle="date" label="Date entrée" width={100} />
-              <Th cle="source" label="Source" width={110} />
-              <Th cle="nom" label="Nom" width={130} />
-              <Th cle="prenom" label="Prénom" width={110} />
-              <Th cle="adresse" label="Adresse" width={160} />
-              <Th cle="ville" label="Ville" width={110} />
-              <Th cle="tel" label="Tél." width={120} />
-              <Th cle="email" label="Email" width={190} />
-              <Th cle="optin" label="Opt-in" width={70} />
-              <Th cle="gains" label="Gains" width={60} />
-              <th className="col-actions"></th>
-            </tr></thead>
-            <tbody>
-              {list.length === 0 && (
-                <tr><td colSpan={12} style={{ padding: 0 }}>
-                  <EmptyState title="Aucun résultat" />
-                </td></tr>
-              )}
-              {list.map((j: FlowinJoueur) => {
-                return (
-                  <tr key={j.id} onClick={() => openDrawer('joueur', j.id)}>
-                    <td className="col-check" onClick={e => e.stopPropagation()}><input type="checkbox" /></td>
-                    <td style={{ color: 'var(--sa-muted)', fontSize: 12.5 }}>{fmtDate(j.first_seen ?? j.ts)}</td>
-                    <td style={{ fontSize: 12, color: 'var(--sa-muted)' }}>{j.source || '—'}</td>
-                    <td style={{ fontWeight: 700 }}>{j.nom || '—'}</td>
-                    <td>{j.prenom || '—'}</td>
-                    <td style={{ fontSize: 12.5, color: 'var(--sa-muted)' }}>{j.adresse || '—'}</td>
-                    <td style={{ fontSize: 12.5 }}>{j.ville || '—'}{j.code_postal ? ` (${j.code_postal})` : ''}</td>
-                    <td style={{ fontSize: 12.5 }}>
-                      {j.tel
-                        ? <a href={`tel:${j.tel}`} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{j.tel}</a>
-                        : '—'}
-                    </td>
-                    <td style={{ fontSize: 12.5 }}>
-                      {j.email
-                        ? <a href={`mailto:${j.email}`} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{j.email}</a>
-                        : '—'}
-                    </td>
-                    <td>{j.optin ? <span className="sa-chip live">✅</span> : <span className="sa-chip">—</span>}</td>
-                    <td><strong>{j.gains ?? 0}</strong></td>
-                    <td className="col-actions" onClick={e => e.stopPropagation()}>
-                      <div className="sa-row-actions">
-                        <button className="sa-btn icon sm" title="Éditer" onClick={(e) => { e.stopPropagation(); openDrawerEdit('joueur', j.id) }}>✏</button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <JoueursContenu />
+    </Suspense>
   )
 }

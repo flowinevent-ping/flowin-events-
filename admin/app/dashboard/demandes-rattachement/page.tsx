@@ -121,6 +121,17 @@ export default function Page() {
               {(l.date_debut_souhaite || l.date_fin_souhaite) && (
                 <div style={{ fontSize: 13.5, marginBottom: 6 }}><b>Dates souhaitées :</b> {l.date_debut_souhaite ?? '—'} → {l.date_fin_souhaite ?? '—'}</div>
               )}
+              {/* FAMILLE E : le pro coche une diffusion et l ecran lui disait
+                  « demande envoyee automatiquement ». Rien n etait envoye, et
+                  cet ecran ne l affichait pas : la demande n existait pour
+                  personne. Elle est affichee ici, la ou le SA la traite. */}
+              {(() => {
+                const d = l as unknown as { diffusion_physique?: boolean; diffusion_digital?: boolean; diffusion_qr_tracking?: boolean }
+                const quoi = [d.diffusion_physique && 'QR physique à imprimer', d.diffusion_digital && 'lien digital', d.diffusion_qr_tracking && 'QR de suivi'].filter(Boolean)
+                return quoi.length > 0 ? (
+                  <div style={{ fontSize: 13.5, marginBottom: 6 }}><b>Diffusion demandée :</b> {quoi.join(' · ')} <span style={{ color: '#B45309', fontSize: 12 }}>— à produire par Flowin</span></div>
+                ) : null
+              })()}
               {Array.isArray(l.lots) && l.lots.length > 0 && (
                 <div style={{ fontSize: 13.5, marginBottom: 6 }}>
                   <b>Lots proposés :</b>

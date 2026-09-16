@@ -354,7 +354,7 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Vous pouvez cocher plusieurs options.</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
             {[
-              { v: diffPhysique, set: setDiffPhysique, t: 'QR code physique', s: 'Généré par notre équipe — demande envoyée automatiquement' },
+              { v: diffPhysique, set: setDiffPhysique, t: 'QR code physique', s: 'Produit par notre équipe — la demande part avec votre inscription, nous revenons vers vous' },
               { v: diffDigital, set: setDiffDigital, t: 'Lien digital', s: 'Un lien à usage unique, à insérer dans vos posts et réseaux' },
               { v: diffQr, set: setDiffQr, t: 'QR codes de tracking', s: 'Pour mesurer chaque support — demande envoyée à notre équipe' },
             ].map(o => (

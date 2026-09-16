@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, ModuleChip, StatusChip } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
-import { sansGabarit } from '@/lib/operations'
+import { sansGabarit, libelleModule } from '@/lib/operations'
 import {
   GABARIT_MODULE, GABARIT_NOM, GABARIT_DESC,
   deroulePour, reglesPour, BLOCS_MULTISTATION,
@@ -150,7 +150,7 @@ function Modeles() {
             <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, marginBottom: 4 }}>Événement source</label>
             <select className="sa-input" style={{ width: '100%' }} value={source} onChange={e => choisirSource(e.target.value)}>
               <option value="">— choisir —</option>
-              {events.map(ev => <option key={ev.id} value={ev.id}>{ev.nom} · {ev.module}</option>)}
+              {events.map(ev => <option key={ev.id} value={ev.id}>{ev.nom} · {libelleModule(ev.module)}</option>)}
             </select>
           </div>
           <div>
@@ -182,7 +182,7 @@ function Modeles() {
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 12.5 }}>{m.nom}</div>
                   <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginTop: 2 }}>
-                    {m.module}
+                    {libelleModule(m.module)}
                     {resumeModele(m).length > 0 && ` · ${resumeModele(m).join(' · ')}`}
                     {origine && ` · tiré de « ${origine.nom} »`}
                   </div>

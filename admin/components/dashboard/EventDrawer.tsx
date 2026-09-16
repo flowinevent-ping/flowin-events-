@@ -8,6 +8,7 @@ import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide } from './SousOnglets'
 import Diffusion from './Diffusion'
+import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -207,6 +208,9 @@ export default function EventDrawer() {
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
     { id: 'qr', label: 'QR' },
+    /* FAMILLE I — regle des apercus : un event qui EXISTE se previsualise par
+       son vrai parcours (ParcoursMobil), la ou on le consulte. */
+    { id: 'apercu', label: 'Aperçu' },
     { id: 'export', label: 'Export' },
   ]
 
@@ -628,6 +632,13 @@ export default function EventDrawer() {
               </>
             )}
           </>
+        )}
+
+        {drawer.tab === 'apercu' && (
+          <ParcoursMobil
+            events={[{ id: ev.id, module: ev.module, nom: ev.nom, super_event_id: ev.super_event_id }]}
+            showTitle={false}
+          />
         )}
 
         {drawer.tab === 'qr' && (

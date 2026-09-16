@@ -38,6 +38,17 @@ export interface ColonneCRM<T> {
   /** Colonne exclue de la recherche plein texte (ex. une date déjà formatée). */
   horsRecherche?: boolean
   style?: React.CSSProperties
+  /* FAMILLE H — mise en forme homogene, reglee ICI et nulle part ailleurs.
+     Par defaut : texte a gauche, une ligne, tronque avec « … » (le texte entier
+     reste lisible au survol), largeur max 240 px. */
+  /** 'droite' pour les montants et les compteurs. */
+  aligne?: 'gauche' | 'droite' | 'centre'
+  /** Largeur fixe en px (en-tete et cellules). */
+  largeur?: number
+  /** Autorise le retour a la ligne (cellule a deux niveaux : nom + sous-ligne). */
+  multiligne?: boolean
+  /** Colonne d actions : pas de tri au clic sur l en-tete. */
+  nonTriable?: boolean
 }
 
 /** Un bouton de filtre, comme « Tous / En attente / Confirmés / Utilisés ». */
@@ -197,9 +208,23 @@ export default function ListeCRM<T>({
     ? 'Chargement…'
     : sousTitre ?? `${nb} résultat${nb > 1 ? 's' : ''}`
 
-  const cellules = (l: T) => colonnes.map(c => (
-    <td key={c.id} style={c.style}>{c.rendu ? c.rendu(l) : (texte(c.valeur(l)) || '—')}</td>
-  ))
+  const alignement = (c: ColonneCRM<T>): React.CSSProperties['textAlign'] =>
+    c.aligne === 'droite' ? 'right' : c.aligne === 'centre' ? 'center' : 'left'
+  const styleCellule = (c: ColonneCRM<T>): React.CSSProperties => ({
+    textAlign: alignement(c),
+    width: c.largeur,
+    maxWidth: c.largeur ?? 240,
+    ...(c.multiligne ? {} : { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }),
+    ...c.style,
+  })
+  const cellules = (l: T) => colonnes.map(c => {
+    const brut = texte(c.valeur(l))
+    return (
+      <td key={c.id} style={styleCellule(c)} title={!c.multiligne && brut ? brut : undefined}>
+        {c.rendu ? c.rendu(l) : (brut || '—')}
+      </td>
+    )
+  })
 
   const corps = (lot: T[]) => lot.map(l => {
     const ouvrable = !!onLigne && (ligneCliquable ? ligneCliquable(l) : true)
@@ -250,8 +275,11 @@ export default function ListeCRM<T>({
             <thead>
               <tr>
                 {colonnes.map(c => (
-                  <th key={c.id} onClick={() => trier(c.id)} title={`Trier par ${c.label}`}>
-                    {c.label}{fleche(c.id)}
+                  <th key={c.id}
+                    onClick={c.nonTriable ? undefined : () => trier(c.id)}
+                    title={c.nonTriable ? undefined : `Trier par ${c.label}`}
+                    style={{ textAlign: alignement(c), width: c.largeur, cursor: c.nonTriable ? 'default' : 'pointer' }}>
+                    {c.label}{c.nonTriable ? '' : fleche(c.id)}
                   </th>
                 ))}
               </tr>

@@ -1,71 +1,81 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+/**
+ * Partenaires — gabarit unique des listes (ListeCRM, famille H) et filtre
+ * `?se=` (lib/filtreSuperEvent.ts) : depuis la carte d un super event, seuls
+ * ses commerces s affichent.
+ *
+ * Rattachement a l operation : la fiche partenaire porte `super_event_id`, OU
+ * son compte pro tient une station dans l operation. Les deux sont acceptes :
+ * 7 pros sur 16 n ont pas de fiche partenaire, et une fiche peut exister sans
+ * compte pro.
+ */
+import { Suspense, useMemo } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { PageHeader, SearchBar, StatusChip, ModuleChip, EmptyState, SortableTh, useTri } from '@/components/dashboard/DashboardUI'
+import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import type { FlowinPartenaire } from '@/lib/types'
+import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
+import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
 
-type Col = 'nom' | 'type' | 'ville' | 'tel' | 'email'
+type P = FlowinPartenaire & { super_event_id?: string | null; secteur?: string | null }
 
-export default function Page() {
-  const { partenaires, openDrawer, openDrawerEdit } = useDashboard()
-  const [search, setSearch] = useState('')
-  const { tri, onSort } = useTri<Col>('nom')
+function PartenairesContenu() {
+  const { partenaires, pros, openDrawer, openDrawerEdit } = useDashboard()
+  const { seId, proIds } = useFiltreSuperEvent()
 
-  const base = partenaires
+  const lignes = useMemo(() => {
+    const l = partenaires as P[]
+    if (!seId) return l
+    const ptDesPros = new Set(pros.filter(p => proIds?.has(p.id)).map(p => p.partenaire_id).filter(Boolean) as string[])
+    return l.filter(p => p.super_event_id === seId || ptDesPros.has(p.id))
+  }, [partenaires, pros, seId, proIds])
 
-  const list = useMemo(() => {
-    let l = base
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      l = l.filter((item: FlowinPartenaire) => ((item as any).nom ?? "").toLowerCase().includes(q) || ((item as any).ville ?? "").toLowerCase().includes(q) || ((item as any).secteur ?? "").toLowerCase().includes(q))
-    }
-    return [...l].sort((a: any, b: any) => {
-      const va = String(a[tri.col] ?? ''); const vb = String(b[tri.col] ?? '')
-      return va.localeCompare(vb, 'fr') * (tri.asc ? 1 : -1)
-    })
-  }, [base, search, tri])
+  const colonnes: ColonneCRM<P>[] = [
+    {
+      id: 'nom', label: 'Partenaire', valeur: p => p.nom, largeur: 240,
+      rendu: p => <span><span style={{ marginRight: 6 }}>{p.emoji ?? '🤝'}</span><b>{p.nom || '—'}</b></span>,
+    },
+    {
+      id: 'type', label: 'Catégorie', valeur: p => p.type, largeur: 110,
+      rendu: p => p.type ? <span className={`sa-chip${p.type === 'National' ? ' purple' : ''}`}>{p.type}</span> : '—',
+    },
+    { id: 'ville', label: 'Ville', valeur: p => p.ville, largeur: 130 },
+    { id: 'tel', label: 'Téléphone', valeur: p => p.tel, largeur: 130 },
+    { id: 'email', label: 'Email', valeur: p => p.email, largeur: 220 },
+    {
+      id: 'pro', label: 'Compte pro', valeur: p => (pros.find(x => x.partenaire_id === p.id) ? 'oui' : 'non'), largeur: 100, aligne: 'centre',
+      rendu: p => (pros.find(x => x.partenaire_id === p.id) ? <span className="sa-chip live">✓</span> : <span className="sa-chip">—</span>),
+    },
+    {
+      id: 'actions', label: '', valeur: () => '', horsRecherche: true, nonTriable: true, largeur: 60, aligne: 'droite',
+      rendu: p => (
+        <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('partenaire', p.id) }}>✏</button>
+      ),
+    },
+  ]
 
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader
-          title="🤝 Partenaires"
-          subtitle={`${list.length} résultat${list.length > 1 ? "s" : ""}`}
+        <ListeCRM<P>
+          titre="🤝 Partenaires"
+          lignes={lignes}
+          colonnes={colonnes}
+          cle={p => p.id}
+          onLigne={p => openDrawer('partenaire', p.id)}
+          triDefaut="nom"
+          placeholderRecherche="Rechercher un partenaire, une ville…"
+          entete={seId ? <BandeauFiltreSE seId={seId} quoi="Partenaires" retour="/dashboard/partenaires" /> : undefined}
         />
-        <SearchBar value={search} onChange={setSearch} placeholder="Rechercher…" />
-        <div style={{overflowX:'auto'}}>
-          <table className="sa-tbl" style={{width:'100%'}}>
-            <thead><tr>
-              <th className="col-check"><input type="checkbox" /></th>
-              <SortableTh col="nom" label="Partenaire" tri={tri} onSort={onSort} />
-              <SortableTh col="type" label="Catégorie" tri={tri} onSort={onSort} />
-              <SortableTh col="ville" label="Ville" tri={tri} onSort={onSort} />
-              <SortableTh col="tel" label="Téléphone" tri={tri} onSort={onSort} />
-              <SortableTh col="email" label="Email" tri={tri} onSort={onSort} />
-              <th className="col-actions"></th>
-            </tr></thead>
-            <tbody>
-              {list.length === 0 && (
-                <tr><td colSpan={7} style={{padding:0}}>
-                  <EmptyState title="Aucun résultat" />
-                </td></tr>
-              )}
-              {list.map((item: FlowinPartenaire) => (
-                <tr key={(item as any).id} onClick={() => openDrawer('partenaire', (item as any).id)}>
-                  <td className="col-check" onClick={e => e.stopPropagation()}><input type="checkbox" /></td>
-                  <td style={{color:"var(--sa-muted)",fontSize:13}}>{String((item as FlowinPartenaire & Record<string,unknown>)["nom"] ?? "—")}</td><td>{(item as FlowinPartenaire).type === "National" ? <span className="sa-chip purple">National</span> : <span className="sa-chip">{}</span>}</td><td style={{color:"var(--sa-muted)",fontSize:13}}>{String((item as FlowinPartenaire & Record<string,unknown>)["ville"] ?? "—")}</td><td style={{color:"var(--sa-muted)",fontSize:13}}>{String((item as FlowinPartenaire & Record<string,unknown>)["tel"] ?? "—")}</td><td style={{color:"var(--sa-muted)",fontSize:13}}>{String((item as FlowinPartenaire & Record<string,unknown>)["email"] ?? "—")}</td>
-                  <td className="col-actions" onClick={e => e.stopPropagation()}>
-                    <div className="sa-row-actions">
-                      <button className="sa-btn icon sm" title="Éditer" onClick={(e) => { e.stopPropagation(); openDrawerEdit('partenaire', (item as any).id) }}>✏</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <PartenairesContenu />
+    </Suspense>
   )
 }
