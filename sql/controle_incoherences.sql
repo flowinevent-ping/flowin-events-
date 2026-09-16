@@ -9,6 +9,8 @@
 -- docs/patterns-bugs-connus.md). 0 partout = etat sain, verifiable sans
 -- relire le code.
 -- Le gabarit master (se-master-superevent) est exclu de tous les controles.
+-- 16/09 (refactor pro) : les events de demonstration (client_type 'demo',
+-- apercu du vrai jeu pendant la creation) sont exclus aussi.
 
 create or replace function public.controle_incoherences()
 returns jsonb
@@ -17,6 +19,7 @@ set search_path to 'public'
 as $function$
 with ev as (
   select * from events where super_event_id is distinct from 'se-master-superevent'
+     and coalesce(client_type, '') <> 'demo'
 ),
 c as (
   select 'jeu_vide' cle, e.id, e.nom from ev e

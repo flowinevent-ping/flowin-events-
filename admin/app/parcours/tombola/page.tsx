@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
 import TombolaClient from './TombolaClient'
+import { lireApercu, appliquerApercu } from '@/lib/apercu'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
 interface Props {
-  searchParams: { ev?: string }
+  searchParams: { ev?: string; preview?: string; apercu?: string }
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -33,8 +34,11 @@ export default async function TombolaPage({ searchParams }: Props) {
     supabase.from('lots').select('*').eq('event_id', evId),
   ])
 
-  const ev = evRes.data as FlowinEvent | null
-  const lots = (lotsRes.data ?? []) as FlowinLot[]
+  /* Apercu pendant la creation (lib/apercu.ts). */
+  const { ev, lots } = await appliquerApercu(
+    { ev: evRes.data as FlowinEvent | null, lots: (lotsRes.data ?? []) as FlowinLot[] },
+    lireApercu(searchParams),
+  )
 
   /* Partenaires depuis cfg.partenaires */
   const partIds: string[] = ev?.cfg?.partenaires ?? []

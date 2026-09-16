@@ -48,7 +48,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
       </div>
 
       <div style={CARD}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 8 }}>Coordonnées</div>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 8 }}>Coordonnées</div>
         {ligne('Email', j.email ? <a href={`mailto:${j.email}`} style={{ color: ACC }}>{j.email}</a> : '—')}
         {ligne('Téléphone', j.tel ? <a href={`tel:${j.tel}`} style={{ color: ACC }}>{j.tel}</a> : '—')}
         {ligne('Ville', j.ville || '—')}
@@ -58,7 +58,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
       </div>
 
       <div style={CARD}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 8 }}>
           Lots gagnés ({tirages.length})
         </div>
         {tirages.length === 0 && <div style={{ fontSize: 13, ...MUTED }}>Aucun lot gagné pour l&apos;instant.</div>}

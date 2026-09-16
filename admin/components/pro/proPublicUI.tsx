@@ -5,9 +5,9 @@
 
 export const ACCENT = '#A855F7'
 export const ACCENT_D = '#7C2D92'
-export const INK = '#0F172A'
-export const MUTED = '#64748B'
-export const BORDER = '#E2E8F0'
+export const INK = '#1c1024'
+export const MUTED = '#8a7e93'
+export const BORDER = '#efe9f2'
 export const BG_PAGE = '#F8F5FC'
 
 export const wrap: React.CSSProperties = { minHeight: '100dvh', background: BG_PAGE, fontFamily: 'system-ui, sans-serif', color: INK }

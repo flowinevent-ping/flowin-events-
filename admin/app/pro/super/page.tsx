@@ -128,7 +128,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       <style>{`@media (max-width:820px){.pro-map-wrap{display:none !important}}`}</style>
       <div className="pro-map-wrap" style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px 0' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B' }}>Mes stations sur la carte</div>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>Mes stations sur la carte</div>
           <div style={{ ...SUB, marginBottom: 10 }}>Même carte, même source que le Super Admin — vos points uniquement. Affichage ordinateur.</div>
         </div>
         <div style={{ height: 360 }}>
@@ -136,7 +136,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
         </div>
       </div>
       <div style={{ ...CARD, overflowX: 'auto' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Mes stations</div>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Mes stations</div>
         {tri.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station.</div> : (
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
             <thead><tr><th style={TH}>Station</th><th style={TH}>Joueurs</th><th style={TH}>Parties</th><th style={TH}>Flashs QR</th></tr></thead>

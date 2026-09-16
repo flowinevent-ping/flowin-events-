@@ -9,7 +9,7 @@ import { Ico } from '@/lib/proicons'
 import { supabase } from '@/lib/supabase'
 
 const btn: React.CSSProperties = { border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }
-const inputStyle: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 9, padding: '9px 11px', fontSize: 13.5, fontFamily: 'inherit' }
+const inputStyle: React.CSSProperties = { width: '100%', border: '1.5px solid #efe9f2', borderRadius: 9, padding: '9px 11px', fontSize: 13.5, fontFamily: 'inherit' }
 
 export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banque; proId: string; estBonus: boolean }) {
   const router = useRouter()
@@ -103,24 +103,24 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
         <button
           onClick={() => setQuestions(qs => [...qs, estBonus ? nouvelleQuestionBonus() : nouvelleQuestionQuiz()])}
-          style={{ ...btn, background: '#fff', border: '1.5px solid #E2E8F0', color: '#0F172A' }}
+          style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024' }}
         ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Une question</button>
         <button
           onClick={() => setQuestions(qs => [...qs, ...blocDeQuatre(estBonus)])}
-          style={{ ...btn, background: '#fff', border: '1.5px solid #E2E8F0', color: '#0F172A' }}
+          style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024' }}
         ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Un bloc de 4</button>
         <button
           onClick={() => setPanneau(p => p === 'ia' ? null : 'ia')}
-          style={{ ...btn, background: panneau === 'ia' ? 'rgba(124,45,146,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#E2E8F0'}`, color: ACC }}
+          style={{ ...btn, background: panneau === 'ia' ? 'rgba(124,45,146,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
         ><Ico k="sparkle" size={13} style={{ marginRight: 6 }} />Générer avec l&apos;IA</button>
         <button
           onClick={() => setPanneau(p => p === 'import' ? null : 'import')}
-          style={{ ...btn, background: panneau === 'import' ? 'rgba(124,45,146,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#E2E8F0'}`, color: ACC }}
+          style={{ ...btn, background: panneau === 'import' ? 'rgba(124,45,146,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
         ><Ico k="upload" size={13} style={{ marginRight: 6 }} />Importer</button>
       </div>
 
       {panneau === 'ia' && (
-        <div style={{ ...CARD, background: '#F8FAFC' }}>
+        <div style={{ ...CARD, background: '#faf7fd' }}>
           <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>Génération assistée par IA</div>
           <div style={{ fontSize: 12, ...MUTED, marginBottom: 12 }}>
             Décrivez un thème, l&apos;IA propose des questions {estBonus ? 'sondage' : 'quiz'} prêtes à relire et ajuster.
@@ -145,7 +145,7 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
       )}
 
       {panneau === 'import' && (
-        <div style={{ ...CARD, background: '#F8FAFC' }}>
+        <div style={{ ...CARD, background: '#faf7fd' }}>
           <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>Importer des questions</div>
           <div style={{ fontSize: 12, ...MUTED, marginBottom: 10, lineHeight: 1.6 }}>
             Collez vos questions : un intitulé par bloc, une réponse par ligne, blocs séparés par une ligne vide.
@@ -166,7 +166,7 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
       <div style={{ marginTop: 8 }} />
 
       <div style={{ ...CARD, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', position: 'sticky', bottom: 12, boxShadow: '0 8px 24px rgba(15,23,42,.08)' }}>
-        <button disabled={pending} onClick={() => sauvegarder(false)} style={{ ...btn, background: '#fff', border: '1.5px solid #E2E8F0', color: '#0F172A', opacity: pending ? 0.6 : 1 }}><Ico k="save" size={13} style={{ marginRight: 6 }} />Enregistrer en brouillon</button>
+        <button disabled={pending} onClick={() => sauvegarder(false)} style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024', opacity: pending ? 0.6 : 1 }}><Ico k="save" size={13} style={{ marginRight: 6 }} />Enregistrer en brouillon</button>
         <button disabled={pending} onClick={() => sauvegarder(true)} style={{ ...btn, background: ACC, color: '#fff', opacity: pending ? 0.6 : 1 }}><Ico k="check" size={13} style={{ marginRight: 6 }} />Valider</button>
         {message && <span style={{ fontSize: 12.5, ...MUTED }}>{message}</span>}
         <a href={`/pro/banques${q}`} style={{ marginLeft: 'auto', fontSize: 13, color: ACC, fontWeight: 700, textDecoration: 'none' }}>← Retour aux banques</a>

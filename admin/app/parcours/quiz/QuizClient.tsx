@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
@@ -127,12 +128,12 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
   }, [])
 
   return (
-    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: '#0F172A', color: '#fff', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{parcoursCSS(c) + `
-        .opt{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;cursor:pointer;font-size:14px;font-weight:600;text-align:left;color:#fff;width:100%;font-family:inherit;margin-bottom:8px}
-        .opt.correct{background:rgba(34,197,94,.2);border-color:#22C55E} .opt.wrong{background:rgba(239,68,68,.2);border-color:#EF4444} .opt.reveal{background:rgba(34,197,94,.12);border-color:#22C55E88}
-        .bonus-opt{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left}
-        .bonus-opt.sel{background:rgba(124,45,146,.2);border-color:#7C2D92}
+        
+        .opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a} .opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444} .opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}
+        .bonus-opt{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left}
+        .bonus-opt.sel{background:rgba(224,33,138,.16);border-color:#E0218A}
       `}</style>
 
       {screen === 'landing' && (

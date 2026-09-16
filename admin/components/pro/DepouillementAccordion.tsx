@@ -18,13 +18,13 @@ export function ResumeVisuelDepouillement({ questions }: { questions: SondageLan
         if (!top) return null
         const pct = top.pct ?? 0
         return (
-          <div key={q.cle} style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 12, padding: '12px 13px' }}>
+          <div key={q.cle} style={{ background: '#fff', border: '1px solid #efe9f2', borderRadius: 12, padding: '12px 13px' }}>
             <div style={{ fontSize: 10.5, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 7, lineHeight: 1.35, minHeight: 27 }}>{q.libelle}</div>
             <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6, lineHeight: 1.3 }}>{top.reponse}</div>
-            <div style={{ width: '100%', height: 5, borderRadius: 99, background: '#E2E8F0', overflow: 'hidden', marginBottom: 5 }}>
+            <div style={{ width: '100%', height: 5, borderRadius: 99, background: '#efe9f2', overflow: 'hidden', marginBottom: 5 }}>
               <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#A855F7,${ACC})`, borderRadius: 99 }} />
             </div>
-            <div style={{ fontSize: 11, color: '#64748B' }}>{pct} % · {q.repondants} réponse{q.repondants > 1 ? 's' : ''}</div>
+            <div style={{ fontSize: 11, color: '#8a7e93' }}>{pct} % · {q.repondants} réponse{q.repondants > 1 ? 's' : ''}</div>
           </div>
         )
       })}
@@ -48,7 +48,7 @@ export default function DepouillementAccordion({ questions }: { questions: Sonda
       {questions.map(q => {
         const estOuvert = ouvert === q.cle
         return (
-          <div key={q.cle} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, overflow: 'hidden' }}>
+          <div key={q.cle} style={{ background: '#faf7fd', border: '1px solid #efe9f2', borderRadius: 12, overflow: 'hidden' }}>
             <button
               onClick={() => setOuvert(estOuvert ? null : q.cle)}
               style={{
@@ -73,7 +73,7 @@ export default function DepouillementAccordion({ questions }: { questions: Sonda
                       <span style={r.libelle_trouve ? undefined : { fontStyle: 'italic', color: '#94A3B8' }}>{r.reponse}</span>
                       <span style={{ fontWeight: 800, whiteSpace: 'nowrap' }}>{r.n} <span style={MUTED}>({pct} %)</span></span>
                     </div>
-                    <div style={{ width: '100%', height: 6, borderRadius: 99, background: '#E2E8F0', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: 6, borderRadius: 99, background: '#efe9f2', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#A855F7,${ACC})`, borderRadius: 99 }} />
                     </div>
                   </div>

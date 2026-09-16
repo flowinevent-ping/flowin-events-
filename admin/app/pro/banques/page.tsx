@@ -30,7 +30,7 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 12 }}>
         {items.map(b => (
           <Link key={b.id} href={`/pro/banques/${b.id}${q}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ ...CARD, marginBottom: 0, cursor: 'pointer', border: b.statut === 'valide' ? '1px solid #E2E8F0' : '1.5px dashed #CBD5E1' }}>
+            <div style={{ ...CARD, marginBottom: 0, cursor: 'pointer', border: b.statut === 'valide' ? '1px solid #efe9f2' : '1.5px dashed #CBD5E1' }}>
               <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 6 }}>{b.nom || 'Sans nom'}</div>
               <div style={{ fontSize: 12, ...MUTED, marginBottom: 8 }}>{b.questions?.length ?? 0} question{(b.questions?.length ?? 0) > 1 ? 's' : ''}</div>
               <span style={{
@@ -70,7 +70,7 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
         hrefCreer="/pro/banques/nouvelle"
       />
 
-      <div style={{ ...CARD, background: '#F8FAFC', fontSize: 12.5, ...MUTED, lineHeight: 1.6 }}>
+      <div style={{ ...CARD, background: '#faf7fd', fontSize: 12.5, ...MUTED, lineHeight: 1.6 }}>
         Une banque <b>brouillon</b> reste modifiable librement. Cliquez <b>Valider</b> dans l&apos;éditeur pour la figer et pouvoir la sélectionner lors de la création d&apos;une animation.
       </div>
     </ProShell>

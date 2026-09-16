@@ -18,7 +18,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { BandeauParcours, BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
-import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
+import ApercuJeu from '@/components/parcours/ApercuJeu'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { useDashboard } from '@/contexts/DashboardContext'
@@ -111,8 +111,6 @@ function Wizard() {
   const { pros, partenaires } = useDashboard()
   const [d, setD] = useState<BrouillonEvent>(brouillonVide())
   const [etape, setEtape] = useState<Etape>('A')
-  /* L ecran d apercu montre : il suit l etape, mais reste pilotable a la main. */
-  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
   /* Les banques de questions, pour parametrer un quiz DES la creation. Meme
      source que la fiche event : une seule liste, pas deux. */
   const [banques, setBanques] = useState<Banque[]>([])
@@ -132,9 +130,6 @@ function Wizard() {
   /* L apercu suit l etape, en montrant l ecran que cette etape fabrique : la
      configuration remplit le quiz, le recapitulatif montre le resultat. Les
      lots n ont pas d ecran a eux — ils vivent dans la carte de l accueil. */
-  useEffect(() => {
-    setEcranApercu(etape === 'C' ? 'quiz' : etape === 'F' ? 'resultats' : 'onboard')
-  }, [etape])
 
   /* Combien de questions les banques cochees rendent reellement disponibles :
      l apercu le dit, plutot que de laisser croire a un quiz qui n a rien a
@@ -579,22 +574,13 @@ function Wizard() {
         />
       </div>
 
-      {/* Le visuel se construit pendant la saisie — demande du 02/09. */}
-      <ApercuApp
-        ecran={ecranApercu}
-        onEcran={setEcranApercu}
-        d={{
+      {/* P3 (16/09) : le VRAI jeu, avec la saisie en cours (lib/apercu.ts). */}
+      <ApercuJeu
+        module={d.module}
+        saisie={{
           nom: d.nom,
-          superEvent: supers.find(se => se.id === d.super_event_id)?.nom ?? null,
-          /* Un event rattache a une operation EST une station parmi d autres :
-             la carte des stations et la carte partenaires font alors partie de
-             son parcours. Seul l event isole les perd. */
-          multistation: !!d.super_event_id,
           lots: d.lots.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur })),
-          nbQuestions: nbDispo.quiz,
-          nbBonus: nbDispo.bonus,
-          intro: (cfgEv.intro as string) ?? null,
-          logoUrl: logoEffectif || null,
+          cfg: { ...cfgEv, ...(logoEffectif ? { logoUrl: logoEffectif } : {}) },
         }}
       />
       </div>

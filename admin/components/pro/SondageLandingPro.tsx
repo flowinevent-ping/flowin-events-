@@ -35,10 +35,10 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
 
   return (
     <div style={{ ...CARD }}>
-      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B' }}>
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>
         Questionnaire terrain — landing
       </div>
-      <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 14, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 13.5, color: '#8a7e93', marginTop: 2, marginBottom: 14, lineHeight: 1.5 }}>
         Saisies faites hors parcours de jeu, sur vos points de collecte, du {jour(per.du)} au {jour(per.au)}.
         {' '}Canal <b>distinct</b> du bonus en jeu : ne pas additionner les deux, une même personne peut avoir répondu par les deux chemins.
       </div>
@@ -66,7 +66,7 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
               <td style={TD}><b>{p.point}</b></td>
               <td style={{ ...TD, fontWeight: 800 }}>{p.saisies}</td>
               <td style={TD}>
-                <span style={{ display: 'inline-block', width: 130, height: 8, borderRadius: 99, background: '#E2E8F0', overflow: 'hidden', verticalAlign: 'middle' }}>
+                <span style={{ display: 'inline-block', width: 130, height: 8, borderRadius: 99, background: '#efe9f2', overflow: 'hidden', verticalAlign: 'middle' }}>
                   <span style={{ display: 'block', height: '100%', width: `${Math.max(4, Math.round(p.saisies / maxP * 100))}%`, background: `linear-gradient(90deg,#A855F7,${ACC})`, borderRadius: 99 }} />
                 </span>
               </td>
@@ -76,13 +76,13 @@ export default function SondageLandingPro({ s, nomsDuPro }: { s: SondageLanding;
       </table>
 
       {!toutAuPro ? (
-        <div style={{ fontSize: 12.5, ...MUTED, marginTop: 12, lineHeight: 1.6, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '11px 13px' }}>
+        <div style={{ fontSize: 12.5, ...MUTED, marginTop: 12, lineHeight: 1.6, background: '#faf7fd', border: '1px solid #efe9f2', borderRadius: 12, padding: '11px 13px' }}>
           Le dépouillement des réponses est calculé à l&apos;échelle du super event ({total} saisies au total, tous points confondus).
           Comme d&apos;autres points que les vôtres ont contribué, il reste réservé à l&apos;organisateur — vous voyez ici le volume de vos propres points.
         </div>
       ) : (
         <>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', margin: '20px 0 10px' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', margin: '20px 0 10px' }}>
             Dépouillement — {total} saisie{total > 1 ? 's' : ''}
           </div>
           <div style={{ fontSize: 12, ...MUTED, marginBottom: 12 }}>Vue d&apos;ensemble — réponse dominante par question.</div>

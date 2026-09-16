@@ -142,15 +142,24 @@ function puces(w, nomCommerce){
   if(out.length < 3){ out.push("Billet nominatif, non remboursable, validable une seule fois"); }
   return out.map(function(p){ return "<li>"+p+"</li>"; }).join("");
 }
+/* UN SEUL BILLET POUR TOUTES LES OPERATIONS (16/09) : ce billet est celui de
+   Nuits du Sud 2026, reference graphique. Pour une autre operation, seuls
+   changent l en-tete (logo et nom de l operation), le pied et les mentions ;
+   le logo Flowin reste le logo officiel. */
+function estNds(w){ return !w.operation || w.operation === "se-nds-2026"; }
 function billet(pid,w,i){
   var nom=w.partenaire_nom||NOMS[pid]||pid;
+  var nds=estNds(w), opNom=w.operation_nom||"";
   var coord=[w.partenaire_adresse,w.partenaire_tel].filter(Boolean).join(" \u00b7 ");
   var url=location.origin+"/lot.html?t="+encodeURIComponent(w.retrait_token);
   return '<div class="tk" id="tk'+i+'">'
-   +'<div class="hd"><img class="nds" src="'+NDS+'" alt="Nuits du Sud">'
-   +'<span class="t">Grand Jeu<br>\u00c9dition 2026</span>'
+   +(nds
+      ? '<div class="hd"><img class="nds" src="'+NDS+'" alt="Nuits du Sud">'
+        +'<span class="t">Grand Jeu<br>\u00c9dition 2026</span>'
+      : '<div class="hd">'+(w.operation_logo?'<img class="nds" src="'+esc(w.operation_logo)+'" alt="">':'')
+        +'<span class="t">'+esc(opNom||"Jeu concours")+'</span>')
    +'<img class="fw" src="'+FLOWIN+'" alt="Flowin"></div><div class="rule"></div>'
-   +'<div class="shop">'+(LOGO[pid]?'<img src="'+LOGO[pid]+'" alt="">':'')
+   +'<div class="shop">'+((LOGO[pid]||w.partenaire_logo)?'<img src="'+esc(LOGO[pid]||w.partenaire_logo)+'" alt="">':'')
    +'<div class="lb">Commerce partenaire</div><b>'+esc(nom)+'</b>'
    +(coord?'<div class="adr">'+esc(coord)+'</div>':'')+'</div>'
    +'<div class="lot"><h2>'+esc(typeBon(w.lot_nom))+' \u2014 <em>valeur '+esc(w.lot_valeur)+' \u20ac</em></h2></div>'
@@ -171,11 +180,11 @@ function billet(pid,w,i){
             + '<div><div class="lab">Email</div><div class="v sm">'+esc(w.joueur_email||"\u2014")+'</div></div></div>';
      })()
    +'<div class="use"><h4>Conditions d\'utilisation</h4><ul>'+puces(w, nom)+'</ul></div>'
-   +'<div class="ment"><p>'+esc(MENTIONS)+'</p></div>'
-   +'<div class="ft"><b>Grand Jeu des Nuits du Sud</b> \u00b7 flowinevent@gmail.com \u00b7 04 93 59 91 37</div>'
+   +'<div class="ment"><p>'+esc(nds ? MENTIONS : "Jeu gratuit sans obligation d'achat \u00b7 "+(opNom?opNom+" \u00b7 ":"")+"non remboursable, non \u00e9changeable contre esp\u00e8ces \u00b7 validable une seule fois.")+'</p></div>'
+   +'<div class="ft"><b>'+esc(nds ? "Grand Jeu des Nuits du Sud" : (opNom||"Flowin"))+'</b> \u00b7 flowinevent@gmail.com \u00b7 04 93 59 91 37</div>'
    +'</div>'
-   +'<div class="acts no-print"><button onclick="printOne('+i+')">\ud83d\udcc4 PDF de ce billet</button>'
-   +'<button onclick="copier(\''+esc(url)+'\')">\ud83d\udd17 Copier le lien</button></div>';
+   +(w.apercu ? '' : '<div class="acts no-print"><button onclick="printOne('+i+')">\ud83d\udcc4 PDF de ce billet</button>'
+   +'<button onclick="copier(\''+esc(url)+'\')">\ud83d\udd17 Copier le lien</button></div>');
 }
 function copier(u){try{navigator.clipboard.writeText(u);}catch(e){}}
 function printAll(){document.body.classList.remove("solo");window.print();}
@@ -202,6 +211,23 @@ function render(){
 (function init(){
   /* ?t=<token> : un seul billet, impression immediate. C est le PDF envoye au gagnant.
      ?p=<slug>  : la planche du commerce (gagnants confirmes uniquement). */
+  /* ?apercu=<json base64> : le billet tel qu il sortira, pendant la creation
+     d une operation (espace pro). Aucune lecture en base. */
+  var AP = qs("apercu")||null;
+  if(AP){
+    var w0 = null;
+    try { w0 = JSON.parse(decodeURIComponent(escape(atob(AP.replace(/-/g,"+").replace(/_/g,"/"))))); } catch(e) { w0 = null; }
+    document.querySelector(".top").style.display="none";
+    document.body.style.padding="0";
+    document.body.style.background="transparent";
+    if(!w0){ document.getElementById("out").innerHTML='<div class="empty">Aper\u00e7u indisponible.</div>'; return; }
+    w0.apercu = true; w0.retrait_token = "apercu"; w0.etat = w0.etat || "a_confirmer";
+    document.getElementById("out").innerHTML = billet(w0.partenaire_id||"", w0, 0);
+    document.querySelectorAll(".box").forEach(function(el){
+      try{ new QRCode(el,{text:location.origin+"/lot.html",width:168,height:168,correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+    });
+    return;
+  }
   var TOK = qs("t")||null;
   if(TOK){
     document.querySelector(".top").style.display="none";

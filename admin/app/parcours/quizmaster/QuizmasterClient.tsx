@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
@@ -105,8 +106,8 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#0F172A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
-      <style>{parcoursCSS(c)+'.opt{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:14px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left;font-size:18px}.opt.correct{background:rgba(34,197,94,.2);border-color:#22C55E}.opt.wrong{background:rgba(239,68,68,.2);border-color:#EF4444}.opt.reveal{background:rgba(34,197,94,.12);border-color:#22C55E88}'}</style>
+    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
+      <style>{parcoursCSS(c)+'.opt{font-size:18px}.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}'}</style>
 
       {screen==='landing'&&(<div className="screen" style={{paddingTop:32,textAlign:'center'}}><div style={{fontSize:48,marginBottom:14}}>🎮</div><div style={{fontSize:24,fontWeight:900,marginBottom:8}}>{nom}</div><div style={{fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20}}>Quiz en direct · Réponds sur ton téléphone</div><button className="btn" onClick={()=>setScreen('vote')}>🎮 Rejoindre le quiz →</button></div>)}
 

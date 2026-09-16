@@ -600,7 +600,7 @@ export default function EventDrawer() {
                         {g.lot_valeur != null ? `${g.lot_valeur} €` : ''}
                         {g.retrait_token && (
                           <> · <a
-                            href={`https://flowin-events.vercel.app/lot.html?t=${g.retrait_token}`}
+                            href={`/nds/billets-partenaires.html?t=${encodeURIComponent(g.retrait_token)}`}
                             target="_blank" rel="noreferrer"
                             onClick={e => e.stopPropagation()}
                             style={{ color: 'inherit' }}

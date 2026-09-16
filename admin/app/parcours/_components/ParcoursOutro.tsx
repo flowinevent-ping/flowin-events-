@@ -19,7 +19,7 @@ export default function ParcoursOutro({ superEventId, gain }: { superEventId?: s
           <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.9 }}>Gagné tout de suite</div>
           <div style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 6px' }}>{gain.lot}</div>
           {gain.conditions && <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 10 }}>{gain.conditions}</div>}
-          <a href={`/lot.html?t=${encodeURIComponent(gain.retraitToken)}`} style={{ display: 'block', background: '#fff', color: '#7C2D92', borderRadius: 12, padding: 14, fontWeight: 800, fontSize: 16, textDecoration: 'none' }}>
+          <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(gain.retraitToken)}`} style={{ display: 'block', background: '#fff', color: '#7C2D92', borderRadius: 12, padding: 14, fontWeight: 800, fontSize: 16, textDecoration: 'none' }}>
             Voir mon billet
           </a>
           <div style={{ fontSize: 11.5, opacity: 0.85, marginTop: 8 }}>À présenter au commerce pour retirer votre lot.</div>

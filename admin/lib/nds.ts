@@ -108,9 +108,9 @@ const origine = () => (typeof window !== 'undefined' ? window.location.origin : 
 
 /** Billet d un gagnant. print=true declenche l impression (export PDF). */
 export function lienBillet(token: string, print = false, operation?: string | null): string {
-  /* Referentiel 11 : la planche de billets est celle de Nuits du Sud. Pour
-     toute autre operation, le billet generique (lot.html) parle de la sienne. */
-  if (operation && operation !== 'se-nds-2026') return `${origine()}/lot.html?t=${encodeURIComponent(token)}`
+  /* Un seul billet pour toutes les operations (billets-partenaires.html lit
+     l operation du tirage). `operation` reste accepte pour les appelants. */
+  void operation
   return `${origine()}/nds/billets-partenaires.html?t=${encodeURIComponent(token)}${print ? '&print=1' : ''}`
 }
 /** Planche de billets d un commerce — ne montre que les gagnants confirmes. */

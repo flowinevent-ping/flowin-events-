@@ -13,7 +13,7 @@ export default async function EditerBanquePage({ params, searchParams }: { param
     return (
       <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="banques">
         <h1 style={H1}>Banque introuvable</h1>
-        <div style={{ fontSize: 13.5, color: '#64748B' }}>Cette banque n&apos;appartient pas à votre espace.</div>
+        <div style={{ fontSize: 13.5, color: '#8a7e93' }}>Cette banque n&apos;appartient pas à votre espace.</div>
       </ProShell>
     )
   }
@@ -21,7 +21,7 @@ export default async function EditerBanquePage({ params, searchParams }: { param
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="banques">
       {searchParams.depuis === 'jeu' && (
-        <a href={`/pro/jeu${q}`} style={{ display: 'inline-block', marginBottom: 14, fontSize: 13, fontWeight: 700, color: '#7C2D92', textDecoration: 'none', background: 'rgba(124,45,146,.08)', borderRadius: 10, padding: '9px 14px' }}>
+        <a href={`/pro/nouvelle${q}${q ? '&' : '?'}type=animation`} style={{ display: 'inline-block', marginBottom: 14, fontSize: 13, fontWeight: 700, color: '#7C2D92', textDecoration: 'none', background: 'rgba(124,45,146,.08)', borderRadius: 10, padding: '9px 14px' }}>
           ← Revenir au parcours « Créer mon animation » (onglet précédent, ou cliquez ici)
         </a>
       )}

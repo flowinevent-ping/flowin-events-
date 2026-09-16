@@ -1,23 +1,11 @@
-import { fetchProDashboard } from '@/lib/pro'
-import ProShell from '@/components/pro/ProShell'
-import { H1, SUB } from '@/lib/proui'
-import { fetchOperationsPro } from '@/lib/operations'
-import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
+import { redirect } from 'next/navigation'
 
-/**
- * MON CRM — referentiel 19 : rangé par opération.
- * La liste unique melangeait les joueurs de toutes les operations. Chaque
- * operation (event ou super event) a maintenant son bloc : ses contacts, son
- * opt-in, son export CSV.
- */
-export default async function ProCrmPage({ searchParams }: { searchParams: { pro?: string } }) {
-  const proId = searchParams.pro ?? ''
-  const [data, ops] = await Promise.all([fetchProDashboard(proId), fetchOperationsPro(proId)])
-  return (
-    <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="crm">
-      <h1 style={H1}>Mon CRM</h1>
-      <div style={{ ...SUB, marginBottom: 16 }}>Vos contacts, opération par opération : qui a joué, où, combien de fois, et qui accepte d’être recontacté.</div>
-      <OngletOperationsPro initial={ops} onglet="crm" />
-    </ProShell>
-  )
+/* P1 (16/09) : le menu pro tient en quatre entrées ; cette page y est rangée. */
+export default function Page({ searchParams }: { searchParams: { pro?: string } }) {
+  const params = new URLSearchParams()
+  if (searchParams.pro) params.set('pro', searchParams.pro)
+  const extra = 'onglet=contacts'
+  if (extra) { const [k, v] = extra.split('='); params.set(k, v) }
+  const s = params.toString()
+  redirect(`/pro/donnees${s ? '?' + s : ''}`)
 }

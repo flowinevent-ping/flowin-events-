@@ -1,20 +1,9 @@
-import { fetchProDashboard } from '@/lib/pro'
-import ProShell from '@/components/pro/ProShell'
-import ParcoursMobil from '@/components/pro/ParcoursMobil'
+import { redirect } from 'next/navigation'
 
-/**
- * Parcours mobil — profil partenaire (v2). Passe les VRAIS evenements du pro au composant,
- * qui affiche le parcours reel en direct (/parcours/<module>?ev=<id>) dans le cadre telephone.
- */
-export default async function ProParcoursPage({ searchParams }: { searchParams: { pro?: string } }) {
-  const proId = searchParams.pro ?? ''
-  const data = await fetchProDashboard(proId)
-  /* fetchProDashboard exclut deja le gabarit master. */
-  const events = (data.events ?? []).map(e => ({ id: e.id, module: e.module, nom: e.nom, super_event_id: e.super_event_id }))
-
-  return (
-    <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="parcours">
-      <ParcoursMobil events={events} />
-    </ProShell>
-  )
+/* P1 (16/09) : le menu pro tient en quatre entrées ; cette page y est rangée. */
+export default function Page({ searchParams }: { searchParams: { pro?: string } }) {
+  const params = new URLSearchParams()
+  if (searchParams.pro) params.set('pro', searchParams.pro)
+  const s = params.toString()
+  redirect(`/pro${s ? '?' + s : ''}`)
 }

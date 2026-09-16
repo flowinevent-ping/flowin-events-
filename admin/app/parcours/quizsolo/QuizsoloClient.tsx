@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
@@ -114,8 +115,8 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:'#0F172A',color:'#fff',fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
-      <style>{parcoursCSS(c)+'.opt{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:14px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left}.opt.correct{background:rgba(34,197,94,.2);border-color:#22C55E}.opt.wrong{background:rgba(239,68,68,.2);border-color:#EF4444}.opt.reveal{background:rgba(34,197,94,.12);border-color:#22C55E88}'}</style>
+    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
+      <style>{parcoursCSS(c)+'.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}'}</style>
       {screen==='landing'&&(<div className="screen" style={{paddingTop:32,textAlign:'center'}}><div style={{fontSize:48,marginBottom:14}}>⏱️</div><div style={{fontSize:24,fontWeight:900,marginBottom:8}}>{nom}</div><div style={{fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20}}>Quiz chronométré · {timerSec}s par question</div><button className="btn" onClick={()=>setScreen('quiz')}>⏱️ Démarrer le quiz →</button></div>)}
       {screen==='quiz'&&q&&(<div className="screen"><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Q{qIdx+1}/{questions.length}</div><div style={{background:timer<=5?'rgba(239,68,68,.2)':'rgba(255,255,255,.06)',borderRadius:'50%',width:40,height:40,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:14,color:timer<=5?'#F87171':'#fff',border:`2px solid ${timer<=5?'#EF4444':'rgba(255,255,255,.15)'}`}}>{timer}</div></div><div style={{background:'rgba(255,255,255,.06)',borderRadius:12,height:4,marginBottom:16}}><div style={{background:c,borderRadius:12,height:'100%',width:`${(timer/timerSec)*100}%`,transition:'width 1s linear'}}/></div><div style={{fontSize:17,fontWeight:800,lineHeight:1.4,marginBottom:20,textAlign:'center'}}>{q.texte}</div>{q.options.map((opt,i)=>{let cls='opt';if(answered){if(i===selected&&i===q.bonne)cls='opt correct';else if(i===selected)cls='opt wrong';else if(i===q.bonne)cls='opt reveal'}return <button key={i} className={cls} onClick={()=>nextQ(i)} disabled={answered}><span style={{fontWeight:800,color:'rgba(255,255,255,.4)',marginRight:8}}>{['A','B','C','D'][i]}</span>{opt}</button>})}</div>)}
       {screen==='result'&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>🎯</div><div style={{fontSize:22,fontWeight:900,marginBottom:6}}>Score : {score}/{questions.length}</div><div style={{fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20}}>Laisse tes coordonnées pour participer au tirage !</div><button className="btn" onClick={()=>setScreen('form')}>Continuer →</button></div>)}

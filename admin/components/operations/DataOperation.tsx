@@ -16,8 +16,8 @@ import { supabase } from '@/lib/supabase'
 import type { DonneesOperation } from '@/lib/operations'
 import { Camembert } from '@/components/dashboard/Camembert'
 
-const BRD = '#E2E8F0'
-const MUT = '#64748B'
+const BRD = 'var(--sa-border, #E2E8F0)'
+const MUT = 'var(--sa-muted, #64748B)'
 const ACC = '#7C2D92'
 const btn: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 11px', borderRadius: 8,

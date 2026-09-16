@@ -29,7 +29,7 @@ import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } 
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 const input: React.CSSProperties = {
-  border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '10px 12px',
+  border: '1.5px solid #efe9f2', borderRadius: 10, padding: '10px 12px',
   fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box',
 }
 
@@ -55,11 +55,11 @@ export default function GagnantsClient({ initial }: { initial: OperationsPro }) 
   )
 }
 
-function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; data: OperationsPro; onChange: () => void }) {
+export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; data: OperationsPro; onChange: () => void }) {
   const [message, setMessage] = useState<Msg>(null)
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
   const kpi = (n: number, l: string) => (
-    <div style={{ flex: '1 1 110px', background: '#F8FAFC', borderRadius: 10, padding: '9px 12px' }}>
+    <div style={{ flex: '1 1 110px', background: '#faf7fd', borderRadius: 10, padding: '9px 12px' }}>
       <div style={{ fontSize: 20, fontWeight: 900, color: '#7C2D92' }}>{n}</div>
       <div style={{ fontSize: 11, ...MUTED }}>{l}</div>
     </div>
@@ -156,7 +156,7 @@ function Tirage({ op, data, setMessage, onChange }: {
   }
 
   return (
-    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+    <div style={{ background: '#faf7fd', border: '1px solid #efe9f2', borderRadius: 12, padding: 14, marginBottom: 12 }}>
       <div style={{ fontWeight: 800, fontSize: 13.5 }}>Tirage au sort</div>
       <div style={{ fontSize: 12, ...MUTED, margin: '2px 0 10px' }}>
         {eligibles === null ? 'Chargement du vivier…' : `${vivier.length} joueur${vivier.length > 1 ? 's' : ''} ayant joué`}
@@ -177,8 +177,8 @@ function Tirage({ op, data, setMessage, onChange }: {
         <button style={btnPrimaire} disabled={envoi || eligibles === null} onClick={() => tirer()}>🎲 Lancer le tirage</button>
       )}
       {propose && (
-        <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: 10, padding: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B' }}>Gagnant proposé</div>
+        <div style={{ background: '#fff', border: '1px solid #efe9f2', borderRadius: 10, padding: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>Gagnant proposé</div>
           <div style={{ fontWeight: 800, fontSize: 15, marginTop: 2 }}>{propose.nom}</div>
           <div style={{ fontSize: 12, ...MUTED }}>{propose.email ?? 'pas d’email'}{propose.tel ? ` · ${propose.tel}` : ''}</div>
           {dejaGagnants.indexOf(propose.nom) >= 0 && (
@@ -199,11 +199,11 @@ function Tirage({ op, data, setMessage, onChange }: {
         </div>
       )}
       {mail !== 'idle' && !propose && (
-        <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: mail === 'ok' ? '#15803D' : mail === 'echec' ? '#B45309' : '#64748B' }}>
+        <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: mail === 'ok' ? '#15803D' : mail === 'echec' ? '#B45309' : '#8a7e93' }}>
           {mail === 'envoi' && 'Envoi du billet…'}
           {mail === 'ok' && 'Billet envoyé par email au gagnant.'}
           {mail === 'echec' && 'Tirage enregistré, mais le billet n’a pas pu être envoyé par email.'}
-          {dernierToken && <> · <a href={`/lot.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>voir le billet</a></>}
+          {dernierToken && <> · <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>voir le billet</a></>}
         </div>
       )}
     </div>
@@ -260,7 +260,7 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
           {g.joueurEmail && <div style={{ fontSize: 11.5, ...MUTED }}>{g.joueurEmail}</div>}
           {g.retireAt && <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           {g.retraitToken && (
-            <a href={`/lot.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
+            <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
               style={{ fontSize: 11.5, color: '#7C2D92', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
           )}
         </div>
@@ -273,7 +273,7 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
         </div>
       </div>
       {ouvert && (
-        <div style={{ marginTop: 10, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: 12 }}>
+        <div style={{ marginTop: 10, background: '#faf7fd', border: '1px solid #efe9f2', borderRadius: 10, padding: 12 }}>
           <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Validation en caisse</div>
           <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 8 }}>
             Saisissez votre code PIN à 4 chiffres — celui de votre fiche de retrait. Le lot est alors décompté de votre stock.

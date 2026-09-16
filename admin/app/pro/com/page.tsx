@@ -1,23 +1,9 @@
-import type { Metadata } from 'next'
-import { fetchOperationsPro } from '@/lib/operations'
-import ProShell from '@/components/pro/ProShell'
-import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
-import { H1, SUB } from '@/lib/proui'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = { title: 'Emails & com — Flowin Pro' }
-
-/**
- * Emails & com — meme rubrique que la fiche pro SA (famille J : memes
- * rubriques des deux cotes), un bloc par operation.
- */
-export default async function ProComPage({ searchParams }: { searchParams: { pro?: string } }) {
-  const proId = searchParams.pro ?? ''
-  const ops = await fetchOperationsPro(proId)
-  return (
-    <ProShell proName={ops.proNom ?? 'Mon établissement'} proId={proId} active="com">
-      <h1 style={H1}>Emails &amp; com</h1>
-      <div style={{ ...SUB, marginBottom: 16 }}>Vos supports et vos liens de jeu, opération par opération.</div>
-      <OngletOperationsPro initial={ops} onglet="comm" />
-    </ProShell>
-  )
+/* P1 (16/09) : le menu pro tient en quatre entrées ; cette page y est rangée. */
+export default function Page({ searchParams }: { searchParams: { pro?: string } }) {
+  const params = new URLSearchParams()
+  if (searchParams.pro) params.set('pro', searchParams.pro)
+  const s = params.toString()
+  redirect(`/pro${s ? '?' + s : ''}`)
 }

@@ -16,8 +16,8 @@ import { CARD, ACC } from '@/lib/proui'
 type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null }
 type Fiche = { image_url: string | null; site_web: string | null; instagram: string | null; facebook: string | null }
 
-const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#64748B', marginBottom: 5, display: 'block' }
-const inp: React.CSSProperties = { width: '100%', border: '1.5px solid #E2E8F0', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12, background: '#fff' }
+const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#8a7e93', marginBottom: 5, display: 'block' }
+const inp: React.CSSProperties = { width: '100%', border: '1.5px solid #efe9f2', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12, background: '#fff' }
 
 export default function EntrepriseForm({ initial }: { initial: Pro }) {
   const [p, setP] = useState<Pro>(initial)
@@ -95,7 +95,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
               {champF('facebook', 'Facebook', 'https://facebook.com/…')}
             </>
           ) : (
-            <div style={{ fontSize: 12.5, color: '#64748B' }}>Logo et liens : votre fiche commerce sera créée par Flowin.</div>
+            <div style={{ fontSize: 12.5, color: '#8a7e93' }}>Logo et liens : votre fiche commerce sera créée par Flowin.</div>
           )}
         </div>
       </div>

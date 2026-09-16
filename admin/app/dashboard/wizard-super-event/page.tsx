@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
-import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
+import ApercuJeu from '@/components/parcours/ApercuJeu'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
@@ -72,7 +72,6 @@ export default function Page() {
   /* L apercu montre la station en cours de reglage : sans ca, on parametre
      cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
   const [apercuPro, setApercuPro] = useState('')
-  const [ecranApercu, setEcranApercu] = useState<EcranApercu>('onboard')
 
   const [occupe, setOccupe] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
@@ -223,7 +222,7 @@ export default function Page() {
             <b>Ici, vous rattachez.</b> Le pro coché reçoit sa station immédiatement,
             sans validation — c’est vous qui décidez.{' '}
             <b>Un pro qui demande à participer</b>, lui, passe par son espace
-            (<code className="sa-code">/pro/rejoindre</code>) : sa demande atterrit dans{' '}
+            (<code className="sa-code">/pro/nouvelle</code>) : sa demande atterrit dans{' '}
             <Link href="/dashboard/demandes-rattachement" className="sa-lien">Demandes de participation</Link>,
             et son approbation crée sa station avec tout ce qu’il a saisi.
           </div>
@@ -336,19 +335,10 @@ export default function Page() {
           {/* Le visuel se construit pendant la saisie. Un super event n a pas
               d ecran a lui : ce qu on montre, c est la STATION en cours de
               reglage — c est elle que le joueur ouvrira. */}
-          <ApercuApp
-            ecran={ecranApercu}
-            onEcran={setEcranApercu}
-            d={{
-              nom: proApercu ? (pros.find(p => p.id === proApercu)?.nom ?? proApercu) : nom,
-              superEvent: nom || null,
-              /* Un super event groupe plusieurs stations : la carte des
-                 stations et la carte partenaires font partie du parcours. */
-              multistation: true,
-              nbStations: Object.keys(choisis).length,
-              logoUrl: logoUrl.trim() || null,
-              nbPartenaires: Object.keys(choisis).length,
-            }}
+          <ApercuJeu
+            module={module}
+            eventId={module === GABARIT_MODULE ? 'ev-master-superevent-bar' : null}
+            saisie={{ nom: proApercu ? (pros.find(p => p.id === proApercu)?.nom ?? proApercu) : nom, cfg: { ...cfgJeu, ...(logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) } }}
           />
         </div>
 

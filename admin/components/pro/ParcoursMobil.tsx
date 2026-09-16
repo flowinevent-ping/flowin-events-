@@ -16,7 +16,7 @@ import { supabase } from '@/lib/supabase'
 const ACC = '#7C2D92'
 type Ev = { id: string; module: string; nom: string; super_event_id?: string | null }
 
-function Phone({ src, empty }: { src?: string; empty?: string }) {
+export function Phone({ src, empty }: { src?: string; empty?: string }) {
   const W = 252, H = 505, SCALE = 0.64
   const IW = Math.round(W / SCALE)
   const IH = Math.round(H / SCALE)

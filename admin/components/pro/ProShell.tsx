@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { CHARTE, POLICE_ADMIN, VARIABLES_CSS } from '@/lib/charte'
+import { CHARTE_PRO, POLICE_PRO, VARIABLES_CSS } from '@/lib/charte'
 
 /**
  * Coquille brandee de l'espace Pro (identite Flowin Pro de la maquette validee).
@@ -22,25 +22,24 @@ import { CHARTE, POLICE_ADMIN, VARIABLES_CSS } from '@/lib/charte'
  * 4 raccourcis les plus utilises + "Plus" pour tout le reste -- jamais tout le menu en bas,
  * ecran trop etroit pour 10 items.
  */
-interface NavItem { key: string; label: string; icon: string; route?: string; group: string }
+interface NavItem { key: string; label: string; sous: string; icon: string; route: string }
+/* P1 (16/09) : quatre entrees. Tout se lit par operation : une operation
+   s ouvre sur sa fiche (/pro/operation), qui porte jeu, lots, diffusion,
+   gagnants, trafic, CRM et contrat. */
 const NAV: NavItem[] = [
-  { key: 'accueil', label: 'Accueil', icon: 'home', route: '/pro', group: 'TABLEAU DE BORD' },
-  { key: 'entreprise', label: 'Mon entreprise', icon: 'shop', route: '/pro/entreprise', group: 'MON COMPTE' },
-  { key: 'jeu', label: 'Créer mon animation', icon: 'game', route: '/pro/jeu', group: 'MES CAMPAGNES' },
-  { key: 'banques', label: 'Mes banques', icon: 'bank', route: '/pro/banques', group: 'MES CAMPAGNES' },
-  { key: 'events', label: 'Mes events', icon: 'calendar', route: '/pro/events', group: 'MES CAMPAGNES' },
-  { key: 'lots', label: 'Lots & distribution', icon: 'gift', route: '/pro/lots', group: 'MES CAMPAGNES' },
-  { key: 'com', label: 'Emails & com', icon: 'mail', route: '/pro/com', group: 'MES CAMPAGNES' },
-  { key: 'contrat', label: 'Contrat', icon: 'doc', route: '/pro/contrat', group: 'MON COMPTE' },
-  { key: 'crm', label: 'Mon CRM', icon: 'users', route: '/pro/crm', group: 'MES DONNÉES' },
-  { key: 'gagnants', label: 'Gagnants & tirage', icon: 'dice', route: '/pro/tirage', group: 'MES DONNÉES' },
-  { key: 'tracking', label: 'Tracking liens & QR', icon: 'target', route: '/pro/tracking', group: 'MES DONNÉES' },
-  { key: 'super', label: 'Super Event', icon: 'star', route: '/pro/super', group: 'ALLER PLUS LOIN' },
-  { key: 'rejoindre', label: 'Rejoindre un super event', icon: 'join', route: '/pro/rejoindre', group: 'ALLER PLUS LOIN' },
-  { key: 'parcours', label: 'Parcours mobil', icon: 'phone', route: '/pro/parcours', group: 'PARCOURS MOBIL' },
+  { key: 'operations', label: 'Mes opérations', sous: 'Events et super events', icon: 'calendar', route: '/pro' },
+  { key: 'nouvelle', label: 'Nouvelle opération', sous: 'Créer ou rejoindre', icon: 'join', route: '/pro/nouvelle' },
+  { key: 'donnees', label: 'Mes données', sous: 'Contacts, gagnants, trafic', icon: 'users', route: '/pro/donnees' },
+  { key: 'compte', label: 'Mon compte', sous: 'Entreprise, contrat, banques', icon: 'shop', route: '/pro/compte' },
 ]
-/* Raccourcis de la barre basse mobile -- les 4 les plus utilises + Plus (ouvre le tiroir complet) */
-const NAV_BASSE: string[] = ['accueil', 'jeu', 'crm', 'gagnants']
+/* Les pages existantes gardent leur cle : elles se rangent sous l une des quatre. */
+const RANGEMENT: Record<string, string> = {
+  accueil: 'operations', events: 'operations', super: 'operations', parcours: 'operations', operation: 'operations',
+  lots: 'operations', com: 'operations',
+  jeu: 'nouvelle', rejoindre: 'nouvelle',
+  crm: 'donnees', gagnants: 'donnees', tracking: 'donnees',
+  entreprise: 'compte', contrat: 'compte', banques: 'compte',
+}
 const ICONS: Record<string, string> = {
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
   shop: '<path d="M3 9l1.5-5h15L21 9M4 9v11h16V9M4 9h16"/>',
@@ -58,7 +57,7 @@ const ICONS: Record<string, string> = {
   doc: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
   more: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
 }
-const ACCENT = CHARTE.accentClair, ACCENT_D = CHARTE.accent, SB = CHARTE.sidebar, SB2 = CHARTE.sidebar2
+const C = CHARTE_PRO
 
 function Icon({ k }: { k: string }) {
   return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: ICONS[k] ?? '' }} />
@@ -66,91 +65,86 @@ function Icon({ k }: { k: string }) {
 
 export default function ProShell({ proName, proId, active, children }: { proName: string; proId: string; active: string; children: React.ReactNode }) {
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
-  const groups = Array.from(new Set(NAV.map(n => n.group)))
+  const actif = RANGEMENT[active] ?? active
   const [open, setOpen] = useState(false)
+  const page = NAV.find(n => n.key === actif)
 
   const sidebar = (
-    <aside className="pro-sidebar" style={{ width: 248, flexShrink: 0, background: `linear-gradient(180deg,${SB},${SB2})`, color: 'rgba(255,255,255,.78)', padding: '20px 14px', height: '100dvh', overflowY: 'auto' }}>
-      <div style={{ fontWeight: 900, fontSize: 20, color: '#fff', letterSpacing: '-.5px', padding: '0 8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: ACCENT, marginRight: 8, verticalAlign: 'middle' }} />Flow<span style={{ color: ACCENT }}>in</span> Pro</span>
+    <aside className="pro-sidebar" style={{ width: 256, flexShrink: 0, background: `linear-gradient(180deg,${C.sidebar},${C.sidebar2})`, color: 'rgba(255,255,255,.78)', padding: '22px 14px', height: '100dvh', overflowY: 'auto', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
+      <div style={{ padding: '4px 8px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Logo officiel (public/nds/assets/flowin_blanc.png) */}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style={{ height: 26, width: 'auto' }} />
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>PRO</span>
+        </span>
         <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,.6)', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>×</button>
       </div>
-      <div style={{ background: 'rgba(168,85,247,.16)', border: '1px solid rgba(168,85,247,.3)', borderRadius: 12, padding: '10px 12px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 9 }}>
-        <span style={{ fontSize: 10, fontWeight: 800, background: ACCENT_D, color: '#fff', borderRadius: 6, padding: '2px 7px' }}>PRO</span>
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{proName || 'Mon établissement'}</span>
+      <div style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, padding: '11px 13px', marginBottom: 20 }}>
+        <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.5)' }}>Établissement</div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', lineHeight: 1.25, marginTop: 2 }}>{proName || 'Mon établissement'}</div>
       </div>
-      {groups.map(g => (
-        <div key={g} style={{ marginBottom: 10 }}>
-          {/* Meme en-tete de groupe que la sidebar SA (.sa-sb-group). */}
-          <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.48)', padding: '12px 8px 7px' }}>{g}</div>
-          {NAV.filter(n => n.group === g).map(n => {
-            const on = n.key === active
-            const inner = (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', marginBottom: 2, borderLeft: `3px solid ${on ? ACCENT : 'transparent'}`, background: on ? 'linear-gradient(90deg,rgba(168,85,247,.18),rgba(168,85,247,.03))' : 'transparent', color: on ? '#fff' : (n.route ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.34)'), fontSize: 13, fontWeight: on ? 700 : 600 }}>
-                <span style={{ width: 30, height: 30, borderRadius: 9, background: on ? ACCENT_D : 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: on ? '#fff' : 'rgba(255,255,255,.7)' }}><Icon k={n.icon} /></span>
-                <span style={{ flex: 1 }}>{n.label}</span>
-                {!n.route && <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.35)' }}>bientôt</span>}
-              </div>
-            )
-            return n.route
-              ? <Link key={n.key} href={`${n.route}${q}`} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>{inner}</Link>
-              : <div key={n.key}>{inner}</div>
-          })}
-        </div>
-      ))}
+      {NAV.map(n => {
+        const on = n.key === actif
+        return (
+          <Link key={n.key} href={`${n.route}${q}`} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 10px', marginBottom: 6, borderRadius: 14, background: on ? C.degrade : 'transparent', color: '#fff', boxShadow: on ? '0 8px 20px rgba(224,33,138,.3)' : 'none' }}>
+              <span style={{ width: 34, height: 34, borderRadius: 11, background: on ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon k={n.icon} /></span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 14, fontWeight: 800 }}>{n.label}</span>
+                <span style={{ display: 'block', fontSize: 11, fontWeight: 600, color: on ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.5)' }}>{n.sous}</span>
+              </span>
+            </div>
+          </Link>
+        )
+      })}
     </aside>
   )
 
   const barreBasse = (
     <nav className="pro-bottom-nav" style={{ display: 'none' }}>
-      {NAV_BASSE.map(key => {
-        const n = NAV.find(x => x.key === key)!
-        const on = n.key === active
+      {NAV.map(n => {
+        const on = n.key === actif
         return (
           <Link key={n.key} href={`${n.route}${q}`} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? '#fff' : 'rgba(255,255,255,.55)' }}>
-            <span style={{ color: on ? ACCENT : 'inherit' }}><Icon k={n.icon} /></span>
-            <span style={{ fontSize: 10, fontWeight: on ? 800 : 600, lineHeight: 1 }}>{n.label.split(' ')[0]}</span>
+            <span style={{ color: on ? C.magenta : 'inherit' }}><Icon k={n.icon} /></span>
+            <span style={{ fontSize: 10, fontWeight: on ? 800 : 600, lineHeight: 1 }}>{n.label.replace(/^(Mes|Mon|Nouvelle) /, '')}</span>
           </Link>
         )
       })}
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Voir tout le menu"
-        style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.55)', fontFamily: 'inherit' }}
-      >
-        <Icon k="more" />
-        <span style={{ fontSize: 10, fontWeight: 600, lineHeight: 1 }}>Plus</span>
-      </button>
     </nav>
   )
 
   return (
-    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: CHARTE.fond, fontFamily: POLICE_ADMIN, fontSize: 14, color: CHARTE.texte }}>
+    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: C.fond, fontFamily: POLICE_PRO, fontSize: 14, color: C.texte }}>
       <style>{`
-        :root { ${VARIABLES_CSS} }
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+        :root { ${VARIABLES_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; }
+        .pro-shell input, .pro-shell select, .pro-shell textarea, .pro-shell button { font-family: ${POLICE_PRO}; }
         .pro-sidebar { position: sticky; top: 0; }
-        .pro-hamburger, .pro-drawer-backdrop, .pro-bottom-nav { display: none; }
+        .pro-drawer-backdrop, .pro-bottom-nav, .pro-hamburger { display: none; }
         @media (max-width: 860px) {
           .pro-sidebar { position: fixed; left: 0; top: 0; z-index: 40; transform: translateX(-100%); transition: transform .22s ease; }
           .pro-shell.open .pro-sidebar { transform: translateX(0); box-shadow: 8px 0 32px rgba(0,0,0,.25); }
           .pro-drawer-close { display: block !important; }
-          .pro-drawer-backdrop { display: none; }
-          .pro-shell.open .pro-drawer-backdrop { display: block; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 30; }
-          .pro-main-pad { padding: 18px !important; padding-bottom: 78px !important; }
+          .pro-shell.open .pro-drawer-backdrop { display: block; position: fixed; inset: 0; background: rgba(22,8,32,.45); z-index: 30; }
+          .pro-main-pad { padding: 16px !important; padding-bottom: 78px !important; }
           .pro-bottom-nav {
             display: flex !important; position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
-            background: linear-gradient(180deg,${SB},${SB2}); border-top: 1px solid rgba(255,255,255,.08);
+            background: linear-gradient(180deg,${C.sidebar},${C.sidebar2}); border-top: 1px solid rgba(255,255,255,.08);
             padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -6px 20px rgba(0,0,0,.18);
           }
+          .pro-hamburger { display: inline-flex !important; }
         }
       `}</style>
       {sidebar}
       <div className="pro-drawer-backdrop" onClick={() => setOpen(false)} />
       <main style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ background: CHARTE.carte, borderBottom: `1px solid ${CHARTE.bordure}`, height: 52, padding: '0 24px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: CHARTE.attenue }}>
-          <span style={{ fontWeight: 600 }}>Flowin Pro</span><span>›</span><span style={{ fontWeight: 800, color: '#0F172A' }}>{NAV.find(n => n.key === active)?.label ?? 'Accueil'}</span>
+        <div style={{ background: '#fff', borderBottom: `1px solid ${C.bordure}`, height: 54, padding: '0 24px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: C.attenue }}>
+          <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Menu" style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: C.accent, padding: 0 }}><Icon k="more" /></button>
+          <span style={{ fontWeight: 700 }}>Flowin Pro</span><span>›</span><span style={{ fontWeight: 800, color: C.texte }}>{page?.label ?? 'Mes opérations'}</span>
         </div>
-        <div className="pro-main-pad" style={{ padding: 24, maxWidth: 1120 }}>{children}</div>
+        <div className="pro-main-pad" style={{ padding: 26, maxWidth: 1180 }}>{children}</div>
       </main>
       {barreBasse}
     </div>

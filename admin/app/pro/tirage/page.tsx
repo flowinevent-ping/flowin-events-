@@ -1,28 +1,11 @@
-import type { Metadata } from 'next'
-import { fetchOperationsPro } from '@/lib/operations'
-import { supabase } from '@/lib/supabase'
-import ProShell from '@/components/pro/ProShell'
-import GagnantsClient from '@/components/pro/GagnantsClient'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = { title: 'Gagnants & tirage — Flowin Pro' }
-
-interface Props { searchParams: { pro?: string; ev?: string } }
-
-/**
- * Gagnants & tirage — un bloc par operation (lib/operations.ts).
- * `?ev=` reste accepte pour retrouver le pro depuis un lien d event.
- */
-export default async function ProTiragePage({ searchParams }: Props) {
-  let proId = searchParams.pro ?? ''
-  const evId = searchParams.ev ?? ''
-  if (!proId && evId) {
-    const { data: ev } = await supabase.from('events').select('pro_id').eq('id', evId).single()
-    proId = ev?.pro_id ?? ''
-  }
-  const ops = await fetchOperationsPro(proId)
-  return (
-    <ProShell proName={ops.proNom ?? 'Mon établissement'} proId={proId} active="gagnants">
-      <GagnantsClient initial={ops} />
-    </ProShell>
-  )
+/* P1 (16/09) : le menu pro tient en quatre entrées ; cette page y est rangée. */
+export default function Page({ searchParams }: { searchParams: { pro?: string } }) {
+  const params = new URLSearchParams()
+  if (searchParams.pro) params.set('pro', searchParams.pro)
+  const extra = 'onglet=gagnants'
+  if (extra) { const [k, v] = extra.split('='); params.set(k, v) }
+  const s = params.toString()
+  redirect(`/pro/donnees${s ? '?' + s : ''}`)
 }

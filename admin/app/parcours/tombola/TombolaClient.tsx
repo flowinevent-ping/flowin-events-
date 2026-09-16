@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { generateTicket } from '@/lib/ticket'
 import { getJoueurLocal, claimJoueur, writeJoueur } from '@/lib/parcours'
+import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
@@ -142,7 +143,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   }, [])
 
   return (
-    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: '#0F172A', color: '#fff', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         .screen{padding:20px;min-height:100dvh;display:flex;flex-direction:column}
@@ -153,9 +154,9 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
         .label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:5px}
         .err-msg{font-size:11px;color:#F87171;margin-top:3px;font-weight:700}
         .source-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit}
-        .source-chip.sel{background:rgba(168,85,247,.15);border-color:#7C2D92;color:#C4B5FD}
+        .source-chip.sel{background:rgba(224,33,138,.16);border-color:#E0218A;color:#fff}
         .gender-btn{flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:14px}
-        .gender-btn.sel{background:rgba(168,85,247,.15);border-color:#7C2D92;color:#C4B5FD}
+        .gender-btn.sel{background:rgba(224,33,138,.16);border-color:#E0218A;color:#fff}
         .lot-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
         .lot-row:last-child{border-bottom:none}
         .part-tile{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center;cursor:pointer}
@@ -187,7 +188,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
                 const ranks = ['🥇', '🥈', '🥉', '🎁', '🎁']
                 return (
                   <div key={l.id} className="lot-row">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(168,85,247,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(224,33,138,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
                       {l.emoji || ranks[i] || '🎁'}
                     </div>
                     <div>
@@ -200,7 +201,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             </div>
           )}
           {tirageText && (
-            <div style={{ background: 'rgba(168,85,247,.1)', border: '1px solid rgba(168,85,247,.25)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)', marginBottom: 16 }}>
+            <div style={{ background: 'rgba(124,45,146,.18)', border: '1px solid rgba(224,33,138,.3)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)', marginBottom: 16 }}>
               {tirageText}
             </div>
           )}
@@ -321,7 +322,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             <div style={{ fontSize: 20, fontWeight: 900, textAlign: 'center', marginBottom: 4 }}>{partSelected.nom}</div>
             {partSelected.description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', textAlign: 'center', lineHeight: 1.5, marginBottom: 12 }}>{partSelected.description}</div>}
             {partSelected.promo_text && (
-              <div style={{ background: 'rgba(168,85,247,.1)', border: '1px solid rgba(168,85,247,.25)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#C4B5FD', marginBottom: 12, textAlign: 'center' }}>
+              <div style={{ background: 'rgba(124,45,146,.18)', border: '1px solid rgba(224,33,138,.3)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#fff', marginBottom: 12, textAlign: 'center' }}>
                 🎁 {partSelected.promo_text}
               </div>
             )}

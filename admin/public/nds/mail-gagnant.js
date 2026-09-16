@@ -17,7 +17,7 @@
    REFERENTIEL 36 (16/09) : l email est au nom de SON operation. Sans
    `operation`, ou pour se-nds-2026, le texte de Nuits du Sud est inchange.
    Pour toute autre operation, le meme message est ecrit au nom de
-   `operation_nom`, et le billet pointe sur /lot.html (billet generique).
+   `operation_nom` ; le billet est le meme pour toutes (billets-partenaires.html).
    ========================================================================== */
 (function (root) {
   'use strict';
@@ -34,7 +34,6 @@
   function lienBillet(t) {
     if (t.billet_lien) return t.billet_lien;              // lien impose manuellement
     if (!t.retrait_token) return '';
-    if (!estNds(t)) return root.location.origin + '/lot.html?t=' + encodeURIComponent(t.retrait_token);
     return root.location.origin + '/nds/billets-partenaires.html?t=' + encodeURIComponent(t.retrait_token);
   }
   function puces(conditions) {

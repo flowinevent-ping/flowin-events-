@@ -264,7 +264,15 @@ export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; s
   }
 }
 
+/* Un apercu (?preview=1, cadre telephone des parcours de creation) n ecrit
+   jamais de joueur ni de participation. */
+function estApercu(): boolean {
+  if (typeof window === 'undefined') return false
+  try { return new URLSearchParams(window.location.search).has('preview') } catch { return false }
+}
+
 export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
+  if (estApercu()) return { success: true, duplicate: false, ticket: payload.ticket_code }
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
 
@@ -553,6 +561,7 @@ export async function claimJoueur(
   bonus?: Record<string, unknown>,
   extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; started_at?: string; quizTicket?: boolean; bonusTicket?: boolean; lotGagne?: string }
 ): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
+  if (estApercu()) return { success: true, duplicate: false, ticket: generateTicket(prefix) }
   const emailLower = joueur.email.toLowerCase().trim()
   const today = new Date().toISOString().slice(0, 10)
   // Dedup 1/jour/station : bloque le rejeu de CETTE station le MEME jour (rejouable un autre jour).
@@ -641,39 +650,52 @@ export function shuffle<T>(arr: T[]): T[] {
 }
 
 /* ── Shared CSS generator ── */
+/* P7 (16/09) : les jeux suivent la charte NDS 2026 (lib/nds2026Design.ts,
+   base sombre canonique) : Manrope, fond #2a1036 -> #160820, bouton degrade
+   #8E2E9E -> #E0218A, cartes et options comme les ecrans quiz du gabarit,
+   filet or / magenta / violet. `couleur` (couleur de l event) reste celle du
+   code ticket. */
+export const NDS_JEU_FOND = 'linear-gradient(180deg,#2a1036,#160820)'
+export const NDS_JEU_POLICE = "'Manrope',system-ui,sans-serif"
 export function parcoursCSS(couleur: string): string {
   return `
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    html,body{height:100%;background:#0F172A}
-    .app{max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:#0F172A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    .screen{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column}
-    .btn{width:100%;padding:14px;border:none;border-radius:50px;background:${couleur};color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .1s}
-    .btn:active{transform:scale(.98)} .btn:disabled{opacity:.6}
-    .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.55);font-size:13px;padding:10px;cursor:pointer;width:100%;font-family:inherit;margin-top:6px}
-    .back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0}
-    .input{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit}
-    .input:focus{border-color:${couleur}} .input.err{border-color:#F87171}
+    html,body{height:100%;background:#0c0a12}
+    body{font-family:${NDS_JEU_POLICE};-webkit-font-smoothing:antialiased}
+    .app{max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:${NDS_JEU_FOND};color:#fff;font-family:${NDS_JEU_POLICE}}
+    .screen{flex:1;padding:20px;overflow-y:auto;display:flex;flex-direction:column;position:relative}
+    .btn,.btn-cta{width:100%;padding:16px;border:none;border-radius:50px;background:linear-gradient(90deg,#8E2E9E,#E0218A);color:#fff;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;transition:transform .1s;box-shadow:0 10px 24px rgba(224,33,138,.35)}
+    .btn:active,.btn-cta:active{transform:scale(.98)} .btn:disabled,.btn-cta:disabled{opacity:.6}
+    .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:50px;color:rgba(255,255,255,.7);font-size:13px;font-weight:700;padding:11px;cursor:pointer;width:100%;font-family:inherit;margin-top:8px}
+    .back{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;color:#fff}
+    .input{width:100%;padding:13px 14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:13px;color:#fff;font-size:15px;font-weight:600;outline:none;font-family:inherit}
+    .input::placeholder{color:rgba(255,255,255,.32)}
+    .input:focus{border-color:#E0218A} .input.err{border-color:#f87171}
     .label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin-bottom:5px}
-    .err{font-size:11px;color:#F87171;margin-top:3px;font-weight:700}
+    .err,.err-msg{font-size:11px;color:#f87171;margin-top:3px;font-weight:700}
     .header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-    .title{font-weight:800;font-size:17px}
-    .sub{font-size:12px;color:rgba(255,255,255,.45)}
-    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px}
-    .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:4px 12px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+    .title{font-weight:800;font-size:19px}
+    .sub{font-size:12px;color:rgba(255,255,255,.5)}
+    .card{position:relative;overflow:hidden;background:linear-gradient(180deg,#2B1036,#160820);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:16px;box-shadow:0 14px 30px rgba(43,16,54,.38)}
+    .card:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#F5A100,#E0218A,#6f4bd8)}
+    .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(224,33,138,.18);border:1px solid #E0218A;border-radius:100px;padding:4px 12px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#ffd5ec}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .source-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit}
-    .source-chip.sel{background:rgba(168,85,247,.15);border-color:#7C2D92;color:#C4B5FD}
-    .gender-btn{flex:1;padding:10px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:14px}
-    .gender-btn.sel{background:rgba(168,85,247,.15);border-color:#7C2D92;color:#C4B5FD}
-    .ticket-code{font-size:28px;font-weight:900;color:${couleur};letter-spacing:.1em;margin:12px 0;font-family:monospace;text-align:center}
-    .part-tile{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center;cursor:pointer}
-    .link-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;margin-bottom:8px}
-    select.input option{background:#1E293B}
+    .opt{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:14px 15px;cursor:pointer;font-size:15px;font-weight:600;text-align:left;color:#fff;width:100%;font-family:inherit;margin-bottom:10px}
+    .opt.sel{border-color:#E0218A;background:rgba(224,33,138,.16)}
+    .source-chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:7px 13px;font-size:12px;font-weight:600;color:rgba(255,255,255,.62);cursor:pointer;font-family:inherit}
+    .source-chip.sel{background:rgba(224,33,138,.18);border-color:#E0218A;color:#ffd5ec}
+    .gender-btn{flex:1;padding:11px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;font-size:14px}
+    .gender-btn.sel{background:rgba(224,33,138,.18);border-color:#E0218A;color:#ffd5ec}
+    .ticket-code{font-size:28px;font-weight:900;color:${couleur || '#E0218A'};letter-spacing:.1em;margin:12px 0;font-family:ui-monospace,Menlo,monospace;text-align:center}
+    .part-tile{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center;cursor:pointer}
+    .link-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;margin-bottom:8px}
+    select.input option{background:#2B1036}
     .progress{display:flex;gap:6px;margin-bottom:16px}
-    .progress-step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.12)}
-    .progress-step.on{background:${couleur}}
-    .rgpd{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;font-size:11px;color:rgba(255,255,255,.45);line-height:1.5}
-    .rgpd-check{width:20px;height:20px;border-radius:5px;background:${couleur};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+    .progress-step{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12)}
+    .progress-step.on{background:linear-gradient(90deg,#8E2E9E,#E0218A)}
+    .rgpd{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
+    .rgpd-check{width:20px;height:20px;border-radius:6px;background:linear-gradient(90deg,#8E2E9E,#E0218A);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
   `
 }
 
