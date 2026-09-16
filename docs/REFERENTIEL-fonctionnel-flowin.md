@@ -253,3 +253,11 @@ SQL appliqué : `billet_unique.sql`, `evenements_demo_apercu.sql`, `controle_inc
 | CRM introuvable | Onglet « CRM » sur chaque vignette et dans chaque fiche ; Mes données → CRM, avec choix de l'opération |
 | Page illisible | Fiche : bandeau avec les chiffres (parties, lots, gagnants, à remettre), barre d'onglets fixe, titre de section |
 | Aperçu super event perdu | Parcours mobil d'origine (event + super event) dans l'onglet Jeu et bouton « Parcours mobil » |
+
+### Retour Romain du 16/09 nuit (2) — corrigé
+
+| Demande | Réalisé |
+|---|---|
+| « Réduis, mets en vignettes, trop grand » | Petites vignettes (dates, nom, type, parties, gagnants, à remettre) ; bandeau et tuiles de chiffres réduits |
+| « Passé, en cours, à venir, et surtout par date mois/année » | Mes opérations et Mes données (Gagnants, Trafic) : sections En cours / À venir / Passées, puis par mois et année ; filtre Animations / Super events |
+| « Un CRM complet, tous events et actions confondus » | Mes données → CRM : un contact par ligne, toutes opérations confondues, avec origines, opérations, parties, gains ; filtres opération, origine, gagnants, mois, opt-in ; onglets Par origine, Par opération, Statistiques ; relances email (Gmail en copie cachée, opt-in et gagnants), SMS, copie des coordonnées, export CSV ; fiche contact (email, appel, SMS, WhatsApp). RPC `crm_pro` (sql/crm_pro.sql). Le même CRM, limité à l'opération, dans l'onglet CRM de chaque fiche |

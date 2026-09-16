@@ -83,9 +83,9 @@ export function AucuneOperation() {
 
 function Mini({ v, l }: { v: React.ReactNode; l: string }) {
   return (
-    <div style={{ flex: '1 1 90px', background: SUBT, borderRadius: 10, padding: '9px 10px' }}>
-      <div style={{ fontSize: 18, fontWeight: 800 }}>{v}</div>
-      <div style={{ fontSize: 10, fontWeight: 700, color: MUT, textTransform: 'uppercase', letterSpacing: '.04em' }}>{l}</div>
+    <div style={{ flex: '0 1 132px', minWidth: 104, background: SUBT, borderRadius: 10, padding: '6px 10px' }}>
+      <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.2 }}>{v}</div>
+      <div style={{ fontSize: 10.5, fontWeight: 700, color: MUT, lineHeight: 1.25 }}>{l}</div>
     </div>
   )
 }
