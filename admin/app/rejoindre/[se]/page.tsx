@@ -14,11 +14,12 @@ const NOTFOUND = (
 export default async function Page({ params }: Props) {
   const { data: se } = await supabase
     .from('super_events')
-    .select('id,nom,description,date_d,date_f,frais_pro,module')
+    .select('id,nom,description,date_d,date_f,frais_pro,module,status')
     .eq('id', params.se)
     .single()
 
-  if (!se) return NOTFOUND
+  /* Un super event cree par un pro n est ouvert qu apres validation Flowin. */
+  if (!se || se.status === 'pending') return NOTFOUND
 
   return <RejoindreClient se={se} />
 }

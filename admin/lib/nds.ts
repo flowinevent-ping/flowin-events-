@@ -283,6 +283,8 @@ export interface SuperEvent {
   /** Jeu impose a toutes les stations (referentiel 25). */
   module?: string | null
   cfg_jeu?: Record<string, unknown> | null
+  /** Pro createur (referentiel 32), null = cree par le SA. */
+  pro_id?: string | null
 }
 
 export interface ResultatDuplication {
@@ -301,7 +303,7 @@ export interface ResultatDuplication {
 export async function fetchSuperEvents(opts: { avecGabarit?: boolean } = {}): Promise<SuperEvent[]> {
   const { data, error } = await supabase
     .from('super_events')
-    .select('id, nom, status, date_d, date_f, description, logo_url, module, cfg_jeu')
+    .select('id, nom, status, date_d, date_f, description, logo_url, module, cfg_jeu, pro_id')
     .order('date_d', { ascending: false })
   if (error) { console.error('[fetchSuperEvents]', error.message); return [] }
   const l = (data ?? []) as SuperEvent[]

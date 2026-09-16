@@ -22,6 +22,7 @@ import type { SuperEvent } from '@/lib/nds'
 import { Ico } from '@/lib/proicons'
 import { SECTEURS_PRO } from '@/lib/proCreation'
 import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
+import BandeauEtapes from '@/components/parcours/BandeauEtapes'
 
 const ORANGE = '#C2410C'
 const BLUE = '#2746A6'
@@ -154,15 +155,7 @@ export default function RejoindreWizard({ proId, proNom, supers }: { proId: stri
 
   return (
     <div>
-      <div style={{ borderRadius: 18, padding: '18px 20px', color: '#fff', marginBottom: 18, background: `linear-gradient(135deg,#FF8A14,${ORANGE})` }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>REJOINDRE UN SUPER EVENT</div>
-        <div style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 2px' }}>Étape {etape} sur {totalEtapes}</div>
-        <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
-          {Array.from({ length: totalEtapes }).map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 5, borderRadius: 99, background: i < etape ? '#fff' : 'rgba(255,255,255,.3)' }} />
-          ))}
-        </div>
-      </div>
+      <BandeauEtapes titre="Rejoindre un super event" i={etape - 1} total={totalEtapes} teinte="super" />
 
       {/* Deux colonnes, meme grille que les parcours SA et que « creer mon
           animation » : la saisie a gauche, ce que le joueur verra a droite. */}

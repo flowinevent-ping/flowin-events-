@@ -50,7 +50,7 @@ function RejoindreContenu() {
       if (pro.statut !== 'valide') { router.push('/pro/connexion'); return }
       setProId(pro.id); setProNom(pro.nom)
       const se = await fetchSuperEvents()
-      setSupers(se.filter(s => s.status !== 'past'))
+      setSupers(se.filter(s => s.status !== 'past' && s.status !== 'pending'))
       setChargement(false)
     })()
   }, [router, params])

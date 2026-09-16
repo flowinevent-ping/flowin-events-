@@ -23,6 +23,7 @@
  */
 
 import { useState } from 'react'
+import BandeauEtapes from '@/components/parcours/BandeauEtapes'
 
 /** La teinte du parcours — convention deja etablie dans RejoindreWizard :
  *  bleu = pro, orange = super event, violet = l accent Flowin. */
@@ -34,26 +35,16 @@ const CLASSE_TEINTE: Record<TeinteParcours, string> = { event: '', super: ' t-su
  * jauge de segments. C est lui qui donne aux trois creations le meme air que
  * l app pro, au lieu du bandeau de page du dashboard.
  */
-export function BandeauParcours({
-  titre, i, total,
-}: {
-  /** Ce qu on est en train de creer, en capitales — « CREER UN SUPER EVENT ». */
+export function BandeauParcours({ titre, i, total, teinte = 'event' }: {
+  /** Ce qu on est en train de creer — « Creer un super event ». */
   titre: string
   /** Index de l etape en cours, base 0. */
   i: number
   total: number
+  teinte?: TeinteParcours
 }) {
-  return (
-    <div className="sa-parc-bandeau">
-      <div className="ey">{titre}</div>
-      <div className="et">Étape {i + 1} sur {total}</div>
-      <div className="jauge">
-        {Array.from({ length: total }).map((_, n) => (
-          <span key={n} className={n <= i ? 'on' : ''} />
-        ))}
-      </div>
-    </div>
-  )
+  /* Referentiel 47 : le meme bandeau que les parcours pro (BandeauEtapes). */
+  return <BandeauEtapes titre={titre} i={i} total={total} teinte={teinte} />
 }
 
 export interface EtapeParcours {
@@ -97,7 +88,7 @@ export function Parcours({
 
   return (
     <div className={`sa-parc${CLASSE_TEINTE[teinte]}`}>
-      {bandeau && <BandeauParcours titre={bandeau} i={i} total={etapes.length} />}
+      {bandeau && <BandeauParcours titre={bandeau} i={i} total={etapes.length} teinte={teinte} />}
       <ol className="sa-parc-barre">
         {etapes.map((x, n) => {
           const accessible = n <= atteint

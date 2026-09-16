@@ -11,6 +11,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { superEventsReels, GABARIT_SE_ID } from '@/lib/operations'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { supabase } from '@/lib/supabase'
 import { PageHeader, SectionHeader, EmptyState, StatusChip } from '@/components/dashboard/DashboardUI'
 import {
   fetchSuperEvents, dupliquerSuperEvent, slugSuperEvent,
@@ -138,7 +139,7 @@ export default function Page() {
                   const seEvents = events.filter(e => e.super_event_id === se.id)
                   // Meme convention que plus bas dans ce fichier : le pro 'pro-nds-2026'
                   // (ou equivalent id se-<x>) porte le role organisateur du super event.
-                  const orga = pros.find(p => p.id === `pro-${se.id.replace(/^se-/, '')}`) ?? pros.find(p => p.id === 'pro-nds-2026' && se.id === 'se-nds-2026')
+                  const orga = (se.pro_id ? pros.find(p => p.id === se.pro_id) : undefined) ?? pros.find(p => p.id === `pro-${se.id.replace(/^se-/, '')}`) ?? pros.find(p => p.id === 'pro-nds-2026' && se.id === 'se-nds-2026')
                   const colonnes: { cle: EtatStation; titre: string }[] = [
                     { cle: 'live', titre: '🔴 En cours' },
                     { cle: 'upcoming', titre: '📅 À venir' },
@@ -150,7 +151,19 @@ export default function Page() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <b style={{ fontSize: 14.5 }}>{se.nom}</b>
                         <span className={`sa-chip ${st === 'en_cours' ? 'live' : 'past'}`} style={{ fontSize: 10 }}>{libStatut[st]}</span>
+                        {se.status === 'pending' && <span className="sa-chip" style={{ fontSize: 10, color: '#B45309', borderColor: '#B45309' }}>À valider</span>}
                       </div>
+                      {/* Referentiel 32 : un super event cree par un pro attend la
+                          validation du SA avant d etre ouvert aux commerces. */}
+                      {se.status === 'pending' && (
+                        <div className="sa-alert warn" style={{ fontSize: 12, marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                          Créé par un pro — fermé aux inscriptions tant qu’il n’est pas validé.
+                          <button className="sa-btn sm primary" onClick={async () => {
+                            const { error } = await supabase.from('super_events').update({ status: 'upcoming' }).eq('id', se.id)
+                            if (error) alert('Validation impossible.'); else charger()
+                          }}>✓ Valider et ouvrir</button>
+                        </div>
+                      )}
                       <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>
                         {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
                       </div>

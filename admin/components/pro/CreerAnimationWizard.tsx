@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { creerAnimation, enregistrerDemandeQuiz } from '@/lib/pro'
+import { creerAnimation, creerSuperEventPro, enregistrerDemandeQuiz } from '@/lib/pro'
 import { supabase } from '@/lib/supabase'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
+import BandeauEtapes from '@/components/parcours/BandeauEtapes'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { sorteBanque } from '@/lib/gabarit'
 
@@ -81,6 +82,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [demandeEnvoyee, setDemandeEnvoyee] = useState(false)
   const [demandeTracee, setDemandeTracee] = useState<'idle' | 'ok' | 'echec'>('idle')
   const [module_, setModule] = useState<string | null>(null)
+  /* Referentiel 32 : meme parcours pour creer un super event (festival,
+     association, franchise, groupement) — tirage au sort uniquement. */
+  const [typeOp, setTypeOp] = useState<'event' | 'super'>('event')
+  const estSuper = typeOp === 'super'
   const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
   const [banques, setBanques] = useState<Banque[]>(banqueQuizExistante)
@@ -132,9 +137,11 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [diffQr, setDiffQr] = useState(false)
   const [envoi, setEnvoi] = useState<'idle' | 'envoi' | 'ok' | 'echec'>('idle')
   const [eventCree, setEventCree] = useState<string | null>(null)
+  const [superCree, setSuperCree] = useState<string | null>(null)
 
   useEffect(() => { setBanques(banqueQuizExistante) }, [banqueQuizExistante])
 
+  const jeuxProposes = estSuper ? JEUX.filter(j => j.m !== 'spin') : JEUX
   const jeu = JEUX.find(j => j.m === module_)
   const avecApercu = module_ === GABARIT_MODULE
 
@@ -260,7 +267,8 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
     const lotsValides = lots.filter(l => l.nom.trim())
     if (!module_ || !nom.trim() || lotsValides.length === 0) return
     setEnvoi('envoi')
-    const res = await creerAnimation({
+    const creer = estSuper ? creerSuperEventPro : creerAnimation
+    const res0 = await creer({
       proId, module: module_, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null,
       banqueId,
       cfgJeu: {
@@ -268,12 +276,14 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
         ...(module_ === 'spin' ? { spinSegments: cfgJeu.spinSegments ?? [] } : {}),
         ...(module_ === 'vote' ? { voteItems: cfgJeu.voteItems ?? [] } : {}),
       },
-      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, valeur: Number(l.valeur) || 0, type: module_ === 'spin' ? 'instantane' as const : l.type, conditions: l.conditions.trim() })),
+      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, valeur: Number(l.valeur) || 0, type: estSuper ? 'tirage' as const : module_ === 'spin' ? 'instantane' as const : l.type, conditions: l.conditions.trim() })),
       /* La roue decide elle-meme du gain (segment) : pas de regle aleatoire en plus. */
-      regleRecompense: aUnLotInstantane && module_ !== 'spin' ? { mode: modeInstant, everyX, probabilite } : undefined,
+      regleRecompense: aUnLotInstantane && module_ !== 'spin' && !estSuper ? { mode: modeInstant, everyX, probabilite } : undefined,
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
+    const res = res0
     if (res.ok) {
+      setSuperCree(estSuper && 'superEventId' in res ? (res as { superEventId: string | null }).superEventId : null)
       setEventCree(res.eventId)
       setEnvoi('ok')
       setEtape(e => e + 1) // étape "livraison"
@@ -297,15 +307,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   return (
     <div>
       <a href={`/pro/events${q}`} style={{ fontSize: 12.5, color: MUTED.color, fontWeight: 700, textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>← Quitter sans créer</a>
-      <div style={{ borderRadius: 18, padding: '18px 20px', color: '#fff', marginBottom: 18, background: 'linear-gradient(135deg,#7C2D92 0%,#A855F7 100%)' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>CRÉER MON ANIMATION</div>
-        <div style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 2px' }}>Étape {etape} sur {totalEtapes}</div>
-        <div style={{ display: 'flex', gap: 5, marginTop: 12 }}>
-          {Array.from({ length: totalEtapes }).map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 5, borderRadius: 99, background: i < etape ? '#fff' : 'rgba(255,255,255,.3)' }} />
-          ))}
-        </div>
-      </div>
+      <BandeauEtapes titre={estSuper ? 'Créer un super event' : 'Créer mon animation'} i={etape - 1} total={totalEtapes} teinte={estSuper ? 'super' : 'event'} />
 
       {/* Deux colonnes des que le gabarit est choisi : la saisie a gauche, le
           parcours joueur a droite. `sa-parc-avec-apercu` vient de
@@ -318,11 +320,24 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Nom et jeu de votre animation</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Le nom sert à l&apos;identifier dans vos events. Choisissez ensuite le format joué.</div>
-          <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>Nom de l&apos;animation</label>
+          <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 8 }}>Vous créez…</label>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 18 }}>
+            {([
+              ['event', 'Une animation', 'Chez vous : un jeu, vos lots, gain immédiat ou tirage.'],
+              ['super', 'Un super event', 'Festival, association, franchise, groupement : plusieurs commerces, un même jeu, tirage au sort.'],
+            ] as const).map(([v, t, d]) => (
+              <div key={v} onClick={() => { setTypeOp(v); if (v === 'super' && module_ === 'spin') setModule(null) }}
+                style={{ flex: '1 1 220px', border: typeOp === v ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 14, padding: 14, cursor: 'pointer', background: typeOp === v ? 'rgba(168,85,247,.06)' : '#fff' }}>
+                <div style={{ fontWeight: 800, fontSize: 14 }}>{t}</div>
+                <div style={{ fontSize: 12, ...MUTED, marginTop: 3 }}>{d}</div>
+              </div>
+            ))}
+          </div>
+          <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 5 }}>{estSuper ? 'Nom du super event' : 'Nom de l\u2019animation'}</label>
           <input style={{ ...input, marginBottom: 18 }} value={nom} onChange={e => setNom(e.target.value)} placeholder="Ex. Jeu d'été chez nous" />
           <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 8 }}>Quel jeu ?</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
-            {JEUX.map(g => (
+            {jeuxProposes.map(g => (
               <div
                 key={g.m}
                 onClick={() => setModule(g.m)}
@@ -596,7 +611,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                     <button onClick={() => retirerLot(l.id)} style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, width: 40, height: 42, cursor: 'pointer', color: '#B91C1C', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>×</button>
                   )}
                 </div>
-                {module_ !== 'spin' && <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                {module_ !== 'spin' && !estSuper && <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                   {(['tirage', 'instantane'] as const).map(v => (
                     <div
                       key={v}
@@ -651,7 +666,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           )}
 
 
-          {aUnLotInstantane && module_ !== 'spin' && (
+          {estSuper && (
+            <div style={{ fontSize: 12, color: '#B45309', margin: '4px 0 10px' }}>Super event : tous les lots sont attribués par tirage au sort.</div>
+          )}
+          {aUnLotInstantane && module_ !== 'spin' && !estSuper && (
             <div style={{ marginTop: 18 }}>
               <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Règle du gain immédiat</div>
               <div style={{ fontSize: 11, ...MUTED, marginBottom: 8 }}>S&apos;applique à tous les lots réglés en gain immédiat.</div>
@@ -776,10 +794,17 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 7 }}><Ico k="check" size={16} style={{ color: '#15803D' }} />Votre demande est enregistrée</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>Transmise à l&apos;équipe Flowin pour validation avant mise en ligne.</div>
+          {superCree && (
+            <div style={{ background: 'rgba(194,65,12,.06)', border: '1px solid rgba(194,65,12,.25)', borderRadius: 12, padding: '12px 14px', fontSize: 12.5, marginBottom: 16, lineHeight: 1.55 }}>
+              Super event créé, avec votre station. Une fois validé par Flowin, les commerces le rejoignent depuis leur espace (« Rejoindre un super event ») ou par ce lien d’inscription :
+              <div style={{ fontWeight: 700, wordBreak: 'break-all', marginTop: 4 }}>https://flowin-events.vercel.app/rejoindre/{superCree}</div>
+            </div>
+          )}
 
           <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#64748B', marginBottom: 10 }}>Récapitulatif</div>
             {[
+              ['Type', estSuper ? 'Super event — tirage au sort' : 'Animation'],
               ['Nom', nom || '—'],
               ['Jeu', JEUX.find(j => j.m === module_)?.t ?? '—'],
               /* « Aucune sélectionnée » ne peut plus arriver : l etape ne se

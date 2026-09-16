@@ -1,6 +1,7 @@
 -- ECRAN SA DE CONTROLE — compteurs d incoherences.
 -- Appliquee le 16/09/2026 sur le projet ywcqtupgoxfzkddqkztk.
 -- 16/09 (lot 4) : + QR de suivi a valider, + diffusions demandees (referentiel 17).
+-- 16/09 (lot 7) : + super events crees par un pro, a valider (referentiel 32).
 --
 -- Une ligne par controle : combien d elements sont en defaut, et lesquels
 -- (10 exemples). Lue par /dashboard/controle. Chaque controle correspond a
@@ -63,6 +64,8 @@ c as (
      and (coalesce((e.cfg->'diffusion_demandee'->>'physique')::boolean, false)
           or coalesce((e.cfg->'diffusion_demandee'->>'qr_tracking')::boolean, false))
   union all
+  select 'se_a_valider', s.id, s.nom from super_events s where s.status = 'pending'
+  union all
   select 'se_sans_dates', s.id, s.nom from super_events s
    where s.id <> 'se-master-superevent' and (s.date_d is null or s.date_f is null)
 ),
@@ -80,7 +83,8 @@ libs(cle, libelle, cible, rang) as (values
   ('demande_en_attente','Demandes de participation en attente','demandes',11),
   ('qr_suivi_a_valider','QR de suivi demandés, à valider (onglet QR & liens de la station)','events',12),
   ('diffusion_a_traiter','Supports imprimés ou QR de suivi demandés à la création','events',13),
-  ('se_sans_dates','Super events sans dates','super_events',14))
+  ('se_a_valider','Super events créés par un pro, à valider','super_events',14),
+  ('se_sans_dates','Super events sans dates','super_events',15))
 select coalesce(jsonb_agg(jsonb_build_object(
   'cle', l.cle, 'libelle', l.libelle, 'cible', l.cible,
   'n', (select count(*) from c where c.cle = l.cle),
