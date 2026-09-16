@@ -24,8 +24,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueursEligibles, type JoueurEligible } from '@/lib/dashboard'
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
-import { fetchOperationsPro } from '@/lib/operations'
-import { BlocOperation, AucuneOperation, Vide, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
+import { fetchOperationsPro, gagnantsParStation, libelleRemise } from '@/lib/operations'
+import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 const input: React.CSSProperties = {
@@ -88,8 +88,13 @@ function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; data: Oper
         )}
 
       {op.gagnants.length === 0 && <Vide>Aucun gagnant sur cette opération.</Vide>}
-      {op.gagnants.map(g => (
-        <LigneGain key={g.id} g={g} superEvent={op.type === 'super'} setMessage={setMessage} onChange={onChange} />
+      {gagnantsParStation(op).map(grp => (
+        <div key={grp.cle}>
+          {grp.nom && <TitreStation nom={grp.nom} n={grp.gagnants.length} />}
+          {grp.gagnants.map(g => (
+            <LigneGain key={g.id} g={g} superEvent={op.type === 'super'} setMessage={setMessage} onChange={onChange} />
+          ))}
+        </div>
       ))}
     </>
   )
@@ -105,6 +110,11 @@ function Tirage({ op, data, setMessage, onChange }: {
   const [envoi, setEnvoi] = useState(false)
   const [mail, setMail] = useState<'idle' | 'envoi' | 'ok' | 'echec'>('idle')
   const [dernierToken, setDernierToken] = useState<string | null>(null)
+  /* Le lot tire : celui que le pro choisit parmi ceux de l event (le premier
+     etait impose). Les lots epuises (quantite atteinte) ne sont pas proposes. */
+  const lotsDispo = op.lots.filter(l => op.gagnants.filter(g => g.lotNom === l.nom).length < l.quantite)
+  const [lotId, setLotId] = useState<string>('')
+  const lotChoisi = lotsDispo.find(l => l.id === lotId) ?? lotsDispo[0] ?? null
 
   /* Le vivier : les joueurs qui ont REELLEMENT joue sur cet event (table
      participations), comptes de test exclus -- fetchJoueursEligibles. */
@@ -122,10 +132,10 @@ function Tirage({ op, data, setMessage, onChange }: {
   const confirmer = async () => {
     if (!propose) return
     setEnvoi(true)
-    const lotNom = op.lots[0]?.nom ?? `Lot — ${ev.nom}`
+    const lotNom = lotChoisi?.nom ?? `Lot — ${ev.nom}`
     const res = await enregistrerTirage({
       superEventId: null, eventId: ev.id, lotNom,
-      lotValeur: op.lots[0]?.valeur ?? null,
+      lotValeur: lotChoisi?.valeur ?? null,
       partenaireId: data.partenaire?.id ?? null,
       joueur: { id: propose.id },
     })
@@ -152,7 +162,17 @@ function Tirage({ op, data, setMessage, onChange }: {
         {eligibles === null ? 'Chargement du vivier…' : `${vivier.length} joueur${vivier.length > 1 ? 's' : ''} ayant joué`}
         {exclus.length > 0 && ` · ${exclus.length} écarté${exclus.length > 1 ? 's' : ''}`}
         {op.lots.length === 0 && ' · aucun lot enregistré sur cet event : le gain portera le nom de l’event.'}
+        {op.lots.length > 0 && lotsDispo.length === 0 && ' · tous les lots ont été attribués.'}
       </div>
+      {lotsDispo.length > 1 && (
+        <select style={{ ...input, marginBottom: 10, maxWidth: 360 }} value={lotChoisi?.id ?? ''} onChange={e => setLotId(e.target.value)}>
+          {lotsDispo.map(l => (
+            <option key={l.id} value={l.id}>
+              {l.nom} — {l.quantite - op.gagnants.filter(g => g.lotNom === l.nom).length} restant(s)
+            </option>
+          ))}
+        </select>
+      )}
       {!propose && (
         <button style={btnPrimaire} disabled={envoi || eligibles === null} onClick={() => tirer()}>🎲 Lancer le tirage</button>
       )}
@@ -238,6 +258,7 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
             {g.lotNom ?? 'Lot'}{g.lotValeur ? ` · ${g.lotValeur} €` : ''}{g.ticketCode ? ` · billet ${g.ticketCode}` : ''}
           </div>
           {g.joueurEmail && <div style={{ fontSize: 11.5, ...MUTED }}>{g.joueurEmail}</div>}
+          {g.retireAt && <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           {g.retraitToken && (
             <a href={`/lot.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
               style={{ fontSize: 11.5, color: '#7C2D92', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Validation d'un lot — Nuits du Sud 2026</title>
+<title>Validation d'un lot</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -130,6 +130,7 @@
         <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style="height:38px;width:auto" onerror="this.style.display='none'">
       </div>
       <h1>Validation d'un lot</h1>
+      <div id="hd-op" style="margin-top:4px;display:none;font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;opacity:.88"></div>
     </div>
     <div class="band"><b>Billet gagnant</b></div>
 
@@ -146,6 +147,17 @@
           <div class="lb">Commerce partenaire</div>
           <div class="nm" id="p-part"></div>
         </div>
+        <!-- Le billet lui-meme, lisible par le gagnant avant la validation en caisse. -->
+        <div class="lotbox">
+          <div class="type" id="p-type">Bon cadeau</div>
+          <div class="lot" id="p-lot"></div>
+          <div id="p-valwrap"><span class="val" id="p-val"></span></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="k">Bénéficiaire</span><span class="v" id="p-nom"></span></div>
+          <div class="row"><span class="k">N° de billet</span><span class="v num" id="p-num"></span></div>
+        </div>
+        <div class="sub" style="margin:14px 0 6px;text-align:center">Présentez ce billet au commerce. La suite est réservée au commerçant.</div>
         <div class="field">
           <label for="p-code">Code professionnel</label>
           <div class="sub" style="margin:0 0 10px">Reçu par email lors de votre inscription. Il autorise la validation des billets de votre établissement.</div>
@@ -271,7 +283,12 @@
     'pt-nook':"Au choix : 1 café offert pour 1 acheté · formule petit-déjeuner offerte · 1 boisson achetée = 1 salé offert · non cumulable · valable jusqu'au 25 octobre 2026",
     'pt-utile':"Valable dès 22 € d'achat en magasin · non cumulable · valable jusqu'au 25 octobre 2026"
   };
-  var COND_DEF = "Billet nominatif et incessible · non remboursable et non échangeable contre espèces · utilisable une seule fois · valable jusqu'au 25 octobre 2026";
+  /* Conditions generales. La date limite du 25 octobre 2026 est celle de Nuits
+     du Sud 2026 : elle ne s ajoute qu a ses billets (referentiel 11 : le billet
+     parle de SON operation). */
+  var COND_DEF = "Billet nominatif et incessible · non remboursable et non échangeable contre espèces · utilisable une seule fois";
+  var COND_DEF_NDS = COND_DEF + " · valable jusqu'au 25 octobre 2026";
+  var CUR = null; // billet en cours : nom et logo du commerce viennent de la base
 
   function $(id){ return document.getElementById(id); }
   function show(id){
@@ -279,8 +296,19 @@
     for (var i=0;i<st.length;i++){ st[i].classList.remove('on'); }
     $(id).classList.add('on');
   }
-  function partName(p){ return PART[p] || (p ? p.replace('pt-','') : '—'); }
-  function partLogo(p){ return p ? ('/nds/partenaires/'+p.replace('pt-','')+'.png') : ''; }
+  function partName(p){
+    if (CUR && CUR.partenaire === p && CUR.partenaire_nom) return CUR.partenaire_nom;
+    return PART[p] || (p ? p.replace('pt-','') : '—');
+  }
+  function partLogo(p){
+    if (CUR && CUR.partenaire === p && CUR.partenaire_logo) return CUR.partenaire_logo;
+    return p ? ('/nds/partenaires/'+p.replace('pt-','')+'.png') : '';
+  }
+  function afficherOperation(d){
+    var el = $('hd-op');
+    if (el && d && d.operation_nom) { el.textContent = d.operation_nom; el.style.display = ''; }
+    if (d && d.operation_nom) document.title = "Validation d'un lot — " + d.operation_nom;
+  }
   function setLogo(id, p){
     var el = $(id), src = partLogo(p);
     if (src) { el.onerror = function(){ el.style.display='none'; }; el.src = src; el.style.display='block'; }
@@ -347,7 +375,7 @@
       c = c.trim();
       if(c && (!d.lot || c.toLowerCase() !== String(d.lot).toLowerCase())) _c.push(c);
     });
-    if(_c.length < 3) _c.push(COND_DEF);
+    if(_c.length < 3) _c.push(d.operation === 'se-nds-2026' ? COND_DEF_NDS : COND_DEF);
     $('v-cond').textContent = _c.join(' · ');
     show('s-valable');
   }
@@ -414,6 +442,7 @@
     b.disabled = true; b.textContent = 'Validation…';
     rpc('valider_lot', { p_token: TOK }).then(function(res){
       var d = Array.isArray(res) ? res[0] : res;
+      if (d && CUR) { d.partenaire_nom = CUR.partenaire_nom; d.partenaire_logo = CUR.partenaire_logo; }
       if (d && d.ok) { renderDone(d); }
       else if (d && d.raison === 'deja_utilise') { renderDeja(d); }
       else {
@@ -451,6 +480,8 @@
     rpc('consulter_lot', { p_token: TOK }).then(function(res){
       var d = Array.isArray(res) ? res[0] : res;
       if (!d || !d.ok) { show('s-introuvable'); return; }
+      CUR = d;
+      afficherOperation(d);
       if (d.raison === 'deja_utilise') { renderDeja(d); return; }
       /* Porte PIN professionnel : uniquement pour les lots rattaches a un partenaire commerce.
          Les lots de l organisateur (partenaire_id null) restent sans cette etape. */
@@ -458,6 +489,12 @@
         PENDING = d;
         setLogo('p-logo', d.partenaire);
         $('p-part').textContent = partName(d.partenaire);
+        $('p-type').textContent = typeBon(d.lot);
+        $('p-lot').textContent = d.lot || 'Lot';
+        if (d.valeur != null) { $('p-val').textContent = 'Valeur : '+d.valeur+' €'; $('p-valwrap').style.display=''; }
+        else { $('p-valwrap').style.display='none'; }
+        $('p-nom').textContent = (d.etat === 'a_confirmer' || !d.gagnant) ? 'À attribuer' : d.gagnant;
+        $('p-num').textContent = d.ticket_code || '—';
         show('s-pin');
         $('btn-pin').addEventListener('click', accederApresPin);
         $('p-code').addEventListener('keydown', function(e){ if (e.key === 'Enter') accederApresPin(); });

@@ -11,7 +11,13 @@
    Champs attendus (tous optionnels sauf email) :
      type, prenom, joueur_nom, email / joueur_email, lot_nom, lot_valeur,
      ticket_code, retrait_token, partenaire_nom, partenaire_adresse,
-     partenaire_tel, conditions, date / date_soir
+     partenaire_tel, conditions, date / date_soir,
+     operation (id du super event ou de l event), operation_nom
+
+   REFERENTIEL 36 (16/09) : l email est au nom de SON operation. Sans
+   `operation`, ou pour se-nds-2026, le texte de Nuits du Sud est inchange.
+   Pour toute autre operation, le meme message est ecrit au nom de
+   `operation_nom`, et le billet pointe sur /lot.html (billet generique).
    ========================================================================== */
 (function (root) {
   'use strict';
@@ -19,9 +25,16 @@
   function prenomDe(t) {
     return String(t.prenom || t.joueur_nom || '').trim().split(/\s+/)[0] || '';
   }
+  function estNds(t) {
+    return !t || !t.operation || t.operation === 'se-nds-2026';
+  }
+  function nomOp(t) {
+    return String((t && t.operation_nom) || '').trim() || 'notre jeu';
+  }
   function lienBillet(t) {
     if (t.billet_lien) return t.billet_lien;              // lien impose manuellement
     if (!t.retrait_token) return '';
+    if (!estNds(t)) return root.location.origin + '/lot.html?t=' + encodeURIComponent(t.retrait_token);
     return root.location.origin + '/nds/billets-partenaires.html?t=' + encodeURIComponent(t.retrait_token);
   }
   function puces(conditions) {
@@ -38,6 +51,7 @@
   }
 
   function sujet(t) {
+    if (!estNds(t)) return nomOp(t) + ' & Flowin — Vous avez gagné !';
     return (t && t.type === 'soir')
       ? 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné une place !'
       : 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné !';
@@ -52,7 +66,9 @@
     var L = ['Bonjour ' + prenomDe(t) + ',', ''];
 
     if (grand) {
-      L.push('Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagné :', '',
+      L.push(estNds(t)
+               ? 'Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagné :'
+               : 'Bravo ! Au jeu ' + nomOp(t) + ', tu as gagné :', '',
              '   ' + (t.lot_nom || 'un lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : ''));
       if (comm)  L.push('   chez ' + comm);
       if (coord) L.push('   ' + coord);
@@ -80,7 +96,7 @@
       L.push("Présente-toi avec cet email à l'entrée, on s'occupe du reste.", '',
              "Merci d'avoir participé.", '');
     }
-    L.push('Flowin, les Nuits du Sud, la Ville de Vence',
+    L.push(estNds(t) ? 'Flowin, les Nuits du Sud, la Ville de Vence' : ('Flowin & ' + nomOp(t)),
            'flowinevent@gmail.com · 04 93 59 91 37');
     return L.join('\n');
   }

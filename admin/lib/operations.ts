@@ -170,6 +170,8 @@ export interface GagnantOperation {
   /** a_confirmer : tire, pas encore appele (SA) · confirme : appele · retire : lot remis. */
   etat: 'a_confirmer' | 'confirme' | 'retire'
   date: string | null
+  /** Referentiel 10 : date et heure de remise du lot (validation en caisse). */
+  retireAt: string | null
   superEventId: string | null
   eventId: string | null
 }
@@ -295,8 +297,12 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     lotValeur: num(t.lot_valeur),
     ticketCode: (t.ticket_code as string) ?? null,
     retraitToken: (t.retrait_token as string) ?? null,
-    etat: t.retire_at ? 'retire' : t.notifie_at ? 'confirme' : 'a_confirmer',
+    /* Un gain d event autonome (tirage du pro, gain immediat) n attend pas
+       d appel du SA : il est confirme d emblee. Seul le super event passe par
+       « a confirmer » (tirage pilote par le SA). */
+    etat: t.retire_at ? 'retire' : (t.notifie_at || !t.super_event_id) ? 'confirme' : 'a_confirmer',
     date: t.created_at ? String(t.created_at).slice(0, 10) : null,
+    retireAt: (t.retire_at as string) ?? null,
     superEventId: (t.super_event_id as string) ?? null,
     eventId: (t.event_id as string) ?? null,
   }))
@@ -365,6 +371,30 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     partenaire,
     operations,
   }
+}
+
+/** Referentiel 10 : « remis le 12 juil. à 18:42 ». */
+export function libelleRemise(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return `remis le ${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} à ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+}
+
+/** Referentiel 35 : sur un super event, les gagnants se lisent par station.
+ *  Un gagnant sans station connue est range sous « Tirage de l operation ». */
+export function gagnantsParStation(op: DonneesOperation): { cle: string; nom: string; gagnants: GagnantOperation[] }[] {
+  if (op.type !== 'super') return [{ cle: op.id, nom: '', gagnants: op.gagnants }]
+  const groupes = new Map<string, { cle: string; nom: string; gagnants: GagnantOperation[] }>()
+  op.stations.forEach(s => groupes.set(s.id, { cle: s.id, nom: s.nom ?? s.id, gagnants: [] }))
+  const sans = { cle: '_op', nom: 'Tirage de l’opération', gagnants: [] as GagnantOperation[] }
+  op.gagnants.forEach(g => {
+    const grp = g.eventId ? groupes.get(g.eventId) : undefined
+    if (grp) grp.gagnants.push(g); else sans.gagnants.push(g)
+  })
+  const l = Array.from(groupes.values()).filter(x => x.gagnants.length)
+  if (sans.gagnants.length) l.push(sans)
+  return l
 }
 
 /* ── Tracking d une operation ──────────────────────────────────────────────── */

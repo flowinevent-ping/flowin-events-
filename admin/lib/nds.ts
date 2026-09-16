@@ -107,7 +107,10 @@ export async function annulerEtRetirer(
 const origine = () => (typeof window !== 'undefined' ? window.location.origin : '')
 
 /** Billet d un gagnant. print=true declenche l impression (export PDF). */
-export function lienBillet(token: string, print = false): string {
+export function lienBillet(token: string, print = false, operation?: string | null): string {
+  /* Referentiel 11 : la planche de billets est celle de Nuits du Sud. Pour
+     toute autre operation, le billet generique (lot.html) parle de la sienne. */
+  if (operation && operation !== 'se-nds-2026') return `${origine()}/lot.html?t=${encodeURIComponent(token)}`
   return `${origine()}/nds/billets-partenaires.html?t=${encodeURIComponent(token)}${print ? '&print=1' : ''}`
 }
 /** Planche de billets d un commerce — ne montre que les gagnants confirmes. */
@@ -119,20 +122,26 @@ export function lienPlanchePartenaire(partenaireId: string): string {
  * reutilisee depuis nds-lots aussi (meme principe que mail-gagnant.js : ne jamais recopier). */
 export function mailPartenaireUrl(
   g: { joueur_nom?: string | null; lot_nom?: string | null; ticket_code?: string | null; retrait_token?: string | null },
-  partenaireNom: string, partenaireEmail: string | null
+  partenaireNom: string, partenaireEmail: string | null,
+  /* Referentiel 36 : l email part au nom de SON operation. Sans operation (ou
+     Nuits du Sud), le texte historique est inchange. */
+  operation?: { id: string; nom: string | null } | null
 ): string {
-  const lien = g.retrait_token ? `${origine()}/nds/billets-partenaires.html?t=${encodeURIComponent(g.retrait_token)}` : ''
+  const nds = !operation || operation.id === 'se-nds-2026'
+  const lien = g.retrait_token ? lienBillet(g.retrait_token, false, operation?.id ?? null) : ''
   const sujet = `Nouveau gagnant à valider — ${g.lot_nom || 'votre lot'}`
   const corps = [
     `Bonjour ${partenaireNom || ''},`, '',
-    'Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 :', '',
+    nds
+      ? 'Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 :'
+      : `Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au jeu ${operation?.nom || ''} :`, '',
     `   ${g.joueur_nom || '—'}`,
     `   ${g.lot_nom || ''}`,
     g.ticket_code ? `   N° de billet : ${g.ticket_code}` : '', '',
     'Le billet à télécharger (le même que celui reçu par le client), avec le QR à scanner pour valider le retrait :', '',
     `   ${lien}`, '',
     'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez. Le lot est déstocké automatiquement.', '',
-    'Merci,', 'Flowin & les Nuits du Sud', 'flowinevent@gmail.com · 04 93 59 91 37',
+    'Merci,', nds ? 'Flowin & les Nuits du Sud' : `Flowin & ${operation?.nom || ''}`, 'flowinevent@gmail.com · 04 93 59 91 37',
   ].join('\n')
   return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
 }

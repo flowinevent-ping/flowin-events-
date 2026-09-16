@@ -296,6 +296,8 @@ export interface GagnantRow {
   lot_valeur: number | null
   partenaire_id: string | null
   super_event_id: string | null
+  /** Station / event du gagnant (referentiel 35). */
+  event_id: string | null
   statut: string | null
   notifie_at: string | null
   retire_at: string | null
@@ -305,7 +307,7 @@ export interface GagnantRow {
 export async function fetchGagnants(): Promise<GagnantRow[]> {
   const { data, error } = await supabase
     .from('tirages')
-    .select('id,joueur_id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,statut,notifie_at,retire_at,retrait_token,created_at')
+    .select('id,joueur_id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,statut,notifie_at,retire_at,retrait_token,created_at')
     .neq('statut', 'annule')
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchGagnants]', error.message); return [] }

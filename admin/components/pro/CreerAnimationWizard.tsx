@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { creerAnimation, enregistrerDemandeQuiz } from '@/lib/pro'
+import { supabase } from '@/lib/supabase'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
@@ -87,6 +88,34 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
      gabarit, segments de la roue, elements du vote — avec le meme composant
      que la creation cote SA (ConfigJeu), donc les memes cles lues par les jeux. */
   const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
+  /* Referentiel 6 : « selection OU redaction des lots » — les lots que le pro
+     a deja crees sur ses autres operations, a reprendre en un clic. */
+  const [lotsExistants, setLotsExistants] = useState<{ nom: string; valeur: number; conditions: string }[]>([])
+  useEffect(() => {
+    if (!proId) return
+    ;(async () => {
+      const { data: evs } = await supabase.from('events').select('id').eq('pro_id', proId)
+      const ids = ((evs ?? []) as { id: string }[]).map(e => e.id)
+      if (!ids.length) return
+      const { data } = await supabase.from('lots').select('titre,nom,valeur,valeur_euros,conditions').in('event_id', ids)
+      const vus = new Set<string>()
+      const l: { nom: string; valeur: number; conditions: string }[] = []
+      ;((data ?? []) as { titre: string | null; nom: string | null; valeur: number | null; valeur_euros: number | null; conditions: string | null }[])
+        .forEach(x => {
+          const nom = (x.titre || x.nom || '').trim()
+          if (!nom || vus.has(nom.toLowerCase())) return
+          vus.add(nom.toLowerCase())
+          l.push({ nom, valeur: Number(x.valeur_euros ?? x.valeur) || 0, conditions: x.conditions ?? '' })
+        })
+      setLotsExistants(l)
+    })()
+  }, [proId])
+  function reprendreLot(x: { nom: string; valeur: number; conditions: string }) {
+    setLots(ls => {
+      const base = ls.filter(l => l.nom.trim())
+      return [...base, { id: 'r' + Date.now(), nom: x.nom, quantite: 5, valeur: x.valeur, type: module_ === 'spin' ? 'instantane' : 'tirage', conditions: x.conditions }]
+    })
+  }
   const [bonusIds, setBonusIds] = useState<string[]>([])
   /* `valeur` ajoute le 04/09 : le billet imprime affiche « Valeur du bon », le
      parcours ne la demandait nulle part. Sans elle, le bon sortait a 0 EUR. */
@@ -522,6 +551,19 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             Le joueur peut le gagner <b>au tirage au sort</b> à la fin, ou <b>tout de suite</b> s’il répond juste.
           </div>
 
+          {lotsExistants.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 6 }}>Reprendre un lot déjà créé</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {lotsExistants.filter(x => !lots.some(l => l.nom.trim().toLowerCase() === x.nom.toLowerCase())).map(x => (
+                  <button key={x.nom} onClick={() => reprendreLot(x)}
+                    style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 99, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#0F172A', fontFamily: 'inherit' }}>
+                    + {x.nom}{x.valeur ? ` · ${x.valeur} €` : ''}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Vos lots {lots.length > 1 ? `(${lots.length})` : ''}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 10 }}>
             {lots.map(l => (

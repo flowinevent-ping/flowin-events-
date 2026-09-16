@@ -13,7 +13,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
-  libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro,
+  libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise,
   type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/nds'
@@ -181,33 +181,49 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
         </div>
       )}
       {op.gagnants.length === 0 && <Vide>Aucun gagnant tiré sur cette opération.</Vide>}
-      {op.gagnants.map(g => (
+      {gagnantsParStation(op).map(grp => (
+        <div key={grp.cle}>
+          {grp.nom && <TitreStation nom={grp.nom} n={grp.gagnants.length} />}
+          {grp.gagnants.map(g => (
         <div key={g.id} style={ligne}>
           <div style={{ flex: 1, minWidth: 170 }}>
             <div style={{ fontWeight: 700, fontSize: 13 }}>{g.etat === 'a_confirmer' && op.type === 'super' ? 'À attribuer' : (g.joueurNom ?? '—')}</div>
-            <div style={{ fontSize: 11, color: MUT }}>{g.lotNom ?? 'Lot'}{g.lotValeur ? ` · ${g.lotValeur} €` : ''}{g.date ? ` · ${new Date(`${g.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}</div>
+            <div style={{ fontSize: 11, color: MUT }}>{g.lotNom ?? 'Lot'}{g.lotValeur ? ` · ${g.lotValeur} €` : ''}{g.date ? ` · tiré le ${new Date(`${g.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}</div>
+            {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           </div>
           <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7C2D92' }}>{g.ticketCode ?? '—'}</span>
           <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}</Pastille>
-          {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true)} target="_blank" rel="noopener noreferrer">📄 Billet</a>}
+          {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">📄 Billet</a>}
           {g.etat !== 'a_confirmer' && (
             <>
               <button style={btn} onClick={() => {
                 const url = window.flowinMailGagnant?.gmailUrl({
                   joueur_nom: g.joueurNom, email: g.joueurEmail, lot_nom: g.lotNom,
                   ticket_code: g.ticketCode, retrait_token: g.retraitToken, type: 'lot',
+                  operation: op.id, operation_nom: op.nom,
                 })
                 if (url) window.open(url, '_blank', 'noopener')
               }}>✉️ Gagnant</button>
               <button style={btn} onClick={() => window.open(mailPartenaireUrl({
                 joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
-              }, partenaireNom, partenaireEmail), '_blank', 'noopener')}>✉️ Commerce</button>
+              }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>✉️ Commerce</button>
             </>
           )}
           {g.etat === 'a_confirmer' && <button style={btnPrimaire} onClick={() => confirmer(g.id)}>✓ Confirmer</button>}
         </div>
+          ))}
+        </div>
       ))}
     </>
+  )
+}
+
+/** En-tete d un groupe de gagnants (referentiel 35 : par station). */
+export function TitreStation({ nom, n }: { nom: string; n: number }) {
+  return (
+    <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: MUT, margin: '12px 0 2px' }}>
+      📍 {nom} · {n}
+    </div>
   )
 }
 

@@ -313,7 +313,16 @@ function Wizard() {
               </select>)}
             {ligne('Super event', false,
               <select className="sa-input" style={{ width: '100%' }} value={d.super_event_id ?? ''}
-                onChange={e => maj({ super_event_id: e.target.value || null })}>
+                onChange={e => {
+                  /* Referentiel 25 : une station herite du jeu de son super event. */
+                  const se = supers.find(x => x.id === e.target.value)
+                  if (!se) { maj({ super_event_id: null }); return }
+                  maj({
+                    super_event_id: se.id,
+                    module: (se.module || 'nds2026') as typeof d.module,
+                    cfg: { ...cfgEv, ...((se.cfg_jeu ?? {}) as Record<string, unknown>) },
+                  })
+                }}>
                 <option value="">— aucun —</option>
                 {supers.map(se => <option key={se.id} value={se.id}>{se.nom}</option>)}
               </select>)}
@@ -408,7 +417,14 @@ function Wizard() {
               <div className="sa-muted" style={{ fontSize: 11, margin: '14px 0 8px' }}>ou choisir un module directement :</div>
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 }}>
+          {d.super_event_id && (
+            <div className="sa-alert info" style={{ fontSize: 12.5, marginBottom: 12 }}>
+              Station du super event <b>{supers.find(x => x.id === d.super_event_id)?.nom ?? d.super_event_id}</b> :
+              le jeu est celui choisi pour l’opération ({MODULES.find(m => m.id === d.module)?.nom ?? d.module}),
+              en tirage au sort uniquement.
+            </div>
+          )}
+          {!d.super_event_id && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 }}>
             {MODULES.map(m => (
               <button key={m.id} type="button" onClick={() => maj({ module: m.id })}
                 style={{
@@ -424,7 +440,7 @@ function Wizard() {
                 <div className="sa-muted" style={{ fontSize: 11, marginTop: 3 }}>{m.desc}</div>
               </button>
             ))}
-          </div>
+          </div>}
           </>
         )}
 

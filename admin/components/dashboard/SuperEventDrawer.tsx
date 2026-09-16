@@ -25,6 +25,7 @@ import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { DrawerTabs, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide, sousOngletActif, type SousOnglet } from './SousOnglets'
 import { TableauStations } from './TableauStations'
+import TirageSuperEvent from './TirageSuperEvent'
 import { lienPortee } from '@/lib/portee'
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—')
@@ -47,7 +48,8 @@ const ONGLETS: { id: string; label: string; sous: SousOnglet[] }[] = [
   ] },
   { id: 'lots', label: 'Lots & tirages', sous: [
     { id: 'lots', label: 'Lots' },
-    { id: 'acces', label: 'Stock, tirage, gagnants' },
+    { id: 'tirage', label: 'Tirage au sort' },
+    { id: 'acces', label: 'Stock et gagnants' },
   ] },
   { id: 'pros', label: 'Pros & partenaires', sous: [
     { id: 'tous', label: 'Tous' },
@@ -272,11 +274,19 @@ export default function SuperEventDrawer() {
           </>
         )}
 
+        {ong.id === 'lots' && sActif === 'tirage' && (
+          <TirageSuperEvent seId={seId} stations={evs.map(e => ({ id: e.id, nom: e.nom }))} />
+        )}
+
         {ong.id === 'lots' && sActif === 'acces' && (
           <>
             <Raccourci se={seId} href="/dashboard/nds-lots" titre="Stock des lots" desc="Quantités configurées et restantes" />
-            <Raccourci se={seId} href="/dashboard/gagnants" titre="Liste des gagnants" desc="Tirages, confirmations, retraits" />
-            <Raccourci se={seId} href="/tirage-nds.html" titre="Tirage au sort" desc="Outil de tirage (HTML autonome)" statique />
+            <Raccourci se={seId} href="/dashboard/gagnants" titre="Liste des gagnants" desc="Tirages, confirmations, retraits — par station" />
+            {/* L outil historique de Nuits du Sud (regles d age et de code postal
+                propres a cette edition) ne vaut que pour elle. */}
+            {seId === 'se-nds-2026' && (
+              <Raccourci se={seId} href="/tirage-nds.html" titre="Tirage Nuits du Sud" desc="Outil historique de l’édition 2026 (HTML autonome)" statique />
+            )}
           </>
         )}
 

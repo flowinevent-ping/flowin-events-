@@ -44,7 +44,7 @@ function etatDe(t: GagnantRow): Etat {
 }
 
 export default function Page() {
-  const { openDrawer, partenaires } = useDashboard()
+  const { openDrawer, partenaires, events } = useDashboard()
   const [list, setList] = useState<GagnantRow[] | null>(null)
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [pro, setPro] = useState('')
@@ -58,7 +58,18 @@ export default function Page() {
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
   const nomPartenaire = (id: string | null) => partenaires.find(p => p.id === id)?.nom ?? (id ?? '—')
-  const nomSuper = (id: string | null) => supers.find(s => s.id === id)?.nom ?? (id ?? '(hors super event)')
+  const nomEvent = (id: string | null) => events.find(e => e.id === id)?.nom ?? (id ?? '')
+  /* REFERENTIEL 35 — rangement par OPERATION (super event, ou event autonome)
+     puis par STATION. Il etait par super event puis par commerce : un tirage
+     d event autonome tombait dans « hors super event », melange aux autres. */
+  const operationDe = (t: GagnantRow) => t.super_event_id
+    ? { id: t.super_event_id, label: supers.find(s => s.id === t.super_event_id)?.nom ?? t.super_event_id }
+    : t.event_id
+      ? { id: `ev:${t.event_id}`, label: nomEvent(t.event_id) }
+      : { id: '_hors', label: 'Sans opération' }
+  const stationDe = (t: GagnantRow) => t.event_id
+    ? { id: t.event_id, label: nomEvent(t.event_id) }
+    : { id: `pt:${t.partenaire_id ?? '_'}`, label: `Tirage de l’opération${t.partenaire_id ? ` — ${nomPartenaire(t.partenaire_id)}` : ''}` }
 
   const partenairesAvecGagnant = useMemo(() => {
     if (!list) return []
@@ -86,7 +97,8 @@ export default function Page() {
         </>
       ),
     },
-    { id: 'pro', label: 'Pro', valeur: t => nomPartenaire(t.partenaire_id), style: { fontSize: 12.5 } },
+    { id: 'station', label: 'Station', valeur: t => stationDe(t).label, style: { fontSize: 12.5 } },
+    { id: 'pro', label: 'Commerce', valeur: t => nomPartenaire(t.partenaire_id), style: { fontSize: 12.5 } },
     { id: 'lot_nom', label: 'Lot', valeur: t => t.lot_nom },
     { id: 'lot_valeur', label: 'Valeur', valeur: t => t.lot_valeur, rendu: t => euros(t.lot_valeur) },
     {
@@ -143,8 +155,8 @@ export default function Page() {
             id: 'pro', libelleTout: 'Tous les pros',
             options: partenairesAvecGagnant, valeur: pro, onChange: setPro,
           }]}
-          categorie={t => ({ id: t.super_event_id ?? '_hors', label: nomSuper(t.super_event_id) })}
-          sousCategorie={t => ({ id: t.partenaire_id ?? '_sans', label: nomPartenaire(t.partenaire_id) })}
+          categorie={operationDe}
+          sousCategorie={stationDe}
           legende={
             <>
               <b>En attente</b> = jamais appelé · <b>Confirmé</b> = appelé, lot pas encore
