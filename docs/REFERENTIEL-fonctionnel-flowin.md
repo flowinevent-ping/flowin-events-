@@ -88,102 +88,91 @@ flowchart TD
 
 ---
 
-## 5. Audit du 16/09 — demandé vs existant
+## 5. Audit — chaque requête : état et correction proposée
 
-✅ existe et fonctionne · 🟡 partiel ou défaillant · ❌ absent
+✅ fonctionne · 🟡 partiel · ❌ absent
 
-### 5.1 Event (pro)
+### Event
 
-| Demandé | État | Constat |
-|---|---|---|
-| Inscription : secteur, adresse | 🟡 | `/pro/inscription` crée le pro ; pas de logo, site, réseaux ; `/pro/entreprise` en lecture seule ; aucune fiche commerce créée |
-| Espace pro protégé | ❌ | toutes les pages `/pro` ouvrent le compte passé dans l'URL (`?pro=`), sans connexion |
-| Animation quiz / quiz + bonus | 🟡 | proposées ; une seule banque, pas de banque bonus |
-| Animation vote / roue | ❌ | proposées mais créées **sans contenu** (ni items de vote, ni segments de roue) |
-| Lots : rédaction + règles | 🟡 | saisis ; pas de catalogue (valeur saisie perdue : **corrigé le 16/09**) |
-| Distribution immédiat / tirage | ❌ | enregistrée, **jamais lue par les jeux** |
-| Liste des gagnants | ✅ | par opération |
-| Heure d'utilisation du lot | ❌ | seulement « remis / à remettre » |
-| Validation mobile par PIN | 🟡 | `lot.html` fonctionne mais textes, logos et date « 25 octobre 2026 » NDS en dur ; pas de PIN pour un pro sans fiche commerce ; bouton « remis sans PIN » (lien « voir le billet » cassé : **corrigé le 16/09**) |
-| QR de l'event | ✅ | généré localement, PNG / SVG / affiche A4 |
-| WhatsApp / SMS | ✅ | |
-| Email prérempli | 🟡 | seulement en fin de création, texte sans lien |
-| Instagram | ❌ | |
-| Texte type « nous sommes heureux… » | ❌ | |
-| Mailchimp / multi-envoi | ❌ | côté pro ; export Mailchimp seulement dans le monolithe SA |
-| QR de tracking sur demande | 🟡 | demande enregistrée ; seul le SA crée les QR ; les liens à usage unique ne sont lus par aucun jeu |
-| CRM | 🟡 | une liste à plat, toutes opérations mélangées, 200 lignes max |
-| Pics de fréquentation | ✅ | par heure et par jour |
-| Sexe, âge | ✅ | camemberts |
-| Code postal | ❌ | |
-| Réponses par participant + stats | 🟡 | totaux sur la page station ; rien par participant |
+| # | Requête | État | Constat | Correction proposée |
+|---|---|---|---|---|
+| 1 | Coordonnées de l'établissement (secteur, adresse) | 🟡 | saisies à l'inscription, plus modifiables ensuite | rendre « Mon entreprise » modifiable |
+| 2 | Animation quiz | ✅ | une banque de questions au choix | — |
+| 3 | Animation quiz + questions bonus | 🟡 | pas de choix de banque bonus | ajouter le choix de la banque bonus dans « Créer mon animation » |
+| 4 | Animation vote | ❌ | créée sans éléments à voter | ajouter la saisie des éléments (écran déjà existant côté SA) |
+| 5 | Animation roue | ❌ | créée sans segments | ajouter la saisie des segments (écran déjà existant côté SA) |
+| 6 | Sélection ou rédaction des lots | 🟡 | rédaction seulement | proposer aussi les lots déjà créés par le pro |
+| 7 | Règles d'utilisation des lots | ✅ | champ conditions | — |
+| 8 | Distribution : gain immédiat / après tirage | 🟡 | choix enregistré, jamais appliqué par les jeux | faire appliquer le choix par les jeux (touche les modules quiz et roue : ton accord requis) |
+| 9 | Liste des gagnants | ✅ | par opération | — |
+| 10 | Lot utilisé, à quelle heure | 🟡 | lot oui, heure non affichée | afficher date + heure de remise sur chaque gagnant |
+| 11 | Validation mobile par code PIN | 🟡 | fonctionne ; textes NDS en dur sur le billet ; pas de PIN pour un pro sans fiche commerce | billet aux textes de l'opération ; PIN rattaché au pro |
+| 12 | Publication par email | 🟡 | Gmail seulement en fin de création, sans lien | bouton email prérempli (texte + lien) dans « Emails & com » |
+| 13 | Publication WhatsApp | ✅ | | — |
+| 14 | Publication Instagram | ❌ | | bouton « copier le texte + télécharger le visuel QR » |
+| 15 | Texte type « nous sommes heureux… » + lien | ❌ | | texte prérempli modifiable (nom, dates, lot, lien), réutilisé par email / WhatsApp / Instagram |
+| 16 | QR code de l'event | ✅ | PNG, SVG, affiche A4 | — |
+| 17 | QR tracking par support, sur demande à Flowin | 🟡 | demande enregistrée, aucun retour au pro | bouton « demander un QR de suivi » → validation SA → QR visible chez le pro |
+| 18 | Mailchimp / multi-publication | ❌ | | export des contacts opt-in au format Mailchimp + texte type |
+| 19 | CRM | 🟡 | une liste unique, opérations mélangées | CRM rangé par opération |
+| 20 | Pics de fréquentation | ✅ | heure et jour | — |
+| 21 | Répartition sexe, âge | ✅ | camemberts | — |
+| 22 | Répartition code postal | ❌ | | ajouter la répartition par code postal dans le bloc Tracking |
+| 23 | Réponses aux questions par participant + stats | 🟡 | totaux seulement, sur la page station | stats par question + détail par participant, par opération |
 
-### 5.2 Super event — cas 1 (le pro rejoint)
+### Super event — cas 1 : intégrer
 
-| Demandé | État | Constat |
-|---|---|---|
-| Choisir un super event et s'inscrire | 🟡 | **deux chemins concurrents** (`/pro/rejoindre` et `/rejoindre/[se]`), aucun ne crée une station active ; le second écrase une fiche pro existante |
-| Jeu imposé par le créateur | ❌ | aucune notion de « jeu du super event » ; le pro ou le SA choisit |
-| Visible sur la carte | 🟡 | le GPS saisi par le pro est **perdu à la validation SA** ; placement manuel |
-| QR de la station | ✅ | |
-| Lien de tracking unique | 🟡 | liens codés sur le module Quiz + bonus quel que soit le jeu |
-| Lots, gagnants, diffusion comme un event | 🟡 | lots du super event lus dans la fiche commerce, que l'inscription ne crée pas ; lots, adresse, catégorie saisis par le pro **perdus à la validation** |
-| Trafic global et par station | 🟡 | par station uniquement |
+| # | Requête | État | Constat | Correction proposée |
+|---|---|---|---|---|
+| 24 | Le pro choisit un super event et s'inscrit | 🟡 | deux chemins ; à la validation SA, adresse, lots et GPS saisis sont perdus | un seul chemin ; la validation SA crée la station avec toutes les infos saisies |
+| 25 | Jeu déjà choisi par le créateur | ❌ | le jeu est choisi station par station | jeu enregistré sur le super event, hérité par chaque station |
+| 26 | Station active visible sur la carte | 🟡 | GPS perdu à la validation | reprise du GPS (voir 24) |
+| 27 | QR de la station (publier, imprimer) | ✅ | | — |
+| 28 | Lien de tracking unique sur demande | 🟡 | lien toujours construit sur « Quiz + bonus » | même circuit que 17, lien sur le jeu réel |
+| 29 | Lots, règles, gagnants comme un event | 🟡 | lots lus dans la fiche commerce, que l'inscription ne crée pas | lots du super event au même endroit que ceux d'un event |
+| 30 | Diffusion comme un event | ✅ | même rubrique « Emails & com » | — |
+| 31 | Trafic global et par station | 🟡 | par station seulement | ajouter le total du super event en tête |
 
-### 5.3 Super event — cas 2 (créer)
+### Super event — cas 2 : créer
 
-| Demandé | État | Constat |
-|---|---|---|
-| Créer un super event | 🟡 | SA uniquement ; **aucun parcours pour un festival / une asso / une franchise** |
-| Nom, durée, jeu | ✅ | côté SA |
-| Tirage au sort uniquement | ❌ | la roue et le gain immédiat restent proposés |
-| Tirage du super event | 🟡 | uniquement dans `tirage-nds.html` (page hors dashboard), lot par lot, commerce par commerce |
-| Gagnants groupés par station | 🟡 | groupés par commerce |
-| Email au nom du super event | ❌ | textes « Nuits du Sud » en dur |
-| Parcours joueur générique | 🟡 | module Quiz + bonus encore lié aux stations et textes NDS |
+| # | Requête | État | Constat | Correction proposée |
+|---|---|---|---|---|
+| 32 | Même process que créer un event | 🟡 | parcours SA séparé ; aucun pour festival / asso / franchise | même parcours que l'event, option « super event », ouvert au pro |
+| 33 | Choix du jeu | 🟡 | choisi par station | un seul choix pour le super event (voir 25) |
+| 34 | Tirage au sort uniquement | ❌ | roue et gain immédiat proposés ; tirage seulement dans `tirage-nds.html` | masquer roue et gain immédiat ; bouton tirage dans la fiche du super event |
+| 35 | Gagnants regroupés par station | 🟡 | regroupés par commerce | regrouper par station |
+| 36 | Email prérempli au nom du super event | ❌ | texte « Nuits du Sud » en dur | texte au nom du super event |
 
-### 5.4 Super Admin
+### Super Admin
 
-| Demandé | État | Constat |
-|---|---|---|
-| Créer / supprimer pros, events, super events | 🟡 | suppression d'un pro ou d'un event sans aucun garde-fou (events, gagnants) |
-| Planning | ❌ | kanbans par statut, aucun calendrier date · enseigne · event · QR |
-| Accès total au compte pro | 🟡 | fiche en 8 onglets ; pas de lien direct « ouvrir son espace » ; pas son CRM dans la fiche |
-| Fiche complète | ✅ | |
-| Bon de commande et facture par event / super event / date | 🟡 | super event seulement (NDS en dur) ; **rien pour un event** |
-| QR par event | ✅ | |
-| Stock des lots par event / super event | 🟡 | stock par commerce uniquement |
-| Règles de diffusion | 🟡 | saisies côté pro seulement, jamais appliquées |
-| Code PIN | 🟡 | affiché, **non modifiable** |
-| Email depuis la fiche | 🟡 | liens Gmail ; aucun envoi réel côté SA |
+| # | Requête | État | Constat | Correction proposée |
+|---|---|---|---|---|
+| 37 | Créer / supprimer pros, events, super events | ✅ | | — |
+| 38 | Planning (QR utilisé, event / super event, date, enseigne, nom) | ❌ | | vue planning chronologique avec ces 5 colonnes |
+| 39 | Accès total au compte pro | 🟡 | fiche 8 onglets ; CRM du pro absent | ajouter son CRM dans la fiche + bouton « voir son espace » |
+| 40 | Fiche complète | ✅ | | — |
+| 41 | Bon de commande et facture par event, super event, date | 🟡 | super event seulement (NDS) | bon et facture rattachés à chaque opération, dans l'onglet Contrat |
+| 42 | QR lié à l'event | ✅ | | — |
+| 43 | Lots en stock par event / super event | 🟡 | stock par commerce | stock par opération |
+| 44 | Règles de diffusion | 🟡 | non modifiables par le SA | champ modifiable dans la fiche event |
+| 45 | Code PIN de validation | 🟡 | affiché, non modifiable | champ modifiable dans la fiche pro |
+| 46 | Envoi d'email depuis la fiche pro | 🟡 | liens Gmail pour les gagnants seulement | bouton email prérempli au pro |
 
-### 5.5 Dette mesurée
+### Transversal
 
-| | |
-|---|---|
-| Pages | 78 pages Next + **60 pages HTML statiques** + monolithe `dashboard.html` (1,1 Mo) |
-| Tirage des gagnants | **6 endroits** différents |
-| Lots | 5 endroits · bons de commande : 6 · aperçus de parcours : 7 |
-| Lots stockés dans | 3 endroits (`cfg.lots`, table `lots`, `partenaires.lots`) |
-| Parcours de création / souscription | 9, sur **4 grammaires différentes** |
-| Pages ou fichiers figés sur Nuits du Sud | une vingtaine (`se-nds-2026` par défaut, textes, logos) |
+| # | Requête | État | Constat | Correction proposée |
+|---|---|---|---|---|
+| 47 | Cohérence graphique | 🟡 | 4 présentations de parcours différentes | un seul composant d'étapes |
+| 48 | Parcours de souscription homogènes | 🟡 | 9 parcours | 3 parcours sur le même squelette : créer un event · rejoindre un super event · créer un super event |
+| 49 | Jeux complets | 🟡 | vote et roue vides côté pro | voir 4 et 5 |
+| 50 | Fin des pertes | 🟡 | lots à 3 endroits ; infos perdues à la validation ; pages en double | une seule source par donnée (voir 24, 29, 43) ; doublons retirés du menu |
 
----
+## 6. Ordre de correction proposé
 
-## 6. Diagnostic — trois causes
-
-1. **Construit pour Nuits du Sud, généralisé par ajouts.** Chaque besoin générique a été greffé à côté du code NDS au lieu de le remplacer : textes, logos, identifiants NDS restent en dur.
-2. **Trois couches jamais fusionnées** : monolithe, pages HTML statiques, application Next. Une fonction existe souvent deux ou trois fois, dans des états différents — d'où l'impression de perte permanente.
-3. **Pas de modèle unique d'« opération ».** Les lots vivent à trois endroits, les gagnants et le PIN sont rattachés au commerce et non à l'event, le jeu n'est pas rattaché au super event. Chaque écran recalcule à sa façon, et chaque parcours d'inscription écrit ailleurs.
-
----
-
-## 7. Proposition — simple, en 5 étapes
-
-| # | Étape | Résultat |
-|---|---|---|
-| 1 | **Geler** : plus aucune page nouvelle. Ce référentiel fait foi. Menu réduit aux écrans du référentiel ; pages HTML NDS et monolithe retirés du menu (archivés, consultables). | un seul dashboard, une seule vérité |
-| 2 | **Un modèle « opération »** : lots uniquement dans la table `lots` (par event), stock et gagnants par event, PIN par pro, jeu imposé porté par le super event, GPS sur la station. Migration des trois sources de lots. | chaque écran lit la même donnée |
-| 3 | **Un seul parcours de création**, identique pro et SA, 5 étapes : Établissement → Animation (contenu inclus : questions, segments, items) → Lots (règles + immédiat / tirage) → Diffusion → Récapitulatif. Variantes : « rejoindre un super event » (jeu imposé, étapes 1-3-4-5) et « créer un super event » (tirage seul). Remplace les 9 parcours. | fin des pertes à la validation |
-| 4 | **Espace pro en 6 rubriques** : Mes opérations · Lots & gagnants (+ validation PIN, heure) · Diffusion (QR, lien, WhatsApp, Insta, email, texte type, demande de tracking) · Trafic & CRM (par opération, CP, réponses) · Mon établissement (modifiable) · Contrat. Connexion obligatoire. **La fiche pro SA = les mêmes 6 rubriques**, plus planning, contrôle, bon de commande et facture par opération. | une seule grammaire |
-| 5 | **Retirer Nuits du Sud du code** : textes d'email, billet `lot.html`, tirage, kit → paramétrés par l'opération ; tirage du super event dans le dashboard. | Nuits du Sud devient une opération comme les autres |
+1. Pertes de données : 24, 25, 26, 29, 43
+2. Jeux complets : 3, 4, 5, 8
+3. Lots et gagnants : 6, 10, 11, 34, 35, 36
+4. Diffusion : 12, 14, 15, 17, 18, 28
+5. Data : 19, 22, 23, 31
+6. Super Admin : 38, 39, 41, 44, 45, 46
+7. Parcours et graphisme : 1, 32, 47, 48
