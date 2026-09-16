@@ -17,7 +17,11 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
   /* Ne prendre que les QCM : depuis le 03/09 une banque bonus peut se trouver
      dans le meme tableau. Sans banque bonus cochee, ce filtre ne retire rien. */
   const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm')
-  const [questions] = useState(() => shuffle(allQs).slice(0, (cfg.quizNbQuestions as number) ?? 5))
+  /* FAMILLE G : les questions personnalisees de l event (cfg.customQuestions)
+     n etaient lues que par quiz et quizsolo. Un Quiz Master sans banque cochee
+     sortait irrecuperablement vide. Meme lecture que QuizsoloClient. */
+  const customQs = (Array.isArray(cfg.customQuestions) ? cfg.customQuestions : []) as QuizQuestion[]
+  const [questions] = useState(() => shuffle(allQs.concat(customQs)).slice(0, (cfg.quizNbQuestions as number) ?? 5))
   const [screen, setScreen] = useState<Screen>('landing')
   useParcoursTracking('quizmaster', evId, screen)
   const [qIdx, setQIdx] = useState(0)

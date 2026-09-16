@@ -81,7 +81,7 @@
              "Merci d'avoir participé.", '');
     }
     L.push('Flowin, les Nuits du Sud, la Ville de Vence',
-           'flowinevent@gmail.com · 06 16 35 49 36');
+           'flowinevent@gmail.com · 04 93 59 91 37');
     return L.join('\n');
   }
 

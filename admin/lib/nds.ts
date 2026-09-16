@@ -132,7 +132,7 @@ export function mailPartenaireUrl(
     'Le billet à télécharger (le même que celui reçu par le client), avec le QR à scanner pour valider le retrait :', '',
     `   ${lien}`, '',
     'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez. Le lot est déstocké automatiquement.', '',
-    'Merci,', 'Flowin & les Nuits du Sud', 'flowinevent@gmail.com · 06 16 35 49 36',
+    'Merci,', 'Flowin & les Nuits du Sud', 'flowinevent@gmail.com · 04 93 59 91 37',
   ].join('\n')
   return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
 }
@@ -284,13 +284,16 @@ export interface ResultatDuplication {
   note?: string
 }
 
-export async function fetchSuperEvents(): Promise<SuperEvent[]> {
+/** Super events. Le gabarit master est exclu (famille B) : seule la page
+ *  Super Events le demande, pour le proposer comme modele a dupliquer. */
+export async function fetchSuperEvents(opts: { avecGabarit?: boolean } = {}): Promise<SuperEvent[]> {
   const { data, error } = await supabase
     .from('super_events')
     .select('id, nom, status, date_d, date_f, description, logo_url')
     .order('date_d', { ascending: false })
   if (error) { console.error('[fetchSuperEvents]', error.message); return [] }
-  return (data ?? []) as SuperEvent[]
+  const l = (data ?? []) as SuperEvent[]
+  return opts.avecGabarit ? l : l.filter(s => s.id !== 'se-master-superevent')
 }
 
 /**
@@ -343,7 +346,7 @@ export interface BrouillonSuperEvent {
    *  le parcours joueur lit deja. */
   logoUrl?: string | null
   /** Les pros a rattacher, avec le module de jeu de leur station. */
-  pros: { pro_id: string; nom: string; module: string }[]
+  pros: { pro_id: string; nom: string; module: string; cfg?: Record<string, unknown> }[]
 }
 
 export interface ResultatCreationSE {
@@ -414,7 +417,14 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
       /* Le logo de l operation descend dans le cfg de la station : c est la que
          le parcours joueur le lit (`cfg.logoUrl`). Une station peut ensuite
          avoir le sien depuis sa fiche, sans toucher a l operation. */
-      cfg: d.logoUrl ? { logoUrl: d.logoUrl } : {},
+      /* Contenu du jeu choisi dans le parcours (banques, nombre de questions...)
+         et lien du QR, calcule sur l identifiant definitif -- meme regle que
+         lib/wizard.ts. Sans eux la station sortait vide (famille G). */
+      cfg: {
+        ...(p.cfg ?? {}),
+        ...(d.logoUrl ? { logoUrl: d.logoUrl } : {}),
+        qrUrl: `https://flowin-events.vercel.app/parcours/${p.module || 'quiz'}?ev=${evId}`,
+      },
       participants: 0, gagnants: 0, joueurs_optin: 0,
     })
     // Une station qui echoue ne doit pas annuler les autres : on continue et on

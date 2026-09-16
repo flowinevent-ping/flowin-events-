@@ -31,6 +31,9 @@ import {
   type SuperEvent,
 } from '@/lib/nds'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
+import ConfigJeu from '@/components/dashboard/ConfigJeu'
+import { fetchBanquesToutes, type Banque } from '@/lib/banques'
+import { JEUX_A_QUESTIONS, nbSourcesQuestions } from '@/lib/wizard'
 
 const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
   /* Le gabarit de reference en tete, et par defaut : c est de NDS 2026 qu on
@@ -58,6 +61,12 @@ export default function Page() {
   const [tirageGlobal, setTirageGlobal] = useState(true)
   const [choisis, setChoisis] = useState<Record<string, string>>({}) // pro_id -> module
   const [recherchePro, setRecherchePro] = useState('')
+  /* FAMILLE G — le contenu du jeu se regle A LA CREATION, station par station.
+     Les stations sortaient avec un cfg vide (ni banque, ni qrUrl) : « Assurance
+     Charvolin » aux Fetes du Haut Pays en est la trace. */
+  const [cfgs, setCfgs] = useState<Record<string, Record<string, unknown>>>({})
+  const [banques, setBanques] = useState<Banque[]>([])
+  useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
 
   /* L apercu montre la station en cours de reglage : sans ca, on parametre
      cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
@@ -87,6 +96,8 @@ export default function Page() {
   }, [pros, recherchePro])
 
   const nbChoisis = Object.keys(choisis).length
+  const stationsSansQuestions = Object.keys(choisis)
+    .filter(pid => JEUX_A_QUESTIONS.indexOf(choisis[pid]) >= 0 && nbSourcesQuestions(cfgs[pid]) === 0)
   const proApercu = (apercuPro && choisis[apercuPro]) ? apercuPro : Object.keys(choisis)[0] ?? ''
 
   const basculerPro = (proId: string) =>
@@ -109,6 +120,7 @@ export default function Page() {
         pro_id: proId,
         nom: pros.find(p => p.id === proId)?.nom ?? proId,
         module: choisis[proId],
+        cfg: cfgs[proId] ?? {},
       })),
     })
     setOccupe(false)
@@ -219,6 +231,9 @@ export default function Page() {
     {
       id: 'jeux', icone: '🎮', titre: 'Le jeu de chaque station',
       sous: 'Les jeux sont indépendants de l’opération : deux stations du même super event peuvent proposer des jeux différents.',
+      bloque: stationsSansQuestions.length
+        ? `Choisissez les questions de : ${stationsSansQuestions.map(pid => pros.find(p => p.id === pid)?.nom ?? pid).join(', ')}.`
+        : undefined,
       contenu: nbChoisis === 0 ? (
         <div className="sa-muted" style={{ fontSize: 13 }}>
           Aucun pro sélectionné à l’étape précédente — rien à configurer ici.
@@ -240,6 +255,14 @@ export default function Page() {
                     onClick={() => { setChoisis(c => ({ ...c, [proId]: m.id })); setApercuPro(proId) }}
                   />
                 ))}
+              </div>
+              <div style={{ marginTop: 10, paddingLeft: 10, borderLeft: '3px solid var(--sa-border)' }}>
+                <ConfigJeu
+                  module={choisis[proId]}
+                  cfg={cfgs[proId] ?? {}}
+                  onChange={cfg => setCfgs(c => ({ ...c, [proId]: cfg }))}
+                  banques={banques}
+                />
               </div>
             </div>
           ))}
@@ -293,8 +316,8 @@ export default function Page() {
           ))}
           {nbChoisis > 0 && (
             <div style={{ marginTop: 12, fontSize: 11.5, color: 'var(--sa-muted)', lineHeight: 1.5 }}>
-              Les stations sont créées en statut « à venir ». Leur QR, leurs lots et leur
-              contenu de jeu se règlent ensuite depuis la fiche de chaque station.
+              Les stations sont créées en statut « à venir », avec le contenu de jeu choisi
+              et leur lien de QR. Leurs lots se règlent ensuite depuis la fiche de chaque station.
             </div>
           )}
         </div>

@@ -18,12 +18,13 @@ import { useMemo } from 'react'
 import { PageHeader } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { sansGabarit } from '@/lib/operations'
 
 export default function Page() {
   const { events, pros } = useDashboard()
 
   const evs = useMemo(() => {
-    const reels = (events ?? []).filter(e => e.module && e.super_event_id && e.super_event_id !== 'se-master-superevent')
+    const reels = sansGabarit(events).filter(e => e.module && e.super_event_id)
     const parPro = new Map<string, typeof reels[number]>()
     for (const e of reels) {
       const cle = e.pro_id ?? e.id
@@ -34,17 +35,16 @@ export default function Page() {
     return Array.from(parPro.values())
       .map(e => {
         const proNom = pros.find(p => p.id === e.pro_id)?.nom
-        return { id: e.id, module: e.module, nom: proNom ?? e.nom }
+        return { id: e.id, module: e.module, nom: proNom ?? e.nom, super_event_id: e.super_event_id }
       })
       .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
   }, [events, pros])
 
-  const seId = events?.find(e => e.super_event_id && e.super_event_id !== 'se-master-superevent')?.super_event_id ?? undefined
 
   return (
     <div>
       <PageHeader title="📱 Parcours mobil" subtitle="Aperçu du vrai parcours joueur — event & super event" />
-      <ParcoursMobil events={evs} seId={seId} showTitle={false} />
+      <ParcoursMobil events={evs} showTitle={false} />
     </div>
   )
 }

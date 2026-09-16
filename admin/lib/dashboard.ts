@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { sansGabarit } from './operations'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinLot, FlowinPro } from './types'
 
 /**
@@ -35,12 +36,16 @@ export async function deleteJoueur(id: string): Promise<boolean> {
 }
 
 /* ── Events ── */
+/* FAMILLE B — le gabarit master (22 events) n est jamais une operation.
+   Filtre UNIQUE, pose a la source des donnees du dashboard SA : toutes les
+   pages qui lisent `events` depuis DashboardContext en heritent d un coup,
+   au lieu d un filtre recopie page par page (present dans 8, absent de 11). */
 export async function fetchAllEvents(): Promise<FlowinEvent[]> {
   const { data } = await supabase
     .from('events')
     .select('*')
     .order('date_d', { ascending: false })
-  return (data ?? []) as FlowinEvent[]
+  return sansGabarit(data as FlowinEvent[] | null)
 }
 
 export async function upsertEvent(ev: Partial<FlowinEvent>): Promise<boolean> {
@@ -136,7 +141,7 @@ export async function fetchEventParticipants(eventId: string): Promise<FlowinJou
 export async function fetchDashboardStats() {
   const [joueursRes, eventsRes, partenairesRes, lotsRes, prosRes] = await Promise.all([
     supabase.from('joueurs').select('id, optin, gains, events', { count: 'exact' }),
-    supabase.from('events').select('id, status, module, participants', { count: 'exact' }),
+    supabase.from('events').select('id, status, module, participants', { count: 'exact' }).or('super_event_id.is.null,super_event_id.neq.se-master-superevent'),
     supabase.from('partenaires').select('id, actif', { count: 'exact' }),
     supabase.from('lots').select('id, valeur, quantite, retire', { count: 'exact' }),
     supabase.from('pros').select('id', { count: 'exact' }),
@@ -481,6 +486,9 @@ export async function enregistrerTirage(params: {
     p_partenaire_id: params.partenaireId ?? null,
     p_valeur: params.lotValeur ?? null,
     p_super_event_id: params.superEventId,
+    /* Rattache le gagnant a son event (colonne ajoutee le 16/09) : sans elle,
+       un tirage fait sur un event autonome n appartenait a aucune operation. */
+    p_event_id: params.eventId,
   })
   if (error) { console.error('[enregistrerTirage] rpc échouée:', error.message); return { ok: false, code: '', retraitToken: null } }
   const row = Array.isArray(data) ? data[0] : data

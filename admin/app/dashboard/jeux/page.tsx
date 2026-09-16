@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, ModuleChip, StatusChip } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
+import { sansGabarit } from '@/lib/operations'
 import {
   GABARIT_MODULE, GABARIT_NOM, GABARIT_DESC,
   deroulePour, reglesPour, BLOCS_MULTISTATION,
@@ -206,7 +207,7 @@ export default function JeuxPage() {
         <PageHeader title="🎮 Jeux" subtitle="Le gabarit de référence et les modules — cliquer une carte affiche son déroulé et ses events" />
         <div style={{ padding: 24, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {MODULES.map(m => {
-            const moduleEvents = events.filter(e => e.module === m.id)
+            const moduleEvents = sansGabarit(events).filter(e => e.module === m.id)
             const live = moduleEvents.filter(e => e.status === 'live')
             const actif = ouvert === m.id
             return (
@@ -251,8 +252,7 @@ export default function JeuxPage() {
                       👁 Aperçu navigable — le vrai parcours joueur
                     </div>
                     <ParcoursMobil
-                      events={moduleEvents.map(ev => ({ id: ev.id, module: ev.module, nom: ev.nom }))}
-                      seId={moduleEvents.find(ev => ev.super_event_id)?.super_event_id ?? undefined}
+                      events={moduleEvents.map(ev => ({ id: ev.id, module: ev.module, nom: ev.nom, super_event_id: ev.super_event_id }))}
                       showTitle={false}
                     />
                   </div>

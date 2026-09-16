@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { FlowinEvent, FlowinJoueur, FlowinLot, FlowinPro } from './types'
+import { sansGabarit } from './operations'
 
 export interface ProDashboardData {
   pro: FlowinPro | null
@@ -20,11 +21,14 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
     .limit(1)
 
   /* Events du pro */
-  const { data: events } = await supabase
+  const { data: eventsBruts } = await supabase
     .from('events')
     .select('*')
     .eq('pro_id', proId)
     .order('date_d', { ascending: false })
+  /* Le gabarit master n est jamais une operation (famille B) : filtre a la
+     source, pour toutes les pages /pro qui passent par ici. */
+  const events = sansGabarit(eventsBruts as FlowinEvent[] | null)
 
   if (!events?.length) return { pro: pros?.[0] ?? null, events: [], joueurs: [], lots: [] }
 
@@ -115,6 +119,30 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     },
   })
   if (error) { console.error('[creerAnimation]', error.message); return { ok: false, eventId: null, error: error.message } }
+
+  /* FAMILLE C — les lots vont AUSSI dans la table `lots`, la seule que lisent
+     l ecran Lots, le stock, le tirage et le destockage. cfg.lots reste ecrit
+     pour la compatibilite. Identifiants : meme regle que la migration
+     sql/materialiser_lots_cfg_en_table.sql ('lot-<event>-<rang>'). */
+  if (params.lots.length) {
+    const { data: pro } = await supabase.from('pros').select('partenaire_id').eq('id', params.proId).maybeSingle()
+    const { error: eLots } = await supabase.from('lots').insert(params.lots.map((l, i) => ({
+      id: `lot-${id}-${i + 1}`,
+      event_id: id,
+      partenaire_id: (pro as { partenaire_id: string | null } | null)?.partenaire_id ?? null,
+      titre: l.nom.trim() || 'Lot',
+      nom: l.nom.trim() || 'Lot',
+      quantite: l.quantite || 1,
+      valeur: l.valeur ?? 0,
+      valeur_euros: l.valeur ?? null,
+      conditions: l.conditions.trim() || null,
+      note: l.type === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort',
+    })))
+    if (eLots) {
+      console.error('[creerAnimation] lots', eLots.message)
+      return { ok: false, eventId: id, error: `Animation créée, mais ses lots n’ont pas été enregistrés : ${eLots.message}` }
+    }
+  }
   return { ok: true, eventId: id }
 }
 

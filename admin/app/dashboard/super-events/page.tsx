@@ -9,6 +9,7 @@
  * consomme appartiennent a une edition et ne sont jamais repris.
  */
 import { useEffect, useState, useMemo } from 'react'
+import { superEventsReels, GABARIT_SE_ID } from '@/lib/operations'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState, StatusChip } from '@/components/dashboard/DashboardUI'
 import {
@@ -58,7 +59,7 @@ export default function Page() {
   const [enCours, setEnCours] = useState(false)
   const [res, setRes] = useState<ResultatDuplication | null>(null)
 
-  const charger = () => fetchSuperEvents().then(setListe)
+  const charger = () => fetchSuperEvents({ avecGabarit: true }).then(setListe)
   useEffect(() => { charger() }, [])
 
   const nouvelId = slugSuperEvent(nom)
@@ -78,10 +79,12 @@ export default function Page() {
      (En cours / A venir / Termine), pas une liste plate ou tout se ressemble. */
   const parStatut = useMemo(() => {
     const g: Record<'en_cours' | 'a_venir' | 'passe', SuperEvent[]> = { en_cours: [], a_venir: [], passe: [] }
-    ;(liste ?? []).forEach(se => g[statutReel(se)].push(se))
+    /* Le gabarit est propose comme modele (bouton ci-dessous), jamais range
+       parmi les operations : il s affichait « Termine, 22 stations ». */
+    superEventsReels(liste).forEach(se => g[statutReel(se)].push(se))
     return g
   }, [liste])
-  const master = (liste ?? []).find(s => s.id === 'se-master-superevent') ?? null
+  const master = (liste ?? []).find(s => s.id === GABARIT_SE_ID) ?? null
 
   const accesRapides = (seId: string): { icone: string; label: string; href: string }[] => [
     /* LES CINQ LIENS OUVRAIENT LES PAGES GLOBALES (constate le 14/09) : depuis
@@ -120,7 +123,7 @@ export default function Page() {
         </div>
 
         {liste === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
-        {liste?.length === 0 && <EmptyState title="Aucun super event" />}
+        {liste !== null && superEventsReels(liste).length === 0 && <EmptyState title="Aucun super event" />}
 
         {liste !== null && liste.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>

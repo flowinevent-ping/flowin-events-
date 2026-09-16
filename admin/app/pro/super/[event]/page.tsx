@@ -12,7 +12,6 @@ export default async function ProStationPage({ params, searchParams }: { params:
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
   const ev = data.events.find(e => e.id === params.event)
-  const seId = data.events.find(e => e.super_event_id)?.super_event_id ?? null
   const q = proId ? `&pro=${encodeURIComponent(proId)}` : ''
 
   if (!ev) {
@@ -22,6 +21,8 @@ export default async function ProStationPage({ params, searchParams }: { params:
     </ProShell>
   }
 
+  /* Le super event est celui de CETTE station -- plus le premier venu (famille D). */
+  const seId = ev.super_event_id ?? null
   const jours = seId ? await fetchJours(seId) : []
   const jourSel = searchParams.jour ?? jours[jours.length - 1]?.jour ?? null
   const stationsJour = seId ? await fetchStations(jourSel, seId) : []
@@ -77,7 +78,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
 
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
-      <div style={{ fontSize: 13, marginBottom: 6 }}><Link href={`/pro/super?pro=${encodeURIComponent(proId)}`} style={{ color: ACC, textDecoration: 'none', fontWeight: 700 }}>← Mes stations</Link></div>
+      <div style={{ fontSize: 13, marginBottom: 6 }}><Link href={seId ? `/pro/super?pro=${encodeURIComponent(proId)}&se=${encodeURIComponent(seId)}` : `/pro/events?pro=${encodeURIComponent(proId)}`} style={{ color: ACC, textDecoration: 'none', fontWeight: 700 }}>{seId ? '← Mes stations' : '← Mes events'}</Link></div>
       <h1 style={H1}>{ev.nom}</h1>
       <div style={{ ...SUB, marginBottom: 16 }}>Activité par jour — sélectionnez une date.</div>
 

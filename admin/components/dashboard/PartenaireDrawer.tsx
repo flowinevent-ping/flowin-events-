@@ -12,17 +12,7 @@ import {
 } from '@/lib/nds'
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
 import { Ico } from '@/lib/proicons'
-
-declare global {
-  interface Window {
-    flowinMailGagnant?: {
-      sujet: (t: Record<string, unknown>) => string
-      corps: (t: Record<string, unknown>) => string
-      gmailUrl: (t: Record<string, unknown>) => string
-      lienBillet: (t: Record<string, unknown>) => string
-    }
-  }
-}
+import { OngletOperationsSA, type OngletOperation } from '@/components/operations/BlocsOperations'
 
 /** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici. */
 function useMailGagnant() {
@@ -113,6 +103,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
   // est la relation vivante (mise a jour a chaque creation d'event), donc fiable.
   const proLie = pros.find(pr => pr.partenaire_id === p.id)
   const pEvents = proLie ? events.filter(e => e.pro_id === proLie.id) : []
+  const parOperation = !!proLie && !edit && ['lots', 'gagnants', 'comm', 'contrat'].indexOf(tabActif) >= 0
 
   function enterEdit() {
     setForm({ ...p })
@@ -200,6 +191,12 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
       {!inline && <DrawerTabs tabs={tabs} active={tabActif} onSelect={majTab} />}
 
       <div className={inline ? '' : 'sa-drawer-body'}>
+        {/* Commerce rattache a un compte pro : les onglets par operation sont ceux
+            de la fiche pro -- memes blocs, meme code (lib/operations.ts). La
+            fiche partenaire ne connaissait qu UNE operation, la sienne. */}
+        {parOperation && (
+          <OngletOperationsSA proId={proLie!.id} onglet={tabActif as OngletOperation} onStation={id => openDrawer('event', id)} />
+        )}
         {tabActif === 'infos' && !edit && (
           <>
             {p.image_url && (
@@ -303,7 +300,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
           </>
         )}
 
-        {tabActif === 'lots' && (
+        {tabActif === 'lots' && !parOperation && (
           <>
             <SectionHeader>{(gagnants ?? pLots).length} lot{(gagnants ?? pLots).length > 1 ? 's' : ''}</SectionHeader>
             {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
@@ -332,7 +329,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
 
         {/* Le PIN vit ici, pas dans « Contrat » : c est le code que le
             commercant saisit pour valider un billet, donc a cote des billets. */}
-        {tabActif === 'gagnants' && (
+        {tabActif === 'gagnants' && !parOperation && (
           <>
             <SectionHeader>🔐 Code de validation en caisse</SectionHeader>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff8ea', border: '1px solid #f2e1b6', borderRadius: 12, padding: '14px 16px', marginBottom: 10 }}>
@@ -353,7 +350,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
           </>
         )}
 
-        {tabActif === 'gagnants' && (
+        {tabActif === 'gagnants' && !parOperation && (
           <>
             <SectionHeader>🏆 Gagnants &amp; billets</SectionHeader>
             {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
@@ -418,7 +415,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
           </>
         )}
 
-        {tabActif === 'comm' && (
+        {tabActif === 'comm' && !parOperation && (
           <>
             <a
               href={`/nds/kit-digital/index.html#${p.id.replace(/^pt-/, '')}`}
@@ -448,7 +445,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             montrait aucun contrat.
             Le PIN, lui, sert a valider un billet en caisse : il est deplace
             dans « Gagnants & billets », a cote des billets qu il valide. */}
-        {tabActif === 'contrat' && (
+        {tabActif === 'contrat' && !parOperation && (
           <>
             <SectionHeader>💶 Sponsoring &amp; facturation</SectionHeader>
             <div className="sa-field">

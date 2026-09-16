@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { libelleModule } from '@/lib/operations'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 /**
  * Parcours mobil (30/07/2026, v2 — branchement du vrai contenu).
@@ -12,12 +14,7 @@ import { useState } from 'react'
  */
 
 const ACC = '#7C2D92'
-type Ev = { id: string; module: string; nom: string }
-
-const MODULE_LABEL: Record<string, string> = {
-  quiz: 'Quiz', quizmaster: 'Quiz Master', quizsolo: 'Quiz Solo',
-  spin: 'Roue', tombola: 'Tombola', vote: 'Vote', paques: 'Chasse aux œufs',
-}
+type Ev = { id: string; module: string; nom: string; super_event_id?: string | null }
 
 function Phone({ src, empty }: { src?: string; empty?: string }) {
   const W = 252, H = 505, SCALE = 0.64
@@ -43,10 +40,37 @@ function Phone({ src, empty }: { src?: string; empty?: string }) {
   )
 }
 
-export default function ParcoursMobil({ events = [], seId, showTitle = true }: { events?: Ev[]; seId?: string; showTitle?: boolean }) {
-  const [tab, setTab] = useState<'event' | 'super'>('event')
+/**
+ * APERCU DU PARCOURS — regle unique (famille I) :
+ *  - l apercu montre TOUJOURS le vrai parcours (iframe, preview=1), jamais une maquette ;
+ *  - on choisit d abord l event, groupe par operation (rien a plat) ;
+ *  - la vue « super event » (ecran carte) n est proposee QUE pour une station
+ *    de super event : un event seul n a pas d ecran carte (lib/gabarit.ts,
+ *    BLOCS_MULTISTATION). Elle ne depend plus d un `seId` devine par la page
+ *    appelante (famille D) -- ce parametre n etait d ailleurs jamais lu.
+ */
+export default function ParcoursMobil({ events = [], showTitle = true }: { events?: Ev[]; showTitle?: boolean }) {
+  /* Noms des super events, pour titrer les groupes du selecteur. */
+  const [supers, setSupers] = useState<Record<string, string>>({})
+  useEffect(() => {
+    supabase.from('super_events').select('id,nom').then(({ data }) => {
+      const m: Record<string, string> = {}
+      ;((data ?? []) as { id: string; nom: string }[]).forEach(x => { m[x.id] = x.nom })
+      setSupers(m)
+    })
+  }, [])
+  const [tabDemande, setTab] = useState<'event' | 'super'>('event')
   const [evId, setEvId] = useState(events[0]?.id ?? '')
   const ev = events.find(e => e.id === evId) ?? events[0]
+  const multistation = !!ev?.super_event_id
+  const tab = multistation ? tabDemande : 'event'
+  const groupes = events.reduce<{ cle: string; nom: string; evs: Ev[] }[]>((acc, e) => {
+    const cle = e.super_event_id ?? ''
+    let g = acc.find(x => x.cle === cle)
+    if (!g) { g = { cle, nom: cle ? (supers[cle] ?? cle) : 'Events autonomes', evs: [] }; acc.push(g) }
+    g.evs.push(e)
+    return acc
+  }, [])
 
   const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
   const superUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1&screen=carte` : ''
@@ -70,7 +94,7 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         {tabBtn('event', 'Parcours event', 'Votre animation, en direct')}
-        {tabBtn('super', 'Parcours super event', 'La carte des stations')}
+        {multistation && tabBtn('super', 'Parcours super event', 'La carte des stations')}
       </div>
 
       <div style={{ display: 'flex', gap: 36, alignItems: 'flex-start', flexWrap: 'wrap', paddingLeft: 4 }}>
@@ -83,8 +107,12 @@ export default function ParcoursMobil({ events = [], seId, showTitle = true }: {
                 onChange={e => setEvId(e.target.value)}
                 style={{ width: '100%', maxWidth: 360, padding: '11px 12px', borderRadius: 12, border: '1px solid #CBD5E1', background: '#fff', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, color: '#0F172A', cursor: 'pointer' }}
               >
-                {events.map(e => (
-                  <option key={e.id} value={e.id}>{e.nom} — {MODULE_LABEL[e.module] ?? e.module}</option>
+                {groupes.map(g => (
+                  <optgroup key={g.cle || 'autonomes'} label={g.nom}>
+                    {g.evs.map(e => (
+                      <option key={e.id} value={e.id}>{e.nom} — {libelleModule(e.module)}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

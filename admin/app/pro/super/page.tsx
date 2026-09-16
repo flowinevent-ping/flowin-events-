@@ -8,18 +8,63 @@ import { Camembert } from '@/components/dashboard/Camembert'
 import SondageLandingPro from '@/components/pro/SondageLandingPro'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
+import { grouperOperations, libelleDates, type SuperEventRef } from '@/lib/operations'
+import { BlocOperation } from '@/components/operations/BlocsOperations'
 
-export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string } }) {
+/**
+ * Super event — UNE operation a la fois, designee explicitement (`?se=`).
+ *
+ * La page prenait `data.events.find(e => e.super_event_id)` : le premier
+ * super event venu (famille D), et titrait « Nuits du Sud 2026 » en dur.
+ * Charvolin tient des stations dans deux super events : la page montrait
+ * l un ou l autre selon l ordre de la requete.
+ *
+ * Sans `?se=` et avec plusieurs super events : la liste, un bloc chacun.
+ * Avec un seul : son bilan directement.
+ */
+export default async function ProSuperPage({ searchParams }: { searchParams: { pro?: string; se?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
-  const evIds = new Set(data.events.map(e => e.id))
-  const seId = data.events.find(e => e.super_event_id)?.super_event_id ?? null
+  const { data: supersRes } = await supabase.from('super_events').select('id,nom,date_d,date_f,status')
+  const opsSE = grouperOperations(data.events, (supersRes ?? []) as SuperEventRef[]).filter(o => o.type === 'super')
+  const choisi = opsSE.find(o => o.id === searchParams.se) ?? (opsSE.length === 1 ? opsSE[0] : null)
+  const seId = choisi?.id ?? null
+  const qp = proId ? `?pro=${encodeURIComponent(proId)}` : '?'
+
+  if (!choisi) {
+    return (
+      <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
+        <h1 style={H1}>Mes super events</h1>
+        <div style={{ ...SUB, marginBottom: 16 }}>Les opérations collectives auxquelles vous participez. Ouvrez-en une pour voir le bilan de vos stations.</div>
+        {opsSE.length === 0 && <div style={{ ...CARD, fontSize: 13, ...MUTED }}>Vous ne participez à aucun super event.</div>}
+        {opsSE.map(op => (
+          <BlocOperation key={op.cle} op={op} droite={
+            <Link href={`/pro/super${qp}&se=${encodeURIComponent(op.id)}`} style={{ color: ACC, fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Voir le bilan →</Link>
+          }>
+            {op.stations.map(st => (
+              <div key={st.id} style={{ fontSize: 13, padding: '4px 0' }}>
+                <Link href={`/pro/super/${st.id}${qp}`} style={{ color: ACC, fontWeight: 700, textDecoration: 'none' }}>{st.nom} →</Link>
+              </div>
+            ))}
+          </BlocOperation>
+        ))}
+      </ProShell>
+    )
+  }
+
+  /* Tout ce qui suit est borne aux stations du pro DANS CE super event. */
+  const evIds = new Set(choisi.stations.map(e => e.id))
+  const { data: partsSe } = evIds.size
+    ? await supabase.from('participations').select('joueur_id').in('event_id', Array.from(evIds))
+    : { data: [] as { joueur_id: string }[] }
+  const idsJoueursSe = new Set(((partsSe ?? []) as { joueur_id: string | null }[]).map(p => p.joueur_id).filter(Boolean) as string[])
+  const joueursSe = data.joueurs.filter(j => idsJoueursSe.has(j.id))
 
   /* Même RPC que le SA (super_event_stations), filtrée aux seules stations du pro — parité garantie */
   const allStations = seId ? await fetchStations(null, seId) : []
   /* Canal de collecte hors parcours (landing) — meme RPC que le SA, filtre aux points du pro */
   const sondage = seId ? await fetchSondageLanding(seId) : null
-  const nomsDuPro = new Set(data.events.map(e => e.nom))
+  const nomsDuPro = new Set(choisi.stations.map(e => e.nom))
   const myStations = allStations.filter(s => evIds.has(s.event_id))
   const tri = myStations.slice().sort((a, b) => (b.commencees ?? 0) - (a.commencees ?? 0))
 
@@ -32,19 +77,19 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
     lieux = lieuxRes ?? []
   }
 
-  const joueurs = data.joueurs.length
+  const joueurs = joueursSe.length
   const parties = myStations.reduce((s, x) => s + (x.commencees ?? 0), 0)
   const scans = myStations.reduce((s, x) => s + (x.scans ?? 0), 0)
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const hk = (v: React.ReactNode, k: string) => <div style={{ flex: 1, minWidth: 90 }}><div style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-1px' }}>{v}</div><div style={{ fontSize: 11.5, opacity: 0.9 }}>{k}</div></div>
 
-  const nF = data.joueurs.filter(j => (j as any).genre === 'F').length
-  const nH = data.joueurs.filter(j => (j as any).genre === 'H').length
+  const nF = joueursSe.filter(j => (j as any).genre === 'F').length
+  const nH = joueursSe.filter(j => (j as any).genre === 'H').length
   const sexeParts = [{ valeur: 'Femmes', n: nF }, { valeur: 'Hommes', n: nH }]
 
   const tranches = ['-18', '18-25', '26-35', '36-50', '51-65', '65+']
   const ageParts = tranches
-    .map(t => ({ valeur: t, n: data.joueurs.filter(j => (j as any).age_tranche === t).length }))
+    .map(t => ({ valeur: t, n: joueursSe.filter(j => (j as any).age_tranche === t).length }))
     .filter(p => p.n > 0)
 
   const { data: visites } = evIds.size
@@ -62,7 +107,11 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
 
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
-      <h1 style={H1}>Ma participation{seId ? ' — Nuits du Sud 2026' : ''}</h1>
+      {opsSE.length > 1 && (
+        <div style={{ fontSize: 13, marginBottom: 6 }}><Link href={`/pro/super${qp}`} style={{ color: ACC, textDecoration: 'none', fontWeight: 700 }}>← Mes super events</Link></div>
+      )}
+      <h1 style={H1}>Ma participation — {choisi.nom}</h1>
+      <div style={{ ...SUB }}>{libelleDates(choisi.dateD, choisi.dateF)}</div>
       <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est réservé à l'organisateur (Super Admin). Chiffres calculés via la même fonction que le Super Admin (super_event_stations).</div>
       <div style={{ borderRadius: 18, padding: 20, color: '#fff', marginBottom: 16, background: 'linear-gradient(135deg,#FF8A14 0%,#EA580C 55%,#C2410C 100%)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>

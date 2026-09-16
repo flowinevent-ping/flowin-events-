@@ -768,7 +768,7 @@ function exportPdf(){
         var lien=location.origin+location.pathname+'?id='+encodeURIComponent(rec.id);
         var to=rec.email||'';
         var subject='Votre bon de commande à signer — Nuits du Sud 2026';
-        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n° '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois signé, vous en recevez une copie.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 06 16 35 49 36';
+        var body='Bonjour,\n\nVoici votre bon de commande pour le partenariat Nuits du Sud 2026 (n° '+rec.id+').\nMerci de le relire, le signer et le valider en ligne :\n'+lien+'\n\nUne fois signé, vous en recevez une copie.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 04 93 59 91 37';
         try{ if(navigator.clipboard) navigator.clipboard.writeText('Objet : '+subject+'\n\n'+body); }catch(e){}
         setStatus('Bon '+rec.id+' enregistré. E-mail préparé pour '+(to||'le client')+' avec le lien de signature. Si le corps est vide dans ton webmail, le message est déjà copié — colle-le (Cmd/Ctrl+V). Lien : '+lien,'ok');
         window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(to)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');
@@ -901,7 +901,7 @@ function exportPdf(){
         var _link=location.href;
         var _mb=$('mailClientBtn');
         if(_mb){
-          var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 06 16 35 49 36';
+          var _body='Bonjour,\n\nVoici votre bon de commande signé pour le partenariat Nuits du Sud 2026 :\n'+_link+'\n\nVous pouvez le consulter et le télécharger en PDF depuis ce lien.\n\nFlowin (OPConsult · BAITA EURL) · flowinevent@gmail.com · 04 93 59 91 37';
           _mb.target='_blank'; _mb.href='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(d.email||'')+'&su='+encodeURIComponent('Votre bon de commande — Nuits du Sud 2026')+'&body='+encodeURIComponent(_body);
         }
         var _cb=$('copyLinkBtn');

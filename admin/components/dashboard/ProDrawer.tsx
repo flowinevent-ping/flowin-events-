@@ -2,18 +2,12 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
-import {
-  upsertPro, deletePro,
-  fetchQrStations, creerQrStation, publierQrStation,
-  fetchLiensEphemeres, creerLienEphemere, publierLienEphemere,
-  type QrStation, type LienEphemere,
-} from '@/lib/dashboard'
+import { upsertPro, deletePro } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
-import { TableauStations } from './TableauStations'
-import PartenaireDrawer from './PartenaireDrawer'
-import Diffusion from './Diffusion'
-import { SousOngletVide } from './SousOnglets'
+import QrLiensEvent from './QrLiensEvent'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
+import { grouperOperations, libelleModule } from '@/lib/operations'
+import { BlocOperation, AucuneOperation, OngletOperationsSA, type OngletOperation } from '@/components/operations/BlocsOperations'
 import type { FlowinPro } from '@/lib/types'
 
 export default function ProDrawer() {
@@ -60,27 +54,26 @@ export default function ProDrawer() {
     closeDrawer()
   }
 
-  /* UNE SEULE FICHE PAR COMMERCE. 9 pros sur 16 ont une fiche partenaire liee
-     (SAFER = pro-safer + pt-safer) : selon l ecran d ou l on cliquait, on
-     tombait sur l une OU l autre, jamais sur les deux. Les onglets de la fiche
-     commerce sont donc rendus ICI, par le composant PartenaireDrawer lui-meme
-     en mode inline -- aucune ligne dupliquee, aucune divergence possible. */
-  const aFicheCommerce = !!p.partenaire_id
+  /* RIEN A PLAT (Romain, handoff du 14/09). Les six onglets partent de la
+     liste des events du pro et affichent un bloc par operation -- super event
+     ou event autonome -- trie par date decroissante. Ils ne sont plus delegues
+     a PartenaireDrawer, qui filtrait sur UNE fiche partenaire (Charvolin :
+     « 0 lot » a cote de « 5 stations »). Ils existent donc pour tous les pros,
+     avec ou sans fiche commerce. */
+  const operations = grouperOperations(proEvents, supers)
   const tabs = [
     { id: 'infos', label: 'Infos' },
-    { id: 'events', label: 'Ses stations', badge: proEvents.length },
-    ...(aFicheCommerce ? [
-      { id: 'c-lots', label: 'Lots & stock' },
-      { id: 'c-gagnants', label: 'Gagnants & billets' },
-      { id: 'c-comm', label: 'Emails & com' },
-      { id: 'c-contrat', label: 'Contrat' },
-    ] : []),
+    { id: 'events', label: 'Ses stations', badge: operations.reduce((n, o) => n + o.stations.length, 0) },
+    { id: 'c-lots', label: 'Lots & stock' },
+    { id: 'c-gagnants', label: 'Gagnants & billets' },
+    { id: 'c-comm', label: 'Emails & com' },
+    { id: 'c-contrat', label: 'Contrat' },
     { id: 'qrliens', label: 'QR & Liens' },
     { id: 'tracking', label: 'Tracking' },
   ]
-  /* Correspondance onglet pro -> onglet de la fiche commerce. */
-  const ONGLET_COMMERCE: Record<string, string> = {
-    'c-lots': 'lots', 'c-gagnants': 'gagnants', 'c-comm': 'comm', 'c-contrat': 'contrat',
+  /* Correspondance onglet de la fiche -> contenu par operation. */
+  const ONGLET_OPERATION: Record<string, OngletOperation> = {
+    'c-lots': 'lots', 'c-gagnants': 'gagnants', 'c-comm': 'comm', 'c-contrat': 'contrat', tracking: 'tracking',
   }
 
   const initials = p.nom.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -100,7 +93,7 @@ export default function ProDrawer() {
 
       {p.partenaire_id && (
         <div
-          onClick={() => openDrawer('partenaire', p.partenaire_id as string)}
+          onClick={() => openDrawer('partenaire', p.partenaire_id as string, 'infos')}
           style={{ margin: '0 20px 14px', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <span style={{ fontSize: 12.5, fontWeight: 700 }}>🤝 Fiche partenaire liée — logo, kit com, billets, facture</span>
@@ -157,31 +150,20 @@ export default function ProDrawer() {
             <p className="sa-muted" style={{ fontSize: 11.5, marginBottom: 14 }}>
               Généré et publié par vous — le pro n&apos;y accède qu&apos;une fois « Publié » activé.
             </p>
-            {proEvents.length === 0 && <div className="sa-empty-inline">Aucun event pour ce pro</div>}
-            {proEvents.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} />)}
+            {operations.length === 0 && <AucuneOperation />}
+            {operations.map(op => (
+              <BlocOperation key={op.cle} op={op}>
+                {op.stations.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} />)}
+              </BlocOperation>
+            ))}
           </>
         )}
 
-        {drawer.tab === 'tracking' && (
-          <>
-            <SectionHeader>📡 Tracking de ses stations</SectionHeader>
-            <TableauStations proId={p.id} tout titre={`Stations de ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
-          </>
-        )}
-
-        {ONGLET_COMMERCE[drawer.tab] && !p.partenaire_id && (
-          <SousOngletVide
-            libelle="Fiche commerce"
-            raison="Ce compte pro n'a pas de fiche commerce liée : pas de lots, de gagnants ni de contrat à afficher."
-          />
-        )}
-
-        {ONGLET_COMMERCE[drawer.tab] && p.partenaire_id && (
-          <PartenaireDrawer
-            inline
-            partenaireId={p.partenaire_id}
-            tab={ONGLET_COMMERCE[drawer.tab]}
-            onTab={() => { /* la navigation reste pilotee par les onglets du pro */ }}
+        {ONGLET_OPERATION[drawer.tab] && (
+          <OngletOperationsSA
+            proId={p.id}
+            onglet={ONGLET_OPERATION[drawer.tab]}
+            onStation={id => openDrawer('event', id)}
           />
         )}
 
@@ -190,37 +172,24 @@ export default function ProDrawer() {
             {liveEvents.length > 0 && (
               <div className="sa-alert live">🔴 {liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
             )}
-            <SectionHeader>{proEvents.length} station{proEvents.length > 1 ? 's' : ''}</SectionHeader>
             <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 8 }}>Toucher une station ouvre sa fiche : jeu, participants, lots et gagnants.</div>
-            {proEvents.length === 0 && <div className="sa-empty-inline">Aucune station</div>}
-            {/* Groupees par super event : le jeu et la comm changent d une
-                operation a l autre, les melanger a plat n a pas de sens. */}
-            {proEvents
-              .map(e => e.super_event_id ?? '(hors super event)')
-              .filter((v, i, a) => a.indexOf(v) === i)
-              .map(cle => {
-              const nom = cle === '(hors super event)'
-                ? 'Hors super event'
-                : (supers.find(x => x.id === cle)?.nom ?? cle)
-              const liste = proEvents.filter(e => (e.super_event_id ?? '(hors super event)') === cle)
-              return (
-                <div key={cle}>
-                  <div className="sa-grp">{nom} · {liste.length}</div>
-                  {liste.map(ev => (
-                    <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id, 'stats')} style={{ cursor: 'pointer' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700 }}>{ev.nom}</div>
-                        <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
-                          {ev.module} · {ev.date_d ?? 'sans date'} · {ev.participants ?? 0} participations
-                        </div>
+            {operations.length === 0 && <AucuneOperation />}
+            {operations.map(op => (
+              <BlocOperation key={op.cle} op={op}>
+                {op.stations.map(ev => (
+                  <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id, 'stats')} style={{ cursor: 'pointer' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700 }}>{ev.nom}</div>
+                      <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+                        {libelleModule(ev.module)} · {ev.participants ?? 0} participations
                       </div>
-                      <StatusChip status={ev.status} />
-                      <ModuleChip module={ev.module} />
                     </div>
-                  ))}
-                </div>
-              )
-            })}
+                    <StatusChip status={ev.status} />
+                    <ModuleChip module={ev.module} />
+                  </div>
+                ))}
+              </BlocOperation>
+            ))}
           </>
         )}
 
@@ -246,104 +215,3 @@ export default function ProDrawer() {
   )
 }
 
-/** Bloc QR stations + liens ephemeres pour un event donne, dans l'onglet QR & Liens de la fiche Pro. */
-function QrLiensEvent({ eventId, eventNom }: { eventId: string; eventNom: string }) {
-  const [stations, setStations] = useState<QrStation[]>([])
-  const [liens, setLiens] = useState<LienEphemere[]>([])
-  const [nomStation, setNomStation] = useState('')
-  const [ouvert, setOuvert] = useState('')
-  const [nomLien, setNomLien] = useState('')
-  const [busy, setBusy] = useState(false)
-
-  const charger = () => {
-    fetchQrStations(eventId).then(setStations)
-    fetchLiensEphemeres(eventId).then(setLiens)
-  }
-  useEffect(() => { charger() }, [eventId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const qrUrl = (source: string) =>
-    `https://flowin-events.vercel.app/parcours/nds2026?ev=${encodeURIComponent(eventId)}&source=${encodeURIComponent(source)}`
-  const lienUrl = (token: string) =>
-    `https://flowin-events.vercel.app/parcours/nds2026?ev=${encodeURIComponent(eventId)}&token=${token}`
-
-  async function ajouterStation() {
-    if (!nomStation.trim()) return
-    setBusy(true)
-    await creerQrStation(eventId, nomStation.trim())
-    setNomStation('')
-    charger()
-    setBusy(false)
-  }
-  async function ajouterLien() {
-    setBusy(true)
-    await creerLienEphemere(eventId, nomLien.trim() || null as unknown as string)
-    setNomLien('')
-    charger()
-    setBusy(false)
-  }
-
-  return (
-    <div style={{ border: '1px solid var(--sa-border)', borderRadius: 12, padding: 14, marginBottom: 14 }}>
-      <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 10 }}>{eventNom}</div>
-
-      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: 'var(--sa-muted)', marginBottom: 6 }}>
-        QR fixes ({stations.length})
-      </div>
-      {stations.map(s => (
-        <div key={s.id} style={{ padding: '7px 0', borderBottom: '1px solid var(--sa-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* La vignette existait avant (via api.qrserver.com) : elle est
-                conservee, mais generee localement comme le reste. */}
-            <Diffusion vignette={44} url={qrUrl(s.source_qr)} titre={s.nom} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 12.5 }}>{s.nom}</div>
-              <div style={{ fontSize: 10.5, color: 'var(--sa-muted)' }}>?source={s.source_qr}</div>
-            </div>
-            {/* Les supports (QR telechargeable, affiche A4) se deplient : la liste reste lisible. */}
-            <button className="sa-btn sm" onClick={() => setOuvert(o => (o === s.id ? '' : s.id))}>
-              {ouvert === s.id ? '▲ Supports' : '▼ Supports'}
-            </button>
-            <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(qrUrl(s.source_qr))}>Copier</button>
-            <button className={`sa-btn sm${s.publie ? ' primary' : ''}`} onClick={() => publierQrStation(s.id, !s.publie).then(charger)}>
-              {s.publie ? '✓ Publié' : 'Publier'}
-            </button>
-          </div>
-          {ouvert === s.id && (
-            <div style={{ padding: '10px 0 4px' }}>
-              <Diffusion compact url={qrUrl(s.source_qr)} titre={`${eventNom} — ${s.nom}`} sousTitre={s.nom} />
-            </div>
-          )}
-        </div>
-      ))}
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <input className="sa-input" placeholder="Nom de la station — ex. Caisse 1" value={nomStation} onChange={e => setNomStation(e.target.value)} style={{ flex: 1 }} />
-        <button className="sa-btn sm" disabled={busy || !nomStation.trim()} onClick={ajouterStation}>+ Ajouter</button>
-      </div>
-
-      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: 'var(--sa-muted)', margin: '16px 0 6px' }}>
-        Liens à usage unique ({liens.length})
-      </div>
-      {liens.map(l => (
-        <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid var(--sa-border)' }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 12.5 }}>{l.nom || l.token.slice(0, 8)}</div>
-            <div style={{ fontSize: 10.5, color: l.used_at ? '#B45309' : 'var(--sa-muted)' }}>
-              {l.used_at ? `Utilisé le ${new Date(l.used_at).toLocaleString('fr-FR')}` : 'Non utilisé'}
-            </div>
-          </div>
-          <button className="sa-btn sm" disabled={!!l.used_at} onClick={() => navigator.clipboard?.writeText(lienUrl(l.token))}>Copier</button>
-          <button className={`sa-btn sm${l.publie ? ' primary' : ''}`} onClick={() => publierLienEphemere(l.id, !l.publie).then(charger)}>
-            {l.publie ? '✓ Publié' : 'Publier'}
-          </button>
-        </div>
-      ))}
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <input className="sa-input" placeholder="Nom (optionnel) — ex. Post Facebook" value={nomLien} onChange={e => setNomLien(e.target.value)} style={{ flex: 1 }} />
-        <button className="sa-btn sm" disabled={busy} onClick={ajouterLien}>+ Générer</button>
-      </div>
-      <p className="sa-muted" style={{ fontSize: 10.5, marginTop: 6 }}>
-        Le lien porte un jeton unique consommable (RPC prête). La vérification côté parcours joueur n&apos;est pas encore branchée — voir note de session.
-      </p>
-    </div>
-  )
-}

@@ -73,6 +73,17 @@ export function nbJours(d: BrouillonEvent): number {
 
 export interface Probleme { etape: string; message: string }
 
+/** Modules qui posent des questions -- et donc ne tournent pas sans elles. */
+export const JEUX_A_QUESTIONS = ['quiz', 'quizmaster', 'quizsolo', 'nds2026']
+
+/** Nombre de sources de questions d un cfg : banques quiz + questions personnalisees. */
+export function nbSourcesQuestions(cfg: Record<string, unknown> | null | undefined): number {
+  const c = cfg ?? {}
+  const banques = Array.isArray(c.quizBanques) ? c.quizBanques.length : 0
+  const perso = Array.isArray(c.customQuestions) ? c.customQuestions.length : 0
+  return banques + perso
+}
+
 /**
  * Controle de coherence. Renvoie la liste des problemes, vide si tout va bien.
  * Le formulaire ne s enregistre pas tant qu il reste un probleme : mieux vaut refuser
@@ -87,6 +98,13 @@ export function controler(d: BrouillonEvent): Probleme[] {
     p.push({ etape: 'A', message: 'La date de fin précède la date de début.' })
   }
   if (!d.module) p.push({ etape: 'B', message: 'Un module de jeu doit être choisi.' })
+  /* FAMILLE G : un jeu de questions sans question sortait nu de la creation
+     (4 events sur 36 au 14/09) et ne se rattrapait qu apres coup, dans la
+     fiche. La creation est refusee tant qu aucune source de questions n est
+     choisie : une banque cochee, ou des questions personnalisees. */
+  if (JEUX_A_QUESTIONS.indexOf(d.module) >= 0 && nbSourcesQuestions(d.cfg) === 0) {
+    p.push({ etape: 'C', message: 'Ce jeu pose des questions : cochez au moins une banque de questions.' })
+  }
   d.lots.forEach((l, i) => {
     if (!l.nom?.trim()) p.push({ etape: 'E', message: `Le lot n°${i + 1} n'a pas de nom.` })
     if ((l.quantite ?? 1) < 1) p.push({ etape: 'E', message: `Le lot « ${l.nom || i + 1} » a une quantité nulle.` })

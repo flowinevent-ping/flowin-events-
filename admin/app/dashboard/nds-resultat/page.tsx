@@ -40,7 +40,7 @@ export default function Page() {
   useEffect(() => {
     fetchSuperEvents().then(l => {
       // Le Master est un gabarit de duplication, jamais joue reellement.
-      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      const reels = l /* gabarit deja exclu par fetchSuperEvents */
       setSupers(reels)
       if (reels.length) setSe(reels[0].id)
     })

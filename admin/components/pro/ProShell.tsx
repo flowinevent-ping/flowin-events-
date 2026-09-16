@@ -29,6 +29,8 @@ const NAV: NavItem[] = [
   { key: 'banques', label: 'Mes banques', icon: 'bank', route: '/pro/banques', group: 'MES CAMPAGNES' },
   { key: 'events', label: 'Mes events', icon: 'calendar', route: '/pro/events', group: 'MES CAMPAGNES' },
   { key: 'lots', label: 'Lots & distribution', icon: 'gift', route: '/pro/lots', group: 'MES CAMPAGNES' },
+  { key: 'com', label: 'Emails & com', icon: 'mail', route: '/pro/com', group: 'MES CAMPAGNES' },
+  { key: 'contrat', label: 'Contrat', icon: 'doc', route: '/pro/contrat', group: 'MON COMPTE' },
   { key: 'crm', label: 'Mon CRM', icon: 'users', route: '/pro/crm', group: 'MES DONNÉES' },
   { key: 'gagnants', label: 'Gagnants & tirage', icon: 'dice', route: '/pro/tirage', group: 'MES DONNÉES' },
   { key: 'tracking', label: 'Tracking liens & QR', icon: 'target', route: '/pro/tracking', group: 'MES DONNÉES' },
@@ -51,6 +53,8 @@ const ICONS: Record<string, string> = {
   star: '<path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/>',
   phone: '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10.5 18.5h3"/>',
   join: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  doc: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
   more: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
 }
 const ACCENT = '#A855F7', ACCENT_D = '#7C2D92', SB = '#1E293B', SB2 = '#172033'

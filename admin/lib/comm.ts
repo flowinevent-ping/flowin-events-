@@ -40,7 +40,7 @@ export async function fetchCommConfig(se: string = SE_DEFAUT): Promise<CommConfi
  */
 export const CONTACT_PARTENAIRE = {
   email: 'flowinevent@gmail.com',
-  tel: '06 16 35 49 36',
+  tel: '04 93 59 91 37',
 } as const
 
 /**

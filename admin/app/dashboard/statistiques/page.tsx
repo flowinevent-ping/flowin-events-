@@ -45,7 +45,7 @@ export default function Page() {
       // Le Master est un gabarit de duplication, jamais joue reellement -- le
       // montrer ici comme un onglet au meme titre que le vrai festival induit
       // en erreur (le selectionner afficherait un rapport a zero partout).
-      const reels = l.filter(x => x.id !== 'se-master-superevent')
+      const reels = l /* gabarit deja exclu par fetchSuperEvents */
       setSupers(reels)
       if (reels.length) setSe(reels[0].id)
       else setCharge(false)

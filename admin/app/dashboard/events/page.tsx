@@ -18,6 +18,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { sansGabarit } from '@/lib/operations'
 import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent } from '@/lib/types'
@@ -37,7 +38,7 @@ export default function Page() {
   const [onglet, setOnglet] = useState<'kanban' | 'parcours'>('kanban')
 
   const evsParcours = useMemo(() => {
-    const reels = (events ?? []).filter(e => e.module && e.super_event_id && e.super_event_id !== 'se-master-superevent')
+    const reels = sansGabarit(events).filter(e => e.module && e.super_event_id)
     const parPro = new Map<string, typeof reels[number]>()
     for (const e of reels) {
       const cle = e.pro_id ?? e.id
@@ -45,10 +46,9 @@ export default function Page() {
       if (!actuel || (e.status === 'live' && actuel.status !== 'live')) parPro.set(cle, e)
     }
     return Array.from(parPro.values())
-      .map(e => ({ id: e.id, module: e.module, nom: pros.find(p => p.id === e.pro_id)?.nom ?? e.nom }))
+      .map(e => ({ id: e.id, module: e.module, nom: pros.find(p => p.id === e.pro_id)?.nom ?? e.nom, super_event_id: e.super_event_id }))
       .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
   }, [events, pros])
-  const seIdParcours = events?.find(e => e.super_event_id && e.super_event_id !== 'se-master-superevent')?.super_event_id ?? undefined
 
   /* Cette page groupe PAR PRO : un event sans pro_id (ex. la demo B2B "Découvrez
      Flowin", sans pro rattache) n'a pas sa place ici -- il faisait apparaitre une
@@ -126,7 +126,7 @@ export default function Page() {
         </div>
 
         {onglet === 'parcours' && (
-          <ParcoursMobil events={evsParcours} seId={seIdParcours} showTitle={false} />
+          <ParcoursMobil events={evsParcours} showTitle={false} />
         )}
 
         {onglet === 'kanban' && (<>

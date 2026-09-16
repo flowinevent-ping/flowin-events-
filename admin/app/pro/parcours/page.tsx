@@ -9,14 +9,12 @@ import ParcoursMobil from '@/components/pro/ParcoursMobil'
 export default async function ProParcoursPage({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
   const data = await fetchProDashboard(proId)
-  const events = (data.events ?? [])
-    .filter(e => e.super_event_id !== 'se-master-superevent')
-    .map(e => ({ id: e.id, module: e.module, nom: e.nom }))
-  const seId = data.events?.find(e => e.super_event_id && e.super_event_id !== 'se-master-superevent')?.super_event_id ?? undefined
+  /* fetchProDashboard exclut deja le gabarit master. */
+  const events = (data.events ?? []).map(e => ({ id: e.id, module: e.module, nom: e.nom, super_event_id: e.super_event_id }))
 
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="parcours">
-      <ParcoursMobil events={events} seId={seId} />
+      <ParcoursMobil events={events} />
     </ProShell>
   )
 }
