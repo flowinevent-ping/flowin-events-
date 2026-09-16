@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase'
 import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueursEligibles, type JoueurEligible } from '@/lib/dashboard'
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
 import { fetchOperationsPro, gagnantsParStation, libelleRemise } from '@/lib/operations'
+import { operationsRangees } from '@/lib/rangementOperations'
 import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
@@ -35,18 +36,18 @@ const input: React.CSSProperties = {
 
 type Msg = { ok: boolean; texte: string } | null
 
-export default function GagnantsClient({ initial }: { initial: OperationsPro }) {
+export default function GagnantsClient({ initial, cle, titre = true }: { initial: OperationsPro; cle?: string | null; titre?: boolean }) {
   const [data, setData] = useState<OperationsPro>(initial)
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
 
   return (
     <div>
-      <h1 style={H1}>Gagnants &amp; tirage</h1>
-      <div style={{ ...SUB, marginBottom: 16 }}>
+      {titre && <h1 style={H1}>Gagnants &amp; tirage</h1>}
+      {titre && <div style={{ ...SUB, marginBottom: 16 }}>
         Un bloc par opération : ses gagnants, leurs billets, la validation en caisse — et le tirage sur vos events.
-      </div>
+      </div>}
       {data.operations.length === 0 && <div style={CARD}><AucuneOperation /></div>}
-      {data.operations.map(op => (
+      {operationsRangees(data.operations, cle).map(op => (
         <BlocOperation key={op.cle} op={op}>
           <BlocGagnants op={op} data={data} onChange={recharger} />
         </BlocOperation>
@@ -174,7 +175,7 @@ function Tirage({ op, data, setMessage, onChange }: {
         </select>
       )}
       {!propose && (
-        <button style={btnPrimaire} disabled={envoi || eligibles === null} onClick={() => tirer()}>🎲 Lancer le tirage</button>
+        <button style={btnPrimaire} disabled={envoi || eligibles === null} onClick={() => tirer()}>Lancer le tirage</button>
       )}
       {propose && (
         <div style={{ background: '#fff', border: '1px solid #efe9f2', borderRadius: 10, padding: 12 }}>
@@ -269,7 +270,7 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
             fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
             color: remis ? '#15803D' : '#B45309', background: remis ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)',
           }}>{remis ? 'Remis' : 'À remettre'}</span>
-          <button style={btn} onClick={() => { setOuvert(!ouvert); setPin(''); setMessage(null) }}>{ouvert ? 'Fermer' : 'Valider'}</button>
+          <button style={btn} onClick={() => { setOuvert(!ouvert); setPin(''); setMessage(null) }}>{ouvert ? 'Fermer' : remis ? 'Modifier' : 'Valider'}</button>
         </div>
       </div>
       {ouvert && (

@@ -283,6 +283,17 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
       .order('created_at', { ascending: false }),
   ])
 
+  /* Parties reelles, comptees dans `participations` : la colonne
+     events.participants n est pas tenue a jour (restait a 0). */
+  const comptes = await Promise.all(evIds.map(id =>
+    supabase.from('participations').select('id', { count: 'exact', head: true }).eq('event_id', id)
+      .then(r => [id, r.count ?? 0] as [string, number])))
+  const partiesDe = new Map<string, number>(comptes)
+  ops.forEach(o => o.stations.forEach(st => {
+    const n = partiesDe.get(st.id)
+    if (n !== undefined) st.participants = n
+  }))
+
   const partenaire = (partRes.data ?? null) as PartenaireMin | null
   const lotsTable = (lotsRes.data ?? []) as Record<string, unknown>[]
   const stock = (stockRes.data ?? []) as { lot_id: string | null; utilise: boolean | null }[]

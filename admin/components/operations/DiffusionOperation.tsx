@@ -115,10 +115,10 @@ export function DiffusionStation({ op, s, mode }: { op: DonneesOperation; s: Sta
 
           <div style={{ fontSize: 11.5, fontWeight: 800, margin: '12px 0 4px' }}>Publier</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <a style={btn} href={gmail} target="_blank" rel="noopener noreferrer">✉️ Email (Gmail)</a>
-            <a style={btn} href={`https://wa.me/?text=${encodeURIComponent(texte)}`} target="_blank" rel="noopener noreferrer">📲 WhatsApp</a>
-            <a style={btn} href={`sms:?body=${encodeURIComponent(texte)}`}>💬 SMS</a>
-            <button style={btn} onClick={copier}>📸 Instagram : copier le texte</button>
+            <a style={btn} href={gmail} target="_blank" rel="noopener noreferrer">Email (Gmail)</a>
+            <a style={btn} href={`https://wa.me/?text=${encodeURIComponent(texte)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a style={btn} href={`sms:?body=${encodeURIComponent(texte)}`}>SMS</a>
+            <button style={btn} onClick={copier}>Instagram : copier le texte</button>
           </div>
           <div style={{ fontSize: 11, color: MUT, margin: '4px 0 10px' }}>
             Instagram : copiez le texte, téléchargez le visuel QR ci-dessous, puis publiez-le depuis l’application.

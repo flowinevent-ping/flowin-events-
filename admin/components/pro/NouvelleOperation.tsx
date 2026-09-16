@@ -24,7 +24,7 @@ import type { Banque } from '@/lib/banques'
 import type { SuperEvent } from '@/lib/nds'
 import type { PackParticipation } from '@/lib/commercial'
 import { GABARIT_MODULE, GABARIT_NOM, sorteBanque } from '@/lib/gabarit'
-import { libelleModule, libelleDates, iconeModule } from '@/lib/operations'
+import { libelleModule, libelleDates } from '@/lib/operations'
 import { SECTEURS_PRO } from '@/lib/proCreation'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED, choix } from '@/lib/proui'
@@ -344,10 +344,10 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
 
   /* ── Etape 0 : le choix ─────────────────────────────────────────────── */
   if (!type || etape === 0) {
-    const cartes: { t: TypeOp; titre: string; texte: string; ic: string }[] = [
-      { t: 'animation', titre: 'Créer une animation', texte: 'Chez vous : un jeu, vos lots, gain immédiat ou tirage au sort.', ic: '🎯' },
-      { t: 'rejoindre', titre: 'Rejoindre un super event', texte: 'Devenez une station d’un festival ou d’une opération de commerçants : le jeu est déjà choisi, vous apparaissez sur la carte.', ic: '📍' },
-      { t: 'super', titre: 'Créer un super event', texte: 'Festival, association, franchise, groupement : plusieurs commerces, un même jeu, tirage au sort.', ic: '⭐' },
+    const cartes: { t: TypeOp; titre: string; texte: string }[] = [
+      { t: 'animation', titre: 'Créer une animation', texte: 'Chez vous : un jeu, vos lots, gain immédiat ou tirage au sort.' },
+      { t: 'rejoindre', titre: 'Rejoindre un super event', texte: 'Devenez une station d’un festival ou d’une opération de commerçants : le jeu est déjà choisi, vous apparaissez sur la carte.' },
+      { t: 'super', titre: 'Créer un super event', texte: 'Festival, association, franchise, groupement : plusieurs commerces, un même jeu, tirage au sort.' },
     ]
     return (
       <div style={{ maxWidth: 980 }}>
@@ -357,7 +357,6 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
           {cartes.map(c => (
             <button key={c.t} style={{ ...choix(false), padding: 20, background: '#fff' }}
               onClick={() => { setType(c.t); setEtape(1); if (c.t === 'super' && module_ === 'spin') setModule(null) }}>
-              <div style={{ fontSize: 30, marginBottom: 10 }}>{c.ic}</div>
               <div style={{ fontSize: 17, fontWeight: 800 }}>{c.titre}</div>
               <div style={{ fontSize: 13, ...MUTED, marginTop: 6, lineHeight: 1.5 }}>{c.texte}</div>
               <div style={{ marginTop: 14, fontWeight: 800, color: C.magenta, fontSize: 13.5 }}>Commencer →</div>
@@ -428,7 +427,7 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
                   <button key={s.id} style={choix(seId === s.id)} onClick={() => setSeId(s.id)}>
                     <div style={{ fontWeight: 800, fontSize: 15 }}>{s.nom}</div>
                     <div style={{ fontSize: 12.5, ...MUTED, marginTop: 3 }}>{libelleDates(s.date_d, s.date_f)}</div>
-                    <div style={{ fontSize: 12.5, marginTop: 6, color: C.accent, fontWeight: 700 }}>{iconeModule(s.module)} {libelleModule(s.module || GABARIT_MODULE)}</div>
+                    <div style={{ fontSize: 12.5, marginTop: 6, color: C.accent, fontWeight: 700 }}>{libelleModule(s.module || GABARIT_MODULE)}</div>
                   </button>
                 ))}
               </div>
@@ -469,7 +468,7 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
             <>
               <Titre t="Le jeu de l’opération" s="Choisi par l’organisateur : votre station le propose, les gagnants sont tirés au sort." />
               <div style={{ ...choix(true), cursor: 'default' }}>
-                <div style={{ fontSize: 17, fontWeight: 800 }}>{iconeModule(moduleActif)} {libelleModule(moduleActif)}</div>
+                <div style={{ fontSize: 17, fontWeight: 800 }}>{libelleModule(moduleActif)}</div>
                 <div style={{ fontSize: 13, ...MUTED, marginTop: 4 }}>{se?.nom}</div>
               </div>
               <div style={{ fontSize: 12.5, ...MUTED, marginTop: 12 }}>Le jeu s’affiche à droite, tel que vos clients le verront sur leur téléphone.</div>
@@ -482,7 +481,6 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 10, marginBottom: 18 }}>
                 {jeuxProposes.map(g => (
                   <button key={g.m} style={choix(module_ === g.m)} onClick={() => { if (module_ !== g.m) { setModule(g.m); setCfgJeu({}) } }}>
-                    <div style={{ fontSize: 24 }}>{iconeModule(g.m)}</div>
                     <div style={{ fontWeight: 800, fontSize: 15, marginTop: 6 }}>{g.t}</div>
                     <div style={{ fontSize: 12, ...MUTED, marginTop: 3 }}>{g.s}</div>
                   </button>

@@ -70,7 +70,7 @@ export function SuccessScreen({ emoji, title, children }: { emoji: string; title
   return (
     <div style={wrap}>
       <div style={heroStyle}>
-        <div style={{ fontSize: 54, marginBottom: 10 }}>{emoji}</div>
+        {/* Pas d emoticone dans l espace pro (Romain, 16/09). */}{void emoji}
         <div style={{ fontSize: 26, fontWeight: 800 }}>{title}</div>
       </div>
       <div style={pageWrap}>

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 const ONGLETS = [
   { id: 'entreprise', label: 'Mon entreprise' },
-  { id: 'contrat', label: 'Contrats' },
+  { id: 'contrat', label: 'Bons de commande & factures' },
   { id: 'banques', label: 'Banques de questions' },
 ] as const
 

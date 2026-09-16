@@ -21,6 +21,7 @@ import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
+import { operationsRangees } from '@/lib/rangementOperations'
 
 export type Mode = 'sa' | 'pro'
 export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking' | 'crm'
@@ -58,7 +59,6 @@ export function BlocOperation({ op, children, droite }: { op: Operation; childre
   return (
     <section style={{ background: CARDBG, border: `1px solid ${BRD}`, borderRadius: 14, marginBottom: 14, overflow: 'hidden' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: `1px solid ${BRD}`, background: SUBT, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 18 }}>{op.type === 'super' ? '⭐' : '📅'}</span>
         <div style={{ flex: 1, minWidth: 180 }}>
           <div style={{ fontWeight: 800, fontSize: 14.5 }}>{op.nom}</div>
           <div style={{ fontSize: 11.5, color: MUT, marginTop: 1 }}>
@@ -111,7 +111,6 @@ export function ContenuLots({ op }: { op: DonneesOperation }) {
       {op.lots.length === 0 && <Vide>Aucun lot sur cette opération.</Vide>}
       {op.lots.map(l => (
         <div key={l.id} style={ligne}>
-          <span style={{ fontSize: 16 }}>{l.emoji || '🎁'}</span>
           <div style={{ flex: 1, minWidth: 160 }}>
             <div style={{ fontWeight: 700, fontSize: 13 }}>{l.nom}</div>
             <div style={{ fontSize: 11, color: MUT }}>
@@ -178,7 +177,7 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
       </div>
       {n('a_confirmer') > 0 && (
         <div style={{ fontSize: 12, color: '#B45309', marginBottom: 8 }}>
-          ☎ {n('a_confirmer')} gagnant{n('a_confirmer') > 1 ? 's' : ''} à appeler. Le commerçant ne les verra qu&apos;une fois confirmés.
+          {n('a_confirmer')} gagnant{n('a_confirmer') > 1 ? 's' : ''} à appeler. Le commerçant ne les verra qu&apos;une fois confirmés.
         </div>
       )}
       {op.gagnants.length === 0 && <Vide>Aucun gagnant tiré sur cette opération.</Vide>}
@@ -193,8 +192,8 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
             {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           </div>
           <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7C2D92' }}>{g.ticketCode ?? '—'}</span>
-          <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}</Pastille>
-          {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">📄 Billet</a>}
+          <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
+          {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
           {g.etat !== 'a_confirmer' && (
             <>
               <button style={btn} onClick={() => {
@@ -204,10 +203,10 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
                   operation: op.id, operation_nom: op.nom,
                 })
                 if (url) window.open(url, '_blank', 'noopener')
-              }}>✉️ Gagnant</button>
+              }}>Email gagnant</button>
               <button style={btn} onClick={() => window.open(mailPartenaireUrl({
                 joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
-              }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>✉️ Commerce</button>
+              }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>Email commerce</button>
             </>
           )}
           {g.etat === 'a_confirmer' && <button style={btnPrimaire} onClick={() => confirmer(g.id)}>✓ Confirmer</button>}
@@ -223,7 +222,7 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
 export function TitreStation({ nom, n }: { nom: string; n: number }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: MUT, margin: '12px 0 2px' }}>
-      📍 {nom} · {n}
+      {nom} · {n}
     </div>
   )
 }
@@ -246,7 +245,6 @@ export function ContenuComm({ op, partenaireId, partenaireSe, mode }: {
       {kit.length === 0 && <Vide>Aucun support de communication produit pour cette opération.</Vide>}
       {kit.map(el => (
         <div key={el.libelle} style={ligne}>
-          <span>{el.icone}</span>
           <span style={{ flex: 1, fontSize: 12.5 }}>{el.libelle}</span>
           <a style={btn} href={el.url} target="_blank" rel="noopener noreferrer">Ouvrir</a>
           <button style={btn} onClick={() => navigator.clipboard?.writeText(el.url)}>Copier</button>
@@ -315,12 +313,18 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
             </div>
           </div>
           <Pastille ton={bn.factureNumero ? 'ok' : 'neutre'}>{bn.factureNumero ? `Facture ${bn.factureNumero}` : 'Non facturé'}</Pastille>
+          {mode === 'pro' && (
+            <>
+              <a style={btn} target="_blank" rel="noreferrer" href={`/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`}>Voir le bon</a>
+              {bn.factureNumero && <a style={btn} target="_blank" rel="noreferrer" href={`/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}`}>Voir la facture</a>}
+            </>
+          )}
           {mode === 'sa' && (
             <>
               <a style={btn} target="_blank" rel="noreferrer" href={`/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`}>Bon →</a>
               <a style={btn} target="_blank" rel="noreferrer"
                 href={bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}` : `/facture-nds.html?devis=${encodeURIComponent(bn.id)}`}>
-                🧾 {bn.factureNumero ? 'Facture' : 'Facturer'}
+                {bn.factureNumero ? 'Facture' : 'Facturer'}
               </a>
             </>
           )}
@@ -473,7 +477,7 @@ export function EncartPin({ pin }: { pin: string | null }) {
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: '#a1690a' }}>PIN du commerce · validation en caisse</div>
         <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 24, fontWeight: 800, letterSpacing: 7, color: '#23142c', marginTop: 2 }}>{pin ?? '—'}</div>
       </div>
-      {pin && <button style={{ ...btn, marginLeft: 'auto' }} onClick={() => navigator.clipboard?.writeText(pin)}>📋 Copier</button>}
+      {pin && <button style={{ ...btn, marginLeft: 'auto' }} onClick={() => navigator.clipboard?.writeText(pin)}>Copier</button>}
     </div>
   )
 }
@@ -489,7 +493,7 @@ export function OngletOperationsSA({ proId, onglet, onStation }: {
     <>
       {onglet === 'gagnants' && pt && <EncartPin pin={pt.code_pin} />}
       {data.operations.length === 0 && <AucuneOperation />}
-      {data.operations.map(op => (
+      {operationsRangees(data.operations).map(op => (
         <BlocOperation key={op.cle} op={op}>
           {onglet === 'lots' && <ContenuLots op={op} />}
           {onglet === 'gagnants' && <ContenuGagnantsSA op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
@@ -539,8 +543,10 @@ export const ONGLETS_FICHE: { id: string; label: string; onglet?: OngletOperatio
 ]
 
 /** Les onglets « donnees » du dashboard pro -- memes blocs que la fiche SA. */
-export function OngletOperationsPro({ initial, onglet, prefixeStation }: {
+export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
   initial: OperationsPro; onglet: Exclude<OngletOperation, 'gagnants'>
+  /** Une seule operation (filtre de Mes donnees). */
+  cle?: string | null
   /** ex. « /pro/super/ » : chaque station du tracking ouvre sa page detail. */
   prefixeStation?: string
 }) {
@@ -552,7 +558,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation }: {
   return (
     <>
       {data.operations.length === 0 && <AucuneOperation />}
-      {data.operations.map(op => (
+      {operationsRangees(data.operations, cle).map(op => (
         <BlocOperation key={op.cle} op={op}>
           {onglet === 'lots' && <ContenuLots op={op} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}

@@ -4,26 +4,20 @@
  * FICHE D UNE OPERATION (P1, 16/09) — tout ce qui concerne UNE operation
  * (event ou super event), au meme endroit, en onglets. Les contenus sont
  * ceux des blocs deja utilises cote SA et cote pro (BlocsOperations).
+ *
+ * Mise en page (16/09 soir, retour Romain « on ne voit rien ») : bandeau de
+ * l operation avec ses chiffres, barre d onglets fixe en haut, contenu en
+ * dessous. Aucune emoticone.
  */
 import { useState } from 'react'
-import { fetchOperationsPro, libelleDates, libelleModule, libelleStatut, type OperationsPro } from '@/lib/operations'
+import { fetchOperationsPro, libelleDates, libelleModule, type OperationsPro } from '@/lib/operations'
+import { ONGLETS_OP, LIBELLE_PERIODE, periodeOperation, type OngletOp } from '@/lib/ongletsOperation'
 import { ContenuLots, ContenuComm, ContenuContrat, ContenuTracking } from '@/components/operations/BlocsOperations'
 import { ContenuCrm } from '@/components/operations/DataOperation'
 import { BlocGagnants } from '@/components/pro/GagnantsClient'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, BTN2 } from '@/lib/proui'
-
-export const ONGLETS_OP = [
-  { id: 'jeu', label: 'Jeu' },
-  { id: 'lots', label: 'Lots' },
-  { id: 'diffusion', label: 'Diffusion' },
-  { id: 'gagnants', label: 'Gagnants' },
-  { id: 'trafic', label: 'Trafic' },
-  { id: 'crm', label: 'Contacts' },
-  { id: 'contrat', label: 'Contrat' },
-] as const
-export type OngletOp = typeof ONGLETS_OP[number]['id']
 
 export default function FicheOperationPro({ initial, cle, onglet: ongletInitial }: { initial: OperationsPro; cle: string; onglet: OngletOp }) {
   const [data, setData] = useState(initial)
@@ -34,6 +28,10 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
   if (!op) return <div style={CARD}>Opération introuvable. <a href={`/pro${q}`} style={{ color: C.accent, fontWeight: 700 }}>Mes opérations</a></div>
   const pt = data.partenaire
   const st = op.stations[0]
+  const parties = op.stations.reduce((n, s) => n + (s.participants ?? 0), 0)
+  const remis = op.gagnants.filter(g => g.etat === 'retire').length
+  const lotsTotal = op.lots.reduce((n, l) => n + (l.quantite || 0), 0)
+  const periode = periodeOperation(op.dateD, op.dateF, op.status)
 
   function changer(o: OngletOp) {
     setOnglet(o)
@@ -44,50 +42,69 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
     } catch { /* rien */ }
   }
 
+  const chiffre = (v: number | string, l: string) => (
+    <div style={{ flex: '1 1 120px', background: 'rgba(255,255,255,.12)', borderRadius: 14, padding: '10px 14px' }}>
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.1 }}>{v}</div>
+      <div style={{ fontSize: 11.5, fontWeight: 700, opacity: 0.85, marginTop: 2 }}>{l}</div>
+    </div>
+  )
+
   return (
     <div>
       <a href={`/pro${q}`} style={{ fontSize: 13, fontWeight: 700, color: C.accent, textDecoration: 'none' }}>← Mes opérations</a>
-      <div style={{ ...CARD, padding: 0, overflow: 'hidden', marginTop: 10 }}>
-        <div style={{ background: `linear-gradient(180deg,${C.accent},${C.accentFonce})`, color: '#fff', padding: '20px 22px', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', opacity: 0.8 }}>
-            {op.type === 'super' ? 'Super event' : 'Animation'} · {libelleStatut(op.status)}
+
+      {/* Bandeau de l operation */}
+      <div style={{ borderRadius: 20, overflow: 'hidden', marginTop: 10, background: `linear-gradient(135deg,${C.accent},${C.accentFonce})`, color: '#fff', position: 'relative', boxShadow: '0 12px 30px rgba(43,16,54,.18)' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
+        <div style={{ padding: '22px 24px 20px' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
+              {op.type === 'super' ? 'Super event' : 'Animation'}
+            </span>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: periode === 'en_cours' ? C.magenta : 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
+              {LIBELLE_PERIODE[periode]}
+            </span>
           </div>
-          <div style={{ fontSize: 24, fontWeight: 800, marginTop: 4 }}>{op.nom}</div>
-          <div style={{ fontSize: 13.5, opacity: 0.9, marginTop: 2 }}>
-            {libelleDates(op.dateD, op.dateF)} · {op.type === 'super' ? `${op.stations.length} station${op.stations.length > 1 ? 's' : ''}` : libelleModule(op.stations[0]?.module)}
+          <div style={{ fontSize: 26, fontWeight: 800, marginTop: 8, lineHeight: 1.15 }}>{op.nom}</div>
+          <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>
+            {libelleDates(op.dateD, op.dateF)} · {libelleModule(st?.module)}
+            {op.type === 'super' ? ` · ${op.stations.length > 1 ? `${op.stations.length} stations` : `station : ${st?.nom ?? '—'}`}` : ''}
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
+            {chiffre(parties, op.type === 'super' ? 'parties sur votre station' : 'parties')}
+            {chiffre(lotsTotal, 'lots engagés')}
+            {chiffre(op.gagnants.length, 'gagnants')}
+            {chiffre(op.gagnants.length - remis, 'lots à remettre')}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 6, padding: '12px 14px', overflowX: 'auto' }}>
+      </div>
+
+      {/* Onglets : barre fixe en haut de la page */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 5, background: C.fond, padding: '12px 0 10px' }}>
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 16, padding: 6 }}>
           {ONGLETS_OP.map(o => (
             <button key={o.id} onClick={() => changer(o.id)}
-              style={{ border: 'none', borderRadius: 50, padding: '9px 16px', fontWeight: 800, fontSize: 13.5, cursor: 'pointer', whiteSpace: 'nowrap',
-                background: onglet === o.id ? C.degrade : C.subtil, color: onglet === o.id ? '#fff' : C.accent }}>
+              style={{ border: 'none', borderRadius: 12, padding: '11px 16px', fontWeight: 800, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
+                background: onglet === o.id ? C.degrade : 'transparent', color: onglet === o.id ? '#fff' : C.texte }}>
               {o.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div style={CARD}>
+      <div style={{ ...CARD, padding: 22 }}>
+        <div style={{ fontSize: 19, fontWeight: 800, marginBottom: 14 }}>{ONGLETS_OP.find(o => o.id === onglet)?.label}</div>
+
         {onglet === 'jeu' && st && (
           <div>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{libelleModule(st.module)}</div>
-              <div style={{ fontSize: 13, ...MUTED, marginTop: 3, marginBottom: 14 }}>
-                {op.type === 'super' ? 'Le jeu du super event, identique sur chaque station.' : 'Le jeu de votre animation, tel que vos clients le voient.'}
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18 }}>
+              <div style={{ flex: 1, minWidth: 220, fontSize: 13.5, ...MUTED }}>
+                {op.type === 'super' ? 'Le jeu du super event, identique sur chaque station. Choisissez la vue « event » ou « super event ».' : 'Le jeu de votre animation, tel que vos clients le voient.'}
               </div>
-              {op.type === 'super' && (
-                <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Carte et bilan du super event</a>
-              )}
-              {op.type === 'event' && (
-                <a href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Activité détaillée</a>
-              )}
+              {op.type === 'super'
+                ? <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Carte et bilan du super event</a>
+                : <a href={`/pro/super/${encodeURIComponent(st.id)}${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Activité détaillée</a>}
             </div>
-          </div>
-        )}
-        {onglet === 'jeu' && (
-          <div style={{ marginTop: 18 }}>
             {/* Parcours mobil d origine : parcours event + parcours super event, choix de la station. */}
             <ParcoursMobil events={op.stations.map(s => ({ id: s.id, module: s.module, nom: s.nom, super_event_id: s.super_event_id }))} showTitle={false} />
           </div>
@@ -97,7 +114,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial 
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} />}
         {onglet === 'crm' && <ContenuCrm op={op} />}
-        {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
+        {onglet === 'bons' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
       </div>
     </div>
   )

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 export default function Page({ searchParams }: { searchParams: { pro?: string } }) {
   const params = new URLSearchParams()
   if (searchParams.pro) params.set('pro', searchParams.pro)
-  const extra = 'onglet=contacts'
+  const extra = 'onglet=crm'
   if (extra) { const [k, v] = extra.split('='); params.set(k, v) }
   const s = params.toString()
   redirect(`/pro/donnees${s ? '?' + s : ''}`)

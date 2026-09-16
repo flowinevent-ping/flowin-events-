@@ -133,7 +133,7 @@ export default function InscriptionProPage() {
             </div>
           </div>
 
-          <div style={{ fontWeight: 800, fontSize: 17 }}>{e?.icone} {e?.titre}</div>
+          <div style={{ fontWeight: 800, fontSize: 17 }}>{e?.titre}</div>
           <div style={{ fontSize: 13, color: MUTED, margin: '4px 0 18px', lineHeight: 1.55 }}>{e?.sous}</div>
 
           {e?.vignettes && (
@@ -148,7 +148,7 @@ export default function InscriptionProPage() {
                     borderRadius: 14, padding: 16, cursor: 'pointer',
                   }}
                 >
-                  <div style={{ fontWeight: 800, fontSize: 14.5 }}>{p.icone} {p.titre}</div>
+                  <div style={{ fontWeight: 800, fontSize: 14.5 }}>{p.titre}</div>
                   <div style={{ fontSize: 12.5, color: MUTED, margin: '4px 0 8px', lineHeight: 1.5 }}>{p.sous}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {p.badges.map(b => (

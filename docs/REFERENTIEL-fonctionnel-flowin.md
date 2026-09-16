@@ -240,3 +240,16 @@ Base : sections 1 à 3 (le référentiel) + les captures de Romain (17:28) + le 
 | P7 | `parcoursCSS` commun (boutons, cartes, choix, ticket) + fond et police NDS sur Quiz, Quiz solo, Quiz master, Roue, Vote, Tombola | `/parcours/<jeu>?ev=ev-demo-<jeu>` |
 
 SQL appliqué : `billet_unique.sql`, `evenements_demo_apercu.sql`, `controle_incoherences.sql` (events de démo exclus des contrôles).
+
+### Retour Romain du 16/09 soir (captures Assurance Charvolin) — corrigé
+
+| Constat | Correction |
+|---|---|
+| Fiche opération : « Une erreur s'est produite » sur tous les onglets | La page serveur lisait la liste des onglets depuis un fichier client : liste déplacée dans `lib/ongletsOperation.ts` |
+| Vignettes à 0 partie alors que le trafic en montre | Les parties sont comptées dans `participations` (la colonne `events.participants` restait à 0) |
+| Rangement confus | Mes opérations : sections Animations / Super events, tri par date (en cours, à venir, terminées), filtre par période |
+| Émoticônes | Retirées de tout l'espace pro |
+| Pas d'onglet bons de commande et factures | Onglet « Bons de commande & factures » dans chaque opération (voir le bon, voir la facture) et dans Mon compte |
+| CRM introuvable | Onglet « CRM » sur chaque vignette et dans chaque fiche ; Mes données → CRM, avec choix de l'opération |
+| Page illisible | Fiche : bandeau avec les chiffres (parties, lots, gagnants, à remettre), barre d'onglets fixe, titre de section |
+| Aperçu super event perdu | Parcours mobil d'origine (event + super event) dans l'onglet Jeu et bouton « Parcours mobil » |
