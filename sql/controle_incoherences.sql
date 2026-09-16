@@ -1,5 +1,6 @@
 -- ECRAN SA DE CONTROLE — compteurs d incoherences.
 -- Appliquee le 16/09/2026 sur le projet ywcqtupgoxfzkddqkztk.
+-- 16/09 (lot 4) : + QR de suivi a valider, + diffusions demandees (referentiel 17).
 --
 -- Une ligne par controle : combien d elements sont en defaut, et lesquels
 -- (10 exemples). Lue par /dashboard/controle. Chaque controle correspond a
@@ -53,6 +54,15 @@ c as (
   select 'demande_en_attente', d.id::text, coalesce(d.pro_id, '') || ' → ' || coalesce(d.super_event_id, '') from demandes_rattachement_super_event d
    where d.statut = 'en_attente'
   union all
+  select 'qr_suivi_a_valider', q.event_id, coalesce(e.nom, q.event_id) || ' · ' || q.nom from qr_stations q
+    join ev e on e.id = q.event_id
+   where coalesce(q.publie, false) = false
+  union all
+  select 'diffusion_a_traiter', e.id, e.nom from ev e
+   where e.cfg->'diffusion_demandee'->>'statut' = 'en_attente_sa'
+     and (coalesce((e.cfg->'diffusion_demandee'->>'physique')::boolean, false)
+          or coalesce((e.cfg->'diffusion_demandee'->>'qr_tracking')::boolean, false))
+  union all
   select 'se_sans_dates', s.id, s.nom from super_events s
    where s.id <> 'se-master-superevent' and (s.date_d is null or s.date_f is null)
 ),
@@ -68,7 +78,9 @@ libs(cle, libelle, cible, rang) as (values
   ('lots_sans_stock','Commerces avec lots engagés mais aucune unité de stock','partenaires',9),
   ('gagnant_a_appeler','Gagnants de super event jamais confirmés (à appeler)','tirages',10),
   ('demande_en_attente','Demandes de participation en attente','demandes',11),
-  ('se_sans_dates','Super events sans dates','super_events',12))
+  ('qr_suivi_a_valider','QR de suivi demandés, à valider (onglet QR & liens de la station)','events',12),
+  ('diffusion_a_traiter','Supports imprimés ou QR de suivi demandés à la création','events',13),
+  ('se_sans_dates','Super events sans dates','super_events',14))
 select coalesce(jsonb_agg(jsonb_build_object(
   'cle', l.cle, 'libelle', l.libelle, 'cible', l.cible,
   'n', (select count(*) from c where c.cle = l.cle),

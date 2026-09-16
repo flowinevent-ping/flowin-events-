@@ -9,7 +9,10 @@ import {
 import Diffusion from './Diffusion'
 
 /** Bloc QR stations + liens ephemeres pour un event donne, dans l'onglet QR & Liens de la fiche Pro. */
-export default function QrLiensEvent({ eventId, eventNom }: { eventId: string; eventNom: string }) {
+export default function QrLiensEvent({ eventId, eventNom, module }: { eventId: string; eventNom: string; module?: string | null }) {
+  /* Referentiel 28 : le lien porte le jeu REEL de l event (il etait toujours
+     construit sur « Quiz + bonus »). */
+  const jeu = module || 'nds2026'
   const [stations, setStations] = useState<QrStation[]>([])
   const [liens, setLiens] = useState<LienEphemere[]>([])
   const [nomStation, setNomStation] = useState('')
@@ -24,9 +27,9 @@ export default function QrLiensEvent({ eventId, eventNom }: { eventId: string; e
   useEffect(() => { charger() }, [eventId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const qrUrl = (source: string) =>
-    `https://flowin-events.vercel.app/parcours/nds2026?ev=${encodeURIComponent(eventId)}&source=${encodeURIComponent(source)}`
+    `https://flowin-events.vercel.app/parcours/${jeu}?ev=${encodeURIComponent(eventId)}&source=${encodeURIComponent(source)}`
   const lienUrl = (token: string) =>
-    `https://flowin-events.vercel.app/parcours/nds2026?ev=${encodeURIComponent(eventId)}&token=${token}`
+    `https://flowin-events.vercel.app/parcours/${jeu}?ev=${encodeURIComponent(eventId)}&token=${token}`
 
   async function ajouterStation() {
     if (!nomStation.trim()) return

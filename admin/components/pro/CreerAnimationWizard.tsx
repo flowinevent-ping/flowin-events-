@@ -131,6 +131,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [diffDigital, setDiffDigital] = useState(true)
   const [diffQr, setDiffQr] = useState(false)
   const [envoi, setEnvoi] = useState<'idle' | 'envoi' | 'ok' | 'echec'>('idle')
+  const [eventCree, setEventCree] = useState<string | null>(null)
 
   useEffect(() => { setBanques(banqueQuizExistante) }, [banqueQuizExistante])
 
@@ -273,6 +274,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
     if (res.ok) {
+      setEventCree(res.eventId)
       setEnvoi('ok')
       setEtape(e => e + 1) // étape "livraison"
     } else {
@@ -282,6 +284,15 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
 
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const lotsTexte = lots.filter(l => l.nom.trim()).map(l => l.nom).join(', ') || '—'
+  /* Referentiel 12/15 : le texte d annonce porte le LIEN du jeu. */
+  const lienAnimation = eventCree && module_ ? `https://flowin-events.vercel.app/parcours/${module_}?ev=${encodeURIComponent(eventCree)}` : ''
+  const texteAnnonce = [
+    `Bonjour,`, '',
+    `Nous sommes heureux de vous inviter à jouer à « ${nom} »${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''} !`,
+    `À gagner : ${lotsTexte}.`,
+    ...(lienAnimation ? [`Participez ici : ${lienAnimation}`] : []), '',
+    `À très vite !`,
+  ].join('\n')
 
   return (
     <div>
@@ -828,13 +839,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             readOnly
             id="texte-annonce"
             style={{ ...input, minHeight: 140, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}
-            value={[
-              `Objet : ${nom} — jouez et tentez de gagner !`, '',
-              `Bonjour,`, '',
-              `On lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.`,
-              `Jouez et tentez de gagner : ${lotsTexte}.`, '',
-              `À très vite !`,
-            ].join('\n')}
+            value={`Objet : ${nom} — jouez et tentez de gagner !\n\n${texteAnnonce}`}
           />
           <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 20 }}>
             <button style={{ ...btnGhost, display: 'flex', alignItems: 'center', gap: 7 }} onClick={() => {
@@ -844,8 +849,17 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             <a
               style={{ ...btnGhost, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 }}
               target="_blank" rel="noreferrer"
-              href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nom + ' — jouez et tentez de gagner !')}&body=${encodeURIComponent(`Bonjour,\n\nOn lance une nouvelle animation : ${nom}${dateD ? ` du ${dateD}${dateF ? ` au ${dateF}` : ''}` : ''}.\nJouez et tentez de gagner : ${lotsTexte}.\n\nÀ très vite !`)}`}
+              href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nom + ' — jouez et tentez de gagner !')}&body=${encodeURIComponent(texteAnnonce)}`}
             ><Ico k="mail" size={13} />Ouvrir dans Gmail</a>
+            <a
+              style={{ ...btnGhost, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 7 }}
+              target="_blank" rel="noreferrer"
+              href={`https://wa.me/?text=${encodeURIComponent(texteAnnonce)}`}
+            >WhatsApp</a>
+          </div>
+          <div style={{ fontSize: 12, ...MUTED, marginTop: -10, marginBottom: 18 }}>
+            Texte modifiable, Instagram, SMS, QR de suivi et export Mailchimp : rubrique{' '}
+            <a href={`/pro/com${q}`} style={{ color: ACC, fontWeight: 700 }}>Emails &amp; com</a>.
           </div>
 
           <button style={{ ...btnPrimary, width: '100%' }} onClick={() => router.push(`/pro/events?pro=${encodeURIComponent(proId)}`)}>Terminer — voir mes events →</button>

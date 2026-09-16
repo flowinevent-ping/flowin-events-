@@ -17,9 +17,9 @@ import {
   type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/nds'
-import Diffusion from '@/components/dashboard/Diffusion'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
+import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
 
 export type Mode = 'sa' | 'pro'
 export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking'
@@ -229,8 +229,6 @@ export function TitreStation({ nom, n }: { nom: string; n: number }) {
 
 /* ── Emails & com ──────────────────────────────────────────────────────────── */
 
-const BASE = 'https://flowin-events.vercel.app'
-const lienJeu = (s: { id: string; module: string }) => `${BASE}/parcours/${s.module}?ev=${encodeURIComponent(s.id)}`
 
 export function ContenuComm({ op, partenaireId, partenaireSe, mode }: {
   op: DonneesOperation; partenaireId: string | null; partenaireSe: string | null; mode: Mode
@@ -255,46 +253,11 @@ export function ContenuComm({ op, partenaireId, partenaireSe, mode }: {
       ))}
 
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '14px 0 4px' }}>
-        Lien de jeu {op.type === 'super' ? 'par station' : ''}
+        Diffusion {op.type === 'super' ? 'par station' : ''}
       </div>
-      {op.stations.map(s => <LienJeu key={s.id} s={s} mode={mode} />)}
+      {op.stations.map(s => <DiffusionStation key={s.id} op={op} s={s} mode={mode} />)}
+      <ExportMailchimp op={op} />
     </>
-  )
-}
-
-/* Une station : son lien, son QR genere localement (famille F : plus
-   d api.qrserver.com), le partage direct -- ce que portait l ancien ProClient
-   dans sa grammaire mobile, repris ici dans la grammaire commune. */
-function LienJeu({ s, mode }: { s: DonneesOperation['stations'][number]; mode: Mode }) {
-  const [ouvert, setOuvert] = useState(false)
-  const url = lienJeu(s)
-  const texte = `Participez à ${s.nom} : ${url}`
-  const dd = (s.cfg as Record<string, unknown> | null)?.diffusion_demandee as { statut?: string; physique?: boolean; digital?: boolean; qr_tracking?: boolean } | undefined
-  const demandes = dd ? [dd.physique && 'supports imprimés', dd.digital && 'diffusion digitale', dd.qr_tracking && 'QR de suivi'].filter(Boolean) : []
-  return (
-          <div style={{ borderTop: `1px solid ${BRD}`, padding: '8px 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div style={{ fontWeight: 700, fontSize: 12.5 }}>{s.nom}</div>
-                <div style={{ fontSize: 10.5, color: MUT, wordBreak: 'break-all' }}>{url}</div>
-                {demandes.length > 0 && (
-                  <div style={{ fontSize: 11, color: '#B45309', marginTop: 2 }}>
-                    Demande enregistrée ({demandes.join(', ')}) — {mode === 'sa' ? 'à traiter : aucun envoi automatique.' : 'Flowin la traite manuellement ; rien n’est envoyé automatiquement.'}
-                  </div>
-                )}
-              </div>
-              <button style={btn} onClick={() => setOuvert(o => !o)}>{ouvert ? '▲ QR' : '▼ QR & partage'}</button>
-            </div>
-            {ouvert && (
-              <div style={{ paddingTop: 10 }}>
-                <Diffusion compact url={url} titre={s.nom} sousTitre="Scannez pour jouer" />
-                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                  <a style={btn} href={`https://wa.me/?text=${encodeURIComponent(texte)}`} target="_blank" rel="noopener noreferrer">📲 WhatsApp</a>
-                  <a style={btn} href={`sms:?body=${encodeURIComponent(texte)}`}>💬 SMS</a>
-                </div>
-              </div>
-            )}
-          </div>
   )
 }
 
@@ -489,7 +452,7 @@ export function OngletOperationsSA({ proId, onglet, onStation }: {
           {onglet === 'contrat' && <ContenuContrat op={op} mode="sa" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={proId} onStation={onStation} />}
           {onglet === 'stations' && <ContenuStations op={op} onStation={onStation} />}
-          {onglet === 'qr' && op.stations.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} />)}
+          {onglet === 'qr' && op.stations.map(ev => <QrLiensEvent key={ev.id} eventId={ev.id} eventNom={ev.nom} module={ev.module} />)}
         </BlocOperation>
       ))}
     </>
