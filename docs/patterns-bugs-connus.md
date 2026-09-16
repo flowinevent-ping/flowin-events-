@@ -268,6 +268,29 @@ trancher en une requête, avant de conclure quoi que ce soit sur l'origine des d
 temporelle réelle** — l'écart entre l'estimation initiale et la réalité vérifiée peut
 être énorme, dans un sens comme dans l'autre.
 
+## Pattern L — Écran « par pro » délégué à un composant d'UNE opération
+
+**Symptôme** : « 0 lot » à côté d'un badge « 5 stations » ; un sélecteur d'event
+qui ne change pas la liste affichée.
+
+**Cause** : la fiche pro rendait `PartenaireDrawer` (filtré sur `partenaire_id`,
+donc sur le seul super event de la fiche commerce) ; `fetchProGains([evId])`
+ignorait `evId` et renvoyait tous les gains du commerce.
+
+**Règle** : tout écran qui parle d'un pro part de `fetchOperationsPro(proId)`
+(`lib/operations.ts`) et rend un `BlocOperation` par opération. Jamais de total
+à plat, jamais de `find(e => e.super_event_id)`.
+
+## Pattern M — Retour de RPC lu avec la mauvaise forme / mauvais paramètre
+
+**Trouvé le 16/09** : `GagnantsClient` passait le PIN du commerce à
+`valider_lot(token, pin)`, qui compare `p_pin` au **numéro de billet** ; et lisait
+le retour (`jsonb {ok, raison}`) comme un booléen. Le bon chemin, celui de
+`lot.html` : `verifier_pin_pro(token, pin)` puis `valider_lot(token)`.
+
+**Comment vérifier** : `pg_get_functiondef` avant tout appel, et chercher un
+appelant existant qui marche (`grep -rn "rpc('<nom>'" admin/public admin/app`).
+
 1. Pattern A : lister toutes les pages avec `<table` mais 0 `onClick`
 2. Pattern B/C : `grep` les patterns ci-dessus, vérifier au cas par cas si c'est
    un vrai defaut (contexte partenaire/event réel) ou un usage légitime (Pattern B
