@@ -192,3 +192,37 @@ Principe tenu partout : **une opération = un bloc** (event ou super event, nom 
 | 7 Parcours | 1 32 47 48 | Mon entreprise modifiable ; **créer un super event côté pro** (même parcours, tirage seul, validé par le SA) ; un seul bandeau d'étapes pour tous les parcours ; carte de gain à la charte NDS 2026 | `EntrepriseForm`, `creerSuperEventPro()`, `BandeauEtapes` |
 
 Reste hors de ces lots (constats de l'écran Contrôle au 16/09) : 15 pros sans compte de connexion, 6 events sans pro, 3 stations sans GPS, 3 diffusions demandées à traiter, 1 commerce avec lots sans stock. Doublons du menu SA (bons de commande ×2, CRM participants / joueurs) : non retirés, à trancher.
+
+---
+
+## 8. Nouvel audit du 16/09 (soir) — le parcours pro, vu par le pro
+
+Base : sections 1 à 3 (le référentiel) + les captures de Romain (17:28) + le code.
+
+| # | Où | Constat | Écart au référentiel |
+|---|---|---|---|
+| A1 | Menu pro | 14 entrées dans 5 groupes (Mes events, Super Event, Tracking liens & QR, Parcours mobil, Mes banques…) : la même opération se retrouve sur 6 pages | « tout par event / super event » : l'entrée devrait être l'opération |
+| A2 | Créer mon animation | 6 étapes. Aperçu seulement pour Quiz + bonus, et c'est une reconstitution d'écrans, pas le jeu. Quiz, Roue, Vote, Tombola : aucun aperçu | 1.1 « choix d'une animation » : le pro ne voit pas ce qu'il choisit |
+| A3 | Billet dans le parcours | Modèle `bon-achat-template.html` (18/06) ≠ billet réellement reçu (`nds/billets-partenaires.html`, `lot.html`). Logo Flowin dessiné (rond « F » turquoise) au lieu du logo officiel `nds/assets/flowin_blanc.png`. Bandeau « Nuits du Sud · 9 → 18 juillet » affiché pour toute animation | 1.2 validation des lots : le billet montré n'est pas celui du gagnant |
+| A4 | Rejoindre un super event | 8 étapes. Latitude et longitude à taper à la main. L'aperçu s'ouvre sur l'écran Bonus vide (« aucune banque bonus cochée »). Étape « pack » = catalogue NDS | 2.1 « le pro choisit et s'inscrit » : trop long, pas visuel |
+| A5 | Saisie | Formulaires au style dashboard (champs gris, boutons bleus/violets) ; le joueur voit la charte NDS 2026. Aucun lien visible entre un champ et l'écran du jeu | demande du 16/09 : la saisie doit ressembler à l'application |
+| A6 | Jeux | Seul Quiz + bonus (`nds2026`) suit la charte NDS 2026 (Manrope, #7C2D92, #E0218A, #F5A100). Quiz, Quiz solo, Quiz master, Roue, Vote, Tombola ont chacun leur style sombre | référence graphique des jeux = NDS 2026 |
+| A7 | Mise en ligne | La capture 17:28 montre l'ancienne étape 1 (sans le choix « animation / super event », poussé à 17:04) | à vérifier après rechargement |
+
+### Proposition — uniquement avec ce qui existe déjà
+
+| N° | Proposition | Éléments existants réutilisés |
+|---|---|---|
+| P1 | Menu pro réduit à 4 entrées : **Mes opérations** (blocs event / super event) · **Nouvelle opération** · **Mes données** (CRM, gagnants, trafic, rangés par opération) · **Mon compte** (entreprise, contrat). Une opération s'ouvre sur sa fiche : Jeu · Lots · Diffusion · Gagnants · Trafic · Contrat | blocs par opération et onglets de la fiche pro SA (`ONGLETS_FICHE`) |
+| P2 | **Nouvelle opération** : un écran de choix (Créer une animation · Rejoindre un super event · Créer un super event), puis le même squelette en 4 étapes : Établissement → Jeu → Lots → Diffusion & récap | `BandeauEtapes`, parcours actuels fusionnés |
+| P3 | Aperçu = **le vrai jeu** pour les 7 jeux, dans le cadre téléphone, avec le nom et les lots saisis | `ParcoursMobil` (iframe `preview=1`) + events démo existants (`ev-demo-quizsolo`, `ev-demo-quizmaster`, `ev-demo-vote`, `ev-flowin-demo` pour la roue, gabarit `nds2026`) ; Quiz et Tombola n'ont pas d'event démo : à créer sur le même modèle |
+| P4 | Billet montré = **le billet réel** (carte de `billets-partenaires.html`), logo officiel `flowin_blanc.png`, nom de l'opération à la place de « Nuits du Sud » hors NDS ; retrait de `bon-achat-template.html` | `billets-partenaires.html`, `lot.html`, `nds/assets/flowin_blanc.png` |
+| P5 | Rejoindre : adresse seule (GPS posé par Flowin à la validation), aperçu ouvert sur l'accueil du jeu, pack affiché seulement si l'opération en a | approbation SA existante |
+| P6 | Saisie aux couleurs de l'application (Manrope, #7C2D92, #E0218A, boutons et cartes du gabarit NDS) | variables de `lib/nds2026Design.ts` |
+| P7 | Les 6 autres jeux passés à la charte NDS 2026, jeu par jeu (accueil, question, résultat, inscription, ticket) | écrans de `NDS2026Client.tsx` comme modèle |
+
+### Méthode de travail proposée
+1. Une demande = des numéros (A…, P…, ou une ligne du référentiel). Rien d'autre n'est touché.
+2. Aucun élément visuel créé : chaque écran part d'un fichier existant nommé dans la colonne « Éléments existants ». S'il n'existe rien, maquette montrée avant d'écrire du code.
+3. Ce que je remarque en plus va dans « À trancher », jamais dans le code.
+4. Fin de lot : liste des URL à ouvrir pour vérifier, écran par écran.
