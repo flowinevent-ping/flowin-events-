@@ -23,11 +23,17 @@
  */
 
 import type { Banque } from '@/lib/banques'
+/* Les classes sa-* utilisees ici n existent que dans le CSS du dashboard :
+   le composant emporte les siennes pour s afficher aussi dans l espace pro. */
+import './configjeu.css'
 import { GABARIT_MODULE, sorteBanque } from '@/lib/gabarit'
 
 export type CfgJeu = Record<string, unknown>
 
-export interface SegmentSpin { label: string; couleur?: string; poids?: number }
+/* `color` et `perdant` : les cles que lit le jeu (app/parcours/spin). Les
+   segments ecrits avant le 16/09 portaient `couleur`, que la roue ignorait :
+   elle est encore lue en repli. */
+export interface SegmentSpin { label: string; color?: string; couleur?: string; perdant?: boolean; poids?: number }
 export interface ItemVote { id: string; nom: string; emoji?: string; desc?: string }
 
 const COULEURS = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#9d4edd', '#ff8fab', '#cfc4d8']
@@ -74,7 +80,7 @@ function ListeBanques({
   )
 }
 
-export default function ConfigJeu({
+function ConfigJeuContenu({
   module: mod, cfg, onChange, banques = [],
 }: {
   module: string
@@ -174,7 +180,7 @@ export default function ConfigJeu({
           </div>
           <button
             className="sa-btn sm primary" style={{ marginLeft: 'auto' }}
-            onClick={() => set({ spinSegments: [...segments, { label: '', couleur: COULEURS[segments.length % COULEURS.length] }] })}
+            onClick={() => set({ spinSegments: [...segments, { label: '', color: COULEURS[segments.length % COULEURS.length] }] })}
           >
             + Ajouter un segment
           </button>
@@ -185,15 +191,22 @@ export default function ConfigJeu({
           </div>
         )}
         {segments.map((sg, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 56px auto', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 56px auto auto', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <input
               className="sa-input" placeholder="Ce qui est écrit sur le segment" value={sg.label ?? ''}
               onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })}
             />
             <input
-              className="sa-input" type="color" style={{ height: 36, padding: 3 }} value={sg.couleur ?? '#7C2D92'}
-              onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, couleur: e.target.value } : x) })}
+              className="sa-input" type="color" style={{ height: 36, padding: 3 }} value={sg.color ?? sg.couleur ?? '#7C2D92'}
+              onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, color: e.target.value } : x) })}
             />
+            <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer' }}>
+              <input
+                type="checkbox" checked={!!sg.perdant}
+                onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, perdant: e.target.checked } : x) })}
+              />
+              perdant
+            </label>
             <button
               className="sa-btn sm"
               onClick={() => set({ spinSegments: segments.filter((_, j) => j !== i) })}
@@ -322,4 +335,13 @@ export default function ConfigJeu({
       l’événement créé. On ne vous demande rien d’inutile ici.
     </div>
   )
+}
+
+export default function ConfigJeu(props: {
+  module: string
+  cfg: CfgJeu
+  onChange: (cfg: CfgJeu) => void
+  banques?: Banque[]
+}) {
+  return <div className="cfgjeu"><ConfigJeuContenu {...props} /></div>
 }

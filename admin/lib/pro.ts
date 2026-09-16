@@ -82,6 +82,8 @@ export interface CreationAnimation {
   dateD: string | null
   dateF: string | null
   banqueId?: string | null
+  /** Contenu propre au jeu (referentiel 3/4/5). */
+  cfgJeu?: Record<string, unknown>
   /* `valeur` : montant affiche sur le billet (« Valeur du bon »). */
   lots: { nom: string; quantite: number; valeur?: number; type: 'tirage' | 'instantane'; conditions: string }[]
   regleRecompense?: { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
@@ -104,6 +106,9 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
     gain_ticket: params.lots.some(l => l.type === 'tirage'),
     gain_immediat: premierInstantane?.nom ?? null,
     cfg: {
+      /* Contenu propre au jeu (bonusBanques, spinSegments, voteItems) :
+         memes cles que la creation SA, lues par les jeux. */
+      ...(params.cfgJeu ?? {}),
       quizBanques: params.banqueId ? [params.banqueId] : [],
       /* Lien du QR, sur l identifiant definitif -- meme regle que lib/wizard.ts
          (famille G : 3 events sortaient sans). */

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
@@ -20,6 +21,8 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   const lsKey = `flowin_played_${evId}`
 
   const [screen, setScreen] = useState<Screen>('landing')
+  /* Referentiel 8 : gain immediat attribue par la regle de l event. */
+  const [gain, setGain] = useState<GainImmediat | null>(null)
   useParcoursTracking('vote', evId, screen)
   const [votes, setVotes] = useState<Record<string, number>>({})
   const [form, setForm] = useState({ prenom:'',nom:'',email:'',tel:'',genre:'',age:'',cp:'',source:'' })
@@ -45,6 +48,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
         email: local.email || f.email, tel: local.tel || f.tel,
         cp: local.cp || f.cp, age: local.age || f.age, genre: local.genre || f.genre }))
       const res = await claimJoueur(local, evId, 'VS')
+      setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
       if (res.duplicate) { setScreen('already'); return }
@@ -66,6 +70,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     const voteData: Record<string, unknown> = { vote_mode: mode }
     items.forEach(it => { voteData[`vote_${it.id}`] = votes[it.id] ?? null })
     const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS',bonus_reponses:voteData })
+    setGain(res.gain ?? null)
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
     if (!res.success) { if (res.error) console.error('[vote] enregistrement Supabase échoué:', res.error); setErrors({ email: 'Enregistrement impossible, réessaie.' }); return }
@@ -150,7 +155,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
             <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
           </div>
-          <ParcoursOutro superEventId={ev?.super_event_id} />
+          <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
     </div>

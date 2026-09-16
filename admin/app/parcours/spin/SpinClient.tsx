@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -22,6 +23,8 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const SECTEURS = ['Commerçant','Restaurateur','Exposant','Organisateur','Entreprise','Association','Collectivité','Autre']
 
   const [screen, setScreen] = useState<Screen>('landing')
+  /* Referentiel 8 : gain immediat attribue par la regle de l event. */
+  const [gain, setGain] = useState<GainImmediat | null>(null)
   const [spinning, setSpinning] = useState(false)
   const [resultSeg, setResultSeg] = useState<Segment | null>(null)
   const [angle, setAngle] = useState(0)
@@ -48,13 +51,14 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
         prenom: local.prenom || f.prenom, nom: local.nom || f.nom,
         email: local.email || f.email, tel: local.tel || f.tel,
         cp: local.cp || f.cp, age: local.age || f.age, genre: local.genre || f.genre }))
-      const res = await claimJoueur(local, evId, 'SP')
+      const res = await claimJoueur(local, evId, 'SP', undefined, { lotGagne: (resultSeg && !resultSeg.perdant) ? resultSeg.label : undefined })
+      setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
       if (res.duplicate) { setScreen('already'); return }
       setTicket(res.ticket); setScreen('ticket')
     })()
-  }, [screen, reco, evId, lsKey])
+  }, [screen, reco, evId, lsKey, resultSeg])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -228,6 +232,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       lot_gagne: (resultSeg && !resultSeg.perdant) ? resultSeg.label : undefined,
       events:[evId], ticket_code:tc, source:'spin', prefix:'SP'
     })
+    setGain(res.gain ?? null)
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
     if(!res.success){if(res.error)console.error('[spin] Supabase échoué:',res.error);return}
@@ -386,9 +391,10 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               </div>
               <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
               {ev?.super_event_id ? (
-                <ParcoursOutro superEventId={ev.super_event_id} />
+                <ParcoursOutro superEventId={ev.super_event_id} gain={gain} />
               ) : (
                 <>
+                  {gain && <ParcoursOutro gain={gain} />}
                   <a href="tel:0616354936" className="btn" style={{ display:'block',textDecoration:'none',background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'13px 0',width:'82%',margin:'0 auto',fontWeight:900,letterSpacing:1,color:'#fff' }}>📞 Contactez-nous</a>
                   <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'10px auto 0',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'rgba(255,255,255,.7)',cursor:'pointer' }} onClick={()=>{ if (evId === 'ev-flowin-demo') { window.location.href = '/landing' } else { setScreen('landing') } }}>← Retour à l&apos;accueil</button>
                 </>

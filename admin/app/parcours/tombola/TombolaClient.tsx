@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { generateTicket } from '@/lib/ticket'
 import { getJoueurLocal, claimJoueur, writeJoueur } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 
@@ -29,6 +30,8 @@ interface Props {
 
 export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const [screen, setScreen] = useState<Screen>('landing')
+  /* Referentiel 8 : gain immediat attribue par la regle de l event. */
+  const [gain, setGain] = useState<GainImmediat | null>(null)
   useParcoursTracking('tombola', evId, screen)
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', genre: '', age: '', cp: '', source: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -74,6 +77,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
         email: local.email || f.email, tel: local.tel || f.tel,
         cp: local.cp || f.cp, age: local.age || f.age, genre: local.genre || f.genre }))
       const res = await claimJoueur(local, evId, 'TB')
+      setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
       if (res.duplicate) { setScreen('already'); return }
@@ -98,6 +102,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       decouverte: form.source.replace(/^[^ ]+ /, '') || undefined,
       events: [evId], ticket_code: tc, source: 'tombola', prefix: 'TB',
     })
+    setGain(res.gain ?? null)
     setSubmitting(false)
 
     // Doublon : déjà inscrit en base -> écran "déjà joué"
@@ -355,7 +360,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
           )}
-          <ParcoursOutro superEventId={ev?.super_event_id} />
+          <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
 
@@ -377,7 +382,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
           )}
-          <ParcoursOutro superEventId={ev?.super_event_id} />
+          <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
     </div>

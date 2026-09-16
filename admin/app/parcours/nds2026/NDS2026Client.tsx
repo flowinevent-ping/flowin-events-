@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
+import type { GainImmediat } from '@/lib/parcours'
 import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJoueurHistory, shuffle, AGE_OPTIONS, writeSondageBrigade, ndsQueueWrite, ndsFlushQueue } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import { NDS_CSS, NDS_CSS_APP, NDS_SPRITE } from '@/lib/nds2026Design'
@@ -651,7 +652,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   }, [ENABLE_SW])
 
   // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
-  async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+  async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
     if (preview) return { success: true, duplicate: false, ticket: tc }
     const qrSource = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
     return recurrent
@@ -664,6 +665,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
           optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk,
         })
   }
+
+  /* Referentiel 8 : gain immediat attribue par la regle d un event autonome
+     (jamais sur un super event : tirage uniquement). */
+  const [gainImmediat, setGainImmediat] = useState<GainImmediat | null>(null)
 
   async function persist(bonusOverride?: boolean): Promise<string> {
     if (saved) return ticket
@@ -687,6 +692,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
     let res = await remoteWrite(tc, quizTk, bonusTk)
     if (!res.success && !res.duplicate) { res = await remoteWrite(tc, quizTk, bonusTk) } // 1 réessai auto
     setSaving(false)
+    if (res.gain) setGainImmediat(res.gain)
     const finalTicket = res.ticket || tc
     if (finalTicket !== tc) {
       setTicket(finalTicket)
@@ -1142,6 +1148,14 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
                 <div style={{ background: '#FFF4E5', border: '1px solid #F5B544', borderRadius: 12, padding: '12px 14px', margin: '0 0 14px', color: '#7a4d00', fontSize: 14, textAlign: 'left' }}>
                   <b>Enregistrement non confirmé.</b> Ton ticket <b>{ticket || '—'}</b> n&apos;a pas pu être sauvegardé en ligne (réseau).
                   <a onClick={retrySave} style={{ display: 'inline-block', marginTop: 8, fontWeight: 700, color: '#3B5CC4', cursor: 'pointer' }}>{saving ? 'Nouvelle tentative…' : 'Réessayer maintenant ↻'}</a>
+                </div>
+              )}
+              {gainImmediat && (
+                <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.9 }}>Gagné tout de suite</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 6px' }}>{gainImmediat.lot}</div>
+                  {gainImmediat.conditions && <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 10 }}>{gainImmediat.conditions}</div>}
+                  <a href={`/lot.html?t=${encodeURIComponent(gainImmediat.retraitToken)}`} style={{ display: 'block', background: '#fff', color: '#7C2D92', borderRadius: 12, padding: '14px', fontWeight: 800, fontSize: 16, textDecoration: 'none' }}>Voir mon billet</a>
                 </div>
               )}
               {(() => { const pc = STATIONS.filter(s => ndsPlayedToday(s.id)).length; const done = pc >= STATIONS.length; return (

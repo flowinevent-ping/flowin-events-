@@ -8,6 +8,8 @@ import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 import ApercuApp, { type EcranApercu } from '@/components/dashboard/ApercuApp'
+import ConfigJeu from '@/components/dashboard/ConfigJeu'
+import { sorteBanque } from '@/lib/gabarit'
 
 const ICONES: Record<string, React.ReactNode> = {
   /* Le gabarit de reference. Meme dessin que cote SA (app/dashboard/wizard-event) :
@@ -81,6 +83,11 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
   const [nom, setNom] = useState('')
   const [banqueId, setBanqueId] = useState<string | null>(null)
   const [banques, setBanques] = useState<Banque[]>(banqueQuizExistante)
+  /* Referentiel 3/4/5 : le contenu propre a chaque jeu — banques bonus du
+     gabarit, segments de la roue, elements du vote — avec le meme composant
+     que la creation cote SA (ConfigJeu), donc les memes cles lues par les jeux. */
+  const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
+  const [bonusIds, setBonusIds] = useState<string[]>([])
   /* `valeur` ajoute le 04/09 : le billet imprime affiche « Valeur du bon », le
      parcours ne la demandait nulle part. Sans elle, le bon sortait a 0 EUR. */
   const [lots, setLots] = useState<{ id: string; nom: string; quantite: number; valeur: number; type: 'tirage' | 'instantane'; conditions: string }[]>(
@@ -183,8 +190,32 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
     nbQuestions: banques.find(b => b.id === banqueId)?.questions?.filter(x => x.type === 'qcm').length ?? 0,
     nbBonus: banques.find(b => b.id === banqueId)?.questions?.filter(x => x.type === 'single' || x.type === 'multi').length ?? 0,
   }
-  const etapeBanque = jeu?.banque ?? false
+  /* L etape 2 existe pour tout jeu qui a un contenu : banque de questions
+     (quiz, gabarit) ou elements a saisir (roue, vote). */
+  const etapeJeuContenu = module_ === 'spin' || module_ === 'vote'
+  const etapeBanque = (jeu?.banque ?? false) || etapeJeuContenu
   const totalEtapes = etapeBanque ? 6 : 5
+  const segmentsOk = (((cfgJeu.spinSegments as { label?: string }[]) ?? []).filter(x => (x.label ?? '').trim()).length >= 2)
+  const itemsOk = (((cfgJeu.voteItems as { nom?: string }[]) ?? []).filter(x => (x.nom ?? '').trim()).length >= 2)
+  const etapeContenuOk = module_ === 'spin' ? segmentsOk : module_ === 'vote' ? itemsOk : true
+  const banquesBonus = banques.filter(b => sorteBanque(b.questions) === 'bonus' || sorteBanque(b.questions) === 'mixte' || (b.tags || []).includes('bonus'))
+
+  /* Roue : un segment gagnant = un lot du meme nom (appliquer_regle_gain
+     attribue le lot dont le nom est celui du segment). En passant a l etape
+     des lots, les segments gagnants deviennent des lots, a completer. */
+  function lotsDepuisSegments() {
+    if (module_ !== 'spin') return
+    const gagnants = ((cfgJeu.spinSegments as { label?: string; perdant?: boolean }[]) ?? [])
+      .filter(x => !x.perdant && (x.label ?? '').trim())
+    setLots(ls => {
+      const noms = new Set(ls.map(l => l.nom.trim().toLowerCase()).filter(Boolean))
+      const ajouts = gagnants.filter(g => !noms.has(g.label!.trim().toLowerCase()))
+        .map((g, i) => ({ id: 'seg' + Date.now() + i, nom: g.label!.trim(), quantite: 5, valeur: 0, type: 'instantane' as const, conditions: '' }))
+      const base = ls.filter(l => l.nom.trim())
+      const r = [...base, ...ajouts]
+      return r.length ? r : ls
+    })
+  }
   const aUnLotInstantane = lots.some(l => l.type === 'instantane')
 
   function suivant() { setEtape(e => e + 1) }
@@ -202,8 +233,14 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
     const res = await creerAnimation({
       proId, module: module_, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null,
       banqueId,
-      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, valeur: Number(l.valeur) || 0, type: l.type, conditions: l.conditions.trim() })),
-      regleRecompense: aUnLotInstantane ? { mode: modeInstant, everyX, probabilite } : undefined,
+      cfgJeu: {
+        ...(module_ === GABARIT_MODULE && bonusIds.length ? { bonusBanques: bonusIds } : {}),
+        ...(module_ === 'spin' ? { spinSegments: cfgJeu.spinSegments ?? [] } : {}),
+        ...(module_ === 'vote' ? { voteItems: cfgJeu.voteItems ?? [] } : {}),
+      },
+      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, valeur: Number(l.valeur) || 0, type: module_ === 'spin' ? 'instantane' as const : l.type, conditions: l.conditions.trim() })),
+      /* La roue decide elle-meme du gain (segment) : pas de regle aleatoire en plus. */
+      regleRecompense: aUnLotInstantane && module_ !== 'spin' ? { mode: modeInstant, everyX, probabilite } : undefined,
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
     if (res.ok) {
@@ -268,12 +305,33 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
         </div>
       )}
 
-      {etape === 2 && etapeBanque && (
+      {etape === 2 && etapeJeuContenu && (
+        <div style={CARD}>
+          <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>
+            {module_ === 'spin' ? 'Les segments de votre roue' : 'Les éléments soumis au vote'}
+          </div>
+          <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>
+            {module_ === 'spin'
+              ? 'Au moins deux segments. Un segment gagnant porte le nom du lot qu’il fait gagner : il devient un lot à l’étape suivante. Cochez « perdant » pour les cases sans lot.'
+              : 'Au moins deux éléments : produits, plats, artistes… Le joueur vote pour son préféré.'}
+          </div>
+          <ConfigJeu module={module_ ?? ''} cfg={cfgJeu} onChange={setCfgJeu} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+            <button style={btnGhost} onClick={precedent}>← Précédent</button>
+            <button
+              style={{ ...btnPrimary, opacity: etapeContenuOk ? 1 : 0.45, cursor: etapeContenuOk ? 'pointer' : 'not-allowed' }}
+              disabled={!etapeContenuOk} onClick={() => { lotsDepuisSegments(); suivant() }}
+            >Suivant →</button>
+          </div>
+        </div>
+      )}
+
+      {etape === 2 && etapeBanque && !etapeJeuContenu && (
         <div style={CARD}>
           <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Quelle banque de questions ?</div>
           <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 16 }}>Choisissez une de vos banques, créez-en une, ou demandez à Flowin d’écrire les questions. Un jeu sans questions ne peut pas tourner.</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {banques.filter(b => !(b.tags || []).includes('bonus')).map(b => (
+            {banques.filter(b => !(b.tags || []).includes('bonus') && sorteBanque(b.questions) !== 'bonus').map(b => (
               <div
                 key={b.id}
                 onClick={() => { const n = banqueId === b.id ? null : b.id; setBanqueId(n); setVoieBanque(n ? 'mienne' : null) }}
@@ -388,6 +446,41 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
             </div>
           )}
 
+          {module_ === GABARIT_MODULE && (
+            <div style={{ marginTop: 18 }}>
+              <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 4 }}>Questions bonus</div>
+              <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>
+                Le bonus rapporte un ticket de plus. Sans banque bonus, l’écran bonus n’apparaît pas.
+              </div>
+              {banquesBonus.length === 0 && <div style={{ fontSize: 12.5, ...MUTED }}>Aucune banque de questions bonus pour l&apos;instant.</div>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {banquesBonus.map(b => {
+                  const on = bonusIds.indexOf(b.id) >= 0
+                  return (
+                    <div
+                      key={b.id}
+                      onClick={() => setBonusIds(ids => on ? ids.filter(x => x !== b.id) : [...ids, b.id])}
+                      style={{
+                        border: on ? `2px solid ${ACC}` : '1.5px solid #E2E8F0', borderRadius: 12, padding: 13, cursor: 'pointer',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        background: on ? 'rgba(168,85,247,.06)' : '#fff',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 13.5 }}>{b.nom}</div>
+                        <div style={{ fontSize: 11.5, ...MUTED }}>{(b.questions || []).length} questions</div>
+                      </div>
+                      <span style={{ fontSize: 10.5, fontWeight: 800, color: on ? ACC : '#94A3B8' }}>{on ? 'CHOISIE' : 'CHOISIR'}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <a href={`/pro/banques/nouvelle${q}&tags=bonus&depuis=jeu`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontSize: 12.5, color: ACC, fontWeight: 700, textDecoration: 'none', marginTop: 8 }}>
+                + Créer une banque bonus (nouvel onglet)
+              </a>
+            </div>
+          )}
+
           {banqueId && (() => {
             const b = banques.find(x => x.id === banqueId)
             const apercu = (b?.questions ?? []).slice(0, 3)
@@ -450,7 +543,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                     <button onClick={() => retirerLot(l.id)} style={{ background: '#fff', border: '1.5px solid #E2E8F0', borderRadius: 10, width: 40, height: 42, cursor: 'pointer', color: '#B91C1C', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>×</button>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                {module_ !== 'spin' && <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                   {(['tirage', 'instantane'] as const).map(v => (
                     <div
                       key={v}
@@ -463,7 +556,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
                       {v === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}
                     </div>
                   ))}
-                </div>
+                </div>}
                 <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Conditions d’utilisation</label>
                 <textarea
                   style={{ ...input, minHeight: 54, resize: 'vertical', fontFamily: 'inherit' }}
@@ -505,7 +598,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
           )}
 
 
-          {aUnLotInstantane && (
+          {aUnLotInstantane && module_ !== 'spin' && (
             <div style={{ marginTop: 18 }}>
               <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Règle du gain immédiat</div>
               <div style={{ fontSize: 11, ...MUTED, marginBottom: 8 }}>S&apos;applique à tous les lots réglés en gain immédiat.</div>
@@ -639,7 +732,10 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
               /* « Aucune sélectionnée » ne peut plus arriver : l etape ne se
                  franchit qu avec une banque ou une demande envoyee. Le recap
                  dit donc laquelle des deux. */
-              ...(etapeBanque ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? (demandeEnvoyee ? 'Réalisée par Flowin — demande envoyée' : '—')]] : []),
+              ...(module_ === 'spin' ? [['Segments de la roue', String(((cfgJeu.spinSegments as unknown[]) ?? []).length)]] : []),
+              ...(module_ === 'vote' ? [['Éléments soumis au vote', String(((cfgJeu.voteItems as unknown[]) ?? []).length)]] : []),
+              ...(module_ === GABARIT_MODULE ? [['Banques bonus', bonusIds.length ? banques.filter(b => bonusIds.indexOf(b.id) >= 0).map(b => b.nom).join(', ') : 'aucune']] : []),
+              ...(etapeBanque && !etapeJeuContenu ? [['Banque de questions', banques.find(b => b.id === banqueId)?.nom ?? (demandeEnvoyee ? 'Réalisée par Flowin — demande envoyée' : '—')]] : []),
               ...lots.filter(l => l.nom.trim()).map((l, i) => [
                 lots.filter(x => x.nom.trim()).length > 1 ? `Lot ${i + 1}` : 'Lot',
                 `${l.nom} × ${l.quantite} — ${l.type === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}`,

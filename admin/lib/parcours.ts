@@ -178,6 +178,23 @@ export async function attribuerSuperEvent(
 
 import { captureParrainage } from './parrainage'
 
+/* ── Referentiel 8 : gain immediat applique par les jeux ──
+   Le choix « gain immediat / tirage » du pro etait enregistre et jamais lu.
+   appliquer_regle_gain (sql/appliquer_regle_gain.sql) decide cote base :
+   rien sur un super event (tirage uniquement), sinon la regle de l event, ou
+   le lot du segment gagnant pour la roue. Le gain part dans `tirages` : meme
+   billet, meme validation PIN, meme liste de gagnants que le tirage. */
+export interface GainImmediat { lot: string; conditions: string | null; retraitToken: string; ticketCode: string | null }
+export async function appliquerRegleGain(joueurId: string, evId: string, lotNom?: string | null): Promise<GainImmediat | null> {
+  const { data, error } = await supabase.rpc('appliquer_regle_gain', {
+    p_joueur_id: joueurId, p_event_id: evId, p_lot_nom: lotNom ?? null,
+  })
+  if (error) { console.error('[appliquerRegleGain]', error.message); return null }
+  const r = (data ?? {}) as { gagne?: boolean; lot?: string; conditions?: string | null; retrait_token?: string; ticket_code?: string | null }
+  if (!r.gagne || !r.lot || !r.retrait_token) return null
+  return { lot: r.lot, conditions: r.conditions ?? null, retraitToken: r.retrait_token, ticketCode: r.ticket_code ?? null }
+}
+
 /* ── Anti-scan à distance : géolocalisation du scan ── */
 function getScanPosition(timeoutMs = 8000): Promise<GeolocationPosition | null> {
   if (typeof navigator === 'undefined' || !navigator.geolocation) return Promise.resolve(null)
@@ -247,7 +264,7 @@ export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; s
   }
 }
 
-export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
 
@@ -410,9 +427,11 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     })
     /* Bloc 2 — Super Event : tickets (quiz si 4/4, bonus si fait) + gain immédiat, scan sur place */
     await attribuerSuperEvent(joueurId, evId, today, geo.onSite, { quiz: quizTk, bonus: bonusTk })
+    const gain = partErr ? null : await appliquerRegleGain(joueurId, evId, payload.lot_gagne)
     rememberJoueur(joueurId, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
     /* Parrainage : si l'inscription vient d'un lien ?ref=, on l'enregistre (validé + attribué au commerce) */
     await captureParrainage(extId)
+    return { success: true, duplicate: false, ticket: tc, gain }
   }
 
   return { success: true, duplicate: false, ticket: tc }
@@ -532,8 +551,8 @@ export async function claimJoueur(
   evId: string,
   prefix: TicketPrefix,
   bonus?: Record<string, unknown>,
-  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; started_at?: string; quizTicket?: boolean; bonusTicket?: boolean }
-): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string }> {
+  extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; started_at?: string; quizTicket?: boolean; bonusTicket?: boolean; lotGagne?: string }
+): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
   const emailLower = joueur.email.toLowerCase().trim()
   const today = new Date().toISOString().slice(0, 10)
   // Dedup 1/jour/station : bloque le rejeu de CETTE station le MEME jour (rejouable un autre jour).
@@ -568,8 +587,9 @@ export async function claimJoueur(
     scoreMoy: extra?.score,
   })
   await attribuerSuperEvent(joueur.id, evId, today, geo.onSite, { quiz: quizTk, bonus: bonusTk })
+  const gain = await appliquerRegleGain(joueur.id, evId, extra?.lotGagne)
   rememberJoueur(joueur.id, emailLower, joueur.prenom)
-  return { success: true, duplicate: false, ticket: tc }
+  return { success: true, duplicate: false, ticket: tc, gain }
 }
 
 /* ── File d'attente durable des écritures (option hors-ligne) ──

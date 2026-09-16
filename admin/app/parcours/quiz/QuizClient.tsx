@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
@@ -27,6 +28,8 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
 
   const [questions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
   const [screen, setScreen] = useState<Screen>('landing')
+  /* Referentiel 8 : gain immediat attribue par la regle de l event. */
+  const [gain, setGain] = useState<GainImmediat | null>(null)
   useParcoursTracking('quiz', evId, screen)
   const [qIdx, setQIdx] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
@@ -76,6 +79,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
         email: local.email || f.email, tel: local.tel || f.tel,
         cp: local.cp || f.cp, age: local.age || f.age, genre: local.genre || f.genre }))
       const res = await claimJoueur(local, evId, 'PQ', bonusAnswers)
+      setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
       if (res.duplicate) { setScreen('already'); return }
@@ -94,6 +98,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     setSubmitting(true)
     const tc = generateTicket('PQ')
     const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: true, optin_version: 'nds-2026-v3' })
+    setGain(res.gain ?? null)
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}; setScreen('already'); return }
     if (!res.success) { if (res.error) console.error('[quiz] Supabase échoué:', res.error); setErrors(e => ({ ...e, email: 'Enregistrement impossible, réessaie.' })); return }
@@ -247,7 +252,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
           </div>
           {partenaires.length > 0 && <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>🤝 Nos partenaires</button>}
-          <ParcoursOutro superEventId={ev?.super_event_id} />
+          <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
     </div>

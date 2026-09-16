@@ -1,0 +1,12 @@
+/* ---- ConfigJeu : les classes sa-* qu il utilise, pour l espace pro ----
+   :where() garde une specificite minimale : dans le dashboard, les regles de
+   globals.css (et celles, plus precises, de .sa-parc) continuent de s appliquer.
+   Chaque variable porte la valeur du dashboard en repli. */
+:where(.cfgjeu) .sa-input{width:100%;padding:9px 12px;border:1.5px solid var(--sa-border,#E2E8F0);border-radius:8px;font-size:14px;font-weight:500;background:var(--sa-card,#fff);color:var(--sa-text,#0F172A);outline:none;font-family:inherit;box-sizing:border-box}
+:where(.cfgjeu) .sa-lbl{display:block;font-size:11.5px;font-weight:800;margin-bottom:5px;color:var(--sa-text,#0F172A)}
+:where(.cfgjeu) .sa-aide{display:block;font-size:11.5px;color:var(--sa-muted,#64748B);margin-top:5px;line-height:1.5}
+:where(.cfgjeu) .sa-muted{color:var(--sa-muted,#64748B)}
+:where(.cfgjeu) .sa-list-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--sa-border,#E2E8F0)}
+:where(.cfgjeu) .sa-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;border:1.5px solid var(--sa-border,#E2E8F0);background:var(--sa-card,#fff);color:var(--sa-text,#0F172A);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:inherit}
+:where(.cfgjeu) .sa-btn.sm{padding:5px 10px;font-size:12px}
+:where(.cfgjeu) .sa-btn.primary{background:var(--sa-accent,#7C2D92);color:#fff;border-color:var(--sa-accent,#7C2D92)}
