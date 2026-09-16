@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import { CHARTE_PRO, POLICE_PRO, VARIABLES_CSS } from '@/lib/charte'
 
 /**
@@ -68,6 +69,29 @@ export default function ProShell({ proName, proId, active, children }: { proName
   const actif = RANGEMENT[active] ?? active
   const [open, setOpen] = useState(false)
   const page = NAV.find(n => n.key === actif)
+
+  /* Sans ?pro= dans l adresse : on retrouve le pro connecte et on recharge
+     la meme page avec son identifiant. Personne de connecte : ecran de connexion. */
+  const [sansPro, setSansPro] = useState<'cherche' | 'aucun' | null>(proId ? null : 'cherche')
+  useEffect(() => {
+    if (proId) return
+    let fini = false
+    ;(async () => {
+      const { data } = await supabase.auth.getSession()
+      const uid = data.session?.user?.id
+      if (uid) {
+        const { data: pro } = await supabase.from('pros').select('id').eq('auth_id', uid).maybeSingle()
+        if (pro?.id && !fini) {
+          const u = new URL(window.location.href)
+          u.searchParams.set('pro', pro.id)
+          window.location.replace(u.toString())
+          return
+        }
+      }
+      if (!fini) setSansPro('aucun')
+    })()
+    return () => { fini = true }
+  }, [proId])
 
   const sidebar = (
     <aside className="pro-sidebar" style={{ width: 256, flexShrink: 0, background: `linear-gradient(180deg,${C.sidebar},${C.sidebar2})`, color: 'rgba(255,255,255,.78)', padding: '22px 14px', height: '100dvh', overflowY: 'auto', position: 'relative' }}>
@@ -144,7 +168,18 @@ export default function ProShell({ proName, proId, active, children }: { proName
           <button className="pro-hamburger" onClick={() => setOpen(true)} aria-label="Menu" style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: C.accent, padding: 0 }}><Icon k="more" /></button>
           <span style={{ fontWeight: 700 }}>Flowin Pro</span><span>›</span><span style={{ fontWeight: 800, color: C.texte }}>{page?.label ?? 'Mes opérations'}</span>
         </div>
-        <div className="pro-main-pad" style={{ padding: 26, maxWidth: 1180 }}>{children}</div>
+        <div className="pro-main-pad" style={{ padding: 26, maxWidth: 1180 }}>
+          {sansPro === 'cherche' && <div style={{ fontSize: 14, color: C.attenue }}>Chargement de votre espace…</div>}
+          {sansPro === 'aucun' && (
+            <div style={{ background: C.carte, border: `1px solid ${C.bordure}`, borderRadius: 18, padding: 30, maxWidth: 460, textAlign: 'center' }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.texte }}>Connectez-vous à votre espace pro</div>
+              <div style={{ fontSize: 13.5, color: C.attenue, margin: '6px 0 18px' }}>Vos opérations, vos lots et vos données s&apos;affichent une fois connecté.</div>
+              <Link href="/pro/connexion" style={{ display: 'inline-block', background: C.degrade, color: '#fff', borderRadius: 999, padding: '12px 26px', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Se connecter</Link>
+              <div style={{ fontSize: 13, color: C.attenue, marginTop: 14 }}>Pas encore de compte ? <Link href="/pro/inscription" style={{ color: C.accent, fontWeight: 700 }}>Créer mon espace</Link></div>
+            </div>
+          )}
+          {sansPro === null && children}
+        </div>
       </main>
       {barreBasse}
     </div>
