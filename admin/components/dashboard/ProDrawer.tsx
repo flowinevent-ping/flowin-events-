@@ -8,6 +8,7 @@ import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { grouperOperations } from '@/lib/operations'
 import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/BlocsOperations'
 import type { FlowinPro } from '@/lib/types'
+import ActionsFichePro from './ActionsFichePro'
 
 export default function ProDrawer() {
   const { drawer, closeDrawer, setDrawerTab, pros, setPros, events, openDrawer } = useDashboard()
@@ -89,6 +90,8 @@ export default function ProDrawer() {
           <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--sa-accent)' }}>Ouvrir →</span>
         </div>
       )}
+
+      <ActionsFichePro pro={p} />
 
       <DrawerTabs tabs={tabs} active={drawer.tab} onSelect={setDrawerTab} />
 

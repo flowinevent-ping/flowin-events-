@@ -187,6 +187,8 @@ export interface ContratOperation {
   bonMontantTtc: number | null
   factureNumero: string | null
   dateEmission: string | null
+  /** Referentiel 41 : tous les bons de l operation, chacun avec sa facture. */
+  bons: { id: string; statut: string | null; montantTtc: number | null; date: string | null; factureNumero: string | null }[]
 }
 
 export interface DonneesOperation extends Operation {
@@ -269,9 +271,13 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
           return supabase.from('lots_stock').select('id,lot_id,utilise').in('lot_id', lotIds)
         })
       : Promise.resolve({ data: [] }),
-    partenaireId
-      ? supabase.from('bons_commande').select('id,super_event_id,montant_ttc,statut,created_at').eq('partenaire_id', partenaireId).order('created_at', { ascending: false })
-      : Promise.resolve({ data: [] }),
+    /* Bons : ceux du commerce, et ceux rattaches aux events du pro (event_id). */
+    supabase.from('bons_commande').select('id,super_event_id,event_id,partenaire_id,montant_ttc,statut,created_at')
+      .or([
+        partenaireId ? `partenaire_id.eq.${partenaireId}` : '',
+        evIds.length ? `event_id.in.(${evIds.map(i => `"${i}"`).join(',')})` : '',
+      ].filter(Boolean).join(',') || 'id.eq.__aucun__')
+      .order('created_at', { ascending: false }),
   ])
 
   const partenaire = (partRes.data ?? null) as PartenaireMin | null
@@ -281,7 +287,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     const l = stock.filter(x => x.lot_id && lotIds.has(x.lot_id))
     return l.length ? { total: l.length, dispo: l.filter(x => !x.utilise).length } : null
   }
-  const bons = (bonsRes.data ?? []) as { id: string; super_event_id: string | null; montant_ttc: number | null; statut: string | null }[]
+  const bons = (bonsRes.data ?? []) as { id: string; super_event_id: string | null; event_id: string | null; montant_ttc: number | null; statut: string | null; created_at: string | null }[]
 
   /* Tirages : dedoublonnes par id (un tirage d event pris dans un super event
      remonte dans les deux requetes). */
@@ -339,22 +345,33 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     const gagnants = tirages.filter(t =>
       (t.eventId && ids.has(t.eventId)) || (op.type === 'super' && t.superEventId === op.id))
 
+    /* Contrat (referentiel 41) : les bons de CETTE operation — rattaches a une
+       de ses stations, ou au super event lui-meme pour le commerce. */
+    const bonsOp = bons.filter(bn => (bn.event_id && ids.has(bn.event_id))
+      || (op.type === 'super' && !bn.event_id && bn.super_event_id === op.id))
+      .map(bn => {
+        const f = facturesParBon.get(bn.id)
+        return { id: bn.id, statut: bn.statut, montantTtc: num(bn.montant_ttc), date: bn.created_at ? String(bn.created_at).slice(0, 10) : null, factureNumero: f?.numero ?? null }
+      })
+    const bon = bonsOp[0] ?? null
+    const fac = bon ? facturesParBon.get(bon.id) : undefined
     let contrat: ContratOperation | null = null
     if (estSEduPartenaire && partenaire) {
-      const bon = bons.find(b => b.super_event_id === op.id) ?? bons.find(b => !b.super_event_id) ?? null
-      const fac = bon ? facturesParBon.get(bon.id) : undefined
       contrat = {
         offre: partenaire.offre, montant: num(partenaire.montant_sponsoring),
         paiementMode: partenaire.paiement_mode, statutPaiement: partenaire.statut_paiement,
         factureEmise: partenaire.facture_emise,
-        bonId: bon?.id ?? null, bonStatut: bon?.statut ?? null, bonMontantTtc: num(bon?.montant_ttc),
+        bonId: bon?.id ?? null, bonStatut: bon?.statut ?? null, bonMontantTtc: bon?.montantTtc ?? null,
         factureNumero: fac?.numero ?? null, dateEmission: fac?.date_emission ?? null,
+        bons: bonsOp,
       }
-    } else if (op.type === 'event') {
-      const ps = (op.stations[0] as unknown as { paiement_statut?: string | null }).paiement_statut ?? null
-      if (ps) contrat = {
+    } else {
+      const ps = op.type === 'event' ? ((op.stations[0] as unknown as { paiement_statut?: string | null }).paiement_statut ?? null) : null
+      contrat = {
         offre: null, montant: null, paiementMode: null, statutPaiement: ps, factureEmise: null,
-        bonId: null, bonStatut: null, bonMontantTtc: null, factureNumero: null, dateEmission: null,
+        bonId: bon?.id ?? null, bonStatut: bon?.statut ?? null, bonMontantTtc: bon?.montantTtc ?? null,
+        factureNumero: fac?.numero ?? null, dateEmission: fac?.date_emission ?? null,
+        bons: bonsOp,
       }
     }
 

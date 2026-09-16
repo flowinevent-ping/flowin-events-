@@ -274,9 +274,13 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
   const c = op.contrat
   if (!c) return <Vide>Aucun contrat enregistré pour cette opération.</Vide>
   const paye = c.statutPaiement === 'valide' || c.statutPaiement === 'paye'
+  const commerceSE = op.type === 'super' && c.offre !== null
   async function majPaiement(v: string) {
-    if (!partenaireId) return
-    const { error } = await supabase.from('partenaires').update({ statut_paiement: v }).eq('id', partenaireId)
+    /* Super event : le paiement est celui du commerce (partenaires) ; event
+       autonome : celui de l event (events.paiement_statut). */
+    const { error } = commerceSE
+      ? (partenaireId ? await supabase.from('partenaires').update({ statut_paiement: v }).eq('id', partenaireId) : { error: { message: 'pas de fiche commerce' } })
+      : await supabase.from('events').update({ paiement_statut: v }).eq('id', op.stations[0]?.id ?? '')
     if (error) { alert('Échec de la mise à jour.'); return }
     onChange()
   }
@@ -285,27 +289,50 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
       <span style={{ width: 150, flexShrink: 0, color: MUT }}>{l}</span><span style={{ fontWeight: 600 }}>{v}</span>
     </div>
   )
+  /* Referentiel 41 : un nouveau bon se cree DEPUIS l operation, qui lui est
+     rattache (bon-commande-nds.html lit ?se= / ?ev= / ?pt=). */
+  const p = new URLSearchParams()
+  if (op.type === 'super') p.set('se', op.id)
+  else p.set('ev', op.stations[0]?.id ?? op.id)
+  if (partenaireId) p.set('pt', partenaireId)
+  const lienNouveauBon = `/bon-commande-nds.html?${p.toString()}`
   return (
     <>
-      {op.type === 'super' && champ('Formule', c.offre || '—')}
-      {op.type === 'super' && champ('Montant', c.montant != null ? `${c.montant} €` : '—')}
-      {op.type === 'super' && champ('Mode de paiement', c.paiementMode ? (MODES[c.paiementMode] ?? c.paiementMode) : '—')}
+      {commerceSE && champ('Formule', c.offre || '—')}
+      {commerceSE && champ('Montant', c.montant != null ? `${c.montant} €` : '—')}
+      {commerceSE && champ('Mode de paiement', c.paiementMode ? (MODES[c.paiementMode] ?? c.paiementMode) : '—')}
       {champ('Paiement', <Pastille ton={paye ? 'ok' : 'warn'}>{paye ? 'Reçu' : (c.statutPaiement === 'en_attente' || !c.statutPaiement ? 'En attente' : c.statutPaiement)}</Pastille>)}
-      {op.type === 'super' && champ('Bon de commande', c.bonId ? <code>{c.bonId}{c.bonStatut ? ` · ${c.bonStatut}` : ''}</code> : 'Aucun bon lié')}
-      {op.type === 'super' && champ('Facture', c.factureNumero
-        ? `${c.factureNumero}${c.dateEmission ? ` · ${new Date(c.dateEmission).toLocaleDateString('fr-FR')}` : ''}`
-        : (c.factureEmise ? 'Émise (suivi manuel)' : 'Non émise'))}
-      {mode === 'sa' && op.type === 'super' && (
+      {commerceSE && !c.factureNumero && champ('Facture', c.factureEmise ? 'Émise (suivi manuel)' : 'Non émise')}
+
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 4px' }}>Bons de commande &amp; factures</div>
+      {c.bons.length === 0 && <Vide>Aucun bon de commande rattaché à cette opération.</Vide>}
+      {c.bons.map(bn => (
+        <div key={bn.id} style={ligne}>
+          <div style={{ flex: 1, minWidth: 160 }}>
+            <code style={{ fontWeight: 700, fontSize: 12.5 }}>{bn.id}</code>
+            <div style={{ fontSize: 11, color: MUT }}>
+              {bn.statut ?? '—'}{bn.montantTtc != null ? ` · ${bn.montantTtc} € TTC` : ''}{bn.date ? ` · ${new Date(`${bn.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}
+            </div>
+          </div>
+          <Pastille ton={bn.factureNumero ? 'ok' : 'neutre'}>{bn.factureNumero ? `Facture ${bn.factureNumero}` : 'Non facturé'}</Pastille>
+          {mode === 'sa' && (
+            <>
+              <a style={btn} target="_blank" rel="noreferrer" href={`/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`}>Bon →</a>
+              <a style={btn} target="_blank" rel="noreferrer"
+                href={bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}` : `/facture-nds.html?devis=${encodeURIComponent(bn.id)}`}>
+                🧾 {bn.factureNumero ? 'Facture' : 'Facturer'}
+              </a>
+            </>
+          )}
+        </div>
+      ))}
+
+      {mode === 'sa' && (
         <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
           {paye
             ? <button style={btn} onClick={() => majPaiement('en_attente')}>↩ Paiement en attente</button>
             : <button style={btnPrimaire} onClick={() => majPaiement('valide')}>✓ Valider le paiement</button>}
-          {c.bonId && (
-            <a style={btn} target="_blank" rel="noreferrer"
-              href={c.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(c.factureNumero)}` : `/facture-nds.html?devis=${encodeURIComponent(c.bonId)}`}>
-              🧾 {c.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'} →
-            </a>
-          )}
+          <a style={btn} target="_blank" rel="noreferrer" href={lienNouveauBon}>＋ Nouveau bon de commande</a>
         </div>
       )}
     </>

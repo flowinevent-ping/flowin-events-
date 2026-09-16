@@ -440,10 +440,10 @@
   }
 
   function fromDevis(b){
-    STATE.devisId=b.id; STATE.superEvent=b.super_event_id||PORTEE_SE;
+    STATE.devisId=b.id; STATE.superEvent=(b.event_id ? (b.super_event_id||null) : (b.super_event_id||PORTEE_SE));
     STATE.cibleId='p-bc-'+b.id;
     fillClient({raison_sociale:b.raison_sociale,adresse:b.adresse,cp:b.cp,ville:b.ville,siret:b.siret,email:b.email});
-    $('l_label').value=b.offre_label||b.offre||'Partenariat NDS 2026';
+    $('l_label').value=b.offre_label||b.offre||(b.event_id ? 'Animation Flowin' : 'Partenariat NDS 2026');
     $('l_pu').value=(b.montant_ht!=null?b.montant_ht:'');
     compute(); renderNum();
   }
@@ -453,7 +453,7 @@
     var cl=f.client||{};
     STATE.devisId=cl.devis_ref||cl.bon_id||null;
     STATE.edition=cl.edition||1;
-    STATE.superEvent=f.super_event_id||PORTEE_SE;
+    STATE.superEvent=(f.super_event_id!==undefined ? f.super_event_id : PORTEE_SE);
     STATE.cibleId=f.cible_id||null;
     STATE.dateEmission=f.date_emission||today();
     fillClient(cl);

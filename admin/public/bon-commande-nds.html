@@ -604,6 +604,18 @@ function exportPdf(){
   function $(id){return document.getElementById(id);}
   function eur(n){ return Number(n).toLocaleString('fr-FR')+' \u20ac'; }
   function qs(name){ var m=new RegExp('[?&]'+name+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
+  /* Referentiel 41 (16/09) : le bon se rattache a SON operation. ?se= (super
+     event), ?ev= (event ou station), ?pt= (fiche commerce), passes par la
+     fiche pro du dashboard. Sans parametre : Nuits du Sud 2026, comme avant. */
+  var BON_EV = qs('ev');
+  var BON_SE = qs('se') || (BON_EV ? null : 'se-nds-2026');
+  var BON_PT = qs('pt');
+  function rattacher(rec){
+    rec.super_event_id = BON_SE;
+    if (BON_EV) rec.event_id = BON_EV;
+    if (BON_PT) rec.partenaire_id = BON_PT;
+    return rec;
+  }
 
   // --- Totaux (pilotes par le prix de l'offre selectionnee) ---
   function parseNum(v){ if(v==null) return NaN; return parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(/\s/g,'').replace(',','.')); }
@@ -710,7 +722,7 @@ function exportPdf(){
     }
     var catHt=parseFloat(sel.getAttribute('data-ht')); if(isNaN(catHt)) catHt=null;
     var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
-    return { id:id, super_event_id:'se-nds-2026', statut: withSig?'signe':'envoye',
+    return rattacher({ id:id, statut: withSig?'signe':'envoye',
       raison_sociale:raison, adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
       contact:contact, tel:tel, email:emailEnvoi.toLowerCase(), siret:$('f_siret').value.trim()||null,
       offre:sel.getAttribute('data-offre'), offre_label:sel.getAttribute('data-label'),
@@ -722,16 +734,16 @@ function exportPdf(){
       signataire: withSig?($('f_signataire').value.trim()||contact):null,
       date_signature: withSig?($('f_date').value.trim()||dstr):null,
       signature: withSig?cv.toDataURL('image/png'):null,
-      cgv_version:CGV_VERSION, cgv_acceptee_at: withSig?new Date().toISOString():null };
+      cgv_version:CGV_VERSION, cgv_acceptee_at: withSig?new Date().toISOString():null });
   }
   function collectDraft(){
     var id=(($('docNum')&&$('docNum').value)||'').trim() || defNum;
-    var rec={ id:id, super_event_id:'se-nds-2026',
+    var rec=rattacher({ id:id,
       raison_sociale:$('f_raison').value.trim()||null,
       adresse:$('f_adresse').value.trim()||null, cp:$('f_cp').value.trim()||null, ville:$('f_ville').value.trim()||null,
       contact:$('f_contact').value.trim()||null, tel:$('f_tel').value.trim()||null,
       email:((($('f_email_envoi')&&$('f_email_envoi').value.trim())||$('f_email').value.trim()||'').toLowerCase())||null,
-      siret:$('f_siret').value.trim()||null };
+      siret:$('f_siret').value.trim()||null });
     if(sel){
       var t=computeTotals();
       rec.offre=sel.getAttribute('data-offre'); rec.offre_label=sel.getAttribute('data-label');

@@ -8,6 +8,7 @@ import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide } from './SousOnglets'
 import Diffusion from './Diffusion'
+import ReglesDiffusion from './ReglesDiffusion'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 
@@ -540,6 +541,7 @@ export default function EventDrawer() {
 
         {drawer.tab === 'lots' && (
           <>
+            <ReglesDiffusion eventId={ev.id} superEventId={ev.super_event_id} />
             {pro?.partenaire_id ? (
               <>
                 <div

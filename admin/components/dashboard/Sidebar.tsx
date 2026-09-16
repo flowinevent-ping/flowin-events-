@@ -61,7 +61,7 @@ const ICON_PATHS: Record<string, string> = {
 }
 const ICON_BY_ID: Record<string, string> = {
   accueil: 'home', pros: 'building', joueurs: 'users', gagnants: 'trophy', partenaires: 'handshake',
-  events: 'calendar', 'super-events': 'star',
+  events: 'calendar', planning: 'calendar', 'super-events': 'star',
   'wizard-super-event': 'sparkles', parcours: 'phone', btob: 'target', 'btob-prospects': 'target', landing: 'globe',
   'landing-page': 'globe', pilotage: 'target', statistiques: 'chart', rapports: 'chart', 'rapport-points': 'pin',
   'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map',
@@ -121,6 +121,7 @@ export default function Sidebar() {
       ton: 'sys',
       items: [
         { id: 'accueil', icon: '🏠', label: 'Accueil', href: '/dashboard' },
+        { id: 'planning', icon: '📅', label: 'Planning', href: '/dashboard/planning' },
       ],
     },
     {
