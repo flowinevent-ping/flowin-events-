@@ -14,10 +14,11 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
   libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro,
-  type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation,
+  type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/nds'
 import Diffusion from '@/components/dashboard/Diffusion'
+import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 
 export type Mode = 'sa' | 'pro'
@@ -371,8 +372,8 @@ export function ContenuTracking({ op, proId, onStation }: {
         <Mini v={t.digital} l="dont digital" />
         <Mini v={t.parties} l="parties" />
         <Mini v={t.joueurs} l="joueurs" />
-        <Mini v={t.rejoue} l="ont rejoué" />
       </div>
+      {s.stats && <StatsUniformes st={s.stats} />}
       <div style={{ fontSize: 11, color: MUT, marginBottom: 4 }}>
         Un flash est une ouverture du QR, pas une personne. {op.type === 'super' ? 'Période officielle de l’opération.' : 'Tout l’historique de l’event.'}
       </div>
@@ -397,6 +398,28 @@ export function ContenuTracking({ op, proId, onStation }: {
             </div>
           ))}
         </>
+      )}
+    </>
+  )
+}
+
+/* ── Stats uniformes ─────────────────────────────────────────────────────────
+   Memes indicateurs pour toute operation. Distributions en camemberts. */
+function StatsUniformes({ st }: { st: StatsOperation }) {
+  const jourFr = (j: string) => new Date(`${j}T12:00:00`).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+        <Mini v={st.rejoue_meme_jour} l="rejoué le même jour" />
+        <Mini v={st.rejoue_autre_jour} l="revenus un autre jour" />
+        <Mini v={st.pic_heure ? `${st.pic_heure.heure}h` : '—'} l={st.pic_heure ? `pic horaire · ${st.pic_heure.parties} parties` : 'pic horaire'} />
+        <Mini v={st.pic_jour ? jourFr(st.pic_jour.jour) : '—'} l={st.pic_jour ? `pic journalier · ${st.pic_jour.parties} parties` : 'pic journalier'} />
+      </div>
+      {st.joueurs > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 10, marginBottom: 8 }}>
+          <Camembert titre="Sexe" parts={st.sexe} unite="joueurs" />
+          <Camembert titre="Tranches d’âge" parts={st.age} unite="joueurs" />
+        </div>
       )}
     </>
   )

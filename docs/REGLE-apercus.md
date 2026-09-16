@@ -10,8 +10,8 @@
 Règles de `ParcoursMobil` :
 
 - le sélecteur d'events est **groupé par opération** (super event / events autonomes) — rien à plat ;
-- la vue « Parcours super event » (écran carte) n'est proposée **que** pour une station de super event :
-  un event seul n'a pas d'écran carte (`lib/gabarit.ts`, `BLOCS_MULTISTATION`) ;
+- la vue « Parcours super event » est **toujours** proposée (le parcours NDS 2026 est décliné en marque blanche) :
+  station d'un super event → son propre écran carte ; event autonome → le gabarit marque blanche (station du master) ;
 - le super event est celui **de l'event choisi**, jamais deviné par la page appelante (famille D).
 
 `Diffusion.tsx` (QR) garde son bouton « aperçu téléphone » : même technique (vrai parcours), rattaché au QR qu'on s'apprête à imprimer.

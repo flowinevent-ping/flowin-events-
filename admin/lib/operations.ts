@@ -378,9 +378,25 @@ export interface StationSuivi {
   event_id: string; station: string; flashs: number; physique: number; digital: number
   parties: number; joueurs: number; rejoue: number; heure_pic: number | null
 }
+/** Stats uniformes (RPC operation_stats). Romain, 16/09 : rejoue = les deux
+ *  (meme jour ET d un jour a l autre) ; pic = les deux (heure ET jour). */
+export interface StatsOperation {
+  parties: number
+  joueurs: number
+  rejoue_meme_jour: number
+  rejoue_autre_jour: number
+  pic_heure: { heure: number; parties: number } | null
+  pic_jour: { jour: string; parties: number } | null
+  par_heure: { heure: number; parties: number }[]
+  par_jour: { jour: string; parties: number }[]
+  sexe: { valeur: string; n: number }[]
+  age: { valeur: string; n: number }[]
+}
+
 export interface SuiviOperation {
   stations: StationSuivi[]
   totaux: { flashs: number; physique: number; digital: number; parties: number; joueurs: number; rejoue: number }
+  stats: StatsOperation | null
 }
 
 /**
@@ -389,11 +405,17 @@ export interface SuiviOperation {
  * Event autonome : evenement_tracking([id]) -- tout son historique.
  */
 export async function fetchSuiviOperation(op: Operation, proId: string): Promise<SuiviOperation | null> {
-  const { data, error } = op.type === 'super'
-    ? await supabase.rpc('station_tracking', { p_se: op.id, p_pro: proId, p_partenaire: null, p_jour: null, p_tout: false })
-    : await supabase.rpc('evenement_tracking', { p_events: op.stations.map(s => s.id) })
+  const ids = op.stations.map(s => s.id)
+  const [{ data, error }, st] = await Promise.all([
+    op.type === 'super'
+      ? supabase.rpc('station_tracking', { p_se: op.id, p_pro: proId, p_partenaire: null, p_jour: null, p_tout: false })
+      : supabase.rpc('evenement_tracking', { p_events: ids }),
+    supabase.rpc('operation_stats', { p_events: ids, p_se: op.type === 'super' ? op.id : null }),
+  ])
   if (error) { console.error('[fetchSuiviOperation]', error.message); return null }
-  return (data as SuiviOperation) ?? null
+  if (st.error) console.error('[fetchSuiviOperation] stats', st.error.message)
+  if (!data) return null
+  return { ...(data as Omit<SuiviOperation, 'stats'>), stats: (st.data as StatsOperation) ?? null }
 }
 
 /* ── Libelles d etat ───────────────────────────────────────────────────────── */

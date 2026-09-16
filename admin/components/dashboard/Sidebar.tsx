@@ -54,6 +54,7 @@ const ICON_PATHS: Record<string, string> = {
   gamepad: '<rect x="2" y="6" width="20" height="12" rx="4"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="14" r="1"/>',
   sparkles: '<path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/><path d="M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
   wrench: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z"/>',
   layout: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
   dice: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="16" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="8" cy="16" r="1"/>',
@@ -72,7 +73,7 @@ const ICON_BY_ID: Record<string, string> = {
   'plaquette-nds': 'receipt', 'nds-partenaire-offres': 'receipt', 'pitch-nds': 'phone',
   'flowin-partenaire-presentation': 'layout', 'bons-commande-liste': 'clipboard',
   'facture-nds': 'receipt', 'kit-digital': 'gift',
-  roadmap: 'map', parametres: 'settings', maintenance: 'wrench', pro: 'layout', 'pro-comptes': 'link', 'pro-gagnants': 'dice', 'pro-crm': 'users', 'pro-tracking': 'target', 'pro-super': 'star', 'pro-events': 'calendar', 'pro-lots': 'gift',
+  roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check', pro: 'layout', 'pro-comptes': 'link', 'pro-gagnants': 'dice', 'pro-crm': 'users', 'pro-tracking': 'target', 'pro-super': 'star', 'pro-events': 'calendar', 'pro-lots': 'gift',
 }
 function SbIcon({ id, fallback }: { id: string; fallback: string }) {
   const p = ICON_PATHS[ICON_BY_ID[id]]
@@ -212,6 +213,7 @@ export default function Sidebar() {
       items: [
         { id: 'roadmap', icon: '🗺️', label: 'Feuille de route', href: '/dashboard/roadmap' },
         { id: 'parametres', icon: '⚙️', label: 'Paramètres', href: '/dashboard/parametres' },
+        { id: 'controle', icon: '🩺', label: 'Contrôle', href: '/dashboard/controle' },
         { id: 'maintenance', icon: '🛠️', label: 'Maintenance', href: '/dashboard/maintenance' },
       ],
     },

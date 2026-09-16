@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { fetchOperationsPro } from '@/lib/operations'
 import ProShell from '@/components/pro/ProShell'
 import { BlocOperation, AucuneOperation } from '@/components/operations/BlocsOperations'
-import { CARD, MUTED } from '@/lib/proui'
+import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 export const metadata: Metadata = { title: 'Dashboard Pro — Flowin' }
 
@@ -40,8 +40,8 @@ export default async function ProAccueilPage({ searchParams }: Props) {
   return (
     <ProShell proName={proName} proId={proId} active="accueil">
       <div style={{ marginBottom: 18 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-.6px' }}>Bonjour, {proName}</h1>
-        <div style={{ fontSize: 14, color: '#64748B', marginTop: 2 }}>Vos opérations, de la plus récente à la plus ancienne.</div>
+        <h1 style={H1}>Bonjour, {proName}</h1>
+        <div style={SUB}>Vos opérations, de la plus récente à la plus ancienne.</div>
       </div>
 
       {ops.operations.length === 0 && <div style={CARD}><AucuneOperation /></div>}

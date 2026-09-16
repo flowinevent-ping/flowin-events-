@@ -26,7 +26,7 @@ import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueu
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
 import { fetchOperationsPro } from '@/lib/operations'
 import { BlocOperation, AucuneOperation, Vide, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
-import { CARD, MUTED } from '@/lib/proui'
+import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 const input: React.CSSProperties = {
   border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '10px 12px',
@@ -41,8 +41,8 @@ export default function GagnantsClient({ initial }: { initial: OperationsPro }) 
 
   return (
     <div>
-      <div style={{ fontWeight: 900, fontSize: 22, marginBottom: 4 }}>Gagnants &amp; tirage</div>
-      <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 18 }}>
+      <h1 style={H1}>Gagnants &amp; tirage</h1>
+      <div style={{ ...SUB, marginBottom: 16 }}>
         Un bloc par opération : ses gagnants, leurs billets, la validation en caisse — et le tirage sur vos events.
       </div>
       {data.operations.length === 0 && <div style={CARD}><AucuneOperation /></div>}

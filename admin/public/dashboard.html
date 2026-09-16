@@ -2928,11 +2928,11 @@ function renderModal(){
   else if(k==='qr-landing'){
       var _qd=state.modal.data||{};
       var _qu=(_qd.url&&_qd.url.length>5?_qd.url:'https://flowin-events.vercel.app/landing')+'?source=qr';
-      var _qi='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='+encodeURIComponent(_qu)+'&bgcolor=1B3A5C&color=ffffff&margin=12';
+      /* QR genere localement (genQRSvg, lib embarquee) -- plus d appel a api.qrserver.com (famille F). */
       html='<div class="modal-header"><div class="modal-title">📱 QR — '+esc(_qd.nom||'Landing')+'</div><button class="modal-close" onclick="closeModal()">×</button></div>'
           +'<div class="modal-body" style="text-align:center;padding:24px">'
           +'<div style="background:linear-gradient(135deg,#1B3A5C,#0F2A45);border-radius:16px;padding:24px;display:inline-block">'
-          +'<img src="'+_qi+'" style="width:200px;height:200px;border-radius:8px;display:block;margin:0 auto 14px">'
+          +'<div style="width:200px;height:200px;border-radius:8px;overflow:hidden;background:#fff;margin:0 auto 14px">'+genQRSvg(_qu,{size:200,color:'#1B3A5C'})+'</div>'
           +'<div style="font-size:10px;color:rgba(255,255,255,.5);word-break:break-all;font-family:monospace;background:rgba(0,0,0,.2);border-radius:6px;padding:5px 10px">'+esc(_qu)+'</div>'
           +'</div>'
           +'<div style="margin-top:16px;display:flex;gap:10px;justify-content:center">'
@@ -12445,10 +12445,10 @@ function modalLanding(data){
     html += '<div style="display:flex;flex-direction:column;gap:12px">';
     /* QR code EN HAUT — visible sans scroll */
     var _ldUrl2 = (ld.deployUrl && ld.deployUrl.length > 5) ? ld.deployUrl : 'https://flowin-events.vercel.app/landing';
-    var _qrSrc2 = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(_ldUrl2+'?source=qr')+'&bgcolor=1B3A5C&color=ffffff&margin=10';
+    /* QR genere localement (genQRSvg) -- plus d appel a api.qrserver.com (famille F). */
     html += '<div style="background:linear-gradient(135deg,#1B3A5C,#0F2A45);border-radius:14px;padding:16px;text-align:center">'
          + '<div style="font-size:9px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px">📱 QR Code d\'accès direct</div>'
-         + '<img src="'+_qrSrc2+'" style="width:140px;height:140px;border-radius:8px;display:block;margin:0 auto 10px;background:#fff;padding:3px">'
+         + '<div style="width:140px;height:140px;border-radius:8px;overflow:hidden;margin:0 auto 10px;background:#fff;padding:3px">'+genQRSvg(_ldUrl2+'?source=qr',{size:140,color:'#1B3A5C'})+'</div>'
          + '<div style="font-size:9px;color:rgba(255,255,255,.4);margin-bottom:10px;word-break:break-all;font-family:monospace;background:rgba(0,0,0,.2);border-radius:5px;padding:4px 8px">'+esc(_ldUrl2)+'</div>'
          + '<div style="display:flex;gap:6px;justify-content:center">'
          + '<button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:10px" onclick="(function(){var u=\''+esc(_ldUrl2)+'?source=qr\';navigator.clipboard?navigator.clipboard.writeText(u).then(function(){toast(\'Lien copié\',\'success\');}):alert(u);})()" >📋 Copier</button>'

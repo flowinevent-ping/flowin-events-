@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { CHARTE, POLICE_ADMIN, VARIABLES_CSS } from '@/lib/charte'
 
 /**
  * Coquille brandee de l'espace Pro (identite Flowin Pro de la maquette validee).
@@ -57,7 +58,7 @@ const ICONS: Record<string, string> = {
   doc: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
   more: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
 }
-const ACCENT = '#A855F7', ACCENT_D = '#7C2D92', SB = '#1E293B', SB2 = '#172033'
+const ACCENT = CHARTE.accentClair, ACCENT_D = CHARTE.accent, SB = CHARTE.sidebar, SB2 = CHARTE.sidebar2
 
 function Icon({ k }: { k: string }) {
   return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: ICONS[k] ?? '' }} />
@@ -80,11 +81,12 @@ export default function ProShell({ proName, proId, active, children }: { proName
       </div>
       {groups.map(g => (
         <div key={g} style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', color: 'rgba(255,255,255,.42)', padding: '0 8px 6px' }}>{g}</div>
+          {/* Meme en-tete de groupe que la sidebar SA (.sa-sb-group). */}
+          <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.48)', padding: '12px 8px 7px' }}>{g}</div>
           {NAV.filter(n => n.group === g).map(n => {
             const on = n.key === active
             const inner = (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 10, marginBottom: 2, background: on ? 'rgba(168,85,247,.20)' : 'transparent', color: on ? '#fff' : (n.route ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.34)'), fontSize: 13.5, fontWeight: on ? 700 : 500 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', marginBottom: 2, borderLeft: `3px solid ${on ? ACCENT : 'transparent'}`, background: on ? 'linear-gradient(90deg,rgba(168,85,247,.18),rgba(168,85,247,.03))' : 'transparent', color: on ? '#fff' : (n.route ? 'rgba(255,255,255,.78)' : 'rgba(255,255,255,.34)'), fontSize: 13, fontWeight: on ? 700 : 600 }}>
                 <span style={{ width: 30, height: 30, borderRadius: 9, background: on ? ACCENT_D : 'rgba(255,255,255,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: on ? '#fff' : 'rgba(255,255,255,.7)' }}><Icon k={n.icon} /></span>
                 <span style={{ flex: 1 }}>{n.label}</span>
                 {!n.route && <span style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,.35)' }}>bientôt</span>}
@@ -123,9 +125,9 @@ export default function ProShell({ proName, proId, active, children }: { proName
   )
 
   return (
-    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: '#F1F5F9', fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif', color: '#0F172A' }}>
+    <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: CHARTE.fond, fontFamily: POLICE_ADMIN, fontSize: 14, color: CHARTE.texte }}>
       <style>{`
-        :root { --sa-bg:#F1F5F9; --sa-card:#FFFFFF; --sa-border:#E2E8F0; --sa-text:#0F172A; --sa-muted:#64748B; --sa-subtle:#F8FAFC; }
+        :root { ${VARIABLES_CSS} }
         .pro-sidebar { position: sticky; top: 0; }
         .pro-hamburger, .pro-drawer-backdrop, .pro-bottom-nav { display: none; }
         @media (max-width: 860px) {
@@ -145,10 +147,10 @@ export default function ProShell({ proName, proId, active, children }: { proName
       {sidebar}
       <div className="pro-drawer-backdrop" onClick={() => setOpen(false)} />
       <main style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '14px 26px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748B' }}>
+        <div style={{ background: CHARTE.carte, borderBottom: `1px solid ${CHARTE.bordure}`, height: 52, padding: '0 24px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: CHARTE.attenue }}>
           <span style={{ fontWeight: 600 }}>Flowin Pro</span><span>›</span><span style={{ fontWeight: 800, color: '#0F172A' }}>{NAV.find(n => n.key === active)?.label ?? 'Accueil'}</span>
         </div>
-        <div className="pro-main-pad" style={{ padding: '26px', maxWidth: 1120 }}>{children}</div>
+        <div className="pro-main-pad" style={{ padding: 24, maxWidth: 1120 }}>{children}</div>
       </main>
       {barreBasse}
     </div>

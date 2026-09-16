@@ -44,10 +44,12 @@ function Phone({ src, empty }: { src?: string; empty?: string }) {
  * APERCU DU PARCOURS — regle unique (famille I) :
  *  - l apercu montre TOUJOURS le vrai parcours (iframe, preview=1), jamais une maquette ;
  *  - on choisit d abord l event, groupe par operation (rien a plat) ;
- *  - la vue « super event » (ecran carte) n est proposee QUE pour une station
- *    de super event : un event seul n a pas d ecran carte (lib/gabarit.ts,
- *    BLOCS_MULTISTATION). Elle ne depend plus d un `seId` devine par la page
- *    appelante (famille D) -- ce parametre n etait d ailleurs jamais lu.
+ *  - la vue « super event » est TOUJOURS proposee. Le parcours super event
+ *    de NDS 2026 a ete decline en marque blanche pour tous (Romain, 16/09) :
+ *      . station d un super event -> son propre ecran carte ;
+ *      . event autonome -> le gabarit marque blanche (station du master), pour
+ *        montrer ce que donnerait l event dans un super event.
+ *    Le super event n est jamais devine par la page appelante (famille D).
  */
 export default function ParcoursMobil({ events = [], showTitle = true }: { events?: Ev[]; showTitle?: boolean }) {
   /* Noms des super events, pour titrer les groupes du selecteur. */
@@ -63,7 +65,14 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
   const [evId, setEvId] = useState(events[0]?.id ?? '')
   const ev = events.find(e => e.id === evId) ?? events[0]
   const multistation = !!ev?.super_event_id
-  const tab = multistation ? tabDemande : 'event'
+  const tab = tabDemande
+  /* Une station du gabarit marque blanche, pour la vue super event d un event autonome. */
+  const [stationGabarit, setStationGabarit] = useState<string | null>(null)
+  useEffect(() => {
+    supabase.from('events').select('id').eq('super_event_id', 'se-master-superevent').eq('module', 'nds2026')
+      .order('id').limit(1)
+      .then(({ data }) => { const d = (data ?? []) as { id: string }[]; setStationGabarit(d[0]?.id ?? null) })
+  }, [])
   const groupes = events.reduce<{ cle: string; nom: string; evs: Ev[] }[]>((acc, e) => {
     const cle = e.super_event_id ?? ''
     let g = acc.find(x => x.cle === cle)
@@ -73,7 +82,9 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
   }, [])
 
   const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
-  const superUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1&screen=carte` : ''
+  const superUrl = ev && multistation
+    ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1&screen=carte`
+    : stationGabarit ? `/parcours/nds2026?ev=${encodeURIComponent(stationGabarit)}&preview=1&screen=carte` : ''
   const url = tab === 'event' ? eventUrl : superUrl
   const phoneUrl = url ? `${url}&bar=0` : ''
   const empty = 'Aucun événement à prévisualiser pour le moment.'
@@ -88,13 +99,13 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
   return (
     <div>
       {showTitle && (<>
-        <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-.6px' }}>Parcours mobil</div>
+        <div style={{ fontSize: 20, fontWeight: 800 }}>Parcours mobil</div>
         <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 18 }}>Le vrai parcours joueur, en direct. Choisissez un événement et prévisualisez-le tel qu'il s'affiche sur mobile.</div>
       </>)}
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         {tabBtn('event', 'Parcours event', 'Votre animation, en direct')}
-        {multistation && tabBtn('super', 'Parcours super event', 'La carte des stations')}
+        {tabBtn('super', 'Parcours super event', multistation ? 'La carte des stations' : 'Le gabarit marque blanche')}
       </div>
 
       <div style={{ display: 'flex', gap: 36, alignItems: 'flex-start', flexWrap: 'wrap', paddingLeft: 4 }}>
@@ -126,7 +137,9 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
             Le <b>vrai parcours</b> (pas une maquette). Le cadre ci-contre montre le <b>visuel réel</b>, sans barre d'admin.{' '}
             {tab === 'event'
               ? 'En plein écran, une barre en haut permet en plus de parcourir tous les écrans (accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil) — pratique pour la démo ou la comm.'
-              : 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec un event seul : l\'accès aux autres stations et au multi-partenaire.'}
+              : multistation
+                ? 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec un event seul : l\'accès aux autres stations et au multi-partenaire.'
+                : 'Cet event n\'appartient à aucun super event : le cadre montre le parcours super event en marque blanche (gabarit tiré de NDS 2026), tel qu\'il se déclinerait pour une opération multi-stations.'}
           </p>
         </div>
 
