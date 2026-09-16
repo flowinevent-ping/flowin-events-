@@ -183,7 +183,7 @@ function Tirage({ op, data, setMessage, onChange }: {
           {mail === 'envoi' && 'Envoi du billet…'}
           {mail === 'ok' && 'Billet envoyé par email au gagnant.'}
           {mail === 'echec' && 'Tirage enregistré, mais le billet n’a pas pu être envoyé par email.'}
-          {dernierToken && <> · <a href={`/lot.html?token=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>voir le billet</a></>}
+          {dernierToken && <> · <a href={`/lot.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>voir le billet</a></>}
         </div>
       )}
     </div>
@@ -239,7 +239,7 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
           </div>
           {g.joueurEmail && <div style={{ fontSize: 11.5, ...MUTED }}>{g.joueurEmail}</div>}
           {g.retraitToken && (
-            <a href={`/lot.html?token=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
+            <a href={`/lot.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
               style={{ fontSize: 11.5, color: '#7C2D92', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
           )}
         </div>

@@ -202,7 +202,7 @@ export default function CreerAnimationWizard({ proId, partenaireId, proName, ban
     const res = await creerAnimation({
       proId, module: module_, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null,
       banqueId,
-      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, type: l.type, conditions: l.conditions.trim() })),
+      lots: lotsValides.map(l => ({ nom: l.nom.trim(), quantite: l.quantite, valeur: Number(l.valeur) || 0, type: l.type, conditions: l.conditions.trim() })),
       regleRecompense: aUnLotInstantane ? { mode: modeInstant, everyX, probabilite } : undefined,
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
