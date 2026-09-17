@@ -30,6 +30,36 @@ declare global {
 
 const dateHeureFr = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
+
+/* Romain, 17/09 : le résumé « 16 tirés · 15 confirmés · 1 retiré » en texte
+   plat gris n'était « ni visible ni identifiable ». Remplacé par des badges
+   colorés distincts, un ton par statut — cohérent avec les chips utilisés
+   partout ailleurs dans le dashboard (sa-chip). */
+const TONS_COMPTEUR: Record<string, { bg: string; c: string }> = {
+  neutre: { bg: 'var(--sa-subtle)', c: 'var(--sa-muted)' },
+  alerte: { bg: '#FEF3C7', c: '#92400E' },
+  ok: { bg: '#DCFCE7', c: '#166534' },
+  accent: { bg: '#DBEAFE', c: '#1D4ED8' },
+}
+function Compteur({ n, label, labelPluriel, ton }: { n: number; label: string; labelPluriel: string; ton: keyof typeof TONS_COMPTEUR }) {
+  const t = TONS_COMPTEUR[ton]
+  return (
+    <span style={{ background: t.bg, color: t.c, fontSize: 12, fontWeight: 800, padding: '4px 10px', borderRadius: 99, whiteSpace: 'nowrap' }}>
+      {n} {n > 1 ? labelPluriel : label}
+    </span>
+  )
+}
+
+/* « Confirmé » et « Retiré » étaient tous les deux verts (sa-chip live) —
+   indiscernables d'un coup d'œil dans une liste, alors que c'est justement
+   ce que Romain veut reperer vite. Retiré passe au bleu (meme ton que le
+   compteur ci-dessus), Confirmé reste vert, À appeler orange. */
+function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
+  const ton = etat === 'retire' ? 'accent' : etat === 'confirme' ? 'ok' : 'alerte'
+  const t = TONS_COMPTEUR[ton]
+  const texte = etat === 'retire' ? '✓ Retiré' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
+  return <span style={{ background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>{texte}</span>
+}
 /** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici
  * (deja utilise depuis PartenaireDrawer, meme pattern repris a l'identique). */
 function useMailGagnant() {
@@ -182,11 +212,12 @@ export default function Page() {
 
         {(lignes ?? []).map(l => (
           <div key={l.id} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
               <button className="sa-btn sm" onClick={() => openDrawer('partenaire', l.id)} style={{ fontWeight: 800 }}>{l.nom}</button>
-              <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>
-                {l.etat.tires} tiré{l.etat.tires > 1 ? 's' : ''} · {l.etat.confirmes} confirmé{l.etat.confirmes > 1 ? 's' : ''} · {l.etat.retires} retiré{l.etat.retires > 1 ? 's' : ''}
-              </span>
+              <Compteur n={l.etat.tires} label="tiré" labelPluriel="tirés" ton="neutre" />
+              {l.etat.a_confirmer > 0 && <Compteur n={l.etat.a_confirmer} label="à appeler" labelPluriel="à appeler" ton="alerte" />}
+              <Compteur n={l.etat.confirmes} label="confirmé" labelPluriel="confirmés" ton="ok" />
+              <Compteur n={l.etat.retires} label="retiré" labelPluriel="retirés" ton="accent" />
             </div>
 
             {l.etat.a_confirmer > 0 && (
@@ -196,18 +227,22 @@ export default function Page() {
             )}
 
             {l.gagnants.map(g => (
-              <div key={g.tirage_id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '7px 10px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 5 }}>
-                <span style={{ flex: 1, minWidth: 150 }}>
+              <div key={g.tirage_id} style={{
+                display: 'grid', gridTemplateColumns: 'minmax(140px,1.6fr) minmax(90px,.7fr) minmax(120px,.8fr)', gap: '2px 12px',
+                alignItems: 'center', padding: '9px 12px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 5,
+              }}>
+                <span>
                   <b style={{ fontSize: 13 }}>{g.etat === 'a_confirmer' ? 'À attribuer' : (g.joueur_nom ?? '—')}</b>
                   <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}> · {g.lot_nom}</span>
                 </span>
                 <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticket_code ?? '—'}</span>
-                <span className={`sa-chip ${g.etat === 'a_confirmer' ? 'past' : 'live'}`}>
-                  {g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}
-                </span>
-                {g.etat === 'retire' && dateHeureFr(g.retire_at) && (
-                  <span style={{ fontSize: 11, color: 'var(--sa-muted)' }}>le {dateHeureFr(g.retire_at)}</span>
-                )}
+                <div>
+                  <ChipEtat etat={g.etat as 'a_confirmer' | 'confirme' | 'retire'} />
+                  {g.etat === 'retire' && dateHeureFr(g.retire_at) && (
+                    <div style={{ fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 2 }}>le {dateHeureFr(g.retire_at)}</div>
+                  )}
+                </div>
+                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
                 {g.retrait_token && (
                   <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
                 )}
@@ -256,6 +291,7 @@ export default function Page() {
                     <button className="sa-btn sm" onClick={() => onRetirer(g, l.id)} title="Annuler et tirer un nouveau gagnant pour ce lot">🔁 Re-tirer</button>
                   </>
                 )}
+                </div>
               </div>
             ))}
           </div>

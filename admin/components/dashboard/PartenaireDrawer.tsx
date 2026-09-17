@@ -17,6 +17,19 @@ import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/Blocs
 const dateHeureFr = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
 
+/* Confirme (vert) et Retire (bleu) doivent se distinguer d'un coup d'oeil --
+   memes tons que nds-lots/page.tsx. */
+const TONS_ETAT: Record<string, { bg: string; c: string }> = {
+  retire: { bg: '#DBEAFE', c: '#1D4ED8' },
+  confirme: { bg: '#DCFCE7', c: '#166534' },
+  a_confirmer: { bg: '#FEF3C7', c: '#92400E' },
+}
+function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
+  const t = TONS_ETAT[etat]
+  const texte = etat === 'retire' ? '✓ Retiré' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
+  return <span style={{ background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>{texte}</span>
+}
+
 /** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici. */
 function useMailGagnant() {
   useEffect(() => {
@@ -382,18 +395,22 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             )}
             {!chargeG && gagnants?.length === 0 && <div className="sa-muted" style={{ fontSize: 13 }}>Aucun gagnant tiré pour ce partenaire.</div>}
             {!chargeG && (gagnants ?? []).map(g => (
-              <div key={g.tirage_id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6 }}>
-                <span style={{ flex: 1, minWidth: 150 }}>
+              <div key={g.tirage_id} style={{
+                display: 'grid', gridTemplateColumns: 'minmax(140px,1.6fr) minmax(90px,.7fr) minmax(120px,.8fr)', gap: '2px 12px',
+                alignItems: 'center', padding: '9px 12px', background: 'var(--sa-subtle)', borderRadius: 9, marginBottom: 6,
+              }}>
+                <span>
                   <b style={{ fontSize: 13 }}>{g.etat === 'a_confirmer' ? 'À attribuer' : (g.joueur_nom ?? '—')}</b>
                   <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}> · {g.lot_nom}</span>
                 </span>
                 <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticket_code ?? '—'}</span>
-                <span className={`sa-chip ${g.etat === 'retire' ? 'live' : g.etat === 'confirme' ? 'live' : 'past'}`}>
-                  {g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}
-                </span>
-                {g.etat === 'retire' && dateHeureFr(g.retire_at) && (
-                  <span style={{ fontSize: 11, color: 'var(--sa-muted)' }}>le {dateHeureFr(g.retire_at)}</span>
-                )}
+                <div>
+                  <ChipEtat etat={g.etat as 'a_confirmer' | 'confirme' | 'retire'} />
+                  {g.etat === 'retire' && dateHeureFr(g.retire_at) && (
+                    <div style={{ fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 2 }}>le {dateHeureFr(g.retire_at)}</div>
+                  )}
+                </div>
+                <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
                 {g.retrait_token && (
                   <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
                 )}
@@ -439,6 +456,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                 {g.etat === 'a_confirmer' && (
                   <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
                 )}
+                </div>
               </div>
             ))}
           </>

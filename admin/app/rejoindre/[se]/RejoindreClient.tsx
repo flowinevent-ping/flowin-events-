@@ -71,36 +71,57 @@ export default function RejoindreClient({ se }: { se: SE }) {
     setSubmitting(false)
   }
 
-  const wrap: React.CSSProperties = { minHeight: '100dvh', background: CHARTE.fond, fontFamily: POLICE_ADMIN, color: CHARTE.texte, padding: '0 0 40px' }
-  const card: React.CSSProperties = { maxWidth: 540, margin: '0 auto', padding: '0 18px' }
+  const wrap: React.CSSProperties = { minHeight: '100dvh', width: '100%', boxSizing: 'border-box', background: CHARTE.fond, fontFamily: POLICE_ADMIN, color: CHARTE.texte }
   const surface: React.CSSProperties = { background: CHARTE.carte, border: `1px solid ${CHARTE.bordure}`, borderRadius: 16, padding: '22px 20px 26px' }
   const label: React.CSSProperties = { fontSize: 11.5, fontWeight: 800, letterSpacing: '.05em', color: CHARTE.attenue, textTransform: 'uppercase', marginBottom: 6, display: 'block' }
-  const input: React.CSSProperties = { width: '100%', padding: '11px 13px', borderRadius: 10, border: `1px solid ${CHARTE.bordure}`, background: CHARTE.subtil, fontSize: 15, fontFamily: 'inherit', color: CHARTE.texte, outline: 'none' }
+  const input: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 10, border: `1px solid ${CHARTE.bordure}`, background: CHARTE.subtil, fontSize: 15, fontFamily: 'inherit', color: CHARTE.texte, outline: 'none' }
   const field: React.CSSProperties = { marginBottom: 15 }
   const sectionTitre: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: ORANGE, margin: '22px 0 13px' }
-  const hero: React.CSSProperties = { background: `linear-gradient(135deg,${ORANGE},${ORANGE2})`, color: '#fff', textAlign: 'center' }
+
+  /* Desktop (>= 900px) : deux colonnes cote a cote (pitch + formulaire), le
+     bandeau orange occupe toute la hauteur de la colonne de gauche au lieu
+     d'un bandeau etroit au-dessus d'un formulaire mobile flottant, seul, au
+     milieu d'un ecran large — releve par Romain (17/09) comme « vide, hors
+     sujet ». Mobile : empile comme avant, une colonne, hero en haut. */
+  const style = `
+    .rj-page{min-height:100dvh}
+    .rj-hero{background:linear-gradient(135deg,${ORANGE},${ORANGE2});color:#fff;padding:44px 24px;text-align:center}
+    .rj-corps{padding:0 18px 40px}
+    .rj-carte{max-width:540px;margin:-16px auto 0}
+    @media (min-width:900px){
+      .rj-page{display:grid;grid-template-columns:minmax(320px,1fr) minmax(460px,620px)}
+      .rj-hero{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;text-align:left;padding:56px}
+      .rj-corps{padding:56px 48px;display:flex;align-items:flex-start}
+      .rj-carte{margin:0;max-width:100%;width:100%}
+    }
+  `
 
   if (done) {
     return (
       <div style={wrap}>
-        <div style={{ ...hero, padding: '54px 18px 40px' }}>
-          <div style={{ fontSize: 54, marginBottom: 10 }}>🎉</div>
-          <div style={{ fontSize: 26, fontWeight: 800 }}>Demande envoyée !</div>
-        </div>
-        <div style={{ ...card, marginTop: -18 }}>
-          <div style={surface}>
-            <div style={{ fontSize: 15, lineHeight: 1.6 }}>
-              Merci <strong>{f.prenom}</strong> ! La demande de <strong>{f.commerce}</strong> pour l&apos;opération <strong>{se.nom}</strong> est enregistrée.
-            </div>
-            <div style={{ background: 'rgba(194,65,12,.07)', borderRadius: 12, padding: '15px 16px', margin: '18px 0', fontSize: 14, lineHeight: 1.6, color: CHARTE.texte }}>
-              Nous validons votre commerce sous 24–48h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', border: `1px solid ${CHARTE.bordure}`, borderRadius: 12 }}>
-              <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>Frais de participation</span>
-              <span style={{ fontSize: 18, fontWeight: 800 }}>{frais} € HT</span>
-            </div>
-            <div style={{ fontSize: 12.5, color: CHARTE.attenue, marginTop: 10, lineHeight: 1.5 }}>
-              Déductible si vous souscrivez ensuite à un abonnement Flowin. Les modalités de règlement vous seront communiquées par email.
+        <style>{style}</style>
+        <div className="rj-page">
+          <div className="rj-hero">
+            <div style={{ fontSize: 54, marginBottom: 10 }}>🎉</div>
+            <div style={{ fontSize: 26, fontWeight: 800 }}>Demande envoyée !</div>
+          </div>
+          <div className="rj-corps">
+            <div className="rj-carte">
+              <div style={surface}>
+                <div style={{ fontSize: 15, lineHeight: 1.6 }}>
+                  Merci <strong>{f.prenom}</strong> ! La demande de <strong>{f.commerce}</strong> pour l&apos;opération <strong>{se.nom}</strong> est enregistrée.
+                </div>
+                <div style={{ background: 'rgba(194,65,12,.07)', borderRadius: 12, padding: '15px 16px', margin: '18px 0', fontSize: 14, lineHeight: 1.6, color: CHARTE.texte }}>
+                  Nous validons votre commerce sous 24–48h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', border: `1px solid ${CHARTE.bordure}`, borderRadius: 12 }}>
+                  <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>Frais de participation</span>
+                  <span style={{ fontSize: 18, fontWeight: 800 }}>{frais} € HT</span>
+                </div>
+                <div style={{ fontSize: 12.5, color: CHARTE.attenue, marginTop: 10, lineHeight: 1.5 }}>
+                  Déductible si vous souscrivez ensuite à un abonnement Flowin. Les modalités de règlement vous seront communiquées par email.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -110,15 +131,18 @@ export default function RejoindreClient({ se }: { se: SE }) {
 
   return (
     <div style={wrap}>
-      <div style={{ ...hero, padding: '46px 18px 38px' }}>
-        <div style={{ fontSize: 12.5, fontWeight: 700, opacity: 0.9, letterSpacing: '.05em', textTransform: 'uppercase' }}>Devenez commerce partenaire</div>
-        <div style={{ fontSize: 27, fontWeight: 800, marginTop: 8, lineHeight: 1.15 }}>{se.nom}</div>
-        <div style={{ fontSize: 14, opacity: 0.92, marginTop: 8, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-          Animez votre boutique, captez de nouveaux clients et offrez-leur une chance de gagner.
+      <style>{style}</style>
+      <div className="rj-page">
+        <div className="rj-hero">
+          <div style={{ fontSize: 12.5, fontWeight: 700, opacity: 0.9, letterSpacing: '.05em', textTransform: 'uppercase' }}>Devenez commerce partenaire</div>
+          <div style={{ fontSize: 32, fontWeight: 800, marginTop: 10, lineHeight: 1.15 }}>{se.nom}</div>
+          <div style={{ fontSize: 15, opacity: 0.92, marginTop: 10, maxWidth: 420 }}>
+            Animez votre boutique, captez de nouveaux clients et offrez-leur une chance de gagner.
+          </div>
         </div>
-      </div>
 
-      <div style={{ ...card, marginTop: -16 }}>
+        <div className="rj-corps">
+        <div className="rj-carte">
         <div style={surface}>
 
           <div style={{ ...sectionTitre, marginTop: 0 }}>🏪 Votre commerce</div>
@@ -165,6 +189,8 @@ export default function RejoindreClient({ se }: { se: SE }) {
           <div style={{ fontSize: 12, color: CHARTE.attenue, textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
             Sans engagement. Validation sous 24–48h. Données jamais cédées.
           </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>
