@@ -10,7 +10,7 @@ import type { ParcoursPageData } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'ticket' | 'already'
-interface Segment { label: string; color: string; perdant?: boolean; stock?: number }
+interface Segment { label: string; color: string; perdant?: boolean; stock?: number; mode?: 'immediat' | 'tirage' | 'voisin' }
 interface Props extends ParcoursPageData { evId: string }
 
 export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
@@ -319,7 +319,15 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               </div>
               <div style={{ fontSize:22,fontWeight:900,marginBottom:8 }}>Tu as gagné !</div>
               <div style={{ background:`${resultSeg.color}22`,border:`2px solid ${resultSeg.color}66`,borderRadius:14,padding:'16px 20px',fontSize:17,fontWeight:800,color:'#fff',marginBottom:20 }}>{resultSeg.label}</div>
-              <button className="btn" onClick={()=>setScreen('form')}>Réclamer mon gain →</button>
+              {resultSeg.mode === 'tirage' && (
+                <div style={{ fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:16,maxWidth:300 }}>Ce lot est un bon inscrit pour un tirage au sort. Laisse tes coordonnées pour y participer.</div>
+              )}
+              {resultSeg.mode === 'voisin' && (
+                <div style={{ fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:16,maxWidth:300 }}>Ce lot se transmet : passe ton ticket à la personne à côté de toi, c&apos;est elle qui le réclame.</div>
+              )}
+              <button className="btn" onClick={()=>setScreen('form')}>
+                {resultSeg.mode === 'tirage' ? 'Participer au tirage →' : resultSeg.mode === 'voisin' ? 'Continuer →' : 'Réclamer mon gain →'}
+              </button>
             </>
           )}
         </div>

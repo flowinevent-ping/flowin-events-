@@ -112,23 +112,55 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
         <div className="screen">
           <div className="header"><div><div className="title">Votez !</div><div className="sub">{nom}</div></div></div>
           {items.length === 0 && <div style={{ textAlign:'center',color:'rgba(255,255,255,.45)',padding:32 }}>Aucun élément configuré.</div>}
-          {items.map(item => (
-            <div key={item.id} className="card" style={{ marginBottom:10,display:'flex',alignItems:'center',gap:12 }}>
-              <div style={{ fontSize:32,flexShrink:0 }}>{item.emoji||'🎤'}</div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontWeight:800,fontSize:14 }}>{item.nom}</div>
-                {item.genre && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{item.genre}</div>}
-              </div>
-              <div style={{ display:'flex',gap:4 }}>
-                {[1,2,3,4,5].map(star => (
-                  <button key={star} onClick={()=>setVotes(v=>({...v,[item.id]:star}))}
-                    style={{ fontSize:20,background:'none',border:'none',cursor:'pointer',color:(votes[item.id]??0)>=star?'#FBBF24':'rgba(255,255,255,.2)',padding:'2px' }}>★</button>
-                ))}
-              </div>
-            </div>
-          ))}
-          <div style={{ flex:1 }} />
-          <button className="btn" style={{ marginTop:16 }} onClick={()=>setScreen('form')}>Valider mon vote →</button>
+          {mode === 'unique' ? (
+            <>
+              {items.map(item => {
+                const choisi = votes.__choix === 1 && votes[item.id] === 1
+                return (
+                  <button key={item.id} className="card" onClick={()=>{
+                    const next: Record<string, number> = { __choix: 1 }
+                    items.forEach(it => { next[it.id] = it.id === item.id ? 1 : 0 })
+                    setVotes(next)
+                  }}
+                    style={{ marginBottom:10,display:'flex',alignItems:'center',gap:12,width:'100%',textAlign:'left',cursor:'pointer',
+                      border: choisi ? `2px solid ${c}` : undefined }}>
+                    <div style={{ width:38,height:38,borderRadius:10,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:15,background:`${c}33`,color:c }}>
+                      {(item.nom||'?').trim().slice(0,1).toUpperCase()}
+                    </div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:800,fontSize:14 }}>{item.nom}</div>
+                      {item.desc && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{item.desc}</div>}
+                    </div>
+                    {choisi && <div style={{ color:c,fontWeight:900,fontSize:18 }}>✓</div>}
+                  </button>
+                )
+              })}
+              <div style={{ flex:1 }} />
+              <button className="btn" style={{ marginTop:16 }} disabled={votes.__choix !== 1} onClick={()=>setScreen('form')}>Valider mon choix →</button>
+            </>
+          ) : (
+            <>
+              {items.map(item => (
+                <div key={item.id} className="card" style={{ marginBottom:10,display:'flex',alignItems:'center',gap:12 }}>
+                  <div style={{ width:38,height:38,borderRadius:10,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:15,background:`${c}33`,color:c }}>
+                    {(item.nom||'?').trim().slice(0,1).toUpperCase()}
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontWeight:800,fontSize:14 }}>{item.nom}</div>
+                    {item.genre && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{item.genre}</div>}
+                  </div>
+                  <div style={{ display:'flex',gap:4 }}>
+                    {[1,2,3,4,5].map(star => (
+                      <button key={star} onClick={()=>setVotes(v=>({...v,[item.id]:star}))}
+                        style={{ fontSize:20,background:'none',border:'none',cursor:'pointer',color:(votes[item.id]??0)>=star?'#FBBF24':'rgba(255,255,255,.2)',padding:'2px' }}>★</button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <div style={{ flex:1 }} />
+              <button className="btn" style={{ marginTop:16 }} onClick={()=>setScreen('form')}>Valider mon vote →</button>
+            </>
+          )}
         </div>
       )}
 

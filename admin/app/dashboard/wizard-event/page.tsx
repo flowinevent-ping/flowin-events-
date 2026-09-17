@@ -20,6 +20,7 @@ import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { BandeauParcours, BarreParcours, PiedParcours } from '@/components/dashboard/Parcours'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
+import { Ico } from '@/lib/proicons'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
@@ -73,15 +74,15 @@ const ICONES_MODULE: Record<Module, React.ReactNode> = {
   ),
 }
 
-const MODULES: { id: Module; nom: string; desc: string; emoji: string }[] = [
+const MODULES: { id: Module; nom: string; desc: string }[] = [
   /* Le gabarit de reference en premier : on part de NDS 2026, pas de zero. */
-  { id: GABARIT_MODULE as Module, nom: GABARIT_NOM, desc: 'Le gabarit de référence — quiz, bonus, ticket', emoji: '🎯' },
-  { id: 'quiz', nom: 'Quiz', desc: 'Questions à choix multiple', emoji: '❓' },
-  { id: 'quizsolo', nom: 'Quiz solo', desc: 'Parcours individuel', emoji: '🧍' },
-  { id: 'quizmaster', nom: 'Quiz master', desc: 'Animé en direct', emoji: '🎤' },
-  { id: 'spin', nom: 'Roue', desc: 'Tirage instantané', emoji: '🎡' },
-  { id: 'vote', nom: 'Vote', desc: 'Sondage du public', emoji: '🗳️' },
-  { id: 'tombola', nom: 'Tombola', desc: 'Tirage différé', emoji: '🎟️' },
+  { id: GABARIT_MODULE as Module, nom: GABARIT_NOM, desc: 'Le gabarit de référence — quiz, bonus, ticket' },
+  { id: 'quiz', nom: 'Quiz', desc: 'Questions à choix multiple' },
+  { id: 'quizsolo', nom: 'Quiz solo', desc: 'Parcours individuel, sans bonus' },
+  { id: 'quizmaster', nom: 'Quiz master', desc: 'Animé en direct' },
+  { id: 'spin', nom: 'Roue', desc: 'Tirage instantané' },
+  { id: 'vote', nom: 'Vote', desc: 'Note ou sondage du public' },
+  { id: 'tombola', nom: 'Tombola', desc: 'Tirage différé' },
 ]
 
 const VISIBILITES: { cle: string; label: string }[] = [
@@ -295,17 +296,18 @@ function Wizard() {
         {etape === 'A' && (
           <>
             {jours > 1 && (
-              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, border: '1px solid var(--sa-border)', fontSize: 11.5 }}>
-                📆 <b>Événement sur {jours} jours</b> — du {d.date_d} au {d.date_f}.
+              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, border: '1px solid var(--sa-border)', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Ico k="calendar" size={13} /> <b>Événement sur {jours} jours</b> — du {d.date_d} au {d.date_f}.
               </div>
             )}
             {ligne("Nom de l'événement", true,
               <input className="sa-input" style={{ width: '100%' }} value={d.nom}
                 onChange={e => maj({ nom: e.target.value })} placeholder="Jazz à Nice 2027…" />)}
             {proInconnu && (
-              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, background: '#FEF3C7', color: '#92400E', fontSize: 11.5 }}>
-                ⚠ Le pro pré-rempli (<b>{d.pro_id}</b>) est introuvable dans la liste —
-                sélectionnez-le manuellement ci-dessous.
+              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, background: '#FEF3C7', color: '#92400E', fontSize: 11.5, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                <Ico k="warning" size={13} style={{ marginTop: 1, flexShrink: 0 }} />
+                <span>Le pro pré-rempli (<b>{d.pro_id}</b>) est introuvable dans la liste —
+                sélectionnez-le manuellement ci-dessous.</span>
               </div>
             )}
             {ligne('Pro client', true,
@@ -368,8 +370,10 @@ function Wizard() {
               <div style={{ display: 'flex', gap: 8 }}>
                 {(['btoc', 'btob'] as const).map(t => (
                   <button key={t} className={`sa-btn sm${d.client_type === t ? ' primary' : ''}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
                     onClick={() => maj({ client_type: t })}>
-                    {t === 'btoc' ? '👤 Grand public' : '🏢 Professionnels'}
+                    <Ico k={t === 'btoc' ? 'user' : 'shop'} size={13} />
+                    {t === 'btoc' ? 'Grand public' : 'Professionnels'}
                   </button>
                 ))}
               </div>)}
@@ -466,8 +470,8 @@ function Wizard() {
                 parametrage est ici, ecrit dans le MEME `cfg` que lit le parcours
                 joueur : aucune cle nouvelle, sinon le jeu ne saurait pas la lire. */}
             <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--sa-border)' }}>
-              <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 10 }}>
-                🎮 Paramétrage du jeu
+              <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Ico k="game" size={14} /> Paramétrage du jeu
               </div>
               <ConfigJeu
                 module={d.module}

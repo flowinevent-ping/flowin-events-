@@ -32,9 +32,18 @@ export type CfgJeu = Record<string, unknown>
 
 /* `color` et `perdant` : les cles que lit le jeu (app/parcours/spin). Les
    segments ecrits avant le 16/09 portaient `couleur`, que la roue ignorait :
-   elle est encore lue en repli. */
-export interface SegmentSpin { label: string; color?: string; couleur?: string; perdant?: boolean; poids?: number }
+   elle est encore lue en repli. `mode` : distribution du lot quand le segment
+   est gagnant -- immediat (remis tout de suite), tirage (bon inscrit pour un
+   tirage au sort differe) ou voisin (le ticket se transmet). Absent = immediat. */
+export interface SegmentSpin { label: string; color?: string; couleur?: string; perdant?: boolean; poids?: number; mode?: 'immediat' | 'tirage' | 'voisin' }
 export interface ItemVote { id: string; nom: string; emoji?: string; desc?: string }
+
+const TAILLES_ROUE = [6, 8, 10]
+const MODES_GAIN: { val: SegmentSpin['mode']; label: string }[] = [
+  { val: 'immediat', label: 'Gain immédiat' },
+  { val: 'tirage', label: 'Bon pour un tirage au sort' },
+  { val: 'voisin', label: 'Passe ton ticket à ton voisin' },
+]
 
 const COULEURS = ['#7C2D92', '#E0218A', '#F5A100', '#1D9E75', '#378ADD', '#9d4edd', '#ff8fab', '#cfc4d8']
 
@@ -172,47 +181,84 @@ function ConfigJeuContenu({
 
   /* ── Roue ────────────────────────────────────────────────────────────── */
   if (mod === 'spin') {
+    /* Ajuste le nombre de segments a une taille cible : complete avec des
+       segments vierges colores si besoin, tronque sinon (les derniers). */
+    const fixerTaille = (n: number) => {
+      if (n === segments.length) return
+      if (n > segments.length) {
+        const ajout: SegmentSpin[] = Array.from({ length: n - segments.length }, (_, k) => ({
+          label: '', color: COULEURS[(segments.length + k) % COULEURS.length], mode: 'immediat',
+        }))
+        set({ spinSegments: [...segments, ...ajout] })
+      } else {
+        set({ spinSegments: segments.slice(0, n) })
+      }
+    }
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
           <div style={{ fontSize: 12.5, fontWeight: 700 }}>
             {segments.length} segment{segments.length > 1 ? 's' : ''} sur la roue
           </div>
+          <div style={{ display: 'flex', gap: 6, marginLeft: 8 }}>
+            {TAILLES_ROUE.map(n => (
+              <button
+                key={n} type="button" className="sa-btn sm"
+                style={segments.length === n ? { borderColor: 'var(--sa-accent)', color: 'var(--sa-accent)' } : undefined}
+                onClick={() => fixerTaille(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
           <button
             className="sa-btn sm primary" style={{ marginLeft: 'auto' }}
-            onClick={() => set({ spinSegments: [...segments, { label: '', color: COULEURS[segments.length % COULEURS.length] }] })}
+            onClick={() => set({ spinSegments: [...segments, { label: '', color: COULEURS[segments.length % COULEURS.length], mode: 'immediat' }] })}
           >
             + Ajouter un segment
           </button>
         </div>
         {segments.length === 0 && (
           <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10 }}>
-            Une roue sans segment ne peut pas tourner. Ajoutez-en au moins deux.
+            Une roue sans segment ne peut pas tourner. Choisissez une taille ci-dessus (6, 8 ou 10),
+            ou ajoutez-en au moins deux.
           </div>
         )}
         {segments.map((sg, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 56px auto auto', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-            <input
-              className="sa-input" placeholder="Ce qui est écrit sur le segment" value={sg.label ?? ''}
-              onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })}
-            />
-            <input
-              className="sa-input" type="color" style={{ height: 36, padding: 3 }} value={sg.color ?? sg.couleur ?? '#7C2D92'}
-              onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, color: e.target.value } : x) })}
-            />
-            <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer' }}>
+          <div key={i} style={{ border: '1px solid var(--sa-border)', borderRadius: 10, padding: 9, marginBottom: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 56px auto auto', gap: 8, alignItems: 'center' }}>
               <input
-                type="checkbox" checked={!!sg.perdant}
-                onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, perdant: e.target.checked } : x) })}
+                className="sa-input" placeholder="Ce qui est écrit sur le segment" value={sg.label ?? ''}
+                onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })}
               />
-              perdant
-            </label>
-            <button
-              className="sa-btn sm"
-              onClick={() => set({ spinSegments: segments.filter((_, j) => j !== i) })}
-            >
-              Retirer
-            </button>
+              <input
+                className="sa-input" type="color" style={{ height: 36, padding: 3 }} value={sg.color ?? sg.couleur ?? '#7C2D92'}
+                onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, color: e.target.value } : x) })}
+              />
+              <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                <input
+                  type="checkbox" checked={!!sg.perdant}
+                  onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, perdant: e.target.checked } : x) })}
+                />
+                perdant
+              </label>
+              <button
+                className="sa-btn sm"
+                onClick={() => set({ spinSegments: segments.filter((_, j) => j !== i) })}
+              >
+                Retirer
+              </button>
+            </div>
+            {!sg.perdant && (
+              <div style={{ marginTop: 8 }}>
+                <select
+                  className="sa-input" style={{ width: '100%' }} value={sg.mode ?? 'immediat'}
+                  onChange={e => set({ spinSegments: segments.map((x, j) => j === i ? { ...x, mode: e.target.value as SegmentSpin['mode'] } : x) })}
+                >
+                  {MODES_GAIN.map(m => <option key={m.val} value={m.val}>{m.label}</option>)}
+                </select>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -290,8 +336,28 @@ function ConfigJeuContenu({
 
   /* ── Vote ────────────────────────────────────────────────────────────── */
   if (mod === 'vote') {
+    const voteMode = (cfg.voteMode as string) ?? 'stars'
     return (
       <div>
+        <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Mode de vote</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <button type="button" className="sa-btn sm"
+            style={voteMode === 'stars' ? { borderColor: 'var(--sa-accent)', color: 'var(--sa-accent)' } : undefined}
+            onClick={() => set({ voteMode: 'stars' })}>
+            Note (1 à 5)
+          </button>
+          <button type="button" className="sa-btn sm"
+            style={voteMode === 'unique' ? { borderColor: 'var(--sa-accent)', color: 'var(--sa-accent)' } : undefined}
+            onClick={() => set({ voteMode: 'unique' })}>
+            Choix unique
+          </button>
+        </div>
+        <div className="sa-aide" style={{ marginBottom: 12 }}>
+          {voteMode === 'stars'
+            ? 'Le joueur note chaque élément de 1 à 5 étoiles — utile pour départager plusieurs artistes ou candidats le même soir.'
+            : 'Le joueur choisit un seul élément — utile pour un sondage, une question de copropriété ou d’entreprise.'}
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
           <div style={{ fontSize: 12.5, fontWeight: 700 }}>
             {items.length} élément{items.length > 1 ? 's' : ''} à départager
@@ -305,17 +371,14 @@ function ConfigJeuContenu({
         </div>
         {items.length === 0 && (
           <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10 }}>
-            Sans élément, il n’y a rien à voter. Ajoutez-en au moins deux.
+            Sans élément, il n’y a rien à voter. Ajoutez-en au moins deux — un artiste, un candidat,
+            un sujet de copropriété, une option de sondage…
           </div>
         )}
         {items.map((it, i) => (
-          <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '58px 1fr auto', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+          <div key={it.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8, alignItems: 'center', marginBottom: 8 }}>
             <input
-              className="sa-input" placeholder="🎭" value={it.emoji ?? ''}
-              onChange={e => set({ voteItems: items.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x) })}
-            />
-            <input
-              className="sa-input" placeholder="Nom de l’élément" value={it.nom}
+              className="sa-input" placeholder="Nom de l’élément (artiste, sujet, option…)" value={it.nom}
               onChange={e => set({ voteItems: items.map((x, j) => j === i ? { ...x, nom: e.target.value } : x) })}
             />
             <button className="sa-btn sm" onClick={() => set({ voteItems: items.filter((_, j) => j !== i) })}>
