@@ -286,7 +286,7 @@ a:hover{text-decoration:underline}
      vignette rayon 14, padding 16, bord 2px teinte quand choisie
      muted    #64748B
    La TEINTE suit la convention deja etablie la-bas : bleu #2746A6 = pro,
-   orange #C2410C = super event, violet #2563EB = l accent Flowin.
+   orange #C2410C = super event, bleu #2563EB = l accent Flowin.
    ═══════════════════════════════════════════════════════════════════════════ */
 .sa-parc{--parc:#2563EB;--parc2:#3B82F6}
 .sa-parc.t-super{--parc:#C2410C;--parc2:#FF8A14}
