@@ -61,99 +61,66 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     })()
   }, [screen, reco, evId, lsKey, resultSeg])
 
+  /* Rendu plat (2D, aplats de couleur francs) plutot que l ancien style casino
+     3D chrome/LED -- reference donnee par Romain : cadran plat, une couleur par
+     secteur, moyeu simple porteur du mot SPIN, pointeur sobre. */
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !segments.length) return
     const ctx = canvas.getContext('2d')!
     const W = canvas.width, CX = W/2, CY = W/2
-    const sR = W*0.41, RIM = W*0.052, hR = W*0.082, oR = sR+RIM
+    const sR = W*0.46, hR = W*0.13
     const n = segments.length, ARC = (2 * Math.PI) / n
-    const DARK = ['#007A6C','#29408C','#6A0080','#B71010','#0088A0','#8E1010','#4A0070','#005048']
     ctx.clearRect(0, 0, W, W)
 
-    // Fond bleu radial
-    const bg = ctx.createRadialGradient(CX, CY*0.65, 40, CX, CY, W*0.7)
-    bg.addColorStop(0,'#1030A0'); bg.addColorStop(0.4,'#0A1E6A'); bg.addColorStop(1,'#030818')
-    ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(CX, CY, oR+4, 0, Math.PI*2); ctx.fill()
+    // Halo doux derriere le cadran
+    ctx.beginPath(); ctx.arc(CX, CY, sR+6, 0, Math.PI*2)
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill()
 
-    // Anneau bleu drum 3D
-    for (let k = 0; k <= 20; k++) {
-      const t = k/20, rr = sR + t*RIM
-      const brt = 0.5 + Math.pow(Math.sin(t*Math.PI*0.92+0.1), 1.2) * 0.6
-      ctx.beginPath(); ctx.arc(CX, CY, rr, 0, Math.PI*2)
-      ctx.strokeStyle = `rgb(${Math.floor(10+brt*25)},${Math.floor(48+brt*98)},${Math.floor(172+brt*68)})`
-      ctx.lineWidth = RIM/20*1.5; ctx.stroke()
-    }
-    ctx.beginPath(); ctx.arc(CX, CY, sR+RIM*0.45, -Math.PI*0.82, -Math.PI*0.12)
-    ctx.strokeStyle = 'rgba(180,220,255,.22)'; ctx.lineWidth = 8; ctx.stroke()
-    ctx.beginPath(); ctx.arc(CX, CY, oR+2, 0, Math.PI*2); ctx.strokeStyle = 'rgba(0,20,80,.75)'; ctx.lineWidth = 2; ctx.stroke()
-    ctx.beginPath(); ctx.arc(CX, CY, oR+1, 0, Math.PI*2); ctx.strokeStyle = 'rgba(80,160,255,.45)'; ctx.lineWidth = 1.2; ctx.stroke()
-
-    // Dots LED amber
-    const dR = sR + RIM*0.55
-    for (let d = 0; d < 12; d++) {
-      const da = d/12*Math.PI*2, dx = CX+Math.cos(da)*dR, dy = CY+Math.sin(da)*dR
-      ctx.beginPath(); ctx.arc(dx, dy, 3.6, 0, Math.PI*2); ctx.fillStyle = 'rgba(0,12,45,.7)'; ctx.fill()
-      const dg = ctx.createRadialGradient(dx-1, dy-1, 0, dx, dy, 3)
-      dg.addColorStop(0,'#FFE566'); dg.addColorStop(0.5,'#FFAA00'); dg.addColorStop(1,'#CC7700')
-      ctx.beginPath(); ctx.arc(dx, dy, 3, 0, Math.PI*2); ctx.fillStyle = dg; ctx.fill()
-      ctx.beginPath(); ctx.arc(dx, dy, 1.1, 0, Math.PI*2); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill()
-    }
-
-    // Séparateur chrome
-    ctx.beginPath(); ctx.arc(CX, CY, sR+2, 0, Math.PI*2); ctx.strokeStyle = 'rgba(0,0,0,.38)'; ctx.lineWidth = 2.5; ctx.stroke()
-    const cg = ctx.createLinearGradient(CX-sR, CY, CX+sR, CY)
-    cg.addColorStop(0,'#B8C0D0'); cg.addColorStop(0.3,'#E0E8F4'); cg.addColorStop(0.7,'#A0ACBC'); cg.addColorStop(1,'#B8C0D0')
-    ctx.beginPath(); ctx.arc(CX, CY, sR+1, 0, Math.PI*2); ctx.strokeStyle = cg; ctx.lineWidth = 3; ctx.stroke()
-
-    // Segments
+    // Secteurs -- aplat de couleur, pas de degrade
+    const maxTexte = sR - hR - 16
     segments.forEach((seg, i) => {
-      const s = i*ARC + angle + 0.02, e = s + ARC - 0.04, mid = (s+e)/2
-      const mx = CX+Math.cos(mid)*sR*0.52, my = CY+Math.sin(mid)*sR*0.52
-      const baseCol = seg.color || '#3B5CC4'
-      const sg = ctx.createRadialGradient(mx, my, 0, CX, CY, sR)
-      sg.addColorStop(0, baseCol); sg.addColorStop(0.6, baseCol); sg.addColorStop(1, DARK[i % DARK.length])
-      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, sR, s, e); ctx.closePath(); ctx.fillStyle = sg; ctx.fill()
-      ctx.save(); ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, sR, s, e); ctx.closePath(); ctx.clip()
-      const bv = ctx.createLinearGradient(CX+Math.cos(mid)*8, CY+Math.sin(mid)*8, CX+Math.cos(mid)*sR, CY+Math.sin(mid)*sR)
-      bv.addColorStop(0,'rgba(255,255,255,.28)'); bv.addColorStop(0.4,'rgba(255,255,255,.07)'); bv.addColorStop(1,'rgba(0,0,0,.2)')
-      ctx.fillStyle = bv; ctx.fillRect(CX-sR, CY-sR, sR*2, sR*2); ctx.restore()
-      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.lineTo(CX+Math.cos(s)*sR, CY+Math.sin(s)*sR)
-      ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1.5; ctx.stroke()
+      const s = i*ARC + angle, e = s + ARC, mid = (s+e)/2
+      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.arc(CX, CY, sR, s, e); ctx.closePath()
+      ctx.fillStyle = seg.color || '#3B5CC4'
+      ctx.fill()
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke()
+
       ctx.save(); ctx.translate(CX, CY); ctx.rotate(mid)
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
-      ctx.font = 'bold 13px system-ui'
-      const txt = seg.label.length > 14 ? seg.label.slice(0,13)+'…' : seg.label
-      ctx.strokeStyle = 'rgba(0,0,0,.95)'; ctx.lineWidth = 4; ctx.strokeText(txt, sR-9, 0)
-      ctx.fillStyle = '#fff'; ctx.fillText(txt, sR-9, 0); ctx.restore()
+      ctx.font = '700 13px system-ui, -apple-system, sans-serif'
+      /* Troncature sur largeur reelle mesuree, pas sur un nombre de caracteres :
+         un texte qui deborde de son secteur peinturlurait sur le voisin. */
+      let txt = seg.label || '—'
+      if (ctx.measureText(txt).width > maxTexte) {
+        while (txt.length > 1 && ctx.measureText(txt + '…').width > maxTexte) txt = txt.slice(0, -1)
+        txt += '…'
+      }
+      ctx.fillStyle = '#fff'
+      ctx.fillText(txt, sR-14, 0)
+      ctx.restore()
     })
-    ctx.beginPath(); ctx.arc(CX, CY, sR, 0, Math.PI*2); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.5; ctx.stroke()
 
-    // Hub chrome + bille verte
-    for (let rh = hR+12; rh > hR+1; rh -= 0.7) {
-      const th = (rh-hR-1)/11, v = Math.floor(138+Math.sin(th*Math.PI)*105)
-      ctx.beginPath(); ctx.arc(CX, CY, rh, 0, Math.PI*2)
-      ctx.strokeStyle = `rgb(${v},${v+8},${v+18})`; ctx.lineWidth = 0.8; ctx.stroke()
-    }
-    ctx.beginPath(); ctx.arc(CX, CY, hR+12, 0, Math.PI*2); ctx.strokeStyle = 'rgba(80,100,140,.7)'; ctx.lineWidth = 2; ctx.stroke()
-    const hg = ctx.createRadialGradient(CX-hR*0.3, CY-hR*0.32, 2, CX, CY, hR)
-    hg.addColorStop(0,'#88DD44'); hg.addColorStop(0.4,'#44AA22'); hg.addColorStop(1,'#114408')
-    ctx.beginPath(); ctx.arc(CX, CY, hR, 0, Math.PI*2); ctx.fillStyle = hg; ctx.fill()
-    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, hR, 0, Math.PI*2); ctx.clip()
-    const hs = ctx.createRadialGradient(CX-hR*0.3, CY-hR*0.34, 0, CX, CY, hR)
-    hs.addColorStop(0,'rgba(200,255,140,.45)'); hs.addColorStop(1,'rgba(0,0,0,0)')
-    ctx.fillStyle = hs; ctx.fillRect(CX-hR, CY-hR, hR*2, hR*2); ctx.restore()
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('SPIN', CX, CY)
+    // Contour exterieur blanc
+    ctx.beginPath(); ctx.arc(CX, CY, sR, 0, Math.PI*2); ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.stroke()
 
-    // Pointer bleu interne
-    const py = CY - sR - RIM*0.5
-    ctx.save(); ctx.translate(2, 3)
-    ctx.beginPath(); ctx.moveTo(CX-11, py-12); ctx.lineTo(CX+11, py-12); ctx.lineTo(CX+6, py+1); ctx.lineTo(CX, py+12); ctx.lineTo(CX-6, py+1); ctx.closePath()
-    ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fill(); ctx.restore()
-    const ptg = ctx.createLinearGradient(CX-11, 0, CX+11, 0)
-    ptg.addColorStop(0,'#6AABEE'); ptg.addColorStop(0.5,'#AACCF0'); ptg.addColorStop(1,'#6AABEE')
-    ctx.beginPath(); ctx.moveTo(CX-11, py-12); ctx.lineTo(CX+11, py-12); ctx.lineTo(CX+6, py+1); ctx.lineTo(CX, py+12); ctx.lineTo(CX-6, py+1); ctx.closePath()
-    ctx.fillStyle = ptg; ctx.fill(); ctx.strokeStyle = 'rgba(80,140,210,.5)'; ctx.lineWidth = 1; ctx.stroke()
+    // Moyeu blanc simple avec le mot SPIN
+    ctx.beginPath(); ctx.arc(CX, CY, hR, 0, Math.PI*2)
+    ctx.fillStyle = '#fff'; ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 2; ctx.stroke()
+    ctx.fillStyle = c || '#3B5CC4'
+    ctx.font = '800 13px system-ui, -apple-system, sans-serif'
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillText('SPIN', CX, CY)
+
+    // Pointeur sobre, triangle plein en haut
+    const py = CY - sR
+    ctx.beginPath()
+    ctx.moveTo(CX-12, py+2); ctx.lineTo(CX+12, py+2); ctx.lineTo(CX, py+22)
+    ctx.closePath()
+    ctx.fillStyle = '#fff'
+    ctx.fill()
+    ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1; ctx.stroke()
   }, [segments, angle, c, screen])
 
   /* Confettis sur écran de gain + ticket */
@@ -287,9 +254,17 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
       {screen === 'spin' && (
         <div className="screen" style={{ alignItems:'center',paddingTop:24 }}>
-          <div style={{ fontSize:15,fontWeight:800,marginBottom:20,textAlign:'center' }}>Appuie sur la roue !</div>
+          <div style={{ fontSize:15,fontWeight:800,marginBottom:14,textAlign:'center' }}>Appuie sur la roue !</div>
+          <div style={{ display:'flex',flexWrap:'wrap',gap:'6px 12px',justifyContent:'center',maxWidth:300,marginBottom:16 }}>
+            {segments.map((sg,i) => (
+              <div key={i} style={{ display:'flex',alignItems:'center',gap:5,fontSize:11,fontWeight:700,color:'rgba(255,255,255,.75)' }}>
+                <span style={{ width:8,height:8,borderRadius:'50%',background:sg.color||'#3B5CC4',flexShrink:0 }} />
+                {sg.label || '—'}
+              </div>
+            ))}
+          </div>
           <div style={{ position:'relative',width:300,height:300,cursor:spinning?'default':'pointer' }} onClick={spinWheel}>
-            <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:'50%',boxShadow:'0 14px 40px rgba(16,30,120,.4)' }} />
+            <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:'50%',boxShadow:'0 14px 34px rgba(0,0,0,.35)' }} />
           </div>
           <button className="btn" onClick={spinWheel} disabled={spinning} style={{ maxWidth:240,marginTop:18 }}>
             <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />{spinning?'La roue tourne…':'Faire tourner la roue'}
