@@ -1,8 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { libelleModule, iconeModule } from '@/lib/operations'
+import { libelleModule } from '@/lib/operations'
 import { CHARTE, POLICE_ADMIN } from '@/lib/charte'
+import { Ico } from '@/lib/proicons'
 
 type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; frais_pro?: number | null; module?: string | null }
 
@@ -75,8 +76,17 @@ export default function RejoindreClient({ se }: { se: SE }) {
   const surface: React.CSSProperties = { background: CHARTE.carte, border: `1px solid ${CHARTE.bordure}`, borderRadius: 16, padding: '22px 20px 26px' }
   const label: React.CSSProperties = { fontSize: 11.5, fontWeight: 800, letterSpacing: '.05em', color: CHARTE.attenue, textTransform: 'uppercase', marginBottom: 6, display: 'block' }
   const input: React.CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '11px 13px', borderRadius: 10, border: `1px solid ${CHARTE.bordure}`, background: CHARTE.subtil, fontSize: 15, fontFamily: 'inherit', color: CHARTE.texte, outline: 'none' }
-  const field: React.CSSProperties = { marginBottom: 15 }
-  const sectionTitre: React.CSSProperties = { fontSize: 13, fontWeight: 800, color: ORANGE, margin: '22px 0 13px' }
+  const field: React.CSSProperties = { marginBottom: 12 }
+  const styleSection: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 800, color: ORANGE, margin: '18px 0 11px' }
+  /* Romain, 17/09 : « on n'utilise aucun emoji, on n'utilise que des pictos » --
+     memes icones vectorielles que le reste de l'app (lib/proicons.tsx, deja
+     construites pour cette raison exacte : « ne rendent pas correctement avec
+     Manrope »). */
+  const Section = ({ icone, titre, first }: { icone: string; titre: string; first?: boolean }) => (
+    <div style={{ ...styleSection, ...(first ? { marginTop: 0 } : null) }}>
+      <Ico k={icone} size={15} /> {titre}
+    </div>
+  )
 
   /* Desktop (>= 900px) : deux colonnes cote a cote (pitch + formulaire), le
      bandeau orange occupe toute la hauteur de la colonne de gauche au lieu
@@ -102,7 +112,9 @@ export default function RejoindreClient({ se }: { se: SE }) {
         <style>{style}</style>
         <div className="rj-page">
           <div className="rj-hero">
-            <div style={{ fontSize: 54, marginBottom: 10 }}>🎉</div>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Ico k="check" size={30} style={{ color: '#fff' }} />
+            </div>
             <div style={{ fontSize: 26, fontWeight: 800 }}>Demande envoyée !</div>
           </div>
           <div className="rj-corps">
@@ -145,33 +157,37 @@ export default function RejoindreClient({ se }: { se: SE }) {
         <div className="rj-carte">
         <div style={surface}>
 
-          <div style={{ ...sectionTitre, marginTop: 0 }}>🏪 Votre commerce</div>
+          <Section icone="shop" titre="Votre commerce" first />
           <div style={field}><label style={label}>Nom du commerce *</label><input style={input} value={f.commerce} onChange={e => set('commerce', e.target.value)} /></div>
-          <div style={field}>
-            <label style={label}>Catégorie *</label>
-            <select style={input} value={f.categorie} onChange={e => set('categorie', e.target.value)}>
-              <option value="">Choisir…</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 11, marginBottom: 12 }}>
+            <div>
+              <label style={label}>Catégorie *</label>
+              <select style={input} value={f.categorie} onChange={e => set('categorie', e.target.value)}>
+                <option value="">Choisir…</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div><label style={label}>Adresse *</label><input style={input} value={f.adresse} onChange={e => set('adresse', e.target.value)} placeholder="N°, rue, code postal, ville" /></div>
           </div>
-          <div style={field}><label style={label}>Adresse *</label><input style={input} value={f.adresse} onChange={e => set('adresse', e.target.value)} placeholder="N°, rue, code postal, ville" /></div>
 
-          <div style={sectionTitre}>👤 Votre contact</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11, marginBottom: 15 }}>
+          <Section icone="user" titre="Votre contact" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 11, marginBottom: 12 }}>
             <div><label style={label}>Prénom *</label><input style={input} value={f.prenom} onChange={e => set('prenom', e.target.value)} /></div>
             <div><label style={label}>Nom *</label><input style={input} value={f.nom} onChange={e => set('nom', e.target.value)} /></div>
+            <div><label style={label}>Téléphone *</label><input style={input} type="tel" inputMode="tel" value={f.tel} onChange={e => set('tel', e.target.value)} /></div>
           </div>
           <div style={field}><label style={label}>Email *</label><input style={input} type="email" inputMode="email" autoCapitalize="none" value={f.email} onChange={e => set('email', e.target.value)} /></div>
-          <div style={field}><label style={label}>Téléphone *</label><input style={input} type="tel" inputMode="tel" value={f.tel} onChange={e => set('tel', e.target.value)} /></div>
 
-          <div style={sectionTitre}>🎮 Le jeu de l&apos;opération</div>
-          <div style={{ ...field, background: 'rgba(194,65,12,.07)', borderRadius: 10, padding: '12px 14px', fontSize: 14, color: CHARTE.texte }}>
-            <strong>{iconeModule(se.module)} {libelleModule(se.module ?? 'nds2026')}</strong>
-            <div style={{ fontSize: 12.5, marginTop: 4, color: CHARTE.attenue }}>Choisi par l&apos;organisateur. Les gagnants sont désignés par tirage au sort.</div>
+          <Section icone="game" titre="Le jeu de l'opération" />
+          <div style={{ ...field, display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(194,65,12,.07)', borderRadius: 10, padding: '10px 14px', fontSize: 13.5, color: CHARTE.texte }}>
+            <div style={{ flex: 1 }}>
+              <strong>{libelleModule(se.module ?? 'nds2026')}</strong>
+              <div style={{ fontSize: 12, marginTop: 2, color: CHARTE.attenue }}>Choisi par l&apos;organisateur, gagnants désignés par tirage au sort.</div>
+            </div>
           </div>
 
-          <div style={sectionTitre}>🎁 Votre lot pour le tirage</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: 11, marginBottom: 15 }}>
+          <Section icone="gift" titre="Votre lot pour le tirage" />
+          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: 11, marginBottom: 12 }}>
             <div><label style={label}>Lot offert</label><input style={input} value={f.lot} onChange={e => set('lot', e.target.value)} placeholder="ex : 1 bon d'achat de 20 €" /></div>
             <div><label style={label}>Quantité</label><input style={input} inputMode="numeric" value={f.quantite} onChange={e => set('quantite', e.target.value)} /></div>
           </div>

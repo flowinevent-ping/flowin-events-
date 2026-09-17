@@ -124,6 +124,12 @@ function Wizard() {
   useEffect(() => { fetchModeles().then(setModeles).catch(() => setModeles([])) }, [])
   const [envoi, setEnvoi] = useState(false)
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
+  /* Romain, 17/09 : le bandeau « points a completer » s affichait des l
+     arrivee sur un formulaire vierge, avant meme une tentative de saisie --
+     accueil en alerte jaune. Visible desormais seulement au recapitulatif
+     (etape F, ou on s attend a voir ce qui bloque) ou apres un premier essai
+     d enregistrement refuse. */
+  const [tenteEnregistrer, setTenteEnregistrer] = useState(false)
 
   const maj = (champs: Partial<BrouillonEvent>) => setD(x => ({ ...x, ...champs }))
 
@@ -205,6 +211,8 @@ function Wizard() {
     setD(x => ({ ...x, lots: x.lots.map((l, j) => (j === i ? { ...l, ...champs } : l)) }))
 
   const enregistrement = async () => {
+    setTenteEnregistrer(true)
+    if (problemes.length > 0) return
     setEnvoi(true)
     setRetour(null)
     const r = await enregistrer(d, 'create')
@@ -259,7 +267,7 @@ function Wizard() {
       <BandeauParcours titre="Créer un événement" i={iEtape} total={ETAPES.length} />
       <BarreParcours<Etape> etapes={ETAPES.map(s => ({ id: s.id, label: s.label }))} actif={etape} onAller={setEtape} />
 
-      {problemes.length > 0 && (
+      {(tenteEnregistrer || etape === 'F') && problemes.length > 0 && (
         <div style={{
           marginBottom: 14, padding: '10px 12px', borderRadius: 10,
           border: '1px solid #b4791f', background: 'rgba(244,181,68,.10)', fontSize: 11.5, lineHeight: 1.6,
@@ -570,7 +578,7 @@ function Wizard() {
           onTerminer={enregistrement}
           libelleFin="Créer l’événement"
           occupe={envoi}
-          bloque={problemes.length ? `${problemes.length} point${problemes.length > 1 ? 's' : ''} à compléter — voir la liste ci-dessus.` : undefined}
+          bloque={problemes.length ? `${problemes.length} point${problemes.length > 1 ? 's' : ''} à compléter${tenteEnregistrer || etape === 'F' ? ' — voir la liste ci-dessus' : ''}.` : undefined}
         />
       </div>
 
