@@ -161,8 +161,8 @@ export default function Sidebar() {
       group: 'CRM',
       ton: 'crm',
       items: [
-        { id: 'nds-participants', icon: '👥', label: 'CRM Participants', href: '/dashboard/nds-participants' },
-        { id: 'joueurs', icon: '👤', label: 'Joueurs', count: joueurs.length, href: '/dashboard/joueurs' },
+        { id: 'nds-participants', icon: '👥', label: 'CRM — Passages par station', href: '/dashboard/nds-participants' },
+        { id: 'joueurs', icon: '👤', label: 'Joueurs — fiches contact', count: joueurs.length, href: '/dashboard/joueurs' },
         { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
         { id: 'wizard-pro', icon: '✨', label: 'Créer un pro', href: '/dashboard/wizard-pro' },
         { id: 'partenaires', icon: '🤝', label: 'Partenaires (fiche commerce)', count: partenaires.length, href: '/dashboard/partenaires' },
@@ -180,8 +180,7 @@ export default function Sidebar() {
       items: [
         { id: 'envoi-masse', icon: '📢', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
         { id: 'landing-page', icon: '🌐', label: 'Landing pages', href: '/dashboard/landing-page' },
-        { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande', href: '/dashboard/nds-bon-commande' },
-        { id: 'bons-commande-liste', icon: '📋', label: 'Bons de commande & Factures (liste)', href: '/bons-commande-liste.html', external: true },
+        { id: 'nds-bon-commande', icon: '🧾', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
         { id: 'facture-nds', icon: '💶', label: 'Générer une facture', href: '/facture-nds.html', external: true },
         { id: 'nds-packs', icon: '🎟️', label: 'Packs de participation', href: '/dashboard/nds-packs' },
         { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
