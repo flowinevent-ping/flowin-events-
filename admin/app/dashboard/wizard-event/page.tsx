@@ -293,7 +293,7 @@ function Wizard() {
             )}
             {ligne("Nom de l'événement", true,
               <input className="sa-input" style={{ width: '100%' }} value={d.nom}
-                onChange={e => maj({ nom: e.target.value })} placeholder="Nuits du Sud 2027…" />)}
+                onChange={e => maj({ nom: e.target.value })} placeholder="Jazz à Nice 2027…" />)}
             {proInconnu && (
               <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, background: '#FEF3C7', color: '#92400E', fontSize: 11.5 }}>
                 ⚠ Le pro pré-rempli (<b>{d.pro_id}</b>) est introuvable dans la liste —
