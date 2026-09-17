@@ -11,6 +11,7 @@
  * Generique : le super event est selectionne, jamais code en dur.
  */
 import { useEffect, useMemo, useState } from 'react'
+import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
@@ -51,6 +52,7 @@ function CarteQuestion({ q }: { q: QuestionBonus }) {
 }
 
 export default function Page() {
+  const { openDrawer } = useDashboard()
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [se, setSe] = useState('')
   const [r, setR] = useState<RapportPoints | null>(null)
@@ -124,7 +126,7 @@ export default function Page() {
           </div>
 
           <div style={{ overflowX: 'auto' }}>
-            <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+            <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
               <thead>
                 <tr>
                   <th style={{ ...th, textAlign: 'left' }}>Point de jeu</th>
@@ -144,7 +146,7 @@ export default function Page() {
               </thead>
               <tbody>
                 {points.map((p: PointJeu) => (
-                  <tr key={p.event_id}>
+                  <tr key={p.event_id} onClick={() => openDrawer('event', p.event_id)}>
                     <td style={{ ...cell, textAlign: 'left', fontWeight: 600 }}>{p.nom}</td>
                     <td style={{ ...cell, textAlign: 'left' }}>
                       <span className="sa-chip" style={{ fontSize: 10 }}>{p.type}</span>
