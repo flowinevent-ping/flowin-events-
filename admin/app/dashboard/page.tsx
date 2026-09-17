@@ -145,7 +145,7 @@ export default function DashboardPage() {
                     <button
                       key={ev.id}
                       className="sa-kb-vignette"
-                      style={{ borderLeftColor: ev.couleur ?? '#7C2D92' }}
+                      style={{ borderLeftColor: ev.couleur ?? '#2563EB' }}
                       onClick={() => openDrawer('event', ev.id, 'infos')}
                       title={`Ouvrir ${ev.nom}`}
                     >

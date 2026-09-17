@@ -22,7 +22,7 @@ export function ResumeVisuelDepouillement({ questions }: { questions: SondageLan
             <div style={{ fontSize: 10.5, fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 7, lineHeight: 1.35, minHeight: 27 }}>{q.libelle}</div>
             <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6, lineHeight: 1.3 }}>{top.reponse}</div>
             <div style={{ width: '100%', height: 5, borderRadius: 99, background: '#efe9f2', overflow: 'hidden', marginBottom: 5 }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#A855F7,${ACC})`, borderRadius: 99 }} />
+              <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#60A5FA,${ACC})`, borderRadius: 99 }} />
             </div>
             <div style={{ fontSize: 11, color: '#8a7e93' }}>{pct} % · {q.repondants} réponse{q.repondants > 1 ? 's' : ''}</div>
           </div>
@@ -74,7 +74,7 @@ export default function DepouillementAccordion({ questions }: { questions: Sonda
                       <span style={{ fontWeight: 800, whiteSpace: 'nowrap' }}>{r.n} <span style={MUTED}>({pct} %)</span></span>
                     </div>
                     <div style={{ width: '100%', height: 6, borderRadius: 99, background: '#efe9f2', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#A855F7,${ACC})`, borderRadius: 99 }} />
+                      <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg,#60A5FA,${ACC})`, borderRadius: 99 }} />
                     </div>
                   </div>
                   )

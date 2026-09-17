@@ -39,5 +39,5 @@
 .sa-apercu-pas .sa-apercu-btn{border:1.5px solid var(--sa-border,#E2E8F0);background:var(--sa-card,#fff);
   border-radius:9px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;
   color:var(--sa-text,#0F172A);font-family:inherit}
-.sa-apercu-pas .sa-apercu-btn.actif{border-color:var(--sa-accent,#7C2D92);
-  background:var(--sa-subtle,rgba(124,45,146,.08))}
+.sa-apercu-pas .sa-apercu-btn.actif{border-color:var(--sa-accent,#2563EB);
+  background:var(--sa-subtle,rgba(37,99,235,.08))}

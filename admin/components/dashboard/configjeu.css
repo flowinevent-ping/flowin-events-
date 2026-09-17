@@ -9,4 +9,4 @@
 :where(.cfgjeu) .sa-list-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--sa-border,#E2E8F0)}
 :where(.cfgjeu) .sa-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;border:1.5px solid var(--sa-border,#E2E8F0);background:var(--sa-card,#fff);color:var(--sa-text,#0F172A);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:inherit}
 :where(.cfgjeu) .sa-btn.sm{padding:5px 10px;font-size:12px}
-:where(.cfgjeu) .sa-btn.primary{background:var(--sa-accent,#7C2D92);color:#fff;border-color:var(--sa-accent,#7C2D92)}
+:where(.cfgjeu) .sa-btn.primary{background:var(--sa-accent,#2563EB);color:#fff;border-color:var(--sa-accent,#2563EB)}

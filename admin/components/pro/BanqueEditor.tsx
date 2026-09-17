@@ -111,11 +111,11 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
         ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Un bloc de 4</button>
         <button
           onClick={() => setPanneau(p => p === 'ia' ? null : 'ia')}
-          style={{ ...btn, background: panneau === 'ia' ? 'rgba(124,45,146,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
+          style={{ ...btn, background: panneau === 'ia' ? 'rgba(37,99,235,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
         ><Ico k="sparkle" size={13} style={{ marginRight: 6 }} />Générer avec l&apos;IA</button>
         <button
           onClick={() => setPanneau(p => p === 'import' ? null : 'import')}
-          style={{ ...btn, background: panneau === 'import' ? 'rgba(124,45,146,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
+          style={{ ...btn, background: panneau === 'import' ? 'rgba(37,99,235,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
         ><Ico k="upload" size={13} style={{ marginRight: 6 }} />Importer</button>
       </div>
 

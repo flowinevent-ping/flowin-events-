@@ -45,7 +45,7 @@ export default function PartenaireSheet({ partenaire, onClose }: PartenaireSheet
         <div className="fl-sheet-handle" />
         <button className="fl-sheet-close" onClick={onClose}>✕</button>
         <div className="fl-sheet-body">
-          <div className="fl-sheet-avatar" style={{ background: 'rgba(168,85,247,.15)' }}>
+          <div className="fl-sheet-avatar" style={{ background: 'rgba(96,165,250,.15)' }}>
             {partenaire.image_url
               ? <img src={partenaire.image_url} alt={partenaire.nom} />
               : <span style={{ fontSize: 34 }}>{partenaire.emoji || emojiForPartenaire(partenaire.nom)}</span>

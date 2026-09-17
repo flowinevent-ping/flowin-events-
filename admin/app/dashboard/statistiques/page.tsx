@@ -146,7 +146,7 @@ export default function Page() {
                   <td style={{ textAlign: 'right', fontWeight: 700 }}>{x.parties}</td>
                   <td style={{ textAlign: 'right' }}>{x.joueurs}</td>
                   <td style={{ textAlign: 'right', color: '#1D9E75', fontWeight: 700 }}>{x.primo_inscrits}</td>
-                  <td style={{ textAlign: 'right', color: '#7C2D92', fontWeight: 700 }}>{x.joueurs_revenus}</td>
+                  <td style={{ textAlign: 'right', color: '#2563EB', fontWeight: 700 }}>{x.joueurs_revenus}</td>
                 </tr>
               ))}
             </tbody>

@@ -131,7 +131,7 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
   body { margin:0; font-family: Manrope, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:#0F172A }
   .p { width:210mm; height:297mm; padding:22mm 18mm; display:flex; flex-direction:column;
        align-items:center; justify-content:center; text-align:center; page-break-after:always }
-  .k { font-size:13pt; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#7C2D92 }
+  .k { font-size:13pt; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#2563EB }
   h1 { font-size:34pt; line-height:1.1; margin:6mm 0 2mm; font-weight:900 }
   .s { font-size:15pt; color:#475569; margin:0 0 10mm }
   .q { width:112mm; height:112mm; padding:6mm; background:#fff; border:2px solid #E2E8F0; border-radius:8mm }
@@ -139,7 +139,7 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
   .c { font-size:19pt; font-weight:800; margin-top:10mm }
   .u { font-size:9.5pt; color:#94A3B8; margin-top:4mm; word-break:break-all; max-width:150mm }
   @media print { .n { display:none } }
-  .n { position:fixed; top:10px; right:10px; font:600 13px/1 system-ui; background:#7C2D92;
+  .n { position:fixed; top:10px; right:10px; font:600 13px/1 system-ui; background:#2563EB;
        color:#fff; border:0; border-radius:8px; padding:10px 14px; cursor:pointer }
 </style></head><body>
 <button class="n" onclick="window.print()">Imprimer</button>

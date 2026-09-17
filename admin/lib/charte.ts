@@ -17,9 +17,9 @@ export const CHARTE = {
   subtil: '#F8FAFC',
   sidebar: '#1E293B',
   sidebar2: '#172033',
-  accent: '#7C2D92',
-  accentClair: '#A855F7',
-  accentFonce: '#6B248A',
+  accent: '#2563EB',
+  accentClair: '#60A5FA',
+  accentFonce: '#1D4ED8',
 } as const
 
 export const POLICE_ADMIN = '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif'
@@ -28,13 +28,10 @@ export const POLICE_ADMIN = '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,A
 export const VARIABLES_CSS = `--sa-bg:${CHARTE.fond};--sa-card:${CHARTE.carte};--sa-border:${CHARTE.bordure};--sa-text:${CHARTE.texte};--sa-muted:${CHARTE.attenue};--sa-subtle:${CHARTE.subtil};--sa-accent:${CHARTE.accent};--sa-accent-light:${CHARTE.accentClair};--sa-accent-dark:${CHARTE.accentFonce};`
 
 /**
- * CHARTE PRO (16/09, P6) — l espace pro prend les couleurs et la police de
- * l application joueur (charte NDS 2026, lib/nds2026Design.ts) : la saisie
- * ressemble a ce que verra le client. Valeurs relevees, aucune inventee :
- *   --ink #1c1024, --muted #8a7e93, --line #efe9f2, --purple #7C2D92,
- *   --purple-deep #5A1E6E, --magenta #E0218A, --magenta2 #8E2E9E,
- *   --card1 #2B1036, --card2 #160820 ; fond #f2edf7 (lot.html) ;
- *   champs clairs #faf7fd / #e7def0 (surcharges blanches du gabarit).
+ * CHARTE PRO (17/09) — bascule du violet/magenta vers un bleu, sur demande
+ * Romain (l espace pro et le dashboard SA ne sont plus alignes sur la
+ * charte NDS 2026 du parcours joueur, qui reste violette et n est pas
+ * touchee : lib/nds2026Design.ts et NDS2026Client.tsx sont hors perimetre).
  */
 export const CHARTE_PRO = {
   fond: '#f2edf7',
@@ -45,15 +42,15 @@ export const CHARTE_PRO = {
   texte: '#1c1024',
   attenue: '#8a7e93',
   subtil: '#faf7fd',
-  sidebar: '#2B1036',
-  sidebar2: '#160820',
-  accent: '#7C2D92',
-  accentFonce: '#5A1E6E',
-  magenta: '#E0218A',
-  magenta2: '#8E2E9E',
+  sidebar: '#0F1E33',
+  sidebar2: '#0A1526',
+  accent: '#2563EB',
+  accentFonce: '#1D4ED8',
+  magenta: '#0EA5E9',
+  magenta2: '#3B82F6',
   or: '#F5A100',
-  degrade: 'linear-gradient(90deg,#8E2E9E,#E0218A)',
-  filet: 'linear-gradient(90deg,#F5A100,#E0218A,#6f4bd8)',
+  degrade: 'linear-gradient(90deg,#3B82F6,#0EA5E9)',
+  filet: 'linear-gradient(90deg,#F5A100,#0EA5E9,#2563EB)',
 } as const
 
 export const POLICE_PRO = "'Manrope',system-ui,sans-serif"

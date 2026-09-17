@@ -46,10 +46,10 @@ export function CarteChaleur({
           return (
             <div key={h} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: 26 }}
               title={n ? `${n} partie${n > 1 ? 's' : ''} · ${c?.joueurs} joueur${(c?.joueurs ?? 0) > 1 ? 's' : ''}` : undefined}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, color: n ? '#7C2D92' : 'var(--sa-muted)', marginBottom: 3, height: 14 }}>{n || ''}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, color: n ? '#2563EB' : 'var(--sa-muted)', marginBottom: 3, height: 14 }}>{n || ''}</div>
               <div style={{
                 width: 16, height: hPx, borderRadius: 4,
-                background: n ? 'linear-gradient(180deg,#A855F7,#7C2D92)' : 'var(--sa-subtle)',
+                background: n ? 'linear-gradient(180deg,#60A5FA,#2563EB)' : 'var(--sa-subtle)',
               }} />
               <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--sa-muted)', marginTop: 5 }}>{h}h</div>
             </div>

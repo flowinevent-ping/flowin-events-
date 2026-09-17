@@ -26,7 +26,7 @@ import { operationsRangees } from '@/lib/rangementOperations'
 export type Mode = 'sa' | 'pro'
 export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking' | 'crm'
 
-const ACC = 'var(--sa-accent, #7C2D92)'
+const ACC = 'var(--sa-accent, #2563EB)'
 const MUT = 'var(--sa-muted, #64748B)'
 const BRD = 'var(--sa-border, #E2E8F0)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
@@ -37,7 +37,7 @@ export const btn: React.CSSProperties = {
   fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', color: 'inherit',
   textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap',
 }
-export const btnPrimaire: React.CSSProperties = { ...btn, background: '#7C2D92', borderColor: '#7C2D92', color: '#fff' }
+export const btnPrimaire: React.CSSProperties = { ...btn, background: '#2563EB', borderColor: '#2563EB', color: '#fff' }
 
 export function Vide({ children }: { children: React.ReactNode }) {
   return <div style={{ fontSize: 12.5, color: MUT, padding: '6px 0' }}>{children}</div>
@@ -48,7 +48,7 @@ function Pastille({ ton, children }: { ton: 'ok' | 'warn' | 'neutre' | 'acc'; ch
     ok: ['rgba(34,197,94,.12)', '#15803D'],
     warn: ['rgba(245,158,11,.13)', '#B45309'],
     neutre: [SUBT, MUT],
-    acc: ['rgba(168,85,247,.11)', '#7C2D92'],
+    acc: ['rgba(96,165,250,.11)', '#2563EB'],
   }[ton]
   return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10.5, fontWeight: 800, borderRadius: 99, padding: '3px 9px', background: c[0], color: c[1], whiteSpace: 'nowrap' }}>{children}</span>
 }
@@ -191,7 +191,7 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
             <div style={{ fontSize: 11, color: MUT }}>{g.lotNom ?? 'Lot'}{g.lotValeur ? ` · ${g.lotValeur} €` : ''}{g.date ? ` · tiré le ${new Date(`${g.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}</div>
             {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           </div>
-          <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7C2D92' }}>{g.ticketCode ?? '—'}</span>
+          <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
           <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
           {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
           {g.etat !== 'a_confirmer' && (

@@ -3,8 +3,8 @@
    de celle déjà en place dans ProShell.tsx / /pro (accueil), pas une couleur importée des
    anciennes pages /rejoindre et /sponsor jamais utilisées. */
 
-export const ACCENT = '#A855F7'
-export const ACCENT_D = '#7C2D92'
+export const ACCENT = '#60A5FA'
+export const ACCENT_D = '#2563EB'
 export const INK = '#1c1024'
 export const MUTED = '#8a7e93'
 export const BORDER = '#efe9f2'
@@ -30,7 +30,7 @@ export function Hero({ kicker, title, sub }: { kicker: string; title: string; su
 export const pageWrap: React.CSSProperties = { maxWidth: 540, margin: '0 auto', padding: '0 18px 40px' }
 
 export const card: React.CSSProperties = {
-  background: '#fff', borderRadius: 20, padding: '24px 22px', boxShadow: '0 6px 24px rgba(124,45,146,.08)', border: `1px solid ${BORDER}`,
+  background: '#fff', borderRadius: 20, padding: '24px 22px', boxShadow: '0 6px 24px rgba(37,99,235,.08)', border: `1px solid ${BORDER}`,
 }
 
 export const cardFloating: React.CSSProperties = { ...card, marginTop: -18 }

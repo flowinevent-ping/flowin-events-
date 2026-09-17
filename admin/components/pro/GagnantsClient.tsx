@@ -61,7 +61,7 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
   const kpi = (n: number, l: string) => (
     <div style={{ flex: '1 1 110px', background: '#faf7fd', borderRadius: 10, padding: '9px 12px' }}>
-      <div style={{ fontSize: 20, fontWeight: 900, color: '#7C2D92' }}>{n}</div>
+      <div style={{ fontSize: 20, fontWeight: 900, color: '#2563EB' }}>{n}</div>
       <div style={{ fontSize: 11, ...MUTED }}>{l}</div>
     </div>
   )
@@ -204,7 +204,7 @@ function Tirage({ op, data, setMessage, onChange }: {
           {mail === 'envoi' && 'Envoi du billet…'}
           {mail === 'ok' && 'Billet envoyé par email au gagnant.'}
           {mail === 'echec' && 'Tirage enregistré, mais le billet n’a pas pu être envoyé par email.'}
-          {dernierToken && <> · <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>voir le billet</a></>}
+          {dernierToken && <> · <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#2563EB', fontWeight: 700 }}>voir le billet</a></>}
         </div>
       )}
     </div>
@@ -262,7 +262,7 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
           {g.retireAt && <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           {g.retraitToken && (
             <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
-              style={{ fontSize: 11.5, color: '#7C2D92', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
+              style={{ fontSize: 11.5, color: '#2563EB', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

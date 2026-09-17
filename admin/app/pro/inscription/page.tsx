@@ -144,7 +144,7 @@ export default function InscriptionProPage() {
                   onClick={() => maj({ profil: p.id as ProfilPro })}
                   style={{
                     border: f.profil === p.id ? `2px solid ${ACCENT_D}` : `1.5px solid ${BORDER}`,
-                    background: f.profil === p.id ? 'rgba(124,45,146,.05)' : '#fff',
+                    background: f.profil === p.id ? 'rgba(37,99,235,.05)' : '#fff',
                     borderRadius: 14, padding: 16, cursor: 'pointer',
                   }}
                 >
@@ -152,7 +152,7 @@ export default function InscriptionProPage() {
                   <div style={{ fontSize: 12.5, color: MUTED, margin: '4px 0 8px', lineHeight: 1.5 }}>{p.sous}</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {p.badges.map(b => (
-                      <span key={b} style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 8px', borderRadius: 99, background: 'rgba(124,45,146,.1)', color: ACCENT_D }}>{b}</span>
+                      <span key={b} style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 8px', borderRadius: 99, background: 'rgba(37,99,235,.1)', color: ACCENT_D }}>{b}</span>
                     ))}
                   </div>
                 </div>

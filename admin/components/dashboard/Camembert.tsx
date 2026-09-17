@@ -49,7 +49,7 @@ export function Camembert({
                 <span style={{ width: 11, height: 11, borderRadius: 3, background: PALETTE[i % PALETTE.length], flex: 'none' }} />
                 <span style={{ flex: 1, fontSize: 12, fontWeight: 700 }}>{p.valeur}</span>
                 <span style={{ fontSize: 12, color: 'var(--sa-muted)' }}>{p.n}</span>
-                <span style={{ fontSize: 13, fontWeight: 800, color: '#7C2D92', width: 46, textAlign: 'right' }}>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#2563EB', width: 46, textAlign: 'right' }}>
                   {Math.round((p.n / somme) * 1000) / 10} %
                 </span>
               </div>

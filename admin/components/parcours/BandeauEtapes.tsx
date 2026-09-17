@@ -10,7 +10,7 @@
 export type TeinteEtapes = 'event' | 'super' | 'pro'
 
 export const COULEURS_ETAPES: Record<TeinteEtapes, [string, string]> = {
-  event: ['#9B45B4', '#7C2D92'],
+  event: ['#3B82F6', '#2563EB'],
   super: ['#FF8A14', '#C2410C'],
   pro: ['#3B7DE0', '#2746A6'],
 }

@@ -89,7 +89,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
             style={{
               textDecoration: 'none', fontSize: 12.5, fontWeight: 700, borderRadius: 20, padding: '6px 12px',
               border: `1.5px solid ${j.jour === jourSel ? ACC : '#efe9f2'}`,
-              background: j.jour === jourSel ? 'rgba(124,45,146,.08)' : '#fff',
+              background: j.jour === jourSel ? 'rgba(37,99,235,.08)' : '#fff',
               color: j.jour === jourSel ? ACC : '#1c1024',
             }}>
             {fr(j.jour)}{j.hors_periode ? ' (hors période)' : ''}

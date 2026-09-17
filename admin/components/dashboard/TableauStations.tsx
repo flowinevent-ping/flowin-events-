@@ -120,7 +120,7 @@ export function TableauStations({
                 <td style={{ ...cellule, textAlign: 'right', color: s.digital ? '#E0218A' : 'var(--sa-muted)', fontWeight: s.digital ? 700 : 400 }}>{s.digital}</td>
                 <td style={{ ...cellule, textAlign: 'right', fontWeight: 800 }}>{s.parties}</td>
                 <td style={{ ...cellule, textAlign: 'right' }}>{s.joueurs}</td>
-                <td style={{ ...cellule, textAlign: 'right', color: '#7C2D92', fontWeight: 700 }}>{s.rejoue}</td>
+                <td style={{ ...cellule, textAlign: 'right', color: '#2563EB', fontWeight: 700 }}>{s.rejoue}</td>
                 <td style={{ ...cellule, textAlign: 'right', color: 'var(--sa-muted)' }}>
                   {s.heure_pic != null ? `${String(s.heure_pic).padStart(2, '0')}h` : '—'}
                 </td>

@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase'
  * (/pro/parcours) et cote dashboard SA (/dashboard/parcours) via les memes props.
  */
 
-const ACC = '#7C2D92'
+const ACC = '#2563EB'
 type Ev = { id: string; module: string; nom: string; super_event_id?: string | null }
 
 export function Phone({ src, empty }: { src?: string; empty?: string }) {
@@ -90,7 +90,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
   const empty = 'Aucun événement à prévisualiser pour le moment.'
 
   const tabBtn = (t: 'event' | 'super', label: string, sous: string) => (
-    <button onClick={() => setTab(t)} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${ACC}` : '2px solid #E2E8F0', background: tab === t ? 'rgba(124,45,146,.06)' : '#fff' }}>
+    <button onClick={() => setTab(t)} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${ACC}` : '2px solid #E2E8F0', background: tab === t ? 'rgba(37,99,235,.06)' : '#fff' }}>
       <div style={{ fontWeight: 800, fontSize: 14, color: tab === t ? ACC : '#0F172A' }}>{label}</div>
       <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 2 }}>{sous}</div>
     </button>
