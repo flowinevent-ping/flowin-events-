@@ -50,6 +50,9 @@
   }
 
   function sujet(t) {
+    if (t && t.type === 'relance') {
+      return estNds(t) ? 'Nuits du Sud & Flowin — Ton lot t’attend toujours !' : (nomOp(t) + ' & Flowin — Ton lot t’attend toujours !');
+    }
     if (!estNds(t)) return nomOp(t) + ' & Flowin — Vous avez gagné !';
     return (t && t.type === 'soir')
       ? 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné une place !'
@@ -63,6 +66,26 @@
     var comm   = t.partenaire_nom || '';
     var coord  = [t.partenaire_adresse, t.partenaire_tel].filter(Boolean).join(' — ');
     var L = ['Bonjour ' + prenomDe(t) + ',', ''];
+
+    if (t.type === 'relance') {
+      L.push("Petit rappel : tu as gagné, il y a quelques jours, au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " :", '',
+             '   ' + (t.lot_nom || 'un lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : ''));
+      if (comm)  L.push('   chez ' + comm);
+      if (coord) L.push('   ' + coord);
+      L.push('', "Nous n'avons pas encore de trace de ton passage pour le récupérer !", '');
+      if (lien) {
+        L.push('>>> TON BILLET EST ICI <<<', '',
+               '   ' + lien, '',
+               "Présente ce billet (papier ou écran) chez le commerçant, il scanne le QR et c'est réglé.", '');
+      }
+      var cRelance = puces(t.conditions);
+      if (cRelance.length) { L.push('À SAVOIR', ''); L.push.apply(L, cRelance); L.push(''); }
+      if (t.ticket_code) L.push('Ton numéro de billet : ' + t.ticket_code, '');
+      L.push('À bientôt chez notre partenaire !', '',
+             estNds(t) ? 'Flowin, les Nuits du Sud, la Ville de Vence' : ('Flowin & ' + nomOp(t)),
+             'flowinevent@gmail.com · 04 93 59 91 37');
+      return L.join('\n');
+    }
 
     if (grand) {
       L.push(estNds(t)

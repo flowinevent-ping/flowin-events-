@@ -27,6 +27,9 @@ declare global {
     }
   }
 }
+
+const dateHeureFr = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
 /** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici
  * (deja utilise depuis PartenaireDrawer, meme pattern repris a l'identique). */
 function useMailGagnant() {
@@ -202,6 +205,9 @@ export default function Page() {
                 <span className={`sa-chip ${g.etat === 'a_confirmer' ? 'past' : 'live'}`}>
                   {g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'}
                 </span>
+                {g.etat === 'retire' && dateHeureFr(g.retire_at) && (
+                  <span style={{ fontSize: 11, color: 'var(--sa-muted)' }}>le {dateHeureFr(g.retire_at)}</span>
+                )}
                 {g.retrait_token && (
                   <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
                 )}
@@ -219,6 +225,23 @@ export default function Page() {
                     >
                       ✉️ Gagnant
                     </button>
+                    {g.etat === 'confirme' && (
+                      <button
+                        className="sa-btn sm"
+                        title="Le lot est confirmé mais pas encore retiré en caisse"
+                        onClick={() => {
+                          const url = window.flowinMailGagnant?.gmailUrl({
+                            joueur_nom: g.joueur_nom, email: g.joueur_email, lot_nom: g.lot_nom,
+                            ticket_code: g.ticket_code, retrait_token: g.retrait_token,
+                            partenaire_nom: g.partenaire_nom, partenaire_adresse: g.partenaire_adresse,
+                            partenaire_tel: g.partenaire_tel, conditions: g.conditions, type: 'relance',
+                          })
+                          if (url) window.open(url, '_blank', 'noopener')
+                        }}
+                      >
+                        🔔 Relancer
+                      </button>
+                    )}
                     <button
                       className="sa-btn sm"
                       onClick={() => window.open(mailPartenaireUrl(g, l.nom, l.email), '_blank', 'noopener')}
