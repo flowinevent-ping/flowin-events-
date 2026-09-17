@@ -345,8 +345,12 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
 
 /* ── Tracking ──────────────────────────────────────────────────────────────── */
 
-export function ContenuTracking({ op, proId, onStation }: {
+export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
   op: DonneesOperation; proId: string; onStation?: (eventId: string) => void
+  /** Cote pro (17/09, Romain) : un commercant ne voit que sa propre station,
+      jamais le total du super event (parties/joueurs de tous les autres
+      commerces confondus) — donnee commerciale d autres partenaires. */
+  masquerGlobal?: boolean
 }) {
   const [s, setS] = useState<SuiviOperation | null | undefined>(undefined)
   const [origines, setOrigines] = useState<{ source: string; n: number }[]>([])
@@ -378,7 +382,7 @@ export function ContenuTracking({ op, proId, onStation }: {
   const t = s.totaux
   return (
     <>
-      {op.type === 'super' && s.global && (
+      {op.type === 'super' && s.global && !masquerGlobal && (
         <>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, marginBottom: 4 }}>Toute l’opération — toutes stations</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -387,10 +391,12 @@ export function ContenuTracking({ op, proId, onStation }: {
             <Mini v={s.global.rejoue_autre_jour} l="revenus un autre jour" />
             <Mini v={s.global.pic_heure ? `${s.global.pic_heure.heure}h` : '—'} l="pic horaire" />
           </div>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, marginBottom: 4 }}>
-            {op.stations.length > 1 ? 'Vos stations' : 'Votre station'}
-          </div>
         </>
+      )}
+      {op.type === 'super' && s.global && (
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, marginBottom: 4 }}>
+          {op.stations.length > 1 ? 'Vos stations' : 'Votre station'}
+        </div>
       )}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <Mini v={t.flashs} l="flashs QR" />
@@ -563,7 +569,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
           {onglet === 'lots' && <ContenuLots op={op} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
-          {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} />}
+          {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} masquerGlobal />}
           {onglet === 'crm' && <ContenuCrm op={op} />}
         </BlocOperation>
       ))}

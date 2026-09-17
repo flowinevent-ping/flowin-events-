@@ -113,7 +113,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
         {onglet === 'lots' && <ContenuLots op={op} />}
         {onglet === 'diffusion' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
-        {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} />}
+        {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}
         {onglet === 'crm' && <CrmPro proId={data.proId} proNom={data.proNom ?? ''} contacts={contacts} operations={[]} operationFixe={op.cle} />}
         {onglet === 'bons' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
       </div>
