@@ -162,6 +162,7 @@ export default function Sidebar() {
       ton: 'crm',
       items: [
         { id: 'nds-participants', icon: '👥', label: 'CRM — Passages par station', href: '/dashboard/nds-participants' },
+        { id: 'crm-pro', icon: '👥', label: 'CRM pro (toutes ses opérations)', href: '/dashboard/crm-pro' },
         { id: 'joueurs', icon: '👤', label: 'Joueurs — fiches contact', count: joueurs.length, href: '/dashboard/joueurs' },
         { id: 'pros', icon: '🏢', label: 'Pros', count: pros.length, href: '/dashboard/pros' },
         { id: 'wizard-pro', icon: '✨', label: 'Créer un pro', href: '/dashboard/wizard-pro' },
@@ -186,25 +187,6 @@ export default function Sidebar() {
         { id: 'cgv', icon: '📄', label: 'CGV & légal', href: '/dashboard/cgv' },
         { id: 'pilotage', icon: '🎯', label: 'Pilotage', href: '/dashboard/pilotage' },
         { id: 'rapports', icon: '📊', label: 'Rapports', href: '/dashboard/rapports' },
-      ],
-    },
-    {
-      /* Propre a l operation Nuits du Sud 2026 : ces outils sont bornes a
-         se-nds-2026 ou portent son identite. Les melanger aux outils
-         generiques laissait croire qu ils servaient pour toute operation. */
-      group: 'NDS 2026',
-      ton: 'out',
-      items: [
-        { id: 'tirage-nds', icon: '🎰', label: 'Tirage au sort', href: '/tirage-nds.html', external: true },
-        { id: 'nds-front', icon: '🎨', label: 'Front NDS', href: '/dashboard/nds-front' },
-        { id: 'nds-comm', icon: '📣', label: 'Billets & kit com partenaire', href: '/dashboard/nds-comm' },
-        { id: 'nds-media', icon: '🎬', label: 'Vidéo & média', href: '/dashboard/nds-media' },
-        { id: 'nds-visuels', icon: '🖼️', label: 'Visuels & vidéos (A4/réseaux/spot)', href: '/nds-visuels.html', external: true },
-        { id: 'plaquette-nds', icon: '📖', label: 'Plaquette commerciale', href: '/plaquette-nds.html', external: true },
-        { id: 'nds-partenaire-offres', icon: '💶', label: 'Plaquette offres & tarifs', href: '/nds' },
-        { id: 'pitch-nds', icon: '📞', label: 'Argumentaire téléphonique', href: '/pitch-nds.html', external: true },
-        { id: 'flowin-partenaire-presentation', icon: '🎤', label: 'Présentation partenaire', href: '/flowin-partenaire-presentation.html', external: true },
-        { id: 'kit-digital', icon: '📦', label: 'Dossiers partenaires (A3/A4/vidéo/QR)', href: '/nds/kit-digital/index.html', external: true },
       ],
     },
     {

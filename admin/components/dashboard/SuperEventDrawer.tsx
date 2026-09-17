@@ -59,6 +59,12 @@ const ONGLETS: { id: string; label: string; sous: SousOnglet[] }[] = [
   { id: 'rapports', label: 'Rapports', sous: [
     { id: 'acces', label: 'Les quatre rapports' },
   ] },
+  /* Propre a se-nds-2026 (voir tabs plus bas) : ces outils ne valent que pour
+     cette edition, ils n apparaissent plus dans le menu general (17/09,
+     Romain — « range NDS en dehors de la barre de nav »). */
+  { id: 'outils-nds', label: 'Outils NDS', sous: [
+    { id: 'acces', label: 'Accès' },
+  ] },
 ]
 
 /**
@@ -125,6 +131,7 @@ export default function SuperEventDrawer() {
     { id: 'lots', label: 'Lots & tirages', badge: lotsSe.length },
     { id: 'pros', label: 'Pros', badge: prosSe.length },
     { id: 'rapports', label: 'Rapports' },
+    ...(seId === 'se-nds-2026' ? [{ id: 'outils-nds', label: 'Outils NDS' }] : []),
   ]
 
   /* Une station "du super event" appartient a l organisateur ; les autres sont
@@ -328,6 +335,24 @@ export default function SuperEventDrawer() {
             <Raccourci se={seId} href="/dashboard/rapport-points" titre="Rapport détaillé" desc="Par point de jeu, bonus et sondage landing" />
             <Raccourci se={seId} href="/dashboard/statistiques" titre="Statistiques & résultats" desc="Vue complète, chiffres publiables, pics" />
             <Raccourci se={seId} href="/dashboard/track-qr" titre="Origines du trafic" desc="D'où viennent les visiteurs" />
+          </>
+        )}
+
+        {ong.id === 'outils-nds' && seId === 'se-nds-2026' && (
+          <>
+            <p style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+              Outils propres à Nuits du Sud 2026 (visuels, kits, plaquettes) — ils ne valent
+              pas pour une autre opération, c'est pour ça qu'ils sont ici et non dans le menu général.
+            </p>
+            <Raccourci se={seId} href="/dashboard/nds-front" titre="Front NDS" desc="Écrans et front-office de l'édition" />
+            <Raccourci se={seId} href="/dashboard/nds-comm" titre="Billets & kit com partenaire" desc="Billets, kit de communication par commerce" />
+            <Raccourci se={seId} href="/dashboard/nds-media" titre="Vidéo & média" desc="Bibliothèque vidéo de l'opération" />
+            <Raccourci se={seId} href="/nds-visuels.html" titre="Visuels & vidéos (A4/réseaux/spot)" desc="Génération des supports visuels" statique />
+            <Raccourci se={seId} href="/plaquette-nds.html" titre="Plaquette commerciale" desc="Document de présentation" statique />
+            <Raccourci se={seId} href="/nds" titre="Plaquette offres & tarifs" desc="Page publique des offres" statique />
+            <Raccourci se={seId} href="/pitch-nds.html" titre="Argumentaire téléphonique" desc="Script de prospection" statique />
+            <Raccourci se={seId} href="/flowin-partenaire-presentation.html" titre="Présentation partenaire" desc="Support de présentation aux commerces" statique />
+            <Raccourci se={seId} href="/nds/kit-digital/index.html" titre="Dossiers partenaires (A3/A4/vidéo/QR)" desc="Kit complet par partenaire" statique />
           </>
         )}
 
