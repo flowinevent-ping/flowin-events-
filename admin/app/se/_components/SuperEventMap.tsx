@@ -27,6 +27,10 @@ interface Props {
   height?: number | string
   showPosition?: boolean
   onSelect?: (id: string) => void
+  /** Marqueurs deplacables a la souris/au doigt -- combine a `onMove`, ecrit la
+      nouvelle position au lacher plutot que de se contenter de l afficher. */
+  editable?: boolean
+  onMove?: (id: string, lat: number, lng: number) => void
 }
 
 declare global {
@@ -57,11 +61,13 @@ function esc(s: string): string {
   return s.replace(/[&<>"]/g, (c) => (({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } as Record<string, string>)[c]))
 }
 
-export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, showPosition = false, onSelect }: Props) {
+export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, showPosition = false, onSelect, editable = false, onMove }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
   const onSelectRef = useRef(onSelect)
   useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
+  const onMoveRef = useRef(onMove)
+  useEffect(() => { onMoveRef.current = onMove }, [onMove])
 
   useEffect(() => {
     let cancelled = false
@@ -96,8 +102,14 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
           iconSize: [28, 28],
           iconAnchor: [14, 14],
         })
-        const m = L.marker([p.lat, p.lng], { icon }).addTo(map)
-        if (onSelectRef.current) {
+        const m = L.marker([p.lat, p.lng], { icon, draggable: editable }).addTo(map)
+        if (editable) {
+          m.bindTooltip(p.nom, { direction: 'top', offset: [0, -14] })
+          m.on('dragend', () => {
+            const { lat, lng } = m.getLatLng()
+            if (onMoveRef.current) onMoveRef.current(p.id, lat, lng)
+          })
+        } else if (onSelectRef.current) {
           m.on('click', () => { if (onSelectRef.current) onSelectRef.current(p.id) })
         } else {
           const dir = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
@@ -134,7 +146,7 @@ export default function SuperEventMap({ lieux, mode = 'vitrine', height = 340, s
       cancelled = true
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null }
     }
-  }, [JSON.stringify(lieux), mode, showPosition])
+  }, [JSON.stringify(lieux), mode, showPosition, editable])
 
   return <div ref={ref} style={{ width: '100%', height, borderRadius: 12, overflow: 'hidden', zIndex: 0 }} />
 }

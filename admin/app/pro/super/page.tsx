@@ -3,7 +3,7 @@ import { fetchProDashboard } from '@/lib/pro'
 import { fetchStations, fetchSondageLanding } from '@/lib/nds'
 import { supabase } from '@/lib/supabase'
 import ProShell from '@/components/pro/ProShell'
-import SuperEventMap from '@/app/se/_components/SuperEventMap'
+import StationsCarteGPS from '@/components/pro/StationsCarteGPS'
 import { Camembert } from '@/components/dashboard/Camembert'
 import SondageLandingPro from '@/components/pro/SondageLandingPro'
 import { CARD, TH, TD, MUTED, H1, SUB, ACC } from '@/lib/proui'
@@ -125,16 +125,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
         <Camembert titre="Origine" parts={origParts} unite="visiteurs" />
       </div>
 
-      <style>{`@media (max-width:820px){.pro-map-wrap{display:none !important}}`}</style>
-      <div className="pro-map-wrap" style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '14px 18px 0' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>Mes stations sur la carte</div>
-          <div style={{ ...SUB, marginBottom: 10 }}>Même carte, même source que le Super Admin — vos points uniquement. Affichage ordinateur.</div>
-        </div>
-        <div style={{ height: 360 }}>
-          <SuperEventMap lieux={lieux as any} mode="vitrine" height="100%" showPosition={false} />
-        </div>
-      </div>
+      <StationsCarteGPS lieux={lieux as any} />
       <div style={{ ...CARD, overflowX: 'auto' }}>
         <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10 }}>Mes stations</div>
         {tri.length === 0 ? <div style={{ fontSize: 13, ...MUTED }}>Aucune station.</div> : (

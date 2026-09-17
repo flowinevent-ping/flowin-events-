@@ -12,6 +12,7 @@ import {
 } from '@/lib/nds'
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
 import { Ico } from '@/lib/proicons'
+import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/BlocsOperations'
 
 const dateHeureFr = (iso: string | null) =>
@@ -64,6 +65,8 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
   const [form, setForm] = useState<Partial<FlowinPartenaire>>({})
   const [saving, setSaving] = useState(false)
   const [logoPreview, setLogoPreview] = useState('')
+  const [uploadEnCours, setUploadEnCours] = useState(false)
+  const [uploadErreur, setUploadErreur] = useState('')
   /* Gagnants du partenaire : charges a l ouverture de l onglet, jamais au montage,
      pour ne pas alourdir le tiroir quand on ne consulte que les infos. */
   const [gagnants, setGagnants] = useState<GagnantPartenaire[] | null>(null)
@@ -145,6 +148,20 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
     if (ok) setPartenaires(partenaires.map(x => x.id === p.id ? { ...x, ...form } as FlowinPartenaire : x))
     setSaving(false)
     setEdit(false)
+  }
+
+  async function onFichierLogo(e: React.ChangeEvent<HTMLInputElement>) {
+    const fichier = e.target.files?.[0]
+    e.target.value = ''
+    if (!fichier) return
+    setUploadErreur('')
+    setUploadEnCours(true)
+    const redim = await redimensionnerImage(fichier).catch(() => fichier)
+    const res = await uploaderLogo(redim, `partenaires/${p.id}`)
+    setUploadEnCours(false)
+    if ('erreur' in res) { setUploadErreur(res.erreur); return }
+    setForm(prev => ({ ...prev, image_url: res.url }))
+    setLogoPreview(res.url)
   }
 
   async function del() {
@@ -260,7 +277,20 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               </div>
               <div style={{ flex: 1 }}>
                 <div className="sa-field">
-                  <label className="sa-label">Logo (URL — PNG, SVG, JPG)</label>
+                  <label className="sa-label">Logo</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <label className="sa-btn sm" style={{ cursor: uploadEnCours ? 'default' : 'pointer' }}>
+                      <Ico k="upload" size={13} style={{ marginRight: 5 }} />
+                      {uploadEnCours ? 'Envoi…' : 'Choisir un fichier'}
+                      <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
+                        disabled={uploadEnCours} onChange={onFichierLogo} />
+                    </label>
+                  </div>
+                  {uploadErreur && <div className="sa-aide" style={{ color: '#c0392b', marginTop: 4 }}>{uploadErreur}</div>}
+                  <span className="sa-aide">PNG, JPG, WebP ou SVG — 5 Mo max, redimensionné automatiquement.</span>
+                </div>
+                <div className="sa-field">
+                  <label className="sa-label">Ou coller une URL</label>
                   <input className="sa-input" type="url" placeholder="https://…" value={form.image_url ?? ''} onChange={e => { ff('image_url')(e); setLogoPreview(e.target.value) }} />
                 </div>
                 <div className="sa-field">

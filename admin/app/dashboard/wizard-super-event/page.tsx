@@ -34,6 +34,8 @@ import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { JEUX_A_QUESTIONS, nbSourcesQuestions } from '@/lib/wizard'
+import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
+import { Ico } from '@/lib/proicons'
 
 const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
   /* Le gabarit de reference en tete, et par defaut : c est de NDS 2026 qu on
@@ -58,6 +60,8 @@ export default function Page() {
   const [dateF, setDateF] = useState('')
   const [description, setDescription] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
+  const [uploadEnCours, setUploadEnCours] = useState(false)
+  const [uploadErreur, setUploadErreur] = useState('')
   const [geofence, setGeofence] = useState('150')
   const [tirageGlobal, setTirageGlobal] = useState(true)
   const [choisis, setChoisis] = useState<Record<string, true>>({})
@@ -107,6 +111,19 @@ export default function Page() {
       else n[proId] = true
       return n
     })
+  }
+
+  async function onFichierLogo(e: React.ChangeEvent<HTMLInputElement>) {
+    const fichier = e.target.files?.[0]
+    e.target.value = ''
+    if (!fichier) return
+    setUploadErreur('')
+    setUploadEnCours(true)
+    const redim = await redimensionnerImage(fichier).catch(() => fichier)
+    const res = await uploaderLogo(redim, `super-events/${id || 'nouveau'}`)
+    setUploadEnCours(false)
+    if ('erreur' in res) { setUploadErreur(res.erreur); return }
+    setLogoUrl(res.url)
   }
 
   async function creer() {
@@ -170,8 +187,20 @@ export default function Page() {
           </div>
           <label>
             <span className="sa-lbl">Logo de l’opération</span>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8 }}>
+              {logoUrl && (
+                <img src={logoUrl} alt="" style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 8, border: '1px solid var(--sa-border)' }} onError={() => setLogoUrl('')} />
+              )}
+              <label className="sa-btn sm" style={{ cursor: uploadEnCours ? 'default' : 'pointer' }}>
+                <Ico k="upload" size={13} style={{ marginRight: 5 }} />
+                {uploadEnCours ? 'Envoi…' : 'Choisir un fichier'}
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
+                  disabled={uploadEnCours} onChange={onFichierLogo} />
+              </label>
+            </div>
+            {uploadErreur && <span className="sa-aide" style={{ color: '#c0392b', display: 'block', marginBottom: 6 }}>{uploadErreur}</span>}
             <input className="sa-input" value={logoUrl} onChange={e => setLogoUrl(e.target.value)}
-              placeholder="https://…/logo.png" />
+              placeholder="https://…/logo.png (ou coller une URL)" />
             <span className="sa-aide">
               Il s’affiche en tête du parcours joueur, sur <b>toutes les stations</b> de
               l’opération. Laissé vide, la place reste libre — le gabarit n’affiche
