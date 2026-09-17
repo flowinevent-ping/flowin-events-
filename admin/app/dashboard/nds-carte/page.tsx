@@ -177,7 +177,7 @@ export default function Page() {
   return (
     <div className="sa-page">
       <PageHeader
-        title="🗺️ Carte du super event"
+        title="Carte du super event"
         subtitle={`${supers.find(x => x.id === se)?.nom ?? se} — deux couches séparées : stations et commerces partenaires`}
         actions={<button className="sa-btn" onClick={recharger}>Recharger</button>}
       />

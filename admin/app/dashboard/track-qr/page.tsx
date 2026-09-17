@@ -47,7 +47,7 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="🔗 Origines du trafic" subtitle="D'où viennent les visiteurs, où vont les clics" />
+        <PageHeader title="Origines du trafic" subtitle="D'où viennent les visiteurs, où vont les clics" />
 
         {supers.length > 1 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
@@ -75,7 +75,7 @@ export default function Page() {
 
             {jours.length > 0 && (
               <>
-                <SectionHeader>📈 Tendance quotidienne</SectionHeader>
+                <SectionHeader>Tendance quotidienne</SectionHeader>
                 <CourbeQuotidienne
                   titre=""
                   points={jours.map(j => ({ jour: j.jour, valeurs: { station: j.scans_station, reseaux: j.scans_reseaux, clics: j.clics } }))}
@@ -88,13 +88,13 @@ export default function Page() {
               </>
             )}
 
-            <SectionHeader>📍 Origine des visiteurs</SectionHeader>
+            <SectionHeader>Origine des visiteurs</SectionHeader>
             <div style={{ marginBottom: 20 }}>
               <Camembert titre="Répartition par source" parts={parts} unite="visiteurs"
                 onSlice={pid => openDrawer('partenaire', pid, 'stats')} />
             </div>
 
-            <SectionHeader>📊 Détail par source</SectionHeader>
+            <SectionHeader>Détail par source</SectionHeader>
             <div style={{ overflowX: 'auto', marginBottom: 20 }}>
               <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead><tr>
@@ -122,7 +122,7 @@ export default function Page() {
               </table>
             </div>
 
-            <SectionHeader>↗️ Clics sortants vers les partenaires</SectionHeader>
+            <SectionHeader>Clics sortants vers les partenaires</SectionHeader>
             {t.total_clics === 0 ? (
               <div className="sa-alert warn" style={{ fontSize: 12.5 }}>
                 Aucun clic sortant enregistré pour cette édition. Le suivi des clics vers les fiches,

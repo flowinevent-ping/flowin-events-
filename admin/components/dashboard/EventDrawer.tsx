@@ -314,7 +314,7 @@ export default function EventDrawer() {
 
         {drawer.tab === 'jeu' && segmentsInit && ev.module === 'spin' && (
           <div>
-            <SectionHeader>🎡 Segments de la roue</SectionHeader>
+            <SectionHeader>Segments de la roue</SectionHeader>
             {segments.length === 0 && (
               <div className="sa-empty-inline" style={{ marginBottom: 12 }}>
                 Aucun segment — le joueur verra une roue vide. Ajoute au moins 2 segments.
@@ -358,7 +358,7 @@ export default function EventDrawer() {
 
         {drawer.tab === 'jeu' && segmentsInit && isQuizFamily && (
           <div>
-            <SectionHeader>🎯 Banques de questions</SectionHeader>
+            <SectionHeader>Banques de questions</SectionHeader>
             {banques.length === 0 && (
               <div className="sa-empty-inline" style={{ marginBottom: 12 }}>Aucune banque en base.</div>
             )}
@@ -392,7 +392,7 @@ export default function EventDrawer() {
               )
             })}
 
-            <SectionHeader>⚙️ Paramètres</SectionHeader>
+            <SectionHeader>Paramètres</SectionHeader>
             <div className="sa-field">
               <label className="sa-label">Nombre de questions posées</label>
               <input
@@ -445,7 +445,7 @@ export default function EventDrawer() {
 
         {drawer.tab === 'jeu' && segmentsInit && ev.module === 'vote' && (
           <div>
-            <SectionHeader>⭐ Éléments à voter</SectionHeader>
+            <SectionHeader>Éléments à voter</SectionHeader>
             {voteItems.length === 0 && (
               <div className="sa-empty-inline" style={{ marginBottom: 12 }}>
                 Aucun élément — le joueur verra un vote vide. Ajoute au moins 2 éléments.

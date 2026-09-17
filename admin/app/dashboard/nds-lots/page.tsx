@@ -172,7 +172,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="🎁 Stock des lots"
+          title="Stock des lots"
           subtitle="Gagnants tirés, confirmations et retraits en caisse"
         />
 

@@ -58,7 +58,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="🩺 Contrôle"
+          title="Contrôle"
           subtitle={liste === null ? 'Chargement…'
             : `${enDefaut} contrôle${enDefaut > 1 ? 's' : ''} en défaut sur ${liste.length}${maj ? ` · relevé à ${maj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}` : ''}`}
           actions={<button className="sa-btn sm" onClick={charger}>↻ Relancer</button>}

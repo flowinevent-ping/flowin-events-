@@ -189,7 +189,7 @@ export default function Page() {
   return (
     <div className="sa-page">
       <PageHeader
-        title="🏢 Créer un pro"
+        title="Créer un pro"
         subtitle={`Le même parcours que l’espace pro — ${ETAPES_FICHE_PRO.length} étapes, mêmes questions`}
       />
       <Parcours

@@ -109,7 +109,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="🎬 Events"
+          title="Events"
           subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`}
           actions={
             <>

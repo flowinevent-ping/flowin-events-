@@ -104,7 +104,7 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="⭐ Super Events" subtitle="Éditions et duplication de structure" />
+        <PageHeader title="Super Events" subtitle="Éditions et duplication de structure" />
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
           {master && (
@@ -258,7 +258,7 @@ export default function Page() {
 
         {source && (
           <>
-            <SectionHeader>🔁 Dupliquer « {source.nom} »</SectionHeader>
+            <SectionHeader>Dupliquer « {source.nom} »</SectionHeader>
             <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 18 }}>
               <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
                 Seule la <b>structure</b> est copiée : paramètres, stations de jeu, thème, sondage.

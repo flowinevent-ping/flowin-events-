@@ -75,7 +75,7 @@ export default function Page() {
         <b> Aucun secret n&apos;est affiché sur cette page</b> — ni jeton, ni clé de service.
       </div>
 
-      <SectionHeader>🧱 Infrastructure</SectionHeader>
+      <SectionHeader>Infrastructure</SectionHeader>
       <Bloc titre="Accès">
         <Ligne cle="Dépôt GitHub">
           <a href={REPO} target="_blank" rel="noopener noreferrer">flowinevent-ping/flowin-events-</a>
@@ -88,7 +88,7 @@ export default function Page() {
         </Ligne>
       </Bloc>
 
-      <SectionHeader>🎮 Parcours de test</SectionHeader>
+      <SectionHeader>Parcours de test</SectionHeader>
       <Bloc titre={`Partenaires — ${parcours.length}`}>
         {!parcours.length ? (
           <div className="sa-muted" style={{ fontSize: 11.5 }}>
@@ -127,7 +127,7 @@ export default function Page() {
         </Bloc>
       )}
 
-      <SectionHeader>📋 Notes</SectionHeader>
+      <SectionHeader>Notes</SectionHeader>
       <Bloc titre="État connu">
         <div className="sa-muted" style={{ fontSize: 11.5, lineHeight: 1.7 }}>
           Le durcissement RLS avancé et la séparation de la clé d&apos;administration

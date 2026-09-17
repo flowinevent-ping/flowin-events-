@@ -105,10 +105,10 @@ export default function Page() {
 
       {!charge && r && (
         <>
-          <SectionHeader>🔢 Chiffres de référence</SectionHeader>
+          <SectionHeader>Chiffres de référence</SectionHeader>
           <BandeauChiffres se={se} />
 
-          <SectionHeader>📍 Détail par point de jeu</SectionHeader>
+          <SectionHeader>Détail par point de jeu</SectionHeader>
 
           <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
             {(['tous', 'Station', 'Partenaire'] as const).map(f => (
@@ -184,7 +184,7 @@ export default function Page() {
             </table>
           </div>
 
-          <SectionHeader>📝 Questions bonus</SectionHeader>
+          <SectionHeader>Questions bonus</SectionHeader>
 
           {!b || !b.familles.length ? (
             <EmptyState icon="📝" title="Aucune réponse bonus" desc="Les questions bonus n'ont pas encore été renseignées." />
@@ -211,7 +211,7 @@ export default function Page() {
             </>
           )}
 
-          <SectionHeader>🗂️ Questionnaire de la landing</SectionHeader>
+          <SectionHeader>Questionnaire de la landing</SectionHeader>
 
           {!ld || !ld.questions.length ? (
             <EmptyState icon="🗂️" title="Aucune saisie" desc="Le questionnaire hors parcours n'a pas encore été utilisé." />

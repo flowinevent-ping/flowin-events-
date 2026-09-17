@@ -22,7 +22,7 @@ export default function RapportsPage() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="📊 Rapports" subtitle="Statistiques globales Flowin" />
+        <PageHeader title="Rapports" subtitle="Statistiques globales Flowin" />
         <div style={{ padding: 24, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           {stats.map(s => (
             <div key={s.label} className="sa-kpi" style={{ borderRadius: 10, border: '1px solid var(--sa-border)' }}>

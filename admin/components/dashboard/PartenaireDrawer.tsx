@@ -267,7 +267,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
         {tabActif === 'infos' && edit && (
           <>
             {/* Logo preview */}
-            <SectionHeader>🖼 Logo & Identité</SectionHeader>
+            <SectionHeader>Logo & Identité</SectionHeader>
             <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 14 }}>
               <div style={{ width: 80, height: 80, flexShrink: 0, borderRadius: 10, border: '2px dashed var(--sa-border)', background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {logoPreview
@@ -326,10 +326,10 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                 </label>
               ))}
             </div>
-            <SectionHeader>📱 Présence parcours joueurs <span className="sa-badge-pill purple">bottom sheet</span></SectionHeader>
+            <SectionHeader>Présence parcours joueurs <span className="sa-badge-pill purple">bottom sheet</span></SectionHeader>
             <div className="sa-field"><label className="sa-label">Description</label><textarea className="sa-input" rows={2} value={form.description ?? ''} onChange={ff('description')} /></div>
             <div className="sa-field"><label className="sa-label">Texte promo (bandeau violet)</label><input className="sa-input" value={form.promo_text ?? ''} onChange={ff('promo_text')} /></div>
-            <SectionHeader>🔗 Réseaux & contact <span className="sa-badge-pill green">liens parcours</span></SectionHeader>
+            <SectionHeader>Réseaux & contact <span className="sa-badge-pill green">liens parcours</span></SectionHeader>
             <div style={{ background: 'rgba(29,155,117,.06)', border: '1px solid rgba(29,155,117,.15)', borderRadius: 10, padding: '10px 12px', marginBottom: 14 }}>
               {(['site_web', 'instagram', 'facebook'] as (keyof FlowinPartenaire)[]).map(k => (
                 <div key={k} className="sa-field">
@@ -383,7 +383,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             commercant saisit pour valider un billet, donc a cote des billets. */}
         {(tabActif === 'gagnants' || tabActif === 'c-gagnants') && !parOperation && (
           <>
-            <SectionHeader>🔐 Code de validation en caisse</SectionHeader>
+            <SectionHeader>Code de validation en caisse</SectionHeader>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff8ea', border: '1px solid #f2e1b6', borderRadius: 12, padding: '14px 16px', marginBottom: 10 }}>
               <div>
                 <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: '#a1690a' }}>PIN du commerce</div>
@@ -404,7 +404,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
 
         {(tabActif === 'gagnants' || tabActif === 'c-gagnants') && !parOperation && (
           <>
-            <SectionHeader>🏆 Gagnants &amp; billets</SectionHeader>
+            <SectionHeader>Gagnants &amp; billets</SectionHeader>
             {chargeG && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
             {!chargeG && etatG && (
               <>
@@ -501,7 +501,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             >
               📦 Dossier complet (A3/A4/A5, vidéo, QR, zip) →
             </a>
-            <SectionHeader>📦 Pack d&apos;envoi</SectionHeader>
+            <SectionHeader>Pack d&apos;envoi</SectionHeader>
             <div className="sa-alert info" style={{ marginBottom: 10, fontSize: 12.5 }}>
               Tout ce que le commerçant doit recevoir, réuni ici.
             </div>
@@ -524,7 +524,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             dans « Gagnants & billets », a cote des billets qu il valide. */}
         {(tabActif === 'contrat' || tabActif === 'c-contrat') && !parOperation && (
           <>
-            <SectionHeader>💶 Sponsoring &amp; facturation</SectionHeader>
+            <SectionHeader>Sponsoring &amp; facturation</SectionHeader>
             <div className="sa-field">
               <label className="sa-label">Formule / offre choisie</label>
               <input className="sa-input" placeholder="ex. visibilite_lots, sponsoring loterie…" value={form.offre ?? ''} onChange={ff('offre')} />
@@ -566,7 +566,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
 
         {(tabActif === 'stats' || tabActif === 'tracking') && !parOperation && (
           <>
-            <SectionHeader>📡 Tracking de sa station</SectionHeader>
+            <SectionHeader>Tracking de sa station</SectionHeader>
             <div style={{ marginBottom: 18 }}>
               <TableauStations partenaireId={p.id} tout titre={`Station ${p.nom}`} onStation={s => openDrawer('event', s.event_id)} />
             </div>
@@ -580,7 +580,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               <div className="sa-kpi"><div className="sa-kpi-val">{pEvents.length}</div><div className="sa-kpi-lbl">Events</div></div>
             </div>
 
-            <SectionHeader>💶 Sponsoring &amp; facturation</SectionHeader>
+            <SectionHeader>Sponsoring &amp; facturation</SectionHeader>
             <FieldRow label="Formule choisie" value={p.offre ? <strong>{p.offre}</strong> : '—'} />
             <FieldRow label="Montant" value={p.montant_sponsoring != null ? <strong>{p.montant_sponsoring} €</strong> : '—'} />
             <FieldRow label="Mode de paiement" value={modeLabel(p.paiement_mode)} />

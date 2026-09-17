@@ -100,7 +100,7 @@ export default function Page() {
         <Link className="sa-btn sm" href="/dashboard/prospection">Prospection</Link>
       </div>
 
-      <SectionHeader>🎯 Cockpit</SectionHeader>
+      <SectionHeader>Cockpit</SectionHeader>
 
       {!events.length ? (
         <EmptyState icon="🎯" title="Aucun événement" desc="Aucun événement n'est enregistré." />

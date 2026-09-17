@@ -204,7 +204,7 @@ export default function JeuxPage() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="🎮 Jeux" subtitle="Le gabarit de référence et les modules — cliquer une carte affiche son déroulé et ses events" />
+        <PageHeader title="Jeux" subtitle="Le gabarit de référence et les modules — cliquer une carte affiche son déroulé et ses events" />
         <div style={{ padding: 24, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
           {MODULES.map(m => {
             const moduleEvents = sansGabarit(events).filter(e => e.module === m.id)

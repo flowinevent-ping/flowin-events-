@@ -71,7 +71,7 @@ export default function Page() {
         est signalé, avec l&apos;endroit où ça se règle.
       </div>
 
-      <SectionHeader>📇 Coordonnées de contact</SectionHeader>
+      <SectionHeader>Coordonnées de contact</SectionHeader>
       <Bloc titre="Supports partenaires et clients">
         <Ligne cle="Email" valeur={CONTACT_PARTENAIRE.email} />
         <Ligne
@@ -81,7 +81,7 @@ export default function Page() {
         />
       </Bloc>
 
-      <SectionHeader>🎪 Communication</SectionHeader>
+      <SectionHeader>Communication</SectionHeader>
       <Bloc titre="Configuration de l'événement en cours">
         <Ligne cle="Événement" valeur={cfg?.evenement ?? absent} />
         <Ligne cle="Édition" valeur={cfg?.edition ?? absent} />
@@ -93,7 +93,7 @@ export default function Page() {
         />
       </Bloc>
 
-      <SectionHeader>📄 Documents légaux</SectionHeader>
+      <SectionHeader>Documents légaux</SectionHeader>
       <Bloc titre={`${docs.length} document${docs.length > 1 ? 's' : ''}`}>
         <Ligne cle="Validés — opposables" valeur={String(valides.length)} />
         <Ligne
@@ -105,7 +105,7 @@ export default function Page() {
         />
       </Bloc>
 
-      <SectionHeader>📊 Volumétrie</SectionHeader>
+      <SectionHeader>Volumétrie</SectionHeader>
       <Bloc titre="Données chargées">
         <Ligne cle="Super events" valeur={String(supers.length)} />
         <Ligne cle="Événements" valeur={String(events.length)} />
@@ -114,7 +114,7 @@ export default function Page() {
         <Ligne cle="Joueurs CRM" valeur={String(joueurs.length)} />
       </Bloc>
 
-      <SectionHeader>🔒 Ce qui ne se règle pas ici</SectionHeader>
+      <SectionHeader>Ce qui ne se règle pas ici</SectionHeader>
       <Bloc titre="Et où ça se règle">
         <Ligne cle="Accès et rôles base de données" valeur="Console Supabase" />
         <Ligne cle="Variables d'environnement" valeur="Console Vercel" />

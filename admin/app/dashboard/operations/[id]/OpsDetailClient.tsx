@@ -181,7 +181,7 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
 
           {landing && (
             <div className="sa-card" style={{ padding: 18, marginBottom: 16 }}>
-              <SectionHeader>💶 Tarif de l'offre partenaire</SectionHeader>
+              <SectionHeader>Tarif de l'offre partenaire</SectionHeader>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input className="sa-input" type="number" value={prix} onChange={(e) => setPrix(e.target.value)} placeholder="ex. 450" style={{ maxWidth: 160 }} />
                 <span style={{ fontWeight: 800, fontSize: 16 }}>€</span>
@@ -196,7 +196,7 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
 
           <div className="sa-card" style={{ padding: 18, marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <SectionHeader>🤝 Partenaires ({commerces.length})</SectionHeader>
+              <SectionHeader>Partenaires ({commerces.length})</SectionHeader>
               <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
                 <button className={`sa-btn sm${vue === 'vignettes' ? ' primary' : ''}`} onClick={() => setVue('vignettes')}>▦ Vignettes</button>
                 <button className={`sa-btn sm${vue === 'liste' ? ' primary' : ''}`} onClick={() => setVue('liste')}>☰ Liste CRM</button>
@@ -273,7 +273,7 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
           </div>
 
           <div className="sa-card" style={{ padding: 18 }}>
-            <SectionHeader>➕ Ajouter un commerce partenaire</SectionHeader>
+            <SectionHeader>Ajouter un commerce partenaire</SectionHeader>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <input className="sa-input" placeholder="Nom *" value={f.nom} onChange={(e) => setF({ ...f, nom: e.target.value })} />
               <input className="sa-input" placeholder="Catégorie" value={f.categorie} onChange={(e) => setF({ ...f, categorie: e.target.value })} />

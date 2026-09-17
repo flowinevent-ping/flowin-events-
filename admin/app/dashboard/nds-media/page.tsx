@@ -99,7 +99,7 @@ export default function Page() {
   return (
     <div className="sa-page">
       <PageHeader
-        title="🎬 Supports de communication"
+        title="Supports de communication"
         subtitle="QR, affiches et visuels — rangés par opération, puis par pro et par station"
       />
 

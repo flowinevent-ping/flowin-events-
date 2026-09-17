@@ -30,7 +30,7 @@ export default async function OperationsPage() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="⭐ Opérations — Super Events"
+          title="Opérations — Super Events"
           subtitle="Vue d'ensemble par super event : commerces, joueurs, billets, sponsors, CA"
         />
         <div style={{ padding: '0 24px 24px' }}>

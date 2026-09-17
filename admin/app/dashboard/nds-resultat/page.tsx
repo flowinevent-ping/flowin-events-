@@ -102,7 +102,7 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="📅 Résultat journalier" subtitle="Stations de jeu et commerces partenaires, par jour" />
+        <PageHeader title="Résultat journalier" subtitle="Stations de jeu et commerces partenaires, par jour" />
 
         {supers.length > 1 && (
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
@@ -192,7 +192,7 @@ export default function Page() {
 
         {optin && (
           <div style={{ marginBottom: 20 }}>
-            <SectionHeader>🛡️ Conformité RGPD & complétion</SectionHeader>
+            <SectionHeader>Conformité RGPD & complétion</SectionHeader>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 14 }}>
               {([
                 [`${optin.taux_optin ?? 0} %`, 'Opt-in du jour'],
@@ -217,7 +217,7 @@ export default function Page() {
 
         {(engag || repond) && (
           <div style={{ marginBottom: 20 }}>
-            <SectionHeader>🎯 Engagement du jour</SectionHeader>
+            <SectionHeader>Engagement du jour</SectionHeader>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14 }}>
               {engag && (
                 <Camembert titre="Une partie vs rejoué" unite="joueurs"

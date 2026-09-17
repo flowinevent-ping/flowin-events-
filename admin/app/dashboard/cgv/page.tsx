@@ -56,7 +56,7 @@ export default function Page() {
 
       {!charge && docs.length > 0 && (
         <>
-          <SectionHeader>📄 Documents</SectionHeader>
+          <SectionHeader>Documents</SectionHeader>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 10, marginBottom: 20 }}>
             {docs.map(d => (
@@ -96,7 +96,7 @@ export default function Page() {
 
           {doc && (
             <>
-              <SectionHeader>✏️ {doc.titre ?? doc.id}</SectionHeader>
+              <SectionHeader>{doc.titre ?? doc.id}</SectionHeader>
 
               {!estValide(doc) && (
                 <div style={{

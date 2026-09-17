@@ -71,13 +71,13 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="📣 Envoi en masse"
+          title="Envoi en masse"
           subtitle="Message à plusieurs joueurs à la fois — même mécanisme Gmail que les envois unitaires, par lots"
         />
         <div style={{ padding: '0 24px 24px' }}>
 
           <div className="sa-card" style={{ padding: 18, marginBottom: 16 }}>
-            <SectionHeader>✉️ Message</SectionHeader>
+            <SectionHeader>Message</SectionHeader>
             <div className="sa-field">
               <label className="sa-label">Objet</label>
               <input className="sa-input" value={objet} onChange={e => setObjet(e.target.value)} placeholder="Merci d'avoir joué aux Nuits du Sud 2026 !" style={{ width: '100%' }} />
@@ -90,7 +90,7 @@ export default function Page() {
           </div>
 
           <div className="sa-card" style={{ padding: 18, marginBottom: 16 }}>
-            <SectionHeader>👥 Destinataires ({destinataires.length})</SectionHeader>
+            <SectionHeader>Destinataires ({destinataires.length})</SectionHeader>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
               <input className="sa-input" placeholder="Rechercher un nom, une ville…" value={q} onChange={e => setQ(e.target.value)} style={{ maxWidth: 280 }} />
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700 }}>
@@ -130,7 +130,7 @@ export default function Page() {
           </div>
 
           <div className="sa-card" style={{ padding: 18 }}>
-            <SectionHeader>🚀 Envoyer — {lots.length} lot{lots.length > 1 ? 's' : ''} de {TAILLE_LOT} maximum</SectionHeader>
+            <SectionHeader>Envoyer — {lots.length} lot{lots.length > 1 ? 's' : ''} de {TAILLE_LOT} maximum</SectionHeader>
             {!pret && <div className="sa-muted" style={{ fontSize: 12.5 }}>Renseigne l&apos;objet, le message, et au moins un destinataire.</div>}
             {pret && (
               <>

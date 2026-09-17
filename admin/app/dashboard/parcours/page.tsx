@@ -43,7 +43,7 @@ export default function Page() {
 
   return (
     <div>
-      <PageHeader title="📱 Parcours mobil" subtitle="Aperçu du vrai parcours joueur — event & super event" />
+      <PageHeader title="Parcours mobil" subtitle="Aperçu du vrai parcours joueur — event & super event" />
       <ParcoursMobil events={evs} showTitle={false} />
     </div>
   )

@@ -40,7 +40,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="👥 CRM pro"
+          title="CRM pro"
           subtitle="Le CRM complet d'un pro, toutes ses opérations confondues — même vue que lui"
           actions={
             <select className="sa-input" value={proId} onChange={e => setProId(e.target.value)}>

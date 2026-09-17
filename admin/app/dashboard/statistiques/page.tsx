@@ -172,7 +172,7 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page">
-        <PageHeader title="📊 Statistiques & résultats" subtitle="Activité, audience et retombées partenaires" />
+        <PageHeader title="Statistiques & résultats" subtitle="Activité, audience et retombées partenaires" />
 
         {supers.length > 1 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
@@ -224,14 +224,14 @@ export default function Page() {
 
         {section === 'reference' && (
           <>
-            <SectionHeader>🔢 Chiffres de référence</SectionHeader>
+            <SectionHeader>Chiffres de référence</SectionHeader>
             <BandeauChiffres se={se} />
           </>
         )}
 
         {section === 'stations' && (
           <>
-            <SectionHeader>📡 Tracking par station</SectionHeader>
+            <SectionHeader>Tracking par station</SectionHeader>
             <div style={{ marginBottom: 22 }}>
               <TableauStations se={se} jour={jour === 'tous' ? undefined : jour} tout={jour === 'tous'} onStation={s2 => openDrawer('event', s2.event_id)} />
             </div>
@@ -245,7 +245,7 @@ export default function Page() {
         {section === 'pics' && (
           pics?.cellules?.length ? (
             <>
-              <SectionHeader>🔥 Pics de jeu</SectionHeader>
+              <SectionHeader>Pics de jeu</SectionHeader>
               {pics.pic && (
                 <div className="sa-alert info" style={{ marginBottom: 12, fontSize: 12.5 }}>
                   Pic absolu : <b>{pics.pic.parties} parties</b> le <b>{pics.pic.soiree.split('-').reverse().join('/')}</b> entre{' '}
@@ -267,7 +267,7 @@ export default function Page() {
 
         {section === 'partenaires' && (
           <>
-            <SectionHeader>🗺️ Consultation des partenaires dans l&apos;application</SectionHeader>
+            <SectionHeader>Consultation des partenaires dans l&apos;application</SectionHeader>
             <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
               <b>{r.ecrans?.carte ?? 0} appareils</b> ont ouvert la carte des partenaires et{' '}
               <b>{r.ecrans?.partenaires ?? 0}</b> l&apos;écran partenaires.
@@ -278,7 +278,7 @@ export default function Page() {
               )}
             </div>
 
-            <SectionHeader>🔗 Redirections vers les partenaires</SectionHeader>
+            <SectionHeader>Redirections vers les partenaires</SectionHeader>
             {pic && (
               <div className="sa-alert info" style={{ marginBottom: 14, fontSize: 12.5 }}>
                 Pic de redirections : <b>{pic.clics} clics</b> vers <b>{pic.partenaire}</b> le <b>{fr(pic.jour)}</b> à <b>{String(pic.heure).padStart(2, '0')}h</b>.
@@ -297,7 +297,7 @@ export default function Page() {
 
         {section === 'audience' && (
           <>
-            <SectionHeader>👥 Profil de l&apos;audience</SectionHeader>
+            <SectionHeader>Profil de l&apos;audience</SectionHeader>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
               <Camembert titre="Genre" parts={r.genre} unite="joueurs" />
               <Camembert titre="Tranche d'âge" parts={r.age} unite="joueurs" />
@@ -310,7 +310,7 @@ export default function Page() {
 
         {section === 'joueurs' && (
           <>
-            <SectionHeader>🏅 Meilleurs joueurs</SectionHeader>
+            <SectionHeader>Meilleurs joueurs</SectionHeader>
             <div style={{ overflowX: 'auto' }}>
               <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead><tr>

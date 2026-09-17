@@ -341,7 +341,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="⭐ Créer un super event"
+          title="Créer un super event"
           subtitle="Le SA crée l’opération et y rattache directement des pros — ce n’est pas une demande de participation"
           actions={<Link href="/dashboard/super-events" className="sa-btn sm">← Super Events</Link>}
         />
@@ -427,7 +427,7 @@ function ZoneSuppression() {
 
   return (
     <div className="sa-page" style={{ marginTop: 20, borderColor: '#E2B4B4' }}>
-      <SectionHeader>🗑️ Supprimer un super event créé par erreur</SectionHeader>
+      <SectionHeader>Supprimer un super event créé par erreur</SectionHeader>
       <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 12, lineHeight: 1.5 }}>
         Refusé automatiquement si l’opération porte des parties jouées ou des tirages.
         Les stations rattachées partent avec elle ; <b>les fiches pro sont conservées</b> —

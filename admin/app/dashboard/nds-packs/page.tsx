@@ -65,7 +65,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title="🎟️ Packs de participation"
+          title="Packs de participation"
           subtitle="Catalogue Visibilité / Animation / Sponsor officiel — modifiable et publié en direct"
         />
 
