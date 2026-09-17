@@ -127,7 +127,7 @@ export default function Page() {
       {l.length === 0 && <div className="sa-muted" style={{ fontSize: 13, marginBottom: 14 }}>{vide}</div>}
       {l.length > 0 && (
         <div style={{ overflowX: 'auto', marginBottom: 18 }}>
-          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+          <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
             <thead><tr>
               <th>Jour</th><th>Station</th><th style={{ textAlign: 'right' }}>Clics</th>
               <th style={{ textAlign: 'right' }}>Parties</th><th style={{ textAlign: 'right' }}>Joueurs</th>
@@ -312,7 +312,7 @@ export default function Page() {
           <>
             <SectionHeader>🏅 Meilleurs joueurs</SectionHeader>
             <div style={{ overflowX: 'auto' }}>
-              <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+              <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead><tr>
                   <th>#</th><th>Joueur</th><th>Code postal</th>
                   <th style={{ textAlign: 'right' }}>Parties</th><th style={{ textAlign: 'right' }}>Lots gagnés</th><th>Contact</th>

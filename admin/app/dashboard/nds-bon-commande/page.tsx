@@ -169,7 +169,7 @@ export default function Page() {
 
       {!charge && filtres.length > 0 && (
         <div style={{ overflowX: 'auto' }}>
-          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+          <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
             <thead>
               <tr>
                 <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('raison_sociale')}>Raison sociale{flecheTri('raison_sociale')}</th>

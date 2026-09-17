@@ -128,7 +128,7 @@ export default function Page() {
             <div style={{ marginBottom: 22 }}>
               <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Pipeline commercial — prospection partenaires ({commerciaux.length})</div>
               <div style={{ overflowX: 'auto' }}>
-                <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+                <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                   <thead><tr>
                     <th style={{ ...cell, textAlign: 'left' }}>Enseigne</th>
                     <th style={{ ...cell, textAlign: 'left' }}>Contact</th>
@@ -139,7 +139,7 @@ export default function Page() {
                   </tr></thead>
                   <tbody>
                     {commerciaux.map(r => (
-                      <tr key={r.id}>
+                      <tr key={r.id} style={{ cursor: 'default' }}>
                         <td style={{ ...cell, fontWeight: 600 }}>{r.enseigne ?? '—'}</td>
                         <td style={cell}>
                           {r.contact_email ? <a href={`mailto:${r.contact_email}`}>{r.contact_email}</a> : '—'}
@@ -166,7 +166,7 @@ export default function Page() {
           <div>
             <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>Collecte terrain — contacts joueurs ({terrain.length})</div>
             <div style={{ overflowX: 'auto' }}>
-              <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+              <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead><tr>
                   {th('source_label', 'Origine')}
                   <th style={{ ...cell, textAlign: 'left' }}>Contact</th>

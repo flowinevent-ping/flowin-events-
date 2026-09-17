@@ -110,7 +110,7 @@ export default function Page() {
             <EmptyState icon="🔍" title="Aucun résultat" desc="Aucun prospect ne correspond à cette recherche." />
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+              <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead>
                   <tr>
                     <th style={{ ...cell, textAlign: 'left', cursor: 'pointer', userSelect: 'none' }} onClick={() => trier('enseigne')}>Enseigne{flecheTri('enseigne')}</th>

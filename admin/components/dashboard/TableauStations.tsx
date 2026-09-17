@@ -90,7 +90,7 @@ export function TableauStations({
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-        <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+        <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
           <thead><tr>
             <Th champ="station">Station</Th><Th champ="type">Type</Th>
             <Th champ="flashs" right>Flashs</Th>

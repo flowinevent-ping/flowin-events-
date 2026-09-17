@@ -96,7 +96,7 @@ export default function Page() {
 
             <SectionHeader>📊 Détail par source</SectionHeader>
             <div style={{ overflowX: 'auto', marginBottom: 20 }}>
-              <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+              <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                 <thead><tr>
                   <th>Source</th><th style={{ textAlign: 'right' }}>Visiteurs</th>
                   <th style={{ textAlign: 'right' }}>Événements</th><th style={{ textAlign: 'right' }}>Par visiteur</th>
@@ -131,7 +131,7 @@ export default function Page() {
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
-                <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+                <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
                   <thead><tr><th>Partenaire</th><th style={{ textAlign: 'right' }}>Clics</th><th style={{ textAlign: 'right' }}>Joueurs</th></tr></thead>
                   <tbody>
                     {t.clics_par_partenaire.map(c => (

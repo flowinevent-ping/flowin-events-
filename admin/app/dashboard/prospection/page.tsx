@@ -88,7 +88,7 @@ export default function Page() {
 
       {!charge && filtres.length > 0 && (
         <div style={{ overflowX: 'auto' }}>
-          <table className="sa-table" style={{ width: '100%', fontSize: 12.5 }}>
+          <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>
             <thead>
               <tr>
                 <th style={{ ...cell, textAlign: 'left' }}>Enseigne</th>
@@ -104,7 +104,7 @@ export default function Page() {
               {filtres.map(p => {
                 const retard = relanceEnRetard(p)
                 return (
-                  <tr key={p.id} style={p.pas_interesse ? { opacity: 0.55 } : undefined}>
+                  <tr key={p.id} style={{ cursor: 'default', ...(p.pas_interesse ? { opacity: 0.55 } : null) }}>
                     <td style={{ ...cell, fontWeight: 600 }}>
                       {p.enseigne ?? '—'}
                       {p.adresse && <div className="sa-muted" style={{ fontSize: 10.5 }}>{p.adresse}</div>}
