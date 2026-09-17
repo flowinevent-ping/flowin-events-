@@ -5,6 +5,7 @@ import { PageHeader, EmptyState, SearchBar, useTri } from '@/components/dashboar
 import { supabase } from '@/lib/supabase'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { DemandeRattachement } from '@/lib/types'
+import { geocoderAdresse } from '@/lib/geocodage'
 
 type Ligne = DemandeRattachement & { pro_nom: string; se_nom: string }
 type Col = 'created_at' | 'pro_nom' | 'statut'
@@ -43,8 +44,19 @@ export default function Page() {
      le pro a saisi (nom du commerce, adresse, GPS, lots) et le jeu du super
      event. Avant, l approbation ne changeait qu un statut puis ouvrait un
      wizard pre-rempli de 5 champs : adresse, lots et GPS etaient perdus. */
+  /* Le pro ne tape que l adresse (« Flowin place votre station sur la carte
+     a partir de cette adresse, a la validation »). Ce geocodage automatique
+     n existait pas encore : la RPC lisait d.lat/d.lng tels quels, jamais
+     remplis -> stations sans GPS a chaque approbation avec adresse seule. */
   async function approuver(l: Ligne) {
     setEnCours(l.id); setErreur(''); setInfo('')
+    if (l.lat == null && l.lng == null && l.persona !== 'annonceur' && (l.adresse || l.ville)) {
+      const coords = await geocoderAdresse(l.adresse, l.code_postal, l.ville)
+      if (coords) {
+        await supabase.from('demandes_rattachement_super_event').update({ lat: coords.lat, lng: coords.lng }).eq('id', l.id)
+        l = { ...l, lat: coords.lat, lng: coords.lng }
+      }
+    }
     const { data, error } = await supabase.rpc('approuver_demande_rattachement', { p_id: l.id })
     const r = (data ?? {}) as { ok?: boolean; erreur?: string; event_id?: string | null; lots?: number }
     if (error || !r.ok) setErreur(`Demande non approuvée — ${error?.message ?? r.erreur ?? 'erreur inconnue'}`)
