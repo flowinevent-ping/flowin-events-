@@ -35,6 +35,23 @@
 .sa-sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--sa-accent),var(--sa-accent-light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0}
 .sa-sb-username{color:#fff;font-size:13px;font-weight:700}
 .sa-sb-userrole{color:var(--sa-sb-text-dim);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+/* ── Sidebar mobile : sous 900px le menu ne collabsait jamais, le contenu
+   vivait dans les ~55% de largeur restants (colonnes ecrasees, texte coupe).
+   Panneau hors-ecran + hamburger, actifs uniquement sous ce seuil. ── */
+.sa-mobile-bar{display:none}
+.sa-sb-backdrop{display:none}
+@media (max-width:900px){
+  .sa-shell{display:block;height:auto;overflow:visible}
+  .sa-mobile-bar{display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;background:var(--sa-sb-bg);border-bottom:1px solid var(--sa-sb-border);position:sticky;top:0;z-index:30}
+  .sa-mobile-burger{background:none;border:none;color:#fff;padding:4px;display:flex;cursor:pointer}
+  .sa-mobile-titre{color:#fff;font-size:17px;font-weight:900;letter-spacing:-.5px}
+  .sa-mobile-titre em{font-style:normal;color:var(--sa-accent-light)}
+  .sa-sb-backdrop{display:block;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:40}
+  .sa-sb{position:fixed;top:0;left:0;z-index:50;transform:translateX(-100%);transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.35);width:82vw;max-width:300px}
+  .sa-sb.open{transform:translateX(0)}
+  .sa-main{min-height:100vh}
+  .sa-content{padding:16px}
+}
 /* ── Topbar ── */
 .sa-topbar{height:52px;background:var(--sa-card);border-bottom:1px solid var(--sa-border);padding:0 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}
 .sa-breadcrumb{flex:1;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sa-muted)}

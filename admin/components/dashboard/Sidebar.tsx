@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 
@@ -82,6 +83,12 @@ export default function Sidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const { joueurs, events, partenaires, pros } = useDashboard()
+  /* Le menu ne collabsait jamais sous 900px : sur telephone, le contenu vivait
+     dans les ~55% de largeur restants, colonnes ecrasees et texte coupe.
+     Panneau hors-ecran + bouton hamburger, visibles seulement sous ce seuil
+     (CSS .sa-mobile-bar). Ferme automatiquement apres un choix de page. */
+  const [ouvert, setOuvert] = useState(false)
+  useEffect(() => { setOuvert(false) }, [pathname])
 
   const liveCount = events.filter(e => e.status === 'live').length
 
@@ -203,7 +210,17 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="sa-sb">
+    <>
+      {/* Barre mobile : masquee au-dela de 900px (voir globals.css) */}
+      <div className="sa-mobile-bar">
+        <button className="sa-mobile-burger" onClick={() => setOuvert(true)} aria-label="Ouvrir le menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <span className="sa-sb-logo-dot" />
+        <span className="sa-mobile-titre">Flow<em>in</em></span>
+      </div>
+      {ouvert && <div className="sa-sb-backdrop" onClick={() => setOuvert(false)} />}
+    <div className={`sa-sb${ouvert ? ' open' : ''}`}>
       {/* Logo */}
       <div className="sa-sb-logo">
         <div className="sa-sb-logo-dot" />
@@ -246,5 +263,6 @@ export default function Sidebar() {
         </div>
       </div>
     </div>
+    </>
   )
 }
