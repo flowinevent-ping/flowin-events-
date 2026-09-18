@@ -59,7 +59,15 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
 
   const [panneau, setPanneau] = useState<'ia' | 'import' | null>(null)
   const [themeIA, setThemeIA] = useState('')
-  const [nombreIA, setNombreIA] = useState(4)
+  /* `nombreIA` reste une CHAINE brute tant qu'on tape : la convertir en Number()
+     a chaque frappe puis la reinjecter dans `value` produisait des courses avec
+     le champ number natif du navigateur (le DOM affichait deja le caractere
+     tape avant le re-rendu React) -- symptome constate par Romain (18/09),
+     un « 0300 » impossible a obtenir en tapant normalement. Le nettoyage
+     (borne 1-12, repli sur 4) n'a lieu qu'a la perte de focus et a l'appel API. */
+  const [nombreIA, setNombreIA] = useState('4')
+  const nombreIAPropre = () => Math.min(Math.max(Math.round(Number(nombreIA)) || 4, 1), 12)
+  const [contexteIA, setContexteIA] = useState('')
   const [genIA, setGenIA] = useState<'idle' | 'busy' | 'echec'>('idle')
   const [erreurIA, setErreurIA] = useState<string | null>(null)
   const [texteImport, setTexteImport] = useState('')
@@ -71,14 +79,14 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
       const res = await fetch('/api/pro/generer-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme: themeIA.trim(), nombre: nombreIA, bonus: estBonus }),
+        body: JSON.stringify({ theme: themeIA.trim(), nombre: nombreIAPropre(), bonus: estBonus, contexte: contexteIA.trim() }),
       })
       const data = await res.json()
       if (!data.ok) { setGenIA('echec'); setErreurIA(data.error ?? 'Échec de la génération.'); return }
       const nouvelles = mapQuestionsIA(data.questions ?? [], estBonus)
       if (!nouvelles.length) { setGenIA('echec'); setErreurIA('Aucune question exploitable reçue.'); return }
       setQuestions(qs => [...qs, ...nouvelles])
-      setGenIA('idle'); setThemeIA(''); setPanneau(null)
+      setGenIA('idle'); setThemeIA(''); setContexteIA(''); setNombreIA('4'); setPanneau(null)
     } catch {
       setGenIA('echec'); setErreurIA('Échec de la génération — réessayez.')
     }
@@ -268,15 +276,34 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
                 </div>
                 <div style={{ width: 90 }}>
                   <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Nombre</label>
-                  <input style={inputStyle} type="number" min={1} max={12} value={nombreIA} onChange={e => setNombreIA(Number(e.target.value))} />
+                  <input
+                    style={inputStyle} type="number" min={1} max={12} inputMode="numeric"
+                    value={nombreIA}
+                    onChange={e => setNombreIA(e.target.value)}
+                    onBlur={() => setNombreIA(String(nombreIAPropre()))}
+                  />
                 </div>
-                <button
-                  disabled={genIA === 'busy' || !themeIA.trim()}
-                  onClick={genererIA}
-                  style={{ ...btn, background: ACC, color: '#fff', opacity: genIA === 'busy' || !themeIA.trim() ? 0.5 : 1 }}
-                >{genIA === 'busy' ? 'Génération…' : 'Générer'}</button>
               </div>
-              {genIA === 'echec' && <div style={{ fontSize: 12.5, color: '#B91C1C', fontWeight: 700 }}>{erreurIA}</div>}
+              {/* « une boite de chat avec toi en ecran » (Romain, 18/09) : un texte
+                  colle donne un vrai contexte a l'IA, plutot que le seul theme court
+                  -- un paragraphe d'histoire locale, un extrait de site, des notes. */}
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 4 }}>Contexte (optionnel)</label>
+                <textarea
+                  style={{ ...inputStyle, minHeight: 90, resize: 'vertical', fontFamily: 'inherit' }}
+                  value={contexteIA}
+                  onChange={e => setContexteIA(e.target.value)}
+                  placeholder="Collez ici un texte pour guider l'IA : historique du lieu, programme de la soirée, notes de brief…"
+                  maxLength={6000}
+                />
+                <div style={{ fontSize: 10.5, ...MUTED, marginTop: 3, textAlign: 'right' }}>{contexteIA.length}/6000</div>
+              </div>
+              <button
+                disabled={genIA === 'busy' || !themeIA.trim()}
+                onClick={genererIA}
+                style={{ ...btn, background: ACC, color: '#fff', opacity: genIA === 'busy' || !themeIA.trim() ? 0.5 : 1 }}
+              >{genIA === 'busy' ? 'Génération…' : 'Générer'}</button>
+              {genIA === 'echec' && <div style={{ fontSize: 12.5, color: '#B91C1C', fontWeight: 700, marginTop: 8 }}>{erreurIA}</div>}
             </div>
           )}
 

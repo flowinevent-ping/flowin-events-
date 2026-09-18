@@ -29,13 +29,22 @@ export async function POST(req: NextRequest) {
   const theme = String(body?.theme ?? '').trim().slice(0, 300)
   const nombre = Math.min(Math.max(Number(body?.nombre) || 4, 1), 12)
   const bonus = !!body?.bonus
+  /* Contexte libre colle par le pro (Romain, 18/09 : « une boite de chat avec
+     toi en ecran » plutot que le seul theme court) -- un paragraphe d'histoire
+     locale, un extrait de site, des notes de brief. Optionnel, borne large
+     mais pas illimite pour rester dans le budget de tokens du prompt. */
+  const contexte = String(body?.contexte ?? '').trim().slice(0, 6000)
   if (!theme) {
     return NextResponse.json({ ok: false, error: 'Merci de préciser un thème.' }, { status: 400 })
   }
 
+  const blocContexte = contexte
+    ? `\n\nVoici un texte de contexte fourni par l'organisateur -- appuie-toi dessus en priorite pour ancrer les questions dans des faits reels, plutot que d'inventer :\n"""\n${contexte}\n"""`
+    : ''
+
   const consigne = bonus
-    ? `Genere ${nombre} questions de type sondage (aucune bonne reponse -- choix unique ou multiple) sur le theme suivant, pour un jeu d'animation commerciale en France : "${theme}". Reponds UNIQUEMENT avec un JSON valide, un tableau d'objets de la forme {"label": string, "type": "single"|"multi", "options": string[]} (2 a 5 options par question, francais naturel, pas de numerotation). Aucun texte avant ou apres le JSON.`
-    : `Genere ${nombre} questions de quiz (QCM avec une seule bonne reponse) sur le theme suivant, pour un jeu d'animation commerciale en France : "${theme}". Reponds UNIQUEMENT avec un JSON valide, un tableau d'objets de la forme {"texte": string, "options": string[], "bonne": number} (bonne = index de la bonne reponse dans options, 3 a 4 options par question, francais naturel). Aucun texte avant ou apres le JSON.`
+    ? `Genere ${nombre} questions de type sondage (aucune bonne reponse -- choix unique ou multiple) sur le theme suivant, pour un jeu d'animation commerciale en France : "${theme}".${blocContexte}\n\nReponds UNIQUEMENT avec un JSON valide, un tableau d'objets de la forme {"label": string, "type": "single"|"multi", "options": string[]} (2 a 5 options par question, francais naturel, pas de numerotation). Aucun texte avant ou apres le JSON.`
+    : `Genere ${nombre} questions de quiz (QCM avec une seule bonne reponse) sur le theme suivant, pour un jeu d'animation commerciale en France : "${theme}".${blocContexte}\n\nReponds UNIQUEMENT avec un JSON valide, un tableau d'objets de la forme {"texte": string, "options": string[], "bonne": number} (bonne = index de la bonne reponse dans options, 3 a 4 options par question, francais naturel). Aucun texte avant ou apres le JSON.`
 
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
