@@ -7,7 +7,7 @@ import Link from 'next/link'
 import type { DonneesOperation } from '@/lib/operations'
 import { libelleModule } from '@/lib/operations'
 import type { GroupePeriode } from '@/lib/rangementOperations'
-import { CHARTE_PRO as C } from '@/lib/charte'
+import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 
 const MOIS_C = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
 /** « 26–27 sept. 2026 », « 9 juil. → 2 août 2026 ». */
@@ -40,9 +40,6 @@ export function chiffresOperation(op: DonneesOperation) {
    distinguaient mal, tous deux en bleu. « garde le super event en orange,
    l'event en bleu » -- reprend l'orange deja etabli comme identifiant super
    event ailleurs dans l'appli (SuperEventDrawer .t-super, /rejoindre). */
-const ACCENT_ANIM = C.accentFonce
-const ACCENT_SUPER = '#C2410C'
-
 export function Vignette({ op, href, liens }: { op: DonneesOperation; href: string; liens?: { label: string; href: string }[] }) {
   const k = chiffresOperation(op)
   const accent = op.type === 'super' ? ACCENT_SUPER : ACCENT_ANIM

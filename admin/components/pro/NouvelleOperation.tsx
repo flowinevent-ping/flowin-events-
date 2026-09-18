@@ -26,8 +26,9 @@ import type { PackParticipation } from '@/lib/commercial'
 import { GABARIT_MODULE, GABARIT_NOM, sorteBanque } from '@/lib/gabarit'
 import { libelleModule, libelleDates } from '@/lib/operations'
 import { SECTEURS_PRO } from '@/lib/proCreation'
-import { CHARTE_PRO as C } from '@/lib/charte'
+import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED, choix } from '@/lib/proui'
+import { Ico } from '@/lib/proicons'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import BandeauEtapes from '@/components/parcours/BandeauEtapes'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
@@ -344,22 +345,40 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
 
   /* ── Etape 0 : le choix ─────────────────────────────────────────────── */
   if (!type || etape === 0) {
-    const cartes: { t: TypeOp; titre: string; texte: string }[] = [
-      { t: 'animation', titre: 'Créer une animation', texte: 'Chez vous : un jeu, vos lots, gain immédiat ou tirage au sort.' },
-      { t: 'rejoindre', titre: 'Rejoindre un super event', texte: 'Devenez une station d’un festival ou d’une opération de commerçants : le jeu est déjà choisi, vous apparaissez sur la carte.' },
-      { t: 'super', titre: 'Créer un super event', texte: 'Festival, association, franchise, groupement : plusieurs commerces, un même jeu, tirage au sort.' },
+    /* Code couleur (lib/charte.ts, 18/09) : super event = orange, event/
+       animation = bleu -- « rejoindre » ET « créer » un super event sont
+       tous deux de la famille super event, meme accent.
+       Pictogrammes + badge colore + liseré au survol : « moins plat, plus
+       vivant » (Romain, 18/09), meme registre que la Vignette d'operation
+       (components/pro/GrilleOperations.tsx) -- pas une esthetique inventee
+       pour cet ecran seul. */
+    const cartes: { t: TypeOp; titre: string; texte: string; icone: string; accent: string }[] = [
+      { t: 'animation', titre: 'Créer une animation', texte: 'Chez vous : un jeu, vos lots, gain immédiat ou tirage au sort.', icone: 'game', accent: ACCENT_ANIM },
+      { t: 'rejoindre', titre: 'Rejoindre un super event', texte: 'Devenez une station d’un festival ou d’une opération de commerçants : le jeu est déjà choisi, vous apparaissez sur la carte.', icone: 'handshake', accent: ACCENT_SUPER },
+      { t: 'super', titre: 'Créer un super event', texte: 'Festival, association, franchise, groupement : plusieurs commerces, un même jeu, tirage au sort.', icone: 'sparkle', accent: ACCENT_SUPER },
     ]
     return (
       <div style={{ maxWidth: 980 }}>
+        <style>{`.nop-carte{position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+          .nop-carte:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(28,16,36,.10)}
+          .nop-carte .nop-filet{position:absolute;top:0;left:0;right:0;height:3px}
+          .nop-carte .nop-fleche{transition:transform .15s}
+          .nop-carte:hover .nop-fleche{transform:translateX(3px)}`}</style>
         <div style={{ fontSize: 24, fontWeight: 800 }}>Nouvelle opération</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '4px 0 20px' }}>Quatre étapes, avec à droite le jeu tel que vos clients le verront.</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 14 }}>
           {cartes.map(c => (
-            <button key={c.t} style={{ ...choix(false), padding: 20, background: '#fff' }}
+            <button key={c.t} className="nop-carte" style={{ ...choix(false), padding: 20, background: '#fff', textAlign: 'left' }}
               onClick={() => { setType(c.t); setEtape(1); if (c.t === 'super' && module_ === 'spin') setModule(null) }}>
+              <span className="nop-filet" style={{ background: c.accent }} />
+              <div style={{ width: 42, height: 42, borderRadius: 12, background: `${c.accent}1a`, color: c.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                <Ico k={c.icone} size={21} />
+              </div>
               <div style={{ fontSize: 17, fontWeight: 800 }}>{c.titre}</div>
               <div style={{ fontSize: 13, ...MUTED, marginTop: 6, lineHeight: 1.5 }}>{c.texte}</div>
-              <div style={{ marginTop: 14, fontWeight: 800, color: C.magenta, fontSize: 13.5 }}>Commencer →</div>
+              <div style={{ marginTop: 14, fontWeight: 800, color: c.accent, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 5 }}>
+                Commencer <span className="nop-fleche">→</span>
+              </div>
             </button>
           ))}
         </div>

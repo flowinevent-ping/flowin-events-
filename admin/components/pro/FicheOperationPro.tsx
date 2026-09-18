@@ -19,6 +19,7 @@ import { BlocGagnants } from '@/components/pro/GagnantsClient'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, BTN2 } from '@/lib/proui'
+import { COULEURS_ETAPES } from '@/components/parcours/BandeauEtapes'
 
 export default function FicheOperationPro({ initial, cle, onglet: ongletInitial, contacts }: { initial: OperationsPro; cle: string; onglet: OngletOp; contacts: ContactPro[] }) {
   const [data, setData] = useState(initial)
@@ -33,6 +34,11 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
   const lotsTotal = op.lots.reduce((n, l) => n + (l.quantite || 0), 0)
   const periode = periodeOperation(op.dateD, op.dateF, op.status)
+  /* Code couleur (18/09, « applique ces choses sur la totalite de
+     l'environnement ») : le bandeau restait bleu meme pour un super event --
+     COULEURS_ETAPES est deja la source unique du parcours de creation
+     (components/parcours/BandeauEtapes.tsx), reprise ici a l'identique. */
+  const [teinte1, teinte2] = COULEURS_ETAPES[op.type === 'super' ? 'super' : 'event']
 
   function changer(o: OngletOp) {
     setOnglet(o)
@@ -55,7 +61,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
       <a href={`/pro${q}`} style={{ fontSize: 13, fontWeight: 700, color: C.accent, textDecoration: 'none' }}>← Mes opérations</a>
 
       {/* Bandeau de l operation */}
-      <div style={{ borderRadius: 20, overflow: 'hidden', marginTop: 10, background: `linear-gradient(135deg,${C.accent},${C.accentFonce})`, color: '#fff', position: 'relative', boxShadow: '0 12px 30px rgba(43,16,54,.18)' }}>
+      <div style={{ borderRadius: 20, overflow: 'hidden', marginTop: 10, background: `linear-gradient(135deg,${teinte1},${teinte2})`, color: '#fff', position: 'relative', boxShadow: '0 12px 30px rgba(43,16,54,.18)' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
         <div style={{ padding: '15px 20px 14px' }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>

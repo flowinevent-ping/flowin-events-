@@ -54,3 +54,14 @@ export const CHARTE_PRO = {
 } as const
 
 export const POLICE_PRO = "'Manrope',system-ui,sans-serif"
+
+/**
+ * Code couleur super event / event-animation (Romain, 18/09) : « garde le
+ * super event en orange, l'event en bleu » -- identifiant deja etabli
+ * ailleurs (SuperEventDrawer .t-super, /rejoindre). Source unique : tout
+ * ecran qui distingue les deux types reprend CES constantes, jamais une
+ * teinte recalculee localement (« applique ces choses sur la totalite de
+ * l'environnement », 18/09).
+ */
+export const ACCENT_SUPER = '#C2410C'
+export const ACCENT_ANIM = CHARTE_PRO.accentFonce
