@@ -357,28 +357,34 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
       { t: 'rejoindre', titre: 'Rejoindre un super event', texte: 'Devenez une station d’un festival ou d’une opération de commerçants : le jeu est déjà choisi, vous apparaissez sur la carte.', icone: 'handshake', accent: ACCENT_SUPER },
       { t: 'super', titre: 'Créer un super event', texte: 'Festival, association, franchise, groupement : plusieurs commerces, un même jeu, tirage au sort.', icone: 'sparkle', accent: ACCENT_SUPER },
     ]
+    /* Deuxieme passe (18/09, retour sur premiere version) : « des pictos plus
+       gros, pas obligé d'encadré, textes alignés, pictos centrés, esthétique
+       plus léchée ». Halo rond (pas de tuile carrée) qui se remplit de la
+       couleur au survol, contenu centre de bout en bout, CTA en vraie pastille
+       plutot qu'un lien texte + fleche. */
     return (
       <div style={{ maxWidth: 980 }}>
-        <style>{`.nop-carte{position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
-          .nop-carte:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(28,16,36,.10)}
-          .nop-carte .nop-filet{position:absolute;top:0;left:0;right:0;height:3px}
-          .nop-carte .nop-fleche{transition:transform .15s}
+        <style>{`.nop-carte{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+          .nop-carte:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(28,16,36,.12);border-color:var(--acc)}
+          .nop-carte .nop-filet{position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc)}
+          .nop-carte .nop-halo{width:72px;height:72px;border-radius:999px;background:var(--acc-tint);color:var(--acc);display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:background .18s ease,color .18s ease}
+          .nop-carte:hover .nop-halo{background:var(--acc);color:#fff}
+          .nop-carte .nop-cta{margin-top:20px;padding:10px 22px;border-radius:999px;background:var(--acc-tint);color:var(--acc);font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:background .18s ease,color .18s ease}
+          .nop-carte:hover .nop-cta{background:var(--acc);color:#fff}
+          .nop-carte .nop-fleche{transition:transform .18s ease}
           .nop-carte:hover .nop-fleche{transform:translateX(3px)}`}</style>
         <div style={{ fontSize: 24, fontWeight: 800 }}>Nouvelle opération</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '4px 0 20px' }}>Quatre étapes, avec à droite le jeu tel que vos clients le verront.</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
           {cartes.map(c => (
-            <button key={c.t} className="nop-carte" style={{ ...choix(false), padding: 20, background: '#fff', textAlign: 'left' }}
+            <button key={c.t} className="nop-carte"
+              style={{ ...choix(false), padding: '34px 26px 28px', background: '#fff', ['--acc' as string]: c.accent, ['--acc-tint' as string]: `${c.accent}17` } as React.CSSProperties}
               onClick={() => { setType(c.t); setEtape(1); if (c.t === 'super' && module_ === 'spin') setModule(null) }}>
-              <span className="nop-filet" style={{ background: c.accent }} />
-              <div style={{ width: 42, height: 42, borderRadius: 12, background: `${c.accent}1a`, color: c.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                <Ico k={c.icone} size={21} />
-              </div>
-              <div style={{ fontSize: 17, fontWeight: 800 }}>{c.titre}</div>
-              <div style={{ fontSize: 13, ...MUTED, marginTop: 6, lineHeight: 1.5 }}>{c.texte}</div>
-              <div style={{ marginTop: 14, fontWeight: 800, color: c.accent, fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 5 }}>
-                Commencer <span className="nop-fleche">→</span>
-              </div>
+              <span className="nop-filet" />
+              <div className="nop-halo"><Ico k={c.icone} size={32} /></div>
+              <div style={{ fontSize: 18, fontWeight: 800 }}>{c.titre}</div>
+              <div style={{ fontSize: 13, ...MUTED, marginTop: 8, lineHeight: 1.55, maxWidth: 260 }}>{c.texte}</div>
+              <span className="nop-cta">Commencer <span className="nop-fleche">→</span></span>
             </button>
           ))}
         </div>
