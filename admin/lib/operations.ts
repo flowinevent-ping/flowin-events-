@@ -51,24 +51,21 @@ export function superEventsReels<T extends { id: string }>(liste: T[] | null | u
 
 /* ── Libelles des modules (famille A) ──────────────────────────────────────── */
 
-const MODULES: Record<string, { nom: string; icone: string }> = {
-  nds2026: { nom: 'Quiz + bonus', icone: '🎯' },
-  quiz: { nom: 'Quiz', icone: '🧠' },
-  quizmaster: { nom: 'Quiz Master', icone: '🎮' },
-  quizsolo: { nom: 'Quiz Solo', icone: '⏱️' },
-  spin: { nom: 'Roue', icone: '🎡' },
-  tombola: { nom: 'Tombola', icone: '🎟️' },
-  vote: { nom: 'Vote', icone: '⭐' },
-  paques: { nom: 'Chasse aux œufs', icone: '🥚' },
+const MODULES: Record<string, { nom: string }> = {
+  nds2026: { nom: 'Quiz + bonus' },
+  quiz: { nom: 'Quiz' },
+  quizmaster: { nom: 'Quiz Master' },
+  quizsolo: { nom: 'Quiz Solo' },
+  spin: { nom: 'Roue' },
+  tombola: { nom: 'Tombola' },
+  vote: { nom: 'Vote' },
+  paques: { nom: 'Chasse aux œufs' },
 }
 
 /** Nom lisible d un module. `nds2026` -> « Quiz + bonus ». */
 export function libelleModule(m: string | null | undefined): string {
   if (!m) return '—'
   return MODULES[m]?.nom ?? m
-}
-export function iconeModule(m: string | null | undefined): string {
-  return (m && MODULES[m]?.icone) || '🎮'
 }
 
 /* ── Dates ─────────────────────────────────────────────────────────────────── */

@@ -29,6 +29,8 @@ const PATHS: Record<string, string> = {
   shop: '<path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9a3 3 0 0 0 6 0M9 9a3 3 0 0 0 6 0M15 9a3 3 0 0 0 6 0"/>',
   user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+  chevronLeft: '<path d="M15 18l-6-6 6-6"/>',
+  chevronRight: '<path d="M9 18l6-6-6-6"/>',
 }
 
 export function Ico({ k, size = 14, style }: { k: keyof typeof PATHS | string; size?: number; style?: React.CSSProperties }) {
@@ -37,6 +39,33 @@ export function Ico({ k, size = 14, style }: { k: keyof typeof PATHS | string; s
   return (
     <svg
       viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={2}
+      strokeLinecap="round" strokeLinejoin="round"
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0, ...style }}
+      dangerouslySetInnerHTML={{ __html: d }}
+    />
+  )
+}
+
+/**
+ * Un pictogramme distinct par module de jeu -- UNE seule source, reprise partout
+ * ou un module doit s'identifier visuellement (wizard-event, /dashboard/jeux),
+ * pour ne jamais avoir deux jeux de dessins differents pour le meme jeu.
+ * Remplace les emoji (🎯🎟️🧠🎮⏱️🎡⭐) qui y vivaient avant.
+ */
+const MODULE_PATHS: Record<string, string> = {
+  nds2026: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
+  quiz: '<circle cx="12" cy="12" r="10"/><path d="M9.5 9.2c0-1.4 1.1-2.4 2.5-2.4s2.5 1 2.5 2.2c0 1.6-2.5 1.8-2.5 3.6"/><circle cx="12" cy="16.3" r="1" fill="currentColor" stroke="none"/>',
+  quizsolo: '<circle cx="12" cy="7.5" r="3"/><path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/>',
+  quizmaster: '<rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V22M8.5 22h7"/>',
+  spin: '<circle cx="12" cy="12" r="10"/><path d="M12 2v10l7 4"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
+  vote: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 12.5l2.5 2.5L16 9.5"/>',
+  tombola: '<rect x="3" y="7" width="18" height="11" rx="2"/><path d="M9 7v11M15 7v11" strokeDasharray="1.5 2.5"/><path d="M3 12h4M17 12h4"/>',
+}
+export function IcoModule({ module, size = 22, style }: { module: string; size?: number; style?: React.CSSProperties }) {
+  const d = MODULE_PATHS[module] ?? MODULE_PATHS.quiz
+  return (
+    <svg
+      viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={1.8}
       strokeLinecap="round" strokeLinejoin="round"
       style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0, ...style }}
       dangerouslySetInnerHTML={{ __html: d }}

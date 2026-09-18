@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, ModuleChip, StatusChip } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
+import { IcoModule } from '@/lib/proicons'
 import { sansGabarit, libelleModule } from '@/lib/operations'
 import {
   GABARIT_MODULE, GABARIT_NOM, GABARIT_DESC,
@@ -19,13 +20,13 @@ const MODULES = [
      tete parce que c est celui a partir duquel on cree, plutot que de repartir
      de zero. Son identifiant en base est `nds2026` — inchange, ce sont les
      events du festival. */
-  { id: GABARIT_MODULE, icon: '🎯', name: GABARIT_NOM, desc: GABARIT_DESC, gabarit: true },
-  { id: 'tombola', icon: '🎟️', name: 'Tombola', desc: 'Inscription CRM + tirage au sort' },
-  { id: 'quiz', icon: '🧠', name: 'Quiz', desc: 'QCM avec bonus + 2 tickets' },
-  { id: 'quizmaster', icon: '🎮', name: 'Quiz Master', desc: 'Quiz en direct sur grand écran' },
-  { id: 'quizsolo', icon: '⏱️', name: 'Quiz Solo', desc: 'Quiz timed en autonomie' },
-  { id: 'spin', icon: '🎡', name: 'Roue', desc: 'Roue de la fortune' },
-  { id: 'vote', icon: '⭐', name: 'Vote', desc: 'Vote artistes / produits' },
+  { id: GABARIT_MODULE, name: GABARIT_NOM, desc: GABARIT_DESC, gabarit: true },
+  { id: 'tombola', name: 'Tombola', desc: 'Inscription CRM + tirage au sort' },
+  { id: 'quiz', name: 'Quiz', desc: 'QCM avec bonus + 2 tickets' },
+  { id: 'quizmaster', name: 'Quiz Master', desc: 'Quiz en direct sur grand écran' },
+  { id: 'quizsolo', name: 'Quiz Solo', desc: 'Quiz timed en autonomie' },
+  { id: 'spin', name: 'Roue', desc: 'Roue de la fortune' },
+  { id: 'vote', name: 'Vote', desc: 'Vote artistes / produits' },
 ]
 
 /* Le deroule et les regles du gabarit, aux deux portees. Une seule source :
@@ -129,7 +130,7 @@ function Modeles() {
   return (
     <div style={{ padding: '0 24px 24px' }}>
       <div style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: '1px solid var(--sa-border)' }}>
-        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>🧩 Modèles de jeu</div>
+        <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>Modèles de jeu</div>
         <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 16 }}>
           Un modèle se fabrique à partir d’un événement existant : il en reprend le module, la
           configuration du jeu, les lots, la visibilité pro et la couleur. Le parcours de création
@@ -216,7 +217,9 @@ export default function JeuxPage() {
                 onClick={() => setOuvert(actif ? null : m.id)}
                 style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: actif ? '2px solid var(--sa-accent)' : '1px solid var(--sa-border)', cursor: 'pointer', gridColumn: actif ? 'span 3' : undefined }}
               >
-                <div style={{ fontSize: 36, marginBottom: 10 }}>{m.icon}</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--sa-card)', border: '1px solid var(--sa-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sa-accent)', marginBottom: 10 }}>
+                  <IcoModule module={m.id} size={22} />
+                </div>
                 <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{m.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 12 }}>{m.desc}</div>
                 <div style={{ fontSize: 12, display: 'flex', gap: 8 }}>
@@ -249,7 +252,7 @@ export default function JeuxPage() {
                 {actif && moduleEvents.length > 0 && (
                   <div style={{ marginTop: 16, borderTop: '1px solid var(--sa-border)', paddingTop: 14 }} onClick={e => e.stopPropagation()}>
                     <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 10 }}>
-                      👁 Aperçu navigable — le vrai parcours joueur
+                      Aperçu navigable — le vrai parcours joueur
                     </div>
                     <ParcoursMobil
                       events={moduleEvents.map(ev => ({ id: ev.id, module: ev.module, nom: ev.nom, super_event_id: ev.super_event_id }))}
