@@ -323,10 +323,6 @@ export function ContenuComm({ op, partenaireId, partenaireSe, mode }: {
 
 /* ── Contrat ───────────────────────────────────────────────────────────────── */
 
-const MODES: Record<string, string> = {
-  lydia_wero: 'Lydia / Wero', paypal: 'PayPal', sepa: 'Virement SEPA', virement: 'Virement bancaire', especes: 'Espèces',
-}
-
 export function ContenuContrat({ op, mode, partenaireId, onChange }: {
   op: DonneesOperation; mode: Mode; partenaireId: string | null; onChange: () => void
 }) {
@@ -343,11 +339,6 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
     if (error) { alert('Échec de la mise à jour.'); return }
     onChange()
   }
-  const champ = (l: string, v: React.ReactNode) => (
-    <div style={{ display: 'flex', gap: 10, padding: '6px 0', borderTop: `1px solid ${BRD}`, fontSize: 12.5 }}>
-      <span style={{ width: 150, flexShrink: 0, color: MUT }}>{l}</span><span style={{ fontWeight: 600 }}>{v}</span>
-    </div>
-  )
   /* Referentiel 41 : un nouveau bon se cree DEPUIS l operation, qui lui est
      rattache (bon-commande-nds.html lit ?se= / ?ev= / ?pt=). */
   const p = new URLSearchParams()
@@ -357,13 +348,11 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
   const lienNouveauBon = `/bon-commande-nds.html?${p.toString()}`
   return (
     <>
-      {commerceSE && champ('Formule', c.offre || '—')}
-      {commerceSE && champ('Montant', c.montant != null ? `${c.montant} €` : '—')}
-      {commerceSE && champ('Mode de paiement', c.paiementMode ? (MODES[c.paiementMode] ?? c.paiementMode) : '—')}
-      {champ('Paiement', <Pastille ton={paye ? 'ok' : 'warn'}>{paye ? 'Reçu' : (c.statutPaiement === 'en_attente' || !c.statutPaiement ? 'En attente' : c.statutPaiement)}</Pastille>)}
-      {commerceSE && !c.factureNumero && champ('Facture', c.factureEmise ? 'Émise (suivi manuel)' : 'Non émise')}
-
-      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 4px' }}>Bons de commande &amp; factures</div>
+      {/* Formule / Montant / Mode de paiement / Paiement retires (Romain,
+          18/09) : « informations inutiles » au-dessus de la vraie donnee, le
+          bon de commande et sa facture. La ligne de bon ci-dessous porte deja
+          le montant et le statut. */}
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '0 0 4px' }}>Bons de commande &amp; factures</div>
       {c.bons.length === 0 && <Vide>Aucun bon de commande rattaché à cette opération.</Vide>}
       {c.bons.map(bn => (
         <div key={bn.id} style={ligne}>
