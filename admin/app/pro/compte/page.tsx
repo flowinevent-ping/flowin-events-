@@ -5,6 +5,7 @@ import { fetchBanquesPro } from '@/lib/banques'
 import ProShell from '@/components/pro/ProShell'
 import EntrepriseForm from '@/components/pro/EntrepriseForm'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
+import ListeFactures from '@/components/pro/ListeFactures'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, H1, SUB, MUTED, BTN2 } from '@/lib/proui'
 
@@ -46,7 +47,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             contact: p.contact ?? null, email: p.email ?? null, tel: p.tel ?? null, partenaire_id: p.partenaire_id ?? null,
           }} />
         : <div style={CARD}>Établissement introuvable.</div>)}
-      {onglet === 'contrat' && <OngletOperationsPro initial={ops} onglet="contrat" />}
+      {onglet === 'contrat' && <ListeFactures operations={ops.operations} />}
       {onglet === 'lots' && <OngletOperationsPro initial={ops} onglet="lots" />}
       {onglet === 'banques' && (
         <div style={CARD}>

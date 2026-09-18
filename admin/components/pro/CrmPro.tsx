@@ -12,7 +12,7 @@
  * `operationFixe` : le meme CRM limite a une operation (fiche operation).
  */
 import { useMemo, useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { ContactPro } from '@/lib/crmPro'
 import { libelleOrigine } from '@/lib/crmPro'
 import { Camembert } from '@/components/dashboard/Camembert'
@@ -58,6 +58,7 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
   operationFixe?: string | null
   operationInitiale?: string | null
 }) {
+  const router = useRouter()
   const [vue, setVue] = useState<Vue>('contacts')
   const [q, setQ] = useState('')
   const [op, setOp] = useState(operationFixe ?? operationInitiale ?? '')
@@ -222,13 +223,18 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
                   <tr>
                     <th style={th}><input type="checkbox" checked={choisis.length === liste.length && liste.length > 0} onChange={toutCocher} /></th>
                     <th style={th}>Contact</th><th style={th}>Coordonnées</th><th style={th}>Origine</th>
-                    <th style={th}>Opérations</th><th style={th}>Parties</th><th style={th}>Gains</th><th style={th}>Dernière</th><th style={th}>Opt-in</th><th style={th}></th>
+                    <th style={th}>Opérations</th><th style={th}>Parties</th><th style={th}>Gains</th><th style={th}>Dernière</th><th style={th}>Opt-in</th>
                   </tr>
                 </thead>
                 <tbody>
+                  {/* Ligne cliquable -> fiche, plus de colonne « Fiche » redondante
+                      (Romain, 18/09 : « pas besoin de marquer fiche, un simple clic
+                      sur la ligne permet d'y accéder »). La case à cocher stoppe la
+                      propagation pour ne pas ouvrir la fiche en la cochant. */}
                   {visibles.map(c => (
-                    <tr key={c.joueur_id} style={{ background: sel.has(c.joueur_id) ? 'rgba(224,33,138,.05)' : undefined }}>
-                      <td style={td}><input type="checkbox" checked={sel.has(c.joueur_id)} onChange={() => basculer(c.joueur_id)} /></td>
+                    <tr key={c.joueur_id} onClick={() => router.push(`/pro/crm/${c.joueur_id}${qs}`)}
+                      style={{ cursor: 'pointer', background: sel.has(c.joueur_id) ? 'rgba(224,33,138,.05)' : undefined }}>
+                      <td style={td} onClick={e => e.stopPropagation()}><input type="checkbox" checked={sel.has(c.joueur_id)} onChange={() => basculer(c.joueur_id)} /></td>
                       <td style={td}>
                         <div style={{ fontWeight: 800 }}>{`${c.prenom ?? ''} ${c.nom ?? ''}`.trim() || '—'}</div>
                         <div style={{ fontSize: 11.5, color: C.attenue }}>{[c.code_postal, c.ville].filter(Boolean).join(' ') || '—'}</div>
@@ -247,7 +253,6 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
                       </td>
                       <td style={{ ...td, whiteSpace: 'nowrap' }}>{dateFr(c.derniere)}</td>
                       <td style={td}>{c.optin ? <span style={{ color: '#15803D', fontWeight: 800 }}>Oui</span> : <span style={{ color: C.attenue }}>Non</span>}</td>
-                      <td style={td}><Link href={`/pro/crm/${c.joueur_id}${qs}`} style={{ color: C.accent, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>Fiche</Link></td>
                     </tr>
                   ))}
                 </tbody>
