@@ -28,17 +28,30 @@ export function chiffresOperation(op: DonneesOperation) {
   return { parties, lots, gagnants: op.gagnants.length, aRemettre: op.gagnants.length - remis }
 }
 
+/* Polish demande par Romain (18/09) : « le bleu est dégueulasse, trop
+   lumineux, harmonise avec le bleu du sidebar » -- le bleu vif #2563EB
+   (C.accent) sur fond blanc, repete sur les chiffres ET le badge ET la
+   bordure, faisait trop de saturation d un coup. C.accentFonce (#1D4ED8,
+   deja dans la charte) est le meme bleu, plus dense, moins « neon ».
+   « on ne voit pas que ce sont des boutons » : les liens de pied de carte
+   n avaient ni fond ni bordure -- de simples mots bleus. Ils devienne des
+   puces avec un vrai contour. */
+const ACCENT_ANIM = C.accentFonce
+const ACCENT_SUPER = '#0369A1'
+
 export function Vignette({ op, href, liens }: { op: DonneesOperation; href: string; liens?: { label: string; href: string }[] }) {
   const k = chiffresOperation(op)
+  const accent = op.type === 'super' ? ACCENT_SUPER : ACCENT_ANIM
   const chiffre = (v: number, l: string) => (
-    <span style={{ whiteSpace: 'nowrap' }}><b style={{ color: C.accent, fontSize: 15 }}>{v}</b> <span style={{ color: C.attenue, fontSize: 11.5 }}>{l}</span></span>
+    <span style={{ whiteSpace: 'nowrap' }}><b style={{ color: accent, fontSize: 15 }}>{v}</b> <span style={{ color: C.attenue, fontSize: 11.5 }}>{l}</span></span>
   )
   return (
-    <div style={{ background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 12px rgba(43,16,54,.04)' }}>
-      <Link href={href} style={{ textDecoration: 'none', color: C.texte, padding: '11px 13px 9px', display: 'block', borderLeft: `4px solid ${op.type === 'super' ? C.magenta : C.accent}` }}>
+    <div className="op-vignette" style={{ background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 12px rgba(43,16,54,.04)', transition: 'box-shadow .15s, transform .15s' }}>
+      <style>{`.op-vignette:hover{box-shadow:0 8px 20px rgba(43,16,54,.1);transform:translateY(-1px)} .op-vignette-lien:hover{background:${C.subtil};border-color:${accent}}`}</style>
+      <Link href={href} style={{ textDecoration: 'none', color: C.texte, padding: '11px 13px 9px', display: 'block', borderLeft: `4px solid ${accent}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'center' }}>
           <span style={{ fontSize: 11.5, fontWeight: 700, color: C.attenue, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{datesCourtes(op.dateD, op.dateF)}</span>
-          <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.07em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: op.type === 'super' ? C.magenta : C.accent }}>
+          <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: accent, background: `${accent}14`, borderRadius: 99, padding: '3px 8px' }}>
             {op.type === 'super' ? 'Super event' : 'Animation'}
           </span>
         </div>
@@ -53,9 +66,12 @@ export function Vignette({ op, href, liens }: { op: DonneesOperation; href: stri
         </div>
       </Link>
       {liens && liens.length > 0 && (
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '7px 13px', borderTop: `1px solid ${C.bordure}`, background: C.subtil }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', padding: '9px 11px', borderTop: `1px solid ${C.bordure}`, background: C.subtil }}>
           {liens.map(l => (
-            <Link key={l.label} href={l.href} style={{ fontSize: 11.5, fontWeight: 800, color: C.accent, textDecoration: 'none', whiteSpace: 'nowrap' }}>{l.label}</Link>
+            <Link key={l.label} href={l.href} className="op-vignette-lien"
+              style={{ fontSize: 11, fontWeight: 800, color: accent, textDecoration: 'none', whiteSpace: 'nowrap', background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 99, padding: '5px 10px', transition: 'background .12s, border-color .12s' }}>
+              {l.label}
+            </Link>
           ))}
         </div>
       )}
