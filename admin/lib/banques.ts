@@ -16,6 +16,9 @@ import { supabase } from './supabase'
  * bouton Valider demande par Romain.
  */
 
+/** `theme` et `difficulte` : rangement demande par Romain (18/09), facultatifs
+ *  -- une question sans theme reste valide, juste non rangee au recapitulatif. */
+export type Difficulte = 'facile' | 'moyen' | 'difficile'
 export interface QuestionQuiz {
   id: string
   type: 'qcm'
@@ -24,6 +27,8 @@ export interface QuestionQuiz {
   bonne: number
   points?: number
   explication?: string
+  theme?: string
+  difficulte?: Difficulte
 }
 export interface OptionBonus { val: string; label: string }
 export interface QuestionBonus {
@@ -31,6 +36,8 @@ export interface QuestionBonus {
   type: 'single' | 'multi'
   label: string
   options: OptionBonus[]
+  theme?: string
+  difficulte?: Difficulte
 }
 export type QuestionBanque = QuestionQuiz | QuestionBonus
 

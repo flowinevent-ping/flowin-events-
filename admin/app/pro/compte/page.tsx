@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
 const ONGLETS = [
   { id: 'entreprise', label: 'Mon entreprise' },
   { id: 'contrat', label: 'Bons de commande & factures' },
+  { id: 'lots', label: 'Lots & stock' },
   { id: 'banques', label: 'Banques de questions' },
 ] as const
 
@@ -46,6 +47,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
           }} />
         : <div style={CARD}>Établissement introuvable.</div>)}
       {onglet === 'contrat' && <OngletOperationsPro initial={ops} onglet="contrat" />}
+      {onglet === 'lots' && <OngletOperationsPro initial={ops} onglet="lots" />}
       {onglet === 'banques' && (
         <div style={CARD}>
           {banques.length === 0 && <div style={{ fontSize: 13.5, ...MUTED, marginBottom: 12 }}>Aucune banque de questions.</div>}

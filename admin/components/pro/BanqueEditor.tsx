@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Banque, QuestionQuiz, QuestionBonus, QuestionBanque } from '@/lib/banques'
+import type { Banque, QuestionQuiz, QuestionBonus, QuestionBanque, Difficulte } from '@/lib/banques'
 import { enregistrerBanque, nouvelleQuestionQuiz, nouvelleQuestionBonus, blocDeQuatre, parseImportQuestions, mapQuestionsIA } from '@/lib/banques'
 import { CARD, MUTED, ACC } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
@@ -10,6 +10,32 @@ import { supabase } from '@/lib/supabase'
 
 const btn: React.CSSProperties = { border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: 'pointer' }
 const inputStyle: React.CSSProperties = { width: '100%', border: '1.5px solid #efe9f2', borderRadius: 9, padding: '9px 11px', fontSize: 13.5, fontFamily: 'inherit' }
+
+/* Rangement demande par Romain (18/09) : "rangement par theme et difficulte".
+   Facultatif -- une question sans theme reste valide, juste non groupee au
+   recapitulatif (voir Recap plus bas). */
+function ThemeEtDifficulte({ theme, difficulte, onChange }: {
+  theme?: string; difficulte?: Difficulte
+  onChange: (patch: { theme?: string; difficulte?: Difficulte }) => void
+}) {
+  return (
+    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+      <input
+        value={theme ?? ''} onChange={e => onChange({ theme: e.target.value })}
+        placeholder="Thème (optionnel)" style={{ ...inputStyle, flex: 1, fontSize: 12.5 }}
+      />
+      <select
+        value={difficulte ?? ''} onChange={e => onChange({ difficulte: (e.target.value || undefined) as Difficulte | undefined })}
+        style={{ ...inputStyle, width: 130, flexShrink: 0, fontSize: 12.5 }}
+      >
+        <option value="">Difficulté</option>
+        <option value="facile">Facile</option>
+        <option value="moyen">Moyen</option>
+        <option value="difficile">Difficile</option>
+      </select>
+    </div>
+  )
+}
 
 /* Refonte (18/09), consigne repetee de Romain, pas respectee la premiere
    fois : « un seul bloc de quatre questions, une reponse [correcte] et une
@@ -180,17 +206,38 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
         <>
           <div style={{ ...CARD }}>
             <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 10 }}>Récapitulatif — {questions.length} question{questions.length > 1 ? 's' : ''}</div>
-            {questions.map((qst, i) => {
-              const intitule = estBonus ? (qst as QuestionBonus).label : (qst as QuestionQuiz).texte
-              const bonne = !estBonus ? (qst as QuestionQuiz).options[(qst as QuestionQuiz).bonne] : null
-              return (
-                <button key={qst.id} onClick={() => setEtape(i)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: i > 0 ? '1px solid #efe9f2' : 'none', padding: '10px 0', cursor: 'pointer' }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8' }}>Q{i + 1}</div>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1c1024' : '#B45309' }}>{intitule?.trim() || 'Intitulé manquant'}</div>
-                  {bonne != null && <div style={{ fontSize: 12, color: '#15803D', marginTop: 2 }}>Bonne réponse : {bonne || '—'}</div>}
-                </button>
-              )
-            })}
+            {(() => {
+              const uneQuestion = (qst: QuestionBanque, i: number) => {
+                const intitule = estBonus ? (qst as QuestionBonus).label : (qst as QuestionQuiz).texte
+                const bonne = !estBonus ? (qst as QuestionQuiz).options[(qst as QuestionQuiz).bonne] : null
+                return (
+                  <button key={qst.id} onClick={() => setEtape(i)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid #efe9f2', padding: '10px 0', cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8' }}>Q{i + 1}</span>
+                      {qst.difficulte && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: ACC, background: 'rgba(37,99,235,.08)', borderRadius: 99, padding: '1px 7px' }}>{qst.difficulte}</span>}
+                    </div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1c1024' : '#B45309' }}>{intitule?.trim() || 'Intitulé manquant'}</div>
+                    {bonne != null && <div style={{ fontSize: 12, color: '#15803D', marginTop: 2 }}>Bonne réponse : {bonne || '—'}</div>}
+                  </button>
+                )
+              }
+              /* Rangement par theme demande par Romain -- ne groupe que si au
+                 moins une question porte un theme, sinon liste plate. */
+              const auMoinsUnTheme = questions.some(q => q.theme?.trim())
+              if (!auMoinsUnTheme) return questions.map((qst, i) => uneQuestion(qst, i))
+              const groupes = new Map<string, { qst: QuestionBanque; i: number }[]>()
+              questions.forEach((qst, i) => {
+                const t = qst.theme?.trim() || 'Sans thème'
+                if (!groupes.has(t)) groupes.set(t, [])
+                groupes.get(t)!.push({ qst, i })
+              })
+              return Array.from(groupes.entries()).map(([theme, items]) => (
+                <div key={theme} style={{ marginTop: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#94A3B8', marginTop: 10 }}>{theme}</div>
+                  {items.map(({ qst, i }) => uneQuestion(qst, i))}
+                </div>
+              ))
+            })()}
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -284,7 +331,10 @@ function UneQuestionQuiz({ question: qst, index, total, onChange, onRetirer }: {
         <input value={qst.texte} onChange={e => onChange({ texte: e.target.value })} placeholder="Intitulé de la question" style={{ ...inputStyle, flex: 1 }} autoFocus />
         {total > 1 && <button onClick={onRetirer} style={{ ...btn, background: 'transparent', color: '#B45309', flexShrink: 0 }} title="Retirer la question">×</button>}
       </div>
-      <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7 }}>
+      <div style={{ paddingLeft: 30 }}>
+        <ThemeEtDifficulte theme={qst.theme} difficulte={qst.difficulte} onChange={onChange} />
+      </div>
+      <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: -2 }}>Réponses — cochez la bonne</div>
         {qst.options.map((opt, oi) => (
           <div key={oi} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -322,7 +372,10 @@ function UneQuestionBonus({ question: qst, index, total, onChange, onRetirer }: 
         </select>
         {total > 1 && <button onClick={onRetirer} style={{ ...btn, background: 'transparent', color: '#B45309', flexShrink: 0 }} title="Retirer la question">×</button>}
       </div>
-      <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7 }}>
+      <div style={{ paddingLeft: 30 }}>
+        <ThemeEtDifficulte theme={qst.theme} difficulte={qst.difficulte} onChange={onChange} />
+      </div>
+      <div style={{ paddingLeft: 30, display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
         {qst.options.map((opt, oi) => (
           <div key={oi} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input value={opt.label} onChange={e => majOpt(oi, e.target.value)} placeholder={`Réponse ${oi + 1}`} style={{ ...inputStyle, flex: 1 }} />
