@@ -370,6 +370,7 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
           .nop-carte .nop-halo{width:72px;height:72px;border-radius:999px;background:var(--acc-tint);color:var(--acc);display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:background .18s ease,color .18s ease}
           .nop-carte:hover .nop-halo{background:var(--acc);color:#fff}
           .nop-carte .nop-cta{margin-top:20px;padding:10px 22px;border-radius:999px;background:var(--acc-tint);color:var(--acc);font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:background .18s ease,color .18s ease}
+          .nop-carte .nop-spacer{flex:1}
           .nop-carte:hover .nop-cta{background:var(--acc);color:#fff}
           .nop-carte .nop-fleche{transition:transform .18s ease}
           .nop-carte:hover .nop-fleche{transform:translateX(3px)}`}</style>
@@ -384,6 +385,12 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
               <div className="nop-halo"><Ico k={c.icone} size={32} /></div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{c.titre}</div>
               <div style={{ fontSize: 13, ...MUTED, marginTop: 8, lineHeight: 1.55, maxWidth: 260 }}>{c.texte}</div>
+              {/* Les 3 descriptions ne font pas la meme longueur -> sans ce
+                  ressort, le bouton de chaque carte suivait juste le texte et
+                  se retrouvait a une hauteur differente d'une carte a l'autre
+                  (Romain, 18/09 : « tout n'est pas aligné »). Il pousse
+                  « Commencer » au meme niveau bas sur les 3 cartes. */}
+              <div className="nop-spacer" />
               <span className="nop-cta">Commencer <span className="nop-fleche">→</span></span>
             </button>
           ))}

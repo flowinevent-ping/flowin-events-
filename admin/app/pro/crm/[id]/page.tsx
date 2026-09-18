@@ -1,6 +1,7 @@
 import { fetchOperationsPro } from '@/lib/operations'
 import { fetchJoueurTirages } from '@/lib/dashboard'
 import { fetchCrmPro, libelleOrigine } from '@/lib/crmPro'
+import { communeParCodePostal } from '@/lib/geo'
 import ProShell from '@/components/pro/ProShell'
 import { CARD, MUTED, H1, ACC } from '@/lib/proui'
 import { CHARTE_PRO as C } from '@/lib/charte'
@@ -31,6 +32,11 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
     )
   }
 
+  /* « il faut remplir les villes si on a les codes postaux » (Romain, 18/09)
+     -- ne jamais laisser la case vide quand le code postal suffit a la
+     deduire. Repli d'affichage uniquement (API officielle geo.api.gouv.fr) :
+     ne recrit jamais joueurs.ville en base. */
+  const villeDeduite = !j.ville && j.code_postal ? await communeParCodePostal(j.code_postal) : null
   const nom = `${j.prenom ?? ''} ${j.nom ?? ''}`.trim() || 'Sans nom'
   const initiales = ((j.prenom?.[0] ?? '') + (j.nom?.[0] ?? '')).toUpperCase() || '?'
   const tel = (j.tel ?? '').replace(/[^\d+]/g, '')
@@ -71,7 +77,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
           {ligne('Email', j.email || '—')}
           {ligne('Téléphone', j.tel || '—')}
           {ligne('Code postal', j.code_postal || '—')}
-          {ligne('Ville', j.ville || '—')}
+          {ligne('Ville', j.ville || (villeDeduite ? <>{villeDeduite} <span style={MUTED}>(déduite du code postal)</span></> : '—'))}
           {ligne('Genre', j.genre === 'F' ? 'Femme' : j.genre === 'H' ? 'Homme' : (j.genre || '—'))}
           {ligne('Âge', j.tranche_age || '—')}
           {ligne('Origine', j.origines.length ? j.origines.map(libelleOrigine).join(', ') : '—')}

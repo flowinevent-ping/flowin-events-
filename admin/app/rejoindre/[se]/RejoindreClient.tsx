@@ -357,8 +357,15 @@ export default function RejoindreClient({ se }: { se: SE }) {
                         ))}
                       </ul>
                     )}
+                    {/* Regle (Romain, 18/09) : le lot ne se retranche plus du
+                        prix affiche -- deux montants distincts, comme « 500 €
+                        de participation + 90 € de lot en bon d'achat », pas un
+                        prix qui « comprend » le lot. La formule qui a bien
+                        fonctionne est conservee, seul le libelle changeait. */}
                     {p.lot_valeur != null && p.lot_valeur > 0 && (
-                      <div style={{ fontSize: 11.5, color: CHARTE.attenue, marginTop: 6 }}>dont {p.lot_valeur.toLocaleString('fr-FR')} € de lots offerts inclus</div>
+                      <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700, marginTop: 6 }}>
+                        + {p.lot_valeur.toLocaleString('fr-FR')} € de lots offerts par le commerce, en plus de la participation
+                      </div>
                     )}
                   </button>
                 ))}
