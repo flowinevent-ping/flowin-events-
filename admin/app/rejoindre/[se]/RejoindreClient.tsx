@@ -1,11 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { libelleModule } from '@/lib/operations'
 import { CHARTE, POLICE_ADMIN } from '@/lib/charte'
 import { Ico } from '@/lib/proicons'
+import { fetchPacksParticipation, type PackParticipation } from '@/lib/commercial'
 
-type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; frais_pro?: number | null; module?: string | null }
+type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; frais_pro?: number | null; module?: string | null; logo_url?: string | null }
 
 const CATEGORIES: { nom: string; icone: string }[] = [
   { nom: 'Boulangerie', icone: 'gift' },
@@ -52,6 +53,20 @@ export default function RejoindreClient({ se }: { se: SE }) {
     prenom: '', nom: '', email: '', tel: '',
     lot: '', quantite: '1', conditions: '',
   })
+
+  /* Tarification reelle (18/09) : le "frais_pro" fixe n'est que le repli --
+     la vraie offre commerciale, avec ce qu'elle inclut, vit dans
+     packs_participation (memes packs que /pro/nouvelle propose deja pour
+     rejoindre se-nds-2026). On ne reinvente ni prix ni calcul : meme source,
+     meme filtre (seul ce super event a des packs pour le moment). */
+  const [packs, setPacks] = useState<PackParticipation[]>([])
+  const [packId, setPackId] = useState<string | null>(null)
+  useEffect(() => {
+    if (se.id !== 'se-nds-2026') return
+    fetchPacksParticipation().then(ps => { setPacks(ps); if (ps.length) setPackId(ps[0].id) })
+  }, [se.id])
+  const packChoisi = packs.find(p => p.id === packId) ?? null
+  const prixAffiche = packChoisi ? packChoisi.prix_ht : frais
 
   function set<K extends keyof typeof f>(k: K, v: string) { setF(p => ({ ...p, [k]: v })) }
 
@@ -110,6 +125,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
         nom_commerce: f.commerce.trim(), categorie: f.categorie, adresse: f.adresse.trim(),
         regle_jeu: se.module ?? 'nds2026',
         lots: f.lot.trim() ? [{ titre: f.lot.trim(), valeur_euros: 0, quantite: Number(f.quantite) || 1, conditions: f.conditions.trim() }] : [],
+        pack_id: packId,
         statut: 'en_attente',
       })
       if (dErr) { setErr("Une erreur est survenue. Réessayez."); setSubmitting(false); return }
@@ -133,7 +149,10 @@ export default function RejoindreClient({ se }: { se: SE }) {
   const style = `
     @keyframes rjIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
     .rj-page{min-height:100dvh}
-    .rj-hero{background:linear-gradient(135deg,${ORANGE},${ORANGE2});color:#fff;padding:44px 24px;text-align:center}
+    .rj-hero{background:linear-gradient(135deg,${ORANGE},${ORANGE2});color:#fff;padding:44px 24px;text-align:center;position:relative;overflow:hidden}
+    .rj-hero-orbe{position:absolute;border-radius:50%;background:rgba(255,255,255,.12);pointer-events:none}
+    .rj-hero-orbe-1{width:260px;height:260px;top:-90px;right:-70px}
+    .rj-hero-orbe-2{width:180px;height:180px;bottom:-60px;left:-50px;background:rgba(0,0,0,.08)}
     .rj-corps{padding:0 18px 40px}
     .rj-carte{max-width:540px;margin:-16px auto 0}
     .rj-step{animation:rjIn .28s ease}
@@ -204,8 +223,8 @@ export default function RejoindreClient({ se }: { se: SE }) {
                   Nous validons votre commerce sous 24–48h. Votre <strong>QR à afficher en boutique</strong> et votre <strong>tableau de bord</strong> seront activés à ce moment-là.
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', border: `1px solid ${CHARTE.bordure}`, borderRadius: 12 }}>
-                  <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>Frais de participation</span>
-                  <span style={{ fontSize: 18, fontWeight: 800 }}>{frais} € HT</span>
+                  <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Frais de participation'}</span>
+                  <span style={{ fontSize: 18, fontWeight: 800 }}>{prixAffiche.toLocaleString('fr-FR')} € HT</span>
                 </div>
                 <div style={{ fontSize: 12.5, color: CHARTE.attenue, marginTop: 10, lineHeight: 1.5 }}>
                   Déductible si vous souscrivez ensuite à un abonnement Flowin. Les modalités de règlement vous seront communiquées par email.
@@ -223,9 +242,18 @@ export default function RejoindreClient({ se }: { se: SE }) {
       <style>{style}</style>
       <div className="rj-page">
         <div className="rj-hero">
-          <div style={{ fontSize: 12.5, fontWeight: 700, opacity: 0.9, letterSpacing: '.05em', textTransform: 'uppercase' }}>Devenez commerce partenaire</div>
-          <div style={{ fontSize: 32, fontWeight: 800, marginTop: 10, lineHeight: 1.15 }}>{se.nom}</div>
-          <div style={{ fontSize: 15, opacity: 0.92, marginTop: 10, maxWidth: 420 }}>
+          <div className="rj-hero-orbe rj-hero-orbe-1" />
+          <div className="rj-hero-orbe rj-hero-orbe-2" />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 26 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', boxShadow: '0 0 10px rgba(255,255,255,.8)' }} />
+            <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-.4px' }}>Flow<em style={{ fontStyle: 'normal', opacity: 0.85 }}>in</em></span>
+            {se.logo_url && (
+              <img src={se.logo_url} alt={se.nom} style={{ height: 28, maxWidth: 120, objectFit: 'contain', marginLeft: 10, borderRadius: 6, background: 'rgba(255,255,255,.14)', padding: '3px 8px' }} />
+            )}
+          </div>
+          <div style={{ position: 'relative', fontSize: 12.5, fontWeight: 700, opacity: 0.9, letterSpacing: '.05em', textTransform: 'uppercase' }}>Devenez commerce partenaire</div>
+          <div style={{ position: 'relative', fontSize: 32, fontWeight: 800, marginTop: 10, lineHeight: 1.15 }}>{se.nom}</div>
+          <div style={{ position: 'relative', fontSize: 15, opacity: 0.92, marginTop: 10, maxWidth: 420 }}>
             Animez votre boutique, captez de nouveaux clients et offrez-leur une chance de gagner.
           </div>
         </div>
@@ -247,7 +275,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
               <button className="rj-btn" style={{ width: '100%' }} onClick={() => aller('commerce')}>
                 Commencer <Ico k="chevronRight" size={16} />
               </button>
-              <div style={{ fontSize: 12, color: CHARTE.attenue, marginTop: 12 }}>Sans engagement · {frais} € HT de participation</div>
+              <div style={{ fontSize: 12, color: CHARTE.attenue, marginTop: 12 }}>Sans engagement · {packs.length ? `à partir de ${Math.min(...packs.map(p => p.prix_ht)).toLocaleString('fr-FR')}` : prixAffiche.toLocaleString('fr-FR')} € HT de participation</div>
             </div>
           )}
 
@@ -301,6 +329,42 @@ export default function RejoindreClient({ se }: { se: SE }) {
               <label style={label}>Conditions d&apos;utilisation</label>
               <input style={input} value={f.conditions} onChange={e => set('conditions', e.target.value)} placeholder="ex : valable sur présentation du billet" />
             </div>
+
+            {packs.length > 0 && (
+              <div style={field}>
+                <label style={label}>Votre participation</label>
+                {packs.map(p => (
+                  <button key={p.id} type="button" onClick={() => setPackId(p.id)}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left', marginBottom: 9, padding: '13px 14px', borderRadius: 12,
+                      border: `1.5px solid ${packId === p.id ? ORANGE : CHARTE.bordure}`,
+                      background: packId === p.id ? 'rgba(194,65,12,.06)' : CHARTE.subtil, cursor: 'pointer', fontFamily: 'inherit',
+                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 14.5, fontWeight: 800, color: CHARTE.texte }}>{p.nom}</span>
+                        {p.badge && <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.05em', textTransform: 'uppercase', color: ORANGE, background: 'rgba(194,65,12,.12)', borderRadius: 99, padding: '3px 8px' }}>{p.badge}</span>}
+                      </div>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: ORANGE, whiteSpace: 'nowrap' }}>{p.prix_ht.toLocaleString('fr-FR')} € HT</span>
+                    </div>
+                    {p.sous_titre && <div style={{ fontSize: 12, color: CHARTE.attenue, marginTop: 3 }}>{p.sous_titre}</div>}
+                    {p.inclusions && (
+                      <ul style={{ margin: '8px 0 0', padding: 0, listStyle: 'none' }}>
+                        {p.inclusions.split('\n').map(l => l.trim()).filter(Boolean).map((ligne, i) => (
+                          <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, color: CHARTE.texte, marginTop: 3 }}>
+                            <Ico k="check" size={11} style={{ color: '#15803D', marginTop: 2, flexShrink: 0 }} />{ligne}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {p.lot_valeur != null && p.lot_valeur > 0 && (
+                      <div style={{ fontSize: 11.5, color: CHARTE.attenue, marginTop: 6 }}>dont {p.lot_valeur.toLocaleString('fr-FR')} € de lots offerts inclus</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <Nav suite="Voir le récapitulatif" />
           </>)}
 
@@ -320,8 +384,8 @@ export default function RejoindreClient({ se }: { se: SE }) {
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0 4px', marginTop: 8 }}>
-              <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>Frais de participation</span>
-              <span style={{ fontSize: 18, fontWeight: 800 }}>{frais} € HT</span>
+              <span style={{ fontSize: 13.5, color: CHARTE.attenue }}>{packChoisi ? packChoisi.nom : 'Frais de participation'}</span>
+              <span style={{ fontSize: 18, fontWeight: 800 }}>{prixAffiche.toLocaleString('fr-FR')} € HT</span>
             </div>
             {err && <div style={{ background: '#FEECEC', color: '#B42318', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, margin: '10px 0 0' }}>{err}</div>}
             <div className="rj-nav">
