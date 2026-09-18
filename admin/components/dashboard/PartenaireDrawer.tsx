@@ -27,8 +27,12 @@ const TONS_ETAT: Record<string, { bg: string; c: string }> = {
 }
 function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
   const t = TONS_ETAT[etat]
-  const texte = etat === 'retire' ? '✓ Retiré' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
-  return <span style={{ background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>{texte}</span>
+  const texte = etat === 'retire' ? 'Retiré' : etat === 'confirme' ? 'Confirmé' : 'À appeler'
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>
+      <Ico k={etat === 'a_confirmer' ? 'phone' : 'check'} size={11} />{texte}
+    </span>
+  )
 }
 
 /** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici. */
@@ -80,6 +84,13 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
   const tabActif = tab ?? drawer.tab
   const majTab = onTab ?? setDrawerTab
   const p = useMemo(() => partenaires.find(x => x.id === pidActif), [partenaires, pidActif])
+
+  /* BUG CONSTATE (18/09) : l onglet Contrat lit `form`, pas `p` -- il n affichait
+     donc les offre/montant/paiement REELS qu apres etre passe par « Editer » sur
+     Infos. `form` doit toujours partir d une copie de `p`, pas rester vide tant
+     qu enterEdit() n a pas ete appele. Cle sur l id : un enregistrement en cours
+     (edit=true) n est jamais efface par un re-rendu de la meme fiche. */
+  useEffect(() => { if (p) setForm({ ...p }) }, [p?.id])
 
   const pid = pidActif
   const ongletGagnants = ['gagnants', 'comm', 'lots', 'c-gagnants', 'c-comm', 'c-lots'].indexOf(tabActif) >= 0
@@ -206,10 +217,10 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {p.image_url
             ? <img src={p.image_url} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'contain', border: '1px solid var(--sa-border)' }} />
-            : <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>{p.emoji ?? '🤝'}</div>
+            : <div style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sa-accent)' }}><Ico k="handshake" size={19} /></div>
           }
           <div>
-            <div className="sa-drawer-title">🤝 {p.nom}</div>
+            <div className="sa-drawer-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Ico k="handshake" size={15} style={{ color: 'var(--sa-accent)' }} />{p.nom}</div>
             <div className="sa-drawer-sub"><span className={`sa-chip ${typeChip}`}>{p.type ?? 'Local'}</span></div>
           </div>
         </div>
@@ -222,8 +233,8 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
           onClick={() => openDrawer('pro', proLie.id)}
           style={{ margin: '0 20px 14px', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
-          <span style={{ fontSize: 12.5, fontWeight: 700 }}>🏢 Compte pro lié — connexion, tracking, QR & liens</span>
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--sa-accent)' }}>Ouvrir →</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}><Ico k="building" size={13} />Compte pro lié — connexion, tracking, QR & liens</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--sa-accent)', display: 'flex', alignItems: 'center', gap: 3 }}>Ouvrir <Ico k="chevronRight" size={12} /></span>
         </div>
       )}
 
@@ -239,28 +250,45 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
         {tabActif === 'infos' && !edit && (
           <>
             {p.image_url && (
-              <div style={{ marginBottom: 16, textAlign: 'center' }}>
+              <div style={{ marginBottom: 14, textAlign: 'center' }}>
                 <img src={p.image_url} alt="logo" style={{ maxHeight: 80, maxWidth: '100%', objectFit: 'contain', borderRadius: 10 }} />
               </div>
             )}
-            <FieldRow label="Nom" value={<strong>{p.nom}</strong>} />
-            <FieldRow label="Type" value={<span className={`sa-chip ${typeChip}`}>{p.type ?? '-'}</span>} />
-            <FieldRow label="Secteur" value={p.secteur} />
-            <FieldRow label="Ville" value={p.ville} />
-            <FieldRow label="Statut" value={
-              <span>{p.actif !== false ? '✅ Actif' : '⭕ Inactif'} · {p.visible !== false ? 'Visible' : 'Masqué'}{(p.en_avant) ? ' · ⭐ En avant' : ''}</span>
-            } />
-            {p.description && <><SectionHeader>Description</SectionHeader><div className="sa-text-block">{p.description}</div></>}
-            {p.promo_text && <><SectionHeader>Promo</SectionHeader><div className="sa-promo-block">{p.promo_text}</div></>}
-            <SectionHeader>Liens</SectionHeader>
-            <FieldRow label="Site web" value={p.site_web || p.url ? <a href={p.site_web ?? p.url ?? '#'} target="_blank" rel="noopener">{p.site_web ?? p.url}</a> : '-'} />
-            <FieldRow label="Instagram" value={p.instagram ?? '-'} />
-            <FieldRow label="Facebook" value={p.facebook ?? '-'} />
-            <SectionHeader>Contact</SectionHeader>
-            <FieldRow label="Nom" value={p.contact} />
-            <FieldRow label="Email" value={p.email ? <a href={`mailto:${p.email}`}>{p.email}</a> : '-'} />
-            <FieldRow label="Téléphone" value={p.tel} />
-            <FieldRow label="SIRET" value={p.siret ? <code className="sa-code">{p.siret}</code> : '-'} />
+            {/* Regroupement par carte -- avant, 8+ lignes plates d affilee (« trop
+                d info d un coup », Romain 17/09). Meme classe .sa-support que le
+                reste du dashboard, juste utilisee ici pour cloisonner. */}
+            <div className="sa-support" style={{ marginBottom: 10 }}>
+              <FieldRow label="Nom" value={<strong>{p.nom}</strong>} />
+              <FieldRow label="Type" value={<span className={`sa-chip ${typeChip}`}>{p.type ?? '-'}</span>} />
+              <FieldRow label="Secteur" value={p.secteur} />
+              <FieldRow label="Ville" value={p.ville} />
+              <FieldRow label="Statut" value={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <span className={`sa-chip ${p.actif !== false ? 'live' : ''}`}>{p.actif !== false ? 'Actif' : 'Inactif'}</span>
+                  <span className="sa-chip">{p.visible !== false ? 'Visible' : 'Masqué'}</span>
+                  {p.en_avant && <span className="sa-chip purple" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ico k="star" size={11} />En avant</span>}
+                </span>
+              } />
+            </div>
+            {(p.description || p.promo_text) && (
+              <div className="sa-support" style={{ marginBottom: 10 }}>
+                {p.description && <><SectionHeader>Description</SectionHeader><div className="sa-text-block">{p.description}</div></>}
+                {p.promo_text && <><SectionHeader>Promo</SectionHeader><div className="sa-promo-block">{p.promo_text}</div></>}
+              </div>
+            )}
+            <div className="sa-support" style={{ marginBottom: 10 }}>
+              <SectionHeader><Ico k="globe" size={12} />Liens</SectionHeader>
+              <FieldRow label="Site web" value={p.site_web || p.url ? <a href={p.site_web ?? p.url ?? '#'} target="_blank" rel="noopener">{p.site_web ?? p.url}</a> : '-'} />
+              <FieldRow label="Instagram" value={p.instagram ?? '-'} />
+              <FieldRow label="Facebook" value={p.facebook ?? '-'} />
+            </div>
+            <div className="sa-support">
+              <SectionHeader><Ico k="user" size={12} />Contact</SectionHeader>
+              <FieldRow label="Nom" value={p.contact} />
+              <FieldRow label="Email" value={p.email ? <a href={`mailto:${p.email}`}>{p.email}</a> : '-'} />
+              <FieldRow label="Téléphone" value={p.tel} />
+              <FieldRow label="SIRET" value={p.siret ? <code className="sa-code">{p.siret}</code> : '-'} />
+            </div>
           </>
         )}
 
@@ -272,7 +300,9 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               <div style={{ width: 80, height: 80, flexShrink: 0, borderRadius: 10, border: '2px dashed var(--sa-border)', background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {logoPreview
                   ? <img src={logoPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setLogoPreview('')} />
-                  : <span style={{ fontSize: 28 }}>{form.emoji ?? p.emoji ?? '🖼'}</span>
+                  : <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--sa-muted)' }}>
+                      {(form.emoji ?? p.emoji) || (form.nom ?? p.nom ?? '?').trim().charAt(0).toUpperCase()}
+                    </span>
                 }
               </div>
               <div style={{ flex: 1 }}>
@@ -294,8 +324,8 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                   <input className="sa-input" type="url" placeholder="https://…" value={form.image_url ?? ''} onChange={e => { ff('image_url')(e); setLogoPreview(e.target.value) }} />
                 </div>
                 <div className="sa-field">
-                  <label className="sa-label">Emoji fallback</label>
-                  <input className="sa-input" placeholder="🤝" value={form.emoji ?? ''} onChange={ff('emoji')} />
+                  <label className="sa-label">Repère si aucun logo</label>
+                  <input className="sa-input" placeholder="Ex. première lettre du nom" value={form.emoji ?? ''} onChange={ff('emoji')} />
                 </div>
               </div>
             </div>
@@ -318,11 +348,11 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               </div>
             </div>
             <div style={{ display: 'flex', gap: 16, padding: '8px 12px', background: 'var(--sa-subtle)', borderRadius: 8, marginBottom: 14 }}>
-              {[['actif', 'Actif'], ['visible', 'Visible'], ['en_avant', '⭐ En avant']].map(([k, l]) => (
-                <label key={k} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              {[['actif', 'Actif', null], ['visible', 'Visible', null], ['en_avant', 'En avant', 'star']].map(([k, l, ic]) => (
+                <label key={k as string} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
                   <input type="checkbox" checked={(form[k as keyof FlowinPartenaire] as boolean) !== false}
-                    onChange={e => setForm(prev => ({ ...prev, [k]: e.target.checked }))} />
-                  {l}
+                    onChange={e => setForm(prev => ({ ...prev, [k as string]: e.target.checked }))} />
+                  {ic && <Ico k={ic as string} size={12} />}{l}
                 </label>
               ))}
             </div>
@@ -331,16 +361,16 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             <div className="sa-field"><label className="sa-label">Texte promo (bandeau violet)</label><input className="sa-input" value={form.promo_text ?? ''} onChange={ff('promo_text')} /></div>
             <SectionHeader>Réseaux & contact <span className="sa-badge-pill green">liens parcours</span></SectionHeader>
             <div style={{ background: 'rgba(29,155,117,.06)', border: '1px solid rgba(29,155,117,.15)', borderRadius: 10, padding: '10px 12px', marginBottom: 14 }}>
-              {(['site_web', 'instagram', 'facebook'] as (keyof FlowinPartenaire)[]).map(k => (
+              {([['site_web', 'Site web', 'globe'], ['instagram', 'Instagram', 'instagram'], ['facebook', 'Facebook', 'facebook']] as [keyof FlowinPartenaire, string, string][]).map(([k, l, ic]) => (
                 <div key={k} className="sa-field">
-                  <label className="sa-label">{k === 'site_web' ? '🌐 Site web' : k === 'instagram' ? '📸 Instagram' : '🔵 Facebook'}</label>
+                  <label className="sa-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Ico k={ic} size={12} />{l}</label>
                   <input className="sa-input" value={form[k] as string ?? ''} onChange={ff(k)} />
                 </div>
               ))}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div className="sa-field"><label className="sa-label">📧 Email</label><input className="sa-input" type="email" value={form.email ?? ''} onChange={ff('email')} /></div>
-              <div className="sa-field"><label className="sa-label">📞 Tél</label><input className="sa-input" type="tel" value={form.tel ?? ''} onChange={ff('tel')} /></div>
+              <div className="sa-field"><label className="sa-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Ico k="mail" size={12} />Email</label><input className="sa-input" type="email" value={form.email ?? ''} onChange={ff('email')} /></div>
+              <div className="sa-field"><label className="sa-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Ico k="phone" size={12} />Tél</label><input className="sa-input" type="tel" value={form.tel ?? ''} onChange={ff('tel')} /></div>
             </div>
             <SectionHeader>Administratif</SectionHeader>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -393,7 +423,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               </div>
               {(p as unknown as Record<string, string>).code_pin && (
                 <button className="sa-btn sm" style={{ marginLeft: 'auto' }}
-                  onClick={() => navigator.clipboard?.writeText(String((p as unknown as Record<string, string>).code_pin))}>📋 Copier</button>
+                  onClick={() => navigator.clipboard?.writeText(String((p as unknown as Record<string, string>).code_pin))}><Ico k="copy" size={12} style={{ marginRight: 4 }} />Copier</button>
               )}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 16 }}>
@@ -418,7 +448,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                 </div>
                 {etatG.a_confirmer > 0 && (
                   <div className="sa-alert warn" style={{ marginBottom: 10, fontSize: 12.5 }}>
-                    ☎ {etatG.a_confirmer} gagnant{etatG.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
+                    <Ico k="phone" size={13} /> {etatG.a_confirmer} gagnant{etatG.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
                   </div>
                 )}
               </>
@@ -442,7 +472,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                 </div>
                 <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
                 {g.retrait_token && (
-                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
+                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}><Ico k="file" size={12} style={{ marginRight: 4 }} />Billet</a>
                 )}
                 {g.etat !== 'a_confirmer' && (
                   <>
@@ -456,7 +486,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                         if (url) window.open(url, '_blank', 'noopener')
                       }}
                     >
-                      ✉️ Gagnant
+                      <Ico k="mail" size={12} style={{ marginRight: 4 }} />Gagnant
                     </button>
                     {g.etat === 'confirme' && (
                       <button
@@ -472,19 +502,19 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                           if (url) window.open(url, '_blank', 'noopener')
                         }}
                       >
-                        🔔 Relancer
+                        <Ico k="bell" size={12} style={{ marginRight: 4 }} />Relancer
                       </button>
                     )}
                     <button
                       className="sa-btn sm"
                       onClick={() => window.open(mailPartenaireUrl(g, p.nom, p.email ?? null), '_blank', 'noopener')}
                     >
-                      ✉️ Vous
+                      <Ico k="mail" size={12} style={{ marginRight: 4 }} />Vous
                     </button>
                   </>
                 )}
                 {g.etat === 'a_confirmer' && (
-                  <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
+                  <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}><Ico k="check" size={12} style={{ marginRight: 4 }} />Confirmer</button>
                 )}
                 </div>
               </div>
@@ -499,7 +529,8 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               target="_blank" rel="noreferrer"
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
             >
-              📦 Dossier complet (A3/A4/A5, vidéo, QR, zip) →
+              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><Ico k="package" size={13} />Dossier complet (A3/A4/A5, vidéo, QR, zip)</span>
+              <Ico k="chevronRight" size={13} />
             </a>
             <SectionHeader>Pack d&apos;envoi</SectionHeader>
             <div className="sa-alert info" style={{ marginBottom: 10, fontSize: 12.5 }}>
@@ -507,10 +538,10 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             </div>
             {packEnvoi(p.id).map(el => (
               <div key={el.libelle} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--sa-subtle)', borderRadius: 8, marginBottom: 6 }}>
-                <span>{el.icone}</span>
+                <Ico k={el.icone} size={14} style={{ color: 'var(--sa-accent)' }} />
                 <span style={{ flex: 1, fontSize: 12.5 }}>{el.libelle}</span>
                 <a className="sa-btn sm" href={el.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Ouvrir</a>
-                <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(el.url)}>Copier</button>
+                <button className="sa-btn sm" onClick={() => navigator.clipboard?.writeText(el.url)}><Ico k="copy" size={11} style={{ marginRight: 3 }} />Copier</button>
               </div>
             ))}
           </>
@@ -557,7 +588,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               <div className="sa-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: '10px 0' }}>
                   <input type="checkbox" checked={form.facture_emise === true} onChange={e => setForm(prev => ({ ...prev, facture_emise: e.target.checked }))} />
-                  🧾 Facture émise
+                  <Ico k="receipt" size={13} />Facture émise
                 </label>
               </div>
             </div>
@@ -586,30 +617,30 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             <FieldRow label="Mode de paiement" value={modeLabel(p.paiement_mode)} />
             <FieldRow label="Paiement" value={
               p.statut_paiement === 'valide'
-                ? <span className="sa-chip live">✅ Reçu</span>
-                : <span className="sa-chip">⏳ En attente</span>
+                ? <span className="sa-chip live" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ico k="check" size={11} />Reçu</span>
+                : <span className="sa-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ico k="clock" size={11} />En attente</span>
             } />
             {factureReelle ? (
               <>
                 <FieldRow label="Bon de commande" value={<code className="sa-code">{factureReelle.bonId}</code>} />
                 <FieldRow label="Facture" value={
                   factureReelle.factureNumero
-                    ? <span className="sa-chip live">🧾 {factureReelle.factureNumero}{factureReelle.dateEmission ? ` · ${new Date(factureReelle.dateEmission).toLocaleDateString('fr-FR')}` : ''}</span>
+                    ? <span className="sa-chip live" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ico k="receipt" size={11} />{factureReelle.factureNumero}{factureReelle.dateEmission ? ` · ${new Date(factureReelle.dateEmission).toLocaleDateString('fr-FR')}` : ''}</span>
                     : <span className="sa-chip">— Pas encore émise (devis {factureReelle.bonStatut ?? 'brouillon'})</span>
                 } />
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                   {p.statut_paiement === 'valide'
-                    ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Paiement en attente</button>
-                    : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le paiement</button>}
+                    ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}><Ico k="undo" size={12} style={{ marginRight: 4 }} />Paiement en attente</button>
+                    : <button className="sa-btn primary" onClick={() => setPaiement('valide')}><Ico k="check" size={12} style={{ marginRight: 4 }} />Valider le paiement</button>}
                   <a
                     className="sa-btn"
                     href={factureReelle.factureNumero
                       ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}`
                       : `/facture-nds.html?devis=${encodeURIComponent(factureReelle.bonId)}`}
                     target="_blank" rel="noreferrer"
-                    style={{ textDecoration: 'none' }}
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}
                   >
-                    🧾 {factureReelle.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'} →
+                    <Ico k="receipt" size={12} />{factureReelle.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'}<Ico k="chevronRight" size={12} />
                   </a>
                 </div>
               </>
@@ -617,7 +648,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
               <>
                 <FieldRow label="Facture" value={
                   p.facture_emise
-                    ? <span className="sa-chip live">🧾 Émise</span>
+                    ? <span className="sa-chip live" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Ico k="receipt" size={11} />Émise</span>
                     : <span className="sa-chip">— Non émise</span>
                 } />
                 <div className="sa-alert info" style={{ marginTop: 10, marginBottom: 10, fontSize: 12 }}>
@@ -625,11 +656,11 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                 </div>
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                   {p.statut_paiement === 'valide'
-                    ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}>↩ Paiement en attente</button>
-                    : <button className="sa-btn primary" onClick={() => setPaiement('valide')}>✓ Valider le paiement</button>}
+                    ? <button className="sa-btn" onClick={() => setPaiement('en_attente')}><Ico k="undo" size={12} style={{ marginRight: 4 }} />Paiement en attente</button>
+                    : <button className="sa-btn primary" onClick={() => setPaiement('valide')}><Ico k="check" size={12} style={{ marginRight: 4 }} />Valider le paiement</button>}
                   {p.facture_emise
-                    ? <button className="sa-btn" onClick={() => setFacture(false)}>↩ Facture non émise</button>
-                    : <button className="sa-btn" onClick={() => setFacture(true)}>🧾 Marquer facture émise</button>}
+                    ? <button className="sa-btn" onClick={() => setFacture(false)}><Ico k="undo" size={12} style={{ marginRight: 4 }} />Facture non émise</button>
+                    : <button className="sa-btn" onClick={() => setFacture(true)}><Ico k="receipt" size={12} style={{ marginRight: 4 }} />Marquer facture émise</button>}
                 </div>
               </>
             )}
@@ -653,16 +684,16 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
       <div className="sa-drawer-footer">
         {edit ? (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={12} style={{ marginRight: 4 }} />Supprimer</button>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="sa-btn" onClick={() => setEdit(false)}>Annuler</button>
-              <button className="sa-btn primary" onClick={save} disabled={saving}>{saving ? 'Enregistrement…' : '✓ Enregistrer'}</button>
+              <button className="sa-btn primary" onClick={save} disabled={saving}>{saving ? 'Enregistrement…' : <><Ico k="check" size={12} style={{ marginRight: 4 }} />Enregistrer</>}</button>
             </div>
           </>
         ) : (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
-            <button className="sa-btn primary" onClick={enterEdit}>✏ Éditer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={12} style={{ marginRight: 4 }} />Supprimer</button>
+            <button className="sa-btn primary" onClick={enterEdit}><Ico k="edit" size={12} style={{ marginRight: 4 }} />Éditer</button>
           </>
         )}
       </div>

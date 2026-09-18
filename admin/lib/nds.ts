@@ -150,6 +150,7 @@ export function lienBilanPartenaire(partenaireId: string): string {
   return `${origine()}/nds/bilan/email-partenaire.html?p=${encodeURIComponent(partenaireId)}`
 }
 
+/** `icone` : cle du pictogramme (lib/proicons.tsx Ico), jamais un emoji. */
 export interface ElementPack { icone: string; libelle: string; url: string }
 
 /** Pack d envoi : tout ce que le commercant doit recevoir, en un bloc. */
@@ -157,13 +158,13 @@ export function packEnvoi(partenaireId: string): ElementPack[] {
   const slug = partenaireId.replace(/^pt-/, '')
   const o = origine()
   return [
-    { icone: '✉️', libelle: 'Email de remerciement (chiffres + son PIN)', url: lienBilanPartenaire(partenaireId) },
-    { icone: '🎟️', libelle: 'Billets de ses gagnants confirmés',          url: lienPlanchePartenaire(partenaireId) },
-    { icone: '📊', libelle: 'Visuel bilan',                                url: `${o}/nds/bilan/bilan-nds-2026.png` },
-    { icone: '📄', libelle: 'Affiche A4 boutique',                         url: `${o}/nds/visuels/nds_a4_${slug}.png` },
-    { icone: '🎫', libelle: 'Planche de tickets (PDF)',                    url: `${o}/nds/visuels/tickets/nds_tickets_${slug}.pdf` },
-    { icone: '🎨', libelle: 'Kit digital complet',                         url: `${o}/nds/kit-digital/index.html#${slug}` },
-    { icone: '🔗', libelle: 'Page de validation en caisse',                url: `${o}/lot.html` },
+    { icone: 'mail', libelle: 'Email de remerciement (chiffres + son PIN)', url: lienBilanPartenaire(partenaireId) },
+    { icone: 'ticket', libelle: 'Billets de ses gagnants confirmés',        url: lienPlanchePartenaire(partenaireId) },
+    { icone: 'chart', libelle: 'Visuel bilan',                              url: `${o}/nds/bilan/bilan-nds-2026.png` },
+    { icone: 'file', libelle: 'Affiche A4 boutique',                        url: `${o}/nds/visuels/nds_a4_${slug}.png` },
+    { icone: 'download', libelle: 'Planche de tickets (PDF)',               url: `${o}/nds/visuels/tickets/nds_tickets_${slug}.pdf` },
+    { icone: 'package', libelle: 'Kit digital complet',                     url: `${o}/nds/kit-digital/index.html#${slug}` },
+    { icone: 'link', libelle: 'Page de validation en caisse',               url: `${o}/lot.html` },
   ]
 }
 
