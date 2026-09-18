@@ -209,6 +209,24 @@ export default function Sidebar() {
     return pathname.startsWith(href)
   }
 
+  /* Accordeon par groupe (Romain, 18/09) : « en cliquant sur le titre, deployer
+     la liste qui le concerne, sans sortir la totalite des elements ; en
+     cliquant une deuxieme fois ca le referme ». Replie par defaut, sauf le
+     groupe qui contient la page en cours -- toujours voir ou on est. */
+  const [ouverts, setOuverts] = useState<Set<string>>(() => new Set())
+  useEffect(() => {
+    const actif = groups.find(g => g.items.some(it => isActive(it.href)))
+    if (actif) setOuverts(prev => (prev.has(actif.group) ? prev : new Set(prev).add(actif.group)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname])
+  function basculerGroupe(nom: string) {
+    setOuverts(prev => {
+      const n = new Set(prev)
+      if (n.has(nom)) n.delete(nom); else n.add(nom)
+      return n
+    })
+  }
+
   return (
     <>
       {/* Barre mobile : masquee au-dela de 900px (voir globals.css) */}
@@ -229,13 +247,16 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <div className="sa-sb-main">
-        {groups.map(g => (
+        {groups.map(g => {
+          const deploye = ouverts.has(g.group)
+          return (
           <div key={g.group} className="sa-sb-bloc">
-            <div className={`sa-sb-group ton-${g.ton}`}>
+            <button type="button" className={`sa-sb-group ton-${g.ton}`} aria-expanded={deploye} onClick={() => basculerGroupe(g.group)}>
               <span className="sa-sb-group-bar" />
-              {g.group}
-            </div>
-            {g.items.map(item => (
+              <span className="sa-sb-group-label">{g.group}</span>
+              <svg className="sa-sb-group-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+            {deploye && g.items.map(item => (
               <button
                 key={item.id}
                 className={`sa-sb-item${isActive(item.href) ? ' active' : ''}`}
@@ -251,7 +272,8 @@ export default function Sidebar() {
               </button>
             ))}
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* User */}
