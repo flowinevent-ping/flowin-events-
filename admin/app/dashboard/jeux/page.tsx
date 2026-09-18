@@ -29,6 +29,14 @@ const MODULES = [
   { id: 'vote', name: 'Vote', desc: 'Vote artistes / produits' },
 ]
 
+/* « tout est de la même couleur, ça risque de se perdre » (Romain, 18/09) --
+   les 7 pictogrammes de module partageaient tous var(--sa-accent). Une
+   couleur par module, pour les distinguer d un coup d oeil dans la grille. */
+const COULEUR_MODULE: Record<string, string> = {
+  [GABARIT_MODULE]: '#2563EB', tombola: '#7C3AED', quiz: '#0D9488',
+  quizmaster: '#D97706', quizsolo: '#DB2777', spin: '#EA580C', vote: '#16A34A',
+}
+
 /* Le deroule et les regles du gabarit, aux deux portees. Une seule source :
    lib/gabarit.ts — la meme que lit le parcours de creation. */
 function FicheGabarit() {
@@ -215,10 +223,10 @@ export default function JeuxPage() {
               <div
                 key={m.id}
                 onClick={() => setOuvert(actif ? null : m.id)}
-                style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: actif ? '2px solid var(--sa-accent)' : '1px solid var(--sa-border)', cursor: 'pointer', gridColumn: actif ? 'span 3' : undefined }}
+                style={{ background: 'var(--sa-subtle)', borderRadius: 12, padding: 20, border: actif ? `2px solid ${COULEUR_MODULE[m.id]}` : '1px solid var(--sa-border)', cursor: 'pointer', gridColumn: actif ? 'span 3' : undefined }}
               >
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--sa-card)', border: '1px solid var(--sa-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sa-accent)', marginBottom: 10 }}>
-                  <IcoModule module={m.id} size={22} />
+                <div style={{ width: 58, height: 58, borderRadius: 999, background: `${COULEUR_MODULE[m.id]}17`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: COULEUR_MODULE[m.id], marginBottom: 12 }}>
+                  <IcoModule module={m.id} size={28} />
                 </div>
                 <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 4 }}>{m.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 12 }}>{m.desc}</div>
