@@ -17,6 +17,12 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#D4537E',
+  /* Sans ca, un navigateur ou systeme en mode sombre (force-dark Android,
+     lecteur en mode nuit...) assombrit tout ce qui n a pas de couleur
+     explicite -- ici, le fond du <body> avant que la page charge son propre
+     habillage. Toute la charte (SA, pro, /rejoindre) est pensee pour un fond
+     clair uniquement ; ce site n a pas de theme sombre a proposer. */
+  colorScheme: 'light',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

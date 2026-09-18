@@ -96,8 +96,10 @@ export async function enregistrerBanque(id: string, questions: QuestionBanque[],
   return true
 }
 
+/* Le modele demande par Romain : une question, quatre reponses, une bonne
+   reponse -- pas deux reponses avec un lien "+ ajouter" pour arriver a quatre. */
 export function nouvelleQuestionQuiz(): QuestionQuiz {
-  return { id: 'q_' + Math.random().toString(36).slice(2, 9), type: 'qcm', texte: '', options: ['', ''], bonne: 0, points: 1 }
+  return { id: 'q_' + Math.random().toString(36).slice(2, 9), type: 'qcm', texte: '', options: ['', '', '', ''], bonne: 0, points: 1 }
 }
 export function nouvelleQuestionBonus(): QuestionBonus {
   return { id: 'q_' + Math.random().toString(36).slice(2, 9), type: 'single', label: '', options: [{ val: 'a', label: '' }, { val: 'b', label: '' }] }

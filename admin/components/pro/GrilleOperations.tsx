@@ -35,9 +35,13 @@ export function chiffresOperation(op: DonneesOperation) {
    deja dans la charte) est le meme bleu, plus dense, moins « neon ».
    « on ne voit pas que ce sont des boutons » : les liens de pied de carte
    n avaient ni fond ni bordure -- de simples mots bleus. Ils devienne des
-   puces avec un vrai contour. */
+   puces avec un vrai contour.
+   Code couleur (18/09, second retour) : super event et animation se
+   distinguaient mal, tous deux en bleu. « garde le super event en orange,
+   l'event en bleu » -- reprend l'orange deja etabli comme identifiant super
+   event ailleurs dans l'appli (SuperEventDrawer .t-super, /rejoindre). */
 const ACCENT_ANIM = C.accentFonce
-const ACCENT_SUPER = '#0369A1'
+const ACCENT_SUPER = '#C2410C'
 
 export function Vignette({ op, href, liens }: { op: DonneesOperation; href: string; liens?: { label: string; href: string }[] }) {
   const k = chiffresOperation(op)
