@@ -270,7 +270,7 @@
 </style>
 </head>
 <body>
-<div class="flowin-topbar"><a href="/dashboard" class="flowin-topbar-back">← Dashboard</a><span class="flowin-topbar-brand">Flow<b>in</b></span></div>
+<div class="flowin-topbar"><a href="/dashboard" class="flowin-topbar-back" id="topbarBack">← Retour</a><span class="flowin-topbar-brand">Flow<b>in</b></span></div>
 
 
 <div class="doc">
@@ -353,10 +353,10 @@
     </div>
 
     <div class="fac-actions no-print">
-      <button type="button" id="saveBtn" class="btn-primary">Enregistrer la facture</button>
+      <button type="button" id="saveBtn" class="btn-primary editonly">Enregistrer la facture</button>
       <a href="#" class="btn-primary" style="background:#3B5CC4" onclick="exportPdf();return false;">&#128229; Télécharger en PDF (A4)</a>
-      <a href="#" id="mailBtn" class="btn-primary" style="background:#1D9E75">&#9993;&#65039; Envoyer au client</a>
-      <button type="button" id="editionBtn" class="btn-primary" style="background:#7C2D92" title="Cr&eacute;er une facture rectificative (&eacute;dition suivante)">+ Nouvelle &eacute;dition</button>
+      <a href="#" id="mailBtn" class="btn-primary editonly" style="background:#1D9E75">&#9993;&#65039; Envoyer au client</a>
+      <button type="button" id="editionBtn" class="btn-primary editonly" style="background:#7C2D92" title="Cr&eacute;er une facture rectificative (&eacute;dition suivante)">+ Nouvelle &eacute;dition</button>
       <span id="status" class="statusmsg"></span>
     </div>
   </div>
@@ -394,6 +394,12 @@
   function H(){ return {'apikey':KEY,'Authorization':'Bearer '+AUTH}; }
   function $(id){return document.getElementById(id);}
   function qs(n){ var m=new RegExp('[?&]'+n+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
+  /* « quand on clique sur Dashboard on revient sur le dashboard SA, ça ne
+     revient pas à la page précédente comme ça devrait être le cas » (Romain,
+     18/09) -- ce lien etait un href fixe vers /dashboard. Retour a la page
+     precedente quand il y en a une (ouvert depuis l espace pro, il doit
+     fermer l onglet ou revenir dessus, jamais sauter dans le SA). */
+  (function(){ var b=$('topbarBack'); if(!b) return; b.addEventListener('click',function(e){ if(window.history.length>1){ e.preventDefault(); window.history.back(); } }); })();
   function pad2(n){ return String(n).length<2?('0'+n):String(n); }
   function eur(n){ n=Number(n); return isFinite(n)?n.toLocaleString('fr-FR')+' \u20ac':'\u2014'; }
   function parseNum(v){ if(v==null) return NaN; return parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(',','.')); }
@@ -516,10 +522,20 @@
   (async function(){
   await _ensureFreshToken();
   var num=qs('num'), devis=qs('devis');
+  /* Lecture seule par defaut sur une facture existante -- meme convention que
+     bon-commande-nds.html (?id=... = vue, ?id=...&edit=1 = edition), qui l
+     avait deja et que cette page n avait jamais reprise : n importe qui avec
+     le lien ?num=... pouvait taper dans les champs et cliquer Enregistrer.
+     « seul dashboard SA peut modifier » (Romain, 18/09). */
+  function verrouillerLecture(){
+    document.body.className+=' viewmode';
+    var champs=document.querySelectorAll('.inv input,.inv textarea,.c-in');
+    for(var i=0;i<champs.length;i++){ champs[i].setAttribute('readonly','readonly'); }
+  }
   if(num){
     fetch(SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(num)+'&select=*',{headers:H()})
       .then(function(r){return r.json();})
-      .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } } else { setStatus('Facture introuvable.','err'); } });
+      .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); if(qs('edit')!=='1'){ verrouillerLecture(); } if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } } else { setStatus('Facture introuvable.','err'); } });
   } else if(devis){
     // existe-t-il deja une facture pour ce devis ? sinon on la prepare depuis le bon
     fetch(SUPA+'/rest/v1/factures?client->>bon_id=eq.'+encodeURIComponent(devis)+'&select=*&order=numero.desc',{headers:H()})

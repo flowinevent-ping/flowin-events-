@@ -47,7 +47,10 @@ interface Ligne {
   paye: boolean
   bonId: string | null
   factureNumero: string | null
-  lien: string | null
+  /** Les deux documents sont distincts (Romain, 18/09 : "il manque le bon de
+   *  commande, il faut ces deux documents") -- jamais l'un OU l'autre. */
+  lienBon: string | null
+  lienFacture: string | null
 }
 
 function construireLignes(operations: DonneesOperation[]): Ligne[] {
@@ -59,7 +62,7 @@ function construireLignes(operations: DonneesOperation[]): Ligne[] {
     if (c.bons.length === 0) {
       out.push({
         cleLigne: op.cle, opNom: op.nom, opDates: libelleDates(op.dateD, op.dateF),
-        date: op.dateD, montant: c.montant, paye, bonId: null, factureNumero: null, lien: null,
+        date: op.dateD, montant: c.montant, paye, bonId: null, factureNumero: null, lienBon: null, lienFacture: null,
       })
       continue
     }
@@ -68,7 +71,10 @@ function construireLignes(operations: DonneesOperation[]): Ligne[] {
         cleLigne: `${op.cle}:${bn.id}`, opNom: op.nom, opDates: libelleDates(op.dateD, op.dateF),
         date: bn.date, montant: bn.montantTtc ?? c.montant, paye,
         bonId: bn.id, factureNumero: bn.factureNumero,
-        lien: bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}` : `/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`,
+        /* Vue seule -- ?id=/?num= sans &edit=1 (verrou ajoute le 18/09 sur
+           facture-nds.html, deja en place sur bon-commande-nds.html). */
+        lienBon: `/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`,
+        lienFacture: bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}` : null,
       })
     }
   }
@@ -132,18 +138,28 @@ export default function ListeFactures({ operations }: { operations: DonneesOpera
               </tr>
             </thead>
             <tbody>
+              {/* Deux documents distincts, chacun son lien -- une ligne entiere
+                  cliquable n'avait de sens que pour UN seul document a la
+                  fois (Romain, 18/09 : "il manque le bon de commande, il
+                  faut ces deux documents"). Les deux ouvrent en lecture
+                  seule (pas de &edit=1) : "seul dashboard SA peut modifier". */}
               {lignes.map(l => (
-                <tr key={l.cleLigne}
-                  style={{ cursor: l.lien ? 'pointer' : 'default' }}
-                  onClick={() => { if (l.lien) window.open(l.lien, '_blank', 'noopener') }}
-                >
+                <tr key={l.cleLigne}>
                   <td style={td}>
                     <div style={{ fontWeight: 800 }}>{l.opNom}</div>
                     <div style={{ fontSize: 11.5, color: C.attenue }}>{l.opDates}</div>
                   </td>
                   <td style={{ ...td, whiteSpace: 'nowrap' }}>{dateFr(l.date)}</td>
-                  <td style={td}>{l.bonId ? <code style={{ fontSize: 12 }}>{l.bonId}</code> : <span style={{ color: C.attenue }}>—</span>}</td>
-                  <td style={td}>{l.factureNumero ? <code style={{ fontSize: 12 }}>{l.factureNumero}</code> : <span style={{ color: C.attenue }}>Non émise</span>}</td>
+                  <td style={td}>
+                    {l.lienBon
+                      ? <a href={l.lienBon} target="_blank" rel="noopener noreferrer" style={{ color: C.accent, fontWeight: 700, textDecoration: 'none' }}><code style={{ fontSize: 12 }}>{l.bonId}</code></a>
+                      : <span style={{ color: C.attenue }}>—</span>}
+                  </td>
+                  <td style={td}>
+                    {l.lienFacture
+                      ? <a href={l.lienFacture} target="_blank" rel="noopener noreferrer" style={{ color: C.accent, fontWeight: 700, textDecoration: 'none' }}><code style={{ fontSize: 12 }}>{l.factureNumero}</code></a>
+                      : <span style={{ color: C.attenue }}>Non émise</span>}
+                  </td>
                   <td style={{ ...td, fontWeight: 800, whiteSpace: 'nowrap' }}>{l.montant != null ? `${l.montant.toLocaleString('fr-FR')} €` : '—'}</td>
                   <td style={td}><Pastille ok={l.paye} texte={l.paye ? 'Payé' : 'En attente'} /></td>
                 </tr>

@@ -100,7 +100,13 @@ export default function ProShell({ proName, proId, active, children }: { proName
         {/* Logo officiel (public/nds/assets/flowin_blanc.png) */}
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style={{ height: 26, width: 'auto' }} />
-          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>PRO</span>
+          {/* Le PNG (flowin_blanc.png) porte une marge interne asymetrique --
+              centre sur SA propre boite, "PRO" tombait visiblement plus bas
+              que la ligne de base du logo (Romain, 18/09 : "le Pro est
+              completement decale"). Remonte + italique, verifie par capture
+              d'ecran a l'echelle reelle (3x) jusqu'a alignement correct sur
+              la casse haute du mot "Flowin". */}
+          <span style={{ fontSize: 11, fontWeight: 800, fontStyle: 'italic', letterSpacing: '.1em', color: 'rgba(255,255,255,.65)', marginTop: -6, lineHeight: 1 }}>PRO</span>
         </span>
         <button className="pro-drawer-close" onClick={() => setOpen(false)} aria-label="Fermer le menu" style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,.6)', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>×</button>
       </div>

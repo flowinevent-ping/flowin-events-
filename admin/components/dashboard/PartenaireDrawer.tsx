@@ -635,7 +635,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                   <a
                     className="sa-btn"
                     href={factureReelle.factureNumero
-                      ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}`
+                      ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}&edit=1`
                       : `/facture-nds.html?devis=${encodeURIComponent(factureReelle.bonId)}`}
                     target="_blank" rel="noreferrer"
                     style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}

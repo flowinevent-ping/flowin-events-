@@ -274,7 +274,7 @@ export default function Page() {
                 <a
                   className="sa-btn sm"
                   href={factureReelle.factureNumero
-                    ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}`
+                    ? `/facture-nds.html?num=${encodeURIComponent(factureReelle.factureNumero)}&edit=1`
                     : `/facture-nds.html?devis=${encodeURIComponent(factureReelle.bonId)}`}
                   target="_blank" rel="noreferrer"
                   style={{ textDecoration: 'none', display: 'inline-block', marginTop: 2, marginBottom: 4 }}

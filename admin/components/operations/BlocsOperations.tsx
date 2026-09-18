@@ -372,8 +372,11 @@ export function ContenuContrat({ op, mode, partenaireId, onChange }: {
           {mode === 'sa' && (
             <>
               <a style={btn} target="_blank" rel="noreferrer" href={`/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`}>Bon →</a>
+              {/* &edit=1 : la facture s'ouvre desormais en lecture seule par
+                  defaut (verrou du 18/09, cote pro comme cote SA) -- seul le
+                  SA doit pouvoir la modifier, ce lien le lui redonne. */}
               <a style={btn} target="_blank" rel="noreferrer"
-                href={bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}` : `/facture-nds.html?devis=${encodeURIComponent(bn.id)}`}>
+                href={bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}&edit=1` : `/facture-nds.html?devis=${encodeURIComponent(bn.id)}`}>
                 {bn.factureNumero ? 'Facture' : 'Facturer'}
               </a>
             </>
