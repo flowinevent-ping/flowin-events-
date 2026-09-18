@@ -104,6 +104,15 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'todo', titre: 'Module d\\u2019envoi en masse (emailing)', detail: 'Distinct des envois unitaires deja fonctionnels (devis/factures/gagnants) -- necessaire pour un message aux ~840 joueurs' },
     ],
   },
+  {
+    titre: 'Espace Pro — lots & visibilité (18/09, à cadrer)',
+    items: [
+      { etat: 'ok', titre: 'Crédit / débit manuel des lots', detail: 'Déjà livré : /pro/compte → onglet "Lots & stock" (lib/stock.ts, AjustementStock). Pas visible depuis "Mes données" -- c\\u2019est ce qui a fait dire à Romain que rien n\\u2019existait.' },
+      { etat: 'ok', titre: 'Liste des gagnants + code PIN de validation', detail: 'Déjà livré : /pro/donnees → onglet "Gagnants & tirage" ; PIN affiché sur la fiche partenaire (PartenaireDrawer, onglet Gagnants). Pas de raccourci rapide depuis "Mes données".' },
+      { etat: 'todo', titre: 'Décision à prendre : sortir "Lots & stock" de Mon profil', detail: 'Romain (18/09) : "doit-on séparer la gestion des lots du profil de l\\u2019entreprise, pour la rendre visible et accessible rapidement ?" -- si oui, la ranger dans "Mes données" aux côtés de CRM/Gagnants/Trafic, présentée en tableau par opération (même registre que ListeFactures.tsx), avec le crédit/débit et le code PIN visibles directement, pas seulement depuis Mon profil.' },
+      { etat: 'todo', titre: 'Compteur de visibilité (logo / fiche vus, pas seulement cliqués)', detail: 'Romain (18/09) : "le nombre de fois où la page ou le logo a pu être visible" -- argument commercial pour les annonceurs (trafic organique). N\\u2019existe pas : le tracking actuel compte les clics/participations, pas les impressions (affichages sans clic). Nécessite un nouvel événement de tracking, pas un simple affichage de donnée déjà en base.' },
+    ],
+  },
 ]
 
 export function avancement(blocs: BlocRoadmap[] = BLOCS) {
