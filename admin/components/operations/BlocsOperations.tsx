@@ -14,9 +14,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
   libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise,
-  type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation,
+  type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation, type LotOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/nds'
+import { ajouterStock, retirerStock } from '@/lib/stock'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
@@ -94,40 +95,100 @@ const ligne: React.CSSProperties = { display: 'flex', alignItems: 'center', gap:
 
 /* ── Lots & stock ──────────────────────────────────────────────────────────── */
 
+/* Ajustement manuel du stock d'un lot -- Romain : « gestion des lots,
+   stockage et déstockage ». Le déstockage AUTOMATIQUE existe déjà (scan du
+   billet en caisse) ; ceci ajoute le geste manuel : réapprovisionner, ou
+   retirer une unité perdue/cassée jamais destinée à un gagnant. N'agit
+   jamais sur une unité déjà remise (voir lib/stock.ts). */
+function AjustementStock({ lotId, onAjuste }: { lotId: string; onAjuste: (delta: number) => void }) {
+  const [n, setN] = useState('1')
+  const [busy, setBusy] = useState<'ajout' | 'retrait' | null>(null)
+  const [erreur, setErreur] = useState<string | null>(null)
+
+  async function ajouter() {
+    const q = Math.max(1, parseInt(n) || 1)
+    setBusy('ajout'); setErreur(null)
+    const ok = await ajouterStock(lotId, q)
+    setBusy(null)
+    if (!ok) { setErreur("Échec — ce lot n'a pas encore de stock matérialisé, il ne peut pas être réapprovisionné depuis cet écran."); return }
+    onAjuste(q)
+  }
+  async function retirer() {
+    const q = Math.max(1, parseInt(n) || 1)
+    setBusy('retrait'); setErreur(null)
+    const fait = await retirerStock(lotId, q)
+    setBusy(null)
+    if (!fait) { setErreur('Aucune unité disponible à retirer.'); return }
+    onAjuste(-fait)
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+      <input
+        type="number" min={1} value={n} onChange={e => setN(e.target.value)}
+        style={{ width: 52, border: `1px solid ${BRD}`, borderRadius: 8, padding: '4px 6px', fontSize: 12, fontFamily: 'inherit' }}
+      />
+      <button style={btn} disabled={busy !== null} onClick={ajouter}>{busy === 'ajout' ? '…' : '+ Réapprovisionner'}</button>
+      <button style={btn} disabled={busy !== null} onClick={retirer}>{busy === 'retrait' ? '…' : '− Retirer (perte/casse)'}</button>
+      {erreur && <span style={{ fontSize: 11, color: '#B45309' }}>{erreur}</span>}
+    </div>
+  )
+}
+
 export function ContenuLots({ op }: { op: DonneesOperation }) {
   const unites = op.lots.reduce((s, l) => s + l.quantite, 0)
   const valeur = op.lots.reduce((s, l) => s + (l.valeur ?? 0) * l.quantite, 0)
   const tires = op.gagnants.length
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
+  /* Ajustements locaux appliques apres un ecrit reussi -- evite de dependre
+     d'un rechargement complet de l'operation pour voir le nouveau total. */
+  const [ajustements, setAjustements] = useState<Record<string, number>>({})
+  const stockAffiche = (l: LotOperation) => {
+    if (!l.stock) return null
+    const d = ajustements[l.id] ?? 0
+    return { total: l.stock.total + d, dispo: l.stock.dispo + d }
+  }
+  const stockOpAffiche = op.stock
+    ? { total: op.stock.total + Object.values(ajustements).reduce((a, b) => a + b, 0), dispo: op.stock.dispo + Object.values(ajustements).reduce((a, b) => a + b, 0) }
+    : null
+
   return (
     <>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
         <Mini v={unites} l="lots engagés" />
         <Mini v={`${valeur} €`} l="valeur" />
-        {op.stock && <Mini v={`${op.stock.dispo} / ${op.stock.total}`} l="stock disponible" />}
+        {stockOpAffiche && <Mini v={`${stockOpAffiche.dispo} / ${stockOpAffiche.total}`} l="stock disponible" />}
         <Mini v={tires} l="tirés" />
         <Mini v={remis} l="remis" />
       </div>
       {op.lots.length === 0 && <Vide>Aucun lot sur cette opération.</Vide>}
-      {op.lots.map(l => (
-        <div key={l.id} style={ligne}>
-          <div style={{ flex: 1, minWidth: 160 }}>
-            <div style={{ fontWeight: 700, fontSize: 13 }}>{l.nom}</div>
-            <div style={{ fontSize: 11, color: MUT }}>
-              {l.valeur != null ? `${l.valeur} € · ` : ''}quantité {l.quantite}
-              {l.stationNom ? ` · station ${l.stationNom}` : ''}
+      {op.lots.map(l => {
+        const stock = stockAffiche(l)
+        return (
+          <div key={l.id} style={{ ...ligne, flexDirection: 'column', alignItems: 'stretch' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{l.nom}</div>
+                <div style={{ fontSize: 11, color: MUT }}>
+                  {l.valeur != null ? `${l.valeur} € · ` : ''}quantité {l.quantite}
+                  {l.stationNom ? ` · station ${l.stationNom}` : ''}
+                </div>
+                {l.conditions && <div style={{ fontSize: 11, color: MUT }}>{l.conditions}</div>}
+              </div>
+              {(() => {
+                /* Referentiel 43 : le stock se lit par lot, dans son operation. */
+                if (stock) return <Pastille ton={stock.dispo > 0 ? 'ok' : 'warn'}>stock {stock.dispo} / {stock.total}</Pastille>
+                const tiresLot = op.gagnants.filter(g => g.lotNom === l.nom).length
+                const reste = Math.max(0, l.quantite - tiresLot)
+                return <Pastille ton={reste > 0 ? 'neutre' : 'warn'}>{reste} restant{reste > 1 ? 's' : ''} / {l.quantite}</Pastille>
+              })()}
             </div>
-            {l.conditions && <div style={{ fontSize: 11, color: MUT }}>{l.conditions}</div>}
+            {l.stock && (
+              <AjustementStock lotId={l.id} onAjuste={delta => setAjustements(a => ({ ...a, [l.id]: (a[l.id] ?? 0) + delta }))} />
+            )}
           </div>
-          {(() => {
-            /* Referentiel 43 : le stock se lit par lot, dans son operation. */
-            if (l.stock) return <Pastille ton={l.stock.dispo > 0 ? 'ok' : 'warn'}>stock {l.stock.dispo} / {l.stock.total}</Pastille>
-            const tiresLot = op.gagnants.filter(g => g.lotNom === l.nom).length
-            const reste = Math.max(0, l.quantite - tiresLot)
-            return <Pastille ton={reste > 0 ? 'neutre' : 'warn'}>{reste} restant{reste > 1 ? 's' : ''} / {l.quantite}</Pastille>
-          })()}
-        </div>
-      ))}
+        )
+      })}
     </>
   )
 }
