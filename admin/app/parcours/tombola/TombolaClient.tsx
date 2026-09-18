@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { generateTicket } from '@/lib/ticket'
-import { getJoueurLocal, claimJoueur, writeJoueur } from '@/lib/parcours'
+import { getJoueurLocal, claimJoueur, writeJoueur, SOURCES, AGE_OPTIONS } from '@/lib/parcours'
 import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import type { GainImmediat } from '@/lib/parcours'
@@ -10,17 +10,6 @@ import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 
 type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
-
-const SOURCES = ['📸 Instagram', '🔵 Facebook', '📋 Affiche / Flyer', '📣 Bouche à oreille', '🌐 Autre']
-const AGE_OPTIONS = [
-  { val: '', label: 'Tranche d\'âge' },
-  { val: '-18', label: 'Moins de 18 ans' },
-  { val: '18-25', label: '18–25 ans' },
-  { val: '26-35', label: '26–35 ans' },
-  { val: '36-50', label: '36–50 ans' },
-  { val: '51-65', label: '51–65 ans' },
-  { val: '65+', label: '66 ans et plus' },
-]
 
 interface Props {
   ev: FlowinEvent | null
@@ -173,11 +162,13 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
                 ❤️ {badge}
               </div>
             )}
-            <svg viewBox="0 0 100 100" width={84} height={84} style={{ display: 'block', margin: '0 auto 14px', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,.4))' }}>
-              <circle cx="50" cy="50" r="50" fill="#fff" />
-              <rect x="38" y="16" width="24" height="68" rx="5" fill={c} />
-              <rect x="16" y="38" width="68" height="24" rx="5" fill={c} />
-            </svg>
+            <div style={{ width: 96, height: 96, borderRadius: '50%', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 62%)`, border: '1px solid rgba(255,255,255,.16)', boxShadow: `0 18px 40px ${c}4d, 0 0 60px ${c}59` }}>
+              <svg viewBox="0 0 100 100" width={56} height={56} style={{ display: 'block' }}>
+                <circle cx="50" cy="50" r="50" fill="#fff" />
+                <rect x="38" y="16" width="24" height="68" rx="5" fill={c} />
+                <rect x="16" y="38" width="68" height="24" rx="5" fill={c} />
+              </svg>
+            </div>
             <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>{nom}</div>
             {description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', lineHeight: 1.6, marginBottom: 10, padding: '0 8px' }}>{description}</div>}
             {dates && <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 16 }}>{dates}</div>}
@@ -210,6 +201,10 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Nos {partenaires.length} partenaires</button>
           )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, opacity: .6 }}>
+            <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style={{ height: 13, width: 'auto' }} />
+            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}>Propulsé par Flowin</span>
+          </div>
         </div>
       )}
 
@@ -236,10 +231,10 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             ))}
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label className="label">Genre</label>
+            <label className="label">Sexe</label>
             <div style={{ display: 'flex', gap: 8 }}>
-              {['👩 Femme', '👨 Homme'].map(g => (
-                <button key={g} className={`gender-btn${form.genre === g ? ' sel' : ''}`} onClick={() => setForm(f => ({ ...f, genre: g }))}>{g}</button>
+              {[['H', 'Homme'], ['F', 'Femme']].map(([val, lbl]) => (
+                <button key={val} className={`gender-btn${form.genre === val ? ' sel' : ''}`} onClick={() => setForm(f => ({ ...f, genre: val }))}>{lbl}</button>
               ))}
             </div>
           </div>

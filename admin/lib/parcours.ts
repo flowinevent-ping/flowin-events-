@@ -696,6 +696,17 @@ export function parcoursCSS(couleur: string): string {
     .progress-step.on{background:linear-gradient(90deg,#8E2E9E,#E0218A)}
     .rgpd{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
     .rgpd-check{width:20px;height:20px;border-radius:6px;background:linear-gradient(90deg,#8E2E9E,#E0218A);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+    /* Habillage de marque des ecrans d'accueil (P8, 18/09) : halo lumineux
+       derriere le logo/emoji de l'operation + badge Flowin en pied d'ecran --
+       avant ca, l'accueil de Vote/QuizSolo/QuizMaster etait un simple emoji
+       flottant sur fond nu, sans aucune identite Flowin visible
+       (Romain : « pas du tout dans la charte graphique, pas engageant »). */
+    .parc-logo-halo{width:96px;height:96px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:44px;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.18),rgba(255,255,255,.03) 62%);border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 40px rgba(224,33,138,.3),0 0 60px rgba(142,46,158,.35);position:relative}
+    .parc-logo-halo:before{content:"";position:absolute;inset:-13px;border-radius:50%;background:conic-gradient(from 180deg,#F5A100,#E0218A,#6f4bd8,#F5A100);opacity:.4;filter:blur(15px);z-index:-1}
+    .parc-logo-halo svg,.parc-logo-halo img{max-width:56px;max-height:56px}
+    .parc-flowin-badge{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:18px;opacity:.6}
+    .parc-flowin-badge img{height:13px;width:auto}
+    .parc-flowin-badge span{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.6)}
   `
 }
 

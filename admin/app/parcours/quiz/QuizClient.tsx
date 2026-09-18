@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
@@ -139,8 +141,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
       {screen === 'landing' && (
         <div className="screen" style={{ paddingTop: 32 }}>
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            {cfg.logoSvg ? <div dangerouslySetInnerHTML={{ __html: cfg.logoSvg as string }} style={{ display:'flex',justifyContent:'center',marginBottom:14 }} />
-              : <div style={{ fontSize: 48, marginBottom: 14 }}>{cfg.logoEmoji as string || '🎮'}</div>}
+            <ParcoursLogo emoji={(cfg.logoEmoji as string) || '🎮'} logoSvg={cfg.logoSvg as string} />
             <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>{nom}</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', marginBottom: 8 }}>{(cfg.subtitle as string) || ''}</div>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', marginBottom: 16 }}>{(cfg.datesLabel as string) || ''}</div>
@@ -159,6 +160,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
           <button className="btn" onClick={() => setScreen('quiz')}>{front.ctaText || '🎮 Jouer gratuitement →'}</button>
           <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
           {partenaires.length > 0 && <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Nos {partenaires.length} partenaires</button>}
+          <FlowinBadge />
         </div>
       )}
 
@@ -206,11 +208,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
           </div>
           <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e => setForm(f=>({...f,email:e.target.value}))} />{errors.email && <div className="err">{errors.email}</div>}</div>
           <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e => setForm(f=>({...f,tel:e.target.value}))} />{errors.tel && <div className="err">{errors.tel}</div>}</div>
-          <div className="grid2" style={{ marginBottom:12 }}>
-            <div><label className="label">Tranche d'âge</label><select className="input" value={form.age} onChange={e => setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-            <div><label className="label">CP</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e => setForm(f=>({...f,cp:e.target.value}))} /></div>
-          </div>
-          <div style={{ marginBottom:12 }}><label className="label">Comment découvert ?</label><div style={{ display:'flex',flexWrap:'wrap',gap:6,marginTop:6 }}>{SOURCES.map(s=><button key={s} className={`source-chip${form.source===s?' sel':''}`} onClick={()=>setForm(f=>({...f,source:s}))}>{s}</button>)}</div></div>
+          <ParcoursChampsStandard form={form} setForm={setForm} />
           <div className="rgpd"><div className="rgpd-check">✓</div><div>Je souhaite rester en contact avec les Nuits du Sud et Flowin. Mes données ne sont ni échangées ni vendues.</div></div>
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
         </div>

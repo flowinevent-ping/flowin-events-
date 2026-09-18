@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
@@ -229,9 +231,9 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       <style>{parcoursCSS(c)}</style>
 
       {screen === 'landing' && (
-        <div className="screen" style={{ paddingTop:32,textAlign:'center' }}>
-          <div style={{ marginBottom:14 }}>
-            <i className="ti ti-rotate-clockwise" style={{ fontSize:48,color:c }} aria-hidden="true" />
+        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
+          <div className="parc-logo-halo">
+            <i className="ti ti-rotate-clockwise" style={{ fontSize:44,color:c }} aria-hidden="true" />
           </div>
           <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
           <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string)||'Tentez votre chance !'}</div>
@@ -249,6 +251,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               <i className="ti ti-users" style={{ marginRight:6 }} aria-hidden="true" />Nos partenaires
             </button>
           )}
+          <FlowinBadge />
         </div>
       )}
 
@@ -330,10 +333,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               <div><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
             </div>
           ) : (
-            <div className="grid2" style={{ marginBottom:12 }}>
-              <div><label className="label">Tranche d'âge</label><select className="input" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-              <div><label className="label">CP</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
-            </div>
+            <ParcoursChampsStandard form={form} setForm={setForm} />
           )}
           <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>

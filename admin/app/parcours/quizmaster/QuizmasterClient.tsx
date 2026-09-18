@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, shuffle, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
@@ -109,11 +111,29 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{parcoursCSS(c)+'.opt{font-size:18px}.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}'}</style>
 
-      {screen==='landing'&&(<div className="screen" style={{paddingTop:32,textAlign:'center'}}><div style={{fontSize:48,marginBottom:14}}>🎮</div><div style={{fontSize:24,fontWeight:900,marginBottom:8}}>{nom}</div><div style={{fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20}}>Quiz en direct · Réponds sur ton téléphone</div><button className="btn" onClick={()=>setScreen('vote')}>🎮 Rejoindre le quiz →</button></div>)}
+      {screen==='landing'&&(
+        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
+          <ParcoursLogo emoji={(cfg.logoEmoji as string) || '🎮'} logoSvg={cfg.logoSvg as string} />
+          <div style={{fontSize:24,fontWeight:900,marginBottom:8}}>{nom}</div>
+          <div style={{fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20}}>Quiz en direct · Réponds sur ton téléphone</div>
+          <button className="btn" onClick={()=>setScreen('vote')}>🎮 Rejoindre le quiz →</button>
+          <FlowinBadge />
+        </div>
+      )}
 
       {screen==='vote'&&q&&(<div className="screen"><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Q{qIdx+1}/{questions.length}</div><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Score : {score}</div></div><div style={{fontSize:19,fontWeight:800,lineHeight:1.4,marginBottom:24,textAlign:'center'}}>{q.texte}</div>{q.options.map((opt,i)=>{let cls='opt';if(selected!==null){if(i===selected&&i===q.bonne)cls='opt correct';else if(i===selected)cls='opt wrong';else if(i===q.bonne)cls='opt reveal'}const letters=['🅰️','🅱️','🅾️','🆇'];return <button key={i} className={cls} onClick={()=>handleVote(i)} disabled={selected!==null}>{letters[i]||['A','B','C','D'][i]} {opt}</button>})}</div>)}
 
-      {screen==='form'&&!getJoueurLocal()&&(<div className="screen"><div className="header"><div><div className="title">Crée ton compte</div><div className="sub">Score final : {score}/{questions.length}</div></div></div><div className="grid2" style={{marginBottom:12}}>{[['prenom','Prénom *','given-name'],['nom','Nom *','family-name']].map(([k,l,ac])=>(<div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} autoComplete={ac} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>))}</div><div style={{marginBottom:12}}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div><div style={{marginBottom:12}}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div><div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div><button className="btn" style={{marginTop:16}} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button></div>)}
+      {screen==='form'&&!getJoueurLocal()&&(
+        <div className="screen">
+          <div className="header"><div><div className="title">Crée ton compte</div><div className="sub">Score final : {score}/{questions.length}</div></div></div>
+          <div className="grid2" style={{marginBottom:12}}>{[['prenom','Prénom *','given-name'],['nom','Nom *','family-name']].map(([k,l,ac])=>(<div key={k}><label className="label">{l}</label><input className={`input${errors[k]?' err':''}`} autoComplete={ac} value={form[k as keyof typeof form]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} />{errors[k]&&<div className="err">{errors[k]}</div>}</div>))}</div>
+          <div style={{marginBottom:12}}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
+          <div style={{marginBottom:12}}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
+          <ParcoursChampsStandard form={form} setForm={setForm} />
+          <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
+          <button className="btn" style={{marginTop:16}} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
+        </div>
+      )}
 
       {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
     </div>

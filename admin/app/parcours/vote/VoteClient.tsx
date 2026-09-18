@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, parcoursCSS, SOURCES, AGE_OPTIONS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
 import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -111,12 +113,11 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
         // l'operation si configure, meme repli que QuizClient -- pas d'emoji
         // fixe qui masque le logo Flowin/partenaire attendu.
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          {cfg.logoSvg
-            ? <div dangerouslySetInnerHTML={{ __html: cfg.logoSvg as string }} style={{ display:'flex',justifyContent:'center',marginBottom:14 }} />
-            : <div style={{ fontSize:48,marginBottom:14 }}>{(cfg.logoEmoji as string) || '⭐'}</div>}
+          <ParcoursLogo emoji={(cfg.logoEmoji as string) || '⭐'} logoSvg={cfg.logoSvg as string} />
           <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
           <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string)||'Votez pour vos favoris !'}</div>
           <button className="btn" onClick={()=>lsCheck()||setScreen('vote')}>⭐ Voter maintenant →</button>
+          <FlowinBadge />
         </div>
       )}
 
@@ -193,18 +194,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
           </div>
           <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
           <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
-          {/* Champs standard du formulaire d'inscription (Romain, 18/09 : « nom,
-              prénom, sexe, tranche d'âge, code postal, email, téléphone, opt-in,
-              vous nous avez connu comment — toujours les mêmes »). `genre`, `age`,
-              `cp` et `source` existaient déjà dans l'état et étaient déjà envoyés
-              à l'enregistrement (writeJoueur) : seuls les champs de saisie
-              manquaient ici. */}
-          <div className="grid2" style={{ marginBottom:12 }}>
-            <div><label className="label">Sexe</label><select className="input" value={form.genre} onChange={e=>setForm(f=>({...f,genre:e.target.value}))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select></div>
-            <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e=>setForm(f=>({...f,age:e.target.value}))}>{AGE_OPTIONS.map(o=><option key={o.val} value={o.val}>{o.label}</option>)}</select></div>
-          </div>
-          <div style={{ marginBottom:12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e=>setForm(f=>({...f,cp:e.target.value}))} /></div>
-          <div style={{ marginBottom:12 }}><label className="label">Comment nous avez-vous connu ?</label><div style={{ display:'flex',flexWrap:'wrap',gap:6,marginTop:6 }}>{SOURCES.map(s=><button key={s} className={`source-chip${form.source===s?' sel':''}`} onClick={()=>setForm(f=>({...f,source:s}))}>{s}</button>)}</div></div>
+          <ParcoursChampsStandard form={form} setForm={setForm} />
           <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
         </div>
