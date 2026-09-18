@@ -31,7 +31,7 @@ const NAV: NavItem[] = [
   { key: 'operations', label: 'Mes opérations', sous: 'Events et super events', icon: 'calendar', route: '/pro' },
   { key: 'nouvelle', label: 'Nouvelle opération', sous: 'Créer ou rejoindre', icon: 'join', route: '/pro/nouvelle' },
   { key: 'donnees', label: 'Mes données', sous: 'CRM, gagnants, trafic', icon: 'users', route: '/pro/donnees' },
-  { key: 'compte', label: 'Mon compte', sous: 'Entreprise, bons & factures, banques', icon: 'shop', route: '/pro/compte' },
+  { key: 'compte', label: 'Mon profil', sous: 'Entreprise, bons & factures, lots, banques', icon: 'shop', route: '/pro/compte' },
 ]
 /* Les pages existantes gardent leur cle : elles se rangent sous l une des quatre. */
 const RANGEMENT: Record<string, string> = {

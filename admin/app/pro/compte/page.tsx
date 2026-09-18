@@ -28,7 +28,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const qo = q ? `${q}&` : '?'
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="compte">
-      <h1 style={H1}>Mon compte</h1>
+      <h1 style={H1}>Mon profil</h1>
       <div style={{ ...SUB, marginBottom: 14 }}>Vos coordonnées, vos contrats et vos questions.</div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
         {ONGLETS.map(o => (
