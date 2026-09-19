@@ -5,6 +5,7 @@ import { fetchOperationsPro } from '@/lib/operations'
 import { rangerParPeriode, type FiltreType } from '@/lib/rangementOperations'
 import ProShell from '@/components/pro/ProShell'
 import GrilleOperations, { Vignette } from '@/components/pro/GrilleOperations'
+import AlerteLotsRetires from '@/components/pro/AlerteLotsRetires'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, H1, SUB, BTN, BTN2 } from '@/lib/proui'
 
@@ -41,6 +42,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
 
   return (
     <ProShell proName={proName} proId={proId} active="operations">
+      <AlerteLotsRetires partenaireId={ops.partenaire?.id ?? null} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
         <div style={{ flex: 1, minWidth: 200 }}>
           <h1 style={H1}>Mes opérations</h1>

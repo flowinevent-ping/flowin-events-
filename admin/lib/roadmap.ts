@@ -129,6 +129,13 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'todo', titre: 'Implémentation -- en attente du feu vert de Romain (nuit du 18/09)', detail: 'Romain (18/09) : architecture validée dans son principe (option B, câblage direct, SIRET unique), mais il garde la main -- "tu gardes le projet sous le coude, tu l\\u2019appelles projet câblage facturation... je te lancerai cet ordre éventuellement dans la nuit." Écriture dans Jeffyre toujours bloquée tant que ce feu vert explicite n\\u2019est pas donné. Restent à trancher au moment du go : valeur `espace` Flowin Event, choix B/BT pour Baïta, mécanisme d\\u2019accès externe (item SSO), plan Supabase.' },
     ],
   },
+  {
+    titre: 'Envoi en masse — connecteur email tiers (19/09, à cadrer)',
+    items: [
+      { etat: 'ok', titre: 'Canal WhatsApp + filtres CRM (source, statut gagnant) ajoutés', detail: 'Envoi en masse (SA) a maintenant un canal WhatsApp (liens wa.me un par un, pas de BCC possible côté WhatsApp) à côté du Gmail existant, plus les mêmes filtres que le reste du CRM (source, gagnant/lot en attente/confirmé/utilisé), ville et code postal affichés.' },
+      { etat: 'todo', titre: 'Connecteur email tiers (Brevo, Mailchimp, ou autre) -- décision de Romain à venir', detail: 'Romain veut un vrai envoi groupé (suivi ouverture/clic, désabonnement automatique -- absent du lien Gmail actuel). Mailchimp écarté : plafond gratuit à 500 contacts (déjà 471 destinataires opt-in aujourd\\u2019hui). Brevo (ex-Sendinblue, français) recommandé en alternative : gratuit jusqu\\u2019à 300 emails/jour, aucune limite de contacts, pas de carte bancaire. Romain : "si tu as une autre solution que Brevo ou Mailchimp tu me diras" -- à rechercher/proposer si une meilleure option existe. Quel que soit l\\u2019outil choisi, ça reste une vraie intégration (compte à créer, expéditeur à vérifier, clé API) -- pas un simple bouton à ajouter. Écriture/câblage bloqués tant que Romain n\\u2019a pas créé de compte et fourni la clé API.' },
+    ],
+  },
 ]
 
 export function avancement(blocs: BlocRoadmap[] = BLOCS) {

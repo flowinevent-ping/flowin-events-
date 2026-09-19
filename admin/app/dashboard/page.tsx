@@ -24,6 +24,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { StatusChip, ModuleChip } from '@/components/dashboard/DashboardUI'
+import AlerteLotsRetires from '@/components/dashboard/AlerteLotsRetires'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 
 type Ev = {
@@ -89,6 +90,7 @@ export default function DashboardPage() {
 
   return (
     <div className="sa-content">
+      <AlerteLotsRetires />
       {/* Chaque tuile mene a l ecran qui detaille son chiffre — un chiffre qu on
           ne peut pas ouvrir est une impasse. */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
