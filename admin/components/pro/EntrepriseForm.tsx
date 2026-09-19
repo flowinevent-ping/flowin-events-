@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { SECTEURS_PRO } from '@/lib/proCreation'
 import { CARD, ACC } from '@/lib/proui'
+import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 
 type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null }
 type Fiche = { image_url: string | null; site_web: string | null; instagram: string | null; facebook: string | null }
@@ -23,12 +24,28 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
   const [p, setP] = useState<Pro>(initial)
   const [f, setF] = useState<Fiche>({ image_url: null, site_web: null, instagram: null, facebook: null })
   const [etat, setEtat] = useState<'' | 'envoi' | 'ok' | 'ko'>('')
+  const [uploadEnCours, setUploadEnCours] = useState(false)
+  const [uploadErreur, setUploadErreur] = useState('')
 
   useEffect(() => {
     if (!initial.partenaire_id) return
     supabase.from('partenaires').select('image_url,site_web,instagram,facebook').eq('id', initial.partenaire_id).maybeSingle()
       .then(({ data }) => { if (data) setF(data as Fiche) })
   }, [initial.partenaire_id])
+
+  async function onFichierLogo(e: React.ChangeEvent<HTMLInputElement>) {
+    const fichier = e.target.files?.[0]
+    e.target.value = ''
+    if (!fichier || !p.partenaire_id) return
+    setUploadErreur('')
+    setUploadEnCours(true)
+    const redim = await redimensionnerImage(fichier).catch(() => fichier)
+    const res = await uploaderLogo(redim, `partenaires/${p.partenaire_id}`)
+    setUploadEnCours(false)
+    if ('erreur' in res) { setUploadErreur(res.erreur); return }
+    setF(x => ({ ...x, image_url: res.url }))
+    setEtat('')
+  }
 
   const champ = (k: keyof Pro, l: string, ph = '') => (
     <label>
@@ -64,6 +81,29 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
 
   return (
     <>
+      {p.partenaire_id && (
+        <div style={{ ...CARD, display: 'flex', gap: 18, alignItems: 'center', marginBottom: 14 }}>
+          <div style={{ width: 96, height: 96, flexShrink: 0, borderRadius: 16, border: '2px dashed #efe9f2', background: '#faf8fb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            {f.image_url
+              ? <img src={f.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setF(x => ({ ...x, image_url: null }))} />
+              : <span style={{ fontSize: 34, fontWeight: 900, color: '#c9bfd0' }}>{(p.nom ?? '?').trim().charAt(0).toUpperCase()}</span>}
+          </div>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <span style={lbl}>Logo de l&apos;établissement</span>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <label style={{ background: uploadEnCours ? '#efe9f2' : ACC, color: uploadEnCours ? '#8a7e93' : '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: uploadEnCours ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+                {uploadEnCours ? 'Envoi…' : '📤 Choisir un fichier'}
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
+                  disabled={uploadEnCours} onChange={onFichierLogo} />
+              </label>
+              <input style={{ ...inp, flex: 1, minWidth: 180, marginBottom: 0 }} placeholder="ou coller une URL https://…/logo.png"
+                value={f.image_url ?? ''} onChange={e => { setF(x => ({ ...x, image_url: e.target.value })); setEtat('') }} />
+            </div>
+            {uploadErreur && <div style={{ fontSize: 12, color: '#B45309', marginTop: 6, fontWeight: 700 }}>{uploadErreur}</div>}
+            <div style={{ fontSize: 11.5, color: '#8a7e93', marginTop: 6 }}>PNG, JPG, WebP ou SVG — 5 Mo max. Affiché sur vos jeux, la carte et les billets.</div>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14 }}>
         <div style={CARD}>
           {champ('nom', 'Établissement *')}
@@ -87,9 +127,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
           {champ('tel', 'Téléphone')}
           {p.partenaire_id ? (
             <>
-              <div style={{ fontSize: 12.5, fontWeight: 800, margin: '6px 0 8px' }}>Logo &amp; liens (affichés sur vos jeux et QR)</div>
-              {champF('image_url', 'Logo (adresse de l’image)', 'https://…/logo.png')}
-              {f.image_url && <img src={f.image_url} alt="" style={{ maxHeight: 48, marginBottom: 12 }} />}
+              <div style={{ fontSize: 12.5, fontWeight: 800, margin: '6px 0 8px' }}>Liens (affichés sur vos jeux et QR)</div>
               {champF('site_web', 'Site web', 'https://…')}
               {champF('instagram', 'Instagram', '@votrecompte')}
               {champF('facebook', 'Facebook', 'https://facebook.com/…')}

@@ -33,6 +33,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import { fetchCrmParticipants, fetchSuperEvents, type CrmParticipant, type SuperEvent } from '@/lib/nds'
+import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 
 import { usePorteeInitiale } from '@/lib/portee'
 const fr = (d: string | null) => {
@@ -58,8 +59,18 @@ export default function Page() {
 
   const [pro, setPro] = useState('')
   const [erreur, setErreur] = useState('')
+  /* Romain, 19/09 : « je veux voir les gagnants, il y avait des participants qui
+     ont joué 10/15/20 fois ou plus, il y a une erreur ». En realite chaque ligne
+     est un (joueur, STATION) -- un joueur passe sur 5 stations a 3-4 parties
+     chacune n apparait jamais comme « 20 », il est fragmente en 5 petites lignes
+     triees par date. Pas une regression de comptage : un defaut d angle de vue.
+     Ajoute donc un total par joueur (toutes stations confondues, triable) et un
+     rappel des lots gagnes (table `tirages`, fetchGagnants -- deja globale, pas
+     scopee par partenaire comme fetchGagnantsPartenaire). */
+  const [gagnants, setGagnants] = useState<GagnantRow[]>([])
 
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
+  useEffect(() => { fetchGagnants().then(setGagnants) }, [])
   useEffect(() => {
     let vivant = true
     setListe(null); setErreur('')
@@ -88,6 +99,21 @@ export default function Page() {
       .map(id => ({ id, label: vus[id] }))
       .sort((a, b) => a.label.localeCompare(b.label, 'fr'))
   }, [liste])
+
+  const gagnantsParJoueur = useMemo(() => {
+    const m: Record<string, GagnantRow[]> = {}
+    gagnants.forEach(g => { if (g.joueur_id) (m[g.joueur_id] ??= []).push(g) })
+    return m
+  }, [gagnants])
+
+  /* Total toutes stations confondues, calcule sur `visibles` (avant la barre de
+     recherche interne a ListeCRM) : la recherche ne doit pas faire bouger le
+     total affiche sur les lignes qui restent visibles. */
+  const totalParJoueur = useMemo(() => {
+    const m: Record<string, number> = {}
+    ;(visibles ?? []).forEach(p => { m[p.joueur_id] = (m[p.joueur_id] ?? 0) + (p.nb_parties ?? 0) })
+    return m
+  }, [visibles])
 
   const stats = useMemo(() => {
     const l = affichees
@@ -155,6 +181,32 @@ export default function Page() {
       rendu: p => <span className="sa-chip">{p.nb_parties}</span>,
     },
     {
+      /* Une ligne = une station. Le total ci-dessous cumule TOUTES les stations
+         du joueur dans la portee affichee -- c est lui qui revele un joueur a
+         10/15/20 parties, invisible quand on ne regarde que le chiffre par
+         station (Romain, 19/09). */
+      id: 'total_joueur', label: 'Total joueur', valeur: p => totalParJoueur[p.joueur_id] ?? p.nb_parties,
+      rendu: p => {
+        const t = totalParJoueur[p.joueur_id] ?? p.nb_parties ?? 0
+        return t > (p.nb_parties ?? 0)
+          ? <span className="sa-chip live" title="Toutes stations confondues">{t}</span>
+          : <span style={{ color: 'var(--sa-muted)' }}>—</span>
+      },
+    },
+    {
+      id: 'lots', label: 'Lots', horsRecherche: true,
+      valeur: p => (gagnantsParJoueur[p.joueur_id]?.length ?? 0),
+      rendu: p => {
+        const gs = gagnantsParJoueur[p.joueur_id]
+        if (!gs?.length) return <span style={{ color: 'var(--sa-muted)' }}>—</span>
+        return (
+          <span className="sa-chip live" title={gs.map(g => g.lot_nom ?? '?').join(', ')}>
+            🏆 {gs.length > 1 ? `${gs.length} lots` : (gs[0].lot_nom ?? '1 lot')}
+          </span>
+        )
+      },
+    },
+    {
       id: 'derniere', label: 'Activité', valeur: p => p.derniere, horsRecherche: true,
       rendu: p => <span style={{ fontSize: 11.5, color: 'var(--sa-muted)' }}>{fr(p.premiere)} → {fr(p.derniere)}</span>,
     },
@@ -177,13 +229,14 @@ export default function Page() {
           colonnes={colonnes}
           cle={p => `${p.joueur_id}/${p.event_id}`}
           onLigne={p => openDrawer('joueur', p.joueur_id)}
-          triDefaut="derniere"
+          triDefaut="total_joueur"
           triDescendant
           placeholderRecherche="Rechercher un nom, un email, un code postal, un pro…"
           filtres={[
             { id: 'tous', label: 'Tous' },
             { id: 'optin', label: 'Opt-in', test: p => !!p.optin },
             { id: 'fideles', label: '3 parties et +', test: p => (p.nb_parties ?? 0) >= 3 },
+            { id: 'gagnants', label: '🏆 Gagnants', test: p => (gagnantsParJoueur[p.joueur_id]?.length ?? 0) > 0 },
           ]}
           selecteurs={pros.length > 1 ? [{
             id: 'pro', libelleTout: 'Tous les pros', options: pros, valeur: pro, onChange: setPro,
