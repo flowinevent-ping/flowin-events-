@@ -45,7 +45,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
 
   return (
     <ProShell proName={ops.proNom ?? 'Mon établissement'} proId={proId} active="donnees">
-      <h1 style={H1}>Mes données</h1>
+      <h1 style={H1}>Mes super data</h1>
       <div style={{ ...SUB, marginBottom: 12 }}>CRM, gagnants et trafic de toutes vos opérations.</div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5 }}>

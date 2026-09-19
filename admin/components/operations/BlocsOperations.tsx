@@ -16,8 +16,10 @@ import {
   libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise,
   type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation, type LotOperation,
 } from '@/lib/operations'
-import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource } from '@/lib/nds'
+import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource, supprimerSuperEvent } from '@/lib/nds'
+import { deleteEvent } from '@/lib/dashboard'
 import { ajouterStock, retirerStock } from '@/lib/stock'
+import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
@@ -54,26 +56,79 @@ function Pastille({ ton, children }: { ton: 'ok' | 'warn' | 'neutre' | 'acc'; ch
   return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10.5, fontWeight: 800, borderRadius: 99, padding: '3px 9px', background: c[0], color: c[1], whiteSpace: 'nowrap' }}>{children}</span>
 }
 
-/** L en-tete et le cadre d un bloc -- identique sur tous les onglets. */
+/** L en-tete et le cadre d un bloc -- identique sur tous les onglets.
+ * Repliable, replie par defaut : Romain (19/09) « trop d'info et en desordre »
+ * sur une page qui affichait TOUT deploye d'un coup pour chaque operation.
+ * Bordure + badge colores (bleu event / orange super event) -- meme code
+ * couleur que Vignette (components/pro/GrilleOperations.tsx), qui manquait
+ * ici (« on ne distingue pas les events des super events, fait comme sur
+ * l'autre pages »). */
 export function BlocOperation({ op, children, droite }: { op: Operation; children: React.ReactNode; droite?: React.ReactNode }) {
   const statut = op.status
+  const [ouvert, setOuvert] = useState(false)
+  const accent = op.type === 'super' ? ACCENT_SUPER : ACCENT_ANIM
   return (
-    <section style={{ background: CARDBG, border: `1px solid ${BRD}`, borderRadius: 14, marginBottom: 14, overflow: 'hidden' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: `1px solid ${BRD}`, background: SUBT, flexWrap: 'wrap' }}>
+    <section style={{ background: CARDBG, border: `1px solid ${BRD}`, borderLeft: `4px solid ${accent}`, borderRadius: 14, marginBottom: 14, overflow: 'hidden' }}>
+      <header
+        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: ouvert ? `1px solid ${BRD}` : 'none', background: SUBT, flexWrap: 'wrap', cursor: 'pointer' }}
+        onClick={() => setOuvert(o => !o)}
+      >
+        <span style={{ fontSize: 11, color: MUT, transform: ouvert ? 'rotate(90deg)' : 'none', transition: 'transform .12s', flexShrink: 0 }}>▶</span>
         <div style={{ flex: 1, minWidth: 180 }}>
-          <div style={{ fontWeight: 800, fontSize: 14.5 }}>{op.nom}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 800, fontSize: 14.5 }}>{op.nom}</span>
+            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: accent, background: `${accent}17`, borderRadius: 99, padding: '3px 8px' }}>
+              {op.type === 'super' ? 'Super event' : 'Event'}
+            </span>
+          </div>
           <div style={{ fontSize: 11.5, color: MUT, marginTop: 1 }}>
             {libelleDates(op.dateD, op.dateF)}
             {' · '}{op.type === 'super'
-              ? `Super event · ${op.stations.length} station${op.stations.length > 1 ? 's' : ''}`
-              : `Event · ${libelleModule(op.stations[0]?.module)}`}
+              ? `${op.stations.length} station${op.stations.length > 1 ? 's' : ''}`
+              : libelleModule(op.stations[0]?.module)}
           </div>
         </div>
         {statut && <Pastille ton={statut === 'live' ? 'ok' : statut === 'upcoming' ? 'acc' : 'neutre'}>{libelleStatut(statut)}</Pastille>}
-        {droite}
+        <div onClick={e => e.stopPropagation()} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{droite}</div>
       </header>
-      <div style={{ padding: '12px 16px' }}>{children}</div>
+      {ouvert && <div style={{ padding: '12px 16px' }}>{children}</div>}
     </section>
+  )
+}
+
+/** Suppression d une operation -- reprend les memes garde-fous que l existant :
+ * confirm() texte identique a EventDrawer pour un event, saisie du nom exact
+ * pour un super event (RPC supprimer_super_event, refuse s il porte de la
+ * vraie activite joueur). */
+function SupprimerOperationBtn({ op, onSupprime }: { op: Operation; onSupprime: () => void }) {
+  const [busy, setBusy] = useState(false)
+  async function supprimer() {
+    if (op.type === 'super') {
+      const saisie = window.prompt(`Suppression définitive de « ${op.nom} » (super event). Retape son nom exact pour confirmer :`)
+      if (saisie === null) return
+      setBusy(true)
+      const r = await supprimerSuperEvent(op.id, saisie)
+      setBusy(false)
+      if (!r.ok) {
+        if (r.raison === 'activite') alert(`Suppression refusée : cette opération porte ${r.participations} partie(s) et ${r.tirages} tirage(s) réels.`)
+        else if (r.raison === 'confirmation') alert('Nom saisi incorrect — suppression annulée.')
+        else alert(r.message ?? 'Suppression impossible.')
+        return
+      }
+      onSupprime()
+      return
+    }
+    if (!confirm(`Supprimer l'event "${op.nom}" ? Action irréversible.`)) return
+    setBusy(true)
+    const ok = await deleteEvent(op.id)
+    setBusy(false)
+    if (!ok) { alert('Suppression impossible.'); return }
+    onSupprime()
+  }
+  return (
+    <button style={{ ...btn, color: '#B91C1C', borderColor: '#FCA5A5' }} disabled={busy} onClick={supprimer}>
+      {busy ? '…' : '🗑 Supprimer'}
+    </button>
   )
 }
 
@@ -618,7 +673,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
     <>
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations, cle).map(op => (
-        <BlocOperation key={op.cle} op={op}>
+        <BlocOperation key={op.cle} op={op} droite={<SupprimerOperationBtn op={op} onSupprime={recharger} />}>
           {onglet === 'lots' && <ContenuLots op={op} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}

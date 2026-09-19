@@ -30,7 +30,7 @@ interface NavItem { key: string; label: string; sous: string; icon: string; rout
 const NAV: NavItem[] = [
   { key: 'operations', label: 'Mes opérations', sous: 'Events et super events', icon: 'calendar', route: '/pro' },
   { key: 'nouvelle', label: 'Nouvelle opération', sous: 'Créer ou rejoindre', icon: 'join', route: '/pro/nouvelle' },
-  { key: 'donnees', label: 'Mes données', sous: 'CRM, gagnants, trafic', icon: 'users', route: '/pro/donnees' },
+  { key: 'donnees', label: 'Mes super data', sous: 'CRM, gagnants, trafic', icon: 'users', route: '/pro/donnees' },
   { key: 'compte', label: 'Mon profil', sous: 'Entreprise, bons & factures, lots, banques', icon: 'shop', route: '/pro/compte' },
 ]
 /* Les pages existantes gardent leur cle : elles se rangent sous l une des quatre. */
