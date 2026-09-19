@@ -116,7 +116,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
             <ParcoursMobil events={op.stations.map(s => ({ id: s.id, module: s.module, nom: s.nom, super_event_id: s.super_event_id }))} showTitle={false} />
           </div>
         )}
-        {onglet === 'lots' && <ContenuLots op={op} />}
+        {onglet === 'lots' && <ContenuLots op={op} partenaire={pt} onChange={recharger} />}
         {onglet === 'diffusion' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}
