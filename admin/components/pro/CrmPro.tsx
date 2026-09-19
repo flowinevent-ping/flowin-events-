@@ -267,15 +267,18 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
 
       {vue === 'origines' && (
         <TableRepartition titre="Origine" lignes={(() => {
-          const m = new Map<string, { n: number; g: number; o: number }>()
+          /* Cle = code brut d origine (pour re-filtrer les Contacts au clic),
+             libelle = ce qui s affiche. Avant : la cle etait deja le libelle
+             traduit, impossible a reinjecter dans le filtre `origine` qui
+             attend le code brut (c.origines.includes(origine)). */
+          const m = new Map<string, { nom: string; n: number; g: number; o: number }>()
           liste.forEach(c => (c.origines.length ? c.origines : ['']).forEach(o => {
-            const k = o ? libelleOrigine(o) : 'Non renseignée'
-            const x = m.get(k) ?? { n: 0, g: 0, o: 0 }
+            const x = m.get(o) ?? { nom: o ? libelleOrigine(o) : 'Non renseignée', n: 0, g: 0, o: 0 }
             x.n++; if (c.nb_gains > 0) x.g++; if (c.optin) x.o++
-            m.set(k, x)
+            m.set(o, x)
           }))
-          return Array.from(m.entries()).map(([k, x]) => ({ nom: k, ...x })).sort((a, b) => b.n - a.n)
-        })()} />
+          return Array.from(m.entries()).map(([id, x]) => ({ id, ...x })).sort((a, b) => b.n - a.n)
+        })()} onLigne={id => { setOrigine(id); setVue('contacts') }} />
       )}
 
       {vue === 'operations' && (
@@ -286,8 +289,8 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
             x.n++; x.p += Number(o.parties ?? 0); if (c.nb_gains > 0) x.g++; if (c.optin) x.o++
             m.set(o.cle, x)
           }))
-          return Array.from(m.values()).sort((a, b) => b.n - a.n)
-        })()} />
+          return Array.from(m.entries()).map(([id, x]) => ({ id, ...x })).sort((a, b) => b.n - a.n)
+        })()} onLigne={id => { setOp(id); setVue('contacts') }} />
       )}
 
       {vue === 'stats' && (
@@ -308,20 +311,27 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
   )
 }
 
-function TableRepartition({ titre, lignes }: { titre: string; lignes: { nom: string; n: number; g: number; o: number; p?: number }[] }) {
+function TableRepartition({ titre, lignes, onLigne }: { titre: string; lignes: { id?: string; nom: string; n: number; g: number; o: number; p?: number }[]; onLigne?: (id: string) => void }) {
   const max = Math.max(1, ...lignes.map(l => l.n))
   return (
     <div style={{ background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, overflowX: 'auto' }}>
+      {onLigne && lignes.length > 0 && (
+        <div style={{ padding: '9px 14px', fontSize: 11.5, color: C.attenue, borderBottom: `1px solid ${C.bordure}` }}>Clique une ligne pour voir ses contacts.</div>
+      )}
       {lignes.length === 0 ? <div style={{ padding: 16, fontSize: 13, color: C.attenue }}>Aucune donnée.</div> : (
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
           <thead><tr>
             <th style={th}>{titre}</th><th style={th}>Contacts</th>
             {lignes.some(l => l.p !== undefined) && <th style={th}>Parties</th>}
-            <th style={th}>Gagnants</th><th style={th}>Opt-in</th><th style={th}>Poids</th>
+            <th style={th}>Gagnants</th><th style={th}>Opt-in</th>
+            <th style={th} title="Part de cette ligne par rapport à celle qui en a le plus">Répartition</th>
           </tr></thead>
           <tbody>
             {lignes.map(l => (
-              <tr key={l.nom}>
+              <tr key={l.id ?? l.nom} onClick={onLigne && l.id !== undefined ? () => onLigne(l.id as string) : undefined}
+                style={onLigne ? { cursor: 'pointer' } : undefined}
+                onMouseEnter={onLigne ? e => (e.currentTarget.style.background = C.subtil) : undefined}
+                onMouseLeave={onLigne ? e => (e.currentTarget.style.background = '') : undefined}>
                 <td style={{ ...td, fontWeight: 800 }}>{l.nom}</td>
                 <td style={td}>{l.n}</td>
                 {l.p !== undefined && <td style={td}>{l.p}</td>}

@@ -177,31 +177,36 @@ export default function Page() {
     },
     { id: 'pro_nom', label: 'Pro', valeur: p => p.pro_nom, style: { fontSize: 12.5 } },
     {
-      id: 'nb_parties', label: 'Parties', valeur: p => p.nb_parties,
+      id: 'nb_parties', label: 'Parties (cette station)', valeur: p => p.nb_parties,
       rendu: p => <span className="sa-chip">{p.nb_parties}</span>,
     },
     {
-      /* Une ligne = une station. Le total ci-dessous cumule TOUTES les stations
-         du joueur dans la portee affichee -- c est lui qui revele un joueur a
-         10/15/20 parties, invisible quand on ne regarde que le chiffre par
-         station (Romain, 19/09). */
-      id: 'total_joueur', label: 'Total joueur', valeur: p => totalParJoueur[p.joueur_id] ?? p.nb_parties,
+      /* Une ligne = une station. Ce total cumule TOUTES les stations du joueur
+         dans la portee affichee -- c est lui qui revele un joueur a 10/15/20
+         parties, invisible quand on ne regarde que le chiffre par station
+         (Romain, 19/09). Affiche toujours la valeur (meme egale a "Parties")
+         -- un "—" a la place laissait croire a une donnee manquante plutot
+         qu a "pas d autre station". */
+      id: 'total_joueur', label: 'Total (toutes stations)', valeur: p => totalParJoueur[p.joueur_id] ?? p.nb_parties,
       rendu: p => {
         const t = totalParJoueur[p.joueur_id] ?? p.nb_parties ?? 0
-        return t > (p.nb_parties ?? 0)
-          ? <span className="sa-chip live" title="Toutes stations confondues">{t}</span>
-          : <span style={{ color: 'var(--sa-muted)' }}>—</span>
+        return <span className="sa-chip live" title="Somme des parties de ce joueur sur toutes les stations de cette portée, pas seulement celle-ci">{t}</span>
       },
     },
     {
+      /* "il manque la colonne lots utilisé/en attente" (Romain, 19/09) : le nom
+         du lot seul ne disait pas s il avait ete remis. Meme etat a 3 valeurs
+         que app/dashboard/gagnants/page.tsx (a_confirmer/confirme/retire). */
       id: 'lots', label: 'Lots', horsRecherche: true,
       valeur: p => (gagnantsParJoueur[p.joueur_id]?.length ?? 0),
       rendu: p => {
         const gs = gagnantsParJoueur[p.joueur_id]
         if (!gs?.length) return <span style={{ color: 'var(--sa-muted)' }}>—</span>
+        const nom = gs.length > 1 ? `${gs.length} lots` : (gs[0].lot_nom ?? '1 lot')
+        const statut = gs.some(g => g.retire_at) ? '✅ Utilisé' : gs.some(g => g.notifie_at) ? '📞 Confirmé' : '⏳ En attente'
         return (
           <span className="sa-chip live" title={gs.map(g => g.lot_nom ?? '?').join(', ')}>
-            🏆 {gs.length > 1 ? `${gs.length} lots` : (gs[0].lot_nom ?? '1 lot')}
+            🏆 {nom} · {statut}
           </span>
         )
       },
