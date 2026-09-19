@@ -3,6 +3,7 @@
 import { libelleModule } from '@/lib/operations'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { ACCENT_SUPER } from '@/lib/charte'
 
 /**
  * Parcours mobil (30/07/2026, v2 — branchement du vrai contenu).
@@ -89,12 +90,19 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
   const phoneUrl = url ? `${url}&bar=0` : ''
   const empty = 'Aucun événement à prévisualiser pour le moment.'
 
-  const tabBtn = (t: 'event' | 'super', label: string, sous: string) => (
-    <button onClick={() => setTab(t)} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${ACC}` : '2px solid #E2E8F0', background: tab === t ? 'rgba(37,99,235,.06)' : '#fff' }}>
-      <div style={{ fontWeight: 800, fontSize: 14, color: tab === t ? ACC : '#0F172A' }}>{label}</div>
-      <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 2 }}>{sous}</div>
-    </button>
-  )
+  /* Romain (19/09) : « super event en orange partout ». Les deux onglets
+     rendaient le meme bleu quand actifs -- « Parcours super event » n avait
+     aucune distinction, alors que ACCENT_SUPER (meme orange que Vignette,
+     BlocOperation, FicheOperationPro) est deja la couleur etablie ailleurs. */
+  const tabBtn = (t: 'event' | 'super', label: string, sous: string) => {
+    const c = t === 'super' ? ACCENT_SUPER : ACC
+    return (
+      <button onClick={() => setTab(t)} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${c}` : '2px solid #E2E8F0', background: tab === t ? `${c}0F` : '#fff' }}>
+        <div style={{ fontWeight: 800, fontSize: 14, color: tab === t ? c : '#0F172A' }}>{label}</div>
+        <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 2 }}>{sous}</div>
+      </button>
+    )
+  }
 
   return (
     <div>

@@ -176,10 +176,17 @@ export default function RejoindreClient({ se }: { se: SE }) {
     }
   `
 
+  /* Romain (19/09) : « icône pictogramme commerce trop petit », « on a dit
+     super event en orange, pas rouille, même orange partout ». Le halo pale
+     a 10% d opacite rendait l icone terne, sans rapport avec le vrai orange
+     vif du bandeau (ORANGE/ORANGE2, meme paire que COULEURS_ETAPES.super
+     utilisee partout ailleurs) -- remplace par un fond degrade plein, icone
+     blanche, et un format plus grand (56px, comme l icone d accueil un peu
+     plus haut dans ce meme fichier). */
   const Titre = ({ icone, titre, sous }: { icone: string; titre: string; sous?: string }) => (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(194,65,12,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: ORANGE, marginBottom: 10 }}>
-        <Ico k={icone} size={20} />
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: `linear-gradient(135deg,${ORANGE2},${ORANGE})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', marginBottom: 10, boxShadow: `0 8px 18px ${ORANGE}33` }}>
+        <Ico k={icone} size={26} />
       </div>
       <div style={{ fontSize: 19, fontWeight: 800 }}>{titre}</div>
       {sous && <div style={{ fontSize: 13, color: CHARTE.attenue, marginTop: 4, lineHeight: 1.5 }}>{sous}</div>}
@@ -264,7 +271,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
 
           {etape === 'intro' && (
             <div style={{ textAlign: 'center', padding: '8px 4px' }}>
-              <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(194,65,12,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: ORANGE, margin: '0 auto 16px' }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: `linear-gradient(135deg,${ORANGE2},${ORANGE})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', margin: '0 auto 16px', boxShadow: `0 8px 18px ${ORANGE}33` }}>
                 <Ico k="shop" size={26} />
               </div>
               <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Rejoindre en 4 étapes</div>
