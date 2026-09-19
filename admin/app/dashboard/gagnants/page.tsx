@@ -29,6 +29,7 @@ import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { usePorteeInitiale } from '@/lib/portee'
+import { useMailGagnant } from '@/lib/mailGagnant'
 
 type Etat = 'a_confirmer' | 'confirme' | 'retire'
 const LIB_ETAT: Record<Etat, string> = { a_confirmer: 'En attente', confirme: 'Confirmé', retire: 'Utilisé' }
@@ -45,6 +46,7 @@ function etatDe(t: GagnantRow): Etat {
 
 export default function Page() {
   const { openDrawer, partenaires, events } = useDashboard()
+  useMailGagnant()
   const [list, setList] = useState<GagnantRow[] | null>(null)
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [pro, setPro] = useState('')
@@ -128,6 +130,40 @@ export default function Page() {
       id: 'created_at', label: 'Tiré le', valeur: t => t.created_at, horsRecherche: true,
       rendu: t => <span style={{ fontSize: 12.5 }}>{dateFr(t.created_at)}</span>,
     },
+    {
+      /* Romain (19/09) : « module pour relancer les gagnants qui n'ont pas
+         utilise leur ticket, dans la meme section que la liste ». Le bouton
+         existait deja sur /dashboard/nds-lots (Stock des lots), mais pas ici
+         -- or c'est ICI que Romain cherche, recherche et filtre un gagnant.
+         Meme mecanique (flowinMailGagnant, type 'relance'), memes conditions :
+         uniquement pour un lot confirme (donc deja notifie) et pas encore
+         retire -- un gagnant "en attente" n'a pas encore ete appele, le
+         relancer par email n'aurait pas de sens. */
+      id: 'action', label: '', nonTriable: true, horsRecherche: true, aligne: 'centre', largeur: 96,
+      valeur: () => '',
+      rendu: t => {
+        if (etatDe(t) !== 'confirme') return null
+        const p = partenaires.find(x => x.id === t.partenaire_id)
+        return (
+          <button
+            className="sa-btn sm"
+            title="Rappeler par email que le lot confirmé n'a pas encore été retiré"
+            onClick={e => {
+              e.stopPropagation()
+              const url = window.flowinMailGagnant?.gmailUrl({
+                joueur_nom: t.joueur_nom, email: t.joueur_email, lot_nom: t.lot_nom,
+                ticket_code: t.ticket_code, retrait_token: t.retrait_token,
+                partenaire_nom: p?.nom, partenaire_adresse: p?.adresse, partenaire_tel: p?.tel,
+                type: 'relance',
+              })
+              if (url) window.open(url, '_blank', 'noopener')
+            }}
+          >
+            🔔 Relancer
+          </button>
+        )
+      },
+    },
   ]
 
   return (
@@ -160,7 +196,8 @@ export default function Page() {
           legende={
             <>
               <b>En attente</b> = jamais appelé · <b>Confirmé</b> = appelé, lot pas encore
-              récupéré · <b>Utilisé</b> = billet scanné et lot remis en boutique
+              récupéré · <b>Utilisé</b> = billet scanné et lot remis en boutique · le bouton{' '}
+              <b>🔔 Relancer</b> (visible sur les confirmés) envoie un rappel par email
             </>
           }
         />

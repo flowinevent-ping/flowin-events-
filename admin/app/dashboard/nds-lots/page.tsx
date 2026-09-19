@@ -15,18 +15,9 @@ import {
   lienBillet, mailPartenaireUrl, SE_DEFAUT, fetchSuperEvents,
   type GagnantPartenaire, type EtatPartenaire, type SuperEvent,
 } from '@/lib/nds'
+import { useMailGagnant } from '@/lib/mailGagnant'
 
 import { usePorteeInitiale } from '@/lib/portee'
-declare global {
-  interface Window {
-    flowinMailGagnant?: {
-      sujet: (t: Record<string, unknown>) => string
-      corps: (t: Record<string, unknown>) => string
-      gmailUrl: (t: Record<string, unknown>) => string
-      lienBillet: (t: Record<string, unknown>) => string
-    }
-  }
-}
 
 const dateHeureFr = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
@@ -60,18 +51,6 @@ function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
   const texte = etat === 'retire' ? '✓ Retiré' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
   return <span style={{ background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>{texte}</span>
 }
-/** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici
- * (deja utilise depuis PartenaireDrawer, meme pattern repris a l'identique). */
-function useMailGagnant() {
-  useEffect(() => {
-    if (window.flowinMailGagnant || document.getElementById('flowin-mail-gagnant-script')) return
-    const s = document.createElement('script')
-    s.id = 'flowin-mail-gagnant-script'
-    s.src = '/nds/mail-gagnant.js'
-    document.head.appendChild(s)
-  }, [])
-}
-
 interface Ligne {
   id: string
   nom: string

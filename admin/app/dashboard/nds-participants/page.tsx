@@ -203,10 +203,17 @@ export default function Page() {
         const gs = gagnantsParJoueur[p.joueur_id]
         if (!gs?.length) return <span style={{ color: 'var(--sa-muted)' }}>—</span>
         const nom = gs.length > 1 ? `${gs.length} lots` : (gs[0].lot_nom ?? '1 lot')
-        const statut = gs.some(g => g.retire_at) ? '✅ Utilisé' : gs.some(g => g.notifie_at) ? '📞 Confirmé' : '⏳ En attente'
+        /* Meme etat que /dashboard/gagnants, mais la couleur restait identique
+           (verte) pour les 3 statuts -- rien ne distinguait "deja retire" de
+           "encore en attente" d'un coup d'oeil (Romain, 19/09 : "visuel clair
+           et evident"). Meme code couleur que la ChipEtat de /dashboard/nds-lots
+           (orange = a appeler, vert = confirme, bleu = retire). */
+        const etat = gs.some(g => g.retire_at) ? 'retire' : gs.some(g => g.notifie_at) ? 'confirme' : 'a_confirmer'
+        const classe = etat === 'retire' ? 'purple' : etat === 'confirme' ? 'live' : 'warn'
+        const libelle = etat === 'retire' ? '✅ Utilisé' : etat === 'confirme' ? '📞 Confirmé' : '⏳ En attente'
         return (
-          <span className="sa-chip live" title={gs.map(g => g.lot_nom ?? '?').join(', ')}>
-            🏆 {nom} · {statut}
+          <span className={`sa-chip ${classe}`} title={gs.map(g => g.lot_nom ?? '?').join(', ')}>
+            🏆 {nom} · {libelle}
           </span>
         )
       },
