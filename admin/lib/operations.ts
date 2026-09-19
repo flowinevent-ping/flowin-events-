@@ -187,8 +187,11 @@ export interface ContratOperation {
   /** 'commerce' : paiement porte par la fiche commerce (partenaires) ;
    *  'station' : paiement porte par l event / la station (events.paiement_statut). */
   source: 'commerce' | 'station'
-  /** Referentiel 41 : tous les bons de l operation, chacun avec sa facture. */
-  bons: { id: string; statut: string | null; montantTtc: number | null; date: string | null; factureNumero: string | null }[]
+  /** Referentiel 41 : tous les bons de l operation, chacun avec sa facture.
+   *  jetonBon/jetonFacture : acces public lecture seule sans session admin
+   *  (sql/2026-09-19-acces-public-bon-facture.sql) -- null tant que la
+   *  migration n est pas appliquee en prod. */
+  bons: { id: string; statut: string | null; montantTtc: number | null; date: string | null; factureNumero: string | null; jetonBon: string | null; jetonFacture: string | null }[]
 }
 
 export interface DonneesOperation extends Operation {
@@ -271,13 +274,26 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
           return supabase.from('lots_stock').select('id,lot_id,utilise').in('lot_id', lotIds)
         })
       : Promise.resolve({ data: [] }),
-    /* Bons : ceux du commerce, et ceux rattaches aux events du pro (event_id). */
-    supabase.from('bons_commande').select('id,super_event_id,event_id,partenaire_id,montant_ttc,statut,created_at')
-      .or([
+    /* Bons : ceux du commerce, et ceux rattaches aux events du pro (event_id).
+       `jeton_public` (sql/2026-09-19-acces-public-bon-facture.sql) permet un
+       lien de consultation sans session admin -- colonne pas encore garantie
+       en prod tant que la migration n est pas appliquee (cette session n a
+       pas d acces a la base flowin-events) : repli sans elle si la colonne
+       n existe pas encore, pour ne jamais casser la liste des bons en
+       attendant. */
+    (async () => {
+      const filtre = [
         partenaireId ? `partenaire_id.eq.${partenaireId}` : '',
         evIds.length ? `event_id.in.(${evIds.map(i => `"${i}"`).join(',')})` : '',
-      ].filter(Boolean).join(',') || 'id.eq.__aucun__')
-      .order('created_at', { ascending: false }),
+      ].filter(Boolean).join(',') || 'id.eq.__aucun__'
+      const avecJeton = await supabase.from('bons_commande')
+        .select('id,super_event_id,event_id,partenaire_id,montant_ttc,statut,created_at,jeton_public')
+        .or(filtre).order('created_at', { ascending: false })
+      if (!avecJeton.error) return avecJeton
+      return supabase.from('bons_commande')
+        .select('id,super_event_id,event_id,partenaire_id,montant_ttc,statut,created_at')
+        .or(filtre).order('created_at', { ascending: false })
+    })(),
   ])
 
   /* Parties reelles, comptees dans `participations` : la colonne
@@ -298,7 +314,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     const l = stock.filter(x => x.lot_id && lotIds.has(x.lot_id))
     return l.length ? { total: l.length, dispo: l.filter(x => !x.utilise).length } : null
   }
-  const bons = (bonsRes.data ?? []) as { id: string; super_event_id: string | null; event_id: string | null; montant_ttc: number | null; statut: string | null; created_at: string | null }[]
+  const bons = (bonsRes.data ?? []) as { id: string; super_event_id: string | null; event_id: string | null; montant_ttc: number | null; statut: string | null; created_at: string | null; jeton_public?: string | null }[]
 
   /* Tirages : dedoublonnes par id (un tirage d event pris dans un super event
      remonte dans les deux requetes). */
@@ -325,12 +341,18 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
   }))
   tirages.sort((a, b) => String(b.date ?? '').localeCompare(String(a.date ?? '')) || (a.lotNom ?? '').localeCompare(b.lotNom ?? '', 'fr'))
 
-  /* Facture liee au bon le plus recent de chaque super event. */
-  const facturesParBon = new Map<string, { numero: string; date_emission: string | null }>()
+  /* Facture liee au bon le plus recent de chaque super event. Meme repli que
+     bons_commande ci-dessus si `jeton_public` n existe pas encore sur
+     `factures`. */
+  const facturesParBon = new Map<string, { numero: string; date_emission: string | null; jeton_public?: string | null }>()
   if (bons.length) {
-    const { data: facs } = await supabase.from('factures')
-      .select('numero,date_emission,client').in('client->>bon_id', bons.map(b => b.id))
-    ;((facs ?? []) as { numero: string; date_emission: string | null; client: { bon_id?: string } | null }[])
+    let facs = (await supabase.from('factures')
+      .select('numero,date_emission,client,jeton_public').in('client->>bon_id', bons.map(b => b.id))) as { data: unknown[] | null; error: unknown }
+    if (facs.error) {
+      facs = await supabase.from('factures')
+        .select('numero,date_emission,client').in('client->>bon_id', bons.map(b => b.id))
+    }
+    ;((facs.data ?? []) as { numero: string; date_emission: string | null; client: { bon_id?: string } | null; jeton_public?: string | null }[])
       .forEach(f => { const b = f.client?.bon_id; if (b && !facturesParBon.has(b)) facturesParBon.set(b, f) })
   }
 
@@ -362,7 +384,10 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
       || (op.type === 'super' && !bn.event_id && bn.super_event_id === op.id))
       .map(bn => {
         const f = facturesParBon.get(bn.id)
-        return { id: bn.id, statut: bn.statut, montantTtc: num(bn.montant_ttc), date: bn.created_at ? String(bn.created_at).slice(0, 10) : null, factureNumero: f?.numero ?? null }
+        return {
+          id: bn.id, statut: bn.statut, montantTtc: num(bn.montant_ttc), date: bn.created_at ? String(bn.created_at).slice(0, 10) : null,
+          factureNumero: f?.numero ?? null, jetonBon: bn.jeton_public ?? null, jetonFacture: f?.jeton_public ?? null,
+        }
       })
     const bon = bonsOp[0] ?? null
     const fac = bon ? facturesParBon.get(bon.id) : undefined

@@ -191,7 +191,24 @@ function AjustementStock({ lotId, onAjuste }: { lotId: string; onAjuste: (delta:
   )
 }
 
-export function ContenuLots({ op, partenaire, onChange }: { op: DonneesOperation; partenaire?: PartenaireMin | null; onChange?: () => void }) {
+/** Bouton "Gerer les lots" -- volontairement PAS dans le contenu repliable de
+ * ContenuLots (un bloc d operation est replie par defaut, cf. BlocOperation) :
+ * mis dans le `droite` de l en-tete via les onglets appelants, il reste visible
+ * meme replie. Romain (19/09) : « où est le modal ?? » -- introuvable la
+ * premiere fois car cache derriere le repli. */
+export function BoutonGererLots({ op, partenaire, onChange }: { op: DonneesOperation; partenaire?: PartenaireMin | null; onChange?: () => void }) {
+  const [ouvert, setOuvert] = useState(false)
+  return (
+    <>
+      <button onClick={() => setOuvert(true)} style={btnPrimaire}>⚙️ Gérer les lots</button>
+      {ouvert && (
+        <ModalGererLots op={op} partenaire={partenaire ?? null} onClose={() => setOuvert(false)} onChange={() => { setOuvert(false); onChange?.() }} />
+      )}
+    </>
+  )
+}
+
+export function ContenuLots({ op }: { op: DonneesOperation }) {
   const unites = op.lots.reduce((s, l) => s + l.quantite, 0)
   const valeur = op.lots.reduce((s, l) => s + (l.valeur ?? 0) * l.quantite, 0)
   const tires = op.gagnants.length
@@ -199,10 +216,6 @@ export function ContenuLots({ op, partenaire, onChange }: { op: DonneesOperation
   /* Ajustements locaux appliques apres un ecrit reussi -- evite de dependre
      d'un rechargement complet de l'operation pour voir le nouveau total. */
   const [ajustements, setAjustements] = useState<Record<string, number>>({})
-  /* Modal complet (Romain, 19/09) : valeur/conditions/type/stock/billet, un
-     seul endroit au lieu d eclate entre l assistant de creation, l ecran SA
-     "Regles de diffusion" et ce present bloc stock. */
-  const [modalOuvert, setModalOuvert] = useState(false)
   const stockAffiche = (l: LotOperation) => {
     if (!l.stock) return null
     const d = ajustements[l.id] ?? 0
@@ -220,11 +233,7 @@ export function ContenuLots({ op, partenaire, onChange }: { op: DonneesOperation
         {stockOpAffiche && <Mini v={`${stockOpAffiche.dispo} / ${stockOpAffiche.total}`} l="stock disponible" />}
         <Mini v={tires} l="tirés" />
         <Mini v={remis} l="remis" />
-        <button onClick={() => setModalOuvert(true)} style={{ ...btnPrimaire, marginLeft: 'auto' }}>⚙️ Gérer les lots</button>
       </div>
-      {modalOuvert && (
-        <ModalGererLots op={op} partenaire={partenaire ?? null} onClose={() => setModalOuvert(false)} onChange={() => { setModalOuvert(false); onChange?.() }} />
-      )}
       {op.lots.length === 0 && <Vide>Aucun lot sur cette opération.</Vide>}
       {op.lots.map(l => {
         const stock = stockAffiche(l)
@@ -617,8 +626,8 @@ export function OngletOperationsSA({ proId, onglet, onStation }: {
       {onglet === 'gagnants' && pt && <EncartPin pin={pt.code_pin} />}
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations).map(op => (
-        <BlocOperation key={op.cle} op={op}>
-          {onglet === 'lots' && <ContenuLots op={op} partenaire={pt} onChange={recharger} />}
+        <BlocOperation key={op.cle} op={op} droite={onglet === 'lots' ? <BoutonGererLots op={op} partenaire={pt} onChange={recharger} /> : undefined}>
+          {onglet === 'lots' && <ContenuLots op={op} />}
           {onglet === 'gagnants' && <ContenuGagnantsSA op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="sa" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="sa" partenaireId={pt?.id ?? null} onChange={recharger} />}
@@ -682,8 +691,8 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
     <>
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations, cle).map(op => (
-        <BlocOperation key={op.cle} op={op} droite={<SupprimerOperationBtn op={op} onSupprime={recharger} />}>
-          {onglet === 'lots' && <ContenuLots op={op} partenaire={pt} onChange={recharger} />}
+        <BlocOperation key={op.cle} op={op} droite={<>{onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} />}<SupprimerOperationBtn op={op} onSupprime={recharger} /></>}>
+          {onglet === 'lots' && <ContenuLots op={op} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} masquerGlobal />}

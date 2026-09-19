@@ -580,11 +580,13 @@ function exportPdf(){
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  var JETON_PUBLIC=(function(){var m=new RegExp('[?&]jeton=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null;})();
+  var MODE_JETON=!!(JETON_PUBLIC&&/[?&]id=/.test(location.search));
   // ---- Sécurité admin : session requise, avec rafraîchissement automatique du token
-  // (identique à dashboard.html) ----
+  // (identique à dashboard.html), SAUF en mode jeton public (lecture seule) ----
   var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
-  if(!_S||!_S.access_token){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
-  var AUTH=_S.access_token;
+  if(!MODE_JETON&&(!_S||!_S.access_token)){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
+  var AUTH=(_S&&_S.access_token)||KEY;
   function _saveSess(d){
     _S={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
     AUTH=d.access_token; localStorage.setItem('flowin_admin_session',JSON.stringify(_S));
@@ -596,6 +598,7 @@ function exportPdf(){
       .catch(function(){ return false; });
   }
   function _ensureFreshToken(){
+    if(!_S) return Promise.resolve(true);
     var margin=5*60;
     if(!_S.expires_at || (_S.expires_at - Math.floor(Date.now()/1000)) < margin){ return _authRefresh(); }
     return Promise.resolve(true);
@@ -800,7 +803,7 @@ function exportPdf(){
   // --- Mode lecture (?id=) : charge le doc rempli + signe ---
   var viewId=qs('id');
   (function(){ var _fid=qs('id'); if(_fid){ ['factureBtn','factureBtnV'].forEach(function(bid){ var b=document.getElementById(bid); if(b) b.href='/facture-nds.html?devis='+encodeURIComponent(_fid); }); } })();
-  var EDIT_MODE=!!(viewId && qs('edit')==='1');
+  var EDIT_MODE=!MODE_JETON&&!!(viewId && qs('edit')==='1'); // un lien a jeton n edite jamais, quel que soit &edit=
   var prefillSlug = (!viewId) ? qs('prefill') : null;
   function fillEditable(d){
     if($('docNum')){ $('docNum').value=d.id; if($('payRef')) $('payRef').textContent=d.id; }
@@ -860,10 +863,15 @@ function exportPdf(){
       }).catch(function(){ setStatus('Pr\u00e9-remplissage indisponible \u2014 remplis manuellement.','err'); });
   }
   if(viewId){
-    fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}})
-      .then(function(r){ return r.json(); })
+    /* Acces public par jeton (19/09) : passe par la RPC bon_commande_public
+       (SECURITY DEFINER), jamais par la table directement -- meme principe
+       que facture-nds.html. */
+    var _pBon=MODE_JETON
+      ? fetch(SUPA+'/rest/v1/rpc/bon_commande_public',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_id:viewId,p_jeton:JETON_PUBLIC})})
+      : fetch(SUPA+'/rest/v1/bons_commande?id=eq.'+encodeURIComponent(viewId)+'&select=*',{headers:{'apikey':KEY,'Authorization':'Bearer '+AUTH}});
+    _pBon.then(function(r){ return r.json(); })
       .then(function(rows){
-        if(!rows||!rows.length){ setStatus('Bon de commande introuvable.','err'); return; }
+        if(!rows||!rows.length){ setStatus(MODE_JETON?'Lien invalide ou expiré.':'Bon de commande introuvable.','err'); return; }
         var d=rows[0];
         if(EDIT_MODE){ fillEditable(d); return; }
         document.body.className+=' viewmode';

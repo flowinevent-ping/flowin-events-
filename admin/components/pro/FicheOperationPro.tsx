@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import { fetchOperationsPro, libelleDates, libelleModule, type OperationsPro } from '@/lib/operations'
 import { ONGLETS_OP, LIBELLE_PERIODE, periodeOperation, type OngletOp } from '@/lib/ongletsOperation'
-import { ContenuLots, ContenuComm, ContenuContrat, ContenuTracking } from '@/components/operations/BlocsOperations'
+import { ContenuLots, BoutonGererLots, ContenuComm, ContenuContrat, ContenuTracking } from '@/components/operations/BlocsOperations'
 import CrmPro from '@/components/pro/CrmPro'
 import type { ContactPro } from '@/lib/crmPro'
 import { BlocGagnants } from '@/components/pro/GagnantsClient'
@@ -100,7 +100,10 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
       </div>
 
       <div style={{ ...CARD, padding: 16 }}>
-        <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>{ONGLETS_OP.find(o => o.id === onglet)?.label}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <div style={{ fontSize: 16, fontWeight: 800, flex: 1 }}>{ONGLETS_OP.find(o => o.id === onglet)?.label}</div>
+          {onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} />}
+        </div>
 
         {onglet === 'jeu' && st && (
           <div>
@@ -116,7 +119,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
             <ParcoursMobil events={op.stations.map(s => ({ id: s.id, module: s.module, nom: s.nom, super_event_id: s.super_event_id }))} showTitle={false} />
           </div>
         )}
-        {onglet === 'lots' && <ContenuLots op={op} partenaire={pt} onChange={recharger} />}
+        {onglet === 'lots' && <ContenuLots op={op} />}
         {onglet === 'diffusion' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}

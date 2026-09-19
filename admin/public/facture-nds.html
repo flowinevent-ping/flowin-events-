@@ -370,11 +370,21 @@
 (function(){
   var SUPA='https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY='sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
+  function qs(n){ var m=new RegExp('[?&]'+n+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
+  /* Acces public par jeton (19/09) : un vrai pro n a pas de session admin
+     dans son navigateur -- sans ca, TOUT visiteur sans session atterrissait
+     sur la connexion SA avant meme de voir la facture en lecture seule
+     (« la facture... renvoie vers accès SA », Romain). Un lien ?num=...&jeton=...
+     (genere par ListeFactures.tsx une fois sql/2026-09-19-acces-public-bon-facture.sql
+     applique) passe par la RPC facture_publique (SECURITY DEFINER), jamais par
+     la table directement -- aucune ouverture de la table en lecture publique. */
+  var JETON_PUBLIC=qs('jeton');
+  var MODE_JETON=!!(JETON_PUBLIC&&qs('num'));
   // ---- Sécurité admin : session requise, avec rafraîchissement automatique du token
-  // (identique à dashboard.html) ----
+  // (identique à dashboard.html), SAUF en mode jeton public (lecture seule) ----
   var _S=(function(){try{return JSON.parse(localStorage.getItem('flowin_admin_session')||'null');}catch(e){return null;}})();
-  if(!_S||!_S.access_token){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
-  var AUTH=_S.access_token;
+  if(!MODE_JETON&&(!_S||!_S.access_token)){ location.replace('/admin-connexion.html?next='+encodeURIComponent(location.pathname+location.search)); throw new Error('redir-login'); }
+  var AUTH=(_S&&_S.access_token)||KEY;
   function _saveSess(d){
     _S={access_token:d.access_token,refresh_token:d.refresh_token,expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600))};
     AUTH=d.access_token; localStorage.setItem('flowin_admin_session',JSON.stringify(_S));
@@ -388,12 +398,12 @@
     }catch(e){ return false; }
   }
   async function _ensureFreshToken(){
+    if(!_S) return; // mode jeton public : pas de session a rafraichir
     var margin=5*60;
     if(!_S.expires_at || (_S.expires_at - Math.floor(Date.now()/1000)) < margin){ await _authRefresh(); }
   }
   function H(){ return {'apikey':KEY,'Authorization':'Bearer '+AUTH}; }
   function $(id){return document.getElementById(id);}
-  function qs(n){ var m=new RegExp('[?&]'+n+'=([^&]+)').exec(location.search); return m?decodeURIComponent(m[1]):null; }
   /* « quand on clique sur Dashboard on revient sur le dashboard SA, ça ne
      revient pas à la page précédente comme ça devrait être le cas » (Romain,
      18/09) -- ce lien etait un href fixe vers /dashboard. Retour a la page
@@ -533,9 +543,11 @@
     for(var i=0;i<champs.length;i++){ champs[i].setAttribute('readonly','readonly'); }
   }
   if(num){
-    fetch(SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(num)+'&select=*',{headers:H()})
-      .then(function(r){return r.json();})
-      .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); if(qs('edit')!=='1'){ verrouillerLecture(); } if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } } else { setStatus('Facture introuvable.','err'); } });
+    var _p=MODE_JETON
+      ? fetch(SUPA+'/rest/v1/rpc/facture_publique',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H()),body:JSON.stringify({p_numero:num,p_jeton:JETON_PUBLIC})})
+      : fetch(SUPA+'/rest/v1/factures?numero=eq.'+encodeURIComponent(num)+'&select=*',{headers:H()});
+    _p.then(function(r){return r.json();})
+      .then(function(rows){ if(rows&&rows.length){ fromFacture(rows[0]); if(MODE_JETON||qs('edit')!=='1'){ verrouillerLecture(); } if(qs('dl')){ setTimeout(function(){ try{ exportPdf(); }catch(e){} }, 900); } } else { setStatus(MODE_JETON?'Lien invalide ou expiré.':'Facture introuvable.','err'); } });
   } else if(devis){
     // existe-t-il deja une facture pour ce devis ? sinon on la prepare depuis le bon
     fetch(SUPA+'/rest/v1/factures?client->>bon_id=eq.'+encodeURIComponent(devis)+'&select=*&order=numero.desc',{headers:H()})

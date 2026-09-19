@@ -67,14 +67,19 @@ function construireLignes(operations: DonneesOperation[]): Ligne[] {
       continue
     }
     for (const bn of c.bons) {
+      /* Acces sans session admin (19/09) : un vrai pro n a pas de session SA
+         dans son navigateur -- sans jeton, la page redirige vers la connexion
+         SA avant meme d atteindre la vue lecture seule (« la facture...
+         renvoie vers accès SA », Romain). Le jeton est null tant que
+         sql/2026-09-19-acces-public-bon-facture.sql n est pas applique : le
+         lien reste alors celui d avant (fonctionne seulement pour un
+         visiteur qui a deja une session SA, ex. Romain lui-meme). */
       out.push({
         cleLigne: `${op.cle}:${bn.id}`, opNom: op.nom, opDates: libelleDates(op.dateD, op.dateF),
         date: bn.date, montant: bn.montantTtc ?? c.montant, paye,
         bonId: bn.id, factureNumero: bn.factureNumero,
-        /* Vue seule -- ?id=/?num= sans &edit=1 (verrou ajoute le 18/09 sur
-           facture-nds.html, deja en place sur bon-commande-nds.html). */
-        lienBon: `/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}`,
-        lienFacture: bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}` : null,
+        lienBon: `/bon-commande-nds.html?id=${encodeURIComponent(bn.id)}${bn.jetonBon ? `&jeton=${encodeURIComponent(bn.jetonBon)}` : ''}`,
+        lienFacture: bn.factureNumero ? `/facture-nds.html?num=${encodeURIComponent(bn.factureNumero)}${bn.jetonFacture ? `&jeton=${encodeURIComponent(bn.jetonFacture)}` : ''}` : null,
       })
     }
   }
