@@ -1,10 +1,10 @@
 -- 19/09/2026 — Accès public en lecture seule à UN bon de commande / UNE
 -- facture, par jeton, sans session admin.
--- NON APPLIQUÉ EN PROD -- cette session n'a pas d'accès Supabase au projet
--- flowin-events (ywcqtupgoxfzkddqkztk). À exécuter via Supabase MCP/dashboard
--- par une session qui y a accès, PUIS voir la todo de code associée (liens
--- ListeFactures.tsx + gate facture-nds.html/bon-commande-nds.html, déjà
--- poussés, mais inertes tant que ce fichier n'est pas appliqué).
+-- APPLIQUÉ EN PROD le 19/09/2026 (projet flowin-events, ywcqtupgoxfzkddqkztk)
+-- via Supabase MCP -- confirmé : 0 bon/facture sans jeton, les deux RPC
+-- existent. Le code (ListeFactures.tsx + gate facture-nds.html/
+-- bon-commande-nds.html) était déjà en prod et attendait cette migration ;
+-- il est désormais actif de bout en bout.
 --
 -- CE QUE ROMAIN A REPÉRÉ (19/09) : « la facture est modifiable et renvoie
 -- vers accès SA ». Diagnostic réel après lecture du code (pas une supposition) :

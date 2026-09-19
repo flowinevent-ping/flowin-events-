@@ -1,7 +1,9 @@
 -- 19/09/2026 — CRM Participants : LEFT JOIN sur `events` (au lieu d'INNER).
--- NON APPLIQUE EN PROD -- cette session n'a pas d'acces Supabase au projet
--- flowin-events (ywcqtupgoxfzkddqkztk). A executer via Supabase MCP/dashboard
--- par une session qui y a acces.
+-- APPLIQUE EN PROD le 19/09/2026 (projet flowin-events, ywcqtupgoxfzkddqkztk)
+-- via Supabase MCP. Verification prealable (requete ci-dessous) : aucune
+-- participation orpheline aujourd'hui -- pas de sous-comptage actif, cette
+-- migration est une securite pour l'avenir (une station supprimee plus tard
+-- ne fera plus disparaitre ses participations du CRM).
 --
 -- Romain (19/09) : « je veux voir les gagnants, il y avait des participants
 -- qui ont joue 10/15/20 fois ou plus, il y a une erreur ». Un des deux sujets
