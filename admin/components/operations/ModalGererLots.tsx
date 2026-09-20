@@ -244,7 +244,6 @@ function CarteLot({ l, enSuperEvent, stockInfo, dAjust, onAjuste, maj, op, stati
   op: DonneesOperation; station: DonneesOperation['stations'][number]; partenaire: PartenaireMin | null; billets: GagnantOperation[]
 }) {
   const [ouvert, setOuvert] = useState(false)
-  const [apercu, setApercu] = useState(false)
   const nonRetires = billets.filter(g => g.etat !== 'retire').length
   const accent = enSuperEvent ? ACCENT_SUPER : ACCENT_ANIM
   const typeLabel = enSuperEvent ? 'Tirage au sort' : (estInstant(l.note) ? 'Gain immédiat' : 'Tirage au sort')
@@ -272,64 +271,74 @@ function CarteLot({ l, enSuperEvent, stockInfo, dAjust, onAjuste, maj, op, stati
       </button>
 
       {ouvert && (
-        <div style={{ padding: '0 12px 12px' }}>
-          <SousTitre>Paramètres</SousTitre>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
-            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Nom
-              <input value={l.nom ?? ''} onChange={e => maj(l.id, 'nom', e.target.value)}
-                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-            </label>
-            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Valeur (€)
-              <input type="number" min={0} value={l.valeur ?? 0} onChange={e => maj(l.id, 'valeur', parseFloat(e.target.value) || 0)}
-                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-            </label>
-            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Quantité
-              <input type="number" min={1} value={l.quantite ?? 1} onChange={e => maj(l.id, 'quantite', Math.max(1, parseInt(e.target.value) || 1))}
-                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-            </label>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: enSuperEvent ? '1fr' : '2fr 1fr', gap: 8 }}>
-            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Conditions d&apos;utilisation
-              <input value={l.conditions ?? ''} onChange={e => maj(l.id, 'conditions', e.target.value || null)} placeholder="ex. Valable sur présentation du billet, non cumulable"
-                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-            </label>
-            {!enSuperEvent && (
-              <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Type
-                <select value={estInstant(l.note) ? 'instantane' : 'tirage'} onChange={e => maj(l.id, 'note', e.target.value === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort')}
-                  style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}>
-                  <option value="tirage">Tirage au sort</option>
-                  <option value="instantane">Gain immédiat</option>
-                </select>
-              </label>
-            )}
-          </div>
-          {enSuperEvent && <div style={{ fontSize: 11, color: MUT, marginTop: 6 }}>Station de super event : tirage au sort uniquement, non modifiable ici.</div>}
+        <div style={{ padding: '0 12px 14px' }}>
+          {/* Reglages a gauche, distribution (le vrai billet, en direct) a
+              droite -- Romain (20/09) : « on doit pouvoir publier des lots,
+              donner la quantite, les conditions, ET voir la distribution --
+              fais une simulation si tu veux ». Le billet n etait avant que
+              derriere un bouton "Apercu" ; il est maintenant toujours visible
+              et se met a jour en direct pendant la saisie, pour voir tout de
+              suite ce que le gagnant recevra. */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.3fr) minmax(220px,1fr)', gap: 20 }}>
+            <div>
+              <SousTitre>Paramètres</SousTitre>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
+                <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Nom
+                  <input value={l.nom ?? ''} onChange={e => maj(l.id, 'nom', e.target.value)}
+                    style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                </label>
+                <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Valeur (€)
+                  <input type="number" min={0} value={l.valeur ?? 0} onChange={e => maj(l.id, 'valeur', parseFloat(e.target.value) || 0)}
+                    style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                </label>
+                <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Quantité
+                  <input type="number" min={1} value={l.quantite ?? 1} onChange={e => maj(l.id, 'quantite', Math.max(1, parseInt(e.target.value) || 1))}
+                    style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                </label>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: enSuperEvent ? '1fr' : '2fr 1fr', gap: 8 }}>
+                <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Conditions d&apos;utilisation
+                  <input value={l.conditions ?? ''} onChange={e => maj(l.id, 'conditions', e.target.value || null)} placeholder="ex. Valable sur présentation du billet, non cumulable"
+                    style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                </label>
+                {!enSuperEvent && (
+                  <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Type
+                    <select value={estInstant(l.note) ? 'instantane' : 'tirage'} onChange={e => maj(l.id, 'note', e.target.value === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort')}
+                      style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}>
+                      <option value="tirage">Tirage au sort</option>
+                      <option value="instantane">Gain immédiat</option>
+                    </select>
+                  </label>
+                )}
+              </div>
+              {enSuperEvent && <div style={{ fontSize: 11, color: MUT, marginTop: 6 }}>Station de super event : tirage au sort uniquement, non modifiable ici.</div>}
 
-          <SousTitre>Stock &amp; billet</SousTitre>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            {stockInfo ? (
-              <AjustementStockLigne lotId={l.id} dispo={stockInfo.dispo + dAjust} total={stockInfo.total + dAjust} onAjuste={onAjuste} />
-            ) : (
-              <span style={{ fontSize: 11, color: MUT }}>Pas de stock unitaire géré pour ce lot — quantité déclarative uniquement.</span>
-            )}
-            <button onClick={() => setApercu(a => !a)}
-              style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 99, padding: '4px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', color: ACC }}>
-              🎫 {apercu ? 'Masquer le billet' : 'Aperçu du billet'}
-            </button>
-          </div>
-          {apercu && (
-            <div style={{ marginTop: 10 }}>
-              <BilletApercu
-                commerce={partenaire?.nom ?? 'Votre commerce'}
-                lot={(l.nom ?? '').trim() || 'Lot'} valeur={l.valeur ?? 0} conditions={l.conditions}
-                operation={op.type === 'super' ? op.id : station.id} operationNom={op.nom}
-                hauteur={520}
-              />
+              <SousTitre>Stock</SousTitre>
+              {stockInfo ? (
+                <AjustementStockLigne lotId={l.id} dispo={stockInfo.dispo + dAjust} total={stockInfo.total + dAjust} onAjuste={onAjuste} />
+              ) : (
+                <span style={{ fontSize: 11, color: MUT }}>Pas de stock unitaire géré pour ce lot — quantité déclarative uniquement.</span>
+              )}
             </div>
-          )}
 
-          <SousTitre>Gagnants</SousTitre>
-          <PanneauGagnants billets={billets} opNom={op.nom} />
+            <div>
+              <SousTitre>Distribution — ce que le gagnant reçoit</SousTitre>
+              <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, overflow: 'hidden', background: '#fff' }}>
+                <BilletApercu
+                  commerce={partenaire?.nom ?? 'Votre commerce'}
+                  lot={(l.nom ?? '').trim() || 'Lot'} valeur={l.valeur ?? 0} conditions={l.conditions}
+                  operation={op.type === 'super' ? op.id : station.id} operationNom={op.nom}
+                  hauteur={360}
+                />
+              </div>
+              <div style={{ fontSize: 10.5, color: MUT, marginTop: 4 }}>Simulation en direct — se met à jour pendant la saisie.</div>
+            </div>
+          </div>
+
+          <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 12, marginTop: 14, background: '#fff' }}>
+            <SousTitre>Gagnants — contacter ceux qui ont utilisé ou non leur lot</SousTitre>
+            <PanneauGagnants billets={billets} opNom={op.nom} />
+          </div>
         </div>
       )}
     </div>
