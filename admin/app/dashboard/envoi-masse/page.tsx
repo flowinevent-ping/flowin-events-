@@ -19,8 +19,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
-
-const TAILLE_LOT = 40
+import { lienGmailBcc, lienWhatsApp, lotsEmail, TAILLE_LOT_EMAIL as TAILLE_LOT } from '@/lib/messaging'
 
 /* Meme etat a 3 valeurs que app/dashboard/gagnants/page.tsx -- ne pas
    reinventer un autre vocabulaire (Romain, 19/09 : « il faut le complet
@@ -31,16 +30,6 @@ function etatDe(t: GagnantRow): EtatGagnant {
   if (t.retire_at) return 'retire'
   if (t.notifie_at) return 'confirme'
   return 'a_confirmer'
-}
-
-/* Normalise un numero FR pour un lien wa.me (E.164 sans le "+") :
-   "06 12 34 56 78" -> "33612345678". Best-effort, jamais bloquant : un
-   numero deja international ou mal forme part tel quel. */
-function telWhatsApp(tel: string): string {
-  const digits = tel.replace(/[^\d+]/g, '')
-  if (digits.startsWith('+')) return digits.slice(1)
-  if (digits.startsWith('0')) return '33' + digits.slice(1)
-  return digits
 }
 
 export default function Page() {
@@ -82,21 +71,10 @@ export default function Page() {
     return l
   }, [joueurs, filtreOptin, source, statutGagnant, etatsParJoueur, q, canal])
 
-  const lots = useMemo(() => {
-    if (canal !== 'email') return []
-    const out: string[][] = []
-    for (let i = 0; i < destinataires.length; i += TAILLE_LOT) {
-      out.push(destinataires.slice(i, i + TAILLE_LOT).map(j => j.email))
-    }
-    return out
-  }, [destinataires, canal])
+  const lots = useMemo(() => (canal === 'email' ? lotsEmail(destinataires, j => j.email) : []), [destinataires, canal])
 
   function lienGmailLot(bccList: string[]): string {
-    return `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(bccList.join(','))}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
-  }
-
-  function lienWhatsApp(tel: string): string {
-    return `https://wa.me/${telWhatsApp(tel)}?text=${encodeURIComponent(message)}`
+    return lienGmailBcc(bccList, objet, message)
   }
 
   function exporterCsv() {
@@ -257,7 +235,7 @@ export default function Page() {
                   {destinataires.slice(0, 200).map(j => (
                     <a
                       key={j.id}
-                      href={lienWhatsApp(j.tel!)}
+                      href={lienWhatsApp(j.tel!, message)}
                       target="_blank" rel="noreferrer"
                       className="sa-btn sm"
                       style={{ textDecoration: 'none', justifyContent: 'space-between', display: 'flex' }}
