@@ -17,18 +17,32 @@
  * Un lot vit dans `lots`, sur sa station (event_id), meme pour un super event
  * (referentiel 29) -- cf. ReglesDiffusion.tsx. Verrouille en tirage au sort
  * pour toute station de super event (regle deja en vigueur, reprise ici).
+ *
+ * REDESIGN (Romain, 20/09) : « il y a beaucoup d'informations et ce n'est pas
+ * très intuitif [...] il manque surtout la visualisation des gagnants avec
+ * les bons utilisés et non utilisés [...] pouvoir relancer les gagnants qui
+ * n'ont pas utilisé les bons et remercier les autres ». Chaque lot est
+ * maintenant une carte repliée par defaut (resume : nom, valeur, stock,
+ * gagnants) qui s'ouvre sur 3 blocs distincts -- Paramètres / Stock & billet /
+ * Gagnants -- au lieu d'un unique formulaire toujours deploye. Le bloc
+ * Gagnants ajoute ce qui manquait : compteur utilisés/non utilisés, selection,
+ * et un texte de relance/remerciement personnalisable ({prenom}/{lien}),
+ * envoye via les memes liens Gmail/WhatsApp prerempli que partout ailleurs
+ * dans l'app (aucun envoi serveur).
  */
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { DonneesOperation, PartenaireMin } from '@/lib/operations'
+import type { DonneesOperation, PartenaireMin, GagnantOperation } from '@/lib/operations'
 import BilletApercu from '@/components/parcours/BilletApercu'
 import { ajouterStock, retirerStock } from '@/lib/stock'
+import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
 const CARDBG = 'var(--sa-card, #FFFFFF)'
 const ACC = 'var(--sa-accent, #2563EB)'
+const BASE = 'https://flowin-events.vercel.app'
 
 interface LotLigne {
   id: string; event_id: string; nom: string | null; titre: string | null
@@ -70,13 +84,248 @@ function AjustementStockLigne({ lotId, dispo, total, onAjuste }: { lotId: string
   )
 }
 
+/* Petit intitulé de sous-section, identique pour Paramètres / Stock & billet /
+   Gagnants -- meme hierarchie visuelle partout dans la carte d un lot. */
+function SousTitre({ children }: { children: React.ReactNode }) {
+  return <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', letterSpacing: '.04em', margin: '12px 0 6px' }}>{children}</div>
+}
+
+function badgeStyle(couleur: 'gris' | 'ambre' | 'vert'): React.CSSProperties {
+  const c = { gris: ['#64748B', 'rgba(100,116,139,.1)'], ambre: ['#B45309', 'rgba(245,158,11,.13)'], vert: ['#15803D', 'rgba(34,197,94,.1)'] }[couleur]
+  return { fontSize: 11, fontWeight: 800, color: c[0], background: c[1], borderRadius: 99, padding: '3px 9px', whiteSpace: 'nowrap' }
+}
+
+/* Le vrai lien du billet (celui du gagnant, pas l apercu) -- meme URL que
+   GagnantsClient/ParcoursOutro ("voir le billet"). */
+const lienBillet = (token: string | null) => token ? `${BASE}/nds/billets-partenaires.html?t=${encodeURIComponent(token)}` : ''
+
+/* {prenom}/{lot}/{lien} remplaces par personnaliser() -- un seul texte modifiable
+   sert a tout le monde, chacun reçoit sa propre version (prenom + son billet). */
+const texteRelanceParDefaut = (opNom: string) =>
+  `Bonjour {prenom},\n\nVous avez gagné « {lot} » lors de ${opNom} — merci d'avoir joué !\nNous n'avons pas encore de vos nouvelles pour le retrait : présentez-vous en boutique dès que possible pour en profiter.\n{lien}\n\nÀ très vite !`
+const texteMerciParDefaut = (opNom: string) =>
+  `Bonjour {prenom},\n\nMerci d'être passé récupérer « {lot} » lors de ${opNom} ! Nous espérons que ça vous a plu.\n\nÀ très vite pour de nouvelles animations !`
+
+function personnaliser(texte: string, g: GagnantOperation): string {
+  const prenom = (g.joueurNom ?? '').trim().split(/\s+/)[0] || 'à vous'
+  const lien = lienBillet(g.retraitToken)
+  return texte
+    .replace(/\{prenom\}/g, prenom)
+    .replace(/\{lot\}/g, g.lotNom ?? 'ce lot')
+    .replace(/\{lien\}/g, lien ? `Votre billet : ${lien}` : '')
+}
+
+/** Bloc gagnants d'un lot : compteur utilisés/non utilisés, selection,
+ *  relance/remerciement personnalisable, envoye en liens individuels
+ *  (Gmail "to:" / WhatsApp) -- jamais de BCC ici, chaque texte est different
+ *  d une personne a l autre (prenom, lien de billet). */
+function PanneauGagnants({ billets, opNom }: { billets: GagnantOperation[]; opNom: string }) {
+  const [selection, setSelection] = useState<Record<number, boolean>>({})
+  const [canal, setCanal] = useState<'email' | 'whatsapp'>('email')
+  const [objet, setObjet] = useState('')
+  const [texte, setTexte] = useState('')
+
+  const nonRetires = billets.filter(g => g.etat !== 'retire')
+  const retires = billets.filter(g => g.etat === 'retire')
+  const selectionnes = billets.filter(g => selection[g.id])
+
+  function basculer(id: number) {
+    setSelection(s => ({ ...s, [id]: !s[id] }))
+  }
+  function selectionnerGroupe(groupe: GagnantOperation[], objetParDefaut: string, texteParDefaut: string) {
+    const m: Record<number, boolean> = {}
+    groupe.forEach(g => { m[g.id] = true })
+    setSelection(m)
+    setObjet(objetParDefaut)
+    setTexte(texteParDefaut)
+  }
+
+  if (billets.length === 0) {
+    return <div style={{ fontSize: 12, color: MUT }}>Aucun gagnant sur ce lot pour l&apos;instant.</div>
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+        <span style={badgeStyle('gris')}>{billets.length} gagnant{billets.length > 1 ? 's' : ''}</span>
+        {nonRetires.length > 0 && <span style={badgeStyle('ambre')}>⏳ {nonRetires.length} à relancer</span>}
+        {retires.length > 0 && <span style={badgeStyle('vert')}>✅ {retires.length} utilisé{retires.length > 1 ? 's' : ''}</span>}
+      </div>
+
+      <div style={{ maxHeight: 180, overflowY: 'auto', border: `1px solid ${BRD}`, borderRadius: 8 }}>
+        {billets.map(g => (
+          <label key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 9px', borderTop: `1px solid ${BRD}`, fontSize: 12, cursor: 'pointer' }}>
+            <input type="checkbox" checked={!!selection[g.id]} onChange={() => basculer(g.id)} />
+            <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <b>{g.joueurNom ?? 'Joueur'}</b>
+              <span style={{ color: MUT }}> — {g.etat === 'retire' ? '✅ utilisé' : g.etat === 'confirme' ? '📞 confirmé, à retirer' : '⏳ à confirmer'}</span>
+            </span>
+            {g.retireAt && <span style={{ color: MUT, fontSize: 11 }}>{new Date(g.retireAt).toLocaleDateString('fr-FR')}</span>}
+          </label>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+        <button
+          style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
+          disabled={!nonRetires.length}
+          onClick={() => selectionnerGroupe(nonRetires, `Votre lot vous attend — ${opNom}`, texteRelanceParDefaut(opNom))}>
+          📣 Relancer les non utilisés ({nonRetires.length})
+        </button>
+        <button
+          style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
+          disabled={!retires.length}
+          onClick={() => selectionnerGroupe(retires, `Merci d'avoir joué — ${opNom}`, texteMerciParDefaut(opNom))}>
+          🙏 Remercier ceux qui ont utilisé ({retires.length})
+        </button>
+        {selectionnes.length > 0 && (
+          <button style={{ border: 'none', background: 'none', color: MUT, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline' }}
+            onClick={() => setSelection({})}>Tout désélectionner</button>
+        )}
+      </div>
+
+      {selectionnes.length > 0 && (
+        <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 10, marginTop: 8, background: SUBT }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <button type="button" onClick={() => setCanal('email')}
+              style={{ border: `1px solid ${BRD}`, background: canal === 'email' ? ACC : '#fff', color: canal === 'email' ? '#fff' : '#0F172A', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>✉️ Email</button>
+            <button type="button" onClick={() => setCanal('whatsapp')}
+              style={{ border: `1px solid ${BRD}`, background: canal === 'whatsapp' ? ACC : '#fff', color: canal === 'whatsapp' ? '#fff' : '#0F172A', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>💬 WhatsApp</button>
+          </div>
+          {canal === 'email' && (
+            <input value={objet} onChange={e => setObjet(e.target.value)} placeholder="Objet"
+              style={{ display: 'block', width: '100%', marginBottom: 6, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+          )}
+          <textarea value={texte} onChange={e => setTexte(e.target.value)} rows={5}
+            style={{ display: 'block', width: '100%', border: `1px solid ${BRD}`, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', resize: 'vertical' }} />
+          <div style={{ fontSize: 10.5, color: MUT, margin: '4px 0 8px' }}>
+            {'{prenom}'}, {'{lot}'} et {'{lien}'} (lien du billet) sont remplacés automatiquement pour chaque gagnant — le texte est différent pour chacun, pas d&apos;envoi groupé identique.
+          </div>
+
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', marginBottom: 4 }}>
+            {canal === 'email' ? 'Un lien par personne (aucun envoi automatique) :' : 'Une conversation par personne :'}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 160, overflowY: 'auto' }}>
+            {selectionnes.map(g => {
+              const dispo = canal === 'email' ? !!g.joueurEmail : !!g.joueurTel
+              if (!dispo) {
+                return <span key={g.id} style={{ fontSize: 11.5, color: MUT }}>{g.joueurNom ?? 'Joueur'} — {canal === 'email' ? 'pas d’email' : 'pas de téléphone'} connu.</span>
+              }
+              const href = canal === 'email'
+                ? lienGmailTo(g.joueurEmail!, objet, personnaliser(texte, g))
+                : lienWhatsApp(g.joueurTel!, personnaliser(texte, g))
+              return (
+                <a key={g.id} href={href} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'flex', justifyContent: 'space-between', border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 9px', fontSize: 12, textDecoration: 'none', color: '#0F172A' }}>
+                  <span>{canal === 'email' ? '✉️' : '💬'} {g.joueurNom ?? 'Joueur'}</span>
+                  <span style={{ color: MUT }}>{canal === 'email' ? g.joueurEmail : g.joueurTel}</span>
+                </a>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Une carte de lot, repliee par defaut : un resume cliquable, puis 3 blocs
+ *  (Parametres / Stock & billet / Gagnants) une fois ouverte. */
+function CarteLot({ l, enSuperEvent, stockInfo, dAjust, onAjuste, maj, op, station, partenaire, billets }: {
+  l: LotLigne; enSuperEvent: boolean; stockInfo: { total: number; dispo: number } | undefined; dAjust: number
+  onAjuste: (delta: number) => void; maj: (id: string, champ: keyof LotLigne, v: string | number | null) => void
+  op: DonneesOperation; station: DonneesOperation['stations'][number]; partenaire: PartenaireMin | null; billets: GagnantOperation[]
+}) {
+  const [ouvert, setOuvert] = useState(false)
+  const [apercu, setApercu] = useState(false)
+  const nonRetires = billets.filter(g => g.etat !== 'retire').length
+
+  return (
+    <div style={{ border: `1px solid ${BRD}`, borderRadius: 12, marginBottom: 10, background: SUBT, overflow: 'hidden' }}>
+      <button onClick={() => setOuvert(o => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', padding: 12, fontFamily: 'inherit' }}>
+        <span style={{ fontSize: 11, color: MUT, transform: ouvert ? 'rotate(90deg)' : 'none', transition: 'transform .12s', flexShrink: 0 }}>▶</span>
+        <span style={{ flex: 1, minWidth: 140, fontWeight: 800, fontSize: 13.5 }}>{(l.nom ?? '').trim() || 'Nouveau lot'}</span>
+        <span style={badgeStyle('gris')}>{(l.valeur ?? 0).toLocaleString('fr-FR')} €</span>
+        <span style={badgeStyle('gris')}>× {l.quantite ?? 1}</span>
+        {enSuperEvent
+          ? <span style={badgeStyle('gris')}>🔒 tirage au sort</span>
+          : <span style={badgeStyle('gris')}>{estInstant(l.note) ? '⚡ instantané' : '🎟️ tirage au sort'}</span>}
+        {stockInfo && <span style={badgeStyle((stockInfo.dispo + dAjust) > 0 ? 'vert' : 'ambre')}>stock {stockInfo.dispo + dAjust}/{stockInfo.total + dAjust}</span>}
+        {billets.length > 0 && <span style={badgeStyle(nonRetires > 0 ? 'ambre' : 'vert')}>🏆 {billets.length}{nonRetires > 0 ? ` · ${nonRetires} à relancer` : ''}</span>}
+      </button>
+
+      {ouvert && (
+        <div style={{ padding: '0 12px 12px' }}>
+          <SousTitre>Paramètres</SousTitre>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
+            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Nom
+              <input value={l.nom ?? ''} onChange={e => maj(l.id, 'nom', e.target.value)}
+                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            </label>
+            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Valeur (€)
+              <input type="number" min={0} value={l.valeur ?? 0} onChange={e => maj(l.id, 'valeur', parseFloat(e.target.value) || 0)}
+                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            </label>
+            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Quantité
+              <input type="number" min={1} value={l.quantite ?? 1} onChange={e => maj(l.id, 'quantite', Math.max(1, parseInt(e.target.value) || 1))}
+                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            </label>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: enSuperEvent ? '1fr' : '2fr 1fr', gap: 8 }}>
+            <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Conditions d&apos;utilisation
+              <input value={l.conditions ?? ''} onChange={e => maj(l.id, 'conditions', e.target.value || null)} placeholder="ex. Valable sur présentation du billet, non cumulable"
+                style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            </label>
+            {!enSuperEvent && (
+              <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Type
+                <select value={estInstant(l.note) ? 'instantane' : 'tirage'} onChange={e => maj(l.id, 'note', e.target.value === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort')}
+                  style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}>
+                  <option value="tirage">Tirage au sort</option>
+                  <option value="instantane">Gain immédiat</option>
+                </select>
+              </label>
+            )}
+          </div>
+          {enSuperEvent && <div style={{ fontSize: 11, color: MUT, marginTop: 6 }}>Station de super event : tirage au sort uniquement, non modifiable ici.</div>}
+
+          <SousTitre>Stock &amp; billet</SousTitre>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            {stockInfo ? (
+              <AjustementStockLigne lotId={l.id} dispo={stockInfo.dispo + dAjust} total={stockInfo.total + dAjust} onAjuste={onAjuste} />
+            ) : (
+              <span style={{ fontSize: 11, color: MUT }}>Pas de stock unitaire géré pour ce lot — quantité déclarative uniquement.</span>
+            )}
+            <button onClick={() => setApercu(a => !a)}
+              style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 99, padding: '4px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', color: ACC }}>
+              🎫 {apercu ? 'Masquer le billet' : 'Aperçu du billet'}
+            </button>
+          </div>
+          {apercu && (
+            <div style={{ marginTop: 10 }}>
+              <BilletApercu
+                commerce={partenaire?.nom ?? 'Votre commerce'}
+                lot={(l.nom ?? '').trim() || 'Lot'} valeur={l.valeur ?? 0} conditions={l.conditions}
+                operation={op.type === 'super' ? op.id : station.id} operationNom={op.nom}
+                hauteur={520}
+              />
+            </div>
+          )}
+
+          <SousTitre>Gagnants</SousTitre>
+          <PanneauGagnants billets={billets} opNom={op.nom} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
   op: DonneesOperation; partenaire: PartenaireMin | null; onClose: () => void; onChange: () => void
 }) {
   const [lots, setLots] = useState<LotLigne[] | null>(null)
   const [regles, setRegles] = useState<Record<string, Regle>>({})
   const [ajustements, setAjustements] = useState<Record<string, number>>({})
-  const [apercuId, setApercuId] = useState<string | null>(null)
   const [etat, setEtat] = useState<'' | 'envoi' | 'ok' | 'ko'>('')
 
   useEffect(() => {
@@ -135,15 +384,13 @@ export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
     if (!ko) onChange()
   }
 
-  const lotApercu = (lots ?? []).find(l => l.id === apercuId) ?? null
-
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>
       <div style={{ background: CARDBG, borderRadius: 16, width: '100%', maxWidth: 880, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(0,0,0,.3)' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: `1px solid ${BRD}`, position: 'sticky', top: 0, background: CARDBG, zIndex: 1 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: 16 }}>Gérer les lots</div>
-            <div style={{ fontSize: 12, color: MUT }}>{op.nom} — valeur, conditions, type, stock, billet</div>
+            <div style={{ fontSize: 12, color: MUT }}>{op.nom} — valeur, conditions, type, stock, billet, gagnants</div>
           </div>
           <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: 20, cursor: 'pointer', color: MUT, lineHeight: 1 }}>✕</button>
         </div>
@@ -154,8 +401,6 @@ export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
           {lots !== null && op.stations.map(station => {
             const lotsStation = lots.filter(l => l.event_id === station.id)
             const enSuperEvent = !!station.super_event_id
-            const aInstant = lotsStation.some(l => estInstant(l.note))
-            const regle = regles[station.id] ?? { mode: 'aleatoire' as const, everyX: 10, probabilite: 15 }
             return (
               <div key={station.id} style={{ marginBottom: 22 }}>
                 {op.stations.length > 1 && <div style={{ fontWeight: 800, fontSize: 13.5, marginBottom: 8 }}>{station.nom}</div>}
@@ -163,80 +408,13 @@ export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
                 {lotsStation.length === 0 && <div style={{ fontSize: 12.5, color: MUT, marginBottom: 8 }}>Aucun lot sur cette station.</div>}
 
                 {lotsStation.map(l => {
-                  const stockInfo = op.lots.find(ol => ol.id === l.id)?.stock
+                  const stockInfo = op.lots.find(ol => ol.id === l.id)?.stock ?? undefined
                   const dAjust = ajustements[l.id] ?? 0
                   const billets = op.gagnants.filter(g => g.lotNom === (l.nom ?? '').trim())
                   return (
-                    <div key={l.id} style={{ border: `1px solid ${BRD}`, borderRadius: 12, padding: 12, marginBottom: 10, background: SUBT }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, marginBottom: 8 }}>
-                        <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Nom
-                          <input value={l.nom ?? ''} onChange={e => maj(l.id, 'nom', e.target.value)}
-                            style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                        </label>
-                        <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Valeur (€)
-                          <input type="number" min={0} value={l.valeur ?? 0} onChange={e => maj(l.id, 'valeur', parseFloat(e.target.value) || 0)}
-                            style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                        </label>
-                        <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Quantité
-                          <input type="number" min={1} value={l.quantite ?? 1} onChange={e => maj(l.id, 'quantite', Math.max(1, parseInt(e.target.value) || 1))}
-                            style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                        </label>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: enSuperEvent ? '1fr' : '2fr 1fr', gap: 8, marginBottom: 8 }}>
-                        <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Conditions d&apos;utilisation
-                          <input value={l.conditions ?? ''} onChange={e => maj(l.id, 'conditions', e.target.value || null)} placeholder="ex. Valable sur présentation du billet, non cumulable"
-                            style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                        </label>
-                        {!enSuperEvent && (
-                          <label style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase' }}>Type
-                            <select value={estInstant(l.note) ? 'instantane' : 'tirage'} onChange={e => maj(l.id, 'note', e.target.value === 'instantane' ? 'Type : gain instantané' : 'Type : tirage au sort')}
-                              style={{ display: 'block', width: '100%', marginTop: 3, border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}>
-                              <option value="tirage">Tirage au sort</option>
-                              <option value="instantane">Gain immédiat</option>
-                            </select>
-                          </label>
-                        )}
-                      </div>
-                      {enSuperEvent && <div style={{ fontSize: 11, color: MUT, marginBottom: 8 }}>Station de super event : tirage au sort uniquement, non modifiable ici.</div>}
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingTop: 8, borderTop: `1px solid ${BRD}` }}>
-                        {stockInfo ? (
-                          <AjustementStockLigne lotId={l.id} dispo={stockInfo.dispo + dAjust} total={stockInfo.total + dAjust}
-                            onAjuste={d => setAjustements(a => ({ ...a, [l.id]: (a[l.id] ?? 0) + d }))} />
-                        ) : (
-                          <span style={{ fontSize: 11, color: MUT }}>Pas de stock unitaire géré pour ce lot — quantité déclarative uniquement.</span>
-                        )}
-                        <button onClick={() => setApercuId(apercuId === l.id ? null : l.id)}
-                          style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 99, padding: '4px 11px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', color: ACC }}>
-                          🎫 {apercuId === l.id ? 'Masquer le billet' : 'Aperçu du billet'}
-                        </button>
-                        <span style={{ fontSize: 11, color: billets.length ? '#15803D' : MUT, fontWeight: billets.length ? 700 : 400 }}>
-                          {billets.length ? `🏆 ${billets.length} billet${billets.length > 1 ? 's' : ''} déjà émis` : 'Aucun billet émis pour ce lot'}
-                        </span>
-                      </div>
-
-                      {billets.length > 0 && (
-                        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          {billets.map(g => (
-                            <div key={g.id} style={{ fontSize: 11.5, color: MUT }}>
-                              <b style={{ color: 'inherit' }}>{g.joueurNom ?? 'Joueur'}</b> — {g.etat === 'retire' ? '✅ remis' : g.etat === 'confirme' ? '📞 confirmé' : '⏳ à appeler'}
-                              {g.retireAt ? ` · ${new Date(g.retireAt).toLocaleDateString('fr-FR')}` : ''}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {apercuId === l.id && (
-                        <div style={{ marginTop: 10 }}>
-                          <BilletApercu
-                            commerce={partenaire?.nom ?? 'Votre commerce'}
-                            lot={(l.nom ?? '').trim() || 'Lot'} valeur={l.valeur ?? 0} conditions={l.conditions}
-                            operation={op.type === 'super' ? op.id : null} operationNom={op.nom}
-                            hauteur={520}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    <CarteLot key={l.id} l={l} enSuperEvent={enSuperEvent} stockInfo={stockInfo} dAjust={dAjust}
+                      onAjuste={d => setAjustements(a => ({ ...a, [l.id]: (a[l.id] ?? 0) + d }))}
+                      maj={maj} op={op} station={station} partenaire={partenaire} billets={billets} />
                   )
                 })}
 
@@ -245,32 +423,37 @@ export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
                   + Ajouter un lot
                 </button>
 
-                {aInstant && !enSuperEvent && station.module !== 'spin' && (
-                  <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 10, marginTop: 10 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 6 }}>Gain immédiat : quand le joueur gagne-t-il ?</div>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                      <select value={regle.mode} onChange={e => setRegles(rs => ({ ...rs, [station.id]: { ...regle, mode: e.target.value as Regle['mode'] } }))}
-                        style={{ border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 12.5 }}>
-                        <option value="aleatoire">Au hasard</option>
-                        <option value="tousLesX">Tous les X joueurs</option>
-                      </select>
-                      {regle.mode === 'aleatoire' ? (
-                        <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <input type="number" min={0} max={100} value={regle.probabilite}
-                            onChange={e => setRegles(rs => ({ ...rs, [station.id]: { ...regle, probabilite: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) } }))}
-                            style={{ width: 60, border: `1px solid ${BRD}`, borderRadius: 8, padding: '5px 7px' }} /> % de chances par partie
-                        </label>
-                      ) : (
-                        <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          un gagnant tous les
-                          <input type="number" min={1} value={regle.everyX}
-                            onChange={e => setRegles(rs => ({ ...rs, [station.id]: { ...regle, everyX: Math.max(1, parseInt(e.target.value) || 1) } }))}
-                            style={{ width: 60, border: `1px solid ${BRD}`, borderRadius: 8, padding: '5px 7px' }} /> joueurs
-                        </label>
-                      )}
+                {(() => {
+                  const aInstant = lotsStation.some(l => estInstant(l.note))
+                  const regle = regles[station.id] ?? { mode: 'aleatoire' as const, everyX: 10, probabilite: 15 }
+                  if (!aInstant || enSuperEvent || station.module === 'spin') return null
+                  return (
+                    <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 10, marginTop: 10 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 800, marginBottom: 6 }}>Gain immédiat : quand le joueur gagne-t-il ?</div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <select value={regle.mode} onChange={e => setRegles(rs => ({ ...rs, [station.id]: { ...regle, mode: e.target.value as Regle['mode'] } }))}
+                          style={{ border: `1px solid ${BRD}`, borderRadius: 8, padding: '6px 8px', fontSize: 12.5 }}>
+                          <option value="aleatoire">Au hasard</option>
+                          <option value="tousLesX">Tous les X joueurs</option>
+                        </select>
+                        {regle.mode === 'aleatoire' ? (
+                          <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <input type="number" min={0} max={100} value={regle.probabilite}
+                              onChange={e => setRegles(rs => ({ ...rs, [station.id]: { ...regle, probabilite: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) } }))}
+                              style={{ width: 60, border: `1px solid ${BRD}`, borderRadius: 8, padding: '5px 7px' }} /> % de chances par partie
+                          </label>
+                        ) : (
+                          <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            un gagnant tous les
+                            <input type="number" min={1} value={regle.everyX}
+                              onChange={e => setRegles(rs => ({ ...rs, [station.id]: { ...regle, everyX: Math.max(1, parseInt(e.target.value) || 1) } }))}
+                              style={{ width: 60, border: `1px solid ${BRD}`, borderRadius: 8, padding: '5px 7px' }} /> joueurs
+                          </label>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )
+                })()}
               </div>
             )
           })}
