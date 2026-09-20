@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { libelleModule } from '@/lib/operations'
-import { IcoModule } from '@/lib/proicons'
+import { IcoModule, Ico } from '@/lib/proicons'
+import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
 
 /* ── KPI Card ── */
 interface KpiProps {
@@ -102,6 +103,22 @@ export function StatusChip({ status }: { status: string }) {
    et icone viennent de lib/operations.ts, source unique. */
 export function ModuleChip({ module }: { module: string }) {
   return <span className="sa-chip purple" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IcoModule module={module} size={11} /> {libelleModule(module)}</span>
+}
+
+/* ── Type chip (Super event / Event) ── */
+/* Romain (20/09) : « il y a des pro, des events, super events... ce n'est pas
+   logique, les informations sont melangees » sur le kanban accueil -- meme
+   code couleur/icone que BlocOperation et GrilleOperations (orange
+   ACCENT_SUPER / bleu ACCENT_ANIM) pour reconnaitre le type d'une vignette
+   d'un coup d'oeil, cle unique deja etablie ailleurs : super_event_id. */
+export function TypeChip({ estSuper }: { estSuper: boolean }) {
+  const accent = estSuper ? ACCENT_SUPER : ACCENT_ANIM
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', color: accent, background: `${accent}17`, borderRadius: 99, padding: '3px 8px', whiteSpace: 'nowrap' }}>
+      <Ico k={estSuper ? 'sparkle' : 'building'} size={11} />
+      {estSuper ? 'Super event' : 'Event'}
+    </span>
+  )
 }
 
 /* ── Empty state ── */

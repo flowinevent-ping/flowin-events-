@@ -23,7 +23,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { StatusChip, ModuleChip } from '@/components/dashboard/DashboardUI'
+import { StatusChip, ModuleChip, TypeChip } from '@/components/dashboard/DashboardUI'
 import AlerteLotsRetires from '@/components/dashboard/AlerteLotsRetires'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 
@@ -152,6 +152,11 @@ export default function DashboardPage() {
                       title={`Ouvrir ${ev.nom}`}
                     >
                       <div className="chips">
+                        {/* Type d'abord : Super event (orange) vs Event (bleu),
+                            meme code couleur que Vignette/BlocOperation -- avant
+                            statut/module, pour lever la confusion en un coup d'oeil
+                            (Romain, 20/09). */}
+                        <TypeChip estSuper={!!ev.super_event_id} />
                         <StatusChip status={ev.status} />
                         <ModuleChip module={ev.module} />
                       </div>
