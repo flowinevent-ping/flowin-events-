@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { libelleModule } from '@/lib/operations'
-import { IcoModule, Ico } from '@/lib/proicons'
+import { IcoModule } from '@/lib/proicons'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
 
 /* ── KPI Card ── */
@@ -107,15 +107,17 @@ export function ModuleChip({ module }: { module: string }) {
 
 /* ── Type chip (Super event / Event) ── */
 /* Romain (20/09) : « il y a des pro, des events, super events... ce n'est pas
-   logique, les informations sont melangees » sur le kanban accueil -- meme
-   code couleur/icone que BlocOperation et GrilleOperations (orange
-   ACCENT_SUPER / bleu ACCENT_ANIM) pour reconnaitre le type d'une vignette
-   d'un coup d'oeil, cle unique deja etablie ailleurs : super_event_id. */
+   logique, les informations sont melangees » sur le kanban accueil, puis
+   « cette vignette est moche » sur la 1ere version (icone + gras 800 +
+   police 10.5, incoherente a cote des autres chips de la carte). Reprend
+   maintenant EXACTEMENT le style deja approuve de BlocOperation
+   (components/operations/BlocsOperations.tsx) pour la meme distinction
+   Super event/Event -- meme police 9.5, meme letter-spacing, pas d'icone --
+   au lieu d'inventer un nouveau look. */
 export function TypeChip({ estSuper }: { estSuper: boolean }) {
   const accent = estSuper ? ACCENT_SUPER : ACCENT_ANIM
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 800, letterSpacing: '.04em', textTransform: 'uppercase', color: accent, background: `${accent}17`, borderRadius: 99, padding: '3px 8px', whiteSpace: 'nowrap' }}>
-      <Ico k={estSuper ? 'sparkle' : 'building'} size={11} />
+    <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: accent, background: `${accent}17`, borderRadius: 99, padding: '3px 8px' }}>
       {estSuper ? 'Super event' : 'Event'}
     </span>
   )
