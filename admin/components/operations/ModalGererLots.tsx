@@ -36,6 +36,7 @@ import type { DonneesOperation, PartenaireMin, GagnantOperation } from '@/lib/op
 import BilletApercu from '@/components/parcours/BilletApercu'
 import { ajouterStock, retirerStock } from '@/lib/stock'
 import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
+import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
@@ -90,9 +91,15 @@ function SousTitre({ children }: { children: React.ReactNode }) {
   return <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', letterSpacing: '.04em', margin: '12px 0 6px' }}>{children}</div>
 }
 
+/* Meme gabarit que .sa-chip (globals.css) -- police 11/700, padding 2px 8px --
+   pour que ces badges se fondent dans le reste de l app au lieu de trancher
+   (Romain, 20/09 : « pousse l'UX », suite a « cette vignette est moche »
+   sur la 1ere version, plus lourde). Reserve aux infos qui demandent une
+   action ou une attention (stock bas, gagnants a relancer) ; le reste (nom,
+   valeur, quantite, type) est du texte simple, pas des pastilles. */
 function badgeStyle(couleur: 'gris' | 'ambre' | 'vert'): React.CSSProperties {
   const c = { gris: ['#64748B', 'rgba(100,116,139,.1)'], ambre: ['#B45309', 'rgba(245,158,11,.13)'], vert: ['#15803D', 'rgba(34,197,94,.1)'] }[couleur]
-  return { fontSize: 11, fontWeight: 800, color: c[0], background: c[1], borderRadius: 99, padding: '3px 9px', whiteSpace: 'nowrap' }
+  return { fontSize: 11, fontWeight: 700, color: c[0], background: c[1], borderRadius: 99, padding: '2px 8px', whiteSpace: 'nowrap' }
 }
 
 /* Le vrai lien du billet (celui du gagnant, pas l apercu) -- meme URL que
@@ -239,20 +246,29 @@ function CarteLot({ l, enSuperEvent, stockInfo, dAjust, onAjuste, maj, op, stati
   const [ouvert, setOuvert] = useState(false)
   const [apercu, setApercu] = useState(false)
   const nonRetires = billets.filter(g => g.etat !== 'retire').length
+  const accent = enSuperEvent ? ACCENT_SUPER : ACCENT_ANIM
+  const typeLabel = enSuperEvent ? 'Tirage au sort' : (estInstant(l.note) ? 'Gain immédiat' : 'Tirage au sort')
+  const stockBas = stockInfo && (stockInfo.dispo + dAjust) <= 0
 
   return (
-    <div style={{ border: `1px solid ${BRD}`, borderRadius: 12, marginBottom: 10, background: SUBT, overflow: 'hidden' }}>
+    <div style={{ border: `1px solid ${BRD}`, borderLeft: `3px solid ${accent}`, borderRadius: 12, marginBottom: 10, background: SUBT, overflow: 'hidden' }}>
+      {/* Repliee par defaut : nom + resume en texte simple (pas de mur de
+          pastilles) -- seules les infos qui demandent une action (stock
+          epuise, gagnants a relancer) ressortent en badge colore. */}
       <button onClick={() => setOuvert(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', padding: 12, fontFamily: 'inherit' }}>
+        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', padding: '11px 14px', fontFamily: 'inherit' }}>
         <span style={{ fontSize: 11, color: MUT, transform: ouvert ? 'rotate(90deg)' : 'none', transition: 'transform .12s', flexShrink: 0 }}>▶</span>
-        <span style={{ flex: 1, minWidth: 140, fontWeight: 800, fontSize: 13.5 }}>{(l.nom ?? '').trim() || 'Nouveau lot'}</span>
-        <span style={badgeStyle('gris')}>{(l.valeur ?? 0).toLocaleString('fr-FR')} €</span>
-        <span style={badgeStyle('gris')}>× {l.quantite ?? 1}</span>
-        {enSuperEvent
-          ? <span style={badgeStyle('gris')}>🔒 tirage au sort</span>
-          : <span style={badgeStyle('gris')}>{estInstant(l.note) ? '⚡ instantané' : '🎟️ tirage au sort'}</span>}
-        {stockInfo && <span style={badgeStyle((stockInfo.dispo + dAjust) > 0 ? 'vert' : 'ambre')}>stock {stockInfo.dispo + dAjust}/{stockInfo.total + dAjust}</span>}
-        {billets.length > 0 && <span style={badgeStyle(nonRetires > 0 ? 'ambre' : 'vert')}>🏆 {billets.length}{nonRetires > 0 ? ` · ${nonRetires} à relancer` : ''}</span>}
+        <div style={{ flex: 1, minWidth: 140 }}>
+          <div style={{ fontWeight: 800, fontSize: 14 }}>{(l.nom ?? '').trim() || 'Nouveau lot'}</div>
+          <div style={{ fontSize: 11.5, color: MUT, marginTop: 1 }}>
+            {(l.valeur ?? 0).toLocaleString('fr-FR')} € · × {l.quantite ?? 1} · {typeLabel}{enSuperEvent ? ' (verrouillé)' : ''}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          {stockInfo && stockBas && <span style={badgeStyle('ambre')}>stock épuisé</span>}
+          {nonRetires > 0 && <span style={badgeStyle('ambre')}>{nonRetires} à relancer</span>}
+          {billets.length > 0 && nonRetires === 0 && <span style={badgeStyle('vert')}>{billets.length} gagnant{billets.length > 1 ? 's' : ''}</span>}
+        </div>
       </button>
 
       {ouvert && (
