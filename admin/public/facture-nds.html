@@ -404,12 +404,14 @@
   }
   function H(){ return {'apikey':KEY,'Authorization':'Bearer '+AUTH}; }
   function $(id){return document.getElementById(id);}
-  /* « quand on clique sur Dashboard on revient sur le dashboard SA, ça ne
-     revient pas à la page précédente comme ça devrait être le cas » (Romain,
-     18/09) -- ce lien etait un href fixe vers /dashboard. Retour a la page
-     precedente quand il y en a une (ouvert depuis l espace pro, il doit
-     fermer l onglet ou revenir dessus, jamais sauter dans le SA). */
-  (function(){ var b=$('topbarBack'); if(!b) return; b.addEventListener('click',function(e){ if(window.history.length>1){ e.preventDefault(); window.history.back(); } }); })();
+  /* « en cliquant sur retour dans facture et bon de commande depuis pro on
+     arrive dans SA » (Romain, 20/09) -- le correctif du 18/09 (history.back()
+     si history.length>1) ne suffisait pas : cette page s ouvre TOUJOURS dans
+     un nouvel onglet (target="_blank" depuis la fiche pro / le CRM), donc
+     history.length vaut 1 et l ancien code retombait sur le href fixe
+     "/dashboard" (l ecran SA). Desormais : jamais de retour a la page
+     precedente possible -> on ferme l onglet plutot que de sauter dans le SA. */
+  (function(){ var b=$('topbarBack'); if(!b) return; b.addEventListener('click',function(e){ e.preventDefault(); if(window.history.length>1){ window.history.back(); } else { window.close(); } }); })();
   function pad2(n){ return String(n).length<2?('0'+n):String(n); }
   function eur(n){ n=Number(n); return isFinite(n)?n.toLocaleString('fr-FR')+' \u20ac':'\u2014'; }
   function parseNum(v){ if(v==null) return NaN; return parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(',','.')); }
