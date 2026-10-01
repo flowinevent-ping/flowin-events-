@@ -10,7 +10,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import { CourbeQuotidienne } from '@/components/dashboard/CourbeQuotidienne'
-import { fetchTrackQr, fetchTrackQrQuotidien, fetchSuperEvents, libelleSource, type TrackQr, type TrackQrJour, type SuperEvent } from '@/lib/nds'
+import { fetchTrackQr, fetchTrackQrQuotidien, fetchSuperEvents, superEventParDefaut, libelleSource, type TrackQr, type TrackQrJour, type SuperEvent } from '@/lib/nds'
 
 export default function Page() {
   const { partenaires, openDrawer } = useDashboard()
@@ -30,7 +30,14 @@ export default function Page() {
   }
 
   useEffect(() => {
-    fetchSuperEvents().then(l => { setSupers(l); if (l.length) setSe(l[0].id); else setCharge(false) })
+    fetchSuperEvents().then(l => {
+      setSupers(l)
+      /* Jamais le super event le plus RECENT (date_d) par defaut : un super
+         event a venir n a aucune donnee et affiche un ecran vide, pris pour
+         une panne. superEventParDefaut() prefere live > past > upcoming. */
+      const defaut = superEventParDefaut(l)
+      if (defaut) setSe(defaut.id); else setCharge(false)
+    })
   }, [])
   useEffect(() => {
     if (!se) return

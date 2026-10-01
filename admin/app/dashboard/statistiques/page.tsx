@@ -14,7 +14,7 @@ import { CarteChaleur } from '@/components/dashboard/CarteChaleur'
 import { TableauStations } from '@/components/dashboard/TableauStations'
 import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
-  fetchRapport, fetchPics, fetchSuperEvents,
+  fetchRapport, fetchPics, fetchSuperEvents, superEventParDefaut,
   type Rapport, type Pics, type SuperEvent,
 } from '@/lib/nds'
 
@@ -23,15 +23,20 @@ const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p
 
 export default function Page() {
   const { openDrawer } = useDashboard()
-  /* Aucun super event code en dur : on charge la liste et on selectionne le plus recent.
-     Les memes indicateurs valent pour toute edition presente ou future. */
+  /* Aucun super event code en dur : on charge la liste et on en choisit un par
+     defaut (superEventParDefaut -- jamais juste le plus RECENT par date, voir
+     lib/nds.ts). Les memes indicateurs valent pour toute edition presente ou
+     future. */
   const [supers, setSupers] = useState<SuperEvent[]>([])
   const [se, setSe] = useState<string>('')
   /* Portee recue de la fiche qui nous a ouverts : on arrive DEJA cadre sur son
      super event. Sans ca, ouvrir ce module depuis « Jazz a Nice 2027 » affichait
-     Nuits du Sud. Les boutons de l ecran restent maitres ensuite. */
+     Nuits du Sud. Les boutons de l ecran restent maitres ensuite.
+     Bug corrige (01/10) : cette portee etait aussitot ECRASEE par le choix par
+     defaut ci-dessous des que la liste des super events arrivait (deux effets
+     independants qui se marchaient dessus) -- fusionnes en un seul effet qui
+     priorise la portee d URL quand elle existe. */
   const porteeUrl = usePorteeInitiale()
-  useEffect(() => { if (porteeUrl.se) setSe(porteeUrl.se) }, [porteeUrl.se])
 
   const [r, setR] = useState<Rapport | null>(null)
   const [pics, setPics] = useState<Pics | null>(null)
@@ -47,10 +52,12 @@ export default function Page() {
       // en erreur (le selectionner afficherait un rapport a zero partout).
       const reels = l /* gabarit deja exclu par fetchSuperEvents */
       setSupers(reels)
-      if (reels.length) setSe(reels[0].id)
+      if (porteeUrl.se) { setSe(porteeUrl.se); return }
+      const defaut = superEventParDefaut(reels)
+      if (defaut) setSe(defaut.id)
       else setCharge(false)
     })
-  }, [])
+  }, [porteeUrl.se])
 
   useEffect(() => {
     if (!se) return

@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { Camembert } from '@/components/dashboard/Camembert'
 import {
-  fetchJours, fetchStations, fetchSuperEvents,
+  fetchJours, fetchStations, fetchSuperEvents, superEventParDefaut,
   fetchOptinJour, fetchEngagementJour, fetchRepondantsJour,
   type JourActivite, type StationJour, type SuperEvent,
   type OptinJour, type EngagementJour, type RepondantsJour,
@@ -42,7 +42,11 @@ export default function Page() {
       // Le Master est un gabarit de duplication, jamais joue reellement.
       const reels = l /* gabarit deja exclu par fetchSuperEvents */
       setSupers(reels)
-      if (reels.length) setSe(reels[0].id)
+      /* Jamais le super event le plus RECENT (date_d) par defaut : un super
+         event a venir n a aucune donnee et affiche un ecran vide, pris pour
+         une panne. superEventParDefaut() prefere live > past > upcoming. */
+      const defaut = superEventParDefaut(reels)
+      if (defaut) setSe(defaut.id)
     })
   }, [])
 
