@@ -15,7 +15,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { BandeauChiffres } from '@/components/dashboard/BandeauChiffres'
 import {
-  fetchRapportPoints, fetchBonusResultats, fetchSondageLanding, fetchSuperEvents,
+  fetchRapportPoints, fetchBonusResultats, fetchSondageLanding, fetchSuperEvents, superEventParDefaut,
   type RapportPoints, type BonusResultats, type SondageLanding,
   type PointJeu, type QuestionBonus, type SuperEvent,
 } from '@/lib/nds'
@@ -64,7 +64,11 @@ export default function Page() {
   useEffect(() => {
     fetchSuperEvents().then(l => {
       setSupers(l)
-      if (l.length) setSe(l[0].id)
+      /* Jamais le super event le plus RECENT (date_d) par defaut : un super
+         event a venir n a aucune donnee et affiche un ecran vide, pris pour
+         une panne. superEventParDefaut() prefere live > past > upcoming. */
+      const defaut = superEventParDefaut(l)
+      if (defaut) setSe(defaut.id)
       else setCharge(false)
     })
   }, [])

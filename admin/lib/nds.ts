@@ -311,6 +311,25 @@ export async function fetchSuperEvents(opts: { avecGabarit?: boolean } = {}): Pr
   return opts.avecGabarit ? l : l.filter(s => s.id !== 'se-master-superevent')
 }
 
+/** Le super event par defaut d un ecran de resultats/rapport (statistiques,
+ *  resultat journalier, rapport detaille, origines du trafic) quand aucune
+ *  portee n est passee par l URL.
+ *
+ *  Bug corrige (01/10) : ces ecrans prenaient `reels[0]`, le PREMIER de la
+ *  liste triee par date_d DESCENDANT -- donc le super event dont la date de
+ *  DEBUT est la plus tardive, meme s il n a pas encore eu lieu et n a donc
+ *  AUCUNE donnee. Des qu un super event futur (ex. "Fetes du haut et moyen
+ *  pays", 17/10/2026) est cree apres un festival deja termine (ex. "Nuits du
+ *  Sud 2026", termine le 18/07/2026), ce futur event devenait le choix par
+ *  defaut de tous ces ecrans -- rapport vide partout, pris pour une panne
+ *  ("statistique ne fonctionne pas").
+ *  Priorite desormais : live > past > upcoming (ce qui a des resultats a
+ *  montrer d abord), a date_d decroissante au sein d une meme priorite. */
+export function superEventParDefaut(l: SuperEvent[]): SuperEvent | undefined {
+  const priorite = (s: SuperEvent) => (s.status === 'live' ? 0 : s.status === 'past' ? 1 : 2)
+  return [...l].sort((a, b) => priorite(a) - priorite(b) || String(b.date_d ?? '').localeCompare(String(a.date_d ?? '')))[0]
+}
+
 /**
  * Duplique la STRUCTURE d un super event : parametres, events, stations.
  * Les donnees d edition (joueurs, tirages, gagnants, stock consomme) ne sont
