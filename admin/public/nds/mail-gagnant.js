@@ -53,6 +53,9 @@
     if (t && t.type === 'relance') {
       return estNds(t) ? 'Nuits du Sud & Flowin — Ton lot t’attend toujours !' : (nomOp(t) + ' & Flowin — Ton lot t’attend toujours !');
     }
+    if (t && t.type === 'merci') {
+      return estNds(t) ? 'Nuits du Sud & Flowin — Merci d’être passé !' : (nomOp(t) + ' & Flowin — Merci d’être passé !');
+    }
     if (!estNds(t)) return nomOp(t) + ' & Flowin — Vous avez gagné !';
     return (t && t.type === 'soir')
       ? 'Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné une place !'
@@ -68,20 +71,37 @@
     var L = ['Bonjour ' + prenomDe(t) + ',', ''];
 
     if (t.type === 'relance') {
-      L.push("Petit rappel : tu as gagné, il y a quelques jours, au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " :", '',
+      L.push("Hey, salut, merci encore d'avoir participé au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " !", '',
+             "Petit rappel : tu as gagné :", '',
              '   ' + (t.lot_nom || 'un lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : ''));
       if (comm)  L.push('   chez ' + comm);
       if (coord) L.push('   ' + coord);
-      L.push('', "Nous n'avons pas encore de trace de ton passage pour le récupérer !", '');
+      L.push('', "Nous n'avons pas encore de trace de ton passage pour le récupérer ! Ne laisse pas passer ta chance — tu peux aussi en faire profiter un proche.", '');
       if (lien) {
         L.push('>>> TON BILLET EST ICI <<<', '',
                '   ' + lien, '',
-               "Présente ce billet (papier ou écran) chez le commerçant, il scanne le QR et c'est réglé.", '');
+               "Clique sur ce lien : tu peux l'imprimer ou le garder sur ton téléphone.",
+               "C'est ce billet, avec son QR code, que tu présenteras en boutique.", '');
       }
+      L.push('COMMENT EN PROFITER, EN 3 ÉTAPES', '',
+             '   1. Rends-toi chez ' + (comm || 'notre commerçant partenaire'),
+             '   2. Présente ton billet, papier ou écran',
+             "   3. Le commerçant scanne le QR code et valide — c'est tout", '');
       var cRelance = puces(t.conditions);
       if (cRelance.length) { L.push('À SAVOIR', ''); L.push.apply(L, cRelance); L.push(''); }
       if (t.ticket_code) L.push('Ton numéro de billet : ' + t.ticket_code, '');
       L.push('À bientôt chez notre partenaire !', '',
+             estNds(t) ? 'Flowin, les Nuits du Sud, la Ville de Vence' : ('Flowin & ' + nomOp(t)),
+             'flowinevent@gmail.com · 04 93 59 91 37');
+      return L.join('\n');
+    }
+
+    if (t.type === 'merci') {
+      L.push("Hey, salut, merci encore d'avoir participé au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " !", '',
+             "Nous avons bien vu que tu es passé récupérer :", '',
+             '   ' + (t.lot_nom || 'ton lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : ''));
+      if (comm) L.push('   chez ' + comm);
+      L.push('', "On espère que ça t'a plu ! À très vite pour de nouvelles animations.", '',
              estNds(t) ? 'Flowin, les Nuits du Sud, la Ville de Vence' : ('Flowin & ' + nomOp(t)),
              'flowinevent@gmail.com · 04 93 59 91 37');
       return L.join('\n');

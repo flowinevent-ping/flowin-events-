@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
   libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise,
-  type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation, type LotOperation, type PartenaireMin,
+  type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation, type LotOperation, type PartenaireMin, type GagnantOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource, supprimerSuperEvent } from '@/lib/nds'
 import { deleteEvent } from '@/lib/dashboard'
@@ -22,7 +22,7 @@ import { ajouterStock, retirerStock } from '@/lib/stock'
 import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
-import ModalGererLots, { PanneauGagnants } from './ModalGererLots'
+import ModalGererLots from './ModalGererLots'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
 import { operationsRangees } from '@/lib/rangementOperations'
@@ -307,12 +307,28 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
      masse -- un « a_confirmer » n a pas encore ete appele par le SA, le
      relancer serait premature (meme regle que le bouton Email commerce
      ci-dessous). */
-  const contactables = op.gagnants.filter(g => g.etat !== 'a_confirmer')
+  useMailGagnant()
   async function confirmer(id: number) {
     if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
     const { error } = await supabase.rpc('marquer_notifie', { p_tirage_id: id })
     if (error) { alert('La confirmation a échoué.'); return }
     onChange()
+  }
+  /* Lien de relance/remerciement -- MEME source de texte unique que partout
+     ailleurs dans l app (nds-lots, PartenaireDrawer, la page gagnants) :
+     /nds/mail-gagnant.js, jamais recopie. Romain (20/10), apres avoir
+     teste un panneau de selection en masse (ajoute puis retire ici,
+     references dans l historique du depot) : « je ne vois toujours pas où
+     se trouve le bouton [...] il serait bien de le mettre à côté de la
+     ligne email [...] éventuellement ligne par ligne, mais de ne pas
+     modifier le texte ». Un clic = un email pret, texte toujours identique
+     (modifiable par la personne dans Gmail avant envoi, jamais ici). */
+  function lienRelance(g: GagnantOperation, type: 'relance' | 'merci') {
+    return window.flowinMailGagnant?.gmailUrl({
+      joueur_nom: g.joueurNom, email: g.joueurEmail, lot_nom: g.lotNom, lot_valeur: g.lotValeur,
+      ticket_code: g.ticketCode, retrait_token: g.retraitToken, partenaire_nom: partenaireNom,
+      type, operation: op.id, operation_nom: op.nom,
+    })
   }
   return (
     <>
@@ -325,21 +341,6 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
       {n('a_confirmer') > 0 && (
         <div style={{ fontSize: 12, color: '#B45309', marginBottom: 8 }}>
           {n('a_confirmer')} gagnant{n('a_confirmer') > 1 ? 's' : ''} à appeler. Le commerçant ne les verra qu&apos;une fois confirmés.
-        </div>
-      )}
-
-      {/* Relancer / remercier en masse, directement ici -- Romain (20/10) :
-          « où se trouve la fonction ? [...] en sélectionnant ceux à qui
-          envoyer, avec le lien [...] via Gmail ». Avant, ce panneau n existait
-          que dans « Gérer les lots », lot par lot -- jamais trouve depuis cet
-          onglet. Meme panneau qu ailleurs, ici au niveau de l operation
-          entiere. */}
-      {contactables.length > 0 && (
-        <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 12, marginBottom: 12, background: SUBT }}>
-          <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>
-            Relancer ou remercier les gagnants
-          </div>
-          <PanneauGagnants billets={contactables} opNom={op.nom} proContact={{ nom: partenaireNom, email: partenaireEmail }} />
         </div>
       )}
 
@@ -367,11 +368,18 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
             <Pastille ton="warn">⚠️ Stock non décompté</Pastille>
           )}
           {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
-          {/* « Email gagnant » (annonce initiale du gain) supprime ici : il
+          {/* « Email gagnant » (annonce initiale du gain) supprime : il
               renvoyait le texte de PREMIERE annonce, pas un texte de relance --
-              Romain (20/10) a recu ce texte en pensant relancer. Le panneau
-              de relance/remerciement ci-dessus est desormais le seul chemin
-              pour recontacter un gagnant deja notifie, avec le bon ton. */}
+              Romain (20/10) a recu ce texte en pensant relancer. A sa place,
+              un bouton Relancer/Remercier par ligne, juste a cote d Email
+              commerce comme demande, avec le texte de relance/remerciement
+              (meme source que partout ailleurs). */}
+          {g.etat !== 'a_confirmer' && g.etat !== 'retire' && (
+            <button style={btn} onClick={() => { const u = lienRelance(g, 'relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+          )}
+          {g.etat === 'retire' && (
+            <button style={btn} onClick={() => { const u = lienRelance(g, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+          )}
           {g.etat !== 'a_confirmer' && (
             <button style={btn} onClick={() => window.open(mailPartenaireUrl({
               joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
