@@ -282,17 +282,22 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Meme vocabulaire que la fiche SA (Retiré/À retirer) -- Romain
+              (20/10) : « choisis celui qui sera le plus convenable pour le
+              moins de confusion dans le langage pour admin et dans le
+              langage pour le pro ». */}
           <span style={{
             fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
             color: remis ? '#15803D' : '#B45309', background: remis ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)',
-          }}>{remis ? 'Remis' : 'À remettre'}</span>
+          }}>{remis ? 'Retiré' : 'À retirer'}</span>
           {/* « Marquer remis sans PIN » ci-dessous ne decompte pas le stock --
-              distinct du statut "Remis" (Romain, 20/10). */}
-          {g.stockDestocke !== null && (
+              signale seulement l anomalie (retire sans destockage reel), pas
+              le cas normal. */}
+          {remis && g.stockDestocke === false && (
             <span style={{
               fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
-              color: g.stockDestocke ? '#15803D' : '#64748B', background: g.stockDestocke ? 'rgba(21,128,61,.09)' : 'rgba(100,116,139,.1)',
-            }}>{g.stockDestocke ? '📦 Destocké' : '📦 En stock'}</span>
+              color: '#B45309', background: 'rgba(245,158,11,.13)',
+            }}>⚠️ Stock non décompté</span>
           )}
           <button style={btn} onClick={() => { setOuvert(!ouvert); setPin(''); setMessage(null) }}>{ouvert ? 'Fermer' : remis ? 'Modifier' : 'Valider'}</button>
         </div>

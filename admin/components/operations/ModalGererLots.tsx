@@ -107,9 +107,14 @@ function badgeStyle(couleur: 'gris' | 'ambre' | 'vert'): React.CSSProperties {
 const lienBillet = (token: string | null) => token ? `${BASE}/nds/billets-partenaires.html?t=${encodeURIComponent(token)}` : ''
 
 /* {prenom}/{lot}/{lien} remplaces par personnaliser() -- un seul texte modifiable
-   sert a tout le monde, chacun reçoit sa propre version (prenom + son billet). */
+   sert a tout le monde, chacun reçoit sa propre version (prenom + son billet).
+   Ton repris de l annonce initiale ("Waouh, bravo !") + urgence (perime) +
+   suggestion de l offrir a un proche -- Romain (20/10) : « dans la meme
+   tonalite waouh [...] tres engageant [...] tu peux personnaliser les textes
+   en fonction des annonceurs » -- modifiable dans le champ texte avant
+   l envoi (ex. "n'oublie pas de venir passer ton BSR" pour une auto-ecole). */
 const texteRelanceParDefaut = (opNom: string) =>
-  `Bonjour {prenom},\n\nL'équipe de Flowin vous remercie d'avoir participé à ${opNom} !\nN'oubliez pas votre lot « {lot} » à retirer — ou à offrir à un de vos proches — dans l'établissement :\n{lien}\n\nÀ très vite !`
+  `Bonjour {prenom},\n\nWaouh, tu n'as pas encore récupéré ton lot « {lot} » gagné lors de ${opNom} !\nNe laisse pas passer ta chance — viens le retirer, ou fais-en profiter un proche, avant qu'il ne soit périmé.\n{lien}\n\nÀ très vite !`
 const texteMerciParDefaut = (opNom: string) =>
   `Bonjour {prenom},\n\nMerci d'être passé récupérer « {lot} » lors de ${opNom} ! Nous espérons que ça vous a plu.\n\nÀ très vite pour de nouvelles animations !`
 

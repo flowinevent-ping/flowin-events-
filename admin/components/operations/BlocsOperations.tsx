@@ -302,12 +302,11 @@ export function useMailGagnant() {
 export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange }: {
   op: DonneesOperation; partenaireNom: string; partenaireEmail: string | null; onChange: () => void
 }) {
-  useMailGagnant()
   const n = (e: string) => op.gagnants.filter(g => g.etat === e).length
   /* Seuls les gagnants confirmes (appeles) ou deja retires sont contactables en
      masse -- un « a_confirmer » n a pas encore ete appele par le SA, le
-     relancer serait premature (meme regle que les boutons individuels
-     Email gagnant/Email commerce ci-dessous). */
+     relancer serait premature (meme regle que le bouton Email commerce
+     ci-dessous). */
   const contactables = op.gagnants.filter(g => g.etat !== 'a_confirmer')
   async function confirmer(id: number) {
     if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
@@ -357,30 +356,26 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
           </div>
           <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
           <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
-          {/* Distinct du statut ci-dessus : un gain peut etre marque « Retiré »
-              a la main (sans PIN) sans que le stock du lot ait reellement ete
-              decompte -- Romain (20/10) : « il manque un statut celui de lot
-              destocke ou en stock ». null (lot sans stock unitaire suivi,
-              quantite declarative) : rien n est affiche, la question ne se
-              pose pas pour ce lot. */}
-          {g.stockDestocke !== null && (
-            <Pastille ton={g.stockDestocke ? 'ok' : 'neutre'}>{g.stockDestocke ? '📦 Destocké' : '📦 En stock'}</Pastille>
+          {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
+              la distinction stock n apparait QUE si elle revele une anomalie :
+              marque « Retiré » a la main (sans PIN, GagnantsClient) sans que
+              le stock unitaire du lot ait suivi -- Romain (20/10) : « choisis
+              celui qui sera le plus convenable pour le moins de confusion ».
+              Rien d affiche dans le cas normal (deja retire ET stock suivi,
+              ou pas encore retire, ou lot sans stock unitaire suivi). */}
+          {g.etat === 'retire' && g.stockDestocke === false && (
+            <Pastille ton="warn">⚠️ Stock non décompté</Pastille>
           )}
           {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
+          {/* « Email gagnant » (annonce initiale du gain) supprime ici : il
+              renvoyait le texte de PREMIERE annonce, pas un texte de relance --
+              Romain (20/10) a recu ce texte en pensant relancer. Le panneau
+              de relance/remerciement ci-dessus est desormais le seul chemin
+              pour recontacter un gagnant deja notifie, avec le bon ton. */}
           {g.etat !== 'a_confirmer' && (
-            <>
-              <button style={btn} onClick={() => {
-                const url = window.flowinMailGagnant?.gmailUrl({
-                  joueur_nom: g.joueurNom, email: g.joueurEmail, lot_nom: g.lotNom,
-                  ticket_code: g.ticketCode, retrait_token: g.retraitToken, type: 'lot',
-                  operation: op.id, operation_nom: op.nom,
-                })
-                if (url) window.open(url, '_blank', 'noopener')
-              }}>Email gagnant</button>
-              <button style={btn} onClick={() => window.open(mailPartenaireUrl({
-                joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
-              }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>Email commerce</button>
-            </>
+            <button style={btn} onClick={() => window.open(mailPartenaireUrl({
+              joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
+            }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>Email commerce</button>
           )}
           {g.etat === 'a_confirmer' && <button style={btnPrimaire} onClick={() => confirmer(g.id)}>✓ Confirmer</button>}
         </div>
