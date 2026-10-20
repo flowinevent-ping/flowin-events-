@@ -240,8 +240,14 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
       .eq('pro_id', proId),
     supabase.from('super_events').select('id,nom,date_d,date_f,status'),
   ])
-  if (!pro) return vide
-  const partenaireId = (pro as { partenaire_id: string | null }).partenaire_id
+  /* La fiche `pros` elle-meme peut echouer a charger (ligne isolee, latence,
+     etc.) sans que ca signifie qu il n y a aucune operation : les events
+     (`evs`) sont deja charges dans le meme Promise.all, independamment de ce
+     lookup. Avant, un echec de CE SEUL lookup faisait jeter tout le reste et
+     afficher a tort « aucun event ni super event pour ce compte » a un pro
+     qui a pourtant bien des stations (Romain, 20/10 : le badge « Ses stations »
+     et l onglet Gagnants se contredisaient sur le meme pro). */
+  const partenaireId = pro ? (pro as { partenaire_id: string | null }).partenaire_id : null
 
   const ops = grouperOperations((evs ?? []) as EvMin[], (ses ?? []) as SuperEventRef[])
   const evIds = ops.flatMap(o => o.stations.map(s => s.id))
@@ -421,8 +427,8 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
   return {
     proId,
-    proNom: (pro as { nom: string | null }).nom ?? null,
-    proEmail: (pro as { email: string | null }).email ?? null,
+    proNom: pro ? (pro as { nom: string | null }).nom ?? null : null,
+    proEmail: pro ? (pro as { email: string | null }).email ?? null : null,
     partenaire,
     operations,
   }
