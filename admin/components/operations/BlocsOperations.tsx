@@ -22,7 +22,7 @@ import { ajouterStock, retirerStock } from '@/lib/stock'
 import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
-import ModalGererLots from './ModalGererLots'
+import ModalGererLots, { PanneauGagnants } from './ModalGererLots'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
 import { operationsRangees } from '@/lib/rangementOperations'
@@ -210,7 +210,15 @@ export function BoutonGererLots({ op, partenaire, onChange }: { op: DonneesOpera
 
 export function ContenuLots({ op }: { op: DonneesOperation }) {
   const unites = op.lots.reduce((s, l) => s + l.quantite, 0)
-  const valeur = op.lots.reduce((s, l) => s + (l.valeur ?? 0) * l.quantite, 0)
+  /* Valeur du STOCK engage (chaque lot x sa quantite), pas celle reellement
+     distribuee -- Romain (20/10) : « tu annonces 450€ de lot et si je fais le
+     compte... » en comptant les gagnants reels. Les deux sont legitimes mais
+     differentes (450€ = inventaire total, ex. 2x100€ + 2x100€ + 1x50€ ;
+     la valeur distribuee ne compte que les lots reellement tires) -- on
+     affiche desormais les deux, nommees sans ambiguite, pour verifier d un
+     coup d oeil. */
+  const valeurEngagee = op.lots.reduce((s, l) => s + (l.valeur ?? 0) * l.quantite, 0)
+  const valeurDistribuee = op.gagnants.reduce((s, g) => s + (g.lotValeur ?? 0), 0)
   const tires = op.gagnants.length
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
   /* Ajustements locaux appliques apres un ecrit reussi -- evite de dependre
@@ -229,7 +237,8 @@ export function ContenuLots({ op }: { op: DonneesOperation }) {
     <>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
         <Mini v={unites} l="lots engagés" />
-        <Mini v={`${valeur} €`} l="valeur" />
+        <Mini v={`${valeurEngagee} €`} l="valeur engagée (stock)" />
+        <Mini v={`${valeurDistribuee} €`} l="valeur distribuée (gagnants)" />
         {stockOpAffiche && <Mini v={`${stockOpAffiche.dispo} / ${stockOpAffiche.total}`} l="stock disponible" />}
         <Mini v={tires} l="tirés" />
         <Mini v={remis} l="remis" />
@@ -295,6 +304,11 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
 }) {
   useMailGagnant()
   const n = (e: string) => op.gagnants.filter(g => g.etat === e).length
+  /* Seuls les gagnants confirmes (appeles) ou deja retires sont contactables en
+     masse -- un « a_confirmer » n a pas encore ete appele par le SA, le
+     relancer serait premature (meme regle que les boutons individuels
+     Email gagnant/Email commerce ci-dessous). */
+  const contactables = op.gagnants.filter(g => g.etat !== 'a_confirmer')
   async function confirmer(id: number) {
     if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
     const { error } = await supabase.rpc('marquer_notifie', { p_tirage_id: id })
@@ -314,6 +328,22 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
           {n('a_confirmer')} gagnant{n('a_confirmer') > 1 ? 's' : ''} à appeler. Le commerçant ne les verra qu&apos;une fois confirmés.
         </div>
       )}
+
+      {/* Relancer / remercier en masse, directement ici -- Romain (20/10) :
+          « où se trouve la fonction ? [...] en sélectionnant ceux à qui
+          envoyer, avec le lien [...] via Gmail ». Avant, ce panneau n existait
+          que dans « Gérer les lots », lot par lot -- jamais trouve depuis cet
+          onglet. Meme panneau qu ailleurs, ici au niveau de l operation
+          entiere. */}
+      {contactables.length > 0 && (
+        <div style={{ border: `1px solid ${BRD}`, borderRadius: 10, padding: 12, marginBottom: 12, background: SUBT }}>
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>
+            Relancer ou remercier les gagnants
+          </div>
+          <PanneauGagnants billets={contactables} opNom={op.nom} proContact={{ nom: partenaireNom, email: partenaireEmail }} />
+        </div>
+      )}
+
       {op.gagnants.length === 0 && <Vide>Aucun gagnant tiré sur cette opération.</Vide>}
       {gagnantsParStation(op).map(grp => (
         <div key={grp.cle}>
