@@ -171,6 +171,14 @@ export interface GagnantOperation {
   retireAt: string | null
   superEventId: string | null
   eventId: string | null
+  /** Le lot a-t-il reellement ete decompte du stock unitaire (lots_stock.utilise,
+   *  pose par valider_lot au scan PIN) ? Distinct de `etat === 'retire'` : un
+   *  gain peut etre marque "remis" a la main (bouton « Marquer remis sans PIN »,
+   *  GagnantsClient) sans jamais passer par la validation qui destocke -- les
+   *  deux peuvent diverger (Romain, 20/10 : « il manque un statut celui de lot
+   *  destocke ou en stock »). null si ce lot n a pas de stock unitaire suivi
+   *  (quantite declarative uniquement) : la question ne s applique pas. */
+  stockDestocke: boolean | null
 }
 
 export interface ContratOperation {
@@ -277,7 +285,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
         .then(async r => {
           const lotIds = ((r.data ?? []) as { id: string }[]).map(x => x.id)
           if (!lotIds.length) return { data: [] }
-          return supabase.from('lots_stock').select('id,lot_id,utilise').in('lot_id', lotIds)
+          return supabase.from('lots_stock').select('id,lot_id,utilise,attribue_a').in('lot_id', lotIds)
         })
       : Promise.resolve({ data: [] }),
     /* Bons : ceux du commerce, et ceux rattaches aux events du pro (event_id).
@@ -315,7 +323,12 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
   const partenaire = (partRes.data ?? null) as PartenaireMin | null
   const lotsTable = (lotsRes.data ?? []) as Record<string, unknown>[]
-  const stock = (stockRes.data ?? []) as { lot_id: string | null; utilise: boolean | null }[]
+  const stock = (stockRes.data ?? []) as { lot_id: string | null; utilise: boolean | null; attribue_a: string | null }[]
+  /* `attribue_a` n est pose (par valider_lot, au scan PIN) que sur l unite
+     reellement destockee pour CE billet precis -- jamais sur une unite encore
+     disponible. Sa cle est `ticket_code` (tirages.ticket_code), pas l id du
+     tirage. */
+  const ticketsDestockes = new Set(stock.filter(x => x.utilise && x.attribue_a).map(x => x.attribue_a as string))
   const stockDe = (lotIds: Set<string>) => {
     const l = stock.filter(x => x.lot_id && lotIds.has(x.lot_id))
     return l.length ? { total: l.length, dispo: l.filter(x => !x.utilise).length } : null
@@ -344,6 +357,10 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     retireAt: (t.retire_at as string) ?? null,
     superEventId: (t.super_event_id as string) ?? null,
     eventId: (t.event_id as string) ?? null,
+    /* Complete plus bas, par operation : il faut d abord savoir si LE LOT de
+       ce gain a du stock unitaire suivi (op.lots[].stock) pour distinguer
+       « en stock » de « non suivi ». */
+    stockDestocke: null,
   }))
   tirages.sort((a, b) => String(b.date ?? '').localeCompare(String(a.date ?? '')) || (a.lotNom ?? '').localeCompare(b.lotNom ?? '', 'fr'))
 
@@ -383,6 +400,13 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
 
     const gagnants = tirages.filter(t =>
       (t.eventId && ids.has(t.eventId)) || (op.type === 'super' && t.superEventId === op.id))
+      .map(t => {
+        /* Meme appariement par NOM que lots<->gagnants ailleurs (ModalGererLots) :
+           un tirage ne porte que lot_nom, jamais lot_id. */
+        const lotCorresp = lots.find(l => l.nom === (t.lotNom ?? '').trim())
+        const suivi = !!lotCorresp?.stock
+        return { ...t, stockDestocke: suivi ? ticketsDestockes.has(t.ticketCode ?? '') : null }
+      })
 
     /* Contrat (referentiel 41) : les bons de CETTE operation — rattaches a une
        de ses stations, ou au super event lui-meme pour le commerce. */

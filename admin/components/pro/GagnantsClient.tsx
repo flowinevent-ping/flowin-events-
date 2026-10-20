@@ -286,6 +286,14 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
             fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
             color: remis ? '#15803D' : '#B45309', background: remis ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)',
           }}>{remis ? 'Remis' : 'À remettre'}</span>
+          {/* « Marquer remis sans PIN » ci-dessous ne decompte pas le stock --
+              distinct du statut "Remis" (Romain, 20/10). */}
+          {g.stockDestocke !== null && (
+            <span style={{
+              fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
+              color: g.stockDestocke ? '#15803D' : '#64748B', background: g.stockDestocke ? 'rgba(21,128,61,.09)' : 'rgba(100,116,139,.1)',
+            }}>{g.stockDestocke ? '📦 Destocké' : '📦 En stock'}</span>
+          )}
           <button style={btn} onClick={() => { setOuvert(!ouvert); setPin(''); setMessage(null) }}>{ouvert ? 'Fermer' : remis ? 'Modifier' : 'Valider'}</button>
         </div>
       </div>

@@ -327,6 +327,15 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
           </div>
           <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
           <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
+          {/* Distinct du statut ci-dessus : un gain peut etre marque « Retiré »
+              a la main (sans PIN) sans que le stock du lot ait reellement ete
+              decompte -- Romain (20/10) : « il manque un statut celui de lot
+              destocke ou en stock ». null (lot sans stock unitaire suivi,
+              quantite declarative) : rien n est affiche, la question ne se
+              pose pas pour ce lot. */}
+          {g.stockDestocke !== null && (
+            <Pastille ton={g.stockDestocke ? 'ok' : 'neutre'}>{g.stockDestocke ? '📦 Destocké' : '📦 En stock'}</Pastille>
+          )}
           {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
           {g.etat !== 'a_confirmer' && (
             <>
