@@ -19,6 +19,7 @@ import {
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource, supprimerSuperEvent } from '@/lib/nds'
 import { deleteEvent } from '@/lib/dashboard'
 import { ajouterStock, retirerStock } from '@/lib/stock'
+import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
@@ -276,28 +277,6 @@ export function ContenuLots({ op }: { op: DonneesOperation }) {
 }
 
 /* ── Gagnants & billets (lecture SA) ───────────────────────────────────────── */
-
-declare global {
-  interface Window {
-    flowinMailGagnant?: {
-      sujet: (t: Record<string, unknown>) => string
-      corps: (t: Record<string, unknown>) => string
-      gmailUrl: (t: Record<string, unknown>) => string
-      lienBillet: (t: Record<string, unknown>) => string
-    }
-  }
-}
-
-/** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte. */
-export function useMailGagnant() {
-  useEffect(() => {
-    if (window.flowinMailGagnant || document.getElementById('flowin-mail-gagnant-script')) return
-    const s = document.createElement('script')
-    s.id = 'flowin-mail-gagnant-script'
-    s.src = '/nds/mail-gagnant.js'
-    document.head.appendChild(s)
-  }, [])
-}
 
 export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange }: {
   op: DonneesOperation; partenaireNom: string; partenaireEmail: string | null; onChange: () => void

@@ -26,7 +26,8 @@ import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueu
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
 import { fetchOperationsPro, gagnantsParStation, libelleRemise } from '@/lib/operations'
 import { operationsRangees } from '@/lib/rangementOperations'
-import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire, useMailGagnant } from '@/components/operations/BlocsOperations'
+import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
+import { useMailGagnant } from '@/lib/mailGagnant'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 const input: React.CSSProperties = {

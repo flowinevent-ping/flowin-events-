@@ -14,6 +14,7 @@ import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
 import { Ico } from '@/lib/proicons'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/BlocsOperations'
+import { useMailGagnant } from '@/lib/mailGagnant'
 
 const dateHeureFr = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
@@ -35,16 +36,6 @@ function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
   )
 }
 
-/** Charge /nds/mail-gagnant.js une seule fois -- source unique du texte, jamais recopiee ici. */
-function useMailGagnant() {
-  useEffect(() => {
-    if (window.flowinMailGagnant || document.getElementById('flowin-mail-gagnant-script')) return
-    const s = document.createElement('script')
-    s.id = 'flowin-mail-gagnant-script'
-    s.src = '/nds/mail-gagnant.js'
-    document.head.appendChild(s)
-  }, [])
-}
 
 /**
  * Fiche commerce. DEUX SURFACES, UN SEUL CODE.

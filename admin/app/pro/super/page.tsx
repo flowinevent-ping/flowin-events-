@@ -139,7 +139,10 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
 
       <div style={{ ...CARD, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ color: ACC }}><Ico k="dice" size={16} /></span><div><div style={{ fontWeight: 800, fontSize: 14 }}>Gagnants &amp; tirage</div><div style={{ fontSize: 12.5, ...MUTED }}>Tirage global mutualisé.</div></div></div>
-        <Link href={`/pro/tirage${q}`} style={{ background: ACC, color: '#fff', borderRadius: 12, padding: '10px 16px', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Ouvrir le tirage →</Link>
+        {/* Relaie le super event en cours (`op=se:<id>`) -- avant, ce lien
+            perdait ce contexte et retombait sur la grille de toutes les
+            operations (audit UX du 20/10). */}
+        <Link href={`/pro/tirage${q}${seId ? `${q ? '&' : '?'}op=${encodeURIComponent(`se:${seId}`)}` : ''}`} style={{ background: ACC, color: '#fff', borderRadius: 12, padding: '10px 16px', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Ouvrir le tirage →</Link>
       </div>
     </ProShell>
   )
