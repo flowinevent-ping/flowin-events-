@@ -27,6 +27,7 @@ import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/op
 import { fetchOperationsPro, gagnantsParStation, libelleRemise } from '@/lib/operations'
 import { operationsRangees } from '@/lib/rangementOperations'
 import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
+import { PanneauGagnants } from '@/components/operations/ModalGererLots'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 const input: React.CSSProperties = {
@@ -87,6 +88,21 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
             Super event : le tirage et les remplacements sont pilotés par Flowin. Vous validez ici les billets présentés en caisse.
           </div>
         )}
+
+      {/* Relancer les gagnants n'ayant pas retiré leur lot, remercier ceux qui
+          l'ont fait -- Romain (20/10) : « observer ceux qui ont utilisé leur
+          lot de ceux qui restent à utiliser [...] remercier ceux qui ont
+          utilisé leur lot », directement depuis le compte du pro. Meme panneau
+          que « Gérer les lots » (ModalGererLots), ici au niveau de toute
+          l'opération plutôt que d'un seul lot. */}
+      {op.gagnants.length > 0 && (
+        <div style={{ ...CARD, padding: 12, marginBottom: 14 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: '#8a7e93', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>
+            Relancer ou remercier les gagnants
+          </div>
+          <PanneauGagnants billets={op.gagnants} opNom={op.nom} />
+        </div>
+      )}
 
       {op.gagnants.length === 0 && <Vide>Aucun gagnant sur cette opération.</Vide>}
       {gagnantsParStation(op).map(grp => (

@@ -126,7 +126,7 @@ function personnaliser(texte: string, g: GagnantOperation): string {
  *  relance/remerciement personnalisable, envoye en liens individuels
  *  (Gmail "to:" / WhatsApp) -- jamais de BCC ici, chaque texte est different
  *  d une personne a l autre (prenom, lien de billet). */
-function PanneauGagnants({ billets, opNom }: { billets: GagnantOperation[]; opNom: string }) {
+export function PanneauGagnants({ billets, opNom }: { billets: GagnantOperation[]; opNom: string }) {
   const [selection, setSelection] = useState<Record<number, boolean>>({})
   const [canal, setCanal] = useState<'email' | 'whatsapp'>('email')
   const [objet, setObjet] = useState('')
