@@ -4,8 +4,10 @@ import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, fetchJoueurTirages, fetchJoueurParticipations, type SeTicketRow, type SeGainRow, type TirageRow, type ParticipationRow } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip } from './DashboardUI'
-import { useMailGagnant, btn } from '@/components/operations/BlocsOperations'
+import { btn } from '@/components/operations/BlocsOperations'
+import { useMailGagnant } from '@/lib/mailGagnant'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
+import { etatTirage, LIBELLE_ETAT_TIRAGE } from '@/lib/operations'
 import type { FlowinJoueur } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -195,7 +197,15 @@ export default function JoueurDrawer() {
 
         {drawer.tab === 'lots' && (
           <>
-            <SectionHeader>{joueurLots.length} lot{joueurLots.length > 1 ? 's' : ''} gagné{joueurLots.length > 1 ? 's' : ''}</SectionHeader>
+            {/* Distinct de l onglet « Lots gagnés » (table `tirages`, tirage
+                au sort) -- celui-ci lit l ancienne attribution directe sur
+                la table `lots` (champ assigne_a). Deux sources differentes,
+                legende ajoutee pour ne pas croire a un bug si les comptes
+                ne correspondent pas (audit UX du 20/10). */}
+            <SectionHeader>{joueurLots.length} lot{joueurLots.length > 1 ? 's' : ''} attribué{joueurLots.length > 1 ? 's' : ''} directement</SectionHeader>
+            <div style={{ fontSize: 11, color: 'var(--sa-muted)', marginBottom: 8 }}>
+              Attribution manuelle sur un lot (hors tirage au sort) — voir aussi l&apos;onglet « Lots gagnés » pour les gains par tirage.
+            </div>
             {joueurLots.length === 0 && <div className="sa-empty-inline">Aucun lot gagné</div>}
             {joueurLots.map(l => (
               <div key={l.id} className="sa-list-item">
@@ -214,7 +224,8 @@ export default function JoueurDrawer() {
               const partenaire = t.partenaire_id ? t.partenaire_id.replace(/^pt-/, '') : 'Nuits du Sud'
               const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'
               const lien = t.retrait_token ? `/nds/billets-partenaires.html?t=${t.retrait_token}` : null
-              const retire = t.statut !== 'annule' && !!t.retire_at
+              const annule = t.statut === 'annule'
+              const etat = etatTirage(t)
               return (
                 <div key={t.id} className="sa-list-item" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 18 }}>🎫</span>
@@ -227,12 +238,17 @@ export default function JoueurDrawer() {
                     {lien && <a href={lien} target="_blank" rel="noreferrer" style={{ fontSize: 11 }}>Voir le billet →</a>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {retire
-                      ? <span className="sa-chip">Retiré</span>
-                      : <span className="sa-chip live">À retirer</span>}
-                    {t.statut !== 'annule' && (retire
-                      ? <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
-                      : <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>)}
+                    {/* Meme etat a 3 valeurs et memes libelles que partout
+                        ailleurs (lib/operations.ts) -- avant, cet onglet
+                        reduisait a 2 etats et perdait « à appeler » (audit
+                        UX du 20/10). */}
+                    <span className={`sa-chip${etat === 'retire' ? '' : ' live'}`}>{LIBELLE_ETAT_TIRAGE[etat]}</span>
+                    {!annule && etat === 'confirme' && (
+                      <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+                    )}
+                    {!annule && etat === 'retire' && (
+                      <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+                    )}
                   </div>
                 </div>
               )

@@ -125,10 +125,13 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1; ctx.stroke()
   }, [segments, angle, c, screen])
 
-  /* Confettis sur écran de gain + ticket */
+  /* Confettis sur écran de gain + ticket -- JAMAIS si le segment tire est
+     perdant (Romain, 20/10, audit UX : l ecran "ticket" annoncait "VOUS AVEZ
+     GAGNE" avec confettis meme apres un segment perdant -- risque de litige
+     en boutique). */
   useEffect(() => {
     const gainResult = screen === 'result' && resultSeg && !resultSeg.perdant
-    const gainTicket = screen === 'ticket'
+    const gainTicket = screen === 'ticket' && resultSeg && !resultSeg.perdant
     if (!gainResult && !gainTicket) return
     const canvas = confettiRef.current
     if (!canvas) return
@@ -355,7 +358,16 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
         </div>
       )}
 
-      {(screen === 'ticket' || screen === 'already') && (
+      {(screen === 'ticket' || screen === 'already') && (() => {
+        /* Un segment perdant produit quand meme un ticket (participation au
+           tirage general) -- l ecran ne doit annoncer un gain QUE si ce
+           segment, tire dans CETTE session, est reellement gagnant. Pour une
+           visite de retour ("already", resultSeg reinitialise a null au
+           rechargement), on ne sait plus s il avait gagne -- on ne l affirme
+           donc jamais ici, pour ne jamais promettre un lot a tort : l email
+           de gain (mail-gagnant.js) et le billet restent la source fiable. */
+        const won = screen === 'ticket' && !!resultSeg && !resultSeg.perdant
+        return (
         <div className="screen" style={{ justifyContent:'center',alignItems:'center',textAlign:'center',position:'relative',minHeight:'100dvh',background:'radial-gradient(ellipse at 50% 40%, #0a1f2e 0%, #060d18 70%)' }}>
           <canvas ref={confettiRef} width={430} height={700} style={{ position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5 }} />
           {/* Rayons en fond */}
@@ -364,15 +376,19 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           </div>
           {/* Carte teal */}
           <div style={{ position:'relative',zIndex:10,width:'88%',maxWidth:360,borderRadius:18,overflow:'hidden',border:'2px solid #14B8A6',boxShadow:'0 0 40px rgba(20,184,166,.5),0 12px 48px rgba(0,0,0,.6)',background:'#071620' }}>
-            <div style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',padding:'12px 0',fontSize:14,fontWeight:900,letterSpacing:3,color:'#fff' }}>✦ FÉLICITATIONS ✦</div>
+            <div style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',padding:'12px 0',fontSize:14,fontWeight:900,letterSpacing:3,color:'#fff' }}>{won ? '✦ FÉLICITATIONS ✦' : '✦ MERCI D’AVOIR JOUÉ ✦'}</div>
             <div style={{ padding:'22px 20px 26px' }}>
-              <div style={{ fontSize:46,marginBottom:10 }}>🥳</div>
-              <div style={{ fontSize:11,fontWeight:800,letterSpacing:2,color:'#2DD4BF',marginBottom:4 }}>VOUS AVEZ GAGNÉ</div>
+              <div style={{ fontSize:46,marginBottom:10 }}>{won ? '🥳' : '🎡'}</div>
+              {won && <div style={{ fontSize:11,fontWeight:800,letterSpacing:2,color:'#2DD4BF',marginBottom:4 }}>VOUS AVEZ GAGNÉ</div>}
               <div style={{ fontSize:26,fontWeight:900,color:'#fff',marginBottom:18,textTransform:'uppercase' }}>{form.prenom||'Vous'}</div>
-              <div style={{ border:'1px solid rgba(45,212,191,.4)',borderRadius:12,padding:'14px 16px',marginBottom:16,background:'rgba(20,184,166,.06)' }}>
-                <div style={{ fontSize:11,fontWeight:700,color:'#2DD4BF',marginBottom:4 }}>Votre lot</div>
-                <div style={{ fontSize:19,fontWeight:900,color:'#fff' }}>{resultSeg&&!resultSeg.perdant?resultSeg.label:'Lot offert'}</div>
-              </div>
+              {won ? (
+                <div style={{ border:'1px solid rgba(45,212,191,.4)',borderRadius:12,padding:'14px 16px',marginBottom:16,background:'rgba(20,184,166,.06)' }}>
+                  <div style={{ fontSize:11,fontWeight:700,color:'#2DD4BF',marginBottom:4 }}>Votre lot</div>
+                  <div style={{ fontSize:19,fontWeight:900,color:'#fff' }}>{resultSeg?.label ?? 'Lot offert'}</div>
+                </div>
+              ) : (
+                <div style={{ fontSize:13,color:'rgba(255,255,255,.65)',marginBottom:16 }}>Votre participation est enregistrée.</div>
+              )}
               <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
               {ev?.super_event_id ? (
                 <ParcoursOutro superEventId={ev.super_event_id} gain={gain} />
@@ -392,7 +408,8 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

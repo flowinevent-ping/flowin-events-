@@ -36,6 +36,7 @@ import type { DonneesOperation, PartenaireMin, GagnantOperation } from '@/lib/op
 import BilletApercu from '@/components/parcours/BilletApercu'
 import { ajouterStock, retirerStock } from '@/lib/stock'
 import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
+import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
@@ -108,15 +109,25 @@ const lienBillet = (token: string | null) => token ? `${BASE}/nds/billets-parten
 
 /* {prenom}/{lot}/{lien} remplaces par personnaliser() -- un seul texte modifiable
    sert a tout le monde, chacun reçoit sa propre version (prenom + son billet).
-   Ton repris de l annonce initiale ("Waouh, bravo !") + urgence (perime) +
-   suggestion de l offrir a un proche -- Romain (20/10) : « dans la meme
-   tonalite waouh [...] tres engageant [...] tu peux personnaliser les textes
-   en fonction des annonceurs » -- modifiable dans le champ texte avant
-   l envoi (ex. "n'oublie pas de venir passer ton BSR" pour une auto-ecole). */
-const texteRelanceParDefaut = (opNom: string) =>
-  `Bonjour {prenom},\n\nWaouh, tu n'as pas encore récupéré ton lot « {lot} » gagné lors de ${opNom} !\nNe laisse pas passer ta chance — viens le retirer, ou fais-en profiter un proche, avant qu'il ne soit périmé.\n{lien}\n\nÀ très vite !`
-const texteMerciParDefaut = (opNom: string) =>
-  `Bonjour {prenom},\n\nMerci d'être passé récupérer « {lot} » lors de ${opNom} ! Nous espérons que ça vous a plu.\n\nÀ très vite pour de nouvelles animations !`
+   Le texte par defaut N EST PLUS ecrit ici : il vient de la source unique
+   /nds/mail-gagnant.js (meme moteur que les boutons Relancer/Remercier par
+   ligne ailleurs dans l app) -- un audit UX (20/10) a trouve ce panneau
+   recopiant son propre texte, exactement ce que ce fichier interdit dans
+   son en-tete. On appelle sujet()/corps() avec les tokens {prenom}/{lot}/
+   {lien} comme valeurs de champ : la fonction les recopie tels quels dans
+   le texte (aucune transformation sur ces placeholders), ce qui donne un
+   texte par defaut identique au mot pres a celui envoye ailleurs, tout en
+   restant un modele editable pour un envoi groupe. */
+function texteParDefaut(type: 'relance' | 'merci', opNom: string): { objet: string; texte: string } {
+  const champs = { type, prenom: '{prenom}', joueur_nom: '{prenom}', lot_nom: '{lot}', billet_lien: '{lien}', operation_nom: opNom }
+  const objet = window.flowinMailGagnant?.sujet(champs)
+    ?? (type === 'relance' ? `Votre lot vous attend — ${opNom}` : `Merci d'avoir joué — ${opNom}`)
+  const texte = window.flowinMailGagnant?.corps(champs)
+    ?? (type === 'relance'
+      ? `Bonjour {prenom},\n\nVous avez gagné « {lot} » lors de ${opNom} — n'oubliez pas de le retirer !\n{lien}`
+      : `Bonjour {prenom},\n\nMerci d'être passé récupérer « {lot} » lors de ${opNom} !`)
+  return { objet, texte }
+}
 
 function personnaliser(texte: string, g: GagnantOperation): string {
   const prenom = (g.joueurNom ?? '').trim().split(/\s+/)[0] || 'à vous'
@@ -124,7 +135,7 @@ function personnaliser(texte: string, g: GagnantOperation): string {
   return texte
     .replace(/\{prenom\}/g, prenom)
     .replace(/\{lot\}/g, g.lotNom ?? 'ce lot')
-    .replace(/\{lien\}/g, lien ? `Votre billet : ${lien}` : '')
+    .replace(/\{lien\}/g, lien)
 }
 
 /** Bloc gagnants d'un lot : compteur utilisés/non utilisés, selection,
@@ -139,6 +150,7 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
    *  n a pas de sens). */
   proContact?: { nom: string | null; email: string | null } | null
 }) {
+  useMailGagnant()
   const [selection, setSelection] = useState<Record<number, boolean>>({})
   const [canal, setCanal] = useState<'email' | 'whatsapp'>('email')
   const [objet, setObjet] = useState('')
@@ -188,13 +200,13 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
         <button
           style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
           disabled={!nonRetires.length}
-          onClick={() => selectionnerGroupe(nonRetires, `Votre lot vous attend — ${opNom}`, texteRelanceParDefaut(opNom))}>
+          onClick={() => { const d = texteParDefaut('relance', opNom); selectionnerGroupe(nonRetires, d.objet, d.texte) }}>
           📣 Relancer les non utilisés ({nonRetires.length})
         </button>
         <button
           style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
           disabled={!retires.length}
-          onClick={() => selectionnerGroupe(retires, `Merci d'avoir joué — ${opNom}`, texteMerciParDefaut(opNom))}>
+          onClick={() => { const d = texteParDefaut('merci', opNom); selectionnerGroupe(retires, d.objet, d.texte) }}>
           🙏 Remercier ceux qui ont utilisé ({retires.length})
         </button>
         {selectionnes.length > 0 && (

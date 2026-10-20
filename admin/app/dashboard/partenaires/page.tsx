@@ -44,7 +44,18 @@ function PartenairesContenu() {
     { id: 'email', label: 'Email', valeur: p => p.email, largeur: 220 },
     {
       id: 'pro', label: 'Compte pro', valeur: p => (pros.find(x => x.partenaire_id === p.id) ? 'oui' : 'non'), largeur: 100, aligne: 'centre',
-      rendu: p => (pros.find(x => x.partenaire_id === p.id) ? <span className="sa-chip live">✓</span> : <span className="sa-chip">—</span>),
+      /* Avant : badge non cliquable, il fallait ouvrir la fiche partenaire
+         PUIS cliquer le bandeau "Compte pro lié" pour y acceder -- jamais en
+         un clic direct depuis la liste (audit UX du 20/10). */
+      rendu: p => {
+        const pro = pros.find(x => x.partenaire_id === p.id)
+        if (!pro) return <span className="sa-chip">—</span>
+        return (
+          <span className="sa-chip live" style={{ cursor: 'pointer' }}
+            onClick={e => { e.stopPropagation(); openDrawer('pro', pro.id) }}
+            title="Ouvrir le compte pro">✓ Ouvrir →</span>
+        )
+      },
     },
     {
       id: 'actions', label: '', valeur: () => '', horsRecherche: true, nonTriable: true, largeur: 60, aligne: 'droite',

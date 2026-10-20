@@ -60,7 +60,7 @@ interface Ligne {
 }
 
 export default function Page() {
-  const { partenaires, openDrawer } = useDashboard()
+  const { partenaires, lots, openDrawer } = useDashboard()
   const [lignes, setLignes] = useState<Ligne[] | null>(null)
   useMailGagnant()
 
@@ -80,8 +80,15 @@ export default function Page() {
   const [supers, setSupers] = useState<SuperEvent[]>([])
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
-  /* Seuls les partenaires dotes d au moins un lot nous interessent ici. */
-  const dotes = partenaires.filter(p => Array.isArray(p.lots) && p.lots.length > 0)
+  /* Seuls les partenaires dotes d au moins un lot nous interessent ici.
+     AVANT : filtrait seulement sur le jsonb `partenaires.lots`, qui peut
+     diverger de la table normalisee `lots` (meme probleme de synchronisation
+     documente pour pros/partenaires) -- un partenaire dont les lots
+     n existent que dans `lots` restait invisible ici meme avec de vrais
+     gagnants a traiter (audit UX du 20/10). On inclut desormais aussi les
+     partenaires presents dans `lots` (meme source que PartenaireDrawer). */
+  const dotes = partenaires.filter(p =>
+    (Array.isArray(p.lots) && p.lots.length > 0) || lots.some(l => l.partenaire_id === p.id))
 
   const charger = useCallback(async () => {
     // Vider AVANT de recharger : sinon, en changeant de super event, on lit les

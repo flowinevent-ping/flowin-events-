@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
+import { etatTirage, LIBELLE_ETAT_TIRAGE } from '@/lib/operations'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide } from './SousOnglets'
@@ -568,7 +569,7 @@ export default function EventDrawer() {
                       onSelect={v => setFiltreG(v as 'tous' | 'actifs' | 'retires')}
                       onglets={[
                         { id: 'tous', label: 'Tous' },
-                        { id: 'actifs', label: 'Libres' },
+                        { id: 'actifs', label: 'Non retirés' },
                         { id: 'retires', label: 'Retirés' },
                       ]}
                     />
@@ -609,7 +610,15 @@ export default function EventDrawer() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <span className={`sa-chip${g.statut === 'retire' ? ' live' : ''}`}>{g.statut === 'retire' ? 'Retiré' : 'Libre'}</span>
+                      {/* Avant : 2 etats lus directement sur `statut`, qui
+                          confondait « jamais appele » et « confirme, pas
+                          encore retire » sous un meme « Libre » -- source
+                          unique maintenant (lib/operations.ts), audit UX du
+                          20/10. */}
+                      {(() => {
+                        const etat = etatTirage(g)
+                        return <span className={`sa-chip${etat === 'retire' ? ' live' : ''}`}>{LIBELLE_ETAT_TIRAGE[etat]}</span>
+                      })()}
                       {g.statut === 'retire' && g.retire_at && (
                         <div style={{ fontSize: 9.5, color: 'var(--sa-muted)', marginTop: 3 }}>{fmtDT(g.retire_at)}</div>
                       )}

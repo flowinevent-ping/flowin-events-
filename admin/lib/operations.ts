@@ -181,6 +181,29 @@ export interface GagnantOperation {
   stockDestocke: boolean | null
 }
 
+export type EtatTirage = 'a_confirmer' | 'confirme' | 'retire'
+
+/** Source UNIQUE de l etat a 3 valeurs d un tirage -- ne jamais recalculer
+ *  ailleurs (audit UX du 20/10 : au moins 2 ecrans divergeaient, l un d eux,
+ *  EventDrawer, perdait meme la distinction a_confirmer/confirme en lisant
+ *  directement `tirages.statut` au lieu de deriver l etat comme ici).
+ *  Un gain d event autonome (tirage du pro, gain immediat) n attend pas
+ *  d appel du SA : il est confirme d emblee. Seul le super event passe par
+ *  « a confirmer » (tirage pilote par le SA). */
+export function etatTirage(t: { retire_at?: string | null; notifie_at?: string | null; super_event_id?: string | null }): EtatTirage {
+  if (t.retire_at) return 'retire'
+  if (t.notifie_at || !t.super_event_id) return 'confirme'
+  return 'a_confirmer'
+}
+
+/** Libelles courts, identiques partout (fiche pro, fiche event, fiche joueur,
+ *  liste Gagnants) -- avant : « En attente »/« Confirmé »/« Utilisé » sur
+ *  certains ecrans, « À appeler »/« Confirmé »/« Retiré » sur d autres pour
+ *  le MEME etat. */
+export const LIBELLE_ETAT_TIRAGE: Record<EtatTirage, string> = {
+  a_confirmer: 'À appeler', confirme: 'Confirmé', retire: 'Retiré',
+}
+
 export interface ContratOperation {
   offre: string | null
   montant: number | null
@@ -349,10 +372,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     lotValeur: num(t.lot_valeur),
     ticketCode: (t.ticket_code as string) ?? null,
     retraitToken: (t.retrait_token as string) ?? null,
-    /* Un gain d event autonome (tirage du pro, gain immediat) n attend pas
-       d appel du SA : il est confirme d emblee. Seul le super event passe par
-       « a confirmer » (tirage pilote par le SA). */
-    etat: t.retire_at ? 'retire' : (t.notifie_at || !t.super_event_id) ? 'confirme' : 'a_confirmer',
+    etat: etatTirage({ retire_at: t.retire_at as string | null, notifie_at: t.notifie_at as string | null, super_event_id: t.super_event_id as string | null }),
     date: t.created_at ? String(t.created_at).slice(0, 10) : null,
     retireAt: (t.retire_at as string) ?? null,
     superEventId: (t.super_event_id as string) ?? null,

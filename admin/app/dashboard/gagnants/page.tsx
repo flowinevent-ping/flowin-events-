@@ -30,18 +30,21 @@ import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { usePorteeInitiale } from '@/lib/portee'
 import { useMailGagnant } from '@/lib/mailGagnant'
+import { etatTirage, LIBELLE_ETAT_TIRAGE, type EtatTirage } from '@/lib/operations'
 
-type Etat = 'a_confirmer' | 'confirme' | 'retire'
-const LIB_ETAT: Record<Etat, string> = { a_confirmer: 'En attente', confirme: 'Confirmé', retire: 'Utilisé' }
+type Etat = EtatTirage
+const LIB_ETAT = LIBELLE_ETAT_TIRAGE
 
 const euros = (n: number | null) => (n == null ? '—' : `${n} €`)
 const dateFr = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 const dateHeureFr = (s: string | null) => (s ? new Date(s).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—')
 
+/* Avant : ignorait le cas « event autonome » (gain immediat, non pilote par
+   le SA) -- un tel gagnant restait affiche « En attente » indefiniment meme
+   confirme d emblee. Delegue desormais a la meme source unique que partout
+   ailleurs (lib/operations.ts), audit UX du 20/10. */
 function etatDe(t: GagnantRow): Etat {
-  if (t.retire_at) return 'retire'
-  if (t.notifie_at) return 'confirme'
-  return 'a_confirmer'
+  return etatTirage(t)
 }
 
 export default function Page() {

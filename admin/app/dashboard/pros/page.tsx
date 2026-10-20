@@ -45,6 +45,17 @@ function ProsContenu() {
     { id: 'email', label: 'Email', valeur: p => p.email, largeur: 210 },
     { id: 'stations', label: 'Stations', valeur: p => nbStations(p.id), aligne: 'droite', largeur: 80, horsRecherche: true },
     {
+      /* Avant : aucune colonne equivalente ici, alors que « Partenaires »
+         affiche « Compte pro » -- navigation a sens unique (audit UX du
+         20/10). */
+      id: 'partenaire', label: 'Fiche partenaire', valeur: p => (p.partenaire_id ? 'oui' : 'non'), largeur: 120, aligne: 'centre',
+      rendu: p => p.partenaire_id
+        ? <span className="sa-chip live" style={{ cursor: 'pointer' }}
+            onClick={e => { e.stopPropagation(); openDrawer('partenaire', p.partenaire_id as string) }}
+            title="Ouvrir la fiche partenaire">✓ Ouvrir →</span>
+        : <span className="sa-chip">—</span>,
+    },
+    {
       id: 'statut', label: 'Statut', valeur: p => STATUT_STYLE[p.statut ?? 'valide']?.label ?? p.statut, largeur: 110,
       rendu: p => {
         const st = STATUT_STYLE[p.statut ?? 'valide'] ?? STATUT_STYLE.valide

@@ -187,6 +187,10 @@ export interface TirageRow {
   ticket_code: string | null
   retrait_token: string | null
   retire_at: string | null
+  /** Necessaire pour deriver l etat a 3 valeurs (lib/operations.ts
+   *  etatTirage) -- sans quoi un gain non appele semblait identique a un
+   *  gain confirme (audit UX du 20/10). */
+  notifie_at: string | null
   statut: string | null
   created_at: string | null
 }
@@ -280,7 +284,7 @@ export async function publierLienEphemere(id: string, publie: boolean): Promise<
 export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
   const { data, error } = await supabase
     .from('tirages')
-    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,ticket_code,retrait_token,retire_at,statut,created_at')
+    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,ticket_code,retrait_token,retire_at,notifie_at,statut,created_at')
     .eq('joueur_id', joueurId)
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchJoueurTirages]', error.message); return [] }
