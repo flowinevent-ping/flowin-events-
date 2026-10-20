@@ -4,6 +4,8 @@ import { useState, useMemo, useEffect } from 'react'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { updateJoueur, deleteJoueur, fetchJoueurTicketsGains, fetchJoueurTirages, fetchJoueurParticipations, type SeTicketRow, type SeGainRow, type TirageRow, type ParticipationRow } from '@/lib/dashboard'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip } from './DashboardUI'
+import { useMailGagnant, btn } from '@/components/operations/BlocsOperations'
+import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import type { FlowinJoueur } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -13,6 +15,7 @@ function fmt(d?: string | null) {
 
 export default function JoueurDrawer() {
   const { drawer, closeDrawer, setDrawerTab, joueurs, setJoueurs, events, lots } = useDashboard()
+  useMailGagnant()
   const [edit, setEdit] = useState(drawer.edit)
   const [form, setForm] = useState<Partial<FlowinJoueur>>({})
   const [saving, setSaving] = useState(false)
@@ -20,6 +23,12 @@ export default function JoueurDrawer() {
   const [seGains, setSeGains] = useState<SeGainRow[]>([])
   const [tirages, setTirages] = useState<TirageRow[]>([])
   const [participations, setParticipations] = useState<ParticipationRow[]>([])
+  /* Noms des operations (super events) pour afficher a quelle operation
+     chaque gain appartient -- un joueur peut avoir joue a plusieurs
+     operations au fil du temps (Romain, 20/10 : « s'il participe à
+     plusieurs actions, on puisse avoir son historique »). */
+  const [supers, setSupers] = useState<SuperEvent[]>([])
+  useEffect(() => { fetchSuperEvents({ avecGabarit: true }).then(setSupers) }, [])
 
   const j = useMemo(() => joueurs.find(x => x.id === drawer.id), [joueurs, drawer.id])
 
@@ -31,6 +40,24 @@ export default function JoueurDrawer() {
     fetchJoueurParticipations(drawer.id).then(r => { if (on) setParticipations(r) })
     return () => { on = false }
   }, [drawer.id])
+
+  function operationNom(t: TirageRow): string {
+    if (t.super_event_id) return supers.find(s => s.id === t.super_event_id)?.nom ?? t.super_event_id
+    if (t.event_id) return events.find(e => e.id === t.event_id)?.nom ?? t.event_id
+    return 'Opération inconnue'
+  }
+  /* Meme source de texte unique que partout ailleurs dans l app (fiche pro
+     SA, compte pro, nds-lots) : /nds/mail-gagnant.js, jamais recopiee --
+     complementaire a ce qui vient d etre construit pour la relance, pas un
+     nouveau mecanisme concurrent. */
+  function lienRelanceJoueur(t: TirageRow, type: 'relance' | 'merci') {
+    if (!j) return undefined
+    return window.flowinMailGagnant?.gmailUrl({
+      joueur_nom: `${j.prenom ?? ''} ${j.nom ?? ''}`.trim(), email: j.email, lot_nom: t.lot_nom, lot_valeur: t.lot_valeur,
+      ticket_code: t.ticket_code, retrait_token: t.retrait_token,
+      type, operation: t.super_event_id ?? t.event_id ?? undefined, operation_nom: operationNom(t),
+    })
+  }
 
   if (!j) return (
     <div className="sa-drawer-empty">
@@ -187,17 +214,26 @@ export default function JoueurDrawer() {
               const partenaire = t.partenaire_id ? t.partenaire_id.replace(/^pt-/, '') : 'Nuits du Sud'
               const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : '—'
               const lien = t.retrait_token ? `/nds/billets-partenaires.html?t=${t.retrait_token}` : null
+              const retire = t.statut !== 'annule' && !!t.retire_at
               return (
-                <div key={t.id} className="sa-list-item" style={{ alignItems: 'flex-start' }}>
+                <div key={t.id} className="sa-list-item" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 18 }}>🎫</span>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 160 }}>
                     <div style={{ fontWeight: 700 }}>{t.lot_nom ?? 'Lot'}</div>
-                    <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{partenaire} · {date}</div>
+                    {/* Indicateur de l operation -- un meme joueur peut avoir
+                        joue a plusieurs operations au fil du temps. */}
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB' }}>{operationNom(t)}</div>
+                    <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>chez {partenaire} · {date}</div>
                     {lien && <a href={lien} target="_blank" rel="noreferrer" style={{ fontSize: 11 }}>Voir le billet →</a>}
                   </div>
-                  {t.retire_at
-                    ? <span className="sa-chip">Retiré</span>
-                    : <span className="sa-chip live">À retirer</span>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {retire
+                      ? <span className="sa-chip">Retiré</span>
+                      : <span className="sa-chip live">À retirer</span>}
+                    {t.statut !== 'annule' && (retire
+                      ? <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+                      : <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>)}
+                  </div>
                 </div>
               )
             })}
