@@ -390,7 +390,17 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     const lots: LotOperation[] = lotsTable.filter(l => ids.has(String(l.event_id))).map(l => {
       const id = String(l.id)
       return {
-        id, nom: String(l.titre ?? l.nom ?? 'Lot'), emoji: (l.emoji as string) ?? null,
+        /* `nom`, pas `titre` : confirme en base (20/10) que `tirages.lot_nom`
+           est systematiquement ecrit depuis la colonne `nom` (100% des 58
+           tirages reels), alors que `titre` en derive parfois sans le tiret
+           cadratin (« 100 € de remise formation BSR » vs « ... — formation
+           BSR ») -- un ancien import (Auto-Ecole de l'ARA) avait les deux
+           colonnes desynchronisees. Priorise `titre` cassait l'appariement
+           lot<->gagnant pour CES lots : "2 restants / 2" alors qu'un gagnant
+           existait deja (Romain, 20/10 : « il y a marque quantite 2 [...]
+           je pense qu'il y a confusion [...] soit il manque des gagnants,
+           soit il y a une erreur »). */
+        id, nom: String(l.nom ?? l.titre ?? 'Lot'), emoji: (l.emoji as string) ?? null,
         valeur: num(l.valeur_euros ?? l.valeur), quantite: num(l.quantite) ?? 1,
         conditions: (l.conditions as string) ?? null,
         source: 'station' as const, stationNom: op.type === 'super' ? nomStation(String(l.event_id)) : null,
