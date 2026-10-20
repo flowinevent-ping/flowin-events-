@@ -113,24 +113,6 @@ const texteRelanceParDefaut = (opNom: string) =>
 const texteMerciParDefaut = (opNom: string) =>
   `Bonjour {prenom},\n\nMerci d'être passé récupérer « {lot} » lors de ${opNom} ! Nous espérons que ça vous a plu.\n\nÀ très vite pour de nouvelles animations !`
 
-/* Email de courtoisie au PRO, en concomitance d'une relance/remerciement --
- * Romain (20/10) : « on envoie un email au pro qui dit nous avons relancé la
- * liste des gagnants, et on remet la liste des personnes ». Un seul lien
- * Gmail de plus, meme mecanisme que le reste (jamais d'envoi serveur) --
- * recapitule qui vient d etre contacte et pourquoi, pour que le commerce ne
- * soit jamais surpris par des clients qui reviennent suite a la relance. */
-function texteProParDefaut(action: 'relance' | 'merci', opNom: string, liste: GagnantOperation[]): string {
-  const verbe = action === 'relance' ? 'relancé' : 'remercié'
-  const objetListe = liste.map(g => `- ${g.joueurNom ?? 'Joueur'} — ${g.lotNom ?? 'lot'}`).join('\n')
-  const consigne = action === 'relance'
-    ? "Ils n'ont pas encore retiré leur lot — ils peuvent se présenter chez vous avec leur billet."
-    : "Ils ont déjà retiré leur lot."
-  return `Bonjour,\n\nNous venons de ${verbe} ${liste.length} gagnant${liste.length > 1 ? 's' : ''} de ${opNom} pour votre établissement :\n\n${objetListe}\n\n${consigne}\n\nL'équipe Flowin`
-}
-function objetProParDefaut(action: 'relance' | 'merci', opNom: string): string {
-  return action === 'relance' ? `Relance envoyée — gagnants à retirer leur lot (${opNom})` : `Remerciements envoyés aux gagnants (${opNom})`
-}
-
 function personnaliser(texte: string, g: GagnantOperation): string {
   const prenom = (g.joueurNom ?? '').trim().split(/\s+/)[0] || 'à vous'
   const lien = lienBillet(g.retraitToken)
@@ -156,7 +138,6 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
   const [canal, setCanal] = useState<'email' | 'whatsapp'>('email')
   const [objet, setObjet] = useState('')
   const [texte, setTexte] = useState('')
-  const [action, setAction] = useState<'relance' | 'merci' | null>(null)
 
   const nonRetires = billets.filter(g => g.etat !== 'retire')
   const retires = billets.filter(g => g.etat === 'retire')
@@ -165,13 +146,12 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
   function basculer(id: number) {
     setSelection(s => ({ ...s, [id]: !s[id] }))
   }
-  function selectionnerGroupe(a: 'relance' | 'merci', groupe: GagnantOperation[], objetParDefaut: string, texteParDefaut: string) {
+  function selectionnerGroupe(groupe: GagnantOperation[], objetParDefaut: string, texteParDefaut: string) {
     const m: Record<number, boolean> = {}
     groupe.forEach(g => { m[g.id] = true })
     setSelection(m)
     setObjet(objetParDefaut)
     setTexte(texteParDefaut)
-    setAction(a)
   }
 
   if (billets.length === 0) {
@@ -203,13 +183,13 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
         <button
           style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
           disabled={!nonRetires.length}
-          onClick={() => selectionnerGroupe('relance', nonRetires, `Votre lot vous attend — ${opNom}`, texteRelanceParDefaut(opNom))}>
+          onClick={() => selectionnerGroupe(nonRetires, `Votre lot vous attend — ${opNom}`, texteRelanceParDefaut(opNom))}>
           📣 Relancer les non utilisés ({nonRetires.length})
         </button>
         <button
           style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}
           disabled={!retires.length}
-          onClick={() => selectionnerGroupe('merci', retires, `Merci d'avoir joué — ${opNom}`, texteMerciParDefaut(opNom))}>
+          onClick={() => selectionnerGroupe(retires, `Merci d'avoir joué — ${opNom}`, texteMerciParDefaut(opNom))}>
           🙏 Remercier ceux qui ont utilisé ({retires.length})
         </button>
         {selectionnes.length > 0 && (
@@ -233,11 +213,16 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
           <textarea value={texte} onChange={e => setTexte(e.target.value)} rows={5}
             style={{ display: 'block', width: '100%', border: `1px solid ${BRD}`, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', resize: 'vertical' }} />
           <div style={{ fontSize: 10.5, color: MUT, margin: '4px 0 8px' }}>
-            {'{prenom}'}, {'{lot}'} et {'{lien}'} (lien du billet) sont remplacés automatiquement pour chaque gagnant — le texte est différent pour chacun, pas d&apos;envoi groupé identique.
+            {'{prenom}'}, {'{lot}'} et {'{lien}'} (lien du billet déjà émis) sont remplacés automatiquement pour chaque gagnant — le texte est différent pour chacun, pas d&apos;envoi groupé identique.
           </div>
+          {canal === 'email' && proContact?.email && (
+            <div style={{ fontSize: 10.5, color: MUT, margin: '0 0 8px' }}>
+              {proContact.nom || 'Le commerce'} ({proContact.email}) est mis en copie sur chaque email ci-dessous.
+            </div>
+          )}
 
           <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', marginBottom: 4 }}>
-            {canal === 'email' ? 'Un lien par personne (aucun envoi automatique) :' : 'Une conversation par personne :'}
+            {canal === 'email' ? 'Un lien par personne, prêt à envoyer (s\'ouvre dans Gmail) :' : 'Une conversation par personne :'}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 160, overflowY: 'auto' }}>
             {selectionnes.map(g => {
@@ -246,7 +231,7 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
                 return <span key={g.id} style={{ fontSize: 11.5, color: MUT }}>{g.joueurNom ?? 'Joueur'} — {canal === 'email' ? 'pas d’email' : 'pas de téléphone'} connu.</span>
               }
               const href = canal === 'email'
-                ? lienGmailTo(g.joueurEmail!, objet, personnaliser(texte, g))
+                ? lienGmailTo(g.joueurEmail!, objet, personnaliser(texte, g), proContact?.email)
                 : lienWhatsApp(g.joueurTel!, personnaliser(texte, g))
               return (
                 <a key={g.id} href={href} target="_blank" rel="noopener noreferrer"
@@ -257,21 +242,6 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
               )
             })}
           </div>
-
-          {proContact?.email && action && (
-            <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${BRD}` }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, color: MUT, textTransform: 'uppercase', marginBottom: 4 }}>
-                En concomitance — prévenir le commerce
-              </div>
-              <a
-                href={lienGmailTo(proContact.email, objetProParDefaut(action, opNom), texteProParDefaut(action, opNom, selectionnes))}
-                target="_blank" rel="noopener noreferrer"
-                style={{ display: 'flex', justifyContent: 'space-between', border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '6px 10px', fontSize: 12, textDecoration: 'none', color: '#0F172A' }}>
-                <span>✉️ Prévenir {proContact.nom || 'le commerce'} — liste des {selectionnes.length} gagnant{selectionnes.length > 1 ? 's' : ''} {action === 'relance' ? 'relancé' : 'remercié'}{selectionnes.length > 1 ? 's' : ''}</span>
-                <span style={{ color: MUT }}>{proContact.email}</span>
-              </a>
-            </div>
-          )}
         </div>
       )}
     </div>

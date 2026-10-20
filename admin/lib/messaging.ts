@@ -27,9 +27,13 @@ export function lienGmailBcc(bccList: string[], objet: string, message: string):
 }
 
 /** Un lien Gmail a UN destinataire (pas de BCC) -- permet de personnaliser le
- *  texte par personne (ex. prenom, lien de billet), impossible en BCC groupe. */
-export function lienGmailTo(email: string, objet: string, message: string): string {
-  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
+ *  texte par personne (ex. prenom, lien de billet), impossible en BCC groupe.
+ *  `cc` optionnel (Romain, 20/10 : « mettre en copie [...] pour l'envoi au pro
+ *  des personnes qu'on a relancées ») -- le commerce voit directement, dans sa
+ *  boite mail, chaque message reellement envoye a un gagnant. */
+export function lienGmailTo(email: string, objet: string, message: string, cc?: string | null): string {
+  const base = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
+  return cc ? `${base}&cc=${encodeURIComponent(cc)}` : base
 }
 
 export const TAILLE_LOT_EMAIL = 40
