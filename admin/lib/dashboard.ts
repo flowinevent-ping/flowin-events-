@@ -180,6 +180,11 @@ export interface TirageRow {
   lot_valeur: number | null
   partenaire_id: string | null
   super_event_id: string | null
+  /** Station precise du gain -- referentiel 35, ajoute pour que la fiche
+   *  joueur affiche l operation (et pas seulement le commerce), et pour
+   *  alimenter la relance (Romain, 20/10). */
+  event_id: string | null
+  ticket_code: string | null
   retrait_token: string | null
   retire_at: string | null
   statut: string | null
@@ -275,7 +280,7 @@ export async function publierLienEphemere(id: string, publie: boolean): Promise<
 export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
   const { data, error } = await supabase
     .from('tirages')
-    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,retrait_token,retire_at,statut,created_at')
+    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,ticket_code,retrait_token,retire_at,statut,created_at')
     .eq('joueur_id', joueurId)
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchJoueurTirages]', error.message); return [] }
