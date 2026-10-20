@@ -26,8 +26,7 @@ import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueu
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
 import { fetchOperationsPro, gagnantsParStation, libelleRemise } from '@/lib/operations'
 import { operationsRangees } from '@/lib/rangementOperations'
-import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
-import { PanneauGagnants } from '@/components/operations/ModalGererLots'
+import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire, useMailGagnant } from '@/components/operations/BlocsOperations'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 
 const input: React.CSSProperties = {
@@ -58,6 +57,7 @@ export default function GagnantsClient({ initial, cle, titre = true }: { initial
 }
 
 export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; data: OperationsPro; onChange: () => void }) {
+  useMailGagnant()
   const [message, setMessage] = useState<Msg>(null)
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
   const kpi = (n: number, l: string) => (
@@ -89,27 +89,13 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
           </div>
         )}
 
-      {/* Relancer les gagnants n'ayant pas retiré leur lot, remercier ceux qui
-          l'ont fait -- Romain (20/10) : « observer ceux qui ont utilisé leur
-          lot de ceux qui restent à utiliser [...] remercier ceux qui ont
-          utilisé leur lot », directement depuis le compte du pro. Meme panneau
-          que « Gérer les lots » (ModalGererLots), ici au niveau de toute
-          l'opération plutôt que d'un seul lot. */}
-      {op.gagnants.length > 0 && (
-        <div style={{ ...CARD, padding: 12, marginBottom: 14 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 800, color: '#8a7e93', textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>
-            Relancer ou remercier les gagnants
-          </div>
-          <PanneauGagnants billets={op.gagnants} opNom={op.nom} />
-        </div>
-      )}
-
       {op.gagnants.length === 0 && <Vide>Aucun gagnant sur cette opération.</Vide>}
       {gagnantsParStation(op).map(grp => (
         <div key={grp.cle}>
           {grp.nom && <TitreStation nom={grp.nom} n={grp.gagnants.length} />}
           {grp.gagnants.map(g => (
-            <LigneGain key={g.id} g={g} superEvent={op.type === 'super'} setMessage={setMessage} onChange={onChange} />
+            <LigneGain key={g.id} g={g} superEvent={op.type === 'super'} opId={op.id} opNom={op.nom}
+              partenaireNom={data.partenaire?.nom ?? data.proNom ?? ''} setMessage={setMessage} onChange={onChange} />
           ))}
         </div>
       ))}
@@ -227,13 +213,25 @@ function Tirage({ op, data, setMessage, onChange }: {
   )
 }
 
-function LigneGain({ g, superEvent, setMessage, onChange }: {
-  g: GagnantOperation; superEvent: boolean; setMessage: (m: Msg) => void; onChange: () => void
+function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onChange }: {
+  g: GagnantOperation; superEvent: boolean; opId: string; opNom: string; partenaireNom: string
+  setMessage: (m: Msg) => void; onChange: () => void
 }) {
   const [ouvert, setOuvert] = useState(false)
   const [pin, setPin] = useState('')
   const [envoi, setEnvoi] = useState(false)
   const remis = g.etat === 'retire'
+  /* Meme source de texte unique que partout ailleurs (nds-lots, fiche SA,
+     PartenaireDrawer) : /nds/mail-gagnant.js -- jamais recopie. Romain
+     (20/10) : « mettre [le bouton] à côté de la ligne email [...]
+     éventuellement ligne par ligne, mais de ne pas modifier le texte ». */
+  function lienRelance(type: 'relance' | 'merci') {
+    return window.flowinMailGagnant?.gmailUrl({
+      joueur_nom: g.joueurNom, email: g.joueurEmail, lot_nom: g.lotNom, lot_valeur: g.lotValeur,
+      ticket_code: g.ticketCode, retrait_token: g.retraitToken, partenaire_nom: partenaireNom,
+      type, operation: opId, operation_nom: opNom,
+    })
+  }
 
   const validerAvecPin = async () => {
     if (!g.retraitToken) { setMessage({ ok: false, texte: 'Ce gain n’a pas de jeton de retrait — validation impossible.' }); return }
@@ -298,6 +296,12 @@ function LigneGain({ g, superEvent, setMessage, onChange }: {
               fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
               color: '#B45309', background: 'rgba(245,158,11,.13)',
             }}>⚠️ Stock non décompté</span>
+          )}
+          {!remis && (
+            <button style={btn} onClick={() => { const u = lienRelance('relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+          )}
+          {remis && (
+            <button style={btn} onClick={() => { const u = lienRelance('merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
           )}
           <button style={btn} onClick={() => { setOuvert(!ouvert); setPin(''); setMessage(null) }}>{ouvert ? 'Fermer' : remis ? 'Modifier' : 'Valider'}</button>
         </div>
