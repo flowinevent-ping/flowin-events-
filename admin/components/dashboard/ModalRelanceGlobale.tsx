@@ -66,6 +66,10 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
   /** File d'envoi en cours -- ids des gagnants restant a relancer, dans l
    *  ordre d affichage. null = pas de file active. */
   const [file, setFile] = useState<string[] | null>(null)
+  /** Selection manuelle (Romain, 21/10 : « pouvoir sélectionner avec un
+   *  bouton l'envoi multiple ») -- un, deux, trois ou tous, au choix, en plus
+   *  des raccourcis « Tout relancer » / « Relancer ce pro ». */
+  const [selection, setSelection] = useState<Record<string, boolean>>({})
 
   const groupes = useMemo(() => {
     const parPro = new Map<string, GagnantRow[]>()
@@ -113,6 +117,10 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
   }
 
   const idsNonRelances = useMemo(() => gagnants.filter(g => !relances[g.id]).map(g => g.id), [gagnants, relances])
+  const idsSelectionnes = useMemo(() => idsNonRelances.filter(id => selection[id]), [idsNonRelances, selection])
+  function basculerSelection(id: string) {
+    setSelection(s => ({ ...s, [id]: !s[id] }))
+  }
 
   function informerPro(partenaireId: string, liste: GagnantRow[]) {
     const p = partenaires.find(x => x.id === partenaireId)
@@ -137,13 +145,29 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
               {totalRelances > 0 ? ` · ${totalRelances} déjà relancé${totalRelances > 1 ? 's' : ''} dans cette session` : ''}
             </div>
           </div>
-          {!idEnCours && idsNonRelances.length > 1 && (
+          {!idEnCours && idsSelectionnes.length > 0 && (
+            <button style={btnPrimaire} onClick={() => demarrerFile(idsSelectionnes)}>
+              🔔 Envoyer la sélection ({idsSelectionnes.length})
+            </button>
+          )}
+          {!idEnCours && idsSelectionnes.length === 0 && idsNonRelances.length > 1 && (
             <button style={btnPrimaire} onClick={() => demarrerFile(idsNonRelances)}>
               🔔 Tout relancer ({idsNonRelances.length})
             </button>
           )}
           <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: 20, cursor: 'pointer', color: MUT, lineHeight: 1 }}>✕</button>
         </div>
+
+        {!idEnCours && idsNonRelances.length > 1 && (
+          <div style={{ padding: '8px 20px 0', fontSize: 12 }}>
+            <button
+              style={{ border: 'none', background: 'none', color: '#2563EB', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 12 }}
+              onClick={() => setSelection(idsSelectionnes.length === idsNonRelances.length ? {} : Object.fromEntries(idsNonRelances.map(id => [id, true])))}
+            >
+              {idsSelectionnes.length === idsNonRelances.length ? 'Tout désélectionner' : `Tout sélectionner (${idsNonRelances.length})`}
+            </button>
+          </div>
+        )}
 
         {/* File d'envoi active : un seul bouton, toujours au meme endroit,
             envoie puis avance seul -- enchainer sans chercher la ligne suivante. */}
@@ -192,6 +216,10 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
                   const faite = !!relances[g.id]
                   return (
                     <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderTop: `1px solid ${BRD}`, flexWrap: 'wrap', opacity: faite ? 0.65 : 1 }}>
+                      {!faite && (
+                        <input type="checkbox" checked={!!selection[g.id]} onChange={() => basculerSelection(g.id)}
+                          style={{ width: 16, height: 16, flexShrink: 0, cursor: 'pointer' }} />
+                      )}
                       <div style={{ flex: 1, minWidth: 160 }}>
                         <div style={{ fontWeight: 700, fontSize: 13 }}>{g.joueur_nom ?? '—'}</div>
                         <div style={{ fontSize: 11, color: MUT }}>{g.lot_nom ?? 'Lot'}{g.lot_valeur != null ? ` · ${g.lot_valeur} €` : ''}</div>
