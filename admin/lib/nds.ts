@@ -148,6 +148,33 @@ export function mailPartenaireUrl(
   ].join('\n')
   return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
 }
+
+/** Info au pro qu on vient de relancer ses gagnants non retires -- Romain
+ * (21/10) : « le texte que tu vas mettre en envoi au pro pour dire qu on a
+ * relancé les clients [...] avec notre signature et tout le laïus ». Un seul
+ * email par pro, listant tous ceux relances d un coup (pas un email par
+ * gagnant) -- purement informatif, aucune action attendue du commercant.
+ * Texte approuve mot pour mot avant implementation. */
+export function mailPartenaireRelanceUrl(
+  gagnants: { joueur_nom?: string | null; lot_nom?: string | null }[],
+  partenaireNom: string, partenaireEmail: string | null,
+  operation?: { id: string; nom: string | null } | null
+): string {
+  const nds = !operation || operation.id === 'se-nds-2026'
+  const n = gagnants.length
+  const nomJeu = nds ? 'des Nuits du Sud' : (operation?.nom || '')
+  const sujet = `${nds ? 'Nuits du Sud & Flowin' : `${operation?.nom || ''} & Flowin`} — Rappel envoyé à vos gagnants non retirés`
+  const corps = [
+    `Hey, salut ${partenaireNom || ''} !`, '',
+    `On vient de relancer ${n} client${n > 1 ? 's' : ''} qui ${n > 1 ? 'ont' : 'a'} gagné un lot chez vous au jeu ${nomJeu} et ne ${n > 1 ? 'les ont' : "l'a"} pas encore récupéré${n > 1 ? 's' : ''} :`, '',
+    ...gagnants.map(g => `   ${g.joueur_nom || '—'} — ${g.lot_nom || ''}`),
+    '',
+    "Rien à faire de votre côté : s'ils se présentent en boutique, c'est la même procédure que d'habitude — flashez le QR de leur billet, saisissez votre code de validation, et le lot est déstocké automatiquement.", '',
+    'Merci,', nds ? 'Flowin & les Nuits du Sud' : `Flowin & ${operation?.nom || ''}`, 'flowinevent@gmail.com · 04 93 59 91 37',
+  ].join('\n')
+  return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
+}
+
 /** Page bilan + procedure + PIN, destinee au commercant. */
 export function lienBilanPartenaire(partenaireId: string): string {
   return `${origine()}/nds/bilan/email-partenaire.html?p=${encodeURIComponent(partenaireId)}`
