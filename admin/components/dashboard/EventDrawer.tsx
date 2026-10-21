@@ -569,8 +569,8 @@ export default function EventDrawer() {
                       onSelect={v => setFiltreG(v as 'tous' | 'actifs' | 'retires')}
                       onglets={[
                         { id: 'tous', label: 'Tous' },
-                        { id: 'actifs', label: 'Non retirés' },
-                        { id: 'retires', label: 'Retirés' },
+                        { id: 'actifs', label: 'Non utilisés' },
+                        { id: 'retires', label: 'Utilisés' },
                       ]}
                     />
                     <select
@@ -637,7 +637,7 @@ export default function EventDrawer() {
                       <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
                       <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
                     </div>
-                    {l.retire && <span className="sa-chip live">Retiré</span>}
+                    {l.retire && <span className="sa-chip live">Utilisé</span>}
                   </div>
                 ))}
               </>

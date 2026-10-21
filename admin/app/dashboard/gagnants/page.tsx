@@ -30,7 +30,7 @@ import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { usePorteeInitiale } from '@/lib/portee'
 import { useMailGagnant } from '@/lib/mailGagnant'
-import { etatTirage, LIBELLE_ETAT_TIRAGE, type EtatTirage } from '@/lib/operations'
+import { etatTirage, LIBELLE_ETAT_TIRAGE, marquerRelance, type EtatTirage } from '@/lib/operations'
 import ModalRelanceGlobale from '@/components/dashboard/ModalRelanceGlobale'
 
 type Etat = EtatTirage
@@ -58,6 +58,10 @@ export default function Page() {
      la page s ouvre cadree sur l operation, le selecteur reste maitre ensuite. */
   const [se, setSe] = useState('')
   const [relanceOuverte, setRelanceOuverte] = useState(false)
+  /* Trace locale des relances envoyees DEPUIS cette page (bouton par ligne) --
+     en plus de l ecrit en base (marquerRelance), pour refleter l etat tout de
+     suite sans recharger `list`. */
+  const [relancesSession, setRelancesSession] = useState<Record<string, true>>({})
   const portee = usePorteeInitiale()
   useEffect(() => { if (portee.se) setSe(portee.se) }, [portee.se])
 
@@ -144,15 +148,16 @@ export default function Page() {
          uniquement pour un lot confirme (donc deja notifie) et pas encore
          retire -- un gagnant "en attente" n'a pas encore ete appele, le
          relancer par email n'aurait pas de sens. */
-      id: 'action', label: '', nonTriable: true, horsRecherche: true, aligne: 'centre', largeur: 96,
+      id: 'action', label: '', nonTriable: true, horsRecherche: true, aligne: 'centre', largeur: 110,
       valeur: () => '',
       rendu: t => {
         if (etatDe(t) !== 'confirme') return null
         const p = partenaires.find(x => x.id === t.partenaire_id)
+        const relance = relancesSession[t.id] || t.relance_envoyee_at
         return (
           <button
             className="sa-btn sm"
-            title="Rappeler par email que le lot confirmé n'a pas encore été retiré"
+            title={relance ? "Renvoyer un rappel par email" : "Rappeler par email que le lot confirmé n'a pas encore été retiré"}
             onClick={e => {
               e.stopPropagation()
               const url = window.flowinMailGagnant?.gmailUrl({
@@ -162,9 +167,11 @@ export default function Page() {
                 type: 'relance',
               })
               if (url) window.open(url, '_blank', 'noopener')
+              marquerRelance(Number(t.id))
+              setRelancesSession(r => ({ ...r, [t.id]: true }))
             }}
           >
-            🔔 Relancer
+            🔔 {relance ? 'Relancer à nouveau' : 'Relancer'}
           </button>
         )
       },
@@ -187,13 +194,19 @@ export default function Page() {
           placeholderRecherche="Rechercher un joueur, un lot, un ticket…"
           actions={
             <button className="sa-btn sm primary" disabled={aRelancer.length === 0} onClick={() => setRelanceOuverte(true)}>
-              🔔 Relancer les non retirés{aRelancer.length > 0 ? ` (${aRelancer.length})` : ''}
+              🔔 Relancer (lot pas récupéré){aRelancer.length > 0 ? ` (${aRelancer.length})` : ''}
             </button>
           }
           filtres={[
             { id: 'tous', label: 'Tous' },
             { id: 'a_confirmer', label: 'En attente', test: t => etatDe(t) === 'a_confirmer' },
             { id: 'confirme', label: 'Confirmés', test: t => etatDe(t) === 'confirme' },
+            /* Romain (21/10) : « il manque la sélection de ceux que l'on veut
+               voir, qui sont ceux qui sont relancés ou à relancer » -- deux
+               sous-filtres du groupe Confirmés, bases sur relance_envoyee_at
+               (persiste en base, pas seulement pendant la session). */
+            { id: 'a_relancer', label: 'À relancer', test: t => etatDe(t) === 'confirme' && !t.relance_envoyee_at },
+            { id: 'relance', label: 'Déjà relancés', test: t => etatDe(t) === 'confirme' && !!t.relance_envoyee_at },
             { id: 'retire', label: 'Utilisés', test: t => etatDe(t) === 'retire' },
           ]}
           selecteurs={[{
@@ -208,7 +221,8 @@ export default function Page() {
           legende={
             <>
               <b>En attente</b> = jamais appelé · <b>Confirmé</b> = appelé, lot pas encore
-              récupéré · <b>Utilisé</b> = billet scanné et lot remis en boutique · le bouton{' '}
+              récupéré (sous-filtres <b>À relancer</b> / <b>Déjà relancés</b>) ·{' '}
+              <b>Utilisé</b> = billet scanné et lot remis en boutique · le bouton{' '}
               <b>🔔 Relancer</b> (visible sur les confirmés) envoie un rappel par email
             </>
           }

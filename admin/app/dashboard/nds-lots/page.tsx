@@ -48,7 +48,7 @@ function Compteur({ n, label, labelPluriel, ton }: { n: number; label: string; l
 function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
   const ton = etat === 'retire' ? 'accent' : etat === 'confirme' ? 'ok' : 'alerte'
   const t = TONS_COMPTEUR[ton]
-  const texte = etat === 'retire' ? '✓ Retiré' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
+  const texte = etat === 'retire' ? '✓ Utilisé' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
   return <span style={{ background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>{texte}</span>
 }
 interface Ligne {
@@ -181,7 +181,7 @@ export default function Page() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10, marginBottom: 18 }}>
           {([['Lots tirés', total.tires], ['Gagnants distincts', gagnantsDistincts], ['À appeler', total.a_confirmer],
-             ['Confirmés', total.confirmes], ['Retirés en caisse', total.retires]] as [string, number][])
+             ['Confirmés', total.confirmes], ['Utilisés en caisse', total.retires]] as [string, number][])
             .map(([lib, val]) => (
             <div key={lib} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: '16px 14px' }}>
               <div style={{ fontSize: 26, fontWeight: 800 }}>{val}</div>

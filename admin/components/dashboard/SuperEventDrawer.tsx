@@ -275,7 +275,7 @@ export default function SuperEventDrawer() {
                       {l.valeur ? `${l.valeur} €` : '—'}{l.quantite ? ` · ${l.quantite} ex.` : ''}
                     </div>
                   </div>
-                  {l.retire && <span className="sa-chip live">Retiré</span>}
+                  {l.retire && <span className="sa-chip live">Utilisé</span>}
                 </div>
               ))}
           </>

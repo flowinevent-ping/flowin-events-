@@ -33,6 +33,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { DonneesOperation, PartenaireMin, GagnantOperation } from '@/lib/operations'
+import { marquerRelance } from '@/lib/operations'
 import BilletApercu from '@/components/parcours/BilletApercu'
 import { ajouterStock, retirerStock } from '@/lib/stock'
 import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
@@ -252,6 +253,7 @@ export function PanneauGagnants({ billets, opNom, proContact }: {
                 : lienWhatsApp(g.joueurTel!, personnaliser(texte, g))
               return (
                 <a key={g.id} href={href} target="_blank" rel="noopener noreferrer"
+                  onClick={() => { if (g.etat !== 'retire') marquerRelance(g.id) }}
                   style={{ display: 'flex', justifyContent: 'space-between', border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '5px 9px', fontSize: 12, textDecoration: 'none', color: '#0F172A' }}>
                   <span>{canal === 'email' ? '✉️' : '💬'} {g.joueurNom ?? 'Joueur'}</span>
                   <span style={{ color: MUT }}>{canal === 'email' ? g.joueurEmail : g.joueurTel}</span>

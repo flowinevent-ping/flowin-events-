@@ -22,6 +22,7 @@ import type { GagnantRow } from '@/lib/dashboard'
 import type { FlowinPartenaire } from '@/lib/types'
 import type { SuperEvent } from '@/lib/nds'
 import { mailPartenaireRelanceUrl } from '@/lib/nds'
+import { marquerRelance } from '@/lib/operations'
 
 const CARDBG = 'var(--sa-card, #FFFFFF)'
 const BRD = 'var(--sa-border, #E2E8F0)'
@@ -43,7 +44,15 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
   supers: SuperEvent[]
   onClose: () => void
 }) {
-  const [relances, setRelances] = useState<Record<string, boolean>>({})
+  /* Initialise depuis relance_envoyee_at (base) -- pas seulement « coché dans
+     cette session » : rouvrir la boîte de dialogue, ou revenir demain,
+     montre encore qui a deja ete relance. Un nouveau clic reste possible
+     (« Relancer à nouveau »), setRelances l actualise alors a la date du jour. */
+  const [relances, setRelances] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {}
+    gagnants.forEach(g => { if (g.relance_envoyee_at) init[g.id] = true })
+    return init
+  })
   const [prosInformes, setProsInformes] = useState<Record<string, boolean>>({})
 
   const groupes = useMemo(() => {
@@ -72,6 +81,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
       type: 'relance',
     })
     if (url) window.open(url, '_blank', 'noopener')
+    marquerRelance(Number(g.id))
     setRelances(r => ({ ...r, [g.id]: true }))
   }
 

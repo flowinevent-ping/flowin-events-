@@ -28,7 +28,7 @@ const TONS_ETAT: Record<string, { bg: string; c: string }> = {
 }
 function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
   const t = TONS_ETAT[etat]
-  const texte = etat === 'retire' ? 'Retiré' : etat === 'confirme' ? 'Confirmé' : 'À appeler'
+  const texte = etat === 'retire' ? 'Utilisé' : etat === 'confirme' ? 'Confirmé' : 'À appeler'
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>
       <Ico k={etat === 'a_confirmer' ? 'phone' : 'check'} size={11} />{texte}
@@ -385,7 +385,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
                   <div style={{ fontWeight: 700 }}>{g.lot_nom}</div>
                   <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.joueur_nom ?? '—'}</div>
                 </div>
-                {g.etat === 'retire' && <span className="sa-chip live">Retiré</span>}
+                {g.etat === 'retire' && <span className="sa-chip live">Utilisé</span>}
               </div>
             ))}
             {!gagnants && !chargeG && pLots.map(l => (
@@ -430,7 +430,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             {!chargeG && etatG && (
               <>
                 <div className="sa-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 12 }}>
-                  {([['Tirés', etatG.tires], ['À appeler', etatG.a_confirmer], ['Confirmés', etatG.confirmes], ['Retirés', etatG.retires]] as [string, number][]).map(([lib, val]) => (
+                  {([['Tirés', etatG.tires], ['À appeler', etatG.a_confirmer], ['Confirmés', etatG.confirmes], ['Utilisés', etatG.retires]] as [string, number][]).map(([lib, val]) => (
                     <div key={lib} style={{ background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
                       <div style={{ fontSize: 20, fontWeight: 800 }}>{val}</div>
                       <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sa-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>{lib}</div>
