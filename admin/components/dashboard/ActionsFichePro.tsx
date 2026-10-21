@@ -30,11 +30,19 @@ export default function ActionsFichePro({ pro }: { pro: FlowinPro }) {
   }, [ptId])
 
   const espace = `${BASE}/pro?pro=${encodeURIComponent(pro.id)}`
+  /* Email de bienvenue a la creation/validation d un compte pro -- avant,
+     corps vide (2 lignes blanches) entre le salut et le lien. Romain
+     (21/10) : « la meme chose pour les autres profils [...] a la
+     generation d un nouveau compte [...] la meme chose a chaque fois » --
+     meme ton que le texte de relance au gagnant (mail-gagnant.js), ecrit
+     une seule fois ici, pour que ce soit toujours le meme texte quel que
+     soit le pro. */
   const corps = [
-    `Bonjour${pro.contact ? ` ${pro.contact}` : ''},`, '',
-    '', '',
+    `Hey, salut${pro.contact ? ` ${pro.contact}` : ''} !`, '',
+    'Bienvenue chez Flowin ! Votre espace pro est prêt : vous y retrouverez vos lots, vos gagnants, votre trafic et vos documents.', '',
     `Votre espace Flowin : ${espace}`,
     ...(pin ? [`Votre code de validation des lots en caisse : ${pin}`] : []), '',
+    'À bientôt !',
     'L’équipe Flowin',
     'flowinevent@gmail.com · 04 93 59 91 37',
   ].join('\n')
