@@ -151,9 +151,16 @@
     return L.join('\n');
   }
 
+  /* Romain (21/10) : « je crois qu'on n'envoie pas depuis la boite
+     flowinevent@gmail.com [...] il faut que ca parte de cette boite ». Sans
+     indication, Gmail compose avec le compte Google "actif" du navigateur,
+     qui peut etre un autre compte que celui connecte pour Flowin -- authuser
+     force Gmail a utiliser CE compte, s il est bien connecte dans le meme
+     navigateur (ne connecte personne a sa place, bascule seulement parmi les
+     comptes deja ouverts). */
   function gmailUrl(t) {
     t = t || {};
-    return 'https://mail.google.com/mail/?view=cm&fs=1'
+    return 'https://mail.google.com/mail/?authuser=flowinevent%40gmail.com&view=cm&fs=1'
       + '&to=' + encodeURIComponent(t.email || t.joueur_email || '')
       + '&su=' + encodeURIComponent(sujet(t))
       + '&body=' + encodeURIComponent(corps(t));

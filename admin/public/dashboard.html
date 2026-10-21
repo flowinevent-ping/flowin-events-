@@ -5289,7 +5289,7 @@ function ndsLotsMailUrl(g){
   L.push('');
   L.push('Flowin, les Nuits du Sud, la Ville de Vence te remercient pour ta participation.');
   L.push('flowinevent@gmail.com · 04 93 59 91 37');
-  return 'https://mail.google.com/mail/?view=cm&fs=1'
+  return 'https://mail.google.com/mail/?authuser=flowinevent%40gmail.com&view=cm&fs=1'
     + '&to='+encodeURIComponent((g.gagnant&&g.gagnant.email)||'')
     + '&su='+encodeURIComponent(objet)
     + '&body='+encodeURIComponent(L.join('\n'));
@@ -8340,7 +8340,7 @@ function ptMailPack(p, list){
 function ptEnvoiPack(pid){
   var p = findPartner(pid); if(!p) return;
   var list = _ptData.gag[pid] || [];
-  var url = 'https://mail.google.com/mail/?view=cm&fs=1'
+  var url = 'https://mail.google.com/mail/?authuser=flowinevent%40gmail.com&view=cm&fs=1'
     + (p.email ? '&to='+encodeURIComponent(p.email) : '')
     + '&su='+encodeURIComponent('Nuits du Sud 2026 - vos gagnants, vos billets et vos visuels')
     + '&body='+encodeURIComponent(ptMailPack(p, list));
@@ -8454,7 +8454,7 @@ function ptMailRemerciement(p, totalVisites){
     'Les Nuits du Sud & Flowin',
     'flowinevent@gmail.com - 04 93 59 91 37'
   ].filter(function(x){ return x !== null; });
-  return 'https://mail.google.com/mail/?view=cm&fs=1'
+  return 'https://mail.google.com/mail/?authuser=flowinevent%40gmail.com&view=cm&fs=1'
     + (p.email ? '&to='+encodeURIComponent(p.email) : '')
     + '&su='+encodeURIComponent('Merci pour votre participation - Nuits du Sud 2026')
     + '&body='+encodeURIComponent(L.join('\n'));
@@ -8512,7 +8512,7 @@ function gagMailCommerce(t, p){
     'Les Nuits du Sud & Flowin',
     'flowinevent@gmail.com - 04 93 59 91 37'
   ];
-  return 'https://mail.google.com/mail/?view=cm&fs=1'
+  return 'https://mail.google.com/mail/?authuser=flowinevent%40gmail.com&view=cm&fs=1'
     + ((p&&p.email)?'&to='+encodeURIComponent(p.email):'')
     + '&su='+encodeURIComponent('Nuits du Sud - un gagnant vient d etre confirme chez vous')
     + '&body='+encodeURIComponent(L.join('\n'));
@@ -8956,7 +8956,7 @@ html += '<div class="section-h">🌙 Communs Nuits du Sud</div>';
                + (url?'<a class="btn btn-sm" href="'+escAttr(url)+'" target="_blank" rel="noopener" style="font-size:11px;text-decoration:none">🎟️ Voir le billet</a>':'<span class="text-xs text-muted">Billet indisponible (token manquant)</span>')
                + (url?'<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(\''+escAttr(url)+'\',\'Lien du billet\')">🔗 Copier le lien</button>':'')
                + '<button class="btn btn-sm" style="font-size:11px" onclick="ptCopy(ptMailLot(findPartner(\''+esc(p.id)+'\'),(_ptData.gag[\''+esc(p.id)+'\']||[]).filter(function(x){return Number(x.tirage_id)==='+Number(t.tirage_id)+';})[0]),\'Email gagnant\')">✉️ Copier l\'email</button>'
-               + (t.joueur_email?'<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(t.joueur_email)+'&su='+encodeURIComponent('Nuits du Sud 2026 — vous avez gagné !')+'">📨 Gmail</a>':'')
+               + (t.joueur_email?'<a class="btn btn-sm" style="font-size:11px;text-decoration:none" target="_blank" rel="noopener" href="https://mail.google.com/mail/?authuser=flowinevent%40gmail.com&view=cm&fs=1&to='+encodeURIComponent(t.joueur_email)+'&su='+encodeURIComponent('Nuits du Sud 2026 — vous avez gagné !')+'">📨 Gmail</a>':'')
                + '<button class="btn btn-sm" style="font-size:11px" onclick="ptNotifie(\''+esc(p.id)+'\','+Number(t.tirage_id)+','+(sent?'false':'true')+')">'+(sent?'↺ Annuler « envoyé »':'✓ Marquer envoyé')+'</button>'
                + '</div></div>';
         });
