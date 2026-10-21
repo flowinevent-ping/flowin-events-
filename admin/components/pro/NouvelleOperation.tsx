@@ -28,7 +28,7 @@ import { libelleModule, libelleDates } from '@/lib/operations'
 import { SECTEURS_PRO } from '@/lib/proCreation'
 import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED, choix } from '@/lib/proui'
-import { Ico } from '@/lib/proicons'
+import { Ico, IcoModule } from '@/lib/proicons'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import BandeauEtapes from '@/components/parcours/BandeauEtapes'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
@@ -70,6 +70,22 @@ function Titre({ t, s }: { t: string; s?: string }) {
     </div>
   )
 }
+
+/* Style de carte a halo (etape 0 "Que voulez-vous faire ?"), reutilise pour
+   le choix du super event (etape 1 de "rejoindre") -- harmonise les deux
+   ecrans de choix au lieu de retomber sur de simples boutons plats
+   (Romain, 21/10 : "je ne fais pas le distinguo"). */
+const NOP_CARTE_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+  .nop-carte:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(28,16,36,.12);border-color:var(--acc)}
+  .nop-carte .nop-filet{position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc)}
+  .nop-carte .nop-halo{width:72px;height:72px;border-radius:999px;background:var(--acc-tint);color:var(--acc);display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:background .18s ease,color .18s ease}
+  .nop-carte:hover .nop-halo{background:var(--acc);color:#fff}
+  .nop-carte .nop-cta{margin-top:20px;padding:10px 22px;border-radius:999px;background:var(--acc-tint);color:var(--acc);font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:background .18s ease,color .18s ease}
+  .nop-carte .nop-spacer{flex:1}
+  .nop-carte:hover .nop-cta{background:var(--acc);color:#fff}
+  .nop-carte .nop-fleche{transition:transform .18s ease}
+  .nop-carte:hover .nop-fleche{transform:translateX(3px)}
+  .nop-carte.nop-actif{border-color:var(--acc);background:var(--acc-tint)}`
 
 export default function NouvelleOperation({ pro, banques, supers, packs, typeInitial, seInitial }: {
   pro: ProNouvelle
@@ -364,16 +380,7 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
        plutot qu'un lien texte + fleche. */
     return (
       <div style={{ maxWidth: 980 }}>
-        <style>{`.nop-carte{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-          .nop-carte:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(28,16,36,.12);border-color:var(--acc)}
-          .nop-carte .nop-filet{position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc)}
-          .nop-carte .nop-halo{width:72px;height:72px;border-radius:999px;background:var(--acc-tint);color:var(--acc);display:flex;align-items:center;justify-content:center;margin-bottom:18px;transition:background .18s ease,color .18s ease}
-          .nop-carte:hover .nop-halo{background:var(--acc);color:#fff}
-          .nop-carte .nop-cta{margin-top:20px;padding:10px 22px;border-radius:999px;background:var(--acc-tint);color:var(--acc);font-weight:800;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:background .18s ease,color .18s ease}
-          .nop-carte .nop-spacer{flex:1}
-          .nop-carte:hover .nop-cta{background:var(--acc);color:#fff}
-          .nop-carte .nop-fleche{transition:transform .18s ease}
-          .nop-carte:hover .nop-fleche{transform:translateX(3px)}`}</style>
+        <style>{NOP_CARTE_CSS}</style>
         <div style={{ fontSize: 24, fontWeight: 800 }}>Nouvelle opération</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '4px 0 20px' }}>Quatre étapes, avec à droite le jeu tel que vos clients le verront.</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
@@ -453,15 +460,23 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
           {etape === 1 && rejoindre && (
             <>
               <Titre t="Quel super event ?" s="Choisissez l’opération : son jeu est déjà choisi par l’organisateur." />
+              <style>{NOP_CARTE_CSS}</style>
               {supers.length === 0 && <div style={{ fontSize: 13, ...MUTED, marginBottom: 12 }}>Aucun super event ouvert aux inscriptions pour le moment.</div>}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10, marginBottom: 18 }}>
-                {supers.map(s => (
-                  <button key={s.id} style={choix(seId === s.id)} onClick={() => setSeId(s.id)}>
-                    <div style={{ fontWeight: 800, fontSize: 15 }}>{s.nom}</div>
-                    <div style={{ fontSize: 12.5, ...MUTED, marginTop: 3 }}>{libelleDates(s.date_d, s.date_f)}</div>
-                    <div style={{ fontSize: 12.5, marginTop: 6, color: C.accent, fontWeight: 700 }}>{libelleModule(s.module || GABARIT_MODULE)}</div>
-                  </button>
-                ))}
+                {supers.map(s => {
+                  const actif = seId === s.id
+                  return (
+                    <button key={s.id} type="button" className={`nop-carte${actif ? ' nop-actif' : ''}`}
+                      style={{ ...choix(false), padding: '22px 18px 18px', background: '#fff', ['--acc' as string]: ACCENT_SUPER, ['--acc-tint' as string]: `${ACCENT_SUPER}17` } as React.CSSProperties}
+                      onClick={() => setSeId(s.id)}>
+                      <span className="nop-filet" />
+                      <div className="nop-halo" style={{ width: 54, height: 54, marginBottom: 10 }}><IcoModule module={s.module || GABARIT_MODULE} size={24} /></div>
+                      <div style={{ fontWeight: 800, fontSize: 15 }}>{s.nom}</div>
+                      <div style={{ fontSize: 12.5, ...MUTED, marginTop: 3 }}>{libelleDates(s.date_d, s.date_f)}</div>
+                      <div style={{ fontSize: 12.5, marginTop: 6, color: ACCENT_SUPER, fontWeight: 700 }}>{libelleModule(s.module || GABARIT_MODULE)}</div>
+                    </button>
+                  )
+                })}
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                 {([['commerce', 'J’accueille une station de jeu'], ['annonceur', 'Je suis annonceur, sans station']] as const).map(([v, l]) => (

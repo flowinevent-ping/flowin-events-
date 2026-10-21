@@ -27,6 +27,37 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
   const data = await fetchProDashboard(proId)
   const { data: supersRes } = await supabase.from('super_events').select('id,nom,date_d,date_f,status')
   const opsSE = grouperOperations(data.events, (supersRes ?? []) as SuperEventRef[]).filter(o => o.type === 'super')
+
+  /* Demandes "rejoindre un super event" pas encore actees (en_attente) ou
+     refusees : sans ca, le pro qui a envoye une demande ne voit plus rien
+     nulle part tant que le SA n a pas valide (audit UX 21/10, Romain). Une
+     fois validee, event_id est rempli et l operation apparait via opsSE
+     ci-dessus -- on exclut donc 'validee' pour ne pas doublonner. */
+  const demandes = proId
+    ? (await supabase
+        .from('demandes_rattachement_super_event')
+        .select('id,super_event_id,statut,created_at,note_sa')
+        .eq('pro_id', proId)
+        .neq('statut', 'validee')
+        .order('created_at', { ascending: false })).data ?? []
+    : []
+  const nomSuper = (id: string) => (supersRes ?? []).find(s => s.id === id)?.nom ?? id
+  const blocDemandes = demandes.length > 0 && (
+    <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {demandes.map(d => (
+        <div key={d.id} style={{ ...CARD, margin: 0, padding: '12px 16px', borderLeft: `3px solid ${d.statut === 'refusee' ? '#C23B3B' : '#C2410C'}` }}>
+          <div style={{ fontWeight: 800, fontSize: 13.5 }}>
+            {d.statut === 'refusee' ? '✕ Demande refusée — ' : '⏳ En attente de validation — '}{nomSuper(d.super_event_id)}
+          </div>
+          <div style={{ fontSize: 12, ...MUTED, marginTop: 2 }}>
+            {d.statut === 'refusee'
+              ? (d.note_sa || 'Votre demande de rattachement n’a pas été retenue.')
+              : 'Votre demande a bien été envoyée, Flowin la valide avant qu’elle apparaisse ici.'}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
   const choisi = opsSE.find(o => o.id === searchParams.se) ?? (opsSE.length === 1 ? opsSE[0] : null)
   const seId = choisi?.id ?? null
   const qp = proId ? `?pro=${encodeURIComponent(proId)}` : '?'
@@ -36,7 +67,8 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
         <h1 style={H1}>Mes super events</h1>
         <div style={{ ...SUB, marginBottom: 16 }}>Les opérations collectives auxquelles vous participez. Ouvrez-en une pour voir le bilan de vos stations.</div>
-        {opsSE.length === 0 && <div style={{ ...CARD, fontSize: 13, ...MUTED }}>Vous ne participez à aucun super event.</div>}
+        {blocDemandes}
+        {opsSE.length === 0 && demandes.length === 0 && <div style={{ ...CARD, fontSize: 13, ...MUTED }}>Vous ne participez à aucun super event.</div>}
         {opsSE.map(op => (
           <BlocOperation key={op.cle} op={op} droite={
             <Link href={`/pro/super${qp}&se=${encodeURIComponent(op.id)}`} style={{ color: ACC, fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Voir le bilan →</Link>
@@ -113,6 +145,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       <h1 style={H1}>Ma participation — {choisi.nom}</h1>
       <div style={{ ...SUB }}>{libelleDates(choisi.dateD, choisi.dateF)}</div>
       <div style={{ ...SUB, marginBottom: 16 }}>Vous ne voyez ici que vos propres stations. Le bilan global du super event est réservé à l'organisateur (Super Admin). Chiffres calculés via la même fonction que le Super Admin (super_event_stations).</div>
+      {blocDemandes}
       <div style={{ borderRadius: 18, padding: 20, color: '#fff', marginBottom: 16, background: 'linear-gradient(135deg,#FF8A14 0%,#EA580C 55%,#C2410C 100%)' }}>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', opacity: 0.9 }}>MA PARTICIPATION · BILAN</div>
         <div style={{ fontSize: 22, fontWeight: 900, margin: '4px 0 14px' }}>{data.pro?.nom ?? 'Mon établissement'}</div>
