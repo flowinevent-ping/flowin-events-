@@ -179,6 +179,20 @@ export interface GagnantOperation {
    *  destocke ou en stock »). null si ce lot n a pas de stock unitaire suivi
    *  (quantite declarative uniquement) : la question ne s applique pas. */
   stockDestocke: boolean | null
+  /** Date du dernier email de relance envoye -- Romain (21/10) : « il manque
+   *  la sélection de ceux que l'on veut voir, qui sont ceux qui sont
+   *  relancés ou à relancer ». Rempli par marquerRelance() au clic sur
+   *  Relancer, jamais par le joueur. */
+  relanceEnvoyeeAt: string | null
+}
+
+/** Enregistre qu une relance vient d etre envoyee a ce gagnant -- appele par
+ *  CHAQUE bouton Relancer de l app (SA, pro, modal globale), pour que la
+ *  liste des gagnants puisse filtrer "à relancer" / "déjà relancés" sans
+ *  dependre d un etat garde en memoire le temps d une seule session. */
+export async function marquerRelance(tirageId: number): Promise<void> {
+  const { error } = await supabase.from('tirages').update({ relance_envoyee_at: new Date().toISOString() }).eq('id', tirageId)
+  if (error) console.error('[marquerRelance]', error.message)
 }
 
 export type EtatTirage = 'a_confirmer' | 'confirme' | 'retire'
@@ -197,11 +211,13 @@ export function etatTirage(t: { retire_at?: string | null; notifie_at?: string |
 }
 
 /** Libelles courts, identiques partout (fiche pro, fiche event, fiche joueur,
- *  liste Gagnants) -- avant : « En attente »/« Confirmé »/« Utilisé » sur
- *  certains ecrans, « À appeler »/« Confirmé »/« Retiré » sur d autres pour
- *  le MEME etat. */
+ *  liste Gagnants). « Retiré » (precedemment unifie ici) prete a confusion :
+ *  Romain (21/10) le lit comme « retire du tirage, redistribue a quelqu un
+ *  d autre » (un re-tirage suite a un gagnant injoignable), alors que l etat
+ *  veut dire « billet scanne, lot remis en boutique ». « Utilisé » ne porte
+ *  pas cette double lecture. */
 export const LIBELLE_ETAT_TIRAGE: Record<EtatTirage, string> = {
-  a_confirmer: 'À appeler', confirme: 'Confirmé', retire: 'Retiré',
+  a_confirmer: 'À appeler', confirme: 'Confirmé', retire: 'Utilisé',
 }
 
 export interface ContratOperation {
@@ -295,12 +311,12 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
       : Promise.resolve({ data: [] }),
     partenaireId && seIds.length
       ? supabase.from('tirages')
-        .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,created_at,super_event_id,event_id,statut,type')
+        .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .eq('partenaire_id', partenaireId).in('super_event_id', seIds).neq('statut', 'annule').eq('type', 'grand')
       : Promise.resolve({ data: [] }),
     evIds.length
       ? supabase.from('tirages')
-        .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,created_at,super_event_id,event_id,statut,type')
+        .select('id,joueur_nom,joueur_email,joueur_tel,lot_nom,lot_valeur,ticket_code,retrait_token,notifie_at,retire_at,relance_envoyee_at,created_at,super_event_id,event_id,statut,type')
         .in('event_id', evIds).neq('statut', 'annule')
       : Promise.resolve({ data: [] }),
     evIds.length
@@ -375,6 +391,7 @@ export async function fetchOperationsPro(proId: string): Promise<OperationsPro> 
     etat: etatTirage({ retire_at: t.retire_at as string | null, notifie_at: t.notifie_at as string | null, super_event_id: t.super_event_id as string | null }),
     date: t.created_at ? String(t.created_at).slice(0, 10) : null,
     retireAt: (t.retire_at as string) ?? null,
+    relanceEnvoyeeAt: (t.relance_envoyee_at as string) ?? null,
     superEventId: (t.super_event_id as string) ?? null,
     eventId: (t.event_id as string) ?? null,
     /* Complete plus bas, par operation : il faut d abord savoir si LE LOT de

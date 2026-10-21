@@ -7,7 +7,7 @@ import { DrawerTabs, FieldRow, SectionHeader, StatusChip } from './DashboardUI'
 import { btn } from '@/components/operations/BlocsOperations'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
-import { etatTirage, LIBELLE_ETAT_TIRAGE } from '@/lib/operations'
+import { etatTirage, LIBELLE_ETAT_TIRAGE, marquerRelance } from '@/lib/operations'
 import type { FlowinJoueur } from '@/lib/types'
 
 function fmt(d?: string | null) {
@@ -244,7 +244,11 @@ export default function JoueurDrawer() {
                         UX du 20/10). */}
                     <span className={`sa-chip${etat === 'retire' ? '' : ' live'}`}>{LIBELLE_ETAT_TIRAGE[etat]}</span>
                     {!annule && etat === 'confirme' && (
-                      <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+                      <button style={btn} onClick={() => {
+                        const u = lienRelanceJoueur(t, 'relance')
+                        if (u) window.open(u, '_blank', 'noopener')
+                        marquerRelance(Number(t.id))
+                      }}>🔔 {t.relance_envoyee_at ? 'Relancer à nouveau' : 'Relancer'}</button>
                     )}
                     {!annule && etat === 'retire' && (
                       <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>

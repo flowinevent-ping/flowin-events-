@@ -24,7 +24,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { marquerGainUtilise, enregistrerTirage, envoyerTicketGagnant, fetchJoueursEligibles, type JoueurEligible } from '@/lib/dashboard'
 import type { DonneesOperation, GagnantOperation, OperationsPro } from '@/lib/operations'
-import { fetchOperationsPro, gagnantsParStation, libelleRemise } from '@/lib/operations'
+import { fetchOperationsPro, gagnantsParStation, libelleRemise, marquerRelance } from '@/lib/operations'
 import { operationsRangees } from '@/lib/rangementOperations'
 import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
 import { useMailGagnant } from '@/lib/mailGagnant'
@@ -281,14 +281,16 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Meme vocabulaire que la fiche SA (Retiré/À retirer) -- Romain
+          {/* Meme vocabulaire que la fiche SA (Utilisé/À retirer) -- Romain
               (20/10) : « choisis celui qui sera le plus convenable pour le
               moins de confusion dans le langage pour admin et dans le
-              langage pour le pro ». */}
+              langage pour le pro ». « Retiré » renomme en « Utilisé » le
+              21/10 : lu comme « retire du tirage » (un re-tirage suite a un
+              gagnant injoignable), pas « billet utilise en boutique ». */}
           <span style={{
             fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
             color: remis ? '#15803D' : '#B45309', background: remis ? 'rgba(21,128,61,.09)' : 'rgba(180,83,9,.09)',
-          }}>{remis ? 'Retiré' : 'À retirer'}</span>
+          }}>{remis ? 'Utilisé' : 'À retirer'}</span>
           {/* « Marquer remis sans PIN » ci-dessous ne decompte pas le stock --
               signale seulement l anomalie (retire sans destockage reel), pas
               le cas normal. */}
@@ -299,7 +301,11 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
             }}>⚠️ Stock non décompté</span>
           )}
           {!remis && (
-            <button style={btn} onClick={() => { const u = lienRelance('relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+            <button style={btn} onClick={() => {
+              const u = lienRelance('relance')
+              if (u) window.open(u, '_blank', 'noopener')
+              marquerRelance(g.id)
+            }}>🔔 {g.relanceEnvoyeeAt ? 'Relancer à nouveau' : 'Relancer'}</button>
           )}
           {remis && (
             <button style={btn} onClick={() => { const u = lienRelance('merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>

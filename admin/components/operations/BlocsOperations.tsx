@@ -13,7 +13,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import {
-  libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise,
+  libelleDates, libelleModule, libelleStatut, fetchSuiviOperation, fetchOperationsPro, gagnantsParStation, libelleRemise, marquerRelance,
   type DonneesOperation, type Operation, type OperationsPro, type SuiviOperation, type StatsOperation, type LotOperation, type PartenaireMin, type GagnantOperation,
 } from '@/lib/operations'
 import { packEnvoi, lienBillet, mailPartenaireUrl, libelleSource, supprimerSuperEvent } from '@/lib/nds'
@@ -236,6 +236,12 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
   g: GagnantOperation; op: DonneesOperation; partenaireNom: string; partenaireEmail: string | null
   onConfirmer: (id: number) => void; masquerLot?: boolean
 }) {
+  /* Trace locale d un clic Relancer dans CETTE session -- en plus de l ecrit
+     en base (marquerRelance), pour afficher l etat « relancé » tout de suite
+     sans recharger la fiche. g.relanceEnvoyeeAt (venu de la base) prend le
+     relai des le prochain chargement. */
+  const [relanceLocale, setRelanceLocale] = useState<string | null>(null)
+  const relanceAt = relanceLocale ?? g.relanceEnvoyeeAt
   return (
     <div style={ligne}>
       <div style={{ flex: 1, minWidth: 170 }}>
@@ -245,9 +251,12 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
           {g.date ? `${!masquerLot ? ' · ' : ''}tiré le ${new Date(`${g.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}
         </div>
         {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
+        {g.etat === 'confirme' && relanceAt && (
+          <div style={{ fontSize: 11, color: MUT }}>🔔 Relancé le {new Date(relanceAt).toLocaleDateString('fr-FR')}</div>
+        )}
       </div>
       <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
-      <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
+      <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Utilisé' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
       {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
           la distinction stock n apparait QUE si elle revele une anomalie. */}
       {g.etat === 'retire' && g.stockDestocke === false && (
@@ -255,7 +264,11 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
       )}
       {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
       {g.etat !== 'a_confirmer' && g.etat !== 'retire' && (
-        <button style={btn} onClick={() => { const u = lienRelanceTirage(g, 'relance', op, partenaireNom); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+        <button style={btn} onClick={() => {
+          const u = lienRelanceTirage(g, 'relance', op, partenaireNom)
+          if (u) window.open(u, '_blank', 'noopener')
+          marquerRelance(g.id); setRelanceLocale(new Date().toISOString())
+        }}>🔔 {relanceAt ? 'Relancer à nouveau' : 'Relancer'}</button>
       )}
       {g.etat === 'retire' && (
         <button style={btn} onClick={() => { const u = lienRelanceTirage(g, 'merci', op, partenaireNom); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>

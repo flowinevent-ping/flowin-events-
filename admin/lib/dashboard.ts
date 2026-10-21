@@ -191,6 +191,9 @@ export interface TirageRow {
    *  etatTirage) -- sans quoi un gain non appele semblait identique a un
    *  gain confirme (audit UX du 20/10). */
   notifie_at: string | null
+  /** Date de la derniere relance envoyee -- filtre « à relancer » / « déjà
+   *  relancés » (Romain, 21/10). */
+  relance_envoyee_at: string | null
   statut: string | null
   created_at: string | null
 }
@@ -284,7 +287,7 @@ export async function publierLienEphemere(id: string, publie: boolean): Promise<
 export async function fetchJoueurTirages(joueurId: string): Promise<TirageRow[]> {
   const { data, error } = await supabase
     .from('tirages')
-    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,ticket_code,retrait_token,retire_at,notifie_at,statut,created_at')
+    .select('id,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,ticket_code,retrait_token,retire_at,notifie_at,relance_envoyee_at,statut,created_at')
     .eq('joueur_id', joueurId)
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchJoueurTirages]', error.message); return [] }
@@ -310,13 +313,14 @@ export interface GagnantRow {
   statut: string | null
   notifie_at: string | null
   retire_at: string | null
+  relance_envoyee_at: string | null
   retrait_token: string | null
   created_at: string | null
 }
 export async function fetchGagnants(): Promise<GagnantRow[]> {
   const { data, error } = await supabase
     .from('tirages')
-    .select('id,joueur_id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,statut,notifie_at,retire_at,retrait_token,created_at')
+    .select('id,joueur_id,joueur_nom,joueur_email,ticket_code,lot_nom,lot_valeur,partenaire_id,super_event_id,event_id,statut,notifie_at,retire_at,relance_envoyee_at,retrait_token,created_at')
     .neq('statut', 'annule')
     .order('created_at', { ascending: false })
   if (error) { console.error('[fetchGagnants]', error.message); return [] }
