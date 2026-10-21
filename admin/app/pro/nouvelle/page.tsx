@@ -2,6 +2,7 @@ import { fetchProDashboard } from '@/lib/pro'
 import { fetchBanquesPro } from '@/lib/banques'
 import { fetchPacksParticipation } from '@/lib/commercial'
 import { supabase } from '@/lib/supabase'
+import { geocoderAdresse } from '@/lib/geocodage'
 import ProShell from '@/components/pro/ProShell'
 import NouvelleOperation, { type SuperOuvert, type ProNouvelle } from '@/components/pro/NouvelleOperation'
 
@@ -30,9 +31,33 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
       </ProShell>
     )
   }
-  const supers: SuperOuvert[] = ((ses ?? []) as (SuperOuvert & { events: string[] | null })[]).map(s => ({
-    ...s, station: (s.events ?? [])[0] ?? null,
-  }))
+  const premieresStations = ((ses ?? []) as (SuperOuvert & { events: string[] | null })[])
+    .map(s => (s.events ?? [])[0]).filter(Boolean) as string[]
+  /* Localisation du super event = celle de sa premiere station (adresse reelle
+     saisie a la creation, cf. creerSuperEventPro) -- jamais inventee. Geocodage
+     paresseux, meme mecanique que la validation des demandes de rattachement
+     (app/dashboard/demandes-rattachement) : si une adresse existe sans lat/lng,
+     on la geocode une fois et on l ecrit en base pour la prochaine fois.
+     Romain, 21/10 : "les memes cartes partout, il y a les adresses postales,
+     on l a fait pour NDS 2026" -- meme pipeline, reutilise ici. */
+  const { data: stationsRes } = premieresStations.length
+    ? await supabase.from('events').select('id,adresse,lat,lng').in('id', premieresStations)
+    : { data: [] as { id: string; adresse: string | null; lat: number | null; lng: number | null }[] }
+  const stationById = new Map((stationsRes ?? []).map(e => [e.id, e]))
+  for (const st of stationsRes ?? []) {
+    if (st.lat == null && st.lng == null && st.adresse) {
+      const coords = await geocoderAdresse(st.adresse, null, null)
+      if (coords) {
+        await supabase.from('events').update({ lat: coords.lat, lng: coords.lng }).eq('id', st.id)
+        stationById.set(st.id, { ...st, lat: coords.lat, lng: coords.lng })
+      }
+    }
+  }
+  const supers: SuperOuvert[] = ((ses ?? []) as (SuperOuvert & { events: string[] | null })[]).map(s => {
+    const premiere = (s.events ?? [])[0] ?? null
+    const station = premiere ? stationById.get(premiere) : null
+    return { ...s, station: premiere, lat: station?.lat ?? null, lng: station?.lng ?? null }
+  })
   const t = searchParams.type
   const type = t === 'animation' || t === 'rejoindre' || t === 'super' ? t : null
   return (
