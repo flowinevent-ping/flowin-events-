@@ -29,6 +29,7 @@ import { SECTEURS_PRO } from '@/lib/proCreation'
 import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED, choix } from '@/lib/proui'
 import { Ico, IcoModule } from '@/lib/proicons'
+import SuperEventMap from '@/app/se/_components/SuperEventMap'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import BandeauEtapes from '@/components/parcours/BandeauEtapes'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
@@ -43,7 +44,7 @@ export interface ProNouvelle {
   code_postal: string | null; ville: string | null; email: string | null; tel: string | null
   contact: string | null; partenaire_id: string | null; statut: string | null
 }
-export interface SuperOuvert extends SuperEvent { frais_pro?: number | null; station?: string | null }
+export interface SuperOuvert extends SuperEvent { frais_pro?: number | null; station?: string | null; lat?: number | null; lng?: number | null }
 
 const JEUX: { m: string; t: string; s: string; banque: boolean }[] = [
   { m: GABARIT_MODULE, t: GABARIT_NOM, s: 'Le gabarit de référence — quiz, bonus, ticket', banque: true },
@@ -461,6 +462,15 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
             <>
               <Titre t="Quel super event ?" s="Choisissez l’opération : son jeu est déjà choisi par l’organisateur." />
               <style>{NOP_CARTE_CSS}</style>
+              {supers.some(s => s.lat != null && s.lng != null) && (
+                <div style={{ marginBottom: 14 }}>
+                  <SuperEventMap
+                    lieux={supers.map(s => ({ id: s.id, nom: s.nom, lat: s.lat ?? null, lng: s.lng ?? null, module: s.module, couleur: ACCENT_SUPER }))}
+                    height={220}
+                    onSelect={setSeId}
+                  />
+                </div>
+              )}
               {supers.length === 0 && <div style={{ fontSize: 13, ...MUTED, marginBottom: 12 }}>Aucun super event ouvert aux inscriptions pour le moment.</div>}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10, marginBottom: 18 }}>
                 {supers.map(s => {
