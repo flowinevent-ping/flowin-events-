@@ -209,7 +209,71 @@ export function BoutonGererLots({ op, partenaire, onChange }: { op: DonneesOpera
   )
 }
 
-export function ContenuLots({ op }: { op: DonneesOperation }) {
+/** Lien Gmail de relance/remerciement pour UN tirage -- source unique
+ * (mail-gagnant.js), partagee entre l onglet "Lots & stock" et l onglet
+ * "Gagnants & billets" pour ne jamais ecrire ce texte a deux endroits. */
+function lienRelanceTirage(g: GagnantOperation, type: 'relance' | 'merci', op: DonneesOperation, partenaireNom: string) {
+  return window.flowinMailGagnant?.gmailUrl({
+    joueur_nom: g.joueurNom, email: g.joueurEmail, lot_nom: g.lotNom, lot_valeur: g.lotValeur,
+    ticket_code: g.ticketCode, retrait_token: g.retraitToken, partenaire_nom: partenaireNom,
+    type, operation: op.id, operation_nom: op.nom,
+  })
+}
+
+async function confirmerGagnant(id: number, onChange: () => void) {
+  if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
+  const { error } = await supabase.rpc('marquer_notifie', { p_tirage_id: id })
+  if (error) { alert('La confirmation a échoué.'); return }
+  onChange()
+}
+
+/** Une ligne gagnant -- partagee entre "Gagnants & billets" (vue a plat,
+ * groupee par station) et "Lots & stock" (vue groupee par lot, pour agir sans
+ * changer d onglet -- Romain (21/10) : « visualiser et rester dans ce même
+ * onglet [...] à qui ils ont été utilisés, quand [...] si on doit les
+ * relancer »). Meme logique, un seul endroit. */
+function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masquerLot }: {
+  g: GagnantOperation; op: DonneesOperation; partenaireNom: string; partenaireEmail: string | null
+  onConfirmer: (id: number) => void; masquerLot?: boolean
+}) {
+  return (
+    <div style={ligne}>
+      <div style={{ flex: 1, minWidth: 170 }}>
+        <div style={{ fontWeight: 700, fontSize: 13 }}>{g.etat === 'a_confirmer' && op.type === 'super' ? 'À attribuer' : (g.joueurNom ?? '—')}</div>
+        <div style={{ fontSize: 11, color: MUT }}>
+          {!masquerLot && `${g.lotNom ?? 'Lot'}${g.lotValeur ? ` · ${g.lotValeur} €` : ''}`}
+          {g.date ? `${!masquerLot ? ' · ' : ''}tiré le ${new Date(`${g.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}
+        </div>
+        {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
+      </div>
+      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
+      <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
+      {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
+          la distinction stock n apparait QUE si elle revele une anomalie. */}
+      {g.etat === 'retire' && g.stockDestocke === false && (
+        <Pastille ton="warn">⚠️ Stock non décompté</Pastille>
+      )}
+      {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
+      {g.etat !== 'a_confirmer' && g.etat !== 'retire' && (
+        <button style={btn} onClick={() => { const u = lienRelanceTirage(g, 'relance', op, partenaireNom); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
+      )}
+      {g.etat === 'retire' && (
+        <button style={btn} onClick={() => { const u = lienRelanceTirage(g, 'merci', op, partenaireNom); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+      )}
+      {g.etat !== 'a_confirmer' && (
+        <button style={btn} onClick={() => window.open(mailPartenaireUrl({
+          joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
+        }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>Email commerce</button>
+      )}
+      {g.etat === 'a_confirmer' && <button style={btnPrimaire} onClick={() => onConfirmer(g.id)}>✓ Confirmer</button>}
+    </div>
+  )
+}
+
+export function ContenuLots({ op, partenaireNom, partenaireEmail, onChange }: {
+  op: DonneesOperation; partenaireNom?: string; partenaireEmail?: string | null; onChange?: () => void
+}) {
+  useMailGagnant()
   const unites = op.lots.reduce((s, l) => s + l.quantite, 0)
   /* Valeur du STOCK engage (chaque lot x sa quantite), pas celle reellement
      distribuee -- Romain (20/10) : « tu annonces 450€ de lot et si je fais le
@@ -233,6 +297,13 @@ export function ContenuLots({ op }: { op: DonneesOperation }) {
   const stockOpAffiche = op.stock
     ? { total: op.stock.total + Object.values(ajustements).reduce((a, b) => a + b, 0), dispo: op.stock.dispo + Object.values(ajustements).reduce((a, b) => a + b, 0) }
     : null
+  /* Liste des gagnants d un lot, repliee par defaut sous chaque lot --
+     Romain (21/10) : « visualiser et rester dans ce même onglet [...] à qui
+     ils ont été utilisés, quand [...] et si on doit les relancer ». On garde
+     "Gagnants & billets" a cote (vue a plat, groupee par station plutot que
+     par lot) plutot que de la supprimer : utile pour un coup d oeil global
+     sur toute l operation. */
+  const [lotsOuverts, setLotsOuverts] = useState<Record<string, boolean>>({})
 
   return (
     <>
@@ -265,9 +336,30 @@ export function ContenuLots({ op }: { op: DonneesOperation }) {
                 const reste = Math.max(0, l.quantite - tiresLot)
                 return <Pastille ton={reste > 0 ? 'neutre' : 'warn'}>{reste} restant{reste > 1 ? 's' : ''} / {l.quantite}</Pastille>
               })()}
+              {(() => {
+                const gagnantsLot = op.gagnants.filter(g => g.lotNom === l.nom)
+                if (gagnantsLot.length === 0) return null
+                const ouvert = !!lotsOuverts[l.id]
+                return (
+                  <button style={btn} onClick={() => setLotsOuverts(o => ({ ...o, [l.id]: !ouvert }))}>
+                    {ouvert ? '▾' : '▸'} {gagnantsLot.length} gagnant{gagnantsLot.length > 1 ? 's' : ''}
+                  </button>
+                )
+              })()}
             </div>
             {l.stock && (
               <AjustementStock lotId={l.id} onAjuste={delta => setAjustements(a => ({ ...a, [l.id]: (a[l.id] ?? 0) + delta }))} />
+            )}
+            {lotsOuverts[l.id] && (
+              <div style={{ marginTop: 4 }}>
+                {op.gagnants.filter(g => g.lotNom === l.nom).map(g => (
+                  <LigneGagnant
+                    key={g.id} g={g} op={op} masquerLot
+                    partenaireNom={partenaireNom ?? ''} partenaireEmail={partenaireEmail ?? null}
+                    onConfirmer={id => confirmerGagnant(id, () => onChange?.())}
+                  />
+                ))}
+              </div>
             )}
           </div>
         )
@@ -287,28 +379,6 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
      relancer serait premature (meme regle que le bouton Email commerce
      ci-dessous). */
   useMailGagnant()
-  async function confirmer(id: number) {
-    if (!confirm('Confirmer ce gagnant ?\n\nIl apparaîtra alors dans la liste et les billets du partenaire, et son nom s\'inscrira sur le billet.')) return
-    const { error } = await supabase.rpc('marquer_notifie', { p_tirage_id: id })
-    if (error) { alert('La confirmation a échoué.'); return }
-    onChange()
-  }
-  /* Lien de relance/remerciement -- MEME source de texte unique que partout
-     ailleurs dans l app (nds-lots, PartenaireDrawer, la page gagnants) :
-     /nds/mail-gagnant.js, jamais recopie. Romain (20/10), apres avoir
-     teste un panneau de selection en masse (ajoute puis retire ici,
-     references dans l historique du depot) : « je ne vois toujours pas où
-     se trouve le bouton [...] il serait bien de le mettre à côté de la
-     ligne email [...] éventuellement ligne par ligne, mais de ne pas
-     modifier le texte ». Un clic = un email pret, texte toujours identique
-     (modifiable par la personne dans Gmail avant envoi, jamais ici). */
-  function lienRelance(g: GagnantOperation, type: 'relance' | 'merci') {
-    return window.flowinMailGagnant?.gmailUrl({
-      joueur_nom: g.joueurNom, email: g.joueurEmail, lot_nom: g.lotNom, lot_valeur: g.lotValeur,
-      ticket_code: g.ticketCode, retrait_token: g.retraitToken, partenaire_nom: partenaireNom,
-      type, operation: op.id, operation_nom: op.nom,
-    })
-  }
   return (
     <>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -328,44 +398,10 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
         <div key={grp.cle}>
           {grp.nom && <TitreStation nom={grp.nom} n={grp.gagnants.length} />}
           {grp.gagnants.map(g => (
-        <div key={g.id} style={ligne}>
-          <div style={{ flex: 1, minWidth: 170 }}>
-            <div style={{ fontWeight: 700, fontSize: 13 }}>{g.etat === 'a_confirmer' && op.type === 'super' ? 'À attribuer' : (g.joueurNom ?? '—')}</div>
-            <div style={{ fontSize: 11, color: MUT }}>{g.lotNom ?? 'Lot'}{g.lotValeur ? ` · ${g.lotValeur} €` : ''}{g.date ? ` · tiré le ${new Date(`${g.date}T12:00:00`).toLocaleDateString('fr-FR')}` : ''}</div>
-            {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
-          </div>
-          <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
-          <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Retiré' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
-          {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
-              la distinction stock n apparait QUE si elle revele une anomalie :
-              marque « Retiré » a la main (sans PIN, GagnantsClient) sans que
-              le stock unitaire du lot ait suivi -- Romain (20/10) : « choisis
-              celui qui sera le plus convenable pour le moins de confusion ».
-              Rien d affiche dans le cas normal (deja retire ET stock suivi,
-              ou pas encore retire, ou lot sans stock unitaire suivi). */}
-          {g.etat === 'retire' && g.stockDestocke === false && (
-            <Pastille ton="warn">⚠️ Stock non décompté</Pastille>
-          )}
-          {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
-          {/* « Email gagnant » (annonce initiale du gain) supprime : il
-              renvoyait le texte de PREMIERE annonce, pas un texte de relance --
-              Romain (20/10) a recu ce texte en pensant relancer. A sa place,
-              un bouton Relancer/Remercier par ligne, juste a cote d Email
-              commerce comme demande, avec le texte de relance/remerciement
-              (meme source que partout ailleurs). */}
-          {g.etat !== 'a_confirmer' && g.etat !== 'retire' && (
-            <button style={btn} onClick={() => { const u = lienRelance(g, 'relance'); if (u) window.open(u, '_blank', 'noopener') }}>🔔 Relancer</button>
-          )}
-          {g.etat === 'retire' && (
-            <button style={btn} onClick={() => { const u = lienRelance(g, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
-          )}
-          {g.etat !== 'a_confirmer' && (
-            <button style={btn} onClick={() => window.open(mailPartenaireUrl({
-              joueur_nom: g.joueurNom, lot_nom: g.lotNom, ticket_code: g.ticketCode, retrait_token: g.retraitToken,
-            }, partenaireNom, partenaireEmail, { id: op.id, nom: op.nom }), '_blank', 'noopener')}>Email commerce</button>
-          )}
-          {g.etat === 'a_confirmer' && <button style={btnPrimaire} onClick={() => confirmer(g.id)}>✓ Confirmer</button>}
-        </div>
+            <LigneGagnant
+              key={g.id} g={g} op={op} partenaireNom={partenaireNom} partenaireEmail={partenaireEmail}
+              onConfirmer={id => confirmerGagnant(id, onChange)}
+            />
           ))}
         </div>
       ))}
@@ -648,7 +684,7 @@ export function OngletOperationsSA({ proId, onglet, onStation }: {
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations).map(op => (
         <BlocOperation key={op.cle} op={op} droite={onglet === 'lots' ? <BoutonGererLots op={op} partenaire={pt} onChange={recharger} /> : undefined}>
-          {onglet === 'lots' && <ContenuLots op={op} />}
+          {onglet === 'lots' && <ContenuLots op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
           {onglet === 'gagnants' && <ContenuGagnantsSA op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="sa" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="sa" partenaireId={pt?.id ?? null} onChange={recharger} />}
@@ -713,7 +749,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations, cle).map(op => (
         <BlocOperation key={op.cle} op={op} droite={<>{onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} />}<SupprimerOperationBtn op={op} onSupprime={recharger} /></>}>
-          {onglet === 'lots' && <ContenuLots op={op} />}
+          {onglet === 'lots' && <ContenuLots op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} masquerGlobal />}
