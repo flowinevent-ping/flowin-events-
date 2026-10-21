@@ -16,6 +16,15 @@
  * Après avoir relancé les gagnants d'un pro, un bouton dédié informe CE pro
  * (un seul email, qui liste tous les gagnants relancés chez lui) -- texte
  * approuvé par Romain le 21/10, voir mailPartenaireRelanceUrl (lib/nds.ts).
+ *
+ * FILE D'ENVOI (Romain, 21/10) : « pas le faire un à un [...] qu'est-ce qui
+ * pourrait simplifier le process ». Chaque email reste un clic Gmail
+ * individuel -- un navigateur bloque les popups ouverts en boucle par un
+ * seul clic, impossible d'ouvrir 47 onglets Gmail d'un coup. Mais on peut
+ * retirer la friction de CHERCHER chaque ligne : « Tout relancer » bâtit une
+ * file, et un seul gros bouton, toujours au même endroit, envoie puis avance
+ * tout seul au suivant -- cliquer, cliquer, cliquer, au lieu de scroller et
+ * chercher à chaque fois.
  */
 import { useMemo, useState } from 'react'
 import type { GagnantRow } from '@/lib/dashboard'
@@ -54,6 +63,9 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
     return init
   })
   const [prosInformes, setProsInformes] = useState<Record<string, boolean>>({})
+  /** File d'envoi en cours -- ids des gagnants restant a relancer, dans l
+   *  ordre d affichage. null = pas de file active. */
+  const [file, setFile] = useState<string[] | null>(null)
 
   const groupes = useMemo(() => {
     const parPro = new Map<string, GagnantRow[]>()
@@ -85,6 +97,23 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
     setRelances(r => ({ ...r, [g.id]: true }))
   }
 
+  function demarrerFile(ids: string[]) {
+    const restants = ids.filter(id => !relances[id])
+    setFile(restants.length ? restants : null)
+  }
+
+  const idEnCours = useMemo(() => file?.find(id => !relances[id]) ?? null, [file, relances])
+  const gagnantEnCours = useMemo(() => (idEnCours ? gagnants.find(g => g.id === idEnCours) ?? null : null), [idEnCours, gagnants])
+  const resteDansFile = useMemo(() => (file ? file.filter(id => !relances[id]).length : 0), [file, relances])
+
+  function relancerEtAvancer(g: GagnantRow) {
+    relancer(g)
+    const suite = (file ?? []).filter(id => id !== g.id && !relances[id])
+    setFile(suite.length ? suite : null)
+  }
+
+  const idsNonRelances = useMemo(() => gagnants.filter(g => !relances[g.id]).map(g => g.id), [gagnants, relances])
+
   function informerPro(partenaireId: string, liste: GagnantRow[]) {
     const p = partenaires.find(x => x.id === partenaireId)
     const relancesDuGroupe = liste.filter(g => relances[g.id])
@@ -108,8 +137,26 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
               {totalRelances > 0 ? ` · ${totalRelances} déjà relancé${totalRelances > 1 ? 's' : ''} dans cette session` : ''}
             </div>
           </div>
+          {!idEnCours && idsNonRelances.length > 1 && (
+            <button style={btnPrimaire} onClick={() => demarrerFile(idsNonRelances)}>
+              🔔 Tout relancer ({idsNonRelances.length})
+            </button>
+          )}
           <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: 20, cursor: 'pointer', color: MUT, lineHeight: 1 }}>✕</button>
         </div>
+
+        {/* File d'envoi active : un seul bouton, toujours au meme endroit,
+            envoie puis avance seul -- enchainer sans chercher la ligne suivante. */}
+        {gagnantEnCours && (
+          <div style={{ position: 'sticky', top: 73, zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: '#EFF6FF', borderBottom: `1px solid ${BRD}`, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '.04em' }}>Envoi en cours · reste {resteDansFile}</div>
+              <div style={{ fontWeight: 700, fontSize: 13.5 }}>{gagnantEnCours.joueur_nom ?? '—'} <span style={{ fontWeight: 500, color: MUT }}>— {gagnantEnCours.lot_nom ?? 'Lot'}</span></div>
+            </div>
+            <button style={btnPrimaire} onClick={() => relancerEtAvancer(gagnantEnCours)}>✉️ Envoyer et passer au suivant</button>
+            <button style={btn} onClick={() => setFile(null)}>Arrêter la file</button>
+          </div>
+        )}
 
         <div style={{ padding: 20 }}>
           {gagnants.length === 0 && (
@@ -126,6 +173,9 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
                     {pro?.nom ?? 'Sans commerce rattaché'}
                     <span style={{ fontWeight: 700, fontSize: 11.5, color: MUT, marginLeft: 6 }}>{faites}/{liste.length} relancé{liste.length > 1 ? 's' : ''}</span>
                   </div>
+                  {!idEnCours && faites < liste.length && (
+                    <button style={btn} onClick={() => demarrerFile(liste.map(g => g.id))}>🔔 Relancer ce pro ({liste.length - faites})</button>
+                  )}
                   {informe ? (
                     <span style={{ fontSize: 11.5, fontWeight: 700, color: '#15803D' }}>✓ Pro informé</span>
                   ) : (

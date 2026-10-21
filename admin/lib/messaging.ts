@@ -20,10 +20,19 @@ export function lienWhatsApp(tel: string, message: string): string {
   return `https://wa.me/${telWhatsApp(tel)}?text=${encodeURIComponent(message)}`
 }
 
+/** Romain (21/10) : « je crois qu'on n'envoie pas depuis la boîte
+ *  flowinevent@gmail.com [...] il faut que ça parte de cette boîte ». Sans
+ *  indication, Gmail compose avec le compte Google "actif" du navigateur, qui
+ *  peut etre un autre compte que celui de Flowin -- `authuser` force Gmail a
+ *  utiliser CE compte, s il est bien connecte dans le meme navigateur (ne
+ *  connecte personne a sa place, bascule seulement parmi les comptes deja
+ *  ouverts). Tout lien Gmail de l app doit le porter. */
+const AUTHUSER_FLOWIN = 'authuser=flowinevent%40gmail.com'
+
 /** Un lien Gmail par lot de destinataires (BCC), pour rester dans une
  *  longueur d URL raisonnable -- decoupe le tableau avant appel. */
 export function lienGmailBcc(bccList: string[], objet: string, message: string): string {
-  return `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(bccList.join(','))}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
+  return `https://mail.google.com/mail/?${AUTHUSER_FLOWIN}&view=cm&fs=1&bcc=${encodeURIComponent(bccList.join(','))}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
 }
 
 /** Un lien Gmail a UN destinataire (pas de BCC) -- permet de personnaliser le
@@ -32,9 +41,13 @@ export function lienGmailBcc(bccList: string[], objet: string, message: string):
  *  des personnes qu'on a relancées ») -- le commerce voit directement, dans sa
  *  boite mail, chaque message reellement envoye a un gagnant. */
 export function lienGmailTo(email: string, objet: string, message: string, cc?: string | null): string {
-  const base = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
+  const base = `https://mail.google.com/mail/?${AUTHUSER_FLOWIN}&view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
   return cc ? `${base}&cc=${encodeURIComponent(cc)}` : base
 }
+
+/** Base d un lien Gmail compose, deja munie du bon compte -- pour les
+ *  endroits qui construisent leur propre URL (to/su/body/bcc). */
+export const GMAIL_COMPOSE_BASE = `https://mail.google.com/mail/?${AUTHUSER_FLOWIN}&view=cm&fs=1`
 
 export const TAILLE_LOT_EMAIL = 40
 

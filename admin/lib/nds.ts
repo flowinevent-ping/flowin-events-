@@ -14,6 +14,7 @@
  * Rien n est code en dur sur NDS : le super event est toujours un parametre.
  */
 import { supabase } from './supabase'
+import { GMAIL_COMPOSE_BASE } from './messaging'
 
 export const SE_DEFAUT = 'se-nds-2026'
 
@@ -146,7 +147,7 @@ export function mailPartenaireUrl(
     'À sa présentation en boutique : flashez le QR, saisissez votre code de validation, et validez. Le lot est déstocké automatiquement.', '',
     'Merci,', nds ? 'Flowin & les Nuits du Sud' : `Flowin & ${operation?.nom || ''}`, 'flowinevent@gmail.com · 04 93 59 91 37',
   ].join('\n')
-  return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
+  return `${GMAIL_COMPOSE_BASE}${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
 }
 
 /** Info au pro qu on vient de relancer ses gagnants non retires -- Romain
@@ -172,7 +173,7 @@ export function mailPartenaireRelanceUrl(
     "Rien à faire de votre côté : s'ils se présentent en boutique, c'est la même procédure que d'habitude — flashez le QR de leur billet, saisissez votre code de validation, et le lot est déstocké automatiquement.", '',
     'Merci,', nds ? 'Flowin & les Nuits du Sud' : `Flowin & ${operation?.nom || ''}`, 'flowinevent@gmail.com · 04 93 59 91 37',
   ].join('\n')
-  return `https://mail.google.com/mail/?view=cm&fs=1${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
+  return `${GMAIL_COMPOSE_BASE}${partenaireEmail ? `&to=${encodeURIComponent(partenaireEmail)}` : ''}&su=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`
 }
 
 /** Page bilan + procedure + PIN, destinee au commercant. */

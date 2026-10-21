@@ -11,6 +11,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { GMAIL_COMPOSE_BASE } from '@/lib/messaging'
 import type { FlowinPro } from '@/lib/types'
 
 const BASE = 'https://flowin-events.vercel.app'
@@ -46,7 +47,7 @@ export default function ActionsFichePro({ pro }: { pro: FlowinPro }) {
     'L’équipe Flowin',
     'flowinevent@gmail.com · 04 93 59 91 37',
   ].join('\n')
-  const gmail = `https://mail.google.com/mail/?view=cm&fs=1${pro.email ? `&to=${encodeURIComponent(pro.email)}` : ''}&su=${encodeURIComponent(`Flowin — ${pro.nom}`)}&body=${encodeURIComponent(corps)}`
+  const gmail = `${GMAIL_COMPOSE_BASE}${pro.email ? `&to=${encodeURIComponent(pro.email)}` : ''}&su=${encodeURIComponent(`Flowin — ${pro.nom}`)}&body=${encodeURIComponent(corps)}`
 
   async function enregistrer() {
     if (!ptId || !/^\d{4}$/.test(saisie)) { setEtat('ko'); return }
