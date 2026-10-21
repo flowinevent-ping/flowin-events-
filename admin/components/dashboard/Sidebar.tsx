@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { supabase } from '@/lib/supabase'
 
 interface NavItem {
   id: string
@@ -10,6 +11,9 @@ interface NavItem {
   count?: number
   href: string
   live?: number
+  /** Badge « alarme » (ambre) -- distinct du compteur neutre : signale une
+   *  action en attente plutot qu un simple total. */
+  alerte?: number
   external?: boolean
 }
 
@@ -92,6 +96,23 @@ export default function Sidebar() {
 
   const liveCount = events.filter(e => e.status === 'live').length
 
+  /* Romain (21/10) : « ce serait pas mieux d'avoir ça dans l'onglet sur le
+     côté avec une alarme ? » -- le bouton de relance groupée existait deja
+     (/dashboard/gagnants), mais fallait le trouver. Badge ambre sur « Liste
+     des gagnants », visible depuis n'importe quelle page : combien de
+     gagnants confirmes attendent encore d'etre relances. Meme calcul que
+     etatTirage() === 'confirme' (lib/operations.ts), refait en SQL pour ne
+     recuperer qu'un compte, pas les lignes. */
+  const [aRelancer, setARelancer] = useState(0)
+  useEffect(() => {
+    let vivant = true
+    supabase.from('tirages').select('id', { count: 'exact', head: true })
+      .neq('statut', 'annule').is('retire_at', null)
+      .or('notifie_at.not.is.null,super_event_id.is.null')
+      .then(({ count }) => { if (vivant) setARelancer(count ?? 0) })
+    return () => { vivant = false }
+  }, [])
+
   /**
    * REGROUPEMENT SEUL — aucune entree n est supprimee, aucune route ne dispa-
    * rait. Les 45 entrees sont toutes la ; elles changent de groupe et gagnent
@@ -136,7 +157,7 @@ export default function Sidebar() {
         { id: 'wizard-super-event', label: 'Créer un super event', href: '/dashboard/wizard-super-event' },
         { id: 'operations', label: 'Opérations (vue complète)', href: '/dashboard/operations' },
         { id: 'nds-lots', label: 'Stock des lots', href: '/dashboard/nds-lots' },
-        { id: 'gagnants', label: 'Liste des gagnants', href: '/dashboard/gagnants' },
+        { id: 'gagnants', label: 'Liste des gagnants', href: '/dashboard/gagnants', alerte: aRelancer },
         { id: 'nds-resultat', label: 'Résultat journalier', href: '/dashboard/nds-resultat' },
         { id: 'rapport-points', label: 'Rapport détaillé', href: '/dashboard/rapport-points' },
         { id: 'statistiques', label: 'Statistiques & résultats', href: '/dashboard/statistiques' },
@@ -216,9 +237,21 @@ export default function Sidebar() {
   const [ouverts, setOuverts] = useState<Set<string>>(() => new Set())
   useEffect(() => {
     const actif = groups.find(g => g.items.some(it => isActive(it.href)))
-    if (actif) setOuverts(prev => (prev.has(actif.group) ? prev : new Set(prev).add(actif.group)))
+    /* Un groupe replie cachait aussi son badge « alarme » -- Romain (21/10) :
+       « ce serait pas mieux d'avoir ça [...] avec une alarme ? ». Deplie
+       aussi tout groupe qui en porte une, pour qu'elle soit vue sans devoir
+       d'abord deviner ou cliquer. */
+    const avecAlerte = groups.filter(g => g.items.some(it => (it.alerte ?? 0) > 0))
+    setOuverts(prev => {
+      const n = new Set(prev)
+      if (actif) n.add(actif.group)
+      avecAlerte.forEach(g => n.add(g.group))
+      let identique = n.size === prev.size
+      if (identique) n.forEach(x => { if (!prev.has(x)) identique = false })
+      return identique ? prev : n
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname])
+  }, [pathname, aRelancer])
   function basculerGroupe(nom: string) {
     setOuverts(prev => {
       const n = new Set(prev)
@@ -266,6 +299,8 @@ export default function Sidebar() {
                 <span className="sa-sb-label">{item.label}</span>
                 {item.live ? (
                   <span className="sa-sb-badge live">{item.live} live</span>
+                ) : item.alerte ? (
+                  <span className="sa-sb-badge alerte" title="Gagnants confirmés, lot pas encore retiré">🔔 {item.alerte}</span>
                 ) : item.count !== undefined && item.count > 0 ? (
                   <span className="sa-sb-badge">{item.count}</span>
                 ) : null}

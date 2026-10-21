@@ -34,6 +34,7 @@
 .sa-sb-label{flex:1}
 .sa-sb-badge{background:rgba(255,255,255,.12);color:var(--sa-sb-text);font-size:10px;font-weight:700;padding:1px 7px;border-radius:100px;min-width:20px;text-align:center}
 .sa-sb-badge.live{background:rgba(34,197,94,.25);color:#4ADE80}
+.sa-sb-badge.alerte{background:rgba(245,158,11,.28);color:#FBBF24}
 .sa-sb-user{border-top:1px solid var(--sa-sb-border);padding:14px 20px;display:flex;align-items:center;gap:10px}
 .sa-sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--sa-accent),var(--sa-accent-light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0}
 .sa-sb-username{color:#fff;font-size:13px;font-weight:700}
