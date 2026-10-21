@@ -20,7 +20,7 @@ export interface BlocRoadmap {
   items: ItemRoadmap[]
 }
 
-export const MAJ = '30/08/2026'
+export const MAJ = '21/10/2026'
 
 export const LIBELLE_ETAT: Record<EtatItem, string> = {
   ok: '✓ Fait',
@@ -78,6 +78,7 @@ export const BLOCS: BlocRoadmap[] = [
     items: [
       { etat: 'ok', titre: 'Envois devis, factures, listes gagnants et billets vers les pros/partenaires', detail: 'Liens Gmail pre-remplis (mailPartenaireUrl, flowinMailGagnant), utilises en production sur PartenaireDrawer, CRM Landing, CRM Retours, BtoB Prospects' },
       { etat: 'ok', titre: 'Emails aux gagnants (annonce lot + billet)', detail: 'Meme mecanisme, deja envoye en prod' },
+      { etat: 'ok', titre: 'Relance groupée des lots non retirés, avec sélection multiple', detail: '21/10 : fenêtre de relance par pro, file d’envoi "suivant", cases à cocher + "Tout sélectionner" (#16, #19, #20). Reste un clic Gmail par envoi (pas serveur-à-serveur) -- ne résout pas le point ci-dessous.' },
       { etat: 'hold', titre: 'Email de remerciement en masse aux ~840 joueurs', detail: 'Le mecanisme Gmail pre-rempli marche 1 par 1 (gagnants, quelques pros) -- pas exploitable pour un envoi en masse a tous les joueurs. En attente d\u2019un vrai connecteur emailing (API/service d\u2019envoi en masse), pas d\u2019un connecteur emailing en general (qui existe deja pour les envois unitaires).' },
       { etat: 'todo', titre: 'PDF du billet en pièce jointe', detail: 'Le mail actuel envoie un LIEN vers le billet, pas un PDF attache -- limite technique des liens mailto/Gmail compose (ne peuvent pas joindre de fichier)' },
       { etat: 'todo', titre: 'Envoi automatise sans etape humaine', detail: 'Aujourd\u2019hui, un humain doit ouvrir Gmail et cliquer Envoyer a chaque fois -- domaine expediteur a verifier avant tout envoi serveur-a-serveur' },
@@ -127,6 +128,17 @@ export const BLOCS: BlocRoadmap[] = [
       { etat: 'todo', titre: 'Bloqueur confirmé : SSO Vercel sur jeffrey-crm.vercel.app', detail: 'Vérifié via API Vercel (18/09) : le projet jeffrey-crm a ssoProtection.enabled=true, deploymentType="all_except_custom_domains". Les 3 domaines actuels (jeffrey-crm.vercel.app, jeffrey-crm-nextoping.vercel.app, jeffrey-crm-git-main-nextoping.vercel.app) sont tous des sous-domaines vercel.app, donc TOUS protégés par le SSO Vercel de l\\u2019équipe -- un pro externe sans compte dans l\\u2019équipe Vercel de Romain ne peut pas ouvrir un lien direct aujourd\\u2019hui (redirection vers une connexion Vercel). Le câblage direct ne peut pas fonctionner pour un client/pro externe sans l\\u2019un de : (a) un domaine personnalisé sur le projet Jeffrey (non protégé par ce réglage), ou (b) désactiver le SSO pour ce projet, ou (c) une page de partage publique/à jeton côté Jeffyre (lien signé, sans compte, recommandé -- gratuit, ne coûte que du développement, plus sûr que (b) qui exposerait tout le CRM). Réponse de Romain toujours attendue.' },
       { etat: 'todo', titre: 'Recommandation : passer le projet Supabase Jeffyre en plan payant avant mise en prod', detail: 'Vérifié le 18/09 : l\\u2019organisation Supabase "3opconsult" qui héberge Jeffyre est sur le plan gratuit -- aucune garantie de disponibilité, mise en pause automatique après inactivité. Incompatible avec un rôle d\\u2019autorité de numérotation légale appelée en temps réel (en particulier par Ping, à chaque transaction Stripe). À confirmer avec Romain avant bascule en prod.' },
       { etat: 'todo', titre: 'Implémentation -- en attente du feu vert de Romain (nuit du 18/09)', detail: 'Romain (18/09) : architecture validée dans son principe (option B, câblage direct, SIRET unique), mais il garde la main -- "tu gardes le projet sous le coude, tu l\\u2019appelles projet câblage facturation... je te lancerai cet ordre éventuellement dans la nuit." Écriture dans Jeffyre toujours bloquée tant que ce feu vert explicite n\\u2019est pas donné. Restent à trancher au moment du go : valeur `espace` Flowin Event, choix B/BT pour Baïta, mécanisme d\\u2019accès externe (item SSO), plan Supabase.' },
+    ],
+  },
+  {
+    titre: 'UX/UI & gamification — chantiers cités par Romain (21/10, à cadrer)',
+    items: [
+      { etat: 'todo', titre: 'Parcours pro : distinguer clairement "créer un événement" / "créer un super event"', detail: 'Romain (21/10) : à l’arrivée sur la plateforme, pas de distinguo visuel net. NB : l’écran de choix (NouvelleOperation.tsx, étape 0) a déjà été retravaillé le 18/09 sur ce point exact (3 cartes "Créer une animation" / "Rejoindre un super event" / "Créer un super event", couleur dédiée). À vérifier avec Romain si le problème porte sur cet écran précis (régression/pas vu la dernière version) ou sur un autre point d’entrée, avant de retoucher.' },
+      { etat: 'todo', titre: 'Parcours d’inscription (pro) : simplifier l’ergonomie', detail: 'Romain (21/10) : "commence à être bien" mais pas encore ultra efficace -- écran(s) précis à cadrer avec lui.' },
+      { etat: 'todo', titre: 'Visualisation des statistiques : moderniser', detail: 'Romain (21/10) : évolution en cours mais trop lente, veut quelque chose de plus actuel et de meilleure qualité -- périmètre exact (quelle page stats) à cadrer.' },
+      { etat: 'todo', titre: 'Spin roulette : ergonomie de jeu pas conforme à l’intention', detail: 'Romain (21/10) : ne ressemble pas à l’ergonomie de jeu voulue. ⚠️ Garde-fou existant : SpinClient.tsx est NO-TOUCH, la mécanique passe uniquement par `cfg` en base -- à cadrer avec Romain si le besoin est un réglage visuel dans ce cadre, ou une refonte du composant qui demande de lever explicitement ce garde-fou.' },
+      { etat: 'todo', titre: 'Espace pro : univers/sections pas terminés', detail: 'Romain (21/10) -- périmètre exact (quelles sections) à cadrer.' },
+      { etat: 'todo', titre: 'Envoi multiple côté pro (parité avec l’admin)', detail: 'Romain (21/10) : la sélection multiple livrée côté SA (21/10, cf. "Automatisation des envois") n’existe pas côté espace pro -- à cadrer : le pro doit-il relancer ses propres gagnants lui-même, ou ça reste un geste SA ?' },
     ],
   },
   {
