@@ -68,15 +68,22 @@
     var lien   = lienBillet(t);
     var comm   = t.partenaire_nom || '';
     var coord  = [t.partenaire_adresse, t.partenaire_tel].filter(Boolean).join(' — ');
-    var L = ['Bonjour ' + prenomDe(t) + ',', ''];
+    var prenom = prenomDe(t);
+    var L;
 
+    /* Romain (21/10), apres relecture du texte reel genere : « Hey, salut
+       Julie ! Merci encore [...] » en UN SEUL salut fusionne, pas un
+       "Bonjour X," suivi d un second "Hey, salut" (doublon corrige ici) --
+       et la ligne "nous n avons pas encore de trace de ton passage" jugee
+       trop froide, remplacee par un rappel positif (temps restant + offrir
+       a un proche). Approuve mot pour mot avant implementation. */
     if (t.type === 'relance') {
-      L.push("Hey, salut, merci encore d'avoir participé au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " !", '',
-             "Petit rappel : tu as gagné :", '',
-             '   ' + (t.lot_nom || 'un lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : ''));
+      L = ["Hey, salut " + prenom + " ! Merci encore d'avoir participé au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " !", '',
+           "Petit rappel : tu as gagné :", '',
+           '   ' + (t.lot_nom || 'un lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : '')];
       if (comm)  L.push('   chez ' + comm);
       if (coord) L.push('   ' + coord);
-      L.push('', "Nous n'avons pas encore de trace de ton passage pour le récupérer ! Ne laisse pas passer ta chance — tu peux aussi en faire profiter un proche.", '');
+      L.push('', "N'oublie pas : il te reste encore un peu de temps pour utiliser ton bon — ou pour en faire profiter un ami ou un proche !", '');
       if (lien) {
         L.push('>>> TON BILLET EST ICI <<<', '',
                '   ' + lien, '',
@@ -97,9 +104,9 @@
     }
 
     if (t.type === 'merci') {
-      L.push("Hey, salut, merci encore d'avoir participé au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " !", '',
-             "Nous avons bien vu que tu es passé récupérer :", '',
-             '   ' + (t.lot_nom || 'ton lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : ''));
+      L = ["Hey, salut " + prenom + " ! Merci encore d'avoir participé au jeu " + (estNds(t) ? 'des Nuits du Sud' : nomOp(t)) + " !", '',
+           "Nous avons bien vu que tu es passé récupérer :", '',
+           '   ' + (t.lot_nom || 'ton lot') + (t.lot_valeur != null ? ' — valeur ' + t.lot_valeur + ' €' : '')];
       if (comm) L.push('   chez ' + comm);
       L.push('', "On espère que ça t'a plu ! À très vite pour de nouvelles animations.", '',
              estNds(t) ? 'Flowin, les Nuits du Sud, la Ville de Vence' : ('Flowin & ' + nomOp(t)),
@@ -107,6 +114,7 @@
       return L.join('\n');
     }
 
+    L = ['Bonjour ' + prenom + ',', ''];
     if (grand) {
       L.push(estNds(t)
                ? 'Waouh, bravo ! Au grand tirage du jeu des Nuits du Sud 2026, tu as gagné :'

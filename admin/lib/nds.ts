@@ -131,10 +131,13 @@ export function mailPartenaireUrl(
   const lien = g.retrait_token ? lienBillet(g.retrait_token, false, operation?.id ?? null) : ''
   const sujet = `Nouveau gagnant à valider — ${g.lot_nom || 'votre lot'}`
   const corps = [
-    `Bonjour ${partenaireNom || ''},`, '',
+    /* Meme ton que le texte de relance au gagnant (mail-gagnant.js, Romain
+       20/10 : \u00ab Hey, salut... \u00bb plutot qu un \u00ab Bonjour \u00bb formel) -- applique
+       ici aussi pour rester coherent entre les deux profils, gagnant et pro. */
+    `Hey, salut ${partenaireNom || ''} !`, '',
     nds
-      ? 'Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 :'
-      : `Nous vous informons qu\u2019un client vient de gagner l\u2019un de vos lots au jeu ${operation?.nom || ''} :`, '',
+      ? 'Bonne nouvelle : un client vient de gagner l\u2019un de vos lots au Grand Jeu des Nuits du Sud 2026 !'
+      : `Bonne nouvelle : un client vient de gagner l\u2019un de vos lots au jeu ${operation?.nom || ''} !`, '',
     `   ${g.joueur_nom || '—'}`,
     `   ${g.lot_nom || ''}`,
     g.ticket_code ? `   N° de billet : ${g.ticket_code}` : '', '',
