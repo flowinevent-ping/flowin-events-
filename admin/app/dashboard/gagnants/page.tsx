@@ -31,6 +31,7 @@ import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { usePorteeInitiale } from '@/lib/portee'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { etatTirage, LIBELLE_ETAT_TIRAGE, type EtatTirage } from '@/lib/operations'
+import ModalRelanceGlobale from '@/components/dashboard/ModalRelanceGlobale'
 
 type Etat = EtatTirage
 const LIB_ETAT = LIBELLE_ETAT_TIRAGE
@@ -56,6 +57,7 @@ export default function Page() {
   /* FILTRE ?se= (acces rapide « Gagnants » de la carte d un super event) :
      la page s ouvre cadree sur l operation, le selecteur reste maitre ensuite. */
   const [se, setSe] = useState('')
+  const [relanceOuverte, setRelanceOuverte] = useState(false)
   const portee = usePorteeInitiale()
   useEffect(() => { if (portee.se) setSe(portee.se) }, [portee.se])
 
@@ -169,6 +171,8 @@ export default function Page() {
     },
   ]
 
+  const aRelancer = (visibles ?? []).filter(t => etatDe(t) === 'confirme')
+
   return (
     <div className="sa-content">
       <div className="sa-page">
@@ -181,6 +185,11 @@ export default function Page() {
           triDefaut="created_at"
           triDescendant
           placeholderRecherche="Rechercher un joueur, un lot, un ticket…"
+          actions={
+            <button className="sa-btn sm primary" disabled={aRelancer.length === 0} onClick={() => setRelanceOuverte(true)}>
+              🔔 Relancer les non retirés{aRelancer.length > 0 ? ` (${aRelancer.length})` : ''}
+            </button>
+          }
           filtres={[
             { id: 'tous', label: 'Tous' },
             { id: 'a_confirmer', label: 'En attente', test: t => etatDe(t) === 'a_confirmer' },
@@ -205,6 +214,9 @@ export default function Page() {
           }
         />
       </div>
+      {relanceOuverte && (
+        <ModalRelanceGlobale gagnants={aRelancer} partenaires={partenaires} supers={supers} onClose={() => setRelanceOuverte(false)} />
+      )}
     </div>
   )
 }
