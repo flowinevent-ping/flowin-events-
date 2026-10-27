@@ -1,16 +1,18 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
-import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
+import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
+import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'vote' | 'form' | 'ticket' | 'already'
+type Screen = 'landing' | 'vote' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface VoteItem { id: string; nom: string; emoji?: string; genre?: string; desc?: string }
 interface Props extends ParcoursPageData { evId: string }
 
@@ -22,12 +24,14 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   const mode = (cfg.voteMode ?? 'stars') as string
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
   const lsKey = `flowin_played_${evId}`
+  const theme = resolveParcoursTheme('vote', ev?.cfg)
 
   const [screen, setScreen] = useState<Screen>('landing')
   /* Referentiel 8 : gain immediat attribue par la regle de l event. */
   const [gain, setGain] = useState<GainImmediat | null>(null)
   useParcoursTracking('vote', evId, screen)
   const [votes, setVotes] = useState<Record<string, number>>({})
+  const [partIdx, setPartIdx] = useState(0)
   /* Vote par etoiles : un artiste/element a la fois, pas une liste entiere
      d'un coup (Romain, 18/09 : « le vote doit se passer page à page... on ne
      voit pas si jamais il y a des questions ou des artistes »). */
@@ -85,9 +89,11 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   }
 
 
+  const partSelected = partenaires[partIdx]
+
   /* Navigation postMessage — flèches dashboard SA */
   useEffect(() => {
-    const NAV_SCREENS: Screen[] = ['landing', 'vote', 'form', 'ticket', 'already']
+    const NAV_SCREENS: Screen[] = ['landing', 'vote', 'form', 'partenaires', 'ticket', 'already']
     function onMsg(e: MessageEvent) {
       if (!e.data || !e.data.flowinNav) return
       setScreen(cur => {
@@ -102,7 +108,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
+    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{parcoursCSS(c)}</style>
 
       {screen === 'landing' && (
@@ -113,10 +119,13 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
         // l'operation si configure, meme repli que QuizClient -- pas d'emoji
         // fixe qui masque le logo Flowin/partenaire attendu.
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <ParcoursLogo emoji={(cfg.logoEmoji as string) || '⭐'} logoSvg={cfg.logoSvg as string} />
+          <ParcoursLogo emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl} />
           <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
-          <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string)||'Votez pour vos favoris !'}</div>
-          <button className="btn" onClick={()=>lsCheck()||setScreen('vote')}>⭐ Voter maintenant →</button>
+          <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string) || theme.texts.landingSubtitle}</div>
+          <button className="btn" onClick={()=>lsCheck()||setScreen('vote')}>{theme.texts.ctaLanding || 'Voter maintenant'} →</button>
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
+          )}
           <FlowinBadge />
         </div>
       )}
@@ -144,7 +153,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
                       <div style={{ fontWeight:800,fontSize:14 }}>{item.nom}</div>
                       {item.desc && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{item.desc}</div>}
                     </div>
-                    {choisi && <div style={{ color:c,fontWeight:900,fontSize:18 }}>✓</div>}
+                    {choisi && <div style={{ color:c,fontWeight:800,fontSize:11,textTransform:'uppercase',letterSpacing:'.05em' }}>Sélectionné</div>}
                   </button>
                 )
               })}
@@ -195,20 +204,33 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
           <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
           <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
           <ParcoursChampsStandard form={form} setForm={setForm} />
-          <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
-          <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
+          <div className="rgpd"><div className="rgpd-check" /><div>{RGPD_TEXT}</div></div>
+          <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'Valider →'}</button>
         </div>
+      )}
+
+      {screen === 'partenaires' && (
+        <div className="screen">
+          <div className="header"><div><div className="title">Nos partenaires</div><div className="sub">{nom}</div></div></div>
+          <ParcoursPartenairesGrid partenaires={partenaires} onSelect={i => { setPartIdx(i); setScreen('partSheet') }} />
+          <button className="btn-ghost" onClick={() => setScreen('landing')}>Retour</button>
+        </div>
+      )}
+
+      {screen === 'partSheet' && partSelected && (
+        <ParcoursPartenaireSheet p={partSelected} onClose={() => setScreen('partenaires')} />
       )}
 
       {(screen === 'ticket' || screen === 'already') && (
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <div style={{ fontSize:48,marginBottom:12 }}>{screen==='ticket'?'🎉':'✅'}</div>
           <div style={{ fontSize:22,fontWeight:900,marginBottom:20 }}>{screen==='ticket'?'Vote enregistré !':'Déjà voté !'}</div>
           <div className="card" style={{ borderTop:`4px solid ${c}` }}>
-            <div style={{ fontSize:32,marginBottom:8 }}>🎟️</div>
             <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
-            {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>🗓️ {tirageText}</div>}
+            {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{tirageText}</div>}
           </div>
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Découvrir nos partenaires</button>
+          )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
