@@ -366,7 +366,6 @@ export default function Page() {
               reglage — c est elle que le joueur ouvrira. */}
           <ApercuJeu
             module={module}
-            eventId={module === GABARIT_MODULE ? 'ev-master-superevent-bar' : null}
             saisie={{ nom: proApercu ? (pros.find(p => p.id === proApercu)?.nom ?? proApercu) : nom, cfg: { ...cfgJeu, ...(logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) } }}
           />
         </div>
