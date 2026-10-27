@@ -214,10 +214,24 @@ a:hover{text-decoration:underline}
 /* ---- Kanban horizontal de vignettes cliquables (accueil, et reutilisable) ---- */
 /* Colonnes de largeur fixe qui defilent horizontalement : le nombre de colonnes
    ne doit pas ecraser la largeur des vignettes, sinon le titre d un event passe
-   sur quatre lignes des qu on ajoute un statut. */
+   sur quatre lignes des qu on ajoute un statut.
+   MISE A JOUR (27/10, 1ere passe) : .sa-kb-vignette reprend le rayon (18), la
+   bordure (#efe9f2) et l ombre (0 6px 18px rgba(43,16,54,.05)) de CARD. .sa-kb-col
+   suit la meme famille de rayon (14, celui deja use par .sa-tile sur l Accueil).
+   MISE A JOUR (27/10, 2e passe) : Romain a montre la preview ("ces especes de
+   trucs sur le cote degueulasse" -- la barre de couleur plaquee sur le bord
+   gauche) contre la maquette validee le matin meme (comparaison calendrier vs
+   kanban) : plus de bordure laterale coloree ; a la place une pastille ronde
+   (icone etoile = super event, icone ticket = event) en tete de ligne, le nom
+   juste a cote en gras, et une puce de date a droite -- repere principal sur
+   UNE SEULE ligne horizontale centree verticalement (.sa-kb-ligne), jamais un
+   bloc de texte empile. Les infos secondaires (enseigne/stations, participants)
+   passent en 2e ligne discrete sous le repere principal (.sa-kb-sub), pas dans
+   le meme niveau visuel. La mecanique de defilement (overflow-x sur .sa-kanban,
+   flex-shrink:0 sur les colonnes) n est pas touchee. */
 .sa-kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
 .sa-kb-col{flex:0 0 268px;background:var(--sa-subtle);border:1px solid var(--sa-border);
-  border-radius:12px;padding:10px;min-width:0}
+  border-radius:14px;padding:10px;min-width:0}
 .sa-kb-tete{display:flex;align-items:center;gap:7px;padding:2px 4px 10px;
   font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted)}
 .sa-kb-tete .pastille{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -227,18 +241,23 @@ a:hover{text-decoration:underline}
 .sa-kb-corps{display:flex;flex-direction:column;gap:8px}
 .sa-kb-vide{font-size:11.5px;color:var(--sa-muted);padding:8px 4px}
 .sa-kb-vignette{display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
-  background:var(--sa-card);border:1px solid var(--sa-border);border-left:4px solid var(--sa-accent);
-  border-radius:10px;padding:11px 12px;transition:box-shadow .12s,transform .12s}
-.sa-kb-vignette:hover{box-shadow:0 4px 14px rgba(15,23,42,.10);transform:translateY(-1px)}
-.sa-kb-vignette .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
-/* Conteneur de texte empile (nom + enseigne/nb de stations) : explicitement
-   flex-column, pas de simple empilement implicite -- une maquette kanban
-   anterieure a deja montre que des blocs de texte empiles en <span> sans
-   cette regle font disparaitre ou mal centrer le nom de l operation. */
-.sa-kb-vignette .kb-corps-texte{display:flex;flex-direction:column}
-.sa-kb-vignette .nom{font-weight:800;font-size:13.5px;line-height:1.25;color:var(--sa-text)}
-.sa-kb-vignette .pro{font-size:11.5px;color:var(--sa-muted);margin-top:3px}
-.sa-kb-vignette .meta{display:flex;gap:12px;font-size:11.5px;color:var(--sa-muted);margin-top:6px}
+  background:#fff;border:1px solid #efe9f2;
+  border-radius:18px;padding:11px 12px;box-shadow:0 6px 18px rgba(43,16,54,.05);
+  transition:box-shadow .12s,transform .12s}
+.sa-kb-vignette:hover{box-shadow:0 10px 26px rgba(43,16,54,.10);transform:translateY(-1px)}
+/* Repere principal : pastille icone + nom + date, tout sur une ligne, centre
+   verticalement -- jamais de bloc de texte empile ici. */
+.sa-kb-ligne{display:flex;align-items:center;gap:8px}
+.sa-kb-pastille{width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center}
+.sa-kb-nom{flex:1;min-width:0;font-weight:800;font-size:13.5px;line-height:1.25;
+  color:var(--sa-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sa-kb-date{flex-shrink:0;background:var(--sa-subtle);color:var(--sa-muted);
+  font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;white-space:nowrap}
+/* Ligne secondaire discrete (enseigne/stations, participants) sous le repere
+   principal -- plus petite, plus pale, jamais au meme niveau visuel que le nom. */
+.sa-kb-sub{font-size:11px;color:var(--sa-muted);margin-top:6px;padding-left:34px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Une tuile de chiffre qui s ouvre : meme apparence que .sa-kpi, mais c est un
    bouton, donc il faut neutraliser le style natif et rendre le clic visible. */
@@ -305,18 +324,25 @@ a:hover{text-decoration:underline}
    puis « les visuels que tu as donnes sont ceux du jeu pour la version
    participants, pas pro ni dashboard SA creation ».
 
-   Les jetons ci-dessous sont ceux de components/pro/RejoindreWizard.tsx et
-   CreerAnimationWizard.tsx, releves un par un, pas approches :
-     carte    #fff, bord 1px #E2E8F0, rayon 16, padding 18
+   MISE A JOUR (27/10) : RejoindreWizard.tsx et CreerAnimationWizard.tsx ont
+   depuis ete remplaces par components/pro/NouvelleOperation.tsx. Les jetons
+   ci-dessous sont desormais ceux REELLEMENT lus la (lib/proui.ts -- CARD,
+   CHAMP, LABEL, BTN, BTN2), et non plus une approximation relevee a l oeil :
+   un ecart entre les deux est precisement ce que Romain a signale ("pas du
+   tout la meme ergonomie") en comparant le wizard SA a la maquette Flowin Pro.
+     carte    #fff, bord 1px #efe9f2, rayon 18, padding 18/22, ombre 0 6px 18px rgba(43,16,54,.05)
      bandeau  rayon 18, padding 18/20, texte blanc, degrade de la teinte
      jauge    5px de haut, rayon 99, blanche a l avancement
-     champ    bord 1.5px #E2E8F0, rayon 10, padding 11/13, 14px
-     libelle  12px, 700
-     bouton   rayon 12, padding 12/22, 14px, 800 ; fantome bord 1.5px #E2E8F0
+     champ    bord 1.5px #e7def0, rayon 13-14, padding 12/14, 15px, fond #faf7fd
+     libelle  10.5px, 800, MAJUSCULES, lettres espacees, gris #8a7e93
+     bouton   pilule (rayon 50), degrade plein pour l action principale,
+              fantome bord 1.5px #e7def0 pour le retour
      vignette rayon 14, padding 16, bord 2px teinte quand choisie
      muted    #64748B
-   La TEINTE suit la convention deja etablie la-bas : bleu #2746A6 = pro,
-   orange #C2410C = super event, bleu #2563EB = l accent Flowin.
+   La TEINTE suit la convention deja etablie la-bas, portee par --parc/--parc2
+   (jamais une couleur fixe, pour ne pas casser les 3 parcours qui partagent ce
+   bloc) : bleu #2746A6 = pro, orange #C2410C = super event, bleu #2563EB =
+   l accent Flowin.
    ═══════════════════════════════════════════════════════════════════════════ */
 .sa-parc{--parc:#2563EB;--parc2:#3B82F6}
 .sa-parc.t-super{--parc:#C2410C;--parc2:#FF8A14}
@@ -349,8 +375,13 @@ a:hover{text-decoration:underline}
 .sa-parc-pas.actif .n{background:var(--parc);border-color:var(--parc);color:#fff}
 .sa-parc-pas.actif .l{color:#0F172A}
 
-/* La carte de l etape : celle du parcours pro, blanche et aeree. */
-.sa-parc-scene{background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:22px 22px 20px}
+/* La carte de l etape : celle du parcours pro (lib/proui.ts, CARD) -- fond
+   blanc, bordure tres claire, ombre legere. Avant, cette carte reprenait les
+   jetons generiques du dashboard (bordure #E2E8F0, pas d ombre) au lieu des
+   jetons REELS du pro (bordure #efe9f2, ombre rgba(43,16,54,.05)), d ou l ecart
+   visuel signale par Romain face a la maquette "Flowin Pro". */
+.sa-parc-scene{background:#fff;border:1px solid #efe9f2;border-radius:18px;padding:22px 22px 20px;
+  box-shadow:0 6px 18px rgba(43,16,54,.05)}
 @keyframes sa-parc-entree{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
 .sa-parc-vue{animation:sa-parc-entree .18s ease-out}
 @media (prefers-reduced-motion:reduce){.sa-parc-vue{animation:none}}
@@ -359,20 +390,32 @@ a:hover{text-decoration:underline}
 .sa-parc-tete h2{margin:0;font-size:19px;font-weight:900;letter-spacing:-.3px;color:#0F172A}
 .sa-parc-tete p{margin:4px 0 0;font-size:13px;color:#64748B;line-height:1.55;max-width:62ch}
 
-/* Champs : ceux du parcours pro, plus grands que ceux du dashboard. */
+/* Champs : ceux du parcours pro (lib/proui.ts, CHAMP) -- fond legerement
+   teinte #faf7fd, bordure #e7def0, pas la bordure grise plate et le fond blanc
+   par defaut que le navigateur donnait encore a ces champs. Rayon 14 : celui
+   deja pose par la precedente passe sur cette meme page (cartes de module, de
+   modele, de lot). S applique aussi aux champs date/heure/couleur -- memes
+   classes, meme habillage ; le widget natif du navigateur n est pas touche. */
 .sa-parc .sa-input,.sa-parc textarea.sa-input,.sa-parc select.sa-input{
-  width:100%;border:1.5px solid #E2E8F0;border-radius:10px;padding:11px 13px;
-  font-size:14px;font-family:inherit;background:#fff;color:#0F172A}
+  width:100%;border:1.5px solid #e7def0;border-radius:14px;padding:12px 14px;
+  font-size:15px;font-weight:600;font-family:inherit;background:#faf7fd;color:#1c1024}
 .sa-parc .sa-input:focus{outline:2px solid var(--parc);outline-offset:1px;border-color:var(--parc)}
-.sa-parc .sa-lbl{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:#0F172A}
+/* Libelle en petites capitales grises -- celui du pro (lib/proui.ts, LABEL),
+   pas le libelle sombre et casse normale que ce bloc donnait avant. */
+.sa-parc .sa-lbl{display:block;font-size:10.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:6px;color:#8a7e93}
 .sa-parc .sa-aide{display:block;font-size:11.5px;color:#64748B;margin-top:5px;line-height:1.5}
 
-/* Pied : Precedent fantome a gauche, Suivant plein a droite. */
+/* Pied : fantome (BTN2) a gauche, degrade plein (BTN) a droite -- memes
+   jetons que le pro (pilule rayon 50, bordure #e7def0), teinte via --parc/
+   --parc2 pour rester bleu/orange/bleu-fonce selon le parcours (event/super/
+   pro), au lieu d un bleu fixe qui casserait cette convention deja etablie. */
 .sa-parc-pied{display:flex;align-items:center;gap:12px;margin-top:20px}
-.sa-parc-pied .sa-btn{background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;
-  padding:12px 20px;font-weight:700;font-size:14px;color:#0F172A}
-.sa-parc-pied .sa-btn.primary{background:var(--parc);border-color:var(--parc);color:#fff;
-  padding:12px 22px;font-weight:800}
+.sa-parc-pied .sa-btn{background:#fff;border:1.5px solid #e7def0;border-radius:50px;
+  padding:12px 22px;font-weight:700;font-size:14px;color:var(--parc)}
+.sa-parc-pied .sa-btn.primary{background:linear-gradient(90deg,var(--parc2),var(--parc));
+  border-color:transparent;color:#fff;padding:14px 26px;font-weight:800;
+  box-shadow:0 10px 24px color-mix(in srgb, var(--parc) 28%, transparent)}
 .sa-parc-pied .sa-btn:disabled{opacity:.4}
 .sa-parc-compte{font-size:12.5px;color:#64748B;margin-left:auto;margin-right:auto}
 .sa-parc-bloque{font-size:12.5px;font-weight:800;color:#B45309;text-align:right;max-width:340px;line-height:1.4}
