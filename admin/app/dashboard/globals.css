@@ -5,7 +5,6 @@
   --sa-sb-text:rgba(255,255,255,.78);--sa-sb-text-dim:rgba(255,255,255,.48);--sa-sb-border:rgba(255,255,255,.08);
   --sa-accent:#2563EB;--sa-accent-light:#60A5FA;--sa-accent-dark:#1D4ED8;
   --sa-sub-ink:#334155;
-  --sa-cal-past:#94A3B8;--sa-cal-live:#10B981;--sa-cal-upcoming:#F59E0B;
 }
 /* ── Layout shell ── */
 .sa-shell{display:flex;height:100vh;overflow:hidden;background:var(--sa-bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;font-size:14px;color:var(--sa-text)}
@@ -232,6 +231,11 @@ a:hover{text-decoration:underline}
   border-radius:10px;padding:11px 12px;transition:box-shadow .12s,transform .12s}
 .sa-kb-vignette:hover{box-shadow:0 4px 14px rgba(15,23,42,.10);transform:translateY(-1px)}
 .sa-kb-vignette .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+/* Conteneur de texte empile (nom + enseigne/nb de stations) : explicitement
+   flex-column, pas de simple empilement implicite -- une maquette kanban
+   anterieure a deja montre que des blocs de texte empiles en <span> sans
+   cette regle font disparaitre ou mal centrer le nom de l operation. */
+.sa-kb-vignette .kb-corps-texte{display:flex;flex-direction:column}
 .sa-kb-vignette .nom{font-weight:800;font-size:13.5px;line-height:1.25;color:var(--sa-text)}
 .sa-kb-vignette .pro{font-size:11.5px;color:var(--sa-muted);margin-top:3px}
 .sa-kb-vignette .meta{display:flex;gap:12px;font-size:11.5px;color:var(--sa-muted);margin-top:6px}
@@ -470,42 +474,3 @@ a:hover{text-decoration:underline}
 .sa-shortcut .n{font-size:11.5px;color:var(--sa-sub-ink);font-weight:600}
 .sa-shortcut .go{font-size:11px;color:var(--sa-accent);font-weight:700;display:flex;align-items:center;gap:3px;margin-top:2px}
 
-/* ---- Planning : calendrier mensuel (type Google Agenda) ----
-   lib/calendrier.ts calcule la grille et l empilement ; ce fichier n habille
-   que le rendu. Repli "+N" plutot que masquer un event en cas de chevauchement
-   -- demande explicite de Romain (26/10). */
-.cal-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.cal-nav{display:flex;align-items:center;gap:4px}
-.cal-navbtn{width:32px;height:32px;border-radius:9px;border:1px solid var(--sa-border);background:var(--sa-card);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sa-text)}
-.cal-navbtn:hover{background:var(--sa-subtle)}
-.cal-title{font-size:16px;font-weight:800;min-width:150px;text-align:center}
-.cal-today-btn{margin-left:auto;font-size:12px;font-weight:700;color:var(--sa-accent);background:none;border:1px solid var(--sa-border);
-  border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit}
-.cal-today-btn:hover{background:var(--sa-subtle)}
-
-.cal-legend{display:flex;gap:16px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.cal-legend .it{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--sa-sub-ink);font-weight:600}
-.cal-legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-
-.cal{border:1px solid var(--sa-border);border-radius:14px;overflow:hidden;background:var(--sa-card)}
-.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--sa-subtle);border-bottom:1px solid var(--sa-border)}
-.cal-dow div{padding:9px 0;text-align:center;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--sa-muted)}
-
-.cal-week{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(26px,auto);position:relative;border-bottom:1px solid var(--sa-border)}
-.cal-week:last-child{border-bottom:none}
-.cal-day{border-right:1px solid var(--sa-border);padding:6px 7px;min-height:110px}
-.cal-day:last-child{border-right:none}
-.cal-daynum{font-size:12px;font-weight:700;color:var(--sa-text);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-.cal-day.out .cal-daynum{color:#CBD5E1}
-.cal-day.today .cal-daynum{background:var(--sa-accent);color:#fff}
-
-.cal-bar{margin-top:2px;height:21px;border-radius:6px;display:flex;align-items:center;padding:0 8px;border:none;
-  font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
-  font-family:inherit;text-align:left}
-.cal-bar.past{background:var(--sa-cal-past)}
-.cal-bar.live{background:var(--sa-cal-live)}
-.cal-bar.upcoming{background:var(--sa-cal-upcoming);color:#78350F}
-.cal-more{margin-top:2px;height:18px;border-radius:99px;background:var(--sa-subtle);border:1px solid var(--sa-border);
-  color:var(--sa-sub-ink);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;
-  font-family:inherit}

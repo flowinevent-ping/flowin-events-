@@ -4,8 +4,9 @@
  * ACCUEIL — tableau de bord de reporting (maquette validee par Romain le
  * 26/10 : https://claude.ai/artifact/NLXLgEe1PTQANWCAygR44r).
  *
- * Remplace le kanban d events (parti sur /dashboard/planning, qui est
- * desormais un calendrier). Accueil n est plus une vue d events : c est un
+ * Remplace le kanban d events qui vivait ici (parti sur /dashboard/planning,
+ * qui est lui-meme un kanban par statut, pas une liste d events a plat).
+ * Accueil n est plus une vue d events : c est un
  * reporting (KPI + repartition joueurs) et des raccourcis vers les listes de
  * la sidebar -- « simplifier la vie, un visuel accessible, simple ».
  *
