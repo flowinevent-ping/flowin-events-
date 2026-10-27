@@ -90,6 +90,14 @@
   .prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--magenta),var(--gold));z-index:21;transition:width .4s ease}
   .prog.se{background:linear-gradient(90deg,var(--blue),var(--violet))}
 
+  /* ===== Fond tramé halftone (piste Super Event uniquement) ===== */
+  .halftone-bg::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+      background-image:radial-gradient(circle,rgba(255,211,77,.35) 1.3px,transparent 1.3px);
+      background-size:13px 13px;
+      mask-image:radial-gradient(70% 70% at 50% 35%,#000,transparent);
+      -webkit-mask-image:radial-gradient(70% 70% at 50% 35%,#000,transparent);
+      opacity:.45}
+
   /* ===== HOME ===== */
   #home .logo{font-size:clamp(44px,9.6vw,80px);font-weight:900;letter-spacing:-.03em;line-height:1}
   .logo{font-weight:900;letter-spacing:-.03em;line-height:1}
@@ -204,6 +212,9 @@
              display:flex;align-items:center;justify-content:center}
   .reason .ri svg{width:21px;height:21px;color:#fff}
   .reason .rt{font-size:12.5px;font-weight:800;line-height:1.35}
+  .reason .rt2{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.3;font-weight:600}
+  .compline{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5;padding-top:14px;border-top:1px solid var(--line)}
+  .compline b{color:#fff}
 
   /* ===== RECAP horizontal ===== */
   .trio-h{display:flex;justify-content:center;gap:16px;margin-top:8px}
@@ -213,6 +224,7 @@
   .tword-h .ti2{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center}
   .tword-h .ti2 svg{width:27px;height:27px;color:#fff}
   .tword-h h3{font-size:clamp(15px,3.2vw,19px);font-weight:900;letter-spacing:-.01em}
+  .tword-h .tp{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.3;font-weight:600;max-width:120px}
 
   /* ===== SE network diagram ===== */
   .hubwrap{position:relative;width:280px;height:260px;margin:20px auto 0}
@@ -240,6 +252,12 @@
   .netlabels{display:flex;flex-direction:column;gap:7px;margin-top:14px;max-width:380px;margin-left:auto;margin-right:auto;text-align:left}
   .netlabels .nl{display:flex;gap:9px;align-items:center;font-size:12px;font-weight:700;color:var(--muted)}
   .netlabels .nl .dotc{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .compare-row{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+  .cchip{flex:1;min-width:140px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+  .cchip .ch{font-size:11px;font-weight:800}
+  .cchip .cv{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .cchip.win{border-color:rgba(0,180,160,.5);background:rgba(0,180,160,.08)}
+  .cchip.win .ch{color:var(--teal)}
 
   /* ===== SE 2 modes ===== */
   .modes{display:flex;flex-direction:column;gap:10px;margin-top:20px}
@@ -467,25 +485,30 @@
 
   <div class="scr" id="ev2" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(124,45,146,.24), transparent)">
     <div class="inner">
-      <h1 class="mega">Des lots qui <em>ont du sens</em>.</h1>
+      <h1 class="mega">Moins cher qu'une <em>carte de fidélité</em>. Plus simple à lancer.</h1>
       <div class="reasons">
         <div class="reason" data-rz style="--c1:#E0218A;--c2:#7C2D92">
-          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
-          <div class="rt">Faire revenir<br>un client</div>
+          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 5L19 9.7 13.7 11.4 12 17l-1.7-5.6L5 9.7 10.3 8 12 3Z"/></svg></div>
+          <div class="rt">Animer simplement</div>
+          <div class="rt2">Un jeu à la caisse, pas un programme à gérer</div>
         </div>
         <div class="reason" data-rz style="--c1:#3B5CC4;--c2:#00B4A0">
-          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
-          <div class="rt">Lancer<br>un produit</div>
+          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 8-9-6-9 6 9 6 9-6Z"/><path d="M3 8v8l9 6 9-6V8"/></svg></div>
+          <div class="rt">Capter le flux</div>
+          <div class="rt2">Chaque passage en boutique devient un contact</div>
         </div>
         <div class="reason" data-rz style="--c1:#F5A100;--c2:#EC5B45">
-          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
-          <div class="rt">Faire une<br>promotion</div>
+          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></div>
+          <div class="rt">Garder le contact</div>
+          <div class="rt2">Les coordonnées sont à vous, prêtes à recontacter</div>
         </div>
         <div class="reason" data-rz style="--c1:#00B4A0;--c2:#3B5CC4">
-          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 8-9-6-9 6 9 6 9-6Z"/><path d="M3 8v8l9 6 9-6V8"/><path d="M12 14v8"/></svg></div>
-          <div class="rt">Écouler<br>un stock</div>
+          <div class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+          <div class="rt">Construire votre prospection</div>
+          <div class="rt2">Les nouveaux visages deviennent des pistes commerciales</div>
         </div>
       </div>
+      <div class="compline">Une carte de fidélité, c'est de l'impression, un boîtier de scan, un logiciel à suivre. Ici : <b>un jeu, un QR code en caisse</b>, rien à développer, rien à maintenir.</div>
     </div>
   </div>
 
@@ -511,9 +534,9 @@
     <div class="inner">
       <div class="eyebrow">En trois mots</div>
       <div class="trio-h">
-        <div class="tword-h" data-w><div class="ti2" style="background:linear-gradient(135deg,#7C2D92,#E0218A)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1Z"/><path d="M15 8.5a3.5 3.5 0 0 1 0 7"/><path d="M18 5.5a7.5 7.5 0 0 1 0 13"/></svg></div><h3>Animez.</h3></div>
-        <div class="tword-h" data-w><div class="ti2" style="background:linear-gradient(135deg,#00B4A0,#3B5CC4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><h3>Fidélisez.</h3></div>
-        <div class="tword-h" data-w><div class="ti2" style="background:linear-gradient(135deg,#F5A100,#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg></div><h3>Boostez.</h3></div>
+        <div class="tword-h" data-w><div class="ti2" style="background:linear-gradient(135deg,#7C2D92,#E0218A)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1Z"/><path d="M15 8.5a3.5 3.5 0 0 1 0 7"/><path d="M18 5.5a7.5 7.5 0 0 1 0 13"/></svg></div><h3>Animez.</h3><div class="tp">Un jeu à la caisse, prêt en quelques minutes</div></div>
+        <div class="tword-h" data-w><div class="ti2" style="background:linear-gradient(135deg,#00B4A0,#3B5CC4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div><h3>Fidélisez.</h3><div class="tp">Chaque passage devient un contact à recontacter</div></div>
+        <div class="tword-h" data-w><div class="ti2" style="background:linear-gradient(135deg,#F5A100,#EC5B45)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg></div><h3>Boostez.</h3><div class="tp">De nouveaux visiteurs attirés par le jeu découvrent votre commerce</div></div>
       </div>
       <div class="end-links">
         <a href="#" id="toSE">Découvrir le Super Event <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
@@ -522,7 +545,7 @@
   </div>
 
   <!-- ===================== SUPER EVENT TRACK ===================== -->
-  <div class="scr" id="se0" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(59,92,196,.24), transparent)">
+  <div class="scr halftone-bg" id="se0" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(59,92,196,.24), transparent)">
     <div class="inner">
       <div class="logo" style="font-size:clamp(30px,6.4vw,46px);display:flex;align-items:baseline;gap:10px;justify-content:center;margin-bottom:6px"><span class="super-logo" style="font-size:1.1em">Super</span><span>Event</span></div>
       <h1 class="mega">Rejoignez <em class="b">l'événement</em>.</h1>
@@ -532,14 +555,28 @@
 
   <div class="scr" id="se1" data-glow="radial-gradient(60% 50% at 50% 35%, rgba(59,92,196,.24), transparent)">
     <div class="inner">
-      <div class="eyebrow se">L'effet boule de neige</div>
-      <h1 class="mega" style="font-size:clamp(24px,5.6vw,38px)">Un <em class="b">réseau</em>, une diffusion.</h1>
-      <p class="lede">L'événement diffuse vers chaque commerçant. Chaque commerçant, via sa clientèle, renvoie vers l'événement.</p>
+      <div class="eyebrow se">Un réseau de diffusion hyper-local</div>
+      <h1 class="mega" style="font-size:clamp(24px,5.6vw,38px)">La même logique qu'un <em class="b">panneau 4x3</em>. Sans le budget pub.</h1>
+      <p class="lede">L'événement diffuse sa communication directement dans les commerces participants — comme un affichage urbain ou une campagne sponsorisée, mais là où les gens passent vraiment. En retour, chaque commerçant renvoie sa clientèle vers l'événement.</p>
 
       <div class="hubwrap" id="hubwrap"></div>
       <div class="netlabels">
-        <div class="nl"><span class="dotc" style="background:var(--gold)"></span>Événement → Commerçant (diffusion)</div>
-        <div class="nl"><span class="dotc" style="background:var(--teal)"></span>Clientèle du commerçant → Événement (retour)</div>
+        <div class="nl"><span class="dotc" style="background:var(--gold)"></span>Événement → Commerçant : visibilité locale, sans budget publicitaire</div>
+        <div class="nl"><span class="dotc" style="background:var(--teal)"></span>Commerçant → Événement : nouveaux visiteurs attirés par le jeu</div>
+      </div>
+      <div class="compare-row">
+        <div class="cchip">
+          <div class="ch">Panneau 4x3</div>
+          <div class="cv">Coût fixe, pas de ciblage</div>
+        </div>
+        <div class="cchip">
+          <div class="ch">Post sponsorisé</div>
+          <div class="cv">Coût par clic, portée incertaine</div>
+        </div>
+        <div class="cchip win">
+          <div class="ch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-2px;margin-right:4px"><path d="M20 6 9 17l-5-5"/></svg>Super Event</div>
+          <div class="cv">Diffusion en boutique, gratuite pour l'organisateur</div>
+        </div>
       </div>
     </div>
   </div>
