@@ -24,8 +24,9 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { grouperOperations, libelleDates, type Operation } from '@/lib/operations'
 import { grouperParStatut } from '@/lib/planningKanban'
-import { TypeChip, PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
+import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
+import { Ico } from '@/lib/proicons'
 
 export default function Page() {
   const { events, pros, partenaires, openDrawer } = useDashboard()
@@ -48,6 +49,21 @@ export default function Page() {
 
   const participants = (op: Operation) => op.stations.reduce((n, s) => n + (s.participants ?? 0), 0)
 
+  // Ligne secondaire discrete sous le repere principal (pastille + nom + date) :
+  // enseigne ou nb de stations, puis nb de participants -- jamais empile en bloc.
+  const sousInfo = (op: Operation) => {
+    const parts: string[] = []
+    if (op.type === 'super') {
+      parts.push(`${op.stations.length} station${op.stations.length > 1 ? 's' : ''}`)
+    } else {
+      const e = enseigne(op.stations[0]?.pro_id ?? null)
+      if (e) parts.push(e)
+    }
+    const n = participants(op)
+    parts.push(`${n} participant${n > 1 ? 's' : ''}`)
+    return parts.join(' · ')
+  }
+
   return (
     <div className="sa-content">
       <PageHeader title="Planning" subtitle="Super events et events, par statut" />
@@ -64,29 +80,26 @@ export default function Page() {
               </header>
               <div className="sa-kb-corps">
                 {col.ops.length === 0 && <div className="sa-kb-vide">—</div>}
-                {col.ops.map(op => (
-                  <button
-                    key={op.cle}
-                    className="sa-kb-vignette"
-                    style={{ borderLeftColor: op.type === 'super' ? ACCENT_SUPER : ACCENT_ANIM }}
-                    onClick={() => ouvrir(op)}
-                    title={`Ouvrir ${op.nom}`}
-                  >
-                    <div className="chips">
-                      <TypeChip estSuper={op.type === 'super'} />
-                    </div>
-                    <div className="kb-corps-texte">
-                      <div className="nom">{op.nom}</div>
-                      {op.type === 'super'
-                        ? <div className="pro">{op.stations.length} station{op.stations.length > 1 ? 's' : ''}</div>
-                        : (enseigne(op.stations[0]?.pro_id ?? null) && <div className="pro">🏢 {enseigne(op.stations[0]?.pro_id ?? null)}</div>)}
-                    </div>
-                    <div className="meta">
-                      <span>👥 {participants(op)}</span>
-                      {op.dateD && <span>📅 {libelleDates(op.dateD, op.dateF)}</span>}
-                    </div>
-                  </button>
-                ))}
+                {col.ops.map(op => {
+                  const accent = op.type === 'super' ? ACCENT_SUPER : ACCENT_ANIM
+                  return (
+                    <button
+                      key={op.cle}
+                      className="sa-kb-vignette"
+                      onClick={() => ouvrir(op)}
+                      title={`Ouvrir ${op.nom}`}
+                    >
+                      <div className="sa-kb-ligne">
+                        <span className="sa-kb-pastille" style={{ background: `${accent}20`, color: accent }}>
+                          <Ico k={op.type === 'super' ? 'star' : 'ticket'} size={14} />
+                        </span>
+                        <span className="sa-kb-nom">{op.nom}</span>
+                        {op.dateD && <span className="sa-kb-date">{libelleDates(op.dateD, op.dateF)}</span>}
+                      </div>
+                      <div className="sa-kb-sub">{sousInfo(op)}</div>
+                    </button>
+                  )
+                })}
               </div>
             </section>
           ))}

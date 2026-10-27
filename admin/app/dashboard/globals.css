@@ -215,16 +215,20 @@ a:hover{text-decoration:underline}
 /* Colonnes de largeur fixe qui defilent horizontalement : le nombre de colonnes
    ne doit pas ecraser la largeur des vignettes, sinon le titre d un event passe
    sur quatre lignes des qu on ajoute un statut.
-   MISE A JOUR (27/10) : Romain a signale que ce Kanban tranchait avec le reste
-   du dashboard, deja realigne sur les jetons reels du pro (lib/proui.ts CARD --
-   voir .sa-parc-scene juste au-dessus). .sa-kb-vignette reprend donc EXACTEMENT
-   le rayon (18), la bordure (#efe9f2) et l ombre (0 6px 18px rgba(43,16,54,.05))
-   de CARD, au lieu de ses valeurs generiques precedentes (rayon 10, bordure
-   --sa-border, pas d ombre au repos). .sa-kb-col suit la meme famille de rayon
-   (14, celui deja use par .sa-tile sur l Accueil) pour rester un contenant
-   coherent sans pour autant copier le rayon de la carte qu il contient. La
-   mecanique de defilement (overflow-x sur .sa-kanban, flex-shrink:0 sur les
-   colonnes) n est pas touchee. */
+   MISE A JOUR (27/10, 1ere passe) : .sa-kb-vignette reprend le rayon (18), la
+   bordure (#efe9f2) et l ombre (0 6px 18px rgba(43,16,54,.05)) de CARD. .sa-kb-col
+   suit la meme famille de rayon (14, celui deja use par .sa-tile sur l Accueil).
+   MISE A JOUR (27/10, 2e passe) : Romain a montre la preview ("ces especes de
+   trucs sur le cote degueulasse" -- la barre de couleur plaquee sur le bord
+   gauche) contre la maquette validee le matin meme (comparaison calendrier vs
+   kanban) : plus de bordure laterale coloree ; a la place une pastille ronde
+   (icone etoile = super event, icone ticket = event) en tete de ligne, le nom
+   juste a cote en gras, et une puce de date a droite -- repere principal sur
+   UNE SEULE ligne horizontale centree verticalement (.sa-kb-ligne), jamais un
+   bloc de texte empile. Les infos secondaires (enseigne/stations, participants)
+   passent en 2e ligne discrete sous le repere principal (.sa-kb-sub), pas dans
+   le meme niveau visuel. La mecanique de defilement (overflow-x sur .sa-kanban,
+   flex-shrink:0 sur les colonnes) n est pas touchee. */
 .sa-kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
 .sa-kb-col{flex:0 0 268px;background:var(--sa-subtle);border:1px solid var(--sa-border);
   border-radius:14px;padding:10px;min-width:0}
@@ -237,19 +241,23 @@ a:hover{text-decoration:underline}
 .sa-kb-corps{display:flex;flex-direction:column;gap:8px}
 .sa-kb-vide{font-size:11.5px;color:var(--sa-muted);padding:8px 4px}
 .sa-kb-vignette{display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
-  background:#fff;border:1px solid #efe9f2;border-left:4px solid var(--sa-accent);
+  background:#fff;border:1px solid #efe9f2;
   border-radius:18px;padding:11px 12px;box-shadow:0 6px 18px rgba(43,16,54,.05);
   transition:box-shadow .12s,transform .12s}
 .sa-kb-vignette:hover{box-shadow:0 10px 26px rgba(43,16,54,.10);transform:translateY(-1px)}
-.sa-kb-vignette .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
-/* Conteneur de texte empile (nom + enseigne/nb de stations) : explicitement
-   flex-column, pas de simple empilement implicite -- une maquette kanban
-   anterieure a deja montre que des blocs de texte empiles en <span> sans
-   cette regle font disparaitre ou mal centrer le nom de l operation. */
-.sa-kb-vignette .kb-corps-texte{display:flex;flex-direction:column}
-.sa-kb-vignette .nom{font-weight:800;font-size:13.5px;line-height:1.25;color:var(--sa-text)}
-.sa-kb-vignette .pro{font-size:11.5px;color:var(--sa-muted);margin-top:3px}
-.sa-kb-vignette .meta{display:flex;gap:12px;font-size:11.5px;color:var(--sa-muted);margin-top:6px}
+/* Repere principal : pastille icone + nom + date, tout sur une ligne, centre
+   verticalement -- jamais de bloc de texte empile ici. */
+.sa-kb-ligne{display:flex;align-items:center;gap:8px}
+.sa-kb-pastille{width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center}
+.sa-kb-nom{flex:1;min-width:0;font-weight:800;font-size:13.5px;line-height:1.25;
+  color:var(--sa-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sa-kb-date{flex-shrink:0;background:var(--sa-subtle);color:var(--sa-muted);
+  font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;white-space:nowrap}
+/* Ligne secondaire discrete (enseigne/stations, participants) sous le repere
+   principal -- plus petite, plus pale, jamais au meme niveau visuel que le nom. */
+.sa-kb-sub{font-size:11px;color:var(--sa-muted);margin-top:6px;padding-left:34px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Une tuile de chiffre qui s ouvre : meme apparence que .sa-kpi, mais c est un
    bouton, donc il faut neutraliser le style natif et rendre le clic visible. */
