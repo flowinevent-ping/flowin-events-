@@ -195,10 +195,14 @@ function Wizard() {
     }
   }
 
+  /* `sa-lbl` : le meme libelle que les autres parcours sa-parc (BarreParcours,
+     ConfigJeu) -- avant, ce formulaire redefinissait son propre style de
+     libelle en ligne, legerement different (11.5px non scope vs 12px scope),
+     plutot que de reprendre celui deja etabli pour la meme famille d ecrans. */
   const ligne = (label: string, requis: boolean, champ: React.ReactNode) => (
     <div style={{ marginBottom: 12 }}>
-      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, marginBottom: 4 }}>
-        {label}{requis && <span style={{ color: '#c46a6a' }}> *</span>}
+      <label className="sa-lbl">
+        {label}{requis && <span style={{ color: '#B91C1C' }}> *</span>}
       </label>
       {champ}
     </div>
@@ -220,11 +224,16 @@ function Wizard() {
         actions={<button className="sa-btn" onClick={() => router.push('/dashboard/events')}>Annuler</button>}
       />
 
+      {/* Rayon 12 et teintes de succes/erreur alignes sur le reste du parcours
+          sa-parc (voir le bandeau "points a completer" et PiedParcours,
+          .sa-parc-bloque) et sur l espace pro (NouvelleOperation) : un seul
+          vert et un seul rouge pour toute cette famille d ecrans, au lieu
+          d une nuance recalculee ici. */}
       {retour && (
         <div style={{
-          marginBottom: 12, padding: '10px 12px', borderRadius: 10, fontSize: 12, fontWeight: 600,
-          border: `1px solid ${retour.ok ? '#2f7d4f' : '#c46a6a'}`,
-          color: retour.ok ? '#2f7d4f' : '#c46a6a',
+          marginBottom: 12, padding: '10px 14px', borderRadius: 12, fontSize: 12, fontWeight: 600,
+          border: `1px solid ${retour.ok ? '#15803D' : '#B91C1C'}`,
+          color: retour.ok ? '#15803D' : '#B91C1C',
         }}>
           {retour.texte}
         </div>
@@ -239,8 +248,8 @@ function Wizard() {
 
       {(tenteEnregistrer || etape === 'F') && problemes.length > 0 && (
         <div style={{
-          marginBottom: 14, padding: '10px 12px', borderRadius: 10,
-          border: '1px solid #b4791f', background: 'rgba(244,181,68,.10)', fontSize: 11.5, lineHeight: 1.6,
+          marginBottom: 14, padding: '10px 14px', borderRadius: 12,
+          border: '1px solid rgba(245,158,11,.25)', background: 'rgba(245,158,11,.08)', fontSize: 11.5, lineHeight: 1.6,
         }}>
           <b>{problemes.length} point{problemes.length > 1 ? 's' : ''} à compléter</b> avant enregistrement :
           <ul style={{ margin: '5px 0 0', paddingLeft: 18 }}>
@@ -265,7 +274,7 @@ function Wizard() {
         {etape === 'A' && (
           <>
             {jours > 1 && (
-              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, border: '1px solid var(--sa-border)', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 12, border: '1px solid var(--sa-border)', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Ico k="calendar" size={13} /> <b>Événement sur {jours} jours</b> — du {d.date_d} au {d.date_f}.
               </div>
             )}
@@ -273,7 +282,7 @@ function Wizard() {
               <input className="sa-input" style={{ width: '100%' }} value={d.nom}
                 onChange={e => maj({ nom: e.target.value })} placeholder="Jazz à Nice 2027…" />)}
             {proInconnu && (
-              <div style={{ marginBottom: 12, padding: '9px 11px', borderRadius: 9, background: '#FEF3C7', color: '#92400E', fontSize: 11.5, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+              <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 12, background: 'rgba(245,158,11,.08)', border: '1px solid rgba(245,158,11,.25)', color: '#B45309', fontSize: 11.5, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                 <Ico k="warning" size={13} style={{ marginTop: 1, flexShrink: 0 }} />
                 <span>Le pro pré-rempli (<b>{d.pro_id}</b>) est introuvable dans la liste —
                 sélectionnez-le manuellement ci-dessous.</span>
@@ -371,8 +380,12 @@ function Wizard() {
                   <button key={m.id} type="button"
                     onClick={() => { setD(x => appliquerModele(m, x)); setModeleApplique(m.id) }}
                     style={{
-                      textAlign: 'left', cursor: 'pointer', padding: '13px 14px', borderRadius: 12,
-                      background: modeleApplique === m.id ? 'var(--sa-subtle)' : 'transparent',
+                      textAlign: 'left', cursor: 'pointer', padding: '14px 15px', borderRadius: 14,
+                      /* Meme rayon (14) et meme teinte au choix (fond teinte 5% de
+                         l accent, pas un simple gris) que .sa-choix / les cartes
+                         de jeu de l espace pro -- un seul vocabulaire de carte
+                         "selectionnable" sur cet ecran. */
+                      background: modeleApplique === m.id ? 'color-mix(in srgb, var(--sa-accent) 5%, #fff)' : '#fff',
                       border: `2px solid ${modeleApplique === m.id ? 'var(--sa-accent)' : 'var(--sa-border)'}`,
                     }}>
                     <div style={{ fontSize: 13, fontWeight: 800 }}>{m.nom}</div>
@@ -386,7 +399,7 @@ function Wizard() {
                 ))}
               </div>
               {modeleApplique && (
-                <div style={{ marginTop: 10, padding: '9px 11px', borderRadius: 9, border: '1px solid #2f7d4f', color: '#2f7d4f', fontSize: 11.5 }}>
+                <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(21,128,61,.3)', background: 'rgba(21,128,61,.08)', color: '#15803D', fontSize: 11.5 }}>
                   Modèle appliqué. Tout reste modifiable aux étapes suivantes.
                 </div>
               )}
@@ -406,11 +419,17 @@ function Wizard() {
                 style={{
                   textAlign: 'center', cursor: 'pointer', padding: '18px 13px', borderRadius: 14,
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  background: d.module === m.id ? 'var(--sa-subtle)' : 'transparent',
+                  background: d.module === m.id ? 'color-mix(in srgb, var(--sa-accent) 5%, #fff)' : '#fff',
                   border: `2px solid ${d.module === m.id ? 'var(--sa-accent)' : 'var(--sa-border)'}`,
                 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
-                  <IcoModule module={m.id} style={{ color: 'var(--sa-accent)' }} />
+                {/* Halo rond rempli de l accent au choix -- le meme pictogramme
+                    que les cartes "Que voulez-vous faire ?" de l espace pro
+                    (NouvelleOperation, .nop-halo), pas une tuile carree grise. */}
+                <div style={{
+                  width: 44, height: 44, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10,
+                  background: d.module === m.id ? 'var(--sa-accent)' : 'color-mix(in srgb, var(--sa-accent) 10%, #fff)',
+                }}>
+                  <IcoModule module={m.id} style={{ color: d.module === m.id ? '#fff' : 'var(--sa-accent)' }} />
                 </div>
                 <div style={{ fontSize: 13.5, fontWeight: 800 }}>{m.nom}</div>
                 <div className="sa-muted" style={{ fontSize: 11, marginTop: 3 }}>{m.desc}</div>
@@ -471,7 +490,7 @@ function Wizard() {
             )}
 
             {d.lots.map((l, i) => (
-              <div key={i} style={{ border: '1px solid var(--sa-border)', borderRadius: 10, padding: 11, marginBottom: 8 }}>
+              <div key={i} style={{ border: '1px solid var(--sa-border)', borderRadius: 14, padding: 14, marginBottom: 10, background: '#fff' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: 8, alignItems: 'end' }}>
                   {ligne('Nom du lot', true,
                     <input className="sa-input" style={{ width: '100%' }} value={l.nom}
