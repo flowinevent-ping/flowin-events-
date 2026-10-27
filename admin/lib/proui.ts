@@ -14,13 +14,18 @@ export const ACC = C.accent
 /** Champ de saisie, bouton principal et bouton secondaire de l application. */
 export const CHAMP: CSSProperties = { width: '100%', padding: '12px 14px', background: C.champ, border: `1.5px solid ${C.bordureChamp}`, borderRadius: 13, color: C.texte, fontSize: 15, fontWeight: 600, fontFamily: POLICE_PRO, outline: 'none', boxSizing: 'border-box' }
 export const LABEL: CSSProperties = { display: 'block', fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 6 }
-export const BTN: CSSProperties = { border: 'none', borderRadius: 50, padding: '14px 26px', fontFamily: POLICE_PRO, fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: C.degrade, boxShadow: '0 10px 24px rgba(224,33,138,.28)' }
+/* Halo du bouton et teinte de selection : la charte etait passee au bleu
+   le 17/09 (lib/charte.ts, CHARTE_PRO) mais ces deux valeurs etaient restees
+   codees en dur sur l ancien rose/magenta -- un bouton au degrade bleu avec
+   une ombre rose, une carte choisie teintee de rose. Alignees sur C.accent
+   (#2563EB -> 37,99,235), meme famille que C.degrade. */
+export const BTN: CSSProperties = { border: 'none', borderRadius: 50, padding: '14px 26px', fontFamily: POLICE_PRO, fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: C.degrade, boxShadow: '0 10px 24px rgba(37,99,235,.28)' }
 export const BTN2: CSSProperties = { border: `1.5px solid ${C.bordureChamp}`, borderRadius: 50, padding: '12px 22px', fontFamily: POLICE_PRO, fontWeight: 700, fontSize: 14, color: C.accent, cursor: 'pointer', background: '#fff' }
-/** Carte a choisir (jeu, type d operation) : bordure magenta quand choisie. */
+/** Carte a choisir (jeu, type d operation) : bordure bleue (C.magenta) quand choisie. */
 export function choix(actif: boolean): CSSProperties {
   return {
     border: actif ? `2px solid ${C.magenta}` : `1.5px solid ${C.bordureChamp}`,
-    background: actif ? 'rgba(224,33,138,.07)' : C.champ,
+    background: actif ? 'rgba(37,99,235,.07)' : C.champ,
     borderRadius: 16, padding: 16, cursor: 'pointer', textAlign: 'left', fontFamily: POLICE_PRO, color: C.texte,
   }
 }

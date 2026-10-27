@@ -118,7 +118,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
         const on = n.key === actif
         return (
           <Link key={n.key} href={`${n.route}${q}`} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 10px', marginBottom: 6, borderRadius: 14, background: on ? C.degrade : 'transparent', color: '#fff', boxShadow: on ? '0 8px 20px rgba(224,33,138,.3)' : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 10px', marginBottom: 6, borderRadius: 14, background: on ? C.degrade : 'transparent', color: '#fff', boxShadow: on ? '0 8px 20px rgba(37,99,235,.3)' : 'none' }}>
               <span style={{ width: 34, height: 34, borderRadius: 11, background: on ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon k={n.icon} /></span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 14, fontWeight: 800 }}>{n.label}</span>
