@@ -214,10 +214,20 @@ a:hover{text-decoration:underline}
 /* ---- Kanban horizontal de vignettes cliquables (accueil, et reutilisable) ---- */
 /* Colonnes de largeur fixe qui defilent horizontalement : le nombre de colonnes
    ne doit pas ecraser la largeur des vignettes, sinon le titre d un event passe
-   sur quatre lignes des qu on ajoute un statut. */
+   sur quatre lignes des qu on ajoute un statut.
+   MISE A JOUR (27/10) : Romain a signale que ce Kanban tranchait avec le reste
+   du dashboard, deja realigne sur les jetons reels du pro (lib/proui.ts CARD --
+   voir .sa-parc-scene juste au-dessus). .sa-kb-vignette reprend donc EXACTEMENT
+   le rayon (18), la bordure (#efe9f2) et l ombre (0 6px 18px rgba(43,16,54,.05))
+   de CARD, au lieu de ses valeurs generiques precedentes (rayon 10, bordure
+   --sa-border, pas d ombre au repos). .sa-kb-col suit la meme famille de rayon
+   (14, celui deja use par .sa-tile sur l Accueil) pour rester un contenant
+   coherent sans pour autant copier le rayon de la carte qu il contient. La
+   mecanique de defilement (overflow-x sur .sa-kanban, flex-shrink:0 sur les
+   colonnes) n est pas touchee. */
 .sa-kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
 .sa-kb-col{flex:0 0 268px;background:var(--sa-subtle);border:1px solid var(--sa-border);
-  border-radius:12px;padding:10px;min-width:0}
+  border-radius:14px;padding:10px;min-width:0}
 .sa-kb-tete{display:flex;align-items:center;gap:7px;padding:2px 4px 10px;
   font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted)}
 .sa-kb-tete .pastille{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -227,9 +237,10 @@ a:hover{text-decoration:underline}
 .sa-kb-corps{display:flex;flex-direction:column;gap:8px}
 .sa-kb-vide{font-size:11.5px;color:var(--sa-muted);padding:8px 4px}
 .sa-kb-vignette{display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
-  background:var(--sa-card);border:1px solid var(--sa-border);border-left:4px solid var(--sa-accent);
-  border-radius:10px;padding:11px 12px;transition:box-shadow .12s,transform .12s}
-.sa-kb-vignette:hover{box-shadow:0 4px 14px rgba(15,23,42,.10);transform:translateY(-1px)}
+  background:#fff;border:1px solid #efe9f2;border-left:4px solid var(--sa-accent);
+  border-radius:18px;padding:11px 12px;box-shadow:0 6px 18px rgba(43,16,54,.05);
+  transition:box-shadow .12s,transform .12s}
+.sa-kb-vignette:hover{box-shadow:0 10px 26px rgba(43,16,54,.10);transform:translateY(-1px)}
 .sa-kb-vignette .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
 /* Conteneur de texte empile (nom + enseigne/nb de stations) : explicitement
    flex-column, pas de simple empilement implicite -- une maquette kanban
