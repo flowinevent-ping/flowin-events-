@@ -20,7 +20,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { creerAnimation, creerSuperEventPro, enregistrerDemandeQuiz } from '@/lib/pro'
-import type { Banque } from '@/lib/banques'
+import type { Banque, QuestionQuiz } from '@/lib/banques'
+import { creerBanque, enregistrerBanque, nouvelleQuestionQuiz } from '@/lib/banques'
 import type { SuperEvent } from '@/lib/nds'
 import type { PackParticipation } from '@/lib/commercial'
 import { GABARIT_MODULE, GABARIT_NOM, sorteBanque } from '@/lib/gabarit'
@@ -59,6 +60,21 @@ const MAIL_FLOWIN = 'flowinevent@gmail.com'
 const BASE = 'https://flowin-events.vercel.app'
 const ETAPES = ['Établissement', 'Jeu', 'Lots', 'Diffusion & récap']
 const lotVide = (type: Lot['type'] = 'tirage'): Lot => ({ id: 'l' + Math.random().toString(36).slice(2, 8), nom: '', quantite: 5, valeur: 0, type, conditions: '' })
+
+/* Volet C — 3 questions de depart pour le pro qui n a ni banque ni envie
+   d en demander une a Flowin. Du texte-gabarit, JAMAIS une vraie question
+   (aucun fait invente) : le pro remplace l intitule et les 4 reponses avant
+   de pouvoir valider (bouton desactive sinon). Meme forme que le modele
+   reel (nouvelleQuestionQuiz, lib/banques.ts) : 1 question, 4 reponses,
+   1 bonne reponse. */
+function suggestionsExemples(): QuestionQuiz[] {
+  const base = (texte: string): QuestionQuiz => ({ ...nouvelleQuestionQuiz(), texte, options: ['Réponse à corriger', 'Réponse à corriger', 'Réponse à corriger', 'Réponse à corriger'] })
+  return [
+    base('Exemple à modifier — une question sur votre commerce'),
+    base('Exemple à modifier — une question sur votre quartier ou votre ville'),
+    base('Exemple à modifier — une question sur vos produits ou votre savoir-faire'),
+  ]
+}
 
 function Champ({ label, children }: { label: string; children: React.ReactNode }) {
   return <label style={{ display: 'block', marginBottom: 14 }}><span style={LABEL}>{label}</span>{children}</label>
@@ -125,6 +141,11 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
   const [contactTel, setContactTel] = useState(pro.tel ?? '')
   const [contactEmail, setContactEmail] = useState(pro.email ?? '')
   const [demandeFlowin, setDemandeFlowin] = useState<'' | 'ok' | 'echec'>('')
+  /* Volet C — encart "3 questions suggerees", independant de la voie Flowin. */
+  const [panneauSuggestions, setPanneauSuggestions] = useState(false)
+  const [suggestions, setSuggestions] = useState<QuestionQuiz[]>(() => suggestionsExemples())
+  const [banqueSuggeree, setBanqueSuggeree] = useState<Banque | null>(null)
+  const [validationSuggestions, setValidationSuggestions] = useState<'' | 'enregistrement' | 'ok' | 'echec'>('')
   const jeu = JEUX.find(j => j.m === module_)
   const moduleActif = rejoindre ? (se?.module || GABARIT_MODULE) : module_
 
@@ -224,6 +245,24 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
   const precedent = () => aller(etape === 4 && sansLots ? 2 : Math.max(etape - 1, 0))
 
   const majLot = (id: string, champ: keyof Lot, v: string | number) => setLots(ls => ls.map(l => (l.id === id ? { ...l, [champ]: v } : l)))
+
+  /* Volet C — edition des 3 suggestions, puis enregistrement dans le vrai
+     modele (table `banques`, meme fonctions que l editeur complet /pro/banques). */
+  const majSuggestion = (i: number, patch: Partial<QuestionQuiz>) => setSuggestions(qs => qs.map((q, qi) => (qi === i ? { ...q, ...patch } : q)))
+  const majOptionSuggestion = (i: number, oi: number, v: string) => setSuggestions(qs => qs.map((q, qi) => (qi === i ? { ...q, options: q.options.map((o, oii) => (oii === oi ? v : o)) } : q)))
+  const suggestionsCompletes = suggestions.every(s => s.texte.trim() && s.options.every(o => o.trim()))
+  async function validerSuggestions() {
+    setValidationSuggestions('enregistrement')
+    const banque = banqueSuggeree ?? await creerBanque({ proId: pro.id, nom: nom.trim() ? `Questions — ${nom.trim()}` : 'Questions suggérées', tags: ['quiz'] })
+    if (!banque) { setValidationSuggestions('echec'); return }
+    const ok = await enregistrerBanque(banque.id, suggestions, true)
+    if (!ok) { setValidationSuggestions('echec'); return }
+    setBanqueSuggeree(banque)
+    setBanqueId(banque.id)
+    setVoieFlowin(false)
+    setValidationSuggestions('ok')
+    setPanneauSuggestions(false)
+  }
   const aUnInstant = !estSuper && !rejoindre && module_ !== 'spin' && lotsNommes.some(l => l.type === 'instantane')
 
   /* ── Apercu ─────────────────────────────────────────────────────────── */
@@ -338,8 +377,23 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
             )}
             {!rejoindre && lien && (
               <>
-                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 8 }}>Le QR de votre jeu</div>
-                <Diffusion compact url={lien} titre={nom.trim()} sousTitre="Scannez pour jouer" />
+                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>Vos 3 QR, un par canal</div>
+                <div style={{ fontSize: 12, ...MUTED, marginBottom: 10, lineHeight: 1.5 }}>
+                  Même jeu, un paramètre de source différent sur chaque QR : vos données (CRM, trafic) distingueront d’où viennent vos joueurs.
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginBottom: 18 }}>
+                  {[
+                    { source: 'magasin', label: 'Magasin', sous: 'QR imprimé, affiché chez vous' },
+                    { source: 'instagram', label: 'Réseaux sociaux', sous: 'À poster sur vos réseaux' },
+                    { source: 'tracking', label: 'Tracking', sous: 'Pour une affiche ou un support tiers' },
+                  ].map(c => (
+                    <div key={c.source} style={{ border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 12, background: '#fff', textAlign: 'center' }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 2 }}>{c.label}</div>
+                      <div style={{ fontSize: 11, ...MUTED, marginBottom: 8 }}>{c.sous}</div>
+                      <Diffusion compact url={`${lien}&source=${c.source}`} titre={`${nom.trim()} — ${c.label}`} sousTitre="Scannez pour jouer" />
+                    </div>
+                  ))}
+                </div>
                 <div style={{ fontSize: 13, fontWeight: 800, margin: '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
@@ -350,6 +404,19 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
                 </div>
               </>
             )}
+
+            {/* Volet B — assistance immediate : seuls contacts reels deja presents
+                dans ce fichier (TEL_FLOWIN, MAIL_FLOWIN), aucun numero invente. */}
+            <div style={{ marginTop: 22, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 2 }}>Besoin d’aide ?</div>
+              <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>L’équipe Flowin répond directement.</div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <a style={{ ...BTN2, textDecoration: 'none' }} href={`tel:${TEL_FLOWIN.replace(/\s/g, '')}`}>Appeler le {TEL_FLOWIN}</a>
+                <a style={{ ...BTN2, textDecoration: 'none' }} href={`sms:${TEL_FLOWIN.replace(/\s/g, '')}`}>SMS</a>
+                <a style={{ ...BTN2, textDecoration: 'none' }} href={`mailto:${MAIL_FLOWIN}`}>Email</a>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
               {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/operation${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
               <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
@@ -409,7 +476,13 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
 
   const titreParcours = rejoindre ? 'Rejoindre un super event' : estSuper ? 'Créer un super event' : 'Créer une animation'
   const jeuxProposes = estSuper ? JEUX.filter(j => j.m !== 'spin') : JEUX
-  const banquesQuiz = banques.filter(b => !(b.tags || []).includes('bonus') && sorteBanque(b.questions) !== 'bonus')
+  const banquesQuizBase = banques.filter(b => !(b.tags || []).includes('bonus') && sorteBanque(b.questions) !== 'bonus')
+  /* Volet C — la banque creee depuis l encart "suggestions" n est pas dans la
+     prop `banques` (chargee par la page avant l enregistrement) : on l ajoute
+     localement a la liste affichee, memes donnees que ce qui vient d etre ecrit. */
+  const banquesQuiz = banqueSuggeree && !banquesQuizBase.some(b => b.id === banqueSuggeree.id)
+    ? banquesQuizBase.concat({ ...banqueSuggeree, questions: suggestions, statut: 'valide' })
+    : banquesQuizBase
   const banquesBonus = banques.filter(b => sorteBanque(b.questions) === 'bonus' || sorteBanque(b.questions) === 'mixte' || (b.tags || []).includes('bonus'))
   const lotPrincipal = lotsNommes[0] ?? null
 
@@ -568,8 +641,42 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
                     <a href={`/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>
-                    <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(voieFlowin ? { borderColor: C.magenta } : {}) }} onClick={() => { setVoieFlowin(true); setBanqueId(null) }}>Demander à Flowin d’écrire le quiz</button>
+                    <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(panneauSuggestions ? { borderColor: C.magenta } : {}) }} onClick={() => { setPanneauSuggestions(v => !v); setVoieFlowin(false) }}>3 questions suggérées, à adapter</button>
+                    <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(voieFlowin ? { borderColor: C.magenta } : {}) }} onClick={() => { setVoieFlowin(true); setBanqueId(null); setPanneauSuggestions(false) }}>Demander à Flowin d’écrire le quiz</button>
                   </div>
+
+                  {panneauSuggestions && (
+                    <div style={{ marginTop: 12, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 4 }}>3 questions suggérées</div>
+                      <div style={{ fontSize: 12, ...MUTED, marginBottom: 12, lineHeight: 1.5 }}>
+                        Des exemples à remplacer par vos propres questions — ce ne sont pas de vraies questions. Modifiez l’intitulé et les 4 réponses, cochez la bonne, puis validez.
+                      </div>
+                      {suggestions.map((s, i) => (
+                        <div key={s.id} style={{ border: `1.5px solid ${C.bordureChamp}`, borderRadius: 14, padding: 12, marginBottom: 10, background: '#fff' }}>
+                          <div style={{ fontSize: 10.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: C.attenue, marginBottom: 6 }}>Exemple {i + 1}/3 — à modifier</div>
+                          <input style={CHAMP} value={s.texte} onChange={e => majSuggestion(i, { texte: e.target.value })} placeholder="Intitulé de la question" />
+                          <div style={{ display: 'grid', gap: 7, marginTop: 8 }}>
+                            {s.options.map((opt, oi) => (
+                              <div key={oi} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                <input type="radio" name={`sugg-bonne-${s.id}`} checked={s.bonne === oi} onChange={() => majSuggestion(i, { bonne: oi })} title="Bonne réponse" />
+                                <input style={{ ...CHAMP, flex: 1 }} value={opt} onChange={e => majOptionSuggestion(i, oi, e.target.value)} placeholder={`Réponse ${oi + 1}`} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <button style={{ ...BTN, padding: '11px 20px', fontSize: 14, opacity: suggestionsCompletes ? 1 : 0.45 }}
+                          disabled={!suggestionsCompletes || validationSuggestions === 'enregistrement'}
+                          onClick={validerSuggestions}>
+                          {validationSuggestions === 'enregistrement' ? 'Enregistrement…' : 'Valider'}
+                        </button>
+                        {!suggestionsCompletes && <span style={{ fontSize: 12, color: '#B45309', fontWeight: 700 }}>Complétez l’intitulé et les 4 réponses des 3 questions.</span>}
+                      </div>
+                      {validationSuggestions === 'ok' && <div style={{ fontSize: 12.5, color: '#15803D', fontWeight: 700, marginTop: 8 }}>Questions enregistrées et sélectionnées pour ce jeu.</div>}
+                      {validationSuggestions === 'echec' && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 8 }}>Enregistrement impossible — réessayez.</div>}
+                    </div>
+                  )}
 
                   {voieFlowin && (
                     <div style={{ marginTop: 12, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
