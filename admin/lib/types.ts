@@ -46,6 +46,10 @@ export interface EventCfg {
   subtitle?: string
   nomCourt?: string
   datesLabel?: string
+  /** Surcharge de thème "niveau B" : écrase, champ par champ, les valeurs par
+      défaut du module (lib/parcoursTheme.ts, "niveau A") pour CET event
+      uniquement. Jamais lue par aucun autre event -- voir resolveParcoursTheme. */
+  theme?: Partial<import('./parcoursTheme').ParcoursTheme>
   [key: string]: unknown
 }
 

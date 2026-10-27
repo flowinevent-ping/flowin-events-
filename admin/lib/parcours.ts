@@ -52,7 +52,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   if (seId) {
     const { data } = await supabase
       .from('partenaires')
-      .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,ordre')
+      .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,ordre,tel,contact,ville,adresse')
       .eq('super_event_id', seId)
       .order('ordre', { ascending: true, nullsFirst: false })
       .order('nom', { ascending: true })
@@ -62,7 +62,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
     if (partIds.length) {
       const { data } = await supabase
         .from('partenaires')
-        .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif')
+        .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,tel,contact,ville,adresse')
         .in('id', partIds)
       partenaires = ((data ?? []) as FlowinPartenaire[]).filter(p => p.actif !== false)
     }
@@ -689,7 +689,16 @@ export function parcoursCSS(couleur: string): string {
     .gender-btn.sel{background:rgba(224,33,138,.18);border-color:#E0218A;color:#ffd5ec}
     .ticket-code{font-size:28px;font-weight:900;color:${couleur || '#E0218A'};letter-spacing:.1em;margin:12px 0;font-family:ui-monospace,Menlo,monospace;text-align:center}
     .part-tile{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center;cursor:pointer}
+    .part-tile-avatar{width:52px;height:52px;border-radius:12px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:rgba(224,33,138,.18);color:#ffd5ec;object-fit:contain}
     .link-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;margin-bottom:8px}
+    /* Fiche partenaire partagée (ParcoursPartenaires.tsx), commune a tous les
+       parcours -- avant ca Tombola etait le seul module a avoir une vraie
+       fiche partenaire, chaque autre module reinventait la sienne ou n en
+       avait aucune. */
+    .part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:flex-end}
+    .part-sheet{background:#1E1530;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:430px;margin:0 auto;max-height:80dvh;overflow-y:auto}
+    .part-sheet-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto 12px;overflow:hidden}
+    .part-sheet-avatar img{width:100%;height:100%;object-fit:contain}
     select.input option{background:#2B1036}
     .progress{display:flex;gap:6px;margin-bottom:16px}
     .progress-step{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12)}
@@ -709,6 +718,12 @@ export function parcoursCSS(couleur: string): string {
     .parc-flowin-badge span{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.6)}
   `
 }
+
+/* ── Texte RGPD unique, partagé par tous les formulaires de parcours ──
+   Avant ce commit, chaque module (Vote/Quiz/QuizSolo/Tombola) portait son
+   propre libellé RGPD, legerement different d un module a l autre -- texte
+   exact impose par Romain, a utiliser partout (cf CLAUDE.md). */
+export const RGPD_TEXT = "J'accepte que mes coordonnées soient utilisées pour ce jeu. Traitées et utilisées par Flowin, mes données ne sont ni vendues ni échangées, en respect avec la loi RGPD."
 
 /* ── Shared Form Component helper ── */
 export const SOURCES = ['📸 Instagram', '🔵 Facebook', '📋 Affiche / Flyer', '📣 Bouche à oreille', '🌐 Autre']

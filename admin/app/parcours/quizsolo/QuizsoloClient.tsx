@@ -1,16 +1,18 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
-import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
+import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
+import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
+import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'quiz' | 'result' | 'form' | 'ticket' | 'already'
+type Screen = 'landing' | 'quiz' | 'result' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
 
 export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }: Props) {
@@ -20,6 +22,8 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
   const nbQ = (cfg.quizNbQuestions as number) ?? 5
   const timerSec = 30
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
+  const theme = resolveParcoursTheme('quizsolo', ev?.cfg)
+  const [partIdx, setPartIdx] = useState(0)
   /* Ne prendre que les QCM : depuis le 03/09 une banque bonus peut se trouver
      dans le meme tableau. Sans banque bonus cochee, ce filtre ne retire rien. */
   const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm')
@@ -100,9 +104,11 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
   const q=questions[qIdx]
 
 
+  const partSelected = partenaires[partIdx]
+
   /* Navigation postMessage — flèches dashboard SA */
   useEffect(() => {
-    const NAV_SCREENS: Screen[] = ['landing', 'quiz', 'result', 'form', 'ticket', 'already']
+    const NAV_SCREENS: Screen[] = ['landing', 'quiz', 'result', 'form', 'partenaires', 'ticket', 'already']
     function onMsg(e: MessageEvent) {
       if (!e.data || !e.data.flowinNav) return
       setScreen(cur => {
@@ -117,19 +123,22 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
+    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{parcoursCSS(c)+'.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}'}</style>
       {screen==='landing'&&(
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <ParcoursLogo emoji={(cfg.logoEmoji as string) || '⏱️'} logoSvg={cfg.logoSvg as string} />
+          <ParcoursLogo emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl} />
           <div style={{fontSize:24,fontWeight:900,marginBottom:8}}>{nom}</div>
           <div style={{fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20}}>Quiz chronométré · {timerSec}s par question</div>
-          <button className="btn" onClick={()=>setScreen('quiz')}>⏱️ Démarrer le quiz →</button>
+          <button className="btn" onClick={()=>setScreen('quiz')}>{theme.texts.ctaLanding || 'Démarrer le quiz'} →</button>
+          {partenaires.length > 0 && (
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
+          )}
           <FlowinBadge />
         </div>
       )}
       {screen==='quiz'&&q&&(<div className="screen"><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}><div style={{fontSize:12,fontWeight:700,color:'rgba(255,255,255,.45)'}}>Q{qIdx+1}/{questions.length}</div><div style={{background:timer<=5?'rgba(239,68,68,.2)':'rgba(255,255,255,.06)',borderRadius:'50%',width:40,height:40,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:14,color:timer<=5?'#F87171':'#fff',border:`2px solid ${timer<=5?'#EF4444':'rgba(255,255,255,.15)'}`}}>{timer}</div></div><div style={{background:'rgba(255,255,255,.06)',borderRadius:12,height:4,marginBottom:16}}><div style={{background:c,borderRadius:12,height:'100%',width:`${(timer/timerSec)*100}%`,transition:'width 1s linear'}}/></div><div style={{fontSize:17,fontWeight:800,lineHeight:1.4,marginBottom:20,textAlign:'center'}}>{q.texte}</div>{q.options.map((opt,i)=>{let cls='opt';if(answered){if(i===selected&&i===q.bonne)cls='opt correct';else if(i===selected)cls='opt wrong';else if(i===q.bonne)cls='opt reveal'}return <button key={i} className={cls} onClick={()=>nextQ(i)} disabled={answered}><span style={{fontWeight:800,color:'rgba(255,255,255,.4)',marginRight:8}}>{['A','B','C','D'][i]}</span>{opt}</button>})}</div>)}
-      {screen==='result'&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>🎯</div><div style={{fontSize:22,fontWeight:900,marginBottom:6}}>Score : {score}/{questions.length}</div><div style={{fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20}}>Laisse tes coordonnées pour participer au tirage !</div><button className="btn" onClick={()=>setScreen('form')}>Continuer →</button></div>)}
+      {screen==='result'&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:22,fontWeight:900,marginBottom:6}}>Score : {score}/{questions.length}</div><div style={{fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20}}>Laisse tes coordonnées pour participer au tirage !</div><button className="btn" onClick={()=>setScreen('form')}>Continuer →</button></div>)}
       {screen==='form'&&!getJoueurLocal()&&(
         <div className="screen">
           <div className="header"><div><div className="title">Crée ton compte</div><div className="sub">Score : {score}/{questions.length}</div></div></div>
@@ -137,11 +146,21 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
           <div style={{marginBottom:12}}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
           <div style={{marginBottom:12}}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
           <ParcoursChampsStandard form={form} setForm={setForm} />
-          <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
-          <button className="btn" style={{marginTop:16}} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
+          <div className="rgpd"><div className="rgpd-check" /><div>{RGPD_TEXT}</div></div>
+          <button className="btn" style={{marginTop:16}} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'Valider →'}</button>
         </div>
       )}
-      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
+      {screen==='partenaires'&&(
+        <div className="screen">
+          <div className="header"><div><div className="title">Nos partenaires</div><div className="sub">{nom}</div></div></div>
+          <ParcoursPartenairesGrid partenaires={partenaires} onSelect={i => { setPartIdx(i); setScreen('partSheet') }} />
+          <button className="btn-ghost" onClick={() => setScreen('landing')}>Retour</button>
+        </div>
+      )}
+      {screen==='partSheet'&&partSelected&&(
+        <ParcoursPartenaireSheet p={partSelected} onClose={() => setScreen('partenaires')} />
+      )}
+      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>{tirageText}</div>}</div>{partenaires.length>0&&<button className="btn-ghost" onClick={()=>setScreen('partenaires')}>Découvrir nos partenaires</button>}<ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
     </div>
   )
 }

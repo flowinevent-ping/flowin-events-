@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { generateTicket } from '@/lib/ticket'
-import { getJoueurLocal, claimJoueur, writeJoueur, SOURCES, AGE_OPTIONS } from '@/lib/parcours'
-import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
+import { getJoueurLocal, claimJoueur, writeJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
+import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
+import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
 import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
+import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
 type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 
@@ -38,6 +41,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const description = front.description ?? ''
   const tirageText = front.lotTirage ?? (cfg.tirageDate ? `\u{1F4C5} Tirage le ${cfg.tirageDate}` : '')
   const ctaText = front.ctaText ?? "Je m'inscris \u00e0 la tombola \u2192"
+  const theme = resolveParcoursTheme('tombola', ev?.cfg)
 
   const lsKey = `flowin_played_${evId}`
   useEffect(() => {
@@ -132,9 +136,15 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   }, [])
 
   return (
-    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
+    <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
+        .part-tile-avatar{width:52px;height:52px;border-radius:12px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:rgba(224,33,138,.18);color:#ffd5ec;object-fit:contain}
+        .part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:flex-end}
+        .part-sheet{background:#1E293B;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:430px;margin:0 auto;max-height:80dvh;overflow-y:auto}
+        .part-sheet-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;margin:0 auto 12px;overflow:hidden}
+        .part-sheet-avatar img{width:100%;height:100%;object-fit:contain}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
         .screen{padding:20px;min-height:100dvh;display:flex;flex-direction:column}
         .btn-cta{width:100%;padding:16px;border:none;border-radius:50px;background:${c};color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
         .btn-ghost{background:none;border:1px solid rgba(255,255,255,.15);border-radius:12px;color:rgba(255,255,255,.55);font-size:13px;padding:10px;cursor:pointer;width:100%;font-family:inherit;margin-top:6px}
@@ -159,7 +169,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             {badge && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '5px 14px', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 14 }}>
-                ❤️ {badge}
+                {badge}
               </div>
             )}
             <div style={{ width: 96, height: 96, borderRadius: '50%', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 62%)`, border: '1px solid rgba(255,255,255,.16)', boxShadow: `0 18px 40px ${c}4d, 0 0 60px ${c}59` }}>
@@ -176,11 +186,10 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {lots.length > 0 && (
             <div style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, marginBottom: 14 }}>
               {lots.slice(0, 5).map((l, i) => {
-                const ranks = ['🥇', '🥈', '🥉', '🎁', '🎁']
                 return (
                   <div key={l.id} className="lot-row">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(224,33,138,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
-                      {l.emoji || ranks[i] || '🎁'}
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(224,33,138,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#ffd5ec', flexShrink: 0 }}>
+                      {i + 1}
                     </div>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 800 }}>{l.titre || l.nom}</div>
@@ -199,7 +208,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
           <div style={{ fontSize: 10, textAlign: 'center', color: 'rgba(255,255,255,.3)', margin: '6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
           {partenaires.length > 0 && (
-            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Nos {partenaires.length} partenaires</button>
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
           )}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, opacity: .6 }}>
             <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style={{ height: 13, width: 'auto' }} />
@@ -231,14 +240,6 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             ))}
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label className="label">Sexe</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {[['H', 'Homme'], ['F', 'Femme']].map(([val, lbl]) => (
-                <button key={val} className={`gender-btn${form.genre === val ? ' sel' : ''}`} onClick={() => setForm(f => ({ ...f, genre: val }))}>{lbl}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{ marginBottom: 12 }}>
             <label className="label">Email *</label>
             <input className={`input${errors.email ? ' err' : ''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none"
               value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
@@ -250,29 +251,10 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
               value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} />
             {errors.tel && <div className="err-msg">{errors.tel}</div>}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
-            <div>
-              <label className="label">Tranche d&apos;âge</label>
-              <select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>
-                {AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="label">Code postal</label>
-              <input className="input" inputMode="numeric" autoComplete="postal-code" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />
-            </div>
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label className="label">Comment nous avez-vous connu ?</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-              {SOURCES.map(s => (
-                <button key={s} className={`source-chip${form.source === s ? ' sel' : ''}`} onClick={() => setForm(f => ({ ...f, source: s }))}>{s}</button>
-              ))}
-            </div>
-          </div>
+          <ParcoursChampsStandard form={form} setForm={setForm} />
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '12px 0 0', fontSize: 11, color: 'rgba(255,255,255,.45)', lineHeight: 1.5 }}>
-            <div style={{ width: 20, height: 20, borderRadius: 5, background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12 }}>✓</div>
-            <div>J&apos;accepte de participer à cette tombola et d&apos;être recontacté(e) par les organisateurs. Données jamais cédées à des tiers.</div>
+            <div style={{ width: 20, height: 20, borderRadius: 5, background: c, flexShrink: 0 }} />
+            <div>{RGPD_TEXT}</div>
           </div>
           <button className="btn-cta" style={{ marginTop: 20 }} onClick={handleSubmit} disabled={submitting}>
             {submitting ? 'Vérification…' : 'Valider mon inscription →'}
@@ -287,20 +269,10 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             <button className="btn-ghost" style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', flexShrink: 0 }} onClick={() => setScreen('landing')}>←</button>
             <div style={{ fontWeight: 800, fontSize: 17 }}>Nos partenaires</div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-            {partenaires.map((p, i) => (
-              <div key={p.id} className="part-tile" onClick={() => { setPartIdx(i); setScreen('partSheet') }}>
-                {p.image_url
-                  ? <img src={p.image_url} alt={p.nom} style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 8, marginBottom: 6, display: 'block', margin: '0 auto 6px' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                  : <div style={{ fontSize: 32, marginBottom: 6 }}>{p.emoji || '🤝'}</div>
-                }
-                <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.3 }}>{p.nom}</div>
-              </div>
-            ))}
-          </div>
+          <ParcoursPartenairesGrid partenaires={partenaires} onSelect={i => { setPartIdx(i); setScreen('partSheet') }} />
           {existingTicket ? (
             <button className="btn-cta" style={{ background:'rgba(34,197,94,.15)',border:'2px solid #22C55E',color:'#4ADE80' }}
-              onClick={() => setScreen('already')}>✅ Déjà inscrit(e) · revoir mon ticket</button>
+              onClick={() => setScreen('already')}>Déjà inscrit(e) · revoir mon ticket</button>
           ) : (
             <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
           )}
@@ -309,30 +281,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
 
       {/* BOTTOM SHEET PARTENAIRE */}
       {screen === 'partSheet' && partSelected && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 10, display: 'flex', alignItems: 'flex-end' }} onClick={() => setScreen('partenaires')}>
-          <div style={{ background: '#1E293B', borderRadius: '20px 20px 0 0', padding: 20, width: '100%', maxWidth: 430, margin: '0 auto', maxHeight: '70dvh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,.06)', border: '2px solid rgba(255,255,255,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, margin: '0 auto 12px' }}>
-              {partSelected.image_url ? <img src={partSelected.image_url} alt={partSelected.nom} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} /> : partSelected.emoji || '🤝'}
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 900, textAlign: 'center', marginBottom: 4 }}>{partSelected.nom}</div>
-            {partSelected.description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', textAlign: 'center', lineHeight: 1.5, marginBottom: 12 }}>{partSelected.description}</div>}
-            {partSelected.promo_text && (
-              <div style={{ background: 'rgba(124,45,146,.18)', border: '1px solid rgba(224,33,138,.3)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#fff', marginBottom: 12, textAlign: 'center' }}>
-                🎁 {partSelected.promo_text}
-              </div>
-            )}
-            {(partSelected.site_web || partSelected.url) && (
-              <a href={partSelected.site_web ?? partSelected.url!} target="_blank" rel="noopener" className="link-btn">🌐 <span>Site web</span></a>
-            )}
-            {partSelected.instagram && (
-              <a href={partSelected.instagram.startsWith('http') ? partSelected.instagram : `https://instagram.com/${partSelected.instagram.replace('@', '')}`} target="_blank" rel="noopener" className="link-btn">📸 <span>Instagram</span></a>
-            )}
-            {partSelected.facebook && (
-              <a href={partSelected.facebook.startsWith('http') ? partSelected.facebook : `https://facebook.com/${partSelected.facebook}`} target="_blank" rel="noopener" className="link-btn">🔵 <span>Facebook</span></a>
-            )}
-            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>← Retour</button>
-          </div>
-        </div>
+        <ParcoursPartenaireSheet p={partSelected} onClose={() => setScreen('partenaires')} />
       )}
 
       {/* TICKET */}
@@ -343,18 +292,17 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
               INSCRIPTION CONFIRMÉE
             </div>
-            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Tu es dans la course ! 🎉</div>
+            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Tu es dans la course !</div>
             <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Ton numéro de tombola a été enregistré</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,.06)', border: '1.5px solid rgba(255,255,255,.15)', borderRadius: 16, padding: 20, textAlign: 'center', marginBottom: 16, borderTop: `4px solid ${c}` }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🎟️</div>
             <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Ton ticket tombola</div>
             <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.4)' }}>{nom}</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: c, letterSpacing: '.1em', margin: '12px 0', fontFamily: 'monospace' }}>{ticket}</div>
             {tirageText && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)' }}>{tirageText}</div>}
           </div>
           {partenaires.length > 0 && (
-            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Découvrir nos partenaires</button>
           )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
@@ -364,19 +312,17 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       {screen === 'already' && (
         <div className="screen" style={{ justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
             <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 6 }}>Déjà inscrit !</div>
             <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Tu es déjà dans la course pour {nom}.</div>
           </div>
           {existingTicket && (
             <div style={{ background: 'rgba(255,255,255,.06)', border: `1.5px solid rgba(255,255,255,.15)`, borderRadius: 16, padding: 20, textAlign: 'center', marginBottom: 16, borderTop: `4px solid ${c}` }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🎟️</div>
               <div style={{ fontSize: 28, fontWeight: 900, color: c, letterSpacing: '.1em', fontFamily: 'monospace' }}>{existingTicket}</div>
               {tirageText && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)', marginTop: 8 }}>{tirageText}</div>}
             </div>
           )}
           {partenaires.length > 0 && (
-            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>🤝 Découvrir nos partenaires</button>
+            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Découvrir nos partenaires</button>
           )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
