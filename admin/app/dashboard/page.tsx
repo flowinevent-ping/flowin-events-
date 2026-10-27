@@ -1,181 +1,184 @@
 'use client'
 
 /**
- * ACCUEIL — kanban HORIZONTAL de vignettes cliquables.
+ * ACCUEIL — tableau de bord de reporting (maquette validee par Romain le
+ * 26/10 : https://claude.ai/artifact/NLXLgEe1PTQANWCAygR44r).
  *
- * Romain, 02/09 : « organise graphiquement mieux que ca, le kanban horizontal
- * format vignette cliquable. Il y a une regression, on ne peut pas cliquer sur
- * les infos ».
+ * Remplace le kanban d events qui vivait ici (parti sur /dashboard/planning,
+ * qui est lui-meme un kanban par statut, pas une liste d events a plat).
+ * Accueil n est plus une vue d events : c est un
+ * reporting (KPI + repartition joueurs) et des raccourcis vers les listes de
+ * la sidebar -- « simplifier la vie, un visuel accessible, simple ».
  *
- * CONSTAT AVANT DE TOUCHER : les cartes d event etaient deja cliquables (elles
- * ouvrent le drawer). Ce qui n a JAMAIS ete cliquable, ce sont les 4 tuiles du
- * haut — verifie dans tout l historique git du fichier, aucun onClick n y a
- * jamais existe. Elles le deviennent ici : chacune mene a l ecran qui detaille
- * son chiffre.
- *
- * Les deux grilles empilees (« en cours », « a venir ») deviennent UN kanban a
- * colonnes, ce qui montre d un coup ou en est le portefeuille au lieu de
- * masquer les events passes. Le filtre de portee en tete applique la regle
- * generale : on entre par un super event, et tout ce qui s affiche lui
- * appartient.
+ * Donnees reelles uniquement : ville/genre/age_tranche existent bien sur
+ * joueurs (lib/types.ts), genre est stocke 'H'/'F' (voir TombolaClient.tsx).
+ * Le delta "+12% vs N-1" de la maquette etait un exemple fictif -- on n a pas
+ * de moyen fiable de calculer un vrai delta, donc il n apparait pas ici.
  */
-
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
-import { StatusChip, ModuleChip, TypeChip } from '@/components/dashboard/DashboardUI'
+import { Ico } from '@/lib/proicons'
 import AlerteLotsRetires from '@/components/dashboard/AlerteLotsRetires'
-import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 
-type Ev = {
-  id: string; nom: string; status: string; module: string
-  date_d?: string | null; participants: number; couleur: string
-  pro_id: string | null; super_event_id?: string | null
+const COULEURS_VILLE = ['#2563EB', '#F59E0B', '#10B981', '#A855F7', '#BE123C']
+const COULEUR_HOMME = '#2563EB'
+const COULEUR_FEMME = '#DB2777'
+
+type Part = { label: string; n: number }
+
+/** Regroupe des valeurs texte (deja normalisees par l appelant), triees par
+ *  frequence, les moins frequentes fusionnees dans "Autres" au-dela de max. */
+function repartir(valeurs: (string | null)[], max = 5): { parts: Part[]; nonRenseigne: number } {
+  const compte = new Map<string, number>()
+  let nonRenseigne = 0
+  valeurs.forEach(v => {
+    const t = (v ?? '').trim()
+    if (!t) { nonRenseigne++; return }
+    compte.set(t, (compte.get(t) ?? 0) + 1)
+  })
+  const tries = Array.from(compte.entries()).map(([label, n]) => ({ label, n })).sort((a, b) => b.n - a.n)
+  if (tries.length <= max) return { parts: tries, nonRenseigne }
+  const tete = tries.slice(0, max - 1)
+  const resteN = tries.slice(max - 1).reduce((s, p) => s + p.n, 0)
+  return { parts: [...tete, { label: 'Autres', n: resteN }], nonRenseigne }
 }
 
-const COLONNES: { cle: string; titre: string; ton: string }[] = [
-  { cle: 'live', titre: 'En cours', ton: '#22C55E' },
-  { cle: 'upcoming', titre: 'À venir', ton: '#F59E0B' },
-  { cle: 'past', titre: 'Terminés', ton: '#94A3B8' },
-  { cle: 'archived', titre: 'Archivés', ton: '#CBD5E1' },
-]
+const CIRCONFERENCE = 2 * Math.PI * 15.9
+
+/** Arcs d un donut en %, calcules a partir d un total (sans la part "non
+ *  renseigne", exclue de la base pour ne pas fausser les pourcentages). */
+function arcsDonut(parts: Part[]) {
+  const total = parts.reduce((s, p) => s + p.n, 0)
+  if (!total) return []
+  let cumul = 0
+  return parts.map(p => {
+    const pct = (p.n / total) * 100
+    const long = (pct / 100) * CIRCONFERENCE
+    const arc = { pct, dasharray: `${long} ${CIRCONFERENCE - long}`, dashoffset: -(cumul / 100) * CIRCONFERENCE + CIRCONFERENCE * 0.25 }
+    cumul += pct
+    return arc
+  })
+}
+
+function Donut({ titre, parts, nonRenseigne, couleurs }: { titre: string; parts: Part[]; nonRenseigne: number; couleurs: string[] }) {
+  const arcs = arcsDonut(parts)
+  const total = parts.reduce((s, p) => s + p.n, 0)
+  return (
+    <div className="sa-tile sa-donut-card">
+      <h3>{titre}</h3>
+      {total === 0 ? (
+        <div className="sa-empty-inline">Pas encore de donnée.</div>
+      ) : (
+        <div className="sa-donut-row">
+          <svg width="80" height="80" viewBox="0 0 42 42" role="img" aria-label={titre}>
+            <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--sa-border)" strokeWidth="5.2" />
+            {arcs.map((a, i) => (
+              <circle key={i} cx="21" cy="21" r="15.9" fill="none" stroke={couleurs[i % couleurs.length]} strokeWidth="5.2"
+                strokeDasharray={a.dasharray} strokeDashoffset={a.dashoffset} transform="rotate(-90 21 21)" />
+            ))}
+          </svg>
+          <div className="sa-legend">
+            {parts.map((p, i) => (
+              <div className="sa-leg-item" key={p.label}>
+                <span className="sa-leg-dot" style={{ background: couleurs[i % couleurs.length] }} />
+                <span className="sa-leg-lbl">{p.label}</span>
+                <span className="sa-leg-val">{Math.round((p.n / total) * 100)} %</span>
+              </div>
+            ))}
+            {nonRenseigne > 0 && (
+              <div className="sa-leg-item"><span className="sa-leg-lbl" style={{ color: 'var(--sa-muted)', fontWeight: 500 }}>
+                {nonRenseigne} joueur{nonRenseigne > 1 ? 's' : ''} sans cette info
+              </span></div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { joueurs, events, partenaires, pros, lots, openDrawer } = useDashboard()
-  const [portee, setPortee] = useState('')
-  /* Pour NOMMER les portees : afficher « se-nds-2026 » sur un bouton, c est
-     montrer une cle technique a quelqu un qui cherche « Nuits du Sud 2026 ». */
-  const [supers, setSupers] = useState<SuperEvent[]>([])
-  useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
+  const { joueurs, events, partenaires, pros, lots } = useDashboard()
 
-  // Les fiches "Démo · X" (pro_id null) servent à tester chaque module de jeu,
-  // pas a representer une activite operationnelle reelle -- exclues de l'accueil
-  // pour ne pas polluer la vue "ce qui se passe reellement en ce moment".
   const estDemo = (e: { pro_id: string | null; nom: string }) => e.pro_id === null && e.nom.startsWith('Démo')
-
-  const reels = useMemo(() => (events as Ev[]).filter(e => !estDemo(e)), [events])
-
-  /* Les super events reellement portes par des events : on ne propose pas une
-     portee qui ne filtrerait rien. */
-  const portees = useMemo(() => {
-    const vus: Record<string, boolean> = {}
-    const out: string[] = []
-    reels.forEach(e => {
-      const s = e.super_event_id
-      if (s && !vus[s]) { vus[s] = true; out.push(s) }
-    })
-    return out
-  }, [reels])
-
-  const filtres = useMemo(
-    () => (portee ? reels.filter(e => e.super_event_id === portee) : reels),
-    [reels, portee])
+  const reels = useMemo(() => events.filter(e => !estDemo(e)), [events])
 
   const totalOptins = joueurs.filter(j => j.optin).length
   const totalGagnants = joueurs.filter(j => j.gains > 0).length
-  const nbLive = filtres.filter(e => e.status === 'live').length
-  const nbUpcoming = filtres.filter(e => e.status === 'upcoming').length
+  const nbLive = reels.filter(e => e.status === 'live').length
+  const nbUpcoming = reels.filter(e => e.status === 'upcoming').length
+  const prosActifs = pros.filter(p => p.statut === 'valide').length
+  const partenairesActifs = partenaires.filter(p => p.actif).length
+  const sponsoring = partenaires.reduce((s, p) => s + (p.montant_sponsoring ?? 0), 0)
+  const lotsUtilises = lots.filter(l => l.retire).length
 
-  const kpis: { val: number; lbl: string; sub: string; href: string }[] = [
-    { val: joueurs.length, lbl: 'Joueurs CRM', sub: `${totalOptins} opt-in · ${totalGagnants} gagnants`, href: '/dashboard/joueurs' },
-    // `filtres`, pas `reels` : avec une portee active, le total doit compter ce
-    // que le kanban affiche dessous, pas tout Flowin.
-    { val: filtres.length, lbl: 'Events', sub: `${nbLive} en cours · ${nbUpcoming} à venir`, href: '/dashboard/events' },
-    { val: partenaires.length, lbl: 'Partenaires', sub: `${lots.length} lots · ${pros.length} pros`, href: '/dashboard/partenaires' },
-    { val: totalOptins, lbl: 'Opt-in newsletter', sub: `${joueurs.length ? Math.round(totalOptins / joueurs.length * 100) : 0}% de taux`, href: '/dashboard/nds-participants' },
+  const kpis: { icone: string; val: string; lbl: string; sub: string; href: string }[] = [
+    { icone: 'users', val: String(joueurs.length), lbl: 'Joueurs CRM', sub: `${totalOptins} opt-in · ${totalGagnants} gagnants`, href: '/dashboard/joueurs' },
+    { icone: 'building', val: String(pros.length), lbl: 'Pros enregistrés', sub: `${prosActifs} validés`, href: '/dashboard/pros' },
+    { icone: 'handshake', val: String(partenaires.length), lbl: 'Partenaires', sub: `${partenairesActifs} actifs`, href: '/dashboard/partenaires' },
+    { icone: 'game', val: String(nbLive), lbl: 'Events en cours', sub: `${nbUpcoming} à venir`, href: '/dashboard/events' },
+    { icone: 'chart', val: `${sponsoring.toLocaleString('fr-FR')} €`, lbl: 'Sponsoring généré', sub: `sur ${partenaires.length} partenaires`, href: '/dashboard/partenaires' },
+    { icone: 'gift', val: `${lotsUtilises} / ${lots.length}`, lbl: 'Lots utilisés', sub: `${lots.length - lotsUtilises} encore disponibles`, href: '/dashboard/nds-lots' },
   ]
 
-  const nomPro = (id: string | null) => (id ? pros.find(p => p.id === id)?.nom ?? id : null)
+  const raccourcis: { icone: string; lbl: string; n: string; href: string }[] = [
+    { icone: 'building', lbl: 'CRM Pro', n: `${pros.length} fiches`, href: '/dashboard/crm-pro' },
+    { icone: 'users', lbl: 'CRM Utilisateurs', n: `${joueurs.length} joueurs`, href: '/dashboard/joueurs' },
+    { icone: 'game', lbl: 'Jeux', n: '7 modules', href: '/dashboard/jeux' },
+    { icone: 'calendar', lbl: 'Events', n: `${reels.length} events`, href: '/dashboard/events' },
+    { icone: 'star', lbl: 'Super Events', n: 'Opérations', href: '/dashboard/super-events' },
+  ]
+
+  const villes = useMemo(() => repartir(joueurs.map(j => j.ville), 5), [joueurs])
+  const ages = useMemo(() => repartir(joueurs.map(j => j.age_tranche), 5), [joueurs])
+  const genres = useMemo(() => {
+    const h = joueurs.filter(j => j.genre === 'H').length
+    const f = joueurs.filter(j => j.genre === 'F').length
+    const autres = joueurs.length - h - f
+    const parts: Part[] = []
+    if (h) parts.push({ label: 'Homme', n: h })
+    if (f) parts.push({ label: 'Femme', n: f })
+    return { parts, nonRenseigne: autres }
+  }, [joueurs])
+  const couleursGenre = genres.parts.map(p => (p.label === 'Homme' ? COULEUR_HOMME : COULEUR_FEMME))
 
   return (
     <div className="sa-content">
       <AlerteLotsRetires />
-      {/* Chaque tuile mene a l ecran qui detaille son chiffre — un chiffre qu on
-          ne peut pas ouvrir est une impasse. */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
+
+      <div className="sa-kpi-rep-grid">
         {kpis.map(k => (
-          <button
-            key={k.lbl}
-            className="sa-kpi sa-kpi-clic"
-            onClick={() => router.push(k.href)}
-            title={`Ouvrir ${k.lbl}`}
-          >
-            <div className="sa-kpi-val">{k.val}</div>
-            <div className="sa-kpi-lbl">{k.lbl}</div>
-            <div className="sa-kpi-sub">{k.sub}</div>
+          <button key={k.lbl} className="sa-tile sa-kpi-rep" onClick={() => router.push(k.href)} title={`Ouvrir ${k.lbl}`}>
+            <div className="sa-ico-badge"><Ico k={k.icone} size={30} /></div>
+            <div className="sa-kpi-rep-txt">
+              <div className="sa-kpi-rep-val">{k.val}</div>
+              <div className="sa-kpi-rep-lbl">{k.lbl}</div>
+              <div className="sa-kpi-rep-sub">{k.sub}</div>
+            </div>
           </button>
         ))}
       </div>
 
-      {portees.length > 1 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
-          <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--sa-muted)', marginRight: 4 }}>
-            Portée
-          </span>
-          <button className={`sa-btn sm${portee === '' ? ' primary' : ''}`} onClick={() => setPortee('')}>Tout Flowin</button>
-          {portees.map(id => (
-            <button key={id} className={`sa-btn sm${portee === id ? ' primary' : ''}`} onClick={() => setPortee(id)}>
-              {supers.find(se => se.id === id)?.nom ?? id}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="sa-sec-h"><h2>Répartition des joueurs</h2></div>
+      <div className="sa-donut-grid">
+        <Donut titre="Par ville" parts={villes.parts} nonRenseigne={villes.nonRenseigne} couleurs={COULEURS_VILLE} />
+        <Donut titre="Par sexe" parts={genres.parts} nonRenseigne={genres.nonRenseigne} couleurs={couleursGenre} />
+        <Donut titre="Par tranche d'âge" parts={ages.parts} nonRenseigne={ages.nonRenseigne} couleurs={COULEURS_VILLE} />
+      </div>
 
-      {filtres.length === 0 ? (
-        <div className="sa-page" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📅</div>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>Aucun event</div>
-          <div style={{ color: 'var(--sa-muted)', fontSize: 13 }}>
-            Créez votre premier event depuis la section Events.
-          </div>
-        </div>
-      ) : (
-        <div className="sa-kanban">
-          {COLONNES.map(col => {
-            const lot = filtres.filter(e => e.status === col.cle)
-            return (
-              <section key={col.cle} className="sa-kb-col">
-                <header className="sa-kb-tete">
-                  <span className="pastille" style={{ background: col.ton }} />
-                  <span className="t">{col.titre}</span>
-                  <span className="n">{lot.length}</span>
-                </header>
-                <div className="sa-kb-corps">
-                  {lot.length === 0 && <div className="sa-kb-vide">—</div>}
-                  {lot.map(ev => (
-                    <button
-                      key={ev.id}
-                      className="sa-kb-vignette"
-                      style={{ borderLeftColor: ev.couleur ?? '#2563EB' }}
-                      onClick={() => openDrawer('event', ev.id, 'infos')}
-                      title={`Ouvrir ${ev.nom}`}
-                    >
-                      <div className="chips">
-                        {/* Type d'abord : Super event (orange) vs Event (bleu),
-                            meme code couleur que Vignette/BlocOperation -- avant
-                            statut/module, pour lever la confusion en un coup d'oeil
-                            (Romain, 20/09). */}
-                        <TypeChip estSuper={!!ev.super_event_id} />
-                        <StatusChip status={ev.status} />
-                        <ModuleChip module={ev.module} />
-                      </div>
-                      <div className="nom">{ev.nom}</div>
-                      {/* Le pro auquel l event appartient : on entre dans un event
-                          et on voit a qui il est, sans ouvrir la fiche. */}
-                      {nomPro(ev.pro_id) && <div className="pro">🏢 {nomPro(ev.pro_id)}</div>}
-                      <div className="meta">
-                        <span>👥 {ev.participants}</span>
-                        {ev.date_d && <span>📅 {new Date(ev.date_d).toLocaleDateString('fr-FR')}</span>}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )
-          })}
-        </div>
-      )}
+      <div className="sa-sec-h"><h2>Accès rapides</h2></div>
+      <div className="sa-shortcut-grid">
+        {raccourcis.map(r => (
+          <button key={r.lbl} className="sa-tile sa-shortcut" onClick={() => router.push(r.href)} title={`Ouvrir ${r.lbl}`}>
+            <div className="sa-ico-badge"><Ico k={r.icone} size={36} /></div>
+            <div className="lbl">{r.lbl}</div>
+            <div className="n">{r.n}</div>
+            <div className="go">Ouvrir <Ico k="chevronRight" size={12} /></div>
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
