@@ -377,8 +377,23 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
             )}
             {!rejoindre && lien && (
               <>
-                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 8 }}>Le QR de votre jeu</div>
-                <Diffusion compact url={lien} titre={nom.trim()} sousTitre="Scannez pour jouer" />
+                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>Vos 3 QR, un par canal</div>
+                <div style={{ fontSize: 12, ...MUTED, marginBottom: 10, lineHeight: 1.5 }}>
+                  Même jeu, un paramètre de source différent sur chaque QR : vos données (CRM, trafic) distingueront d’où viennent vos joueurs.
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginBottom: 18 }}>
+                  {[
+                    { source: 'magasin', label: 'Magasin', sous: 'QR imprimé, affiché chez vous' },
+                    { source: 'instagram', label: 'Réseaux sociaux', sous: 'À poster sur vos réseaux' },
+                    { source: 'tracking', label: 'Tracking', sous: 'Pour une affiche ou un support tiers' },
+                  ].map(c => (
+                    <div key={c.source} style={{ border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 12, background: '#fff', textAlign: 'center' }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 2 }}>{c.label}</div>
+                      <div style={{ fontSize: 11, ...MUTED, marginBottom: 8 }}>{c.sous}</div>
+                      <Diffusion compact url={`${lien}&source=${c.source}`} titre={`${nom.trim()} — ${c.label}`} sousTitre="Scannez pour jouer" />
+                    </div>
+                  ))}
+                </div>
                 <div style={{ fontSize: 13, fontWeight: 800, margin: '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
@@ -389,6 +404,19 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
                 </div>
               </>
             )}
+
+            {/* Volet B — assistance immediate : seuls contacts reels deja presents
+                dans ce fichier (TEL_FLOWIN, MAIL_FLOWIN), aucun numero invente. */}
+            <div style={{ marginTop: 22, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 2 }}>Besoin d’aide ?</div>
+              <div style={{ fontSize: 12, ...MUTED, marginBottom: 10 }}>L’équipe Flowin répond directement.</div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <a style={{ ...BTN2, textDecoration: 'none' }} href={`tel:${TEL_FLOWIN.replace(/\s/g, '')}`}>Appeler le {TEL_FLOWIN}</a>
+                <a style={{ ...BTN2, textDecoration: 'none' }} href={`sms:${TEL_FLOWIN.replace(/\s/g, '')}`}>SMS</a>
+                <a style={{ ...BTN2, textDecoration: 'none' }} href={`mailto:${MAIL_FLOWIN}`}>Email</a>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
               {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/operation${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
               <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
