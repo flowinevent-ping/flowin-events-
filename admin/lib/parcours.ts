@@ -68,6 +68,29 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
     }
   }
 
+  /* Jeu propre du partenaire (Romain, 28/10) : un commerce listé comme
+     partenaire sponsor ICI peut AUSSI être un pro qui fait tourner sa
+     propre opération ailleurs (pros.partenaire_id -> events.pro_id, event
+     live). Relation réelle, jamais inventée -- si aucun partenaire n'a ce
+     lien aujourd'hui, la boucle ci-dessous ne pose aucune valeur et
+     jeu_event_id reste undefined partout, sans rien afficher côté joueur. */
+  if (partenaires.length) {
+    const { data: prosData } = await supabase
+      .from('pros').select('id,partenaire_id').in('partenaire_id', partenaires.map(p => p.id))
+    const proIds = ((prosData ?? []) as { id: string; partenaire_id: string }[])
+    if (proIds.length) {
+      const { data: evData } = await supabase
+        .from('events').select('id,pro_id,module').in('pro_id', proIds.map(p => p.id)).eq('status', 'live')
+      const evByPro = new Map(((evData ?? []) as { id: string; pro_id: string; module: string }[]).map(e => [e.pro_id, e]))
+      const proByPartenaire = new Map(proIds.map(p => [p.partenaire_id, p.id]))
+      partenaires = partenaires.map(p => {
+        const proId = proByPartenaire.get(p.id)
+        const ev2 = proId ? evByPro.get(proId) : undefined
+        return ev2 ? { ...p, jeu_event_id: ev2.id, jeu_module: ev2.module } : p
+      })
+    }
+  }
+
   /* Banques de questions.
      `quizBanques` = les QCM ; `bonusBanques` = les questions bonus (format
      sondage). Les deux vivent dans la MEME table `banques`, distinguees par le

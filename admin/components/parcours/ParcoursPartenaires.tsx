@@ -60,6 +60,9 @@ export function ParcoursPartenaireSheet({ p, onClose }: { p: FlowinPartenaire; o
         {p.facebook && (
           <a href={p.facebook.startsWith('http') ? p.facebook : `https://facebook.com/${p.facebook}`} target="_blank" rel="noopener" className="link-btn"><span>Facebook</span></a>
         )}
+        {p.jeu_event_id && p.jeu_module && (
+          <a href={`/parcours/${p.jeu_module}?ev=${p.jeu_event_id}`} target="_blank" rel="noopener" className="link-btn"><span>Jouer au jeu de {p.nom}</span></a>
+        )}
         <button className="btn-ghost" onClick={onClose}>Retour</button>
       </div>
     </div>

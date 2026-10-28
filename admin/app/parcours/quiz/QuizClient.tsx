@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { buildInviteLink } from '@/lib/parrainage'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
@@ -130,6 +131,25 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (!res.success) { if (res.error) console.error('[quiz] Supabase échoué:', res.error); setErrors(e => ({ ...e, email: 'Enregistrement impossible, réessaie.' })); return }
     setTicket(res.ticket); setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}
     setScreen('ticket')
+  }
+
+  /* Parrainage : meme mecanique que NDS2026Client (lib/parrainage.ts, deja
+     generique -- captureParrainage est deja appele par tout writeJoueur,
+     et le trigger DB tg_parrainage_credit_ticket crediter deja un ticket
+     'parrainage' au parrain quand le filleul s'inscrit via ?ref=). Seul ce
+     qui manquait ici est le bouton de partage : meme fonction, meme lien,
+     prefixe d'external_id 'pq' pour matcher celui ecrit par writeJoueur
+     ci-dessus (prefix: 'PQ'), texte generique (pas de mention NDS 2026). */
+  const shareParrainage = async () => {
+    const email = (form.email || getJoueurLocal()?.email || '').trim().toLowerCase()
+    if (!email.includes('@')) return
+    const extId = 'j-pq-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
+    const link = buildInviteLink(`/parcours/quiz?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
+    const txt = `Je joue à ${nom} 🎟️ Rejoins-moi, joue et tente de gagner ! ${link}`
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
+      else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
+    } catch { /* annule */ }
   }
 
   const q = questions[qIdx]
@@ -265,6 +285,9 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{tirageText}</div>}
           </div>
           {partenaires.length > 0 && <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>Découvrir nos partenaires</button>}
+          {(form.email || getJoueurLocal()?.email) && (
+            <button className="btn-ghost" style={{ marginTop: 8 }} onClick={shareParrainage}>Parraine un ami &amp; gagne un ticket</button>
+          )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
