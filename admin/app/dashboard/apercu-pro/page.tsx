@@ -21,12 +21,25 @@ import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/Dashbo
  *    au lieu d'une seule grille plate de 16 cartes identiques.
  * 4. Cartes allegees : logo + nom + ville seulement, le reste (secteur, id technique) passe
  *    en toute petite mention ou est retire de la vue -- moins de texte par carte.
+ *
+ * 27/10 : le bandeau du haut pointait vers /schemas/flowin-pro-navigation.html, un prototype
+ * statique fige au 20/10 -- il ne refletait deja plus la refonte de NouvelleOperation (PR #30).
+ * C'est exactement ce decalage maquette/code reel qui a fait croire a Romain qu'il avait deja
+ * vu le nouveau parcours pro. Remplace par un acces direct a /pro/nouvelle (le vrai parcours de
+ * creation, celui de NouvelleOperation.tsx), pour Event comme pour Super Event -- jamais une
+ * copie figee. Le fichier du prototype n'est pas supprime (archive), seul le lien disparait.
  */
 const SECTEURS_TECHNIQUES = new Set(['station-festival'])
 
 export default function Page() {
   const { pros, partenaires } = useDashboard()
   const [search, setSearch] = useState('')
+  const [proParcours, setProParcours] = useState('')
+
+  const prosOuverts = useMemo(
+    () => pros.filter(p => !SECTEURS_TECHNIQUES.has(p.secteur)).slice().sort((a, b) => (a.nom || '').localeCompare(b.nom || '')),
+    [pros]
+  )
 
   const logoParPartenaireId = useMemo(() => {
     const m = new Map<string, string>()
@@ -57,27 +70,51 @@ export default function Page() {
   return (
     <div className="sa-content">
       <div className="sa-page" style={{ marginBottom: 16 }}>
-        <PageHeader title="Aperçu Pro" subtitle="Prototype de validation + accès direct aux vrais dashboards partenaires" />
+        <PageHeader title="Aperçu Pro" subtitle="Accès direct aux vrais dashboards partenaires et à leur parcours de création, en direct depuis le code actuel" />
         <div style={{ padding: '0 24px 20px' }}>
-          <a
-            href="/schemas/flowin-pro-navigation.html"
-            target="_blank"
-            rel="noreferrer"
+          <div
             style={{
-              display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none',
-              background: 'linear-gradient(135deg,#FBEAF0,#fff)', border: '1px solid #F4C0D5',
-              borderRadius: 12, padding: '14px 16px',
+              display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12,
+              border: '1px solid var(--sa-border)', borderRadius: 12, padding: '14px 16px', background: 'var(--sa-card)',
             }}
           >
-            <span style={{ width: 22, height: 22, borderRadius: 6, background: '#9F1A4D', flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#9F1A4D' }}>Prototype navigable — desktop / tablette / mobile</div>
+            <div style={{ flex: '1 1 240px', minWidth: 220 }}>
+              <div style={{ fontSize: 13, fontWeight: 800 }}>Voir le parcours de création, en direct</div>
               <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 2 }}>
-                Onglets cliquables, données réelles, pour valider un parcours avant de le porter dans le code.
+                Choisissez un pro pour ouvrir son vrai écran de création — le code actuel, jamais une maquette.
               </div>
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#9F1A4D', flexShrink: 0 }}>Ouvrir →</span>
-          </a>
+            <select
+              value={proParcours}
+              onChange={e => setProParcours(e.target.value)}
+              style={{ minWidth: 220, padding: '8px 10px', borderRadius: 8, border: '1.5px solid var(--sa-border)', fontSize: 13, fontFamily: 'inherit', background: 'var(--sa-card)', color: 'var(--sa-text)' }}
+            >
+              <option value="">Choisir un pro…</option>
+              {prosOuverts.map(p => (
+                <option key={p.id} value={p.id}>{p.nom || p.id}{p.ville ? ` — ${p.ville}` : ''}</option>
+              ))}
+            </select>
+            <a
+              className="sa-btn sm"
+              href={proParcours ? `/pro/nouvelle?pro=${encodeURIComponent(proParcours)}&type=animation` : undefined}
+              target="_blank"
+              rel="noreferrer"
+              aria-disabled={!proParcours}
+              style={!proParcours ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
+            >
+              Voir le parcours Event
+            </a>
+            <a
+              className="sa-btn sm"
+              href={proParcours ? `/pro/nouvelle?pro=${encodeURIComponent(proParcours)}&type=super` : undefined}
+              target="_blank"
+              rel="noreferrer"
+              aria-disabled={!proParcours}
+              style={!proParcours ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
+            >
+              Voir le parcours Super Event
+            </a>
+          </div>
         </div>
       </div>
 
