@@ -3,9 +3,10 @@ import { useState, useEffect, useRef } from 'react'
 import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
-import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
@@ -16,6 +17,12 @@ import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Segment { label: string; color: string; perdant?: boolean; stock?: number; mode?: 'immediat' | 'tirage' | 'voisin' }
 interface Props extends ParcoursPageData { evId: string }
+
+/* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
+const SPIN_STEPS = [
+  { titre: 'Flashe le QR code', sous: 'À la station' },
+  { titre: 'Tourne la roue', sous: 'Et tente ta chance' },
+]
 
 export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
@@ -235,28 +242,35 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c)}</style>
+      <style>{parcoursCSS(c) + PARCOURS_HERO_CSS}</style>
 
       {screen === 'landing' && (
-        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <ParcoursLogo emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl} />
-          <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
-          <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string) || theme.texts.landingSubtitle || 'Tentez votre chance !'}</div>
-          {tirageText && (
-            <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'center',gap:6 }}>
-              <i className="ti ti-calendar" style={{ fontSize:14 }} aria-hidden="true" />{tirageText}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+          <ParcoursHero module="spin" nom={nom}
+            emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl}
+            subtitle={(cfg.subtitle as string) || theme.texts.landingSubtitle || 'Tentez votre chance !'} />
+          <div className="pc-stage">
+            <ParcoursPrizeCard lots={lots} />
+            <ParcoursHowTo steps={SPIN_STEPS} />
+            <div style={{ flex: 1 }} />
+            <div style={{ padding: '0 18px' }}>
+              {tirageText && (
+                <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'center',gap:6 }}>
+                  <i className="ti ti-calendar" style={{ fontSize:14 }} aria-hidden="true" />{tirageText}
+                </div>
+              )}
+              <button className="btn" onClick={()=>setScreen('spin')}>
+                <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />{theme.texts.ctaLanding || 'Faire tourner la roue'} →
+              </button>
+              <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
+              {partenaires.length > 0 && (
+                <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>
+                  <i className="ti ti-users" style={{ marginRight:6 }} aria-hidden="true" />Nos partenaires
+                </button>
+              )}
+              <FlowinBadge />
             </div>
-          )}
-          <button className="btn" onClick={()=>setScreen('spin')}>
-            <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />{theme.texts.ctaLanding || 'Faire tourner la roue'} →
-          </button>
-          <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
-          {partenaires.length > 0 && (
-            <button className="btn-ghost" onClick={()=>setScreen('partenaires')}>
-              <i className="ti ti-users" style={{ marginRight:6 }} aria-hidden="true" />Nos partenaires
-            </button>
-          )}
-          <FlowinBadge />
+          </div>
         </div>
       )}
 

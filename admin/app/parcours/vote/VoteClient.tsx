@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react'
 import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
-import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -15,6 +16,12 @@ import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 type Screen = 'landing' | 'vote' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface VoteItem { id: string; nom: string; emoji?: string; genre?: string; desc?: string }
 interface Props extends ParcoursPageData { evId: string }
+
+/* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
+const VOTE_STEPS = [
+  { titre: 'Flashe le QR code', sous: 'À la station' },
+  { titre: 'Vote pour ton favori', sous: 'Et tente ta chance' },
+]
 
 export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
@@ -109,24 +116,25 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c)}</style>
+      <style>{parcoursCSS(c) + PARCOURS_HERO_CSS}</style>
 
       {screen === 'landing' && (
-        // Centrage vertical + horizontal, comme l'ecran ticket/already plus bas
-        // dans ce meme fichier -- le contenu (titre + sous-titre + 1 bouton) est
-        // trop court pour un simple paddingTop, il restait plaque en haut de
-        // l'ecran (Romain, 18/09 : « c'est décalé, c'est pas centré »). Logo de
-        // l'operation si configure, meme repli que QuizClient -- pas d'emoji
-        // fixe qui masque le logo Flowin/partenaire attendu.
-        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <ParcoursLogo emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl} />
-          <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
-          <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string) || theme.texts.landingSubtitle}</div>
-          <button className="btn" onClick={()=>lsCheck()||setScreen('vote')}>{theme.texts.ctaLanding || 'Voter maintenant'} →</button>
-          {partenaires.length > 0 && (
-            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
-          )}
-          <FlowinBadge />
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+          <ParcoursHero module="vote" nom={nom}
+            emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl}
+            subtitle={(cfg.subtitle as string) || theme.texts.landingSubtitle || undefined} />
+          <div className="pc-stage">
+            <ParcoursPrizeCard lots={lots} />
+            <ParcoursHowTo steps={VOTE_STEPS} />
+            <div style={{ flex: 1 }} />
+            <div style={{ padding: '0 18px' }}>
+              <button className="btn" onClick={()=>lsCheck()||setScreen('vote')}>{theme.texts.ctaLanding || 'Voter maintenant'} →</button>
+              {partenaires.length > 0 && (
+                <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
+              )}
+              <FlowinBadge />
+            </div>
+          </div>
         </div>
       )}
 
