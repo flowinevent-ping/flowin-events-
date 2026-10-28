@@ -168,6 +168,13 @@ export interface FlowinPartenaire {
   paiement_mode: string | null
   facture_emise: boolean
   event_id: string | null
+  /* Le jeu propre du partenaire, quand ce commerce est AUSSI un pro qui a
+     sa propre operation live (pros.partenaire_id -> events.pro_id). Jamais
+     stocke en base sur `partenaires` : calcule a la volee par
+     fetchParcoursData (lib/parcours.ts), absent (undefined) partout
+     ailleurs ou ce type est utilise. */
+  jeu_event_id?: string | null
+  jeu_module?: string | null
 }
 
 export interface FlowinParticipation {
