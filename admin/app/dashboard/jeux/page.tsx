@@ -5,7 +5,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, ModuleChip, StatusChip } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import { IcoModule } from '@/lib/proicons'
-import { sansGabarit, libelleModule } from '@/lib/operations'
+import { sansGabarit, libelleModule, libelleDates } from '@/lib/operations'
 import {
   GABARIT_MODULE, GABARIT_NOM, GABARIT_DESC,
   deroulePour, reglesPour, BLOCS_MULTISTATION,
@@ -245,17 +245,24 @@ export default function JeuxPage() {
                   <div onClick={e => e.stopPropagation()}><FicheGabarit /></div>
                 )}
                 {actif && (
-                  <div style={{ marginTop: 14, borderTop: '1px solid var(--sa-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }} onClick={e => e.stopPropagation()}>
-                    {moduleEvents.length === 0 && <div style={{ fontSize: 12, color: 'var(--sa-muted)' }}>Aucun event sur ce module.</div>}
+                  <div className="sa-kb-corps" style={{ marginTop: 14, borderTop: '1px solid var(--sa-border)', paddingTop: 12 }} onClick={e => e.stopPropagation()}>
+                    {moduleEvents.length === 0 && <div className="sa-kb-vide">Aucun event sur ce module.</div>}
                     {moduleEvents.map(ev => (
-                      <div
+                      <button
                         key={ev.id}
+                        className="sa-kb-vignette"
                         onClick={() => openDrawer('event', ev.id)}
-                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '8px 10px', cursor: 'pointer' }}
+                        title={`Ouvrir ${ev.nom}`}
                       >
-                        <span style={{ fontWeight: 600, fontSize: 12.5 }}>{ev.nom}</span>
-                        <StatusChip status={ev.status} />
-                      </div>
+                        <div className="sa-kb-ligne">
+                          <span className="sa-kb-pastille" style={{ background: `${COULEUR_MODULE[m.id]}20`, color: COULEUR_MODULE[m.id] }}>
+                            <IcoModule module={m.id} size={14} />
+                          </span>
+                          <span className="sa-kb-nom">{ev.nom}</span>
+                          {ev.date_d && <span className="sa-kb-date">{libelleDates(ev.date_d, ev.date_f)}</span>}
+                        </div>
+                        <div className="sa-kb-sub"><StatusChip status={ev.status} /></div>
+                      </button>
                     ))}
                   </div>
                 )}
