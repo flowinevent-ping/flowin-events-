@@ -1,0 +1,1613 @@
+'use client'
+
+import { useState, useEffect, useCallback, useRef } from 'react'
+import type { ReactNode, CSSProperties } from 'react'
+import type { GainImmediat } from '@/lib/parcours'
+import { writeJoueur, claimJoueur, getJoueurLocal, lookupJoueurByEmail, fetchJoueurHistory, shuffle, AGE_OPTIONS, writeSondageBrigade, ndsQueueWrite, ndsFlushQueue } from '@/lib/parcours'
+import { generateTicket } from '@/lib/ticket'
+import { NDS_CSS, NDS_CSS_APP, NDS_SPRITE } from '@/lib/nds2026Design'
+import { resolveParcoursTheme } from '@/lib/parcoursTheme'
+import { supabase } from '@/lib/supabase'
+import { trackVisite, trackErreur } from '@/lib/track'
+import { buildInviteLink } from '@/lib/parrainage'
+import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
+
+type Screen = 'onboard' | 'inscription' | 'quiz' | 'resultats' | 'bonus' | 'final' | 'tickets' | 'carte' | 'partenaires' | 'profil' | 'refusdigital'
+interface Props extends ParcoursPageData { evId: string }
+
+/* Master Quiz + bonus marque blanche — copie de NDS2026Client.tsx (front de reference, jamais modifie).
+   Tout le contenu Nuits du Sud est remplace par les donnees de l'event ; les stations viennent du
+   super event reel de l'event (aucune station en dur) ; un event autonome n'a ni carte ni cumul. */
+const MODULE_TAG = 'master-quiz'
+const PREFIX = 'PQ' as const
+const SRC = ['Instagram', 'Affiche', 'Bouche à oreille', 'Autre']
+const SRC_ICON: Record<string, string> = { 'Instagram': 'i-insta', 'Affiche': 'i-poster', 'Bouche à oreille': 'i-chat', 'Autre': 'i-spark' }
+
+/* Consentement RGPD — versionné pour traçabilité de la preuve de consentement.
+   Incrémenter la version à chaque modification du texte. */
+const OPTIN_VERSION = 'master-quiz-v1'
+const optinText = (nom: string) => `Je souhaite rester en contact avec les infos de ${nom || "l'organisateur"} et de Flowin. Mes coordonnées ne sont ni vendues ni cédées.`
+
+/* Logo partenaire robuste : si image_url est vide OU si le fichier est introuvable (404,
+   logo pas encore fourni par le partenaire), on retombe proprement sur le fallback au lieu
+   d'afficher une image cassée. Dès que le vrai PNG est déposé au chemin attendu, il s'affiche. */
+function PartnerLogo({ src, alt, fallback, imgStyle, className }: { src: string | null; alt: string; fallback: ReactNode; imgStyle?: CSSProperties; className?: string }) {
+  const [broken, setBroken] = useState(false)
+  const loadedRef = useRef(false)
+  useEffect(() => {
+    loadedRef.current = false
+    setBroken(false)
+    if (!src) return
+    // Réseau lent : si le logo n'a pas chargé après 6 s, on affiche le repli au lieu d'un blanc.
+    const t = setTimeout(() => { if (!loadedRef.current) setBroken(true) }, 6000)
+    return () => clearTimeout(t)
+  }, [src])
+  if (!src || broken) return <>{fallback}</>
+  return <img src={src} alt={alt} className={className} style={imgStyle} loading="lazy" decoding="async" onLoad={() => { loadedRef.current = true }} onError={() => setBroken(true)} />
+}
+
+type Station = { id: string; nom: string; ou: string; icon: string; lat: number; lng: number; msg: string }
+
+/* ── Tickets NDS ───────────────────────────────────────────────────────────────
+   Règle : 1 ticket / station / JOUR. Le droit au ticket d'une station se remet à
+   zéro chaque jour (on peut rejouer au même endroit le lendemain), MAIS le cumul
+   des tickets gagnés est conservé à vie (ledger monotone, jamais remis à zéro). */
+function ndsYmd(): string {
+  const d = new Date()
+  const p = (n: number) => (n < 10 ? '0' + n : '' + n)
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+}
+/* Référentiel consolidé : chaque QR numéroté EST sa propre station (1 ticket/station/jour).
+   On ne regroupe plus en familles. Compat : un ancien id groupé renvoie vers la 1re
+   station numérotée correspondante (au cas où un vieux QR/lien serait encore scanné). */
+function ndsFamily(id: string): string { return id }
+/* Cumul local par perimetre (super event, ou event autonome) : jamais melange avec le ledger NDS. */
+let LEDGER_KEY = 'flowin_mq_ledger'
+function ndsLedgerGet(): string[] {
+  try { const r = localStorage.getItem(LEDGER_KEY); return r ? (JSON.parse(r) as string[]) : [] } catch { return [] }
+}
+function ndsLedgerAdd(key: string): number {
+  try {
+    const l = ndsLedgerGet()
+    if (l.indexOf(key) === -1) { l.push(key); localStorage.setItem(LEDGER_KEY, JSON.stringify(l)) }
+    return l.length
+  } catch { return 1 }
+}
+/* Cumul des tickets gagnés depuis toujours (≥ 1 pour l'affichage). */
+function ndsCumul(): number { return Math.max(1, ndsLedgerGet().length) }
+/* Cette famille de station a-t-elle déjà été jouée AUJOURD'HUI ? */
+function ndsPlayedToday(famId: string): boolean {
+  try { return localStorage.getItem('flowin_played_' + famId + '_' + ndsYmd()) != null } catch { return false }
+}
+/* Favoris (partenaires) — liste persistante, pas de reset quotidien. */
+const NDS_FAVORIS_KEY = 'flowin_favoris_partenaires'
+function ndsFavorisList(): string[] {
+  try { const r = localStorage.getItem(NDS_FAVORIS_KEY); return r ? (JSON.parse(r) as string[]) : [] } catch { return [] }
+}
+function ndsIsFavori(id: string): boolean { return ndsFavorisList().indexOf(id) !== -1 }
+function ndsToggleFavori(id: string): string[] {
+  const l = ndsFavorisList()
+  const i = l.indexOf(id)
+  if (i === -1) l.push(id); else l.splice(i, 1)
+  try { localStorage.setItem(NDS_FAVORIS_KEY, JSON.stringify(l)) } catch {}
+  return l
+}
+/* Commerce partenaire affiché sur la carte (vue v_nds_commerces_carte : déjà filtrée actif/visible) */
+type Commerce = {
+  id: string; nom: string; pack: string | null
+  latitude: number; longitude: number
+  image_url: string | null; en_avant: boolean | null
+  lot_resume?: string | null; lots_dispo?: number | null
+  ville: string | null; adresse: string | null
+  site_web: string | null; instagram: string | null; facebook: string | null
+  promo_text: string | null; tickets_par_scan: number | null; ordre_carte: number | null
+}
+
+const CONFETTI_PIECES = Array.from({ length: 20 }).map((_, i) => ({ l: (i * 5.3 + (i % 4) * 2) % 100, d: (i % 7) * 0.09, c: ['#E0218A', '#22D3C6', '#F5B544', '#7C2D92', '#10b981'][i % 5] }))
+
+export default function MasterQuizClient({ ev, lots, partenaires, banques, evId }: Props) {
+  const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
+  const nom = ev?.nom ?? ''
+  const theme = resolveParcoursTheme('quiz', ev?.cfg)
+  const multi = !!ev?.super_event_id
+  LEDGER_KEY = 'flowin_mq_ledger_' + (ev?.super_event_id || evId)
+  const [STATIONS, setStations] = useState<Station[]>([])
+  /* Le quiz ne prend que les QCM. Le filtre est ajoute le 03/09 : depuis que
+     les banques bonus sont chargees dans le meme tableau, une banque de
+     sondage glisserait sinon ses questions dans le quiz. Pour NDS 2026, dont
+     toutes les banques sont des QCM, il ne retire rien. */
+  const allQs = banques.flatMap(b => b.questions ?? []).filter(q => (q as { type?: string }).type === 'qcm') as QuizQuestion[]
+  const customQs = (cfg.customQuestions ?? []) as QuizQuestion[]
+  const nbQ = (cfg.quizNbQuestions as number) ?? 4
+  /* Les questions bonus : la liste ecrite a la main sur l event si elle existe
+     — c est le cas de NDS 2026, rien ne change pour lui — sinon celles des
+     banques bonus cochees, ce qui est le chemin des events crees depuis le
+     gabarit. */
+  const bonusDesBanques = banques
+    .flatMap(b => b.questions ?? [])
+    .filter(q => { const t = (q as { type?: string }).type; return t === 'single' || t === 'multi' }) as unknown as BonusQuestion[]
+  const bonusQs = ((cfg.quizBonusList as BonusQuestion[] | undefined) ?? (bonusDesBanques.length ? bonusDesBanques : [])) as BonusQuestion[]
+  /* Logo : cfg.logoUrl, sinon cfg.theme.logoUrl ; sans logo, le nom de l'event sert de titre. */
+  /* Marque blanche : logo de l'event (cfg.logoUrl, sinon theme), sinon le nom de l'event en titre. */
+  const logoUrl: string | null = (cfg.logoUrl as string) || theme.logoUrl || null
+  /* Lots : ceux de l'event (cfg prioritaire, sinon table lots). Aucun lot invente : sans lot, la carte est masquee. */
+  const lotsActifs = lots.filter(l => !l.retire)
+  const lotNom = (cfg.lotNom as string) || lotsActifs[0]?.titre || lotsActifs[0]?.nom || ''
+  const lotDesc = (cfg.lotDesc as string) || lotsActifs[0]?.description || ''
+  const lot2Nom = (cfg.lot2Nom as string) || lotsActifs[1]?.titre || lotsActifs[1]?.nom || ''
+  const lot2Desc = (cfg.lot2Desc as string) || lotsActifs[1]?.description || ''
+  const lotResume = (cfg.lotResume as string) || lotsActifs.map(l => l.titre || l.nom).filter(Boolean).join(' · ')
+  const tirageTxt = (cfg.tirageTexte as string) || 'Tirage au sort parmi les tickets'
+
+  const [questions, setQuestions] = useState<QuizQuestion[]>([])
+  // Anti-répétition : historique du joueur reconnu (device local), chargé en tâche de fond dès le montage.
+  // Reste vide (comportement actuel inchangé) pour tout joueur non reconnu — aucune régression possible.
+  const [joueurHistory, setJoueurHistory] = useState<{ answeredQuizIds: string[]; bonusDone: boolean }>({ answeredQuizIds: [], bonusDone: false })
+  useEffect(() => {
+    const jid = getJoueurLocal()?.id
+    if (!jid) return
+    fetchJoueurHistory(jid).then(setJoueurHistory).catch(() => { /* best-effort, pas de blocage */ })
+  }, [])
+  // Retire du tirage les questions déjà vues par ce joueur (tout le festival). Si le stock restant
+  // est insuffisant pour composer un jeu complet, on retombe sur le pool entier (jamais moins de nbQ).
+  function drawQuestions(): QuizQuestion[] {
+    const pool = [...allQs, ...customQs]
+    const fresh = pool.filter(q => !joueurHistory.answeredQuizIds.includes(q.id))
+    const source = fresh.length >= nbQ ? fresh : pool
+    return shuffle(source).slice(0, nbQ)
+  }
+  const [screen, setScreen] = useState<Screen>('onboard')
+  const [qIdx, setQIdx] = useState(0)
+  const [selected, setSelected] = useState<number | null>(null)
+  const [answered, setAnswered] = useState(false)
+  const [score, setScore] = useState(0)
+  const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', age: '', cp: '', source: '', sexe: '', optin: false })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [ticket, setTicket] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(false)
+  const [emailKnown, setEmailKnown] = useState<{ prenom?: string; alreadyPlayed: boolean } | null>(null)
+  const [lookingUp, setLookingUp] = useState(false)
+  const [bonusAnswers, setBonusAnswers] = useState<Record<string, string | string[]>>({})
+  const [quizAnswers, setQuizAnswers] = useState<{ qid: string; texte: string; choix: number; reponse: string; bonne: number; correct: boolean }[]>([])
+  const [bonusIdx, setBonusIdx] = useState(0)
+  const [bonusDone, setBonusDone] = useState(false)
+  const sondageAnonSaved = useRef(false)
+  const [sheetPart, setSheetPart] = useState<number | null>(null)
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const mapObjRef = useRef<unknown>(null)
+  const [placeMode, setPlaceMode] = useState(false)
+  /* Lus dans un effet (jamais pendant le rendu) : evite l'ecart serveur/client a l'hydratation. */
+  const [isDigitalLink, setIsDigitalLink] = useState(false)
+  const [preview, setPreview] = useState(false)
+  const [barreVisible, setBarreVisible] = useState(false)
+  const MB = true  // nouveau layout marque blanche : uniquement pilote par cfg (jamais par preview seul) --
+    // preview=1 sert a valider SANS polluer les vraies donnees (skip auto-jump quiz, popups, etc.), pas a forcer
+    // le layout marque blanche. Avant ce fix, previsualiser un vrai event NDS 2026 (aucun cfg.mbLayout) affichait
+    // a tort le nouveau layout au lieu du vrai visuel historique -- signale par Romain (Parcours mobil, 25/08).
+  const [profilTab, setProfilTab] = useState<'tickets' | 'infos' | 'favoris'>('tickets')  // fusion Tickets+Profil (MB)
+  const [favTick, setFavTick] = useState(0)  // incrémenté pour forcer le re-render après toggle favori (localStorage)
+  const toggleFav = (id: string) => { ndsToggleFavori(id); setFavTick(t => t + 1) }
+  const [sessionStart] = useState<string>(() => new Date().toISOString())
+  const [geo, setGeo] = useState<Record<string, { lat: number; lng: number }>>({})
+  const geoRef = useRef<Record<string, { lat: number; lng: number }>>({})
+
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search)
+      const pv = sp.has('preview')
+      setPreview(pv)
+      setBarreVisible(pv && sp.get('bar') !== '0')
+      setIsDigitalLink((sp.get('source') || '').startsWith('reseaux-'))
+      const qs = shuffle([...allQs, ...customQs]).slice(0, nbQ)
+      setQuestions(qs)
+      if (multi && sp.get('screen') === 'carte') { setScreen('carte'); return }
+      if ((sp.get('source') || '').startsWith('reseaux-') && getJoueurLocal()) { setScreen('refusdigital'); return }
+      // On a flashé une station (QR) ou on arrive par la carte : on saute l'écran d'accueil -> direct au quiz.
+      // Exceptions : station déjà jouée aujourd'hui (on garde le récap « déjà flashé ») ou station sans quiz.
+      let alreadyPlayed = false
+      try { alreadyPlayed = localStorage.getItem(lsKey) != null } catch {}
+      if (!pv && !alreadyPlayed && qs.length > 0) setScreen('quiz')
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  // Log du scan/ouverture parcours NDS — alimente l'entonnoir (scans -> jeux -> coordonnées)
+  useEffect(() => { trackVisite(MODULE_TAG, evId) }, [evId])
+  /* Stations = events reels du super event de cet event (rien en dur). Event autonome : aucune station. */
+  useEffect(() => {
+    const seId = ev?.super_event_id
+    if (!seId) return
+    let cancelled = false
+    supabase.from('events').select('id,nom,lieu,lat,lng').eq('super_event_id', seId).then(({ data }) => {
+      if (cancelled || !data) return
+      setStations((data as { id: string; nom: string; lieu: string | null; lat: number | null; lng: number | null }[]).map(r => ({
+        id: r.id, nom: r.nom, ou: r.lieu || '', icon: 'i-layers', lat: r.lat ?? 0, lng: r.lng ?? 0, msg: '',
+      })))
+    })
+    return () => { cancelled = true }
+  }, [ev?.super_event_id])
+  // Log des étapes franchies (1 seule fois par étape/station) — mesure du décrochage
+  const etapesVues = useRef<Record<string, boolean>>({})
+  useEffect(() => {
+    const k = String(evId || '-') + ':' + screen
+    if (etapesVues.current[k]) return
+    etapesVues.current[k] = true
+    trackVisite(MODULE_TAG, evId, screen)
+  }, [screen, evId])
+  const [recurrent, setRecurrent] = useState<{ id: string; email: string; prenom?: string } | null>(null)
+  // Popup reconnaissance « Déjà inscrit ? » — s'affiche au milieu du quiz après le flash
+  const [recoOpen, setRecoOpen] = useState(false)
+  const [recoAsked, setRecoAsked] = useState(false)
+  const [recoMode, setRecoMode] = useState<'ask' | 'email'>('ask')
+  const [recoEmail, setRecoEmail] = useState('')
+  const [recoBusy, setRecoBusy] = useState(false)
+  const [recoMsg, setRecoMsg] = useState<string | null>(null)
+  const [ticketCount, setTicketCount] = useState(1)
+  const [fly, setFly] = useState(0)
+  const [celebrate, setCelebrate] = useState(0)
+  const refreshServerTickets = useCallback(async (jid?: string | null) => {
+    const id = jid || recurrent?.id || getJoueurLocal()?.id
+    if (!id) return
+    try {
+      const seId = ev?.super_event_id
+      if (!seId) return
+      const { count } = await supabase.from('se_tickets').select('id', { count: 'exact', head: true }).eq('joueur_id', id).eq('super_event_id', seId)
+      if (typeof count === 'number' && count > 0) setTicketCount(count)
+    } catch { /* hors-ligne : garde le cumul local */ }
+  }, [recurrent, ev?.super_event_id])
+  const [scanOpen, setScanOpen] = useState(false)
+  const [scanErr, setScanErr] = useState(false)
+  const [dejaJoue, setDejaJoue] = useState(false)
+  const [victoryPopup, setVictoryPopup] = useState(false)
+  const [bonusPopup, setBonusPopup] = useState(false)
+  const bonusPopupShownRef = useRef(false)
+  const victoryShownRef = useRef(false)
+  const [scanTarget, setScanTarget] = useState<{ id?: string; nom: string; lat?: number; lng?: number; msg?: string; ou?: string; done?: boolean } | null>(null)
+  const [mapView, setMapView] = useState<'stations' | 'partenaires'>('stations')
+  const [commerces, setCommerces] = useState<Commerce[]>([])
+  const [maPos, setMaPos] = useState<{ lat: number; lng: number } | null>(null)
+
+  // Distance à vol d'oiseau (Haversine) + temps de marche estimé (5 km/h)
+  function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+    const R = 6371000, r = Math.PI / 180
+    const dLat = (b.lat - a.lat) * r, dLng = (b.lng - a.lng) * r
+    const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLng / 2) ** 2
+    return Math.round(2 * R * Math.asin(Math.sqrt(x)))
+  }
+  function distanceTxt(c: { latitude: number; longitude: number }) {
+    if (!maPos) return null
+    const m = distanceM(maPos, { lat: c.latitude, lng: c.longitude })
+    const min = Math.max(1, Math.round(m / 83))
+    return m < 1000 ? `À ${m} m · ${min} min à pied` : `À ${(m / 1000).toFixed(1)} km · ${min} min à pied`
+  }
+  function itineraire(c: { latitude: number; longitude: number; nom: string }) {
+    const u = `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}&travelmode=walking`
+    try { window.open(u, '_blank', 'noopener') } catch { /* ignore */ }
+  }
+  const [bandPartners, setBandPartners] = useState<{ id: string; nom: string; image_url: string | null; emoji: string | null }[]>([])
+  const [fiche, setFiche] = useState<Commerce | null>(null)
+  // Bandeau partenaires : placeholders « Votre logo ici » tant que les partenaires de l'event n'ont pas de logo.
+  const bandReal = bandPartners.filter(p => p.image_url)
+  const bandUnit: { id: string; nom: string; image_url: string | null }[] = bandReal.length
+    ? bandReal.map(p => ({ id: p.id, nom: p.nom, image_url: p.image_url }))
+    : Array.from({ length: 6 }).map((_, i) => ({ id: `ph-${i}`, nom: 'Votre logo ici', image_url: null }))
+  const bandTrack = [...bandUnit, ...bandUnit]
+  const scanVideoRef = useRef<HTMLVideoElement | null>(null)
+
+  const lsKey = `flowin_played_${ndsFamily(evId)}_${ndsYmd()}`
+
+  // Anti retour-arrière : si la page est restaurée depuis la mémoire du navigateur (bfcache),
+  // on recharge -> on repasse par la règle "déjà joué" au lieu de pouvoir rejouer la même station.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted && !preview) window.location.reload() }
+    window.addEventListener('pageshow', onShow)
+    return () => window.removeEventListener('pageshow', onShow)
+  }, [])
+
+  useEffect(() => {
+    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); if (!preview) setDejaJoue(true); if (s !== 'played') setTicket(s) } } catch {}
+    // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
+    const prof = getJoueurLocal()
+    if (prof) {
+      setRecurrent(prof)
+      setForm(f => ({ ...f,
+        prenom: prof.prenom || f.prenom, nom: prof.nom || f.nom,
+        email: prof.email || f.email, tel: prof.tel || f.tel,
+        cp: prof.cp || f.cp, age: prof.age || f.age, sexe: prof.genre || f.sexe }))
+    }
+    // Cumul des tickets gagnés à vie (jamais remis à zéro)
+    try { setTicketCount(ndsCumul()) } catch {}
+  }, [lsKey])
+
+  // Popup « Déjà inscrit ? » : à l'arrivée sur le quiz, si le joueur n'est pas déjà
+  // reconnu (localStorage/email) et qu'on ne l'a pas encore demandé cette session.
+  useEffect(() => {
+    if (!preview && (screen === 'quiz' || screen === 'bonus') && !recurrent && !recoAsked && !saved) {
+      setRecoMode('ask'); setRecoMsg(null); setRecoOpen(true)
+    }
+  }, [screen, recurrent, recoAsked, saved])
+
+
+
+  // Scanner QR in-app (caméra + jsQR) — flasher le QR d'une station sans sortir du jeu
+  useEffect(() => {
+    if (!scanOpen) return
+    setScanErr(false)
+    let stream: MediaStream | null = null
+    let raf = 0
+    let stopped = false
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    type JsQRFn = (d: Uint8ClampedArray, w: number, h: number) => { data: string } | null
+
+    function loadJsQR(): Promise<JsQRFn> {
+      const w = window as unknown as { jsQR?: JsQRFn }
+      if (w.jsQR) return Promise.resolve(w.jsQR)
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script')
+        s.src = 'https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'
+        s.onload = () => resolve((window as unknown as { jsQR: JsQRFn }).jsQR)
+        s.onerror = reject
+        document.head.appendChild(s)
+      })
+    }
+
+    async function start() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        const video = scanVideoRef.current
+        if (!video) return
+        video.srcObject = stream
+        await video.play()
+        const jsQR = await loadJsQR()
+        const tick = () => {
+          if (stopped) return
+          if (video.readyState >= 2 && ctx && video.videoWidth) {
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const code = jsQR(img.data, img.width, img.height)
+            if (code && code.data) {
+              const m = code.data.match(/ev=([a-z0-9-]+)/i)
+              if (m) { stopped = true; window.location.href = `/parcours/master-quiz?ev=${m[1]}`; return }
+            }
+          }
+          raf = requestAnimationFrame(tick)
+        }
+        raf = requestAnimationFrame(tick)
+      } catch {
+        setScanErr(true)
+      }
+    }
+    start()
+    return () => {
+      stopped = true
+      cancelAnimationFrame(raf)
+      if (stream) stream.getTracks().forEach(t => t.stop())
+    }
+  }, [scanOpen])
+
+  // Commerces partenaires (vue v_nds_commerces_carte) : chargés à l'entrée sur l'écran carte
+  useEffect(() => {
+    // TODO master : la vue v_nds_commerces_carte est propre a NDS ; carte partenaires a brancher sur les partenaires de l'event.
+    if (screen !== 'carte' || commerces.length || true) return
+    let cancelled = false
+    supabase.from('v_nds_commerces_carte').select('*').then(({ data }) => {
+      if (cancelled) return
+      const rows = (data ?? []) as Commerce[]
+      setCommerces(rows.filter(c => c.latitude != null && c.longitude != null))
+    })
+    return () => { cancelled = true }
+  }, [screen, commerces.length])
+
+  // Positions des 4 stations carte : resync depuis la base (events) -> alignées sur le dashboard
+  useEffect(() => {
+    if (screen !== 'carte' || placeMode || !STATIONS.length) return
+    let cancelled = false
+    const fams = STATIONS.map(s => s.id)
+    supabase.from('events').select('id,lat,lng').in('id', fams).then(({ data }) => {
+      if (cancelled || !data) return
+      const next = { ...geoRef.current }
+      ;(data as { id: string; lat: number | null; lng: number | null }[]).forEach(r => {
+        if (r.lat != null && r.lng != null) next[r.id] = { lat: r.lat, lng: r.lng }
+      })
+      geoRef.current = next
+      setGeo({ ...next })
+    })
+    return () => { cancelled = true }
+  }, [screen, placeMode, STATIONS])
+
+  // Bandeau partenaires défilant (dock au-dessus du nav, sur tous les écrans) : uniquement les partenaires ayant choisi la formule bandeau (bandeau=true) et actifs
+  useEffect(() => {
+    let cancelled = false
+    // Partenaires de CET event uniquement (jamais la liste globale, qui afficherait les partenaires d'un autre client).
+    if (!cancelled) setBandPartners(partenaires.filter(p => p.actif !== false).map(p => ({ id: p.id, nom: p.nom, image_url: p.image_url, emoji: p.emoji })))
+    return () => { cancelled = true }
+  }, [partenaires])
+
+  // Carte Leaflet : chargée à la demande quand on arrive sur l'écran carte
+  useEffect(() => {
+    if (screen !== 'carte') return
+    let cancelled = false
+
+    function ensureLeaflet(): Promise<unknown> {
+      const w = window as unknown as { L?: unknown }
+      if (w.L) return Promise.resolve(w.L)
+      return new Promise((resolve, reject) => {
+        // CSS
+        if (!document.getElementById('leaflet-css')) {
+          const link = document.createElement('link')
+          link.id = 'leaflet-css'
+          link.rel = 'stylesheet'
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+          document.head.appendChild(link)
+        }
+        // JS
+        const existing = document.getElementById('leaflet-js') as HTMLScriptElement | null
+        if (existing) { existing.addEventListener('load', () => resolve((window as unknown as { L: unknown }).L)); return }
+        const s = document.createElement('script')
+        s.id = 'leaflet-js'
+        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+        s.onload = () => resolve((window as unknown as { L: unknown }).L)
+        s.onerror = reject
+        document.head.appendChild(s)
+      })
+    }
+
+    ensureLeaflet().then((L) => {
+      if (cancelled || !mapRef.current) return
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const LL = L as any
+      // Si une map existe déjà sur ce node, on la détruit (re-entrée écran)
+      if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
+
+      const pts = STATIONS.filter(st => st.lat && st.lng)
+      const center: [number, number] = pts.length ? [pts.reduce((a, st) => a + st.lat, 0) / pts.length, pts.reduce((a, st) => a + st.lng, 0) / pts.length] : [46.6, 2.4]
+      const map = LL.map(mapRef.current, { zoomControl: false, attributionControl: false }).setView(center, 17)
+      mapObjRef.current = map
+      LL.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
+
+      // Stations : jaune = validé (joué) · vert clignotant = à jouer · ★ = station courante
+      if (mapView === 'stations' || placeMode) STATIONS.forEach(st => {
+        const cur = st.id === ndsFamily(evId)
+        let done = false
+        try { done = ndsPlayedToday(st.id) } catch {}
+        const bg = done ? '#F5B544' : '#16a34a'
+        const cls = done ? '' : 'nds-mk-pulse'
+        const mark = cur ? '★' : (done ? '✓' : '')
+        const html = `<div class="${cls}" style="width:24px;height:24px;border-radius:50%;background:${bg};border:2px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px">${mark}</div>`
+        const icon = LL.divIcon({ html, className: '', iconSize: [24, 24], iconAnchor: [12, 12] })
+        const g0 = geoRef.current[st.id]
+        const mk = LL.marker([g0 ? g0.lat : st.lat, g0 ? g0.lng : st.lng], { icon, draggable: placeMode }).addTo(map)
+        if (placeMode) {
+          mk.on('dragend', (e: { target: { getLatLng: () => { lat: number; lng: number } } }) => {
+            const ll = e.target.getLatLng()
+            geoRef.current = { ...geoRef.current, [st.id]: { lat: ll.lat, lng: ll.lng } }
+            setGeo({ ...geoRef.current })
+          })
+        } else {
+          mk.on('click', () => { if (cur) setScreen('onboard'); else setScanTarget({ id: st.id, nom: st.nom, lat: st.lat, lng: st.lng, msg: st.msg, ou: st.ou, done }) })
+        }
+      })
+
+      // Commerces partenaires actifs (vue v_nds_commerces_carte) : clic -> fiche
+      if (mapView === 'partenaires') commerces.forEach(c => {
+        const big = !!c.en_avant
+        const sz = big ? 30 : 24
+        let cdone = false
+        try { cdone = ndsPlayedToday(ndsFamily('ev-nds-' + c.id.replace(/^pt-/, ''))) } catch {}
+        const cbg = cdone ? '#F5B544' : '#16a34a'
+        const ccls = cdone ? '' : 'nds-mk-pulse'
+        const html = `<div class="${ccls}" style="width:${sz}px;height:${sz}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${cbg};border:2px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.3)"></div>`
+        const icon = LL.divIcon({ html, className: '', iconSize: [sz, sz], iconAnchor: [sz / 2, sz] })
+        const tk = (c as Commerce).tickets_par_scan || 1
+        const gain = cdone ? '\u2713 fait' : (tk > 1 ? `+${tk} tickets` : '+1 ticket')
+        const gbg = cdone ? '#16a34a' : (tk > 1 ? '#7C2D92' : '#F97C4A')
+        const tag = LL.divIcon({
+          html: `<div style="transform:translate(-50%,-100%);white-space:nowrap;background:#fff;border-radius:9px;padding:3px 7px;font:800 10.5px Manrope,system-ui;color:#1a1226;box-shadow:0 3px 10px rgba(0,0,0,.18);border:1px solid #eee">${c.nom.length > 14 ? c.nom.slice(0, 13) + '\u2026' : c.nom} <span style="color:${gbg}">${gain}</span></div>`,
+          className: '', iconSize: [0, 0], iconAnchor: [0, sz + 6],
+        })
+        LL.marker([c.latitude, c.longitude], { icon: tag, interactive: false }).addTo(map)
+        LL.marker([c.latitude, c.longitude], { icon }).addTo(map).on('click', () => { logClicPartenaire(c.id, 'fiche', null); setFiche(c) })
+      })
+      // Position du joueur (géoloc) — affichée sur les deux vues
+      if (typeof navigator !== 'undefined' && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          setMaPos({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+          if (cancelled || mapObjRef.current !== map) return
+          const uhtml = '<div style="width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 6px rgba(37,99,235,.25)"></div>'
+          const uicon = LL.divIcon({ html: uhtml, className: '', iconSize: [18, 18], iconAnchor: [9, 9] })
+          LL.marker([pos.coords.latitude, pos.coords.longitude], { icon: uicon, zIndexOffset: 1000 }).addTo(map).bindPopup('Tu es ici')
+        }, () => {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 })
+      }
+      setTimeout(() => { try { map.invalidateSize() } catch {} }, 120)
+    }).catch(() => { /* CDN bloqué : la liste de stations reste affichée en fallback */ })
+
+    return () => {
+      cancelled = true
+      if (mapObjRef.current) { try { (mapObjRef.current as { remove: () => void }).remove() } catch {} mapObjRef.current = null }
+    }
+  }, [screen, evId, commerces, mapView, placeMode, STATIONS])
+
+  const handleAnswer = useCallback((idx: number) => {
+    if (answered) return
+    setSelected(idx); setAnswered(true)
+    const cur = questions[qIdx]
+    if (cur) {
+      if (idx === cur.bonne) setScore(s => s + 1)
+      setQuizAnswers(a => [...a, { qid: cur.id, texte: cur.texte, choix: idx, reponse: cur.options[idx] ?? '', bonne: cur.bonne, correct: idx === cur.bonne }])
+    }
+  }, [answered, qIdx, questions])
+
+  const goNext = useCallback(() => {
+    if (qIdx + 1 < questions.length) { setQIdx(i => i + 1); setSelected(null); setAnswered(false) }
+    else setScreen('resultats')
+  }, [qIdx, questions])
+
+  // Reconnaissance par email (Tâche 4) : pré-remplissage + route claimJoueur (ticket par compte, pas par appareil)
+  async function onEmailBlur(): Promise<void> {
+    const em = form.email.trim()
+    if (em.indexOf('@') === -1 || recurrent || lookingUp) return
+    setLookingUp(true)
+    try {
+      const j = await lookupJoueurByEmail(em, evId)
+      if (j) {
+        setRecurrent({ id: j.id, email: j.email, prenom: j.prenom })
+        setForm(f => ({ ...f,
+          prenom: j.prenom || f.prenom, nom: j.nom || f.nom, tel: j.tel || f.tel,
+          cp: j.cp || f.cp, age: j.age || f.age, sexe: j.genre || f.sexe }))
+        setEmailKnown({ prenom: j.prenom, alreadyPlayed: j.alreadyPlayed })
+        if (isDigitalLink) setScreen('refusdigital')
+      } else { setEmailKnown(null) }
+    } catch { /* silencieux */ }
+    setLookingUp(false)
+  }
+
+  // Popup reconnaissance : valider l'email -> retrouve le compte (reconnu = formulaire de fin sauté)
+  async function recoSubmitEmail(): Promise<void> {
+    const em = recoEmail.trim()
+    if (em.indexOf('@') === -1 || recoBusy) { setRecoMsg('Entre un email valide.'); return }
+    setRecoBusy(true); setRecoMsg(null)
+    try {
+      const j = await lookupJoueurByEmail(em, evId)
+      if (j) {
+        setRecurrent({ id: j.id, email: j.email, prenom: j.prenom })
+        setForm(f => ({ ...f,
+          prenom: j.prenom || f.prenom, nom: j.nom || f.nom, email: j.email || em, tel: j.tel || f.tel,
+          cp: j.cp || f.cp, age: j.age || f.age, sexe: j.genre || f.sexe, optin: true }))
+        setEmailKnown({ prenom: j.prenom, alreadyPlayed: j.alreadyPlayed })
+        setRecoOpen(false); setRecoAsked(true)
+        if (isDigitalLink) { setScreen('refusdigital'); setRecoBusy(false); return }
+      } else {
+        setRecoMsg("On ne te trouve pas avec cet email. Tu pourras t'inscrire à la fin du quiz.")
+      }
+    } catch { setRecoMsg('Connexion impossible, réessaie.') }
+    setRecoBusy(false)
+  }
+
+  function recoDismiss(): void { setRecoOpen(false); setRecoAsked(true); setRecoMode('ask'); setRecoEmail(''); setRecoMsg(null) }
+
+  async function submitInscription() {
+    const errs: Record<string, string> = {}
+    // Compte reconnu (recurrent) : profil déjà connu -> pas besoin de re-remplir prénom/nom
+    if (!recurrent && !form.prenom.trim()) errs.prenom = 'Requis'
+    if (!recurrent && !form.nom.trim()) errs.nom = 'Requis'
+    if (!form.email.includes('@')) errs.email = 'Email invalide'
+    // Coordonnées : tous les champs obligatoires (seul l'opt-in marketing reste facultatif — RGPD).
+    if (!form.tel.trim()) errs.tel = 'Requis'
+    if (!form.cp.trim()) errs.cp = 'Requis'
+    if (!form.age) errs.age = 'Requis'
+    if (!form.sexe) errs.sexe = 'Requis'
+    setErrors(errs)
+    if (Object.keys(errs).length) return
+    await persist()
+    setScreen('final')
+  }
+
+  // Tickets NDS : 1 ticket si quiz parfait (sans-faute) + 1 ticket si bonus fait -> jusqu'à 2/station/jour.
+  // Le nombre de questions vient de cfg.quizNbQuestions (3 depuis le 14/07, 4 avant) : la règle s'adapte seule.
+  const quizPerfect = questions.length === 0 || score >= questions.length
+  useEffect(() => { if ((screen === 'resultats' || screen === 'final') && (quizPerfect || bonusDone)) { setFly(f => f + 1); setCelebrate(c => c + 1) } }, [screen, quizPerfect, bonusDone])
+  useEffect(() => { if (!preview && screen === 'final' && (quizPerfect || bonusDone) && !victoryShownRef.current) { victoryShownRef.current = true; setVictoryPopup(true) } }, [screen, quizPerfect, bonusDone, preview])
+  // Pop-up bonus (master marque blanche uniquement, gated cfg.bonusPopup) : a l'arrivee sur Resultats,
+  // pousse vers la question bonus. NDS live n'a pas le flag -> aucun changement.
+  useEffect(() => { if (!preview && cfg.bonusPopup && screen === 'resultats' && !bonusDone && !bonusPopupShownRef.current) { bonusPopupShownRef.current = true; setBonusPopup(true) } }, [screen, bonusDone, preview, cfg.bonusPopup])
+  useEffect(() => { if (screen === 'tickets' || screen === 'final' || (screen === 'onboard' && saved)) refreshServerTickets() }, [screen, saved, refreshServerTickets])
+
+  // Écritures en attente (réseau coupé lors d'un jeu) : on rejoue au montage puis à chaque retour du réseau.
+  useEffect(() => {
+    ndsFlushQueue()
+    const onErr = (e: ErrorEvent) => { void trackErreur(MODULE_TAG, evId, 'js:' + String(e.message || '').slice(0, 60)) }
+    const onRej = () => { void trackErreur(MODULE_TAG, evId, 'promise') }
+    window.addEventListener('error', onErr)
+    window.addEventListener('unhandledrejection', onRej)
+    const onOnline = () => { void trackErreur(MODULE_TAG, evId, 'reprise-reseau'); ndsFlushQueue() }
+    window.addEventListener('online', onOnline)
+    return () => {
+      window.removeEventListener('online', onOnline)
+      window.removeEventListener('error', onErr)
+      window.removeEventListener('unhandledrejection', onRej)
+    }
+  }, [evId])
+
+  // Cache hors-ligne (service worker chirurgical) — ACTIF, restreint au jeu (scope /parcours/).
+  // Ne touche PAS le dashboard/brigade/carte. Kill-switch: KILL=true dans public/sw.js (~2 min à se propager).
+  const ENABLE_SW = true
+  useEffect(() => {
+    if (!ENABLE_SW) return
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+    navigator.serviceWorker.register('/sw.js', { scope: '/parcours/' }).catch(() => {})
+  }, [ENABLE_SW])
+
+  // Écriture distante isolée (réutilisée par persist + retry) — Tâche 5
+  async function remoteWrite(tc: string, quizTk: boolean, bonusTk: boolean): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
+    if (preview) return { success: true, duplicate: false, ticket: tc }
+    const qrSource = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
+    return recurrent
+      ? await claimJoueur(recurrent, evId, PREFIX, bonusAnswers, { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, source: MODULE_TAG, source_qr: qrSource, started_at: sessionStart, quizTicket: quizTk, bonusTicket: bonusTk })
+      : await writeJoueur({
+          email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel,
+          code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined,
+          score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc,
+          source: MODULE_TAG, source_qr: qrSource ?? null, started_at: sessionStart, prefix: PREFIX, bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers,
+          optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk,
+        })
+  }
+
+  /* Referentiel 8 : gain immediat attribue par la regle d un event autonome
+     (jamais sur un super event : tirage uniquement). */
+  const [gainImmediat, setGainImmediat] = useState<GainImmediat | null>(null)
+
+  async function persist(bonusOverride?: boolean): Promise<string> {
+    if (saved) return ticket
+    setSaving(true)
+    // 2 tickets possibles : quiz (sans-faute) + bonus. bonusOverride force l'état frais quand le bonus vient d'être validé.
+    // Sans quiz (banque vide = brigade sondage), aucun ticket quiz : seul le sondage/bonus rapporte le point.
+    const quizTk = questions.length > 0 && quizPerfect
+    const bonusTk = bonusOverride ?? bonusDone
+    const tc = generateTicket(PREFIX)
+    setTicket(tc)
+    setSaved(true)
+    try {
+      // Marqueur "joué aujourd'hui" (anti-rejeu), distinct du compteur de tickets
+      localStorage.setItem(lsKey, (quizTk || bonusTk) ? tc : 'played')
+      // Cumul tickets sur tout le festival : 1 entrée par ticket gagné (quiz / bonus), par station, par jour
+      if (quizTk) ndsLedgerAdd(ndsFamily(evId) + '@' + ndsYmd())
+      if (bonusTk) ndsLedgerAdd('b:' + ndsFamily(evId) + '@' + ndsYmd())
+      setTicketCount(ndsCumul())
+    } catch {}
+
+    let res = await remoteWrite(tc, quizTk, bonusTk)
+    if (!res.success && !res.duplicate) { res = await remoteWrite(tc, quizTk, bonusTk) } // 1 réessai auto
+    setSaving(false)
+    if (res.gain) setGainImmediat(res.gain)
+    const finalTicket = res.ticket || tc
+    if (finalTicket !== tc) {
+      setTicket(finalTicket)
+      try { if (quizTk || bonusTk) localStorage.setItem(lsKey, finalTicket) } catch {}
+    }
+    const ok = res.success || res.duplicate
+    setSaveError(!ok)
+    if (!ok) {
+      // File d'attente durable : rejeu auto au retour du réseau (idempotent : dédup jour/station côté serveur).
+      const qrSrc = (() => { try { return new URLSearchParams(window.location.search).get('source') || undefined } catch { return undefined } })()
+      if (recurrent) {
+        ndsQueueWrite({ kind: 'claim', joueur: { id: recurrent.id, email: recurrent.email, prenom: recurrent.prenom }, evId, prefix: PREFIX, bonus: bonusAnswers, extra: { quiz_reponses: quizAnswers, score: `${score}/${questions.length}`, decouverte: form.source || undefined, source: MODULE_TAG, source_qr: qrSrc, started_at: sessionStart, quizTicket: quizTk, bonusTicket: bonusTk } })
+      } else {
+        ndsQueueWrite({ kind: 'write', payload: { email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, age_tranche: form.age, genre: form.sexe || undefined, decouverte: form.source || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: MODULE_TAG, source_qr: qrSrc ?? null, started_at: sessionStart, prefix: PREFIX, bonus_reponses: bonusAnswers, quiz_reponses: quizAnswers, optin: form.optin, optin_version: OPTIN_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk } })
+      }
+      void trackErreur(MODULE_TAG, evId, 'ecriture')
+      console.error('[master-quiz] enregistrement Supabase échoué — mis en file d\'attente (réessai auto):', res.error)
+    }
+    return finalTicket
+  }
+
+  // Réessai manuel depuis la bannière d'erreur — Tâche 5
+  async function retrySave(): Promise<void> {
+    if (saving) return
+    setSaving(true)
+    const tc = ticket || generateTicket(PREFIX)
+    const res = await remoteWrite(tc, questions.length > 0 && quizPerfect, bonusDone)
+    setSaving(false)
+    const ok = res.success || res.duplicate
+    setSaveError(!ok)
+    if (ok) {
+      const ft = res.ticket || tc
+      if (ft !== tc) { setTicket(ft); try { localStorage.setItem(lsKey, ft) } catch {} }
+    }
+  }
+
+  async function finaliser() {
+    // Profil déjà connu (récurrent) -> on enregistre directement, sinon on demande le profil
+    if (recurrent) { await persist(); setScreen('final') }
+    else setScreen('inscription')
+  }
+
+  async function finishBonus() {
+    setBonusDone(true)
+    // Stats RSE anonymes (zéro PII) : on enregistre les réponses dès la fin du sondage,
+    // que la personne s'inscrive ensuite ou non. Gated par cfg.sondageAnonyme (brigade only).
+    if (cfg.sondageAnonyme && !sondageAnonSaved.current) {
+      sondageAnonSaved.current = true
+      await writeSondageBrigade(evId, bonusAnswers)
+    }
+    // Le bonus rapporte le ticket si le quiz ne l'a pas déjà donné (1 ticket/station/jour) -> persist(true)
+    if (recurrent) { await persist(true); setScreen('final') }
+    else setScreen('inscription')
+  }
+
+  const q = questions[qIdx]
+  const navOn = screen === 'final' || screen === 'tickets' || screen === 'carte' || screen === 'partenaires' || screen === 'profil' || (screen === 'onboard' && saved)
+  const bandOn = screen !== 'inscription' && screen !== 'bonus'
+
+  function setSource(s: string) { setForm(f => ({ ...f, source: s })) }
+
+  // Tracking clic partenaire : qui (joueur) · quel partenaire · quel lien · quelle station · quand
+  // lienKey='fiche' (ouverture de la fiche, url null) ou 'site_web'/'instagram'/'facebook'/'maps' (lien sortant)
+  function logClicPartenaire(partenaireId: string, lienKey: string, url: string | null) {
+    if (!partenaireId) return
+    if (lienKey !== 'fiche' && !url) return
+    try {
+      const jid = recurrent?.id || getJoueurLocal()?.id || null
+      void supabase.from('partenaire_clics').insert({
+        partenaire_id: partenaireId, event_id: evId, lien_key: lienKey, url, joueur_id: jid,
+      })
+    } catch { /* best-effort, ne bloque jamais l'ouverture du lien */ }
+  }
+  const shareParrainage = async () => {
+    const email = (form.email || recurrent?.email || '').trim().toLowerCase()
+    if (email.indexOf('@') === -1) return
+    const extId = 'j-nd-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
+    const link = buildInviteLink(`/parcours/master-quiz?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
+    const txt = `Je joue à ${nom || 'ce jeu'} ! Rejoins-moi, joue et tente de gagner : ${link}`
+    setCelebrate(c => c + 1)
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom || 'Flowin', text: txt }) }
+      else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
+    } catch { /* annule */ }
+  }
+  function nb(target: Screen) { setSheetPart(null); setScreen(target) }
+
+  /* Apercu admin (ParcoursMobil) : avance/recule ecran par ecran via postMessage. */
+  const NAV_SCREENS: Screen[] = multi
+    ? ['onboard', 'quiz', 'resultats', 'bonus', 'inscription', 'final', 'carte', 'profil', 'partenaires', 'refusdigital']
+    : ['onboard', 'quiz', 'resultats', 'bonus', 'inscription', 'final', 'profil', 'partenaires', 'refusdigital']
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data as { flowinNav?: string } | null
+      if (!d || (d.flowinNav !== 'next' && d.flowinNav !== 'prev')) return
+      setScreen(cur => {
+        const i = NAV_SCREENS.indexOf(cur)
+        if (d.flowinNav === 'next' && i < NAV_SCREENS.length - 1) return NAV_SCREENS[i + 1]
+        if (d.flowinNav === 'prev' && i > 0) return NAV_SCREENS[i - 1]
+        return cur
+      })
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [multi])
+
+  // Bandeau partenaires (inline, collé au contenu) — réutilisé en bas de plusieurs écrans
+  const partnerBand = (
+    <div className="logoband logoband-inline" onClick={() => nb('partenaires')} style={{ cursor: 'pointer' }} aria-label="Espace partenaires">
+      <div className="logotrack">
+        {bandTrack.map((p, i) => (
+          <span className={`logoslot${p.image_url ? '' : ' logoslot-ph'}`} key={`bd-${p.id}-${i}`}>
+            <PartnerLogo src={p.image_url} alt={p.nom} fallback={'Votre logo ici'} />
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="ndsbody">
+      {fly > 0 && <div key={`fly-${fly}`} className="ticketfly" aria-hidden="true">+1&#8239;<svg className="ic" style={{ width: 16, height: 16, verticalAlign: -3 }}><use href="#i-ticket" /></svg></div>}
+      {celebrate > 0 && (
+        <div className="confetti-wrap" key={`cf-${celebrate}`} aria-hidden="true">
+          {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
+        </div>
+      )}
+      <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');" + NDS_CSS + NDS_CSS_APP }} />
+      <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: NDS_SPRITE }} />
+      <style dangerouslySetInnerHTML={{ __html: '@keyframes nds-pop{0%{transform:scale(.82);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}' }} />
+      {/* Marque blanche : pas de photo du festival. Image de fond de l'event si definie (cfg.theme.bgImage), sinon degrade de la charte. */}
+      <style dangerouslySetInnerHTML={{ __html: '.ndsbody .scr.on .hero{background:' + (theme.bgImage ? '#190a25 url(' + JSON.stringify(theme.bgImage) + ') center 30%/cover no-repeat' : 'linear-gradient(135deg,#5A1E6E 0%,#7C2D92 55%,#E0218A 100%)') + ' !important}.ndsbody .mq-title{position:relative;z-index:1;color:#fff;font-weight:900;font-size:30px;line-height:1.1;margin:6px 0 16px;letter-spacing:-.01em}' }} />
+
+      <div className="phone">
+        {barreVisible && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 4000, background: 'rgba(26,18,38,.96)', padding: '8px 10px', display: 'flex', gap: 6, overflowX: 'auto', boxShadow: '0 2px 10px rgba(0,0,0,.3)' }}>
+            <span style={{ color: '#F5B544', fontWeight: 800, fontSize: 11, whiteSpace: 'nowrap', alignSelf: 'center', paddingRight: 4 }}>APERÇU</span>
+            {([['onboard', 'Accueil'], ['quiz', 'Quiz'], ['resultats', 'Résultats'], ['bonus', 'Bonus'], ['inscription', 'Inscription'], ['final', 'Fin'], ...(multi ? [['carte', 'Carte'] as const] : []), ['partenaires', 'Partenaires'], ['profil', 'Profil']] as const).map(([sc, lb]) => (
+              <button key={sc} onClick={() => setScreen(sc)} style={{ background: screen === sc ? '#E0218A' : 'rgba(255,255,255,.14)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>{lb}</button>
+            ))}
+            <button onClick={() => setDejaJoue(true)} style={{ background: '#F5B544', color: '#1a1226', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>Pop-up</button>
+            <button onClick={() => setVictoryPopup(true)} style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>Victoire</button>
+            <button onClick={() => setBonusPopup(true)} style={{ background: '#7C2D92', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>Pop-up bonus</button>
+          </div>
+        )}
+        {dejaJoue && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 3000, background: 'rgba(12,10,18,.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 20, padding: '24px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.4)', animation: 'nds-pop .3s cubic-bezier(.2,1.3,.5,1) both' }}>
+              <div style={{ width: 56, height: 56, margin: '0 auto 12px', borderRadius: '50%', background: '#f3eef7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg className="ic" style={{ width: 28, height: 28, color: '#7C2D92' }}><use href="#i-pin" /></svg></div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>{multi ? <>Tu as déjà flashé cette station aujourd&apos;hui&nbsp;!</> : <>Tu as déjà joué aujourd&apos;hui&nbsp;!</>}</div>
+              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 18, lineHeight: 1.4 }}>{multi ? <>Ton ticket est bien gardé. File vers une <b>autre station</b> pour gagner <b>+1 ticket</b> et plus de chances au tirage.</> : <>Ton ticket est bien gardé. Reviens demain pour rejouer.</>}</div>
+              {multi && <><button onClick={() => { setDejaJoue(false); setScreen('carte') }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><svg className="ic" style={{ width: 18, height: 18 }}><use href="#i-map" /></svg>Voir la carte &amp; les autres stations</button>
+              <button onClick={() => { setDejaJoue(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#f3eef7', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '13px', fontFamily: 'inherit', fontWeight: 700, fontSize: 15, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><svg className="ic" style={{ width: 17, height: 17 }}><use href="#i-scan" /></svg>Scanner une autre station</button></>}
+              <a onClick={() => setDejaJoue(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Fermer</a>
+            </div>
+          </div>
+        )}
+        {victoryPopup && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 3200, background: 'rgba(12,10,18,.74)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 22, padding: '26px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.45)', animation: 'nds-pop .32s cubic-bezier(.2,1.3,.5,1) both' }}>
+              <div style={{ width: 64, height: 64, margin: '0 auto 10px', borderRadius: '50%', background: 'linear-gradient(135deg,#F5B544,#E0218A)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg className="ic" style={{ width: 32, height: 32, color: '#fff' }}><use href="#i-trophy" /></svg></div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Bravo, +1 ticket&nbsp;!</div>
+              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 16, lineHeight: 1.4 }}>Tu as <b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage. {multi && (() => { const rest = STATIONS.length - STATIONS.filter(s => ndsPlayedToday(s.id)).length; return rest > 0 ? `Plus que ${rest} station${rest > 1 ? 's' : ''} pour le max de chances !` : 'Tu as tout fait, énorme\u00a0!' })()}</div>
+              {multi ? (
+                <button onClick={() => { setVictoryPopup(false); setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><svg className="ic" style={{ width: 17, height: 17 }}><use href="#i-scan" /></svg>Scanner la prochaine station</button>
+              ) : (
+                <button onClick={() => setVictoryPopup(false)} style={{ width: '100%', background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>Super&nbsp;!</button>
+              )}
+              {multi && <a onClick={() => setVictoryPopup(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Plus tard</a>}
+            </div>
+          </div>
+        )}
+        {bonusPopup && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 3200, background: 'rgba(12,10,18,.74)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 22, padding: '26px 22px', maxWidth: 340, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,.45)', animation: 'nds-pop .32s cubic-bezier(.2,1.3,.5,1) both' }}>
+              <div style={{ width: 60, height: 60, borderRadius: '50%', margin: '0 auto 12px', background: 'linear-gradient(135deg,#16a34a,#3ED598)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.5a1.8 1.8 0 0 0 0 3.4V15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.6a1.8 1.8 0 0 0 0-3.4z" /><path d="M13 7v10" strokeDasharray="1.5 2.5" /></svg>
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>Gagne un ticket supplémentaire&nbsp;!</div>
+              <div style={{ fontSize: 14.5, color: '#6b6478', marginBottom: 16, lineHeight: 1.4 }}>Réponds à la <b>question bonus</b> et repars avec un ticket de plus. Ça prend 10 secondes.</div>
+              <button onClick={() => { setBonusPopup(false); setScreen('bonus') }} style={{ width: '100%', background: 'linear-gradient(135deg,#16a34a,#3ED598)', color: '#fff', border: 'none', borderRadius: 12, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>Répondre à la question bonus</button>
+              <a onClick={() => setBonusPopup(false)} style={{ fontSize: 13, color: '#9b93a8', cursor: 'pointer', fontWeight: 600 }}>Ce n&apos;est pas maintenant</a>
+            </div>
+          </div>
+        )}
+        {screen === 'onboard' && (
+          <section className="scr on">
+            <div className="hero">
+              {/* Logo de l'event, sinon son nom en titre (jamais la marque d'un autre). */}
+              {logoUrl === null
+                ? <div className="mq-title">{nom}</div>
+                : <img className="hlogo" src={logoUrl} alt={nom} />}
+              {lotNom && <div className="prize">
+                <div className="lbl">À gagner</div>
+                <div className="prow">
+                  <span className="sq" style={{ background: 'linear-gradient(135deg,#E0218A,#8E2E9E)' }}><svg className="ic"><use href="#i-ticket" /></svg></span>
+                  <div><div className="nm">{lotNom}</div><div className="vl">{lotDesc}</div></div>
+                </div>
+                {lot2Nom && <>
+                <div className="div" />
+                <div className="prow">
+                  <span className="sq" style={{ background: 'linear-gradient(135deg,#E0218A,#8E2E9E)' }}><svg className="ic"><use href="#i-voucher" /></svg></span>
+                  <div><div className="nm">{lot2Nom}</div><div className="vl">{lot2Desc}</div></div>
+                </div>
+                </>}
+              </div>}
+            </div>
+            <div className="stage">
+              {saved ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(22,163,74,.16)', border: '1px solid rgba(22,163,74,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
+                    <svg className="ic" style={{ width: 20, height: 20, color: '#4ade80', flexShrink: 0 }}><use href="#i-checkc" /></svg>
+                    <span>{multi ? <>Tu as déjà flashé <b>cette station</b> aujourd&apos;hui — ton ticket est gardé (<b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b>). File vers une <b>autre station</b> pour en gagner un de plus&nbsp;!</> : <>Tu as déjà joué aujourd&apos;hui — ton ticket est gardé (<b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b>). Reviens demain pour rejouer&nbsp;!</>}</span>
+                  </div>
+                  {!multi ? null : STATIONS.filter(s => ndsPlayedToday(s.id)).length < STATIONS.length ? (
+                    <>
+                      <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 14, padding: '14px 15px', marginBottom: 14 }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1226', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <svg className="ic" style={{ width: 16, height: 16, color: 'var(--magenta)' }}><use href="#i-layers" /></svg>
+                          Chaque station = 1 ticket de plus
+                        </div>
+                        {STATIONS.map(s => { const dn = ndsPlayedToday(s.id); return (
+                          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: '#52455e', padding: '5px 0' }}>
+                            <span className={dn ? 'stdot stdot-done' : 'stdot stdot-todo'} />
+                            <span><b>{s.nom}</b> — {dn ? 'validée ✓' : 'à jouer'}</span>
+                          </div>
+                        )})}
+                      </div>
+                      <a className="btn" onClick={() => setScreen('carte')}><svg className="ic" style={{ width: 18, height: 18, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Gagner d&apos;autres tickets</a>
+                      <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Nos partenaires</span><span className="cta-sub">Découvre leurs offres et leurs lots</span></span><span className="cta-go">›</span></a>
+                    </>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(224,33,138,.14)', border: '1px solid rgba(224,33,138,.4)', borderRadius: 14, padding: '14px 15px', marginBottom: 14, fontSize: 14, fontWeight: 600 }}>
+                      <svg className="ic" style={{ width: 20, height: 20, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-ticket" /></svg>
+                      <span>Toutes les stations jouées ! Tu as le <b>maximum de tickets</b>. Bonne chance au tirage&nbsp;!</span>
+                    </div>
+                  )}
+                  <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7C2D92', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScreen('profil')}>Voir mes tickets</a>
+                </>
+              ) : (
+                <>
+                  {cfg.intro ? (
+                    <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '16px 18px', marginBottom: 14, fontSize: 14.5, lineHeight: 1.55, color: '#1a1226', fontWeight: 600, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>{cfg.intro as string}</div>
+                  ) : (<>
+                  <div style={{ textAlign: 'center', marginBottom: 8, marginTop: 2 }}>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1a1226' }}>Comment jouer&#8239;?</div>
+                  </div>
+                  <div style={{ background: '#faf7fd', border: '1px solid #ece7f2', borderRadius: 16, padding: '13px 16px', marginBottom: 12, boxShadow: '0 8px 22px rgba(30,16,46,.10)' }}>
+                    {[
+                      ...(multi ? [{ ic: 'i-map', t: 'Rends-toi à une station jeux', s: 'Sur la carte' }] : []),
+                      { ic: 'i-scan', t: 'Flash le QR code', s: 'À la station' },
+                      { ic: 'i-help', t: 'Réponds au quizz', s: 'Et gagne des tickets' },
+                    ].map((step, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '7px 0' }}>
+                        <span style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href={`#${step.ic}`} /></svg></span>
+                        <span style={{ fontSize: 13.5, color: '#52455e', lineHeight: 1.3 }}><b style={{ color: '#1a1226' }}>{step.t}</b><br /><span style={{ fontSize: 12.5, opacity: .85 }}>{step.s}</span></span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Romain, 04/09 : « l info cumul tes points aux autres stations
+                      jeux doit etre visible avec le reste ». Elle n existait qu APRES
+                      avoir joue (ecrans resultats et ticket) : a l accueil, seul
+                      « + vous jouez, + vos chances augmentent » s affichait, qui ne dit
+                      pas OU on rejoue. La regle est ecrite ici avec les memes mots que
+                      l ecran ticket — « chaque station = 1 ticket de plus » — pour ne
+                      pas annoncer deux regles differentes selon l ecran. */}
+                  {multi && <div style={{ background: 'linear-gradient(90deg,rgba(34,211,198,.16),rgba(224,33,138,.16))', border: '1px solid #ece7f2', borderRadius: 14, padding: '11px 14px', marginBottom: 14, color: '#1a1226', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontWeight: 800, fontSize: 14.5 }}>
+                      <svg className="ic" style={{ width: 18, height: 18, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-layers" /></svg>
+                      <span>+ Vous jouez, + vos chances augmentent</span>
+                    </div>
+                    <div style={{ fontSize: 12.5, lineHeight: 1.4, color: '#52455e', marginTop: 5 }}>
+                      Tes tickets se <b>cumulent d’une station à l’autre</b> : {STATIONS.length} stations à jouer, <b>chacune = 1 ticket de plus</b>.
+                    </div>
+                  </div>}
+                  </>)}
+                  <a className="btn" onClick={() => {
+                    const nextQuestions = drawQuestions()
+                    setQuestions(nextQuestions)
+                    if (nextQuestions.length > 0) { setScreen('quiz'); return }
+                    // Pas de quiz classique (banque vide) : passe au bonus, sauf si déjà répondu
+                    // par ce joueur (peu importe quand, tout le festival) -> routage neutre identique
+                    // à la fin normale du bonus (recurrent -> ticket direct, sinon -> inscription).
+                    if (bonusQs.length > 0 && !joueurHistory.bonusDone) { setScreen('bonus'); return }
+                    if (bonusQs.length > 0 && joueurHistory.bonusDone) { finaliser(); return }
+                    setScreen('resultats')
+                  }}>{recurrent ? `Rejouer${recurrent.prenom ? ', ' + recurrent.prenom : ''} →` : 'Je joue maintenant'}</a>
+                  <div className="foot">En participant, tu acceptes notre politique de confidentialité.</div>
+                </>
+              )}
+            </div>
+          </section>
+        )}
+
+        {screen === 'inscription' && (
+          <section className="scr purple on">
+            <div className="pad">
+              <div className="dhead">
+                <div className="back" onClick={() => setScreen('resultats')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
+                                <div><div className="dtitle">Bravo, ton ticket est là&nbsp;!</div><div className="dsub">Plus que tes coordonnées pour le valider.</div></div>
+              </div>
+              <div className="winban">
+                <div className="winban-r">
+                  <span className="winban-ic"><svg className="ic"><use href="#i-ticket" /></svg></span>
+                  <span className="winban-t">Bravo&nbsp;! Ton ticket<br />est enregistré</span>
+                </div>
+                <div className="winban-s">
+                  Laisse-nous tes coordonnées : <b>on te prévient si tu gagnes</b>.{multi && <> Et n&apos;oublie pas — d&apos;autres stations t&apos;attendent, <b>chacune = 1 ticket de plus</b>.</>}
+                </div>
+              </div>
+              <div className="grid2" style={{ marginBottom: 12 }}>
+                <div><label className="label">Prénom</label><input className="input" autoComplete="given-name" value={form.prenom} onChange={e => setForm(f => ({ ...f, prenom: e.target.value }))} />{errors.prenom && <div className="err">{errors.prenom}</div>}</div>
+                <div><label className="label">Nom</label><input className="input" autoComplete="family-name" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} />{errors.nom && <div className="err">{errors.nom}</div>}</div>
+              </div>
+              <div style={{ marginBottom: 12 }}><label className="label">Email</label><input className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e => { const v = e.target.value; setForm(f => ({ ...f, email: v })); if (emailKnown) setEmailKnown(null) }} onBlur={onEmailBlur} />{errors.email && <div className="err">{errors.email}</div>}
+                {emailKnown && (
+                  <div style={{ background: '#EEF2FF', border: '1px solid #3B5CC4', borderRadius: 12, padding: '10px 12px', marginTop: 8, color: '#23357a', fontSize: 13.5 }}>
+                    {emailKnown.alreadyPlayed
+                      ? <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''}&nbsp;! Tu as déjà joué cette station — tu gardes ton ticket.</>
+                      : <>Content de te revoir{emailKnown.prenom ? `, ${emailKnown.prenom}` : ''}&nbsp;! On a pré-rempli tes infos, vérifie et valide.</>}
+                  </div>
+                )}
+              </div>
+              <div style={{ marginBottom: 12 }}><label className="label">Téléphone</label><input className="input" type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e => setForm(f => ({ ...f, tel: e.target.value }))} />{errors.tel && <div className="err">{errors.tel}</div>}</div>
+              <div className="grid2" style={{ marginBottom: 12 }}>
+                <div><label className="label">Sexe</label><select className="input" value={form.sexe} onChange={e => setForm(f => ({ ...f, sexe: e.target.value }))}><option value="">—</option><option value="H">Homme</option><option value="F">Femme</option></select>{errors.sexe && <div className="err">{errors.sexe}</div>}</div>
+                <div><label className="label">Tranche d&apos;âge</label><select className="input" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))}>{AGE_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}</select>{errors.age && <div className="err">{errors.age}</div>}</div>
+              </div>
+              <div style={{ marginBottom: 12 }}><label className="label">Code postal</label><input className="input" inputMode="numeric" autoComplete="postal-code" placeholder="—" value={form.cp} onChange={e => setForm(f => ({ ...f, cp: e.target.value }))} />{errors.cp && <div className="err">{errors.cp}</div>}</div>
+              <div><label className="label label-strong">Tu nous as connus par…</label>
+                <div className="chips">{SRC.map(s => <span key={s} className={`chip${form.source === s ? ' sel' : ''}`} onClick={() => setSource(s)}><svg className="ic" style={{ width: 14, height: 14, marginRight: 3, verticalAlign: -2 }}><use href={`#${SRC_ICON[s]}`} /></svg>{s}</span>)}</div>
+              </div>
+              <div className={`rgpd rgpd-check${form.optin ? ' on' : ''}`} onClick={() => setForm(f => ({ ...f, optin: !f.optin }))} role="checkbox" aria-checked={form.optin} tabIndex={0}>
+                <span className="rc">{form.optin && <svg className="ic"><use href="#i-check" /></svg>}</span>
+                <div>{optinText(nom)}</div>
+              </div>
+              {errors.optin && <div className="err">{errors.optin}</div>}
+              <a className="btn" onClick={submitInscription}>{saving ? 'Enregistrement…' : 'Valider mon ticket →'}</a>
+            </div>
+          </section>
+        )}
+
+        {screen === 'quiz' && q && (
+          <section className="scr purple on">
+            {recoOpen && (
+              <div onClick={recoDismiss} style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 18, background: 'rgba(20,8,30,.55)', backdropFilter: 'blur(2px)' }}>
+                <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 320, background: '#fff', borderRadius: 20, padding: '22px 20px', boxShadow: '0 24px 60px rgba(20,8,40,.5)', textAlign: 'center' }}>
+                  {recoMode === 'ask' ? (
+                    <>
+                      <div style={{ width: 54, height: 54, margin: '0 auto 12px', borderRadius: 16, background: 'linear-gradient(135deg,#7C2D92,#E0218A)', display: 'grid', placeItems: 'center' }}>
+                        <svg viewBox="0 0 24 24" style={{ width: 26, height: 26, fill: 'none', stroke: '#fff', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                      </div>
+                      <div style={{ fontWeight: 800, fontSize: 19, color: '#23142c' }}>Déjà inscrit&nbsp;?</div>
+                      <div style={{ fontSize: 13, color: '#7a708a', margin: '8px 0 18px', lineHeight: 1.45 }}>Si tu as déjà joué une station, entre ton email&nbsp;: on garde tes infos et tes tickets.</div>
+                      <button onClick={() => { setRecoMode('email'); setRecoMsg(null) }} style={{ width: '100%', border: 'none', borderRadius: 13, padding: 14, fontFamily: 'inherit', fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: 'linear-gradient(90deg,#7C2D92,#E0218A)', boxShadow: '0 8px 20px rgba(224,33,138,.32)' }}>Oui, j&apos;ai déjà joué</button>
+                      <button onClick={recoDismiss} style={{ width: '100%', marginTop: 10, border: '1px solid #ece6f0', borderRadius: 13, padding: 13, fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#7a708a', cursor: 'pointer', background: '#fff' }}>Non, c&apos;est ma première fois</button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontWeight: 800, fontSize: 18, color: '#23142c', marginBottom: 12 }}>Ton email</div>
+                      <input type="email" inputMode="email" autoCapitalize="none" autoComplete="email" value={recoEmail} onChange={e => { setRecoEmail(e.target.value); if (recoMsg) setRecoMsg(null) }} placeholder="prenom@email.com" onKeyDown={e => { if (e.key === 'Enter') recoSubmitEmail() }} style={{ width: '100%', border: '1px solid #ece6f0', borderRadius: 12, padding: '13px 14px', fontSize: 15, fontFamily: 'inherit', outline: 'none', color: '#23142c' }} />
+                      {recoMsg && <div style={{ fontSize: 12.5, color: '#b4456e', marginTop: 8, lineHeight: 1.4 }}>{recoMsg}</div>}
+                      <button onClick={recoSubmitEmail} disabled={recoBusy} style={{ width: '100%', marginTop: 14, border: 'none', borderRadius: 13, padding: 14, fontFamily: 'inherit', fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: 'linear-gradient(90deg,#7C2D92,#E0218A)', boxShadow: '0 8px 20px rgba(224,33,138,.32)', opacity: recoBusy ? 0.7 : 1 }}>{recoBusy ? 'Recherche…' : 'Valider'}</button>
+                      <button onClick={recoDismiss} style={{ width: '100%', marginTop: 10, border: 'none', background: 'none', color: '#a99fb3', fontFamily: 'inherit', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Passer, je m&apos;inscris à la fin</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="pad">
+              <div className="dhead">
+                <div className="back" onClick={() => setScreen('onboard')}><svg className="ic"><use href="#i-arrowl" /></svg></div>
+                <div style={{ flex: 1 }}><div className="dtitle">{nom}</div><div className="dsub">Quiz · {qIdx + 1} / {questions.length}</div></div>
+                
+              </div>
+              <div className="progress">{questions.map((_, k) => <div key={k} className={`pstep${k <= qIdx ? ' on' : ''}`} />)}</div>
+              <div className="qcard">
+                <div className="qtxt">{q.texte}</div>
+                {q.options.map((opt, i) => {
+                  let cls = 'opt'
+                  if (answered) { if (i === q.bonne) cls = 'opt correct'; else if (i === selected) cls = 'opt wrong' }
+                  else if (i === selected) cls = 'opt sel'
+                  return <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={answered}>{opt}</button>
+                })}
+                {answered && (
+                  <div className="qexpl">
+                    {selected === q.bonne ? <b>Bonne réponse ✓</b> : <span>Bonne réponse : <b>{q.options[q.bonne]}</b></span>}
+                    {q.explication && <div style={{ marginTop: 6 }}>{q.explication}</div>}
+                  </div>
+                )}
+                {answered && (
+                  <button onClick={goNext} style={{ marginTop: 14, width: '100%', border: 'none', borderRadius: 14, padding: '15px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, color: '#fff', cursor: 'pointer', background: 'linear-gradient(90deg,var(--magenta2),var(--magenta))', boxShadow: '0 8px 20px rgba(224,33,138,.32)' }}>
+                    {qIdx + 1 < questions.length ? 'Question suivante →' : 'Voir mon résultat →'}
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {screen === 'resultats' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="res-head">
+              <div className="res-ico"><svg className="ic"><use href="#i-trophy" /></svg></div>
+              <div className="res-bravo disp">{quizPerfect ? 'Wow, super\u202f!' : (bonusDone ? 'Bravo\u202f!' : 'Il te reste une chance\u202f!')}</div>
+              <div className="res-sub">{quizPerfect ? 'Continue comme ça et cumule tes tickets\u202f!' : (bonusDone ? 'Ton ticket est validé pour le tirage' : 'Réponds au bonus juste en dessous et repars avec ton ticket')}</div>
+            </div>
+            <div className="res-body">
+              <div className="score-card">
+                <div className="score disp">{score}/{questions.length}</div>
+                <div className="score-line">
+                  {quizPerfect ? 'Sans faute — 1 ticket'
+                    : `${score}/${questions.length} — le bonus te donne quand même ton ticket`}
+                  {bonusDone && ' · +1 ticket bonus'}
+                </div>
+              </div>
+              {bonusQs.length > 0 && !bonusDone && !joueurHistory.bonusDone && (
+                <a className="cta cta-bonus" onClick={() => { setBonusIdx(0); setScreen('bonus') }}>
+                  <span className="cta-badge"><svg className="ic"><use href="#i-spark" /></svg></span><span className="cta-txt"><span className="cta-t">Rattrape ton ticket</span><span className="cta-sub">5 questions · 30 secondes chrono</span></span><span className="cta-go">›</span>
+                </a>
+              )}
+              {lotResume && <div className="infocard b-magenta"><svg className="ic"><use href="#i-gift" /></svg><div>Lot : <b>{lotResume}</b></div></div>}
+              <div className="infocard b-green"><svg className="ic"><use href="#i-checkc" /></svg><div>Participation enregistrée&#8239;!</div></div>
+              {quizPerfect && (
+                <div className="infocard b-magenta" style={{ flexDirection: 'column', gap: 4 }}>
+                  <div><b>Continue comme ça&#8239;!</b> Chaque action = +1 ticket :</div>
+                  <div style={{ fontSize: 13.5, color: '#52455e' }}>{multi && <>• Va dans les autres stations &nbsp;</>}• Réponds aux questions bonus &nbsp;• Parraine tes amis</div>
+                </div>
+              )}
+              <a className="btn" style={{ marginTop: 10 }} onClick={finaliser}>{saving ? 'Enregistrement…' : (recurrent ? (quizPerfect || bonusDone ? 'Voir mon ticket →' : 'Continuer →') : (quizPerfect || bonusDone ? 'Valider et recevoir mon ticket →' : 'Valider ma participation →'))}</a>
+            </div>
+          </section>
+        )}
+
+        {screen === 'bonus' && bonusQs[bonusIdx] && (
+          <section className="scr purple on">
+            <div className="pad">
+              <div className="dhead"><div className="back" onClick={() => setScreen('resultats')}><svg className="ic"><use href="#i-arrowl" /></svg></div><div style={{ flex: 1 }}><div className="dtitle">Bonus</div><div className="dsub">{bonusIdx + 1} / {bonusQs.length} · double tes chances</div></div></div>
+              <div className="qcard">
+                <div className="qtxt">{bonusQs[bonusIdx].label}</div>
+                {bonusQs[bonusIdx].options.map(opt => {
+                  const bq = bonusQs[bonusIdx]
+                  const ans = bonusAnswers[bq.id]
+                  const isSel = Array.isArray(ans) ? ans.includes(opt.val) : ans === opt.val
+                  return <button key={opt.val} className={`opt optb${isSel ? ' sel' : ''}`} onClick={() => setBonusAnswers(a => bq.type === 'multi'
+                    ? { ...a, [bq.id]: ((a[bq.id] as string[] | undefined) ?? []).includes(opt.val) ? (a[bq.id] as string[]).filter(v => v !== opt.val) : [...((a[bq.id] as string[] | undefined) ?? []), opt.val] }
+                    : { ...a, [bq.id]: opt.val })}>{opt.label}</button>
+                })}
+              </div>
+              <a className="btn" onClick={() => bonusIdx + 1 < bonusQs.length ? setBonusIdx(i => i + 1) : finishBonus()}>{bonusIdx + 1 < bonusQs.length ? 'Suivant →' : (saving ? 'Enregistrement…' : 'Terminer →')}</a>
+            </div>
+          </section>
+        )}
+
+        {screen === 'refusdigital' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="res-head">
+              <div className="res-ico"><svg className="ic"><use href="#i-map" /></svg></div>
+              <div className="res-bravo disp">Rends-toi sur le lieu pour jouer</div>
+              <div className="res-sub">Ce lien digital est reserve a ta premiere participation. Ton compte existe deja : pour rejouer, flashe le QR sur place.</div>
+            </div>
+            <div className="res-body padnav">
+              <a className="double" onClick={() => setScreen(multi ? 'carte' : 'partenaires')}><svg className="ic"><use href={multi ? '#i-map' : '#i-store'} /></svg> {multi ? 'Voir la carte des stations' : 'Voir nos partenaires'}</a>
+            </div>
+          </section>
+        )}
+        {screen === 'final' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="res-head">
+              <div className="res-ico"><svg className="ic"><use href="#i-checkc" /></svg></div>
+              <div className="res-bravo disp">{quizPerfect || bonusDone ? "C'est validé !" : 'Participation enregistrée'}</div>
+              <div className="res-sub">{saveError ? 'Ticket émis — sauvegarde en ligne à confirmer' : (quizPerfect || bonusDone ? 'Participation enregistrée pour le tirage' : 'Pas de ticket à cette station — réussis un sans-faute ou la question bonus')}</div>
+            </div>
+            <div className="res-body padnav">
+              {saveError && (
+                <div style={{ background: '#FFF4E5', border: '1px solid #F5B544', borderRadius: 12, padding: '12px 14px', margin: '0 0 14px', color: '#7a4d00', fontSize: 14, textAlign: 'left' }}>
+                  <b>Enregistrement non confirmé.</b> Ton ticket <b>{ticket || '—'}</b> n&apos;a pas pu être sauvegardé en ligne (réseau).
+                  <a onClick={retrySave} style={{ display: 'inline-block', marginTop: 8, fontWeight: 700, color: '#3B5CC4', cursor: 'pointer' }}>{saving ? 'Nouvelle tentative…' : 'Réessayer maintenant ↻'}</a>
+                </div>
+              )}
+              {gainImmediat && (
+                <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase', opacity: 0.9 }}>Gagné tout de suite</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, margin: '4px 0 6px' }}>{gainImmediat.lot}</div>
+                  {gainImmediat.conditions && <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 10 }}>{gainImmediat.conditions}</div>}
+                  <a href={`/lot.html?t=${encodeURIComponent(gainImmediat.retraitToken)}`} style={{ display: 'block', background: '#fff', color: '#7C2D92', borderRadius: 12, padding: '14px', fontWeight: 800, fontSize: 16, textDecoration: 'none' }}>Voir mon billet</a>
+                </div>
+              )}
+              {multi && (() => { const pc = STATIONS.filter(s => ndsPlayedToday(s.id)).length; const done = pc >= STATIONS.length; return (
+                <div style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', borderRadius: 16, padding: '16px', margin: '0 0 16px', color: '#fff', boxShadow: '0 8px 24px rgba(124,45,146,.35)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                    <div style={{ fontSize: 15, fontWeight: 800 }}>{pc} / {STATIONS.length} stations jouées</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}><svg className="ic" style={{ width: 15, height: 15 }}><use href="#i-ticket" /></svg>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</div>
+                  </div>
+                  <div style={{ height: 10, background: 'rgba(255,255,255,.25)', borderRadius: 999, overflow: 'hidden', marginBottom: 12 }}>
+                    <div style={{ height: '100%', width: `${Math.round(pc / STATIONS.length * 100)}%`, background: '#F5B544', borderRadius: 999, transition: 'width .6s ease' }} />
+                  </div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: done ? 0 : 12 }}>{done ? 'Toutes les stations jouées, bravo\u00a0!' : 'Flashe une autre station → +1 ticket, plus de chances au tirage'}</div>
+                  {!done && (
+                    <button onClick={() => { setScreen('carte'); setScanOpen(true) }} style={{ width: '100%', background: '#fff', color: '#7C2D92', border: 'none', borderRadius: 12, padding: '14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 16, cursor: 'pointer' }}>Scanner la prochaine station</button>
+                  )}
+                </div>
+              ); })()}
+              {!multi ? null : MB ? (() => { const faites = STATIONS.filter(s => ndsPlayedToday(s.id)).length; return (
+                <div className="coll" style={{ marginBottom: 14 }}>
+                  <div className="coll-h"><span className="coll-t">Autres stations</span><span className="coll-c">{faites} / {STATIONS.length}</span></div>
+                  <div className="coll-g">
+                    {STATIONS.map(st => { const on = ndsPlayedToday(st.id); return (
+                      <div key={st.id} className={`coll-b mbf${on ? ' on' : ''}`} title={st.ou} onClick={() => setScreen('carte')} style={{ cursor: 'pointer' }}>
+                        <svg className="ic"><use href={`#${st.icon}`} /></svg>
+                        <span className="coll-n">{st.nom}</span>
+                      </div>
+                    )})}
+                  </div>
+                </div>
+              ); })() : (
+                <>
+                  <div className="res-eyebrow">Joue les autres stations</div>
+                  <div className="nextcard">
+                    {STATIONS.filter(s => s.id !== evId).map(s => { const dn = ndsPlayedToday(s.id); return (
+                      <div className="nextline" key={s.id} onClick={() => setScreen('carte')} style={{ cursor: 'pointer' }}><span className={`em${dn ? '' : ' nds-mk-pulse'}`} style={{ background: dn ? '#F5B544' : '#16a34a' }}><svg className="ic"><use href={`#${dn ? 'i-checkc' : s.icon}`} /></svg></span><div><div className="nm">{s.nom}</div><div className="ou">{dn ? 'validée ✓' : s.ou}</div></div></div>
+                    )})}
+                  </div>
+                </>
+              )}
+              <div className="bnote" style={{ margin: '6px 4px 16px', textAlign: 'left' }}>{multi ? 'Chaque station jouée = 1 ticket de plus. ' : ''}{tirageTxt}.</div>
+              {multi && <a className="double" onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Carte &amp; autres stations</a>}
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Nos partenaires</span><span className="cta-sub">Découvre leurs offres et leurs lots</span></span><span className="cta-go">›</span></a>
+              {(form.email || recurrent?.email) && (
+                <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
+              )}
+              <a className="reslink" onClick={() => setScreen('profil')}>Mon profil &amp; mes tickets</a>
+            </div>
+          </section>
+        )}
+
+        {screen === 'tickets' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="pad padnav">
+              <div className="tk-hero">
+                <div className="tk-big">{ticketCount}</div>
+                <div className="tk-lbl">{ticketCount > 1 ? 'tickets cumulés' : 'ticket gagné'}</div>
+                <div className="tk-draw"><svg className="ic"><use href="#i-clock" /></svg> {tirageTxt}</div>
+              </div>
+              {(() => {
+                const total = STATIONS.length
+                const faites = STATIONS.filter(st => ndsPlayedToday(st.id)).length
+                const reste = Math.max(0, total - faites)
+                return (
+                  <div className="coll">
+                    <div className="coll-h">
+                      <span className="coll-t">Ma collection</span>
+                      <span className="coll-c">{faites} / {total}</span>
+                    </div>
+                    <div className="coll-g">
+                      {STATIONS.map(st => {
+                        const on = ndsPlayedToday(st.id)
+                        const fam = 'mbf'
+                        return (
+                          <div key={st.id} className={`coll-b ${fam}${on ? ' on' : ''}`} title={st.ou}>
+                            <svg className="ic"><use href={`#${st.icon}`} /></svg>
+                            <span className="coll-n">{st.nom}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className="coll-p">
+                      {reste > 0
+                        ? <>Plus tu joues, plus tu gagnes — encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à débloquer.</>
+                        : <>Collection complète — tu as le <b>maximum de chances</b> au tirage&nbsp;!</>}
+                    </div>
+                  </div>
+                )
+              })()}
+              {ticketCount < STATIONS.length * 2 && (
+                <>
+                  <div className="tk-tip" style={{ marginTop: 12 }}><svg className="ic"><use href="#i-layers" /></svg><div>Réponds aux quiz des autres stations : <b>chaque station = 1 ticket de plus</b> et plus de chances au tirage.</div></div>
+                  <a className="double" style={{ marginTop: 14 }} onClick={() => setScreen('carte')}><svg className="ic"><use href="#i-map" /></svg> Cumuler aux autres stations</a>
+                </>
+              )}
+              {ticketCount >= STATIONS.length * 2 && (
+                <div className="tk-tip" style={{ marginTop: 12, background: '#e9f9ef', borderColor: '#bbf7d0', color: '#16a34a' }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>Toutes les stations jouées !</b> Tu as le maximum de tickets pour le tirage.</div></div>
+              )}
+              {(form.email || recurrent?.email) && (
+                <a className="parrainbtn" onClick={shareParrainage}><svg className="ic"><use href="#i-ticket" /></svg> Parraine un ami &amp; gagne un ticket</a>
+              )}
+            </div>
+          </section>
+        )}
+
+        {screen === 'carte' && multi && (
+          <section className="scr carte" id="carteScr">
+            <div className="map-top">
+              <div className="qc">
+                <span className="em"><svg className="ic"><use href="#i-map" /></svg></span>
+                <div style={{ minWidth: 0 }}><div className="t">Les points de jeu</div><div className="s">Flashe le QR de chaque station pour cumuler tes tickets</div></div>
+                <span className="tk"><svg className="ic"><use href="#i-ticket" /></svg> {ticketCount}</span>
+              </div>
+            </div>
+            <div className="map-fake">
+              <div className="map-real" ref={mapRef} />
+              <div className="map-list">
+                {/* TODO master : bascule « chez les partenaires » a rebrancher sur les partenaires geolocalises de l'event. */}
+                <div className="map-switch">
+                  <button onClick={() => setMapView('stations')} className="on">Les stations</button>
+                </div>
+              </div>
+            </div>
+            {placeMode && (
+              <div style={{ position: 'absolute', left: 12, right: 12, bottom: 204, zIndex: 1200, background: '#1a1226', color: '#fff', borderRadius: 14, padding: '12px 14px', boxShadow: '0 10px 30px rgba(0,0,0,.4)' }}>
+                <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 6 }}>Mode placement — glisse les points sur la carte</div>
+                {STATIONS.map(st => { const g = geo[st.id]; return <div key={st.id} style={{ fontSize: 11.5, opacity: .85, fontVariantNumeric: 'tabular-nums' }}>{st.nom} : {(g ? g.lat : st.lat).toFixed(5)}, {(g ? g.lng : st.lng).toFixed(5)}</div> })}
+                <button onClick={() => { const out = STATIONS.map(st => { const g = geo[st.id]; return { id: st.id, lat: g ? +g.lat.toFixed(6) : st.lat, lng: g ? +g.lng.toFixed(6) : st.lng } }); try { navigator.clipboard.writeText(JSON.stringify(out)) } catch {} }} style={{ marginTop: 9, width: '100%', background: '#E0218A', border: 'none', color: '#fff', borderRadius: 10, padding: '10px 14px', fontFamily: 'inherit', fontWeight: 800, fontSize: 13, cursor: 'pointer' }}>Copier les positions</button>
+              </div>
+            )}
+            {scanTarget && (
+              <>
+                <div className="pt-dim2" onClick={() => setScanTarget(null)} />
+                <div className="pt-sheet2">
+                  {scanTarget.done ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 8 }}>
+                        <span style={{ width: 30, height: 30, borderRadius: '50%', background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 17, height: 17, color: '#fff' }}><use href="#i-checkc" /></svg></span>
+                        <div style={{ fontWeight: 800, fontSize: 18 }}>« {scanTarget.nom} » déjà jouée</div>
+                      </div>
+                      <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 14, background: '#e9f9ef', border: '1px solid #bbf7d0', borderRadius: 12, padding: '12px 14px' }}>Tu as déjà joué cette station aujourd&apos;hui. File vers une <b>autre station</b> pour gagner un ticket de plus au tirage&nbsp;!</div>
+                      {scanTarget.lat && scanTarget.lng ? (
+                        <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 0 }} onClick={() => logClicPartenaire(scanTarget.id || 'inconnu', 'maps', `https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`)}>
+                          <svg className="ic" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: -3 }}><use href="#i-map" /></svg>Y retourner (Maps)
+                        </a>
+                      ) : null}
+                      <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Fermer</a>
+                    </>
+                  ) : (
+                  <>
+                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: scanTarget.ou ? 2 : 6 }}>Direction « {scanTarget.nom} »</div>
+                  {scanTarget.ou ? (
+                    <div style={{ fontSize: 13.5, color: '#7a708a', fontWeight: 600, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-map" /></svg>{scanTarget.ou}</div>
+                  ) : null}
+                  {scanTarget.msg ? (
+                    <div style={{ fontSize: 14.5, color: '#1a1226', fontWeight: 700, lineHeight: 1.5, marginBottom: 12, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '12px 14px' }}>{scanTarget.msg}</div>
+                  ) : null}
+                  <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, marginBottom: 14 }}>Pour gagner <b>1 ticket de plus</b>, rends-toi à cette station et <b>flashe son QR code</b> sur place. Tu cumules un ticket à chaque station, toute la soirée.</div>
+                  <button className="btn" style={{ marginTop: 0 }} onClick={() => { setScanTarget(null); setScanOpen(true) }}>Flasher le QR maintenant</button>
+                  {scanTarget.lat && scanTarget.lng ? (
+                    <a className="btn-ghost" href={`https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`} target="_blank" rel="noreferrer" style={{ marginTop: 10 }} onClick={() => logClicPartenaire(scanTarget.id || 'inconnu', 'maps', `https://www.google.com/maps/dir/?api=1&destination=${scanTarget.lat},${scanTarget.lng}`)}>
+                      <svg className="ic" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
+                    </a>
+                  ) : null}
+                  <a className="reslink" style={{ display: 'block', textAlign: 'center', marginTop: 12, color: '#7a708a', fontWeight: 700, cursor: 'pointer' }} onClick={() => setScanTarget(null)}>Plus tard</a>
+                  </>
+                  )}
+                </div>
+              </>
+            )}
+            {fiche && (
+              <>
+                <div className="pt-dim2" onClick={() => setFiche(null)} />
+                <div className="pt-sheet2">
+                  <button onClick={() => setFiche(null)} aria-label="Fermer" style={{ position: 'absolute', top: 14, right: 16, background: '#f1edf5', border: 'none', color: '#1a1020', borderRadius: 999, width: 32, height: 32, fontSize: 18, cursor: 'pointer' }}>×</button>
+                  <PartnerLogo src={fiche.image_url} alt="" fallback={null} imgStyle={{ width: 92, height: 92, borderRadius: 18, objectFit: 'contain', background: '#fff', padding: 8, boxSizing: 'border-box', marginBottom: 12 }} />
+                  <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 8 }}>{fiche.nom}</div>
+                  {fiche.adresse || fiche.ville ? (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
+                      <svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0, marginTop: 2 }}><use href="#i-map" /></svg>
+                      <span><b style={{ color: '#1a1226' }}>Le lieu — </b>{[fiche.adresse, fiche.ville].filter(Boolean).join(', ')}</span>
+                    </div>
+                  ) : null}
+                  {(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const tel = pp?.tel; return tel ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: '#52455e', marginBottom: 10 }}>
+                      <svg className="ic" style={{ width: 15, height: 15, color: 'var(--magenta)', flexShrink: 0 }}><use href="#i-phone" /></svg>
+                      <span><b style={{ color: '#1a1226' }}>Tél — </b><a href={`tel:${tel}`} style={{ color: '#7C2D92', fontWeight: 700 }}>{tel}</a></span>
+                    </div>
+                  ) : null })()}
+                  {distanceTxt(fiche) && (
+                    <div style={{ fontSize: 13.5, color: '#6b6478', fontWeight: 700, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-map" /></svg>{distanceTxt(fiche)}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 14, color: '#1a1226', fontWeight: 600, lineHeight: 1.5, marginBottom: 10, background: '#f6f3fb', border: '1px solid #e7def0', borderRadius: 12, padding: '11px 13px' }}><b>Le jeu — </b>{`Flashe le QR sur place pour gagner +${fiche.tickets_par_scan || 1} ticket${(fiche.tickets_par_scan || 1) > 1 ? 's' : ''} pour le tirage.`}</div>
+                  {fiche.lot_resume ? (
+                    <div style={{ fontSize: 13.5, color: '#9A3412', lineHeight: 1.5, marginBottom: 12, background: '#FFF7ED', border: '1px solid #FBD9C2', borderRadius: 12, padding: '11px 13px' }}>
+                      <b>À gagner ici — </b>{fiche.lot_resume}
+                      {(fiche.lots_dispo || 0) > 0 && <span style={{ display: 'block', marginTop: 4, fontWeight: 800 }}>{fiche.lots_dispo} lot{(fiche.lots_dispo || 0) > 1 ? 's' : ''} encore à gagner au tirage</span>}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13.5, color: '#5B1E6B', lineHeight: 1.5, marginBottom: 12, background: '#F6F0FA', border: '1px solid #E7DAF0', borderRadius: 12, padding: '11px 13px' }}>
+                      <b>Double tes chances — </b>ici tu gagnes <b>2 tickets</b> d&apos;un coup. Plus de tickets, plus de chances de remporter <b>n&apos;importe lequel</b> des lots du grand tirage.
+                    </div>
+                  )}
+                  <a className="cta cta-shop" onClick={() => itineraire(fiche)}>
+                    <span className="cta-badge"><svg className="ic"><use href="#i-map" /></svg></span>
+                    <span className="cta-txt"><span className="cta-t">M&apos;y rendre</span><span className="cta-sub">Itinéraire à pied</span></span>
+                    <span className="cta-go">›</span>
+                  </a>
+{(() => { const pp = partenaires.find(p => p.id === fiche.id || p.nom === fiche.nom); const ls = pp && Array.isArray(pp.lots) ? pp.lots : []; return ls.length ? (
+  <div className="pt-lots" style={{ marginBottom: 12 }}>
+    <div className="pt-lots-h"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-gift" /></svg> Lots à gagner</div>
+    {ls.map((lot, li) => { const n = lot.gagnants ?? lot.quantite ?? 0; return (
+      <div className="pt-lot" key={lot.id || li}>
+        <div className="pt-lot-t">{lot.titre || lot.nom}</div>
+        {n > 0 ? <div className="pt-lot-q">{n} gagnant{n > 1 ? 's' : ''}</div> : null}
+        {lot.description ? <div className="pt-lot-d">{lot.description}</div> : null}
+      </div>
+    )})}
+  </div>
+) : null })()}
+                  {fiche.latitude && fiche.longitude ? (
+                    <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`} target="_blank" rel="noreferrer" style={{ marginTop: 0, marginBottom: 12 }} onClick={() => logClicPartenaire(fiche.id, 'maps', `https://www.google.com/maps/dir/?api=1&destination=${fiche.latitude},${fiche.longitude}`)}>
+                      <svg className="ic" style={{ width: 16, height: 16, marginRight: 7, verticalAlign: -3 }}><use href="#i-map" /></svg>Itinéraire (Maps)
+                    </a>
+                  ) : null}
+                  {fiche.promo_text ? <div style={{ background: '#fff4e6', color: '#c2410c', borderRadius: 12, padding: '10px 13px', fontWeight: 700, fontSize: 13.5, marginBottom: 12 }}>{fiche.promo_text}</div> : null}
+                  {fiche.site_web || fiche.instagram || fiche.facebook ? (
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {fiche.site_web ? <a className="reslink" href={fiche.site_web} onClick={() => logClicPartenaire(fiche.id, 'site_web', fiche.site_web)} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Site web</a> : null}
+                      {fiche.instagram ? <a className="reslink" href={fiche.instagram} onClick={() => logClicPartenaire(fiche.id, 'instagram', fiche.instagram)} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Instagram</a> : null}
+                      {fiche.facebook ? <a className="reslink" href={fiche.facebook} onClick={() => logClicPartenaire(fiche.id, 'facebook', fiche.facebook)} target="_blank" rel="noreferrer" style={{ color: '#7C2D92', fontWeight: 700 }}>Facebook</a> : null}
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            )}
+            {scanOpen && (
+              <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: '#000' }}>
+                <video ref={scanVideoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(180deg,rgba(0,0,0,.6),transparent)' }}>
+                  <span style={{ color: '#fff', fontWeight: 800, fontSize: 15 }}>Vise le QR de la station</span>
+                  <button onClick={() => setScanOpen(false)} style={{ background: 'rgba(255,255,255,.2)', border: 'none', color: '#fff', borderRadius: 999, width: 38, height: 38, fontSize: 20, cursor: 'pointer' }}>×</button>
+                </div>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 220, height: 220, border: '3px solid rgba(255,255,255,.9)', borderRadius: 24, boxShadow: '0 0 0 4000px rgba(0,0,0,.35)' }} />
+                {scanErr && (
+                  <div style={{ position: 'absolute', bottom: 40, left: 20, right: 20, background: '#fff', borderRadius: 16, padding: '16px', textAlign: 'center', fontSize: 14, color: '#1a1226' }}>
+                    Caméra indisponible ici. Ouvre l&apos;<b>appareil photo</b> de ton téléphone et vise le QR de la station : il ouvre le jeu automatiquement.
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {screen === 'partenaires' && (
+          <section className="scr" style={{ background: '#fff' }}>
+            <div className="pad padnav">
+              <div className="pt-hero">Nos partenaires</div>
+              <div className="pt-sub">Ils rendent ce jeu possible : découvre leurs offres et les lots qu’ils mettent en jeu.</div>
+              {partenaires.length === 0 && <div className="pt-banner"><svg className="ic"><use href="#i-store" /></svg><div>Espace partenaires — les partenaires de l&apos;événement s&apos;afficheront ici (logos, offres, réseaux).</div></div>}
+              <div className="pt-grid">
+                {partenaires.map((p, i) => (
+                  <div className="pt-card" key={p.id} style={{ position: 'relative' }} onClick={() => { logClicPartenaire(p.id, 'fiche', null); setSheetPart(i) }}>
+                    {preview && (
+                      <button
+                        aria-label={ndsIsFavori(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                        onClick={(e) => { e.stopPropagation(); toggleFav(p.id) }}
+                        style={{ position: 'absolute', top: 6, right: 6, zIndex: 2, width: 26, height: 26, border: 'none', borderRadius: '50%', background: 'rgba(255,255,255,.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,.15)', cursor: 'pointer' }}
+                      >
+                        <svg className="ic" style={{ width: 14, height: 14, color: ndsIsFavori(p.id) ? '#E0218A' : '#b8adc4' }}><use href={ndsIsFavori(p.id) ? '#i-heartf' : '#i-heart'} /></svg>
+                      </button>
+                    )}
+                    <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
+                    <div className="pt-nm">{p.nom}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {sheetPart !== null && partenaires[sheetPart] && (
+              <>
+                <div className="pt-dim2" onClick={() => setSheetPart(null)} />
+                <div className="pt-sheet2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 6 }}>
+                    <div className="pt-logo" style={{ margin: 0 }}><PartnerLogo src={partenaires[sheetPart].image_url} alt="" fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
+                    <div><div style={{ fontWeight: 800, fontSize: 19 }}>{partenaires[sheetPart].nom}</div>{partenaires[sheetPart].promo_text && <div style={{ fontSize: 13, color: '#7a708a' }}>{partenaires[sheetPart].promo_text}</div>}</div>
+                  </div>
+                  {partenaires[sheetPart].description && <div style={{ fontSize: 14, color: '#52455e', lineHeight: 1.5, margin: '8px 0' }}>{partenaires[sheetPart].description}</div>}
+                  {Array.isArray(partenaires[sheetPart].lots) && partenaires[sheetPart].lots!.length > 0 && (
+                    <div className="pt-lots">
+                      <div className="pt-lots-h"><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-gift" /></svg> Lots à gagner</div>
+                      {partenaires[sheetPart].lots!.map((lot, li) => {
+                        const n = lot.gagnants ?? lot.quantite ?? 0
+                        return (
+                          <div className="pt-lot" key={lot.id || li}>
+                            <div className="pt-lot-t">{lot.titre || lot.nom}</div>
+                            {n > 0 ? <div className="pt-lot-q">{n} gagnant{n > 1 ? 's' : ''}</div> : null}
+                            {lot.description ? <div className="pt-lot-d">{lot.description}</div> : null}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {(partenaires[sheetPart].site_web || partenaires[sheetPart].url) && <a className="sh-row" href={partenaires[sheetPart].site_web || partenaires[sheetPart].url || '#'} target="_blank" rel="noopener noreferrer" onClick={() => logClicPartenaire(partenaires[sheetPart].id, 'site_web', partenaires[sheetPart].site_web || partenaires[sheetPart].url || null)}><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-store" /></svg> Site web</a>}
+                  {partenaires[sheetPart].instagram && <a className="sh-row" href={partenaires[sheetPart].instagram!} target="_blank" rel="noopener noreferrer" onClick={() => logClicPartenaire(partenaires[sheetPart].id, 'instagram', partenaires[sheetPart].instagram || null)}><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-insta" /></svg> Instagram</a>}
+                  {partenaires[sheetPart].facebook && <a className="sh-row" href={partenaires[sheetPart].facebook!} target="_blank" rel="noopener noreferrer" onClick={() => logClicPartenaire(partenaires[sheetPart].id, 'facebook', partenaires[sheetPart].facebook || null)}><svg className="ic" style={{ width: 16, height: 16 }}><use href="#i-fb" /></svg> Facebook</a>}
+                  <a className="btn" style={{ marginTop: 16 }} onClick={() => setSheetPart(null)}>Fermer</a>
+                </div>
+              </>
+            )}
+          </section>
+        )}
+
+        {screen === 'profil' && (
+          <section className="scr on" style={{ background: '#fff' }}>
+            <div className="pad padnav">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 16 }}>
+                <span style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,var(--purple),var(--magenta))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg className="ic" style={{ width: 28, height: 28, color: '#fff' }}><use href="#i-user" /></svg></span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1226' }}>{form.prenom || recurrent?.prenom || 'Mon profil'}</div>
+                  <div style={{ fontSize: 13, color: '#7a708a' }}>{form.email || recurrent?.email || (nom ? `Participant · ${nom}` : 'Participant')}</div>
+                </div>
+              </div>
+
+              {MB && (
+                <div style={{ display: 'flex', gap: 6, background: '#f3eef7', borderRadius: 12, padding: 4, marginBottom: 16 }}>
+                  {([['tickets', 'Mes tickets'], ['infos', 'Mes coordonnées'], ...(preview ? [['favoris', 'Mes favoris'] as const] : [])] as const).map(([k, lb]) => (
+                    <button key={k} onClick={() => setProfilTab(k)} style={{ flex: 1, border: 'none', borderRadius: 9, padding: '9px', fontFamily: 'inherit', fontWeight: 800, fontSize: 13, cursor: 'pointer', background: profilTab === k ? '#fff' : 'transparent', color: profilTab === k ? '#7C2D92' : '#7a708a', boxShadow: profilTab === k ? '0 1px 4px rgba(124,45,146,.15)' : 'none' }}>{lb}</button>
+                  ))}
+                </div>
+              )}
+
+              {(!MB || profilTab === 'tickets') && (() => {
+                const total = STATIONS.length
+                const faites = STATIONS.filter(st => ndsPlayedToday(st.id)).length
+                const reste = Math.max(0, total - faites)
+                return (
+                  <>
+                    <div className="hero">
+                      <div className="hero-n">{ticketCount || 0}</div>
+                      <div className="hero-l">{(ticketCount || 0) > 1 ? 'tickets pour le tirage' : 'ticket pour le tirage'}</div>
+                      {multi && <><div className="hero-bar">
+                        {Array.from({ length: total }).map((_, k) => (<div key={k} className={`hero-seg${k < faites ? ' on' : ''}`} />))}
+                      </div>
+                      <div className="hero-p">{reste > 0 ? <>Encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à scanner pour maximiser tes chances</> : <>Toutes les stations jouées — tu as le <b>maximum de chances</b> !</>}</div></>}
+                    </div>
+                    {MB && multi && (
+                      <div className="coll" style={{ marginTop: 14 }}>
+                        <div className="coll-h"><span className="coll-t">Mes stations</span><span className="coll-c">{faites} / {total}</span></div>
+                        <div className="coll-g">
+                          {STATIONS.map(st => { const on = ndsPlayedToday(st.id); return (
+                            <div key={st.id} className={`coll-b mbf${on ? ' on' : ''}`} title={st.ou}><svg className="ic"><use href={`#${st.icon}`} /></svg><span className="coll-n">{st.nom}</span></div>
+                          )})}
+                        </div>
+                        <div className="coll-p">{reste > 0 ? <>Encore <b>{reste} station{reste > 1 ? 's' : ''}</b> à débloquer pour plus de tickets.</> : <>Toutes les stations faites — <b>maximum de chances</b> !</>}</div>
+                      </div>
+                    )}
+                    <div className="infocard b-green" style={{ marginTop: MB ? 12 : 10 }}><svg className="ic"><use href="#i-checkc" /></svg><div><b>{ticketCount} ticket{ticketCount > 1 ? 's' : ''}</b> pour le tirage{multi ? ' · cumul sur toutes les stations' : ''}</div></div>
+                  </>
+                )
+              })()}
+
+              {(!MB || profilTab === 'infos') && (
+                <>
+                  {MB && (
+                    <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 4 }}>
+                      <div className="coll-t" style={{ marginBottom: 10 }}>Mes coordonnées</div>
+                      {([['Prénom', form.prenom || recurrent?.prenom], ['Email', form.email || recurrent?.email], ['Téléphone', form.tel]] as const).map(([lb, val]) => (
+                        <div key={lb} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderBottom: '1px solid #ece6f3', fontSize: 13.5 }}>
+                          <span style={{ color: '#7a708a', fontWeight: 600 }}>{lb}</span>
+                          <span style={{ color: '#1a1226', fontWeight: 700, textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{val || '—'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ background: '#f7f4fb', border: '1px solid #ece6f3', borderRadius: 14, padding: '14px 15px', marginTop: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, fontWeight: 800, color: '#1a1226', marginBottom: 6 }}>
+                      <svg className="ic" style={{ width: 17, height: 17, color: 'var(--magenta)' }}><use href="#i-spark" /></svg>
+                      Tu restes informé
+                    </div>
+                    <div style={{ fontSize: 13, color: '#52455e', lineHeight: 1.5 }}>Tu recevras les infos de {nom || "l'organisateur"}, les offres et nouveautés des partenaires. Désinscription à tout moment.</div>
+                  </div>
+                </>
+              )}
+
+              {preview && profilTab === 'favoris' && (() => {
+                const favs = partenaires.filter(p => ndsIsFavori(p.id))
+                return (
+                  <div key={favTick}>
+                    {favs.length === 0 ? (
+                      <div className="infocard" style={{ marginTop: 4 }}>
+                        <svg className="ic"><use href="#i-heart" /></svg>
+                        <div>Touche le cœur sur une fiche partenaire pour l&apos;ajouter ici.</div>
+                      </div>
+                    ) : (
+                      <div className="pt-grid" style={{ marginTop: 4 }}>
+                        {favs.map((p, i) => (
+                          <div className="pt-card" key={p.id} style={{ position: 'relative' }} onClick={() => { const idx = partenaires.findIndex(x => x.id === p.id); logClicPartenaire(p.id, 'fiche', null); setSheetPart(idx) }}>
+                            <button
+                              aria-label="Retirer des favoris"
+                              onClick={(e) => { e.stopPropagation(); toggleFav(p.id) }}
+                              style={{ position: 'absolute', top: 6, right: 6, zIndex: 2, width: 26, height: 26, border: 'none', borderRadius: '50%', background: 'rgba(255,255,255,.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 6px rgba(0,0,0,.15)', cursor: 'pointer' }}
+                            >
+                              <svg className="ic" style={{ width: 14, height: 14, color: '#E0218A' }}><use href="#i-heartf" /></svg>
+                            </button>
+                            <div className="pt-logo"><PartnerLogo src={p.image_url} alt={p.nom} fallback={<svg className="ic"><use href="#i-store" /></svg>} imgStyle={{ width: '100%', height: '100%', objectFit: 'contain' }} /></div>
+                            <div className="pt-nm">{p.nom}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
+              <div className="res-eyebrow" style={{ marginTop: 20 }}>Accès rapides</div>
+              <a className="cta cta-shop" onClick={() => setScreen('partenaires')}><span className="cta-badge"><svg className="ic"><use href="#i-store" /></svg></span><span className="cta-txt"><span className="cta-t">Nos partenaires</span><span className="cta-sub">Découvre leurs offres et leurs lots</span></span><span className="cta-go">›</span></a>
+              {multi && <a className="double" onClick={() => setScreen('carte')} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-map" /></svg> La carte des stations</a>}
+              {preview && <a className="double" onClick={shareParrainage} style={{ marginTop: 10 }}><svg className="ic"><use href="#i-share" /></svg> Partager &amp; gagner un ticket</a>}
+            </div>
+          </section>
+        )}
+
+        {bandOn && (
+          <div className="botdock">
+            {screen !== 'tickets' && partnerBand}
+            {navOn && (
+            <nav className="nav on" id="nav">
+              <button className={`nb${screen === 'profil' ? ' on' : ''}`} onClick={() => nb('profil')}><svg className="ic"><use href="#i-user" /></svg>Profil</button>
+              {multi && <button className={`nb${screen === 'carte' ? ' on' : ''}`} onClick={() => nb('carte')}><svg className="ic"><use href="#i-map" /></svg>Carte</button>}
+              {multi && <button onClick={() => { setScreen('carte'); setScanOpen(true) }} aria-label="Scanner une station" style={{ background: 'linear-gradient(135deg,#7C2D92,#E0218A)', color: '#fff', border: 'none', borderRadius: 16, padding: '9px 6px 6px', fontFamily: 'inherit', fontWeight: 800, fontSize: 11, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, boxShadow: '0 6px 16px rgba(224,33,138,.5)', transform: 'translateY(-10px)', minWidth: 62 }}><svg className="ic" style={{ width: 22, height: 22 }}><use href="#i-scan" /></svg>Scanner</button>}
+              {!MB && <button className={`nb${screen === 'tickets' ? ' on' : ''}`} onClick={() => nb('tickets')}><svg className="ic"><use href="#i-ticket" /></svg>Tickets</button>}
+              <button className={`nb${screen === 'partenaires' ? ' on' : ''}`} onClick={() => nb('partenaires')}><svg className="ic"><use href="#i-store" /></svg>Partenaires</button>
+            </nav>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
