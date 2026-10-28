@@ -83,7 +83,48 @@ function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Landing |
   )
 }
 
+function OrdiApercu({ landing, onPrev, onNext, position }: { landing: Landing | null; onPrev: () => void; onNext: () => void; position: string }) {
+  const DW = 1280, DH = 800, W = 720, SCALE = W / DW, H = Math.round(DH * SCALE)
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, maxWidth: '100%' }}>
+      <button className="sa-btn icon" onClick={onPrev} disabled={!landing} aria-label="Landing précédente" style={{ fontSize: 18 }}>‹</button>
+      <div style={{ width: W, maxWidth: 'calc(100vw - 120px)', flexShrink: 1 }}>
+        <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--sa-border)', boxShadow: '0 20px 50px rgba(15,23,42,.18)', background: '#fff' }}>
+          <div style={{ height: 22, background: '#E2E8F0', display: 'flex', alignItems: 'center', gap: 5, padding: '0 9px' }}>
+            <span style={{ width: 8, height: 8, borderRadius: 4, background: '#F87171' }} />
+            <span style={{ width: 8, height: 8, borderRadius: 4, background: '#FBBF24' }} />
+            <span style={{ width: 8, height: 8, borderRadius: 4, background: '#34D399' }} />
+          </div>
+          <div style={{ width: W, height: H, position: 'relative', overflow: 'hidden' }}>
+            {landing?.deploy_url ? (
+              <iframe
+                key={landing.id}
+                src={landing.deploy_url}
+                title={`Aperçu ordinateur — ${landing.nom ?? landing.id}`}
+                loading="lazy"
+                style={{ width: DW, height: DH, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left' }}
+              />
+            ) : (
+              <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#64748B', fontSize: 13 }}>
+                Aucune landing avec URL de déploiement à prévisualiser.
+              </div>
+            )}
+          </div>
+        </div>
+        {landing && (
+          <div style={{ textAlign: 'center', marginTop: 10 }}>
+            <div style={{ fontWeight: 800, fontSize: 13 }}>{landing.nom ?? landing.id}</div>
+            <div className="sa-muted" style={{ fontSize: 11, marginTop: 2 }}>{position}</div>
+          </div>
+        )}
+      </div>
+      <button className="sa-btn icon" onClick={onNext} disabled={!landing} aria-label="Landing suivante" style={{ fontSize: 18 }}>›</button>
+    </div>
+  )
+}
+
 export default function Page() {
+  const [vue, setVue] = useState<'tel' | 'ordi'>('tel')
   const [list, setList] = useState<Landing[]>([])
   const [charge, setCharge] = useState(true)
   const [q, setQ] = useState('')
@@ -127,12 +168,30 @@ export default function Page() {
 
       {!charge && avecUrl.length > 0 && (
         <div style={{ background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <PhoneApercu
-            landing={courant}
-            onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
-            onNext={() => setIdx(i => (i + 1) % avecUrl.length)}
-            position={`${idx + 1} / ${avecUrl.length}${courant?.id.startsWith('pg-') ? ' · page de référence' : ' · landing gérée'}`}
-          />
+          <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+            <button className="sa-btn" onClick={() => setVue('tel')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'tel' ? 'var(--sa-accent)' : undefined, color: vue === 'tel' ? '#fff' : undefined }}>📱 Téléphone</button>
+            <button className="sa-btn" onClick={() => setVue('ordi')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'ordi' ? 'var(--sa-accent)' : undefined, color: vue === 'ordi' ? '#fff' : undefined }}>💻 Ordinateur</button>
+          </div>
+          {vue === 'tel' ? (
+            <PhoneApercu
+              landing={courant}
+              onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
+              onNext={() => setIdx(i => (i + 1) % avecUrl.length)}
+              position={`${idx + 1} / ${avecUrl.length}${courant?.id.startsWith('pg-') ? ' · page de référence' : ' · landing gérée'}`}
+            />
+          ) : (
+            <OrdiApercu
+              landing={courant}
+              onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
+              onNext={() => setIdx(i => (i + 1) % avecUrl.length)}
+              position={`${idx + 1} / ${avecUrl.length}${courant?.id.startsWith('pg-') ? ' · page de référence' : ' · landing gérée'}`}
+            />
+          )}
+          {courant?.deploy_url && (
+            <a href={courant.deploy_url} target="_blank" rel="noopener noreferrer" className="sa-btn" style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', marginTop: 4 }}>
+              Ouvrir cette page en plein écran ↗
+            </a>
+          )}
         </div>
       )}
 
