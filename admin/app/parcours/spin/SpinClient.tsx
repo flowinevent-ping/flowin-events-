@@ -1,17 +1,19 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
-import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
-import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
+import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
 import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
+import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'ticket' | 'already'
+type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Segment { label: string; color: string; perdant?: boolean; stock?: number; mode?: 'immediat' | 'tirage' | 'voisin' }
 interface Props extends ParcoursPageData { evId: string }
 
@@ -24,6 +26,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const lsKey = `flowin_played_${evId}`
   const isBtob = (ev?.client_type === 'btob')
   const SECTEURS = ['Commerçant','Restaurateur','Exposant','Organisateur','Entreprise','Association','Collectivité','Autre']
+  const theme = resolveParcoursTheme('spin', ev?.cfg)
 
   const [screen, setScreen] = useState<Screen>('landing')
   /* Referentiel 8 : gain immediat attribue par la regle de l event. */
@@ -36,6 +39,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [ticket, setTicket] = useState('')
   const [existingTicket, setExistingTicket] = useState('')
+  const [partIdx, setPartIdx] = useState(0)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const confettiRef = useRef<HTMLCanvasElement>(null)
 
@@ -215,7 +219,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
   /* Navigation postMessage — flèches dashboard SA */
   useEffect(() => {
-    const NAV_SCREENS: Screen[] = ['landing', 'spin', 'result', 'form', 'ticket', 'already']
+    const NAV_SCREENS: Screen[] = ['landing', 'spin', 'result', 'form', 'partenaires', 'ticket', 'already']
     function onMsg(e: MessageEvent) {
       if (!e.data || !e.data.flowinNav) return
       setScreen(cur => {
@@ -230,23 +234,21 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   }, [])
 
   return (
-    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
+    <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
       <style>{parcoursCSS(c)}</style>
 
       {screen === 'landing' && (
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <div className="parc-logo-halo">
-            <i className="ti ti-rotate-clockwise" style={{ fontSize:44,color:c }} aria-hidden="true" />
-          </div>
+          <ParcoursLogo emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl} />
           <div style={{ fontSize:24,fontWeight:900,marginBottom:8 }}>{nom}</div>
-          <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string)||'Tentez votre chance !'}</div>
+          <div style={{ fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{(cfg.subtitle as string) || theme.texts.landingSubtitle || 'Tentez votre chance !'}</div>
           {tirageText && (
             <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'center',gap:6 }}>
               <i className="ti ti-calendar" style={{ fontSize:14 }} aria-hidden="true" />{tirageText}
             </div>
           )}
           <button className="btn" onClick={()=>setScreen('spin')}>
-            <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />Faire tourner la roue →
+            <i className="ti ti-rotate-clockwise" style={{ marginRight:6 }} aria-hidden="true" />{theme.texts.ctaLanding || 'Faire tourner la roue'} →
           </button>
           <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
           {partenaires.length > 0 && (
@@ -338,24 +340,21 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           ) : (
             <ParcoursChampsStandard form={form} setForm={setForm} />
           )}
-          <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
-          <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
+          <div className="rgpd"><div className="rgpd-check" /><div>{RGPD_TEXT}</div></div>
+          <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'Valider →'}</button>
         </div>
       )}
 
       {screen === 'partenaires' && (
         <div className="screen">
-          <div className="header"><div className="back" onClick={()=>setScreen('landing')}>←</div><div className="title">Nos partenaires</div></div>
-          <div className="grid2" style={{ marginBottom:16 }}>{partenaires.map((p,i)=><div key={p.id} className="part-tile" onClick={()=>{}}>{p.image_url?<img src={p.image_url} alt={p.nom} style={{width:52,height:52,objectFit:'contain',borderRadius:8,display:'block',margin:'0 auto 6px'}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />:p.emoji?<div style={{fontSize:32,marginBottom:6}}>{p.emoji}</div>:<div style={{fontSize:28,marginBottom:6,color:c}}><i className="ti ti-users" aria-hidden="true"/></div>}<div style={{fontSize:11,fontWeight:700}}>{p.nom}</div></div>)}</div>
-          {existingTicket ? (
-            <button className="btn" style={{background:'rgba(34,197,94,.15)',border:'2px solid #22C55E',color:'#4ADE80'}}
-              onClick={()=>setScreen('already')}>
-              <i className="ti ti-check" style={{ marginRight:6 }} aria-hidden="true" />Déjà joué · revoir mon ticket
-            </button>
-          ) : (
-            <button className="btn" onClick={()=>setScreen('spin')}>Jouer →</button>
-          )}
+          <div className="header"><div><div className="title">Nos partenaires</div><div className="sub">{nom}</div></div></div>
+          <ParcoursPartenairesGrid partenaires={partenaires} onSelect={i => { setPartIdx(i); setScreen('partSheet') }} />
+          <button className="btn-ghost" onClick={() => setScreen('landing')}>Retour</button>
         </div>
+      )}
+
+      {screen === 'partSheet' && partenaires[partIdx] && (
+        <ParcoursPartenaireSheet p={partenaires[partIdx]} onClose={() => setScreen('partenaires')} />
       )}
 
       {(screen === 'ticket' || screen === 'already') && (() => {
@@ -378,7 +377,6 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           <div style={{ position:'relative',zIndex:10,width:'88%',maxWidth:360,borderRadius:18,overflow:'hidden',border:'2px solid #14B8A6',boxShadow:'0 0 40px rgba(20,184,166,.5),0 12px 48px rgba(0,0,0,.6)',background:'#071620' }}>
             <div style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',padding:'12px 0',fontSize:14,fontWeight:900,letterSpacing:3,color:'#fff' }}>{won ? '✦ FÉLICITATIONS ✦' : '✦ MERCI D’AVOIR JOUÉ ✦'}</div>
             <div style={{ padding:'22px 20px 26px' }}>
-              <div style={{ fontSize:46,marginBottom:10 }}>{won ? '🥳' : '🎡'}</div>
               {won && <div style={{ fontSize:11,fontWeight:800,letterSpacing:2,color:'#2DD4BF',marginBottom:4 }}>VOUS AVEZ GAGNÉ</div>}
               <div style={{ fontSize:26,fontWeight:900,color:'#fff',marginBottom:18,textTransform:'uppercase' }}>{form.prenom||'Vous'}</div>
               {won ? (
@@ -395,7 +393,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               ) : (
                 <>
                   {gain && <ParcoursOutro gain={gain} />}
-                  <a href="tel:0616354936" className="btn" style={{ display:'block',textDecoration:'none',background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'13px 0',width:'82%',margin:'0 auto',fontWeight:900,letterSpacing:1,color:'#fff' }}>📞 Contactez-nous</a>
+                  <a href="tel:0616354936" className="btn" style={{ display:'block',textDecoration:'none',background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',border:'none',borderRadius:100,padding:'13px 0',width:'82%',margin:'0 auto',fontWeight:900,letterSpacing:1,color:'#fff' }}>Contactez-nous</a>
                   <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'10px auto 0',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'rgba(255,255,255,.7)',cursor:'pointer' }} onClick={()=>{ if (evId === 'ev-flowin-demo') { window.location.href = '/landing' } else { setScreen('landing') } }}>← Retour à l&apos;accueil</button>
                 </>
               )}
