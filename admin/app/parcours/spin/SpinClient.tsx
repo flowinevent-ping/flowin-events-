@@ -2,11 +2,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
+import { buildInviteLink, getParrainageRecu } from '@/lib/parrainage'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
@@ -14,7 +15,7 @@ import type { ParcoursPageData } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
+type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already' | 'refusdigital'
 interface Segment { label: string; color: string; perdant?: boolean; stock?: number; mode?: 'immediat' | 'tirage' | 'voisin' }
 interface Props extends ParcoursPageData { evId: string }
 
@@ -47,10 +48,21 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const [ticket, setTicket] = useState('')
   const [existingTicket, setExistingTicket] = useState('')
   const [partIdx, setPartIdx] = useState(0)
+  const [parrainRecu, setParrainRecu] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const confettiRef = useRef<HTMLCanvasElement>(null)
 
-  useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
+  /* Accès roulette réservé au QR physique (Romain, 28/10) : contrairement à
+     l'anti-fraude générique (QuizClient), qui ne bloque que le REJEU d'un
+     joueur déjà reconnu, ici tout arrivant via un lien réseaux/digital
+     (?source=reseaux-*) est bloqué, même pour une première visite — la roue
+     ne doit tourner qu'après un flash QR sur place. */
+  useEffect(() => {
+    try {
+      if (isDigitalLinkSource()) { setScreen('refusdigital'); return }
+      const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') }
+    } catch {}
+  }, [lsKey])
   useParcoursTracking('spin', evId, screen)
 
   /* Bloc 2 — compte déjà créé : on saute le formulaire et on attribue directement */
@@ -224,9 +236,37 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   }
 
 
+  /* Parrainage AVEC récompense (Spin fait partie des 3 modules à récompense,
+     comme Quiz/Tombola — contrairement à Vote qui est share-only). Même
+     mécanique que QuizClient.tsx : lib/parrainage.ts est déjà générique
+     (captureParrainage déjà appelé par writeJoueur/claimJoueur ci-dessus),
+     il ne manquait que le bouton de partage. */
+  const shareParrainage = async () => {
+    const email = (form.email || getJoueurLocal()?.email || '').trim().toLowerCase()
+    if (!email.includes('@')) return
+    const extId = 'j-sp-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
+    const link = buildInviteLink(`/parcours/spin?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
+    const txt = `Je joue à ${nom} 🎟️ Rejoins-moi, joue et tente de gagner ! ${link}`
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
+      else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
+    } catch { /* annule */ }
+  }
+
+  /* Historique côté filleul (Romain, 28/10) : si CE joueur a lui-même rejoint
+     via un lien de parrainage, on l'affiche sur son propre écran ticket —
+     lecture seule sur `parrainage`, voir lib/parrainage.ts. */
+  useEffect(() => {
+    if (screen !== 'ticket' && screen !== 'already') return
+    const email = (form.email || getJoueurLocal()?.email || '').trim().toLowerCase()
+    if (!email.includes('@')) return
+    const extId = 'j-sp-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
+    getParrainageRecu(extId).then(r => { if (r) setParrainRecu(r.ts) })
+  }, [screen])
+
   /* Navigation postMessage — flèches dashboard SA */
   useEffect(() => {
-    const NAV_SCREENS: Screen[] = ['landing', 'spin', 'result', 'form', 'partenaires', 'ticket', 'already']
+    const NAV_SCREENS: Screen[] = ['landing', 'spin', 'result', 'form', 'partenaires', 'ticket', 'already', 'refusdigital']
     function onMsg(e: MessageEvent) {
       if (!e.data || !e.data.flowinNav) return
       setScreen(cur => {
@@ -402,6 +442,12 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
                 <div style={{ fontSize:13,color:'rgba(255,255,255,.65)',marginBottom:16 }}>Votre participation est enregistrée.</div>
               )}
               <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
+              {parrainRecu && (
+                <div style={{ fontSize:11,fontWeight:700,color:'#2DD4BF',marginBottom:14 }}>🎉 Tu as rejoint grâce au parrainage d&apos;un ami</div>
+              )}
+              {(form.email || getJoueurLocal()?.email) && (
+                <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'0 auto 12px',background:'transparent',border:'1px solid rgba(45,212,191,.35)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'#2DD4BF',cursor:'pointer' }} onClick={shareParrainage}>Parraine un ami &amp; gagne un tour</button>
+              )}
               {ev?.super_event_id ? (
                 <ParcoursOutro superEventId={ev.super_event_id} gain={gain} />
               ) : (
@@ -422,6 +468,12 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
         </div>
         )
       })()}
+
+      {screen === 'refusdigital' && (
+        <div className="pc-stage">
+          <ParcoursRefusDigital superEventId={ev?.super_event_id} />
+        </div>
+      )}
     </div>
   )
 }
