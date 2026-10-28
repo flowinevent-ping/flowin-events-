@@ -137,7 +137,32 @@ export function ParcoursHowTo({ steps }: { steps: HowToStep[] }) {
   )
 }
 
-/** CSS partagé des 4 pièces ci-dessus, à concaténer après `parcoursCSS(c)`
+export interface RegleJeu { titre: string; texte: string }
+
+/** Carte claire "Les règles du jeu" — en plus de "Comment jouer ?" (qui dit
+ *  le geste), celle-ci dit la mécanique de gain : propre à chaque module,
+ *  jamais le texte du quiz recopié sur les 4 autres (Romain, 28/10). */
+export function ParcoursRegles({ regles }: { regles: RegleJeu[] }) {
+  if (!regles.length) return null
+  return (
+    <div className="pc-regles">
+      <div className="pc-regles-title">Les règles du jeu</div>
+      <div className="pc-regles-card">
+        {regles.map((r, i) => (
+          <div key={i} className="pc-regles-row">
+            <span className="pc-regles-dot" aria-hidden="true" />
+            <div>
+              <div className="pc-regles-h">{r.titre}</div>
+              <div className="pc-regles-t">{r.texte}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** CSS partagé des 5 pièces ci-dessus, à concaténer après `parcoursCSS(c)`
  *  dans le `<style>` de chaque module. Valeurs recopiées à la main depuis le
  *  niveau générique (non `.ndsbody`) de nds2026Design.ts. */
 export const PARCOURS_HERO_CSS = `
@@ -169,4 +194,13 @@ export const PARCOURS_HERO_CSS = `
   .pc-howto-txt{font-size:13.5px;color:#52455e;line-height:1.3}
   .pc-howto-txt b{color:#1a1226}
   .pc-howto-sub{font-size:12.5px;opacity:.85}
+
+  .pc-regles{margin:14px 18px 0}
+  .pc-regles-title{text-align:center;font-size:17px;font-weight:800;color:#1a1226;margin-bottom:10px}
+  .pc-regles-card{background:#faf7fd;border:1px solid #ece7f2;border-radius:16px;padding:13px 16px;box-shadow:0 8px 22px rgba(30,16,46,.10)}
+  .pc-regles-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(26,18,38,.06)}
+  .pc-regles-row:last-child{border-bottom:none}
+  .pc-regles-dot{width:7px;height:7px;border-radius:50%;background:#E0218A;flex-shrink:0;margin-top:6px}
+  .pc-regles-h{font-size:13.5px;font-weight:800;color:#1a1226}
+  .pc-regles-t{font-size:12.5px;color:#52455e;line-height:1.4;margin-top:2px}
 `
