@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react'
 import { generateTicket } from '@/lib/ticket'
 import { getJoueurLocal, claimJoueur, writeJoueur, RGPD_TEXT } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
+import { buildInviteLink } from '@/lib/parrainage'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
+type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already' | 'refusdigital'
 
 /* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
 const TOMBOLA_STEPS = [
@@ -51,8 +52,13 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const theme = resolveParcoursTheme('tombola', ev?.cfg)
 
   const lsKey = `flowin_played_${evId}`
+  /* Anti-fraude "lien digital" avant le check "déjà joué" : un joueur reconnu
+     sur l'appareil qui arrive via un lien réseaux (pas le parrainage, voir
+     ParcoursHero.tsx) ne doit pas pouvoir rejouer sans flasher le vrai QR
+     sur place, même si CET event précis n'a pas encore été joué. */
   useEffect(() => {
     try {
+      if (isDigitalLinkSource() && getJoueurLocal()) { setScreen('refusdigital'); return }
       const saved = localStorage.getItem(lsKey)
       if (saved) { setExistingTicket(saved); setScreen('already') }
     } catch {}
@@ -120,6 +126,25 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     const finalTicket = res.ticket || tc
     try { localStorage.setItem(lsKey, finalTicket) } catch {}
     setTicket(finalTicket); setExistingTicket(finalTicket); setScreen('ticket')
+  }
+
+  /* Parrainage : meme mecanique que QuizClient (lib/parrainage.ts, deja
+     generique -- captureParrainage est deja appele par tout writeJoueur,
+     et le trigger DB tg_parrainage_credit_ticket crediter deja un ticket
+     'parrainage' au parrain quand le filleul s'inscrit via ?ref=). Seul ce
+     qui manquait ici est le bouton de partage : meme fonction, meme lien,
+     prefixe d'external_id 'tb' pour matcher celui ecrit par writeJoueur
+     ci-dessus (prefix: 'TB'), texte generique (pas de mention NDS 2026). */
+  const shareParrainage = async () => {
+    const email = (form.email || getJoueurLocal()?.email || '').trim().toLowerCase()
+    if (!email.includes('@')) return
+    const extId = 'j-tb-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
+    const link = buildInviteLink(`/parcours/tombola?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
+    const txt = `Je participe à ${nom} 🎟️ Rejoins-moi, inscris-toi et tente de gagner ! ${link}`
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
+      else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
+    } catch { /* annule */ }
   }
 
   const partSelected = partenaires[partIdx]
@@ -287,6 +312,9 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Découvrir nos partenaires</button>
           )}
+          {(form.email || getJoueurLocal()?.email) && (
+            <button className="btn-ghost" onClick={shareParrainage}>Parraine un ami &amp; gagne un ticket</button>
+          )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
         </div>
       )}
@@ -307,7 +335,17 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           {partenaires.length > 0 && (
             <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Découvrir nos partenaires</button>
           )}
+          {(form.email || getJoueurLocal()?.email) && (
+            <button className="btn-ghost" onClick={shareParrainage}>Parraine un ami &amp; gagne un ticket</button>
+          )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
+        </div>
+      )}
+
+      {/* REFUS DIGITAL (anti-fraude) */}
+      {screen === 'refusdigital' && (
+        <div className="pc-stage">
+          <ParcoursRefusDigital superEventId={ev?.super_event_id} />
         </div>
       )}
     </div>
