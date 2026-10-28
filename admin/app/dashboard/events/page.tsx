@@ -21,6 +21,8 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { sansGabarit } from '@/lib/operations'
 import { PageHeader, SearchBar, EmptyState } from '@/components/dashboard/DashboardUI'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
+import { Ico } from '@/lib/proicons'
+import { ACCENT_ANIM } from '@/lib/charte'
 import type { FlowinEvent } from '@/lib/types'
 
 type EtatAnim = 'live' | 'upcoming' | 'past' | 'archived'
@@ -148,32 +150,34 @@ export default function Page() {
                   const parStatut = (statut: EtatAnim) => animations.filter(a => String(a.status ?? 'past') === statut)
                   const enCours = parStatut('live').length
                   return (
-                    <div key={pid} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <b style={{ fontSize: 14.5 }}>{pro?.nom ?? pid}</b>
-                        {enCours > 0 && <span className="sa-chip live" style={{ fontSize: 10 }}>🔴 {enCours} en cours</span>}
+                    <div key={pid} className="sa-kb-vignette" style={{ cursor: 'default', marginBottom: 12 }}>
+                      <div className="sa-kb-ligne">
+                        <span className="sa-kb-pastille" style={{ background: `${ACCENT_ANIM}20`, color: ACCENT_ANIM }}>
+                          <Ico k="shop" size={14} />
+                        </span>
+                        <span className="sa-kb-nom">{pro?.nom ?? pid}</span>
+                        {enCours > 0 && <span className="sa-kb-date">🔴 {enCours} en cours</span>}
                       </div>
-                      <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>
-                        {animations.length} animation{animations.length > 1 ? 's' : ''}
+                      <div className="sa-kb-sub">
+                        {animations.length} animation{animations.length > 1 ? 's' : ''} · {pid}
                       </div>
-                      <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 4 }}>{pid}</div>
 
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                      {/* Meme principe que l option B des cartes Super Events (validee
+                          par Romain le 28/10) : raccourcis en chips plutot qu en gros
+                          boutons pleine largeur, visibles sans ouvrir le detail. */}
+                      <div className="sa-kb-chips">
                         {accesRapides.map(a => (
-                          <a key={a.label} href={a.href} className="sa-btn sm" style={{ textDecoration: 'none', fontSize: 11 }}>
+                          <a key={a.label} href={a.href} className="sa-kb-chip">
                             {a.icone} {a.label}
                           </a>
                         ))}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                        <button className="sa-btn sm" onClick={() => setOuvert(ouvert === pid ? null : pid)}>
-                          {ouvert === pid ? 'Masquer' : `📍 ${animations.length} animation${animations.length > 1 ? 's' : ''}`}
+                        <button className="sa-kb-chip muted" onClick={() => setOuvert(ouvert === pid ? null : pid)}>
+                          {ouvert === pid ? '▲ Masquer' : `📍 ${animations.length} animation${animations.length > 1 ? 's' : ''}`}
                         </button>
                       </div>
 
                       {ouvert === pid && (
-                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)' }}>
+                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--sa-border)', marginLeft: 34 }}>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
                             {COLONNES.map(col => {
                               const cardsCol = parStatut(col.cle)
