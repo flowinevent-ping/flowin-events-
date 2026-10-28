@@ -40,9 +40,14 @@ const COULEUR_MODULE: Record<string, string> = {
 }
 
 /* Le deroule et les regles du gabarit, aux deux portees. Une seule source :
-   lib/gabarit.ts — la meme que lit le parcours de creation. */
+   lib/gabarit.ts — la meme que lit le parcours de creation.
+   Defaut sur 'event' (station seule) : Romain, 28/10 -- affiche par defaut
+   la version multi-stations (carte des stations, etc.) laissait penser que
+   ces ecrans faisaient partie de tout event, alors qu'ils n'existent que
+   pour un super event. La portee la plus courante (un event autonome) est
+   desormais celle qu'on voit sans toucher au toggle. */
 function FicheGabarit() {
-  const [portee, setPortee] = useState<'super' | 'event'>('super')
+  const [portee, setPortee] = useState<'super' | 'event'>('event')
   const multi = portee === 'super'
   return (
     <div style={{ marginTop: 14, borderTop: '1px solid var(--sa-border)', paddingTop: 14 }}>
