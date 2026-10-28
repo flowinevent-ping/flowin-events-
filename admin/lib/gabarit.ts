@@ -32,8 +32,29 @@
  * d'autre ne change.
  */
 
-/** L'identifiant du module tel qu'il est deja ecrit en base sur les events. */
-export const GABARIT_MODULE = 'nds2026'
+/** L'identifiant du module tel qu'il est deja ecrit en base sur les events.
+ *
+ * Bascule du 28/10 : 'nds2026' -> 'quiz'. Les 3 ecarts fonctionnels releves
+ * entre le gabarit et QuizClient (regle de ticket sans-faute/bonus, ticket par
+ * station/commerce visite, carte des stations + cumul des tickets) sont
+ * combles :
+ *  - la regle de ticket est maintenant cablee dans QuizClient (quiz_ticket /
+ *    bonus_ticket, meme calcul que NDS2026Client : sans-faute = ticket direct,
+ *    bonus termine = ticket de rattrapage/supplementaire) ;
+ *  - le ticket par station/commerce visite est deja generique : chaque appel
+ *    a `writeJoueur`/`claimJoueur` (donc chaque module, Quiz compris) appelle
+ *    deja `attribuerSuperEvent` (lib/parcours.ts), qui ecrit dans `se_tickets` ;
+ *  - la carte des stations et le cumul des tickets existent deja comme page
+ *    generique `/se/[se]` (app/se/[se]/SuperEventClient.tsx, deja compatible
+ *    'quiz' dans sa palette MODULE_UI) : `ParcoursOutro`, deja utilise par
+ *    QuizClient, y renvoie ("Retour a l'operation"). C'est le meme mecanisme
+ *    que celui des autres modules unifies (Vote/QuizSolo/Tombola/Spin), qui
+ *    n'ont pas non plus de carte inline -- Quiz n'est donc pas un cas special.
+ *
+ * NDS2026Client.tsx garde sa propre carte inline (Leaflet, geolocalisation) et
+ * son propre ledger localStorage : c'est l'implementation historique du
+ * festival, qui n'a jamais ete migree vers /se/[se]. Elle n'est pas touchee. */
+export const GABARIT_MODULE = 'quiz'
 
 /** Le nom sous lequel Romain le designe. */
 export const GABARIT_NOM = 'Quiz + bonus'

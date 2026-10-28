@@ -16,13 +16,13 @@ import {
 } from '@/lib/modeles'
 
 const MODULES = [
-  /* Le gabarit de reference, tire de NDS 2026 (voir lib/gabarit.ts). Il est en
-     tete parce que c est celui a partir duquel on cree, plutot que de repartir
-     de zero. Son identifiant en base est `nds2026` — inchange, ce sont les
-     events du festival. */
+  /* Le gabarit de reference (voir lib/gabarit.ts). Il est en tete parce que
+     c est celui a partir duquel on cree, plutot que de repartir de zero. Son
+     identifiant en base est GABARIT_MODULE ('quiz' depuis le 28/10 -- voir le
+     commentaire de gabarit.ts) : pas de ligne separee pour 'quiz' ci-dessous,
+     ce serait le meme module en double. */
   { id: GABARIT_MODULE, name: GABARIT_NOM, desc: GABARIT_DESC, gabarit: true },
   { id: 'tombola', name: 'Tombola', desc: 'Inscription CRM + tirage au sort' },
-  { id: 'quiz', name: 'Quiz', desc: 'QCM avec bonus + 2 tickets' },
   { id: 'quizmaster', name: 'Quiz Master', desc: 'Quiz en direct sur grand écran' },
   { id: 'quizsolo', name: 'Quiz Solo', desc: 'Quiz timed en autonomie' },
   { id: 'spin', name: 'Roue', desc: 'Roue de la fortune' },
@@ -31,9 +31,11 @@ const MODULES = [
 
 /* « tout est de la même couleur, ça risque de se perdre » (Romain, 18/09) --
    les 7 pictogrammes de module partageaient tous var(--sa-accent). Une
-   couleur par module, pour les distinguer d un coup d oeil dans la grille. */
+   couleur par module, pour les distinguer d un coup d oeil dans la grille.
+   GABARIT_MODULE règle la couleur du gabarit (= 'quiz' depuis le 28/10), pas
+   de clé 'quiz' séparée : ce serait la même clé en double. */
 const COULEUR_MODULE: Record<string, string> = {
-  [GABARIT_MODULE]: '#2563EB', tombola: '#7C3AED', quiz: '#0D9488',
+  [GABARIT_MODULE]: '#2563EB', tombola: '#7C3AED',
   quizmaster: '#D97706', quizsolo: '#DB2777', spin: '#EA580C', vote: '#16A34A',
 }
 

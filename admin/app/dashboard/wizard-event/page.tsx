@@ -44,9 +44,10 @@ type Etape = typeof ETAPES[number]['id']
 
 
 const MODULES: { id: Module; nom: string; desc: string }[] = [
-  /* Le gabarit de reference en premier : on part de NDS 2026, pas de zero. */
-  { id: GABARIT_MODULE as Module, nom: GABARIT_NOM, desc: 'Le gabarit de référence — quiz, bonus, ticket' },
-  { id: 'quiz', nom: 'Quiz', desc: 'Questions à choix multiple' },
+  /* Le gabarit de reference en premier : on part de lui, pas de zero. Pas de
+     ligne separee pour 'quiz' : GABARIT_MODULE vaut 'quiz' depuis le 28/10
+     (lib/gabarit.ts) -- ce serait le meme module en double. */
+  { id: GABARIT_MODULE as Module, nom: GABARIT_NOM, desc: 'Questions à choix multiple, bonus de rattrapage optionnel' },
   { id: 'quizsolo', nom: 'Quiz solo', desc: 'Parcours individuel, sans bonus' },
   { id: 'quizmaster', nom: 'Quiz master', desc: 'Animé en direct' },
   { id: 'spin', nom: 'Roue', desc: 'Tirage instantané' },
