@@ -30,6 +30,7 @@ interface NavItem { key: string; label: string; sous: string; icon: string; rout
 const NAV: NavItem[] = [
   { key: 'operations', label: 'Mes opérations', sous: 'Events et super events', icon: 'calendar', route: '/pro' },
   { key: 'nouvelle', label: 'Nouvelle opération', sous: 'Créer ou rejoindre', icon: 'join', route: '/pro/nouvelle' },
+  { key: 'historique', label: 'Historique', sous: 'QR, PIN, lots, gagnants', icon: 'clock', route: '/pro/historique' },
   { key: 'donnees', label: 'Mes super data', sous: 'CRM, gagnants, trafic', icon: 'users', route: '/pro/donnees' },
   { key: 'compte', label: 'Mon profil', sous: 'Entreprise, bons & factures, lots, banques', icon: 'shop', route: '/pro/compte' },
 ]
@@ -56,6 +57,7 @@ const ICONS: Record<string, string> = {
   join: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   doc: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
   more: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
 }
 const C = CHARTE_PRO
