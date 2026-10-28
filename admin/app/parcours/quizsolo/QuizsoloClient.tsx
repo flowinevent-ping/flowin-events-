@@ -6,7 +6,7 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRegles, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
@@ -20,17 +20,6 @@ interface Props extends ParcoursPageData { evId: string }
 const QUIZSOLO_STEPS = [
   { titre: 'Flashe le QR code', sous: 'À la station' },
   { titre: 'Réponds au quiz', sous: 'Gagne ton ticket' },
-]
-
-/* Regles reelles (lib/parcours.ts writeJoueur) : le ticket est ecrit des la
-   validation du formulaire, sans condition de score (contrairement a Quiz) --
-   le score n'est qu'une information jointe a la participation. Dedup
-   par jour confirmee par le check `played_date` de claimJoueur/writeJoueur,
-   commune a tous les modules. */
-const QUIZSOLO_REGLES = [
-  { titre: 'Un ticket par jour', texte: 'Le droit au ticket se remet à zéro chaque jour : on peut rejouer le lendemain.' },
-  { titre: 'Ton ticket est validé à la fin du quiz', texte: 'Quel que soit ton score — il est enregistré avec ta participation.' },
-  { titre: 'Déjà un compte : on ne resaisit rien', texte: 'Un joueur reconnu sur son appareil, ou qui donne son email, retrouve ses informations et son ticket — le formulaire ne lui est plus demandé.' },
 ]
 
 export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }: Props) {
@@ -151,7 +140,6 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
           <div className="pc-stage">
             <ParcoursPrizeCard lots={lots} />
             <ParcoursHowTo steps={QUIZSOLO_STEPS} />
-            <ParcoursRegles regles={QUIZSOLO_REGLES} />
             <div style={{ flex: 1 }} />
             <div style={{ padding: '0 18px' }}>
               <button className="btn" onClick={()=>setScreen('quiz')}>{theme.texts.ctaLanding || 'Démarrer le quiz'} →</button>

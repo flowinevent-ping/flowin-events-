@@ -7,22 +7,16 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRegles, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
-import { reglesPour } from '@/lib/gabarit'
 
 type Screen = 'landing' | 'quiz' | 'resultats' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
-
-/* Les vraies regles du gabarit (lib/gabarit.ts), portee event seul : la
-   portee multi-station (carte des stations, +1/commerce) est deja montree
-   ailleurs (page generique /se/[se] via ParcoursOutro), pas ici. */
-const QUIZ_REGLES = reglesPour(false)
 
 /* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
 const QUIZ_STEPS = [
@@ -175,7 +169,6 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
           <div className="pc-stage">
             <ParcoursPrizeCard lots={lots} />
             <ParcoursHowTo steps={QUIZ_STEPS} />
-            <ParcoursRegles regles={QUIZ_REGLES} />
             <div style={{ flex: 1 }} />
             <div style={{ padding: '0 18px' }}>
               {tirageText && <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',textAlign:'center',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14 }}>{tirageText}</div>}
