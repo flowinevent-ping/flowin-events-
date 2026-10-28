@@ -124,7 +124,14 @@ export default function DashboardPage() {
   ]
 
   const raccourcis: { icone: string; lbl: string; n: string; href: string }[] = [
-    { icone: 'building', lbl: 'CRM Pro', n: `${pros.length} fiches`, href: '/dashboard/crm-pro' },
+    /* Pointait vers /dashboard/crm-pro (un picker : choisir un pro -> voir son
+       seul CRM de joueurs). Romain (28/10) veut qu'un clic sur « CRM Pro »
+       affiche directement la liste complete des pros (nom, contact, adresse,
+       telephone, operations en cours) -- c'est deja /dashboard/pros, meme
+       famille ListeCRM que Joueurs/Partenaires/Gagnants. Le CRM complet d'un
+       pro choisi reste accessible via la sidebar (« CRM pro (toutes ses
+       operations) ») et depuis la fiche d'un pro. */
+    { icone: 'building', lbl: 'CRM Pro', n: `${pros.length} fiches`, href: '/dashboard/pros' },
     { icone: 'users', lbl: 'CRM Utilisateurs', n: `${joueurs.length} joueurs`, href: '/dashboard/joueurs' },
     { icone: 'game', lbl: 'Jeux', n: '7 modules', href: '/dashboard/jeux' },
     { icone: 'calendar', lbl: 'Events', n: `${reels.length} events`, href: '/dashboard/events' },
