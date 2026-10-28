@@ -136,7 +136,8 @@ function Wizard() {
     const nom = params.get('nom') ?? ''
     const dd = params.get('d')
     const df = params.get('f')
-    if (!pro && !se && !nom && !dd && !df) return
+    const module = params.get('module') ?? ''
+    if (!pro && !se && !nom && !dd && !df && !module) return
     preSaisieFaite.current = true
     setD(x => ({
       ...x,
@@ -145,6 +146,7 @@ function Wizard() {
       nom: nom || x.nom,
       date_d: dd || x.date_d,
       date_f: df || dd || x.date_f,
+      module: (module || x.module) as typeof x.module,
     }))
   }, [params])
   const problemes = useMemo(() => controler(d), [d])

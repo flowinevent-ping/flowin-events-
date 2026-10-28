@@ -282,6 +282,17 @@ export default function JeuxPage() {
                     />
                   </div>
                 )}
+                {actif && (
+                  <div style={{ marginTop: 16, borderTop: '1px solid var(--sa-border)', paddingTop: 14 }} onClick={e => e.stopPropagation()}>
+                    <a
+                      href={`/dashboard/wizard-event?module=${encodeURIComponent(m.id)}`}
+                      target="_blank" rel="noreferrer"
+                      style={{ display: 'block', textAlign: 'center', padding: '10px', borderRadius: 10, background: COULEUR_MODULE[m.id], color: '#fff', fontWeight: 800, fontSize: 12.5, textDecoration: 'none' }}
+                    >
+                      + Créer une animation avec ce module
+                    </a>
+                  </div>
+                )}
               </div>
             )
           })}
