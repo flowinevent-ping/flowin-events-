@@ -47,9 +47,13 @@ export interface ProNouvelle {
 }
 export interface SuperOuvert extends SuperEvent { frais_pro?: number | null; station?: string | null; lat?: number | null; lng?: number | null }
 
+/* GABARIT_MODULE vaut maintenant 'quiz' (lib/gabarit.ts) : l'ancienne entree
+   dediee 'quiz' serait devenue un doublon visuel avec le gabarit (meme id de
+   module) -- une seule entree reste, avec le libelle du gabarit (le bonus est
+   optionnel : sans banque bonus choisie a l'etape suivante, l'ecran bonus
+   n'apparait pas pour le joueur). */
 const JEUX: { m: string; t: string; s: string; banque: boolean }[] = [
-  { m: GABARIT_MODULE, t: GABARIT_NOM, s: 'Le gabarit de référence — quiz, bonus, ticket', banque: true },
-  { m: 'quiz', t: 'Quiz', s: 'Questions à choix multiple', banque: true },
+  { m: GABARIT_MODULE, t: GABARIT_NOM, s: 'Questions à choix multiple, bonus de rattrapage optionnel', banque: true },
   { m: 'spin', t: 'Roue de la fortune', s: 'Tirage instantané, segments = lots', banque: false },
   { m: 'tombola', t: 'Tombola', s: 'Inscription + grand tirage', banque: false },
   { m: 'vote', t: 'Vote', s: 'Vote produits / artistes', banque: false },
@@ -276,10 +280,17 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
       ...(module_ === GABARIT_MODULE && bonusIds.length ? { bonusBanques: bonusIds } : {}),
     },
   }), [rejoindre, nomCommerce, nom, lotsNommes, module_, cfgJeu, jeu, banqueId, bonusIds])
-  /* Station montree : celle du super event rejoint ; pour un super event cree
-     sur le gabarit, une station du gabarit (carte multi-stations) ; sinon la demo. */
-  const stationApercu = rejoindre ? (se?.station ?? null)
-    : estSuper && module_ === GABARIT_MODULE ? 'ev-master-superevent-bar' : null
+  /* Station montree : celle du super event rejoint ; sinon la demo du module
+     (ApercuJeu retombe sur EVENT_DEMO[module] — ev-demo-quiz pour le gabarit).
+     Avant le 28/10, un super event cree sur le gabarit forcait une vraie
+     station de production ('ev-master-superevent-bar', Nuits du Sud) : c'etait
+     necessaire quand seul NDS2026Client savait afficher la carte multi-stations.
+     Cela n'a plus lieu d'etre : la carte+les tickets sont maintenant la page
+     generique /se/[se] (ParcoursOutro), identique pour toute operation ; forcer
+     une station reelle ici ne ferait que fuiter les donnees de production NDS
+     2026 dans l'apercu d'une operation vide -- exactement le bug corrige par
+     ailleurs dans wizard-super-event (PR #33). */
+  const stationApercu = rejoindre ? (se?.station ?? null) : null
 
   /* ── Envoi ──────────────────────────────────────────────────────────── */
   async function envoyer() {

@@ -38,12 +38,13 @@ import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { Ico } from '@/lib/proicons'
 
 const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
-  /* Le gabarit de reference en tete, et par defaut : c est de NDS 2026 qu on
-     part, pas d une page blanche (Romain, 03/09). */
-  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Le gabarit de référence — quiz, bonus, ticket', icone: '🎯' },
-  /* Pas de roue : un super event se joue en tirage au sort uniquement
+  /* Le gabarit de reference en tete, et par defaut : on part de lui, pas d une
+     page blanche (Romain, 03/09). Pas de ligne separee pour 'quiz' :
+     GABARIT_MODULE vaut 'quiz' depuis le 28/10 (lib/gabarit.ts) -- ce serait
+     le meme module en double.
+     Pas de roue : un super event se joue en tirage au sort uniquement
      (referentiel 34) — la roue distribue un lot immediat. */
-  { id: 'quiz', nom: 'Quiz', sous: 'Questions à la suite', icone: '🧠' },
+  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Questions à la suite, bonus de rattrapage optionnel', icone: '🧠' },
   { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur', icone: '🎤' },
   { id: 'quizsolo', nom: 'Quiz Solo', sous: 'Le joueur seul, à son rythme', icone: '🎯' },
   { id: 'tombola', nom: 'Tombola', sous: 'Tirage différé', icone: '🎟️' },

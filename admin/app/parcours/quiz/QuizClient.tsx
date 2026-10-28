@@ -14,7 +14,7 @@ import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcou
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'quiz' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
+type Screen = 'landing' | 'quiz' | 'resultats' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
 
 export default function QuizClient({ ev, lots, partenaires, banques, evId }: Props) {
@@ -41,15 +41,28 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
   const [selected, setSelected] = useState<number | null>(null)
   const [answered, setAnswered] = useState(false)
   const [score, setScore] = useState(0)
+  /* Compte des bonnes réponses, séparé du score pondéré (q.points) : la règle
+     « sans-faute = ticket » (gabarit.ts) porte sur le nombre de questions
+     réussies, pas sur un total de points qui peut varier d'une question à l'autre. */
+  const [correctCount, setCorrectCount] = useState(0)
   const [timer, setTimer] = useState(timerSec)
   const [bonusAnswers, setBonusAnswers] = useState<Record<string, string | string[]>>({})
   const [bonusIdx, setBonusIdx] = useState(0)
+  /* Le bonus rattrape le ticket manqué (quiz non parfait) et en ajoute un sinon
+     -> jusqu'à 2 tickets/jour, même règle que NDS2026Client. */
+  const [bonusDone, setBonusDone] = useState(false)
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', genre: '', age: '', cp: '', source: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [ticket, setTicket] = useState('')
   const [existingTicket, setExistingTicket] = useState('')
   const [partIdx, setPartIdx] = useState(0)
+
+  /* Règle de ticket (gabarit.ts, REGLES) : sans-faute -> ticket direct ; le
+     bonus rattrape le ticket manqué et en ajoute un sinon -> jusqu'à 2/jour. */
+  const quizPerfect = questions.length === 0 || correctCount >= questions.length
+  const quizTk = questions.length > 0 && quizPerfect
+  const bonusTk = bonusDone
 
   const lsKey = `flowin_played_${evId}`
   useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
@@ -65,12 +78,12 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (answered) return
     setSelected(idx); setAnswered(true)
     const q = questions[qIdx]
-    if (idx === q.bonne) setScore(s => s + (q.points ?? 1))
+    if (idx === q.bonne) { setScore(s => s + (q.points ?? 1)); setCorrectCount(c => c + 1) }
     setTimeout(() => {
       if (qIdx + 1 < questions.length) { setQIdx(i => i + 1); setSelected(null); setAnswered(false) }
-      else setScreen(bonusQs.length ? 'bonus' : 'form')
+      else setScreen('resultats')
     }, 1200)
-  }, [answered, qIdx, questions, bonusQs.length])
+  }, [answered, qIdx, questions])
 
   /* Bloc 2 — compte deja cree : saute le formulaire, attribue directement */
   const [reco, setReco] = useState(false)
@@ -84,7 +97,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
         prenom: local.prenom || f.prenom, nom: local.nom || f.nom,
         email: local.email || f.email, tel: local.tel || f.tel,
         cp: local.cp || f.cp, age: local.age || f.age, genre: local.genre || f.genre }))
-      const res = await claimJoueur(local, evId, 'PQ', bonusAnswers)
+      const res = await claimJoueur(local, evId, 'PQ', bonusAnswers, { quizTicket: quizTk, bonusTicket: bonusTk, score: `${score}/${questions.length}` })
       setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
@@ -103,7 +116,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('PQ')
-    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: true, optin_version: 'nds-2026-v3' })
+    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: true, optin_version: 'nds-2026-v3', quiz_ticket: quizTk, bonus_ticket: bonusTk })
     setGain(res.gain ?? null)
     setSubmitting(false)
     if (res.duplicate) { setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}; setScreen('already'); return }
@@ -118,7 +131,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
 
   /* Navigation postMessage — flèches dashboard SA */
   useEffect(() => {
-    const NAV_SCREENS: Screen[] = ['landing', 'quiz', 'bonus', 'form', 'partenaires', 'ticket', 'already']
+    const NAV_SCREENS: Screen[] = ['landing', 'quiz', 'resultats', 'bonus', 'form', 'partenaires', 'ticket', 'already']
     function onMsg(e: MessageEvent) {
       if (!e.data || !e.data.flowinNav) return
       setScreen(cur => {
@@ -186,6 +199,19 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
         </div>
       )}
 
+      {screen === 'resultats' && (
+        <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
+          <div style={{ fontSize:13,fontWeight:800,color:'rgba(255,255,255,.45)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:10 }}>Ton score</div>
+          <div style={{ fontSize:40,fontWeight:900,marginBottom:10 }}>{correctCount}/{questions.length}</div>
+          <div style={{ fontSize:14,color:'rgba(255,255,255,.65)',marginBottom:24,lineHeight:1.5 }}>
+            {quizPerfect
+              ? 'Sans faute ! Ton ticket est acquis.'
+              : bonusQs.length ? 'Pas de sans-faute, mais le bonus peut te rattraper et t’ajouter un ticket.' : 'Pas de sans-faute cette fois — rejoue une autre station pour retenter ta chance.'}
+          </div>
+          <button className="btn" onClick={() => setScreen(bonusQs.length ? 'bonus' : 'form')}>{bonusQs.length ? 'Tenter le bonus →' : 'Continuer →'}</button>
+        </div>
+      )}
+
       {screen === 'bonus' && bonusQs[bonusIdx] && (
         <div className="screen">
           <div style={{ fontSize:11,fontWeight:800,color:'rgba(255,255,255,.35)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:6 }}>Bonus {bonusIdx+1}/{bonusQs.length}</div>
@@ -197,7 +223,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
               onClick={() => { const bq = bonusQs[bonusIdx]; setBonusAnswers(a => bq.type==='multi' ? { ...a,[bq.id]:((a[bq.id] as string[]|undefined)??[]).includes(opt.val)?((a[bq.id] as string[]).filter((v:string)=>v!==opt.val)):[...((a[bq.id] as string[]|undefined)??[]),opt.val] } : { ...a,[bq.id]:opt.val }) }}>{opt.label}</button>
           })}
           <div style={{ flex:1 }} />
-          <button className="btn" style={{ marginTop:16 }} onClick={() => bonusIdx+1 < bonusQs.length ? setBonusIdx(i=>i+1) : setScreen('form')}>{bonusIdx+1 < bonusQs.length ? 'Suivant →' : 'Continuer →'}</button>
+          <button className="btn" style={{ marginTop:16 }} onClick={() => { if (bonusIdx+1 < bonusQs.length) { setBonusIdx(i=>i+1) } else { setBonusDone(true); setScreen('form') } }}>{bonusIdx+1 < bonusQs.length ? 'Suivant →' : 'Continuer →'}</button>
         </div>
       )}
 
