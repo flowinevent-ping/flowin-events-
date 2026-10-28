@@ -13,6 +13,8 @@ import { superEventsReels, GABARIT_SE_ID } from '@/lib/operations'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { supabase } from '@/lib/supabase'
 import { PageHeader, SectionHeader, EmptyState, StatusChip } from '@/components/dashboard/DashboardUI'
+import { Ico } from '@/lib/proicons'
+import { ACCENT_SUPER } from '@/lib/charte'
 import {
   fetchSuperEvents, dupliquerSuperEvent, slugSuperEvent,
   type SuperEvent, type ResultatDuplication,
@@ -147,16 +149,25 @@ export default function Page() {
                     { cle: 'archive', titre: '🗄️ Archivées' },
                   ]
                   return (
-                    <div key={se.id} style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 14, padding: 16, marginBottom: 12 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <b style={{ fontSize: 14.5 }}>{se.nom}</b>
-                        <span className={`sa-chip ${st === 'en_cours' ? 'live' : 'past'}`} style={{ fontSize: 10 }}>{libStatut[st]}</span>
-                        {se.status === 'pending' && <span className="sa-chip" style={{ fontSize: 10, color: '#B45309', borderColor: '#B45309' }}>À valider</span>}
+                    <div key={se.id} className="sa-kb-vignette" style={{ cursor: 'default', marginBottom: 12 }}>
+                      <div className="sa-kb-ligne">
+                        <span className="sa-kb-pastille" style={{ background: `${ACCENT_SUPER}20`, color: ACCENT_SUPER }}>
+                          <Ico k="star" size={14} />
+                        </span>
+                        <span className="sa-kb-nom">{se.nom}</span>
+                        <span className="sa-kb-date">
+                          {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
+                        </span>
                       </div>
+                      <div className="sa-kb-sub">
+                        {seEvents.length} station{seEvents.length > 1 ? 's' : ''} · {libStatut[st]}
+                        {se.status === 'pending' && ' · À valider'}
+                      </div>
+
                       {/* Referentiel 32 : un super event cree par un pro attend la
                           validation du SA avant d etre ouvert aux commerces. */}
                       {se.status === 'pending' && (
-                        <div className="sa-alert warn" style={{ fontSize: 12, marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div className="sa-alert warn" style={{ fontSize: 12, marginTop: 8, marginLeft: 34, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                           Créé par un pro — fermé aux inscriptions tant qu’il n’est pas validé.
                           <button className="sa-btn sm primary" onClick={async () => {
                             const { error } = await supabase.from('super_events').update({ status: 'upcoming' }).eq('id', se.id)
@@ -164,14 +175,10 @@ export default function Page() {
                           }}>✓ Valider et ouvrir</button>
                         </div>
                       )}
-                      <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginTop: 4 }}>
-                        {se.date_d ?? '—'}{se.date_f ? ` → ${se.date_f}` : ''}
-                      </div>
-                      <div style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 10.5, color: 'var(--sa-muted)', marginTop: 4 }}>{se.id}</div>
                       {orga && (
                         <div
                           onClick={() => openDrawer('pro', orga.id)}
-                          style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '6px 10px', background: 'var(--sa-subtle)', borderRadius: 8, cursor: 'pointer', width: 'fit-content' }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, marginLeft: 34, padding: '6px 10px', background: 'var(--sa-subtle)', borderRadius: 8, cursor: 'pointer', width: 'fit-content' }}
                         >
                           <span style={{ fontSize: 12 }}>🏛️</span>
                           <span style={{ fontSize: 11.5, fontWeight: 700 }}>{orga.nom}</span>
@@ -179,15 +186,22 @@ export default function Page() {
                         </div>
                       )}
 
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                      {/* Option B (validee par Romain le 28/10) : les raccourcis
+                          restent visibles sans ouvrir la fiche, en chips plutot
+                          qu en gros boutons pleine largeur. */}
+                      <div className="sa-kb-chips">
                         {accesRapides(se.id).map(a => (
-                          <a key={a.label} href={a.href} className="sa-btn sm" style={{ textDecoration: 'none', fontSize: 11 }}>
+                          <a key={a.label} href={a.href} className="sa-kb-chip">
                             {a.icone} {a.label}
                           </a>
                         ))}
+                        <button className="sa-kb-chip muted"
+                          onClick={() => { setSource(se); setNom(''); setRes(null) }}>
+                          🔁 Dupliquer
+                        </button>
                       </div>
 
-                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                      <div style={{ display: 'flex', gap: 8, marginTop: 10, marginLeft: 34 }}>
                         <button
                           className="sa-btn sm primary"
                           onClick={() => openDrawer('superevent', se.id)}
@@ -195,14 +209,10 @@ export default function Page() {
                           🎪 Ouvrir la fiche
                         </button>
                         <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm" style={{ textDecoration: 'none' }}>
-                          📊 Fiche complète (KPIs, commerces, tarif)
+                          📊 Fiche complète
                         </a>
                         <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
-                          {ouvert === se.id ? 'Masquer' : `📍 ${seEvents.length} station${seEvents.length > 1 ? 's' : ''}`}
-                        </button>
-                        <button className="sa-btn sm" style={{ marginLeft: 'auto' }}
-                          onClick={() => { setSource(se); setNom(''); setRes(null) }}>
-                          🔁 Dupliquer
+                          {ouvert === se.id ? 'Masquer' : '📍 Stations'}
                         </button>
                       </div>
 

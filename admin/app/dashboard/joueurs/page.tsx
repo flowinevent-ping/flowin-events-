@@ -20,7 +20,7 @@ import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
 const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 
 function JoueursContenu() {
-  const { joueurs, openDrawer, openDrawerEdit } = useDashboard()
+  const { joueurs, openDrawer, openDrawerEdit, events } = useDashboard()
   const { seId, eventIds } = useFiltreSuperEvent()
   const [idsSe, setIdsSe] = useState<Set<string> | null>(null)
 
@@ -41,9 +41,19 @@ function JoueursContenu() {
   const lien = (href: string, texte: string) => (
     <a href={href} onClick={e => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{texte}</a>
   )
+  /* j.source est generique ("nds2026", "TEST"...) -- pas la vraie station de
+     capture. La vraie donnee est la 1ere entree de joueurs.events, qu on
+     resout vers le nom reel de la station via les events deja charges dans
+     le contexte (pas de requete supplementaire). Repli sur j.source si la
+     station n est plus resolvable (archivee/supprimee), puis '—'. */
+  const nomStation = (j: FlowinJoueur) => {
+    const evId = j.events?.[0]
+    const nom = evId ? events.find(e => e.id === evId)?.nom : undefined
+    return nom ?? j.source ?? ''
+  }
   const colonnes: ColonneCRM<FlowinJoueur>[] = [
     { id: 'date', label: 'Date entrée', valeur: j => j.first_seen ?? j.ts ?? '', rendu: j => fmtDate(j.first_seen ?? j.ts), largeur: 100, horsRecherche: true },
-    { id: 'source', label: 'Source', valeur: j => j.source, largeur: 110 },
+    { id: 'source', label: 'Source', valeur: j => nomStation(j), rendu: j => nomStation(j) || '—', largeur: 150 },
     { id: 'nom', label: 'Nom', valeur: j => j.nom, rendu: j => <b>{j.nom || '—'}</b>, largeur: 140 },
     { id: 'prenom', label: 'Prénom', valeur: j => j.prenom, largeur: 120 },
     { id: 'adresse', label: 'Adresse', valeur: j => j.adresse, largeur: 170 },

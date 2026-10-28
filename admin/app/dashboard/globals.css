@@ -258,6 +258,17 @@ a:hover{text-decoration:underline}
    principal -- plus petite, plus pale, jamais au meme niveau visuel que le nom. */
 .sa-kb-sub{font-size:11px;color:var(--sa-muted);margin-top:6px;padding-left:34px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Rangee de raccourcis d acces (Pros/Partenaires/Joueurs/Lots/Gagnants/Dupliquer)
+   sous une vignette .sa-kb-* -- option B validee par Romain le 28/10 pour
+   /dashboard/super-events : les actions restent visibles sans ouvrir la fiche,
+   habillees en chip (pas en bouton pleine largeur) pour rester discretes. */
+.sa-kb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;padding-left:34px}
+.sa-kb-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;
+  border:1px solid var(--sa-border);border-radius:99px;padding:4px 10px;
+  font-size:11px;font-weight:700;color:var(--sa-text);text-decoration:none;
+  cursor:pointer;font-family:inherit;transition:border-color .12s}
+.sa-kb-chip:hover{border-color:var(--sa-accent)}
+.sa-kb-chip.muted{background:var(--sa-subtle)}
 
 /* Une tuile de chiffre qui s ouvre : meme apparence que .sa-kpi, mais c est un
    bouton, donc il faut neutraliser le style natif et rendre le clic visible. */
