@@ -93,11 +93,20 @@ export default function Page() {
     fetchLandings().then(setList).finally(() => setCharge(false))
   }, [])
 
+  /* Romain (28/10) : la grille ci-dessous ne listait QUE les 2 landings
+     pilotables de la table `landings` -- les 11 pages de reference statiques
+     (PAGES_STATIQUES) n'etaient visibles/cliquables que via les fleches du
+     petit carrousel en haut, jamais dans la grille ni la recherche. Priorite
+     demandee : CHAQUE page listee a un lien direct qui ouvre la vraie page
+     en plein ecran dans un nouvel onglet -- donc toutes les pages vivent
+     maintenant dans la meme liste, filtree par la meme recherche. */
+  const toutes = useMemo(() => [...list, ...PAGES_STATIQUES], [list])
+
   const filtres = useMemo(() => {
     const t = q.trim().toLowerCase()
-    if (!t) return list
-    return list.filter(l => (l.nom ?? l.id).toLowerCase().includes(t))
-  }, [list, q])
+    if (!t) return toutes
+    return toutes.filter(l => (l.nom ?? l.id).toLowerCase().includes(t))
+  }, [toutes, q])
 
   const avecUrl = useMemo(() => [...list.filter(l => l.deploy_url), ...PAGES_STATIQUES], [list])
   const courant = avecUrl[idx] ?? null
@@ -164,29 +173,39 @@ export default function Page() {
               </div>
 
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-                <span
-                  className="sa-chip"
-                  style={{
-                    fontSize: 10, fontWeight: 700,
-                    color: l.published ? '#2f7d4f' : 'var(--sa-muted)',
-                    borderColor: l.published ? '#2f7d4f' : 'var(--sa-border)',
-                  }}
-                >
-                  {l.published ? 'En ligne' : 'Hors ligne'}
-                </span>
+                {l.id.startsWith('pg-') ? (
+                  <span className="sa-chip" style={{ fontSize: 10, fontWeight: 700 }}>Page de référence</span>
+                ) : (
+                  <span
+                    className="sa-chip"
+                    style={{
+                      fontSize: 10, fontWeight: 700,
+                      color: l.published ? '#2f7d4f' : 'var(--sa-muted)',
+                      borderColor: l.published ? '#2f7d4f' : 'var(--sa-border)',
+                    }}
+                  >
+                    {l.published ? 'En ligne' : 'Hors ligne'}
+                  </span>
+                )}
                 {l.statut && <span className="sa-chip" style={{ fontSize: 10 }}>{l.statut}</span>}
                 {l.module_jeu && <span className="sa-chip" style={{ fontSize: 10 }}>🎮 {l.module_jeu}</span>}
               </div>
 
+              {/* Lien direct, prioritaire sur l'apercu cadre-telephone (qui peut
+                  rendre une page "ecrasee" selon le navigateur) : ouvre la vraie
+                  page en plein ecran dans un nouvel onglet, sans scaling. Romain
+                  (28/10) : "avoir acces aux landing pages dans les pleines pages
+                  avec le lien visualisable directement". */}
               {l.deploy_url ? (
                 <a
                   href={l.deploy_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
-                  style={{ fontSize: 11.5, wordBreak: 'break-all' }}
+                  className="sa-btn"
+                  style={{ fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px' }}
                 >
-                  {l.deploy_url}
+                  Ouvrir la page ↗
                 </a>
               ) : (
                 <div className="sa-muted" style={{ fontSize: 11.5 }}>Aucune URL de déploiement</div>
