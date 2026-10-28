@@ -169,7 +169,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
 
   return (
     <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{PARCOURS_HERO_CSS + `
+      <style dangerouslySetInnerHTML={{ __html: PARCOURS_HERO_CSS + `
         *{box-sizing:border-box;margin:0;padding:0}
         .part-tile-avatar{width:52px;height:52px;border-radius:12px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:rgba(224,33,138,.18);color:#ffd5ec;object-fit:contain}
         .part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:flex-end}
@@ -193,7 +193,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
         .part-tile{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center;cursor:pointer}
         .link-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;color:#fff;text-decoration:none;margin-bottom:8px}
         select.input option{background:#1E293B}
-      `}</style>
+      ` }} />
 
       {/* LANDING */}
       {screen === 'landing' && (

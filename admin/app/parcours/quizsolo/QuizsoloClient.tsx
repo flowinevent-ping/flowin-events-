@@ -131,7 +131,7 @@ export default function QuizsoloClient({ ev, lots, partenaires, banques, evId }:
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c)+PARCOURS_HERO_CSS+'.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}'}</style>
+      <style dangerouslySetInnerHTML={{ __html: parcoursCSS(c)+PARCOURS_HERO_CSS+'.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}' }} />
       {screen==='landing'&&(
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
           <ParcoursHero module="quizsolo" nom={nom}
