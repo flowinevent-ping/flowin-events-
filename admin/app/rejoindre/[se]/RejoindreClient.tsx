@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabasePublic } from '@/lib/supabase'
 import { libelleModule } from '@/lib/operations'
 import { CHARTE, POLICE_ADMIN } from '@/lib/charte'
 import { Ico } from '@/lib/proicons'
@@ -110,7 +110,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
       const emailLower = f.email.toLowerCase().trim()
       const proId = 'pro-' + slug(emailLower)
 
-      await supabase.from('pros').upsert({
+      await supabasePublic.from('pros').upsert({
         id: proId, nom: f.commerce.trim(), adresse: f.adresse.trim(), secteur: f.categorie,
         contact: `${f.prenom.trim()} ${f.nom.trim()}`, email: emailLower, tel: f.tel.trim(),
       }, { onConflict: 'id' })
@@ -120,7 +120,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
          super event etait ignore et la demande n apparaissait nulle part cote
          SA. Elle depose maintenant la meme demande que /pro/rejoindre ;
          l approbation SA cree la station avec le jeu du super event. */
-      const { error: dErr } = await supabase.from('demandes_rattachement_super_event').insert({
+      const { error: dErr } = await supabasePublic.from('demandes_rattachement_super_event').insert({
         pro_id: proId, super_event_id: se.id, persona: 'commerce',
         nom_commerce: f.commerce.trim(), categorie: f.categorie, adresse: f.adresse.trim(),
         regle_jeu: se.module ?? 'nds2026',
