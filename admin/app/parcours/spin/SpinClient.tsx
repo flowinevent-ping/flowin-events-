@@ -282,7 +282,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c) + PARCOURS_HERO_CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: parcoursCSS(c) + PARCOURS_HERO_CSS }} />
 
       {screen === 'landing' && (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>

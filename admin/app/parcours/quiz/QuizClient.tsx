@@ -184,12 +184,12 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
 
   return (
     <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c) + PARCOURS_HERO_CSS + `
+      <style dangerouslySetInnerHTML={{ __html: parcoursCSS(c) + PARCOURS_HERO_CSS + `
 
         .opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a} .opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444} .opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}
         .bonus-opt{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left}
         .bonus-opt.sel{background:rgba(224,33,138,.16);border-color:#E0218A}
-      `}</style>
+      ` }} />
 
       {screen === 'landing' && (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>

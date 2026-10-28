@@ -109,7 +109,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c)+'.opt{font-size:18px}.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}'}</style>
+      <style dangerouslySetInnerHTML={{ __html: parcoursCSS(c)+'.opt{font-size:18px}.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}' }} />
 
       {screen==='landing'&&(
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
