@@ -100,11 +100,22 @@
   .gamepane{display:none}
   .gamepane.on{display:block}
 
-  .quizcard{margin:14px auto 0;max-width:400px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-           border-radius:18px;padding:16px 18px;text-align:left}
-  .qz-tag{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
-  .qz-q{font-family:'Manrope';font-size:15.5px;font-weight:700;margin-top:8px;line-height:1.3}
-  .qz-opts{margin-top:12px}
+  /* Phone-frame identique au vrai parcours Quiz : hero #6e2785 + degrade de scene
+     (valeurs copiees a la main depuis ParcoursHero.tsx / nds2026Design.ts — fichiers jamais importes ni modifies). */
+  .qzphone{margin:14px auto 0;max-width:280px;border-radius:26px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.45);text-align:left}
+  .qz-hero{background:#6e2785;padding:14px 16px 12px}
+  .qz-hero-top{display:flex;align-items:center;gap:9px}
+  .qz-hero-badge{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+                 background:linear-gradient(135deg,var(--gold),var(--magenta));font-size:15px}
+  .qz-hero-nom{font-size:13.5px;font-weight:900;color:#fff}
+  .qz-hero-tag{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px}
+  .qz-stage{background:linear-gradient(180deg,#6e2785 0%,#3a1450 45%,#160820 100%);padding:16px 16px 18px}
+  .qz-progwrap{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .qz-progtxt{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.45);white-space:nowrap}
+  .qz-progtrack{background:rgba(255,255,255,.1);border-radius:12px;height:4px;flex:1}
+  .qz-progfill{display:block;background:var(--magenta);border-radius:12px;height:100%;width:100%}
+  .qz-q{font-family:'Manrope';font-size:14px;font-weight:800;line-height:1.35;margin-bottom:12px}
+  .qz-opts{}
   .qz-opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);
          border-radius:12px;padding:11px 13px;color:#fff;font-size:12.5px;font-weight:600;font-family:inherit;
          margin-bottom:7px;cursor:pointer;position:relative}
@@ -117,6 +128,10 @@
   .qexpl{margin-top:2px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;
         padding:11px 13px;font-size:12px;line-height:1.5;color:rgba(255,255,255,.85)}
   .qexpl b{color:#4ade80}
+  .qz-result{display:none;text-align:center;padding:10px 0 2px}
+  .qz-result.on{display:block}
+  .qz-result-lbl{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+  .qz-result-score{font-size:30px;font-weight:900;margin-top:4px;color:#fff}
   .qz-cta{display:none;margin-top:12px;width:100%;background:linear-gradient(135deg,var(--purple),var(--magenta));color:#fff;
          border:none;font-family:inherit;font-weight:800;font-size:13px;padding:13px;border-radius:100px;cursor:pointer}
   .qz-cta.on{display:block}
@@ -408,17 +423,33 @@
       </div>
 
       <div class="gamepane" id="gameQuiz">
-        <div class="quizcard">
-          <div class="qz-tag">Exemple réel — Nuits du Sud 2026</div>
-          <div class="qz-q">En quelle année le groupe Danakil a-t-il été formé, par une bande de lycéens à Marly-le-Roi ?</div>
-          <div class="qz-opts">
-            <button class="qz-opt" data-qz>1995</button>
-            <button class="qz-opt" data-qz data-correct="1">2000</button>
-            <button class="qz-opt" data-qz>2005</button>
-            <button class="qz-opt" data-qz>2010</button>
+        <div class="qzphone">
+          <div class="qz-hero">
+            <div class="qz-hero-top">
+              <span class="qz-hero-badge">🎯</span>
+              <span class="qz-hero-nom">Nuits du Sud 2026</span>
+            </div>
+            <div class="qz-hero-tag">Exemple réel — parcours en direct</div>
           </div>
-          <div class="qexpl" id="qzExpl" style="display:none"></div>
-          <button class="qz-cta" id="qzCta" type="button">Voir mon gain</button>
+          <div class="qz-stage">
+            <div class="qz-progwrap">
+              <span class="qz-progtxt">Question 1/1</span>
+              <span class="qz-progtrack"><span class="qz-progfill"></span></span>
+            </div>
+            <div class="qz-q">En quelle année le groupe Danakil a-t-il été formé, par une bande de lycéens à Marly-le-Roi ?</div>
+            <div class="qz-opts">
+              <button class="qz-opt" data-qz>1995</button>
+              <button class="qz-opt" data-qz data-correct="1">2000</button>
+              <button class="qz-opt" data-qz>2005</button>
+              <button class="qz-opt" data-qz>2010</button>
+            </div>
+            <div class="qexpl" id="qzExpl" style="display:none"></div>
+            <div class="qz-result" id="qzResult">
+              <div class="qz-result-lbl">Ton score</div>
+              <div class="qz-result-score" id="qzResultScore">1/1</div>
+            </div>
+            <button class="qz-cta" id="qzCta" type="button">Voir mon gain</button>
+          </div>
         </div>
         <div class="subtiny">Le commerce choisit ses questions — culture, marque, thématique locale.</div>
       </div>
@@ -784,6 +815,8 @@
   var qzOpts = document.querySelectorAll('[data-qz]');
   var qzAnswered = false;
   var qzExpl = document.getElementById('qzExpl');
+  var qzResult = document.getElementById('qzResult');
+  var qzResultScore = document.getElementById('qzResultScore');
   var qzCta = document.getElementById('qzCta');
   qzOpts.forEach(function(btn){
     btn.addEventListener('click', function(e){
@@ -800,7 +833,11 @@
       qzExpl.innerHTML = wasCorrect
         ? '<b>Bonne r\u00e9ponse\u00a0!</b>'
         : 'Bonne r\u00e9ponse\u00a0: <b>2000</b>';
-      qzCta.classList.add('on');
+      qzResultScore.textContent = wasCorrect ? '1/1' : '0/1';
+      setTimeout(function(){
+        qzResult.classList.add('on');
+        qzCta.classList.add('on');
+      }, 900);
     });
   });
   qzCta.addEventListener('click', function(e){
