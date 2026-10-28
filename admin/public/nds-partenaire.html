@@ -636,7 +636,7 @@
         <div class="pack">
           <div class="ph">
             <div class="pnm">Visibilité<small>Votre présence dans l’opération</small></div>
-            <div class="ppr"><span class="v">590 €</span><span class="u">HT</span></div>
+            <div class="ppr"><span class="v">500 €</span><span class="u">HT</span></div>
           </div>
           <div class="plot"><svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span>Lot mis en jeu : <b>90 € en bon d’achat</b> dans votre boutique</span></div>
           <ul>
@@ -815,7 +815,7 @@
     var lb=document.getElementById('wlabel');if(lb)lb.textContent='Étape '+n+' / 4';window.scrollTo(0,0);
   }
   function wizNext(formId,n){var f=document.getElementById(formId);var ins=f.querySelectorAll('input');var ok=true;for(var i=0;i<ins.length;i++){if(ins[i].type!=='file'&&!ins[i].value.trim()){ins[i].style.borderColor='#EF6B6B';ok=false}else{ins[i].style.borderColor=''}}if(!ok)return;wizGo(n);}
-  window.PACKS={visib:{key:'visibilite',label:'Pack Visibilité',ht:590},anim:{key:'animation',label:'Pack Animation',ht:1490},spons:{key:'sponsor',label:'Pack Sponsor',ht:3590}};
+  window.PACKS={visib:{key:'visibilite',label:'Pack Visibilité',ht:500},anim:{key:'animation',label:'Pack Animation',ht:1490},spons:{key:'sponsor',label:'Pack Sponsor',ht:3590}};
   window.SELECTED_PACK=window.PACKS.visib;
   function eurInt(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');}
   function eur(n){return eurInt(n)+',00 \u20ac';}
