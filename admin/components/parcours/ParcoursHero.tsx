@@ -137,6 +137,39 @@ export function ParcoursHowTo({ steps }: { steps: HowToStep[] }) {
   )
 }
 
+/** Anti-fraude "lien digital" — repris tel quel de NDS2026Client.tsx
+ *  (`isDigitalLink`, écran `refusdigital`, lignes ~208/229/1127). Un lien
+ *  partagé sur les réseaux (`source=reseaux-*`) ne doit servir qu'à une
+ *  PREMIÈRE participation : si le joueur est déjà reconnu sur cet appareil
+ *  (`getJoueurLocal()`), on bloque et on renvoie vers la carte des stations
+ *  plutôt que de laisser rejouer sans flasher un vrai QR sur place.
+ *
+ *  Nuance vérifiée dans le code (pas une supposition) : le lien de
+ *  parrainage lui-même (`shareParrainage`, `lib/parrainage.ts`) ajoute
+ *  `source=parrainage`, pas `source=reseaux-*` — ce garde-fou ne bloque donc
+ *  PAS la réutilisation d'un lien de parrainage, exactement comme
+ *  NDS2026Client (son propre `shareParrainage`, ligne 773, fait pareil). */
+export function isDigitalLinkSource(): boolean {
+  if (typeof window === 'undefined') return false
+  try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false }
+}
+
+/** Écran de blocage anti-fraude — même texte que NDS2026Client. */
+export function ParcoursRefusDigital({ superEventId }: { superEventId?: string | null }) {
+  return (
+    <div className="pc-refus">
+      <span className="pc-refus-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2 2 7l10 5 10-5-10-5Z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+        </svg>
+      </span>
+      <div className="pc-refus-title">Rends-toi sur le lieu pour jouer</div>
+      <div className="pc-refus-sub">Ce lien digital est réservé à ta première participation. Ton compte existe déjà : pour rejouer, flashe le QR sur place.</div>
+      {superEventId && <a className="pc-refus-link" href={`/se/${superEventId}`}>Voir la carte des stations</a>}
+    </div>
+  )
+}
+
 export interface RegleJeu { titre: string; texte: string }
 
 /** Carte claire "Les règles du jeu" — en plus de "Comment jouer ?" (qui dit
@@ -203,4 +236,10 @@ export const PARCOURS_HERO_CSS = `
   .pc-regles-dot{width:7px;height:7px;border-radius:50%;background:#E0218A;flex-shrink:0;margin-top:6px}
   .pc-regles-h{font-size:13.5px;font-weight:800;color:#1a1226}
   .pc-regles-t{font-size:12.5px;color:#52455e;line-height:1.4;margin-top:2px}
+
+  .pc-refus{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;gap:14px}
+  .pc-refus-ico{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+  .pc-refus-title{font-size:19px;font-weight:900;color:#fff}
+  .pc-refus-sub{font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.5;max-width:320px}
+  .pc-refus-link{margin-top:10px;font-size:13px;font-weight:700;color:#fff;text-decoration:underline}
 `

@@ -8,7 +8,7 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
@@ -16,7 +16,7 @@ import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcou
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
-type Screen = 'landing' | 'quiz' | 'resultats' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
+type Screen = 'landing' | 'quiz' | 'resultats' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already' | 'refusdigital'
 interface Props extends ParcoursPageData { evId: string }
 
 /* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
@@ -73,7 +73,17 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
   const bonusTk = bonusDone
 
   const lsKey = `flowin_played_${evId}`
-  useEffect(() => { try { const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') } } catch {} }, [lsKey])
+  /* Anti-fraude "lien digital" avant le check "déjà joué" : un joueur reconnu
+     sur l'appareil qui arrive via un lien réseaux (pas le parrainage, voir
+     ParcoursHero.tsx) ne doit pas pouvoir rejouer sans flasher le vrai QR
+     sur place, même si CET event précis n'a pas encore été joué. */
+  useEffect(() => {
+    try {
+      if (isDigitalLinkSource() && getJoueurLocal()) { setScreen('refusdigital'); return }
+      const s = localStorage.getItem(lsKey)
+      if (s) { setExistingTicket(s); setScreen('already') }
+    } catch {}
+  }, [lsKey])
 
   useEffect(() => {
     if (screen !== 'quiz' || !timerSec || answered) return
@@ -289,6 +299,12 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
             <button className="btn-ghost" style={{ marginTop: 8 }} onClick={shareParrainage}>Parraine un ami &amp; gagne un ticket</button>
           )}
           <ParcoursOutro superEventId={ev?.super_event_id} gain={gain} />
+        </div>
+      )}
+
+      {screen === 'refusdigital' && (
+        <div className="pc-stage">
+          <ParcoursRefusDigital superEventId={ev?.super_event_id} />
         </div>
       )}
     </div>
