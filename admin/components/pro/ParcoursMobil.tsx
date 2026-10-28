@@ -1,7 +1,7 @@
 'use client'
 
 import { libelleModule } from '@/lib/operations'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ACCENT_SUPER } from '@/lib/charte'
 
@@ -17,7 +17,7 @@ import { ACCENT_SUPER } from '@/lib/charte'
 const ACC = '#2563EB'
 type Ev = { id: string; module: string; nom: string; super_event_id?: string | null }
 
-export function Phone({ src, empty }: { src?: string; empty?: string }) {
+export function Phone({ src, empty, iframeRef }: { src?: string; empty?: string; iframeRef?: React.RefObject<HTMLIFrameElement | null> }) {
   const W = 252, H = 505, SCALE = 0.64
   const IW = Math.round(W / SCALE)
   const IH = Math.round(H / SCALE)
@@ -27,6 +27,8 @@ export function Phone({ src, empty }: { src?: string; empty?: string }) {
         <div style={{ borderRadius: 28, overflow: 'hidden', background: '#fff', width: W, height: H, position: 'relative' }}>
           {src ? (
             <iframe
+              key={src}
+              ref={iframeRef}
               src={src}
               title="Aperçu du parcours"
               loading="lazy"
@@ -81,6 +83,17 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
     g.evs.push(e)
     return acc
   }, [])
+
+  /* Navigation ecran par ecran (Romain, 28/10 : « l accessibilite a chaque
+     page dans la navigation... pour pouvoir screenshoter et verifier »).
+     Chaque *Client.tsx du parcours ecoute deja postMessage({flowinNav:
+     'next'|'prev'}) pour avancer dans son propre NAV_SCREENS (mecanisme
+     existant, jusque-la sans emetteur) : on envoie juste le message a
+     l iframe, sans dupliquer sa logique de navigation. */
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const naviguer = (sens: 'next' | 'prev') => {
+    try { iframeRef.current?.contentWindow?.postMessage({ flowinNav: sens }, window.location.origin) } catch { /* iframe pas encore chargee */ }
+  }
 
   const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
   const superUrl = ev && multistation
@@ -151,8 +164,29 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
           </p>
         </div>
 
-        <div style={{ order: 2 }}>
-          <Phone src={phoneUrl || undefined} empty={empty} />
+        <div style={{ order: 2, display: 'flex', alignItems: 'center', gap: 10 }}>
+          {tab === 'event' && url && (
+            <button
+              onClick={() => naviguer('prev')}
+              aria-label="Écran précédent"
+              style={{ flexShrink: 0, width: 34, height: 34, borderRadius: '50%', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer', fontSize: 16, color: '#0F172A' }}
+            >‹</button>
+          )}
+          <div>
+            <Phone src={phoneUrl || undefined} empty={empty} iframeRef={iframeRef} />
+            {tab === 'event' && url && (
+              <div style={{ textAlign: 'center', marginTop: 8, fontSize: 11, color: '#94A3B8' }}>
+                ‹ précédent · suivant › pour parcourir tous les écrans
+              </div>
+            )}
+          </div>
+          {tab === 'event' && url && (
+            <button
+              onClick={() => naviguer('next')}
+              aria-label="Écran suivant"
+              style={{ flexShrink: 0, width: 34, height: 34, borderRadius: '50%', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer', fontSize: 16, color: '#0F172A' }}
+            >›</button>
+          )}
         </div>
       </div>
     </div>
