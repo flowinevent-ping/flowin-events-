@@ -29,6 +29,10 @@ function ProsContenu() {
   const lignes = proIds ? pros.filter((p: FlowinPro) => proIds.has(p.id)) : pros
   const nbEnAttente = lignes.filter((p: FlowinPro) => p.statut === 'en_attente').length
   const nbStations = (id: string) => events.filter(e => e.pro_id === id).length
+  /* Demande de Romain (28/10) : le CRM Pro doit permettre de voir d'un coup
+     d'oeil si un pro a une operation en cours, pas seulement son nombre total
+     de stations (qui compte aussi les operations passees). */
+  const nbEnCours = (id: string) => events.filter(e => e.pro_id === id && e.status === 'live').length
 
   async function traiter(id: string, statut: 'valide' | 'refuse') {
     setEnCours(id)
@@ -39,10 +43,18 @@ function ProsContenu() {
 
   const colonnes = useMemo<ColonneCRM<FlowinPro>[]>(() => [
     { id: 'nom', label: 'Pro', valeur: p => p.nom, rendu: p => <b>{p.nom || '—'}</b>, largeur: 240 },
+    { id: 'contact', label: 'Contact', valeur: p => p.contact, largeur: 150 },
+    { id: 'tel', label: 'Téléphone', valeur: p => p.tel, largeur: 130 },
+    { id: 'adresse', label: 'Adresse', valeur: p => [p.adresse, p.code_postal, p.ville].filter(Boolean).join(' · '), largeur: 220 },
     { id: 'ville', label: 'Ville', valeur: p => p.ville, largeur: 130 },
     { id: 'secteur', label: 'Secteur', valeur: p => p.secteur, largeur: 160 },
-    { id: 'contact', label: 'Contact', valeur: p => p.contact, largeur: 150 },
     { id: 'email', label: 'Email', valeur: p => p.email, largeur: 210 },
+    {
+      id: 'encours', label: 'En cours', valeur: p => nbEnCours(p.id), aligne: 'centre', largeur: 90, horsRecherche: true,
+      rendu: p => nbEnCours(p.id) > 0
+        ? <span className="sa-chip live">{nbEnCours(p.id)} en cours</span>
+        : <span className="sa-chip">—</span>,
+    },
     { id: 'stations', label: 'Stations', valeur: p => nbStations(p.id), aligne: 'droite', largeur: 80, horsRecherche: true },
     {
       /* Avant : aucune colonne equivalente ici, alors que « Partenaires »
