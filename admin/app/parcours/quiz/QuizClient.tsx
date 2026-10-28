@@ -4,9 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
-import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
+import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
@@ -16,6 +17,12 @@ import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
 type Screen = 'landing' | 'quiz' | 'resultats' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
+
+/* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
+const QUIZ_STEPS = [
+  { titre: 'Flashe le QR code', sous: 'À la station' },
+  { titre: 'Réponds au quiz', sous: 'Gagne ton ticket' },
+]
 
 export default function QuizClient({ ev, lots, partenaires, banques, evId }: Props) {
   const cfg = (ev?.cfg ?? {}) as Record<string, unknown>
@@ -147,36 +154,30 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
 
   return (
     <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{parcoursCSS(c) + `
-        
+      <style>{parcoursCSS(c) + PARCOURS_HERO_CSS + `
+
         .opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a} .opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444} .opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}
         .bonus-opt{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#fff;width:100%;font-family:inherit;margin-bottom:8px;text-align:left}
         .bonus-opt.sel{background:rgba(224,33,138,.16);border-color:#E0218A}
       `}</style>
 
       {screen === 'landing' && (
-        <div className="screen" style={{ paddingTop: 32 }}>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <ParcoursLogo emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl} />
-            <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 8 }}>{nom}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', marginBottom: 8 }}>{(cfg.subtitle as string) || theme.texts.landingSubtitle || ''}</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', marginBottom: 16 }}>{(cfg.datesLabel as string) || ''}</div>
-          </div>
-          {lots.length > 0 && (
-            <div className="card" style={{ marginBottom: 14 }}>
-              {lots.slice(0,3).map((l,i) => (
-                <div key={l.id} style={{ display:'flex',alignItems:'center',gap:10,padding:'6px 0',borderBottom:i<2?'1px solid rgba(255,255,255,.06)':'none' }}>
-                  <span style={{ width:28,height:28,borderRadius:8,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:900,background:'rgba(224,33,138,.18)',color:'#ffd5ec' }}>{i+1}</span>
-                  <span style={{ fontSize:13,fontWeight:700 }}>{l.titre||l.nom}</span>
-                </div>
-              ))}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+          <ParcoursHero module="quiz" nom={nom}
+            emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl}
+            subtitle={(cfg.subtitle as string) || theme.texts.landingSubtitle || (cfg.datesLabel as string) || undefined} />
+          <div className="pc-stage">
+            <ParcoursPrizeCard lots={lots} />
+            <ParcoursHowTo steps={QUIZ_STEPS} />
+            <div style={{ flex: 1 }} />
+            <div style={{ padding: '0 18px' }}>
+              {tirageText && <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',textAlign:'center',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14 }}>{tirageText}</div>}
+              <button className="btn" onClick={() => setScreen('quiz')}>{front.ctaText || theme.texts.ctaLanding || 'Jouer gratuitement →'}</button>
+              <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
+              {partenaires.length > 0 && <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>}
+              <FlowinBadge />
             </div>
-          )}
-          {tirageText && <div style={{ background:'rgba(168,85,247,.1)',border:'1px solid rgba(168,85,247,.25)',borderRadius:10,padding:'10px 14px',textAlign:'center',fontSize:12,fontWeight:700,color:'rgba(255,255,255,.8)',marginBottom:14 }}>{tirageText}</div>}
-          <button className="btn" onClick={() => setScreen('quiz')}>{front.ctaText || theme.texts.ctaLanding || 'Jouer gratuitement →'}</button>
-          <div style={{ fontSize:10,textAlign:'center',color:'rgba(255,255,255,.3)',margin:'6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
-          {partenaires.length > 0 && <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>}
-          <FlowinBadge />
+          </div>
         </div>
       )}
 

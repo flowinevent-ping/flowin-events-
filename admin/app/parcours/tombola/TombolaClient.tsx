@@ -7,12 +7,19 @@ import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
 
 type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already'
+
+/* Étapes de l'écran "Comment jouer ?" (ParcoursHowTo) — propres au module. */
+const TOMBOLA_STEPS = [
+  { titre: 'Flashe le QR code', sous: 'À la station' },
+  { titre: 'Inscris-toi au tirage', sous: 'Et tente ta chance' },
+]
 
 interface Props {
   ev: FlowinEvent | null
@@ -137,7 +144,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
 
   return (
     <div style={{ maxWidth: 430, margin: '0 auto', minHeight: '100dvh', background: theme.bgImage ? `url(${theme.bgImage}) center/cover` : theme.bgColor, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style>{`
+      <style>{PARCOURS_HERO_CSS + `
         *{box-sizing:border-box;margin:0;padding:0}
         .part-tile-avatar{width:52px;height:52px;border-radius:12px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:rgba(224,33,138,.18);color:#ffd5ec;object-fit:contain}
         .part-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:flex-end}
@@ -165,54 +172,30 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
 
       {/* LANDING */}
       {screen === 'landing' && (
-        <div className="screen" style={{ paddingTop: 32 }}>
-          <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            {badge && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.2)', borderRadius: 100, padding: '5px 14px', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 14 }}>
-                {badge}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+          <ParcoursHero module="tombola" nom={nom} badgeText={badge}
+            emoji={(cfg.logoEmoji as string) || theme.logoEmoji} logoSvg={(cfg.logoSvg as string) || theme.logoSvg} logoUrl={theme.logoUrl}
+            subtitle={[description, dates].filter(Boolean).join(' · ') || undefined} />
+          <div className="pc-stage">
+            <ParcoursPrizeCard lots={lots} />
+            <ParcoursHowTo steps={TOMBOLA_STEPS} />
+            <div style={{ flex: 1 }} />
+            <div style={{ padding: '0 18px' }}>
+              {tirageText && (
+                <div style={{ background: 'rgba(124,45,146,.18)', border: '1px solid rgba(224,33,138,.3)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)', marginBottom: 16 }}>
+                  {tirageText}
+                </div>
+              )}
+              <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
+              <div style={{ fontSize: 10, textAlign: 'center', color: 'rgba(255,255,255,.3)', margin: '6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
+              {partenaires.length > 0 && (
+                <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, opacity: .6 }}>
+                <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style={{ height: 13, width: 'auto' }} />
+                <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}>Propulsé par Flowin</span>
               </div>
-            )}
-            <div style={{ width: 96, height: 96, borderRadius: '50%', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), rgba(255,255,255,.03) 62%)`, border: '1px solid rgba(255,255,255,.16)', boxShadow: `0 18px 40px ${c}4d, 0 0 60px ${c}59` }}>
-              <svg viewBox="0 0 100 100" width={56} height={56} style={{ display: 'block' }}>
-                <circle cx="50" cy="50" r="50" fill="#fff" />
-                <rect x="38" y="16" width="24" height="68" rx="5" fill={c} />
-                <rect x="16" y="38" width="68" height="24" rx="5" fill={c} />
-              </svg>
             </div>
-            <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>{nom}</div>
-            {description && <div style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', lineHeight: 1.6, marginBottom: 10, padding: '0 8px' }}>{description}</div>}
-            {dates && <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.5)', marginBottom: 16 }}>{dates}</div>}
-          </div>
-          {lots.length > 0 && (
-            <div style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, marginBottom: 14 }}>
-              {lots.slice(0, 5).map((l, i) => {
-                return (
-                  <div key={l.id} className="lot-row">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(224,33,138,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#ffd5ec', flexShrink: 0 }}>
-                      {i + 1}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 800 }}>{l.titre || l.nom}</div>
-                      {l.description && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.45)' }}>{l.description}</div>}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-          {tirageText && (
-            <div style={{ background: 'rgba(124,45,146,.18)', border: '1px solid rgba(224,33,138,.3)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.8)', marginBottom: 16 }}>
-              {tirageText}
-            </div>
-          )}
-          <button className="btn-cta" onClick={() => setScreen('form')}>{ctaText}</button>
-          <div style={{ fontSize: 10, textAlign: 'center', color: 'rgba(255,255,255,.3)', margin: '6px 0 8px' }}>Jeu gratuit · Sans achat obligatoire</div>
-          {partenaires.length > 0 && (
-            <button className="btn-ghost" onClick={() => setScreen('partenaires')}>Nos {partenaires.length} partenaires</button>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, opacity: .6 }}>
-            <img src="/nds/assets/flowin_blanc.png" alt="Flowin" style={{ height: 13, width: 'auto' }} />
-            <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.09em', textTransform: 'uppercase', color: 'rgba(255,255,255,.6)' }}>Propulsé par Flowin</span>
           </div>
         </div>
       )}
