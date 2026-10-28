@@ -805,9 +805,9 @@ export default function MasterQuizClient({ ev, lots, partenaires, banques, evId 
 
   return (
     <div className="ndsbody">
-      {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;<svg className="ic" style={{ width: 16, height: 16, verticalAlign: -3 }}><use href="#i-ticket" /></svg></div>}
+      {fly > 0 && <div key={`fly-${fly}`} className="ticketfly" aria-hidden="true">+1&#8239;<svg className="ic" style={{ width: 16, height: 16, verticalAlign: -3 }}><use href="#i-ticket" /></svg></div>}
       {celebrate > 0 && (
-        <div className="confetti-wrap" key={celebrate} aria-hidden="true">
+        <div className="confetti-wrap" key={`cf-${celebrate}`} aria-hidden="true">
           {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
         </div>
       )}
