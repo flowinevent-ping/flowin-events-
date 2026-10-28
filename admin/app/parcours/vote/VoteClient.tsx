@@ -6,7 +6,7 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRegles, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -21,6 +21,15 @@ interface Props extends ParcoursPageData { evId: string }
 const VOTE_STEPS = [
   { titre: 'Flashe le QR code', sous: 'À la station' },
   { titre: 'Vote pour ton favori', sous: 'Et tente ta chance' },
+]
+
+/* Regles reelles : un choix unique ou une note par etoiles (handleSubmit) ->
+   ticket ecrit sans condition de resultat. Dedup par jour confirmee (meme
+   check `played_date` que les autres modules). */
+const VOTE_REGLES = [
+  { titre: 'Un ticket par jour', texte: 'Le droit au ticket se remet à zéro chaque jour : on peut revoter le lendemain.' },
+  { titre: 'Un vote suffit', texte: 'Valide ton choix (ou ta note pour chaque élément) pour obtenir ton ticket.' },
+  { titre: 'Déjà un compte : on ne resaisit rien', texte: 'Un joueur reconnu sur son appareil, ou qui donne son email, retrouve ses informations et son ticket — le formulaire ne lui est plus demandé.' },
 ]
 
 export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
@@ -126,6 +135,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
           <div className="pc-stage">
             <ParcoursPrizeCard lots={lots} />
             <ParcoursHowTo steps={VOTE_STEPS} />
+            <ParcoursRegles regles={VOTE_REGLES} />
             <div style={{ flex: 1 }} />
             <div style={{ padding: '0 18px' }}>
               <button className="btn" onClick={()=>lsCheck()||setScreen('vote')}>{theme.texts.ctaLanding || 'Voter maintenant'} →</button>

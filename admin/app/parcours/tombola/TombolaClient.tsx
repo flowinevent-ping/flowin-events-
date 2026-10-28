@@ -7,7 +7,7 @@ import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRegles, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
@@ -19,6 +19,15 @@ type Screen = 'landing' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'alr
 const TOMBOLA_STEPS = [
   { titre: 'Flashe le QR code', sous: 'À la station' },
   { titre: 'Inscris-toi au tirage', sous: 'Et tente ta chance' },
+]
+
+/* Regles reelles : l'inscription ne donne pas de lot immediat (ecran
+   "Tu es dans la course !", numero de tombola) -- le gagnant est designe au
+   tirage. Dedup par jour confirmee (meme check `played_date`). */
+const TOMBOLA_REGLES = [
+  { titre: 'Une inscription par jour', texte: 'Le droit à l’inscription se remet à zéro chaque jour : on peut se réinscrire le lendemain.' },
+  { titre: 'Pas de gain immédiat', texte: 'Ton inscription te place dans le tirage — le ou les gagnants sont désignés au tirage.' },
+  { titre: 'Déjà un compte : on ne resaisit rien', texte: 'Un joueur reconnu sur son appareil, ou qui donne son email, retrouve ses informations et son ticket — le formulaire ne lui est plus demandé.' },
 ]
 
 interface Props {
@@ -179,6 +188,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
           <div className="pc-stage">
             <ParcoursPrizeCard lots={lots} />
             <ParcoursHowTo steps={TOMBOLA_STEPS} />
+            <ParcoursRegles regles={TOMBOLA_REGLES} />
             <div style={{ flex: 1 }} />
             <div style={{ padding: '0 18px' }}>
               {tirageText && (

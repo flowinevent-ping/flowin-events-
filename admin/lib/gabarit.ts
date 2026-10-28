@@ -56,8 +56,11 @@
  * festival, qui n'a jamais ete migree vers /se/[se]. Elle n'est pas touchee. */
 export const GABARIT_MODULE = 'quiz'
 
-/** Le nom sous lequel Romain le designe. */
-export const GABARIT_NOM = 'Quiz + bonus'
+/** Le nom affiche. Romain, 28/10 : « je te demande de le mettre en intitule
+ *  marque blanche pour les modeles de jeu » -- affiche partout ou GABARIT_NOM
+ *  est deja lu (jeux/page.tsx, wizard-event, wizard-super-event,
+ *  NouvelleOperation), un seul endroit a changer. */
+export const GABARIT_NOM = 'Quiz + bonus — marque blanche'
 
 export const GABARIT_DESC =
   'Le gabarit de référence, tiré de NDS 2026 : flash, quiz, bonus de rattrapage, inscription, ticket.'

@@ -6,7 +6,7 @@ import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRegles, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
@@ -22,6 +22,18 @@ interface Props extends ParcoursPageData { evId: string }
 const SPIN_STEPS = [
   { titre: 'Flashe le QR code', sous: 'À la station' },
   { titre: 'Tourne la roue', sous: 'Et tente ta chance' },
+]
+
+/* Regles reelles : un tour -> le segment tire decide (gagnant immediat,
+   tirage ou "voisin" selon Segment.mode, vus dans l'ecran "result"). Un
+   segment perdant garde quand meme un ticket (commentaire deja en place plus
+   bas sur l'ecran ticket : participation au tirage general). Dedup par jour
+   confirmee (meme check `played_date`). */
+const SPIN_REGLES = [
+  { titre: 'Un tour par jour', texte: 'Le droit de tourner la roue se remet à zéro chaque jour : on peut retenter sa chance le lendemain.' },
+  { titre: 'Le segment tiré décide', texte: 'Lot immédiat, entrée dans un tirage, ou lot à transmettre à la personne à côté — selon ce que la roue désigne.' },
+  { titre: 'Perdant = quand même dans la course', texte: 'Un tour perdant enregistre quand même ta participation au tirage général.' },
+  { titre: 'Déjà un compte : on ne resaisit rien', texte: 'Un joueur reconnu sur son appareil, ou qui donne son email, retrouve ses informations et son ticket — le formulaire ne lui est plus demandé.' },
 ]
 
 export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
@@ -252,6 +264,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           <div className="pc-stage">
             <ParcoursPrizeCard lots={lots} />
             <ParcoursHowTo steps={SPIN_STEPS} />
+            <ParcoursRegles regles={SPIN_REGLES} />
             <div style={{ flex: 1 }} />
             <div style={{ padding: '0 18px' }}>
               {tirageText && (
