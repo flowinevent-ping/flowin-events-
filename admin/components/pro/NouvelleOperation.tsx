@@ -429,7 +429,10 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
             </div>
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
-              {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/operation${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
+              {/* Historique (Romain, 28/10) : apres la creation, le pro arrive
+                  sur l ecran qui regroupe QR+PIN, stock des lots et gagnants
+                  de CETTE operation -- pas sur la fiche a onglets. */}
+              {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
               <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
             </div>
           </div>
