@@ -73,6 +73,7 @@ const ICON_BY_ID: Record<string, string> = {
   operations: 'gauge',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
   'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
+  'theme-parcours': 'layout',
   'demandes-rattachement': 'handshake',
   'facture-nds': 'receipt',
   roadmap: 'map', parametres: 'settings', maintenance: 'wrench', controle: 'check',
@@ -171,6 +172,7 @@ export default function Sidebar() {
       items: [
         { id: 'events', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
         { id: 'wizard-event-se', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
+        { id: 'theme-parcours', label: 'Thème des parcours', href: '/dashboard/theme-parcours' },
       ],
     },
     {
