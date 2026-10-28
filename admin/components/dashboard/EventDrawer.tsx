@@ -6,6 +6,7 @@ import { upsertEvent, deleteEvent, fetchEventParticipants, fetchGagnants, type G
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { etatTirage, LIBELLE_ETAT_TIRAGE } from '@/lib/operations'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
+import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { DrawerTabs, FieldRow, SectionHeader, StatusChip, ModuleChip } from './DashboardUI'
 import { SousOnglets, SousOngletVide } from './SousOnglets'
 import Diffusion from './Diffusion'
@@ -35,7 +36,14 @@ export default function EventDrawer() {
   const [quizNbQ, setQuizNbQ] = useState(5)
   const [quizTimerOn, setQuizTimerOn] = useState(true)
   const [quizTimerSec, setQuizTimerSec] = useState(30)
-  const [voteItems, setVoteItems] = useState<{ id: string; nom: string; emoji?: string; genre?: string; desc?: string }[]>([])
+  /* "Manche" = un ecran de vote (image/logo + etoiles), lu cote joueur depuis
+     cfg.vote_manches en priorite (VoteClient.tsx) — avec repli sur les cles
+     historiques voteItems/comediens/standupComediens pour les events deja
+     configures avant l'ajout de ce champ. Gabarit fixe et simple (pas de
+     Canva libre) : demande de Romain. */
+  const [manches, setManches] = useState<{ id: string; nom: string; emoji?: string; genre?: string; desc?: string; image?: string; logo?: string; texte?: string }[]>([])
+  const [uploadingManche, setUploadingManche] = useState<number | null>(null)
+  const [uploadErreurManche, setUploadErreurManche] = useState('')
   /* Sous-onglet de l onglet Participants. Les 3 compteurs affiches la n etaient
      pas cliquables : ils deviennent le filtre lui-meme, sans rien ajouter. */
   const [vueParticipants, setVueParticipants] = useState<'tous' | 'optin' | 'sans'>('tous')
@@ -82,7 +90,8 @@ export default function EventDrawer() {
     const qt = cfg.quizTimer
     setQuizTimerOn(qt !== false)
     setQuizTimerSec(typeof qt === 'number' ? qt : 30)
-    setVoteItems(((cfg.voteItems as typeof voteItems) ?? (cfg.comediens as typeof voteItems) ?? (cfg.standupComediens as typeof voteItems) ?? []))
+    setManches(((cfg.vote_manches as typeof manches) ?? (cfg.voteItems as typeof manches) ?? (cfg.comediens as typeof manches) ?? (cfg.standupComediens as typeof manches) ?? []))
+    setUploadErreurManche('')
     setSegmentsInit(true)
   }, [ev?.id])
 
@@ -117,10 +126,26 @@ export default function EventDrawer() {
   async function saveVote() {
     if (!ev) return
     setSavingJeu(true)
-    const cfg = { ...((ev.cfg ?? {}) as Record<string, unknown>), voteItems }
+    // Ecrit uniquement la nouvelle cle vote_manches (lue en priorite par
+    // VoteClient.tsx) ; la cle historique voteItems reste en base inchangee
+    // pour trace, mais n'est plus la source une fois cette fiche enregistree.
+    const cfg = { ...((ev.cfg ?? {}) as Record<string, unknown>), vote_manches: manches }
     const ok = await upsertEvent({ id: ev.id, cfg: cfg as FlowinEvent['cfg'] })
     if (ok) setEvents(events.map(x => x.id === ev.id ? { ...x, cfg: cfg as FlowinEvent['cfg'] } : x))
     setSavingJeu(false)
+  }
+
+  async function onFichierManche(e: React.ChangeEvent<HTMLInputElement>, i: number) {
+    const fichier = e.target.files?.[0]
+    e.target.value = ''
+    if (!fichier || !ev) return
+    setUploadErreurManche('')
+    setUploadingManche(i)
+    const redim = await redimensionnerImage(fichier).catch(() => fichier)
+    const res = await uploaderLogo(redim, `vote-manches/${ev.id}`)
+    setUploadingManche(null)
+    if ('erreur' in res) { setUploadErreurManche(res.erreur); return }
+    setManches(manches.map((x, j) => j === i ? { ...x, image: res.url } : x))
   }
 
   // Ex-violation des Rules of Hooks : ces 2 hooks (+ tri/filtre ci-dessous) etaient
@@ -205,7 +230,7 @@ export default function EventDrawer() {
     { id: 'infos', label: 'Infos' },
     ...(ev.module === 'spin' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: segments.length }] : []),
     ...(isQuizFamily ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: totalDispo }] : []),
-    ...(ev.module === 'vote' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: voteItems.length }] : []),
+    ...(ev.module === 'vote' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: manches.length }] : []),
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
@@ -446,37 +471,68 @@ export default function EventDrawer() {
 
         {drawer.tab === 'jeu' && segmentsInit && ev.module === 'vote' && (
           <div>
-            <SectionHeader>Éléments à voter</SectionHeader>
-            {voteItems.length === 0 && (
+            <SectionHeader>Manches à voter (1 à 10)</SectionHeader>
+            {manches.length === 0 && (
               <div className="sa-empty-inline" style={{ marginBottom: 12 }}>
-                Aucun élément — le joueur verra un vote vide. Ajoute au moins 2 éléments.
+                Aucune manche — le joueur verra un vote vide. Ajoute au moins 2 manches.
               </div>
             )}
-            {voteItems.map((it, i) => (
-              <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <input
-                  className="sa-input" value={it.emoji ?? ''} placeholder="🎤"
-                  onChange={e => setVoteItems(voteItems.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))}
-                  style={{ width: 48, textAlign: 'center', flexShrink: 0, padding: '9px 4px' }}
-                />
-                <input
-                  className="sa-input" value={it.nom} placeholder="Nom"
-                  onChange={e => setVoteItems(voteItems.map((x, j) => j === i ? { ...x, nom: e.target.value } : x))}
-                  style={{ flex: 1 }}
-                />
-                <input
-                  className="sa-input" value={it.genre ?? ''} placeholder="Genre (optionnel)"
-                  onChange={e => setVoteItems(voteItems.map((x, j) => j === i ? { ...x, genre: e.target.value } : x))}
-                  style={{ flex: 1 }}
-                />
-                <button className="sa-btn sm" onClick={() => setVoteItems(voteItems.filter((_, j) => j !== i))}>Retirer</button>
+            {manches.map((it, i) => (
+              <div key={it.id} className="sa-support" style={{ marginBottom: 10, padding: 12 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  {/* Bloc image/logo — position constante, comme cote joueur */}
+                  <div style={{ width: 64, height: 64, flexShrink: 0, borderRadius: 14, border: '2px dashed var(--sa-border)', background: 'var(--sa-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    {it.image || it.logo
+                      ? <img src={it.image || it.logo} alt="" style={{ width: '100%', height: '100%', objectFit: it.image ? 'cover' : 'contain', padding: it.image ? 0 : 6 }} onError={() => setManches(manches.map((x, j) => j === i ? { ...x, image: undefined, logo: undefined } : x))} />
+                      : <span style={{ fontSize: 22 }}>{it.emoji || '🎤'}</span>
+                    }
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                      <label className="sa-btn sm" style={{ cursor: uploadingManche === i ? 'default' : 'pointer' }}>
+                        {uploadingManche === i ? 'Envoi…' : 'Choisir une image'}
+                        <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
+                          disabled={uploadingManche !== null} onChange={e => onFichierManche(e, i)} />
+                      </label>
+                      <input
+                        className="sa-input" value={it.image || it.logo || ''} placeholder="Ou coller une URL (image ou logo)"
+                        onChange={e => setManches(manches.map((x, j) => j === i ? { ...x, image: e.target.value, logo: undefined } : x))}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                      <input
+                        className="sa-input" value={it.emoji ?? ''} placeholder="🎤"
+                        onChange={e => setManches(manches.map((x, j) => j === i ? { ...x, emoji: e.target.value } : x))}
+                        style={{ width: 48, textAlign: 'center', flexShrink: 0, padding: '9px 4px' }}
+                      />
+                      <input
+                        className="sa-input" value={it.nom} placeholder="Nom *"
+                        onChange={e => setManches(manches.map((x, j) => j === i ? { ...x, nom: e.target.value } : x))}
+                        style={{ flex: 1 }}
+                      />
+                      <input
+                        className="sa-input" value={it.genre ?? ''} placeholder="Genre (optionnel)"
+                        onChange={e => setManches(manches.map((x, j) => j === i ? { ...x, genre: e.target.value } : x))}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                    <textarea
+                      className="sa-input" value={it.texte ?? ''} placeholder="Texte affiché sous le nom (optionnel)"
+                      onChange={e => setManches(manches.map((x, j) => j === i ? { ...x, texte: e.target.value } : x))}
+                      style={{ width: '100%', minHeight: 44, resize: 'vertical' }}
+                    />
+                  </div>
+                  <button className="sa-btn sm" onClick={() => setManches(manches.filter((_, j) => j !== i))}>Retirer</button>
+                </div>
               </div>
             ))}
+            {uploadErreurManche && <div className="sa-aide" style={{ color: '#c0392b', marginBottom: 10 }}>{uploadErreurManche}</div>}
             <button
-              className="sa-btn sm" style={{ marginTop: 4 }}
-              onClick={() => setVoteItems([...voteItems, { id: 'vi-' + Math.random().toString(36).slice(2, 8), nom: '', emoji: '🎤' }])}
+              className="sa-btn sm" style={{ marginTop: 4 }} disabled={manches.length >= 10}
+              onClick={() => setManches([...manches, { id: 'vm-' + Math.random().toString(36).slice(2, 8), nom: '', emoji: '🎤' }])}
             >
-              + Ajouter un élément
+              + Ajouter une manche{manches.length >= 10 ? ' (max 10)' : ''}
             </button>
             <div style={{ marginTop: 18 }}>
               <button className="sa-btn primary" onClick={saveVote} disabled={savingJeu}>
