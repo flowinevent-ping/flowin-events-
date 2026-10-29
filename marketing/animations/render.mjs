@@ -15,7 +15,7 @@ const ici = dirname(fileURLToPath(import.meta.url))
 const FPS = 30
 const args = process.argv.slice(2)
 const planchesSeules = args.includes('--planches')
-const tous = ['participants', 'organisateurs', 'partenaires']
+const tous = ['participants-15', 'participants-30', 'organisateurs-15', 'organisateurs-30', 'partenaires-15', 'partenaires-30']
 const ids = args.filter(a => !a.startsWith('--'))
 const videos = ids.length ? ids : tous
 mkdirSync(join(ici, 'planches'), { recursive: true })
@@ -35,22 +35,35 @@ async function ouvrir(id) {
 
 async function planche(id, toutes) {
   const { ctx, page, erreurs } = await ouvrir(id)
-  const info = await page.evaluate(() => ({ duration: window.ANIM.duration, scenes: window.ANIM.scenes }))
-  // 8 images cles : 7 scenes reparties + l ecran de fin.
+  const info = await page.evaluate(() => ({ duration: window.ANIM.duration, scenes: window.ANIM.scenes, mode: window.SCENARIO.end.mode }))
   const sc = info.scenes
-  const choix = []
-  const pas = (sc.length - 1) / 7
-  if (toutes) sc.forEach(s => choix.push(s))
-  else {
-    for (let k = 0; k < 7; k++) choix.push(sc[Math.min(sc.length - 2, Math.round(k * pas))])
-    choix.push(sc[sc.length - 1])
+  const minLegende = info.duration < 20 ? 2 : 3
+  const avertissements = []
+  // Controle sur toute la video : zones sures et textes reduits, a plusieurs
+  // instants de chaque scene (apres le fondu d entree).
+  for (const s of sc) {
+    if (s.caption && s.dur < minLegende) avertissements.push(`[${s.label}] legende affichee ${s.dur} s < ${minLegende} s`)
+    for (const f of [0.25, 0.6, 0.95]) {
+      const t = s.start + Math.min(s.dur - 0.05, Math.max(0.45, s.dur * f))
+      await page.evaluate(x => window.ANIM.seek(x), t)
+      const w = await page.evaluate(() => window.__warnings || [])
+      w.forEach(x => { const m = `[${s.label}] ${x}`; if (!avertissements.includes(m)) avertissements.push(m) })
+    }
   }
-  const images = [], avertissements = []
-  for (const s of choix) {
-    const t = s.start + Math.min(s.dur - 0.25, 3.0)
+  // Images cles : la toute premiere image (vignette de la video), les scenes
+  // du milieu (6 au plus, reparties) et l ecran de fin.
+  const milieu = sc.slice(1, -1)
+  const pris = []
+  if (toutes) sc.forEach(s => pris.push([s, s.start + Math.min(s.dur - 0.25, Math.max(1.2, s.dur * 0.7))]))
+  else {
+    pris.push([sc[0], 0])
+    const n = Math.min(6, milieu.length)
+    for (let k = 0; k < n; k++) { const s = milieu[Math.round(k * (milieu.length - 1) / Math.max(1, n - 1))]; pris.push([s, s.start + Math.min(s.dur - 0.25, Math.max(1.2, s.dur * 0.7))]) }
+    const f = sc[sc.length - 1]; pris.push([f, f.start + f.dur - 0.3])
+  }
+  const images = []
+  for (const [s, t] of pris) {
     await page.evaluate(x => window.ANIM.seek(x), t)
-    const w = await page.evaluate(() => window.__warnings || [])
-    w.forEach(x => avertissements.push(`[${s.label}] ${x}`))
     const buf = await page.screenshot({ type: 'png' })
     images.push({ label: `${s.label} — ${t.toFixed(1)} s`, b64: buf.toString('base64') })
   }
@@ -58,7 +71,7 @@ async function planche(id, toutes) {
   const fin = sc[sc.length - 1]
   await page.evaluate(x => window.ANIM.seek(x), fin.start + fin.dur - 0.2)
   const png = PNG.sync.read(await page.screenshot({ type: 'png' }))
-  const qr = jsQR(new Uint8ClampedArray(png.data), png.width, png.height)
+  const qr = info.mode === 'qr' ? jsQR(new Uint8ClampedArray(png.data), png.width, png.height) : null
   await ctx.close()
 
   const p2 = await browser.newPage({ viewport: { width: toutes ? 1400 : 1120, height: 1060 } })
@@ -102,7 +115,7 @@ for (const id of videos) {
   const r = await planche(id)
   rapport.push(r)
   console.log(`${id} : ${r.duration.toFixed(1)} s, planche ${r.out}`)
-  console.log(`  QR lu : ${r.qr || 'ILLISIBLE'}`)
+  console.log(`  QR lu : ${r.qr || '(pas de QR sur cette coupe ou ILLISIBLE)'}`)
   if (r.avertissements.length) console.log('  avertissements :\n   ' + r.avertissements.join('\n   '))
   if (r.erreurs.length) console.log('  erreurs page :', r.erreurs)
 }

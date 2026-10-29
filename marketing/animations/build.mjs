@@ -10,9 +10,16 @@ const lire = p => readFileSync(join(ici, p), 'utf8')
 
 // Cible reelle de chaque QR de fin (justification dans SCENARIOS.md).
 export const VIDEOS = [
-  { id: 'participants', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz' },
-  { id: 'organisateurs', qr: 'https://flowin-events.vercel.app/pro/inscription' },
-  { id: 'partenaires', qr: 'https://flowin-events.vercel.app/pro/inscription' },
+  // Coupes 15 s (reseaux sociaux) : ecran de fin sans QR, mais la page garde
+  // la meme cible pour le lien « en bio » (voir SCENARIOS.md).
+  // Participants : ?preview=1 n ecrit aucun joueur, aucune participation ni
+  // visite (lib/parcours.ts estApercu, lib/track.ts) : scanner ne cree pas de compte.
+  { id: 'participants-15', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1' },
+  { id: 'participants-30', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1' },
+  { id: 'organisateurs-15', qr: 'https://flowin-events.vercel.app/pro/inscription' },
+  { id: 'organisateurs-30', qr: 'https://flowin-events.vercel.app/pro/inscription' },
+  { id: 'partenaires-15', qr: 'https://flowin-events.vercel.app/pro/inscription' },
+  { id: 'partenaires-30', qr: 'https://flowin-events.vercel.app/pro/inscription' },
 ]
 
 const polices = ['500', '700', '800'].map(w => {

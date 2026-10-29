@@ -1,6 +1,93 @@
 # Animations explicatives Flowin — scénarios et audit
 
-Trois vidéos verticales (1080 × 1920, 30 i/s, sans son nécessaire), une par public. Elles racontent **la même histoire** vue de trois côtés.
+Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V2 (six coupes 15 s / 30 s) est décrite d'abord ; la V1 reste documentée en dessous.
+
+## V2 — six coupes pour TikTok, Instagram et Facebook
+
+La V2 remplace les trois vidéos explicatives par **deux coupes par public** : une publicité réseaux sociaux de **15 s** et une explication de **30 s**. Même histoire, mêmes personnages, mêmes chiffres que la V1 (voir plus bas), mais chaque coupe commence par une accroche en très gros texte et finit sur un appel à l'action unique.
+
+Règles appliquées aux six coupes :
+- **Accroche 0–2 s** (0–3 s en 30 s) : 3 lignes en 52 px, un visuel lisible dès la première image (vignette de la vidéo).
+- **Légendes** : 2 lignes au plus, 29 px gras, affichées toute la scène — 2,5 s minimum en 15 s, 3,2 s en 30 s (consigne : 2 s / 3 s).
+- **Zones sûres** (interface TikTok/Reels) : aucun texte dans les 10 % du haut, les 20 % du bas ni les 15 % de droite. Un voile opaque masque le bas du téléphone. `render.mjs` vérifie chaque texte visible à 3 instants de chaque scène : 0 avertissement sur les six coupes (`planches/rapport.json`).
+- **Fin 15 s (réseaux)** : logo, une phrase, un bouton d'appel à l'action, adresse courte, « Lien en bio ». **Pas de QR.**
+- **Fin 30 s** : même accroche, QR réel petit et secondaire, lu par jsQR avant export.
+- Vocabulaire : « Animation » (un commerce, chez lui) et « Super event » (plusieurs commerces, créé par Flowin).
+
+### Participants 15 s
+| Temps | Scène | Légende |
+|---|---|---|
+| 0–2 s | Accroche (kicker « JEU GRATUIT ») | **Un bon d'achat / à gagner en / 5 questions.** (bon d'achat 20 €, Boulangerie Les Tilleuls) |
+| 2–4,5 s | Aminata flashe le QR du stand | Flashe le QR / de la station. |
+| 4,5–7 s | Accueil du jeu | Gratuit, sans appli, / sans achat. |
+| 7–9,5 s | Ticket PQ-2026-4128 | 5/5 : ton ticket / pour le tirage. |
+| 9,5–12 s | Retrait chez Mei, « Billet validé » | Tirée au sort, Aminata / gagne 20 € chez Mei. |
+| 12–15 s | Fin réseaux | « Joue chez tes commerçants. » · bouton **Cherche le QR Flowin** · flowin-events.vercel.app · Lien en bio |
+
+### Participants 30 s
+Accroche 3 s, puis 7 scènes de 3,2 s : « Aminata flashe le QR / d'une station. » · « Le jeu s'ouvre : / gratuit, sans appli. » · « 5 questions, / une à la fois. » · « Sans faute : / son ticket est acquis. » · « Ticket PQ-2026-4128 / Tirage dimanche. » · « Elle découvre les / commerces partenaires. » · « Tirée au sort, elle / gagne 20 € chez Mei. » — fin 4,6 s : « Joue chez tes commerçants. », QR **Scanne pour essayer le jeu**.
+
+### Organisateurs 15 s
+| Temps | Scène | Légende |
+|---|---|---|
+| 0–2 s | Accroche (kicker « SUPER EVENT ») | **163 contacts / récoltés en / un week-end.** (avatars qui s'ajoutent) |
+| 2–4,5 s | Écran « Que voulez-vous faire ? » : Hugo choisit « Demander la création d'un super event à Flowin » | Hugo demande son / super event à Flowin. |
+| 4,5–7 s | La fête, trois stands | Chaque commerce / devient une station. |
+| 7–9,5 s | « Mes opérations », compteur 214 parties | En direct : / 214 parties. |
+| 9,5–12 s | « Mes super data », CRM | Après la fête : / 163 contacts gardés. |
+| 12–15 s | Fin réseaux | « Un super event pour votre ville. » · bouton **Créez votre compte pro** · flowin-events.vercel.app · Lien en bio |
+
+### Organisateurs 30 s
+Accroche 3 s, puis : « Hugo demande son / super event à Flowin. » · « Flowin le crée : / un jeu, un tirage. » (carte « À venir », 0 partie) · « Chaque commerce / devient une station. » · « En direct : / 214 parties. » · « Dimanche, le tirage / au sort en un clic. » · « Le billet du gagnant / part par email. » · « Après la fête : / 163 contacts gardés. » — fin : « Un super event pour votre ville. », QR **Scannez : compte pro**.
+
+### Partenaires 15 s
+| Temps | Scène | Légende |
+|---|---|---|
+| 0–2 s | Accroche (kicker « COMMERÇANTS ») | **Fini la carte / de fidélité / papier.** (carte à tampons barrée) |
+| 2–4,5 s | « Devenez commerce partenaire » | Mei rejoint le super / event en 4 étapes. |
+| 4,5–7 s | Lot pour le tirage | Elle offre un bon / d'achat de 20 €. |
+| 7–9,5 s | La fête, QR de la boutique | Les joueurs flashent / le QR de sa boutique. |
+| 9,5–12 s | Bilan station | 51 joueurs, 96 flashs / de son QR. |
+| 12–15 s | Fin réseaux | « Animez votre boutique, captez de nouveaux clients. » · bouton **Devenez partenaire** · flowin-events.vercel.app · Lien en bio |
+
+### Partenaires 30 s
+Accroche 3 s, puis : « Mei rejoint le super / event en 4 étapes. » · « Elle offre un bon / d'achat de 20 €. » · « Validée par Flowin / sous 24 à 48 h. » · « Les joueurs flashent / le QR de sa boutique. » · « Sa boutique dans / « Nos partenaires ». » · « 51 joueurs, 96 flashs / de son QR. » · « Lot retiré chez Mei : / billet validé. » — fin : accroche, QR **Scannez : devenir partenaire**.
+
+### Cibles des QR (coupes 30 s)
+| Coupe | Cible | Pourquoi |
+|---|---|---|
+| Participants 30 s | `https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1` | `?preview=1` : mode aperçu (`lib/parcours.ts` `estApercu()`, garde dans `lib/track.ts`) — scanner le QR depuis la vidéo **ne crée ni joueur, ni participation, ni visite**. |
+| Organisateurs 30 s, Partenaires 30 s | `https://flowin-events.vercel.app/pro/inscription` | Inchangé (voir V1). |
+
+## Audit marketing V1 → V2
+
+| # | Critique de la V1 | Correction V2 |
+|---|---|---|
+| 1 | Pas d'accroche : les 2 premières secondes posaient le décor, la vignette ne disait rien. | Accroche en 52 px dès l'image 0, avec un visuel du bénéfice (bon d'achat, contacts, carte de fidélité barrée). |
+| 2 | 35–37 s : trop long pour une publicité sociale, trop court pour tout expliquer. | Deux coupes par public : 15 s (pub) et 30 s (explication). |
+| 3 | Légendes descriptives (« ce qui se passe ») plutôt que vendeuses. | Légendes qui portent un bénéfice réel : commerces = fidélisation sans carte papier, contacts, visites mesurées (flashs) ; joueurs = gratuit, sans appli ; organisateurs = 163 contacts, trafic chez les commerces. |
+| 4 | **Histoire organisateur fausse** : Hugo créait lui-même le super event. Un pro ne peut pas créer un super event. | Hugo **demande** son super event à Flowin (écran « Que voulez-vous faire ? » : « Créer mon animation » / « Intégrer un super event » / « Demander la création d'un super event à Flowin »), Flowin le crée, les commerces rejoignent, direct, tirage, contacts. |
+| 5 | Fin : gros QR, plusieurs messages ; le QR participants menait au vrai jeu (création de compte réelle). | Fin réseaux sans QR (logo, une phrase, un bouton, adresse courte, « Lien en bio ») ; QR réel petit seulement en 30 s ; QR participants en `?preview=1`. |
+| 6 | Textes sous l'interface TikTok/Reels (bas, droite). | Zones sûres imposées et contrôlées automatiquement ; voile en bas du téléphone ; contenu d'écran décalé (`scroll`) pour garder l'essentiel au-dessus. |
+| 7 | Vocabulaire flottant (opération, jeu, event). | « Animation » / « Super event » partout. |
+
+### Promesses retenues, promesses écartées
+- **Retenu** : « Gratuit, sans appli, sans achat » (texte de l'accueil du jeu) ; « 5 questions » (réglage par défaut du Quiz) ; 214 parties, 163 contacts, 51 joueurs / 58 parties / 96 flashs (chiffres de l'histoire commune, cohérents avec ce que montrent les écrans pro) ; « validée sous 24 à 48 h » (texte de « Demande envoyée ! ») ; « Animez votre boutique, captez de nouveaux clients » (texte de l'app).
+- **« Fini la carte de fidélité papier »** : positionnement, pas une fonction « carte de fidélité » ; il s'appuie sur ce qui existe (contacts récoltés, CRM, visites mesurées en flashs QR). À valider par Romain.
+- **Écarté** : « en 30 secondes » (durée de partie jamais mesurée) → remplacé par « 5 questions » ; tout prix ou frais ; tout chiffre de clics vers les sites partenaires (non affiché côté pro).
+- **À savoir** : l'écran « Que voulez-vous faire ? » et le choix « Demander la création d'un super event à Flowin » reprennent la maquette de la refonte en cours ; ils ne sont **pas encore en ligne**. Ne pas publier la coupe organisateurs avant la mise en ligne de ce parcours (ou accepter l'écart).
+
+### Corrigé après relecture des planches V2
+1. Textes qui glissaient sous le voile du bas (« Jeu gratuit · Sans achat obligatoire », « Mon compte & mes gains », « Validé par l'équipe Flowin sous 24–48h », « Ouvrir le tirage → ») : contenu d'écran remonté (`scroll`) scène par scène.
+2. Vignette faible (visuel d'accroche absent à l'image 0) : les visuels démarrent avant t = 0.
+3. Coche de sélection posée sur le titre « Demander la création d'un » : la coche remplace l'icône de la carte.
+4. Résultat du tirage lisible 0,6 s seulement : scène accélérée (k 1,6), validation en caisse aussi (k 1,4).
+5. Écrans remontés : lettres coupées sous l'encoche → bande de barre d'état redessinée par-dessus.
+6. Compteurs (214, 163, 51/58/96) et saisie du lot pas terminés en 2,5 s : animations accélérées dans les coupes 15 s.
+
+---
+
+# V1 (archivée — sources dans `src/scenarios/v1/`)
 
 ## L'histoire commune
 

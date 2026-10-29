@@ -206,6 +206,37 @@
     F.tap(g, w / 2, 144 + 240 + 50, t, 2.2)
   }
 
+  /* « Que voulez-vous faire ? » : maquette « Parcours Pro Flowin » (cartes a
+     halo, charte pro). Un pro ne cree pas de super event : il en integre un,
+     ou demande a Flowin de le creer. */
+  function ecranQueFaire(g, w, h, t) {
+    fondPro(g, w, h, 'Que voulez-vous faire ?', 'Créer ou rejoindre')
+    var cartes = [
+      { l: ['Créer mon animation'], s: 'Chez vous : un jeu, vos lots.', c: '#1D4ED8', ic: 'anim' },
+      { l: ['Intégrer un super event'], s: 'Le jeu est déjà choisi.', c: '#C2410C', ic: 'pin' },
+      { l: ['Demander la création d’un', 'super event à Flowin'], s: 'Flowin le crée pour vous.', c: '#C2410C', ic: 'star' }
+    ]
+    var y = 144
+    cartes.forEach(function (c, i) {
+      var ch = c.l.length > 1 ? 118 : 96
+      var on = i === 2 && t > 1.1
+      carte(g, 14, y, w - 28, ch)
+      R(g, 14, y, w - 28, 4, 2, c.c)
+      if (on) R(g, 14, y, w - 28, ch, 14, c.c + '12', { stroke: c.c, 'stroke-width': 2.4 })
+      var envoye = on && t > 1.5
+      C(g, 44, y + 40, 20, envoye ? '#16a34a' : on ? c.c : c.c + '22')
+      var ic = on ? '#fff' : c.c
+      if (envoye) F.check(g, 44, y + 40, 20, '#16a34a')
+      else if (c.ic === 'anim') { R(g, 32, y + 32, 24, 16, 5, 'none', { stroke: ic, 'stroke-width': 2.2 }); C(g, 39, y + 40, 2, ic); C(g, 49, y + 40, 2, ic) }
+      else if (c.ic === 'pin') { P(g, 'M44 ' + (y + 54) + ' c-8 -9 -11 -13 -11 -18 a11 11 0 1 1 22 0 c0 5 -3 9 -11 18 z', 'none', { stroke: ic, 'stroke-width': 2.2 }); C(g, 44, y + 36, 3.5, ic) }
+      else P(g, 'M44 ' + (y + 27) + ' l3.8 8 l8.6 1 l-6.4 5.8 l1.8 8.6 l-7.8 -4.4 l-7.8 4.4 l1.8 -8.6 l-6.4 -5.8 l8.6 -1 z', ic)
+      c.l.forEach(function (l, k) { T(g, 76, y + 38 + k * 20, l, { size: 14.5, w: 800, fill: COL.proTexte, maxW: w - 104 }) })
+      T(g, 76, y + 38 + c.l.length * 20 + 6, c.s, { size: 11.5, w: 600, fill: COL.proMut, maxW: w - 104 })
+      y += ch + 12
+    })
+    F.tap(g, w / 2, 144 + 96 + 12 + 96 + 12 + 50, t, 0.8)
+  }
+
   function ligneRecap(g, w, y, k, v) {
     T(g, 28, y, k, { size: 12.5, w: 600, fill: COL.proMut })
     T(g, w - 28, y, v, { size: 13.5, w: 800, fill: COL.proTexte, anchor: 'end', maxW: w - 140 })
@@ -238,14 +269,17 @@
       T(g, x + 9, 159, l, { size: 11.5, w: 800, fill: i === 0 ? '#fff' : COL.pro })
       x += lw + 24
     })
-    T(g, 14, 200, 'En cours', { size: 15, w: 800, fill: COL.proTexte })
-    T(g, 84, 200, '1', { size: 12, w: 700, fill: COL.proMut })
+    T(g, 14, 200, o.aVenir ? 'À venir' : 'En cours', { size: 15, w: 800, fill: COL.proTexte })
+    T(g, o.aVenir ? 78 : 84, 200, '1', { size: 12, w: 700, fill: COL.proMut })
     carte(g, 14, 214, w - 28, 192)
     C(g, 36, 238, 11, COL.orange)
     P(g, 'M36 231 l2 5 l5 0.5 l-4 3.5 l1.3 5 l-4.3 -2.8 l-4.3 2.8 l1.3 -5 l-4 -3.5 l5 -0.5 z', '#fff')
     T(g, 54, 243, STORY.event, { size: 15, w: 800, fill: COL.proTexte, maxW: w - 150 })
-    C(g, w - 84, 238, 4, '#16a34a', { opacity: 0.6 + 0.4 * Math.abs(Math.sin(t * 3)) })
-    T(g, w - 26, 242, 'en cours', { size: 10.5, w: 700, fill: '#16a34a', anchor: 'end' })
+    if (o.aVenir) T(g, w - 26, 242, '13 – 14 juin', { size: 10.5, w: 700, fill: COL.pro, anchor: 'end' })
+    else {
+      C(g, w - 84, 238, 4, '#16a34a', { opacity: 0.6 + 0.4 * Math.abs(Math.sin(t * 3)) })
+      T(g, w - 26, 242, 'en cours', { size: 10.5, w: 700, fill: '#16a34a', anchor: 'end' })
+    }
     T(g, 28, 264, 'Super event · Quiz · ' + STORY.stations + ' stations', { size: 11.5, w: 600, fill: COL.proMut, maxW: w - 56 })
     var parties = o.parties !== undefined ? o.parties : Math.round(STORY.parties * F.easeOut(F.prog(t, 0.4, 2.4)))
     var stats = [[String(parties), 'parties'], [String(o.gagnants || 0), 'gagnants'], [String(o.remettre || 0), 'à remettre']]
@@ -458,7 +492,7 @@
   window.CAST = CAST
   window.ECRANS = {
     accueil: ecranAccueil, question: ecranQuestion, score: ecranScore, compte: ecranCompte, billet: ecranBillet,
-    partenaires: ecranPartenaires, nouvelleOp: ecranNouvelleOp, creerSE: ecranCreerSE, mesOps: ecranMesOps,
+    partenaires: ecranPartenaires, nouvelleOp: ecranNouvelleOp, queFaire: ecranQueFaire, creerSE: ecranCreerSE, mesOps: ecranMesOps,
     tirage: ecranTirage, envoi: ecranEnvoi, crm: ecranCRM, bilan: ecranBilan, validation: ecranValidation,
     rejoindre: ecranRejoindre, lot: ecranLot, demande: ecranDemande
   }
@@ -466,19 +500,31 @@
   /* Gabarits de scene partages. */
   window.SCENE = {
     /* Telephone en grand a droite, personnage en buste a gauche. */
+    /* V2 (reseaux sociaux) : telephone centre dans la colonne sure
+       (x 96-436), sous la legende ; le bas passe sous un voile, au-dela
+       duquel TikTok / Reels posent leurs boutons. opts.scroll remonte
+       l ecran (comme un defilement) pour garder l essentiel visible. */
     ecran: function (theme, ecran, perso, opts) {
       opts = opts || {}
+      var fondVoile = { jeu: '#1d0c29', pro: '#F1EFF8', rj: '#FFF3E8' }[theme] || '#0E1B30'
       return function (g, t) {
         F.bgSoft(g, theme)
-        R(g, 0, 840, F.W, 120, 0, theme === 'jeu' ? 'rgba(0,0,0,.18)' : 'rgba(27,58,92,.06)')
-        var p = F.easeOut(F.prog(t, 0, 0.5))
-        var pg = G(g, 'translate(' + ((1 - p) * 40).toFixed(1) + ',0)', p)
-        /* Ecran zoome x1,12 pour rester lisible sur un telephone. */
-        F.phone(pg, 198, 164, 330, 672, function (sg, w, h) {
+        var p = F.easeOut(F.prog(t, 0, 0.4))
+        var pg = G(g, 'translate(0,' + ((1 - p) * 30).toFixed(1) + ')', p)
+        F.phone(pg, 96, 252, 340, 700, function (sg, w, h) {
           var z = 1.12
-          ecran(G(sg, 'scale(' + z + ')'), w / z, h / z, t, opts.args)
+          var sc = opts.scroll || 0
+          ecran(G(sg, 'scale(' + z + ') translate(0,' + (-sc) + ')'), w / z, h / z, t * (opts.k || 1), opts.args)
+          /* Ecran defile : la barre d etat reste en place par-dessus, comme
+             sur un vrai telephone (sinon des lettres coupees sous l encoche). */
+          if (sc) {
+            var b = { jeu: ['#2a1036', true], pro: ['#f2edf7', false], rj: ['#FB7D13', true] }[theme] || ['#fff', false]
+            R(sg, 0, 0, w, 40, 0, b[0])
+            F.statusBar(sg, w, b[1])
+          }
         })
-        if (perso) F.person(g, 108, 958, 0.8, CAST[perso], opts.pose || 'phone', t, { happy: opts.happy })
+        F.veil(g, fondVoile)
+        if (perso) F.person(g, 62, 812, 0.66, CAST[perso], opts.pose || 'phone', t, { happy: opts.happy })
       }
     }
   }
