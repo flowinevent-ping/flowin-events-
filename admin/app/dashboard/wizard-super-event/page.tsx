@@ -14,9 +14,8 @@
  * Ici le SA cree l operation et y rattache directement des pros. Aucune
  * demande, aucune validation en aval : les stations existent en sortant.
  *
- * La suppression vit sur le meme ecran, volontairement : « il faut ajouter la
- * fonction supprimer ce super event en cas d erreur » — l erreur se constate
- * juste apres la creation, c est la qu il faut pouvoir revenir en arriere.
+ * La suppression d un super event cree par erreur vit sur sa fiche
+ * (/dashboard/operations/<id>, ZoneSuppressionSE), pas ici (Romain, 29/10).
  */
 
 import { useEffect, useMemo, useState } from 'react'
