@@ -228,56 +228,30 @@ export async function enregistrerDemandeQuiz(d: DemandeQuizFlowin): Promise<{ ok
 }
 
 /**
- * CREER UN SUPER EVENT, COTE PRO — referentiel 32 (festival, association,
- * tete de franchise, groupement).
- * Meme parcours que « Creer mon animation », option « super event » :
- *   - le super event porte le jeu (module + cfg_jeu, herites par toutes les
- *     stations), ses dates et son createur (pro_id) ;
- *   - tirage au sort uniquement (referentiel 34) ;
- *   - la premiere station est celle de l organisateur, avec ses lots ;
- *   - statut « pending » : Flowin (SA) valide avant ouverture aux commerces
- *     (« super event pousse par le SA »).
+ * PROPOSITION DE SUPER EVENT A FLOWIN (Romain, 29/10) : un pro ne cree pas de
+ * super event, il en demande la creation. Meme file que la demande de quiz
+ * (crm_retours, origine dediee) : elle arrive dans le CRM des retours du SA.
  */
-export async function creerSuperEventPro(params: CreationAnimation): Promise<{ ok: boolean; superEventId: string | null; eventId: string | null; error?: string }> {
-  const slug = params.nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'operation'
-  const seId = `se-${slug}-${Math.random().toString(36).slice(2, 6)}`
-  const evId = `${seId.replace(/^se-/, 'ev-')}-${params.proId.replace(/^pro-/, '')}`
-  const cfgJeu = { ...(params.cfgJeu ?? {}), quizBanques: params.banqueId ? [params.banqueId] : [] }
-  const { error: e1 } = await supabase.from('super_events').insert({
-    id: seId, nom: params.nom, date_d: params.dateD, date_f: params.dateF,
-    module: params.module, cfg_jeu: cfgJeu, pro_id: params.proId,
-    status: 'pending', tirage_global: true, events: [evId], pros: [params.proId],
+export async function enregistrerDemandeSuperEvent(d: {
+  proId: string; proNom: string; nom: string; dates: string; description: string
+  contactNom: string; contactTel: string; contactEmail: string
+}): Promise<{ ok: boolean; error?: string }> {
+  const note = [
+    `Super event proposé : ${d.nom.trim() || '—'}`,
+    d.dates.trim() ? `Période souhaitée : ${d.dates.trim()}` : null,
+    d.description.trim() ? `Projet : ${d.description.trim()}` : null,
+    `Pro : ${d.proId}`,
+  ].filter(Boolean).join('\n')
+  const { error } = await supabase.from('crm_retours').insert({
+    enseigne: d.proNom || d.proId,
+    contact_nom: d.contactNom.trim() || null,
+    contact_tel: d.contactTel.trim() || null,
+    contact_email: d.contactEmail.trim() || null,
+    origine: 'pro-demande-super-event',
+    produit: 'Création d’un super event',
+    etat: 'nouveau',
+    note,
   })
-  if (e1) return { ok: false, superEventId: null, eventId: null, error: e1.message }
-
-  const { data: pro } = await supabase.from('pros').select('nom,partenaire_id,adresse,ville').eq('id', params.proId).maybeSingle()
-  const pr = pro as { nom: string | null; partenaire_id: string | null; adresse: string | null; ville: string | null } | null
-  const { error: e2 } = await supabase.from('events').insert({
-    id: evId, pro_id: params.proId, nom: pr?.nom || params.nom, module: params.module, status: 'upcoming',
-    super_event_id: seId, date_d: params.dateD, date_f: params.dateF,
-    adresse: [pr?.adresse, pr?.ville].filter(Boolean).join(', ') || null,
-    gain_ticket: true, gain_immediat: null,
-    cfg: {
-      ...cfgJeu,
-      qrUrl: `https://flowin-events.vercel.app/parcours/${params.module}?ev=${evId}`,
-      diffusion_demandee: {
-        physique: params.diffusionPhysique, digital: params.diffusionDigital,
-        qr_tracking: params.diffusionQrTracking, statut: 'en_attente_sa',
-      },
-    },
-    participants: 0, gagnants: 0, joueurs_optin: 0,
-  })
-  if (e2) return { ok: false, superEventId: seId, eventId: null, error: `Super event créé, mais sa station n’a pas été enregistrée : ${e2.message}` }
-
-  if (params.lots.length) {
-    const { error: e3 } = await supabase.from('lots').insert(params.lots.map((l, i) => ({
-      id: `lot-${evId}-${i + 1}`, event_id: evId, partenaire_id: pr?.partenaire_id ?? null,
-      titre: l.nom.trim() || 'Lot', nom: l.nom.trim() || 'Lot', quantite: l.quantite || 1,
-      valeur: l.valeur ?? 0, valeur_euros: l.valeur ?? null,
-      conditions: l.conditions.trim() || null, note: 'Type : tirage au sort',
-    })))
-    if (e3) return { ok: false, superEventId: seId, eventId: evId, error: `Super event créé, mais ses lots n’ont pas été enregistrés : ${e3.message}` }
-  }
-  return { ok: true, superEventId: seId, eventId: evId }
+  if (error) { console.error('[enregistrerDemandeSuperEvent]', error.message); return { ok: false, error: error.message } }
+  return { ok: true }
 }

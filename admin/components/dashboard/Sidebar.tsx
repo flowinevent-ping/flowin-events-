@@ -171,7 +171,7 @@ export default function Sidebar() {
       ton: 'ev',
       items: [
         { id: 'events', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
-        { id: 'wizard-event-se', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
+        { id: 'wizard-event-se', label: 'Nouvelle animation', href: '/dashboard/wizard-event' },
         { id: 'theme-parcours', label: 'Thème des parcours', href: '/dashboard/theme-parcours' },
       ],
     },

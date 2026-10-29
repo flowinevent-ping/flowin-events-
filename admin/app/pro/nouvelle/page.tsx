@@ -4,14 +4,15 @@ import { fetchPacksParticipation } from '@/lib/commercial'
 import { supabase } from '@/lib/supabase'
 import { geocoderAdresse } from '@/lib/geocodage'
 import ProShell from '@/components/pro/ProShell'
-import NouvelleOperation, { type SuperOuvert, type ProNouvelle } from '@/components/pro/NouvelleOperation'
+import ParcoursCreation, { type SuperOuvert, type ProNouvelle } from '@/components/creation/ParcoursCreation'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * NOUVELLE OPERATION (P2) — creer une animation, rejoindre un super event,
- * creer un super event : un seul parcours (components/pro/NouvelleOperation).
- * ?type=animation|rejoindre|super ouvre directement le parcours voulu,
+ * NOUVELLE OPERATION — creer une animation, rejoindre un super event ou en
+ * proposer un a Flowin : le parcours unique (components/creation/ParcoursCreation),
+ * le meme que cote Super Admin. ?type=animation|rejoindre|demande ouvre
+ * directement le parcours voulu (?type=super, ancien lien, ouvre la demande),
  * ?se=<id> preselectionne le super event a rejoindre.
  */
 export default async function Page({ searchParams }: { searchParams: { pro?: string; type?: string; se?: string } }) {
@@ -34,7 +35,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const premieresStations = ((ses ?? []) as (SuperOuvert & { events: string[] | null })[])
     .map(s => (s.events ?? [])[0]).filter(Boolean) as string[]
   /* Localisation du super event = celle de sa premiere station (adresse reelle
-     saisie a la creation, cf. creerSuperEventPro) -- jamais inventee. Geocodage
+     saisie a la creation de la station) -- jamais inventee. Geocodage
      paresseux, meme mecanique que la validation des demandes de rattachement
      (app/dashboard/demandes-rattachement) : si une adresse existe sans lat/lng,
      on la geocode une fois et on l ecrit en base pour la prochaine fois.
@@ -59,10 +60,10 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
     return { ...s, station: premiere, lat: station?.lat ?? null, lng: station?.lng ?? null }
   })
   const t = searchParams.type
-  const type = t === 'animation' || t === 'rejoindre' || t === 'super' ? t : null
+  const type = t === 'animation' || t === 'rejoindre' ? t : t === 'super' || t === 'demande' ? 'demande' as const : null
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
-      <NouvelleOperation
+      <ParcoursCreation
         pro={p} banques={banques} supers={supers} packs={packs}
         typeInitial={searchParams.se ? 'rejoindre' : type} seInitial={searchParams.se ?? null}
       />
