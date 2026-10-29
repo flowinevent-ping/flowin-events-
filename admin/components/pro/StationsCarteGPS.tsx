@@ -50,7 +50,7 @@ export default function StationsCarteGPS({ lieux }: { lieux: Lieu[] }) {
 
   return (
     <div>
-      <style>{`@media (max-width:820px){.pro-map-wrap{display:none !important}}`}</style>
+      <style dangerouslySetInnerHTML={{ __html: `@media (max-width:820px){.pro-map-wrap{display:none !important}}` }} />
       <div className="pro-map-wrap" style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px 0' }}>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>Mes stations sur la carte</div>
