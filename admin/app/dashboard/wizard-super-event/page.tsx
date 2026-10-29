@@ -22,16 +22,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
+import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
 import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import type { FlowinPro } from '@/lib/types'
 import { useDashboard } from '@/contexts/DashboardContext'
-import {
-  creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
-  type SuperEvent,
-} from '@/lib/nds'
+import { creerSuperEvent, slugSuperEvent } from '@/lib/nds'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
@@ -381,93 +378,8 @@ export default function Page() {
           />
         </div>
 
-        <ZoneSuppression />
       </div>
     </div>
   )
 }
 
-/**
- * Suppression d un super event cree par erreur.
- * Refusee par la base si l operation porte des participations ou des tirages :
- * on n efface pas de l activite joueur, ni des gagnants a qui on a promis un
- * lot. Le nom doit etre ressaisi exactement — un clic de trop ne suffit pas.
- */
-function ZoneSuppression() {
-  const [supers, setSupers] = useState<SuperEvent[]>([])
-  const [cible, setCible] = useState('')
-  const [saisie, setSaisie] = useState('')
-  const [occupe, setOccupe] = useState(false)
-  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
-
-  const charger = () => fetchSuperEvents().then(setSupers)
-  useEffect(() => { charger() }, [])
-
-  const se = supers.find(s => s.id === cible)
-
-  async function supprimer() {
-    if (!se) return
-    setOccupe(true); setRetour(null)
-    const r = await supprimerSuperEvent(se.id, saisie)
-    setOccupe(false)
-    if (r.ok) {
-      setRetour({ ok: true, texte: `« ${r.nom} » supprimé — ${r.events_supprimes ?? 0} station(s) avec lui.` })
-      setCible(''); setSaisie(''); charger()
-      return
-    }
-    if (r.raison === 'activite') {
-      setRetour({
-        ok: false,
-        texte: `Suppression refusée : cette opération porte ${r.participations} partie(s) et ${r.tirages} tirage(s). `
-          + 'Effacer, ce serait effacer de l’activité joueur réelle et des gagnants déjà désignés.',
-      })
-      return
-    }
-    if (r.raison === 'confirmation') {
-      setRetour({ ok: false, texte: `Le nom saisi ne correspond pas. Attendu exactement : « ${r.attendu} ».` })
-      return
-    }
-    setRetour({
-      ok: false,
-      texte: r.message
-        ? `La suppression a échoué — ${r.message}`
-        : 'Super event introuvable.',
-    })
-  }
-
-  return (
-    <div className="sa-page" style={{ marginTop: 20, borderColor: '#E2B4B4' }}>
-      <SectionHeader>Supprimer un super event créé par erreur</SectionHeader>
-      <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 12, lineHeight: 1.5 }}>
-        Refusé automatiquement si l’opération porte des parties jouées ou des tirages.
-        Les stations rattachées partent avec elle ; <b>les fiches pro sont conservées</b> —
-        un pro existe indépendamment de l’opération à laquelle il a participé.
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select className="sa-input" style={{ maxWidth: 300, width: 'auto' }} value={cible}
-          onChange={e => { setCible(e.target.value); setSaisie(''); setRetour(null) }}>
-          <option value="">— choisir l’opération —</option>
-          {supers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-        </select>
-        {se && (
-          <>
-            <input className="sa-input" style={{ maxWidth: 300 }} value={saisie}
-              onChange={e => setSaisie(e.target.value)}
-              placeholder={`Retapez « ${se.nom} » pour confirmer`} />
-            <button className="sa-btn" style={{ background: '#B3261E', color: '#fff', borderColor: '#B3261E' }}
-              onClick={supprimer} disabled={occupe || saisie.trim() !== (se.nom ?? '').trim()}>
-              {occupe ? '…' : 'Supprimer définitivement'}
-            </button>
-          </>
-        )}
-      </div>
-
-      {retour && (
-        <div className={`sa-alert ${retour.ok ? 'info' : 'warn'}`} style={{ marginTop: 12, fontSize: 12.5 }}>
-          {retour.texte}
-        </div>
-      )}
-    </div>
-  )
-}

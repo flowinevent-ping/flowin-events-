@@ -24,6 +24,7 @@ import { supabase } from '@/lib/supabase'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, KpiCard, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
+import ZoneSuppressionSE from '@/components/dashboard/ZoneSuppressionSE'
 
 type Se = any
 type Com = {
@@ -291,6 +292,8 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
             </div>
             {addMsg && <div style={{ fontSize: 12.5, color: 'var(--sa-accent)', marginTop: 8 }}>{addMsg}</div>}
           </div>
+
+          {se?.id && <ZoneSuppressionSE id={se.id} nom={se.nom ?? ''} />}
 
         </div>
       </div>
