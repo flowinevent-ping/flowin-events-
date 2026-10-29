@@ -47,7 +47,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
       {demandes.map(d => (
         <div key={d.id} style={{ ...CARD, margin: 0, padding: '12px 16px', borderLeft: `3px solid ${d.statut === 'refusee' ? '#C23B3B' : '#C2410C'}` }}>
           <div style={{ fontWeight: 800, fontSize: 13.5 }}>
-            {d.statut === 'refusee' ? '✕ Demande refusée — ' : '⏳ En attente de validation — '}{nomSuper(d.super_event_id)}
+            {d.statut === 'refusee' ? '✕ Demande refusée — ' : 'En attente de validation — '}{nomSuper(d.super_event_id)}
           </div>
           <div style={{ fontSize: 12, ...MUTED, marginTop: 2 }}>
             {d.statut === 'refusee'

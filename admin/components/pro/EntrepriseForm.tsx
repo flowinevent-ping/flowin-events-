@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { SECTEURS_PRO } from '@/lib/proCreation'
 import { CARD, ACC } from '@/lib/proui'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
+import { Ico } from '@/lib/proicons'
 
 type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null }
 type Fiche = { image_url: string | null; site_web: string | null; instagram: string | null; facebook: string | null }
@@ -92,7 +93,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
             <span style={lbl}>Logo de l&apos;établissement</span>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <label style={{ background: uploadEnCours ? '#efe9f2' : ACC, color: uploadEnCours ? '#8a7e93' : '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: uploadEnCours ? 'default' : 'pointer', fontFamily: 'inherit' }}>
-                {uploadEnCours ? 'Envoi…' : '📤 Choisir un fichier'}
+                {uploadEnCours ? 'Envoi…' : <><Ico k="upload" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Choisir un fichier</>}
                 <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
                   disabled={uploadEnCours} onChange={onFichierLogo} />
               </label>

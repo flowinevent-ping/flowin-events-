@@ -402,7 +402,11 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     // Joueur deja connu (quel que soit l'evenement d'origine) -> mise a jour ciblee.
     const dejaId = (existant[0] as { id: string }).id
     const r = await supabase.from('joueurs').update(joueurFields).eq('id', dejaId).select('id')
-    joueurRows = r.data as { id: string }[] | null
+    /* Le joueur anonyme n a pas le droit UPDATE sur joueurs (durcissement RLS
+       d aout) : l update renvoie 0 ligne SANS erreur. Sans ce repli, aucune
+       participation n etait ecrite et le joueur recevait un ticket fictif. */
+    const maj = r.data as { id: string }[] | null
+    joueurRows = maj?.length ? maj : [{ id: dejaId }]
     joueurErr = r.error
   } else {
     const r = await supabase

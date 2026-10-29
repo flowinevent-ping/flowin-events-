@@ -87,7 +87,7 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
 
   return (
     <div className="nds-app">
-      <style>{css(accent)}</style>
+      <style dangerouslySetInnerHTML={{ __html: css(accent) }} />
 
       <div className="topbar">
         <div className="brandrow">

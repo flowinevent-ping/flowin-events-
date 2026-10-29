@@ -150,7 +150,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
 
   return (
     <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: C.fond, fontFamily: POLICE_PRO, fontSize: 14, color: C.texte }}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
         :root { ${VARIABLES_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; --sa-card:#fff; --sa-accent:${C.accent}; }
         .pro-shell input, .pro-shell select, .pro-shell textarea, .pro-shell button { font-family: ${POLICE_PRO}; }
@@ -169,7 +169,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
           }
           .pro-hamburger { display: inline-flex !important; }
         }
-      `}</style>
+      ` }} />
       {sidebar}
       <div className="pro-drawer-backdrop" onClick={() => setOpen(false)} />
       <main style={{ flex: 1, minWidth: 0 }}>

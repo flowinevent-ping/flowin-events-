@@ -1,0 +1,23 @@
+[
+  {
+    "id": "participants",
+    "duration": 37.1,
+    "qr": "https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz",
+    "avertissements": [],
+    "erreurs": []
+  },
+  {
+    "id": "organisateurs",
+    "duration": 35.49999999999999,
+    "qr": "https://flowin-events.vercel.app/pro/inscription",
+    "avertissements": [],
+    "erreurs": []
+  },
+  {
+    "id": "partenaires",
+    "duration": 35.49999999999999,
+    "qr": "https://flowin-events.vercel.app/pro/inscription",
+    "avertissements": [],
+    "erreurs": []
+  }
+]

@@ -212,7 +212,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
   if (done) {
     return (
       <div style={wrap}>
-        <style>{style}</style>
+        <style dangerouslySetInnerHTML={{ __html: style }} />
         <div className="rj-page">
           <div className="rj-hero">
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
@@ -246,7 +246,7 @@ export default function RejoindreClient({ se }: { se: SE }) {
 
   return (
     <div style={wrap}>
-      <style>{style}</style>
+      <style dangerouslySetInnerHTML={{ __html: style }} />
       <div className="rj-page">
         <div className="rj-hero">
           <div className="rj-hero-orbe rj-hero-orbe-1" />
