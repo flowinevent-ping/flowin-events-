@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import '@/styles/sa-kanban.css'
 import DashboardShell from './DashboardShell'
 import {
   fetchAllJoueurs, fetchAllEvents, fetchAllPartenaires,

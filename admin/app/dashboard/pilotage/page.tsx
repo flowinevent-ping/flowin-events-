@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { fetchBonsCommande, estSigne, type BonCommande } from '@/lib/commercial'
+import { Ico } from '@/lib/proicons'
+import { ACCENT_ANIM } from '@/lib/charte'
 
 const dateFr = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 
@@ -46,30 +48,38 @@ export default function Page() {
     { l: 'Opt-in', v: txOptin == null ? '—' : `${txOptin} %`, d: `${optin} joueur${optin > 1 ? 's' : ''}` },
   ]
 
+  /* Meme planning compact (.sa-kb-*) que /dashboard/planning : « meme design
+     de planning partout » (Romain, 29/10). Contenu inchange : 8 events max par
+     colonne, nom, date, lieu, participants. */
   const colonne = (titre: string, puce: string, liste: typeof events, vide: string) => (
-    <div style={{ background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 12, padding: 13 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <div style={{ fontSize: 12.5, fontWeight: 800 }}>{puce} {titre}</div>
-        <span className="sa-chip" style={{ fontSize: 10.5 }}>{liste.length}</span>
-      </div>
-      {!liste.length ? (
-        <div className="sa-muted" style={{ fontSize: 11.5, lineHeight: 1.5 }}>{vide}</div>
-      ) : (
-        liste.slice(0, 8).map(e => (
-          <div key={e.id} style={{ paddingBottom: 8, marginBottom: 8, borderBottom: '1px solid var(--sa-border)' }}>
-            <div style={{ fontSize: 12.5, fontWeight: 600 }}>{e.nom}</div>
-            <div className="sa-muted" style={{ fontSize: 10.5 }}>
-              {dateFr(e.date_d)}{e.lieu ? ` · ${e.lieu}` : ''}
-            </div>
-            {e.participants > 0 && (
-              <div className="sa-muted" style={{ fontSize: 10.5 }}>
-                {e.participants} participant{e.participants > 1 ? 's' : ''}
+    <section className="sa-kb-col" style={{ flex: '1 1 268px' }}>
+      <header className="sa-kb-tete">
+        <span className="t">{puce} {titre}</span>
+        <span className="n">{liste.length}</span>
+      </header>
+      <div className="sa-kb-corps">
+        {!liste.length ? (
+          <div className="sa-kb-vide" style={{ lineHeight: 1.5 }}>{vide}</div>
+        ) : (
+          liste.slice(0, 8).map(e => (
+            <div key={e.id} className="sa-kb-vignette" style={{ cursor: 'default' }}>
+              <div className="sa-kb-ligne">
+                <span className="sa-kb-pastille" style={{ background: `${ACCENT_ANIM}20`, color: ACCENT_ANIM }}>
+                  <Ico k="ticket" size={14} />
+                </span>
+                <span className="sa-kb-nom">{e.nom}</span>
+                {e.date_d && <span className="sa-kb-date">{dateFr(e.date_d)}</span>}
               </div>
-            )}
-          </div>
-        ))
-      )}
-    </div>
+              {(e.lieu || e.participants > 0) && (
+                <div className="sa-kb-sub">
+                  {[e.lieu, e.participants > 0 ? `${e.participants} participant${e.participants > 1 ? 's' : ''}` : ''].filter(Boolean).join(' · ')}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </section>
   )
 
   return (
@@ -105,7 +115,7 @@ export default function Page() {
       {!events.length ? (
         <EmptyState icon="🎯" title="Aucun événement" desc="Aucun événement n'est enregistré." />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 10 }}>
+        <div className="sa-kanban">
           {colonne('Live maintenant', '🔴', live,
             aVenir.length ? `Aucun event en cours. Prochain le ${dateFr(aVenir[0].date_d)}.` : 'Aucun event en cours.')}
           {colonne('À venir', '📅', aVenir, 'Aucun event programmé.')}
