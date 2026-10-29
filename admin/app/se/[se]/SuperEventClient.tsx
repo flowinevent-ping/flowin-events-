@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import SuperEventMap, { Lieu } from '../_components/SuperEventMap'
+import { Ico, IcoModule } from '@/lib/proicons'
 
 type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; social?: { insta?: string; fb?: string; site?: string } | null }
 type Lot = { id: string; rang: number | null; valeur: number | null; libelle?: string | null }
@@ -22,23 +23,23 @@ interface Props {
 
 const HERO = '#3B5CC4'
 
-type ModUI = { label: string; emoji: string; grad: string; accent: string; soft: string }
+type ModUI = { label: string; grad: string; accent: string; soft: string }
 const MODULE_UI: Record<string, ModUI> = {
-  spin: { label: 'Roue de la chance', emoji: '🎡', grad: 'linear-gradient(135deg,#F59E0B,#EA580C)', accent: '#C2410C', soft: '#FDF1E3' },
-  quiz: { label: 'Quiz', emoji: '🧠', grad: 'linear-gradient(135deg,#3B5CC4,#2DA8FF)', accent: '#2746A6', soft: '#EAF0FF' },
-  quizsolo: { label: 'Quiz solo', emoji: '🎯', grad: 'linear-gradient(135deg,#0EA5A4,#0891B2)', accent: '#0E7490', soft: '#E5F7F7' },
-  quizmaster: { label: 'Quiz Master', emoji: '👑', grad: 'linear-gradient(135deg,#4F46E5,#3B5CC4)', accent: '#4338CA', soft: '#ECEBFE' },
-  tombola: { label: 'Tombola', emoji: '🎟️', grad: 'linear-gradient(135deg,#E11D48,#9F1239)', accent: '#BE123C', soft: '#FCE7EC' },
-  vote: { label: 'Vote', emoji: '⭐', grad: 'linear-gradient(135deg,#0EA5A4,#3B5CC4)', accent: '#0E7490', soft: '#E5F7F7' },
+  spin: { label: 'Roue de la chance', grad: 'linear-gradient(135deg,#F59E0B,#EA580C)', accent: '#C2410C', soft: '#FDF1E3' },
+  quiz: { label: 'Quiz', grad: 'linear-gradient(135deg,#3B5CC4,#2DA8FF)', accent: '#2746A6', soft: '#EAF0FF' },
+  quizsolo: { label: 'Quiz solo', grad: 'linear-gradient(135deg,#0EA5A4,#0891B2)', accent: '#0E7490', soft: '#E5F7F7' },
+  quizmaster: { label: 'Quiz Master', grad: 'linear-gradient(135deg,#4F46E5,#3B5CC4)', accent: '#4338CA', soft: '#ECEBFE' },
+  tombola: { label: 'Tombola', grad: 'linear-gradient(135deg,#E11D48,#9F1239)', accent: '#BE123C', soft: '#FCE7EC' },
+  vote: { label: 'Vote', grad: 'linear-gradient(135deg,#0EA5A4,#3B5CC4)', accent: '#0E7490', soft: '#E5F7F7' },
 }
 function modUI(m?: string | null): ModUI {
-  return (m && MODULE_UI[m]) || { label: m || 'Jeu', emoji: '🎮', grad: `linear-gradient(135deg,${HERO},#2DA8FF)`, accent: '#2746A6', soft: '#EAF0FF' }
+  return (m && MODULE_UI[m]) || { label: m || 'Jeu', grad: `linear-gradient(135deg,${HERO},#2DA8FF)`, accent: '#2746A6', soft: '#EAF0FF' }
 }
 
 const PODIUM = [
-  { medal: '🥇', grad: 'linear-gradient(135deg,#FFE08A,#F59E0B)', fg: '#7A4A06', glow: 'rgba(245,158,11,.5)' },
-  { medal: '🥈', grad: 'linear-gradient(135deg,#EDF0F4,#B9C0CA)', fg: '#454C59', glow: 'rgba(150,160,175,.4)' },
-  { medal: '🥉', grad: 'linear-gradient(135deg,#E8B07A,#C8743C)', fg: '#5A2F10', glow: 'rgba(200,116,60,.4)' },
+  { medal: '1', grad: 'linear-gradient(135deg,#FFE08A,#F59E0B)', fg: '#7A4A06', glow: 'rgba(245,158,11,.5)' },
+  { medal: '2', grad: 'linear-gradient(135deg,#EDF0F4,#B9C0CA)', fg: '#454C59', glow: 'rgba(150,160,175,.4)' },
+  { medal: '3', grad: 'linear-gradient(135deg,#E8B07A,#C8743C)', fg: '#5A2F10', glow: 'rgba(200,116,60,.4)' },
 ]
 
 function dirUrl(lat: number, lng: number): string {
@@ -160,11 +161,11 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
           </span>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{se.nom}</div>
-            <div style={{ fontSize: 13, opacity: 0.88, marginTop: 1 }}>Des lots t&apos;attendent juste à côté 🎁</div>
+            <div style={{ fontSize: 13, opacity: 0.88, marginTop: 1 }}>Des lots t&apos;attendent juste à côté <Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} /></div>
           </div>
           {identified && (
             <span style={{ flexShrink: 0, background: 'rgba(255,255,255,.18)', borderRadius: 12, padding: '7px 11px', textAlign: 'center', lineHeight: 1.05 }}>
-              <span style={{ display: 'block', fontSize: 17, fontWeight: 800 }}>🎟️ {ticketCount}</span>
+              <span style={{ display: 'block', fontSize: 17, fontWeight: 800 }}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{ticketCount}</span>
               <span style={{ display: 'block', fontSize: 10, opacity: 0.85 }}>ticket{ticketCount > 1 ? 's' : ''}</span>
             </span>
           )}
@@ -182,7 +183,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
           <div style={{ width: 48, height: 6, background: '#dcdfe6', borderRadius: 3, margin: '0 auto 13px' }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 18, fontWeight: 800 }}>
-              🎮 {lieux.length} commerces{identified ? ` · ${playedCount} joué${playedCount > 1 ? 's' : ''}` : ' jouent le jeu'}
+              <Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{lieux.length} commerces{identified ? ` · ${playedCount} joué${playedCount > 1 ? 's' : ''}` : ' jouent le jeu'}
             </span>
             <span style={{ fontSize: 20, color: '#9aa0ad' }}>{open ? '▾' : '▴'}</span>
           </div>
@@ -193,8 +194,8 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
 
             {identified && (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>{joueur?.prenom ? `Salut ${joueur.prenom} 👋` : 'Salut 👋'}</div>
-                <a href="/moi" style={{ fontSize: 13, fontWeight: 800, color: '#2746A6', background: '#EFF3FE', padding: '7px 13px', borderRadius: 100, textDecoration: 'none' }}>👤 Mon compte</a>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{joueur?.prenom ? `Salut ${joueur.prenom}` : 'Salut'}</div>
+                <a href="/moi" style={{ fontSize: 13, fontWeight: 800, color: '#2746A6', background: '#EFF3FE', padding: '7px 13px', borderRadius: 100, textDecoration: 'none' }}><Ico k="user" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mon compte</a>
               </div>
             )}
 
@@ -213,11 +214,11 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
             {/* Carnet de gains */}
             {identified && gains.length > 0 && (
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}>🎁 Tes gains</div>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}><Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Tes gains</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                   {gains.map((g) => (
                     <div key={g.id} className="fe-card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 15px', borderRadius: 16, background: g.utilise ? '#F3F4F6' : 'linear-gradient(135deg,#EAFBF3,#D6F5E6)', border: `1px solid ${g.utilise ? '#e5e7eb' : '#bfedd6'}` }}>
-                      <span style={{ fontSize: 24, flexShrink: 0 }}>🎁</span>
+                      <span style={{ fontSize: 24, flexShrink: 0 }}><Ico k="gift" size={24} /></span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 15, fontWeight: 800, color: g.utilise ? '#6b7280' : '#0B6E50', textDecoration: g.utilise ? 'line-through' : 'none' }}>{g.libelle || 'Lot'}</div>
                         {g.code && <div style={{ fontSize: 12, color: '#6b7385', fontFamily: 'monospace', marginTop: 2 }}>Code : {g.code}</div>}
@@ -234,7 +235,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
             {/* Podium des lots */}
             {lotsSorted.length > 0 && (
               <div style={{ marginBottom: 22 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.06em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}>🏆 Les lots à rafler</div>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.06em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 12, textAlign: 'center' }}><Ico k="star" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Les lots à rafler</div>
                 <div style={{ display: 'flex', gap: 11, alignItems: 'flex-end' }}>
                   {lotsSorted.slice(0, 3).map((l, i) => {
                     const p = PODIUM[i] || PODIUM[2]
@@ -245,7 +246,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                         className="fe-card"
                         style={{ flex: 1, background: p.grad, color: p.fg, borderRadius: 18, padding: tall ? '20px 8px' : '15px 8px', textAlign: 'center', ...(i === 0 ? { ['--g' as string]: p.glow, animation: 'feGlow 2.4s ease-in-out infinite, feRise .34s ease both' } : {}) }}
                       >
-                        <div style={{ fontSize: tall ? 34 : 28, lineHeight: 1 }}>{p.medal}</div>
+                        <div style={{ fontSize: tall ? 30 : 24, lineHeight: 1, fontWeight: 900 }}>{p.medal}</div>
                         <div style={{ fontSize: tall ? 27 : 22, fontWeight: 800, marginTop: 6 }}>{l.valeur ? `${l.valeur} €` : ''}</div>
                         {l.libelle && <div style={{ fontSize: 11.5, opacity: 0.85, marginTop: 2 }}>{l.libelle}</div>}
                       </div>
@@ -257,7 +258,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
 
             {(se.social?.insta || se.social?.fb) && (
               <div style={{ background: '#fff', border: '1px solid #e6e9f2', borderRadius: 16, padding: '15px 16px', marginBottom: 18, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#2c3a63', marginBottom: 6 }}>🎟️ Résultats du grand tirage</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#2c3a63', marginBottom: 6 }}><Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Résultats du grand tirage</div>
                 <div style={{ fontSize: 12.5, color: '#6b7280', marginBottom: 12, lineHeight: 1.45 }}>Les gagnants sont annoncés sur les réseaux des Nuits du Sud. Suis-les pour ne rien manquer.</div>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                   {se.social?.insta && <a href={se.social.insta} target="_blank" rel="noopener" style={{ flex: 1, maxWidth: 160, padding: '11px', borderRadius: 12, background: '#3B5CC4', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>Instagram</a>}
@@ -268,9 +269,9 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
 
             {!focus && (
               <div style={{ display: 'flex', gap: 12, background: '#EFF3FE', borderRadius: 16, padding: '14px 15px', marginBottom: 18, alignItems: 'center' }}>
-                <span style={{ fontSize: 28, flexShrink: 0 }}>🎉</span>
+                <span style={{ fontSize: 28, flexShrink: 0 }}><Ico k="sparkle" size={28} /></span>
                 <div style={{ fontSize: 13.5, lineHeight: 1.5, color: '#2c3a63' }}>
-                  Le principe est simple : tu pousses la porte, tu joues, tu gagnes. Et à chaque fois, <strong>+1 ticket/jour</strong> pour le grand tirage 🎟️
+                  Le principe est simple : tu pousses la porte, tu joues, tu gagnes. Et à chaque fois, <strong>+1 ticket/jour</strong> pour le grand tirage <Ico k="ticket" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
                 </div>
               </div>
             )}
@@ -280,7 +281,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
               {lieux.map((l, idx) => {
                 const u = modUI(l.module)
                 const isPlayed = identified && played.has(l.id)
-                const hint = l.gain_immediat ? `🎁 ${l.gain_immediat}` : '🎟️ Un ticket à gagner'
+                const hint = l.gain_immediat ? `${l.gain_immediat}` : 'Un ticket à gagner'
                 return (
                   <div
                     key={l.id}
@@ -291,7 +292,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                     style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 15px', borderRadius: 18, background: '#fff', border: `1px solid ${isPlayed ? '#bfedd6' : '#eef0f3'}`, boxShadow: '0 2px 8px rgba(20,26,38,.06)', cursor: 'pointer', animationDelay: `${Math.min(idx * 35, 280)}ms` }}
                   >
                     <span style={{ position: 'relative', width: 52, height: 52, borderRadius: 15, background: u.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 27, flexShrink: 0, boxShadow: '0 3px 10px rgba(20,26,38,.14)' }}>
-                      {u.emoji}
+                      <IcoModule module={l.module ?? 'quiz'} size={26} />
                       {isPlayed && <span style={{ position: 'absolute', top: -5, right: -5, width: 22, height: 22, borderRadius: '50%', background: '#16A34A', color: '#fff', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' }}>✓</span>}
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -311,7 +312,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
 
             {autres.length > 0 && (
               <div style={{ marginTop: 22 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}>🌍 Autres opérations en cours</div>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '.04em', color: '#9aa0ad', textTransform: 'uppercase', marginBottom: 11 }}><Ico k="globe" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Autres opérations en cours</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {autres.map((a) => (
                     <a
@@ -320,7 +321,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                       className="fe-card"
                       style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '14px 15px', borderRadius: 18, background: 'linear-gradient(135deg,#F4F6FB,#EAF0FF)', border: '1px solid #e2e8f6', textDecoration: 'none', color: 'inherit' }}
                     >
-                      <span style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#2746A6,#3B7DE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23, flexShrink: 0 }}>📍</span>
+                      <span style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#2746A6,#3B7DE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 23, flexShrink: 0 }}><Ico k="pin" size={23} /></span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 15.5, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.nom}</div>
                         <div style={{ fontSize: 12.5, color: '#6b7385', marginTop: 2 }}>
@@ -340,7 +341,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 <div style={{ display: 'flex', gap: 9, flexWrap: 'wrap' }}>
                   {sponsors.map((s) => (
                     <span key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid #e3e5ea', padding: '6px 12px', borderRadius: 12, fontSize: 13, fontWeight: 500 }}>
-                      {s.image_url ? <img src={s.image_url} alt="" style={{ width: 20, height: 20, objectFit: 'contain' }} /> : '🏢'} {s.nom}
+                      {s.image_url ? <img src={s.image_url} alt="" style={{ width: 20, height: 20, objectFit: 'contain' }} /> : ''} {s.nom}
                     </span>
                   ))}
                 </div>
@@ -369,7 +370,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', width: 48, height: 6, background: 'rgba(255,255,255,.7)', borderRadius: 3 }} />
                 <button onClick={() => setSelected(null)} style={{ position: 'absolute', top: 14, right: 16, width: 36, height: 36, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,.35)', color: '#fff', fontSize: 18, cursor: 'pointer', backdropFilter: 'blur(4px)' }} aria-label="Fermer">✕</button>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <span style={{ width: 44, height: 44, borderRadius: 13, background: selected.photo_url ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, backdropFilter: 'blur(4px)' }}>{fu.emoji}</span>
+                  <span style={{ width: 44, height: 44, borderRadius: 13, background: selected.photo_url ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, backdropFilter: 'blur(4px)' }}><IcoModule module={selected?.module ?? 'quiz'} size={24} /></span>
                   <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
                     {selected.categorie && <span style={{ fontSize: 12, fontWeight: 800, background: 'rgba(255,255,255,.22)', padding: '4px 11px', borderRadius: 100, backdropFilter: 'blur(4px)' }}>{selected.categorie}</span>}
                     {identified && played.has(selected.id) && <span style={{ fontSize: 12, fontWeight: 800, background: '#16A34A', padding: '4px 11px', borderRadius: 100 }}>✓ Déjà joué</span>}
@@ -377,8 +378,8 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 </div>
                 <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.15, textShadow: selected.photo_url ? '0 1px 8px rgba(0,0,0,.4)' : 'none' }}>{selected.nom}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, fontSize: 13, opacity: 0.95 }}>
-                  <span style={{ fontWeight: 700 }}>🎮 {fu.label}</span>
-                  {dist && <span>· 📍 {dist}</span>}
+                  <span style={{ fontWeight: 700 }}><Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{fu.label}</span>
+                  {dist && <span>· <Ico k="pin" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{dist}</span>}
                 </div>
               </div>
             </div>
@@ -386,11 +387,11 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
             <div style={{ padding: '18px 22px 26px' }}>
 
               {/* Gains */}
-              <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#9aa0ad', marginBottom: 11 }}>Ici, tu repars avec 👇</div>
+              <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#9aa0ad', marginBottom: 11 }}>Ici, tu repars avec</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {selected.gain_immediat && (
                   <div className="fe-card" style={{ display: 'flex', alignItems: 'center', gap: 13, background: '#E9F7F0', color: '#0B6E50', borderRadius: 16, padding: '15px 16px' }}>
-                    <span style={{ fontSize: 26 }}>🎁</span>
+                    <span style={{ display: 'inline-flex' }}><Ico k="gift" size={28} /></span>
                     <div>
                       <div style={{ fontSize: 12, opacity: 0.8 }}>Tu gagnes direct</div>
                       <div style={{ fontSize: 17, fontWeight: 800 }}>{selected.gain_immediat}</div>
@@ -399,7 +400,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 )}
                 {selected.gain_ticket !== false && (
                   <div className="fe-card" style={{ display: 'flex', alignItems: 'center', gap: 13, background: '#EFF3FE', color: '#2c3a63', borderRadius: 16, padding: '15px 16px', animationDelay: '60ms' }}>
-                    <span style={{ fontSize: 26 }}>🎟️</span>
+                    <span style={{ display: 'inline-flex' }}><Ico k="ticket" size={28} /></span>
                     <div>
                       <div style={{ fontSize: 12, opacity: 0.8 }}>Pour le grand tirage</div>
                       <div style={{ fontSize: 17, fontWeight: 800 }}>+1 ticket (1 fois par jour)</div>
@@ -413,25 +414,25 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
                 <div style={{ marginTop: 18, border: '1px solid #eef0f3', borderRadius: 16, overflow: 'hidden' }}>
                   {selected.adresse && (
                     <div style={{ display: 'flex', gap: 12, padding: '13px 15px', borderBottom: '1px solid #f1f2f5' }}>
-                      <span style={{ fontSize: 18, flexShrink: 0 }}>📍</span>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}><Ico k="pin" size={18} /></span>
                       <div style={{ fontSize: 14, color: '#2b3242' }}>{selected.adresse}{dist ? ` · ${dist}` : ''}</div>
                     </div>
                   )}
                   {selected.horaires && (
                     <div style={{ display: 'flex', gap: 12, padding: '13px 15px', borderBottom: '1px solid #f1f2f5' }}>
-                      <span style={{ fontSize: 18, flexShrink: 0 }}>🕒</span>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}><Ico k="clock" size={18} /></span>
                       <div style={{ fontSize: 14, color: '#2b3242' }}>{selected.horaires}</div>
                     </div>
                   )}
                   {selected.tel && (
                     <a href={`tel:${selected.tel.replace(/\s/g, '')}`} style={{ display: 'flex', gap: 12, padding: '13px 15px', borderBottom: selected.site_web ? '1px solid #f1f2f5' : 'none', textDecoration: 'none' }}>
-                      <span style={{ fontSize: 18, flexShrink: 0 }}>📞</span>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}><Ico k="phone" size={18} /></span>
                       <div style={{ fontSize: 14, color: HERO, fontWeight: 600 }}>{selected.tel}</div>
                     </a>
                   )}
                   {selected.site_web && (
                     <a href={selected.site_web} target="_blank" rel="noopener" style={{ display: 'flex', gap: 12, padding: '13px 15px', textDecoration: 'none' }}>
-                      <span style={{ fontSize: 18, flexShrink: 0 }}>🌐</span>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}><Ico k="globe" size={18} /></span>
                       <div style={{ fontSize: 14, color: HERO, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selected.site_web.replace(/^https?:\/\//, '')}</div>
                     </a>
                   )}
@@ -445,7 +446,7 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
 
               {/* Rappel jeu sur place */}
               <div style={{ background: '#FAF6EE', color: '#7a5a1e', borderRadius: 16, padding: '13px 15px', fontSize: 13.5, lineHeight: 1.5, margin: '18px 0 14px' }}>
-                📍 Pour jouer, c&apos;est sur place : rends-toi au commerce et <strong>scanne son QR</strong>.
+                <Ico k="pin" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Pour jouer, c&apos;est sur place : rends-toi au commerce et <strong>scanne son QR</strong>.
               </div>
 
               {/* Actions */}
@@ -457,10 +458,10 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
               {(selected.tel || selected.site_web) && (
                 <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                   {selected.tel && (
-                    <a href={`tel:${selected.tel.replace(/\s/g, '')}`} style={{ flex: 1, textAlign: 'center', background: '#fff', color: '#2b3242', fontWeight: 700, fontSize: 14.5, padding: '13px', borderRadius: 14, textDecoration: 'none', border: '1px solid #e3e5ea' }}>📞 Appeler</a>
+                    <a href={`tel:${selected.tel.replace(/\s/g, '')}`} style={{ flex: 1, textAlign: 'center', background: '#fff', color: '#2b3242', fontWeight: 700, fontSize: 14.5, padding: '13px', borderRadius: 14, textDecoration: 'none', border: '1px solid #e3e5ea' }}><Ico k="phone" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Appeler</a>
                   )}
                   {selected.site_web && (
-                    <a href={selected.site_web} target="_blank" rel="noopener" style={{ flex: 1, textAlign: 'center', background: '#fff', color: '#2b3242', fontWeight: 700, fontSize: 14.5, padding: '13px', borderRadius: 14, textDecoration: 'none', border: '1px solid #e3e5ea' }}>🌐 Site</a>
+                    <a href={selected.site_web} target="_blank" rel="noopener" style={{ flex: 1, textAlign: 'center', background: '#fff', color: '#2b3242', fontWeight: 700, fontSize: 14.5, padding: '13px', borderRadius: 14, textDecoration: 'none', border: '1px solid #e3e5ea' }}><Ico k="globe" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Site</a>
                   )}
                 </div>
               )}

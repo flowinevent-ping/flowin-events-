@@ -165,7 +165,7 @@ export default function OpsDetailClient({ se, commerces, parr, landing, fiches =
     <div className="sa-content">
       <div className="sa-page">
         <PageHeader
-          title={`⭐ ${se.nom}`}
+          title={`${se.nom}`}
           subtitle={`${se.id} · ${se.date_d || '?'} → ${se.date_f || '?'} · geofence ${n(se.geofence_m)} m`}
           actions={<Link href="/dashboard/operations" className="sa-btn sm">← Super Events</Link>}
         />

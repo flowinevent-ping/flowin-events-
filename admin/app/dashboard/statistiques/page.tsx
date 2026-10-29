@@ -19,6 +19,7 @@ import {
 } from '@/lib/nds'
 
 import { usePorteeInitiale } from '@/lib/portee'
+import { Ico } from '@/lib/proicons'
 const fr = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d }
 
 export default function Page() {
@@ -146,7 +147,7 @@ export default function Page() {
                   <td style={{ whiteSpace: 'nowrap' }}>{fr(x.jour)}</td>
                   <td style={{ fontWeight: 700 }}>
                     <span title={x.type === 'commerce' ? 'Station chez un commerce partenaire' : 'Station du festival'}>
-                      {x.type === 'commerce' ? '🤝 ' : '🎪 '}
+                      
                     </span>{x.station}
                   </td>
                   <td style={{ textAlign: 'right' }}>{x.clics}</td>
@@ -164,16 +165,16 @@ export default function Page() {
   )
 
   const VUES: { id: string; icone: string; titre: string; chiffre: string | number; sous: string }[] = [
-    { id: 'reference', icone: '🔢', titre: 'Chiffres de référence', chiffre: t.joueurs, sous: 'joueurs · publiables' },
+    { id: 'reference', icone: 'list', titre: 'Chiffres de référence', chiffre: t.joueurs, sous: 'joueurs · publiables' },
     /* `parties` et `clics_stations` etaient dans l ancien bandeau de 5 KPI :
        ils doivent rester lisibles quelque part, sinon le total de parties du
        festival disparait purement et simplement de l ecran. */
-    { id: 'stations', icone: '📡', titre: 'Tracking par station', chiffre: t.clics_stations, sous: `clics · ${nbStations} festival, ${nbCommerces} partenaires` },
-    { id: 'activite', icone: '🎮', titre: 'Activité par jour', chiffre: t.parties, sous: `parties · ${lignes.length} lignes jour × station` },
-    { id: 'pics', icone: '🔥', titre: 'Pics de jeu', chiffre: pics?.pic?.parties ?? '—', sous: pics?.pic ? `le ${fr(pics.pic.soiree)} à ${pics.pic.heure}h` : 'aucun pic' },
-    { id: 'partenaires', icone: '🔗', titre: 'Retombées partenaires', chiffre: t.clics_partenaires, sous: `${t.clics_depuis_reseaux} depuis les réseaux` },
-    { id: 'audience', icone: '👥', titre: "Profil de l'audience", chiffre: t.joueurs, sous: 'genre · âge · découverte' },
-    { id: 'joueurs', icone: '🏅', titre: 'Meilleurs joueurs', chiffre: r.meilleurs_joueurs.length, sous: 'classement' },
+    { id: 'stations', icone: 'pin', titre: 'Tracking par station', chiffre: t.clics_stations, sous: `clics · ${nbStations} festival, ${nbCommerces} partenaires` },
+    { id: 'activite', icone: 'game', titre: 'Activité par jour', chiffre: t.parties, sous: `parties · ${lignes.length} lignes jour × station` },
+    { id: 'pics', icone: 'chart', titre: 'Pics de jeu', chiffre: pics?.pic?.parties ?? '—', sous: pics?.pic ? `le ${fr(pics.pic.soiree)} à ${pics.pic.heure}h` : 'aucun pic' },
+    { id: 'partenaires', icone: 'link', titre: 'Retombées partenaires', chiffre: t.clics_partenaires, sous: `${t.clics_depuis_reseaux} depuis les réseaux` },
+    { id: 'audience', icone: 'users', titre: "Profil de l'audience", chiffre: t.joueurs, sous: 'genre · âge · découverte' },
+    { id: 'joueurs', icone: 'star', titre: 'Meilleurs joueurs', chiffre: r.meilleurs_joueurs.length, sous: 'classement' },
   ]
 
   return (
@@ -221,7 +222,7 @@ export default function Page() {
               onClick={() => setSection(v.id)}
               aria-pressed={section === v.id}
             >
-              <span className="ic">{v.icone}</span>
+              <span className="ic"><Ico k={v.icone} size={20} /></span>
               <span className="ch">{v.chiffre}</span>
               <span className="ti">{v.titre}</span>
               <span className="so">{v.sous}</span>
@@ -246,7 +247,7 @@ export default function Page() {
         )}
 
         {section === 'activite' && tableau(
-          `🎮 Activité par jour (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
+          `Activité par jour (${lignes.length}) — ${nbStations} du festival, ${nbCommerces} chez les partenaires`,
           lignes, 'Aucune activité sur cette sélection.')}
 
         {section === 'pics' && (
@@ -335,7 +336,7 @@ export default function Page() {
                       <td style={{ fontWeight: 700 }}>{[j.prenom, j.nom].filter(Boolean).join(' ') || '—'}</td>
                       <td>{j.code_postal ?? '—'}</td>
                       <td style={{ textAlign: 'right', fontWeight: 800 }}>{j.parties}</td>
-                      <td style={{ textAlign: 'right' }}>{j.gains > 0 ? <b style={{ color: '#a1690a' }}>🏆 {j.gains}</b> : '—'}</td>
+                      <td style={{ textAlign: 'right' }}>{j.gains > 0 ? <b style={{ color: '#a1690a' }}><Ico k="star" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{j.gains}</b> : '—'}</td>
                       <td>{j.optin ? <span className="sa-chip live">✓</span> : <span className="sa-chip past">—</span>}</td>
                     </tr>
                   ))}

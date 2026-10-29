@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchBonsCommande, majBonCommande, estSigne, remise, type BonCommande } from '@/lib/commercial'
 import { fetchFacturePartenaire, type FacturePartenaire } from '@/lib/dashboard'
+import { Ico } from '@/lib/proicons'
 
 const euros = (n: number | null) =>
   n == null ? '—' : n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -164,7 +165,7 @@ export default function Page() {
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
       {!charge && !filtres.length && (
-        <EmptyState icon="🧾" title="Aucun bon" desc="Aucun bon de commande ne correspond à cette sélection." />
+        <EmptyState icon="receipt" title="Aucun bon" desc="Aucun bon de commande ne correspond à cette sélection." />
       )}
 
       {!charge && filtres.length > 0 && (
@@ -268,7 +269,7 @@ export default function Page() {
               <>
                 <div style={{ fontSize: 13, marginBottom: 4 }}>
                   {factureReelle.factureNumero
-                    ? <span className="sa-chip live">🧾 {factureReelle.factureNumero}{factureReelle.dateEmission ? ` · ${dateFr(factureReelle.dateEmission)}` : ''}</span>
+                    ? <span className="sa-chip live"><Ico k="receipt" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{factureReelle.factureNumero}{factureReelle.dateEmission ? ` · ${dateFr(factureReelle.dateEmission)}` : ''}</span>
                     : <span className="sa-chip">— Pas encore émise (devis {factureReelle.bonStatut ?? 'brouillon'})</span>}
                 </div>
                 <a
@@ -279,7 +280,7 @@ export default function Page() {
                   target="_blank" rel="noreferrer"
                   style={{ textDecoration: 'none', display: 'inline-block', marginTop: 2, marginBottom: 4 }}
                 >
-                  🧾 {factureReelle.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'} →
+                  <Ico k="receipt" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{factureReelle.factureNumero ? 'Voir la facture' : 'Préparer la facture depuis le devis'} →
                 </a>
               </>
             ) : (

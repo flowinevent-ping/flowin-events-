@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useDashboard } from '@/contexts/DashboardContext'
 import { supabase } from '@/lib/supabase'
+import { Ico } from '@/lib/proicons'
 
 interface NavItem {
   id: string
@@ -302,7 +303,7 @@ export default function Sidebar() {
                 {item.live ? (
                   <span className="sa-sb-badge live">{item.live} live</span>
                 ) : item.alerte ? (
-                  <span className="sa-sb-badge alerte" title="Gagnants confirmés, lot pas encore retiré">🔔 {item.alerte}</span>
+                  <span className="sa-sb-badge alerte" title="Gagnants confirmés, lot pas encore retiré"><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{item.alerte}</span>
                 ) : item.count !== undefined && item.count > 0 ? (
                   <span className="sa-sb-badge">{item.count}</span>
                 ) : null}

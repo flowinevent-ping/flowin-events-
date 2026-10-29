@@ -140,7 +140,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     if (!email.includes('@')) return
     const extId = 'j-tb-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
     const link = buildInviteLink(`/parcours/tombola?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
-    const txt = `Je participe à ${nom} 🎟️ Rejoins-moi, inscris-toi et tente de gagner ! ${link}`
+    const txt = `Je participe à ${nom} Rejoins-moi, inscris-toi et tente de gagner ! ${link}`
     try {
       if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
       else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }

@@ -9,6 +9,7 @@ import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
+import { Ico } from '@/lib/proicons'
 
 type Screen = 'landing' | 'wait' | 'vote' | 'form' | 'ticket' | 'already'
 interface Props extends ParcoursPageData { evId: string }
@@ -113,10 +114,10 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
 
       {screen==='landing'&&(
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <ParcoursLogo emoji={(cfg.logoEmoji as string) || '🎮'} logoSvg={cfg.logoSvg as string} />
+          <ParcoursLogo emoji={(cfg.logoEmoji as string) || ''} logoSvg={cfg.logoSvg as string} />
           <div style={{fontSize:24,fontWeight:900,marginBottom:8}}>{nom}</div>
           <div style={{fontSize:13,color:'rgba(255,255,255,.55)',marginBottom:20}}>Quiz en direct · Réponds sur ton téléphone</div>
-          <button className="btn" onClick={()=>setScreen('vote')}>🎮 Rejoindre le quiz →</button>
+          <button className="btn" onClick={()=>setScreen('vote')}><Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Rejoindre le quiz →</button>
           <FlowinBadge />
         </div>
       )}
@@ -135,7 +136,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
         </div>
       )}
 
-      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
+      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{display:'inline-flex',marginBottom:12}}><Ico k={screen==='ticket'?'sparkle':'check'} size={48} /></div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{ display: 'inline-flex', marginBottom: 8 }}><Ico k="ticket" size={34} /></div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
     </div>
   )
 }

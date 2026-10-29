@@ -90,7 +90,7 @@ export default function Page() {
 
       {!charge && !list.length && (
         <EmptyState
-          icon="🎯"
+          icon="game"
           title="Aucun prospect B2B"
           desc="Ces fiches apparaissent lorsqu'un professionnel soumet le formulaire de la landing Flowin. Aucune soumission n'a été enregistrée à ce jour."
         />
@@ -107,7 +107,7 @@ export default function Page() {
           />
 
           {!filtres.length ? (
-            <EmptyState icon="🔍" title="Aucun résultat" desc="Aucun prospect ne correspond à cette recherche." />
+            <EmptyState icon="list" title="Aucun résultat" desc="Aucun prospect ne correspond à cette recherche." />
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table className="sa-tbl" style={{ width: '100%', fontSize: 12.5 }}>

@@ -32,6 +32,7 @@ import type { FlowinPartenaire } from '@/lib/types'
 import type { SuperEvent } from '@/lib/nds'
 import { mailPartenaireRelanceUrl } from '@/lib/nds'
 import { marquerRelance } from '@/lib/operations'
+import { Ico } from '@/lib/proicons'
 
 const CARDBG = 'var(--sa-card, #FFFFFF)'
 const BRD = 'var(--sa-border, #E2E8F0)'
@@ -139,7 +140,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
       <div style={{ background: CARDBG, borderRadius: 16, width: '100%', maxWidth: 880, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(0,0,0,.3)' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 20px', borderBottom: `1px solid ${BRD}`, position: 'sticky', top: 0, background: CARDBG, zIndex: 1 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>🔔 Relancer les gagnants non retirés</div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancer les gagnants non retirés</div>
             <div style={{ fontSize: 12, color: MUT }}>
               {gagnants.length} gagnant{gagnants.length > 1 ? 's' : ''} confirmé{gagnants.length > 1 ? 's' : ''}, lot pas encore récupéré, chez {groupes.length} pro{groupes.length > 1 ? 's' : ''}
               {totalRelances > 0 ? ` · ${totalRelances} déjà relancé${totalRelances > 1 ? 's' : ''} dans cette session` : ''}
@@ -147,12 +148,12 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
           </div>
           {!idEnCours && idsSelectionnes.length > 0 && (
             <button style={btnPrimaire} onClick={() => demarrerFile(idsSelectionnes)}>
-              🔔 Envoyer la sélection ({idsSelectionnes.length})
+              <Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Envoyer la sélection ({idsSelectionnes.length})
             </button>
           )}
           {!idEnCours && idsSelectionnes.length === 0 && idsNonRelances.length > 1 && (
             <button style={btnPrimaire} onClick={() => demarrerFile(idsNonRelances)}>
-              🔔 Tout relancer ({idsNonRelances.length})
+              <Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Tout relancer ({idsNonRelances.length})
             </button>
           )}
           <button onClick={onClose} style={{ border: 'none', background: 'none', fontSize: 20, cursor: 'pointer', color: MUT, lineHeight: 1 }}>✕</button>
@@ -177,7 +178,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
               <div style={{ fontSize: 10.5, fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '.04em' }}>Envoi en cours · reste {resteDansFile}</div>
               <div style={{ fontWeight: 700, fontSize: 13.5 }}>{gagnantEnCours.joueur_nom ?? '—'} <span style={{ fontWeight: 500, color: MUT }}>— {gagnantEnCours.lot_nom ?? 'Lot'}</span></div>
             </div>
-            <button style={btnPrimaire} onClick={() => relancerEtAvancer(gagnantEnCours)}>✉️ Envoyer et passer au suivant</button>
+            <button style={btnPrimaire} onClick={() => relancerEtAvancer(gagnantEnCours)}><Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Envoyer et passer au suivant</button>
             <button style={btn} onClick={() => setFile(null)}>Arrêter la file</button>
           </div>
         )}
@@ -198,7 +199,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
                     <span style={{ fontWeight: 700, fontSize: 11.5, color: MUT, marginLeft: 6 }}>{faites}/{liste.length} relancé{liste.length > 1 ? 's' : ''}</span>
                   </div>
                   {!idEnCours && faites < liste.length && (
-                    <button style={btn} onClick={() => demarrerFile(liste.map(g => g.id))}>🔔 Relancer ce pro ({liste.length - faites})</button>
+                    <button style={btn} onClick={() => demarrerFile(liste.map(g => g.id))}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancer ce pro ({liste.length - faites})</button>
                   )}
                   {informe ? (
                     <span style={{ fontSize: 11.5, fontWeight: 700, color: '#15803D' }}>✓ Pro informé</span>
@@ -208,7 +209,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
                       title={!pro ? 'Pas de fiche commerce rattachée' : faites === 0 ? 'Relancez au moins un gagnant avant d’informer le pro' : undefined}
                       onClick={() => informerPro(partenaireId, liste)}
                     >
-                      ✉️ Informer {pro?.nom ?? 'le pro'}
+                      <Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Informer {pro?.nom ?? 'le pro'}
                     </button>
                   )}
                 </div>
@@ -228,7 +229,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
                       {faite ? (
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#15803D' }}>✓ Relancé</span>
                       ) : (
-                        <button style={btnPrimaire} onClick={() => relancer(g)}>🔔 Relancer</button>
+                        <button style={btnPrimaire} onClick={() => relancer(g)}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancer</button>
                       )}
                     </div>
                   )

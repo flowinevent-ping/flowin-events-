@@ -20,6 +20,7 @@ import { useDashboard } from '@/contexts/DashboardContext'
 import { PageHeader, SectionHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 import { lienGmailBcc, lienWhatsApp, lotsEmail, TAILLE_LOT_EMAIL as TAILLE_LOT } from '@/lib/messaging'
+import { Ico } from '@/lib/proicons'
 
 /* Meme etat a 3 valeurs que app/dashboard/gagnants/page.tsx -- ne pas
    reinventer un autre vocabulaire (Romain, 19/09 : « il faut le complet
@@ -108,8 +109,8 @@ export default function Page() {
             <div className="sa-field" style={{ marginBottom: 12 }}>
               <label className="sa-label">Canal d&apos;envoi</label>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" className={`sa-btn sm${canal === 'email' ? ' primary' : ''}`} onClick={() => setCanal('email')}>✉️ Email</button>
-                <button type="button" className={`sa-btn sm${canal === 'whatsapp' ? ' primary' : ''}`} onClick={() => setCanal('whatsapp')}>💬 WhatsApp</button>
+                <button type="button" className={`sa-btn sm${canal === 'email' ? ' primary' : ''}`} onClick={() => setCanal('email')}><Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Email</button>
+                <button type="button" className={`sa-btn sm${canal === 'whatsapp' ? ' primary' : ''}`} onClick={() => setCanal('whatsapp')}><Ico k="phone" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />WhatsApp</button>
               </div>
             </div>
             {canal === 'whatsapp' && (
@@ -154,7 +155,7 @@ export default function Page() {
             </div>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--sa-muted)' }}>Statut gagnant</span>
-              {([['', 'Tous'], ['gagnant', '🏆 Gagnants'], ['a_confirmer', '⏳ Lot en attente'], ['confirme', '📞 Confirmé'], ['retire', '✅ Lot utilisé']] as const).map(([val, lib]) => (
+              {([['', 'Tous'], ['gagnant', 'Gagnants'], ['a_confirmer', 'Lot en attente'], ['confirme', 'Confirmé'], ['retire', 'Lot utilisé']] as const).map(([val, lib]) => (
                 <button key={val} type="button" className={`sa-btn sm${statutGagnant === val ? ' primary' : ''}`} onClick={() => setStatutGagnant(val)}>{lib}</button>
               ))}
             </div>
@@ -177,7 +178,7 @@ export default function Page() {
                   <tbody>
                     {destinataires.slice(0, 200).map(j => {
                       const etats = etatsParJoueur[j.id]
-                      const lib = etats?.has('retire') ? '✅ Utilisé' : etats?.has('confirme') ? '📞 Confirmé' : etats?.has('a_confirmer') ? '⏳ En attente' : '—'
+                      const lib = etats?.has('retire') ? 'Utilisé' : etats?.has('confirme') ? 'Confirmé' : etats?.has('a_confirmer') ? 'En attente' : '—'
                       return (
                         <tr key={j.id} style={{ borderTop: '1px solid var(--sa-border)' }}>
                           <td style={{ padding: '6px 10px' }}>{[j.prenom, j.nom].filter(Boolean).join(' ') || '—'}</td>
@@ -219,7 +220,7 @@ export default function Page() {
                       className="sa-btn primary"
                       style={{ textDecoration: 'none', justifyContent: 'space-between', display: 'flex' }}
                     >
-                      <span>✉️ Lot {i + 1} / {lots.length} — ouvrir dans Gmail</span>
+                      <span><Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Lot {i + 1} / {lots.length} — ouvrir dans Gmail</span>
                       <span style={{ opacity: 0.85 }}>{bcc.length} destinataire{bcc.length > 1 ? 's' : ''}</span>
                     </a>
                   ))}
@@ -240,7 +241,7 @@ export default function Page() {
                       className="sa-btn sm"
                       style={{ textDecoration: 'none', justifyContent: 'space-between', display: 'flex' }}
                     >
-                      <span>💬 {[j.prenom, j.nom].filter(Boolean).join(' ') || j.tel}</span>
+                      <span><Ico k="phone" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{[j.prenom, j.nom].filter(Boolean).join(' ') || j.tel}</span>
                       <span style={{ opacity: 0.7 }}>{j.tel}</span>
                     </a>
                   ))}
