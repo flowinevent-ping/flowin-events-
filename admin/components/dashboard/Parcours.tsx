@@ -52,7 +52,7 @@ export interface EtapeParcours {
   titre: string
   /** Une ligne d explication sous le titre. */
   sous?: string
-  icone?: string
+  icone?: React.ReactNode
   contenu: React.ReactNode
   /** Message si l etape n est pas complete ; `undefined` = on peut avancer. */
   bloque?: string

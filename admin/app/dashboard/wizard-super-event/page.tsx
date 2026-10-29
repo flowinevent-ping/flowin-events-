@@ -35,20 +35,20 @@ import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { JEUX_A_QUESTIONS, nbSourcesQuestions } from '@/lib/wizard'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
-import { Ico } from '@/lib/proicons'
+import { Ico, IcoModule } from '@/lib/proicons'
 
-const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
+const MODULES: { id: string; nom: string; sous: string }[] = [
   /* Le gabarit de reference en tete, et par defaut : on part de lui, pas d une
      page blanche (Romain, 03/09). Pas de ligne separee pour 'quiz' :
      GABARIT_MODULE vaut 'quiz' depuis le 28/10 (lib/gabarit.ts) -- ce serait
      le meme module en double.
      Pas de roue : un super event se joue en tirage au sort uniquement
      (referentiel 34) — la roue distribue un lot immediat. */
-  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Questions à la suite, bonus de rattrapage optionnel', icone: '🧠' },
-  { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur', icone: '🎤' },
-  { id: 'quizsolo', nom: 'Quiz Solo', sous: 'Le joueur seul, à son rythme', icone: '🎯' },
-  { id: 'tombola', nom: 'Tombola', sous: 'Tirage différé', icone: '🎟️' },
-  { id: 'vote', nom: 'Vote', sous: 'Le public départage', icone: '🗳️' },
+  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Questions à la suite, bonus de rattrapage optionnel' },
+  { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur' },
+  { id: 'quizsolo', nom: 'Quiz Solo', sous: 'Le joueur seul, à son rythme' },
+  { id: 'tombola', nom: 'Tombola', sous: 'Tirage différé' },
+  { id: 'vote', nom: 'Vote', sous: 'Le public départage' },
 ]
 
 export default function Page() {
@@ -153,7 +153,7 @@ export default function Page() {
 
   const etapes: EtapeParcours[] = [
     {
-      id: 'identite', icone: '⭐', titre: 'L’opération',
+      id: 'identite', icone: <Ico k="star" size={26} />, titre: 'L’opération',
       sous: 'Le nom que verront les joueurs, et les dates pendant lesquelles on joue.',
       bloque: !nom.trim() ? 'Donnez un nom à l’opération pour continuer.'
         : !dateD ? 'La date de début est nécessaire.'
@@ -217,7 +217,7 @@ export default function Page() {
       ),
     },
     {
-      id: 'jeux', icone: '🎮', titre: 'Le jeu de l’opération',
+      id: 'jeux', icone: <Ico k="game" size={26} />, titre: 'Le jeu de l’opération',
       sous: 'Choisi une fois pour toute l’opération : chaque station, présente ou à venir, propose ce jeu. Tirage au sort uniquement.',
       bloque: jeuSansQuestions ? 'Choisissez les questions du jeu pour continuer.' : undefined,
       contenu: (
@@ -226,7 +226,7 @@ export default function Page() {
             {MODULES.map(m => (
               <VignetteChoix
                 key={m.id}
-                titre={m.nom} sous={m.sous} icone={m.icone}
+                titre={m.nom} sous={m.sous} icone={<IcoModule module={m.id} size={24} />}
                 actif={module === m.id}
                 onClick={() => { setModule(m.id); setCfgJeu({}) }}
               />
@@ -239,7 +239,7 @@ export default function Page() {
       ),
     },
     {
-      id: 'pros', icone: '🏢', titre: 'Les pros participants',
+      id: 'pros', icone: <Ico k="building" size={26} />, titre: 'Les pros participants',
       sous: 'Chaque pro sélectionné reçoit une station de jeu rattachée à cette opération. On peut en ajouter d’autres plus tard.',
       contenu: (
         <>
@@ -272,7 +272,7 @@ export default function Page() {
                 key={p.id}
                 titre={p.nom ?? p.id}
                 sous={p.ville ?? undefined}
-                icone="🏢"
+                icone={<Ico k="building" size={22} />}
                 actif={!!choisis[p.id]}
                 onClick={() => basculerPro(p.id)}
               />
@@ -282,7 +282,7 @@ export default function Page() {
       ),
     },
     {
-      id: 'reglages', icone: '⚙️', titre: 'Réglages de l’opération',
+      id: 'reglages', icone: <Ico k="settings" size={26} />, titre: 'Réglages de l’opération',
       sous: 'Ce qui vaut pour toutes les stations à la fois.',
       contenu: (
         <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
@@ -296,11 +296,11 @@ export default function Page() {
           </label>
           <div className="sa-choix-grille" style={{ maxWidth: 440 }}>
             <VignetteChoix
-              titre="Tirage global" sous="Un tirage commun à toutes les stations" icone="🎰"
+              titre="Tirage global" sous="Un tirage commun à toutes les stations" icone={<Ico k="globe" size={22} />}
               actif={tirageGlobal} onClick={() => setTirageGlobal(true)}
             />
             <VignetteChoix
-              titre="Tirage par station" sous="Chaque pro tire chez lui" icone="🏪"
+              titre="Tirage par station" sous="Chaque pro tire chez lui" icone={<Ico k="shop" size={22} />}
               actif={!tirageGlobal} onClick={() => setTirageGlobal(false)}
             />
           </div>
@@ -308,7 +308,7 @@ export default function Page() {
       ),
     },
     {
-      id: 'recap', icone: '✅', titre: 'Récapitulatif',
+      id: 'recap', icone: <Ico k="checkCircle" size={26} />, titre: 'Récapitulatif',
       sous: 'Rien n’est écrit tant que vous n’avez pas validé ici.',
       contenu: (
         <div style={{ maxWidth: 620 }}>
