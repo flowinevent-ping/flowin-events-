@@ -211,64 +211,8 @@ a:hover{text-decoration:underline}
 .sa-crm-sous{cursor:default}
 .sa-crm-sous .n{margin-left:7px;font-weight:700;text-transform:none;letter-spacing:0}
 
-/* ---- Kanban horizontal de vignettes cliquables (accueil, et reutilisable) ---- */
-/* Colonnes de largeur fixe qui defilent horizontalement : le nombre de colonnes
-   ne doit pas ecraser la largeur des vignettes, sinon le titre d un event passe
-   sur quatre lignes des qu on ajoute un statut.
-   MISE A JOUR (27/10, 1ere passe) : .sa-kb-vignette reprend le rayon (18), la
-   bordure (#efe9f2) et l ombre (0 6px 18px rgba(43,16,54,.05)) de CARD. .sa-kb-col
-   suit la meme famille de rayon (14, celui deja use par .sa-tile sur l Accueil).
-   MISE A JOUR (27/10, 2e passe) : Romain a montre la preview ("ces especes de
-   trucs sur le cote degueulasse" -- la barre de couleur plaquee sur le bord
-   gauche) contre la maquette validee le matin meme (comparaison calendrier vs
-   kanban) : plus de bordure laterale coloree ; a la place une pastille ronde
-   (icone etoile = super event, icone ticket = event) en tete de ligne, le nom
-   juste a cote en gras, et une puce de date a droite -- repere principal sur
-   UNE SEULE ligne horizontale centree verticalement (.sa-kb-ligne), jamais un
-   bloc de texte empile. Les infos secondaires (enseigne/stations, participants)
-   passent en 2e ligne discrete sous le repere principal (.sa-kb-sub), pas dans
-   le meme niveau visuel. La mecanique de defilement (overflow-x sur .sa-kanban,
-   flex-shrink:0 sur les colonnes) n est pas touchee. */
-.sa-kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
-.sa-kb-col{flex:0 0 268px;background:var(--sa-subtle);border:1px solid var(--sa-border);
-  border-radius:14px;padding:10px;min-width:0}
-.sa-kb-tete{display:flex;align-items:center;gap:7px;padding:2px 4px 10px;
-  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted)}
-.sa-kb-tete .pastille{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sa-kb-tete .t{flex:1;min-width:0}
-.sa-kb-tete .n{background:var(--sa-card);border:1px solid var(--sa-border);border-radius:99px;
-  padding:1px 7px;font-size:10px}
-.sa-kb-corps{display:flex;flex-direction:column;gap:8px}
-.sa-kb-vide{font-size:11.5px;color:var(--sa-muted);padding:8px 4px}
-.sa-kb-vignette{display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
-  background:#fff;border:1px solid #efe9f2;
-  border-radius:18px;padding:11px 12px;box-shadow:0 6px 18px rgba(43,16,54,.05);
-  transition:box-shadow .12s,transform .12s}
-.sa-kb-vignette:hover{box-shadow:0 10px 26px rgba(43,16,54,.10);transform:translateY(-1px)}
-/* Repere principal : pastille icone + nom + date, tout sur une ligne, centre
-   verticalement -- jamais de bloc de texte empile ici. */
-.sa-kb-ligne{display:flex;align-items:center;gap:8px}
-.sa-kb-pastille{width:26px;height:26px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center}
-.sa-kb-nom{flex:1;min-width:0;font-weight:800;font-size:13.5px;line-height:1.25;
-  color:var(--sa-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sa-kb-date{flex-shrink:0;background:var(--sa-subtle);color:var(--sa-muted);
-  font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;white-space:nowrap}
-/* Ligne secondaire discrete (enseigne/stations, participants) sous le repere
-   principal -- plus petite, plus pale, jamais au meme niveau visuel que le nom. */
-.sa-kb-sub{font-size:11px;color:var(--sa-muted);margin-top:6px;padding-left:34px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Rangee de raccourcis d acces (Pros/Partenaires/Joueurs/Lots/Gagnants/Dupliquer)
-   sous une vignette .sa-kb-* -- option B validee par Romain le 28/10 pour
-   /dashboard/super-events : les actions restent visibles sans ouvrir la fiche,
-   habillees en chip (pas en bouton pleine largeur) pour rester discretes. */
-.sa-kb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;padding-left:34px}
-.sa-kb-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;
-  border:1px solid var(--sa-border);border-radius:99px;padding:4px 10px;
-  font-size:11px;font-weight:700;color:var(--sa-text);text-decoration:none;
-  cursor:pointer;font-family:inherit;transition:border-color .12s}
-.sa-kb-chip:hover{border-color:var(--sa-accent)}
-.sa-kb-chip.muted{background:var(--sa-subtle)}
+/* ---- Kanban horizontal de vignettes cliquables : voir styles/sa-kanban.css
+   (feuille partagee SA + pro, importee par app/dashboard/layout.tsx). ---- */
 
 /* Une tuile de chiffre qui s ouvre : meme apparence que .sa-kpi, mais c est un
    bouton, donc il faut neutraliser le style natif et rendre le clic visible. */

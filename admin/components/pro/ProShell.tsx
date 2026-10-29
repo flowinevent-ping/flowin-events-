@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { CHARTE_PRO, POLICE_PRO, VARIABLES_CSS } from '@/lib/charte'
+import '@/styles/sa-kanban.css'
 
 /**
  * Coquille brandee de l'espace Pro (identite Flowin Pro de la maquette validee).
@@ -151,7 +152,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
     <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: C.fond, fontFamily: POLICE_PRO, fontSize: 14, color: C.texte }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-        :root { ${VARIABLES_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; }
+        :root { ${VARIABLES_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; --sa-card:#fff; --sa-accent:${C.accent}; }
         .pro-shell input, .pro-shell select, .pro-shell textarea, .pro-shell button { font-family: ${POLICE_PRO}; }
         .pro-sidebar { position: sticky; top: 0; }
         .pro-drawer-backdrop, .pro-bottom-nav, .pro-hamburger { display: none; }

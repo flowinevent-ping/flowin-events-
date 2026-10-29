@@ -17,10 +17,7 @@
  *     deja le bouton Relancer (texte unique mail-gagnant.js).
  *
  * Kanban (plusieurs operations) : memes classes CSS que le planning SA
- * (.sa-kb-*, app/dashboard/globals.css) -- recopiees ci-dessous car cette
- * feuille n est chargee que sous /dashboard/*, jamais sous /pro/*. Les
- * variables --sa-* qu elles lisent sont deja posees par ProShell (charte
- * pro), donc le rendu est visuellement identique, pas une approximation.
+ * (.sa-kb-*, styles/sa-kanban.css, chargee par ProShell cote pro).
  */
 import { useState } from 'react'
 import Link from 'next/link'
@@ -37,35 +34,6 @@ import { chiffresOperation } from '@/components/pro/GrilleOperations'
 import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { H1, SUB, CARD, MUTED } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
-
-/* Copie exacte (noms de classes et regles) du bloc « Kanban horizontal de
-   vignettes cliquables » de app/dashboard/globals.css -- voir l en-tete de ce
-   fichier pour pourquoi elle est dupliquee plutot qu importee. */
-const SA_KB_CSS = `
-.sa-kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
-.sa-kb-col{flex:0 0 268px;background:var(--sa-subtle);border:1px solid var(--sa-border);
-  border-radius:14px;padding:10px;min-width:0}
-.sa-kb-tete{display:flex;align-items:center;gap:7px;padding:2px 4px 10px;
-  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted)}
-.sa-kb-tete .n{background:var(--sa-card);border:1px solid var(--sa-border);border-radius:99px;
-  padding:1px 7px;font-size:10px}
-.sa-kb-corps{display:flex;flex-direction:column;gap:8px}
-.sa-kb-vide{font-size:11.5px;color:var(--sa-muted);padding:8px 4px}
-.sa-kb-vignette{display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
-  background:#fff;border:1px solid #efe9f2;
-  border-radius:18px;padding:11px 12px;box-shadow:0 6px 18px rgba(43,16,54,.05);
-  transition:box-shadow .12s,transform .12s}
-.sa-kb-vignette:hover{box-shadow:0 10px 26px rgba(43,16,54,.10);transform:translateY(-1px)}
-.sa-kb-ligne{display:flex;align-items:center;gap:8px}
-.sa-kb-pastille{width:26px;height:26px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center}
-.sa-kb-nom{flex:1;min-width:0;font-weight:800;font-size:13.5px;line-height:1.25;
-  color:var(--sa-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sa-kb-date{flex-shrink:0;background:var(--sa-subtle);color:var(--sa-muted);
-  font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 9px;white-space:nowrap}
-.sa-kb-sub{font-size:11px;color:var(--sa-muted);margin-top:6px;padding-left:34px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-`
 
 export default function HistoriqueClient({ initial, cle: cleInitiale }: { initial: OperationsPro; cle?: string | null }) {
   const [data, setData] = useState<OperationsPro>(initial)
@@ -177,7 +145,6 @@ function Kanban({ groupes, onOuvrir }: {
   if (groupes.length === 0) return <div style={CARD}><Vide>Aucune opération.</Vide></div>
   return (
     <>
-      <style>{SA_KB_CSS}</style>
       <div className="sa-kanban">
         {groupes.map(g => (
           <section key={g.periode} className="sa-kb-col">
