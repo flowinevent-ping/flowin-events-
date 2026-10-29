@@ -54,7 +54,7 @@ export default function Page() {
   const colonne = (titre: string, puce: string, liste: typeof events, vide: string) => (
     <section className="sa-kb-col" style={{ flex: '1 1 268px' }}>
       <header className="sa-kb-tete">
-        <span className="t">{puce} {titre}</span>
+        <span className="t"><Ico k={puce} size={12} style={{ marginRight: 5, verticalAlign: -2 }} />{titre}</span>
         <span className="n">{liste.length}</span>
       </header>
       <div className="sa-kb-corps">
@@ -116,10 +116,10 @@ export default function Page() {
         <EmptyState icon="🎯" title="Aucun événement" desc="Aucun événement n'est enregistré." />
       ) : (
         <div className="sa-kanban">
-          {colonne('Live maintenant', '🔴', live,
+          {colonne('Live maintenant', 'bell', live,
             aVenir.length ? `Aucun event en cours. Prochain le ${dateFr(aVenir[0].date_d)}.` : 'Aucun event en cours.')}
-          {colonne('À venir', '📅', aVenir, 'Aucun event programmé.')}
-          {colonne('Passés', '🗂️', passes, 'Aucun event terminé.')}
+          {colonne('À venir', 'calendar', aVenir, 'Aucun event programmé.')}
+          {colonne('Passés', 'clock', passes, 'Aucun event terminé.')}
         </div>
       )}
     </div>

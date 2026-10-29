@@ -27,10 +27,10 @@ import type { FlowinEvent } from '@/lib/types'
 
 type EtatAnim = 'live' | 'upcoming' | 'past' | 'archived'
 const COLONNES: { cle: EtatAnim; titre: string }[] = [
-  { cle: 'live', titre: '🔴 Active' },
-  { cle: 'upcoming', titre: '📅 À venir' },
-  { cle: 'past', titre: '✅ Passée' },
-  { cle: 'archived', titre: '🗄️ Archivée' },
+  { cle: 'live', titre: 'Active' },
+  { cle: 'upcoming', titre: 'À venir' },
+  { cle: 'past', titre: 'Passée' },
+  { cle: 'archived', titre: 'Archivée' },
 ]
 
 export default function Page() {
@@ -101,10 +101,10 @@ export default function Page() {
      demande explicitement la meme presentation. "Pros" retire ici (on est
      deja sur une vue par pro, redondant). */
   const accesRapides: { icone: string; label: string; href: string }[] = [
-    { icone: '🤝', label: 'Partenaires', href: '/dashboard/partenaires' },
-    { icone: '👥', label: 'Joueurs', href: '/dashboard/joueurs' },
-    { icone: '🎁', label: 'Lots', href: '/dashboard/nds-lots' },
-    { icone: '🏆', label: 'Gagnants', href: '/dashboard/gagnants' },
+    { icone: 'handshake', label: 'Partenaires', href: '/dashboard/partenaires' },
+    { icone: 'users', label: 'Joueurs', href: '/dashboard/joueurs' },
+    { icone: 'gift', label: 'Lots', href: '/dashboard/nds-lots' },
+    { icone: 'star', label: 'Gagnants', href: '/dashboard/gagnants' },
   ]
 
   return (
@@ -115,16 +115,16 @@ export default function Page() {
           subtitle={`${list.length} animation${list.length > 1 ? 's' : ''} · ${parPro.length} pro${parPro.length > 1 ? 's' : ''} — hors super events (voir Super Events pour les stations NDS)`}
           actions={
             <>
-              <Link href="/dashboard/wizard-event" className="sa-btn primary sm">✨ Nouvel event</Link>
+              <Link href="/dashboard/wizard-event" className="sa-btn primary sm"><Ico k="plus" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Nouvel event</Link>
               {/* L autre porte d entree : un pro qui demande a participer depuis /pro/rejoindre. */}
-              <Link href="/dashboard/demandes-rattachement" className="sa-btn sm">🤝 Demandes de participation</Link>
+              <Link href="/dashboard/demandes-rattachement" className="sa-btn sm"><Ico k="handshake" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Demandes de participation</Link>
             </>
           }
         />
 
         <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-          <button className={`sa-btn sm${onglet === 'kanban' ? ' primary' : ''}`} onClick={() => setOnglet('kanban')}>📋 Kanban</button>
-          <button className={`sa-btn sm${onglet === 'parcours' ? ' primary' : ''}`} onClick={() => setOnglet('parcours')}>📱 Parcours mobil</button>
+          <button className={`sa-btn sm${onglet === 'kanban' ? ' primary' : ''}`} onClick={() => setOnglet('kanban')}><Ico k="list" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Kanban</button>
+          <button className={`sa-btn sm${onglet === 'parcours' ? ' primary' : ''}`} onClick={() => setOnglet('parcours')}><Ico k="phone" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Parcours mobil</button>
         </div>
 
         {onglet === 'parcours' && (
@@ -140,7 +140,7 @@ export default function Page() {
 
         {list.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            {([['en_cours', '🔴 En cours'], ['a_venir', '📅 À venir'], ['passe', '📁 Terminé']] as const).map(([cle, titreCol]) => (
+            {([['en_cours', 'En cours'], ['a_venir', 'À venir'], ['passe', 'Terminé']] as const).map(([cle, titreCol]) => (
               <div key={cle}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.04em' }}>
                   {titreCol} ({parStatutCol[cle].length})
@@ -156,7 +156,7 @@ export default function Page() {
                           <Ico k="shop" size={14} />
                         </span>
                         <span className="sa-kb-nom">{pro?.nom ?? pid}</span>
-                        {enCours > 0 && <span className="sa-kb-date">🔴 {enCours} en cours</span>}
+                        {enCours > 0 && <span className="sa-kb-date">{enCours} en cours</span>}
                       </div>
                       <div className="sa-kb-sub">
                         {animations.length} animation{animations.length > 1 ? 's' : ''} · {pid}
@@ -168,11 +168,11 @@ export default function Page() {
                       <div className="sa-kb-chips">
                         {accesRapides.map(a => (
                           <a key={a.label} href={a.href} className="sa-kb-chip">
-                            {a.icone} {a.label}
+                            <Ico k={a.icone} size={12} style={{ marginRight: 4, verticalAlign: -2 }} />{a.label}
                           </a>
                         ))}
                         <button className="sa-kb-chip muted" onClick={() => setOuvert(ouvert === pid ? null : pid)}>
-                          {ouvert === pid ? '▲ Masquer' : `📍 ${animations.length} animation${animations.length > 1 ? 's' : ''}`}
+                          {ouvert === pid ? '▲ Masquer' : <><Ico k="pin" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />{animations.length} animation{animations.length > 1 ? 's' : ''}</>}
                         </button>
                       </div>
 
@@ -193,13 +193,13 @@ export default function Page() {
                                         style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 8, padding: '7px 9px', cursor: 'pointer', position: 'relative' }}
                                       >
                                         <div style={{ fontWeight: 700, fontSize: 12 }}>{String(ev.nom ?? '—')}</div>
-                                        <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}>👥 {String(ev.participants ?? 0)}</div>
+                                        <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}><Ico k="users" size={11} style={{ marginRight: 3, verticalAlign: -2 }} />{String(ev.participants ?? 0)}</div>
                                         <button
                                           className="sa-btn icon sm"
                                           title="Éditer"
                                           onClick={e => { e.stopPropagation(); openDrawerEdit('event', String(ev.id)) }}
                                           style={{ position: 'absolute', top: 5, right: 5, opacity: 0.6 }}
-                                        >✏</button>
+                                        ><Ico k="edit" size={12} /></button>
                                       </div>
                                     ))}
                                   </div>
