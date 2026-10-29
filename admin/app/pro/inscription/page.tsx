@@ -76,7 +76,7 @@ export default function InscriptionProPage() {
 
   if (envoi === 'ok') {
     return (
-      <SuccessScreen emoji="✅" title="Demande envoyée">
+      <SuccessScreen emoji="" title="Demande envoyée">
         <div style={{ fontSize: 15.5, lineHeight: 1.6, color: '#374151' }}>
           Votre compte est créé et en attente de validation par l&apos;équipe Flowin. Vous pouvez déjà{' '}
           <Link href="/pro/connexion" style={ghostLink}>vous connecter</Link> pour suivre l&apos;état de votre demande.

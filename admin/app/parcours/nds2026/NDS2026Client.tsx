@@ -166,7 +166,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const lot2Desc = (cfg.lot2Desc as string) || 'Au grand tirage de fin de festival'
   const tirageHeure = (cfg.tirageHeure as string) || '12h30'
 
-  const [questions, setQuestions] = useState<QuizQuestion[]>(() => shuffle([...allQs, ...customQs]).slice(0, nbQ))
+  /* Tirage fait dans l'effet de montage (jamais pendant le rendu) : un shuffle au rendu donne
+     un ordre different cote serveur et cote client -> erreur d'hydratation. */
+  const [questions, setQuestions] = useState<QuizQuestion[]>([])
   // Anti-répétition : historique du joueur reconnu (device local), chargé en tâche de fond dès le montage.
   // Reste vide (comportement actuel inchangé) pour tout joueur non reconnu — aucune régression possible.
   const [joueurHistory, setJoueurHistory] = useState<{ answeredQuizIds: string[]; bonusDone: boolean }>({ answeredQuizIds: [], bonusDone: false })
@@ -205,11 +207,10 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapObjRef = useRef<unknown>(null)
   const [placeMode, setPlaceMode] = useState(false)
-  const [isDigitalLink] = useState<boolean>(() => { try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false } })
-  const [preview] = useState<boolean>(() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })
-  const [barreVisible] = useState<boolean>(() => {
-    try { return preview && new URLSearchParams(window.location.search).get('bar') !== '0' } catch { return preview }
-  })
+  /* Lus dans l'effet de montage (jamais pendant le rendu) : window n'existe pas cote serveur. */
+  const [isDigitalLink, setIsDigitalLink] = useState(false)
+  const [preview, setPreview] = useState(false)
+  const [barreVisible, setBarreVisible] = useState(false)
   const MB = !!cfg.mbLayout  // nouveau layout marque blanche : uniquement pilote par cfg (jamais par preview seul) --
     // preview=1 sert a valider SANS polluer les vraies donnees (skip auto-jump quiz, popups, etc.), pas a forcer
     // le layout marque blanche. Avant ce fix, previsualiser un vrai event NDS 2026 (aucun cfg.mbLayout) affichait
@@ -224,6 +225,12 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   useEffect(() => {
     try {
       const sp = new URLSearchParams(window.location.search)
+      const pv = sp.has('preview')
+      setPreview(pv)
+      setBarreVisible(pv && sp.get('bar') !== '0')
+      setIsDigitalLink((sp.get('source') || '').startsWith('reseaux-'))
+      const qs = shuffle([...allQs, ...customQs]).slice(0, nbQ)
+      setQuestions(qs)
       if (sp.get('place') === '1') { setPlaceMode(true); setScreen('carte'); return }
       if (sp.get('screen') === 'carte') { setScreen('carte'); return }
       if ((sp.get('source') || '').startsWith('reseaux-') && getJoueurLocal()) { setScreen('refusdigital'); return }
@@ -231,7 +238,7 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
       // Exceptions : station déjà jouée aujourd'hui (on garde le récap « déjà flashé ») ou station sans quiz.
       let alreadyPlayed = false
       try { alreadyPlayed = localStorage.getItem(lsKey) != null } catch {}
-      if (!preview && !alreadyPlayed && questions.length > 0) setScreen('quiz')
+      if (!pv && !alreadyPlayed && qs.length > 0) setScreen('quiz')
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -308,14 +315,16 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
   // Anti retour-arrière : si la page est restaurée depuis la mémoire du navigateur (bfcache),
   // on recharge -> on repasse par la règle "déjà joué" au lieu de pouvoir rejouer la même station.
   useEffect(() => {
-    const onShow = (e: PageTransitionEvent) => { if (e.persisted && !preview) window.location.reload() }
+    const pv = (() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })()
+    const onShow = (e: PageTransitionEvent) => { if (e.persisted && !pv) window.location.reload() }
     window.addEventListener('pageshow', onShow)
     return () => window.removeEventListener('pageshow', onShow)
   }, [])
 
   useEffect(() => {
     ndsMigrateLegacy()
-    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); if (!preview) setDejaJoue(true); if (s !== 'played') setTicket(s) } } catch {}
+    const pv = (() => { try { return new URLSearchParams(window.location.search).has('preview') } catch { return false } })()
+    try { const s = localStorage.getItem(lsKey); if (s) { setSaved(true); if (!pv) setDejaJoue(true); if (s !== 'played') setTicket(s) } } catch {}
     // Profil déjà enregistré (autre station / session précédente) -> mode récurrent
     const prof = getJoueurLocal()
     if (prof) {
@@ -795,9 +804,9 @@ export default function NDS2026Client({ ev, lots, partenaires, banques, evId }: 
 
   return (
     <div className="ndsbody">
-      {fly > 0 && <div key={fly} className="ticketfly" aria-hidden="true">+1&#8239;<svg className="ic" style={{ width: 16, height: 16, verticalAlign: -3 }}><use href="#i-ticket" /></svg></div>}
+      {fly > 0 && <div key={`fly-${fly}`} className="ticketfly" aria-hidden="true">+1&#8239;<svg className="ic" style={{ width: 16, height: 16, verticalAlign: -3 }}><use href="#i-ticket" /></svg></div>}
       {celebrate > 0 && (
-        <div className="confetti-wrap" key={celebrate} aria-hidden="true">
+        <div className="confetti-wrap" key={`cf-${celebrate}`} aria-hidden="true">
           {CONFETTI_PIECES.map((pc, i) => <span key={i} className="confetti-pc" style={{ left: `${pc.l}%`, background: pc.c, animationDelay: `${pc.d}s` }} />)}
         </div>
       )}

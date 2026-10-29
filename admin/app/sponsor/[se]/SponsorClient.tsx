@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Ico } from '@/lib/proicons'
 
 type SE = { id: string; nom: string; description?: string | null; date_d?: string | null; date_f?: string | null; pct_flowin?: number | null }
 type Lot = { rang: number | null; valeur: number | null; libelle?: string | null }
@@ -61,7 +62,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
     return (
       <div style={wrap}>
         <div style={{ background: `linear-gradient(135deg,${HERO},#0B6E50)`, color: '#fff', padding: '54px 18px 40px', textAlign: 'center' }}>
-          <div style={{ fontSize: 54, marginBottom: 10 }}>🤝</div>
+          <div style={{ display: 'inline-flex', marginBottom: 10 }}><Ico k="handshake" size={56} /></div>
           <div style={{ fontSize: 26, fontWeight: 800 }}>Merci !</div>
         </div>
         <div style={{ ...card, marginTop: -18 }}>
@@ -91,7 +92,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
         </div>
         {totalLots > 0 && (
           <div style={{ display: 'inline-block', marginTop: 14, background: 'rgba(255,255,255,.18)', borderRadius: 100, padding: '7px 16px', fontSize: 13.5, fontWeight: 700 }}>
-            🎁 {totalLots} € de lots mutualisés
+            <Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{totalLots} € de lots mutualisés
           </div>
         )}
       </div>
@@ -99,7 +100,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
       <div style={{ ...card, marginTop: -16 }}>
         <div style={{ background: '#fff', borderRadius: 20, padding: '22px 20px 26px', boxShadow: '0 6px 24px rgba(20,26,38,.08)' }}>
 
-          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, marginBottom: 13 }}>🏢 Votre structure</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, marginBottom: 13 }}><Ico k="building" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Votre structure</div>
           <div style={field}><label style={label}>Raison sociale *</label><input style={input} value={f.structure} onChange={e => set('structure', e.target.value)} /></div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11, marginBottom: 15 }}>
             <div>
@@ -112,7 +113,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
             <div><label style={label}>Ville</label><input style={input} value={f.ville} onChange={e => set('ville', e.target.value)} /></div>
           </div>
 
-          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}>👤 Votre contact</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}><Ico k="user" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Votre contact</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 11, marginBottom: 15 }}>
             <div><label style={label}>Prénom *</label><input style={input} value={f.prenom} onChange={e => set('prenom', e.target.value)} /></div>
             <div><label style={label}>Nom *</label><input style={input} value={f.nom} onChange={e => set('nom', e.target.value)} /></div>
@@ -120,7 +121,7 @@ export default function SponsorClient({ se, lots }: { se: SE; lots: Lot[] }) {
           <div style={field}><label style={label}>Email *</label><input style={input} type="email" inputMode="email" autoCapitalize="none" value={f.email} onChange={e => set('email', e.target.value)} /></div>
           <div style={field}><label style={label}>Téléphone *</label><input style={input} type="tel" inputMode="tel" value={f.tel} onChange={e => set('tel', e.target.value)} /></div>
 
-          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}>💶 Votre soutien</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: HERO, margin: '22px 0 13px' }}><Ico k="receipt" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Votre soutien</div>
           <div style={field}><label style={label}>Montant du sponsoring (€) *</label><input style={input} type="number" min="0" inputMode="numeric" value={f.montant} onChange={e => set('montant', e.target.value)} /></div>
           <div style={field}><label style={label}>Logo (URL, optionnel)</label><input style={input} type="url" value={f.logo} onChange={e => set('logo', e.target.value)} placeholder="https://…" /></div>
           <div style={field}><label style={label}>Message (optionnel)</label><input style={input} value={f.message} onChange={e => set('message', e.target.value)} /></div>

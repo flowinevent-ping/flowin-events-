@@ -126,7 +126,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     if (!email.includes('@')) return
     const extId = 'j-vs-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
     const link = buildInviteLink(`/parcours/vote?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
-    const txt = `Je vote pour ${nom} 🗳️ Viens voter toi aussi ! ${link}`
+    const txt = `Je vote pour ${nom}. Viens voter toi aussi ! ${link}`
     try {
       if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
       else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }

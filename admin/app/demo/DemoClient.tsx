@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { Ico } from '@/lib/proicons'
 
 const supabase = createClient(
   'https://ywcqtupgoxfzkddqkztk.supabase.co',
@@ -437,7 +438,7 @@ export default function DemoClient() {
             </div>
 
             <div style={{ padding:'24px 20px 20px', textAlign:'center' }}>
-              <div style={{ fontSize:56, marginBottom:12 }}>🥳</div>
+              <div style={{ display:'inline-flex', marginBottom:12 }}><Ico k="sparkle" size={56} /></div>
               <div style={{ fontSize:11, fontWeight:700, color:'rgba(0,200,180,.8)', textTransform:'uppercase', letterSpacing:2, marginBottom:6 }}>
                 Vous avez gagné
               </div>

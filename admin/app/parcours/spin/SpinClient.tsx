@@ -14,6 +14,7 @@ import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
+import { Ico } from '@/lib/proicons'
 
 type Screen = 'landing' | 'spin' | 'result' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already' | 'refusdigital'
 interface Segment { label: string; color: string; perdant?: boolean; stock?: number; mode?: 'immediat' | 'tirage' | 'voisin' }
@@ -246,7 +247,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     if (!email.includes('@')) return
     const extId = 'j-sp-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
     const link = buildInviteLink(`/parcours/spin?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
-    const txt = `Je joue à ${nom} 🎟️ Rejoins-moi, joue et tente de gagner ! ${link}`
+    const txt = `Je joue à ${nom} Rejoins-moi, joue et tente de gagner ! ${link}`
     try {
       if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
       else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
@@ -443,7 +444,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
               )}
               <div style={{ fontSize:12,color:'rgba(255,255,255,.55)',marginBottom:16 }}>Ticket <span style={{ fontWeight:800,color:'#fff',letterSpacing:1 }}>{screen==='ticket'?ticket:existingTicket}</span></div>
               {parrainRecu && (
-                <div style={{ fontSize:11,fontWeight:700,color:'#2DD4BF',marginBottom:14 }}>🎉 Tu as rejoint grâce au parrainage d&apos;un ami</div>
+                <div style={{ fontSize:11,fontWeight:700,color:'#2DD4BF',marginBottom:14 }}><Ico k="sparkle" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Tu as rejoint grâce au parrainage d&apos;un ami</div>
               )}
               {(form.email || getJoueurLocal()?.email) && (
                 <button className="btn-ghost" style={{ display:'block',width:'82%',margin:'0 auto 12px',background:'transparent',border:'1px solid rgba(45,212,191,.35)',borderRadius:100,padding:'10px 0',fontWeight:700,color:'#2DD4BF',cursor:'pointer' }} onClick={shareParrainage}>Parraine un ami &amp; gagne un tour</button>

@@ -15,6 +15,7 @@ import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import type { ParcoursPageData, QuizQuestion, BonusQuestion } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 import { resolveParcoursTheme } from '@/lib/parcoursTheme'
+import { Ico } from '@/lib/proicons'
 
 type Screen = 'landing' | 'quiz' | 'resultats' | 'bonus' | 'form' | 'partenaires' | 'partSheet' | 'ticket' | 'already' | 'refusdigital'
 interface Props extends ParcoursPageData { evId: string }
@@ -155,7 +156,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (!email.includes('@')) return
     const extId = 'j-pq-' + email.replace(/[^a-z0-9]/g, '-').substring(0, 36)
     const link = buildInviteLink(`/parcours/quiz?ev=${evId}`, extId, evId, 'wa') + '&source=parrainage'
-    const txt = `Je joue à ${nom} 🎟️ Rejoins-moi, joue et tente de gagner ! ${link}`
+    const txt = `Je joue à ${nom} Rejoins-moi, joue et tente de gagner ! ${link}`
     try {
       if (typeof navigator !== 'undefined' && navigator.share) { await navigator.share({ title: nom, text: txt }) }
       else { window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank') }
@@ -226,7 +227,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
             if (answered) { if (i===selected && i===q.bonne) cls='opt correct'; else if (i===selected) cls='opt wrong'; else if (i===q.bonne) cls='opt reveal' }
             return <button key={i} className={cls} onClick={() => handleAnswer(i)} disabled={answered}><span style={{ fontWeight:800,color:'rgba(255,255,255,.4)',marginRight:8 }}>{['A','B','C','D'][i]}</span>{opt}</button>
           })}
-          {answered && q.explication && <div style={{ background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.1)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'rgba(255,255,255,.55)',marginTop:8 }}>💡 {q.explication}</div>}
+          {answered && q.explication && <div style={{ background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.1)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'rgba(255,255,255,.55)',marginTop:8 }}><Ico k="sparkle" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{q.explication}</div>}
         </div>
       )}
 

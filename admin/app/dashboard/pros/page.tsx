@@ -12,6 +12,7 @@ import { upsertPro } from '@/lib/dashboard'
 import type { FlowinPro } from '@/lib/types'
 import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
 import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
+import { Ico } from '@/lib/proicons'
 
 const STATUT_STYLE: Record<string, { bg: string; c: string; label: string }> = {
   en_attente: { bg: '#FEF3C7', c: '#92400E', label: 'En attente' },
@@ -84,7 +85,7 @@ function ProsContenu() {
               <button className="sa-btn sm" disabled={enCours === p.id} onClick={() => traiter(p.id, 'refuse')}>Refuser</button>
             </>
           )}
-          <button className="sa-btn icon sm" title="Éditer" onClick={() => openDrawerEdit('pro', p.id)}>✏</button>
+          <button className="sa-btn icon sm" title="Éditer" onClick={() => openDrawerEdit('pro', p.id)}><Ico k="edit" size={13} /></button>
         </div>
       ),
     },
@@ -95,7 +96,7 @@ function ProsContenu() {
     <div className="sa-content">
       <div className="sa-page">
         <ListeCRM<FlowinPro>
-          titre="🏢 Pros"
+          titre="Pros"
           sousTitre={`${lignes.length} pro${lignes.length > 1 ? 's' : ''}${nbEnAttente ? ` · ${nbEnAttente} en attente de validation` : ''}`}
           lignes={lignes}
           colonnes={colonnes}

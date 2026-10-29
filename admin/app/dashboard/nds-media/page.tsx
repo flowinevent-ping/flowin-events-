@@ -132,7 +132,7 @@ export default function Page() {
 
       {!stations.length ? (
         <EmptyState
-          icon="🎬"
+          icon="camera"
           title="Aucune station"
           desc={q ? 'Aucun résultat pour cette recherche.' : 'Cette opération n’a pas encore de station.'}
         />

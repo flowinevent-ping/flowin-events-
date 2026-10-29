@@ -310,7 +310,7 @@ export default function Page() {
               <>
                 <Ico k="check" size={13} style={{ marginRight: 4, verticalAlign: -2 }} /><b>{res.super_event}</b> créé — {res.events_dupliques} station{(res.events_dupliques ?? 0) > 1 ? 's' : ''} sur {res.events_source} dupliquée{(res.events_dupliques ?? 0) > 1 ? 's' : ''},
                 {' '}{res.partenaires_reutilisables} partenaire{(res.partenaires_reutilisables ?? 0) > 1 ? 's' : ''} réutilisable{(res.partenaires_reutilisables ?? 0) > 1 ? 's' : ''}.
-                {!!res.events_hors_convention && <> ⚠ {res.events_hors_convention} event(s) hors convention de nommage, non dupliqué(s).</>}
+                {!!res.events_hors_convention && <> <Ico k="warning" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{res.events_hors_convention} event(s) hors convention de nommage, non dupliqué(s).</>}
                 <br /><span style={{ fontSize: 12, opacity: .8 }}>{res.note}</span>
               </>
             ) : <><Ico k="warning" size={13} style={{ marginRight: 4, verticalAlign: -2 }} />Duplication impossible : {res.raison}</>}

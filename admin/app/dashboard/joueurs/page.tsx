@@ -16,6 +16,7 @@ import type { FlowinJoueur } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
 import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
+import { Ico } from '@/lib/proicons'
 
 const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR') : '—')
 
@@ -64,7 +65,7 @@ function JoueursContenu() {
     { id: 'gains', label: 'Gains', valeur: j => j.gains ?? 0, largeur: 60, aligne: 'droite', horsRecherche: true },
     {
       id: 'actions', label: '', valeur: () => '', horsRecherche: true, nonTriable: true, largeur: 60, aligne: 'droite',
-      rendu: j => <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('joueur', j.id) }}>✏</button>,
+      rendu: j => <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('joueur', j.id) }}><Ico k="edit" size={13} /></button>,
     },
   ]
 
@@ -72,7 +73,7 @@ function JoueursContenu() {
     <div className="sa-content">
       <div className="sa-page">
         <ListeCRM<FlowinJoueur>
-          titre="👥 Joueurs"
+          titre="Joueurs"
           lignes={lignes}
           colonnes={colonnes}
           cle={j => j.id}

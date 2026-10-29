@@ -16,6 +16,7 @@ import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
 import type { FlowinPartenaire } from '@/lib/types'
 import { useFiltreSuperEvent } from '@/lib/filtreSuperEvent'
 import { BandeauFiltreSE } from '@/components/dashboard/BandeauFiltreSE'
+import { Ico } from '@/lib/proicons'
 
 type P = FlowinPartenaire & { super_event_id?: string | null; secteur?: string | null }
 
@@ -33,7 +34,7 @@ function PartenairesContenu() {
   const colonnes: ColonneCRM<P>[] = [
     {
       id: 'nom', label: 'Partenaire', valeur: p => p.nom, largeur: 240,
-      rendu: p => <span><span style={{ marginRight: 6 }}>{p.emoji ?? '🤝'}</span><b>{p.nom || '—'}</b></span>,
+      rendu: p => <span><span style={{ marginRight: 6 }}><Ico k="handshake" size={14} /></span><b>{p.nom || '—'}</b></span>,
     },
     {
       id: 'type', label: 'Catégorie', valeur: p => p.type, largeur: 110,
@@ -60,7 +61,7 @@ function PartenairesContenu() {
     {
       id: 'actions', label: '', valeur: () => '', horsRecherche: true, nonTriable: true, largeur: 60, aligne: 'droite',
       rendu: p => (
-        <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('partenaire', p.id) }}>✏</button>
+        <button className="sa-btn icon sm" title="Éditer" onClick={e => { e.stopPropagation(); openDrawerEdit('partenaire', p.id) }}><Ico k="edit" size={13} /></button>
       ),
     },
   ]
@@ -69,7 +70,7 @@ function PartenairesContenu() {
     <div className="sa-content">
       <div className="sa-page">
         <ListeCRM<P>
-          titre="🤝 Partenaires"
+          titre="Partenaires"
           lignes={lignes}
           colonnes={colonnes}
           cle={p => p.id}

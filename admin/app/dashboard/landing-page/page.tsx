@@ -20,6 +20,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchLandings, type Landing } from '@/lib/administratif'
+import { Ico } from '@/lib/proicons'
 
 const BASE = 'https://flowin-events.vercel.app'
 
@@ -169,8 +170,8 @@ export default function Page() {
       {!charge && avecUrl.length > 0 && (
         <div style={{ background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-            <button className="sa-btn" onClick={() => setVue('tel')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'tel' ? 'var(--sa-accent)' : undefined, color: vue === 'tel' ? '#fff' : undefined }}>📱 Téléphone</button>
-            <button className="sa-btn" onClick={() => setVue('ordi')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'ordi' ? 'var(--sa-accent)' : undefined, color: vue === 'ordi' ? '#fff' : undefined }}>💻 Ordinateur</button>
+            <button className="sa-btn" onClick={() => setVue('tel')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'tel' ? 'var(--sa-accent)' : undefined, color: vue === 'tel' ? '#fff' : undefined }}>Téléphone</button>
+            <button className="sa-btn" onClick={() => setVue('ordi')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'ordi' ? 'var(--sa-accent)' : undefined, color: vue === 'ordi' ? '#fff' : undefined }}>Ordinateur</button>
           </div>
           {vue === 'tel' ? (
             <PhoneApercu
@@ -208,7 +209,7 @@ export default function Page() {
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
       {!charge && !filtres.length && (
-        <EmptyState icon="🌐" title="Aucune landing" desc={q ? 'Aucun résultat pour cette recherche.' : 'Aucune landing enregistrée.'} />
+        <EmptyState icon="globe" title="Aucune landing" desc={q ? 'Aucun résultat pour cette recherche.' : 'Aucune landing enregistrée.'} />
       )}
 
       {!charge && filtres.length > 0 && (
@@ -247,7 +248,7 @@ export default function Page() {
                   </span>
                 )}
                 {l.statut && <span className="sa-chip" style={{ fontSize: 10 }}>{l.statut}</span>}
-                {l.module_jeu && <span className="sa-chip" style={{ fontSize: 10 }}>🎮 {l.module_jeu}</span>}
+                {l.module_jeu && <span className="sa-chip" style={{ fontSize: 10 }}><Ico k="game" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{l.module_jeu}</span>}
               </div>
 
               {/* Lien direct, prioritaire sur l'apercu cadre-telephone (qui peut

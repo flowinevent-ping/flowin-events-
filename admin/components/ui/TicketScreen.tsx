@@ -1,6 +1,7 @@
 'use client'
 
 import type { FlowinEvent, FlowinLot } from '@/lib/types'
+import { Ico } from '@/lib/proicons'
 
 interface TicketScreenProps {
   ticket: string
@@ -28,7 +29,7 @@ export default function TicketScreen({
   return (
     <div className="fl-screen active" style={{ background: 'var(--bg)', padding: '20px 0' }}>
       <div style={{ textAlign: 'center', padding: '24px 20px 16px' }}>
-        <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+        <div style={{ display: 'inline-flex', marginBottom: 8 }}><Ico k="sparkle" size={50} /></div>
         <div style={{ fontFamily: 'Fredoka One, cursive', fontSize: 22, color: couleur }}>
           Inscription confirmée !
         </div>
@@ -39,7 +40,7 @@ export default function TicketScreen({
 
       {/* Ticket principal */}
       <div className="fl-ticket" style={{ borderTopColor: couleur }}>
-        <div style={{ fontSize: 32, marginBottom: 6 }}>🎟️</div>
+        <div style={{ display: 'inline-flex', marginBottom: 6 }}><Ico k="ticket" size={34} /></div>
         <div style={{ fontSize: 11, fontWeight: 800, color: '#888', marginBottom: 2 }}>
           {event.nom}
         </div>
@@ -54,7 +55,7 @@ export default function TicketScreen({
       {/* Ticket bonus si présent */}
       {ticket2 && (
         <div className="fl-ticket" style={{ borderTopColor: '#1D9E75', marginTop: 10 }}>
-          <div style={{ fontSize: 32, marginBottom: 6 }}>🌟</div>
+          <div style={{ display: 'inline-flex', marginBottom: 6 }}><Ico k="star" size={34} /></div>
           <div style={{ fontSize: 11, fontWeight: 800, color: '#1D9E75', marginBottom: 2 }}>
             Ticket bonus
           </div>
@@ -69,21 +70,21 @@ export default function TicketScreen({
         padding: '12px 16px', fontSize: 12, fontWeight: 700,
         color: '#555', lineHeight: 1.6
       }}>
-        📸 Capture d&apos;écran recommandée · Résultats par email
+        <Ico k="camera" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Capture d&apos;écran recommandée · Résultats par email
       </div>
 
       {/* Lots à gagner */}
       {lots.length > 0 && (
         <div style={{ padding: '16px 20px 0' }}>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: '#888', marginBottom: 8 }}>
-            🎁 Lots à gagner
+            <Ico k="gift" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Lots à gagner
           </div>
           {lots.map(lot => (
             <div key={lot.id} style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,.06)'
             }}>
-              <div style={{ fontSize: 24 }}>{lot.emoji ?? '🎁'}</div>
+              <div style={{ display: 'inline-flex' }}><Ico k="gift" size={24} /></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{lot.titre || lot.nom}</div>
                 {lot.valeur ? <div style={{ fontSize: 11, color: '#888' }}>{lot.valeur} €</div> : null}
@@ -96,7 +97,7 @@ export default function TicketScreen({
       {/* CTAs */}
       <div style={{ padding: '20px 20px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <button className="fl-btn fl-btn-primary" style={{ background: couleur }} onClick={onPartenaires}>
-          🤝 Voir nos partenaires →
+          <Ico k="handshake" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Voir nos partenaires →
         </button>
         <button className="fl-btn fl-btn-ghost" style={{ color: couleur, borderColor: couleur }} onClick={onHome}>
           ← Retour à l&apos;accueil

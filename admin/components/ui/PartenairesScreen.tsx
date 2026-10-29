@@ -1,21 +1,15 @@
 'use client'
+import { Ico } from '@/lib/proicons'
 
 import { useState } from 'react'
 import type { FlowinPartenaire, FlowinEvent } from '@/lib/types'
 import PartenaireSheet from './PartenaireSheet'
 
-function emojiForPartenaire(nom: string): string {
+function icoForPartenaire(nom: string): string {
   const n = nom.toLowerCase()
-  if (n.includes('patisserie') || n.includes('palanque')) return '🍰'
-  if (n.includes('bijouterie') || n.includes('bijou') || n.includes('lorenzo')) return '💎'
-  if (n.includes('ccdk') || n.includes('commerce')) return '🏪'
-  if (n.includes('cinema') || n.includes('majestic')) return '🎬'
-  if (n.includes('sport') || n.includes('decathlon')) return '🏃'
-  if (n.includes('pizza') || n.includes('restaurant') || n.includes('napoli')) return '🍕'
-  if (n.includes('mairie') || n.includes('ville') || n.includes('croix')) return '🏛️'
-  if (n.includes('jazz') || n.includes('musique')) return '🎷'
-  if (n.includes('ski') || n.includes('isola')) return '⛷️'
-  return '🤝'
+  if (n.includes('cinema') || n.includes('majestic')) return 'camera'
+  if (n.includes('mairie') || n.includes('ville') || n.includes('croix')) return 'building'
+  return 'shop'
 }
 
 interface PartenairesScreenProps {
@@ -85,7 +79,7 @@ export default function PartenairesScreen({
               >
                 {p.image_url
                   ? <img src={p.image_url} alt={p.nom} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', marginBottom: 8 }} />
-                  : <span className="fl-part-emoji">{p.emoji || emojiForPartenaire(p.nom)}</span>
+                  : <span className="fl-part-emoji"><Ico k={icoForPartenaire(p.nom)} size={26} /></span>
                 }
                 <div className="fl-part-name" style={{ color: nameColor }}>
                   {p.nom.length > 18 ? p.nom.slice(0, 16) + '…' : p.nom}

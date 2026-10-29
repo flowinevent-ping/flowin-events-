@@ -32,6 +32,7 @@ import { usePorteeInitiale } from '@/lib/portee'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { etatTirage, LIBELLE_ETAT_TIRAGE, marquerRelance, type EtatTirage } from '@/lib/operations'
 import ModalRelanceGlobale from '@/components/dashboard/ModalRelanceGlobale'
+import { Ico } from '@/lib/proicons'
 
 type Etat = EtatTirage
 const LIB_ETAT = LIBELLE_ETAT_TIRAGE
@@ -171,7 +172,7 @@ export default function Page() {
               setRelancesSession(r => ({ ...r, [t.id]: true }))
             }}
           >
-            🔔 {relance ? 'Relancer à nouveau' : 'Relancer'}
+            <Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{relance ? 'Relancer à nouveau' : 'Relancer'}
           </button>
         )
       },
@@ -184,7 +185,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <ListeCRM<GagnantRow>
-          titre="🏆 Gagnants"
+          titre="Gagnants"
           lignes={visibles}
           colonnes={colonnes}
           cle={t => t.id}
@@ -194,7 +195,7 @@ export default function Page() {
           placeholderRecherche="Rechercher un joueur, un lot, un ticket…"
           actions={
             <button className="sa-btn sm primary" disabled={aRelancer.length === 0} onClick={() => setRelanceOuverte(true)}>
-              🔔 Relancer (lot pas récupéré){aRelancer.length > 0 ? ` (${aRelancer.length})` : ''}
+              <Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancer (lot pas récupéré){aRelancer.length > 0 ? ` (${aRelancer.length})` : ''}
             </button>
           }
           filtres={[
@@ -223,7 +224,7 @@ export default function Page() {
               <b>En attente</b> = jamais appelé · <b>Confirmé</b> = appelé, lot pas encore
               récupéré (sous-filtres <b>À relancer</b> / <b>Déjà relancés</b>) ·{' '}
               <b>Utilisé</b> = billet scanné et lot remis en boutique · le bouton{' '}
-              <b>🔔 Relancer</b> (visible sur les confirmés) envoie un rappel par email
+              <b><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancer</b> (visible sur les confirmés) envoie un rappel par email
             </>
           }
         />

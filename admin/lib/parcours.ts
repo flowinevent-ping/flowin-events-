@@ -408,6 +408,11 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     const maj = r.data as { id: string }[] | null
     joueurRows = maj?.length ? maj : [{ id: dejaId }]
     joueurErr = r.error
+    /* Sans droit UPDATE, l'event, la date de passage et le ticket du joueur
+       passent par une fonction restreinte a ces seuls champs. */
+    if (!maj?.length && !r.error) {
+      await supabase.rpc('joueur_marquer_partie', { p_id: dejaId, p_events: payload.events ?? [], p_ticket: tc })
+    }
   } else {
     const r = await supabase
       .from('joueurs')
@@ -600,9 +605,9 @@ export async function claimJoueur(
     return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
   }
   const tc = generateTicket(prefix)
-  const { data: jrow } = await supabase.from('joueurs').select('events').eq('id', joueur.id).single()
-  const evs = Array.from(new Set([...(((jrow as { events?: string[] } | null)?.events) ?? []), evId]))
-  await supabase.from('joueurs').update({ events: evs, last_seen: today, ticket_code: tc }).eq('id', joueur.id)
+  /* L'UPDATE direct sur joueurs est refuse a l'anonyme (0 ligne, sans erreur) :
+     events / last_seen / ticket passent par la fonction restreinte. */
+  await supabase.rpc('joueur_marquer_partie', { p_id: joueur.id, p_events: [evId], p_ticket: tc })
   const geo = await captureScanGeo(evId)
   const quizTk = geo.onSite && extra?.quizTicket !== false
   const bonusTk = geo.onSite && extra?.bonusTicket === true

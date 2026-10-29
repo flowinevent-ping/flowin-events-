@@ -21,9 +21,9 @@ import {
 } from '@/lib/comm'
 
 const LIBELLE: Record<string, string> = {
-  email: '✉️ Email clients',
-  instagram: '📸 Instagram',
-  facebook: '👥 Facebook',
+  email: 'Email clients',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
 }
 
 export default function Page() {
@@ -80,7 +80,7 @@ export default function Page() {
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
       {!charge && !actifs.length && (
-        <EmptyState icon="📣" title="Aucun gabarit actif" desc="Aucun gabarit de communication n'est activé en base." />
+        <EmptyState icon="bell" title="Aucun gabarit actif" desc="Aucun gabarit de communication n'est activé en base." />
       )}
 
       {!charge && actifs.length > 0 && (
