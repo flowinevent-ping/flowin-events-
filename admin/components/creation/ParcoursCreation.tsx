@@ -1105,7 +1105,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 ))}
               </div>
 
-              {envoi === 'echec' && <div style={{ fontSize: 13, color: '#B91C1C', fontWeight: 700, marginTop: 12 }}>Enregistrement impossible{erreur ? ` — ${erreur}` : ''}. Réessayez.</div>}
+              {envoi === 'echec' && <div style={{ fontSize: 13, color: '#B91C1C', fontWeight: 700, marginTop: 12 }}>Enregistrement impossible{erreur ? ` — ${erreur.replace(/\.+$/, '')}` : ''}. Réessayez.</div>}
               {bloque[FIN] && <div style={{ fontSize: 12.5, color: '#B45309', fontWeight: 700, marginTop: 12, textAlign: 'right' }}>{bloque[FIN]}</div>}
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 20 }}>
                 <button style={BTN2} onClick={precedent}>← Précédent</button>

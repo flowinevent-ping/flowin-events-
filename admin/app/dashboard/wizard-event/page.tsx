@@ -14,7 +14,7 @@ import { CHARTE_PRO as C, POLICE_PRO } from '@/lib/charte'
 
 export default function Page() {
   return (
-    <div className="sa-page" style={{ background: C.fond, fontFamily: POLICE_PRO, color: C.texte }}>
+    <div className="sa-page" style={{ background: C.fond, fontFamily: POLICE_PRO, color: C.texte, padding: '24px 28px 40px', minHeight: '100vh' }}>
       <Suspense fallback={<div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}>
         <ParcoursCreationSA typeInitial={null} />
       </Suspense>
