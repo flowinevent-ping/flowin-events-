@@ -35,7 +35,8 @@ import { supabase } from '@/lib/supabase'
 import type { DonneesOperation, PartenaireMin, GagnantOperation } from '@/lib/operations'
 import { marquerRelance } from '@/lib/operations'
 import BilletApercu from '@/components/parcours/BilletApercu'
-import { ajouterStock, retirerStock } from '@/lib/stock'
+import { emettreTickets } from '@/lib/stock'
+import TicketsLot from './TicketsLot'
 import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
@@ -53,39 +54,6 @@ interface LotLigne {
 }
 type Regle = { mode: 'tousLesX' | 'aleatoire'; everyX: number; probabilite: number }
 const estInstant = (note: string | null) => /instantan/i.test(note ?? '')
-
-function AjustementStockLigne({ lotId, dispo, total, onAjuste }: { lotId: string; dispo: number; total: number; onAjuste: (delta: number) => void }) {
-  const [n, setN] = useState('1')
-  const [busy, setBusy] = useState<'ajout' | 'retrait' | null>(null)
-  const [erreur, setErreur] = useState('')
-  async function ajouter() {
-    const q = Math.max(1, parseInt(n) || 1)
-    setBusy('ajout'); setErreur('')
-    const ok = await ajouterStock(lotId, q)
-    setBusy(null)
-    if (!ok) { setErreur("Pas de stock matérialisé pour ce lot."); return }
-    onAjuste(q)
-  }
-  async function retirer() {
-    const q = Math.max(1, parseInt(n) || 1)
-    setBusy('retrait'); setErreur('')
-    const fait = await retirerStock(lotId, q)
-    setBusy(null)
-    if (!fait) { setErreur('Aucune unité disponible.'); return }
-    onAjuste(-fait)
-  }
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 11.5, fontWeight: 800, color: dispo > 0 ? '#15803D' : '#B45309', background: dispo > 0 ? 'rgba(34,197,94,.1)' : 'rgba(245,158,11,.13)', borderRadius: 99, padding: '3px 9px' }}>
-        stock {dispo} / {total}
-      </span>
-      <input type="number" min={1} value={n} onChange={e => setN(e.target.value)} style={{ width: 48, border: `1px solid ${BRD}`, borderRadius: 8, padding: '4px 6px', fontSize: 12 }} />
-      <button style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '4px 9px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }} disabled={busy !== null} onClick={ajouter}>{busy === 'ajout' ? '…' : '+ Réappro'}</button>
-      <button style={{ border: `1px solid ${BRD}`, background: '#fff', borderRadius: 8, padding: '4px 9px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }} disabled={busy !== null} onClick={retirer}>{busy === 'retrait' ? '…' : '− Retirer'}</button>
-      {erreur && <span style={{ fontSize: 10.5, color: '#B45309' }}>{erreur}</span>}
-    </div>
-  )
-}
 
 /* Petit intitulé de sous-section, identique pour Paramètres / Stock & billet /
    Gagnants -- meme hierarchie visuelle partout dans la carte d un lot. */
@@ -344,12 +312,9 @@ function CarteLot({ l, enSuperEvent, stockInfo, dAjust, onAjuste, maj, op, stati
               </div>
               {enSuperEvent && <div style={{ fontSize: 11, color: MUT, marginTop: 6 }}>Station de super event : tirage au sort uniquement, non modifiable ici.</div>}
 
-              <SousTitre>Stock</SousTitre>
-              {stockInfo ? (
-                <AjustementStockLigne lotId={l.id} dispo={stockInfo.dispo + dAjust} total={stockInfo.total + dAjust} onAjuste={onAjuste} />
-              ) : (
-                <span style={{ fontSize: 11, color: MUT }}>Pas de stock unitaire géré pour ce lot — quantité déclarative uniquement.</span>
-              )}
+              <SousTitre>Tickets édités — QR et numéro</SousTitre>
+              <TicketsLot lotId={l.id} lotNom={(l.nom ?? '').trim() || 'Lot'} quantite={l.quantite ?? null}
+                onChange={emis => { if (stockInfo) onAjuste(emis - (stockInfo.total + dAjust)) }} />
             </div>
 
             <div>
@@ -421,7 +386,12 @@ export default function ModalGererLots({ op, partenaire, onClose, onChange }: {
         valeur: l.valeur, quantite: Math.max(1, l.quantite ?? 1), conditions: l.conditions, note: l.note,
         partenaire_id: partenaire?.id ?? null,
       }, { onConflict: 'id' })
-      if (error) ko = true
+      if (error) { ko = true; continue }
+      /* Valider un lot = émettre ses tickets (QR + numéro). Idempotent : la
+         RPC ne comble que l'écart avec la quantité, jamais de doublon. Base
+         pas encore migrée : on n'échoue pas l'enregistrement pour autant. */
+      const em = await emettreTickets(l.id)
+      if (!em.ok && em.raison !== 'indisponible') ko = true
     }
     for (const [eventId, r] of Object.entries(regles)) {
       const ev = op.stations.find(s => s.id === eventId)
