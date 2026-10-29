@@ -29,6 +29,7 @@ import { operationsRangees } from '@/lib/rangementOperations'
 import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } from '@/components/operations/BlocsOperations'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
+import { Ico } from '@/lib/proicons'
 
 const input: React.CSSProperties = {
   border: '1.5px solid #efe9f2', borderRadius: 10, padding: '10px 12px',
@@ -298,17 +299,17 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
             <span style={{
               fontSize: 10.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99,
               color: '#B45309', background: 'rgba(245,158,11,.13)',
-            }}>⚠️ Stock non décompté</span>
+            }}><Ico k="warning" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Stock non décompté</span>
           )}
           {!remis && (
             <button style={btn} onClick={() => {
               const u = lienRelance('relance')
               if (u) window.open(u, '_blank', 'noopener')
               marquerRelance(g.id)
-            }}>🔔 {g.relanceEnvoyeeAt ? 'Relancer à nouveau' : 'Relancer'}</button>
+            }}><Ico k="bell" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />{g.relanceEnvoyeeAt ? 'Relancer à nouveau' : 'Relancer'}</button>
           )}
           {remis && (
-            <button style={btn} onClick={() => { const u = lienRelance('merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+            <button style={btn} onClick={() => { const u = lienRelance('merci'); if (u) window.open(u, '_blank', 'noopener') }}><Ico k="mail" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Remercier</button>
           )}
           <button style={btn} onClick={() => { setOuvert(!ouvert); setPin(''); setMessage(null) }}>{ouvert ? 'Fermer' : remis ? 'Modifier' : 'Valider'}</button>
         </div>
