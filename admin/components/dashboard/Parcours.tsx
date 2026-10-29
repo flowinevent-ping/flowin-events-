@@ -52,7 +52,7 @@ export interface EtapeParcours {
   titre: string
   /** Une ligne d explication sous le titre. */
   sous?: string
-  icone?: string
+  icone?: React.ReactNode
   contenu: React.ReactNode
   /** Message si l etape n est pas complete ; `undefined` = on peut avancer. */
   bloque?: string
@@ -155,7 +155,7 @@ export function VignetteChoix({
   return (
     <button className={`sa-choix${actif ? ' actif' : ''}`} onClick={onClick} aria-pressed={actif}>
       {icone && <span className="ic">{icone}</span>}
-      <span className="ti">{titre}</span>
+      <span className="ctt">{titre}</span>
       {sous && <span className="so">{sous}</span>}
       {badges && badges.length > 0 && (
         <span className="bd">{badges.map(b => <span key={b}>{b}</span>)}</span>

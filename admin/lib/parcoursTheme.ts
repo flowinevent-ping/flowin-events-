@@ -58,9 +58,14 @@ export const PARCOURS_THEME_DEFAULTS: Record<Module, ParcoursTheme> = {
 export function resolveParcoursTheme(module: Module, cfg: EventCfg | null | undefined): ParcoursTheme {
   const master = PARCOURS_THEME_DEFAULTS[module] ?? BASE
   const override = cfg?.theme ?? {}
+  /* Les parcours de creation (wizard-event, wizard-super-event, creerSuperEvent)
+     ecrivent le logo dans `cfg.logoUrl`, pas dans `cfg.theme.logoUrl` : sans ce
+     repli, aucun logo televerse ne s affichait cote joueur. */
+  const logoCfg = (cfg as { logoUrl?: unknown } | null | undefined)?.logoUrl
   return {
     ...master,
     ...override,
+    logoUrl: override.logoUrl || (typeof logoCfg === 'string' && logoCfg.trim() ? logoCfg.trim() : undefined) || master.logoUrl,
     texts: { ...master.texts, ...(override.texts ?? {}) },
   }
 }

@@ -223,7 +223,7 @@ export default function Page() {
             >
               <span className="ic">{v.icone}</span>
               <span className="ch">{v.chiffre}</span>
-              <span className="ti">{v.titre}</span>
+              <span className="vtt">{v.titre}</span>
               <span className="so">{v.sous}</span>
             </button>
           ))}

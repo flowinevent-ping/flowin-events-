@@ -14,41 +14,44 @@
  * Ici le SA cree l operation et y rattache directement des pros. Aucune
  * demande, aucune validation en aval : les stations existent en sortant.
  *
- * La suppression vit sur le meme ecran, volontairement : « il faut ajouter la
- * fonction supprimer ce super event en cas d erreur » — l erreur se constate
- * juste apres la creation, c est la qu il faut pouvoir revenir en arriere.
+ * La suppression d un super event cree par erreur vit sur sa fiche
+ * (/dashboard/operations/<id>, ZoneSuppressionSE), pas ici (Romain, 29/10).
  */
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
+import { PageHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
+import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
+import type { FlowinPro } from '@/lib/types'
 import { useDashboard } from '@/contexts/DashboardContext'
-import {
-  creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
-  type SuperEvent,
-} from '@/lib/nds'
+import { creerSuperEvent, slugSuperEvent } from '@/lib/nds'
 import { GABARIT_MODULE, GABARIT_NOM } from '@/lib/gabarit'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import { fetchBanquesToutes, type Banque } from '@/lib/banques'
 import { JEUX_A_QUESTIONS, nbSourcesQuestions } from '@/lib/wizard'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
-import { Ico } from '@/lib/proicons'
+import { Ico, IcoModule } from '@/lib/proicons'
 
-const MODULES: { id: string; nom: string; sous: string; icone: string }[] = [
+/* Banques ecrites pour UNE station de NDS2026 (le bar, les caisses, l ecran,
+   la tablette) : elles n ont pas leur place dans la liste principale d une
+   nouvelle operation. Regroupees a part, repliees, jamais supprimees. */
+const BANQUES_STATION_NDS = ['bq-nds-bar', 'bq-nds-caisses', 'bq-nds-ecrans', 'bq-nds-tablette']
+
+const MODULES: { id: string; nom: string; sous: string }[] = [
   /* Le gabarit de reference en tete, et par defaut : on part de lui, pas d une
      page blanche (Romain, 03/09). Pas de ligne separee pour 'quiz' :
      GABARIT_MODULE vaut 'quiz' depuis le 28/10 (lib/gabarit.ts) -- ce serait
      le meme module en double.
      Pas de roue : un super event se joue en tirage au sort uniquement
      (referentiel 34) — la roue distribue un lot immediat. */
-  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Questions à la suite, bonus de rattrapage optionnel', icone: '🧠' },
-  { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur', icone: '🎤' },
-  { id: 'quizsolo', nom: 'Quiz Solo', sous: 'Le joueur seul, à son rythme', icone: '🎯' },
-  { id: 'tombola', nom: 'Tombola', sous: 'Tirage différé', icone: '🎟️' },
-  { id: 'vote', nom: 'Vote', sous: 'Le public départage', icone: '🗳️' },
+  { id: GABARIT_MODULE, nom: GABARIT_NOM, sous: 'Questions à la suite, bonus de rattrapage optionnel' },
+  { id: 'quizmaster', nom: 'Quiz Master', sous: 'Animé par un meneur' },
+  { id: 'quizsolo', nom: 'Quiz Solo', sous: 'Le joueur seul, à son rythme' },
+  { id: 'tombola', nom: 'Tombola', sous: 'Tirage différé' },
+  { id: 'vote', nom: 'Vote', sous: 'Le public départage' },
 ]
 
 export default function Page() {
@@ -63,16 +66,19 @@ export default function Page() {
   const [logoUrl, setLogoUrl] = useState('')
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [uploadErreur, setUploadErreur] = useState('')
-  const [geofence, setGeofence] = useState('150')
   const [tirageGlobal, setTirageGlobal] = useState(true)
   const [choisis, setChoisis] = useState<Record<string, true>>({})
-  const [recherchePro, setRecherchePro] = useState('')
   /* REFERENTIEL 25/33 — le jeu est choisi UNE fois, par le createur du super
      event, et chaque station en herite (super_events.module / cfg_jeu). */
   const [module, setModule] = useState<string>(GABARIT_MODULE)
   const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
   const [banques, setBanques] = useState<Banque[]>([])
   useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
+  /* Une banque sans aucune question n apporte rien : masquee (sauf deja cochee). */
+  const banquesUtiles = useMemo(() => {
+    const sel = ((cfgJeu.quizBanques as string[]) ?? []).concat((cfgJeu.bonusBanques as string[]) ?? [])
+    return banques.filter(b => (b.questions ?? []).length > 0 || sel.indexOf(b.id) >= 0)
+  }, [banques, cfgJeu])
 
   /* L apercu montre la station en cours de reglage : sans ca, on parametre
      cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
@@ -94,13 +100,22 @@ export default function Page() {
      contenir d espace, d accent ni de majuscule. */
   const id = slugSuperEvent(idManuel || nom)
 
-  const prosFiltres = useMemo(() => {
-    const q = recherchePro.trim().toLowerCase()
-    const l = q ? pros.filter(p => (p.nom ?? '').toLowerCase().includes(q)) : pros
-    return l.slice().sort((a, b) => (a.nom ?? '').localeCompare(b.nom ?? '', 'fr'))
-  }, [pros, recherchePro])
 
   const nbChoisis = Object.keys(choisis).length
+
+  const colonnesPros: ColonneCRM<FlowinPro>[] = useMemo(() => [
+    {
+      id: 'choix', label: '', valeur: p => (choisis[p.id] ? 1 : 0), largeur: 44, aligne: 'centre', horsRecherche: true,
+      rendu: p => <input type="checkbox" checked={!!choisis[p.id]} readOnly aria-label={`Rattacher ${p.nom}`} style={{ pointerEvents: 'none' }} />,
+    },
+    { id: 'nom', label: 'Pro', valeur: p => p.nom, rendu: p => <b>{p.nom || '—'}</b>, largeur: 220 },
+    { id: 'contact', label: 'Contact', valeur: p => p.contact, largeur: 150 },
+    { id: 'tel', label: 'Téléphone', valeur: p => p.tel, largeur: 130 },
+    { id: 'email', label: 'Email', valeur: p => p.email, largeur: 200 },
+    { id: 'ville', label: 'Ville', valeur: p => p.ville, largeur: 120 },
+    { id: 'secteur', label: 'Secteur', valeur: p => p.secteur, largeur: 150 },
+    { id: 'statut', label: 'Statut', valeur: p => ({ en_attente: 'En attente', valide: 'Validé', refuse: 'Refusé' } as Record<string, string>)[p.statut ?? 'valide'] ?? p.statut, largeur: 100 },
+  ], [choisis])
   const jeuSansQuestions = JEUX_A_QUESTIONS.indexOf(module) >= 0 && nbSourcesQuestions(cfgJeu) === 0
   const proApercu = (apercuPro && choisis[apercuPro]) ? apercuPro : Object.keys(choisis)[0] ?? ''
 
@@ -132,7 +147,7 @@ export default function Page() {
     const r = await creerSuperEvent({
       id, nom, dateD: dateD || null, dateF: dateF || null,
       description: description || null,
-      geofenceM: geofence ? Number(geofence) : null,
+      geofenceM: null,
       logoUrl: logoUrl.trim() || null,
       tirageGlobal,
       module,
@@ -153,7 +168,7 @@ export default function Page() {
 
   const etapes: EtapeParcours[] = [
     {
-      id: 'identite', icone: '⭐', titre: 'L’opération',
+      id: 'identite', icone: <Ico k="star" size={26} />, titre: 'L’opération',
       sous: 'Le nom que verront les joueurs, et les dates pendant lesquelles on joue.',
       bloque: !nom.trim() ? 'Donnez un nom à l’opération pour continuer.'
         : !dateD ? 'La date de début est nécessaire.'
@@ -217,7 +232,7 @@ export default function Page() {
       ),
     },
     {
-      id: 'jeux', icone: '🎮', titre: 'Le jeu de l’opération',
+      id: 'jeux', icone: <Ico k="game" size={26} />, titre: 'Le jeu de l’opération',
       sous: 'Choisi une fois pour toute l’opération : chaque station, présente ou à venir, propose ce jeu. Tirage au sort uniquement.',
       bloque: jeuSansQuestions ? 'Choisissez les questions du jeu pour continuer.' : undefined,
       contenu: (
@@ -226,20 +241,20 @@ export default function Page() {
             {MODULES.map(m => (
               <VignetteChoix
                 key={m.id}
-                titre={m.nom} sous={m.sous} icone={m.icone}
+                titre={m.nom} sous={m.sous} icone={<IcoModule module={m.id} size={24} />}
                 actif={module === m.id}
                 onClick={() => { setModule(m.id); setCfgJeu({}) }}
               />
             ))}
           </div>
           <div style={{ paddingLeft: 10, borderLeft: '3px solid var(--sa-border)' }}>
-            <ConfigJeu module={module} cfg={cfgJeu} onChange={setCfgJeu} banques={banques} />
+            <ConfigJeu module={module} cfg={cfgJeu} onChange={setCfgJeu} banques={banquesUtiles} banquesStation={BANQUES_STATION_NDS} />
           </div>
         </div>
       ),
     },
     {
-      id: 'pros', icone: '🏢', titre: 'Les pros participants',
+      id: 'pros', icone: <Ico k="building" size={26} />, titre: 'Les pros participants',
       sous: 'Chaque pro sélectionné reçoit une station de jeu rattachée à cette opération. On peut en ajouter d’autres plus tard.',
       contenu: (
         <>
@@ -256,51 +271,43 @@ export default function Page() {
             <Link href="/dashboard/demandes-rattachement" className="sa-lien">Demandes de participation</Link>,
             et son approbation crée sa station avec tout ce qu’il a saisi.
           </div>
-          <input
-            className="sa-input" style={{ maxWidth: 340, marginBottom: 12 }}
-            value={recherchePro} onChange={e => setRecherchePro(e.target.value)}
-            placeholder="Rechercher un pro…"
-          />
           <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 10 }}>
             {nbChoisis === 0
               ? 'Aucun pro sélectionné — vous pourrez créer l’opération vide et les ajouter ensuite.'
               : `${nbChoisis} pro${nbChoisis > 1 ? 's' : ''} sélectionné${nbChoisis > 1 ? 's' : ''}.`}
           </div>
-          <div className="sa-choix-grille">
-            {prosFiltres.map(p => (
-              <VignetteChoix
-                key={p.id}
-                titre={p.nom ?? p.id}
-                sous={p.ville ?? undefined}
-                icone="🏢"
-                actif={!!choisis[p.id]}
-                onClick={() => basculerPro(p.id)}
-              />
-            ))}
-          </div>
+          {/* La liste du CRM pro (memes colonnes que /dashboard/pros), une case par
+              ligne : on choisit dans la fiche complete, pas sur un nom seul. */}
+          <ListeCRM<FlowinPro>
+            sansEntete
+            lignes={pros}
+            colonnes={colonnesPros}
+            cle={p => p.id}
+            onLigne={p => basculerPro(p.id)}
+            triDefaut="nom"
+            placeholderRecherche="Rechercher un pro, un contact, une ville…"
+            filtres={[
+              { id: 'tous', label: 'Tous' },
+              { id: 'choisis', label: `Sélectionnés${nbChoisis ? ` (${nbChoisis})` : ''}`, test: p => !!choisis[p.id] },
+            ]}
+            videTitre="Aucun pro"
+            videDesc="Aucun pro ne correspond à cette recherche."
+          />
         </>
       ),
     },
     {
-      id: 'reglages', icone: '⚙️', titre: 'Réglages de l’opération',
+      id: 'reglages', icone: <Ico k="settings" size={26} />, titre: 'Réglages de l’opération',
       sous: 'Ce qui vaut pour toutes les stations à la fois.',
       contenu: (
         <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
-          <label>
-            <span className="sa-lbl">Périmètre de jeu (mètres)</span>
-            <input className="sa-input" type="number" value={geofence} onChange={e => setGeofence(e.target.value)} style={{ maxWidth: 160 }} />
-            <span className="sa-aide">
-              Distance maximale entre le joueur et la station pour qu’une partie compte.
-              Vide = aucun contrôle de position.
-            </span>
-          </label>
           <div className="sa-choix-grille" style={{ maxWidth: 440 }}>
             <VignetteChoix
-              titre="Tirage global" sous="Un tirage commun à toutes les stations" icone="🎰"
+              titre="Tirage global" sous="Un tirage commun à toutes les stations" icone={<Ico k="globe" size={22} />}
               actif={tirageGlobal} onClick={() => setTirageGlobal(true)}
             />
             <VignetteChoix
-              titre="Tirage par station" sous="Chaque pro tire chez lui" icone="🏪"
+              titre="Tirage par station" sous="Chaque pro tire chez lui" icone={<Ico k="shop" size={22} />}
               actif={!tirageGlobal} onClick={() => setTirageGlobal(false)}
             />
           </div>
@@ -308,7 +315,7 @@ export default function Page() {
       ),
     },
     {
-      id: 'recap', icone: '✅', titre: 'Récapitulatif',
+      id: 'recap', icone: <Ico k="checkCircle" size={26} />, titre: 'Récapitulatif',
       sous: 'Rien n’est écrit tant que vous n’avez pas validé ici.',
       contenu: (
         <div style={{ maxWidth: 620 }}>
@@ -319,7 +326,6 @@ export default function Page() {
             ['Jeu', MODULES.find(m => m.id === module)?.nom ?? module],
             ['Pros rattachés', nbChoisis ? `${nbChoisis}` : 'aucun'],
             ['Stations créées', nbChoisis ? `${nbChoisis}` : '0'],
-            ['Périmètre', geofence ? `${geofence} m` : 'aucun contrôle'],
             ['Tirage', tirageGlobal ? 'global' : 'par station'],
           ] as [string, string][]).map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--sa-border)' }}>
@@ -371,93 +377,8 @@ export default function Page() {
           />
         </div>
 
-        <ZoneSuppression />
       </div>
     </div>
   )
 }
 
-/**
- * Suppression d un super event cree par erreur.
- * Refusee par la base si l operation porte des participations ou des tirages :
- * on n efface pas de l activite joueur, ni des gagnants a qui on a promis un
- * lot. Le nom doit etre ressaisi exactement — un clic de trop ne suffit pas.
- */
-function ZoneSuppression() {
-  const [supers, setSupers] = useState<SuperEvent[]>([])
-  const [cible, setCible] = useState('')
-  const [saisie, setSaisie] = useState('')
-  const [occupe, setOccupe] = useState(false)
-  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null)
-
-  const charger = () => fetchSuperEvents().then(setSupers)
-  useEffect(() => { charger() }, [])
-
-  const se = supers.find(s => s.id === cible)
-
-  async function supprimer() {
-    if (!se) return
-    setOccupe(true); setRetour(null)
-    const r = await supprimerSuperEvent(se.id, saisie)
-    setOccupe(false)
-    if (r.ok) {
-      setRetour({ ok: true, texte: `« ${r.nom} » supprimé — ${r.events_supprimes ?? 0} station(s) avec lui.` })
-      setCible(''); setSaisie(''); charger()
-      return
-    }
-    if (r.raison === 'activite') {
-      setRetour({
-        ok: false,
-        texte: `Suppression refusée : cette opération porte ${r.participations} partie(s) et ${r.tirages} tirage(s). `
-          + 'Effacer, ce serait effacer de l’activité joueur réelle et des gagnants déjà désignés.',
-      })
-      return
-    }
-    if (r.raison === 'confirmation') {
-      setRetour({ ok: false, texte: `Le nom saisi ne correspond pas. Attendu exactement : « ${r.attendu} ».` })
-      return
-    }
-    setRetour({
-      ok: false,
-      texte: r.message
-        ? `La suppression a échoué — ${r.message}`
-        : 'Super event introuvable.',
-    })
-  }
-
-  return (
-    <div className="sa-page" style={{ marginTop: 20, borderColor: '#E2B4B4' }}>
-      <SectionHeader>Supprimer un super event créé par erreur</SectionHeader>
-      <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 12, lineHeight: 1.5 }}>
-        Refusé automatiquement si l’opération porte des parties jouées ou des tirages.
-        Les stations rattachées partent avec elle ; <b>les fiches pro sont conservées</b> —
-        un pro existe indépendamment de l’opération à laquelle il a participé.
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <select className="sa-input" style={{ maxWidth: 300, width: 'auto' }} value={cible}
-          onChange={e => { setCible(e.target.value); setSaisie(''); setRetour(null) }}>
-          <option value="">— choisir l’opération —</option>
-          {supers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-        </select>
-        {se && (
-          <>
-            <input className="sa-input" style={{ maxWidth: 300 }} value={saisie}
-              onChange={e => setSaisie(e.target.value)}
-              placeholder={`Retapez « ${se.nom} » pour confirmer`} />
-            <button className="sa-btn" style={{ background: '#B3261E', color: '#fff', borderColor: '#B3261E' }}
-              onClick={supprimer} disabled={occupe || saisie.trim() !== (se.nom ?? '').trim()}>
-              {occupe ? '…' : 'Supprimer définitivement'}
-            </button>
-          </>
-        )}
-      </div>
-
-      {retour && (
-        <div className={`sa-alert ${retour.ok ? 'info' : 'warn'}`} style={{ marginTop: 12, fontSize: 12.5 }}>
-          {retour.texte}
-        </div>
-      )}
-    </div>
-  )
-}

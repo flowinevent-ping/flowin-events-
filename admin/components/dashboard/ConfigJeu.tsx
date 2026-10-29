@@ -55,47 +55,64 @@ export const EST_GABARIT = (m: string) => m === GABARIT_MODULE
 /* Une liste de banques a cocher. Sert deux fois : les banques quiz, les banques
    bonus. Le meme composant, pas deux listes qui divergeraient. */
 function ListeBanques({
-  banques, choisies, onChange, vide,
+  banques, choisies, onChange, vide, banquesStation = [], compter, unite = '',
 }: {
   banques: Banque[]
   choisies: string[]
   onChange: (ids: string[]) => void
   vide: string
+  /** Banques propres a une station : regroupees a part, repliees. */
+  banquesStation?: string[]
+  /** Nombre de questions a afficher (defaut : toutes). */
+  compter?: (b: Banque) => number
+  unite?: string
 }) {
   if (!banques.length) {
     return <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10 }}>{vide}</div>
   }
+  const ligne = (b: Banque) => {
+    const n = compter ? compter(b) : (b.questions ?? []).length
+    const coche = choisies.includes(b.id)
+    return (
+      <label key={b.id} className="sa-list-item" style={{ alignItems: 'flex-start', cursor: 'pointer' }}>
+        <input
+          type="checkbox" checked={coche} style={{ marginTop: 3 }}
+          onChange={e => onChange(e.target.checked ? choisies.concat(b.id) : choisies.filter(x => x !== b.id))}
+        />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700 }}>{b.nom}</div>
+          <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
+            {n} question{n !== 1 ? 's' : ''}{unite} · {b.statut === 'valide' ? 'Validée' : 'Brouillon'}
+          </div>
+        </div>
+      </label>
+    )
+  }
+  const principales = banques.filter(b => banquesStation.indexOf(b.id) < 0)
+  const station = banques.filter(b => banquesStation.indexOf(b.id) >= 0)
   return (
     <>
-      {banques.map(b => {
-        const n = (b.questions ?? []).length
-        const coche = choisies.includes(b.id)
-        return (
-          <label key={b.id} className="sa-list-item" style={{ alignItems: 'flex-start', cursor: 'pointer' }}>
-            <input
-              type="checkbox" checked={coche} style={{ marginTop: 3 }}
-              onChange={e => onChange(e.target.checked ? choisies.concat(b.id) : choisies.filter(x => x !== b.id))}
-            />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700 }}>{b.nom}</div>
-              <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
-                {n} question{n !== 1 ? 's' : ''} · {b.statut === 'valide' ? 'Validée' : 'Brouillon'}
-              </div>
-            </div>
-          </label>
-        )
-      })}
+      {principales.map(ligne)}
+      {station.length > 0 && (
+        <details style={{ margin: '6px 0 4px' }} open={station.some(b => choisies.includes(b.id))}>
+          <summary style={{ fontSize: 12, fontWeight: 700, color: 'var(--sa-muted)', cursor: 'pointer', padding: '6px 0' }}>
+            Banques propres à une station NDS2026 ({station.length})
+          </summary>
+          {station.map(ligne)}
+        </details>
+      )}
     </>
   )
 }
 
 function ConfigJeuContenu({
-  module: mod, cfg, onChange, banques = [],
+  module: mod, cfg, onChange, banques = [], banquesStation = [],
 }: {
   module: string
   cfg: CfgJeu
   onChange: (cfg: CfgJeu) => void
   banques?: Banque[]
+  banquesStation?: string[]
 }) {
   const set = (champs: CfgJeu) => onChange({ ...cfg, ...champs })
 
@@ -133,7 +150,7 @@ function ConfigJeuContenu({
       <div>
         <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Banques de questions — quiz</div>
         <ListeBanques
-          banques={bQuiz} choisies={banquesSel}
+          banques={bQuiz} choisies={banquesSel} banquesStation={banquesStation}
           onChange={ids => set({ quizBanques: ids })}
           vide="Aucune banque de QCM en base. Sans elle, le quiz n’a rien à poser."
         />
@@ -144,7 +161,7 @@ function ConfigJeuContenu({
           l’écran n’apparaît pas : le joueur passe des résultats à l’inscription.
         </div>
         <ListeBanques
-          banques={bBonus} choisies={bonusSel}
+          banques={bBonus} choisies={bonusSel} banquesStation={banquesStation}
           onChange={ids => set({ bonusBanques: ids })}
           vide="Aucune banque de questions bonus (format sondage) en base."
         />
@@ -270,34 +287,12 @@ function ConfigJeuContenu({
     return (
       <div>
         <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 8 }}>Banques de questions</div>
-        {banques.length === 0 && (
-          <div className="sa-muted" style={{ fontSize: 11.5, marginBottom: 10 }}>
-            Aucune banque en base. Le quiz peut être créé sans, mais il n’aura pas de
-            questions tant qu’aucune banque ne lui est rattachée.
-          </div>
-        )}
-        {banques.map(b => {
-          const nbQcm = (b.questions ?? []).filter(q => q.type === 'qcm').length
-          const coche = banquesSel.includes(b.id)
-          return (
-            <label key={b.id} className="sa-list-item" style={{ alignItems: 'flex-start', cursor: 'pointer' }}>
-              <input
-                type="checkbox" checked={coche} style={{ marginTop: 3 }}
-                onChange={e => set({
-                  quizBanques: e.target.checked
-                    ? banquesSel.concat(b.id)
-                    : banquesSel.filter(x => x !== b.id),
-                })}
-              />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700 }}>{b.nom}</div>
-                <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
-                  {nbQcm} question{nbQcm !== 1 ? 's' : ''} qcm · {b.statut === 'valide' ? 'Validée' : 'Brouillon'}
-                </div>
-              </div>
-            </label>
-          )
-        })}
+        <ListeBanques
+          banques={banques} choisies={banquesSel} banquesStation={banquesStation}
+          onChange={ids => set({ quizBanques: ids })}
+          compter={b => (b.questions ?? []).filter(q => q.type === 'qcm').length} unite=" qcm"
+          vide="Aucune banque en base. Le quiz peut être créé sans, mais il n’aura pas de questions tant qu’aucune banque ne lui est rattachée."
+        />
 
         <div style={{ fontSize: 12.5, fontWeight: 700, margin: '16px 0 8px' }}>Paramètres</div>
         <label style={{ display: 'block', marginBottom: 12 }}>
@@ -405,6 +400,7 @@ export default function ConfigJeu(props: {
   cfg: CfgJeu
   onChange: (cfg: CfgJeu) => void
   banques?: Banque[]
+  banquesStation?: string[]
 }) {
   return <div className="cfgjeu"><ConfigJeuContenu {...props} /></div>
 }
