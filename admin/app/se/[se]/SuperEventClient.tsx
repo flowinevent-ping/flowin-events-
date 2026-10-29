@@ -138,14 +138,14 @@ export default function SuperEventClient({ se, lots, lieux, sponsors, autres = [
 
   return (
     <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', fontFamily: 'system-ui, sans-serif', color: '#141a26', background: '#f1ede6' }}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes feSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
         @keyframes feFade{from{opacity:0}to{opacity:1}}
         @keyframes feRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.3}}
         @keyframes feGlow{0%,100%{box-shadow:0 4px 14px var(--g)}50%{box-shadow:0 4px 26px var(--g)}}
         .fe-card{animation:feRise .34s ease both}
-      `}</style>
+      ` }} />
 
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <SuperEventMap lieux={mapLieux} mode={identified ? 'jeu' : 'vitrine'} height="100%" showPosition={true} onSelect={selectById} />

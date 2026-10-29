@@ -31,7 +31,7 @@ function statutReel(se: SuperEvent): 'passe' | 'en_cours' | 'a_venir' {
   if (d > j) return 'a_venir'
   return 'en_cours'
 }
-const libStatut = { passe: '📁 Terminé', en_cours: '🔴 En cours', a_venir: '📅 À venir' } as const
+const libStatut = { passe: 'Terminé', en_cours: 'En cours', a_venir: 'À venir' } as const
 
 /* Le kanban filtrait sur e.status brut (colonnes live/upcoming/past) sans jamais
    prevoir le statut 'archived' -- deja identifie et corrige le 28/07 sur /pro/events
@@ -96,11 +96,11 @@ export default function Page() {
        carte n etait transmis nulle part.
        Ils portent desormais ?se=<id>, et les pages destinataires filtrent
        dessus. */
-    { icone: '🏢', label: 'Pros', href: `/dashboard/pros?se=${encodeURIComponent(seId)}` },
-    { icone: '🤝', label: 'Partenaires', href: `/dashboard/partenaires?se=${encodeURIComponent(seId)}` },
-    { icone: '👥', label: 'Joueurs', href: `/dashboard/joueurs?se=${encodeURIComponent(seId)}` },
-    { icone: '🎁', label: 'Lots', href: `/dashboard/nds-lots?se=${encodeURIComponent(seId)}` },
-    { icone: '🏆', label: 'Gagnants', href: `/dashboard/gagnants?se=${encodeURIComponent(seId)}` },
+    { icone: 'building', label: 'Pros', href: `/dashboard/pros?se=${encodeURIComponent(seId)}` },
+    { icone: 'handshake', label: 'Partenaires', href: `/dashboard/partenaires?se=${encodeURIComponent(seId)}` },
+    { icone: 'users', label: 'Joueurs', href: `/dashboard/joueurs?se=${encodeURIComponent(seId)}` },
+    { icone: 'gift', label: 'Lots', href: `/dashboard/nds-lots?se=${encodeURIComponent(seId)}` },
+    { icone: 'star', label: 'Gagnants', href: `/dashboard/gagnants?se=${encodeURIComponent(seId)}` },
   ]
 
   return (
@@ -114,15 +114,15 @@ export default function Page() {
               className="sa-btn primary"
               onClick={() => { setSource(master); setNom(''); setRes(null) }}
             >
-              ✨ Nouveau Super Event depuis le template
+              <Ico k="sparkle" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Nouveau Super Event depuis le template
             </button>
           )}
           {/* La creation DE ZERO, distincte de la duplication ci-contre : on choisit
               les pros et leurs jeux au lieu de rejouer une structure existante. */}
-          <a href="/dashboard/wizard-super-event" className="sa-btn primary">✨ Créer un super event</a>
+          <a href="/dashboard/wizard-super-event" className="sa-btn primary"><Ico k="plus" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Créer un super event</a>
           {/* Cote pro, « participer a un super event » passe par /pro/rejoindre :
               les demandes atterrissent ici, c est la meme porte vue du SA. */}
-          <a href="/dashboard/demandes-rattachement" className="sa-btn">🤝 Demandes de participation</a>
+          <a href="/dashboard/demandes-rattachement" className="sa-btn"><Ico k="handshake" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Demandes de participation</a>
         </div>
 
         {liste === null && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
@@ -130,7 +130,7 @@ export default function Page() {
 
         {liste !== null && liste.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            {([['en_cours', '🔴 En cours'], ['a_venir', '📅 À venir'], ['passe', '📁 Terminé']] as const).map(([cle, titreCol]) => (
+            {([['en_cours', 'En cours'], ['a_venir', 'À venir'], ['passe', 'Terminé']] as const).map(([cle, titreCol]) => (
               <div key={cle}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--sa-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.04em' }}>
                   {titreCol} ({parStatut[cle].length})
@@ -143,10 +143,10 @@ export default function Page() {
                   // (ou equivalent id se-<x>) porte le role organisateur du super event.
                   const orga = (se.pro_id ? pros.find(p => p.id === se.pro_id) : undefined) ?? pros.find(p => p.id === `pro-${se.id.replace(/^se-/, '')}`) ?? pros.find(p => p.id === 'pro-nds-2026' && se.id === 'se-nds-2026')
                   const colonnes: { cle: EtatStation; titre: string }[] = [
-                    { cle: 'live', titre: '🔴 En cours' },
-                    { cle: 'upcoming', titre: '📅 À venir' },
-                    { cle: 'past', titre: '✅ Passées' },
-                    { cle: 'archive', titre: '🗄️ Archivées' },
+                    { cle: 'live', titre: 'En cours' },
+                    { cle: 'upcoming', titre: 'À venir' },
+                    { cle: 'past', titre: 'Passées' },
+                    { cle: 'archive', titre: 'Archivées' },
                   ]
                   return (
                     <div key={se.id} className="sa-kb-vignette" style={{ cursor: 'default', marginBottom: 12 }}>
@@ -180,7 +180,7 @@ export default function Page() {
                           onClick={() => openDrawer('pro', orga.id)}
                           style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, marginLeft: 34, padding: '6px 10px', background: 'var(--sa-subtle)', borderRadius: 8, cursor: 'pointer', width: 'fit-content' }}
                         >
-                          <span style={{ fontSize: 12 }}>🏛️</span>
+                          <Ico k="building" size={13} />
                           <span style={{ fontSize: 11.5, fontWeight: 700 }}>{orga.nom}</span>
                           <span className="sa-muted" style={{ fontSize: 10.5 }}>· fiche complète →</span>
                         </div>
@@ -192,12 +192,12 @@ export default function Page() {
                       <div className="sa-kb-chips">
                         {accesRapides(se.id).map(a => (
                           <a key={a.label} href={a.href} className="sa-kb-chip">
-                            {a.icone} {a.label}
+                            <Ico k={a.icone} size={12} style={{ marginRight: 4, verticalAlign: -2 }} />{a.label}
                           </a>
                         ))}
                         <button className="sa-kb-chip muted"
                           onClick={() => { setSource(se); setNom(''); setRes(null) }}>
-                          🔁 Dupliquer
+                          <Ico k="copy" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Dupliquer
                         </button>
                       </div>
 
@@ -206,13 +206,13 @@ export default function Page() {
                           className="sa-btn sm primary"
                           onClick={() => openDrawer('superevent', se.id)}
                         >
-                          🎪 Ouvrir la fiche
+                          <Ico k="file" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Ouvrir la fiche
                         </button>
                         <a href={`/dashboard/operations/${se.id}`} className="sa-btn sm" style={{ textDecoration: 'none' }}>
-                          📊 Fiche complète
+                          <Ico k="chart" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Fiche complète
                         </a>
                         <button className="sa-btn sm" onClick={() => setOuvert(ouvert === se.id ? null : se.id)}>
-                          {ouvert === se.id ? 'Masquer' : '📍 Stations'}
+                          {ouvert === se.id ? 'Masquer' : <><Ico k="pin" size={12} style={{ marginRight: 5, verticalAlign: -2 }} />Stations</>}
                         </button>
                       </div>
 
@@ -236,7 +236,7 @@ export default function Page() {
                                         >
                                           <div style={{ fontWeight: 700, fontSize: 12 }}>{ev.nom}</div>
                                           <div style={{ fontSize: 10, color: 'var(--sa-muted)' }}>
-                                            {ev.pro_id === 'pro-nds-2026' ? 'Organisateur' : (pro?.nom ?? 'Partenaire')} · {ev.participants ?? 0} 👥
+                                            {ev.pro_id === 'pro-nds-2026' ? 'Organisateur' : (pro?.nom ?? 'Partenaire')} · {ev.participants ?? 0} <Ico k="users" size={11} style={{ verticalAlign: -2 }} />
                                           </div>
                                         </div>
                                       )
@@ -296,7 +296,7 @@ export default function Page() {
 
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className="sa-btn primary" disabled={!nouvelId || enCours} onClick={onDupliquer}>
-                  {enCours ? 'Duplication…' : '🔁 Dupliquer la structure'}
+                  {enCours ? 'Duplication…' : 'Dupliquer la structure'}
                 </button>
                 <button className="sa-btn" onClick={() => { setSource(null); setRes(null) }}>Annuler</button>
               </div>
@@ -308,12 +308,12 @@ export default function Page() {
           <div className={`sa-alert ${res.ok ? 'info' : 'warn'}`} style={{ marginTop: 14, fontSize: 13 }}>
             {res.ok ? (
               <>
-                ✅ <b>{res.super_event}</b> créé — {res.events_dupliques} station{(res.events_dupliques ?? 0) > 1 ? 's' : ''} sur {res.events_source} dupliquée{(res.events_dupliques ?? 0) > 1 ? 's' : ''},
+                <Ico k="check" size={13} style={{ marginRight: 4, verticalAlign: -2 }} /><b>{res.super_event}</b> créé — {res.events_dupliques} station{(res.events_dupliques ?? 0) > 1 ? 's' : ''} sur {res.events_source} dupliquée{(res.events_dupliques ?? 0) > 1 ? 's' : ''},
                 {' '}{res.partenaires_reutilisables} partenaire{(res.partenaires_reutilisables ?? 0) > 1 ? 's' : ''} réutilisable{(res.partenaires_reutilisables ?? 0) > 1 ? 's' : ''}.
                 {!!res.events_hors_convention && <> ⚠ {res.events_hors_convention} event(s) hors convention de nommage, non dupliqué(s).</>}
                 <br /><span style={{ fontSize: 12, opacity: .8 }}>{res.note}</span>
               </>
-            ) : <>❌ Duplication impossible : {res.raison}</>}
+            ) : <><Ico k="warning" size={13} style={{ marginRight: 4, verticalAlign: -2 }} />Duplication impossible : {res.raison}</>}
           </div>
         )}
       </div>

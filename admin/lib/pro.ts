@@ -47,6 +47,16 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
   joueurResults.forEach(r => {
     ;(r.data ?? []).forEach((j: FlowinJoueur) => joueurMap.set(j.id, j))
   })
+  /* joueurs.events n est pas mis a jour pour un joueur deja connu (pas de droit
+     UPDATE en anonyme) : il manquait au CRM du pro alors qu il a bien joue. Les
+     participations, elles, sont toujours ecrites -- on complete par elles. */
+  const { data: parts } = await supabase.from('participations').select('joueur_id').in('event_id', evIds)
+  const manquants = Array.from(new Set(((parts ?? []) as { joueur_id: string | null }[])
+    .map(p => p.joueur_id).filter((id): id is string => !!id && !joueurMap.has(id))))
+  for (let i = 0; i < manquants.length; i += 200) {
+    const { data: js } = await supabase.from('joueurs').select(COLS_JOUEURS).in('id', manquants.slice(i, i + 200))
+    ;(js ?? []).forEach((j: FlowinJoueur) => joueurMap.set(j.id, j))
+  }
   const joueurs = Array.from(joueurMap.values())
 
   /* Lots */

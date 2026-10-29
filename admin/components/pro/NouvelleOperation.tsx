@@ -462,7 +462,7 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
        plutot qu'un lien texte + fleche. */
     return (
       <div style={{ maxWidth: 980 }}>
-        <style>{NOP_CARTE_CSS}</style>
+        <style dangerouslySetInnerHTML={{ __html: NOP_CARTE_CSS }} />
         <div style={{ fontSize: 24, fontWeight: 800 }}>Nouvelle opération</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '4px 0 20px' }}>Quatre étapes, avec à droite le jeu tel que vos clients le verront.</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
@@ -520,8 +520,8 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
       </div>
 
       <div className="nop-grille">
-        <style>{`.nop-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
-          @media (max-width:1020px){.nop-grille{grid-template-columns:1fr}}`}</style>
+        <style dangerouslySetInnerHTML={{ __html: `.nop-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
+          @media (max-width:1020px){.nop-grille{grid-template-columns:1fr}}` }} />
         <div style={CARD}>
 
           {/* ── 1. ÉTABLISSEMENT ── */}
@@ -548,7 +548,7 @@ export default function NouvelleOperation({ pro, banques, supers, packs, typeIni
           {etape === 1 && rejoindre && (
             <>
               <Titre t="Quel super event ?" s="Choisissez l’opération : son jeu est déjà choisi par l’organisateur." />
-              <style>{NOP_CARTE_CSS}</style>
+              <style dangerouslySetInnerHTML={{ __html: NOP_CARTE_CSS }} />
               {supers.some(s => s.lat != null && s.lng != null) && (
                 <div style={{ marginBottom: 14 }}>
                   <SuperEventMap

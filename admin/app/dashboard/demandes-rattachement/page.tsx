@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { PageHeader, EmptyState, SearchBar, useTri } from '@/components/dashboard/DashboardUI'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabasePublic } from '@/lib/supabase'
 import { useDashboard } from '@/contexts/DashboardContext'
 import type { DemandeRattachement } from '@/lib/types'
 import { geocoderAdresse } from '@/lib/geocodage'
@@ -53,7 +53,7 @@ export default function Page() {
     if (l.lat == null && l.lng == null && l.persona !== 'annonceur' && (l.adresse || l.ville)) {
       const coords = await geocoderAdresse(l.adresse, l.code_postal, l.ville)
       if (coords) {
-        await supabase.from('demandes_rattachement_super_event').update({ lat: coords.lat, lng: coords.lng }).eq('id', l.id)
+        await supabasePublic.from('demandes_rattachement_super_event').update({ lat: coords.lat, lng: coords.lng }).eq('id', l.id)
         l = { ...l, lat: coords.lat, lng: coords.lng }
       }
     }
@@ -71,8 +71,12 @@ export default function Page() {
 
   async function refuser(id: number) {
     setEnCours(id); setErreur(''); setInfo('')
-    const { error } = await supabase.from('demandes_rattachement_super_event').update({ statut: 'refusee', traite_at: new Date().toISOString() }).eq('id', id)
-    if (error) setErreur(`Statut non enregistré — ${error.message}`)
+    /* Client sans session : la seule regle UPDATE est pour `anon`. Avec une
+       session pro ouverte dans le meme navigateur, l update passait en
+       `authenticated`, touchait 0 ligne SANS erreur, et l ecran affichait
+       « refusee » alors que la demande restait en attente. */
+    const { data, error } = await supabasePublic.from('demandes_rattachement_super_event').update({ statut: 'refusee', traite_at: new Date().toISOString() }).eq('id', id).select('id')
+    if (error || !data?.length) setErreur(`Statut non enregistré${error ? ` — ${error.message}` : ''}`)
     else setLignes(lignes.map(l => l.id === id ? { ...l, statut: 'refusee', traite_at: new Date().toISOString() } : l))
     setEnCours(null)
   }

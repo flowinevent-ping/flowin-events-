@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabasePublic } from './supabase'
 import { sansGabarit } from './operations'
 import type { FlowinJoueur, FlowinEvent, FlowinPartenaire, FlowinLot, FlowinPro } from './types'
 
@@ -25,14 +25,17 @@ export async function fetchAllJoueurs(): Promise<FlowinJoueur[]> {
   return (data ?? []) as unknown as FlowinJoueur[]
 }
 
+/* Une ecriture refusee par la RLS ne renvoie pas d erreur : 0 ligne touchee.
+   Sans `.select` + controle du nombre de lignes, l ecran affichait « enregistre »
+   alors que rien n etait ecrit (joueurs : aucun droit UPDATE/DELETE en anon). */
 export async function updateJoueur(id: string, fields: Partial<FlowinJoueur>): Promise<boolean> {
-  const { error } = await supabase.from('joueurs').update(fields).eq('id', id)
-  return !error
+  const { data, error } = await supabase.from('joueurs').update(fields).eq('id', id).select('id')
+  return !error && !!data?.length
 }
 
 export async function deleteJoueur(id: string): Promise<boolean> {
-  const { error } = await supabase.from('joueurs').delete().eq('id', id)
-  return !error
+  const { data, error } = await supabase.from('joueurs').delete().eq('id', id).select('id')
+  return !error && !!data?.length
 }
 
 /* ── Events ── */
@@ -103,14 +106,17 @@ export async function fetchAllPros(): Promise<FlowinPro[]> {
   return (data ?? []) as FlowinPro[]
 }
 
+/* Ecritures SA sur `pros` : client sans session. Si le meme navigateur a une
+   session pro ouverte (connexion /pro), le client partage ecrit en
+   `authenticated` et la RLS (pros_self_*) refuse tout pro qui n est pas le sien. */
 export async function upsertPro(p: Partial<FlowinPro>): Promise<boolean> {
-  const { error } = await supabase.from('pros').upsert(p, { onConflict: 'id' })
-  return !error
+  const { data, error } = await supabasePublic.from('pros').upsert(p, { onConflict: 'id' }).select('id')
+  return !error && !!data?.length
 }
 
 export async function deletePro(id: string): Promise<boolean> {
-  const { error } = await supabase.from('pros').delete().eq('id', id)
-  return !error
+  const { data, error } = await supabasePublic.from('pros').delete().eq('id', id).select('id')
+  return !error && !!data?.length
 }
 
 /* ── Participations par event ── */
