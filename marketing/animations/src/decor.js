@@ -22,12 +22,12 @@
     }
     var sx = 226, sy = 330, sw = 226
     F.stand(g, sx, sy, sw, S.shop, COL.orange, function () {
-      F.person(g, sx + sw * 0.62, sy + 214, 0.66, K.mei, 'idle', t, { happy: true, phase: 1 })
+      F.person(g, sx + sw * 0.62, sy + 214, 0.66, K.sophie, 'idle', t, { happy: true, phase: 1 })
     })
     F.qrPanel(g, sx + 14, sy + 176, 84)
     var a = F.easeOut(F.prog(t, 0.2, 0.7))
     var ax = F.lerp(70, 150, a)
-    F.person(g, ax, 940, 1.42, K.aminata, a > 0.8 ? 'scan' : 'idle', t, { happy: true })
+    F.person(g, ax, 940, 1.42, K.julie, a > 0.8 ? 'scan' : 'idle', t, { happy: true })
     if (t > 1.2) {
       var p = (t * 1.6) % 1
       var px = ax + 129 * 1.42, py = 940 - 192 * 1.42
@@ -54,16 +54,16 @@
     T(g, 270, 92 + 112, S.shop, { size: 24, w: 800, fill: COL.ink, anchor: 'middle', maxW: 330 })
   }
 
-  /* Mei dans sa boutique (seule, ou avec Aminata qui retire son lot). */
+  /* Sophie dans sa boutique (seule, ou avec Julie qui retire son lot). */
   function boutique(g, t, o) {
     o = o || {}
     t = t * (o.k || 1)
     F.bgBoutique(g)
     if (o.enseigne) enseigne(g)
     if (o.retrait) {
-      F.person(g, 400, 700, 1.15, K.mei, t > 1.6 ? 'give' : 'idle', t, { flip: true, happy: true, item: 'billet', phase: 1 })
+      F.person(g, 400, 700, 1.15, K.sophie, t > 1.6 ? 'give' : 'idle', t, { flip: true, happy: true, item: 'billet', phase: 1 })
       comptoirBoutique(g)
-      F.person(g, 150, 905, 1.35, K.aminata, 'give', t, { item: 'phoneOut', happy: true })
+      F.person(g, 150, 905, 1.35, K.julie, 'give', t, { item: 'phoneOut', happy: true })
       if (t > 2.2) {
         var b = F.easeOut(F.prog(t, 2.2, 0.4))
         var bg = G(g, 'translate(270,330) scale(' + b + ')')
@@ -72,7 +72,7 @@
         T(bg, 8, 5, 'Billet validé', { size: 17, w: 800, fill: '#0B6E50', anchor: 'middle' })
       }
     } else {
-      F.person(g, 270, 700, 1.3, K.mei, 'wave', t, { happy: true })
+      F.person(g, 270, 700, 1.3, K.sophie, 'wave', t, { happy: true })
       comptoirBoutique(g)
     }
   }
@@ -126,7 +126,7 @@
       C(cg, x, y, 20, 'none', { stroke: '#d9b38c', 'stroke-width': 3 })
       if (i < 3) C(cg, x, y, 12, '#d9b38c')
     }
-    var s = F.easeInOut(F.prog(t, 0.45, 0.4))
+    var s = F.easeInOut(F.prog(t, 0.3, 0.4))
     if (s > 0) P(g, 'M' + 70 + ' ' + 680 + ' L' + (70 + 340 * s).toFixed(1) + ' ' + (680 - 170 * s).toFixed(1), 'none', { stroke: '#fff', 'stroke-width': 14, 'stroke-linecap': 'round' })
   }
 

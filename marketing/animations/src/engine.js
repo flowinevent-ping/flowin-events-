@@ -310,10 +310,31 @@
       })
     }
 
+    /* V3 : deroule. Sous la legende, « ÉTAPE n/N » et une pastille par
+       etape (faites : cochees, en cours : pleine), pour lire le parcours
+       entier et pas des moments isoles. */
+    function etapes(g, n, total, lt, accent, h) {
+      var x0 = 24, y0 = 104 + h + 10, w = 428, hh = 34
+      var op = easeOut((lt - 0.1) / 0.25)
+      var eg = G(g, null, op)
+      R(eg, x0, y0, w, hh, 17, 'rgba(255,255,255,.94)', { stroke: 'rgba(10,20,40,.08)', 'stroke-width': 1 })
+      T(eg, x0 + 16, y0 + 23, 'ÉTAPE ' + n + '/' + total, { size: 15, w: 800, fill: accent, ls: 0.6 })
+      var a = x0 + 128, b = x0 + w - 18, pas = total > 1 ? (b - a) / (total - 1) : 0, cy = y0 + hh / 2
+      R(eg, a, cy - 1.5, b - a, 3, 1.5, '#E3E6EE')
+      if (n > 1) R(eg, a, cy - 1.5, pas * (n - 1), 3, 1.5, accent)
+      for (var i = 1; i <= total; i++) {
+        var cx = a + pas * (i - 1)
+        if (i < n) { C(eg, cx, cy, 8, accent); P(eg, 'M' + (cx - 3.5) + ' ' + cy + ' l2.6 2.6 l4.6 -4.8', 'none', { stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }) }
+        else if (i === n) { C(eg, cx, cy, 11, accent); C(eg, cx, cy, 4, '#fff') }
+        else C(eg, cx, cy, 7, '#fff', { stroke: '#C9CED9', 'stroke-width': 2 })
+      }
+    }
+
     function drawScene(s, t, g) {
       var lt = t - s.start
       s.draw(g, lt, s)
       if (s.caption) caption(g, s.caption, lt, S.accent)
+      if (s.step && S.steps) etapes(g, s.step, S.steps, lt, S.accent, 26 + s.caption.length * 38)
     }
 
     /* Controle des zones sures : chaque texte visible doit tenir dans SAFE.

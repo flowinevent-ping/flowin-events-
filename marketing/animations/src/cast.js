@@ -12,9 +12,9 @@
     parties: 214, joueurs: 163, stFlashs: 96, stParties: 58, stJoueurs: 51
   }
   var CAST = {
-    aminata: { skin: '#6B4226', hair: '#1b1210', hairStyle: 'bun', shirt: '#E0218A', shirt2: '#fff' },
+    julie: { skin: '#6B4226', hair: '#1b1210', hairStyle: 'bun', shirt: '#E0218A', shirt2: '#fff' },
     hugo: { skin: '#F2CBA8', hair: '#7a4b2a', hairStyle: 'short', shirt: '#2563EB', shirt2: '#fff' },
-    mei: { skin: '#E6B48A', hair: '#141014', hairStyle: 'ponytail', shirt: '#00B4A0', shirt2: '#fff', tie: '#F59E0B' }
+    sophie: { skin: '#E6B48A', hair: '#141014', hairStyle: 'ponytail', shirt: '#00B4A0', shirt2: '#fff', tie: '#F59E0B' }
   }
 
   /* ---------- Ecrans joueur (charte des parcours : fond prune) ---------- */
@@ -349,7 +349,7 @@
     }
   }
 
-  function ecranCRM(g, w, h, t) {
+  function ecranCRM(g, w, h, t, o) {
     fondPro(g, w, h, 'Mes super data', 'CRM, gagnants et trafic de toutes vos opérations.')
     var x = 14
     ;['CRM', 'Gagnants & tirage', 'Trafic'].forEach(function (l, i) {
@@ -358,11 +358,12 @@
       T(g, x + 11, 159, l, { size: 11.5, w: 800, fill: i === 0 ? '#fff' : COL.proTexte })
       x += lw + 30
     })
-    var n = Math.round(STORY.joueurs * F.easeOut(F.prog(t, 0.3, 1.6)))
+    o = o || {}
+    var n = Math.round((o.n || STORY.joueurs) * F.easeOut(F.prog(t, 0.3, 1.6)))
     carte(g, 14, 184, w - 28, 74)
     T(g, 28, 226, String(n), { size: 30, w: 800, fill: COL.pro })
     T(g, 100, 214, 'contacts', { size: 13, w: 800, fill: COL.proTexte })
-    T(g, 100, 232, 'joueurs de la ' + STORY.event, { size: 11.5, w: 600, fill: COL.proMut, maxW: w - 130 })
+    T(g, 100, 232, o.sous || 'joueurs de la ' + STORY.event, { size: 11.5, w: 600, fill: COL.proMut, maxW: w - 130 })
     var lignes = [[STORY.pseudo, 'Gagnant'], ['Soleil_7', '2 parties'], ['Brume_19', '1 partie'], ['Pic_33', '3 parties'], ['Vague_5', '1 partie']]
     carte(g, 14, 272, w - 28, 248)
     lignes.forEach(function (l, i) {
@@ -479,7 +480,7 @@
     if (p > 0.5) P(g, 'M' + (w / 2 - 12) + ' 112 l8 8 l16 -16', 'none', { stroke: '#fff', 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
     T(g, w / 2, 176, 'Demande envoyée !', { size: 22, w: 800, anchor: 'middle' })
     R(g, 14, 214, w - 28, 290, 18, '#fff', { stroke: '#efe7df', 'stroke-width': 1 })
-    ;['Merci Mei ! La demande de', STORY.shop, 'pour l’opération ' + STORY.event, 'est enregistrée.'].forEach(function (l, i) {
+    ;['Merci Sophie ! La demande de', STORY.shop, 'pour l’opération ' + STORY.event, 'est enregistrée.'].forEach(function (l, i) {
       T(g, 28, 246 + i * 20, l, { size: 13, w: i === 1 ? 800 : 600, fill: '#1c1024', maxW: w - 56 })
     })
     R(g, 28, 336, w - 56, 140, 12, 'rgba(194,65,12,.07)')
@@ -514,6 +515,7 @@
         F.phone(pg, 96, 252, 340, 700, function (sg, w, h) {
           var z = 1.12
           var sc = opts.scroll || 0
+          if (opts.scrollTo !== undefined) sc = F.lerp(sc, opts.scrollTo, F.easeInOut(F.prog(t, opts.scrollAt || 1.2, 0.6)))
           ecran(G(sg, 'scale(' + z + ') translate(0,' + (-sc) + ')'), w / z, h / z, t * (opts.k || 1), opts.args)
           /* Ecran defile : la barre d etat reste en place par-dessus, comme
              sur un vrai telephone (sinon des lettres coupees sous l encoche). */
