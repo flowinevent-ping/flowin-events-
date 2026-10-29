@@ -1,0 +1,17 @@
+{
+  "name": "flowin-animations",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "planches": "node render.mjs --planches",
+    "render": "node render.mjs",
+    "all": "node build.mjs && node render.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/manrope": "5.1.0",
+    "jsqr": "1.4.0",
+    "pngjs": "7.0.0",
+    "qrcode": "1.5.4"
+  }
+}
