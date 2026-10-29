@@ -545,6 +545,7 @@ export async function supprimerSuperEvent(id: string, confirmation: string): Pro
 export function slugSuperEvent(nom: string): string {
   const base = nom.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    .replace(/^(se-)+/, '')
   return base ? `se-${base}` : ''
 }
 
