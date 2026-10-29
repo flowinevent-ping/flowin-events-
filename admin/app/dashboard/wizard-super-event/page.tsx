@@ -63,7 +63,6 @@ export default function Page() {
   const [logoUrl, setLogoUrl] = useState('')
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [uploadErreur, setUploadErreur] = useState('')
-  const [geofence, setGeofence] = useState('150')
   const [tirageGlobal, setTirageGlobal] = useState(true)
   const [choisis, setChoisis] = useState<Record<string, true>>({})
   const [recherchePro, setRecherchePro] = useState('')
@@ -132,7 +131,7 @@ export default function Page() {
     const r = await creerSuperEvent({
       id, nom, dateD: dateD || null, dateF: dateF || null,
       description: description || null,
-      geofenceM: geofence ? Number(geofence) : null,
+      geofenceM: null,
       logoUrl: logoUrl.trim() || null,
       tirageGlobal,
       module,
@@ -286,14 +285,6 @@ export default function Page() {
       sous: 'Ce qui vaut pour toutes les stations à la fois.',
       contenu: (
         <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
-          <label>
-            <span className="sa-lbl">Périmètre de jeu (mètres)</span>
-            <input className="sa-input" type="number" value={geofence} onChange={e => setGeofence(e.target.value)} style={{ maxWidth: 160 }} />
-            <span className="sa-aide">
-              Distance maximale entre le joueur et la station pour qu’une partie compte.
-              Vide = aucun contrôle de position.
-            </span>
-          </label>
           <div className="sa-choix-grille" style={{ maxWidth: 440 }}>
             <VignetteChoix
               titre="Tirage global" sous="Un tirage commun à toutes les stations" icone={<Ico k="globe" size={22} />}
@@ -319,7 +310,6 @@ export default function Page() {
             ['Jeu', MODULES.find(m => m.id === module)?.nom ?? module],
             ['Pros rattachés', nbChoisis ? `${nbChoisis}` : 'aucun'],
             ['Stations créées', nbChoisis ? `${nbChoisis}` : '0'],
-            ['Périmètre', geofence ? `${geofence} m` : 'aucun contrôle'],
             ['Tirage', tirageGlobal ? 'global' : 'par station'],
           ] as [string, string][]).map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--sa-border)' }}>
