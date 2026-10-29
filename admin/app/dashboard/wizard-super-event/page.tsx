@@ -25,6 +25,8 @@ import Link from 'next/link'
 import { PageHeader, SectionHeader } from '@/components/dashboard/DashboardUI'
 import { Parcours, VignetteChoix, type EtapeParcours } from '@/components/dashboard/Parcours'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
+import ListeCRM, { type ColonneCRM } from '@/components/dashboard/ListeCRM'
+import type { FlowinPro } from '@/lib/types'
 import { useDashboard } from '@/contexts/DashboardContext'
 import {
   creerSuperEvent, supprimerSuperEvent, slugSuperEvent, fetchSuperEvents,
@@ -70,7 +72,6 @@ export default function Page() {
   const [uploadErreur, setUploadErreur] = useState('')
   const [tirageGlobal, setTirageGlobal] = useState(true)
   const [choisis, setChoisis] = useState<Record<string, true>>({})
-  const [recherchePro, setRecherchePro] = useState('')
   /* REFERENTIEL 25/33 — le jeu est choisi UNE fois, par le createur du super
      event, et chaque station en herite (super_events.module / cfg_jeu). */
   const [module, setModule] = useState<string>(GABARIT_MODULE)
@@ -103,13 +104,22 @@ export default function Page() {
      contenir d espace, d accent ni de majuscule. */
   const id = slugSuperEvent(idManuel || nom)
 
-  const prosFiltres = useMemo(() => {
-    const q = recherchePro.trim().toLowerCase()
-    const l = q ? pros.filter(p => (p.nom ?? '').toLowerCase().includes(q)) : pros
-    return l.slice().sort((a, b) => (a.nom ?? '').localeCompare(b.nom ?? '', 'fr'))
-  }, [pros, recherchePro])
 
   const nbChoisis = Object.keys(choisis).length
+
+  const colonnesPros: ColonneCRM<FlowinPro>[] = useMemo(() => [
+    {
+      id: 'choix', label: '', valeur: p => (choisis[p.id] ? 1 : 0), largeur: 44, aligne: 'centre', horsRecherche: true,
+      rendu: p => <input type="checkbox" checked={!!choisis[p.id]} readOnly aria-label={`Rattacher ${p.nom}`} style={{ pointerEvents: 'none' }} />,
+    },
+    { id: 'nom', label: 'Pro', valeur: p => p.nom, rendu: p => <b>{p.nom || '—'}</b>, largeur: 220 },
+    { id: 'contact', label: 'Contact', valeur: p => p.contact, largeur: 150 },
+    { id: 'tel', label: 'Téléphone', valeur: p => p.tel, largeur: 130 },
+    { id: 'email', label: 'Email', valeur: p => p.email, largeur: 200 },
+    { id: 'ville', label: 'Ville', valeur: p => p.ville, largeur: 120 },
+    { id: 'secteur', label: 'Secteur', valeur: p => p.secteur, largeur: 150 },
+    { id: 'statut', label: 'Statut', valeur: p => ({ en_attente: 'En attente', valide: 'Validé', refuse: 'Refusé' } as Record<string, string>)[p.statut ?? 'valide'] ?? p.statut, largeur: 100 },
+  ], [choisis])
   const jeuSansQuestions = JEUX_A_QUESTIONS.indexOf(module) >= 0 && nbSourcesQuestions(cfgJeu) === 0
   const proApercu = (apercuPro && choisis[apercuPro]) ? apercuPro : Object.keys(choisis)[0] ?? ''
 
@@ -265,28 +275,28 @@ export default function Page() {
             <Link href="/dashboard/demandes-rattachement" className="sa-lien">Demandes de participation</Link>,
             et son approbation crée sa station avec tout ce qu’il a saisi.
           </div>
-          <input
-            className="sa-input" style={{ maxWidth: 340, marginBottom: 12 }}
-            value={recherchePro} onChange={e => setRecherchePro(e.target.value)}
-            placeholder="Rechercher un pro…"
-          />
           <div style={{ fontSize: 11.5, color: 'var(--sa-muted)', marginBottom: 10 }}>
             {nbChoisis === 0
               ? 'Aucun pro sélectionné — vous pourrez créer l’opération vide et les ajouter ensuite.'
               : `${nbChoisis} pro${nbChoisis > 1 ? 's' : ''} sélectionné${nbChoisis > 1 ? 's' : ''}.`}
           </div>
-          <div className="sa-choix-grille">
-            {prosFiltres.map(p => (
-              <VignetteChoix
-                key={p.id}
-                titre={p.nom ?? p.id}
-                sous={p.ville ?? undefined}
-                icone={<Ico k="building" size={22} />}
-                actif={!!choisis[p.id]}
-                onClick={() => basculerPro(p.id)}
-              />
-            ))}
-          </div>
+          {/* La liste du CRM pro (memes colonnes que /dashboard/pros), une case par
+              ligne : on choisit dans la fiche complete, pas sur un nom seul. */}
+          <ListeCRM<FlowinPro>
+            sansEntete
+            lignes={pros}
+            colonnes={colonnesPros}
+            cle={p => p.id}
+            onLigne={p => basculerPro(p.id)}
+            triDefaut="nom"
+            placeholderRecherche="Rechercher un pro, un contact, une ville…"
+            filtres={[
+              { id: 'tous', label: 'Tous' },
+              { id: 'choisis', label: `Sélectionnés${nbChoisis ? ` (${nbChoisis})` : ''}`, test: p => !!choisis[p.id] },
+            ]}
+            videTitre="Aucun pro"
+            videDesc="Aucun pro ne correspond à cette recherche."
+          />
         </>
       ),
     },
