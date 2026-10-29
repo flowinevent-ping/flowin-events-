@@ -37,6 +37,11 @@ import { JEUX_A_QUESTIONS, nbSourcesQuestions } from '@/lib/wizard'
 import { uploaderLogo, redimensionnerImage } from '@/lib/upload'
 import { Ico, IcoModule } from '@/lib/proicons'
 
+/* Banques ecrites pour UNE station de NDS2026 (le bar, les caisses, l ecran,
+   la tablette) : elles n ont pas leur place dans la liste principale d une
+   nouvelle operation. Regroupees a part, repliees, jamais supprimees. */
+const BANQUES_STATION_NDS = ['bq-nds-bar', 'bq-nds-caisses', 'bq-nds-ecrans', 'bq-nds-tablette']
+
 const MODULES: { id: string; nom: string; sous: string }[] = [
   /* Le gabarit de reference en tete, et par defaut : on part de lui, pas d une
      page blanche (Romain, 03/09). Pas de ligne separee pour 'quiz' :
@@ -72,6 +77,11 @@ export default function Page() {
   const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
   const [banques, setBanques] = useState<Banque[]>([])
   useEffect(() => { fetchBanquesToutes().then(setBanques) }, [])
+  /* Une banque sans aucune question n apporte rien : masquee (sauf deja cochee). */
+  const banquesUtiles = useMemo(() => {
+    const sel = ((cfgJeu.quizBanques as string[]) ?? []).concat((cfgJeu.bonusBanques as string[]) ?? [])
+    return banques.filter(b => (b.questions ?? []).length > 0 || sel.indexOf(b.id) >= 0)
+  }, [banques, cfgJeu])
 
   /* L apercu montre la station en cours de reglage : sans ca, on parametre
      cinq stations sans jamais voir a quoi ressemble celle qu on regle. */
@@ -232,7 +242,7 @@ export default function Page() {
             ))}
           </div>
           <div style={{ paddingLeft: 10, borderLeft: '3px solid var(--sa-border)' }}>
-            <ConfigJeu module={module} cfg={cfgJeu} onChange={setCfgJeu} banques={banques} />
+            <ConfigJeu module={module} cfg={cfgJeu} onChange={setCfgJeu} banques={banquesUtiles} banquesStation={BANQUES_STATION_NDS} />
           </div>
         </div>
       ),
