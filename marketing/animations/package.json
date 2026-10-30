@@ -6,7 +6,8 @@
     "build": "node build.mjs",
     "planches": "node render.mjs --planches",
     "render": "node render.mjs",
-    "all": "node build.mjs && node render.mjs"
+    "all": "node build.mjs && node render.mjs",
+    "build:h": "node build-h.mjs"
   },
   "devDependencies": {
     "@fontsource/manrope": "5.1.0",

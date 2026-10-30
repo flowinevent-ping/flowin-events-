@@ -2,6 +2,38 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
+## Style H — « typo + vrais écrans » : participants (41 s)
+
+Style validé par Romain après les maquettes A → H : **plus de personnages dessinés**. Un aplat plein écran par scène (magenta, encre, violet, or, teal), un mot géant en Manrope 800 (−0,04 em) calé dans la zone sûre, un seul objet réel par scène (sticker « Station de jeu », téléphone fin avec les vrais écrans du quiz NDS, ticket), et un seul geste graphique : l'**anneau de flash** blanc qui ouvre chaque scène depuis l'objet de la précédente.
+
+Scénario (paroles de Romain) : un guide du « comment ça marche ». On va dans chaque commerce Flowin, on joue au jeu du commerce (quiz + bonus, roue, tombola, vote), sans appli, en flashant le QR. On peut garder Flowin sur son écran d'accueil, et le même jeu continue au festival : Flowin relie culture et commerces.
+
+Page : `participants-h.html`, au format storyboard (lecteur 9:16 à gauche, scènes horodatées cliquables à droite, scène courante surlignée). Vidéo : `participants-h.mp4`, 1080 × 1920, 30 i/s, 41 s. Planches : `planches/participants-h.png` et `planches/participants-h-toutes-scenes.png`.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3,5 s | Accroche | magenta | **TA VILLE / JOUE.** · Festival + commerces, un seul jeu. · sticker Station de jeu |
+| 3,5–7,5 s | Cherche | encre | **CHERCHE.** · Dans chaque commerce Flowin. · vitrine + sticker |
+| 7,5–11,5 s | Flashe | magenta | **FLASHE.** · Sans appli. Sans téléchargement. · téléphone en mode caméra sur le QR, anneaux |
+| 11,5–16,5 s | Un jeu par commerce | violet | **À CHAQUE / PASSAGE, / JOUE.** · 4 cartes : Quiz + bonus, Roue, Tombola, Vote |
+| 16,5–22,5 s | Joue | encre | **JOUE.** · 5 questions, puis des bonus. · vrai quiz (3/5, « Juillet » coché), puis écran « BONUS 1/2 » |
+| 22,5–27 s | Gagne | or | **GAGNE.** · Un ticket pour le tirage au sort. · ticket PQ-2026-4128 qui sort du téléphone (5/5) |
+| 27–31,5 s | Garde-le | teal | **GARDE-LE.** · Ajoute Flowin à ton écran d'accueil. · l'icône rejoint l'écran d'accueil |
+| 31,5–36,5 s | Continue | encre | **CONTINUE.** · Commerces et festival : le même jeu. · plan de ville, boutiques qui s'allument puis la scène du festival |
+| 36,5–41 s | Fin | encre | Culture + commerces. **Un seul jeu.** · QR réel · Flashez. Jouez. Gagnez. · logo Flowin |
+
+Vérifié dans le code (`admin/`) :
+- Jeux : parcours `quiz`, `spin` (roue), `tombola`, `vote` dans `app/parcours/` ; questions bonus du quiz (`QuizClient.tsx`, écran `bonus`).
+- Ticket : `generateTicket` (`lib/ticket`), ticket de l'histoire commune `PQ-2026-4128` (`src/cast.js`), « Tirage au sort » sans date.
+- Écran d'accueil : manifeste PWA (`public/manifest.json`, `display: standalone`, déclaré dans `app/layout.tsx`). L'ajout passe par le menu du navigateur ; il n'y a pas de bouton d'installation dans l'appli.
+- QR de fin : même cible que la V3, `/parcours/quiz?ev=ev-demo-quiz&preview=1` (aperçu : aucun joueur ni participation enregistré, `lib/parcours.ts` `estApercu`). `/nds?preview=1` ouvre la page d'accueil NDS, pas le jeu : non retenu.
+
+Écarts avec le scénario dicté, à valider :
+- « Pour chaque achat fait, joue » → **« À chaque passage, joue »** : l'accueil du jeu affiche « Jeu gratuit · Sans achat obligatoire » ; afficher une obligation d'achat contredirait l'appli (et la règle des jeux-concours).
+- « Enregistrer l'application en moins de 5 secondes » → **« Ajoute Flowin à ton écran d'accueil »**, sans chronomètre : le manifeste existe mais aucune mesure ni bouton d'installation ne permet d'affirmer une durée.
+- L'écran bonus montre une question d'exemple (« Comment as-tu connu le festival ? ») : la banque bonus réelle dépend de chaque opération.
+- Zones sûres : 0 avertissement (contrôle à 3 instants de chaque scène ; pour les mots géants, le haut visible est la hauteur des capitales).
+
 ## V3 — six coupes : déroulé complet, arguments, « vous » pour les commerçants
 
 La V3 corrige la V2 après la relecture de Romain : prénoms classiques, commerçants interpellés directement (« vous », « votre boutique »), **déroulé réel** de chaque public visible étape par étape, arguments explicites (seulement ceux que le code confirme). Mêmes chiffres, mêmes écrans, même histoire (Fête du Lac, Belrive).
