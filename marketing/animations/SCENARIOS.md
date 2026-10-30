@@ -2,37 +2,34 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
-## Style H — « typo + vrais écrans » : participants (41 s)
+## Style H — « typo + vrais écrans » : participants, le guide du joueur (38,5 s)
 
-Style validé par Romain après les maquettes A → H : **plus de personnages dessinés**. Un aplat plein écran par scène (magenta, encre, violet, or, teal), un mot géant en Manrope 800 (−0,04 em) calé dans la zone sûre, un seul objet réel par scène (sticker « Station de jeu », téléphone fin avec les vrais écrans du quiz NDS, ticket), et un seul geste graphique : l'**anneau de flash** blanc qui ouvre chaque scène depuis l'objet de la précédente.
+Style validé par Romain après les maquettes A → H : **pas de personnages dessinés**. Un aplat plein écran par scène (magenta, encre, violet, or, teal), un mot géant en Manrope 800 (−0,04 em) dans la zone sûre, un seul objet réel par scène (sticker « Station de jeu », téléphone fin avec les vrais écrans du quiz NDS, ticket), et un seul geste graphique : l'**anneau de flash** blanc qui ouvre chaque scène depuis l'objet de la précédente.
 
-Scénario (paroles de Romain) : un guide du « comment ça marche ». On va dans chaque commerce Flowin, on joue au jeu du commerce (quiz + bonus, roue, tombola, vote), sans appli, en flashant le QR. On peut garder Flowin sur son écran d'accueil, et le même jeu continue au festival : Flowin relie culture et commerces.
+V2 du texte (retour de Romain : « design OK, wording pas OK ») : les impératifs abstraits de la première version (TA VILLE JOUE, CHERCHE, GARDE-LE, CONTINUE) sont remplacés par un **guide numéroté en 4 étapes**, au tutoiement, en phrases simples. Chaque étape porte une pastille (cercle blanc, chiffre encre) et une barre « Étape n/4 » discrète en bas, sous la zone sûre.
 
-Page : `participants-h.html`, au format storyboard (lecteur 9:16 à gauche, scènes horodatées cliquables à droite, scène courante surlignée). Vidéo : `participants-h.mp4`, 1080 × 1920, 30 i/s, 41 s. Planches : `planches/participants-h.png` et `planches/participants-h-toutes-scenes.png`.
+Page : `participants-h.html`, au format storyboard (« Comment on joue avec Flowin », « Le guide du joueur en 4 étapes. », lecteur 9:16 à gauche, scènes horodatées cliquables à droite). Vidéo : `participants-h.mp4`, 1080 × 1920, 30 i/s, 38,5 s. Planches : `planches/participants-h.png` et `planches/participants-h-toutes-scenes.png`.
 
 | Temps | Scène | Fond | À l'écran |
 |---|---|---|---|
-| 0–3,5 s | Accroche | magenta | **TA VILLE / JOUE.** · Festival + commerces, un seul jeu. · sticker Station de jeu |
-| 3,5–7,5 s | Cherche | encre | **CHERCHE.** · Dans chaque commerce Flowin. · vitrine + sticker |
-| 7,5–11,5 s | Flashe | magenta | **FLASHE.** · Sans appli. Sans téléchargement. · téléphone en mode caméra sur le QR, anneaux |
-| 11,5–16,5 s | Un jeu par commerce | violet | **À CHAQUE / PASSAGE, / JOUE.** · 4 cartes : Quiz + bonus, Roue, Tombola, Vote |
-| 16,5–22,5 s | Joue | encre | **JOUE.** · 5 questions, puis des bonus. · vrai quiz (3/5, « Juillet » coché), puis écran « BONUS 1/2 » |
-| 22,5–27 s | Gagne | or | **GAGNE.** · Un ticket pour le tirage au sort. · ticket PQ-2026-4128 qui sort du téléphone (5/5) |
-| 27–31,5 s | Garde-le | teal | **GARDE-LE.** · Ajoute Flowin à ton écran d'accueil. · l'icône rejoint l'écran d'accueil |
-| 31,5–36,5 s | Continue | encre | **CONTINUE.** · Commerces et festival : le même jeu. · plan de ville, boutiques qui s'allument puis la scène du festival |
-| 36,5–41 s | Fin | encre | Culture + commerces. **Un seul jeu.** · QR réel · Flashez. Jouez. Gagnez. · logo Flowin |
+| 0–3 s | Accroche | magenta | **COMMENT / ON JOUE ?** · Flowin, le jeu de tes commerçants et de ton festival. · sticker Station de jeu |
+| 3–7,5 s | Étape 1 | encre | ① **VA CHEZ TES / COMMERÇANTS.** · Repère le QR Flowin en caisse. · vitrine + sticker |
+| 7,5–11,5 s | Étape 2 | magenta | ② **FLASHE / LE QR.** · Avec ton téléphone. Rien à installer. · téléphone en mode caméra, anneaux |
+| 11,5–16,5 s | Étape 3 | violet | ③ **JOUE AU JEU / DU COMMERCE.** · Chaque commerce a son jeu. · cartes Quiz + bonus, Roue, Tombola, Vote |
+| 16,5–20,5 s | Le quiz | encre | **5 QUESTIONS.** · Le vrai quiz du festival. · quiz NDS 3/5, « Juillet » coché |
+| 20,5–25 s | Étape 4 | or | ④ **TENTE DE / GAGNER.** · Bons d'achat, lots, places de concert. · ticket PQ-2026-4128 « Tirage au sort » |
+| 25–29,5 s | Astuce | teal | ASTUCE · **FLOWIN SUR TON / ÉCRAN D'ACCUEIL.** · Pour rejouer en un geste. |
+| 29,5–34 s | Au festival aussi | encre | **AU FESTIVAL / AUSSI.** · Culture et commerces : un seul jeu. · plan : boutiques puis scène du festival |
+| 34–38,5 s | Fin (4,5 s) | encre | **Joue chez tes commerçants.** · QR réel · Flashez. Jouez. Gagnez. · logo Flowin |
 
 Vérifié dans le code (`admin/`) :
 - Jeux : parcours `quiz`, `spin` (roue), `tombola`, `vote` dans `app/parcours/` ; questions bonus du quiz (`QuizClient.tsx`, écran `bonus`).
-- Ticket : `generateTicket` (`lib/ticket`), ticket de l'histoire commune `PQ-2026-4128` (`src/cast.js`), « Tirage au sort » sans date.
-- Écran d'accueil : manifeste PWA (`public/manifest.json`, `display: standalone`, déclaré dans `app/layout.tsx`). L'ajout passe par le menu du navigateur ; il n'y a pas de bouton d'installation dans l'appli.
-- QR de fin : même cible que la V3, `/parcours/quiz?ev=ev-demo-quiz&preview=1` (aperçu : aucun joueur ni participation enregistré, `lib/parcours.ts` `estApercu`). `/nds?preview=1` ouvre la page d'accueil NDS, pas le jeu : non retenu.
-
-Écarts avec le scénario dicté, à valider :
-- « Pour chaque achat fait, joue » → **« À chaque passage, joue »** : l'accueil du jeu affiche « Jeu gratuit · Sans achat obligatoire » ; afficher une obligation d'achat contredirait l'appli (et la règle des jeux-concours).
-- « Enregistrer l'application en moins de 5 secondes » → **« Ajoute Flowin à ton écran d'accueil »**, sans chronomètre : le manifeste existe mais aucune mesure ni bouton d'installation ne permet d'affirmer une durée.
-- L'écran bonus montre une question d'exemple (« Comment as-tu connu le festival ? ») : la banque bonus réelle dépend de chaque opération.
-- Zones sûres : 0 avertissement (contrôle à 3 instants de chaque scène ; pour les mots géants, le haut visible est la hauteur des capitales).
+- Pas de condition d'achat : l'accueil des jeux affiche « sans achat obligatoire » (`QuizClient.tsx`, `SpinClient.tsx`, `TombolaClient.tsx`). Aucun cumul de tickets entre commerces n'est promis, aucune durée n'est affichée.
+- Lots : **places de concert** attestées pour NDS (`NDS2026Client.tsx` : lot par défaut « 3 places pour ton prochain concert », message de partage « tente de gagner des places de concert ») ; **bons d'achat** : lot offert par le commerçant à l'inscription (`app/rejoindre/[se]/RejoindreClient.tsx`, exemple « 1 bon d'achat »), lot de l'histoire commune « Bon d'achat 20 € » (`src/cast.js`). D'où « Bons d'achat, lots, places de concert. » La base n'a pas pu être interrogée (accès refusé au connecteur) : le contrôle porte sur le code.
+- Ticket : `generateTicket` (`lib/ticket`), numéro de l'histoire commune `PQ-2026-4128`, « Tirage au sort » sans date.
+- Écran d'accueil : manifeste PWA (`public/manifest.json`, `display: standalone`, `app/layout.tsx`). L'ajout passe par le menu du navigateur ; pas de bouton d'installation dans l'appli, donc pas de durée affichée.
+- QR de fin : même cible que la V3, `/parcours/quiz?ev=ev-demo-quiz&preview=1` (aperçu : rien n'est enregistré, `lib/parcours.ts` `estApercu`).
+- Zones sûres : 0 avertissement (contrôle à 3 instants de chaque scène).
 
 ## V3 — six coupes : déroulé complet, arguments, « vous » pour les commerçants
 

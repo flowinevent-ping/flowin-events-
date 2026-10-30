@@ -12,7 +12,7 @@ const lire = p => readFileSync(join(ici, p), 'utf8')
 // Même cible que la V3 : ?preview=1 n'écrit aucun joueur ni participation
 // (lib/parcours.ts estApercu) ; scanner ne crée pas de compte.
 export const VIDEOS_H = [
-  { id: 'participants-h', src: 'src/h/participants-h.js', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1', eyebrow: 'ANIMATION EXPLICATIVE · 40 S · 9:16' },
+  { id: 'participants-h', src: 'src/h/participants-h.js', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1', eyebrow: 'ANIMATION EXPLICATIVE · 38 S · 9:16' },
 ]
 
 const polices = ['500', '700', '800'].map(w => {
@@ -64,7 +64,7 @@ li.on .tc{color:var(--mag)}
 for (const v of VIDEOS_H) {
   const html = `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Flowin — participants (style H)</title>
+<title>Comment on joue avec Flowin</title>
 <style>${css}</style></head>
 <body>
 <div id="wrap">

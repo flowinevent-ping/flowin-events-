@@ -13,7 +13,7 @@ Vidéos verticales 1080 × 1920 (30 i/s) pour TikTok, Instagram et Facebook, par
 | `src/cast.js` | L'histoire commune (chiffres, lot, ticket, personnages) et les écrans de l'application redessinés. |
 | `src/decor.js` | Scènes illustrées partagées (la fête, la boutique, le bureau, l'écran de fin). |
 | `src/scenarios/*-15.js`, `*-30.js` | Le découpage de chaque coupe : accroche, scènes, durées, légendes, fin. V1 dans `src/scenarios/v1/` (référence, non construite ; anciens prénoms). |
-| `participants-h.html`, `.mp4` | **Style H** (« typo + vrais écrans », 41 s) : page storyboard (lecteur + scènes horodatées cliquables). Sources `src/h/engine-h.js` et `src/h/participants-h.js`, assemblées par `build-h.mjs`. |
+| `participants-h.html`, `.mp4` | **Style H** (« typo + vrais écrans », 38,5 s, guide du joueur en 4 étapes) : page storyboard (lecteur + scènes horodatées cliquables). Sources `src/h/engine-h.js` et `src/h/participants-h.js`, assemblées par `build-h.mjs`. |
 | `build.mjs` | Assemble les pages HTML : polices Manrope en base64 et QR code de fin intégrés, sans ressource externe. |
 | `render.mjs` | Planches, lecture des QR, puis export MP4 (Playwright à 30 i/s image par image, puis ffmpeg). |
 

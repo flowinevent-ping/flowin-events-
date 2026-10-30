@@ -26,7 +26,7 @@
       svg.appendChild(el)
       var w = el.getComputedTextLength()
       svg.removeChild(el)
-      tailles[m] = Math.min(150, Math.floor(100 * 420 / w))
+      tailles[m] = Math.min(130, Math.floor(100 * 420 / w))
     })
   }
 
