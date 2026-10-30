@@ -2,6 +2,48 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
+## Style H pastel — deux vidéos participants (commerces 45 s, festival 33 s)
+
+Retour de Romain sur le guide en 4 étapes : il manquait l'introduction (« c'est quoi Flowin ? »), le festival était mélangé aux commerces, le rythme était trop rapide, et il manquait la carte des stations, les deux issues (gain immédiat ou tirage), le retrait du cadeau et les super events. Couleurs jugées trop agressives. D'où **deux vidéos séparées**, même moteur H (mot géant Manrope 800, un seul objet réel, anneau de flash, désormais encre sur pastel), **palette pastel** : jaune beurre, rose pâle, menthe, bleu ciel, lilas, texte encre, magenta seulement en accent (« in » du logo, fin, piste). Environ 4,5 s par scène, une idée par scène.
+
+Pages storyboard : `participants-commerces-h.html`, `participants-festival-h.html`. Vidéos 1080 × 1920, 30 i/s : `participants-commerces-h.mp4` (45 s), `participants-festival-h.mp4` (33 s). Planches : `planches/participants-commerces-h.png`, `planches/participants-festival-h.png` (et `-toutes-scenes`). Briques communes : `src/h/kit-h.js`.
+
+### Vidéo A — Flowin chez tes commerçants (45 s, étapes 1 → 5)
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–4,5 s | Intro | beurre | **C'EST QUOI / FLOWIN ?** · Des jeux gratuits chez tes commerçants. Des cadeaux à gagner. · logo |
+| 4,5–9 s | ① Carte | bleu ciel | **TROUVE LES / STATIONS DE JEU.** · Sur la carte Flowin, près de chez toi. · plan, stations qui apparaissent |
+| 9–13 s | ② Entre | rose | **ENTRE CHEZ TON / COMMERÇANT.** · Repère le sticker en caisse. · vitrine + sticker |
+| 13–17 s | ③ Flashe | menthe | **FLASHE / LE QR.** · Avec ton téléphone. Rien à installer. |
+| 17–23 s | ④ Joue | lilas | **JOUE.** · Quiz, roue, tombola, vote : chaque commerce a son jeu. · 4 cartes puis le quiz (3/5, « Juillet ») |
+| 23–27,5 s | Gain immédiat | beurre | **GAGNÉ TOUT / DE SUITE !** · Selon le jeu : lot gagné sur place… · écran « Tu as gagné ! », « Voir mon billet » |
+| 27,5–32 s | Tirage | bleu ciel | **OU TU ES DANS / LE TIRAGE.** · …ou un ticket pour le tirage au sort. · ticket PQ-2026-4128 |
+| 32–36,5 s | ⑤ Retrait | menthe | **RÉCUPÈRE / TON CADEAU.** · Montre ton billet en boutique. · billet « Billet valable » → « Retrait validé » |
+| 36,5–41 s | Super events | lilas | **DÉCOUVRE LES / SUPER EVENTS.** · Plusieurs commerces, un même jeu. Des cadeaux chez chacun. |
+| 41–45 s | Fin | beurre | **Joue chez tes commerçants.** · QR démo · Flashez. Jouez. Gagnez. · logo |
+
+### Vidéo B — Flowin à ton festival (33 s)
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–4,5 s | Intro | lilas | **TON FESTIVAL / JOUE AVEC / FLOWIN.** · Flowin : des jeux gratuits pour gagner des cadeaux. · sticker |
+| 4,5–9 s | Festival | bleu ciel | **RENDS-TOI / AU FESTIVAL.** · Regarde si Flowin y est. · fanions, scène, public (silhouettes sans visage) |
+| 9–13,5 s | Repère | rose | **REPÈRE / FLOWIN.** · Des stations sur le site et chez les commerçants partenaires. · sticker + Caisses, Bars, Stands, Commerces |
+| 13,5–18,5 s | Piste | menthe | **SUIS LA / PISTE.** · Le plan, station par station. · piste pointillée entre stations numérotées et la scène |
+| 18,5–23,5 s | Joue | beurre | **JOUE ET / GAGNE.** · Le quiz du festival, sur ton téléphone. · quiz NDS 3/5 |
+| 23,5–28,5 s | Lots | rose | **À GAGNER :** · Places de concert · Cadeaux · Goodies · Cadeaux chez tes commerçants |
+| 28,5–33 s | Fin | lilas | **Rends-toi à ton festival.** · QR démo · Flashez. Jouez. Gagnez. · logo |
+
+### Vérifié dans le code (`admin/`)
+- **Carte des stations** : l'écran `carte` du parcours NDS (`NDS2026Client.tsx`) montre les 9 stations numérotées du festival (Caisses 1–3, Bars 1–2, Brigade Verte 1–3…, positions réelles) et les commerces partenaires (vue `v_nds_commerces_carte`) ; la page super event `/se/[se]` a sa carte (`SuperEventMap.tsx`). `public/carte.html` est une carte de visite, pas une carte des stations.
+- **Gain immédiat ou tirage** : roue (`SpinClient.tsx`) : chaque case a un mode `immediat`, `tirage` ou `voisin` (« Tu as gagné ! », « Ce lot est un bon inscrit pour un tirage au sort ») ; quiz : sans faute = ticket pour le tirage, et règle de gain immédiat `appliquerRegleGain` (`lib/parcours.ts`) avec « Voir mon billet » ; tombola : inscription au tirage. D'où « Selon le jeu ».
+- **Retrait** : `public/lot.html` (billet ouvert par son QR) : « Commerce partenaire », « Billet valable », « Bon cadeau », « N° de billet », « Présentez ce billet au commerce » ; le commerçant saisit son **code professionnel** puis « Valider le retrait du lot » → « Retrait validé, le lot peut être remis au client ». Un billet ne sert qu'une fois.
+- **Super events** : relient plusieurs commerces (stations) autour d'un même jeu (`/se/[se]`, `lib/superEventLots.ts`). « Plus de cadeaux » n'est pas défendable tel quel : écrit « Des cadeaux chez chacun ».
+- **Gratuit** : les jeux affichent « sans achat obligatoire ». Aucune condition d'achat, aucun cumul de tickets promis, aucune durée affichée.
+- **Lots festival** : places de concert attestées (`NDS2026Client.tsx`, « 3 places pour ton prochain concert »). **Goodies** et « cadeaux » : non trouvés dans le code, gardés car ce sont les lots annoncés par Romain.
+- QR de fin : `/parcours/quiz?ev=ev-demo-quiz&preview=1` (aperçu sans écriture, lu par jsQR sur les deux vidéos). Zones sûres : 0 avertissement.
+
+La vidéo `participants-h` (guide en 4 étapes, couleurs vives) reste dans le dépôt pour mémoire ; elle est remplacée par ces deux vidéos.
+
 ## Style H — « typo + vrais écrans » : participants, le guide du joueur (38,5 s)
 
 Style validé par Romain après les maquettes A → H : **pas de personnages dessinés**. Un aplat plein écran par scène (magenta, encre, violet, or, teal), un mot géant en Manrope 800 (−0,04 em) dans la zone sûre, un seul objet réel par scène (sticker « Station de jeu », téléphone fin avec les vrais écrans du quiz NDS, ticket), et un seul geste graphique : l'**anneau de flash** blanc qui ouvre chaque scène depuis l'objet de la précédente.

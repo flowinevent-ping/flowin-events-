@@ -4,7 +4,8 @@
    Zones sûres (9:16, 540 x 960) : haut 10 %, bas 20 %, droite 15 %. */
 (function () {
   var W = 540, H = 960, SAFE = { top: 96, bottom: 768, right: 459, left: 24 }
-  var C = { ink: '#150C1C', mag: '#E0218A', gold: '#F5A100', violet: '#7C2D92', teal: '#00B4A0', hero: '#6e2785', white: '#FFFFFF' }
+  var C = { ink: '#150C1C', mag: '#E0218A', gold: '#F5A100', violet: '#7C2D92', teal: '#00B4A0', hero: '#6e2785', white: '#FFFFFF',
+    butter: '#FEFBA8', pink: '#F9C9DF', mint: '#B6EBDF', sky: '#C4E2F8', lilac: '#DCCDF4' }
   var uid = 0
   function id(p) { uid++; return p + uid }
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)) }
@@ -49,7 +50,7 @@
       return '<text class="safe" x="' + x + '" y="' + y + '" font-family="Manrope" font-weight="' + (o.w || 700) + '" font-size="' + (o.size || 24) + '" fill="' + (o.fill || '#fff') + '"' +
         (o.anchor ? ' text-anchor="' + o.anchor + '"' : '') + (o.ls ? ' letter-spacing="' + o.ls + '"' : '') + ' opacity="' + (o.op === undefined ? 1 : o.op) + '">' + esc(t) + '</text>'
     },
-    anneau: function (cx, cy, r, op, w) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r.toFixed(1) + '" fill="none" stroke="#fff" stroke-width="' + (w || 3) + '" opacity="' + op.toFixed(3) + '"/>' },
+    anneau: function (cx, cy, r, op, w) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r.toFixed(1) + '" fill="none" stroke="' + (F.ringCol || '#fff') + '" stroke-width="' + (w || 3) + '" opacity="' + op.toFixed(3) + '"/>' },
     // Anneaux qui s ouvrent depuis un point (geste « flash »).
     flash: function (cx, cy, lt, a, n) {
       var g = ''
@@ -214,7 +215,7 @@
 
   window.FLH = {
     start: function (sc) {
-      SC = sc; svgEl = document.getElementById('svg')
+      SC = sc; svgEl = document.getElementById('svg'); F.ringCol = sc.ring || '#fff'
       total = sc.scenes.reduce(function (a, s) { return a + s.dur }, 0)
       if (location.hash === '#record') document.body.className = 'record'
       var mots = []; sc.scenes.forEach(function (s) { (s.mots || []).forEach(function (m) { mots.push(m) }) })

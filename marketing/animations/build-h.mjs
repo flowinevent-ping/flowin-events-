@@ -12,7 +12,9 @@ const lire = p => readFileSync(join(ici, p), 'utf8')
 // Même cible que la V3 : ?preview=1 n'écrit aucun joueur ni participation
 // (lib/parcours.ts estApercu) ; scanner ne crée pas de compte.
 export const VIDEOS_H = [
-  { id: 'participants-h', src: 'src/h/participants-h.js', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1', eyebrow: 'ANIMATION EXPLICATIVE · 38 S · 9:16' },
+  { id: 'participants-h', src: 'src/h/participants-h.js', qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1', eyebrow: 'ANIMATION EXPLICATIVE · 38 S · 9:16', title: 'Comment on joue avec Flowin' },
+  { id: 'participants-commerces-h', src: 'src/h/participants-commerces-h.js', kit: true, qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1', eyebrow: 'ANIMATION EXPLICATIVE · 44 S · 9:16', title: 'Flowin chez tes commerçants' },
+  { id: 'participants-festival-h', src: 'src/h/participants-festival-h.js', kit: true, qr: 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1', eyebrow: 'ANIMATION EXPLICATIVE · 33 S · 9:16', title: 'Flowin à ton festival' },
 ]
 
 const polices = ['500', '700', '800'].map(w => {
@@ -64,7 +66,7 @@ li.on .tc{color:var(--mag)}
 for (const v of VIDEOS_H) {
   const html = `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Comment on joue avec Flowin</title>
+<title>${v.title}</title>
 <style>${css}</style></head>
 <body>
 <div id="wrap">
@@ -81,6 +83,7 @@ for (const v of VIDEOS_H) {
 </div>
 <script>window.QR=${JSON.stringify(qrPath(v.qr))}</script>
 <script>${lire('src/h/engine-h.js')}</script>
+${v.kit ? `<script>${lire('src/h/kit-h.js')}</script>` : ''}
 <script>${lire(v.src)}</script>
 <script>
 (function(){
