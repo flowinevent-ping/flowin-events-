@@ -138,5 +138,12 @@
     "qr": "https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1",
     "avertissements": [],
     "erreurs": []
+  },
+  {
+    "id": "s3-v9",
+    "duration": 74,
+    "qr": "https://flowin-events.vercel.app/plaquette-animation-magasin.html#offres",
+    "avertissements": [],
+    "erreurs": []
   }
 ]

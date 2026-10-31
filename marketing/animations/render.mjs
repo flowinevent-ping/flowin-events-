@@ -89,7 +89,7 @@ async function planche(id, toutes) {
 }
 
 async function exporter(id) {
-  const { ctx, page, erreurs } = await ouvrir(id)
+  let { ctx, page, erreurs } = await ouvrir(id)
   const duration = await page.evaluate(() => window.ANIM.duration)
   const n = Math.round(duration * FPS)
   const out = join(ici, `${id}.mp4`)
@@ -98,8 +98,20 @@ async function exporter(id) {
     { stdio: ['pipe', 'inherit', 'inherit'] })
   const fini = new Promise((res, rej) => ff.on('close', c => c === 0 ? res() : rej(new Error('ffmpeg ' + c))))
   for (let i = 0; i < n; i++) {
-    await page.evaluate(x => window.ANIM.seek(x), i / FPS)
-    const buf = await page.screenshot({ type: 'png' })
+    let buf
+    // Le rendu est déterministe : si l'onglet plante, on le rouvre et on reprend à l'image i.
+    for (let essai = 0; ; essai++) {
+      try {
+        await page.evaluate(x => window.ANIM.seek(x), i / FPS)
+        buf = await page.screenshot({ type: 'png' })
+        break
+      } catch (e) {
+        if (essai >= 3) throw e
+        console.log(`\n  ${id} : onglet relancé à l'image ${i} (${e.message.split('\n')[0]})`)
+        try { await ctx.close() } catch (e2) {}
+        ;({ ctx, page, erreurs } = await ouvrir(id))
+      }
+    }
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r))
     if (i % 150 === 0) process.stdout.write(`  ${id} ${i}/${n}\r`)
   }
