@@ -1,13 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, cleDejaJoue, CONSENTEMENT_VERSION } from '@/lib/parcours'
 import { buildInviteLink } from '@/lib/parrainage'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, doitRefuserDigital, ParcoursConsentement, ERREUR_CONSENTEMENT, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData } from '@/lib/parcours'
@@ -39,7 +39,11 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     : (cfg.voteItems ?? cfg.comediens ?? cfg.standupComediens ?? [])) as VoteItem[]
   const mode = (cfg.voteMode ?? 'stars') as string
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
-  const lsKey = `flowin_played_${evId}`
+  /* Cle datee (jour local) + QR : « Reviens demain ! » ne bloque plus a vie. */
+  const lsKey = cleDejaJoue(evId)
+  /* Consentement : deux cases NON cochees par defaut (lot QR, 31/10). */
+  const [consentJeu, setConsentJeu] = useState(false)
+  const [consentAnim, setConsentAnim] = useState(false)
   const theme = resolveParcoursTheme('vote', ev?.cfg)
 
   const [screen, setScreen] = useState<Screen>('landing')
@@ -64,7 +68,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
      paramètre) ne doit pas pouvoir revoter sans flasher le vrai QR. */
   const lsCheck = () => {
     try {
-      if (isDigitalLinkSource() && getJoueurLocal()) { setScreen('refusdigital'); return true }
+      if (doitRefuserDigital(evId)) { setScreen('refusdigital'); return true }
       const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already'); return true }
     } catch {}
     return false
@@ -88,6 +92,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
       setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
+      if (res.digitalRefuse) { setScreen('refusdigital'); return }
       if (res.duplicate) { setScreen('already'); return }
       setTicket(res.ticket); setScreen('ticket')
     })()
@@ -99,6 +104,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     if (!form.nom.trim()) errs.nom = 'Obligatoire'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     if (form.tel.replace(/\s/g,'').length < 8) errs.tel = 'Invalide'
+    if (!consentJeu) errs.consentement = ERREUR_CONSENTEMENT
     setErrors(errs); if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('VS')
@@ -106,9 +112,10 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
     // (participations.bonus_answers) pour exploitation dans le rapport.
     const voteData: Record<string, unknown> = { vote_mode: mode }
     items.forEach(it => { voteData[`vote_${it.id}`] = votes[it.id] ?? null })
-    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS',bonus_reponses:voteData })
+    const res = await writeJoueur({ email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,events:[evId],ticket_code:tc,source:'vote',prefix:'VS',bonus_reponses:voteData,optin:consentAnim,optin_version:CONSENTEMENT_VERSION })
     setGain(res.gain ?? null)
     setSubmitting(false)
+    if (res.digitalRefuse) { setScreen('refusdigital'); return }
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
     if (!res.success) { if (res.error) console.error('[vote] enregistrement Supabase échoué:', res.error); setErrors({ email: 'Enregistrement impossible, réessaie.' }); return }
     setTicket(res.ticket); setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
@@ -260,7 +267,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
           <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
           <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
           <ParcoursChampsStandard form={form} setForm={setForm} />
-          <div className="rgpd"><div className="rgpd-check" /><div>{RGPD_TEXT}</div></div>
+          <ParcoursConsentement jeu={consentJeu} animations={consentAnim} onJeu={setConsentJeu} onAnimations={setConsentAnim} erreur={consentJeu ? undefined : errors.consentement} />
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'Valider →'}</button>
         </div>
       )}
@@ -279,7 +286,7 @@ export default function VoteClient({ ev, lots, partenaires, evId }: Props) {
 
       {(screen === 'ticket' || screen === 'already') && (
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <div style={{ fontSize:22,fontWeight:900,marginBottom:20 }}>{screen==='ticket'?'Vote enregistré !':'Déjà voté !'}</div>
+          <div style={{ fontSize:22,fontWeight:900,marginBottom:20 }}>{screen==='ticket'?'Vote enregistré !':'Reviens demain !'}</div>
           <div className="card" style={{ borderTop:`4px solid ${c}` }}>
             <div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>
             {tirageText && <div style={{ fontSize:11,color:'rgba(255,255,255,.45)' }}>{tirageText}</div>}

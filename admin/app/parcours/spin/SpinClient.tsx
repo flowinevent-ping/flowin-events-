@@ -1,13 +1,13 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { writeJoueur, parcoursCSS, getJoueurLocal, claimJoueur, cleDejaJoue, CONSENTEMENT_VERSION } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import { buildInviteLink, getParrainageRecu } from '@/lib/parrainage'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, doitRefuserDigital, ParcoursConsentement, ERREUR_CONSENTEMENT, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { trackVisite } from '@/lib/track'
 import { generateTicket } from '@/lib/ticket'
@@ -31,7 +31,11 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const nom = ev?.nom ?? 'Roue de la fortune'
   const segments = (cfg.spinSegments ?? []) as Segment[]
   const tirageText = (cfg.tirageDate as string) ? `Tirage ${cfg.tirageDate}` : ''
-  const lsKey = `flowin_played_${evId}`
+  /* Cle datee (jour local) + QR : « Reviens demain ! » ne bloque plus a vie. */
+  const lsKey = cleDejaJoue(evId)
+  /* Consentement : deux cases NON cochees par defaut (lot QR, 31/10). */
+  const [consentJeu, setConsentJeu] = useState(false)
+  const [consentAnim, setConsentAnim] = useState(false)
   const isBtob = (ev?.client_type === 'btob')
   const SECTEURS = ['Commerçant','Restaurateur','Exposant','Organisateur','Entreprise','Association','Collectivité','Autre']
   const theme = resolveParcoursTheme('spin', ev?.cfg)
@@ -52,14 +56,13 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const confettiRef = useRef<HTMLCanvasElement>(null)
 
-  /* Accès roulette réservé au QR physique (Romain, 28/10) : contrairement à
-     l'anti-fraude générique (QuizClient), qui ne bloque que le REJEU d'un
-     joueur déjà reconnu, ici tout arrivant via un lien réseaux/digital
-     (?source=reseaux-*) est bloqué, même pour une première visite — la roue
-     ne doit tourner qu'après un flash QR sur place. */
+  /* Lot QR (31/10, decision client) : la roue suit la regle commune a tous
+     les jeux -- un QR digital (?source=reseaux-*) sert UNE fois par compte
+     (il bloquait toute visite digitale depuis le 28/10), un QR physique
+     1 fois par jour. */
   useEffect(() => {
     try {
-      if (isDigitalLinkSource()) { setScreen('refusdigital'); return }
+      if (doitRefuserDigital(evId)) { setScreen('refusdigital'); return }
       const s = localStorage.getItem(lsKey); if (s) { setExistingTicket(s); setScreen('already') }
     } catch {}
   }, [lsKey])
@@ -81,6 +84,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
+      if (res.digitalRefuse) { setScreen('refusdigital'); return }
       if (res.duplicate) { setScreen('already'); return }
       setTicket(res.ticket); setScreen('ticket')
     })()
@@ -215,6 +219,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     if (form.tel.replace(/\s/g,'').length < 8) errs.tel = 'Invalide'
     if (isBtob && !form.secteur) errs.secteur = 'Obligatoire'
+    if (!consentJeu) errs.consentement = ERREUR_CONSENTEMENT
     setErrors(errs); if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('SP')
@@ -226,10 +231,12 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
       secteur: isBtob ? (form.secteur || undefined) : undefined,
       client_type: isBtob ? 'btob' : undefined,
       lot_gagne: (resultSeg && !resultSeg.perdant) ? resultSeg.label : undefined,
-      events:[evId], ticket_code:tc, source:'spin', prefix:'SP'
+      events:[evId], ticket_code:tc, source:'spin', prefix:'SP',
+      optin: consentAnim, optin_version: CONSENTEMENT_VERSION,
     })
     setGain(res.gain ?? null)
     setSubmitting(false)
+    if (res.digitalRefuse) { setScreen('refusdigital'); return }
     if (res.duplicate) { setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('already'); return }
     if(!res.success){if(res.error)console.error('[spin] Supabase échoué:',res.error);return}
     setTicket(res.ticket); setExistingTicket(res.ticket); try{localStorage.setItem(lsKey,res.ticket)}catch{}; setScreen('ticket')
@@ -394,7 +401,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           ) : (
             <ParcoursChampsStandard form={form} setForm={setForm} />
           )}
-          <div className="rgpd"><div className="rgpd-check" /><div>{RGPD_TEXT}</div></div>
+          <ParcoursConsentement jeu={consentJeu} animations={consentAnim} onJeu={setConsentJeu} onAnimations={setConsentAnim} erreur={consentJeu ? undefined : errors.consentement} />
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'Valider →'}</button>
         </div>
       )}
@@ -429,7 +436,7 @@ export default function SpinClient({ ev, lots, partenaires, evId }: Props) {
           </div>
           {/* Carte teal */}
           <div style={{ position:'relative',zIndex:10,width:'88%',maxWidth:360,borderRadius:18,overflow:'hidden',border:'2px solid #14B8A6',boxShadow:'0 0 40px rgba(20,184,166,.5),0 12px 48px rgba(0,0,0,.6)',background:'#071620' }}>
-            <div style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',padding:'12px 0',fontSize:14,fontWeight:900,letterSpacing:3,color:'#fff' }}>{won ? '✦ FÉLICITATIONS ✦' : '✦ MERCI D’AVOIR JOUÉ ✦'}</div>
+            <div style={{ background:'linear-gradient(180deg,#16C8B0,#0E9E8C)',padding:'12px 0',fontSize:14,fontWeight:900,letterSpacing:3,color:'#fff' }}>{won ? '✦ FÉLICITATIONS ✦' : screen === 'already' ? '✦ REVIENS DEMAIN ! ✦' : '✦ MERCI D’AVOIR JOUÉ ✦'}</div>
             <div style={{ padding:'22px 20px 26px' }}>
               {won && <div style={{ fontSize:11,fontWeight:800,letterSpacing:2,color:'#2DD4BF',marginBottom:4 }}>VOUS AVEZ GAGNÉ</div>}
               <div style={{ fontSize:26,fontWeight:900,color:'#fff',marginBottom:18,textTransform:'uppercase' }}>{form.prenom||'Vous'}</div>

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur } from '@/lib/parcours'
+import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur, cleDejaJoue, CONSENTEMENT_VERSION } from '@/lib/parcours'
+import { ParcoursRefusDigital, doitRefuserDigital, ParcoursConsentement, ERREUR_CONSENTEMENT, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import { NDS_JEU_FOND, NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { ParcoursLogo, FlowinBadge } from '@/components/parcours/ParcoursBranding'
@@ -10,7 +11,7 @@ import { generateTicket } from '@/lib/ticket'
 import type { ParcoursPageData, QuizQuestion } from '@/lib/parcours'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
 
-type Screen = 'landing' | 'wait' | 'vote' | 'form' | 'ticket' | 'already'
+type Screen = 'landing' | 'wait' | 'vote' | 'form' | 'ticket' | 'already' | 'refusdigital'
 interface Props extends ParcoursPageData { evId: string }
 
 export default function QuizmasterClient({ ev, lots, partenaires, banques, evId }: Props) {
@@ -38,9 +39,13 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
   const [submitting, setSubmitting] = useState(false)
   const [ticket, setTicket] = useState('')
   const [existingTicket, setExistingTicket] = useState('')
-  const lsKey = `flowin_played_${evId}`
+  /* Cle datee (jour local) + QR : « Reviens demain ! » ne bloque plus a vie. */
+  const lsKey = cleDejaJoue(evId)
+  /* Consentement : deux cases NON cochees par defaut (lot QR, 31/10). */
+  const [consentJeu, setConsentJeu] = useState(false)
+  const [consentAnim, setConsentAnim] = useState(false)
 
-  useEffect(()=>{ try{const s=localStorage.getItem(lsKey);if(s){setExistingTicket(s);setScreen('already')}}catch{} },[lsKey])
+  useEffect(()=>{ try{if(doitRefuserDigital(evId)){setScreen('refusdigital');return}const s=localStorage.getItem(lsKey);if(s){setExistingTicket(s);setScreen('already')}}catch{} },[lsKey, evId])
 
   function handleVote(idx: number){
     if(selected!==null)return
@@ -66,6 +71,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
       setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
+      if (res.digitalRefuse) { setScreen('refusdigital'); return }
       if (res.duplicate) { setScreen('already'); return }
       setTicket(res.ticket); setScreen('ticket')
     })()
@@ -77,12 +83,14 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
     if(!form.nom.trim())errs.nom='Obligatoire'
     if(!form.email.includes('@'))errs.email='Email invalide'
     if(form.tel.replace(/\s/g,'').length<8)errs.tel='Invalide'
+    if(!consentJeu)errs.consentement=ERREUR_CONSENTEMENT
     setErrors(errs);if(Object.keys(errs).length)return
     setSubmitting(true)
     const tc=generateTicket('QM')
-    const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizmaster',prefix:'QM'})
+    const res=await writeJoueur({email:form.email,prenom:form.prenom,nom:form.nom,tel:form.tel,code_postal:form.cp,genre:form.genre,age_tranche:form.age,decouverte:form.source.replace(/^[^ ]+ /,'')||undefined,score_moy:`${score}/${questions.length}`,events:[evId],ticket_code:tc,source:'quizmaster',prefix:'QM',optin:consentAnim,optin_version:CONSENTEMENT_VERSION})
     setGain(res.gain ?? null)
     setSubmitting(false)
+    if(res.digitalRefuse){setScreen('refusdigital');return}
     if(res.duplicate){setExistingTicket(res.ticket);try{localStorage.setItem(lsKey,res.ticket)}catch{};setScreen('already');return}
     if(!res.success){if(res.error)console.error('[quizmaster] Supabase échoué:',res.error);return}
     setTicket(res.ticket);setExistingTicket(res.ticket);try{localStorage.setItem(lsKey,res.ticket)}catch{};setScreen('ticket')
@@ -109,7 +117,7 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
 
   return (
     <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background: NDS_JEU_FOND, color: '#fff', fontFamily: NDS_JEU_POLICE }}>
-      <style dangerouslySetInnerHTML={{ __html: parcoursCSS(c)+'.opt{font-size:18px}.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}' }} />
+      <style dangerouslySetInnerHTML={{ __html: parcoursCSS(c)+PARCOURS_HERO_CSS+'.opt{font-size:18px}.opt.correct{background:rgba(22,163,74,.18);border-color:#16a34a}.opt.wrong{background:rgba(239,68,68,.18);border-color:#ef4444}.opt.reveal{background:rgba(22,163,74,.12);border-color:#16a34a88}' }} />
 
       {screen==='landing'&&(
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
@@ -130,12 +138,13 @@ export default function QuizmasterClient({ ev, lots, partenaires, banques, evId 
           <div style={{marginBottom:12}}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />{errors.email&&<div className="err">{errors.email}</div>}</div>
           <div style={{marginBottom:12}}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e=>setForm(f=>({...f,tel:e.target.value}))} />{errors.tel&&<div className="err">{errors.tel}</div>}</div>
           <ParcoursChampsStandard form={form} setForm={setForm} />
-          <div className="rgpd"><div className="rgpd-check">✓</div><div>J'accepte d'être recontacté(e). Données jamais cédées.</div></div>
+          <ParcoursConsentement jeu={consentJeu} animations={consentAnim} onJeu={setConsentJeu} onAnimations={setConsentAnim} erreur={consentJeu ? undefined : errors.consentement} />
           <button className="btn" style={{marginTop:16}} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'✓ Valider →'}</button>
         </div>
       )}
 
-      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Déjà joué !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
+      {(screen==='ticket'||screen==='already')&&(<div className="screen" style={{justifyContent:'center',textAlign:'center'}}><div style={{fontSize:48,marginBottom:12}}>{screen==='ticket'?'🎉':'✅'}</div><div style={{fontSize:22,fontWeight:900,marginBottom:20}}>{screen==='ticket'?`Score : ${score}/${questions.length}`:'Reviens demain !'}</div><div className="card" style={{borderTop:`4px solid ${c}`}}><div style={{fontSize:32,marginBottom:8}}>🎟️</div><div className="ticket-code">{screen==='ticket'?ticket:existingTicket}</div>{tirageText&&<div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>🗓️ {tirageText}</div>}</div><ParcoursOutro superEventId={ev?.super_event_id} gain={gain} /></div>)}
+      {screen==='refusdigital'&&(<div className="pc-stage"><ParcoursRefusDigital superEventId={ev?.super_event_id} /></div>)}
     </div>
   )
 }
