@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bon de commande Flowin Animation</title>
+<meta name="description" content="Bon de commande en ligne Flowin Animation magasin : formule, signature électronique, paiement par virement ou prélèvement SEPA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#150C1C; --ink2:#3a2f45; --muted:#655a70; --faint:#958aa0;
+    --magenta:#E0218A; --gold:#F5A100; --teal:#00B4A0; --tealD:#00796D; --orange:#EC5B45;
+    --butter:#FEFBA8; --pink:#F9C9DF; --mint:#B6EBDF; --sky:#C4E2F8;
+    --paper:#FFFBF2; --line:#ece6dc; --white:#fff; --err:#C8243B; --hl:#FFF6D6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);font-family:'Manrope',system-ui,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font-family:inherit}
+
+  .flowin-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:#0F172A;color:#fff;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;position:sticky;top:0;z-index:10000;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  .flowin-topbar a{color:#fff;text-decoration:none;font-size:13px;font-weight:700;opacity:.85;white-space:nowrap}
+  .flowin-topbar .flowin-topbar-brand{font-size:14px;font-weight:800;white-space:nowrap}
+  .flowin-topbar .flowin-topbar-brand b{background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .wrap{max-width:880px;margin:0 auto;padding:24px 16px 60px}
+  .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(21,12,28,.35)}
+
+  /* En-tête : signature de marque */
+  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--butter);overflow:hidden}
+  .head svg.paint{position:absolute;left:170px;bottom:-60px;width:190px;height:190px;pointer-events:none;opacity:.95}
+  .brand-sig{display:flex;flex-direction:column;align-items:flex-start;position:relative;z-index:1}
+  .logo{font-weight:900;letter-spacing:-.03em;line-height:1;font-size:46px;color:var(--ink)}
+  .logo em{font-style:normal;background:linear-gradient(120deg,var(--magenta),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ss-eyebrow{font-size:11px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);margin-top:10px}
+  .ss-pill{display:inline-block;margin-top:8px;background:linear-gradient(135deg,var(--gold),#EC5B45);color:#fff;font-weight:800;font-size:12.5px;padding:7px 18px;border-radius:100px}
+  .doc-meta{position:relative;z-index:1;text-align:right}
+  .doc-type{font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1.05}
+  .doc-sub{font-size:13px;font-weight:700;color:var(--ink2);margin-top:4px}
+  .doc-num{font-size:12.5px;color:var(--muted);margin-top:10px;font-weight:600}
+  .doc-num b{color:var(--ink)}
+
+  .body{padding:26px 32px 30px}
+  .sec{margin-top:28px}
+  .sec:first-child{margin-top:0}
+  .sec-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .sec-h .n{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
+  .sec-h h2{font-size:18px;font-weight:900;letter-spacing:-.01em}
+  .hint{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.5}
+
+  .parties{display:grid;grid-template-columns:1fr 1.5fr;gap:16px}
+  .party{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#FFFDF8}
+  .party .ttl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--tealD);margin-bottom:8px}
+  .party .nm{font-size:15px;font-weight:900}
+  .party .ln{font-size:12px;color:var(--muted);line-height:1.6;font-weight:600}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+  .grid .full{grid-column:1 / -1}
+  .f label{display:block;font-size:12px;font-weight:800;color:var(--ink2);margin-bottom:5px}
+  .f label i{font-style:normal;color:var(--magenta)}
+  .f label small{font-weight:600;color:var(--faint)}
+  .f input,.f select{width:100%;font-size:15px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;outline:none;transition:border-color .15s}
+  .f input:focus,.f select:focus{border-color:var(--ink)}
+  .f.err input{border-color:var(--err);background:#fff6f7}
+  .f .em{display:none;font-size:11.5px;color:var(--err);font-weight:700;margin-top:4px}
+  .f.err .em{display:block}
+  .row2{display:grid;grid-template-columns:110px 1fr;gap:10px}
+
+  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #d6cdbf;border-radius:14px;padding:12px 14px;cursor:pointer;background:#FFFDF8}
+  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#f4efe6;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
+  .logo-drop .prev img{max-width:100%;max-height:100%;display:block}
+  .logo-drop b{display:block;font-size:13.5px;font-weight:800}
+  .logo-drop span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+  .logo-drop input{display:none}
+
+  /* Cartes de choix */
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choice{position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 16px 14px;cursor:pointer;background:#fff;transition:border-color .15s,box-shadow .15s;text-align:left;width:100%;color:var(--ink)}
+  .choice:hover{border-color:#cfc6b8}
+  .choice.sel{border-color:var(--ink);box-shadow:0 10px 26px -16px rgba(21,12,28,.55)}
+  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #cfc6b8}
+  .choice.sel .ck{border-color:var(--ink);background:var(--ink)}
+  .choice.sel .ck:after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .choice .cn{font-size:16px;font-weight:900;padding-right:28px}
+  .choice .cd{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.45}
+  .choice .cp{font-size:20px;font-weight:900;margin-top:10px;letter-spacing:-.01em}
+  .choice .cp small{font-size:11.5px;color:var(--muted);font-weight:800}
+  .choice.disabled{opacity:.6;cursor:not-allowed;background:#faf8f4}
+  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--butter);color:#7a5b00;border-radius:100px;padding:3px 9px}
+  .abo{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--ink);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px}
+  .abo b{font-size:16px;font-weight:900;display:block}
+  .abo span{font-size:12.5px;opacity:.75;font-weight:600;display:block;margin-top:3px}
+  .abo .pill{display:inline-block;margin-top:8px;background:linear-gradient(135deg,var(--gold),#EC5B45);font-size:11.5px;font-weight:800;padding:3px 11px;border-radius:100px;opacity:1}
+  .abo .pr{font-size:24px;font-weight:900;white-space:nowrap;text-align:right}
+  .abo .pr small{display:block;font-size:11px;opacity:.7;font-weight:800}
+  .opt-qty{display:none;align-items:center;gap:10px;margin-top:10px;font-size:12px;font-weight:800;color:var(--ink2)}
+  .choice.sel .opt-qty{display:flex}
+  .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:100px;overflow:hidden;background:#fff}
+  .stepper button{width:34px;height:34px;border:none;background:#f4efe6;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .stepper input{width:44px;text-align:center;border:none;font-size:15px;font-weight:900;outline:none;padding:0;color:var(--ink);background:#fff}
+
+  /* Récapitulatif */
+  table.recap{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.recap th{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line)}
+  table.recap th.r,table.recap td.r{text-align:right;white-space:nowrap}
+  table.recap td{padding:10px;border-bottom:1px solid var(--line);font-weight:600;vertical-align:top}
+  table.recap td small{display:block;color:var(--muted);font-size:11.5px;font-weight:600}
+  .totals{margin:14px 0 0 auto;width:330px;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .trow{display:flex;justify-content:space-between;padding:10px 16px;font-size:13.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line)}
+  .trow b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .trow.ttc{border-bottom:none;background:var(--hl);border-top:1.5px dashed var(--gold)}
+  .trow.ttc span{font-size:15px;font-weight:900;color:var(--ink)}
+  .trow.ttc b{font-size:21px;font-weight:900}
+
+  /* Paiement */
+  .paybox{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#FFFDF8;font-size:13px;color:var(--ink2);font-weight:600;line-height:1.6}
+  .paybox b{color:var(--ink)}
+  .paybox .iban{font-variant-numeric:tabular-nums;letter-spacing:.03em}
+  .chk{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.45;color:var(--ink)}
+  .chk input{width:20px;height:20px;flex:none;accent-color:#E0218A;margin-top:1px}
+  .chk a{color:var(--magenta);font-weight:800}
+  .chk.err{color:var(--err)}
+  .projet{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--pink);color:#8a1150;border-radius:100px;padding:2px 8px;margin-left:4px;vertical-align:1px}
+
+  .sign{border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;background:#FFFDF8}
+  .sign .clock{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:12px}
+  .sign .clock b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--magenta),#B0186C);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(224,33,138,.8)}
+  .btn[disabled]{opacity:.55;cursor:default}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--ink);box-shadow:none}
+  .btn.dark{background:var(--ink);box-shadow:none}
+  .status{font-size:13.5px;font-weight:700;margin-top:12px;min-height:20px}
+  .status.err{color:var(--err)} .status.ok{color:var(--tealD)}
+
+  .legal{padding:14px 32px;background:var(--ink);color:rgba(255,255,255,.78);font-size:10.5px;line-height:1.6}
+  .legal b{color:#fff}
+
+  /* Merci */
+  #merci{display:none}
+  body.done #form{display:none}
+  body.done #merci{display:block}
+  .thanks{text-align:center;padding:10px 0 6px}
+  .thanks h2{font-size:clamp(28px,5vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1.1}
+  .thanks h2 em{font-style:normal;color:var(--magenta)}
+  .thanks p{font-size:15px;color:var(--ink2);font-weight:600;margin-top:10px}
+  .steps{list-style:none;counter-reset:s;margin-top:18px;display:flex;flex-direction:column;gap:10px}
+  .steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#FFFDF8;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .steps li:before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-weight:900;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+  .steps li b{color:var(--ink)}
+  .banner{border-radius:14px;padding:12px 16px;font-size:13.5px;font-weight:700;margin-top:16px;line-height:1.5}
+  .banner.warn{background:var(--butter);color:#6b5000}
+  .banner.info{background:var(--mint);color:#00574f}
+
+  @media (max-width:700px){
+    .wrap{padding:14px 10px 40px}
+    .head{flex-direction:column;align-items:flex-start;padding:22px 18px}
+    .doc-meta{text-align:left}
+    .doc-type{font-size:24px}
+    .body{padding:20px 16px 24px}
+    .parties,.grid,.choices{grid-template-columns:1fr}
+    .grid .full{grid-column:auto}
+    .legal{padding:14px 16px}
+    table.recap{font-size:12.5px}
+    table.recap th,table.recap td{padding:8px 6px}
+    .actions .btn{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="flowin-topbar"><a href="/plaquette-animation-magasin.html#prix" id="topBack">&larr; Plaquette</a><span class="flowin-topbar-brand">Flow<b>in</b></span></div>
+
+<div class="wrap">
+<div class="doc">
+  <div class="head">
+    <svg class="paint" id="headPaint" viewBox="-110 -110 220 220" aria-hidden="true"></svg>
+    <div class="brand-sig">
+      <div class="logo">Flow<em>in</em></div>
+      <div class="ss-eyebrow">Animation</div>
+      <div class="ss-pill">Plug &amp; Play</div>
+    </div>
+    <div class="doc-meta">
+      <div class="doc-type">Bon de commande</div>
+      <div class="doc-sub">Flowin Animation magasin</div>
+      <div class="doc-num">N&deg; <b id="docNum">&mdash;</b><br>Date : <b id="docDate">&mdash;</b></div>
+    </div>
+  </div>
+
+  <!-- ================= FORMULAIRE ================= -->
+  <div class="body" id="form">
+
+    <div class="sec">
+      <div class="parties">
+        <div class="party">
+          <div class="ttl">Prestataire</div>
+          <div class="nm">BAITA EURL &middot; Flowin</div>
+          <div class="ln">40 rue des Arcs, 06140 Vence<br>SIRET 512&nbsp;026&nbsp;907&nbsp;00018<br>TVA FR82&nbsp;512&nbsp;026&nbsp;907<br>04 93 59 91 37 &middot; info@opconsult.co</div>
+        </div>
+        <div class="party" style="background:#fff">
+          <div class="ttl">Votre commande en bref</div>
+          <div class="ln" id="briefLn">Abonnement annuel Flowin Animation, kit digital, 1 boutique.</div>
+          <div class="nm" style="margin-top:6px" id="briefTot">&mdash;</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">1</span><h2>Vos informations</h2></div>
+      <div class="grid">
+        <div class="f full" data-f="raison"><label for="f_raison">Raison sociale <i>*</i></label><input id="f_raison" autocomplete="organization"><div class="em">Indiquez la raison sociale.</div></div>
+        <div class="f" data-f="siret"><label for="f_siret">SIRET <i>*</i> <small>(14 chiffres)</small></label><input id="f_siret" inputmode="numeric" autocomplete="off" placeholder="Votre num&eacute;ro SIRET"><div class="em">Le SIRET compte 14 chiffres.</div></div>
+        <div class="f" data-f="nb"><label for="f_nb">Nombre de boutiques <i>*</i></label>
+          <div class="stepper"><button type="button" id="nbMinus" aria-label="Moins">&minus;</button><input id="f_nb" inputmode="numeric" value="1" aria-label="Nombre de boutiques"><button type="button" id="nbPlus" aria-label="Plus">+</button></div>
+          <div class="em">Au moins une boutique.</div></div>
+        <div class="f full" data-f="adresse"><label for="f_adresse">Adresse <i>*</i></label><input id="f_adresse" autocomplete="street-address"><div class="em">Indiquez l&rsquo;adresse.</div></div>
+        <div class="f full"><div class="row2">
+          <div class="f" data-f="cp" style="margin:0"><label for="f_cp">Code postal <i>*</i></label><input id="f_cp" inputmode="numeric" autocomplete="postal-code" maxlength="5"><div class="em">5 chiffres.</div></div>
+          <div class="f" data-f="ville" style="margin:0"><label for="f_ville">Ville <i>*</i></label><input id="f_ville" autocomplete="address-level2"><div class="em">Indiquez la ville.</div></div>
+        </div></div>
+        <div class="f" data-f="contact"><label for="f_contact">Contact (pr&eacute;nom et nom) <i>*</i></label><input id="f_contact" autocomplete="name"><div class="em">Indiquez le nom du contact.</div></div>
+        <div class="f"><label for="f_fonction">Fonction <small>(facultatif)</small></label><input id="f_fonction" autocomplete="organization-title"></div>
+        <div class="f" data-f="email"><label for="f_email">Email <i>*</i></label><input id="f_email" type="email" inputmode="email" autocomplete="email"><div class="em">Email invalide.</div></div>
+        <div class="f" data-f="tel"><label for="f_tel">T&eacute;l&eacute;phone <i>*</i></label><input id="f_tel" type="tel" inputmode="tel" autocomplete="tel"><div class="em">Indiquez un t&eacute;l&eacute;phone.</div></div>
+        <div class="f" data-f="panier"><label for="f_panier">Panier moyen d&eacute;clar&eacute; <small>(facultatif, en &euro;)</small></label><input id="f_panier" inputmode="decimal" autocomplete="off"><div class="em">Montant invalide.</div></div>
+        <div class="f"><label for="f_commercial">Commercial <small>(code vendeur)</small></label><input id="f_commercial" autocomplete="off" placeholder="ex. : code de votre conseiller"></div>
+        <div class="f full"><label>Votre logo <small>(facultatif, pour vos supports)</small></label>
+          <label class="logo-drop" for="f_logo"><div class="prev" id="logoPrev">Aucun logo</div><div><b id="logoTxt">Ajouter votre logo</b><span>PNG, JPG ou SVG. Il sera repris sur vos affiches et votre jeu.</span></div><input id="f_logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
+      <div class="abo">
+        <div><b>Abonnement annuel Flowin Animation</b><span>Quiz, roue, tombola, QR trac&eacute;s par support, tirages, billets, stock, relances, rapports.</span><span class="pill">Moins de 3 &euro; par jour</span></div>
+        <div class="pr">990 &euro;<small>HT / an</small></div>
+      </div>
+      <div class="choices" id="kitChoices">
+        <button type="button" class="choice sel" data-kit="digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Fichiers des affiches, macarons et support de caisse, &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">0 &euro; <small>HT</small></div></button>
+        <button type="button" class="choice" data-kit="physique"><span class="ck"></span><div class="cn">Kit physique</div><div class="cd">Macarons, affiches et support de caisse imprim&eacute;s, livr&eacute;s dans chaque boutique.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></button>
+      </div>
+      <div class="hint" style="margin-top:16px;font-weight:800;color:var(--ink2)">Options</div>
+      <div class="choices" style="margin-top:8px">
+        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions du quiz personnalis&eacute;es</div><div class="cd">R&eacute;daction des questions de votre quiz pour un &eacute;v&eacute;nement : votre marque, vos produits, votre histoire.</div><div class="cp">180 &euro; <small>HT par &eacute;v&eacute;nement</small></div>
+          <div class="opt-qty">Nombre d&rsquo;&eacute;v&eacute;nements <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
+        <div class="choice" id="optBonus" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions bonus personnalis&eacute;es</div><div class="cd">Votre sondage sur mesure : avis client, attentes, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
+          <div class="opt-qty">Nombre de sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
+      </div>
+      <div class="hint">Les lots mis en jeu sont fournis par votre commerce, en plus de l&rsquo;abonnement.</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">3</span><h2>R&eacute;capitulatif</h2></div>
+      <table class="recap"><thead><tr><th>D&eacute;signation</th><th class="r">Qt&eacute;</th><th class="r">Montant HT</th></tr></thead><tbody id="recapBody"></tbody></table>
+      <div class="totals">
+        <div class="trow"><span>Total HT</span><b id="tHT">&mdash;</b></div>
+        <div class="trow"><span>TVA 20 %</span><b id="tTVA">&mdash;</b></div>
+        <div class="trow ttc"><span>Total TTC</span><b id="tTTC">&mdash;</b></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">4</span><h2>Paiement</h2></div>
+      <div class="choices" id="payChoices">
+        <button type="button" class="choice sel" data-pay="virement"><span class="ck"></span><div class="cn">Virement bancaire</div><div class="cd">Vous r&eacute;glez par virement &agrave; r&eacute;ception du bon de commande. La commande est enregistr&eacute;e en attente de paiement.</div></button>
+        <button type="button" class="choice" data-pay="prelevement_sepa" id="paySepa"><span class="ck"></span><div class="cn">Pr&eacute;l&egrave;vement SEPA</div><div class="cd">Mandat sign&eacute; en ligne chez GoCardless, notre prestataire de paiement. Flowin ne voit jamais votre IBAN.</div><span class="soon" id="sepaSoon">V&eacute;rification&hellip;</span></button>
+      </div>
+      <div class="paybox" id="boxVirement">
+        Titulaire : <b>BAITA EURL</b><br>
+        IBAN : <b class="iban">FR76 1460 7003 3470 2211 6462 345</b><br>
+        BIC : <b>CCBPFRPPMAR</b><br>
+        R&eacute;f&eacute;rence &agrave; rappeler : <b id="payRef">&mdash;</b>
+      </div>
+      <div class="paybox" id="boxSepa" style="display:none">
+        <b>Pr&eacute;l&egrave;vement de l&rsquo;abonnement annuel</b> : <span id="sepaAbo">&mdash;</span> TTC.<br>
+        Apr&egrave;s validation, vous &ecirc;tes redirig&eacute; vers la page s&eacute;curis&eacute;e GoCardless pour signer votre mandat SEPA.
+        <label class="chk" style="margin-top:10px"><input type="checkbox" id="sepaReste" checked><span>Pr&eacute;lever aussi le kit et les options (<span id="sepaResteMt">0 &euro;</span> TTC). Sinon, ils sont &agrave; r&eacute;gler par virement.</span></label>
+      </div>
+      <div class="banner warn" id="sepaOff" style="display:none">Le pr&eacute;l&egrave;vement en ligne est bient&ocirc;t disponible. En attendant, choisissez le virement : la commande est enregistr&eacute;e tout de suite.</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">5</span><h2>Conditions et signature</h2></div>
+      <label class="chk" id="cgvRow"><input type="checkbox" id="cgvChk"><span>J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">conditions g&eacute;n&eacute;rales de vente Flowin Animation</a> <span class="projet">projet, en cours de validation juridique</span></span></label>
+      <div class="sign" style="margin-top:14px">
+        <div class="grid">
+          <div class="f" data-f="signataire"><label for="f_signataire">Nom du signataire <i>*</i></label><input id="f_signataire" autocomplete="name"><div class="em">Indiquez le nom du signataire.</div></div>
+          <div class="f"><label for="f_qualite">Qualit&eacute; <small>(g&eacute;rant, directeur&hellip;)</small></label><input id="f_qualite" autocomplete="organization-title"></div>
+        </div>
+        <label class="chk" id="signRow" style="margin-top:14px"><input type="checkbox" id="signChk"><span>Je signe &eacute;lectroniquement ce bon de commande et je m&rsquo;engage &agrave; r&eacute;gler le montant indiqu&eacute;.</span></label>
+        <div class="clock">Date et heure de signature : <b id="clock">&mdash;</b> <span>(enregistr&eacute;es &agrave; la validation)</span></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" id="submitBtn">Valider et signer ma commande</button>
+      <button type="button" class="btn ghost" id="pdfBtn">T&eacute;l&eacute;charger le bon en PDF</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- ================= MERCI ================= -->
+  <div class="body" id="merci">
+    <div class="thanks">
+      <h2 id="mTitle">Merci, votre commande <em>est enregistr&eacute;e</em>.</h2>
+      <p id="mSub">Bon de commande n&deg; <b id="mNum">&mdash;</b>, sign&eacute; le <b id="mDate">&mdash;</b>.</p>
+    </div>
+    <div class="banner warn" id="mOffline" style="display:none">Pas de r&eacute;seau pour l&rsquo;instant : votre commande est gard&eacute;e sur cet appareil et sera transmise automatiquement d&egrave;s le retour de la connexion. Gardez cette page ouverte ou rouvrez-la plus tard.</div>
+    <div class="banner info" id="mSepaInfo" style="display:none"></div>
+    <div class="sec">
+      <div class="sec-h"><span class="n">1</span><h2>R&eacute;capitulatif</h2></div>
+      <table class="recap"><thead><tr><th>D&eacute;signation</th><th class="r">Qt&eacute;</th><th class="r">Montant HT</th></tr></thead><tbody id="mRecap"></tbody></table>
+      <div class="totals">
+        <div class="trow"><span>Total HT</span><b id="mHT">&mdash;</b></div>
+        <div class="trow"><span>TVA 20 %</span><b id="mTVA">&mdash;</b></div>
+        <div class="trow ttc"><span>Total TTC</span><b id="mTTC">&mdash;</b></div>
+      </div>
+    </div>
+    <div class="sec" id="mVirement">
+      <div class="sec-h"><span class="n">2</span><h2>R&egrave;glement par virement</h2></div>
+      <div class="paybox">
+        Montant : <b id="mVirMt">&mdash;</b> TTC<br>
+        Titulaire : <b>BAITA EURL</b><br>
+        IBAN : <b class="iban">FR76 1460 7003 3470 2211 6462 345</b><br>
+        BIC : <b>CCBPFRPPMAR</b><br>
+        R&eacute;f&eacute;rence &agrave; rappeler : <b id="mRef">&mdash;</b>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><span class="n" id="mStepsN">3</span><h2>Les prochaines &eacute;tapes</h2></div>
+      <ol class="steps" id="mSteps"></ol>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn dark" id="mPdf">T&eacute;l&eacute;charger le bon sign&eacute; en PDF</button>
+      <button type="button" class="btn" id="mGc" style="display:none">Signer mon mandat de pr&eacute;l&egrave;vement</button>
+      <a class="btn ghost" href="/plaquette-animation-magasin.html">Retour &agrave; la plaquette</a>
+    </div>
+    <div class="status" id="mStatus" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="legal"><b>Flowin</b> est une marque de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907. Prix en euros hors taxes, TVA 20 % en sus. Abonnement annuel : dur&eacute;e et renouvellement selon les CGV.</div>
+</div>
+</div>
+
+<script src="/nds/vendor/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
+  var TABLE = 'commandes_animation';
+  var API_GC = '/api/paiement/gocardless';
+  var CGV_VERSION = 'am-v2-projet-2026-11-01';
+  var PRIX = { abonnement: 990, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
+  var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
+  var LS_FILE = 'flowin_am_file_attente', LS_DERNIERE = 'flowin_am_derniere';
+
+  function $(id){ return document.getElementById(id); }
+  function qs(name){ var m = new RegExp('[?&]' + name + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null; }
+  function grp(s){ var out = '', c = 0; for (var i = s.length - 1; i >= 0; i--) { out = s.charAt(i) + out; c++; if (c % 3 === 0 && i > 0) out = ' ' + out; } return out; }
+  function eur(n){
+    n = Math.round(Number(n) * 100) / 100;
+    var neg = n < 0; if (neg) n = -n;
+    var ent = Math.floor(n), cts = Math.round((n - ent) * 100);
+    var s = grp(String(ent)) + (cts ? ',' + (cts < 10 ? '0' : '') + cts : '');
+    return (neg ? '-' : '') + s + ' €';
+  }
+  function lsGet(k){ try { var v = window.localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function lsSet(k, v){ try { window.localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function fmtDate(d){ return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); }
+  function fmtDateHeure(d){ return fmtDate(d) + ' à ' + pad(d.getHours()) + 'h' + pad(d.getMinutes()); }
+  function esc(t){ return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  /* Retour */
+  (function(){ var b = $('topBack'); if (!b) return; b.addEventListener('click', function(e){ if (window.history.length > 1 && document.referrer && document.referrer.indexOf(location.host) >= 0) { e.preventDefault(); window.history.back(); } }); })();
+
+  /* Tache de peinture de l'en-tête (même dessin que la plaquette) */
+  (function(){
+    function rnd(seed){ var s = seed * 9301 + 49297; return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+    function n1(x){ return (+x).toFixed(1); }
+    function tache(r, col, seed, cx, cy){
+      var R = rnd(seed), pts = [], i, n = 8;
+      for (i = 0; i < n; i++) { var a = i / n * Math.PI * 2, k = 0.9 + R() * 0.18; pts.push([Math.cos(a) * r * k, Math.sin(a) * r * k]); }
+      var d = 'M' + n1(pts[0][0]) + ',' + n1(pts[0][1]);
+      for (i = 0; i < n; i++) { var p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+        d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]); }
+      return '<g transform="translate(' + cx + ',' + cy + ')" fill="' + col + '"><path d="' + d + 'Z"/><rect x="' + n1(-r * 0.3) + '" y="' + n1(r * 0.6) + '" width="' + n1(r * 0.16) + '" height="' + n1(r * 0.7) + '" rx="' + n1(r * 0.08) + '"/><circle cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.4) + '" r="' + n1(r * 0.1) + '"/></g>';
+    }
+    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#F5A100', 7, 20, 0) + tache(44, '#E0218A', 3, -40, 30);
+  })();
+
+  /* ---------- État ---------- */
+  var st = { nb: 1, kit: 'digital', quiz: 0, bonus: 0, pay: 'virement', gcDispo: false, logo: null };
+  var now = new Date();
+  function genId(){
+    var alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = '', i, buf = null;
+    try { if (window.crypto && window.crypto.getRandomValues) { buf = new Uint8Array(8); window.crypto.getRandomValues(buf); } } catch (e) { buf = null; }
+    for (i = 0; i < 8; i++) s += alpha.charAt((buf ? buf[i] : Math.floor(Math.random() * 256)) % alpha.length);
+    return 'AM-' + now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '-' + s;
+  }
+  var ID = genId();
+  $('docNum').textContent = ID; $('payRef').textContent = ID; $('docDate').textContent = fmtDate(now);
+
+  function clampInt(v, mn, mx){ v = parseInt(String(v).replace(/[^0-9]/g, ''), 10); if (isNaN(v)) v = mn; if (v < mn) v = mn; if (v > mx) v = mx; return v; }
+
+  function calc(){
+    var lignes = [];
+    lignes.push({ lib: 'Abonnement annuel Flowin Animation', det: 'Quiz, roue, tombola, QR tracés, tirages, billets, stock, relances, rapports', q: 1, ht: PRIX.abonnement });
+    var kitHt = st.kit === 'physique' ? PRIX.kitPhysique * st.nb : 0;
+    if (st.kit === 'physique') lignes.push({ lib: 'Kit physique', det: 'Macarons, affiches, support de caisse, ' + eur(PRIX.kitPhysique) + ' HT par boutique', q: st.nb, ht: kitHt });
+    else lignes.push({ lib: 'Kit digital', det: 'Fichiers à imprimer', q: st.nb, ht: 0 });
+    var optHt = 0;
+    if (st.quiz > 0) { lignes.push({ lib: 'Option : questions du quiz personnalisées', det: eur(PRIX.optQuiz) + ' HT par événement', q: st.quiz, ht: PRIX.optQuiz * st.quiz }); optHt += PRIX.optQuiz * st.quiz; }
+    if (st.bonus > 0) { lignes.push({ lib: 'Option : questions bonus personnalisées', det: eur(PRIX.optBonus) + ' HT par sondage', q: st.bonus, ht: PRIX.optBonus * st.bonus }); optHt += PRIX.optBonus * st.bonus; }
+    var ht = PRIX.abonnement + kitHt + optHt;
+    var tva = Math.round(ht * PRIX.tva * 100) / 100;
+    var aboTtc = Math.round(PRIX.abonnement * (1 + PRIX.tva) * 100) / 100;
+    var ttc = Math.round((ht + tva) * 100) / 100;
+    return { lignes: lignes, abo: PRIX.abonnement, kit: kitHt, opt: optHt, ht: ht, tva: tva, ttc: ttc, aboTtc: aboTtc, resteTtc: Math.round((ttc - aboTtc) * 100) / 100 };
+  }
+  function recapHtml(t){
+    var h = '';
+    for (var i = 0; i < t.lignes.length; i++) { var l = t.lignes[i]; h += '<tr><td>' + esc(l.lib) + '<small>' + esc(l.det) + '</small></td><td class="r">' + l.q + '</td><td class="r">' + eur(l.ht) + '</td></tr>'; }
+    return h;
+  }
+  function render(){
+    var t = calc();
+    $('recapBody').innerHTML = recapHtml(t);
+    $('tHT').textContent = eur(t.ht); $('tTVA').textContent = eur(t.tva); $('tTTC').textContent = eur(t.ttc);
+    $('f_nb').value = st.nb;
+    var kits = document.querySelectorAll('#kitChoices .choice');
+    for (var i = 0; i < kits.length; i++) kits[i].className = 'choice' + (kits[i].getAttribute('data-kit') === st.kit ? ' sel' : '');
+    $('optQuiz').className = 'choice' + (st.quiz > 0 ? ' sel' : '');
+    $('optBonus').className = 'choice' + (st.bonus > 0 ? ' sel' : '');
+    if (st.quiz > 0) $('qQuiz').value = st.quiz;
+    if (st.bonus > 0) $('qBonus').value = st.bonus;
+    var pays = document.querySelectorAll('#payChoices .choice');
+    for (var p = 0; p < pays.length; p++) {
+      var k = pays[p].getAttribute('data-pay'), off = (k === 'prelevement_sepa' && !st.gcDispo);
+      pays[p].className = 'choice' + (k === st.pay ? ' sel' : '') + (off ? ' disabled' : '');
+    }
+    $('boxVirement').style.display = st.pay === 'virement' ? 'block' : 'none';
+    $('boxSepa').style.display = st.pay === 'prelevement_sepa' ? 'block' : 'none';
+    $('sepaAbo').textContent = eur(t.aboTtc); $('sepaResteMt').textContent = eur(t.resteTtc);
+    $('sepaReste').parentNode.style.display = t.resteTtc > 0 ? 'flex' : 'none';
+    var opts = []; if (st.quiz) opts.push('quiz personnalisé'); if (st.bonus) opts.push('questions bonus');
+    $('briefLn').textContent = 'Abonnement annuel Flowin Animation, kit ' + st.kit + ', ' + st.nb + ' boutique' + (st.nb > 1 ? 's' : '') + (opts.length ? ', ' + opts.join(' et ') : '') + '.';
+    $('briefTot').textContent = eur(t.ht) + ' HT · ' + eur(t.ttc) + ' TTC';
+  }
+
+  /* ---------- Préremplissage depuis la plaquette ---------- */
+  (function(){
+    var b = qs('boutiques'); if (b) st.nb = clampInt(b, 1, 200);
+    var k = qs('kit'); if (k === 'physique' || k === 'digital') st.kit = k;
+    if (qs('quiz')) st.quiz = clampInt(qs('quiz'), 1, 20);
+    if (qs('bonus')) st.bonus = clampInt(qs('bonus'), 1, 20);
+    var c = qs('commercial') || qs('vendeur'); if (c) $('f_commercial').value = c.slice(0, 60);
+  })();
+
+  /* ---------- Interactions ---------- */
+  $('nbMinus').addEventListener('click', function(){ st.nb = clampInt(st.nb - 1, 1, 200); render(); });
+  $('nbPlus').addEventListener('click', function(){ st.nb = clampInt(st.nb + 1, 1, 200); render(); });
+  $('f_nb').addEventListener('change', function(){ st.nb = clampInt(this.value, 1, 200); render(); });
+  var kitBtns = document.querySelectorAll('#kitChoices .choice');
+  for (var ki = 0; ki < kitBtns.length; ki++) kitBtns[ki].addEventListener('click', function(){ st.kit = this.getAttribute('data-kit'); render(); });
+  function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }
+  function bindOpt(id, name){
+    var el = $(id);
+    el.addEventListener('click', function(e){ var t = e.target; if (t.closest && t.closest('.opt-qty')) return; toggleOpt(name); });
+    el.addEventListener('keydown', function(e){ if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); toggleOpt(name); } });
+  }
+  bindOpt('optQuiz', 'quiz'); bindOpt('optBonus', 'bonus');
+  var qBtns = document.querySelectorAll('.opt-qty button');
+  for (var qi = 0; qi < qBtns.length; qi++) qBtns[qi].addEventListener('click', function(e){ e.stopPropagation(); var n = this.getAttribute('data-q'); st[n] = clampInt(st[n] + parseInt(this.getAttribute('data-d'), 10), 1, 20); render(); });
+  $('qQuiz').addEventListener('change', function(){ st.quiz = clampInt(this.value, 1, 20); render(); });
+  $('qBonus').addEventListener('change', function(){ st.bonus = clampInt(this.value, 1, 20); render(); });
+  var payBtns = document.querySelectorAll('#payChoices .choice');
+  for (var pi = 0; pi < payBtns.length; pi++) payBtns[pi].addEventListener('click', function(){
+    var k = this.getAttribute('data-pay');
+    if (k === 'prelevement_sepa' && !st.gcDispo) { $('sepaOff').style.display = 'block'; st.pay = 'virement'; render(); return; }
+    $('sepaOff').style.display = 'none'; st.pay = k; render();
+  });
+
+  /* Disponibilité GoCardless (route serveur) : sans configuration, « Bientôt disponible » */
+  function setGc(dispo){
+    st.gcDispo = !!dispo;
+    var s = $('sepaSoon');
+    if (dispo) { s.style.display = 'none'; } else { s.style.display = 'inline-block'; s.textContent = 'Bientôt disponible'; if (st.pay === 'prelevement_sepa') st.pay = 'virement'; }
+    render();
+  }
+  (function(){
+    if (location.protocol === 'file:' || !window.fetch) { setGc(false); return; }
+    var fini = false, to = setTimeout(function(){ if (!fini) { fini = true; setGc(false); } }, 6000);
+    fetch(API_GC, { method: 'GET', headers: { 'Accept': 'application/json' } })
+      .then(function(r){ return r.ok ? r.json() : { disponible: false }; })
+      .then(function(j){ if (fini) return; fini = true; clearTimeout(to); setGc(j && j.disponible === true); })
+      .catch(function(){ if (fini) return; fini = true; clearTimeout(to); setGc(false); });
+  })();
+
+  /* Logo : redimensionné dans le navigateur (512 px max) pour rester léger */
+  $('f_logo').addEventListener('change', function(){
+    var file = this.files && this.files[0]; if (!file) return;
+    if (file.size > 8 * 1024 * 1024) { $('logoTxt').textContent = 'Fichier trop lourd (8 Mo maximum)'; return; }
+    var rd = new FileReader();
+    rd.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var w = img.naturalWidth || 512, h = img.naturalHeight || 512, m = Math.max(w, h), k = m > 512 ? 512 / m : 1;
+        var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
+        try { cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); st.logo = cv.toDataURL('image/png'); } catch (e) { st.logo = rd.result; }
+        $('logoPrev').innerHTML = '<img alt="Logo" src="' + st.logo + '">';
+        $('logoTxt').textContent = file.name.slice(0, 60);
+      };
+      img.onerror = function(){ $('logoTxt').textContent = 'Image illisible, essayez un autre fichier'; };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  });
+
+  /* Horloge de signature */
+  function tickClock(){ $('clock').textContent = fmtDateHeure(new Date()); }
+  tickClock(); setInterval(tickClock, 15000);
+
+  /* Les erreurs disparaissent dès que le champ est corrigé */
+  (function(){
+    var fs = document.querySelectorAll('.f[data-f] input');
+    for (var i = 0; i < fs.length; i++) fs[i].addEventListener('input', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
+    $('cgvChk').addEventListener('change', function(){ if (this.checked) $('cgvRow').className = 'chk'; });
+    $('signChk').addEventListener('change', function(){ if (this.checked) $('signRow').className = 'chk'; });
+  })();
+
+  /* ---------- Validation ---------- */
+  function val(id){ var e = $(id); return e ? String(e.value || '').replace(/^\s+|\s+$/g, '') : ''; }
+  function setErr(name, on){ var e = document.querySelector('.f[data-f="' + name + '"]'); if (!e) return; if (on) { if (e.className.indexOf(' err') < 0) e.className += ' err'; } else e.className = e.className.replace(/ err/g, ''); }
+  function status(msg, cls){ var s = $('status'); s.textContent = msg; s.className = 'status ' + (cls || ''); }
+  function valider(avecSignature){
+    var first = null, ok = true;
+    function check(name, cond){ setErr(name, !cond); if (!cond) { ok = false; if (!first) first = document.querySelector('.f[data-f="' + name + '"]'); } }
+    var siret = val('f_siret').replace(/\s/g, '');
+    check('raison', val('f_raison').length > 1);
+    check('siret', /^[0-9]{14}$/.test(siret));
+    check('nb', st.nb >= 1);
+    check('adresse', val('f_adresse').length > 3);
+    check('cp', /^[0-9]{5}$/.test(val('f_cp')));
+    check('ville', val('f_ville').length > 1);
+    check('contact', val('f_contact').length > 1);
+    check('email', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('f_email')));
+    check('tel', val('f_tel').replace(/[^0-9+]/g, '').length >= 8);
+    var pm = val('f_panier'); check('panier', !pm || !isNaN(parseFloat(pm.replace(',', '.'))));
+    if (avecSignature) {
+      check('signataire', val('f_signataire').length > 1);
+      var cgv = $('cgvChk').checked, sg = $('signChk').checked;
+      $('cgvRow').className = 'chk' + (cgv ? '' : ' err'); $('signRow').className = 'chk' + (sg ? '' : ' err');
+      if (!cgv || !sg) { ok = false; if (!first) first = cgv ? $('signRow') : $('cgvRow'); }
+    }
+    if (!ok && first && first.scrollIntoView) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return ok;
+  }
+
+  function collecte(horodatage){
+    var t = calc(), pm = val('f_panier');
+    return {
+      id: ID,
+      raison_sociale: val('f_raison'), siret: val('f_siret').replace(/\s/g, ''),
+      adresse: val('f_adresse'), cp: val('f_cp'), ville: val('f_ville'),
+      contact_nom: val('f_contact'), contact_fonction: val('f_fonction') || null,
+      email: val('f_email').toLowerCase(), tel: val('f_tel'),
+      nb_boutiques: st.nb, panier_moyen: pm ? parseFloat(pm.replace(',', '.')) : null,
+      logo: st.logo, kit: st.kit, opt_quiz_qte: st.quiz, opt_bonus_qte: st.bonus,
+      commercial: val('f_commercial') || null,
+      montant_abonnement_ht: t.abo, montant_kit_ht: t.kit, montant_options_ht: t.opt,
+      montant_ht: t.ht, montant_tva: t.tva, montant_ttc: t.ttc,
+      mode_paiement: st.pay, prelevement_inclut_reste: st.pay === 'prelevement_sepa' ? !!$('sepaReste').checked : false,
+      cgv_acceptee: !!$('cgvChk').checked, cgv_version: CGV_VERSION,
+      signataire_nom: val('f_signataire'), signataire_qualite: val('f_qualite') || null,
+      signature_acceptee: !!$('signChk').checked,
+      signature_horodatage_client: horodatage ? horodatage.toISOString() : null,
+      user_agent: (navigator.userAgent || '').slice(0, 300)
+    };
+  }
+
+  /* ---------- PDF (jsPDF, dans le navigateur) ---------- */
+  function pdf(rec, signe){
+    var J = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (!J) { return false; }
+    function S(t){ return String(t == null ? '' : t).replace(/ /g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
+    var doc = new J({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    var W = 210, M = 15, x = M, y = 18, CW = W - 2 * M;
+    var ink = [21, 12, 28], mut = [101, 90, 112], mag = [224, 33, 138], gold = [245, 161, 0], teal = [0, 121, 109];
+    function T(t, xx, yy, sz, stl, col, al){ doc.setFont('helvetica', stl || 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); doc.text(S(t), xx, yy, al ? { align: al } : undefined); }
+    function wrap(t, xx, yy, sz, col, w, lh){ doc.setFont('helvetica', 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); var ls = doc.splitTextToSize(S(t), w); for (var i = 0; i < ls.length; i++) { doc.text(ls[i], xx, yy); yy += lh; } return yy; }
+    /* Signature de marque */
+    doc.setFillColor(254, 251, 168); doc.rect(0, 0, W, 38, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text('Flow', x, y + 4);
+    var fw = doc.getTextWidth('Flow'); doc.setTextColor(mag[0], mag[1], mag[2]); doc.text('i', x + fw, y + 4); var iw = doc.getTextWidth('i'); doc.setTextColor(gold[0], gold[1], gold[2]); doc.text('n', x + fw + iw, y + 4);
+    T('A N I M A T I O N', x, y + 10.5, 7.5, 'bold', ink);
+    doc.setFillColor(240, 125, 40); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
+    T('Bon de commande', W - M, y + 2, 18, 'bold', ink, 'right');
+    T('Flowin Animation magasin', W - M, y + 8, 9.5, 'normal', mut, 'right');
+    T('No ' + rec.id, W - M, y + 14, 9, 'bold', ink, 'right');
+    T('Date : ' + fmtDate(new Date()), W - M, y + 19, 8.5, 'normal', mut, 'right');
+    y = 48;
+    var cw = (CW - 8) / 2;
+    doc.setDrawColor(230, 224, 214); doc.roundedRect(x, y, cw, 32, 2, 2); doc.roundedRect(x + cw + 8, y, cw, 32, 2, 2);
+    T('PRESTATAIRE', x + 4, y + 6, 7, 'bold', teal); T('BAITA EURL - Flowin', x + 4, y + 12, 10.5, 'bold', ink);
+    T('40 rue des Arcs, 06140 Vence', x + 4, y + 17, 8, 'normal', mut); T('SIRET 512 026 907 00018', x + 4, y + 21.5, 8, 'normal', mut);
+    T('TVA FR82 512 026 907', x + 4, y + 26, 8, 'normal', mut); T('04 93 59 91 37 - info@opconsult.co', x + 4, y + 30, 7.5, 'normal', mut);
+    var px = x + cw + 12;
+    T('CLIENT', px, y + 6, 7, 'bold', teal); T(rec.raison_sociale || '-', px, y + 12, 10.5, 'bold', ink);
+    T(rec.adresse || '', px, y + 17, 8, 'normal', mut); T(((rec.cp || '') + ' ' + (rec.ville || '')).replace(/^\s+/, ''), px, y + 21.5, 8, 'normal', mut);
+    T('SIRET ' + (rec.siret || '-'), px, y + 26, 8, 'normal', mut);
+    T([rec.contact_nom, rec.email, rec.tel].join(' - '), px, y + 30, 7, 'normal', mut);
+    y += 40;
+    T('Boutiques : ' + rec.nb_boutiques + (rec.panier_moyen ? '   -   Panier moyen declare : ' + eur(rec.panier_moyen) : '') + (rec.commercial ? '   -   Commercial : ' + rec.commercial : ''), x, y, 8.5, 'normal', mut);
+    y += 7;
+    T('DESIGNATION', x, y, 7.5, 'bold', teal); T('QTE', W - M - 38, y, 7.5, 'bold', teal, 'right'); T('MONTANT HT', W - M, y, 7.5, 'bold', teal, 'right');
+    y += 2.5; doc.setDrawColor(230, 224, 214); doc.line(x, y, W - M, y); y += 5.5;
+    var t = calc();
+    for (var i = 0; i < t.lignes.length; i++) {
+      var l = t.lignes[i];
+      T(l.lib, x, y, 9.5, 'bold', ink); T(String(l.q), W - M - 38, y, 9.5, 'normal', ink, 'right'); T(eur(l.ht), W - M, y, 9.5, 'bold', ink, 'right');
+      y = wrap(l.det, x, y + 4.3, 7.8, mut, CW - 60, 3.6) + 2;
+      doc.line(x, y - 1.5, W - M, y - 1.5); y += 3.5;
+    }
+    var tx = W - M - 70;
+    T('Total HT', tx, y, 9.5, 'normal', mut); T(eur(t.ht), W - M, y, 9.5, 'bold', ink, 'right'); y += 5.5;
+    T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;
+    doc.setFillColor(255, 246, 214); doc.rect(tx - 3, y, 73, 9, 'F');
+    T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
+    T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
+    if (rec.mode_paiement === 'prelevement_sepa') {
+      y = wrap('Prelevement SEPA via GoCardless : abonnement annuel ' + eur(t.aboTtc) + ' TTC' + (rec.prelevement_inclut_reste && t.resteTtc > 0 ? ', kit et options ' + eur(t.resteTtc) + ' TTC preleves egalement.' : (t.resteTtc > 0 ? '. Kit et options (' + eur(t.resteTtc) + ' TTC) par virement : IBAN ' + IBAN + ' - BIC ' + BIC + ' - titulaire BAITA EURL - reference ' + rec.id + '.' : '.')), x, y, 8.5, ink, CW, 4.2);
+    } else {
+      y = wrap('Virement bancaire de ' + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
+    }
+    y += 5;
+    T('SIGNATURE ELECTRONIQUE', x, y, 7.5, 'bold', teal); y += 5;
+    if (signe) {
+      y = wrap('Signe electroniquement par ' + rec.signataire_nom + (rec.signataire_qualite ? ' (' + rec.signataire_qualite + ')' : '') + ' pour ' + rec.raison_sociale + ', le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '. Case "Je signe electroniquement ce bon de commande" cochee ; CGV Flowin Animation acceptees (version ' + rec.cgv_version + ').', x, y, 8.5, ink, CW, 4.2);
+    } else {
+      y = wrap('Document non signe (brouillon). La commande est formee a la signature electronique en ligne.', x, y, 8.5, mut, CW, 4.2);
+    }
+    y += 4;
+    wrap('Conditions generales de vente Flowin Animation : projet en cours de validation juridique, consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Abonnement annuel : duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
+    wrap('Flowin est une marque de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN ' + IBAN + ' - BIC ' + BIC, x, 287, 6.5, mut, CW, 3);
+    doc.save('bon-commande-flowin-' + rec.id + '.pdf');
+    return true;
+  }
+  $('pdfBtn').addEventListener('click', function(){
+    var rec = collecte(null);
+    if (!pdf(rec, false)) status('Le générateur PDF n’a pas pu se charger. Vérifiez la connexion et réessayez.', 'err');
+  });
+
+  /* ---------- Envoi ---------- */
+  function inserer(rec){
+    return fetch(SUPA + '/rest/v1/' + TABLE, {
+      method: 'POST',
+      headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(rec)
+    }).then(function(r){
+      if (r.status === 409) return 'deja';
+      if (!r.ok) { var e = new Error('http ' + r.status); e.http = r.status; throw e; }
+      return 'ok';
+    });
+  }
+  function fileAttente(){ return lsGet(LS_FILE) || []; }
+  function viderFile(){
+    var f = fileAttente(); if (!f.length || !window.fetch) return;
+    var reste = [], i = 0;
+    function suivant(){
+      if (i >= f.length) { lsSet(LS_FILE, reste); if (!reste.length && document.body.className.indexOf('done') >= 0) { $('mOffline').style.display = 'none'; $('mStatus').textContent = 'Commande transmise.'; $('mStatus').className = 'status ok'; } return; }
+      var rec = f[i++];
+      inserer(rec).then(suivant, function(e){ if (!e || !e.http) reste.push(rec); suivant(); });
+    }
+    suivant();
+  }
+  window.addEventListener('online', viderFile);
+  setTimeout(viderFile, 1500);
+
+  function lancerGoCardless(rec, el){
+    el.textContent = 'Connexion à GoCardless…'; el.className = 'status';
+    return fetch(API_GC, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ commande_id: rec.id }) })
+      .then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }, function(){ return { ok: false, j: {} }; }); })
+      .then(function(res){
+        if (res.ok && res.j && res.j.url && /^https:\/\//.test(res.j.url)) { location.href = res.j.url; return true; }
+        throw new Error((res.j && res.j.error) || 'indisponible');
+      });
+  }
+
+  function etapes(rec, horsLigne){
+    var t = calc(), h = [];
+    if (rec.mode_paiement === 'prelevement_sepa') {
+      h.push('<b>Signez votre mandat SEPA</b> sur la page sécurisée GoCardless (si ce n’est pas déjà fait).');
+      if (!rec.prelevement_inclut_reste && t.resteTtc > 0) h.push('<b>Réglez le kit et les options par virement</b> (' + eur(t.resteTtc) + ' TTC), référence ' + esc(rec.id) + '.');
+    } else {
+      h.push('<b>Réglez ' + eur(t.ttc) + ' TTC par virement</b> avec la référence ' + esc(rec.id) + '. Votre commande passe en « payée » à réception.');
+    }
+    h.push('<b>Flowin vous contacte</b> pour préparer votre animation : lots, questions, couleurs' + (rec.logo ? '' : ', logo') + '.');
+    h.push(rec.kit === 'physique' ? '<b>Votre kit est en préparation</b> : macarons, affiches et support de caisse pour ' + rec.nb_boutiques + ' boutique' + (rec.nb_boutiques > 1 ? 's' : '') + '.' : '<b>Vous recevez votre kit digital</b> : les fichiers des affiches et macarons à imprimer.');
+    h.push('<b>Vous collez, ils flashent, vous mesurez</b> : vos accès au tableau de bord vous sont envoyés par email.');
+    var o = ''; for (var i = 0; i < h.length; i++) o += '<li><span>' + h[i] + '</span></li>';
+    return o;
+  }
+  function afficherMerci(rec, opts){
+    opts = opts || {};
+    var t = calc();
+    document.body.className = 'done';
+    $('mNum').textContent = rec.id;
+    $('mDate').textContent = rec.signature_horodatage_client ? fmtDateHeure(new Date(rec.signature_horodatage_client)) : '—';
+    $('mRecap').innerHTML = recapHtml(t);
+    $('mHT').textContent = eur(t.ht); $('mTVA').textContent = eur(t.tva); $('mTTC').textContent = eur(t.ttc);
+    var virMt = rec.mode_paiement === 'virement' ? t.ttc : (rec.prelevement_inclut_reste ? 0 : t.resteTtc);
+    $('mVirement').style.display = virMt > 0 ? 'block' : 'none';
+    $('mVirMt').textContent = eur(virMt); $('mRef').textContent = rec.id;
+    $('mStepsN').textContent = virMt > 0 ? '3' : '2';
+    $('mSteps').innerHTML = etapes(rec, opts.horsLigne);
+    $('mOffline').style.display = opts.horsLigne ? 'block' : 'none';
+    var info = $('mSepaInfo');
+    if (opts.sepaMsg) { info.style.display = 'block'; info.innerHTML = opts.sepaMsg; } else info.style.display = 'none';
+    $('mGc').style.display = opts.gcRetry ? 'inline-flex' : 'none';
+    window.scrollTo(0, 0);
+    $('mPdf').onclick = function(){ if (!pdf(rec, true)) { $('mStatus').textContent = 'Le générateur PDF n’a pas pu se charger.'; $('mStatus').className = 'status err'; } };
+    $('mGc').onclick = function(){ var b = this; b.disabled = true; lancerGoCardless(rec, $('mStatus')).catch(function(){ b.disabled = false; $('mStatus').textContent = 'Le prélèvement n’est pas disponible pour le moment : réglez par virement avec les coordonnées ci-dessus.'; $('mStatus').className = 'status err'; $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(t.ttc); }); };
+  }
+
+  $('submitBtn').addEventListener('click', function(){
+    if (!valider(true)) { status('Merci de compléter les champs en rouge.', 'err'); return; }
+    var btn = this, quand = new Date(), rec = collecte(quand);
+    btn.disabled = true; status('Enregistrement de votre commande…', '');
+    var memo = { rec: rec, st: { nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
+    lsSet(LS_DERNIERE, memo);
+    if (!window.fetch) { btn.disabled = false; status('Navigateur trop ancien pour l’envoi en ligne. Téléchargez le PDF et envoyez-le à Flowin.', 'err'); return; }
+    inserer(rec).then(function(){
+      if (rec.mode_paiement === 'prelevement_sepa') {
+        status('Commande enregistrée. Redirection vers GoCardless…', 'ok');
+        lancerGoCardless(rec, $('status')).catch(function(){
+          afficherMerci(rec, { gcRetry: true, sepaMsg: 'Votre commande est enregistrée, mais la page de prélèvement n’a pas pu s’ouvrir. Réessayez avec le bouton ci-dessous, ou réglez par virement.' });
+          $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(calc().ttc);
+        });
+      } else {
+        afficherMerci(rec, {});
+      }
+    }, function(e){
+      if (e && e.http) { btn.disabled = false; status('L’enregistrement a échoué (code ' + e.http + '). Réessayez, ou téléchargez le PDF et envoyez-le à Flowin.', 'err'); return; }
+      /* Hors ligne : on garde la commande sur l'appareil et on l'enverra au retour du réseau */
+      var f = fileAttente(); f.push(rec);
+      if (!lsSet(LS_FILE, f)) { btn.disabled = false; status('Pas de réseau. Réessayez dès que la connexion revient.', 'err'); return; }
+      afficherMerci(rec, { horsLigne: true, gcRetry: rec.mode_paiement === 'prelevement_sepa', sepaMsg: rec.mode_paiement === 'prelevement_sepa' ? 'Le mandat de prélèvement se signe en ligne : utilisez le bouton ci-dessous dès que le réseau revient.' : '' });
+    });
+  });
+
+  /* ---------- Retour de la page GoCardless ---------- */
+  (function(){
+    var retour = qs('retour'), cid = qs('commande');
+    if (!retour || !cid) return;
+    var memo = lsGet(LS_DERNIERE);
+    if (!memo || !memo.rec || memo.rec.id !== cid) {
+      document.body.className = 'done';
+      $('mNum').textContent = cid; $('mVirement').style.display = 'none';
+      $('mTitle').innerHTML = retour === 'gocardless' ? 'Merci, votre mandat <em>est signé</em>.' : 'Prélèvement <em>non finalisé</em>.';
+      $('mSub').innerHTML = 'Commande n° <b>' + esc(cid) + '</b>. Flowin vous confirme la suite par email.';
+      return;
+    }
+    st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
+    ID = memo.rec.id; render();
+    if (retour === 'gocardless') {
+      afficherMerci(memo.rec, { sepaMsg: '<b>Mandat SEPA signé.</b> GoCardless le transmet à votre banque ; le prélèvement apparaîtra sur votre relevé sous quelques jours ouvrés. Vous recevez une notification de GoCardless avant chaque prélèvement.' });
+      $('mTitle').innerHTML = 'Merci, votre mandat <em>est signé</em>.';
+    } else {
+      afficherMerci(memo.rec, { gcRetry: true, sepaMsg: 'Le mandat n’a pas été signé. Votre commande reste enregistrée : réessayez, ou réglez par virement.' });
+      $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(calc().ttc);
+      $('mTitle').innerHTML = 'Prélèvement <em>non finalisé</em>.';
+    }
+  })();
+
+  render();
+})();
+</script>
+</body>
+</html>
