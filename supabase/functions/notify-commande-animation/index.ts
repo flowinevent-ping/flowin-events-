@@ -89,8 +89,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
     : `Nouvelle commande Animation magasin — ${r.raison_sociale}`;
   const html =
     '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:580px;margin:0 auto">' +
-    '<div style="background:#150C1C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">' + esc(titre) + "</div>" +
-    '<table style="width:100%;border-collapse:collapse;background:#FFFBF2;border:1px solid #ece6dc;border-top:none">' + trs + "</table>" +
+    '<div style="background:#00B4A0;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">' + esc(titre) + "</div>" +
+    '<table style="width:100%;border-collapse:collapse;background:#F6F7F5;border:1px solid #E1E7E4;border-top:none">' + trs + "</table>" +
     '<div style="color:#958aa0;font-size:12px;padding:14px 4px">Table commandes_animation (Supabase). Statut mis à jour automatiquement par GoCardless pour le prélèvement ; à passer en « payee » à la main à réception d\'un virement.</div></div>';
   const text = titre + "\n\n" + rows.map(([k, v]) => k + " : " + v.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")).join("\n");
 
@@ -117,10 +117,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       : "Virement de " + esc(eur(r.montant_ttc)) + " TTC à l'ordre de BAITA EURL<br>IBAN " + IBAN + " · BIC " + BIC + "<br>Référence à rappeler : " + esc(r.id);
     const htmlClient =
       '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:580px;margin:0 auto">' +
-      '<div style="background:#FEFBA8;border-radius:14px 14px 0 0;padding:18px 20px;color:#150C1C;font-size:17px;font-weight:800">Votre commande Flowin Animation est enregistrée</div>' +
-      '<table style="width:100%;border-collapse:collapse;background:#FFFBF2;border:1px solid #ece6dc;border-top:none">' + trs + "</table>" +
+      '<div style="background:#D9F2EA;border-radius:14px 14px 0 0;padding:18px 20px;color:#150C1C;font-size:17px;font-weight:800">Votre commande Flowin Animation est enregistrée</div>' +
+      '<table style="width:100%;border-collapse:collapse;background:#F6F7F5;border:1px solid #E1E7E4;border-top:none">' + trs + "</table>" +
       '<div style="background:#fff;border:1px solid #ece6dc;border-radius:10px;padding:14px 16px;margin:16px 4px;font-size:13px;color:#3a2f45"><b>Règlement</b><br>' + reglement + "</div>" +
-      '<div style="padding:4px"><a href="' + CGV_URL + '" style="color:#E0218A;font-weight:700;font-size:12px">Conditions générales de vente (projet, en cours de validation juridique)</a></div>' +
+      '<div style="padding:4px"><a href="' + CGV_URL + '" style="color:#00897B;font-weight:700;font-size:12px">Conditions générales de vente</a></div>' +
       '<div style="color:#958aa0;font-size:12px;padding:16px 4px">Merci pour votre confiance. Flowin vous contacte pour préparer votre animation. BAITA EURL · Flowin · 40 rue des Arcs, 06140 Vence.</div></div>';
     results.push(await envoyer(clientEmail, "Votre commande Flowin Animation " + String(r.id), htmlClient, text));
   }

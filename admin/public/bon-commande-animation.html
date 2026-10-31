@@ -10,18 +10,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#150C1C; --ink2:#3a2f45; --muted:#655a70; --faint:#958aa0;
-    --magenta:#E0218A; --gold:#F5A100; --teal:#00B4A0; --tealD:#00796D; --orange:#EC5B45;
-    --butter:#FEFBA8; --pink:#F9C9DF; --mint:#B6EBDF; --sky:#C4E2F8;
-    --paper:#FFFBF2; --line:#ece6dc; --white:#fff; --err:#C8243B; --hl:#FFF6D6;
+    --ink:#150C1C; --ink2:#3a3f45; --muted:#5d6a66; --faint:#8f9a96;
+    --teal:#00B4A0; --tealD:#00897B; --tealL:#E3F6F1;
+    --mint:#D9F2EA; --sky:#D7EEF9; --off:#F6F7F5;
+    --paper:#F6F7F5; --line:#E1E7E4; --white:#fff; --err:#C8243B; --hl:#D9F2EA;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--paper);font-family:'Manrope',system-ui,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
   button,input,select,textarea{font-family:inherit}
 
-  .flowin-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:#0F172A;color:#fff;
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;position:sticky;top:0;z-index:10000;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-  .flowin-topbar a{color:#fff;text-decoration:none;font-size:13px;font-weight:700;opacity:.85;white-space:nowrap}
+  .flowin-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:#fff;color:var(--ink);border-bottom:1px solid var(--line);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;position:sticky;top:0;z-index:10000}
+  .flowin-topbar a{color:var(--ink);text-decoration:none;font-size:13px;font-weight:700;opacity:.85;white-space:nowrap}
   .flowin-topbar .flowin-topbar-brand{font-size:14px;font-weight:800;white-space:nowrap}
   .flowin-topbar .flowin-topbar-brand b{background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
 
@@ -29,13 +29,13 @@
   .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(21,12,28,.35)}
 
   /* En-tête : signature de marque */
-  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--butter);overflow:hidden}
+  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--mint);overflow:hidden;border-bottom:1px solid var(--line)}
   .head svg.paint{position:absolute;left:170px;bottom:-60px;width:190px;height:190px;pointer-events:none;opacity:.95}
   .brand-sig{display:flex;flex-direction:column;align-items:flex-start;position:relative;z-index:1}
   .logo{font-weight:900;letter-spacing:-.03em;line-height:1;font-size:46px;color:var(--ink)}
-  .logo em{font-style:normal;background:linear-gradient(120deg,var(--magenta),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .ss-eyebrow{font-size:11px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);margin-top:10px}
-  .ss-pill{display:inline-block;margin-top:8px;background:linear-gradient(135deg,var(--gold),#EC5B45);color:#fff;font-weight:800;font-size:12.5px;padding:7px 18px;border-radius:100px}
+  .logo em{font-style:normal;background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(21,12,28,.55);margin-top:14px}
+  .ss-pill{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
   .doc-meta{position:relative;z-index:1;text-align:right}
   .doc-type{font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1.05}
   .doc-sub{font-size:13px;font-weight:700;color:var(--ink2);margin-top:4px}
@@ -46,12 +46,12 @@
   .sec{margin-top:28px}
   .sec:first-child{margin-top:0}
   .sec-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  .sec-h .n{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
+  .sec-h .n{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
   .sec-h h2{font-size:18px;font-weight:900;letter-spacing:-.01em}
   .hint{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.5}
 
   .parties{display:grid;grid-template-columns:1fr 1.5fr;gap:16px}
-  .party{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#FFFDF8}
+  .party{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:var(--off)}
   .party .ttl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--tealD);margin-bottom:8px}
   .party .nm{font-size:15px;font-weight:900}
   .party .ln{font-size:12px;color:var(--muted);line-height:1.6;font-weight:600}
@@ -59,17 +59,17 @@
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
   .grid .full{grid-column:1 / -1}
   .f label{display:block;font-size:12px;font-weight:800;color:var(--ink2);margin-bottom:5px}
-  .f label i{font-style:normal;color:var(--magenta)}
+  .f label i{font-style:normal;color:var(--tealD)}
   .f label small{font-weight:600;color:var(--faint)}
   .f input,.f select{width:100%;font-size:15px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;outline:none;transition:border-color .15s}
-  .f input:focus,.f select:focus{border-color:var(--ink)}
+  .f input:focus,.f select:focus{border-color:var(--teal)}
   .f.err input{border-color:var(--err);background:#fff6f7}
   .f .em{display:none;font-size:11.5px;color:var(--err);font-weight:700;margin-top:4px}
   .f.err .em{display:block}
   .row2{display:grid;grid-template-columns:110px 1fr;gap:10px}
 
-  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #d6cdbf;border-radius:14px;padding:12px 14px;cursor:pointer;background:#FFFDF8}
-  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#f4efe6;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
+  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #c9d3ce;border-radius:14px;padding:12px 14px;cursor:pointer;background:var(--off)}
+  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#EAEFEC;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
   .logo-drop .prev img{max-width:100%;max-height:100%;display:block}
   .logo-drop b{display:block;font-size:13.5px;font-weight:800}
   .logo-drop span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
@@ -78,27 +78,26 @@
   /* Cartes de choix */
   .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .choice{position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 16px 14px;cursor:pointer;background:#fff;transition:border-color .15s,box-shadow .15s;text-align:left;width:100%;color:var(--ink)}
-  .choice:hover{border-color:#cfc6b8}
-  .choice.sel{border-color:var(--ink);box-shadow:0 10px 26px -16px rgba(21,12,28,.55)}
-  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #cfc6b8}
-  .choice.sel .ck{border-color:var(--ink);background:var(--ink)}
+  .choice:hover{border-color:#b9c6c0}
+  .choice.sel{border-color:var(--teal);box-shadow:0 10px 26px -16px rgba(21,12,28,.55)}
+  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #c9d3ce}
+  .choice.sel .ck{border-color:var(--teal);background:var(--teal)}
   .choice.sel .ck:after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
   .choice .cn{font-size:16px;font-weight:900;padding-right:28px}
   .choice .cd{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.45}
   .choice .cp{font-size:20px;font-weight:900;margin-top:10px;letter-spacing:-.01em}
   .choice .cp small{font-size:11.5px;color:var(--muted);font-weight:800}
-  .choice.disabled{opacity:.6;cursor:not-allowed;background:#faf8f4}
-  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--butter);color:#7a5b00;border-radius:100px;padding:3px 9px}
-  .abo{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--ink);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px}
+  .choice.disabled{opacity:.6;cursor:not-allowed;background:var(--off)}
+  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sky);color:#2b6aa8;border-radius:100px;padding:3px 9px}
+  .abo{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#fff;color:var(--ink);border:1.5px solid var(--teal);border-radius:16px;padding:16px 18px;margin-bottom:12px}
   .abo b{font-size:16px;font-weight:900;display:block}
   .abo span{font-size:12.5px;opacity:.75;font-weight:600;display:block;margin-top:3px}
-  .abo .pill{display:inline-block;margin-top:8px;background:linear-gradient(135deg,var(--gold),#EC5B45);font-size:11.5px;font-weight:800;padding:3px 11px;border-radius:100px;opacity:1}
   .abo .pr{font-size:24px;font-weight:900;white-space:nowrap;text-align:right}
   .abo .pr small{display:block;font-size:11px;opacity:.7;font-weight:800}
   .opt-qty{display:none;align-items:center;gap:10px;margin-top:10px;font-size:12px;font-weight:800;color:var(--ink2)}
   .choice.sel .opt-qty{display:flex}
   .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:100px;overflow:hidden;background:#fff}
-  .stepper button{width:34px;height:34px;border:none;background:#f4efe6;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .stepper button{width:34px;height:34px;border:none;background:#EAEFEC;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
   .stepper input{width:44px;text-align:center;border:none;font-size:15px;font-weight:900;outline:none;padding:0;color:var(--ink);background:#fff}
 
   /* Récapitulatif */
@@ -110,34 +109,33 @@
   .totals{margin:14px 0 0 auto;width:330px;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .trow{display:flex;justify-content:space-between;padding:10px 16px;font-size:13.5px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line)}
   .trow b{color:var(--ink);font-variant-numeric:tabular-nums}
-  .trow.ttc{border-bottom:none;background:var(--hl);border-top:1.5px dashed var(--gold)}
+  .trow.ttc{border-bottom:none;background:var(--hl);border-top:1.5px dashed var(--teal)}
   .trow.ttc span{font-size:15px;font-weight:900;color:var(--ink)}
   .trow.ttc b{font-size:21px;font-weight:900}
 
   /* Paiement */
-  .paybox{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#FFFDF8;font-size:13px;color:var(--ink2);font-weight:600;line-height:1.6}
+  .paybox{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--off);font-size:13px;color:var(--ink2);font-weight:600;line-height:1.6}
   .paybox b{color:var(--ink)}
   .paybox .iban{font-variant-numeric:tabular-nums;letter-spacing:.03em}
   .chk{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.45;color:var(--ink)}
-  .chk input{width:20px;height:20px;flex:none;accent-color:#E0218A;margin-top:1px}
-  .chk a{color:var(--magenta);font-weight:800}
+  .chk input{width:20px;height:20px;flex:none;accent-color:#00B4A0;margin-top:1px}
+  .chk a{color:var(--tealD);font-weight:800}
   .chk.err{color:var(--err)}
-  .projet{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--pink);color:#8a1150;border-radius:100px;padding:2px 8px;margin-left:4px;vertical-align:1px}
 
-  .sign{border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;background:#FFFDF8}
+  .sign{border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;background:var(--off)}
   .sign .clock{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:12px}
   .sign .clock b{color:var(--ink);font-variant-numeric:tabular-nums}
 
   .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--magenta),#B0186C);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(224,33,138,.8)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(0,137,123,.6)}
   .btn[disabled]{opacity:.55;cursor:default}
-  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--ink);box-shadow:none}
-  .btn.dark{background:var(--ink);box-shadow:none}
+  .btn.ghost{background:#fff;color:var(--tealD);border:1.5px solid var(--teal);box-shadow:none}
+  .btn.dark{background:var(--teal)}
   .status{font-size:13.5px;font-weight:700;margin-top:12px;min-height:20px}
   .status.err{color:var(--err)} .status.ok{color:var(--tealD)}
 
-  .legal{padding:14px 32px;background:var(--ink);color:rgba(255,255,255,.78);font-size:10.5px;line-height:1.6}
-  .legal b{color:#fff}
+  .legal{padding:14px 32px;background:var(--off);border-top:1px solid var(--line);color:var(--muted);font-size:10.5px;line-height:1.6}
+  .legal b{color:var(--ink)}
 
   /* Merci */
   #merci{display:none}
@@ -145,14 +143,14 @@
   body.done #merci{display:block}
   .thanks{text-align:center;padding:10px 0 6px}
   .thanks h2{font-size:clamp(28px,5vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1.1}
-  .thanks h2 em{font-style:normal;color:var(--magenta)}
+  .thanks h2 em{font-style:normal;color:var(--tealD)}
   .thanks p{font-size:15px;color:var(--ink2);font-weight:600;margin-top:10px}
   .steps{list-style:none;counter-reset:s;margin-top:18px;display:flex;flex-direction:column;gap:10px}
-  .steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#FFFDF8;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--off);font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
   .steps li:before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-weight:900;font-size:12.5px;display:flex;align-items:center;justify-content:center}
   .steps li b{color:var(--ink)}
   .banner{border-radius:14px;padding:12px 16px;font-size:13.5px;font-weight:700;margin-top:16px;line-height:1.5}
-  .banner.warn{background:var(--butter);color:#6b5000}
+  .banner.warn{background:var(--sky);color:#24557f}
   .banner.info{background:var(--mint);color:#00574f}
 
   @media (max-width:700px){
@@ -179,7 +177,7 @@
     <svg class="paint" id="headPaint" viewBox="-110 -110 220 220" aria-hidden="true"></svg>
     <div class="brand-sig">
       <div class="logo">Flow<em>in</em></div>
-      <div class="ss-eyebrow">Animation</div>
+      <div class="ss-eyebrow">Animation digitale</div>
       <div class="ss-pill">Plug &amp; Play</div>
     </div>
     <div class="doc-meta">
@@ -235,7 +233,7 @@
     <div class="sec">
       <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
       <div class="abo">
-        <div><b>Abonnement annuel Flowin Animation</b><span>Quiz, roue, tombola, QR trac&eacute;s par support, tirages, billets, stock, relances, rapports.</span><span class="pill">Moins de 3 &euro; par jour</span></div>
+        <div><b>Abonnement annuel Flowin Animation</b><span>Quiz, roue, tombola, QR trac&eacute;s par support, tirages, billets, stock, relances, rapports.</span></div>
         <div class="pr">990 &euro;<small>HT / an</small></div>
       </div>
       <div class="choices" id="kitChoices">
@@ -284,7 +282,7 @@
 
     <div class="sec">
       <div class="sec-h"><span class="n">5</span><h2>Conditions et signature</h2></div>
-      <label class="chk" id="cgvRow"><input type="checkbox" id="cgvChk"><span>J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">conditions g&eacute;n&eacute;rales de vente Flowin Animation</a> <span class="projet">projet, en cours de validation juridique</span></span></label>
+      <label class="chk" id="cgvRow"><input type="checkbox" id="cgvChk"><span>J&rsquo;ai lu et j&rsquo;accepte les <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">conditions g&eacute;n&eacute;rales de vente Flowin Animation</a></span></label>
       <div class="sign" style="margin-top:14px">
         <div class="grid">
           <div class="f" data-f="signataire"><label for="f_signataire">Nom du signataire <i>*</i></label><input id="f_signataire" autocomplete="name"><div class="em">Indiquez le nom du signataire.</div></div>
@@ -353,7 +351,7 @@
   var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
   var TABLE = 'commandes_animation';
   var API_GC = '/api/paiement/gocardless';
-  var CGV_VERSION = 'am-v2-projet-2026-11-01';
+  var CGV_VERSION = 'am-v2-2026-11-01';
   var PRIX = { abonnement: 990, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
   var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
   var LS_FILE = 'flowin_am_file_attente', LS_DERNIERE = 'flowin_am_derniere';
@@ -388,9 +386,9 @@
       var d = 'M' + n1(pts[0][0]) + ',' + n1(pts[0][1]);
       for (i = 0; i < n; i++) { var p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
         d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]); }
-      return '<g transform="translate(' + cx + ',' + cy + ')" fill="' + col + '"><path d="' + d + 'Z"/><rect x="' + n1(-r * 0.3) + '" y="' + n1(r * 0.6) + '" width="' + n1(r * 0.16) + '" height="' + n1(r * 0.7) + '" rx="' + n1(r * 0.08) + '"/><circle cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.4) + '" r="' + n1(r * 0.1) + '"/></g>';
+      return '<g transform="translate(' + cx + ',' + cy + ')" fill="' + col + '"><path d="' + d + 'Z"/><circle cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.4) + '" r="' + n1(r * 0.1) + '"/></g>';
     }
-    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#F5A100', 7, 20, 0) + tache(44, '#E0218A', 3, -40, 30);
+    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#9FE0D4', 7, 20, 0) + tache(44, '#B5DAF4', 3, -40, 30);
   })();
 
   /* ---------- État ---------- */
@@ -594,10 +592,10 @@
     function T(t, xx, yy, sz, stl, col, al){ doc.setFont('helvetica', stl || 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); doc.text(S(t), xx, yy, al ? { align: al } : undefined); }
     function wrap(t, xx, yy, sz, col, w, lh){ doc.setFont('helvetica', 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); var ls = doc.splitTextToSize(S(t), w); for (var i = 0; i < ls.length; i++) { doc.text(ls[i], xx, yy); yy += lh; } return yy; }
     /* Signature de marque */
-    doc.setFillColor(254, 251, 168); doc.rect(0, 0, W, 38, 'F');
+    doc.setFillColor(217, 242, 234); doc.rect(0, 0, W, 38, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text('Flow', x, y + 4);
     var fw = doc.getTextWidth('Flow'); doc.setTextColor(mag[0], mag[1], mag[2]); doc.text('i', x + fw, y + 4); var iw = doc.getTextWidth('i'); doc.setTextColor(gold[0], gold[1], gold[2]); doc.text('n', x + fw + iw, y + 4);
-    T('A N I M A T I O N', x, y + 10.5, 7.5, 'bold', ink);
+    T('A N I M A T I O N   D I G I T A L E', x, y + 10.5, 7, 'bold', [120, 112, 124]);
     doc.setFillColor(240, 125, 40); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
     T('Bon de commande', W - M, y + 2, 18, 'bold', ink, 'right');
     T('Flowin Animation magasin', W - M, y + 8, 9.5, 'normal', mut, 'right');
@@ -629,7 +627,7 @@
     var tx = W - M - 70;
     T('Total HT', tx, y, 9.5, 'normal', mut); T(eur(t.ht), W - M, y, 9.5, 'bold', ink, 'right'); y += 5.5;
     T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;
-    doc.setFillColor(255, 246, 214); doc.rect(tx - 3, y, 73, 9, 'F');
+    doc.setFillColor(217, 242, 234); doc.rect(tx - 3, y, 73, 9, 'F');
     T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
     T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
     if (rec.mode_paiement === 'prelevement_sepa') {
@@ -645,7 +643,7 @@
       y = wrap('Document non signe (brouillon). La commande est formee a la signature electronique en ligne.', x, y, 8.5, mut, CW, 4.2);
     }
     y += 4;
-    wrap('Conditions generales de vente Flowin Animation : projet en cours de validation juridique, consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Abonnement annuel : duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
+    wrap('Conditions generales de vente Flowin Animation consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Abonnement annuel : duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
     wrap('Flowin est une marque de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN ' + IBAN + ' - BIC ' + BIC, x, 287, 6.5, mut, CW, 3);
     doc.save('bon-commande-flowin-' + rec.id + '.pdf');
     return true;
