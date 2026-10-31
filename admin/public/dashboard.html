@@ -11174,7 +11174,7 @@ function renderMasters(){
        + '<div class="page-actions"><button class="btn" onclick="mastersCharger(true);render()">↻ Recharger</button></div></div>';
   if(state.mastersErreur){ return html + '<div class="alert warn"><span class="ico">⚠️</span>'+esc(state.mastersErreur)+'</div></div>'; }
   if(!d){ return html + '<div class="empty-block">Chargement des masters…</div></div>'; }
-  if(d.tableAbsente){ html += '<div class="alert warn" style="margin-bottom:14px"><span class="ico">⚠️</span>Table <b>jeux_masters</b> absente : les valeurs Flowin du code s\'appliquent. Aperçu et édition possibles ; l\'enregistrement sera disponible après application de <b>sql/2026-10-31-jeux-masters.sql</b>.</div>'; }
+  if(d.tableAbsente){ html += '<div class="alert warn" style="margin-bottom:14px"><span class="ico">⚠️</span><span>Table <b>jeux_masters</b> absente : les valeurs Flowin du code s\'appliquent. Aperçu et édition possibles ; l\'enregistrement sera disponible après application de <b>sql/2026-10-31-jeux-masters.sql</b>.</span></div>'; }
   html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
   (d.ordre||[]).forEach(function(id){
     var m = d.masters[id], on = state.masterTab===id, n = mastersUsages(id).length;
