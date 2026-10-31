@@ -34,10 +34,10 @@
   var F = {
     C: C, W: W, H: H, SAFE: SAFE, prog: prog, easeOut: easeOut, easeInOut: easeInOut, clamp: clamp, id: id, esc: esc,
     // Mot(s) géant(s) empilés en haut. lt = temps local ; entree = false pour l image 0.
-    mots: function (lignes, lt, col, entree, y0) {
+    mots: function (lignes, lt, col, entree, y0, max) {
       var y = y0 || SAFE.top + 8, g = ''
       lignes.forEach(function (m, i) {
-        var s = tailles[m] || 100, p = entree === false ? 1 : easeOut(prog(lt, 0.12 + i * 0.12, 0.38))
+        var s = Math.min(tailles[m] || 100, max || 130), p = entree === false ? 1 : easeOut(prog(lt, 0.12 + i * 0.12, 0.38))
         y += s * 0.76
         g += '<text class="safe" data-cap="' + (0.74 * s).toFixed(1) + '" x="30" y="' + (y + (1 - p) * 40).toFixed(1) + '" font-family="Manrope" font-weight="800" font-size="' + s + '" letter-spacing="' + (-0.04 * s).toFixed(1) + '" fill="' + col + '" opacity="' + p.toFixed(3) + '">' + esc(m) + '</text>'
         y += s * 0.16

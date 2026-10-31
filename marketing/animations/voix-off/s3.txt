@@ -1,0 +1,63 @@
+3 · Commerce : animation — La semaine où la boutique de Claire a changé
+Durée : 44 s · 9:16 · MP4 muet (voix et musique à poser au montage)
+
+DIRECTION DE VOIX (toutes les vidéos) : Voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra dynamique. Tutoiement côté joueurs, vouvoiement côté pros.
+Adresse dans ce film : vouvoiement (pros).
+MUSIQUE : Groove funk-pop optimiste, 100–108 BPM, basse marquée ; montée progressive jusqu'au bilan.
+APPEL À L'ACTION : Installez Flowin.
+
+SCRIPT HORODATÉ
+
+[0:00 – 0:03] Lundi
+   Voix off : Lundi. La boutique de Claire est calme.
+   À l'écran : LUNDI. LA BOUTIQUE EST CALME.
+
+[0:03 – 0:05,5] Le kit
+   Voix off : Le kit Flowin arrive.
+   À l'écran : LE KIT FLOWIN ARRIVE.
+
+[0:05,5 – 0:09] On colle
+   Voix off : Elle colle l’affiche. C’est tout. Pas d’appli, pas de formation.
+   À l'écran : ON COLLE. C’EST TOUT.
+
+[0:09 – 0:12] Mardi
+   Voix off : Mardi, elle l’annonce sur ses réseaux.
+   À l'écran : MARDI. ELLE LE DIT SUR SES RÉSEAUX.
+
+[0:12 – 0:15] Les passants
+   Voix off : Les passants s’arrêtent… et flashent.
+   À l'écran : LES PASSANTS S’ARRÊTENT.
+
+[0:15 – 0:17,5] Ils jouent
+   Voix off : Ils jouent : un quiz, la roulette.
+   À l'écran : ILS JOUENT.
+
+[0:17,5 – 0:21,5] Les lots
+   Voix off : Claire choisit ses lots : écouler un stock, lancer une nouveauté, une remise après achat.
+   À l'écran : SES LOTS, SES OBJECTIFS.
+
+[0:21,5 – 0:25] Dimanche
+   Voix off : Dimanche : le tirage se fait en un clic, et le billet part tout seul chez le gagnant.
+   À l'écran : DIMANCHE. TIRAGE EN UN CLIC. · Le billet part tout seul.
+   Écart avec le scénario validé (voix off d'origine : « Dimanche : tirage automatique. La liste des gagnants est diffusée. » ; écran d'origine : « DIMANCHE. TIRAGE AUTOMATIQUE. ») : Il n’existe pas de tirage automatique programmé : le commerçant clique « Lancer le tirage » puis « Confirmer et envoyer le billet » (components/pro/GagnantsClient.tsx) ; c’est l’envoi du billet qui est automatique. « Liste des gagnants diffusée » retiré : l’app n’a pas de diffusion automatique de la liste (les gagnants sont annoncés par l’organisateur sur ses réseaux).
+
+[0:25 – 0:29] Le gagnant revient
+   Voix off : Lundi suivant, un gagnant passe la porte : un nouveau client.
+   À l'écran : UN FLASH = UN NOUVEAU CLIENT.
+
+[0:29 – 0:32,5] Le bilan
+   Voix off : Elle voit ce qui marche : la vitrine, la caisse, les réseaux.
+   À l'écran : ELLE SAIT CE QUI MARCHE.
+
+[0:32,5 – 0:35,5] La relance
+   Voix off : Et elle relance ses clients, en un clic.
+   À l'écran : ELLE RELANCE SES CLIENTS.
+   Écart avec le scénario validé (voix off d'origine : « Et elle relance ses clients, en un clic. » ; écran d'origine : « ELLE RELANCE SES CLIENTS. ») : Pas de bouton nommé « Relancer » : l’écran CRM réel filtre « Opt-in seulement », sélectionne les contacts et propose « Envoyer un email » (components/pro/CrmPro.tsx). C’est ce qui est montré ; la voix off « en un clic » reste vraie.
+
+[0:35,5 – 0:39] Animation = visibilité
+   Voix off : Une animation, c’est de la communication. Et de la visibilité.
+   À l'écran : ANIMATION = COMMUNICATION = VISIBILITÉ.
+
+[0:39 – 0:44] Fin
+   Voix off : Et vous ? Installez Flowin.
+   À l'écran : INSTALLEZ FLOWIN.

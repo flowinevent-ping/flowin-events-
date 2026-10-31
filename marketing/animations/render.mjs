@@ -37,7 +37,8 @@ async function planche(id, toutes) {
   const { ctx, page, erreurs } = await ouvrir(id)
   const info = await page.evaluate(() => ({ duration: window.ANIM.duration, scenes: window.ANIM.scenes, mode: window.SCENARIO.end.mode }))
   const sc = info.scenes
-  const minLegende = info.duration < 20 ? 2 : 3
+  // v3 : plans courts validés (2,5 s mini), gros titre lisible >= 1,5 s.
+  const minLegende = id.endsWith('-v3') ? 2.5 : info.duration < 20 ? 2 : 3
   const avertissements = []
   // Controle sur toute la video : zones sures et textes reduits, a plusieurs
   // instants de chaque scene (apres le fondu d entree).
@@ -119,7 +120,11 @@ for (const id of videos) {
   if (r.avertissements.length) console.log('  avertissements :\n   ' + r.avertissements.join('\n   '))
   if (r.erreurs.length) console.log('  erreurs page :', r.erreurs)
 }
-writeFileSync(join(ici, 'planches', 'rapport.json'), JSON.stringify(rapport.map(({ id, duration, qr, avertissements, erreurs }) => ({ id, duration, qr, avertissements, erreurs })), null, 2))
+// Le rapport garde les vidéos non relancées et remplace celles du jour.
+let ancien = []
+try { ancien = JSON.parse(readFileSync(join(ici, 'planches', 'rapport.json'), 'utf8')) } catch (e) { ancien = [] }
+const neufs = rapport.map(({ id, duration, qr, avertissements, erreurs }) => ({ id, duration, qr, avertissements, erreurs }))
+writeFileSync(join(ici, 'planches', 'rapport.json'), JSON.stringify(ancien.filter(a => !neufs.some(n => n.id === a.id)).concat(neufs), null, 2))
 
 if (!planchesSeules) {
   for (const id of videos) {
