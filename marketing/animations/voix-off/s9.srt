@@ -1,0 +1,23 @@
+1
+00:00:00,150 --> 00:00:03,850
+Votre animation, en quelques étapes.
+
+2
+00:00:04,150 --> 00:00:08,350
+Choisissez votre jeu.
+
+3
+00:00:08,650 --> 00:00:12,850
+Ajoutez vos lots.
+
+4
+00:00:13,150 --> 00:00:17,850
+Votre QR et vos affiches sont prêts.
+
+5
+00:00:18,150 --> 00:00:23,350
+Collez. C’est parti.
+
+6
+00:00:23,650 --> 00:00:29,850
+Flowin. Plug and play.
