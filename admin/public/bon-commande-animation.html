@@ -5,37 +5,34 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bon de commande Flowin Animation</title>
 <meta name="description" content="Bon de commande en ligne Flowin Animation magasin : formule, signature électronique, paiement par virement ou prélèvement SEPA.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#3B2418; --ink2:#5A3E30; --muted:#8A6B5A; --faint:#A88B7A;
-    --teal:#F26B4F; --tealD:#C94F35; --tealL:#FDE7DF; --green:#13A89E;
-    --mint:#FFF6EC; --sky:#FFEFD2; --off:#FFF6EC;
-    --paper:#FFF6EC; --line:#F3D9C4; --white:#fff; --err:#B3261E; --hl:#FFEFD2;
+    --ink:#1B3A5C; --ink2:#2C4A6B; --muted:#5a6b80; --faint:#8A97A8;
+    --teal:#00B4A0; --tealD:#00806F; --tealL:#DDF4F0; --blue:#3B5CC4; --green:#0B7A4F;
+    --mint:#F4F6F9; --sky:#E3E9F8; --off:#F4F6F9; --cream:#F4F6F9;
+    --paper:#F4F6F9; --line:#DCE3EC; --white:#fff; --err:#C62F2F; --hl:#E3E9F8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--paper);font-family:'Manrope',system-ui,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{background:var(--paper);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
   button,input,select,textarea{font-family:inherit}
 
   .flowin-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:#fff;color:var(--ink);border-bottom:1px solid var(--line);
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;position:sticky;top:0;z-index:10000}
   .flowin-topbar a{color:var(--ink);text-decoration:none;font-size:13px;font-weight:700;opacity:.85;white-space:nowrap}
   .flowin-topbar .flowin-topbar-brand{font-size:14px;font-weight:800;white-space:nowrap}
-  .flowin-topbar .flowin-topbar-brand b{background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .flowin-topbar .flowin-topbar-brand b{color:#3B5CC4}
 
   .wrap{max-width:880px;margin:0 auto;padding:24px 16px 60px}
-  .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(59,36,24,.3)}
+  .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(27,58,92,.3)}
 
   /* En-tête : signature de marque */
   .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--cream,#FFF6EC);overflow:hidden;border-bottom:1px solid var(--line)}
   .head svg.paint{position:absolute;left:170px;bottom:-60px;width:190px;height:190px;pointer-events:none;opacity:.95}
   .brand-sig{display:flex;flex-direction:column;align-items:flex-start;position:relative;z-index:1}
   .logo{font-weight:900;letter-spacing:-.03em;line-height:1;font-size:46px;color:var(--ink)}
-  .logo em{font-style:normal;background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(59,36,24,.6);margin-top:14px}
-  .ss-pill{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
+  .logo em{font-style:normal;color:var(--blue)}
+  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(27,58,92,.6);margin-top:14px}
+  .ss-pill{display:inline-block;margin-top:10px;background:var(--teal);color:#fff;font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
   .doc-meta{position:relative;z-index:1;text-align:right}
   .doc-type{font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1.05}
   .doc-sub{font-size:13px;font-weight:700;color:var(--ink2);margin-top:4px}
@@ -68,8 +65,8 @@
   .f.err .em{display:block}
   .row2{display:grid;grid-template-columns:110px 1fr;gap:10px}
 
-  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #E8C6AE;border-radius:14px;padding:12px 14px;cursor:pointer;background:var(--off)}
-  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#FBE9DA;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
+  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #CBD5E2;border-radius:14px;padding:12px 14px;cursor:pointer;background:var(--off)}
+  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#E8EDF3;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
   .logo-drop .prev img{max-width:100%;max-height:100%;display:block}
   .logo-drop b{display:block;font-size:13.5px;font-weight:800}
   .logo-drop span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
@@ -79,16 +76,18 @@
   .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .choices.c3{grid-template-columns:repeat(3,1fr)}
   .guarbox{margin-top:16px;border:2px solid var(--teal);border-radius:18px;padding:16px 18px;background:#fff}
-  .guarbox .gtag{display:inline-block;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:10px}
+  .guarbox .gtag{display:inline-block;background:var(--blue);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:10px}
   .guarbox .gx{display:none;margin-top:12px;background:var(--hl);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700}
   .guarbox .gx b{font-size:20px;color:var(--tealD)}
   .guarbox .gd{font-size:12px;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.5}
-  .guarbox .gd a{color:var(--tealD);font-weight:800}
+  .guarbox .gd a{color:var(--blue);font-weight:800}
+  .gcert{display:none;margin-top:10px;background:var(--green);color:#fff;font-size:12px;font-weight:800;padding:5px 11px;border-radius:100px;width:fit-content}
+  .f input[readonly],.f select[disabled]{background:var(--off);color:var(--ink);opacity:1;font-weight:800}
   .f select{appearance:auto}
   .choice{position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 16px 14px;cursor:pointer;background:#fff;transition:border-color .15s,box-shadow .15s;text-align:left;width:100%;color:var(--ink)}
-  .choice:hover{border-color:#E0B79B}
-  .choice.sel{border-color:var(--teal);box-shadow:0 10px 26px -16px rgba(59,36,24,.6)}
-  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #E8C6AE}
+  .choice:hover{border-color:#AEBBCB}
+  .choice.sel{border-color:var(--teal);box-shadow:0 10px 26px -16px rgba(27,58,92,.6)}
+  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #CBD5E2}
   .choice.sel .ck{border-color:var(--teal);background:var(--teal)}
   .choice.sel .ck:after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
   .choice .cn{font-size:16px;font-weight:900;padding-right:28px}
@@ -96,7 +95,7 @@
   .choice .cp{font-size:20px;font-weight:900;margin-top:10px;letter-spacing:-.01em}
   .choice .cp small{font-size:11.5px;color:var(--muted);font-weight:800}
   .choice.disabled{opacity:.6;cursor:not-allowed;background:var(--off)}
-  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sky);color:#7A4A00;border-radius:100px;padding:3px 9px}
+  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sky);color:#24457F;border-radius:100px;padding:3px 9px}
   .abo{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#fff;color:var(--ink);border:1.5px solid var(--teal);border-radius:16px;padding:16px 18px;margin-bottom:12px}
   .abo b{font-size:16px;font-weight:900;display:block}
   .abo span{font-size:12.5px;opacity:.75;font-weight:600;display:block;margin-top:3px}
@@ -105,7 +104,7 @@
   .opt-qty{display:none;align-items:center;gap:10px;margin-top:10px;font-size:12px;font-weight:800;color:var(--ink2)}
   .choice.sel .opt-qty{display:flex}
   .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:100px;overflow:hidden;background:#fff}
-  .stepper button{width:34px;height:34px;border:none;background:#FBE9DA;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .stepper button{width:34px;height:34px;border:none;background:#E8EDF3;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
   .stepper input{width:44px;text-align:center;border:none;font-size:15px;font-weight:900;outline:none;padding:0;color:var(--ink);background:#fff}
 
   /* Récapitulatif */
@@ -126,7 +125,7 @@
   .paybox b{color:var(--ink)}
   .paybox .iban{font-variant-numeric:tabular-nums;letter-spacing:.03em}
   .chk{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.45;color:var(--ink)}
-  .chk input{width:20px;height:20px;flex:none;accent-color:#F26B4F;margin-top:1px}
+  .chk input{width:20px;height:20px;flex:none;accent-color:#00B4A0;margin-top:1px}
   .chk a{color:var(--tealD);font-weight:800}
   .chk.err{color:var(--err)}
 
@@ -135,7 +134,7 @@
   .sign .clock b{color:var(--ink);font-variant-numeric:tabular-nums}
 
   .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(242,107,79,.7)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(0,180,160,.55)}
   .btn[disabled]{opacity:.55;cursor:default}
   .btn.ghost{background:#fff;color:var(--tealD);border:1.5px solid var(--teal);box-shadow:none}
   .btn.dark{background:var(--teal)}
@@ -158,7 +157,7 @@
   .steps li:before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-weight:900;font-size:12.5px;display:flex;align-items:center;justify-content:center}
   .steps li b{color:var(--ink)}
   .banner{border-radius:14px;padding:12px 16px;font-size:13.5px;font-weight:700;margin-top:16px;line-height:1.5}
-  .banner.warn{background:var(--sky);color:#7A4A00}
+  .banner.warn{background:var(--sky);color:#24457F}
   .banner.info{background:var(--mint);color:#00574f}
 
   @media (max-width:700px){
@@ -254,8 +253,10 @@
       </div>
       <div class="guarbox" id="guarBox">
         <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents</span>
+        <div class="gd" id="garNon" style="font-size:13px">Pour adh&eacute;rer &agrave; la garantie, remplissez et certifiez votre fiche d&eacute;couverte sur la <a href="/plaquette-animation-magasin.html#garantie">page Garantie</a>.</div>
         <label class="chk" id="garRow"><input type="checkbox" id="garChk"><span>J&rsquo;adh&egrave;re &agrave; l&rsquo;offre satisfait ou rembours&eacute;</span></label>
-        <div class="grid" style="margin-top:12px">
+        <div class="gcert" id="garCert"></div>
+        <div class="grid" style="margin-top:12px" id="garGrid">
           <div class="f" data-f="panier"><label for="f_panier">Panier moyen de votre activit&eacute; <small>(en &euro;)</small></label><input id="f_panier" inputmode="decimal" autocomplete="off" placeholder="ex. : 25"><div class="em">Indiquez votre panier moyen.</div></div>
           <div class="f" data-f="flux"><label for="f_flux">Flux journalier estim&eacute;</label><select id="f_flux"><option value="">Choisir</option><option value="15+">Plus de 15 clients par jour</option><option value="50+">Plus de 50 clients par jour</option><option value="100+">Plus de 100 clients par jour</option></select><div class="em">Choisissez votre flux journalier.</div></div>
         </div>
@@ -403,11 +404,11 @@
         d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]); }
       return '<g transform="translate(' + cx + ',' + cy + ')" fill="' + col + '"><path d="' + d + 'Z"/><circle cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.4) + '" r="' + n1(r * 0.1) + '"/></g>';
     }
-    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#FBD3B8', 7, 20, 0) + tache(44, '#FFE2A8', 3, -40, 30);
+    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#C9D5F4', 7, 20, 0) + tache(44, '#BDEBE3', 3, -40, 30);
   })();
 
   /* ---------- État ---------- */
-  var st = { offre: 'annuelle', nb: 1, kit: 'digital', quiz: 0, bonus: 0, garantie: false, pay: 'virement', gcDispo: false, logo: null };
+  var st = { offre: 'annuelle', nb: 1, kit: 'digital', quiz: 0, bonus: 0, garantie: false, certif: null, pay: 'virement', gcDispo: false, logo: null };
   var now = new Date();
   function genId(){
     var alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = '', i, buf = null;
@@ -459,8 +460,11 @@
     $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
     var payant = st.offre !== 'kit_digital';
     $('guarBox').style.display = payant ? 'block' : 'none';
-    if (!payant) st.garantie = false;
+    if (!payant || !st.certif) st.garantie = false;
     $('garChk').checked = st.garantie;
+    $('garNon').style.display = st.certif ? 'none' : 'block';
+    $('garRow').style.display = st.certif ? 'flex' : 'none';
+    $('garGrid').style.display = st.certif ? 'grid' : 'none';
     var X = clientsGarantie(), gx = $('garX');
     if (X) { gx.style.display = 'block'; gx.innerHTML = 'Flowin doit vous apporter <b>' + X + ' clients</b> sur 12 mois.'; } else gx.style.display = 'none';
     if (t.ttc <= 0) { st.pay = 'aucun'; $('secPay').style.display = 'none'; } else { if (st.pay === 'aucun') st.pay = 'virement'; $('secPay').style.display = 'block'; }
@@ -488,9 +492,18 @@
     var b = qs('boutiques'); if (b) st.nb = clampInt(b, 1, 200);
     var k = qs('kit'); if (k === 'physique' || k === 'digital') st.kit = k;
     var of = qs('offre'); if (of === 'annuelle' || of === 'mensuelle' || of === 'kit_digital') st.offre = of;
-    var pm = qs('panier'); if (pm && !isNaN(parseFloat(pm))) $('f_panier').value = String(parseFloat(pm)).replace('.', ',');
-    var fx = qs('flux'); if (fx === '15+' || fx === '50+' || fx === '100+') $('f_flux').value = fx;
-    if (qs('garantie') === '1') st.garantie = true;
+    /* Garantie : seules les données certifiées sur la page Garantie sont acceptées, puis verrouillées */
+    var pm = parseFloat(qs('panier') || ''), fx = qs('flux'), cle = qs('certif_le'), cpar = qs('certif_par');
+    var dCert = cle ? new Date(cle) : null;
+    if (qs('garantie') === '1' && !isNaN(pm) && pm > 0 && (fx === '15+' || fx === '50+' || fx === '100+') && dCert && !isNaN(dCert.getTime()) && cpar) {
+      st.certif = { le: dCert.toISOString(), par: cpar.slice(0, 120) };
+      st.garantie = true;
+      $('f_panier').value = String(pm).replace('.', ','); $('f_panier').readOnly = true;
+      $('f_flux').value = fx; $('f_flux').disabled = true;
+      $('garChk').disabled = true;
+      $('garCert').style.display = 'block';
+      $('garCert').textContent = 'Certifi\u00e9 le ' + fmtDateHeure(dCert) + ' par ' + st.certif.par;
+    }
     if (qs('quiz')) st.quiz = clampInt(qs('quiz'), 1, 20);
     if (qs('bonus')) st.bonus = clampInt(qs('bonus'), 1, 20);
     var c = qs('commercial') || qs('vendeur'); if (c) $('f_commercial').value = c.slice(0, 60);
@@ -504,8 +517,7 @@
   for (var ki = 0; ki < offBtns.length; ki++) offBtns[ki].addEventListener('click', function(){ st.offre = this.getAttribute('data-offre'); render(); });
   $('optKit').addEventListener('click', function(){ st.kit = st.kit === 'physique' ? 'digital' : 'physique'; render(); });
   $('optKit').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); st.kit = st.kit === 'physique' ? 'digital' : 'physique'; render(); } });
-  $('garChk').addEventListener('change', function(){ st.garantie = this.checked; render(); });
-  $('f_panier').addEventListener('input', function(){ render(); });
+  $('garChk').addEventListener('change', function(){ if (st.certif) { st.garantie = true; this.checked = true; } render(); });
   $('f_flux').addEventListener('change', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
   function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }
   function bindOpt(id, name){
@@ -591,7 +603,7 @@
     check('email', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('f_email')));
     check('tel', val('f_tel').replace(/[^0-9+]/g, '').length >= 8);
     var pm = val('f_panier'), pmv = parseFloat(pm.replace(',', '.'));
-    check('panier', st.garantie ? (!isNaN(pmv) && pmv > 0) : (!pm || !isNaN(pmv)));
+    check('panier', !st.garantie || (!isNaN(pmv) && pmv > 0 && !!st.certif));
     check('flux', !st.garantie || !!$('f_flux').value);
     if (avecSignature) {
       check('signataire', val('f_signataire').length > 1);
@@ -611,8 +623,9 @@
       adresse: val('f_adresse'), cp: val('f_cp'), ville: val('f_ville'),
       contact_nom: val('f_contact'), contact_fonction: val('f_fonction') || null,
       email: val('f_email').toLowerCase(), tel: val('f_tel'),
-      nb_boutiques: st.nb, panier_moyen: pm ? parseFloat(pm.replace(',', '.')) : null,
-      offre: st.offre, flux_journalier: $('f_flux').value || null, garantie: !!st.garantie, garantie_clients_objectif: st.garantie ? clientsGarantie() : null,
+      nb_boutiques: st.nb, panier_moyen: st.garantie && pm ? parseFloat(pm.replace(',', '.')) : null,
+      offre: st.offre, flux_journalier: st.garantie ? ($('f_flux').value || null) : null, garantie: !!st.garantie, garantie_clients_objectif: st.garantie ? clientsGarantie() : null,
+      garantie_certifiee_le: st.garantie && st.certif ? st.certif.le : null, garantie_certifiee_par: st.garantie && st.certif ? st.certif.par : null,
       logo: st.logo, kit: st.kit, opt_quiz_qte: st.quiz, opt_bonus_qte: st.bonus,
       commercial: val('f_commercial') || null,
       montant_abonnement_ht: t.abo, montant_kit_ht: t.kit, montant_options_ht: t.opt,
@@ -633,22 +646,22 @@
     function S(t){ return String(t == null ? '' : t).replace(/ /g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
     var doc = new J({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     var W = 210, M = 15, x = M, y = 18, CW = W - 2 * M;
-    var ink = [59, 36, 24], mut = [138, 107, 90], mag = [224, 33, 138], gold = [245, 161, 0], teal = [201, 79, 53];
+    var ink = [27, 58, 92], mut = [90, 107, 128], mag = [59, 92, 196], gold = [59, 92, 196], teal = [0, 128, 111];
     function T(t, xx, yy, sz, stl, col, al){ doc.setFont('helvetica', stl || 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); doc.text(S(t), xx, yy, al ? { align: al } : undefined); }
     function wrap(t, xx, yy, sz, col, w, lh){ doc.setFont('helvetica', 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); var ls = doc.splitTextToSize(S(t), w); for (var i = 0; i < ls.length; i++) { doc.text(ls[i], xx, yy); yy += lh; } return yy; }
     /* Signature de marque */
-    doc.setFillColor(255, 246, 236); doc.rect(0, 0, W, 38, 'F');
+    doc.setFillColor(244, 246, 249); doc.rect(0, 0, W, 38, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text('Flow', x, y + 4);
     var fw = doc.getTextWidth('Flow'); doc.setTextColor(mag[0], mag[1], mag[2]); doc.text('i', x + fw, y + 4); var iw = doc.getTextWidth('i'); doc.setTextColor(gold[0], gold[1], gold[2]); doc.text('n', x + fw + iw, y + 4);
     T('A N I M A T I O N   D I G I T A L E', x, y + 10.5, 7, 'bold', [120, 112, 124]);
-    doc.setFillColor(240, 125, 40); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
+    doc.setFillColor(0, 180, 160); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
     T('Bon de commande', W - M, y + 2, 18, 'bold', ink, 'right');
     T('Flowin Animation magasin', W - M, y + 8, 9.5, 'normal', mut, 'right');
     T('No ' + rec.id, W - M, y + 14, 9, 'bold', ink, 'right');
     T('Date : ' + fmtDate(new Date()), W - M, y + 19, 8.5, 'normal', mut, 'right');
     y = 48;
     var cw = (CW - 8) / 2;
-    doc.setDrawColor(243, 217, 196); doc.roundedRect(x, y, cw, 32, 2, 2); doc.roundedRect(x + cw + 8, y, cw, 32, 2, 2);
+    doc.setDrawColor(220, 227, 236); doc.roundedRect(x, y, cw, 32, 2, 2); doc.roundedRect(x + cw + 8, y, cw, 32, 2, 2);
     T('PRESTATAIRE', x + 4, y + 6, 7, 'bold', teal); T('BAITA EURL - Flowin', x + 4, y + 12, 10.5, 'bold', ink);
     T('40 rue des Arcs, 06140 Vence', x + 4, y + 17, 8, 'normal', mut); T('SIRET 512 026 907 00018', x + 4, y + 21.5, 8, 'normal', mut);
     T('TVA FR82 512 026 907', x + 4, y + 26, 8, 'normal', mut); T('04 93 59 91 37 - info@opconsult.co', x + 4, y + 30, 7.5, 'normal', mut);
@@ -661,7 +674,7 @@
     T('Boutiques : ' + rec.nb_boutiques + (rec.panier_moyen ? '   -   Panier moyen declare : ' + eur(rec.panier_moyen) : '') + (rec.commercial ? '   -   Commercial : ' + rec.commercial : ''), x, y, 8.5, 'normal', mut);
     y += 7;
     T('DESIGNATION', x, y, 7.5, 'bold', teal); T('QTE', W - M - 38, y, 7.5, 'bold', teal, 'right'); T('MONTANT HT', W - M, y, 7.5, 'bold', teal, 'right');
-    y += 2.5; doc.setDrawColor(243, 217, 196); doc.line(x, y, W - M, y); y += 5.5;
+    y += 2.5; doc.setDrawColor(220, 227, 236); doc.line(x, y, W - M, y); y += 5.5;
     var t = calc();
     for (var i = 0; i < t.lignes.length; i++) {
       var l = t.lignes[i];
@@ -672,7 +685,7 @@
     var tx = W - M - 70;
     T('Total HT', tx, y, 9.5, 'normal', mut); T(eur(t.ht), W - M, y, 9.5, 'bold', ink, 'right'); y += 5.5;
     T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;
-    doc.setFillColor(255, 239, 210); doc.rect(tx - 3, y, 73, 9, 'F');
+    doc.setFillColor(227, 233, 248); doc.rect(tx - 3, y, 73, 9, 'F');
     T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
     T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
     if (rec.mode_paiement === 'prelevement_sepa') {
@@ -683,7 +696,7 @@
       y = wrap((rec.offre === 'mensuelle' ? 'Offre mensuelle : virement chaque mois de ' + eur(t.aboTtc) + ' TTC. Premier virement : ' : 'Virement bancaire de ') + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
     }
     y += 3;
-    if (rec.garantie) { y = wrap('Offre satisfait ou rembourse (premiers adherents) : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '). Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2); }
+    if (rec.garantie) { y = wrap('Offre satisfait ou rembourse (premiers adherents) : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '), donnees certifiees par ' + (rec.garantie_certifiee_par || '-') + ' le ' + (rec.garantie_certifiee_le ? fmtDateHeure(new Date(rec.garantie_certifiee_le)) : '-') + ', non modifiables. Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2); }
     y += 4;
     T('SIGNATURE ELECTRONIQUE', x, y, 7.5, 'bold', teal); y += 5;
     if (signe) {
@@ -779,7 +792,7 @@
     if (!valider(true)) { status('Merci de compléter les champs en rouge.', 'err'); return; }
     var btn = this, quand = new Date(), rec = collecte(quand);
     btn.disabled = true; status('Enregistrement de votre commande…', '');
-    var memo = { rec: rec, st: { offre: st.offre, garantie: st.garantie, nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
+    var memo = { rec: rec, st: { offre: st.offre, garantie: st.garantie, certif: st.certif, nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
     lsSet(LS_DERNIERE, memo);
     if (!window.fetch) { btn.disabled = false; status('Navigateur trop ancien pour l’envoi en ligne. Téléchargez le PDF et envoyez-le à Flowin.', 'err'); return; }
     inserer(rec).then(function(){
@@ -813,7 +826,7 @@
       $('mSub').innerHTML = 'Commande n° <b>' + esc(cid) + '</b>. Flowin vous confirme la suite par email.';
       return;
     }
-    st.offre = memo.st.offre || 'annuelle'; st.garantie = !!memo.st.garantie; st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
+    st.offre = memo.st.offre || 'annuelle'; st.garantie = !!memo.st.garantie; st.certif = memo.st.certif || null; st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
     ID = memo.rec.id; render();
     if (retour === 'gocardless') {
       afficherMerci(memo.rec, { sepaMsg: '<b>Mandat SEPA signé.</b> GoCardless le transmet à votre banque ; le prélèvement apparaîtra sur votre relevé sous quelques jours ouvrés. Vous recevez une notification de GoCardless avant chaque prélèvement.' });

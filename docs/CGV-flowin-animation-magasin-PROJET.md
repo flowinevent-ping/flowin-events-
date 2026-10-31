@@ -72,7 +72,8 @@ Les sommes versées pour les kits et les options restent acquises.
 
 Réservée aux premiers adhérents [nombre ou date limite à compléter] ayant souscrit l'offre mensuelle ou l'offre annuelle et coché la case d'adhésion sur le bon de commande.
 
-- **Objectif :** nombre de clients égal au prix de l'offre sur 12 mois (990 € pour l'offre annuelle, 110 € × 12 pour l'offre mensuelle) divisé par le panier moyen déclaré par le Client sur le bon de commande, arrondi à l'unité supérieure.
+- **Données certifiées :** le panier moyen et le flux journalier sont déclarés par le Client dans sa fiche découverte et certifiés exacts par lui (case de certification, nom du déclarant, date et heure enregistrées). Une fois certifiées, ces valeurs ne peuvent plus être modifiées ; elles sont reprises telles quelles dans le bon de commande signé et servent de base unique au calcul de la garantie. Pour les changer, le Client passe une nouvelle commande.
+- **Objectif :** nombre de clients égal au prix de l'offre sur 12 mois (990 € pour l'offre annuelle, 110 € × 12 pour l'offre mensuelle) divisé par le panier moyen certifié, arrondi à l'unité supérieure.
 - **Période :** 12 mois à compter de la prise d'effet.
 - **Condition :** au moins **4 animations** mises en place par le Client sur la période.
 - **Client venu :** un gagnant dont le retrait du lot a été validé en boutique dans l'application Flowin.

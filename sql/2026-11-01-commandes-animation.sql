@@ -46,6 +46,9 @@ create table if not exists public.commandes_animation (
   -- Offre spéciale premiers adhérents « satisfait ou remboursé » (offres mensuelle et annuelle)
   garantie                    boolean not null default false,
   garantie_clients_objectif   integer,              -- recalculé : arrondi sup. (prix sur 12 mois ÷ panier moyen)
+  garantie_certifiee_le       timestamptz,          -- horodatage de la certification par le client (page Garantie)
+  garantie_certifiee_par      text check (char_length(garantie_certifiee_par) <= 120),
+  -- panier_moyen, flux_journalier, garantie*, certification : figés à l'insertion (trigger plus bas)
 
   -- Formule
   offre                       text not null default 'annuelle' check (offre in ('kit_digital','mensuelle','annuelle')),
@@ -133,10 +136,13 @@ begin
   if NEW.montant_ttc = 0 then NEW.mode_paiement := 'aucun'; NEW.prelevement_inclut_reste := false;
   elsif NEW.mode_paiement = 'aucun' then NEW.mode_paiement := 'virement'; end if;
 
-  -- Garantie : réservée aux offres payantes, avec un panier moyen déclaré
-  if NEW.offre = 'kit_digital' or NEW.panier_moyen is null or NEW.panier_moyen <= 0 then
+  -- Garantie : réservée aux offres payantes, avec des données certifiées par le client
+  if NEW.offre = 'kit_digital' or NEW.panier_moyen is null or NEW.panier_moyen <= 0
+     or NEW.garantie_certifiee_le is null or coalesce(NEW.garantie_certifiee_par, '') = '' then
     NEW.garantie := false;
     NEW.garantie_clients_objectif := null;
+    NEW.garantie_certifiee_le := null;
+    NEW.garantie_certifiee_par := null;
   elsif NEW.garantie then
     NEW.garantie_clients_objectif := ceil((case when NEW.offre = 'annuelle' then c_annuel else c_mensuel * 12 end) / NEW.panier_moyen);
   else
@@ -161,6 +167,34 @@ drop trigger if exists trg_commandes_animation_avant_insert on public.commandes_
 create trigger trg_commandes_animation_avant_insert
 before insert on public.commandes_animation
 for each row execute function public.commandes_animation_avant_insert();
+
+-- ---------------------------------------------------------------------------
+-- Anti-triche : les données certifiées sont figées après insertion. Aucune mise à
+-- jour possible, y compris en service_role ; pour changer, nouvelle commande.
+-- ---------------------------------------------------------------------------
+create or replace function public.commandes_animation_donnees_figees()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if NEW.panier_moyen is distinct from OLD.panier_moyen
+     or NEW.flux_journalier is distinct from OLD.flux_journalier
+     or NEW.garantie is distinct from OLD.garantie
+     or NEW.garantie_clients_objectif is distinct from OLD.garantie_clients_objectif
+     or NEW.garantie_certifiee_le is distinct from OLD.garantie_certifiee_le
+     or NEW.garantie_certifiee_par is distinct from OLD.garantie_certifiee_par then
+    raise exception 'Donnees certifiees non modifiables (commande %). Creer une nouvelle commande.', OLD.id
+      using errcode = 'P0001';
+  end if;
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_commandes_animation_donnees_figees on public.commandes_animation;
+create trigger trg_commandes_animation_donnees_figees
+before update on public.commandes_animation
+for each row execute function public.commandes_animation_donnees_figees();
 
 -- ---------------------------------------------------------------------------
 -- RLS minimale
