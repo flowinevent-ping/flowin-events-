@@ -19,6 +19,12 @@
  *   1. L'animation / le super event   2. Jeu   3. Lots
  *   [4. Participants — super event, SA]   fin. Diffusion & QR
  *
+ * Lot QR (31/10) : a l etape Lots, choix du tirage (manuel / automatique a une
+ * date) et de la publication de la liste des gagnants (events.cfg.tirage,
+ * cfg.publierGagnants) ; a l etape Diffusion, le pro cree ses QR traces
+ * (nom, support, physique / digital), enregistres et publies des la creation
+ * (qr_stations) -- plus de « QR de suivi prepare par Flowin ».
+ *
  * Droits (seule difference entre les deux modes) :
  *   - le pro REJOINT un super event par une demande, validee ensuite par le SA ;
  *     il ne cree pas de super event : il en propose la creation a Flowin ;
@@ -50,7 +56,9 @@ import SuperEventMap from '@/app/se/_components/SuperEventMap'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
 import BilletApercu from '@/components/parcours/BilletApercu'
-import Diffusion from '@/components/dashboard/Diffusion'
+import QrTraces, { FormulaireQr, BadgeTypeQr, REGLE_TYPE_QR } from '@/components/operations/QrTraces'
+import { ChoixTirage, erreurTirage, cfgDepuisTirage, libelleDateTirage, localVersIso, lienListeGagnants, type ConfigTirage } from '@/components/operations/ReglageTirage'
+import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
 export type ModeParcours = 'pro' | 'sa'
@@ -235,6 +243,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [lotsExistants, setLotsExistants] = useState<{ nom: string; valeur: number; conditions: string }[]>([])
   const [logoCommerce, setLogoCommerce] = useState<string | null>(null)
 
+  /* Tirage (animation) : manuel ou automatique, liste des gagnants publiee ou non. */
+  const [tirage, setTirage] = useState<ConfigTirage>({ mode: 'manuel', date: '', publier: false })
+
   /* 4. Participants (super event, SA) */
   const [participants, setParticipants] = useState<string[]>(pro?.id ? [pro.id] : [])
   const [recherchePro, setRecherchePro] = useState('')
@@ -242,7 +253,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   /* Diffusion */
   const [diffPhysique, setDiffPhysique] = useState(true)
   const [diffDigital, setDiffDigital] = useState(true)
-  const [diffQr, setDiffQr] = useState(false)
+  const diffQr = false /* remplace par les QR traces crees ci-dessous (lot QR) */
+  const [qrBrouillons, setQrBrouillons] = useState<{ nom: string; support: string; type: TypeQr }[]>([])
   const [offre, setOffre] = useState('')
   const packsProposes = !sa && rejoindre && seId === 'se-nds-2026' ? packs : []
   const [packId, setPackId] = useState<string | null>(null)
@@ -293,6 +305,11 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   /* ── Regles de passage ─────────────────────────────────────────────── */
   const sansLots = rejoindre && persona === 'annonceur'
   const lotsNommes = lots.filter(l => l.nom.trim())
+  /* Le choix du tirage ne concerne qu une animation autonome qui a au moins un
+     lot au tirage au sort (super event : tirage pilote par Flowin). */
+  const aUnTirage = !estSuper && !rejoindre && module_ !== 'spin' && lotsNommes.some(l => l.type === 'tirage')
+  /* QR traces : des qu un event est cree (animation, ou station rattachee par le SA). */
+  const qrPossibles = !estSuper && (!rejoindre || sa)
   const segmentsOk = ((cfgJeu.spinSegments as { label?: string }[]) ?? []).filter(x => (x.label ?? '').trim()).length >= 2
   const itemsOk = ((cfgJeu.voteItems as { nom?: string }[]) ?? []).filter(x => (x.nom ?? '').trim()).length >= 2
   const bloque: Record<number, string | null> = {
@@ -310,7 +327,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       : jeu?.banque && !banqueId && demandeFlowin !== 'ok' ? 'Choisissez une banque de questions, ou demandez-la à Flowin.'
       : module_ === 'spin' && !segmentsOk ? 'Ajoutez au moins deux segments.'
       : module_ === 'vote' && !itemsOk ? 'Ajoutez au moins deux éléments.' : null,
-    3: sansLots ? null : !lotsNommes.length ? 'Ajoutez au moins un lot.' : null,
+    3: sansLots ? null : !lotsNommes.length ? 'Ajoutez au moins un lot.' : aUnTirage ? erreurTirage(tirage) : null,
     [ETAPE_PROS]: null,
     [FIN]: packsProposes.length && !packId ? 'Choisissez un pack.' : null,
   }
@@ -416,7 +433,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         setErreur(`la demande est enregistrée mais le rattachement n’a pas abouti (${error?.message ?? r.erreur ?? 'erreur inconnue'}) : elle reste dans « Demandes de participation »`)
         return
       }
-      setFait({ eventId: r.event_id ?? null, superId: seId }); setEnvoi('')
+      const infoQr = r.event_id ? await enregistrerQr(r.event_id) : ''
+      setFait({ eventId: r.event_id ?? null, superId: seId, info: infoQr || undefined }); setEnvoi('')
       return
     }
 
@@ -455,6 +473,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         ...(module_ === GABARIT_MODULE && bonusIds.length ? { bonusBanques: bonusIds } : {}),
         ...(module_ === 'spin' ? { spinSegments: cfgJeu.spinSegments ?? [] } : {}),
         ...(module_ === 'vote' ? { voteItems: cfgJeu.voteItems ?? [] } : {}),
+        ...(aUnTirage ? cfgDepuisTirage(tirage) : {}),
       },
       lots: lotsNommes.map(l => ({
         nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: Number(l.valeur) || 0,
@@ -465,7 +484,21 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       diffusionPhysique: diffPhysique, diffusionDigital: diffDigital, diffusionQrTracking: diffQr,
     })
     if (!r.ok) { setEnvoi('echec'); setErreur(r.error ?? ''); return }
-    setFait({ eventId: r.eventId, superId: null }); setEnvoi('')
+    const infoQr = r.eventId ? await enregistrerQr(r.eventId) : ''
+    setFait({ eventId: r.eventId, superId: null, info: infoQr || undefined }); setEnvoi('')
+  }
+
+  /* QR traces saisis a l etape Diffusion : enregistres et publies tout de
+     suite. Un echec n annule pas la creation : il est signale, et le QR peut
+     etre recree depuis l ecran final ou la Diffusion. */
+  async function enregistrerQr(eventId: string): Promise<string> {
+    const pris: string[] = []
+    let ko = 0
+    for (const q of qrBrouillons) {
+      const res = await creerQrTrace(eventId, q, pris)
+      if (res.qr) pris.push(res.qr.source_qr); else ko++
+    }
+    return ko ? `${ko} QR n’ont pas pu être enregistrés : recréez-les ci-dessous.` : ''
   }
 
   async function envoyerDemandeSuperEvent() {
@@ -546,23 +579,21 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             )}
             {lien && (
               <>
-                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Le jeu est en ligne : 3 QR, un par usage</div>
+                <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 4 }}>Le jeu est en ligne : vos QR tracés</div>
                 <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 12, lineHeight: 1.5 }}>
-                  Même jeu, une source différente sur chaque QR : les données (CRM, trafic) distinguent d’où viennent les joueurs.
+                  Même jeu, un QR par support : chaque QR est une station de jeu avec ses statistiques (onglet Trafic). Physique : 1 participation par jour ; digital : une seule fois par compte.
                 </div>
-                <div className="pc-qr" style={{ marginBottom: 18 }}>
-                  {[
-                    { source: 'magasin', label: 'En magasin', sous: 'À imprimer, à afficher chez vous' },
-                    { source: 'instagram', label: 'Réseaux sociaux', sous: 'Lien à partager sur vos posts et stories' },
-                    { source: 'tracking', label: 'Tracking', sous: 'Pour mesurer un support précis (affiche, flyer…)' },
-                  ].map(c => (
-                    <div key={c.source} className="pc-qr-tuile">
-                      <div style={{ fontSize: 13.5, fontWeight: 800 }}>{c.label}</div>
-                      <div style={{ fontSize: 11.5, ...MUTED, margin: '3px 0 10px', lineHeight: 1.4 }}>{c.sous}</div>
-                      <Diffusion compact url={`${lien}&source=${c.source}`} titre={`${nomAffiche} — ${c.label}`} sousTitre="Scannez pour jouer" />
-                    </div>
-                  ))}
-                </div>
+                {fait.eventId && moduleActif && (
+                  <div style={{ marginBottom: 18 }}>
+                    <QrTraces grille eventId={fait.eventId} module={moduleActif} titre={nomAffiche} mode={sa ? 'sa' : 'pro'} />
+                  </div>
+                )}
+                {aUnTirage && fait.eventId && (
+                  <div style={{ fontSize: 12.5, ...MUTED, marginBottom: 12 }}>
+                    {tirage.mode === 'auto' ? `Tirage automatique le ${libelleDateTirage(localVersIso(tirage.date))}.` : 'Tirage manuel : lancez-le depuis l’écran Gagnants.'}
+                    {tirage.publier && <> La liste des gagnants sera publiée : <a href={lienListeGagnants(fait.eventId)} target="_blank" rel="noreferrer" style={{ color: C.accent, fontWeight: 700 }}>{BASE}{lienListeGagnants(fait.eventId)}</a></>}
+                  </div>
+                )}
                 <div style={{ fontSize: 13, fontWeight: 800, margin: '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
@@ -997,6 +1028,13 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </div>
               )}
 
+              {aUnTirage && (
+                <div style={{ marginTop: 16, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 8 }}>Tirage au sort : quand et comment ?</div>
+                  <ChoixTirage value={tirage} onChange={setTirage} />
+                </div>
+              )}
+
               {lotPrincipal && !estSuper && (
                 <div style={{ marginTop: 22 }}>
                   <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>Le billet que recevra le gagnant</div>
@@ -1048,11 +1086,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           {/* ── FIN. DIFFUSION & RECAP ── */}
           {etape === FIN && (
             <>
-              <Titre t="Diffusion" s="Le QR et le lien du jeu sont créés automatiquement. Cochez ce que Flowin doit préparer en plus." />
+              <Titre t="Diffusion" s="Le QR et le lien du jeu sont créés automatiquement. Cochez ce que Flowin doit préparer en plus, et créez vos QR tracés." />
               {!estSuper && [
                 { v: diffPhysique, set: setDiffPhysique, t: 'QR code imprimé', s: 'Produit par Flowin, à afficher en magasin', i: 'shop' },
                 { v: diffDigital, set: setDiffDigital, t: 'Lien pour les réseaux', s: 'À coller dans les posts, emails et messages', i: 'instagram' },
-                { v: diffQr, set: setDiffQr, t: 'QR de suivi par support', s: 'Pour savoir d’où viennent les joueurs — préparé par Flowin', i: 'chart' },
               ].map(o => (
                 <button key={o.t} style={{ ...choix(o.v), display: 'flex', gap: 12, alignItems: 'center', width: '100%', marginBottom: 8 }} onClick={() => o.set(!o.v)}>
                   <span style={{ width: 22, height: 22, borderRadius: 7, background: o.v ? C.degrade : '#fff', border: o.v ? 'none' : `1.5px solid ${C.bordureChamp}`, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{o.v && <Ico k="check" size={13} />}</span>
@@ -1061,6 +1098,32 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </button>
               ))}
               {estSuper && <div style={{ fontSize: 13, ...MUTED, lineHeight: 1.5 }}>Chaque station reçoit son QR de jeu à la création ; le lien d’inscription des commerces est donné à la fin.</div>}
+
+              {qrPossibles && (
+                <div style={{ marginTop: 14, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14, background: '#fff' }}>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>QR tracés — autant que vous voulez</div>
+                  <div style={{ fontSize: 12.5, ...MUTED, margin: '3px 0 10px', lineHeight: 1.5 }}>
+                    Un QR par support (vitrine, caisse, Facebook, Instagram…) : chacun est une station de jeu avec ses statistiques. Publiés dès la création, sans attente.
+                  </div>
+                  {QR_PAR_DEFAUT.concat(qrBrouillons.map(q => ({ id: null, nom: q.nom, support: q.support, type: q.type, source_qr: '', publie: true }))).map((q, i) => {
+                    const idxBrouillon = i - QR_PAR_DEFAUT.length
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderTop: i ? `1px solid ${C.bordure}` : 'none', flexWrap: 'wrap' }}>
+                        <b style={{ fontSize: 13 }}>{q.nom}</b><BadgeTypeQr type={q.type} />
+                        <span style={{ fontSize: 12, ...MUTED, flex: 1, minWidth: 160 }}>{q.support}{idxBrouillon < 0 ? ' · inclus par défaut' : ''} — {REGLE_TYPE_QR[q.type]}</span>
+                        {idxBrouillon >= 0 && (
+                          <button aria-label={`Retirer ${q.nom}`} style={{ ...BTN2, padding: '6px 10px', color: '#B91C1C', display: 'inline-flex' }}
+                            onClick={() => setQrBrouillons(l => l.filter((_, j) => j !== idxBrouillon))}><Ico k="trash" size={14} /></button>
+                        )}
+                      </div>
+                    )
+                  })}
+                  <div style={{ marginTop: 10 }}>
+                    <FormulaireQr libelle="+ Ajouter ce QR" onAjouter={q => setQrBrouillons(l => l.concat(q))} />
+                  </div>
+                  {rejoindre && <div style={{ fontSize: 12, ...MUTED, marginTop: 8 }}>Les QR sont créés sur la station dès le rattachement.</div>}
+                </div>
+              )}
 
               {rejoindre && !sa && (
                 <Champ label="Un mot pour l’organisateur (facultatif)">
@@ -1097,7 +1160,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                   ['Jeu', libelleModule(moduleActif)],
                   ...(sansLots ? [] : [['Lots', lotsNommes.map(l => `${l.nom.trim()} × ${l.quantite}`).join(' · ') || '—']]),
                   ...(estSuper ? [['Pros participants', participants.length ? String(participants.length) : 'aucun pour l’instant']] : []),
-                  ...(!estSuper ? [['Diffusion', [diffPhysique && 'QR imprimé', diffDigital && 'lien réseaux', diffQr && 'QR de suivi'].filter(Boolean).join(' · ') || 'Aucune']] : []),
+                  ...(!estSuper ? [['Diffusion', [diffPhysique && 'QR imprimé', diffDigital && 'lien réseaux'].filter(Boolean).join(' · ') || 'Aucune']] : []),
+                  ...(qrPossibles ? [['QR tracés', `${QR_PAR_DEFAUT.length + qrBrouillons.length} (dont ${qrBrouillons.length} ajouté${qrBrouillons.length > 1 ? 's' : ''})`]] : []),
+                  ...(aUnTirage ? [['Tirage', tirage.mode === 'auto' ? `Automatique le ${libelleDateTirage(localVersIso(tirage.date))}` : 'Manuel (un clic)'], ['Liste des gagnants', tirage.publier ? 'Publiée après le tirage' : 'Non publiée']] : []),
                 ] as string[][]).map(([k, v], i) => (
                   <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 14px', fontSize: 13.5, background: i % 2 ? '#fff' : C.subtil }}>
                     <span style={MUTED}>{k}</span><b style={{ textAlign: 'right' }}>{v}</b>

@@ -25,6 +25,9 @@ import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
 import ModalGererLots from './ModalGererLots'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
+import { BadgeTypeQr } from './QrTraces'
+import ReglageTirage from './ReglageTirage'
+import { fetchStatsQr, type StatQr } from '@/lib/qrTraces'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
 import { operationsRangees } from '@/lib/rangementOperations'
 
@@ -400,6 +403,7 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
         <Mini v={n('confirme')} l="confirmés" />
         <Mini v={n('retire')} l="retirés" />
       </div>
+      {op.type === 'event' && op.stations[0] && <ReglageTirage evId={op.stations[0].id} />}
       {n('a_confirmer') > 0 && (
         <div style={{ fontSize: 12, color: '#B45309', marginBottom: 8 }}>
           {n('a_confirmer')} gagnant{n('a_confirmer') > 1 ? 's' : ''} à appeler. Le commerçant ne les verra qu&apos;une fois confirmés.
@@ -616,6 +620,7 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
           {onStation && <span style={{ color: ACC, fontWeight: 800, fontSize: 12 }}>→</span>}
         </div>
       ))}
+      <StatsParQr eventIds={op.stations.map(x => x.id)} />
       {origines.length > 0 && (
         <>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Source d’arrivée — visiteurs identifiés</div>
@@ -629,6 +634,36 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
       )}
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '14px 0 6px' }}>Réponses aux questions</div>
       <ContenuReponses op={op} />
+    </>
+  )
+}
+
+/* ── Statistiques par QR (lot QR, 31/10) ──────────────────────────────────────
+   Chaque QR trace est une station de jeu : flashs (visites), joueurs
+   distincts et parties (participations.source_qr), physique ou digital. */
+function StatsParQr({ eventIds }: { eventIds: string[] }) {
+  const [lignes, setLignes] = useState<StatQr[] | null>(null)
+  const cle = eventIds.join(',')
+  useEffect(() => {
+    let vivant = true
+    setLignes(null)
+    fetchStatsQr(eventIds).then(r => { if (vivant) setLignes(r) })
+    return () => { vivant = false }
+  }, [cle]) // eslint-disable-line react-hooks/exhaustive-deps
+  if (!lignes || lignes.length === 0) return null
+  return (
+    <>
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Par QR — chaque QR est une station de jeu</div>
+      {lignes.map(l => (
+        <div key={l.source || '-'} style={{ ...ligne, padding: '6px 0' }}>
+          <span style={{ flex: 1, minWidth: 140, fontSize: 12.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {l.nom}{l.source && <BadgeTypeQr type={l.type} />}
+          </span>
+          <span style={{ fontSize: 12 }}><b>{l.flashs}</b> flashs</span>
+          <span style={{ fontSize: 12 }}><b>{l.joueurs}</b> joueurs</span>
+          <span style={{ fontSize: 12 }}><b>{l.parties}</b> parties</span>
+        </div>
+      ))}
     </>
   )
 }

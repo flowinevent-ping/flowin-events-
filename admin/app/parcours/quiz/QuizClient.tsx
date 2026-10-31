@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { writeJoueur, shuffle, parcoursCSS, getJoueurLocal, claimJoueur, cleDejaJoue, CONSENTEMENT_VERSION } from '@/lib/parcours'
 import { buildInviteLink } from '@/lib/parrainage'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import { FlowinBadge } from '@/components/parcours/ParcoursBranding'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, doitRefuserDigital, ParcoursConsentement, ERREUR_CONSENTEMENT, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import { generateTicket } from '@/lib/ticket'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
@@ -61,6 +61,9 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
   const [bonusDone, setBonusDone] = useState(false)
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', tel: '', genre: '', age: '', cp: '', source: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  /* Consentement : deux cases NON cochees par defaut (lot QR, 31/10). */
+  const [consentJeu, setConsentJeu] = useState(false)
+  const [consentAnim, setConsentAnim] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [ticket, setTicket] = useState('')
   const [existingTicket, setExistingTicket] = useState('')
@@ -72,14 +75,15 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
   const quizTk = questions.length > 0 && quizPerfect
   const bonusTk = bonusDone
 
-  const lsKey = `flowin_played_${evId}`
+  /* Cle datee (jour local) + QR : « Reviens demain ! » ne bloque plus a vie. */
+  const lsKey = cleDejaJoue(evId)
   /* Anti-fraude "lien digital" avant le check "déjà joué" : un joueur reconnu
      sur l'appareil qui arrive via un lien réseaux (pas le parrainage, voir
      ParcoursHero.tsx) ne doit pas pouvoir rejouer sans flasher le vrai QR
      sur place, même si CET event précis n'a pas encore été joué. */
   useEffect(() => {
     try {
-      if (isDigitalLinkSource() && getJoueurLocal()) { setScreen('refusdigital'); return }
+      if (doitRefuserDigital(evId)) { setScreen('refusdigital'); return }
       const s = localStorage.getItem(lsKey)
       if (s) { setExistingTicket(s); setScreen('already') }
     } catch {}
@@ -119,6 +123,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
       setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
+      if (res.digitalRefuse) { setScreen('refusdigital'); return }
       if (res.duplicate) { setScreen('already'); return }
       setTicket(res.ticket); setScreen('ticket')
     })()
@@ -130,13 +135,15 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
     if (!form.nom.trim()) errs.nom = 'Obligatoire'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     if (form.tel.replace(/\s/g,'').length < 8) errs.tel = 'Invalide'
+    if (!consentJeu) errs.consentement = ERREUR_CONSENTEMENT
     setErrors(errs)
     if (Object.keys(errs).length) return
     setSubmitting(true)
     const tc = generateTicket('PQ')
-    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: true, optin_version: 'nds-2026-v3', quiz_ticket: quizTk, bonus_ticket: bonusTk })
+    const res = await writeJoueur({ email: form.email, prenom: form.prenom, nom: form.nom, tel: form.tel, code_postal: form.cp, genre: form.genre, age_tranche: form.age, decouverte: form.source.replace(/^[^ ]+ /,'') || undefined, score_moy: `${score}/${questions.length}`, events: [evId], ticket_code: tc, source: 'quiz', prefix: 'PQ', bonus_reponses: bonusAnswers, optin: consentAnim, optin_version: CONSENTEMENT_VERSION, quiz_ticket: quizTk, bonus_ticket: bonusTk })
     setGain(res.gain ?? null)
     setSubmitting(false)
+    if (res.digitalRefuse) { setScreen('refusdigital'); return }
     if (res.duplicate) { setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}; setScreen('already'); return }
     if (!res.success) { if (res.error) console.error('[quiz] Supabase échoué:', res.error); setErrors(e => ({ ...e, email: 'Enregistrement impossible, réessaie.' })); return }
     setTicket(res.ticket); setExistingTicket(res.ticket); try { localStorage.setItem(lsKey, res.ticket) } catch {}
@@ -269,7 +276,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
           <div style={{ marginBottom:12 }}><label className="label">Email *</label><input className={`input${errors.email?' err':''}`} type="email" inputMode="email" autoComplete="email" autoCapitalize="none" value={form.email} onChange={e => setForm(f=>({...f,email:e.target.value}))} />{errors.email && <div className="err">{errors.email}</div>}</div>
           <div style={{ marginBottom:12 }}><label className="label">Téléphone *</label><input className={`input${errors.tel?' err':''}`} type="tel" inputMode="tel" autoComplete="tel" value={form.tel} onChange={e => setForm(f=>({...f,tel:e.target.value}))} />{errors.tel && <div className="err">{errors.tel}</div>}</div>
           <ParcoursChampsStandard form={form} setForm={setForm} />
-          <div className="rgpd"><div className="rgpd-check" /><div>{RGPD_TEXT}</div></div>
+          <ParcoursConsentement jeu={consentJeu} animations={consentAnim} onJeu={setConsentJeu} onAnimations={setConsentAnim} erreur={consentJeu ? undefined : errors.consentement} />
           <button className="btn" style={{ marginTop:16 }} onClick={handleSubmit} disabled={submitting}>{submitting?'Envoi…':'Valider →'}</button>
         </div>
       )}
@@ -288,7 +295,7 @@ export default function QuizClient({ ev, lots, partenaires, banques, evId }: Pro
 
       {(screen === 'ticket' || screen === 'already') && (
         <div className="screen" style={{ justifyContent:'center',textAlign:'center' }}>
-          <div style={{ fontSize:22,fontWeight:900,marginBottom:6 }}>{screen==='ticket'?`Bravo ! Score : ${score}/${questions.length}`:'Déjà joué !'}</div>
+          <div style={{ fontSize:22,fontWeight:900,marginBottom:6 }}>{screen==='ticket'?`Bravo ! Score : ${score}/${questions.length}`:'Reviens demain !'}</div>
           <div style={{ fontSize:14,color:'rgba(255,255,255,.55)',marginBottom:20 }}>{nom}</div>
           <div className="card" style={{ borderTop:`4px solid ${c}` }}>
             <div className="ticket-code">{screen==='ticket'?(ticket||'—'  ):(existingTicket||'—')}</div>
