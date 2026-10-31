@@ -56,12 +56,12 @@ export default function HistoriqueClient({ initial, cle: cleInitiale }: { initia
     <div>
       <h1 style={H1}>Historique</h1>
       <div style={{ ...SUB, marginBottom: 16 }}>
-        QR et PIN à télécharger ou imprimer, stock de vos lots, vos gagnants et vos relances — par opération.
+        QR et PIN à télécharger ou imprimer, stock de vos lots, vos gagnants et vos relances — par animation.
       </div>
 
       {data.operations.length === 0 && (
         <div style={{ ...CARD, textAlign: 'center', padding: 26 }}>
-          <div style={{ fontSize: 16, fontWeight: 800 }}>Aucune opération pour le moment</div>
+          <div style={{ fontSize: 16, fontWeight: 800 }}>Aucune animation pour le moment</div>
           <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>Créez votre animation ou rejoignez un super event.</div>
           <Link href={`/pro/nouvelle${q}`} style={{ display: 'inline-block', background: C.degrade, color: '#fff', borderRadius: 999, padding: '12px 26px', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Commencer</Link>
         </div>
@@ -72,7 +72,7 @@ export default function HistoriqueClient({ initial, cle: cleInitiale }: { initia
           {!uneSeule && (
             <button onClick={() => selectionner('')}
               style={{ fontSize: 13, fontWeight: 800, color: C.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 10, fontFamily: 'inherit' }}>
-              ← Toutes mes opérations
+              ← Toutes mes animations
             </button>
           )}
           <DetailOperation op={op} data={data} onChange={recharger} proQuery={q} />
@@ -142,7 +142,7 @@ function Kanban({ groupes, onOuvrir }: {
   groupes: GroupePeriode<DonneesOperation>[]
   onOuvrir: (op: DonneesOperation) => void
 }) {
-  if (groupes.length === 0) return <div style={CARD}><Vide>Aucune opération.</Vide></div>
+  if (groupes.length === 0) return <div style={CARD}><Vide>Aucune animation.</Vide></div>
   return (
     <>
       <div className="sa-kanban">

@@ -6,6 +6,7 @@ import ProShell from '@/components/pro/ProShell'
 import EntrepriseForm from '@/components/pro/EntrepriseForm'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
 import ListeFactures from '@/components/pro/ListeFactures'
+import CoordonneesBancaires from '@/components/pro/CoordonneesBancaires'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, H1, SUB, MUTED, BTN2 } from '@/lib/proui'
 
@@ -13,12 +14,13 @@ export const dynamic = 'force-dynamic'
 
 const ONGLETS = [
   { id: 'entreprise', label: 'Mon entreprise' },
+  { id: 'rib', label: 'Coordonnées bancaires' },
   { id: 'contrat', label: 'Bons de commande & factures' },
   { id: 'lots', label: 'Lots & stock' },
   { id: 'banques', label: 'Banques de questions' },
 ] as const
 
-/** MON COMPTE (P1) — coordonnees, contrats par operation, banques de questions. */
+/** MON PROFIL (P1) — coordonnees, RIB (remboursements), contrats par animation, lots, banques de questions. */
 export default async function Page({ searchParams }: { searchParams: { pro?: string; onglet?: string } }) {
   const proId = searchParams.pro ?? ''
   const onglet = ONGLETS.find(o => o.id === searchParams.onglet)?.id ?? 'entreprise'
@@ -30,7 +32,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="compte">
       <h1 style={H1}>Mon profil</h1>
-      <div style={{ ...SUB, marginBottom: 14 }}>Vos coordonnées, vos contrats et vos questions.</div>
+      <div style={{ ...SUB, marginBottom: 14 }}>Votre entreprise, vos coordonnées bancaires, vos factures, vos lots et vos questions.</div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
         {ONGLETS.map(o => (
           <Link key={o.id} href={`/pro/compte${qo}onglet=${o.id}`}
@@ -46,6 +48,9 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             code_postal: p.code_postal ?? null, ville: p.ville ?? null, siret: p.siret ?? null,
             contact: p.contact ?? null, email: p.email ?? null, tel: p.tel ?? null, partenaire_id: p.partenaire_id ?? null,
           }} />
+        : <div style={CARD}>Établissement introuvable.</div>)}
+      {onglet === 'rib' && (p.id
+        ? <CoordonneesBancaires proId={p.id} titulaireParDefaut={p.nom ?? ''} />
         : <div style={CARD}>Établissement introuvable.</div>)}
       {onglet === 'contrat' && <ListeFactures operations={ops.operations} />}
       {onglet === 'lots' && <OngletOperationsPro initial={ops} onglet="lots" />}

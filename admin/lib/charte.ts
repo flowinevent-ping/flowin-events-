@@ -28,32 +28,55 @@ export const POLICE_ADMIN = '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,A
 export const VARIABLES_CSS = `--sa-bg:${CHARTE.fond};--sa-card:${CHARTE.carte};--sa-border:${CHARTE.bordure};--sa-text:${CHARTE.texte};--sa-muted:${CHARTE.attenue};--sa-subtle:${CHARTE.subtil};--sa-accent:${CHARTE.accent};--sa-accent-light:${CHARTE.accentClair};--sa-accent-dark:${CHARTE.accentFonce};`
 
 /**
- * CHARTE PRO (17/09) — bascule du violet/magenta vers un bleu, sur demande
- * Romain (l espace pro et le dashboard SA ne sont plus alignes sur la
- * charte NDS 2026 du parcours joueur, qui reste violette et n est pas
- * touchee : lib/nds2026Design.ts et NDS2026Client.tsx sont hors perimetre).
+ * CHARTE PRO — refonte du 31/10 (« espace pro conforme »).
+ *
+ * Reprend la charte de la page d'accueil publique (app/landing/LandingClient.tsx) :
+ * encre #1B3A5C, bleu #3B5CC4, papier #F4F6F9, texte secondaire #5a6b80, police
+ * systeme graisse 800-900, logo « Flow » + « in » bleu.
+ *
+ * DIFFERENCE VOULUE avec la landing : l'accent commun (boutons, selection) est
+ * le VIOLET #7A4FE0 et non le teal (decision Romain : « bleu + vert = pharmacie »).
+ * Le fuchsia #E0368C n'est qu'une touche ponctuelle (pastille « en cours »),
+ * jamais en grand aplat, jamais associe a un fond noir. Plus de fond sombre :
+ * la barre laterale de l'espace pro est claire.
+ *
+ * Les noms de cles historiques (magenta, sidebar…) sont conserves pour ne pas
+ * casser les ecrans qui les lisent ; leurs VALEURS suivent la nouvelle charte.
+ * Les memes valeurs sont exposees en variables CSS (--fl-*) par VARIABLES_PRO_CSS,
+ * injectees par ProShell et par le parcours « Ma premiere fois ».
  */
 export const CHARTE_PRO = {
-  fond: '#f2edf7',
+  fond: '#F4F6F9',
   carte: '#FFFFFF',
-  bordure: '#efe9f2',
-  bordureChamp: '#e7def0',
-  champ: '#faf7fd',
-  texte: '#1c1024',
-  attenue: '#8a7e93',
-  subtil: '#faf7fd',
-  sidebar: '#0F1E33',
-  sidebar2: '#0A1526',
-  accent: '#2563EB',
-  accentFonce: '#1D4ED8',
-  magenta: '#0EA5E9',
-  magenta2: '#3B82F6',
+  bordure: '#E3E8EF',
+  bordureChamp: '#D5DCE6',
+  champ: '#F8FAFC',
+  texte: '#1B3A5C',
+  attenue: '#5a6b80',
+  subtil: '#F8FAFC',
+  sidebar: '#FFFFFF',
+  sidebar2: '#FFFFFF',
+  encre: '#1B3A5C',
+  bleu: '#3B5CC4',
+  violet: '#7A4FE0',
+  violetFonce: '#6A3FD0',
+  violetClair: '#EFE9FC',
+  fuchsia: '#E0368C',
+  accent: '#3B5CC4',
+  accentFonce: '#2C479E',
+  /** Historique : « magenta » = la teinte de selection. Desormais le violet commun. */
+  magenta: '#7A4FE0',
+  magenta2: '#3B5CC4',
   or: '#F5A100',
-  degrade: 'linear-gradient(90deg,#3B82F6,#0EA5E9)',
-  filet: 'linear-gradient(90deg,#F5A100,#0EA5E9,#2563EB)',
+  degrade: 'linear-gradient(135deg,#7A4FE0,#6A3FD0)',
+  filet: 'linear-gradient(90deg,#3B5CC4,#7A4FE0)',
 } as const
 
-export const POLICE_PRO = "'Manrope',system-ui,sans-serif"
+/** Les couleurs de l'espace pro en variables CSS, a poser sur :root ou un conteneur. */
+export const VARIABLES_PRO_CSS = `--fl-encre:${CHARTE_PRO.encre};--fl-bleu:${CHARTE_PRO.bleu};--fl-violet:${CHARTE_PRO.violet};--fl-violet-fonce:${CHARTE_PRO.violetFonce};--fl-violet-clair:${CHARTE_PRO.violetClair};--fl-fuchsia:${CHARTE_PRO.fuchsia};--fl-papier:${CHARTE_PRO.fond};--fl-carte:${CHARTE_PRO.carte};--fl-texte2:${CHARTE_PRO.attenue};--fl-bordure:${CHARTE_PRO.bordure};--fl-bordure-champ:${CHARTE_PRO.bordureChamp};--fl-champ:${CHARTE_PRO.champ};--fl-ok:#15803D;--fl-alerte:#B45309;--fl-erreur:#B42318;`
+
+/* Police systeme, comme la landing (graisse 800-900 pour les titres). */
+export const POLICE_PRO = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'
 
 /**
  * Code couleur super event / event-animation (Romain, 18/09) : « garde le

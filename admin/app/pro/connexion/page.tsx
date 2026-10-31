@@ -66,7 +66,7 @@ export default function ConnexionProPage() {
           <button onClick={connecter} disabled={etat === 'loading'} style={{ ...primaryBtn, opacity: etat === 'loading' ? 0.6 : 1 }}>
             {etat === 'loading' ? 'Connexion…' : 'Se connecter'}
           </button>
-          <div style={helpText}>Pas encore de compte ? <Link href="/pro/inscription" style={ghostLink}>S&apos;inscrire</Link></div>
+          <div style={helpText}>Pas encore de compte ? <Link href="/pro/premiere-fois" style={ghostLink}>Ma première fois</Link></div>
         </div>
       </div>
     </div>

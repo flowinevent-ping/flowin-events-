@@ -53,7 +53,7 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="banques">
       <h1 style={H1}>Mes banques de questions</h1>
-      <div style={{ ...SUB, marginBottom: 20 }}>Organisées par catégorie — une banque s&apos;enrichit à chaque modification, elle sert à tous vos events.</div>
+      <div style={{ ...SUB, marginBottom: 20 }}>Organisées par catégorie — une banque s&apos;enrichit à chaque modification, elle sert à toutes vos animations.</div>
 
       <Groupe
         titre="Quiz"

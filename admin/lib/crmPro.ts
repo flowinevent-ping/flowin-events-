@@ -17,11 +17,12 @@ export interface ContactPro {
   premiere: string | null; derniere: string | null
 }
 
-export async function fetchCrmPro(proId: string): Promise<ContactPro[]> {
+/** `sa: true` (dashboard Super Admin) : coordonnees completes. Espace pro : consentants seulement. */
+export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promise<ContactPro[]> {
   if (!proId) return []
   const { data, error } = await supabase.rpc('crm_pro', { p_pro: proId })
   if (error) { console.error('[fetchCrmPro]', error.message); return [] }
-  return ((data ?? []) as ContactPro[]).map(c => ({
+  return ((data ?? []) as ContactPro[]).map(c => (opts?.sa ? c : limiterAuConsentement(c))).map(c => ({
     ...c,
     origines: c.origines ?? [], operations: c.operations ?? [], lots: c.lots ?? [],
     nb_parties: Number(c.nb_parties ?? 0), nb_tickets: Number(c.nb_tickets ?? 0), nb_gains: Number(c.nb_gains ?? 0),
@@ -33,4 +34,17 @@ export function libelleOrigine(o: string): string {
   if (o === 'nds2026') return 'Nuits du Sud 2026'
   if (o === 'brigade-manuel') return 'Brigade (saisie sur place)'
   return libelleSource(o)
+}
+
+/**
+ * CONTACTS UNIQUEMENT AVEC CONSENTEMENT (decision du 31/10, RGPD).
+ * Un joueur qui n'a pas coche la case de consentement reste compte dans les
+ * statistiques (age, genre, code postal, parties) mais ses coordonnees ne sont
+ * pas transmises a l'espace pro : ni email, ni telephone, nom reduit a l'initiale.
+ * Applique cote serveur, avant que les donnees n'atteignent le navigateur.
+ * Les pros ne modifient jamais les coordonnees des joueurs (SA uniquement).
+ */
+export function limiterAuConsentement(c: ContactPro): ContactPro {
+  if (c.optin === true) return c
+  return { ...c, email: null, tel: null, nom: c.nom ? `${c.nom.trim().charAt(0).toUpperCase()}.` : null }
 }
