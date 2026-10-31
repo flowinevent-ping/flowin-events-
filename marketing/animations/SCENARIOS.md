@@ -2,6 +2,29 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
+## v6 — s3-v6 « Et vous, on installe Flowin quand ? » (60 s)
+
+Structure d'une pub de référence analysée par le client : problème → solution → comment ça marche (01 à 04) → résultat → preuves chiffrées → action ; une phrase par écran, grands chiffres peints comme temps forts. Visuels de la v4 (objets dessinés, vrais écrans), taches nettes de la v5, jauges, macaron Plug & Play, carte QR de la v5 ; **aucun pictogramme**, plus de cadran. Textes : `src/h/films-v6.js` ; briques : `src/h/kit-v6.js` (chiffres peints, numéro d'étape, source).
+
+| Temps | Scène | À l'écran |
+|---|---|---|
+| 0–5 s | Le problème | 1 CLIENT SUR 3 NE REVIENT PLUS. · Et les passants ? Ils passent. · « 1/3 » peint · source e-marketing.fr |
+| 5–9,5 s | La solution | UNE ANIMATION PLUG & PLAY. · Le temps de coller une affiche. |
+| 9,5–13,5 s | 01 | ILS FLASHENT. · Sans appli. |
+| 13,5–18 s | 02 | ILS JOUENT. · Quiz, roue, tombola. |
+| 18–22 s | 03 | ILS GAGNENT. |
+| 22–26,5 s | 04 | ILS REVIENNENT. · Le lot se retire chez vous. |
+| 26,5–31 s | Le passage capté | VOUS CAPTEZ LE PASSAGE. · Chaque joueur devient un contact, avec son accord. |
+| 31–36 s | Chaque support suivi | CHAQUE SUPPORT, SUIVI. · jauges, supports sans QR |
+| 36–40,5 s | Vos clients | VOUS CONNAISSEZ VOS CLIENTS. · Âge, sexe, provenance, avis. |
+| 40,5–44,5 s | Le téléphone | TOUT DEPUIS VOTRE TÉLÉPHONE. · Lots, tirage, billets. |
+| 44,5–48,5 s | Preuve | « 2 449 » FLASHS EN 10 JOURS. · source Nuits du Sud 2026, Vence |
+| 48,5–52,5 s | Preuve | « 55 % » DES JOUEURS INSCRITS ACCEPTENT D'ÊTRE RECONTACTÉS. · même source |
+| 52,5–56 s | Le réflexe QR | « 6/10 » DES FRANÇAIS FLASHENT DÉJÀ DES QR CODES. · source M6 Publicité, étude Résonance |
+| 56–60 s | Fin | ET VOUS, ON INSTALLE FLOWIN QUAND ? · Commandez votre macaron. · carte QR, logo, Plug & Play |
+
+Chiffres et sources fournis par le client, affichés tels quels avec leur source (le nombre de contacts n'est pas affiché) ; je ne les ai pas recalculés dans la base.
+
 ## v5 — s3-v5 « Et si vous pouviez mesurer votre pub ? » (55 s)
 
 Retours client sur la v4 (« images beaucoup mieux, couleurs et fonds pastel bien ») : taches plus propres (contour vectoriel lisse, une ou deux coulures franches, trois gouttes : `K5.tache`), pictos dans une pastille ronde blanche à contour fin et ombre douce (`K5.pastille`), le « ? » remplacé par un cadran de mesure dont l'aiguille hésite puis se fixe (`K5.cadran`), QR de fin dans une carte arrondie « Scannez pour essayer » composée avec le logo et le macaron Plug & Play (`K5.carteQR`). Textes du client (`src/h/films-v5.js`) ; la mécanique « un QR par support » n'est plus montrée : les supports sont reliés à un rapport.
