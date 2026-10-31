@@ -21,4 +21,4 @@ Voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra 
 - **s9 — Votre animation en quelques étapes** (30 s) : Lo-fi pop douce, 95 BPM.
 - **s3-v4 — Vous saurez enfin quelle pub vous rapporte des clients** (51 s) : Groove funk-pop optimiste, 96–100 BPM (plus posé que la v3), basse marquée ; montée sur la mesure par support, respiration sur la fin.
 - **s3-v5 — Et si vous pouviez mesurer votre pub ?** (55 s) : Groove funk-pop optimiste, 96–100 BPM, basse marquée ; montée sur la mesure, respiration sur la fin.
-- **s3-v6 — Et vous, on installe Flowin quand ?** (60 s) : Groove funk-pop optimiste, 96–100 BPM ; temps forts sur les grands chiffres (1 sur 3, 2 449, 55 %, 6 sur 10).
+- **s3-v6 — Et vous, on installe Flowin quand ?** (64 s) : Groove funk-pop optimiste, 96–100 BPM ; temps forts sur les grands chiffres (1 sur 3, + de 2 400, 55 %, 70 %, 6 sur 10).

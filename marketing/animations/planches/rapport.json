@@ -120,9 +120,11 @@
   },
   {
     "id": "s3-v6",
-    "duration": 60,
+    "duration": 64,
     "qr": "https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1",
-    "avertissements": [],
+    "avertissements": [
+      "[Preuve : flashs] texte hors zone sûre : « 10 JOURS. »"
+    ],
     "erreurs": []
   }
 ]

@@ -2,7 +2,7 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
-## v6 — s3-v6 « Et vous, on installe Flowin quand ? » (60 s)
+## v6 — s3-v6 « Et vous, on installe Flowin quand ? » (64 s)
 
 Structure d'une pub de référence analysée par le client : problème → solution → comment ça marche (01 à 04) → résultat → preuves chiffrées → action ; une phrase par écran, grands chiffres peints comme temps forts. Visuels de la v4 (objets dessinés, vrais écrans), taches nettes de la v5, jauges, macaron Plug & Play, carte QR de la v5 ; **aucun pictogramme**, plus de cadran. Textes : `src/h/films-v6.js` ; briques : `src/h/kit-v6.js` (chiffres peints, numéro d'étape, source).
 
@@ -18,10 +18,11 @@ Structure d'une pub de référence analysée par le client : problème → solut
 | 31–36 s | Chaque support suivi | CHAQUE SUPPORT, SUIVI. · jauges, supports sans QR |
 | 36–40,5 s | Vos clients | VOUS CONNAISSEZ VOS CLIENTS. · Âge, sexe, provenance, avis. |
 | 40,5–44,5 s | Le téléphone | TOUT DEPUIS VOTRE TÉLÉPHONE. · Lots, tirage, billets. |
-| 44,5–48,5 s | Preuve | « 2 449 » FLASHS EN 10 JOURS. · source Nuits du Sud 2026, Vence |
-| 48,5–52,5 s | Preuve | « 55 % » DES JOUEURS INSCRITS ACCEPTENT D'ÊTRE RECONTACTÉS. · même source |
-| 52,5–56 s | Le réflexe QR | « 6/10 » DES FRANÇAIS FLASHENT DÉJÀ DES QR CODES. · source M6 Publicité, étude Résonance |
-| 56–60 s | Fin | ET VOUS, ON INSTALLE FLOWIN QUAND ? · Commandez votre macaron. · carte QR, logo, Plug & Play |
+| 44,5–48,5 s | Preuve | « + DE 2 400 » FLASHS EN 10 JOURS. · source Nuits du Sud 2026, Vence (2 449 = plancher du comptage) |
+| 48,5–52,5 s | Preuve | « 55 % » DES JOUEURS SOUHAITENT RESTER EN CONTACT. · source Nuits du Sud 2026 |
+| 52,5–56,5 s | Preuve | « 70 % » D'OPT-IN SUR L'OPÉRATION DE PÂQUES. · source Opération Pâques, données Flowin |
+| 56,5–60 s | Le réflexe QR | « 6/10 » DES FRANÇAIS FLASHENT DÉJÀ DES QR CODES. · source M6 Publicité, étude Résonance |
+| 60–64 s | Fin | ET VOUS, ON INSTALLE FLOWIN QUAND ? · Commandez votre macaron. · carte QR, logo, Plug & Play |
 
 Chiffres et sources fournis par le client, affichés tels quels avec leur source (le nombre de contacts n'est pas affiché) ; je ne les ai pas recalculés dans la base.
 

@@ -138,21 +138,31 @@
           return g + T
         }
       },
-      { // 11. Preuve : flashs
+      { // 11. Preuve : flashs (2 449 = plancher du comptage NDS)
         bg: P.menthe, mots: ['FLASHS EN', '10 JOURS.'], from: [240, 520],
-        draw: function (lt, img0) {
-          var g = K6.chiffre('2 449', 240, 300, 150, C.teal, C.gold, lt, 0.2, 61, { largeur: 420 })
+        draw: function (lt) {
+          var g = K6.chiffre('2 400', 260, 320, 150, C.teal, C.gold, lt, 0.2, 61, { largeur: 400 })
+          g += K3.op(F.easeOut(F.prog(lt, 0.35, 0.4)), '<text class="safe" x="34" y="170" font-family="Manrope" font-weight="800" font-size="64" letter-spacing="-2.5" fill="' + INK + '">+ DE</text>')
           g += lignes(['FLASHS EN', '10 JOURS.'], 470, lt, 0.7, 100)
-          g += K6.source('Source : Nuits du Sud 2026, Vence (données Flowin)', lt, 1.2)
+          g += K6.source('Source : Nuits du Sud 2026, Vence', lt, 1.2)
           return g
         }
       },
       { // 12. Preuve : contacts
-        bg: P.rose, mots: ['DES JOUEURS INSCRITS', 'ACCEPTENT D’ÊTRE', 'RECONTACTÉS.'], from: [240, 520],
+        bg: P.rose, mots: ['DES JOUEURS', 'SOUHAITENT RESTER', 'EN CONTACT.'], from: [240, 520],
         draw: function (lt) {
           var g = K6.chiffre('55 %', 240, 310, 190, MAG, C.violet, lt, 0.2, 71, { largeur: 400 })
-          g += lignes(['DES JOUEURS INSCRITS', 'ACCEPTENT D’ÊTRE', 'RECONTACTÉS.'], 480, lt, 0.7, 72)
-          g += K6.source('Source : Nuits du Sud 2026, Vence (données Flowin)', lt, 1.2)
+          g += lignes(['DES JOUEURS', 'SOUHAITENT RESTER', 'EN CONTACT.'], 480, lt, 0.7, 84)
+          g += K6.source('Source : Nuits du Sud 2026', lt, 1.2)
+          return g
+        }
+      },
+      { // 12 bis. Preuve : Pâques (chiffre fourni par le client)
+        bg: P.lilas, mots: ['D’OPT-IN SUR', 'L’OPÉRATION', 'DE PÂQUES.'], from: [240, 520],
+        draw: function (lt) {
+          var g = K6.chiffre('70 %', 240, 310, 190, C.violet, C.teal, lt, 0.2, 75, { largeur: 400 })
+          g += lignes(['D’OPT-IN SUR', 'L’OPÉRATION', 'DE PÂQUES.'], 480, lt, 0.7, 96)
+          g += K6.source('Source : Opération Pâques, données Flowin', lt, 1.2)
           return g
         }
       },

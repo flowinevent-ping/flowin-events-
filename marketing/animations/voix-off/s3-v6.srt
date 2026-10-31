@@ -40,16 +40,20 @@ Et tout se gère depuis votre téléphone : lots, tirage, billets.
 
 11
 00:00:44,650 --> 00:00:48,350
-Aux Nuits du Sud, à Vence : deux mille quatre cent quarante-neuf flashs en dix jours.
+Aux Nuits du Sud, à Vence : plus de deux mille quatre cents flashs en dix jours.
 
 12
 00:00:48,650 --> 00:00:52,350
-Et cinquante-cinq pour cent des joueurs inscrits acceptent d’être recontactés.
+Cinquante-cinq pour cent des joueurs souhaitent rester en contact.
 
 13
-00:00:52,650 --> 00:00:55,850
-Six Français sur dix flashent déjà des QR codes.
+00:00:52,650 --> 00:00:56,350
+Et soixante-dix pour cent d’opt-in sur l’opération de Pâques.
 
 14
-00:00:56,150 --> 00:00:59,850
+00:00:56,650 --> 00:00:59,850
+Six Français sur dix flashent déjà des QR codes.
+
+15
+00:01:00,150 --> 00:01:03,850
 Et vous, on installe Flowin quand ? Commandez votre macaron.

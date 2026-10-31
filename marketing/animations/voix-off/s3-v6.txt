@@ -1,9 +1,9 @@
 3 · Commerce : animation (v6) — Et vous, on installe Flowin quand ?
-Durée : 60 s · 9:16 · MP4 muet (voix et musique à poser au montage)
+Durée : 64 s · 9:16 · MP4 muet (voix et musique à poser au montage)
 
 DIRECTION DE VOIX (toutes les vidéos) : Voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra dynamique. Tutoiement côté joueurs, vouvoiement côté pros.
 Adresse dans ce film : vouvoiement (pros).
-MUSIQUE : Groove funk-pop optimiste, 96–100 BPM ; temps forts sur les grands chiffres (1 sur 3, 2 449, 55 %, 6 sur 10).
+MUSIQUE : Groove funk-pop optimiste, 96–100 BPM ; temps forts sur les grands chiffres (1 sur 3, + de 2 400, 55 %, 70 %, 6 sur 10).
 APPEL À L'ACTION : Commandez votre macaron.
 
 SCRIPT HORODATÉ
@@ -49,17 +49,21 @@ SCRIPT HORODATÉ
    À l'écran : TOUT DEPUIS VOTRE TÉLÉPHONE. · Lots, tirage, billets.
 
 [0:44,5 – 0:48,5] Preuve : flashs
-   Voix off : Aux Nuits du Sud, à Vence : deux mille quatre cent quarante-neuf flashs en dix jours.
-   À l'écran : 2 449 FLASHS EN 10 JOURS. · Nuits du Sud 2026, Vence.
+   Voix off : Aux Nuits du Sud, à Vence : plus de deux mille quatre cents flashs en dix jours.
+   À l'écran : + DE 2 400 FLASHS EN 10 JOURS. · Nuits du Sud 2026, Vence.
 
 [0:48,5 – 0:52,5] Preuve : contacts
-   Voix off : Et cinquante-cinq pour cent des joueurs inscrits acceptent d’être recontactés.
-   À l'écran : 55 % DES JOUEURS INSCRITS ACCEPTENT D’ÊTRE RECONTACTÉS. · Nuits du Sud 2026, Vence.
+   Voix off : Cinquante-cinq pour cent des joueurs souhaitent rester en contact.
+   À l'écran : 55 % DES JOUEURS SOUHAITENT RESTER EN CONTACT. · Nuits du Sud 2026.
 
-[0:52,5 – 0:56] Le réflexe QR
+[0:52,5 – 0:56,5] Preuve : Pâques
+   Voix off : Et soixante-dix pour cent d’opt-in sur l’opération de Pâques.
+   À l'écran : 70 % D’OPT-IN SUR L’OPÉRATION DE PÂQUES. · Opération Pâques, données Flowin.
+
+[0:56,5 – 1:00] Le réflexe QR
    Voix off : Six Français sur dix flashent déjà des QR codes.
    À l'écran : 6 FRANÇAIS SUR 10 FLASHENT DÉJÀ DES QR CODES. · M6 Publicité, étude Résonance.
 
-[0:56 – 1:00] Fin
+[1:00 – 1:04] Fin
    Voix off : Et vous, on installe Flowin quand ? Commandez votre macaron.
    À l'écran : ET VOUS, ON INSTALLE FLOWIN QUAND ? · Commandez votre macaron.
