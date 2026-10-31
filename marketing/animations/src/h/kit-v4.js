@@ -55,29 +55,29 @@
     return '<g transform="translate(' + n1(x) + ',' + n1(y) + ')">' + K3.rect(-s / 2 - 4, -s / 2 - 4, s + 8, s + 8, 6, '#fff') + F.qr(-s / 2, -s / 2, s) + '</g>'
   }
   // Supports de communication (dessins d'objets, sans personnage).
-  K4.bus = function (x, y, w) {
+  K4.bus = function (x, y, w, sansQR) {
     var h = w * 1.0, g = '<g transform="translate(' + n1(x) + ',' + n1(y) + ')">'
     g += K3.rect(-w / 2, -h / 2, w, h * 0.92, w * 0.12, C.gold) + K3.rect(-w * 0.4, -h * 0.42, w * 0.8, h * 0.24, w * 0.05, '#2A2230')
     g += K3.rect(-w * 0.42, -h * 0.12, w * 0.84, h * 0.4, w * 0.04, '#fff') + K3.txt(-w * 0.36, h * 0.03, 'VOTRE', w * 0.085, { fill: INK }) + K3.txt(-w * 0.36, h * 0.13, 'PUB', w * 0.085, { fill: INK }) + K3.txt(-w * 0.36, h * 0.22, 'Jouez →', w * 0.065, { w: 700, fill: MAG })
-    g += K4.miniQR(w * 0.22, h * 0.08, w * 0.26)
+    g += sansQR ? K3.rect(w * 0.06, -h * 0.06, w * 0.32, h * 0.3, w * 0.04, MAG) + K3.txt(w * 0.22, h * 0.13, '%', w * 0.18, { anchor: 'middle', fill: '#fff' }) : K4.miniQR(w * 0.22, h * 0.08, w * 0.26)
     g += '<circle cx="' + n1(-w * 0.36) + '" cy="' + n1(h * 0.36) + '" r="' + n1(w * 0.05) + '" fill="#fff"/><circle cx="' + n1(w * 0.36) + '" cy="' + n1(h * 0.36) + '" r="' + n1(w * 0.05) + '" fill="#fff"/>'
     g += K3.rect(-w * 0.44, h * 0.42, w * 0.18, h * 0.12, w * 0.03, INK) + K3.rect(w * 0.26, h * 0.42, w * 0.18, h * 0.12, w * 0.03, INK)
     return g + '</g>'
   }
-  K4.setTable = function (x, y, w, rot) {
+  K4.setTable = function (x, y, w, rot, sansQR) {
     var h = w * 0.68, g = '<g transform="translate(' + n1(x) + ',' + n1(y) + ') rotate(' + (rot || 0) + ')">'
     g += K3.rect(-w / 2 + 4, -h / 2 + 6, w, h, 8, 'rgba(0,0,0,.15)') + K3.rect(-w / 2, -h / 2, w, h, 8, '#fff')
     g += '<circle cx="' + n1(-w * 0.08) + '" cy="0" r="' + n1(h * 0.3) + '" fill="none" stroke="#e4dcec" stroke-width="' + n1(w * 0.02) + '"/><circle cx="' + n1(-w * 0.08) + '" cy="0" r="' + n1(h * 0.2) + '" fill="none" stroke="#efe9f4" stroke-width="' + n1(w * 0.012) + '"/>'
     g += K3.rect(-w * 0.4, -h * 0.25, w * 0.025, h * 0.5, 2, '#cfc4da') + K3.rect(w * 0.18, -h * 0.25, w * 0.025, h * 0.5, 2, '#cfc4da')
-    g += K4.miniQR(w * 0.34, -h * 0.12, w * 0.17) + K3.txt(w * 0.34, h * 0.22, 'Jouez !', w * 0.065, { anchor: 'middle', fill: MAG })
+    g += sansQR ? K3.txt(w * 0.34, -h * 0.02, 'Menu', w * 0.07, { anchor: 'middle', fill: INK }) + K3.txt(w * 0.34, h * 0.14, 'du jour', w * 0.06, { anchor: 'middle', w: 700, fill: MAG }) : K4.miniQR(w * 0.34, -h * 0.12, w * 0.17) + K3.txt(w * 0.34, h * 0.22, 'Jouez !', w * 0.065, { anchor: 'middle', fill: MAG })
     return g + '</g>'
   }
-  K4.pubReseau = function (x, y, w, rot) {
+  K4.pubReseau = function (x, y, w, rot, sansQR) {
     var h = w * 1.25, g = '<g transform="translate(' + n1(x) + ',' + n1(y) + ') rotate(' + (rot || 0) + ')">'
     g += K3.rect(-w / 2 + 4, -h / 2 + 6, w, h, 12, 'rgba(0,0,0,.15)') + K3.rect(-w / 2, -h / 2, w, h, 12, '#fff')
     g += '<circle cx="' + n1(-w / 2 + 18) + '" cy="' + n1(-h / 2 + 18) + '" r="9" fill="' + C.violet + '"/>' + K3.txt(-w / 2 + 32, -h / 2 + 16, 'Votre commerce', w * 0.07, {}) + K3.txt(-w / 2 + 32, -h / 2 + 28, 'Sponsorisé', w * 0.055, { w: 700, fill: '#8a7e93' })
-    g += K3.rect(-w / 2 + 8, -h / 2 + 40, w - 16, h * 0.56, 8, '#F9D5E5') + K3.txt(0, -h / 2 + 40 + h * 0.2, 'JEU GRATUIT', w * 0.11, { anchor: 'middle' })
-    g += K4.miniQR(0, -h / 2 + 40 + h * 0.37, w * 0.24)
+    g += K3.rect(-w / 2 + 8, -h / 2 + 40, w - 16, h * 0.56, 8, '#F9D5E5') + K3.txt(0, -h / 2 + 40 + h * 0.2, sansQR ? 'NOUVEAU' : 'JEU GRATUIT', w * 0.11, { anchor: 'middle' })
+    g += sansQR ? K3.txt(0, -h / 2 + 40 + h * 0.42, '-20 %', w * 0.16, { anchor: 'middle', fill: MAG }) : K4.miniQR(0, -h / 2 + 40 + h * 0.37, w * 0.24)
     g += K3.rect(-w / 2 + 8, h / 2 - 30, w - 16, 22, 11, '#3B5CC4') + K3.txt(0, h / 2 - 15, 'En savoir plus', w * 0.06, { anchor: 'middle', fill: '#fff' })
     return g + '</g>'
   }

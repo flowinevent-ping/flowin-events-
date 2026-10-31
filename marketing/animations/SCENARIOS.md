@@ -2,6 +2,27 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
+## v5 — s3-v5 « Et si vous pouviez mesurer votre pub ? » (55 s)
+
+Retours client sur la v4 (« images beaucoup mieux, couleurs et fonds pastel bien ») : taches plus propres (contour vectoriel lisse, une ou deux coulures franches, trois gouttes : `K5.tache`), pictos dans une pastille ronde blanche à contour fin et ombre douce (`K5.pastille`), le « ? » remplacé par un cadran de mesure dont l'aiguille hésite puis se fixe (`K5.cadran`), QR de fin dans une carte arrondie « Scannez pour essayer » composée avec le logo et le macaron Plug & Play (`K5.carteQR`). Textes du client (`src/h/films-v5.js`) ; la mécanique « un QR par support » n'est plus montrée : les supports sont reliés à un rapport.
+
+| Temps | Scène | À l'écran |
+|---|---|---|
+| 0–4,5 s | Mesurer | ET SI VOUS POUVIEZ MESURER VOTRE PUB ? · L'impact de chaque action marketing. (cadran) |
+| 4,5–9 s | Plug & Play | UNE SOLUTION PLUG & PLAY. · Une affiche, un macaron : c'est parti. |
+| 9–14 s | On trace | ON TRACE VOTRE COMMUNICATION. · Affiches, réseaux, campagnes… et un rapport simple. |
+| 14–19 s | La mesure | CHAQUE PUB, MESURÉE. (jauges) |
+| 19–23,5 s | L'animation | CHOISISSEZ VOTRE ANIMATION. · Quiz, roue, tombola. (vrais écrans) |
+| 23,5–28 s | La marque | RENFORCEZ VOTRE MARQUE. · Faites jouer. Faites-vous connaître. Faites-les revenir. |
+| 28–32,5 s | Les lots | VOS LOTS, VOS LEVIERS. · Écouler un stock, lancer une nouveauté, une remise après achat. |
+| 32,5–37,5 s | Vos clients | CONNAISSEZ VOS CLIENTS. · Âge, sexe, provenance… et leur avis grâce aux questions bonus. |
+| 37,5–42 s | Le fichier | UN FICHIER CLIENT QUI GRANDIT. · Des contacts avec leur accord, prêts à relancer. |
+| 42–47 s | La gestion | UNE GESTION SIMPLE, AVEC UN TÉLÉPHONE. · Tirage en un clic, billets et stock automatiques. Le gagnant revient, vous scannez. *(écart)* |
+| 47–51 s | Tout-en-un | TOUT-EN-UN. · ANIMATION / FICHIER CLIENT / MESURE + Plug & Play |
+| 51–55 s | Fin | INSTALLEZ FLOWIN. · Le temps de coller une affiche. · carte QR, logo, Plug & Play |
+
+Écart : « Tirage, billets, stock : automatiques » devient « Tirage en un clic, billets et stock automatiques » (le tirage se lance d'un clic, `GagnantsClient.tsx` ; l'envoi du billet et le décompte du stock sont automatiques).
+
 ## v4 — vidéo test s3-v4 « Vous saurez enfin quelle pub vous rapporte des clients » (51 s)
 
 Retours client sur la v3 : plus de silhouettes ni de façades à triangles (« ça fait IA »), style inspiré (sans copie) des grands chiffres à débordement de peinture, couleurs Flowin (magenta, or, violet, teal) sur pastels ; on garde les vrais écrans, les jauges de mesure et le macaron Plug & Play ; rythme ralenti (plans de 4 à 5,5 s) ; le bénéfice doit frapper. Cible terrain : supermarché, auto-école, garage. Claire la fleuriste est abandonnée.

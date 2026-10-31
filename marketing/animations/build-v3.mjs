@@ -13,10 +13,12 @@ const lire = p => readFileSync(join(ici, p), 'utf8')
 // Même cible que les vidéos existantes : ?preview=1 n'écrit rien (lib/parcours.ts estApercu).
 const QR_DEMO = 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1'
 
-const FILMS = new Function(lire('src/h/films-v3.js') + ';' + lire('src/h/films-v4.js') + ';return FILMS')()
-const v4 = id => id.endsWith('-v4')
-const srcFilm = id => v4(id) ? `src/h/v4-${id.replace('-v4', '')}.js` : `src/h/v3-${id}.js`
-const sortie = id => v4(id) ? `${id}.html` : `${id}-v3.html`
+// Réécritures : films-v4.js, films-v5.js… ajoutent leurs films au tableau FILMS.
+const EXTRAS = ['src/h/films-v4.js', 'src/h/films-v5.js'].filter(p => existsSync(join(ici, p)))
+const FILMS = new Function(lire('src/h/films-v3.js') + ';' + EXTRAS.map(lire).join(';') + ';return FILMS')()
+const version = id => { const m = /-v(\d+)$/.exec(id); return m ? +m[1] : 3 }
+const srcFilm = id => version(id) > 3 ? `src/h/v${version(id)}-${id.replace(/-v\d+$/, '')}.js` : `src/h/v3-${id}.js`
+const sortie = id => version(id) > 3 ? `${id}.html` : `${id}-v3.html`
 const ECARTS = new Function('var window={};' + lire('src/h/ecarts-v3.js') + ';return window.ECARTS')()
 const demandes = process.argv.slice(2)
 const films = FILMS.filter(f => (!demandes.length || demandes.includes(f.id)) && existsSync(join(ici, srcFilm(f.id))))
@@ -134,12 +136,13 @@ for (const f of films) {
 </div>
 <script>window.QR=${JSON.stringify(qrPath(QR_DEMO))};window.ASSETS=${JSON.stringify(ASSETS)}</script>
 <script>${lire('src/h/films-v3.js')}</script>
-<script>${lire('src/h/films-v4.js')}</script>
+${EXTRAS.map(p => `<script>${lire(p)}</script>`).join('\n')}
 <script>${lire('src/h/ecarts-v3.js')}</script>
 <script>${lire('src/h/engine-h.js')}</script>
 <script>${lire('src/h/kit-h.js')}</script>
 <script>${lire('src/h/kit-v3.js')}</script>
 <script>${lire('src/h/kit-v4.js')}</script>
+<script>${lire('src/h/kit-v5.js')}</script>
 <script>${lire(srcFilm(f.id))}</script>
 <script>
 (function(){

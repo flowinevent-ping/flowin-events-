@@ -11,5 +11,11 @@ window.ECARTS = {
     10: {
       pourquoi: 'Pas de bouton nommé « Relancer » : l’écran CRM réel filtre « Opt-in seulement », sélectionne les contacts et propose « Envoyer un email » (components/pro/CrmPro.tsx). C’est ce qui est montré ; la voix off « en un clic » reste vraie.'
     }
+  },
+  's3-v5': {
+    9: {
+      ecran: 'UNE GESTION SIMPLE, AVEC UN TÉLÉPHONE. · Tirage en un clic, billets et stock automatiques. Le gagnant revient, vous scannez.',
+      pourquoi: 'Le tirage n’est pas automatique : il se lance d’un clic (« Lancer le tirage », components/pro/GagnantsClient.tsx). L’envoi du billet et le décompte du stock de lots, eux, sont automatiques. Texte écran ajusté en conséquence ; la voix off ne cite pas le tirage.'
+    }
   }
 }

@@ -122,7 +122,7 @@
     var g = '<g transform="translate(' + num(x) + ',' + num(y) + ') rotate(' + (rot || 0) + ')">' + rect(-w / 2 + 5, -h / 2 + 8, w, h, 6, 'rgba(0,0,0,.2)') + rect(-w / 2, -h / 2, w, h, 6, '#fff')
     g += rect(-w / 2, -h / 2, w, h * 0.3, 6, INK) + rect(-w / 2, -h / 2 + h * 0.24, w, h * 0.06, 0, INK)
     g += txt(0, -h / 2 + h * 0.12, 'JOUEZ', w * 0.16, { anchor: 'middle', fill: '#fff', ls: -1 }) + txt(0, -h / 2 + h * 0.22, 'ICI !', w * 0.16, { anchor: 'middle', fill: MAG, ls: -1 })
-    g += F.qr(-w * 0.22, -h * 0.12, w * 0.44)
+    g += o.sansQR ? rect(-w * 0.3, -h * 0.13, w * 0.6, w * 0.5, 6, P.beurre) + txt(0, -h * 0.13 + w * 0.32, 'PROMO', w * 0.13, { anchor: 'middle', fill: MAG }) : F.qr(-w * 0.22, -h * 0.12, w * 0.44)
     g += txt(0, h * 0.3, 'Jeu gratuit · sans achat obligatoire', w * 0.045, { anchor: 'middle', w: 700, fill: '#6b6174' })
     if (o.marque) g += rect(-w * 0.36, h * 0.34, w * 0.72, h * 0.1, 4, '#F4F0F8', { stroke: o.marqueCol || MAG, sw: 2 }) + txt(0, h * 0.405, 'VOTRE MARQUE', w * 0.07, { anchor: 'middle', fill: o.marqueCol || MAG })
     else g += F.logo(0, h * 0.43, w * 0.13, INK, 'middle')

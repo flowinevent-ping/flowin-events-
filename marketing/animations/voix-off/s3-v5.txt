@@ -1,0 +1,58 @@
+3 · Commerce : animation (v5) — Et si vous pouviez mesurer votre pub ?
+Durée : 55 s · 9:16 · MP4 muet (voix et musique à poser au montage)
+
+DIRECTION DE VOIX (toutes les vidéos) : Voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra dynamique. Tutoiement côté joueurs, vouvoiement côté pros.
+Adresse dans ce film : vouvoiement (pros).
+MUSIQUE : Groove funk-pop optimiste, 96–100 BPM, basse marquée ; montée sur la mesure, respiration sur la fin.
+APPEL À L'ACTION : Installez Flowin.
+
+SCRIPT HORODATÉ
+
+[0:00 – 0:04,5] Mesurer
+   Voix off : Et si vous pouviez mesurer votre pub ? L’impact de chaque action marketing.
+   À l'écran : ET SI VOUS POUVIEZ MESURER VOTRE PUB ? · L’impact de chaque action marketing.
+
+[0:04,5 – 0:09] Plug & Play
+   Voix off : Une solution plug and play : une affiche, un macaron… et c’est parti.
+   À l'écran : UNE SOLUTION PLUG & PLAY. · Une affiche, un macaron : c’est parti.
+
+[0:09 – 0:14] On trace
+   Voix off : On trace votre communication : affiches, réseaux, campagnes… et vous recevez un rapport simple.
+   À l'écran : ON TRACE VOTRE COMMUNICATION. · Affiches, réseaux, campagnes… et un rapport simple.
+
+[0:14 – 0:19] La mesure
+   Voix off : Chaque pub est mesurée. Vous voyez enfin ce qui marche.
+   À l'écran : CHAQUE PUB, MESURÉE.
+
+[0:19 – 0:23,5] L’animation
+   Voix off : Choisissez votre animation : quiz, roue, tombola.
+   À l'écran : CHOISISSEZ VOTRE ANIMATION. · Quiz, roue, tombola.
+
+[0:23,5 – 0:28] La marque
+   Voix off : Renforcez votre marque : faites jouer, faites-vous connaître… et faites-les revenir.
+   À l'écran : RENFORCEZ VOTRE MARQUE. · Faites jouer. Faites-vous connaître. Faites-les revenir.
+
+[0:28 – 0:32,5] Les lots
+   Voix off : Vos lots sont vos leviers : écouler un stock, lancer une nouveauté, offrir une remise après achat.
+   À l'écran : VOS LOTS, VOS LEVIERS. · Écouler un stock, lancer une nouveauté, une remise après achat.
+
+[0:32,5 – 0:37,5] Vos clients
+   Voix off : Connaissez vos clients : âge, sexe, provenance… et même leur avis, grâce aux questions bonus.
+   À l'écran : CONNAISSEZ VOS CLIENTS. · Âge, sexe, provenance… et leur avis grâce aux questions bonus.
+
+[0:37,5 – 0:42] Le fichier
+   Voix off : Un fichier client qui grandit : des contacts, avec leur accord, prêts à relancer.
+   À l'écran : UN FICHIER CLIENT QUI GRANDIT. · Des contacts avec leur accord, prêts à relancer.
+
+[0:42 – 0:47] La gestion
+   Voix off : Une gestion simple, avec un téléphone. Le gagnant revient : vous scannez, c’est validé.
+   À l'écran : UNE GESTION SIMPLE, AVEC UN TÉLÉPHONE. · Tirage en un clic, billets et stock automatiques. Le gagnant revient, vous scannez.
+   Écart avec le scénario validé (voix off d'origine : « Une gestion simple, avec un téléphone. Le gagnant revient : vous scannez, c’est validé. » ; écran d'origine : « UNE GESTION SIMPLE, AVEC UN TÉLÉPHONE. · Tirage, billets, stock : automatiques. Le gagnant revient, vous scannez. ») : Le tirage n’est pas automatique : il se lance d’un clic (« Lancer le tirage », components/pro/GagnantsClient.tsx). L’envoi du billet et le décompte du stock de lots, eux, sont automatiques. Texte écran ajusté en conséquence ; la voix off ne cite pas le tirage.
+
+[0:47 – 0:51] Tout-en-un
+   Voix off : Animation, fichier client, mesure : tout-en-un.
+   À l'écran : TOUT-EN-UN.
+
+[0:51 – 0:55] Fin
+   Voix off : Installez Flowin. Le temps de coller une affiche.
+   À l'écran : INSTALLEZ FLOWIN. · Le temps de coller une affiche.
