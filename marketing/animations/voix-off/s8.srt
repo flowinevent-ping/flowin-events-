@@ -1,0 +1,23 @@
+1
+00:00:00,150 --> 00:00:02,350
+Tu as gagné !
+
+2
+00:00:02,650 --> 00:00:05,350
+Ton billet est sur ton téléphone.
+
+3
+00:00:05,650 --> 00:00:08,850
+Tu le montres en boutique…
+
+4
+00:00:09,150 --> 00:00:11,850
+…et pour le commerçant, un simple téléphone suffit.
+
+5
+00:00:12,150 --> 00:00:15,350
+Retrait validé. Un billet, une seule fois.
+
+6
+00:00:15,650 --> 00:00:19,850
+Récupère ton cadeau !
