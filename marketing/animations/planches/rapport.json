@@ -131,5 +131,12 @@
     "qr": "https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1",
     "avertissements": [],
     "erreurs": []
+  },
+  {
+    "id": "s3-v8",
+    "duration": 73.5,
+    "qr": "https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1",
+    "avertissements": [],
+    "erreurs": []
   }
 ]
