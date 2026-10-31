@@ -17,6 +17,12 @@ const IBAN = "FR76 1460 7003 3470 2211 6462 345";
 const BIC = "CCBPFRPPMAR";
 const CGV_URL = "https://flowin-events.vercel.app/cgv-animation-magasin.html";
 
+const OFFRES: Record<string, string> = {
+  kit_digital: "Kit digital (gratuit)",
+  mensuelle: "Offre mensuelle 110 € HT / mois",
+  annuelle: "Offre annuelle 990 € HT / an",
+};
+
 const STATUTS: Record<string, string> = {
   en_attente_paiement: "En attente de paiement",
   mandat_en_cours: "Mandat SEPA en cours",
@@ -53,7 +59,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const options: string[] = [];
   if (Number(r.opt_quiz_qte) > 0) options.push(`Quiz personnalisé × ${r.opt_quiz_qte}`);
   if (Number(r.opt_bonus_qte) > 0) options.push(`Questions bonus × ${r.opt_bonus_qte}`);
-  const paiement = r.mode_paiement === "prelevement_sepa"
+  const paiement = r.mode_paiement === "aucun" ? "Aucun (gratuit)" : r.mode_paiement === "prelevement_sepa"
     ? "Prélèvement SEPA (GoCardless)" + (r.prelevement_inclut_reste ? ", tout inclus" : ", kit et options par virement")
     : "Virement bancaire";
 
@@ -68,7 +74,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     ["Téléphone", esc(r.tel)],
     ["Boutiques", esc(r.nb_boutiques)],
     ["Panier moyen déclaré", r.panier_moyen == null ? "—" : esc(eur(r.panier_moyen))],
-    ["Formule", "Abonnement annuel · " + esc(kit) + (options.length ? " · " + esc(options.join(" · ")) : "")],
+    ["Formule", esc(OFFRES[String(r.offre)] ?? r.offre) + " · " + esc(kit) + (options.length ? " · " + esc(options.join(" · ")) : "")],
+    ["Satisfait ou remboursé", r.garantie ? "Oui, objectif " + esc(r.garantie_clients_objectif) + " clients sur 12 mois" : "Non"],
+    ["Flux journalier déclaré", esc(r.flux_journalier)],
     ["Montant HT", esc(eur(r.montant_ht))],
     ["Montant TTC", esc(eur(r.montant_ttc))],
     ["Paiement", esc(paiement)],

@@ -4,793 +4,381 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Flowin Animation magasin</title>
-<meta name="description" content="Flowin Animation magasin : capter le passage, faire revenir les clients, mesurer chaque support. Plug & Play.">
+<meta name="description" content="Flowin Animation magasin : faites jouer, gardez le contact, faites revenir. Offres, garantie satisfait ou remboursé, bon de commande en ligne.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+  /* Palette « Soleil du Sud » */
   :root{
-    --ink:#150C1C; --ink2:#3a3f45; --muted:#5d6a66;
-    --teal:#00B4A0; --tealT:#00897B; --tealL:#E3F6F1; --blue:#3B8ED6; --blueL:#E4F1FA;
-    --mint:#D9F2EA; --sky:#D7EEF9; --off:#F6F7F5;
-    --card:#ffffff; --line:rgba(21,12,28,.10);
+    --cream:#FFF6EC; --white:#FFFFFF; --ink:#3B2418; --ink2:#5A3E30; --muted:#8A6B5A;
+    --line:#F3D9C4; --coral:#F26B4F; --coralT:#C94F35; --coralL:#FDE7DF;
+    --orange:#F5A100; --orangeL:#FFEFD2; --prune:#8E3B6E; --teal:#13A89E; --tealL:#E1F4F1;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;overflow:hidden;background:var(--mint)}
-  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  html{scroll-behavior:smooth;scroll-padding-top:64px}
+  body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:var(--cream);-webkit-font-smoothing:antialiased;line-height:1.5}
   button{font-family:inherit}
+  a{color:inherit}
 
-  /* Bandeau Flowin (identique aux outils autonomes) */
-  .flowin-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:#fff;color:var(--ink);border-bottom:1px solid var(--line);
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;position:fixed;top:0;left:0;right:0;height:42px;z-index:10000}
-  .flowin-topbar a.flowin-topbar-back{color:var(--ink);text-decoration:none;font-size:13px;font-weight:700;opacity:.85;white-space:nowrap}
-  .flowin-topbar .flowin-topbar-brand{font-size:14px;font-weight:800;white-space:nowrap}
-  .flowin-topbar .flowin-topbar-brand b{background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
-
-  .stage{position:fixed;top:42px;left:0;right:0;bottom:0;overflow:hidden;cursor:pointer;transition:background-color .6s ease}
-  .paint{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-  .scr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-       padding:64px 6vw 112px;opacity:0;pointer-events:none;transform:translateY(22px);
-       transition:opacity .45s cubic-bezier(.2,.7,.3,1),transform .45s cubic-bezier(.2,.7,.3,1);overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .scr.on{opacity:1;pointer-events:auto;transform:translateY(0)}
-  .inner{max-width:620px;width:100%;text-align:center;position:relative;z-index:2;margin:auto}
-  .inner.wide{max-width:1080px}
-
-  .brand-fixed{position:fixed;top:62px;left:26px;z-index:20;display:flex;align-items:center;gap:8px;cursor:pointer;opacity:.9}
+  /* En-tête : petit logo seul à gauche (signature plaquette-nds) */
+  .top{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;background:rgba(255,246,236,.94);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .top .bf{font-size:15px;font-weight:800;letter-spacing:-.02em;text-decoration:none}
+  .top nav{display:flex;gap:20px;align-items:center}
+  .top nav a{font-size:13.5px;font-weight:700;color:var(--ink2);text-decoration:none}
+  .top nav a.cta{background:var(--coral);color:#fff;padding:9px 16px;border-radius:100px}
   .logo{font-weight:900;letter-spacing:-.03em;line-height:1;color:var(--ink)}
   .logo em{font-style:normal;background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .brand-fixed .logo{font-size:14px;font-weight:800;letter-spacing:-.02em}
-  .sign-stack{margin-top:26px;text-align:center}
-  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(21,12,28,.55)}
-  .ss-pill{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;
-           font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
 
-  .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);margin-bottom:14px}
-  h1.mega{font-size:clamp(30px,6.4vw,64px);font-weight:900;line-height:1.04;letter-spacing:-.035em}
-  h1.mega em{font-style:normal;color:var(--tealT)}
-  h1.mega em.t{color:var(--tealT)}
-  h1.mega em.v{color:var(--tealT)}
-  .lede{font-size:clamp(14.5px,1.9vw,18px);color:var(--ink2);margin-top:14px;line-height:1.5;font-weight:600;max-width:560px;margin-left:auto;margin-right:auto}
-  .src{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:14px}
-  .note-ex{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.6);border-radius:100px;padding:4px 10px;margin-top:12px}
-
-  /* Grand chiffre peint */
-  .bignum{position:relative;display:inline-block;margin:6px auto 4px}
-  .bignum svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:0;overflow:visible}
-  .bignum b{position:relative;z-index:1;display:block;font-size:clamp(76px,16vw,170px);font-weight:900;letter-spacing:-.06em;line-height:.95;color:var(--ink)}
-  .bignum b small{font-size:.42em;letter-spacing:-.03em}
-
-  .paintword{position:relative;display:inline-block}
-  .paintword svg{position:absolute;left:12%;top:50%;transform:translate(-50%,-50%);z-index:0;overflow:visible;opacity:.95}
-  .paintword span{position:relative;z-index:1}
-  /* Navigation */
-  .navdots{position:fixed;left:0;right:0;bottom:22px;display:flex;justify-content:center;gap:7px;z-index:20;padding:0 70px}
-  .navdots .d{width:8px;height:8px;border-radius:50%;background:rgba(21,12,28,.2);transition:.25s;cursor:pointer;flex:none}
-  .navdots .d.on{background:var(--teal);width:24px;border-radius:100px}
-  .prog{position:fixed;top:42px;left:0;height:4px;background:var(--teal);z-index:21;transition:width .4s ease}
-  .navbtn{position:fixed;bottom:12px;z-index:22;width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--ink);
-          display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px -8px rgba(21,12,28,.35)}
-  .navbtn svg{width:18px;height:18px}
-  .navbtn.prev{left:16px} .navbtn.next{right:16px}
-  .navbtn[disabled]{opacity:.3;cursor:default}
-  .hint{position:fixed;left:0;right:0;bottom:46px;text-align:center;font-size:10.5px;font-weight:800;color:rgba(21,12,28,.45);letter-spacing:.1em;text-transform:uppercase;z-index:19;pointer-events:none;transition:opacity .3s}
-
-  /* Boutons */
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--teal);color:#fff;border:none;cursor:pointer;
-       font-weight:800;font-size:15px;padding:15px 28px;border-radius:100px;text-decoration:none;box-shadow:0 12px 26px -14px rgba(0,137,123,.55)}
-  .btn.mag{background:var(--teal)}
-  .btn.light{background:#fff;color:var(--tealT);border:1.5px solid var(--teal);box-shadow:none}
+  section{position:relative;padding:72px 24px;overflow:hidden}
+  section.alt{background:var(--white)}
+  .wrap{max-width:1040px;margin:0 auto;position:relative;z-index:1}
+  .center{text-align:center}
+  .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--coralT);margin-bottom:12px}
+  h2{font-size:clamp(28px,4.4vw,44px);font-weight:900;letter-spacing:-.03em;line-height:1.08}
+  h2 em{font-style:normal;color:var(--coral)}
+  .lede{font-size:clamp(15px,1.8vw,17.5px);color:var(--ink2);font-weight:600;margin-top:12px;max-width:560px}
+  .center .lede{margin-left:auto;margin-right:auto}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--coral);color:#fff;border:none;cursor:pointer;font-weight:800;font-size:15px;padding:15px 28px;border-radius:100px;text-decoration:none;box-shadow:0 12px 26px -14px rgba(242,107,79,.8)}
   .btn svg{width:17px;height:17px}
+  .paint{position:absolute;pointer-events:none;z-index:0}
 
-  /* Cartes génériques */
-  .cards{display:grid;gap:14px;margin-top:26px;text-align:left}
-  .cards.c2{grid-template-columns:1fr 1fr}
-  .cards.c3{grid-template-columns:repeat(3,1fr)}
-  .card{background:var(--card);border-radius:20px;padding:20px 20px 18px;box-shadow:0 18px 40px -26px rgba(21,12,28,.45);border:1px solid rgba(21,12,28,.06);position:relative;overflow:hidden}
-  .card h3{font-size:17px;font-weight:900;letter-spacing:-.01em;line-height:1.25}
-  .card p{font-size:13.5px;color:var(--ink2);margin-top:6px;line-height:1.5;font-weight:600}
-  .card .num{font-size:13px;font-weight:900;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-  .card .tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:100px;padding:3px 9px;margin-bottom:10px}
-  .card .bar{position:absolute;left:0;top:0;bottom:0;width:5px}
+  /* 1. Accueil : bloc signature identique à plaquette-nds */
+  .hero{padding:96px 24px 88px;text-align:center}
+  .hero .logo{font-size:clamp(44px,9.6vw,80px)}
+  .sign-stack{margin-top:18px;text-align:center}
+  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(59,36,24,.6)}
+  .ss-pill{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
+  .hero .claim{font-size:clamp(24px,4vw,40px);font-weight:900;letter-spacing:-.03em;line-height:1.15;margin-top:34px}
+  .hero .claim span{color:var(--coral)}
+  .hero .btn{margin-top:30px}
+  .proofline{font-size:13px;font-weight:700;color:var(--muted);margin-top:18px}
+  .proofline b{color:var(--teal)}
 
-  /* Leviers */
-  .levers{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px;text-align:left}
-  .lever{background:#fff;border-radius:24px;padding:24px;box-shadow:0 18px 40px -26px rgba(21,12,28,.45);position:relative;overflow:hidden;border:1px solid var(--line)}
-  .lever .lnum{position:relative;width:72px;height:72px;margin-bottom:10px}
-  .lever .lnum svg{position:absolute;inset:-12px;width:96px;height:96px;overflow:visible}
-  .lever .lnum b{position:relative;font-size:44px;font-weight:900;letter-spacing:-.05em;line-height:72px;display:block;text-align:center}
-  .lever h3{font-size:22px;font-weight:900;letter-spacing:-.02em}
-  .lever p{font-size:14px;color:var(--ink2);margin-top:8px;line-height:1.5;font-weight:600}
-  .chain{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
-  .chain span{background:#fff;border-radius:100px;padding:8px 15px;font-size:13.5px;font-weight:800;box-shadow:0 8px 18px -12px rgba(21,12,28,.5);border:1px solid var(--line)}
-  .chain i{font-style:normal;color:var(--teal);font-weight:900;align-self:center}
-
-  /* Démo : 4 jeux, repris des maquettes validées, dans la charte claire */
-  .gpills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:20px auto 0;max-width:560px}
-  .gpill{border:1.5px solid var(--line);background:#fff;color:var(--ink2);font-weight:800;font-size:13px;padding:9px 16px;border-radius:100px;cursor:pointer}
-  .gpill.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  /* 2. Réseau + démo */
+  .reseau{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+  .points{list-style:none;display:flex;flex-direction:column;gap:12px;margin-top:24px}
+  .points li{display:flex;gap:14px;align-items:flex-start;background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+  .points .n{flex:none;width:32px;height:32px;border-radius:50%;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .points b{display:block;font-size:15.5px;font-weight:900}
+  .points span{display:block;font-size:13px;color:var(--ink2);font-weight:600;margin-top:2px}
+  .gpills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .gpill{border:1.5px solid var(--line);background:#fff;color:var(--ink2);font-weight:800;font-size:13px;padding:8px 15px;border-radius:100px;cursor:pointer}
+  .gpill.on{background:var(--coral);border-color:var(--coral);color:#fff}
   .gamepane{display:none}
   .gamepane.on{display:block}
-  .phone{margin:18px auto 0;max-width:320px;border-radius:28px;overflow:hidden;box-shadow:0 24px 50px -30px rgba(21,12,28,.45);text-align:left;border:1px solid var(--line);background:#fff;color:var(--ink)}
-  .qz-hero{background:var(--teal);color:#fff;padding:14px 16px 12px}
+  .phone{margin:16px auto 0;max-width:320px;border-radius:26px;overflow:hidden;box-shadow:0 24px 50px -30px rgba(59,36,24,.45);border:1px solid var(--line);background:#fff;text-align:left}
+  .qz-hero{background:linear-gradient(135deg,#F26B4F,#F5A100);color:#fff;padding:13px 16px 11px}
   .qz-hero-nom{font-size:13.5px;font-weight:900}
-  .qz-hero-tag{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:4px}
-  .qz-stage{background:#fff;padding:16px 16px 18px}
+  .qz-hero-tag{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-top:3px}
+  .qz-stage{padding:15px 16px 17px;min-height:310px}
   .qz-stage.c{text-align:center}
-  .qz-prog{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tealT);margin-bottom:8px}
-  .qz-q{font-size:14.5px;font-weight:800;line-height:1.35;margin-bottom:12px}
-  .qz-opt{display:block;width:100%;text-align:left;background:var(--off);border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--ink);font-size:12.5px;font-weight:700;margin-bottom:7px;cursor:pointer}
+  .qz-prog{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--coralT);margin-bottom:8px}
+  .qz-q{font-size:14.5px;font-weight:800;line-height:1.35;margin-bottom:11px}
+  .qz-opt{display:block;width:100%;text-align:left;background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:10px 13px;color:var(--ink);font-size:12.5px;font-weight:700;margin-bottom:7px;cursor:pointer}
   .qz-opt.correct{border-color:var(--teal);background:var(--tealL)}
-  .qz-opt.wrong{border-color:#d9534f;background:#fdecea}
-  .qz-opt.picked{border-color:var(--teal);background:var(--tealL)}
-  .qz-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px}
-  .qz-chip{border:1.5px solid var(--line);background:#fff;border-radius:100px;padding:8px 13px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer}
+  .qz-opt.wrong{border-color:var(--coral);background:var(--coralL)}
+  .qz-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .qz-chip{border:1.5px solid var(--line);background:#fff;border-radius:100px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer}
   .qz-chip.picked{border-color:var(--teal);background:var(--tealL)}
-  .qz-msg{display:none;margin-top:6px;background:var(--tealL);border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.5;color:var(--ink)}
+  .qz-msg{display:none;margin-top:6px;background:var(--orangeL);border-radius:12px;padding:10px 13px;font-size:12px;line-height:1.5}
   .qz-msg.on{display:block}
-  .qz-msg b{color:var(--tealT)}
-  .qz-cta{display:none;margin-top:10px;width:100%;background:var(--teal);color:#fff;border:none;font-weight:800;font-size:13px;padding:13px;border-radius:100px;cursor:pointer}
+  .qz-msg b{color:var(--coralT)}
+  .qz-cta{display:none;margin-top:10px;width:100%;background:var(--coral);color:#fff;border:none;font-weight:800;font-size:13px;padding:12px;border-radius:100px;cursor:pointer}
   .qz-cta.on{display:block}
-  .qz-sep{border-top:1px dashed var(--line);margin:14px 0 12px}
-  .qz-k{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--tealT)}
-  .qz-h{font-size:19px;font-weight:900;letter-spacing:-.02em;margin-top:4px}
-  .wheelbox{position:relative;width:260px;height:260px;margin:22px auto 0}
+  .qz-sep{border-top:1px dashed var(--line);margin:12px 0 10px}
+  .qz-k{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--coralT)}
+  .qz-h{font-size:18px;font-weight:900;letter-spacing:-.02em;margin-top:3px}
+  .wheelbox{position:relative;width:230px;height:230px;margin:18px auto 0}
   .wheel{position:absolute;inset:0}
   .wheel svg{width:100%;height:100%;display:block}
-  .pointer{position:absolute;left:50%;top:-12px;width:34px;height:42px;margin-left:-17px;z-index:3;filter:drop-shadow(0 3px 4px rgba(21,12,28,.25));transform-origin:50% 20%}
+  .pointer{position:absolute;left:50%;top:-11px;width:32px;height:40px;margin-left:-16px;z-index:3;filter:drop-shadow(0 3px 4px rgba(59,36,24,.25));transform-origin:50% 20%}
   .wheelbox.spinning .pointer{animation:tick .12s linear 26 alternate}
   @keyframes tick{from{transform:rotate(0)}to{transform:rotate(-16deg)}}
   .bulb{animation:bulb .5s steps(1) infinite}
   .bulb.b2{animation-delay:.25s}
   @keyframes bulb{50%{fill:#fff}}
-  .resultchip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.5);opacity:0;z-index:4;background:#fff;border:1px solid var(--line);border-radius:20px;padding:12px 18px;text-align:center;box-shadow:0 18px 40px -16px rgba(21,12,28,.45);min-width:170px;transition:opacity .3s,transform .45s cubic-bezier(.2,.9,.3,1.3);pointer-events:none}
+  .resultchip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.5);opacity:0;z-index:4;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px 16px;text-align:center;box-shadow:0 18px 40px -16px rgba(59,36,24,.45);min-width:160px;transition:opacity .3s,transform .45s cubic-bezier(.2,.9,.3,1.3);pointer-events:none}
   .resultchip.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  .resultchip small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--tealT)}
-  .resultchip b{display:block;font-size:22px;font-weight:900;letter-spacing:-.02em;margin-top:2px}
-  .legend{font-size:12px;font-weight:700;color:var(--ink2);margin-top:12px;line-height:1.45}
-  .spinbtn{margin-top:14px;width:100%;background:var(--teal);border:none;color:#fff;font-weight:800;font-size:14px;padding:13px 20px;border-radius:100px;cursor:pointer}
+  .resultchip small{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+  .resultchip b{display:block;font-size:20px;font-weight:900;margin-top:2px}
+  .legend{font-size:12px;font-weight:700;color:var(--ink2);margin-top:10px;line-height:1.45}
+  .spinbtn{margin-top:12px;width:100%;background:var(--coral);border:none;color:#fff;font-weight:800;font-size:14px;padding:12px 20px;border-radius:100px;cursor:pointer}
   .spinbtn[disabled]{opacity:.55;cursor:default}
-  .machine{position:relative;margin:18px auto 0;width:240px}
-  .slot{height:32px;border-radius:16px;background:var(--tealT);position:relative;z-index:3;box-shadow:0 0 0 6px var(--tealL)}
-  .slot:after{content:'';position:absolute;left:18px;right:18px;top:13px;height:6px;border-radius:3px;background:#006B60}
-  .paper{position:relative;height:0;overflow:hidden;margin:-16px 16px 0;z-index:2}
-  .paper.on{height:236px}
-  .ptk{position:absolute;left:0;right:0;top:0;background:#fff;border:1px solid var(--line);border-top:none;border-radius:0 0 20px 20px;padding:30px 16px 16px;text-align:center;transform:translateY(-100%);box-shadow:0 16px 26px -16px rgba(21,12,28,.35)}
+  .machine{position:relative;margin:16px auto 0;width:230px}
+  .slot{height:30px;border-radius:15px;background:var(--orange);position:relative;z-index:3;box-shadow:0 0 0 6px var(--orangeL)}
+  .slot:after{content:'';position:absolute;left:18px;right:18px;top:12px;height:6px;border-radius:3px;background:#C27F00}
+  .paper{position:relative;height:0;overflow:hidden;margin:-15px 16px 0;z-index:2}
+  .paper.on{height:214px}
+  .ptk{position:absolute;left:0;right:0;top:0;background:#fff;border:1px solid var(--line);border-top:none;border-radius:0 0 18px 18px;padding:28px 14px 14px;text-align:center;transform:translateY(-100%);box-shadow:0 16px 26px -16px rgba(59,36,24,.35)}
   .paper.on .ptk{animation:print 2.4s .2s cubic-bezier(.4,.1,.3,1) forwards}
   @keyframes print{0%{transform:translateY(-100%)}14%{transform:translateY(-86%)}22%{transform:translateY(-86%)}40%{transform:translateY(-58%)}48%{transform:translateY(-58%)}68%{transform:translateY(-28%)}76%{transform:translateY(-28%)}100%{transform:translateY(0)}}
-  .ptk small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--tealT)}
-  .ptk .no{font-size:38px;font-weight:900;letter-spacing:-.03em;margin-top:8px;font-variant-numeric:tabular-nums}
-  .ptk .bar{height:28px;margin:10px auto 0;width:150px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px)}
-  .ptk p{font-size:11px;color:var(--muted);font-weight:700;margin-top:10px}
-  .bigbtn{width:136px;height:136px;border-radius:50%;margin:22px auto 4px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--teal);color:#fff;font-weight:900;font-size:17px;line-height:1.15;border:7px solid var(--tealL);cursor:pointer;box-shadow:0 14px 30px -16px rgba(0,137,123,.75)}
+  .ptk small{display:block;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--coralT)}
+  .ptk .no{font-size:34px;font-weight:900;letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums}
+  .ptk .bar{height:26px;margin:8px auto 0;width:140px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px)}
+  .ptk p{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:8px}
+  .bigbtn{width:124px;height:124px;border-radius:50%;margin:20px auto 4px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--coral);color:#fff;font-weight:900;font-size:16px;line-height:1.15;border:7px solid var(--coralL);cursor:pointer}
   .bigbtn.off{display:none}
-  .subtiny{font-size:12px;color:var(--ink2);margin-top:12px;font-weight:700}
 
-  /* Modal gain */
-  .winmodal{position:fixed;inset:0;z-index:60;background:rgba(21,12,28,.55);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s ease}
-  .winmodal.on{opacity:1;pointer-events:auto}
-  .winmodal-card{background:#fff;border-radius:22px;padding:28px 24px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.4)}
-  .wm-eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--tealT)}
-  .wm-lot{font-size:22px;font-weight:900;margin-top:8px}
-  .wm-sub{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45;font-weight:600}
-  .wm-perf{height:1px;background:repeating-linear-gradient(90deg,#e4dee9 0 6px,transparent 6px 11px);margin:16px -24px 14px}
-  .wm-btn{margin-top:4px;width:100%;background:var(--teal);color:#fff;border:none;font-weight:800;font-size:13px;padding:12px;border-radius:100px;cursor:pointer}
+  /* 3. Offres : cartes cliquables comme les packs NDS */
+  .offers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px}
+  .offer{position:relative;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:22px;padding:22px 20px 20px;cursor:pointer;color:var(--ink);transition:border-color .15s,box-shadow .15s,transform .15s}
+  .offer:hover{transform:translateY(-2px)}
+  .offer.sel{border-color:var(--coral);box-shadow:0 18px 40px -24px rgba(242,107,79,.7)}
+  .offer .badge{position:absolute;top:-11px;left:20px;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px}
+  .offer .ck{position:absolute;top:18px;right:18px;width:22px;height:22px;border-radius:50%;border:2px solid var(--line)}
+  .offer.sel .ck{border-color:var(--coral);background:var(--coral)}
+  .offer.sel .ck:after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .offer .on{font-size:17px;font-weight:900;padding-right:30px}
+  .offer .op{font-size:30px;font-weight:900;letter-spacing:-.03em;margin-top:10px}
+  .offer .op small{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:0}
+  .offer ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:6px}
+  .offer li{font-size:13px;color:var(--ink2);font-weight:600;padding-left:18px;position:relative}
+  .offer li:before{content:'';position:absolute;left:2px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--teal)}
+  .opts{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .opt{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;font-size:13.5px;font-weight:700;line-height:1.35}
+  .opt input[type=checkbox]{width:19px;height:19px;flex:none;accent-color:#F26B4F;margin-top:1px}
+  .opt small{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-top:2px}
+  .opt .stepper{display:none;margin-top:8px}
+  .opt.sel{border-color:var(--coral)}
+  .opt.sel .stepper{display:inline-flex}
+  .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:100px;overflow:hidden;background:#fff}
+  .stepper button{width:32px;height:32px;border:none;background:var(--cream);font-size:17px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .stepper input{width:40px;text-align:center;border:none;font:inherit;font-size:14px;font-weight:900;outline:none;color:var(--ink);background:#fff}
+  .totbar{margin-top:20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:16px 20px}
+  .totbar .t{font-size:14px;font-weight:700;color:var(--ink2)}
+  .totbar .t b{font-size:20px;font-weight:900;color:var(--ink)}
 
-  /* Supports et mesure */
-  .supports{margin-top:24px;display:flex;flex-direction:column;gap:10px;text-align:left}
-  .sup{display:grid;grid-template-columns:150px 1fr 70px;gap:14px;align-items:center;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 12px 28px -22px rgba(21,12,28,.5);border:1px solid var(--line)}
-  .sup .sn{font-size:15px;font-weight:900}
-  .sup .sd{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
-  .sup .trk{height:12px;background:rgba(21,12,28,.07);border-radius:100px;overflow:hidden}
-  .sup .fill{height:100%;width:0;border-radius:100px;transition:width 1.1s cubic-bezier(.2,.8,.25,1)}
-  .sup .qr{font-size:11px;font-weight:800;color:var(--muted);text-align:right}
+  /* 4. Garantie */
+  .guar{background:#fff;border:2px solid var(--coral);border-radius:28px;padding:30px;display:grid;grid-template-columns:1fr 1fr;gap:28px;box-shadow:0 30px 60px -40px rgba(242,107,79,.6)}
+  .guar .badge{display:inline-block;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:100px;margin-bottom:12px}
+  .guar h2{font-size:clamp(24px,3.4vw,34px)}
+  .guar .gtxt{font-size:14px;color:var(--ink2);font-weight:600;margin-top:12px}
+  .guar .gtxt a{color:var(--coralT);font-weight:800}
+  .fiche{background:var(--cream);border:1px solid var(--line);border-radius:20px;padding:20px}
+  .fiche h3{font-size:16px;font-weight:900}
+  .fl{display:block;font-size:12.5px;font-weight:800;color:var(--ink2);margin:14px 0 6px}
+  .fin{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+  .fin input{flex:1;border:none;font:inherit;font-size:16px;font-weight:800;padding:11px 12px;outline:none;color:var(--ink);background:#fff;min-width:0}
+  .fin span{padding:0 14px;font-weight:800;color:var(--muted)}
+  .flux{display:flex;gap:8px;flex-wrap:wrap}
+  .flux button{border:1.5px solid var(--line);background:#fff;border-radius:100px;padding:8px 13px;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer}
+  .flux button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .fiche .btn{width:100%;margin-top:16px}
+  .ferr{display:none;font-size:12px;font-weight:700;color:var(--coralT);margin-top:8px}
+  .result{display:none;margin-top:16px;background:#fff;border:1.5px solid var(--orange);border-radius:16px;padding:16px;text-align:center}
+  .result.on{display:block}
+  .result .rx{font-size:15px;font-weight:700;color:var(--ink2)}
+  .result .rx b{display:block;font-size:44px;font-weight:900;letter-spacing:-.04em;color:var(--coral);line-height:1.1;margin:4px 0}
+  .result .ro{font-size:12px;color:var(--muted);font-weight:700;margin-top:6px}
 
-  /* Rapports (aperçu) */
-  .dash{margin-top:24px;background:#fff;border-radius:22px;box-shadow:0 30px 60px -30px rgba(21,12,28,.55);text-align:left;overflow:hidden;border:1px solid var(--line)}
-  .dash-top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--tealL);color:var(--ink);border-bottom:1px solid var(--line)}
-  .dash-top b{font-size:13.5px;font-weight:800} .dash-top b em{font-style:normal;background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .dash-top span{font-size:10.5px;font-weight:700;opacity:.7}
-  .dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px}
-  .kpi{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-  .kpi .kl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-  .kpi .kv{font-size:24px;font-weight:900;margin-top:4px;letter-spacing:-.02em}
-  .dash-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:0 16px 16px}
-  .panel{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
-  .panel .kl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-  .donut{width:86px;height:86px;border-radius:50%;margin:4px auto 8px;background:conic-gradient(var(--teal) 0 54%,var(--blue) 54% 100%);position:relative}
-  .donut:after{content:'';position:absolute;inset:14px;background:#fff;border-radius:50%}
-  .leg{font-size:11px;font-weight:700;color:var(--ink2);display:flex;gap:10px;justify-content:center}
-  .leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
-  .hrow{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:11px;font-weight:800;color:var(--ink2)}
-  .hrow span{width:42px;flex:none}
-  .hrow .trk{flex:1;height:8px;border-radius:100px;background:rgba(21,12,28,.07);overflow:hidden}
-  .hrow .trk i{display:block;height:100%;border-radius:100px;background:linear-gradient(90deg,var(--teal),var(--blue))}
+  /* 5. Dernier appel */
+  .final .btn{margin-top:24px}
+  .foot{padding:22px 24px;text-align:center;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);background:var(--cream)}
 
-  /* Retrait */
-  .retrait{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center;margin-top:24px;text-align:left}
-  .rlist{display:flex;flex-direction:column;gap:10px}
-  .rli{background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 12px 28px -22px rgba(21,12,28,.5);border:1px solid var(--line)}
-  .rli b{font-size:15px;font-weight:900;display:block}
-  .rli span{font-size:12.5px;color:var(--ink2);font-weight:600;display:block;margin-top:3px;line-height:1.45}
-  .ticket{background:#fff;border-radius:20px;padding:20px;box-shadow:0 30px 60px -30px rgba(21,12,28,.6);max-width:300px;margin:0 auto;width:100%;border:1px solid var(--line)}
-  .ticket .ok{display:inline-block;background:#e5f7ee;color:#0f8a63;font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:100px;margin-bottom:10px}
-  .ticket .tl{font-size:17px;font-weight:900}
-  .ticket .ts{font-size:12px;color:var(--muted);margin-top:3px;font-weight:600}
-  .ticket .tpin{margin-top:14px;padding-top:14px;border-top:1px dashed #ddd;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--muted)}
-  .ticket .tpin b{font-size:18px;letter-spacing:.2em;color:var(--ink)}
-  .ticket .tbtn{margin-top:14px;background:var(--teal);color:#fff;font-weight:800;font-size:13px;padding:12px;border-radius:12px;text-align:center;cursor:pointer;border:none;width:100%}
-  .ticket .tbtn.done{background:var(--tealT)}
-
-  /* Plug & Play */
-  .pp{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:center;margin-top:24px;text-align:left}
-  .poster{position:relative;max-width:300px;margin:0 auto}
-  .poster img{width:100%;display:block;border-radius:10px;box-shadow:0 30px 60px -24px rgba(21,12,28,.7);transform:rotate(-2.5deg);background:#2a1638;aspect-ratio:1241/1754}
-  .poster .cap{font-size:11px;font-weight:800;color:var(--muted);text-align:center;margin-top:16px}
-  .steps{display:flex;flex-direction:column;gap:12px}
-  .step{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:0 12px 28px -22px rgba(21,12,28,.5);border:1px solid var(--line)}
-  .step .sn{flex:none;width:38px;height:38px;border-radius:50%;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center}
-  .step b{font-size:15px;font-weight:900;display:block}
-  .step span{font-size:12.5px;color:var(--ink2);font-weight:600;line-height:1.45;display:block;margin-top:2px}
-
-  /* Preuves */
-  .proofs{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px;max-width:760px;margin-left:auto;margin-right:auto}
-  .proof{background:#fff;border-radius:22px;padding:22px 16px 18px;box-shadow:0 18px 40px -26px rgba(21,12,28,.45);border:1px solid var(--line)}
-  .proof .pn{position:relative;height:104px;display:flex;align-items:center;justify-content:center}
-  .proof .pn svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:visible}
-  .proof .pn b{position:relative;font-size:clamp(40px,5vw,56px);font-weight:900;letter-spacing:-.05em}
-  .proof p{font-size:13.5px;font-weight:700;color:var(--ink2);margin-top:8px;line-height:1.45}
-  .proof small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-top:8px}
-
-  /* Prix + simulateur */
-  .prices{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;margin-top:22px;text-align:left;align-items:start}
-  .plist{display:flex;flex-direction:column;gap:10px}
-  .pitem{background:#fff;border-radius:16px;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center;box-shadow:0 12px 28px -22px rgba(21,12,28,.5);border:1px solid var(--line)}
-  .pitem b{font-size:15px;font-weight:900;display:block}
-  .pitem span{font-size:12px;color:var(--muted);font-weight:700;display:block;margin-top:2px}
-  .pitem .pv{display:block;margin:0;font-size:20px;font-weight:900;white-space:nowrap;text-align:right}
-  .pitem .pv small{font-size:11px;color:var(--muted);font-weight:800;display:block}
-  .pitem.hero{border:1.5px solid var(--teal)!important}
-  .pitem.hero b{color:var(--tealT)}
-    .sim{background:#fff;border-radius:22px;padding:20px;box-shadow:0 24px 50px -28px rgba(21,12,28,.6);border:1px solid var(--line)}
-  .sim h3{font-size:17px;font-weight:900}
-  .sim .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
-  .sim .lb{font-size:13px;font-weight:800}
-  .stepper{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:100px;overflow:hidden}
-  .stepper button{width:40px;height:40px;border:none;background:var(--off);font-size:20px;font-weight:800;cursor:pointer;color:var(--ink)}
-  .stepper input{width:52px;text-align:center;border:none;font:inherit;font-size:17px;font-weight:900;outline:none;background:#fff;color:var(--ink)}
-  .seg{display:flex;gap:6px;background:var(--off);border-radius:100px;padding:4px}
-  .seg button{border:none;background:transparent;font-weight:800;font-size:12.5px;padding:8px 12px;border-radius:100px;cursor:pointer;color:var(--ink2)}
-  .seg button.on{background:var(--teal);color:#fff}
-  .chk{display:flex;align-items:flex-start;gap:10px;margin-top:12px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.35}
-  .chk input{width:19px;height:19px;flex:none;accent-color:#00B4A0;margin-top:1px}
-  .chk small{display:block;color:var(--muted);font-size:11.5px;font-weight:700}
-  .sim-tot{margin-top:16px;border-top:1.5px dashed var(--line);padding-top:12px}
-  .sim-tot .tl{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--ink2);margin-top:5px}
-  .sim-tot .tl b{color:var(--ink);font-variant-numeric:tabular-nums}
-  .sim-tot .tl.big{font-size:16px;font-weight:900;color:var(--ink);margin-top:9px}
-  .sim-tot .tl.big b{font-size:24px}
-  .sim .btn{width:100%;margin-top:16px}
-
-  @media (max-width:820px){
-    .cards.c3{grid-template-columns:1fr 1fr}
-    .levers,.retrait,.pp,.prices{grid-template-columns:1fr}
-    .dash-grid{grid-template-columns:1fr 1fr}
-    .dash-row{grid-template-columns:1fr}
-    .proofs{grid-template-columns:1fr;gap:12px}
-    .proof .pn{height:76px}
+  @media (max-width:860px){
+    .reseau,.guar{grid-template-columns:1fr}
+    .offers,.opts{grid-template-columns:1fr}
+    .top nav a:not(.cta){display:none}
   }
   @media (max-width:520px){
-    .scr{padding:62px 16px 104px}
-    .cards.c2,.cards.c3{grid-template-columns:1fr}
-    .sup{grid-template-columns:1fr 60px;gap:6px 10px}
-    .sup .trk{grid-column:1 / -1;grid-row:2}
-    .brand-fixed{left:16px;top:58px}
-    .navdots{gap:5px;padding:0 64px}
-    .navdots .d{width:6px;height:6px}
-    .navdots .d.on{width:16px}
+    section{padding:56px 16px}
+    .hero{padding:72px 16px 64px}
+    .top{padding:10px 16px}
+    .guar{padding:20px}
   }
-  @media (min-width:1100px){
-    .scr{padding-top:84px}
-  }
-  @media (prefers-reduced-motion:reduce){ .scr,.sup .fill{transition:none!important} }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.paper.on .ptk{animation:none;transform:none}.bulb{animation:none}}
 </style>
 </head>
 <body>
-<div class="flowin-topbar"><a href="/dashboard" class="flowin-topbar-back" id="topBack">&larr; Dashboard</a><span class="flowin-topbar-brand">Flow<b>in</b></span></div>
 
-<div class="prog" id="prog" style="width:0%"></div>
-<div class="brand-fixed" id="brandHome"><span class="logo">Flow<em>in</em></span></div>
+<header class="top">
+  <a class="bf logo" href="#accueil">Flow<em>in</em></a>
+  <nav><a href="#reseau">Le r&eacute;seau</a><a href="#offres">Les offres</a><a href="#garantie">Garantie</a><a class="cta" id="topOrder" href="/bon-commande-animation.html">Commander</a></nav>
+</header>
 
-<div class="stage" id="stage">
-  <svg class="paint" id="paint" aria-hidden="true"></svg>
-
-  <!-- 1. ACCUEIL -->
-  <section class="scr on" id="s-home" data-bg="#D9F2EA" data-paint="teal,orange">
-    <div class="inner">
-      <div class="logo" style="font-size:clamp(44px,9.6vw,80px)">Flow<em>in</em></div>
-      <div class="sign-stack" style="margin-top:18px">
-        <div class="ss-eyebrow">Animation digitale</div>
-        <div class="ss-pill">Plug &amp; Play</div>
-      </div>
-      <p class="lede" style="margin-top:22px">Le jeu par QR code pour votre magasin : un quiz qui sonde vos clients, capte le passage et mesure chaque support.</p>
-      <div style="margin-top:28px"><button class="btn" type="button" id="btnStart">D&eacute;couvrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button></div>
+<!-- 1. ACCUEIL -->
+<section class="hero" id="accueil">
+  <svg class="paint" id="paintHero" style="right:-70px;top:-60px;width:260px;height:260px" viewBox="-130 -130 260 260" aria-hidden="true"></svg>
+  <svg class="paint" id="paintHero2" style="left:-60px;bottom:-70px;width:200px;height:200px" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+  <div class="wrap">
+    <div class="logo">Flow<em>in</em></div>
+    <div class="sign-stack">
+      <div class="ss-eyebrow">Animation digitale</div>
+      <div class="ss-pill">Plug &amp; Play</div>
     </div>
-  </section>
+    <p class="claim">Faites jouer. <span>Gardez le contact.</span> Faites revenir.</p>
+    <a class="btn" href="#offres">Voir les offres <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg></a>
+    <p class="proofline"><b>Plus de 55 %</b> des joueurs souhaitent garder le contact.</p>
+  </div>
+</section>
 
-  <!-- 2. LE CONSTAT -->
-  <section class="scr" id="s-constat" data-bg="#D7EEF9" data-paint="blue,teal">
-    <div class="inner">
-      <div class="eyebrow">Le constat</div>
-      <h1 class="mega" style="font-size:clamp(30px,5.6vw,58px)"><span class="paintword"><svg data-splash="teal,orange" data-r="54" data-seed="3" width="10" height="10"></svg><span>Votre fichier client dort.</span></span></h1>
-      <h1 class="mega" style="font-size:clamp(24px,3.8vw,40px);margin-top:16px">Et chaque jour, <em>des passants vous &eacute;chappent</em>.</h1>
-      <p class="lede" style="font-size:clamp(16px,2.2vw,21px);margin-top:22px;color:var(--ink)"><b>Flowin capte le flux et mesure l&rsquo;impact de vos actions.</b></p>
+<!-- 2. LE RÉSEAU + DÉMO -->
+<section class="alt" id="reseau">
+  <div class="wrap reseau">
+    <div>
+      <div class="eyebrow">Le r&eacute;seau Flowin</div>
+      <h2>Rejoignez le <em>r&eacute;seau Flowin</em>.</h2>
+      <ul class="points">
+        <li><span class="n" style="background:var(--coral)">1</span><div><b>Vous cr&eacute;ez votre animation</b><span>Un quiz, une roue ou une tombola, &agrave; vos couleurs.</span></div></li>
+        <li><span class="n" style="background:var(--orange)">2</span><div><b>Vous faites gagner chez vous</b><span>Le client joue, gagne et vient retirer son lot en boutique.</span></div></li>
+        <li><span class="n" style="background:var(--teal)">3</span><div><b>Vous mesurez chaque support</b><span>Affiche, caisse, r&eacute;seaux : chaque QR a ses chiffres.</span></div></li>
+      </ul>
     </div>
-  </section>
-
-  <!-- 3. DEUX LEVIERS -->
-  <section class="scr" id="s-leviers" data-bg="#F6F7F5" data-paint="orange,blue">
-    <div class="inner wide">
-      <div class="eyebrow">Flowin, deux leviers</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Un QR, un jeu, un cadeau,<br><em class="t">un client qui revient</em>.</h1>
-      <div class="levers">
-        <div class="lever">
-          <div class="lnum"><svg data-splash="teal" data-r="40" data-seed="5" viewBox="-48 -48 96 96"></svg><b>01</b></div>
-          <h3>Capter le passage</h3>
-          <p>Le passant flashe l&rsquo;affiche en vitrine, r&eacute;pond au quiz en 30 secondes et entre chercher son lot. Le client en caisse joue aussi : vous r&eacute;cup&eacute;rez son contact, avec son accord.</p>
-        </div>
-        <div class="lever">
-          <div class="lnum"><svg data-splash="orange" data-r="40" data-seed="9" viewBox="-48 -48 96 96"></svg><b>02</b></div>
-          <h3>Faire revenir les clients</h3>
-          <p>Le lot se retire en boutique, la remise se d&eacute;pense &agrave; la prochaine visite, et chaque contact opt-in vous permet de relancer vos clients inactifs.</p>
-        </div>
-      </div>
-      <div class="chain"><span>Il flashe</span><i>&rarr;</i><span>Il joue</span><i>&rarr;</i><span>Il gagne</span><i>&rarr;</i><span>Il revient</span></div>
-    </div>
-  </section>
-
-  <!-- 4. DEMO : 4 jeux jouables (repris des maquettes jeux validées) -->
-  <section class="scr" id="s-demo" data-bg="#F6F7F5" data-paint="orange,blue">
-    <div class="inner">
-      <div class="eyebrow">Essayez, comme votre client</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Il <em>joue</em>.</h1>
+    <div class="center">
       <div class="gpills" role="tablist" aria-label="Choisir un jeu">
         <button class="gpill on" type="button" data-game="bonus">Quiz + bonus</button>
         <button class="gpill" type="button" data-game="solo">Quiz solo</button>
         <button class="gpill" type="button" data-game="roue">Roue</button>
         <button class="gpill" type="button" data-game="tombola">Tombola</button>
       </div>
-
-      <div class="gamepane on" id="pane-bonus">
-        <div class="phone">
-          <div class="qz-hero"><div class="qz-hero-nom">Votre boutique</div><div class="qz-hero-tag">Quiz + bonus &middot; exemple</div></div>
-          <div class="qz-stage">
-            <div class="qz-prog">Question 1/1</div>
-            <div class="qz-q">Depuis combien de temps votre boutique accueille-t-elle ses clients ?</div>
-            <button class="qz-opt" type="button" data-qb>Moins de 5 ans</button>
-            <button class="qz-opt" type="button" data-qb data-correct="1">Plus de 10 ans</button>
-            <button class="qz-opt" type="button" data-qb>C&rsquo;est tout nouveau</button>
-            <div class="qz-msg" id="qbMsg"></div>
-            <div id="qbBonus" style="display:none">
-              <div class="qz-sep"></div>
-              <div class="qz-prog">Question bonus &middot; 1 ticket en plus</div>
-              <div class="qz-q">Qu&rsquo;est-ce qui vous fait revenir en boutique ?</div>
-              <div class="qz-chips">
-                <button class="qz-chip" type="button" data-bonus>L&rsquo;accueil</button>
-                <button class="qz-chip" type="button" data-bonus>Les produits</button>
-                <button class="qz-chip" type="button" data-bonus>Les prix</button>
-                <button class="qz-chip" type="button" data-bonus>La proximit&eacute;</button>
-              </div>
-              <div class="qz-msg" id="bonusMsg">Merci pour votre r&eacute;ponse. <b>+1 ticket pour le tirage.</b></div>
-            </div>
+      <div class="gamepane on" id="pane-bonus"><div class="phone">
+        <div class="qz-hero"><div class="qz-hero-nom">Votre boutique</div><div class="qz-hero-tag">Quiz + bonus &middot; exemple</div></div>
+        <div class="qz-stage">
+          <div class="qz-prog">Question 1/1</div>
+          <div class="qz-q">Depuis combien de temps votre boutique accueille-t-elle ses clients ?</div>
+          <button class="qz-opt" type="button" data-qb>Moins de 5 ans</button>
+          <button class="qz-opt" type="button" data-qb data-correct="1">Plus de 10 ans</button>
+          <button class="qz-opt" type="button" data-qb>C&rsquo;est tout nouveau</button>
+          <div class="qz-msg" id="qbMsg"></div>
+          <div id="qbBonus" style="display:none">
+            <div class="qz-sep"></div>
+            <div class="qz-prog">Question bonus &middot; 1 ticket en plus</div>
+            <div class="qz-q">Qu&rsquo;est-ce qui vous fait revenir ?</div>
+            <div class="qz-chips"><button class="qz-chip" type="button" data-bonus>L&rsquo;accueil</button><button class="qz-chip" type="button" data-bonus>Les produits</button><button class="qz-chip" type="button" data-bonus>La proximit&eacute;</button></div>
+            <div class="qz-msg" id="bonusMsg">Merci ! <b>+1 ticket pour le tirage.</b></div>
           </div>
         </div>
-      </div>
-
-      <div class="gamepane" id="pane-solo">
-        <div class="phone">
-          <div class="qz-hero"><div class="qz-hero-nom">Votre boutique</div><div class="qz-hero-tag">Quiz solo &middot; exemple</div></div>
-          <div class="qz-stage">
-            <div class="qz-prog">Question 1/1</div>
-            <div class="qz-q">Qu&rsquo;est-ce qui est fabriqu&eacute; sur place, dans la boutique ?</div>
-            <button class="qz-opt" type="button" data-qs>Le pain</button>
-            <button class="qz-opt" type="button" data-qs>Les confitures</button>
-            <button class="qz-opt" type="button" data-qs data-correct="1">Les deux</button>
-            <div class="qz-msg" id="qsMsg"></div>
-            <button class="qz-cta" id="qsCta" type="button">Voir mon gain</button>
-          </div>
+      </div></div>
+      <div class="gamepane" id="pane-solo"><div class="phone">
+        <div class="qz-hero"><div class="qz-hero-nom">Votre boutique</div><div class="qz-hero-tag">Quiz solo &middot; exemple</div></div>
+        <div class="qz-stage">
+          <div class="qz-prog">Question 1/1</div>
+          <div class="qz-q">Qu&rsquo;est-ce qui est fabriqu&eacute; sur place ?</div>
+          <button class="qz-opt" type="button" data-qs>Le pain</button>
+          <button class="qz-opt" type="button" data-qs>Les confitures</button>
+          <button class="qz-opt" type="button" data-qs data-correct="1">Les deux</button>
+          <div class="qz-msg" id="qsMsg"></div>
+          <button class="qz-cta" id="qsCta" type="button">Voir mon gain</button>
         </div>
-      </div>
-
-      <div class="gamepane" id="pane-roue">
-        <div class="phone">
-          <div class="qz-hero"><div class="qz-hero-nom">Caf&eacute; Exemple</div><div class="qz-hero-tag">Roue &middot; jeu gratuit</div></div>
-          <div class="qz-stage c">
-            <div class="qz-k">Un tour offert</div>
-            <div class="qz-h" id="roueTitre">Tentez votre chance</div>
-            <div class="wheelbox" id="wheelbox"><svg class="pointer" viewBox="0 0 40 48" aria-hidden="true"><path d="M20 46 L4 12 A16 16 0 1 1 36 12 Z" fill="#00897B"/><circle cx="20" cy="15" r="6" fill="#fff"/></svg><div class="wheel" id="wheel"></div><div class="resultchip" id="roueChip"><small>Gain imm&eacute;diat</small><b>Caf&eacute; offert</b></div></div>
-            <div class="legend" id="roueLegend">Case &laquo; Ticket &raquo; : 1 ticket pour le tirage au sort.</div>
-            <button class="spinbtn" id="spinbtn" type="button">Lancer la roue</button>
-          </div>
+      </div></div>
+      <div class="gamepane" id="pane-roue"><div class="phone">
+        <div class="qz-hero"><div class="qz-hero-nom">Caf&eacute; Exemple</div><div class="qz-hero-tag">Roue &middot; jeu gratuit</div></div>
+        <div class="qz-stage c">
+          <div class="qz-k">Un tour offert</div>
+          <div class="qz-h" id="roueTitre">Tentez votre chance</div>
+          <div class="wheelbox" id="wheelbox"><svg class="pointer" viewBox="0 0 40 48" aria-hidden="true"><path d="M20 46 L4 12 A16 16 0 1 1 36 12 Z" fill="#C94F35"/><circle cx="20" cy="15" r="6" fill="#fff"/></svg><div class="wheel" id="wheel"></div><div class="resultchip" id="roueChip"><small>Gain imm&eacute;diat</small><b>Caf&eacute; offert</b></div></div>
+          <div class="legend" id="roueLegend">Case &laquo; Ticket &raquo; : 1 ticket pour le tirage.</div>
+          <button class="spinbtn" id="spinbtn" type="button">Lancer la roue</button>
         </div>
-      </div>
-
-      <div class="gamepane" id="pane-tombola">
-        <div class="phone">
-          <div class="qz-hero"><div class="qz-hero-nom">Boulangerie Exemple</div><div class="qz-hero-tag">Tombola &middot; jeu gratuit</div></div>
-          <div class="qz-stage c">
-            <div class="qz-k" id="tbK">Tombola du jour</div>
-            <div class="qz-h">Votre ticket vous attend</div>
-            <div class="machine"><div class="slot"></div><div class="paper" id="paper"><div class="ptk"><small>Ticket tombola</small><div class="no" id="tbNo">TK-0000</div><div class="bar"></div><p>Tirage au sort &agrave; la date choisie par le commerce</p></div></div></div>
-            <button class="bigbtn" id="bigbtn" type="button">Tirer<br>mon ticket</button>
-            <div class="legend" id="tbLegend">Un ticket par jour et par personne.</div>
-          </div>
+      </div></div>
+      <div class="gamepane" id="pane-tombola"><div class="phone">
+        <div class="qz-hero"><div class="qz-hero-nom">Boulangerie Exemple</div><div class="qz-hero-tag">Tombola &middot; jeu gratuit</div></div>
+        <div class="qz-stage c">
+          <div class="qz-k" id="tbK">Tombola du jour</div>
+          <div class="qz-h">Votre ticket vous attend</div>
+          <div class="machine"><div class="slot"></div><div class="paper" id="paper"><div class="ptk"><small>Ticket tombola</small><div class="no" id="tbNo">TK-0000</div><div class="bar"></div><p>Tirage au sort &agrave; la date choisie par le commerce</p></div></div></div>
+          <button class="bigbtn" id="bigbtn" type="button">Tirer<br>mon ticket</button>
+          <div class="legend" id="tbLegend">Un ticket par jour et par personne.</div>
         </div>
-      </div>
-
-      <div class="subtiny">Exactement ce que joue votre client, sur son t&eacute;l&eacute;phone.</div>
+      </div></div>
     </div>
-  </section>
-
-  <!-- 5. QR PAR SUPPORT -->
-  <section class="scr" id="s-qr" data-bg="#D7EEF9" data-paint="blue,teal">
-    <div class="inner">
-      <div class="eyebrow">Mesure par support</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,50px)">Un QR par support.<br><em class="v">Vous savez ce qui marche.</em></h1>
-      <p class="lede">Chaque emplacement a son propre QR trac&eacute;, avec ses flashs, ses joueurs et ses parties.</p>
-      <div class="supports" id="supports">
-        <div class="sup"><div><div class="sn">Entr&eacute;e, vitrine</div><div class="sd">Affiche, macaron</div></div><div class="trk"><div class="fill" data-w="82%" style="background:var(--teal)"></div></div><div class="qr">QR 1</div></div>
-        <div class="sup"><div><div class="sn">Caisse</div><div class="sd">Support de caisse</div></div><div class="trk"><div class="fill" data-w="64%" style="background:var(--blue)"></div></div><div class="qr">QR 2</div></div>
-        <div class="sup"><div><div class="sn">R&eacute;seaux sociaux</div><div class="sd">Story, post, bio</div></div><div class="trk"><div class="fill" data-w="47%" style="background:var(--teal)"></div></div><div class="qr">Lien 3</div></div>
-        <div class="sup"><div><div class="sn">Campagnes</div><div class="sd">Flyer, email, SMS</div></div><div class="trk"><div class="fill" data-w="31%" style="background:var(--blue)"></div></div><div class="qr">QR 4</div></div>
-      </div>
-      <div class="note-ex">Illustration, pas des donn&eacute;es r&eacute;elles</div>
-    </div>
-  </section>
-
-  <!-- 6. LES 3 JEUX -->
-  <section class="scr" id="s-jeux" data-bg="#F6F7F5" data-paint="orange,blue">
-    <div class="inner wide">
-      <div class="eyebrow">Trois jeux, le quiz en t&ecirc;te</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Le quiz d&rsquo;abord, <em>et deux autres jeux</em>.</h1>
-      <div class="cards c3">
-        <div class="card"><div class="bar" style="background:var(--teal)"></div><span class="tag" style="background:var(--tealL);color:var(--tealT)">Notre point fort</span><h3>Le quiz + bonus</h3><p>Sonder, mesurer, interagir, cr&eacute;er du lien. Le quiz fait conna&icirc;tre votre marque ; les questions bonus recueillent l&rsquo;avis de vos clients et sensibilisent.</p></div>
-        <div class="card"><div class="bar" style="background:var(--blue)"></div><span class="tag" style="background:var(--blueL);color:#2b6aa8">Gain imm&eacute;diat</span><h3>La roue</h3><p>Le client tourne la roue et d&eacute;couvre son lot tout de suite, ou participe au tirage. Id&eacute;al en vitrine et en caisse.</p></div>
-        <div class="card"><div class="bar" style="background:var(--teal)"></div><span class="tag" style="background:var(--off);color:var(--ink2)">Tirage au sort</span><h3>La tombola</h3><p>Chaque participation donne une chance au tirage. Parfait pour un gros lot ou un temps fort commercial.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 8. AVIS CLIENT ET SENSIBILISATION -->
-  <section class="scr" id="s-avis" data-bg="#D9F2EA" data-paint="teal,orange">
-    <div class="inner wide">
-      <div class="eyebrow">Avis client et sensibilisation</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">&laquo; Votre avis m&rsquo;int&eacute;resse,<br><em>tentez votre chance</em> &raquo;</h1>
-      <div class="retrait">
-        <div class="rlist">
-          <div class="rli"><b>Un QR par rayon ou point de contact</b><span>Rayon frais, caisse, accueil : chaque QR pose ses propres questions.</span></div>
-          <div class="rli"><b>Trois questions bonus, un lot &agrave; gagner</b><span>Satisfaction, attentes, habitudes : vos clients r&eacute;pondent parce qu&rsquo;ils jouent.</span></div>
-          <div class="rli"><b>Sensibiliser par le jeu</b><span>Anti-gaspillage, tri, produits locaux : le quiz fait passer le message.</span></div>
-        </div>
-        <div class="phone" style="margin-top:0">
-          <div class="qz-hero"><div class="qz-hero-nom">Rayon frais</div><div class="qz-hero-tag">Question bonus, exemple</div></div>
-          <div class="qz-stage">
-            <div class="qz-prog">Bonus 1/3</div>
-            <div class="qz-q">Qu&rsquo;aimeriez-vous trouver davantage dans ce rayon ?</div>
-            <button class="qz-opt" type="button" data-avis>Plus de produits locaux</button>
-            <button class="qz-opt" type="button" data-avis>Plus de bio</button>
-            <button class="qz-opt" type="button" data-avis>Plus de petits formats</button>
-            <div class="qz-msg" id="avisMsg">Merci, votre r&eacute;ponse est enregistr&eacute;e. <b>Tentez votre chance au tirage.</b></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7. OBJECTIFS -->
-  <section class="scr" id="s-objectifs" data-bg="#D7EEF9" data-paint="blue,teal">
-    <div class="inner wide">
-      <div class="eyebrow">Vos objectifs</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Une animation, <em>six usages</em>.</h1>
-      <div class="cards c3">
-        <div class="card"><div class="num" style="background:var(--teal)">1</div><h3>Animer la client&egrave;le</h3><p>Un moment ludique &agrave; chaque passage.</p></div>
-        <div class="card"><div class="num" style="background:var(--blue)">2</div><h3>R&eacute;compenser vos fid&egrave;les</h3><p>Un cadeau fid&eacute;lit&eacute; pour vos clients actuels.</p></div>
-        <div class="card"><div class="num" style="background:var(--teal)">3</div><h3>&Eacute;couler du stock</h3><p>Le lot fait sortir les produits qui dorment.</p></div>
-        <div class="card"><div class="num" style="background:var(--blue)">4</div><h3>Offrir une remise</h3><p>Une remise &agrave; valoir apr&egrave;s achat, pour faire revenir.</p></div>
-        <div class="card"><div class="num" style="background:var(--blue)">5</div><h3>Faire conna&icirc;tre la marque</h3><p>Le quiz raconte votre histoire et vos produits.</p></div>
-        <div class="card"><div class="num" style="background:var(--tealT)">6</div><h3>Communiquer</h3><p>R&eacute;seaux sociaux, fichier client : l&rsquo;animation devient votre visibilit&eacute;.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 9. GESTION DES GAGNANTS -->
-  <section class="scr" id="s-gagnants" data-bg="#F6F7F5" data-paint="orange,blue">
-    <div class="inner wide">
-      <div class="eyebrow">Les lots et les gagnants</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Le retrait, <em class="v">simple comme un scan</em>.</h1>
-      <div class="retrait">
-        <div class="rlist">
-          <div class="rli"><b>Des lots qui ont du sens</b><span>Remise apr&egrave;s achat, cadeau fid&eacute;lit&eacute;, produit &agrave; d&eacute;couvrir : vous choisissez, vous fournissez.</span></div>
-          <div class="rli"><b>Billet gagnant envoy&eacute; au joueur</b><span>Il re&ccedil;oit son billet digital, num&eacute;rot&eacute;, avec les conditions du lot.</span></div>
-          <div class="rli"><b>Stock d&eacute;compt&eacute; au retrait</b><span>Un employ&eacute;, son t&eacute;l&eacute;phone et un code : le lot est valid&eacute; et retir&eacute; du stock.</span></div>
-        </div>
-        <div class="ticket">
-          <div class="ok">Billet valable</div>
-          <div class="tl">Remise de 10 % sur votre prochain achat</div>
-          <div class="ts">&Agrave; retirer en boutique, exemple de billet</div>
-          <div class="tpin">Code employ&eacute; <b>&bull;&bull;&bull;&bull;</b></div>
-          <button class="tbtn" type="button" id="tbtn">Valider le retrait du lot</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 10. RAPPORTS -->
-  <section class="scr" id="s-rapports" data-bg="#D9F2EA" data-paint="teal,orange">
-    <div class="inner wide">
-      <div class="eyebrow">Vos rapports inclus</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Vous savez <em>qui joue</em>, et d&rsquo;o&ugrave; il vient.</h1>
-      <div class="dash">
-        <div class="dash-top"><b>Flow<em>in</em> &middot; Tableau de bord pro</b><span>Aper&ccedil;u, donn&eacute;es d&rsquo;exemple</span></div>
-        <div class="dash-grid">
-          <div class="kpi"><div class="kl">Flashs</div><div class="kv">1 240</div></div>
-          <div class="kpi"><div class="kl">Joueurs</div><div class="kv">486</div></div>
-          <div class="kpi"><div class="kl">Parties</div><div class="kv">812</div></div>
-          <div class="kpi"><div class="kl">Contacts opt-in</div><div class="kv">271</div></div>
-        </div>
-        <div class="dash-row">
-          <div class="panel"><div class="kl">Sexe</div><div class="donut"></div><div class="leg"><span><i style="background:var(--teal)"></i>Femmes</span><span><i style="background:var(--blue)"></i>Hommes</span></div></div>
-          <div class="panel"><div class="kl">Tranche d&rsquo;&acirc;ge</div>
-            <div class="hrow"><span>18-25</span><div class="trk"><i style="width:38%"></i></div></div>
-            <div class="hrow"><span>26-40</span><div class="trk"><i style="width:64%"></i></div></div>
-            <div class="hrow"><span>41-60</span><div class="trk"><i style="width:47%"></i></div></div>
-            <div class="hrow"><span>60+</span><div class="trk"><i style="width:21%"></i></div></div>
-          </div>
-          <div class="panel"><div class="kl">Provenance (code postal)</div>
-            <div class="hrow"><span>Ville</span><div class="trk"><i style="width:70%"></i></div></div>
-            <div class="hrow"><span>Voisines</span><div class="trk"><i style="width:44%"></i></div></div>
-            <div class="hrow"><span>D&eacute;pt.</span><div class="trk"><i style="width:26%"></i></div></div>
-            <div class="hrow"><span>Hors</span><div class="trk"><i style="width:12%"></i></div></div>
-          </div>
-        </div>
-      </div>
-      <p class="lede" style="font-size:14px">Contact direct avec les clients qui ont coch&eacute; l&rsquo;accord, et seulement eux.</p>
-    </div>
-  </section>
-
-  <!-- 11. PLUG & PLAY -->
-  <section class="scr" id="s-plug" data-bg="#D7EEF9" data-paint="blue,teal">
-    <div class="inner wide">
-      <div class="eyebrow">Plug &amp; Play</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Aussi simple qu&rsquo;une <em>affiche &agrave; coller</em>.</h1>
-      <div class="pp">
-        <div class="poster">
-          <img src="/nds/kit-digital/nds/station-jeu_A4_caisse-1.png" alt="Affiche station jeu r&eacute;elle, Nuits du Sud 2026" loading="lazy">
-          <div class="cap">Support r&eacute;el imprim&eacute; pour le festival Nuits du Sud 2026</div>
-        </div>
-        <div class="steps">
-          <div class="step"><div class="sn" style="background:var(--teal)">1</div><div><b>Vous collez</b><span>Affiches, macarons et support de caisse, &agrave; vos couleurs, avec vos QR trac&eacute;s.</span></div></div>
-          <div class="step"><div class="sn" style="background:var(--blue)">2</div><div><b>Ils flashent</b><span>Aucune application &agrave; t&eacute;l&eacute;charger, ni pour vos clients ni pour vous.</span></div></div>
-          <div class="step"><div class="sn" style="background:var(--teal)">3</div><div><b>Vous mesurez</b><span>Tirage, billets, stock et relances se font tout seuls. Vous suivez les r&eacute;sultats.</span></div></div>
-          <div class="step"><div class="sn" style="background:var(--blue)">4</div><div><b>Kit digital ou kit physique</b><span>Fichiers &agrave; imprimer vous-m&ecirc;me, ou kit imprim&eacute; livr&eacute; dans chaque boutique.</span></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 12. PREUVES -->
-  <section class="scr" id="s-preuves" data-bg="#F6F7F5" data-paint="orange,blue">
-    <div class="inner wide">
-      <div class="eyebrow">Les chiffres r&eacute;els</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">D&eacute;j&agrave; <em>test&eacute; sur le terrain</em>.</h1>
-      <div class="proofs">
-        <div class="proof"><div class="pn"><svg data-splash="teal,blue" data-r="48" data-seed="4" width="10" height="10"></svg><b>+55 %</b></div><p>Plus de 55 % des joueurs souhaitent garder le contact</p><small>Festival Nuits du Sud 2026</small></div>
-        <div class="proof"><div class="pn"><svg data-splash="teal,orange" data-r="48" data-seed="8" width="10" height="10"></svg><b>70 %</b></div><p>70 % d&rsquo;opt-in sur l&rsquo;&eacute;v&eacute;nement local</p><small>Op&eacute;ration Flowin</small></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 13. PRIX + SIMULATEUR -->
-  <section class="scr" id="s-prix" data-bg="#D9F2EA" data-paint="teal,orange">
-    <div class="inner wide">
-      <div class="eyebrow">Flowin Animation</div>
-      <h1 class="mega" style="font-size:clamp(28px,5vw,52px)">Les <em>prix</em>.</h1>
-      <div class="prices">
-        <div class="plist">
-          <div class="pitem hero"><div><b>Abonnement annuel</b><span>Jeux, QR trac&eacute;s, tirages, billets, stock, relances, rapports</span></div><div class="pv">990 &euro;<small>HT / an</small></div></div>
-          <div class="pitem"><div><b>Kit digital</b><span>Affiches et macarons &agrave; imprimer vous-m&ecirc;me</span></div><div class="pv">0 &euro;<small>HT</small></div></div>
-          <div class="pitem"><div><b>Kit physique</b><span>Macarons, affiches, support de caisse, imprim&eacute;s</span></div><div class="pv">149 &euro;<small>HT / boutique</small></div></div>
-          <div class="pitem"><div><b>Option : questions du quiz</b><span>Personnalis&eacute;es pour un &eacute;v&eacute;nement</span></div><div class="pv">180 &euro;<small>HT / &eacute;v&eacute;nement</small></div></div>
-          <div class="pitem"><div><b>Option : questions bonus</b><span>Sondage personnalis&eacute; (avis, sensibilisation)</span></div><div class="pv">180 &euro;<small>HT</small></div></div>
-        </div>
-        <div class="sim" id="sim">
-          <h3>Simulez votre commande</h3>
-          <div class="row"><label class="lb" for="simN">Nombre de boutiques</label>
-            <div class="stepper"><button type="button" id="simMinus" aria-label="Moins">&minus;</button><input id="simN" type="text" inputmode="numeric" value="1" aria-label="Nombre de boutiques"><button type="button" id="simPlus" aria-label="Plus">+</button></div></div>
-          <div class="row"><span class="lb">Kit</span>
-            <div class="seg"><button type="button" class="on" data-kit="digital">Digital</button><button type="button" data-kit="physique">Physique</button></div></div>
-          <label class="chk"><input type="checkbox" id="simQuiz"><span>Questions du quiz personnalis&eacute;es<small>180 &euro; HT par &eacute;v&eacute;nement</small></span></label>
-          <label class="chk"><input type="checkbox" id="simBonus"><span>Questions bonus personnalis&eacute;es<small>180 &euro; HT</small></span></label>
-          <div class="sim-tot">
-            <div class="tl"><span>Abonnement annuel</span><b>990 &euro;</b></div>
-            <div class="tl"><span id="simKitLbl">Kit digital</span><b id="simKit">0 &euro;</b></div>
-            <div class="tl"><span>Options</span><b id="simOpt">0 &euro;</b></div>
-            <div class="tl"><span>Total HT</span><b id="simHT">990 &euro;</b></div>
-            <div class="tl"><span>TVA 20 %</span><b id="simTVA">198 &euro;</b></div>
-            <div class="tl big"><span>Total TTC</span><b id="simTTC">1 188 &euro;</b></div>
-          </div>
-          <a class="btn mag" id="simOrder" href="/bon-commande-animation.html">Commander</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 14. COMMANDER -->
-  <section class="scr" id="s-commande" data-bg="#D7EEF9" data-paint="blue,teal">
-    <div class="inner">
-      <div class="logo" style="font-size:clamp(38px,8vw,58px);margin-bottom:2px">Flow<em>in</em></div>
-      <div class="sign-stack">
-        <div class="ss-eyebrow">Animation digitale</div>
-        <div class="ss-pill">Plug &amp; Play</div>
-      </div>
-      <h1 class="mega" style="font-size:clamp(26px,4.4vw,42px);margin-top:26px">On lance <em>votre animation</em> ?</h1>
-      <p class="lede" id="endRecap">Abonnement annuel, kit digital, 1 boutique : 990 &euro; HT.</p>
-      <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <a class="btn mag" id="endOrder" href="/bon-commande-animation.html">Commander <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
-        <button class="btn light" type="button" id="endSim">Modifier la simulation</button>
-      </div>
-      <p class="src" style="margin-top:20px">Bon de commande en ligne, signature &eacute;lectronique, paiement par virement ou pr&eacute;l&egrave;vement.</p>
-    </div>
-  </section>
-</div>
-
-<div class="winmodal" id="winModal">
-  <div class="winmodal-card">
-    <div class="wm-eyebrow">Gagn&eacute; !</div>
-    <div class="wm-lot" id="wmLot">-10 % sur votre prochain achat</div>
-    <div class="wm-sub">Exemple de lot, tel que le joueur le voit sur son t&eacute;l&eacute;phone. Son billet digital est pr&ecirc;t.</div>
-    <div class="wm-perf"></div>
-    <button class="wm-btn" type="button" id="wmClose">Continuer</button>
   </div>
-</div>
+</section>
 
-<div class="hint" id="hint">Touchez ou fl&egrave;che droite pour continuer</div>
-<button class="navbtn prev" id="prevBtn" type="button" aria-label="Pr&eacute;c&eacute;dent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></svg></button>
-<button class="navbtn next" id="nextBtn" type="button" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
-<div class="navdots" id="navdots"></div>
+<!-- 3. LES OFFRES (ancre #offres : QR de fin des vidéos) -->
+<section id="offres">
+  <div class="wrap">
+    <div class="center">
+      <div class="eyebrow">Les offres</div>
+      <h2>Choisissez <em>votre formule</em>.</h2>
+    </div>
+    <div class="offers" id="offerList">
+      <button type="button" class="offer" data-offre="kit_digital"><span class="ck"></span><div class="on">Kit digital</div><div class="op">Gratuit</div>
+        <ul><li>Affiches et macarons &agrave; imprimer</li><li>Vos QR de jeu</li><li>Pour d&eacute;marrer tout de suite</li></ul></button>
+      <button type="button" class="offer" data-offre="mensuelle"><span class="ck"></span><div class="on">Offre mensuelle</div><div class="op">110 &euro; <small>HT / mois</small></div>
+        <ul><li>Quiz, roue, tombola</li><li>Tirages, billets, stock, relances</li><li>Mesure par support</li></ul></button>
+      <button type="button" class="offer sel" data-offre="annuelle"><span class="badge">Le plus avantageux</span><span class="ck"></span><div class="on">Offre annuelle</div><div class="op">990 &euro; <small>HT / an</small></div>
+        <ul><li>Toute l&rsquo;offre mensuelle</li><li>Un seul paiement pour l&rsquo;ann&eacute;e</li><li>&Eacute;ligible &agrave; la garantie</li></ul></button>
+    </div>
+    <div class="opts">
+      <label class="opt" id="optKit"><input type="checkbox" id="cKit"><span>Kit physique<small>149 &euro; HT par boutique</small>
+        <span class="stepper"><button type="button" data-d="-1" aria-label="Moins">&minus;</button><input id="nbB" value="1" inputmode="numeric" aria-label="Nombre de boutiques"><button type="button" data-d="1" aria-label="Plus">+</button></span></span></label>
+      <label class="opt" id="optQuiz"><input type="checkbox" id="cQuiz"><span>Quiz personnalis&eacute;<small>180 &euro; HT par &eacute;v&eacute;nement</small></span></label>
+      <label class="opt" id="optBonus"><input type="checkbox" id="cBonus"><span>Questions bonus personnalis&eacute;es<small>180 &euro; HT</small></span></label>
+    </div>
+    <div class="totbar">
+      <div class="t" id="totTxt">Offre annuelle : <b>990 &euro; HT / an</b></div>
+      <a class="btn" id="orderBtn" href="/bon-commande-animation.html">Commander cette offre</a>
+    </div>
+  </div>
+</section>
+
+<!-- 4. GARANTIE -->
+<section class="alt" id="garantie">
+  <div class="wrap">
+    <div class="guar">
+      <div>
+        <span class="badge">Offre sp&eacute;ciale premiers adh&eacute;rents</span>
+        <h2>Satisfait <em>ou rembours&eacute;</em>.</h2>
+        <p class="gtxt">Sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas ce chiffre, Flowin vous rembourse la diff&eacute;rence (hors part digitale).</p>
+        <p class="gtxt"><a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a></p>
+      </div>
+      <div class="fiche">
+        <h3>Votre fiche d&eacute;couverte</h3>
+        <label class="fl" for="panier">Panier moyen de votre activit&eacute;</label>
+        <div class="fin"><input id="panier" inputmode="decimal" placeholder="ex. : 25" autocomplete="off"><span>&euro;</span></div>
+        <span class="fl">Flux journalier estim&eacute;</span>
+        <div class="flux" id="flux">
+          <button type="button" data-flux="15+">Plus de 15 / jour</button>
+          <button type="button" data-flux="50+">Plus de 50 / jour</button>
+          <button type="button" data-flux="100+">Plus de 100 / jour</button>
+        </div>
+        <button type="button" class="btn" id="calcBtn">Calculer</button>
+        <div class="ferr" id="ferr">Indiquez votre panier moyen et votre flux journalier.</div>
+        <div class="result" id="result">
+          <div class="rx">Flowin doit vous apporter<b id="rX">0</b>clients sur 12 mois</div>
+          <div class="ro" id="rO"></div>
+          <a class="btn" id="guarOrder" href="/bon-commande-animation.html" style="margin-top:14px;width:100%">Commander avec la garantie</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. COMMANDE -->
+<section class="final center" id="commander">
+  <div class="wrap">
+    <div class="eyebrow">Plug &amp; Play</div>
+    <h2>On lance <em>votre animation</em> ?</h2>
+    <p class="lede">Bon de commande en ligne, signature &eacute;lectronique, paiement par virement ou pr&eacute;l&egrave;vement.</p>
+    <a class="btn" id="finalOrder" href="/bon-commande-animation.html">Remplir le bon de commande</a>
+  </div>
+</section>
+<div class="foot">Flowin est une marque de BAITA EURL &middot; 40 rue des Arcs, 06140 Vence &middot; Prix hors taxes, TVA 20 % en sus.</div>
 
 <script>
 (function(){
   'use strict';
-  var COL = { teal:'#9FE0D4', orange:'#F9CF95', blue:'#B5DAF4', tealF:'#00B4A0', orangeF:'#F5A100', blueF:'#6FB3E6' };
-  var PRIX = { abonnement:990, kitPhysique:149, optQuiz:180, optBonus:180, tva:0.20 };
-
+  var PRIX = { annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 180, optBonus: 180 };
   function $(id){ return document.getElementById(id); }
-  function eur(n){ var s = String(Math.round(n)); var out = ''; var c = 0; for (var i = s.length - 1; i >= 0; i--) { out = s.charAt(i) + out; c++; if (c % 3 === 0 && i > 0) out = ' ' + out; } return out + ' €'; }
   function qs(name){ var m = new RegExp('[?&]' + name + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null; }
-
-  /* Bandeau : retour */
-  (function(){ var b = $('topBack'); if (!b) return; b.addEventListener('click', function(e){ if (window.history.length > 1) { e.preventDefault(); window.history.back(); } }); })();
-
-  /* ---------- Taches de peinture (port de K5.tache des vidéos) ---------- */
-  function rnd(seed){ var s = seed * 9301 + 49297; return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+  function grp(s){ var out = '', c = 0; for (var i = s.length - 1; i >= 0; i--) { out = s.charAt(i) + out; c++; if (c % 3 === 0 && i > 0) out = ' ' + out; } return out; }
+  function eur(n){ return grp(String(Math.round(n))) + ' €'; }
   function n1(x){ return (+x).toFixed(1); }
-  function lisse(pts){
-    var n = pts.length, d = 'M' + n1(pts[0][0]) + ',' + n1(pts[0][1]);
-    for (var i = 0; i < n; i++) {
-      var p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
-      d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]);
-    }
-    return d + 'Z';
-  }
-  function tache(cx, cy, r, col, seed, coulures){
-    var R = rnd(seed || 1), pts = [], N = 8, i;
-    for (i = 0; i < N; i++) { var a = i / N * Math.PI * 2, k = 0.9 + R() * 0.18; pts.push([Math.cos(a) * r * k, Math.sin(a) * r * k]); }
-    var g = '<g transform="translate(' + n1(cx) + ',' + n1(cy) + ')" fill="' + col + '"><path d="' + lisse(pts) + '"/>';
-    var nc = coulures === undefined ? 2 : coulures;
-    for (var c = 0; c < nc; c++) {
-      var x = (c === 0 ? -0.35 : 0.3) * r + (R() - 0.5) * r * 0.15, w = r * (0.14 + R() * 0.05), L = r * (0.45 + R() * 0.35);
-      var y0 = Math.sqrt(Math.max(0, r * r * 0.8 - x * x)) - w * 0.6;
-      g += '<rect x="' + n1(x - w / 2) + '" y="' + n1(y0) + '" width="' + n1(w) + '" height="' + n1(L + w / 2) + '" rx="' + n1(w / 2) + '"/>';
-    }
-    var gs = [[1.25, -0.6], [1.2, 0.5], [-1.22, -0.35]];
-    for (var j = 0; j < gs.length; j++) {
-      var q = gs[j], aa = q[1] + (R() - 0.5) * 0.3, dd = r * q[0], dr = r * (0.07 + 0.04 * j);
-      g += '<circle cx="' + n1(Math.cos(aa) * dd * (q[0] < 0 ? -1 : 1)) + '" cy="' + n1(Math.sin(aa) * dd) + '" r="' + n1(dr) + '"/>';
-    }
-    return g + '</g>';
-  }
-  /* Taches derrière les grands chiffres */
-  (function(){
-    var els = document.querySelectorAll('svg[data-splash]');
-    for (var i = 0; i < els.length; i++) {
-      var el = els[i], cols = el.getAttribute('data-splash').split(','), r = +el.getAttribute('data-r') || 60, seed = +el.getAttribute('data-seed') || 3;
-      var html = '';
-      if (cols.length > 1) html += tache(r * 0.28, -r * 0.05, r * 0.9, COL[cols[1]], seed + 7, 0);
-      html += tache(-r * 0.12, -r * 0.12, r * 0.78, COL[cols[0]], seed, 0);
-      if (!el.getAttribute('viewBox')) { el.setAttribute('viewBox', (-r * 1.6) + ' ' + (-r * 1.6) + ' ' + (r * 3.2) + ' ' + (r * 3.2)); el.setAttribute('width', r * 3.2); el.setAttribute('height', r * 3.2); }
-      el.innerHTML = html;
-    }
-  })();
-  /* Taches d'ambiance en bord d'écran */
-  var paint = $('paint');
-  function drawAmbient(scr){
-    var w = paint.clientWidth || window.innerWidth, h = paint.clientHeight || window.innerHeight;
-    var cols = (scr.getAttribute('data-paint') || 'teal,orange').split(',');
-    var base = Math.min(w, h), seed = 0, id = scr.id;
-    for (var i = 0; i < id.length; i++) seed += id.charCodeAt(i);
-    var small = w < 700;
-    var r1 = base * (small ? 0.15 : 0.17), r2 = base * (small ? 0.12 : 0.12);
-    var html = tache(w - r1 * (small ? 0.05 : 0.35), r1 * (small ? 0.1 : 0.55), r1, COL[cols[0]], seed % 17 + 1, 0) +
-               tache(r2 * 0.25, h - r2 * 0.9, r2, COL[cols[1] || cols[0]], seed % 13 + 3, 0);
-    paint.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
-    paint.innerHTML = '<g opacity=".9">' + html + '</g>';
-  }
 
-  /* ---------- Navigation ---------- */
-  var screens = document.querySelectorAll('.scr');
-  var idx = 0;
-  var stage = $('stage'), prog = $('prog'), dotsWrap = $('navdots'), hint = $('hint');
-  var dots = [];
-  for (var di = 0; di < screens.length; di++) {
-    (function(i){
-      var d = document.createElement('div'); d.className = 'd';
-      d.addEventListener('click', function(e){ e.stopPropagation(); go(i); });
-      dotsWrap.appendChild(d); dots.push(d);
-    })(di);
+  /* Taches de peinture douces (accueil), sans coulures */
+  function rnd(seed){ var s = seed * 9301 + 49297; return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
+  function tache(r, col, seed){
+    var R = rnd(seed), pts = [], n = 8, i;
+    for (i = 0; i < n; i++) { var a = i / n * Math.PI * 2, k = 0.9 + R() * 0.18; pts.push([Math.cos(a) * r * k, Math.sin(a) * r * k]); }
+    var d = 'M' + n1(pts[0][0]) + ',' + n1(pts[0][1]);
+    for (i = 0; i < n; i++) { var p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+      d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]); }
+    return '<path fill="' + col + '" d="' + d + 'Z"/><circle fill="' + col + '" cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.45) + '" r="' + n1(r * 0.1) + '"/>';
   }
-  function go(i){
-    if (i < 0 || i >= screens.length) return;
-    idx = i;
-    for (var k = 0; k < screens.length; k++) { screens[k].className = 'scr' + (k === idx ? ' on' : ''); dots[k].className = 'd' + (k === idx ? ' on' : ''); }
-    var cur = screens[idx];
-    cur.scrollTop = 0;
-    stage.style.backgroundColor = cur.getAttribute('data-bg') || '#D9F2EA';
-    document.body.style.backgroundColor = cur.getAttribute('data-bg') || '#D9F2EA';
-    drawAmbient(cur);
-    prog.style.width = ((idx + 1) / screens.length * 100) + '%';
-    $('prevBtn').disabled = idx === 0;
-    $('nextBtn').disabled = idx === screens.length - 1;
-    var deborde = cur.scrollHeight > cur.clientHeight + 4 || window.innerWidth < 700 || window.innerHeight < 760;
-    hint.style.opacity = (idx === 0 || idx === screens.length - 1 || deborde) ? '0' : '1';
-    if (cur.id === 's-qr') playSupports();
-    try { if (window.history.replaceState) window.history.replaceState(null, '', '#' + cur.id.replace('s-', '')); } catch (e) {}
-  }
-  function next(){ go(idx + 1); }
-  function prev(){ go(idx - 1); }
-  $('prevBtn').addEventListener('click', function(e){ e.stopPropagation(); prev(); });
-  $('nextBtn').addEventListener('click', function(e){ e.stopPropagation(); next(); });
-  $('btnStart').addEventListener('click', function(e){ e.stopPropagation(); next(); });
-  $('brandHome').addEventListener('click', function(e){ e.stopPropagation(); go(0); });
-  var INTERACTIF = 'button,a,input,label,select,textarea,.sim,.phone,.ticket,.gpills,.winmodal,.stepper,.seg';
-  stage.addEventListener('click', function(e){
-    var t = e.target;
-    if (t.closest && t.closest(INTERACTIF)) return;
-    if (window.getSelection && String(window.getSelection()).length > 0) return;
-    next();
-  });
-  document.addEventListener('keydown', function(e){
-    var tg = (e.target && e.target.tagName) || '';
-    if (tg === 'INPUT' || tg === 'TEXTAREA') return;
-    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); next(); }
-    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
-  });
-  /* Balayage horizontal (tablette, téléphone) */
-  var tx = null, ty = null;
-  stage.addEventListener('touchstart', function(e){ if (e.touches.length === 1) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; } }, { passive: true });
-  stage.addEventListener('touchend', function(e){
-    if (tx === null) return;
-    var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty; tx = null;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) { if (e.target.closest && e.target.closest('.sim,.wheelbox')) return; if (dx < 0) next(); else prev(); }
-  }, { passive: true });
-  window.addEventListener('resize', function(){ drawAmbient(screens[idx]); });
-
-  /* ---------- Mesure par support ---------- */
-  var supDone = false;
-  function playSupports(){
-    if (supDone) return; supDone = true;
-    var f = document.querySelectorAll('#supports .fill');
-    for (var i = 0; i < f.length; i++) { (function(el, k){ setTimeout(function(){ el.style.width = el.getAttribute('data-w'); }, 250 + 140 * k); })(f[i], i); }
-  }
+  $('paintHero').innerHTML = tache(100, '#FBD3B8', 5);
+  $('paintHero2').innerHTML = tache(70, '#FFE2A8', 9);
 
   /* ---------- Démo : 4 jeux ---------- */
   var gpills = document.querySelectorAll('.gpill');
@@ -802,13 +390,6 @@
     }
   }
   for (var gi = 0; gi < gpills.length; gi++) gpills[gi].addEventListener('click', function(){ showGame(this.getAttribute('data-game')); });
-
-  var winModal = $('winModal');
-  function showWin(lot){ $('wmLot').textContent = lot; winModal.className = 'winmodal on'; }
-  $('wmClose').addEventListener('click', function(){ winModal.className = 'winmodal'; });
-  winModal.addEventListener('click', function(e){ if (e.target === winModal) winModal.className = 'winmodal'; });
-
-  /* Question à choix unique : marque la bonne réponse, puis appelle suite(bon) */
   function quiz(attr, msgId, okTxt, koTxt, suite){
     var opts = document.querySelectorAll('[' + attr + ']'), fait = false;
     for (var i = 0; i < opts.length; i++) {
@@ -825,10 +406,9 @@
       });
     }
   }
-  quiz('data-qb', 'qbMsg', '<b>Bonne réponse !</b> 1 ticket pour le tirage.', 'La bonne réponse : <b>plus de 10 ans</b>. Vous gagnez quand même 1 ticket.', function(){ $('qbBonus').style.display = 'block'; });
-  quiz('data-qs', 'qsMsg', '<b>Bonne réponse !</b> Score : 1/1.', 'La bonne réponse : <b>les deux</b>. Score : 0/1.', function(){ $('qsCta').className = 'qz-cta on'; });
-  $('qsCta').addEventListener('click', function(){ showWin('-10 % sur votre prochain achat'); });
-  /* Question bonus (sondage) */
+  quiz('data-qb', 'qbMsg', '<b>Bonne réponse !</b> 1 ticket pour le tirage.', 'Réponse : <b>plus de 10 ans</b>. 1 ticket quand même.', function(){ $('qbBonus').style.display = 'block'; });
+  quiz('data-qs', 'qsMsg', '<b>Bonne réponse !</b> Score : 1/1.', 'Réponse : <b>les deux</b>. Score : 0/1.', function(){ $('qsCta').className = 'qz-cta on'; });
+  $('qsCta').addEventListener('click', function(){ this.textContent = 'Gagné : -10 % sur votre prochain achat'; this.disabled = true; });
   (function(){
     var ch = document.querySelectorAll('[data-bonus]'), fait = false;
     for (var i = 0; i < ch.length; i++) ch[i].addEventListener('click', function(){
@@ -838,110 +418,97 @@
     });
   })();
 
-  /* Avis client (écran sensibilisation) */
-  var av = document.querySelectorAll('[data-avis]'), avDone = false;
-  for (var ai = 0; ai < av.length; ai++) {
-    av[ai].addEventListener('click', function(){
-      if (avDone) return; avDone = true;
-      for (var k = 0; k < av.length; k++) { av[k].disabled = true; }
-      this.className += ' picked';
-      $('avisMsg').className = 'qz-msg on';
-    });
-  }
-
-  /* Retrait */
-  $('tbtn').addEventListener('click', function(){ this.className = 'tbtn done'; this.textContent = 'Lot retiré, stock mis à jour'; });
-
-  /* ---------- Roue : dessin des maquettes jeux, recoloré dans la charte ---------- */
-  var SEG = [['Café offert', '#00B4A0', '#fff'], ['Ticket', '#F5A100', '#150C1C'], ['−10 %', '#8CC8EE', '#150C1C'], ['Ticket', '#BFEBDF', '#150C1C'],
-             ['Cookie offert', '#00897B', '#fff'], ['Pas cette fois', '#F6F7F5', '#150C1C'], ['Bon 5 €', '#F9CF95', '#150C1C'], ['Ticket', '#D7EEF9', '#150C1C']];
+  /* Roue des maquettes jeux, palette Soleil du Sud */
+  var SEG = [['Café offert', '#F26B4F', '#fff'], ['Ticket', '#F5A100', '#3B2418'], ['−10 %', '#FBD3B8', '#3B2418'], ['Ticket', '#13A89E', '#fff'],
+             ['Cookie offert', '#8E3B6E', '#fff'], ['Pas cette fois', '#FFF6EC', '#3B2418'], ['Bon 5 €', '#FFE2A8', '#3B2418'], ['Ticket', '#E1F4F1', '#3B2418']];
   function wheelSvg(){
-    var cx = 165, cy = 165, r = 146, h = '<svg viewBox="0 0 330 330" aria-hidden="true"><circle cx="165" cy="165" r="163" fill="#E3F6F1" stroke="#00B4A0" stroke-width="2"/>';
+    var cx = 165, cy = 165, r = 146, h = '<svg viewBox="0 0 330 330" aria-hidden="true"><circle cx="165" cy="165" r="163" fill="#FDE7DF" stroke="#F26B4F" stroke-width="2"/>';
     for (var i = 0; i < SEG.length; i++) {
       var s = SEG[i], a0 = (i * 45 - 22.5) * Math.PI / 180, a1 = (i * 45 + 22.5) * Math.PI / 180;
       h += '<path d="M' + cx + ' ' + cy + ' L' + n1(cx + r * Math.sin(a0)) + ' ' + n1(cy - r * Math.cos(a0)) + ' A' + r + ' ' + r + ' 0 0 1 ' + n1(cx + r * Math.sin(a1)) + ' ' + n1(cy - r * Math.cos(a1)) + 'Z" fill="' + s[1] + '" stroke="#fff" stroke-width="2.5"/>';
       h += '<g transform="rotate(' + (i * 45) + ' ' + cx + ' ' + cy + ')"><text x="' + cx + '" y="' + (cy - r * 0.6) + '" transform="rotate(-90 ' + cx + ' ' + (cy - r * 0.6) + ')" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui" font-weight="800" font-size="' + (s[0].length > 11 ? 12.5 : 15) + '" fill="' + s[2] + '">' + s[0] + '</text></g>';
     }
     for (var k = 0; k < 16; k++) { var a = k * 22.5 * Math.PI / 180; h += '<circle class="bulb' + (k % 2 ? ' b2' : '') + '" cx="' + n1(cx + 155 * Math.sin(a)) + '" cy="' + n1(cy - 155 * Math.cos(a)) + '" r="4" fill="#F5A100"/>'; }
-    return h + '<circle cx="165" cy="165" r="34" fill="#fff" stroke="#00B4A0" stroke-width="5"/><circle cx="165" cy="165" r="14" fill="#00B4A0"/></svg>';
+    return h + '<circle cx="165" cy="165" r="34" fill="#fff" stroke="#F26B4F" stroke-width="5"/><circle cx="165" cy="165" r="14" fill="#F26B4F"/></svg>';
   }
   var wheel = $('wheel'), spun = false;
-  wheel.innerHTML = wheelSvg();
-  wheel.style.transform = 'rotate(-12deg)';
+  wheel.innerHTML = wheelSvg(); wheel.style.transform = 'rotate(-12deg)';
   $('spinbtn').addEventListener('click', function(){
-    var btn = this;
-    if (spun) { showWin('Un café offert'); return; }
-    spun = true; btn.disabled = true; btn.textContent = 'Ça tourne…';
-    $('roueTitre').textContent = 'Ça tourne !';
-    $('wheelbox').className = 'wheelbox spinning';
-    void wheel.offsetWidth;
-    wheel.style.transition = 'transform 4.6s cubic-bezier(.12,.62,.08,1)';
-    wheel.style.transform = 'rotate(1794deg)';
-    setTimeout(function(){
-      $('wheelbox').className = 'wheelbox';
-      $('roueChip').className = 'resultchip on';
-      $('roueLegend').textContent = 'Bravo, la roue s’est arrêtée sur « Café offert ».';
-      btn.disabled = false; btn.textContent = 'Recevoir mon gain';
-    }, 4700);
+    var btn = this; if (spun) return;
+    spun = true; btn.disabled = true; btn.textContent = 'Ça tourne…'; $('roueTitre').textContent = 'Ça tourne !';
+    $('wheelbox').className = 'wheelbox spinning'; void wheel.offsetWidth;
+    wheel.style.transition = 'transform 4.6s cubic-bezier(.12,.62,.08,1)'; wheel.style.transform = 'rotate(1794deg)';
+    setTimeout(function(){ $('wheelbox').className = 'wheelbox'; $('roueChip').className = 'resultchip on'; $('roueLegend').textContent = 'Bravo, la roue s’est arrêtée sur « Café offert ».'; btn.textContent = 'Billet prêt'; }, 4700);
   });
-
-  /* ---------- Tombola : le ticket s'imprime ---------- */
   $('bigbtn').addEventListener('click', function(){
-    this.className = 'bigbtn off';
-    $('tbK').textContent = 'Impression…';
-    $('paper').className = 'paper on';
-    var n = 0, it = setInterval(function(){
-      n++; var v = String(1000 + Math.floor(Math.random() * 9000));
-      $('tbNo').textContent = 'TK-' + (n > 14 ? '0427' : v);
-      if (n > 14) clearInterval(it);
-    }, 90);
+    this.className = 'bigbtn off'; $('tbK').textContent = 'Impression…'; $('paper').className = 'paper on';
+    var n = 0, it = setInterval(function(){ n++; $('tbNo').textContent = 'TK-' + (n > 14 ? '0427' : String(1000 + Math.floor(Math.random() * 9000))); if (n > 14) clearInterval(it); }, 90);
     setTimeout(function(){ $('tbK').textContent = 'Ticket imprimé'; $('tbLegend').textContent = 'Votre ticket participe au tirage au sort.'; }, 2700);
   });
 
-  /* ---------- Simulateur ---------- */
-  var sim = { n: 1, kit: 'digital', quiz: false, bonus: false };
+  /* ---------- Offres ---------- */
+  var st = { offre: 'annuelle', kit: false, nb: 1, quiz: false, bonus: false, panier: null, flux: null };
   var commercial = qs('commercial') || qs('vendeur') || '';
+  var o = qs('offre'); if (o === 'mensuelle' || o === 'annuelle' || o === 'kit_digital') st.offre = o;
   function clampN(v){ v = parseInt(String(v).replace(/[^0-9]/g, ''), 10); if (isNaN(v) || v < 1) v = 1; if (v > 200) v = 200; return v; }
-  function calc(){
-    var kit = sim.kit === 'physique' ? PRIX.kitPhysique * sim.n : 0;
-    var opt = (sim.quiz ? PRIX.optQuiz : 0) + (sim.bonus ? PRIX.optBonus : 0);
-    var ht = PRIX.abonnement + kit + opt, tva = Math.round(ht * PRIX.tva * 100) / 100;
-    return { kit: kit, opt: opt, ht: ht, tva: tva, ttc: ht + tva };
-  }
-  function lienCommande(){
-    var p = ['boutiques=' + sim.n, 'kit=' + sim.kit];
-    if (sim.quiz) p.push('quiz=1');
-    if (sim.bonus) p.push('bonus=1');
+  var offers = document.querySelectorAll('.offer');
+  var calcule = false;
+  function lien(avecGarantie){
+    var p = ['offre=' + st.offre];
+    if (st.kit) p.push('kit=physique', 'boutiques=' + st.nb);
+    if (st.quiz) p.push('quiz=1');
+    if (st.bonus) p.push('bonus=1');
+    if (st.panier) p.push('panier=' + st.panier);
+    if (st.flux) p.push('flux=' + encodeURIComponent(st.flux));
+    if (avecGarantie && st.offre !== 'kit_digital') p.push('garantie=1');
     if (commercial) p.push('commercial=' + encodeURIComponent(commercial));
     return '/bon-commande-animation.html?' + p.join('&');
   }
-  function renderSim(){
-    var t = calc();
-    $('simN').value = sim.n;
-    $('simKitLbl').textContent = sim.kit === 'physique' ? ('Kit physique × ' + sim.n) : 'Kit digital';
-    $('simKit').textContent = eur(t.kit); $('simOpt').textContent = eur(t.opt);
-    $('simHT').textContent = eur(t.ht); $('simTVA').textContent = eur(t.tva); $('simTTC').textContent = eur(t.ttc);
-    var segs = document.querySelectorAll('.seg button');
-    for (var i = 0; i < segs.length; i++) segs[i].className = segs[i].getAttribute('data-kit') === sim.kit ? 'on' : '';
-    var l = lienCommande(); $('simOrder').href = l; $('endOrder').href = l;
-    var opts = []; if (sim.quiz) opts.push('quiz personnalisé'); if (sim.bonus) opts.push('questions bonus');
-    $('endRecap').textContent = 'Abonnement annuel, kit ' + sim.kit + ', ' + sim.n + ' boutique' + (sim.n > 1 ? 's' : '') + (opts.length ? ', ' + opts.join(' et ') : '') + ' : ' + eur(t.ht) + ' HT, soit ' + eur(t.ttc) + ' TTC.';
+  function calc(silencieux){
+    var p = parseFloat(String($('panier').value).replace(',', '.').replace(/[^0-9.]/g, ''));
+    if (isNaN(p) || p <= 0 || !st.flux) { if (!silencieux) $('ferr').style.display = 'block'; return; }
+    $('ferr').style.display = 'none';
+    st.panier = Math.round(p * 100) / 100;
+    var annuel = Math.ceil(PRIX.annuelle / st.panier), mensuel = Math.ceil(PRIX.mensuelle * 12 / st.panier);
+    var mens = st.offre === 'mensuelle';
+    $('rX').textContent = grp(String(mens ? mensuel : annuel));
+    $('rO').textContent = (mens ? 'Offre mensuelle (110 € × 12)' : 'Offre annuelle (990 €)') + ' ÷ panier moyen de ' + String(st.panier).replace('.', ',') + ' €. ' +
+      (mens ? 'Avec l’offre annuelle : ' + grp(String(annuel)) + ' clients.' : 'Avec l’offre mensuelle : ' + grp(String(mensuel)) + ' clients.');
+    $('result').className = 'result on';
+    calcule = true;
   }
-  $('simMinus').addEventListener('click', function(){ sim.n = clampN(sim.n - 1); renderSim(); });
-  $('simPlus').addEventListener('click', function(){ sim.n = clampN(sim.n + 1); renderSim(); });
-  $('simN').addEventListener('change', function(){ sim.n = clampN(this.value); renderSim(); });
-  $('simN').addEventListener('input', function(){ var v = parseInt(this.value, 10); if (!isNaN(v) && v > 0) { sim.n = clampN(v); var t = calc(); $('simHT').textContent = eur(t.ht); } });
-  var segBtns = document.querySelectorAll('.seg button');
-  for (var si = 0; si < segBtns.length; si++) segBtns[si].addEventListener('click', function(){ sim.kit = this.getAttribute('data-kit'); renderSim(); });
-  $('simQuiz').addEventListener('change', function(){ sim.quiz = this.checked; renderSim(); });
-  $('simBonus').addEventListener('change', function(){ sim.bonus = this.checked; renderSim(); });
-  $('endSim').addEventListener('click', function(){ for (var i = 0; i < screens.length; i++) { if (screens[i].id === 's-prix') { go(i); return; } } });
-  renderSim();
+  function render(){
+    for (var i = 0; i < offers.length; i++) offers[i].className = 'offer' + (offers[i].getAttribute('data-offre') === st.offre ? ' sel' : '');
+    $('optKit').className = 'opt' + (st.kit ? ' sel' : ''); $('optQuiz').className = 'opt' + (st.quiz ? ' sel' : ''); $('optBonus').className = 'opt' + (st.bonus ? ' sel' : '');
+    $('nbB').value = st.nb;
+    var base = st.offre === 'annuelle' ? PRIX.annuelle : (st.offre === 'mensuelle' ? PRIX.mensuelle : 0);
+    var extra = (st.kit ? PRIX.kitPhysique * st.nb : 0) + (st.quiz ? PRIX.optQuiz : 0) + (st.bonus ? PRIX.optBonus : 0);
+    var nom = st.offre === 'annuelle' ? 'Offre annuelle' : (st.offre === 'mensuelle' ? 'Offre mensuelle' : 'Kit digital');
+    var txt = nom + ' : <b>' + (base ? eur(base) + ' HT' + (st.offre === 'mensuelle' ? ' / mois' : ' / an') : 'gratuit') + '</b>';
+    if (extra) txt += ' &nbsp;+ options <b>' + eur(extra) + ' HT</b>';
+    $('totTxt').innerHTML = txt;
+    if (calcule) calc(true);
+    var l = lien(false); $('orderBtn').href = l; $('topOrder').href = l; $('finalOrder').href = l; $('guarOrder').href = lien(true);
+  }
+  for (var oi = 0; oi < offers.length; oi++) offers[oi].addEventListener('click', function(){ st.offre = this.getAttribute('data-offre'); render(); });
+  $('cKit').addEventListener('change', function(){ st.kit = this.checked; render(); });
+  $('cQuiz').addEventListener('change', function(){ st.quiz = this.checked; render(); });
+  $('cBonus').addEventListener('change', function(){ st.bonus = this.checked; render(); });
+  var sb = document.querySelectorAll('#optKit .stepper button');
+  for (var si = 0; si < sb.length; si++) sb[si].addEventListener('click', function(e){ e.preventDefault(); st.nb = clampN(st.nb + parseInt(this.getAttribute('data-d'), 10)); render(); });
+  $('nbB').addEventListener('click', function(e){ e.preventDefault(); });
+  $('nbB').addEventListener('change', function(){ st.nb = clampN(this.value); render(); });
 
-  /* Ouverture directe sur un écran : #prix, #demo... */
-  var start = 0, h = (location.hash || '').replace('#', '');
-  if (h) { for (var hi = 0; hi < screens.length; hi++) { if (screens[hi].id === 's-' + h) start = hi; } }
-  go(start);
+  /* ---------- Garantie : fiche découverte ---------- */
+  var fb = document.querySelectorAll('#flux button');
+  for (var fi = 0; fi < fb.length; fi++) fb[fi].addEventListener('click', function(){
+    st.flux = this.getAttribute('data-flux');
+    for (var k = 0; k < fb.length; k++) fb[k].className = fb[k] === this ? 'on' : '';
+    render();
+  });
+  $('calcBtn').addEventListener('click', function(){ if (st.offre === 'kit_digital') st.offre = 'annuelle'; calc(false); render(); });
+  $('panier').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); calc(false); render(); } });
+  render();
 })();
 </script>
 </body>

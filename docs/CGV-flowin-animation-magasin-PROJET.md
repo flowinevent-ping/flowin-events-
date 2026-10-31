@@ -35,7 +35,9 @@ Les prix sont exprimés en euros hors taxes ; la TVA au taux en vigueur (20 %) s
 
 | Élément | Prix HT |
 |---|--:|
-| Abonnement annuel Flowin Animation (jeux, QR codes et liens tracés, tirages, billets, stock, relances, tableau de bord) | 990 € par an |
+| Kit digital seul (fichiers et QR de jeu, sans abonnement) | gratuit |
+| Offre mensuelle Flowin Animation (jeux, QR codes et liens tracés, tirages, billets, stock, relances, tableau de bord) | 110 € par mois |
+| Offre annuelle Flowin Animation (mêmes services) | 990 € par an |
 | Kit digital (fichiers des affiches, macarons et support de caisse à imprimer soi-même) | 0 € |
 | Kit physique (macarons, affiches, support de caisse imprimés) | 149 € par boutique |
 | Option : personnalisation des questions du quiz | 180 € par événement |
@@ -49,13 +51,14 @@ Flowin peut faire évoluer ses tarifs ; toute hausse est notifiée au Client au 
 
 Le Client choisit son mode de paiement sur le bon de commande :
 - **Virement bancaire**, à réception du bon de commande. Coordonnées : BAITA EURL, IBAN FR76 1460 7003 3470 2211 6462 345, BIC CCBPFRPPMAR, en rappelant le numéro de commande.
-- **Prélèvement SEPA**, par l'intermédiaire du prestataire de paiement GoCardless : le Client signe un mandat SEPA sur la page sécurisée de GoCardless ; Flowin n'a pas accès à ses coordonnées bancaires. L'abonnement annuel est prélevé ; le kit et les options peuvent l'être aussi au choix du Client, sinon ils sont réglés par virement. Identifiant créancier SEPA : [à compléter].
+- **Prélèvement SEPA**, par l'intermédiaire du prestataire de paiement GoCardless : le Client signe un mandat SEPA sur la page sécurisée de GoCardless ; Flowin n'a pas accès à ses coordonnées bancaires. Offre annuelle : prélevée en une fois. Offre mensuelle : premier mois prélevé à la commande, puis chaque mois. Le kit et les options peuvent être prélevés aussi au choix du Client, sinon ils sont réglés par virement. Identifiant créancier SEPA : [à compléter].
+- L'offre mensuelle peut aussi être réglée par virement, chaque mois, à réception de facture.
 
 La commande est enregistrée « en attente de paiement » jusqu'à réception du règlement. Les factures sont émises au nom du Client et payables à réception. En cas de retard, des pénalités au taux de trois fois le taux d'intérêt légal s'appliquent de plein droit, ainsi qu'une indemnité forfaitaire de 40 € pour frais de recouvrement (article L441-10 du Code de commerce). Après mise en demeure restée sans effet pendant 15 jours, Flowin peut suspendre le service.
 
 ## Article 6 — Durée, renouvellement et résiliation
 
-L'abonnement est un **abonnement annuel**, qui prend effet à [date de prise d'effet à compléter : signature du bon de commande ou mise en ligne de la première animation].
+L'offre est soit **annuelle**, soit **mensuelle**. Elle prend effet à [date de prise d'effet à compléter : signature du bon de commande ou mise en ligne de la première animation].
 
 Durée d'engagement, conditions de renouvellement et préavis de résiliation : [à compléter].
 
@@ -64,6 +67,17 @@ Les sommes versées pour les kits et les options restent acquises.
 ## Article 7 — Volume de participation
 
 [Conditions d'usage éventuelles (nombre de participants, d'animations ou de boutiques couverts par l'abonnement) : à compléter.] Le jeu n'est jamais interrompu sans information préalable du Client.
+
+## Article 7 bis — Offre spéciale premiers adhérents « satisfait ou remboursé »
+
+Réservée aux premiers adhérents [nombre ou date limite à compléter] ayant souscrit l'offre mensuelle ou l'offre annuelle et coché la case d'adhésion sur le bon de commande.
+
+- **Objectif :** nombre de clients égal au prix de l'offre sur 12 mois (990 € pour l'offre annuelle, 110 € × 12 pour l'offre mensuelle) divisé par le panier moyen déclaré par le Client sur le bon de commande, arrondi à l'unité supérieure.
+- **Période :** 12 mois à compter de la prise d'effet.
+- **Condition :** au moins **4 animations** mises en place par le Client sur la période.
+- **Client venu :** un gagnant dont le retrait du lot a été validé en boutique dans l'application Flowin.
+- **Remboursement :** si le nombre de clients venus est inférieur à l'objectif, Flowin rembourse la différence entre le prix payé et la valeur des clients venus (clients venus × panier moyen déclaré), déduction faite de la part digitale non remboursable de [montant à compléter] et des kits et options.
+- La demande est faite par le Client dans [délai à compléter] après la fin de la période ; le remboursement intervient dans [délai à compléter].
 
 ## Article 8 — Obligations des parties
 

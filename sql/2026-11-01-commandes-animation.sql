@@ -10,7 +10,7 @@
 --   en_attente_paiement  commande signée, virement attendu (ou prélèvement pas encore lancé)
 --   mandat_en_cours      client redirigé vers GoCardless, mandat en cours de signature / validation
 --   mandat_actif         mandat SEPA actif (webhook mandates.active)
---   payee                paiement confirmé (webhook payments.confirmed / paid_out, ou virement reçu saisi à la main)
+--   payee                paiement confirmé (offre mensuelle : 1er mois ; mois suivants par l'abonnement GoCardless) (webhook payments.confirmed / paid_out, ou virement reçu saisi à la main)
 --   mandat_echoue        mandat refusé, annulé ou expiré
 --   paiement_echoue      prélèvement échoué, annulé ou rejeté
 --   annulee              commande annulée par Flowin
@@ -41,8 +41,14 @@ create table if not exists public.commandes_animation (
   panier_moyen                numeric(10,2) check (panier_moyen is null or panier_moyen >= 0),
   logo                        text check (logo is null or (logo like 'data:image/%' and char_length(logo) <= 2000000)),
   commercial                  text check (char_length(commercial) <= 60),
+  flux_journalier             text check (flux_journalier is null or flux_journalier in ('15+','50+','100+')),
+
+  -- Offre spéciale premiers adhérents « satisfait ou remboursé » (offres mensuelle et annuelle)
+  garantie                    boolean not null default false,
+  garantie_clients_objectif   integer,              -- recalculé : arrondi sup. (prix sur 12 mois ÷ panier moyen)
 
   -- Formule
+  offre                       text not null default 'annuelle' check (offre in ('kit_digital','mensuelle','annuelle')),
   kit                         text not null default 'digital' check (kit in ('digital','physique')),
   opt_quiz_qte                integer not null default 0 check (opt_quiz_qte between 0 and 20),
   opt_bonus_qte               integer not null default 0 check (opt_bonus_qte between 0 and 20),
@@ -56,12 +62,13 @@ create table if not exists public.commandes_animation (
   montant_ttc                 numeric(10,2) not null default 0,
 
   -- Paiement
-  mode_paiement               text not null default 'virement' check (mode_paiement in ('virement','prelevement_sepa')),
+  mode_paiement               text not null default 'virement' check (mode_paiement in ('virement','prelevement_sepa','aucun')),
   prelevement_inclut_reste    boolean not null default false,
   montant_preleve_ttc         numeric(10,2),
   gc_billing_request_id       text,
   gc_mandate_id               text,
   gc_payment_id               text,
+  gc_subscription_id          text,                 -- offre mensuelle : abonnement GoCardless (mois 2 et suivants)
   gc_dernier_evenement        text,
   paiement_maj_at             timestamptz,
 
@@ -96,8 +103,9 @@ security definer
 set search_path = public
 as $$
 declare
-  c_abo   constant numeric := 990;   -- abonnement annuel HT
-  c_kit   constant numeric := 149;   -- kit physique HT par boutique
+  c_annuel  constant numeric := 990;  -- offre annuelle HT
+  c_mensuel constant numeric := 110;  -- offre mensuelle HT, par mois (la commande porte le 1er mois)
+  c_kit     constant numeric := 149;   -- kit physique HT par boutique
   c_quiz  constant numeric := 180;   -- option quiz HT par événement
   c_bonus constant numeric := 180;   -- option questions bonus HT
   h json;
@@ -108,6 +116,7 @@ begin
   NEW.gc_billing_request_id := null;
   NEW.gc_mandate_id := null;
   NEW.gc_payment_id := null;
+  NEW.gc_subscription_id := null;
   NEW.gc_dernier_evenement := null;
   NEW.montant_preleve_ttc := null;
   NEW.paiement_maj_at := null;
@@ -115,12 +124,24 @@ begin
   NEW.created_at := now();
   if NEW.mode_paiement <> 'prelevement_sepa' then NEW.prelevement_inclut_reste := false; end if;
 
-  NEW.montant_abonnement_ht := c_abo;
+  NEW.montant_abonnement_ht := case NEW.offre when 'annuelle' then c_annuel when 'mensuelle' then c_mensuel else 0 end;
   NEW.montant_kit_ht        := case when NEW.kit = 'physique' then c_kit * NEW.nb_boutiques else 0 end;
   NEW.montant_options_ht    := c_quiz * NEW.opt_quiz_qte + c_bonus * NEW.opt_bonus_qte;
   NEW.montant_ht            := NEW.montant_abonnement_ht + NEW.montant_kit_ht + NEW.montant_options_ht;
   NEW.montant_tva           := round(NEW.montant_ht * 0.20, 2);
   NEW.montant_ttc           := NEW.montant_ht + NEW.montant_tva;
+  if NEW.montant_ttc = 0 then NEW.mode_paiement := 'aucun'; NEW.prelevement_inclut_reste := false;
+  elsif NEW.mode_paiement = 'aucun' then NEW.mode_paiement := 'virement'; end if;
+
+  -- Garantie : réservée aux offres payantes, avec un panier moyen déclaré
+  if NEW.offre = 'kit_digital' or NEW.panier_moyen is null or NEW.panier_moyen <= 0 then
+    NEW.garantie := false;
+    NEW.garantie_clients_objectif := null;
+  elsif NEW.garantie then
+    NEW.garantie_clients_objectif := ceil((case when NEW.offre = 'annuelle' then c_annuel else c_mensuel * 12 end) / NEW.panier_moyen);
+  else
+    NEW.garantie_clients_objectif := null;
+  end if;
 
   -- Signature électronique simple : horodatage et IP côté serveur
   NEW.signature_horodatage := now();

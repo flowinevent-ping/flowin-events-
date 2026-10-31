@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { majCommandes, supabaseServeurConfigure, verifierSignatureGoCardless } from '@/lib/animationMagasin'
+import { PRIX_AM, goCardless, lireCommande, majCommandes, supabaseServeurConfigure, verifierSignatureGoCardless } from '@/lib/animationMagasin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,7 +13,8 @@ export const dynamic = 'force-dynamic'
  * GOCARDLESS_WEBHOOK_SECRET. Signature invalide -> 498 (convention GoCardless).
  *
  * Evenements traites :
- *   billing_requests.fulfilled  -> enregistre mandat + paiement lies a la commande
+ *   billing_requests.fulfilled  -> enregistre mandat + paiement lies a la commande ; offre mensuelle :
+ *                                  cree l'abonnement GoCardless mensuel (a partir du 2e mois)
  *   mandates.active             -> statut « mandat_actif »
  *   mandates.failed/cancelled/expired -> « mandat_echoue »
  *   payments.confirmed/paid_out -> « payee »
@@ -29,6 +30,33 @@ type GcEvent = {
   details?: { cause?: string; description?: string }
 }
 
+/** Offre mensuelle : abonnement GoCardless de 110 € HT (prélevé TTC) par mois, à partir du mois suivant. */
+async function abonnementMensuel(brId: string, mandat: string): Promise<void> {
+  const c = await lireCommande(brId, 'gc_billing_request_id')
+  if (!c || c.offre !== 'mensuelle') return
+  const ht = Math.round(PRIX_AM.mensuelleHt * 100)
+  const montant = ht + Math.round(ht * PRIX_AM.tva)
+  const debut = new Date()
+  debut.setUTCMonth(debut.getUTCMonth() + 1)
+  const sub = await goCardless(
+    '/subscriptions',
+    {
+      subscriptions: {
+        amount: montant,
+        currency: 'EUR',
+        name: `Flowin Animation - offre mensuelle - ${c.id}`.slice(0, 100),
+        interval_unit: 'monthly',
+        start_date: debut.toISOString().slice(0, 10),
+        metadata: { commande_id: c.id },
+        links: { mandate: mandat },
+      },
+    },
+    `${c.id}-sub`
+  )
+  const subId = sub?.subscriptions?.id
+  if (subId) await majCommandes({ id: 'eq.' + c.id }, { gc_subscription_id: subId })
+}
+
 async function traiter(ev: GcEvent): Promise<void> {
   const l = ev.links || {}
   const trace = { gc_dernier_evenement: `${ev.resource_type}.${ev.action}:${ev.id}`.slice(0, 200) }
@@ -38,6 +66,7 @@ async function traiter(ev: GcEvent): Promise<void> {
     if (l.mandate_request_mandate) patch.gc_mandate_id = l.mandate_request_mandate
     if (l.payment_request_payment) patch.gc_payment_id = l.payment_request_payment
     await majCommandes({ gc_billing_request_id: 'eq.' + l.billing_request }, patch)
+    if (l.mandate_request_mandate) await abonnementMensuel(l.billing_request, l.mandate_request_mandate)
     return
   }
 

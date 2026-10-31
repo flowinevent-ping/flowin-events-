@@ -52,6 +52,9 @@ export async function POST(req: NextRequest) {
   try {
     const c = await lireCommande(id)
     if (!c) return NextResponse.json({ ok: false, error: 'Commande introuvable.' }, { status: 404 })
+    if (c.offre === 'kit_digital' && c.kit !== 'physique' && !c.opt_quiz_qte && !c.opt_bonus_qte) {
+      return NextResponse.json({ ok: false, error: 'Rien à régler pour le kit digital gratuit.' }, { status: 409 })
+    }
     if (c.mode_paiement !== 'prelevement_sepa') {
       return NextResponse.json({ ok: false, error: 'Cette commande est réglée par virement.' }, { status: 409 })
     }
@@ -60,7 +63,8 @@ export async function POST(req: NextRequest) {
     }
 
     const m = calculerMontants(c)
-    const montantCents = c.prelevement_inclut_reste ? m.ttcCents : m.aboTtcCents
+    // Annuelle : l'année ; mensuelle : le 1er mois (les suivants via l'abonnement créé au webhook) ; kit digital : kit et options.
+    const montantCents = c.prelevement_inclut_reste || m.aboTtcCents === 0 ? m.ttcCents : m.aboTtcCents
     const origine = (process.env.FLOWIN_BASE_URL || req.headers.get('origin') || `https://${req.headers.get('host')}`).replace(/\/+$/, '')
     const base = `${origine}/bon-commande-animation.html`
     const meta = { commande_id: id }
@@ -78,9 +82,11 @@ export async function POST(req: NextRequest) {
             payment_request: {
               amount: montantCents,
               currency: 'EUR',
-              description: (c.prelevement_inclut_reste
-                ? `Flowin Animation - commande ${id}`
-                : `Flowin Animation - abonnement annuel - ${id}`
+              description: (c.offre === 'mensuelle'
+                ? `Flowin Animation - offre mensuelle, 1er mois - ${id}`
+                : c.offre === 'annuelle'
+                  ? `Flowin Animation - offre annuelle - ${id}`
+                  : `Flowin Animation - commande ${id}`
               ).slice(0, 100),
               metadata: meta,
             },

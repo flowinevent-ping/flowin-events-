@@ -24,6 +24,6 @@ Aucune valeur dans le dépôt. Sans les trois premières, le bouton « Prélève
 
 ## Déroulé
 
-Bon signé → insert `commandes_animation` (`en_attente_paiement`) → `POST /api/paiement/gocardless` : la route relit la commande, recalcule le montant (abonnement annuel TTC, ou tout le bon si le client l'a choisi), crée un billing request (mandat SEPA + paiement) puis un billing request flow → redirection vers la page GoCardless, où le client saisit son IBAN et signe le mandat. L'application ne voit jamais l'IBAN. Les webhooks mettent ensuite le statut à jour : `mandat_actif`, `payee`, `mandat_echoue`, `paiement_echoue`.
+Bon signé → insert `commandes_animation` (`en_attente_paiement`) → `POST /api/paiement/gocardless` : la route relit la commande, recalcule le montant (offre annuelle TTC, ou 1er mois de l'offre mensuelle, ou tout le bon si le client l'a choisi), crée un billing request (mandat SEPA + paiement) puis un billing request flow → redirection vers la page GoCardless, où le client saisit son IBAN et signe le mandat. L'application ne voit jamais l'IBAN. Les webhooks mettent ensuite le statut à jour : `mandat_actif`, `payee`, `mandat_echoue`, `paiement_echoue`.
 
-Le renouvellement annuel (nouveau paiement sur le mandat existant) n'est pas automatisé : durée et renouvellement restent à fixer dans les CGV.
+Offre mensuelle : à `billing_requests.fulfilled`, le webhook crée un abonnement GoCardless mensuel (110 € HT, prélevé TTC) à partir du mois suivant (`gc_subscription_id`). Le renouvellement de l'offre annuelle n'est pas automatisé : durée et renouvellement restent à fixer dans les CGV.

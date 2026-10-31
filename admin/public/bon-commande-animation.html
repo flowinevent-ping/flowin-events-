@@ -10,10 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#150C1C; --ink2:#3a3f45; --muted:#5d6a66; --faint:#8f9a96;
-    --teal:#00B4A0; --tealD:#00897B; --tealL:#E3F6F1;
-    --mint:#D9F2EA; --sky:#D7EEF9; --off:#F6F7F5;
-    --paper:#F6F7F5; --line:#E1E7E4; --white:#fff; --err:#C8243B; --hl:#D9F2EA;
+    --ink:#3B2418; --ink2:#5A3E30; --muted:#8A6B5A; --faint:#A88B7A;
+    --teal:#F26B4F; --tealD:#C94F35; --tealL:#FDE7DF; --green:#13A89E;
+    --mint:#FFF6EC; --sky:#FFEFD2; --off:#FFF6EC;
+    --paper:#FFF6EC; --line:#F3D9C4; --white:#fff; --err:#B3261E; --hl:#FFEFD2;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--paper);font-family:'Manrope',system-ui,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -26,15 +26,15 @@
   .flowin-topbar .flowin-topbar-brand b{background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
 
   .wrap{max-width:880px;margin:0 auto;padding:24px 16px 60px}
-  .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(21,12,28,.35)}
+  .doc{background:var(--white);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -30px rgba(59,36,24,.3)}
 
   /* En-tête : signature de marque */
-  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--mint);overflow:hidden;border-bottom:1px solid var(--line)}
+  .head{position:relative;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:26px 32px;background:var(--cream,#FFF6EC);overflow:hidden;border-bottom:1px solid var(--line)}
   .head svg.paint{position:absolute;left:170px;bottom:-60px;width:190px;height:190px;pointer-events:none;opacity:.95}
   .brand-sig{display:flex;flex-direction:column;align-items:flex-start;position:relative;z-index:1}
   .logo{font-weight:900;letter-spacing:-.03em;line-height:1;font-size:46px;color:var(--ink)}
   .logo em{font-style:normal;background:linear-gradient(120deg,#E0218A,#F5A100);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(21,12,28,.55);margin-top:14px}
+  .ss-eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:rgba(59,36,24,.6);margin-top:14px}
   .ss-pill{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-weight:800;font-size:12.5px;padding:8px 20px;border-radius:100px}
   .doc-meta{position:relative;z-index:1;text-align:right}
   .doc-type{font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1.05}
@@ -68,8 +68,8 @@
   .f.err .em{display:block}
   .row2{display:grid;grid-template-columns:110px 1fr;gap:10px}
 
-  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #c9d3ce;border-radius:14px;padding:12px 14px;cursor:pointer;background:var(--off)}
-  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#EAEFEC;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
+  .logo-drop{display:flex;align-items:center;gap:14px;border:1.5px dashed #E8C6AE;border-radius:14px;padding:12px 14px;cursor:pointer;background:var(--off)}
+  .logo-drop .prev{width:64px;height:64px;border-radius:12px;background:#FBE9DA;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:10.5px;font-weight:800;color:var(--faint);text-align:center}
   .logo-drop .prev img{max-width:100%;max-height:100%;display:block}
   .logo-drop b{display:block;font-size:13.5px;font-weight:800}
   .logo-drop span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
@@ -77,10 +77,18 @@
 
   /* Cartes de choix */
   .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .choices.c3{grid-template-columns:repeat(3,1fr)}
+  .guarbox{margin-top:16px;border:2px solid var(--teal);border-radius:18px;padding:16px 18px;background:#fff}
+  .guarbox .gtag{display:inline-block;background:linear-gradient(135deg,#F5A100,#EC5B45);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:10px}
+  .guarbox .gx{display:none;margin-top:12px;background:var(--hl);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700}
+  .guarbox .gx b{font-size:20px;color:var(--tealD)}
+  .guarbox .gd{font-size:12px;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.5}
+  .guarbox .gd a{color:var(--tealD);font-weight:800}
+  .f select{appearance:auto}
   .choice{position:relative;border:1.5px solid var(--line);border-radius:16px;padding:16px 16px 14px;cursor:pointer;background:#fff;transition:border-color .15s,box-shadow .15s;text-align:left;width:100%;color:var(--ink)}
-  .choice:hover{border-color:#b9c6c0}
-  .choice.sel{border-color:var(--teal);box-shadow:0 10px 26px -16px rgba(21,12,28,.55)}
-  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #c9d3ce}
+  .choice:hover{border-color:#E0B79B}
+  .choice.sel{border-color:var(--teal);box-shadow:0 10px 26px -16px rgba(59,36,24,.6)}
+  .choice .ck{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;border:2px solid #E8C6AE}
   .choice.sel .ck{border-color:var(--teal);background:var(--teal)}
   .choice.sel .ck:after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
   .choice .cn{font-size:16px;font-weight:900;padding-right:28px}
@@ -88,7 +96,7 @@
   .choice .cp{font-size:20px;font-weight:900;margin-top:10px;letter-spacing:-.01em}
   .choice .cp small{font-size:11.5px;color:var(--muted);font-weight:800}
   .choice.disabled{opacity:.6;cursor:not-allowed;background:var(--off)}
-  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sky);color:#2b6aa8;border-radius:100px;padding:3px 9px}
+  .choice .soon{display:inline-block;margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--sky);color:#7A4A00;border-radius:100px;padding:3px 9px}
   .abo{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#fff;color:var(--ink);border:1.5px solid var(--teal);border-radius:16px;padding:16px 18px;margin-bottom:12px}
   .abo b{font-size:16px;font-weight:900;display:block}
   .abo span{font-size:12.5px;opacity:.75;font-weight:600;display:block;margin-top:3px}
@@ -97,7 +105,7 @@
   .opt-qty{display:none;align-items:center;gap:10px;margin-top:10px;font-size:12px;font-weight:800;color:var(--ink2)}
   .choice.sel .opt-qty{display:flex}
   .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:100px;overflow:hidden;background:#fff}
-  .stepper button{width:34px;height:34px;border:none;background:#EAEFEC;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .stepper button{width:34px;height:34px;border:none;background:#FBE9DA;font-size:18px;font-weight:800;cursor:pointer;color:var(--ink)}
   .stepper input{width:44px;text-align:center;border:none;font-size:15px;font-weight:900;outline:none;padding:0;color:var(--ink);background:#fff}
 
   /* Récapitulatif */
@@ -118,7 +126,7 @@
   .paybox b{color:var(--ink)}
   .paybox .iban{font-variant-numeric:tabular-nums;letter-spacing:.03em}
   .chk{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.45;color:var(--ink)}
-  .chk input{width:20px;height:20px;flex:none;accent-color:#00B4A0;margin-top:1px}
+  .chk input{width:20px;height:20px;flex:none;accent-color:#F26B4F;margin-top:1px}
   .chk a{color:var(--tealD);font-weight:800}
   .chk.err{color:var(--err)}
 
@@ -127,7 +135,7 @@
   .sign .clock b{color:var(--ink);font-variant-numeric:tabular-nums}
 
   .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(0,137,123,.6)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(242,107,79,.7)}
   .btn[disabled]{opacity:.55;cursor:default}
   .btn.ghost{background:#fff;color:var(--tealD);border:1.5px solid var(--teal);box-shadow:none}
   .btn.dark{background:var(--teal)}
@@ -150,7 +158,7 @@
   .steps li:before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-weight:900;font-size:12.5px;display:flex;align-items:center;justify-content:center}
   .steps li b{color:var(--ink)}
   .banner{border-radius:14px;padding:12px 16px;font-size:13.5px;font-weight:700;margin-top:16px;line-height:1.5}
-  .banner.warn{background:var(--sky);color:#24557f}
+  .banner.warn{background:var(--sky);color:#7A4A00}
   .banner.info{background:var(--mint);color:#00574f}
 
   @media (max-width:700px){
@@ -159,7 +167,7 @@
     .doc-meta{text-align:left}
     .doc-type{font-size:24px}
     .body{padding:20px 16px 24px}
-    .parties,.grid,.choices{grid-template-columns:1fr}
+    .parties,.grid,.choices,.choices.c3{grid-template-columns:1fr}
     .grid .full{grid-column:auto}
     .legal{padding:14px 16px}
     table.recap{font-size:12.5px}
@@ -199,7 +207,7 @@
         </div>
         <div class="party" style="background:#fff">
           <div class="ttl">Votre commande en bref</div>
-          <div class="ln" id="briefLn">Abonnement annuel Flowin Animation, kit digital, 1 boutique.</div>
+          <div class="ln" id="briefLn">Offre annuelle Flowin Animation.</div>
           <div class="nm" style="margin-top:6px" id="briefTot">&mdash;</div>
         </div>
       </div>
@@ -222,7 +230,6 @@
         <div class="f"><label for="f_fonction">Fonction <small>(facultatif)</small></label><input id="f_fonction" autocomplete="organization-title"></div>
         <div class="f" data-f="email"><label for="f_email">Email <i>*</i></label><input id="f_email" type="email" inputmode="email" autocomplete="email"><div class="em">Email invalide.</div></div>
         <div class="f" data-f="tel"><label for="f_tel">T&eacute;l&eacute;phone <i>*</i></label><input id="f_tel" type="tel" inputmode="tel" autocomplete="tel"><div class="em">Indiquez un t&eacute;l&eacute;phone.</div></div>
-        <div class="f" data-f="panier"><label for="f_panier">Panier moyen d&eacute;clar&eacute; <small>(facultatif, en &euro;)</small></label><input id="f_panier" inputmode="decimal" autocomplete="off"><div class="em">Montant invalide.</div></div>
         <div class="f"><label for="f_commercial">Commercial <small>(code vendeur)</small></label><input id="f_commercial" autocomplete="off" placeholder="ex. : code de votre conseiller"></div>
         <div class="f full"><label>Votre logo <small>(facultatif, pour vos supports)</small></label>
           <label class="logo-drop" for="f_logo"><div class="prev" id="logoPrev">Aucun logo</div><div><b id="logoTxt">Ajouter votre logo</b><span>PNG, JPG ou SVG. Il sera repris sur vos affiches et votre jeu.</span></div><input id="f_logo" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
@@ -232,22 +239,30 @@
 
     <div class="sec">
       <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
-      <div class="abo">
-        <div><b>Abonnement annuel Flowin Animation</b><span>Quiz, roue, tombola, QR trac&eacute;s par support, tirages, billets, stock, relances, rapports.</span></div>
-        <div class="pr">990 &euro;<small>HT / an</small></div>
-      </div>
-      <div class="choices" id="kitChoices">
-        <button type="button" class="choice sel" data-kit="digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Fichiers des affiches, macarons et support de caisse, &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">0 &euro; <small>HT</small></div></button>
-        <button type="button" class="choice" data-kit="physique"><span class="ck"></span><div class="cn">Kit physique</div><div class="cd">Macarons, affiches et support de caisse imprim&eacute;s, livr&eacute;s dans chaque boutique.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></button>
+      <div class="choices c3" id="offerChoices">
+        <button type="button" class="choice" data-offre="kit_digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Affiches, macarons et QR de jeu &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">Gratuit</div></button>
+        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Offre mensuelle</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support.</div><div class="cp">110 &euro; <small>HT / mois</small></div></button>
+        <button type="button" class="choice sel" data-offre="annuelle"><span class="ck"></span><div class="cn">Offre annuelle</div><div class="cd">Toute l&rsquo;offre mensuelle, en un seul paiement pour l&rsquo;ann&eacute;e.</div><div class="cp">990 &euro; <small>HT / an</small></div></button>
       </div>
       <div class="hint" style="margin-top:16px;font-weight:800;color:var(--ink2)">Options</div>
-      <div class="choices" style="margin-top:8px">
-        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions du quiz personnalis&eacute;es</div><div class="cd">R&eacute;daction des questions de votre quiz pour un &eacute;v&eacute;nement : votre marque, vos produits, votre histoire.</div><div class="cp">180 &euro; <small>HT par &eacute;v&eacute;nement</small></div>
-          <div class="opt-qty">Nombre d&rsquo;&eacute;v&eacute;nements <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
-        <div class="choice" id="optBonus" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions bonus personnalis&eacute;es</div><div class="cd">Votre sondage sur mesure : avis client, attentes, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
-          <div class="opt-qty">Nombre de sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
+      <div class="choices c3" style="margin-top:8px">
+        <div class="choice" id="optKit" role="button" tabindex="0"><span class="ck"></span><div class="cn">Kit physique</div><div class="cd">Macarons, affiches et support de caisse imprim&eacute;s, pour <span id="kitNb">1 boutique</span>.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></div>
+        <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Quiz personnalis&eacute;</div><div class="cd">Vos questions, r&eacute;dig&eacute;es pour un &eacute;v&eacute;nement.</div><div class="cp">180 &euro; <small>HT par &eacute;v&eacute;nement</small></div>
+          <div class="opt-qty">&Eacute;v&eacute;nements <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
+        <div class="choice" id="optBonus" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure : avis client, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
+          <div class="opt-qty">Sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
       </div>
-      <div class="hint">Les lots mis en jeu sont fournis par votre commerce, en plus de l&rsquo;abonnement.</div>
+      <div class="guarbox" id="guarBox">
+        <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents</span>
+        <label class="chk" id="garRow"><input type="checkbox" id="garChk"><span>J&rsquo;adh&egrave;re &agrave; l&rsquo;offre satisfait ou rembours&eacute;</span></label>
+        <div class="grid" style="margin-top:12px">
+          <div class="f" data-f="panier"><label for="f_panier">Panier moyen de votre activit&eacute; <small>(en &euro;)</small></label><input id="f_panier" inputmode="decimal" autocomplete="off" placeholder="ex. : 25"><div class="em">Indiquez votre panier moyen.</div></div>
+          <div class="f" data-f="flux"><label for="f_flux">Flux journalier estim&eacute;</label><select id="f_flux"><option value="">Choisir</option><option value="15+">Plus de 15 clients par jour</option><option value="50+">Plus de 50 clients par jour</option><option value="100+">Plus de 100 clients par jour</option></select><div class="em">Choisissez votre flux journalier.</div></div>
+        </div>
+        <div class="gx" id="garX"></div>
+        <div class="gd">Sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas ce chiffre, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
+      </div>
+      <div class="hint">Les lots mis en jeu sont fournis par votre commerce.</div>
     </div>
 
     <div class="sec">
@@ -260,7 +275,7 @@
       </div>
     </div>
 
-    <div class="sec">
+    <div class="sec" id="secPay">
       <div class="sec-h"><span class="n">4</span><h2>Paiement</h2></div>
       <div class="choices" id="payChoices">
         <button type="button" class="choice sel" data-pay="virement"><span class="ck"></span><div class="cn">Virement bancaire</div><div class="cd">Vous r&eacute;glez par virement &agrave; r&eacute;ception du bon de commande. La commande est enregistr&eacute;e en attente de paiement.</div></button>
@@ -273,7 +288,7 @@
         R&eacute;f&eacute;rence &agrave; rappeler : <b id="payRef">&mdash;</b>
       </div>
       <div class="paybox" id="boxSepa" style="display:none">
-        <b>Pr&eacute;l&egrave;vement de l&rsquo;abonnement annuel</b> : <span id="sepaAbo">&mdash;</span> TTC.<br>
+        <b id="sepaLbl">Pr&eacute;l&egrave;vement de l&rsquo;offre annuelle</b> : <span id="sepaAbo">&mdash;</span> TTC.<br>
         Apr&egrave;s validation, vous &ecirc;tes redirig&eacute; vers la page s&eacute;curis&eacute;e GoCardless pour signer votre mandat SEPA.
         <label class="chk" style="margin-top:10px"><input type="checkbox" id="sepaReste" checked><span>Pr&eacute;lever aussi le kit et les options (<span id="sepaResteMt">0 &euro;</span> TTC). Sinon, ils sont &agrave; r&eacute;gler par virement.</span></label>
       </div>
@@ -339,7 +354,7 @@
     <div class="status" id="mStatus" role="status" aria-live="polite"></div>
   </div>
 
-  <div class="legal"><b>Flowin</b> est une marque de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907. Prix en euros hors taxes, TVA 20 % en sus. Abonnement annuel : dur&eacute;e et renouvellement selon les CGV.</div>
+  <div class="legal"><b>Flowin</b> est une marque de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907. Prix en euros hors taxes, TVA 20 % en sus. Dur&eacute;e et renouvellement selon les CGV.</div>
 </div>
 </div>
 
@@ -352,7 +367,7 @@
   var TABLE = 'commandes_animation';
   var API_GC = '/api/paiement/gocardless';
   var CGV_VERSION = 'am-v2-2026-11-01';
-  var PRIX = { abonnement: 990, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
+  var PRIX = { annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
   var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
   var LS_FILE = 'flowin_am_file_attente', LS_DERNIERE = 'flowin_am_derniere';
 
@@ -388,11 +403,11 @@
         d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]); }
       return '<g transform="translate(' + cx + ',' + cy + ')" fill="' + col + '"><path d="' + d + 'Z"/><circle cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.4) + '" r="' + n1(r * 0.1) + '"/></g>';
     }
-    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#9FE0D4', 7, 20, 0) + tache(44, '#B5DAF4', 3, -40, 30);
+    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#FBD3B8', 7, 20, 0) + tache(44, '#FFE2A8', 3, -40, 30);
   })();
 
   /* ---------- État ---------- */
-  var st = { nb: 1, kit: 'digital', quiz: 0, bonus: 0, pay: 'virement', gcDispo: false, logo: null };
+  var st = { offre: 'annuelle', nb: 1, kit: 'digital', quiz: 0, bonus: 0, garantie: false, pay: 'virement', gcDispo: false, logo: null };
   var now = new Date();
   function genId(){
     var alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = '', i, buf = null;
@@ -405,20 +420,28 @@
 
   function clampInt(v, mn, mx){ v = parseInt(String(v).replace(/[^0-9]/g, ''), 10); if (isNaN(v)) v = mn; if (v < mn) v = mn; if (v > mx) v = mx; return v; }
 
+  var NOM_OFFRE = { annuelle: 'Offre annuelle Flowin Animation', mensuelle: 'Offre mensuelle Flowin Animation', kit_digital: 'Kit digital Flowin' };
   function calc(){
-    var lignes = [];
-    lignes.push({ lib: 'Abonnement annuel Flowin Animation', det: 'Quiz, roue, tombola, QR tracés, tirages, billets, stock, relances, rapports', q: 1, ht: PRIX.abonnement });
+    var lignes = [], abo = st.offre === 'annuelle' ? PRIX.annuelle : (st.offre === 'mensuelle' ? PRIX.mensuelle : 0);
+    if (st.offre === 'annuelle') lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support, 12 mois', q: 1, ht: abo });
+    else if (st.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: eur(PRIX.mensuelle) + ' HT par mois, puis chaque mois', q: 1, ht: abo });
     var kitHt = st.kit === 'physique' ? PRIX.kitPhysique * st.nb : 0;
     if (st.kit === 'physique') lignes.push({ lib: 'Kit physique', det: 'Macarons, affiches, support de caisse, ' + eur(PRIX.kitPhysique) + ' HT par boutique', q: st.nb, ht: kitHt });
-    else lignes.push({ lib: 'Kit digital', det: 'Fichiers à imprimer', q: st.nb, ht: 0 });
+    else lignes.push({ lib: 'Kit digital', det: 'Fichiers et QR de jeu \u00e0 imprimer, gratuit', q: 1, ht: 0 });
     var optHt = 0;
-    if (st.quiz > 0) { lignes.push({ lib: 'Option : questions du quiz personnalisées', det: eur(PRIX.optQuiz) + ' HT par événement', q: st.quiz, ht: PRIX.optQuiz * st.quiz }); optHt += PRIX.optQuiz * st.quiz; }
-    if (st.bonus > 0) { lignes.push({ lib: 'Option : questions bonus personnalisées', det: eur(PRIX.optBonus) + ' HT par sondage', q: st.bonus, ht: PRIX.optBonus * st.bonus }); optHt += PRIX.optBonus * st.bonus; }
-    var ht = PRIX.abonnement + kitHt + optHt;
+    if (st.quiz > 0) { lignes.push({ lib: 'Option : quiz personnalis\u00e9', det: eur(PRIX.optQuiz) + ' HT par \u00e9v\u00e9nement', q: st.quiz, ht: PRIX.optQuiz * st.quiz }); optHt += PRIX.optQuiz * st.quiz; }
+    if (st.bonus > 0) { lignes.push({ lib: 'Option : questions bonus', det: eur(PRIX.optBonus) + ' HT par sondage', q: st.bonus, ht: PRIX.optBonus * st.bonus }); optHt += PRIX.optBonus * st.bonus; }
+    var ht = abo + kitHt + optHt;
     var tva = Math.round(ht * PRIX.tva * 100) / 100;
-    var aboTtc = Math.round(PRIX.abonnement * (1 + PRIX.tva) * 100) / 100;
+    var aboTtc = Math.round(abo * (1 + PRIX.tva) * 100) / 100;
     var ttc = Math.round((ht + tva) * 100) / 100;
-    return { lignes: lignes, abo: PRIX.abonnement, kit: kitHt, opt: optHt, ht: ht, tva: tva, ttc: ttc, aboTtc: aboTtc, resteTtc: Math.round((ttc - aboTtc) * 100) / 100 };
+    return { lignes: lignes, abo: abo, kit: kitHt, opt: optHt, ht: ht, tva: tva, ttc: ttc, aboTtc: aboTtc, resteTtc: Math.round((ttc - aboTtc) * 100) / 100 };
+  }
+  /* Garantie : X = arrondi supérieur (prix sur 12 mois ÷ panier moyen) */
+  function clientsGarantie(){
+    var p = parseFloat(String(($('f_panier') || {}).value || '').replace(',', '.'));
+    if (isNaN(p) || p <= 0 || st.offre === 'kit_digital') return null;
+    return Math.ceil((st.offre === 'annuelle' ? PRIX.annuelle : PRIX.mensuelle * 12) / p);
   }
   function recapHtml(t){
     var h = '';
@@ -430,8 +453,17 @@
     $('recapBody').innerHTML = recapHtml(t);
     $('tHT').textContent = eur(t.ht); $('tTVA').textContent = eur(t.tva); $('tTTC').textContent = eur(t.ttc);
     $('f_nb').value = st.nb;
-    var kits = document.querySelectorAll('#kitChoices .choice');
-    for (var i = 0; i < kits.length; i++) kits[i].className = 'choice' + (kits[i].getAttribute('data-kit') === st.kit ? ' sel' : '');
+    var offs = document.querySelectorAll('#offerChoices .choice');
+    for (var i = 0; i < offs.length; i++) offs[i].className = 'choice' + (offs[i].getAttribute('data-offre') === st.offre ? ' sel' : '');
+    $('optKit').className = 'choice' + (st.kit === 'physique' ? ' sel' : '');
+    $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
+    var payant = st.offre !== 'kit_digital';
+    $('guarBox').style.display = payant ? 'block' : 'none';
+    if (!payant) st.garantie = false;
+    $('garChk').checked = st.garantie;
+    var X = clientsGarantie(), gx = $('garX');
+    if (X) { gx.style.display = 'block'; gx.innerHTML = 'Flowin doit vous apporter <b>' + X + ' clients</b> sur 12 mois.'; } else gx.style.display = 'none';
+    if (t.ttc <= 0) { st.pay = 'aucun'; $('secPay').style.display = 'none'; } else { if (st.pay === 'aucun') st.pay = 'virement'; $('secPay').style.display = 'block'; }
     $('optQuiz').className = 'choice' + (st.quiz > 0 ? ' sel' : '');
     $('optBonus').className = 'choice' + (st.bonus > 0 ? ' sel' : '');
     if (st.quiz > 0) $('qQuiz').value = st.quiz;
@@ -443,10 +475,11 @@
     }
     $('boxVirement').style.display = st.pay === 'virement' ? 'block' : 'none';
     $('boxSepa').style.display = st.pay === 'prelevement_sepa' ? 'block' : 'none';
-    $('sepaAbo').textContent = eur(t.aboTtc); $('sepaResteMt').textContent = eur(t.resteTtc);
-    $('sepaReste').parentNode.style.display = t.resteTtc > 0 ? 'flex' : 'none';
-    var opts = []; if (st.quiz) opts.push('quiz personnalisé'); if (st.bonus) opts.push('questions bonus');
-    $('briefLn').textContent = 'Abonnement annuel Flowin Animation, kit ' + st.kit + ', ' + st.nb + ' boutique' + (st.nb > 1 ? 's' : '') + (opts.length ? ', ' + opts.join(' et ') : '') + '.';
+    $('sepaLbl').textContent = st.offre === 'mensuelle' ? 'Pr\u00e9l\u00e8vement mensuel de l\u2019offre' : 'Pr\u00e9l\u00e8vement de l\u2019offre annuelle';
+    $('sepaAbo').textContent = eur(t.aboTtc) + (st.offre === 'mensuelle' ? ' par mois' : ''); $('sepaResteMt').textContent = eur(t.resteTtc);
+    $('sepaReste').parentNode.style.display = (t.resteTtc > 0 && t.aboTtc > 0) ? 'flex' : 'none';
+    var opts = []; if (st.kit === 'physique') opts.push('kit physique'); if (st.quiz) opts.push('quiz personnalis\u00e9'); if (st.bonus) opts.push('questions bonus');
+    $('briefLn').textContent = NOM_OFFRE[st.offre] + (opts.length ? ', ' + opts.join(', ') : '') + (st.garantie ? ', satisfait ou rembours\u00e9' : '') + '.';
     $('briefTot').textContent = eur(t.ht) + ' HT · ' + eur(t.ttc) + ' TTC';
   }
 
@@ -454,6 +487,10 @@
   (function(){
     var b = qs('boutiques'); if (b) st.nb = clampInt(b, 1, 200);
     var k = qs('kit'); if (k === 'physique' || k === 'digital') st.kit = k;
+    var of = qs('offre'); if (of === 'annuelle' || of === 'mensuelle' || of === 'kit_digital') st.offre = of;
+    var pm = qs('panier'); if (pm && !isNaN(parseFloat(pm))) $('f_panier').value = String(parseFloat(pm)).replace('.', ',');
+    var fx = qs('flux'); if (fx === '15+' || fx === '50+' || fx === '100+') $('f_flux').value = fx;
+    if (qs('garantie') === '1') st.garantie = true;
     if (qs('quiz')) st.quiz = clampInt(qs('quiz'), 1, 20);
     if (qs('bonus')) st.bonus = clampInt(qs('bonus'), 1, 20);
     var c = qs('commercial') || qs('vendeur'); if (c) $('f_commercial').value = c.slice(0, 60);
@@ -463,8 +500,13 @@
   $('nbMinus').addEventListener('click', function(){ st.nb = clampInt(st.nb - 1, 1, 200); render(); });
   $('nbPlus').addEventListener('click', function(){ st.nb = clampInt(st.nb + 1, 1, 200); render(); });
   $('f_nb').addEventListener('change', function(){ st.nb = clampInt(this.value, 1, 200); render(); });
-  var kitBtns = document.querySelectorAll('#kitChoices .choice');
-  for (var ki = 0; ki < kitBtns.length; ki++) kitBtns[ki].addEventListener('click', function(){ st.kit = this.getAttribute('data-kit'); render(); });
+  var offBtns = document.querySelectorAll('#offerChoices .choice');
+  for (var ki = 0; ki < offBtns.length; ki++) offBtns[ki].addEventListener('click', function(){ st.offre = this.getAttribute('data-offre'); render(); });
+  $('optKit').addEventListener('click', function(){ st.kit = st.kit === 'physique' ? 'digital' : 'physique'; render(); });
+  $('optKit').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); st.kit = st.kit === 'physique' ? 'digital' : 'physique'; render(); } });
+  $('garChk').addEventListener('change', function(){ st.garantie = this.checked; render(); });
+  $('f_panier').addEventListener('input', function(){ render(); });
+  $('f_flux').addEventListener('change', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
   function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }
   function bindOpt(id, name){
     var el = $(id);
@@ -548,7 +590,9 @@
     check('contact', val('f_contact').length > 1);
     check('email', /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('f_email')));
     check('tel', val('f_tel').replace(/[^0-9+]/g, '').length >= 8);
-    var pm = val('f_panier'); check('panier', !pm || !isNaN(parseFloat(pm.replace(',', '.'))));
+    var pm = val('f_panier'), pmv = parseFloat(pm.replace(',', '.'));
+    check('panier', st.garantie ? (!isNaN(pmv) && pmv > 0) : (!pm || !isNaN(pmv)));
+    check('flux', !st.garantie || !!$('f_flux').value);
     if (avecSignature) {
       check('signataire', val('f_signataire').length > 1);
       var cgv = $('cgvChk').checked, sg = $('signChk').checked;
@@ -568,11 +612,12 @@
       contact_nom: val('f_contact'), contact_fonction: val('f_fonction') || null,
       email: val('f_email').toLowerCase(), tel: val('f_tel'),
       nb_boutiques: st.nb, panier_moyen: pm ? parseFloat(pm.replace(',', '.')) : null,
+      offre: st.offre, flux_journalier: $('f_flux').value || null, garantie: !!st.garantie, garantie_clients_objectif: st.garantie ? clientsGarantie() : null,
       logo: st.logo, kit: st.kit, opt_quiz_qte: st.quiz, opt_bonus_qte: st.bonus,
       commercial: val('f_commercial') || null,
       montant_abonnement_ht: t.abo, montant_kit_ht: t.kit, montant_options_ht: t.opt,
       montant_ht: t.ht, montant_tva: t.tva, montant_ttc: t.ttc,
-      mode_paiement: st.pay, prelevement_inclut_reste: st.pay === 'prelevement_sepa' ? !!$('sepaReste').checked : false,
+      mode_paiement: t.ttc > 0 ? st.pay : 'aucun', prelevement_inclut_reste: st.pay === 'prelevement_sepa' ? !!$('sepaReste').checked : false,
       cgv_acceptee: !!$('cgvChk').checked, cgv_version: CGV_VERSION,
       signataire_nom: val('f_signataire'), signataire_qualite: val('f_qualite') || null,
       signature_acceptee: !!$('signChk').checked,
@@ -588,11 +633,11 @@
     function S(t){ return String(t == null ? '' : t).replace(/ /g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
     var doc = new J({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     var W = 210, M = 15, x = M, y = 18, CW = W - 2 * M;
-    var ink = [21, 12, 28], mut = [101, 90, 112], mag = [224, 33, 138], gold = [245, 161, 0], teal = [0, 121, 109];
+    var ink = [59, 36, 24], mut = [138, 107, 90], mag = [224, 33, 138], gold = [245, 161, 0], teal = [201, 79, 53];
     function T(t, xx, yy, sz, stl, col, al){ doc.setFont('helvetica', stl || 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); doc.text(S(t), xx, yy, al ? { align: al } : undefined); }
     function wrap(t, xx, yy, sz, col, w, lh){ doc.setFont('helvetica', 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); var ls = doc.splitTextToSize(S(t), w); for (var i = 0; i < ls.length; i++) { doc.text(ls[i], xx, yy); yy += lh; } return yy; }
     /* Signature de marque */
-    doc.setFillColor(217, 242, 234); doc.rect(0, 0, W, 38, 'F');
+    doc.setFillColor(255, 246, 236); doc.rect(0, 0, W, 38, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text('Flow', x, y + 4);
     var fw = doc.getTextWidth('Flow'); doc.setTextColor(mag[0], mag[1], mag[2]); doc.text('i', x + fw, y + 4); var iw = doc.getTextWidth('i'); doc.setTextColor(gold[0], gold[1], gold[2]); doc.text('n', x + fw + iw, y + 4);
     T('A N I M A T I O N   D I G I T A L E', x, y + 10.5, 7, 'bold', [120, 112, 124]);
@@ -603,7 +648,7 @@
     T('Date : ' + fmtDate(new Date()), W - M, y + 19, 8.5, 'normal', mut, 'right');
     y = 48;
     var cw = (CW - 8) / 2;
-    doc.setDrawColor(230, 224, 214); doc.roundedRect(x, y, cw, 32, 2, 2); doc.roundedRect(x + cw + 8, y, cw, 32, 2, 2);
+    doc.setDrawColor(243, 217, 196); doc.roundedRect(x, y, cw, 32, 2, 2); doc.roundedRect(x + cw + 8, y, cw, 32, 2, 2);
     T('PRESTATAIRE', x + 4, y + 6, 7, 'bold', teal); T('BAITA EURL - Flowin', x + 4, y + 12, 10.5, 'bold', ink);
     T('40 rue des Arcs, 06140 Vence', x + 4, y + 17, 8, 'normal', mut); T('SIRET 512 026 907 00018', x + 4, y + 21.5, 8, 'normal', mut);
     T('TVA FR82 512 026 907', x + 4, y + 26, 8, 'normal', mut); T('04 93 59 91 37 - info@opconsult.co', x + 4, y + 30, 7.5, 'normal', mut);
@@ -616,7 +661,7 @@
     T('Boutiques : ' + rec.nb_boutiques + (rec.panier_moyen ? '   -   Panier moyen declare : ' + eur(rec.panier_moyen) : '') + (rec.commercial ? '   -   Commercial : ' + rec.commercial : ''), x, y, 8.5, 'normal', mut);
     y += 7;
     T('DESIGNATION', x, y, 7.5, 'bold', teal); T('QTE', W - M - 38, y, 7.5, 'bold', teal, 'right'); T('MONTANT HT', W - M, y, 7.5, 'bold', teal, 'right');
-    y += 2.5; doc.setDrawColor(230, 224, 214); doc.line(x, y, W - M, y); y += 5.5;
+    y += 2.5; doc.setDrawColor(243, 217, 196); doc.line(x, y, W - M, y); y += 5.5;
     var t = calc();
     for (var i = 0; i < t.lignes.length; i++) {
       var l = t.lignes[i];
@@ -627,15 +672,19 @@
     var tx = W - M - 70;
     T('Total HT', tx, y, 9.5, 'normal', mut); T(eur(t.ht), W - M, y, 9.5, 'bold', ink, 'right'); y += 5.5;
     T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;
-    doc.setFillColor(217, 242, 234); doc.rect(tx - 3, y, 73, 9, 'F');
+    doc.setFillColor(255, 239, 210); doc.rect(tx - 3, y, 73, 9, 'F');
     T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
     T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
     if (rec.mode_paiement === 'prelevement_sepa') {
-      y = wrap('Prelevement SEPA via GoCardless : abonnement annuel ' + eur(t.aboTtc) + ' TTC' + (rec.prelevement_inclut_reste && t.resteTtc > 0 ? ', kit et options ' + eur(t.resteTtc) + ' TTC preleves egalement.' : (t.resteTtc > 0 ? '. Kit et options (' + eur(t.resteTtc) + ' TTC) par virement : IBAN ' + IBAN + ' - BIC ' + BIC + ' - titulaire BAITA EURL - reference ' + rec.id + '.' : '.')), x, y, 8.5, ink, CW, 4.2);
+      y = wrap('Prelevement SEPA via GoCardless : ' + (rec.offre === 'mensuelle' ? 'offre mensuelle ' + eur(t.aboTtc) + ' TTC par mois' : 'offre annuelle ' + eur(t.aboTtc)) + ' TTC' + (rec.prelevement_inclut_reste && t.resteTtc > 0 ? ', kit et options ' + eur(t.resteTtc) + ' TTC preleves egalement.' : (t.resteTtc > 0 ? '. Kit et options (' + eur(t.resteTtc) + ' TTC) par virement : IBAN ' + IBAN + ' - BIC ' + BIC + ' - titulaire BAITA EURL - reference ' + rec.id + '.' : '.')), x, y, 8.5, ink, CW, 4.2);
+    } else if (rec.mode_paiement === 'aucun') {
+      y = wrap('Aucun paiement : kit digital gratuit.', x, y, 8.5, ink, CW, 4.2);
     } else {
-      y = wrap('Virement bancaire de ' + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
+      y = wrap((rec.offre === 'mensuelle' ? 'Offre mensuelle : virement chaque mois de ' + eur(t.aboTtc) + ' TTC. Premier virement : ' : 'Virement bancaire de ') + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
     }
-    y += 5;
+    y += 3;
+    if (rec.garantie) { y = wrap('Offre satisfait ou rembourse (premiers adherents) : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '). Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2); }
+    y += 4;
     T('SIGNATURE ELECTRONIQUE', x, y, 7.5, 'bold', teal); y += 5;
     if (signe) {
       y = wrap('Signe electroniquement par ' + rec.signataire_nom + (rec.signataire_qualite ? ' (' + rec.signataire_qualite + ')' : '') + ' pour ' + rec.raison_sociale + ', le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '. Case "Je signe electroniquement ce bon de commande" cochee ; CGV Flowin Animation acceptees (version ' + rec.cgv_version + ').', x, y, 8.5, ink, CW, 4.2);
@@ -643,7 +692,7 @@
       y = wrap('Document non signe (brouillon). La commande est formee a la signature electronique en ligne.', x, y, 8.5, mut, CW, 4.2);
     }
     y += 4;
-    wrap('Conditions generales de vente Flowin Animation consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Abonnement annuel : duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
+    wrap('Conditions generales de vente Flowin Animation consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
     wrap('Flowin est une marque de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN ' + IBAN + ' - BIC ' + BIC, x, 287, 6.5, mut, CW, 3);
     doc.save('bon-commande-flowin-' + rec.id + '.pdf');
     return true;
@@ -692,11 +741,12 @@
   function etapes(rec, horsLigne){
     var t = calc(), h = [];
     if (rec.mode_paiement === 'prelevement_sepa') {
-      h.push('<b>Signez votre mandat SEPA</b> sur la page sécurisée GoCardless (si ce n’est pas déjà fait).');
+      h.push('<b>Signez votre mandat SEPA</b> sur la page s\u00e9curis\u00e9e GoCardless (si ce n\u2019est pas d\u00e9j\u00e0 fait)' + (rec.offre === 'mensuelle' ? ' : ' + eur(t.aboTtc) + ' TTC pr\u00e9lev\u00e9s chaque mois.' : '.'));
       if (!rec.prelevement_inclut_reste && t.resteTtc > 0) h.push('<b>Réglez le kit et les options par virement</b> (' + eur(t.resteTtc) + ' TTC), référence ' + esc(rec.id) + '.');
-    } else {
-      h.push('<b>Réglez ' + eur(t.ttc) + ' TTC par virement</b> avec la référence ' + esc(rec.id) + '. Votre commande passe en « payée » à réception.');
+    } else if (rec.mode_paiement === 'virement') {
+      h.push('<b>R\u00e9glez ' + eur(t.ttc) + ' TTC par virement</b> avec la r\u00e9f\u00e9rence ' + esc(rec.id) + '.' + (rec.offre === 'mensuelle' ? ' Puis ' + eur(t.aboTtc) + ' TTC chaque mois.' : ' Votre commande passe en \u00ab pay\u00e9e \u00bb \u00e0 r\u00e9ception.'));
     }
+    if (rec.garantie) h.push('<b>Satisfait ou rembours\u00e9</b> : objectif de ' + (rec.garantie_clients_objectif || '\u2014') + ' clients venus retirer leur lot sur 12 mois, avec au moins 4 animations.');
     h.push('<b>Flowin vous contacte</b> pour préparer votre animation : lots, questions, couleurs' + (rec.logo ? '' : ', logo') + '.');
     h.push(rec.kit === 'physique' ? '<b>Votre kit est en préparation</b> : macarons, affiches et support de caisse pour ' + rec.nb_boutiques + ' boutique' + (rec.nb_boutiques > 1 ? 's' : '') + '.' : '<b>Vous recevez votre kit digital</b> : les fichiers des affiches et macarons à imprimer.');
     h.push('<b>Vous collez, ils flashent, vous mesurez</b> : vos accès au tableau de bord vous sont envoyés par email.');
@@ -711,7 +761,7 @@
     $('mDate').textContent = rec.signature_horodatage_client ? fmtDateHeure(new Date(rec.signature_horodatage_client)) : '—';
     $('mRecap').innerHTML = recapHtml(t);
     $('mHT').textContent = eur(t.ht); $('mTVA').textContent = eur(t.tva); $('mTTC').textContent = eur(t.ttc);
-    var virMt = rec.mode_paiement === 'virement' ? t.ttc : (rec.prelevement_inclut_reste ? 0 : t.resteTtc);
+    var virMt = rec.mode_paiement === 'aucun' ? 0 : (rec.mode_paiement === 'virement' ? t.ttc : (rec.prelevement_inclut_reste ? 0 : t.resteTtc));
     $('mVirement').style.display = virMt > 0 ? 'block' : 'none';
     $('mVirMt').textContent = eur(virMt); $('mRef').textContent = rec.id;
     $('mStepsN').textContent = virMt > 0 ? '3' : '2';
@@ -729,7 +779,7 @@
     if (!valider(true)) { status('Merci de compléter les champs en rouge.', 'err'); return; }
     var btn = this, quand = new Date(), rec = collecte(quand);
     btn.disabled = true; status('Enregistrement de votre commande…', '');
-    var memo = { rec: rec, st: { nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
+    var memo = { rec: rec, st: { offre: st.offre, garantie: st.garantie, nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
     lsSet(LS_DERNIERE, memo);
     if (!window.fetch) { btn.disabled = false; status('Navigateur trop ancien pour l’envoi en ligne. Téléchargez le PDF et envoyez-le à Flowin.', 'err'); return; }
     inserer(rec).then(function(){
@@ -763,7 +813,7 @@
       $('mSub').innerHTML = 'Commande n° <b>' + esc(cid) + '</b>. Flowin vous confirme la suite par email.';
       return;
     }
-    st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
+    st.offre = memo.st.offre || 'annuelle'; st.garantie = !!memo.st.garantie; st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
     ID = memo.rec.id; render();
     if (retour === 'gocardless') {
       afficherMerci(memo.rec, { sepaMsg: '<b>Mandat SEPA signé.</b> GoCardless le transmet à votre banque ; le prélèvement apparaîtra sur votre relevé sous quelques jours ouvrés. Vous recevez une notification de GoCardless avant chaque prélèvement.' });

@@ -14,7 +14,8 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
 export const PRIX_AM = {
-  abonnementHt: 990,
+  annuelleHt: 990, // offre annuelle
+  mensuelleHt: 110, // offre mensuelle, par mois
   kitPhysiqueHt: 149, // par boutique
   optQuizHt: 180, // par evenement
   optBonusHt: 180, // par sondage
@@ -24,6 +25,7 @@ export const PRIX_AM = {
 export type CommandeAnimation = {
   id: string
   statut: string
+  offre: 'kit_digital' | 'mensuelle' | 'annuelle'
   raison_sociale: string
   siret: string | null
   adresse: string | null
@@ -44,16 +46,18 @@ export type CommandeAnimation = {
 const cents = (eur: number) => Math.round(eur * 100)
 
 /** Recalcule les montants a partir des choix (on ne fait jamais confiance aux montants envoyes). */
-export function calculerMontants(c: Pick<CommandeAnimation, 'nb_boutiques' | 'kit' | 'opt_quiz_qte' | 'opt_bonus_qte'>) {
+export function calculerMontants(c: Pick<CommandeAnimation, 'offre' | 'nb_boutiques' | 'kit' | 'opt_quiz_qte' | 'opt_bonus_qte'>) {
   const nb = Math.max(1, Math.min(200, Math.floor(Number(c.nb_boutiques) || 1)))
   const quiz = Math.max(0, Math.min(20, Math.floor(Number(c.opt_quiz_qte) || 0)))
   const bonus = Math.max(0, Math.min(20, Math.floor(Number(c.opt_bonus_qte) || 0)))
   const kitHt = c.kit === 'physique' ? PRIX_AM.kitPhysiqueHt * nb : 0
   const optHt = PRIX_AM.optQuizHt * quiz + PRIX_AM.optBonusHt * bonus
-  const ht = PRIX_AM.abonnementHt + kitHt + optHt
+  // Offre mensuelle : la commande porte le 1er mois ; les mois suivants sont prélevés par l'abonnement GoCardless.
+  const aboHt = c.offre === 'annuelle' ? PRIX_AM.annuelleHt : c.offre === 'mensuelle' ? PRIX_AM.mensuelleHt : 0
+  const ht = aboHt + kitHt + optHt
   const ttcCents = cents(ht) + Math.round(cents(ht) * PRIX_AM.tva)
-  const aboTtcCents = cents(PRIX_AM.abonnementHt) + Math.round(cents(PRIX_AM.abonnementHt) * PRIX_AM.tva)
-  return { nb, quiz, bonus, kitHt, optHt, ht, ttcCents, aboTtcCents, resteTtcCents: ttcCents - aboTtcCents }
+  const aboTtcCents = cents(aboHt) + Math.round(cents(aboHt) * PRIX_AM.tva)
+  return { nb, quiz, bonus, aboHt, kitHt, optHt, ht, ttcCents, aboTtcCents, resteTtcCents: ttcCents - aboTtcCents }
 }
 
 /* ---------- Supabase (PostgREST) cote serveur, cle service_role ---------- */
@@ -73,11 +77,11 @@ function entetes(key: string, extra?: Record<string, string>): Record<string, st
 }
 
 const COLONNES =
-  'id,statut,raison_sociale,siret,adresse,cp,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,mode_paiement,prelevement_inclut_reste,gc_billing_request_id'
+  'id,statut,offre,raison_sociale,siret,adresse,cp,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,mode_paiement,prelevement_inclut_reste,gc_billing_request_id'
 
-export async function lireCommande(id: string): Promise<CommandeAnimation | null> {
+export async function lireCommande(id: string, colonne = 'id'): Promise<CommandeAnimation | null> {
   const { url, key } = supa()
-  const r = await fetch(`${url}/rest/v1/commandes_animation?id=eq.${encodeURIComponent(id)}&select=${COLONNES}`, {
+  const r = await fetch(`${url}/rest/v1/commandes_animation?${colonne}=eq.${encodeURIComponent(id)}&select=${COLONNES}`, {
     headers: entetes(key),
     cache: 'no-store',
   })
