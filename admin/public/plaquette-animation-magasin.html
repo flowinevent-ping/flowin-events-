@@ -886,7 +886,7 @@
     if (st.kit) p.push('kit=physique', 'boutiques=' + st.nb);
     if (st.quiz) p.push('quiz=1');
     if (st.bonus) p.push('bonus=1');
-    if (avecGarantie && certif && st.offre !== 'kit_digital') p.push('garantie=1', 'panier=' + certif.panier, 'flux=' + encodeURIComponent(certif.flux), 'certif_le=' + encodeURIComponent(certif.le), 'certif_par=' + encodeURIComponent(certif.nom));
+    if (avecGarantie && certif && st.offre === 'annuelle') p.push('garantie=1', 'panier=' + certif.panier, 'flux=' + encodeURIComponent(certif.flux), 'certif_le=' + encodeURIComponent(certif.le), 'certif_par=' + encodeURIComponent(certif.nom));
     if (commercial) p.push('commercial=' + encodeURIComponent(commercial));
     return '/bon-commande-animation.html?' + p.join('&');
   }
@@ -898,20 +898,22 @@
     var extra = (st.kit ? PRIX.kitPhysique * st.nb : 0) + (st.quiz ? PRIX.optQuiz : 0) + (st.bonus ? PRIX.optBonus : 0);
     var nom = st.offre === 'annuelle' ? 'Offre annuelle' : (st.offre === 'mensuelle' ? 'Offre mensuelle' : 'Kit digital');
     $('totTxt').innerHTML = nom + ' <b>' + (base ? eur(base) + (st.offre === 'mensuelle' ? ' / mois' : ' / an') : 'gratuit') + '</b>' + (extra ? '<br>+ options <b>' + eur(extra) + '</b>' : '');
-    var withG = !!(certif && st.offre !== 'kit_digital');
+    var withG = !!(certif && st.offre === 'annuelle'); /* garantie : offre annuelle uniquement */
     $('endTitre').textContent = nom + (base ? ' · ' + eur(base) + ' HT' + (st.offre === 'mensuelle' ? ' / mois' : ' / an') : ' · gratuit');
     $('endRecap').textContent = (extra ? 'Options : ' + eur(extra) + ' HT. ' : '') + (withG ? 'Avec la garantie satisfait ou remboursé.' : 'Modifiable sur la page Offres.');
-    $('endOrder').href = lien(withG); $('gOrder').href = lien(true);
+    $('endOrder').href = lien(withG);
+    /* « Commander avec la garantie » : la garantie ne s'applique qu'a l'offre annuelle. */
+    var offSauve = st.offre; st.offre = 'annuelle'; var lienG = lien(true); st.offre = offSauve; $('gOrder').href = lienG;
     /* L'inscription « Ma premiere fois » emporte la selection (offre, kit, options, garantie certifiee)
        et la transmet ensuite au bon de commande. */
     var insc = document.querySelectorAll('a[href^="/pro/premiere-fois"]'), qInsc = lien(withG).split('?')[1] || '';
     for (var ii = 0; ii < insc.length; ii++) insc[ii].href = '/pro/premiere-fois' + (qInsc ? '?' + qInsc : '');
     if (certif) {
-      var X = Math.ceil((st.offre === 'mensuelle' ? PRIX.mensuelle * 12 : PRIX.annuelle) / certif.panier);
-      var autre = st.offre === 'mensuelle' ? Math.ceil(PRIX.annuelle / certif.panier) : Math.ceil(PRIX.mensuelle * 12 / certif.panier);
-      $('gX').textContent = st.offre === 'kit_digital' ? '—' : grp(String(X));
-      $('gOther').textContent = st.offre === 'kit_digital' ? 'La garantie concerne les offres mensuelle et annuelle.' :
-        (st.offre === 'mensuelle' ? 'Offre mensuelle (110 € × 12)' : 'Offre annuelle (990 €)') + ' ÷ panier moyen certifié. ' + (st.offre === 'mensuelle' ? 'Offre annuelle : ' : 'Offre mensuelle : ') + grp(String(autre)) + ' clients.';
+      /* Garantie : offre ANNUELLE uniquement, calculee sur le cout de l'abonnement annuel. */
+      var X = Math.ceil(PRIX.annuelle / certif.panier);
+      $('gX').textContent = st.offre === 'annuelle' ? grp(String(X)) : '—';
+      $('gOther').textContent = st.offre === 'annuelle' ? 'Offre annuelle (990 €) ÷ panier moyen certifié.' :
+        'La garantie satisfait ou remboursé concerne uniquement l’offre annuelle (l’offre mensuelle est sans garantie, minimum 3 mois). Choisissez l’offre annuelle pour voir votre objectif : ' + grp(String(X)) + ' clients.';
     }
   }
   for (var oi = 0; oi < offers.length; oi++) offers[oi].addEventListener('click', function(){ st.offre = this.getAttribute('data-offre'); render(); });

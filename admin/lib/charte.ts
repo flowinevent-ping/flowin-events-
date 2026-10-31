@@ -42,17 +42,23 @@ export const VARIABLES_CSS = `--sa-bg:${CHARTE.fond};--sa-card:${CHARTE.carte};-
  *
  * Les noms de cles historiques (magenta, sidebar…) sont conserves pour ne pas
  * casser les ecrans qui les lisent ; leurs VALEURS suivent la nouvelle charte.
+ * ALIGNEE sur les maquettes d'app validees (maquettes-jeux/index.html, 31/10) : memes
+ * jetons --ink, --ink2, --muted, --line (#DCE3EC), --field (#C9D4E3), --cta (#7A4FE0),
+ * --ok, --ko, logo graisse 800 / -.045em, dock bas blanc a filet 1,5 px.
  * Les memes valeurs sont exposees en variables CSS (--fl-*) par VARIABLES_PRO_CSS,
  * injectees par ProShell et par le parcours « Ma premiere fois ».
  */
 export const CHARTE_PRO = {
   fond: '#F4F6F9',
   carte: '#FFFFFF',
-  bordure: '#E3E8EF',
-  bordureChamp: '#D5DCE6',
+  bordure: '#DCE3EC',
+  bordureChamp: '#C9D4E3',
   champ: '#F8FAFC',
   texte: '#1B3A5C',
   attenue: '#5a6b80',
+  encre2: '#3a4d63',
+  ok: '#00897A',
+  ko: '#C62F2F',
   subtil: '#F8FAFC',
   sidebar: '#FFFFFF',
   sidebar2: '#FFFFFF',
@@ -73,7 +79,7 @@ export const CHARTE_PRO = {
 } as const
 
 /** Les couleurs de l'espace pro en variables CSS, a poser sur :root ou un conteneur. */
-export const VARIABLES_PRO_CSS = `--fl-encre:${CHARTE_PRO.encre};--fl-bleu:${CHARTE_PRO.bleu};--fl-violet:${CHARTE_PRO.violet};--fl-violet-fonce:${CHARTE_PRO.violetFonce};--fl-violet-clair:${CHARTE_PRO.violetClair};--fl-fuchsia:${CHARTE_PRO.fuchsia};--fl-papier:${CHARTE_PRO.fond};--fl-carte:${CHARTE_PRO.carte};--fl-texte2:${CHARTE_PRO.attenue};--fl-bordure:${CHARTE_PRO.bordure};--fl-bordure-champ:${CHARTE_PRO.bordureChamp};--fl-champ:${CHARTE_PRO.champ};--fl-ok:#15803D;--fl-alerte:#B45309;--fl-erreur:#B42318;`
+export const VARIABLES_PRO_CSS = `--fl-encre:${CHARTE_PRO.encre};--fl-bleu:${CHARTE_PRO.bleu};--fl-violet:${CHARTE_PRO.violet};--fl-violet-fonce:${CHARTE_PRO.violetFonce};--fl-violet-clair:${CHARTE_PRO.violetClair};--fl-fuchsia:${CHARTE_PRO.fuchsia};--fl-papier:${CHARTE_PRO.fond};--fl-carte:${CHARTE_PRO.carte};--fl-texte2:${CHARTE_PRO.attenue};--fl-bordure:${CHARTE_PRO.bordure};--fl-bordure-champ:${CHARTE_PRO.bordureChamp};--fl-champ:${CHARTE_PRO.champ};--fl-encre2:${CHARTE_PRO.encre2};--fl-ok:${CHARTE_PRO.ok};--fl-alerte:#B45309;--fl-erreur:${CHARTE_PRO.ko};`
 
 /* Police systeme, comme la landing (graisse 800-900 pour les titres). */
 export const POLICE_PRO = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif'

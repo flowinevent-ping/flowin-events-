@@ -41,6 +41,10 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             {o.label}
           </Link>
         ))}
+        <Link href={`/pro/commandes${q}`}
+          style={{ borderRadius: 50, padding: '9px 18px', fontWeight: 800, fontSize: 13.5, textDecoration: 'none', background: '#fff', color: C.accent, border: `1.5px solid ${C.bordureChamp}` }}>
+          Commandes et factures
+        </Link>
       </div>
       {onglet === 'entreprise' && (p.id
         ? <EntrepriseForm initial={{

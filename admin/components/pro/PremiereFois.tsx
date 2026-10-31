@@ -52,6 +52,8 @@ function lireSelection(): string {
     const u = new URLSearchParams(window.location.search)
     const out = new URLSearchParams()
     PARAMS_OFFRE.forEach(k => { const v = u.get(k); if (v) out.set(k, v.slice(0, 120)) })
+    /* Garantie satisfait ou remboursé : offre ANNUELLE uniquement. */
+    if (out.get('offre') !== 'annuelle') ['garantie', 'panier', 'flux', 'certif_le', 'certif_par'].forEach(k => out.delete(k))
     return out.toString()
   } catch { return '' }
 }
@@ -62,7 +64,7 @@ function resumeSelection(sel: string): string {
   if (u.get('kit') === 'physique') morceaux.push(`kit physique (${u.get('boutiques') ?? '1'} boutique${Number(u.get('boutiques') ?? 1) > 1 ? 's' : ''})`)
   if (u.get('quiz')) morceaux.push('quiz personnalisé')
   if (u.get('bonus')) morceaux.push('questions bonus')
-  if (u.get('garantie') === '1') morceaux.push('garantie satisfait ou remboursé')
+  if (u.get('garantie') === '1' && u.get('offre') === 'annuelle') morceaux.push('garantie satisfait ou remboursé')
   return morceaux.filter(Boolean).join(', ')
 }
 

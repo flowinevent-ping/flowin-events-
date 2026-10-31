@@ -241,7 +241,7 @@
       <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
       <div class="choices c3" id="offerChoices">
         <button type="button" class="choice" data-offre="kit_digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Affiches, macarons et QR de jeu &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">Gratuit</div></button>
-        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Offre mensuelle</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support.</div><div class="cp">110 &euro; <small>HT / mois</small></div></button>
+        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Offre mensuelle</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Engagement minimum 3 mois.</div><div class="cp">110 &euro; <small>HT / mois</small></div></button>
         <button type="button" class="choice sel" data-offre="annuelle"><span class="ck"></span><div class="cn">Offre annuelle</div><div class="cd">Toute l&rsquo;offre mensuelle, en un seul paiement pour l&rsquo;ann&eacute;e.</div><div class="cp">990 &euro; <small>HT / an</small></div></button>
       </div>
       <div class="hint" style="margin-top:16px;font-weight:800;color:var(--ink2)">Options</div>
@@ -427,7 +427,7 @@
   function calc(){
     var lignes = [], abo = st.offre === 'annuelle' ? PRIX.annuelle : (st.offre === 'mensuelle' ? PRIX.mensuelle : 0);
     if (st.offre === 'annuelle') lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support, 12 mois', q: 1, ht: abo });
-    else if (st.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: eur(PRIX.mensuelle) + ' HT par mois, puis chaque mois', q: 1, ht: abo });
+    else if (st.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: eur(PRIX.mensuelle) + ' HT par mois, minimum 3 mois', q: 1, ht: abo });
     var kitHt = st.kit === 'physique' ? PRIX.kitPhysique * st.nb : 0;
     if (st.kit === 'physique') lignes.push({ lib: 'Kit physique', det: 'Macarons, affiches, support de caisse, ' + eur(PRIX.kitPhysique) + ' HT par boutique', q: st.nb, ht: kitHt });
     else lignes.push({ lib: 'Kit digital', det: 'Fichiers et QR de jeu \u00e0 imprimer, gratuit', q: 1, ht: 0 });
@@ -443,8 +443,9 @@
   /* Garantie : X = arrondi supérieur (prix sur 12 mois ÷ panier moyen) */
   function clientsGarantie(){
     var p = parseFloat(String(($('f_panier') || {}).value || '').replace(',', '.'));
-    if (isNaN(p) || p <= 0 || st.offre === 'kit_digital') return null;
-    return Math.ceil((st.offre === 'annuelle' ? PRIX.annuelle : PRIX.mensuelle * 12) / p);
+    /* Garantie : offre ANNUELLE uniquement (decision du 31/10), calculee sur le cout de l'abonnement annuel. */
+    if (isNaN(p) || p <= 0 || st.offre !== 'annuelle') return null;
+    return Math.ceil(PRIX.annuelle / p);
   }
   function recapHtml(t){
     var h = '';
@@ -460,7 +461,7 @@
     for (var i = 0; i < offs.length; i++) offs[i].className = 'choice' + (offs[i].getAttribute('data-offre') === st.offre ? ' sel' : '');
     $('optKit').className = 'choice' + (st.kit === 'physique' ? ' sel' : '');
     $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
-    var payant = st.offre !== 'kit_digital';
+    var payant = st.offre === 'annuelle';
     $('guarBox').style.display = payant ? 'block' : 'none';
     if (!payant || !st.certif) st.garantie = false;
     $('garChk').checked = st.garantie;
@@ -497,7 +498,7 @@
     /* Garantie : seules les données certifiées sur la page Garantie sont acceptées, puis verrouillées */
     var pm = parseFloat(qs('panier') || ''), fx = qs('flux'), cle = qs('certif_le'), cpar = qs('certif_par');
     var dCert = cle ? new Date(cle) : null;
-    if (qs('garantie') === '1' && !isNaN(pm) && pm > 0 && (fx === '15+' || fx === '50+' || fx === '100+') && dCert && !isNaN(dCert.getTime()) && cpar) {
+    if (qs('garantie') === '1' && qs('offre') === 'annuelle' && !isNaN(pm) && pm > 0 && (fx === '15+' || fx === '50+' || fx === '100+') && dCert && !isNaN(dCert.getTime()) && cpar) {
       st.certif = { le: dCert.toISOString(), par: cpar.slice(0, 120) };
       st.garantie = true;
       $('f_panier').value = String(pm).replace('.', ','); $('f_panier').readOnly = true;

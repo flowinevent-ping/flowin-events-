@@ -5,7 +5,8 @@
 //
 // Déclenchement : triggers SQL trg_notify_commande_animation_insert / _statut (net.http_post),
 // voir sql/2026-11-01-commandes-animation.sql (NON appliqué à la date d'écriture).
-// Payload : { type: 'nouvelle_commande' | 'statut', ancien_statut, record } (logo retiré).
+// Payload : { type: 'nouvelle_commande' | 'statut', ancien_statut, record } (logo retiré),
+//           ou { type: 'en_attente', jours, commandes: [...] } (alerte commandes en attente de paiement).
 //
 // Secrets projet (déjà configurés pour notify-bon-commande, AUCUNE valeur ici) :
 //   RESEND_API_KEY, NOTIFY_TO (défaut flowinevent@gmail.com), NOTIFY_FROM.
@@ -52,8 +53,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try { payload = await req.json(); } catch { return json({ error: "invalid json" }, 400); }
   const r = (payload.record ?? {}) as Record<string, unknown>;
   const type = String(payload.type ?? "nouvelle_commande");
-  if (!r || !r.id) return json({ error: "no record" }, 422);
   if (!RESEND_API_KEY) return json({ skipped: true, reason: "RESEND_API_KEY absent" });
+
+  // Alerte « commandes en attente de paiement depuis plus de X jours » (fonction SQL alerte_commandes_en_attente)
+  if (type === "en_attente") {
+    const liste = Array.isArray(payload.commandes) ? (payload.commandes as Array<Record<string, unknown>>) : [];
+    if (!liste.length) return json({ skipped: true, reason: "rien en attente" });
+    let lignes = "";
+    for (const c of liste) {
+      lignes += '<tr><td style="padding:7px 14px;font-size:13px;white-space:nowrap">' + esc(c.id) + '</td><td style="padding:7px 14px;font-size:14px;font-weight:600;color:#1B3A5C">' +
+        esc(c.raison_sociale) + '</td><td style="padding:7px 14px;font-size:13px">' + esc(eur(c.montant_ttc)) + ' TTC</td><td style="padding:7px 14px;font-size:13px;font-weight:700;color:#C62F2F">' + esc(c.jours) + " j</td></tr>";
+    }
+    const titreAttente = `${liste.length} commande${liste.length > 1 ? "s" : ""} Animation en attente de paiement depuis plus de ${esc(payload.jours)} jours`;
+    const htmlAttente = '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:620px;margin:0 auto"><div style="background:#1B3A5C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">' +
+      titreAttente + '</div><table style="width:100%;border-collapse:collapse;background:#F4F6F9;border:1px solid #DCE3EC;border-top:none">' + lignes + "</table>" +
+      '<div style="color:#958aa0;font-size:12px;padding:14px 4px">Dès réception du virement : Super Admin, page Commandes Animation, « Marquer le virement reçu ». L\'espace pro du client s\'ouvre alors automatiquement.</div></div>';
+    const resA = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: NOTIFY_FROM, to: [NOTIFY_TO], subject: titreAttente, html: htmlAttente, text: titreAttente + "\n" + liste.map((c) => `${c.id} ${c.raison_sociale} ${c.jours} j`).join("\n") }),
+    });
+    return json({ ok: resA.ok }, resA.ok ? 200 : 502);
+  }
+  if (!r || !r.id) return json({ error: "no record" }, 422);
 
   const kit = r.kit === "physique" ? `Kit physique × ${r.nb_boutiques}` : "Kit digital";
   const options: string[] = [];

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import AccesBloque from './AccesBloque'
 import { CHARTE_PRO, POLICE_PRO, VARIABLES_CSS, VARIABLES_PRO_CSS } from '@/lib/charte'
 import '@/styles/sa-kanban.css'
 
@@ -44,7 +45,7 @@ const RANGEMENT: Record<string, string> = {
   lots: 'operations', com: 'operations',
   jeu: 'nouvelle', rejoindre: 'nouvelle', historique: 'operations',
   crm: 'donnees', gagnants: 'donnees', tracking: 'donnees',
-  entreprise: 'compte', contrat: 'compte', banques: 'compte',
+  entreprise: 'compte', contrat: 'compte', banques: 'compte', commandes: 'compte',
 }
 const ICONS: Record<string, string> = {
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
@@ -78,6 +79,25 @@ export default function ProShell({ proName, proId, active, children }: { proName
   const actif = RANGEMENT[active] ?? active
   const [open, setOpen] = useState(false)
   const page = NAV.find(n => n.key === actif)
+
+  /* ACCES CONDITIONNE AU PAIEMENT (31/10) : un compte cree par « Ma premiere fois » reste
+     « en_attente » jusqu'a la validation du paiement (virement valide par le SA, SEPA par le
+     webhook). Tant que c'est le cas, seule la page « Mes commandes et factures » s'ouvre.
+     Les comptes plus anciens (sans onboarding_source) ne sont pas concernes. Colonne absente
+     (SQL pas encore applique) : pas de blocage. */
+  const [acces, setAcces] = useState<'verif' | 'ok' | 'bloque'>(proId ? 'verif' : 'ok')
+  useEffect(() => {
+    if (!proId) return
+    let fini = false
+    ;(async () => {
+      const { data, error } = await supabase.from('pros').select('statut,onboarding_source').eq('id', proId).maybeSingle()
+      if (fini) return
+      const d = data as { statut?: string; onboarding_source?: string } | null
+      setAcces(!error && d?.onboarding_source === 'premiere-fois' && (d?.statut ?? '') === 'en_attente' ? 'bloque' : 'ok')
+    })()
+    return () => { fini = true }
+  }, [proId])
+  const pageLibre = actif === 'compte' && active === 'commandes'
 
   /* Sans ?pro= dans l adresse : on retrouve le pro connecte et on recharge
      la meme page avec son identifiant. Personne de connecte : ecran de connexion. */
@@ -140,8 +160,8 @@ export default function ProShell({ proName, proId, active, children }: { proName
         const on = n.key === actif
         return (
           <Link key={n.key} href={`${n.route}${q}`} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? C.violetFonce : C.attenue }}>
-            <span style={{ color: on ? C.violet : C.accent }}><Icon k={n.icon} /></span>
-            <span style={{ fontSize: 10, fontWeight: on ? 800 : 600, lineHeight: 1, textAlign: 'center' }}>{LIBELLE_COURT[n.key] ?? n.label}</span>
+            <span style={{ color: on ? C.violet : C.attenue }}><Icon k={n.icon} /></span>
+            <span style={{ fontSize: 11.5, fontWeight: 800, lineHeight: 1.1, textAlign: 'center' }}>{LIBELLE_COURT[n.key] ?? n.label}</span>
           </Link>
         )
       })}
@@ -154,7 +174,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
         :root { ${VARIABLES_CSS} ${VARIABLES_PRO_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; --sa-card:#fff; --sa-accent:${C.accent}; }
         .pro-shell input, .pro-shell select, .pro-shell textarea, .pro-shell button { font-family: ${POLICE_PRO}; }
         .pro-sidebar { position: sticky; top: 0; }
-        .fl-logo { font-size: 21px; font-weight: 900; letter-spacing: -.02em; color: var(--fl-encre); line-height: 1; }
+        .fl-logo { font-size: 22px; font-weight: 800; letter-spacing: -.045em; color: var(--fl-encre); line-height: 1; }
         .fl-logo em { color: var(--fl-bleu); font-style: normal; }
         .pro-drawer-backdrop, .pro-bottom-nav, .pro-hamburger { display: none; }
         @media (max-width: 860px) {
@@ -165,7 +185,7 @@ export default function ProShell({ proName, proId, active, children }: { proName
           .pro-main-pad { padding: 16px !important; padding-bottom: 78px !important; }
           .pro-bottom-nav {
             display: flex !important; position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
-            background: #fff; border-top: 1px solid ${C.bordure};
+            background: #fff; border-top: 1.5px solid ${C.bordure};
             padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -6px 20px rgba(27,58,92,.08);
           }
           .pro-hamburger { display: inline-flex !important; }
@@ -188,7 +208,9 @@ export default function ProShell({ proName, proId, active, children }: { proName
               <div style={{ fontSize: 13, color: C.attenue, marginTop: 14 }}>Pas encore de compte ? <Link href="/pro/premiere-fois" style={{ color: C.accent, fontWeight: 700 }}>Ma première fois</Link></div>
             </div>
           )}
-          {sansPro === null && children}
+          {sansPro === null && acces === 'verif' && <div style={{ fontSize: 14, color: C.attenue }}>Vérification de votre accès…</div>}
+          {sansPro === null && acces === 'bloque' && !pageLibre && <AccesBloque proId={proId} />}
+          {sansPro === null && (acces === 'ok' || (acces === 'bloque' && pageLibre)) && children}
         </div>
       </main>
       {barreBasse}

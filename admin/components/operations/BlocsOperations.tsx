@@ -801,7 +801,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} masquerGlobal />}
-          {onglet === 'crm' && <ContenuCrm op={op} />}
+          {onglet === 'crm' && <ContenuCrm op={op} mode="pro" />}
         </BlocOperation>
       ))}
     </>

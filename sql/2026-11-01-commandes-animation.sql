@@ -136,15 +136,15 @@ begin
   if NEW.montant_ttc = 0 then NEW.mode_paiement := 'aucun'; NEW.prelevement_inclut_reste := false;
   elsif NEW.mode_paiement = 'aucun' then NEW.mode_paiement := 'virement'; end if;
 
-  -- Garantie : réservée aux offres payantes, avec des données certifiées par le client
-  if NEW.offre = 'kit_digital' or NEW.panier_moyen is null or NEW.panier_moyen <= 0
+  -- Garantie : réservée à l'offre ANNUELLE (décision du 31/10), avec des données certifiées par le client
+  if NEW.offre <> 'annuelle' or NEW.panier_moyen is null or NEW.panier_moyen <= 0
      or NEW.garantie_certifiee_le is null or coalesce(NEW.garantie_certifiee_par, '') = '' then
     NEW.garantie := false;
     NEW.garantie_clients_objectif := null;
     NEW.garantie_certifiee_le := null;
     NEW.garantie_certifiee_par := null;
   elsif NEW.garantie then
-    NEW.garantie_clients_objectif := ceil((case when NEW.offre = 'annuelle' then c_annuel else c_mensuel * 12 end) / NEW.panier_moyen);
+    NEW.garantie_clients_objectif := ceil(c_annuel / NEW.panier_moyen);
   else
     NEW.garantie_clients_objectif := null;
   end if;
