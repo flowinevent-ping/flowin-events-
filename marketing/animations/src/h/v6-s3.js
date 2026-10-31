@@ -138,26 +138,26 @@
           return g + T
         }
       },
-      { // 11. Preuve : flashs (2 449 = plancher du comptage NDS)
-        bg: P.menthe, mots: ['FLASHS EN', '10 JOURS.'], from: [240, 520],
+      { // 11. Preuve : flashs
+        bg: P.menthe, mots: ['FLASHS AU', 'FESTIVAL', 'NUITS DU SUD.'], from: [240, 520],
         draw: function (lt) {
-          var g = K6.chiffre('2 400', 260, 320, 150, C.teal, C.gold, lt, 0.2, 61, { largeur: 400 })
-          g += K3.op(F.easeOut(F.prog(lt, 0.35, 0.4)), '<text class="safe" x="34" y="170" font-family="Manrope" font-weight="800" font-size="64" letter-spacing="-2.5" fill="' + INK + '">+ DE</text>')
-          g += lignes(['FLASHS EN', '10 JOURS.'], 470, lt, 0.7, 100)
+          var g = K6.chiffre('2 449', 240, 320, 150, C.teal, C.gold, lt, 0.2, 61, { largeur: 420 })
+          g += lignes(['FLASHS AU', 'FESTIVAL', 'NUITS DU SUD.'], 470, lt, 0.7, 96)
           g += K6.source('Source : Nuits du Sud 2026, Vence', lt, 1.2)
           return g
         }
       },
       { // 12. Preuve : contacts
-        bg: P.rose, mots: ['DES JOUEURS', 'SOUHAITENT RESTER', 'EN CONTACT.'], from: [240, 520],
+        bg: P.rose, mots: ['DES JOUEURS', 'ACCEPTENT D’ÊTRE', 'RECONTACTÉS.'], from: [240, 520],
         draw: function (lt) {
-          var g = K6.chiffre('55 %', 240, 310, 190, MAG, C.violet, lt, 0.2, 71, { largeur: 400 })
-          g += lignes(['DES JOUEURS', 'SOUHAITENT RESTER', 'EN CONTACT.'], 480, lt, 0.7, 84)
-          g += K6.source('Source : Nuits du Sud 2026', lt, 1.2)
+          var g = K6.chiffre('55 %', 260, 330, 180, MAG, C.violet, lt, 0.2, 71, { largeur: 380 })
+          g += K3.op(F.easeOut(F.prog(lt, 0.35, 0.4)), '<text class="safe" x="34" y="170" font-family="Manrope" font-weight="800" font-size="64" letter-spacing="-2.5" fill="' + INK + '">+ DE</text>')
+          g += lignes(['DES JOUEURS', 'ACCEPTENT D’ÊTRE', 'RECONTACTÉS.'], 480, lt, 0.7, 84)
+          g += K6.source('Source : Nuits du Sud 2026, Vence', lt, 1.2)
           return g
         }
       },
-      { // 12 bis. Preuve : Pâques (chiffre fourni par le client)
+      { // 13. Preuve : Pâques (chiffre fourni par le client)
         bg: P.lilas, mots: ['D’OPT-IN SUR', 'L’OPÉRATION', 'DE PÂQUES.'], from: [240, 520],
         draw: function (lt) {
           var g = K6.chiffre('70 %', 240, 310, 190, C.violet, C.teal, lt, 0.2, 75, { largeur: 400 })
@@ -166,12 +166,16 @@
           return g
         }
       },
-      { // 13. Le réflexe QR
-        bg: P.ciel, mots: ['DES FRANÇAIS', 'FLASHENT DÉJÀ', 'DES QR CODES.'], from: [240, 520],
+      { // 13 bis. Le coût (abonnement annuel ~990 € HT, soit ~2,71 € par jour)
+        bg: P.ciel, mots: ['PAR JOUR.'], from: [240, 520],
         draw: function (lt) {
-          var g = K6.chiffre('6/10', 240, 310, 200, C.gold, C.teal, lt, 0.2, 81, { largeur: 380 })
-          g += lignes(['DES FRANÇAIS', 'FLASHENT DÉJÀ', 'DES QR CODES.'], 480, lt, 0.7, 84)
-          g += K6.source('Source : M6 Publicité, étude Résonance', lt, 1.2)
+          var g = K6.chiffre('3 €', 270, 330, 220, C.gold, MAG, lt, 0.2, 85, { largeur: 330 })
+          g += K3.op(F.easeOut(F.prog(lt, 0.35, 0.4)), '<text class="safe" x="34" y="170" font-family="Manrope" font-weight="800" font-size="64" letter-spacing="-2.5" fill="' + INK + '">– DE</text>')
+          g += lignes(['PAR JOUR.'], 470, lt, 0.7, 110)
+          var q = F.easeOut(F.prog(lt, 1.1, 0.4))
+          g += '<text class="safe" x="30" y="' + (F._basMots + 40) + '" font-family="Manrope" font-weight="700" font-size="24" fill="' + INK + '" opacity="' + q.toFixed(3) + '">Le prix d’un café pour capter</text>'
+          g += '<text class="safe" x="30" y="' + (F._basMots + 70) + '" font-family="Manrope" font-weight="700" font-size="24" fill="' + INK + '" opacity="' + q.toFixed(3) + '">et faire revenir vos clients.</text>'
+          g += K6.source('Abonnement annuel', lt, 1.3)
           return g
         }
       },
