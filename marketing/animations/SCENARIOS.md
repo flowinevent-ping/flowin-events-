@@ -2,6 +2,28 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
+## v4 — vidéo test s3-v4 « Vous saurez enfin quelle pub vous rapporte des clients » (51 s)
+
+Retours client sur la v3 : plus de silhouettes ni de façades à triangles (« ça fait IA »), style inspiré (sans copie) des grands chiffres à débordement de peinture, couleurs Flowin (magenta, or, violet, teal) sur pastels ; on garde les vrais écrans, les jauges de mesure et le macaron Plug & Play ; rythme ralenti (plans de 4 à 5,5 s) ; le bénéfice doit frapper. Cible terrain : supermarché, auto-école, garage. Claire la fleuriste est abandonnée.
+
+Fichiers : `s3-v4.html`, `s3-v4.mp4`, `planches/s3-v4.png`, `src/h/v4-s3.js`, `src/h/films-v4.js` (texte et minutage), `src/h/kit-v4.js` (taches de peinture, chiffres peints, supports avec QR, pictos, jauges animées), `voix-off/s3-v4.txt` / `.srt`.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–5 s | La question | rose | **VOTRE PUB MARCHE ?** · Bus, affiche, Facebook… impossible à savoir. · « ? » géant peint |
+| 5–9,5 s | Pour qui | menthe | **SUPERMARCHÉ. AUTO-ÉCOLE. GARAGE.** · Les commerces qui veulent du monde. · trois pastilles peintes |
+| 9,5–14 s | Jour 1 | beurre | **ON BRANCHE, ON JOUE.** · Un QR, une affiche. Rien à installer. · « 1 » peint, affiche, support de caisse, Plug & Play |
+| 14–19 s | Un QR par support | bleu ciel | **UN QR PAR SUPPORT.** · arrière de bus, set de table, pub Facebook, affiche en caisse |
+| 19–23,5 s | Vos clients jouent | lilas | **VOS CLIENTS JOUENT.** · quiz et roue réels |
+| 23,5–27,5 s | Jour 7 | rose | **VOUS MESUREZ.** · « 7 » peint |
+| 27,5–33 s | La mesure | menthe | **CHAQUE PUB, MESURÉE.** · quatre jauges qui montent, hésitent et se posent |
+| 33–37,5 s | Ce qui rapporte | beurre | **VOUS SAUREZ ENFIN** · quelle pub vous rapporte des clients. · écran Trafic réel, source d'arrivée par QR de suivi |
+| 37,5–42 s | Le fichier client | lilas | **UN FICHIER CLIENT QUI GRANDIT.** · écran CRM réel (opt-in) |
+| 42–46 s | Tout-en-un | bleu ciel | **TOUT-EN-UN.** · Animation. Fichier client. Mesure. |
+| 46–51 s | Fin | menthe | **Installez Flowin.** · QR démo · logo + Plug & Play |
+
+Vérité : les QR par support sont les « QR de suivi par support » de l'app (le pro les demande, Flowin les prépare et les publie ; `DiffusionOperation.tsx`) ; leurs sources apparaissent telles quelles dans « Source d'arrivée » (`pub-arriere-bus`, `set-de-table`…, noms d'exemple). Les jauges n'ont pas de chiffre ; l'écran Trafic porte « Valeurs d'illustration ». Les supports (bus, set de table, publication sponsorisée) sont des dessins génériques, sans logo de marque.
+
 ## v3 — neuf films validés par le client (style H pastel, 20 à 44 s)
 
 Neuf vidéos 9:16 (SVG 540 × 960, MP4 1080 × 1920, 30 i/s, **muettes**) fabriquées à partir des scénarios validés (`src/h/films-v3.js`, copie conforme du fichier client : temps de début, titre, description, texte écran « gros titre · petit texte », voix off). Image d'abord, son ensuite : la voix off et la musique sont livrées à part dans `voix-off/` (un `.srt` horodaté et un `.txt` lisible par film, `voix-off/README.md` avec la direction de voix et la note musique de chaque film).

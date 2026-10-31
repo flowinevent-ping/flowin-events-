@@ -19,3 +19,4 @@ Voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra 
 - **s7 — Votre marque au cœur du jeu** (25 s) : Pop élégante, 108 BPM.
 - **s8 — Gagné : simple pour le client, simple pour le commerce** (20 s) : Jingle joyeux, 120 BPM.
 - **s9 — Votre animation en quelques étapes** (30 s) : Lo-fi pop douce, 95 BPM.
+- **s3-v4 — Vous saurez enfin quelle pub vous rapporte des clients** (51 s) : Groove funk-pop optimiste, 96–100 BPM (plus posé que la v3), basse marquée ; montée sur la mesure par support, respiration sur la fin.

@@ -1,6 +1,7 @@
 // Vidéos v3 (neuf films, style H pastel) : pages storyboard autonomes,
 // scripts voix off horodatés (.srt + .txt) et note musique.
-// Textes : src/h/films-v3.js (scénarios validés). Dessins : src/h/v3-<id>.js.
+// Textes : src/h/films-v3.js (scénarios validés) et src/h/films-v4.js (réécritures v4).
+// Dessins : src/h/v3-<id>.js, src/h/v4-<film>.js (id « s3-v4 » -> v4-s3.js).
 // Usage : node build-v3.mjs [s1 s3 ...]
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -12,10 +13,13 @@ const lire = p => readFileSync(join(ici, p), 'utf8')
 // Même cible que les vidéos existantes : ?preview=1 n'écrit rien (lib/parcours.ts estApercu).
 const QR_DEMO = 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1'
 
-const FILMS = new Function(lire('src/h/films-v3.js') + ';return FILMS')()
+const FILMS = new Function(lire('src/h/films-v3.js') + ';' + lire('src/h/films-v4.js') + ';return FILMS')()
+const v4 = id => id.endsWith('-v4')
+const srcFilm = id => v4(id) ? `src/h/v4-${id.replace('-v4', '')}.js` : `src/h/v3-${id}.js`
+const sortie = id => v4(id) ? `${id}.html` : `${id}-v3.html`
 const ECARTS = new Function('var window={};' + lire('src/h/ecarts-v3.js') + ';return window.ECARTS')()
 const demandes = process.argv.slice(2)
-const films = FILMS.filter(f => (!demandes.length || demandes.includes(f.id)) && existsSync(join(ici, `src/h/v3-${f.id}.js`)))
+const films = FILMS.filter(f => (!demandes.length || demandes.includes(f.id)) && existsSync(join(ici, srcFilm(f.id))))
 
 const polices = ['500', '700', '800'].map(w => {
   const b64 = readFileSync(join(ici, `node_modules/@fontsource/manrope/files/manrope-latin-${w}-normal.woff2`)).toString('base64')
@@ -130,11 +134,13 @@ for (const f of films) {
 </div>
 <script>window.QR=${JSON.stringify(qrPath(QR_DEMO))};window.ASSETS=${JSON.stringify(ASSETS)}</script>
 <script>${lire('src/h/films-v3.js')}</script>
+<script>${lire('src/h/films-v4.js')}</script>
 <script>${lire('src/h/ecarts-v3.js')}</script>
 <script>${lire('src/h/engine-h.js')}</script>
 <script>${lire('src/h/kit-h.js')}</script>
 <script>${lire('src/h/kit-v3.js')}</script>
-<script>${lire(`src/h/v3-${f.id}.js`)}</script>
+<script>${lire('src/h/kit-v4.js')}</script>
+<script>${lire(srcFilm(f.id))}</script>
 <script>
 (function(){
   var S=window.SCENARIO,a=0,h='';
@@ -152,6 +158,6 @@ FLH.start(window.SCENARIO)
 </script>
 </body></html>
 `
-  writeFileSync(join(ici, `${f.id}-v3.html`), html)
-  console.log(`${f.id}-v3.html  (${Math.round(html.length / 1024)} ko)  ${f.dur} s  QR -> ${QR_DEMO}`)
+  writeFileSync(join(ici, sortie(f.id)), html)
+  console.log(`${sortie(f.id)}  (${Math.round(html.length / 1024)} ko)  ${f.dur} s  QR -> ${QR_DEMO}`)
 }

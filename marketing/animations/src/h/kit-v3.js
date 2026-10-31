@@ -341,10 +341,11 @@
       g += K3.mini(u, 14 * u, 140 * u, 68 * u, v(214), 'flashs QR') + K3.mini(u, 86 * u, 140 * u, 68 * u, v(150), 'dont physique') + K3.mini(u, 158 * u, 140 * u, 68 * u, v(64), 'dont digital')
       g += K3.mini(u, 14 * u, 186 * u, 104 * u, v(168), 'parties') + K3.mini(u, 122 * u, 186 * u, 104 * u, v(121), 'joueurs')
       g += txt(14 * u, 248 * u, titreListe || 'SOURCE D’ARRIVÉE', 7.5 * u, { fill: PRO.mut, ls: 0.6 * u })
+      var pas = sources.length > 3 ? 25 : 30
       sources.forEach(function (s, i) {
-        var y = (258 + i * 30) * u, w = 120 * u * s[1] * F.easeOut(F.clamp(k * 1.4 - i * 0.15, 0, 1))
-        g += rect(14 * u, y, 212 * u, 24 * u, 7 * u, '#fff', { stroke: PRO.bord, sw: u }) + txt(22 * u, y + 15.5 * u, s[0], 8.5 * u, { fill: PRO.texte })
-        g += rect(104 * u, y + 8 * u, w, 8 * u, 4 * u, i === 2 ? PRO.acc2 : PRO.acc)
+        var y = (258 + i * pas) * u, w = 120 * u * s[1] * F.easeOut(F.clamp(k * 1.4 - i * 0.15, 0, 1))
+        g += rect(14 * u, y, 212 * u, (pas - 6) * u, 7 * u, '#fff', { stroke: PRO.bord, sw: u }) + txt(22 * u, y + (pas - 6) * 0.65 * u, s[0], 8.5 * u, { fill: PRO.texte })
+        g += rect(104 * u, y + (pas - 14) / 2 * u, w, 8 * u, 4 * u, i === 2 ? PRO.acc2 : PRO.acc)
       })
       g += K3.illus(u, sw, 360 * u)
       return g
