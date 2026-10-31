@@ -10,15 +10,15 @@
  *   - email prerempli (Gmail), WhatsApp, SMS, Instagram (texte a copier +
  *     visuel QR a telecharger) ;
  *   - le QR du jeu (PNG, SVG, affiche) ;
- *   - les QR de suivi par support : le pro les DEMANDE, Flowin les valide
- *     (qr_stations.publie), le pro les voit alors ici ;
+ *   - les QR traces par support (lot QR, 31/10) : le pro les cree lui-meme,
+ *     nommes, types physique / digital, publies tout de suite (QrTraces) ;
  *   - l export des contacts opt-in au format Mailchimp (par operation).
  */
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { libelleDates, type DonneesOperation } from '@/lib/operations'
-import { fetchQrStations, creerQrStation, publierQrStation, type QrStation } from '@/lib/dashboard'
+import QrTraces from './QrTraces'
 import Diffusion from '@/components/dashboard/Diffusion'
 
 type Mode = 'sa' | 'pro'
@@ -126,67 +126,9 @@ export function DiffusionStation({ op, s, mode }: { op: DonneesOperation; s: Sta
 
           <Diffusion compact url={url} titre={s.nom} sousTitre="Scannez pour jouer" />
 
-          <QrSuivi s={s} mode={mode} />
+          <QrTraces eventId={s.id} module={s.module} titre={s.nom} mode={mode} />
         </div>
       )}
-    </div>
-  )
-}
-
-/* QR de suivi par support (referentiel 17 et 28) : demande du pro, validation
-   Flowin (publie), puis mise a disposition. Le lien porte le jeu REEL de la
-   station, plus seulement « Quiz + bonus ». */
-function QrSuivi({ s, mode }: { s: Station; mode: Mode }) {
-  const [qrs, setQrs] = useState<QrStation[]>([])
-  const [nom, setNom] = useState('')
-  const [occupe, setOccupe] = useState(false)
-  const charger = () => { fetchQrStations(s.id).then(setQrs) }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { charger() }, [s.id])
-
-  async function demander() {
-    if (!nom.trim()) return
-    setOccupe(true)
-    await creerQrStation(s.id, nom.trim())
-    setNom(''); setOccupe(false); charger()
-  }
-
-  const visibles = qrs
-  return (
-    <div style={{ marginTop: 12 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>QR de suivi par support</div>
-      <div style={{ fontSize: 11, color: MUT, marginBottom: 6 }}>
-        Un QR par support (affiche, flyer, réseau…) pour savoir d’où viennent les joueurs.
-        {mode === 'pro' ? ' Demandez-le ici : Flowin le valide, puis il apparaît prêt à imprimer.' : ' Publier rend le QR visible dans l’espace du pro.'}
-      </div>
-      {visibles.length === 0 && <div style={{ fontSize: 12, color: MUT }}>Aucun QR de suivi pour cette station.</div>}
-      {visibles.map(q => (
-        <div key={q.id} style={{ padding: '6px 0', borderTop: `1px solid ${BRD}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 140 }}>
-              <div style={{ fontWeight: 700, fontSize: 12.5 }}>{q.nom}</div>
-              <div style={{ fontSize: 10.5, color: MUT }}>?source={q.source_qr}</div>
-            </div>
-            {mode === 'sa'
-              ? <button style={q.publie ? btnP : btn} onClick={() => publierQrStation(q.id, !q.publie).then(charger)}>{q.publie ? '✓ Validé' : 'Valider et publier'}</button>
-              : !q.publie && <span style={{ fontSize: 11, fontWeight: 800, color: '#B45309' }}>En attente de validation Flowin</span>}
-          </div>
-          {(q.publie || mode === 'sa') && (
-            <div style={{ paddingTop: 6 }}>
-              <Diffusion vignette={64} url={lienJeuStation(s, q.source_qr)} titre={`${s.nom} — ${q.nom}`} />
-            </div>
-          )}
-        </div>
-      ))}
-      <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-        <input
-          style={{ flex: 1, minWidth: 180, border: `1.5px solid ${BRD}`, borderRadius: 8, padding: '7px 10px', fontSize: 13, fontFamily: 'inherit' }}
-          placeholder="Support — ex. Affiche vitrine, Post Facebook" value={nom} onChange={e => setNom(e.target.value)}
-        />
-        <button style={btn} disabled={occupe || !nom.trim()} onClick={demander}>
-          {mode === 'pro' ? 'Demander un QR de suivi' : '+ Ajouter'}
-        </button>
-      </div>
     </div>
   )
 }

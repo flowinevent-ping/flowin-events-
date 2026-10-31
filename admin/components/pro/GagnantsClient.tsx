@@ -30,6 +30,7 @@ import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } 
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
+import ReglageTirage from '@/components/operations/ReglageTirage'
 
 const input: React.CSSProperties = {
   border: '1.5px solid #efe9f2', borderRadius: 10, padding: '10px 12px',
@@ -83,6 +84,7 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
         }}>{message.texte}</div>
       )}
 
+      {op.type === 'event' && op.stations[0] && <ReglageTirage evId={op.stations[0].id} />}
       {op.type === 'event'
         ? <Tirage op={op} data={data} setMessage={setMessage} onChange={onChange} />
         : (

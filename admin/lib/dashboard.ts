@@ -255,16 +255,8 @@ export async function fetchQrStations(eventId: string): Promise<QrStation[]> {
   if (error) { console.error('[fetchQrStations]', error.message); return [] }
   return (data ?? []) as QrStation[]
 }
-export async function creerQrStation(eventId: string, nom: string): Promise<boolean> {
-  const source = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-  const { error } = await supabase.from('qr_stations').insert({ event_id: eventId, nom, source_qr: source || 'station' })
-  if (error) { console.error('[creerQrStation]', error.message); return false }
-  return true
-}
-export async function publierQrStation(id: string, publie: boolean): Promise<boolean> {
-  const { error } = await supabase.from('qr_stations').update({ publie }).eq('id', id)
-  return !error
-}
+/* Creation / publication des QR : lib/qrTraces.ts (lot QR, 31/10 -- publies
+   des leur creation, nommes, types physique / digital). */
 
 export interface LienEphemere {
   id: string
