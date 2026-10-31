@@ -42,7 +42,29 @@ const ETAPES = [
 type IdEtape = typeof ETAPES[number]['id']
 
 interface Perso { prenom: string; nom: string }
-interface Brouillon { etape: number; f: FichePro; perso: Perso; mode: 'recherche' | 'manuel' | 'prerempli' }
+interface Brouillon { etape: number; f: FichePro; perso: Perso; mode: 'recherche' | 'manuel' | 'prerempli'; selection?: string }
+
+/* Parametres de la plaquette (offre, kit, options, garantie certifiee, commercial) transmis tels quels au bon de commande. */
+const PARAMS_OFFRE = ['offre', 'kit', 'boutiques', 'quiz', 'bonus', 'garantie', 'panier', 'flux', 'certif_le', 'certif_par', 'commercial']
+const NOM_OFFRE: Record<string, string> = { annuelle: 'Offre annuelle', mensuelle: 'Offre mensuelle', kit_digital: 'Kit digital' }
+function lireSelection(): string {
+  try {
+    const u = new URLSearchParams(window.location.search)
+    const out = new URLSearchParams()
+    PARAMS_OFFRE.forEach(k => { const v = u.get(k); if (v) out.set(k, v.slice(0, 120)) })
+    return out.toString()
+  } catch { return '' }
+}
+function resumeSelection(sel: string): string {
+  if (!sel) return ''
+  const u = new URLSearchParams(sel)
+  const morceaux = [NOM_OFFRE[u.get('offre') ?? ''] ?? '']
+  if (u.get('kit') === 'physique') morceaux.push(`kit physique (${u.get('boutiques') ?? '1'} boutique${Number(u.get('boutiques') ?? 1) > 1 ? 's' : ''})`)
+  if (u.get('quiz')) morceaux.push('quiz personnalisé')
+  if (u.get('bonus')) morceaux.push('questions bonus')
+  if (u.get('garantie') === '1') morceaux.push('garantie satisfait ou remboursé')
+  return morceaux.filter(Boolean).join(', ')
+}
 
 const EMAIL_OK = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
 const TEL_OK = (v: string) => !v.trim() || /^(\+?\d[\d\s.-]{7,17}\d)$/.test(v.trim())
@@ -84,6 +106,7 @@ export default function PremiereFois() {
   const [envoi, setEnvoi] = useState<'idle' | 'loading' | 'error'>('idle')
   const [erreur, setErreur] = useState('')
   const [fin, setFin] = useState<{ proId: string; session: boolean; degrade: boolean } | null>(null)
+  const [selection, setSelection] = useState('')
   const haut = useRef<HTMLDivElement>(null)
 
   /* Recherche entreprise */
@@ -95,13 +118,17 @@ export default function PremiereFois() {
   useEffect(() => {
     const b = lireBrouillon()
     if (b && b.etape >= 0) setBrouillonTrouve(b)
+    const sel = lireSelection() || b?.selection || ''
+    setSelection(sel)
+    const nb = new URLSearchParams(sel).get('boutiques')
+    if (nb && /^\d{1,3}$/.test(nb)) setF(x => ({ ...x, nbPointsVente: x.nbPointsVente || nb }))
     setPret(true)
   }, [])
 
   useEffect(() => {
     if (!pret || etape < 0 || etape > 6) return
-    ecrireBrouillon({ etape, f, perso, mode })
-  }, [pret, etape, f, perso, mode])
+    ecrireBrouillon({ etape, f, perso, mode, selection })
+  }, [pret, etape, f, perso, mode, selection])
 
   const maj = (c: Partial<FichePro>) => setF(x => ({ ...x, ...c }))
   const allerA = (n: number) => {
@@ -211,6 +238,15 @@ export default function PremiereFois() {
     }
     if (insErr) { setErreur(`Votre compte est créé mais la fiche entreprise n’a pas pu être enregistrée (${insErr.message}). Contactez l’équipe Flowin.`); setEnvoi('error'); return }
     effacerBrouillon()
+    /* Le bon de commande (public/bon-commande-animation.html) reprend ces informations :
+       stockage local du meme site, jamais dans l'adresse. Efface apres la commande. */
+    try {
+      window.localStorage.setItem('flowin_am_prefill', JSON.stringify({
+        raison: fiche.nom.trim(), siret: fiche.siret, adresse: fiche.adresse, cp: fiche.codePostal, ville: fiche.ville,
+        contact: fiche.contact, fonction: fiche.roleContact, email: fiche.email.trim(), tel: fiche.tel,
+        nb: parseInt(fiche.nbPointsVente ?? '', 10) || 1, commercial: new URLSearchParams(selection).get('commercial') ?? '', pro_id: idPro,
+      }))
+    } catch { /* navigation privee : le bon de commande se remplit a la main */ }
     setEnvoi('idle')
     setFin({ proId: idPro, session: !!authData.session, degrade })
     setEtape(7)
@@ -246,8 +282,10 @@ export default function PremiereFois() {
           <ul className="pf-promesses">
             <li><span className="pf-ic">1</span><div><b>Vous vous présentez</b><br />Votre SIRET suffit : l’annuaire officiel remplit le reste.</div></li>
             <li><span className="pf-ic">2</span><div><b>Vous créez votre accès</b><br />Un email, un mot de passe, et votre espace est ouvert.</div></li>
-            <li><span className="pf-ic">3</span><div><b>Vous lancez votre première animation</b><br />Jeu, lots, QR par support : tout se règle depuis votre espace.</div></li>
+            <li><span className="pf-ic">3</span><div><b>Vous choisissez votre offre et signez</b><br />Annuelle ou mensuelle, kit digital ou physique : bon de commande pré-rempli, signature électronique, virement ou prélèvement.</div></li>
+            <li><span className="pf-ic">4</span><div><b>Vous lancez votre première animation</b><br />Jeu, lots, QR par support : tout se règle depuis votre espace.</div></li>
           </ul>
+          {selection && <div className="pf-info">Votre sélection : <b>{resumeSelection(selection)}</b>. Elle sera reprise dans votre bon de commande.</div>}
           <button className="pf-btn pf-grand" onClick={() => allerA(0)}>C’est parti</button>
           <div className="pf-note">Environ 3 minutes · {ETAPES.length} étapes · vous pouvez revenir en arrière à tout moment</div>
         </main>
@@ -448,7 +486,7 @@ export default function PremiereFois() {
                 <label className="pf-label" htmlFor="pf-mdp2">Confirmez le mot de passe *</label>
                 <input id="pf-mdp2" className="pf-in" type={voirMdp ? 'text' : 'password'} autoComplete="new-password" value={confirmation} onChange={e => setConfirmation(e.target.value)} />
                 {err('confirmation')}
-                <div className="pf-aide" style={{ marginTop: 12 }}>Votre compte est ouvert tout de suite ; l’équipe Flowin valide ensuite votre fiche avant la mise en service de votre première animation.</div>
+                <div className="pf-aide" style={{ marginTop: 12 }}>Ensuite : choix de votre offre{selection ? ` (${resumeSelection(selection)})` : ''}, contrat et paiement sur votre bon de commande, déjà rempli avec ces informations.</div>
                 {erreur && <div className="pf-err" style={{ marginTop: 12 }}>{erreur} {/existe déjà/.test(erreur) && <Link href="/pro/connexion" className="pf-lien">Se connecter</Link>}</div>}
               </>
             )}
@@ -473,10 +511,16 @@ export default function PremiereFois() {
             <p className="pf-sous">Votre espace pro <b>{f.nomCommercial || f.nom}</b> est créé. L’équipe Flowin valide votre fiche ; en attendant, vous pouvez déjà découvrir votre espace.</p>
             {!fin.session && <div className="pf-info">Un email de confirmation vient de vous être envoyé à <b>{f.email}</b>. Cliquez sur le lien qu’il contient, puis connectez-vous.</div>}
             {fin.degrade && <div className="pf-aide">Certaines informations (forme juridique, produits, points de vente) seront complétées dans votre profil.</div>}
+            <div className="pf-suite">
+              <div className="pf-suite-l"><span className="pf-ic">✓</span><span><b>Inscription</b> : faite</span></div>
+              <div className="pf-suite-l"><span className="pf-ic">2</span><span><b>Offre, contrat et paiement</b> : votre bon de commande est pré-rempli</span></div>
+              <div className="pf-suite-l"><span className="pf-ic">3</span><span><b>Espace pro</b> : vos animations, vos lots, vos contacts</span></div>
+            </div>
             <div className="pf-row" style={{ justifyContent: 'center', marginTop: 16 }}>
+              <a className="pf-btn pf-grand" href={`/bon-commande-animation.html${selection ? `?${selection}` : ''}`}>Choisir mon offre et signer</a>
               {fin.session
-                ? <a className="pf-btn pf-grand" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Entrer dans mon espace pro</a>
-                : <a className="pf-btn pf-grand" href="/pro/connexion">Me connecter</a>}
+                ? <a className="pf-btn2" href={`/pro?pro=${encodeURIComponent(fin.proId)}&bienvenue=1`}>Plus tard : entrer dans mon espace pro</a>
+                : <a className="pf-btn2" href="/pro/connexion">Plus tard : me connecter</a>}
             </div>
           </div>
         </main>
@@ -524,7 +568,7 @@ const CSS = `
 .pf-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--fl-violet);color:#fff;border:none;border-radius:100px;padding:13px 22px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit;box-shadow:0 10px 24px rgba(122,79,224,.24)}
 .pf-btn:hover{background:var(--fl-violet-fonce)}
 .pf-btn:disabled{opacity:.6;cursor:default}
-.pf-btn2{display:inline-flex;align-items:center;justify-content:center;background:#fff;color:var(--fl-encre);border:1.5px solid var(--fl-bordure-champ);border-radius:100px;padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.pf-btn2{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:#fff;color:var(--fl-encre);border:1.5px solid var(--fl-bordure-champ);border-radius:100px;padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
 .pf-grand{width:100%;padding:16px;font-size:16px}
 .pf-prog{margin:10px 0 14px}
 .pf-prog-l{display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;color:var(--fl-texte2);margin-bottom:8px}
@@ -578,6 +622,8 @@ const CSS = `
 .pf-recap-l .pf-lien-btn{padding:0;font-size:12.5px}
 .pf-nav{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--fl-bordure)}
 .pf-fin{text-align:center;margin-top:26px}
+.pf-suite{text-align:left;display:grid;gap:8px;margin:14px 0 4px}
+.pf-suite-l{display:flex;gap:10px;align-items:center;font-size:14px;line-height:1.4}
 .pf-coche{width:68px;height:68px;border-radius:50%;background:var(--fl-violet-clair);color:var(--fl-violet);font-size:34px;font-weight:900;display:grid;place-items:center;margin:0 auto 14px}
 @media (max-width:520px){
   .pf-h1{font-size:29px}
