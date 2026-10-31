@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commandes Animation magasin</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/flowin-tokens.css">
+<style>
+  :root{--ink:var(--fl-encre);--blue:var(--fl-bleu);--blueL:var(--fl-bleu-clair);--violet:var(--fl-violet);--violetT:var(--fl-violet-texte);--violetL:var(--fl-violet-clair);--paper:var(--fl-papier);--muted:var(--fl-texte-2);--line:var(--fl-trait);--field:var(--fl-champ);--ok:var(--fl-ok);--ko:var(--fl-ko)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--fl-police);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.4}
+  .top{background:var(--fl-encre-nuit);color:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;height:56px}
+  .top .lg{font-size:18px;font-weight:900;letter-spacing:-.02em}
+  .top .lg em{font-style:normal;color:var(--fl-bleu-doux)}
+  .top a{color:#fff;font-size:13px;font-weight:800;text-decoration:none;border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:7px 11px;margin-left:auto}
+  .wrap{max-width:1240px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:26px;font-weight:900;letter-spacing:-.02em}
+  .sub{font-size:13px;color:var(--muted);font-weight:600;margin-top:4px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+  .f{border:1.5px solid var(--field);background:#fff;color:var(--ink);font-weight:800;font-size:12.5px;padding:7px 12px;border-radius:var(--fl-pilule);cursor:pointer}
+  .f.on{background:var(--violet);border-color:var(--violet);color:#fff}
+  .f b{font-weight:900;margin-left:4px;opacity:.8}
+  .q{flex:1;min-width:180px;border:1.5px solid var(--field);border-radius:var(--fl-rayon-s);padding:8px 11px;font-size:14px;color:var(--ink);font-family:inherit}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer;font-weight:800;font-size:12.5px;padding:8px 13px;border-radius:var(--fl-pilule);background:var(--violet);color:#fff;font-family:inherit;white-space:nowrap}
+  .btn.blue{background:var(--blue)} .btn.line{background:#fff;color:var(--ink);border:1.5px solid var(--field)}
+  .btn[disabled]{opacity:.45;cursor:default}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--fl-rayon);padding:12px 14px;box-shadow:var(--fl-ombre)}
+  .kpi span{display:block;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .kpi b{display:block;font-size:22px;font-weight:900;margin-top:2px}
+  .late{display:block;font-size:12px;font-weight:900;color:var(--ko);margin-top:2px}
+  .retard{display:inline-block;margin-top:4px;font-size:11px;font-weight:900;color:#fff;background:var(--ko);border-radius:var(--fl-pilule);padding:2px 8px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--fl-rayon);box-shadow:var(--fl-ombre);margin-top:14px;overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:980px}
+  th{text-align:left;font-size:10.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);background:var(--paper)}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  td small{display:block;color:var(--muted);font-weight:600;font-size:11.5px}
+  td.r,th.r{text-align:right}
+  .st{display:inline-block;font-size:11px;font-weight:900;border-radius:var(--fl-pilule);padding:3px 9px;white-space:nowrap}
+  .st-attente{background:#FFF4D6;color:#7A5300} .st-sepa{background:var(--blueL);color:var(--blue)} .st-payee{background:var(--violetL);color:var(--violetT)}
+  .st-docs{background:#E3F5EC;color:var(--ok)} .st-ko{background:#FDECEC;color:var(--ko)} .st-annulee{background:#EEF1F5;color:var(--muted)}
+  .acts{display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+  .jr{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:4px}
+  .jr div{padding:1px 0}
+  .msg{margin-top:12px;padding:12px 14px;border-radius:var(--fl-rayon-s);font-size:13.5px;font-weight:700;display:none}
+  .msg.on{display:block} .msg.err{background:#FDECEC;color:var(--ko)} .msg.ok{background:#E3F5EC;color:var(--ok)} .msg.info{background:var(--blueL);color:var(--blue)}
+  .vide{padding:30px;text-align:center;color:var(--muted);font-weight:700}
+  @media (max-width:760px){ .kpis{grid-template-columns:1fr 1fr} h1{font-size:22px} }
+</style>
+</head>
+<body>
+<div class="top"><span class="lg">Flow<em>in</em></span><span style="font-size:12px;font-weight:700;opacity:.7">Super Admin</span><a href="/dashboard.html">&larr; Dashboard</a></div>
+<div class="wrap">
+  <h1>Commandes Animation magasin</h1>
+  <p class="sub">Souscriptions issues de la plaquette et du bon de commande. Un paiement valid&eacute; (webhook GoCardless ou virement marqu&eacute; re&ccedil;u) &eacute;met la facture et envoie contrat sign&eacute; + facture acquitt&eacute;e, une seule fois.</p>
+  <div class="msg" id="msg"></div>
+  <div class="kpis">
+    <div class="kpi"><span>Commandes</span><b id="kN">&mdash;</b></div>
+    <div class="kpi"><span>En attente de paiement</span><b id="kA">&mdash;</b><small id="kL" class="late"></small></div>
+    <div class="kpi"><span>Encaiss&eacute; TTC</span><b id="kE">&mdash;</b></div>
+    <div class="kpi"><span>&Agrave; encaisser TTC</span><b id="kR">&mdash;</b></div>
+  </div>
+  <div class="bar" id="filtres"></div>
+  <div class="bar"><input class="q" id="q" placeholder="Rechercher : n&deg;, raison sociale, SIRET, email, facture"><button class="btn line" type="button" id="rech">Actualiser</button><button class="btn blue" type="button" id="csv">Exporter (CSV)</button></div>
+  <div class="card"><table><thead><tr><th>Date</th><th>Commande</th><th>Client</th><th>Formule</th><th>Paiement</th><th class="r">Montant TTC</th><th>Statut</th><th>Facture</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9" class="vide">Chargement&hellip;</td></tr></tbody></table></div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
+  var COLS = 'id,created_at,statut,offre,engagement_mois,raison_sociale,siret,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,montant_ht,montant_ttc,mode_paiement,garantie,paiement_valide_le,paiement_source,paiement_valide_par,documents_envoyes_le,documents_envois,facture_numero,commercial';
+  var STATUTS = { en_attente_paiement: ['En attente de paiement', 'st-attente'], mandat_en_cours: ['Mandat SEPA en cours', 'st-sepa'], mandat_actif: ['Mandat SEPA actif', 'st-sepa'],
+    payee: ['Payée', 'st-payee'], documents_envoyes: ['Payée · documents envoyés', 'st-docs'], mandat_echoue: ['Mandat échoué', 'st-ko'], paiement_echoue: ['Prélèvement échoué', 'st-ko'], annulee: ['Annulée', 'st-annulee'] };
+  var FILTRES = [['tous', 'Toutes'], ['attente', 'En attente de paiement'], ['payee', 'Payées'], ['docs', 'Documents envoyés'], ['ko', 'Échecs'], ['annulee', 'Annulées']];
+  var DEMO = /[?&]demo=1/.test(location.search);
+  var JOURS = (function(){ var m = /[?&]jours=([0-9]+)/.exec(location.search); return m ? Math.max(1, +m[1]) : 3; })(); /* alerte : en attente depuis plus de JOURS jours */
+  function jours(iso){ return Math.floor((new Date().getTime() - new Date(iso).getTime()) / 86400000); }
+  var sess = null; try { sess = JSON.parse(localStorage.getItem('flowin_admin_session') || 'null'); } catch (e) { sess = null; }
+  var TOKEN = sess && sess.access_token ? sess.access_token : null;
+  var EMAIL_SA = sess && sess.user && sess.user.email ? sess.user.email : 'sa';
+  if (!TOKEN && !DEMO) { location.replace('/admin-connexion.html?next=' + encodeURIComponent('/admin-commandes-animation.html')); return; }
+  var data = [], journal = {}, filtre = 'tous';
+  function $(id){ return document.getElementById(id); }
+  function esc(t){ return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function eur(n){ n = Math.round(Number(n || 0) * 100) / 100; var e = Math.floor(n), c = Math.round((n - e) * 100), s = String(e).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return s + (c ? ',' + (c < 10 ? '0' : '') + c : '') + ' €'; }
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function dh(iso){ if (!iso) return '—'; var d = new Date(iso); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + 'h' + pad(d.getMinutes()); }
+  function msg(t, cls){ var m = $('msg'); m.textContent = t; m.className = 'msg on ' + cls; }
+  function grp(s){ if (s === 'en_attente_paiement' || s === 'mandat_en_cours' || s === 'mandat_actif') return 'attente'; if (s === 'payee') return 'payee'; if (s === 'documents_envoyes') return 'docs'; if (s === 'annulee') return 'annulee'; return 'ko'; }
+  function H(){ return { 'apikey': KEY, 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }; }
+
+  /* Mode démo (?demo=1) : données de test locales, aucune écriture en base */
+  var demo = null;
+  function demoData(){
+    var n = new Date().getTime();
+    return [
+      { id: 'AM-20261101-DEMO0001', created_at: new Date(n - 86400000 * 3).toISOString(), statut: 'documents_envoyes', offre: 'annuelle', engagement_mois: 12, raison_sociale: '[Boutique test 1]', siret: '00000000000000', ville: '[Ville]', contact_nom: '[Contact]', email: 'test1@example.com', tel: '0000000000', nb_boutiques: 2, kit: 'physique', opt_quiz_qte: 1, opt_bonus_qte: 0, montant_ht: 1468, montant_ttc: 1761.6, mode_paiement: 'virement', paiement_valide_le: new Date(n - 86400000).toISOString(), paiement_source: 'admin_virement', paiement_valide_par: 'sa-test@example.com', documents_envoyes_le: new Date(n - 86000000).toISOString(), documents_envois: 1, facture_numero: 'FL-AM-2026-00001' },
+      { id: 'AM-20261101-DEMO0002', created_at: new Date(n - 86400000 * 2).toISOString(), statut: 'payee', offre: 'mensuelle', engagement_mois: 3, raison_sociale: '[Boutique test 2]', siret: '00000000000000', ville: '[Ville]', contact_nom: '[Contact]', email: 'test2@example.com', tel: '0000000000', nb_boutiques: 1, kit: 'digital', opt_quiz_qte: 0, opt_bonus_qte: 0, montant_ht: 110, montant_ttc: 132, mode_paiement: 'prelevement_sepa', paiement_valide_le: new Date(n - 3600000).toISOString(), paiement_source: 'webhook_gocardless', paiement_valide_par: 'gocardless', documents_envoyes_le: null, documents_envois: 0, facture_numero: 'FL-AM-2026-00002' },
+      { id: 'AM-20261101-DEMO0003', created_at: new Date(n - 86400000 * 5).toISOString(), statut: 'en_attente_paiement', offre: 'annuelle', engagement_mois: 12, raison_sociale: '[Boutique test 3]', siret: '00000000000000', ville: '[Ville]', contact_nom: '[Contact]', email: 'test3@example.com', tel: '0000000000', nb_boutiques: 1, kit: 'digital', opt_quiz_qte: 0, opt_bonus_qte: 1, montant_ht: 1170, montant_ttc: 1404, mode_paiement: 'virement', paiement_valide_le: null, documents_envoyes_le: null, documents_envois: 0, facture_numero: null },
+      { id: 'AM-20261101-DEMO0004', created_at: new Date(n - 3600000).toISOString(), statut: 'paiement_echoue', offre: 'mensuelle', engagement_mois: 3, raison_sociale: '[Boutique test 4]', siret: '00000000000000', ville: '[Ville]', contact_nom: '[Contact]', email: 'test4@example.com', tel: '0000000000', nb_boutiques: 3, kit: 'physique', opt_quiz_qte: 0, opt_bonus_qte: 0, montant_ht: 557, montant_ttc: 668.4, mode_paiement: 'prelevement_sepa', paiement_valide_le: null, documents_envoyes_le: null, documents_envois: 0, facture_numero: null }
+    ];
+  }
+  var demoNum = 2;
+
+  function charger(){
+    if (DEMO) { if (!demo) demo = demoData(); data = demo; msg('Mode démo : données de test locales, aucune écriture en base.', 'info'); rendre(); return; }
+    fetch(SUPA + '/rest/v1/commandes_animation?select=' + COLS + '&order=created_at.desc&limit=1000', { headers: H() })
+      .then(function(r){
+        if (r.status === 401) { location.replace('/admin-connexion.html?next=' + encodeURIComponent('/admin-commandes-animation.html')); throw new Error('401'); }
+        if (r.status === 404) throw new Error('La table commandes_animation n’existe pas encore : appliquez sql/2026-11-01-commandes-animation.sql.');
+        if (!r.ok) throw new Error('Lecture impossible (code ' + r.status + ').');
+        return r.json();
+      })
+      .then(function(rows){ data = rows || []; if (!data.length) msg('Aucune commande visible. Si des commandes existent, vérifiez que votre email figure dans public.super_admins.', 'info'); rendre(); chargerJournal(); })
+      .catch(function(e){ if (String(e.message) !== '401') { msg(e.message, 'err'); $('rows').innerHTML = '<tr><td colspan="9" class="vide">—</td></tr>'; } });
+  }
+  function chargerJournal(){
+    fetch(SUPA + '/rest/v1/commandes_animation_journal?select=commande_id,le,par,action&order=le.desc&limit=2000', { headers: H() })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){ journal = {}; for (var i = 0; i < rows.length; i++) { var j = rows[i]; (journal[j.commande_id] = journal[j.commande_id] || []).push(j); } rendre(); })
+      .catch(function(){});
+  }
+  function visibles(){
+    var q = String($('q').value || '').toLowerCase(), out = [];
+    for (var i = 0; i < data.length; i++) {
+      var c = data[i];
+      if (filtre !== 'tous' && grp(c.statut) !== filtre) continue;
+      if (q && [c.id, c.raison_sociale, c.siret, c.email, c.facture_numero, c.ville].join(' ').toLowerCase().indexOf(q) < 0) continue;
+      out.push(c);
+    }
+    return out;
+  }
+  var LIB_J = { virement_recu: 'Virement marqué reçu', renvoi_documents: 'Renvoi des documents demandé', accuse_envoye: 'Accusé de réception envoyé', documents_envoyes: 'Contrat + facture envoyés', envoi_echoue: 'Envoi échoué', paiement_webhook: 'Paiement GoCardless' };
+  function rendre(){
+    var cnt = { tous: data.length, attente: 0, payee: 0, docs: 0, ko: 0, annulee: 0, retard: 0 }, enc = 0, rest = 0, i;
+    for (i = 0; i < data.length; i++) { var g = grp(data[i].statut); cnt[g]++; if (g === 'payee' || g === 'docs') enc += Number(data[i].montant_ttc); else if (g === 'attente') { rest += Number(data[i].montant_ttc); if (jours(data[i].created_at) > JOURS) cnt.retard++; } }
+    $('kN').textContent = data.length; $('kA').textContent = cnt.attente; $('kL').textContent = cnt.retard ? cnt.retard + ' depuis plus de ' + JOURS + ' jours' : ''; $('kE').textContent = eur(enc); $('kR').textContent = eur(rest);
+    var fh = ''; for (i = 0; i < FILTRES.length; i++) fh += '<button type="button" class="f' + (filtre === FILTRES[i][0] ? ' on' : '') + '" data-f="' + FILTRES[i][0] + '">' + FILTRES[i][1] + '<b>' + cnt[FILTRES[i][0]] + '</b></button>';
+    $('filtres').innerHTML = fh;
+    var v = visibles(), h = '';
+    for (i = 0; i < v.length; i++) {
+      var c = v[i], s = STATUTS[c.statut] || [c.statut, 'st-annulee'], g2 = grp(c.statut), j = journal[c.id] || [], jh = '';
+      for (var k = 0; k < j.length && k < 4; k++) jh += '<div>' + dh(j[k].le) + ' · ' + esc(LIB_J[j[k].action] || j[k].action) + ' · ' + esc(j[k].par) + '</div>';
+      var acts = '';
+      if (g2 === 'attente' || g2 === 'ko') acts += '<button type="button" class="btn" data-a="vir" data-id="' + esc(c.id) + '">Marquer le virement reçu</button>';
+      if (g2 === 'payee' || g2 === 'docs') acts += '<button type="button" class="btn line" data-a="docs" data-id="' + esc(c.id) + '">Renvoyer les documents</button>';
+      var retard = (g2 === 'attente' && jours(c.created_at) > JOURS) ? '<span class="retard">En attente depuis ' + jours(c.created_at) + ' j</span>' : '';
+      h += '<tr><td>' + dh(c.created_at) + retard + '</td><td><b>' + esc(c.id) + '</b>' + (c.commercial ? '<small>Commercial : ' + esc(c.commercial) + '</small>' : '') + '</td>' +
+        '<td><b>' + esc(c.raison_sociale) + '</b><small>' + esc(c.ville) + ' · SIRET ' + esc(c.siret) + '</small><small>' + esc(c.contact_nom) + ' · ' + esc(c.email) + '</small></td>' +
+        '<td>' + (c.offre === 'mensuelle' ? 'Mensuelle · 3 mois min.' : 'Annuelle · 12 mois') + '<small>' + (c.kit === 'physique' ? 'Kit physique × ' + c.nb_boutiques : 'Kit digital') + (c.opt_quiz_qte ? ' · quiz' : '') + (c.opt_bonus_qte ? ' · bonus' : '') + (c.garantie ? ' · garantie' : '') + '</small></td>' +
+        '<td>' + (c.mode_paiement === 'prelevement_sepa' ? 'Prélèvement SEPA' : 'Virement') + (c.paiement_valide_le ? '<small>Validé le ' + dh(c.paiement_valide_le) + '<br>par ' + esc(c.paiement_valide_par || c.paiement_source) + '</small>' : '') + '</td>' +
+        '<td class="r"><b>' + eur(c.montant_ttc) + '</b><small>' + eur(c.montant_ht) + ' HT</small></td>' +
+        '<td><span class="st ' + s[1] + '">' + esc(s[0]) + '</span>' + (c.documents_envoyes_le ? '<small>Envoyés le ' + dh(c.documents_envoyes_le) + (c.documents_envois > 1 ? ' (' + c.documents_envois + ' envois)' : '') + '</small>' : '') + '</td>' +
+        '<td>' + (c.facture_numero ? '<b>' + esc(c.facture_numero) + '</b>' : '<small>Émise au paiement</small>') + '</td>' +
+        '<td><div class="acts">' + acts + '</div>' + (jh ? '<div class="jr">' + jh + '</div>' : '') + '</td></tr>';
+    }
+    $('rows').innerHTML = h || '<tr><td colspan="9" class="vide">Aucune commande pour ce filtre.</td></tr>';
+  }
+  function rpc(nom, args){
+    return fetch(SUPA + '/rest/v1/rpc/' + nom, { method: 'POST', headers: H(), body: JSON.stringify(args) })
+      .then(function(r){ return r.json().then(function(j){ if (!r.ok) throw new Error((j && j.message) || ('code ' + r.status)); return j; }, function(){ if (!r.ok) throw new Error('code ' + r.status); return null; }); });
+  }
+  function demoAction(a, id){
+    for (var i = 0; i < demo.length; i++) if (demo[i].id === id) {
+      var c = demo[i], now = new Date().toISOString();
+      (journal[id] = journal[id] || []).unshift({ commande_id: id, le: now, par: EMAIL_SA + ' (démo)', action: a === 'vir' ? 'virement_recu' : 'renvoi_documents' });
+      if (a === 'vir') { demoNum++; c.statut = 'documents_envoyes'; c.paiement_valide_le = now; c.paiement_source = 'admin_virement'; c.paiement_valide_par = EMAIL_SA + ' (démo)'; c.facture_numero = 'FL-AM-2026-' + ('0000' + demoNum).slice(-5); c.documents_envoyes_le = now; c.documents_envois = 1; }
+      else { c.documents_envois = (c.documents_envois || 0) + 1; c.documents_envoyes_le = now; c.statut = 'documents_envoyes'; }
+      journal[id].unshift({ commande_id: id, le: now, par: 'fonction notify-commande-animation (démo)', action: 'documents_envoyes' });
+    }
+    msg(a === 'vir' ? 'Démo : virement marqué reçu, facture émise, contrat + facture envoyés.' : 'Démo : documents renvoyés.', 'ok'); rendre();
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.getAttribute) return;
+    var f = t.getAttribute('data-f'); if (f) { filtre = f; rendre(); return; }
+    var a = t.getAttribute('data-a'), id = t.getAttribute('data-id'); if (!a || !id) return;
+    var c = null; for (var i = 0; i < data.length; i++) if (data[i].id === id) c = data[i];
+    if (a === 'vir' && !window.confirm('Confirmer la réception du virement de ' + eur(c ? c.montant_ttc : 0) + ' TTC pour ' + id + ' ?\nLa facture sera émise et envoyée au client avec le contrat signé. Action journalisée à votre nom.')) return;
+    if (a === 'docs' && !window.confirm('Renvoyer le contrat signé et la facture au client pour ' + id + ' ?')) return;
+    if (DEMO) { demoAction(a, id); return; }
+    t.disabled = true;
+    rpc(a === 'vir' ? 'admin_marquer_virement_recu' : 'admin_renvoyer_documents', { p_commande: id })
+      .then(function(){ msg(a === 'vir' ? 'Virement marqué reçu : facture émise, envoi des documents lancé.' : 'Renvoi des documents demandé.', 'ok'); charger(); })
+      .catch(function(err){ t.disabled = false; msg('Action refusée : ' + err.message, 'err'); });
+  });
+  $('rech').addEventListener('click', charger);
+  $('q').addEventListener('input', rendre);
+  $('csv').addEventListener('click', function(){
+    var v = visibles(), cols = ['id', 'created_at', 'statut', 'offre', 'engagement_mois', 'raison_sociale', 'siret', 'ville', 'contact_nom', 'email', 'tel', 'kit', 'nb_boutiques', 'opt_quiz_qte', 'opt_bonus_qte', 'montant_ht', 'montant_ttc', 'mode_paiement', 'paiement_valide_le', 'paiement_source', 'paiement_valide_par', 'facture_numero', 'documents_envoyes_le', 'documents_envois', 'commercial'];
+    var lines = [cols.join(';')];
+    for (var i = 0; i < v.length; i++) { var row = []; for (var k = 0; k < cols.length; k++) { var x = v[i][cols[k]]; row.push('"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'); } lines.push(row.join(';')); }
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'commandes-animation-' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+  charger();
+})();
+</script>
+</body>
+</html>

@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bon de commande Flowin Animation</title>
 <meta name="description" content="Bon de commande en ligne Flowin Animation magasin : formule, signature électronique, paiement par virement ou prélèvement SEPA.">
+<link rel="stylesheet" href="/flowin-tokens.css">
 <style>
   :root{
-    --ink:#1B3A5C; --ink2:#2C4A6B; --muted:#5a6b80; --faint:#8A97A8;
-    --teal:#7A4FE0; --tealD:#5B34C2; --tealL:#EEE8FC; --blue:#3B5CC4; --green:#3B5CC4;
-    --mint:#F4F6F9; --sky:#E3E9F8; --off:#F4F6F9; --cream:#F4F6F9;
-    --paper:#F4F6F9; --line:#DCE3EC; --white:#fff; --err:#C62F2F; --hl:#E3E9F8;
+    --ink:var(--fl-encre); --ink2:#2C4A6B; --muted:var(--fl-texte-2); --faint:#8A97A8;
+    --teal:var(--fl-violet); --tealD:var(--fl-violet-texte); --tealL:var(--fl-violet-clair); --blue:var(--fl-bleu); --green:var(--fl-bleu);
+    --mint:#F4F6F9; --sky:var(--fl-bleu-clair); --off:#F4F6F9; --cream:#F4F6F9;
+    --paper:var(--fl-papier); --line:var(--fl-trait); --white:#fff; --err:var(--fl-ko); --hl:#E3E9F8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--paper);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -45,6 +46,15 @@
   .sec-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
   .sec-h .n{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:none}
   .sec-h h2{font-size:18px;font-weight:900;letter-spacing:-.01em}
+  .eng{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:900;color:var(--blue);background:#E3E9F8;border-radius:100px;padding:3px 10px}
+  .badge-top{position:absolute;top:-10px;left:14px;background:#E0368C;color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:100px}
+  .eco{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:10px}
+  .eco b{color:var(--tealD)}
+  .engbox{margin-top:12px;border:1.5px solid var(--blue);background:#F5F7FD;border-radius:14px;padding:12px 14px}
+  .engbox.err{border-color:#C62F2F;background:#FFF6F6}
+  .subh{font-size:13px;font-weight:800;color:var(--ink2);margin:18px 0 8px}
+  .trow.due{font-weight:800}
+  .suite{font-size:12.5px;font-weight:800;color:var(--blue);text-align:right;margin-top:6px}
   .hint{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.5}
 
   .parties{display:grid;grid-template-columns:1fr 1.5fr;gap:16px}
@@ -176,7 +186,7 @@
 </style>
 </head>
 <body>
-<div class="flowin-topbar"><a href="/plaquette-animation-magasin.html#prix" id="topBack">&larr; Plaquette</a><span class="flowin-topbar-brand">Flow<b>in</b></span></div>
+<div class="flowin-topbar"><a href="/plaquette-animation-magasin.html#offres" id="topBack">&larr; Plaquette</a><span class="flowin-topbar-brand">Flow<b>in</b></span></div>
 
 <div class="wrap">
 <div class="doc">
@@ -215,7 +225,8 @@
     <div class="sec">
       <div class="sec-h"><span class="n">1</span><h2>Vos informations</h2></div>
       <div class="grid">
-        <div class="f full" data-f="raison"><label for="f_raison">Raison sociale <i>*</i></label><input id="f_raison" autocomplete="organization"><div class="em">Indiquez la raison sociale.</div></div>
+        <div class="f" data-f="raison"><label for="f_raison">Raison sociale <i>*</i></label><input id="f_raison" autocomplete="organization"><div class="em">Indiquez la raison sociale.</div></div>
+        <div class="f"><label for="f_enseigne">Enseigne <small>(si diff&eacute;rente)</small></label><input id="f_enseigne" autocomplete="off"></div>
         <div class="f" data-f="siret"><label for="f_siret">SIRET <i>*</i> <small>(14 chiffres)</small></label><input id="f_siret" inputmode="numeric" autocomplete="off" placeholder="Votre num&eacute;ro SIRET"><div class="em">Le SIRET compte 14 chiffres.</div></div>
         <div class="f" data-f="nb"><label for="f_nb">Nombre de boutiques <i>*</i></label>
           <div class="stepper"><button type="button" id="nbMinus" aria-label="Moins">&minus;</button><input id="f_nb" inputmode="numeric" value="1" aria-label="Nombre de boutiques"><button type="button" id="nbPlus" aria-label="Plus">+</button></div>
@@ -238,21 +249,29 @@
 
     <div class="sec">
       <div class="sec-h"><span class="n">2</span><h2>Votre formule</h2></div>
-      <div class="choices c3" id="offerChoices">
-        <button type="button" class="choice" data-offre="kit_digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Affiches, macarons et QR de jeu &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">Gratuit</div></button>
-        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Offre mensuelle</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support.</div><div class="cp">110 &euro; <small>HT / mois</small></div></button>
-        <button type="button" class="choice sel" data-offre="annuelle"><span class="ck"></span><div class="cn">Offre annuelle</div><div class="cd">Toute l&rsquo;offre mensuelle, en un seul paiement pour l&rsquo;ann&eacute;e.</div><div class="cp">990 &euro; <small>HT / an</small></div></button>
+      <div class="choices" id="offerChoices">
+        <button type="button" class="choice sel" data-offre="annuelle"><span class="badge-top">Le plus avantageux</span><span class="ck"></span><div class="cn">Formule annuelle</div><div class="cd">Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Un seul paiement pour l&rsquo;ann&eacute;e.</div><div class="cp">990 &euro; <small>HT / an</small></div><span class="eng">Engagement 12 mois</span></button>
+        <button type="button" class="choice" data-offre="mensuelle"><span class="ck"></span><div class="cn">Formule mensuelle</div><div class="cd">La m&ecirc;me offre, r&eacute;gl&eacute;e chaque mois. Apr&egrave;s 3 mois, r&eacute;siliable chaque mois.</div><div class="cp">110 &euro; <small>HT / mois</small></div><span class="eng">Engagement 3 mois minimum</span></button>
       </div>
-      <div class="hint" style="margin-top:16px;font-weight:800;color:var(--ink2)">Options</div>
-      <div class="choices c3" style="margin-top:8px">
-        <div class="choice" id="optKit" role="button" tabindex="0"><span class="ck"></span><div class="cn">Kit physique</div><div class="cd">Macarons, affiches et support de caisse imprim&eacute;s, pour <span id="kitNb">1 boutique</span>.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></div>
+      <p class="eco">12 &times; 110 &euro; = 1&nbsp;320 &euro; HT par an en mensuel, contre 990 &euro; HT en annuel : <b>330 &euro; HT d&rsquo;&eacute;conomie</b> avec la formule annuelle.</p>
+      <div class="engbox" id="engBox" style="display:none">
+        <label class="chk" id="engRow" style="margin:0"><input type="checkbox" id="engChk"><span>J&rsquo;ai bien not&eacute; que la formule mensuelle comporte un <b>engagement de 3 mois minimum</b> (3 &times; 110 &euro; HT), puis qu&rsquo;elle est r&eacute;siliable chaque mois selon le pr&eacute;avis des CGV.</span></label>
+      </div>
+      <div class="subh">Vos supports <span style="font-weight:700;color:var(--muted)">(au choix)</span></div>
+      <div class="choices" id="kitChoices">
+        <button type="button" class="choice sel" data-kit="digital"><span class="ck"></span><div class="cn">Kit digital</div><div class="cd">Les fichiers des affiches, macarons et support de caisse, QR de jeu inclus, &agrave; imprimer vous-m&ecirc;me.</div><div class="cp">0 &euro;</div></button>
+        <button type="button" class="choice" data-kit="physique"><span class="ck"></span><div class="cn">Kit physique imprim&eacute;</div><div class="cd">Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, livr&eacute;s pr&ecirc;ts &agrave; poser. Pour <span id="kitNb">1 boutique</span>.</div><div class="cp">149 &euro; <small>HT par boutique</small></div></button>
+      </div>
+      <div class="subh">Options <span style="font-weight:700;color:var(--muted)">(facultatives)</span></div>
+      <div class="choices">
         <div class="choice" id="optQuiz" role="button" tabindex="0"><span class="ck"></span><div class="cn">Quiz personnalis&eacute;</div><div class="cd">Vos questions, r&eacute;dig&eacute;es pour un &eacute;v&eacute;nement.</div><div class="cp">180 &euro; <small>HT par &eacute;v&eacute;nement</small></div>
           <div class="opt-qty">&Eacute;v&eacute;nements <span class="stepper"><button type="button" data-q="quiz" data-d="-1">&minus;</button><input id="qQuiz" value="1" inputmode="numeric" aria-label="Nombre d'&eacute;v&eacute;nements"><button type="button" data-q="quiz" data-d="1">+</button></span></div></div>
         <div class="choice" id="optBonus" role="button" tabindex="0"><span class="ck"></span><div class="cn">Questions bonus</div><div class="cd">Votre sondage sur mesure : avis client, sensibilisation.</div><div class="cp">180 &euro; <small>HT</small></div>
           <div class="opt-qty">Sondages <span class="stepper"><button type="button" data-q="bonus" data-d="-1">&minus;</button><input id="qBonus" value="1" inputmode="numeric" aria-label="Nombre de sondages"><button type="button" data-q="bonus" data-d="1">+</button></span></div></div>
       </div>
       <div class="guarbox" id="guarBox">
-        <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents</span>
+        <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents &middot; formule annuelle</span>
+        <div class="gd" id="garMens" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e &agrave; la <b>formule annuelle</b>. <a href="#" id="garToAn">Passer en formule annuelle</a> pour en b&eacute;n&eacute;ficier.</div>
         <div class="gd" id="garNon" style="font-size:13px">Pour adh&eacute;rer &agrave; la garantie, remplissez et certifiez votre fiche d&eacute;couverte sur la <a href="/plaquette-animation-magasin.html#garantie">page Garantie</a>.</div>
         <label class="chk" id="garRow"><input type="checkbox" id="garChk"><span>J&rsquo;adh&egrave;re &agrave; l&rsquo;offre satisfait ou rembours&eacute;</span></label>
         <div class="gcert" id="garCert"></div>
@@ -261,7 +280,7 @@
           <div class="f" data-f="flux"><label for="f_flux">Flux journalier estim&eacute;</label><select id="f_flux"><option value="">Choisir</option><option value="15+">Plus de 15 clients par jour</option><option value="50+">Plus de 50 clients par jour</option><option value="100+">Plus de 100 clients par jour</option></select><div class="em">Choisissez votre flux journalier.</div></div>
         </div>
         <div class="gx" id="garX"></div>
-        <div class="gd">Sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas ce chiffre, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
+        <div class="gd" id="garTxt">Formule annuelle : sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas ce chiffre, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
       </div>
       <div class="hint">Les lots mis en jeu sont fournis par votre commerce.</div>
     </div>
@@ -272,7 +291,8 @@
       <div class="totals">
         <div class="trow"><span>Total HT</span><b id="tHT">&mdash;</b></div>
         <div class="trow"><span>TVA 20 %</span><b id="tTVA">&mdash;</b></div>
-        <div class="trow ttc"><span>Total TTC</span><b id="tTTC">&mdash;</b></div>
+        <div class="trow ttc"><span>Total TTC &middot; &agrave; payer &agrave; la commande</span><b id="tTTC">&mdash;</b></div>
+        <div class="suite" id="tSuite"></div>
       </div>
     </div>
 
@@ -323,6 +343,7 @@
       <p id="mSub">Bon de commande n&deg; <b id="mNum">&mdash;</b>, sign&eacute; le <b id="mDate">&mdash;</b>.</p>
     </div>
     <div class="banner warn" id="mOffline" style="display:none">Pas de r&eacute;seau pour l&rsquo;instant : votre commande est gard&eacute;e sur cet appareil et sera transmise automatiquement d&egrave;s le retour de la connexion. Gardez cette page ouverte ou rouvrez-la plus tard.</div>
+    <div class="banner warn" id="mEchec" style="display:none"><b>Votre commande est sign&eacute;e, mais elle n&rsquo;a pas pu &ecirc;tre transmise automatiquement</b> (enregistrement en ligne en cours d&rsquo;activation). Rien n&rsquo;est perdu, terminez en deux gestes :<br>1. <a href="#" id="mEchecPdf">T&eacute;l&eacute;chargez votre bon sign&eacute; (PDF)</a> ;<br>2. <a href="#" id="mEchecMail">envoyez-le &agrave; Flowin par email</a> (message pr&eacute;-rempli, joignez le PDF).<br>R&eacute;glez ensuite par virement avec les coordonn&eacute;es ci-dessous. Votre commande est aussi gard&eacute;e sur cet appareil et sera renvoy&eacute;e automatiquement d&egrave;s que le service sera actif.</div>
     <div class="banner info" id="mSepaInfo" style="display:none"></div>
     <div class="sec">
       <div class="sec-h"><span class="n">1</span><h2>R&eacute;capitulatif</h2></div>
@@ -330,7 +351,8 @@
       <div class="totals">
         <div class="trow"><span>Total HT</span><b id="mHT">&mdash;</b></div>
         <div class="trow"><span>TVA 20 %</span><b id="mTVA">&mdash;</b></div>
-        <div class="trow ttc"><span>Total TTC</span><b id="mTTC">&mdash;</b></div>
+        <div class="trow ttc"><span>Total TTC &middot; pay&eacute; &agrave; la commande</span><b id="mTTC">&mdash;</b></div>
+        <div class="suite" id="mSuite"></div>
       </div>
     </div>
     <div class="sec" id="mVirement">
@@ -350,12 +372,13 @@
     <div class="actions">
       <button type="button" class="btn dark" id="mPdf">T&eacute;l&eacute;charger le bon sign&eacute; en PDF</button>
       <button type="button" class="btn" id="mGc" style="display:none">Signer mon mandat de pr&eacute;l&egrave;vement</button>
+      <a class="btn ghost js-inscr" href="/pro/inscription">Cr&eacute;er mon espace pro</a>
       <a class="btn ghost" href="/plaquette-animation-magasin.html">Retour &agrave; la plaquette</a>
     </div>
     <div class="status" id="mStatus" role="status" aria-live="polite"></div>
   </div>
 
-  <div class="legal"><b>Flowin</b> est une marque de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907. Prix en euros hors taxes, TVA 20 % en sus. Dur&eacute;e et renouvellement selon les CGV.</div>
+  <div class="legal"><b>Flowin</b>, produit commercial de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907. Prix en euros hors taxes, TVA 20 % en sus. Dur&eacute;e et renouvellement selon les CGV.</div>
 </div>
 </div>
 
@@ -367,10 +390,11 @@
   var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
   var TABLE = 'commandes_animation';
   var API_GC = '/api/paiement/gocardless';
-  var CGV_VERSION = 'am-v2-2026-11-01';
+  var CGV_VERSION = 'am-v3-2026-11-01';
   var PRIX = { annuelle: 990, mensuelle: 110, kitPhysique: 149, optQuiz: 180, optBonus: 180, tva: 0.20 };
   var IBAN = 'FR76 1460 7003 3470 2211 6462 345', BIC = 'CCBPFRPPMAR';
   var LS_FILE = 'flowin_am_file_attente', LS_DERNIERE = 'flowin_am_derniere';
+  var EMAIL_FLOWIN = 'flowinevent@gmail.com';
 
   function $(id){ return document.getElementById(id); }
   function qs(name){ var m = new RegExp('[?&]' + name + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null; }
@@ -421,14 +445,15 @@
 
   function clampInt(v, mn, mx){ v = parseInt(String(v).replace(/[^0-9]/g, ''), 10); if (isNaN(v)) v = mn; if (v < mn) v = mn; if (v > mx) v = mx; return v; }
 
-  var NOM_OFFRE = { annuelle: 'Offre annuelle Flowin Animation', mensuelle: 'Offre mensuelle Flowin Animation', kit_digital: 'Kit digital Flowin' };
+  var NOM_OFFRE = { annuelle: 'Formule annuelle Flowin Animation', mensuelle: 'Formule mensuelle Flowin Animation' };
+  var ENGAGEMENT = { annuelle: 12, mensuelle: 3 };
   function calc(){
-    var lignes = [], abo = st.offre === 'annuelle' ? PRIX.annuelle : (st.offre === 'mensuelle' ? PRIX.mensuelle : 0);
-    if (st.offre === 'annuelle') lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support, 12 mois', q: 1, ht: abo });
-    else if (st.offre === 'mensuelle') lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: eur(PRIX.mensuelle) + ' HT par mois, puis chaque mois', q: 1, ht: abo });
+    var lignes = [], abo = st.offre === 'annuelle' ? PRIX.annuelle : PRIX.mensuelle;
+    if (st.offre === 'annuelle') lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Engagement 12 mois', q: 1, ht: abo });
+    else lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: 'Engagement 3 mois minimum, puis ' + eur(PRIX.mensuelle) + ' HT par mois, r\u00e9siliable chaque mois', q: 1, ht: abo });
     var kitHt = st.kit === 'physique' ? PRIX.kitPhysique * st.nb : 0;
-    if (st.kit === 'physique') lignes.push({ lib: 'Kit physique', det: 'Macarons, affiches, support de caisse, ' + eur(PRIX.kitPhysique) + ' HT par boutique', q: st.nb, ht: kitHt });
-    else lignes.push({ lib: 'Kit digital', det: 'Fichiers et QR de jeu \u00e0 imprimer, gratuit', q: 1, ht: 0 });
+    if (st.kit === 'physique') lignes.push({ lib: 'Kit physique imprim\u00e9', det: 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, ' + eur(PRIX.kitPhysique) + ' HT', q: st.nb, ht: kitHt });
+    else lignes.push({ lib: 'Kit digital', det: 'Fichiers des affiches, macarons et support de caisse, QR inclus, \u00e0 imprimer', q: 1, ht: 0 });
     var optHt = 0;
     if (st.quiz > 0) { lignes.push({ lib: 'Option : quiz personnalis\u00e9', det: eur(PRIX.optQuiz) + ' HT par \u00e9v\u00e9nement', q: st.quiz, ht: PRIX.optQuiz * st.quiz }); optHt += PRIX.optQuiz * st.quiz; }
     if (st.bonus > 0) { lignes.push({ lib: 'Option : questions bonus', det: eur(PRIX.optBonus) + ' HT par sondage', q: st.bonus, ht: PRIX.optBonus * st.bonus }); optHt += PRIX.optBonus * st.bonus; }
@@ -441,8 +466,8 @@
   /* Garantie : X = arrondi supérieur (prix sur 12 mois ÷ panier moyen) */
   function clientsGarantie(){
     var p = parseFloat(String(($('f_panier') || {}).value || '').replace(',', '.'));
-    if (isNaN(p) || p <= 0 || st.offre === 'kit_digital') return null;
-    return Math.ceil((st.offre === 'annuelle' ? PRIX.annuelle : PRIX.mensuelle * 12) / p);
+    if (isNaN(p) || p <= 0 || st.offre !== 'annuelle') return null;
+    return Math.ceil(PRIX.annuelle / p);
   }
   function recapHtml(t){
     var h = '';
@@ -456,15 +481,21 @@
     $('f_nb').value = st.nb;
     var offs = document.querySelectorAll('#offerChoices .choice');
     for (var i = 0; i < offs.length; i++) offs[i].className = 'choice' + (offs[i].getAttribute('data-offre') === st.offre ? ' sel' : '');
-    $('optKit').className = 'choice' + (st.kit === 'physique' ? ' sel' : '');
+    var kits = document.querySelectorAll('#kitChoices .choice');
+    for (var kk = 0; kk < kits.length; kk++) kits[kk].className = 'choice' + (kits[kk].getAttribute('data-kit') === st.kit ? ' sel' : '');
+    $('engBox').style.display = st.offre === 'mensuelle' ? 'block' : 'none';
+    var suite = st.offre === 'mensuelle' ? 'Puis ' + eur(PRIX.mensuelle) + ' HT (' + eur(Math.round(PRIX.mensuelle * (1 + PRIX.tva) * 100) / 100) + ' TTC) par mois, engagement 3 mois minimum.' : 'Engagement 12 mois.';
+    $('tSuite').textContent = suite; $('mSuite').textContent = suite;
     $('kitNb').textContent = st.nb + ' boutique' + (st.nb > 1 ? 's' : '');
-    var payant = st.offre !== 'kit_digital';
-    $('guarBox').style.display = payant ? 'block' : 'none';
-    if (!payant || !st.certif) st.garantie = false;
+    var annuelle = st.offre === 'annuelle';
+    st.garantie = !!(st.certif && annuelle);
     $('garChk').checked = st.garantie;
-    $('garNon').style.display = st.certif ? 'none' : 'block';
-    $('garRow').style.display = st.certif ? 'flex' : 'none';
-    $('garGrid').style.display = st.certif ? 'grid' : 'none';
+    $('garMens').style.display = annuelle ? 'none' : 'block';
+    $('garTxt').style.display = annuelle ? 'block' : 'none';
+    $('garCert').style.display = st.certif && annuelle ? 'block' : 'none';
+    $('garNon').style.display = annuelle && !st.certif ? 'block' : 'none';
+    $('garRow').style.display = annuelle && st.certif ? 'flex' : 'none';
+    $('garGrid').style.display = annuelle && st.certif ? 'grid' : 'none';
     var X = clientsGarantie(), gx = $('garX');
     if (X) { gx.style.display = 'block'; gx.innerHTML = 'Flowin doit vous apporter <b>' + X + ' clients</b> sur 12 mois.'; } else gx.style.display = 'none';
     if (t.ttc <= 0) { st.pay = 'aucun'; $('secPay').style.display = 'none'; } else { if (st.pay === 'aucun') st.pay = 'virement'; $('secPay').style.display = 'block'; }
@@ -482,8 +513,8 @@
     $('sepaLbl').textContent = st.offre === 'mensuelle' ? 'Pr\u00e9l\u00e8vement mensuel de l\u2019offre' : 'Pr\u00e9l\u00e8vement de l\u2019offre annuelle';
     $('sepaAbo').textContent = eur(t.aboTtc) + (st.offre === 'mensuelle' ? ' par mois' : ''); $('sepaResteMt').textContent = eur(t.resteTtc);
     $('sepaReste').parentNode.style.display = (t.resteTtc > 0 && t.aboTtc > 0) ? 'flex' : 'none';
-    var opts = []; if (st.kit === 'physique') opts.push('kit physique'); if (st.quiz) opts.push('quiz personnalis\u00e9'); if (st.bonus) opts.push('questions bonus');
-    $('briefLn').textContent = NOM_OFFRE[st.offre] + (opts.length ? ', ' + opts.join(', ') : '') + (st.garantie ? ', satisfait ou rembours\u00e9' : '') + '.';
+    var opts = [st.kit === 'physique' ? 'kit physique (' + st.nb + ' boutique' + (st.nb > 1 ? 's' : '') + ')' : 'kit digital']; if (st.quiz) opts.push('quiz personnalis\u00e9'); if (st.bonus) opts.push('questions bonus');
+    $('briefLn').textContent = NOM_OFFRE[st.offre] + (st.offre === 'mensuelle' ? ' (engagement 3 mois minimum)' : ' (engagement 12 mois)') + ', ' + opts.join(', ') + (st.garantie ? ', satisfait ou rembours\u00e9' : '') + '.';
     $('briefTot').textContent = eur(t.ht) + ' HT · ' + eur(t.ttc) + ' TTC';
   }
 
@@ -491,7 +522,7 @@
   (function(){
     var b = qs('boutiques'); if (b) st.nb = clampInt(b, 1, 200);
     var k = qs('kit'); if (k === 'physique' || k === 'digital') st.kit = k;
-    var of = qs('offre'); if (of === 'annuelle' || of === 'mensuelle' || of === 'kit_digital') st.offre = of;
+    var of = qs('offre'); if (of === 'annuelle' || of === 'mensuelle') st.offre = of; else if (of === 'kit_digital') { st.offre = 'annuelle'; st.kit = 'digital'; }
     /* Garantie : seules les données certifiées sur la page Garantie sont acceptées, puis verrouillées */
     var pm = parseFloat(qs('panier') || ''), fx = qs('flux'), cle = qs('certif_le'), cpar = qs('certif_par');
     var dCert = cle ? new Date(cle) : null;
@@ -515,9 +546,11 @@
   $('f_nb').addEventListener('change', function(){ st.nb = clampInt(this.value, 1, 200); render(); });
   var offBtns = document.querySelectorAll('#offerChoices .choice');
   for (var ki = 0; ki < offBtns.length; ki++) offBtns[ki].addEventListener('click', function(){ st.offre = this.getAttribute('data-offre'); render(); });
-  $('optKit').addEventListener('click', function(){ st.kit = st.kit === 'physique' ? 'digital' : 'physique'; render(); });
-  $('optKit').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); st.kit = st.kit === 'physique' ? 'digital' : 'physique'; render(); } });
-  $('garChk').addEventListener('change', function(){ if (st.certif) { st.garantie = true; this.checked = true; } render(); });
+  var kitBtns = document.querySelectorAll('#kitChoices .choice');
+  for (var kb = 0; kb < kitBtns.length; kb++) kitBtns[kb].addEventListener('click', function(){ st.kit = this.getAttribute('data-kit'); render(); });
+  $('engChk').addEventListener('change', function(){ if (this.checked) $('engBox').className = 'engbox'; });
+  $('garChk').addEventListener('change', function(){ if (st.certif && st.offre === 'annuelle') { st.garantie = true; this.checked = true; } render(); });
+  $('garToAn').addEventListener('click', function(e){ e.preventDefault(); st.offre = 'annuelle'; render(); });
   $('f_flux').addEventListener('change', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
   function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }
   function bindOpt(id, name){
@@ -605,6 +638,7 @@
     var pm = val('f_panier'), pmv = parseFloat(pm.replace(',', '.'));
     check('panier', !st.garantie || (!isNaN(pmv) && pmv > 0 && !!st.certif));
     check('flux', !st.garantie || !!$('f_flux').value);
+    if (st.offre === 'mensuelle' && !$('engChk').checked) { ok = false; $('engBox').className = 'engbox err'; if (!first) first = $('engBox'); } else $('engBox').className = 'engbox';
     if (avecSignature) {
       check('signataire', val('f_signataire').length > 1);
       var cgv = $('cgvChk').checked, sg = $('signChk').checked;
@@ -619,12 +653,13 @@
     var t = calc(), pm = val('f_panier');
     return {
       id: ID,
-      raison_sociale: val('f_raison'), siret: val('f_siret').replace(/\s/g, ''),
+      raison_sociale: val('f_raison'), enseigne: val('f_enseigne') || null, siret: val('f_siret').replace(/\s/g, ''),
       adresse: val('f_adresse'), cp: val('f_cp'), ville: val('f_ville'),
       contact_nom: val('f_contact'), contact_fonction: val('f_fonction') || null,
       email: val('f_email').toLowerCase(), tel: val('f_tel'),
       nb_boutiques: st.nb, panier_moyen: st.garantie && pm ? parseFloat(pm.replace(',', '.')) : null,
-      offre: st.offre, flux_journalier: st.garantie ? ($('f_flux').value || null) : null, garantie: !!st.garantie, garantie_clients_objectif: st.garantie ? clientsGarantie() : null,
+      offre: st.offre, engagement_mois: ENGAGEMENT[st.offre], engagement_accepte: st.offre === 'mensuelle' ? !!$('engChk').checked : true,
+      flux_journalier: st.garantie ? ($('f_flux').value || null) : null, garantie: !!st.garantie, garantie_clients_objectif: st.garantie ? clientsGarantie() : null,
       garantie_certifiee_le: st.garantie && st.certif ? st.certif.le : null, garantie_certifiee_par: st.garantie && st.certif ? st.certif.par : null,
       logo: st.logo, kit: st.kit, opt_quiz_qte: st.quiz, opt_bonus_qte: st.bonus,
       commercial: val('f_commercial') || null,
@@ -666,7 +701,7 @@
     T('40 rue des Arcs, 06140 Vence', x + 4, y + 17, 8, 'normal', mut); T('SIRET 512 026 907 00018', x + 4, y + 21.5, 8, 'normal', mut);
     T('TVA FR82 512 026 907', x + 4, y + 26, 8, 'normal', mut); T('04 93 59 91 37 - info@opconsult.co', x + 4, y + 30, 7.5, 'normal', mut);
     var px = x + cw + 12;
-    T('CLIENT', px, y + 6, 7, 'bold', teal); T(rec.raison_sociale || '-', px, y + 12, 10.5, 'bold', ink);
+    T('CLIENT', px, y + 6, 7, 'bold', teal); T((rec.raison_sociale || '-') + (rec.enseigne ? ' (' + rec.enseigne + ')' : ''), px, y + 12, 10.5, 'bold', ink);
     T(rec.adresse || '', px, y + 17, 8, 'normal', mut); T(((rec.cp || '') + ' ' + (rec.ville || '')).replace(/^\s+/, ''), px, y + 21.5, 8, 'normal', mut);
     T('SIRET ' + (rec.siret || '-'), px, y + 26, 8, 'normal', mut);
     T([rec.contact_nom, rec.email, rec.tel].join(' - '), px, y + 30, 7, 'normal', mut);
@@ -687,11 +722,13 @@
     T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;
     doc.setFillColor(227, 233, 248); doc.rect(tx - 3, y, 73, 9, 'F');
     T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
+    T('ENGAGEMENT', x, y, 7.5, 'bold', teal); y += 5;
+    y = wrap(rec.offre === 'mensuelle' ? 'Formule mensuelle : engagement de 3 mois minimum (3 x ' + eur(PRIX.mensuelle) + ' HT), puis reconduction mois par mois, resiliable chaque mois avec le preavis prevu aux CGV. Engagement accepte expressement par le client.' : 'Formule annuelle : engagement de 12 mois, un seul paiement pour l\'annee.', x, y, 8.5, ink, CW, 4.2) + 3;
     T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
     if (rec.mode_paiement === 'prelevement_sepa') {
       y = wrap('Prelevement SEPA via GoCardless : ' + (rec.offre === 'mensuelle' ? 'offre mensuelle ' + eur(t.aboTtc) + ' TTC par mois' : 'offre annuelle ' + eur(t.aboTtc)) + ' TTC' + (rec.prelevement_inclut_reste && t.resteTtc > 0 ? ', kit et options ' + eur(t.resteTtc) + ' TTC preleves egalement.' : (t.resteTtc > 0 ? '. Kit et options (' + eur(t.resteTtc) + ' TTC) par virement : IBAN ' + IBAN + ' - BIC ' + BIC + ' - titulaire BAITA EURL - reference ' + rec.id + '.' : '.')), x, y, 8.5, ink, CW, 4.2);
     } else if (rec.mode_paiement === 'aucun') {
-      y = wrap('Aucun paiement : kit digital gratuit.', x, y, 8.5, ink, CW, 4.2);
+      y = wrap('Aucun paiement.', x, y, 8.5, ink, CW, 4.2);
     } else {
       y = wrap((rec.offre === 'mensuelle' ? 'Offre mensuelle : virement chaque mois de ' + eur(t.aboTtc) + ' TTC. Premier virement : ' : 'Virement bancaire de ') + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
     }
@@ -706,7 +743,7 @@
     }
     y += 4;
     wrap('Conditions generales de vente Flowin Animation consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
-    wrap('Flowin est une marque de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN ' + IBAN + ' - BIC ' + BIC, x, 287, 6.5, mut, CW, 3);
+ wrap('Flowin, produit commercial de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN ' + IBAN + ' - BIC ' + BIC, x, 287, 6.5, mut, CW, 3);
     doc.save('bon-commande-flowin-' + rec.id + '.pdf');
     return true;
   }
@@ -734,7 +771,7 @@
     function suivant(){
       if (i >= f.length) { lsSet(LS_FILE, reste); if (!reste.length && document.body.className.indexOf('done') >= 0) { $('mOffline').style.display = 'none'; $('mStatus').textContent = 'Commande transmise.'; $('mStatus').className = 'status ok'; } return; }
       var rec = f[i++];
-      inserer(rec).then(suivant, function(e){ if (!e || !e.http) reste.push(rec); suivant(); });
+      inserer(rec).then(suivant, function(e){ if (!e || !e.http || e.http === 404 || e.http >= 500) reste.push(rec); suivant(); });
     }
     suivant();
   }
@@ -780,6 +817,13 @@
     $('mStepsN').textContent = virMt > 0 ? '3' : '2';
     $('mSteps').innerHTML = etapes(rec, opts.horsLigne);
     $('mOffline').style.display = opts.horsLigne ? 'block' : 'none';
+    $('mEchec').style.display = opts.echec ? 'block' : 'none';
+    if (opts.echec) {
+      $('mTitle').innerHTML = 'Votre commande <em>est sign&eacute;e</em>.';
+      var corps = 'Bonjour,\n\nVoici mon bon de commande Flowin Animation magasin sign\u00e9 (PDF joint).\n\nN\u00b0 ' + rec.id + '\nSoci\u00e9t\u00e9 : ' + rec.raison_sociale + ' (SIRET ' + rec.siret + ')\nFormule : ' + NOM_OFFRE[rec.offre] + ' (engagement ' + rec.engagement_mois + ' mois)\nSupports : ' + (rec.kit === 'physique' ? 'kit physique, ' + rec.nb_boutiques + ' boutique(s)' : 'kit digital') + '\nTotal \u00e0 la commande : ' + eur(rec.montant_ttc) + ' TTC\nPaiement : ' + (rec.mode_paiement === 'prelevement_sepa' ? 'pr\u00e9l\u00e8vement SEPA' : 'virement') + '\nSign\u00e9 par ' + rec.signataire_nom + ' le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '\nContact : ' + rec.contact_nom + ', ' + rec.email + ', ' + rec.tel + '\n';
+      $('mEchecMail').setAttribute('href', 'mailto:' + EMAIL_FLOWIN + '?subject=' + encodeURIComponent('Bon de commande ' + rec.id + ' - ' + rec.raison_sociale) + '&body=' + encodeURIComponent(corps));
+      $('mEchecPdf').onclick = function(e){ e.preventDefault(); pdf(rec, true); };
+    }
     var info = $('mSepaInfo');
     if (opts.sepaMsg) { info.style.display = 'block'; info.innerHTML = opts.sepaMsg; } else info.style.display = 'none';
     $('mGc').style.display = opts.gcRetry ? 'inline-flex' : 'none';
@@ -792,7 +836,7 @@
     if (!valider(true)) { status('Merci de compléter les champs en rouge.', 'err'); return; }
     var btn = this, quand = new Date(), rec = collecte(quand);
     btn.disabled = true; status('Enregistrement de votre commande…', '');
-    var memo = { rec: rec, st: { offre: st.offre, garantie: st.garantie, certif: st.certif, nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
+    var memo = { rec: rec, st: { eng: rec.engagement_accepte, offre: st.offre, garantie: st.garantie, certif: st.certif, nb: st.nb, kit: st.kit, quiz: st.quiz, bonus: st.bonus } };
     lsSet(LS_DERNIERE, memo);
     if (!window.fetch) { btn.disabled = false; status('Navigateur trop ancien pour l’envoi en ligne. Téléchargez le PDF et envoyez-le à Flowin.', 'err'); return; }
     inserer(rec).then(function(){
@@ -806,7 +850,15 @@
         afficherMerci(rec, {});
       }
     }, function(e){
-      if (e && e.http) { btn.disabled = false; status('L’enregistrement a échoué (code ' + e.http + '). Réessayez, ou téléchargez le PDF et envoyez-le à Flowin.', 'err'); return; }
+      if (e && e.http) {
+        /* Jamais d'impasse : la commande signée est gardée, le client repart avec le PDF, l'email pré-rempli et le virement */
+        btn.disabled = false;
+        if (e.http === 404 || e.http >= 500) { var fq = fileAttente(); fq.push(rec); lsSet(LS_FILE, fq); }
+        if (rec.mode_paiement === 'prelevement_sepa') rec.mode_paiement = 'virement';
+        afficherMerci(rec, { echec: true });
+        $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(rec.montant_ttc);
+        return;
+      }
       /* Hors ligne : on garde la commande sur l'appareil et on l'enverra au retour du réseau */
       var f = fileAttente(); f.push(rec);
       if (!lsSet(LS_FILE, f)) { btn.disabled = false; status('Pas de réseau. Réessayez dès que la connexion revient.', 'err'); return; }
@@ -826,7 +878,7 @@
       $('mSub').innerHTML = 'Commande n° <b>' + esc(cid) + '</b>. Flowin vous confirme la suite par email.';
       return;
     }
-    st.offre = memo.st.offre || 'annuelle'; st.garantie = !!memo.st.garantie; st.certif = memo.st.certif || null; st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
+    st.offre = memo.st.offre === 'mensuelle' ? 'mensuelle' : 'annuelle'; $('engChk').checked = !!memo.st.eng; st.garantie = !!memo.st.garantie; st.certif = memo.st.certif || null; st.nb = memo.st.nb; st.kit = memo.st.kit; st.quiz = memo.st.quiz; st.bonus = memo.st.bonus;
     ID = memo.rec.id; render();
     if (retour === 'gocardless') {
       afficherMerci(memo.rec, { sepaMsg: '<b>Mandat SEPA signé.</b> GoCardless le transmet à votre banque ; le prélèvement apparaîtra sur votre relevé sous quelques jours ouvrés. Vous recevez une notification de GoCardless avant chaque prélèvement.' });
@@ -836,6 +888,14 @@
       $('mVirement').style.display = 'block'; $('mVirMt').textContent = eur(calc().ttc);
       $('mTitle').innerHTML = 'Prélèvement <em>non finalisé</em>.';
     }
+  })();
+
+  /* Espace pro : « Ma première fois » dès qu'elle est en ligne, sinon l'inscription pro existante */
+  (function(){
+    if (!window.fetch || location.protocol === 'file:') return;
+    fetch('/pro/premiere-fois', { method: 'HEAD', credentials: 'same-origin' }).then(function(r){
+      if (!r.ok) return; var a = document.querySelectorAll('.js-inscr'); for (var i = 0; i < a.length; i++) a[i].setAttribute('href', '/pro/premiere-fois');
+    }).catch(function(){});
   })();
 
   render();
