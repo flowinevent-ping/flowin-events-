@@ -1,5 +1,6 @@
 import { fetchParcoursData } from '@/lib/parcours'
 import { lireApercu, appliquerApercu } from '@/lib/apercu'
+import { versMasterSiBesoin } from '@/lib/masters/redirection'
 import SpinClient from './SpinClient'
 
 interface Props { searchParams: { ev?: string; preview?: string; apercu?: string } }
@@ -9,5 +10,7 @@ export default async function Page({ searchParams }: Props) {
   if (!evId) return <div style={{display:'flex',height:'100dvh',alignItems:'center',justifyContent:'center',fontFamily:'system-ui',color:'#888'}}>Aucun event.</div>
   /* Apercu pendant la creation (lib/apercu.ts) : la saisie remplace nom, lots et contenu. */
   const data = await appliquerApercu(await fetchParcoursData(evId), lireApercu(searchParams))
+  /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
+  versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>)
   return <SpinClient {...data} evId={evId} />
 }

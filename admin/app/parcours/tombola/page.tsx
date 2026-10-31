@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { supabase } from '@/lib/supabase'
 import TombolaClient from './TombolaClient'
 import { lireApercu, appliquerApercu } from '@/lib/apercu'
+import { versMasterSiBesoin } from '@/lib/masters/redirection'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
 interface Props {
@@ -39,6 +40,9 @@ export default async function TombolaPage({ searchParams }: Props) {
     { ev: evRes.data as FlowinEvent | null, lots: (lotsRes.data ?? []) as FlowinLot[] },
     lireApercu(searchParams),
   )
+
+  /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
+  versMasterSiBesoin(evId, ev?.cfg, searchParams as Record<string, string | undefined>)
 
   /* Partenaires depuis cfg.partenaires */
   const partIds: string[] = ev?.cfg?.partenaires ?? []

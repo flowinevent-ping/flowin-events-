@@ -41,8 +41,10 @@ export default function ApercuJeu({ module, eventId, saisie, titre }: {
     const t = setTimeout(() => setCleStable(cle), 700)
     return () => clearTimeout(t)
   }, [cle])
+  /* Animation sur un master de jeu (cfg.master) : le parcours /jouer. */
+  const surMaster = !!(saisie.cfg && (saisie.cfg as Record<string, unknown>).master)
   const src = module && ev
-    ? `/parcours/${module}?ev=${encodeURIComponent(ev)}&preview=1&bar=0&apercu=${cleStable}`
+    ? (surMaster ? `/jouer?ev=${encodeURIComponent(ev)}&preview=1&sb=1&apercu=${cleStable}` : `/parcours/${module}?ev=${encodeURIComponent(ev)}&preview=1&bar=0&apercu=${cleStable}`)
     : undefined
   return (
     <div style={{ position: 'sticky', top: 16, alignSelf: 'start' }}>

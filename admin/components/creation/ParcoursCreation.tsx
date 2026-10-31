@@ -59,6 +59,7 @@ import BilletApercu from '@/components/parcours/BilletApercu'
 import QrTraces, { FormulaireQr, BadgeTypeQr, REGLE_TYPE_QR } from '@/components/operations/QrTraces'
 import { ChoixTirage, erreurTirage, cfgDepuisTirage, libelleDateTirage, localVersIso, lienListeGagnants, type ConfigTirage } from '@/components/operations/ReglageTirage'
 import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
+import PersoMaster, { ChoixAchat, cfgMaster, MASTER_VIDE, type EtatMaster } from '@/components/masters/PersoMaster'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
 export type ModeParcours = 'pro' | 'sa'
@@ -77,6 +78,7 @@ export interface ProCatalogue { id: string; nom: string | null; contact: string 
    libelle du gabarit (le bonus est optionnel). */
 const JEUX: { m: string; t: string; s: string; banque: boolean }[] = [
   { m: GABARIT_MODULE, t: GABARIT_NOM, s: 'Questions à choix multiple, bonus de rattrapage optionnel', banque: true },
+  { m: 'quizsolo', t: 'Quiz solo', s: '3 questions, 3/3 = 1 ticket, sans questions bonus', banque: true },
   { m: 'spin', t: 'Roue de la fortune', s: 'Tirage instantané, segments = lots', banque: false },
   { m: 'tombola', t: 'Tombola', s: 'Inscription + grand tirage', banque: false },
   { m: 'vote', t: 'Vote', s: 'Vote produits / artistes', banque: false },
@@ -221,6 +223,14 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [module_, setModule] = useState<string | null>(prefill?.module && JEUX.some(j => j.m === prefill.module) ? prefill.module : null)
   const [cfgJeu, setCfgJeu] = useState<Record<string, unknown>>({})
   const [banqueId, setBanqueId] = useState<string | null>(null)
+  /* Masters de jeux (31/10) : presentation de reference + personnalisation, et
+     obligation d achat au choix du commerce (lib/masters, PersoMaster). */
+  const [master, setMaster] = useState<EtatMaster>(MASTER_VIDE)
+  const [achat, setAchat] = useState<{ obligatoire: boolean; montantMin: string }>({ obligatoire: false, montantMin: '' })
+  const cfgPresentation = useMemo<Record<string, unknown>>(() => (estSuper || rejoindre) ? {} : {
+    ...cfgMaster(module_, master),
+    achat: { obligatoire: achat.obligatoire, montantMin: achat.obligatoire ? achat.montantMin.trim() : '' },
+  }, [estSuper, rejoindre, module_, master, achat])
   const [bonusIds, setBonusIds] = useState<string[]>([])
   const [voieFlowin, setVoieFlowin] = useState(false)
   const [theme, setTheme] = useState('')
@@ -391,8 +401,8 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const saisie = useMemo(() => ({
     nom: rejoindre ? nomCommerce : nom,
     lots: lotsNommes.map(l => ({ nom: l.nom, quantite: l.quantite, valeur: l.valeur, conditions: l.conditions })),
-    cfg: rejoindre ? undefined : { ...cfgContenu, ...(estSuper && logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) },
-  }), [rejoindre, nomCommerce, nom, lotsNommes, cfgContenu, estSuper, logoUrl])
+    cfg: rejoindre ? undefined : { ...cfgContenu, ...cfgPresentation, ...(estSuper && logoUrl.trim() ? { logoUrl: logoUrl.trim() } : {}) },
+  }), [rejoindre, nomCommerce, nom, lotsNommes, cfgContenu, cfgPresentation, estSuper, logoUrl])
   /* Station montree : celle du super event rejoint ; sinon la demo du module. */
   const stationApercu = rejoindre ? (se?.station ?? null) : null
 
@@ -474,6 +484,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         ...(module_ === 'spin' ? { spinSegments: cfgJeu.spinSegments ?? [] } : {}),
         ...(module_ === 'vote' ? { voteItems: cfgJeu.voteItems ?? [] } : {}),
         ...(aUnTirage ? cfgDepuisTirage(tirage) : {}),
+        ...cfgPresentation,
       },
       lots: lotsNommes.map(l => ({
         nom: l.nom.trim(), quantite: Number(l.quantite) || 1, valeur: Number(l.valeur) || 0,
@@ -963,6 +974,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               )}
             </>
           )}
+          {etape === 2 && !rejoindre && !estSuper && module_ && (
+            <PersoMaster module={module_} valeur={master} onChange={setMaster} prefixeUpload={(p.id || 'pro').replace(/[^a-z0-9-]/gi, '')} />
+          )}
           {etape === 2 && btnSuivant(3)}
 
           {/* ── 3. LOTS ── */}
@@ -972,6 +986,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 s={estSuper ? 'Ce que le super event fait gagner. Chaque exemplaire est un rang du grand tirage au sort.'
                   : rejoindre ? 'Ce qui est mis en jeu dans la station. Les gagnants sont tirés au sort.'
                   : 'Une remise, un cadeau, une invitation : quantité, valeur et conditions. Gagné au tirage au sort, ou tout de suite.'} />
+              {!estSuper && !rejoindre && <ChoixAchat valeur={achat} onChange={setAchat} />}
               {!estSuper && lotsExistants.filter(x => !lots.some(l => l.nom.trim().toLowerCase() === x.nom.toLowerCase())).length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={LABEL}>Reprendre un lot déjà créé</div>

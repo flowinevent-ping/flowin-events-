@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { fetchParcoursData } from '@/lib/parcours'
 import { lireApercu, appliquerApercu } from '@/lib/apercu'
 import QuizClient from './QuizClient'
+import { versMasterSiBesoin } from '@/lib/masters/redirection'
 
 interface Props { searchParams: { ev?: string; source?: string; preview?: string; apercu?: string } }
 
@@ -25,5 +26,7 @@ export default async function QuizPage({ searchParams }: Props) {
     redirect(`/parcours/${mod}?ev=${encodeURIComponent(evId)}${src}`)
   }
 
+  /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
+  versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>)
   return <QuizClient {...data} evId={evId} />
 }

@@ -1,0 +1,57 @@
+/*
+ * FLOWIN — FICHIER DE THEME UNIQUE (jetons de couleur)
+ *
+ * Toutes les couleurs des jeux « masters » (/jouer) et de l'ecran
+ * « Masters de jeux » du Super Admin viennent d'ici. Rien n'est code en dur
+ * ailleurs : changer une valeur ici la change partout.
+ *
+ *  >>> ACCENT COMMUN (boutons principaux, pilule Plug & Play) : UNE LIGNE <<<
+ *      Decision Romain (31/10) : plus de teal (« bleu + vert = pharmacie »),
+ *      violet #7A4FE0. Pour rebasculer : remplacer la valeur de --fl-accent
+ *      (ancien teal : #00917F).
+ *
+ *  Regles de charte : fuchsia (#E0368C) en touche ponctuelle seulement,
+ *  jamais fuchsia + noir ; aucun fond sombre hors scene de jeu du quiz.
+ *  Les couleurs d'identite des jeux (roue teal, tombola vert, vote bleu,
+ *  quiz solo prune, quiz bleu) restent celles des maquettes validees.
+ *
+ *  Ne s'applique PAS a Nuits du Sud (charte propre, non touchee).
+ */
+:root{
+  /* --- Accent commun --------------------------------------------------- */
+  --fl-accent:#7A4FE0;
+  --fl-accent-ink:#FFFFFF;
+  --fl-accent-soft:#F0EAFD;
+  --fl-touche:#E0368C;            /* fuchsia : touche ponctuelle uniquement */
+
+  /* --- Habillage commun (charte LandingClient) --------------------------- */
+  --fl-ink:#1B3A5C;               /* encre */
+  --fl-ink-2:#3a4d63;
+  --fl-muted:#5a6b80;             /* secondaire */
+  --fl-blue:#3B5CC4;              /* bleu, « in » du logo */
+  --fl-paper:#F4F6F9;             /* papier */
+  --fl-white:#FFFFFF;
+  --fl-line:#DCE3EC;
+  --fl-field:#C9D4E3;
+  --fl-sky:#EAEFFB;
+  --fl-mint:#E6F7F4;
+  --fl-ok:#00897A;
+  --fl-ko:#C62F2F;
+  --fl-font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+
+  /* --- Couleurs d'identite des jeux ------------------------------------- */
+  --fl-quiz:#3B5CC4;    --fl-quiz-ink:#2C49A6;    --fl-quiz-soft:#EAEFFB;    --fl-quiz-2:#00B4A0;
+  --fl-solo:#8E3B6E;    --fl-solo-ink:#8E3B6E;    --fl-solo-soft:#F1ECFA;    --fl-solo-2:#3B5CC4;
+  --fl-spin:#13A89E;    --fl-spin-ink:#0B7A72;    --fl-spin-soft:#E6F7F4;    --fl-spin-2:#3B5CC4;  --fl-spin-on:#1B3A5C;
+  --fl-tombola:#0B9E6E; --fl-tombola-ink:#087F58; --fl-tombola-soft:#E3F5EC; --fl-tombola-2:#3B5CC4;
+  --fl-vote:#3A6FD8;    --fl-vote-ink:#2F5FC0;    --fl-vote-soft:#EAEFFB;    --fl-vote-2:#00B4A0;
+
+  /* --- Scene de jeu du quiz (seul fond sombre autorise) ------------------ */
+  --fl-stage-1:#1B3A5C; --fl-stage-2:#284C86; --fl-stage-3:#3B5CC4; --fl-stage-kicker:#A9C0FF;
+
+  /* --- Univers comics « Super event » ----------------------------------- */
+  --fl-super-jaune:#FFD23F;
+  --fl-super-rouge:#E2231A;
+  --fl-super-rouge-ink:#C41D15;
+  --fl-super-bleu:#2B5FD9;
+}

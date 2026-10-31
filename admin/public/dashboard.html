@@ -3123,7 +3123,7 @@ function renderSidebar(){
       {id:'crm-landing',ico:'📥',lbl:'CRM Landing pages',n:(state.crmLanding?state.crmLanding.length:0)},
       {id:'landing-page',ico:'🌐',lbl:'Landing Page',n:(DATA.landings||[]).length},
     ]},
-    {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length}, {id:'banques',ico:'🎯',lbl:'Banques de questions',ext:'/banques.html'} ]},
+    {group:'JEUX', list:[ {id:'jeux',ico:'🎮',lbl:'Jeux',n:DATA.jeux.length}, {id:'masters',ico:'🧩',lbl:'Masters de jeux'}, {id:'banques',ico:'🎯',lbl:'Banques de questions',ext:'/banques.html'} ]},
     {group:'REPORTING', list:[ {id:'rapports',ico:'📊',lbl:'Rapports'} ]},
     {group:'SYSTÈME', list:[ {id:'roadmap',ico:'🗺️',lbl:'Feuille de route'}, {id:'cgv',ico:'📜',lbl:'CGV / Légal'}, {id:'parametres',ico:'⚙️',lbl:'Paramètres'} ]}
   ];
@@ -5737,6 +5737,7 @@ function render(){
       console.error('[renderBiblioJeux]', err);
     }
   }
+  else if(v==='masters') html = renderMasters();
   else if(v==='rapports') html = renderRapports();
   else if(v==='parametres') html = renderParametres();
   else if(v==='cgv') html = renderCgv();
@@ -11035,6 +11036,188 @@ function loadJoueurParrainage(extId){
     .then(function(r){ return r.json(); })
     .then(function(rows){ state.joueurParr[extId]=Array.isArray(rows)?rows:[]; if(typeof render==='function') render(); })
     .catch(function(){ state.joueurParr[extId]=[]; if(typeof render==='function') render(); });
+}
+
+// ============ MASTERS DE JEUX (31/10/2026) ============
+// Gabarits de reference des 5 jeux + univers super event (admin/lib/masters).
+// Le code fournit les valeurs par defaut (GET /api/masters) ; le Super Admin les
+// modifie ici (table jeux_masters, sql/2026-10-31-jeux-masters.sql). Regle :
+// modifier un master met a jour toutes les animations qui l'utilisent, sauf les
+// champs que l'animation a personnalises (events.cfg.master.perso).
+// Mode degrade : table absente -> apercu et edition possibles, enregistrement
+// indisponible (message explicite). Syntaxe iOS-safe (var, function, indexOf).
+function mastersCharger(force){
+  if(state.mastersData && !force) return;
+  state.mastersData = null; state.mastersErreur = '';
+  fetch('/api/masters', { cache:'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      state.mastersData = d;
+      if(!state.masterTab) state.masterTab = 'quiz';
+      mastersPreparer(state.masterTab);
+      if(state.view==='masters') render();
+    })
+    .catch(function(){ state.mastersErreur = 'Chargement des masters impossible.'; if(state.view==='masters') render(); });
+}
+function mastersCopie(o){ return JSON.parse(JSON.stringify(o==null?{}:o)); }
+function mastersFusion(a, b){
+  var out = mastersCopie(a), k;
+  if(!b || typeof b!=='object') return out;
+  for(k in b){ if(!Object.prototype.hasOwnProperty.call(b,k)) continue;
+    var v = b[k];
+    if(v===null || v===undefined || v==='') continue;
+    if(v && typeof v==='object' && !Array.isArray(v) && out[k] && typeof out[k]==='object' && !Array.isArray(out[k])) out[k] = mastersFusion(out[k], v);
+    else out[k] = mastersCopie(v);
+  }
+  return out;
+}
+/* Contenu edite = code + surcharge SA deja enregistree. */
+function mastersPreparer(id){
+  var d = state.mastersData; if(!d) return;
+  var m = d.masters[id]; if(!m) return;
+  state.masterEdit = mastersFusion(m.defauts, (d.base||{})[id]);
+  state.masterEcran = (d.ecrans[id]||[])[1] || (d.ecrans[id]||[])[0] || '';
+  state.masterMsg = '';
+}
+function mastersB64(o){
+  var s = btoa(unescape(encodeURIComponent(JSON.stringify(o||{}))));
+  return s.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function mastersUrl(){
+  return '/jouer?m='+encodeURIComponent(state.masterTab)+'&s='+encodeURIComponent(state.masterEcran||'s-accueil')+'&perso='+mastersB64(state.masterEdit);
+}
+/* Listes editees en texte : une ligne par element, champs separes par « | ». */
+function mastersLignes(liste, champs){
+  return (liste||[]).map(function(x){ return champs.map(function(c){ var v = typeof c==='function' ? c(x) : x[c]; return v==null?'':String(v); }).join(' | '); }).join('\n');
+}
+function mastersLire(txt){
+  return String(txt||'').split('\n').map(function(l){ return l.split('|').map(function(x){ return x.trim(); }); }).filter(function(c){ return c.join('')!==''; });
+}
+var MASTERS_LISTES = {
+  lots: { lbl:'Lots (exemples)', aide:'Une ligne par lot : Nom | Condition | imm (gain immédiat) ou tir (tirage) | pastille (ex. 20) | unité (ex. €)',
+    vers:function(l){ return mastersLignes(l,['nom','cond','mode','big','small']); },
+    depuis:function(t){ return mastersLire(t).map(function(c){ return {nom:c[0]||'', cond:c[1]||'', mode:(c[2]==='imm'?'imm':'tir'), big:c[3]||'1', small:c[4]||'lot', type:(c[4]==='€'?'bon':(c[4]==='%'?'remise':'produit'))}; }); } },
+  how: { lbl:'Comment jouer ?', aide:'Une ligne par étape : Titre | Détail',
+    vers:function(l){ return (l||[]).map(function(x){ return x[0]+' | '+x[1]; }).join('\n'); },
+    depuis:function(t){ return mastersLire(t).map(function(c){ return [c[0]||'', c[1]||'']; }); } },
+  questions: { lbl:'Questions (par défaut)', aide:'Une ligne par question : Question | Réponse A | Réponse B | Réponse C | Réponse D | n° de la bonne (1 à 4) | Explication',
+    vers:function(l){ return mastersLignes(l,['txt',function(q){return q.opts[0];},function(q){return q.opts[1];},function(q){return q.opts[2];},function(q){return q.opts[3];},function(q){return (q.ok||0)+1;},'expl']); },
+    depuis:function(t){ return mastersLire(t).map(function(c){ var o=[c[1],c[2],c[3],c[4]].filter(function(x){return x;}); var b=parseInt(c[5],10)||1; return {txt:c[0]||'', opts:o, ok:Math.max(0,Math.min(o.length-1,b-1)), expl:c[6]||''}; }); } },
+  bonus: { lbl:'Questions bonus (par défaut)', aide:'Une ligne par question : Question | choix 1 | choix 2 | choix 3 | choix 4',
+    vers:function(l){ return (l||[]).map(function(q){ return [q.label].concat(q.opts||[]).join(' | '); }).join('\n'); },
+    depuis:function(t){ return mastersLire(t).map(function(c){ return {label:c[0]||'', opts:c.slice(1).filter(function(x){return x;})}; }); } },
+  cases: { lbl:'Cases de la roue (par défaut)', aide:'Une ligne par case : Libellé | couleur de fond (#hex) | couleur du texte (#hex) | imm, tir ou perdu',
+    vers:function(l){ return mastersLignes(l,['label','fond','texte','issue']); },
+    depuis:function(t){ return mastersLire(t).map(function(c){ return {label:c[0]||'', fond:c[1]||'#EAEFFB', texte:c[2]||'#1B3A5C', issue:(c[3]==='perdu'?'perdu':(c[3]==='tir'?'tir':'imm'))}; }); } },
+  candidats: { lbl:'Candidats du vote (par défaut)', aide:'Une ligne par candidat : Nom | sous-titre',
+    vers:function(l){ return mastersLignes(l,['nom','sous']); },
+    depuis:function(t){ return mastersLire(t).map(function(c){ return {nom:c[0]||'', sous:c[1]||''}; }); } }
+};
+function mastersListesDe(id){
+  var l = ['lots','how'];
+  if(id==='quiz'||id==='quizsolo') l.push('questions');
+  if(id==='quiz') l.push('bonus');
+  if(id==='spin') l.push('cases');
+  if(id==='vote') l.push('candidats');
+  if(id==='super') l = ['lots'];
+  return l;
+}
+var _mastersTimer = null;
+function mastersRafraichir(){
+  if(_mastersTimer) clearTimeout(_mastersTimer);
+  _mastersTimer = setTimeout(function(){ var f = document.getElementById('master-apercu'); if(f) f.src = mastersUrl(); }, 600);
+}
+function mastersChamp(chemin, valeur){
+  var e = state.masterEdit, p = chemin.split('.'), i;
+  for(i=0;i<p.length-1;i++){ if(!e[p[i]] || typeof e[p[i]]!=='object') e[p[i]] = {}; e = e[p[i]]; }
+  e[p[p.length-1]] = valeur;
+  mastersRafraichir();
+}
+function mastersListe(cle, txt){ state.masterEdit[cle] = MASTERS_LISTES[cle].depuis(txt); mastersRafraichir(); }
+function mastersOnglet(id){ state.masterTab = id; mastersPreparer(id); render(); }
+function mastersEcran(id){ state.masterEcran = id; var f = document.getElementById('master-apercu'); if(f) f.src = mastersUrl(); }
+/* Ce qui est enregistre : seulement les champs qui different du code. */
+function mastersDiff(id){
+  var code = state.mastersData.masters[id].defauts, e = state.masterEdit, out = {}, k;
+  for(k in e){ if(Object.prototype.hasOwnProperty.call(e,k) && JSON.stringify(e[k])!==JSON.stringify(code[k])) out[k] = e[k]; }
+  return out;
+}
+function mastersEnregistrer(reinit){
+  var id = state.masterTab, d = state.mastersData;
+  if(!d) return;
+  if(d.tableAbsente){ state.masterMsg = 'Table jeux_masters absente : appliquez sql/2026-10-31-jeux-masters.sql pour enregistrer.'; render(); return; }
+  if(!(typeof FLOWIN_SUPA_URL!=='undefined' && FLOWIN_SUPA_URL && FLOWIN_SUPA_ANON)){ state.masterMsg = 'Connexion Supabase non configurée.'; render(); return; }
+  if(reinit && !confirm('Revenir aux valeurs Flowin d\'origine pour ce master ?')) return;
+  var defauts = reinit ? {} : mastersDiff(id);
+  state.masterMsg = 'Enregistrement…'; render();
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/jeux_masters', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':FLOWIN_SUPA_ANON,'Authorization':'Bearer '+FLOWIN_AUTH,'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body: JSON.stringify({ id:id, nom:d.masters[id].nom, defauts:defauts, updated_at:new Date().toISOString() })
+  }).then(function(r){
+    if(!r.ok){ state.masterMsg = 'Enregistrement refusé ('+r.status+'). La table jeux_masters existe-t-elle ?'; render(); return; }
+    if(!d.base) d.base = {};
+    d.base[id] = defauts;
+    if(reinit) mastersPreparer(id);
+    state.masterMsg = reinit ? 'Valeurs Flowin rétablies.' : 'Master enregistré : toutes les animations qui l\'utilisent sont à jour (sauf leurs champs personnalisés).';
+    render();
+  }).catch(function(){ state.masterMsg = 'Enregistrement impossible (réseau).'; render(); });
+}
+function mastersUsages(id){
+  return (DATA.events||[]).filter(function(e){ return e && e.cfg && e.cfg.master && e.cfg.master.id===id; });
+}
+function renderMasters(){
+  mastersCharger(false);
+  var d = state.mastersData;
+  var html = '<div class="page">';
+  html += '<div class="page-header"><div><div class="page-title">🧩 Masters de jeux</div><div class="page-subtitle">Les gabarits de référence : même présentation pour tous les commerces, personnalisée par chaque animation (logo, images, lots, questions)</div></div>'
+       + '<div class="page-actions"><button class="btn" onclick="mastersCharger(true);render()">↻ Recharger</button></div></div>';
+  if(state.mastersErreur){ return html + '<div class="alert warn"><span class="ico">⚠️</span>'+esc(state.mastersErreur)+'</div></div>'; }
+  if(!d){ return html + '<div class="empty-block">Chargement des masters…</div></div>'; }
+  if(d.tableAbsente){ html += '<div class="alert warn" style="margin-bottom:14px"><span class="ico">⚠️</span>Table <b>jeux_masters</b> absente : les valeurs Flowin du code s\'appliquent. Aperçu et édition possibles ; l\'enregistrement sera disponible après application de <b>sql/2026-10-31-jeux-masters.sql</b>.</div>'; }
+  html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+  (d.ordre||[]).forEach(function(id){
+    var m = d.masters[id], on = state.masterTab===id, n = mastersUsages(id).length;
+    html += '<button class="btn'+(on?' btn-primary':'')+'" onclick="mastersOnglet(\''+id+'\')" style="display:inline-flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:'+esc(m.couleur)+'"></span>'+esc(m.nom)+(n?' <span style="opacity:.75">· '+n+'</span>':'')+'</button>';
+  });
+  html += '</div>';
+  var id = state.masterTab, m = d.masters[id], e = state.masterEdit || {};
+  var usages = mastersUsages(id);
+  html += '<div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start">';
+  /* Colonne edition */
+  html += '<div>';
+  html += '<div class="card" style="padding:16px;margin-bottom:14px"><div style="font-weight:800;font-size:16px">'+esc(m.nom)+'</div><div style="color:var(--sa-muted);font-size:13px;margin-top:4px;line-height:1.5">'+esc(m.description)+'</div>'
+       + '<div style="font-size:12.5px;margin-top:8px;color:var(--sa-muted)">Utilisé par <b style="color:var(--sa-text)">'+usages.length+'</b> animation'+(usages.length>1?'s':'')+(usages.length?' : '+usages.slice(0,6).map(function(x){return esc(x.nom||x.id);}).join(', ')+(usages.length>6?'…':''):'')+'</div>'
+       + '<div style="font-size:12px;margin-top:8px;color:var(--sa-muted)">Règle : modifier ce master met à jour toutes ces animations, sauf les champs qu\'elles ont personnalisés.</div></div>';
+  function champ(lbl, chemin, val, ph){ return '<label style="display:block;margin-bottom:10px"><span style="display:block;font-size:12px;font-weight:700;color:var(--sa-muted);margin-bottom:4px">'+lbl+'</span><input class="input" style="width:100%" value="'+esc(val||'')+'" placeholder="'+esc(ph||'')+'" oninput="mastersChamp(\''+chemin+'\',this.value)"></label>'; }
+  html += '<div class="card" style="padding:16px;margin-bottom:14px"><div style="font-weight:800;margin-bottom:10px">Textes</div>';
+  html += champ('Nom du commerce (exemple montré en aperçu)', 'commerce.nom', e.commerce && e.commerce.nom, 'Boulangerie Exemple');
+  html += champ('Date du tirage (exemple)', 'tirageDate', e.tirageDate, '30 novembre 2026');
+  if(id==='quiz') html += champ('Sous-titre de l\'accueil', 'accueilSous', e.accueilSous, '3 questions, des tickets à gagner');
+  if(id!=='super') html += champ('Récompense du parrainage', 'parrain', e.parrain, '');
+  if(id==='vote'){ html += champ('Petit titre du vote', 'voteKicker', e.voteKicker, ''); html += champ('Question du vote', 'voteTitre', e.voteTitre, ''); }
+  html += '<label style="display:block;margin-bottom:4px"><span style="display:block;font-size:12px;font-weight:700;color:var(--sa-muted);margin-bottom:4px">Obligation d\'achat par défaut (chaque commerce peut changer)</span>'
+       + '<select class="input" onchange="mastersChamp(\'achat\',this.value)"><option value="sans"'+(e.achat!=='avec'?' selected':'')+'>Sans obligation d\'achat</option><option value="avec"'+(e.achat==='avec'?' selected':'')+'>Avec obligation d\'achat</option></select></label>';
+  html += '</div>';
+  html += '<div class="card" style="padding:16px;margin-bottom:14px"><div style="font-weight:800;margin-bottom:10px">Contenus par défaut</div>';
+  mastersListesDe(id).forEach(function(cle){
+    var L = MASTERS_LISTES[cle];
+    html += '<label style="display:block;margin-bottom:12px"><span style="display:block;font-size:12.5px;font-weight:800;margin-bottom:2px">'+esc(L.lbl)+'</span><span style="display:block;font-size:11.5px;color:var(--sa-muted);margin-bottom:6px">'+esc(L.aide)+'</span>'
+         + '<textarea class="input" style="width:100%;min-height:96px;font-family:ui-monospace,Menlo,monospace;font-size:12px" oninput="mastersListe(\''+cle+'\',this.value)">'+esc(L.vers(e[cle]))+'</textarea></label>';
+  });
+  html += '<div style="font-size:11.5px;color:var(--sa-muted)">En réel, les lots, questions, cases et candidats saisis par le commerce remplacent ces valeurs. Les noms « … Exemple » ne sont jamais montrés aux joueurs.</div></div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn btn-primary" onclick="mastersEnregistrer(false)">Enregistrer le master</button><button class="btn" onclick="mastersEnregistrer(true)">Revenir aux valeurs Flowin</button>'
+       + (state.masterMsg?'<span style="font-size:12.5px;font-weight:700;color:var(--sa-muted)">'+esc(state.masterMsg)+'</span>':'')+'</div>';
+  html += '</div>';
+  /* Colonne apercu telephone */
+  var ecr = d.ecrans[id]||[];
+  html += '<div style="position:sticky;top:16px"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--sa-muted);margin-bottom:6px">Aperçu téléphone</div>'
+       + '<select class="input" style="width:100%;margin-bottom:10px" onchange="mastersEcran(this.value)">'+ecr.map(function(s,i){ return '<option value="'+esc(s)+'"'+(s===state.masterEcran?' selected':'')+'>'+(i+1)+'. '+esc(s)+'</option>'; }).join('')+'</select>'
+       + '<div style="position:relative;width:286px;height:570px;border-radius:34px;border:1.5px solid var(--sa-border);background:#fff;overflow:hidden;box-shadow:0 10px 24px rgba(15,23,42,.08)">'
+       + '<div class="flowin-phone-scaler" style="width:390px;height:780px;transform:scale(.693);top:6px;left:8px"><iframe id="master-apercu" src="'+esc(mastersUrl())+'" style="width:390px;height:780px" frameborder="0"></iframe></div></div>'
+       + '<a href="'+esc(mastersUrl())+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:12.5px;font-weight:700">Ouvrir en plein écran ↗</a></div>';
+  html += '</div></div>';
+  return html;
 }
 
 // ============ JEUX (catalogue) ============
