@@ -7,7 +7,9 @@
     "planches": "node render.mjs --planches",
     "render": "node render.mjs",
     "all": "node build.mjs && node render.mjs",
-    "build:h": "node build-h.mjs"
+    "build:h": "node build-h.mjs",
+    "build:v3": "node build-v3.mjs",
+    "render:v3": "node render.mjs s1-v3 s2-v3 s3-v3 s4-v3 s5-v3 s6-v3 s7-v3 s8-v3 s9-v3"
   },
   "devDependencies": {
     "@fontsource/manrope": "5.1.0",

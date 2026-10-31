@@ -2,6 +2,170 @@
 
 Vidéos verticales 1080 × 1920, 30 i/s, sans son nécessaire. Elles racontent **la même histoire** (Fête du Lac, Belrive) vue par les participants, les organisateurs et les commerces partenaires. La V3 (six coupes 15 s / 30 s) est décrite d'abord ; les audits V1 → V2 et la V1 restent documentés en dessous. Les prénoms Aminata et Mei des versions précédentes sont devenus Julie et Sophie.
 
+## v3 — neuf films validés par le client (style H pastel, 20 à 44 s)
+
+Neuf vidéos 9:16 (SVG 540 × 960, MP4 1080 × 1920, 30 i/s, **muettes**) fabriquées à partir des scénarios validés (`src/h/films-v3.js`, copie conforme du fichier client : temps de début, titre, description, texte écran « gros titre · petit texte », voix off). Image d'abord, son ensuite : la voix off et la musique sont livrées à part dans `voix-off/` (un `.srt` horodaté et un `.txt` lisible par film, `voix-off/README.md` avec la direction de voix et la note musique de chaque film).
+
+**Direction de voix (toutes les vidéos)** : voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra dynamique ; tutoiement côté joueurs, vouvoiement côté pros.
+
+**Direction artistique** : un fond pastel uni par scène (jaune beurre `#FDF6B2`, rose pâle `#F9D5E5`, menthe `#D9F2EA`, bleu ciel `#D7EEF9`, lilas `#E6DDF7`), texte encre `#150C1C`, gros titre Manrope 800 serré, magenta `#E0218A` en accent seulement, vrais écrans Flowin comme image principale, anneau de flash aux transitions, silhouettes pleines sans visage. Rythme du fichier client (plans de 2,5 à 5 s) ; un gros titre reste au moins 2,5 s à l'écran. Chaque film finit sur le logo Flowin + le **macaron Plug & Play** (pilule dégradée `#F5A100 → #EC5B45` de `plaquette-nds.html`, `.ss-pill`) + le QR démo `/parcours/quiz?ev=ev-demo-quiz&preview=1` (aperçu qui n'enregistre rien), lu par jsQR sur les neuf fins. Zones sûres (haut 10 %, bas 20 %, droite 15 %) : 0 avertissement.
+
+**Sources** : `src/h/kit-v3.js` (briques et écrans v3), `src/h/v3-<id>.js` (dessin de chaque film), `src/h/ecarts-v3.js` (écarts de véracité), `build-v3.mjs` (pages, voix off), `assets/` (affiches réelles du kit digital NDS, QR de station remplacé par le QR démo, nom d'une personne masqué dans le bandeau partenaires). `npm run build:v3` puis `node render.mjs s1-v3 … s9-v3`.
+
+### Écrans reproduits (vérifiés dans `admin/`)
+- **Quiz, bonus** : écrans du quiz NDS (`app/parcours/nds2026`), quiz d'un commerce (`QuizClient`, en-tête générique). **Roue** : `SpinClient.tsx` (« Faire tourner la roue », « Tu as gagné ! »). **Tombola** : `TombolaClient.tsx` (« Tu es dans la course ! », « Ton ticket tombola »). **Vote** : `VoteClient.tsx` (« Votez ! », « Sélectionné », « Valider mon vote → »).
+- **Email gagnant** : objet et phrases de `supabase/functions/send-ticket-gagnant` (« Nuits du Sud & Flowin — Grand Jeu Concours — Vous avez gagné ! », « Waouh, bravo ! », « >>> TON BILLET EST ICI <<< », les 3 étapes). **Billet** : `public/nds/billets-partenaires.html` (en-tête violet, filet or, « Commerce partenaire », QR, « Le commerçant scanne ce code pour valider »).
+- **Retrait** : `public/lot.html` (« Code professionnel » à 4 chiffres, « Accéder à la validation », « Billet valable », « Valider le retrait du lot », « Retrait validé — Le lot peut être remis au client. », un billet ne sert qu'une fois).
+- **Espace pro** (charte `CHARTE_PRO`) : « Mes super data » onglets CRM / Gagnants & tirage / Trafic ; Trafic = `flashs QR`, `dont physique`, `dont digital`, `parties`, `joueurs`, « Source d'arrivée » (sources des QR de suivi par support : `affiche-vitrine`, `support-caisse`, `Réseaux · instagram`) ou liste des stations ; statistiques = camemberts Sexe / Tranches d'âge / Codes postaux, pic journalier et horaire (`components/operations/BlocsOperations.tsx`) ; CRM = tuiles contacts et « opt-in (relançables) », filtre « Opt-in seulement », « Envoyer un email » (`components/pro/CrmPro.tsx`) ; tirage = « Lancer le tirage » → « Gagnant proposé » → « Confirmer et envoyer le billet » (`components/pro/GagnantsClient.tsx`) ; résultats des questions (« Réponses aux questions »).
+- **Création (s9)** : parcours unique de la branche `feat/parcours-creation-unique` (`components/creation/ParcoursCreation.tsx`, pas encore sur `main`) : « Que voulez-vous faire ? » (Créer une animation / Rejoindre un super event / Proposer un super event), étapes « Votre animation · Jeu · Lots · Diffusion & QR », « Quel jeu ? » (Quiz + bonus — marque blanche, Roue de la fortune, Tombola, Vote), « Vos lots » (nom, quantité, valeur, Tirage au sort / Gain immédiat, conditions), fin « Animation créée — En attente de validation par Flowin avant mise en ligne » avec « 3 QR, un par usage » (En magasin, Réseaux sociaux, Tracking) et le bouton « Affiche A4 ».
+- **Affiches** : `public/nds/kit-digital/nds/station-jeu_32x45_caisse-1.png` (bandeau « Nos partenaires » imprimé) pour s1 et s4.
+- **Sponsor (s7)** : pack « Sponsor officiel » (`public/bon-commande-nds-a4.html`) : présence sur tous les supports et stations, bandeau défilant de l'app (`NDS2026Client.tsx`, partenaires `bandeau=true`), lot mis en jeu. « VOTRE MARQUE » = emplacement générique.
+- **Chiffres** : tous les écrans chiffrés portent « Valeurs d'illustration » ; les jauges « + de vues / passages / visibilité » n'ont pas de chiffre. Lots : « Lots donnés à titre d'exemple » (places de concert, pass VIP, soin capillaire, massage… fournis par le client). Prénoms et commerces fictifs (Claire, « Les Fleurs de Claire »), noms de joueurs masqués (« M•••• D. »).
+
+### Écarts avec les scénarios validés (véracité)
+- **s3, Dimanche** : écran « DIMANCHE. TIRAGE EN UN CLIC. · Le billet part tout seul. » et voix off ajustée au lieu de « tirage automatique, la liste des gagnants est diffusée » : le tirage se lance d'un clic (pas de tirage programmé) ; seul l'envoi du billet est automatique ; aucune diffusion automatique de la liste des gagnants.
+- **s3, La relance** : pas de bouton « Relancer » ; l'écran réel montre « Opt-in seulement » puis « Envoyer un email ».
+- **s3 et s4, QR de fin** : QR démo (consigne) au lieu d'un QR « compte pro » / « rejoindre ».
+- **s9** : le parcours réel a une étape « Votre animation » (nom, dates) avant le jeu, propose aussi le Vote, et une animation créée par un pro attend la **validation de Flowin** avant mise en ligne ; l'app génère l'affiche **A4** (les A5/A3 sont produites par Flowin quand le pro coche « QR code imprimé »). Le film montre l'affiche A4.
+- **s4, L'affiche** : affiche station 32 × 45 cm (format proche de l'A3) avec le bandeau des partenaires imprimés.
+
+### Non vérifiable dans l'app
+Le macaron vitrine et le support de caisse (matériel physique du kit, dessin indicatif) ; le « pass VIP », le soin capillaire, le massage (lots indicatifs du client) ; le « lot RSE » de s7 (le pack sponsor prévoit un lot mis en jeu, l'étiquette RSE n'est pas dans le code) ; les publications sur les réseaux de la commerçante (s3, illustrées sans compte réel).
+
+### s1 — Flowin, le jeu de ton festival (36 s)
+À qui : les festivaliers. But : comprendre Flowin et jouer pendant le festival. Page `s1-v3.html`, vidéo `s1-v3.mp4`, planche `planches/s1-v3.png`, voix off `voix-off/s1.srt` / `.txt`. Musique : Pop électro festive, 118–124 BPM, montée sur l'accroche, drop au moment des cadeaux. Bibliothèque libre de droits (Epidemic Sound, Artlist, ou la bibliothèque commerciale TikTok/Instagram).
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3 s | Accroche | beurre | CE SOIR, TU JOUES AUSSI. |
+| 3–5,5 s | Flowin | rose | FLOWIN, C’EST QUOI ? |
+| 5,5–8,5 s | Le principe | lilas | UN FLASH. UN JEU. UN CADEAU. |
+| 8,5–11,5 s | Le téléphone | menthe | TON TÉLÉPHONE SUFFIT. · Rien à télécharger. |
+| 11,5–14,5 s | Les stations | bleu ciel | REPÈRE LES STATIONS DE JEU. |
+| 14,5–17,5 s | Les jeux | rose | QUIZ. ROULETTE. TOMBOLA. |
+| 17,5–20,5 s | Le quiz | beurre | RÉPONDS. GAGNE DES TICKETS. |
+| 20,5–25 s | Les cadeaux | lilas | À GAGNER : · Places de concert, pass VIP, lots des commerçants. |
+| 25–29 s | Le gain | menthe | LE BILLET ARRIVE SUR TON TÉLÉPHONE. |
+| 29–36 s | Fin | beurre | FLASHE UNE STATION. RÉPONDS AU QUIZ. |
+
+### s2 — Chaque commerce, une occasion de gagner (36 s)
+À qui : les clients des commerces de proximité. But : repérer Flowin, jouer et découvrir les commerces. Page `s2-v3.html`, vidéo `s2-v3.mp4`, planche `planches/s2-v3.png`, voix off `voix-off/s2.srt` / `.txt`. Musique : Pop acoustique enjouée (ukulélé, claquements de mains), 110–116 BPM.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3 s | Accroche | bleu ciel | TA RUE CACHE DES CADEAUX. |
+| 3–5,5 s | Le macaron | beurre | REPÈRE LE MACARON FLOWIN. |
+| 5,5–8 s | Flashe | menthe | FLASHE. C’EST GRATUIT. |
+| 8–11,5 s | Chaque commerçant a son jeu | rose | CHAQUE COMMERÇANT A SON JEU. |
+| 11,5–15 s | La révélation | lilas | GAGNÉ ? DÉCOUVRE-LE TOUT DE SUITE. |
+| 15–19 s | Une occasion de gagner | bleu ciel | CHAQUE COMMERCE, UNE OCCASION DE GAGNER. |
+| 19–23 s | Les cadeaux | beurre | DES CADEAUX PRÈS DE CHEZ TOI. |
+| 23–27 s | Le retrait | menthe | MONTRE TON BILLET. REPARS AVEC. |
+| 27–30,5 s | Découvre | rose | ET DÉCOUVRE TES COMMERCES. |
+| 30,5–36 s | Fin | bleu ciel | JOUE CHEZ TES COMMERÇANTS. |
+
+### s3 — La semaine où la boutique de Claire a changé (44 s)
+À qui : les commerçants. But : vivre, en une semaine, le bénéfice de Flowin dans une boutique. Narratif : on suit Claire, fleuriste. Page `s3-v3.html`, vidéo `s3-v3.mp4`, planche `planches/s3-v3.png`, voix off `voix-off/s3.srt` / `.txt`. Musique : Groove funk-pop optimiste, 100–108 BPM, basse marquée ; montée progressive jusqu'au bilan.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3 s | Lundi | rose | LUNDI. LA BOUTIQUE EST CALME. |
+| 3–5,5 s | Le kit | menthe | LE KIT FLOWIN ARRIVE. |
+| 5,5–9 s | On colle | bleu ciel | ON COLLE. C’EST TOUT. |
+| 9–12 s | Mardi | lilas | MARDI. ELLE LE DIT SUR SES RÉSEAUX. |
+| 12–15 s | Les passants | beurre | LES PASSANTS S’ARRÊTENT. |
+| 15–17,5 s | Ils jouent | rose | ILS JOUENT. |
+| 17,5–21,5 s | Les lots | menthe | SES LOTS, SES OBJECTIFS. |
+| 21,5–25 s | Dimanche | bleu ciel | DIMANCHE. TIRAGE EN UN CLIC. · Le billet part tout seul. *(écart, voir plus bas)* |
+| 25–29 s | Le gagnant revient | beurre | UN FLASH = UN NOUVEAU CLIENT. |
+| 29–32,5 s | Le bilan | lilas | ELLE SAIT CE QUI MARCHE. |
+| 32,5–35,5 s | La relance | menthe | ELLE RELANCE SES CLIENTS. *(écart, voir plus bas)* |
+| 35,5–39 s | Animation = visibilité | rose | ANIMATION = COMMUNICATION = VISIBILITÉ. |
+| 39–44 s | Fin | menthe | INSTALLEZ FLOWIN. |
+
+### s4 — Le festival passe par votre boutique (36 s)
+À qui : les commerçants. But : comprendre le super event et le rejoindre. Page `s4-v3.html`, vidéo `s4-v3.mp4`, planche `planches/s4-v3.png`, voix off `voix-off/s4.srt` / `.txt`. Musique : Électro-pop lumineuse, 120 BPM, ambiance festival.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3,5 s | Accroche | lilas | LE FESTIVAL PASSE PAR VOTRE BOUTIQUE. |
+| 3,5–7,5 s | Le super event | beurre | UN SUPER EVENT : · Un même jeu, le festival et les commerces. |
+| 7,5–10,5 s | Station de jeu | rose | DEVENEZ STATION DE JEU. |
+| 10,5–14 s | L’affiche | menthe | VOTRE NOM SUR L’AFFICHE. |
+| 14–17,5 s | Plus de tout | bleu ciel | + DE VUES. + DE PASSAGES. + D’ÉCHANGES. |
+| 17,5–21 s | Vos lots | lilas | PRÉSENTEZ VOS LOTS. |
+| 21–24,5 s | Le gagnant vient | beurre | LE GAGNANT VIENT CHEZ VOUS. |
+| 24,5–28 s | Vos chiffres | rose | VOS CHIFFRES EN DIRECT. |
+| 28–36 s | Fin | lilas | REJOIGNEZ UN SUPER EVENT. |
+
+### s5 — Le jeu de toute votre rue (36 s)
+À qui : associations de commerçants, associations multi-points, organisateurs d’événements. But : créer une opération commune. Page `s5-v3.html`, vidéo `s5-v3.mp4`, planche `planches/s5-v3.png`, voix off `voix-off/s5.srt` / `.txt`. Musique : Pop entraînante et fédératrice, 112 BPM, chœurs légers.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3,5 s | Accroche | menthe | RASSEMBLEZ TOUTE LA RUE. |
+| 3,5–7 s | Fédérer | bleu ciel | UN OUTIL POUR FÉDÉRER. |
+| 7–11 s | Un thème, une date | beurre | UN THÈME. UNE DATE. |
+| 11–14,5 s | Plug & Play | rose | PLUG & PLAY. |
+| 14,5–17 s | Sonder | lilas | SONDEZ. |
+| 17–19,5 s | Mesurer | menthe | MESUREZ. |
+| 19,5–23 s | Origine | bleu ciel | SACHEZ D’OÙ ILS VIENNENT. |
+| 23–27,5 s | Sur un an | beurre | UNE OPÉRATION LISIBLE SUR UN AN. |
+| 27,5–36 s | Fin | menthe | CRÉEZ VOTRE SUPER EVENT. |
+
+### s6 — Votre festival, partout en ville (40 s)
+À qui : organisateurs de festivals. But : faire de Flowin le lien de diffusion avec les commerces, et l’outil de mesure et de fichier client. Page `s6-v3.html`, vidéo `s6-v3.mp4`, planche `planches/s6-v3.png`, voix off `voix-off/s6.srt` / `.txt`. Musique : Électro cinématique, 124 BPM, montée continue, impact final.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3,5 s | Accroche | beurre | VOTRE FESTIVAL, PARTOUT EN VILLE. |
+| 3,5–7 s | Le lien | lilas | FLOWIN, VOTRE LIEN DE DIFFUSION. |
+| 7–10,5 s | Les relais | bleu ciel | CHAQUE STATION EST UN RELAIS. |
+| 10,5–14 s | Visibilité | rose | + DE VISIBILITÉ. + DE FRÉQUENTATION. |
+| 14–17 s | Animer | menthe | ANIMEZ CHAQUE PASSAGE. |
+| 17–20 s | Sensibiliser | beurre | SENSIBILISEZ. |
+| 20–23 s | Mesurer | lilas | MESUREZ LE PASSAGE. |
+| 23–26,5 s | Les personas | bleu ciel | CONNAISSEZ VOTRE PUBLIC. |
+| 26,5–30 s | Le fichier | rose | DÉVELOPPEZ VOTRE FICHIER. |
+| 30–33,5 s | Interagir | menthe | INTERAGISSEZ EN DIRECT. |
+| 33,5–40 s | Fin | beurre | DEVENEZ UN SUPER EVENT. |
+
+### s7 — Votre marque au cœur du jeu (25 s)
+À qui : sponsors et marques. But : comprendre la visibilité du pack Sponsor. Page `s7-v3.html`, vidéo `s7-v3.mp4`, planche `planches/s7-v3.png`, voix off `voix-off/s7.srt` / `.txt`. Musique : Pop élégante, 108 BPM.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–3,5 s | Accroche | lilas | VOTRE MARQUE AU CŒUR DU JEU. |
+| 3,5–7 s | Partout | rose | SUR TOUTES LES STATIONS. |
+| 7–10 s | Le bandeau | menthe | DANS CHAQUE PARTIE. |
+| 10–13,5 s | Le lot RSE | beurre | UN LOT À VOTRE NOM. |
+| 13,5–18 s | Moment heureux | lilas | ASSOCIÉE À UN MOMENT HEUREUX. |
+| 18–25 s | Fin | rose | DEVENEZ SPONSOR DU SUPER EVENT. |
+
+### s8 — Gagné : simple pour le client, simple pour le commerce (20 s)
+À qui : gagnants et commerçants. But : montrer la simplicité du retrait des deux côtés. Page `s8-v3.html`, vidéo `s8-v3.mp4`, planche `planches/s8-v3.png`, voix off `voix-off/s8.srt` / `.txt`. Musique : Jingle joyeux, 120 BPM.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–2,5 s | Gagné | menthe | TU AS GAGNÉ ! |
+| 2,5–5,5 s | Le billet | beurre | TON BILLET EST SUR TON TÉLÉPHONE. |
+| 5,5–9 s | En boutique | rose | TU LE MONTRES. IL LE SCANNE. |
+| 9–12 s | Côté commerce | lilas | UN TÉLÉPHONE SUFFIT. |
+| 12–15,5 s | Validé | menthe | RETRAIT VALIDÉ. |
+| 15,5–20 s | Fin | beurre | RÉCUPÈRE TON CADEAU. |
+
+### s9 — Votre animation en quelques étapes (30 s)
+À qui : les pros qui démarrent. But : prouver le Plug & Play en tuto animé, sur les vrais écrans de création. Page `s9-v3.html`, vidéo `s9-v3.mp4`, planche `planches/s9-v3.png`, voix off `voix-off/s9.srt` / `.txt`. Musique : Lo-fi pop douce, 95 BPM.
+
+| Temps | Scène | Fond | À l'écran |
+|---|---|---|---|
+| 0–4 s | Accroche | bleu ciel | VOTRE ANIMATION EN QUELQUES ÉTAPES. |
+| 4–8,5 s | Le jeu | menthe | CHOISISSEZ VOTRE JEU. |
+| 8,5–13 s | Les lots | beurre | AJOUTEZ VOS LOTS. |
+| 13–18 s | Le QR | lilas | VOTRE QR ET VOS AFFICHES SONT PRÊTS. |
+| 18–23,5 s | Collez | rose | COLLEZ. C’EST PARTI. |
+| 23,5–30 s | Fin | menthe | PLUG & PLAY. |
+
 ## Style H pastel — deux vidéos participants (commerces 45 s, festival 33 s)
 
 Retour de Romain sur le guide en 4 étapes : il manquait l'introduction (« c'est quoi Flowin ? »), le festival était mélangé aux commerces, le rythme était trop rapide, et il manquait la carte des stations, les deux issues (gain immédiat ou tirage), le retrait du cadeau et les super events. Couleurs jugées trop agressives. D'où **deux vidéos séparées**, même moteur H (mot géant Manrope 800, un seul objet réel, anneau de flash, désormais encre sur pastel), **palette pastel** : jaune beurre, rose pâle, menthe, bleu ciel, lilas, texte encre, magenta seulement en accent (« in » du logo, fin, piste). Environ 4,5 s par scène, une idée par scène.

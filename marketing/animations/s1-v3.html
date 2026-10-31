@@ -940,7 +940,7 @@ window.ECARTS = {
   K3.illus = function (u, sw, y) { return txt(sw / 2, y, 'Valeurs d’illustration', 7.5 * u, { anchor: 'middle', w: 700, fill: PRO.mut }) }
   // Trafic (BlocsOperations, ContenuTracking) : flashs, physique, digital,
   // parties, joueurs, puis « Source d'arrivée » (QR de suivi par support).
-  K3.ecranTrafic = function (p, sources) {
+  K3.ecranTrafic = function (p, sources, titreListe) {
     sources = sources || [['affiche-vitrine', 0.9], ['support-caisse', 0.7], ['Réseaux · instagram', 0.55]]
     return function (sw, sh) {
       var u = sw / 240, k = F.clamp(p, 0, 1), g = K3.proFond(sw, sh, u, 'Mes super data', 'CRM, gagnants et trafic de vos opérations.')
@@ -948,7 +948,7 @@ window.ECARTS = {
       var v = function (x) { return String(Math.round(x * k)) }
       g += K3.mini(u, 14 * u, 140 * u, 68 * u, v(214), 'flashs QR') + K3.mini(u, 86 * u, 140 * u, 68 * u, v(150), 'dont physique') + K3.mini(u, 158 * u, 140 * u, 68 * u, v(64), 'dont digital')
       g += K3.mini(u, 14 * u, 186 * u, 104 * u, v(168), 'parties') + K3.mini(u, 122 * u, 186 * u, 104 * u, v(121), 'joueurs')
-      g += txt(14 * u, 248 * u, 'SOURCE D’ARRIVÉE', 7.5 * u, { fill: PRO.mut, ls: 0.6 * u })
+      g += txt(14 * u, 248 * u, titreListe || 'SOURCE D’ARRIVÉE', 7.5 * u, { fill: PRO.mut, ls: 0.6 * u })
       sources.forEach(function (s, i) {
         var y = (258 + i * 30) * u, w = 120 * u * s[1] * F.easeOut(F.clamp(k * 1.4 - i * 0.15, 0, 1))
         g += rect(14 * u, y, 212 * u, 24 * u, 7 * u, '#fff', { stroke: PRO.bord, sw: u }) + txt(22 * u, y + 15.5 * u, s[0], 8.5 * u, { fill: PRO.texte })
@@ -1129,7 +1129,7 @@ window.ECARTS = {
   // Fin : « Le jeu est en ligne : 3 QR, un par usage » + Affiche A4.
   K3.ecranQRs = function (p) {
     return function (sw, sh) {
-      var u = sw / 240, g = K3.proFond(sw, sh, u, 'Animation créée', '') + K3.etapes(u, 4)
+      var u = sw / 240, g = K3.proFond(sw, sh, u, 'Animation créée', 'En attente de validation par Flowin avant mise en ligne.') + K3.etapes(u, 4)
       g += txt(14 * u, 150 * u, 'Le jeu est en ligne :', 12 * u, { fill: PRO.texte }) + txt(14 * u, 165 * u, '3 QR, un par usage', 12 * u, { fill: PRO.texte })
       ;[['En magasin', 'À imprimer, à afficher'], ['Réseaux sociaux', 'Lien pour vos posts'], ['Tracking', 'Un support précis']].forEach(function (t, i) {
         var y = (178 + i * 64) * u, q = F.easeOut(F.clamp(p * 2 - i * 0.3, 0, 1))
@@ -1179,7 +1179,7 @@ window.ECARTS = {
   K3.marque = function (x, y, w, col) {
     var h = w * 0.42
     return '<g transform="translate(' + num(x) + ',' + num(y) + ')">' + rect(-w / 2, -h / 2, w, h, h * 0.2, '#fff', { stroke: col || MAG, sw: 3 }) +
-      '<circle cx="' + num(-w * 0.32) + '" cy="0" r="' + num(h * 0.26) + '" fill="' + (col || MAG) + '"/>' + txt(w * 0.08, h * 0.1, 'VOTRE MARQUE', w * 0.09, { anchor: 'middle', fill: col || MAG }) + '</g>'
+      '<circle cx="' + num(-w * 0.32) + '" cy="0" r="' + num(h * 0.26) + '" fill="' + (col || MAG) + '"/>' + txt(w * 0.13, h * 0.1, 'VOTRE MARQUE', w * 0.072, { anchor: 'middle', fill: col || MAG }) + '</g>'
   }
   // Pastille de rue / commerce sur un plan (cercle + icône), allumée p.
   K3.point = function (x, y, p, icone) {

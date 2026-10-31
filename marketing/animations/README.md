@@ -18,6 +18,23 @@ Vidéos verticales 1080 × 1920 (30 i/s) pour TikTok, Instagram et Facebook, par
 | `build.mjs` | Assemble les pages HTML : polices Manrope en base64 et QR code de fin intégrés, sans ressource externe. |
 | `render.mjs` | Planches, lecture des QR, puis export MP4 (Playwright à 30 i/s image par image, puis ffmpeg). |
 
+## v3 — neuf films validés (style H pastel)
+
+Neuf vidéos tirées des scénarios validés par le client (à ne pas confondre avec l'ancienne « V3 » des six coupes 15 s / 30 s) : s1 participants festival, s2 participants commerces, s3 commerce animation (« la semaine de Claire »), s4 commerce super event, s5 associations, s6 festivals, s7 sponsors, s8 gagnant, s9 tuto pro. MP4 **muets** : voix off et musique livrées à part dans `voix-off/`. Détail, écrans vérifiés et écarts : [SCENARIOS.md](SCENARIOS.md#v3--neuf-films-validés-par-le-client-style-h-pastel-20-à-44-s).
+
+| Fichier | Rôle |
+|---|---|
+| `s1-v3.html` … `s9-v3.html` | Pages storyboard autonomes : lecteur 9:16 (Lecture, Rejouer, barre, temps) et scènes horodatées cliquables (titre, description, texte écran, voix off, écart éventuel). `#record` = scène seule. |
+| `s1-v3.mp4` … `s9-v3.mp4` | 1080 × 1920, 30 i/s, H.264 crf 18, sans son. |
+| `planches/s<n>-v3.png` | Planches de relecture (image 0, scènes clés, fin) ; `planches/rapport.json` : durée, QR lu, avertissements. |
+| `voix-off/<id>.srt`, `.txt`, `README.md` | Voix off horodatée (une réplique par scène), script lisible avec direction de voix et note musique ; README : direction de voix commune et musique de chaque film. |
+| `src/h/films-v3.js` | Scénarios validés (source de vérité des textes et du minutage). |
+| `src/h/ecarts-v3.js` | Écarts volontaires (véracité), repris dans les pages et la voix off. |
+| `src/h/kit-v3.js`, `src/h/v3-<id>.js` | Briques v3 (macaron Plug & Play, écrans pro, billet, retrait, tirage, CRM, création…) et dessin de chaque film. |
+| `assets/` | Affiches réelles du kit digital NDS (QR de station remplacé par le QR démo). |
+
+Régénérer : `npm run build:v3` (pages + voix off), puis `npm run render:v3` (planches, contrôle des QR, MP4) ou `node render.mjs s3-v3` pour un seul film ; `node render.mjs --planches --toutes s3-v3` pour la planche de toutes les scènes.
+
 ## Régénérer
 
 Prérequis : Node 18+, ffmpeg, Playwright avec Chromium.
