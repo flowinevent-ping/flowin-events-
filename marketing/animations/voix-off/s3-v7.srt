@@ -1,0 +1,67 @@
+1
+00:00:00,150 --> 00:00:03,850
+Votre fichier client dort. Et chaque jour, des passants vous échappent.
+
+2
+00:00:04,150 --> 00:00:07,850
+Flowin capte le flux : le jeu transforme le passage en contacts.
+
+3
+00:00:08,150 --> 00:00:11,850
+Et il mesure l’impact de vos actions : affiche, réseaux, flyers, campagnes.
+
+4
+00:00:12,150 --> 00:00:17,850
+Chaque support est mesuré. Vous voyez ce qui marche.
+
+5
+00:00:18,150 --> 00:00:22,350
+Une animation plug and play : le temps de coller un macaron.
+
+6
+00:00:22,650 --> 00:00:26,350
+Un : ils flashent, sans appli.
+
+7
+00:00:26,650 --> 00:00:30,350
+Deux : ils jouent. Quiz, roue, tombola.
+
+8
+00:00:30,650 --> 00:00:34,350
+Le quiz sonde vos clients et crée du lien : questions, avis, sondage.
+
+9
+00:00:34,650 --> 00:00:38,350
+Trois : ils gagnent.
+
+10
+00:00:38,650 --> 00:00:42,350
+Quatre : ils reviennent chercher leur lot, chez vous.
+
+11
+00:00:42,650 --> 00:00:46,350
+Renforcez votre image : faites jouer, faites-vous connaître, faites revenir.
+
+12
+00:00:46,650 --> 00:00:50,850
+Vous connaissez vos clients : âge, sexe, provenance, avis.
+
+13
+00:00:51,150 --> 00:00:54,850
+Et tout se gère depuis votre téléphone : lots, tirage, billets.
+
+14
+00:00:55,150 --> 00:00:58,850
+Cinquante-cinq pour cent des joueurs souhaitent garder le contact.
+
+15
+00:00:59,150 --> 00:01:02,850
+Soixante-dix pour cent d’opt-in sur un événement local.
+
+16
+00:01:03,150 --> 00:01:06,850
+Le tout pour moins de trois euros par jour.
+
+17
+00:01:07,150 --> 00:01:11,850
+Installez Flowin, dès maintenant.
