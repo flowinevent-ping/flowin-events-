@@ -8,7 +8,7 @@
 <style>
   :root{
     --ink:#1B3A5C; --ink2:#2C4A6B; --muted:#5a6b80; --faint:#8A97A8;
-    --teal:#00B4A0; --tealD:#00806F; --tealL:#DDF4F0; --blue:#3B5CC4; --green:#0B7A4F;
+    --teal:#7A4FE0; --tealD:#5B34C2; --tealL:#EEE8FC; --blue:#3B5CC4; --green:#3B5CC4;
     --mint:#F4F6F9; --sky:#E3E9F8; --off:#F4F6F9; --cream:#F4F6F9;
     --paper:#F4F6F9; --line:#DCE3EC; --white:#fff; --err:#C62F2F; --hl:#E3E9F8;
   }
@@ -125,7 +125,7 @@
   .paybox b{color:var(--ink)}
   .paybox .iban{font-variant-numeric:tabular-nums;letter-spacing:.03em}
   .chk{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.45;color:var(--ink)}
-  .chk input{width:20px;height:20px;flex:none;accent-color:#00B4A0;margin-top:1px}
+  .chk input{width:20px;height:20px;flex:none;accent-color:#7A4FE0;margin-top:1px}
   .chk a{color:var(--tealD);font-weight:800}
   .chk.err{color:var(--err)}
 
@@ -134,7 +134,7 @@
   .sign .clock b{color:var(--ink);font-variant-numeric:tabular-nums}
 
   .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:24px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(0,180,160,.55)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--teal);border:none;border-radius:100px;padding:15px 26px;cursor:pointer;text-decoration:none;box-shadow:0 12px 26px -14px rgba(122,79,224,.6)}
   .btn[disabled]{opacity:.55;cursor:default}
   .btn.ghost{background:#fff;color:var(--tealD);border:1.5px solid var(--teal);box-shadow:none}
   .btn.dark{background:var(--teal)}
@@ -404,7 +404,7 @@
         d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + n1(p1[1] + (p2[1] - p0[1]) / 6) + ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + n1(p2[1] - (p3[1] - p1[1]) / 6) + ' ' + n1(p2[0]) + ',' + n1(p2[1]); }
       return '<g transform="translate(' + cx + ',' + cy + ')" fill="' + col + '"><path d="' + d + 'Z"/><circle cx="' + n1(-r * 1.2) + '" cy="' + n1(r * 0.4) + '" r="' + n1(r * 0.1) + '"/></g>';
     }
-    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#C9D5F4', 7, 20, 0) + tache(44, '#BDEBE3', 3, -40, 30);
+    var el = $('headPaint'); if (el) el.innerHTML = tache(62, '#C9D5F4', 7, 20, 0) + tache(44, '#E2D8FA', 3, -40, 30);
   })();
 
   /* ---------- État ---------- */
@@ -646,7 +646,7 @@
     function S(t){ return String(t == null ? '' : t).replace(/ /g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
     var doc = new J({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     var W = 210, M = 15, x = M, y = 18, CW = W - 2 * M;
-    var ink = [27, 58, 92], mut = [90, 107, 128], mag = [59, 92, 196], gold = [59, 92, 196], teal = [0, 128, 111];
+    var ink = [27, 58, 92], mut = [90, 107, 128], mag = [59, 92, 196], gold = [59, 92, 196], teal = [91, 52, 194];
     function T(t, xx, yy, sz, stl, col, al){ doc.setFont('helvetica', stl || 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); doc.text(S(t), xx, yy, al ? { align: al } : undefined); }
     function wrap(t, xx, yy, sz, col, w, lh){ doc.setFont('helvetica', 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); var ls = doc.splitTextToSize(S(t), w); for (var i = 0; i < ls.length; i++) { doc.text(ls[i], xx, yy); yy += lh; } return yy; }
     /* Signature de marque */
@@ -654,7 +654,7 @@
     doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text('Flow', x, y + 4);
     var fw = doc.getTextWidth('Flow'); doc.setTextColor(mag[0], mag[1], mag[2]); doc.text('i', x + fw, y + 4); var iw = doc.getTextWidth('i'); doc.setTextColor(gold[0], gold[1], gold[2]); doc.text('n', x + fw + iw, y + 4);
     T('A N I M A T I O N   D I G I T A L E', x, y + 10.5, 7, 'bold', [120, 112, 124]);
-    doc.setFillColor(0, 180, 160); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
+    doc.setFillColor(122, 79, 224); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
     T('Bon de commande', W - M, y + 2, 18, 'bold', ink, 'right');
     T('Flowin Animation magasin', W - M, y + 8, 9.5, 'normal', mut, 'right');
     T('No ' + rec.id, W - M, y + 14, 9, 'bold', ink, 'right');
