@@ -26,3 +26,4 @@ Voix féminine, cool, posée, suave, chaleureuse, un peu « waouh », pas ultra 
 - **s3-v8 — Installez Flowin dès maintenant** (73.5 s) : Groove funk-pop optimiste, 96–100 BPM, régulier ; temps forts sur l’équaliseur, 55 % et 70 %.
 - **s3-v9 — Installez Flowin dès maintenant** (74 s) : Groove funk-pop solaire, 96–100 BPM, régulier ; temps forts sur l’équaliseur, 55 % et 70 %.
 - **s3-v10 — Installez Flowin dès maintenant** (78.5 s) : Groove funk-pop clair, 96–100 BPM, régulier ; temps forts sur l’équaliseur, 55 % et 70 %.
+- **s3-v11 — Installez Flowin dès maintenant** (80 s) : Groove funk-pop clair, 96–100 BPM, régulier ; temps forts sur l’équaliseur, 55 % et 70 %.

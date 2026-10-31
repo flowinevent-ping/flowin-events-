@@ -148,8 +148,9 @@
     g += r(18, 150, 222, 190, 6, '#FFF1E2', { stroke: INK, sw: 2.5 })
     g += '<path d="M30,166 L70,166 M30,176 L52,176" stroke="#fff" stroke-width="5" stroke-linecap="round"/>'
     g += '<path d="M30,300 L228,300" stroke="' + INK + '" stroke-width="2.5"/>'
-    // Pains en vitrine
-    ;[[62, 288, 26, -10], [112, 290, 30, 8], [170, 288, 26, -6]].forEach(function (b) {
+    // Vitrine : contenu fourni (o.vitrine, v11) ou pains (v9, v10)
+    if (o.vitrine) g += o.vitrine()
+    else [[62, 288, 26, -10], [112, 290, 30, 8], [170, 288, 26, -6]].forEach(function (b) {
       g += '<g transform="translate(' + b[0] + ',' + b[1] + ') rotate(' + b[3] + ')"><ellipse rx="' + b[2] + '" ry="' + n1(b[2] * 0.42) + '" fill="#E6A25C" stroke="' + INK + '" stroke-width="2"/><path d="M' + n1(-b[2] * 0.5) + ',-3 l6,6 M-3,-4 l6,6 M' + n1(b[2] * 0.4) + ',-3 l6,6" stroke="#FFE3CC" stroke-width="2.5" stroke-linecap="round"/></g>'
     })
     // Porte

@@ -15,7 +15,7 @@ const lire = p => readFileSync(join(ici, p), 'utf8')
 const QR_DEMO = 'https://flowin-events.vercel.app/parcours/quiz?ev=ev-demo-quiz&preview=1'
 
 // Réécritures : films-v4.js, films-v5.js… ajoutent leurs films au tableau FILMS.
-const EXTRAS = ['src/h/films-v4.js', 'src/h/films-v5.js', 'src/h/films-v6.js', 'src/h/films-v7.js', 'src/h/films-v8.js', 'src/h/films-v9.js', 'src/h/films-v10.js'].filter(p => existsSync(join(ici, p)))
+const EXTRAS = ['src/h/films-v4.js', 'src/h/films-v5.js', 'src/h/films-v6.js', 'src/h/films-v7.js', 'src/h/films-v8.js', 'src/h/films-v9.js', 'src/h/films-v10.js', 'src/h/films-v11.js'].filter(p => existsSync(join(ici, p)))
 const FILMS = new Function(lire('src/h/films-v3.js') + ';' + EXTRAS.map(lire).join(';') + ';return FILMS')()
 const version = id => { const m = /-v(\d+)$/.exec(id); return m ? +m[1] : 3 }
 const srcFilm = id => version(id) > 3 ? `src/h/v${version(id)}-${id.replace(/-v\d+$/, '')}.js` : `src/h/v3-${id}.js`
@@ -149,6 +149,7 @@ ${EXTRAS.map(p => `<script>${lire(p)}</script>`).join('\n')}
 <script>${lire('src/h/kit-v8.js')}</script>
 ${existsSync(join(ici, 'src/h/kit-v9.js')) ? `<script>${lire('src/h/kit-v9.js')}</script>` : ''}
 ${existsSync(join(ici, 'src/h/kit-v10.js')) ? `<script>${lire('src/h/kit-v10.js')}</script>` : ''}
+${existsSync(join(ici, 'src/h/kit-v11.js')) ? `<script>${lire('src/h/kit-v11.js')}</script>` : ''}
 <script>${lire(srcFilm(f.id))}</script>
 <script>
 (function(){

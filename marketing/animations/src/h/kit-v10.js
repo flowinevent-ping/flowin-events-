@@ -79,7 +79,7 @@
         g += '<circle cx="' + n1(34 * u) + '" cy="' + n1(y + 22 * u) + '" r="' + n1(13 * u) + '" fill="' + l[2] + '"/>'
         g += K3.txt(56 * u, y + 19 * u, l[0], 12 * u, { fill: INK })
         g += K3.txt(56 * u, y + 34 * u, neuf ? 'A joué au quiz · opt-in' : 'Client fidèle', 8.5 * u, { w: 700, fill: neuf ? TEAL : MUT })
-        if (neuf) g += K3.rect(166 * u, y + 13 * u, 52 * u, 18 * u, 9 * u, TEAL) + K3.txt(192 * u, y + 25.5 * u, 'NOUVEAU', 7 * u, { anchor: 'middle', fill: '#fff', ls: 0.5 * u })
+        if (neuf) g += K3.rect(166 * u, y + 13 * u, 52 * u, 18 * u, 9 * u, K10.badge || TEAL) + K3.txt(192 * u, y + 25.5 * u, 'NOUVEAU', 7 * u, { anchor: 'middle', fill: '#fff', ls: 0.5 * u })
         g += '</g>'
       })
       return g
