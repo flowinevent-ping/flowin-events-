@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Commandes Animation magasin</title>
+<title>Commandes jeu d'animation</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/flowin-tokens.css">
 <style>
@@ -52,7 +52,7 @@
 <body>
 <div class="top"><span class="lg">Flow<em>in</em></span><span style="font-size:12px;font-weight:700;opacity:.7">Super Admin</span><a href="/dashboard.html">&larr; Dashboard</a></div>
 <div class="wrap">
-  <h1>Commandes Animation magasin</h1>
+  <h1>Commandes jeu d'animation</h1>
   <p class="sub">Souscriptions issues de la plaquette et du bon de commande. Un paiement valid&eacute; (webhook GoCardless ou virement marqu&eacute; re&ccedil;u) &eacute;met la facture et envoie contrat sign&eacute; + facture acquitt&eacute;e, une seule fois.</p>
   <div class="msg" id="msg"></div>
   <div class="kpis">
@@ -62,15 +62,17 @@
     <div class="kpi"><span>&Agrave; encaisser TTC</span><b id="kR">&mdash;</b></div>
   </div>
   <div class="bar" id="filtres"></div>
-  <div class="bar"><input class="q" id="q" placeholder="Rechercher : n&deg;, raison sociale, SIRET, email, facture"><button class="btn line" type="button" id="rech">Actualiser</button><button class="btn blue" type="button" id="csv">Exporter (CSV)</button></div>
+  <div class="bar"><input class="q" id="q" placeholder="Rechercher : n&deg;, raison sociale, SIRET, email, facture"><button class="btn line" type="button" id="rech">Actualiser</button><button class="btn blue" type="button" id="csv">Exporter (CSV)</button><button class="btn line" type="button" id="crmCsv">Export CRM (CSV)</button><button class="btn line" type="button" id="crmJson">Export CRM (JSON)</button></div>
   <div class="card"><table><thead><tr><th>Date</th><th>Commande</th><th>Client</th><th>Formule</th><th>Paiement</th><th class="r">Montant TTC</th><th>Statut</th><th>Facture</th><th>Actions</th></tr></thead><tbody id="rows"><tr><td colspan="9" class="vide">Chargement&hellip;</td></tr></tbody></table></div>
 </div>
+<script src="/nds/vendor/jspdf.umd.min.js"></script>
+<script src="/bon-commande-pdf.js"></script>
 <script>
 (function(){
   'use strict';
   var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
   var KEY = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1'; /* clé publishable : publique par design */
-  var COLS = 'id,created_at,statut,type_commande,offre,engagement_mois,raison_sociale,siret,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,montant_ht,montant_ttc,mode_paiement,garantie,paiement_valide_le,paiement_source,paiement_valide_par,documents_envoyes_le,documents_envois,facture_numero,commercial';
+  var COLS = 'id,created_at,statut,type_commande,offre,engagement_mois,raison_sociale,siret,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,montant_ht,montant_ttc,mode_paiement,garantie,paiement_valide_le,paiement_source,paiement_valide_par,documents_envoyes_le,documents_envois,facture_numero,commercial,enseigne,adresse,cp,contact_fonction,panier_moyen,flux_journalier,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,prelevement_inclut_reste,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip';
   var STATUTS = { en_attente_paiement: ['En attente de paiement', 'st-attente'], mandat_en_cours: ['Mandat SEPA en cours', 'st-sepa'], mandat_actif: ['Mandat SEPA actif', 'st-sepa'],
     payee: ['Payée', 'st-payee'], documents_envoyes: ['Payée · documents envoyés', 'st-docs'], mandat_echoue: ['Mandat échoué', 'st-ko'], paiement_echoue: ['Prélèvement échoué', 'st-ko'], annulee: ['Annulée', 'st-annulee'] };
   var FILTRES = [['tous', 'Toutes'], ['attente', 'En attente de paiement'], ['payee', 'Payées'], ['docs', 'Documents envoyés'], ['ko', 'Échecs'], ['annulee', 'Annulées']];
@@ -143,7 +145,7 @@
     for (i = 0; i < v.length; i++) {
       var c = v[i], s = STATUTS[c.statut] || [c.statut, 'st-annulee'], g2 = grp(c.statut), j = journal[c.id] || [], jh = '';
       for (var k = 0; k < j.length && k < 4; k++) jh += '<div>' + dh(j[k].le) + ' · ' + esc(LIB_J[j[k].action] || j[k].action) + ' · ' + esc(j[k].par) + '</div>';
-      var acts = '';
+      var acts = '<button type="button" class="btn line" data-a="pdf" data-id="' + esc(c.id) + '">Bon (PDF)</button>';
       if (g2 === 'attente' || g2 === 'ko') acts += '<button type="button" class="btn" data-a="vir" data-id="' + esc(c.id) + '">Marquer le virement reçu</button>';
       if (g2 === 'payee' || g2 === 'docs') acts += '<button type="button" class="btn line" data-a="docs" data-id="' + esc(c.id) + '">Renvoyer les documents</button>';
       var retard = (g2 === 'attente' && jours(c.created_at) > JOURS) ? '<span class="retard">En attente depuis ' + jours(c.created_at) + ' j</span>' : '';
@@ -177,6 +179,7 @@
     var f = t.getAttribute('data-f'); if (f) { filtre = f; rendre(); return; }
     var a = t.getAttribute('data-a'), id = t.getAttribute('data-id'); if (!a || !id) return;
     var c = null; for (var i = 0; i < data.length; i++) if (data[i].id === id) c = data[i];
+    if (a === 'pdf') { bonPdf(c); return; }
     if (a === 'vir' && !window.confirm('Confirmer la réception du virement de ' + eur(c ? c.montant_ttc : 0) + ' TTC pour ' + id + ' ?\nLa facture sera émise et envoyée au client avec le contrat signé. Action journalisée à votre nom.')) return;
     if (a === 'docs' && !window.confirm('Renvoyer le contrat signé et la facture au client pour ' + id + ' ?')) return;
     if (DEMO) { demoAction(a, id); return; }
@@ -185,6 +188,43 @@
       .then(function(){ msg(a === 'vir' ? 'Virement marqué reçu : facture émise, envoi des documents lancé.' : 'Renvoi des documents demandé.', 'ok'); charger(); })
       .catch(function(err){ t.disabled = false; msg('Action refusée : ' + err.message, 'err'); });
   });
+  /* Bon de commande : même modèle que le client, la vente assistée et le PDF envoyé par email (/bon-commande-pdf.js) */
+  function bonPdf(c){
+    var J = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (!c || !J || !window.FlowinBonPDF) { msg('Le générateur PDF n’a pas pu se charger.', 'err'); return; }
+    try { window.FlowinBonPDF.construire(J, c, { signe: !!c.signature_horodatage }).save('bon-commande-flowin-' + c.id + '.pdf'); }
+    catch (err) { msg('PDF impossible : ' + err.message, 'err'); }
+  }
+  /* Export CRM : devis (bons de commande) et factures, une ligne par document (vue sql/08, non appliquée tant que non validée) */
+  var CRM_COLS = ['type_document', 'numero', 'numero_legal', 'date_document', 'raison_sociale', 'siret', 'contact_nom', 'email', 'tel', 'adresse', 'cp', 'ville', 'montant_ht', 'montant_tva', 'montant_ttc', 'statut', 'reference_commande', 'numero_externe', 'crm_id', 'crm_synchro_le'];
+  function telecharger(contenu, nom, type){
+    var blob = new Blob([contenu], { type: type }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = nom; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+  function exportCrm(format){
+    function sortie(rows){
+      var jour = new Date().toISOString().slice(0, 10);
+      if (format === 'json') { telecharger(JSON.stringify(rows, null, 2), 'export-crm-animation-' + jour + '.json', 'application/json'); return; }
+      var lines = [CRM_COLS.join(';')];
+      for (var i = 0; i < rows.length; i++) { var row = []; for (var k = 0; k < CRM_COLS.length; k++) { var x = rows[i][CRM_COLS[k]]; row.push('"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'); } lines.push(row.join(';')); }
+      telecharger('\ufeff' + lines.join('\r\n'), 'export-crm-animation-' + jour + '.csv', 'text/csv;charset=utf-8');
+    }
+    if (DEMO) {
+      var rows = [];
+      for (var i = 0; i < data.length; i++) { var c = data[i]; rows.push({ type_document: 'bon_de_commande', numero: c.id, numero_legal: c.id, date_document: c.signature_horodatage || c.created_at, raison_sociale: c.raison_sociale, siret: c.siret, contact_nom: c.contact_nom, email: c.email, tel: c.tel, adresse: c.adresse, cp: c.cp, ville: c.ville, montant_ht: c.montant_ht, montant_tva: c.montant_tva, montant_ttc: c.montant_ttc, statut: c.statut, reference_commande: c.id }); if (c.facture_numero) rows.push({ type_document: 'facture', numero: c.facture_numero, numero_legal: c.facture_numero, date_document: c.paiement_valide_le, raison_sociale: c.raison_sociale, siret: c.siret, contact_nom: c.contact_nom, email: c.email, tel: c.tel, adresse: c.adresse, cp: c.cp, ville: c.ville, montant_ht: c.montant_ht, montant_tva: c.montant_tva, montant_ttc: c.montant_ttc, statut: 'payee', reference_commande: c.id }); }
+      sortie(rows); return;
+    }
+    fetch(SUPA + '/rest/v1/export_crm_animation?select=' + CRM_COLS.join(',') + '&order=date_document.asc&limit=10000', { headers: H() })
+      .then(function(r){
+        if (r.status === 404) throw new Error('La vue export_crm_animation n’existe pas encore : sql/08-bon-commande-v2.sql doit d’abord être relu et appliqué.');
+        if (!r.ok) throw new Error('Export impossible (code ' + r.status + ').');
+        return r.json();
+      })
+      .then(function(rows){ sortie(rows || []); msg((rows || []).length + ' document(s) exporté(s).', 'ok'); })
+      .catch(function(err){ msg(err.message, 'err'); });
+  }
+  $('crmCsv').addEventListener('click', function(){ exportCrm('csv'); });
+  $('crmJson').addEventListener('click', function(){ exportCrm('json'); });
   $('rech').addEventListener('click', charger);
   $('q').addEventListener('input', rendre);
   $('csv').addEventListener('click', function(){
