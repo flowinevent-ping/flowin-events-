@@ -9,6 +9,7 @@ import AlerteLotsRetires from '@/components/pro/AlerteLotsRetires'
 import CompteurMensuel from '@/components/pro/CompteurMensuel'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, H1, SUB, BTN, BTN2 } from '@/lib/proui'
+import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
 
 export const metadata: Metadata = { title: 'Mes animations — Flowin Pro' }
 export const dynamic = 'force-dynamic'
@@ -34,6 +35,8 @@ export default async function ProAccueilPage({ searchParams }: Props) {
     proId = ev?.pro_id ?? ''
   }
   const ops = await fetchOperationsPro(proId)
+  /* Droits donnes par le Super Admin (sql/06) : sans le droit, les boutons de creation disparaissent. */
+  const peutCreer = peutOuvrirNouvelle(await lireDroitsPro(proId))
   const proName = ops.proNom ?? 'Mon établissement'
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const et = q ? '&' : '?'
@@ -50,7 +53,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
             Votre fiche est en cours de validation par l’équipe Flowin. En attendant, préparez la suite :
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>1. Créer ma première animation</Link>
+            {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>1. Créer ma première animation</Link>}
             <Link href={`/pro/compte${q}${et}onglet=rib`} style={{ ...BTN2, padding: '9px 16px', fontSize: 13, textDecoration: 'none' }}>2. Mes coordonnées bancaires</Link>
             <Link href={`/pro/compte${q}${et}onglet=entreprise`} style={{ ...BTN2, padding: '9px 16px', fontSize: 13, textDecoration: 'none' }}>3. Vérifier ma fiche entreprise</Link>
           </div>
@@ -65,7 +68,7 @@ export default async function ProAccueilPage({ searchParams }: Props) {
         </div>
         <Link href={`/pro/historique${q}`} style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Historique</Link>
         <Link href={`/pro/parcours${q}`} style={{ ...BTN2, padding: '10px 18px', fontSize: 13.5, textDecoration: 'none' }}>Aperçu mobile</Link>
-        <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, padding: '11px 20px', fontSize: 14, textDecoration: 'none' }}>+ Nouvelle animation</Link>
+        {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, padding: '11px 20px', fontSize: 14, textDecoration: 'none' }}>+ Nouvelle animation</Link>}
       </div>
 
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
@@ -84,8 +87,8 @@ export default async function ProAccueilPage({ searchParams }: Props) {
       {groupes.length === 0 && (
         <div style={{ ...CARD, textAlign: 'center', padding: 26 }}>
           <div style={{ fontSize: 16, fontWeight: 800 }}>{ops.operations.length ? 'Aucune animation de ce type' : 'Aucune animation pour le moment'}</div>
-          <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>Créez votre animation ou rejoignez un super event.</div>
-          <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, textDecoration: 'none' }}>Commencer</Link>
+          <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>{peutCreer ? 'Créez votre animation ou rejoignez un super event.' : 'Vos animations apparaîtront ici. Pour en créer, contactez Flowin.'}</div>
+          {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ ...BTN, textDecoration: 'none' }}>Commencer</Link>}
         </div>
       )}
 

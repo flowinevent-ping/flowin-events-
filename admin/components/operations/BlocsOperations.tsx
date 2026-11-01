@@ -23,6 +23,8 @@ import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
+import ModalPartenaires from './ModalPartenaires'
+import { lireDroitsPro } from '@/lib/droitsPro'
 import ModalGererLots from './ModalGererLots'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
 import { BadgeTypeQr } from './QrTraces'
@@ -201,14 +203,24 @@ function AjustementStock({ lotId, onAjuste }: { lotId: string; onAjuste: (delta:
  * mis dans le `droite` de l en-tete via les onglets appelants, il reste visible
  * meme replie. Romain (19/09) : « où est le modal ?? » -- introuvable la
  * premiere fois car cache derriere le repli. */
-export function BoutonGererLots({ op, partenaire, onChange }: { op: DonneesOperation; partenaire?: PartenaireMin | null; onChange?: () => void }) {
+export function BoutonGererLots({ op, partenaire, onChange, cotePro }: { op: DonneesOperation; partenaire?: PartenaireMin | null; onChange?: () => void; /** Espace pro : le bouton Partenaires suit le droit « gerer_partenaires » (sql/06). Le Super Admin voit toujours tout. */ cotePro?: boolean }) {
   const [ouvert, setOuvert] = useState(false)
+  const [peutPartenaires, setPeutPartenaires] = useState(true)
+  useEffect(() => {
+    if (!cotePro) return
+    const pid = op.stations[0]?.pro_id
+    if (pid) lireDroitsPro(pid).then(d => setPeutPartenaires(d.gerer_partenaires))
+  }, [cotePro, op.stations])
+  const [partenairesOuvert, setPartenairesOuvert] = useState(false)
   return (
     <>
       <button onClick={() => setOuvert(true)} style={btnPrimaire}>⚙️ Gérer les lots</button>
+      {/* Partenaires & logos : meme modale, meme emplacement cote Super Admin et cote pro. */}
+      {peutPartenaires && <button onClick={() => setPartenairesOuvert(true)} style={btn} data-ouvrir-partenaires>🤝 Partenaires &amp; logos</button>}
       {ouvert && (
         <ModalGererLots op={op} partenaire={partenaire ?? null} onClose={() => setOuvert(false)} onChange={() => { setOuvert(false); onChange?.() }} />
       )}
+      {partenairesOuvert && <ModalPartenaires op={op} onClose={() => setPartenairesOuvert(false)} onChange={onChange} />}
     </>
   )
 }
@@ -797,7 +809,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
     <>
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations, cle).map(op => (
-        <BlocOperation key={op.cle} op={op} droite={<>{onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} />}<SupprimerOperationBtn op={op} onSupprime={recharger} /></>}>
+        <BlocOperation key={op.cle} op={op} droite={<>{onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} cotePro />}<SupprimerOperationBtn op={op} onSupprime={recharger} /></>}>
           {onglet === 'lots' && <ContenuLots op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}

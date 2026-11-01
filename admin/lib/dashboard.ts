@@ -110,7 +110,11 @@ export async function fetchAllPros(): Promise<FlowinPro[]> {
    session pro ouverte (connexion /pro), le client partage ecrit en
    `authenticated` et la RLS (pros_self_*) refuse tout pro qui n est pas le sien. */
 export async function upsertPro(p: Partial<FlowinPro>): Promise<boolean> {
-  const { data, error } = await supabasePublic.from('pros').upsert(p, { onConflict: 'id' }).select('id')
+  /* `droits` (sql/06) ne passe JAMAIS par cet upsert anonyme : la base le reserve au
+     Super Admin connecte (components/dashboard/DroitsPro.tsx). */
+  const { droits: _droits, ...sansDroits } = p as Partial<FlowinPro> & { droits?: unknown }
+  void _droits
+  const { data, error } = await supabasePublic.from('pros').upsert(sansDroits, { onConflict: 'id' }).select('id')
   return !error && !!data?.length
 }
 

@@ -29,6 +29,12 @@ comment on table public.positions_joueurs is
 create index if not exists positions_joueurs_se_idx on public.positions_joueurs (super_event_id, created_at desc);
 
 alter table public.positions_joueurs enable row level security;
+-- Droits de table explicites (ne pas dependre des droits par defaut du projet) : le joueur (anon)
+-- insere seulement ; la lecture est ouverte au role authenticated, puis filtree par la politique SA.
+revoke all on public.positions_joueurs from anon, authenticated;
+grant insert on public.positions_joueurs to anon, authenticated;
+grant select on public.positions_joueurs to authenticated;
+grant all on public.positions_joueurs to service_role;
 
 -- Le parcours joueur ecrit avec la cle publique : insertion seule, et seulement
 -- avec consentement. Aucune lecture publique (lecture reservee au SA connecte).
@@ -37,7 +43,15 @@ create policy positions_joueurs_insert_public
   on public.positions_joueurs for insert to public
   with check (consentement = true);
 
+-- Lecture : Super Admin uniquement, via est_super_admin() (sql/01-identite-super-admin.sql,
+-- a appliquer AVANT). L'ancienne version lisait la table `profiles`, qui n'existe pas en prod :
+-- la politique echouait a la creation. Sans 01, aucune lecture n'est ouverte (securise par defaut).
 drop policy if exists positions_joueurs_select_sa on public.positions_joueurs;
-create policy positions_joueurs_select_sa
-  on public.positions_joueurs for select to authenticated
-  using ((select role from public.profiles where auth_user_id = auth.uid()) = 'sa');
+do $$
+begin
+  if to_regprocedure('public.est_super_admin()') is not null then
+    execute 'create policy positions_joueurs_select_sa on public.positions_joueurs for select to authenticated using (public.est_super_admin())';
+  else
+    raise notice 'est_super_admin() absente : appliquer sql/01-identite-super-admin.sql puis rejouer ce fichier pour ouvrir la lecture au Super Admin.';
+  end if;
+end $$;

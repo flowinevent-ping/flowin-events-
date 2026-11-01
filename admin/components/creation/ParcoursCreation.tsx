@@ -61,6 +61,7 @@ import { ChoixTirage, erreurTirage, cfgDepuisTirage, libelleDateTirage, localVer
 import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
 import SelecteurLot, { RecapLots, LogoSuperEvent, CarteSuperEvent } from '@/components/masters/SelecteurLot'
 import PersoMaster, { ChoixAchat, cfgMaster, MASTER_VIDE, type EtatMaster } from '@/components/masters/PersoMaster'
+import { DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
 export type ModeParcours = 'pro' | 'sa'
@@ -180,8 +181,10 @@ export function BlocAide() {
   )
 }
 
-export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, packs, typeInitial, seInitial, prefill, prosCatalogue = [], onChangerPro }: {
+export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, packs, typeInitial, seInitial, prefill, prosCatalogue = [], onChangerPro, droits = DROITS_DEFAUT }: {
   mode?: ModeParcours
+  /** Droits donnes par le Super Admin (sql/06-droits-pro.sql). Sans effet en mode SA. */
+  droits?: DroitsPro
   /** Le pro concerne. Peut etre absent seulement pour un super event cree par le SA. */
   pro: ProNouvelle | null
   banques: Banque[]
@@ -456,6 +459,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
         id, nom: nom.trim(), dateD: dateD || null, dateF: dateF || null, description: null,
         geofenceM: null, tirageGlobal: true, logoUrl: logoUrl.trim() || null,
         module: module_ as string, cfgJeu: cfgContenu,
+        proCreateur: sa ? null : (p.id || null),
         pros: participants.map(pid => ({ pro_id: pid, nom: cat.get(pid)?.nom ?? (pid === p.id ? p.nom ?? pid : pid) })),
       })
       if (!r.ok) { setEnvoi('echec'); setErreur(r.erreur ?? ''); return }
@@ -652,13 +656,15 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   if (!type || type === 'demande' || etape === 0) {
     /* Super event = orange, animation = bleu (lib/charte.ts). Memes cartes a
        halo des deux cotes ; seule la troisieme carte change selon les droits. */
-    const cartes: { t: TypeOp; titre: string; texte: string; icone: string; accent: string; cta: string }[] = [
+    const toutesCartes: { t: TypeOp; titre: string; texte: string; icone: string; accent: string; cta: string }[] = [
       { t: 'animation', titre: 'Créer une animation', texte: sa ? `Chez ${p.nom ?? 'ce pro'} : un jeu, ses lots, gain immédiat ou tirage au sort.` : 'Chez vous : un jeu, vos lots, gain immédiat ou tirage au sort.', icone: 'game', accent: ACCENT_ANIM, cta: 'Commencer' },
       { t: 'rejoindre', titre: sa ? 'Intégrer un super event' : 'Rejoindre un super event', texte: sa ? 'Le pro devient une station de l’opération, tout de suite : le jeu est déjà choisi, il apparaît sur la carte.' : 'Devenez une station d’un festival ou d’une opération de commerçants : le jeu est déjà choisi, vous apparaissez sur la carte.', icone: 'pin', accent: ACCENT_SUPER, cta: 'Voir la carte' },
-      sa
+      sa || droits.creer_super_event
         ? { t: 'super', titre: 'Créer un super event', texte: 'Festival, association, groupement : plusieurs commerces, un même jeu, un grand tirage au sort.', icone: 'sparkle', accent: ACCENT_SUPER, cta: 'Commencer' }
         : { t: 'demande', titre: 'Proposer un super event', texte: 'Vous organisez un festival ou une opération de commerçants ? Flowin la crée avec vous.', icone: 'handshake', accent: ACCENT_SUPER, cta: 'Demander à Flowin' },
     ]
+    /* Droits du pro (Super Admin, onglet « Droits » de sa fiche) : une carte dont le droit est retire disparait. */
+    const cartes = sa ? toutesCartes : toutesCartes.filter(c => c.t === 'animation' ? droits.creer_animation : c.t === 'rejoindre' ? droits.rejoindre_super_event : true)
     return (
       <div style={{ maxWidth: 1000 }}>
         <style dangerouslySetInnerHTML={{ __html: PC_CSS }} />
@@ -891,7 +897,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>
+                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
                     <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(panneauSuggestions ? { borderColor: C.magenta } : {}) }} onClick={() => { setPanneauSuggestions(v => !v); setVoieFlowin(false) }}>3 questions suggérées, à adapter</button>
                     {!sa && <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(voieFlowin ? { borderColor: C.magenta } : {}) }} onClick={() => { setVoieFlowin(true); setBanqueId(null); setPanneauSuggestions(false) }}>Je n’ai pas de questions : demander à Flowin</button>}
                   </div>
@@ -967,6 +973,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                         })}
                         {banquesBonus.length === 0 && <div style={{ fontSize: 13, ...MUTED }}>Aucune banque bonus.</div>}
                       </div>
+                      {(sa || droits.creer_banques) && (
+                        <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=bonus&depuis=jeu`} target="_blank" rel="noreferrer" data-creer-banque-bonus style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13, display: 'inline-block', marginTop: 10 }}>+ Créer une banque bonus</a>
+                      )}
                     </>
                   )}
                 </>

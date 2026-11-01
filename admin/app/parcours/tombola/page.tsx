@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseVivant } from '@/lib/supabase'
 import TombolaClient from './TombolaClient'
+import AnimationIndisponible from '@/components/parcours/AnimationIndisponible'
+import { motifIndisponible } from '@/lib/etatAnimation'
 import { lireApercu, appliquerApercu } from '@/lib/apercu'
 import { versMasterSiBesoin } from '@/lib/masters/redirection'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
@@ -31,8 +33,8 @@ export default async function TombolaPage({ searchParams }: Props) {
   }
 
   const [evRes, lotsRes] = await Promise.all([
-    supabase.from('events').select('*').eq('id', evId).single(),
-    supabase.from('lots').select('*').eq('event_id', evId),
+    supabaseVivant.from('events').select('*').eq('id', evId).single(),
+    supabaseVivant.from('lots').select('*').eq('event_id', evId),
   ])
 
   /* Apercu pendant la creation (lib/apercu.ts). */
@@ -40,6 +42,9 @@ export default async function TombolaPage({ searchParams }: Props) {
     { ev: evRes.data as FlowinEvent | null, lots: (lotsRes.data ?? []) as FlowinLot[] },
     lireApercu(searchParams),
   )
+
+  const motif = motifIndisponible(ev as { status?: string; date_d?: string | null; date_f?: string | null; module?: string | null } | null, searchParams)
+  if (motif) return <AnimationIndisponible motif={motif} nom={ev?.nom} debut={ev?.date_d} />
 
   /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
   versMasterSiBesoin(evId, ev?.cfg, searchParams as Record<string, string | undefined>, ev?.module)
