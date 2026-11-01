@@ -24,7 +24,9 @@ export const MASTER_VIDE: EtatMaster = { actif: true, perso: {} }
 /** Ce que l'event stocke (a fusionner dans cfg). */
 export function cfgMaster(module: string | null, m: EtatMaster): Record<string, unknown> {
   const id = masterPourModule(module)
-  if (!id || !m.actif) return {}
+  if (!id) return {}
+  /* « Ancienne presentation » : masterOff garde l'ancien parcours (lib/masters/redirection.ts). */
+  if (!m.actif) return { masterOff: true }
   return { master: { id, perso: nettoyer(m.perso) } }
 }
 

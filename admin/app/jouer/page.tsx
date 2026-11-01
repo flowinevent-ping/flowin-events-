@@ -105,6 +105,7 @@ export default async function Page({ searchParams: sp }: Props) {
       source={MASTERS[masterId].module}
       debut={sp.s || null}
       barre={demo || sp.sb === '1'}
+      apercu={sp.preview !== undefined}
       timer={data?.ev?.cfg && typeof (data.ev.cfg as Record<string, unknown>).quizTimer === 'number' ? Number((data.ev.cfg as Record<string, unknown>).quizTimer) : (data?.ev?.cfg as Record<string, unknown> | undefined)?.quizTimer === false ? 0 : 30}
       tableAbsente={tableAbsente}
     />

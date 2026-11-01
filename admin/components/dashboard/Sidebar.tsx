@@ -182,7 +182,7 @@ export default function Sidebar() {
       group: 'Jeux',
       ton: 'ev',
       items: [
-        { id: 'jeux', label: 'Jeux (templates)', count: 7, href: '/dashboard/jeux' },
+        { id: 'jeux', label: 'Masters de jeux', count: 6, href: '/dashboard/jeux' },
       ],
     },
     {

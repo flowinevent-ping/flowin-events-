@@ -42,7 +42,7 @@ export default async function TombolaPage({ searchParams }: Props) {
   )
 
   /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
-  versMasterSiBesoin(evId, ev?.cfg, searchParams as Record<string, string | undefined>)
+  versMasterSiBesoin(evId, ev?.cfg, searchParams as Record<string, string | undefined>, ev?.module)
 
   /* Partenaires depuis cfg.partenaires */
   const partIds: string[] = ev?.cfg?.partenaires ?? []

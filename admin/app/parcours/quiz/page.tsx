@@ -27,6 +27,6 @@ export default async function QuizPage({ searchParams }: Props) {
   }
 
   /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
-  versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>)
+  versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>, data.ev?.module)
   return <QuizClient {...data} evId={evId} />
 }

@@ -11,6 +11,6 @@ export default async function Page({ searchParams }: Props) {
   /* Apercu pendant la creation (lib/apercu.ts) : la saisie remplace nom, lots et contenu. */
   const data = await appliquerApercu(await fetchParcoursData(evId), lireApercu(searchParams))
   /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
-  versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>)
+  versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>, data.ev?.module)
   return <QuizsoloClient {...data} evId={evId} />
 }

@@ -35,6 +35,8 @@ interface Props {
   barre: boolean
   timer: number
   tableAbsente: boolean
+  /** ?preview=1 : apercu de creation / du Super Admin (rien n'est ecrit, etat d'exemple pour les ecrans de fin). */
+  apercu?: boolean
 }
 
 const CADRE_CSS = `
@@ -418,21 +420,22 @@ export default function JouerClient(p: Props) {
         if (sauve && sauve.r) { Object.keys(sauve.r).forEach(k => { (r as unknown as Record<string, unknown>)[k] = (sauve.r as unknown as Record<string, unknown>)[k] }); pile.current = sauve.pile || []; debut = ancre }
       } catch { /* ignore */ }
     }
-    if (!p.demo && p.evId) {
+    const ex = p.demo || !!p.apercu
+    if (!p.demo && !p.apercu && p.evId) {
       try {
         if (doitRefuserDigital(p.evId)) debut = 'c-digital'
         else if (animationDejaJouee(p.evId) && !new URLSearchParams(location.search).has('preview')) debut = 'c-demain'
       } catch { /* ignore */ }
     }
-    if (p.demo && (debut === 'c-profil' || debut === 'c-connexion')) { r.profil = { prenom: 'Prénom', nom: 'Exemple' }; r.ticket = 'TK-0427'; r.gain = { lot: v.billet.nom, cond: v.billet.cond }; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz'; r.after = v.key === 'spin' ? 'c-billet' : 'c-ticket' }
-    if (p.demo && debut === 'r-tourne') { r.caseIdx = 0; r.rotation = rotationPourCase(v, 0) }
-    if (p.demo && (debut === 'r-gain' || debut === 'r-ticket' || debut === 'r-perdu')) { const want = debut === 'r-gain' ? 'imm' : debut === 'r-ticket' ? 'tir' : 'perdu'; const i = Math.max(0, v.cases.findIndex(c => c.issue === want)); r.caseIdx = i; r.rotation = rotationPourCase(v, i) }
-    if (p.demo && debut === 'q-resultat') r.bonnes = v.questions.length
-    if (p.demo && (debut === 'q-bonne' || debut === 'q-mauvaise')) { const q = v.questions[0]; r.rep[0] = debut === 'q-bonne' ? q?.ok ?? 0 : ((q?.ok ?? 0) + 1) % Math.max(2, q?.opts.length || 2) }
-    if (p.demo && debut === 'q-bonusok') { r.bonnes = v.questions.length; r.bonusFait = true }
-    if (p.demo && (debut === 'c-billet' || debut === 'c-ticket')) { r.ticket = 'TK-0427'; r.after = debut; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz' }
-    if (p.demo && (debut === 'v-envoi' || debut === 'v-resultat')) r.voteIdx = 2
-    if (p.demo && debut === 'c-inscription' && (v.key === 'spin')) r.after = 'c-billet'
+    if (ex && (debut === 'c-profil' || debut === 'c-connexion')) { r.profil = { prenom: 'Prénom', nom: 'Exemple' }; r.ticket = 'TK-0427'; r.gain = { lot: v.billet.nom, cond: v.billet.cond }; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz'; r.after = v.key === 'spin' ? 'c-billet' : 'c-ticket' }
+    if (ex && debut === 'r-tourne') { r.caseIdx = 0; r.rotation = rotationPourCase(v, 0) }
+    if (ex && (debut === 'r-gain' || debut === 'r-ticket' || debut === 'r-perdu')) { const want = debut === 'r-gain' ? 'imm' : debut === 'r-ticket' ? 'tir' : 'perdu'; const i = Math.max(0, v.cases.findIndex(c => c.issue === want)); r.caseIdx = i; r.rotation = rotationPourCase(v, i) }
+    if (ex && debut === 'q-resultat') r.bonnes = v.questions.length
+    if (ex && (debut === 'q-bonne' || debut === 'q-mauvaise')) { const q = v.questions[0]; r.rep[0] = debut === 'q-bonne' ? q?.ok ?? 0 : ((q?.ok ?? 0) + 1) % Math.max(2, q?.opts.length || 2) }
+    if (ex && debut === 'q-bonusok') { r.bonnes = v.questions.length; r.bonusFait = true }
+    if (ex && (debut === 'c-billet' || debut === 'c-ticket')) { r.ticket = 'TK-0427'; r.after = debut; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz' }
+    if (ex && (debut === 'v-envoi' || debut === 'v-resultat')) r.voteIdx = 2
+    if (ex && debut === 'c-inscription' && (v.key === 'spin')) r.after = 'c-billet'
     montrer(debut, true)
     /* Differe : le routeur Next doit d'abord poser son etat d'historique
        (__NA), sinon un retour sur cette entree recharge toute la page. */

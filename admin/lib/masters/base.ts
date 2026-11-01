@@ -12,7 +12,10 @@ import type { ContenuMaster } from './types'
 
 export async function lireDefautsBase(): Promise<{ base: DefautsBase | null; tableAbsente: boolean }> {
   try {
-    const { data, error } = await supabase.from('jeux_masters').select('id,defauts')
+    /* Delai court : un reseau lent ne doit jamais bloquer l'ecran de jeu (valeurs du code en repli). */
+    const lecture = supabase.from('jeux_masters').select('id,defauts')
+    const delai = new Promise<{ data: null; error: { message: string } }>(res => setTimeout(() => res({ data: null, error: { message: 'delai' } }), 2500))
+    const { data, error } = await Promise.race([lecture, delai])
     if (error) return { base: null, tableAbsente: true }
     const base: DefautsBase = {}
     ;((data ?? []) as { id: string; defauts: ContenuMaster | null }[]).forEach(r => {
