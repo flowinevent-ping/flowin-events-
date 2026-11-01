@@ -25,3 +25,11 @@ tel quel (`<link rel="stylesheet" href="/flowin-tokens.css">`) puis pointer leur
 
 Règles : pas de vert/teal hors retours, pas de fond noir, logo « Flow » + « in » bleu.
 L'univers comics jaune/rouge (Bangers, #FFD23F, #E2231A, #3B2418) reste réservé au Super event.
+
+## Logo « Super event »
+
+Fichier partagé : `admin/public/flowin-super-event-logo.svg` (texte converti en tracés, aucune police à charger, `role="img"` et `aria-label="Super event"`).
+Deux lignes, SUPER au-dessus, EVENT dessous, même police (Inter Display Black), même inclinaison (8°), même hauteur de lettres, espacement augmenté ;
+remplissage jaune #FFD23F, contour brun fin (#3B2418), extrusion rouge limitée (#E2231A) cernée d'un filet brun : jamais de rouge sur brun.
+Dans une page : copier le `<symbol id="fl-super-event">` des plaquettes puis `<svg class="sel" role="img" aria-label="Super event" viewBox="0 0 550.9 234"><use href="#fl-super-event"/></svg>`,
+ou simplement `<img src="/flowin-super-event-logo.svg" alt="Super event" width="150">`. Lisible dès 140 px de large.
