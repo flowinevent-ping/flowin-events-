@@ -209,7 +209,7 @@ export default function Sidebar() {
       ton: 'out',
       items: [
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
-        { id: 'landing-page', label: 'Landing pages', href: '/dashboard/landing-page' },
+        { id: 'landing-page', label: 'Landing pages & outils commerciaux', href: '/dashboard/landing-page' },
         { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
         { id: 'commandes-animation', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
         { id: 'facture-nds', label: 'Générer une facture', href: '/facture-nds.html', external: true },

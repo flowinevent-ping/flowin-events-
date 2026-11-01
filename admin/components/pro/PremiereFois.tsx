@@ -18,6 +18,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { capturerSource, tagSource } from '@/lib/source'
 import { CHARTE_PRO as C, VARIABLES_PRO_CSS } from '@/lib/charte'
 import {
   PROFILS_PRO, SECTEURS_PRO, ficheProVide, identifiantPro, lignePro, ligneProEntreprise,
@@ -117,6 +118,8 @@ export default function PremiereFois() {
   const [etatRecherche, setEtatRecherche] = useState<'idle' | 'loading' | 'ok' | 'vide' | 'indispo' | 'erreur'>('idle')
   const [messageRecherche, setMessageRecherche] = useState('')
   const [resultats, setResultats] = useState<EntrepriseTrouvee[]>([])
+  /* Canal d'origine du lien (?src=), retenu à la 1re visite, écrit en tag `src:<canal>` (aucun SQL). */
+  const [src, setSrc] = useState('')
 
   useEffect(() => {
     const b = lireBrouillon()
@@ -125,6 +128,7 @@ export default function PremiereFois() {
     setSelection(sel)
     const nb = new URLSearchParams(sel).get('boutiques')
     if (nb && /^\d{1,3}$/.test(nb)) setF(x => ({ ...x, nbPointsVente: x.nbPointsVente || nb }))
+    setSrc(capturerSource())
     setPret(true)
   }, [])
 
@@ -236,7 +240,9 @@ export default function PremiereFois() {
     let idPro = identifiantPro(fiche)
     const { data: existe } = await supabase.from('pros').select('id').eq('id', idPro).maybeSingle()
     if (existe) idPro = `${idPro}-${Math.random().toString(36).slice(2, 6)}`
-    const base = { ...lignePro(fiche, 'pro'), id: idPro, auth_id: authData.user.id }
+    const ligne = lignePro(fiche, 'pro')
+    const tSrc = tagSource(src)
+    const base = { ...ligne, tags: tSrc ? [...(ligne.tags ?? []), tSrc] : ligne.tags, id: idPro, auth_id: authData.user.id }
     let degrade = false
     let { error: insErr } = await supabase.from('pros').insert({ ...base, ...ligneProEntreprise(fiche, 'premiere-fois') })
     /* Migration sql/02-pros-entreprise-onboarding.sql pas encore appliquee :

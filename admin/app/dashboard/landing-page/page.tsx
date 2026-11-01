@@ -17,30 +17,23 @@
  * Les 9 autres sont fusionnees ici en dur, comme dans le legacy -- fichiers verifies
  * presents sur le disque avant integration, pas supposes.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { PageHeader, EmptyState } from '@/components/dashboard/DashboardUI'
 import { fetchLandings, type Landing } from '@/lib/administratif'
 import { Ico } from '@/lib/proicons'
+import { OutilCarte } from '@/components/dashboard/OutilCarte'
+import { OUTILS, OUTILS_MANQUANTS, PUBLICS, urlProd, type Outil } from '@/lib/outilsCommerciaux'
 
-const BASE = 'https://flowin-events.vercel.app'
+/* MAJ 01/11 -- UNE seule page pour tout le materiel de diffusion (decision Romain) : les 12 pages de
+   reference statiques qui vivaient ici en dur sont desormais dans le catalogue unique
+   lib/outilsCommerciaux.ts, avec les plaquettes, le bon de commande, les CGV, l'inscription pro et les
+   videos. Chaque outil garde ses actions (copier, WhatsApp, email, QR, canal ?src=) et ses regles de
+   statut (valide / brouillon). Les landings gerees (table `landings`) restent inchangees. */
 
-/** Pages de presentation/prospection statiques, hors table `landings` (verifiees sur disque le 30/08). */
-const PAGES_STATIQUES: Landing[] = [
-  { id: 'pg-landing-flowin', nom: 'Landing Flowin', statut: null, published: true, deploy_url: `${BASE}/landing`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-nds', nom: 'Landing NDS', statut: null, published: true, deploy_url: `${BASE}/nds`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-pro', nom: 'Pro (connexion)', statut: null, published: true, deploy_url: `${BASE}/pro`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-nds-pro', nom: 'NDS Pro (présentation)', statut: null, published: true, deploy_url: `${BASE}/nds-pro.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-nds-super-event-pro', nom: 'Super-event Pro (stats/gagnants)', statut: null, published: true, deploy_url: `${BASE}/nds-super-event-pro.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-nds-partenaire-presentation', nom: 'Partenaire (présentation)', statut: null, published: true, deploy_url: `${BASE}/nds-partenaire-presentation.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-flowin-partenaire-presentation', nom: 'Flowin partenaire', statut: null, published: true, deploy_url: `${BASE}/flowin-partenaire-presentation.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-pitch-nds', nom: 'Pitch NDS', statut: null, published: true, deploy_url: `${BASE}/pitch-nds.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-pro-nds-live', nom: 'Pro NDS live', statut: null, published: true, deploy_url: `${BASE}/pro-nds-live.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-prospection', nom: 'Prospection', statut: null, published: true, deploy_url: `${BASE}/prospection.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-demos', nom: 'Démos', statut: null, published: true, deploy_url: `${BASE}/demos.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-  { id: 'pg-carte', nom: 'Carte', statut: null, published: true, deploy_url: `${BASE}/carte.html`, accent_color: null, module_jeu: null, wa_number: null, created_at: null, updated_at: null },
-]
+/** Une diapositive du carrousel d'apercu : landing geree OU outil du catalogue. */
+interface Slide { id: string; nom: string; src: string; aVenir?: boolean; genre: 'geree' | 'outil' }
 
-function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Landing | null; onPrev: () => void; onNext: () => void; position: string }) {
+function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Slide | null; onPrev: () => void; onNext: () => void; position: string }) {
   const W = 220, H = 442, SCALE = 0.586
   const IW = Math.round(W / SCALE), IH = Math.round(H / SCALE)
   return (
@@ -53,17 +46,17 @@ function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Landing |
       <div style={{ width: W + 20, flexShrink: 0 }}>
         <div style={{ borderRadius: 32, padding: 9, background: '#0F172A', boxShadow: '0 20px 50px rgba(15,23,42,.25)' }}>
           <div style={{ borderRadius: 24, overflow: 'hidden', background: '#fff', width: W, height: H, position: 'relative' }}>
-            {landing?.deploy_url ? (
+            {landing?.src ? (
               <iframe
                 key={landing.id}
-                src={landing.deploy_url}
+                src={landing.src}
                 title={`Aperçu — ${landing.nom ?? landing.id}`}
                 loading="lazy"
                 style={{ width: IW, height: IH, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left' }}
               />
             ) : (
               <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 20, textAlign: 'center', color: '#64748B', fontSize: 13 }}>
-                Aucune landing avec URL de déploiement à prévisualiser.
+                {landing?.aVenir ? 'Vidéo à venir : pas encore de fichier à prévisualiser.' : 'Aucune landing avec URL de déploiement à prévisualiser.'}
               </div>
             )}
           </div>
@@ -84,7 +77,7 @@ function PhoneApercu({ landing, onPrev, onNext, position }: { landing: Landing |
   )
 }
 
-function OrdiApercu({ landing, onPrev, onNext, position }: { landing: Landing | null; onPrev: () => void; onNext: () => void; position: string }) {
+function OrdiApercu({ landing, onPrev, onNext, position }: { landing: Slide | null; onPrev: () => void; onNext: () => void; position: string }) {
   const DW = 1280, DH = 800, W = 720, SCALE = W / DW, H = Math.round(DH * SCALE)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, maxWidth: '100%' }}>
@@ -97,17 +90,17 @@ function OrdiApercu({ landing, onPrev, onNext, position }: { landing: Landing | 
             <span style={{ width: 8, height: 8, borderRadius: 4, background: '#34D399' }} />
           </div>
           <div style={{ width: W, height: H, position: 'relative', overflow: 'hidden' }}>
-            {landing?.deploy_url ? (
+            {landing?.src ? (
               <iframe
                 key={landing.id}
-                src={landing.deploy_url}
+                src={landing.src}
                 title={`Aperçu ordinateur — ${landing.nom ?? landing.id}`}
                 loading="lazy"
                 style={{ width: DW, height: DH, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left' }}
               />
             ) : (
               <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#64748B', fontSize: 13 }}>
-                Aucune landing avec URL de déploiement à prévisualiser.
+                {landing?.aVenir ? 'Vidéo à venir : pas encore de fichier à prévisualiser.' : 'Aucune landing avec URL de déploiement à prévisualiser.'}
               </div>
             )}
           </div>
@@ -142,33 +135,44 @@ export default function Page() {
      demandee : CHAQUE page listee a un lien direct qui ouvre la vraie page
      en plein ecran dans un nouvel onglet -- donc toutes les pages vivent
      maintenant dans la meme liste, filtree par la meme recherche. */
-  const toutes = useMemo(() => [...list, ...PAGES_STATIQUES], [list])
+  const [filtre, setFiltre] = useState<'tous' | 'gerees' | 'commerce' | 'organisateur' | 'partenaire'>('tous')
+  const haut = useRef<HTMLDivElement>(null)
+  const t = q.trim().toLowerCase()
 
-  const filtres = useMemo(() => {
-    const t = q.trim().toLowerCase()
-    if (!t) return toutes
-    return toutes.filter(l => (l.nom ?? l.id).toLowerCase().includes(t))
-  }, [toutes, q])
+  const landingsFiltrees = useMemo(() =>
+    (filtre === 'tous' || filtre === 'gerees') ? list.filter(l => !t || (l.nom ?? l.id).toLowerCase().includes(t)) : []
+  , [list, filtre, t])
+  const outilsFiltres = useMemo(() =>
+    OUTILS.filter(o => filtre !== 'gerees' && (filtre === 'tous' || o.public.indexOf(filtre) >= 0)
+      && (!t || (o.titre + ' ' + o.description).toLowerCase().includes(t)))
+  , [filtre, t])
 
-  const avecUrl = useMemo(() => [...list.filter(l => l.deploy_url), ...PAGES_STATIQUES], [list])
-  const courant = avecUrl[idx] ?? null
+  /* Carrousel : landings gerees avec URL, puis tous les outils (les videos « a venir » y figurent). */
+  const slides: Slide[] = useMemo(() => [
+    ...list.filter(l => l.deploy_url).map(l => ({ id: l.id, nom: l.nom ?? l.id, src: l.deploy_url as string, genre: 'geree' as const })),
+    ...OUTILS.map(o => ({ id: o.id, nom: o.titre, src: o.aVenir ? '' : o.chemin, aVenir: !!o.aVenir, genre: 'outil' as const })),
+  ], [list])
+  const avecUrl = slides
+  const courant = slides[idx] ?? null
+  const urlCourante = courant ? (courant.genre === 'outil' ? urlProd(OUTILS.find(o => o.id === courant.id) as Outil) : courant.src) : ''
+  const libelle = (x: Slide | null) => x?.genre === 'outil' ? (x.aVenir ? ' · vidéo à venir' : ' · outil commercial') : ' · landing gérée'
 
   const enLigne = list.filter(l => l.published === true).length
 
-  function ouvrirApercu(l: Landing) {
-    const i = avecUrl.findIndex(x => x.id === l.id)
-    if (i !== -1) setIdx(i)
+  function ouvrirApercu(id: string) {
+    const i = slides.findIndex(x => x.id === id)
+    if (i !== -1) { setIdx(i); if (haut.current) haut.current.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
   }
 
   return (
     <div className="sa-page">
       <PageHeader
-        title="Landing pages"
-        subtitle={`${list.length} landing${list.length > 1 ? 's' : ''} gérée${list.length > 1 ? 's' : ''} · ${enLigne} en ligne · ${avecUrl.length} pages prévisualisables au total`}
+        title="Landing pages & outils commerciaux"
+        subtitle={`${list.length} landing${list.length > 1 ? 's' : ''} gérée${list.length > 1 ? 's' : ''} · ${enLigne} en ligne · ${OUTILS.length} outils commerciaux · ${avecUrl.length} aperçus au total`}
       />
 
       {!charge && avecUrl.length > 0 && (
-        <div style={{ background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+        <div ref={haut} data-carrousel style={{ scrollMarginTop: 12, background: 'var(--sa-subtle)', borderRadius: 14, padding: '18px 14px', marginBottom: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
             <button className="sa-btn" onClick={() => setVue('tel')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'tel' ? 'var(--sa-accent)' : undefined, color: vue === 'tel' ? '#fff' : undefined }}>Téléphone</button>
             <button className="sa-btn" onClick={() => setVue('ordi')} style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: vue === 'ordi' ? 'var(--sa-accent)' : undefined, color: vue === 'ordi' ? '#fff' : undefined }}>Ordinateur</button>
@@ -178,49 +182,56 @@ export default function Page() {
               landing={courant}
               onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
               onNext={() => setIdx(i => (i + 1) % avecUrl.length)}
-              position={`${idx + 1} / ${avecUrl.length}${courant?.id.startsWith('pg-') ? ' · page de référence' : ' · landing gérée'}`}
+              position={`${idx + 1} / ${avecUrl.length}${libelle(courant)}`}
             />
           ) : (
             <OrdiApercu
               landing={courant}
               onPrev={() => setIdx(i => (i - 1 + avecUrl.length) % avecUrl.length)}
               onNext={() => setIdx(i => (i + 1) % avecUrl.length)}
-              position={`${idx + 1} / ${avecUrl.length}${courant?.id.startsWith('pg-') ? ' · page de référence' : ' · landing gérée'}`}
+              position={`${idx + 1} / ${avecUrl.length}${libelle(courant)}`}
             />
           )}
-          {courant?.deploy_url && (
-            <a href={courant.deploy_url} target="_blank" rel="noopener noreferrer" className="sa-btn" style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', marginTop: 4 }}>
+          {urlCourante && (
+            <a href={urlCourante} target="_blank" rel="noopener noreferrer" className="sa-btn" style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', marginTop: 4 }}>
               Ouvrir cette page en plein écran ↗
             </a>
           )}
         </div>
       )}
 
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           className="sa-input"
-          placeholder="Rechercher une landing…"
+          placeholder="Rechercher une landing ou un outil…"
           value={q}
           onChange={e => setQ(e.target.value)}
           style={{ maxWidth: 320 }}
         />
+        {([{ v: 'tous', label: 'Tous' }, { v: 'gerees', label: 'Landings gérées' }, ...PUBLICS] as { v: typeof filtre; label: string }[]).map(p => (
+          <button key={p.v} className="sa-btn" aria-pressed={filtre === p.v} onClick={() => setFiltre(p.v)}
+            style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', background: filtre === p.v ? 'var(--sa-accent)' : undefined, color: filtre === p.v ? '#fff' : undefined }}>{p.label}</button>
+        ))}
       </div>
 
       {charge && <div className="sa-muted" style={{ fontSize: 13 }}>Chargement…</div>}
 
-      {!charge && !filtres.length && (
+      {!charge && !landingsFiltrees.length && !outilsFiltres.length && (
         <EmptyState icon="globe" title="Aucune landing" desc={q ? 'Aucun résultat pour cette recherche.' : 'Aucune landing enregistrée.'} />
       )}
 
-      {!charge && filtres.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 10 }}>
-          {filtres.map(l => (
+      {!charge && (landingsFiltrees.length > 0 || outilsFiltres.length > 0) && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,260px),1fr))', gap: 10, alignItems: 'start' }}>
+          {landingsFiltrees.map(l => (
             <div
               key={l.id}
-              onClick={() => l.deploy_url && ouvrirApercu(l)}
-              style={{ background: 'var(--sa-card)', border: courant?.id === l.id ? '1.5px solid var(--sa-accent)' : '1px solid var(--sa-border)', borderRadius: 10, padding: 13, cursor: l.deploy_url ? 'pointer' : 'default' }}
+              data-landing={l.id} data-actif={courant?.id === l.id ? '1' : '0'}
+              role="button" tabIndex={0} aria-pressed={courant?.id === l.id}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget && l.deploy_url) { e.preventDefault(); ouvrirApercu(l.id) } }}
+              onClick={() => l.deploy_url && ouvrirApercu(l.id)}
+              style={{ background: 'var(--sa-card)', border: courant?.id === l.id ? '2px solid var(--sa-accent)' : '1px solid var(--sa-border)', borderRadius: 12, padding: courant?.id === l.id ? 9 : 10, cursor: l.deploy_url ? 'pointer' : 'default', boxShadow: courant?.id === l.id ? '0 0 0 3px #EFE9FC' : 'none' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                 <span
                   aria-hidden
                   style={{
@@ -232,10 +243,8 @@ export default function Page() {
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{l.nom ?? l.id}</div>
               </div>
 
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-                {l.id.startsWith('pg-') ? (
-                  <span className="sa-chip" style={{ fontSize: 10, fontWeight: 700 }}>Page de référence</span>
-                ) : (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                {(
                   <span
                     className="sa-chip"
                     style={{
@@ -263,7 +272,7 @@ export default function Page() {
                   rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
                   className="sa-btn"
-                  style={{ fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px' }}
+                  style={{ fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px' }}
                 >
                   Ouvrir la page ↗
                 </a>
@@ -272,14 +281,24 @@ export default function Page() {
               )}
 
               {l.updated_at && (
-                <div className="sa-muted" style={{ fontSize: 10, marginTop: 7 }}>
+                <div className="sa-muted" style={{ fontSize: 10, marginTop: 4 }}>
                   modifiée le {new Date(l.updated_at).toLocaleDateString('fr-FR')}
                 </div>
               )}
             </div>
           ))}
+          {outilsFiltres.map(o => (
+            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} onApercu={(x) => ouvrirApercu(x.id)} onSelect={(x) => ouvrirApercu(x.id)} />
+          ))}
         </div>
       )}
+
+      <section style={{ marginTop: 28 }}>
+        <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>Pas encore disponibles</h2>
+        <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--sa-muted)', fontSize: 13, lineHeight: 1.6 }}>
+          {OUTILS_MANQUANTS.map(m => <li key={m.titre}><strong style={{ color: 'var(--sa-text)' }}>{m.titre}</strong> ({PUBLICS.find(p => p.v === m.public)?.label}) : {m.note}</li>)}
+        </ul>
+      </section>
     </div>
   )
 }

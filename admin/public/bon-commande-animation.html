@@ -955,11 +955,19 @@
     }
   })();
 
+  function srcQuery(){
+    var m = /[?&]src=([a-z0-9_-]{1,40})/i.exec(location.search), v = m ? m[1].toLowerCase() : '';
+    try {
+      if (v && !window.localStorage.getItem('flowin_src')) window.localStorage.setItem('flowin_src', v);
+      if (!v) v = window.localStorage.getItem('flowin_src') || '';
+    } catch (e) {}
+    return v ? '?src=' + encodeURIComponent(v) : '';
+  }
   /* Espace pro : « Ma première fois » dès qu'elle est en ligne, sinon l'inscription pro existante */
   (function(){
     if (!window.fetch || location.protocol === 'file:') return;
     fetch('/pro/premiere-fois', { method: 'HEAD', credentials: 'same-origin' }).then(function(r){
-      if (!r.ok || PRO_ID) return; var a = document.querySelectorAll('.js-inscr'); for (var i = 0; i < a.length; i++) a[i].setAttribute('href', '/pro/premiere-fois');
+      if (!r.ok || PRO_ID) return; var a = document.querySelectorAll('.js-inscr'); for (var i = 0; i < a.length; i++) a[i].setAttribute('href', '/pro/premiere-fois' + srcQuery());
     }).catch(function(){});
   })();
 
