@@ -11,7 +11,7 @@ import { CHARTE_PRO as C } from '@/lib/charte'
 import { CANAUX, avecSource } from '@/lib/source'
 import { PUBLICS, urlProd, lienWhatsApp, lienEmail, type Outil } from '@/lib/outilsCommerciaux'
 
-const TYPES: Record<string, string> = { page: 'Page', plaquette: 'Plaquette', document: 'Document', video: 'Vidéo', parcours: 'Parcours' }
+const TYPES: Record<string, string> = { page: 'Page', plaquette: 'Plaquette', document: 'Document', video: 'Vidéo', scenario: 'Scénario vidéo', parcours: 'Parcours' }
 
 function nomFichier(o: Outil, canal: string, ext: string) {
   return `qr-${o.id}${canal && canal !== 'direct' ? '-' + canal : ''}.${ext}`
@@ -42,7 +42,7 @@ const btn: React.CSSProperties = {
   fontSize: 13, cursor: 'pointer', textDecoration: 'none', fontFamily: 'inherit',
 }
 
-export function OutilCarte({ o, onApercu, actif }: { o: Outil; onApercu: (o: Outil, url: string) => void; actif?: boolean }) {
+export function OutilCarte({ o, onApercu, onSelect, actif }: { o: Outil; onApercu: (o: Outil, url: string) => void; onSelect: (o: Outil, url: string) => void; actif?: boolean }) {
   const [canal, setCanal] = useState(o.suivi ? (o.canalDefaut ?? 'direct') : 'direct')
   const [copie, setCopie] = useState(false)
   const [png, setPng] = useState('')
@@ -72,70 +72,78 @@ export function OutilCarte({ o, onApercu, actif }: { o: Outil; onApercu: (o: Out
     window.setTimeout(() => URL.revokeObjectURL(href), 1000)
   }
 
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation()
+  const petit: React.CSSProperties = { ...btn, minHeight: 32, padding: '0 10px', fontSize: 12, borderRadius: 8 }
+  const bloque: React.CSSProperties = { opacity: 0.4, cursor: 'not-allowed' }
+  const bord = actif ? `2px solid ${C.violet}` : `1px solid ${C.bordure}`
+
   return (
-    <article data-outil={o.id} data-statut={o.statut} style={{ background: '#fff', border: actif ? `1.5px solid ${C.violet}` : `1px solid ${C.bordure}`, borderRadius: 14, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+    <article data-outil={o.id} data-statut={o.statut} data-actif={actif ? '1' : '0'}
+      role="button" tabIndex={0} aria-pressed={!!actif} aria-label={`Sélectionner : ${o.titre}`}
+      onClick={() => onSelect(o, url)}
+      onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); onSelect(o, url) } }}
+      style={{ background: '#fff', border: bord, borderRadius: 12, padding: actif ? 11 : 12, display: 'flex', flexDirection: 'column', gap: 8, cursor: 'pointer', boxShadow: actif ? `0 0 0 3px ${C.violetClair}` : 'none', alignSelf: 'start' }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 4 }}>
+            {brouillon && (
+              <span data-brouillon style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: C.ko, borderRadius: 6, padding: '1px 8px' }}>Brouillon : ne pas diffuser</span>
+            )}
             {o.public.map(p => (
-              <span key={p} style={{ fontSize: 11, fontWeight: 800, color: C.bleu, background: '#EAF0FB', borderRadius: 999, padding: '2px 9px' }}>
+              <span key={p} style={{ fontSize: 10.5, fontWeight: 800, color: C.bleu, background: '#EAF0FB', borderRadius: 999, padding: '1px 8px' }}>
                 {PUBLICS.find(x => x.v === p)?.label}
               </span>
             ))}
-            <span style={{ fontSize: 11, fontWeight: 700, color: C.attenue, background: C.fond, borderRadius: 999, padding: '2px 9px' }}>{TYPES[o.type]}</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: C.attenue, background: C.fond, borderRadius: 999, padding: '1px 8px' }}>{TYPES[o.type]}</span>
           </div>
-          {brouillon && (
-            <div data-brouillon style={{ display: 'inline-block', margin: '0 0 6px', fontSize: 12, fontWeight: 800, color: '#fff', background: C.ko, borderRadius: 8, padding: '3px 10px' }}>
-              Brouillon : ne pas diffuser
-            </div>
-          )}
-          <h3 style={{ margin: 0, fontSize: 16, lineHeight: 1.25, color: C.encre }}>{o.titre}</h3>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: C.attenue, lineHeight: 1.4 }}>{o.description}</p>
+          <h3 style={{ margin: 0, fontSize: 14, lineHeight: 1.25, color: C.encre }}>{o.titre}</h3>
+          <p style={{ margin: '3px 0 0', fontSize: 12, color: C.attenue, lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{o.description}</p>
         </div>
         {png && url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={png} alt={`QR code : ${o.titre}`} width={84} height={84} data-qr style={{ borderRadius: 8, border: `1px solid ${C.bordure}`, flex: 'none' }} />
+          <img src={png} alt={`QR code : ${o.titre}`} width={actif ? 72 : 44} height={actif ? 72 : 44} data-qr style={{ borderRadius: 6, border: `1px solid ${C.bordure}`, flex: 'none' }} />
         )}
       </div>
 
-      {o.suivi && !brouillon && (
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 700, color: C.attenue }}>
-          Canal (pour savoir d’où viennent les inscriptions)
-          <select value={canal} onChange={e => setCanal(e.target.value)} aria-label={`Canal pour ${o.titre}`}
-            style={{ minHeight: 40, borderRadius: 10, border: `1px solid ${C.bordureChamp}`, padding: '0 10px', fontSize: 14, fontFamily: 'inherit', color: C.encre, background: '#fff' }}>
-            {CANAUX.map(c => <option key={c.v} value={c.v}>{c.label}</option>)}
-          </select>
-        </label>
-      )}
-
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input readOnly value={aVenir ? 'Vidéo à venir' : brouillon ? 'Lien non diffusable (brouillon)' : url} aria-label={`Lien : ${o.titre}`} data-lien onFocus={e => e.currentTarget.select()}
-          style={{ flex: 1, minWidth: 0, minHeight: 40, borderRadius: 10, border: `1px solid ${C.bordureChamp}`, padding: '0 10px', fontSize: 13, color: C.encre, background: C.fond, fontFamily: 'inherit' }} />
-        <button type="button" onClick={onCopier} disabled={brouillon} data-copier style={{ ...btn, background: C.violet, borderColor: C.violet, color: '#fff', minWidth: 96, opacity: brouillon ? 0.4 : 1, cursor: brouillon ? 'not-allowed' : 'pointer' }}>
+      <div onClick={stop} onKeyDown={stop} style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <button type="button" onClick={onCopier} disabled={brouillon} data-copier
+          style={{ ...petit, background: C.violet, borderColor: C.violet, color: '#fff', ...(brouillon ? bloque : {}) }}>
           {copie ? 'Copié ✓' : 'Copier'}
         </button>
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {brouillon ? (
           <>
-            <span data-wa aria-disabled="true" style={{ ...btn, opacity: 0.4, cursor: 'not-allowed' }}>WhatsApp</span>
-            <span data-mail aria-disabled="true" style={{ ...btn, opacity: 0.4, cursor: 'not-allowed' }}>Email</span>
+            <span data-wa aria-disabled="true" style={{ ...petit, ...bloque }}>WhatsApp</span>
+            <span data-mail aria-disabled="true" style={{ ...petit, ...bloque }}>Email</span>
           </>
         ) : (
           <>
-            <a href={lienWhatsApp(o.message, url)} target="_blank" rel="noopener noreferrer" data-wa style={btn}>WhatsApp</a>
-            <a href={lienEmail(o.titre, o.message, url)} data-mail style={btn}>Email</a>
+            <a href={lienWhatsApp(o.message, url)} target="_blank" rel="noopener noreferrer" data-wa style={petit}>WhatsApp</a>
+            <a href={lienEmail(o.titre, o.message, url)} data-mail style={petit}>Email</a>
           </>
         )}
-        <button type="button" onClick={() => onApercu(o, url)} data-apercu style={btn}>Aperçu</button>
+        <button type="button" onClick={() => onApercu(o, url)} data-apercu style={petit}>Aperçu</button>
       </div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: C.attenue }}>QR code :</span>
-        <button type="button" disabled={!png || brouillon} onClick={() => telecharger(png, nomFichier(o, canal, 'png'))} data-qr-png style={{ ...btn, opacity: brouillon ? 0.4 : 1, cursor: brouillon ? 'not-allowed' : 'pointer' }}>PNG</button>
-        <button type="button" disabled={!svg || brouillon} onClick={onSvg} data-qr-svg style={{ ...btn, opacity: brouillon ? 0.4 : 1, cursor: brouillon ? 'not-allowed' : 'pointer' }}>SVG</button>
-      </div>
+
+      {actif && (
+        <div onClick={stop} onKeyDown={stop} data-panneau style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: `1px solid ${C.bordure}`, paddingTop: 8 }}>
+          {o.suivi && !brouillon && (
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11.5, fontWeight: 700, color: C.attenue }}>
+              Canal (d’où viennent les inscriptions)
+              <select value={canal} onChange={e => setCanal(e.target.value)} aria-label={`Canal pour ${o.titre}`}
+                style={{ minHeight: 34, borderRadius: 8, border: `1px solid ${C.bordureChamp}`, padding: '0 8px', fontSize: 13, fontFamily: 'inherit', color: C.encre, background: '#fff' }}>
+                {CANAUX.map(c => <option key={c.v} value={c.v}>{c.label}</option>)}
+              </select>
+            </label>
+          )}
+          <input readOnly value={aVenir ? 'Vidéo à venir' : brouillon ? 'Lien non diffusable (brouillon)' : url} aria-label={`Lien : ${o.titre}`} data-lien onFocus={e => e.currentTarget.select()}
+            style={{ minHeight: 34, borderRadius: 8, border: `1px solid ${C.bordureChamp}`, padding: '0 8px', fontSize: 12, color: C.encre, background: C.fond, fontFamily: 'inherit', minWidth: 0 }} />
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: C.attenue }}>QR code :</span>
+            <button type="button" disabled={!png || brouillon} onClick={() => telecharger(png, nomFichier(o, canal, 'png'))} data-qr-png style={{ ...petit, ...(brouillon ? bloque : {}) }}>PNG</button>
+            <button type="button" disabled={!svg || brouillon} onClick={onSvg} data-qr-svg style={{ ...petit, ...(brouillon ? bloque : {}) }}>SVG</button>
+          </div>
+        </div>
+      )}
     </article>
   )
 }
-

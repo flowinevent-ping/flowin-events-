@@ -221,14 +221,17 @@ export default function Page() {
       )}
 
       {!charge && (landingsFiltrees.length > 0 || outilsFiltres.length > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,340px),1fr))', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,260px),1fr))', gap: 10, alignItems: 'start' }}>
           {landingsFiltrees.map(l => (
             <div
               key={l.id}
+              data-landing={l.id} data-actif={courant?.id === l.id ? '1' : '0'}
+              role="button" tabIndex={0} aria-pressed={courant?.id === l.id}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget && l.deploy_url) { e.preventDefault(); ouvrirApercu(l.id) } }}
               onClick={() => l.deploy_url && ouvrirApercu(l.id)}
-              style={{ background: 'var(--sa-card)', border: courant?.id === l.id ? '1.5px solid var(--sa-accent)' : '1px solid var(--sa-border)', borderRadius: 10, padding: 13, cursor: l.deploy_url ? 'pointer' : 'default' }}
+              style={{ background: 'var(--sa-card)', border: courant?.id === l.id ? '2px solid var(--sa-accent)' : '1px solid var(--sa-border)', borderRadius: 12, padding: courant?.id === l.id ? 9 : 10, cursor: l.deploy_url ? 'pointer' : 'default', boxShadow: courant?.id === l.id ? '0 0 0 3px #EFE9FC' : 'none' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                 <span
                   aria-hidden
                   style={{
@@ -240,7 +243,7 @@ export default function Page() {
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{l.nom ?? l.id}</div>
               </div>
 
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
                 {(
                   <span
                     className="sa-chip"
@@ -269,7 +272,7 @@ export default function Page() {
                   rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
                   className="sa-btn"
-                  style={{ fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px' }}
+                  style={{ fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px' }}
                 >
                   Ouvrir la page ↗
                 </a>
@@ -278,14 +281,14 @@ export default function Page() {
               )}
 
               {l.updated_at && (
-                <div className="sa-muted" style={{ fontSize: 10, marginTop: 7 }}>
+                <div className="sa-muted" style={{ fontSize: 10, marginTop: 4 }}>
                   modifiée le {new Date(l.updated_at).toLocaleDateString('fr-FR')}
                 </div>
               )}
             </div>
           ))}
           {outilsFiltres.map(o => (
-            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} onApercu={(x) => ouvrirApercu(x.id)} />
+            <OutilCarte key={o.id} o={o} actif={courant?.id === o.id} onApercu={(x) => ouvrirApercu(x.id)} onSelect={(x) => ouvrirApercu(x.id)} />
           ))}
         </div>
       )}

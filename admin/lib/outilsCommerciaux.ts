@@ -11,7 +11,7 @@ export const BASE_PROD = 'https://flowin-events.vercel.app'
 
 export type Public = 'commerce' | 'organisateur' | 'partenaire'
 export type Statut = 'validé' | 'brouillon'
-export type TypeOutil = 'page' | 'plaquette' | 'document' | 'video' | 'parcours'
+export type TypeOutil = 'page' | 'plaquette' | 'document' | 'video' | 'parcours' | 'scenario'
 
 export interface Outil {
   id: string
@@ -98,18 +98,18 @@ export const OUTILS: Outil[] = [
     description: 'Accès aux démos des jeux.',
     chemin: '/demos.html',
     message: 'Bonjour, voici les démos Flowin :' },
-  { statut: 'brouillon', aVenir: true, id: 'video-commerce', titre: 'Vidéo commerces (80 s)', public: ['commerce'], type: 'video', suivi: false,
-    description: 'Vidéo de prospection verticale pour les commerces (WhatsApp, réseaux).',
-    chemin: '',
-    message: 'Bonjour, une vidéo de 80 secondes pour comprendre Flowin en magasin :' },
-  { statut: 'brouillon', aVenir: true, id: 'video-organisateur', titre: 'Vidéo organisateurs (35 s)', public: ['organisateur'], type: 'video', suivi: false,
-    description: 'Vidéo de prospection verticale pour les organisateurs.',
-    chemin: '',
-    message: 'Bonjour, une courte vidéo pour comprendre Flowin pour votre événement :' },
-  { statut: 'brouillon', aVenir: true, id: 'video-partenaire', titre: 'Vidéo partenaires (35 s)', public: ['partenaire'], type: 'video', suivi: false,
-    description: 'Vidéo de prospection verticale pour les partenaires de super-event.',
-    chemin: '',
-    message: 'Bonjour, une courte vidéo pour comprendre Flowin côté partenaire :' },
+  { statut: 'brouillon', id: 'storyboard-commerce', titre: 'Scénario vidéo commerçants (v14, à valider)', public: ['commerce'], type: 'scenario', suivi: false,
+    description: 'Storyboard v14 de la vidéo Flowin Animation pour les commerçants. Pas de MP4 : scénario à valider.',
+    chemin: '/storyboards-video/v14-animation-commercants.html',
+    message: 'Scénario vidéo à valider (ne pas diffuser) :' },
+  { statut: 'brouillon', id: 'storyboard-organisateur', titre: 'Scénario vidéo organisateurs (v14, à valider)', public: ['organisateur'], type: 'scenario', suivi: false,
+    description: 'Storyboard v14 de la vidéo Super Event pour organisateurs, collectivités et festivals. À valider.',
+    chemin: '/storyboards-video/v14-super-event-organisateurs.html',
+    message: 'Scénario vidéo à valider (ne pas diffuser) :' },
+  { statut: 'brouillon', id: 'storyboard-partenaire', titre: 'Scénario vidéo partenaires (v14, à valider)', public: ['partenaire'], type: 'scenario', suivi: false,
+    description: 'Storyboard v14 de la vidéo Super Event pour commerces et partenaires. À valider.',
+    chemin: '/storyboards-video/v14-super-event-partenaires.html',
+    message: 'Scénario vidéo à valider (ne pas diffuser) :' },
   { statut: 'brouillon', id: 'video-nds-partenaire', titre: 'Vidéo NDS partenaires (16:9)', public: ['partenaire'], type: 'video', suivi: false,
     description: 'Vidéo partenaires Nuits du Sud 2026, format horizontal.',
     chemin: '/nds/kit-digital/nds/nds-partenaire-16x9.mp4',
@@ -151,6 +151,6 @@ export function lienEmail(titre: string, message: string, url: string): string {
 export const OUTILS_MANQUANTS: { titre: string; public: Public; note: string }[] = [
   { titre: 'CGV Super Event / Event', public: 'organisateur', note: 'CGV de l’offre organisateur hors Nuits du Sud : à rédiger.' },
   { titre: 'Bon de commande organisateur', public: 'organisateur', note: 'Seul le bon NDS existe : un bon générique reste à construire.' },
-  { titre: 'Vidéo organisateurs et partenaires : version finale', public: 'organisateur', note: 'Anciennes versions de travail non validées : retirées du site, entrées « vidéo à venir ».' },
+  { titre: 'Vidéo organisateurs et partenaires : version finale', public: 'organisateur', note: 'Les 3 scénarios v14 sont à valider ; les MP4 ne seront produits qu’après.' },
   { titre: 'Email de présentation prêt à l’emploi', public: 'commerce', note: 'Modèle d’email avec pièce jointe : à rédiger avec Florine.' },
 ]
