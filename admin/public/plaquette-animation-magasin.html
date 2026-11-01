@@ -380,7 +380,9 @@
   .choisie .chp{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--field);font-size:12.5px;font-weight:800}
   .choisie .chp b{font-size:18px;font-weight:900;white-space:nowrap}
   .choisie .chg{font-size:12px;font-weight:800;color:var(--blue);margin-top:4px}
-  .choisie .chg button{border:none;background:none;color:var(--blue);font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+  .choisie .chg button{display:inline-block;margin-top:6px;border:none;background:var(--blue);color:#fff;font:inherit;font-weight:800;border-radius:100px;padding:8px 16px;cursor:pointer}
+  .rg{margin-top:10px;font-size:12.5px;font-weight:700;color:var(--ink2,#2C4A6B);line-height:1.45}
+  .rg .btn{margin-top:8px;width:100%}
   .choix3{display:flex;flex-direction:column;gap:8px;margin-top:12px}
   .cc{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:11px 14px;text-decoration:none;color:var(--ink);text-align:left;cursor:pointer;font:inherit;width:100%;box-shadow:var(--sh)}
   .cc:hover{border-color:var(--violet)}
@@ -736,6 +738,7 @@
           <div class="rs"><span>Total HT <b id="rHT"></b></span><span>TVA 20 % <b id="rTVA"></b></span></div>
           <div class="rp"><span>&Agrave; payer &agrave; la commande<strong id="rTTC"></strong></span><button class="btn" type="button" data-go="garantie">Continuer</button></div>
           <p class="rn" id="rNote"></p>
+          <div class="rg" id="rGar"></div>
           <button class="btn rgo" type="button" data-go="garantie">Continuer</button>
         </aside>
       </div>
@@ -1162,6 +1165,8 @@
     var h = ''; for (i = 0; i < lignes.length; i++) h += '<div><span>' + lignes[i][0] + '</span><b>' + eur2(lignes[i][1]) + ' HT</b></div>';
     $('rLines').innerHTML = h;
     $('rHT').textContent = eur2(t.ht); $('rTVA').textContent = eur2(t.tva); $('rTTC').textContent = eur2(t.ttc) + ' TTC';
+    $('rGar').innerHTML = st.formule === 'mensuelle' ? 'Satisfait ou remboursé : réservé à la formule annuelle.' : (certif ? 'Satisfait ou remboursé : fiche découverte certifiée.' : 'Offre premiers adhérents : <button class="btn" type="button" id="rGarGo">Je veux bénéficier du satisfait ou remboursé</button>');
+    var rg = $('rGarGo'); if (rg) rg.onclick = function(){ go('garantie'); };
     $('rNote').textContent = st.formule === 'mensuelle' ? 'Puis 110 € HT par mois (132 € TTC), engagement 3 mois minimum.' : 'Engagement 12 mois, un seul paiement pour l’année.';
     /* Page Commander */
     var det = [st.kit === 'physique' ? 'Kit physique imprimé pour ' + nbTxt : 'Kit digital à imprimer'];
@@ -1171,7 +1176,7 @@
     $('endTTC').textContent = eur2(t.ttc) + ' TTC';
     $('gbox').className = 'card gbox' + (st.formule === 'mensuelle' ? ' mens' : '');
     $('endGar').innerHTML = st.formule === 'mensuelle' ? 'Garantie satisfait ou remboursé : réservée à la formule annuelle.' :
-      (certif ? 'Avec la garantie satisfait ou remboursé, fiche découverte certifiée.' : 'Garantie satisfait ou remboursé : <button type="button" id="endGarGo">certifier ma fiche découverte</button>');
+      (certif ? 'Avec la garantie satisfait ou remboursé, fiche découverte certifiée.' : 'Garantie satisfait ou remboursé : <button type="button" id="endGarGo">Je veux bénéficier du satisfait ou remboursé</button>');
     var gg = $('endGarGo'); if (gg) gg.onclick = function(){ go('garantie'); };
     $('endOrder').href = lien(!!certif); $('gOrder').href = lien(true);
     /* « Ma premiere fois » emporte la selection (formule, kit, options, garantie certifiee) jusqu'au bon de commande. */

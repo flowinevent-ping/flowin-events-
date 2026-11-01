@@ -1,6 +1,6 @@
 // supabase/functions/notify-commande-animation/index.ts
 //
-// Chaîne « Flowin Animation magasin » : souscription -> accusé de réception -> paiement validé ->
+// Chaîne « Flowin, jeu d'animation » : souscription -> accusé de réception -> paiement validé ->
 // contrat signé + facture acquittée -> statut documents_envoyes. NON DÉPLOYÉE à la date d'écriture.
 //
 // Appels (voir sql/03-commandes-animation.sql, NON appliqué) :
@@ -21,6 +21,8 @@
 // (les triggers appellent avec la clé anon ; aucune donnée n'est renvoyée à l'appelant).
 
 import { jsPDF } from "npm:jspdf@2.5.1";
+// Modèle unique du bon de commande (identique au navigateur) : pose FlowinBonPDF sur globalThis. Copie de public/bon-commande-pdf.js (MD5 identique, scripts/verifier-bon-commande-pdf.sh).
+import "../_shared/bon-commande-pdf.js";
 import { emailAccuse, emailDocuments, emailFlowin, emailMensualite, esc, eur, pdfContrat, pdfFacture, type Commande, type Facture } from "./documents.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
@@ -29,7 +31,7 @@ const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.de
 const SUPA_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-const COLS = "id,statut,type_commande,offre,engagement_mois,engagement_accepte,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,commercial,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,facture_numero,documents_envoyes_le";
+const COLS = "id,statut,type_commande,offre,enseigne,prelevement_inclut_reste,engagement_mois,engagement_accepte,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,commercial,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,facture_numero,documents_envoyes_le";
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });

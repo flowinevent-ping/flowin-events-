@@ -1,4 +1,4 @@
-# Conditions générales de vente — Flowin Animation magasin
+# Conditions générales de vente — Flowin, jeu d'animation
 
 **PROJET v2 du 01/11/2026, en cours de validation juridique : à faire relire par un juriste avant publication.** Les mentions entre crochets sont à compléter ou à confirmer.
 
@@ -6,7 +6,7 @@
 
 ## Article 1 — Objet et champ d'application
 
-Les présentes conditions générales de vente (CGV) régissent la vente, par la société **BAITA EURL** (Flowin, produit commercial de BAITA EURL), du service « Flowin Animation magasin » à des clients professionnels (le « Client »).
+Les présentes conditions générales de vente (CGV) régissent la vente, par la société **BAITA EURL** (Flowin, produit commercial de BAITA EURL), du service « Flowin, jeu d'animation » à des clients professionnels (le « Client »).
 
 Elles s'appliquent à toute commande passée par bon de commande, en ligne ou sur papier. Elles prévalent sur tout autre document du Client. Le service est réservé aux professionnels ; le Code de la consommation relatif au droit de rétractation ne s'applique pas.
 
@@ -14,7 +14,7 @@ Elles s'appliquent à toute commande passée par bon de commande, en ligne ou su
 
 ## Article 2 — Description du service
 
-Flowin Animation magasin est un service en ligne d'animation commerciale par jeu, accessible par QR code et par lien, sans application à installer. Il comprend :
+Le service « Flowin, jeu d'animation » est un jeu d'animation en ligne, accessible par QR code et par lien, sans application à installer. Il comprend :
 - la mise à disposition d'une ou plusieurs animations (jeux : quiz avec questions bonus, roue, tombola) ;
 - la création de QR codes et de liens tracés par support de diffusion (entrée, caisse, réseaux sociaux, campagnes) ;
 - la gestion des lots, des tickets, des tirages au sort, du stock et du retrait des lots ;
@@ -36,8 +36,8 @@ Les prix sont exprimés en euros hors taxes ; la TVA au taux en vigueur (20 %) s
 | Élément | Prix HT |
 |---|--:|
 | **Formule, au choix :** | |
-| Formule annuelle Flowin Animation (jeux, QR codes et liens tracés, tirages, billets, stock, relances, tableau de bord), engagement 12 mois | 990 € par an |
-| Formule mensuelle Flowin Animation (mêmes services), engagement 3 mois minimum | 110 € par mois |
+| Formule annuelle Flowin, jeu d'animation (jeux, QR codes et liens tracés, tirages, billets, stock, relances, tableau de bord), engagement 12 mois | 990 € par an |
+| Formule mensuelle Flowin, jeu d'animation (mêmes services), engagement 3 mois minimum | 110 € par mois |
 | **Supports, au choix :** | |
 | Kit digital : fichiers des affiches, macarons et support de caisse, QR de jeu inclus, à imprimer soi-même | 0 € |
 | Kit physique imprimé, par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, livrés prêts à poser | 149 € par boutique |
@@ -123,7 +123,7 @@ Aucune partie n'est responsable d'un manquement dû à un cas de force majeure a
 
 ## Article 13 — Droit applicable et litiges
 
-Les présentes CGV sont soumises au droit français. À défaut d'accord amiable, tout litige relève du Tribunal de commerce de [Grasse, à confirmer].
+Les présentes CGV sont soumises au droit français. À défaut d'accord amiable, tout litige relève du Tribunal de commerce de Grasse.
 
 ---
 

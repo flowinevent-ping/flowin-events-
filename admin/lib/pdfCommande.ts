@@ -7,16 +7,21 @@
 import { pdfContrat, pdfFacture, type Commande, type Facture } from './documentsAnimation'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-async function chargerJsPdf(): Promise<any> {
-  const w = window as any
-  if (w.jspdf?.jsPDF) return w.jspdf.jsPDF
-  await new Promise<void>((ok, ko) => {
+function chargerScript(src: string): Promise<void> {
+  return new Promise<void>((ok, ko) => {
     const s = document.createElement('script')
-    s.src = '/nds/vendor/jspdf.umd.min.js'
+    s.src = src
     s.onload = () => ok()
-    s.onerror = () => ko(new Error('jsPDF indisponible'))
+    s.onerror = () => ko(new Error(src + ' indisponible'))
     document.head.appendChild(s)
   })
+}
+
+async function chargerJsPdf(): Promise<any> {
+  const w = window as any
+  if (!w.jspdf?.jsPDF) await chargerScript('/nds/vendor/jspdf.umd.min.js')
+  // Modèle unique du bon de commande (public/bon-commande-pdf.js), partagé avec le navigateur du client et la page Super Admin
+  if (!w.FlowinBonPDF) await chargerScript('/bon-commande-pdf.js')
   return w.jspdf.jsPDF
 }
 
