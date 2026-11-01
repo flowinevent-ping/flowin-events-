@@ -17,7 +17,8 @@ import { supabase } from '@/lib/supabase'
 import { getVisiteurId } from '@/lib/track'
 import QRCode from 'qrcode'
 import { MASTER_CSS } from '@/lib/masters/css'
-import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
+import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, reglePastille, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
+import { chargerMesTickets, nonVus, versVue, marquerVus, TICKETS_EXEMPLE, type ResultatRow } from '@/lib/masters/tickets'
 import type { VueMaster } from '@/lib/masters/resolve'
 import { writeJoueur, getJoueurLocal, animationDejaJouee, dejaJoueAujourdhuiCeQr, CONSENTEMENT_VERSION } from '@/lib/parcours'
 import { doitRefuserDigital } from '@/components/parcours/ParcoursHero'
@@ -78,6 +79,28 @@ export default function JouerClient(p: Props) {
        internes ramenent a l'ecran precedent du parcours, sans quitter la page
        et sans perdre l'etat de la partie. Dans un cadre d'apercu (iframe),
        l'historique du parent n'est pas touche (pile interne). */
+    /* Resultats de tirage a decouvrir (alerte joueur) : file des non vus, pastille sur « Profil ». */
+    const file = { current: [] as ResultatRow[] }
+    const demoPastille = !!(p.demo && p.debut === 'c-profil')
+    const joueurLocal = !p.demo && !p.apercu ? getJoueurLocal() : null
+    function vuResultat(id: string) {
+      if (!joueurLocal) return
+      file.current = file.current.filter(x => x.id !== id)
+      reglePastille(file.current.length)
+      marquerVus(joueurLocal.id, [id])
+    }
+    function chargerProfil(apresChargement?: () => void) {
+      if (!joueurLocal) return
+      chargerMesTickets(joueurLocal.id).then(d => {
+        r.mesTickets = d.groupes
+        file.current = nonVus(d.resultats)
+        reglePastille(file.current.length)
+        if (apresChargement) apresChargement()
+        else if (courant.current === 'c-profil') montrer('c-profil', true)
+        else { const pa = host!.querySelector('.nav a:last-child') as HTMLElement | null; if (pa && !pa.querySelector('.pastille') && file.current.length) pa.insertAdjacentHTML('beforeend', '<span class="pastille">' + file.current.length + '</span>') }
+      }).catch(() => { /* mode degrade : ancien affichage */ })
+    }
+
     /* L'etat de la partie survit a un aller-retour (ex. une station du super
        event puis retour navigateur) : sessionStorage, propre a l'onglet. */
     const cleEtat = 'fm_etat_' + (p.evId || ('m-' + v.id))
@@ -94,6 +117,8 @@ export default function JouerClient(p: Props) {
         if (!enCadre) { try { history.pushState({ ...(history.state || {}), fm: id, n: pile.current.length }, '', '#' + id) } catch { /* ignore */ } }
       }
       courant.current = id
+      reglePastille(demoPastille ? 2 : file.current.length)
+      if (id === 'c-resultat' && r.resultat && !p.demo && !p.apercu) vuResultat(r.resultat.id)
       try { sessionStorage.setItem(cleEtat, JSON.stringify({ r, id, pile: pile.current })) } catch { /* ignore */ }
       host!.innerHTML = rendreEcran(v, r, id)
       const el = host!.firstElementChild as HTMLElement | null
@@ -168,6 +193,7 @@ export default function JouerClient(p: Props) {
         QRCode.toString(contenu, { type: 'svg', margin: 0, width: 110, color: { dark: '#1B3A5C', light: '#FFFFFF' } }).then(svg => { q.innerHTML = svg }).catch(() => { /* garde l'illustration */ })
       }
       if (id === 'c-inscription') majValider()
+      if (id === 'c-profil' && joueurLocal) chargerProfil()
       if (seReel && id === 'sj-carte') monterCarte(el)
       if (seReel && id === 'sj-tickets') chargerTicketsSe(el)
       if (id === 'c-demain') {
@@ -348,6 +374,7 @@ export default function JouerClient(p: Props) {
       if (go === 't-resultat') { montrer('t-res-tirage'); return }
       if (go === 'v-voter') { if (r.voteIdx == null) return; montrer('v-envoi'); return }
       if (go === 'c-valider') { valider(); return }
+      if (go === 'c-resultat') { const x = file.current[0]; if (x) r.resultat = versVue(x); montrer('c-resultat'); return }
       if (go === 'sj-geo') { autourDeMoi(); return }
       if (go === 'c-inscription') { const ch = host!.querySelector('#fpar') as HTMLInputElement | null; if (ch && ch.value.trim()) r.profil = { ...(r.profil || {}), email: ch.value.trim() } }
       if (go === 'c-code' || go === 'c-mdp') { r.erreur = 'L\'espace client arrive bientôt : en attendant, tes tickets et tes lots te sont envoyés par email.'; montrer('c-connexion', true); r.erreur = ''; return }
@@ -456,7 +483,20 @@ export default function JouerClient(p: Props) {
     if (ex && (debut === 'c-billet' || debut === 'c-ticket')) { r.ticket = 'TK-0427'; r.after = debut; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz' }
     if (ex && (debut === 'v-envoi' || debut === 'v-resultat')) r.voteIdx = 2
     if (ex && debut === 'c-inscription' && (v.key === 'spin')) r.after = 'c-billet'
+    if (ex && (debut === 'c-profil')) r.mesTickets = TICKETS_EXEMPLE
     montrer(debut, true)
+    /* Alerte a l'ouverture : si un tirage a eu lieu depuis la derniere visite, le message s'affiche (une seule fois : « vu » memorise). */
+    if (joueurLocal) {
+      const accueil = ['s-flash', 's-accueil', 'c-demain', 'c-digital'].indexOf(debut) >= 0 && !p.debut
+      chargerProfil(() => {
+        if (accueil && courant.current === debut && file.current.length) {
+          r.resultat = versVue(file.current[0]); montrer('c-resultat')
+        } else {
+          const pa = host!.querySelector('.nav a:last-child') as HTMLElement | null
+          if (pa && !pa.querySelector('.pastille') && file.current.length) pa.insertAdjacentHTML('beforeend', '<span class="pastille">' + file.current.length + '</span>')
+        }
+      })
+    }
     /* Differe : le routeur Next doit d'abord poser son etat d'historique
        (__NA), sinon un retour sur cette entree recharge toute la page. */
     const premier = debut

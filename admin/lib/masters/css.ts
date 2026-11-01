@@ -554,4 +554,28 @@ color:var(--ink);font-family:var(--fl-font);-webkit-font-smoothing:antialiased}
 .static *,.static *:before,.static *:after{animation:none!important;transition:none!important}
 .static .confetti{display:none}
 .static .veil{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(244,246,249,.88)}
-.static .urn .card2{opacity:0}`
+.static .urn .card2{opacity:0}
+/* --- Tickets par commerce, statuts de tirage, pastille, bloc « autres commerces » (01/11) --- */
+.autres{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin-top:14px}
+.autres .ai{width:44px;height:44px;border-radius:14px;background:var(--fl-accent-soft);color:var(--fl-accent);display:grid;place-items:center;flex:none}
+.autres b{display:block;font-size:15.5px;font-weight:800;line-height:1.25}
+.autres small{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.4}
+.grp{padding:12px 14px;margin-top:10px}
+.grp .gh{display:flex;gap:12px;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.grp .gh b{display:block;font-size:15.5px;font-weight:800;line-height:1.2}
+.grp .gh small{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+.grp .gt{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:10px 0;border-top:1px solid var(--line)}
+.grp .gt:first-of-type{border-top:0}
+.grp .gt b{font-size:15px;font-weight:800}.grp .gt b i{font-style:normal;color:var(--muted);font-size:12px;font-weight:700}
+.grp .gt small{flex:1;min-width:70px;font-size:12px;color:var(--muted);font-weight:600}
+.grp .gt .tag{margin-top:0}
+.tag.st-attente{background:#fff;border-color:#AEBBCD;color:var(--fl-ink)}
+.tag.st-gagne{background:#DDF3F0;color:#0B6F67}
+.tag.st-perdu{background:#FDECEC;color:#9B2323}
+.nav a{position:relative}
+.nav .pastille{position:absolute;top:-1px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--fl-touche);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid #fff;line-height:1}
+.card.alerte{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;margin-top:14px;cursor:pointer;border-color:var(--fl-accent);background:var(--fl-accent-soft);font-family:inherit;color:var(--ink)}
+.card.alerte .ai{width:42px;height:42px;border-radius:13px;background:var(--fl-accent);color:#fff;display:grid;place-items:center;flex:none}
+.card.alerte b{display:block;font-size:15px;font-weight:800}
+.card.alerte small{display:block;font-size:12.5px;color:var(--ink2);font-weight:600;margin-top:2px}
+`
