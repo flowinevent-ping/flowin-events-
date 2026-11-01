@@ -19,7 +19,7 @@ Aucune valeur dans le dépôt. Sans les trois premières, le bouton « Prélève
 1. Compte GoCardless de BAITA EURL (sandbox d'abord), schéma SEPA Core activé.
 2. Créer le jeton d'accès, puis le webhook vers `https://flowin-events.vercel.app/api/paiement/gocardless/webhook` ; copier son secret.
 3. Renseigner les variables ci-dessus dans Vercel, redéployer.
-4. Appliquer `sql/2026-11-01-commandes-animation.sql` (après relecture) et déployer la fonction edge `notify-commande-animation`.
+4. Appliquer, dans cet ordre et après relecture, `sql/01-identite-super-admin.sql`, `sql/02-pros-entreprise-onboarding.sql`, `sql/03-commandes-animation.sql` (voir l'en-tête de 01 : ordre, prérequis, compte Super Admin à créer), puis déployer la fonction edge `notify-commande-animation`.
 5. Tester en sandbox : commande avec « Prélèvement SEPA » ; IBAN de test GoCardless sur la page hébergée ; vérifier le statut (`mandat_en_cours` puis `mandat_actif` puis `payee`).
 
 ## Déroulé

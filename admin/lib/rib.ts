@@ -6,7 +6,7 @@
  * l'abonnement : le mandat de prelevement est gere par GoCardless, Flowin ne
  * collecte pas d'IBAN pour cela.
  *
- * Stockage : table dediee `pros_rib` (sql/pros_rib.sql), RLS stricte (le pro
+ * Stockage : table dediee `pros_rib` (sql/04-pros-rib.sql), RLS stricte (le pro
  * proprietaire et le SA). Jamais dans un jsonb public.
  */
 

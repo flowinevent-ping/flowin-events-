@@ -21,7 +21,7 @@ export interface ContactPro {
 export async function fetchCrmPro(proId: string, opts?: { sa?: boolean }): Promise<ContactPro[]> {
   if (!proId) return []
   /* Espace pro : fonction qui ne renvoie les coordonnees que des joueurs consentants
-     (sql/confidentialite_contacts.sql, phase 1). Tant qu'elle n'est pas appliquee, repli
+     (sql/05-confidentialite-contacts.sql, phase 1). Tant qu'elle n'est pas appliquee, repli
      sur crm_pro + masque cote application (limiterAuConsentement ci-dessous). Le SA garde
      la fonction complete. */
   let rep = await supabase.rpc(opts?.sa ? 'crm_pro' : 'crm_pro_consentants', { p_pro: proId })

@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { GMAIL_COMPOSE_BASE } from '@/lib/messaging'
 import type { FlowinPro } from '@/lib/types'
+import { Ico } from '@/lib/proicons'
 
 const BASE = 'https://flowin-events.vercel.app'
 
@@ -58,8 +59,8 @@ export default function ActionsFichePro({ pro }: { pro: FlowinPro }) {
 
   return (
     <div style={{ margin: '0 20px 14px', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-      <a className="sa-btn sm" href={espace} target="_blank" rel="noopener noreferrer">👁 Voir son espace</a>
-      <a className="sa-btn sm" href={gmail} target="_blank" rel="noopener noreferrer">✉️ Écrire au pro</a>
+      <a className="sa-btn sm" href={espace} target="_blank" rel="noopener noreferrer"><Ico k="user" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Voir son espace</a>
+      <a className="sa-btn sm" href={gmail} target="_blank" rel="noopener noreferrer"><Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Écrire au pro</a>
       {!pro.email && <span style={{ fontSize: 11, color: '#B45309' }}>email non renseigné</span>}
       <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
         <span className="sa-muted">PIN caisse</span>

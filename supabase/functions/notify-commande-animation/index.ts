@@ -1,161 +1,133 @@
 // supabase/functions/notify-commande-animation/index.ts
 //
-// Email à Flowin (et copie au client à la création) pour les commandes « Flowin Animation magasin »
-// (table commandes_animation, alimentée par admin/public/bon-commande-animation.html).
+// Chaîne « Flowin Animation magasin » : souscription -> accusé de réception -> paiement validé ->
+// contrat signé + facture acquittée -> statut documents_envoyes. NON DÉPLOYÉE à la date d'écriture.
 //
-// Déclenchement : triggers SQL trg_notify_commande_animation_insert / _statut (net.http_post),
-// voir sql/2026-11-01-commandes-animation.sql (NON appliqué à la date d'écriture).
-// Payload : { type: 'nouvelle_commande' | 'statut', ancien_statut, record } (logo retiré),
-//           ou { type: 'en_attente', jours, commandes: [...] } (alerte commandes en attente de paiement).
+// Appels (voir sql/03-commandes-animation.sql, NON appliqué) :
+//   { type: 'nouvelle_commande', record }   trigger après insert  -> email Flowin + ACCUSÉ au client
+//                                            (bon de commande PDF + coordonnées de virement, PAS de facture)
+//   { type: 'statut', ancien_statut, record } changement de statut -> email Flowin
+//   { type: 'paiement_valide', record }      statut -> payee (webhook GoCardless ou SA « virement reçu ») :
+//                                            la base a déjà émis la facture ; envoi contrat + facture, UNE fois
+//   { type: 'renvoi_documents', commande_id } bouton SA « Renvoyer les documents » (journalisé en base)
+//   { type: 'facture_mensualite', commande_id, facture_numero } route webhook (mois 2 et suivants)
+//   { type: 'en_attente', jours, commandes: [{id, raison_sociale, montant_ttc, jours}] }  alerte quotidienne
+//                                            « commandes en attente de paiement depuis plus de X jours »
+//                                            (SQL alerte_commandes_en_attente, a planifier) -> email Flowin
 //
-// Secrets projet (déjà configurés pour notify-bon-commande, AUCUNE valeur ici) :
-//   RESEND_API_KEY, NOTIFY_TO (défaut flowinevent@gmail.com), NOTIFY_FROM.
+// Secrets (AUCUNE valeur ici) : RESEND_API_KEY, NOTIFY_TO (défaut flowinevent@gmail.com), NOTIFY_FROM.
+// SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont fournis automatiquement par Supabase aux fonctions edge.
+// Déploiement : supabase functions deploy notify-commande-animation --no-verify-jwt
+// (les triggers appellent avec la clé anon ; aucune donnée n'est renvoyée à l'appelant).
+
+import { jsPDF } from "npm:jspdf@2.5.1";
+import { emailAccuse, emailDocuments, emailFlowin, emailMensualite, esc, eur, pdfContrat, pdfFacture, type Commande, type Facture } from "./documents.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "flowinevent@gmail.com";
 const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.dev>";
-const IBAN = "FR76 1460 7003 3470 2211 6462 345";
-const BIC = "CCBPFRPPMAR";
-const CGV_URL = "https://flowin-events.vercel.app/cgv-animation-magasin.html";
+const SUPA_URL = Deno.env.get("SUPABASE_URL") || "";
+const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
-const OFFRES: Record<string, string> = {
-  kit_digital: "Kit digital (gratuit)",
-  mensuelle: "Offre mensuelle 110 € HT / mois",
-  annuelle: "Offre annuelle 990 € HT / an",
-};
+const COLS = "id,statut,type_commande,offre,engagement_mois,engagement_accepte,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,commercial,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,facture_numero,documents_envoyes_le";
 
-const STATUTS: Record<string, string> = {
-  en_attente_paiement: "En attente de paiement",
-  mandat_en_cours: "Mandat SEPA en cours",
-  mandat_actif: "Mandat SEPA actif",
-  payee: "Payée",
-  mandat_echoue: "Mandat refusé ou annulé",
-  paiement_echoue: "Prélèvement échoué",
-  annulee: "Annulée",
-};
-
-function esc(v: unknown): string {
-  if (v === null || v === undefined || v === "") return "—";
-  return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-function eur(v: unknown): string {
-  const n = Number(v);
-  if (!isFinite(n)) return "—";
-  return n.toLocaleString("fr-FR", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
-}
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+}
+const H = () => ({ apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, "Content-Type": "application/json" });
+async function rest(path: string, init: RequestInit = {}): Promise<any> {
+  const r = await fetch(`${SUPA_URL}/rest/v1/${path}`, { ...init, headers: { ...H(), ...(init.headers || {}) } });
+  if (!r.ok) throw new Error(`${path.split("?")[0]} ${r.status}`);
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+const rpc = (nom: string, args: Record<string, unknown>) => rest(`rpc/${nom}`, { method: "POST", body: JSON.stringify(args) });
+async function commande(id: string): Promise<Commande | null> {
+  const rows = await rest(`commandes_animation?id=eq.${encodeURIComponent(id)}&select=${COLS}`); return rows?.[0] ?? null;
+}
+async function facture(filtre: string): Promise<Facture | null> {
+  const rows = await rest(`factures_animation?${filtre}&select=*`); return rows?.[0] ?? null;
+}
+function b64(buf: ArrayBuffer): string {
+  const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s);
+}
+async function envoyer(to: string, m: { sujet: string; html: string }, pj: Array<{ filename: string; content: string }> = []): Promise<string> {
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST", headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: NOTIFY_FROM, to: [to], subject: m.sujet, html: m.html, attachments: pj.length ? pj : undefined }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`resend ${r.status} ${JSON.stringify(j).slice(0, 200)}`);
+  return String(j.id ?? "");
+}
+
+/** Paiement validé ou renvoi : contrat signé + facture acquittée, une seule fois (sauf renvoi SA). */
+async function documents(id: string, force: boolean): Promise<Response> {
+  if (force) {
+    // Renvoi : uniquement si le SA l'a demandé il y a moins de 2 minutes (journal en base)
+    const depuis = new Date(Date.now() - 120000).toISOString();
+    const j = await rest(`commandes_animation_journal?commande_id=eq.${encodeURIComponent(id)}&action=eq.renvoi_documents&le=gte.${depuis}&select=id&limit=1`);
+    if (!j?.length) return json({ ok: false, error: "renvoi non demandé par le SA" }, 403);
+  }
+  const reserve = await rpc("reserver_envoi_documents", { p_commande: id, p_force: force });
+  if (reserve !== true) return json({ ok: true, skipped: "déjà envoyé, envoi en cours ou paiement non validé" });
+  try {
+    const r = await commande(id); if (!r) throw new Error("commande introuvable");
+    const f = await facture(`commande_id=eq.${encodeURIComponent(id)}&objet=eq.commande`); if (!f) throw new Error("facture absente");
+    const resend = await envoyer(String(r.email), emailDocuments(r, f), [
+      { filename: `contrat-flowin-${r.id}.pdf`, content: b64(pdfContrat(jsPDF, r)) },
+      { filename: `facture-${f.numero}.pdf`, content: b64(pdfFacture(jsPDF, f)) },
+    ]);
+    await rpc("terminer_envoi_documents", { p_commande: id, p_ok: true, p_details: { resend, facture: f.numero, renvoi: force } });
+    return json({ ok: true, facture: f.numero });
+  } catch (e) {
+    await rpc("terminer_envoi_documents", { p_commande: id, p_ok: false, p_details: { erreur: String(e).slice(0, 300) } }).catch(() => null);
+    return json({ ok: false, error: String(e) }, 502);
+  }
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
-  let payload: Record<string, unknown> = {};
-  try { payload = await req.json(); } catch { return json({ error: "invalid json" }, 400); }
-  const r = (payload.record ?? {}) as Record<string, unknown>;
-  const type = String(payload.type ?? "nouvelle_commande");
+  let p: Record<string, any> = {};
+  try { p = await req.json(); } catch { return json({ error: "invalid json" }, 400); }
   if (!RESEND_API_KEY) return json({ skipped: true, reason: "RESEND_API_KEY absent" });
-
-  // Alerte « commandes en attente de paiement depuis plus de X jours » (fonction SQL alerte_commandes_en_attente)
-  if (type === "en_attente") {
-    const liste = Array.isArray(payload.commandes) ? (payload.commandes as Array<Record<string, unknown>>) : [];
-    if (!liste.length) return json({ skipped: true, reason: "rien en attente" });
-    let lignes = "";
-    for (const c of liste) {
-      lignes += '<tr><td style="padding:7px 14px;font-size:13px;white-space:nowrap">' + esc(c.id) + '</td><td style="padding:7px 14px;font-size:14px;font-weight:600;color:#1B3A5C">' +
-        esc(c.raison_sociale) + '</td><td style="padding:7px 14px;font-size:13px">' + esc(eur(c.montant_ttc)) + ' TTC</td><td style="padding:7px 14px;font-size:13px;font-weight:700;color:#C62F2F">' + esc(c.jours) + " j</td></tr>";
+  if (!SUPA_URL || !SERVICE) return json({ error: "SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY absents" }, 500);
+  const type = String(p.type ?? "");
+  try {
+    if (type === "en_attente") {
+      const liste: Array<Record<string, unknown>> = Array.isArray(p.commandes) ? p.commandes : [];
+      if (!liste.length) return json({ ok: true, skipped: "rien en attente" });
+      const lignes = liste.map((c) => `<tr><td style="padding:7px 14px;font-size:13px;white-space:nowrap">${esc(c.id)}</td><td style="padding:7px 14px;font-size:14px;font-weight:600;color:#1B3A5C">${esc(c.raison_sociale)}</td><td style="padding:7px 14px;font-size:13px">${esc(eur(c.montant_ttc))} TTC</td><td style="padding:7px 14px;font-size:13px;font-weight:700;color:#C62F2F">${esc(c.jours)} j</td></tr>`).join("");
+      const sujet = `${liste.length} commande${liste.length > 1 ? "s" : ""} Animation en attente de paiement depuis plus de ${esc(p.jours)} jours`;
+      const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:620px;margin:0 auto"><div style="background:#1B3A5C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">${sujet}</div><table style="width:100%;border-collapse:collapse;background:#F4F6F9;border:1px solid #DCE3EC;border-top:none">${lignes}</table><div style="color:#5a6b80;font-size:12px;padding:14px 4px">Dès réception du virement : page Super Admin des commandes Animation, « Marquer le virement reçu ». La facture est émise et l'espace pro du client s'ouvre automatiquement.</div></div>`;
+      await envoyer(NOTIFY_TO, { sujet, html });
+      return json({ ok: true });
     }
-    const titreAttente = `${liste.length} commande${liste.length > 1 ? "s" : ""} Animation en attente de paiement depuis plus de ${esc(payload.jours)} jours`;
-    const htmlAttente = '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:620px;margin:0 auto"><div style="background:#1B3A5C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">' +
-      titreAttente + '</div><table style="width:100%;border-collapse:collapse;background:#F4F6F9;border:1px solid #DCE3EC;border-top:none">' + lignes + "</table>" +
-      '<div style="color:#958aa0;font-size:12px;padding:14px 4px">Dès réception du virement : Super Admin, page Commandes Animation, « Marquer le virement reçu ». L\'espace pro du client s\'ouvre alors automatiquement.</div></div>';
-    const resA = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: NOTIFY_FROM, to: [NOTIFY_TO], subject: titreAttente, html: htmlAttente, text: titreAttente + "\n" + liste.map((c) => `${c.id} ${c.raison_sociale} ${c.jours} j`).join("\n") }),
-    });
-    return json({ ok: resA.ok }, resA.ok ? 200 : 502);
+    if (type === "nouvelle_commande" || type === "statut") {
+      const id = String(p.record?.id ?? ""); if (!id) return json({ error: "no record" }, 422);
+      const r = await commande(id); if (!r) return json({ error: "commande introuvable" }, 404);   // relue en base : on n'envoie pas ce que l'appelant affirme
+      await envoyer(NOTIFY_TO, emailFlowin(r, type, p.ancien_statut));
+      if (type === "nouvelle_commande") {
+        const deja = await rest(`commandes_animation?id=eq.${encodeURIComponent(id)}&accuse_envoye_le=is.null&select=id`, {
+          method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify({ accuse_envoye_le: new Date().toISOString() }),
+        });
+        if (deja?.length) {
+          await envoyer(String(r.email), emailAccuse(r), [{ filename: `bon-commande-flowin-${r.id}.pdf`, content: b64(pdfContrat(jsPDF, r)) }]);
+          await rest("commandes_animation_journal", { method: "POST", body: JSON.stringify({ commande_id: id, par: "fonction notify-commande-animation", action: "accuse_envoye" }) });
+        }
+      }
+      return json({ ok: true });
+    }
+    if (type === "paiement_valide") return await documents(String(p.record?.id ?? ""), false);
+    if (type === "renvoi_documents") return await documents(String(p.commande_id ?? ""), true);
+    if (type === "facture_mensualite") {
+      const id = String(p.commande_id ?? ""), num = String(p.facture_numero ?? "");
+      const r = await commande(id); const f = await facture(`numero=eq.${encodeURIComponent(num)}&commande_id=eq.${encodeURIComponent(id)}`);
+      if (!r || !f) return json({ error: "introuvable" }, 404);
+      await envoyer(String(r.email), emailMensualite(r, f), [{ filename: `facture-${f.numero}.pdf`, content: b64(pdfFacture(jsPDF, f)) }]);
+      return json({ ok: true });
+    }
+    return json({ error: "type inconnu" }, 422);
+  } catch (e) {
+    return json({ ok: false, error: String(e) }, 500);
   }
-  if (!r || !r.id) return json({ error: "no record" }, 422);
-
-  const kit = r.kit === "physique" ? `Kit physique × ${r.nb_boutiques}` : "Kit digital";
-  const options: string[] = [];
-  if (Number(r.opt_quiz_qte) > 0) options.push(`Quiz personnalisé × ${r.opt_quiz_qte}`);
-  if (Number(r.opt_bonus_qte) > 0) options.push(`Questions bonus × ${r.opt_bonus_qte}`);
-  const paiement = r.mode_paiement === "aucun" ? "Aucun (gratuit)" : r.mode_paiement === "prelevement_sepa"
-    ? "Prélèvement SEPA (GoCardless)" + (r.prelevement_inclut_reste ? ", tout inclus" : ", kit et options par virement")
-    : "Virement bancaire";
-
-  const rows: Array<[string, string]> = [
-    ["Commande", esc(r.id)],
-    ["Statut", esc(STATUTS[String(r.statut)] ?? r.statut)],
-    ["Établissement", esc(r.raison_sociale)],
-    ["SIRET", esc(r.siret)],
-    ["Adresse", esc([r.adresse, [r.cp, r.ville].filter(Boolean).join(" ")].filter(Boolean).join(", "))],
-    ["Contact", esc(r.contact_nom) + (r.contact_fonction ? " (" + esc(r.contact_fonction) + ")" : "")],
-    ["Email", esc(r.email)],
-    ["Téléphone", esc(r.tel)],
-    ["Boutiques", esc(r.nb_boutiques)],
-    ["Panier moyen déclaré", r.panier_moyen == null ? "—" : esc(eur(r.panier_moyen))],
-    ["Formule", esc(OFFRES[String(r.offre)] ?? r.offre) + " · " + esc(kit) + (options.length ? " · " + esc(options.join(" · ")) : "")],
-    ["Satisfait ou remboursé", r.garantie ? "Oui, objectif " + esc(r.garantie_clients_objectif) + " clients sur 12 mois" : "Non"],
-    ["Flux journalier déclaré", esc(r.flux_journalier)],
-    ["Données certifiées", r.garantie_certifiee_le ? esc(r.garantie_certifiee_par) + " le " + esc(new Date(String(r.garantie_certifiee_le)).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })) : "—"],
-    ["Montant HT", esc(eur(r.montant_ht))],
-    ["Montant TTC", esc(eur(r.montant_ttc))],
-    ["Paiement", esc(paiement)],
-    ["Commercial", esc(r.commercial)],
-    ["Logo fourni", r.a_un_logo ? "Oui" : "Non"],
-    ["Signataire", esc(r.signataire_nom) + (r.signataire_qualite ? " (" + esc(r.signataire_qualite) + ")" : "")],
-    ["Signé le", esc(r.signature_horodatage ? new Date(String(r.signature_horodatage)).toLocaleString("fr-FR", { timeZone: "Europe/Paris" }) : null)],
-    ["IP de signature", esc(r.signature_ip)],
-    ["CGV", esc(r.cgv_version)],
-  ];
-  let trs = "";
-  for (const [k, v] of rows) {
-    trs += '<tr><td style="padding:7px 14px;color:#655a70;font-size:13px;white-space:nowrap">' + k +
-      '</td><td style="padding:7px 14px;color:#1B3A5C;font-size:14px;font-weight:600">' + v + "</td></tr>";
-  }
-  const titre = type === "statut"
-    ? `Commande Animation ${r.id} : ${STATUTS[String(r.statut)] ?? r.statut}`
-    : `Nouvelle commande Animation magasin — ${r.raison_sociale}`;
-  const html =
-    '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:580px;margin:0 auto">' +
-    '<div style="background:#1B3A5C;border-radius:14px 14px 0 0;padding:18px 20px;color:#fff;font-size:17px;font-weight:800">' + esc(titre) + "</div>" +
-    '<table style="width:100%;border-collapse:collapse;background:#F4F6F9;border:1px solid #DCE3EC;border-top:none">' + trs + "</table>" +
-    '<div style="color:#958aa0;font-size:12px;padding:14px 4px">Table commandes_animation (Supabase). Statut mis à jour automatiquement par GoCardless pour le prélèvement ; à passer en « payee » à la main à réception d\'un virement.</div></div>';
-  const text = titre + "\n\n" + rows.map(([k, v]) => k + " : " + v.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")).join("\n");
-
-  const clientEmail = String(r.email ?? "").trim();
-  const emailValide = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clientEmail);
-
-  async function envoyer(to: string, subject: string, htmlBody: string, textBody: string) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: NOTIFY_FROM, to: [to], reply_to: emailValide ? clientEmail : undefined, subject, html: htmlBody, text: textBody }),
-    });
-    return { to, ok: res.ok, status: res.status };
-  }
-
-  const results: Array<Record<string, unknown>> = [];
-  results.push(await envoyer(NOTIFY_TO, titre, html, text));
-
-  // Copie client : seulement à la création
-  if (type === "nouvelle_commande" && emailValide) {
-    const reglement = r.mode_paiement === "prelevement_sepa"
-      ? "Prélèvement SEPA : signez votre mandat sur la page sécurisée GoCardless si ce n'est pas déjà fait." +
-        (r.prelevement_inclut_reste ? "" : "<br>Kit et options à régler par virement : IBAN " + IBAN + " · BIC " + BIC + " · référence " + esc(r.id))
-      : "Virement de " + esc(eur(r.montant_ttc)) + " TTC à l'ordre de BAITA EURL<br>IBAN " + IBAN + " · BIC " + BIC + "<br>Référence à rappeler : " + esc(r.id);
-    const htmlClient =
-      '<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:580px;margin:0 auto">' +
-      '<div style="background:#E3E9F8;border-radius:14px 14px 0 0;padding:18px 20px;color:#1B3A5C;font-size:17px;font-weight:800">Votre commande Flowin Animation est enregistrée</div>' +
-      '<table style="width:100%;border-collapse:collapse;background:#F4F6F9;border:1px solid #DCE3EC;border-top:none">' + trs + "</table>" +
-      '<div style="background:#fff;border:1px solid #ece6dc;border-radius:10px;padding:14px 16px;margin:16px 4px;font-size:13px;color:#3a2f45"><b>Règlement</b><br>' + reglement + "</div>" +
-      '<div style="padding:4px"><a href="' + CGV_URL + '" style="color:#00897B;font-weight:700;font-size:12px">Conditions générales de vente</a></div>' +
-      '<div style="color:#958aa0;font-size:12px;padding:16px 4px">Merci pour votre confiance. Flowin vous contacte pour préparer votre animation. BAITA EURL · Flowin · 40 rue des Arcs, 06140 Vence.</div></div>';
-    results.push(await envoyer(clientEmail, "Votre commande Flowin Animation " + String(r.id), htmlClient, text));
-  }
-
-  const anyFail = results.some((x) => x.ok === false);
-  return json({ ok: !anyFail, results }, anyFail ? 502 : 200);
 });

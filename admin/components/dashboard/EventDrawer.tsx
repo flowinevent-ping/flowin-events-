@@ -13,6 +13,7 @@ import Diffusion from './Diffusion'
 import ReglesDiffusion from './ReglesDiffusion'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
+import { Ico } from '@/lib/proicons'
 
 function fmt(d?: string | null) {
   if (!d) return '-'
@@ -228,9 +229,9 @@ export default function EventDrawer() {
 
   const tabs = [
     { id: 'infos', label: 'Infos' },
-    ...(ev.module === 'spin' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: segments.length }] : []),
-    ...(isQuizFamily ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: totalDispo }] : []),
-    ...(ev.module === 'vote' ? [{ id: 'jeu', label: '🎮 Contenu du jeu', badge: manches.length }] : []),
+    ...(ev.module === 'spin' ? [{ id: 'jeu', label: 'Contenu du jeu', badge: segments.length }] : []),
+    ...(isQuizFamily ? [{ id: 'jeu', label: 'Contenu du jeu', badge: totalDispo }] : []),
+    ...(ev.module === 'vote' ? [{ id: 'jeu', label: 'Contenu du jeu', badge: manches.length }] : []),
     { id: 'stats', label: 'Stats' },
     { id: 'participants', label: 'Participants', badge: ev.participants },
     { id: 'lots', label: 'Lots', badge: gagnants.length || evLots.length },
@@ -245,7 +246,7 @@ export default function EventDrawer() {
     <>
       <div className="sa-drawer-h">
         <div>
-          <div className="sa-drawer-title">📅 {ev.nom}</div>
+          <div className="sa-drawer-title"><Ico k="calendar" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{ev.nom}</div>
           <div className="sa-drawer-sub" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <StatusChip status={ev.status} />
             <ModuleChip module={ev.module} />
@@ -266,7 +267,7 @@ export default function EventDrawer() {
                 target="_blank" rel="noreferrer"
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', marginBottom: 14, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', color: 'inherit' }}
               >
-                📦 Dossier complet du partenaire (A3/A4/A5, vidéo, QR, zip) →
+                <Ico k="package" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Dossier complet du partenaire (A3/A4/A5, vidéo, QR, zip) →
               </a>
             )}
             <FieldRow label="Nom" value={ev.nom} />
@@ -285,7 +286,7 @@ export default function EventDrawer() {
             <SectionHeader>Partenaires ({evParts.length})</SectionHeader>
             {evParts.map(p => p && (
               <div key={p.id} className="sa-list-item">
-                <span>{p.emoji ?? '🤝'}</span>
+                <span style={{ display: 'inline-flex' }}><Ico k="handshake" size={16} /></span>
                 <span>{p.nom}</span>
               </div>
             ))}
@@ -294,7 +295,7 @@ export default function EventDrawer() {
 
         {drawer.tab === 'infos' && edit && (
           <>
-            <div className="sa-alert info">✏️ Mode édition</div>
+            <div className="sa-alert info"><Ico k="edit" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mode édition</div>
             <div className="sa-field">
               <label className="sa-label">Nom</label>
               <input className="sa-input" value={form.nom ?? ''} onChange={f('nom')} />
@@ -445,12 +446,12 @@ export default function EventDrawer() {
 
             {totalDispo === 0 && (
               <div className="sa-alert warn">
-                ⚠️ Jeu vide — aucune banque sélectionnée ou banques sans question qcm. Le joueur verra un quiz sans questions.
+                <Ico k="warning" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Jeu vide — aucune banque sélectionnée ou banques sans question qcm. Le joueur verra un quiz sans questions.
               </div>
             )}
             {totalDispo > 0 && quizNbQ > totalDispo && (
               <div className="sa-alert warn">
-                ⚠️ {quizNbQ} questions demandées mais {totalDispo} seulement disponibles
+                <Ico k="warning" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{quizNbQ} questions demandées mais {totalDispo} seulement disponibles
                 {customCount > 0 && ev.module !== 'quizmaster' ? ` (banques + ${customCount} personnalisée${customCount > 1 ? 's' : ''})` : ''}.
                 Le jeu tirera au maximum {totalDispo}.
               </div>
@@ -605,7 +606,7 @@ export default function EventDrawer() {
                   onClick={() => openDrawer('partenaire', pro.partenaire_id as string)}
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--sa-subtle)', borderRadius: 10, padding: '10px 12px', marginBottom: 12, cursor: 'pointer', fontSize: 12.5, fontWeight: 700 }}
                 >
-                  🤝 Voir la fiche partenaire complète (billets, facture, com) →
+                  <Ico k="handshake" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Voir la fiche partenaire complète (billets, facture, com) →
                 </div>
                 <SectionHeader>{gagnants.length} tirage{gagnants.length > 1 ? 's' : ''}</SectionHeader>
                 {gagnants.length > 0 && (
@@ -650,7 +651,7 @@ export default function EventDrawer() {
                     onClick={() => g.joueur_id && openDrawer('joueur', g.joueur_id)}
                     style={{ cursor: g.joueur_id ? 'pointer' : 'default' }}
                   >
-                    <span style={{ fontSize: 22 }}>🎁</span>
+                    <span style={{ display: 'inline-flex' }}><Ico k="gift" size={24} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700 }}>{g.joueur_nom ?? '—'} — {g.lot_nom ?? '—'}</div>
                       <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>
@@ -688,7 +689,7 @@ export default function EventDrawer() {
                 {evLots.length === 0 && <div className="sa-empty-inline">Aucun lot</div>}
                 {evLots.map(l => (
                   <div key={l.id} className="sa-list-item">
-                    <span style={{ fontSize: 22 }}>{l.emoji ?? '🎁'}</span>
+                    <span style={{ display: 'inline-flex' }}><Ico k="gift" size={22} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
                       <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{l.valeur} €</div>
@@ -719,13 +720,13 @@ export default function EventDrawer() {
                   onClick={() => openDrawer('pro', pro.id, 'qrliens')}
                   style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer', fontSize: 12.5, fontWeight: 700, display: 'flex', justifyContent: 'space-between' }}
                 >
-                  📱 QR multi-stations & liens à usage unique <span>→</span>
+                  <Ico k="phone" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />QR multi-stations & liens à usage unique <span>→</span>
                 </div>
                 <a
                   href="/dashboard/nds-comm" target="_blank" rel="noreferrer"
                   style={{ background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, fontWeight: 700, display: 'flex', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
                 >
-                  🖼️ Logo, kit com et visuels du partenaire <span>→</span>
+                  <Ico k="camera" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Logo, kit com et visuels du partenaire <span>→</span>
                 </a>
               </div>
             )}
@@ -736,9 +737,9 @@ export default function EventDrawer() {
           <div style={{ padding: '0 4px' }}>
             <SectionHeader>Exports disponibles</SectionHeader>
             {[
-              { label: '👥 Joueurs (CSV)', desc: `${participants.length} participants`, fn: () => telechargerCsv(`joueurs-${ev.id}.csv`, participants, ['prenom', 'nom', 'email', 'ticket_code', 'optin']) },
-              { label: '✅ Opt-in (CSV)', desc: `${participants.filter(j => j.optin).length} contacts`, fn: () => telechargerCsv(`optin-${ev.id}.csv`, participants.filter(j => j.optin), ['prenom', 'nom', 'email']) },
-              { label: '🎁 Gagnants (CSV)', desc: `${gagnants.length} gagnants`, fn: () => telechargerCsv(`gagnants-${ev.id}.csv`, gagnants, ['joueur_nom', 'joueur_email', 'lot_nom', 'lot_valeur', 'statut']) },
+              { label: 'Joueurs (CSV)', desc: `${participants.length} participants`, fn: () => telechargerCsv(`joueurs-${ev.id}.csv`, participants, ['prenom', 'nom', 'email', 'ticket_code', 'optin']) },
+              { label: 'Opt-in (CSV)', desc: `${participants.filter(j => j.optin).length} contacts`, fn: () => telechargerCsv(`optin-${ev.id}.csv`, participants.filter(j => j.optin), ['prenom', 'nom', 'email']) },
+              { label: 'Gagnants (CSV)', desc: `${gagnants.length} gagnants`, fn: () => telechargerCsv(`gagnants-${ev.id}.csv`, gagnants, ['joueur_nom', 'joueur_email', 'lot_nom', 'lot_valeur', 'statut']) },
             ].map(item => (
               <div key={item.label} className="sa-list-item" style={{ cursor: 'pointer' }} onClick={item.fn}>
                 <div style={{ flex: 1 }}>
@@ -755,7 +756,7 @@ export default function EventDrawer() {
       <div className="sa-drawer-footer">
         {edit ? (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Supprimer</button>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="sa-btn" onClick={() => setEdit(false)}>Annuler</button>
               <button className="sa-btn primary" onClick={save} disabled={saving}>
@@ -765,8 +766,8 @@ export default function EventDrawer() {
           </>
         ) : (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
-            <button className="sa-btn primary" onClick={enterEdit}>✏ Éditer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Supprimer</button>
+            <button className="sa-btn primary" onClick={enterEdit}><Ico k="edit" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Éditer</button>
           </>
         )}
       </div>

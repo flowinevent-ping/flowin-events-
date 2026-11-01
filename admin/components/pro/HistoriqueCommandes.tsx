@@ -18,7 +18,8 @@ import {
   type CommandeAnimation, type StatutAffiche, LIBELLE_PAIEMENT, LIBELLE_STATUT, NOM_OFFRE, VIREMENT,
   chargerCommandes, dateFr, dateHeureFr, eur, lignesCommande, montantAVirer, statutAffiche,
 } from '@/lib/commandesPro'
-import { telechargerContrat, telechargerFacture, type IdentitePro } from '@/lib/pdfCommande'
+import { telechargerContrat, telechargerFacture } from '@/lib/pdfCommande'
+import type { Facture } from '@/lib/documentsAnimation'
 
 const TEINTE: Record<StatutAffiche, { fond: string; texte: string }> = {
   attente: { fond: '#FFF4E0', texte: '#9A5B00' },
@@ -34,16 +35,17 @@ export function Pastille({ s }: { s: StatutAffiche }) {
 }
 
 const resumeOffre = (c: CommandeAnimation) => {
-  const p = [NOM_OFFRE[c.offre]?.replace(' Flowin Animation', '') ?? c.offre]
+  const p = [NOM_OFFRE[c.offre] ?? c.offre]
   p.push(c.kit === 'physique' ? `kit physique × ${c.nb_boutiques}` : 'kit digital')
   if (c.opt_quiz_qte > 0) p.push(`quiz × ${c.opt_quiz_qte}`)
   if (c.opt_bonus_qte > 0) p.push(`bonus × ${c.opt_bonus_qte}`)
   return p.join(' · ')
 }
 
-export default function HistoriqueCommandes({ proId, identite }: { proId: string; identite: IdentitePro }) {
+export default function HistoriqueCommandes({ proId }: { proId: string }) {
   const [etat, setEtat] = useState<'charge' | 'ok' | 'sans-session' | 'indisponible' | 'erreur'>('charge')
   const [liste, setListe] = useState<CommandeAnimation[]>([])
+  const [factures, setFactures] = useState<Record<string, Facture[]>>({})
   const [message, setMessage] = useState('')
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [info, setInfo] = useState<Record<string, string>>({})
@@ -51,7 +53,7 @@ export default function HistoriqueCommandes({ proId, identite }: { proId: string
 
   const recharger = useCallback(async () => {
     const r = await chargerCommandes(proId)
-    setEtat(r.etat); setListe(r.commandes); setMessage(r.message ?? '')
+    setEtat(r.etat); setListe(r.commandes); setFactures(r.factures); setMessage(r.message ?? '')
     if (r.commandes.length === 1) setOuvert(o => o ?? r.commandes[0].id)
   }, [proId])
   useEffect(() => { recharger() }, [recharger])
@@ -60,11 +62,11 @@ export default function HistoriqueCommandes({ proId, identite }: { proId: string
     try { await navigator.clipboard.writeText(txt); setCopie(cle) } catch { setCopie('') }
     setTimeout(() => setCopie(''), 2000)
   }
-  async function pdf(c: CommandeAnimation, quoi: 'contrat' | 'facture') {
+  async function pdf(c: CommandeAnimation, f?: Facture) {
     setInfo(i => ({ ...i, [c.id]: '' }))
     try {
-      if (quoi === 'contrat') await telechargerContrat(c, identite)
-      else await telechargerFacture(c, identite)
+      if (f) await telechargerFacture(f)
+      else await telechargerContrat(c)
     } catch {
       setInfo(i => ({ ...i, [c.id]: 'Le générateur PDF n’a pas pu se charger. Vérifiez la connexion et réessayez.' }))
     }
@@ -152,23 +154,27 @@ export default function HistoriqueCommandes({ proId, identite }: { proId: string
                       <div style={LIGNE}><span style={MUTED}>Total HT</span><b>{eur(c.montant_ht)}</b></div>
                       <div style={LIGNE}><span style={MUTED}>TVA 20 %</span><b>{eur(c.montant_tva)}</b></div>
                       <div style={{ ...LIGNE, fontSize: 15 }}><span style={{ fontWeight: 900 }}>Total TTC</span><b>{eur(c.montant_ttc)}</b></div>
-                      {c.garantie && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Satisfait ou remboursé (offre annuelle) : objectif de {c.garantie_clients_objectif} clients venus retirer leur lot sur 12 mois.</div>}
+                      {c.garantie && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Satisfait ou remboursé (première souscription annuelle) : objectif de {c.garantie_clients_objectif} clients venus retirer leur lot sur 12 mois.</div>}
+                      {c.type_commande === 'renouvellement' && <div style={{ fontSize: 12.5, ...MUTED, marginTop: 8, lineHeight: 1.5 }}>Renouvellement : la garantie satisfait ou remboursé est réservée à la première souscription annuelle.</div>}
                     </div>
 
                     <div>
                       <div style={ETIQ}>Paiement et documents</div>
                       <div style={LIGNE}><span style={MUTED}>Mode de paiement</span><b>{LIBELLE_PAIEMENT[c.mode_paiement] ?? c.mode_paiement}</b></div>
                       <div style={LIGNE}><span style={MUTED}>Statut</span><Pastille s={s} /></div>
+                      <div style={LIGNE}><span style={MUTED}>Souscription</span><b>{c.type_commande === 'renouvellement' ? 'Renouvellement' : 'Première souscription'}</b></div>
                       <div style={LIGNE}><span style={MUTED}>Signé le</span><b>{dateHeureFr(c.signature_horodatage ?? c.created_at)}</b></div>
-                      {c.virement_recu_at && <div style={LIGNE}><span style={MUTED}>Paiement validé le</span><b>{dateFr(c.virement_recu_at)}</b></div>}
-                      {c.facture_numero && <div style={LIGNE}><span style={MUTED}>Facture</span><b>{c.facture_numero}</b></div>}
+                      {c.paiement_valide_le && <div style={LIGNE}><span style={MUTED}>Paiement validé le</span><b>{dateFr(c.paiement_valide_le)}</b></div>}
+                      {(factures[c.id] ?? []).map(f => <div key={f.numero} style={LIGNE}><span style={MUTED}>{f.objet === 'mensualite' ? 'Facture mensualité' : 'Facture'}</span><b>{f.numero}</b></div>)}
 
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-                        <button style={{ ...BTN2, padding: '10px 16px', fontSize: 13 }} onClick={() => pdf(c, 'contrat')}>Contrat signé (PDF)</button>
-                        <button style={{ ...BTN2, padding: '10px 16px', fontSize: 13, opacity: c.facture_numero ? 1 : .55, cursor: c.facture_numero ? 'pointer' : 'default' }}
-                          disabled={!c.facture_numero} onClick={() => pdf(c, 'facture')}>Facture (PDF)</button>
+                        <button style={{ ...BTN2, padding: '10px 16px', fontSize: 13 }} onClick={() => pdf(c)}>Contrat signé (PDF)</button>
+                        {(factures[c.id] ?? []).map(f => (
+                          <button key={f.numero} style={{ ...BTN2, padding: '10px 16px', fontSize: 13 }} onClick={() => pdf(c, f)}>{f.objet === 'mensualite' ? 'Mensualité' : 'Facture'} {f.numero} (PDF)</button>
+                        ))}
+                        {!(factures[c.id] ?? []).length && <button style={{ ...BTN2, padding: '10px 16px', fontSize: 13, opacity: .55, cursor: 'default' }} disabled>Facture (PDF)</button>}
                       </div>
-                      {!c.facture_numero && <div style={{ fontSize: 12, ...MUTED, marginTop: 6 }}>La facture acquittée est disponible dès que votre paiement est validé.</div>}
+                      {!(factures[c.id] ?? []).length && <div style={{ fontSize: 12, ...MUTED, marginTop: 6 }}>La facture acquittée est disponible dès que votre paiement est validé.</div>}
                       {info[c.id] && <div style={{ fontSize: 12.5, fontWeight: 700, marginTop: 8, color: info[c.id].startsWith('Rappel') ? C.ok : C.ko }}>{info[c.id]}</div>}
                     </div>
                   </div>

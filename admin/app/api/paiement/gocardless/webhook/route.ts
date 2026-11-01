@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PRIX_AM, goCardless, lireCommande, majCommandes, supabaseServeurConfigure, verifierSignatureGoCardless } from '@/lib/animationMagasin'
+import { PRIX_AM, goCardless, lireCommande, majCommandes, notifierCommande, rpc, supabaseServeurConfigure, verifierSignatureGoCardless } from '@/lib/animationMagasin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,7 +17,9 @@ export const dynamic = 'force-dynamic'
  *                                  cree l'abonnement GoCardless mensuel (a partir du 2e mois)
  *   mandates.active             -> statut « mandat_actif »
  *   mandates.failed/cancelled/expired -> « mandat_echoue »
- *   payments.confirmed/paid_out -> « payee »
+ *   payments.confirmed/paid_out -> « payee » (paiement validé : la base émet la facture, la fonction edge
+ *                                  envoie contrat signé + facture acquittée, une seule fois) ;
+ *                                  mensualité d'abonnement (links.subscription) -> facture de la mensualité
  *   payments.failed/cancelled/charged_back -> « paiement_echoue »
  * Une erreur base renvoie 500 : GoCardless renvoie alors l'evenement plus tard.
  */
@@ -83,7 +85,19 @@ async function traiter(ev: GcEvent): Promise<void> {
 
   if (ev.resource_type === 'payments' && l.payment) {
     if (ev.action === 'confirmed' || ev.action === 'paid_out') {
-      await majCommandes({ gc_payment_id: 'eq.' + l.payment, statut: 'neq.annulee' }, { ...trace, statut: 'payee' })
+      if (l.subscription) {
+        // Mois 2 et suivants de la formule mensuelle : facture de la mensualité (idempotente par paiement)
+        const c = await lireCommande(l.subscription, 'gc_subscription_id')
+        if (c) {
+          const numero = await rpc<string>('emettre_facture_animation', { p_commande: c.id, p_gc_payment: l.payment })
+          await notifierCommande({ type: 'facture_mensualite', commande_id: c.id, facture_numero: numero })
+        }
+        return
+      }
+      await majCommandes(
+        { gc_payment_id: 'eq.' + l.payment, statut: 'not.in.(payee,documents_envoyes,annulee)' },
+        { ...trace, statut: 'payee', paiement_valide_le: new Date().toISOString(), paiement_source: 'webhook_gocardless', paiement_valide_par: 'gocardless' }
+      )
     } else if (['failed', 'cancelled', 'charged_back', 'late_failure_settled'].indexOf(ev.action) >= 0) {
       await majCommandes({ gc_payment_id: 'eq.' + l.payment, statut: 'neq.annulee' }, { ...trace, statut: 'paiement_echoue' })
     } else {

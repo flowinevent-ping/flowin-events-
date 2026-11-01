@@ -36,6 +36,7 @@ import { fetchCrmParticipants, fetchSuperEvents, type CrmParticipant, type Super
 import { fetchGagnants, type GagnantRow } from '@/lib/dashboard'
 
 import { usePorteeInitiale } from '@/lib/portee'
+import { Ico } from '@/lib/proicons'
 const fr = (d: string | null) => {
   if (!d) return '—'
   const p = d.split('-')
@@ -210,10 +211,10 @@ export default function Page() {
            (orange = a appeler, vert = confirme, bleu = retire). */
         const etat = gs.some(g => g.retire_at) ? 'retire' : gs.some(g => g.notifie_at) ? 'confirme' : 'a_confirmer'
         const classe = etat === 'retire' ? 'purple' : etat === 'confirme' ? 'live' : 'warn'
-        const libelle = etat === 'retire' ? '✅ Utilisé' : etat === 'confirme' ? '📞 Confirmé' : '⏳ En attente'
+        const libelle = etat === 'retire' ? 'Utilisé' : etat === 'confirme' ? 'Confirmé' : 'En attente'
         return (
           <span className={`sa-chip ${classe}`} title={gs.map(g => g.lot_nom ?? '?').join(', ')}>
-            🏆 {nom} · {libelle}
+            <Ico k="star" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{nom} · {libelle}
           </span>
         )
       },
@@ -234,7 +235,7 @@ export default function Page() {
     <div className="sa-content">
       <div className="sa-page">
         <ListeCRM<CrmParticipant>
-          titre="👥 CRM Participants"
+          titre="CRM Participants"
           sousTitre={liste === null ? undefined
             : `${stats.joueurs} participant${stats.joueurs > 1 ? 's' : ''} · ${stats.lignes} passage${stats.lignes > 1 ? 's' : ''} en station`}
           lignes={visibles}
@@ -248,7 +249,7 @@ export default function Page() {
             { id: 'tous', label: 'Tous' },
             { id: 'optin', label: 'Opt-in', test: p => !!p.optin },
             { id: 'fideles', label: '3 parties et +', test: p => (p.nb_parties ?? 0) >= 3 },
-            { id: 'gagnants', label: '🏆 Gagnants', test: p => (gagnantsParJoueur[p.joueur_id]?.length ?? 0) > 0 },
+            { id: 'gagnants', label: 'Gagnants', test: p => (gagnantsParJoueur[p.joueur_id]?.length ?? 0) > 0 },
           ]}
           selecteurs={pros.length > 1 ? [{
             id: 'pro', libelleTout: 'Tous les pros', options: pros, valeur: pro, onChange: setPro,

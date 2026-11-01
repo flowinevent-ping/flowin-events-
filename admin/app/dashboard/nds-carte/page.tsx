@@ -198,7 +198,7 @@ export default function Page() {
       )}
 
       <div style={{ display: 'inline-flex', gap: 4, background: 'var(--sa-card)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: 4, marginBottom: 12 }}>
-        {([['stations', `📍 Stations (${stations.length})`], ['partenaires', `🏪 Partenaires (${commerces.length})`]] as const).map(([k, l]) => (
+        {([['stations', `Stations (${stations.length})`], ['partenaires', `Partenaires (${commerces.length})`]] as const).map(([k, l]) => (
           <button
             key={k}
             className={`sa-btn sm${couche === k ? ' primary' : ''}`}
@@ -234,7 +234,7 @@ export default function Page() {
           {charge && <div className="sa-muted" style={{ fontSize: 11.5 }}>Chargement…</div>}
 
           {!charge && !points.length && (
-            <EmptyState icon="🗺️" title="Aucun point" desc="Aucun élément à afficher sur cette couche." />
+            <EmptyState icon="pin" title="Aucun point" desc="Aucun élément à afficher sur cette couche." />
           )}
 
           {!charge && points.map(p => {

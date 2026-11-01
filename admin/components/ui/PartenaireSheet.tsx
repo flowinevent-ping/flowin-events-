@@ -1,19 +1,13 @@
 'use client'
 
 import type { FlowinPartenaire } from '@/lib/types'
+import { Ico } from '@/lib/proicons'
 
-function emojiForPartenaire(nom: string): string {
+function icoForPartenaire(nom: string): string {
   const n = nom.toLowerCase()
-  if (n.includes('patisserie') || n.includes('palanque') || n.includes('boulangerie')) return '🍰'
-  if (n.includes('bijouterie') || n.includes('bijou') || n.includes('lorenzo')) return '💎'
-  if (n.includes('ccdk') || n.includes('commerce')) return '🏪'
-  if (n.includes('cinema') || n.includes('majestic')) return '🎬'
-  if (n.includes('sport') || n.includes('decathlon')) return '🏃'
-  if (n.includes('pizza') || n.includes('restaurant') || n.includes('napoli')) return '🍕'
-  if (n.includes('mairie') || n.includes('ville') || n.includes('croix')) return '🏛️'
-  if (n.includes('jazz') || n.includes('musique')) return '🎷'
-  if (n.includes('ski') || n.includes('isola')) return '⛷️'
-  return '🤝'
+  if (n.includes('cinema') || n.includes('majestic')) return 'camera'
+  if (n.includes('mairie') || n.includes('ville') || n.includes('croix')) return 'building'
+  return 'shop'
 }
 
 interface PartenaireSheetProps {
@@ -48,7 +42,7 @@ export default function PartenaireSheet({ partenaire, onClose }: PartenaireSheet
           <div className="fl-sheet-avatar" style={{ background: 'rgba(96,165,250,.15)' }}>
             {partenaire.image_url
               ? <img src={partenaire.image_url} alt={partenaire.nom} />
-              : <span style={{ fontSize: 34 }}>{partenaire.emoji || emojiForPartenaire(partenaire.nom)}</span>
+              : <span style={{ display: 'inline-flex' }}><Ico k={icoForPartenaire(partenaire.nom)} size={34} /></span>
             }
           </div>
 
@@ -65,19 +59,19 @@ export default function PartenaireSheet({ partenaire, onClose }: PartenaireSheet
           <div className="fl-sheet-links">
             {siteUrl && (
               <a href={siteUrl} target="_blank" rel="noopener noreferrer" className="fl-sheet-link">
-                <span className="fl-sheet-link-ico">🌐</span>
+                <span className="fl-sheet-link-ico"><Ico k="globe" size={16} /></span>
                 <span>Site internet</span>
               </a>
             )}
             {instaUrl && (
               <a href={instaUrl} target="_blank" rel="noopener noreferrer" className="fl-sheet-link">
-                <span className="fl-sheet-link-ico">📸</span>
+                <span className="fl-sheet-link-ico"><Ico k="camera" size={16} /></span>
                 <span>Instagram</span>
               </a>
             )}
             {fbUrl && (
               <a href={fbUrl} target="_blank" rel="noopener noreferrer" className="fl-sheet-link">
-                <span className="fl-sheet-link-ico">🔵</span>
+                <span className="fl-sheet-link-ico"><Ico k="facebook" size={16} /></span>
                 <span>Facebook</span>
               </a>
             )}

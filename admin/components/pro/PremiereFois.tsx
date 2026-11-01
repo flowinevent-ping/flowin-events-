@@ -46,7 +46,7 @@ interface Brouillon { etape: number; f: FichePro; perso: Perso; mode: 'recherche
 
 /* Parametres de la plaquette (offre, kit, options, garantie certifiee, commercial) transmis tels quels au bon de commande. */
 const PARAMS_OFFRE = ['offre', 'kit', 'boutiques', 'quiz', 'bonus', 'garantie', 'panier', 'flux', 'certif_le', 'certif_par', 'commercial']
-const NOM_OFFRE: Record<string, string> = { annuelle: 'Offre annuelle', mensuelle: 'Offre mensuelle', kit_digital: 'Kit digital' }
+const NOM_OFFRE: Record<string, string> = { annuelle: 'Formule annuelle', mensuelle: 'Formule mensuelle (3 mois minimum)' }
 function lireSelection(): string {
   try {
     const u = new URLSearchParams(window.location.search)
@@ -61,6 +61,7 @@ function resumeSelection(sel: string): string {
   if (!sel) return ''
   const u = new URLSearchParams(sel)
   const morceaux = [NOM_OFFRE[u.get('offre') ?? ''] ?? '']
+  if (u.get('kit') === 'digital') morceaux.push('kit digital')
   if (u.get('kit') === 'physique') morceaux.push(`kit physique (${u.get('boutiques') ?? '1'} boutique${Number(u.get('boutiques') ?? 1) > 1 ? 's' : ''})`)
   if (u.get('quiz')) morceaux.push('quiz personnalisé')
   if (u.get('bonus')) morceaux.push('questions bonus')
@@ -231,7 +232,7 @@ export default function PremiereFois() {
     const base = { ...lignePro(fiche, 'pro'), id: idPro, auth_id: authData.user.id }
     let degrade = false
     let { error: insErr } = await supabase.from('pros').insert({ ...base, ...ligneProEntreprise(fiche, 'premiere-fois') })
-    /* Migration sql/pros_onboarding_entreprise.sql pas encore appliquee :
+    /* Migration sql/02-pros-entreprise-onboarding.sql pas encore appliquee :
        colonne inconnue (PGRST204 / 42703) -> on cree la fiche sans ces champs. */
     if (insErr && (insErr.code === 'PGRST204' || insErr.code === '42703' || /column/i.test(insErr.message))) {
       degrade = true
@@ -244,7 +245,7 @@ export default function PremiereFois() {
        stockage local du meme site, jamais dans l'adresse. Efface apres la commande. */
     try {
       window.localStorage.setItem('flowin_am_prefill', JSON.stringify({
-        raison: fiche.nom.trim(), siret: fiche.siret, adresse: fiche.adresse, cp: fiche.codePostal, ville: fiche.ville,
+        raison: fiche.nom.trim(), enseigne: (fiche.nomCommercial ?? '').trim(), siret: fiche.siret, adresse: fiche.adresse, cp: fiche.codePostal, ville: fiche.ville,
         contact: fiche.contact, fonction: fiche.roleContact, email: fiche.email.trim(), tel: fiche.tel,
         nb: parseInt(fiche.nbPointsVente ?? '', 10) || 1, commercial: new URLSearchParams(selection).get('commercial') ?? '', pro_id: idPro,
       }))

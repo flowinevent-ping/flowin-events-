@@ -9,6 +9,7 @@ import { useMailGagnant } from '@/lib/mailGagnant'
 import { fetchSuperEvents, type SuperEvent } from '@/lib/nds'
 import { etatTirage, LIBELLE_ETAT_TIRAGE, marquerRelance } from '@/lib/operations'
 import type { FlowinJoueur } from '@/lib/types'
+import { Ico } from '@/lib/proicons'
 
 function fmt(d?: string | null) {
   if (!d) return '-'
@@ -116,7 +117,7 @@ export default function JoueurDrawer() {
           <div className="sa-avatar">{initials}</div>
           <div>
             <div className="sa-drawer-title">{j.prenom} {j.nom}</div>
-            <div className="sa-drawer-sub">{j.email} · {j.optin ? '✅ Opt-in' : '⭕ No opt-in'}</div>
+            <div className="sa-drawer-sub">{j.email} · {j.optin ? 'Opt-in' : 'No opt-in'}</div>
           </div>
         </div>
         <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
@@ -137,7 +138,7 @@ export default function JoueurDrawer() {
             <FieldRow label="Ticket" value={j.ticket_code ? <code className="sa-code">{j.ticket_code}</code> : '-'} />
             <FieldRow label="Score" value={j.score_moy ?? '-'} />
             <FieldRow label="Gains" value={j.gains ?? 0} />
-            <FieldRow label="Opt-in" value={j.optin ? '✅ Oui' : 'Non'} />
+            <FieldRow label="Opt-in" value={j.optin ? 'Oui' : 'Non'} />
             <FieldRow label="Première visite" value={fmt(j.first_seen)} />
             <FieldRow label="Dernière visite" value={fmt(j.last_seen)} />
             <FieldRow label="Source" value={j.source} />
@@ -146,7 +147,7 @@ export default function JoueurDrawer() {
 
         {drawer.tab === 'infos' && edit && (
           <>
-            <div className="sa-alert info">✏️ Mode édition</div>
+            <div className="sa-alert info"><Ico k="edit" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mode édition</div>
             {(['prenom', 'nom', 'tel', 'ville', 'code_postal'] as (keyof FlowinJoueur)[]).map(k => (
               <div key={k} className="sa-field">
                 <label className="sa-label">{k}</label>
@@ -209,7 +210,7 @@ export default function JoueurDrawer() {
             {joueurLots.length === 0 && <div className="sa-empty-inline">Aucun lot gagné</div>}
             {joueurLots.map(l => (
               <div key={l.id} className="sa-list-item">
-                <span style={{ fontSize: 20 }}>{l.emoji ?? '🎁'}</span>
+                <span style={{ display: 'inline-flex' }}><Ico k="gift" size={20} /></span>
                 <div>{l.titre || l.nom} — {l.valeur} €</div>
               </div>
             ))}
@@ -228,7 +229,7 @@ export default function JoueurDrawer() {
               const etat = etatTirage(t)
               return (
                 <div key={t.id} className="sa-list-item" style={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 18 }}>🎫</span>
+                  <span style={{ display: 'inline-flex' }}><Ico k="ticket" size={20} /></span>
                   <div style={{ flex: 1, minWidth: 160 }}>
                     <div style={{ fontWeight: 700 }}>{t.lot_nom ?? 'Lot'}</div>
                     {/* Indicateur de l operation -- un meme joueur peut avoir
@@ -248,10 +249,10 @@ export default function JoueurDrawer() {
                         const u = lienRelanceJoueur(t, 'relance')
                         if (u) window.open(u, '_blank', 'noopener')
                         marquerRelance(Number(t.id))
-                      }}>🔔 {t.relance_envoyee_at ? 'Relancer à nouveau' : 'Relancer'}</button>
+                      }}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{t.relance_envoyee_at ? 'Relancer à nouveau' : 'Relancer'}</button>
                     )}
                     {!annule && etat === 'retire' && (
-                      <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+                      <button style={btn} onClick={() => { const u = lienRelanceJoueur(t, 'merci'); if (u) window.open(u, '_blank', 'noopener') }}><Ico k="handshake" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Remercier</button>
                     )}
                   </div>
                 </div>
@@ -268,7 +269,7 @@ export default function JoueurDrawer() {
               const ev = events.find(e => e.id === eid)
               return (
                 <div key={eid} className="sa-list-item">
-                  <span style={{ fontSize: 18 }}>🎟️</span>
+                  <span style={{ display: 'inline-flex' }}><Ico k="ticket" size={20} /></span>
                   <div style={{ flex: 1 }}>{ev?.nom ?? eid}</div>
                   <strong>{n}</strong>
                 </div>
@@ -279,7 +280,7 @@ export default function JoueurDrawer() {
             {seGains.length === 0 && <div className="sa-empty-inline">Aucun gain immédiat</div>}
             {seGains.map(g => (
               <div key={g.id} className="sa-list-item">
-                <span style={{ fontSize: 18 }}>🎁</span>
+                <span style={{ display: 'inline-flex' }}><Ico k="gift" size={20} /></span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{g.libelle ?? 'Lot'}</div>
                   {g.code && <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>{g.code}</div>}
@@ -296,7 +297,7 @@ export default function JoueurDrawer() {
       <div className="sa-drawer-footer">
         {edit ? (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Supprimer</button>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="sa-btn" onClick={() => setEdit(false)}>Annuler</button>
               <button className="sa-btn primary" onClick={save} disabled={saving}>
@@ -306,8 +307,8 @@ export default function JoueurDrawer() {
           </>
         ) : (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
-            <button className="sa-btn primary" onClick={enterEdit}>✏ Éditer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Supprimer</button>
+            <button className="sa-btn primary" onClick={enterEdit}><Ico k="edit" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Éditer</button>
           </>
         )}
       </div>

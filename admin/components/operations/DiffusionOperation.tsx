@@ -147,7 +147,7 @@ export function ExportMailchimp({ op }: { op: DonneesOperation }) {
     const lignes: { email: string | null; prenom: string | null; nom: string | null; tel: string | null; code_postal: string | null }[] = []
     for (let i = 0; i < jids.length; i += 200) {
       const lot = jids.slice(i, i + 200)
-      /* Consentants seulement, via la fonction securisee (sql/confidentialite_contacts.sql) ;
+      /* Consentants seulement, via la fonction securisee (sql/05-confidentialite-contacts.sql) ;
          repli sur la lecture filtree tant qu'elle n'est pas appliquee. */
       const r = await supabase.rpc('joueurs_consentants_par_ids', { p_ids: lot })
       const data = r.error

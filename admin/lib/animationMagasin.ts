@@ -5,7 +5,7 @@
  * Les memes prix sont recopies (volontairement) dans :
  *   - admin/public/plaquette-animation-magasin.html (simulateur)
  *   - admin/public/bon-commande-animation.html (bon de commande)
- *   - sql/2026-11-01-commandes-animation.sql (recalcul en base, source de verite)
+ *   - sql/03-commandes-animation.sql (recalcul en base, source de verite)
  * Toute modification de prix doit etre faite aux quatre endroits.
  *
  * Aucun secret ici : la cle service_role est lue dans process.env (Vercel).
@@ -14,8 +14,8 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
 export const PRIX_AM = {
-  annuelleHt: 990, // offre annuelle
-  mensuelleHt: 110, // offre mensuelle, par mois
+  annuelleHt: 990, // formule annuelle, engagement 12 mois
+  mensuelleHt: 110, // formule mensuelle, par mois, engagement 3 mois minimum
   kitPhysiqueHt: 149, // par boutique
   optQuizHt: 180, // par evenement
   optBonusHt: 180, // par sondage
@@ -25,7 +25,9 @@ export const PRIX_AM = {
 export type CommandeAnimation = {
   id: string
   statut: string
-  offre: 'kit_digital' | 'mensuelle' | 'annuelle'
+  offre: 'mensuelle' | 'annuelle'
+  engagement_mois?: number
+  gc_subscription_id?: string | null
   raison_sociale: string
   siret: string | null
   adresse: string | null
@@ -53,7 +55,7 @@ export function calculerMontants(c: Pick<CommandeAnimation, 'offre' | 'nb_boutiq
   const kitHt = c.kit === 'physique' ? PRIX_AM.kitPhysiqueHt * nb : 0
   const optHt = PRIX_AM.optQuizHt * quiz + PRIX_AM.optBonusHt * bonus
   // Offre mensuelle : la commande porte le 1er mois ; les mois suivants sont prélevés par l'abonnement GoCardless.
-  const aboHt = c.offre === 'annuelle' ? PRIX_AM.annuelleHt : c.offre === 'mensuelle' ? PRIX_AM.mensuelleHt : 0
+  const aboHt = c.offre === 'annuelle' ? PRIX_AM.annuelleHt : PRIX_AM.mensuelleHt
   const ht = aboHt + kitHt + optHt
   const ttcCents = cents(ht) + Math.round(cents(ht) * PRIX_AM.tva)
   const aboTtcCents = cents(aboHt) + Math.round(cents(aboHt) * PRIX_AM.tva)
@@ -77,7 +79,7 @@ function entetes(key: string, extra?: Record<string, string>): Record<string, st
 }
 
 const COLONNES =
-  'id,statut,offre,raison_sociale,siret,adresse,cp,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,mode_paiement,prelevement_inclut_reste,gc_billing_request_id'
+  'id,statut,offre,engagement_mois,gc_subscription_id,raison_sociale,siret,adresse,cp,ville,contact_nom,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,mode_paiement,prelevement_inclut_reste,gc_billing_request_id'
 
 export async function lireCommande(id: string, colonne = 'id'): Promise<CommandeAnimation | null> {
   const { url, key } = supa()
@@ -106,6 +108,20 @@ export async function majCommandes(filtre: Record<string, string>, patch: Record
   if (!r.ok) throw new Error(`maj commande ${r.status}`)
   const rows = (await r.json()) as unknown[]
   return Array.isArray(rows) ? rows.length : 0
+}
+
+/** Appel d'une fonction SQL (RPC PostgREST) en service_role, ex. emettre_facture_animation. */
+export async function rpc<T = unknown>(nom: string, args: Record<string, unknown>): Promise<T> {
+  const { url, key } = supa()
+  const r = await fetch(`${url}/rest/v1/rpc/${nom}`, { method: 'POST', headers: entetes(key), body: JSON.stringify(args), cache: 'no-store' })
+  if (!r.ok) throw new Error(`rpc ${nom} ${r.status}`)
+  return (await r.json()) as T
+}
+
+/** Déclenche la fonction edge notify-commande-animation (ex. facture d'une mensualité). */
+export async function notifierCommande(body: Record<string, unknown>): Promise<void> {
+  const { url, key } = supa()
+  await fetch(`${url}/functions/v1/notify-commande-animation`, { method: 'POST', headers: entetes(key), body: JSON.stringify(body), cache: 'no-store' })
 }
 
 /* ---------- GoCardless (API REST) ---------- */

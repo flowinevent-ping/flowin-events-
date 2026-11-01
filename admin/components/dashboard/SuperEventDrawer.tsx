@@ -27,6 +27,7 @@ import { SousOnglets, SousOngletVide, sousOngletActif, type SousOnglet } from '.
 import { TableauStations } from './TableauStations'
 import TirageSuperEvent from './TirageSuperEvent'
 import { lienPortee } from '@/lib/portee'
+import { Ico } from '@/lib/proicons'
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—')
 
@@ -155,7 +156,7 @@ export default function SuperEventDrawer() {
     <>
       <div className="sa-drawer-h">
         <div>
-          <div className="sa-drawer-title">🎪 {se?.nom ?? seId}</div>
+          <div className="sa-drawer-title"><Ico k="star" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{se?.nom ?? seId}</div>
           <div className="sa-drawer-sub">
             <span>{se ? `${fmt(se.date_d)} → ${fmt(se.date_f)}` : 'Chargement…'}</span>
             <span>{evs.length} station{evs.length > 1 ? 's' : ''}</span>
@@ -268,7 +269,7 @@ export default function SuperEventDrawer() {
               ? <SousOngletVide libelle="Lots" raison="Aucun lot rattaché aux stations de ce super event." />
               : lotsSe.map(l => (
                 <div key={l.id} className="sa-list-item">
-                  <span style={{ fontSize: 20 }}>{l.emoji ?? '🎁'}</span>
+                  <span style={{ display: 'inline-flex' }}><Ico k="gift" size={20} /></span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700 }}>{l.titre || l.nom}</div>
                     <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>

@@ -11,19 +11,15 @@ export const dynamic = 'force-dynamic'
 export default async function Page({ searchParams }: { searchParams: { pro?: string } }) {
   const proId = searchParams.pro ?? ''
   let nom = 'Mon établissement'
-  let enseigne: string | null = null
   if (proId) {
-    let r = await supabase.from('pros').select('nom,nom_commercial').eq('id', proId).maybeSingle()
-    if (r.error) r = (await supabase.from('pros').select('nom').eq('id', proId).maybeSingle()) as typeof r
-    const d = r.data as { nom?: string; nom_commercial?: string } | null
-    if (d?.nom) nom = d.nom
-    enseigne = d?.nom_commercial || null
+    const { data } = await supabase.from('pros').select('nom').eq('id', proId).maybeSingle()
+    if (data?.nom) nom = data.nom
   }
   return (
     <ProShell proName={nom} proId={proId} active="commandes">
       <h1 style={H1}>Mes commandes et factures</h1>
       <div style={{ ...SUB, marginBottom: 14 }}>Vos commandes, vos contrats signés et vos factures, avec leur état de paiement.</div>
-      {proId ? <HistoriqueCommandes proId={proId} identite={{ nom, enseigne }} /> : null}
+      {proId ? <HistoriqueCommandes proId={proId} /> : null}
     </ProShell>
   )
 }

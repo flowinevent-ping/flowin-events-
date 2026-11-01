@@ -1,7 +1,8 @@
 -- ============================================================================
--- PROS — champs entreprise et onboarding (« Ma première fois », 31/10/2026)
+-- 02 — PROS : champs entreprise et onboarding (« Ma première fois », 31/10/2026)
 -- ============================================================================
--- A APPLIQUER A LA MAIN (SQL editor Supabase ou apply_migration), UNE fois.
+-- PREREQUIS : la table public.pros (existante). Aucun autre fichier. Voir l'ordre complet en tete de 01.
+-- A APPLIQUER A LA MAIN (SQL editor Supabase ou apply_migration).
 -- Rien n'est detruit : uniquement des colonnes ajoutees, toutes facultatives.
 --
 -- Tant que ce fichier n'est pas applique, le parcours /pro/premiere-fois
@@ -27,3 +28,6 @@ alter table public.pros add column if not exists onboarding_fini_at  timestamptz
 -- Le SIRET reste dans la colonne historique `siret` (texte, 14 chiffres sans espace).
 comment on column public.pros.siren is 'SIREN (9 chiffres), deduit du SIRET ou de l''API Recherche d''entreprises';
 comment on column public.pros.nb_points_vente is 'Nombre de points de vente declare par le pro a l''inscription';
+
+-- Date d'ouverture de l'espace pro (posee une seule fois par l'activation au paiement, voir 03).
+alter table public.pros add column if not exists acces_active_at timestamptz;

@@ -18,6 +18,7 @@ import {
 import { useMailGagnant } from '@/lib/mailGagnant'
 
 import { usePorteeInitiale } from '@/lib/portee'
+import { Ico } from '@/lib/proicons'
 
 const dateHeureFr = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null
@@ -48,7 +49,7 @@ function Compteur({ n, label, labelPluriel, ton }: { n: number; label: string; l
 function ChipEtat({ etat }: { etat: 'a_confirmer' | 'confirme' | 'retire' }) {
   const ton = etat === 'retire' ? 'accent' : etat === 'confirme' ? 'ok' : 'alerte'
   const t = TONS_COMPTEUR[ton]
-  const texte = etat === 'retire' ? '✓ Utilisé' : etat === 'confirme' ? '✓ Confirmé' : '☎ À appeler'
+  const texte = etat === 'retire' ? '✓ Utilisé' : etat === 'confirme' ? '✓ Confirmé' : 'À appeler'
   return <span style={{ background: t.bg, color: t.c, fontSize: 11.5, fontWeight: 800, padding: '4px 9px', borderRadius: 99, whiteSpace: 'nowrap' }}>{texte}</span>
 }
 interface Ligne {
@@ -175,7 +176,7 @@ export default function Page() {
 
         {totalFantome > 0 && (
           <div className="sa-alert warn" style={{ marginBottom: 16, fontSize: 12.5 }}>
-            ⚠ {totalConfigure} lots configurés au total, {totalHonore} réellement confirmés/retirés (les deux correspondent — aucun partenaire lésé) — mais {totalFantome} tirages restent en base sans jamais avoir été destinés à être honorés, tirés au-delà du stock avant la correction du 31/08. Voir <code className="sa-code">docs/sql/2026-08-31-fix-tirage-lot-quantite.sql</code>.
+            <Ico k="warning" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{totalConfigure} lots configurés au total, {totalHonore} réellement confirmés/retirés (les deux correspondent — aucun partenaire lésé) — mais {totalFantome} tirages restent en base sans jamais avoir été destinés à être honorés, tirés au-delà du stock avant la correction du 31/08. Voir <code className="sa-code">docs/sql/2026-08-31-fix-tirage-lot-quantite.sql</code>.
           </div>
         )}
 
@@ -208,7 +209,7 @@ export default function Page() {
 
             {l.etat.a_confirmer > 0 && (
               <div className="sa-alert warn" style={{ marginBottom: 10, fontSize: 12.5 }}>
-                ☎ {l.etat.a_confirmer} gagnant{l.etat.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
+                <Ico k="phone" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{l.etat.a_confirmer} gagnant{l.etat.a_confirmer > 1 ? 's' : ''} à appeler. Le partenaire ne les verra qu&apos;une fois confirmés.
               </div>
             )}
 
@@ -230,7 +231,7 @@ export default function Page() {
                 </div>
                 <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
                 {g.retrait_token && (
-                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>📄 Billet</a>
+                  <a className="sa-btn sm" href={lienBillet(g.retrait_token, true)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}><Ico k="file" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Billet</a>
                 )}
                 {g.etat !== 'a_confirmer' && (
                   <>
@@ -244,7 +245,7 @@ export default function Page() {
                         if (url) window.open(url, '_blank', 'noopener')
                       }}
                     >
-                      ✉️ Gagnant
+                      <Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Gagnant
                     </button>
                     {g.etat === 'confirme' && (
                       <button
@@ -260,21 +261,21 @@ export default function Page() {
                           if (url) window.open(url, '_blank', 'noopener')
                         }}
                       >
-                        🔔 Relancer
+                        <Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancer
                       </button>
                     )}
                     <button
                       className="sa-btn sm"
                       onClick={() => window.open(mailPartenaireUrl(g, l.nom, l.email), '_blank', 'noopener')}
                     >
-                      ✉️ Partenaire
+                      <Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Partenaire
                     </button>
                   </>
                 )}
                 {g.etat === 'a_confirmer' && (
                   <>
                     <button className="sa-btn sm primary" onClick={() => onConfirmer(g.tirage_id)}>✓ Confirmer</button>
-                    <button className="sa-btn sm" onClick={() => onRetirer(g, l.id)} title="Annuler et tirer un nouveau gagnant pour ce lot">🔁 Re-tirer</button>
+                    <button className="sa-btn sm" onClick={() => onRetirer(g, l.id)} title="Annuler et tirer un nouveau gagnant pour ce lot"><Ico k="undo" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Re-tirer</button>
                   </>
                 )}
                 </div>

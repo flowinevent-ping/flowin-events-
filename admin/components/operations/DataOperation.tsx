@@ -57,7 +57,7 @@ async function chargerContacts(op: DonneesOperation, seulementConsentants = fals
   for (let i = 0; i < jids.length; i += 200) {
     const lot = jids.slice(i, i + 200)
     /* Espace pro : uniquement les joueurs consentants, via la fonction securisee
-       (sql/confidentialite_contacts.sql) ; repli sur la lecture filtree tant qu'elle n'est pas appliquee. */
+       (sql/05-confidentialite-contacts.sql) ; repli sur la lecture filtree tant qu'elle n'est pas appliquee. */
     let rep: { data: unknown } = { data: null }
     if (seulementConsentants) {
       const r = await supabase.rpc('joueurs_consentants_par_ids', { p_ids: lot })

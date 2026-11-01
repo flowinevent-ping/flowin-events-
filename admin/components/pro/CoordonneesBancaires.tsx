@@ -8,7 +8,7 @@
  * l'application ne collecte pas d'IBAN pour cela — le libelle le dit a l'ecran.
  *
  * Lecture / ecriture avec la SESSION du pro (client `supabase`) : la table
- * `pros_rib` (sql/pros_rib.sql) n'est accessible qu'au pro proprietaire et au
+ * `pros_rib` (sql/04-pros-rib.sql) n'est accessible qu'au pro proprietaire et au
  * SA ; le pro ne relit jamais l'IBAN complet, seulement sa version masquee.
  * Tant que la migration n'est pas appliquee : message « bientot disponible ».
  */

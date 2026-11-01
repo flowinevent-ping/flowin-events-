@@ -1,7 +1,8 @@
 -- ============================================================================
--- PROS_RIB — coordonnées bancaires du pro (31/10/2026)
+-- 04 — PROS_RIB : coordonnées bancaires du pro (31/10/2026)
 -- ============================================================================
--- A APPLIQUER A LA MAIN, UNE fois. Ne pas rejouer sans relire.
+-- PREREQUIS : 01-identite-super-admin.sql (est_super_admin) et la table public.pros.
+-- A APPLIQUER A LA MAIN. Rejouable sans dommage.
 --
 -- A QUOI ELLES SERVENT : rembourser le pro (garantie « Flowin vous rembourse
 -- la différence ») et lui faire des virements. JAMAIS pour le prélèvement de
@@ -14,32 +15,15 @@
 --   * le pro propriétaire (pros.auth_id = auth.uid()) lit / écrit SA ligne ;
 --     il ne relit JAMAIS l'IBAN complet : la colonne `iban` n'est pas lisible
 --     par le rôle authenticated (droits par colonne), seul `iban_masque` l'est ;
---   * le Super Admin (compte listé dans flowin_super_admins) lit tout, via la
+--   * le Super Admin (compte inscrit dans flowin_super_admins, voir 01) lit tout, via la
 --     politique SA et la fonction rib_pro_complet().
 --
 -- Tant que ce fichier n'est pas appliqué, l'onglet « Coordonnées bancaires »
 -- du profil pro affiche un message « bientôt disponible » et n'enregistre rien.
 -- ============================================================================
 
--- 1. Les comptes Super Admin (auth Supabase). A remplir à la main :
---    insert into public.flowin_super_admins(auth_id, email) values ('<uuid auth>', '<email>');
-create table if not exists public.flowin_super_admins (
-  auth_id    uuid primary key,
-  email      text default '',
-  created_at timestamptz default now()
-);
-alter table public.flowin_super_admins enable row level security;
--- Aucune politique : illisible par anon / authenticated ; lu seulement par la fonction ci-dessous.
-
-create or replace function public.est_super_admin()
-returns boolean
-language sql stable security definer
-set search_path to 'public'
-as $$
-  select exists (select 1 from public.flowin_super_admins s where s.auth_id = auth.uid())
-$$;
-revoke all on function public.est_super_admin() from public, anon;
-grant execute on function public.est_super_admin() to authenticated;
+-- 1. Identite du Super Admin : table flowin_super_admins et fonction est_super_admin() viennent de
+--    01-identite-super-admin.sql (une seule definition, pas de copie ici).
 
 -- 2. La table
 create table if not exists public.pros_rib (

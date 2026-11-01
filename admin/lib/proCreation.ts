@@ -74,7 +74,7 @@ export interface FichePro {
   motdepasse: string
   notes: string
   /* Champs entreprise du parcours « Ma premiere fois » (31/10). Facultatifs ;
-     colonnes ajoutees par sql/pros_onboarding_entreprise.sql. */
+     colonnes ajoutees par sql/02-pros-entreprise-onboarding.sql. */
   siren?: string
   formeJuridique?: string
   formeJuridiqueCode?: string
@@ -251,7 +251,7 @@ export function lignePro(f: FichePro, cote: CotePro, statutSA: 'valide' | 'en_at
 }
 
 /**
- * Les colonnes entreprise / onboarding (sql/pros_onboarding_entreprise.sql).
+ * Les colonnes entreprise / onboarding (sql/02-pros-entreprise-onboarding.sql).
  * Separees de lignePro : tant que la migration n'est pas appliquee, l'appelant
  * retente l'insertion sans elles (mode degrade) au lieu d'echouer.
  */

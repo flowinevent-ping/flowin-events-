@@ -1,18 +1,25 @@
 /**
- * COMMANDES ET FACTURES DU PRO (31/10/2026) — table commandes_animation
- * (sql/2026-11-01-commandes-animation.sql + sql/commandes_animation_pro.sql).
+ * COMMANDES ET FACTURES DU PRO (01/11/2026) — tables commandes_animation et factures_animation
+ * (sql/03-commandes-animation.sql). UNE SEULE chaine : memes colonnes, memes statuts, memes
+ * factures (FL-AM-AAAA-NNNNN) que la page Super Admin et la fonction edge.
  *
- * Lecture sous RLS avec la SESSION du pro : un pro ne lit que ses commandes, le SA lit tout.
- * Tant que les SQL ne sont pas appliques, `chargerCommandes` renvoie { etat: 'indisponible' }
- * et l'ecran affiche « bientot disponible » au lieu d'une erreur.
+ * Lecture sous RLS avec la SESSION du pro : un pro ne lit que SES commandes et SES factures,
+ * le SA lit tout. Tant que le SQL n'est pas applique, `chargerCommandes` renvoie
+ * { etat: 'indisponible' } et l'ecran affiche « bientot disponible » au lieu d'une erreur.
  */
 import { supabase } from './supabase'
+import type { Facture } from './documentsAnimation'
+import { BIC, IBAN } from './documentsAnimation'
 
 export interface CommandeAnimation {
   id: string
   created_at: string
   statut: string
+  type_commande?: 'premiere' | 'renouvellement'
+  offre: 'mensuelle' | 'annuelle'
+  engagement_mois?: number
   raison_sociale: string
+  enseigne?: string | null
   siret: string
   adresse: string
   cp: string
@@ -22,7 +29,6 @@ export interface CommandeAnimation {
   email: string
   tel: string
   nb_boutiques: number
-  offre: 'kit_digital' | 'mensuelle' | 'annuelle'
   kit: 'digital' | 'physique'
   opt_quiz_qte: number
   opt_bonus_qte: number
@@ -36,54 +42,68 @@ export interface CommandeAnimation {
   prelevement_inclut_reste: boolean
   garantie: boolean
   garantie_clients_objectif: number | null
+  garantie_certifiee_par: string | null
+  garantie_certifiee_le: string | null
   panier_moyen: number | null
+  flux_journalier: string | null
   cgv_version: string | null
+  engagement_accepte: boolean
   signataire_nom: string
   signataire_qualite: string | null
   signature_horodatage: string | null
   signature_ip: string | null
   commercial: string | null
   pro_id: string | null
-  virement_recu_at: string | null
-  documents_envoyes_at: string | null
+  paiement_valide_le: string | null
+  paiement_source: string | null
+  paiement_valide_par: string | null
+  documents_envoyes_le: string | null
   facture_numero: string | null
-  facture_emise_at: string | null
   relance_paiement_at: string | null
-  paiement_maj_at: string | null
+  relances_paiement: number | null
 }
 
-const COLONNES = 'id,created_at,statut,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,offre,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,prelevement_inclut_reste,garantie,garantie_clients_objectif,panier_moyen,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,commercial,pro_id,virement_recu_at,documents_envoyes_at,facture_numero,facture_emise_at,relance_paiement_at,paiement_maj_at'
-/** Colonnes d'avant sql/commandes_animation_pro.sql (repli). */
-const COLONNES_BASE = 'id,created_at,statut,raison_sociale,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,offre,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,prelevement_inclut_reste,garantie,garantie_clients_objectif,panier_moyen,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,commercial'
+const COLONNES = 'id,created_at,statut,type_commande,offre,engagement_mois,engagement_accepte,raison_sociale,enseigne,siret,adresse,cp,ville,contact_nom,contact_fonction,email,tel,nb_boutiques,kit,opt_quiz_qte,opt_bonus_qte,montant_abonnement_ht,montant_kit_ht,montant_options_ht,montant_ht,montant_tva,montant_ttc,mode_paiement,prelevement_inclut_reste,garantie,garantie_clients_objectif,garantie_certifiee_le,garantie_certifiee_par,panier_moyen,flux_journalier,cgv_version,signataire_nom,signataire_qualite,signature_horodatage,signature_ip,commercial,pro_id,paiement_valide_le,paiement_source,paiement_valide_par,documents_envoyes_le,facture_numero,relance_paiement_at,relances_paiement'
 
 export type EtatChargement = 'ok' | 'sans-session' | 'indisponible' | 'erreur'
 
 const TABLE_ABSENTE = (code?: string, msg?: string) =>
-  code === '42P01' || code === 'PGRST205' || /does not exist|schema cache/i.test(msg ?? '')
+  code === '42P01' || code === 'PGRST205' || /does not exist|schema cache|Could not find/i.test(msg ?? '')
 
-/** `proId` : la commande est rattachee au compte pro (colonne pro_id). */
-export async function chargerCommandes(proId: string): Promise<{ etat: EtatChargement; commandes: CommandeAnimation[]; message?: string }> {
-  const { data: s } = await supabase.auth.getSession()
-  if (!s.session) return { etat: 'sans-session', commandes: [] }
-  let rep = await supabase.from('commandes_animation').select(COLONNES).eq('pro_id', proId).order('created_at', { ascending: false })
-  if (rep.error && /pro_id|virement_recu|facture|documents_envoyes|relance_paiement|paiement_maj/.test(rep.error.message)) {
-    // colonnes de sql/commandes_animation_pro.sql absentes : on ne peut pas lier au pro, donc rien a afficher
-    return { etat: 'indisponible', commandes: [] }
-  }
-  if (rep.error) {
-    if (TABLE_ABSENTE(rep.error.code, rep.error.message)) return { etat: 'indisponible', commandes: [] }
-    return { etat: 'erreur', commandes: [], message: rep.error.message }
-  }
-  return { etat: 'ok', commandes: (rep.data ?? []) as unknown as CommandeAnimation[] }
+export interface ResultatCommandes {
+  etat: EtatChargement
+  commandes: CommandeAnimation[]
+  /** Factures emises (commande + mensualites), par numero de commande. */
+  factures: Record<string, Facture[]>
+  message?: string
 }
 
-export { COLONNES_BASE }
+/** `proId` : les commandes rattachees au compte pro (colonne pro_id, sql/03). */
+export async function chargerCommandes(proId: string): Promise<ResultatCommandes> {
+  const vide = { commandes: [], factures: {} }
+  const { data: s } = await supabase.auth.getSession()
+  if (!s.session) return { etat: 'sans-session', ...vide }
+  const rep = await supabase.from('commandes_animation').select(COLONNES).eq('pro_id', proId).order('created_at', { ascending: false })
+  if (rep.error) {
+    if (TABLE_ABSENTE(rep.error.code, rep.error.message) || /column/i.test(rep.error.message)) return { etat: 'indisponible', ...vide }
+    return { etat: 'erreur', ...vide, message: rep.error.message }
+  }
+  const commandes = (rep.data ?? []) as unknown as CommandeAnimation[]
+  const factures: Record<string, Facture[]> = {}
+  if (commandes.length) {
+    const f = await supabase.from('factures_animation').select('*').in('commande_id', commandes.map(c => c.id)).order('emise_le', { ascending: true })
+    ;((f.data ?? []) as unknown as Facture[]).forEach(x => { (factures[x.commande_id] = factures[x.commande_id] ?? []).push(x) })
+  }
+  return { etat: 'ok', commandes, factures }
+}
 
 export type StatutAffiche = 'attente' | 'paye' | 'documents' | 'a_reprendre' | 'annulee'
 
+/** Memes regroupements que la page Super Admin : un mandat SEPA actif n'est PAS encore un paiement. */
 export function statutAffiche(c: CommandeAnimation): StatutAffiche {
   if (c.statut === 'annulee') return 'annulee'
-  if (c.statut === 'payee' || c.statut === 'mandat_actif') return c.documents_envoyes_at ? 'documents' : 'paye'
+  if (c.statut === 'documents_envoyes') return 'documents'
+  if (c.statut === 'payee') return 'paye'
   if (c.statut === 'mandat_echoue' || c.statut === 'paiement_echoue') return 'a_reprendre'
   return 'attente'
 }
@@ -97,31 +117,14 @@ export const LIBELLE_STATUT: Record<StatutAffiche, string> = {
 }
 
 export const NOM_OFFRE: Record<string, string> = {
-  annuelle: 'Offre annuelle Flowin Animation',
-  mensuelle: 'Offre mensuelle Flowin Animation',
-  kit_digital: 'Kit digital Flowin',
+  annuelle: 'Formule annuelle',
+  mensuelle: 'Formule mensuelle',
 }
 
 export const LIBELLE_PAIEMENT: Record<string, string> = {
   virement: 'Virement bancaire',
   prelevement_sepa: 'Prélèvement SEPA (GoCardless)',
   aucun: 'Aucun (gratuit)',
-}
-
-export interface LigneCommande { lib: string; det: string; q: number; ht: number }
-
-const PRIX_OPT = 180
-
-/** Lignes de la commande : memes libelles que le bon de commande. */
-export function lignesCommande(c: CommandeAnimation): LigneCommande[] {
-  const l: LigneCommande[] = []
-  if (c.offre === 'annuelle') l.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support, 12 mois', q: 1, ht: Number(c.montant_abonnement_ht) })
-  else if (c.offre === 'mensuelle') l.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: 'Minimum 3 mois', q: 1, ht: Number(c.montant_abonnement_ht) })
-  if (c.kit === 'physique') l.push({ lib: 'Kit physique', det: 'Macarons, affiches, support de caisse', q: c.nb_boutiques, ht: Number(c.montant_kit_ht) })
-  else l.push({ lib: 'Kit digital', det: 'Fichiers et QR de jeu à imprimer, gratuit', q: 1, ht: 0 })
-  if (c.opt_quiz_qte > 0) l.push({ lib: 'Option : quiz personnalisé', det: 'Par animation', q: c.opt_quiz_qte, ht: PRIX_OPT * c.opt_quiz_qte })
-  if (c.opt_bonus_qte > 0) l.push({ lib: 'Option : questions bonus', det: 'Par sondage', q: c.opt_bonus_qte, ht: PRIX_OPT * c.opt_bonus_qte })
-  return l
 }
 
 export const eur = (n: number | string | null | undefined) =>
@@ -132,8 +135,8 @@ export const dateFr = (iso: string | null | undefined) =>
 export const dateHeureFr = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }) : '—'
 
-/** Coordonnees de virement : celles des documents Flowin existants (bon de commande). */
-export const VIREMENT = { titulaire: 'BAITA EURL', iban: 'FR76 1460 7003 3470 2211 6462 345', bic: 'CCBPFRPPMAR' }
+/** Coordonnees de virement : celles des documents Flowin (source unique : documentsAnimation). */
+export const VIREMENT = { titulaire: 'BAITA EURL', iban: IBAN, bic: BIC }
 
 /** Montant restant a regler par virement selon le mode de paiement. */
 export function montantAVirer(c: CommandeAnimation): number {
@@ -142,3 +145,6 @@ export function montantAVirer(c: CommandeAnimation): number {
   const abo = Math.round(Number(c.montant_abonnement_ht) * 1.2 * 100) / 100
   return c.prelevement_inclut_reste ? 0 : Math.round((Number(c.montant_ttc) - abo) * 100) / 100
 }
+
+/** Lignes de la commande : memes que le bon de commande, la facture et le contrat. */
+export { lignesCommande } from './documentsAnimation'

@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
   try {
     const c = await lireCommande(id)
     if (!c) return NextResponse.json({ ok: false, error: 'Commande introuvable.' }, { status: 404 })
-    if (c.offre === 'kit_digital' && c.kit !== 'physique' && !c.opt_quiz_qte && !c.opt_bonus_qte) {
-      return NextResponse.json({ ok: false, error: 'Rien à régler pour le kit digital gratuit.' }, { status: 409 })
+    if (c.offre !== 'annuelle' && c.offre !== 'mensuelle') {
+      return NextResponse.json({ ok: false, error: 'Formule inconnue.' }, { status: 409 })
     }
     if (c.mode_paiement !== 'prelevement_sepa') {
       return NextResponse.json({ ok: false, error: 'Cette commande est réglée par virement.' }, { status: 409 })

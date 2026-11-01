@@ -6,7 +6,7 @@
 
 ## Article 1 — Objet et champ d'application
 
-Les présentes conditions générales de vente (CGV) régissent la vente, par la société **BAITA EURL**, exploitant la marque **Flowin**, du service « Flowin Animation magasin » à des clients professionnels (le « Client »).
+Les présentes conditions générales de vente (CGV) régissent la vente, par la société **BAITA EURL** (Flowin, produit commercial de BAITA EURL), du service « Flowin Animation magasin » à des clients professionnels (le « Client »).
 
 Elles s'appliquent à toute commande passée par bon de commande, en ligne ou sur papier. Elles prévalent sur tout autre document du Client. Le service est réservé aux professionnels ; le Code de la consommation relatif au droit de rétractation ne s'applique pas.
 
@@ -35,13 +35,16 @@ Les prix sont exprimés en euros hors taxes ; la TVA au taux en vigueur (20 %) s
 
 | Élément | Prix HT |
 |---|--:|
-| Kit digital seul (fichiers et QR de jeu, sans abonnement) | gratuit |
-| Offre mensuelle Flowin Animation (jeux, QR codes et liens tracés, tirages, billets, stock, relances, tableau de bord) | 110 € par mois |
-| Offre annuelle Flowin Animation (mêmes services) | 990 € par an |
-| Kit digital (fichiers des affiches, macarons et support de caisse à imprimer soi-même) | 0 € |
-| Kit physique (macarons, affiches, support de caisse imprimés) | 149 € par boutique |
+| **Formule, au choix :** | |
+| Formule annuelle Flowin Animation (jeux, QR codes et liens tracés, tirages, billets, stock, relances, tableau de bord), engagement 12 mois | 990 € par an |
+| Formule mensuelle Flowin Animation (mêmes services), engagement 3 mois minimum | 110 € par mois |
+| **Supports, au choix :** | |
+| Kit digital : fichiers des affiches, macarons et support de caisse, QR de jeu inclus, à imprimer soi-même | 0 € |
+| Kit physique imprimé, par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, livrés prêts à poser | 149 € par boutique |
 | Option : personnalisation des questions du quiz | 180 € par événement |
 | Option : personnalisation des questions bonus | 180 € |
+
+Le Client choisit une seule formule (annuelle ou mensuelle) et un seul type de supports (kit digital ou kit physique). Sur 12 mois, la formule mensuelle représente 1 320 € HT (12 × 110 €), soit 330 € HT de plus que la formule annuelle.
 
 **Lots :** les lots mis en jeu sont fournis et financés par le Client, en plus des prix ci-dessus.
 
@@ -51,16 +54,19 @@ Flowin peut faire évoluer ses tarifs ; toute hausse est notifiée au Client au 
 
 Le Client choisit son mode de paiement sur le bon de commande :
 - **Virement bancaire**, à réception du bon de commande. Coordonnées : BAITA EURL, IBAN FR76 1460 7003 3470 2211 6462 345, BIC CCBPFRPPMAR, en rappelant le numéro de commande.
-- **Prélèvement SEPA**, par l'intermédiaire du prestataire de paiement GoCardless : le Client signe un mandat SEPA sur la page sécurisée de GoCardless ; Flowin n'a pas accès à ses coordonnées bancaires. Offre annuelle : prélevée en une fois. Offre mensuelle : premier mois prélevé à la commande, puis chaque mois. Le kit et les options peuvent être prélevés aussi au choix du Client, sinon ils sont réglés par virement. Identifiant créancier SEPA : [à compléter].
-- L'offre mensuelle peut aussi être réglée par virement, chaque mois, à réception de facture.
+- **Prélèvement SEPA**, par l'intermédiaire du prestataire de paiement GoCardless : le Client signe un mandat SEPA sur la page sécurisée de GoCardless ; Flowin n'a pas accès à ses coordonnées bancaires. Formule annuelle : prélevée en une fois. Formule mensuelle : premier mois prélevé à la commande, puis chaque mois. Le kit et les options peuvent être prélevés aussi au choix du Client, sinon ils sont réglés par virement. Identifiant créancier SEPA : [à compléter].
+- La formule mensuelle peut aussi être réglée par virement, chaque mois, à réception de facture.
+
+Sont payés à la commande : formule annuelle, 990 € HT + supports + options ; formule mensuelle, premier mois (110 € HT) + supports + options, puis 110 € HT chaque mois.
 
 La commande est enregistrée « en attente de paiement » jusqu'à réception du règlement. Les factures sont émises au nom du Client et payables à réception. En cas de retard, des pénalités au taux de trois fois le taux d'intérêt légal s'appliquent de plein droit, ainsi qu'une indemnité forfaitaire de 40 € pour frais de recouvrement (article L441-10 du Code de commerce). Après mise en demeure restée sans effet pendant 15 jours, Flowin peut suspendre le service.
 
 ## Article 6 — Durée, renouvellement et résiliation
 
-L'offre est soit **annuelle**, soit **mensuelle**. Elle prend effet à [date de prise d'effet à compléter : signature du bon de commande ou mise en ligne de la première animation].
+La formule est soit **annuelle**, soit **mensuelle**. Elle prend effet à [date de prise d'effet à compléter : signature du bon de commande ou mise en ligne de la première animation].
 
-Durée d'engagement, conditions de renouvellement et préavis de résiliation : [à compléter].
+- **Formule annuelle :** engagement ferme de 12 mois à compter de la prise d'effet. Renouvellement : [conditions de renouvellement à compléter].
+- **Formule mensuelle :** engagement minimum de 3 mois à compter de la prise d'effet (soit 3 × 110 € HT). Le Client accepte expressément cet engagement sur le bon de commande (case dédiée). À l'issue des 3 premiers mois, la formule se poursuit mois par mois et peut être résiliée chaque mois, par écrit, avec un préavis de [préavis à compléter]. Une résiliation demandée pendant les 3 premiers mois prend effet à la fin du 3e mois ; les mois restants jusqu'à cette date restent dus.
 
 Les sommes versées pour les kits et les options restent acquises.
 
@@ -70,10 +76,10 @@ Les sommes versées pour les kits et les options restent acquises.
 
 ## Article 7 bis — Offre spéciale premiers adhérents « satisfait ou remboursé »
 
-Réservée aux premiers adhérents [nombre ou date limite à compléter] ayant souscrit l'offre mensuelle ou l'offre annuelle et coché la case d'adhésion sur le bon de commande.
+Réservée aux **premiers adhérents**, à la **première souscription annuelle** [nombre ou date limite à compléter], pour le Client ayant coché la case d'adhésion sur le bon de commande. Elle ne s'applique ni à la formule mensuelle, ni aux renouvellements : un Client qui a déjà une commande payée (même SIRET ou même adresse email) est un renouvellement, et la case est alors bloquée. Cette qualité est déterminée par Flowin à l'enregistrement de la commande ; le Client ne peut pas la modifier.
 
 - **Données certifiées :** le panier moyen et le flux journalier sont déclarés par le Client dans sa fiche découverte et certifiés exacts par lui (case de certification, nom du déclarant, date et heure enregistrées). Une fois certifiées, ces valeurs ne peuvent plus être modifiées ; elles sont reprises telles quelles dans le bon de commande signé et servent de base unique au calcul de la garantie. Pour les changer, le Client passe une nouvelle commande.
-- **Objectif :** nombre de clients égal au prix de l'offre sur 12 mois (990 € pour l'offre annuelle, 110 € × 12 pour l'offre mensuelle) divisé par le panier moyen certifié, arrondi à l'unité supérieure.
+- **Objectif :** nombre de clients égal au prix de la formule annuelle (990 € HT) divisé par le panier moyen certifié, arrondi à l'unité supérieure. L'objectif est atteint lorsque clients venus × panier moyen certifié ≥ 990 € HT.
 - **Période :** 12 mois à compter de la prise d'effet.
 - **Condition :** au moins **4 animations** mises en place par le Client sur la période.
 - **Client venu :** un gagnant dont le retrait du lot a été validé en boutique dans l'application Flowin.

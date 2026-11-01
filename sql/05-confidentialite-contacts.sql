@@ -1,6 +1,8 @@
 -- ============================================================================
--- CONFIDENTIALITE DES CONTACTS JOUEURS — plan de migration (31/10/2026)
+-- 05 — CONFIDENTIALITE DES CONTACTS JOUEURS — plan de migration (31/10/2026)
 -- ============================================================================
+-- PREREQUIS : 01-identite-super-admin.sql ; fonction existante crm_pro (sql/crm_pro.sql).
+-- Seule la PHASE 1 est executable maintenant ; les phases 2 et 3 sont un plan (commentaires).
 -- DECISION DE ROMAIN : seul le SUPER ADMIN Flowin lit les coordonnees completes
 -- (email, telephone, nom, prenom...) de tous les joueurs. Un pro ne voit que les
 -- contacts qui ont consenti a etre contactes, et seulement ceux de SON commerce.
@@ -66,23 +68,7 @@
 -- ============================================================================
 -- PHASE 1 — AJOUTS SANS EFFET SUR L'EXISTANT (peut etre applique des maintenant)
 -- ============================================================================
--- 1a. Identite du SA (meme definition que sql/pros_rib.sql : idempotent)
-create table if not exists public.flowin_super_admins (
-  auth_id    uuid primary key,
-  email      text default '',
-  created_at timestamptz default now()
-);
-alter table public.flowin_super_admins enable row level security;
-
-create or replace function public.est_super_admin()
-returns boolean
-language sql stable security definer
-set search_path to 'public'
-as $$
-  select exists (select 1 from public.flowin_super_admins s where s.auth_id = auth.uid())
-$$;
-revoke all on function public.est_super_admin() from public, anon;
-grant execute on function public.est_super_admin() to authenticated;
+-- 1a. Identite du SA : flowin_super_admins et est_super_admin() viennent de 01-identite-super-admin.sql.
 
 -- 1b. Le SA, connecte, lit tout ; sans session il ne lit rien de plus qu'aujourd'hui.
 --     (Politique additive : n'enleve rien a ce qui existe.)
@@ -133,11 +119,11 @@ grant execute on function public.joueurs_consentants_par_ids(uuid[]) to anon, au
 -- PHASE 2 — DONNER UNE IDENTITE AU SUPER ADMIN (code, pas de SQL destructif)
 -- ============================================================================
 --   1. Creer le compte Supabase Auth du SA et l'inscrire :
---        insert into public.flowin_super_admins(auth_id, email) values ('<uuid auth.users>', '<email>');
+--        voir l'insert en tete de 01-identite-super-admin.sql ;
 --   2. Ajouter une connexion au dashboard (Next et dashboard.html) ; faire lire joueurs,
 --      crm_*, tirages, commandes via la session (role authenticated + est_super_admin()).
---      La page /dashboard/commandes-animation (ce lot) montre le modele : connexion SA,
---      puis lectures et ecritures sous RLS.
+--      La page /admin-commandes-animation.html (connexion via /admin-connexion.html) montre le
+--      modele : connexion SA, puis lectures et ecritures sous RLS.
 --   3. Tant que le SA n'a pas de session, NE PAS passer a la phase 3.
 
 -- ============================================================================
