@@ -83,62 +83,62 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px)}}
 
   /* 7. Super event : chapitre dédié, univers BD au service de la lisibilité (textes >= 16 px) */
-  .pg-super{background-color:#FFFDF5;background-image:radial-gradient(rgba(226,35,26,.10) 1.4px,transparent 1.5px);background-size:11px 11px}
+  .pg-super{background-color:#fff;background-image:radial-gradient(rgba(59,92,196,.10) 1.4px,transparent 1.5px);background-size:11px 11px}
   .in.sev{max-width:980px}
   .sel{display:block;width:150px;height:64px;flex:none}
   .herohead{display:flex;align-items:center;justify-content:center;gap:14px}
   .se-eye{font-family:'Bangers',cursive;font-size:22px;letter-spacing:.08em;color:#E2231A;line-height:1}
-  .sev h2{text-wrap:balance;color:#3B2418;font-size:clamp(25px,5.6vw,46px);letter-spacing:-.02em;margin-top:6px}
+  .sev h2{text-wrap:balance;color:#1B2F5C;font-size:clamp(25px,5.6vw,46px);letter-spacing:-.02em;margin-top:6px}
   .sev h2 em{color:#E2231A}
-  .sv{margin:12px auto 0;background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:5px 5px 0 #3B2418;padding:6px;width:min(100%,max(250px,calc((100vh - 400px) * var(--ar,1.2))));overflow:hidden}
+  .sv{margin:12px auto 0;background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:5px 5px 0 #1B2F5C;padding:6px;width:min(100%,max(250px,calc((100vh - 400px) * var(--ar,1.2))));overflow:hidden}
   .sv svg{display:block;width:100%;height:auto}
-  .cp{font-size:clamp(16px,2vw,20px);font-weight:800;color:#3B2418;line-height:1.3;margin:14px auto 0;max-width:780px}
-  .cp .note{display:block;font-size:16px;font-weight:700;color:#5a4a40;margin-top:4px}
+  .cp{font-size:clamp(16px,2vw,20px);font-weight:800;color:#1B2F5C;line-height:1.3;margin:14px auto 0;max-width:780px}
+  .cp .note{display:block;font-size:16px;font-weight:700;color:#44557F;margin-top:4px}
   .flw{animation:fl 1.6s linear infinite}
   @keyframes fl{to{stroke-dashoffset:-20}}
   /* 2. avant / après */
   .avap{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;text-align:left}
-  .ap{background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:5px 5px 0 #3B2418;padding:6px 12px 10px;display:flex;flex-direction:column;align-items:center}
+  .ap{background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:5px 5px 0 #1B2F5C;padding:6px 12px 10px;display:flex;flex-direction:column;align-items:center}
   .ap .ph{width:100%}
   .ap .ph svg{display:block;width:100%;height:auto;max-height:calc((100vh - 330px) / 2 - 62px);margin:0 auto}
-  .ap b{font-size:19px;font-weight:900;line-height:1.15;color:#3B2418;margin-top:2px}
-  .ap span{font-size:16px;font-weight:700;line-height:1.3;color:#3B2418;margin-top:2px}
+  .ap b{font-size:19px;font-weight:900;line-height:1.15;color:#1B2F5C;margin-top:2px}
+  .ap span{font-size:16px;font-weight:700;line-height:1.3;color:#1B2F5C;margin-top:2px}
   .ap.off .ph svg{filter:grayscale(1);opacity:.8}
   .ap.off b{color:#6b6b6b}
   .ap.on{background:#FFF3C4}
   .ap.on b{color:#E2231A}
   /* 3. les 4 temps */
   .temps4{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px;text-align:left}
-  .t4{display:flex;gap:10px;align-items:center;background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:4px 4px 0 #3B2418;padding:6px 12px 6px 6px}
+  .t4{display:flex;gap:10px;align-items:center;background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:4px 4px 0 #1B2F5C;padding:6px 12px 6px 6px}
   .t4 .pic{flex:none;width:96px}
   .t4 .pic svg{display:block;width:100%;height:auto}
-  .t4 .nb{display:inline-flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:19px;width:26px;height:26px;border-radius:50%;background:#FFD23F;border:2px solid #3B2418;color:#3B2418;margin-right:7px;vertical-align:middle}
-  .t4 b{font-size:18px;font-weight:900;line-height:1.15;color:#3B2418;vertical-align:middle}
-  .t4 .d{display:block;font-size:16px;font-weight:700;line-height:1.28;color:#3B2418;margin-top:3px}
+  .t4 .nb{display:inline-flex;align-items:center;justify-content:center;font-family:'Bangers',cursive;font-size:19px;width:26px;height:26px;border-radius:50%;background:#FFD23F;border:2px solid #1B2F5C;color:#1B2F5C;margin-right:7px;vertical-align:middle}
+  .t4 b{font-size:18px;font-weight:900;line-height:1.15;color:#1B2F5C;vertical-align:middle}
+  .t4 .d{display:block;font-size:16px;font-weight:700;line-height:1.28;color:#1B2F5C;margin-top:3px}
   /* 5. puces partenaires */
   .chips4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;text-align:left}
-  .ch4{display:flex;align-items:center;gap:9px;background:#FFF3C4;border:3px solid #3B2418;border-radius:12px;padding:8px 10px;font-size:16px;font-weight:900;line-height:1.2;color:#3B2418}
+  .ch4{display:flex;align-items:center;gap:9px;background:#FFF3C4;border:3px solid #1B2F5C;border-radius:12px;padding:8px 10px;font-size:16px;font-weight:900;line-height:1.2;color:#1B2F5C}
   .ch4 .ic{flex:none;width:28px;height:28px;color:#E2231A}
   /* 6. exemple : thème, dates, bandeau défilant */
-  .theme{display:inline-block;line-height:1.15;margin-top:10px;background:#E2231A;color:#fff;font-weight:900;font-size:16px;letter-spacing:.03em;border:3px solid #3B2418;border-radius:10px;padding:5px 12px;box-shadow:3px 3px 0 #3B2418}
-  .tick{margin:12px auto 0;overflow:hidden;background:#FFD23F;border:3px solid #3B2418;border-radius:10px;width:min(100%,max(250px,calc((100vh - 400px) * 1.2)));white-space:nowrap}
+  .theme{display:inline-block;line-height:1.15;margin-top:10px;background:#E2231A;color:#fff;font-weight:900;font-size:16px;letter-spacing:.03em;border:3px solid #1B2F5C;border-radius:10px;padding:5px 12px;box-shadow:3px 3px 0 #1B2F5C}
+  .tick{margin:12px auto 0;overflow:hidden;background:#FFD23F;border:3px solid #1B2F5C;border-radius:10px;width:min(100%,max(250px,calc((100vh - 400px) * 1.2)));white-space:nowrap}
   .tick .tr{display:inline-flex;animation:tk 22s linear infinite}
-  .tick .tr span{font-family:'Bangers',cursive;font-size:20px;letter-spacing:.06em;color:#3B2418;padding:3px 0}
+  .tick .tr span{font-family:'Bangers',cursive;font-size:20px;letter-spacing:.06em;color:#1B2F5C;padding:3px 0}
   @keyframes tk{to{transform:translateX(-50%)}}
   /* 8. clé en main + CTA */
   .bul3{display:flex;flex-direction:column;gap:7px;margin:12px auto 0;max-width:640px;text-align:left}
-  .bul3 div{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;line-height:1.25;color:#3B2418}
+  .bul3 div{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;line-height:1.25;color:#1B2F5C}
   .bul3 .ic{flex:none;width:28px;height:28px;color:#E2231A}
   .cbtns{margin-top:14px}
-  .cbtn{display:inline-flex;align-items:center;justify-content:center;background:#E2231A;color:#fff;border:3px solid #3B2418;box-shadow:4px 4px 0 #3B2418;border-radius:12px;font-family:inherit;font-weight:900;font-size:17px;padding:11px 18px;text-decoration:none;cursor:pointer}
-  .cbtn.alt{background:#FFD23F;color:#3B2418}
-  .proof-se{margin-top:10px;font-size:16px;font-weight:800;color:#5a4a40}
-  .nav.se{background:#FFD23F;border-top:3px solid #3B2418}
+  .cbtn{display:inline-flex;align-items:center;justify-content:center;background:#E2231A;color:#fff;border:3px solid #1B2F5C;box-shadow:4px 4px 0 #1B2F5C;border-radius:12px;font-family:inherit;font-weight:900;font-size:17px;padding:11px 18px;text-decoration:none;cursor:pointer}
+  .cbtn.alt{background:#FFD23F;color:#1B2F5C}
+  .proof-se{margin-top:10px;font-size:16px;font-weight:800;color:#44557F}
+  .nav.se{background:#FFD23F;border-top:3px solid #1B2F5C}
   .nav button{white-space:nowrap}
-  .nav.se .cnt{font-size:19px;letter-spacing:.04em;color:#3B2418;font-weight:900;display:flex;flex-direction:column;align-items:center;line-height:1.05;white-space:nowrap}
+  .nav.se .cnt{font-size:19px;letter-spacing:.04em;color:#1B2F5C;font-weight:900;display:flex;flex-direction:column;align-items:center;line-height:1.05;white-space:nowrap}
   .nav.se .cnt small{font-family:'Bangers',cursive;font-weight:400;font-size:14px;letter-spacing:.12em;color:#E2231A}
   .prog.se{background:#E2231A}
-  .drawer a.se{background:#FFD23F;color:#3B2418;border:2px solid #3B2418;border-radius:12px;font-weight:900;justify-content:space-between;margin:10px 0 2px;padding:10px 12px}
+  .drawer a.se{background:#FFD23F;color:#1B2F5C;border:2px solid #1B2F5C;border-radius:12px;font-weight:900;justify-content:space-between;margin:10px 0 2px;padding:10px 12px}
   .drawer a.se span{font-size:12px;font-weight:800}
   .drawer a.sub{padding:7px 4px 7px 22px;font-size:14px;color:rgba(255,255,255,.7)}
   .drawer a.sub.on{color:#FFD23F}
@@ -173,8 +173,8 @@
   .merci .ic{width:44px;height:44px;color:var(--violet);margin:0 auto 8px}
 
   /* Document organisateurs : identité BD sur toute la plaquette */
-  .nav{background:#FFD23F;border-top:3px solid #3B2418}
-  .nav .cnt{font-size:19px;letter-spacing:.04em;color:#3B2418;font-weight:900;display:flex;flex-direction:column;align-items:center;line-height:1.05;white-space:nowrap}
+  .nav{background:#FFD23F;border-top:3px solid #1B2F5C}
+  .nav .cnt{font-size:19px;letter-spacing:.04em;color:#1B2F5C;font-weight:900;display:flex;flex-direction:column;align-items:center;line-height:1.05;white-space:nowrap}
   .nav .cnt small{font-family:'Bangers',cursive;font-weight:400;font-size:14px;letter-spacing:.12em;color:#E2231A}
   .nav button{white-space:nowrap}
   .prog{background:#E2231A}
@@ -182,28 +182,28 @@
   @media (max-width:560px){ .menu .aud2{display:none} }
   .aud{font-size:16px;font-weight:900;color:#E2231A;letter-spacing:.03em;line-height:1.2;text-transform:uppercase}
   .ben6{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px;text-align:left}
-  .b6{background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:4px 4px 0 #3B2418;padding:9px 10px}
-  .b6 .bi{width:38px;height:38px;border-radius:50%;background:#FFD23F;border:2.5px solid #3B2418;display:flex;align-items:center;justify-content:center;color:#E2231A}
+  .b6{background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:4px 4px 0 #1B2F5C;padding:9px 10px}
+  .b6 .bi{width:38px;height:38px;border-radius:50%;background:#FFD23F;border:2.5px solid #1B2F5C;display:flex;align-items:center;justify-content:center;color:#E2231A}
   .b6 .bi .ic{width:22px;height:22px;stroke-width:2}
-  .b6 b{display:block;font-size:17px;font-weight:900;line-height:1.15;margin-top:6px;color:#3B2418}
-  .b6 span{display:block;font-size:16px;font-weight:700;line-height:1.25;color:#3B2418;margin-top:2px}
-  .srcl{margin-top:10px;font-size:16px;font-weight:700;color:#5a4a40}
+  .b6 b{display:block;font-size:17px;font-weight:900;line-height:1.15;margin-top:6px;color:#1B2F5C}
+  .b6 span{display:block;font-size:16px;font-weight:700;line-height:1.25;color:#1B2F5C;margin-top:2px}
+  .srcl{margin-top:10px;font-size:16px;font-weight:700;color:#44557F}
   .p3{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px}
-  .p3 div{background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:4px 4px 0 #3B2418;padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:12px}
+  .p3 div{background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:4px 4px 0 #1B2F5C;padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:12px}
   .p3 b{font-family:'Bangers',cursive;font-weight:400;font-size:44px;line-height:1;color:#E2231A;letter-spacing:.02em}
-  .p3 b.tbc{font-family:inherit;font-weight:900;font-size:19px;color:#8A5200}
-  .p3 span{font-size:18px;font-weight:800;color:#3B2418;line-height:1.2;text-align:left}
-  .p2{max-width:620px;margin-left:auto;margin-right:auto}
-  @media (min-width:900px){ .p3{grid-template-columns:repeat(3,1fr)} .p2{grid-template-columns:repeat(2,1fr)} .p3 div{flex-direction:column;padding:16px 12px;gap:6px} .p3 span{text-align:center;font-size:20px} .p3 b{font-size:64px} .p3 b.tbc{font-size:22px} }
-  .bul3.big div{background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:4px 4px 0 #3B2418;padding:10px 14px;font-size:19px}
+
+  .p3 span{font-size:18px;font-weight:800;color:#1B2F5C;line-height:1.2;text-align:left}
+  .p2{max-width:700px;margin-left:auto;margin-right:auto}
+  @media (min-width:900px){ .p3{grid-template-columns:repeat(2,1fr)} .p3 div{flex-direction:column;padding:16px 12px;gap:6px} .p3 span{text-align:center;font-size:20px} .p3 b{font-size:64px} .p3 b.tbc{font-size:22px} }
+  .bul3.big div{background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:4px 4px 0 #1B2F5C;padding:10px 14px;font-size:19px}
   .bul3.big .ic{width:44px;height:44px;color:#E2231A}
   @media (min-width:900px){ .bul3.big{max-width:none;gap:16px} .bul3.big div{flex-direction:column;text-align:center;font-size:21px;padding:18px 14px;gap:10px} .bul3.big .ic{width:64px;height:64px} }
   .proof-se small{display:block;font-size:16px;font-weight:700;margin-top:2px}
   .sheet{display:none;position:absolute;inset:0;z-index:6;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:26px 16px 22px;background:#FFFDF5;flex-direction:column}
   .sheet.on{display:flex}
-  .sx{position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:50%;border:2px solid #3B2418;background:#fff;color:#3B2418;font-size:22px;line-height:1;cursor:pointer;z-index:3}
+  .sx{position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:50%;border:2px solid #1B2F5C;background:#fff;color:#1B2F5C;font-size:22px;line-height:1;cursor:pointer;z-index:3}
   .sheet .eyebrow{color:#E2231A}
-  .sheet h2{color:#3B2418} .sheet h2 em{color:#E2231A}
+  .sheet h2{color:#1B2F5C} .sheet h2 em{color:#E2231A}
   .drawer a.cta{background:#E2231A;border:2px solid #FFD23F}
   @media (min-width:900px){ .ben6{grid-template-columns:repeat(3,1fr)} .b6{padding:14px 16px} .b6 b{font-size:20px} .b6 span{font-size:17px} .b6 .bi{width:46px;height:46px} }
   @media (max-height:760px){ .b6{padding:6px 9px} .b6 .bi{width:28px;height:28px} .b6 .bi .ic{width:17px;height:17px} .b6 b{margin-top:3px} .ben6{gap:7px;margin-top:8px} .srcl{margin-top:6px} }
@@ -212,11 +212,11 @@
   .menu .lg{font-size:22px}
   .logo.fl{font-size:34px;line-height:1}
   .herohead{gap:12px;flex-wrap:nowrap}
-  .herohead .aud{background:#FFD23F;color:#3B2418;border:2px solid #3B2418;border-radius:100px;padding:3px 12px;font-size:16px;line-height:1.15;text-align:center}
+  .herohead .aud{background:#FFD23F;color:#1B2F5C;border:2px solid #1B2F5C;border-radius:100px;padding:3px 12px;font-size:16px;line-height:1.15;text-align:center}
   .sel{width:min(300px,86vw);height:auto;margin:6px auto 0}
   .cp{font-size:clamp(18px,2.2vw,22px)}
   .cp .note,.srcl,.proof-se small{font-size:16px}
-  .srcl{font-size:18px;margin-top:10px;font-weight:800;color:#3B2418}
+  .srcl{font-size:18px;margin-top:10px;font-weight:800;color:#1B2F5C}
   .proof-se{font-size:18px}
   .t4 .pic{width:104px}
   .t4 b{font-size:20px}
@@ -227,20 +227,20 @@
   .b6 .bi .ic{width:28px;height:28px}
   .b6 b{font-size:19px;margin-top:0}
   .bul3 div{font-size:18px}
-  .bul3 .ic{width:40px;height:40px;color:#3B2418}
-  .theme{background:#3B2418;color:#FFD23F;font-size:18px;box-shadow:3px 3px 0 #E2231A}
+  .bul3 .ic{width:40px;height:40px;color:#1B2F5C}
+  .theme{background:#1B2F5C;color:#FFD23F;font-size:18px;box-shadow:3px 3px 0 #E2231A}
   .theme span{color:#fff}
-  .cbtn{background:#3B2418;color:#FFD23F;box-shadow:4px 4px 0 #E2231A;font-size:18px}
-  .cbtn.alt{background:#FFD23F;color:#3B2418}
-  .drawer a.cta{background:#FFD23F;color:#3B2418;border:2px solid #3B2418}
+  .cbtn{background:#1B2F5C;color:#FFD23F;box-shadow:4px 4px 0 #E2231A;font-size:18px}
+  .cbtn.alt{background:#FFD23F;color:#1B2F5C}
+  .drawer a.cta{background:#FFD23F;color:#1B2F5C;border:2px solid #1B2F5C}
   .tick .tr span{font-size:22px}
   @media (min-width:900px){ .b6{padding:16px 18px} .b6 b{font-size:22px} .t4 .pic{width:min(100%,220px)} .t4 b{font-size:22px} .t4 .d{font-size:19px} .sel{width:340px} }
   @media (max-height:760px){ .sel{width:min(250px,74vw)} .logo.fl{font-size:30px} .b6{padding:8px 10px;gap:5px} .b6 .bi{width:42px;height:42px} .b6 .bi .ic{width:26px;height:26px} .t4 .pic{width:92px} .t4 .d{font-size:17px} }
-  .b6 .bi{color:#3B2418}
+  .b6 .bi{color:#1B2F5C}
   /* légende de la carte et rangées « avant / pendant / après » */
-  .leg2{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin-top:10px;font-size:18px;font-weight:800;color:#3B2418}
+  .leg2{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin-top:10px;font-size:18px;font-weight:800;color:#1B2F5C}
   .leg2 span{display:inline-flex;align-items:center;gap:8px}
-  .leg2 i{display:inline-block;width:22px;height:22px;border-radius:50%;border:2.5px solid #3B2418}
+  .leg2 i{display:inline-block;width:22px;height:22px;border-radius:50%;border:2.5px solid #1B2F5C}
   .leg2 .lg1{background:#FFD23F}
   .leg2 .lg2{background:#fff;box-shadow:inset 0 0 0 4px #FFD23F}
   .t3 .t4 .d{font-size:17.5px}
@@ -266,6 +266,43 @@
   @media (max-height:760px){ .pg{padding-top:16px} h2{font-size:clamp(23px,5.6vw,34px)} .claim{margin-top:18px}
     .sev h2{font-size:clamp(23px,5.4vw,40px)} .t4 b{font-size:17px} .aud{font-size:16px} }
   @media (prefers-reduced-motion:reduce){ .pg{transition:none} .bulb,.bigbtn{animation:none} .paper.on .ptk{animation:none;transform:none} }
+
+  /* Palette primaire : blanc, bleu (dominant), jaune et rouge en accents, violet de la charte. Ni vert, ni orange, ni fond sombre. */
+  .pg-super{background-color:#fff;background-image:radial-gradient(rgba(59,92,196,.10) 1.4px,transparent 1.5px)}
+  .se-eye{color:#3B5CC4}
+  .sev h2 em{color:#3B5CC4}
+  .bul3 .ic,.bul3.big .ic{color:#3B5CC4}
+  .cbtn{background:#3B5CC4}
+  .cbtn.alt{background:#FFD23F}
+  .nav,.nav.se{background:#fff;border-top:3px solid #1B2F5C}
+  .nav .cnt small,.nav.se .cnt small{color:#3B5CC4}
+  .t4 .nb{background:#FFD23F}
+  .b6 .bi{color:#3B5CC4}
+  .flow2{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;text-align:left}
+  .fl2{background:#fff;border:3px solid #1B2F5C;border-radius:14px;box-shadow:4px 4px 0 #1B2F5C;padding:8px 10px 10px}
+  .fl2 .fh{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;color:#1B2F5C}
+  .fl2 .fh i{font-style:normal;font-family:'Bangers',cursive;font-size:19px;width:26px;height:26px;border-radius:50%;background:#FFD23F;border:2px solid #1B2F5C;display:inline-flex;align-items:center;justify-content:center}
+  .fl2 .fr{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px}
+  .fl2 .nd{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;background:#EEF2FC;border-radius:10px;padding:6px 4px}
+  .fl2 .nd .ic{width:36px;height:36px;color:#3B5CC4}
+  .fl2 .nd b{font-size:16px;font-weight:900;line-height:1.1;color:#1B2F5C}
+  .fl2 .ar{flex:none;font-size:24px;font-weight:900;color:#E2231A}
+  .fl2 p{font-size:16px;font-weight:700;line-height:1.28;color:#1B2F5C;margin-top:8px}
+  .gw{display:grid;grid-template-columns:1fr;gap:6px;margin-top:10px;text-align:left}
+  .gw div{background:#FFD23F;border:3px solid #1B2F5C;border-radius:12px;padding:6px 10px;font-size:16px;font-weight:800;line-height:1.25;color:#1B2F5C}
+  @media (min-width:900px){ .flow2{grid-template-columns:3fr 2fr;gap:16px} .fl2{padding:14px 16px 16px} .fl2 .fh{font-size:20px} .fl2 .nd .ic{width:48px;height:48px} .fl2 .nd b{font-size:18px} .fl2 p{font-size:18px} .gw{grid-template-columns:1fr 1fr;gap:14px;margin-top:16px} .gw div{font-size:18px;padding:10px 14px} }
+  .q6 .b6{border-color:#1B2F5C;box-shadow:4px 4px 0 #1B2F5C}
+  .q6 .b6 b,.q6 .b6 span{color:#fff}
+  .q6 .c-bl{background:#3B5CC4}.q6 .c-rd{background:#E2231A}.q6 .c-vi{background:#7A4FE0}
+  .q6 .c-ye{background:#FFD23F}.q6 .c-wh{background:#fff}.q6 .c-sk{background:#CFDAF7}
+  .q6 .c-ye b,.q6 .c-ye span,.q6 .c-wh b,.q6 .c-wh span,.q6 .c-sk b,.q6 .c-sk span{color:#1B2F5C}
+  .q6 .c-bl .bi,.q6 .c-rd .bi,.q6 .c-vi .bi{background:#fff;border-color:#1B2F5C}
+  .q6 .c-ye .bi,.q6 .c-wh .bi,.q6 .c-sk .bi{background:#fff;border-color:#1B2F5C}
+  .q6 .c-rd .bi{color:#E2231A}.q6 .c-vi .bi{color:#7A4FE0}
+  .p3 b{color:#3B5CC4;white-space:nowrap}
+  .p3 .ic{width:40px;height:40px;color:#3B5CC4;flex:none}
+  .bul3.big.b2 div{font-size:19px}
+  @media (max-height:780px){ .fl2 .nd .ic{width:28px;height:28px} .fl2 p{margin-top:4px} .fl2 .fr{margin-top:5px} .gw{margin-top:7px;gap:4px} .gw div{padding:3px 8px} .flow2{gap:7px;margin-top:8px} .fl2{padding:6px 8px 8px} }
 </style>
 </head>
 <body>
@@ -342,36 +379,53 @@
       <div class="se-eye">Animer, communiquer, faire participer</div>
       <h2>Avant, pendant, <em>apr&egrave;s</em>.</h2>
       <div class="temps4 t3">
-        <div class="t4"><div class="pic" data-s3="2"></div><div><span class="nb">1</span><b>Avant</b><span class="d">Communiquez en m&ecirc;me temps que vous : le jeu fait participer.</span></div></div>
-        <div class="t4"><div class="pic" data-s3="3"></div><div><span class="nb">2</span><b>Pendant</b><span class="d">Des stations-jeux au festival et chez les partenaires.</span></div></div>
-        <div class="t4"><div class="pic" data-s3="4"></div><div><span class="nb">3</span><b>Apr&egrave;s</b><span class="d">Vos lots (places &agrave; gagner) et ceux de vos partenaires.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="2"></div><div><span class="nb">1</span><b>Avant</b><span class="d">Communiquez sur le quiz et les lots &agrave; gagner, dans les stations-jeux de vos partenaires.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="3"></div><div><span class="nb">2</span><b>Pendant</b><span class="d">Des stations-jeux au c&oelig;ur de votre &eacute;v&eacute;nement et chez vos partenaires : tout le monde participe.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="4"></div><div><span class="nb">3</span><b>Apr&egrave;s</b><span class="d">Communiquez sur les lots distribu&eacute;s et remerciez vos partenaires.</span></div></div>
       </div>
     </div>
   </section>
 
-  <!-- 3. VISIBILITÉ : PARTENAIRES RELAIS -->
-  <section class="pg pg-super" id="carte" data-titre="Plus de visibilit&eacute;">
+  <!-- 3. RÉSEAU QUI DIFFUSE : schéma en 2 temps, gagnant-gagnant -->
+  <section class="pg pg-super" id="carte" data-titre="Un r&eacute;seau qui diffuse">
     <div class="in sev">
-      <div class="se-eye">Visibilit&eacute;</div>
-      <h2>Augmentez votre <em>visibilit&eacute;</em>.</h2>
-      <div class="sv" style="--ar:1.2" data-v="6"></div>
-      <div class="leg2"><span><i class="lg1"></i>Au festival</span><span><i class="lg2"></i>Chez les partenaires</span></div>
-      <p class="cp">Vos partenaires diffusent le jeu &agrave; leurs clients, sur leur lieu de vente. Vous relayez aussi les commerces alentour.</p>
+      <div class="se-eye">Gagnant-gagnant</div>
+      <h2>Un r&eacute;seau qui <em>diffuse votre &eacute;v&eacute;nement</em>.</h2>
+      <div class="flow2">
+        <div class="fl2">
+          <span class="fh"><i>1</i>Avant l&rsquo;&eacute;v&eacute;nement</span>
+          <div class="fr">
+            <div class="nd"><svg class="ic"><use href="#i-event"/></svg><b>Festival</b></div><span class="ar">&rarr;</span>
+            <div class="nd"><svg class="ic"><use href="#i-vitrine"/></svg><b>Stations-jeux</b></div><span class="ar">&rarr;</span>
+            <div class="nd"><svg class="ic"><use href="#i-contact"/></svg><b>Public</b></div>
+          </div>
+          <p>Le festival diffuse son quiz et ses lots &agrave; gagner via les commerces partenaires.</p>
+        </div>
+        <div class="fl2">
+          <span class="fh"><i>2</i>Pendant l&rsquo;&eacute;v&eacute;nement</span>
+          <div class="fr">
+            <div class="nd"><svg class="ic"><use href="#i-contact"/></svg><b>Participants</b></div><span class="ar">&harr;</span>
+            <div class="nd"><svg class="ic"><use href="#i-gift"/></svg><b>Lots des commer&ccedil;ants</b></div>
+          </div>
+          <p>Ils continuent de jouer pour gagner les lots des commer&ccedil;ants.</p>
+        </div>
+      </div>
+      <div class="gw"><div><b>Vous</b> : un r&eacute;seau de diffusion chez les commerces.</div><div><b>Eux</b> : la visibilit&eacute; et le passage de l&rsquo;&eacute;v&eacute;nement.</div></div>
     </div>
   </section>
 
   <!-- 4. QUIZ ET SONDAGES PERSONNALISABLES -->
   <section class="pg pg-super" id="quiz" data-titre="Quiz et sondages">
     <div class="in sev">
-      <div class="se-eye">Quiz et sondages personnalisables</div>
+      <div class="se-eye">Quiz et sondages &agrave; votre image</div>
       <h2>Vos questions, <em>votre message</em>.</h2>
-      <div class="ben6">
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-book"/></svg></div><b>Connaissance</b><span>Quiz sur l&rsquo;&eacute;v&eacute;nement</span></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-star"/></svg></div><b>Marque</b><span>Quiz &agrave; vos couleurs</span></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-quiz"/></svg></div><b>Int&eacute;r&ecirc;t</b><span>Donnez envie d&rsquo;y venir</span></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-libre"/></svg></div><b>RSE, &eacute;cologie</b><span>Sondage et sensibilisation</span></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-ok"/></svg></div><b>S&eacute;curit&eacute;, violence</b><span>Sondage et sensibilisation</span></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-carte"/></svg></div><b>Transport, mobilit&eacute;</b><span>Sondage et sensibilisation</span></div>
+      <div class="ben6 q6">
+        <div class="b6 c-bl"><div class="bi"><svg class="ic"><use href="#i-book"/></svg></div><b>Connaissance</b><span>Quiz &eacute;v&eacute;nement</span></div>
+        <div class="b6 c-rd"><div class="bi"><svg class="ic"><use href="#i-star"/></svg></div><b>Marque</b><span>Vos couleurs</span></div>
+        <div class="b6 c-ye"><div class="bi"><svg class="ic"><use href="#i-quiz"/></svg></div><b>Int&eacute;r&ecirc;t</b><span>Envie de venir</span></div>
+        <div class="b6 c-vi"><div class="bi"><svg class="ic"><use href="#i-libre"/></svg></div><b>RSE</b><span>Sondage &eacute;cologie</span></div>
+        <div class="b6 c-wh"><div class="bi"><svg class="ic"><use href="#i-ok"/></svg></div><b>S&eacute;curit&eacute;</b><span>Sondage violence</span></div>
+        <div class="b6 c-sk"><div class="bi"><svg class="ic"><use href="#i-carte"/></svg></div><b>Mobilit&eacute;</b><span>Sondage transports</span></div>
       </div>
     </div>
   </section>
@@ -380,11 +434,10 @@
   <section class="pg pg-super" id="communaute" data-titre="Une communaut&eacute;">
     <div class="in sev">
       <div class="se-eye">Communaut&eacute;</div>
-      <h2>Une communaut&eacute; <em>&agrave; qui parler</em>.</h2>
-      <div class="bul3 big">
-        <div><svg class="ic"><use href="#i-contact"/></svg>Vos participants deviennent une communaut&eacute;.</div>
-        <div><svg class="ic"><use href="#i-mail"/></svg>Vous vous adressez directement &agrave; eux, avec leur accord.</div>
-        <div><svg class="ic"><use href="#i-jeu"/></svg>Un jeu qui f&eacute;d&egrave;re, toute l&rsquo;ann&eacute;e.</div>
+      <h2>&Agrave; chaque &eacute;v&eacute;nement, <em>votre communaut&eacute; grandit</em>.</h2>
+      <div class="bul3 big b2">
+        <div><svg class="ic"><use href="#i-contact"/></svg>Vous gardez le contact avec vos participants (avec leur accord).</div>
+        <div><svg class="ic"><use href="#i-jeu"/></svg>Un jeu qui s&rsquo;installe &agrave; chaque &eacute;v&eacute;nement : une solution plug and play, simple &agrave; int&eacute;grer.</div>
       </div>
     </div>
   </section>
@@ -392,27 +445,27 @@
   <!-- 6. TICKETS ET TIRAGE AU SORT -->
   <section class="pg pg-super" id="tickets" data-titre="Tickets et tirage au sort">
     <div class="in sev">
-      <div class="se-eye">Le jeu</div>
-      <h2>Cumulez des tickets, <em>tentez de gagner</em>.</h2>
+      <div class="se-eye">La r&egrave;gle du jeu</div>
+      <h2>&Agrave; chaque station, <em>un quiz</em>.</h2>
       <div class="bul3 big">
-        <div><svg class="ic"><use href="#i-quiz"/></svg>&Agrave; chaque station, on r&eacute;pond au quiz.</div>
-        <div><svg class="ic"><use href="#i-gift"/></svg>Chaque r&eacute;ponse fait cumuler des tickets.</div>
-        <div><svg class="ic"><use href="#i-trophee"/></svg>Concours par tirage au sort &agrave; la fin de l&rsquo;&eacute;v&eacute;nement.</div>
+        <div><svg class="ic"><use href="#i-quiz"/></svg>Chaque bonne r&eacute;ponse fait cumuler des tickets.</div>
+        <div><svg class="ic"><use href="#i-trophee"/></svg>Tirage au sort &agrave; la fin de l&rsquo;&eacute;v&eacute;nement.</div>
       </div>
+      <p class="cp">Les participants gagnent des lots pour l&rsquo;&eacute;v&eacute;nement, puis, pendant et apr&egrave;s, des lots dans les commerces partenaires.</p>
     </div>
   </section>
 
-  <!-- 7. PREUVE : NUITS DU SUD 2026 (gagnants : chiffre donné par Romain, bilan NDS 2026 ; festivaliers : présentation partenaires NDS 2026) -->
-  <section class="pg pg-super" id="preuve" data-titre="La preuve">
+  <!-- 7. NUITS DU SUD 2026 EN CHIFFRES : valeurs données par Romain (bilan NDS 2026), à changer dans CHIFFRES_NDS (script en bas de page) -->
+  <section class="pg pg-super" id="chiffres" data-titre="En chiffres">
     <div class="in sev">
-      <div class="se-eye">La preuve</div>
-      <h2>Nuits du Sud 2026 : <em>plus de 70 gagnants</em>.</h2>
+      <div class="se-eye">Le bilan</div>
+      <h2>Nuits du Sud 2026 <em>en chiffres</em>.</h2>
       <div class="p3 p2">
-        <div><b>70+</b><span>gagnants</span></div>
-        <div><b>24&nbsp;000</b><span>festivaliers</span></div>
+        <div><b data-nds="contact"></b><span>des participants souhaitent garder le contact</span></div>
+        <div><b data-nds="lots"></b><span>lots distribu&eacute;s</span></div>
       </div>
-      <p class="cp">Un jeu qui valorise le tissu et le d&eacute;veloppement locaux.</p>
-      <p class="srcl">Source : bilan Nuits du Sud 2026 (gagnants) ; pr&eacute;sentation partenaires NDS 2026 (festivaliers).</p>
+      <p class="cp">Un jeu qui valorise le tissu et le d&eacute;veloppement local.</p>
+      <p class="srcl">Source : bilan Nuits du Sud 2026.</p>
     </div>
   </section>
 
@@ -524,7 +577,10 @@
   $('stage').addEventListener('scroll', function(){ if (this.scrollLeft || this.scrollTop) { this.scrollLeft = 0; this.scrollTop = 0; } });
 
   /* ---------- Super event : illustrations BD (SVG générés, mêmes briques sur toutes les slides) ---------- */
-  var SK = '#3B2418', SR = '#3B2418', SA = '#E2231A', SY = '#FFD23F', SC = '#FFF3C4', SBL = '#3B5CC4', SBP = '#A9BCEC', SBG = '#FFFDF5';
+  /* Chiffres Nuits du Sud 2026 (donnés par Romain, bilan NDS 2026) : seul endroit à modifier */
+  var CHIFFRES_NDS = { contact: '56 %', lots: '70+' };
+  (function(){ var e = document.querySelectorAll('[data-nds]'); for (var i = 0; i < e.length; i++) e[i].textContent = CHIFFRES_NDS[e[i].getAttribute('data-nds')] || ''; })();
+  var SK = '#1B2F5C', SR = '#1B2F5C', SA = '#E2231A', SY = '#FFD23F', SC = '#FFF3C4', SBL = '#3B5CC4', SBP = '#A9BCEC', SBG = '#FFFDF5';
   function sTxt(x, y, s, size, o){
     o = o || {}; size = size === 17 ? 19 : (size === 16 ? 18 : size);
     return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || 'middle') + '" font-size="' + size + '" fill="' + (o.c || SK) + '"' +
