@@ -11470,7 +11470,7 @@ function renderBiblioJeux(){
   /* Chaque module a son event de demo. Sans parametre ev la page renvoie "Aucun event.",
      et avec un event d un autre module elle redirige vers ce module : l apercu montrait
      donc toujours la spin. EV_DEMO donne le bon event pour chaque onglet. */
-  _masterUrl = parcoursUrl(tab, EV_DEMO[tab] || ('ev-demo-'+tab));
+  _masterUrl = estModuleMaster(tab) ? masterApercuUrl(tab, 's-accueil', null) : parcoursUrl(tab, EV_DEMO[tab] || ('ev-demo-'+tab));
   var _jmIframeId = 'iframe-master-'+tab;
   var _modDef = modDefs.filter(function(m){return m.id===tab;})[0] || {};
   if(_modDef.sansParcours){
@@ -11944,7 +11944,78 @@ function modalComm(d){
 }
 
 // ============ PREVIEWS MODULES ============
+/* ── Masters de jeux dans le dashboard (31/10, copie conforme des maquettes) ──
+   Tous les apercus de jeu du Super Admin affichent le meme parcours /jouer que
+   le joueur et l'espace pro (memes masters, meme design). */
+var MASTERS_MODULES = ['quiz','quizsolo','spin','tombola','vote'];
+function estModuleMaster(m){ return MASTERS_MODULES.indexOf(m)>=0; }
+var MASTER_ECRANS_CLES = [['s-accueil','Accueil'],['s-regles','Règles'],['@jeu','Jeu'],['c-parrainage','Parrainage'],['c-inscription','Coordonnées'],['c-ticket','Ticket']];
+function masterPremierEcran(m){ return m==='spin'?'r-roue':(m==='tombola'?'t-tirer':(m==='vote'?'v-choix':'q-question')); }
+/* Saisie du wizard -> apercu reel (lib/apercu.ts : nom, lots, cfg). */
+function masterApercuSaisie(d){
+  var lots = (d.lots||[]).map(function(l){ return { nom:String(l.nom||l.titre||''), quantite:Number(l.quantite||l.qte||1)||1, valeur:Number(l.valeur||0)||0, conditions:String(l.conditions||'') }; }).filter(function(l){ return l.nom; });
+  return { nom:d.nom||'', lots:lots, cfg:d.cfg||{} };
+}
+function masterIframeHtml(src, id, h){
+  h = h || 600;
+  var sc = 296/390;
+  return '<div style="position:relative;width:296px;height:'+h+'px;overflow:hidden;margin:0 auto;border-radius:18px;background:#F4F6F9">'
+       + '<iframe '+(id?'id="'+esc(id)+'" ':'')+'src="'+esc(src)+'" frameborder="0" style="position:absolute;left:0;top:0;width:390px;height:'+Math.round(h/sc)+'px;border:0;transform:scale('+sc.toFixed(4)+');transform-origin:top left"></iframe></div>';
+}
+function masterApercuUrl(m, ecran, d){
+  ecran = ecran==='@jeu' ? masterPremierEcran(m) : (ecran||'s-accueil');
+  if(d){
+    var ev = d.id || d.editingId || ('ev-demo-'+m);
+    return '/jouer?ev='+encodeURIComponent(ev)+'&preview=1&sb=1&s='+encodeURIComponent(ecran)+'&apercu='+mastersB64(masterApercuSaisie(d));
+  }
+  return '/jouer?m='+encodeURIComponent(m)+'&s='+encodeURIComponent(ecran);
+}
+/* Telephone + pastilles d'ecrans (meme storyboard que la maquette). */
+function masterTelephoneHtml(m, d, cle){
+  var cur = state['masterEcr_'+cle] || 's-accueil';
+  var html = '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:10px">';
+  MASTER_ECRANS_CLES.forEach(function(x){
+    html += '<button class="btn btn-sm'+(cur===x[0]?' btn-primary':'')+'" style="padding:4px 9px;font-size:11.5px" onclick="state[\'masterEcr_'+cle+'\']=\''+x[0]+'\';var f=document.getElementById(\'mfr-'+cle+'\');if(f)f.src=masterApercuUrl(\''+m+'\',\''+x[0]+'\','+(d?'state.wiz&&state.wiz.draft':'null')+');var bs=this.parentNode.querySelectorAll(\'button\');for(var i=0;i<bs.length;i++)bs[i].className=\'btn btn-sm\';this.className=\'btn btn-sm btn-primary\'">'+esc(x[1])+'</button>';
+  });
+  html += '</div>' + masterIframeHtml(masterApercuUrl(m, cur, d), 'mfr-'+cle, 600);
+  html += '<div style="text-align:center;margin-top:8px"><a href="'+esc(masterApercuUrl(m, cur, d))+'" target="_blank" rel="noopener" style="font-size:12px;font-weight:700">Ouvrir en plein écran ↗</a></div>';
+  return html;
+}
+function wizMasterDefaut(d){
+  if(!d || !d.cfg) return;
+  if(estModuleMaster(d.module)){
+    if(d.cfg.masterOff) { delete d.cfg.master; return; }
+    var perso = d.cfg.master && d.cfg.master.perso ? d.cfg.master.perso : {};
+    d.cfg.master = { id:d.module, perso:perso };
+  } else { delete d.cfg.master; }
+}
+function wizMasterBascule(on){
+  var d = state.wiz && state.wiz.draft; if(!d) return;
+  if(on){ delete d.cfg.masterOff; } else { d.cfg.masterOff = true; }
+  wizMasterDefaut(d); renderWizard();
+}
+function wizAchat(v){
+  var d = state.wiz && state.wiz.draft; if(!d) return;
+  var a = d.cfg.achat || {obligatoire:false, montantMin:''};
+  if(v==='avec'||v==='sans') a.obligatoire = (v==='avec'); else a.montantMin = String(v||'');
+  d.cfg.achat = a;
+}
+function wizMasterBloc(d){
+  if(!estModuleMaster(d.module)) return '';
+  var on = !!(d.cfg && d.cfg.master);
+  var a = (d.cfg && d.cfg.achat) || {obligatoire:false, montantMin:''};
+  var html = '<div class="card mt-3" style="padding:16px"><div style="font-weight:800;font-size:15px">Présentation : master de jeu Flowin</div>'
+    + '<div style="font-size:12.5px;color:var(--sa-muted);margin:4px 0 10px;line-height:1.5">Mêmes écrans pour tous les commerces (maquettes validées). Le logo, les lots, les questions, les cases et les candidats saisis ici sont repris tels quels.</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn'+(on?' btn-primary':'')+'" onclick="wizMasterBascule(true)">Master Flowin (recommandé)</button><button class="btn'+(on?'':' btn-primary')+'" onclick="wizMasterBascule(false)">Ancienne présentation</button></div>'
+    + '<div style="font-weight:800;font-size:14px;margin-top:14px">Pour jouer, il faut…</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center"><select class="input" onchange="wizAchat(this.value)"><option value="sans"'+(a.obligatoire?'':' selected')+'>Sans obligation d\'achat</option><option value="avec"'+(a.obligatoire?' selected':'')+'>Avec obligation d\'achat</option></select>'
+    + '<input class="input" placeholder="Montant minimum (facultatif)" value="'+esc(a.montantMin||'')+'" oninput="wizAchat(this.value)" style="max-width:220px"></div>'
+    + '<div style="font-size:11.5px;color:var(--sa-muted);margin-top:6px">Affiché aux joueurs sur l\'accueil et dans les règles, tel quel.</div></div>';
+  return html;
+}
+
 function renderPreviewModule(type,e){
+  if(estModuleMaster(type)) return masterIframeHtml(masterApercuUrl(type,'s-accueil',null), '', 560);
   if(type==='spin') return renderPreviewSpin(e);
   if(type==='vote') return renderPreviewVote(e);
   if(type==='quiz'||type==='quizsolo'||type==='quizmaster') return renderPreviewQuiz(e);
@@ -13441,6 +13512,7 @@ function wizSave(){
 function renderWizardEvent(){
   if(!state.wiz || !state.wiz.draft){ goView('events'); return ''; }
   const d = state.wiz.draft, step = state.wiz.step;
+  if(d.module && d.cfg && !d.cfg.master && !d.cfg.masterOff && state.wiz.mode!=='edit') wizMasterDefaut(d);
   // Variables globales utilisées dans les sous-fonctions du wizard
   var wiz_d = d;
   var wiz_nbJours = (d.dateD && d.dateF && d.dateF !== d.dateD) ?
@@ -13525,13 +13597,14 @@ function renderWizardEvent(){
     html += '<div class="section-h">Étape 2 · Choix du module de jeu</div>';
     html += '<div class="module-cards">';
     Object.entries(DATA.modules).forEach(([k,m]) => {
-      html += '<div class="module-card '+(d.module===k?'selected':'')+'" onclick="state.wiz.draft.module=\''+k+'\';mergeCfgDefaults(state.wiz.draft);renderWizard()">'
+      html += '<div class="module-card '+(d.module===k?'selected':'')+'" onclick="state.wiz.draft.module=\''+k+'\';mergeCfgDefaults(state.wiz.draft);wizMasterDefaut(state.wiz.draft);renderWizard()">'
            + '<div class="emoji">'+m.emoji+'</div>'
            + '<div class="name">'+esc(m.label)+'</div>'
            + '<div class="desc">'+esc(m.desc)+'</div></div>';
     });
     html += '</div>';
     if(d.module) html += '<div class="alert info mt-3"><span class="ico">✓</span>Module <strong>'+esc(DATA.modules[d.module].label)+'</strong> sélectionné · passez à l\'étape 3 pour configurer.</div>';
+    if(d.module) html += wizMasterBloc(d);
   } else if(step==='C'){
     html += '<div class="section-h">Étape 3 · Configuration du module '+(d.module?moduleChip(d.module):'')+'</div>';
     if(!d.module) html += '<div class="alert warn"><span class="ico">⚠️</span>Choisissez d\'abord un module à l\'étape 2.</div>';
@@ -13794,6 +13867,9 @@ function renderWizardEvent(){
   } else if(step==='B' && !d.module){
     // Étape B sans module choisi
     html += '<div class="empty-block"><div class="ico">🎮</div><div class="t">Aperçu du jeu</div><div class="d mt-2">Choisissez un module pour voir le rendu.</div></div>';
+  } else if(d.module && estModuleMaster(d.module) && d.cfg && d.cfg.master){
+    // Master de jeu : le vrai parcours /jouer, avec la saisie en cours (toutes etapes)
+    html += masterTelephoneHtml(d.module, d, 'wiz');
   } else if(d.module && step==='C'){
     // Étape C : séquence complète des pages joueur
     html += renderWizPreviewSequence(d);
