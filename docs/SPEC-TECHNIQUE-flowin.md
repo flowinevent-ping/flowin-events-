@@ -4,7 +4,7 @@
 >
 > Document de référence pour travailler avec des **agents IA de production et de maintenance**.
 > Version : **v1** · MAJ : 2026-06-28 · Source de vérité opérationnelle : table Supabase `handoff_notes` clé `handoff-nds-2026-comm`.
-> Déploiement de référence : **Nuits du Sud 2026** (festival Vence, 9–18 juillet, ~24 000 festivaliers).
+> Déploiement de référence : **Nuits du Sud 2026** (festival Vence, 9–18 juillet).
 
 Ce document est descriptif de l'état **réel** du système (audité en base + repo le 28/06/2026). Il ne prescrit pas de refonte. Les invariants marqués 🔒 ne doivent pas être modifiés sans instruction explicite.
 

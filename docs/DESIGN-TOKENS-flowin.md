@@ -25,3 +25,12 @@ tel quel (`<link rel="stylesheet" href="/flowin-tokens.css">`) puis pointer leur
 
 Règles : pas de vert/teal hors retours, pas de fond noir, logo « Flow » + « in » bleu.
 L'univers comics jaune/rouge (Bangers, #FFD23F, #E2231A, #3B2418) reste réservé au Super event.
+
+## Logo « Super event »
+
+Fichier partagé : `admin/public/flowin-super-event-logo.svg` (texte converti en tracés, aucune police à charger, `role="img"` et `aria-label="Super event"`).
+C'est le composant `LogoSuperEvent` de l'application (`admin/components/masters/SelecteurLot.tsx`) converti à l'identique : « SUPER » en Bangers jaune #FFD23F,
+contour #1B3A5C (.06 em, tracé sous le remplissage), extrusion rouge #E2231A (.035 et .07 em), espacement .05 em ; « EVENT » en Bangers #1B3A5C à 82 % de la taille,
+tourné de -4°, sur la même ligne. Dans une page : copier le `<symbol id="fl-super-event">` des plaquettes puis
+`<svg class="sel" role="img" aria-label="Super event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>`
+(le viewBox de l'élément commence à 0 0 ; celui du symbole est celui du fichier), ou `<img src="/flowin-super-event-logo.svg" alt="Super event" width="280">`.

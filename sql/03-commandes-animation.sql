@@ -1,4 +1,4 @@
--- 03 — Commandes « Flowin Animation magasin » (01/11/2026)
+-- 03 — Commandes « Flowin, jeu d'animation » (01/11/2026)
 -- NON APPLIQUÉ. À relire par Romain, puis à appliquer (apply_migration, projet ywcqtupgoxfzkddqkztk).
 -- Rejouable sans dommage (create if not exists / create or replace / drop ... if exists).
 --
@@ -450,7 +450,7 @@ begin
     select numero into num from public.factures_animation where commande_id = p_commande and objet = 'commande';
     if num is not null then return num; end if;
     lignes := jsonb_build_array(jsonb_build_object(
-      'lib', case when c.offre = 'annuelle' then 'Formule annuelle Flowin Animation' else 'Formule mensuelle Flowin Animation, 1er mois' end,
+      'lib', case when c.offre = 'annuelle' then 'Formule annuelle Flowin, jeu d''animation' else 'Formule mensuelle Flowin, jeu d''animation, 1er mois' end,
       'det', case when c.offre = 'annuelle' then 'Engagement 12 mois' else 'Engagement 3 mois minimum, puis 110 EUR HT par mois' end,
       'q', 1, 'ht', c.montant_abonnement_ht));
     lignes := lignes || jsonb_build_array(jsonb_build_object(
@@ -464,7 +464,7 @@ begin
     select numero into num from public.factures_animation where gc_payment_id = p_gc_payment;
     if num is not null then return num; end if;
     if c.offre <> 'mensuelle' then raise exception 'Mensualite sur une formule annuelle (%).', p_commande; end if;
-    lignes := jsonb_build_array(jsonb_build_object('lib','Formule mensuelle Flowin Animation','det','Mensualite prelevee (GoCardless ' || p_gc_payment || ')','q',1,'ht',110));
+    lignes := jsonb_build_array(jsonb_build_object('lib','Formule mensuelle Flowin, jeu d''animation','det','Mensualite prelevee (GoCardless ' || p_gc_payment || ')','q',1,'ht',110));
     ht := 110; tva := 22;
   end if;
 

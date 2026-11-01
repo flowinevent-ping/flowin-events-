@@ -2,7 +2,7 @@
 // Ne pas modifier ici : node scripts/verifier-documents-animation.mjs controle que les deux fichiers sont identiques.
 // supabase/functions/notify-commande-animation/documents.ts
 //
-// Documents et emails « Flowin Animation magasin », sans dépendance Deno : testable sous Node
+// Documents et emails « Flowin, jeu d'animation », sans dépendance Deno : testable sous Node
 // (node --experimental-strip-types). Le constructeur jsPDF est injecté par l'appelant.
 //
 // Charte de facturation reprise de admin/public/facture-nds.html : émetteur BAITA EURL (« Flowin, produit commercial de BAITA EURL »),
@@ -31,6 +31,7 @@ export type Ligne = { lib: string; det?: string; q: number; ht: number };
 export type Facture = {
   numero: string; commande_id: string; objet: string; emise_le: string; payee_le: string; mode_paiement: string;
   client: Record<string, string>; lignes: Ligne[]; montant_ht: number; montant_tva: number; montant_ttc: number;
+  source_numero?: string; numero_externe?: string | null; // préparation CRM (sql/08) : facultatifs
 };
 
 export const FORMULES: Record<string, string> = {
@@ -68,9 +69,12 @@ export function dateFr(iso: unknown, heure = false): string {
 
 /** Lignes du bon de commande (même calcul que la page, la base et la facture). */
 export function lignesCommande(r: Commande): Ligne[] {
+  // Modèle unique (public/bon-commande-pdf.js) quand il est chargé ; sinon repli sur les montants enregistrés.
+  const M = (globalThis as any).FlowinBonPDF;
+  if (M && M.calculDepuisCommande) return M.calculDepuisCommande(r).lignes as Ligne[];
   const l: Ligne[] = [];
-  if (r.offre === "annuelle") l.push({ lib: "Formule annuelle Flowin Animation", det: "Engagement 12 mois", q: 1, ht: Number(r.montant_abonnement_ht) });
-  else l.push({ lib: "Formule mensuelle Flowin Animation, 1er mois", det: "Engagement 3 mois minimum, puis 110 € HT par mois", q: 1, ht: Number(r.montant_abonnement_ht) });
+  if (r.offre === "annuelle") l.push({ lib: "Formule annuelle Flowin, jeu d'animation", det: "Engagement 12 mois", q: 1, ht: Number(r.montant_abonnement_ht) });
+  else l.push({ lib: "Formule mensuelle Flowin, jeu d'animation, 1er mois", det: "Engagement 3 mois minimum, puis 110 € HT par mois", q: 1, ht: Number(r.montant_abonnement_ht) });
   if (r.kit === "physique") l.push({ lib: "Kit physique imprimé", det: "Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons", q: Number(r.nb_boutiques), ht: Number(r.montant_kit_ht) });
   else l.push({ lib: "Kit digital", det: "Fichiers à imprimer, QR inclus", q: 1, ht: 0 });
   if (Number(r.opt_quiz_qte) > 0) l.push({ lib: "Option : quiz personnalisé", det: "180 € HT par événement", q: Number(r.opt_quiz_qte), ht: 180 * Number(r.opt_quiz_qte) });
@@ -138,12 +142,18 @@ function pied(p: ReturnType<typeof base>) {
   p.wrap(EMETTEUR.mention + " - " + EMETTEUR.adresse + " - SIRET " + EMETTEUR.siret + " - " + EMETTEUR.rcs + " - TVA " + EMETTEUR.tva + " - IBAN " + IBAN + " - BIC " + BIC, p.M, 287, 6.5, p.mut, p.W - 2 * p.M, 3);
 }
 
+/** Numéro qui fait foi : celui du CRM si la numérotation est confiée au CRM, sinon FL-AM-AAAA-NNNNN. */
+export function numeroLegal(f: Facture): string {
+  return f.source_numero === "crm" && f.numero_externe ? String(f.numero_externe) : f.numero;
+}
+
 /** Facture acquittée (émise après paiement validé). */
 export function pdfFacture(J: any, f: Facture): ArrayBuffer {
-  const p = base(J, "FACTURE", "Facture n° " + f.numero, "Commande " + f.commande_id);
+  const legal = numeroLegal(f);
+  const p = base(J, "FACTURE", "Facture n° " + legal, "Commande " + f.commande_id + (legal !== f.numero ? " - ref. interne " + f.numero : ""));
   const { M, W, ink, mut, violet, T, wrap } = p, CW = W - 2 * M;
   T("Date d'emission : " + dateFr(f.emise_le), M, 46, 8.5, "normal", mut);
-  T("Prestation : Flowin Animation magasin", W - M, 46, 8.5, "normal", mut, "right");
+  T("Prestation : Flowin, jeu d'animation", W - M, 46, 8.5, "normal", mut, "right");
   let y = parties(p, f.client, 51);
   y = tableau(p, f.lignes, Number(f.montant_ht), Number(f.montant_tva), Number(f.montant_ttc), y, "Net a payer TTC");
   p.doc.setDrawColor(59, 92, 196); p.doc.setLineWidth(0.6); p.doc.roundedRect(W - M - 52, y - 4, 52, 10, 2, 2);
@@ -153,31 +163,17 @@ export function pdfFacture(J: any, f: Facture): ArrayBuffer {
     ? "Mode : prelevement SEPA (GoCardless). Paiement recu le " + dateFr(f.payee_le) + "."
     : "Mode : virement bancaire - BIC : " + BIC + " - IBAN : " + IBAN + " - Reference a rappeler : " + f.commande_id + ". Paiement recu le " + dateFr(f.payee_le) + ".", M, y, 8.5, ink, CW - 58, 4.2) + 4;
   y = wrap("Echeance de paiement : a reception (facture acquittee). " + MENTIONS_RETARD, M, y, 7.8, mut, CW, 3.8) + 3;
-  wrap("Conditions generales de vente Flowin Animation : " + CGV_URL, M, y, 7.5, mut, CW, 3.6);
+  wrap("Conditions generales de vente Flowin, jeu d'animation : " + CGV_URL, M, y, 7.5, mut, CW, 3.6);
   pied(p);
   return p.doc.output("arraybuffer");
 }
 
-/** Contrat : bon de commande signé (même contenu que le PDF du navigateur, horodatage et IP serveur). */
+/** Contrat : bon de commande signé. MODÈLE UNIQUE : public/bon-commande-pdf.js (même PDF que le navigateur du client et que la page Super Admin).
+ *  Le script doit être chargé avant (Deno : import "../_shared/bon-commande-pdf.js" ; navigateur : <script src="/bon-commande-pdf.js">). */
 export function pdfContrat(J: any, r: Commande): ArrayBuffer {
-  const p = base(J, "Bon de commande signe", "N° " + r.id, "Flowin Animation magasin");
-  const { M, W, ink, mut, violet, T, wrap } = p, CW = W - 2 * M;
-  let y = parties(p, r as Record<string, string>, 46);
-  T("Boutiques : " + r.nb_boutiques + (r.commercial ? "   -   Commercial : " + r.commercial : ""), M, y, 8.5, "normal", mut); y += 7;
-  y = tableau(p, lignesCommande(r), Number(r.montant_ht), Number(r.montant_tva), Number(r.montant_ttc), y, "Total TTC");
-  T("ENGAGEMENT", M, y, 7.5, "bold", violet); y += 5;
-  y = wrap(r.offre === "mensuelle"
-    ? "Formule mensuelle : engagement de 3 mois minimum (3 x 110 EUR HT), puis mois par mois, resiliable chaque mois avec le preavis prevu aux CGV. Engagement accepte expressement par le client."
-    : "Formule annuelle : engagement de 12 mois.", M, y, 8.5, ink, CW, 4.2) + 3;
-  if (r.garantie) {
-    T("SATISFAIT OU REMBOURSE", M, y, 7.5, "bold", violet); y += 5;
-    y = wrap("Objectif : " + r.garantie_clients_objectif + " clients venus retirer leur lot sur 12 mois, avec au moins 4 animations. Donnees certifiees par " + r.garantie_certifiee_par + " le " + dateFr(r.garantie_certifiee_le, true) + " (panier moyen " + eur(r.panier_moyen) + ", flux " + r.flux_journalier + "), non modifiables.", M, y, 8.5, ink, CW, 4.2) + 3;
-  }
-  T("SIGNATURE ELECTRONIQUE", M, y, 7.5, "bold", violet); y += 5;
-  y = wrap("Signe electroniquement par " + r.signataire_nom + (r.signataire_qualite ? " (" + r.signataire_qualite + ")" : "") + " pour " + r.raison_sociale + ", le " + dateFr(r.signature_horodatage, true) + " (horodatage serveur)" + (r.signature_ip ? ", adresse IP " + r.signature_ip : "") + ". CGV Flowin Animation acceptees (version " + r.cgv_version + ").", M, y, 8.5, ink, CW, 4.2) + 4;
-  wrap("Conditions generales de vente : " + CGV_URL + ". Les lots mis en jeu sont fournis par le client.", M, y, 7.5, mut, CW, 3.6);
-  pied(p);
-  return p.doc.output("arraybuffer");
+  const M = (globalThis as any).FlowinBonPDF;
+  if (!M) throw new Error("Modele PDF du bon de commande non charge (bon-commande-pdf.js).");
+  return M.construire(J, r, { signe: true }).output("arraybuffer");
 }
 
 /* ------------------------------------------------------------------ Emails */
@@ -200,15 +196,22 @@ function tableHtml(r: Commande): string {
 ${r.offre === "mensuelle" ? `<p style="font-size:13px;color:#3B5CC4;font-weight:700">Puis 110 € HT (132 € TTC) par mois, engagement 3 mois minimum.</p>` : ""}`;
 }
 
+/** Rappel cliquable « satisfait ou remboursé » : formule annuelle sans garantie, hors renouvellement. */
+export function rappelGarantie(r: Commande): string {
+  if (r.offre !== "annuelle" || r.garantie || r.type_commande === "renouvellement") return "";
+  const lien = "https://flowin-events.vercel.app/bon-commande-animation.html?garantie=demarche&commande=" + encodeURIComponent(String(r.id));
+  return `<div style="border:2px solid #7A4FE0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px"><b>Satisfait ou remboursé</b> : la garantie des premiers adhérents (formule annuelle) n'est pas encore activée sur votre commande. Remplissez et certifiez votre fiche découverte en deux minutes :<br><a href="${lien}" style="display:inline-block;margin-top:10px;background:#7A4FE0;color:#fff;text-decoration:none;font-weight:800;padding:10px 18px;border-radius:100px">Je veux bénéficier du satisfait ou remboursé</a></div>`;
+}
+
 /** Avant paiement : accusé de réception + bon de commande + coordonnées de virement. PAS de facture. */
 export function emailAccuse(r: Commande): { sujet: string; html: string } {
   const vir = r.mode_paiement === "virement"
     ? `<div style="background:#F4F6F9;border-radius:12px;padding:12px 14px;font-size:14px;margin-top:12px"><b>Règlement par virement : ${eur(r.montant_ttc)} TTC</b><br>Titulaire : ${EMETTEUR.societe}<br>IBAN : <b>${IBAN}</b><br>BIC : ${BIC}<br>Référence à rappeler : <b>${esc(r.id)}</b></div>`
     : `<p style="font-size:14px">Prélèvement SEPA : signez votre mandat sur la page sécurisée GoCardless si ce n'est pas déjà fait.</p>`;
   return {
-    sujet: `Commande ${r.id} reçue · Flowin Animation magasin`,
+    sujet: `Commande ${r.id} reçue · Flowin, jeu d'animation`,
     html: cadre("Merci, votre commande est bien reçue.", `<p style="font-size:14px">Bonjour ${esc(r.contact_nom)},<br>votre bon de commande n° <b>${esc(r.id)}</b> signé le ${dateFr(r.signature_horodatage, true)} est enregistré <b>en attente de paiement</b>. Vous le trouverez en pièce jointe.</p>
-${tableHtml(r)}${vir}
+${tableHtml(r)}${vir}${rappelGarantie(r)}
 <p style="font-size:13px;color:#5a6b80">Dès réception de votre paiement, vous recevrez votre contrat signé et votre facture acquittée, puis vos accès.<br><a href="${CGV_URL}" style="color:#3B5CC4">Conditions générales de vente</a></p>`),
   };
 }
@@ -216,9 +219,9 @@ ${tableHtml(r)}${vir}
 /** Après paiement validé : contrat signé + facture acquittée + accès. */
 export function emailDocuments(r: Commande, f: Facture): { sujet: string; html: string } {
   return {
-    sujet: `Paiement reçu · contrat et facture ${f.numero} · Flowin`,
+    sujet: `Paiement reçu · contrat et facture ${numeroLegal(f)} · Flowin`,
     html: cadre("Paiement reçu, bienvenue chez Flowin.", `<p style="font-size:14px">Bonjour ${esc(r.contact_nom)},<br>nous avons bien reçu votre paiement de <b>${eur(f.montant_ttc)} TTC</b> pour la commande <b>${esc(r.id)}</b>.</p>
-<p style="font-size:14px">En pièces jointes : <b>votre contrat signé</b> (bon de commande n° ${esc(r.id)}) et <b>votre facture acquittée n° ${esc(f.numero)}</b>.</p>
+<p style="font-size:14px">En pièces jointes : <b>votre contrat signé</b> (bon de commande n° ${esc(r.id)}) et <b>votre facture acquittée n° ${esc(numeroLegal(f))}</b>.</p>
 <p style="font-size:14px"><b>Vos accès :</b> créez ou ouvrez votre espace pro sur <a href="https://flowin-events.vercel.app/pro/inscription" style="color:#3B5CC4">flowin-events.vercel.app/pro</a> avec l'email ${esc(r.email)}. Flowin vous contacte pour préparer votre première animation.</p>`),
   };
 }
@@ -226,8 +229,8 @@ export function emailDocuments(r: Commande, f: Facture): { sujet: string; html: 
 /** Mensualité (mois 2 et suivants) : facture acquittée seule. */
 export function emailMensualite(r: Commande, f: Facture): { sujet: string; html: string } {
   return {
-    sujet: `Facture ${f.numero} · mensualité Flowin Animation`,
-    html: cadre("Votre facture mensuelle.", `<p style="font-size:14px">Bonjour ${esc(r.contact_nom)},<br>votre mensualité de ${eur(f.montant_ttc)} TTC a été prélevée. Votre facture acquittée n° <b>${esc(f.numero)}</b> est en pièce jointe.</p>`),
+    sujet: `Facture ${numeroLegal(f)} · mensualité Flowin, jeu d'animation`,
+    html: cadre("Votre facture mensuelle.", `<p style="font-size:14px">Bonjour ${esc(r.contact_nom)},<br>votre mensualité de ${eur(f.montant_ttc)} TTC a été prélevée. Votre facture acquittée n° <b>${esc(numeroLegal(f))}</b> est en pièce jointe.</p>`),
   };
 }
 
@@ -244,6 +247,6 @@ export function emailFlowin(r: Commande, type: string, ancien?: string): { sujet
   const t = lignes.map(([k, v]) => `<tr><td style="padding:4px 10px 4px 0;color:#5a6b80;font-size:13px">${k}</td><td style="padding:4px 0;font-size:14px;font-weight:700">${v}</td></tr>`).join("");
   return {
     sujet: (type === "nouvelle_commande" ? "Nouvelle commande " : "Commande ") + r.id + " · " + (STATUTS[String(r.statut)] ?? r.statut) + " · " + (r.raison_sociale ?? ""),
-    html: cadre(type === "nouvelle_commande" ? "Nouvelle commande Animation magasin" : "Changement de statut", `<table>${t}</table>`),
+    html: cadre(type === "nouvelle_commande" ? "Nouvelle commande jeu d'animation" : "Changement de statut", `<table>${t}</table>`),
   };
 }

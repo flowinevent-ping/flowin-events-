@@ -20,7 +20,7 @@ Paiement en ligne **OFF**. Facture émise **à la validation du bon de commande*
 
 ## 2. CONCEPT (canonique, validé)
 
-Cet été, **24 000 festivaliers** jouent à un **quiz RSE** pendant les Nuits du Sud et **découvrent les commerces partenaires sur une carte interactive**.
+Cet été, les festivaliers jouent à un **quiz RSE** pendant les Nuits du Sud et **découvrent les commerces partenaires sur une carte interactive**.
 Dans votre commerce, **le jeu continue** : un **QR à votre nom** + un **lien à diffuser**. Vos clients jouent au quiz (découvrent / reconnaissent votre enseigne) et **cumulent des tickets**. Plus on joue dans les commerces, plus on gagne — **bon d'achat à gagner chez vous** + **grand tirage au sort** à la clôture. **1 commerce partenaire = 1 lot.**
 
 Coordonnées : **info@opconsult.co · 06 16 35 49 36** — Romain Collin.
@@ -34,7 +34,7 @@ Liens : Présentation https://flowin-events.vercel.app/nds-partenaire-presentati
 
 Bonjour,
 
-Cet été, pendant les Nuits du Sud, 24 000 festivaliers jouent à un quiz RSE lors de leurs visites en ville — et découvrent les commerces partenaires sur une carte interactive.
+Cet été, pendant les Nuits du Sud, les festivaliers jouent à un quiz RSE lors de leurs visites en ville — et découvrent les commerces partenaires sur une carte interactive.
 
 Dans votre commerce partenaire des Nuits du Sud, le jeu continue : un QR à votre nom, une animation sur mesure, et un bon d'achat à gagner chez vous à la fin du festival.
 
@@ -55,7 +55,7 @@ Romain Collin
 
 Bonjour,
 
-Du 9 au 18 juillet, les Nuits du Sud rassemblent 24 000 festivaliers à Vence. Avec Flowin, le jeu officiel du parcours partenaires, ils jouent à un quiz RSE et découvrent les commerces partenaires sur une carte interactive.
+Du 9 au 18 juillet, les Nuits du Sud rassemblent les festivaliers à Vence. Avec Flowin, le jeu officiel du parcours partenaires, ils jouent à un quiz RSE et découvrent les commerces partenaires sur une carte interactive.
 
 Dans votre commerce, le jeu continue : un QR à votre nom + un lien à diffuser. Vos clients jouent au quiz, (re)découvrent votre enseigne et cumulent des tickets. Plus on joue dans les commerces, plus on gagne — un bon d'achat à gagner chez vous et un grand tirage au sort à la clôture. Un commerce partenaire = un lot.
 
@@ -82,7 +82,7 @@ Bonjour,
 
 Comme promis, voici le détail de l'opération.
 
-Cet été, pendant les Nuits du Sud, 24 000 festivaliers jouent à un quiz RSE lors de leurs visites en ville — et découvrent les commerces partenaires sur une carte interactive. L'objectif RSE : mettre en avant les commerces locaux et partenaires. Le jeu continue pendant toute la durée du festival.
+Cet été, pendant les Nuits du Sud, les festivaliers jouent à un quiz RSE lors de leurs visites en ville — et découvrent les commerces partenaires sur une carte interactive. L'objectif RSE : mettre en avant les commerces locaux et partenaires. Le jeu continue pendant toute la durée du festival.
 
 - Un quizz personnalisable, accessible par QR code
 - Un lien à diffuser sur vos réseaux
@@ -106,7 +106,7 @@ Romain Collin
 ## 4 bis. SCRIPT PHONING (aligné concept validé)
 
 **Accroche (10 s)**
-« Bonjour, Romain Collin de Flowin — on est partenaire des Nuits du Sud. Cet été, 24 000 festivaliers jouent à un quiz RSE et découvrent les commerces partenaires sur une carte. Je vous appelle parce que dans votre commerce, le jeu peut continuer. Vous avez deux minutes ? »
+« Bonjour, Romain Collin de Flowin — on est partenaire des Nuits du Sud. Cet été, les festivaliers jouent à un quiz RSE et découvrent les commerces partenaires sur une carte. Je vous appelle parce que dans votre commerce, le jeu peut continuer. Vous avez deux minutes ? »
 
 **Le concept**
 « On vous donne un QR à votre nom + un lien à diffuser. Vos clients jouent au quiz, découvrent votre enseigne et cumulent des tickets. Plus on joue dans les commerces, plus on gagne — avec un bon d'achat à gagner chez vous et un grand tirage au sort à la clôture. Un commerce = un lot. »

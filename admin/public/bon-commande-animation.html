@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Bon de commande Flowin Animation</title>
-<meta name="description" content="Bon de commande en ligne Flowin Animation magasin : formule, signature électronique, paiement par virement ou prélèvement SEPA.">
+<title>Bon de commande Flowin, jeu d'animation</title>
+<meta name="description" content="Bon de commande en ligne Flowin, jeu d'animation : formule, signature électronique, paiement par virement ou prélèvement SEPA.">
 <link rel="stylesheet" href="/flowin-tokens.css">
 <style>
   :root{
@@ -57,7 +57,37 @@
   .suite{font-size:12.5px;font-weight:800;color:var(--blue);text-align:right;margin-top:6px}
   .hint{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.5}
 
-  .parties{display:grid;grid-template-columns:1fr 1.5fr;gap:16px}
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+  .party{display:flex;flex-direction:column}
+  .party .cl{display:flex;flex-direction:column;gap:3px;margin-top:2px}
+  .party .cl div{font-size:12px;color:var(--muted);line-height:1.5;font-weight:600;overflow-wrap:anywhere}
+  .party .cl b{color:var(--ink);font-weight:800}
+  .party .cl .todo,.party .nm .todo{color:#9A5B00;font-style:italic;font-weight:700}
+  .party .nm .todo{font-size:13.5px}
+  .gstate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:13px;font-weight:800}
+  .gpill{display:inline-block;font-size:11.5px;font-weight:800;padding:4px 11px;border-radius:100px}
+  .gpill.todo{background:#FFF1D6;color:#8A5200}
+  .gpill.ok{background:var(--green);color:#fff}
+  .gbtn{margin-top:12px}
+  .gprinc{font-size:13px;font-weight:700;line-height:1.5;margin-top:2px}
+  [hidden]{display:none!important}
+  .gmodal{position:fixed;inset:0;z-index:20000;background:rgba(27,58,92,.55);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+  .gm-box{position:relative;background:#fff;border-radius:20px;max-width:520px;width:100%;max-height:calc(100vh - 28px);overflow:auto;padding:22px 22px 20px;box-shadow:0 30px 80px -30px rgba(27,58,92,.7)}
+  .gm-x{position:absolute;top:10px;right:12px;width:36px;height:36px;border:none;background:#E8EDF3;border-radius:50%;font-size:20px;font-weight:800;cursor:pointer;color:var(--ink)}
+  .gm-st{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--tealD);padding-right:40px}
+  .gm-box h3{font-size:20px;font-weight:900;letter-spacing:-.01em;margin:6px 0 8px;padding-right:36px;line-height:1.2}
+  .gm-box p{font-size:13px;color:var(--ink2);font-weight:600;line-height:1.5;margin-bottom:10px}
+  .gm-ro{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .gm-ro b{text-align:right}
+  .gm-err{display:none;color:var(--err);font-size:13px;font-weight:700;margin-top:8px}
+  .gm-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .gm-act .btn{flex:1 1 150px}
+  #gdem{display:none}
+  body.gdem #form,body.gdem #merci{display:none}
+  body.gdem #gdem{display:block}
+  .mgar{margin-top:16px;border:2px solid var(--teal);border-radius:16px;padding:14px 16px;background:#fff;font-size:13.5px;font-weight:600;line-height:1.5}
+  .mgar b{font-weight:900}
+  .mgar .btn{margin-top:10px}
   .party{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:var(--off)}
   .party .ttl{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--tealD);margin-bottom:8px}
   .party .nm{font-size:15px;font-weight:900}
@@ -199,7 +229,7 @@
     </div>
     <div class="doc-meta">
       <div class="doc-type">Bon de commande</div>
-      <div class="doc-sub">Flowin Animation magasin</div>
+      <div class="doc-sub">Flowin, jeu d'animation</div>
       <div class="doc-num">N&deg; <b id="docNum">&mdash;</b><br>Date : <b id="docDate">&mdash;</b></div>
     </div>
   </div>
@@ -212,12 +242,12 @@
         <div class="party">
           <div class="ttl">Prestataire</div>
           <div class="nm">BAITA EURL &middot; Flowin</div>
-          <div class="ln">40 rue des Arcs, 06140 Vence<br>SIRET 512&nbsp;026&nbsp;907&nbsp;00018<br>TVA FR82&nbsp;512&nbsp;026&nbsp;907<br>04 93 59 91 37 &middot; info@opconsult.co</div>
+          <div class="ln">40 rue des Arcs, 06140 Vence<br>SIRET 512&nbsp;026&nbsp;907&nbsp;00018<br>RCS Grasse 512&nbsp;026&nbsp;907<br>TVA FR82&nbsp;512&nbsp;026&nbsp;907<br>04 93 59 91 37 &middot; info@opconsult.co</div>
         </div>
-        <div class="party" style="background:#fff">
-          <div class="ttl">Votre commande en bref</div>
-          <div class="ln" id="briefLn">Offre annuelle Flowin Animation.</div>
-          <div class="nm" style="margin-top:6px" id="briefTot">&mdash;</div>
+        <div class="party" id="clientCard" aria-live="polite">
+          <div class="ttl">Client</div>
+          <div class="nm" id="clNom"></div>
+          <div class="cl" id="clLn"></div>
         </div>
       </div>
     </div>
@@ -272,17 +302,17 @@
       </div>
       <div class="guarbox" id="guarBox">
         <span class="gtag">Offre sp&eacute;ciale premiers adh&eacute;rents &middot; formule annuelle</span>
+        <div class="gprinc" id="garTxt">Satisfait ou rembours&eacute; : sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas l&rsquo;objectif fix&eacute; avec votre panier moyen, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
         <div class="gd" id="garMens" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e &agrave; la <b>formule annuelle</b>. <a href="#" id="garToAn">Passer en formule annuelle</a> pour en b&eacute;n&eacute;ficier.</div>
-        <div class="gd" id="garRenouv" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e aux <b>premiers adh&eacute;rents</b>, &agrave; la <b>premi&egrave;re souscription annuelle</b> ; elle ne s&rsquo;applique pas aux renouvellements. Votre dossier correspond &agrave; un renouvellement : la case est bloqu&eacute;e.</div>
-        <div class="gd" id="garNon" style="font-size:13px">Pour adh&eacute;rer &agrave; la garantie, remplissez et certifiez votre fiche d&eacute;couverte sur la <a href="/plaquette-animation-magasin.html#garantie">page Garantie</a>.</div>
-        <label class="chk" id="garRow"><input type="checkbox" id="garChk"><span>J&rsquo;adh&egrave;re &agrave; l&rsquo;offre satisfait ou rembours&eacute;</span></label>
-        <div class="gcert" id="garCert"></div>
+        <div class="gd" id="garRenouv" style="display:none;font-size:13px;font-weight:700">La garantie satisfait ou rembours&eacute; est r&eacute;serv&eacute;e aux <b>premiers adh&eacute;rents</b>, &agrave; la <b>premi&egrave;re souscription annuelle</b> ; elle ne s&rsquo;applique pas aux renouvellements. Votre dossier correspond &agrave; un renouvellement : elle n&rsquo;est pas disponible.</div>
+        <div class="gstate" id="garEtat"></div>
+        <button type="button" class="btn gbtn" id="garBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button>
+        <label class="chk" id="garRow" style="margin-top:12px"><input type="checkbox" id="garChk"><span>J&rsquo;adh&egrave;re &agrave; l&rsquo;offre satisfait ou rembours&eacute;</span></label>
         <div class="grid" style="margin-top:12px" id="garGrid">
           <div class="f" data-f="panier"><label for="f_panier">Panier moyen de votre activit&eacute; <small>(en &euro;)</small></label><input id="f_panier" inputmode="decimal" autocomplete="off" placeholder="ex. : 25"><div class="em">Indiquez votre panier moyen.</div></div>
           <div class="f" data-f="flux"><label for="f_flux">Flux journalier estim&eacute;</label><select id="f_flux"><option value="">Choisir</option><option value="15+">Plus de 15 clients par jour</option><option value="50+">Plus de 50 clients par jour</option><option value="100+">Plus de 100 clients par jour</option></select><div class="em">Choisissez votre flux journalier.</div></div>
         </div>
         <div class="gx" id="garX"></div>
-        <div class="gd" id="garTxt">Formule annuelle : sur 12 mois, avec au moins 4 animations, si le nombre de clients venus retirer leur lot en boutique n&rsquo;atteint pas ce chiffre, Flowin vous rembourse la diff&eacute;rence (hors part digitale). <a href="/cgv-animation-magasin.html" target="_blank" rel="noopener">Conditions d&eacute;taill&eacute;es dans les CGV</a>.</div>
       </div>
       <div class="hint">Les lots mis en jeu sont fournis par votre commerce.</div>
     </div>
@@ -367,6 +397,7 @@
         R&eacute;f&eacute;rence &agrave; rappeler : <b id="mRef">&mdash;</b>
       </div>
     </div>
+    <div class="mgar" id="mGarantie" style="display:none"><div id="mGarTxt"></div><button type="button" class="btn" id="mGarBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button></div>
     <div class="sec">
       <div class="sec-h"><span class="n" id="mStepsN">3</span><h2>Les prochaines &eacute;tapes</h2></div>
       <ol class="steps" id="mSteps"></ol>
@@ -380,11 +411,51 @@
     <div class="status" id="mStatus" role="status" aria-live="polite"></div>
   </div>
 
+  <!-- ================= DEMARCHE GARANTIE (lien de l'email) ================= -->
+  <div class="body" id="gdem">
+    <div class="thanks"><h2>Votre garantie <em>satisfait ou rembours&eacute;</em></h2><p>Commande n&deg; <b id="gdNum">&mdash;</b></p></div>
+    <div class="banner info" id="gdMsg">Remplissez et certifiez votre fiche d&eacute;couverte : cela prend deux minutes.</div>
+    <div class="actions"><button type="button" class="btn" id="gdBtn">Je veux b&eacute;n&eacute;ficier du satisfait ou rembours&eacute;</button><a class="btn ghost" href="/plaquette-animation-magasin.html">Retour &agrave; la plaquette</a></div>
+  </div>
+
   <div class="legal"><b>Flowin</b>, produit commercial de <b>BAITA EURL</b> &middot; 40 rue des Arcs, 06140 Vence &middot; SIRET 512&nbsp;026&nbsp;907&nbsp;00018 &middot; RCS Grasse 512&nbsp;026&nbsp;907 &middot; TVA intracommunautaire FR82&nbsp;512&nbsp;026&nbsp;907. Prix en euros hors taxes, TVA 20 % en sus. Dur&eacute;e et renouvellement selon les CGV.</div>
 </div>
 </div>
 
+<div class="gmodal" id="gModal" role="dialog" aria-modal="true" aria-labelledby="gmTitle" hidden>
+  <div class="gm-box">
+    <button type="button" class="gm-x" id="gmX" aria-label="Fermer">&times;</button>
+    <div id="gm1">
+      <div class="gm-st">&Eacute;tape 1 sur 2 &middot; Fiche d&eacute;couverte</div>
+      <h3 id="gmTitle">Parlons de votre activit&eacute;</h3>
+      <p>Ces deux informations servent de base unique au calcul de votre objectif de clients.</p>
+      <div class="f" data-f="gmpanier"><label for="gm_panier">Panier moyen <small>(en &euro;)</small></label><input id="gm_panier" inputmode="decimal" autocomplete="off" placeholder="ex. : 25"></div>
+      <div class="f" data-f="gmflux" style="margin-top:12px"><label for="gm_flux">Flux journalier estim&eacute;</label><select id="gm_flux"><option value="">Choisir</option><option value="15+">Plus de 15 clients par jour</option><option value="50+">Plus de 50 clients par jour</option><option value="100+">Plus de 100 clients par jour</option></select></div>
+      <div class="gm-err" id="gmErr1">Indiquez un panier moyen (en euros) et votre flux journalier.</div>
+      <div class="gm-act"><button type="button" class="btn ghost" id="gmCancel">Annuler</button><button type="button" class="btn" id="gmNext">Continuer</button></div>
+    </div>
+    <div id="gm2" hidden>
+      <div class="gm-st">&Eacute;tape 2 sur 2 &middot; Certification</div>
+      <h3>V&eacute;rifiez et certifiez</h3>
+      <div class="gm-ro"><span>Panier moyen</span><b id="gm_rp"></b></div>
+      <div class="gm-ro"><span>Flux journalier</span><b id="gm_rf"></b></div>
+      <div class="gm-ro"><span>Objectif de clients sur 12 mois</span><b id="gm_rx"></b></div>
+      <div class="f" style="margin-top:12px"><label for="gm_nom">Votre nom et pr&eacute;nom <i>*</i></label><input id="gm_nom" autocomplete="name"></div>
+      <label class="chk" style="margin-top:12px"><input type="checkbox" id="gm_ok"><span>Je certifie l&rsquo;exactitude de ces informations. Elles servent de base unique au calcul et ne pourront plus &ecirc;tre modifi&eacute;es.</span></label>
+      <div class="gm-err" id="gmErr2">Indiquez votre nom et cochez la certification.</div>
+      <div class="gm-act"><button type="button" class="btn ghost" id="gmBack">Retour</button><button type="button" class="btn" id="gmCert">Valider et certifier</button></div>
+    </div>
+    <div id="gm3" hidden>
+      <div class="gm-st">C&rsquo;est fait</div>
+      <h3 id="gm3t">Votre fiche est certifi&eacute;e</h3>
+      <p id="gm3p"></p>
+      <div class="gm-act"><button type="button" class="btn" id="gmFin">Retour au bon de commande</button></div>
+    </div>
+  </div>
+</div>
+
 <script src="/nds/vendor/jspdf.umd.min.js"></script>
+<script src="/bon-commande-pdf.js"></script>
 <script>
 (function(){
   'use strict';
@@ -447,24 +518,10 @@
 
   function clampInt(v, mn, mx){ v = parseInt(String(v).replace(/[^0-9]/g, ''), 10); if (isNaN(v)) v = mn; if (v < mn) v = mn; if (v > mx) v = mx; return v; }
 
-  var NOM_OFFRE = { annuelle: 'Formule annuelle Flowin Animation', mensuelle: 'Formule mensuelle Flowin Animation' };
+  var MODELE = window.FlowinBonPDF;   /* modèle unique : /bon-commande-pdf.js (calcul + PDF) */
+  var NOM_OFFRE = MODELE ? MODELE.NOM_OFFRE : { annuelle: 'Formule annuelle Flowin, jeu d\'animation', mensuelle: 'Formule mensuelle Flowin, jeu d\'animation' };
   var ENGAGEMENT = { annuelle: 12, mensuelle: 3 };
-  function calc(){
-    var lignes = [], abo = st.offre === 'annuelle' ? PRIX.annuelle : PRIX.mensuelle;
-    if (st.offre === 'annuelle') lignes.push({ lib: NOM_OFFRE.annuelle, det: 'Quiz, roue, tombola, tirages, billets, stock, relances, mesure par support. Engagement 12 mois', q: 1, ht: abo });
-    else lignes.push({ lib: NOM_OFFRE.mensuelle + ', 1er mois', det: 'Engagement 3 mois minimum, puis ' + eur(PRIX.mensuelle) + ' HT par mois, r\u00e9siliable chaque mois', q: 1, ht: abo });
-    var kitHt = st.kit === 'physique' ? PRIX.kitPhysique * st.nb : 0;
-    if (st.kit === 'physique') lignes.push({ lib: 'Kit physique imprim\u00e9', det: 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, ' + eur(PRIX.kitPhysique) + ' HT', q: st.nb, ht: kitHt });
-    else lignes.push({ lib: 'Kit digital', det: 'Fichiers des affiches, macarons et support de caisse, QR inclus, \u00e0 imprimer', q: 1, ht: 0 });
-    var optHt = 0;
-    if (st.quiz > 0) { lignes.push({ lib: 'Option : quiz personnalis\u00e9', det: eur(PRIX.optQuiz) + ' HT par \u00e9v\u00e9nement', q: st.quiz, ht: PRIX.optQuiz * st.quiz }); optHt += PRIX.optQuiz * st.quiz; }
-    if (st.bonus > 0) { lignes.push({ lib: 'Option : questions bonus', det: eur(PRIX.optBonus) + ' HT par sondage', q: st.bonus, ht: PRIX.optBonus * st.bonus }); optHt += PRIX.optBonus * st.bonus; }
-    var ht = abo + kitHt + optHt;
-    var tva = Math.round(ht * PRIX.tva * 100) / 100;
-    var aboTtc = Math.round(abo * (1 + PRIX.tva) * 100) / 100;
-    var ttc = Math.round((ht + tva) * 100) / 100;
-    return { lignes: lignes, abo: abo, kit: kitHt, opt: optHt, ht: ht, tva: tva, ttc: ttc, aboTtc: aboTtc, resteTtc: Math.round((ttc - aboTtc) * 100) / 100 };
-  }
+  function calc(){ return MODELE.calcul({ offre: st.offre, kit: st.kit, nb: st.nb, quiz: st.quiz, bonus: st.bonus }); }
   /* Garantie : X = arrondi supérieur (prix sur 12 mois ÷ panier moyen) */
   function clientsGarantie(){
     var p = parseFloat(String(($('f_panier') || {}).value || '').replace(',', '.'));
@@ -496,8 +553,11 @@
     $('garMens').style.display = annuelle ? 'none' : 'block';
     $('garRenouv').style.display = annuelle && st.renouv ? 'block' : 'none';
     $('garTxt').style.display = eligible ? 'block' : 'none';
-    $('garCert').style.display = st.certif && eligible ? 'block' : 'none';
-    $('garNon').style.display = eligible && !st.certif ? 'block' : 'none';
+    $('garEtat').style.display = eligible ? 'flex' : 'none';
+    $('garEtat').innerHTML = st.certif && eligible
+      ? '<span class="gpill ok">Certifi\u00e9e</span><span>le ' + fmtDateHeure(new Date(st.certif.le)) + ' par ' + esc(st.certif.par) + '</span>'
+      : '<span class="gpill todo">\u00c0 compl\u00e9ter</span><span>Fiche d\u00e9couverte \u00e0 remplir et \u00e0 certifier.</span>';
+    $('garBtn').style.display = eligible && !st.certif ? 'inline-flex' : 'none';
     $('garRow').style.display = eligible && st.certif ? 'flex' : 'none';
     $('garGrid').style.display = eligible && st.certif ? 'grid' : 'none';
     var X = eligible ? clientsGarantie() : null, gx = $('garX');
@@ -517,9 +577,19 @@
     $('sepaLbl').textContent = st.offre === 'mensuelle' ? 'Pr\u00e9l\u00e8vement mensuel de l\u2019offre' : 'Pr\u00e9l\u00e8vement de l\u2019offre annuelle';
     $('sepaAbo').textContent = eur(t.aboTtc) + (st.offre === 'mensuelle' ? ' par mois' : ''); $('sepaResteMt').textContent = eur(t.resteTtc);
     $('sepaReste').parentNode.style.display = (t.resteTtc > 0 && t.aboTtc > 0) ? 'flex' : 'none';
-    var opts = [st.kit === 'physique' ? 'kit physique (' + st.nb + ' boutique' + (st.nb > 1 ? 's' : '') + ')' : 'kit digital']; if (st.quiz) opts.push('quiz personnalis\u00e9'); if (st.bonus) opts.push('questions bonus');
-    $('briefLn').textContent = NOM_OFFRE[st.offre] + (st.offre === 'mensuelle' ? ' (engagement 3 mois minimum)' : ' (engagement 12 mois)') + ', ' + opts.join(', ') + (st.garantie ? ', satisfait ou rembours\u00e9' : '') + '.';
-    $('briefTot').textContent = eur(t.ht) + ' HT · ' + eur(t.ttc) + ' TTC';
+    renderClient();
+  }
+  /* Carte « Client » : reprend en direct la saisie, sans prix ; « à compléter » tant qu'un champ est vide */
+  function renderClient(){
+    function v(id){ return String(($(id) || {}).value || '').replace(/^\s+|\s+$/g, ''); }
+    function ligne(lib, val){ return '<div>' + lib + ' : ' + (val ? '<b>' + esc(val) + '</b>' : '<span class="todo">\u00e0 compl\u00e9ter</span>') + '</div>'; }
+    var raison = v('f_raison'), ens = v('f_enseigne'), cp = v('f_cp'), ville = v('f_ville'), ad = v('f_adresse');
+    var nm = raison ? esc(raison) + (ens && ens !== raison ? ' <span style="font-weight:700;color:var(--muted)">(' + esc(ens) + ')</span>' : '') : '<span class="todo">Raison sociale \u00e0 compl\u00e9ter</span>';
+    var cpv = (cp + ' ' + ville).replace(/^\s+|\s+$/g, '');
+    var adr = ad && cpv ? ad + ', ' + cpv : (ad || cpv);
+    var contact = v('f_contact') ? v('f_contact') + (v('f_fonction') ? ' (' + v('f_fonction') + ')' : '') : '';
+    $('clNom').innerHTML = nm;
+    $('clLn').innerHTML = ligne('Adresse', adr) + ligne('SIRET', v('f_siret')) + ligne('Boutiques', String(st.nb)) + ligne('Contact', contact) + ligne('Email', v('f_email')) + ligne('T\u00e9l.', v('f_tel'));
   }
 
   /* ---------- Préremplissage depuis la plaquette ---------- */
@@ -536,8 +606,6 @@
       $('f_panier').value = String(pm).replace('.', ','); $('f_panier').readOnly = true;
       $('f_flux').value = fx; $('f_flux').disabled = true;
       $('garChk').disabled = true;
-      $('garCert').style.display = 'block';
-      $('garCert').textContent = 'Certifi\u00e9 le ' + fmtDateHeure(dCert) + ' par ' + st.certif.par;
     }
     if (qs('quiz')) st.quiz = clampInt(qs('quiz'), 1, 20);
     if (qs('bonus')) st.bonus = clampInt(qs('bonus'), 1, 20);
@@ -574,6 +642,7 @@
   for (var kb = 0; kb < kitBtns.length; kb++) kitBtns[kb].addEventListener('click', function(){ st.kit = this.getAttribute('data-kit'); render(); });
   $('engChk').addEventListener('change', function(){ if (this.checked) $('engBox').className = 'engbox'; });
   $('garChk').addEventListener('change', function(){ if (st.certif && st.offre === 'annuelle' && !st.renouv) { st.garantie = true; this.checked = true; } render(); });
+  $('garBtn').addEventListener('click', function(){ ouvrirDemarche('bon'); });
   $('garToAn').addEventListener('click', function(e){ e.preventDefault(); st.offre = 'annuelle'; render(); });
   $('f_flux').addEventListener('change', function(){ var q = this.closest ? this.closest('.f[data-f]') : null; if (q) q.className = q.className.replace(/ err/g, ''); });
   function toggleOpt(name){ st[name] = st[name] > 0 ? 0 : 1; render(); }
@@ -699,76 +768,11 @@
     };
   }
 
-  /* ---------- PDF (jsPDF, dans le navigateur) ---------- */
+  /* ---------- PDF : même modèle que l'email signé et la page Super Admin (/bon-commande-pdf.js) ---------- */
   function pdf(rec, signe){
     var J = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-    if (!J) { return false; }
-    function S(t){ return String(t == null ? '' : t).replace(/ /g, ' ').replace(/€/g, 'EUR').replace(/[‘’]/g, "'").replace(/[“”«»]/g, '"').replace(/[–—]/g, '-').replace(/·/g, '-'); }
-    var doc = new J({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-    var W = 210, M = 15, x = M, y = 18, CW = W - 2 * M;
-    var ink = [27, 58, 92], mut = [90, 107, 128], mag = [59, 92, 196], gold = [59, 92, 196], teal = [91, 52, 194];
-    function T(t, xx, yy, sz, stl, col, al){ doc.setFont('helvetica', stl || 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); doc.text(S(t), xx, yy, al ? { align: al } : undefined); }
-    function wrap(t, xx, yy, sz, col, w, lh){ doc.setFont('helvetica', 'normal'); doc.setFontSize(sz); doc.setTextColor(col[0], col[1], col[2]); var ls = doc.splitTextToSize(S(t), w); for (var i = 0; i < ls.length; i++) { doc.text(ls[i], xx, yy); yy += lh; } return yy; }
-    /* Signature de marque */
-    doc.setFillColor(244, 246, 249); doc.rect(0, 0, W, 38, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(ink[0], ink[1], ink[2]); doc.text('Flow', x, y + 4);
-    var fw = doc.getTextWidth('Flow'); doc.setTextColor(mag[0], mag[1], mag[2]); doc.text('i', x + fw, y + 4); var iw = doc.getTextWidth('i'); doc.setTextColor(gold[0], gold[1], gold[2]); doc.text('n', x + fw + iw, y + 4);
-    T('A N I M A T I O N   D I G I T A L E', x, y + 10.5, 7, 'bold', [120, 112, 124]);
-    doc.setFillColor(122, 79, 224); doc.roundedRect(x, y + 13, 25, 5.5, 2.75, 2.75, 'F'); T('Plug & Play', x + 12.5, y + 16.8, 7.5, 'bold', [255, 255, 255], 'center');
-    T('Bon de commande', W - M, y + 2, 18, 'bold', ink, 'right');
-    T('Flowin Animation magasin', W - M, y + 8, 9.5, 'normal', mut, 'right');
-    T('No ' + rec.id, W - M, y + 14, 9, 'bold', ink, 'right');
-    T('Date : ' + fmtDate(new Date()), W - M, y + 19, 8.5, 'normal', mut, 'right');
-    y = 48;
-    var cw = (CW - 8) / 2;
-    doc.setDrawColor(220, 227, 236); doc.roundedRect(x, y, cw, 32, 2, 2); doc.roundedRect(x + cw + 8, y, cw, 32, 2, 2);
-    T('PRESTATAIRE', x + 4, y + 6, 7, 'bold', teal); T('BAITA EURL - Flowin', x + 4, y + 12, 10.5, 'bold', ink);
-    T('40 rue des Arcs, 06140 Vence', x + 4, y + 17, 8, 'normal', mut); T('SIRET 512 026 907 00018', x + 4, y + 21.5, 8, 'normal', mut);
-    T('TVA FR82 512 026 907', x + 4, y + 26, 8, 'normal', mut); T('04 93 59 91 37 - info@opconsult.co', x + 4, y + 30, 7.5, 'normal', mut);
-    var px = x + cw + 12;
-    T('CLIENT', px, y + 6, 7, 'bold', teal); T((rec.raison_sociale || '-') + (rec.enseigne ? ' (' + rec.enseigne + ')' : ''), px, y + 12, 10.5, 'bold', ink);
-    T(rec.adresse || '', px, y + 17, 8, 'normal', mut); T(((rec.cp || '') + ' ' + (rec.ville || '')).replace(/^\s+/, ''), px, y + 21.5, 8, 'normal', mut);
-    T('SIRET ' + (rec.siret || '-'), px, y + 26, 8, 'normal', mut);
-    T([rec.contact_nom, rec.email, rec.tel].join(' - '), px, y + 30, 7, 'normal', mut);
-    y += 40;
-    T('Boutiques : ' + rec.nb_boutiques + (rec.panier_moyen ? '   -   Panier moyen declare : ' + eur(rec.panier_moyen) : '') + (rec.commercial ? '   -   Commercial : ' + rec.commercial : ''), x, y, 8.5, 'normal', mut);
-    y += 7;
-    T('DESIGNATION', x, y, 7.5, 'bold', teal); T('QTE', W - M - 38, y, 7.5, 'bold', teal, 'right'); T('MONTANT HT', W - M, y, 7.5, 'bold', teal, 'right');
-    y += 2.5; doc.setDrawColor(220, 227, 236); doc.line(x, y, W - M, y); y += 5.5;
-    var t = calc();
-    for (var i = 0; i < t.lignes.length; i++) {
-      var l = t.lignes[i];
-      T(l.lib, x, y, 9.5, 'bold', ink); T(String(l.q), W - M - 38, y, 9.5, 'normal', ink, 'right'); T(eur(l.ht), W - M, y, 9.5, 'bold', ink, 'right');
-      y = wrap(l.det, x, y + 4.3, 7.8, mut, CW - 60, 3.6) + 2;
-      doc.line(x, y - 1.5, W - M, y - 1.5); y += 3.5;
-    }
-    var tx = W - M - 70;
-    T('Total HT', tx, y, 9.5, 'normal', mut); T(eur(t.ht), W - M, y, 9.5, 'bold', ink, 'right'); y += 5.5;
-    T('TVA 20 %', tx, y, 9.5, 'normal', mut); T(eur(t.tva), W - M, y, 9.5, 'bold', ink, 'right'); y += 2.5;
-    doc.setFillColor(227, 233, 248); doc.rect(tx - 3, y, 73, 9, 'F');
-    T('Total TTC', tx, y + 6.2, 11, 'bold', ink); T(eur(t.ttc), W - M, y + 6.2, 12, 'bold', ink, 'right'); y += 16;
-    T('ENGAGEMENT', x, y, 7.5, 'bold', teal); y += 5;
-    y = wrap(rec.offre === 'mensuelle' ? 'Formule mensuelle : engagement de 3 mois minimum (3 x ' + eur(PRIX.mensuelle) + ' HT), puis reconduction mois par mois, resiliable chaque mois avec le preavis prevu aux CGV. Engagement accepte expressement par le client.' : 'Formule annuelle : engagement de 12 mois, un seul paiement pour l\'annee.', x, y, 8.5, ink, CW, 4.2) + 3;
-    T('PAIEMENT', x, y, 7.5, 'bold', teal); y += 5;
-    if (rec.mode_paiement === 'prelevement_sepa') {
-      y = wrap('Prelevement SEPA via GoCardless : ' + (rec.offre === 'mensuelle' ? 'offre mensuelle ' + eur(t.aboTtc) + ' TTC par mois' : 'offre annuelle ' + eur(t.aboTtc)) + ' TTC' + (rec.prelevement_inclut_reste && t.resteTtc > 0 ? ', kit et options ' + eur(t.resteTtc) + ' TTC preleves egalement.' : (t.resteTtc > 0 ? '. Kit et options (' + eur(t.resteTtc) + ' TTC) par virement : IBAN ' + IBAN + ' - BIC ' + BIC + ' - titulaire BAITA EURL - reference ' + rec.id + '.' : '.')), x, y, 8.5, ink, CW, 4.2);
-    } else if (rec.mode_paiement === 'aucun') {
-      y = wrap('Aucun paiement.', x, y, 8.5, ink, CW, 4.2);
-    } else {
-      y = wrap((rec.offre === 'mensuelle' ? 'Offre mensuelle : virement chaque mois de ' + eur(t.aboTtc) + ' TTC. Premier virement : ' : 'Virement bancaire de ') + eur(t.ttc) + ' TTC a l\'ordre de BAITA EURL - IBAN ' + IBAN + ' - BIC ' + BIC + ' - reference a rappeler : ' + rec.id + '. Commande enregistree en attente de paiement.', x, y, 8.5, ink, CW, 4.2);
-    }
-    y += 3;
-    if (rec.garantie) { y = wrap('Offre satisfait ou rembourse (premiers adherents) : objectif de ' + (rec.garantie_clients_objectif || '-') + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations (panier moyen declare : ' + (rec.panier_moyen ? eur(rec.panier_moyen) : '-') + ', flux journalier : ' + (rec.flux_journalier || '-') + '), donnees certifiees par ' + (rec.garantie_certifiee_par || '-') + ' le ' + (rec.garantie_certifiee_le ? fmtDateHeure(new Date(rec.garantie_certifiee_le)) : '-') + ', non modifiables. Conditions dans les CGV.', x, y, 8.5, ink, CW, 4.2); }
-    y += 4;
-    T('SIGNATURE ELECTRONIQUE', x, y, 7.5, 'bold', teal); y += 5;
-    if (signe) {
-      y = wrap('Signe electroniquement par ' + rec.signataire_nom + (rec.signataire_qualite ? ' (' + rec.signataire_qualite + ')' : '') + ' pour ' + rec.raison_sociale + ', le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '. Case "Je signe electroniquement ce bon de commande" cochee ; CGV Flowin Animation acceptees (version ' + rec.cgv_version + ').', x, y, 8.5, ink, CW, 4.2);
-    } else {
-      y = wrap('Document non signe (brouillon). La commande est formee a la signature electronique en ligne.', x, y, 8.5, mut, CW, 4.2);
-    }
-    y += 4;
-    wrap('Conditions generales de vente Flowin Animation consultables sur flowin-events.vercel.app/cgv-animation-magasin.html. Les lots mis en jeu sont fournis par le client. Duree et renouvellement selon les CGV.', x, y, 7.5, mut, CW, 3.6);
- wrap('Flowin, produit commercial de BAITA EURL - 40 rue des Arcs, 06140 Vence - SIRET 512 026 907 00018 - RCS Grasse 512 026 907 - TVA FR82 512 026 907 - IBAN ' + IBAN + ' - BIC ' + BIC, x, 287, 6.5, mut, CW, 3);
+    if (!J || !MODELE) { return false; }
+    var doc = MODELE.construire(J, rec, { signe: !!signe });
     doc.save('bon-commande-flowin-' + rec.id + '.pdf');
     return true;
   }
@@ -855,11 +859,12 @@
     $('mVirMt').textContent = eur(virMt); $('mRef').textContent = rec.id;
     $('mStepsN').textContent = virMt > 0 ? '3' : '2';
     $('mSteps').innerHTML = etapes(rec, opts.horsLigne);
+    majRappelGarantie(rec, opts);
     $('mOffline').style.display = opts.horsLigne ? 'block' : 'none';
     $('mEchec').style.display = opts.echec ? 'block' : 'none';
     if (opts.echec) {
       $('mTitle').innerHTML = 'Votre commande <em>est sign&eacute;e</em>.';
-      var corps = 'Bonjour,\n\nVoici mon bon de commande Flowin Animation magasin sign\u00e9 (PDF joint).\n\nN\u00b0 ' + rec.id + '\nSoci\u00e9t\u00e9 : ' + rec.raison_sociale + ' (SIRET ' + rec.siret + ')\nFormule : ' + NOM_OFFRE[rec.offre] + ' (engagement ' + rec.engagement_mois + ' mois)\nSupports : ' + (rec.kit === 'physique' ? 'kit physique, ' + rec.nb_boutiques + ' boutique(s)' : 'kit digital') + '\nTotal \u00e0 la commande : ' + eur(rec.montant_ttc) + ' TTC\nPaiement : ' + (rec.mode_paiement === 'prelevement_sepa' ? 'pr\u00e9l\u00e8vement SEPA' : 'virement') + '\nSign\u00e9 par ' + rec.signataire_nom + ' le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '\nContact : ' + rec.contact_nom + ', ' + rec.email + ', ' + rec.tel + '\n';
+      var corps = 'Bonjour,\n\nVoici mon bon de commande Flowin, jeu d\'animation sign\u00e9 (PDF joint).\n\nN\u00b0 ' + rec.id + '\nSoci\u00e9t\u00e9 : ' + rec.raison_sociale + ' (SIRET ' + rec.siret + ')\nFormule : ' + NOM_OFFRE[rec.offre] + ' (engagement ' + rec.engagement_mois + ' mois)\nSupports : ' + (rec.kit === 'physique' ? 'kit physique, ' + rec.nb_boutiques + ' boutique(s)' : 'kit digital') + '\nTotal \u00e0 la commande : ' + eur(rec.montant_ttc) + ' TTC\nPaiement : ' + (rec.mode_paiement === 'prelevement_sepa' ? 'pr\u00e9l\u00e8vement SEPA' : 'virement') + '\nSign\u00e9 par ' + rec.signataire_nom + ' le ' + fmtDateHeure(new Date(rec.signature_horodatage_client)) + '\nContact : ' + rec.contact_nom + ', ' + rec.email + ', ' + rec.tel + '\n';
       $('mEchecMail').setAttribute('href', 'mailto:' + EMAIL_FLOWIN + '?subject=' + encodeURIComponent('Bon de commande ' + rec.id + ' - ' + rec.raison_sociale) + '&body=' + encodeURIComponent(corps));
       $('mEchecPdf').onclick = function(e){ e.preventDefault(); pdf(rec, true); };
     }
@@ -957,6 +962,114 @@
       if (!r.ok || PRO_ID) return; var a = document.querySelectorAll('.js-inscr'); for (var i = 0; i < a.length; i++) a[i].setAttribute('href', '/pro/premiere-fois');
     }).catch(function(){});
   })();
+
+  /* ---------- Démarche « satisfait ou remboursé » : fiche découverte, certification, retour au bon ---------- */
+  var FLUX_LIB = { '15+': 'Plus de 15 clients par jour', '50+': 'Plus de 50 clients par jour', '100+': 'Plus de 100 clients par jour' };
+  var SS_CERTIF = 'flowin_am_certif';   /* même clé que la page Garantie de la plaquette */
+  var gm = { mode: 'bon', commande: null, saisie: null, fait: null }, gmRetour = null;
+  function gmStep(n){ $('gm1').hidden = n !== 1; $('gm2').hidden = n !== 2; $('gm3').hidden = n !== 3; }
+  function gmErr(id, on, msg){ var e = $(id); e.style.display = on ? 'block' : 'none'; if (msg) e.textContent = msg; }
+  function ouvrirDemarche(mode, commande, fait){
+    gm.mode = mode; gm.commande = commande || null; gm.saisie = null; gm.fait = fait || null;
+    try { gmRetour = document.activeElement; } catch (e) { gmRetour = null; }
+    $('gm_panier').value = mode === 'bon' ? val('f_panier') : ''; $('gm_flux').value = mode === 'bon' ? $('f_flux').value : '';
+    $('gm_nom').value = mode === 'bon' ? val('f_contact') : ''; $('gm_ok').checked = false;
+    gmErr('gmErr1', false); gmErr('gmErr2', false); $('gmCert').disabled = false;
+    gmStep(1); $('gModal').hidden = false;
+    setTimeout(function(){ try { $('gm_panier').focus(); } catch (e) {} }, 30);
+  }
+  function fermerDemarche(){ $('gModal').hidden = true; try { if (gmRetour && gmRetour.focus && gmRetour.offsetParent !== null) gmRetour.focus(); } catch (e) {} }
+  $('gmX').addEventListener('click', fermerDemarche); $('gmCancel').addEventListener('click', fermerDemarche);
+  document.addEventListener('keydown', function(e){ if ((e.key === 'Escape' || e.keyCode === 27) && !$('gModal').hidden) fermerDemarche(); });
+  $('gmNext').addEventListener('click', function(){
+    var p = parseFloat(String($('gm_panier').value).replace(',', '.').replace(/[^0-9.]/g, '')), fx = $('gm_flux').value;
+    if (isNaN(p) || p <= 0 || p > 100000 || !FLUX_LIB[fx]) { gmErr('gmErr1', true); return; }
+    gmErr('gmErr1', false);
+    gm.saisie = { panier: Math.round(p * 100) / 100, flux: fx };
+    $('gm_rp').textContent = String(gm.saisie.panier).replace('.', ',') + ' €'; $('gm_rf').textContent = FLUX_LIB[fx];
+    $('gm_rx').textContent = Math.ceil(PRIX.annuelle / gm.saisie.panier) + ' clients';
+    gmStep(2);
+  });
+  $('gm_nom').addEventListener('input', function(){ gmErr('gmErr2', false); }); $('gm_ok').addEventListener('change', function(){ gmErr('gmErr2', false); });
+  $('gmBack').addEventListener('click', function(){ gmStep(1); });
+  function souscrireGarantie(commande, sa, nom){
+    return fetch(SUPA + '/rest/v1/rpc/souscrire_garantie_animation', {
+      method: 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_commande: commande, p_panier: sa.panier, p_flux: sa.flux, p_nom: nom })
+    }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, j: j }; }, function(){ return { ok: r.ok, j: {} }; }); });
+  }
+  function messageGarantie(m){
+    m = String(m || '');
+    if (m.indexOf('renouvellement') >= 0) return 'La garantie est réservée à la première souscription annuelle : elle ne s’applique pas aux renouvellements.';
+    if (m.indexOf('mensuelle') >= 0) return 'La garantie est réservée à la formule annuelle.';
+    if (m.indexOf('deja') >= 0) return 'La garantie est déjà certifiée pour cette commande : elle ne peut plus être modifiée.';
+    if (m.indexOf('delai') >= 0) return 'Le délai pour ajouter la garantie à cette commande est dépassé : contactez l’équipe Flowin.';
+    return 'La garantie n’a pas pu être enregistrée pour le moment. Contactez l’équipe Flowin, elle l’ajoutera à votre commande.';
+  }
+  $('gmCert').addEventListener('click', function(){
+    var nom = String($('gm_nom').value || '').replace(/^\s+|\s+$/g, '');
+    if (!gm.saisie || nom.length < 3 || !$('gm_ok').checked) { gmErr('gmErr2', true, 'Indiquez votre nom et cochez la certification.'); return; }
+    gmErr('gmErr2', false);
+    var le = new Date().toISOString(), sa = gm.saisie, btn = this;
+    nom = nom.slice(0, 120);
+    function fin(titre, texte){ $('gm3t').textContent = titre; $('gm3p').textContent = texte; gmStep(3); }
+    try { window.sessionStorage.setItem(SS_CERTIF, JSON.stringify({ panier: sa.panier, flux: sa.flux, nom: nom, le: le })); } catch (e) {}
+    if (gm.mode === 'bon') {
+      st.certif = { le: le, par: nom }; st.garantie = true;
+      $('f_panier').value = String(sa.panier).replace('.', ','); $('f_panier').readOnly = true;
+      $('f_flux').value = sa.flux; $('f_flux').disabled = true; $('garChk').disabled = true;
+      render();
+      fin('Votre fiche est certifiée', 'La case « satisfait ou remboursé » est cochée sur votre bon de commande et les valeurs sont verrouillées.');
+      $('gmFin').textContent = 'Retour au bon de commande';
+      return;
+    }
+    btn.disabled = true; gmErr('gmErr2', true, 'Enregistrement…'); $('gmErr2').style.color = 'var(--muted)';
+    souscrireGarantie(gm.commande, sa, nom).then(function(res){
+      btn.disabled = false; $('gmErr2').style.color = '';
+      if (!res.ok) { gmErr('gmErr2', true, messageGarantie(res.j && (res.j.message || res.j.error))); return; }
+      var obj = (res.j && res.j.objectif) || Math.ceil(PRIX.annuelle / sa.panier);
+      fin('Satisfait ou remboursé enregistré', 'Objectif : ' + obj + ' clients venus retirer leur lot en boutique sur 12 mois, avec au moins 4 animations. Votre fiche est certifiée le ' + fmtDateHeure(new Date(le)) + ' par ' + nom + '.');
+      $('gmFin').textContent = 'Fermer';
+      if (gm.fait) gm.fait({ objectif: obj, panier: sa.panier, flux: sa.flux, nom: nom, le: le });
+    }, function(){ btn.disabled = false; $('gmErr2').style.color = ''; gmErr('gmErr2', true, 'Pas de réseau : réessayez dans un instant.'); });
+  });
+  $('gmFin').addEventListener('click', function(){
+    fermerDemarche();
+    if (gm.mode === 'bon') { var g = $('guarBox'); if (g && g.scrollIntoView) g.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  });
+
+  /* Rappel sur la page de confirmation (commande enregistrée sans la garantie) */
+  function majRappelGarantie(rec, opts){
+    var box = $('mGarantie'), txt = $('mGarTxt'), btn = $('mGarBtn');
+    btn.style.display = 'none';
+    if (rec.garantie || opts.horsLigne || opts.echec) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    if (rec.offre !== 'annuelle') { txt.innerHTML = '<b>Satisfait ou remboursé</b> : cette garantie est réservée à la formule annuelle.'; return; }
+    if (st.renouv) { txt.innerHTML = '<b>Satisfait ou remboursé</b> : cette garantie est réservée à la première souscription annuelle ; elle ne s’applique pas aux renouvellements.'; return; }
+    txt.innerHTML = '<b>Vous pouvez encore bénéficier du satisfait ou remboursé.</b> Remplissez et certifiez votre fiche découverte (deux minutes) : elle sera ajoutée à votre commande. Le même lien vous est aussi envoyé par email.';
+    btn.style.display = 'inline-flex';
+    btn.onclick = function(){
+      ouvrirDemarche('commande', rec.id, function(r){
+        rec.garantie = true; rec.garantie_clients_objectif = r.objectif; rec.panier_moyen = r.panier; rec.flux_journalier = r.flux; rec.garantie_certifiee_par = r.nom; rec.garantie_certifiee_le = r.le;
+        $('mSteps').innerHTML = etapes(rec, false);
+        txt.innerHTML = '<b>Satisfait ou remboursé enregistré</b> : objectif de ' + r.objectif + ' clients sur 12 mois, fiche certifiée le ' + fmtDateHeure(new Date(r.le)) + '.';
+        btn.style.display = 'none';
+      });
+    };
+  }
+
+  /* Lien de l'email : ?garantie=demarche&commande=AM-... */
+  (function(){
+    var cid = qs('commande');
+    if (qs('garantie') !== 'demarche' || !cid || !/^AM-[0-9]{8}-[A-Z0-9]{8}$/.test(cid)) return;
+    document.body.className = 'gdem'; $('gdNum').textContent = cid;
+    $('gdBtn').addEventListener('click', function(){
+      ouvrirDemarche('commande', cid, function(r){
+        $('gdMsg').textContent = 'Satisfait ou remboursé enregistré : objectif de ' + r.objectif + ' clients sur 12 mois. Merci !'; $('gdBtn').style.display = 'none';
+      });
+    });
+  })();
+  $('form').addEventListener('input', renderClient); $('form').addEventListener('change', renderClient);
 
   render();
 })();

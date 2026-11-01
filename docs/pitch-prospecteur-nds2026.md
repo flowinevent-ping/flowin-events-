@@ -5,7 +5,7 @@
 
 ## ACCROCHE
 
-> « Bonjour, Romain Collin de Flowin. Je vous appelle au sujet du festival des Nuits du Sud — ça vous parle ? On y organise un grand jeu-concours pendant toute la durée du festival, 24 000 participants attendus sur 6 soirées. »
+> « Bonjour, Romain Collin de Flowin. Je vous appelle au sujet du festival des Nuits du Sud — ça vous parle ? On y organise un grand jeu-concours pendant toute la durée du festival, des participants attendus sur 6 soirées. »
 
 ---
 
@@ -36,7 +36,7 @@
 ## OBJECTIONS COURANTES
 
 **« C'est cher. »**
-> « 590 € HT sur 6 soirées, avec 24 000 visiteurs dont 80 % de locaux — ça fait moins de 100 € la soirée pour être visible sur la carte de tout le festival. Et vous avez un gagnant qui revient chez vous avec un bon d'achat : c'est de la fidélisation concrète. »
+> « 590 € HT sur 6 soirées, avec 80 % de locaux — ça fait moins de 100 € la soirée pour être visible sur la carte de tout le festival. Et vous avez un gagnant qui revient chez vous avec un bon d'achat : c'est de la fidélisation concrète. »
 
 **« On n'a pas le temps de gérer ça. »**
 > « Vous n'avez rien à gérer. On configure tout. Vous recevez votre QR, vous le posez, c'est fini. Le suivi est dans un dashboard — si vous voulez y jeter un œil, sinon on s'en occupe. »
