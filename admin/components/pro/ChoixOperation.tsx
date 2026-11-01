@@ -18,7 +18,7 @@ export default function ChoixOperation({ groupes, valeur }: {
       }}
       style={{ minWidth: 280, maxWidth: '100%', padding: '11px 14px', borderRadius: 14, border: `1.5px solid ${C.bordureChamp}`, background: '#fff', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: C.texte, cursor: 'pointer' }}
     >
-      <option value="">Toutes les opérations</option>
+      <option value="">Toutes les animations</option>
       {groupes.map(g => (
         <optgroup key={g.titre} label={g.titre}>
           {g.ops.map(o => <option key={o.cle} value={o.cle}>{o.nom} — {o.dates}</option>)}

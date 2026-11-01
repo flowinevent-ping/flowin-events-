@@ -49,9 +49,9 @@ export const PROFILS_PRO = [
   },
   {
     id: 'annonceur', icone: '📣', titre: 'Annonceur · sponsor',
-    sous: 'Vous communiquez sur l’opération sans tenir de station.',
-    sousSA: 'Il communique sur l’opération sans tenir de station.',
-    badges: ['Audience locale', 'Impact', 'Choix de l’event'],
+    sous: 'Vous communiquez sur l’animation sans tenir de station.',
+    sousSA: 'Il communique sur l’animation sans tenir de station.',
+    badges: ['Audience locale', 'Impact', 'Choix de l’animation'],
   },
 ] as const
 export type ProfilPro = typeof PROFILS_PRO[number]['id']
@@ -73,6 +73,17 @@ export interface FichePro {
   tel: string
   motdepasse: string
   notes: string
+  /* Champs entreprise du parcours « Ma premiere fois » (31/10). Facultatifs ;
+     colonnes ajoutees par sql/02-pros-entreprise-onboarding.sql. */
+  siren?: string
+  formeJuridique?: string
+  formeJuridiqueCode?: string
+  codeNaf?: string
+  activiteNaf?: string
+  dateCreation?: string
+  nomCommercial?: string
+  produits?: string
+  nbPointsVente?: string
 }
 
 export function ficheProVide(): FichePro {
@@ -80,6 +91,8 @@ export function ficheProVide(): FichePro {
     profil: '', nom: '', identifiant: '', secteur: '', adresse: '', codePostal: '',
     ville: '', siret: '', contact: '', roleContact: '', email: '', tel: '',
     motdepasse: '', notes: '',
+    siren: '', formeJuridique: '', formeJuridiqueCode: '', codeNaf: '', activiteNaf: '',
+    dateCreation: '', nomCommercial: '', produits: '', nbPointsVente: '',
   }
 }
 
@@ -234,5 +247,27 @@ export function lignePro(f: FichePro, cote: CotePro, statutSA: 'valide' | 'en_at
     notes: cote === 'sa' ? f.notes : '',
     statut: cote === 'pro' ? ('en_attente' as const) : statutSA,
     tags: f.profil ? [f.profil] : [],
+  }
+}
+
+/**
+ * Les colonnes entreprise / onboarding (sql/02-pros-entreprise-onboarding.sql).
+ * Separees de lignePro : tant que la migration n'est pas appliquee, l'appelant
+ * retente l'insertion sans elles (mode degrade) au lieu d'echouer.
+ */
+export function ligneProEntreprise(f: FichePro, source: 'premiere-fois' | 'sa') {
+  const nb = parseInt(f.nbPointsVente ?? '', 10)
+  return {
+    siren: (f.siren ?? '').replace(/\D/g, '') || (f.siret ?? '').replace(/\D/g, '').slice(0, 9),
+    forme_juridique: f.formeJuridique ?? '',
+    forme_juridique_code: f.formeJuridiqueCode ?? '',
+    code_naf: f.codeNaf ?? '',
+    activite_naf: f.activiteNaf ?? '',
+    date_creation_entreprise: f.dateCreation || null,
+    nom_commercial: f.nomCommercial ?? '',
+    produits_services: (f.produits ?? '').trim(),
+    nb_points_vente: Number.isFinite(nb) && nb > 0 ? nb : null,
+    onboarding_source: source,
+    onboarding_fini_at: new Date().toISOString(),
   }
 }

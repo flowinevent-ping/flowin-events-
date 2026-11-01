@@ -13,6 +13,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { SectionHeader } from './DashboardUI'
+import { Ico } from '@/lib/proicons'
 
 interface LotSE { id: string; event_id: string; titre: string | null; nom: string | null; quantite: number | null; valeur: number | null }
 interface Station { id: string; nom: string | null }
@@ -76,7 +77,7 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
       {stations.filter(s => lots.some(l => l.event_id === s.id)).map(s => (
         <div key={s.id} style={{ marginBottom: 10 }}>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--sa-muted)', margin: '10px 0 2px' }}>
-            📍 {s.nom ?? s.id}
+            <Ico k="pin" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{s.nom ?? s.id}
           </div>
           {lots.filter(l => l.event_id === s.id).map(l => {
             const reste = Math.max(0, (l.quantite ?? 1) - dejaTires(l))
@@ -96,7 +97,7 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
                       onChange={e => setNb(x => ({ ...x, [l.id]: Math.max(1, Math.min(reste, parseInt(e.target.value) || 1)) }))}
                     />
                     <button className="sa-btn sm primary" disabled={occupe === l.id} onClick={() => tirer(l)}>
-                      {occupe === l.id ? '…' : '🎲 Tirer'}
+                      {occupe === l.id ? '…' : 'Tirer'}
                     </button>
                   </>
                 )}

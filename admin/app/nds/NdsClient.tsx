@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { Ico } from '@/lib/proicons'
 
 type Cfg = {
   accent_color?: string
@@ -192,7 +193,7 @@ export default function NdsClient({ cfg }: { cfg: Cfg }) {
           </div>
 
           {sent ? (
-            <div className="psent">✅ Merci ! Votre demande est enregistrée — l’équipe Flowin · Nuits du Sud vous recontacte rapidement.</div>
+            <div className="psent"><Ico k="check" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Merci ! Votre demande est enregistrée — l’équipe Flowin · Nuits du Sud vous recontacte rapidement.</div>
           ) : (
             <div className="pform">
               <div><label>Nom de l’établissement *</label><input value={pf.nom} onChange={e => setPf({ ...pf, nom: e.target.value })} placeholder="Ex. Cave du Jardin" /></div>

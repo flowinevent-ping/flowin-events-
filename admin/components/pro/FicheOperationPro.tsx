@@ -27,7 +27,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
   const op = data.operations.find(o => o.cle === cle)
   const q = `?pro=${encodeURIComponent(initial.proId)}`
-  if (!op) return <div style={CARD}>Opération introuvable. <a href={`/pro${q}`} style={{ color: C.accent, fontWeight: 700 }}>Mes opérations</a></div>
+  if (!op) return <div style={CARD}>Animation introuvable. <a href={`/pro${q}`} style={{ color: C.accent, fontWeight: 700 }}>Mes animations</a></div>
   const pt = data.partenaire
   const st = op.stations[0]
   const parties = op.stations.reduce((n, s) => n + (s.participants ?? 0), 0)
@@ -58,17 +58,17 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
 
   return (
     <div>
-      <a href={`/pro${q}`} style={{ fontSize: 13, fontWeight: 700, color: C.accent, textDecoration: 'none' }}>← Mes opérations</a>
+      <a href={`/pro${q}`} style={{ fontSize: 13, fontWeight: 700, color: C.accent, textDecoration: 'none' }}>← Mes animations</a>
 
       {/* Bandeau de l operation */}
-      <div style={{ borderRadius: 20, overflow: 'hidden', marginTop: 10, background: `linear-gradient(135deg,${teinte1},${teinte2})`, color: '#fff', position: 'relative', boxShadow: '0 12px 30px rgba(43,16,54,.18)' }}>
+      <div style={{ borderRadius: 20, overflow: 'hidden', marginTop: 10, background: `linear-gradient(135deg,${teinte1},${teinte2})`, color: '#fff', position: 'relative', boxShadow: '0 12px 30px rgba(27,58,92,.18)' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: C.filet }} />
         <div style={{ padding: '15px 20px 14px' }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
               {op.type === 'super' ? 'Super event' : 'Animation'}
             </span>
-            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: periode === 'en_cours' ? C.magenta : 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', background: periode === 'en_cours' ? C.fuchsia : 'rgba(255,255,255,.16)', borderRadius: 50, padding: '4px 10px' }}>
               {LIBELLE_PERIODE[periode]}
             </span>
           </div>
@@ -109,7 +109,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
           <div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18 }}>
               <div style={{ flex: 1, minWidth: 220, fontSize: 13.5, ...MUTED }}>
-                {op.type === 'super' ? 'Le jeu du super event, identique sur chaque station. Choisissez la vue « event » ou « super event ».' : 'Le jeu de votre animation, tel que vos clients le voient.'}
+                {op.type === 'super' ? 'Le jeu du super event, identique sur chaque station. Choisissez la vue « mon animation » ou « super event ».' : 'Le jeu de votre animation, tel que vos clients le voient.'}
               </div>
               {op.type === 'super'
                 ? <a href={`/pro/super${q}&se=${encodeURIComponent(op.id)}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }}>Carte et bilan du super event</a>

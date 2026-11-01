@@ -28,7 +28,7 @@ export default function Page() {
     if (!proId) { setOps(null); setContacts([]); return }
     let vivant = true
     setCharge(true)
-    Promise.all([fetchOperationsPro(proId), fetchCrmPro(proId)])
+    Promise.all([fetchOperationsPro(proId), fetchCrmPro(proId, { sa: true })])
       .then(([o, c]) => { if (vivant) { setOps(o); setContacts(c) } })
       .finally(() => { if (vivant) setCharge(false) })
     return () => { vivant = false }

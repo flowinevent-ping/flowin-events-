@@ -146,7 +146,13 @@ export function ExportMailchimp({ op }: { op: DonneesOperation }) {
     if (!jids.length) { setEtat('vide'); return }
     const lignes: { email: string | null; prenom: string | null; nom: string | null; tel: string | null; code_postal: string | null }[] = []
     for (let i = 0; i < jids.length; i += 200) {
-      const { data } = await supabase.from('joueurs').select('email,prenom,nom,tel,code_postal,optin').in('id', jids.slice(i, i + 200)).eq('optin', true)
+      const lot = jids.slice(i, i + 200)
+      /* Consentants seulement, via la fonction securisee (sql/05-confidentialite-contacts.sql) ;
+         repli sur la lecture filtree tant qu'elle n'est pas appliquee. */
+      const r = await supabase.rpc('joueurs_consentants_par_ids', { p_ids: lot })
+      const data = r.error
+        ? (await supabase.from('joueurs').select('email,prenom,nom,tel,code_postal,optin').in('id', lot).eq('optin', true)).data
+        : r.data
       lignes.push(...((data ?? []) as typeof lignes))
     }
     const ok = lignes.filter(l => l.email)

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { fetchLotsSuperEvent } from '@/lib/superEventLots'
 import SponsorClient from './SponsorClient'
 
 export const revalidate = 60
@@ -20,8 +21,7 @@ export default async function Page({ params }: Props) {
 
   if (!se) return NOTFOUND
 
-  const { data: lots } = await supabase
-    .from('se_lots').select('rang,valeur,libelle').eq('super_event_id', params.se).order('rang')
+  const lots = await fetchLotsSuperEvent(params.se)
 
-  return <SponsorClient se={se} lots={lots ?? []} />
+  return <SponsorClient se={se} lots={lots} />
 }

@@ -101,7 +101,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
     : stationGabarit ? `/parcours/nds2026?ev=${encodeURIComponent(stationGabarit)}&preview=1&screen=carte` : ''
   const url = tab === 'event' ? eventUrl : superUrl
   const phoneUrl = url ? `${url}&bar=0` : ''
-  const empty = 'Aucun événement à prévisualiser pour le moment.'
+  const empty = 'Aucune animation à prévisualiser pour le moment.'
 
   /* Romain (19/09) : « super event en orange partout ». Les deux onglets
      rendaient le meme bleu quand actifs -- « Parcours super event » n avait
@@ -121,11 +121,11 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
     <div>
       {showTitle && (<>
         <div style={{ fontSize: 20, fontWeight: 800 }}>Parcours mobil</div>
-        <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 18 }}>Le vrai parcours joueur, en direct. Choisissez un événement et prévisualisez-le tel qu'il s'affiche sur mobile.</div>
+        <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 18 }}>Le vrai parcours joueur, en direct. Choisissez une animation et prévisualisez-la tel qu'il s'affiche sur mobile.</div>
       </>)}
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        {tabBtn('event', 'Parcours event', 'Votre animation, en direct')}
+        {tabBtn('event', 'Parcours animation', 'Votre animation, en direct')}
         {tabBtn('super', 'Parcours super event', multistation ? 'La carte des stations' : 'Le gabarit marque blanche')}
       </div>
 
@@ -133,7 +133,7 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
         <div style={{ flex: '0 1 360px', minWidth: 260, maxWidth: 400, order: 1 }}>
           {events.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: '#64748B', marginBottom: 8 }}>Événement à prévisualiser</div>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: '#64748B', marginBottom: 8 }}>Animation à prévisualiser</div>
               <select
                 value={ev?.id ?? ''}
                 onChange={e => setEvId(e.target.value)}
@@ -159,8 +159,8 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
             {tab === 'event'
               ? 'En plein écran, une barre en haut permet en plus de parcourir tous les écrans (accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil) — pratique pour la démo ou la comm.'
               : multistation
-                ? 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec un event seul : l\'accès aux autres stations et au multi-partenaire.'
-                : 'Cet event n\'appartient à aucun super event : le cadre montre le parcours super event en marque blanche (gabarit tiré de NDS 2026), tel qu\'il se déclinerait pour une opération multi-stations.'}
+                ? 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec une animation seule : l\'accès aux autres stations et au multi-partenaire.'
+                : 'Cette animation n\'appartient à aucun super event : le cadre montre le parcours super event en marque blanche (gabarit tiré de NDS 2026), tel qu\'il se déclinerait pour une animation multi-stations.'}
           </p>
         </div>
 

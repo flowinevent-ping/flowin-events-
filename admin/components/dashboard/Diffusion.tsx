@@ -23,6 +23,7 @@
  */
 
 import { useEffect, useState } from 'react'
+import { Ico } from '@/lib/proicons'
 
 type Props = {
   /** L'URL a encoder — deja construite par l'appelant, jamais fabriquee ici. */
@@ -185,13 +186,13 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
       </div>
 
       <div style={{ marginTop: 10, display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
-        <button className="sa-btn sm" style={btn} onClick={copier}>{copie ? '✓ Copié' : '📋 Copier le lien'}</button>
+        <button className="sa-btn sm" style={btn} onClick={copier}>{copie ? '✓ Copié' : 'Copier le lien'}</button>
         <button className="sa-btn sm" style={btn} onClick={dlPng} disabled={!png}>⬇ PNG</button>
         <button className="sa-btn sm" style={btn} onClick={dlSvg} disabled={!svg}>⬇ SVG</button>
-        <button className="sa-btn sm" style={btn} onClick={affiche} disabled={!svg}>🖨 Affiche A4</button>
+        <button className="sa-btn sm" style={btn} onClick={affiche} disabled={!svg}><Ico k="file" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Affiche A4</button>
         {!compact && (
           <button className="sa-btn sm" style={btn} onClick={() => setApercu(v => !v)}>
-            {apercu ? '▲ Masquer l’aperçu' : '📱 Aperçu du parcours'}
+            {apercu ? '▲ Masquer l’aperçu' : 'Aperçu du parcours'}
           </button>
         )}
       </div>

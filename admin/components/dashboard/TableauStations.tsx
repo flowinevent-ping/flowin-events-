@@ -108,7 +108,7 @@ export function TableauStations({
                 style={onStation ? { cursor: 'pointer' } : undefined}
                 title={onStation ? 'Voir le détail de cette station' : undefined}>
                 <td style={{ ...cellule, fontWeight: 700 }}>
-                  {s.type === 'partenaire' ? '🤝 ' : '🎪 '}{s.station}
+                  {s.station}
                 </td>
                 <td style={cellule}>
                   <span className={`sa-chip ${s.type === 'partenaire' ? 'live' : 'past'}`}>

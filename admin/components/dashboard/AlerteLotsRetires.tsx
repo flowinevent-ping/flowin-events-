@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { fetchLotsRetiresRecents, ilYA } from '@/lib/alertesLots'
 import type { GagnantRow } from '@/lib/dashboard'
 import { useDashboard } from '@/contexts/DashboardContext'
+import { Ico } from '@/lib/proicons'
 
 /** Alerte SA — tous partenaires confondus. Rien à l'écran si rien de récent. */
 export default function AlerteLotsRetires() {
@@ -17,7 +18,7 @@ export default function AlerteLotsRetires() {
 
   return (
     <div className="sa-alert live texte" style={{ marginBottom: 14 }}>
-      <div style={{ fontWeight: 800, marginBottom: 6 }}>🎉 {lots.length} lot{lots.length > 1 ? 's' : ''} retiré{lots.length > 1 ? 's' : ''} récemment</div>
+      <div style={{ fontWeight: 800, marginBottom: 6 }}><Ico k="sparkle" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{lots.length} lot{lots.length > 1 ? 's' : ''} retiré{lots.length > 1 ? 's' : ''} récemment</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, fontWeight: 500 }}>
         {lots.slice(0, 6).map(t => (
           <div key={t.id}>

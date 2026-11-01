@@ -38,9 +38,12 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
      select('*') echoue silencieusement pour anon (pas de droit table-level sur
      joueurs, uniquement colonne par colonne depuis le durcissement securite --
      cf. admin/lib/dashboard.ts). Liste explicite, meme colonnes que fetchAllJoueurs. */
-  const COLS_JOUEURS = 'id,ts,pseudo,prenom,nom,email,ecole,classe,genre,ref,pwa_installed,pwa_installed_at,pts_total,streak,updated_at,user_id,push_token,niveau_id,derniere_session,tel,ddn,rgpd_at,profil_complet,code_postal,date_naissance,last_seen,external_id,optin,optin_date,first_seen,ville,events,source,client_type,score_moy,email_lower,ticket_code,gains,age_tranche,enseigne,lot_gagne,decouverte,adresse,tags,secteur,optin_version,classe_id,visiteur_id,etablissement_id,actif,sexe,tranche_age'
+  /* CONFIDENTIALITE (31/10) : l'espace pro ne recoit ici AUCUNE coordonnee (ni email, ni
+     telephone, ni nom, ni prenom, ni date de naissance, ni adresse) : seulement ce qui sert
+     aux statistiques. Les contacts consentants passent par crm_pro_consentants. */
+  const COLS_JOUEURS = 'id,genre,sexe,age_tranche,tranche_age,code_postal,ville,optin,optin_date,events,source,client_type,first_seen,last_seen,gains,actif'
   const joueurPromises = evIds.map(eid =>
-    supabase.from('joueurs').select(COLS_JOUEURS).contains('events', [eid])
+    supabase.from('joueurs').select(COLS_JOUEURS).contains('events', [eid]).returns<FlowinJoueur[]>()
   )
   const joueurResults = await Promise.all(joueurPromises)
   const joueurMap = new Map<string, FlowinJoueur>()
@@ -54,7 +57,7 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
   const manquants = Array.from(new Set(((parts ?? []) as { joueur_id: string | null }[])
     .map(p => p.joueur_id).filter((id): id is string => !!id && !joueurMap.has(id))))
   for (let i = 0; i < manquants.length; i += 200) {
-    const { data: js } = await supabase.from('joueurs').select(COLS_JOUEURS).in('id', manquants.slice(i, i + 200))
+    const { data: js } = await supabase.from('joueurs').select(COLS_JOUEURS).in('id', manquants.slice(i, i + 200)).returns<FlowinJoueur[]>()
     ;(js ?? []).forEach((j: FlowinJoueur) => joueurMap.set(j.id, j))
   }
   const joueurs = Array.from(joueurMap.values())

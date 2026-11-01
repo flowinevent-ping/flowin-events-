@@ -30,6 +30,7 @@ import ReglageTirage from './ReglageTirage'
 import { fetchStatsQr, type StatQr } from '@/lib/qrTraces'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
 import { operationsRangees } from '@/lib/rangementOperations'
+import { Ico } from '@/lib/proicons'
 
 export type Mode = 'sa' | 'pro'
 export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking' | 'crm'
@@ -132,7 +133,7 @@ function SupprimerOperationBtn({ op, onSupprime }: { op: Operation; onSupprime: 
   }
   return (
     <button style={{ ...btn, color: '#B91C1C', borderColor: '#FCA5A5' }} disabled={busy} onClick={supprimer}>
-      {busy ? '…' : '🗑 Supprimer'}
+      {busy ? '…' : 'Supprimer'}
     </button>
   )
 }
@@ -255,7 +256,7 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
         </div>
         {g.retireAt && <div style={{ fontSize: 11, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
         {g.etat === 'confirme' && relanceAt && (
-          <div style={{ fontSize: 11, color: MUT }}>🔔 Relancé le {new Date(relanceAt).toLocaleDateString('fr-FR')}</div>
+          <div style={{ fontSize: 11, color: MUT }}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancé le {new Date(relanceAt).toLocaleDateString('fr-FR')}</div>
         )}
       </div>
       <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
@@ -263,7 +264,7 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
       {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
           la distinction stock n apparait QUE si elle revele une anomalie. */}
       {g.etat === 'retire' && g.stockDestocke === false && (
-        <Pastille ton="warn">⚠️ Stock non décompté</Pastille>
+        <Pastille ton="warn"><Ico k="warning" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Stock non décompté</Pastille>
       )}
       {g.retraitToken && <a style={btn} href={lienBillet(g.retraitToken, true, op.id)} target="_blank" rel="noopener noreferrer">Billet</a>}
       {g.etat !== 'a_confirmer' && g.etat !== 'retire' && (
@@ -271,10 +272,10 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
           const u = lienRelanceTirage(g, 'relance', op, partenaireNom)
           if (u) window.open(u, '_blank', 'noopener')
           marquerRelance(g.id); setRelanceLocale(new Date().toISOString())
-        }}>🔔 {relanceAt ? 'Relancer à nouveau' : 'Relancer'}</button>
+        }}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{relanceAt ? 'Relancer à nouveau' : 'Relancer'}</button>
       )}
       {g.etat === 'retire' && (
-        <button style={btn} onClick={() => { const u = lienRelanceTirage(g, 'merci', op, partenaireNom); if (u) window.open(u, '_blank', 'noopener') }}>🙏 Remercier</button>
+        <button style={btn} onClick={() => { const u = lienRelanceTirage(g, 'merci', op, partenaireNom); if (u) window.open(u, '_blank', 'noopener') }}><Ico k="handshake" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Remercier</button>
       )}
       {g.etat !== 'a_confirmer' && (
         <button style={btn} onClick={() => window.open(mailPartenaireUrl({
@@ -801,7 +802,7 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} masquerGlobal />}
-          {onglet === 'crm' && <ContenuCrm op={op} />}
+          {onglet === 'crm' && <ContenuCrm op={op} mode="pro" />}
         </BlocOperation>
       ))}
     </>

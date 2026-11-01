@@ -67,7 +67,7 @@ export default function GrilleOperations({ groupes, vignette }: {
       {groupes.map(g => (
         <section key={g.periode} className="sa-kb-col">
           <header className="sa-kb-tete">
-            {g.periode === 'en_cours' && <span className="pastille" style={{ background: C.magenta }} />}
+            {g.periode === 'en_cours' && <span className="pastille" style={{ background: C.fuchsia }} />}
             <span className="t">{g.titre}</span>
             <span className="n">{g.n}</span>
           </header>

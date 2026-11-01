@@ -9,6 +9,7 @@ import { grouperOperations } from '@/lib/operations'
 import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/BlocsOperations'
 import type { FlowinPro } from '@/lib/types'
 import ActionsFichePro from './ActionsFichePro'
+import { Ico } from '@/lib/proicons'
 
 export default function ProDrawer() {
   const { drawer, closeDrawer, setDrawerTab, pros, setPros, events, openDrawer } = useDashboard()
@@ -74,7 +75,7 @@ export default function ProDrawer() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div className="sa-avatar">{initials}</div>
           <div>
-            <div className="sa-drawer-title">🏢 {p.nom}</div>
+            <div className="sa-drawer-title"><Ico k="building" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />{p.nom}</div>
             <div className="sa-drawer-sub">{p.ville} · {p.secteur}</div>
           </div>
         </div>
@@ -86,7 +87,7 @@ export default function ProDrawer() {
           onClick={() => openDrawer('partenaire', p.partenaire_id as string, 'infos')}
           style={{ margin: '0 20px 14px', background: 'var(--sa-subtle)', border: '1px solid var(--sa-border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
-          <span style={{ fontSize: 12.5, fontWeight: 700 }}>🤝 Fiche partenaire liée — logo, kit com, billets, facture</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700 }}><Ico k="handshake" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Fiche partenaire liée — logo, kit com, billets, facture</span>
           <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--sa-accent)' }}>Ouvrir →</span>
         </div>
       )}
@@ -116,7 +117,7 @@ export default function ProDrawer() {
 
         {drawer.tab === 'infos' && edit && (
           <>
-            <div className="sa-alert info">✏️ Mode édition</div>
+            <div className="sa-alert info"><Ico k="edit" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Mode édition</div>
             {(['nom', 'secteur', 'ville', 'code_postal', 'adresse', 'siret'] as (keyof FlowinPro)[]).map(k => (
               <div key={k} className="sa-field">
                 <label className="sa-label">{k.replace(/_/g, ' ')}</label>
@@ -138,7 +139,7 @@ export default function ProDrawer() {
         )}
 
         {drawer.tab === 'events' && liveEvents.length > 0 && (
-          <div className="sa-alert live">🔴 {liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
+          <div className="sa-alert live">{liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
         )}
         {drawer.tab === 'qrliens' && (
           <p className="sa-muted" style={{ fontSize: 11.5, marginBottom: 14 }}>
@@ -158,7 +159,7 @@ export default function ProDrawer() {
       <div className="sa-drawer-footer">
         {edit ? (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Supprimer</button>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="sa-btn" onClick={() => setEdit(false)}>Annuler</button>
               <button className="sa-btn primary" onClick={save} disabled={saving}>{saving ? '…' : '✓ Enregistrer'}</button>
@@ -166,8 +167,8 @@ export default function ProDrawer() {
           </>
         ) : (
           <>
-            <button className="sa-btn danger-ghost" onClick={del}>🗑 Supprimer</button>
-            <button className="sa-btn primary" onClick={enterEdit}>✏ Éditer</button>
+            <button className="sa-btn danger-ghost" onClick={del}><Ico k="trash" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Supprimer</button>
+            <button className="sa-btn primary" onClick={enterEdit}><Ico k="edit" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Éditer</button>
           </>
         )}
       </div>
