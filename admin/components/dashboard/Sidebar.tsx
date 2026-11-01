@@ -73,7 +73,7 @@ const ICON_BY_ID: Record<string, string> = {
   prospection: 'phone', 'nds-bon-commande': 'receipt', 'commandes-animation': 'receipt', 'nds-packs': 'gift',
   operations: 'gauge', banques: 'clipboard',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
-  'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
+  'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'outils-commerciaux': 'link', 'apercu-pro': 'layout',
   'theme-parcours': 'layout',
   'demandes-rattachement': 'handshake',
   'facture-nds': 'receipt',
@@ -208,6 +208,7 @@ export default function Sidebar() {
       group: 'Comm & outils',
       ton: 'out',
       items: [
+        { id: 'outils-commerciaux', label: 'Outils commerciaux', href: '/dashboard/outils-commerciaux' },
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
         { id: 'landing-page', label: 'Landing pages', href: '/dashboard/landing-page' },
         { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },

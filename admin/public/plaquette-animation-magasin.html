@@ -1131,9 +1131,19 @@
     var ht = abo + kit + opt, tva = r2(ht * 0.2);
     return { abo: abo, kit: kit, opt: opt, ht: ht, tva: tva, ttc: r2(ht + tva) };
   }
+  /* Canal d'origine (?src=) : retenu à la 1re visite, transmis à « Ma première fois » */
+  function srcCourant(){
+    var m = /[?&]src=([a-z0-9_-]{1,40})/i.exec(location.search), v = m ? m[1].toLowerCase() : '';
+    try {
+      if (v && !window.localStorage.getItem('flowin_src')) window.localStorage.setItem('flowin_src', v);
+      if (!v) v = window.localStorage.getItem('flowin_src') || '';
+    } catch (e) {}
+    return v;
+  }
   var inscrEnLigne = false;
   function majInscr(){
     var a = document.querySelectorAll('.js-inscr'), q = lien(!!certif).split('?')[1] || '';
+    var src = srcCourant(); if (src) q += (q ? '&' : '') + 'src=' + encodeURIComponent(src);
     for (var i = 0; i < a.length; i++) a[i].setAttribute('href', '/pro/premiere-fois' + (q ? '?' + q : ''));
   }
   function lien(avecGarantie){
