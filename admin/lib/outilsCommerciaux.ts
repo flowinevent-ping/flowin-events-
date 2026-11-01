@@ -114,6 +114,22 @@ export const OUTILS: Outil[] = [
     description: 'Vidéo partenaires Nuits du Sud 2026, format horizontal.',
     chemin: '/nds/kit-digital/nds/nds-partenaire-16x9.mp4',
     message: 'Bonjour, voici la vidéo partenaires Nuits du Sud 2026 :' },
+  { statut: 'brouillon', id: 'landing-nds', titre: 'Landing NDS', public: ['partenaire'], type: 'page', suivi: false,
+    description: 'Page publique Nuits du Sud 2026.',
+    chemin: '/nds',
+    message: 'Bonjour, voici la page Nuits du Sud 2026 :' },
+  { statut: 'brouillon', id: 'pro-connexion', titre: 'Pro (connexion)', public: ['commerce'], type: 'page', suivi: false,
+    description: 'Connexion à l’espace pro.',
+    chemin: '/pro',
+    message: 'Bonjour, voici l’accès à votre espace pro Flowin :' },
+  { statut: 'brouillon', id: 'pro-nds-live', titre: 'Pro NDS live', public: ['partenaire'], type: 'page', suivi: false,
+    description: 'Suivi en direct pour les partenaires NDS.',
+    chemin: '/pro-nds-live.html',
+    message: 'Bonjour, voici votre suivi en direct :' },
+  { statut: 'brouillon', id: 'carte', titre: 'Carte', public: ['partenaire'], type: 'page', suivi: false,
+    description: 'Carte des partenaires et des stations.',
+    chemin: '/carte.html',
+    message: 'Bonjour, voici la carte :' },
 ]
 
 /** Lien de production complet (jamais d'URL de preview). */
