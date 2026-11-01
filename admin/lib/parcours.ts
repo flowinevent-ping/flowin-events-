@@ -303,8 +303,12 @@ export function sourceQrUrl(): string | null {
   if (typeof window === 'undefined') return null
   try {
     const p = new URLSearchParams(window.location.search)
-    const s = (p.get('source') || p.get('utm_source') || '').trim()
+    /* Normalise (audit QR 01/11) : minuscules et jeu de caracteres des slugs. Sans cela, `source=RESEAUX-x`
+       n'etait plus lu comme digital (regle « 1 fois par compte » contournee par un simple changement de casse),
+       et une chaine arbitraire (espaces, balises, 500 caracteres) etait ecrite telle quelle dans participations.source_qr. */
+    const s = (p.get('source') || p.get('utm_source') || '').trim().toLowerCase()
     if (!s || SOURCES_NON_QR.indexOf(s) >= 0) return null
+    if (!/^[a-z0-9][a-z0-9_.-]{0,63}$/.test(s)) return null
     return s
   } catch { return null }
 }

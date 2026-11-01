@@ -39,13 +39,14 @@ import { ajouterStock, retirerStock } from '@/lib/stock'
 import { lienGmailTo, lienWhatsApp } from '@/lib/messaging'
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_SUPER, ACCENT_ANIM } from '@/lib/charte'
+import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
 const CARDBG = 'var(--sa-card, #FFFFFF)'
 const ACC = 'var(--sa-accent, #7A4FE0)'
-const BASE = 'https://flowin-events.vercel.app'
+const BASE = BASE_CANONIQUE
 
 interface LotLigne {
   id: string; event_id: string; nom: string | null; titre: string | null

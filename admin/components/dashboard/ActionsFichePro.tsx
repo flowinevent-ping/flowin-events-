@@ -12,10 +12,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { GMAIL_COMPOSE_BASE } from '@/lib/messaging'
+import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 import type { FlowinPro } from '@/lib/types'
 import { Ico } from '@/lib/proicons'
 
-const BASE = 'https://flowin-events.vercel.app'
+const BASE = BASE_CANONIQUE
 
 export default function ActionsFichePro({ pro }: { pro: FlowinPro }) {
   const [pin, setPin] = useState<string | null>(null)

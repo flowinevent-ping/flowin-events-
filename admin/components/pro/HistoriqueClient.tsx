@@ -117,7 +117,7 @@ function DetailOperation({ op, data, onChange, proQuery }: {
           {op.stations.map(s => (
             <div key={s.id} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 6 }}>{s.nom}</div>
-              <Diffusion compact url={lienJeuStation(s)}
+              <Diffusion compact ancienFormat url={lienJeuStation(s)}
                 titre={op.type === 'super' ? `${op.nom} — ${s.nom}` : s.nom} sousTitre="Scannez pour jouer" />
             </div>
           ))}

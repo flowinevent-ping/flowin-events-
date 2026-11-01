@@ -14,6 +14,7 @@ import ReglesDiffusion from './ReglesDiffusion'
 import ParcoursMobil from '@/components/pro/ParcoursMobil'
 import type { FlowinEvent, FlowinJoueur, FlowinPartenaire } from '@/lib/types'
 import { Ico } from '@/lib/proicons'
+import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 
 function fmt(d?: string | null) {
   if (!d) return '-'
@@ -197,7 +198,7 @@ export default function EventDrawer() {
 
   const evLots = lots.filter(l => l.event_id === ev.id)
   const evParts = ((ev.cfg?.partenaires ?? []) as string[]).map((id: string) => partenaires.find(p => p.id === id)).filter((x): x is FlowinPartenaire => !!x)
-  const qrUrl = `https://flowin-events.vercel.app/parcours/${ev.module}?ev=${ev.id}`
+  const qrUrl = `${BASE_CANONIQUE}/parcours/${ev.module}?ev=${ev.id}`
 
   // Contenu du jeu quiz -- verifie dans le code reel (grep "cfg\." dans chaque *Client.tsx, Pattern H) :
   // QuizClient et QuizsoloClient lisent banques + customQuestions, QuizmasterClient lit SEULEMENT les banques.
@@ -713,7 +714,7 @@ export default function EventDrawer() {
           <div style={{ textAlign: 'center', padding: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--sa-muted)' }}>QR CODE D&apos;ACCÈS</div>
             {/* QR genere dans le navigateur : telechargeable (PNG/SVG/A4), plus aucun appel a un tiers. */}
-            <Diffusion url={qrUrl} titre={ev.nom} sousTitre="Scannez pour jouer" />
+            <Diffusion ancienFormat url={qrUrl} titre={ev.nom} sousTitre="Scannez pour jouer" />
             {pro && (
               <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--sa-border)', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div

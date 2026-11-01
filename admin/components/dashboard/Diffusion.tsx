@@ -24,6 +24,7 @@
 
 import { useEffect, useState } from 'react'
 import { Ico } from '@/lib/proicons'
+import { nomFichierQr } from '@/lib/qrPermalien'
 
 type Props = {
   /** L'URL a encoder — deja construite par l'appelant, jamais fabriquee ici. */
@@ -36,15 +37,13 @@ type Props = {
   compact?: boolean
   /** Vignette seule : le QR, sans lien ni boutons. Pour les listes. */
   vignette?: number
-}
-
-/** Nom de fichier sur : pas d'accent, pas d'espace, pas de separateur de chemin. */
-function slug(s: string) {
-  return (s || 'qr')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .toLowerCase() || 'qr'
+  /** Identification du QR (audit 01/11) : son nom, son support et son code court figurent sur
+   *  l'affiche ET dans le nom des fichiers, pour ne jamais confondre deux QR a l'impression. */
+  qrNom?: string
+  support?: string | null
+  code?: string | null
+  /** true = le lien contient le jeu (ancien format) : avertissement « change si le jeu change ». */
+  ancienFormat?: boolean
 }
 
 function telecharger(nom: string, blob: Blob) {
@@ -59,7 +58,7 @@ function telecharger(nom: string, blob: Blob) {
   setTimeout(() => URL.revokeObjectURL(href), 4000)
 }
 
-export default function Diffusion({ url, titre, sousTitre, compact = false, vignette }: Props) {
+export default function Diffusion({ url, titre, sousTitre, compact = false, vignette, qrNom, support, code, ancienFormat = false }: Props) {
   /* L etat porte SON url : sans ca, en changeant d event dans un drawer qui
      n est jamais demonte, on affiche une frame le QR du precedent sous le nom
      et le lien du nouveau — avec les boutons de telechargement actifs. */
@@ -110,13 +109,13 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
     const bin = atob(b64)
     const buf = new Uint8Array(bin.length)
     for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i)
-    telecharger(`qr-${slug(titre)}.png`, new Blob([buf], { type: 'image/png' }))
+    telecharger(nomFichierQr({ titre, qr: qrNom, support, code }, 'png'), new Blob([buf], { type: 'image/png' }))
   }
 
   function dlSvg() {
     setErreur('')
     if (!svg) return
-    telecharger(`qr-${slug(titre)}.svg`, new Blob([svg], { type: 'image/svg+xml' }))
+    telecharger(nomFichierQr({ titre, qr: qrNom, support, code }, 'svg'), new Blob([svg], { type: 'image/svg+xml' }))
   }
 
   /** Affiche A4 : QR vectoriel, donc net a l'impression quelle que soit la taille. */
@@ -124,8 +123,10 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
     setErreur('')
     if (!svg) return
     const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    /* Ligne d'identification imprimee : « QR <nom> · <support> · réf. <code> ». */
+    const ident = [qrNom ? `QR « ${qrNom} »` : '', support && support !== qrNom ? support : '', code ? `réf. ${code}` : ''].filter(Boolean).join(' · ')
     const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
-<title>Affiche — ${esc(titre)}</title>
+<title>Affiche — ${esc(titre)}${qrNom ? ' — ' + esc(qrNom) : ''}${code ? ' — ' + esc(code) : ''}</title>
 <style>
   @page { size: A4; margin: 0 }
   * { box-sizing: border-box }
@@ -134,7 +135,8 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
        align-items:center; justify-content:center; text-align:center; page-break-after:always }
   .k { font-size:13pt; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#7A4FE0 }
   h1 { font-size:34pt; line-height:1.1; margin:6mm 0 2mm; font-weight:900 }
-  .s { font-size:15pt; color:#475569; margin:0 0 10mm }
+  .s { font-size:15pt; color:#475569; margin:0 0 4mm }
+  .i { font-size:12pt; font-weight:800; color:#0F172A; background:#F1F5F9; border-radius:99px; padding:2mm 6mm; margin:0 0 8mm }
   .q { width:112mm; height:112mm; padding:6mm; background:#fff; border:2px solid #E2E8F0; border-radius:8mm }
   .q svg { width:100%; height:100% }
   .c { font-size:19pt; font-weight:800; margin-top:10mm }
@@ -148,6 +150,7 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
   <div class="k">Flowin</div>
   <h1>${esc(titre)}</h1>
   <p class="s">${esc(sousTitre ?? 'Scannez pour jouer')}</p>
+  ${ident ? `<div class="i">${esc(ident)}</div>` : ''}
   <div class="q">${svg}</div>
   <div class="c">Scannez ce QR code pour jouer</div>
   <div class="u">${esc(url)}</div>
@@ -184,6 +187,12 @@ export default function Diffusion({ url, titre, sousTitre, compact = false, vign
       }}>
         {url}
       </div>
+
+      {ancienFormat && (
+        <div role="note" style={{ marginTop: 8, fontSize: 11, textAlign: 'left', color: '#B45309', background: 'rgba(245,158,11,.1)', borderRadius: 8, padding: '6px 10px' }}>
+          Ce lien contient le jeu : le QR changerait si vous changiez de jeu. Pour un QR à imprimer, utilisez les QR tracés (lien permanent <b>/q/…</b>).
+        </div>
+      )}
 
       <div style={{ marginTop: 10, display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'center' }}>
         <button className="sa-btn sm" style={btn} onClick={copier}>{copie ? '✓ Copié' : 'Copier le lien'}</button>

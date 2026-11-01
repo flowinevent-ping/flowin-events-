@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { BASE_CANONIQUE } from './qrPermalien'
 import type { FlowinEvent, FlowinLot, Module, ClientType } from './types'
 
 /**
@@ -129,7 +130,7 @@ function identifiant(prefixe: string): string {
 }
 
 export function urlQr(module: Module | '', evId: string): string {
-  return `https://flowin-events.vercel.app/parcours/${module || 'quiz'}?ev=${evId}`
+  return `${BASE_CANONIQUE}/parcours/${module || 'quiz'}?ev=${evId}`
 }
 
 export interface ResultatEcriture {
