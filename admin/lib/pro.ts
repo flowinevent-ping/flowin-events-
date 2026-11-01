@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { FlowinEvent, FlowinJoueur, FlowinLot, FlowinPro } from './types'
 import { sansGabarit } from './operations'
+import { BASE_CANONIQUE } from './qrPermalien'
 
 export interface ProDashboardData {
   pro: FlowinPro | null
@@ -77,7 +78,7 @@ export async function fetchProDashboard(proId: string): Promise<ProDashboardData
 }
 
 export function getQrUrl(event: FlowinEvent): string {
-  return `https://flowin-events.vercel.app/parcours/${event.module}?ev=${event.id}`
+  return `${BASE_CANONIQUE}/parcours/${event.module}?ev=${event.id}`
 }
 
 /**
@@ -125,7 +126,7 @@ export async function creerAnimation(params: CreationAnimation): Promise<{ ok: b
       quizBanques: params.banqueId ? [params.banqueId] : [],
       /* Lien du QR, sur l identifiant definitif -- meme regle que lib/wizard.ts
          (famille G : 3 events sortaient sans). */
-      qrUrl: `https://flowin-events.vercel.app/parcours/${params.module}?ev=${id}`,
+      qrUrl: `${BASE_CANONIQUE}/parcours/${params.module}?ev=${id}`,
       // lotNom/lotQuantite conserves pour compatibilite avec du code qui lirait encore un lot unique
       lotNom: premierLot?.nom ?? '',
       lotQuantite: premierLot?.quantite ?? 0,

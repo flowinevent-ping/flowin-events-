@@ -56,6 +56,7 @@ import SuperEventMap from '@/app/se/_components/SuperEventMap'
 import ConfigJeu from '@/components/dashboard/ConfigJeu'
 import ApercuJeu from '@/components/parcours/ApercuJeu'
 import BilletApercu from '@/components/parcours/BilletApercu'
+import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 import QrTraces, { FormulaireQr, BadgeTypeQr, REGLE_TYPE_QR } from '@/components/operations/QrTraces'
 import { ChoixTirage, erreurTirage, cfgDepuisTirage, libelleDateTirage, localVersIso, lienListeGagnants, type ConfigTirage } from '@/components/operations/ReglageTirage'
 import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
@@ -88,7 +89,7 @@ const JEUX: { m: string; t: string; s: string; banque: boolean }[] = [
 const CATEGORIES = ['Boulangerie', 'Restaurant', 'Bar · Café', 'Caviste', 'Fleuriste', 'Librairie', 'Épicerie fine', 'Mode', 'Beauté · Coiffure', 'Décoration', 'Autre']
 const TEL_FLOWIN = '04 93 59 91 37'
 const MAIL_FLOWIN = 'flowinevent@gmail.com'
-const BASE = 'https://flowin-events.vercel.app'
+const BASE = BASE_CANONIQUE
 /** Banques ecrites pour une seule station NDS2026 : rangees a part (PR #67). */
 const BANQUES_STATION_NDS = ['bq-nds-bar', 'bq-nds-caisses', 'bq-nds-ecrans', 'bq-nds-tablette']
 const lotVide = (type: Lot['type'] = 'tirage'): Lot => ({ id: 'l' + Math.random().toString(36).slice(2, 8), nom: '', quantite: 5, valeur: 0, type, conditions: '' })

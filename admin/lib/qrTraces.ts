@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import type { QrStation } from '@/lib/dashboard'
+import { lienAncien, lienPermanent } from '@/lib/qrPermalien'
 
 /**
  * QR TRACES = STATIONS DE JEU (lot QR, 31/10).
@@ -44,7 +45,16 @@ export interface QrTrace {
   source_qr: string
   publie: boolean
   parDefaut?: boolean
+  /** Code court du QR permanent (sql/08-qr-permaliens.sql) ; null = pas encore de code (SQL non applique). */
+  code_court?: string | null
 }
+
+/** Lien a imprimer / copier / encoder pour un QR : le permalien /q/<code> quand le QR a un code
+ *  (le jeu n'est alors PAS dans l'URL), sinon l'ancien lien (le jeu est dans l'URL : ce QR casserait
+ *  si on changait de jeu -- `estPermanent` permet de l'afficher). */
+export const urlDuQr = (q: QrTrace, eventId: string, module: string | null | undefined): string =>
+  q.code_court ? lienPermanent(q.code_court) : lienAncien(eventId, module, q.source_qr)
+export const estPermanent = (q: QrTrace): boolean => !!q.code_court
 
 /** Les 3 QR donnes a la fin de la creation, corriges selon la convention :
  *  le QR reseaux est DIGITAL (`reseaux-instagram`, plus `instagram`). */
@@ -77,17 +87,42 @@ export function slugQr(nom: string, support: string, type: TypeQr, existants: st
   return s
 }
 
-type LigneQr = QrStation & { support?: string | null; type_qr?: string | null }
+type LigneQr = QrStation & { support?: string | null; type_qr?: string | null; code_court?: string | null }
 
 export function versQrTrace(r: LigneQr): QrTrace {
   const type: TypeQr = r.type_qr === 'digital' || r.type_qr === 'physique' ? r.type_qr : (estDigital(r.source_qr) ? 'digital' : 'physique')
-  return { id: r.id, nom: r.nom, support: r.support ?? null, type, source_qr: r.source_qr, publie: r.publie !== false }
+  return { id: r.id, nom: r.nom, support: r.support ?? null, type, source_qr: r.source_qr, publie: r.publie !== false, code_court: r.code_court ?? null }
 }
 
 export async function fetchQrTraces(eventId: string): Promise<QrTrace[]> {
   const { data, error } = await supabase.from('qr_stations').select('*').eq('event_id', eventId).order('created_at')
   if (error) { console.error('[fetchQrTraces]', error.message); return [] }
   return ((data ?? []) as LigneQr[]).map(versQrTrace)
+}
+
+/** Cree en base (sans doublon) les 3 QR par defaut d'une animation pour qu'ils aient un code
+ *  permanent : RPC qr_assurer_defauts (sql/08). Silencieux si le SQL n'est pas applique. Retourne
+ *  true quand la liste doit etre rechargee. */
+export async function assurerQrParDefaut(eventId: string, qrs: QrTrace[]): Promise<boolean> {
+  /* Ne rien ecrire en simple consultation tant que le SQL 08 n'est pas applique : on le
+     detecte par la presence de la colonne (une ligne portant code_court) ou en sondant. */
+  const sonde = await supabase.from('qr_stations').select('code_court').limit(1)
+  if (sonde.error) return false
+  if (QR_PAR_DEFAUT.every(d => qrs.some(q => q.source_qr === d.source_qr && q.code_court))) return false
+  const r = await supabase.rpc('qr_assurer_defauts', { p_event_id: eventId })
+  return !r.error
+}
+
+export type ResultatChangementJeu = { ok: boolean; erreur?: string }
+
+/** Change le jeu derriere TOUS les QR de l'animation (module + master ensemble) : le QR imprime ne
+ *  change pas. Reserve au proprietaire et au Super Admin, journalise (sql/08). */
+export async function changerJeuStation(eventId: string, jeu: string): Promise<ResultatChangementJeu> {
+  const { error } = await supabase.rpc('changer_jeu_station', { p_event_id: eventId, p_module: jeu })
+  if (!error) return { ok: true }
+  const m = error.message || ''
+  if (/Could not find the function|changer_jeu_station|schema cache/i.test(m) && !/propriétaire/.test(m)) return { ok: false, erreur: 'Fonction non disponible : le SQL 08-qr-permaliens.sql n’est pas encore appliqué.' }
+  return { ok: false, erreur: m }
 }
 
 /** QR enregistres + QR par defaut absents de la base (fusion par slug). */

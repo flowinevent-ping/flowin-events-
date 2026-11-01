@@ -4,7 +4,7 @@ import TombolaClient from './TombolaClient'
 import AnimationIndisponible from '@/components/parcours/AnimationIndisponible'
 import { motifIndisponible } from '@/lib/etatAnimation'
 import { lireApercu, appliquerApercu } from '@/lib/apercu'
-import { versMasterSiBesoin } from '@/lib/masters/redirection'
+import { versMasterSiBesoin, versBonJeuSiAutre } from '@/lib/masters/redirection'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 
 interface Props {
@@ -47,6 +47,7 @@ export default async function TombolaPage({ searchParams }: Props) {
   if (motif) return <AnimationIndisponible motif={motif} nom={ev?.nom} debut={ev?.date_d} />
 
   /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
+  versBonJeuSiAutre('tombola', evId, ev?.module, searchParams as Record<string, string | undefined>)
   versMasterSiBesoin(evId, ev?.cfg, searchParams as Record<string, string | undefined>, ev?.module)
 
   /* Partenaires depuis cfg.partenaires */

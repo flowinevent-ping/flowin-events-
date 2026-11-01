@@ -2,7 +2,7 @@ import { fetchParcoursData } from '@/lib/parcours'
 import AnimationIndisponible from '@/components/parcours/AnimationIndisponible'
 import { motifIndisponible } from '@/lib/etatAnimation'
 import { lireApercu, appliquerApercu } from '@/lib/apercu'
-import { versMasterSiBesoin } from '@/lib/masters/redirection'
+import { versMasterSiBesoin, versBonJeuSiAutre } from '@/lib/masters/redirection'
 import VoteClient from './VoteClient'
 
 interface Props { searchParams: { ev?: string; preview?: string; apercu?: string } }
@@ -16,6 +16,7 @@ export default async function Page({ searchParams }: Props) {
   const motif = motifIndisponible(data.ev as { status?: string; date_d?: string | null; date_f?: string | null; module?: string | null } | null, searchParams)
   if (motif) return <AnimationIndisponible motif={motif} nom={data.ev?.nom} debut={data.ev?.date_d} />
   /* Animation sur un master de jeu : parcours /jouer (lib/masters). */
+  versBonJeuSiAutre('vote', evId, data.ev?.module, searchParams as Record<string, string | undefined>)
   versMasterSiBesoin(evId, data.ev?.cfg, searchParams as Record<string, string | undefined>, data.ev?.module)
   return <VoteClient {...data} evId={evId} />
 }

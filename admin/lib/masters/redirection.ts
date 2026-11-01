@@ -24,3 +24,23 @@ export function versMasterSiBesoin(evId: string, cfg: unknown, sp: Record<string
   if (sp.bar === '0' || sp.sb === '1') q.set('sb', sp.bar === '0' ? '0' : '1')
   redirect('/jouer?' + q.toString())
 }
+
+/**
+ * Ancien QR dont l'URL contient le jeu (/parcours/<jeu>?ev=...) alors que l'animation a
+ * CHANGE de jeu depuis l'impression (audit QR du 01/11). Sans ceci, /parcours/spin?ev=X
+ * affichait la roue pour une animation devenue Quiz Master (ou Nuits du Sud) : mauvais jeu,
+ * mauvaises regles. Ici on renvoie vers le parcours du jeu ACTUEL, en gardant source & co
+ * (l'attribution au QR est conservee). Les jeux « masters » n'ont pas besoin de ce renvoi :
+ * versMasterSiBesoin les envoie deja sur /jouer, qui lit le jeu actuel. Jamais en apercu.
+ */
+const PARCOURS_CONNUS = ['quiz', 'quizsolo', 'quizmaster', 'spin', 'tombola', 'vote', 'nds2026']
+export function versBonJeuSiAutre(routeModule: string, evId: string, module: string | null | undefined, sp: Record<string, string | undefined>): void {
+  if (!evId || !module || module === routeModule) return
+  if (sp.preview !== undefined || sp.apercu) return
+  if (PARCOURS_CONNUS.indexOf(module) < 0) return
+  if (routeModule !== 'quizmaster' && estModuleMaster(module)) return
+  const q = new URLSearchParams()
+  q.set('ev', evId)
+  ;['source', 'ref', 'etab', 'ch', 'token'].forEach(k => { if (sp[k]) q.set(k, String(sp[k])) })
+  redirect('/parcours/' + module + '?' + q.toString())
+}

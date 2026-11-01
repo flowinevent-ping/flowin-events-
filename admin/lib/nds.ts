@@ -14,6 +14,7 @@
  * Rien n est code en dur sur NDS : le super event est toujours un parametre.
  */
 import { supabase } from './supabase'
+import { BASE_CANONIQUE } from './qrPermalien'
 import { GMAIL_COMPOSE_BASE } from './messaging'
 
 export const SE_DEFAUT = 'se-nds-2026'
@@ -496,7 +497,7 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
       cfg: {
         ...(d.cfgJeu ?? {}),
         ...(d.logoUrl ? { logoUrl: d.logoUrl } : {}),
-        qrUrl: `https://flowin-events.vercel.app/parcours/${d.module || 'nds2026'}?ev=${evId}`,
+        qrUrl: `${BASE_CANONIQUE}/parcours/${d.module || 'nds2026'}?ev=${evId}`,
       },
       participants: 0, gagnants: 0, joueurs_optin: 0,
       // Referentiel 34 : super event = tirage au sort uniquement.

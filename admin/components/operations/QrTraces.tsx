@@ -18,10 +18,14 @@ import { useEffect, useState } from 'react'
 import Diffusion from '@/components/dashboard/Diffusion'
 import {
   SUPPORTS_QR, typeParDefaut, fetchQrTraces, avecDefauts, creerQrTrace, publierQrTrace,
+  assurerQrParDefaut, changerJeuStation, urlDuQr, estPermanent,
   type QrTrace, type TypeQr,
 } from '@/lib/qrTraces'
+import { lienAncien } from '@/lib/qrPermalien'
+import { libelleModule } from '@/lib/operations'
 
-const BASE = 'https://flowin-events.vercel.app'
+/* Jeux proposables derriere un QR (hors Nuits du Sud). Memes identifiants que events.module. */
+const JEUX_CHANGEABLES = ['quiz', 'quizsolo', 'quizmaster', 'spin', 'tombola', 'vote']
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const btn: React.CSSProperties = {
@@ -32,8 +36,20 @@ const btn: React.CSSProperties = {
 const btnP: React.CSSProperties = { ...btn, background: '#7A4FE0', borderColor: '#7A4FE0', color: '#fff' }
 const champ: React.CSSProperties = { border: `1.5px solid ${BRD}`, borderRadius: 8, padding: '7px 10px', fontSize: 13, fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box' }
 
-export const lienQr = (eventId: string, module: string | null | undefined, source?: string) =>
-  `${BASE}/parcours/${module || 'nds2026'}?ev=${encodeURIComponent(eventId)}${source ? `&source=${encodeURIComponent(source)}` : ''}`
+/** Ancien format (jeu dans l'URL). Les QR a imprimer passent par `urlDuQr` (lien permanent /q/<code>). */
+export const lienQr = (eventId: string, module: string | null | undefined, source?: string) => lienAncien(eventId, module, source)
+
+/** Pastille « permanent » : le QR ne change pas si on change de jeu. */
+export function BadgePermanent({ q }: { q: QrTrace }) {
+  const ok = estPermanent(q)
+  return (
+    <span title={ok ? 'Le QR ne contient pas le jeu : vous pouvez changer de jeu sans le réimprimer.' : 'Le lien contient le jeu : ce QR changerait si vous changiez de jeu.'}
+      style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', padding: '2px 7px', borderRadius: 99, whiteSpace: 'nowrap',
+        background: ok ? 'rgba(59,92,196,.1)' : 'rgba(245,158,11,.14)', color: ok ? '#3B5CC4' : '#B45309' }}>
+      {ok ? 'Permanent' : 'Ancien format'}
+    </span>
+  )
+}
 
 /** Pastille physique / digital. */
 export function BadgeTypeQr({ type }: { type: TypeQr }) {
@@ -98,9 +114,35 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
   const [ouvert, setOuvert] = useState<string>('')
   const [occupe, setOccupe] = useState(false)
   const [erreur, setErreur] = useState('')
+  const [jeu, setJeu] = useState<string>(module || 'nds2026')
+  const [jeuChoix, setJeuChoix] = useState<string>(module || 'quiz')
+  const [jeuMsg, setJeuMsg] = useState<{ ok: boolean; t: string } | null>(null)
+  const [jeuOccupe, setJeuOccupe] = useState(false)
+  useEffect(() => { setJeu(module || 'nds2026'); setJeuChoix(module || 'quiz') }, [module, eventId])
   const charger = () => { fetchQrTraces(eventId).then(setQrs) }
+  /* Charge, puis cree (une fois) les QR par defaut en base pour qu'ils aient un code permanent. */
+  useEffect(() => {
+    let vivant = true
+    fetchQrTraces(eventId).then(async l => {
+      if (!vivant) return
+      setQrs(l)
+      /* Nuits du Sud (nds2026) : ses QR sont deja imprimes et ont leur propre mecanique -- on n'y ecrit rien en simple consultation. */
+      if (module !== 'nds2026' && await assurerQrParDefaut(eventId, l) && vivant) setQrs(await fetchQrTraces(eventId))
+    })
+    return () => { vivant = false }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { charger() }, [eventId, recharge])
+  }, [eventId, module, recharge])
+
+  async function changerJeu() {
+    if (jeuChoix === jeu) return
+    const ancien = libelleModule(jeu), nouveau = libelleModule(jeuChoix)
+    if (typeof window !== 'undefined' && !window.confirm(`Changer le jeu de « ${ancien} » à « ${nouveau} » ?\n\nLes QR déjà imprimés restent valables et mènent au nouveau jeu. Les statistiques et les règles (1 partie par jour par QR, digital 1 fois par compte) sont conservées. Le changement est enregistré dans le journal.\n\nPensez à vérifier le contenu du nouveau jeu (questions, lots, cases de la roue) : sinon le joueur verrait le contenu d’exemple.`)) return
+    setJeuOccupe(true); setJeuMsg(null)
+    const r = await changerJeuStation(eventId, jeuChoix)
+    setJeuOccupe(false)
+    if (r.ok) { setJeu(jeuChoix); setJeuMsg({ ok: true, t: `Jeu changé : « ${nouveau} ». Les QR imprimés mènent maintenant à ce jeu.` }) }
+    else setJeuMsg({ ok: false, t: r.erreur || 'Changement impossible.' })
+  }
 
   async function ajouter(q: { nom: string; support: string; type: TypeQr }) {
     setOccupe(true); setErreur('')
@@ -122,10 +164,10 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
           {visibles.map(q => (
             <div key={q.source_qr} className="pc-qr-tuile">
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 13.5, fontWeight: 800 }}>{q.nom}</span><BadgeTypeQr type={q.type} />
+                <span style={{ fontSize: 13.5, fontWeight: 800 }}>{q.nom}</span><BadgeTypeQr type={q.type} />{jeu !== 'nds2026' && <BadgePermanent q={q} />}
               </div>
               <div style={{ fontSize: 11.5, color: MUT, margin: '3px 0 10px', lineHeight: 1.4 }}>{q.support ?? ''}{q.support ? ' · ' : ''}{REGLE_TYPE_QR[q.type]}</div>
-              <Diffusion compact url={lienQr(eventId, module, q.source_qr)} titre={`${titre} — ${q.nom}`} sousTitre="Scannez pour jouer" />
+              <Diffusion compact url={urlDuQr(q, eventId, jeu)} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={!estPermanent(q) && jeu !== 'nds2026'} sousTitre="Scannez pour jouer" />
             </div>
           ))}
         </div>
@@ -143,7 +185,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
         Chaque QR est une station de jeu avec ses propres statistiques (onglet Trafic). Il est utilisable dès sa création.
       </div>
       {visibles.map(q => {
-        const url = lienQr(eventId, module, q.source_qr)
+        const url = urlDuQr(q, eventId, jeu)
         const cle = q.source_qr
         return (
           <div key={cle} style={{ padding: '6px 0', borderTop: `1px solid ${BRD}` }}>
@@ -153,10 +195,11 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 700, fontSize: 12.5 }}>{q.nom}</span>
                   <BadgeTypeQr type={q.type} />
+                  {jeu !== 'nds2026' && <BadgePermanent q={q} />}
                   {q.parDefaut && <span style={{ fontSize: 10.5, color: MUT }}>par défaut</span>}
                   {!q.publie && <span style={{ fontSize: 10.5, fontWeight: 800, color: '#B45309' }}>masqué au pro</span>}
                 </div>
-                <div style={{ fontSize: 10.5, color: MUT }}>{q.support ? `${q.support} · ` : ''}?source={q.source_qr}</div>
+                <div style={{ fontSize: 10.5, color: MUT }}>{q.support ? `${q.support} · ` : ''}{q.code_court ? `réf. ${q.code_court}` : `?source=${q.source_qr}`}</div>
               </div>
               <button style={btn} onClick={() => setOuvert(o => (o === cle ? '' : cle))}>{ouvert === cle ? '▲ Supports' : '▼ Lien, PNG, SVG, affiche'}</button>
               {mode === 'sa' && q.id && (
@@ -165,7 +208,7 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
             </div>
             {ouvert === cle && (
               <div style={{ padding: '10px 0 4px' }}>
-                <Diffusion compact url={url} titre={`${titre} — ${q.nom}`} sousTitre={q.nom} />
+                <Diffusion compact url={url} titre={titre} qrNom={q.nom} support={q.support} code={q.code_court} ancienFormat={!estPermanent(q) && jeu !== 'nds2026'} sousTitre="Scannez pour jouer" />
               </div>
             )}
           </div>
@@ -175,6 +218,21 @@ export default function QrTraces({ eventId, module, titre, mode, grille = false,
         <FormulaireQr onAjouter={ajouter} occupe={occupe} />
         {erreur && <div style={{ fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 6 }}>{erreur}</div>}
       </div>
+      {jeu !== 'nds2026' && (
+        <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${BRD}` }}>
+          <div style={{ fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>Jeu derrière les QR : {libelleModule(jeu)}</div>
+          <div style={{ fontSize: 11, color: MUT, marginBottom: 6 }}>
+            Les QR « Permanent » ne contiennent pas le jeu : vous pouvez changer de jeu sans réimprimer. Réservé au propriétaire de l’animation et à Flowin ; chaque changement est journalisé.
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <select style={{ ...champ, flex: '0 1 200px' }} value={jeuChoix} aria-label="Nouveau jeu" onChange={e => { setJeuChoix(e.target.value); setJeuMsg(null) }}>
+              {JEUX_CHANGEABLES.map(j => <option key={j} value={j}>{libelleModule(j)}</option>)}
+            </select>
+            <button type="button" style={btnP} disabled={jeuOccupe || jeuChoix === jeu} onClick={changerJeu}>{jeuOccupe ? 'Changement…' : 'Changer le jeu'}</button>
+            {jeuMsg && <span role="status" style={{ fontSize: 12, fontWeight: 700, color: jeuMsg.ok ? '#15803D' : '#B45309' }}>{jeuMsg.t}</span>}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import {
   type LienEphemere,
 } from '@/lib/dashboard'
 import QrTraces from '@/components/operations/QrTraces'
+import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 
 /** Bloc QR traces + liens ephemeres pour un event donne, dans l'onglet QR & Liens de la fiche Pro. */
 export default function QrLiensEvent({ eventId, eventNom, module }: { eventId: string; eventNom: string; module?: string | null }) {
@@ -22,7 +23,7 @@ export default function QrLiensEvent({ eventId, eventNom, module }: { eventId: s
   useEffect(() => { charger() }, [eventId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const lienUrl = (token: string) =>
-    `https://flowin-events.vercel.app/parcours/${jeu}?ev=${encodeURIComponent(eventId)}&token=${token}`
+    `${BASE_CANONIQUE}/parcours/${jeu}?ev=${encodeURIComponent(eventId)}&token=${token}`
 
   async function ajouterLien() {
     setBusy(true)

@@ -19,12 +19,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { libelleDates, type DonneesOperation } from '@/lib/operations'
 import QrTraces from './QrTraces'
+import { BASE_CANONIQUE } from '@/lib/qrPermalien'
 import Diffusion from '@/components/dashboard/Diffusion'
 
 type Mode = 'sa' | 'pro'
 type Station = DonneesOperation['stations'][number]
 
-const BASE = 'https://flowin-events.vercel.app'
+const BASE = BASE_CANONIQUE
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const btn: React.CSSProperties = {
@@ -124,7 +125,7 @@ export function DiffusionStation({ op, s, mode }: { op: DonneesOperation; s: Sta
             Instagram : copiez le texte, téléchargez le visuel QR ci-dessous, puis publiez-le depuis l’application.
           </div>
 
-          <Diffusion compact url={url} titre={s.nom} sousTitre="Scannez pour jouer" />
+          <Diffusion compact ancienFormat url={url} titre={s.nom} sousTitre="Scannez pour jouer" />
 
           <QrTraces eventId={s.id} module={s.module} titre={s.nom} mode={mode} />
         </div>
