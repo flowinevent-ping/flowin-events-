@@ -89,17 +89,20 @@
   .ss-pill{display:inline-block;margin-top:9px;background:var(--violet);color:#fff;font-weight:800;font-size:12.5px;padding:7px 18px;border-radius:100px}
   .claim{font-size:clamp(25px,5.4vw,38px);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:26px}
   .claim span{color:var(--blue)}
-  .hb{list-style:none;display:flex;flex-direction:column;gap:6px;margin:12px auto 0;max-width:420px;text-align:left}
-  .hb li{display:flex;align-items:center;gap:10px;font-size:clamp(16px,2.2vw,19px);font-weight:800;line-height:1.2}
-  .hb .ic{flex:none;width:30px;height:30px;color:var(--violet)}
-  .hb li:nth-child(2) .ic{color:var(--blue)}
-  .tbv{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#8A5200;background:#FFF1D6;border-radius:100px;padding:3px 10px}
+  .hb4{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px auto 0;max-width:760px;text-align:left;padding:0}
+  .hb4 li{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px;box-shadow:0 8px 20px -16px rgba(27,58,92,.5)}
+  .hb4 .ic{display:block;width:44px;height:44px;color:var(--violet)}
+  .hb4 li:nth-child(2n) .ic{color:var(--blue)}
+  .hb4 b{display:block;font-size:clamp(15px,2vw,19px);font-weight:900;line-height:1.15;margin-top:4px}
+  .hb4 small{display:block;font-size:13.5px;font-weight:700;color:var(--muted);line-height:1.25;margin-top:3px}
+  @media (min-width:900px){ .hb4{grid-template-columns:repeat(4,1fr);gap:12px;max-width:none;width:min(980px,calc(100vw - 48px));position:relative;left:50%;transform:translateX(-50%)} .hb4 li{padding:16px} .hb4 .ic{width:60px;height:60px} .hb4 small{font-size:15px} }
   .blk ul{list-style:none;display:flex;flex-direction:column;gap:6px;text-align:left;width:100%}
   .blk li{font-size:17px;font-weight:700;color:var(--muted);line-height:1.28;padding-left:20px;position:relative}
   .blk li:before{content:'';position:absolute;left:2px;top:.5em;width:9px;height:9px;border-radius:50%;background:var(--violet)}
   .blk li b{color:var(--ink);font-weight:900}
   @media (max-width:759px){ #superevent .sel{display:none} #superevent .blk li{font-size:16px;line-height:1.22} #superevent .blk ul{gap:3px} #superevent .bic{display:none} }
-  @media (max-height:860px){ .home .hb{gap:4px;margin-top:8px} .home .lede{display:none} .home .doors{margin-top:14px} }
+  @media (max-height:860px){ .home .hb4{margin-top:10px;gap:6px} .home .hb4 .ic{width:34px;height:34px} .home .hb4 li{padding:8px 10px} .home .doors{margin-top:12px} }
+  @media (max-height:780px){ .home .logo{font-size:44px} .home .claim{margin-top:8px;font-size:23px} .home .hb4{margin-top:8px} .home .hb4 small{font-size:12.5px} .home .hb4 .ic{width:30px;height:30px} .home .doors{margin-top:8px;gap:7px} .home .lk2{margin-top:6px} }
   .blob{position:absolute;pointer-events:none;z-index:0}
 
   /* 2. Réseau */
@@ -556,16 +559,13 @@
     <svg class="blob" style="left:-50px;bottom:20px;width:170px;height:170px" viewBox="-90 -90 180 180" data-blob="#E2D8FA,9" aria-hidden="true"></svg>
     <div class="in home">
       <div class="logo">Flow<em>in</em></div>
-      <div class="sign-stack"><div class="ss-eyebrow">Animation digitale</div><div class="ss-pill">Plug &amp; Play</div></div>
-      <!-- ACCROCHE PROVISOIRE, A VALIDER par Romain -->
-      <p class="claim">Et si votre commerce<br><span>animait ses clients&nbsp;?</span></p>
-      <ul class="hb">
-        <li><svg class="ic"><use href="#i-client"/></svg>Constituez votre fichier client</li>
-        <li><svg class="ic"><use href="#i-gift"/></svg>Augmentez la fid&eacute;lit&eacute;</li>
-        <li><svg class="ic"><use href="#i-contact"/></svg>Augmentez le trafic</li>
+      <p class="claim">Flowin, <span>animation Plug &amp; Play</span></p>
+      <ul class="hb4">
+        <li><svg class="ic"><use href="#i-client"/></svg><b>Constituez votre fichier client</b><small>Chaque joueur qui y consent devient un contact.</small></li>
+        <li><svg class="ic"><use href="#i-jeu"/></svg><b>Animez votre fichier client</b><small>Jeux et lots, avec leur accord.</small></li>
+        <li><svg class="ic"><use href="#i-qr"/></svg><b>Captez le flux passant</b><small>Un QR code : ceux qui passent jouent.</small></li>
+        <li><svg class="ic"><use href="#i-vitrine"/></svg><b>Ramenez du trafic</b><small>Des lots &agrave; retirer chez vous.</small></li>
       </ul>
-      <span class="tbv">Accroche provisoire &middot; &agrave; valider</span>
-      <p class="lede">L&rsquo;animation commerciale par le jeu, cr&eacute;&eacute;e pour vous par Flowin, sans gestion de votre part.</p>
       <div class="doors">
         <button class="door" type="button" data-go="pourquoi"><span class="dc"><svg class="ic"><use href="#i-vitrine"/></svg></span><span><b>J&rsquo;ai un commerce</b><small>Faites jouer vos clients, gardez le contact</small></span><span class="da">&rarr;</span></button>
         <a class="door alt" href="/plaquette-super-event.html"><span class="dc"><svg class="ic"><use href="#i-mega"/></svg></span><span><b>J&rsquo;organise un &eacute;v&eacute;nement</b><small>Ou je repr&eacute;sente une institution</small></span><span class="da">&rarr;</span></a>
@@ -582,11 +582,11 @@
       <p class="lede big">Un jeu &agrave; votre image, personnalisable : quiz, roue ou tombola.</p>
       <div class="why">
         <div class="card wy"><svg class="ic"><use href="#i-client"/></svg><div><b>Constituez votre fichier client</b><small>Chaque joueur qui y consent devient un contact. Restaurateurs : Flowin vous en donne un.</small></div></div>
-        <div class="card wy"><svg class="ic"><use href="#i-contact"/></svg><div><b>Augmentez le trafic</b><small>De nouveaux clients, plus de passage, plus de visibilit&eacute;</small></div></div>
-        <div class="card wy"><svg class="ic"><use href="#i-gift"/></svg><div><b>Augmentez la fid&eacute;lit&eacute;</b><small>Des lots &agrave; retirer chez vous : ils reviennent</small></div></div>
-        <div class="card wy"><svg class="ic"><use href="#i-rapport"/></svg><div><b>Activez vos clients dormants</b><small>Un jeu pour les raviver, avec leur accord</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-jeu"/></svg><div><b>Animez votre fichier client</b><small>Jeux et lots pour garder le lien, avec leur accord</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-qr"/></svg><div><b>Captez le flux passant</b><small>Un QR code en caisse : ceux qui passent jouent</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-vitrine"/></svg><div><b>Ramenez du trafic</b><small>Des lots &agrave; retirer chez vous : ils reviennent</small></div></div>
       </div>
-      <p class="sans"><b>Et aussi :</b> mesurez vos actions commerciales, renforcez votre marque. Seuls les joueurs qui ont dit oui peuvent &ecirc;tre contact&eacute;s. <b>Sans gestion</b> de votre part.</p>
+      <p class="sans"><b>Et aussi :</b> mesure de vos actions, marque renforc&eacute;e. Seuls les joueurs qui ont dit oui sont contact&eacute;s. <b>Sans gestion</b> de votre part.</p>
     </div>
   </section>
 
