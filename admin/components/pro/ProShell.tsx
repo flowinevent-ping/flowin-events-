@@ -170,6 +170,8 @@ export default function ProShell({ proName, proId, active, children }: { proName
 
   return (
     <div className={`pro-shell${open ? ' open' : ''}`} style={{ display: 'flex', minHeight: '100dvh', background: C.fond, fontFamily: POLICE_PRO, fontSize: 14, color: C.texte }}>
+      {/* Jetons de theme communs (accent violet) : public/flowin-theme.css */}
+      <link rel="stylesheet" href="/flowin-theme.css" />
       <style dangerouslySetInnerHTML={{ __html: `
         :root { ${VARIABLES_CSS} ${VARIABLES_PRO_CSS} --sa-border:${C.bordure}; --sa-muted:${C.attenue}; --sa-text:${C.texte}; --sa-subtle:${C.subtil}; --sa-card:#fff; --sa-accent:${C.accent}; }
         .pro-shell input, .pro-shell select, .pro-shell textarea, .pro-shell button { font-family: ${POLICE_PRO}; }

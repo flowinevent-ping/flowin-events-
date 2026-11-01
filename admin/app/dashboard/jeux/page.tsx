@@ -35,7 +35,7 @@ const MODULES = [
    GABARIT_MODULE règle la couleur du gabarit (= 'quiz' depuis le 28/10), pas
    de clé 'quiz' séparée : ce serait la même clé en double. */
 const COULEUR_MODULE: Record<string, string> = {
-  [GABARIT_MODULE]: '#2563EB', tombola: '#7C3AED',
+  [GABARIT_MODULE]: '#7A4FE0', tombola: '#7C3AED',
   quizmaster: '#D97706', quizsolo: '#DB2777', spin: '#EA580C', vote: '#16A34A',
 }
 

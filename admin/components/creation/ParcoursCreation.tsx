@@ -59,6 +59,7 @@ import BilletApercu from '@/components/parcours/BilletApercu'
 import QrTraces, { FormulaireQr, BadgeTypeQr, REGLE_TYPE_QR } from '@/components/operations/QrTraces'
 import { ChoixTirage, erreurTirage, cfgDepuisTirage, libelleDateTirage, localVersIso, lienListeGagnants, type ConfigTirage } from '@/components/operations/ReglageTirage'
 import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
+import SelecteurLot, { RecapLots, LogoSuperEvent, CarteSuperEvent } from '@/components/masters/SelecteurLot'
 import PersoMaster, { ChoixAchat, cfgMaster, MASTER_VIDE, type EtatMaster } from '@/components/masters/PersoMaster'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
@@ -145,7 +146,7 @@ export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex
   .pc-aide .btns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
   .pc-aide .ab{padding:10px 16px;border-radius:50px;font-size:12.5px;font-weight:800;text-decoration:none;font-family:inherit;border:none;cursor:pointer}
   .pc-aide .ab.appel{background:#dcfce7;color:#166534}
-  .pc-aide .ab.msg{background:rgba(37,99,235,.1);color:${C.accent}}
+  .pc-aide .ab.msg{background:rgba(122,79,224,.1);color:${C.accent}}
   .pc-ligne-pro{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid ${C.bordure};border-radius:14px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-family:inherit;color:${C.texte}}
   .pc-ligne-pro.sel{border-color:${ACCENT_SUPER};background:${ACCENT_SUPER}10}`
 
@@ -582,6 +583,15 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           </div>
           <div style={{ padding: 22 }}>
             {fait.info && <div style={{ fontSize: 13, color: '#B45309', fontWeight: 700, marginBottom: 14 }}>{fait.info}</div>}
+            {rejoindre && (
+              <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 18, padding: '6px 16px', marginBottom: 16, background: '#fff' }}>
+                {[['Événement', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : 'En attente de validation']].map(([k, v]) => (
+                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderTop: k === 'Événement' ? 'none' : `1px solid ${C.bordure}` }}>
+                    <span style={{ ...MUTED, fontSize: 13 }}>{k}</span><b style={{ fontSize: 14 }}>{v}</b>
+                  </div>
+                ))}
+              </div>
+            )}
             {estSuper && fait.superId && (
               <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
                 Les commerces le rejoignent depuis leur espace ou par ce lien :
@@ -735,7 +745,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           <Ico k={type === 'animation' ? 'game' : rejoindre ? 'pin' : 'sparkle'} size={19} />
         </span>
         <div>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>{titreParcours}</div>
+          <div style={{ fontSize: 20, fontWeight: 800 }}>{estSuper || rejoindre ? <><LogoSuperEvent taille={30} /> <span style={{ fontSize: 15, marginLeft: 4 }}>· {titreParcours}</span></> : titreParcours}</div>
           {sa && p.id && <div style={{ fontSize: 12.5, ...MUTED }}>Pour {p.nom}</div>}
         </div>
         <button onClick={() => { setType(null); setEtape(0) }} style={{ marginLeft: 'auto', border: 'none', background: 'none', color: C.attenue, fontWeight: 700, cursor: 'pointer', fontSize: 12.5 }}>Changer de choix</button>
@@ -795,21 +805,10 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </div>
               )}
               {supers.length === 0 && <div style={{ fontSize: 13, ...MUTED, marginBottom: 12 }}>Aucun super event ouvert aux inscriptions pour le moment.</div>}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10, marginBottom: 18 }}>
-                {supers.map(s => {
-                  const actif = seId === s.id
-                  return (
-                    <button key={s.id} type="button" className={`nop-carte${actif ? ' nop-actif' : ''}`}
-                      style={{ ...choix(false), padding: '22px 18px 18px', background: '#fff', ['--acc' as string]: ACCENT_SUPER, ['--acc-tint' as string]: `${ACCENT_SUPER}17` } as React.CSSProperties}
-                      onClick={() => setSeId(s.id)}>
-                      <span className="nop-filet" />
-                      <div className="nop-halo" style={{ width: 54, height: 54, marginBottom: 10 }}><IcoModule module={s.module || GABARIT_MODULE} size={24} /></div>
-                      <div style={{ fontWeight: 800, fontSize: 15 }}>{s.nom}</div>
-                      <div style={{ fontSize: 12.5, ...MUTED, marginTop: 3 }}>{libelleDates(s.date_d, s.date_f)}</div>
-                      <div style={{ fontSize: 12.5, marginTop: 6, color: ACCENT_SUPER, fontWeight: 700 }}>{libelleModule(s.module || GABARIT_MODULE)}</div>
-                    </button>
-                  )
-                })}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 10, marginBottom: 18 }}>
+                {supers.map(s => (
+                  <CarteSuperEvent key={s.id} nom={s.nom} dates={libelleDates(s.date_d, s.date_f)} jeu={libelleModule(s.module || GABARIT_MODULE)} actif={seId === s.id} onClick={() => setSeId(s.id)} />
+                ))}
               </div>
               <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
                 {([['commerce', sa ? 'Il accueille une station de jeu' : 'J’accueille une station de jeu'], ['annonceur', sa ? 'Annonceur, sans station' : 'Je suis annonceur, sans station']] as const).map(([v, l]) => (
@@ -1001,31 +1000,13 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </div>
               )}
               {lots.map(l => (
-                <div key={l.id} style={{ border: `1.5px solid ${C.bordureChamp}`, borderRadius: 16, padding: 14, marginBottom: 12, background: '#fff' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto', gap: 10, alignItems: 'end' }}>
-                    <Champ label="Lot"><input style={CHAMP} value={l.nom} onChange={e => majLot(l.id, 'nom', e.target.value)} placeholder="Ex. Café gourmand offert" /></Champ>
-                    <Champ label="Quantité"><input style={CHAMP} type="number" min={1} value={l.quantite} onChange={e => majLot(l.id, 'quantite', Number(e.target.value))} /></Champ>
-                    <Champ label="Valeur €"><input style={CHAMP} type="number" min={0} value={l.valeur} onChange={e => majLot(l.id, 'valeur', Number(e.target.value))} /></Champ>
-                    <button aria-label="Retirer" disabled={lots.length < 2} onClick={() => setLots(ls => ls.filter(x => x.id !== l.id))}
-                      style={{ ...BTN2, padding: '10px 12px', marginBottom: 14, opacity: lots.length < 2 ? 0.3 : 1, color: '#B91C1C', display: 'inline-flex' }}><Ico k="trash" size={15} /></button>
-                  </div>
-                  {!estSuper && !rejoindre && module_ !== 'spin' && (
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                      {(['tirage', 'instantane'] as const).map(v => (
-                        <button key={v} style={{ ...choix(l.type === v), flex: 1, padding: '9px 10px', textAlign: 'center', fontWeight: 700, fontSize: 13 }} onClick={() => majLot(l.id, 'type', v)}>
-                          {v === 'tirage' ? 'Tirage au sort' : 'Gain immédiat'}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {!estSuper && (
-                    <Champ label="Conditions d’utilisation">
-                      <input style={CHAMP} value={l.conditions} onChange={e => majLot(l.id, 'conditions', e.target.value)} placeholder="Ex. valable sur présentation du billet" />
-                    </Champ>
-                  )}
-                </div>
+                <SelecteurLot key={l.id} lot={l} retirable={lots.length > 1}
+                  avecMode={!estSuper && !rejoindre && module_ !== 'spin'}
+                  onChange={(champ, v) => majLot(l.id, champ, v)}
+                  onRetirer={() => setLots(ls => ls.filter(x => x.id !== l.id))} />
               ))}
-              <button style={BTN2} onClick={() => setLots(ls => ls.concat(lotVide(module_ === 'spin' ? 'instantane' : 'tirage')))}>+ Ajouter un lot</button>
+              <button style={{ ...BTN2, width: '100%', borderStyle: 'dashed', color: C.violet }} onClick={() => setLots(ls => ls.concat(lotVide(module_ === 'spin' ? 'instantane' : 'tirage')))}>+ Ajouter un lot</button>
+              {!estSuper && <RecapLots lots={lots} achat={achat.obligatoire} tirage={aUnTirage && tirage.mode === 'auto' ? libelleDateTirage(localVersIso(tirage.date)) : ''} />}
 
               {aUnInstant && (
                 <div style={{ marginTop: 16, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
@@ -1046,7 +1027,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               {aUnTirage && (
                 <div style={{ marginTop: 16, background: C.subtil, border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 14 }}>
                   <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 8 }}>Tirage au sort : quand et comment ?</div>
-                  <ChoixTirage value={tirage} onChange={setTirage} />
+                  <ChoixTirage value={tirage} onChange={setTirage} finEvenement={dateF || undefined} />
                 </div>
               )}
 

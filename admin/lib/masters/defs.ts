@@ -111,6 +111,18 @@ export const MASTERS: Record<MasterId, DefinitionMaster> = {
       parrain: 'Chaque ami qui s\'inscrit = 1 ticket de plus pour la loterie.',
       voteKicker: 'Plateau stand-up · ce soir',
       voteTitre: 'Vote pour ton humoriste préféré',
+      vitrineAsso: 'Association des commerçants Exemple',
+      vitrines: [
+        { nom: 'Boulangerie Exemple', sous: 'Vitrine 1' },
+        { nom: 'Café Exemple', sous: 'Vitrine 2' },
+        { nom: 'Librairie Exemple', sous: 'Vitrine 3' },
+        { nom: 'Fleuriste Exemple', sous: 'Vitrine 4' },
+        { nom: 'Opticien Exemple', sous: 'Vitrine 5' },
+      ],
+      sondage: [
+        { label: 'Ce qui te plaît le plus ?', opts: ['Les lumières', 'Les décors', 'Les couleurs', 'L\'idée'] },
+        { label: 'Tu viens souvent dans le quartier ?', opts: ['Chaque semaine', 'Chaque mois', 'Rarement'] },
+      ],
       candidats: [
         { nom: 'Humoriste A', sous: 'Passage 1 · [nom à compléter]' },
         { nom: 'Humoriste B', sous: 'Passage 2 · [nom à compléter]' },

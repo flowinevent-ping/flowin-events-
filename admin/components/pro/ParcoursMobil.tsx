@@ -14,7 +14,7 @@ import { ACCENT_SUPER } from '@/lib/charte'
  * (/pro/parcours) et cote dashboard SA (/dashboard/parcours) via les memes props.
  */
 
-const ACC = '#2563EB'
+const ACC = '#7A4FE0'
 type Ev = { id: string; module: string; nom: string; super_event_id?: string | null }
 
 export function Phone({ src, empty, iframeRef }: { src?: string; empty?: string; iframeRef?: React.RefObject<HTMLIFrameElement | null> }) {

@@ -281,7 +281,7 @@ export default function JouerClient(p: Props) {
       const quiz = v.key === 'quiz' || v.key === 'solo'
       const cas = r.caseIdx != null ? v.cases[r.caseIdx] : null
       const bonus: Record<string, unknown> = {}
-      if (v.key === 'vote' && r.voteIdx != null) { bonus.vote_mode = 'choix'; bonus.vote_choix = v.candidats[r.voteIdx]?.nom ?? null }
+      if (v.key === 'vote' && r.voteIdx != null) { bonus.vote_mode = r.vitrineVote ? 'vitrine' : 'choix'; bonus.vote_choix = (r.vitrineVote ? v.vitrines : v.candidats)[r.voteIdx]?.nom ?? null }
       Object.keys(reponsesBonus).forEach(k => { bonus[k] = reponsesBonus[k] })
       const res = await writeJoueur({
         email: f.email, prenom: f.prenom, nom: f.nom, tel: f.tel, code_postal: f.cp || undefined,
@@ -380,8 +380,11 @@ export default function JouerClient(p: Props) {
       if (tg) { tg.classList.toggle('on'); tg.setAttribute('aria-checked', String(tg.classList.contains('on'))); majValider(); return }
       const part = t.closest('[data-part]') as HTMLElement | null
       if (part) regleParte(Number(part.getAttribute('data-part')))
+      const vit = t.closest('[data-vitrine]') as HTMLElement | null
+      if (vit) { r.voteIdx = Number(vit.getAttribute('data-vitrine')); r.vitrineVote = true }
       const gg = t.closest('[data-go]') as HTMLButtonElement | null
       if (gg) {
+        if (gg.hasAttribute('data-sondage')) host!.querySelectorAll('.chip.on[data-one^="s"]').forEach(c => { reponsesBonus['sondage_' + (c.getAttribute('data-one') || '').slice(1)] = c.getAttribute('data-val') || '' })
         if (gg.disabled) return
         if (gg.hasAttribute('data-after')) r.after = gg.getAttribute('data-after')
         aller(gg.getAttribute('data-go') || 's-accueil', gg.getAttribute('data-repli') || '')

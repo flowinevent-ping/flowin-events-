@@ -21,7 +21,7 @@ export interface ConfigTirage { mode: 'manuel' | 'auto'; date: string; publier: 
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
-const ACC = '#2563EB'
+const ACC = '#7A4FE0'
 
 /** ISO -> valeur d un <input type="datetime-local"> (heure locale). */
 export function isoVersLocal(iso: string | null | undefined): string {
@@ -70,12 +70,25 @@ export function tirageDepuisCfg(cfg: Record<string, unknown> | null | undefined)
 
 const choix = (on: boolean): React.CSSProperties => ({
   flex: '1 1 200px', textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
-  border: `1.5px solid ${on ? ACC : BRD}`, background: on ? 'rgba(37,99,235,.06)' : '#fff', color: '#0F172A',
+  border: `1.5px solid ${on ? ACC : BRD}`, background: on ? 'rgba(122,79,224,.06)' : '#fff', color: '#0F172A',
 })
 
 /** Formulaire controle (utilise tel quel dans le parcours de creation). */
-export function ChoixTirage({ value, onChange }: { value: ConfigTirage; onChange: (c: ConfigTirage) => void }) {
+/** Raccourcis de date de la maquette « Sélecteur de lots » : tirage en un clic. */
+function dateRaccourci(k: 'mois' | 'trimestre', ref: Date = new Date()): string {
+  const p = (n: number) => (n < 10 ? '0' : '') + n
+  const fin = k === 'mois' ? new Date(ref.getFullYear(), ref.getMonth() + 1, 0) : new Date(ref.getFullYear(), Math.floor(ref.getMonth() / 3) * 3 + 3, 0)
+  return `${fin.getFullYear()}-${p(fin.getMonth() + 1)}-${p(fin.getDate())}T18:00`
+}
+const libCourt = (v: string) => { const d = new Date(v); return isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) }
+
+export function ChoixTirage({ value, onChange, finEvenement }: { value: ConfigTirage; onChange: (c: ConfigTirage) => void; finEvenement?: string }) {
   const err = erreurTirage(value)
+  const raccourcis: { id: string; t: string; v: string }[] = [
+    { id: 'mois', t: 'Fin du mois', v: dateRaccourci('mois') },
+    { id: 'trimestre', t: 'Fin du trimestre', v: dateRaccourci('trimestre') },
+  ]
+  if (finEvenement) raccourcis.push({ id: 'event', t: 'Fin de l’événement', v: finEvenement.slice(0, 10) + 'T18:00' })
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -88,6 +101,18 @@ export function ChoixTirage({ value, onChange }: { value: ConfigTirage; onChange
           <span style={{ fontSize: 12, color: MUT }}>Flowin tire au sort à la date choisie et envoie le billet au gagnant.</span>
         </button>
       </div>
+      {value.mode === 'auto' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 8, marginTop: 12 }}>
+          {raccourcis.map(r => (
+            <button key={r.id} type="button" style={{ ...choix(value.date === r.v), flex: 'none', textAlign: 'center' }} onClick={() => onChange({ ...value, date: r.v })}>
+              <b style={{ display: 'block', fontSize: 13 }}>{r.t}</b><span style={{ fontSize: 12, color: MUT }}>{libCourt(r.v)}</span>
+            </button>
+          ))}
+          <button type="button" style={{ ...choix(!!value.date && !raccourcis.some(r => r.v === value.date)), flex: 'none', textAlign: 'center' }} onClick={() => { const d = new Date(); d.setDate(d.getDate() + 7); onChange({ ...value, date: isoVersLocal(d.toISOString()).slice(0, 10) + 'T18:00' }) }}>
+            <b style={{ display: 'block', fontSize: 13 }}>Date personnalisée</b><span style={{ fontSize: 12, color: MUT }}>Choisir un jour</span>
+          </button>
+        </div>
+      )}
       {value.mode === 'auto' && (
         <label style={{ display: 'block', marginTop: 10 }}>
           <span style={{ display: 'block', fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Tirage automatique le</span>

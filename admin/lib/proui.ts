@@ -18,7 +18,7 @@ export const LABEL: CSSProperties = { display: 'block', fontSize: 10.5, fontWeig
    le 17/09 (lib/charte.ts, CHARTE_PRO) mais ces deux valeurs etaient restees
    codees en dur sur l ancien rose/magenta -- un bouton au degrade bleu avec
    une ombre rose, une carte choisie teintee de rose. Alignees sur C.accent
-   (#2563EB -> 37,99,235), meme famille que C.degrade. */
+   (#7A4FE0 -> 37,99,235), meme famille que C.degrade. */
 export const BTN: CSSProperties = { border: 'none', borderRadius: 50, padding: '14px 26px', fontFamily: POLICE_PRO, fontWeight: 800, fontSize: 15, color: '#fff', cursor: 'pointer', background: C.degrade, boxShadow: '0 10px 24px rgba(122,79,224,.26)' }
 export const BTN2: CSSProperties = { border: `1.5px solid ${C.bordureChamp}`, borderRadius: 50, padding: '12px 22px', fontFamily: POLICE_PRO, fontWeight: 700, fontSize: 14, color: C.accent, cursor: 'pointer', background: '#fff' }
 /** Carte a choisir (jeu, type d operation) : bordure violette (C.magenta = violet commun) quand choisie. */

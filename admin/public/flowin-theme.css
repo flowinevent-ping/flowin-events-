@@ -16,28 +16,33 @@
  *  quiz solo prune, quiz bleu) restent celles des maquettes validees.
  *
  *  Ne s'applique PAS a Nuits du Sud (charte propre, non touchee).
+ *
+ *  FUSION 01/11 : ce fichier REUTILISE les jetons de flowin-tokens.css (poses par
+ *  l'agent espace pro : --fl-violet, --fl-encre, --fl-papier…) au lieu de les
+ *  dupliquer ; il ajoute seulement les alias courts des ecrans de jeu (--fl-ink,
+ *  --fl-accent…) et les couleurs d'identite des jeux. Un seul accent : --fl-violet.
  */
-:root{
-  /* --- Accent commun --------------------------------------------------- */
-  --fl-accent:#7A4FE0;
-  --fl-accent-ink:#FFFFFF;
-  --fl-accent-soft:#F0EAFD;
-  --fl-touche:#E0368C;            /* fuchsia : touche ponctuelle uniquement */
+@import url('/flowin-tokens.css');
 
-  /* --- Habillage commun (charte LandingClient) --------------------------- */
-  --fl-ink:#1B3A5C;               /* encre */
+:root{
+  /* --- Accent commun : ALIAS du jeton partage --fl-violet (flowin-tokens.css) --- */
+  --fl-accent:var(--fl-violet,#7A4FE0);
+  --fl-accent-ink:#FFFFFF;
+  --fl-accent-soft:var(--fl-violet-clair,#EEE8FC);
+  --fl-touche:var(--fl-fuchsia,#E0368C);   /* touche ponctuelle uniquement */
+
+  /* --- Habillage commun (alias des jetons partages) -------------------- */
+  --fl-ink:var(--fl-encre,#1B3A5C);
   --fl-ink-2:#3a4d63;
-  --fl-muted:#5a6b80;             /* secondaire */
-  --fl-blue:#3B5CC4;              /* bleu, « in » du logo */
-  --fl-paper:#F4F6F9;             /* papier */
+  --fl-muted:var(--fl-texte-2,#5a6b80);
+  --fl-blue:var(--fl-bleu,#3B5CC4);
+  --fl-paper:var(--fl-papier,#F4F6F9);
   --fl-white:#FFFFFF;
-  --fl-line:#DCE3EC;
+  --fl-line:var(--fl-trait,#DCE3EC);
   --fl-field:#C9D4E3;
   --fl-sky:#EAEFFB;
   --fl-mint:#E6F7F4;
-  --fl-ok:#00897A;
-  --fl-ko:#C62F2F;
-  --fl-font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --fl-font:var(--fl-police,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif);
 
   /* --- Couleurs d'identite des jeux ------------------------------------- */
   --fl-quiz:#3B5CC4;    --fl-quiz-ink:#2C49A6;    --fl-quiz-soft:#EAEFFB;    --fl-quiz-2:#00B4A0;

@@ -17,9 +17,9 @@ export const CHARTE = {
   subtil: '#F8FAFC',
   sidebar: '#1E293B',
   sidebar2: '#172033',
-  accent: '#2563EB',
-  accentClair: '#60A5FA',
-  accentFonce: '#1D4ED8',
+  accent: '#7A4FE0',
+  accentClair: '#9B7BEA',
+  accentFonce: '#6A3FD0',
 } as const
 
 export const POLICE_ADMIN = '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif'
@@ -68,8 +68,10 @@ export const CHARTE_PRO = {
   violetFonce: '#6A3FD0',
   violetClair: '#EFE9FC',
   fuchsia: '#E0368C',
-  accent: '#3B5CC4',
-  accentFonce: '#2C479E',
+  /* Accent commun = violet (01/11, decision Romain : violet partout, espace pro compris).
+     Source des valeurs : public/flowin-tokens.css (--fl-violet) / flowin-theme.css (--fl-accent). */
+  accent: '#7A4FE0',
+  accentFonce: '#6A3FD0',
   /** Historique : « magenta » = la teinte de selection. Desormais le violet commun. */
   magenta: '#7A4FE0',
   magenta2: '#3B5CC4',
@@ -92,5 +94,6 @@ export const POLICE_PRO = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sa
  * teinte recalculee localement (« applique ces choses sur la totalite de
  * l'environnement », 18/09).
  */
-export const ACCENT_SUPER = '#C2410C'
+/* 01/11 : univers comics des maquettes Super event (rouge #E2231A, jaune #FFD23F) — remplace l'orange. */
+export const ACCENT_SUPER = '#C41D15'
 export const ACCENT_ANIM = CHARTE_PRO.accentFonce

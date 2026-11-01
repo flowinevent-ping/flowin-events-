@@ -234,7 +234,7 @@ export default function JoueurDrawer() {
                     <div style={{ fontWeight: 700 }}>{t.lot_nom ?? 'Lot'}</div>
                     {/* Indicateur de l operation -- un meme joueur peut avoir
                         joue a plusieurs operations au fil du temps. */}
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#2563EB' }}>{operationNom(t)}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#7A4FE0' }}>{operationNom(t)}</div>
                     <div style={{ fontSize: 11, color: 'var(--sa-muted)' }}>chez {partenaire} · {date}</div>
                     {lien && <a href={lien} target="_blank" rel="noreferrer" style={{ fontSize: 11 }}>Voir le billet →</a>}
                   </div>

@@ -98,6 +98,9 @@ export interface VueMaster {
   candidats: Candidat[]
   voteKicker: string
   voteTitre: string
+  vitrines: Candidat[]
+  sondage: { label: string; opts: string[] }[]
+  vitrineAsso: string
   images: { hero?: string; vitrine?: string }
   commerce: { activite: string; adresse: string; horaires: string; site: string }
   partenaires: PartenaireAffiche[]
@@ -255,6 +258,9 @@ export function construireVue(data: ParcoursPageData | null, o: OptionsVue = {})
     candidats: vReels.length ? vReels : (c.candidats || []),
     voteKicker: c.voteKicker || '',
     voteTitre: c.voteTitre || 'Vote pour ton préféré',
+    vitrines: c.vitrines || [],
+    sondage: c.sondage || [],
+    vitrineAsso: c.vitrineAsso || '[association à compléter]',
     images: c.images || {},
     commerce: {
       activite: c.commerce?.activite || '',

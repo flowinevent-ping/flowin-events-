@@ -27,6 +27,8 @@ export interface EtatPartie {
   caseIdx: number | null
   rotation: number
   voteIdx: number | null
+  /** true : le vote porte sur une vitrine (exemple 2 du vote). */
+  vitrineVote: boolean
   tombolaNo: string
   after: string | null
   profil: { prenom?: string; nom?: string; email?: string; tel?: string; cp?: string; age?: string } | null
@@ -36,7 +38,7 @@ export interface EtatPartie {
 }
 
 export function etatInitial(): EtatPartie {
-  return { qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, tombolaNo: '', after: null, profil: null, parrainN: 0, erreur: '', envoi: false }
+  return { qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, parrainN: 0, erreur: '', envoi: false }
 }
 
 /* ── Outils ────────────────────────────────────────────────────────────── */
@@ -606,6 +608,33 @@ S['v-resultat'] = { r: function (v, r) {
     foot(btn('Recevoir mon ticket', 'c-parrainage', '', ' data-after="c-ticket"')) + '</div>'
 } }
 
+/* Vote — exemple 2 : « la plus belle vitrine » (carte, QR de la vitrine, ticket + sondage) */
+S['v2-carte'] = { tall: true, r: function (v, r) {
+  const vit = v.vitrines.length ? v.vitrines : [{ nom: '[vitrine à compléter]', sous: '' }]
+  const cur = r.voteIdx == null ? Math.min(3, vit.length - 1) : r.voteIdx
+  return '<div class="scr bg-o">' + barre() + '<div class="hdr"><div class="brand" style="flex:1"><span class="mono">' + esc(monogramme2(v.vitrineAsso)) + '</span><div style="min-width:0"><b>' + esc(v.vitrineAsso) + '</b><i>Vote · Vitrines de Noël</i></div></div></div>' +
+    '<div style="padding:0 20px 10px;flex:none"><h2 class="h2" style="font-size:27px">La plus belle vitrine</h2><p class="sub" style="font-size:14px;margin-top:4px">Rends-toi devant les vitrines et flashe le QR de ta préférée.</p></div>' +
+    '<div class="map">' + mapSvg() + mapPins([[90, 240, 'done'], [200, 200, 'todo', 2], [315, 160, 'todo', 3], [230, 350, 'todo here', 4], [80, 390, 'todo', 5]]) +
+    '<div class="card msheet"><div style="display:flex;gap:12px;align-items:center"><span class="pmono" style="background:#E6F7F4;color:#00796B;width:48px;height:48px">' + esc(monogramme2(vit[cur].nom)) + '</span><div style="flex:1"><div class="kicker" style="font-size:10.5px">Vitrine ' + (cur + 1) + '</div><b style="display:block;font-size:17px;font-weight:800">' + esc(vit[cur].nom) + '</b><small class="placeholder" style="font-size:12.5px">[adresse à compléter]</small></div></div><div class="surplace">' + icon('scan', 15, 2) + 'Flashe le QR collé sur la vitrine pour voter</div><button class="btn" style="margin-top:10px;min-height:48px;font-size:16px" data-go="v2-flash" data-vote="' + cur + '" data-vitrine="' + cur + '">Voter pour cette vitrine</button></div></div>' +
+    dock({ nav: 'c-commerces' }) + '</div>'
+} }
+S['v2-flash'] = { r: function (v, r) {
+  const vit = v.vitrines.length ? v.vitrines : [{ nom: '[vitrine à compléter]', sous: '', photo: '' }]
+  const i = Math.min(r.voteIdx == null ? 3 : r.voteIdx, vit.length - 1), c = vit[i]
+  const photo = c.photo && urlSure(c.photo)
+  return '<div class="scr bg-s">' + barre() + '<div class="hdr"><button class="iconbtn" data-go="@retour" data-repli="v2-carte" aria-label="Retour">' + icon('chevL', 22, 2) + '</button><div class="brand" style="flex:1"><span class="mono">' + esc(monogramme2(v.vitrineAsso)) + '</span><div style="min-width:0"><b>Vitrines de Noël</b><i>Vote · Jeu gratuit</i></div></div></div>' +
+    '<div class="body"><div class="kicker" style="margin-top:8px">Vitrine ' + (i + 1) + ' sur ' + vit.length + '</div><h2 class="h2" style="font-size:30px">' + esc(c.nom) + '</h2><div class="vitrine" style="margin-top:14px">' + (photo ? '<img alt="" src="' + photo + '">' : geo([['h', 40, 120, 200, 'var(--fl-spin)'], ['c', 210, 40, 90, '#F5A100'], ['r', 260, 140, 60, '#EAEFFB', 12], ['o', 60, 30, 50, 'var(--fl-solo)']])) + '</div>' +
+    (photo ? '' : '<p class="mention">Photo de la vitrine à fournir</p>') + '<div class="card infobox"><div class="inforow">' + icon('ticket', 21) + 'Ton vote = 1 ticket pour le tirage + ' + v.sondage.length + ' questions</div></div></div>' + foot(btn('Je vote pour cette vitrine', 'v2-sondage')) + '</div>'
+} }
+S['v2-sondage'] = { tall: true, r: function (v) {
+  const n = v.sondage.length
+  return '<div class="scr bg-w">' + barre() + '<div class="hdr"><span style="width:44px"></span><div class="ttl">A voté !<small>Vitrines de Noël</small></div><span style="width:44px"></span></div>' +
+    '<div class="body"><div class="tk" style="margin-top:6px"><div class="main"><small>Ticket · vitrines de Noël</small><b class="num">TK-1204</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° 1204</b></div></div>' +
+    v.sondage.map(function (q, i) { return '<div class="card bcard"><div class="kicker">Question ' + (i + 1) + ' / ' + n + '</div><h4>' + esc(q.label) + '</h4><div class="chips">' + q.opts.map(function (o) { return '<button class="chip" data-one="s' + i + '" data-val="' + esc(o) + '">' + esc(o) + '</button>' }).join('') + '</div></div>' }).join('') +
+    '<p class="mention" style="text-align:left">Réglé par l\'association des commerçants, un commerce ou l\'organisateur.</p></div>' + foot(btn('Valider', 'c-parrainage', '', ' data-after="c-ticket" data-sondage')) + '</div>'
+} }
+function monogramme2(nom: string): string { const m = String(nom || '').replace(/[^0-9A-Za-zÀ-ÖØ-öø-ÿ ]/g, ' ').split(/\s+/).filter(function (x) { return x && ['de', 'des', 'du', 'la', 'le', 'les', 'd', 'l'].indexOf(x.toLowerCase()) < 0 }); return !m.length ? 'FL' : m.length === 1 ? m[0].slice(0, 2).toUpperCase() : (m[0][0] + m[1][0]).toUpperCase() }
+
 /* Univers SUPER EVENT (joueur) */
 function burst(t: string, w: number, bg: string, fg: string, rot?: number, fs?: number): string {
   const pts: string[] = [], n = 22
@@ -686,7 +715,7 @@ export const DEROULES: Record<string, string[]> = {
   solo: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'c-parrainage', 'c-inscription', 'c-ticket'].concat(COMMUN_FIN),
   spin: ['s-flash', 's-accueil', 's-regles', 'r-roue', 'r-tourne', 'r-gain', 'r-ticket', 'r-perdu', 'c-parrainage', 'c-inscription', 'c-billet', 'c-ticket'].concat(COMMUN_FIN),
   tombola: ['s-flash', 's-accueil', 's-regles', 't-tirer', 't-impression', 't-res-tirage', 't-res-instant', 'c-parrainage', 'c-inscription', 'c-ticket', 'c-billet'].concat(COMMUN_FIN),
-  vote: ['s-flash', 's-accueil', 's-regles', 'v-choix', 'v-envoi', 'v-resultat', 'c-parrainage', 'c-inscription', 'c-ticket'].concat(COMMUN_FIN),
+  vote: ['s-flash', 's-accueil', 's-regles', 'v-choix', 'v-envoi', 'v-resultat', 'c-parrainage', 'c-inscription', 'c-ticket', 'v2-carte', 'v2-flash', 'v2-sondage'].concat(COMMUN_FIN),
   sej: ['sj-accueil', 'sj-carte', 'sj-station', 'sj-encours', 'sj-tickets'],
 }
 /** Ecrans qui animent quelque chose a l'entree (gere par le client). */

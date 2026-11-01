@@ -62,6 +62,10 @@ export interface ContenuMaster {
   candidats?: Candidat[]
   voteKicker?: string
   voteTitre?: string
+  /** Exemple 2 du vote : « la plus belle vitrine » (carte, QR de la vitrine, ticket + sondage). */
+  vitrines?: Candidat[]
+  sondage?: BonusMaster[]
+  vitrineAsso?: string
   images?: { hero?: string; vitrine?: string }
   partenaires?: PartenaireAffiche[]
 }
