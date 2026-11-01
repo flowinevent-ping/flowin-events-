@@ -226,6 +226,13 @@ export default function PremiereFois() {
         : (authErr?.message ?? 'La création du compte a échoué. Réessayez dans un instant.'))
       setEnvoi('error'); return
     }
+    /* Email deja inscrit : Supabase ne renvoie pas d'erreur (protection contre l'enumeration des comptes)
+       mais un faux utilisateur, sans identite. Sans ce controle, l'insertion de la fiche echoue sur la cle
+       etrangere pros_auth_id_fkey alors qu'aucun compte n'a ete cree. */
+    if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
+      setErreur('Un compte existe déjà avec cet email. Connectez-vous plutôt, ou utilisez une autre adresse.')
+      setEnvoi('error'); return
+    }
     let idPro = identifiantPro(fiche)
     const { data: existe } = await supabase.from('pros').select('id').eq('id', idPro).maybeSingle()
     if (existe) idPro = `${idPro}-${Math.random().toString(36).slice(2, 6)}`
@@ -239,7 +246,13 @@ export default function PremiereFois() {
       const r = await supabase.from('pros').insert(base)
       insErr = r.error
     }
-    if (insErr) { setErreur(`Votre compte est créé mais la fiche entreprise n’a pas pu être enregistrée (${insErr.message}). Contactez l’équipe Flowin.`); setEnvoi('error'); return }
+    if (insErr) {
+      /* 23503 = cle etrangere : le compte d'acces n'existe pas (email deja utilise ou compte non cree). */
+      setErreur(insErr.code === '23503'
+        ? 'Un compte existe déjà avec cet email, ou la création de l’accès n’a pas abouti. Connectez-vous plutôt, ou utilisez une autre adresse.'
+        : `Votre accès est créé mais la fiche entreprise n’a pas pu être enregistrée (${insErr.message}). Contactez l’équipe Flowin.`)
+      setEnvoi('error'); return
+    }
     effacerBrouillon()
     /* Le bon de commande (public/bon-commande-animation.html) reprend ces informations :
        stockage local du meme site, jamais dans l'adresse. Efface apres la commande. */
