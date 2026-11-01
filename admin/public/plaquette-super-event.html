@@ -188,6 +188,15 @@
   .b6 b{display:block;font-size:17px;font-weight:900;line-height:1.15;margin-top:6px;color:#3B2418}
   .b6 span{display:block;font-size:16px;font-weight:700;line-height:1.25;color:#3B2418;margin-top:2px}
   .srcl{margin-top:10px;font-size:16px;font-weight:700;color:#5a4a40}
+  .p3{display:grid;grid-template-columns:1fr;gap:9px;margin-top:12px}
+  .p3 div{background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:4px 4px 0 #3B2418;padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:12px}
+  .p3 b{font-family:'Bangers',cursive;font-weight:400;font-size:44px;line-height:1;color:#E2231A;letter-spacing:.02em}
+  .p3 b.tbc{font-family:inherit;font-weight:900;font-size:19px;color:#8A5200}
+  .p3 span{font-size:18px;font-weight:800;color:#3B2418;line-height:1.2;text-align:left}
+  @media (min-width:900px){ .p3{grid-template-columns:repeat(3,1fr)} .p3 div{flex-direction:column;padding:16px 12px;gap:6px} .p3 span{text-align:center;font-size:20px} .p3 b{font-size:64px} .p3 b.tbc{font-size:22px} }
+  .bul3.big div{background:#fff;border:3px solid #3B2418;border-radius:14px;box-shadow:4px 4px 0 #3B2418;padding:10px 14px;font-size:19px}
+  .bul3.big .ic{width:44px;height:44px;color:#E2231A}
+  @media (min-width:900px){ .bul3.big{max-width:none;gap:16px} .bul3.big div{flex-direction:column;text-align:center;font-size:21px;padding:18px 14px;gap:10px} .bul3.big .ic{width:64px;height:64px} }
   .proof-se small{display:block;font-size:16px;font-weight:700;margin-top:2px}
   .sheet{display:none;position:absolute;inset:0;z-index:6;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:26px 16px 22px;background:#FFFDF5;flex-direction:column}
   .sheet.on{display:flex}
@@ -320,80 +329,90 @@
     <div class="in sev">
       <div class="herohead"><div class="logo fl">Flow<em>in</em></div><div class="aud">Organisateurs &amp; institutions</div></div>
       <svg class="sel" role="img" aria-label="Super event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
-      <h2>Un &eacute;v&eacute;nement. <em>Tous ses partenaires.</em> Un seul jeu.</h2>
+      <h2>Animez vos <em>futurs participants</em>.</h2>
       <div class="sv" style="--ar:1.18" data-v="1"></div>
-      <p class="cp">Cr&eacute;ez l&rsquo;&eacute;v&eacute;nement avant l&rsquo;&eacute;v&eacute;nement, rassemblez pendant.</p>
+      <p class="cp">Un jeu au th&egrave;me de votre &eacute;v&eacute;nement, avec tous ses partenaires.</p>
     </div>
   </section>
 
-  <!-- 2. AVANT, PENDANT, APRÈS -->
-  <section class="pg pg-super" id="temps" data-titre="Avant, pendant, apr&egrave;s">
+  <!-- 2. ANIMER : AVANT, PENDANT, APRÈS -->
+  <section class="pg pg-super" id="temps" data-titre="Animer, communiquer, faire participer">
     <div class="in sev">
-      <div class="se-eye">Un jeu qui rassemble</div>
+      <div class="se-eye">Animer, communiquer, faire participer</div>
       <h2>Avant, pendant, <em>apr&egrave;s</em>.</h2>
       <div class="temps4 t3">
-        <div class="t4"><div class="pic" data-s3="2"></div><div><span class="nb">1</span><b>Avant</b><span class="d">Cr&eacute;ez l&rsquo;&eacute;v&eacute;nement avant l&rsquo;&eacute;v&eacute;nement : vos partenaires en parlent, le jeu est au th&egrave;me.</span></div></div>
-        <div class="t4"><div class="pic" data-s3="3"></div><div><span class="nb">2</span><b>Pendant</b><span class="d">Rassemblez : des stations-jeux au festival et chez les partenaires.</span></div></div>
-        <div class="t4"><div class="pic" data-s3="4"></div><div><span class="nb">3</span><b>Apr&egrave;s</b><span class="d">Des lots en lien avec l&rsquo;&eacute;v&eacute;nement, un retour d&rsquo;exp&eacute;rience.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="2"></div><div><span class="nb">1</span><b>Avant</b><span class="d">Communiquez en m&ecirc;me temps que vous : le jeu fait participer.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="3"></div><div><span class="nb">2</span><b>Pendant</b><span class="d">Des stations-jeux au festival et chez les partenaires.</span></div></div>
+        <div class="t4"><div class="pic" data-s3="4"></div><div><span class="nb">3</span><b>Apr&egrave;s</b><span class="d">Vos lots (places &agrave; gagner) et ceux de vos partenaires.</span></div></div>
       </div>
     </div>
   </section>
 
-  <!-- 3. UN JEU QUI DIFFUSE, AU THÈME -->
-  <section class="pg pg-super" id="diffuse" data-titre="Un jeu au th&egrave;me de l&rsquo;&eacute;v&eacute;nement">
+  <!-- 3. VISIBILITÉ : PARTENAIRES RELAIS -->
+  <section class="pg pg-super" id="carte" data-titre="Plus de visibilit&eacute;">
     <div class="in sev">
-      <div class="se-eye">Un jeu qui diffuse</div>
-      <h2>Un jeu <em>au th&egrave;me</em> de votre &eacute;v&eacute;nement.</h2>
-      <div class="sv" style="--ar:1.2" data-v="9"></div>
-      <p class="cp">Quiz et jeu au th&egrave;me du festival : vos partenaires locaux le diffusent.</p>
-    </div>
-  </section>
-
-  <!-- 4. STATIONS-JEUX PARTOUT -->
-  <section class="pg pg-super" id="carte" data-titre="Des stations-jeux partout">
-    <div class="in sev">
-      <div class="se-eye">La carte des stations</div>
-      <h2>Des stations-jeux <em>partout</em>.</h2>
+      <div class="se-eye">Visibilit&eacute;</div>
+      <h2>Augmentez votre <em>visibilit&eacute;</em>.</h2>
       <div class="sv" style="--ar:1.2" data-v="6"></div>
       <div class="leg2"><span><i class="lg1"></i>Au festival</span><span><i class="lg2"></i>Chez les partenaires</span></div>
-      <div class="tick" aria-hidden="true"><div class="tr"><span>&starf; F&ecirc;te de la musique Exemple &starf; Caf&eacute; Exemple &starf; Boutique Exemple &starf; H&ocirc;tel Exemple &starf; Librairie Exemple </span><span>&starf; F&ecirc;te de la musique Exemple &starf; Caf&eacute; Exemple &starf; Boutique Exemple &starf; H&ocirc;tel Exemple &starf; Librairie Exemple </span></div></div>
+      <p class="cp">Vos partenaires diffusent le jeu &agrave; leurs clients, sur leur lieu de vente. Vous relayez aussi les commerces alentour.</p>
     </div>
   </section>
 
-  <!-- 5. PARTENAIRES À L'HONNEUR + LOTS -->
-  <section class="pg pg-super" id="honneur" data-titre="Vos partenaires &agrave; l&rsquo;honneur">
+  <!-- 4. QUIZ ET SONDAGES PERSONNALISABLES -->
+  <section class="pg pg-super" id="quiz" data-titre="Quiz et sondages">
     <div class="in sev">
-      <div class="se-eye">Mise &agrave; l&rsquo;honneur</div>
-      <h2>Vos partenaires <em>&agrave; l&rsquo;honneur</em>.</h2>
-      <div class="sv" style="--ar:1.18" data-v="7"></div>
-      <p class="cp">Lots valables pendant l&rsquo;&eacute;v&eacute;nement : places, pass, lots chez les commer&ccedil;ants, nouveaut&eacute;s mises en avant.</p>
-    </div>
-  </section>
-
-  <!-- 6. RETOUR D'EXPÉRIENCE -->
-  <section class="pg pg-super" id="apports" data-titre="Retour d&rsquo;exp&eacute;rience">
-    <div class="in sev">
-      <div class="se-eye">Pour l&rsquo;organisateur</div>
-      <h2>Un retour d&rsquo;exp&eacute;rience <em>en jouant</em>.</h2>
+      <div class="se-eye">Quiz et sondages personnalisables</div>
+      <h2>Vos questions, <em>votre message</em>.</h2>
       <div class="ben6">
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-contact"/></svg></div><b>Garder le contact</b></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-quiz"/></svg></div><b>Sondage</b></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-libre"/></svg></div><b>D&eacute;marche RSE</b></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-ok"/></svg></div><b>Qualit&eacute; de l&rsquo;&eacute;v&eacute;nement</b></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-star"/></svg></div><b>Renforcer la marque</b></div>
-        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-rapport"/></svg></div><b>Rapport de mesure</b></div>
+        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-book"/></svg></div><b>Connaissance</b><span>Quiz sur l&rsquo;&eacute;v&eacute;nement</span></div>
+        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-star"/></svg></div><b>Marque</b><span>Quiz &agrave; vos couleurs</span></div>
+        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-quiz"/></svg></div><b>Int&eacute;r&ecirc;t</b><span>Donnez envie d&rsquo;y venir</span></div>
+        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-libre"/></svg></div><b>RSE, &eacute;cologie</b><span>Sondage et sensibilisation</span></div>
+        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-ok"/></svg></div><b>S&eacute;curit&eacute;, violence</b><span>Sondage et sensibilisation</span></div>
+        <div class="b6"><div class="bi"><svg class="ic"><use href="#i-carte"/></svg></div><b>Transport, mobilit&eacute;</b><span>Sondage et sensibilisation</span></div>
       </div>
-      <p class="srcl">70 % d&rsquo;opt-in sur un &eacute;v&eacute;nement local. Source : Festival Nuits du Sud 2026.</p>
     </div>
   </section>
 
-  <!-- 7. COMMUNICATION MUTUALISÉE -->
-  <section class="pg pg-super" id="zone" data-titre="Communication mutualis&eacute;e">
+  <!-- 5. COMMUNAUTÉ -->
+  <section class="pg pg-super" id="communaute" data-titre="Une communaut&eacute;">
     <div class="in sev">
-      <div class="se-eye">Communication</div>
-      <h2>Une communication <em>mutualis&eacute;e</em>.</h2>
-      <div class="sv" style="--ar:1.2" data-v="10"></div>
-      <p class="cp">Partagez la communication de l&rsquo;&eacute;v&eacute;nement en local et sur une zone plus &eacute;tendue, via les partenaires et le jeu.</p>
+      <div class="se-eye">Communaut&eacute;</div>
+      <h2>Une communaut&eacute; <em>&agrave; qui parler</em>.</h2>
+      <div class="bul3 big">
+        <div><svg class="ic"><use href="#i-contact"/></svg>Vos participants deviennent une communaut&eacute;.</div>
+        <div><svg class="ic"><use href="#i-mail"/></svg>Vous vous adressez directement &agrave; eux, avec leur accord.</div>
+        <div><svg class="ic"><use href="#i-jeu"/></svg>Un jeu qui f&eacute;d&egrave;re, toute l&rsquo;ann&eacute;e.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. TICKETS ET TIRAGE AU SORT -->
+  <section class="pg pg-super" id="tickets" data-titre="Tickets et tirage au sort">
+    <div class="in sev">
+      <div class="se-eye">Le jeu</div>
+      <h2>Cumulez des tickets, <em>tentez de gagner</em>.</h2>
+      <div class="bul3 big">
+        <div><svg class="ic"><use href="#i-quiz"/></svg>&Agrave; chaque station, on r&eacute;pond au quiz.</div>
+        <div><svg class="ic"><use href="#i-gift"/></svg>Chaque r&eacute;ponse fait cumuler des tickets.</div>
+        <div><svg class="ic"><use href="#i-trophee"/></svg>Concours par tirage au sort &agrave; la fin de l&rsquo;&eacute;v&eacute;nement.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. PREUVE : NUITS DU SUD 2026 (source : docs/EMAILS-NDS2026-cloture.md, liste des lots de clôture) -->
+  <section class="pg pg-super" id="preuve" data-titre="La preuve">
+    <div class="in sev">
+      <div class="se-eye">La preuve</div>
+      <h2>Nuits du Sud 2026 : <em>51 lots offerts</em>.</h2>
+      <div class="p3">
+        <div><b>51</b><span>lots offerts</span></div>
+        <div><b>6</b><span>commerces de Vence</span></div>
+        <div><b class="tbc">[chiffre &agrave; confirmer]</b><span>valeur des gains offerts</span></div>
+      </div>
+      <p class="cp">Des lots qui valorisent le tissu et le d&eacute;veloppement locaux.</p>
+      <p class="srcl">Source : liste des lots de cl&ocirc;ture, Nuits du Sud 2026.</p>
     </div>
   </section>
 
@@ -409,7 +428,6 @@
         <div><svg class="ic"><use href="#i-cal"/></svg>Pr&ecirc;t en quelques minutes.</div>
       </div>
       <div class="btns cbtns"><button class="cbtn" type="button" id="cta">Parlons de votre prochain &eacute;v&eacute;nement</button></div>
-      <p class="proof-se">Nuits du Sud 2026 : 24&nbsp;000 festivaliers, 80 % de locaux.<small>Source : pr&eacute;sentation partenaires NDS 2026.</small></p>
     </div>
   </section>
 

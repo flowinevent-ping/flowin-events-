@@ -89,6 +89,17 @@
   .ss-pill{display:inline-block;margin-top:9px;background:var(--violet);color:#fff;font-weight:800;font-size:12.5px;padding:7px 18px;border-radius:100px}
   .claim{font-size:clamp(25px,5.4vw,38px);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:26px}
   .claim span{color:var(--blue)}
+  .hb{list-style:none;display:flex;flex-direction:column;gap:6px;margin:12px auto 0;max-width:420px;text-align:left}
+  .hb li{display:flex;align-items:center;gap:10px;font-size:clamp(16px,2.2vw,19px);font-weight:800;line-height:1.2}
+  .hb .ic{flex:none;width:30px;height:30px;color:var(--violet)}
+  .hb li:nth-child(2) .ic{color:var(--blue)}
+  .tbv{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#8A5200;background:#FFF1D6;border-radius:100px;padding:3px 10px}
+  .blk ul{list-style:none;display:flex;flex-direction:column;gap:6px;text-align:left;width:100%}
+  .blk li{font-size:17px;font-weight:700;color:var(--muted);line-height:1.28;padding-left:20px;position:relative}
+  .blk li:before{content:'';position:absolute;left:2px;top:.5em;width:9px;height:9px;border-radius:50%;background:var(--violet)}
+  .blk li b{color:var(--ink);font-weight:900}
+  @media (max-width:759px){ #superevent .sel{display:none} #superevent .blk li{font-size:16px;line-height:1.22} #superevent .blk ul{gap:3px} #superevent .bic{display:none} }
+  @media (max-height:860px){ .home .hb{gap:4px;margin-top:8px} .home .lede{display:none} .home .doors{margin-top:14px} }
   .blob{position:absolute;pointer-events:none;z-index:0}
 
   /* 2. Réseau */
@@ -477,7 +488,7 @@
   .pick .badge{position:static;align-self:flex-start;margin:-2px 0 5px}
   .recap{min-width:0}
   @media (min-width:860px){ .cfg{grid-template-columns:minmax(0,1fr) 300px} }
-  @media (min-width:760px){ .why{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media (min-width:760px){ .why{grid-template-columns:repeat(2,minmax(0,1fr))} }
   @media (min-width:900px){ .ben6{grid-template-columns:repeat(3,minmax(0,1fr))} .chips4{grid-template-columns:repeat(4,minmax(0,1fr))} .temps4:not(.t3){grid-template-columns:repeat(4,minmax(0,1fr))} .t3{grid-template-columns:repeat(3,minmax(0,1fr))} }
 </style>
 </head>
@@ -546,8 +557,15 @@
     <div class="in home">
       <div class="logo">Flow<em>in</em></div>
       <div class="sign-stack"><div class="ss-eyebrow">Animation digitale</div><div class="ss-pill">Plug &amp; Play</div></div>
-      <p class="claim">Activez vos clients dormants.<br><span>Augmentez la fid&eacute;lit&eacute;.</span><br>Augmentez le trafic.</p>
-      <p class="lede">Chacun son jeu, chacun son animation : Flowin la cr&eacute;e pour vous, sans gestion de votre part.</p>
+      <!-- ACCROCHE PROVISOIRE, A VALIDER par Romain -->
+      <p class="claim">Et si votre commerce<br><span>animait ses clients&nbsp;?</span></p>
+      <ul class="hb">
+        <li><svg class="ic"><use href="#i-client"/></svg>Constituez votre fichier client</li>
+        <li><svg class="ic"><use href="#i-gift"/></svg>Augmentez la fid&eacute;lit&eacute;</li>
+        <li><svg class="ic"><use href="#i-contact"/></svg>Augmentez le trafic</li>
+      </ul>
+      <span class="tbv">Accroche provisoire &middot; &agrave; valider</span>
+      <p class="lede">L&rsquo;animation commerciale par le jeu, cr&eacute;&eacute;e pour vous par Flowin, sans gestion de votre part.</p>
       <div class="doors">
         <button class="door" type="button" data-go="pourquoi"><span class="dc"><svg class="ic"><use href="#i-vitrine"/></svg></span><span><b>J&rsquo;ai un commerce</b><small>Faites jouer vos clients, gardez le contact</small></span><span class="da">&rarr;</span></button>
         <a class="door alt" href="/plaquette-super-event.html"><span class="dc"><svg class="ic"><use href="#i-mega"/></svg></span><span><b>J&rsquo;organise un &eacute;v&eacute;nement</b><small>Ou je repr&eacute;sente une institution</small></span><span class="da">&rarr;</span></a>
@@ -557,18 +575,18 @@
   </section>
 
   <!-- 2. RELANCER SES CLIENTS -->
-  <section class="pg bg-paper" id="pourquoi" data-titre="Relancez vos clients">
+  <section class="pg bg-paper" id="pourquoi" data-titre="Pourquoi Flowin">
     <div class="in wide">
       <div class="eyebrow">Flowin Animation</div>
-      <h2>Un jeu pour <em>activer vos clients</em>.</h2>
-      <p class="lede big">Vous cr&eacute;ez votre animation : quiz, roue ou tombola, comme vous le souhaitez.</p>
+      <h2>L&rsquo;animation commerciale <em>par le jeu</em>.</h2>
+      <p class="lede big">Un jeu &agrave; votre image, personnalisable : quiz, roue ou tombola.</p>
       <div class="why">
-        <div class="card wy"><svg class="ic"><use href="#i-client"/></svg><div><b>Activez vos clients dormants</b><small>Un fichier client qui dort, un jeu qui le r&eacute;veille</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-client"/></svg><div><b>Constituez votre fichier client</b><small>Chaque joueur qui y consent devient un contact. Restaurateurs : Flowin vous en donne un.</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-contact"/></svg><div><b>Augmentez le trafic</b><small>De nouveaux clients, plus de passage, plus de visibilit&eacute;</small></div></div>
         <div class="card wy"><svg class="ic"><use href="#i-gift"/></svg><div><b>Augmentez la fid&eacute;lit&eacute;</b><small>Des lots &agrave; retirer chez vous : ils reviennent</small></div></div>
-        <div class="card wy"><svg class="ic"><use href="#i-contact"/></svg><div><b>Augmentez le trafic</b><small>Plus de passage, plus de visibilit&eacute;</small></div></div>
-        <div class="card wy"><svg class="ic"><use href="#i-rapport"/></svg><div><b>Cr&eacute;ez du lien</b><small>Un jeu pour dialoguer avec vos clients</small></div></div>
+        <div class="card wy"><svg class="ic"><use href="#i-rapport"/></svg><div><b>Activez vos clients dormants</b><small>Un jeu pour les raviver, avec leur accord</small></div></div>
       </div>
-      <p class="sans"><b>Sans gestion :</b> Flowin cr&eacute;e l&rsquo;animation pour vous, et un espace d&eacute;di&eacute; vous aide &agrave; piloter votre visibilit&eacute;.</p>
+      <p class="sans"><b>Et aussi :</b> mesurez vos actions commerciales, renforcez votre marque. Seuls les joueurs qui ont dit oui peuvent &ecirc;tre contact&eacute;s. <b>Sans gestion</b> de votre part.</p>
     </div>
   </section>
 
@@ -742,14 +760,22 @@
       <div class="blks">
         <div class="card blk">
           <svg class="sel" role="img" aria-label="Super event" viewBox="0 0 437.4 92.6"><use href="#fl-super-event"/></svg>
-          <h3>Un Super event pr&egrave;s de chez vous ? Rejoignez-le.</h3>
-          <p>Un jeu qui rassemble les commerces autour d&rsquo;un th&egrave;me : plus de passage chez vous.</p>
+          <h3>Soyez partenaire d&rsquo;un &eacute;v&eacute;nement</h3>
+          <ul>
+            <li><b>Apparaissez</b> pendant l&rsquo;&eacute;v&eacute;nement.</li>
+            <li><b>Faites gagner des lots</b> li&eacute;s &agrave; l&rsquo;&eacute;v&eacute;nement.</li>
+            <li><b>Relayez</b> sa communication sur vos r&eacute;seaux.</li>
+          </ul>
           <a class="btn" href="/pro/rejoindre">Rejoindre un Super event</a>
         </div>
         <div class="card blk">
           <div class="bic"><svg class="ic"><use href="#i-star"/></svg></div>
-          <h3>Vous souhaitez appara&icirc;tre dans Flowin ?</h3>
-          <p>Votre fiche, votre logo dans le bandeau et l&rsquo;annuaire des partenaires : soyez mis &agrave; l&rsquo;honneur.</p>
+          <h3>Devenez station-jeu</h3>
+          <ul>
+            <li><b>Augmentez votre trafic</b> : les festivaliers jouent chez vous.</li>
+            <li><b>Soyez mis &agrave; l&rsquo;honneur</b> pour les lots distribu&eacute;s.</li>
+            <li><b>Faites revenir vos clients</b> : bons de remise &agrave; gagner chez vous.</li>
+          </ul>
           <button class="btn line" type="button" id="partBtn">&Ecirc;tre contact&eacute;</button>
         </div>
       </div>
