@@ -77,7 +77,7 @@ export function lignesCommande(r: Commande): Ligne[] {
   else l.push({ lib: "Formule mensuelle Flowin, jeu d'animation, 1er mois", det: "Engagement 3 mois minimum, puis 110 € HT par mois", q: 1, ht: Number(r.montant_abonnement_ht) });
   if (r.kit === "physique") l.push({ lib: "Kit physique imprimé", det: "Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons", q: Number(r.nb_boutiques), ht: Number(r.montant_kit_ht) });
   else l.push({ lib: "Kit digital", det: "Fichiers à imprimer, QR inclus", q: 1, ht: 0 });
-  if (Number(r.opt_quiz_qte) > 0) l.push({ lib: "Option : quiz personnalisé", det: "180 € HT par événement", q: Number(r.opt_quiz_qte), ht: 180 * Number(r.opt_quiz_qte) });
+  if (Number(r.opt_quiz_qte) > 0) l.push({ lib: "Option : quiz personnalisé", det: "180 € HT par animation", q: Number(r.opt_quiz_qte), ht: 180 * Number(r.opt_quiz_qte) });
   if (Number(r.opt_bonus_qte) > 0) l.push({ lib: "Option : questions bonus", det: "180 € HT", q: Number(r.opt_bonus_qte), ht: 180 * Number(r.opt_bonus_qte) });
   return l;
 }

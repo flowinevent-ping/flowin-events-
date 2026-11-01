@@ -63,6 +63,7 @@ import { creerQrTrace, QR_PAR_DEFAUT, type TypeQr } from '@/lib/qrTraces'
 import SelecteurLot, { RecapLots, LogoSuperEvent, CarteSuperEvent } from '@/components/masters/SelecteurLot'
 import PersoMaster, { ChoixAchat, cfgMaster, MASTER_VIDE, type EtatMaster } from '@/components/masters/PersoMaster'
 import { DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
+import { messageFr } from '@/lib/erreursFr'
 
 type TypeOp = 'animation' | 'rejoindre' | 'super' | 'demande'
 export type ModeParcours = 'pro' | 'sa'
@@ -139,7 +140,7 @@ export const PC_CSS = `.nop-carte{position:relative;overflow:hidden;display:flex
   .pc-step.done{color:#16a34a;cursor:pointer}
   .pc-step.done .n{background:#16a34a}
   .pc-grille{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
-  @media (max-width:1020px){.pc-grille{grid-template-columns:1fr}}
+  @media (max-width:1020px){.pc-grille{grid-template-columns:minmax(0,1fr)}}
   .pc-qr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   @media (max-width:720px){.pc-qr{grid-template-columns:1fr}}
   .pc-qr-tuile{background:#fff;border:1.5px solid ${C.bordure};border-radius:16px;padding:16px;text-align:center}
@@ -430,7 +431,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       }
       if (!sa) {
         const { error } = await supabase.from('demandes_rattachement_super_event').insert(ligne)
-        if (error) { setEnvoi('echec'); setErreur(error.message); return }
+        if (error) { setEnvoi('echec'); setErreur(messageFr(error)); return }
         setFait({ eventId: null, superId: seId }); setEnvoi('')
         return
       }
@@ -440,12 +441,12 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       const coords = persona === 'commerce' ? await geocoderAdresse(ligne.adresse, ligne.code_postal, ligne.ville).catch(() => null) : null
       const { data: ins, error: eIns } = await supabasePublic.from('demandes_rattachement_super_event')
         .insert({ ...ligne, ...(coords ? { lat: coords.lat, lng: coords.lng } : {}) }).select('id').single()
-      if (eIns || !ins) { setEnvoi('echec'); setErreur(eIns?.message ?? 'demande non enregistrée'); return }
+      if (eIns || !ins) { setEnvoi('echec'); setErreur(eIns ? messageFr(eIns) : 'Votre demande n’a pas pu être enregistrée.'); return }
       const { data, error } = await supabasePublic.rpc('approuver_demande_rattachement', { p_id: (ins as { id: number }).id })
       const r = (data ?? {}) as { ok?: boolean; erreur?: string; event_id?: string | null }
       if (error || !r.ok) {
         setEnvoi('echec')
-        setErreur(`la demande est enregistrée mais le rattachement n’a pas abouti (${error?.message ?? r.erreur ?? 'erreur inconnue'}) : elle reste dans « Demandes de participation »`)
+        setErreur(`la demande est enregistrée mais le rattachement n’a pas abouti (${error ? messageFr(error) : r.erreur ?? 'erreur inconnue'}) : elle reste dans « Demandes de participation »`)
         return
       }
       const infoQr = r.event_id ? await enregistrerQr(r.event_id) : ''
@@ -476,7 +477,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
       let info = r.erreur
       if (lignes.length) {
         const { error } = await supabasePublic.from('se_lots').insert(lignes)
-        if (error) info = `Super event créé, mais ses lots n’ont pas été enregistrés — ${error.message}`
+        if (error) info = `Super event créé, mais ses lots n’ont pas été enregistrés — ${messageFr(error)}`
       }
       setFait({ eventId: null, superId: id, info }); setEnvoi('')
       return
@@ -555,7 +556,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
               L’équipe Flowin vous recontacte pour monter « {dNom.trim()} » avec vous. Une fois le super event créé, vous le rejoignez depuis cet écran.
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 18 }}>
-              <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
+              <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
             </div>
           </div>
           <BlocAide />
@@ -590,7 +591,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             {fait.info && <div style={{ fontSize: 13, color: '#B45309', fontWeight: 700, marginBottom: 14 }}>{fait.info}</div>}
             {rejoindre && (
               <div style={{ border: `1.5px solid ${C.bordure}`, borderRadius: 18, padding: '6px 16px', marginBottom: 16, background: '#fff' }}>
-                {[['Événement', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : 'En attente de validation']].map(([k, v]) => (
+                {[['Super event', se?.nom ?? '—'], ['Jeu', libelleModule(moduleActif || GABARIT_MODULE)], ['Statut', sa ? 'Station créée' : 'En attente de validation']].map(([k, v]) => (
                   <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '11px 0', borderTop: k === 'Événement' ? 'none' : `1px solid ${C.bordure}` }}>
                     <span style={{ ...MUTED, fontSize: 13 }}>{k}</span><b style={{ fontSize: 14 }}>{v}</b>
                   </div>
@@ -623,9 +624,9 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 <div style={{ fontSize: 13, fontWeight: 800, margin: '18px 0 8px' }}>Le texte pour l’annoncer</div>
                 <textarea readOnly value={texte} style={{ ...CHAMP, minHeight: 150, resize: 'vertical' }} />
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                  <a style={{ ...BTN2, textDecoration: 'none' }} target="_blank" rel="noreferrer"
+                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer"
                     href={`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(nomAffiche)}&body=${encodeURIComponent(texte)}`}>Email</a>
-                  <a style={{ ...BTN2, textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
+                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(texte)}`}>WhatsApp</a>
                   <button style={BTN2} onClick={() => navigator.clipboard?.writeText(texte)}>Copier (Instagram, SMS…)</button>
                 </div>
               </>
@@ -636,14 +637,14 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
               {sa ? (
                 <>
-                  {fait.superId && (estSuper || rejoindre) && <a style={{ ...BTN, textDecoration: 'none' }} href={`/dashboard/operations/${encodeURIComponent(fait.superId)}`}>Ouvrir le super event →</a>}
-                  {!estSuper && !rejoindre && <a style={{ ...BTN, textDecoration: 'none' }} href="/dashboard/events">Voir les animations →</a>}
-                  {p.id && <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro/historique${q}${opCle ? `&op=${encodeURIComponent(opCle)}` : ''}`}>Voir l’espace du pro</a>}
+                  {fait.superId && (estSuper || rejoindre) && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href={`/dashboard/operations/${encodeURIComponent(fait.superId)}`}>Ouvrir le super event →</a>}
+                  {!estSuper && !rejoindre && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href="/dashboard/events">Voir les animations →</a>}
+                  {p.id && <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro/historique${q}${opCle ? `&op=${encodeURIComponent(opCle)}` : ''}`}>Voir l’espace du pro</a>}
                 </>
               ) : (
                 <>
-                  {opCle && <a style={{ ...BTN, textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
-                  <a style={{ ...BTN2, textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
+                  {opCle && <a style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }} href={`/pro/historique${q}&op=${encodeURIComponent(opCle)}`}>Ouvrir mon opération →</a>}
+                  <a style={{ ...BTN2, display: 'inline-block', textDecoration: 'none' }} href={`/pro${q}`}>Mes opérations</a>
                 </>
               )}
             </div>
@@ -678,7 +679,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           </div>
           {sa && onChangerPro && <button onClick={onChangerPro} style={{ ...BTN2, marginLeft: 'auto', padding: '9px 16px', fontSize: 13 }}>Changer de pro</button>}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 16 }}>
           {cartes.map(c => (
             <button key={c.t} className={`nop-carte${type === c.t ? ' nop-actif' : ''}`}
               style={{ ...choix(false), padding: '34px 26px 28px', background: '#fff', ['--acc' as string]: c.accent, ['--acc-tint' as string]: `${c.accent}17` } as React.CSSProperties}
@@ -698,7 +699,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
             <Champ label="Nom envisagé"><input style={CHAMP} value={dNom} onChange={e => setDNom(e.target.value)} placeholder="Ex. Fête des commerçants 2027" /></Champ>
             <Champ label="Période souhaitée"><input style={CHAMP} value={dDates} onChange={e => setDDates(e.target.value)} placeholder="Ex. du 12 au 20 juin 2027" /></Champ>
             <Champ label="Votre projet"><textarea style={{ ...CHAMP, minHeight: 84 }} value={dDescription} onChange={e => setDDescription(e.target.value)} placeholder="Le lieu, le nombre de commerces envisagés, le public…" /></Champ>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(180px,100%),1fr))', gap: 10 }}>
               <Champ label="Personne à contacter"><input style={CHAMP} value={contactNom} onChange={e => setContactNom(e.target.value)} /></Champ>
               <Champ label="Téléphone"><input style={CHAMP} value={contactTel} onChange={e => setContactTel(e.target.value)} /></Champ>
               <Champ label="Email"><input style={CHAMP} value={contactEmail} onChange={e => setContactEmail(e.target.value)} /></Champ>
@@ -812,7 +813,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                 </div>
               )}
               {supers.length === 0 && <div style={{ fontSize: 13, ...MUTED, marginBottom: 12 }}>Aucun super event ouvert aux inscriptions pour le moment.</div>}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 10, marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(300px,100%),1fr))', gap: 10, marginBottom: 18 }}>
                 {supers.map(s => (
                   <CarteSuperEvent key={s.id} nom={s.nom} dates={libelleDates(s.date_d, s.date_f)} jeu={libelleModule(s.module || GABARIT_MODULE)} actif={seId === s.id} onClick={() => setSeId(s.id)} />
                 ))}
@@ -864,7 +865,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
           {etape === 2 && !rejoindre && (
             <>
               <Titre t="Quel jeu ?" s={estSuper ? 'Choisi une fois pour tout le super event : chaque station le propose. Tirage au sort uniquement.' : 'Touchez un jeu : il s’affiche à droite tel que les clients le verront.'} />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 10, marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(170px,100%),1fr))', gap: 10, marginBottom: 18 }}>
                 {jeuxProposes.map(g => (
                   <button key={g.m} style={{ ...choix(module_ === g.m), display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }} onClick={() => { if (module_ !== g.m) { setModule(g.m); setCfgJeu({}) } }}>
                     <span style={{ width: 40, height: 40, borderRadius: 999, background: module_ === g.m ? C.accent : `${C.accent}14`, color: module_ === g.m ? '#fff' : C.accent, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IcoModule module={g.m} size={20} /></span>
@@ -898,7 +899,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
+                    {(sa || droits.creer_banques) && <a href={sa ? '/dashboard/banques' : `/pro/banques/nouvelle${q}&tags=quiz&depuis=jeu`} target="_blank" rel="noreferrer" style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', padding: '9px 16px', fontSize: 13 }}>+ Créer une banque</a>}
                     <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(panneauSuggestions ? { borderColor: C.magenta } : {}) }} onClick={() => { setPanneauSuggestions(v => !v); setVoieFlowin(false) }}>3 questions suggérées, à adapter</button>
                     {!sa && <button style={{ ...BTN2, padding: '9px 16px', fontSize: 13, ...(voieFlowin ? { borderColor: C.magenta } : {}) }} onClick={() => { setVoieFlowin(true); setBanqueId(null); setPanneauSuggestions(false) }}>Je n’ai pas de questions : demander à Flowin</button>}
                   </div>

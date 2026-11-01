@@ -9,7 +9,7 @@
  * l operation avec ses chiffres, barre d onglets fixe en haut, contenu en
  * dessous. Aucune emoticone.
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchOperationsPro, libelleDates, libelleModule, type OperationsPro } from '@/lib/operations'
 import { ONGLETS_OP, LIBELLE_PERIODE, periodeOperation, type OngletOp } from '@/lib/ongletsOperation'
 import { ContenuLots, BoutonGererLots, ContenuComm, ContenuContrat, ContenuTracking } from '@/components/operations/BlocsOperations'
@@ -21,10 +21,17 @@ import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, MUTED, BTN2 } from '@/lib/proui'
 import { COULEURS_ETAPES } from '@/components/parcours/BandeauEtapes'
 
-export default function FicheOperationPro({ initial, cle, onglet: ongletInitial, contacts }: { initial: OperationsPro; cle: string; onglet: OngletOp; contacts: ContactPro[] }) {
+/** Sur un super event, l'onglet des contacts s'appelle « Participants » (ses droits sont rappeles dans l'onglet). */
+function libelleOnglet(id: string, label: string, type: string): string { return id === 'crm' && type === 'super' ? 'Participants' : label }
+
+export default function FicheOperationPro({ initial, cle, onglet: ongletInitial, contacts, erreurContacts }: { initial: OperationsPro; cle: string; onglet: OngletOp; contacts: ContactPro[]; erreurContacts?: string | null }) {
   const [data, setData] = useState(initial)
   const [onglet, setOnglet] = useState<OngletOp>(ongletInitial)
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
+  /* Petit ecran : la barre d'onglets defile ; l'onglet actif (ex. « Participants ») doit rester visible. */
+  useEffect(() => {
+    try { document.querySelector(`[data-onglet="${onglet}"]`)?.scrollIntoView({ inline: 'center', block: 'nearest' }) } catch { /* rien */ }
+  }, [onglet])
   const op = data.operations.find(o => o.cle === cle)
   const q = `?pro=${encodeURIComponent(initial.proId)}`
   if (!op) return <div style={CARD}>Animation introuvable. <a href={`/pro${q}`} style={{ color: C.accent, fontWeight: 700 }}>Mes animations</a></div>
@@ -90,10 +97,10 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
       <div style={{ position: 'sticky', top: 0, zIndex: 5, background: C.fond, padding: '10px 0 8px' }}>
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5 }}>
           {ONGLETS_OP.map(o => (
-            <button key={o.id} onClick={() => changer(o.id)}
+            <button key={o.id} data-onglet={o.id} aria-current={onglet === o.id ? 'page' : undefined} onClick={() => changer(o.id)}
               style={{ border: 'none', borderRadius: 12, padding: '8px 13px', fontWeight: 800, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit',
                 background: onglet === o.id ? C.degrade : 'transparent', color: onglet === o.id ? '#fff' : C.texte }}>
-              {o.label}
+              {libelleOnglet(o.id, o.label, op.type)}
             </button>
           ))}
         </div>
@@ -101,7 +108,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
 
       <div style={{ ...CARD, padding: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <div style={{ fontSize: 16, fontWeight: 800, flex: 1 }}>{ONGLETS_OP.find(o => o.id === onglet)?.label}</div>
+          <div style={{ fontSize: 16, fontWeight: 800, flex: 1 }}>{libelleOnglet(onglet, ONGLETS_OP.find(o => o.id === onglet)?.label ?? '', op.type)}</div>
           {onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} cotePro />}
         </div>
 
@@ -123,7 +130,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
         {onglet === 'diffusion' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
         {onglet === 'gagnants' && <BlocGagnants op={op} data={data} onChange={recharger} />}
         {onglet === 'trafic' && <ContenuTracking op={op} proId={data.proId} onStation={id => { window.location.href = `/pro/super/${encodeURIComponent(id)}${q}` }} masquerGlobal />}
-        {onglet === 'crm' && <CrmPro proId={data.proId} proNom={data.proNom ?? ''} contacts={contacts} operations={[]} operationFixe={op.cle} />}
+        {onglet === 'crm' && <CrmPro proId={data.proId} proNom={data.proNom ?? ''} contacts={contacts} erreur={erreurContacts} operations={[]} operationFixe={op.cle} />}
         {onglet === 'bons' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
       </div>
     </div>

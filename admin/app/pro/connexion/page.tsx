@@ -21,7 +21,7 @@ export default function ConnexionProPage() {
     setErreur('')
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd })
     if (error || !data.user) {
-      setErreur(error?.message === 'Invalid login credentials' ? 'Email ou mot de passe incorrect.' : (error?.message ?? 'Erreur de connexion.'))
+      setErreur(error?.message === 'Invalid login credentials' ? 'Email ou mot de passe incorrect.' : (error?.message === 'Email not confirmed' ? 'Votre email n’est pas encore confirmé : ouvrez le message reçu puis réessayez.' : 'Connexion impossible pour le moment. Vérifiez votre email et votre mot de passe, puis réessayez.'))
       setEtat('error')
       return
     }

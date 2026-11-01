@@ -1,5 +1,7 @@
 # Flowin · Schéma & Migration SQL
 
+> **Ordre d'application des fichiers en attente (01 à 10, dates) : voir [`README-ORDRE.md`](README-ORDRE.md).**
+
 État au 15/05/2026 — Validé sur PostgreSQL 16 local.
 
 ---

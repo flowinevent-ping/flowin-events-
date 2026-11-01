@@ -45,7 +45,7 @@ export interface QrTrace {
   source_qr: string
   publie: boolean
   parDefaut?: boolean
-  /** Code court du QR permanent (sql/08-qr-permaliens.sql) ; null = pas encore de code (SQL non applique). */
+  /** Code court du QR permanent (sql/09-qr-permaliens.sql) ; null = pas encore de code (SQL non applique). */
   code_court?: string | null
 }
 
@@ -121,7 +121,7 @@ export async function changerJeuStation(eventId: string, jeu: string): Promise<R
   const { error } = await supabase.rpc('changer_jeu_station', { p_event_id: eventId, p_module: jeu })
   if (!error) return { ok: true }
   const m = error.message || ''
-  if (/Could not find the function|changer_jeu_station|schema cache/i.test(m) && !/propriétaire/.test(m)) return { ok: false, erreur: 'Fonction non disponible : le SQL 08-qr-permaliens.sql n’est pas encore appliqué.' }
+  if (/Could not find the function|changer_jeu_station|schema cache/i.test(m) && !/propriétaire/.test(m)) return { ok: false, erreur: 'Fonction non disponible : le SQL 09-qr-permaliens.sql n’est pas encore appliqué.' }
   return { ok: false, erreur: m }
 }
 

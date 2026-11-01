@@ -192,7 +192,7 @@ export default function EventDrawer() {
   if (!ev) return (
     <div className="sa-drawer-empty">
       <button className="sa-drawer-close" onClick={closeDrawer}>×</button>
-      <div>Event introuvable</div>
+      <div>Animation introuvable</div>
     </div>
   )
 
@@ -219,7 +219,7 @@ export default function EventDrawer() {
   }
 
   async function del() {
-    if (!confirm(`Supprimer l'event "${ev.nom}" ? Action irréversible.`)) return
+    if (!confirm(`Supprimer l'animation "${ev.nom}" ? Action irréversible.`)) return
     await deleteEvent(ev.id)
     setEvents(events.filter(x => x.id !== ev.id))
     closeDrawer()
@@ -329,7 +329,7 @@ export default function EventDrawer() {
             <div className="sa-field">
               <label className="sa-label">Super Event</label>
               <select className="sa-input" value={form.super_event_id ?? ''} onChange={e => setForm(p => ({ ...p, super_event_id: e.target.value || null }))}>
-                <option value="">— Aucun (event autonome)</option>
+                <option value="">— Aucun (animation autonome)</option>
                 {supers.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
               </select>
             </div>

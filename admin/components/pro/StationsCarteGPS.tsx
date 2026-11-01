@@ -75,7 +75,9 @@ export default function StationsCarteGPS({ lieux }: { lieux: Lieu[] }) {
         {points.map(p => {
           const d = brouillon[p.id] ?? { lat: p.lat != null ? String(p.lat) : '', lng: p.lng != null ? String(p.lng) : '' }
           return (
-            <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 120px auto', gap: 8, alignItems: 'end', marginBottom: 10 }}>
+            <div key={p.id} className="gps-ligne" style={{ display: 'grid', gridTemplateColumns: '1fr 120px 120px auto', gap: 8, alignItems: 'end', marginBottom: 10 }}>
+              {/* 390 px : la ligne (station, latitude, longitude, bouton) depassait l'ecran ; elle passe sur deux rangees. */}
+              <style dangerouslySetInnerHTML={{ __html: '@media (max-width:560px){.gps-ligne{grid-template-columns:1fr 1fr !important}.gps-ligne>div:first-of-type{grid-column:1 / -1}.gps-ligne>button{grid-column:1 / -1}.gps-ligne input{min-width:0;width:100%;box-sizing:border-box}}' }} />
               <div>
                 <div style={LABEL}>Station</div>
                 <div style={{ fontSize: 13.5, fontWeight: 700, padding: '10px 0' }}>{p.nom}</div>

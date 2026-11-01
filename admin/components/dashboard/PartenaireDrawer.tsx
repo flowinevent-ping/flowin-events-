@@ -599,7 +599,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
             <div className="sa-kpi-grid-2">
               <div className="sa-kpi"><div className="sa-kpi-val">{pLots.length}</div><div className="sa-kpi-lbl">Lots fournis</div></div>
               <div className="sa-kpi"><div className="sa-kpi-val">{pLots.reduce((s, l) => s + (l.valeur ?? 0) * (l.quantite ?? 1), 0)} €</div><div className="sa-kpi-lbl">Valeur</div></div>
-              <div className="sa-kpi"><div className="sa-kpi-val">{pEvents.length}</div><div className="sa-kpi-lbl">Events</div></div>
+              <div className="sa-kpi"><div className="sa-kpi-val">{pEvents.length}</div><div className="sa-kpi-lbl">Animations</div></div>
             </div>
 
             <SectionHeader>Sponsoring &amp; facturation</SectionHeader>
@@ -661,7 +661,7 @@ export default function PartenaireDrawer({ partenaireId, tab, onTab, inline = fa
         {tabActif === 'events' && !parOperation && (
           <>
             <SectionHeader>{pEvents.length} event{pEvents.length > 1 ? 's' : ''} sponsorisé{pEvents.length > 1 ? 's' : ''}</SectionHeader>
-            {pEvents.length === 0 && <div className="sa-empty-inline">Aucun event</div>}
+            {pEvents.length === 0 && <div className="sa-empty-inline">Aucune animation</div>}
             {pEvents.map((ev: FlowinEvent) => ev && (
               <div key={ev.id} className="sa-list-item" onClick={() => openDrawer('event', ev.id)} style={{ cursor: 'pointer' }}>
                 <div style={{ flex: 1, fontWeight: 700 }}>{(ev as { nom: string }).nom}</div>

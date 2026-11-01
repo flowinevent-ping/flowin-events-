@@ -86,7 +86,7 @@ export function BlocOperation({ op, children, droite }: { op: Operation; childre
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 800, fontSize: 14.5 }}>{op.nom}</span>
             <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: accent, background: `${accent}17`, borderRadius: 99, padding: '3px 8px' }}>
-              {op.type === 'super' ? 'Super event' : 'Event'}
+              {op.type === 'super' ? 'Super event' : 'Animation'}
             </span>
           </div>
           <div style={{ fontSize: 11.5, color: MUT, marginTop: 1 }}>
@@ -126,7 +126,7 @@ function SupprimerOperationBtn({ op, onSupprime }: { op: Operation; onSupprime: 
       onSupprime()
       return
     }
-    if (!confirm(`Supprimer l'event "${op.nom}" ? Action irréversible.`)) return
+    if (!confirm(`Supprimer l'animation "${op.nom}" ? Action irréversible.`)) return
     setBusy(true)
     const ok = await deleteEvent(op.id)
     setBusy(false)
@@ -142,7 +142,7 @@ function SupprimerOperationBtn({ op, onSupprime }: { op: Operation; onSupprime: 
 
 /** Liste vide de toute operation -- le seul cas ou il n y a aucun bloc. */
 export function AucuneOperation() {
-  return <Vide>Aucun event ni super event pour ce compte.</Vide>
+  return <Vide>Aucune animation ni super event pour ce compte.</Vide>
 }
 
 function Mini({ v, l }: { v: React.ReactNode; l: string }) {
@@ -620,7 +620,7 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
       </div>
       {s.stats && <StatsUniformes st={s.stats} />}
       <div style={{ fontSize: 11, color: MUT, marginBottom: 4 }}>
-        Un flash est une ouverture du QR, pas une personne. {op.type === 'super' ? 'Période officielle de l’opération.' : 'Tout l’historique de l’event.'}
+        Un flash est une ouverture du QR, pas une personne. {op.type === 'super' ? 'Période officielle de l’opération.' : 'Tout l’historique de l’animation.'}
       </div>
       {s.stations.length === 0 && <Vide>Aucun flash ni partie enregistré.</Vide>}
       {s.stations.map(st => (

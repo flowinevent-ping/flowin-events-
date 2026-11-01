@@ -112,7 +112,7 @@ export default function Page() {
       </Bloc>
 
       {evenements.length > 0 && (
-        <Bloc titre={`Événements en cours ou à venir — ${evenements.length}`}>
+        <Bloc titre={`Animations en cours ou à venir — ${evenements.length}`}>
           {evenements.map(e => (
             <Ligne key={e.id} cle={e.nom}>
               <a

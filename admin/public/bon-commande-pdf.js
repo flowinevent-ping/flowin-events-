@@ -39,7 +39,7 @@
     if (c.kit === 'physique') lignes.push({ lib: 'Kit physique imprimé', det: 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, ' + eur(PRIX.kitPhysique) + ' HT', q: nb, ht: kitHt });
     else lignes.push({ lib: 'Kit digital', det: 'Fichiers des affiches, macarons et support de caisse, QR inclus, à imprimer', q: 1, ht: 0 });
     var optHt = 0;
-    if (quiz > 0) { lignes.push({ lib: 'Option : quiz personnalisé', det: eur(PRIX.optQuiz) + ' HT par événement', q: quiz, ht: PRIX.optQuiz * quiz }); optHt += PRIX.optQuiz * quiz; }
+    if (quiz > 0) { lignes.push({ lib: 'Option : quiz personnalisé', det: eur(PRIX.optQuiz) + ' HT par animation', q: quiz, ht: PRIX.optQuiz * quiz }); optHt += PRIX.optQuiz * quiz; }
     if (bonus > 0) { lignes.push({ lib: 'Option : questions bonus', det: eur(PRIX.optBonus) + ' HT par sondage', q: bonus, ht: PRIX.optBonus * bonus }); optHt += PRIX.optBonus * bonus; }
     var ht = abo + kitHt + optHt;
     var tva = Math.round(ht * PRIX.tva * 100) / 100;

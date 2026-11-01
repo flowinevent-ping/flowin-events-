@@ -137,12 +137,12 @@ export default function Page() {
     <div className="sa-page">
       <PageHeader
         title="Thème des parcours"
-        subtitle="Personnalise l'apparence d'un event (fond, logo, textes) sans toucher au code — niveau B du système de thème"
+        subtitle="Personnalise l'apparence d'une animation (fond, logo, textes) sans toucher au code — niveau B du système de thème"
       />
 
       <div style={{ padding: '0 24px 24px' }}>
         <div className="sa-field" style={{ maxWidth: 480 }}>
-          <label className="sa-label">Event à personnaliser</label>
+          <label className="sa-label">Animation à personnaliser</label>
           <select className="sa-input" value={eventId} onChange={e => setEventId(e.target.value)}>
             <option value="">— Choisir —</option>
             {evsThemables.map(e => (
@@ -153,7 +153,7 @@ export default function Page() {
           </select>
           {evsThemables.length === 0 && (
             <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 6 }}>
-              Aucun event Vote / Quiz / Quiz solo / Tombola / Spin pour le moment.
+              Aucune animation Vote / Quiz / Quiz solo / Tombola / Spin pour le moment.
             </div>
           )}
           <div className="sa-muted" style={{ fontSize: 11.5, marginTop: 6, lineHeight: 1.5 }}>
@@ -164,7 +164,7 @@ export default function Page() {
 
         {!ev && (
           <div className="sa-muted" style={{ fontSize: 13, padding: '20px 0' }}>
-            Choisissez un event ci-dessus pour voir et modifier son thème.
+            Choisissez une animation ci-dessus pour voir et modifier son thème.
           </div>
         )}
 
@@ -173,7 +173,7 @@ export default function Page() {
             <div>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>
-                  {estPersonnalise ? 'Thème personnalisé pour cet event' : "Thème par défaut du module — aucune personnalisation sur cet event"}
+                  {estPersonnalise ? 'Thème personnalisé pour cette animation' : "Thème par défaut du module — aucune personnalisation sur cette animation"}
                 </div>
                 {estPersonnalise && (
                   <button type="button" className="sa-btn sm" onClick={toutReinitialiser}>Tout réinitialiser</button>

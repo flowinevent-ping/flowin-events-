@@ -89,7 +89,7 @@ export function ChoixTirage({ value, onChange, finEvenement }: { value: ConfigTi
     { id: 'mois', t: 'Fin du mois', v: dateRaccourci('mois') },
     { id: 'trimestre', t: 'Fin du trimestre', v: dateRaccourci('trimestre') },
   ]
-  if (finEvenement) raccourcis.push({ id: 'event', t: 'Fin de l’événement', v: finEvenement.slice(0, 10) + 'T18:00' })
+  if (finEvenement) raccourcis.push({ id: 'event', t: 'Fin de l’animation', v: finEvenement.slice(0, 10) + 'T18:00' })
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

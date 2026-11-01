@@ -1,0 +1,29 @@
+-- Controles de fin de chaine (lecture seule). Une ligne par controle : OK ... ou KO ...
+with c(nom, ok) as (values
+  ('est_super_admin() existe',                       to_regprocedure('public.est_super_admin()') is not null),
+  ('pros.droits existe',                             exists (select 1 from information_schema.columns where table_schema='public' and table_name='pros' and column_name='droits')),
+  ('pros.siren existe (02)',                         exists (select 1 from information_schema.columns where table_schema='public' and table_name='pros' and column_name='siren')),
+  ('commandes_animation existe (03)',                to_regclass('public.commandes_animation') is not null),
+  ('factures_animation existe (03)',                 to_regclass('public.factures_animation') is not null),
+  ('pros_rib existe (04)',                           to_regclass('public.pros_rib') is not null),
+  ('crm_pro_consentants existe (05)',                to_regprocedure('public.crm_pro_consentants(text)') is not null),
+  ('joueurs_consentants_par_ids existe (05)',        to_regprocedure('public.joueurs_consentants_par_ids(uuid[])') is not null),
+  ('policy joueurs_super_admin_lecture (05)',        exists (select 1 from pg_policies where tablename='joueurs' and policyname='joueurs_super_admin_lecture')),
+  ('joueurs.optin_version existe (07)',              exists (select 1 from information_schema.columns where table_schema='public' and table_name='joueurs' and column_name='optin_version')),
+  ('jeux_masters existe',                            to_regclass('public.jeux_masters') is not null),
+  ('positions_joueurs existe',                       to_regclass('public.positions_joueurs') is not null),
+  ('tirage_auto_animations existe',                  to_regprocedure('public.tirage_auto_animations()') is not null),
+  ('facturation_config existe (08)',                 to_regclass('public.facturation_config') is not null),
+  ('prochain_numero_facture_animation existe (08)',  exists (select 1 from pg_proc where proname='prochain_numero_facture_animation')),
+  ('export_crm_animation existe (08)',               to_regclass('public.export_crm_animation') is not null),
+  ('qr_stations.code_court existe (09)',             exists (select 1 from information_schema.columns where table_schema='public' and table_name='qr_stations' and column_name='code_court')),
+  ('changer_jeu_station existe (09)',                exists (select 1 from pg_proc where proname='changer_jeu_station')),
+  ('tirage_resultats existe (10)',                   to_regclass('public.tirage_resultats') is not null),
+  ('mes_resultats_tirage existe (10)',               exists (select 1 from pg_proc where proname='mes_resultats_tirage')),
+  ('NDS : anon lit toujours joueurs.email et tel (la phase 1 ne ferme rien)', has_column_privilege('anon', 'public.joueurs', 'email', 'select') and has_column_privilege('anon', 'public.joueurs', 'tel', 'select')),
+  ('NDS : anon peut toujours ecrire joueurs (inscription des parcours)', has_table_privilege('anon', 'public.joueurs', 'insert') and has_table_privilege('anon', 'public.joueurs', 'update')),
+  ('anon ne lit pas flowin_super_admins',            not has_table_privilege('anon', 'public.flowin_super_admins', 'select')),
+  ('anon ne lit pas pros_rib',                       not has_table_privilege('anon', 'public.pros_rib', 'select')),
+  ('anon ne lit pas tirage_resultats',               not has_table_privilege('anon', 'public.tirage_resultats', 'select'))
+)
+select case when ok then 'OK ' else 'KO ' end || nom from c order by ok, nom;

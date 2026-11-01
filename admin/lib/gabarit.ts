@@ -77,7 +77,7 @@ export interface EtapeJoueur {
 }
 
 export const DEROULE: EtapeJoueur[] = [
-  { ecran: 'flash', titre: 'Le flash', detail: 'Le joueur scanne le QR de la station. Le QR porte l’identifiant de l’event — c’est lui qui dit quelle station a été jouée.' },
+  { ecran: 'flash', titre: 'Le flash', detail: 'Le joueur scanne le QR de la station. Le QR porte l’identifiant de l’animation — c’est lui qui dit quelle station a été jouée.' },
   { ecran: 'onboard', titre: 'Accueil', detail: 'Les lots à gagner, puis « Comment jouer ? » en trois étapes, puis le bouton « Je joue maintenant ».' },
   { ecran: 'quiz', titre: 'Le quiz', detail: 'Les questions tirées au hasard dans les banques cochées. Une réponse par question, correction affichée tout de suite, avec l’explication quand la question en porte une.' },
   { ecran: 'resultats', titre: 'Le score', detail: 'Le score sur le total. Sans faute : le ticket est acquis. Sinon, le bonus le rattrape.' },

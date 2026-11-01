@@ -29,6 +29,7 @@ import {
   type EntrepriseTrouvee,
 } from '@/lib/entreprise'
 
+import { messageFr } from '@/lib/erreursFr'
 const CLE_BROUILLON = 'flowin.premiere-fois.v1'
 
 const ETAPES = [
@@ -256,7 +257,7 @@ export default function PremiereFois() {
       /* 23503 = cle etrangere : le compte d'acces n'existe pas (email deja utilise ou compte non cree). */
       setErreur(insErr.code === '23503'
         ? 'Un compte existe déjà avec cet email, ou la création de l’accès n’a pas abouti. Connectez-vous plutôt, ou utilisez une autre adresse.'
-        : `Votre accès est créé mais la fiche entreprise n’a pas pu être enregistrée (${insErr.message}). Contactez l’équipe Flowin.`)
+        : `Votre accès est créé mais la fiche entreprise n’a pas pu être enregistrée (${messageFr(insErr)}) Contactez l’équipe Flowin.`)
       setEnvoi('error'); return
     }
     effacerBrouillon()

@@ -18,6 +18,7 @@ import {
   type CommandeAnimation, type StatutAffiche, LIBELLE_PAIEMENT, LIBELLE_STATUT, NOM_OFFRE, VIREMENT,
   chargerCommandes, dateFr, dateHeureFr, eur, lignesCommande, montantAVirer, statutAffiche,
 } from '@/lib/commandesPro'
+import LienBonCommande from './LienBonCommande'
 import { telechargerContrat, telechargerFacture } from '@/lib/pdfCommande'
 import type { Facture } from '@/lib/documentsAnimation'
 
@@ -97,14 +98,14 @@ export default function HistoriqueCommandes({ proId }: { proId: string }) {
       </div>
     )
   }
-  if (etat === 'erreur') return <div style={{ ...CARD, color: C.ko }}>Impossible de charger vos commandes ({message}).</div>
+  if (etat === 'erreur') return <div style={{ ...CARD, color: C.ko }}>Impossible de charger vos commandes : {message}. Si le problème continue, contactez Flowin.</div>
 
   if (!liste.length) {
     return (
       <div style={{ ...CARD, textAlign: 'center', padding: 28 }}>
         <div style={{ fontSize: 17, fontWeight: 900 }}>Aucune commande pour le moment</div>
         <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 16px' }}>Choisissez votre offre et signez votre bon de commande pour ouvrir votre espace.</div>
-        <a href="/bon-commande-animation.html" style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Choisir mon offre et signer</a>
+        <LienBonCommande proId={proId} style={{ ...BTN, display: 'inline-block', textDecoration: 'none' }}>Choisir mon offre et signer</LienBonCommande>
       </div>
     )
   }

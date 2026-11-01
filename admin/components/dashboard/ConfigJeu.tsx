@@ -390,7 +390,7 @@ function ConfigJeuContenu({
     <div className="sa-muted" style={{ fontSize: 12.5, lineHeight: 1.55 }}>
       Ce module n’a pas de paramétrage propre avant création : les lots se règlent
       à l’étape suivante, et le reste se pilote depuis la fiche une fois
-      l’événement créé. On ne vous demande rien d’inutile ici.
+      l’animation créée. On ne vous demande rien d’inutile ici.
     </div>
   )
 }

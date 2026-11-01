@@ -120,7 +120,7 @@ begin
       'lib', case when c.kit = 'physique' then 'Kit physique imprime' else 'Kit digital' end,
       'det', case when c.kit = 'physique' then 'Par boutique : 1 support de caisse, 3 affiches A4, 3 macarons' else 'Fichiers a imprimer, QR inclus' end,
       'q', case when c.kit = 'physique' then c.nb_boutiques else 1 end, 'ht', c.montant_kit_ht));
-    if c.opt_quiz_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : quiz personnalise','det','180 EUR HT par evenement','q',c.opt_quiz_qte,'ht',180 * c.opt_quiz_qte)); end if;
+    if c.opt_quiz_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : quiz personnalise','det','180 EUR HT par animation','q',c.opt_quiz_qte,'ht',180 * c.opt_quiz_qte)); end if;
     if c.opt_bonus_qte > 0 then lignes := lignes || jsonb_build_array(jsonb_build_object('lib','Option : questions bonus','det','180 EUR HT','q',c.opt_bonus_qte,'ht',180 * c.opt_bonus_qte)); end if;
     ht := c.montant_ht; tva := c.montant_tva;
   else

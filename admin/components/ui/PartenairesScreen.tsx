@@ -48,7 +48,7 @@ export default function PartenairesScreen({
         <button className="fl-back-btn" onClick={onBack}>←</button>
         <div>
           <div style={{ fontFamily: 'Fredoka One, cursive', fontSize: 18 }}>Nos partenaires</div>
-          <div style={{ fontSize: 11, color: '#888' }}>Ils rendent cet event possible ({partenaires.length})</div>
+          <div style={{ fontSize: 11, color: '#888' }}>Ils rendent cette animation possible ({partenaires.length})</div>
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export default function PartenairesScreen({
       {/* Grid */}
       {partenaires.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 40, color: '#888', fontSize: 14 }}>
-          Aucun partenaire configuré pour cet event.
+          Aucun partenaire configuré pour cette animation.
         </div>
       ) : (
         <div className="fl-part-grid">

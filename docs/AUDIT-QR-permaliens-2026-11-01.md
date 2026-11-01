@@ -71,7 +71,7 @@ Lancement : `QA_DIR=… OUT=… bash admin/scripts/qa-qr/run-e2e.sh` (Postgres l
 Dans l'ordre, section par section (chaque fichier est rejouable) :
 1. `sql/01-identite-super-admin.sql` (si pas déjà fait) : prérequis du verrou Super Admin.
 2. `sql/2026-11-01-tirage-auto-liste-gagnants.sql`, sections 1 à 3 : colonnes `support` / `type_qr`, index des règles par QR, statistiques par QR.
-3. **`sql/08-qr-permaliens.sql`** (nouveau) : code court, garde-fous, QR par défaut, journal, verrou, `changer_jeu_station`.
+3. **`sql/09-qr-permaliens.sql`** (nouveau) : code court, garde-fous, QR par défaut, journal, verrou, `changer_jeu_station`.
 4. Vérifications en fin de fichier 08 (aucun QR sans code, aucun doublon).
 5. Variables Vercel (facultatives) : `NEXT_PUBLIC_FLOWIN_BASE_URL` (futur domaine), `FLOWIN_QR_LIMITE_SCANS` (défaut 90/min/IP), `FLOWIN_QR_LIMITE_INCONNUS` (défaut 8 / 5 min / IP).
 6. Recommandé : règle de limite de débit Vercel Firewall sur `/q/*`.

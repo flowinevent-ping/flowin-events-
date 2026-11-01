@@ -41,7 +41,7 @@ Les prix sont exprimés en euros hors taxes ; la TVA au taux en vigueur (20 %) s
 | **Supports, au choix :** | |
 | Kit digital : fichiers des affiches, macarons et support de caisse, QR de jeu inclus, à imprimer soi-même | 0 € |
 | Kit physique imprimé, par boutique : 1 support de caisse, 3 affiches A4, 3 macarons autocollants, livrés prêts à poser | 149 € par boutique |
-| Option : personnalisation des questions du quiz | 180 € par événement |
+| Option : personnalisation des questions du quiz | 180 € par animation |
 | Option : personnalisation des questions bonus | 180 € |
 
 Le Client choisit une seule formule (annuelle ou mensuelle) et un seul type de supports (kit digital ou kit physique). Sur 12 mois, la formule mensuelle représente 1 320 € HT (12 × 110 €), soit 330 € HT de plus que la formule annuelle.

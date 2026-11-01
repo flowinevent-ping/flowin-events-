@@ -53,7 +53,10 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             id: p.id, nom: p.nom ?? null, secteur: p.secteur ?? null, adresse: p.adresse ?? null,
             code_postal: p.code_postal ?? null, ville: p.ville ?? null, siret: p.siret ?? null,
             contact: p.contact ?? null, email: p.email ?? null, tel: p.tel ?? null, partenaire_id: p.partenaire_id ?? null,
-          }} />
+            nom_commercial: p.nom_commercial ?? null, forme_juridique: p.forme_juridique ?? null, siren: p.siren ?? null,
+            code_naf: p.code_naf ?? null, activite_naf: p.activite_naf ?? null, produits_services: p.produits_services ?? null,
+            nb_points_vente: p.nb_points_vente ?? null,
+          }} avecFicheEntreprise={'siren' in p} />
         : <div style={CARD}>Établissement introuvable.</div>)}
       {onglet === 'rib' && (p.id
         ? <CoordonneesBancaires proId={p.id} titulaireParDefaut={p.nom ?? ''} />

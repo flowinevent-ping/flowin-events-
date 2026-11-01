@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, CHAMP, LABEL, BTN, BTN2, MUTED } from '@/lib/proui'
 import { bicCoherent, compacterIban, erreurBic, erreurIban, formaterIban, masquerIban } from '@/lib/rib'
+import { messageFr } from '@/lib/erreursFr'
 
 interface RibAffiche { titulaire: string; iban_masque: string; bic: string; updated_at: string | null }
 type Etat = 'charge' | 'sans-session' | 'indisponible' | 'refuse' | 'pret'
@@ -46,7 +47,7 @@ export default function CoordonneesBancaires({ proId, titulaireParDefaut }: { pr
       if (fini) return
       if (error) {
         if (TABLE_ABSENTE(error.code, error.message)) setEtat('indisponible')
-        else { setEtat('refuse'); setMessage(error.message) }
+        else { setEtat('refuse'); setMessage(messageFr(error)) }
         return
       }
       setRib((ligne as RibAffiche) ?? null)
@@ -70,7 +71,7 @@ export default function CoordonneesBancaires({ proId, titulaireParDefaut }: { pr
     const { error } = rib
       ? await supabase.from('pros_rib').update(ligne).eq('pro_id', proId)
       : await supabase.from('pros_rib').insert({ ...ligne, pro_id: proId })
-    if (error) { setEnvoi('error'); setMessage(TABLE_ABSENTE(error.code, error.message) ? 'Enregistrement pas encore disponible.' : error.message); return }
+    if (error) { setEnvoi('error'); setMessage(TABLE_ABSENTE(error.code, error.message) ? 'Enregistrement pas encore disponible.' : messageFr(error)); return }
     setRib({ titulaire: ligne.titulaire, iban_masque: ligne.iban_masque, bic: ligne.bic, updated_at: new Date().toISOString() })
     setIban(''); setTente(false); setEdition(false); setEnvoi('ok')
   }

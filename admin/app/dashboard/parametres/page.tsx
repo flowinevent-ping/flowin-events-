@@ -82,8 +82,8 @@ export default function Page() {
       </Bloc>
 
       <SectionHeader>Communication</SectionHeader>
-      <Bloc titre="Configuration de l'événement en cours">
-        <Ligne cle="Événement" valeur={cfg?.evenement ?? absent} />
+      <Bloc titre="Configuration du super event en cours">
+        <Ligne cle="Super event" valeur={cfg?.evenement ?? absent} />
         <Ligne cle="Édition" valeur={cfg?.edition ?? absent} />
         <Ligne cle="Lieu" valeur={cfg?.lieu ?? absent} />
         <Ligne
@@ -108,7 +108,7 @@ export default function Page() {
       <SectionHeader>Volumétrie</SectionHeader>
       <Bloc titre="Données chargées">
         <Ligne cle="Super events" valeur={String(supers.length)} />
-        <Ligne cle="Événements" valeur={String(events.length)} />
+        <Ligne cle="Animations" valeur={String(events.length)} />
         <Ligne cle="Partenaires" valeur={String(partenaires.length)} />
         <Ligne cle="Professionnels" valeur={String(pros.length)} />
         <Ligne cle="Joueurs CRM" valeur={String(joueurs.length)} />
