@@ -833,6 +833,7 @@
       if (!rec.prelevement_inclut_reste && t.resteTtc > 0) h.push('<b>Réglez le kit et les options par virement</b> (' + eur(t.resteTtc) + ' TTC), référence ' + esc(rec.id) + '.');
     } else if (rec.mode_paiement === 'virement') {
       h.push('<b>R\u00e9glez ' + eur(t.ttc) + ' TTC par virement</b> avec la r\u00e9f\u00e9rence ' + esc(rec.id) + '.' + (rec.offre === 'mensuelle' ? ' Puis ' + eur(t.aboTtc) + ' TTC chaque mois.' : ' Votre commande passe en \u00ab pay\u00e9e \u00bb \u00e0 r\u00e9ception.'));
+      h.push('<b>L\u2019\u00e9quipe Flowin prend contact avec vous dans la journ\u00e9e</b> pour valider votre inscription et la r\u00e9ception du paiement. Votre espace pro s\u2019ouvre d\u00e8s cette validation.');
     }
     if (rec.garantie) h.push('<b>Satisfait ou rembours\u00e9</b> : objectif de ' + (rec.garantie_clients_objectif || '\u2014') + ' clients venus retirer leur lot sur 12 mois, avec au moins 4 animations.');
     h.push('<b>Flowin vous contacte</b> pour préparer votre animation : lots, questions, couleurs' + (rec.logo ? '' : ', logo') + '.');
