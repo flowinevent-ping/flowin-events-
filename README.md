@@ -2,7 +2,7 @@
 
 **Flowin** transforme un événement ou un commerce en jeu : on **scanne un QR**, on **joue** (quiz / sondage), on **gagne des tickets** pour une tombola. Produit de **BAITA EURL (OPConsult)**, Vence (06).
 
-🎪 **Déploiement vitrine en cours : Nuits du Sud 2026** — festival de Vence, **9 → 18 juillet 2026**, ~24 000 festivaliers, 6 commerces partenaires.
+🎪 **Déploiement vitrine en cours : Nuits du Sud 2026** — festival de Vence, **9 → 18 juillet 2026**.
 
 ---
 
