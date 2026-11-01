@@ -11,12 +11,12 @@
 //
 // Secrets projet (aucune valeur ici) :
 //   RESEND_API_KEY   déjà configuré pour notify-bon-commande / notify-souscription
-//   RAPPEL_TO        destinataire (défaut : flowinevents@gmail.com, adresse donnée dans la consigne)
+//   RAPPEL_TO        destinataire (défaut : flowinevent@gmail.com, l'adresse unique de Flowin dans le dépôt)
 //   NOTIFY_FROM      expéditeur Resend (défaut onboarding@resend.dev : sans domaine vérifié,
 //                    Resend n'envoie qu'à l'adresse du compte, voir README notify-souscription)
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
-const RAPPEL_TO = Deno.env.get("RAPPEL_TO") || "flowinevents@gmail.com";
+const RAPPEL_TO = Deno.env.get("RAPPEL_TO") || "flowinevent@gmail.com";
 const NOTIFY_FROM = Deno.env.get("NOTIFY_FROM") || "Flowin <onboarding@resend.dev>";
 const ORIGINES = ["https://flowin-events.vercel.app", "http://localhost:3000"];
 
