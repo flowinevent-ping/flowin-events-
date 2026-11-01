@@ -16,7 +16,18 @@ import type { LotAffiche } from './types'
 import { L } from './defs'
 
 /* ── Etat de la partie ─────────────────────────────────────────────────── */
+/** Un ticket du joueur et le statut de SON tirage. 'inconnu' = table des resultats absente (mode degrade : pas de statut). */
+export interface TicketLigne { code: string; le: string; statut: 'attente' | 'gagne' | 'perdu' | 'inconnu'; n?: number }
+/** « Mes tickets » groupes par commerce (et par animation / super event). */
+export interface GroupeTickets { cle: string; commerce: string; operation?: string; tirageDate: string; tickets: TicketLigne[]; /** Lots gagnes dans ce commerce (billet de retrait). */ lots?: { nom: string; token?: string }[] }
+/** Resultat d'un tirage pour ce joueur (alerte dans l'application). */
+export interface ResultatVue { id: string; statut: 'gagne' | 'perdu'; commerce: string; operation?: string; tirageLe: string; tickets: number; lot?: string; token?: string }
+
 export interface EtatPartie {
+  /** Profil : tickets groupes par commerce (null = pas encore charge, ancien affichage). */
+  mesTickets: GroupeTickets[] | null
+  /** Resultat de tirage affiche (ecrans c-resultat-*). */
+  resultat: ResultatVue | null
   qi: number
   rep: (number | null)[]
   bonnes: number
@@ -38,7 +49,7 @@ export interface EtatPartie {
 }
 
 export function etatInitial(): EtatPartie {
-  return { qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, parrainN: 0, erreur: '', envoi: false }
+  return { mesTickets: null, resultat: null, qi: 0, rep: [], bonnes: 0, bonusFait: false, ticket: '', ticketBonus: '', gain: null, caseIdx: null, rotation: -12, voteIdx: null, vitrineVote: false, tombolaNo: '', after: null, profil: null, parrainN: 0, erreur: '', envoi: false }
 }
 
 /* ── Outils ────────────────────────────────────────────────────────────── */
@@ -178,9 +189,12 @@ function pband(v: VueMaster): string {
   const it = v.partenaires.map(function (p, i) { return '<span class="vg"><span class="plogo" style="width:108px;height:54px">' + logoPart(v, i, 88, 34) + '</span><b>' + esc(p.nom) + '</b></span>' }).join('')
   return '<div class="pband" data-go="c-partenaires"><div class="ph2">Nos partenaires<span>Voir tout ' + icon('chevR', 14, 2.4) + '</span></div><div class="mq"><div class="mqi" style="transform:translateX(-' + off + 'px);animation-delay:-' + del.toFixed(1) + 's">' + it + it + '</div></div></div>'
 }
+/** Resultats de tirage pas encore vus (pastille sur « Profil »). Regle par le client avant chaque rendu. */
+let NON_VUS = 0
+export function reglePastille(n: number) { NON_VUS = n }
 function navbar(on: string): string {
   const it = [['play', 'Jouer', 's-accueil'], ['store', 'Commerces', 'c-commerces'], ['handshake', 'Partenaires', 'c-partenaires'], ['user', 'Profil', 'c-profil']]
-  return '<nav class="nav">' + it.map(function (x) { return '<a data-go="' + x[2] + '" class="' + (on === x[2] ? 'on' : '') + '">' + icon(x[0], 23) + x[1] + '</a>' }).join('') + '</nav>'
+  return '<nav class="nav">' + it.map(function (x) { return '<a data-go="' + x[2] + '" class="' + (on === x[2] ? 'on' : '') + '">' + icon(x[0], 23) + x[1] + (x[2] === 'c-profil' && NON_VUS > 0 ? '<span class="pastille" aria-label="' + NON_VUS + ' résultat' + (NON_VUS > 1 ? 's' : '') + ' de tirage à voir">' + NON_VUS + '</span>' : '') + '</a>' }).join('') + '</nav>'
 }
 function dock(o: { cta?: string; nav?: string | false }): string { return '<div class="dock">' + (o.cta ? '<div class="cta">' + o.cta + '</div>' : '') + (o.nav === false ? '' : navbar(o.nav || '')) + '</div>' }
 function etapes(i: number): string {
@@ -334,6 +348,14 @@ S['c-billet'] = { tall: true, r: function (v, r) {
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }
 
+/** Invitation a gagner d'autres tickets chez les commerces partenaires. Le nombre n'est affiche QUE s'il est reel
+ *  (commerces partenaires actifs reellement connus), jamais en demonstration. */
+function autresCommerces(v: VueMaster): string {
+  const nb = v.demo ? 0 : Math.max(0, v.commerces.length - 1)
+  return '<div class="card autres a-rise" style="--d:.7s"><span class="ai">' + icon('store', 24) + '</span><div style="flex:1;min-width:0"><b>Gagne d\'autres tickets chez les commerces partenaires Flowin</b>' +
+    '<small>' + (nb > 0 ? nb + ' commerce' + (nb > 1 ? 's' : '') + ' partenaire' + (nb > 1 ? 's' : '') + ' actif' + (nb > 1 ? 's' : '') + ' : ' : '') + 'chaque commerce joué = des chances de plus au tirage.</small>' +
+    '<button class="btn line" style="margin-top:10px;min-height:46px;font-size:15px" data-go="c-commerces">Voir les commerces</button></div></div>'
+}
 S['c-ticket'] = { tall: true, r: function (v, r) {
   const parfait = r.bonnes >= v.questions.length && v.questions.length > 0
   const n = (v.key === 'quiz' || v.key === 'solo') ? ((parfait ? 1 : 0) + (r.bonusFait ? 1 : 0)) : 1
@@ -343,6 +365,7 @@ S['c-ticket'] = { tall: true, r: function (v, r) {
     (n ? '<div class="tk"><div class="main"><small>Ticket · ' + esc(v.who.nom) + '</small><b class="num">' + esc(code) + '</b><span>Tirage au sort le ' + txt(v.tirage) + '</span></div><div class="stub"><b>N° ' + esc(numCourt(code)) + '</b></div></div>' : '') +
     '<div class="card stack a-rise" style="--d:.5s"><span class="cnt">' + n + '</span><p>' + (n > 1 ? 'tickets pour ce tirage. ' : 'ticket pour ce tirage. ') + (n ? 'On te prévient par email si tu gagnes.' : 'Fais un sans-faute demain pour gagner ton ticket.') + '</p></div>' +
     '<div class="card infobox a-rise" style="--d:.6s"><div class="inforow">' + icon('users', 21) + '<span>' + esc(v.parrain) + '</span></div><div class="inforow">' + icon('clock', 21) + 'Reviens demain : une partie par jour et par commerce</div></div></div>' +
+    autresCommerces(v) +
     dock({ cta: btn('Parrainer mes amis', 'c-parrainage'), nav: '' }) + '</div>'
 } }
 
@@ -366,6 +389,31 @@ S['c-parrainage'] = { tall: true, r: function (v, r) {
     '</div>' + (avant ? foot(btn('Continuer : mes coordonnées', 'c-inscription') + '<p class="mention">Tu peux parrainer maintenant ou plus tard, depuis ton profil.</p>') : dock({ nav: '' })) + '</div>'
 } }
 
+/** Statut d'un ticket : en attente / gagne / pas tire (rien si la table des resultats n'existe pas encore). */
+function chipStatut(t: TicketLigne): string {
+  if (t.statut === 'gagne') return '<span class="tag st-gagne">Tiré au sort : GAGNÉ</span>'
+  if (t.statut === 'perdu') return '<span class="tag st-perdu">Tiré au sort : PAS TIRÉ</span>'
+  if (t.statut === 'attente') return '<span class="tag st-attente">En attente de tirage</span>'
+  return ''
+}
+/** « Mes tickets » GROUPES par commerce (et animation / super event) : numeros, date du tirage, statut de CHAQUE tirage. */
+function mesTicketsHtml(v: VueMaster, r: EtatPartie, nbT: number): string {
+  const g = r.mesTickets
+  if (!g) {
+    /* Pas (encore) de donnees groupees : ancien affichage, un seul ticket de la partie en cours. */
+    return '<div class="sect"><h4>Mes tickets</h4><span>Tirage le ' + esc(courte(v.tirage)) + '</span></div>' +
+      (nbT ? '<div class="mt"><span class="l"></span><div class="c"><b class="num">' + esc(r.ticket) + '</b><small>' + esc(v.who.nom) + ' · aujourd\'hui</small></div><div class="r">' + icon('ticket', 22) + '</div></div>' : '<div class="card" style="padding:14px 16px;font-size:14px;font-weight:600;color:var(--ink2)">Pas encore de ticket aujourd\'hui.</div>')
+  }
+  const total = g.reduce(function (n, x) { return n + x.tickets.length }, 0)
+  let h = '<div class="sect"><h4>Mes tickets</h4><span>' + total + ' ticket' + (total > 1 ? 's' : '') + ' · ' + g.length + ' commerce' + (g.length > 1 ? 's' : '') + '</span></div>'
+  if (!g.length) return h + '<div class="card" style="padding:14px 16px;font-size:14px;font-weight:600;color:var(--ink2)">Pas encore de ticket. Joue chez un commerce pour en gagner.</div>'
+  g.forEach(function (x) {
+    h += '<div class="card grp"><div class="gh"><span class="pmono" style="background:var(--fl-sky);color:var(--c-ink)">' + esc(monogramme2(x.commerce)) + '</span><div style="flex:1;min-width:0"><b>' + esc(x.commerce) + '</b>' +
+      '<small>' + (x.operation ? esc(x.operation) + ' · ' : '') + 'Tirage : ' + txt(x.tirageDate) + '</small></div></div>' +
+      x.tickets.map(function (t) { return '<div class="gt"><b class="num">' + esc(t.code) + (t.n && t.n > 1 ? ' <i>×' + t.n + '</i>' : '') + '</b><small>' + esc(t.le) + '</small>' + chipStatut(t) + '</div>' }).join('') + '</div>'
+  })
+  return h
+}
 S['c-profil'] = { tall: true, r: function (v, r) {
   const p = r.profil
   const nomComplet = p && (p.prenom || p.nom) ? ((p.prenom || '') + ' ' + (p.nom || '')).trim() : 'Mon profil'
@@ -373,14 +421,21 @@ S['c-profil'] = { tall: true, r: function (v, r) {
   const parfait = r.bonnes >= v.questions.length && v.questions.length > 0
   const nbT = r.ticket ? ((v.key === 'quiz' || v.key === 'solo') ? ((parfait ? 1 : 0) + (r.bonusFait ? 1 : 0)) : 1) : 0
   const aGain = !!(r.gain || (r.after === 'c-billet' && r.ticket))
+  /* Avec « Mes tickets » groupes : lots = tickets gagnes ; tickets en jeu = en attente de tirage (ou sans statut si la table des resultats n'existe pas). */
+  const lignes = r.mesTickets ? r.mesTickets.reduce(function (a, g) { return a.concat(g.tickets) }, [] as TicketLigne[]) : null
+  const kpiLots = lignes ? lignes.filter(function (t) { return t.statut === 'gagne' }).length : (aGain ? 1 : 0)
+  const kpiTickets = lignes ? lignes.filter(function (t) { return t.statut === 'attente' || t.statut === 'inconnu' }).reduce(function (n, t) { return n + (t.n || 1) }, 0) : nbT
   return '<div class="scr bg-o">' + barre() + geo([['c', 318, 74, 92, 'var(--c)']]) +
     '<div class="body" style="padding-top:6px"><div style="display:flex;gap:14px;align-items:center"><button class="iconbtn" data-go="@retour" data-repli="s-accueil" aria-label="Retour">' + icon('chevL', 22, 2) + '</button><span class="avatar">' + esc(ini) + '</span><div><div class="kicker" style="color:var(--muted)">Mon profil</div><div style="font-size:23px;font-weight:800;letter-spacing:-.03em;margin-top:2px">' + esc(nomComplet) + '</div></div></div>' +
-    '<div class="kpis"><div class="card kpi"><b>' + (aGain ? 1 : 0) + '</b><span>lot à retirer</span></div><div class="card kpi"><b>' + nbT + '</b><span>tickets en jeu</span></div></div>' +
+    '<div class="kpis"><div class="card kpi"><b>' + kpiLots + '</b><span>lot' + (kpiLots > 1 ? 's' : '') + ' à retirer</span></div><div class="card kpi"><b>' + kpiTickets + '</b><span>ticket' + (kpiTickets > 1 ? 's' : '') + ' en jeu</span></div></div>' +
     '<div class="sect"><h4>Mes lots gagnés</h4><span>Billets QR</span></div>' +
-    (aGain ? '<div class="card mb" data-go="c-billet"><div style="padding:4px;border:1.5px solid var(--line);border-radius:12px">' + qr(42, 44) + '</div><div class="tx"><b>' + esc(r.gain ? r.gain.lot : v.billet.nom) + '</b><small>' + esc(v.billetChez) + '</small><span class="tag imm">À retirer</span></div>' + icon('chevR', 20, 2) + '</div>'
+    (lignes && lignes.some(function (t) { return t.statut === 'gagne' }) ? r.mesTickets!.filter(function (g) { return g.tickets.some(function (t) { return t.statut === 'gagne' }) }).map(function (g) {
+      const lot = g.lots && g.lots[0]
+      return '<a class="card mb" style="text-decoration:none;color:inherit" ' + (lot && lot.token ? 'href="/lot.html?t=' + encodeURIComponent(lot.token) + '"' : 'data-go="c-resultat"') + '><div class="pmono" style="background:#DDF3F0;color:#0B6F67">' + icon('ticket', 22) + '</div><div class="tx"><b>' + esc(lot ? lot.nom : 'Lot gagné') + '</b><small>' + esc(g.commerce) + ' · tirage ' + esc(g.tirageDate) + '</small><span class="tag imm">À retirer</span></div>' + icon('chevR', 20, 2) + '</a>' }).join('') :
+    aGain ? '<div class="card mb" data-go="c-billet"><div style="padding:4px;border:1.5px solid var(--line);border-radius:12px">' + qr(42, 44) + '</div><div class="tx"><b>' + esc(r.gain ? r.gain.lot : v.billet.nom) + '</b><small>' + esc(v.billetChez) + '</small><span class="tag imm">À retirer</span></div>' + icon('chevR', 20, 2) + '</div>'
       : '<div class="card" style="padding:14px 16px;font-size:14px;font-weight:600;color:var(--ink2)">Aucun lot pour l\'instant. Tes billets gagnants arriveront ici.</div>') +
-    '<div class="sect"><h4>Mes tickets</h4><span>Tirage le ' + esc(courte(v.tirage)) + '</span></div>' +
-    (nbT ? '<div class="mt"><span class="l"></span><div class="c"><b class="num">' + esc(r.ticket) + '</b><small>' + esc(v.who.nom) + ' · aujourd\'hui</small></div><div class="r">' + icon('ticket', 22) + '</div></div>' : '<div class="card" style="padding:14px 16px;font-size:14px;font-weight:600;color:var(--ink2)">Pas encore de ticket aujourd\'hui.</div>') +
+    (NON_VUS > 0 ? '<button class="card alerte" data-go="c-resultat"><span class="ai">' + icon('spark', 22) + '</span><div style="flex:1;text-align:left"><b>' + NON_VUS + ' résultat' + (NON_VUS > 1 ? 's' : '') + ' de tirage à découvrir</b><small>Touche pour voir si tu as été tiré au sort.</small></div>' + icon('chevR', 20, 2) + '</button>' : '') +
+    mesTicketsHtml(v, r, nbT) +
     '<div class="sect"><h4>Mes coordonnées</h4></div>' +
     '<div class="card rows"><div><span>Prénom, nom</span><b>' + (p && (p.prenom || p.nom) ? esc(nomComplet) : '<span class="placeholder">[à saisir en jouant]</span>') + '</b></div><div><span>Email</span><b>' + (p && p.email ? esc(p.email) : '<span class="placeholder">[email saisi]</span>') + '</b></div><div><span>Téléphone</span><b>' + (p && p.tel ? esc(p.tel) : '<span class="placeholder">[téléphone saisi]</span>') + '</b></div><div><span>Code postal</span><b>' + (p && p.cp ? esc(p.cp) : '<span class="placeholder">[saisi]</span>') + '</b></div><div><span>Tranche d\'âge</span><b>' + (p && p.age ? esc(p.age) : '<span class="placeholder">[saisie]</span>') + '</b></div></div>' +
     '<button class="card action" data-go="c-connexion"><span class="ai">' + icon('key', 22) + '</span><div style="flex:1"><b>Créer un mot de passe</b><small>Ton espace client : tickets et lots retrouvés partout</small></div>' + icon('chevR', 20, 2) + '</button>' +
@@ -488,6 +543,33 @@ S['c-digital'] = { r: function (v) {
     '<p style="font-size:16px;line-height:1.5;font-weight:600;color:var(--ink2);margin:10px 0 20px">Rends-toi en magasin pour continuer à jouer une fois par jour et tenter de gagner tes lots et tes tickets.</p>' +
     btn('Trouver un commerce', 'c-commerces') + '<button class="lnk" data-go="c-profil" style="color:var(--ink2)">Fermer</button></div></div>'
 } }
+
+/* Resultat d'un tirage (alerte joueur). Memes ecrans en maquette (c-resultat-gagne / c-resultat-perdu) et en reel (c-resultat). */
+function resultatScreen(v: VueMaster, r: EtatPartie, force?: 'gagne' | 'perdu'): string {
+  const x = r.resultat
+  const statut = force || (x ? x.statut : 'perdu')
+  const commerce = x ? x.commerce : v.who.nom
+  const quand = x ? x.tirageLe : v.tirage
+  const nb = x ? x.tickets : 2
+  if (statut === 'gagne') {
+    const lot = x && x.lot ? x.lot : v.billet.nom
+    return '<div class="scr bg-m">' + confetti(40, 61) + barre() + hdr(v, { title: 'Résultat du tirage', small: commerce }) +
+      '<div class="body" style="text-align:center;align-items:center"><span class="tag st-gagne a-pop" style="--d:.2s;font-size:13px;padding:7px 16px;margin-top:22px;letter-spacing:.08em;text-transform:uppercase">Tiré au sort : gagné</span>' +
+      '<h2 class="big a-rise" style="--d:.4s;font-size:46px;margin-top:16px">Bravo,<br>c\'est gagné&nbsp;!</h2>' +
+      '<div class="card reward a-rise" style="--d:.7s;width:100%;text-align:left">' + glyph(v.billet) + '<div class="tx"><small>Ton lot · ' + esc(commerce) + '</small><b>' + esc(lot) + '</b><span>Tirage du ' + txt(quand) + ' · ' + nb + ' ticket' + (nb > 1 ? 's' : '') + '</span></div></div>' +
+      '<p class="sub a-rise" style="--d:.8s">Ton billet est dans ton profil : montre-le au commerçant, qui le valide avec son code.</p></div>' +
+      foot((x && x.token ? '<a class="btn" style="text-decoration:none" href="/lot.html?t=' + encodeURIComponent(x.token) + '">Voir mon billet</a>' : btn('Voir mon billet', 'c-billet')) + '<button class="lnk" data-go="c-profil">Retour à mon profil</button>') + '</div>'
+  }
+  return '<div class="scr bg-o">' + barre() + geo([['c', 270, 120, 130, 'var(--c2)']]) + hdr(v, { title: 'Résultat du tirage', small: commerce }) +
+    '<div class="body" style="text-align:center;align-items:center"><span class="tag st-perdu a-pop" style="--d:.2s;font-size:13px;padding:7px 16px;margin-top:22px;letter-spacing:.08em;text-transform:uppercase">Tiré au sort : pas tiré</span>' +
+    '<h2 class="big a-rise" style="--d:.4s;font-size:44px;margin-top:16px">Pas tiré<br>cette fois</h2>' +
+    '<div class="card a-rise" style="--d:.6s;width:100%;text-align:left;padding:14px 16px;margin-top:6px"><div class="kicker" style="color:var(--muted)">' + esc(commerce) + '</div><div style="font-size:14px;font-weight:700;margin-top:4px;color:var(--ink2)">Tirage du ' + txt(quand) + ' · tu participais avec ' + nb + ' ticket' + (nb > 1 ? 's' : '') + '.</div></div>' +
+    '<p class="sub a-rise" style="--d:.7s;max-width:330px">Le tirage a été fait, malheureusement tu n\'as pas été tiré. Reste attentif : d\'autres tirages sont en cours et d\'autres animations aussi.</p></div>' +
+    foot(btn('Voir les animations en cours', 'c-commerces') + '<button class="lnk" data-go="c-profil">Retour à mon profil</button>') + '</div>'
+}
+S['c-resultat'] = { r: function (v, r) { return resultatScreen(v, r) } }
+S['c-resultat-gagne'] = { r: function (v, r) { return resultatScreen(v, r, 'gagne') } }
+S['c-resultat-perdu'] = { r: function (v, r) { return resultatScreen(v, r, 'perdu') } }
 
 /* Commercant (retrait d'un lot) — demonstration dans l'apercu du master */
 function proHdr(back?: string): string { return '<div class="prohdr">' + (back ? '<button class="iconbtn" data-go="@retour" data-repli="\' + back + \'" aria-label="Retour">' + icon('chevL', 22, 2) + '</button>' : '<span style="width:44px"></span>') + '<span class="wm">Flow<span>in</span><em>PRO</em></span><span style="width:44px"></span></div>' }
@@ -711,7 +793,7 @@ S['sj-tickets'] = { tall: true, r: function (v) {
 } }
 
 /* ── Deroules (ordre du storyboard des maquettes) ──────────────────────── */
-const COMMUN_FIN = ['c-profil', 'c-connexion', 'c-raccourci', 'c-raccourci-a', 'c-commerces', 'c-carte', 'c-fiche', 'c-partenaires', 'c-fichepart', 'c-demain', 'c-digital', 'm-code', 'm-valider', 'm-ok']
+const COMMUN_FIN = ['c-profil', 'c-resultat-gagne', 'c-resultat-perdu', 'c-connexion', 'c-raccourci', 'c-raccourci-a', 'c-commerces', 'c-carte', 'c-fiche', 'c-partenaires', 'c-fichepart', 'c-demain', 'c-digital', 'm-code', 'm-valider', 'm-ok']
 export const DEROULES: Record<string, string[]> = {
   quiz: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'q-bonusintro', 'q-bonus', 'q-bonusok', 'c-parrainage', 'c-inscription', 'c-ticket'].concat(COMMUN_FIN),
   solo: ['s-flash', 's-accueil', 's-regles', 'q-question', 'q-bonne', 'q-mauvaise', 'q-resultat', 'c-parrainage', 'c-inscription', 'c-ticket'].concat(COMMUN_FIN),

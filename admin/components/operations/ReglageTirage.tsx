@@ -17,7 +17,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export interface ConfigTirage { mode: 'manuel' | 'auto'; date: string; publier: boolean }
+/** notifierPerdants : e-mail de service « tu n'as pas ete tire » aux participants non tires (defaut oui). */
+export interface ConfigTirage { mode: 'manuel' | 'auto'; date: string; publier: boolean; notifierPerdants?: boolean }
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
@@ -58,14 +59,14 @@ export function erreurTirage(c: ConfigTirage): string | null {
 export function cfgDepuisTirage(c: ConfigTirage): Record<string, unknown> {
   const iso = c.mode === 'auto' ? localVersIso(c.date) : null
   return {
-    tirage: { mode: c.mode, date: iso },
+    tirage: { mode: c.mode, date: iso, notifierPerdants: c.notifierPerdants !== false },
     publierGagnants: c.publier,
     ...(iso ? { tirageDate: libelleDateTirage(iso) } : {}),
   }
 }
 export function tirageDepuisCfg(cfg: Record<string, unknown> | null | undefined): ConfigTirage {
-  const t = ((cfg ?? {}).tirage ?? {}) as { mode?: string; date?: string | null }
-  return { mode: t.mode === 'auto' ? 'auto' : 'manuel', date: isoVersLocal(t.date ?? null), publier: (cfg ?? {}).publierGagnants === true }
+  const t = ((cfg ?? {}).tirage ?? {}) as { mode?: string; date?: string | null; notifierPerdants?: boolean }
+  return { mode: t.mode === 'auto' ? 'auto' : 'manuel', date: isoVersLocal(t.date ?? null), publier: (cfg ?? {}).publierGagnants === true, notifierPerdants: t.notifierPerdants !== false }
 }
 
 const choix = (on: boolean): React.CSSProperties => ({
@@ -121,6 +122,13 @@ export function ChoixTirage({ value, onChange, finEvenement }: { value: ConfigTi
           {err && <span style={{ display: 'block', fontSize: 12, color: '#B45309', fontWeight: 700, marginTop: 4 }}>{err}</span>}
         </label>
       )}
+      <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginTop: 12, cursor: 'pointer' }}>
+        <input type="checkbox" checked={value.notifierPerdants !== false} onChange={e => onChange({ ...value, notifierPerdants: e.target.checked })} style={{ width: 18, height: 18, marginTop: 1 }} />
+        <span>
+          <b style={{ display: 'block', fontSize: 13 }}>Prévenir par e-mail les participants qui n’ont pas été tirés</b>
+          <span style={{ fontSize: 12, color: MUT }}>Message de service sobre (le résultat de leur participation, un lien vers l’application), seulement à ceux qui ont laissé un e-mail. Ils voient aussi le résultat dans l’application, quoi que vous choisissiez.</span>
+        </span>
+      </label>
       <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginTop: 12, cursor: 'pointer' }}>
         <input type="checkbox" checked={value.publier} onChange={e => onChange({ ...value, publier: e.target.checked })} style={{ width: 18, height: 18, marginTop: 1 }} />
         <span>

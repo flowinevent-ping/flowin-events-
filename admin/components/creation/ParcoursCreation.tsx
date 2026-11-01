@@ -258,7 +258,7 @@ export default function ParcoursCreation({ mode = 'pro', pro, banques, supers, p
   const [logoCommerce, setLogoCommerce] = useState<string | null>(null)
 
   /* Tirage (animation) : manuel ou automatique, liste des gagnants publiee ou non. */
-  const [tirage, setTirage] = useState<ConfigTirage>({ mode: 'manuel', date: '', publier: false })
+  const [tirage, setTirage] = useState<ConfigTirage>({ mode: 'manuel', date: '', publier: false, notifierPerdants: true })
 
   /* 4. Participants (super event, SA) */
   const [participants, setParticipants] = useState<string[]>(pro?.id ? [pro.id] : [])

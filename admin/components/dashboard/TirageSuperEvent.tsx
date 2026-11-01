@@ -59,6 +59,18 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
     charger()
   }
 
+  /* Fin du tirage : chaque participant voit son resultat (gagne / pas tire) dans son profil
+     (sql/08-resultats-tirage.sql). Sans cette fonction en base : message clair, rien ne casse. */
+  async function terminer() {
+    setOccupe('fin'); setMessage(null)
+    const { data, error } = await supabase.rpc('enregistrer_resultats_tirage_super', { p_super_event_id: seId })
+    setOccupe(null)
+    if (error) { setMessage({ ok: false, texte: 'Enregistrement des résultats indisponible pour le moment (la fonction n’est pas encore en base).' }); return }
+    setMessage(Number(data) > 0
+      ? { ok: true, texte: `Tirage terminé : ${data} résultat${Number(data) > 1 ? 's' : ''} enregistré${Number(data) > 1 ? 's' : ''} (gagné / pas tiré). Les joueurs le voient dans leur profil.` }
+      : { ok: false, texte: 'Rien à enregistrer : aucun gagnant tiré depuis le dernier tirage terminé.' })
+  }
+
   return (
     <>
       <SectionHeader>Tirage au sort</SectionHeader>
@@ -106,6 +118,14 @@ export default function TirageSuperEvent({ seId, stations }: { seId: string; sta
           })}
         </div>
       ))}
+      {tires.length > 0 && (
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--sa-border)' }}>
+          <div style={{ fontSize: 12, color: 'var(--sa-muted)', marginBottom: 8, lineHeight: 1.5 }}>
+            Tirage terminé ? Chaque participant verra son résultat dans l’application ; ceux qui n’ont pas été tirés reçoivent un e-mail de service (réglage de l’opération).
+          </div>
+          <button className="sa-btn sm" disabled={occupe === 'fin'} onClick={terminer}>{occupe === 'fin' ? '…' : 'Terminer le tirage et prévenir les participants'}</button>
+        </div>
+      )}
     </>
   )
 }

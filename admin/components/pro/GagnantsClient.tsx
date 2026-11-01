@@ -117,6 +117,19 @@ function Tirage({ op, data, setMessage, onChange }: {
   const [envoi, setEnvoi] = useState(false)
   const [mail, setMail] = useState<'idle' | 'envoi' | 'ok' | 'echec'>('idle')
   const [dernierToken, setDernierToken] = useState<string | null>(null)
+  /* « Terminer le tirage » : le commerce clot SON tirage quand il le souhaite. Cela pose
+     events.cfg.tirage.fait_le ; la base enregistre alors le resultat de chaque participant
+     (sql/08-resultats-tirage.sql) : profil joueur + alerte (gagne / pas tire). */
+  const [fin, setFin] = useState<'idle' | 'envoi' | 'ok' | 'ko'>('idle')
+  const terminer = async () => {
+    setFin('envoi')
+    const { data } = await supabase.from('events').select('cfg').eq('id', ev.id).maybeSingle()
+    const cfg = ((data as { cfg: Record<string, unknown> | null } | null)?.cfg) ?? {}
+    const tirageCfg = ((cfg.tirage ?? {}) as Record<string, unknown>)
+    const { error } = await supabase.from('events').update({ cfg: { ...cfg, tirage: { ...tirageCfg, fait_le: new Date().toISOString() } } }).eq('id', ev.id)
+    setFin(error ? 'ko' : 'ok')
+    if (!error) onChange()
+  }
   /* Le lot tire : celui que le pro choisit parmi ceux de l event (le premier
      etait impose). Les lots epuises (quantite atteinte) ne sont pas proposes. */
   const lotsDispo = op.lots.filter(l => op.gagnants.filter(g => g.lotNom === l.nom).length < l.quantite)
@@ -203,6 +216,16 @@ function Tirage({ op, data, setMessage, onChange }: {
               tirer((eligibles ?? []).filter(j => ex.indexOf(j.id) < 0))
             }}>Injoignable — retirer au sort</button>
           </div>
+        </div>
+      )}
+      {!propose && op.gagnants.length > 0 && (
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid #E3E8EF' }}>
+          <div style={{ fontSize: 12, ...MUTED, marginBottom: 8, lineHeight: 1.5 }}>
+            Tirage terminé pour cette fois ? Chaque participant verra son résultat (gagné ou pas tiré) dans l’application{(op.stations[0]?.cfg as { tirage?: { notifierPerdants?: boolean } } | undefined)?.tirage?.notifierPerdants === false ? '' : ', et ceux qui n’ont pas été tirés reçoivent un e-mail de service'}. Vous pourrez refaire un tirage plus tard.
+          </div>
+          <button style={btn} disabled={fin === 'envoi'} onClick={terminer}>{fin === 'envoi' ? 'Enregistrement…' : 'Terminer le tirage et prévenir les participants'}</button>
+          {fin === 'ok' && <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 700, color: '#15803D' }}>Tirage terminé : les résultats sont enregistrés.</span>}
+          {fin === 'ko' && <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 700, color: '#B45309' }}>Échec, réessayez.</span>}
         </div>
       )}
       {mail !== 'idle' && !propose && (
