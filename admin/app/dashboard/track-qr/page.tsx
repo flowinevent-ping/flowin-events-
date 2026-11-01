@@ -87,7 +87,7 @@ export default function Page() {
                   titre=""
                   points={jours.map(j => ({ jour: j.jour, valeurs: { station: j.scans_station, reseaux: j.scans_reseaux, clics: j.clics } }))}
                   series={[
-                    { cle: 'station', label: 'Scans QR station', couleur: '#2563EB' },
+                    { cle: 'station', label: 'Scans QR station', couleur: '#7A4FE0' },
                     { cle: 'reseaux', label: 'Scans QR réseaux', couleur: '#378ADD' },
                     { cle: 'clics', label: 'Clics sortants', couleur: '#E0218A' },
                   ]}

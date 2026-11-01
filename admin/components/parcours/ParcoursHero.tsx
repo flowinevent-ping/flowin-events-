@@ -25,6 +25,8 @@
  * les mêmes tracés que proicons.tsx si ce fichier change.
  */
 
+import { animationDejaJouee, CONSENTEMENT_JEU, CONSENTEMENT_ANIMATIONS } from '@/lib/parcours'
+
 export interface HeroLogoProps { emoji?: string; logoSvg?: string; logoUrl?: string }
 
 /** Un dégradé propre à chaque module, dans la famille violet/magenta/orange
@@ -137,38 +139,63 @@ export function ParcoursHowTo({ steps }: { steps: HowToStep[] }) {
   )
 }
 
-/** Anti-fraude "lien digital" — repris tel quel de NDS2026Client.tsx
- *  (`isDigitalLink`, écran `refusdigital`, lignes ~208/229/1127). Un lien
- *  partagé sur les réseaux (`source=reseaux-*`) ne doit servir qu'à une
- *  PREMIÈRE participation : si le joueur est déjà reconnu sur cet appareil
- *  (`getJoueurLocal()`), on bloque et on renvoie vers la carte des stations
- *  plutôt que de laisser rejouer sans flasher un vrai QR sur place.
- *
- *  Nuance vérifiée dans le code (pas une supposition) : le lien de
- *  parrainage lui-même (`shareParrainage`, `lib/parrainage.ts`) ajoute
- *  `source=parrainage`, pas `source=reseaux-*` — ce garde-fou ne bloque donc
- *  PAS la réutilisation d'un lien de parrainage, exactement comme
- *  NDS2026Client (son propre `shareParrainage`, ligne 773, fait pareil). */
+/** Anti-fraude "lien digital" — convention NDS 2026 : un lien partagé sur
+ *  les réseaux porte `source=reseaux-*`. Le lien de parrainage
+ *  (`source=parrainage`) n'est PAS un lien digital au sens de cette règle. */
 export function isDigitalLinkSource(): boolean {
   if (typeof window === 'undefined') return false
-  try { return (new URLSearchParams(window.location.search).get('source') || '').startsWith('reseaux-') } catch { return false }
+  try { return (new URLSearchParams(window.location.search).get('source') || '').indexOf('reseaux-') === 0 } catch { return false }
 }
 
-/** Écran de blocage anti-fraude — même texte que NDS2026Client. */
+/** Lot QR (31/10) : un QR DIGITAL est utilisable une seule fois par compte.
+ *  Refus immédiat côté appareil si cette animation y a déjà été jouée ; sinon
+ *  c'est le serveur (writeJoueur / claimJoueur -> digitalRefuse) qui tranche,
+ *  pour un compte reconnu sur un autre appareil. */
+export function doitRefuserDigital(evId: string): boolean {
+  return isDigitalLinkSource() && animationDejaJouee(evId)
+}
+
+/** Pop-up de refus d'un lien digital déjà utilisé (texte validé client, 31/10)
+ *  + lien vers la carte des stations quand l'animation appartient à un
+ *  super event (seule carte qui existe). */
 export function ParcoursRefusDigital({ superEventId }: { superEventId?: string | null }) {
   return (
-    <div className="pc-refus">
-      <span className="pc-refus-ico" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2 2 7l10 5 10-5-10-5Z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
-        </svg>
-      </span>
-      <div className="pc-refus-title">Rends-toi sur le lieu pour jouer</div>
-      <div className="pc-refus-sub">Ce lien digital est réservé à ta première participation. Ton compte existe déjà : pour rejouer, flashe le QR sur place.</div>
-      {superEventId && <a className="pc-refus-link" href={`/se/${superEventId}`}>Voir la carte des stations</a>}
+    <div className="pc-refus" role="dialog" aria-modal="true" aria-labelledby="pc-refus-title">
+      <div className="pc-refus-pop">
+        <span className="pc-refus-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z" />
+          </svg>
+        </span>
+        <div className="pc-refus-title" id="pc-refus-title">Rendez-vous en magasin</div>
+        <div className="pc-refus-sub">Rendez-vous en magasin pour continuer à jouer une fois par jour et tenter de gagner vos lots et vos tickets.</div>
+        {superEventId && <a className="pc-refus-link" href={`/se/${superEventId}`}>Voir la carte des stations</a>}
+      </div>
     </div>
   )
 }
+
+/** Deux vraies cases de consentement, NON cochées par défaut (tous les jeux
+ *  sauf NDS 2026). La première est obligatoire pour valider la participation,
+ *  la seconde (facultative) alimente joueurs.optin. */
+export function ParcoursConsentement({ jeu, animations, onJeu, onAnimations, erreur }: {
+  jeu: boolean; animations: boolean; onJeu: (v: boolean) => void; onAnimations: (v: boolean) => void; erreur?: string
+}) {
+  return (
+    <div className="pc-consent">
+      <label className={`pc-consent-l${erreur ? ' err' : ''}`}>
+        <input type="checkbox" checked={jeu} onChange={e => onJeu(e.target.checked)} />
+        <span>{CONSENTEMENT_JEU} <b aria-hidden="true">*</b></span>
+      </label>
+      {erreur && <div className="err-msg" style={{ margin: '-4px 0 8px 30px' }}>{erreur}</div>}
+      <label className="pc-consent-l">
+        <input type="checkbox" checked={animations} onChange={e => onAnimations(e.target.checked)} />
+        <span>{CONSENTEMENT_ANIMATIONS}</span>
+      </label>
+    </div>
+  )
+}
+export const ERREUR_CONSENTEMENT = 'Cochez cette case pour valider votre participation.'
 
 export interface RegleJeu { titre: string; texte: string }
 
@@ -237,9 +264,15 @@ export const PARCOURS_HERO_CSS = `
   .pc-regles-h{font-size:13.5px;font-weight:800;color:#1a1226}
   .pc-regles-t{font-size:12.5px;color:#52455e;line-height:1.4;margin-top:2px}
 
-  .pc-refus{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;gap:14px}
-  .pc-refus-ico{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+  .pc-refus{flex:1;min-height:100dvh;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:40px 22px}
+  .pc-refus-pop{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;background:#2a1038;border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:26px 22px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+  .pc-refus-ico{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#E0218A,#8E2E9E);display:flex;align-items:center;justify-content:center}
   .pc-refus-title{font-size:19px;font-weight:900;color:#fff}
-  .pc-refus-sub{font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.5;max-width:320px}
-  .pc-refus-link{margin-top:10px;font-size:13px;font-weight:700;color:#fff;text-decoration:underline}
-`
+  .pc-refus-sub{font-size:14px;color:rgba(255,255,255,.75);line-height:1.5}
+  .pc-refus-link{margin-top:6px;font-size:13px;font-weight:700;color:#fff;text-decoration:underline}
+
+  .pc-consent{margin:12px 0 0}
+  .pc-consent-l{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:rgba(255,255,255,.75);line-height:1.5;margin-bottom:10px;cursor:pointer}
+  .pc-consent-l input{width:20px;height:20px;flex-shrink:0;margin:0;accent-color:#E0218A;cursor:pointer}
+  .pc-consent-l b{color:#E0218A}
+  .pc-consent-l.err span{color:#fca5a5}`

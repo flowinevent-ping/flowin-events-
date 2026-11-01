@@ -18,7 +18,7 @@ import { Camembert } from '@/components/dashboard/Camembert'
 
 const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
-const ACC = '#2563EB'
+const ACC = '#7A4FE0'
 const btn: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 11px', borderRadius: 8,
   border: `1.5px solid ${BRD}`, background: '#fff', color: '#0F172A', fontSize: 12, fontWeight: 700,
@@ -39,7 +39,7 @@ interface Contact {
   parties: number; derniere: string | null; stations: string[]
 }
 
-async function chargerContacts(op: DonneesOperation): Promise<Contact[]> {
+async function chargerContacts(op: DonneesOperation, seulementConsentants = false): Promise<Contact[]> {
   const ids = op.stations.map(s => s.id)
   if (!ids.length) return []
   const { data: parts } = await supabase.from('participations')
@@ -55,8 +55,19 @@ async function chargerContacts(op: DonneesOperation): Promise<Contact[]> {
   const jids = Array.from(agg.keys())
   const out: Contact[] = []
   for (let i = 0; i < jids.length; i += 200) {
-    const { data } = await supabase.from('joueurs')
-      .select('id,prenom,nom,email,tel,ville,code_postal,optin,first_seen').in('id', jids.slice(i, i + 200))
+    const lot = jids.slice(i, i + 200)
+    /* Espace pro : uniquement les joueurs consentants, via la fonction securisee
+       (sql/05-confidentialite-contacts.sql) ; repli sur la lecture filtree tant qu'elle n'est pas appliquee. */
+    let rep: { data: unknown } = { data: null }
+    if (seulementConsentants) {
+      const r = await supabase.rpc('joueurs_consentants_par_ids', { p_ids: lot })
+      rep = r.error
+        ? await supabase.from('joueurs').select('id,prenom,nom,email,tel,ville,code_postal,optin,first_seen').in('id', lot).eq('optin', true)
+        : r
+    } else {
+      rep = await supabase.from('joueurs').select('id,prenom,nom,email,tel,ville,code_postal,optin,first_seen').in('id', lot)
+    }
+    const data = rep.data
     ;((data ?? []) as Omit<Contact, 'parties' | 'derniere' | 'stations'>[]).forEach(j => {
       const a = agg.get(j.id)!
       const noms = Array.from(a.stations).map(id => op.stations.find(s => s.id === id)?.nom ?? id)
@@ -66,7 +77,7 @@ async function chargerContacts(op: DonneesOperation): Promise<Contact[]> {
   return out.sort((a, b) => String(b.derniere ?? '').localeCompare(String(a.derniere ?? '')))
 }
 
-export function ContenuCrm({ op }: { op: DonneesOperation }) {
+export function ContenuCrm({ op, mode = 'sa' }: { op: DonneesOperation; mode?: 'sa' | 'pro' }) {
   const [liste, setListe] = useState<Contact[] | null>(null)
   const [q, setQ] = useState('')
   const [tous, setTous] = useState(false)
@@ -74,7 +85,7 @@ export function ContenuCrm({ op }: { op: DonneesOperation }) {
   useEffect(() => {
     let vivant = true
     setListe(null)
-    chargerContacts(op).then(l => { if (vivant) setListe(l) })
+    chargerContacts(op, mode === 'pro').then(l => { if (vivant) setListe(l) })
     return () => { vivant = false }
   }, [cle]) // eslint-disable-line react-hooks/exhaustive-deps
 

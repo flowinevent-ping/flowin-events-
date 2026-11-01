@@ -23,7 +23,7 @@ type Vue = 'contacts' | 'origines' | 'operations' | 'stats'
 const VUES: { id: Vue; label: string }[] = [
   { id: 'contacts', label: 'Contacts' },
   { id: 'origines', label: 'Par origine' },
-  { id: 'operations', label: 'Par opération' },
+  { id: 'operations', label: 'Par animation' },
   { id: 'stats', label: 'Statistiques' },
 ]
 const TAILLE_LOT = 40
@@ -91,12 +91,13 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
 
   const choisis = liste.filter(c => sel.has(c.joueur_id))
   const cible = choisis.length ? choisis : liste
-  /* Relance par email : opt-in, ou gagnant (retrait de son lot). */
-  const destEmail = cible.filter(c => c.email && (c.optin || c.nb_gains > 0))
-  const exclus = cible.filter(c => c.email).length - destEmail.length
+  /* Contacts uniquement avec consentement (31/10) : seuls les joueurs opt-in
+     sont relançables. lib/crmPro masque deja les coordonnees des autres. */
+  const destEmail = cible.filter(c => c.email && c.optin === true)
+  const exclus = cible.filter(c => c.optin !== true).length
   const lotsEmail: string[][] = []
   for (let i = 0; i < destEmail.length; i += TAILLE_LOT) lotsEmail.push(destEmail.slice(i, i + TAILLE_LOT).map(c => c.email as string))
-  const tels = cible.map(c => c.tel).filter((x): x is string => !!x)
+  const tels = cible.filter(c => c.optin === true).map(c => c.tel).filter((x): x is string => !!x)
   const lienGmail = (bcc: string[]) =>
     `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(bcc.join(','))}&su=${encodeURIComponent(objet)}&body=${encodeURIComponent(message)}`
 
@@ -114,8 +115,9 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
   }
   function exporter() {
     const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
-    const entete = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Code postal', 'Ville', 'Genre', 'Âge', 'Opt-in', 'Origines', 'Opérations', 'Parties', 'Gains', 'Lots', 'Première', 'Dernière']
-    const lignes = cible.map(c => [c.prenom, c.nom, c.email, c.tel, c.code_postal, c.ville, c.genre, c.tranche_age, c.optin ? 'oui' : 'non',
+    const entete = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Code postal', 'Ville', 'Genre', 'Âge', 'Opt-in', 'Origines', 'Animations', 'Parties', 'Gains', 'Lots', 'Première', 'Dernière']
+    /* Export : coordonnees des seuls contacts consentants. */
+    const lignes = cible.filter(c => c.optin === true).map(c => [c.prenom, c.nom, c.email, c.tel, c.code_postal, c.ville, c.genre, c.tranche_age, c.optin ? 'oui' : 'non',
       c.origines.map(libelleOrigine).join(' / '), c.operations.map(o => o.nom).join(' / '), c.nb_parties, c.nb_gains, c.lots.join(' / '),
       c.premiere ?? '', c.derniere ?? ''])
     const csv = '﻿' + [entete, ...lignes].map(l => l.map(esc).join(',')).join('\n')
@@ -159,7 +161,7 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher : nom, email, ville…" style={{ ...petit, flex: '1 1 200px' }} />
         {!operationFixe && (
           <select value={op} onChange={e => { setOp(e.target.value); setSel(new Set()) }} style={petit}>
-            <option value="">Toutes les opérations</option>
+            <option value="">Toutes les animations</option>
             {operations.map(o => <option key={o.cle} value={o.cle}>{o.nom} — {o.dates}</option>)}
           </select>
         )}
@@ -192,8 +194,11 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
             <a style={bouton} href={tels.length ? `sms:${tels.join(',')}${message ? `?body=${encodeURIComponent(message)}` : ''}` : undefined}>SMS ({tels.length})</a>
             <button style={bouton} onClick={() => copier(destEmail.map(c => c.email).join(', '), 'emails')}>Copier les emails</button>
             <button style={bouton} onClick={() => copier(tels.join(', '), 'téléphones')}>Copier les téléphones</button>
-            <button style={bouton} onClick={exporter}>Export CSV</button>
+            <button style={bouton} onClick={exporter}>Export CSV (consentants)</button>
             {copie && <span style={{ fontSize: 12, color: '#15803D', fontWeight: 700 }}>{copie} copiés</span>}
+          </div>
+          <div style={{ fontSize: 12.5, color: C.attenue, marginBottom: 10, lineHeight: 1.5 }}>
+            Coordonnées visibles uniquement pour les joueurs qui ont coché la case de consentement. Les autres sont comptés dans vos statistiques, sans email ni téléphone. Les coordonnées des joueurs ne sont modifiables que par l’équipe Flowin.
           </div>
 
           {composer && (
@@ -203,7 +208,7 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
                 <div><label style={LABEL}>Objet</label><input style={CHAMP} value={objet} onChange={e => setObjet(e.target.value)} placeholder={`${proNom} — …`} /></div>
                 <div><label style={LABEL}>Message</label><textarea style={{ ...CHAMP, minHeight: 110, resize: 'vertical' }} value={message} onChange={e => setMessage(e.target.value)} /></div>
               </div>
-              {exclus > 0 && <div style={{ fontSize: 12, color: C.attenue, marginTop: 8 }}>{exclus} contact{exclus > 1 ? 's' : ''} sans opt-in exclu{exclus > 1 ? 's' : ''} (seuls les opt-in et les gagnants reçoivent une relance).</div>}
+              {exclus > 0 && <div style={{ fontSize: 12, color: C.attenue, marginTop: 8 }}>{exclus} contact{exclus > 1 ? 's' : ''} sans opt-in exclu{exclus > 1 ? 's' : ''} (seuls les joueurs consentants reçoivent une relance).</div>}
               <div style={{ fontSize: 12, color: C.attenue, margin: '8px 0' }}>Chaque bouton ouvre Gmail, destinataires en copie cachée ({TAILLE_LOT} maximum par envoi).</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {lotsEmail.map((l, i) => (
@@ -223,7 +228,7 @@ export default function CrmPro({ proId, proNom, contacts, operations, operationF
                   <tr>
                     <th style={th}><input type="checkbox" checked={choisis.length === liste.length && liste.length > 0} onChange={toutCocher} /></th>
                     <th style={th}>Contact</th><th style={th}>Coordonnées</th><th style={th}>Origine</th>
-                    <th style={th}>Opérations</th><th style={th}>Parties</th><th style={th}>Gains</th><th style={th}>Dernière</th><th style={th}>Opt-in</th>
+                    <th style={th}>Animations</th><th style={th}>Parties</th><th style={th}>Gains</th><th style={th}>Dernière</th><th style={th}>Opt-in</th>
                   </tr>
                 </thead>
                 <tbody>

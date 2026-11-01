@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseVivant } from './supabase'
 import { generateTicket } from './ticket'
 import type { TicketPrefix } from './types'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from './types'
@@ -37,8 +37,8 @@ export interface ParcoursPageData {
 /* ── Fetch partagé server-side ── */
 export async function fetchParcoursData(evId: string): Promise<ParcoursPageData> {
   const [evRes, lotsRes] = await Promise.all([
-    supabase.from('events').select('*').eq('id', evId).single(),
-    supabase.from('lots').select('*').eq('event_id', evId),
+    supabaseVivant.from('events').select('*').eq('id', evId).single(),
+    supabaseVivant.from('lots').select('*').eq('event_id', evId),
   ])
   const ev = evRes.data as FlowinEvent | null
   const lots = (lotsRes.data ?? []) as FlowinLot[]
@@ -50,7 +50,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   const seId = ((ev as unknown) as { super_event_id?: string } | null)?.super_event_id
   let partenaires: FlowinPartenaire[] = []
   if (seId) {
-    const { data } = await supabase
+    const { data } = await supabaseVivant
       .from('partenaires')
       .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,ordre,tel,contact,ville,adresse')
       .eq('super_event_id', seId)
@@ -60,7 +60,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   } else {
     const partIds = (cfg.partenaires ?? []) as string[]
     if (partIds.length) {
-      const { data } = await supabase
+      const { data } = await supabaseVivant
         .from('partenaires')
         .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,tel,contact,ville,adresse')
         .in('id', partIds)
@@ -75,11 +75,11 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
      lien aujourd'hui, la boucle ci-dessous ne pose aucune valeur et
      jeu_event_id reste undefined partout, sans rien afficher côté joueur. */
   if (partenaires.length) {
-    const { data: prosData } = await supabase
+    const { data: prosData } = await supabaseVivant
       .from('pros').select('id,partenaire_id').in('partenaire_id', partenaires.map(p => p.id))
     const proIds = ((prosData ?? []) as { id: string; partenaire_id: string }[])
     if (proIds.length) {
-      const { data: evData } = await supabase
+      const { data: evData } = await supabaseVivant
         .from('events').select('id,pro_id,module').in('pro_id', proIds.map(p => p.id)).eq('status', 'live')
       const evByPro = new Map(((evData ?? []) as { id: string; pro_id: string; module: string }[]).map(e => [e.pro_id, e]))
       const proByPartenaire = new Map(proIds.map(p => [p.partenaire_id, p.id]))
@@ -103,7 +103,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
     .filter((id, i, a) => a.indexOf(id) === i)
   let banques: ParcoursBanque[] = []
   if (banqueIds.length) {
-    const { data } = await supabase.from('banques').select('*').in('id', banqueIds)
+    const { data } = await supabaseVivant.from('banques').select('*').in('id', banqueIds)
     banques = (data ?? []) as ParcoursBanque[]
   }
 
@@ -287,6 +287,60 @@ export async function captureScanGeo(evId: string): Promise<{ onSite: boolean; s
   }
 }
 
+/* ── QR tracés = stations de jeu (lot QR, 31/10) ─────────────────────────────
+   Chaque QR porte un `?source=<slug>` (table qr_stations.source_qr). Il est
+   traité comme une station de jeu :
+     - QR PHYSIQUE (slug ordinaire) : 1 participation par jour, par joueur et
+       par QR ;
+     - QR DIGITAL (slug `reseaux-*`, convention NDS 2026) : utilisable une
+       seule fois par compte — un compte qui a déjà joué l'animation est
+       renvoyé en magasin.
+   La source est relue dans l'URL pour TOUS les jeux : participations.source_qr
+   est écrit par writeJoueur/claimJoueur même quand le jeu ne le passe pas
+   (seul NDS2026Client le passait). `parrainage` / `direct` ne sont pas des QR. */
+const SOURCES_NON_QR = ['parrainage', 'direct']
+export function sourceQrUrl(): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const p = new URLSearchParams(window.location.search)
+    const s = (p.get('source') || p.get('utm_source') || '').trim()
+    if (!s || SOURCES_NON_QR.indexOf(s) >= 0) return null
+    return s
+  } catch { return null }
+}
+export function estSourceDigitale(s: string | null | undefined): boolean {
+  return !!s && s.indexOf('reseaux-') === 0
+}
+/** Jour LOCAL (pas UTC) au format AAAA-MM-JJ : la règle « 1 fois par jour »
+ *  bascule à minuit chez le joueur, comme le jeu NDS 2026 (ndsYmd). */
+export function jourLocal(d: Date = new Date()): string {
+  const m = d.getMonth() + 1, j = d.getDate()
+  return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (j < 10 ? '0' : '') + j
+}
+/** Clé localStorage « déjà joué » DATÉE : par animation, par QR et par jour
+ *  local. Le lendemain, la clé change et le joueur peut rejouer. Remplace
+ *  l'ancienne `flowin_played_${evId}` sans date, qui bloquait à vie. */
+export function cleDejaJoue(evId: string): string {
+  return 'flowin_played_' + evId + '_' + (sourceQrUrl() || 'direct') + '_' + jourLocal()
+}
+/** Trace locale « ce compte a déjà joué cette animation » (toutes sources) :
+ *  sert au refus immédiat d'un lien digital déjà utilisé, avant tout appel
+ *  serveur. L'ancienne clé sans date compte aussi (joueurs d'avant le lot). */
+export function marquerAnimationJouee(evId: string): void {
+  try { localStorage.setItem('flowin_evjoue_' + evId, '1') } catch { /* ignore */ }
+  /* + trace DATEE (par QR et par jour local) : c'est elle qui decide « Reviens demain ».
+     Verification 01/11 : /jouer relisait la trace sans date, donc « Reviens demain »
+     restait affiche TOUS LES JOURS suivants et pour tous les QR du meme commerce. */
+  try { localStorage.setItem(cleDejaJoue(evId), '1') } catch { /* ignore */ }
+}
+/** Deja joue AUJOURD'HUI sur CE QR (physique : 1 fois par jour et par QR). Repart a zero chaque nuit. */
+export function dejaJoueAujourdhuiCeQr(evId: string): boolean {
+  try { return localStorage.getItem(cleDejaJoue(evId)) != null } catch { return false }
+}
+export function animationDejaJouee(evId: string): boolean {
+  try { return localStorage.getItem('flowin_evjoue_' + evId) != null || localStorage.getItem('flowin_played_' + evId) != null } catch { return false }
+}
+
 /* Un apercu (?preview=1, cadre telephone des parcours de creation) n ecrit
    jamais de joueur ni de participation. */
 function estApercu(): boolean {
@@ -294,10 +348,36 @@ function estApercu(): boolean {
   try { return new URLSearchParams(window.location.search).has('preview') } catch { return false }
 }
 
-export async function writeJoueur(payload: JoueurPayload): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
+export interface ResultatPartie { success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null; /** Lien digital (`reseaux-*`) déjà utilisé par ce compte sur cette animation. */ digitalRefuse?: boolean }
+
+/** Contrôle serveur des règles de QR (avant l'insert ; les index uniques de
+ *  sql/2026-11-01-tirage-auto-liste-gagnants.sql le doublent en base) :
+ *    - digital : refus si le compte a DEJA une participation sur l'animation ;
+ *    - physique : refus si une participation existe aujourd'hui sur CE QR.
+ *  NDS 2026 (prefixe ND) garde sa regle historique : 1/jour/station quel que
+ *  soit le QR. */
+async function controleRegleQr(joueurId: string, evId: string, sourceQr: string | null, prefix: string): Promise<{ bloque: boolean; digital: boolean; ticket?: string }> {
+  if (estSourceDigitale(sourceQr)) {
+    const { data } = await supabase.from('participations').select('ticket_code').eq('joueur_id', joueurId).eq('event_id', evId).limit(1)
+    if (data?.length) return { bloque: true, digital: true, ticket: (data[0] as { ticket_code?: string }).ticket_code }
+    return { bloque: false, digital: true }
+  }
+  const debutJour = new Date(); debutJour.setHours(0, 0, 0, 0)
+  let q = supabase.from('participations').select('ticket_code').eq('joueur_id', joueurId).eq('event_id', evId).gte('created_at', debutJour.toISOString())
+  /* Hors NDS : quota par QR (les parties digitales, autre source_qr, ne
+     comptent donc pas dans le quota physique du jour). */
+  if (prefix !== 'ND') q = sourceQr ? q.eq('source_qr', sourceQr) : q.is('source_qr', null)
+  const { data } = await q.limit(5)
+  const lignes = (data ?? []) as { ticket_code?: string }[]
+  if (lignes.length) return { bloque: true, digital: false, ticket: lignes[0].ticket_code }
+  return { bloque: false, digital: false }
+}
+
+export async function writeJoueur(payload: JoueurPayload): Promise<ResultatPartie> {
   if (estApercu()) return { success: true, duplicate: false, ticket: payload.ticket_code }
   const emailLower = payload.email.toLowerCase().trim()
   const evId = payload.events[0]
+  const sourceQr = payload.source_qr !== undefined ? payload.source_qr : sourceQrUrl()
 
   /* Anti-doublon — CORRIGE (19/07).
      AVANT : .eq('email_lower', …).contains('events', [evId]) — sans aucune borne de date.
@@ -320,20 +400,15 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       id: string; ticket_code?: string; prenom?: string; nom?: string;
       tel?: string; code_postal?: string; age_tranche?: string; genre?: string
     }
-    const debutJour = new Date(); debutJour.setHours(0, 0, 0, 0)
-    const { data: dejaJoue } = await supabase
-      .from('participations')
-      .select('id')
-      .eq('joueur_id', d0.id)
-      .eq('event_id', evId)
-      .gte('created_at', debutJour.toISOString())
-      .limit(1)
-
-    if (dejaJoue?.length) {
+    /* Lot QR (31/10) : la regle depend du QR flashe (digital = 1 fois par
+       compte, physique = 1/jour/QR) -- controleRegleQr. */
+    const ctl = await controleRegleQr(d0.id, evId, sourceQr ?? null, payload.prefix)
+    if (ctl.bloque) {
       rememberJoueur(d0.id, emailLower, d0.prenom, {
         nom: d0.nom, tel: d0.tel, cp: d0.code_postal, age: d0.age_tranche, genre: d0.genre,
       })
-      return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
+      marquerAnimationJouee(evId)
+      return { success: false, duplicate: true, ticket: ctl.ticket || d0.ticket_code || '', digitalRefuse: ctl.digital }
     }
   }
 
@@ -380,7 +455,9 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     client_type: payload.client_type || 'btoc',
     lot_gagne: payload.lot_gagne || null,
     score_moy: scorePct,
-    optin: payload.optin !== false,
+    /* Consentement (lot QR, 31/10) : l'opt-in vaut la 2e case du formulaire,
+       NON cochee par defaut -- plus de `true` implicite. */
+    optin: payload.optin === true,
     optin_date: today,
     optin_version: payload.optin_version || null,
     last_seen: today,
@@ -407,10 +484,15 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
        participation n etait ecrite et le joueur recevait un ticket fictif. */
     const maj = r.data as { id: string }[] | null
     joueurRows = maj?.length ? maj : [{ id: dejaId }]
-    joueurErr = r.error
+    /* « permission denied » (42501) : selon la base, l'update anonyme est refuse par une ERREUR
+       (pas de droit de table) au lieu de renvoyer 0 ligne. Meme traitement : repli sur
+       joueur_marquer_partie. Sans cela, tout joueur DEJA CONNU qui rejouait recevait
+       « Enregistrement impossible » (constate au rejeu local du 01/11). */
+    const refusDroit = !!r.error && ((r.error as { code?: string }).code === '42501' || /permission denied|row-level security/i.test(r.error.message || ''))
+    joueurErr = refusDroit ? null : r.error
     /* Sans droit UPDATE, l'event, la date de passage et le ticket du joueur
        passent par une fonction restreinte a ces seuls champs. */
-    if (!maj?.length && !r.error) {
+    if (!maj?.length && (!r.error || refusDroit)) {
       await supabase.rpc('joueur_marquer_partie', { p_id: dejaId, p_events: payload.events ?? [], p_ticket: tc })
     }
   } else {
@@ -420,6 +502,20 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       .select('id')
     joueurRows = r.data as { id: string }[] | null
     joueurErr = r.error
+  }
+
+  /* Repli : colonne `optin_version` absente en base (sql/07-joueurs-optin-version.sql non applique).
+     Sans ce repli, TOUTE inscription echouait (PGRST204). On reessaie sans la version du
+     consentement : l'inscription aboutit, seule la trace de version manque. */
+  if (joueurErr && /optin_version/i.test(joueurErr.message || '')) {
+    const { optin_version: _v, ...sansVersion } = joueurFields
+    void _v
+    const r2 = existant?.length
+      ? await supabase.from('joueurs').update(sansVersion).eq('id', (existant[0] as { id: string }).id).select('id')
+      : await supabase.from('joueurs').insert({ ...sansVersion, first_seen: today }).select('id')
+    if (existant?.length) joueurRows = (r2.data as { id: string }[] | null)?.length ? (r2.data as { id: string }[]) : [{ id: (existant[0] as { id: string }).id }]
+    else joueurRows = r2.data as { id: string }[] | null
+    joueurErr = r2.error
   }
 
   if (joueurErr) {
@@ -442,12 +538,12 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
       completed: true,
       tickets: nbTickets,
       bonus_answers: payload.bonus_reponses ?? null,
-      source_qr: payload.source_qr ?? null,
+      source_qr: sourceQr ?? null,
       started_at: payload.started_at ?? null,
       ...geo.scan,
     })
     if (partErr) {
-      if ((partErr as { code?: string }).code === '23505') return { success: false, duplicate: true, ticket: tc }
+      if ((partErr as { code?: string }).code === '23505') { marquerAnimationJouee(evId); return { success: false, duplicate: true, ticket: tc, digitalRefuse: estSourceDigitale(sourceQr) } }
       console.error('[writeJoueur] insert participation échoué:', partErr.message)
     }
     /* Stockage complet des réponses (profil + découverte + quiz + bonus) dans se_reponses */
@@ -459,7 +555,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
         prenom: payload.prenom ?? null, nom: payload.nom ?? null, email: emailLower,
         tel: payload.tel ?? null, code_postal: payload.code_postal ?? null,
         age_tranche: payload.age_tranche ?? null, genre: payload.genre ?? null,
-        optin: payload.optin !== false,
+        optin: payload.optin === true,
       },
       quiz_reponses: payload.quiz_reponses,
       bonus_reponses: payload.bonus_reponses,
@@ -471,6 +567,7 @@ export async function writeJoueur(payload: JoueurPayload): Promise<{ success: bo
     rememberJoueur(joueurId, emailLower, payload.prenom, { nom: payload.nom, tel: payload.tel, cp: payload.code_postal, age: payload.age_tranche, genre: payload.genre })
     /* Parrainage : si l'inscription vient d'un lien ?ref=, on l'enregistre (validé + attribué au commerce) */
     await captureParrainage(extId)
+    if (!partErr) marquerAnimationJouee(evId)
     return { success: true, duplicate: false, ticket: tc, gain }
   }
 
@@ -592,17 +689,18 @@ export async function claimJoueur(
   prefix: TicketPrefix,
   bonus?: Record<string, unknown>,
   extra?: { quiz_reponses?: unknown; score?: string; decouverte?: string; source?: string; source_qr?: string; started_at?: string; quizTicket?: boolean; bonusTicket?: boolean; lotGagne?: string }
-): Promise<{ success: boolean; duplicate: boolean; ticket: string; error?: string; gain?: GainImmediat | null }> {
+): Promise<ResultatPartie> {
   if (estApercu()) return { success: true, duplicate: false, ticket: generateTicket(prefix) }
   const emailLower = joueur.email.toLowerCase().trim()
   const today = new Date().toISOString().slice(0, 10)
-  // Dedup 1/jour/station : bloque le rejeu de CETTE station le MEME jour (rejouable un autre jour).
-  const { data: dupToday } = await supabase
-    .from('participations').select('ticket_code').eq('joueur_id', joueur.id).eq('event_id', evId).eq('played_date', today).limit(1)
-  if (dupToday?.length) {
-    const d0 = dupToday[0] as { ticket_code?: string }
+  const sourceQr = extra?.source_qr !== undefined ? extra.source_qr : sourceQrUrl()
+  /* Regle du QR flashe : digital = 1 fois par compte, physique = 1/jour/QR
+     (NDS 2026 : 1/jour/station). Rejouable un autre jour sur un QR physique. */
+  const ctl = await controleRegleQr(joueur.id, evId, sourceQr ?? null, prefix)
+  if (ctl.bloque) {
     rememberJoueur(joueur.id, emailLower, joueur.prenom)
-    return { success: false, duplicate: true, ticket: d0.ticket_code ?? '' }
+    marquerAnimationJouee(evId)
+    return { success: false, duplicate: true, ticket: ctl.ticket ?? '', digitalRefuse: ctl.digital }
   }
   const tc = generateTicket(prefix)
   /* L'UPDATE direct sur joueurs est refuse a l'anonyme (0 ligne, sans erreur) :
@@ -613,9 +711,9 @@ export async function claimJoueur(
   const bonusTk = geo.onSite && extra?.bonusTicket === true
   const nbTickets = (quizTk ? 1 : 0) + (bonusTk ? 1 : 0)
   const sc = extra?.score ? (parseInt(String(extra.score).split('/')[0]) || 0) : 0
-  const { error: partErr2 } = await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: extra?.source_qr ?? null, started_at: extra?.started_at ?? null, ...geo.scan })
+  const { error: partErr2 } = await supabase.from('participations').insert({ joueur_id: joueur.id, event_id: evId, ticket_code: tc, score: sc, completed: true, tickets: nbTickets, bonus_answers: bonus ?? null, source_qr: sourceQr ?? null, started_at: extra?.started_at ?? null, ...geo.scan })
   if (partErr2) {
-    if ((partErr2 as { code?: string }).code === '23505') { rememberJoueur(joueur.id, emailLower, joueur.prenom); return { success: false, duplicate: true, ticket: tc } }
+    if ((partErr2 as { code?: string }).code === '23505') { rememberJoueur(joueur.id, emailLower, joueur.prenom); marquerAnimationJouee(evId); return { success: false, duplicate: true, ticket: tc, digitalRefuse: estSourceDigitale(sourceQr) } }
     return { success: false, duplicate: false, ticket: tc, error: partErr2.message }
   }
   await writeSeReponses({
@@ -630,6 +728,7 @@ export async function claimJoueur(
   await attribuerSuperEvent(joueur.id, evId, today, geo.onSite, { quiz: quizTk, bonus: bonusTk })
   const gain = await appliquerRegleGain(joueur.id, evId, extra?.lotGagne)
   rememberJoueur(joueur.id, emailLower, joueur.prenom)
+  marquerAnimationJouee(evId)
   return { success: true, duplicate: false, ticket: tc, gain }
 }
 
@@ -755,6 +854,12 @@ export function parcoursCSS(couleur: string): string {
    Avant ce commit, chaque module (Vote/Quiz/QuizSolo/Tombola) portait son
    propre libellé RGPD, legerement different d un module a l autre -- texte
    exact impose par Romain, a utiliser partout (cf CLAUDE.md). */
+/* Consentement (lot QR, 31/10) — deux vraies cases, NON cochees par defaut,
+   dans tous les jeux sauf NDS 2026 (inchange). La 1re conditionne la
+   participation, la 2e alimente joueurs.optin. */
+export const CONSENTEMENT_JEU = "J'autorise Flowin à conserver mes coordonnées uniquement dans le cadre du jeu. Mes données ne sont ni échangées ni revendues."
+export const CONSENTEMENT_ANIMATIONS = "J'autorise Flowin à me faire participer à ses animations."
+export const CONSENTEMENT_VERSION = 'flowin-consentement-2026-11'
 export const RGPD_TEXT = "J'accepte que mes coordonnées soient utilisées pour ce jeu. Traitées et utilisées par Flowin, mes données ne sont ni vendues ni échangées, en respect avec la loi RGPD."
 
 /* ── Shared Form Component helper ── */

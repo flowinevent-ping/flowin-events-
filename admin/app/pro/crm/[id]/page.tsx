@@ -60,7 +60,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
         <div style={{ flex: 1, minWidth: 180 }}>
           <div style={{ fontSize: 18, fontWeight: 800 }}>{nom}</div>
           <div style={{ fontSize: 12.5, ...MUTED }}>
-            {j.optin ? 'Opt-in : relançable' : 'Sans opt-in'} · {j.nb_parties} partie{j.nb_parties > 1 ? 's' : ''} · {j.nb_gains} lot{j.nb_gains > 1 ? 's' : ''} gagné{j.nb_gains > 1 ? 's' : ''}
+            {j.optin ? 'Consentement donné : contactable' : 'Sans consentement : coordonnées masquées'} · {j.nb_parties} partie{j.nb_parties > 1 ? 's' : ''} · {j.nb_gains} lot{j.nb_gains > 1 ? 's' : ''} gagné{j.nb_gains > 1 ? 's' : ''}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -74,8 +74,8 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 14 }}>
         <div style={CARD}>
           {titre('Coordonnées')}
-          {ligne('Email', j.email || '—')}
-          {ligne('Téléphone', j.tel || '—')}
+          {ligne('Email', j.email || (j.optin ? '—' : 'Masqué (sans consentement)'))}
+          {ligne('Téléphone', j.tel || (j.optin ? '—' : 'Masqué (sans consentement)'))}
           {ligne('Code postal', j.code_postal || '—')}
           {ligne('Ville', j.ville || (villeDeduite ? <>{villeDeduite} <span style={MUTED}>(déduite du code postal)</span></> : '—'))}
           {ligne('Genre', j.genre === 'F' ? 'Femme' : j.genre === 'H' ? 'Homme' : (j.genre || '—'))}
@@ -86,7 +86,7 @@ export default async function FicheJoueurProPage({ params, searchParams }: { par
         </div>
 
         <div style={CARD}>
-          {titre(`Opérations (${j.operations.length})`)}
+          {titre(`Animations (${j.operations.length})`)}
           {j.operations.length === 0 && <div style={{ fontSize: 13, ...MUTED }}>Aucune.</div>}
           {j.operations.map(o => (
             <div key={o.cle} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '7px 0', borderBottom: `1px solid ${C.bordure}`, fontSize: 13 }}>

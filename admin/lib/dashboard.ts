@@ -110,7 +110,11 @@ export async function fetchAllPros(): Promise<FlowinPro[]> {
    session pro ouverte (connexion /pro), le client partage ecrit en
    `authenticated` et la RLS (pros_self_*) refuse tout pro qui n est pas le sien. */
 export async function upsertPro(p: Partial<FlowinPro>): Promise<boolean> {
-  const { data, error } = await supabasePublic.from('pros').upsert(p, { onConflict: 'id' }).select('id')
+  /* `droits` (sql/06) ne passe JAMAIS par cet upsert anonyme : la base le reserve au
+     Super Admin connecte (components/dashboard/DroitsPro.tsx). */
+  const { droits: _droits, ...sansDroits } = p as Partial<FlowinPro> & { droits?: unknown }
+  void _droits
+  const { data, error } = await supabasePublic.from('pros').upsert(sansDroits, { onConflict: 'id' }).select('id')
   return !error && !!data?.length
 }
 
@@ -255,16 +259,8 @@ export async function fetchQrStations(eventId: string): Promise<QrStation[]> {
   if (error) { console.error('[fetchQrStations]', error.message); return [] }
   return (data ?? []) as QrStation[]
 }
-export async function creerQrStation(eventId: string, nom: string): Promise<boolean> {
-  const source = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-  const { error } = await supabase.from('qr_stations').insert({ event_id: eventId, nom, source_qr: source || 'station' })
-  if (error) { console.error('[creerQrStation]', error.message); return false }
-  return true
-}
-export async function publierQrStation(id: string, publie: boolean): Promise<boolean> {
-  const { error } = await supabase.from('qr_stations').update({ publie }).eq('id', id)
-  return !error
-}
+/* Creation / publication des QR : lib/qrTraces.ts (lot QR, 31/10 -- publies
+   des leur creation, nommes, types physique / digital). */
 
 export interface LienEphemere {
   id: string

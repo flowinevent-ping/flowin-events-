@@ -219,6 +219,8 @@ export interface FlowinPro {
   partenaire_id: string | null
   statut: 'en_attente' | 'valide' | 'refuse'
   auth_id: string | null
+  /** Droits d'acces (sql/06-droits-pro.sql). Absent tant que le SQL n'est pas applique. */
+  droits?: Record<string, boolean> | null
 }
 
 export interface FlowinSuperEvent {

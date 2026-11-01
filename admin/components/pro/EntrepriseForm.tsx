@@ -18,8 +18,8 @@ import { Ico } from '@/lib/proicons'
 type Pro = { id: string; nom: string | null; secteur: string | null; adresse: string | null; code_postal: string | null; ville: string | null; siret: string | null; contact: string | null; email: string | null; tel: string | null; partenaire_id: string | null }
 type Fiche = { image_url: string | null; site_web: string | null; instagram: string | null; facebook: string | null }
 
-const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#8a7e93', marginBottom: 5, display: 'block' }
-const inp: React.CSSProperties = { width: '100%', border: '1.5px solid #efe9f2', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12, background: '#fff' }
+const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: '#5a6b80', marginBottom: 5, display: 'block' }
+const inp: React.CSSProperties = { width: '100%', border: '1.5px solid #E3E8EF', borderRadius: 12, padding: '11px 13px', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 12, background: '#fff' }
 
 export default function EntrepriseForm({ initial }: { initial: Pro }) {
   const [p, setP] = useState<Pro>(initial)
@@ -84,7 +84,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
     <>
       {p.partenaire_id && (
         <div style={{ ...CARD, display: 'flex', gap: 18, alignItems: 'center', marginBottom: 14 }}>
-          <div style={{ width: 96, height: 96, flexShrink: 0, borderRadius: 16, border: '2px dashed #efe9f2', background: '#faf8fb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+          <div style={{ width: 96, height: 96, flexShrink: 0, borderRadius: 16, border: '2px dashed #E3E8EF', background: '#faf8fb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {f.image_url
               ? <img src={f.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={() => setF(x => ({ ...x, image_url: null }))} />
               : <span style={{ fontSize: 34, fontWeight: 900, color: '#c9bfd0' }}>{(p.nom ?? '?').trim().charAt(0).toUpperCase()}</span>}
@@ -92,7 +92,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
           <div style={{ flex: 1, minWidth: 220 }}>
             <span style={lbl}>Logo de l&apos;établissement</span>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <label style={{ background: uploadEnCours ? '#efe9f2' : ACC, color: uploadEnCours ? '#8a7e93' : '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: uploadEnCours ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+              <label style={{ background: uploadEnCours ? '#E3E8EF' : ACC, color: uploadEnCours ? '#5a6b80' : '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontWeight: 800, fontSize: 13, cursor: uploadEnCours ? 'default' : 'pointer', fontFamily: 'inherit' }}>
                 {uploadEnCours ? 'Envoi…' : <><Ico k="upload" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Choisir un fichier</>}
                 <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }}
                   disabled={uploadEnCours} onChange={onFichierLogo} />
@@ -101,7 +101,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
                 value={f.image_url ?? ''} onChange={e => { setF(x => ({ ...x, image_url: e.target.value })); setEtat('') }} />
             </div>
             {uploadErreur && <div style={{ fontSize: 12, color: '#B45309', marginTop: 6, fontWeight: 700 }}>{uploadErreur}</div>}
-            <div style={{ fontSize: 11.5, color: '#8a7e93', marginTop: 6 }}>PNG, JPG, WebP ou SVG — 5 Mo max. Affiché sur vos jeux, la carte et les billets.</div>
+            <div style={{ fontSize: 11.5, color: '#5a6b80', marginTop: 6 }}>PNG, JPG, WebP ou SVG — 5 Mo max. Affiché sur vos jeux, la carte et les billets.</div>
           </div>
         </div>
       )}
@@ -134,7 +134,7 @@ export default function EntrepriseForm({ initial }: { initial: Pro }) {
               {champF('facebook', 'Facebook', 'https://facebook.com/…')}
             </>
           ) : (
-            <div style={{ fontSize: 12.5, color: '#8a7e93' }}>Logo et liens : votre fiche commerce sera créée par Flowin.</div>
+            <div style={{ fontSize: 12.5, color: '#5a6b80' }}>Logo et liens : votre fiche commerce sera créée par Flowin.</div>
           )}
         </div>
       </div>

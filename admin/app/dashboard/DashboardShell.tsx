@@ -30,6 +30,8 @@ export default function DashboardShell({
       initialPros={initialPros}
       initialLots={initialLots}
     >
+      {/* Jetons de theme communs (accent violet) : public/flowin-theme.css */}
+      <link rel="stylesheet" href="/flowin-theme.css" />
       <div className="sa-shell">
         <Sidebar />
         <div className="sa-main">

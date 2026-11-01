@@ -3,28 +3,32 @@
 import { libelleModule } from '@/lib/operations'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { ACCENT_SUPER } from '@/lib/charte'
+import { CHARTE_PRO as C, ACCENT_SUPER } from '@/lib/charte'
+import { estModuleMaster, ECRANS_APERCU, urlApercuMaster } from '@/lib/masters/apercu'
 
 /**
- * Parcours mobil (30/07/2026, v2 — branchement du vrai contenu).
- * Affiche le VRAI parcours joueur en direct dans un cadre telephone (iframe), pas une maquette :
- *  - onglet Event : /parcours/<module>?ev=<id> (le parcours reel de l'animation choisie)
- *  - onglet Super event : /se/<seId> (la page publique du super event : carte des stations, lots)
- * Un selecteur permet de choisir quel evenement previsualiser. Reutilise cote profil partenaire
- * (/pro/parcours) et cote dashboard SA (/dashboard/parcours) via les memes props.
+ * APERCU DU PARCOURS JOUEUR — refonte du 01/11 : les MASTERS de jeux.
+ *
+ * Meme page que le joueur, le Super Admin et l'espace pro : /jouer
+ * (admin/app/jouer, maquettes validees). Les jeux Quiz + bonus, Quiz solo,
+ * Roue, Tombola et Vote s'affichent donc avec leur master ; l'univers comics
+ * du super event pour l'onglet « super event ». Les modules qui ne sont pas
+ * des masters (Quiz Master, NDS 2026) gardent leur ancien parcours, inchange.
+ *
+ * Cadre telephone clair (plus de coque noire), pastilles d'ecrans comme le
+ * storyboard des maquettes, fleches precedent / suivant (postMessage), retour
+ * et historique geres par la page /jouer elle-meme.
  */
 
-const ACC = '#2563EB'
 type Ev = { id: string; module: string; nom: string; super_event_id?: string | null }
 
+/** Cadre telephone clair, aux dimensions des maquettes (390 px de large). */
 export function Phone({ src, empty, iframeRef }: { src?: string; empty?: string; iframeRef?: React.RefObject<HTMLIFrameElement | null> }) {
-  const W = 252, H = 505, SCALE = 0.64
-  const IW = Math.round(W / SCALE)
-  const IH = Math.round(H / SCALE)
+  const W = 280, SCALE = W / 390, H = Math.round(844 * SCALE)
   return (
-    <div style={{ width: W + 20, flexShrink: 0 }}>
-      <div style={{ borderRadius: 36, padding: 10, background: '#0F172A', boxShadow: '0 24px 60px rgba(15,23,42,.28)' }}>
-        <div style={{ borderRadius: 28, overflow: 'hidden', background: '#fff', width: W, height: H, position: 'relative' }}>
+    <div style={{ width: W + 22, flexShrink: 0 }}>
+      <div style={{ borderRadius: 38, padding: 10, background: '#fff', border: `1.5px solid ${C.bordureChamp}`, boxShadow: '0 24px 50px rgba(27,58,92,.12), 0 6px 16px rgba(27,58,92,.06)' }}>
+        <div style={{ borderRadius: 28, overflow: 'hidden', background: C.fond, width: W, height: H, position: 'relative', boxShadow: `0 0 0 1.5px ${C.bordure}` }}>
           {src ? (
             <iframe
               key={src}
@@ -32,10 +36,10 @@ export function Phone({ src, empty, iframeRef }: { src?: string; empty?: string;
               src={src}
               title="Aperçu du parcours"
               loading="lazy"
-              style={{ width: IW, height: IH, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left' }}
+              style={{ width: 390, height: 844, border: 0, transform: `scale(${SCALE})`, transformOrigin: 'top left' }}
             />
           ) : (
-            <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center', color: '#64748B', fontSize: 13.5, lineHeight: 1.5 }}>{empty}</div>
+            <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center', color: C.attenue, fontSize: 13.5, lineHeight: 1.5 }}>{empty}</div>
           )}
         </div>
       </div>
@@ -43,17 +47,6 @@ export function Phone({ src, empty, iframeRef }: { src?: string; empty?: string;
   )
 }
 
-/**
- * APERCU DU PARCOURS — regle unique (famille I) :
- *  - l apercu montre TOUJOURS le vrai parcours (iframe, preview=1), jamais une maquette ;
- *  - on choisit d abord l event, groupe par operation (rien a plat) ;
- *  - la vue « super event » est TOUJOURS proposee. Le parcours super event
- *    de NDS 2026 a ete decline en marque blanche pour tous (Romain, 16/09) :
- *      . station d un super event -> son propre ecran carte ;
- *      . event autonome -> le gabarit marque blanche (station du master), pour
- *        montrer ce que donnerait l event dans un super event.
- *    Le super event n est jamais devine par la page appelante (famille D).
- */
 export default function ParcoursMobil({ events = [], showTitle = true }: { events?: Ev[]; showTitle?: boolean }) {
   /* Noms des super events, pour titrer les groupes du selecteur. */
   const [supers, setSupers] = useState<Record<string, string>>({})
@@ -64,18 +57,11 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
       setSupers(m)
     })
   }, [])
-  const [tabDemande, setTab] = useState<'event' | 'super'>('event')
+  const [tab, setTab] = useState<'event' | 'super'>('event')
   const [evId, setEvId] = useState(events[0]?.id ?? '')
+  const [ecran, setEcran] = useState('s-accueil')
   const ev = events.find(e => e.id === evId) ?? events[0]
   const multistation = !!ev?.super_event_id
-  const tab = tabDemande
-  /* Une station du gabarit marque blanche, pour la vue super event d un event autonome. */
-  const [stationGabarit, setStationGabarit] = useState<string | null>(null)
-  useEffect(() => {
-    supabase.from('events').select('id').eq('super_event_id', 'se-master-superevent').eq('module', 'nds2026')
-      .order('id').limit(1)
-      .then(({ data }) => { const d = (data ?? []) as { id: string }[]; setStationGabarit(d[0]?.id ?? null) })
-  }, [])
   const groupes = events.reduce<{ cle: string; nom: string; evs: Ev[] }[]>((acc, e) => {
     const cle = e.super_event_id ?? ''
     let g = acc.find(x => x.cle === cle)
@@ -84,35 +70,29 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
     return acc
   }, [])
 
-  /* Navigation ecran par ecran (Romain, 28/10 : « l accessibilite a chaque
-     page dans la navigation... pour pouvoir screenshoter et verifier »).
-     Chaque *Client.tsx du parcours ecoute deja postMessage({flowinNav:
-     'next'|'prev'}) pour avancer dans son propre NAV_SCREENS (mecanisme
-     existant, jusque-la sans emetteur) : on envoie juste le message a
-     l iframe, sans dupliquer sa logique de navigation. */
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const naviguer = (sens: 'next' | 'prev') => {
     try { iframeRef.current?.contentWindow?.postMessage({ flowinNav: sens }, window.location.origin) } catch { /* iframe pas encore chargee */ }
   }
 
-  const eventUrl = ev ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1` : ''
-  const superUrl = ev && multistation
-    ? `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1&screen=carte`
-    : stationGabarit ? `/parcours/nds2026?ev=${encodeURIComponent(stationGabarit)}&preview=1&screen=carte` : ''
-  const url = tab === 'event' ? eventUrl : superUrl
-  const phoneUrl = url ? `${url}&bar=0` : ''
-  const empty = 'Aucun événement à prévisualiser pour le moment.'
+  const master = !!ev && estModuleMaster(ev.module)
+  /* Onglet animation : le master du jeu. Onglet super event : l'univers comics
+     du super event de la station, ou son exemple si l'animation est seule. */
+  let url = ''
+  if (ev) {
+    if (tab === 'super') url = urlApercuMaster({ superEventId: multistation ? ev.super_event_id : null, master: 'super' })
+    else if (master) url = urlApercuMaster({ evId: ev.id, ecran })
+    else url = `/parcours/${ev.module}?ev=${encodeURIComponent(ev.id)}&preview=1`
+  }
+  const phoneUrl = url && url.indexOf('/jouer') !== 0 ? `${url}&bar=0` : url
+  const empty = 'Aucune animation à prévisualiser pour le moment.'
 
-  /* Romain (19/09) : « super event en orange partout ». Les deux onglets
-     rendaient le meme bleu quand actifs -- « Parcours super event » n avait
-     aucune distinction, alors que ACCENT_SUPER (meme orange que Vignette,
-     BlocOperation, FicheOperationPro) est deja la couleur etablie ailleurs. */
   const tabBtn = (t: 'event' | 'super', label: string, sous: string) => {
-    const c = t === 'super' ? ACCENT_SUPER : ACC
+    const c = t === 'super' ? ACCENT_SUPER : C.violet
     return (
-      <button onClick={() => setTab(t)} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 14, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${c}` : '2px solid #E2E8F0', background: tab === t ? `${c}0F` : '#fff' }}>
-        <div style={{ fontWeight: 800, fontSize: 14, color: tab === t ? c : '#0F172A' }}>{label}</div>
-        <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 2 }}>{sous}</div>
+      <button onClick={() => { setTab(t); setEcran(t === 'super' ? 'sj-accueil' : 's-accueil') }} style={{ flex: 1, textAlign: 'left', padding: '13px 16px', borderRadius: 16, cursor: 'pointer', fontFamily: 'inherit', border: tab === t ? `2px solid ${c}` : `1.5px solid ${C.bordure}`, background: tab === t ? (t === 'super' ? '#FFF8EA' : C.violetClair) : '#fff' }}>
+        <div style={{ fontWeight: 800, fontSize: 14, color: tab === t ? c : C.texte }}>{label}</div>
+        <div style={{ fontSize: 11.5, color: C.attenue, marginTop: 2 }}>{sous}</div>
       </button>
     )
   }
@@ -121,23 +101,23 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
     <div>
       {showTitle && (<>
         <div style={{ fontSize: 20, fontWeight: 800 }}>Parcours mobil</div>
-        <div style={{ fontSize: 13.5, color: '#64748B', marginTop: 2, marginBottom: 18 }}>Le vrai parcours joueur, en direct. Choisissez un événement et prévisualisez-le tel qu'il s'affiche sur mobile.</div>
+        <div style={{ fontSize: 13.5, color: C.attenue, marginTop: 2, marginBottom: 18 }}>Le vrai parcours joueur, en direct, avec les masters de jeux. Choisissez une animation et prévisualisez-la telle qu’elle s’affiche sur mobile.</div>
       </>)}
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        {tabBtn('event', 'Parcours event', 'Votre animation, en direct')}
-        {tabBtn('super', 'Parcours super event', multistation ? 'La carte des stations' : 'Le gabarit marque blanche')}
+        {tabBtn('event', 'Parcours animation', 'Votre animation, en direct')}
+        {tabBtn('super', 'Parcours super event', multistation ? 'L’univers super event de la station' : 'L’univers super event (exemple)')}
       </div>
 
       <div style={{ display: 'flex', gap: 36, alignItems: 'flex-start', flexWrap: 'wrap', paddingLeft: 4 }}>
         <div style={{ flex: '0 1 360px', minWidth: 260, maxWidth: 400, order: 1 }}>
           {events.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: '#64748B', marginBottom: 8 }}>Événement à prévisualiser</div>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 8 }}>Animation à prévisualiser</div>
               <select
                 value={ev?.id ?? ''}
-                onChange={e => setEvId(e.target.value)}
-                style={{ width: '100%', maxWidth: 360, padding: '11px 12px', borderRadius: 12, border: '1px solid #CBD5E1', background: '#fff', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, color: '#0F172A', cursor: 'pointer' }}
+                onChange={e => { setEvId(e.target.value); setEcran(tab === 'super' ? 'sj-accueil' : 's-accueil') }}
+                style={{ width: '100%', maxWidth: 360, padding: '11px 12px', borderRadius: 13, border: `1.5px solid ${C.bordureChamp}`, background: '#fff', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, color: C.texte, cursor: 'pointer' }}
               >
                 {groupes.map(g => (
                   <optgroup key={g.cle || 'autonomes'} label={g.nom}>
@@ -150,42 +130,42 @@ export default function ParcoursMobil({ events = [], showTitle = true }: { event
             </div>
           )}
 
-          {url && (
-            <a href={url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', padding: '11px 18px', borderRadius: 10, background: ACC, color: '#fff', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Ouvrir en plein écran ↗</a>
+          {tab === 'event' && master && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: C.attenue, marginBottom: 8 }}>Écran</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {ECRANS_APERCU.map(x => {
+                  const id = x.id === '@jeu' && ev ? x.jeu(ev.module) : x.id
+                  const on = ecran === id
+                  return (
+                    <button key={x.id} onClick={() => setEcran(id)} style={{ padding: '7px 13px', borderRadius: 100, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 12.5, border: `1.5px solid ${on ? C.violet : C.bordureChamp}`, background: on ? C.violetClair : '#fff', color: on ? '#5B34C2' : C.texte }}>{x.t}</button>
+                  )
+                })}
+              </div>
+            </div>
           )}
 
-          <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 14, lineHeight: 1.5, maxWidth: 360 }}>
-            Le <b>vrai parcours</b> (pas une maquette). Le cadre ci-contre montre le <b>visuel réel</b>, sans barre d'admin.{' '}
+          {url && (
+            <a href={url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', padding: '11px 18px', borderRadius: 100, background: C.violet, color: '#fff', fontWeight: 800, fontSize: 13, textDecoration: 'none' }}>Ouvrir en plein écran ↗</a>
+          )}
+
+          <p style={{ fontSize: 12, color: C.attenue, marginTop: 14, lineHeight: 1.5, maxWidth: 360 }}>
+            Le <b>vrai parcours</b>, le même que celui du joueur et de l’espace pro (masters de jeux).{' '}
             {tab === 'event'
-              ? 'En plein écran, une barre en haut permet en plus de parcourir tous les écrans (accueil, quiz, résultats, bonus, inscription, fin, tickets, carte, partenaires, profil) — pratique pour la démo ou la comm.'
-              : multistation
-                ? 'Le même parcours, ouvert directement sur l\'écran carte — la seule différence avec un event seul : l\'accès aux autres stations et au multi-partenaire.'
-                : 'Cet event n\'appartient à aucun super event : le cadre montre le parcours super event en marque blanche (gabarit tiré de NDS 2026), tel qu\'il se déclinerait pour une opération multi-stations.'}
+              ? (master ? 'Touchez les pastilles pour passer d’un écran à l’autre, ou jouez directement dans le cadre : le bouton Retour et le retour du navigateur fonctionnent.' : 'Ce jeu n’a pas de master : son parcours historique est affiché.')
+              : (multistation ? 'Carte des stations, super tickets et grand tirage de l’opération.' : 'Cette animation n’appartient à aucun super event : le cadre montre l’univers super event en exemple.')}
           </p>
         </div>
 
         <div style={{ order: 2, display: 'flex', alignItems: 'center', gap: 10 }}>
-          {tab === 'event' && url && (
-            <button
-              onClick={() => naviguer('prev')}
-              aria-label="Écran précédent"
-              style={{ flexShrink: 0, width: 34, height: 34, borderRadius: '50%', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer', fontSize: 16, color: '#0F172A' }}
-            >‹</button>
+          {url && (
+            <button onClick={() => naviguer('prev')} aria-label="Écran précédent"
+              style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', border: `1.5px solid ${C.bordureChamp}`, background: '#fff', cursor: 'pointer', fontSize: 16, color: C.texte }}>‹</button>
           )}
-          <div>
-            <Phone src={phoneUrl || undefined} empty={empty} iframeRef={iframeRef} />
-            {tab === 'event' && url && (
-              <div style={{ textAlign: 'center', marginTop: 8, fontSize: 11, color: '#94A3B8' }}>
-                ‹ précédent · suivant › pour parcourir tous les écrans
-              </div>
-            )}
-          </div>
-          {tab === 'event' && url && (
-            <button
-              onClick={() => naviguer('next')}
-              aria-label="Écran suivant"
-              style={{ flexShrink: 0, width: 34, height: 34, borderRadius: '50%', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer', fontSize: 16, color: '#0F172A' }}
-            >›</button>
+          <Phone src={phoneUrl || undefined} empty={empty} iframeRef={iframeRef} />
+          {url && (
+            <button onClick={() => naviguer('next')} aria-label="Écran suivant"
+              style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', border: `1.5px solid ${C.bordureChamp}`, background: '#fff', cursor: 'pointer', fontSize: 16, color: C.texte }}>›</button>
           )}
         </div>
       </div>

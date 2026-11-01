@@ -14,9 +14,9 @@ import { H1, SUB } from '@/lib/proui'
 export const dynamic = 'force-dynamic'
 
 const ONGLETS = [
-  { id: 'crm', label: 'CRM' },
+  { id: 'crm', label: 'Contacts' },
   { id: 'gagnants', label: 'Gagnants & tirage' },
-  { id: 'trafic', label: 'Trafic' },
+  { id: 'trafic', label: 'Trafic par support' },
 ] as const
 type Onglet = (typeof ONGLETS)[number]['id']
 const ALIAS: Record<string, Onglet> = { contacts: 'crm', tracking: 'trafic', tirage: 'gagnants' }
@@ -45,8 +45,8 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
 
   return (
     <ProShell proName={ops.proNom ?? 'Mon établissement'} proId={proId} active="donnees">
-      <h1 style={H1}>Mes super data</h1>
-      <div style={{ ...SUB, marginBottom: 12 }}>CRM, gagnants et trafic de toutes vos opérations.</div>
+      <h1 style={H1}>Mes contacts &amp; stats</h1>
+      <div style={{ ...SUB, marginBottom: 12 }}>Contacts consentants, gagnants et trafic par support, pour toutes vos animations.</div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: `1px solid ${C.bordure}`, borderRadius: 14, padding: 5 }}>
           {ONGLETS.map(o => (
@@ -75,7 +75,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
 
       {onglet !== 'crm' && opChoisie && (
         <>
-          <Link href={lien(onglet)} style={{ fontSize: 13, fontWeight: 800, color: C.accent, textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>← Toutes les opérations</Link>
+          <Link href={lien(onglet)} style={{ fontSize: 13, fontWeight: 800, color: C.accent, textDecoration: 'none', display: 'inline-block', marginBottom: 10 }}>← Toutes les animations</Link>
           {onglet === 'gagnants' && <GagnantsClient initial={ops} cle={cle} titre={false} />}
           {onglet === 'trafic' && <OngletOperationsPro initial={ops} onglet="tracking" prefixeStation="/pro/super/" cle={cle} />}
         </>

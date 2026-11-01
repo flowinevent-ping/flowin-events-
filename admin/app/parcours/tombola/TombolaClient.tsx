@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { generateTicket } from '@/lib/ticket'
-import { getJoueurLocal, claimJoueur, writeJoueur, RGPD_TEXT } from '@/lib/parcours'
+import { getJoueurLocal, claimJoueur, writeJoueur, cleDejaJoue, CONSENTEMENT_VERSION } from '@/lib/parcours'
 import { NDS_JEU_POLICE } from '@/lib/parcours'
 import { buildInviteLink } from '@/lib/parrainage'
 import ParcoursOutro from '../_components/ParcoursOutro'
 import ParcoursChampsStandard from '@/components/parcours/ParcoursChampsStandard'
 import { ParcoursPartenairesGrid, ParcoursPartenaireSheet } from '@/components/parcours/ParcoursPartenaires'
-import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, isDigitalLinkSource, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
+import { ParcoursHero, ParcoursPrizeCard, ParcoursHowTo, ParcoursRefusDigital, doitRefuserDigital, ParcoursConsentement, ERREUR_CONSENTEMENT, PARCOURS_HERO_CSS } from '@/components/parcours/ParcoursHero'
 import type { GainImmediat } from '@/lib/parcours'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from '@/lib/types'
 import { useParcoursTracking } from '@/lib/parcours-tracking'
@@ -51,14 +51,18 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
   const ctaText = front.ctaText ?? "Je m'inscris \u00e0 la tombola \u2192"
   const theme = resolveParcoursTheme('tombola', ev?.cfg)
 
-  const lsKey = `flowin_played_${evId}`
+  /* Cle datee (jour local) + QR : « Reviens demain ! » ne bloque plus a vie. */
+  const lsKey = cleDejaJoue(evId)
+  /* Consentement : deux cases NON cochees par defaut (lot QR, 31/10). */
+  const [consentJeu, setConsentJeu] = useState(false)
+  const [consentAnim, setConsentAnim] = useState(false)
   /* Anti-fraude "lien digital" avant le check "déjà joué" : un joueur reconnu
      sur l'appareil qui arrive via un lien réseaux (pas le parrainage, voir
      ParcoursHero.tsx) ne doit pas pouvoir rejouer sans flasher le vrai QR
      sur place, même si CET event précis n'a pas encore été joué. */
   useEffect(() => {
     try {
-      if (isDigitalLinkSource() && getJoueurLocal()) { setScreen('refusdigital'); return }
+      if (doitRefuserDigital(evId)) { setScreen('refusdigital'); return }
       const saved = localStorage.getItem(lsKey)
       if (saved) { setExistingTicket(saved); setScreen('already') }
     } catch {}
@@ -87,6 +91,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       setGain(res.gain ?? null)
       try { localStorage.setItem(lsKey, res.ticket) } catch {}
       setExistingTicket(res.ticket)
+      if (res.digitalRefuse) { setScreen('refusdigital'); return }
       if (res.duplicate) { setScreen('already'); return }
       setTicket(res.ticket); setScreen('ticket')
     })()
@@ -98,6 +103,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
     if (!form.nom.trim()) errs.nom = 'Obligatoire'
     if (!form.email.includes('@')) errs.email = 'Email invalide'
     if (form.tel.replace(/\s/g, '').length < 8) errs.tel = 'Invalide'
+    if (!consentJeu) errs.consentement = ERREUR_CONSENTEMENT
     setErrors(errs)
     if (Object.keys(errs).length) return
 
@@ -108,10 +114,12 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       code_postal: form.cp, genre: form.genre, age_tranche: form.age,
       decouverte: form.source.replace(/^[^ ]+ /, '') || undefined,
       events: [evId], ticket_code: tc, source: 'tombola', prefix: 'TB',
+      optin: consentAnim, optin_version: CONSENTEMENT_VERSION,
     })
     setGain(res.gain ?? null)
     setSubmitting(false)
 
+    if (res.digitalRefuse) { setScreen('refusdigital'); return }
     // Doublon : déjà inscrit en base -> écran "déjà joué"
     if (res.duplicate) {
       const t = res.ticket || ''
@@ -260,10 +268,7 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
             {errors.tel && <div className="err-msg">{errors.tel}</div>}
           </div>
           <ParcoursChampsStandard form={form} setForm={setForm} />
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '12px 0 0', fontSize: 11, color: 'rgba(255,255,255,.45)', lineHeight: 1.5 }}>
-            <div style={{ width: 20, height: 20, borderRadius: 5, background: c, flexShrink: 0 }} />
-            <div>{RGPD_TEXT}</div>
-          </div>
+          <ParcoursConsentement jeu={consentJeu} animations={consentAnim} onJeu={setConsentJeu} onAnimations={setConsentAnim} erreur={consentJeu ? undefined : errors.consentement} />
           <button className="btn-cta" style={{ marginTop: 20 }} onClick={handleSubmit} disabled={submitting}>
             {submitting ? 'Vérification…' : 'Valider mon inscription →'}
           </button>
@@ -323,8 +328,8 @@ export default function TombolaClient({ ev, lots, partenaires, evId }: Props) {
       {screen === 'already' && (
         <div className="screen" style={{ justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 6 }}>Déjà inscrit !</div>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Tu es déjà dans la course pour {nom}.</div>
+            <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 6 }}>Reviens demain !</div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,.55)' }}>Tu es déjà dans la course pour {nom} aujourd’hui. Demain, tu pourras rejouer.</div>
           </div>
           {existingTicket && (
             <div style={{ background: 'rgba(255,255,255,.06)', border: `1.5px solid rgba(255,255,255,.15)`, borderRadius: 16, padding: 20, textAlign: 'center', marginBottom: 16, borderTop: `4px solid ${c}` }}>

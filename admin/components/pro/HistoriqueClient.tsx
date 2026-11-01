@@ -19,7 +19,7 @@
  * Kanban (plusieurs operations) : memes classes CSS que le planning SA
  * (.sa-kb-*, styles/sa-kanban.css, chargee par ProShell cote pro).
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   fetchOperationsPro, libelleDates, libelleModule,
@@ -34,6 +34,7 @@ import { chiffresOperation } from '@/components/pro/GrilleOperations'
 import { CHARTE_PRO as C, ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { H1, SUB, CARD, MUTED } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
+import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
 
 export default function HistoriqueClient({ initial, cle: cleInitiale }: { initial: OperationsPro; cle?: string | null }) {
   const [data, setData] = useState<OperationsPro>(initial)
@@ -42,6 +43,9 @@ export default function HistoriqueClient({ initial, cle: cleInitiale }: { initia
   const recharger = () => { fetchOperationsPro(initial.proId).then(setData) }
   const op = data.operations.find(o => o.cle === cle)
   const q = `?pro=${encodeURIComponent(initial.proId)}`
+  /* Droit « creer / rejoindre » retire par le Super Admin (sql/06) : pas de bouton de creation. */
+  const [peutCreer, setPeutCreer] = useState(true)
+  useEffect(() => { lireDroitsPro(initial.proId).then(d => setPeutCreer(peutOuvrirNouvelle(d))) }, [initial.proId])
 
   function selectionner(c: string) {
     setCle(c)
@@ -56,14 +60,14 @@ export default function HistoriqueClient({ initial, cle: cleInitiale }: { initia
     <div>
       <h1 style={H1}>Historique</h1>
       <div style={{ ...SUB, marginBottom: 16 }}>
-        QR et PIN à télécharger ou imprimer, stock de vos lots, vos gagnants et vos relances — par opération.
+        QR et PIN à télécharger ou imprimer, stock de vos lots, vos gagnants et vos relances — par animation.
       </div>
 
       {data.operations.length === 0 && (
         <div style={{ ...CARD, textAlign: 'center', padding: 26 }}>
-          <div style={{ fontSize: 16, fontWeight: 800 }}>Aucune opération pour le moment</div>
-          <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>Créez votre animation ou rejoignez un super event.</div>
-          <Link href={`/pro/nouvelle${q}`} style={{ display: 'inline-block', background: C.degrade, color: '#fff', borderRadius: 999, padding: '12px 26px', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Commencer</Link>
+          <div style={{ fontSize: 16, fontWeight: 800 }}>Aucune animation pour le moment</div>
+          <div style={{ fontSize: 13.5, ...MUTED, margin: '6px 0 14px' }}>{peutCreer ? 'Créez votre animation ou rejoignez un super event.' : 'Pour créer une animation, contactez Flowin.'}</div>
+          {peutCreer && <Link href={`/pro/nouvelle${q}`} style={{ display: 'inline-block', background: C.degrade, color: '#fff', borderRadius: 999, padding: '12px 26px', fontWeight: 800, fontSize: 14, textDecoration: 'none' }}>Commencer</Link>}
         </div>
       )}
 
@@ -72,7 +76,7 @@ export default function HistoriqueClient({ initial, cle: cleInitiale }: { initia
           {!uneSeule && (
             <button onClick={() => selectionner('')}
               style={{ fontSize: 13, fontWeight: 800, color: C.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 10, fontFamily: 'inherit' }}>
-              ← Toutes mes opérations
+              ← Toutes mes animations
             </button>
           )}
           <DetailOperation op={op} data={data} onChange={recharger} proQuery={q} />
@@ -123,7 +127,7 @@ function DetailOperation({ op, data, onChange, proQuery }: {
       <div style={CARD}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div style={{ fontWeight: 800, fontSize: 15, flex: 1 }}>Stock des lots</div>
-          <BoutonGererLots op={op} partenaire={pt} onChange={onChange} />
+          <BoutonGererLots op={op} partenaire={pt} onChange={onChange} cotePro />
         </div>
         <ContenuLots op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={onChange} />
       </div>
@@ -142,7 +146,7 @@ function Kanban({ groupes, onOuvrir }: {
   groupes: GroupePeriode<DonneesOperation>[]
   onOuvrir: (op: DonneesOperation) => void
 }) {
-  if (groupes.length === 0) return <div style={CARD}><Vide>Aucune opération.</Vide></div>
+  if (groupes.length === 0) return <div style={CARD}><Vide>Aucune animation.</Vide></div>
   return (
     <>
       <div className="sa-kanban">

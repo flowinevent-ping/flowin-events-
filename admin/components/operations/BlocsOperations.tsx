@@ -23,8 +23,13 @@ import { useMailGagnant } from '@/lib/mailGagnant'
 import { ACCENT_ANIM, ACCENT_SUPER } from '@/lib/charte'
 import { Camembert } from '@/components/dashboard/Camembert'
 import QrLiensEvent from '@/components/dashboard/QrLiensEvent'
+import ModalPartenaires from './ModalPartenaires'
+import { lireDroitsPro } from '@/lib/droitsPro'
 import ModalGererLots from './ModalGererLots'
 import { DiffusionStation, ExportMailchimp } from './DiffusionOperation'
+import { BadgeTypeQr } from './QrTraces'
+import ReglageTirage from './ReglageTirage'
+import { fetchStatsQr, type StatQr } from '@/lib/qrTraces'
 import { ContenuCrm, ContenuReponses } from './DataOperation'
 import { operationsRangees } from '@/lib/rangementOperations'
 import { Ico } from '@/lib/proicons'
@@ -32,7 +37,7 @@ import { Ico } from '@/lib/proicons'
 export type Mode = 'sa' | 'pro'
 export type OngletOperation = 'stations' | 'lots' | 'gagnants' | 'comm' | 'contrat' | 'qr' | 'tracking' | 'crm'
 
-const ACC = 'var(--sa-accent, #2563EB)'
+const ACC = 'var(--sa-accent, #7A4FE0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const BRD = 'var(--sa-border, #E2E8F0)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
@@ -43,7 +48,7 @@ export const btn: React.CSSProperties = {
   fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', color: 'inherit',
   textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap',
 }
-export const btnPrimaire: React.CSSProperties = { ...btn, background: '#2563EB', borderColor: '#2563EB', color: '#fff' }
+export const btnPrimaire: React.CSSProperties = { ...btn, background: '#7A4FE0', borderColor: '#7A4FE0', color: '#fff' }
 
 export function Vide({ children }: { children: React.ReactNode }) {
   return <div style={{ fontSize: 12.5, color: MUT, padding: '6px 0' }}>{children}</div>
@@ -54,7 +59,7 @@ function Pastille({ ton, children }: { ton: 'ok' | 'warn' | 'neutre' | 'acc'; ch
     ok: ['rgba(34,197,94,.12)', '#15803D'],
     warn: ['rgba(245,158,11,.13)', '#B45309'],
     neutre: [SUBT, MUT],
-    acc: ['rgba(96,165,250,.11)', '#2563EB'],
+    acc: ['rgba(122,79,224,.11)', '#7A4FE0'],
   }[ton]
   return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10.5, fontWeight: 800, borderRadius: 99, padding: '3px 9px', background: c[0], color: c[1], whiteSpace: 'nowrap' }}>{children}</span>
 }
@@ -198,14 +203,24 @@ function AjustementStock({ lotId, onAjuste }: { lotId: string; onAjuste: (delta:
  * mis dans le `droite` de l en-tete via les onglets appelants, il reste visible
  * meme replie. Romain (19/09) : « où est le modal ?? » -- introuvable la
  * premiere fois car cache derriere le repli. */
-export function BoutonGererLots({ op, partenaire, onChange }: { op: DonneesOperation; partenaire?: PartenaireMin | null; onChange?: () => void }) {
+export function BoutonGererLots({ op, partenaire, onChange, cotePro }: { op: DonneesOperation; partenaire?: PartenaireMin | null; onChange?: () => void; /** Espace pro : le bouton Partenaires suit le droit « gerer_partenaires » (sql/06). Le Super Admin voit toujours tout. */ cotePro?: boolean }) {
   const [ouvert, setOuvert] = useState(false)
+  const [peutPartenaires, setPeutPartenaires] = useState(true)
+  useEffect(() => {
+    if (!cotePro) return
+    const pid = op.stations[0]?.pro_id
+    if (pid) lireDroitsPro(pid).then(d => setPeutPartenaires(d.gerer_partenaires))
+  }, [cotePro, op.stations])
+  const [partenairesOuvert, setPartenairesOuvert] = useState(false)
   return (
     <>
       <button onClick={() => setOuvert(true)} style={btnPrimaire}>⚙️ Gérer les lots</button>
+      {/* Partenaires & logos : meme modale, meme emplacement cote Super Admin et cote pro. */}
+      {peutPartenaires && <button onClick={() => setPartenairesOuvert(true)} style={btn} data-ouvrir-partenaires>🤝 Partenaires &amp; logos</button>}
       {ouvert && (
         <ModalGererLots op={op} partenaire={partenaire ?? null} onClose={() => setOuvert(false)} onChange={() => { setOuvert(false); onChange?.() }} />
       )}
+      {partenairesOuvert && <ModalPartenaires op={op} onClose={() => setPartenairesOuvert(false)} onChange={onChange} />}
     </>
   )
 }
@@ -256,7 +271,7 @@ function LigneGagnant({ g, op, partenaireNom, partenaireEmail, onConfirmer, masq
           <div style={{ fontSize: 11, color: MUT }}><Ico k="bell" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Relancé le {new Date(relanceAt).toLocaleDateString('fr-FR')}</div>
         )}
       </div>
-      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticketCode ?? '—'}</span>
+      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7A4FE0' }}>{g.ticketCode ?? '—'}</span>
       <Pastille ton={g.etat === 'a_confirmer' ? 'warn' : 'ok'}>{g.etat === 'retire' ? '✓ Utilisé' : g.etat === 'confirme' ? '✓ Confirmé' : 'À appeler'}</Pastille>
       {/* Un seul langage de statut (Retiré/À retirer, pastille ci-dessus) --
           la distinction stock n apparait QUE si elle revele une anomalie. */}
@@ -401,6 +416,7 @@ export function ContenuGagnantsSA({ op, partenaireNom, partenaireEmail, onChange
         <Mini v={n('confirme')} l="confirmés" />
         <Mini v={n('retire')} l="retirés" />
       </div>
+      {op.type === 'event' && op.stations[0] && <ReglageTirage evId={op.stations[0].id} />}
       {n('a_confirmer') > 0 && (
         <div style={{ fontSize: 12, color: '#B45309', marginBottom: 8 }}>
           {n('a_confirmer')} gagnant{n('a_confirmer') > 1 ? 's' : ''} à appeler. Le commerçant ne les verra qu&apos;une fois confirmés.
@@ -617,6 +633,7 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
           {onStation && <span style={{ color: ACC, fontWeight: 800, fontSize: 12 }}>→</span>}
         </div>
       ))}
+      <StatsParQr eventIds={op.stations.map(x => x.id)} />
       {origines.length > 0 && (
         <>
           <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Source d’arrivée — visiteurs identifiés</div>
@@ -630,6 +647,36 @@ export function ContenuTracking({ op, proId, onStation, masquerGlobal }: {
       )}
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '14px 0 6px' }}>Réponses aux questions</div>
       <ContenuReponses op={op} />
+    </>
+  )
+}
+
+/* ── Statistiques par QR (lot QR, 31/10) ──────────────────────────────────────
+   Chaque QR trace est une station de jeu : flashs (visites), joueurs
+   distincts et parties (participations.source_qr), physique ou digital. */
+function StatsParQr({ eventIds }: { eventIds: string[] }) {
+  const [lignes, setLignes] = useState<StatQr[] | null>(null)
+  const cle = eventIds.join(',')
+  useEffect(() => {
+    let vivant = true
+    setLignes(null)
+    fetchStatsQr(eventIds).then(r => { if (vivant) setLignes(r) })
+    return () => { vivant = false }
+  }, [cle]) // eslint-disable-line react-hooks/exhaustive-deps
+  if (!lignes || lignes.length === 0) return null
+  return (
+    <>
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: MUT, margin: '12px 0 2px' }}>Par QR — chaque QR est une station de jeu</div>
+      {lignes.map(l => (
+        <div key={l.source || '-'} style={{ ...ligne, padding: '6px 0' }}>
+          <span style={{ flex: 1, minWidth: 140, fontSize: 12.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {l.nom}{l.source && <BadgeTypeQr type={l.type} />}
+          </span>
+          <span style={{ fontSize: 12 }}><b>{l.flashs}</b> flashs</span>
+          <span style={{ fontSize: 12 }}><b>{l.joueurs}</b> joueurs</span>
+          <span style={{ fontSize: 12 }}><b>{l.parties}</b> parties</span>
+        </div>
+      ))}
     </>
   )
 }
@@ -762,12 +809,12 @@ export function OngletOperationsPro({ initial, onglet, prefixeStation, cle }: {
     <>
       {data.operations.length === 0 && <AucuneOperation />}
       {operationsRangees(data.operations, cle).map(op => (
-        <BlocOperation key={op.cle} op={op} droite={<>{onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} />}<SupprimerOperationBtn op={op} onSupprime={recharger} /></>}>
+        <BlocOperation key={op.cle} op={op} droite={<>{onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} cotePro />}<SupprimerOperationBtn op={op} onSupprime={recharger} /></>}>
           {onglet === 'lots' && <ContenuLots op={op} partenaireNom={pt?.nom ?? data.proNom ?? ''} partenaireEmail={pt?.email ?? data.proEmail} onChange={recharger} />}
           {onglet === 'comm' && <ContenuComm op={op} partenaireId={pt?.id ?? null} partenaireSe={pt?.super_event_id ?? null} mode="pro" />}
           {onglet === 'contrat' && <ContenuContrat op={op} mode="pro" partenaireId={pt?.id ?? null} onChange={recharger} />}
           {onglet === 'tracking' && <ContenuTracking op={op} proId={data.proId} onStation={onStation} masquerGlobal />}
-          {onglet === 'crm' && <ContenuCrm op={op} />}
+          {onglet === 'crm' && <ContenuCrm op={op} mode="pro" />}
         </BlocOperation>
       ))}
     </>

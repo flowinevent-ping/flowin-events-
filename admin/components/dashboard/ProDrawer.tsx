@@ -9,6 +9,7 @@ import { grouperOperations } from '@/lib/operations'
 import { OngletOperationsSA, ONGLETS_FICHE } from '@/components/operations/BlocsOperations'
 import type { FlowinPro } from '@/lib/types'
 import ActionsFichePro from './ActionsFichePro'
+import DroitsPro from './DroitsPro'
 import { Ico } from '@/lib/proicons'
 
 export default function ProDrawer() {
@@ -64,7 +65,8 @@ export default function ProDrawer() {
   const operations = grouperOperations(proEvents, supers)
   const nbStations = operations.reduce((n, o) => n + o.stations.length, 0)
   /* Memes onglets que la fiche partenaire rattachee (ONGLETS_FICHE, famille J). */
-  const tabs = ONGLETS_FICHE.map(t => ({ id: t.id, label: t.label, badge: t.id === 'events' ? nbStations : undefined }))
+  /* Onglet « Droits » : ce que le pro peut faire dans son espace (sql/06-droits-pro.sql). */
+  const tabs = ONGLETS_FICHE.map(t => ({ id: t.id, label: t.label, badge: t.id === 'events' ? nbStations : undefined })).concat([{ id: 'droits', label: 'Droits', badge: undefined }])
   const ongletActif = ONGLETS_FICHE.find(t => t.id === drawer.tab)?.onglet
 
   const initials = p.nom.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -138,6 +140,7 @@ export default function ProDrawer() {
           </>
         )}
 
+        {drawer.tab === 'droits' && <DroitsPro pro={p} />}
         {drawer.tab === 'events' && liveEvents.length > 0 && (
           <div className="sa-alert live">{liveEvents.length} event{liveEvents.length > 1 ? 's' : ''} en cours</div>
         )}

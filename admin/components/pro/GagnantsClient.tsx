@@ -30,9 +30,10 @@ import { BlocOperation, AucuneOperation, Vide, TitreStation, btn, btnPrimaire } 
 import { useMailGagnant } from '@/lib/mailGagnant'
 import { CARD, MUTED, H1, SUB } from '@/lib/proui'
 import { Ico } from '@/lib/proicons'
+import ReglageTirage from '@/components/operations/ReglageTirage'
 
 const input: React.CSSProperties = {
-  border: '1.5px solid #efe9f2', borderRadius: 10, padding: '10px 12px',
+  border: '1.5px solid #E3E8EF', borderRadius: 10, padding: '10px 12px',
   fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box',
 }
 
@@ -46,7 +47,7 @@ export default function GagnantsClient({ initial, cle, titre = true }: { initial
     <div>
       {titre && <h1 style={H1}>Gagnants &amp; tirage</h1>}
       {titre && <div style={{ ...SUB, marginBottom: 16 }}>
-        Un bloc par opération : ses gagnants, leurs billets, la validation en caisse — et le tirage sur vos events.
+        Un bloc par animation : ses gagnants, leurs billets, la validation en caisse — et le tirage en un clic sur vos animations.
       </div>}
       {data.operations.length === 0 && <div style={CARD}><AucuneOperation /></div>}
       {operationsRangees(data.operations, cle).map(op => (
@@ -64,7 +65,7 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
   const remis = op.gagnants.filter(g => g.etat === 'retire').length
   const kpi = (n: number, l: string) => (
     <div style={{ flex: '1 1 110px', background: '#faf7fd', borderRadius: 10, padding: '9px 12px' }}>
-      <div style={{ fontSize: 20, fontWeight: 900, color: '#2563EB' }}>{n}</div>
+      <div style={{ fontSize: 20, fontWeight: 900, color: '#3B5CC4' }}>{n}</div>
       <div style={{ fontSize: 11, ...MUTED }}>{l}</div>
     </div>
   )
@@ -83,6 +84,7 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
         }}>{message.texte}</div>
       )}
 
+      {op.type === 'event' && op.stations[0] && <ReglageTirage evId={op.stations[0].id} />}
       {op.type === 'event'
         ? <Tirage op={op} data={data} setMessage={setMessage} onChange={onChange} />
         : (
@@ -91,7 +93,7 @@ export function BlocGagnants({ op, data, onChange }: { op: DonneesOperation; dat
           </div>
         )}
 
-      {op.gagnants.length === 0 && <Vide>Aucun gagnant sur cette opération.</Vide>}
+      {op.gagnants.length === 0 && <Vide>Aucun gagnant sur cette animation.</Vide>}
       {gagnantsParStation(op).map(grp => (
         <div key={grp.cle}>
           {grp.nom && <TitreStation nom={grp.nom} n={grp.gagnants.length} />}
@@ -129,7 +131,7 @@ function Tirage({ op, data, setMessage, onChange }: {
 
   const tirer = (liste = vivier) => {
     setMessage(null); setMail('idle'); setDernierToken(null)
-    if (!liste.length) { setPropose(null); setMessage({ ok: false, texte: 'Aucun joueur éligible : personne n’a encore joué sur cet event.' }); return }
+    if (!liste.length) { setPropose(null); setMessage({ ok: false, texte: 'Aucun joueur éligible : personne n’a encore joué sur cette animation.' }); return }
     setPropose(liste[Math.floor(Math.random() * liste.length)])
   }
 
@@ -161,12 +163,12 @@ function Tirage({ op, data, setMessage, onChange }: {
   }
 
   return (
-    <div style={{ background: '#faf7fd', border: '1px solid #efe9f2', borderRadius: 12, padding: 14, marginBottom: 12 }}>
+    <div style={{ background: '#faf7fd', border: '1px solid #E3E8EF', borderRadius: 12, padding: 14, marginBottom: 12 }}>
       <div style={{ fontWeight: 800, fontSize: 13.5 }}>Tirage au sort</div>
       <div style={{ fontSize: 12, ...MUTED, margin: '2px 0 10px' }}>
         {eligibles === null ? 'Chargement du vivier…' : `${vivier.length} joueur${vivier.length > 1 ? 's' : ''} ayant joué`}
         {exclus.length > 0 && ` · ${exclus.length} écarté${exclus.length > 1 ? 's' : ''}`}
-        {op.lots.length === 0 && ' · aucun lot enregistré sur cet event : le gain portera le nom de l’event.'}
+        {op.lots.length === 0 && ' · aucun lot enregistré sur cette animation : le gain portera le nom de l’animation.'}
         {op.lots.length > 0 && lotsDispo.length === 0 && ' · tous les lots ont été attribués.'}
       </div>
       {lotsDispo.length > 1 && (
@@ -182,12 +184,12 @@ function Tirage({ op, data, setMessage, onChange }: {
         <button style={btnPrimaire} disabled={envoi || eligibles === null} onClick={() => tirer()}>Lancer le tirage</button>
       )}
       {propose && (
-        <div style={{ background: '#fff', border: '1px solid #efe9f2', borderRadius: 10, padding: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>Gagnant proposé</div>
+        <div style={{ background: '#fff', border: '1px solid #E3E8EF', borderRadius: 10, padding: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80' }}>Gagnant proposé</div>
           <div style={{ fontWeight: 800, fontSize: 15, marginTop: 2 }}>{propose.nom}</div>
           <div style={{ fontSize: 12, ...MUTED }}>{propose.email ?? 'pas d’email'}{propose.tel ? ` · ${propose.tel}` : ''}</div>
           {dejaGagnants.indexOf(propose.nom) >= 0 && (
-            <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 4 }}>A déjà gagné sur cet event.</div>
+            <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 4 }}>A déjà gagné sur cette animation.</div>
           )}
           {!propose.email && (
             <div style={{ fontSize: 11.5, color: '#B45309', marginTop: 4 }}>Sans email, le billet ne peut pas lui être envoyé — il faudra le prévenir vous-même.</div>
@@ -204,11 +206,11 @@ function Tirage({ op, data, setMessage, onChange }: {
         </div>
       )}
       {mail !== 'idle' && !propose && (
-        <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: mail === 'ok' ? '#15803D' : mail === 'echec' ? '#B45309' : '#8a7e93' }}>
+        <div style={{ marginTop: 10, fontSize: 12, fontWeight: 600, color: mail === 'ok' ? '#15803D' : mail === 'echec' ? '#B45309' : '#5a6b80' }}>
           {mail === 'envoi' && 'Envoi du billet…'}
           {mail === 'ok' && 'Billet envoyé par email au gagnant.'}
           {mail === 'echec' && 'Tirage enregistré, mais le billet n’a pas pu être envoyé par email.'}
-          {dernierToken && <> · <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#2563EB', fontWeight: 700 }}>voir le billet</a></>}
+          {dernierToken && <> · <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(dernierToken)}`} target="_blank" rel="noreferrer" style={{ color: '#3B5CC4', fontWeight: 700 }}>voir le billet</a></>}
         </div>
       )}
     </div>
@@ -278,7 +280,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
           {g.retireAt && <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700 }}>{libelleRemise(g.retireAt)}</div>}
           {g.retraitToken && (
             <a href={`/nds/billets-partenaires.html?t=${encodeURIComponent(g.retraitToken)}`} target="_blank" rel="noreferrer"
-              style={{ fontSize: 11.5, color: '#2563EB', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
+              style={{ fontSize: 11.5, color: '#3B5CC4', fontWeight: 700, textDecoration: 'none' }}>Voir le billet ↗</a>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -315,7 +317,7 @@ function LigneGain({ g, superEvent, opId, opNom, partenaireNom, setMessage, onCh
         </div>
       </div>
       {ouvert && (
-        <div style={{ marginTop: 10, background: '#faf7fd', border: '1px solid #efe9f2', borderRadius: 10, padding: 12 }}>
+        <div style={{ marginTop: 10, background: '#faf7fd', border: '1px solid #E3E8EF', borderRadius: 10, padding: 12 }}>
           <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Validation en caisse</div>
           <div style={{ fontSize: 11.5, ...MUTED, marginBottom: 8 }}>
             Saisissez votre code PIN à 4 chiffres — celui de votre fiche de retrait. Le lot est alors décompté de votre stock.

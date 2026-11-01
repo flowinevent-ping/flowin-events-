@@ -45,7 +45,7 @@ const btn: React.CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap',
 }
 const btnOk: React.CSSProperties = { ...btn, background: 'rgba(34,197,94,.1)', borderColor: 'rgba(34,197,94,.3)', color: '#15803D' }
-const btnPrimaire: React.CSSProperties = { ...btn, background: '#2563EB', borderColor: '#2563EB', color: '#fff' }
+const btnPrimaire: React.CSSProperties = { ...btn, background: '#7A4FE0', borderColor: '#7A4FE0', color: '#fff' }
 
 export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onClose }: {
   /** Déjà filtrés par l'appelant : confirmés, pas encore retirés. */
@@ -162,7 +162,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
         {!idEnCours && idsNonRelances.length > 1 && (
           <div style={{ padding: '8px 20px 0', fontSize: 12 }}>
             <button
-              style={{ border: 'none', background: 'none', color: '#2563EB', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 12 }}
+              style={{ border: 'none', background: 'none', color: '#7A4FE0', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 12 }}
               onClick={() => setSelection(idsSelectionnes.length === idsNonRelances.length ? {} : Object.fromEntries(idsNonRelances.map(id => [id, true])))}
             >
               {idsSelectionnes.length === idsNonRelances.length ? 'Tout désélectionner' : `Tout sélectionner (${idsNonRelances.length})`}
@@ -175,7 +175,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
         {gagnantEnCours && (
           <div style={{ position: 'sticky', top: 73, zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: '#EFF6FF', borderBottom: `1px solid ${BRD}`, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 180 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '.04em' }}>Envoi en cours · reste {resteDansFile}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, color: '#7A4FE0', textTransform: 'uppercase', letterSpacing: '.04em' }}>Envoi en cours · reste {resteDansFile}</div>
               <div style={{ fontWeight: 700, fontSize: 13.5 }}>{gagnantEnCours.joueur_nom ?? '—'} <span style={{ fontWeight: 500, color: MUT }}>— {gagnantEnCours.lot_nom ?? 'Lot'}</span></div>
             </div>
             <button style={btnPrimaire} onClick={() => relancerEtAvancer(gagnantEnCours)}><Ico k="mail" size={13} style={{ marginRight: 5, verticalAlign: -2 }} />Envoyer et passer au suivant</button>
@@ -225,7 +225,7 @@ export default function ModalRelanceGlobale({ gagnants, partenaires, supers, onC
                         <div style={{ fontWeight: 700, fontSize: 13 }}>{g.joueur_nom ?? '—'}</div>
                         <div style={{ fontSize: 11, color: MUT }}>{g.lot_nom ?? 'Lot'}{g.lot_valeur != null ? ` · ${g.lot_valeur} €` : ''}</div>
                       </div>
-                      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#2563EB' }}>{g.ticket_code ?? '—'}</span>
+                      <span style={{ fontFamily: 'ui-monospace,Menlo,monospace', fontSize: 11.5, fontWeight: 700, color: '#7A4FE0' }}>{g.ticket_code ?? '—'}</span>
                       {faite ? (
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#15803D' }}>✓ Relancé</span>
                       ) : (

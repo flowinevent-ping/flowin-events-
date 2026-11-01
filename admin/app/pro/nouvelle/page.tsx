@@ -4,14 +4,17 @@ import { fetchPacksParticipation } from '@/lib/commercial'
 import { supabase } from '@/lib/supabase'
 import { geocoderAdresse } from '@/lib/geocodage'
 import ProShell from '@/components/pro/ProShell'
-import NouvelleOperation, { type SuperOuvert, type ProNouvelle } from '@/components/pro/NouvelleOperation'
+import OptionDesactivee from '@/components/pro/OptionDesactivee'
+import { lireDroitsPro, peutOuvrirNouvelle } from '@/lib/droitsPro'
+import ParcoursCreation, { type SuperOuvert, type ProNouvelle } from '@/components/creation/ParcoursCreation'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * NOUVELLE OPERATION (P2) — creer une animation, rejoindre un super event,
- * creer un super event : un seul parcours (components/pro/NouvelleOperation).
- * ?type=animation|rejoindre|super ouvre directement le parcours voulu,
+ * NOUVELLE OPERATION — creer une animation, rejoindre un super event ou en
+ * proposer un a Flowin : le parcours unique (components/creation/ParcoursCreation),
+ * le meme que cote Super Admin. ?type=animation|rejoindre|demande ouvre
+ * directement le parcours voulu (?type=super, ancien lien, ouvre la demande),
  * ?se=<id> preselectionne le super event a rejoindre.
  */
 export default async function Page({ searchParams }: { searchParams: { pro?: string; type?: string; se?: string } }) {
@@ -31,10 +34,28 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
       </ProShell>
     )
   }
+  /* DROITS donnes par le Super Admin (sql/06-droits-pro.sql). Colonne absente : tout est permis
+     comme avant. Le menu et les cartes masquent l'option ; ici, l'acces DIRECT par l'adresse
+     est aussi refuse, avec un message clair. La base refuse de toute facon l'ecriture. */
+  const droits = await lireDroitsPro(proId)
+  const demande = searchParams.type
+  const refuse = !peutOuvrirNouvelle(droits)
+    ? 'Nouvelle animation'
+    : (demande === 'animation' && !droits.creer_animation) ? 'Créer une animation'
+    : ((demande === 'rejoindre' || searchParams.se) && !droits.rejoindre_super_event) ? 'Rejoindre un super event'
+    : (demande === 'super' && !droits.creer_super_event && !droits.rejoindre_super_event && !droits.creer_animation) ? 'Super event'
+    : null
+  if (refuse) {
+    return (
+      <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
+        <OptionDesactivee proId={proId} option={refuse} />
+      </ProShell>
+    )
+  }
   const premieresStations = ((ses ?? []) as (SuperOuvert & { events: string[] | null })[])
     .map(s => (s.events ?? [])[0]).filter(Boolean) as string[]
   /* Localisation du super event = celle de sa premiere station (adresse reelle
-     saisie a la creation, cf. creerSuperEventPro) -- jamais inventee. Geocodage
+     saisie a la creation de la station) -- jamais inventee. Geocodage
      paresseux, meme mecanique que la validation des demandes de rattachement
      (app/dashboard/demandes-rattachement) : si une adresse existe sans lat/lng,
      on la geocode une fois et on l ecrit en base pour la prochaine fois.
@@ -59,11 +80,11 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
     return { ...s, station: premiere, lat: station?.lat ?? null, lng: station?.lng ?? null }
   })
   const t = searchParams.type
-  const type = t === 'animation' || t === 'rejoindre' || t === 'super' ? t : null
+  const type = t === 'animation' || t === 'rejoindre' ? t : t === 'super' ? (droits.creer_super_event ? 'super' as const : 'demande' as const) : t === 'demande' ? 'demande' as const : null
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="nouvelle">
-      <NouvelleOperation
-        pro={p} banques={banques} supers={supers} packs={packs}
+      <ParcoursCreation
+        pro={p} banques={banques} supers={supers} packs={packs} droits={droits}
         typeInitial={searchParams.se ? 'rejoindre' : type} seInitial={searchParams.se ?? null}
       />
     </ProShell>

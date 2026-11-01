@@ -66,7 +66,7 @@ export default async function ProSuperPage({ searchParams }: { searchParams: { p
     return (
       <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
         <h1 style={H1}>Mes super events</h1>
-        <div style={{ ...SUB, marginBottom: 16 }}>Les opérations collectives auxquelles vous participez. Ouvrez-en une pour voir le bilan de vos stations.</div>
+        <div style={{ ...SUB, marginBottom: 16 }}>Les animations collectives auxquelles vous participez. Ouvrez-en une pour voir le bilan de vos stations.</div>
         {blocDemandes}
         {opsSE.length === 0 && demandes.length === 0 && <div style={{ ...CARD, fontSize: 13, ...MUTED }}>Vous ne participez à aucun super event.</div>}
         {opsSE.map(op => (

@@ -45,7 +45,7 @@ function ThemeEtDifficulte({ theme, difficulte, onChange }: {
    blocDeQuatre) s'affichaient TOUTES en meme temps, empilees. Elles passent
    maintenant une par une (etape), le bouton Enregistrer/Valider n'apparaissant
    qu'au recapitulatif final -- meme principe que le parcours /rejoindre. */
-export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banque; proId: string; estBonus: boolean }) {
+export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { banque: Banque; proId: string; estBonus: boolean; /** Super Admin : retour vers /dashboard/banques */ lienRetour?: string }) {
   const router = useRouter()
   const [nom, setNom] = useState(banque.nom)
   const [questions, setQuestions] = useState(banque.questions?.length ? banque.questions : blocDeQuatre(estBonus))
@@ -165,7 +165,7 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
             <button key={qst.id} onClick={() => setEtape(i)}
               style={{
                 width: 30, height: 30, borderRadius: '50%', border: `1.5px solid ${actif ? ACC : '#efe9f2'}`,
-                background: actif ? ACC : rempli ? 'rgba(37,99,235,.08)' : '#fff',
+                background: actif ? ACC : rempli ? 'rgba(122,79,224,.08)' : '#fff',
                 color: actif ? '#fff' : rempli ? ACC : '#94A3B8',
                 fontWeight: 800, fontSize: 12, cursor: 'pointer',
               }}
@@ -222,7 +222,7 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
                   <button key={qst.id} onClick={() => setEtape(i)} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', borderTop: '1px solid #efe9f2', padding: '10px 0', cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 11, fontWeight: 800, color: '#94A3B8' }}>Q{i + 1}</span>
-                      {qst.difficulte && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: ACC, background: 'rgba(37,99,235,.08)', borderRadius: 99, padding: '1px 7px' }}>{qst.difficulte}</span>}
+                      {qst.difficulte && <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: ACC, background: 'rgba(122,79,224,.08)', borderRadius: 99, padding: '1px 7px' }}>{qst.difficulte}</span>}
                     </div>
                     <div style={{ fontSize: 13.5, fontWeight: 700, color: intitule?.trim() ? '#1c1024' : '#B45309' }}>{intitule?.trim() || 'Intitulé manquant'}</div>
                     {bonne != null && <div style={{ fontSize: 12, color: '#15803D', marginTop: 2 }}>Bonne réponse : {bonne || '—'}</div>}
@@ -256,10 +256,10 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
               style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024' }}
             ><Ico k="plus" size={13} style={{ marginRight: 6 }} />Un bloc de 4</button>
             <button onClick={() => setPanneau(p => p === 'ia' ? null : 'ia')}
-              style={{ ...btn, background: panneau === 'ia' ? 'rgba(37,99,235,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
+              style={{ ...btn, background: panneau === 'ia' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'ia' ? ACC : '#efe9f2'}`, color: ACC }}
             ><Ico k="sparkle" size={13} style={{ marginRight: 6 }} />Générer avec l&apos;IA</button>
             <button onClick={() => setPanneau(p => p === 'import' ? null : 'import')}
-              style={{ ...btn, background: panneau === 'import' ? 'rgba(37,99,235,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
+              style={{ ...btn, background: panneau === 'import' ? 'rgba(122,79,224,.08)' : '#fff', border: `1.5px solid ${panneau === 'import' ? ACC : '#efe9f2'}`, color: ACC }}
             ><Ico k="upload" size={13} style={{ marginRight: 6 }} />Importer</button>
           </div>
 
@@ -332,7 +332,7 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
             <button disabled={pending} onClick={() => sauvegarder(false)} style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024', opacity: pending ? 0.6 : 1 }}><Ico k="save" size={13} style={{ marginRight: 6 }} />Enregistrer en brouillon</button>
             <button disabled={pending} onClick={() => sauvegarder(true)} style={{ ...btn, background: ACC, color: '#fff', opacity: pending ? 0.6 : 1 }}><Ico k="check" size={13} style={{ marginRight: 6 }} />Valider</button>
             {message && <span style={{ fontSize: 12.5, ...MUTED }}>{message}</span>}
-            <a href={`/pro/banques${q}`} style={{ marginLeft: 'auto', fontSize: 13, color: ACC, fontWeight: 700, textDecoration: 'none' }}>← Retour aux banques</a>
+            <a href={lienRetour ?? `/pro/banques${q}`} style={{ marginLeft: 'auto', fontSize: 13, color: ACC, fontWeight: 700, textDecoration: 'none' }}>← Retour aux banques</a>
           </div>
         </>
       )}

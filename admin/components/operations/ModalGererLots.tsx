@@ -44,7 +44,7 @@ const BRD = 'var(--sa-border, #E2E8F0)'
 const MUT = 'var(--sa-muted, #64748B)'
 const SUBT = 'var(--sa-subtle, #F8FAFC)'
 const CARDBG = 'var(--sa-card, #FFFFFF)'
-const ACC = 'var(--sa-accent, #2563EB)'
+const ACC = 'var(--sa-accent, #7A4FE0)'
 const BASE = 'https://flowin-events.vercel.app'
 
 interface LotLigne {

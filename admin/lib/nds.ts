@@ -415,7 +415,8 @@ export interface BrouillonSuperEvent {
   module: string
   cfgJeu: Record<string, unknown>
   /** Les pros a rattacher : une station chacun, avec le jeu du super event. */
-  pros: { pro_id: string; nom: string }[]
+  pros: { pro_id: string; nom: string }[]  /** Pro qui cree lui-meme le super event (droit « creer_super_event », sql/06). Null : cree par le Super Admin. */
+  proCreateur?: string | null
 }
 
 export interface ResultatCreationSE {
@@ -461,6 +462,7 @@ export async function creerSuperEvent(d: BrouillonSuperEvent): Promise<ResultatC
     status: 'upcoming',
     events: [],
     pros: d.pros.map(p => p.pro_id),
+    ...(d.proCreateur ? { pro_id: d.proCreateur } : {}),
   })
   if (errSe) return { ok: false, fait, erreur: `Super event non cree — ${errSe.message}` }
   fait.push('super event')

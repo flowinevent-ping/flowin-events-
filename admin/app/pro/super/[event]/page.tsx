@@ -79,7 +79,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
 
   return (
     <ProShell proName={data.pro?.nom ?? 'Mon établissement'} proId={proId} active="super">
-      <div style={{ fontSize: 13, marginBottom: 6 }}><Link href={seId ? `/pro/super?pro=${encodeURIComponent(proId)}&se=${encodeURIComponent(seId)}` : `/pro/events?pro=${encodeURIComponent(proId)}`} style={{ color: ACC, textDecoration: 'none', fontWeight: 700 }}>{seId ? '← Mes stations' : '← Mes events'}</Link></div>
+      <div style={{ fontSize: 13, marginBottom: 6 }}><Link href={seId ? `/pro/super?pro=${encodeURIComponent(proId)}&se=${encodeURIComponent(seId)}` : `/pro/events?pro=${encodeURIComponent(proId)}`} style={{ color: ACC, textDecoration: 'none', fontWeight: 700 }}>{seId ? '← Mes stations' : '← Mes animations'}</Link></div>
       <h1 style={H1}>{ev.nom}</h1>
       <div style={{ ...SUB, marginBottom: 16 }}>Activité par jour — sélectionnez une date.</div>
 
@@ -89,7 +89,7 @@ export default async function ProStationPage({ params, searchParams }: { params:
             style={{
               textDecoration: 'none', fontSize: 12.5, fontWeight: 700, borderRadius: 20, padding: '6px 12px',
               border: `1.5px solid ${j.jour === jourSel ? ACC : '#efe9f2'}`,
-              background: j.jour === jourSel ? 'rgba(37,99,235,.08)' : '#fff',
+              background: j.jour === jourSel ? 'rgba(122,79,224,.08)' : '#fff',
               color: j.jour === jourSel ? ACC : '#1c1024',
             }}>
             {fr(j.jour)}{j.hors_periode ? ' (hors période)' : ''}

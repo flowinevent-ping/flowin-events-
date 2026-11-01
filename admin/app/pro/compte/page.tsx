@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchOperationsPro } from '@/lib/operations'
 import { fetchBanquesPro } from '@/lib/banques'
+import { lireDroitsPro } from '@/lib/droitsPro'
 import ProShell from '@/components/pro/ProShell'
 import EntrepriseForm from '@/components/pro/EntrepriseForm'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
 import ListeFactures from '@/components/pro/ListeFactures'
+import CoordonneesBancaires from '@/components/pro/CoordonneesBancaires'
 import { CHARTE_PRO as C } from '@/lib/charte'
 import { CARD, H1, SUB, MUTED, BTN2 } from '@/lib/proui'
 
@@ -13,24 +15,26 @@ export const dynamic = 'force-dynamic'
 
 const ONGLETS = [
   { id: 'entreprise', label: 'Mon entreprise' },
+  { id: 'rib', label: 'Coordonnées bancaires' },
   { id: 'contrat', label: 'Bons de commande & factures' },
   { id: 'lots', label: 'Lots & stock' },
   { id: 'banques', label: 'Banques de questions' },
 ] as const
 
-/** MON COMPTE (P1) — coordonnees, contrats par operation, banques de questions. */
+/** MON PROFIL (P1) — coordonnees, RIB (remboursements), contrats par animation, lots, banques de questions. */
 export default async function Page({ searchParams }: { searchParams: { pro?: string; onglet?: string } }) {
   const proId = searchParams.pro ?? ''
   const onglet = ONGLETS.find(o => o.id === searchParams.onglet)?.id ?? 'entreprise'
   const [data, ops, banques] = await Promise.all([fetchProDashboard(proId), fetchOperationsPro(proId), fetchBanquesPro(proId)])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = (data.pro ?? {}) as any
+  const peutBanques = (await lireDroitsPro(proId)).creer_banques
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const qo = q ? `${q}&` : '?'
   return (
     <ProShell proName={p.nom ?? 'Mon établissement'} proId={proId} active="compte">
       <h1 style={H1}>Mon profil</h1>
-      <div style={{ ...SUB, marginBottom: 14 }}>Vos coordonnées, vos contrats et vos questions.</div>
+      <div style={{ ...SUB, marginBottom: 14 }}>Votre entreprise, vos coordonnées bancaires, vos factures, vos lots et vos questions.</div>
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
         {ONGLETS.map(o => (
           <Link key={o.id} href={`/pro/compte${qo}onglet=${o.id}`}
@@ -39,6 +43,10 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             {o.label}
           </Link>
         ))}
+        <Link href={`/pro/commandes${q}`}
+          style={{ borderRadius: 50, padding: '9px 18px', fontWeight: 800, fontSize: 13.5, textDecoration: 'none', background: '#fff', color: C.accent, border: `1.5px solid ${C.bordureChamp}` }}>
+          Commandes et factures
+        </Link>
       </div>
       {onglet === 'entreprise' && (p.id
         ? <EntrepriseForm initial={{
@@ -46,6 +54,9 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
             code_postal: p.code_postal ?? null, ville: p.ville ?? null, siret: p.siret ?? null,
             contact: p.contact ?? null, email: p.email ?? null, tel: p.tel ?? null, partenaire_id: p.partenaire_id ?? null,
           }} />
+        : <div style={CARD}>Établissement introuvable.</div>)}
+      {onglet === 'rib' && (p.id
+        ? <CoordonneesBancaires proId={p.id} titulaireParDefaut={p.nom ?? ''} />
         : <div style={CARD}>Établissement introuvable.</div>)}
       {onglet === 'contrat' && <ListeFactures operations={ops.operations} />}
       {onglet === 'lots' && <OngletOperationsPro initial={ops} onglet="lots" />}
@@ -58,7 +69,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
               <b>{b.nom}</b><span style={MUTED}>{(b.questions || []).length} questions · {b.statut === 'valide' ? 'validée' : 'brouillon'} →</span>
             </Link>
           ))}
-          <Link href={`/pro/banques/nouvelle${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginTop: 14 }}>+ Créer une banque</Link>
+          {peutBanques && <Link href={`/pro/banques/nouvelle${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginTop: 14 }}>+ Créer une banque</Link>}
         </div>
       )}
     </ProShell>

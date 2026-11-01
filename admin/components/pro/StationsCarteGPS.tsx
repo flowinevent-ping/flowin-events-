@@ -53,7 +53,7 @@ export default function StationsCarteGPS({ lieux }: { lieux: Lieu[] }) {
       <style dangerouslySetInnerHTML={{ __html: `@media (max-width:820px){.pro-map-wrap{display:none !important}}` }} />
       <div className="pro-map-wrap" style={{ ...CARD, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px 0' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93' }}>Mes stations sur la carte</div>
+          <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80' }}>Mes stations sur la carte</div>
           <div style={{ fontSize: 13, ...MUTED, marginBottom: 10 }}>Glissez un point pour corriger sa position — enregistré immédiatement.</div>
         </div>
         <div style={{ height: 360 }}>
@@ -68,7 +68,7 @@ export default function StationsCarteGPS({ lieux }: { lieux: Lieu[] }) {
       )}
 
       <div style={CARD}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#8a7e93', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: '#5a6b80', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Ico k="pin" size={13} /> Corriger un point manuellement
         </div>
         {points.length === 0 && <div style={{ fontSize: 13, ...MUTED }}>Aucune station.</div>}

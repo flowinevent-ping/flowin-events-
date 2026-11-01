@@ -9,8 +9,8 @@ export const ONGLETS_OP = [
   { id: 'lots', label: 'Lots' },
   { id: 'diffusion', label: 'Diffusion' },
   { id: 'gagnants', label: 'Gagnants & tirage' },
-  { id: 'trafic', label: 'Trafic' },
-  { id: 'crm', label: 'CRM' },
+  { id: 'trafic', label: 'Trafic par support' },
+  { id: 'crm', label: 'Contacts' },
   { id: 'bons', label: 'Bons de commande & factures' },
 ] as const
 export type OngletOp = typeof ONGLETS_OP[number]['id']

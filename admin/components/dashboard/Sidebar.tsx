@@ -70,8 +70,8 @@ const ICON_BY_ID: Record<string, string> = {
   'wizard-super-event': 'sparkles', 'btob-prospects': 'target',
   'landing-page': 'globe', pilotage: 'target', statistiques: 'chart', 'rapport-points': 'pin',
   'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map',
-  prospection: 'phone', 'nds-bon-commande': 'receipt', 'nds-packs': 'gift',
-  operations: 'gauge',
+  prospection: 'phone', 'nds-bon-commande': 'receipt', 'commandes-animation': 'receipt', 'nds-packs': 'gift',
+  operations: 'gauge', banques: 'clipboard',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
   'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
   'theme-parcours': 'layout',
@@ -172,7 +172,7 @@ export default function Sidebar() {
       ton: 'ev',
       items: [
         { id: 'events', label: 'Events', count: events.length, live: liveCount, href: '/dashboard/events' },
-        { id: 'wizard-event-se', label: 'Nouvel événement', href: '/dashboard/wizard-event' },
+        { id: 'wizard-event-se', label: 'Nouvelle animation', href: '/dashboard/wizard-event' },
         { id: 'theme-parcours', label: 'Thème des parcours', href: '/dashboard/theme-parcours' },
       ],
     },
@@ -182,7 +182,8 @@ export default function Sidebar() {
       group: 'Jeux',
       ton: 'ev',
       items: [
-        { id: 'jeux', label: 'Jeux (templates)', count: 7, href: '/dashboard/jeux' },
+        { id: 'jeux', label: 'Masters de jeux', count: 6, href: '/dashboard/jeux' },
+        { id: 'banques', label: 'Banques de questions', href: '/dashboard/banques' },
       ],
     },
     {
@@ -210,6 +211,7 @@ export default function Sidebar() {
         { id: 'envoi-masse', label: 'Envoi en masse', href: '/dashboard/envoi-masse' },
         { id: 'landing-page', label: 'Landing pages', href: '/dashboard/landing-page' },
         { id: 'nds-bon-commande', label: 'Bons de commande & factures', href: '/dashboard/nds-bon-commande' },
+        { id: 'commandes-animation', label: 'Commandes Animation', href: '/admin-commandes-animation.html', external: true },
         { id: 'facture-nds', label: 'Générer une facture', href: '/facture-nds.html', external: true },
         { id: 'nds-packs', label: 'Packs de participation', href: '/dashboard/nds-packs' },
         { id: 'cgv', label: 'CGV & légal', href: '/dashboard/cgv' },
