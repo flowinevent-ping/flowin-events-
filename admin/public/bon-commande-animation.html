@@ -1069,6 +1069,51 @@
       });
     });
   })();
+  /* ---------- Reprise de la fiche du compte pro connecté ----------
+     Session Supabase du même site (localStorage sb-*-auth-token, écrite par la connexion pro). Lecture de SA fiche
+     uniquement, avec le jeton du pro : la RLS de public.pros décide (aucune clé secrète, aucune lecture publique).
+     Sans session, seul ?email= (déjà saisi par la personne) remplit l'email. Champ absent = champ vide. */
+  function sessionPro(){
+    try {
+      for (var i = 0; i < window.localStorage.length; i++) {
+        var k = window.localStorage.key(i);
+        if (!/^sb-[a-z0-9]+-auth-token$/.test(k)) continue;
+        var v = JSON.parse(window.localStorage.getItem(k) || 'null');
+        if (v && v.access_token && v.user && v.user.id && (!v.expires_at || v.expires_at * 1000 > new Date().getTime())) return v;
+      }
+    } catch (e) {}
+    return null;
+  }
+  function remplirVides(map){
+    var n = 0;
+    for (var k in map) {
+      if (!map.hasOwnProperty(k)) continue;
+      var el = $(k), v = map[k];
+      if (el && v != null && String(v).replace(/^\s+|\s+$/g, '') && !String(el.value || '').replace(/\s/g, '')) { el.value = String(v).slice(0, 200); n++; }
+    }
+    return n;
+  }
+  (function(){
+    var em = qs('email');
+    if (em && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) remplirVides({ f_email: em });
+    var sess = sessionPro();
+    if (!sess || !window.fetch || location.protocol === 'file:') { renderClient(); return; }
+    var cols = 'id,nom,nom_commercial,siret,adresse,code_postal,ville,contact,role_contact,email,tel,nb_points_vente';
+    var url = SUPA + '/rest/v1/pros?select=' + cols + '&auth_id=eq.' + encodeURIComponent(sess.user.id) + (qs('pro') && /^[a-z0-9-]{3,80}$/.test(qs('pro')) ? '&id=eq.' + encodeURIComponent(qs('pro')) : '') + '&limit=1';
+    fetch(url, { headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + sess.access_token } })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){
+        var f = rows && rows[0]; if (!f) return;
+        var n = remplirVides({ f_raison: f.nom, f_enseigne: f.nom_commercial, f_siret: String(f.siret || '').replace(/\s/g, ''), f_adresse: f.adresse, f_cp: f.code_postal, f_ville: f.ville,
+          f_contact: f.contact, f_fonction: f.role_contact, f_email: f.email, f_tel: f.tel });
+        var nb = parseInt(f.nb_points_vente, 10); if (nb > 0 && !qs('boutiques')) st.nb = clampInt(nb, 1, 200);
+        if (f.id && /^[a-z0-9-]{3,80}$/.test(String(f.id))) PRO_ID = String(f.id);
+        var siret = val('f_siret').replace(/\s/g, ''); if (siret) setErr('siret', !/^[0-9]{14}$/.test(siret));
+        if (n || nb > 0) { var b = $('prefillInfo'); if (b) { b.textContent = 'Informations reprises de votre compte. Vérifiez-les et complétez ce qui manque : tout reste modifiable.'; b.style.display = 'block'; } }
+        render(); verifierClient();
+      })
+      .catch(function(){});
+  })();
   $('form').addEventListener('input', renderClient); $('form').addEventListener('change', renderClient);
 
   render();
