@@ -71,7 +71,7 @@ const ICON_BY_ID: Record<string, string> = {
   'landing-page': 'globe', pilotage: 'target', statistiques: 'chart', 'rapport-points': 'pin',
   'track-qr': 'link', 'nds-lots': 'gift', 'nds-resultat': 'calendar', 'nds-participants': 'users', 'nds-carte': 'map',
   prospection: 'phone', 'nds-bon-commande': 'receipt', 'commandes-animation': 'receipt', 'nds-packs': 'gift',
-  operations: 'gauge',
+  operations: 'gauge', banques: 'clipboard',
   'crm-landing': 'inbox', 'crm-retours': 'clipboard', cgv: 'receipt', jeux: 'gamepad', 'wizard-event': 'sparkles',
   'wizard-event-se': 'sparkles', 'wizard-pro': 'sparkles', 'envoi-masse': 'megaphone', 'apercu-pro': 'layout',
   'theme-parcours': 'layout',
@@ -183,6 +183,7 @@ export default function Sidebar() {
       ton: 'ev',
       items: [
         { id: 'jeux', label: 'Masters de jeux', count: 6, href: '/dashboard/jeux' },
+        { id: 'banques', label: 'Banques de questions', href: '/dashboard/banques' },
       ],
     },
     {

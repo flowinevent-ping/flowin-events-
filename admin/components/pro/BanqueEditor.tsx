@@ -45,7 +45,7 @@ function ThemeEtDifficulte({ theme, difficulte, onChange }: {
    blocDeQuatre) s'affichaient TOUTES en meme temps, empilees. Elles passent
    maintenant une par une (etape), le bouton Enregistrer/Valider n'apparaissant
    qu'au recapitulatif final -- meme principe que le parcours /rejoindre. */
-export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banque; proId: string; estBonus: boolean }) {
+export default function BanqueEditor({ banque, proId, estBonus, lienRetour }: { banque: Banque; proId: string; estBonus: boolean; /** Super Admin : retour vers /dashboard/banques */ lienRetour?: string }) {
   const router = useRouter()
   const [nom, setNom] = useState(banque.nom)
   const [questions, setQuestions] = useState(banque.questions?.length ? banque.questions : blocDeQuatre(estBonus))
@@ -332,7 +332,7 @@ export default function BanqueEditor({ banque, proId, estBonus }: { banque: Banq
             <button disabled={pending} onClick={() => sauvegarder(false)} style={{ ...btn, background: '#fff', border: '1.5px solid #efe9f2', color: '#1c1024', opacity: pending ? 0.6 : 1 }}><Ico k="save" size={13} style={{ marginRight: 6 }} />Enregistrer en brouillon</button>
             <button disabled={pending} onClick={() => sauvegarder(true)} style={{ ...btn, background: ACC, color: '#fff', opacity: pending ? 0.6 : 1 }}><Ico k="check" size={13} style={{ marginRight: 6 }} />Valider</button>
             {message && <span style={{ fontSize: 12.5, ...MUTED }}>{message}</span>}
-            <a href={`/pro/banques${q}`} style={{ marginLeft: 'auto', fontSize: 13, color: ACC, fontWeight: 700, textDecoration: 'none' }}>← Retour aux banques</a>
+            <a href={lienRetour ?? `/pro/banques${q}`} style={{ marginLeft: 'auto', fontSize: 13, color: ACC, fontWeight: 700, textDecoration: 'none' }}>← Retour aux banques</a>
           </div>
         </>
       )}

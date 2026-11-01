@@ -19,11 +19,12 @@ import QRCode from 'qrcode'
 import { MASTER_CSS } from '@/lib/masters/css'
 import { rendreEcran, etatInitial, rotationPourCase, regleBarre, regleParte, regleSuperReel, ecranExiste, DEROULES, type EtatPartie } from '@/lib/masters/engine'
 import type { VueMaster } from '@/lib/masters/resolve'
-import { writeJoueur, getJoueurLocal, animationDejaJouee, CONSENTEMENT_VERSION } from '@/lib/parcours'
+import { writeJoueur, getJoueurLocal, animationDejaJouee, dejaJoueAujourdhuiCeQr, CONSENTEMENT_VERSION } from '@/lib/parcours'
 import { doitRefuserDigital } from '@/components/parcours/ParcoursHero'
 import { buildInviteLink } from '@/lib/parrainage'
 import { generateTicket } from '@/lib/ticket'
 import type { TicketPrefix } from '@/lib/types'
+import { proposerInstallation, marquerInstallee, refuserProposition, ecouterInstallation, installationNativeDisponible, lancerInstallationNative } from '@/lib/pwaInstall'
 
 interface Props {
   vue: VueMaster
@@ -98,7 +99,20 @@ export default function JouerClient(p: Props) {
       const el = host!.firstElementChild as HTMLElement | null
       if (el) el.scrollTop = 0
       entree(id, el)
+      majInstall()
     }
+
+    /* Raccourci « ecran d'accueil » (lib/pwaInstall.ts) : l'entree n'est montree
+       que si l'application n'est PAS installee et n'a pas ete refusee
+       recemment. En apercu / maquette / cadre : toujours visible (ecran a montrer). */
+    const apercuInstall = p.demo || !!p.apercu || enCadre
+    function majInstall() {
+      const voir = proposerInstallation({ apercu: apercuInstall })
+      host!.querySelectorAll('[data-pwa-entree]').forEach(x => { (x as HTMLElement).style.display = voir ? '' : 'none' })
+      const b = host!.querySelector('[data-pwa-installer]') as HTMLElement | null
+      if (b) b.style.display = !apercuInstall && installationNativeDisponible() ? '' : 'none'
+    }
+    const arretInstall = apercuInstall ? null : ecouterInstallation(majInstall)
     function retour(repli: string) {
       if (!enCadre && pile.current.length && history.state && history.state.fm) { history.back(); return }
       const prec = pile.current.pop()
@@ -342,6 +356,12 @@ export default function JouerClient(p: Props) {
 
     function clic(e: MouseEvent) {
       const t = e.target as HTMLElement
+      /* Raccourci : memoriser « installe » / « plus tard » (jamais en apercu). */
+      if (!apercuInstall) {
+        if (t.closest('[data-pwa-fait]')) { marquerInstallee(); majInstall() }
+        if (t.closest('[data-pwa-refus]')) { refuserProposition(); majInstall() }
+        if (t.closest('[data-pwa-installer]')) { lancerInstallationNative().then(res => { majInstall(); if (res === 'accepted') retour('') }); return }
+      }
       const href = t.closest('[data-href]') as HTMLElement | null
       if (href) { location.href = href.getAttribute('data-href') || '/'; return }
       const rep = t.closest('[data-rep]') as HTMLElement | null
@@ -424,7 +444,7 @@ export default function JouerClient(p: Props) {
     if (!p.demo && !p.apercu && p.evId) {
       try {
         if (doitRefuserDigital(p.evId)) debut = 'c-digital'
-        else if (animationDejaJouee(p.evId) && !new URLSearchParams(location.search).has('preview')) debut = 'c-demain'
+        else if (dejaJoueAujourdhuiCeQr(p.evId) && !new URLSearchParams(location.search).has('preview')) debut = 'c-demain'
       } catch { /* ignore */ }
     }
     if (ex && (debut === 'c-profil' || debut === 'c-connexion')) { r.profil = { prenom: 'Prénom', nom: 'Exemple' }; r.ticket = 'TK-0427'; r.gain = { lot: v.billet.nom, cond: v.billet.cond }; r.bonnes = v.questions.length; r.bonusFait = v.key === 'quiz'; r.after = v.key === 'spin' ? 'c-billet' : 'c-ticket' }
@@ -442,7 +462,7 @@ export default function JouerClient(p: Props) {
     const premier = debut
     const tReplace = window.setTimeout(() => { if (!enCadre) { try { history.replaceState({ ...(history.state || {}), fm: premier, n: 0 }, '', location.pathname + location.search + '#' + premier) } catch { /* ignore */ } } }, 0)
 
-    return () => { clearTimeout(tReplace); nettoyer(); host.removeEventListener('click', clic); host.removeEventListener('keydown', touche); window.removeEventListener('message', message); window.removeEventListener('popstate', surPopstate) }
+    return () => { if (arretInstall) arretInstall(); clearTimeout(tReplace); nettoyer(); host.removeEventListener('click', clic); host.removeEventListener('keydown', touche); window.removeEventListener('message', message); window.removeEventListener('popstate', surPopstate) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p.evId, p.vue.id, p.debut, p.demo])
 

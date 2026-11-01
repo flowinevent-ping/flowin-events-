@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import AccesBloque from './AccesBloque'
+import { lireDroitsPro, peutOuvrirNouvelle, DROITS_DEFAUT, type DroitsPro } from '@/lib/droitsPro'
 import { CHARTE_PRO, POLICE_PRO, VARIABLES_CSS, VARIABLES_PRO_CSS } from '@/lib/charte'
 import '@/styles/sa-kanban.css'
 
@@ -79,6 +80,16 @@ export default function ProShell({ proName, proId, active, children }: { proName
   const actif = RANGEMENT[active] ?? active
   const [open, setOpen] = useState(false)
   const page = NAV.find(n => n.key === actif)
+  /* Droits donnes par le Super Admin (sql/06-droits-pro.sql) : une entree de menu
+     dont le droit est retire disparait. Colonne absente : tout reste visible. */
+  const [droits, setDroits] = useState<DroitsPro>(DROITS_DEFAUT)
+  useEffect(() => {
+    if (!proId) return
+    let fini = false
+    lireDroitsPro(proId).then(d => { if (!fini) setDroits(d) })
+    return () => { fini = true }
+  }, [proId])
+  const navVisible = NAV.filter(n => n.key !== 'nouvelle' || peutOuvrirNouvelle(droits))
 
   /* ACCES CONDITIONNE AU PAIEMENT (31/10) : un compte cree par « Ma premiere fois » reste
      « en_attente » jusqu'a la validation du paiement (virement valide par le SA, SEPA par le
@@ -137,10 +148,10 @@ export default function ProShell({ proName, proId, active, children }: { proName
         <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.12em', textTransform: 'uppercase', color: C.attenue }}>Établissement</div>
         <div style={{ fontSize: 14, fontWeight: 800, color: C.texte, lineHeight: 1.25, marginTop: 2 }}>{proName || 'Mon établissement'}</div>
       </div>
-      {NAV.map(n => {
+      {navVisible.map(n => {
         const on = n.key === actif
         return (
-          <Link key={n.key} href={`${n.route}${q}`} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
+          <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} onClick={() => setOpen(false)} style={{ textDecoration: 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', marginBottom: 5, borderRadius: 14, background: on ? C.violetClair : 'transparent', color: on ? C.violetFonce : C.texte }}>
               <span style={{ width: 34, height: 34, borderRadius: 11, background: on ? C.violet : C.fond, color: on ? '#fff' : C.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon k={n.icon} /></span>
               <span style={{ flex: 1, minWidth: 0 }}>
@@ -156,10 +167,10 @@ export default function ProShell({ proName, proId, active, children }: { proName
 
   const barreBasse = (
     <nav className="pro-bottom-nav" style={{ display: 'none' }}>
-      {NAV.map(n => {
+      {navVisible.map(n => {
         const on = n.key === actif
         return (
-          <Link key={n.key} href={`${n.route}${q}`} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? C.violetFonce : C.attenue }}>
+          <Link key={n.key} href={`${n.route}${q}`} data-nav={n.key} style={{ textDecoration: 'none', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '9px 4px 8px', color: on ? C.violetFonce : C.attenue }}>
             <span style={{ color: on ? C.violet : C.attenue }}><Icon k={n.icon} /></span>
             <span style={{ fontSize: 11.5, fontWeight: 800, lineHeight: 1.1, textAlign: 'center' }}>{LIBELLE_COURT[n.key] ?? n.label}</span>
           </Link>

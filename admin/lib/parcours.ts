@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseVivant } from './supabase'
 import { generateTicket } from './ticket'
 import type { TicketPrefix } from './types'
 import type { FlowinEvent, FlowinLot, FlowinPartenaire } from './types'
@@ -37,8 +37,8 @@ export interface ParcoursPageData {
 /* ── Fetch partagé server-side ── */
 export async function fetchParcoursData(evId: string): Promise<ParcoursPageData> {
   const [evRes, lotsRes] = await Promise.all([
-    supabase.from('events').select('*').eq('id', evId).single(),
-    supabase.from('lots').select('*').eq('event_id', evId),
+    supabaseVivant.from('events').select('*').eq('id', evId).single(),
+    supabaseVivant.from('lots').select('*').eq('event_id', evId),
   ])
   const ev = evRes.data as FlowinEvent | null
   const lots = (lotsRes.data ?? []) as FlowinLot[]
@@ -50,7 +50,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   const seId = ((ev as unknown) as { super_event_id?: string } | null)?.super_event_id
   let partenaires: FlowinPartenaire[] = []
   if (seId) {
-    const { data } = await supabase
+    const { data } = await supabaseVivant
       .from('partenaires')
       .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,ordre,tel,contact,ville,adresse')
       .eq('super_event_id', seId)
@@ -60,7 +60,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
   } else {
     const partIds = (cfg.partenaires ?? []) as string[]
     if (partIds.length) {
-      const { data } = await supabase
+      const { data } = await supabaseVivant
         .from('partenaires')
         .select('id,nom,emoji,description,promo_text,site_web,url,instagram,facebook,image_url,lots,actif,tel,contact,ville,adresse')
         .in('id', partIds)
@@ -75,11 +75,11 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
      lien aujourd'hui, la boucle ci-dessous ne pose aucune valeur et
      jeu_event_id reste undefined partout, sans rien afficher côté joueur. */
   if (partenaires.length) {
-    const { data: prosData } = await supabase
+    const { data: prosData } = await supabaseVivant
       .from('pros').select('id,partenaire_id').in('partenaire_id', partenaires.map(p => p.id))
     const proIds = ((prosData ?? []) as { id: string; partenaire_id: string }[])
     if (proIds.length) {
-      const { data: evData } = await supabase
+      const { data: evData } = await supabaseVivant
         .from('events').select('id,pro_id,module').in('pro_id', proIds.map(p => p.id)).eq('status', 'live')
       const evByPro = new Map(((evData ?? []) as { id: string; pro_id: string; module: string }[]).map(e => [e.pro_id, e]))
       const proByPartenaire = new Map(proIds.map(p => [p.partenaire_id, p.id]))
@@ -103,7 +103,7 @@ export async function fetchParcoursData(evId: string): Promise<ParcoursPageData>
     .filter((id, i, a) => a.indexOf(id) === i)
   let banques: ParcoursBanque[] = []
   if (banqueIds.length) {
-    const { data } = await supabase.from('banques').select('*').in('id', banqueIds)
+    const { data } = await supabaseVivant.from('banques').select('*').in('id', banqueIds)
     banques = (data ?? []) as ParcoursBanque[]
   }
 
@@ -328,6 +328,14 @@ export function cleDejaJoue(evId: string): string {
  *  serveur. L'ancienne clé sans date compte aussi (joueurs d'avant le lot). */
 export function marquerAnimationJouee(evId: string): void {
   try { localStorage.setItem('flowin_evjoue_' + evId, '1') } catch { /* ignore */ }
+  /* + trace DATEE (par QR et par jour local) : c'est elle qui decide « Reviens demain ».
+     Verification 01/11 : /jouer relisait la trace sans date, donc « Reviens demain »
+     restait affiche TOUS LES JOURS suivants et pour tous les QR du meme commerce. */
+  try { localStorage.setItem(cleDejaJoue(evId), '1') } catch { /* ignore */ }
+}
+/** Deja joue AUJOURD'HUI sur CE QR (physique : 1 fois par jour et par QR). Repart a zero chaque nuit. */
+export function dejaJoueAujourdhuiCeQr(evId: string): boolean {
+  try { return localStorage.getItem(cleDejaJoue(evId)) != null } catch { return false }
 }
 export function animationDejaJouee(evId: string): boolean {
   try { return localStorage.getItem('flowin_evjoue_' + evId) != null || localStorage.getItem('flowin_played_' + evId) != null } catch { return false }
@@ -476,10 +484,15 @@ export async function writeJoueur(payload: JoueurPayload): Promise<ResultatParti
        participation n etait ecrite et le joueur recevait un ticket fictif. */
     const maj = r.data as { id: string }[] | null
     joueurRows = maj?.length ? maj : [{ id: dejaId }]
-    joueurErr = r.error
+    /* « permission denied » (42501) : selon la base, l'update anonyme est refuse par une ERREUR
+       (pas de droit de table) au lieu de renvoyer 0 ligne. Meme traitement : repli sur
+       joueur_marquer_partie. Sans cela, tout joueur DEJA CONNU qui rejouait recevait
+       « Enregistrement impossible » (constate au rejeu local du 01/11). */
+    const refusDroit = !!r.error && ((r.error as { code?: string }).code === '42501' || /permission denied|row-level security/i.test(r.error.message || ''))
+    joueurErr = refusDroit ? null : r.error
     /* Sans droit UPDATE, l'event, la date de passage et le ticket du joueur
        passent par une fonction restreinte a ces seuls champs. */
-    if (!maj?.length && !r.error) {
+    if (!maj?.length && (!r.error || refusDroit)) {
       await supabase.rpc('joueur_marquer_partie', { p_id: dejaId, p_events: payload.events ?? [], p_ticket: tc })
     }
   } else {
@@ -489,6 +502,20 @@ export async function writeJoueur(payload: JoueurPayload): Promise<ResultatParti
       .select('id')
     joueurRows = r.data as { id: string }[] | null
     joueurErr = r.error
+  }
+
+  /* Repli : colonne `optin_version` absente en base (sql/07-joueurs-optin-version.sql non applique).
+     Sans ce repli, TOUTE inscription echouait (PGRST204). On reessaie sans la version du
+     consentement : l'inscription aboutit, seule la trace de version manque. */
+  if (joueurErr && /optin_version/i.test(joueurErr.message || '')) {
+    const { optin_version: _v, ...sansVersion } = joueurFields
+    void _v
+    const r2 = existant?.length
+      ? await supabase.from('joueurs').update(sansVersion).eq('id', (existant[0] as { id: string }).id).select('id')
+      : await supabase.from('joueurs').insert({ ...sansVersion, first_seen: today }).select('id')
+    if (existant?.length) joueurRows = (r2.data as { id: string }[] | null)?.length ? (r2.data as { id: string }[]) : [{ id: (existant[0] as { id: string }).id }]
+    else joueurRows = r2.data as { id: string }[] | null
+    joueurErr = r2.error
   }
 
   if (joueurErr) {

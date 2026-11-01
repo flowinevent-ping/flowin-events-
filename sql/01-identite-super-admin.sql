@@ -8,6 +8,8 @@
 --                                        (requiert 01 et 02 ; fonction edge notify-commande-animation)
 --   04-pros-rib.sql                      coordonnees bancaires du pro (requiert 01)
 --   05-confidentialite-contacts.sql      contacts joueurs : phase 1 ; phases 2 et 3 = plan (requiert 01)
+--   06-droits-pro.sql                    droits d'acces du pro pilotes par le Super Admin (requiert 01)
+--   07-joueurs-optin-version.sql         colonne joueurs.optin_version ecrite par le code (independant ; a lancer en premier)
 -- Chaque fichier peut etre rejoue sans dommage (idempotent), sauf mention contraire.
 --
 -- PREREQUIS : aucun.

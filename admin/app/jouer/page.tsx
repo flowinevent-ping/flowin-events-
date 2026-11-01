@@ -22,6 +22,8 @@ import { lireDefautsBase } from '@/lib/masters/base'
 import { estMasterId, MASTERS } from '@/lib/masters/defs'
 import type { ContenuMaster, MasterId } from '@/lib/masters/types'
 import JouerClient from './JouerClient'
+import AnimationIndisponible from '@/components/parcours/AnimationIndisponible'
+import { motifIndisponible, etatAnimation } from '@/lib/etatAnimation'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Jouer et gagner', description: 'Une partie gratuite, des lots à gagner.' }
@@ -75,7 +77,13 @@ export default async function Page({ searchParams: sp }: Props) {
     if (r) {
       superEvent = r
       persoSe = { commerce: { nom: r.nom }, tirageDate: r.fin ? libDates(null, r.fin) : undefined, lots: r.lots && r.lots.length ? r.lots : undefined }
+    } else if (sp.preview === undefined && !sp.apercu) {
+      /* Verification 01/11 : un super event inexistant affichait la maquette d'exemple. */
+      return <AnimationIndisponible motif="inexistante" />
+    } else {
+      /* apercu de creation : on garde l'ecran d'exemple */
     }
+    if (r && sp.preview === undefined && !sp.apercu && etatAnimation({ date_f: r.fin }) === 'terminee') return <AnimationIndisponible motif="terminee" nom={r.nom} />
   } else if (sp.ev) {
     const saisie = lireApercu(sp)
     let brut = await fetchParcoursData(sp.ev)
@@ -85,6 +93,10 @@ export default async function Page({ searchParams: sp }: Props) {
       const mod = (saisie.cfg && (saisie.cfg.master as { id?: string } | undefined)?.id) || (estMasterId(sp.m) ? sp.m : 'quiz')
       brut = { ...brut, ev: { id: sp.ev, nom: saisie.nom || '', module: mod, cfg: {}, adresse: '' } as unknown as ParcoursPageData['ev'] }
     }
+    /* QR menant a une animation inexistante, terminee ou pas encore commencee :
+       message clair, aucun jeu, aucune ecriture (verification du 01/11). */
+    const motif = motifIndisponible(brut.ev as { status?: string; date_d?: string | null; date_f?: string | null; module?: string | null } | null, sp)
+    if (motif) return <AnimationIndisponible motif={motif} nom={brut.ev?.nom} debut={brut.ev?.date_d} />
     data = await appliquerApercu(brut, saisie)
     if (!data.ev) data = null
     const seId = data?.ev?.super_event_id

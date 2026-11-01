@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchBanquesPro, type Banque } from '@/lib/banques'
 import ProShell from '@/components/pro/ProShell'
+import { lireDroitsPro } from '@/lib/droitsPro'
 import { CARD, MUTED, H1, SUB, ACC } from '@/lib/proui'
 
 /**
@@ -16,6 +17,7 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
   const proId = searchParams.pro ?? ''
   const [data, banques] = await Promise.all([fetchProDashboard(proId), fetchBanquesPro(proId)])
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
+  const peutCreer = (await lireDroitsPro(proId)).creer_banques
 
   const quiz = banques.filter(b => !estBonus(b))
   const bonus = banques.filter(estBonus)
@@ -41,11 +43,11 @@ export default async function ProBanquesPage({ searchParams }: { searchParams: {
             </div>
           </Link>
         ))}
-        <Link href={`${hrefCreer}${q ? '&' : '?'}${q.slice(1)}&tags=${tagsDefaut.join(',')}`} style={{ textDecoration: 'none' }}>
+        {peutCreer && <Link href={`${hrefCreer}?${q ? q.slice(1) + '&' : ''}tags=${tagsDefaut.join(',')}`} style={{ textDecoration: 'none' }}>
           <div style={{ ...CARD, marginBottom: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 84, border: '1.5px dashed #CBD5E1', color: ACC, fontWeight: 700, fontSize: 13 }}>
             + Nouvelle banque
           </div>
-        </Link>
+        </Link>}
       </div>
     </div>
   )

@@ -6306,6 +6306,7 @@ function renderDrawer(){
     if(state.drawer.type==='partenaire'){ var _pc = findPartner(state.drawer.id); if(_pc) loadBonsCommandeLies(_pc.id, _pc.contact_email||_pc.email||'', _pc.siret||'', _pc.nom||''); }
     else if(state.drawer.type==='pro'){ var _po = findPro(state.drawer.id); if(_po) loadBonsCommandeLies(_po.id, _po.email||'', _po.siret||'', _po.nom||''); }
   }
+  if(state.drawer.open && state.drawer.tab==='droits' && state.drawer.type==='pro'){ droitsProCharger(state.drawer.id); }
   requestAnimationFrame(function(){
     var db2 = document.querySelector('.drawer-body');
     if(db2) db2.scrollTop = scrollY;
@@ -6347,6 +6348,69 @@ function drawerFooter(actions){
 }
 
 // ----- PRO drawer -----
+/* ===== DROITS DU PRO (sql/06-droits-pro.sql) : ce que le pro peut faire dans son espace =====
+   Reserve au Super Admin connecte (fonction pro_definir_droit). Journal des changements en dessous. */
+var DROITS_PRO_LISTE = [
+  {cle:'creer_animation', titre:'Peut créer une animation (event)', aide:'Le bouton « Créer une animation » et le parcours de création.'},
+  {cle:'creer_super_event', titre:'Peut créer un super event', aide:'Désactivé : le pro peut seulement proposer un super event à Flowin. Activé : il le crée lui-même.'},
+  {cle:'rejoindre_super_event', titre:'Peut rejoindre / intégrer un super event', aide:'Demander à devenir une station d’un super event existant.'},
+  {cle:'creer_banques', titre:'Peut créer des banques de quiz', aide:'Créer et alimenter ses banques de questions (quiz et bonus).'},
+  {cle:'gerer_partenaires', titre:'Peut gérer ses partenaires et logos', aide:'Interface seulement (pas de verrou en base).'}
+];
+var DROITS_PRO_DEFAUT = {creer_animation:true, creer_super_event:false, rejoindre_super_event:true, creer_banques:true, gerer_partenaires:true};
+function droitsProSessionOk(){
+  return !!(FLOWIN_ADMIN_SESSION && FLOWIN_ADMIN_SESSION.access_token && FLOWIN_ADMIN_SESSION.expires_at && (Math.floor(Date.now()/1000) < FLOWIN_ADMIN_SESSION.expires_at - 30));
+}
+function droitsProBox(p){
+  return '<div id="droitsProBox" data-pro="'+escAttr(p.id)+'"><div class="text-xs text-muted">Chargement des droits…</div></div>';
+}
+function droitsProEnt(){ return {apikey:FLOWIN_SUPA_ANON, Authorization:'Bearer '+FLOWIN_AUTH, 'Content-Type':'application/json'}; }
+function droitsProCharger(proId){
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/pros?select=droits&id=eq.'+encodeURIComponent(proId), {headers:droitsProEnt()})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+    .then(function(x){
+      var box = document.getElementById('droitsProBox');
+      if(!box || box.getAttribute('data-pro')!==proId) return;
+      var present = !!(x.ok && x.d && x.d.length);
+      var brut = present ? (x.d[0].droits || null) : null;
+      fetch(FLOWIN_SUPA_URL+'/rest/v1/pros_droits_journal?select=droit,avant,apres,par_email,le&pro_id=eq.'+encodeURIComponent(proId)+'&order=le.desc&limit=10', {headers:droitsProEnt()})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){ droitsProRendre(box, proId, present, brut, j); })
+        .catch(function(){ droitsProRendre(box, proId, present, brut, null); });
+    })
+    .catch(function(){ var b = document.getElementById('droitsProBox'); if(b) b.innerHTML = '<div class="alert info">Droits indisponibles (réseau).</div>'; });
+}
+function droitsProRendre(box, proId, present, brut, journal){
+  var d = {}; var i;
+  for(i=0;i<DROITS_PRO_LISTE.length;i++){ var k = DROITS_PRO_LISTE[i].cle; d[k] = (brut && typeof brut[k]==='boolean') ? brut[k] : DROITS_PRO_DEFAUT[k]; }
+  var actif = present && droitsProSessionOk();
+  var h = '<div class="text-xs text-muted" style="margin-bottom:10px">Un droit retiré fait disparaître le bouton chez le pro ET bloque l’accès direct (message « contactez Flowin »).</div>';
+  if(!present) h += '<div class="alert info" data-droits-absent><span class="ico">ℹ️</span>Le SQL <b>06-droits-pro.sql</b> n’est pas encore appliqué : valeurs par défaut affichées (rien n’est bloqué), interrupteurs inactifs.</div>';
+  else if(!droitsProSessionOk()) h += '<div class="alert info"><span class="ico">🔒</span>Connexion Super Admin requise pour changer un droit : <a href="/admin-connexion.html?next=/dashboard.html">se connecter</a>.</div>';
+  for(i=0;i<DROITS_PRO_LISTE.length;i++){
+    var x = DROITS_PRO_LISTE[i];
+    h += '<label data-droit="'+x.cle+'" style="display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1px solid var(--border,#e5e7eb);border-radius:10px;margin-bottom:8px;'+(actif?'cursor:pointer':'opacity:.7')+'">'
+      + '<input type="checkbox" '+(d[x.cle]?'checked ':'')+(actif?'':'disabled ')+'onchange="droitsProBasculer(\''+escAttr(proId)+'\',\''+x.cle+'\',this.checked)" style="margin-top:3px;width:18px;height:18px">'
+      + '<span style="flex:1"><b style="display:block;font-size:13px">'+esc(x.titre)+'</b><span class="text-xs text-muted">'+esc(x.aide)+'</span></span>'
+      + '<b style="font-size:11px;color:'+(d[x.cle]?'#166534':'#991B1B')+'">'+(d[x.cle]?'Autorisé':'Retiré')+'</b></label>';
+  }
+  if(present){
+    h += '<div class="section-h" style="margin-top:14px">Historique des changements</div>';
+    if(!journal) h += '<div class="text-xs text-muted">Historique indisponible (Super Admin connecté requis).</div>';
+    else if(!journal.length) h += '<div class="text-xs text-muted">Aucun changement enregistré.</div>';
+    else for(i=0;i<journal.length;i++){ var l = journal[i];
+      var nom = ''; var q; for(q=0;q<DROITS_PRO_LISTE.length;q++){ if(DROITS_PRO_LISTE[q].cle===l.droit) nom = DROITS_PRO_LISTE[q].titre; }
+      h += '<div class="text-xs" style="padding:3px 0;border-bottom:1px solid var(--border,#e5e7eb)">'+esc(new Date(l.le).toLocaleString('fr-FR'))+' · '+esc(l.par_email||'inconnu')+' · '+esc(nom||l.droit)+' : '+(l.avant?'oui':'non')+' → <b>'+(l.apres?'oui':'non')+'</b></div>'; }
+  }
+  box.innerHTML = h;
+}
+function droitsProBasculer(proId, cle, valeur){
+  fetch(FLOWIN_SUPA_URL+'/rest/v1/rpc/pro_definir_droit', {method:'POST', headers:droitsProEnt(), body:JSON.stringify({p_pro:proId, p_droit:cle, p_valeur:!!valeur})})
+    .then(function(r){ return r.json().then(function(d){ if(!r.ok) throw new Error((d && d.message) || ('Erreur '+r.status)); return d; }); })
+    .then(function(){ toast((valeur?'Activé':'Retiré')+' : '+cle,'success'); droitsProCharger(proId); })
+    .catch(function(e){ toast('Droit non modifié : '+e.message,'error'); droitsProCharger(proId); });
+}
+
 function drawerPro(p){
   if(!p) return '<div class="drawer-h"><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="drawer-body">Pro introuvable</div>';
   const evs = DATA.events.filter(e=>e.proId===p.id);
@@ -6364,7 +6428,8 @@ function drawerPro(p){
     {id:'stats',label:'Stats'},
     {id:'liens',label:'Joueurs · Partenaires',badge:joueursLies.length+partenairesLies.length||null},
     {id:'export',label:'Export'},
-    {id:'contrat',label:'Documents'}
+    {id:'contrat',label:'Documents'},
+    {id:'droits',label:'Droits'}
   ]);
   html += '<div class="drawer-body">';
   if(p.partenaireId){
@@ -6602,6 +6667,8 @@ function drawerPro(p){
     html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'events-pro\',\''+p.id+'\')">📥 Tous les events (CSV)</button>';
     html += '<button class="btn mb-2 btn-block" onclick="exportCSV(\'joueurs-pro\',\''+p.id+'\')">📥 Joueurs CRM rattachés (CSV)</button>';
     html += '<button class="btn btn-block" onclick="toast(\'Synthèse XLSX générée\',\'success\')">📊 Synthèse statistique (XLSX)</button>';
+  } else if(state.drawer.tab==='droits'){
+    html += droitsProBox(p);
   } else if(state.drawer.tab==='contrat'){
     if(state.drawer.type==='partenaire'){ html += ptPinHtml(p); }
     html += '<div class="alert info"><span class="ico">🧾</span>Bons de commande &amp; factures rattachés à ce compte.</div>';

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { fetchProDashboard } from '@/lib/pro'
 import { fetchOperationsPro } from '@/lib/operations'
 import { fetchBanquesPro } from '@/lib/banques'
+import { lireDroitsPro } from '@/lib/droitsPro'
 import ProShell from '@/components/pro/ProShell'
 import EntrepriseForm from '@/components/pro/EntrepriseForm'
 import { OngletOperationsPro } from '@/components/operations/BlocsOperations'
@@ -27,6 +28,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
   const [data, ops, banques] = await Promise.all([fetchProDashboard(proId), fetchOperationsPro(proId), fetchBanquesPro(proId)])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = (data.pro ?? {}) as any
+  const peutBanques = (await lireDroitsPro(proId)).creer_banques
   const q = proId ? `?pro=${encodeURIComponent(proId)}` : ''
   const qo = q ? `${q}&` : '?'
   return (
@@ -67,7 +69,7 @@ export default async function Page({ searchParams }: { searchParams: { pro?: str
               <b>{b.nom}</b><span style={MUTED}>{(b.questions || []).length} questions · {b.statut === 'valide' ? 'validée' : 'brouillon'} →</span>
             </Link>
           ))}
-          <Link href={`/pro/banques/nouvelle${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginTop: 14 }}>+ Créer une banque</Link>
+          {peutBanques && <Link href={`/pro/banques/nouvelle${q}`} style={{ ...BTN2, display: 'inline-block', textDecoration: 'none', marginTop: 14 }}>+ Créer une banque</Link>}
         </div>
       )}
     </ProShell>

@@ -371,12 +371,24 @@ revoke all on function public.tirage_auto_animations() from public, anon, authen
 -- 7. PLANIFICATION pg_cron — toutes les 15 minutes (idempotent : le job
 --    existant du même nom est remplacé).
 -- -----------------------------------------------------------------------------
-create extension if not exists pg_cron;
-
+-- ETAT DE LA PROD (verifie le 01/11) : pg_net present, pg_cron ABSENT. On tente donc de l'activer ;
+-- s'il n'est pas disponible, le fichier ne plante pas : il le dit, et le tirage programme doit alors
+-- etre declenche autrement (voir ALTERNATIVES). Aucune autre section n'en depend.
+--   ALTERNATIVES si pg_cron reste indisponible :
+--     a) Supabase > Database > Extensions : activer pg_cron (gratuit), puis rejouer ce fichier ;
+--     b) edge function planifiee (Supabase Cron / Vercel Cron) qui appelle, avec la cle service_role
+--        stockee cote serveur, `select public.tirage_auto_animations();` toutes les 15 minutes ;
+--     c) en attendant : le Super Admin lance le tirage a la main (SQL editor) apres l'heure prevue.
 do $$
 declare j record;
 begin
-  for j in select jobid from cron.job where jobname = 'tirage-auto-animations' loop
+  begin
+    create extension if not exists pg_cron;
+  exception when others then
+    raise notice 'pg_cron indisponible (%) : tirage programme NON planifie. Voir ALTERNATIVES ci-dessus.', sqlerrm;
+    return;
+  end;
+  for j in execute 'select jobid from cron.job where jobname = ''tirage-auto-animations''' loop
     perform cron.unschedule(j.jobid);
   end loop;
   perform cron.schedule('tirage-auto-animations', '*/15 * * * *', 'select public.tirage_auto_animations();');

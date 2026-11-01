@@ -102,7 +102,7 @@ export default function FicheOperationPro({ initial, cle, onglet: ongletInitial,
       <div style={{ ...CARD, padding: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div style={{ fontSize: 16, fontWeight: 800, flex: 1 }}>{ONGLETS_OP.find(o => o.id === onglet)?.label}</div>
-          {onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} />}
+          {onglet === 'lots' && <BoutonGererLots op={op} partenaire={pt} onChange={recharger} cotePro />}
         </div>
 
         {onglet === 'jeu' && st && (

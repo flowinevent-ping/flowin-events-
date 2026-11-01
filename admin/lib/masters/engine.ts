@@ -223,7 +223,7 @@ S['s-accueil'] = { tall: true, r: function (v) {
     '<div class="card gain a-rise" style="--d:.1s"><div class="lbl"><span>À gagner</span><span style="letter-spacing:.04em;text-transform:none">' + nbLots(v.lots.length) + '</span></div>' + v.lots.map(function (l) { return lotRow(v, l) }).join('') + tirLigne(v) + '</div>' +
     '<div style="font-size:17px;font-weight:800;margin-top:20px">Comment jouer ?</div><div class="card howto a-rise" style="--d:.2s">' + v.how.map(function (h, i) { return '<div class="how"><span class="n">' + (i + 1) + '</span><div><b>' + esc(h[0]) + '</b><span>' + esc(h[1]) + '</span></div></div>' }).join('') + '</div>' +
     '<div class="mention" style="text-align:left;margin-top:10px">' + FIN_OK + ' · ' + esc(v.achat) + ' chez ce commerçant</div>' +
-    '<button class="lnk" data-go="c-raccourci" style="text-align:left;padding-left:0">' + icon('phone', 18, 2) + ' Installer le raccourci sur mon téléphone</button></div>' +
+    '<button class="lnk" data-pwa-entree data-go="c-raccourci" style="text-align:left;padding-left:0">' + icon('phone', 18, 2) + ' Installer le raccourci sur mon téléphone</button></div>' +
     dock({ cta: btn('Je joue maintenant', 's-regles', 'a-pulse'), nav: 's-accueil' }) + '</div>'
 } }
 
@@ -384,7 +384,7 @@ S['c-profil'] = { tall: true, r: function (v, r) {
     '<div class="sect"><h4>Mes coordonnées</h4></div>' +
     '<div class="card rows"><div><span>Prénom, nom</span><b>' + (p && (p.prenom || p.nom) ? esc(nomComplet) : '<span class="placeholder">[à saisir en jouant]</span>') + '</b></div><div><span>Email</span><b>' + (p && p.email ? esc(p.email) : '<span class="placeholder">[email saisi]</span>') + '</b></div><div><span>Téléphone</span><b>' + (p && p.tel ? esc(p.tel) : '<span class="placeholder">[téléphone saisi]</span>') + '</b></div><div><span>Code postal</span><b>' + (p && p.cp ? esc(p.cp) : '<span class="placeholder">[saisi]</span>') + '</b></div><div><span>Tranche d\'âge</span><b>' + (p && p.age ? esc(p.age) : '<span class="placeholder">[saisie]</span>') + '</b></div></div>' +
     '<button class="card action" data-go="c-connexion"><span class="ai">' + icon('key', 22) + '</span><div style="flex:1"><b>Créer un mot de passe</b><small>Ton espace client : tickets et lots retrouvés partout</small></div>' + icon('chevR', 20, 2) + '</button>' +
-    '<button class="card action" data-go="c-raccourci"><span class="ai">' + icon('phone', 22) + '</span><div style="flex:1"><b>Installer le raccourci sur mon téléphone</b><small>Flowin en un geste, comme une application</small></div>' + icon('chevR', 20, 2) + '</button>' +
+    '<button class="card action" data-pwa-entree data-go="c-raccourci"><span class="ai">' + icon('phone', 22) + '</span><div style="flex:1"><b>Installer le raccourci sur mon téléphone</b><small>Flowin en un geste, comme une application</small></div>' + icon('chevR', 20, 2) + '</button>' +
     '<button class="card action" data-go="c-parrainage"><span class="ai">' + icon('users', 22) + '</span><div style="flex:1"><b>Parrainer mes amis</b><small>WhatsApp, SMS ou email</small></div>' + icon('chevR', 20, 2) + '</button>' +
     '</div>' + dock({ nav: 'c-profil' }) + '</div>'
 } }
@@ -411,7 +411,9 @@ function raccourci(v: VueMaster, os: string): string {
     '<div class="veil" data-go="@retour"></div><div class="sheet"><div class="grab"></div><h3 style="font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.1">Installe le raccourci<br>sur ton téléphone</h3>' +
     '<div class="seg" style="margin-top:14px"><button class="' + (ios ? 'on' : '') + '" data-one="os" data-osv="ios">iPhone</button><button class="' + (ios ? '' : 'on') + '" data-one="os" data-osv="and">Android</button></div>' +
     steps(stI, 'ios') + steps(stA, 'and') + '<p class="mention" style="text-align:left" data-os-note>' + (ios ? 'Sur iPhone, le raccourci s\'installe depuis Safari uniquement.' : 'Sur Android, depuis Chrome (ou le navigateur du téléphone).') + '</p>' +
-    '<div style="margin-top:12px">' + btn('C\'est fait', '@retour') + '</div></div></div>'
+    '<button class="btn" data-pwa-installer style="display:none;margin-top:12px;width:100%">Installer maintenant</button>' +
+    '<div style="margin-top:12px">' + btn('C\'est fait, c\'est installé', '@retour', '', ' data-pwa-fait') + '</div>' +
+    '<button class="lnk" data-pwa-refus data-go="@retour" style="display:block;margin:10px auto 0;text-align:center">Plus tard</button></div></div>'
 }
 S['c-raccourci'] = { r: function (v) { return raccourci(v, 'ios') } }
 S['c-raccourci-a'] = { r: function (v) { return raccourci(v, 'and') } }
