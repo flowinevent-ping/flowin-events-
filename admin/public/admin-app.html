@@ -29,6 +29,7 @@ p{color:#5b6b80;line-height:1.5;margin:8px 0}
   <h1>Flowin Event</h1>
   <p>Espace administrateur.</p>
   <a class="b" id="ouvrir" href="/admin-connexion.html">Ouvrir mon espace</a>
+  <div class="s" id="etat" style="display:none"></div>
   <div class="s" id="aide">
     <b>Installer l'application</b><br>
     iPhone : Partager, puis « Sur l'écran d'accueil ».<br>
@@ -37,16 +38,65 @@ p{color:#5b6b80;line-height:1.5;margin:8px 0}
 </div>
 <script>
 (function () {
+  var SUPA = 'https://ywcqtupgoxfzkddqkztk.supabase.co';
+  var ANON = 'sb_publishable_yQcGyoh4UdlUCwA96RKSwg_3jMJVVb1';
   var standalone = false;
   try {
     standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
   } catch (e) {}
-  var cible = '/admin-connexion.html';
-  try {
-    if (localStorage.getItem('flowin_admin_session')) { cible = '/dashboard.html'; }
-  } catch (e) {}
-  document.getElementById('ouvrir').setAttribute('href', cible);
-  if (standalone) { window.location.replace(cible); }
+  var etat = document.getElementById('etat');
+  var ouvrir = document.getElementById('ouvrir');
+  function cibleSession() {
+    try { if (localStorage.getItem('flowin_admin_session')) { return '/dashboard.html'; } } catch (e) {}
+    return '/admin-connexion.html';
+  }
+  function majBouton() { ouvrir.setAttribute('href', cibleSession()); }
+  majBouton();
+
+  // Connexion automatique par lien : /admin-app.html#e=<email>&p=<mot de passe> (le fragment # n'est jamais envoye au serveur).
+  // Il est efface de la barre d'adresse des la lecture. Aucun identifiant n'est stocke dans le code.
+  var h = '';
+  try { h = window.location.hash || ''; } catch (e) {}
+  var email = '', pwd = '';
+  if (h.length > 1) {
+    var parts = h.slice(1).split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split('=');
+      var k = kv[0]; var v = '';
+      try { v = decodeURIComponent((kv[1] || '').replace(/\+/g, ' ')); } catch (e) { v = kv[1] || ''; }
+      if (k === 'e') { email = v; }
+      if (k === 'p') { pwd = v; }
+    }
+    try { history.replaceState(null, '', window.location.pathname); } catch (e) {}
+  }
+  if (email && pwd) {
+    etat.style.display = 'block';
+    etat.textContent = 'Connexion en cours...';
+    fetch(SUPA + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pwd })
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, d: d, status: r.status }; });
+    }).then(function (x) {
+      if (x.ok && x.d && x.d.access_token) {
+        var sess = {
+          access_token: x.d.access_token,
+          refresh_token: x.d.refresh_token,
+          expires_at: x.d.expires_at || (Math.floor(Date.now() / 1000) + (x.d.expires_in || 3600))
+        };
+        try { localStorage.setItem('flowin_admin_session', JSON.stringify(sess)); } catch (e) {}
+        majBouton();
+        etat.innerHTML = '<b>Connect\u00e9.</b> Installez maintenant l\u2019application avec les \u00e9tapes ci-dessous, ou ouvrez votre espace.';
+      } else {
+        etat.textContent = 'Connexion impossible : ' + ((x.d && (x.d.error_description || x.d.msg)) || ('erreur ' + x.status));
+      }
+    }).catch(function (e) {
+      etat.textContent = 'Connexion impossible : ' + e.message;
+    });
+    return;
+  }
+  if (standalone) { window.location.replace(cibleSession()); }
 })();
 </script>
 </body>
