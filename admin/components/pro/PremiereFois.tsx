@@ -29,7 +29,7 @@ import {
   type EntrepriseTrouvee,
 } from '@/lib/entreprise'
 
-import { messageFr } from '@/lib/erreursFr'
+import { messageFr, messageAuth } from '@/lib/erreursFr'
 const CLE_BROUILLON = 'flowin.premiere-fois.v1'
 
 const ETAPES = [
@@ -113,6 +113,8 @@ export default function PremiereFois() {
   const [fin, setFin] = useState<{ proId: string; session: boolean; degrade: boolean } | null>(null)
   const [selection, setSelection] = useState('')
   const haut = useRef<HTMLDivElement>(null)
+  /* Compte d'acces deja cree pendant cette visite (reprise apres un echec d'enregistrement de la fiche). */
+  const compteCree = useRef<{ email: string; id: string } | null>(null)
 
   /* Recherche entreprise */
   const [recherche, setRecherche] = useState('')
@@ -224,26 +226,40 @@ export default function PremiereFois() {
   async function creer() {
     setEnvoi('loading'); setErreur('')
     const fiche: FichePro = { ...f, contact: `${perso.prenom.trim()} ${perso.nom.trim()}`.trim(), siret: chiffres(f.siret) }
-    const { data: authData, error: authErr } = await supabase.auth.signUp({ email: fiche.email.trim(), password: fiche.motdepasse })
-    if (authErr || !authData.user) {
-      setErreur(authErr?.message === 'User already registered'
-        ? 'Un compte existe déjà avec cet email. Connectez-vous plutôt.'
-        : (authErr?.message ?? 'La création du compte a échoué. Réessayez dans un instant.'))
-      setEnvoi('error'); return
-    }
-    /* Email deja inscrit : Supabase ne renvoie pas d'erreur (protection contre l'enumeration des comptes)
-       mais un faux utilisateur, sans identite. Sans ce controle, l'insertion de la fiche echoue sur la cle
-       etrangere pros_auth_id_fkey alors qu'aucun compte n'a ete cree. */
-    if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
-      setErreur('Un compte existe déjà avec cet email. Connectez-vous plutôt, ou utilisez une autre adresse.')
-      setEnvoi('error'); return
+    const adresse = fiche.email.trim()
+    /* Reprise apres un echec de l'enregistrement de la fiche : le compte d'acces existe deja (cree au 1er essai).
+       On le reutilise au lieu de refaire un signUp, qui repondrait « compte deja existant » et bloquerait le pro. */
+    let userId = '', aSession = false
+    if (compteCree.current && compteCree.current.email === adresse.toLowerCase()) {
+      userId = compteCree.current.id
+    } else {
+      const { data: authData, error: authErr } = await supabase.auth.signUp({ email: adresse, password: fiche.motdepasse })
+      if (authErr || !authData.user) {
+        setErreur(messageAuth(authErr)); setEnvoi('error'); return
+      }
+      /* Email deja inscrit : Supabase ne renvoie pas d'erreur (protection contre l'enumeration des comptes)
+         mais un faux utilisateur, sans identite. On tente alors la connexion avec le mot de passe saisi :
+         si le compte n'a pas de fiche pro (inscription interrompue), on la complete ; sinon on renvoie vers la connexion. */
+      if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
+        const { data: conn, error: connErr } = await supabase.auth.signInWithPassword({ email: adresse, password: fiche.motdepasse })
+        if (connErr || !conn.user) {
+          setErreur('Un compte existe déjà avec cet email. Connectez-vous, ou utilisez « Mot de passe oublié » sur la page de connexion.')
+          setEnvoi('error'); return
+        }
+        const { data: dejaPro } = await supabase.from('pros').select('id').eq('auth_id', conn.user.id).maybeSingle()
+        if (dejaPro) { setErreur('Votre espace existe déjà : connectez-vous avec cet email.'); setEnvoi('error'); return }
+        userId = conn.user.id; aSession = true
+      } else {
+        userId = authData.user.id; aSession = !!authData.session
+      }
+      compteCree.current = { email: adresse.toLowerCase(), id: userId }
     }
     let idPro = identifiantPro(fiche)
     const { data: existe } = await supabase.from('pros').select('id').eq('id', idPro).maybeSingle()
     if (existe) idPro = `${idPro}-${Math.random().toString(36).slice(2, 6)}`
     const ligne = lignePro(fiche, 'pro')
     const tSrc = tagSource(src)
-    const base = { ...ligne, tags: tSrc ? [...(ligne.tags ?? []), tSrc] : ligne.tags, id: idPro, auth_id: authData.user.id }
+    const base = { ...ligne, tags: tSrc ? [...(ligne.tags ?? []), tSrc] : ligne.tags, id: idPro, auth_id: userId }
     let degrade = false
     let { error: insErr } = await supabase.from('pros').insert({ ...base, ...ligneProEntreprise(fiche, 'premiere-fois') })
     /* Migration sql/02-pros-entreprise-onboarding.sql pas encore appliquee :
@@ -254,10 +270,12 @@ export default function PremiereFois() {
       insErr = r.error
     }
     if (insErr) {
-      /* 23503 = cle etrangere : le compte d'acces n'existe pas (email deja utilise ou compte non cree). */
+      /* 23503 = cle etrangere : le compte d'acces n'existe pas. 23505 = identifiant ou SIRET deja pris. */
       setErreur(insErr.code === '23503'
-        ? 'Un compte existe déjà avec cet email, ou la création de l’accès n’a pas abouti. Connectez-vous plutôt, ou utilisez une autre adresse.'
-        : `Votre accès est créé mais la fiche entreprise n’a pas pu être enregistrée (${messageFr(insErr)}) Contactez l’équipe Flowin.`)
+        ? 'La création de votre accès n’a pas abouti. Réessayez ; si cela continue, utilisez une autre adresse email.'
+        : insErr.code === '23505'
+          ? 'Un établissement avec ces informations existe déjà. Connectez-vous, ou contactez l’équipe Flowin.'
+          : `Votre accès est créé, mais la fiche entreprise n’a pas pu être enregistrée : ${messageFr(insErr)} Vous pouvez réessayer : votre compte est conservé.`)
       setEnvoi('error'); return
     }
     effacerBrouillon()
@@ -271,7 +289,7 @@ export default function PremiereFois() {
       }))
     } catch { /* navigation privee : le bon de commande se remplit a la main */ }
     setEnvoi('idle')
-    setFin({ proId: idPro, session: !!authData.session, degrade })
+    setFin({ proId: idPro, session: aSession, degrade })
     setEtape(7)
   }
 
