@@ -125,14 +125,3 @@ export function compterJouables(qs: QuestionBanque[] | null | undefined): { joua
   ;(qs ?? []).forEach(q => { if (resoudreQuestion(q)) jouables++; else aCompleter++ })
   return { jouables, aCompleter }
 }
-
-/**
- * Sondage bonus : « comme X % des joueurs » UNIQUEMENT a partir de vraies reponses.
- * Renvoie null sous le seuil (pas de pourcentage invente quand l echantillon est trop mince).
- */
-export function pourcentageReel(comptes: Record<string, number>, choix: string, seuilMini = 30): number | null {
-  let total = 0
-  Object.keys(comptes).forEach(k => { total += comptes[k] || 0 })
-  if (total < seuilMini || !(choix in comptes)) return null
-  return Math.round((comptes[choix] / total) * 100)
-}
