@@ -1383,9 +1383,16 @@
       msg.innerHTML = 'L’envoi n’a pas abouti. Réessayez dans un instant.';
     }
     if (!window.fetch) { echec(); return; }
-    fetch(SUPA + '/functions/v1/notify-rappel', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify(data) })
+    var entetes = { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY };
+    /* 1) La demande est D'ABORD enregistrée en base (dashboard Flowin + fiche du pro) : elle ne peut pas se perdre.
+       2) L'email est un doublon de confort, envoyé ensuite, sans jamais bloquer ni faire échouer l'envoi. */
+    fetch(SUPA + '/rest/v1/rpc/deposer_demande_rappel', { method: 'POST', headers: entetes, body: JSON.stringify({ p: data }) })
       .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-      .then(function(j){ if (!j || !j.ok) throw new Error('ko'); $('fRappel').style.display = 'none'; $('r_merci').className = 'card merci on'; })
+      .then(function(j){
+        if (!j || !j.ok) throw new Error('ko');
+        try { fetch(SUPA + '/functions/v1/notify-rappel', { method: 'POST', headers: entetes, body: JSON.stringify(data) }).catch(function(){}); } catch (e) {}
+        $('fRappel').style.display = 'none'; $('r_merci').className = 'card merci on';
+      })
       .catch(echec);
   });
   var inputs = document.querySelectorAll('#fRappel [data-r] input');

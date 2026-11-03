@@ -11,6 +11,8 @@ import type { FlowinPro } from '@/lib/types'
 import ActionsFichePro from './ActionsFichePro'
 import DroitsPro from './DroitsPro'
 import { Ico } from '@/lib/proicons'
+import CarteRappel from './CarteRappel'
+import { fetchDemandesRappel, marquerRappel, type DemandeRappel } from '@/lib/demandesRappel'
 
 import { libelleSecteur } from '@/lib/proCreation'
 export default function ProDrawer() {
@@ -24,6 +26,13 @@ export default function ProDrawer() {
   useEffect(() => { fetchSuperEvents().then(setSupers) }, [])
 
   const p = useMemo(() => pros.find(x => x.id === drawer.id), [pros, drawer.id])
+  /* Demandes de rappel de ce pro (formulaire des plaquettes, rattachees par email). */
+  const [rappels, setRappels] = useState<DemandeRappel[]>([])
+  useEffect(() => { if (drawer.id) fetchDemandesRappel(drawer.id).then(setRappels) }, [drawer.id])
+  async function basculerRappel(d: DemandeRappel) {
+    const vers = d.statut === 'nouvelle'
+    if (await marquerRappel(d.id, vers)) setRappels(l => l.map(x => x.id === d.id ? { ...x, statut: vers ? 'traitee' : 'nouvelle' } : x))
+  }
 
   if (!p) return (
     <div className="sa-drawer-empty">
@@ -115,6 +124,12 @@ export default function ProDrawer() {
             <FieldRow label="Téléphone" value={p.tel ? <a href={`tel:${p.tel}`}>{p.tel}</a> : '-'} />
             <SectionHeader>Notes</SectionHeader>
             <div className="sa-text-block">{p.notes || '-'}</div>
+            {rappels.length > 0 && (
+              <>
+                <SectionHeader>Demandes de rappel ({rappels.filter(r => r.statut === 'nouvelle').length} à rappeler)</SectionHeader>
+                {rappels.map(r => <CarteRappel key={r.id} d={r} onBascule={basculerRappel} />)}
+              </>
+            )}
           </>
         )}
 
