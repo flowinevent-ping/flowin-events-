@@ -1,0 +1,33 @@
+{
+  "id": "/pro-app.html",
+  "name": "Flowin Pro",
+  "short_name": "Flowin Pro",
+  "description": "Espace commerçant et organisateur",
+  "lang": "fr",
+  "start_url": "/pro-app.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1B3A5C",
+  "theme_color": "#1B3A5C",
+  "icons": [
+    {
+      "src": "/icon-fp-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-fp-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-fp-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
